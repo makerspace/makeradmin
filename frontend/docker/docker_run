@@ -1,0 +1,9 @@
+#!/bin/bash
+
+ABSOLUTE_PATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+docker run -d \
+    --name makeradmin-frontend \
+    -e VIRTUAL_HOST=makeradmin.dev \
+    -v $ABSOLUTE_PATH/../dist:/var/www/html \
+    makeradmin/frontend:1.0

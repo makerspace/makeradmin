@@ -1,0 +1,184 @@
+html, body, #main {
+	height: 100%;
+}
+
+/* Loading React application */
+.loading-application {
+	margin: 0 auto;
+	border: 1px solid #000;
+	width: 200px;
+	text-align: center;
+	margin-top: 50%;
+}
+
+/* Loading data from REST API into collection or model */
+.loadingOverlay {
+	position: absolute;
+	top: 0;
+	height: 100%;
+	width: 100%;
+	font-size: 1.5em;
+	background-color: rgba(0, 0, 0, 0.05);
+	text-align: center;
+	border-radius: 3px;
+	animation: fadein 0.3s;
+}
+
+.loadingOverlay .loadingWrapper {
+	position: relative;
+	top: 50%;
+}
+
+@keyframes fadein {
+	from { opacity: 0; }
+	to   { opacity: 1; }
+}
+
+@keyframes fadein2 {
+	from { filter: blur(0px); }
+	to   { filter: blur(1px); }
+}
+
+.loadingOverlay span {
+	color: steelblue;
+}
+
+.backboneTableLoading tbody {
+	animation: fadein2 0.3s;
+	filter: blur(1px);
+}
+
+.invoice .box {
+/*	border: 1px solid #000;*/
+}
+
+.invoice .title {
+	font-weight: bold;
+	font-size: 0.9em;
+}
+
+.invoice .data {
+}
+
+
+/* react-select */
+.Select input {
+	border: 0 !important;
+	background: 0;
+}
+
+/* Remove buttons in lists */
+a.removebutton {
+	color: #f88;
+}
+
+.key-active {
+	color: #8f8;
+}
+
+.key-inactive {
+	color: #f88;
+}
+
+
+/* Better forms */
+.meep .uk-form input[type=text] {
+	border: none;
+	border-radius: 0;
+	border-bottom: 1px solid #aaa;
+	background-color: #fff;
+	padding: 0;
+	color: #111;
+	margin: 5px 0;
+	height: 25px;
+}
+
+.meep .uk-form input[disabled] {
+	border: 0;
+}
+
+.meep .uk-form input:focus {
+	border-bottom: 3px solid #66f;
+}
+
+.meep input[name=address_zipcode] {
+	margin-right: 2em !important;
+}
+
+.meep input[name=address_city] {
+	width: 342px;
+}
+
+.meep .zipcode,
+.meep .city {
+	float: left;
+}
+
+.meep .zipcode {
+	width: 157px;
+}
+
+.meep .uk-form-row label {
+	font-size: 11px;
+	font-weight: bold;
+	color: #666;
+	height: 16px;
+	display: inline-block;
+}
+
+.meep .uk-form-row {
+	position: relative;
+	margin-bottom: 30px;
+}
+
+.meep .uk-form-row:focus {
+	background-color: green;
+}
+
+.meep .uk-form-controls {
+	margin-top: -5px;
+	position: absolute;
+	margin-left: 0;
+}
+
+.meep .uk-form fieldset {
+	margin-bottom: 2em;
+	padding-left: 3em;
+}
+
+.meep .uk-form legend {
+	margin-left: -2em;
+	padding: 0;
+}
+
+.meep ::-webkit-input-placeholder {
+	font-style: italic;
+}
+
+.meep :-moz-placeholder {
+	font-style: italic;
+}
+
+.meep ::-moz-placeholder {
+	font-style: italic;
+}
+
+.meep :-ms-input-placeholder {
+	font-style: italic;
+}
+
+button.uk-float-left {
+	margin-right: 1em;
+}
+
+.filterbox {
+	clear: both;
+	border: 1px solid #ccc;
+	border-radius: 8px;
+	padding: 10px;
+	margin: 20px 0;
+}
+
+.uk-form .error {
+	color: red;
+}

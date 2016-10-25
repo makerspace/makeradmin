@@ -1,0 +1,4 @@
+#!/bin/bash
+
+ABSOLUTE_PATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+docker build --tag=makeradmin/frontend:1.0 $ABSOLUTE_PATH

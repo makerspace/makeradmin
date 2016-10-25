@@ -5,11 +5,11 @@ module.exports = {
 	output:
 	{
 		filename: "app.js",
-		path: "./dist",
+		path: __dirname + "/dist/js",
 	},
 
 	resolve: {
-		extensions: ['', '.js', '.jsx']
+		extensions: ["", ".js", ".jsx"]
 	},
 
 	module: {
@@ -20,7 +20,7 @@ module.exports = {
 				exclude: /node_modules/,
 				loader: "babel-loader",
 				query: {
-					presets: ['es2015', 'react']
+					presets: ["es2015", "react"]
 				}
 			},
 		],
