@@ -1,0 +1,21 @@
+#!/bin/bash
+
+ABSOLUTE_PATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+if [  $# -le 3 ]
+then
+	echo -e "Usage:\n$0 [mysql_host] [mysql_user] [mysql_db] [mysql_pass]"
+	exit 1
+fi
+
+# Create the API Gateway container
+docker run -d \
+    --name makeradmin-apigateway \
+    --net makeradmin \
+    -e VIRTUAL_HOST=api.makeradmin.dev \
+    -e MYSQL_HOST=$1 \
+    -e MYSQL_USER=$2 \
+    -e MYSQL_PASS=$3 \
+    -e MYSQL_DB=$4 \
+    -v $ABSOLUTE_PATH/../lumen:/var/www/html \
+    makeradmin/apigateway:1.0
