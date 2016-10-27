@@ -9,31 +9,37 @@ use App\Models\Entity;
 class Group extends Entity
 {
 	protected $type = "group";
+	protected $table = "membership_groups";
+	protected $id_column = "group_id";
 	protected $columns = [
-		"entity_id" => [
-			"column" => "entity.entity_id",
-			"select" => "entity.entity_id",
+		"group_id" => [
+			"column" => "membership_groups.group_id",
+			"select" => "membership_groups.group_id",
+		],
+		"parent" => [
+			"column" => "membership_groups.parent",
+			"select" => "membership_groups.parent",
 		],
 		"created_at" => [
-			"column" => "entity.created_at",
-			"select" => "DATE_FORMAT(entity.created_at, '%Y-%m-%dT%H:%i:%sZ')",
+			"column" => "membership_groups.created_at",
+			"select" => "DATE_FORMAT(membership_groups.created_at, '%Y-%m-%dT%H:%i:%sZ')",
 		],
 		"updated_at" => [
-			"column" => "entity.updated_at",
-			"select" => "DATE_FORMAT(entity.updated_at, '%Y-%m-%dT%H:%i:%sZ')",
+			"column" => "membership_groups.updated_at",
+			"select" => "DATE_FORMAT(membership_groups.updated_at, '%Y-%m-%dT%H:%i:%sZ')",
 		],
 		"title" => [
-			"column" => "entity.title",
-			"select" => "entity.title",
+			"column" => "membership_groups.title",
+			"select" => "membership_groups.title",
 		],
 		"description" => [
-			"column" => "entity.description",
-			"select" => "entity.description",
+			"column" => "membership_groups.description",
+			"select" => "membership_groups.description",
 		],
 	];
 	protected $sort = ["title", "asc"];
 	protected $validation = [
-		"title" => ["required", "unique"],
+		"title" => ["required"/*, "unique"*/],
 	];
 
 	public function _search($query, $search)
@@ -44,8 +50,8 @@ class Group extends Entity
 			$query = $query->where(function($query) use($word) {
 				// Build the search query
 				$query
-					->  where("entity.title",       "like", "%".$word."%")
-					->orWhere("entity.description", "like", "%".$word."%");
+					->  where("membership_groups.title",       "like", "%".$word."%")
+					->orWhere("membership_groups.description", "like", "%".$word."%");
 			});
 		}
 
@@ -64,9 +70,12 @@ class Group extends Entity
 		$query = $this->_applyFilter($query, $filters);
 
 		// Calculate total number of peoples in the group
+/*
 		$query = $query
 			->leftJoin("relation", "relation.entity2", "=", "entity.entity_id")
 			->selectRaw("(SELECT COUNT(*) FROM relation LEFT JOIN entity e ON e.entity_id = relation.entity1 WHERE relation.entity2 = entity.entity_id AND e.type=\"member\") AS membercount");
+*/
+// TODO: Member count
 
 		// Sort
 		$query = $this->_applySorting($query);

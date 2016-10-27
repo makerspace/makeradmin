@@ -9,93 +9,92 @@ use App\Models\Entity;
 class Member extends Entity
 {
 	protected $type = "member";
-	protected $join = "member";
+	protected $table = "membership_members";
+	protected $id_column = "member_id";
 	protected $columns = [
-		"entity_id" => [
-			"column" => "entity.entity_id",
-			"select" => "entity.entity_id",
+		"member_id" => [
+			"column" => "membership_members.member_id",
+			"select" => "membership_members.member_id",
 		],
 		"created_at" => [
-			"column" => "entity.created_at",
-			"select" => "DATE_FORMAT(entity.created_at, '%Y-%m-%dT%H:%i:%sZ')",
+			"column" => "membership_members.created_at",
+			"select" => "DATE_FORMAT(membership_members.created_at, '%Y-%m-%dT%H:%i:%sZ')",
 		],
 		"updated_at" => [
-			"column" => "entity.updated_at",
-			"select" => "DATE_FORMAT(entity.updated_at, '%Y-%m-%dT%H:%i:%sZ')",
+			"column" => "membership_members.updated_at",
+			"select" => "DATE_FORMAT(membership_members.updated_at, '%Y-%m-%dT%H:%i:%sZ')",
 		],
-		"description" => [
-			"column" => "entity.description",
-			"select" => "entity.description",
-		],
+/*
 		"member_number" => [
 			"column" => "member.member_number",
 			"select" => "member.member_number",
 		],
+*/
 		"email" => [
-			"column" => "member.email",
-			"select" => "member.email",
+			"column" => "membership_members.email",
+			"select" => "membership_members.email",
 		],
 		"password" => [
-			"column" => "member.password",
-			"select" => "member.password",
+			"column" => "membership_members.password",
+			"select" => "membership_members.password",
 		],
 		"reset_token" => [
-			"column" => "member.reset_token",
-			"select" => "member.reset_token",
+			"column" => "membership_members.reset_token",
+			"select" => "membership_members.reset_token",
 		],
 		"reset_expire" => [
-			"column" => "member.reset_expire",
-			"select" => "member.reset_expire",
+			"column" => "membership_members.reset_expire",
+			"select" => "membership_members.reset_expire",
 		],
 		"firstname" => [
-			"column" => "member.firstname",
-			"select" => "member.firstname",
+			"column" => "membership_members.firstname",
+			"select" => "membership_members.firstname",
 		],
 		"lastname" => [
-			"column" => "member.lastname",
-			"select" => "member.lastname",
+			"column" => "membership_members.lastname",
+			"select" => "membership_members.lastname",
 		],
 		"civicregno" => [
-			"column" => "member.civicregno",
-			"select" => "member.civicregno",
+			"column" => "membership_members.civicregno",
+			"select" => "membership_members.civicregno",
 		],
 		"company" => [
-			"column" => "member.company",
-			"select" => "member.company",
+			"column" => "membership_members.company",
+			"select" => "membership_members.company",
 		],
 		"orgno" => [
-			"column" => "member.orgno",
-			"select" => "member.orgno",
+			"column" => "membership_members.orgno",
+			"select" => "membership_members.orgno",
 		],
 		"address_street" => [
-			"column" => "member.address_street",
-			"select" => "member.address_street",
+			"column" => "membership_members.address_street",
+			"select" => "membership_members.address_street",
 		],
 		"address_extra" => [
-			"column" => "member.address_extra",
-			"select" => "member.address_extra",
+			"column" => "membership_members.address_extra",
+			"select" => "membership_members.address_extra",
 		],
 		"address_zipcode" => [
-			"column" => "member.address_zipcode",
-			"select" => "member.address_zipcode",
+			"column" => "membership_members.address_zipcode",
+			"select" => "membership_members.address_zipcode",
 		],
 		"address_city" => [
-			"column" => "member.address_city",
-			"select" => "member.address_city",
+			"column" => "membership_members.address_city",
+			"select" => "membership_members.address_city",
 		],
 		"address_country" => [
-			"column" => "member.address_country",
-			"select" => "member.address_country",
+			"column" => "membership_members.address_country",
+			"select" => "membership_members.address_country",
 		],
 		"phone" => [
-			"column" => "member.phone",
-			"select" => "member.phone",
+			"column" => "membership_members.phone",
+			"select" => "membership_members.phone",
 		],
 	];
-	protected $sort = ["member_number", "desc"];
+	protected $sort = ["member_id", "desc"];
 	protected $validation = [
 		"firstname" => ["required"],
-//		"email"     => ["required", "unique"],
+		"email"     => ["required", "unique"],
 	];
 
 	public function _search($query, $search)
@@ -108,16 +107,16 @@ class Member extends Entity
 				$phone = ltrim($word, "0");
 				// Build the search query
 				$query
-					->  where("member.firstname",       "like", "%".$word."%")
-					->orWhere("member.lastname",        "like", "%".$word."%")
-					->orWhere("member.email",           "like", "%".$word."%")
-					->orWhere("member.address_street",  "like", "%".$word."%")
-					->orWhere("member.address_extra",   "like", "%".$word."%")
-					->orWhere("member.address_zipcode", "like", "%".$word."%")
-					->orWhere("member.address_city",    "like", "%".$word."%")
-					->orWhere("member.phone",           "like", "%".$phone."%")
-					->orWhere("member.civicregno",      "like", "%".$word."%")
-					->orWhere("member.member_number",   "like", "%".$word."%");
+					->  where("membership_members.firstname",       "like", "%".$word."%")
+					->orWhere("membership_members.lastname",        "like", "%".$word."%")
+					->orWhere("membership_members.email",           "like", "%".$word."%")
+					->orWhere("membership_members.address_street",  "like", "%".$word."%")
+					->orWhere("membership_members.address_extra",   "like", "%".$word."%")
+					->orWhere("membership_members.address_zipcode", "like", "%".$word."%")
+					->orWhere("membership_members.address_city",    "like", "%".$word."%")
+					->orWhere("membership_members.phone",           "like", "%".$phone."%")
+					->orWhere("membership_members.civicregno",      "like", "%".$word."%");
+//					->orWhere("membership_members.member_number",   "like", "%".$word."%");
 			});
 		}
 

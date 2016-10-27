@@ -12,10 +12,9 @@ fi
 docker run -d \
     --name makeradmin-membership \
     --net makeradmin \
-    -e VIRTUAL_HOST=api.makeradmin.dev \
     -e MYSQL_HOST=$1 \
     -e MYSQL_USER=$2 \
     -e MYSQL_PASS=$3 \
     -e MYSQL_DB=$4 \
-    -v $ABSOLUTE_PATH/../laravel:/var/www/html \
+    -v $ABSOLUTE_PATH/../lumen:/var/www/html \
     makeradmin/membership:1.0

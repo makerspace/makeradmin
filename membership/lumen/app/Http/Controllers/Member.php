@@ -21,6 +21,48 @@ class Member extends Controller
 	 */
 	function list(Request $request)
 	{
+/*
+		$user = $request->header("X-Username");
+		$org  = $request->header("X-Organisation");
+
+		if($user != "chille")
+		{
+			// Send response to client
+			return Response()->json([
+				"status"  => "error",
+				"message" => "Access denied",
+			], 403);
+		}
+*/
+		/*
+			En header specificerar vilken orgainsation/grupp man arbetar mot
+				Riksorg = allt
+				Förening / arbetsgrupp = begränsa till dess användare + kolla behörigheter
+				Användare = access denied
+
+			if($user == admin)
+			{
+				// Access to everything
+			}
+			else if($user == invidual member)
+			{
+				// Access only to self
+			}
+			else
+			{
+				//
+			}
+
+			Permissions:
+				Admin    = Hämta samtliga users
+				User     = Hämta sin egen data
+				Styrelse = Hämta users för en viss organisation
+
+				Read content
+				Create content
+				Delete content
+		*/
+
 		return $this->_applyStandardFilters("Member", $request);
 	}
 
@@ -33,6 +75,7 @@ class Member extends Controller
 
 		// TODO: This should be removed
 		// Create a unique member number if not specified
+/*
 		if(!empty($json["member_number"]))
 		{
 			$member_number = $json["member_number"];
@@ -52,11 +95,11 @@ class Member extends Controller
 				$member_number = ($newest_member->member_number + 1);
 			}
 		}
-
+*/
 		// Create new member
 		$entity = new MemberModel;
-		$entity->member_number   = $member_number;
-		$entity->email           = $json["email"];
+//		$entity->member_number   = $member_number;
+		$entity->email           = $json["email"]           ?? null;
 		$entity->password        = $json["password"]        ?? null;
 		$entity->firstname       = $json["firstname"]       ?? null;
 		$entity->lastname        = $json["lastname"]        ?? null;
@@ -67,15 +110,16 @@ class Member extends Controller
 		$entity->address_extra   = $json["address_extra"]   ?? null;
 		$entity->address_zipcode = $json["address_zipcode"] ?? null;
 		$entity->address_city    = $json["address_city"]    ?? null;
-		$entity->address_country = $json["address_country"] ?? "SE";
+		$entity->address_country = $json["address_country"] ?? "se";
 		$entity->phone           = $json["phone"]           ?? null;
 
+/*
 		// Add relations
 		if(!empty($json["relations"]))
 		{
 			$entity->addRelations($json["relations"]);
 		}
-
+*/
 		// Validate input
 		$entity->validate();
 
@@ -92,18 +136,19 @@ class Member extends Controller
 	/**
 	 *
 	 */
-	function read(Request $request, $member_number)
+	function read(Request $request, $member_id)
 	{
 		// Load the entity
 		$entity = MemberModel::load([
-			"member_number" => $member_number
+			"member_id" => $member_id
 		]);
 
 		// Generate an error if there is no such member
 		if(false === $entity)
 		{
 			return Response()->json([
-				"message" => "No member with specified member number",
+				"status" => "error",
+				"message" => "No member with specified member_id",
 			], 404);
 		}
 		else
@@ -115,18 +160,19 @@ class Member extends Controller
 	/**
 	 *
 	 */
-	function update(Request $request, $member_number)
+	function update(Request $request, $member_id)
 	{
 		// Load the entity
 		$entity = MemberModel::load([
-			["member_number", "=", $member_number]
+			"member_id" => ["=", $member_id]
 		]);
 
-		// Generate an error if there is no such product
+		// Generate an error if there is no such member
 		if(false === $entity)
 		{
 			return Response()->json([
-				"message" => "Could not find any member with specified member_number",
+				"status" => "error",
+				"message" => "Could not find any member with specified member_id",
 			], 404);
 		}
 
@@ -137,17 +183,7 @@ class Member extends Controller
 		{
 			$entity->{$key} = $value ?? null;
 		}
-/*
-		// TODO: Validate input
-		// TODO: Validation of tagid will fail because it is already in the database en therefore not unique
-		$errors = $entity->validate();
-		if(!empty($errors))
-		{
-			return Response()->json([
-				"errors" => $errors,
-			], 400);
-		}
-*/
+
 		// Validate input
 		$entity->validate();
 
@@ -164,24 +200,35 @@ class Member extends Controller
 	/**
 	 *
 	 */
-	function delete(Request $request, $member_number)
+	function delete(Request $request, $member_id)
 	{
 		// Load the entity
 		$entity = MemberModel::load([
-			["member_number", "=", $member_number]
+			"member_id" => ["=", $member_id]
 		]);
+
+		// Generate an error if there is no such member
+		if(false === $entity)
+		{
+			return Response()->json([
+				"status"  => "error",
+				"message" => "Could not find any member with specified member_id",
+			], 404);
+		}
 
 		if($entity->delete())
 		{
-			return [
-				"status" => "deleted"
-			];
+			return Response()->json([
+				"status"  => "deleted",
+				"message" => "The member was successfully deleted",
+			], 200);
 		}
 		else
 		{
-			return [
-				"status" => "error"
-			];
+			return Response()->json([
+				"status"  => "error",
+				"message" => "An error occured when trying to delete member",
+			], 500);
 		}
 	}
 }
