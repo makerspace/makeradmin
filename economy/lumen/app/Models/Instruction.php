@@ -18,7 +18,7 @@ public function Transactions()
 /**
  *
  */
-class AccountingInstruction extends Entity
+class Instruction extends Entity
 {
 	protected $type = "accounting_instruction";
 	protected $join = "accounting_instruction";

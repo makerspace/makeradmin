@@ -7,7 +7,7 @@ use App\Models\Entity;
 
 // TODO: Ta hänsyn till accounting_period
 
-class AccountingAccount extends Entity
+class Account extends Entity
 {
 	protected $type = "accounting_account";
 	protected $join = "accounting_account";

@@ -12,7 +12,6 @@ fi
 docker run -d \
     --name makeradmin-economy \
     --net makeradmin \
-    -e VIRTUAL_HOST=api.makeradmin.dev \
     -e MYSQL_HOST=$1 \
     -e MYSQL_USER=$2 \
     -e MYSQL_PASS=$3 \

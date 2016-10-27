@@ -1,18 +1,20 @@
 <?php
-namespace App\Http\Controllers\V2;
+namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
-use App\Models\AccountingAccount;
+// Models
+use App\Models\AccountModel;
 
+// TODO: Remove
 use App\Traits\AccountingPeriod;
 use App\Traits\Pagination;
 
-class EconomyAccount extends Controller
+class Account extends Controller
 {
-	use AccountingPeriod, Pagination;
+	use Pagination;
 
 	/**
 	 * Returns the masterledger
@@ -38,7 +40,7 @@ class EconomyAccount extends Controller
 		}
 
 		// Return all account that have a balance not equal to 0
-		return AccountingAccount::list($filters);
+		return AccountModel::list($filters);
 	}
 
 	/**
@@ -74,7 +76,7 @@ class EconomyAccount extends Controller
 		}
 
 		// Load data from database
-		$result = call_user_func("\App\Models\AccountingAccount::list", $filters);
+		$result = call_user_func("\App\Models\Account::list", $filters);
 
 		// Return json array
 		return $result;
@@ -100,10 +102,10 @@ class EconomyAccount extends Controller
 		}
 
 		// Create new entity
-		$entity = new AccountingAccount;
-		$entity->account_number     = $json["account_number"];
-		$entity->title              = $json["title"];
-		$entity->description        = $json["description"] ?? null;
+		$entity = new AccountModel;
+		$entity->account_number     = $json["account_number"] ?? null;
+		$entity->title              = $json["title"]          ?? null;
+		$entity->description        = $json["description"]    ?? null;
 		$entity->accounting_period  = $accountingperiod_id;
 
 		// Validate input
@@ -128,7 +130,7 @@ class EconomyAccount extends Controller
 		$this->_getAccountingPeriodId($accountingperiod);
 
 		// Load the account
-		$entity = AccountingAccount::load([
+		$entity = AccountModel::load([
 			"accountingperiod" => $accountingperiod,
 			"account_number"   => ["=", $account_number],
 		]);
@@ -163,7 +165,7 @@ class EconomyAccount extends Controller
 		$this->_getAccountingPeriodId($accountingperiod);
 
 		// Load the account
-		$entity = AccountingAccount::load([
+		$entity = AccountModel::load([
 			["accountingperiod", "=", $accountingperiod],
 			["account_number",   "=", $account_number],
 		]);

@@ -1,17 +1,19 @@
 <?php
-namespace App\Http\Controllers\V2;
+namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
-use App\Models\AccountingInstruction;
-use App\Traits\AccountingPeriod;
+// Models
+use App\Models\Instruction;
+
+// TODO: Remove
 use App\Traits\Pagination;
 
-class EconomyInstruction extends Controller
+class Instruction extends Controller
 {
-	use AccountingPeriod, Pagination;
+	use Pagination;
 
 	/**
 	 *
@@ -42,7 +44,7 @@ class EconomyInstruction extends Controller
 		}
 
 		// Load data from datbase
-		$result = AccountingInstruction::list($filters);
+		$result = Instruction::list($filters);
 
 		// Return json array
 		return $result;
@@ -68,7 +70,7 @@ class EconomyInstruction extends Controller
 		}
 */
 		// Create new accounting instruction
-		$entity = new AccountingInstruction;
+		$entity = new Instruction;
 		$entity->title                         = $json["title"];
 		$entity->description                   = $json["description"]         ?? null;
 		$entity->instruction_number            = $json["instruction_number"]  ?? null;
@@ -107,7 +109,7 @@ class EconomyInstruction extends Controller
 		$this->_getAccountingPeriodId($accountingperiod);
 
 		// Load the instruction entity
-		$entity = AccountingInstruction::load([
+		$entity = Instruction::load([
 			"accountingperiod"   => $accountingperiod,
 			"instruction_number" => $instruction_number,
 		]);
@@ -157,7 +159,7 @@ class EconomyInstruction extends Controller
 		$this->_getAccountingPeriodId($accountingperiod);
 
 		// Load the instruction entity
-		$entity = AccountingInstruction::load([
+		$entity = Instruction::load([
 			"accountingperiod"   => $accountingperiod,
 			"instruction_number" => $instruction_number,
 		]);

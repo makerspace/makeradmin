@@ -1,13 +1,14 @@
 <?php
-namespace App\Http\Controllers\V2;
+namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
+// TODO: Remove
 use App\Traits\Pagination;
 
-class EconomyCostcenter extends Controller
+class Costcenter extends Controller
 {
 	use Pagination;
 

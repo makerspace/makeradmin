@@ -1,17 +1,15 @@
 <?php
-namespace App\Http\Controllers\V2;
+namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
-use App\Models\AccountingAccount;
-use App\Traits\AccountingPeriod;
+// Models
+use App\Models\Account;
 
-class EconomyReport extends Controller
+class Report extends Controller
 {
-	use AccountingPeriod;
-
 	/**
 	 *
 	 */
@@ -198,7 +196,7 @@ class EconomyReport extends Controller
 
 		if(array_key_exists("accountfilter", $data))
 		{
-			$accounts = AccountingAccount::list(
+			$accounts = Account::list(
 				[
 					["accountingperiod", "=", $accountingperiod],
 					["account_number", ">=", $data["accountfilter"]["from"]],

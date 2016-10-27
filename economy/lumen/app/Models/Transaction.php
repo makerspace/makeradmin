@@ -2,7 +2,7 @@
 namespace App\Models;
 use DB;
 
-class AccountingTransaction extends Entity
+class Transaction extends Entity
 {
 	protected $type = "accounting_transaction";
 	protected $join = "accounting_transaction";

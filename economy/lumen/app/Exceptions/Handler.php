@@ -45,6 +45,39 @@ class Handler extends ExceptionHandler
      */
     public function render($request, Exception $e)
     {
-        return parent::render($request, $e);
+        if($e instanceof \App\Exceptions\EntityValidationException)
+        {
+            return Response()->json([
+                "status"  => "error",
+                "column"  => $e->getColumn(),
+                "message" => $e->getMessage(),
+            ], 422);
+        }
+        else if($e instanceof \App\Exceptions\FilterNotFoundException)
+        {
+            return Response()->json([
+                "status"  => "error",
+                "column"  => $e->getColumn(),
+                "data"    => $e->getData(),
+                "message" => $e->getMessage(),
+            ], 404);
+        }
+        else if($e instanceof \Symfony\Component\HttpKernel\Exception\NotFoundHttpException)
+        {
+            return Response()->json([
+                "status"  => "error",
+                "message" => "The route you specified could not be found",
+            ], 404);
+        }
+        else
+        {
+            // When we're in production we want a generic error message via the API, and not a rendered HTML page
+            return Response()->json([
+                "status"  => "error",
+                "message" => "Caught unknown exception: {$e->getMessage()}",
+                "debug"   => $e->getTrace(),
+            ], 500);
+        }
+
     }
 }

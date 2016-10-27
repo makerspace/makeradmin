@@ -1,18 +1,19 @@
 <?php
-namespace App\Http\Controllers\V2;
+namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
-use App\Models\AccountingTransaction;
+// Models
+use App\Models\Transaction;
 
-use App\Traits\AccountingPeriod;
+// TODO: Remove
 use App\Traits\Pagination;
 
-class EconomyTransactions extends Controller
+class Transactions extends Controller
 {
-	use AccountingPeriod, Pagination;
+	use Pagination;
 
 	/**
 	 *
@@ -55,7 +56,7 @@ class EconomyTransactions extends Controller
 		}
 
 		// Load data from database
-		$result = AccountingTransaction::list($filters);
+		$result = Transaction::list($filters);
 
 		// Return json array
 		return $result;
@@ -77,7 +78,7 @@ class EconomyTransactions extends Controller
 		// Check that the specified accounting period exists
 		$accountingperiod_id = $this->_getAccountingPeriodId($accountingperiod);
 
-		$result = AccountingTransaction::list(
+		$result = Transaction::list(
 			[
 				["per_page", $this->per_page($request)],
 				["account_number", "=", $account_number],
