@@ -4,7 +4,7 @@ import GroupModel from '../Models/Group'
 var GroupCollection = Backbone.PageableCollection.extend(
 {
 	model: GroupModel,
-	url: "/group",
+	url: "/membership/group",
 });
 
 module.exports = GroupCollection;

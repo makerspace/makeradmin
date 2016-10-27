@@ -2,8 +2,8 @@ import Backbone from 'backbone'
 
 var MemberModel = Backbone.Model.fullExtend(
 {
-	idAttribute: "member_number",
-	urlRoot: "/member",
+	idAttribute: "member_id",
+	urlRoot: "/membership/member",
 	defaults: {
 		created_at: "0000-00-00T00:00:00Z",
 		updated_at: "0000-00-00T00:00:00Z",
