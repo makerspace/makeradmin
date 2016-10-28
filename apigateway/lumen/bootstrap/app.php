@@ -59,9 +59,10 @@ $app->singleton(
 |
 */
 
-// $app->middleware([
-//    App\Http\Middleware\ExampleMiddleware::class
-// ]);
+// Make the JSON response human readable
+$app->middleware([
+	App\Http\Middleware\PrettifyJson::class
+]);
 
 // $app->routeMiddleware([
 //     'auth' => App\Http\Middleware\Authenticate::class,
