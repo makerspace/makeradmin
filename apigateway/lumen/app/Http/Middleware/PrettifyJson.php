@@ -23,10 +23,16 @@ class PrettifyJson
 			// Use our own fancy class that prints it pretty!
 			return new Meep($response->getData());
 		}
+		// The Passport stuff seems to return the JSON data as a normal Response, and not an JsonResponse
+		else if(($json = json_decode($response->getContent())) !== false)
+		{
+			// Use our own fancy class that prints it pretty!
+			return new Meep($json);
+		}
 
 		if(!method_exists($response, "render"))
 		{
-				return $response;
+			return $response;
 		}
 
 		$content = $response->render()."\n";
@@ -46,6 +52,6 @@ class Meep
 
 	function __toString()
 	{
-		return json_encode($this->data, JSON_PRETTY_PRINT)."\n";
+		return json_encode($this->data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)."\n";
 	}
 }
