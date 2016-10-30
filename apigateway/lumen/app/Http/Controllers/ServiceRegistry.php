@@ -136,4 +136,9 @@ class ServiceRegistry extends Controller
 		return response($result, $http_code)
 			->header("Content-Type", "application/json");
 	}
+
+	public function handleOptions(Request $request)
+	{
+		return response("", 200);
+	}
 }

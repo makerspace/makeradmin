@@ -16,6 +16,11 @@ use Illuminate\Http\Request;
 
 use \App\Http\Controllers\ServiceRegistry;
 
+header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
+header("Access-Control-Allow-Headers: Origin, Content-Type, Accept, Authorization, X-Request-With, Access-Control-Allow-Origin");
+//header("Access-Control-Allow-Credentials: true");
+
 // API version 2
 $app->group(["prefix" => "v1"], function() use ($app)
 {
@@ -57,4 +62,11 @@ $app->group(["prefix" => "v1"], function() use ($app)
 	$app->get("/{p1}/{p2}",           "\App\Http\Controllers\ServiceRegistry@handleRoute");
 	$app->get("/{p1}/{p2}/{p3}",      "\App\Http\Controllers\ServiceRegistry@handleRoute");
 	$app->get("/{p1}/{p2}/{p3}/{p4}", "\App\Http\Controllers\ServiceRegistry@handleRoute");
+
+	// Handle CORS requests
+	$app->options("/",                    "\App\Http\Controllers\ServiceRegistry@handleOptions");
+	$app->options("/{p1}",                "\App\Http\Controllers\ServiceRegistry@handleOptions");
+	$app->options("/{p1}/{p2}",           "\App\Http\Controllers\ServiceRegistry@handleOptions");
+	$app->options("/{p1}/{p2}/{p3}",      "\App\Http\Controllers\ServiceRegistry@handleOptions");
+	$app->options("/{p1}/{p2}/{p3}/{p4}", "\App\Http\Controllers\ServiceRegistry@handleOptions");
 });
