@@ -8,25 +8,18 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
 use Illuminate\Contracts\Auth\Access\Authorizable as AuthorizableContract;
 
-class User extends Model implements AuthenticatableContract, AuthorizableContract
+// Used for Passport stuff
+use League\OAuth2\Server\Entities\UserEntityInterface;
+use Laravel\Passport\HasApiTokens;
+
+class User extends Model implements AuthenticatableContract, AuthorizableContract, UserEntityInterface
 {
-    use Authenticatable, Authorizable;
+	use Authenticatable, Authorizable, HasApiTokens;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array
-     */
-    protected $fillable = [
-        'name', 'email',
-    ];
+	protected $primaryKey = "user_id";
 
-    /**
-     * The attributes excluded from the model's JSON form.
-     *
-     * @var array
-     */
-    protected $hidden = [
-        'password',
-    ];
+	public function getIdentifier()
+	{
+		return $this->user_id;
+	}
 }
