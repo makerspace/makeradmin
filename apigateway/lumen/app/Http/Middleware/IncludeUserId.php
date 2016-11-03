@@ -4,8 +4,9 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Contracts\Auth\Factory as Auth;
+use DB;
 
-class Authenticate
+class IncludeUserId
 {
 	/**
 	 * The authentication guard factory instance.
@@ -35,12 +36,20 @@ class Authenticate
 	 */
 	public function handle($request, Closure $next, $guard = null)
 	{
-		if(!$this->auth->guard($guard)->check())
+		// Get the access token from header
+		$header = $request->header("Authorization");
+		$access_token = trim(preg_replace('/^(?:\s+)?Bearer\s/', '', $header));
+
+		// Find the access token in the database
+		$user = DB::table("access_tokens")
+			->select("user_id")
+			->where("access_token", $access_token)
+			->first();
+
+		// Save the user_id
+		if($user)
 		{
-			return Response()->json([
-				"status" => "error",
-				"message" => "Unauthorized",
-			], 401);
+			$this->auth->guard($guard)->setUserId($user->user_id);
 		}
 
 		return $next($request);

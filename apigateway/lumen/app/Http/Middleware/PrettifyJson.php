@@ -1,8 +1,8 @@
 <?php
 
 namespace App\Http\Middleware;
-use \Illuminate\Http\Response;
 
+use Illuminate\Http\Response;
 use Closure;
 
 class PrettifyJson
@@ -16,39 +16,34 @@ class PrettifyJson
 	*/
 	public function handle($request, Closure $next)
 	{
+
 		$response = $next($request);
 		$status_code = $response->getStatusCode();
 
-		// Prettify JSON
-		if($response instanceof \Illuminate\Http\JsonResponse)
+		// Decode the data
+		if(($json = json_decode($response->getContent())) !== null)
 		{
-			// Use our own fancy class that prints it pretty!
-			return new Response(
-				$this->_formatJson($response->getData()),
-				$status_code
-			);
+			$content = (array)$json;
 		}
-		// The Passport stuff seems to return the JSON data as a normal Response, and not an JsonResponse
-		else if(($json = json_decode($response->getContent())) !== null)
+		else if(method_exists($response, "render"))
 		{
-			// Use our own fancy class that prints it pretty!
-			return new Response(
-				$this->_formatJson($json),
-				$status_code
-			);
+			$content = [
+				"message" => (string)$response->render()
+			];
 		}
-
-		if(!method_exists($response, "render"))
+		else
 		{
-			return new Response(
-				$this->_formatJson(["message" => (string)$response->original]),
-				$status_code
-			);
+			$content = [
+				"message" => (string)$response->original
+			];
 		}
 
-		$content = $response->render()."\n";
-
-		return $content;
+		// Send the well formatted response to the client
+		return (new Response(
+			$this->_formatJson($content),
+			$status_code
+		))
+		->header("Content-Type", "application/json");
 	}
 
 	public function _formatJson($json)

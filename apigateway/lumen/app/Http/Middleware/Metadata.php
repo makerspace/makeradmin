@@ -2,10 +2,11 @@
 
 namespace App\Http\Middleware;
 
-use Closure;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Contracts\Auth\Factory as Auth;
+use Closure;
 
-class Authenticate
+class Metadata
 {
 	/**
 	 * The authentication guard factory instance.
@@ -35,14 +36,26 @@ class Authenticate
 	 */
 	public function handle($request, Closure $next, $guard = null)
 	{
-		if(!$this->auth->guard($guard)->check())
+		$response = $next($request);
+
+		// Parse the previous response
+		$json = json_decode($response->getContent());
+
+		// Add metadata to the response
+		if(!isset($json->_meta))
 		{
-			return Response()->json([
-				"status" => "error",
-				"message" => "Unauthorized",
-			], 401);
+			$json->_meta = [
+				"service" => "apigateway",
+				"version" => "1.0",
+			];
 		}
 
-		return $next($request);
+		// Create a new response
+		return (new JsonResponse(
+			$json,
+			$response->getStatusCode()
+		));
+
+		return $response;
 	}
 }

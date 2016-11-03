@@ -8,27 +8,66 @@ use Illuminate\Support\Facades\Auth;
 
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
+use App\Service;
+use App\Logger;
+use App\Libraries\CurlBrowser;
+
+/**
+ * Controller for the service registry
+ */
 class ServiceRegistry extends Controller
 {
+	/**
+	 * Reqister a new micro service
+	 */
 	public function register(Request $request)
 	{
 		$json = $request->json()->all();
 
-		// TODO: Register service
+		// TODO: Check permissions
+		// TODO: Better validation
 
+		// Check that the service does not already exist
+		if(Service::getService($json["url"], $json["version"]))
+		{
+			return Response()->json([
+				"status"  => "error",
+				"message" => "A service does alredy exist with identical URL and version",
+			]);
+		}
+
+		// Register the service
+		Service::register([
+			"name"     => $json["name"],
+			"url"      => $json["url"],
+			"endpoint" => $json["endpoint"],
+			"version"  => $json["version"],
+		]);
+
+		// Send response
 		return Response()->json([
 			"status"  => "registered",
 			"message" => "The service was successfully registered",
-			"data"    => $json,
 		], 200);
 	}
 
+	/**
+	 * Remove an existing micro service
+	 */
 	public function unregister(Request $request)
 	{
 		$json = $request->json()->all();
 
-		// TODO: Unregister service
+		// TODO: Check permissions
+		// TODO: Better validation
 
+		// Unregister the service
+		Service::unregister([
+			"name"    => $json["name"],
+			"version" => $json["version"],
+		]);
+
+		// Send response
 		return Response()->json([
 			"status"  => "unregistered",
 			"message" => "The service was successfully unregistered",
@@ -36,109 +75,101 @@ class ServiceRegistry extends Controller
 		], 200);
 	}
 
+	/**
+	 * Return a list of all registered micro services
+	 */
 	public function list(Request $request)
 	{
 		$json = $request->json()->all();
 
-		// TODO: List services
+		// TODO: Check permissions
+
+		// List services
+		$result = Service::all();
 
 		return Response()->json([
-			"data"  => [],
+			"data"  => $result,
 		], 200);
 	}
 
+	/**
+	 * Handle an incoming HTTP request
+	 *
+	 * Finds the appropriate micro service and sends a HTTP request to it
+	 */
 	public function handleRoute(Request $request, $p1, $p2 = null, $p3 = null, $p4 = null)
 	{
 		// Split the path into segments and get version + service
 		$path = explode("/", $request->path());
-		$version = $path[0];
-		$service = $path[1];
+		$service = $path[0];
+		$version = 1;// TODO: Get version from header
 
-		// TODO: Should be in database
-		$services = [
-			"membership" => [
-				"name"     => "Membership Micro Service",
-				"url"      => "/membership",
-				"endpoint" => "http://172.19.0.4:80",
-				"version"  => "1.0",
-			],
-			"economy" => [
-				"name"     => "Economy Micro Service",
-				"url"      => "/economy",
-				"endpoint" => "http://172.19.0.5:80",
-				"version"  => "1.0",
-			],
-		];
-		if(array_key_exists($service, $services))
-		{
-			$endpoint = $services[$p1]["endpoint"];
-		}
-		else
+
+		// Get the endpoint URL or throw an exception if no service was found
+		if(($service = Service::getService($service, $version)) === false)
 		{
 			throw new NotFoundHttpException;
 		}
 
-		// Combine into a new path without the version prefix
-		array_shift($path);
-		$p = implode("/", $path);
-		$url = "{$endpoint}/{$p}";
-
 		// Initialize cURL
-		$ch = curl_init();
-		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-		curl_setopt($ch, CURLOPT_HEADER, false);
+		$ch = new CurlBrowser;
 
 		// Add a header with authentication information
 		$user = Auth::user();
 		if($user)
 		{
-			curl_setopt($ch, CURLOPT_HTTPHEADER,
-				[
-					"X-Member-Id: {$user->user_id}",
-				]
-			);
+			$ch->setHeader("X-Member-Id", $user->user_id);
 		}
 
 		// Append the query string parameters like ?sort_by=column etc to the URL
-		$querystring = http_build_query($request->all(), "", "&");
-		if(!empty($querystring))
-		{
-			$url .= "?{$querystring}";
-		}
+		// TODO: $request->all() is not correct
+		$ch->setQueryString($request->all());
 
-		// Set the URL
-		curl_setopt($ch, CURLOPT_URL, $url);
+		// Get JSON and POST data
+		// TODO: Should not include query string parameters
+		$data = json_encode($request->all());
 
-		// Use the correct HTTP method
-		curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $request->method());
+		// Create a new url with the service endpoint url included
+		$url = $service->endpoint . "/" . implode("/", $path);
 
-		// A POST, PUT or DELETE request should include the JSON data
-		if(in_array($request->method(), ["POST", "PUT", "DELETE"]))
-		{
-			curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $request->method());
-			curl_setopt($ch, CURLOPT_POST, true);
-			$data = json_encode($request->all());
-			curl_setopt($ch, CURLOPT_HTTPHEADER, [
-				"Content-Type: application/json",
-				"Content-Length: " . strlen($data)
-			]);
-			curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+		// Send the request
+		$result = $ch->call($request->method(), $url, $data);
+		$http_code = $ch->getStatusCode();
 
-			// TODO: Is the X-Member-Id still intact?
-		}
-
-		// Execute the cURL request and get data
-		$result = curl_exec($ch);
-		$http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-		curl_close($ch);
+		// Log the internal HTTP request
+		Logger::logServiceTraffic($ch);
 
 		// Send response to client
 		return response($result, $http_code)
 			->header("Content-Type", "application/json");
 	}
 
+	/**
+	 * Handles CORS requests
+	 *
+	 * This is an API, so everything should be allowed
+	 */
 	public function handleOptions(Request $request)
 	{
 		return response("", 200);
+	}
+
+	public function test()
+	{
+		$user = Auth::user();
+		if(!$user)
+		{
+			return Response()->json([
+				"status"  => "ok",
+				"message" => "Hello not logged in user!",
+			], 200);
+		}
+		else
+		{
+			return Response()->json([
+				"status"  => "ok",
+				"message" => "Hello user {$user->user_id}!",
+			], 200);
+		}
 	}
 }

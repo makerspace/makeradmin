@@ -60,15 +60,37 @@ class Handler extends ExceptionHandler
 				"message" => "The method you specified is not allowed on this route",
 			], 404);
 		}
+		else if($e instanceof \App\Exceptions\ServiceRequestTimeout)
+		{
+			// When we're in production we want a generic error message via the API, and not a rendered HTML page
+			return Response()->json([
+				"status"  => "error",
+				"message" => "Something went wrong while trying to contact a service in our internal network",
+			], 500);
+		}
 		else
 		{
+			// Bulid a stripped down backtrace, so we don't get problems with recursions in the arguments
+			$trace = [];
+			foreach($e->getTrace() as $x)
+			{
+				$params = [];
+				$params["file"] = $x["file"] ?? null;
+				$params["line"] = $x["line"] ?? null;
+				$params["function"] = $x["function"];
+				$params["class"] = $x["class"] ?? null;
+				$params["args"] = [];//TODO
+
+				$trace[] = $params;
+			}
+
 			// When we're in production we want a generic error message via the API, and not a rendered HTML page
 			return Response()->json([
 				"status"  => "error",
 				"message" => "Caught unknown exception: {$e->getMessage()}",
 				"type"    => get_class($e),
-				"debug"   => $e->getTrace(),
-			], 404);
+				"debug"   => $trace,
+			], 500);
 		}
 	}
 }

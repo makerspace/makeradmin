@@ -61,12 +61,15 @@ $app->singleton(
 
 // Make the JSON response human readable
 $app->middleware([
-    App\Http\Middleware\PrettifyJson::class
+    App\Http\Middleware\Logging::class,
+    App\Http\Middleware\PrettifyJson::class,
+    App\Http\Middleware\Metadata::class,
+    App\Http\Middleware\IncludeUserId::class,
 ]);
 
 // Enable auth middleware (shipped with Lumen)
 $app->routeMiddleware([
-    'auth' => App\Http\Middleware\Authenticate::class,
+    "auth" => App\Http\Middleware\Authenticate::class,
 ]);
 
 /*
@@ -80,8 +83,8 @@ $app->routeMiddleware([
 |
 */
 
-$app->register(Laravel\Passport\PassportServiceProvider::class);
-$app->register(Dusterio\LumenPassport\PassportServiceProvider::class);
+//$app->register(Laravel\Passport\PassportServiceProvider::class);
+//$app->register(Dusterio\LumenPassport\PassportServiceProvider::class);
 $app->register(App\Providers\AuthServiceProvider::class);
 
 /*
@@ -97,6 +100,10 @@ $app->register(App\Providers\AuthServiceProvider::class);
 
 $app->group(['namespace' => 'App\Http\Controllers'], function ($app) {
     require __DIR__.'/../routes/web.php';
+});
+
+$app->singleton('filesystem', function ($app) {
+    return $app->loadComponent('filesystems', 'Illuminate\Filesystem\FilesystemServiceProvider', 'filesystem');
 });
 
 return $app;
