@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Auth;
 
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
+use App\Exceptions\EntityValidationException;
 use App\Service;
 use App\Logger;
 use App\Libraries\CurlBrowser;
@@ -24,8 +25,25 @@ class ServiceRegistry extends Controller
 	{
 		$json = $request->json()->all();
 
-		// TODO: Check permissions
 		// TODO: Better validation
+		if(empty($json["name"]))
+		{
+			throw new EntityValidationException("name", "required");
+		}
+		if(empty($json["url"]))
+		{
+			throw new EntityValidationException("url", "required");
+		}
+		if(empty($json["endpoint"]))
+		{
+			throw new EntityValidationException("endpoint", "required");
+		}
+		if(empty($json["version"]))
+		{
+			throw new EntityValidationException("version", "required");
+		}
+
+		// TODO: Check permissions
 
 		// Check that the service does not already exist
 		if(Service::getService($json["url"], $json["version"]))
@@ -58,8 +76,17 @@ class ServiceRegistry extends Controller
 	{
 		$json = $request->json()->all();
 
-		// TODO: Check permissions
 		// TODO: Better validation
+		if(empty($json["name"]))
+		{
+			throw new EntityValidationException("name", "required");
+		}
+		if(empty($json["version"]))
+		{
+			throw new EntityValidationException("version", "required");
+		}
+
+		// TODO: Check permissions
 
 		// Unregister the service
 		Service::unregister([
@@ -87,6 +114,7 @@ class ServiceRegistry extends Controller
 		// List services
 		$result = Service::all();
 
+		// Send response to client
 		return Response()->json([
 			"data"  => $result,
 		], 200);
