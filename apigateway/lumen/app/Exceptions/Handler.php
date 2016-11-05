@@ -45,7 +45,15 @@ class Handler extends ExceptionHandler
 	 */
 	public function render($request, Exception $e)
 	{
-		if($e instanceof \Symfony\Component\HttpKernel\Exception\NotFoundHttpException)
+		if($e instanceof \App\Exceptions\EntityValidationException)
+		{
+			return Response()->json([
+				"status"  => "error",
+				"column"  => $e->getColumn(),
+				"message" => $e->getMessage(),
+			], 422);
+		}
+		else if($e instanceof \Symfony\Component\HttpKernel\Exception\NotFoundHttpException)
 		{
 			return Response()->json([
 				"status"  => "error",

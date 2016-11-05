@@ -17,6 +17,8 @@ class CreateAccessTokensTable extends Migration
 		{
 			$table->integer("user_id");
 			$table->string("access_token", 32);
+			$table->string("browser");
+			$table->string("ip");
 			$table->dateTimeTz("expires");
 
 			$table->index("user_id");

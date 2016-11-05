@@ -4,7 +4,7 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Contracts\Auth\Factory as Auth;
-use DB;
+use App\Login;
 
 class IncludeUserId
 {
@@ -40,16 +40,11 @@ class IncludeUserId
 		$header = $request->header("Authorization");
 		$access_token = trim(preg_replace('/^(?:\s+)?Bearer\s/', '', $header));
 
-		// Find the access token in the database
-		$user = DB::table("access_tokens")
-			->select("user_id")
-			->where("access_token", $access_token)
-			->first();
-
-		// Save the user_id
-		if($user)
+		// Find the access token in the database and set user_id if found
+		if(($user = Login::getUserFromAccessToken($access_token)) !== false)
 		{
-			$this->auth->guard($guard)->setUserId($user->user_id);
+			Login::updateToken($access_token);
+			$this->auth->guard($guard)->setUserObject($user);
 		}
 
 		return $next($request);

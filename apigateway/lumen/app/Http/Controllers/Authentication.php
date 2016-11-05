@@ -7,6 +7,7 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 
 use App\Login;
+use App\Exceptions\EntityValidationException;
 use DB;
 
 /**
@@ -19,19 +20,32 @@ class Authentication extends Controller
 	 */
 	public function login(Request $request)
 	{
-		$username = $request->get("username");
-		$password = $request->get("password");
+		$username   = $request->get("username");
+		$password   = $request->get("password");
+		$grant_type = $request->get("grant_type");
 
 		// Too many failed attempts?
 		if(Login::shouldThrottle())
 		{
 			return Response()->json([
 				"status"  => "error",
-				"message" => "Your have reached your maximum failed login attempt for the last hour. Please try again later.",
-			], 401);
+				"message" => "Your have reached your maximum number of failed login attempts for the last hour. Please try again later.",
+			], 429);
 		}
 
-		// TODO: Validate input
+		// Validate input
+		if($grant_type != "password")
+		{
+			throw new EntityValidationException("grant_type", null, "Unknown grant type");
+		}
+		if(empty($username))
+		{
+			throw new EntityValidationException("username", "required");
+		}
+		if(empty($password))
+		{
+			throw new EntityValidationException("password", "required");
+		}
 
 		// Send a request to membership module
 		$user_id = Login::authenticate($username, $password);
@@ -66,6 +80,7 @@ class Authentication extends Controller
 			return Response()->json([
 				"status"  => "ok",
 				"message" => "The access_token have been successfully removed",
+				"token"   => $access_token,
 			], 200);
 		}
 		else
@@ -74,6 +89,7 @@ class Authentication extends Controller
 			return Response()->json([
 				"status"  => "error",
 				"message" => "The access_token you specified could not be found in the database",
+				"token"   => $access_token,
 			], 404);
 		}
 	}
@@ -84,7 +100,7 @@ class Authentication extends Controller
 	public function listTokens(Request $request)
 	{
 		// Get user id
-		$user_id = Auth::user()->user_id;
+		$user_id = Auth::user()->member_id;
 
 		// Get users access tokens from the database
 		$result = Login::getTokens($user_id);

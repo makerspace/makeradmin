@@ -11,7 +11,7 @@ header("Access-Control-Allow-Headers: Origin, Content-Type, Accept, Authorizatio
 
 // OAuth 2.0 stuff
 $app->  post("oauth/token",          "Authentication@login");
-$app->  post("oauth/reset_password", "Authentication@reset");
+$app->  post("oauth/resetpassword",  "Authentication@reset");
 $app->   get("oauth/token",         ["middleware" => "auth", "uses" => "Authentication@listTokens"]);
 $app->delete("oauth/token/{token}", ["middleware" => "auth", "uses" => "Authentication@logout"]);
 

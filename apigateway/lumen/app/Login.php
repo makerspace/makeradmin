@@ -6,6 +6,7 @@ use DB;
 use App\Exceptions\ServiceRequestTimeout;
 use App\Logger;
 use App\Libraries\CurlBrowser;
+use Illuminate\Support\Facades\Auth;
 
 /**
  * TODO:
@@ -38,9 +39,9 @@ class Login
 		Logger::logServiceTraffic($ch);
 
 		// Return the user_id or false if unsuccessful
-		if($ch->getStatusCode() == 200 && ($data = $ch->getJson()) !== false && isset($data->user_id))
+		if($ch->getStatusCode() == 200 && ($data = $ch->getJson()) !== false && isset($data->member_id))
 		{
-			return $data->user_id;
+			return $data->member_id;
 		}
 		else
 		{
@@ -62,6 +63,8 @@ class Login
 			"user_id"      => $user_id,
 			"access_token" => $bearer,
 			"expires"      => $expires,
+			"browser"      => $_SERVER["HTTP_USER_AGENT"],
+			"ip"           => $_SERVER["REMOTE_ADDR"],
 		]);
 
 		// Return result
@@ -79,14 +82,14 @@ class Login
 	}
 
 	/**
-	 *
+	 * Remove an access token from the database
 	 */
 	public static function removeToken($access_token)
 	{
 		// Remove access token from databas
 		$num = DB::table("access_tokens")
 			->where("access_token", $access_token)
-			->where("user_id",      Auth::user()->user_id)
+			->where("user_id",      Auth::user()->member_id)
 			->delete();
 
 		// One line should have been removed
@@ -98,21 +101,74 @@ class Login
 	 */
 	public static function getTokens($user_id)
 	{
+		// TODO: Check expiry date
 		return DB::Table("access_tokens")
-			->select("access_token")
+			->select("access_token", "browser", "ip")
 			->selectRaw("DATE_FORMAT(expires, '%Y-%m-%dT%H:%i:%sZ') AS expires")
 			->where("user_id", $user_id)
 			->get();
 	}
 
 	/**
-	 *
+	 * Generate an reset password token and send an E-mail
 	 */
 	public static function reset()
 	{
 		// TODO: Check that the E-mail is existing
 		// TODO: Create a record in database with the reset token
 		// TODO: Send an E-mail to the user
+	}
+
+	/**
+	 * Update the access token
+	 *
+	 * Extend expiry date
+	 * Update IP
+	 * Update user agent
+	 */
+	public static function updateToken($access_token)
+	{
+		DB::table("access_tokens")
+			->where("access_token", $access_token)
+			->update(
+				[
+					"browser" => $_SERVER["HTTP_USER_AGENT"],
+					"ip"      => $_SERVER["REMOTE_ADDR"],
+					"expires" => DB::raw("CURRENT_TIME"),
+				]
+			);
+	}
+
+	/**
+	 * Get the user object related to the access_token
+	 */
+	public static function getUserFromAccessToken($access_token)
+	{
+		// Get the user_id related to the access token
+		$user_id = DB::table("access_tokens")
+			->where("access_token", $access_token)
+			->value("user_id");
+
+		// Get endpoint URL for membership module
+		if(($service = Service::getService("membership")) === false)
+		{
+			// If no service is specified we should just throw an generic error saying the service could not be contacted
+			throw new ServiceRequestTimeout;
+		}
+		$url = "{$service->endpoint}/membership/authenticate";
+
+		// Make a request to the membership module and load the user object (including roles and permissions)
+		$ch = new CurlBrowser();
+		$result = $ch->call("GET", "{$service->endpoint}/membership/member/{$user_id}", []);
+
+		if($ch->getStatusCode() == 200 && ($json = $ch->getJson()) !== false && isset($json->member_id))
+		{
+			return $json;
+		}
+		else
+		{
+			return false;
+		}
 	}
 
 	/**
@@ -129,7 +185,7 @@ class Login
 	}
 
 	/**
-	 * Log a failed login
+	 * Log a failed login attempt
 	 */
 	public static function logFail()
 	{

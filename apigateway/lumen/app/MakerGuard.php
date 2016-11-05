@@ -9,7 +9,7 @@ use DB;
 
 class MakerGuard implements Guard
 {
-	protected $user_id = null;
+	protected $user;
 
 	/**
 	 * Determine if the current user is authenticated.
@@ -18,7 +18,12 @@ class MakerGuard implements Guard
 	 */
 	public function check()
 	{
-		return $this->user_id !== null ? true : false;
+		if(!$this->user)
+		{
+			return false;
+		}
+
+		return $this->user->member_id;
 	}
 
 	/**
@@ -38,6 +43,14 @@ class MakerGuard implements Guard
 	 */
 	public function user()
 	{
+		if(!$this->user)
+		{
+			return false;
+		}
+
+		return $this->user;
+
+/*
 		if(!$this->user_id)
 		{
 			return false;
@@ -46,6 +59,7 @@ class MakerGuard implements Guard
 		$x = new \stdClass();
 		$x->user_id = $this->user_id;
 		return $x;
+*/
 	}
 
 	/**
@@ -80,9 +94,14 @@ class MakerGuard implements Guard
 		die("\nNot implemented: setUser()\n");
 	}
 
+	public function setUserObject($user)
+	{
+		$this->user = $user;
+	}
+
 	public function setUserId($user_id)
 	{
-		$this->user_id = $user_id;
+		die("setUserId\n");
 	}
 
 	public function handle($request, Closure $next, $guard = null)
