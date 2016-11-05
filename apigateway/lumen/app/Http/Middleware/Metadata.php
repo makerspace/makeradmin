@@ -41,6 +41,12 @@ class Metadata
 		// Parse the previous response
 		$json = json_decode($response->getContent());
 
+		// If the JSON couldn't be parsed we have to create a new empty object
+		if($json === null)
+		{
+			$json = new \stdClass;
+		}
+
 		// Add metadata to the response
 		if(!isset($json->_meta))
 		{
