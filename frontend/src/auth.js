@@ -34,6 +34,20 @@ module.exports =
 	},
 
 	/**
+	 *
+	 */
+	requestPassword(username)
+	{
+		$.ajax({
+			method: "POST",
+			url: config.apiBasePath + "/oauth/resetpassword",
+			data: {
+				username,
+			}
+		})
+	},
+
+	/**
 	 * Send an API login request and save the login token
 	 */
 	login(username, password)
@@ -43,20 +57,22 @@ module.exports =
 		// Login with OAuth 2.0
 		$.ajax({
 			method: "POST",
-			url: config.apiBasePath + "/oauth/access_token",
+			url: config.apiBasePath + "/oauth/token",
 			data: {
 				grant_type: "password",
-				client_id: config.clientId,
-				client_secret: "123", // TODO: No client secret
 				username,
 				password,
 			}
 		})
 		.always(function(data, textStatus, xhr)
 		{
-			if(xhr.status == 401)
+			if(data.status == 401)
 			{
-				UIkit.modal.alert("<h2>Error</h2>Authentication failed<br>Invalid username or password");
+				UIkit.modal.alert("<h2>Inloggningen misslyckades</h2>Felaktigt användarnamn eller lösenord");
+			}
+			else if(data.status == 429)
+			{
+				UIkit.modal.alert("<h2>Inloggningen misslyckades</h2>För många misslyckades inloggningar. Kontot spärrat i 60 minuter");
 			}
 			else if(xhr.status == 200 && data.access_token !== undefined)
 			{
@@ -66,7 +82,7 @@ module.exports =
 			else
 			{
 				// TODO: Generic class for error messages?
-				UIkit.modal.alert("<h2>Error</h2>Received an unexpected result from the server<br><br>" + xhr.status + " " + xhr.statusText + "<br><br>" + xhr.responseText);
+				UIkit.modal.alert("<h2>Inloggningen misslyckades</h2>Tog emot ett oväntat svar från servern:<br><br>" + data.status + " " + data.statusText + "<br><br>" + data.responseText);
 			}
 		});
 	},
@@ -76,11 +92,19 @@ module.exports =
 	 */
 	logout()
 	{
+		// Tell the server to delete the access token
+		$.ajax({
+			method: "DELETE",
+			url: config.apiBasePath + "/oauth/token/" + localStorage.token,
+			headers: {
+				"Authorization": "Bearer " + localStorage.token
+			}
+		})
+
+		// Delete from localStorage and send user to login form
 		delete localStorage.token
 		this.onChange(false);
 		browserHistory.push("/");
-
-		// TODO: Send API request
 	},
 
 	/**

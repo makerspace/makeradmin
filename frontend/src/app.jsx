@@ -77,7 +77,10 @@ import MailSendHandler from './Mail/Send'
 import { MailHistoryHandler } from './Mail/History'
 import KeysOverviewHandler from './Keys/Overview'
 
-import auth from './auth';
+import auth from './auth'
+import Login from './Login/Login'
+import LoginResetPassword from './Login/LoginResetPassword'
+import AccessTokensHandler from './Login/AccessTokensHandler'
 
 var nav = new Backbone.Model({
 	brand: "Makerspace Internal v2",
@@ -204,6 +207,10 @@ var nav = new Backbone.Model({
 					target: "/settings/global",
 				},
 				{
+					text: "Access tokens",
+					target: "/settings/tokens",
+				},
+				{
 					text: "Automation",
 					target: "/settings/automation",
 				},
@@ -281,56 +288,6 @@ var nav = new Backbone.Model({
 	]
 });
 
-class Login extends React.Component
-{
-	login(e)
-	{
-		e.preventDefault();
-
-		var username = this.refs.username.value;
-		var password = this.refs.password.value;
-
-		auth.login(username, password);
-	}
-
-	render()
-	{
-		return (
-			<div className="uk-vertical-align uk-text-center uk-height-1-1">
-				<div className="uk-vertical-align-middle" style={{width: "250px"}}>
-					<form className="uk-panel uk-panel-box uk-form" onSubmit={this.login.bind(this)}>
-						<div className="uk-form-row">
-							<h2>Logga in</h2>
-						</div>
-
-						<div className="uk-form-row">
-							<div className="uk-form-icon">
-								<i className="uk-icon-user"></i>
-								<input ref="username" className="uk-width-1-1 uk-form-large" type="text" placeholder="Användarnamn" />
-							</div>
-						</div>
-
-						<div className="uk-form-row">
-							<div className="uk-form-icon">
-								<i className="uk-icon-lock"></i>
-								<input ref="password" className="uk-width-1-1 uk-form-large" type="password" placeholder="Lösenord" />
-							</div>
-						</div>
-
-						<div className="uk-form-row">
-							<button type="submit" className="uk-width-1-1 uk-button uk-button-primary uk-button-large">Logga in</button>
-						</div>
-
-						<div className="uk-form-row uk-text-small">
-							<a className="uk-float-right uk-link uk-link-muted" onClick={UIkit.modal.alert.bind([], "Haha!")}>Glömt ditt lösenord?</a>
-						</div>
-					</form>
-				</div>
-			</div>
-		);
-	}
-}
-
 var App = React.createClass({
 	getInitialState()
 	{
@@ -349,7 +306,6 @@ var App = React.createClass({
 	componentWillMount()
 	{
 		auth.onChange = this.updateAuth;
-//		auth.login();
 	},
 
 	render: function()
@@ -413,6 +369,7 @@ const Logout = React.createClass({
 
 ReactDOM.render((
 	<Router history={browserHistory}>
+		<Route path="resetpassword" component={LoginResetPassword} />
 		<Route path="/" component={App} >
 			<IndexRoute component={DashboardHandler} />
 			<Route path="logout" component={Logout} />
@@ -471,6 +428,7 @@ ReactDOM.render((
 			<Route path="settings">
 				<IndexRedirect to="global" />
 				<Route path="global"     component={SettingsGlobalHandler} />
+				<Route path="tokens"     component={AccessTokensHandler} />
 				<Route path="automation" component={SettingsAutomationHandler} />
 				<Route path="export"     component={ExportHandler} />
 				<Route path="mail"       component={MailTemplatesHandler} />
