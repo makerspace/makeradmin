@@ -231,4 +231,36 @@ class Member extends Controller
 			], 500);
 		}
 	}
+
+	/**
+	 * Authenticate a user
+	 */
+	public function authenticate(Request $request)
+	{
+		$username = $request->get("username");
+		$password = $request->get("password");
+
+		// TODO: Validate input
+
+		// Check if the user is in the database
+		$result = DB::table("membership_members")
+			->select("member_id", "password")
+			->where("email", $username)
+			->first();
+
+		// Verify the password hash
+		if($result && password_verify($password, $result->password))
+		{
+			return Response()->json([
+				"member_id" => $result->member_id,
+			], 200);
+		}
+		else
+		{
+			return Response()->json([
+				"status"  => "error",
+				"message" => "The username and/or password you specified was incorrect",
+			], 401);
+		}
+	}
 }

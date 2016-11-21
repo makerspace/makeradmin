@@ -11,6 +11,8 @@
 |
 */
 
+$app->  post("membership/authenticate", "Member@authenticate");   // Authenticate a member
+
 // Members
 $app->   get("membership/member",      "Member@list");   // Get collection
 $app->  post("membership/member",      "Member@create"); // Model: Create
