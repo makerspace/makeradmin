@@ -38,14 +38,6 @@ class Member extends Entity
 			"column" => "membership_members.password",
 			"select" => "membership_members.password",
 		],
-		"reset_token" => [
-			"column" => "membership_members.reset_token",
-			"select" => "membership_members.reset_token",
-		],
-		"reset_expire" => [
-			"column" => "membership_members.reset_expire",
-			"select" => "membership_members.reset_expire",
-		],
 		"firstname" => [
 			"column" => "membership_members.firstname",
 			"select" => "membership_members.firstname",

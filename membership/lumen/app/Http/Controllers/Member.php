@@ -148,12 +148,29 @@ class Member extends Controller
 		{
 			return Response()->json([
 				"status" => "error",
-				"message" => "No member with specified member_id",
+				"message" => "Could not find any member with specified member_id",
 			], 404);
 		}
 		else
 		{
-			return $entity->toArray();
+			// Convert user object to array
+			$result = $entity->toArray();
+
+			// Get roles and permission for user
+			$result["roles"] = [];
+			$roles = DB::table("membership_roles")
+				->join("membership_members_roles", "membership_members_roles.role_id", "membership_roles.role_id")
+				->select("membership_roles.role_id", "membership_roles.group_id", "membership_roles.title", "membership_roles.description")
+				->where("member_id", $member_id)
+				->get();
+			foreach($roles as $role)
+			{
+				$result["roles"][$role->role_id] = (array)$role;
+				$result["roles"][$role->role_id]["permissions"] = DB::table("membership_permissions")->where("role_id", $role->role_id)->get();
+			}
+
+			// Return result
+			return $result;
 		}
 	}
 

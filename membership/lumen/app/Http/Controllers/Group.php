@@ -39,7 +39,7 @@ class Group extends Controller
 
 		// Get a list of all groups including children
 		$all_groups = DB::table("membership_groups AS node")
-			->join("membership_groups AS parent", function($join){
+			->join("membership_groups AS parent", function($join) {
 				$join->whereRaw("`node`.`left` BETWEEN `parent`.`left` AND `parent`.`right`");
 			})
 			->select("node.group_id")
