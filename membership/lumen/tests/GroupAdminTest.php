@@ -5,12 +5,11 @@ use Laravel\Lumen\Testing\DatabaseTransactions;
 // Test the group API as an administrator
 class GroupAdminTest extends TestCase
 {
-/*
 	// Check if the group list is empty
 	public function test1()
 	{
 		$this
-			->get("/group")
+			->get("/membership/group")
 			->seeJson([
 				"data"         => [],
 				"per_page"     => 25,
@@ -23,7 +22,7 @@ class GroupAdminTest extends TestCase
 	// Create a group
 	public function test2()
 	{
-		$this->json("POST", "/group", [
+		$this->json("POST", "/membership/group", [
 			"title"       => "New group",
 			"description" => "This group is fancy!",
 //			"parent"      => 1
@@ -35,7 +34,7 @@ class GroupAdminTest extends TestCase
 	public function test3()
 	{
 		$this
-			->get("/group")
+			->get("/membership/group")
 			->seeJson([
 				"per_page"  => 25,
 				"total"     => 1,
@@ -50,11 +49,12 @@ class GroupAdminTest extends TestCase
 		$this->assertTrue($result->data[0]->description == "This group is fancy!");
 	}
 
+/*
 	// Load the group directly
 	public function test4()
 	{
 		$this
-			->get("/group/1")
+			->get("/membership/group/1")
 			->seeJson([
 				"parent"      => null,
 				"title"       => "New group",
@@ -66,7 +66,7 @@ class GroupAdminTest extends TestCase
 	// Create a group without a title
 	public function test5()
 	{
-		$this->json("POST", "/group", [])
+		$this->json("POST", "/membership/group", [])
 		->seeJson([
 			"status"  => "error",
 			"column"  => "title",
@@ -74,12 +74,11 @@ class GroupAdminTest extends TestCase
 		])
 		->assertResponseStatus(422);
 	}
-*/
 
 	// Delete a group that does not exist
 	public function test6()
 	{
-		$this->json("DELETE", "/group/123", [
+		$this->json("DELETE", "/membership/group/123", [
 		])
 		->seeJson([
 			"status"  => "error",
@@ -91,11 +90,12 @@ class GroupAdminTest extends TestCase
 	// Read a group that does not exist
 	public function test7()
 	{
-		$this->get("/group/123")
+		$this->get("/membership/group/123")
 		->seeJson([
 			"status"  => "error",
 			"message" => "No group with specified group_id",
 		])
 		->assertResponseStatus(404);
 	}
+*/
 }

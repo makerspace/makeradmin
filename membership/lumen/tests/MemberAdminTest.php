@@ -5,12 +5,11 @@ use Laravel\Lumen\Testing\DatabaseTransactions;
 // Test the member API as an administrator
 class MemberAdminTest extends TestCase
 {
-/*
 	// Check if the member list is empty
 	public function test1()
 	{
 		$this
-			->get("/member")
+			->get("/membership/member")
 			->seeJson([
 				"data"         => [],
 				"per_page"     => 25,
@@ -23,7 +22,7 @@ class MemberAdminTest extends TestCase
 	// Create a member
 	public function test2()
 	{
-		$this->json("POST", "/member", [
+		$this->json("POST", "/membership/member", [
 			"email"     => "john@example.com",
 			"firstname" => "John",
 			"lastname"  => "Doe",
@@ -35,7 +34,7 @@ class MemberAdminTest extends TestCase
 	public function test3()
 	{
 		$this
-			->get("/member")
+			->get("/membership/member")
 			->seeJson([
 				"per_page"  => 25,
 				"total"     => 1,
@@ -56,7 +55,7 @@ class MemberAdminTest extends TestCase
 	public function test4()
 	{
 		$this
-			->get("/member/1")
+			->get("/membership/member/1")
 			->seeJson([
 				"email"           => "john@example.com",
 				"firstname"       => "John",
@@ -69,7 +68,7 @@ class MemberAdminTest extends TestCase
 	// Try to create a duplicate
 	public function test5()
 	{
-		$this->json("POST", "/member", [
+		$this->json("POST", "/membership/member", [
 			"email"     => "john@example.com",
 			"firstname" => "John",
 			"lastname"  => "Doe",
@@ -85,7 +84,7 @@ class MemberAdminTest extends TestCase
 	// Create a user without a first name
 	public function test6()
 	{
-		$this->json("POST", "/member", [])
+		$this->json("POST", "/membership/member", [])
 		->seeJson([
 			"status"  => "error",
 			"column"  => "firstname",
@@ -97,7 +96,7 @@ class MemberAdminTest extends TestCase
 	// Delete a member that does not exist
 	public function test7()
 	{
-		$this->json("DELETE", "/member/123", [])
+		$this->json("DELETE", "/membership/member/123", [])
 		->seeJson([
 			"status"  => "error",
 			"message" => "Could not find any member with specified member_id",
@@ -108,7 +107,7 @@ class MemberAdminTest extends TestCase
 	// Read a member that does not exist
 	public function test8()
 	{
-		$this->get("/member/123")
+		$this->get("/membership/member/123")
 		->seeJson([
 			"status"  => "error",
 			"message" => "Could not find any member with specified member_id",
@@ -119,7 +118,7 @@ class MemberAdminTest extends TestCase
 	// Soft delete the first member
 	public function test9()
 	{
-		$this->json("DELETE", "/member/1", [])
+		$this->json("DELETE", "/membership/member/1", [])
 		->seeJson([
 			"status" => "deleted",
 		])
@@ -130,9 +129,9 @@ class MemberAdminTest extends TestCase
 	public function test10()
 	{
 		$this
-			->get("/member/1")
+			->get("/membership/member/1")
 			->seeJson([
-				"message" => "No member with specified member_id",
+				"message" => "Could not find any member with specified member_id",
 			])
 			->assertResponseStatus(404);
 	}
@@ -147,7 +146,7 @@ class MemberAdminTest extends TestCase
 	{
 		for($i = 0; $i < 200; $i++)
 		{
-			$this->json("POST", "/member", [
+			$this->json("POST", "/membership/member", [
 				"email"     => "john_{$i}@example.com",
 				"firstname" => "John",
 				"lastname"  => "Doe {$i}",
@@ -162,7 +161,7 @@ class MemberAdminTest extends TestCase
 	// Update member
 	public function test13()
 	{
-		$this->json("PUT", "/member/2", [
+		$this->json("PUT", "/membership/member/2", [
 			"email" => "john@doe.com",
 		])
 		->seeJson([
@@ -175,7 +174,7 @@ class MemberAdminTest extends TestCase
 	public function test14()
 	{
 		$this
-			->get("/member/2")
+			->get("/membership/member/2")
 			->seeJson([
 				"email"           => "john@doe.com",
 				"firstname"       => "John",
@@ -190,7 +189,7 @@ class MemberAdminTest extends TestCase
 	public function test15()
 	{
 		$this
-			->get("/member")
+			->get("/membership/member")
 			->seeJson([
 				"per_page"  => 25,
 				"total"     => 200,
@@ -204,7 +203,7 @@ class MemberAdminTest extends TestCase
 	public function test16()
 	{
 		$this
-			->get("/member?search=Doe%2056")
+			->get("/membership/member?search=Doe%2056")
 			->seeJson([
 				"per_page"  => 25,
 				"total"     => 2,
@@ -219,7 +218,7 @@ class MemberAdminTest extends TestCase
 	public function test17()
 	{
 		$this
-			->get("/member?sort_by=magic")
+			->get("/membership/member?sort_by=magic")
 			->seeJson([
 				"status"  => "error",
 				"column"  => "sort_by",
@@ -228,7 +227,6 @@ class MemberAdminTest extends TestCase
 			])
 			->assertResponseStatus(404);
 	}
-*/
 
 	// TODO: Check that sorting is working
 	// TODO: Check that filtering is working
