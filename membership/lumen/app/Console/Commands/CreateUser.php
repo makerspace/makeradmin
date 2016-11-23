@@ -7,7 +7,6 @@ use App\Models\Member as MemberModel;
 
 class CreateUser extends Command
 {
-
 	/**
 	 * The console command name.
 	 *

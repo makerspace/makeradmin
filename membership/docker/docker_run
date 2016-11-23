@@ -2,7 +2,7 @@
 
 ABSOLUTE_PATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-if [  $# -le 3 ]
+if [  $# -le 4 ]
 then
 	echo -e "Usage:\n$0 [mysql_host] [mysql_user] [mysql_db] [mysql_pass]"
 	exit 1
@@ -16,5 +16,6 @@ docker run -d \
     -e MYSQL_USER=$2 \
     -e MYSQL_PASS=$3 \
     -e MYSQL_DB=$4 \
+    -e APIGATEWAY=$5 \
     -v $ABSOLUTE_PATH/../lumen:/var/www/html \
     makeradmin/membership:1.0
