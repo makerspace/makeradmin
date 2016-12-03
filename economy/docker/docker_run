@@ -16,5 +16,6 @@ docker run -d \
     -e MYSQL_USER=$2 \
     -e MYSQL_PASS=$3 \
     -e MYSQL_DB=$4 \
+    -e APIGATEWAY=$5 \
     -v $ABSOLUTE_PATH/../lumen:/var/www/html \
     makeradmin/economy:1.0
