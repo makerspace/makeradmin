@@ -15,12 +15,14 @@ class CreateEconomyAccountTable extends Migration
 	{
 		Schema::create("economy_account", function (Blueprint $table)
 		{
-			$table->increments("account_id");
+			$table->increments("economy_account_id");
 			$table->string("title");
-			$table->text("description");
+			$table->text("description")->nullable();
 
 			$table->integer("account_number");
-			$table->integer("economy_period"); // TODO: foreign key
+
+			$table->integer("economy_accountingperiod_id")->unsigned();
+			$table->foreign("economy_accountingperiod_id")->references("economy_accountingperiod_id")->on("economy_accountingperiod");
 
 			$table->dateTimeTz("created_at")->default(DB::raw("CURRENT_TIMESTAMP"));
 			$table->dateTimeTz("updated_at")->default(DB::raw("CURRENT_TIMESTAMP"));

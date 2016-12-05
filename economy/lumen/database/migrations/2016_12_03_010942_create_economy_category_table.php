@@ -15,9 +15,9 @@ class CreateEconomyCategoryTable extends Migration
 	{
 		Schema::create("economy_category", function (Blueprint $table)
 		{
-			$table->increments("category_id");
+			$table->increments("economy_category_id");
 			$table->string("title");
-			$table->text("description");
+			$table->text("description")->nullable();
 
 			$table->dateTimeTz("created_at")->default(DB::raw("CURRENT_TIMESTAMP"));
 			$table->dateTimeTz("updated_at")->default(DB::raw("CURRENT_TIMESTAMP"));

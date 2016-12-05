@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateEconomyCostCenterTable extends Migration
+class CreateEconomyVerificationSeriesTable extends Migration
 {
 	/**
 	 * Run the migrations.
@@ -13,11 +13,11 @@ class CreateEconomyCostCenterTable extends Migration
 	 */
 	public function up()
 	{
-		Schema::create("economy_cost_center", function (Blueprint $table)
+		Schema::create("economy_verificationseries", function (Blueprint $table)
 		{
-			$table->increments("cost_center_id");
+			$table->increments("economy_verificationseries_id");
 			$table->string("title");
-			$table->text("description");
+			$table->text("description")->nullable();
 
 			$table->dateTimeTz("created_at")->default(DB::raw("CURRENT_TIMESTAMP"));
 			$table->dateTimeTz("updated_at")->default(DB::raw("CURRENT_TIMESTAMP"));
@@ -32,6 +32,6 @@ class CreateEconomyCostCenterTable extends Migration
 	 */
 	public function down()
 	{
-		Schema::drop("economy_cost_center");
+		Schema::drop("economy_verificationseries");
 	}
 }
