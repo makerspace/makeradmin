@@ -4,64 +4,65 @@ use DB;
 
 class Transaction extends Entity
 {
-	protected $type = "accounting_transaction";
-	protected $join = "accounting_transaction";
+	protected $type = "transaction";
+	protected $table = "economy_transaction";
+	protected $id_column = "transaction_id";
 	protected $columns = [
-		"entity_id" => [
-			"column" => "entity.entity_id",
-			"select" => "entity.entity_id",
+		"transaction_id" => [
+			"column" => "economy_transaction.economy_transaction_id",
+			"select" => "economy_transaction.economy_transaction_id",
 		],
 		"created_at" => [
-			"column" => "entity.created_at",
-			"select" => "DATE_FORMAT(entity.created_at, '%Y-%m-%dT%H:%i:%sZ')",
+			"column" => "economy_transaction.created_at",
+			"select" => "DATE_FORMAT(economy_transaction.created_at, '%Y-%m-%dT%H:%i:%sZ')",
 		],
 		"updated_at" => [
-			"column" => "DATE_FORMAT(entity.updated_at, '%Y-%m-%dT%H:%i:%sZ')",
-			"select" => "DATE_FORMAT(entity.updated_at, '%Y-%m-%dT%H:%i:%sZ')",
+			"column" => "DATE_FORMAT(economy_transaction.updated_at, '%Y-%m-%dT%H:%i:%sZ')",
+			"select" => "DATE_FORMAT(economy_transaction.updated_at, '%Y-%m-%dT%H:%i:%sZ')",
 		],
 		"transaction_title" => [
-			"column" => "entity.title",
-			"select" => "entity.title",
+			"column" => "economy_transaction.title",
+			"select" => "economy_transaction.title",
 		],
 		"transaction_description" => [
-			"column" => "entity.description",
-			"select" => "entity.description",
+			"column" => "economy_transaction.description",
+			"select" => "economy_transaction.description",
 		],
-		"accounting_instruction" => [
-			"column" => "accounting_transaction.accounting_instruction",
-			"select" => "accounting_transaction.accounting_instruction",
+		"instruction_id" => [
+			"column" => "economy_transaction.economy_instruction_id",
+			"select" => "economy_transaction.economy_instruction_id",
 		],
-		"accounting_account" => [
-			"column" => "accounting_transaction.accounting_account",
-			"select" => "accounting_transaction.accounting_account",
+		"account_id" => [
+			"column" => "economy_transaction.economy_account_id",
+			"select" => "economy_transaction.economy_account_id",
 		],
-		"accounting_cost_center" => [
-			"column" => "accounting_transaction.accounting_cost_center",
-			"select" => "accounting_transaction.accounting_cost_center",
+		"costcenter_id" => [
+			"column" => "economy_transaction.economy_costcenter_id",
+			"select" => "economy_transaction.economy_costcenter_id",
 		],
 		"amount" => [
-			"column" => "accounting_transaction.amount",
-			"select" => "accounting_transaction.amount",
+			"column" => "economy_transaction.amount",
+			"select" => "economy_transaction.amount",
 		],
 		"external_id" => [
-			"column" => "accounting_transaction.external_id",
-			"select" => "accounting_transaction.external_id",
+			"column" => "economy_transaction.external_id",
+			"select" => "economy_transaction.external_id",
 		],
 		"instruction_title" => [
-			"column" => "ie.title",
-			"select" => "ie.title",
+			"column" => "economy_instruction.title",
+			"select" => "economy_instruction.title",
 		],
 		"instruction_number" => [
-			"column" => "accounting_instruction.instruction_number",
-			"select" => "accounting_instruction.instruction_number",
+			"column" => "economy_instruction.instruction_number",
+			"select" => "economy_instruction.instruction_number",
 		],
 		"accounting_date" => [
-			"column" => "accounting_instruction.accounting_date",
-			"select" => "accounting_instruction.accounting_date",
+			"column" => "economy_instruction.accounting_date",
+			"select" => "DATE_FORMAT(economy_instruction.accounting_date, '%Y-%m-%d')",
 		],
 		"extid" => [
-			"column" => "accounting_instruction.external_id",
-			"select" => "accounting_instruction.external_id",
+			"column" => "economy_instruction.external_id",
+			"select" => "economy_instruction.external_id",
 		],
 	];
 	protected $sort = ["accounting_date", "desc"];
@@ -95,16 +96,16 @@ class Transaction extends Entity
 			if("accountingperiod" == $id)
 			{
 				$query = $query
-					->leftJoin("accounting_period", "accounting_period.entity_id", "=", "accounting_instruction.accounting_period")
-					->where("accounting_period.name", $op, $param);
+					->leftJoin("economy_period", "economy_period.economy_period_id", "=", "economy_instruction.economy_period_id")
+					->where("economy_period.name", $op, $param);
 				unset($filters[$id]);
 			}
 			// Filter on accounting period
 			else if("account_number" == $id)
 			{
 				$query = $query
-					->leftJoin("accounting_account", "accounting_account.entity_id", "=", "accounting_transaction.accounting_account")
-					->where("accounting_account.account_number", $op, $param);
+					->leftJoin("economy_account", "economy_account.economy_account_id", "=", "economy_transaction.economy_account_id")
+					->where("economy_account.account_number", $op, $param);
 				unset($filters[$id]);
 			}
 		}
@@ -114,8 +115,7 @@ class Transaction extends Entity
 
 		// Load the instruction
 		$query = $query
-			->leftJoin("accounting_instruction", "accounting_instruction.entity_id", "=", "accounting_transaction.accounting_instruction")
-			->leftJoin("entity AS ie", "ie.entity_id", "=", "accounting_instruction.entity_id");
+			->leftJoin("economy_instruction", "economy_instruction.economy_instruction_id", "=", "economy_transaction.economy_instruction_id");
 
 		// Sort
 		$query = $this->_applySorting($query);

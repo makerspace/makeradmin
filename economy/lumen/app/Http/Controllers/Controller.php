@@ -13,9 +13,9 @@ class Controller extends BaseController
 	 */
 	protected function _getAccountingPeriodId($period)
 	{
-		$accountingperiod_id = DB::table("accounting_period")
+		$accountingperiod_id = DB::table("economy_accountingperiod")
 			->where("name", "=", $period)
-			->value("entity_id");
+			->value("economy_accountingperiod_id");
 
 		if(null === $accountingperiod_id)
 		{

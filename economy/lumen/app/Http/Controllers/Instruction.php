@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
 // Models
-use App\Models\Instruction;
+use App\Models\Instruction as InstructionModel;
 
 // TODO: Remove
 use App\Traits\Pagination;
@@ -44,7 +44,7 @@ class Instruction extends Controller
 		}
 
 		// Load data from datbase
-		$result = Instruction::list($filters);
+		$result = InstructionModel::list($filters);
 
 		// Return json array
 		return $result;
@@ -70,22 +70,22 @@ class Instruction extends Controller
 		}
 */
 		// Create new accounting instruction
-		$entity = new Instruction;
-		$entity->title                         = $json["title"];
-		$entity->description                   = $json["description"]         ?? null;
-		$entity->instruction_number            = $json["instruction_number"]  ?? null;
-		$entity->accounting_date               = $json["accounting_date"];
-		$entity->accounting_category           = $json["accounting_category"] ?? null;
-		$entity->importer                      = $json["importer"]            ?? null;
-		$entity->external_id                   = $json["external_id"]         ?? null;
-		$entity->external_date                 = $json["external_date"]       ?? null;
-		$entity->external_text                 = $json["external_text"]       ?? null;
+		$entity = new InstructionModel;
+		$entity->title                = $json["title"];
+		$entity->description          = $json["description"]         ?? null;
+		$entity->instruction_number   = $json["instruction_number"]  ?? null;
+		$entity->accounting_date      = $json["accounting_date"];
+		$entity->category_id          = $json["accounting_category"] ?? null;
+		$entity->importer             = $json["importer"]            ?? null;
+		$entity->external_id          = $json["external_id"]         ?? null;
+		$entity->external_date        = $json["external_date"]       ?? null;
+		$entity->external_text        = $json["external_text"]       ?? null;
 		/*
-		$entity->external_data                 = $json["external_data"]       ?? null;
+		$entity->external_data        = $json["external_data"]       ?? null;
 		*/
-		$entity->accounting_verification_serie = $json["accounting_verification_serie"] ?? null;
-		$entity->transactions                  = $json["transactions"];
-		$entity->accounting_period             = $accountingperiod_id;
+		$entity->verificationserie_id = $json["accounting_verification_serie"] ?? null;
+		$entity->transactions         = $json["transactions"];
+		$entity->accountingperiod_id  = $accountingperiod_id;
 
 		// Validate input
 		$entity->validate();
@@ -109,7 +109,7 @@ class Instruction extends Controller
 		$this->_getAccountingPeriodId($accountingperiod);
 
 		// Load the instruction entity
-		$entity = Instruction::load([
+		$entity = InstructionModel::load([
 			"accountingperiod"   => $accountingperiod,
 			"instruction_number" => $instruction_number,
 		]);
@@ -159,7 +159,7 @@ class Instruction extends Controller
 		$this->_getAccountingPeriodId($accountingperiod);
 
 		// Load the instruction entity
-		$entity = Instruction::load([
+		$entity = InstructionModel::load([
 			"accountingperiod"   => $accountingperiod,
 			"instruction_number" => $instruction_number,
 		]);

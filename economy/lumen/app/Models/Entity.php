@@ -176,6 +176,14 @@ class Entity
 				// Filter on arbritrary columns
 				else
 				{
+					// Translate the column name
+					if(array_key_exists($id, $this->columns))
+					{
+						list($table, $column) = explode(".", $this->columns[$id]["column"]);
+						$id = $column;
+					}
+
+					// Run the filter
 					if(!is_array($filter))
 					{
 						$query = $query->where($id, "=", $filter);
@@ -484,7 +492,11 @@ class Entity
 			}
 */
 			list($table, $column) = explode(".", $data["column"]);
-			if(array_key_exists($column, $this->data))
+			if(array_key_exists($name, $this->data))
+			{
+				$inserts[$column] = $this->data[$name];
+			}
+			else if(array_key_exists($column, $this->data))
 			{
 				$inserts[$column] = $this->data[$column];
 			}

@@ -2,7 +2,7 @@
 namespace App\Models;
 
 use App\Models\Entity;
-use App\Models\AccountingTransaction;
+use App\Models\Transaction;
 use DB;
 
 /*
@@ -20,68 +20,69 @@ public function Transactions()
  */
 class Instruction extends Entity
 {
-	protected $type = "accounting_instruction";
-	protected $join = "accounting_instruction";
+	protected $type = "instruction";
+	protected $table = "economy_instruction";
+	protected $id_column = "instruction_id";
 	protected $columns = [
-		"entity_id" => [
-			"column" => "entity.entity_id",
-			"select" => "entity.entity_id",
+		"instruction_id" => [
+			"column" => "economy_instruction.economy_instruction_id",
+			"select" => "economy_instruction.economy_instruction_id",
 		],
 		"created_at" => [
-			"column" => "entity.created_at",
-			"select" => "DATE_FORMAT(entity.created_at, '%Y-%m-%dT%H:%i:%sZ')",
+			"column" => "economy_instruction.created_at",
+			"select" => "DATE_FORMAT(economy_instruction.created_at, '%Y-%m-%dT%H:%i:%sZ')",
 		],
 		"updated_at" => [
-			"column" => "entity.updated_at",
-			"select" => "DATE_FORMAT(entity.updated_at, '%Y-%m-%dT%H:%i:%sZ')",
+			"column" => "economy_instruction.updated_at",
+			"select" => "DATE_FORMAT(economy_instruction.updated_at, '%Y-%m-%dT%H:%i:%sZ')",
 		],
 		"title" => [
-			"column" => "entity.title",
-			"select" => "entity.title",
+			"column" => "economy_instruction.title",
+			"select" => "economy_instruction.title",
 		],
 		"description" => [
-			"column" => "entity.description",
-			"select" => "entity.description",
+			"column" => "economy_instruction.description",
+			"select" => "economy_instruction.description",
 		],
 		"instruction_number" => [
-			"column" => "accounting_instruction.instruction_number",
-			"select" => "accounting_instruction.instruction_number",
+			"column" => "economy_instruction.instruction_number",
+			"select" => "economy_instruction.instruction_number",
 		],
 		"accounting_date" => [
-			"column" => "accounting_instruction.accounting_date",
-			"select" => "accounting_instruction.accounting_date",
+			"column" => "economy_instruction.accounting_date",
+			"select" => "DATE_FORMAT(economy_instruction.accounting_date, '%Y-%m-%d')",
 		],
-		"accounting_category" => [
-			"column" => "accounting_instruction.accounting_category",
-			"select" => "accounting_instruction.accounting_category",
+		"economy_category" => [
+			"column" => "economy_instruction.economy_category_id",
+			"select" => "economy_instruction.economy_category_id",
 		],
 		"importer" => [
-			"column" => "accounting_instruction.importer",
-			"select" => "accounting_instruction.importer",
+			"column" => "economy_instruction.importer",
+			"select" => "economy_instruction.importer",
 		],
 		"external_id" => [
-			"column" => "accounting_instruction.external_id",
-			"select" => "accounting_instruction.external_id",
+			"column" => "economy_instruction.external_id",
+			"select" => "economy_instruction.external_id",
 		],
 		"external_date" => [
-			"column" => "accounting_instruction.external_date",
-			"select" => "accounting_instruction.external_date",
+			"column" => "economy_instruction.external_date",
+			"select" => "economy_instruction.external_date",
 		],
 		"external_text" => [
-			"column" => "accounting_instruction.external_text",
-			"select" => "accounting_instruction.external_text",
+			"column" => "economy_instruction.external_text",
+			"select" => "economy_instruction.external_text",
 		],
 		"external_data" => [
-			"column" => "accounting_instruction.external_data",
-			"select" => "accounting_instruction.external_data",
+			"column" => "economy_instruction.external_data",
+			"select" => "economy_instruction.external_data",
 		],
-		"accounting_verification_series" => [
-			"column" => "accounting_instruction.accounting_verification_series",
-			"select" => "accounting_instruction.accounting_verification_series",
+		"verificationseries_id" => [
+			"column" => "economy_instruction.economy_verificationseries_id",
+			"select" => "economy_instruction.economy_verificationseries_id",
 		],
-		"accounting_period" => [
-			"column" => "accounting_instruction.accounting_period",
-			"select" => "accounting_instruction.accounting_period",
+		"accountingperiod_id" => [
+			"column" => "economy_instruction.economy_accountingperiod_id",
+			"select" => "economy_instruction.economy_accountingperiod_id",
 		],
 	];
 	protected $sort = ["instruction_number", "desc"];
@@ -94,10 +95,10 @@ class Instruction extends Entity
 			$query = $query->where(function($query) use($word) {
 				// Build the search query
 				$query
-					->  where("entity.title",                              "like", "%".$word."%")
-					->orWhere("entity.description",                        "like", "%".$word."%")
-					->orWhere("accounting_instruction.instruction_number", "like", "%".$word."%")
-					->orWhere("accounting_instruction.external_id",        "like", "%".$word."%");
+					->  where("economy_instruction.title",              "like", "%".$word."%")
+					->orWhere("economy_instruction.description",        "like", "%".$word."%")
+					->orWhere("economy_instruction.instruction_number", "like", "%".$word."%")
+					->orWhere("economy_instruction.external_id",        "like", "%".$word."%");
 			});
 		}
 
@@ -133,17 +134,17 @@ class Instruction extends Entity
 			if("accountingperiod" == $id)
 			{
 				$query = $query
-					->leftJoin("accounting_period", "accounting_period.entity_id", "=", "accounting_instruction.accounting_period")
-					->where("accounting_period.name", $op, $param);
+					->leftJoin("economy_accountingperiod", "economy_accountingperiod.economy_accountingperiod_id", "=", "economy_instruction.economy_accountingperiod_id")
+					->where("economy_accountingperiod.name", $op, $param);
 				unset($filters[$id]);
 			}
-			// Filter on transaction.account_id
+			// Filter on transaction.economy_account_id
 			else if("account_id" == $id)
 			{
 				$query = $query
-					->join("accounting_transaction", "accounting_transaction.accounting_instruction", "=", "entity.entity_id")
-					->join("accounting_account", "accounting_account.entity_id", "=", "accounting_transaction.accounting_account")
-					->where("accounting_account.account_number", $op, $param);
+					->join("economy_transaction", "economy_transaction.economy_instruction_id", "=", "economy_instruction.economy_instruction_id")
+					->join("economy_account", "economy_account.economy_account_id", "=", "economy_transaction.economy_account")
+					->where("economy_account.account_number", $op, $param);
 				unset($filters[$id]);
 			}
 			else if("has_voucher" == $id)
@@ -159,11 +160,11 @@ class Instruction extends Entity
 			}
 		}
 
-		// Apply standard filters like entity_id, relations, etc
+		// Apply standard filters like id, relations, etc
 		$query = $this->_applyFilter($query, $filters);
 
 		// Get the balance
-		$query->selectRaw("(SELECT SUM(amount) FROM accounting_transaction WHERE amount > 0 AND accounting_instruction = entity.entity_id) AS balance");
+		$query->selectRaw("(SELECT SUM(amount) FROM economy_transaction WHERE amount > 0 AND economy_instruction_id = economy_instruction.economy_instruction_id) AS balance");
 
 		// Sort
 		$query = $this->_applySorting($query);
@@ -175,13 +176,15 @@ class Instruction extends Entity
 		}
 
 		// Run the MySQL query
-		$data = $query->get();
+		$result = $query->get();
 
 		// Indicate if the instruction has attached vouchers or not
-		foreach($data as $id => &$row)
+		$data = [];
+		foreach($result as $id => $row)
 		{
 //			// Append files ("Verifikat")
 //			$row->files = [];
+			$row->has_vouchers = false;
 			if(!empty($row->external_id))
 			{
 				$dir = "/var/www/html/vouchers/{$row->external_id}";
@@ -191,40 +194,28 @@ class Instruction extends Entity
 /*
 					foreach(glob("{$dir}/*") as $file)
 					{
-						$row->files[] = basename($file);
+						$row["files"][] = basename($file);
 					}
 */
-					// Apply filter: Remove all instructions with a voucher
-					if(!empty($filter_vouchers) && $filter_vouchers === false)
-					{
-						unset($data[$id]);
-					}
 				}
 			}
-			else
-			{
-				$row->has_vouchers = false;
 
-				// Apply filter: Remove all instructions with a voucher
-				if(!empty($filter_vouchers) && $filter_vouchers === true)
-				{
-					unset($data[$id]);
-				}
+			// Apply filter: Remove all instructions with a voucher
+			if(!(isset($filter_vouchers) && $filter_vouchers === true && $row->has_vouchers === true))
+			{
+				$data[] = $row;
 			}
 		}
-		unset($row);
 
 		// If we removed rows in the foreach above the indexing will be wrong, so we need to remove all keys.
-		$data = array_values($data);
-
 		$result = [
 			"data" => $data
 		];
 
 		if($this->pagination != null)
 		{
-			$result["total"]    = $query->getCountForPagination();
-			$result["per_page"] = $this->pagination;
+			$result["total"]     = $query->getCountForPagination();
+			$result["per_page"]  = $this->pagination;
 			$result["last_page"] = ceil($result["total"] / $result["per_page"]);
 		}
 
@@ -236,7 +227,6 @@ class Instruction extends Entity
 	 */
 	public function _load($filters, $show_deleted = false)
 	{
-
 		// Load accounting instruction
 		$query = $this->_buildLoadQuery();
 
@@ -258,26 +248,26 @@ class Instruction extends Entity
 			if("accountingperiod" == $id)
 			{
 				$query = $query
-					->leftJoin("accounting_period", "accounting_period.entity_id", "=", "accounting_instruction.accounting_period")
-					->where("accounting_period.name", $op, $param);
+					->leftJoin("economy_accountingperiod", "economy_accountingperiod.economy_accountingperiod_id", "=", "economy_instruction.economy_accountingperiod_id")
+					->where("economy_accountingperiod.name", $op, $param);
 				unset($filters[$id]);
 			}
 			else if("instruction_number" == $id)
 			{
 				// Filter on instruction_number
-				$query = $query->where("accounting_instruction.instruction_number", $op, $param);
+				$query = $query->where("economy_instruction.instruction_number", $op, $param);
 				unset($filters[$id]);
 			}
 		}
 
-		// Apply standard filters like entity_id, relations, etc
+		// Apply standard filters like id, relations, etc
 		$query = $this->_applyFilter($query, $filters);
 
 		// Join transactions table and calculate balance
 		$query = $query
-			->leftJoin("accounting_transaction", "accounting_transaction.accounting_instruction", "=", "entity.entity_id")
-			->groupBy("entity.entity_id")
-			->where("accounting_transaction.amount", ">", 0)
+			->leftJoin("economy_transaction", "economy_transaction.economy_instruction_id", "=", "economy_instruction.economy_instruction_id")
+			->groupBy("economy_instruction.economy_instruction_id")
+			->where("economy_transaction.amount", ">", 0)
 			->selectRaw("SUM(amount) AS balance");
 
 		// Get result from database
@@ -290,7 +280,7 @@ class Instruction extends Entity
 		}
 
 		// Create a new entity
-		$entity = new AccountingInstruction;
+		$entity = new Instruction;
 
 		// Populate the entity with data
 		foreach($data as $key => $value)
@@ -299,17 +289,16 @@ class Instruction extends Entity
 		}
 
 		// Load the transactions
-		$entity->transactions = DB::table("entity")
-			->join("accounting_transaction", "accounting_transaction.entity_id", "=", "entity.entity_id")
-			->join("accounting_account", "accounting_transaction.accounting_account", "=", "accounting_account.entity_id")
-			->join("entity AS e2", "accounting_account.entity_id", "=", "e2.entity_id")
-			->where("accounting_instruction", "=", $entity->entity_id)
+		$entity->transactions = DB::table("economy_instruction")
+			->join("economy_transaction", "economy_transaction.economy_instruction_id", "=", "economy_instruction.economy_instruction_id")
+			->join("economy_account", "economy_transaction.economy_account_id", "=", "economy_account.economy_account_id")
+			->where("economy_instruction.economy_instruction_id", "=", $entity->instruction_id)
 			->select(
-				"entity.title",
-				"entity.description",
-				"accounting_transaction.amount AS balance",
-				"accounting_account.account_number",
-				"e2.title AS account_title"
+				"economy_instruction.title",
+				"economy_instruction.description",
+				"economy_transaction.amount AS balance",
+				"economy_account.account_number",
+				"economy_account.title AS account_title"
 			)
 			->get();
 
@@ -334,13 +323,13 @@ class Instruction extends Entity
 		{
 			foreach($this->data["transactions"] as $i => $transaction)
 			{
-				$entity = new AccountingTransaction;
-				$entity->accounting_instruction = $this->entity_id;
-				$entity->title                  = $transaction["title"];
-				$entity->accounting_account     = $this->_getAccountEntityId($transaction["account_number"]);
-				$entity->amount                 = $transaction["amount"];
-				$entity->accounting_cost_center = $transaction["accounting_cost_center"] ?? null;
-				$entity->external_id            = $transaction["external_id"] ?? null;
+				$entity = new Transaction;
+				$entity->instruction_id = $this->entity_id;
+				$entity->title          = $transaction["title"];
+				$entity->account_id     = $this->_getAccountEntityId($transaction["account_number"]);
+				$entity->amount         = $transaction["amount"];
+				$entity->costcenter_id  = $transaction["economy_cost_center"] ?? null;
+				$entity->external_id    = $transaction["external_id"] ?? null;
 
 				// Add relations
 				if(!empty($transaction["relations"]))
@@ -358,6 +347,6 @@ class Instruction extends Entity
 
 	protected function _getAccountEntityId($account_number)
 	{
-		return DB::table("accounting_account")->where("account_number", $account_number)->value("entity_id");
+		return DB::table("economy_account")->where("account_number", $account_number)->value("economy_account_id");
 	}
 }

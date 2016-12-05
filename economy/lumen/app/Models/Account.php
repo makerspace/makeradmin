@@ -9,36 +9,37 @@ use App\Models\Entity;
 
 class Account extends Entity
 {
-	protected $type = "accounting_account";
-	protected $join = "accounting_account";
+	protected $type = "account";
+	protected $table = "economy_account";
+	protected $id_column = "account_id";
 	protected $columns = [
-		"entity_id" => [
-			"column" => "entity.entity_id",
-			"select" => "entity.entity_id",
+		"account_id" => [
+			"column" => "economy_account.economy_account_id",
+			"select" => "economy_account.economy_account_id",
 		],
 		"created_at" => [
-			"column" => "entity.created_at",
-			"select" => "DATE_FORMAT(entity.created_at, '%Y-%m-%dT%H:%i:%sZ')",
+			"column" => "economy_account.created_at",
+			"select" => "DATE_FORMAT(economy_account.created_at, '%Y-%m-%dT%H:%i:%sZ')",
 		],
 		"updated_at" => [
-			"column" => "entity.updated_at",
-			"select" => "DATE_FORMAT(entity.updated_at, '%Y-%m-%dT%H:%i:%sZ')",
+			"column" => "economy_account.updated_at",
+			"select" => "DATE_FORMAT(economy_account.updated_at, '%Y-%m-%dT%H:%i:%sZ')",
 		],
 		"title" => [
-			"column" => "entity.title",
-			"select" => "entity.title",
+			"column" => "economy_account.title",
+			"select" => "economy_account.title",
 		],
 		"description" => [
-			"column" => "entity.description",
-			"select" => "entity.description",
+			"column" => "economy_account.description",
+			"select" => "economy_account.description",
 		],
 		"account_number" => [
-			"column" => "accounting_account.account_number",
-			"select" => "accounting_account.account_number",
+			"column" => "economy_account.account_number",
+			"select" => "economy_account.account_number",
 		],
-		"accounting_period" => [
-			"column" => "accounting_account.accounting_period",
-			"select" => "accounting_account.accounting_period",
+		"accountingperiod_id" => [
+			"column" => "economy_account.economy_accountingperiod_id",
+			"select" => "economy_account.economy_accountingperiod_id",
 		],
 	];
 	protected $sort = ["account_number", "asc"];
@@ -55,8 +56,8 @@ class Account extends Entity
 		$query = $this->_buildLoadQuery();
 
 		// Get account balance
-		$query = $query->leftJoin("accounting_transaction", "accounting_account.entity_id", "=", "accounting_transaction.accounting_account")
-			->groupBy("entity.entity_id")
+		$query = $query->leftJoin("economy_transaction", "economy_account.economy_account_id", "=", "economy_transaction.economy_account_id")
+			->groupBy("economy_account.economy_account_id")
 			->selectRaw("COALESCE(SUM(amount), 0) AS balance");
 
 		// Go through filters
@@ -77,8 +78,8 @@ class Account extends Entity
 			if("accountingperiod" == $id)
 			{
 				$query = $query
-					->leftJoin("accounting_period", "accounting_period.entity_id", "=", "accounting_account.accounting_period")
-					->where("accounting_period.name", $op, $param);
+					->leftJoin("economy_accountingperiod", "economy_accountingperiod.economy_accountingperiod_id", "=", "economy_account.economy_accountingperiod_id")
+					->where("economy_accountingperiod.name", $op, $param);
 				unset($filters[$id]);
 			}
 			// Filter on account balance
@@ -90,7 +91,7 @@ class Account extends Entity
 			// Filter on number of transactions
 			else if("transactions" == $id)
 			{
-				$query = $query->selectRaw("COUNT(accounting_transaction.entity_id) AS num_transactions");
+				$query = $query->selectRaw("COUNT(economy_transaction.economy_transaction_id) AS num_transactions");
 				$query = $query->having("num_transactions", $op, $param);
 				unset($filters[$id]);
 			}
@@ -98,7 +99,7 @@ class Account extends Entity
 			// Filter on account_number
 			else if("account_number" == $id)
 			{
-				$query = $query->where("accounting_account.account_number", $filter[0], $filter[1]);
+				$query = $query->where("economy_account.account_number", $filter[0], $filter[1]);
 				unset($filters[$id]);
 			}
 */
@@ -129,17 +130,12 @@ class Account extends Entity
 		foreach($data as &$row)
 		{
 			// Instruction with number 0 is always ingoing balance
-			$ingoing = AccountingInstruction::load(
+			$ingoing = Instruction::load(
 				[
 					["instruction_number", "=", 0]
 				]
 			);
-/*
-			echo "<pre>a";
-			print_r($ingoing);
-			die();
-			$row->balance_in = 0;
-*/
+
 			if(empty($ingoing))
 			{
 				continue;
@@ -210,14 +206,14 @@ class Account extends Entity
 			if("accountingperiod" == $id)
 			{
 				$query = $query
-					->leftJoin("accounting_period", "accounting_period.entity_id", "=", "accounting_account.accounting_period")
-					->where("accounting_period.name", $op, $param);
+					->leftJoin("economy_accountingperiod", "economy_accountingperiod.economy_accountingperiod_id", "=", "economy_account.economy_accountingperiod_id")
+					->where("economy_accountingperiod.name", $op, $param);
 				unset($filters[$id]);
 			}
 			// Filter on account_number
 			else if("account_number" == $id)
 			{
-				$query = $query->where("accounting_account.account_number", $op, $param);
+				$query = $query->where("economy_account.account_number", $op, $param);
 				unset($filters[$id]);
 			}
 		}
@@ -227,15 +223,15 @@ class Account extends Entity
 
 		// Calculate sum of transactions
 		$query = $query
-			->leftJoin("accounting_transaction", "accounting_account.entity_id", "=", "accounting_transaction.accounting_account")
-			->groupBy("entity.entity_id")
+			->leftJoin("economy_transaction", "economy_account.economy_account_id", "=", "economy_transaction.economy_account_id")
+			->groupBy("economy_account.economy_account_id")
 			->selectRaw("SUM(amount) AS balance");
 
 		// Get result from database
 		$data = (array)$query->first();
 
 		// Create a new entity
-		$entity = new AccountingAccount;
+		$entity = new Account;
 
 		// Populate the entity with data
 		foreach($data as $key => $value)

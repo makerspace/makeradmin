@@ -18,17 +18,13 @@ class Costcenter extends Controller
 	function list(Request $request, $accountingperiod)
 	{
 		// Check that the specified accounting period exists
-		$x = $this->_accountingPeriodOrFail($accountingperiod);
-		if(null !== $x)
-		{
-			return $x;
-		}
+		$x = $this->_getAccountingPeriodId($accountingperiod);
 
-		// TODO: DEBUG: Generate an "500 internal server error"
-		sleep(2);
-		$x = 9 / 0;
-
-		return ['error' => 'not implemented'];
+		// Send response to client
+		return Response()->json([
+			"status" => "not_implemented",
+			"entity" => [],
+		], 201);
 	}
 
 	/**
@@ -36,7 +32,11 @@ class Costcenter extends Controller
 	 */
 	function create(Request $request, $accountingperiod, $id)
 	{
-		return ['error' => 'not implemented'];
+		// Send response to client
+		return Response()->json([
+			"status" => "not_implemented",
+			"entity" => [],
+		], 201);
 	}
 
 	/**
@@ -44,7 +44,11 @@ class Costcenter extends Controller
 	 */
 	function read(Request $request, $accountingperiod, $id)
 	{
-		return ['error' => 'not implemented'];
+		// Send response to client
+		return Response()->json([
+			"status" => "not_implemented",
+			"entity" => [],
+		], 201);
 	}
 
 	/**
@@ -52,7 +56,11 @@ class Costcenter extends Controller
 	 */
 	function update(Request $request, $accountingperiod, $id)
 	{
-		return ['error' => 'not implemented'];
+		// Send response to client
+		return Response()->json([
+			"status" => "not_implemented",
+			"entity" => [],
+		], 201);
 	}
 
 	/**
@@ -60,6 +68,10 @@ class Costcenter extends Controller
 	 */
 	function delete(Request $request, $accountingperiod, $id)
 	{
-		return ['error' => 'not implemented'];
+		// Send response to client
+		return Response()->json([
+			"status" => "not_implemented",
+			"entity" => [],
+		], 201);
 	}
 }

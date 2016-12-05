@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
 // Models
-use App\Models\AccountModel;
+use App\Models\Account as AccountModel;
 
 // TODO: Remove
 use App\Traits\AccountingPeriod;
@@ -103,10 +103,10 @@ class Account extends Controller
 
 		// Create new entity
 		$entity = new AccountModel;
-		$entity->account_number     = $json["account_number"] ?? null;
-		$entity->title              = $json["title"]          ?? null;
-		$entity->description        = $json["description"]    ?? null;
-		$entity->accounting_period  = $accountingperiod_id;
+		$entity->account_number      = $json["account_number"] ?? null;
+		$entity->title               = $json["title"]          ?? null;
+		$entity->description         = $json["description"]    ?? null;
+		$entity->accountingperiod_id = $accountingperiod_id;
 
 		// Validate input
 		$entity->validate();
