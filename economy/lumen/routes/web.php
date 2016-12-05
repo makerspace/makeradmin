@@ -61,4 +61,8 @@ $app->group(array("namespace" => "App\Http\Controllers", "prefix" => "economy/{a
 
 	// Files / vouchers
 	$app->   get("file/{external_id}/{filename}", "Economy@file"); // Get collection
+
+	// Maintenance / Debugging
+	$app->get("debug/updateinstructionnumbers", "Maintenance@updateInstructionNumbers");
+	$app->get("debug/unbalanced",               "Maintenance@unbalancedInstructions");
 });
