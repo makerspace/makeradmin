@@ -9,45 +9,46 @@ use DB;
  */
 class Mail extends Entity
 {
-	protected $type = "mail";
-	protected $join = "mail";
+	protected $type = "queue";
+	protected $table = "messages_queue";
+	protected $id_column = "queue_id";
 	protected $columns = [
-		"entity_id" => [
-			"column" => "entity.entity_id",
-			"select" => "entity.entity_id",
+		"queue_id" => [
+			"column" => "messages_queue.messages_queue_id",
+			"select" => "messages_queue.messages_queue_id",
 		],
 		"created_at" => [
-			"column" => "entity.created_at",
-			"select" => "DATE_FORMAT(entity.created_at, '%Y-%m-%dT%H:%i:%sZ')",
+			"column" => "messages_queue.created_at",
+			"select" => "DATE_FORMAT(messages_queue.created_at, '%Y-%m-%dT%H:%i:%sZ')",
 		],
 		"updated_at" => [
-			"column" => "entity.updated_at",
-			"select" => "DATE_FORMAT(entity.updated_at, '%Y-%m-%dT%H:%i:%sZ')",
+			"column" => "messages_queue.updated_at",
+			"select" => "DATE_FORMAT(messages_queue.updated_at, '%Y-%m-%dT%H:%i:%sZ')",
 		],
 		"title" => [
-			"column" => "entity.title",
-			"select" => "entity.title",
+			"column" => "messages_queue.title",
+			"select" => "messages_queue.title",
 		],
 		"description" => [
-			"column" => "entity.description",
-			"select" => "entity.description",
+			"column" => "messages_queue.description",
+			"select" => "messages_queue.description",
 		],
 		"type" => [
-			"column" => "mail.type",
-			"select" => "mail.type",
+			"column" => "messages_queue.type",
+			"select" => "messages_queue.type",
 		],
 		"recipient" => [
-			"column" => "mail.recipient",
-			"select" => "mail.recipient",
+			"column" => "messages_queue.recipient",
+			"select" => "messages_queue.recipient",
 		],
 		"status" => [
-			"column" => "mail.status",
-			"select" => "mail.status",
+			"column" => "messages_queue.status",
+			"select" => "messages_queue.status",
 		],
 		"date_sent" => [
-			"column" => "mail.date_sent",
+			"column" => "messages_queue.date_sent",
 			// An ugly way to sort unsent messages first
-			"select" => "IF(`date_sent` IS NULL, '2030-01-01 00:00:00', DATE_FORMAT(mail.date_sent, '%Y-%m-%dT%H:%i:%sZ'))",
+			"select" => "IF(`date_sent` IS NULL, '2030-01-01 00:00:00', DATE_FORMAT(messages_queue.date_sent, '%Y-%m-%dT%H:%i:%sZ'))",
 		],
 	];
 	protected $sort = [
@@ -75,7 +76,7 @@ class Mail extends Entity
 		// Paginate
 		if($this->pagination != null)
 		{
-			$query->paginate($this->pagination);
+//			$query->paginate($this->pagination);
 		}
 
 		// Run the MySQL query

@@ -1,5 +1,5 @@
 <?php
-namespace App\Http\Controllers\V2;
+namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -40,11 +40,12 @@ class Mail extends Controller
 
 		foreach($json["recipients"] as $recipient)
 		{
-			// TODO: Get entity_id from $recipient
-			// TODO: Use entity_id instead of member_number
+			// Load the recipient
+			// TODO: Load from API
+/*
 			$x = MemberModel::Load(
 				[
-					"member_number" => ["=", $recipient["value"]]
+					"member_id" => ["=", $recipient["value"]]
 				]
 			);
 
@@ -59,6 +60,8 @@ class Mail extends Controller
 			{
 				$recipient = $x->phone;
 			}
+*/
+			$recipient = "john@doe.local";
 
 			// Create new mail
 			$entity = new MailModel;
@@ -70,7 +73,7 @@ class Mail extends Controller
 			$entity->date_sent   = null;
 
 			// Create a relation to the recipient Member entity
-			$entity->addRelation($x->entity_id);
+//			$entity->addRelation($x->entity_id);
 
 			// Validate input
 			$entity->validate();

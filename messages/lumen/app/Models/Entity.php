@@ -3,43 +3,23 @@ namespace App\Models;
 
 use DB;
 
+use \App\Exceptions\FilterNotFoundException;
+use \App\Exceptions\EntityValidationException;
+
+
 /**
  * Entity class
  */
 class Entity
 {
 	public $entity_id = null;     // The database unique id for the entity
+	protected $id_column = null;  // Name of the primary key
 	protected $data = [];         // Holds the data of the object
 	protected $pagination = null; // No pagination by default
 	protected $relations = [];    // An array with information about relations to other entities
 	protected $type = null;       // The type of the entity, eg. "member"
 	protected $join = null;       // Specify the relation table we should join, if any
-	protected $columns = [
-		"type" => [
-			"column" => "entity.type",
-			"select" => "entity.type",
-		],
-		"entity_id" => [
-			"column" => "entity.entity_id",
-			"select" => "entity.entity_id",
-		],
-		"created_at" => [
-			"column" => "entity.created_at",
-			"select" => "DATE_FORMAT(entity.created_at, '%Y-%m-%dT%H:%i:%sZ')",
-		],
-		"updated_at" => [
-			"column" => "entity.updated_at",
-			"select" => "DATE_FORMAT(entity.updated_at, '%Y-%m-%dT%H:%i:%sZ')",
-		],
-		"title" => [
-			"column" => "entity.title",
-			"select" => "entity.title",
-		],
-		"description" => [
-			"column" => "entity.description",
-			"select" => "entity.description",
-		],
-	];
+	protected $columns = [];
 	protected $sort = ["created_at", "desc"]; // An array with sorting options eg. ["entity_id", "desc"] or [["date_updated", "asc"],["date_created","desc"]]
 	protected $validation = [];               // Validation rules
 
@@ -68,7 +48,7 @@ class Entity
 					// TODO: Should not be a hardcoded list
 					if(in_array($this->type, ["accounting_transaction", "accounting_period", "accounting_instruction", "accounting_account", "member", "mail", "product", "rfid", "subscription", "invoice"]))
 					{
-						$this->join = $this->type;
+//						$this->join = $this->type;
 					}
 
 					// Remove the filter to prevent further processing
@@ -77,6 +57,11 @@ class Entity
 				// Sorting
 				else if("sort" == $id)
 				{
+					if(true)
+					{
+						throw new \App\Exceptions\FilterNotFoundException("sort_by", $filter, "Could not find the column you trying to sort by");
+					}
+
 					$this->sort = $filter;
 					unset($filters[$id]);
 				}
@@ -90,18 +75,13 @@ class Entity
 	protected function _buildLoadQuery($show_deleted = false)
 	{
 		// Get all entities
-		$query = DB::table("entity");
-
-		// Type
-		if($this->type !== null)
-		{
-			$query = $query->where("entity.type", "=", $this->type);
-		}
+		$query = DB::table($this->table);
 
 		// Join data table
 		if($this->join !== null)
 		{
-			$query = $query->join($this->join, "{$this->join}.entity_id", "=", "entity.entity_id");
+			die("join");
+//			$query = $query->join($this->join, "{$this->join}.entity_id", "=", "entity.entity_id");
 		}
 
 		// Get columns
@@ -115,14 +95,14 @@ class Entity
 		{
 			// Include the deleted_at column in output only when we show deleted content
 			$this->columns["deleted_at"] = [
-				"column" => "entity.deleted_at",
-				"select" => "entity.deleted_at",
+				"column" => "{$this->table}.deleted_at",
+				"select" => "{$this->table}.deleted_at",
 			];
 		}
 		else
 		{
 			// The deleted_at should be null, which means it is not yet deleted
-			$query = $query->whereNull("entity.deleted_at");
+			$query = $query->whereNull("{$this->table}.deleted_at");
 		}
 
 		// Return the query
@@ -196,13 +176,28 @@ class Entity
 				// Filter on arbritrary columns
 				else
 				{
+					// Translate the column name
+					if(array_key_exists($id, $this->columns))
+					{
+						list($table, $column) = explode(".", $this->columns[$id]["column"]);
+						$id = $column;
+					}
+
+					// Run the filter
 					if(!is_array($filter))
 					{
 						$query = $query->where($id, "=", $filter);
 					}
 					else
 					{
-						$query = $query->where($id, $filter[0], $filter[1]);
+						if($filter[0] == "in")
+						{
+							$query = $query->whereIn($id, $filter[1]);
+						}
+						else
+						{
+							$query = $query->where($id, $filter[0], $filter[1]);
+						}
 					}
 					unset($filters[$id]);
 				}
@@ -328,6 +323,8 @@ class Entity
 			return false;
 		}
 		
+		$data["entity_id"] = $data[$this->id_column];
+
 		// Create a new entity based on type
 		// TODO: Should not be a hardcoded list
 		$type = ($this->type !== null ? $this->type : $data["type"]);
@@ -488,13 +485,18 @@ class Entity
 		$inserts = [];
 		foreach($this->columns as $name => $data)
 		{
+/*
 			if(!strpos($data["column"], "."))
 			{
 				continue;
 			}
-
+*/
 			list($table, $column) = explode(".", $data["column"]);
-			if($table == $this->join && array_key_exists($column, $this->data))
+			if(array_key_exists($name, $this->data))
+			{
+				$inserts[$column] = $this->data[$name];
+			}
+			else if(array_key_exists($column, $this->data))
 			{
 				$inserts[$column] = $this->data[$column];
 			}
@@ -503,26 +505,29 @@ class Entity
 		// Update an existing entity
 		if($this->entity_id !== null)
 		{
+/*
 			// Update a row in the entity table
-			DB::table("entity")
+			DB::table($this->table)
 				->where("entity_id", $this->entity_id)
 				->update([
 					"updated_at"  => date("c"),
 					"title"       => $this->data["title"]       ?? null,
 					"description" => $this->data["description"] ?? null,
 				]);
+*/
 
 			// Update a row in the relation table
 			if(!empty($inserts))
 			{
-				DB::table($this->join)
-					->where("entity_id", $this->entity_id)
+				DB::table($this->table)
+					->where($this->id_column, $this->entity_id)
 					->update($inserts);
 			}
 		}
 		// Create a new entity
 		else
 		{
+			/*
 			// Create a new row in the entity table
 			$this->entity_id = DB::table("entity")->insertGetId([
 				"type"        => $this->type,
@@ -531,13 +536,13 @@ class Entity
 				"created_at"  => date("c"),
 				"updated_at"  => date("c"),
 			]);
-
+*/
 			// Create a row in the relation table
-			if(!empty($inserts))
-			{
-				$inserts["entity_id"] = $this->entity_id;
-				DB::table($this->join)->insert($inserts);
-			}
+//			if(!empty($inserts))
+//			{
+//				$inserts["entity_id"] = $this->entity_id;
+				$this->entity_id = DB::table($this->table)->insertGetId($inserts);
+//			}
 		}
 
 		// Go through the list of relations
@@ -590,15 +595,15 @@ class Entity
 		if($permanent === true)
 		{
 			// Permanent delete
-			DB::table("entity")
-				->where("entity_id", $this->entity_id)
+			DB::table($this->table)
+				->where($this->id_column, $this->entity_id)
 				->delete();
 		}
 		else
 		{
 			// Soft delete
-			DB::table("entity")
-				->where("entity_id", $this->entity_id)
+			DB::table($this->table)
+				->where($this->id_column, $this->entity_id)
 				->update(["deleted_at" => date("c")]);
 		}
 
@@ -679,10 +684,12 @@ class Entity
 				else if($rule == "unique")
 				{
 					// Check if there is anything in the database
-					$result = Entity::load([
-						"type" => $this->join,
+					$result = $this::load([
+						"type" => $this->type,
 						$field => $this->data[$field]
 					]);
+//					print_r($result);
+//					die("load");
 
 					// A unique value collision is not fatal if it is from the same entity thas is being validated (itself)... or else we could not save an entity
 					if(!empty($result) && ($result->entity_id != $this->entity_id))
@@ -716,24 +723,5 @@ class Entity
 				}
 			}
 		}
-	}
-}
-
-/**
- * Thrown when a Entity::validate() fails and catched in app/Exceptions/Handler.php to return a standardized validation error result
- */
-class EntityValidationException extends \Exception
-{
-	protected $column;
-
-	function __construct($column, $message)
-	{
-		$this->column = $column;
-		$this->message = $message;
-	}
-
-	function getColumn()
-	{
-		return $this->column;
 	}
 }
