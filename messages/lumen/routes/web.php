@@ -12,5 +12,16 @@
 */
 
 $app->get('/', function () use ($app) {
-    return $app->version();
+	return $app->version();
+});
+
+// Mail
+$app->group(array("namespace" => "App\Http\Controllers"), function() use ($app)
+{
+	$app->   get("mail",      "Mail@list");   // Get collection
+	$app->  post("mail",      "Mail@create"); // Model: Create
+	$app->   get("mail/{id}", "Mail@read");   // Model: Read
+	$app->   put("mail/{id}", "Mail@update"); // Model: Update
+	$app->delete("mail/{id}", "Mail@delete"); // Model: Delete
+	$app->  post("mail/send", "Mail@send");   // Add E-mail to send queue
 });
