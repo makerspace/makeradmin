@@ -17,7 +17,7 @@ cd ./MakerAdmin-Membership/docker/
 ```
 
 # Step 2: Create a database
-Create a new database and user in your MySQL database server. 
+Create a new database and user in your MySQL database server.
 
 ```
 CREATE USER `makeradmin-membership`@'%' IDENTIFIED BY 'password';
