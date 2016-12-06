@@ -4,7 +4,7 @@ ABSOLUTE_PATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 if [  $# -le 3 ]
 then
-	echo -e "Usage:\n$0 [mysql_host] [mysql_user] [mysql_db] [mysql_pass]"
+	echo -e "Usage:\n$0 [mysql_host] [mysql_user] [mysql_pass] [mysql_db]"
 	exit 1
 fi
 
