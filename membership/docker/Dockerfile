@@ -13,7 +13,7 @@ COPY conf/php-fpm.conf /usr/local/etc/php-fpm.conf
 COPY conf/php-fpm-www.conf /etc/php-fpm.d/www.conf
 
 # Install PDO
-RUN	docker-php-ext-configure pdo_mysql && \
+RUN docker-php-ext-configure pdo_mysql && \
     docker-php-ext-install pdo_mysql
 
 # Forward request and error logs to docker log collector
@@ -21,8 +21,6 @@ RUN ln -sf /dev/stdout /var/log/nginx/access.log && \
     ln -sf /dev/stderr /var/log/nginx/error.log
 
 EXPOSE 80
-#VOLUME ["/var/www/html"]
 
 COPY myStartupScript.sh /usr/local/myscripts/myStartupScript.sh
-COPY registerService.sh /usr/local/myscripts/registerService.sh
 CMD ["/usr/local/myscripts/myStartupScript.sh"]
