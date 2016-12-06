@@ -13,7 +13,7 @@ The following guide will help you install the Membership module. Before installn
 # Step 1: Download the source code from GitHub
 ```
 git clone https://github.com/MakersOfSweden/MakerAdmin-Membership
-cd ./MakerAdmin-Frontend/docker/
+cd ./MakerAdmin-Membership/docker/
 ```
 
 # Step 2: Create a database
