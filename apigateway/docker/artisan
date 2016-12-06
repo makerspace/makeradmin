@@ -1,0 +1,2 @@
+#!/bin/bash
+docker exec -it makeradmin-apigateway /usr/local/bin/php artisan $*
