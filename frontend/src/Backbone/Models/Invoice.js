@@ -1,9 +1,10 @@
 import Backbone from 'backbone'
+import config from '../../config'
 
 var InvoiceModel = Backbone.Model.fullExtend(
 {
 	idAttribute: "invoice_number",
-	urlRoot: "/economy/2015/invoice",
+	urlRoot: "/economy/" + config.accountingPeriod + "/invoice",
 	defaults: {
 		created_at: "0000-00-00T00:00:00Z",
 		updated_at: "0000-00-00T00:00:00Z",

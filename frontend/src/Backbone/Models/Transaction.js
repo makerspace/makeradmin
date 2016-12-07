@@ -1,9 +1,10 @@
 import Backbone from 'backbone'
+import config from '../../config'
 
 var TransactionModel = Backbone.Model.fullExtend(
 {
 	idAttribute: "entity_id",
-	urlRoot: "/economy/2015/transaction",
+	urlRoot: "/economy/" + config.accountingPeriod + "/transaction",
 	defaults: {
 		created_at: "0000-00-00T00:00:00Z",
 		updated_at: "0000-00-00T00:00:00Z",

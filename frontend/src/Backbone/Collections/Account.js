@@ -1,10 +1,11 @@
 import Backbone from 'backbone'
 import AccountModel from '../Models/Account'
+import config from '../../config'
 
 var AccountCollection = Backbone.PageableCollection.extend(
 {
 	model: AccountModel,
-	url: "/economy/2015/account",
+	url: "/economy/" + config.accountingPeriod + "/account",
 });
 
 module.exports = AccountCollection;

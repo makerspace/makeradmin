@@ -1,9 +1,10 @@
 import Backbone from 'backbone'
+import config from '../../config'
 
 var InstructionModel = Backbone.Model.fullExtend(
 {
 	idAttribute: "instruction_number",
-	urlRoot: "/economy/2015/instruction",
+	urlRoot: "/economy/" + config.accountingPeriod + "/instruction",
 	defaults: {
 		entity_id: 0,
 		instruction_number: 0,

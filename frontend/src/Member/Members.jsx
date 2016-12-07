@@ -95,7 +95,7 @@ var Members = React.createClass({
 	{
 		return (
 			<tr key={i}>
-				<td><Link to={"/members/" + row.member_number}>{row.member_number}</Link></td>
+				<td><Link to={"/members/" + row.member_id}>{row.member_id}</Link></td>
 				<td>-</td>
 				<td>{row.firstname}</td>
 				<td>{row.lastname}</td>
@@ -103,7 +103,7 @@ var Members = React.createClass({
 				<td><DateField date={row.created_at} /></td>
 				<td>
 					<TableDropdownMenu>
-						<Link to={"/members/" + row.member_number}><i className="uk-icon uk-icon-cog"></i> Redigera medlem</Link>
+						<Link to={"/members/" + row.member_id}><i className="uk-icon uk-icon-cog"></i> Redigera medlem</Link>
 						{this.removeButton(i, "Ta bort medlem")}
 					</TableDropdownMenu>
 				</td>
@@ -116,7 +116,7 @@ var Members = React.createClass({
 		return [
 			{
 				title: "#",
-				sort: "member_number",
+				sort: "member_id",
 			},
 			{
 				title: "Kön",

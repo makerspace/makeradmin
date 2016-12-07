@@ -1,6 +1,8 @@
 import React from 'react'
 import BackboneReact from 'backbone-react-component'
 
+import config from '../config'
+
 // Backbone
 import MasterledgerCollection from '../Backbone/Collections/Masterledger'
 
@@ -21,7 +23,7 @@ var EconomyResultReportHandler = React.createClass({
 	componentDidMount: function()
 	{
 		$.ajax({
-			url: "/api/v2/economy/2015/resultreport",
+			url: config.apiBasePath + "/economy/" + config.accountingPeriod + "/resultreport",
 			dataType: 'json',
 			cache: false,
 			success: function(data) {

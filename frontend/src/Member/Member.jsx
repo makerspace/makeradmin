@@ -21,7 +21,7 @@ var MemberHandler = React.createClass({
 	getInitialState: function()
 	{
 		var member = new MemberModel({
-			member_number: this.props.params.id
+			member_id: this.props.params.id
 		});
 
 		var _this = this;
@@ -44,7 +44,8 @@ var MemberHandler = React.createClass({
 		$.UIkit.init();
 /*
 		var _this = this;
-		$("[data-uk-switcher]").on("show.uk.switcher", function(event, area) {
+		$("[data-uk-switcher]").on("show.uk.switcher", function(event, area)
+		{
 			if(area.context.id == "member_keys")
 			{
 				if(!this.keys_synced)
@@ -81,19 +82,19 @@ var MemberHandler = React.createClass({
 						<MemberForm model={this.state.model} />
 					</li>
 					<li>
-						<GroupUserBox member_number={this.state.model.get("member_number")} />
+						<GroupUserBox member_id={this.state.model.get("member_id")} />
 					</li>
 					<li>
-						<KeysUserBox member_number={this.state.model.get("member_number")} />
+						<KeysUserBox member_id={this.state.model.get("member_id")} />
 					</li>
 					<li>
-						<SubscriptionUserBox member_number={this.state.model.get("member_number")} />
+						<SubscriptionUserBox member_id={this.state.model.get("member_id")} />
 					</li>
 					<li>
-						<TransactionUserBox member_number={this.state.model.get("member_number")} />
+						<TransactionUserBox member_id={this.state.model.get("member_id")} />
 					</li>
 					<li>
-						<MailUserBox member_number={this.state.model.get("member_number")} />
+						<MailUserBox member_id={this.state.model.get("member_id")} />
 					</li>
 				</ul>
 			</div>
@@ -134,7 +135,7 @@ var MemberForm = React.createClass({
 				if(response.status == "created")
 				{
 					UIkit.modal.alert("Successfully created");
-					browserHistory.push("/members/" + response.entity.member_number);
+					browserHistory.push("/members/" + response.entity.member_id);
 				}
 				else if(response.status == "updated")
 				{

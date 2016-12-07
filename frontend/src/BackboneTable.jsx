@@ -13,9 +13,8 @@ var BackboneTable = {
 	{
 		var _this = this;
 
-		// Extend the collection
-		var collection = this.props.type;
-		var ExtendedCollection = collection.extend(
+		// Create an array with options used for extending the collection
+		var options =
 		{
 			state:
 			{
@@ -54,7 +53,17 @@ var BackboneTable = {
 					}
 				}
 			},
-		});
+		};
+
+		// Use a different URL, if specified
+		if(typeof this.props.url != "undefined")
+		{
+			options.url = this.props.url;
+		}
+
+		// Extend the collection
+		var collection = this.props.type;
+		var ExtendedCollection = collection.extend(options);
 
 		// Create a new extended collection
 		// TODO: Does params really work?
@@ -299,7 +308,7 @@ var BackboneTable = {
 		return (
 			<div>
 				{this.renderPagination(1)}
-				<div style={{position: "relative"}}>
+				<div style={{position: "relative", "clear": "both"}}>
 					<table className={"uk-table uk-table-condensed uk-table-striped uk-table-hover" + loadingClass}>
 						<thead>
 							<tr>

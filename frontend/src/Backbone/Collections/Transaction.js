@@ -1,5 +1,6 @@
 import Backbone from 'backbone'
 import TransactionModel from '../Models/Transaction'
+import config from '../../config'
 
 var TransactionCollection = Backbone.PageableCollection.extend(
 {
@@ -9,7 +10,7 @@ var TransactionCollection = Backbone.PageableCollection.extend(
 		this.id = options.id;
 	},
 
-	url: "/economy/2015/transaction",
+	url: "/economy/" + config.accountingPeriod + "/transaction",
 });
 
 module.exports = TransactionCollection;

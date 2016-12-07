@@ -157,17 +157,7 @@ var GroupUserBox = React.createClass(
 		{
 			return (
 				<div>
-					<Groups type={GroupCollection}
-						filters={{
-							relations:
-							[
-								{
-									type: "member",
-									member_number: this.props.member_number,
-								}
-							]
-						}}
-					/>
+					<Groups type={GroupCollection} url={"/membership/member/" + this.props.member_id + "/groups"} />
 					<button className="uk-button uk-button-primary" onClick={this.add}><i className="uk-icon-plus-circle" /> Lägg till grupp</button>
 				</div>
 			);

@@ -12,7 +12,7 @@ var GroupHandler = React.createClass({
 	getInitialState: function()
 	{
 		var group = new GroupModel({
-			entity_id: this.props.params.id
+			group_id: this.props.params.id
 		});
 		group.fetch();
 
@@ -27,16 +27,7 @@ var GroupHandler = React.createClass({
 		return (
 			<div>
 				<Group model={this.state.model} />
-				<GroupMembers type={MemberCollection}
-					filters={{
-						relations:
-						[
-							{
-								entity_id: this.state.model.get("entity_id"),
-							}
-						]
-					}}
-				/>
+				<GroupMembers type={MemberCollection} url={"/membership/group/" + this.props.params.id + "/members"} />
 			</div>
 		);
 	},
@@ -47,7 +38,7 @@ var GroupEditHandler = React.createClass({
 	getInitialState: function()
 	{
 		var id = this.props.params.id;
-		var group = new GroupModel({entity_id: id});
+		var group = new GroupModel({group_id: id});
 		group.fetch();
 
 		this.title = "Meep";
@@ -184,7 +175,7 @@ var Group = React.createClass({
 	{
 		return (
 			<div>
-				<h2>{this.state.model.entity_id ? "Redigera grupp" : "Skapa grupp"}</h2>
+				<h2>{this.state.model.group_id ? "Redigera grupp" : "Skapa grupp"}</h2>
 
 				<form className="uk-form uk-form-horizontal" onSubmit={this.save}>
 					<div className="uk-form-row">
@@ -209,7 +200,7 @@ var Group = React.createClass({
 					<div className="uk-form-row">
 						<div className="uk-form-controls">
 							<button className="uk-button uk-button-danger uk-float-left" onClick={this.cancel}><i className="uk-icon-close"></i> Avbryt</button>
-							{this.state.model.entity_id ? <button className="uk-button uk-button-danger uk-float-left" onClick={this.remove}><i className="uk-icon-trash"></i> Ta bort grupp</button> : ""}
+							{this.state.model.group_id ? <button className="uk-button uk-button-danger uk-float-left" onClick={this.remove}><i className="uk-icon-trash"></i> Ta bort grupp</button> : ""}
 							<button className="uk-button uk-button-success uk-float-right" onClick={this.save}><i className="uk-icon-save"></i> Spara grupp</button>
 						</div>
 					</div>

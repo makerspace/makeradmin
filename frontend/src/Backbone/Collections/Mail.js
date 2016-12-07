@@ -4,7 +4,7 @@ import MailModel from '../Models/Mail'
 var MailCollection = Backbone.PageableCollection.extend(
 {
 	model: MailModel,
-	url: "/mail",
+	url: "/messages",
 });
 
 module.exports = MailCollection;

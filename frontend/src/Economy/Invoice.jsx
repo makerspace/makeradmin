@@ -1,6 +1,8 @@
 import React from 'react'
 import BackboneReact from 'backbone-react-component'
 
+import config from '../config'
+
 // Backbone
 import InvoiceCollection from '../Backbone/Collections/Invoice'
 import InvoiceModel from '../Backbone/Models/Invoice'
@@ -195,7 +197,7 @@ var Invoice = React.createClass({
 
 		return (
 			<div className="invoice">
-				<a href={"/api/v2/economy/2015/invoice/" + this.state.model.invoice_number + "/export"}>Exportera *.ODT</a>
+				<a href={"/economy/" + config.accountingPeriod + "/invoice/" + this.state.model.invoice_number + "/export"}>Exportera *.ODT</a>
 
 				<div className="uk-grid">
 					<div className="uk-width-1-3 box">

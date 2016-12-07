@@ -72,7 +72,7 @@ class MailSendHandler extends React.Component
 
 		$.ajax({
 			method: "GET",
-			url: config.apiBasePath + "/member",
+			url: config.apiBasePath + "/membership/member",
 			data: {
 				search: input,
 			},
@@ -82,8 +82,11 @@ class MailSendHandler extends React.Component
 
 				data.data.forEach(function(element, index, array){
 					autoComplete.push({
-						label: element.firstname + " " + element.lastname + " (#" + element.member_number + ")",
-						value: element.member_number,
+						label: "Member:" + element.firstname + " " + element.lastname + " (#" + element.member_number + ")",
+						value: {
+							type: "member",
+							id: element.member_id,
+						},
 					});
 				});
 
@@ -110,13 +113,22 @@ class MailSendHandler extends React.Component
 		var subject    = this.state.subject;
 		var body       = this.state.body;
 
+		// Filter recipients (Remove label)
+		var filteredRecipients = [];
+		recipients.forEach(function(element, index, array) {
+			filteredRecipients.push(element.value);
+		});
+//		var filteredRecipients = recipients;
+
 		// Send API request
 		$.ajax({
 			method: "POST",
-			url: config.apiBasePath + "/mail",
+			url: config.apiBasePath + "/messages",
+			dataType: "json",
+			contentType: "application/json; charset=utf-8",
 			data: JSON.stringify({
 				type,
-				recipients,
+				recipients: filteredRecipients,
 				subject,
 				body
 			}),

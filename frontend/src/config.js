@@ -3,6 +3,7 @@ var config = {
 	pagination: {
 		pageSize: 25,
 	},
+	accountingPeriod: "2015",
 }
 
 module.exports = config;

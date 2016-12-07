@@ -1,11 +1,6 @@
 import React from 'react'
-import BackboneReact from 'backbone-react-component'
 
-import Currency from '../Formatters/Currency'
-
-//import { EconomyAccountingInstructionList } from './Instruction'
-
-var EconomyAccount = React.createClass({
+var AccountingPeriod = React.createClass({
 	mixins: [Backbone.React.Component.mixin],
 
 	handleChange: function(event)
@@ -25,11 +20,11 @@ var EconomyAccount = React.createClass({
 			<div>
 				<form className="uk-form uk-form-horizontal">
 					<div className="uk-form-row">
-						<label className="uk-form-label">Kontonummer</label>
+						<label className="uk-form-label">Namn</label>
 						<div className="uk-form-controls">
 							<div className="uk-form-icon">
 								<i className="uk-icon-database"></i>
-								<input type="text" value={this.state.model.account_number} className="uk-form-width-large" onChange={this.handleChange} />
+								<input type="text" value={this.state.model.name} className="uk-form-width-large" onChange={this.handleChange} />
 							</div>
 						</div>
 					</div>
@@ -47,14 +42,24 @@ var EconomyAccount = React.createClass({
 					<div className="uk-form-row">
 						<label className="uk-form-label">Beskrivning</label>
 						<div className="uk-form-controls">
-							<textarea value={this.state.model.description} className="uk-form-width-large" onChange={this.handleChange} />
+							<div className="uk-form-icon">
+								<i className="uk-icon-database"></i>
+								<textarea value={this.state.model.description} className="uk-form-width-large" onChange={this.handleChange} />
+							</div>
 						</div>
 					</div>
 
 					<div className="uk-form-row">
-						<label className="uk-form-label">Balans</label>
+						<label className="uk-form-label">Startdatum</label>
 						<div className="uk-form-controls">
-							<Currency value={this.state.model.balance} currency="SEK" />
+							<input type="text" value={this.state.model.start} className="uk-form-width-large" onChange={this.handleChange} />
+						</div>
+					</div>
+
+					<div className="uk-form-row">
+						<label className="uk-form-label">Slutdatum</label>
+						<div className="uk-form-controls">
+							<input type="text" value={this.state.model.end} className="uk-form-width-large" onChange={this.handleChange} />
 						</div>
 					</div>
 				</form>
@@ -63,4 +68,4 @@ var EconomyAccount = React.createClass({
 	},
 });
 
-module.exports = EconomyAccount;
+module.exports = AccountingPeriod;

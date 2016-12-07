@@ -61,7 +61,7 @@ var MailHistory = React.createClass({
 		return [
 			{
 				title: "Id",
-				sort: "entity_id",
+				sort: "queue_id",
 			},
 			{
 				title: "Status",
@@ -82,7 +82,7 @@ var MailHistory = React.createClass({
 	{
 		return (
 			<tr key={i}>
-				<td><Link to={"/mail/" + row.entity_id}>{row.entity_id}</Link></td>
+				<td><Link to={"/mail/" + row.queue_id}>{row.queue_id}</Link></td>
 				<td>
 					{(() => {
 						switch (row.status) {

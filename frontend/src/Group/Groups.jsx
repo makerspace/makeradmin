@@ -81,9 +81,9 @@ var Groups = React.createClass({
 		}
 	},
 
-	removeTextMessage: function(entity)
+	removeTextMessage: function(group)
 	{
-		return "Are you sure you want to remove group \"" + entity.title + "\"?";
+		return "Are you sure you want to remove group \"" + group.title + "\"?";
 	},
 
 	removeErrorMessage: function()
@@ -116,12 +116,12 @@ var Groups = React.createClass({
 	{
 		return (
 			<tr key={i}>
-				<td><Link to={"/groups/" + row.entity_id}>{row.title}</Link></td>
-				<td><Link to={"/groups/" + row.entity_id}>{row.description}</Link></td>
+				<td><Link to={"/groups/" + row.group_id}>{row.title}</Link></td>
+				<td><Link to={"/groups/" + row.group_id}>{row.description}</Link></td>
 				<td>{row.membercount}</td>
 				<td>
 					<TableDropdownMenu>
-						<Link to={"/groups/" + row.entity_id + "/edit"}><i className="uk-icon uk-icon-cog"></i> Redigera grupp</Link>
+						<Link to={"/groups/" + row.group_id + "/edit"}><i className="uk-icon uk-icon-cog"></i> Redigera grupp</Link>
 						{this.removeButton(i, "Ta bort grupp")}
 					</TableDropdownMenu>
 				</td>

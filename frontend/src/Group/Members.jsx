@@ -19,10 +19,10 @@ var GroupMembers = React.createClass({
 		this.fetch();
 	},
 
-	removeTextMessage: function(entity)
+	removeTextMessage: function(group)
 	{
 		// TODO
-		return "Are you sure you want to remove group \"" + entity.title + "\"?";
+		return "Are you sure you want to remove group \"" + group.title + "\"?";
 	},
 
 	removeErrorMessage: function()

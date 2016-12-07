@@ -17,55 +17,47 @@ import {
 } from 'react-router'
 import Backbone from './Backbone/FullExtend'
 import { browserHistory } from 'react-router'
-import {
-	MemberHandler,
-	MemberAddHandler,
-} from './Member/Member'
+
+// Member / group handlers
+import { MemberAddHandler } from './Member/Member'
+import { MemberHandler } from './Member/Member'
 import { MembersHandler } from './Member/Members'
-import { GroupHandler, GroupAddHandler, GroupEditHandler } from './Group/Group'
+import { GroupHandler } from './Group/Group'
+import { GroupAddHandler } from './Group/Group'
+import { GroupEditHandler } from './Group/Group'
 import { GroupsHandler } from './Group/Groups'
-import SalesOverviewHandler from './Sales/Overview'
+
+// Sales handlers
+import SalesOverviewHandler from './Sales/OverviewHandler'
 import { SalesProductsHandler } from './Sales/Products'
 import { SalesSubscriptionsHandler } from './Sales/Subscriptions'
 import { SalesHistoryHandler } from './Sales/History'
-import {
-	MasterLedgerHandler,
-	EconomyOverviewHandler,
-	EconomyDebugHandler,
-	EconomyAccountingPeriodHandler,
-} from './Economy/Other'
 
-import {
-	EconomyAccountingInstructionsHandler,
-	EconomyAccountingInstructionAddHandler,
-	EconomyAccountingInstructionHandler,
-	EconomyAccountingInstructionImportHandler,
-} from './Economy/Instruction'
-
-import {
-	EconomyAccountsHandler,
-	EconomyAccountHandler,
-	EconomyAccountEditHandler,
-	EconomyAccountAddHandler,
-} from './Economy/Account'
-
+// Economy handlers
+import MasterLedgerHandler from './Economy/MasterLedgerHandler'
+import { EconomyOverviewHandler } from './Economy/Other'
+import { EconomyDebugHandler } from './Economy/Other'
+import EconomyAccountingPeriodsHandler from './Economy/AccountingPeriodsHandler'
+import EconomyAccountingPeriodHandler from './Economy/AccountingPeriodsHandler'
+import EconomyAccountingPeriodAddHandler from './Economy/AccountingPeriodAddHandler'
+import EconomyAccountingPeriodEditHandler from './Economy/AccountingPeriodEditHandler'
+import EconomyAccountingInstructionsHandler from './Economy/InstructionsHandler'
+import EconomyAccountingInstructionAddHandler from './Economy/InstructionAddHandler'
+import EconomyAccountingInstructionHandler from './Economy/InstructionHandler'
+import EconomyAccountingInstructionImportHandler from './Economy/InstructionImportHandler'
+import EconomyAccountsHandler from './Economy/AccountsHandler'
+import EconomyAccountHandler from './Economy/AccountHandler'
+import EconomyAccountEditHandler from './Economy/AccountEditHandler'
+import EconomyAccountAddHandler from './Economy/AccountAddHandler'
 import EconomyValuationSheetHandler from './Economy/ValuationSheet'
 import EconomyResultReportHandler from './Economy/ResultReport'
+import EconomyCostCentersHandler from './Economy/CostCentersHandler'
+import EconomyCostCenterHandler from './Economy/CostCenterHandler'
 
-import {
-	EconomyCostCentersHandler,
-	EconomyCostCenterHandler,
-} from './Economy/CostCenter'
-
+// Invoice handlers
 import { InvoiceListHandler, InvoiceHandler, InvoiceAddHandler } from './Economy/Invoice'
 
-import {
-	Nav,
-	SideNav,
-	SideNav2,
-	Breadcrumb,
-} from './nav'
-
+// Other handlers
 import SettingsGlobalHandler from './Settings/Global'
 import SettingsAutomationHandler from './Settings/Automation'
 import StatisticsHandler from './Statistics'
@@ -77,13 +69,21 @@ import MailSendHandler from './Mail/Send'
 import { MailHistoryHandler } from './Mail/History'
 import KeysOverviewHandler from './Keys/Overview'
 
+
+import {
+	Nav,
+	SideNav,
+	SideNav2,
+	Breadcrumb,
+} from './nav'
+
 import auth from './auth'
 import Login from './Login/Login'
 import LoginResetPassword from './Login/LoginResetPassword'
 import AccessTokensHandler from './Login/AccessTokensHandler'
 
 var nav = new Backbone.Model({
-	brand: "Makerspace Internal v2",
+	brand: "MakerAdmin 1.0",
 	navItems:
 	[
 		{
@@ -434,7 +434,10 @@ ReactDOM.render((
 				<Route path="mail"       component={MailTemplatesHandler} />
 				<Route path="economy">
 					<Route path="debug"             component={EconomyDebugHandler} />
-					<Route path="accountingperiods" component={EconomyAccountingPeriodHandler} />
+					<Route path="accountingperiods"         component={EconomyAccountingPeriodsHandler} />
+					<Route path="accountingperiod/add"      component={EconomyAccountingPeriodAddHandler} />
+					<Route path="accountingperiod/:id"      component={EconomyAccountingPeriodHandler} />
+					<Route path="accountingperiod/:id/edit" component={EconomyAccountingPeriodEditHandler} />
 					<Route path="accounts"          component={EconomyAccountsHandler} />
 					<Route path="account/add"       component={EconomyAccountAddHandler} />
 					<Route path="account/:id/edit"  component={EconomyAccountEditHandler} />
