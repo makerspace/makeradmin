@@ -3,8 +3,6 @@ import BackboneReact from 'backbone-react-component'
 
 import Currency from '../Formatters/Currency'
 
-//import { EconomyAccountingInstructionList } from './Instruction'
-
 var EconomyAccount = React.createClass({
 	mixins: [Backbone.React.Component.mixin],
 

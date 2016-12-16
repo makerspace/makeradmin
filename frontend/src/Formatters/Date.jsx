@@ -4,7 +4,7 @@ var DateField = React.createClass({
 	render: function()
 	{
 		var str = <em>Ej angivet</em>;
-		if(this.props.date != "")
+		if(this.props.date !== undefined && this.props.date != "")
 		{
 			var options = {
 				year: 'numeric', month: 'numeric', day: 'numeric',

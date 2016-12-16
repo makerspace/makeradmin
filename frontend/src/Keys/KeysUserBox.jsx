@@ -1,8 +1,8 @@
 import React from 'react'
 
 // Backbone
-import RfidCollection from '../Backbone/Collections/Rfid'
-import RfidModel from '../Backbone/Models/Rfid'
+import RfidCollection from './Collections/Rfid'
+import RfidModel from './Models/Rfid'
 
 import Keys from './Keys'
 import Edit from './Edit'

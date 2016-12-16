@@ -1,7 +1,7 @@
 import React from 'react'
 
 // Backbone
-import TransactionCollection from '../Backbone/Collections/Transaction'
+import TransactionCollection from './Collections/Transaction'
 
 import TransactionsUser from './TransactionsUser'
 

@@ -1,53 +1,11 @@
 import React from 'react'
 import BackboneReact from 'backbone-react-component'
 
-// Backbone
-import SalesHistoryCollection from '../Backbone/Collections/SalesHistory'
-import SalesHistoryModel from '../Backbone/Models/SalesHistory'
-
 import { Link } from 'react-router'
 import BackboneTable from '../BackboneTable'
-import DateField from '../Formatters/Date'
 import Currency from '../Formatters/Currency'
 
-import TableFilterBox from '../TableFilterBox'
-
-var SalesHistoryHandler = React.createClass({
-	getInitialState: function()
-	{
-		return {
-			filters: this.props.filters || {},
-		};
-	},
-
-	updateFilters: function(newFilter)
-	{
-		var filters = this.overrideFiltersFromProps(newFilter);
-		this.setState({
-			filters: filters
-		});
-	},
-
-	overrideFiltersFromProps: function(filters)
-	{
-		return filters;
-	},
-
-	render: function()
-	{
-		return (
-			<div>
-				<h2>Försäljningshistorik</h2>
-				<p>På denna sida ser du en lista på samtliga sålda produkter.</p>
-				<TableFilterBox onChange={this.updateFilters} />
-				<History type={SalesHistoryCollection} filters={this.state.filters} />
-			</div>
-		);
-	},
-});
-SalesHistoryHandler.title = "Visa försäljning";
-
-var History = React.createClass({
+module.exports = React.createClass({
 	mixins: [Backbone.React.Component.mixin, BackboneTable],
 
 	componentWillMount: function()
@@ -106,7 +64,3 @@ var History = React.createClass({
 		);
 	},
 });
-
-module.exports = {
-	SalesHistoryHandler
-}

@@ -3,7 +3,7 @@ import BackboneTable from '../BackboneTable'
 import TableDropdownMenu from '../TableDropdownMenu'
 
 // Backbone
-import RfidModel from '../Backbone/Models/Rfid'
+import RfidModel from './Models/Rfid'
 
 var Keys = React.createClass({
 	mixins: [Backbone.React.Component.mixin, BackboneTable],

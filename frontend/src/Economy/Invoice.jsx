@@ -4,8 +4,8 @@ import BackboneReact from 'backbone-react-component'
 import config from '../config'
 
 // Backbone
-import InvoiceCollection from '../Backbone/Collections/Invoice'
-import InvoiceModel from '../Backbone/Models/Invoice'
+import InvoiceCollection from './Collections/Invoice'
+import InvoiceModel from './Models/Invoice'
 
 import { Link } from 'react-router'
 import Currency from '../Formatters/Currency'
@@ -13,155 +13,7 @@ import DateField from '../Formatters/Date'
 import BackboneTable from '../BackboneTable'
 import TableFilterBox from '../TableFilterBox'
 
-var InvoiceListHandler = React.createClass({
-	getInitialState: function()
-	{
-		return {
-			filters: this.props.filters || {},
-		};
-	},
-
-	updateFilters: function(newFilter)
-	{
-		var filters = this.overrideFiltersFromProps(newFilter);
-		this.setState({
-			filters: filters
-		});
-	},
-
-	overrideFiltersFromProps: function(filters)
-	{
-		return filters;
-	},
-
-	render: function()
-	{
-		return (
-			<div className="uk-width-1-1">
-				<h2>Fakturor</h2>
-
-				<p className="uk-float-left">På denna sida ser du en lista på samtliga fakturor för det valda bokföringsåret.</p>
-				<Link to={"/economy/invoice/add"} className="uk-button uk-button-primary uk-float-right"><i className="uk-icon-plus-circle"></i> Skapa ny faktura</Link>
-
-				<TableFilterBox onChange={this.updateFilters} />
-				<InvoiceList type={InvoiceCollection} filters={this.state.filters} />
-			</div>
-		);
-	},
-});
-InvoiceListHandler.title = "Visa fakturor";
-
-var InvoiceHandler = React.createClass({
-	getInitialState: function()
-	{
-		var id = this.props.params.id;
-		var invoice = new InvoiceModel({id: id});
-		invoice.fetch();
-
-		return {
-			model: invoice
-		};
-	},
-
-	render: function()
-	{
-		return (
-			<div>
-				<h2>Faktura</h2>
-				<Invoice model={this.state.model} />
-			</div>
-		);
-	},
-});
-
-var InvoiceAddHandler = React.createClass({
-	getInitialState: function()
-	{
-		var invoice = new InvoiceModel();
-
-		return {
-			model: invoice
-		};
-	},
-
-	render: function()
-	{
-		return (
-			<div>
-				<h2>Skapa faktura</h2>
-				<Invoice model={this.state.model} />
-			</div>
-		);
-	},
-});
-
-var InvoiceList = React.createClass({
-	mixins: [Backbone.React.Component.mixin, BackboneTable],
-
-	getInitialState: function()
-	{
-		return {
-			columns: 6,
-		};
-	},
-
-	componentWillMount: function()
-	{
-		this.state.collection.fetch();
-	},
-
-	renderHeader: function()
-	{
-		return [
-			{
-				title: "#",
-				sort: "invoice_number",
-			},
-			{
-				title: "Förfallodatum",
-				sort: "date_expiry",
-			},
-			{
-				title: "Mottagare",
-				sort: "title",
-			},
-			{
-				title: "Referens",
-				sort: "your_reference",
-			},
-			{
-				title: "Belopp",
-				class: "uk-text-right",
-				sort: "_total",
-			},
-			{
-				title: "Status",
-				sort: "status",
-			},
-		];
-	},
-
-	renderRow: function(row, i)
-	{
-		if(row.status == "unpaid")
-		{
-			row.status = "Obetald";
-		}
-
-		return (
-			<tr key={i}>
-				<td><Link to={"/economy/invoice/" + row.invoice_number}>{row.invoice_number}</Link></td>
-				<td><DateField date={row.date_expiry} /></td>
-				<td>{row.title}</td>
-				<td>{row.your_reference}</td>
-				<td className="uk-text-right"><Currency value={row._total} currency={row.currency} /></td>
-				<td>{row.status}</td>
-			</tr>
-		);
-	},
-});
-
-var Invoice = React.createClass({
+module.exports = React.createClass({
 	mixins: [Backbone.React.Component.mixin],
 
 	render: function()
@@ -278,9 +130,3 @@ var Invoice = React.createClass({
 		);
 	},
 });
-
-module.exports = {
-	InvoiceListHandler,
-	InvoiceHandler,
-	InvoiceAddHandler,
-}

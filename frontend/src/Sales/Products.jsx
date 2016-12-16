@@ -1,32 +1,13 @@
 import React from 'react'
 
-// Backbone
-import ProductCollection from '../Backbone/Collections/Product'
-import ProductModel from '../Backbone/Models/Product'
-
 import { Link } from 'react-router'
 import BackboneTable from '../BackboneTable'
 import Currency from '../Formatters/Currency'
-import DateField from '../Formatters/Date'
+//import DateField from '../Formatters/Date'
 import TableDropdownMenu from '../TableDropdownMenu'
 
-var SalesProductsHandler = React.createClass({
-	render: function()
-	{
-		return (
-			<div>
-				<h2>Produkter</h2>
 
-				<p className="uk-float-left">På denna sida ser du en lista på samtliga produkter som finns för försäljning.</p>
-				<Link to="/product/add" className="uk-button uk-button-primary uk-float-right"><i className="uk-icon-plus-circle"></i> Skapa ny produkt</Link>
-
-				<Products type={ProductCollection}/>
-			</div>
-		);
-	},
-});
-
-var Products = React.createClass({
+module.exports = React.createClass({
 	mixins: [Backbone.React.Component.mixin, BackboneTable],
 
 	getInitialState: function()
@@ -104,8 +85,3 @@ var Products = React.createClass({
 		);
 	},
 });
-
-module.exports = {
-	SalesProductsHandler,
-	Products,
-}

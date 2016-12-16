@@ -46,8 +46,6 @@
 
 	/* WEBPACK VAR INJECTION */(function(global) {'use strict';
 
-	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
 	var _react = __webpack_require__(1);
 
 	var _react2 = _interopRequireDefault(_react);
@@ -58,104 +56,38 @@
 
 	var _reactRouter = __webpack_require__(172);
 
-	var _FullExtend = __webpack_require__(236);
+	var _nav = __webpack_require__(236);
+
+	var _FullExtend = __webpack_require__(241);
 
 	var _FullExtend2 = _interopRequireDefault(_FullExtend);
 
-	var _Member = __webpack_require__(243);
-
-	var _Members = __webpack_require__(284);
-
-	var _Group = __webpack_require__(286);
-
-	var _Groups = __webpack_require__(261);
-
-	var _Overview = __webpack_require__(288);
-
-	var _Overview2 = _interopRequireDefault(_Overview);
-
-	var _Products = __webpack_require__(289);
-
-	var _Subscriptions = __webpack_require__(292);
-
-	var _History = __webpack_require__(295);
-
-	var _Other = __webpack_require__(298);
-
-	var _Instruction = __webpack_require__(301);
-
-	var _Account = __webpack_require__(304);
-
-	var _ValuationSheet = __webpack_require__(307);
-
-	var _ValuationSheet2 = _interopRequireDefault(_ValuationSheet);
-
-	var _ResultReport = __webpack_require__(308);
-
-	var _ResultReport2 = _interopRequireDefault(_ResultReport);
-
-	var _CostCenter = __webpack_require__(309);
-
-	var _Invoice = __webpack_require__(312);
-
-	var _nav = __webpack_require__(315);
-
-	var _Global = __webpack_require__(316);
-
-	var _Global2 = _interopRequireDefault(_Global);
-
-	var _Automation = __webpack_require__(317);
-
-	var _Automation2 = _interopRequireDefault(_Automation);
-
-	var _Statistics = __webpack_require__(318);
-
-	var _Statistics2 = _interopRequireDefault(_Statistics);
-
-	var _Dashboard = __webpack_require__(319);
-
-	var _Dashboard2 = _interopRequireDefault(_Dashboard);
-
-	var _Export = __webpack_require__(320);
-
-	var _Export2 = _interopRequireDefault(_Export);
-
-	var _Templates = __webpack_require__(321);
-
-	var _Templates2 = _interopRequireDefault(_Templates);
-
-	var _Send = __webpack_require__(322);
-
-	var _Send2 = _interopRequireDefault(_Send);
-
-	var _History2 = __webpack_require__(256);
-
-	var _Overview3 = __webpack_require__(323);
-
-	var _Overview4 = _interopRequireDefault(_Overview3);
-
-	var _auth = __webpack_require__(241);
+	var _auth = __webpack_require__(243);
 
 	var _auth2 = _interopRequireDefault(_auth);
 
+	var _Login = __webpack_require__(245);
+
+	var _Login2 = _interopRequireDefault(_Login);
+
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
 	// Load jQuery and UIkit
-	global.jQuery = __webpack_require__(239);
+	global.jQuery = __webpack_require__(240);
 	global.$ = global.jQuery;
-	__webpack_require__(324);
-	__webpack_require__(325);
-	__webpack_require__(326);
-	__webpack_require__(327);
+	__webpack_require__(246);
+	__webpack_require__(247);
+	__webpack_require__(248);
+	__webpack_require__(249);
+
+	// React stuff
+
+
+	// Login / OAuth
+
 
 	var nav = new _FullExtend2.default.Model({
-		brand: "Makerspace Internal v2",
+		brand: "MakerAdmin 1.0",
 		navItems: [{
 			text: "Medlemmar",
 			target: "/members",
@@ -229,7 +161,7 @@
 			}]
 		}, {
 			text: "Utskick",
-			target: "/mail",
+			target: "/messages",
 			icon: "envelope"
 		}, {
 			text: "Statistik",
@@ -244,6 +176,9 @@
 			{
 				text: "Globala inställningar",
 				target: "/settings/global"
+			}, {
+				text: "Access tokens",
+				target: "/settings/tokens"
 			}, {
 				text: "Automation",
 				target: "/settings/automation"
@@ -260,10 +195,10 @@
 				icon: "money"
 			}, {
 				text: "Kontoplan",
-				target: "/settings/economy/accounts"
+				target: "/settings/economy/account"
 			}, {
 				text: "Räkneskapsår",
-				target: "/settings/economy/accountingperiods"
+				target: "/settings/economy/accountingperiod"
 			}, {
 				text: "Debug",
 				target: "/settings/economy/debug"
@@ -278,9 +213,6 @@
 				text: "Utskick",
 				target: "",
 				icon: "envelope"
-			}, {
-				text: "Utskick",
-				target: "/settings/mail"
 			}, {
 				text: "Mallar",
 				target: "/settings/mail/templates"
@@ -300,7 +232,7 @@
 				target: "/settings/export"
 			}, {
 				text: "Importera data",
-				target: "/settings/export"
+				target: "/settings/import"
 			}]
 		}, {
 			text: "Logga ut",
@@ -308,93 +240,6 @@
 			icon: "sign-out"
 		}]
 	});
-
-	var Login = function (_React$Component) {
-		_inherits(Login, _React$Component);
-
-		function Login() {
-			_classCallCheck(this, Login);
-
-			return _possibleConstructorReturn(this, (Login.__proto__ || Object.getPrototypeOf(Login)).apply(this, arguments));
-		}
-
-		_createClass(Login, [{
-			key: 'login',
-			value: function login(e) {
-				e.preventDefault();
-
-				var username = this.refs.username.value;
-				var password = this.refs.password.value;
-
-				_auth2.default.login(username, password);
-			}
-		}, {
-			key: 'render',
-			value: function render() {
-				return _react2.default.createElement(
-					'div',
-					{ className: 'uk-vertical-align uk-text-center uk-height-1-1' },
-					_react2.default.createElement(
-						'div',
-						{ className: 'uk-vertical-align-middle', style: { width: "250px" } },
-						_react2.default.createElement(
-							'form',
-							{ className: 'uk-panel uk-panel-box uk-form', onSubmit: this.login.bind(this) },
-							_react2.default.createElement(
-								'div',
-								{ className: 'uk-form-row' },
-								_react2.default.createElement(
-									'h2',
-									null,
-									'Logga in'
-								)
-							),
-							_react2.default.createElement(
-								'div',
-								{ className: 'uk-form-row' },
-								_react2.default.createElement(
-									'div',
-									{ className: 'uk-form-icon' },
-									_react2.default.createElement('i', { className: 'uk-icon-user' }),
-									_react2.default.createElement('input', { ref: 'username', className: 'uk-width-1-1 uk-form-large', type: 'text', placeholder: 'Användarnamn' })
-								)
-							),
-							_react2.default.createElement(
-								'div',
-								{ className: 'uk-form-row' },
-								_react2.default.createElement(
-									'div',
-									{ className: 'uk-form-icon' },
-									_react2.default.createElement('i', { className: 'uk-icon-lock' }),
-									_react2.default.createElement('input', { ref: 'password', className: 'uk-width-1-1 uk-form-large', type: 'password', placeholder: 'Lösenord' })
-								)
-							),
-							_react2.default.createElement(
-								'div',
-								{ className: 'uk-form-row' },
-								_react2.default.createElement(
-									'button',
-									{ type: 'submit', className: 'uk-width-1-1 uk-button uk-button-primary uk-button-large' },
-									'Logga in'
-								)
-							),
-							_react2.default.createElement(
-								'div',
-								{ className: 'uk-form-row uk-text-small' },
-								_react2.default.createElement(
-									'a',
-									{ className: 'uk-float-right uk-link uk-link-muted', onClick: UIkit.modal.alert.bind([], "Haha!") },
-									'Glömt ditt lösenord?'
-								)
-							)
-						)
-					)
-				);
-			}
-		}]);
-
-		return Login;
-	}(_react2.default.Component);
 
 	var App = _react2.default.createClass({
 		displayName: 'App',
@@ -410,7 +255,6 @@
 		},
 		componentWillMount: function componentWillMount() {
 			_auth2.default.onChange = this.updateAuth;
-			//		auth.login();
 		},
 
 
@@ -442,139 +286,53 @@
 					)
 				);
 			} else {
-				return _react2.default.createElement(Login, null);
+				return _react2.default.createElement(_Login2.default, null);
 			}
 		}
 	});
 	App.title = "Internal";
 
-	var NoMatch = _react2.default.createClass({
-		displayName: 'NoMatch',
+	/*
+	<Route path="tokens"     component={AccessTokensHandler} />
+	*/
 
-		render: function render() {
-			return _react2.default.createElement(
-				'h2',
-				null,
-				'404'
-			);
-		}
-	});
+	var rootRoute = {
+		childRoutes: [{
+			path: "resetpassword",
+			component: __webpack_require__(250)
+		}, {
+			path: "/",
+			component: App,
+			indexRoute: {
+				component: __webpack_require__(251)
+			},
+			childRoutes: [{
+				path: "logout",
+				component: __webpack_require__(252)
+			}, __webpack_require__(253), __webpack_require__(306), __webpack_require__(349), __webpack_require__(363), __webpack_require__(372), __webpack_require__(374), __webpack_require__(379), {
+				path: "settings",
+				indexRoute: {
+					component: __webpack_require__(376)
+				},
+				childRoutes: [{
+					path: "global",
+					indexRoute: {
+						component: __webpack_require__(376)
+					}
+				}, {
+					path: "automation",
+					indexRoute: {
+						component: __webpack_require__(377)
+					}
+				}]
+			}, {
+				path: "*",
+				component: __webpack_require__(378)
+			}]
+		}]
+	};
 
-	var NotImplemented = _react2.default.createClass({
-		displayName: 'NotImplemented',
-
-		render: function render() {
-			return _react2.default.createElement(
-				'h2',
-				null,
-				'Not implemented'
-			);
-		}
-	});
-
-	var Logout = _react2.default.createClass({
-		displayName: 'Logout',
-		componentDidMount: function componentDidMount() {
-			_auth2.default.logout();
-		},
-		render: function render() {
-			return _react2.default.createElement(
-				'p',
-				null,
-				'You are now logged out'
-			);
-		}
-	});
-
-	_reactDom2.default.render(_react2.default.createElement(
-		_reactRouter.Router,
-		{ history: _reactRouter.browserHistory },
-		_react2.default.createElement(
-			_reactRouter.Route,
-			{ path: '/', component: App },
-			_react2.default.createElement(_reactRouter.IndexRoute, { component: _Dashboard2.default }),
-			_react2.default.createElement(_reactRouter.Route, { path: 'logout', component: Logout }),
-			_react2.default.createElement(
-				_reactRouter.Route,
-				{ path: 'members' },
-				_react2.default.createElement(_reactRouter.IndexRoute, { component: _Members.MembersHandler }),
-				_react2.default.createElement(_reactRouter.Route, { path: 'add', component: _Member.MemberAddHandler }),
-				_react2.default.createElement(_reactRouter.Route, { path: ':id', component: _Member.MemberHandler })
-			),
-			_react2.default.createElement(
-				_reactRouter.Route,
-				{ path: 'groups' },
-				_react2.default.createElement(_reactRouter.IndexRoute, { component: _Groups.GroupsHandler }),
-				_react2.default.createElement(_reactRouter.Route, { path: 'add', component: _Group.GroupAddHandler }),
-				_react2.default.createElement(_reactRouter.Route, { path: ':id', component: _Group.GroupHandler }),
-				_react2.default.createElement(_reactRouter.Route, { path: ':id/edit', component: _Group.GroupEditHandler })
-			),
-			_react2.default.createElement(
-				_reactRouter.Route,
-				{ path: 'keys' },
-				_react2.default.createElement(_reactRouter.IndexRoute, { component: _Overview4.default })
-			),
-			_react2.default.createElement(
-				_reactRouter.Route,
-				{ path: 'sales' },
-				_react2.default.createElement(_reactRouter.IndexRedirect, { to: 'overview' }),
-				_react2.default.createElement(_reactRouter.Route, { path: 'overview', component: _Overview2.default }),
-				_react2.default.createElement(_reactRouter.Route, { path: 'products', component: _Products.SalesProductsHandler }),
-				_react2.default.createElement(_reactRouter.Route, { path: 'subscriptions', component: _Subscriptions.SalesSubscriptionsHandler }),
-				_react2.default.createElement(_reactRouter.Route, { path: 'history', component: _History.SalesHistoryHandler })
-			),
-			_react2.default.createElement(
-				_reactRouter.Route,
-				{ path: 'economy' },
-				_react2.default.createElement(_reactRouter.IndexRedirect, { to: 'overview' }),
-				_react2.default.createElement(_reactRouter.Route, { path: 'overview', component: _Other.EconomyOverviewHandler }),
-				_react2.default.createElement(_reactRouter.Route, { path: 'masterledger', component: _Other.MasterLedgerHandler }),
-				_react2.default.createElement(
-					_reactRouter.Route,
-					{ path: 'invoice' },
-					_react2.default.createElement(_reactRouter.IndexRedirect, { to: 'list' }),
-					_react2.default.createElement(_reactRouter.Route, { path: 'list', component: _Invoice.InvoiceListHandler }),
-					_react2.default.createElement(_reactRouter.Route, { path: 'add', component: _Invoice.InvoiceAddHandler }),
-					_react2.default.createElement(_reactRouter.Route, { path: ':id', component: _Invoice.InvoiceHandler })
-				),
-				_react2.default.createElement(_reactRouter.Route, { path: 'instruction', component: _Instruction.EconomyAccountingInstructionsHandler }),
-				_react2.default.createElement(_reactRouter.Route, { path: 'instruction/add', component: _Instruction.EconomyAccountingInstructionAddHandler }),
-				_react2.default.createElement(_reactRouter.Route, { path: 'instruction/:id', component: _Instruction.EconomyAccountingInstructionHandler }),
-				_react2.default.createElement(_reactRouter.Route, { path: 'instruction/:id/import', component: _Instruction.EconomyAccountingInstructionImportHandler }),
-				_react2.default.createElement(_reactRouter.Route, { path: 'valuationsheet', component: _ValuationSheet2.default }),
-				_react2.default.createElement(_reactRouter.Route, { path: 'resultreport', component: _ResultReport2.default }),
-				_react2.default.createElement(_reactRouter.Route, { path: 'costcenter', component: _CostCenter.EconomyCostCentersHandler }),
-				_react2.default.createElement(_reactRouter.Route, { path: 'costcenter/:id', component: _CostCenter.EconomyCostCenterHandler }),
-				_react2.default.createElement(_reactRouter.Route, { path: 'account/:id', component: _Account.EconomyAccountHandler })
-			),
-			_react2.default.createElement(
-				_reactRouter.Route,
-				{ path: 'mail' },
-				_react2.default.createElement(_reactRouter.IndexRoute, { component: _History2.MailHistoryHandler }),
-				_react2.default.createElement(_reactRouter.Route, { path: 'send', component: _Send2.default })
-			),
-			_react2.default.createElement(_reactRouter.Route, { path: 'statistics', component: _Statistics2.default }),
-			_react2.default.createElement(
-				_reactRouter.Route,
-				{ path: 'settings' },
-				_react2.default.createElement(_reactRouter.IndexRedirect, { to: 'global' }),
-				_react2.default.createElement(_reactRouter.Route, { path: 'global', component: _Global2.default }),
-				_react2.default.createElement(_reactRouter.Route, { path: 'automation', component: _Automation2.default }),
-				_react2.default.createElement(_reactRouter.Route, { path: 'export', component: _Export2.default }),
-				_react2.default.createElement(_reactRouter.Route, { path: 'mail', component: _Templates2.default }),
-				_react2.default.createElement(
-					_reactRouter.Route,
-					{ path: 'economy' },
-					_react2.default.createElement(_reactRouter.Route, { path: 'debug', component: _Other.EconomyDebugHandler }),
-					_react2.default.createElement(_reactRouter.Route, { path: 'accountingperiods', component: _Other.EconomyAccountingPeriodHandler }),
-					_react2.default.createElement(_reactRouter.Route, { path: 'accounts', component: _Account.EconomyAccountsHandler }),
-					_react2.default.createElement(_reactRouter.Route, { path: 'account/add', component: _Account.EconomyAccountAddHandler }),
-					_react2.default.createElement(_reactRouter.Route, { path: 'account/:id/edit', component: _Account.EconomyAccountEditHandler })
-				)
-			),
-			_react2.default.createElement(_reactRouter.Route, { path: '*', component: NoMatch })
-		)
-	), document.getElementById("main"));
+	_reactDom2.default.render(_react2.default.createElement(_reactRouter.Router, { history: _reactRouter.browserHistory, routes: rootRoute }), document.getElementById("main"));
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
@@ -27659,78 +27417,630 @@
 
 	'use strict';
 
-	var _backbone = __webpack_require__(237);
+	var _react = __webpack_require__(1);
 
-	var _backbone2 = _interopRequireDefault(_backbone);
+	var _react2 = _interopRequireDefault(_react);
 
-	var _backbone3 = __webpack_require__(240);
+	var _reactRouter = __webpack_require__(172);
 
-	var _backbone4 = _interopRequireDefault(_backbone3);
+	var _backboneReactComponent = __webpack_require__(237);
 
-	var _auth = __webpack_require__(241);
-
-	var _auth2 = _interopRequireDefault(_auth);
-
-	var _config = __webpack_require__(242);
-
-	var _config2 = _interopRequireDefault(_config);
+	var _backboneReactComponent2 = _interopRequireDefault(_backboneReactComponent);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-	// Update the Backbone sync() method to work with our RESTful API with OAuth 2.0 authentication
-	var backboneSync = _backbone2.default.sync;
-	_backbone2.default.sync = function (method, model, options) {
-		// Include the OAuth 2.0 access token
-		options.headers = {
-			"Authorization": "Bearer " + _auth2.default.getAccessToken()
-		};
+	var NavItem = _react2.default.createClass({
+		displayName: 'NavItem',
 
-		// Base path for API access
-		options.url = _config2.default.apiBasePath + (typeof model.url == "function" ? model.url() : model.url);
+		contextTypes: {
+			history: _react2.default.PropTypes.object
+		},
 
-		// Add generic error handling to those models who doesn't implement own error handling
-		if (!options.error) {
-			options.error = function (data, xhr, options) {
-				if (xhr.status == 401) {
-					UIkit.modal.alert("<h2>Error</h2>You are unauthorized to use this API resource. This could be because one of the following reasons:<br><br>1) You have been logged out from the API<br>2) You do not have permissions to access this resource");
+		render: function render() {
+			if (this.props.navItem.external) {
+				return _react2.default.createElement(
+					'li',
+					null,
+					_react2.default.createElement(
+						'a',
+						{ href: this.props.navItem.target },
+						this.props.navItem.text
+					)
+				);
+			} else {
+				if (this.context.history.isActive(this.props.navItem.target)) {
+					var className = "uk-active";
 				} else {
-					UIkit.modal.alert("<h2>Error</h2>Received an unexpected result from the server<br><br>" + data.status + " " + data.statusText + "<br><br>" + data.responseText);
+					var className = null;
 				}
-			};
+
+				return _react2.default.createElement(
+					'li',
+					{ className: className },
+					_react2.default.createElement(
+						_reactRouter.IndexLink,
+						{ activeClassName: 'uk-active', to: this.props.navItem.target },
+						_react2.default.createElement('i', { className: "uk-icon-" + this.props.navItem.icon }),
+						' ',
+						this.props.navItem.text
+					)
+				);
+			}
 		}
+	});
 
-		// Call the stored original Backbone.sync method with extra headers argument added
-		backboneSync(method, model, options);
-	};
+	var Nav = _react2.default.createClass({
+		displayName: 'Nav',
 
-	_backbone2.default.Model.fullExtend = function (protoProps, staticProps) {
-		if (typeof protoProps === "undefined") {
-			var protoProps = [];
+		mixins: [Backbone.React.Component.mixin],
+
+		contextTypes: {
+			history: _react2.default.PropTypes.object
+		},
+
+		render: function render() {
+			return _react2.default.createElement(
+				'nav',
+				{ className: 'uk-navbar' },
+				_react2.default.createElement(
+					'div',
+					{ className: 'uk-container uk-container-center' },
+					_react2.default.createElement(
+						_reactRouter.Link,
+						{ to: '/', className: 'uk-navbar-brand' },
+						this.state.model.brand
+					),
+					_react2.default.createElement(
+						'ul',
+						{ className: 'uk-navbar-nav uk-hidden-small uk-navbar-attached' },
+						this.state.model.navItems.map(function (navItem, i) {
+							return _react2.default.createElement(NavItem, { navItem: navItem, key: i });
+						})
+					),
+					_react2.default.createElement(
+						'div',
+						{ className: 'uk-navbar-flip' },
+						_react2.default.createElement('a', { className: 'uk-navbar-toggle uk-visible-small', 'data-uk-offcanvas': '{target:\'#sidenav\'}' })
+					)
+				)
+			);
 		}
+	});
 
-		// TODO: Override the set() method so when React inputs a "" it is casted to NULL
+	var SideNav = _react2.default.createClass({
+		displayName: 'SideNav',
 
-		// Preprocess the data received from the API and make sure all null's are changed to empty strings, because otherwise React will be whining when using those values in a <input value={...} />
-		protoProps["parse"] = function (response, options) {
-			for (var key in response) {
-				if (response.hasOwnProperty(key) && response[key] === null) {
-					response[key] = "";
+		mixins: [Backbone.React.Component.mixin],
+
+		render: function render() {
+			return _react2.default.createElement(
+				'div',
+				{ id: 'sidenav', className: 'uk-offcanvas' },
+				_react2.default.createElement(
+					'div',
+					{ className: 'uk-offcanvas-bar' },
+					_react2.default.createElement(
+						'ul',
+						{ className: 'uk-nav uk-nav-offcanvas', 'data-uk-nav': true },
+						_react2.default.createElement(
+							'li',
+							null,
+							_react2.default.createElement(
+								_reactRouter.IndexLink,
+								{ to: '/' },
+								this.state.model.brand
+							)
+						),
+						this.state.model.navItems.map(function (navItem, i) {
+							return _react2.default.createElement(NavItem, { navItem: navItem, key: i });
+						})
+					)
+				)
+			);
+		}
+	});
+
+	var SideNav2 = _react2.default.createClass({
+		displayName: 'SideNav2',
+
+		mixins: [Backbone.React.Component.mixin],
+
+		contextTypes: {
+			history: _react2.default.PropTypes.object
+		},
+
+		render: function render() {
+			// Get the main category (level 0)
+			var activeItem = null;
+			for (var i = 0; i < this.state.model.navItems.length; i++) {
+				var item = this.state.model.navItems[i];
+				if (this.context.history.isActive(item.target)) {
+					activeItem = item;
 				}
 			}
 
-			return response;
-		};
+			// There is no active menu, or children.
+			if (activeItem === null || typeof activeItem.children == 'undefined') {
+				return false;
+			} else {
+				return _react2.default.createElement(
+					'div',
+					{ className: 'uk-panel uk-panel-box', 'data-uk-sticky': '{top:35}' },
+					_react2.default.createElement(
+						'ul',
+						{ className: 'uk-nav uk-nav-side', 'data-uk-scrollspy-nav': '{closest:\'li\', smoothscroll:true}' },
+						_react2.default.createElement(
+							'li',
+							{ className: 'uk-nav-header' },
+							activeItem.text
+						),
+						_react2.default.createElement('li', { className: 'uk-nav-divider' }),
+						activeItem.children.map(function (navItem, i) {
+							if (typeof navItem.type != "undefined" && navItem.type == "separator") {
+								return _react2.default.createElement('li', { key: i, className: 'uk-nav-divider' });
+							} else if (typeof navItem.type != "undefined" && navItem.type == "heading") {
+								return _react2.default.createElement(
+									'li',
+									{ key: i, className: 'uk-nav-header' },
+									navItem.text
+								);
+							} else {
+								return _react2.default.createElement(NavItem, { key: i, navItem: navItem, activeItem: activeItem });
+							}
+						})
+					)
+				);
+			}
+		}
+	});
 
-		// Call default extend method
-		var extended = _backbone2.default.Model.extend.call(this, protoProps, staticProps);
+	var Breadcrumb = _react2.default.createClass({
+		displayName: 'Breadcrumb',
 
-		return extended;
-	};
+		render: function render() {
+			//		const depth = this.props.routes.length;
+			return _react2.default.createElement('span', null);
+			return _react2.default.createElement(
+				'ul',
+				{ className: 'uk-breadcrumb' },
+				this.props.routes.map(function (item, index) {
+					return _react2.default.createElement(
+						'li',
+						{ key: index },
+						_react2.default.createElement(
+							_reactRouter.Link,
+							{
+								onlyActiveOnIndex: true,
+								activeClassName: 'uk-active',
+								to: item.path || '' },
+							item.component.title
+						)
+					);
+				})
+			);
+		}
+	});
 
-	module.exports = _backbone2.default;
+	module.exports = { Nav: Nav, SideNav: SideNav, SideNav2: SideNav2, Breadcrumb: Breadcrumb };
 
 /***/ },
 /* 237 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;// Backbone React Component
+	// ========================
+	//
+	//     Backbone.React.Component v0.10.0
+	//
+	//     (c) 2014, 2015 "Magalhas" José Magalhães <magalhas@gmail.com>
+	//     Backbone.React.Component can be freely distributed under the MIT license.
+	//
+	//
+	// `Backbone.React.Component` is a mixin that glues [Backbone](http://backbonejs.org/)
+	// models and collections into [React](http://facebook.github.io/react/) components.
+	//
+	// When the component is mounted, a wrapper starts listening to models and
+	// collections changes to automatically set your component state and achieve UI
+	// binding through reactive updates.
+	//
+	//
+	//
+	// Basic Usage
+	//
+	//     var MyComponent = React.createClass({
+	//       mixins: [Backbone.React.Component.mixin],
+	//       render: function () {
+	//         return <div>{this.state.model.foo}</div>;
+	//       }
+	//     });
+	//     var model = new Backbone.Model({foo: 'bar'});
+	//     ReactDOM.render(<MyComponent model={model} />, document.body);
+
+	(function (root, factory) {
+	  // Universal module definition
+	  if (true) {
+	    !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(1), __webpack_require__(34), __webpack_require__(238), __webpack_require__(239)], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory), __WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ? (__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+	  } else if (typeof module !== 'undefined' && module.exports) {
+	    module.exports = factory(require('react'), require('react-dom'), require('backbone'), require('underscore'));
+	  } else {
+	    factory(root.React, root.ReactDOM, root.Backbone, root._);
+	  }
+	}(this, function (React, ReactDOM, Backbone, _) {
+	  'use strict';
+	  if (!Backbone.React) {
+	    Backbone.React = {};
+	  }
+	  if (!Backbone.React.Component) {
+	    Backbone.React.Component = {};
+	  }
+	  // Mixin used in all component instances. Exported through `Backbone.React.Component.mixin`.
+	  var mixin = Backbone.React.Component.mixin = {
+	    // Types of the context passed to child components. Only
+	    // `hasParentBackboneMixin` is required all of the others are optional.
+	    childContextTypes: {
+	      hasParentBackboneMixin: React.PropTypes.bool.isRequired,
+	      parentModel: React.PropTypes.any,
+	      parentCollection: React.PropTypes.any
+	    },
+	    // Types of the context received from the parent component. All of them are
+	    // optional.
+	    contextTypes: {
+	      hasParentBackboneMixin: React.PropTypes.bool,
+	      parentModel: React.PropTypes.any,
+	      parentCollection: React.PropTypes.any
+	    },
+	    // Passes data to our child components.
+	    getChildContext: function () {
+	      return {
+	        hasParentBackboneMixin: true,
+	        parentModel: this.getModel(),
+	        parentCollection: this.getCollection()
+	      };
+	    },
+	    // Sets `this.el` and `this.$el` when the component mounts.
+	    componentDidMount: function () {
+	      this.setElement(ReactDOM.findDOMNode(this));
+	    },
+	    // Sets `this.el` and `this.$el` when the component updates.
+	    componentDidUpdate: function () {
+	      this.setElement(ReactDOM.findDOMNode(this));
+	    },
+	    // When the component gets the initial state, instance a `Wrapper` to take
+	    // care of models and collections binding with `this.state`.
+	    getInitialState: function () {
+	      var initialState = {};
+
+	      if (!this.wrapper) {
+	        this.wrapper = new Wrapper(this, initialState);
+	      }
+
+	      return initialState;
+	    },
+	    // When the component mounts, instance a `Wrapper` to take care
+	    // of models and collections binding with `this.state`.
+	    componentWillMount: function () {
+	      if (!this.wrapper) {
+	        this.wrapper = new Wrapper(this);
+	      }
+	    },
+	    // When the component unmounts, dispose listeners and delete
+	    // `this.wrapper` reference.
+	    componentWillUnmount: function () {
+	      if (this.wrapper) {
+	        this.wrapper.stopListening();
+	        delete this.wrapper;
+	      }
+	    },
+	    // In order to allow passing nested models and collections as reference we
+	    // filter `nextProps.model` and `nextProps.collection`.
+	    componentWillReceiveProps: function (nextProps) {
+	      var model = nextProps.model;
+	      var collection = nextProps.collection;
+
+	      if (this.wrapper.model && model) {
+	        if (this.wrapper.model !== model) {
+	          this.wrapper.stopListening();
+	          this.wrapper = new Wrapper(this, void 0, nextProps);
+	        }
+	      } else if (model) {
+	        this.wrapper = new Wrapper(this, void 0, nextProps);
+	      }
+
+	      if (this.wrapper.collection && collection) {
+	        if (this.wrapper.collection !== collection) {
+	          this.wrapper.stopListening();
+	          this.wrapper = new Wrapper(this, void 0, nextProps);
+	        }
+	      } else if (collection) {
+	        this.wrapper = new Wrapper(this, void 0, nextProps);
+	      }
+	    },
+	    // Shortcut to `@$el.find` if jQuery ins present, else if fallbacks to DOM
+	    // native `querySelector`. Inspired by `Backbone.View`.
+	    $: function () {
+	      var els;
+
+	      if (this.$el) {
+	        els = this.$el.find.apply(this.$el, arguments);
+	      } else {
+	        var el = ReactDOM.findDOMNode(this);
+	        els = el.querySelector.apply(el, arguments);
+	      }
+
+	      return els;
+	    },
+	    // Grabs the collection from `@wrapper.collection` or `@context.parentCollection`
+	    getCollection: function () {
+	      return this.wrapper.collection || this.context.parentCollection;
+	    },
+	    // Grabs the model from `@wrapper.model` or `@context.parentModel`
+	    getModel: function () {
+	      return this.wrapper.model || this.context.parentModel;
+	    },
+	    // Sets a DOM element to render/mount this component on this.el and this.$el.
+	    setElement: function (el) {
+	      if (el && Backbone.$ && el instanceof Backbone.$) {
+	        if (el.length > 1) {
+	          throw new Error('You can only assign one element to a component');
+	        }
+	        this.el = el[0];
+	        this.$el = el;
+	      } else if (el) {
+	        this.el = el;
+	        if (Backbone.$) {
+	          this.$el = Backbone.$(el);
+	        }
+	      }
+	      return this;
+	    }
+	  };
+	  // Binds models and collections to a `React.Component`. It mixes `Backbone.Events`.
+	  function Wrapper (component, initialState, nextProps) {
+	    // Object to store wrapper state (not the component state)
+	    this.state = {};
+	    // 1:1 relation with the `component`
+	    this.component = component;
+	    // Use `nextProps` or `component.props` and grab `model` and `collection`
+	    // from there
+	    var props = nextProps || component.props || {};
+	    var model, collection;
+
+	    if (component.overrideModel && typeof component.overrideModel === 'function'){
+	      // Define overrideModel() method on your `React class` to programatically supply a model object
+	      // Will override `this.props.model`
+	      model = component.overrideModel();
+	    } else {
+	      model = props.model;
+	    }
+
+	    if (component.overrideCollection && typeof component.overrideCollection === 'function'){
+	      // Define overrideCollection() method on your `React class` to programatically supply a collection object
+	      // Will override `this.props.collection`
+	      collection = component.overrideCollection();
+	    } else {
+	      collection = props.collection;
+	    }
+
+	    this.setModels(model, initialState);
+	    this.setCollections(collection, initialState);
+	  }
+	  // Mixing `Backbone.Events` into `Wrapper.prototype`
+	  _.extend(Wrapper.prototype, Backbone.Events, {
+	    // Sets `this.state` when a model/collection request results in error. It delegates
+	    // to `this.setState`. It listens to `Backbone.Model#error` and `Backbone.Collection#error`.
+	    onError: function (modelOrCollection, res, options) {
+	      // Set state only if there's no silent option
+	      if (!options.silent) {
+	        this.component.setState({
+	          isRequesting: false,
+	          hasError: true,
+	          error: res
+	        });
+	      }
+	    },
+	    onInvalid: function (model, res, options) {
+	      if (!options.silent) {
+	        this.component.setState({
+	          isInvalid: true
+	        });
+	      }
+	    },
+	    // Sets `this.state` when a model/collection request starts. It delegates to
+	    // `this.setState`. It listens to `Backbone.Model#request` and
+	    // `Backbone.Collection#request`.
+	    onRequest: function (modelOrCollection, xhr, options) {
+	      // Set `state` only if there's no silent option
+	      if (!options.silent) {
+	        this.component.setState({
+	          isRequesting: true,
+	          hasError: false,
+	          isInvalid: false
+	        });
+	      }
+	    },
+	    // Sets `this.state` when a model/collection syncs. It delegates to `this.setState`.
+	    // It listens to `Backbone.Model#sync` and `Backbone.Collection#sync`
+	    onSync: function (modelOrCollection, res, options) {
+	      // Calls `setState` only if there's no silent option
+	      if (!options.silent) {
+	        this.component.setState({isRequesting: false});
+	      }
+	    },
+	    // Check if `models` is a `Backbone.Model` or an hashmap of them, sets them
+	    // to the component state and binds to update on any future changes
+	    setModels: function (models, initialState, isDeferred) {
+	      var isValid = typeof models !== 'undefined';
+
+	      if (isValid) {
+	        if (!models.attributes) {
+	          if (typeof models === 'object') {
+	            var _values = _.values(models);
+	            isValid = _values.length > 0 && _values[0].attributes;
+	          } else {
+	            isValid = false;
+	          }
+	        }
+	      }
+
+	      if (isValid) {
+	        this.model = models;
+	        // Set model(s) attributes on `initialState` for the first render
+	        this.setStateBackbone(models, void 0, initialState, isDeferred);
+	        this.startModelListeners(models);
+	      }
+	    },
+	    // Check if `collections` is a `Backbone.Model` or an hashmap of them,
+	    // sets them to the component state and binds to update on any future changes
+	    setCollections: function (collections, initialState, isDeferred) {
+	      if (typeof collections !== 'undefined' && (collections.models ||
+	          typeof collections === 'object' && _.values(collections)[0].models)) {
+	        // The collection(s) bound to this component
+	        this.collection = collections;
+	        // Set collection(s) models on `initialState` for the first render
+	        this.setStateBackbone(collections, void 0, initialState, isDeferred);
+	        this.startCollectionListeners(collections);
+	      }
+	    },
+	    // Used internally to set `this.collection` or `this.model` on `this.state`. Delegates to
+	    // `this.setState`. It listens to `Backbone.Collection` events such as `update`,
+	    // `change`, `sort`, `reset` and to `Backbone.Model` `change`.
+	    setStateBackbone: function (modelOrCollection, key, target, isDeferred) {
+	      if (!(modelOrCollection.models || modelOrCollection.attributes)) {
+	        for (key in modelOrCollection)
+	            this.setStateBackbone(modelOrCollection[key], key, target);
+	        return;
+	      }
+	      this.setState.apply(this, arguments);
+	    },
+	    // Get the attributes for the collection or model as array or hash
+	    getAttributes: function (modelOrCollection){
+	      var attrs = [];
+
+	      // if a collection, get the attributes of each, otherwise return modelOrCollection
+	      if (modelOrCollection instanceof Backbone.Collection) {
+	        for (var i = 0; i < modelOrCollection.models.length; i++) {
+	          attrs.push(modelOrCollection.models[i].attributes);
+	        }
+	        return attrs;
+	      } else {
+	        return modelOrCollection.attributes
+	      }
+	    },
+	    // Sets a model, collection or object into state by delegating to `this.component.setState`.
+	    setState: function (modelOrCollection, key, target, isDeferred) {
+	      var state = {};
+	      var newState = this.getAttributes(modelOrCollection);
+
+	      if (key) {
+	        state[key] = newState;
+	      } else if (modelOrCollection.models) {
+	        state.collection = newState;
+	      } else {
+	        state.model = newState;
+	      }
+
+	      if (target) {
+	        _.extend(target, state);
+	      } else if (isDeferred) {
+	        this.nextState = _.extend(this.nextState || {}, state);
+	        _.defer(_.bind(function () {
+	          if (this.nextState) {
+	            this.component.setState(this.nextState);
+	            this.nextState = null;
+	          }
+	        }, this));
+	      } else {
+	        this.component.setState(state);
+	      }
+	    },
+	    // Binds the component to any collection changes.
+	    startCollectionListeners: function (collection, key) {
+	      if (!collection) collection = this.collection;
+	      if (collection) {
+	        if (collection.models)
+	          this
+	            .listenTo(collection, 'update change sort reset',
+	              _.partial(this.setStateBackbone, collection, key, void 0, true))
+	            .listenTo(collection, 'error', this.onError)
+	            .listenTo(collection, 'request', this.onRequest)
+	            .listenTo(collection, 'sync', this.onSync);
+	        else if (typeof collection === 'object')
+	          for (key in collection)
+	            if (collection.hasOwnProperty(key))
+	              this.startCollectionListeners(collection[key], key);
+	      }
+	    },
+	    // Binds the component to any model changes.
+	    startModelListeners: function (model, key) {
+	      if (!model) model = this.model;
+	      if (model) {
+	        if (model.attributes)
+	          this
+	            .listenTo(model, 'change',
+	              _.partial(this.setStateBackbone, model, key, void 0, true))
+	            .listenTo(model, 'error', this.onError)
+	            .listenTo(model, 'request', this.onRequest)
+	            .listenTo(model, 'sync', this.onSync)
+	            .listenTo(model, 'invalid', this.onInvalid);
+	        else if (typeof model === 'object')
+	          for (key in model)
+	            this.startModelListeners(model[key], key);
+	      }
+	    }
+	  });
+
+	  // Facade method to bypass the `mixin` usage. For use cases such as ES6
+	  // classes or else. It binds any `Backbone.Model` and `Backbone.Collection`
+	  // instance found inside `backboneInstances.models` and
+	  // `backboneInstances.collections` (single instances or objects of them)
+	  mixin.on = function (component, backboneInstances) {
+	    var wrapper;
+
+	    if (!component.wrapper) {
+	      wrapper = new Wrapper(component);
+	    } else {
+	      wrapper = component.wrapper;
+	    }
+
+	    if (backboneInstances.models) {
+	      wrapper.setModels(backboneInstances.models);
+	    }
+	    if (backboneInstances.collections) {
+	      wrapper.setCollections(backboneInstances.collections);
+	    }
+	    component.wrapper = wrapper;
+	  };
+
+	  // Shortcut method to bind a model or multiple models
+	  mixin.onModel = function (component, models) {
+	    mixin.on(component, {models: models});
+	  };
+
+	  // Shortcut method to bind a collection or multiple collections
+	  mixin.onCollection = function (component, collections) {
+	    mixin.on(component, {collections: collections});
+	  };
+
+	  // Facade method to dispose of a `component.wrapper`
+	  mixin.off = function (component, modelOrCollection) {
+	    if (arguments.length === 2) {
+	      if (component.wrapper) {
+	        component.wrapper.stopListening(modelOrCollection);
+	        // TODO Remove modelOrCollection from `component.state`?
+	      }
+	    } else {
+	      mixin.componentWillUnmount.call(component);
+	    }
+	  };
+
+	  // Expose `Backbone.React.Component.mixin`.
+	  return mixin;
+	}));
+	// <a href="https://github.com/magalhas/backbone-react-component"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://github-camo.global.ssl.fastly.net/38ef81f8aca64bb9a64448d0d70f1308ef5341ab/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6461726b626c75655f3132313632312e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png"></a>
+
+
+/***/ },
+/* 238 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/* WEBPACK VAR INJECTION */(function(global) {//     Backbone.js 1.3.3
@@ -27749,7 +28059,7 @@
 
 	  // Set up Backbone appropriately for the environment. Start with AMD.
 	  if (true) {
-	    !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(238), __webpack_require__(239), exports], __WEBPACK_AMD_DEFINE_RESULT__ = function(_, $, exports) {
+	    !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(239), __webpack_require__(240), exports], __WEBPACK_AMD_DEFINE_RESULT__ = function(_, $, exports) {
 	      // Export global even in AMD case in case this script is loaded with
 	      // others that may still expect a global Backbone.
 	      root.Backbone = factory(root, exports, _, $);
@@ -29657,7 +29967,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 238 */
+/* 239 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;//     Underscore.js 1.8.3
@@ -31211,7 +31521,7 @@
 
 
 /***/ },
-/* 239 */
+/* 240 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
@@ -41437,7 +41747,83 @@
 
 
 /***/ },
-/* 240 */
+/* 241 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _backbone = __webpack_require__(238);
+
+	var _backbone2 = _interopRequireDefault(_backbone);
+
+	var _backbone3 = __webpack_require__(242);
+
+	var _backbone4 = _interopRequireDefault(_backbone3);
+
+	var _auth = __webpack_require__(243);
+
+	var _auth2 = _interopRequireDefault(_auth);
+
+	var _config = __webpack_require__(244);
+
+	var _config2 = _interopRequireDefault(_config);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	// Update the Backbone sync() method to work with our RESTful API with OAuth 2.0 authentication
+	var backboneSync = _backbone2.default.sync;
+	_backbone2.default.sync = function (method, model, options) {
+		// Include the OAuth 2.0 access token
+		options.headers = {
+			"Authorization": "Bearer " + _auth2.default.getAccessToken()
+		};
+
+		// Base path for API access
+		options.url = _config2.default.apiBasePath + (typeof model.url == "function" ? model.url() : model.url);
+
+		// Add generic error handling to those models who doesn't implement own error handling
+		if (!options.error) {
+			options.error = function (data, xhr, options) {
+				if (xhr.status == 401) {
+					UIkit.modal.alert("<h2>Error</h2>You are unauthorized to use this API resource. This could be because one of the following reasons:<br><br>1) You have been logged out from the API<br>2) You do not have permissions to access this resource");
+				} else {
+					UIkit.modal.alert("<h2>Error</h2>Received an unexpected result from the server<br><br>" + data.status + " " + data.statusText + "<br><br>" + data.responseText);
+				}
+			};
+		}
+
+		// Call the stored original Backbone.sync method with extra headers argument added
+		backboneSync(method, model, options);
+	};
+
+	_backbone2.default.Model.fullExtend = function (protoProps, staticProps) {
+		if (typeof protoProps === "undefined") {
+			var protoProps = [];
+		}
+
+		// TODO: Override the set() method so when React inputs a "" it is casted to NULL
+
+		// Preprocess the data received from the API and make sure all null's are changed to empty strings, because otherwise React will be whining when using those values in a <input value={...} />
+		protoProps["parse"] = function (response, options) {
+			for (var key in response) {
+				if (response.hasOwnProperty(key) && response[key] === null) {
+					response[key] = "";
+				}
+			}
+
+			return response;
+		};
+
+		// Call default extend method
+		var extended = _backbone2.default.Model.extend.call(this, protoProps, staticProps);
+
+		return extended;
+	};
+
+	module.exports = _backbone2.default;
+
+/***/ },
+/* 242 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/*
@@ -41454,7 +41840,7 @@
 
 	  // CommonJS
 	  if (true) {
-	    module.exports = factory(__webpack_require__(238), __webpack_require__(237));
+	    module.exports = factory(__webpack_require__(239), __webpack_require__(238));
 	  }
 	  // AMD
 	  else if (typeof define == "function" && define.amd) {
@@ -42811,14 +43197,14 @@
 
 
 /***/ },
-/* 241 */
+/* 243 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
 	var _reactRouter = __webpack_require__(172);
 
-	var _config = __webpack_require__(242);
+	var _config = __webpack_require__(244);
 
 	var _config2 = _interopRequireDefault(_config);
 
@@ -42853,6 +43239,20 @@
 
 
 		/**
+	  *
+	  */
+		requestPassword: function requestPassword(username) {
+			$.ajax({
+				method: "POST",
+				url: _config2.default.apiBasePath + "/oauth/resetpassword",
+				data: {
+					username: username
+				}
+			});
+		},
+
+
+		/**
 	  * Send an API login request and save the login token
 	  */
 		login: function login(username, password) {
@@ -42861,23 +43261,23 @@
 			// Login with OAuth 2.0
 			$.ajax({
 				method: "POST",
-				url: _config2.default.apiBasePath + "/oauth/access_token",
+				url: _config2.default.apiBasePath + "/oauth/token",
 				data: {
 					grant_type: "password",
-					client_id: _config2.default.clientId,
-					client_secret: "123", // TODO: No client secret
 					username: username,
 					password: password
 				}
 			}).always(function (data, textStatus, xhr) {
-				if (xhr.status == 401) {
-					UIkit.modal.alert("<h2>Error</h2>Authentication failed<br>Invalid username or password");
+				if (data.status == 401) {
+					UIkit.modal.alert("<h2>Inloggningen misslyckades</h2>Felaktigt användarnamn eller lösenord");
+				} else if (data.status == 429) {
+					UIkit.modal.alert("<h2>Inloggningen misslyckades</h2>För många misslyckades inloggningar. Kontot spärrat i 60 minuter");
 				} else if (xhr.status == 200 && data.access_token !== undefined) {
 					localStorage.token = data.access_token;
 					_this.onChange(true);
 				} else {
 					// TODO: Generic class for error messages?
-					UIkit.modal.alert("<h2>Error</h2>Received an unexpected result from the server<br><br>" + xhr.status + " " + xhr.statusText + "<br><br>" + xhr.responseText);
+					UIkit.modal.alert("<h2>Inloggningen misslyckades</h2>Tog emot ett oväntat svar från servern:<br><br>" + data.status + " " + data.statusText + "<br><br>" + data.responseText);
 				}
 			});
 		},
@@ -42887,11 +43287,19 @@
 	  * Send an API logout request and remove the login token
 	  */
 		logout: function logout() {
+			// Tell the server to delete the access token
+			$.ajax({
+				method: "DELETE",
+				url: _config2.default.apiBasePath + "/oauth/token/" + localStorage.token,
+				headers: {
+					"Authorization": "Bearer " + localStorage.token
+				}
+			});
+
+			// Delete from localStorage and send user to login form
 			delete localStorage.token;
 			this.onChange(false);
 			_reactRouter.browserHistory.push("/");
-
-			// TODO: Send API request
 		},
 
 
@@ -42902,11168 +43310,23 @@
 	};
 
 /***/ },
-/* 242 */
+/* 244 */
 /***/ function(module, exports) {
 
 	"use strict";
 
 	var config = {
-		apiBasePath: "http://api.makeradmin.dev/v1",
-		clientId: "js-frontend-v0.1", // OAuth 2.0 client id
+		apiBasePath: "http://api.makeradmin.dev",
 		pagination: {
 			pageSize: 25
-		}
+		},
+		accountingPeriod: "2015"
 	};
 
 	module.exports = config;
 
 /***/ },
-/* 243 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var _react = __webpack_require__(1);
-
-	var _react2 = _interopRequireDefault(_react);
-
-	var _backboneReactComponent = __webpack_require__(244);
-
-	var _backboneReactComponent2 = _interopRequireDefault(_backboneReactComponent);
-
-	var _Member = __webpack_require__(245);
-
-	var _Member2 = _interopRequireDefault(_Member);
-
-	var _reactRouter = __webpack_require__(172);
-
-	var _Date = __webpack_require__(246);
-
-	var _Date2 = _interopRequireDefault(_Date);
-
-	var _KeysUserBox = __webpack_require__(247);
-
-	var _KeysUserBox2 = _interopRequireDefault(_KeysUserBox);
-
-	var _MailUserBox = __webpack_require__(255);
-
-	var _MailUserBox2 = _interopRequireDefault(_MailUserBox);
-
-	var _GroupUserBox = __webpack_require__(260);
-
-	var _GroupUserBox2 = _interopRequireDefault(_GroupUserBox);
-
-	var _SubscriptionUserBox = __webpack_require__(277);
-
-	var _SubscriptionUserBox2 = _interopRequireDefault(_SubscriptionUserBox);
-
-	var _TransactionUserBox = __webpack_require__(278);
-
-	var _TransactionUserBox2 = _interopRequireDefault(_TransactionUserBox);
-
-	var _CountryDropdown = __webpack_require__(283);
-
-	var _CountryDropdown2 = _interopRequireDefault(_CountryDropdown);
-
-	var _DateTime = __webpack_require__(259);
-
-	var _DateTime2 = _interopRequireDefault(_DateTime);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	// Backbone
-
-
-	var MemberHandler = _react2.default.createClass({
-		displayName: 'MemberHandler',
-
-		getInitialState: function getInitialState() {
-			var member = new _Member2.default({
-				member_number: this.props.params.id
-			});
-
-			var _this = this;
-			member.fetch({
-				success: function success() {
-					// This component does not use the ReactBackbone mixin, so we have to force redraw it when the Backbone model is loaded from the server
-					_this.forceUpdate();
-				}
-			});
-
-			//		this.title = "Meep";
-			return {
-				model: member
-			};
-		},
-
-		componentDidMount: function componentDidMount() {
-			// Ugly way to get the switcher javascript working
-			$.UIkit.init();
-			/*
-	  		var _this = this;
-	  		$("[data-uk-switcher]").on("show.uk.switcher", function(event, area) {
-	  			if(area.context.id == "member_keys")
-	  			{
-	  				if(!this.keys_synced)
-	  				{
-	  					// Get the RFID keys associated with the member
-	  					_this.state.model.keys = 
-	  					_this.state.collection = _this.state.model.keys;
-	  
-	  					_this.state.model.keys.fetch();
-	  					this.keys_synced = true;
-	  				}
-	  			}
-	  		});
-	  */
-		},
-
-		render: function render() {
-			return _react2.default.createElement(
-				'div',
-				null,
-				_react2.default.createElement(
-					'h2',
-					null,
-					'Medlem #',
-					this.state.model.get("member_number"),
-					': ',
-					this.state.model.get("firstname"),
-					' ',
-					this.state.model.get("lastname")
-				),
-				_react2.default.createElement(
-					'ul',
-					{ className: 'uk-tab', 'data-uk-switcher': '{connect:\'#user-tabs\'}' },
-					_react2.default.createElement(
-						'li',
-						{ id: 'member_info' },
-						_react2.default.createElement(
-							'a',
-							null,
-							'Personuppgifter'
-						)
-					),
-					_react2.default.createElement(
-						'li',
-						{ id: 'member_groups' },
-						_react2.default.createElement(
-							'a',
-							null,
-							'Grupper'
-						)
-					),
-					_react2.default.createElement(
-						'li',
-						{ id: 'member_keys' },
-						_react2.default.createElement(
-							'a',
-							null,
-							'Nycklar'
-						)
-					),
-					_react2.default.createElement(
-						'li',
-						{ id: 'member_labaccess' },
-						_react2.default.createElement(
-							'a',
-							null,
-							'Prenumerationer'
-						)
-					),
-					_react2.default.createElement(
-						'li',
-						{ id: 'member_transactions' },
-						_react2.default.createElement(
-							'a',
-							null,
-							'Transaktioner'
-						)
-					),
-					_react2.default.createElement(
-						'li',
-						{ id: 'member_groups' },
-						_react2.default.createElement(
-							'a',
-							null,
-							'Utskick'
-						)
-					)
-				),
-				_react2.default.createElement(
-					'ul',
-					{ id: 'user-tabs', className: 'uk-switcher' },
-					_react2.default.createElement(
-						'li',
-						null,
-						_react2.default.createElement(MemberForm, { model: this.state.model })
-					),
-					_react2.default.createElement(
-						'li',
-						null,
-						_react2.default.createElement(_GroupUserBox2.default, { member_number: this.state.model.get("member_number") })
-					),
-					_react2.default.createElement(
-						'li',
-						null,
-						_react2.default.createElement(_KeysUserBox2.default, { member_number: this.state.model.get("member_number") })
-					),
-					_react2.default.createElement(
-						'li',
-						null,
-						_react2.default.createElement(_SubscriptionUserBox2.default, { member_number: this.state.model.get("member_number") })
-					),
-					_react2.default.createElement(
-						'li',
-						null,
-						_react2.default.createElement(_TransactionUserBox2.default, { member_number: this.state.model.get("member_number") })
-					),
-					_react2.default.createElement(
-						'li',
-						null,
-						_react2.default.createElement(_MailUserBox2.default, { member_number: this.state.model.get("member_number") })
-					)
-				)
-			);
-		}
-	});
-
-	// Import functions from other modules
-
-	MemberHandler.title = "Visa medlem";
-
-	var MemberForm = _react2.default.createClass({
-		displayName: 'MemberForm',
-
-		mixins: [Backbone.React.Component.mixin],
-
-		cancel: function cancel(event) {
-			// Prevent the form from being submitted
-			event.preventDefault();
-
-			UIkit.modal.alert("TODO: Clear form");
-		},
-
-		remove: function remove(event) {
-			// Prevent the form from being submitted
-			event.preventDefault();
-
-			UIkit.modal.alert("TODO: Remove");
-		},
-
-		save: function save(event) {
-			var _this = this;
-
-			// Prevent the form from being submitted
-			event.preventDefault();
-
-			this.getModel().save([], {
-				success: function success(model, response) {
-					if (response.status == "created") {
-						UIkit.modal.alert("Successfully created");
-						_reactRouter.browserHistory.push("/members/" + response.entity.member_number);
-					} else if (response.status == "updated") {
-						UIkit.modal.alert("Successfully updated");
-					} else {
-						_this.error();
-					}
-				},
-				error: function error(model, response, options) {
-					_this.error();
-				}
-			});
-		},
-
-		error: function error() {
-			UIkit.modal.alert("Error saving model");
-		},
-
-		handleChange: function handleChange(event) {
-			// Update the model with new value
-			var target = event.target;
-			var key = target.getAttribute("name");
-			this.state.model[key] = target.value;
-
-			// When we change the value of the model we have to rerender the component
-			this.forceUpdate();
-		},
-
-		render: function render() {
-			return _react2.default.createElement(
-				'div',
-				{ className: 'meep' },
-				_react2.default.createElement(
-					'form',
-					{ className: 'uk-form' },
-					_react2.default.createElement(
-						'fieldset',
-						null,
-						_react2.default.createElement(
-							'legend',
-							null,
-							_react2.default.createElement('i', { className: 'uk-icon-user' }),
-							' Personuppgifter'
-						),
-						_react2.default.createElement(
-							'div',
-							{ className: 'uk-form-row' },
-							_react2.default.createElement(
-								'label',
-								{ htmlFor: 'civicregno', className: 'uk-form-label' },
-								this.state.model.civicregno ? "Personnummer" : ""
-							),
-							_react2.default.createElement(
-								'div',
-								{ className: 'uk-form-controls' },
-								_react2.default.createElement('input', { type: 'text', name: 'civicregno', id: 'civicregno', value: this.state.model.civicregno, placeholder: 'Personnummer', onChange: this.handleChange, className: 'uk-form-width-large' })
-							)
-						),
-						_react2.default.createElement(
-							'div',
-							{ className: 'uk-form-row' },
-							_react2.default.createElement(
-								'label',
-								{ htmlFor: 'firstname', className: 'uk-form-label' },
-								this.state.model.firstname ? "Förnamn" : ""
-							),
-							_react2.default.createElement(
-								'div',
-								{ className: 'uk-form-controls' },
-								_react2.default.createElement('input', { type: 'text', name: 'firstname', id: 'firstname', value: this.state.model.firstname, placeholder: 'Förnamn', onChange: this.handleChange, className: 'uk-form-width-large' })
-							)
-						),
-						_react2.default.createElement(
-							'div',
-							{ className: 'uk-form-row' },
-							_react2.default.createElement(
-								'label',
-								{ htmlFor: 'lastname', className: 'uk-form-label' },
-								this.state.model.lastname ? "Efternamn" : ""
-							),
-							_react2.default.createElement(
-								'div',
-								{ className: 'uk-form-controls' },
-								_react2.default.createElement('input', { type: 'text', name: 'lastname', id: 'lastname', value: this.state.model.lastname, placeholder: 'Efternamn', onChange: this.handleChange, className: 'uk-form-width-large' })
-							)
-						),
-						_react2.default.createElement(
-							'div',
-							{ className: 'uk-form-row' },
-							_react2.default.createElement(
-								'label',
-								{ htmlFor: 'email', className: 'uk-form-label' },
-								this.state.model.email ? "E-post" : ""
-							),
-							_react2.default.createElement(
-								'div',
-								{ className: 'uk-form-controls' },
-								_react2.default.createElement(
-									'div',
-									{ className: 'uk-form-icon' },
-									_react2.default.createElement('i', { className: 'uk-icon-envelope' }),
-									_react2.default.createElement('input', { type: 'text', name: 'email', id: 'email', value: this.state.model.email, placeholder: 'E-postadress', onChange: this.handleChange, className: 'uk-form-width-large' })
-								)
-							)
-						),
-						_react2.default.createElement(
-							'div',
-							{ className: 'uk-form-row' },
-							_react2.default.createElement(
-								'label',
-								{ htmlFor: 'phone', className: 'uk-form-label' },
-								this.state.model.phone ? "Telefonnummer" : ""
-							),
-							_react2.default.createElement(
-								'div',
-								{ className: 'uk-form-controls' },
-								_react2.default.createElement(
-									'div',
-									{ className: 'uk-form-icon' },
-									_react2.default.createElement('i', { className: 'uk-icon-phone' }),
-									_react2.default.createElement('input', { type: 'text', name: 'phone', id: 'phone', value: this.state.model.phone, placeholder: 'Telefonnummer', onChange: this.handleChange, className: 'uk-form-width-large' })
-								)
-							)
-						)
-					),
-					_react2.default.createElement(
-						'fieldset',
-						{ 'data-uk-margin': true },
-						_react2.default.createElement(
-							'legend',
-							null,
-							_react2.default.createElement('i', { className: 'uk-icon-home' }),
-							' Adress'
-						),
-						_react2.default.createElement(
-							'div',
-							{ className: 'uk-form-row' },
-							_react2.default.createElement(
-								'label',
-								{ htmlFor: 'address_street', className: 'uk-form-label' },
-								this.state.model.address_street ? "Address" : ""
-							),
-							_react2.default.createElement(
-								'div',
-								{ className: 'uk-form-controls' },
-								_react2.default.createElement('input', { type: 'text', name: 'address_street', id: 'address_street', value: this.state.model.address_street, placeholder: 'Adress inkl gatunummer och lägenhetsnummer', onChange: this.handleChange, className: 'uk-form-width-large' })
-							)
-						),
-						_react2.default.createElement(
-							'div',
-							{ className: 'uk-form-row' },
-							_react2.default.createElement(
-								'label',
-								{ htmlFor: 'address_extra', className: 'uk-form-label' },
-								this.state.model.address_extra ? "Address extra" : ""
-							),
-							_react2.default.createElement(
-								'div',
-								{ className: 'uk-form-controls' },
-								_react2.default.createElement('input', { type: 'text', name: 'address_extra', id: 'address_extra', value: this.state.model.address_extra, placeholder: 'Extra adressrad, t ex C/O adress', onChange: this.handleChange, className: 'uk-form-width-large' })
-							)
-						),
-						_react2.default.createElement(
-							'div',
-							{ className: 'uk-form-row' },
-							_react2.default.createElement(
-								'div',
-								{ className: 'zipcode' },
-								_react2.default.createElement(
-									'label',
-									{ htmlFor: 'address_zipcode', className: 'uk-form-label' },
-									this.state.model.address_zipcode ? "Postnummer" : ""
-								),
-								_react2.default.createElement(
-									'div',
-									{ className: 'uk-form-controls' },
-									_react2.default.createElement('input', { type: 'text', name: 'address_zipcode', id: 'address_zipcode', value: this.state.model.address_zipcode, placeholder: 'Postnummer', onChange: this.handleChange, className: 'uk-form-width-small' })
-								)
-							),
-							_react2.default.createElement(
-								'div',
-								{ className: 'city' },
-								_react2.default.createElement(
-									'label',
-									{ htmlFor: 'address_city', className: 'uk-form-label' },
-									this.state.model.address_city ? "Postort" : ""
-								),
-								_react2.default.createElement(
-									'div',
-									{ className: 'uk-form-controls' },
-									_react2.default.createElement('input', { type: 'text', name: 'address_city', id: 'address_city', value: this.state.model.address_city, placeholder: 'Postort', onChange: this.handleChange })
-								)
-							)
-						),
-						_react2.default.createElement(
-							'div',
-							{ className: 'uk-form-row' },
-							_react2.default.createElement(
-								'label',
-								{ htmlFor: '', className: 'uk-form-label' },
-								'Land'
-							),
-							_react2.default.createElement(
-								'div',
-								{ className: 'uk-form-controls' },
-								_react2.default.createElement(_CountryDropdown2.default, { country: this.state.model.address_country, onChange: this.changeCountry })
-							)
-						)
-					),
-					this.state.model.entity_id > 0 ? _react2.default.createElement(
-						'fieldset',
-						{ 'data-uk-margin': true },
-						_react2.default.createElement(
-							'legend',
-							null,
-							_react2.default.createElement('i', { className: 'uk-icon-tag' }),
-							' Metadata'
-						),
-						_react2.default.createElement(
-							'div',
-							{ className: 'uk-form-row' },
-							_react2.default.createElement(
-								'label',
-								{ className: 'uk-form-label' },
-								'Medlem sedan'
-							),
-							_react2.default.createElement(
-								'div',
-								{ className: 'uk-form-controls' },
-								_react2.default.createElement('i', { className: 'uk-icon-calendar' }),
-								' ',
-								_react2.default.createElement(_DateTime2.default, { date: this.state.model.created_at })
-							)
-						),
-						_react2.default.createElement(
-							'div',
-							{ className: 'uk-form-row' },
-							_react2.default.createElement(
-								'label',
-								{ className: 'uk-form-label' },
-								'Senast uppdaterad'
-							),
-							_react2.default.createElement(
-								'div',
-								{ className: 'uk-form-controls' },
-								_react2.default.createElement('i', { className: 'uk-icon-calendar' }),
-								' ',
-								_react2.default.createElement(_DateTime2.default, { date: this.state.model.updated_at })
-							)
-						)
-					) : "",
-					_react2.default.createElement(
-						'div',
-						{ className: 'uk-form-row' },
-						_react2.default.createElement(
-							'button',
-							{ className: 'uk-button uk-button-danger uk-float-left', onClick: this.cancel },
-							_react2.default.createElement('i', { className: 'uk-icon-close' }),
-							' Avbryt'
-						),
-						this.state.model.entity_id ? _react2.default.createElement(
-							'button',
-							{ className: 'uk-button uk-button-danger uk-float-left', onClick: this.remove },
-							_react2.default.createElement('i', { className: 'uk-icon-trash' }),
-							' Ta bort medlem'
-						) : "",
-						_react2.default.createElement(
-							'button',
-							{ className: 'uk-button uk-button-success uk-float-right', onClick: this.save },
-							_react2.default.createElement('i', { className: 'uk-icon-save' }),
-							' Spara personuppgifter'
-						)
-					)
-				)
-			);
-		},
-
-		changeCountry: function changeCountry(country) {
-			this.getModel().set({
-				address_country: country
-			});
-		}
-	});
-
-	var MemberAddHandler = _react2.default.createClass({
-		displayName: 'MemberAddHandler',
-
-		getInitialState: function getInitialState() {
-			return {
-				model: new _Member2.default()
-			};
-		},
-
-		render: function render() {
-			return _react2.default.createElement(
-				'div',
-				null,
-				_react2.default.createElement(
-					'h2',
-					null,
-					'Skapa medlem'
-				),
-				_react2.default.createElement(MemberForm, { model: this.state.model })
-			);
-		}
-	});
-	MemberAddHandler.title = "Skapa medlem";
-
-	module.exports = {
-		MemberHandler: MemberHandler,
-		MemberAddHandler: MemberAddHandler
-	};
-
-/***/ },
-/* 244 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;// Backbone React Component
-	// ========================
-	//
-	//     Backbone.React.Component v0.10.0
-	//
-	//     (c) 2014, 2015 "Magalhas" José Magalhães <magalhas@gmail.com>
-	//     Backbone.React.Component can be freely distributed under the MIT license.
-	//
-	//
-	// `Backbone.React.Component` is a mixin that glues [Backbone](http://backbonejs.org/)
-	// models and collections into [React](http://facebook.github.io/react/) components.
-	//
-	// When the component is mounted, a wrapper starts listening to models and
-	// collections changes to automatically set your component state and achieve UI
-	// binding through reactive updates.
-	//
-	//
-	//
-	// Basic Usage
-	//
-	//     var MyComponent = React.createClass({
-	//       mixins: [Backbone.React.Component.mixin],
-	//       render: function () {
-	//         return <div>{this.state.model.foo}</div>;
-	//       }
-	//     });
-	//     var model = new Backbone.Model({foo: 'bar'});
-	//     ReactDOM.render(<MyComponent model={model} />, document.body);
-
-	(function (root, factory) {
-	  // Universal module definition
-	  if (true) {
-	    !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(1), __webpack_require__(34), __webpack_require__(237), __webpack_require__(238)], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory), __WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ? (__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
-	  } else if (typeof module !== 'undefined' && module.exports) {
-	    module.exports = factory(require('react'), require('react-dom'), require('backbone'), require('underscore'));
-	  } else {
-	    factory(root.React, root.ReactDOM, root.Backbone, root._);
-	  }
-	}(this, function (React, ReactDOM, Backbone, _) {
-	  'use strict';
-	  if (!Backbone.React) {
-	    Backbone.React = {};
-	  }
-	  if (!Backbone.React.Component) {
-	    Backbone.React.Component = {};
-	  }
-	  // Mixin used in all component instances. Exported through `Backbone.React.Component.mixin`.
-	  var mixin = Backbone.React.Component.mixin = {
-	    // Types of the context passed to child components. Only
-	    // `hasParentBackboneMixin` is required all of the others are optional.
-	    childContextTypes: {
-	      hasParentBackboneMixin: React.PropTypes.bool.isRequired,
-	      parentModel: React.PropTypes.any,
-	      parentCollection: React.PropTypes.any
-	    },
-	    // Types of the context received from the parent component. All of them are
-	    // optional.
-	    contextTypes: {
-	      hasParentBackboneMixin: React.PropTypes.bool,
-	      parentModel: React.PropTypes.any,
-	      parentCollection: React.PropTypes.any
-	    },
-	    // Passes data to our child components.
-	    getChildContext: function () {
-	      return {
-	        hasParentBackboneMixin: true,
-	        parentModel: this.getModel(),
-	        parentCollection: this.getCollection()
-	      };
-	    },
-	    // Sets `this.el` and `this.$el` when the component mounts.
-	    componentDidMount: function () {
-	      this.setElement(ReactDOM.findDOMNode(this));
-	    },
-	    // Sets `this.el` and `this.$el` when the component updates.
-	    componentDidUpdate: function () {
-	      this.setElement(ReactDOM.findDOMNode(this));
-	    },
-	    // When the component gets the initial state, instance a `Wrapper` to take
-	    // care of models and collections binding with `this.state`.
-	    getInitialState: function () {
-	      var initialState = {};
-
-	      if (!this.wrapper) {
-	        this.wrapper = new Wrapper(this, initialState);
-	      }
-
-	      return initialState;
-	    },
-	    // When the component mounts, instance a `Wrapper` to take care
-	    // of models and collections binding with `this.state`.
-	    componentWillMount: function () {
-	      if (!this.wrapper) {
-	        this.wrapper = new Wrapper(this);
-	      }
-	    },
-	    // When the component unmounts, dispose listeners and delete
-	    // `this.wrapper` reference.
-	    componentWillUnmount: function () {
-	      if (this.wrapper) {
-	        this.wrapper.stopListening();
-	        delete this.wrapper;
-	      }
-	    },
-	    // In order to allow passing nested models and collections as reference we
-	    // filter `nextProps.model` and `nextProps.collection`.
-	    componentWillReceiveProps: function (nextProps) {
-	      var model = nextProps.model;
-	      var collection = nextProps.collection;
-
-	      if (this.wrapper.model && model) {
-	        if (this.wrapper.model !== model) {
-	          this.wrapper.stopListening();
-	          this.wrapper = new Wrapper(this, void 0, nextProps);
-	        }
-	      } else if (model) {
-	        this.wrapper = new Wrapper(this, void 0, nextProps);
-	      }
-
-	      if (this.wrapper.collection && collection) {
-	        if (this.wrapper.collection !== collection) {
-	          this.wrapper.stopListening();
-	          this.wrapper = new Wrapper(this, void 0, nextProps);
-	        }
-	      } else if (collection) {
-	        this.wrapper = new Wrapper(this, void 0, nextProps);
-	      }
-	    },
-	    // Shortcut to `@$el.find` if jQuery ins present, else if fallbacks to DOM
-	    // native `querySelector`. Inspired by `Backbone.View`.
-	    $: function () {
-	      var els;
-
-	      if (this.$el) {
-	        els = this.$el.find.apply(this.$el, arguments);
-	      } else {
-	        var el = ReactDOM.findDOMNode(this);
-	        els = el.querySelector.apply(el, arguments);
-	      }
-
-	      return els;
-	    },
-	    // Grabs the collection from `@wrapper.collection` or `@context.parentCollection`
-	    getCollection: function () {
-	      return this.wrapper.collection || this.context.parentCollection;
-	    },
-	    // Grabs the model from `@wrapper.model` or `@context.parentModel`
-	    getModel: function () {
-	      return this.wrapper.model || this.context.parentModel;
-	    },
-	    // Sets a DOM element to render/mount this component on this.el and this.$el.
-	    setElement: function (el) {
-	      if (el && Backbone.$ && el instanceof Backbone.$) {
-	        if (el.length > 1) {
-	          throw new Error('You can only assign one element to a component');
-	        }
-	        this.el = el[0];
-	        this.$el = el;
-	      } else if (el) {
-	        this.el = el;
-	        if (Backbone.$) {
-	          this.$el = Backbone.$(el);
-	        }
-	      }
-	      return this;
-	    }
-	  };
-	  // Binds models and collections to a `React.Component`. It mixes `Backbone.Events`.
-	  function Wrapper (component, initialState, nextProps) {
-	    // Object to store wrapper state (not the component state)
-	    this.state = {};
-	    // 1:1 relation with the `component`
-	    this.component = component;
-	    // Use `nextProps` or `component.props` and grab `model` and `collection`
-	    // from there
-	    var props = nextProps || component.props || {};
-	    var model, collection;
-
-	    if (component.overrideModel && typeof component.overrideModel === 'function'){
-	      // Define overrideModel() method on your `React class` to programatically supply a model object
-	      // Will override `this.props.model`
-	      model = component.overrideModel();
-	    } else {
-	      model = props.model;
-	    }
-
-	    if (component.overrideCollection && typeof component.overrideCollection === 'function'){
-	      // Define overrideCollection() method on your `React class` to programatically supply a collection object
-	      // Will override `this.props.collection`
-	      collection = component.overrideCollection();
-	    } else {
-	      collection = props.collection;
-	    }
-
-	    this.setModels(model, initialState);
-	    this.setCollections(collection, initialState);
-	  }
-	  // Mixing `Backbone.Events` into `Wrapper.prototype`
-	  _.extend(Wrapper.prototype, Backbone.Events, {
-	    // Sets `this.state` when a model/collection request results in error. It delegates
-	    // to `this.setState`. It listens to `Backbone.Model#error` and `Backbone.Collection#error`.
-	    onError: function (modelOrCollection, res, options) {
-	      // Set state only if there's no silent option
-	      if (!options.silent) {
-	        this.component.setState({
-	          isRequesting: false,
-	          hasError: true,
-	          error: res
-	        });
-	      }
-	    },
-	    onInvalid: function (model, res, options) {
-	      if (!options.silent) {
-	        this.component.setState({
-	          isInvalid: true
-	        });
-	      }
-	    },
-	    // Sets `this.state` when a model/collection request starts. It delegates to
-	    // `this.setState`. It listens to `Backbone.Model#request` and
-	    // `Backbone.Collection#request`.
-	    onRequest: function (modelOrCollection, xhr, options) {
-	      // Set `state` only if there's no silent option
-	      if (!options.silent) {
-	        this.component.setState({
-	          isRequesting: true,
-	          hasError: false,
-	          isInvalid: false
-	        });
-	      }
-	    },
-	    // Sets `this.state` when a model/collection syncs. It delegates to `this.setState`.
-	    // It listens to `Backbone.Model#sync` and `Backbone.Collection#sync`
-	    onSync: function (modelOrCollection, res, options) {
-	      // Calls `setState` only if there's no silent option
-	      if (!options.silent) {
-	        this.component.setState({isRequesting: false});
-	      }
-	    },
-	    // Check if `models` is a `Backbone.Model` or an hashmap of them, sets them
-	    // to the component state and binds to update on any future changes
-	    setModels: function (models, initialState, isDeferred) {
-	      var isValid = typeof models !== 'undefined';
-
-	      if (isValid) {
-	        if (!models.attributes) {
-	          if (typeof models === 'object') {
-	            var _values = _.values(models);
-	            isValid = _values.length > 0 && _values[0].attributes;
-	          } else {
-	            isValid = false;
-	          }
-	        }
-	      }
-
-	      if (isValid) {
-	        this.model = models;
-	        // Set model(s) attributes on `initialState` for the first render
-	        this.setStateBackbone(models, void 0, initialState, isDeferred);
-	        this.startModelListeners(models);
-	      }
-	    },
-	    // Check if `collections` is a `Backbone.Model` or an hashmap of them,
-	    // sets them to the component state and binds to update on any future changes
-	    setCollections: function (collections, initialState, isDeferred) {
-	      if (typeof collections !== 'undefined' && (collections.models ||
-	          typeof collections === 'object' && _.values(collections)[0].models)) {
-	        // The collection(s) bound to this component
-	        this.collection = collections;
-	        // Set collection(s) models on `initialState` for the first render
-	        this.setStateBackbone(collections, void 0, initialState, isDeferred);
-	        this.startCollectionListeners(collections);
-	      }
-	    },
-	    // Used internally to set `this.collection` or `this.model` on `this.state`. Delegates to
-	    // `this.setState`. It listens to `Backbone.Collection` events such as `update`,
-	    // `change`, `sort`, `reset` and to `Backbone.Model` `change`.
-	    setStateBackbone: function (modelOrCollection, key, target, isDeferred) {
-	      if (!(modelOrCollection.models || modelOrCollection.attributes)) {
-	        for (key in modelOrCollection)
-	            this.setStateBackbone(modelOrCollection[key], key, target);
-	        return;
-	      }
-	      this.setState.apply(this, arguments);
-	    },
-	    // Get the attributes for the collection or model as array or hash
-	    getAttributes: function (modelOrCollection){
-	      var attrs = [];
-
-	      // if a collection, get the attributes of each, otherwise return modelOrCollection
-	      if (modelOrCollection instanceof Backbone.Collection) {
-	        for (var i = 0; i < modelOrCollection.models.length; i++) {
-	          attrs.push(modelOrCollection.models[i].attributes);
-	        }
-	        return attrs;
-	      } else {
-	        return modelOrCollection.attributes
-	      }
-	    },
-	    // Sets a model, collection or object into state by delegating to `this.component.setState`.
-	    setState: function (modelOrCollection, key, target, isDeferred) {
-	      var state = {};
-	      var newState = this.getAttributes(modelOrCollection);
-
-	      if (key) {
-	        state[key] = newState;
-	      } else if (modelOrCollection.models) {
-	        state.collection = newState;
-	      } else {
-	        state.model = newState;
-	      }
-
-	      if (target) {
-	        _.extend(target, state);
-	      } else if (isDeferred) {
-	        this.nextState = _.extend(this.nextState || {}, state);
-	        _.defer(_.bind(function () {
-	          if (this.nextState) {
-	            this.component.setState(this.nextState);
-	            this.nextState = null;
-	          }
-	        }, this));
-	      } else {
-	        this.component.setState(state);
-	      }
-	    },
-	    // Binds the component to any collection changes.
-	    startCollectionListeners: function (collection, key) {
-	      if (!collection) collection = this.collection;
-	      if (collection) {
-	        if (collection.models)
-	          this
-	            .listenTo(collection, 'update change sort reset',
-	              _.partial(this.setStateBackbone, collection, key, void 0, true))
-	            .listenTo(collection, 'error', this.onError)
-	            .listenTo(collection, 'request', this.onRequest)
-	            .listenTo(collection, 'sync', this.onSync);
-	        else if (typeof collection === 'object')
-	          for (key in collection)
-	            if (collection.hasOwnProperty(key))
-	              this.startCollectionListeners(collection[key], key);
-	      }
-	    },
-	    // Binds the component to any model changes.
-	    startModelListeners: function (model, key) {
-	      if (!model) model = this.model;
-	      if (model) {
-	        if (model.attributes)
-	          this
-	            .listenTo(model, 'change',
-	              _.partial(this.setStateBackbone, model, key, void 0, true))
-	            .listenTo(model, 'error', this.onError)
-	            .listenTo(model, 'request', this.onRequest)
-	            .listenTo(model, 'sync', this.onSync)
-	            .listenTo(model, 'invalid', this.onInvalid);
-	        else if (typeof model === 'object')
-	          for (key in model)
-	            this.startModelListeners(model[key], key);
-	      }
-	    }
-	  });
-
-	  // Facade method to bypass the `mixin` usage. For use cases such as ES6
-	  // classes or else. It binds any `Backbone.Model` and `Backbone.Collection`
-	  // instance found inside `backboneInstances.models` and
-	  // `backboneInstances.collections` (single instances or objects of them)
-	  mixin.on = function (component, backboneInstances) {
-	    var wrapper;
-
-	    if (!component.wrapper) {
-	      wrapper = new Wrapper(component);
-	    } else {
-	      wrapper = component.wrapper;
-	    }
-
-	    if (backboneInstances.models) {
-	      wrapper.setModels(backboneInstances.models);
-	    }
-	    if (backboneInstances.collections) {
-	      wrapper.setCollections(backboneInstances.collections);
-	    }
-	    component.wrapper = wrapper;
-	  };
-
-	  // Shortcut method to bind a model or multiple models
-	  mixin.onModel = function (component, models) {
-	    mixin.on(component, {models: models});
-	  };
-
-	  // Shortcut method to bind a collection or multiple collections
-	  mixin.onCollection = function (component, collections) {
-	    mixin.on(component, {collections: collections});
-	  };
-
-	  // Facade method to dispose of a `component.wrapper`
-	  mixin.off = function (component, modelOrCollection) {
-	    if (arguments.length === 2) {
-	      if (component.wrapper) {
-	        component.wrapper.stopListening(modelOrCollection);
-	        // TODO Remove modelOrCollection from `component.state`?
-	      }
-	    } else {
-	      mixin.componentWillUnmount.call(component);
-	    }
-	  };
-
-	  // Expose `Backbone.React.Component.mixin`.
-	  return mixin;
-	}));
-	// <a href="https://github.com/magalhas/backbone-react-component"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://github-camo.global.ssl.fastly.net/38ef81f8aca64bb9a64448d0d70f1308ef5341ab/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6461726b626c75655f3132313632312e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png"></a>
-
-
-/***/ },
 /* 245 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-
-	var _backbone = __webpack_require__(237);
-
-	var _backbone2 = _interopRequireDefault(_backbone);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	var MemberModel = _backbone2.default.Model.fullExtend({
-		idAttribute: "member_number",
-		urlRoot: "/member",
-		defaults: {
-			created_at: "0000-00-00T00:00:00Z",
-			updated_at: "0000-00-00T00:00:00Z",
-			entity_id: 0,
-			member_number: null,
-			civicregno: "",
-			firstname: "",
-			lastname: "",
-			email: "",
-			phone: "",
-			address_street: "",
-			address_extra: "",
-			address_zipcode: "",
-			address_city: "",
-			address_country: "se"
-		}
-	});
-
-	module.exports = MemberModel;
-
-/***/ },
-/* 246 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var _react = __webpack_require__(1);
-
-	var _react2 = _interopRequireDefault(_react);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	var DateField = _react2.default.createClass({
-		displayName: 'DateField',
-
-		render: function render() {
-			var options = {
-				year: 'numeric', month: 'numeric', day: 'numeric',
-				hour12: false
-			};
-
-			var str = new Intl.DateTimeFormat('sv-SE', options).format(Date.parse(this.props.date));
-			return _react2.default.createElement(
-				'span',
-				null,
-				str
-			);
-		}
-	});
-
-	module.exports = DateField;
-
-/***/ },
-/* 247 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var _react = __webpack_require__(1);
-
-	var _react2 = _interopRequireDefault(_react);
-
-	var _Rfid = __webpack_require__(248);
-
-	var _Rfid2 = _interopRequireDefault(_Rfid);
-
-	var _Rfid3 = __webpack_require__(249);
-
-	var _Rfid4 = _interopRequireDefault(_Rfid3);
-
-	var _Keys = __webpack_require__(250);
-
-	var _Keys2 = _interopRequireDefault(_Keys);
-
-	var _Edit = __webpack_require__(254);
-
-	var _Edit2 = _interopRequireDefault(_Edit);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	// Backbone
-
-
-	var KeysUserBox = _react2.default.createClass({
-		displayName: 'KeysUserBox',
-
-		getInitialState: function getInitialState() {
-			return {
-				showEditForm: false
-			};
-		},
-
-		edit: function edit(model) {
-			// Load the entity into the edit form
-			this.setState({
-				showEditForm: true,
-				rfidModel: model
-			});
-		},
-
-		add: function add() {
-			var newRfid = new _Rfid4.default();
-
-			// Load the entity into the edit form
-			this.setState({
-				showEditForm: true,
-				rfidModel: newRfid
-			});
-		},
-
-		rfidClose: function rfidClose() {
-			this.state.rfidModel.trigger("destroy", this.state.rfidModel);
-
-			this.setState({
-				showEditForm: false
-			});
-		},
-
-		rfidSave: function rfidSave() {
-			this.setState({
-				showEditForm: false
-			});
-		},
-
-		render: function render() {
-			if (this.state.showEditForm) {
-				return _react2.default.createElement(_Edit2.default, { model: this.state.rfidModel, ref: 'edit', member_number: this.props.member_number, close: this.rfidClose, save: this.rfidSave });
-			} else {
-				return _react2.default.createElement(
-					'div',
-					null,
-					_react2.default.createElement(_Keys2.default, { type: _Rfid2.default,
-						filters: {
-							relations: [{
-								type: "member",
-								member_number: this.props.member_number
-							}]
-						},
-						edit: this.edit }),
-					_react2.default.createElement(
-						'button',
-						{ className: 'uk-button uk-button-primary', onClick: this.add },
-						_react2.default.createElement('i', { className: 'uk-icon-plus-circle' }),
-						' Lägg till ny RFID-tagg'
-					)
-				);
-			}
-		}
-	});
-
-	module.exports = KeysUserBox;
-
-/***/ },
-/* 248 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var _backbone = __webpack_require__(237);
-
-	var _backbone2 = _interopRequireDefault(_backbone);
-
-	var _Rfid = __webpack_require__(249);
-
-	var _Rfid2 = _interopRequireDefault(_Rfid);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	var RfidCollection = _backbone2.default.PageableCollection.extend({
-		model: _Rfid2.default,
-		url: "/rfid"
-	});
-
-	module.exports = RfidCollection;
-
-/***/ },
-/* 249 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-
-	var _backbone = __webpack_require__(237);
-
-	var _backbone2 = _interopRequireDefault(_backbone);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	var RfidModel = _backbone2.default.Model.fullExtend({
-		idAttribute: "entity_id",
-		urlRoot: "/rfid",
-		defaults: {
-			created_at: "0000-00-00T00:00:00Z",
-			updated_at: "0000-00-00T00:00:00Z",
-			tagid: "",
-			description: "",
-			status: "inactive",
-			startdate: "0000-00-00T00:00:00Z",
-			enddate: "0000-00-00T00:00:00Z"
-		}
-	});
-
-	module.exports = RfidModel;
-
-/***/ },
-/* 250 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var _react = __webpack_require__(1);
-
-	var _react2 = _interopRequireDefault(_react);
-
-	var _BackboneTable = __webpack_require__(251);
-
-	var _BackboneTable2 = _interopRequireDefault(_BackboneTable);
-
-	var _TableDropdownMenu = __webpack_require__(253);
-
-	var _TableDropdownMenu2 = _interopRequireDefault(_TableDropdownMenu);
-
-	var _Rfid = __webpack_require__(249);
-
-	var _Rfid2 = _interopRequireDefault(_Rfid);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	var Keys = _react2.default.createClass({
-		displayName: 'Keys',
-
-		mixins: [Backbone.React.Component.mixin, _BackboneTable2.default],
-
-		getInitialState: function getInitialState() {
-			return {
-				columns: 4
-			};
-		},
-
-		componentWillMount: function componentWillMount() {
-			this.fetch();
-		},
-
-		componentWillReceiveProps: function componentWillReceiveProps(nextProps) {
-			if (nextProps.filters != this.state.filters) {
-				this.setState({
-					filters: nextProps.filters
-				});
-
-				// TODO: setState() has a delay so we need to wait a moment
-				var _this = this;
-				setTimeout(function () {
-					_this.fetch();
-				}, 100);
-			}
-		},
-
-		removeTextMessage: function removeTextMessage(entity) {
-			return "Are you sure you want to remove key \"" + entity.tagid + "\"?";
-		},
-
-		removeErrorMessage: function removeErrorMessage() {
-			UIkit.modal.alert("Error deleting key");
-		},
-
-		edit: function edit(row) {
-			// We need to load a new model because the model can not belong to two different components at the same time.
-			this.props.edit(this.getCollection().at(row).clone());
-		},
-
-		renderHeader: function renderHeader() {
-			return [{
-				title: "Status",
-				sort: "status"
-			}, {
-				title: "RFID",
-				sort: "tagid"
-			}, {
-				title: "Beskrivning",
-				sort: "description"
-			}, {
-				title: ""
-			}];
-		},
-
-		renderRow: function renderRow(row, i) {
-			return _react2.default.createElement(
-				'tr',
-				{ key: i },
-				_react2.default.createElement(
-					'td',
-					null,
-					function () {
-						switch (row.status) {
-							case "active":
-								return _react2.default.createElement(
-									'span',
-									null,
-									_react2.default.createElement('i', { className: 'uk-icon uk-icon-check key-active' }),
-									'Aktiv'
-								);
-							case "inactive":
-								return _react2.default.createElement(
-									'span',
-									null,
-									_react2.default.createElement('i', { className: 'uk-icon uk-icon-close key-inactive' }),
-									'Inaktiv'
-								);
-							case "auto":
-								return _react2.default.createElement(
-									'span',
-									null,
-									_react2.default.createElement('i', { className: 'uk-icon uk-icon-cog key-auto' }),
-									'Auto'
-								);
-						}
-					}()
-				),
-				_react2.default.createElement(
-					'td',
-					null,
-					row.tagid
-				),
-				_react2.default.createElement(
-					'td',
-					null,
-					row.description
-				),
-				_react2.default.createElement(
-					'td',
-					null,
-					_react2.default.createElement(
-						_TableDropdownMenu2.default,
-						null,
-						_react2.default.createElement(
-							'a',
-							{ onClick: this.edit.bind(this, i) },
-							_react2.default.createElement('i', { className: 'uk-icon uk-icon-cog' }),
-							' Redigera'
-						),
-						this.removeButton(i)
-					)
-				)
-			);
-		}
-	});
-
-	// Backbone
-
-
-	module.exports = Keys;
-
-/***/ },
-/* 251 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var _react = __webpack_require__(1);
-
-	var _react2 = _interopRequireDefault(_react);
-
-	var _reactDom = __webpack_require__(34);
-
-	var _reactDom2 = _interopRequireDefault(_reactDom);
-
-	var _Common = __webpack_require__(252);
-
-	var _config = __webpack_require__(242);
-
-	var _config2 = _interopRequireDefault(_config);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	/// TODO: This Mixin's should handle auto refresh
-
-	/**
-	 * This is a mixin used with Backbone to provide error handlers.
-	 */
-	var BackboneTable = {
-		getInitialState: function getInitialState() {
-			var _this = this;
-
-			// Extend the collection
-			var collection = this.props.type;
-			var ExtendedCollection = collection.extend({
-				state: {
-					pageSize: _config2.default.pagination.pageSize
-				},
-
-				parseRecords: function parseRecords(resp, options) {
-					return resp.data;
-				},
-
-				parseState: function parseState(resp, queryParams, state, options) {
-					// Otherwise we just save the parameters to be used when initializing the paginator
-					_this.setState({
-						totalRecords: resp.total,
-						totalPages: resp.last_page,
-						pageSize: resp.per_page
-					});
-
-					// Hide the pagination if the total number of records is 0 or there is only 1 page
-					// When the pagination is hidden there is no way to get it back as the javascript stops when React removes the DOM node.
-					if (resp.last_page == 0 && resp.data.length > 0) {
-						// Note: For some reason Laravel only sends the pagination data on first request
-					} else {
-							if (resp.total == 0 || resp.last_page == 1) {
-								_this.setState({ showPagination: false });
-							} else {
-								_this.updatePagination(resp.last_page);
-							}
-						}
-				}
-			});
-
-			// Create a new extended collection
-			// TODO: Does params really work?
-			var data = new ExtendedCollection(null, this.props.params);
-
-			this.pagination = [];
-
-			return {
-				status: "done",
-				collection: data,
-				showPagination: true,
-				sort_column: "",
-				sort_order: "asc",
-				filters: this.props.filters || {}
-			};
-		},
-
-		componentWillReceiveProps: function componentWillReceiveProps(nextProps) {
-			if (nextProps.filters != this.state.filters) {
-				this.setState({
-					filters: nextProps.filters
-				});
-
-				// TODO: setState() has a delay so we need to wait a moment
-				var _this = this;
-				setTimeout(function () {
-					_this.fetch();
-				}, 100);
-			}
-		},
-
-		initializePagination: function initializePagination(i) {
-			var _this = this;
-
-			// Initialize top and bottom pagination
-			for (var i = 1; i <= 2; i++) {
-				var name = "pag" + i;
-				var pag = _reactDom2.default.findDOMNode(this.refs[name]);
-
-				if (pag !== undefined) {
-					this.pagination[i] = UIkit.pagination(pag, {
-						items: this.state.totalRecords,
-						itemsOnPage: this.state.pageSize
-					});
-
-					$(pag).on("select.uk.pagination", function (e, pageIndex) {
-						// Update both paginators manually
-						_this.pagination[1].currentPage = pageIndex;
-						_this.pagination[2].currentPage = pageIndex;
-						_this.pagination[1].render(_this.pagination[1].pages);
-						_this.pagination[2].render(_this.pagination[1].pages);
-
-						// Send request to server
-						_this.fetch();
-					});
-				}
-			}
-		},
-
-		updatePagination: function updatePagination(last_page) {
-			// Initialize top and bottom pagination
-			for (var i = 1; i <= 2; i++) {
-				// If the paginator is already set up we need to update the parameters and rerender it
-				if (typeof this.pagination[i] != "undefined") {
-					this.pagination[i].pages = last_page;
-					this.pagination[i].render();
-				}
-			}
-		},
-
-		removeButton: function removeButton(i, text) {
-			if (text === undefined) {
-				var text = "Ta bort";
-			}
-
-			return _react2.default.createElement(
-				'a',
-				{ onClick: this.remove.bind(this, i), className: 'removebutton' },
-				_react2.default.createElement('i', { className: 'uk-icon uk-icon-remove' }),
-				' ',
-				text
-			);
-		},
-
-		remove: function remove(row) {
-			var _this = this;
-			var entity = this.getCollection().at(row);
-			UIkit.modal.confirm(this.removeTextMessage(entity.attributes), function () {
-				entity.destroy({
-					wait: true,
-					success: function success(model, response) {
-						if (response.status == "deleted") {
-							//						UIkit.modal.alert("Successfully deleted");
-						} else {
-								_this.removeErrorMessage();
-							}
-					},
-					error: function error() {
-						_this.removeErrorMessage();
-					}
-				});
-			});
-			return false;
-		},
-
-		componentWillMount: function componentWillMount() {
-			this.wrapper.setCollections(this.state.collection);
-
-			var _this = this;
-
-			// This event is fired when a request is sent to the server
-			this.state.collection.on("request", function () {
-				_this.setState({
-					status: "loading"
-				});
-			});
-
-			// This event is fired after a collection have been received from the server
-			this.state.collection.on("sync", function () {
-				_this.setState({
-					status: "done"
-				});
-			});
-
-			// This event is fired after a model have been successfully deleted.
-			this.state.collection.on("destroy", function () {
-				_this.setState({
-					status: "done"
-				});
-			});
-
-			// This event is fired when receiveing a collection from the server failed
-			this.state.collection.on("error", function (e) {
-				// If the pending flag is set to false this is probably and delete error or anything else that does not need to update the collection
-				if (e._pending === false) {
-					_this.setState({
-						status: "done"
-					});
-					return;
-				}
-
-				_this.setState({
-					status: "error"
-				});
-			});
-		},
-
-		componentDidMount: function componentDidMount() {
-			var _this = this;
-			window.requestAnimationFrame(function () {
-				_this.initializePagination();
-			});
-		},
-
-		// Fetch data from server
-		fetch: function fetch() {
-			var filters = this.state.filters;
-
-			// Pagination
-			var pageIndex = 0;
-			if (this.pagination[1]) {
-				// Get the current selected page from the top paginator
-				pageIndex = this.pagination[1].currentPage;
-			}
-
-			filters.page = pageIndex + 1;
-
-			// Apply sort
-			filters.sort_by = this.state.sort_column;
-			filters.sort_order = this.state.sort_order;
-
-			// Send request to server
-			this.getCollection().fetch({
-				data: filters
-			});
-		},
-
-		render: function render() {
-			var _this = this;
-
-			if (this.state.status == "loading") {
-				var loading = _react2.default.createElement(
-					'div',
-					{ className: 'loadingOverlay' },
-					_react2.default.createElement(
-						'div',
-						{ className: 'loadingWrapper' },
-						_react2.default.createElement(_Common.Loading, null)
-					)
-				);
-				var loadingClass = " backboneTableLoading";
-			}
-
-			if (this.state.status == "error") {
-				var content = _react2.default.createElement(
-					'tr',
-					{ key: '0' },
-					_react2.default.createElement(
-						'td',
-						{ colSpan: this.state.columns, className: 'uk-text-center' },
-						_react2.default.createElement(
-							'p',
-							null,
-							_react2.default.createElement(
-								'em',
-								null,
-								'Hämtning av data misslyckades.'
-							),
-							'  ',
-							_react2.default.createElement(
-								'button',
-								{ className: 'uk-button uk-button-primary uk-button-mini', onClick: this.tryAgain },
-								_react2.default.createElement('i', { className: 'uk-icon-refresh' }),
-								' Försök igen'
-							)
-						)
-					)
-				);
-			} else if (this.state.collection.length == 0) {
-				var content = _react2.default.createElement(
-					'tr',
-					{ key: '0' },
-					_react2.default.createElement(
-						'td',
-						{ colSpan: this.state.columns, className: 'uk-text-center' },
-						_react2.default.createElement(
-							'em',
-							null,
-							'Listan är tom'
-						)
-					)
-				);
-			} else {
-				var content = this.state.collection.map(this.renderRow);
-			}
-
-			return _react2.default.createElement(
-				'div',
-				null,
-				this.renderPagination(1),
-				_react2.default.createElement(
-					'div',
-					{ style: { position: "relative" } },
-					_react2.default.createElement(
-						'table',
-						{ className: "uk-table uk-table-condensed uk-table-striped uk-table-hover" + loadingClass },
-						_react2.default.createElement(
-							'thead',
-							null,
-							_react2.default.createElement(
-								'tr',
-								null,
-								this.renderHeader().map(function (column, i) {
-									if (column.title) {
-										if (_this.state.sort_column == column.sort) {
-											var icon = _react2.default.createElement('i', { className: "uk-icon uk-icon-angle-" + (_this.state.sort_order == "asc" ? "up" : "down") });
-										}
-
-										return _react2.default.createElement(
-											'th',
-											{ key: i, className: column.class },
-											column.sort ? _react2.default.createElement(
-												'a',
-												{ 'data-sort': column.sort, onClick: _this.sort },
-												column.title,
-												' ',
-												icon
-											) : column.title
-										);
-									} else {
-										return _react2.default.createElement('th', { key: i });
-									}
-								})
-							)
-						),
-						_react2.default.createElement(
-							'tbody',
-							null,
-							content
-						)
-					),
-					loading
-				),
-				this.renderPagination(2)
-			);
-		},
-
-		sort: function sort(event) {
-			if (event.target.dataset.sort != this.state.sort_column) {
-				// Always start with ascending sort
-				var order = "asc";
-			} else {
-				// Toggle between asc/desc when the user is clicking the same column multiple times
-				var order = this.state.sort_order == "asc" ? "desc" : "asc";
-			}
-
-			// Save the sort order
-			this.setState({
-				sort_column: event.target.dataset.sort,
-				sort_order: order
-			});
-
-			// Request new sorted data from the server
-			// TODO: setState does not change the state asap
-			var _this = this;
-			setTimeout(function () {
-				_this.fetch();
-			}, 100);
-		},
-
-		tryAgain: function tryAgain() {
-			this.fetch();
-		},
-
-		renderPagination: function renderPagination(i) {
-			if (this.state.showPagination === true) {
-				return _react2.default.createElement(
-					'ul',
-					{ name: "pag" + i, ref: "pag" + i, className: 'uk-pagination' },
-					_react2.default.createElement(
-						'li',
-						{ className: '' },
-						_react2.default.createElement(
-							'a',
-							null,
-							_react2.default.createElement('i', { className: 'uk-icon-angle-double-left' })
-						)
-					)
-				);
-			}
-		}
-	};
-
-	module.exports = BackboneTable;
-
-/***/ },
-/* 252 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-
-	var _react = __webpack_require__(1);
-
-	var _react2 = _interopRequireDefault(_react);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	var Loading = _react2.default.createClass({
-		displayName: "Loading",
-
-		render: function render() {
-			return _react2.default.createElement(
-				"span",
-				null,
-				_react2.default.createElement("i", { className: "uk-icon-refresh uk-icon-spin" }),
-				" Hämtar data..."
-			);
-		}
-	});
-
-	module.exports = {
-		Loading: Loading
-	};
-
-/***/ },
-/* 253 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-
-	var _react = __webpack_require__(1);
-
-	var _react2 = _interopRequireDefault(_react);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	var TableDropdownMenu = _react2.default.createClass({
-		displayName: "TableDropdownMenu",
-
-		render: function render() {
-			return _react2.default.createElement(
-				"div",
-				{ className: "uk-align-right uk-margin-remove" },
-				_react2.default.createElement(
-					"div",
-					{ "data-uk-dropdown": "{mode:'click'}", className: "uk-button-dropdown" },
-					_react2.default.createElement(
-						"button",
-						{ className: "uk-button uk-button-mini" },
-						_react2.default.createElement("i", { className: "uk-icon-angle-down" })
-					),
-					_react2.default.createElement(
-						"div",
-						{ className: "uk-dropdown uk-dropdown-small" },
-						_react2.default.createElement(
-							"ul",
-							{ className: "uk-nav uk-nav-dropdown" },
-							_react2.default.Children.map(this.props.children, function (child, i) {
-								return _react2.default.createElement(
-									"li",
-									{ className: "uk-dropdown-close" },
-									child
-								);
-							})
-						)
-					)
-				)
-			);
-		}
-	});
-
-	module.exports = TableDropdownMenu;
-
-/***/ },
-/* 254 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var _react = __webpack_require__(1);
-
-	var _react2 = _interopRequireDefault(_react);
-
-	var _backboneReactComponent = __webpack_require__(244);
-
-	var _backboneReactComponent2 = _interopRequireDefault(_backboneReactComponent);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	var Edit = _react2.default.createClass({
-		displayName: 'Edit',
-
-		mixins: [Backbone.React.Component.mixin],
-
-		getInitialState: function getInitialState() {
-			return {
-				error_column: "",
-				error_message: ""
-			};
-		},
-
-		cancel: function cancel(event) {
-			// Prevent the form from being submitted
-			event.preventDefault();
-
-			// Tell parent to close form
-			this.props.close();
-		},
-
-		remove: function remove(event) {
-			// Prevent the form from being submitted
-			event.preventDefault();
-
-			UIkit.modal.alert("TODO: Remove");
-		},
-
-		save: function save(event) {
-			var _this = this;
-
-			// Prevent the form from being submitted
-			event.preventDefault();
-
-			// Add a relation to the member and save the model
-			this.getModel().save({
-				relations: [{
-					type: "member",
-					member_number: this.props.member_number
-				}]
-			}, {
-				wait: true,
-				success: function success() {
-					_this.getModel().trigger("destroy", _this.getModel());
-
-					// Tell parent to save form
-					// For some reason a sync event is fired a few ms after React destroys the element, so we have to wait until the sync is done.
-					setTimeout(function () {
-						_this.props.save.call();
-					}, 10);
-				},
-				error: function error(model, xhr, options) {
-					if (xhr.status == 422) {
-						_this.setState({
-							error_column: xhr.responseJSON.column,
-							error_message: xhr.responseJSON.message
-						});
-					}
-				}
-			});
-		},
-
-		handleChange: function handleChange(event) {
-			// Update the model with new value
-			var target = event.target;
-			var key = target.getAttribute("name");
-			this.state.model[key] = target.value;
-
-			// When we change the value of the model we have to rerender the component
-			this.forceUpdate();
-		},
-
-		renderErrorMsg: function renderErrorMsg(column) {
-			if (this.state.error_column == column) {
-				return _react2.default.createElement(
-					'p',
-					{ className: 'uk-form-help-block error' },
-					'Error: ',
-					this.state.error_message
-				);
-			}
-		},
-
-		render: function render() {
-			var _this2 = this;
-
-			return _react2.default.createElement(
-				'form',
-				{ className: 'uk-form uk-form-horizontal' },
-				_react2.default.createElement(
-					'div',
-					{ className: '' },
-					_react2.default.createElement(
-						'h3',
-						null,
-						this.state.model.entity_id ? "Redigera RFID-tagg" : "Lägg till ny RFID-tagg"
-					),
-					_react2.default.createElement(
-						'div',
-						{ className: 'uk-form-row' },
-						_react2.default.createElement(
-							'label',
-							{ className: 'uk-form-label', htmlFor: 'tagid' },
-							'ID'
-						),
-						_react2.default.createElement(
-							'div',
-							{ className: 'uk-form-controls' },
-							_react2.default.createElement('input', { type: 'text', id: 'tagid', name: 'tagid', placeholder: 'Använd en RFID-läsare för att läsa av det unika numret på nyckeln', value: this.state.model.tagid, className: 'uk-form-width-large', onChange: this.handleChange }),
-							this.renderErrorMsg("tagid")
-						)
-					),
-					_react2.default.createElement(
-						'div',
-						{ className: 'uk-form-row' },
-						_react2.default.createElement(
-							'label',
-							{ className: 'uk-form-label', htmlFor: 'description' },
-							'Beskrivning'
-						),
-						_react2.default.createElement(
-							'div',
-							{ className: 'uk-form-controls' },
-							_react2.default.createElement('textarea', { id: 'description', name: 'description', placeholder: 'Det är valfritt att lägga in en beskrivning av nyckeln', value: this.state.model.description, className: 'uk-form-width-large', onChange: this.handleChange }),
-							this.renderErrorMsg("description")
-						)
-					),
-					_react2.default.createElement(
-						'div',
-						{ className: 'uk-form-row' },
-						_react2.default.createElement(
-							'label',
-							{ className: 'uk-form-label', htmlFor: 'status' },
-							'Status'
-						),
-						_react2.default.createElement(
-							'div',
-							{ className: 'uk-form-controls' },
-							_react2.default.createElement(
-								'select',
-								{ ref: 'status', id: 'status', name: 'status', value: this.state.model.status, className: 'uk-form-width-large', onChange: this.handleChange },
-								_react2.default.createElement(
-									'option',
-									{ value: 'active' },
-									'Aktiv'
-								),
-								_react2.default.createElement(
-									'option',
-									{ value: 'inactive' },
-									'Inaktiv'
-								),
-								_react2.default.createElement(
-									'option',
-									{ value: 'auto' },
-									'Auto'
-								)
-							),
-							this.renderErrorMsg("status")
-						)
-					),
-					_react2.default.createElement(
-						'div',
-						{ className: 'uk-form-row' },
-						_react2.default.createElement(
-							'div',
-							{ className: 'uk-form-controls' },
-							_react2.default.createElement(
-								'p',
-								null,
-								_react2.default.createElement('i', { className: 'uk-icon uk-icon-info-circle' }),
-								function () {
-									switch (_this2.state.model.status) {
-										case "active":
-											return "En aktiv nyckel är permanent aktiv inom de datum som specificeras nedan och påverkas altså inte av eventuella betalningar.";
-										case "inactive":
-											return "En inaktiv nyckel är permanent inaktiv och går ej att använda i passersystem förän den aktiveras igen.";
-										case "auto":
-											return "Auto-läget beräknar fram om nyckeln skall vara aktiv eller ej beroende på medlemmens eventuella betalningar.";
-									}
-								}()
-							)
-						)
-					),
-					this.state.model.status == "active" ? _react2.default.createElement(
-						'div',
-						{ className: 'uk-form-row' },
-						_react2.default.createElement(
-							'label',
-							{ className: 'uk-form-label', htmlFor: 'startdate' },
-							'Startdatum'
-						),
-						_react2.default.createElement(
-							'div',
-							{ className: 'uk-form-controls' },
-							_react2.default.createElement(
-								'div',
-								{ className: 'uk-form-icon' },
-								_react2.default.createElement('i', { className: 'uk-icon-calendar' }),
-								_react2.default.createElement('input', { type: 'text', id: 'startdate', name: 'startdate', value: this.state.model.startdate, className: 'uk-form-width-large', onChange: this.handleChange }),
-								this.renderErrorMsg("startdate")
-							)
-						)
-					) : "",
-					this.state.model.status == "active" ? _react2.default.createElement(
-						'div',
-						{ className: 'uk-form-row' },
-						_react2.default.createElement(
-							'label',
-							{ className: 'uk-form-label', htmlFor: 'enddate' },
-							'Slutdatum'
-						),
-						_react2.default.createElement(
-							'div',
-							{ className: 'uk-form-controls' },
-							_react2.default.createElement(
-								'div',
-								{ className: 'uk-form-icon' },
-								_react2.default.createElement('i', { className: 'uk-icon-calendar' }),
-								_react2.default.createElement('input', { type: 'text', id: 'enddate', name: 'enddate', value: this.state.model.enddate, className: 'uk-form-width-large', onChange: this.handleChange }),
-								this.renderErrorMsg("enddate")
-							)
-						)
-					) : "",
-					_react2.default.createElement(
-						'div',
-						{ className: 'uk-form-row' },
-						_react2.default.createElement(
-							'div',
-							{ className: 'uk-form-controls' },
-							_react2.default.createElement(
-								'button',
-								{ className: 'uk-button uk-button-danger uk-float-left', onClick: this.cancel },
-								_react2.default.createElement('i', { className: 'uk-icon-close' }),
-								' Avbryt'
-							),
-							this.state.model.entity_id ? _react2.default.createElement(
-								'button',
-								{ className: 'uk-button uk-button-danger uk-float-left', onClick: this.remove },
-								_react2.default.createElement('i', { className: 'uk-icon-trash' }),
-								' Ta bort nyckel'
-							) : "",
-							_react2.default.createElement(
-								'button',
-								{ className: 'uk-button uk-button-success uk-float-right', onClick: this.save },
-								_react2.default.createElement('i', { className: 'uk-icon-save' }),
-								' Spara nyckel'
-							)
-						)
-					)
-				)
-			);
-		}
-	});
-
-	module.exports = Edit;
-
-/***/ },
-/* 255 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var _react = __webpack_require__(1);
-
-	var _react2 = _interopRequireDefault(_react);
-
-	var _History = __webpack_require__(256);
-
-	var _Mail = __webpack_require__(258);
-
-	var _Mail2 = _interopRequireDefault(_Mail);
-
-	var _reactRouter = __webpack_require__(172);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	// Backbone
-
-
-	var MailUserBox = _react2.default.createClass({
-		displayName: 'MailUserBox',
-
-		render: function render() {
-			return _react2.default.createElement(
-				'div',
-				null,
-				_react2.default.createElement(_History.MailHistory, { type: _Mail2.default,
-					filters: {
-						relations: [{
-							type: "member",
-							member_number: this.props.member_number
-						}]
-					}
-				}),
-				_react2.default.createElement(
-					_reactRouter.Link,
-					{ to: '/mail/send', className: 'uk-button uk-button-primary' },
-					_react2.default.createElement('i', { className: 'uk-icon-envelope' }),
-					' Skicka meddelande'
-				)
-			);
-		}
-	});
-
-	module.exports = MailUserBox;
-
-/***/ },
-/* 256 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var _react = __webpack_require__(1);
-
-	var _react2 = _interopRequireDefault(_react);
-
-	var _Mail = __webpack_require__(257);
-
-	var _Mail2 = _interopRequireDefault(_Mail);
-
-	var _Mail3 = __webpack_require__(258);
-
-	var _Mail4 = _interopRequireDefault(_Mail3);
-
-	var _reactRouter = __webpack_require__(172);
-
-	var _BackboneTable = __webpack_require__(251);
-
-	var _BackboneTable2 = _interopRequireDefault(_BackboneTable);
-
-	var _DateTime = __webpack_require__(259);
-
-	var _DateTime2 = _interopRequireDefault(_DateTime);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	var MailHistoryHandler = _react2.default.createClass({
-		displayName: 'MailHistoryHandler',
-
-		render: function render() {
-			return _react2.default.createElement(
-				'div',
-				null,
-				_react2.default.createElement(
-					'h2',
-					null,
-					'Historik'
-				),
-				_react2.default.createElement(
-					'p',
-					{ className: 'uk-float-left' },
-					'Visa lista över samtliga E-post och SMS-utskick.'
-				),
-				_react2.default.createElement(
-					_reactRouter.Link,
-					{ to: '/mail/send', className: 'uk-button uk-button-primary uk-float-right' },
-					_react2.default.createElement('i', { className: 'uk-icon-plus-circle' }),
-					' Skapa nytt utskick'
-				),
-				_react2.default.createElement(MailHistory, { type: _Mail4.default })
-			);
-		}
-	});
-
-	// Backbone
-
-	MailHistoryHandler.title = "Utskickshistorik";
-
-	var MailHistory = _react2.default.createClass({
-		displayName: 'MailHistory',
-
-		mixins: [Backbone.React.Component.mixin, _BackboneTable2.default],
-
-		getInitialState: function getInitialState() {
-			return {
-				columns: 6
-			};
-		},
-
-		componentWillMount: function componentWillMount() {
-			this.fetch();
-		},
-
-		componentWillReceiveProps: function componentWillReceiveProps(nextProps) {
-			if (nextProps.filters != this.state.filters) {
-				this.setState({
-					filters: nextProps.filters
-				});
-
-				// TODO: setState() has a delay so we need to wait a moment
-				var _this = this;
-				setTimeout(function () {
-					_this.fetch();
-				}, 100);
-			}
-		},
-
-		renderHeader: function renderHeader() {
-			return [{
-				title: "Id",
-				sort: "entity_id"
-			}, {
-				title: "Status",
-				sort: "status"
-			}, {
-				title: "Mottagare",
-				sort: "recipient"
-			}, {
-				title: "Meddelande",
-				sort: "description"
-			}];
-		},
-
-		renderRow: function renderRow(row, i) {
-			return _react2.default.createElement(
-				'tr',
-				{ key: i },
-				_react2.default.createElement(
-					'td',
-					null,
-					_react2.default.createElement(
-						_reactRouter.Link,
-						{ to: "/mail/" + row.entity_id },
-						row.entity_id
-					)
-				),
-				_react2.default.createElement(
-					'td',
-					null,
-					function () {
-						switch (row.status) {
-							case "queued":
-								return _react2.default.createElement(
-									'span',
-									null,
-									'Köad ',
-									_react2.default.createElement(_DateTime2.default, { date: row.created_at })
-								);
-							case "failed":
-								return "Sändning misslyckades";
-							case "sent":
-								return _react2.default.createElement(
-									'span',
-									null,
-									'Skickad ',
-									_react2.default.createElement(_DateTime2.default, { date: row.date_sent })
-								);
-							default:
-								return "Okänt";
-						}
-					}()
-				),
-				_react2.default.createElement(
-					'td',
-					null,
-					row.type == "email" ? _react2.default.createElement('i', { className: 'uk-icon-envelope', title: 'E-mail' }) : _react2.default.createElement('i', { className: 'uk-icon-commenting', title: 'SMS' }),
-					' ',
-					row.recipient
-				),
-				_react2.default.createElement(
-					'td',
-					null,
-					row.type == "email" ? row.title : row.description
-				)
-			);
-		}
-	});
-
-	module.exports = {
-		MailHistoryHandler: MailHistoryHandler,
-		MailHistory: MailHistory
-	};
-
-/***/ },
-/* 257 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-
-	var _backbone = __webpack_require__(237);
-
-	var _backbone2 = _interopRequireDefault(_backbone);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	var MailModel = _backbone2.default.Model.fullExtend({
-		idAttribute: "entity_id",
-		urlRoot: "/mail",
-		defaults: {
-			created_at: "0000-00-00T00:00:00Z",
-			updated_at: "0000-00-00T00:00:00Z",
-			type: "",
-			recipient: "",
-			title: "",
-			description: "",
-			status: 0,
-			date_sent: "0000-00-00T00:00:00Z"
-		}
-	});
-
-	module.exports = MailModel;
-
-/***/ },
-/* 258 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var _backbone = __webpack_require__(237);
-
-	var _backbone2 = _interopRequireDefault(_backbone);
-
-	var _Mail = __webpack_require__(257);
-
-	var _Mail2 = _interopRequireDefault(_Mail);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	var MailCollection = _backbone2.default.PageableCollection.extend({
-		model: _Mail2.default,
-		url: "/mail"
-	});
-
-	module.exports = MailCollection;
-
-/***/ },
-/* 259 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var _react = __webpack_require__(1);
-
-	var _react2 = _interopRequireDefault(_react);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	var DateTimeField = _react2.default.createClass({
-		displayName: 'DateTimeField',
-
-		render: function render() {
-			var str = _react2.default.createElement(
-				'em',
-				null,
-				'Ej angivet'
-			);
-			if (this.props.date != "") {
-				var options = {
-					year: 'numeric', month: 'numeric', day: 'numeric',
-					hour: 'numeric', minute: 'numeric', second: 'numeric',
-					hour12: false
-				};
-
-				var str = new Intl.DateTimeFormat('sv-SE', options).format(Date.parse(this.props.date));
-			}
-
-			return _react2.default.createElement(
-				'span',
-				null,
-				str
-			);
-		}
-	});
-
-	module.exports = DateTimeField;
-
-/***/ },
-/* 260 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var _react = __webpack_require__(1);
-
-	var _react2 = _interopRequireDefault(_react);
-
-	var _Groups = __webpack_require__(261);
-
-	var _Group = __webpack_require__(262);
-
-	var _Group2 = _interopRequireDefault(_Group);
-
-	var _reactSelect = __webpack_require__(265);
-
-	var _config = __webpack_require__(242);
-
-	var _config2 = _interopRequireDefault(_config);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	var GroupUserBox = _react2.default.createClass({
-		displayName: 'GroupUserBox',
-
-		getInitialState: function getInitialState() {
-			return {
-				showEditForm: false,
-				addGroups: ""
-			};
-		},
-
-		add: function add() {
-			this.setState({
-				showEditForm: true
-			});
-		},
-
-		cancel: function cancel() {
-			this.setState({
-				showEditForm: false,
-				addGroups: ""
-			});
-		},
-
-		changeValue: function changeValue(value) {
-			this.setState({
-				addGroups: value
-			});
-
-			// Clear the search history so there is no drop down with old data after adding a recipient
-			this.refs.addgroups.setState({ options: [] });
-		},
-
-		// Disable client side filtering
-		filter: function filter(option, filterString) {
-			return option;
-		},
-
-		search: function search(input, callback) {
-			// Clear the search history so there is no drop down with old data when search text input is empty
-			if (!input) {
-				return Promise.resolve({ options: [] });
-			}
-
-			$.ajax({
-				method: "GET",
-				url: _config2.default.apiBasePath + "/group",
-				data: {
-					search: input
-				}
-			}).done(function (data) {
-				setTimeout(function () {
-					var autoComplete = [];
-
-					data.data.forEach(function (element, index, array) {
-						autoComplete.push({
-							label: element.title + ": " + element.description,
-							value: element.entity_id
-						});
-					});
-
-					callback(null, {
-						options: autoComplete
-					});
-				}, 100);
-			});
-		},
-
-		// Send an API request and queue the message to be sent
-		send: function send(event) {
-			var _this = this;
-
-			// Prevent the form from being submitted
-			event.preventDefault();
-
-			// Create a list of entity_id's that should relate to this entity
-			var entity2 = [];
-			this.state.addGroups.forEach(function (element, index, array) {
-				entity2.push(element.value);
-			});
-
-			// Send API request
-			$.ajax({
-				method: "POST",
-				url: _config2.default.apiBasePath + "/relation",
-				data: JSON.stringify({
-					entity1: [{
-						relations: [{
-							type: "member",
-							member_number: this.props.member_number
-						}]
-					}],
-					entity2: entity2
-				})
-			}).done(function () {
-				/*
-	   			_this.setState({
-	   				showEditForm: false,
-	   				addGroups: "",
-	   			});
-	   */
-			});
-		},
-
-		gotoGroup: function gotoGroup(value, event) {
-			UIkit.modal.alert("TODO: Go to member " + value.label);
-		},
-
-		render: function render() {
-			if (this.state.showEditForm) {
-				return _react2.default.createElement(
-					'div',
-					null,
-					_react2.default.createElement(
-						'form',
-						{ className: 'uk-form uk-form-horizontal', onSubmit: this.send },
-						_react2.default.createElement(
-							'div',
-							{ className: 'uk-form-row' },
-							_react2.default.createElement(
-								'label',
-								{ className: 'uk-form-label', htmlFor: 'groups' },
-								'Lägg till användaren i följande grupper'
-							),
-							_react2.default.createElement(
-								'div',
-								{ className: 'uk-form-controls' },
-								_react2.default.createElement(_reactSelect.Async, { ref: 'addgroups', multi: true, cache: false, name: 'groups', value: this.state.addGroups, filterOption: this.filter, loadOptions: this.search, onChange: this.changeValue, onValueClick: this.gotoGroup })
-							)
-						),
-						_react2.default.createElement(
-							'div',
-							{ className: 'uk-form-row' },
-							_react2.default.createElement(
-								'div',
-								{ className: 'uk-form-controls' },
-								_react2.default.createElement(
-									'button',
-									{ className: 'uk-float-left uk-button uk-button-danger', onClick: this.cancel },
-									_react2.default.createElement('i', { className: 'uk-icon-close' }),
-									' Avbryt'
-								),
-								_react2.default.createElement(
-									'button',
-									{ className: 'uk-float-right uk-button uk-button-success', onClick: this.save },
-									_react2.default.createElement('i', { className: 'uk-icon-save' }),
-									' Spara'
-								)
-							)
-						)
-					)
-				);
-			} else {
-				return _react2.default.createElement(
-					'div',
-					null,
-					_react2.default.createElement(_Groups.Groups, { type: _Group2.default,
-						filters: {
-							relations: [{
-								type: "member",
-								member_number: this.props.member_number
-							}]
-						}
-					}),
-					_react2.default.createElement(
-						'button',
-						{ className: 'uk-button uk-button-primary', onClick: this.add },
-						_react2.default.createElement('i', { className: 'uk-icon-plus-circle' }),
-						' Lägg till grupp'
-					)
-				);
-			}
-		}
-	});
-
-	// Backbone
-
-
-	module.exports = GroupUserBox;
-
-/***/ },
-/* 261 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var _react = __webpack_require__(1);
-
-	var _react2 = _interopRequireDefault(_react);
-
-	var _backboneReactComponent = __webpack_require__(244);
-
-	var _backboneReactComponent2 = _interopRequireDefault(_backboneReactComponent);
-
-	var _Group = __webpack_require__(262);
-
-	var _Group2 = _interopRequireDefault(_Group);
-
-	var _reactRouter = __webpack_require__(172);
-
-	var _BackboneTable = __webpack_require__(251);
-
-	var _BackboneTable2 = _interopRequireDefault(_BackboneTable);
-
-	var _TableDropdownMenu = __webpack_require__(253);
-
-	var _TableDropdownMenu2 = _interopRequireDefault(_TableDropdownMenu);
-
-	var _TableFilterBox = __webpack_require__(264);
-
-	var _TableFilterBox2 = _interopRequireDefault(_TableFilterBox);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	var GroupsHandler = _react2.default.createClass({
-		displayName: 'GroupsHandler',
-
-		getInitialState: function getInitialState() {
-			return {
-				filters: {}
-			};
-		},
-
-		// TODO: Remove?
-		overrideFiltersFromProps: function overrideFiltersFromProps(filters) {
-			console.log("overrideFiltersFromProps");
-			return filters;
-		},
-
-		updateFilters: function updateFilters(newFilter) {
-			var filters = this.overrideFiltersFromProps(newFilter);
-			this.setState({
-				filters: filters
-			});
-		},
-
-		render: function render() {
-			return _react2.default.createElement(
-				'div',
-				null,
-				_react2.default.createElement(
-					'h2',
-					null,
-					'Grupper'
-				),
-				_react2.default.createElement(
-					'p',
-					{ className: 'uk-float-left' },
-					'På denna sida ser du en lista på samtliga grupper.'
-				),
-				_react2.default.createElement(
-					_reactRouter.Link,
-					{ className: 'uk-button uk-button-primary uk-float-right', to: '/groups/add' },
-					_react2.default.createElement('i', { className: 'uk-icon-plus-circle' }),
-					' Skapa ny grupp'
-				),
-				_react2.default.createElement(_TableFilterBox2.default, { onChange: this.updateFilters }),
-				_react2.default.createElement(Groups, { type: _Group2.default, filters: this.state.filters })
-			);
-		}
-	});
-
-	// Backbone
-
-	GroupsHandler.title = "Visa grupper";
-
-	var Groups = _react2.default.createClass({
-		displayName: 'Groups',
-
-		mixins: [Backbone.React.Component.mixin, _BackboneTable2.default],
-
-		getInitialState: function getInitialState() {
-			return {
-				columns: 9
-			};
-		},
-
-		componentWillMount: function componentWillMount() {
-			this.fetch();
-		},
-
-		componentWillReceiveProps: function componentWillReceiveProps(nextProps) {
-			if (nextProps.filters != this.state.filters) {
-				this.setState({
-					filters: nextProps.filters
-				});
-
-				// TODO: setState() has a delay so we need to wait a moment
-				var _this = this;
-				setTimeout(function () {
-					_this.fetch();
-				}, 100);
-			}
-		},
-
-		removeTextMessage: function removeTextMessage(entity) {
-			return "Are you sure you want to remove group \"" + entity.title + "\"?";
-		},
-
-		removeErrorMessage: function removeErrorMessage() {
-			UIkit.modal.alert("Error deleting group");
-		},
-
-		renderHeader: function renderHeader() {
-			return [{
-				title: "Namn",
-				sort: "title"
-			}, {
-				title: "Beskrivning",
-				sort: "description"
-			}, {
-				title: "Antal medlemmar",
-				sort: "membercount"
-			}, {
-				title: ""
-			}];
-		},
-
-		renderRow: function renderRow(row, i) {
-			return _react2.default.createElement(
-				'tr',
-				{ key: i },
-				_react2.default.createElement(
-					'td',
-					null,
-					_react2.default.createElement(
-						_reactRouter.Link,
-						{ to: "/groups/" + row.entity_id },
-						row.title
-					)
-				),
-				_react2.default.createElement(
-					'td',
-					null,
-					_react2.default.createElement(
-						_reactRouter.Link,
-						{ to: "/groups/" + row.entity_id },
-						row.description
-					)
-				),
-				_react2.default.createElement(
-					'td',
-					null,
-					row.membercount
-				),
-				_react2.default.createElement(
-					'td',
-					null,
-					_react2.default.createElement(
-						_TableDropdownMenu2.default,
-						null,
-						_react2.default.createElement(
-							_reactRouter.Link,
-							{ to: "/groups/" + row.entity_id + "/edit" },
-							_react2.default.createElement('i', { className: 'uk-icon uk-icon-cog' }),
-							' Redigera grupp'
-						),
-						this.removeButton(i, "Ta bort grupp")
-					)
-				)
-			);
-		}
-	});
-
-	module.exports = {
-		GroupsHandler: GroupsHandler,
-		Groups: Groups
-	};
-
-/***/ },
-/* 262 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var _backbone = __webpack_require__(237);
-
-	var _backbone2 = _interopRequireDefault(_backbone);
-
-	var _Group = __webpack_require__(263);
-
-	var _Group2 = _interopRequireDefault(_Group);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	var GroupCollection = _backbone2.default.PageableCollection.extend({
-		model: _Group2.default,
-		url: "/group"
-	});
-
-	module.exports = GroupCollection;
-
-/***/ },
-/* 263 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-
-	var _backbone = __webpack_require__(237);
-
-	var _backbone2 = _interopRequireDefault(_backbone);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	var GroupModel = _backbone2.default.Model.fullExtend({
-		idAttribute: "entity_id",
-		urlRoot: "/group",
-		defaults: {
-			created_at: "0000-00-00T00:00:00Z",
-			updated_at: "0000-00-00T00:00:00Z",
-			title: "",
-			description: ""
-		}
-	});
-
-	module.exports = GroupModel;
-
-/***/ },
-/* 264 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-
-	var _react = __webpack_require__(1);
-
-	var _react2 = _interopRequireDefault(_react);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	var TableFilterBox = _react2.default.createClass({
-		displayName: "TableFilterBox",
-
-		getInitialState: function getInitialState() {
-			this.filters = {};
-			return {};
-		},
-
-		buildNewFilterObject: function buildNewFilterObject() {
-			var newFilter = {};
-
-			// Filters
-			for (var key in this.filters) {
-				var value = this.filters[key];
-				console.log(key + ": " + value);
-				newFilter[key] = value;
-			}
-
-			// Search
-			if (this.refs.search.value != "") {
-				newFilter["search"] = this.refs.search.value;
-			}
-
-			// Debugging
-			console.log(newFilter);
-
-			this.props.onChange(newFilter);
-		},
-
-		changeFilterValue: function changeFilterValue(event) {
-			var target = event.target;
-			var key = target.getAttribute("name");
-			this.filters[key] = target.value;
-
-			this.buildNewFilterObject();
-		},
-
-		render: function render() {
-			return _react2.default.createElement(
-				"div",
-				{ className: "filterbox" },
-				_react2.default.createElement(
-					"div",
-					{ className: "uk-grid" },
-					_react2.default.createElement(
-						"div",
-						{ className: "uk-width-2-3" },
-						_react2.default.createElement(
-							"form",
-							{ className: "uk-form" },
-							_react2.default.createElement(
-								"div",
-								{ className: "uk-form-icon" },
-								_react2.default.createElement("i", { className: "uk-icon-search" }),
-								_react2.default.createElement("input", { ref: "search", type: "text", className: "uk-form-width-large", placeholder: "Skriv in ett sökord", onChange: this.buildNewFilterObject })
-							)
-						)
-					),
-					_react2.default.createElement(
-						"div",
-						{ className: "uk-width-1-3" },
-						_react2.default.createElement(
-							"div",
-							{ className: "uk-align-right2" },
-							_react2.default.createElement(
-								"button",
-								{ className: "uk-button uk-float-right", "data-uk-toggle": "{target:'#my-id'}" },
-								"Visa fler filter ",
-								_react2.default.createElement("i", { className: "uk-icon uk-icon-angle-down" })
-							)
-						)
-					)
-				),
-				_react2.default.createElement(
-					"div",
-					{ id: "my-id", className: "uk-hidden" },
-					_react2.default.createElement(
-						"label",
-						{ htmlFor: "filter_active", className: "uk-form-label" },
-						"Aktiv:"
-					),
-					_react2.default.createElement(
-						"select",
-						{ ref: "filter_active", id: "filter_active", name: "filter_active", onChange: this.changeFilterValue },
-						_react2.default.createElement(
-							"option",
-							{ value: "yes" },
-							"Ja"
-						),
-						_react2.default.createElement(
-							"option",
-							{ value: "no" },
-							"Nej"
-						),
-						_react2.default.createElement(
-							"option",
-							{ value: "auto" },
-							"Auto"
-						)
-					),
-					_react2.default.createElement(
-						"button",
-						{ className: "uk-button" },
-						_react2.default.createElement("i", { className: "uk-icon uk-icon-close" }),
-						" Nollställ filter"
-					)
-				)
-			);
-		}
-	});
-
-	module.exports = TableFilterBox;
-
-/***/ },
-/* 265 */
-/***/ function(module, exports, __webpack_require__) {
-
-	/*!
-	  Copyright (c) 2016 Jed Watson.
-	  Licensed under the MIT License (MIT), see
-	  http://jedwatson.github.io/react-select
-	*/
-
-	'use strict';
-
-	Object.defineProperty(exports, '__esModule', {
-		value: true
-	});
-
-	var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
-
-	function _objectWithoutProperties(obj, keys) { var target = {}; for (var i in obj) { if (keys.indexOf(i) >= 0) continue; if (!Object.prototype.hasOwnProperty.call(obj, i)) continue; target[i] = obj[i]; } return target; }
-
-	function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
-	var _react = __webpack_require__(1);
-
-	var _react2 = _interopRequireDefault(_react);
-
-	var _reactDom = __webpack_require__(34);
-
-	var _reactDom2 = _interopRequireDefault(_reactDom);
-
-	var _reactInputAutosize = __webpack_require__(266);
-
-	var _reactInputAutosize2 = _interopRequireDefault(_reactInputAutosize);
-
-	var _classnames = __webpack_require__(267);
-
-	var _classnames2 = _interopRequireDefault(_classnames);
-
-	var _utilsDefaultArrowRenderer = __webpack_require__(268);
-
-	var _utilsDefaultArrowRenderer2 = _interopRequireDefault(_utilsDefaultArrowRenderer);
-
-	var _utilsDefaultFilterOptions = __webpack_require__(269);
-
-	var _utilsDefaultFilterOptions2 = _interopRequireDefault(_utilsDefaultFilterOptions);
-
-	var _utilsDefaultMenuRenderer = __webpack_require__(271);
-
-	var _utilsDefaultMenuRenderer2 = _interopRequireDefault(_utilsDefaultMenuRenderer);
-
-	var _Async = __webpack_require__(272);
-
-	var _Async2 = _interopRequireDefault(_Async);
-
-	var _AsyncCreatable = __webpack_require__(273);
-
-	var _AsyncCreatable2 = _interopRequireDefault(_AsyncCreatable);
-
-	var _Creatable = __webpack_require__(274);
-
-	var _Creatable2 = _interopRequireDefault(_Creatable);
-
-	var _Option = __webpack_require__(275);
-
-	var _Option2 = _interopRequireDefault(_Option);
-
-	var _Value = __webpack_require__(276);
-
-	var _Value2 = _interopRequireDefault(_Value);
-
-	function stringifyValue(value) {
-		var valueType = typeof value;
-		if (valueType === 'string') {
-			return value;
-		} else if (valueType === 'object') {
-			return JSON.stringify(value);
-		} else if (valueType === 'number' || valueType === 'boolean') {
-			return String(value);
-		} else {
-			return '';
-		}
-	}
-
-	var stringOrNode = _react2['default'].PropTypes.oneOfType([_react2['default'].PropTypes.string, _react2['default'].PropTypes.node]);
-
-	var instanceId = 1;
-
-	var Select = _react2['default'].createClass({
-
-		displayName: 'Select',
-
-		propTypes: {
-			addLabelText: _react2['default'].PropTypes.string, // placeholder displayed when you want to add a label on a multi-value input
-			'aria-label': _react2['default'].PropTypes.string, // Aria label (for assistive tech)
-			'aria-labelledby': _react2['default'].PropTypes.string, // HTML ID of an element that should be used as the label (for assistive tech)
-			arrowRenderer: _react2['default'].PropTypes.func, // Create drop-down caret element
-			autoBlur: _react2['default'].PropTypes.bool, // automatically blur the component when an option is selected
-			autofocus: _react2['default'].PropTypes.bool, // autofocus the component on mount
-			autosize: _react2['default'].PropTypes.bool, // whether to enable autosizing or not
-			backspaceRemoves: _react2['default'].PropTypes.bool, // whether backspace removes an item if there is no text input
-			backspaceToRemoveMessage: _react2['default'].PropTypes.string, // Message to use for screenreaders to press backspace to remove the current item - {label} is replaced with the item label
-			className: _react2['default'].PropTypes.string, // className for the outer element
-			clearAllText: stringOrNode, // title for the "clear" control when multi: true
-			clearValueText: stringOrNode, // title for the "clear" control
-			clearable: _react2['default'].PropTypes.bool, // should it be possible to reset value
-			delimiter: _react2['default'].PropTypes.string, // delimiter to use to join multiple values for the hidden field value
-			disabled: _react2['default'].PropTypes.bool, // whether the Select is disabled or not
-			escapeClearsValue: _react2['default'].PropTypes.bool, // whether escape clears the value when the menu is closed
-			filterOption: _react2['default'].PropTypes.func, // method to filter a single option (option, filterString)
-			filterOptions: _react2['default'].PropTypes.any, // boolean to enable default filtering or function to filter the options array ([options], filterString, [values])
-			ignoreAccents: _react2['default'].PropTypes.bool, // whether to strip diacritics when filtering
-			ignoreCase: _react2['default'].PropTypes.bool, // whether to perform case-insensitive filtering
-			inputProps: _react2['default'].PropTypes.object, // custom attributes for the Input
-			inputRenderer: _react2['default'].PropTypes.func, // returns a custom input component
-			instanceId: _react2['default'].PropTypes.string, // set the components instanceId
-			isLoading: _react2['default'].PropTypes.bool, // whether the Select is loading externally or not (such as options being loaded)
-			joinValues: _react2['default'].PropTypes.bool, // joins multiple values into a single form field with the delimiter (legacy mode)
-			labelKey: _react2['default'].PropTypes.string, // path of the label value in option objects
-			matchPos: _react2['default'].PropTypes.string, // (any|start) match the start or entire string when filtering
-			matchProp: _react2['default'].PropTypes.string, // (any|label|value) which option property to filter on
-			menuBuffer: _react2['default'].PropTypes.number, // optional buffer (in px) between the bottom of the viewport and the bottom of the menu
-			menuContainerStyle: _react2['default'].PropTypes.object, // optional style to apply to the menu container
-			menuRenderer: _react2['default'].PropTypes.func, // renders a custom menu with options
-			menuStyle: _react2['default'].PropTypes.object, // optional style to apply to the menu
-			multi: _react2['default'].PropTypes.bool, // multi-value input
-			name: _react2['default'].PropTypes.string, // generates a hidden <input /> tag with this field name for html forms
-			noResultsText: stringOrNode, // placeholder displayed when there are no matching search results
-			onBlur: _react2['default'].PropTypes.func, // onBlur handler: function (event) {}
-			onBlurResetsInput: _react2['default'].PropTypes.bool, // whether input is cleared on blur
-			onChange: _react2['default'].PropTypes.func, // onChange handler: function (newValue) {}
-			onClose: _react2['default'].PropTypes.func, // fires when the menu is closed
-			onCloseResetsInput: _react2['default'].PropTypes.bool, // whether input is cleared when menu is closed through the arrow
-			onFocus: _react2['default'].PropTypes.func, // onFocus handler: function (event) {}
-			onInputChange: _react2['default'].PropTypes.func, // onInputChange handler: function (inputValue) {}
-			onInputKeyDown: _react2['default'].PropTypes.func, // input keyDown handler: function (event) {}
-			onMenuScrollToBottom: _react2['default'].PropTypes.func, // fires when the menu is scrolled to the bottom; can be used to paginate options
-			onOpen: _react2['default'].PropTypes.func, // fires when the menu is opened
-			onValueClick: _react2['default'].PropTypes.func, // onClick handler for value labels: function (value, event) {}
-			openAfterFocus: _react2['default'].PropTypes.bool, // boolean to enable opening dropdown when focused
-			openOnFocus: _react2['default'].PropTypes.bool, // always open options menu on focus
-			optionClassName: _react2['default'].PropTypes.string, // additional class(es) to apply to the <Option /> elements
-			optionComponent: _react2['default'].PropTypes.func, // option component to render in dropdown
-			optionRenderer: _react2['default'].PropTypes.func, // optionRenderer: function (option) {}
-			options: _react2['default'].PropTypes.array, // array of options
-			pageSize: _react2['default'].PropTypes.number, // number of entries to page when using page up/down keys
-			placeholder: stringOrNode, // field placeholder, displayed when there's no value
-			required: _react2['default'].PropTypes.bool, // applies HTML5 required attribute when needed
-			resetValue: _react2['default'].PropTypes.any, // value to use when you clear the control
-			scrollMenuIntoView: _react2['default'].PropTypes.bool, // boolean to enable the viewport to shift so that the full menu fully visible when engaged
-			searchable: _react2['default'].PropTypes.bool, // whether to enable searching feature or not
-			simpleValue: _react2['default'].PropTypes.bool, // pass the value to onChange as a simple value (legacy pre 1.0 mode), defaults to false
-			style: _react2['default'].PropTypes.object, // optional style to apply to the control
-			tabIndex: _react2['default'].PropTypes.string, // optional tab index of the control
-			tabSelectsValue: _react2['default'].PropTypes.bool, // whether to treat tabbing out while focused to be value selection
-			value: _react2['default'].PropTypes.any, // initial field value
-			valueComponent: _react2['default'].PropTypes.func, // value component to render
-			valueKey: _react2['default'].PropTypes.string, // path of the label value in option objects
-			valueRenderer: _react2['default'].PropTypes.func, // valueRenderer: function (option) {}
-			wrapperStyle: _react2['default'].PropTypes.object },
-
-		// optional style to apply to the component wrapper
-		statics: { Async: _Async2['default'], AsyncCreatable: _AsyncCreatable2['default'], Creatable: _Creatable2['default'] },
-
-		getDefaultProps: function getDefaultProps() {
-			return {
-				addLabelText: 'Add "{label}"?',
-				arrowRenderer: _utilsDefaultArrowRenderer2['default'],
-				autosize: true,
-				backspaceRemoves: true,
-				backspaceToRemoveMessage: 'Press backspace to remove {label}',
-				clearable: true,
-				clearAllText: 'Clear all',
-				clearValueText: 'Clear value',
-				delimiter: ',',
-				disabled: false,
-				escapeClearsValue: true,
-				filterOptions: _utilsDefaultFilterOptions2['default'],
-				ignoreAccents: true,
-				ignoreCase: true,
-				inputProps: {},
-				isLoading: false,
-				joinValues: false,
-				labelKey: 'label',
-				matchPos: 'any',
-				matchProp: 'any',
-				menuBuffer: 0,
-				menuRenderer: _utilsDefaultMenuRenderer2['default'],
-				multi: false,
-				noResultsText: 'No results found',
-				onBlurResetsInput: true,
-				onCloseResetsInput: true,
-				openAfterFocus: false,
-				optionComponent: _Option2['default'],
-				pageSize: 5,
-				placeholder: 'Select...',
-				required: false,
-				scrollMenuIntoView: true,
-				searchable: true,
-				simpleValue: false,
-				tabSelectsValue: true,
-				valueComponent: _Value2['default'],
-				valueKey: 'value'
-			};
-		},
-
-		getInitialState: function getInitialState() {
-			return {
-				inputValue: '',
-				isFocused: false,
-				isOpen: false,
-				isPseudoFocused: false,
-				required: false
-			};
-		},
-
-		componentWillMount: function componentWillMount() {
-			this._instancePrefix = 'react-select-' + (this.props.instanceId || ++instanceId) + '-';
-			var valueArray = this.getValueArray(this.props.value);
-
-			if (this.props.required) {
-				this.setState({
-					required: this.handleRequired(valueArray[0], this.props.multi)
-				});
-			}
-		},
-
-		componentDidMount: function componentDidMount() {
-			if (this.props.autofocus) {
-				this.focus();
-			}
-		},
-
-		componentWillReceiveProps: function componentWillReceiveProps(nextProps) {
-			var valueArray = this.getValueArray(nextProps.value, nextProps);
-
-			if (nextProps.required) {
-				this.setState({
-					required: this.handleRequired(valueArray[0], nextProps.multi)
-				});
-			}
-		},
-
-		componentWillUpdate: function componentWillUpdate(nextProps, nextState) {
-			if (nextState.isOpen !== this.state.isOpen) {
-				this.toggleTouchOutsideEvent(nextState.isOpen);
-				var handler = nextState.isOpen ? nextProps.onOpen : nextProps.onClose;
-				handler && handler();
-			}
-		},
-
-		componentDidUpdate: function componentDidUpdate(prevProps, prevState) {
-			// focus to the selected option
-			if (this.menu && this.focused && this.state.isOpen && !this.hasScrolledToOption) {
-				var focusedOptionNode = _reactDom2['default'].findDOMNode(this.focused);
-				var menuNode = _reactDom2['default'].findDOMNode(this.menu);
-				menuNode.scrollTop = focusedOptionNode.offsetTop;
-				this.hasScrolledToOption = true;
-			} else if (!this.state.isOpen) {
-				this.hasScrolledToOption = false;
-			}
-
-			if (this._scrollToFocusedOptionOnUpdate && this.focused && this.menu) {
-				this._scrollToFocusedOptionOnUpdate = false;
-				var focusedDOM = _reactDom2['default'].findDOMNode(this.focused);
-				var menuDOM = _reactDom2['default'].findDOMNode(this.menu);
-				var focusedRect = focusedDOM.getBoundingClientRect();
-				var menuRect = menuDOM.getBoundingClientRect();
-				if (focusedRect.bottom > menuRect.bottom || focusedRect.top < menuRect.top) {
-					menuDOM.scrollTop = focusedDOM.offsetTop + focusedDOM.clientHeight - menuDOM.offsetHeight;
-				}
-			}
-			if (this.props.scrollMenuIntoView && this.menuContainer) {
-				var menuContainerRect = this.menuContainer.getBoundingClientRect();
-				if (window.innerHeight < menuContainerRect.bottom + this.props.menuBuffer) {
-					window.scrollBy(0, menuContainerRect.bottom + this.props.menuBuffer - window.innerHeight);
-				}
-			}
-			if (prevProps.disabled !== this.props.disabled) {
-				this.setState({ isFocused: false }); // eslint-disable-line react/no-did-update-set-state
-				this.closeMenu();
-			}
-		},
-
-		componentWillUnmount: function componentWillUnmount() {
-			document.removeEventListener('touchstart', this.handleTouchOutside);
-		},
-
-		toggleTouchOutsideEvent: function toggleTouchOutsideEvent(enabled) {
-			if (enabled) {
-				document.addEventListener('touchstart', this.handleTouchOutside);
-			} else {
-				document.removeEventListener('touchstart', this.handleTouchOutside);
-			}
-		},
-
-		handleTouchOutside: function handleTouchOutside(event) {
-			// handle touch outside on ios to dismiss menu
-			if (this.wrapper && !this.wrapper.contains(event.target)) {
-				this.closeMenu();
-			}
-		},
-
-		focus: function focus() {
-			if (!this.input) return;
-			this.input.focus();
-
-			if (this.props.openAfterFocus) {
-				this.setState({
-					isOpen: true
-				});
-			}
-		},
-
-		blurInput: function blurInput() {
-			if (!this.input) return;
-			this.input.blur();
-		},
-
-		handleTouchMove: function handleTouchMove(event) {
-			// Set a flag that the view is being dragged
-			this.dragging = true;
-		},
-
-		handleTouchStart: function handleTouchStart(event) {
-			// Set a flag that the view is not being dragged
-			this.dragging = false;
-		},
-
-		handleTouchEnd: function handleTouchEnd(event) {
-			// Check if the view is being dragged, In this case
-			// we don't want to fire the click event (because the user only wants to scroll)
-			if (this.dragging) return;
-
-			// Fire the mouse events
-			this.handleMouseDown(event);
-		},
-
-		handleTouchEndClearValue: function handleTouchEndClearValue(event) {
-			// Check if the view is being dragged, In this case
-			// we don't want to fire the click event (because the user only wants to scroll)
-			if (this.dragging) return;
-
-			// Clear the value
-			this.clearValue(event);
-		},
-
-		handleMouseDown: function handleMouseDown(event) {
-			// if the event was triggered by a mousedown and not the primary
-			// button, or if the component is disabled, ignore it.
-			if (this.props.disabled || event.type === 'mousedown' && event.button !== 0) {
-				return;
-			}
-
-			if (event.target.tagName === 'INPUT') {
-				return;
-			}
-
-			// prevent default event handlers
-			event.stopPropagation();
-			event.preventDefault();
-
-			// for the non-searchable select, toggle the menu
-			if (!this.props.searchable) {
-				this.focus();
-				return this.setState({
-					isOpen: !this.state.isOpen
-				});
-			}
-
-			if (this.state.isFocused) {
-				// On iOS, we can get into a state where we think the input is focused but it isn't really,
-				// since iOS ignores programmatic calls to input.focus() that weren't triggered by a click event.
-				// Call focus() again here to be safe.
-				this.focus();
-
-				var input = this.input;
-				if (typeof input.getInput === 'function') {
-					// Get the actual DOM input if the ref is an <AutosizeInput /> component
-					input = input.getInput();
-				}
-
-				// clears the value so that the cursor will be at the end of input when the component re-renders
-				input.value = '';
-
-				// if the input is focused, ensure the menu is open
-				this.setState({
-					isOpen: true,
-					isPseudoFocused: false
-				});
-			} else {
-				// otherwise, focus the input and open the menu
-				this._openAfterFocus = true;
-				this.focus();
-			}
-		},
-
-		handleMouseDownOnArrow: function handleMouseDownOnArrow(event) {
-			// if the event was triggered by a mousedown and not the primary
-			// button, or if the component is disabled, ignore it.
-			if (this.props.disabled || event.type === 'mousedown' && event.button !== 0) {
-				return;
-			}
-			// If the menu isn't open, let the event bubble to the main handleMouseDown
-			if (!this.state.isOpen) {
-				return;
-			}
-			// prevent default event handlers
-			event.stopPropagation();
-			event.preventDefault();
-			// close the menu
-			this.closeMenu();
-		},
-
-		handleMouseDownOnMenu: function handleMouseDownOnMenu(event) {
-			// if the event was triggered by a mousedown and not the primary
-			// button, or if the component is disabled, ignore it.
-			if (this.props.disabled || event.type === 'mousedown' && event.button !== 0) {
-				return;
-			}
-			event.stopPropagation();
-			event.preventDefault();
-
-			this._openAfterFocus = true;
-			this.focus();
-		},
-
-		closeMenu: function closeMenu() {
-			if (this.props.onCloseResetsInput) {
-				this.setState({
-					isOpen: false,
-					isPseudoFocused: this.state.isFocused && !this.props.multi,
-					inputValue: ''
-				});
-			} else {
-				this.setState({
-					isOpen: false,
-					isPseudoFocused: this.state.isFocused && !this.props.multi,
-					inputValue: this.state.inputValue
-				});
-			}
-			this.hasScrolledToOption = false;
-		},
-
-		handleInputFocus: function handleInputFocus(event) {
-			if (this.props.disabled) return;
-			var isOpen = this.state.isOpen || this._openAfterFocus || this.props.openOnFocus;
-			if (this.props.onFocus) {
-				this.props.onFocus(event);
-			}
-			this.setState({
-				isFocused: true,
-				isOpen: isOpen
-			});
-			this._openAfterFocus = false;
-		},
-
-		handleInputBlur: function handleInputBlur(event) {
-			// The check for menu.contains(activeElement) is necessary to prevent IE11's scrollbar from closing the menu in certain contexts.
-			if (this.menu && (this.menu === document.activeElement || this.menu.contains(document.activeElement))) {
-				this.focus();
-				return;
-			}
-
-			if (this.props.onBlur) {
-				this.props.onBlur(event);
-			}
-			var onBlurredState = {
-				isFocused: false,
-				isOpen: false,
-				isPseudoFocused: false
-			};
-			if (this.props.onBlurResetsInput) {
-				onBlurredState.inputValue = '';
-			}
-			this.setState(onBlurredState);
-		},
-
-		handleInputChange: function handleInputChange(event) {
-			var newInputValue = event.target.value;
-
-			if (this.state.inputValue !== event.target.value && this.props.onInputChange) {
-				var nextState = this.props.onInputChange(newInputValue);
-				// Note: != used deliberately here to catch undefined and null
-				if (nextState != null && typeof nextState !== 'object') {
-					newInputValue = '' + nextState;
-				}
-			}
-
-			this.setState({
-				isOpen: true,
-				isPseudoFocused: false,
-				inputValue: newInputValue
-			});
-		},
-
-		handleKeyDown: function handleKeyDown(event) {
-			if (this.props.disabled) return;
-
-			if (typeof this.props.onInputKeyDown === 'function') {
-				this.props.onInputKeyDown(event);
-				if (event.defaultPrevented) {
-					return;
-				}
-			}
-
-			switch (event.keyCode) {
-				case 8:
-					// backspace
-					if (!this.state.inputValue && this.props.backspaceRemoves) {
-						event.preventDefault();
-						this.popValue();
-					}
-					return;
-				case 9:
-					// tab
-					if (event.shiftKey || !this.state.isOpen || !this.props.tabSelectsValue) {
-						return;
-					}
-					this.selectFocusedOption();
-					return;
-				case 13:
-					// enter
-					if (!this.state.isOpen) return;
-					event.stopPropagation();
-					this.selectFocusedOption();
-					break;
-				case 27:
-					// escape
-					if (this.state.isOpen) {
-						this.closeMenu();
-						event.stopPropagation();
-					} else if (this.props.clearable && this.props.escapeClearsValue) {
-						this.clearValue(event);
-						event.stopPropagation();
-					}
-					break;
-				case 38:
-					// up
-					this.focusPreviousOption();
-					break;
-				case 40:
-					// down
-					this.focusNextOption();
-					break;
-				case 33:
-					// page up
-					this.focusPageUpOption();
-					break;
-				case 34:
-					// page down
-					this.focusPageDownOption();
-					break;
-				case 35:
-					// end key
-					if (event.shiftKey) {
-						return;
-					}
-					this.focusEndOption();
-					break;
-				case 36:
-					// home key
-					if (event.shiftKey) {
-						return;
-					}
-					this.focusStartOption();
-					break;
-				default:
-					return;
-			}
-			event.preventDefault();
-		},
-
-		handleValueClick: function handleValueClick(option, event) {
-			if (!this.props.onValueClick) return;
-			this.props.onValueClick(option, event);
-		},
-
-		handleMenuScroll: function handleMenuScroll(event) {
-			if (!this.props.onMenuScrollToBottom) return;
-			var target = event.target;
-
-			if (target.scrollHeight > target.offsetHeight && !(target.scrollHeight - target.offsetHeight - target.scrollTop)) {
-				this.props.onMenuScrollToBottom();
-			}
-		},
-
-		handleRequired: function handleRequired(value, multi) {
-			if (!value) return true;
-			return multi ? value.length === 0 : Object.keys(value).length === 0;
-		},
-
-		getOptionLabel: function getOptionLabel(op) {
-			return op[this.props.labelKey];
-		},
-
-		/**
-	  * Turns a value into an array from the given options
-	  * @param	{String|Number|Array}	value		- the value of the select input
-	  * @param	{Object}		nextProps	- optionally specify the nextProps so the returned array uses the latest configuration
-	  * @returns	{Array}	the value of the select represented in an array
-	  */
-		getValueArray: function getValueArray(value, nextProps) {
-			var _this = this;
-
-			/** support optionally passing in the `nextProps` so `componentWillReceiveProps` updates will function as expected */
-			var props = typeof nextProps === 'object' ? nextProps : this.props;
-			if (props.multi) {
-				if (typeof value === 'string') value = value.split(props.delimiter);
-				if (!Array.isArray(value)) {
-					if (value === null || value === undefined) return [];
-					value = [value];
-				}
-				return value.map(function (value) {
-					return _this.expandValue(value, props);
-				}).filter(function (i) {
-					return i;
-				});
-			}
-			var expandedValue = this.expandValue(value, props);
-			return expandedValue ? [expandedValue] : [];
-		},
-
-		/**
-	  * Retrieve a value from the given options and valueKey
-	  * @param	{String|Number|Array}	value	- the selected value(s)
-	  * @param	{Object}		props	- the Select component's props (or nextProps)
-	  */
-		expandValue: function expandValue(value, props) {
-			var valueType = typeof value;
-			if (valueType !== 'string' && valueType !== 'number' && valueType !== 'boolean') return value;
-			var options = props.options;
-			var valueKey = props.valueKey;
-
-			if (!options) return;
-			for (var i = 0; i < options.length; i++) {
-				if (options[i][valueKey] === value) return options[i];
-			}
-		},
-
-		setValue: function setValue(value) {
-			var _this2 = this;
-
-			if (this.props.autoBlur) {
-				this.blurInput();
-			}
-			if (!this.props.onChange) return;
-			if (this.props.required) {
-				var required = this.handleRequired(value, this.props.multi);
-				this.setState({ required: required });
-			}
-			if (this.props.simpleValue && value) {
-				value = this.props.multi ? value.map(function (i) {
-					return i[_this2.props.valueKey];
-				}).join(this.props.delimiter) : value[this.props.valueKey];
-			}
-			this.props.onChange(value);
-		},
-
-		selectValue: function selectValue(value) {
-			var _this3 = this;
-
-			//NOTE: update value in the callback to make sure the input value is empty so that there are no styling issues (Chrome had issue otherwise)
-			this.hasScrolledToOption = false;
-			if (this.props.multi) {
-				this.setState({
-					inputValue: '',
-					focusedIndex: null
-				}, function () {
-					_this3.addValue(value);
-				});
-			} else {
-				this.setState({
-					isOpen: false,
-					inputValue: '',
-					isPseudoFocused: this.state.isFocused
-				}, function () {
-					_this3.setValue(value);
-				});
-			}
-		},
-
-		addValue: function addValue(value) {
-			var valueArray = this.getValueArray(this.props.value);
-			this.setValue(valueArray.concat(value));
-		},
-
-		popValue: function popValue() {
-			var valueArray = this.getValueArray(this.props.value);
-			if (!valueArray.length) return;
-			if (valueArray[valueArray.length - 1].clearableValue === false) return;
-			this.setValue(valueArray.slice(0, valueArray.length - 1));
-		},
-
-		removeValue: function removeValue(value) {
-			var valueArray = this.getValueArray(this.props.value);
-			this.setValue(valueArray.filter(function (i) {
-				return i !== value;
-			}));
-			this.focus();
-		},
-
-		clearValue: function clearValue(event) {
-			// if the event was triggered by a mousedown and not the primary
-			// button, ignore it.
-			if (event && event.type === 'mousedown' && event.button !== 0) {
-				return;
-			}
-			event.stopPropagation();
-			event.preventDefault();
-			this.setValue(this.getResetValue());
-			this.setState({
-				isOpen: false,
-				inputValue: ''
-			}, this.focus);
-		},
-
-		getResetValue: function getResetValue() {
-			if (this.props.resetValue !== undefined) {
-				return this.props.resetValue;
-			} else if (this.props.multi) {
-				return [];
-			} else {
-				return null;
-			}
-		},
-
-		focusOption: function focusOption(option) {
-			this.setState({
-				focusedOption: option
-			});
-		},
-
-		focusNextOption: function focusNextOption() {
-			this.focusAdjacentOption('next');
-		},
-
-		focusPreviousOption: function focusPreviousOption() {
-			this.focusAdjacentOption('previous');
-		},
-
-		focusPageUpOption: function focusPageUpOption() {
-			this.focusAdjacentOption('page_up');
-		},
-
-		focusPageDownOption: function focusPageDownOption() {
-			this.focusAdjacentOption('page_down');
-		},
-
-		focusStartOption: function focusStartOption() {
-			this.focusAdjacentOption('start');
-		},
-
-		focusEndOption: function focusEndOption() {
-			this.focusAdjacentOption('end');
-		},
-
-		focusAdjacentOption: function focusAdjacentOption(dir) {
-			var options = this._visibleOptions.map(function (option, index) {
-				return { option: option, index: index };
-			}).filter(function (option) {
-				return !option.option.disabled;
-			});
-			this._scrollToFocusedOptionOnUpdate = true;
-			if (!this.state.isOpen) {
-				this.setState({
-					isOpen: true,
-					inputValue: '',
-					focusedOption: this._focusedOption || options[dir === 'next' ? 0 : options.length - 1].option
-				});
-				return;
-			}
-			if (!options.length) return;
-			var focusedIndex = -1;
-			for (var i = 0; i < options.length; i++) {
-				if (this._focusedOption === options[i].option) {
-					focusedIndex = i;
-					break;
-				}
-			}
-			if (dir === 'next' && focusedIndex !== -1) {
-				focusedIndex = (focusedIndex + 1) % options.length;
-			} else if (dir === 'previous') {
-				if (focusedIndex > 0) {
-					focusedIndex = focusedIndex - 1;
-				} else {
-					focusedIndex = options.length - 1;
-				}
-			} else if (dir === 'start') {
-				focusedIndex = 0;
-			} else if (dir === 'end') {
-				focusedIndex = options.length - 1;
-			} else if (dir === 'page_up') {
-				var potentialIndex = focusedIndex - this.props.pageSize;
-				if (potentialIndex < 0) {
-					focusedIndex = 0;
-				} else {
-					focusedIndex = potentialIndex;
-				}
-			} else if (dir === 'page_down') {
-				var potentialIndex = focusedIndex + this.props.pageSize;
-				if (potentialIndex > options.length - 1) {
-					focusedIndex = options.length - 1;
-				} else {
-					focusedIndex = potentialIndex;
-				}
-			}
-
-			if (focusedIndex === -1) {
-				focusedIndex = 0;
-			}
-
-			this.setState({
-				focusedIndex: options[focusedIndex].index,
-				focusedOption: options[focusedIndex].option
-			});
-		},
-
-		getFocusedOption: function getFocusedOption() {
-			return this._focusedOption;
-		},
-
-		getInputValue: function getInputValue() {
-			return this.state.inputValue;
-		},
-
-		selectFocusedOption: function selectFocusedOption() {
-			if (this._focusedOption) {
-				return this.selectValue(this._focusedOption);
-			}
-		},
-
-		renderLoading: function renderLoading() {
-			if (!this.props.isLoading) return;
-			return _react2['default'].createElement(
-				'span',
-				{ className: 'Select-loading-zone', 'aria-hidden': 'true' },
-				_react2['default'].createElement('span', { className: 'Select-loading' })
-			);
-		},
-
-		renderValue: function renderValue(valueArray, isOpen) {
-			var _this4 = this;
-
-			var renderLabel = this.props.valueRenderer || this.getOptionLabel;
-			var ValueComponent = this.props.valueComponent;
-			if (!valueArray.length) {
-				return !this.state.inputValue ? _react2['default'].createElement(
-					'div',
-					{ className: 'Select-placeholder' },
-					this.props.placeholder
-				) : null;
-			}
-			var onClick = this.props.onValueClick ? this.handleValueClick : null;
-			if (this.props.multi) {
-				return valueArray.map(function (value, i) {
-					return _react2['default'].createElement(
-						ValueComponent,
-						{
-							id: _this4._instancePrefix + '-value-' + i,
-							instancePrefix: _this4._instancePrefix,
-							disabled: _this4.props.disabled || value.clearableValue === false,
-							key: 'value-' + i + '-' + value[_this4.props.valueKey],
-							onClick: onClick,
-							onRemove: _this4.removeValue,
-							value: value
-						},
-						renderLabel(value, i),
-						_react2['default'].createElement(
-							'span',
-							{ className: 'Select-aria-only' },
-							' '
-						)
-					);
-				});
-			} else if (!this.state.inputValue) {
-				if (isOpen) onClick = null;
-				return _react2['default'].createElement(
-					ValueComponent,
-					{
-						id: this._instancePrefix + '-value-item',
-						disabled: this.props.disabled,
-						instancePrefix: this._instancePrefix,
-						onClick: onClick,
-						value: valueArray[0]
-					},
-					renderLabel(valueArray[0])
-				);
-			}
-		},
-
-		renderInput: function renderInput(valueArray, focusedOptionIndex) {
-			var _this5 = this;
-
-			if (this.props.inputRenderer) {
-				return this.props.inputRenderer();
-			} else {
-				var _classNames;
-
-				var className = (0, _classnames2['default'])('Select-input', this.props.inputProps.className);
-				var isOpen = !!this.state.isOpen;
-
-				var ariaOwns = (0, _classnames2['default'])((_classNames = {}, _defineProperty(_classNames, this._instancePrefix + '-list', isOpen), _defineProperty(_classNames, this._instancePrefix + '-backspace-remove-message', this.props.multi && !this.props.disabled && this.state.isFocused && !this.state.inputValue), _classNames));
-
-				// TODO: Check how this project includes Object.assign()
-				var inputProps = _extends({}, this.props.inputProps, {
-					role: 'combobox',
-					'aria-expanded': '' + isOpen,
-					'aria-owns': ariaOwns,
-					'aria-haspopup': '' + isOpen,
-					'aria-activedescendant': isOpen ? this._instancePrefix + '-option-' + focusedOptionIndex : this._instancePrefix + '-value',
-					'aria-labelledby': this.props['aria-labelledby'],
-					'aria-label': this.props['aria-label'],
-					className: className,
-					tabIndex: this.props.tabIndex,
-					onBlur: this.handleInputBlur,
-					onChange: this.handleInputChange,
-					onFocus: this.handleInputFocus,
-					ref: function ref(_ref) {
-						return _this5.input = _ref;
-					},
-					required: this.state.required,
-					value: this.state.inputValue
-				});
-
-				if (this.props.disabled || !this.props.searchable) {
-					var _props$inputProps = this.props.inputProps;
-					var inputClassName = _props$inputProps.inputClassName;
-
-					var divProps = _objectWithoutProperties(_props$inputProps, ['inputClassName']);
-
-					return _react2['default'].createElement('div', _extends({}, divProps, {
-						role: 'combobox',
-						'aria-expanded': isOpen,
-						'aria-owns': isOpen ? this._instancePrefix + '-list' : this._instancePrefix + '-value',
-						'aria-activedescendant': isOpen ? this._instancePrefix + '-option-' + focusedOptionIndex : this._instancePrefix + '-value',
-						className: className,
-						tabIndex: this.props.tabIndex || 0,
-						onBlur: this.handleInputBlur,
-						onFocus: this.handleInputFocus,
-						ref: function (ref) {
-							return _this5.input = ref;
-						},
-						'aria-readonly': '' + !!this.props.disabled,
-						style: { border: 0, width: 1, display: 'inline-block' } }));
-				}
-
-				if (this.props.autosize) {
-					return _react2['default'].createElement(_reactInputAutosize2['default'], _extends({}, inputProps, { minWidth: '5px' }));
-				}
-				return _react2['default'].createElement(
-					'div',
-					{ className: className },
-					_react2['default'].createElement('input', inputProps)
-				);
-			}
-		},
-
-		renderClear: function renderClear() {
-			if (!this.props.clearable || !this.props.value || this.props.value === 0 || this.props.multi && !this.props.value.length || this.props.disabled || this.props.isLoading) return;
-			return _react2['default'].createElement(
-				'span',
-				{ className: 'Select-clear-zone', title: this.props.multi ? this.props.clearAllText : this.props.clearValueText,
-					'aria-label': this.props.multi ? this.props.clearAllText : this.props.clearValueText,
-					onMouseDown: this.clearValue,
-					onTouchStart: this.handleTouchStart,
-					onTouchMove: this.handleTouchMove,
-					onTouchEnd: this.handleTouchEndClearValue
-				},
-				_react2['default'].createElement('span', { className: 'Select-clear', dangerouslySetInnerHTML: { __html: '&times;' } })
-			);
-		},
-
-		renderArrow: function renderArrow() {
-			var onMouseDown = this.handleMouseDownOnArrow;
-			var arrow = this.props.arrowRenderer({ onMouseDown: onMouseDown });
-
-			return _react2['default'].createElement(
-				'span',
-				{
-					className: 'Select-arrow-zone',
-					onMouseDown: onMouseDown
-				},
-				arrow
-			);
-		},
-
-		filterOptions: function filterOptions(excludeOptions) {
-			var filterValue = this.state.inputValue;
-			var options = this.props.options || [];
-			if (this.props.filterOptions) {
-				// Maintain backwards compatibility with boolean attribute
-				var filterOptions = typeof this.props.filterOptions === 'function' ? this.props.filterOptions : _utilsDefaultFilterOptions2['default'];
-
-				return filterOptions(options, filterValue, excludeOptions, {
-					filterOption: this.props.filterOption,
-					ignoreAccents: this.props.ignoreAccents,
-					ignoreCase: this.props.ignoreCase,
-					labelKey: this.props.labelKey,
-					matchPos: this.props.matchPos,
-					matchProp: this.props.matchProp,
-					valueKey: this.props.valueKey
-				});
-			} else {
-				return options;
-			}
-		},
-
-		onOptionRef: function onOptionRef(ref, isFocused) {
-			if (isFocused) {
-				this.focused = ref;
-			}
-		},
-
-		renderMenu: function renderMenu(options, valueArray, focusedOption) {
-			if (options && options.length) {
-				return this.props.menuRenderer({
-					focusedOption: focusedOption,
-					focusOption: this.focusOption,
-					instancePrefix: this._instancePrefix,
-					labelKey: this.props.labelKey,
-					onFocus: this.focusOption,
-					onSelect: this.selectValue,
-					optionClassName: this.props.optionClassName,
-					optionComponent: this.props.optionComponent,
-					optionRenderer: this.props.optionRenderer || this.getOptionLabel,
-					options: options,
-					selectValue: this.selectValue,
-					valueArray: valueArray,
-					valueKey: this.props.valueKey,
-					onOptionRef: this.onOptionRef
-				});
-			} else if (this.props.noResultsText) {
-				return _react2['default'].createElement(
-					'div',
-					{ className: 'Select-noresults' },
-					this.props.noResultsText
-				);
-			} else {
-				return null;
-			}
-		},
-
-		renderHiddenField: function renderHiddenField(valueArray) {
-			var _this6 = this;
-
-			if (!this.props.name) return;
-			if (this.props.joinValues) {
-				var value = valueArray.map(function (i) {
-					return stringifyValue(i[_this6.props.valueKey]);
-				}).join(this.props.delimiter);
-				return _react2['default'].createElement('input', {
-					type: 'hidden',
-					ref: function (ref) {
-						return _this6.value = ref;
-					},
-					name: this.props.name,
-					value: value,
-					disabled: this.props.disabled });
-			}
-			return valueArray.map(function (item, index) {
-				return _react2['default'].createElement('input', { key: 'hidden.' + index,
-					type: 'hidden',
-					ref: 'value' + index,
-					name: _this6.props.name,
-					value: stringifyValue(item[_this6.props.valueKey]),
-					disabled: _this6.props.disabled });
-			});
-		},
-
-		getFocusableOptionIndex: function getFocusableOptionIndex(selectedOption) {
-			var options = this._visibleOptions;
-			if (!options.length) return null;
-
-			var focusedOption = this.state.focusedOption || selectedOption;
-			if (focusedOption && !focusedOption.disabled) {
-				var focusedOptionIndex = options.indexOf(focusedOption);
-				if (focusedOptionIndex !== -1) {
-					return focusedOptionIndex;
-				}
-			}
-
-			for (var i = 0; i < options.length; i++) {
-				if (!options[i].disabled) return i;
-			}
-			return null;
-		},
-
-		renderOuter: function renderOuter(options, valueArray, focusedOption) {
-			var _this7 = this;
-
-			var menu = this.renderMenu(options, valueArray, focusedOption);
-			if (!menu) {
-				return null;
-			}
-
-			return _react2['default'].createElement(
-				'div',
-				{ ref: function (ref) {
-						return _this7.menuContainer = ref;
-					}, className: 'Select-menu-outer', style: this.props.menuContainerStyle },
-				_react2['default'].createElement(
-					'div',
-					{ ref: function (ref) {
-							return _this7.menu = ref;
-						}, role: 'listbox', className: 'Select-menu', id: this._instancePrefix + '-list',
-						style: this.props.menuStyle,
-						onScroll: this.handleMenuScroll,
-						onMouseDown: this.handleMouseDownOnMenu },
-					menu
-				)
-			);
-		},
-
-		render: function render() {
-			var _this8 = this;
-
-			var valueArray = this.getValueArray(this.props.value);
-			var options = this._visibleOptions = this.filterOptions(this.props.multi ? this.getValueArray(this.props.value) : null);
-			var isOpen = this.state.isOpen;
-			if (this.props.multi && !options.length && valueArray.length && !this.state.inputValue) isOpen = false;
-			var focusedOptionIndex = this.getFocusableOptionIndex(valueArray[0]);
-
-			var focusedOption = null;
-			if (focusedOptionIndex !== null) {
-				focusedOption = this._focusedOption = options[focusedOptionIndex];
-			} else {
-				focusedOption = this._focusedOption = null;
-			}
-			var className = (0, _classnames2['default'])('Select', this.props.className, {
-				'Select--multi': this.props.multi,
-				'Select--single': !this.props.multi,
-				'is-disabled': this.props.disabled,
-				'is-focused': this.state.isFocused,
-				'is-loading': this.props.isLoading,
-				'is-open': isOpen,
-				'is-pseudo-focused': this.state.isPseudoFocused,
-				'is-searchable': this.props.searchable,
-				'has-value': valueArray.length
-			});
-
-			var removeMessage = null;
-			if (this.props.multi && !this.props.disabled && valueArray.length && !this.state.inputValue && this.state.isFocused && this.props.backspaceRemoves) {
-				removeMessage = _react2['default'].createElement(
-					'span',
-					{ id: this._instancePrefix + '-backspace-remove-message', className: 'Select-aria-only', 'aria-live': 'assertive' },
-					this.props.backspaceToRemoveMessage.replace('{label}', valueArray[valueArray.length - 1][this.props.labelKey])
-				);
-			}
-
-			return _react2['default'].createElement(
-				'div',
-				{ ref: function (ref) {
-						return _this8.wrapper = ref;
-					},
-					className: className,
-					style: this.props.wrapperStyle },
-				this.renderHiddenField(valueArray),
-				_react2['default'].createElement(
-					'div',
-					{ ref: function (ref) {
-							return _this8.control = ref;
-						},
-						className: 'Select-control',
-						style: this.props.style,
-						onKeyDown: this.handleKeyDown,
-						onMouseDown: this.handleMouseDown,
-						onTouchEnd: this.handleTouchEnd,
-						onTouchStart: this.handleTouchStart,
-						onTouchMove: this.handleTouchMove
-					},
-					_react2['default'].createElement(
-						'span',
-						{ className: 'Select-multi-value-wrapper', id: this._instancePrefix + '-value' },
-						this.renderValue(valueArray, isOpen),
-						this.renderInput(valueArray, focusedOptionIndex)
-					),
-					removeMessage,
-					this.renderLoading(),
-					this.renderClear(),
-					this.renderArrow()
-				),
-				isOpen ? this.renderOuter(options, !this.props.multi ? valueArray : null, focusedOption) : null
-			);
-		}
-
-	});
-
-	exports['default'] = Select;
-	module.exports = exports['default'];
-
-/***/ },
-/* 266 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
-
-	var React = __webpack_require__(1);
-
-	var sizerStyle = { position: 'absolute', top: 0, left: 0, visibility: 'hidden', height: 0, overflow: 'scroll', whiteSpace: 'pre' };
-
-	var AutosizeInput = React.createClass({
-		displayName: 'AutosizeInput',
-
-		propTypes: {
-			className: React.PropTypes.string, // className for the outer element
-			defaultValue: React.PropTypes.any, // default field value
-			inputClassName: React.PropTypes.string, // className for the input element
-			inputStyle: React.PropTypes.object, // css styles for the input element
-			minWidth: React.PropTypes.oneOfType([// minimum width for input element
-			React.PropTypes.number, React.PropTypes.string]),
-			onChange: React.PropTypes.func, // onChange handler: function(newValue) {}
-			placeholder: React.PropTypes.string, // placeholder text
-			placeholderIsMinWidth: React.PropTypes.bool, // don't collapse size to less than the placeholder
-			style: React.PropTypes.object, // css styles for the outer element
-			value: React.PropTypes.any },
-		// field value
-		getDefaultProps: function getDefaultProps() {
-			return {
-				minWidth: 1
-			};
-		},
-		getInitialState: function getInitialState() {
-			return {
-				inputWidth: this.props.minWidth
-			};
-		},
-		componentDidMount: function componentDidMount() {
-			this.copyInputStyles();
-			this.updateInputWidth();
-		},
-		componentDidUpdate: function componentDidUpdate() {
-			this.updateInputWidth();
-		},
-		copyInputStyles: function copyInputStyles() {
-			if (!this.isMounted() || !window.getComputedStyle) {
-				return;
-			}
-			var inputStyle = window.getComputedStyle(this.refs.input);
-			if (!inputStyle) {
-				return;
-			}
-			var widthNode = this.refs.sizer;
-			widthNode.style.fontSize = inputStyle.fontSize;
-			widthNode.style.fontFamily = inputStyle.fontFamily;
-			widthNode.style.fontWeight = inputStyle.fontWeight;
-			widthNode.style.fontStyle = inputStyle.fontStyle;
-			widthNode.style.letterSpacing = inputStyle.letterSpacing;
-			if (this.props.placeholder) {
-				var placeholderNode = this.refs.placeholderSizer;
-				placeholderNode.style.fontSize = inputStyle.fontSize;
-				placeholderNode.style.fontFamily = inputStyle.fontFamily;
-				placeholderNode.style.fontWeight = inputStyle.fontWeight;
-				placeholderNode.style.fontStyle = inputStyle.fontStyle;
-				placeholderNode.style.letterSpacing = inputStyle.letterSpacing;
-			}
-		},
-		updateInputWidth: function updateInputWidth() {
-			if (!this.isMounted() || typeof this.refs.sizer.scrollWidth === 'undefined') {
-				return;
-			}
-			var newInputWidth = undefined;
-			if (this.props.placeholder && (!this.props.value || this.props.value && this.props.placeholderIsMinWidth)) {
-				newInputWidth = Math.max(this.refs.sizer.scrollWidth, this.refs.placeholderSizer.scrollWidth) + 2;
-			} else {
-				newInputWidth = this.refs.sizer.scrollWidth + 2;
-			}
-			if (newInputWidth < this.props.minWidth) {
-				newInputWidth = this.props.minWidth;
-			}
-			if (newInputWidth !== this.state.inputWidth) {
-				this.setState({
-					inputWidth: newInputWidth
-				});
-			}
-		},
-		getInput: function getInput() {
-			return this.refs.input;
-		},
-		focus: function focus() {
-			this.refs.input.focus();
-		},
-		blur: function blur() {
-			this.refs.input.blur();
-		},
-		select: function select() {
-			this.refs.input.select();
-		},
-		render: function render() {
-			var sizerValue = this.props.defaultValue || this.props.value || '';
-			var wrapperStyle = this.props.style || {};
-			if (!wrapperStyle.display) wrapperStyle.display = 'inline-block';
-			var inputStyle = _extends({}, this.props.inputStyle);
-			inputStyle.width = this.state.inputWidth + 'px';
-			inputStyle.boxSizing = 'content-box';
-			var inputProps = _extends({}, this.props);
-			inputProps.className = this.props.inputClassName;
-			inputProps.style = inputStyle;
-			// ensure props meant for `AutosizeInput` don't end up on the `input`
-			delete inputProps.inputClassName;
-			delete inputProps.inputStyle;
-			delete inputProps.minWidth;
-			delete inputProps.placeholderIsMinWidth;
-			return React.createElement(
-				'div',
-				{ className: this.props.className, style: wrapperStyle },
-				React.createElement('input', _extends({}, inputProps, { ref: 'input' })),
-				React.createElement(
-					'div',
-					{ ref: 'sizer', style: sizerStyle },
-					sizerValue
-				),
-				this.props.placeholder ? React.createElement(
-					'div',
-					{ ref: 'placeholderSizer', style: sizerStyle },
-					this.props.placeholder
-				) : null
-			);
-		}
-	});
-
-	module.exports = AutosizeInput;
-
-/***/ },
-/* 267 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
-	  Copyright (c) 2016 Jed Watson.
-	  Licensed under the MIT License (MIT), see
-	  http://jedwatson.github.io/classnames
-	*/
-	/* global define */
-
-	(function () {
-		'use strict';
-
-		var hasOwn = {}.hasOwnProperty;
-
-		function classNames () {
-			var classes = [];
-
-			for (var i = 0; i < arguments.length; i++) {
-				var arg = arguments[i];
-				if (!arg) continue;
-
-				var argType = typeof arg;
-
-				if (argType === 'string' || argType === 'number') {
-					classes.push(arg);
-				} else if (Array.isArray(arg)) {
-					classes.push(classNames.apply(null, arg));
-				} else if (argType === 'object') {
-					for (var key in arg) {
-						if (hasOwn.call(arg, key) && arg[key]) {
-							classes.push(key);
-						}
-					}
-				}
-			}
-
-			return classes.join(' ');
-		}
-
-		if (typeof module !== 'undefined' && module.exports) {
-			module.exports = classNames;
-		} else if (true) {
-			// register as 'classnames', consistent with npm package name
-			!(__WEBPACK_AMD_DEFINE_ARRAY__ = [], __WEBPACK_AMD_DEFINE_RESULT__ = function () {
-				return classNames;
-			}.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
-		} else {
-			window.classNames = classNames;
-		}
-	}());
-
-
-/***/ },
-/* 268 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-
-	Object.defineProperty(exports, "__esModule", {
-		value: true
-	});
-	exports["default"] = arrowRenderer;
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
-
-	var _react = __webpack_require__(1);
-
-	var _react2 = _interopRequireDefault(_react);
-
-	function arrowRenderer(_ref) {
-		var onMouseDown = _ref.onMouseDown;
-
-		return _react2["default"].createElement("span", {
-			className: "Select-arrow",
-			onMouseDown: onMouseDown
-		});
-	}
-
-	;
-	module.exports = exports["default"];
-
-/***/ },
-/* 269 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
-
-	var _stripDiacritics = __webpack_require__(270);
-
-	var _stripDiacritics2 = _interopRequireDefault(_stripDiacritics);
-
-	function filterOptions(options, filterValue, excludeOptions, props) {
-		var _this = this;
-
-		if (props.ignoreAccents) {
-			filterValue = (0, _stripDiacritics2['default'])(filterValue);
-		}
-
-		if (props.ignoreCase) {
-			filterValue = filterValue.toLowerCase();
-		}
-
-		if (excludeOptions) excludeOptions = excludeOptions.map(function (i) {
-			return i[props.valueKey];
-		});
-
-		return options.filter(function (option) {
-			if (excludeOptions && excludeOptions.indexOf(option[props.valueKey]) > -1) return false;
-			if (props.filterOption) return props.filterOption.call(_this, option, filterValue);
-			if (!filterValue) return true;
-			var valueTest = String(option[props.valueKey]);
-			var labelTest = String(option[props.labelKey]);
-			if (props.ignoreAccents) {
-				if (props.matchProp !== 'label') valueTest = (0, _stripDiacritics2['default'])(valueTest);
-				if (props.matchProp !== 'value') labelTest = (0, _stripDiacritics2['default'])(labelTest);
-			}
-			if (props.ignoreCase) {
-				if (props.matchProp !== 'label') valueTest = valueTest.toLowerCase();
-				if (props.matchProp !== 'value') labelTest = labelTest.toLowerCase();
-			}
-			return props.matchPos === 'start' ? props.matchProp !== 'label' && valueTest.substr(0, filterValue.length) === filterValue || props.matchProp !== 'value' && labelTest.substr(0, filterValue.length) === filterValue : props.matchProp !== 'label' && valueTest.indexOf(filterValue) >= 0 || props.matchProp !== 'value' && labelTest.indexOf(filterValue) >= 0;
-		});
-	}
-
-	module.exports = filterOptions;
-
-/***/ },
-/* 270 */
-/***/ function(module, exports) {
-
-	'use strict';
-
-	var map = [{ 'base': 'A', 'letters': /[\u0041\u24B6\uFF21\u00C0\u00C1\u00C2\u1EA6\u1EA4\u1EAA\u1EA8\u00C3\u0100\u0102\u1EB0\u1EAE\u1EB4\u1EB2\u0226\u01E0\u00C4\u01DE\u1EA2\u00C5\u01FA\u01CD\u0200\u0202\u1EA0\u1EAC\u1EB6\u1E00\u0104\u023A\u2C6F]/g }, { 'base': 'AA', 'letters': /[\uA732]/g }, { 'base': 'AE', 'letters': /[\u00C6\u01FC\u01E2]/g }, { 'base': 'AO', 'letters': /[\uA734]/g }, { 'base': 'AU', 'letters': /[\uA736]/g }, { 'base': 'AV', 'letters': /[\uA738\uA73A]/g }, { 'base': 'AY', 'letters': /[\uA73C]/g }, { 'base': 'B', 'letters': /[\u0042\u24B7\uFF22\u1E02\u1E04\u1E06\u0243\u0182\u0181]/g }, { 'base': 'C', 'letters': /[\u0043\u24B8\uFF23\u0106\u0108\u010A\u010C\u00C7\u1E08\u0187\u023B\uA73E]/g }, { 'base': 'D', 'letters': /[\u0044\u24B9\uFF24\u1E0A\u010E\u1E0C\u1E10\u1E12\u1E0E\u0110\u018B\u018A\u0189\uA779]/g }, { 'base': 'DZ', 'letters': /[\u01F1\u01C4]/g }, { 'base': 'Dz', 'letters': /[\u01F2\u01C5]/g }, { 'base': 'E', 'letters': /[\u0045\u24BA\uFF25\u00C8\u00C9\u00CA\u1EC0\u1EBE\u1EC4\u1EC2\u1EBC\u0112\u1E14\u1E16\u0114\u0116\u00CB\u1EBA\u011A\u0204\u0206\u1EB8\u1EC6\u0228\u1E1C\u0118\u1E18\u1E1A\u0190\u018E]/g }, { 'base': 'F', 'letters': /[\u0046\u24BB\uFF26\u1E1E\u0191\uA77B]/g }, { 'base': 'G', 'letters': /[\u0047\u24BC\uFF27\u01F4\u011C\u1E20\u011E\u0120\u01E6\u0122\u01E4\u0193\uA7A0\uA77D\uA77E]/g }, { 'base': 'H', 'letters': /[\u0048\u24BD\uFF28\u0124\u1E22\u1E26\u021E\u1E24\u1E28\u1E2A\u0126\u2C67\u2C75\uA78D]/g }, { 'base': 'I', 'letters': /[\u0049\u24BE\uFF29\u00CC\u00CD\u00CE\u0128\u012A\u012C\u0130\u00CF\u1E2E\u1EC8\u01CF\u0208\u020A\u1ECA\u012E\u1E2C\u0197]/g }, { 'base': 'J', 'letters': /[\u004A\u24BF\uFF2A\u0134\u0248]/g }, { 'base': 'K', 'letters': /[\u004B\u24C0\uFF2B\u1E30\u01E8\u1E32\u0136\u1E34\u0198\u2C69\uA740\uA742\uA744\uA7A2]/g }, { 'base': 'L', 'letters': /[\u004C\u24C1\uFF2C\u013F\u0139\u013D\u1E36\u1E38\u013B\u1E3C\u1E3A\u0141\u023D\u2C62\u2C60\uA748\uA746\uA780]/g }, { 'base': 'LJ', 'letters': /[\u01C7]/g }, { 'base': 'Lj', 'letters': /[\u01C8]/g }, { 'base': 'M', 'letters': /[\u004D\u24C2\uFF2D\u1E3E\u1E40\u1E42\u2C6E\u019C]/g }, { 'base': 'N', 'letters': /[\u004E\u24C3\uFF2E\u01F8\u0143\u00D1\u1E44\u0147\u1E46\u0145\u1E4A\u1E48\u0220\u019D\uA790\uA7A4]/g }, { 'base': 'NJ', 'letters': /[\u01CA]/g }, { 'base': 'Nj', 'letters': /[\u01CB]/g }, { 'base': 'O', 'letters': /[\u004F\u24C4\uFF2F\u00D2\u00D3\u00D4\u1ED2\u1ED0\u1ED6\u1ED4\u00D5\u1E4C\u022C\u1E4E\u014C\u1E50\u1E52\u014E\u022E\u0230\u00D6\u022A\u1ECE\u0150\u01D1\u020C\u020E\u01A0\u1EDC\u1EDA\u1EE0\u1EDE\u1EE2\u1ECC\u1ED8\u01EA\u01EC\u00D8\u01FE\u0186\u019F\uA74A\uA74C]/g }, { 'base': 'OI', 'letters': /[\u01A2]/g }, { 'base': 'OO', 'letters': /[\uA74E]/g }, { 'base': 'OU', 'letters': /[\u0222]/g }, { 'base': 'P', 'letters': /[\u0050\u24C5\uFF30\u1E54\u1E56\u01A4\u2C63\uA750\uA752\uA754]/g }, { 'base': 'Q', 'letters': /[\u0051\u24C6\uFF31\uA756\uA758\u024A]/g }, { 'base': 'R', 'letters': /[\u0052\u24C7\uFF32\u0154\u1E58\u0158\u0210\u0212\u1E5A\u1E5C\u0156\u1E5E\u024C\u2C64\uA75A\uA7A6\uA782]/g }, { 'base': 'S', 'letters': /[\u0053\u24C8\uFF33\u1E9E\u015A\u1E64\u015C\u1E60\u0160\u1E66\u1E62\u1E68\u0218\u015E\u2C7E\uA7A8\uA784]/g }, { 'base': 'T', 'letters': /[\u0054\u24C9\uFF34\u1E6A\u0164\u1E6C\u021A\u0162\u1E70\u1E6E\u0166\u01AC\u01AE\u023E\uA786]/g }, { 'base': 'TZ', 'letters': /[\uA728]/g }, { 'base': 'U', 'letters': /[\u0055\u24CA\uFF35\u00D9\u00DA\u00DB\u0168\u1E78\u016A\u1E7A\u016C\u00DC\u01DB\u01D7\u01D5\u01D9\u1EE6\u016E\u0170\u01D3\u0214\u0216\u01AF\u1EEA\u1EE8\u1EEE\u1EEC\u1EF0\u1EE4\u1E72\u0172\u1E76\u1E74\u0244]/g }, { 'base': 'V', 'letters': /[\u0056\u24CB\uFF36\u1E7C\u1E7E\u01B2\uA75E\u0245]/g }, { 'base': 'VY', 'letters': /[\uA760]/g }, { 'base': 'W', 'letters': /[\u0057\u24CC\uFF37\u1E80\u1E82\u0174\u1E86\u1E84\u1E88\u2C72]/g }, { 'base': 'X', 'letters': /[\u0058\u24CD\uFF38\u1E8A\u1E8C]/g }, { 'base': 'Y', 'letters': /[\u0059\u24CE\uFF39\u1EF2\u00DD\u0176\u1EF8\u0232\u1E8E\u0178\u1EF6\u1EF4\u01B3\u024E\u1EFE]/g }, { 'base': 'Z', 'letters': /[\u005A\u24CF\uFF3A\u0179\u1E90\u017B\u017D\u1E92\u1E94\u01B5\u0224\u2C7F\u2C6B\uA762]/g }, { 'base': 'a', 'letters': /[\u0061\u24D0\uFF41\u1E9A\u00E0\u00E1\u00E2\u1EA7\u1EA5\u1EAB\u1EA9\u00E3\u0101\u0103\u1EB1\u1EAF\u1EB5\u1EB3\u0227\u01E1\u00E4\u01DF\u1EA3\u00E5\u01FB\u01CE\u0201\u0203\u1EA1\u1EAD\u1EB7\u1E01\u0105\u2C65\u0250]/g }, { 'base': 'aa', 'letters': /[\uA733]/g }, { 'base': 'ae', 'letters': /[\u00E6\u01FD\u01E3]/g }, { 'base': 'ao', 'letters': /[\uA735]/g }, { 'base': 'au', 'letters': /[\uA737]/g }, { 'base': 'av', 'letters': /[\uA739\uA73B]/g }, { 'base': 'ay', 'letters': /[\uA73D]/g }, { 'base': 'b', 'letters': /[\u0062\u24D1\uFF42\u1E03\u1E05\u1E07\u0180\u0183\u0253]/g }, { 'base': 'c', 'letters': /[\u0063\u24D2\uFF43\u0107\u0109\u010B\u010D\u00E7\u1E09\u0188\u023C\uA73F\u2184]/g }, { 'base': 'd', 'letters': /[\u0064\u24D3\uFF44\u1E0B\u010F\u1E0D\u1E11\u1E13\u1E0F\u0111\u018C\u0256\u0257\uA77A]/g }, { 'base': 'dz', 'letters': /[\u01F3\u01C6]/g }, { 'base': 'e', 'letters': /[\u0065\u24D4\uFF45\u00E8\u00E9\u00EA\u1EC1\u1EBF\u1EC5\u1EC3\u1EBD\u0113\u1E15\u1E17\u0115\u0117\u00EB\u1EBB\u011B\u0205\u0207\u1EB9\u1EC7\u0229\u1E1D\u0119\u1E19\u1E1B\u0247\u025B\u01DD]/g }, { 'base': 'f', 'letters': /[\u0066\u24D5\uFF46\u1E1F\u0192\uA77C]/g }, { 'base': 'g', 'letters': /[\u0067\u24D6\uFF47\u01F5\u011D\u1E21\u011F\u0121\u01E7\u0123\u01E5\u0260\uA7A1\u1D79\uA77F]/g }, { 'base': 'h', 'letters': /[\u0068\u24D7\uFF48\u0125\u1E23\u1E27\u021F\u1E25\u1E29\u1E2B\u1E96\u0127\u2C68\u2C76\u0265]/g }, { 'base': 'hv', 'letters': /[\u0195]/g }, { 'base': 'i', 'letters': /[\u0069\u24D8\uFF49\u00EC\u00ED\u00EE\u0129\u012B\u012D\u00EF\u1E2F\u1EC9\u01D0\u0209\u020B\u1ECB\u012F\u1E2D\u0268\u0131]/g }, { 'base': 'j', 'letters': /[\u006A\u24D9\uFF4A\u0135\u01F0\u0249]/g }, { 'base': 'k', 'letters': /[\u006B\u24DA\uFF4B\u1E31\u01E9\u1E33\u0137\u1E35\u0199\u2C6A\uA741\uA743\uA745\uA7A3]/g }, { 'base': 'l', 'letters': /[\u006C\u24DB\uFF4C\u0140\u013A\u013E\u1E37\u1E39\u013C\u1E3D\u1E3B\u017F\u0142\u019A\u026B\u2C61\uA749\uA781\uA747]/g }, { 'base': 'lj', 'letters': /[\u01C9]/g }, { 'base': 'm', 'letters': /[\u006D\u24DC\uFF4D\u1E3F\u1E41\u1E43\u0271\u026F]/g }, { 'base': 'n', 'letters': /[\u006E\u24DD\uFF4E\u01F9\u0144\u00F1\u1E45\u0148\u1E47\u0146\u1E4B\u1E49\u019E\u0272\u0149\uA791\uA7A5]/g }, { 'base': 'nj', 'letters': /[\u01CC]/g }, { 'base': 'o', 'letters': /[\u006F\u24DE\uFF4F\u00F2\u00F3\u00F4\u1ED3\u1ED1\u1ED7\u1ED5\u00F5\u1E4D\u022D\u1E4F\u014D\u1E51\u1E53\u014F\u022F\u0231\u00F6\u022B\u1ECF\u0151\u01D2\u020D\u020F\u01A1\u1EDD\u1EDB\u1EE1\u1EDF\u1EE3\u1ECD\u1ED9\u01EB\u01ED\u00F8\u01FF\u0254\uA74B\uA74D\u0275]/g }, { 'base': 'oi', 'letters': /[\u01A3]/g }, { 'base': 'ou', 'letters': /[\u0223]/g }, { 'base': 'oo', 'letters': /[\uA74F]/g }, { 'base': 'p', 'letters': /[\u0070\u24DF\uFF50\u1E55\u1E57\u01A5\u1D7D\uA751\uA753\uA755]/g }, { 'base': 'q', 'letters': /[\u0071\u24E0\uFF51\u024B\uA757\uA759]/g }, { 'base': 'r', 'letters': /[\u0072\u24E1\uFF52\u0155\u1E59\u0159\u0211\u0213\u1E5B\u1E5D\u0157\u1E5F\u024D\u027D\uA75B\uA7A7\uA783]/g }, { 'base': 's', 'letters': /[\u0073\u24E2\uFF53\u00DF\u015B\u1E65\u015D\u1E61\u0161\u1E67\u1E63\u1E69\u0219\u015F\u023F\uA7A9\uA785\u1E9B]/g }, { 'base': 't', 'letters': /[\u0074\u24E3\uFF54\u1E6B\u1E97\u0165\u1E6D\u021B\u0163\u1E71\u1E6F\u0167\u01AD\u0288\u2C66\uA787]/g }, { 'base': 'tz', 'letters': /[\uA729]/g }, { 'base': 'u', 'letters': /[\u0075\u24E4\uFF55\u00F9\u00FA\u00FB\u0169\u1E79\u016B\u1E7B\u016D\u00FC\u01DC\u01D8\u01D6\u01DA\u1EE7\u016F\u0171\u01D4\u0215\u0217\u01B0\u1EEB\u1EE9\u1EEF\u1EED\u1EF1\u1EE5\u1E73\u0173\u1E77\u1E75\u0289]/g }, { 'base': 'v', 'letters': /[\u0076\u24E5\uFF56\u1E7D\u1E7F\u028B\uA75F\u028C]/g }, { 'base': 'vy', 'letters': /[\uA761]/g }, { 'base': 'w', 'letters': /[\u0077\u24E6\uFF57\u1E81\u1E83\u0175\u1E87\u1E85\u1E98\u1E89\u2C73]/g }, { 'base': 'x', 'letters': /[\u0078\u24E7\uFF58\u1E8B\u1E8D]/g }, { 'base': 'y', 'letters': /[\u0079\u24E8\uFF59\u1EF3\u00FD\u0177\u1EF9\u0233\u1E8F\u00FF\u1EF7\u1E99\u1EF5\u01B4\u024F\u1EFF]/g }, { 'base': 'z', 'letters': /[\u007A\u24E9\uFF5A\u017A\u1E91\u017C\u017E\u1E93\u1E95\u01B6\u0225\u0240\u2C6C\uA763]/g }];
-
-	module.exports = function stripDiacritics(str) {
-		for (var i = 0; i < map.length; i++) {
-			str = str.replace(map[i].letters, map[i].base);
-		}
-		return str;
-	};
-
-/***/ },
-/* 271 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
-
-	var _classnames = __webpack_require__(267);
-
-	var _classnames2 = _interopRequireDefault(_classnames);
-
-	var _react = __webpack_require__(1);
-
-	var _react2 = _interopRequireDefault(_react);
-
-	function menuRenderer(_ref) {
-		var focusedOption = _ref.focusedOption;
-		var instancePrefix = _ref.instancePrefix;
-		var labelKey = _ref.labelKey;
-		var onFocus = _ref.onFocus;
-		var onSelect = _ref.onSelect;
-		var optionClassName = _ref.optionClassName;
-		var optionComponent = _ref.optionComponent;
-		var optionRenderer = _ref.optionRenderer;
-		var options = _ref.options;
-		var valueArray = _ref.valueArray;
-		var valueKey = _ref.valueKey;
-		var onOptionRef = _ref.onOptionRef;
-
-		var Option = optionComponent;
-
-		return options.map(function (option, i) {
-			var isSelected = valueArray && valueArray.indexOf(option) > -1;
-			var isFocused = option === focusedOption;
-			var optionClass = (0, _classnames2['default'])(optionClassName, {
-				'Select-option': true,
-				'is-selected': isSelected,
-				'is-focused': isFocused,
-				'is-disabled': option.disabled
-			});
-
-			return _react2['default'].createElement(
-				Option,
-				{
-					className: optionClass,
-					instancePrefix: instancePrefix,
-					isDisabled: option.disabled,
-					isFocused: isFocused,
-					isSelected: isSelected,
-					key: 'option-' + i + '-' + option[valueKey],
-					onFocus: onFocus,
-					onSelect: onSelect,
-					option: option,
-					optionIndex: i,
-					ref: function (ref) {
-						onOptionRef(ref, isFocused);
-					}
-				},
-				optionRenderer(option, i)
-			);
-		});
-	}
-
-	module.exports = menuRenderer;
-
-/***/ },
-/* 272 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	Object.defineProperty(exports, '__esModule', {
-		value: true
-	});
-
-	var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
-
-	var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-
-	var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; desc = parent = undefined; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
-
-	function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
-	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
-
-	function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-	var _react = __webpack_require__(1);
-
-	var _react2 = _interopRequireDefault(_react);
-
-	var _Select = __webpack_require__(265);
-
-	var _Select2 = _interopRequireDefault(_Select);
-
-	var _utilsStripDiacritics = __webpack_require__(270);
-
-	var _utilsStripDiacritics2 = _interopRequireDefault(_utilsStripDiacritics);
-
-	var propTypes = {
-		autoload: _react2['default'].PropTypes.bool.isRequired, // automatically call the `loadOptions` prop on-mount; defaults to true
-		cache: _react2['default'].PropTypes.any, // object to use to cache results; set to null/false to disable caching
-		children: _react2['default'].PropTypes.func.isRequired, // Child function responsible for creating the inner Select component; (props: Object): PropTypes.element
-		ignoreAccents: _react2['default'].PropTypes.bool, // strip diacritics when filtering; defaults to true
-		ignoreCase: _react2['default'].PropTypes.bool, // perform case-insensitive filtering; defaults to true
-		loadingPlaceholder: _react.PropTypes.string.isRequired, // replaces the placeholder while options are loading
-		loadOptions: _react2['default'].PropTypes.func.isRequired, // callback to load options asynchronously; (inputValue: string, callback: Function): ?Promise
-		options: _react.PropTypes.array.isRequired, // array of options
-		placeholder: _react2['default'].PropTypes.oneOfType([// field placeholder, displayed when there's no value (shared with Select)
-		_react2['default'].PropTypes.string, _react2['default'].PropTypes.node]),
-		searchPromptText: _react2['default'].PropTypes.oneOfType([// label to prompt for search input
-		_react2['default'].PropTypes.string, _react2['default'].PropTypes.node])
-	};
-
-	var defaultProps = {
-		autoload: true,
-		cache: {},
-		children: defaultChildren,
-		ignoreAccents: true,
-		ignoreCase: true,
-		loadingPlaceholder: 'Loading...',
-		options: [],
-		searchPromptText: 'Type to search'
-	};
-
-	var Async = (function (_Component) {
-		_inherits(Async, _Component);
-
-		function Async(props, context) {
-			_classCallCheck(this, Async);
-
-			_get(Object.getPrototypeOf(Async.prototype), 'constructor', this).call(this, props, context);
-
-			this.state = {
-				isLoading: false,
-				options: props.options
-			};
-
-			this._onInputChange = this._onInputChange.bind(this);
-		}
-
-		_createClass(Async, [{
-			key: 'componentDidMount',
-			value: function componentDidMount() {
-				var autoload = this.props.autoload;
-
-				if (autoload) {
-					this.loadOptions('');
-				}
-			}
-		}, {
-			key: 'componentWillUpdate',
-			value: function componentWillUpdate(nextProps, nextState) {
-				var _this = this;
-
-				var propertiesToSync = ['options'];
-				propertiesToSync.forEach(function (prop) {
-					if (_this.props[prop] !== nextProps[prop]) {
-						_this.setState(_defineProperty({}, prop, nextProps[prop]));
-					}
-				});
-			}
-		}, {
-			key: 'loadOptions',
-			value: function loadOptions(inputValue) {
-				var _this2 = this;
-
-				var _props = this.props;
-				var cache = _props.cache;
-				var loadOptions = _props.loadOptions;
-
-				if (cache && cache.hasOwnProperty(inputValue)) {
-					this.setState({
-						options: cache[inputValue]
-					});
-
-					return;
-				}
-
-				var callback = function callback(error, data) {
-					if (callback === _this2._callback) {
-						_this2._callback = null;
-
-						var options = data && data.options || [];
-
-						if (cache) {
-							cache[inputValue] = options;
-						}
-
-						_this2.setState({
-							isLoading: false,
-							options: options
-						});
-					}
-				};
-
-				// Ignore all but the most recent request
-				this._callback = callback;
-
-				var promise = loadOptions(inputValue, callback);
-				if (promise) {
-					promise.then(function (data) {
-						return callback(null, data);
-					}, function (error) {
-						return callback(error);
-					});
-				}
-
-				if (this._callback && !this.state.isLoading) {
-					this.setState({
-						isLoading: true
-					});
-				}
-
-				return inputValue;
-			}
-		}, {
-			key: '_onInputChange',
-			value: function _onInputChange(inputValue) {
-				var _props2 = this.props;
-				var ignoreAccents = _props2.ignoreAccents;
-				var ignoreCase = _props2.ignoreCase;
-
-				if (ignoreAccents) {
-					inputValue = (0, _utilsStripDiacritics2['default'])(inputValue);
-				}
-
-				if (ignoreCase) {
-					inputValue = inputValue.toLowerCase();
-				}
-
-				return this.loadOptions(inputValue);
-			}
-		}, {
-			key: 'render',
-			value: function render() {
-				var _props3 = this.props;
-				var children = _props3.children;
-				var loadingPlaceholder = _props3.loadingPlaceholder;
-				var placeholder = _props3.placeholder;
-				var searchPromptText = _props3.searchPromptText;
-				var _state = this.state;
-				var isLoading = _state.isLoading;
-				var options = _state.options;
-
-				var props = {
-					noResultsText: isLoading ? loadingPlaceholder : searchPromptText,
-					placeholder: isLoading ? loadingPlaceholder : placeholder,
-					options: isLoading ? [] : options
-				};
-
-				return children(_extends({}, this.props, props, {
-					isLoading: isLoading,
-					onInputChange: this._onInputChange
-				}));
-			}
-		}]);
-
-		return Async;
-	})(_react.Component);
-
-	exports['default'] = Async;
-
-	Async.propTypes = propTypes;
-	Async.defaultProps = defaultProps;
-
-	function defaultChildren(props) {
-		return _react2['default'].createElement(_Select2['default'], props);
-	};
-	module.exports = exports['default'];
-
-/***/ },
-/* 273 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
-
-	var _react = __webpack_require__(1);
-
-	var _react2 = _interopRequireDefault(_react);
-
-	var _Select = __webpack_require__(265);
-
-	var _Select2 = _interopRequireDefault(_Select);
-
-	var AsyncCreatable = _react2['default'].createClass({
-		displayName: 'AsyncCreatableSelect',
-
-		render: function render() {
-			var _this = this;
-
-			return _react2['default'].createElement(
-				_Select2['default'].Async,
-				this.props,
-				function (asyncProps) {
-					return _react2['default'].createElement(
-						_Select2['default'].Creatable,
-						_this.props,
-						function (creatableProps) {
-							return _react2['default'].createElement(_Select2['default'], _extends({}, asyncProps, creatableProps, {
-								onInputChange: function (input) {
-									creatableProps.onInputChange(input);
-									return asyncProps.onInputChange(input);
-								}
-							}));
-						}
-					);
-				}
-			);
-		}
-	});
-
-	module.exports = AsyncCreatable;
-
-/***/ },
-/* 274 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
-
-	function _objectWithoutProperties(obj, keys) { var target = {}; for (var i in obj) { if (keys.indexOf(i) >= 0) continue; if (!Object.prototype.hasOwnProperty.call(obj, i)) continue; target[i] = obj[i]; } return target; }
-
-	var _react = __webpack_require__(1);
-
-	var _react2 = _interopRequireDefault(_react);
-
-	var _Select = __webpack_require__(265);
-
-	var _Select2 = _interopRequireDefault(_Select);
-
-	var _utilsDefaultFilterOptions = __webpack_require__(269);
-
-	var _utilsDefaultFilterOptions2 = _interopRequireDefault(_utilsDefaultFilterOptions);
-
-	var _utilsDefaultMenuRenderer = __webpack_require__(271);
-
-	var _utilsDefaultMenuRenderer2 = _interopRequireDefault(_utilsDefaultMenuRenderer);
-
-	var Creatable = _react2['default'].createClass({
-		displayName: 'CreatableSelect',
-
-		propTypes: {
-			// Child function responsible for creating the inner Select component
-			// This component can be used to compose HOCs (eg Creatable and Async)
-			// (props: Object): PropTypes.element
-			children: _react2['default'].PropTypes.func,
-
-			// See Select.propTypes.filterOptions
-			filterOptions: _react2['default'].PropTypes.any,
-
-			// Searches for any matching option within the set of options.
-			// This function prevents duplicate options from being created.
-			// ({ option: Object, options: Array, labelKey: string, valueKey: string }): boolean
-			isOptionUnique: _react2['default'].PropTypes.func,
-
-			// Determines if the current input text represents a valid option.
-			// ({ label: string }): boolean
-			isValidNewOption: _react2['default'].PropTypes.func,
-
-			// See Select.propTypes.menuRenderer
-			menuRenderer: _react2['default'].PropTypes.any,
-
-			// Factory to create new option.
-			// ({ label: string, labelKey: string, valueKey: string }): Object
-			newOptionCreator: _react2['default'].PropTypes.func,
-
-			// See Select.propTypes.options
-			options: _react2['default'].PropTypes.array,
-
-			// Creates prompt/placeholder option text.
-			// (filterText: string): string
-			promptTextCreator: _react2['default'].PropTypes.func,
-
-			// Decides if a keyDown event (eg its `keyCode`) should result in the creation of a new option.
-			shouldKeyDownEventCreateNewOption: _react2['default'].PropTypes.func
-		},
-
-		// Default prop methods
-		statics: {
-			isOptionUnique: isOptionUnique,
-			isValidNewOption: isValidNewOption,
-			newOptionCreator: newOptionCreator,
-			promptTextCreator: promptTextCreator,
-			shouldKeyDownEventCreateNewOption: shouldKeyDownEventCreateNewOption
-		},
-
-		getDefaultProps: function getDefaultProps() {
-			return {
-				filterOptions: _utilsDefaultFilterOptions2['default'],
-				isOptionUnique: isOptionUnique,
-				isValidNewOption: isValidNewOption,
-				menuRenderer: _utilsDefaultMenuRenderer2['default'],
-				newOptionCreator: newOptionCreator,
-				promptTextCreator: promptTextCreator,
-				shouldKeyDownEventCreateNewOption: shouldKeyDownEventCreateNewOption
-			};
-		},
-
-		createNewOption: function createNewOption() {
-			var _props = this.props;
-			var isValidNewOption = _props.isValidNewOption;
-			var newOptionCreator = _props.newOptionCreator;
-			var _props$options = _props.options;
-			var options = _props$options === undefined ? [] : _props$options;
-			var shouldKeyDownEventCreateNewOption = _props.shouldKeyDownEventCreateNewOption;
-
-			if (isValidNewOption({ label: this.inputValue })) {
-				var option = newOptionCreator({ label: this.inputValue, labelKey: this.labelKey, valueKey: this.valueKey });
-				var _isOptionUnique = this.isOptionUnique({ option: option });
-
-				// Don't add the same option twice.
-				if (_isOptionUnique) {
-					options.unshift(option);
-
-					this.select.selectValue(option);
-				}
-			}
-		},
-
-		filterOptions: function filterOptions() {
-			var _props2 = this.props;
-			var filterOptions = _props2.filterOptions;
-			var isValidNewOption = _props2.isValidNewOption;
-			var options = _props2.options;
-			var promptTextCreator = _props2.promptTextCreator;
-
-			// TRICKY Check currently selected options as well.
-			// Don't display a create-prompt for a value that's selected.
-			// This covers async edge-cases where a newly-created Option isn't yet in the async-loaded array.
-			var excludeOptions = arguments[2] || [];
-
-			var filteredOptions = filterOptions.apply(undefined, arguments) || [];
-
-			if (isValidNewOption({ label: this.inputValue })) {
-				var _newOptionCreator = this.props.newOptionCreator;
-
-				var option = _newOptionCreator({
-					label: this.inputValue,
-					labelKey: this.labelKey,
-					valueKey: this.valueKey
-				});
-
-				// TRICKY Compare to all options (not just filtered options) in case option has already been selected).
-				// For multi-selects, this would remove it from the filtered list.
-				var _isOptionUnique2 = this.isOptionUnique({
-					option: option,
-					options: excludeOptions.concat(filteredOptions)
-				});
-
-				if (_isOptionUnique2) {
-					var _prompt = promptTextCreator(this.inputValue);
-
-					this._createPlaceholderOption = _newOptionCreator({
-						label: _prompt,
-						labelKey: this.labelKey,
-						valueKey: this.valueKey
-					});
-
-					filteredOptions.unshift(this._createPlaceholderOption);
-				}
-			}
-
-			return filteredOptions;
-		},
-
-		isOptionUnique: function isOptionUnique(_ref2) {
-			var option = _ref2.option;
-			var options = _ref2.options;
-			var isOptionUnique = this.props.isOptionUnique;
-
-			options = options || this.select.filterOptions();
-
-			return isOptionUnique({
-				labelKey: this.labelKey,
-				option: option,
-				options: options,
-				valueKey: this.valueKey
-			});
-		},
-
-		menuRenderer: function menuRenderer(params) {
-			var menuRenderer = this.props.menuRenderer;
-
-			return menuRenderer(_extends({}, params, {
-				onSelect: this.onOptionSelect
-			}));
-		},
-
-		onInputChange: function onInputChange(input) {
-			// This value may be needed in between Select mounts (when this.select is null)
-			this.inputValue = input;
-		},
-
-		onInputKeyDown: function onInputKeyDown(event) {
-			var shouldKeyDownEventCreateNewOption = this.props.shouldKeyDownEventCreateNewOption;
-
-			var focusedOption = this.select.getFocusedOption();
-
-			if (focusedOption && focusedOption === this._createPlaceholderOption && shouldKeyDownEventCreateNewOption({ keyCode: event.keyCode })) {
-				this.createNewOption();
-
-				// Prevent decorated Select from doing anything additional with this keyDown event
-				event.preventDefault();
-			}
-		},
-
-		onOptionSelect: function onOptionSelect(option, event) {
-			if (option === this._createPlaceholderOption) {
-				this.createNewOption();
-			} else {
-				this.select.selectValue(option);
-			}
-		},
-
-		render: function render() {
-			var _this = this;
-
-			var _props3 = this.props;
-			var _props3$children = _props3.children;
-			var children = _props3$children === undefined ? defaultChildren : _props3$children;
-			var newOptionCreator = _props3.newOptionCreator;
-			var shouldKeyDownEventCreateNewOption = _props3.shouldKeyDownEventCreateNewOption;
-
-			var restProps = _objectWithoutProperties(_props3, ['children', 'newOptionCreator', 'shouldKeyDownEventCreateNewOption']);
-
-			var props = _extends({}, restProps, {
-				allowCreate: true,
-				filterOptions: this.filterOptions,
-				menuRenderer: this.menuRenderer,
-				onInputChange: this.onInputChange,
-				onInputKeyDown: this.onInputKeyDown,
-				ref: function ref(_ref) {
-					_this.select = _ref;
-
-					// These values may be needed in between Select mounts (when this.select is null)
-					if (_ref) {
-						_this.labelKey = _ref.props.labelKey;
-						_this.valueKey = _ref.props.valueKey;
-					}
-				}
-			});
-
-			return children(props);
-		}
-	});
-
-	function defaultChildren(props) {
-		return _react2['default'].createElement(_Select2['default'], props);
-	};
-
-	function isOptionUnique(_ref3) {
-		var option = _ref3.option;
-		var options = _ref3.options;
-		var labelKey = _ref3.labelKey;
-		var valueKey = _ref3.valueKey;
-
-		return options.filter(function (existingOption) {
-			return existingOption[labelKey] === option[labelKey] || existingOption[valueKey] === option[valueKey];
-		}).length === 0;
-	};
-
-	function isValidNewOption(_ref4) {
-		var label = _ref4.label;
-
-		return !!label;
-	};
-
-	function newOptionCreator(_ref5) {
-		var label = _ref5.label;
-		var labelKey = _ref5.labelKey;
-		var valueKey = _ref5.valueKey;
-
-		var option = {};
-		option[valueKey] = label;
-		option[labelKey] = label;
-		option.className = 'Select-create-option-placeholder';
-		return option;
-	};
-
-	function promptTextCreator(label) {
-		return 'Create option "' + label + '"';
-	}
-
-	function shouldKeyDownEventCreateNewOption(_ref6) {
-		var keyCode = _ref6.keyCode;
-
-		switch (keyCode) {
-			case 9: // TAB
-			case 13: // ENTER
-			case 188:
-				// COMMA
-				return true;
-		}
-
-		return false;
-	};
-
-	module.exports = Creatable;
-
-/***/ },
-/* 275 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
-
-	var _react = __webpack_require__(1);
-
-	var _react2 = _interopRequireDefault(_react);
-
-	var _classnames = __webpack_require__(267);
-
-	var _classnames2 = _interopRequireDefault(_classnames);
-
-	var Option = _react2['default'].createClass({
-		displayName: 'Option',
-
-		propTypes: {
-			children: _react2['default'].PropTypes.node,
-			className: _react2['default'].PropTypes.string, // className (based on mouse position)
-			instancePrefix: _react2['default'].PropTypes.string.isRequired, // unique prefix for the ids (used for aria)
-			isDisabled: _react2['default'].PropTypes.bool, // the option is disabled
-			isFocused: _react2['default'].PropTypes.bool, // the option is focused
-			isSelected: _react2['default'].PropTypes.bool, // the option is selected
-			onFocus: _react2['default'].PropTypes.func, // method to handle mouseEnter on option element
-			onSelect: _react2['default'].PropTypes.func, // method to handle click on option element
-			onUnfocus: _react2['default'].PropTypes.func, // method to handle mouseLeave on option element
-			option: _react2['default'].PropTypes.object.isRequired, // object that is base for that option
-			optionIndex: _react2['default'].PropTypes.number },
-		// index of the option, used to generate unique ids for aria
-		blockEvent: function blockEvent(event) {
-			event.preventDefault();
-			event.stopPropagation();
-			if (event.target.tagName !== 'A' || !('href' in event.target)) {
-				return;
-			}
-			if (event.target.target) {
-				window.open(event.target.href, event.target.target);
-			} else {
-				window.location.href = event.target.href;
-			}
-		},
-
-		handleMouseDown: function handleMouseDown(event) {
-			event.preventDefault();
-			event.stopPropagation();
-			this.props.onSelect(this.props.option, event);
-		},
-
-		handleMouseEnter: function handleMouseEnter(event) {
-			this.onFocus(event);
-		},
-
-		handleMouseMove: function handleMouseMove(event) {
-			this.onFocus(event);
-		},
-
-		handleTouchEnd: function handleTouchEnd(event) {
-			// Check if the view is being dragged, In this case
-			// we don't want to fire the click event (because the user only wants to scroll)
-			if (this.dragging) return;
-
-			this.handleMouseDown(event);
-		},
-
-		handleTouchMove: function handleTouchMove(event) {
-			// Set a flag that the view is being dragged
-			this.dragging = true;
-		},
-
-		handleTouchStart: function handleTouchStart(event) {
-			// Set a flag that the view is not being dragged
-			this.dragging = false;
-		},
-
-		onFocus: function onFocus(event) {
-			if (!this.props.isFocused) {
-				this.props.onFocus(this.props.option, event);
-			}
-		},
-		render: function render() {
-			var _props = this.props;
-			var option = _props.option;
-			var instancePrefix = _props.instancePrefix;
-			var optionIndex = _props.optionIndex;
-
-			var className = (0, _classnames2['default'])(this.props.className, option.className);
-
-			return option.disabled ? _react2['default'].createElement(
-				'div',
-				{ className: className,
-					onMouseDown: this.blockEvent,
-					onClick: this.blockEvent },
-				this.props.children
-			) : _react2['default'].createElement(
-				'div',
-				{ className: className,
-					style: option.style,
-					role: 'option',
-					onMouseDown: this.handleMouseDown,
-					onMouseEnter: this.handleMouseEnter,
-					onMouseMove: this.handleMouseMove,
-					onTouchStart: this.handleTouchStart,
-					onTouchMove: this.handleTouchMove,
-					onTouchEnd: this.handleTouchEnd,
-					id: instancePrefix + '-option-' + optionIndex,
-					title: option.title },
-				this.props.children
-			);
-		}
-	});
-
-	module.exports = Option;
-
-/***/ },
-/* 276 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
-
-	var _react = __webpack_require__(1);
-
-	var _react2 = _interopRequireDefault(_react);
-
-	var _classnames = __webpack_require__(267);
-
-	var _classnames2 = _interopRequireDefault(_classnames);
-
-	var Value = _react2['default'].createClass({
-
-		displayName: 'Value',
-
-		propTypes: {
-			children: _react2['default'].PropTypes.node,
-			disabled: _react2['default'].PropTypes.bool, // disabled prop passed to ReactSelect
-			id: _react2['default'].PropTypes.string, // Unique id for the value - used for aria
-			onClick: _react2['default'].PropTypes.func, // method to handle click on value label
-			onRemove: _react2['default'].PropTypes.func, // method to handle removal of the value
-			value: _react2['default'].PropTypes.object.isRequired },
-
-		// the option object for this value
-		handleMouseDown: function handleMouseDown(event) {
-			if (event.type === 'mousedown' && event.button !== 0) {
-				return;
-			}
-			if (this.props.onClick) {
-				event.stopPropagation();
-				this.props.onClick(this.props.value, event);
-				return;
-			}
-			if (this.props.value.href) {
-				event.stopPropagation();
-			}
-		},
-
-		onRemove: function onRemove(event) {
-			event.preventDefault();
-			event.stopPropagation();
-			this.props.onRemove(this.props.value);
-		},
-
-		handleTouchEndRemove: function handleTouchEndRemove(event) {
-			// Check if the view is being dragged, In this case
-			// we don't want to fire the click event (because the user only wants to scroll)
-			if (this.dragging) return;
-
-			// Fire the mouse events
-			this.onRemove(event);
-		},
-
-		handleTouchMove: function handleTouchMove(event) {
-			// Set a flag that the view is being dragged
-			this.dragging = true;
-		},
-
-		handleTouchStart: function handleTouchStart(event) {
-			// Set a flag that the view is not being dragged
-			this.dragging = false;
-		},
-
-		renderRemoveIcon: function renderRemoveIcon() {
-			if (this.props.disabled || !this.props.onRemove) return;
-			return _react2['default'].createElement(
-				'span',
-				{ className: 'Select-value-icon',
-					'aria-hidden': 'true',
-					onMouseDown: this.onRemove,
-					onTouchEnd: this.handleTouchEndRemove,
-					onTouchStart: this.handleTouchStart,
-					onTouchMove: this.handleTouchMove },
-				'×'
-			);
-		},
-
-		renderLabel: function renderLabel() {
-			var className = 'Select-value-label';
-			return this.props.onClick || this.props.value.href ? _react2['default'].createElement(
-				'a',
-				{ className: className, href: this.props.value.href, target: this.props.value.target, onMouseDown: this.handleMouseDown, onTouchEnd: this.handleMouseDown },
-				this.props.children
-			) : _react2['default'].createElement(
-				'span',
-				{ className: className, role: 'option', 'aria-selected': 'true', id: this.props.id },
-				this.props.children
-			);
-		},
-
-		render: function render() {
-			return _react2['default'].createElement(
-				'div',
-				{ className: (0, _classnames2['default'])('Select-value', this.props.value.className),
-					style: this.props.value.style,
-					title: this.props.value.title
-				},
-				this.renderRemoveIcon(),
-				this.renderLabel()
-			);
-		}
-
-	});
-
-	module.exports = Value;
-
-/***/ },
-/* 277 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var _react = __webpack_require__(1);
-
-	var _react2 = _interopRequireDefault(_react);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	var SubscriptionUserBox = _react2.default.createClass({
-		displayName: 'SubscriptionUserBox',
-
-		render: function render() {
-			return _react2.default.createElement(
-				'span',
-				null,
-				'SubscriptionUserBox'
-			);
-		}
-	});
-
-	module.exports = SubscriptionUserBox;
-
-/***/ },
-/* 278 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var _react = __webpack_require__(1);
-
-	var _react2 = _interopRequireDefault(_react);
-
-	var _Transaction = __webpack_require__(279);
-
-	var _Transaction2 = _interopRequireDefault(_Transaction);
-
-	var _TransactionsUser = __webpack_require__(281);
-
-	var _TransactionsUser2 = _interopRequireDefault(_TransactionsUser);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	// Backbone
-
-
-	var TransactionUserBox = _react2.default.createClass({
-		displayName: 'TransactionUserBox',
-
-		render: function render() {
-			return _react2.default.createElement(
-				'div',
-				null,
-				_react2.default.createElement(_TransactionsUser2.default, { type: _Transaction2.default,
-					filters: {
-						relations: [{
-							type: "member",
-							member_number: this.props.member_number
-						}]
-					}
-				})
-			);
-		}
-	});
-
-	module.exports = TransactionUserBox;
-
-/***/ },
-/* 279 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var _backbone = __webpack_require__(237);
-
-	var _backbone2 = _interopRequireDefault(_backbone);
-
-	var _Transaction = __webpack_require__(280);
-
-	var _Transaction2 = _interopRequireDefault(_Transaction);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	var TransactionCollection = _backbone2.default.PageableCollection.extend({
-		model: _Transaction2.default,
-		initialize: function initialize(models, options) {
-			this.id = options.id;
-		},
-
-		url: "/economy/2015/transaction"
-	});
-
-	module.exports = TransactionCollection;
-
-/***/ },
-/* 280 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-
-	var _backbone = __webpack_require__(237);
-
-	var _backbone2 = _interopRequireDefault(_backbone);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	var TransactionModel = _backbone2.default.Model.fullExtend({
-		idAttribute: "entity_id",
-		urlRoot: "/economy/2015/transaction",
-		defaults: {
-			created_at: "0000-00-00T00:00:00Z",
-			updated_at: "0000-00-00T00:00:00Z",
-			transaction_title: "",
-			transaction_description: "",
-			accounting_instruction: "",
-			accounting_account: "",
-			accounting_cost_center: "",
-			amount: 0,
-			external_id: "",
-			instruction_title: "",
-			instruction_number: 0,
-			accounting_date: "0000-00-00T00:00:00Z",
-			extid: 0,
-			balance: 0
-		}
-	});
-
-	module.exports = TransactionModel;
-
-/***/ },
-/* 281 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var _react = __webpack_require__(1);
-
-	var _react2 = _interopRequireDefault(_react);
-
-	var _backboneReactComponent = __webpack_require__(244);
-
-	var _backboneReactComponent2 = _interopRequireDefault(_backboneReactComponent);
-
-	var _BackboneTable = __webpack_require__(251);
-
-	var _BackboneTable2 = _interopRequireDefault(_BackboneTable);
-
-	var _reactRouter = __webpack_require__(172);
-
-	var _Currency = __webpack_require__(282);
-
-	var _Currency2 = _interopRequireDefault(_Currency);
-
-	var _Date = __webpack_require__(246);
-
-	var _Date2 = _interopRequireDefault(_Date);
-
-	var _TableDropdownMenu = __webpack_require__(253);
-
-	var _TableDropdownMenu2 = _interopRequireDefault(_TableDropdownMenu);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	var TransactionsUser = _react2.default.createClass({
-		displayName: 'TransactionsUser',
-
-		mixins: [Backbone.React.Component.mixin, _BackboneTable2.default],
-
-		getInitialState: function getInitialState() {
-			return {
-				columns: 4
-			};
-		},
-
-		componentWillMount: function componentWillMount() {
-			this.fetch();
-		},
-
-		componentWillReceiveProps: function componentWillReceiveProps(nextProps) {
-			if (nextProps.filters != this.state.filters) {
-				this.setState({
-					filters: nextProps.filters
-				});
-
-				// TODO: setState() has a delay so we need to wait a moment
-				var _this = this;
-				setTimeout(function () {
-					_this.fetch();
-				}, 100);
-			}
-		},
-
-		renderHeader: function renderHeader() {
-			return [{
-				title: "Bokföringsdatum",
-				sort: "accounting_date"
-			}, {
-				title: "Transaktion",
-				sort: "transaction_title"
-			}, {
-				title: "Belopp",
-				class: "uk-text-right",
-				sort: "amount"
-			}, {
-				title: ""
-			}];
-		},
-
-		renderRow: function renderRow(row, i) {
-			return _react2.default.createElement(
-				'tr',
-				{ key: i },
-				_react2.default.createElement(
-					'td',
-					null,
-					_react2.default.createElement(_Date2.default, { date: row.accounting_date })
-				),
-				_react2.default.createElement(
-					'td',
-					null,
-					_react2.default.createElement(
-						_reactRouter.Link,
-						{ to: "/economy/instruction/" + row.instruction_number },
-						row.transaction_title
-					)
-				),
-				_react2.default.createElement(
-					'td',
-					{ className: 'uk-text-right' },
-					_react2.default.createElement(_Currency2.default, { value: row.amount, currency: 'SEK' })
-				),
-				_react2.default.createElement(
-					'td',
-					null,
-					_react2.default.createElement(
-						_TableDropdownMenu2.default,
-						null,
-						_react2.default.createElement(
-							_reactRouter.Link,
-							{ to: "/product/" + row.entity_id + "/edit" },
-							_react2.default.createElement('i', { className: 'uk-icon uk-icon-cog' }),
-							' Redigera metadata'
-						),
-						_react2.default.createElement(
-							_reactRouter.Link,
-							{ to: "/economy/instruction/" + row.instruction_number },
-							_react2.default.createElement('i', { className: 'uk-icon uk-icon-cog' }),
-							' Visa verifikation'
-						)
-					)
-				)
-			);
-		}
-	});
-
-	module.exports = TransactionsUser;
-
-/***/ },
-/* 282 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var _react = __webpack_require__(1);
-
-	var _react2 = _interopRequireDefault(_react);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	var Currency = _react2.default.createClass({
-		displayName: 'Currency',
-
-		render: function render() {
-			var formatter = new Intl.NumberFormat('sv-SE', {
-				/*
-	   style: 'currency',
-	   currency: 'SEK',
-	   */
-				minimumFractionDigits: 2,
-				maximumFractionDigits: 2
-			});
-
-			var value = formatter.format(this.props.value / 100);
-			return _react2.default.createElement(
-				'span',
-				null,
-				value,
-				' ',
-				this.props.currency
-			);
-		}
-	});
-
-	module.exports = Currency;
-
-/***/ },
-/* 283 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-
-	var _react = __webpack_require__(1);
-
-	var _react2 = _interopRequireDefault(_react);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	var CountryDropdown = _react2.default.createClass({
-		displayName: "CountryDropdown",
-
-		getInitialState: function getInitialState() {
-			this.continents = [{
-				name: "Africa",
-				countries: [{
-					name: "Algeria",
-					code: "dz"
-				}, {
-					name: "Angola",
-					code: "ao"
-				}, {
-					name: "Benin",
-					code: "bj"
-				}, {
-					name: "Botswana",
-					code: "bw"
-				}, {
-					name: "Burkina Faso",
-					code: "bf"
-				}, {
-					name: "Cameroon",
-					code: "cm"
-				}, {
-					name: "Cape Verde",
-					code: "cv"
-				}, {
-					name: "Central African Republic",
-					code: "cf"
-				}, {
-					name: "Chad",
-					code: "td"
-				}, {
-					name: "Comoros",
-					code: "km"
-				}, {
-					name: "Congo",
-					code: "cg"
-				}, {
-					name: "Congo, The Democratic Republic of the",
-					code: "cd"
-				}, {
-					name: "Cote d'Ivoire",
-					code: "ci"
-				}, {
-					name: "Djibouti",
-					code: "dj"
-				}, {
-					name: "Egypt",
-					code: "eg"
-				}, {
-					name: "Equatorial Guinea",
-					code: "gq"
-				}, {
-					name: "Eritrea",
-					code: "er"
-				}, {
-					name: "Ethiopia",
-					code: "et"
-				}, {
-					name: "Gabon",
-					code: "ga"
-				}, {
-					name: "Gambia",
-					code: "gm"
-				}, {
-					name: "Ghana",
-					code: "gh"
-				}, {
-					name: "Guinea",
-					code: "gn"
-				}, {
-					name: "Guinea-Bissau",
-					code: "gw"
-				}, {
-					name: "Kenya",
-					code: "ke"
-				}, {
-					name: "Lesotho",
-					code: "ls"
-				}, {
-					name: "Liberia",
-					code: "lr"
-				}, {
-					name: "Libya",
-					code: "ly"
-				}, {
-					name: "Madagascar",
-					code: "mg"
-				}, {
-					name: "Malawi",
-					code: "mw"
-				}, {
-					name: "Mali",
-					code: "ml"
-				}, {
-					name: "Mauritania",
-					code: "mr"
-				}, {
-					name: "Mauritius",
-					code: "mu"
-				}, {
-					name: "Mayotte",
-					code: "yt"
-				}, {
-					name: "Morocco",
-					code: "ma"
-				}, {
-					name: "Mozambique",
-					code: "mz"
-				}, {
-					name: "Namibia",
-					code: "na"
-				}, {
-					name: "Niger",
-					code: "ne"
-				}, {
-					name: "Nigeria",
-					code: "ng"
-				}, {
-					name: "Reunion",
-					code: "re"
-				}, {
-					name: "Rwanda",
-					code: "rw"
-				}, {
-					name: "Saint Helena",
-					code: "sh"
-				}, {
-					name: "Sao Tome and Principe",
-					code: "st"
-				}, {
-					name: "Senegal",
-					code: "sn"
-				}, {
-					name: "Seychelles",
-					code: "sc"
-				}, {
-					name: "Sierra Leone",
-					code: "sl"
-				}, {
-					name: "Somalia",
-					code: "so"
-				}, {
-					name: "South Africa",
-					code: "za"
-				}, {
-					name: "South Sudan",
-					code: "ss"
-				}, {
-					name: "Sudan",
-					code: "sd"
-				}, {
-					name: "Swaziland",
-					code: "sz"
-				}, {
-					name: "Tanzania",
-					code: "tz"
-				}, {
-					name: "Togo",
-					code: "tg"
-				}, {
-					name: "Tunisia",
-					code: "tn"
-				}, {
-					name: "Uganda",
-					code: "ug"
-				}, {
-					name: "Western Sahara",
-					code: "eh"
-				}, {
-					name: "Zambia",
-					code: "zm"
-				}, {
-					name: "Zimbabwe",
-					code: "zw"
-				}]
-			}, {
-				name: "America",
-				countries: [{
-					name: "Anguilla",
-					code: "ai"
-				}, {
-					name: "Antigua and Barbuda",
-					code: "ag"
-				}, {
-					name: "Argentina",
-					code: "ar"
-				}, {
-					name: "Aruba",
-					code: "aw"
-				}, {
-					name: "Bahamas",
-					code: "bs"
-				}, {
-					name: "Barbados",
-					code: "bb"
-				}, {
-					name: "Belize",
-					code: "bz"
-				}, {
-					name: "Bermuda",
-					code: "bm"
-				}, {
-					name: "Bolivia, Plurinational State of",
-					code: "bo"
-				}, {
-					name: "Brazil",
-					code: "br"
-				}, {
-					name: "Canada",
-					code: "ca"
-				}, {
-					name: "Cayman Islands",
-					code: "ky"
-				}, {
-					name: "Chile",
-					code: "cl"
-				}, {
-					name: "Colombia",
-					code: "co"
-				}, {
-					name: "Costa Rica",
-					code: "cr"
-				}, {
-					name: "Cuba",
-					code: "cu"
-				}, {
-					name: "Curacao",
-					code: "cw"
-				}, {
-					name: "Dominica",
-					code: "dm"
-				}, {
-					name: "Dominican Republic",
-					code: "do"
-				}, {
-					name: "Ecuador",
-					code: "ec"
-				}, {
-					name: "El Salvador",
-					code: "sv"
-				}, {
-					name: "Falkland Islands (Malvinas)",
-					code: "fk"
-				}, {
-					name: "French Guiana",
-					code: "gf"
-				}, {
-					name: "Greenland",
-					code: "gl"
-				}, {
-					name: "Grenada",
-					code: "gd"
-				}, {
-					name: "Guadeloupe",
-					code: "gp"
-				}, {
-					name: "Guatemala",
-					code: "gt"
-				}, {
-					name: "Guyana",
-					code: "gy"
-				}, {
-					name: "Haiti",
-					code: "ht"
-				}, {
-					name: "Honduras",
-					code: "hn"
-				}, {
-					name: "Jamaica",
-					code: "jm"
-				}, {
-					name: "Martinique",
-					code: "mq"
-				}, {
-					name: "Mexico",
-					code: "mx"
-				}, {
-					name: "Montserrat",
-					code: "ms"
-				}, {
-					name: "Netherlands Antilles",
-					code: "an"
-				}, {
-					name: "Nicaragua",
-					code: "ni"
-				}, {
-					name: "Panama",
-					code: "pa"
-				}, {
-					name: "Paraguay",
-					code: "py"
-				}, {
-					name: "Peru",
-					code: "pe"
-				}, {
-					name: "Puerto Rico",
-					code: "pr"
-				}, {
-					name: "Saint Kitts and Nevis",
-					code: "kn"
-				}, {
-					name: "Saint Lucia",
-					code: "lc"
-				}, {
-					name: "Saint Pierre and Miquelon",
-					code: "pm"
-				}, {
-					name: "Saint Vincent and the Grenadines",
-					code: "vc"
-				}, {
-					name: "Sint Maarten",
-					code: "sx"
-				}, {
-					name: "Suriname",
-					code: "sr"
-				}, {
-					name: "Trinidad and Tobago",
-					code: "tt"
-				}, {
-					name: "Turks and Caicos Islands",
-					code: "tc"
-				}, {
-					name: "United States",
-					code: "us"
-				}, {
-					name: "Uruguay",
-					code: "uy"
-				}, {
-					name: "Venezuela, Bolivarian Republic of",
-					code: "ve"
-				}, {
-					name: "Virgin Islands, British",
-					code: "vg"
-				}, {
-					name: "Virgin Islands, U.S.",
-					code: "vi"
-				}]
-			}, {
-				name: "Asia",
-				countries: [{
-					name: "Afghanistan",
-					code: "af"
-				}, {
-					name: "Armenia",
-					code: "am"
-				}, {
-					name: "Azerbaijan",
-					code: "az"
-				}, {
-					name: "Bahrain",
-					code: "bh"
-				}, {
-					name: "Bangladesh",
-					code: "bd"
-				}, {
-					name: "Bhutan",
-					code: "bt"
-				}, {
-					name: "Brunei Darussalam",
-					code: "bn"
-				}, {
-					name: "Cambodia",
-					code: "kh"
-				}, {
-					name: "China",
-					code: "cn"
-				}, {
-					name: "Cyprus",
-					code: "cy"
-				}, {
-					name: "Georgia",
-					code: "ge"
-				}, {
-					name: "Hong Kong",
-					code: "hk"
-				}, {
-					name: "India",
-					code: "in"
-				}, {
-					name: "Indonesia",
-					code: "id"
-				}, {
-					name: "Iran, Islamic Republic of",
-					code: "ir"
-				}, {
-					name: "Iraq",
-					code: "iq"
-				}, {
-					name: "Israel",
-					code: "il"
-				}, {
-					name: "Japan",
-					code: "jp"
-				}, {
-					name: "Jordan",
-					code: "jo"
-				}, {
-					name: "Kazakhstan",
-					code: "kz"
-				}, {
-					name: "Korea, Democratic People's Republic of",
-					code: "kp"
-				}, {
-					name: "Korea, Republic of",
-					code: "kr"
-				}, {
-					name: "Kuwait",
-					code: "kw"
-				}, {
-					name: "Kyrgyzstan",
-					code: "kg"
-				}, {
-					name: "Lao People's Democratic Republic",
-					code: "la"
-				}, {
-					name: "Lebanon",
-					code: "lb"
-				}, {
-					name: "Macao",
-					code: "mo"
-				}, {
-					name: "Malaysia",
-					code: "my"
-				}, {
-					name: "Maldives",
-					code: "mv"
-				}, {
-					name: "Mongolia",
-					code: "mn"
-				}, {
-					name: "Myanmar",
-					code: "mm"
-				}, {
-					name: "Nepal",
-					code: "np"
-				}, {
-					name: "Oman",
-					code: "om"
-				}, {
-					name: "Pakistan",
-					code: "pk"
-				}, {
-					name: "Palestinian Territory, Occupied",
-					code: "ps"
-				}, {
-					name: "Philippines",
-					code: "ph"
-				}, {
-					name: "Qatar",
-					code: "qa"
-				}, {
-					name: "Saudi Arabia",
-					code: "sa"
-				}, {
-					name: "Singapore",
-					code: "sg"
-				}, {
-					name: "Sri Lanka",
-					code: "lk"
-				}, {
-					name: "Syrian Arab Republic",
-					code: "sy"
-				}, {
-					name: "Taiwan, Province of China",
-					code: "tw"
-				}, {
-					name: "Tajikistan",
-					code: "tj"
-				}, {
-					name: "Thailand",
-					code: "th"
-				}, {
-					name: "Timor-Leste",
-					code: "tl"
-				}, {
-					name: "Turkey",
-					code: "tr"
-				}, {
-					name: "Turkmenistan",
-					code: "tm"
-				}, {
-					name: "United Arab Emirates",
-					code: "ae"
-				}, {
-					name: "Uzbekistan",
-					code: "uz"
-				}, {
-					name: "Viet Nam",
-					code: "vn"
-				}, {
-					name: "Yemen",
-					code: "ye"
-				}]
-			}, {
-				name: "Europe",
-				countries: [{
-					name: "Albania",
-					code: "al"
-				}, {
-					name: "Andorra",
-					code: "ad"
-				}, {
-					name: "Austria",
-					code: "at"
-				}, {
-					name: "Belarus",
-					code: "by"
-				}, {
-					name: "Belgium",
-					code: "be"
-				}, {
-					name: "Bosnia and Herzegovina",
-					code: "ba"
-				}, {
-					name: "Bulgaria",
-					code: "bg"
-				}, {
-					name: "Croatia",
-					code: "hr"
-				}, {
-					name: "Czech Republic",
-					code: "cz"
-				}, {
-					name: "Denmark",
-					code: "dk"
-				}, {
-					name: "Estonia",
-					code: "ee"
-				}, {
-					name: "Faroe Islands",
-					code: "fo"
-				}, {
-					name: "Finland",
-					code: "fi"
-				}, {
-					name: "France",
-					code: "fr"
-				}, {
-					name: "Germany",
-					code: "de"
-				}, {
-					name: "Gibraltar",
-					code: "gi"
-				}, {
-					name: "Greece",
-					code: "gr"
-				}, {
-					name: "Holy See (Vatican City State)",
-					code: "va"
-				}, {
-					name: "Hungary",
-					code: "hu"
-				}, {
-					name: "Iceland",
-					code: "is"
-				}, {
-					name: "Ireland",
-					code: "ie"
-				}, {
-					name: "Italy",
-					code: "it"
-				}, {
-					name: "Kosovo",
-					code: "xk"
-				}, {
-					name: "Latvia",
-					code: "lv"
-				}, {
-					name: "Liechtenstein",
-					code: "li"
-				}, {
-					name: "Lithuania",
-					code: "lt"
-				}, {
-					name: "Luxembourg",
-					code: "lu"
-				}, {
-					name: "Macedonia, The Former Yugoslav Republic of",
-					code: "mk"
-				}, {
-					name: "Malta",
-					code: "mt"
-				}, {
-					name: "Moldova, Republic of",
-					code: "md"
-				}, {
-					name: "Monaco",
-					code: "mc"
-				}, {
-					name: "Montenegro",
-					code: "me"
-				}, {
-					name: "Netherlands",
-					code: "nl"
-				}, {
-					name: "Norway",
-					code: "no"
-				}, {
-					name: "Poland",
-					code: "pl"
-				}, {
-					name: "Portugal",
-					code: "pt"
-				}, {
-					name: "Romania",
-					code: "ro"
-				}, {
-					name: "Russian Federation",
-					code: "ru"
-				}, {
-					name: "San Marino",
-					code: "sm"
-				}, {
-					name: "Serbia",
-					code: "rs"
-				}, {
-					name: "Slovakia",
-					code: "sk"
-				}, {
-					name: "Slovenia",
-					code: "si"
-				}, {
-					name: "Spain",
-					code: "es"
-				}, {
-					name: "Sweden",
-					code: "se"
-				}, {
-					name: "Switzerland",
-					code: "ch"
-				}, {
-					name: "Ukraine",
-					code: "ua"
-				}, {
-					name: "United Kingdom",
-					code: "gb"
-				}]
-			}, {
-				name: "Australia and Oceania",
-				countries: [{
-					name: "American Samoa",
-					code: "as"
-				}, {
-					name: "Australia",
-					code: "au"
-				}, {
-					name: "Cook Islands",
-					code: "ck"
-				}, {
-					name: "Fiji",
-					code: "fj"
-				}, {
-					name: "French Polynesia",
-					code: "pf"
-				}, {
-					name: "Guam",
-					code: "gu"
-				}, {
-					name: "Kiribati",
-					code: "ki"
-				}, {
-					name: "Marshall Islands",
-					code: "mh"
-				}, {
-					name: "Micronesia, Federated States of",
-					code: "fm"
-				}, {
-					name: "Nauru",
-					code: "nr"
-				}, {
-					name: "New Caledonia",
-					code: "nc"
-				}, {
-					name: "New Zealand",
-					code: "nz"
-				}, {
-					name: "Niue",
-					code: "nu"
-				}, {
-					name: "Norfolk Island",
-					code: "nf"
-				}, {
-					name: "Northern Mariana Islands",
-					code: "mp"
-				}, {
-					name: "Palau",
-					code: "pw"
-				}, {
-					name: "Papua New Guinea",
-					code: "pg"
-				}, {
-					name: "Pitcairn",
-					code: "pn"
-				}, {
-					name: "Samoa",
-					code: "ws"
-				}, {
-					name: "Solomon Islands",
-					code: "sb"
-				}, {
-					name: "Tokelau",
-					code: "tk"
-				}, {
-					name: "Tonga",
-					code: "to"
-				}, {
-					name: "Tuvalu",
-					code: "tv"
-				}, {
-					name: "Vanuatu",
-					code: "vu"
-				}, {
-					name: "Wallis and Futuna",
-					code: "wf"
-				}]
-			}, {
-				name: "Other areas",
-				countries: [{
-					name: "Bouvet Island",
-					code: "bv"
-				}, {
-					name: "British Indian Ocean Territory",
-					code: "io"
-				}, {
-					name: "Canary Islands",
-					code: "ic"
-				}, {
-					name: "Catalonia",
-					code: "catalonia"
-				}, {
-					name: "England",
-					code: "england"
-				}, {
-					name: "European Union",
-					code: "eu"
-				}, {
-					name: "French Southern Territories",
-					code: "tf"
-				}, {
-					name: "Guernsey",
-					code: "gg"
-				}, {
-					name: "Heard Island and McDonald Islands",
-					code: "hm"
-				}, {
-					name: "Isle of Man",
-					code: "im"
-				}, {
-					name: "Jersey",
-					code: "je"
-				}, {
-					name: "Kurdistan",
-					code: "kurdistan"
-				}, {
-					name: "Scotland",
-					code: "scotland"
-				}, {
-					name: "Somaliland",
-					code: "somaliland"
-				}, {
-					name: "South Georgia and the South Sandwich Islands",
-					code: "gs"
-				}, {
-					name: "Tibet",
-					code: "tibet"
-				}, {
-					name: "United States Minor Outlying Islands",
-					code: "um"
-				}, {
-					name: "Wales",
-					code: "wales"
-				}, {
-					name: "Zanzibar",
-					code: "zanzibar"
-				}]
-			}];
-
-			return {
-				country: this.props.country
-			};
-		},
-
-		render: function render() {
-			var _this = this;
-			var countries = [];
-			var num = 0;
-			this.continents.forEach(function (continent, index, array) {
-				var elm = _react2.default.createElement(
-					"li",
-					{ key: num, className: "uk-nav-header" },
-					continent.name
-				);
-				countries.push(elm);
-				num++;
-
-				continent.countries.forEach(function (country, index, array) {
-					var elm = _react2.default.createElement(
-						"li",
-						{ key: country.code },
-						_react2.default.createElement(
-							"a",
-							{ onClick: _this.selectCountry, "data-country": country.code, className: "uk-dropdown-close" },
-							_react2.default.createElement("span", { className: "flag flag-" + country.code }),
-							" ",
-							country.name
-						)
-					);
-					countries.push(elm);
-				});
-			});
-
-			return _react2.default.createElement(
-				"div",
-				{ "data-uk-dropdown": "{mode:'click'}", className: "uk-button-dropdown" },
-				_react2.default.createElement(
-					"button",
-					{ className: "uk-button uk-button-mini" },
-					_react2.default.createElement("span", { className: "flag flag-" + this.state.country }),
-					" ",
-					this.getCountryName(this.state.country),
-					" ",
-					_react2.default.createElement("i", { className: "uk-icon-angle-down" })
-				),
-				_react2.default.createElement(
-					"div",
-					{ className: "uk-dropdown uk-dropdown-scrollable uk-dropdown-small" },
-					_react2.default.createElement(
-						"ul",
-						{ className: "uk-nav uk-nav-dropdown" },
-						countries
-					)
-				)
-			);
-		},
-
-		// Update the country when the props are changed
-		componentWillReceiveProps: function componentWillReceiveProps(nextProps) {
-			this.setState({ country: nextProps.country.toLowerCase() });
-		},
-
-		// Send changes back to parent
-		selectCountry: function selectCountry(event) {
-			this.props.onChange(event.target.dataset.country);
-		},
-
-		// Get a readable name from a country code
-		getCountryName: function getCountryName(code) {
-			var name = "Unknown";
-
-			this.continents.forEach(function (continent, index, array) {
-				continent.countries.forEach(function (country, index, array) {
-					if (country.code == code) {
-						name = country.name;
-						return;
-					}
-				});
-
-				if (name != "Unknown") {
-					return;
-				}
-			});
-
-			return name;
-		}
-	});
-
-	module.exports = CountryDropdown;
-
-/***/ },
-/* 284 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var _react = __webpack_require__(1);
-
-	var _react2 = _interopRequireDefault(_react);
-
-	var _backboneReactComponent = __webpack_require__(244);
-
-	var _backboneReactComponent2 = _interopRequireDefault(_backboneReactComponent);
-
-	var _Member = __webpack_require__(285);
-
-	var _Member2 = _interopRequireDefault(_Member);
-
-	var _reactRouter = __webpack_require__(172);
-
-	var _BackboneTable = __webpack_require__(251);
-
-	var _BackboneTable2 = _interopRequireDefault(_BackboneTable);
-
-	var _Date = __webpack_require__(246);
-
-	var _Date2 = _interopRequireDefault(_Date);
-
-	var _config = __webpack_require__(242);
-
-	var _config2 = _interopRequireDefault(_config);
-
-	var _TableDropdownMenu = __webpack_require__(253);
-
-	var _TableDropdownMenu2 = _interopRequireDefault(_TableDropdownMenu);
-
-	var _TableFilterBox = __webpack_require__(264);
-
-	var _TableFilterBox2 = _interopRequireDefault(_TableFilterBox);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	var MembersHandler = _react2.default.createClass({
-		displayName: 'MembersHandler',
-
-		getInitialState: function getInitialState() {
-			return {
-				filters: this.props.filters || {}
-			};
-		},
-
-		updateFilters: function updateFilters(newFilter) {
-			var filters = this.overrideFiltersFromProps(newFilter);
-			this.setState({
-				filters: filters
-			});
-		},
-
-		overrideFiltersFromProps: function overrideFiltersFromProps(filters) {
-			return filters;
-		},
-
-		render: function render() {
-			return _react2.default.createElement(
-				'div',
-				null,
-				_react2.default.createElement(
-					'h2',
-					null,
-					'Medlemmar'
-				),
-				_react2.default.createElement(
-					'p',
-					{ className: 'uk-float-left' },
-					'På denna sida ser du en lista på samtliga medlemmar.'
-				),
-				_react2.default.createElement(
-					_reactRouter.Link,
-					{ to: '/members/add', className: 'uk-button uk-button-primary uk-float-right' },
-					_react2.default.createElement('i', { className: 'uk-icon-plus-circle' }),
-					' Skapa ny medlem'
-				),
-				_react2.default.createElement(_TableFilterBox2.default, { onChange: this.updateFilters }),
-				_react2.default.createElement(Members, { type: _Member2.default, filters: this.state.filters })
-			);
-		}
-	});
-
-	// Backbone
-
-	MembersHandler.title = "Visa medlemmar";
-
-	var Members = _react2.default.createClass({
-		displayName: 'Members',
-
-		mixins: [Backbone.React.Component.mixin, _BackboneTable2.default],
-
-		getInitialState: function getInitialState() {
-			return {
-				columns: 7
-			};
-		},
-
-		/*
-	 	// TODO: Få igång denna igen
-	 	fetch: function(search)
-	 	{
-	 		if(search !== undefined && search.length > 0)
-	 		{
-	 			// Update the paginator so that is tells us we're on page 1
-	 			this.pagination[1].currentPage = 0;
-	 			this.pagination[2].currentPage = 0;
-	 			this.pagination[1].render();
-	 			this.pagination[2].render();
-	 
-	 			// Make sure the Backbone collection will receive page 1
-	 			this.getCollection().state.currentPage = 1;
-	 		}
-	 	},
-	 */
-		componentWillMount: function componentWillMount() {
-			this.fetch();
-		},
-
-		removeTextMessage: function removeTextMessage(entity) {
-			return "Are you sure you want to remove member \"" + entity.firstname + " " + entity.lastname + "\"?";
-		},
-
-		removeErrorMessage: function removeErrorMessage() {
-			UIkit.modal.alert("Error deleting member");
-		},
-
-		renderRow: function renderRow(row, i) {
-			return _react2.default.createElement(
-				'tr',
-				{ key: i },
-				_react2.default.createElement(
-					'td',
-					null,
-					_react2.default.createElement(
-						_reactRouter.Link,
-						{ to: "/members/" + row.member_number },
-						row.member_number
-					)
-				),
-				_react2.default.createElement(
-					'td',
-					null,
-					'-'
-				),
-				_react2.default.createElement(
-					'td',
-					null,
-					row.firstname
-				),
-				_react2.default.createElement(
-					'td',
-					null,
-					row.lastname
-				),
-				_react2.default.createElement(
-					'td',
-					null,
-					row.email
-				),
-				_react2.default.createElement(
-					'td',
-					null,
-					_react2.default.createElement(_Date2.default, { date: row.created_at })
-				),
-				_react2.default.createElement(
-					'td',
-					null,
-					_react2.default.createElement(
-						_TableDropdownMenu2.default,
-						null,
-						_react2.default.createElement(
-							_reactRouter.Link,
-							{ to: "/members/" + row.member_number },
-							_react2.default.createElement('i', { className: 'uk-icon uk-icon-cog' }),
-							' Redigera medlem'
-						),
-						this.removeButton(i, "Ta bort medlem")
-					)
-				)
-			);
-		},
-
-		renderHeader: function renderHeader() {
-			return [{
-				title: "#",
-				sort: "member_number"
-			}, {
-				title: "Kön"
-			}, {
-				title: "Förnamn",
-				sort: "firstname"
-			}, {
-				title: "Efternamn",
-				sort: "lastname"
-			}, {
-				title: "E-post",
-				sort: "email"
-			}, {
-				title: "Blev medlem",
-				sort: "created_at"
-			}, {
-				title: ""
-			}];
-		}
-	});
-
-	module.exports = {
-		MembersHandler: MembersHandler
-	};
-
-/***/ },
-/* 285 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var _backbone = __webpack_require__(237);
-
-	var _backbone2 = _interopRequireDefault(_backbone);
-
-	var _Member = __webpack_require__(245);
-
-	var _Member2 = _interopRequireDefault(_Member);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	var MemberCollection = _backbone2.default.PageableCollection.extend({
-		model: _Member2.default,
-		url: "/member"
-	});
-
-	module.exports = MemberCollection;
-
-/***/ },
-/* 286 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var _react = __webpack_require__(1);
-
-	var _react2 = _interopRequireDefault(_react);
-
-	var _backboneReactComponent = __webpack_require__(244);
-
-	var _backboneReactComponent2 = _interopRequireDefault(_backboneReactComponent);
-
-	var _Group = __webpack_require__(263);
-
-	var _Group2 = _interopRequireDefault(_Group);
-
-	var _Member = __webpack_require__(285);
-
-	var _Member2 = _interopRequireDefault(_Member);
-
-	var _reactRouter = __webpack_require__(172);
-
-	var _Members = __webpack_require__(287);
-
-	var _Members2 = _interopRequireDefault(_Members);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	// Backbone
-
-
-	var GroupHandler = _react2.default.createClass({
-		displayName: 'GroupHandler',
-
-		getInitialState: function getInitialState() {
-			var group = new _Group2.default({
-				entity_id: this.props.params.id
-			});
-			group.fetch();
-
-			this.title = "Meep";
-			return {
-				model: group
-			};
-		},
-
-		render: function render() {
-			return _react2.default.createElement(
-				'div',
-				null,
-				_react2.default.createElement(Group, { model: this.state.model }),
-				_react2.default.createElement(_Members2.default, { type: _Member2.default,
-					filters: {
-						relations: [{
-							entity_id: this.state.model.get("entity_id")
-						}]
-					}
-				})
-			);
-		}
-	});
-	GroupHandler.title = "Visa grupp";
-
-	var GroupEditHandler = _react2.default.createClass({
-		displayName: 'GroupEditHandler',
-
-		getInitialState: function getInitialState() {
-			var id = this.props.params.id;
-			var group = new _Group2.default({ entity_id: id });
-			group.fetch();
-
-			this.title = "Meep";
-			return {
-				model: group
-			};
-		},
-
-		render: function render() {
-			return _react2.default.createElement(Group, { model: this.state.model });
-		}
-	});
-	GroupEditHandler.title = "Visa grupp";
-
-	var GroupAddHandler = _react2.default.createClass({
-		displayName: 'GroupAddHandler',
-
-		getInitialState: function getInitialState() {
-			var newGroup = new _Group2.default();
-			return {
-				model: newGroup
-			};
-		},
-
-		render: function render() {
-			return _react2.default.createElement(
-				'div',
-				null,
-				_react2.default.createElement(Group, { model: this.state.model })
-			);
-		}
-	});
-
-	var Group = _react2.default.createClass({
-		displayName: 'Group',
-
-		mixins: [Backbone.React.Component.mixin],
-
-		getInitialState: function getInitialState() {
-			return {
-				error_column: "",
-				error_message: ""
-			};
-		},
-
-		cancel: function cancel(event) {
-			// Prevent the form from being submitted
-			event.preventDefault();
-
-			UIkit.modal.alert("TODO: Cancel");
-		},
-
-		remove: function remove(event) {
-			// Prevent the form from being submitted
-			event.preventDefault();
-
-			UIkit.modal.alert("TODO: Remove");
-		},
-
-		save: function save(event) {
-			var _this = this;
-
-			// Prevent the form from being submitted
-			event.preventDefault();
-
-			this.getModel().save([], {
-				success: function success(model, response) {
-					if (response.status == "created") {
-						_reactRouter.browserHistory.push("/groups");
-						UIkit.modal.alert("Successfully created");
-					} else if (response.status == "updated") {
-						_reactRouter.browserHistory.push("/groups");
-						UIkit.modal.alert("Successfully updated");
-					} else {
-						_this.error();
-					}
-				},
-				error: function error(model, xhr, options) {
-					if (xhr.status == 422) {
-						_this.setState({
-							error_column: xhr.responseJSON.column,
-							error_message: xhr.responseJSON.message
-						});
-					} else {
-
-						_this.error();
-					}
-				}
-			});
-		},
-
-		error: function error() {
-			UIkit.modal.alert("Error saving model");
-		},
-
-		handleChange: function handleChange(event) {
-			// Update the model with new value
-			var target = event.target;
-			var key = target.getAttribute("name");
-			this.state.model[key] = target.value;
-
-			// When we change the value of the model we have to rerender the component
-			this.forceUpdate();
-		},
-
-		renderErrorMsg: function renderErrorMsg(column) {
-			if (this.state.error_column == column) {
-				return _react2.default.createElement(
-					'p',
-					{ className: 'uk-form-help-block error' },
-					'Error: ',
-					this.state.error_message
-				);
-			}
-		},
-
-		render: function render() {
-			return _react2.default.createElement(
-				'div',
-				null,
-				_react2.default.createElement(
-					'h2',
-					null,
-					this.state.model.entity_id ? "Redigera grupp" : "Skapa grupp"
-				),
-				_react2.default.createElement(
-					'form',
-					{ className: 'uk-form uk-form-horizontal', onSubmit: this.save },
-					_react2.default.createElement(
-						'div',
-						{ className: 'uk-form-row' },
-						_react2.default.createElement(
-							'label',
-							{ className: 'uk-form-label' },
-							'Namn'
-						),
-						_react2.default.createElement(
-							'div',
-							{ className: 'uk-form-controls' },
-							_react2.default.createElement(
-								'div',
-								{ className: 'uk-form-icon' },
-								_react2.default.createElement('i', { className: 'uk-icon-tag' }),
-								_react2.default.createElement('input', { type: 'text', name: 'title', className: 'uk-form-width-large', value: this.state.model.title, onChange: this.handleChange })
-							),
-							this.renderErrorMsg("title")
-						)
-					),
-					_react2.default.createElement(
-						'div',
-						{ className: 'uk-form-row' },
-						_react2.default.createElement(
-							'label',
-							{ className: 'uk-form-label' },
-							'Beskrivning'
-						),
-						_react2.default.createElement(
-							'div',
-							{ className: 'uk-form-controls' },
-							_react2.default.createElement('textarea', { name: 'description', className: 'uk-form-width-large', value: this.state.model.description, onChange: this.handleChange }),
-							this.renderErrorMsg("description")
-						)
-					),
-					_react2.default.createElement(
-						'div',
-						{ className: 'uk-form-row' },
-						_react2.default.createElement(
-							'div',
-							{ className: 'uk-form-controls' },
-							_react2.default.createElement(
-								'button',
-								{ className: 'uk-button uk-button-danger uk-float-left', onClick: this.cancel },
-								_react2.default.createElement('i', { className: 'uk-icon-close' }),
-								' Avbryt'
-							),
-							this.state.model.entity_id ? _react2.default.createElement(
-								'button',
-								{ className: 'uk-button uk-button-danger uk-float-left', onClick: this.remove },
-								_react2.default.createElement('i', { className: 'uk-icon-trash' }),
-								' Ta bort grupp'
-							) : "",
-							_react2.default.createElement(
-								'button',
-								{ className: 'uk-button uk-button-success uk-float-right', onClick: this.save },
-								_react2.default.createElement('i', { className: 'uk-icon-save' }),
-								' Spara grupp'
-							)
-						)
-					)
-				)
-			);
-		}
-	});
-
-	module.exports = {
-		GroupHandler: GroupHandler,
-		GroupAddHandler: GroupAddHandler,
-		GroupEditHandler: GroupEditHandler,
-		Group: Group
-	};
-
-/***/ },
-/* 287 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var _react = __webpack_require__(1);
-
-	var _react2 = _interopRequireDefault(_react);
-
-	var _backboneReactComponent = __webpack_require__(244);
-
-	var _backboneReactComponent2 = _interopRequireDefault(_backboneReactComponent);
-
-	var _BackboneTable = __webpack_require__(251);
-
-	var _BackboneTable2 = _interopRequireDefault(_BackboneTable);
-
-	var _reactRouter = __webpack_require__(172);
-
-	var _TableDropdownMenu = __webpack_require__(253);
-
-	var _TableDropdownMenu2 = _interopRequireDefault(_TableDropdownMenu);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	var GroupMembers = _react2.default.createClass({
-		displayName: 'GroupMembers',
-
-		mixins: [Backbone.React.Component.mixin, _BackboneTable2.default],
-
-		getInitialState: function getInitialState() {
-			return {
-				columns: 9
-			};
-		},
-
-		componentWillMount: function componentWillMount() {
-			this.fetch();
-		},
-
-		removeTextMessage: function removeTextMessage(entity) {
-			// TODO
-			return "Are you sure you want to remove group \"" + entity.title + "\"?";
-		},
-
-		removeErrorMessage: function removeErrorMessage() {
-			// TODO
-			UIkit.modal.alert("Error deleting group");
-		},
-
-		renderHeader: function renderHeader() {
-			return [{
-				title: "Medlemsnummer"
-			}, {
-				title: "Namn"
-			}, {
-				title: ""
-			}];
-		},
-
-		renderRow: function renderRow(row, i) {
-			return _react2.default.createElement(
-				'tr',
-				{ key: i },
-				_react2.default.createElement(
-					'td',
-					null,
-					_react2.default.createElement(
-						_reactRouter.Link,
-						{ to: "/members/" + row.member_number },
-						row.member_number
-					)
-				),
-				_react2.default.createElement(
-					'td',
-					null,
-					_react2.default.createElement(
-						_reactRouter.Link,
-						{ to: "/members/" + row.member_number },
-						row.firstname,
-						' ',
-						row.lastname
-					)
-				),
-				_react2.default.createElement(
-					'td',
-					null,
-					_react2.default.createElement(
-						_TableDropdownMenu2.default,
-						null,
-						this.removeButton(i, "Ta bort medlem ur grupp")
-					)
-				)
-			);
-		}
-	});
-
-	module.exports = GroupMembers;
-
-/***/ },
-/* 288 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var _react = __webpack_require__(1);
-
-	var _react2 = _interopRequireDefault(_react);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	var SalesOverviewHandler = _react2.default.createClass({
-		displayName: 'SalesOverviewHandler',
-
-		render: function render() {
-			return _react2.default.createElement(
-				'div',
-				null,
-				_react2.default.createElement(
-					'h2',
-					null,
-					'Översikt försäljning'
-				),
-				_react2.default.createElement('p', null)
-			);
-		}
-	});
-
-	module.exports = SalesOverviewHandler;
-
-/***/ },
-/* 289 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var _react = __webpack_require__(1);
-
-	var _react2 = _interopRequireDefault(_react);
-
-	var _Product = __webpack_require__(290);
-
-	var _Product2 = _interopRequireDefault(_Product);
-
-	var _Product3 = __webpack_require__(291);
-
-	var _Product4 = _interopRequireDefault(_Product3);
-
-	var _reactRouter = __webpack_require__(172);
-
-	var _BackboneTable = __webpack_require__(251);
-
-	var _BackboneTable2 = _interopRequireDefault(_BackboneTable);
-
-	var _Currency = __webpack_require__(282);
-
-	var _Currency2 = _interopRequireDefault(_Currency);
-
-	var _Date = __webpack_require__(246);
-
-	var _Date2 = _interopRequireDefault(_Date);
-
-	var _TableDropdownMenu = __webpack_require__(253);
-
-	var _TableDropdownMenu2 = _interopRequireDefault(_TableDropdownMenu);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	var SalesProductsHandler = _react2.default.createClass({
-		displayName: 'SalesProductsHandler',
-
-		render: function render() {
-			return _react2.default.createElement(
-				'div',
-				null,
-				_react2.default.createElement(
-					'h2',
-					null,
-					'Produkter'
-				),
-				_react2.default.createElement(
-					'p',
-					{ className: 'uk-float-left' },
-					'På denna sida ser du en lista på samtliga produkter som finns för försäljning.'
-				),
-				_react2.default.createElement(
-					_reactRouter.Link,
-					{ to: '/product/add', className: 'uk-button uk-button-primary uk-float-right' },
-					_react2.default.createElement('i', { className: 'uk-icon-plus-circle' }),
-					' Skapa ny produkt'
-				),
-				_react2.default.createElement(Products, { type: _Product2.default })
-			);
-		}
-	});
-
-	// Backbone
-
-
-	var Products = _react2.default.createClass({
-		displayName: 'Products',
-
-		mixins: [Backbone.React.Component.mixin, _BackboneTable2.default],
-
-		getInitialState: function getInitialState() {
-			return {
-				columns: 7
-			};
-		},
-
-		componentWillMount: function componentWillMount() {
-			this.state.collection.fetch();
-		},
-
-		removeTextMessage: function removeTextMessage(entity) {
-			return "Are you sure you want to remove product \"" + entity.title + "\"?";
-		},
-
-		removeErrorMessage: function removeErrorMessage() {
-			UIkit.modal.alert("Error deleting product");
-		},
-
-		renderHeader: function renderHeader() {
-			return [{
-				title: "#",
-				sort: "entity_id"
-			}, {
-				title: "Namn",
-				sort: "title"
-			}, {
-				title: "Giltig till",
-				sort: "expiry_date"
-			}, {
-				title: "Prenumeration",
-				sort: "auto_extend"
-			}, {
-				title: "Giltighetstid",
-				sort: "interval"
-			}, {
-				title: "Pris",
-				sort: "price"
-			}, {
-				title: ""
-			}];
-		},
-
-		renderRow: function renderRow(row, i) {
-			return _react2.default.createElement(
-				'tr',
-				{ key: i },
-				_react2.default.createElement(
-					'td',
-					null,
-					row.entity_id
-				),
-				_react2.default.createElement(
-					'td',
-					null,
-					_react2.default.createElement(
-						_reactRouter.Link,
-						{ to: "/product/" + row.entity_id },
-						row.title
-					)
-				),
-				_react2.default.createElement(
-					'td',
-					null,
-					row.expiry_date
-				),
-				_react2.default.createElement(
-					'td',
-					null,
-					row.auto_extend
-				),
-				_react2.default.createElement(
-					'td',
-					null,
-					row.interval
-				),
-				_react2.default.createElement(
-					'td',
-					null,
-					_react2.default.createElement(_Currency2.default, { value: row.price })
-				),
-				_react2.default.createElement(
-					'td',
-					null,
-					_react2.default.createElement(
-						_TableDropdownMenu2.default,
-						null,
-						_react2.default.createElement(
-							_reactRouter.Link,
-							{ to: "/product/" + row.entity_id + "/edit" },
-							_react2.default.createElement('i', { className: 'uk-icon uk-icon-cog' }),
-							' Redigera produkt'
-						),
-						this.removeButton(i, "Ta bort produkt")
-					)
-				)
-			);
-		}
-	});
-
-	module.exports = {
-		SalesProductsHandler: SalesProductsHandler,
-		Products: Products
-	};
-
-/***/ },
-/* 290 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var _backbone = __webpack_require__(237);
-
-	var _backbone2 = _interopRequireDefault(_backbone);
-
-	var _Product = __webpack_require__(291);
-
-	var _Product2 = _interopRequireDefault(_Product);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	var ProductCollection = _backbone2.default.PageableCollection.extend({
-		model: _Product2.default,
-		url: "/product"
-	});
-
-	module.exports = ProductCollection;
-
-/***/ },
-/* 291 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-
-	var _backbone = __webpack_require__(237);
-
-	var _backbone2 = _interopRequireDefault(_backbone);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	var ProductModel = _backbone2.default.Model.fullExtend({
-		idAttribute: "entity_id",
-		urlRoot: "/product",
-		defaults: {
-			created_at: "0000-00-00T00:00:00Z",
-			updated_at: "0000-00-00T00:00:00Z",
-			title: "",
-			description: "",
-			expiry_date: "",
-			price: 0,
-			interval: ""
-		}
-	});
-
-	module.exports = ProductModel;
-
-/***/ },
-/* 292 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var _react = __webpack_require__(1);
-
-	var _react2 = _interopRequireDefault(_react);
-
-	var _backboneReactComponent = __webpack_require__(244);
-
-	var _backboneReactComponent2 = _interopRequireDefault(_backboneReactComponent);
-
-	var _Subscription = __webpack_require__(293);
-
-	var _Subscription2 = _interopRequireDefault(_Subscription);
-
-	var _Subscription3 = __webpack_require__(294);
-
-	var _Subscription4 = _interopRequireDefault(_Subscription3);
-
-	var _reactRouter = __webpack_require__(172);
-
-	var _BackboneTable = __webpack_require__(251);
-
-	var _BackboneTable2 = _interopRequireDefault(_BackboneTable);
-
-	var _Date = __webpack_require__(246);
-
-	var _Date2 = _interopRequireDefault(_Date);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	var SalesSubscriptionsHandler = _react2.default.createClass({
-		displayName: 'SalesSubscriptionsHandler',
-
-		render: function render() {
-			return _react2.default.createElement(
-				'div',
-				null,
-				_react2.default.createElement(
-					'h2',
-					null,
-					'Prenumerationer'
-				),
-				_react2.default.createElement(
-					'p',
-					null,
-					'På denna sida ser du en lista på samtliga prenumerationer.'
-				),
-				_react2.default.createElement(Subscriptions, { type: _Subscription2.default })
-			);
-		}
-	});
-
-	// Backbone
-
-	SalesSubscriptionsHandler.title = "Visa prenumerationer";
-
-	var Subscriptions = _react2.default.createClass({
-		displayName: 'Subscriptions',
-
-		mixins: [Backbone.React.Component.mixin, _BackboneTable2.default],
-
-		getInitialState: function getInitialState() {
-			return {
-				columns: 4
-			};
-		},
-
-		componentWillMount: function componentWillMount() {
-			this.state.collection.fetch();
-		},
-
-		renderHeader: function renderHeader() {
-			return [{
-				title: "Member"
-			}, {
-				title: "Startdatum"
-			}, {
-				title: "Beskrivning"
-			}, {
-				title: "Produkt"
-			}];
-		},
-
-		renderRow: function renderRow(row, i) {
-			return _react2.default.createElement(
-				'tr',
-				{ key: i },
-				_react2.default.createElement(
-					'td',
-					null,
-					row.member_id
-				),
-				_react2.default.createElement(
-					'td',
-					null,
-					row.date_start
-				),
-				_react2.default.createElement(
-					'td',
-					null,
-					row.title
-				),
-				_react2.default.createElement(
-					'td',
-					null,
-					row.product_id
-				)
-			);
-		}
-	});
-
-	module.exports = {
-		SalesSubscriptionsHandler: SalesSubscriptionsHandler
-	};
-
-/***/ },
-/* 293 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var _backbone = __webpack_require__(237);
-
-	var _backbone2 = _interopRequireDefault(_backbone);
-
-	var _Subscription = __webpack_require__(294);
-
-	var _Subscription2 = _interopRequireDefault(_Subscription);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	var SubscriptionCollection = _backbone2.default.PageableCollection.extend({
-		model: _Subscription2.default,
-		url: "/subscription"
-	});
-
-	module.exports = SubscriptionCollection;
-
-/***/ },
-/* 294 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-
-	var _backbone = __webpack_require__(237);
-
-	var _backbone2 = _interopRequireDefault(_backbone);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	var SubscriptionModel = _backbone2.default.Model.fullExtend({
-		idAttribute: "account_number",
-		urlRoot: "/subscription",
-		defaults: {
-			created_at: "0000-00-00T00:00:00Z",
-			updated_at: "0000-00-00T00:00:00Z",
-			title: "",
-			member_id: 0,
-			product_id: 0,
-			date_start: "0000-00-00T00:00:00Z"
-		}
-	});
-
-	module.exports = SubscriptionModel;
-
-/***/ },
-/* 295 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var _react = __webpack_require__(1);
-
-	var _react2 = _interopRequireDefault(_react);
-
-	var _backboneReactComponent = __webpack_require__(244);
-
-	var _backboneReactComponent2 = _interopRequireDefault(_backboneReactComponent);
-
-	var _SalesHistory = __webpack_require__(296);
-
-	var _SalesHistory2 = _interopRequireDefault(_SalesHistory);
-
-	var _SalesHistory3 = __webpack_require__(297);
-
-	var _SalesHistory4 = _interopRequireDefault(_SalesHistory3);
-
-	var _reactRouter = __webpack_require__(172);
-
-	var _BackboneTable = __webpack_require__(251);
-
-	var _BackboneTable2 = _interopRequireDefault(_BackboneTable);
-
-	var _Date = __webpack_require__(246);
-
-	var _Date2 = _interopRequireDefault(_Date);
-
-	var _Currency = __webpack_require__(282);
-
-	var _Currency2 = _interopRequireDefault(_Currency);
-
-	var _TableFilterBox = __webpack_require__(264);
-
-	var _TableFilterBox2 = _interopRequireDefault(_TableFilterBox);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	var SalesHistoryHandler = _react2.default.createClass({
-		displayName: 'SalesHistoryHandler',
-
-		getInitialState: function getInitialState() {
-			return {
-				filters: this.props.filters || {}
-			};
-		},
-
-		updateFilters: function updateFilters(newFilter) {
-			var filters = this.overrideFiltersFromProps(newFilter);
-			this.setState({
-				filters: filters
-			});
-		},
-
-		overrideFiltersFromProps: function overrideFiltersFromProps(filters) {
-			return filters;
-		},
-
-		render: function render() {
-			return _react2.default.createElement(
-				'div',
-				null,
-				_react2.default.createElement(
-					'h2',
-					null,
-					'Försäljningshistorik'
-				),
-				_react2.default.createElement(
-					'p',
-					null,
-					'På denna sida ser du en lista på samtliga sålda produkter.'
-				),
-				_react2.default.createElement(_TableFilterBox2.default, { onChange: this.updateFilters }),
-				_react2.default.createElement(History, { type: _SalesHistory2.default, filters: this.state.filters })
-			);
-		}
-	});
-
-	// Backbone
-
-	SalesHistoryHandler.title = "Visa försäljning";
-
-	var History = _react2.default.createClass({
-		displayName: 'History',
-
-		mixins: [Backbone.React.Component.mixin, _BackboneTable2.default],
-
-		componentWillMount: function componentWillMount() {
-			this.state.collection.fetch();
-		},
-
-		getInitialState: function getInitialState() {
-			return {
-				columns: 7
-			};
-		},
-
-		renderHeader: function renderHeader() {
-			return [{
-				title: "Datum",
-				sort: "accounting_date"
-			}, {
-				title: "Order",
-				sort: "extid"
-			}, {
-				title: "Medlem",
-				sort: "member_number"
-			}, {
-				title: "Beskrivning"
-			}, {
-				title: "Produkt",
-				sort: "product_title"
-			}, {
-				title: "Belopp",
-				class: "uk-text-right",
-				sort: "amount"
-			}];
-		},
-
-		renderRow: function renderRow(row, i) {
-			return _react2.default.createElement(
-				'tr',
-				{ key: i },
-				_react2.default.createElement(
-					'td',
-					null,
-					row.accounting_date
-				),
-				_react2.default.createElement(
-					'td',
-					null,
-					_react2.default.createElement(
-						_reactRouter.Link,
-						{ to: "/entity/" + row.entity_id },
-						row.extid
-					)
-				),
-				_react2.default.createElement(
-					'td',
-					null,
-					_react2.default.createElement(
-						_reactRouter.Link,
-						{ to: "/members/" + row.member_number },
-						row.member_firstname,
-						' ',
-						row.member_lastname
-					)
-				),
-				_react2.default.createElement(
-					'td',
-					null,
-					row.instruction_title
-				),
-				_react2.default.createElement(
-					'td',
-					null,
-					_react2.default.createElement(
-						_reactRouter.Link,
-						{ to: "/sales/products/" + row.product_id },
-						row.product_title
-					)
-				),
-				_react2.default.createElement(
-					'td',
-					{ className: 'uk-text-right' },
-					_react2.default.createElement(_Currency2.default, { value: -1 * row.amount })
-				)
-			);
-		}
-	});
-
-	module.exports = {
-		SalesHistoryHandler: SalesHistoryHandler
-	};
-
-/***/ },
-/* 296 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var _backbone = __webpack_require__(237);
-
-	var _backbone2 = _interopRequireDefault(_backbone);
-
-	var _SalesHistory = __webpack_require__(297);
-
-	var _SalesHistory2 = _interopRequireDefault(_SalesHistory);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	var SalesHistoryCollection = _backbone2.default.PageableCollection.extend({
-		model: _SalesHistory2.default,
-		url: "/sales/history"
-	});
-
-	module.exports = SalesHistoryCollection;
-
-/***/ },
-/* 297 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-
-	var _backbone = __webpack_require__(237);
-
-	var _backbone2 = _interopRequireDefault(_backbone);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	var SalesHistoryModel = _backbone2.default.Model.fullExtend({
-		idAttribute: "entity_id",
-		urlRoot: "/sales/history",
-		defaults: {
-			created_at: "0000-00-00T00:00:00Z",
-			updated_at: "0000-00-00T00:00:00Z",
-			recipient: "",
-			title: "",
-			description: ""
-		}
-	});
-
-	module.exports = SalesHistoryModel;
-
-/***/ },
-/* 298 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var _react = __webpack_require__(1);
-
-	var _react2 = _interopRequireDefault(_react);
-
-	var _backboneReactComponent = __webpack_require__(244);
-
-	var _backboneReactComponent2 = _interopRequireDefault(_backboneReactComponent);
-
-	var _Masterledger = __webpack_require__(299);
-
-	var _Masterledger2 = _interopRequireDefault(_Masterledger);
-
-	var _reactRouter = __webpack_require__(172);
-
-	var _BackboneTable = __webpack_require__(251);
-
-	var _BackboneTable2 = _interopRequireDefault(_BackboneTable);
-
-	var _Currency = __webpack_require__(282);
-
-	var _Currency2 = _interopRequireDefault(_Currency);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	// Backbone
-
-
-	var MasterLedgerHandler = _react2.default.createClass({
-		displayName: 'MasterLedgerHandler',
-
-		render: function render() {
-			return _react2.default.createElement(
-				'div',
-				null,
-				_react2.default.createElement(
-					'h2',
-					null,
-					'Huvudbok'
-				),
-				_react2.default.createElement(EconomyAccounts, { type: _Masterledger2.default })
-			);
-		}
-	});
-
-	var EconomyAccounts = _react2.default.createClass({
-		displayName: 'EconomyAccounts',
-
-		mixins: [Backbone.React.Component.mixin, _BackboneTable2.default],
-
-		getInitialState: function getInitialState() {
-			return {
-				columns: 3
-			};
-		},
-
-		componentWillMount: function componentWillMount() {
-			this.state.collection.fetch();
-		},
-
-		renderHeader: function renderHeader() {
-			return [{
-				title: "#",
-				sort: "account_number"
-			}, {
-				title: "Konto",
-				sort: "title"
-			}, {
-				title: "Kontobalans",
-				class: "uk-text-right"
-			}];
-		},
-
-		renderRow: function renderRow(row, i) {
-			return _react2.default.createElement(
-				'tr',
-				{ key: i },
-				_react2.default.createElement(
-					'td',
-					null,
-					_react2.default.createElement(
-						_reactRouter.Link,
-						{ to: "/economy/account/" + row.account_number },
-						row.account_number
-					)
-				),
-				_react2.default.createElement(
-					'td',
-					null,
-					row.title
-				),
-				_react2.default.createElement(
-					'td',
-					{ className: 'uk-text-right' },
-					_react2.default.createElement(_Currency2.default, { value: row.balance })
-				)
-			);
-		}
-	});
-
-	var EconomyOverviewHandler = _react2.default.createClass({
-		displayName: 'EconomyOverviewHandler',
-
-		render: function render() {
-			return _react2.default.createElement(
-				'div',
-				null,
-				_react2.default.createElement(
-					'h2',
-					null,
-					'Översikt'
-				),
-				_react2.default.createElement(
-					'ul',
-					null,
-					_react2.default.createElement(
-						'li',
-						null,
-						'Samtliga obetalda fakturor + 3 senaste betalda'
-					),
-					_react2.default.createElement(
-						'li',
-						null,
-						'5 senaste skapade/ändrade verifikationerna'
-					),
-					_react2.default.createElement(
-						'li',
-						null,
-						'Saldo på konton (Bank, Stripe, PayPal, etc)'
-					),
-					_react2.default.createElement(
-						'li',
-						null,
-						'Datum för senaste synkroniseringar (Bank, Stripe, PayPal, etc)'
-					)
-				)
-			);
-		}
-	});
-
-	var EconomyDebugHandler = _react2.default.createClass({
-		displayName: 'EconomyDebugHandler',
-
-		render: function render() {
-
-			return _react2.default.createElement(
-				'div',
-				{ className: 'uk-width-1-1' },
-				_react2.default.createElement(
-					'h2',
-					null,
-					'Debug'
-				)
-			);
-		}
-	});
-
-	var EconomyAccountingPeriodHandler = _react2.default.createClass({
-		displayName: 'EconomyAccountingPeriodHandler',
-
-		render: function render() {
-			return _react2.default.createElement(
-				'div',
-				null,
-				_react2.default.createElement(
-					'h2',
-					null,
-					'Räkneskapsår'
-				),
-				_react2.default.createElement(
-					'p',
-					null,
-					'Konfiguera räkneskapsår'
-				)
-			);
-		}
-	});
-
-	module.exports = {
-		EconomyOverviewHandler: EconomyOverviewHandler,
-		MasterLedgerHandler: MasterLedgerHandler,
-		EconomyDebugHandler: EconomyDebugHandler,
-		EconomyAccountingPeriodHandler: EconomyAccountingPeriodHandler
-	};
-
-/***/ },
-/* 299 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var _backbone = __webpack_require__(237);
-
-	var _backbone2 = _interopRequireDefault(_backbone);
-
-	var _Account = __webpack_require__(300);
-
-	var _Account2 = _interopRequireDefault(_Account);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	var MasterledgerCollection = _backbone2.default.PageableCollection.extend({
-		model: _Account2.default,
-		url: "/economy/2015/masterledger"
-	});
-
-	module.exports = MasterledgerCollection;
-
-/***/ },
-/* 300 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-
-	var _backbone = __webpack_require__(237);
-
-	var _backbone2 = _interopRequireDefault(_backbone);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	var AccountModel = _backbone2.default.Model.fullExtend({
-		idAttribute: "account_number",
-		urlRoot: "/economy/2015/account",
-		defaults: {
-			created_at: "0000-00-00T00:00:00Z",
-			updated_at: "0000-00-00T00:00:00Z",
-			account_number: "",
-			title: "",
-			description: "",
-			balance: 0,
-			accounting_transaction: [],
-			instructions: []
-		}
-	});
-
-	module.exports = AccountModel;
-
-/***/ },
-/* 301 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var _react = __webpack_require__(1);
-
-	var _react2 = _interopRequireDefault(_react);
-
-	var _backboneReactComponent = __webpack_require__(244);
-
-	var _backboneReactComponent2 = _interopRequireDefault(_backboneReactComponent);
-
-	var _Instruction = __webpack_require__(302);
-
-	var _Instruction2 = _interopRequireDefault(_Instruction);
-
-	var _Instruction3 = __webpack_require__(303);
-
-	var _Instruction4 = _interopRequireDefault(_Instruction3);
-
-	var _reactRouter = __webpack_require__(172);
-
-	var _Currency = __webpack_require__(282);
-
-	var _Currency2 = _interopRequireDefault(_Currency);
-
-	var _Date = __webpack_require__(246);
-
-	var _Date2 = _interopRequireDefault(_Date);
-
-	var _BackboneTable = __webpack_require__(251);
-
-	var _BackboneTable2 = _interopRequireDefault(_BackboneTable);
-
-	var _TableDropdownMenu = __webpack_require__(253);
-
-	var _TableDropdownMenu2 = _interopRequireDefault(_TableDropdownMenu);
-
-	var _TableFilterBox = __webpack_require__(264);
-
-	var _TableFilterBox2 = _interopRequireDefault(_TableFilterBox);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	// Backbone
-
-
-	var EconomyAccountingInstructionsHandler = _react2.default.createClass({
-		displayName: 'EconomyAccountingInstructionsHandler',
-
-		getInitialState: function getInitialState() {
-			return {
-				filters: this.props.filters || {}
-			};
-		},
-
-		updateFilters: function updateFilters(newFilter) {
-			var filters = this.overrideFiltersFromProps(newFilter);
-			this.setState({
-				filters: filters
-			});
-		},
-
-		overrideFiltersFromProps: function overrideFiltersFromProps(filters) {
-			return filters;
-		},
-
-		render: function render() {
-			return _react2.default.createElement(
-				'div',
-				{ className: 'uk-width-1-1' },
-				_react2.default.createElement(
-					'h2',
-					null,
-					'Verifikationer'
-				),
-				_react2.default.createElement(
-					'p',
-					{ className: 'uk-float-left' },
-					'Lista över samtliga verifikationer i bokföringen'
-				),
-				_react2.default.createElement(
-					_reactRouter.Link,
-					{ to: '/economy/instruction/add', className: 'uk-button uk-button-primary uk-float-right' },
-					_react2.default.createElement('i', { className: 'uk-icon-plus-circle' }),
-					' Skapa ny verifikation'
-				),
-				_react2.default.createElement(_TableFilterBox2.default, { onChange: this.updateFilters }),
-				_react2.default.createElement(EconomyAccountingInstructionList, { type: _Instruction2.default, filters: this.state.filters })
-			);
-		}
-	});
-	EconomyAccountingInstructionsHandler.title = "Visa verifikationer";
-
-	var EconomyAccountingInstructionHandler = _react2.default.createClass({
-		displayName: 'EconomyAccountingInstructionHandler',
-
-		getInitialState: function getInitialState() {
-			var instruction = new _Instruction4.default({ instruction_number: this.props.params.id });
-			instruction.fetch();
-
-			return {
-				model: instruction
-			};
-		},
-
-		render: function render() {
-			return _react2.default.createElement(EconomyAccountingInstruction, { model: this.state.model });
-		}
-	});
-
-	var EconomyAccountingInstructionAddHandler = _react2.default.createClass({
-		displayName: 'EconomyAccountingInstructionAddHandler',
-
-		getInitialState: function getInitialState() {
-			var instruction = new _Instruction4.default();
-
-			return {
-				model: instruction
-			};
-		},
-
-		render: function render() {
-			return _react2.default.createElement(EconomyAccountingInstruction, { model: this.state.model });
-		}
-	});
-
-	var EconomyAccountingInstructionImportHandler = _react2.default.createClass({
-		displayName: 'EconomyAccountingInstructionImportHandler',
-
-		getInitialState: function getInitialState() {
-			var instruction = new _Instruction4.default({ instruction_number: this.props.params.id });
-			instruction.fetch();
-
-			return {
-				model: instruction
-			};
-		},
-
-		render: function render() {
-			return _react2.default.createElement(EconomyAccountingInstructionImport, { model: this.state.model });
-		}
-	});
-
-	var EconomyAccountingInstructionList = _react2.default.createClass({
-		displayName: 'EconomyAccountingInstructionList',
-
-		mixins: [Backbone.React.Component.mixin, _BackboneTable2.default],
-
-		getInitialState: function getInitialState() {
-			return {
-				columns: 6
-			};
-		},
-
-		componentWillMount: function componentWillMount() {
-			this.state.collection.fetch();
-		},
-
-		renderHeader: function renderHeader() {
-			return [{
-				title: "#",
-				sort: "instruction_number"
-			}, {
-				title: "Bokföringsdatum",
-				sort: "accounting_date"
-			}, {
-				title: "Beskrivning",
-				sort: "title"
-			}, {
-				title: "Belopp",
-				class: "uk-text-right"
-			}, {
-				title: ""
-			}, {
-				title: ""
-			}];
-		},
-
-		removeTextMessage: function removeTextMessage(entity) {
-			return "Are you sure you want to remove instruction \"" + entity.instruction_number + " " + entity.title + "\"?";
-		},
-
-		removeErrorMessage: function removeErrorMessage() {
-			UIkit.modal.alert("Error deleting instruction");
-		},
-
-		renderRow: function renderRow(row, i) {
-			//		if(typeof row.files != "undefined")
-			if (row.has_vouchers) {
-				var icon = _react2.default.createElement('i', { className: 'uk-icon-file' });
-			} else {
-				var icon = "";
-			}
-
-			return _react2.default.createElement(
-				'tr',
-				{ key: i },
-				_react2.default.createElement(
-					'td',
-					null,
-					_react2.default.createElement(
-						_reactRouter.Link,
-						{ to: "/economy/instruction/" + row.instruction_number },
-						row.instruction_number
-					)
-				),
-				_react2.default.createElement(
-					'td',
-					null,
-					_react2.default.createElement(_Date2.default, { date: row.accounting_date })
-				),
-				_react2.default.createElement(
-					'td',
-					null,
-					row.title
-				),
-				_react2.default.createElement(
-					'td',
-					{ className: 'uk-text-right' },
-					_react2.default.createElement(_Currency2.default, { value: row.balance })
-				),
-				_react2.default.createElement(
-					'td',
-					null,
-					icon
-				),
-				_react2.default.createElement(
-					'td',
-					null,
-					_react2.default.createElement(
-						_TableDropdownMenu2.default,
-						null,
-						_react2.default.createElement(
-							_reactRouter.Link,
-							{ to: "/economy/instruction/" + row.instruction_number },
-							_react2.default.createElement('i', { className: 'uk-icon uk-icon-cog' }),
-							' Redigera verifikation'
-						),
-						this.removeButton(i, "Ta bort verifikation")
-					)
-				)
-			);
-		}
-	});
-
-	var EconomyAccountingInstruction = _react2.default.createClass({
-		displayName: 'EconomyAccountingInstruction',
-
-		mixins: [Backbone.React.Component.mixin],
-
-		handleChange: function handleChange(event) {
-			// Update the model with new value
-			var target = event.target;
-			var key = target.getAttribute("name");
-			this.state.model[key] = target.value;
-
-			// When we change the value of the model we have to rerender the component
-			this.forceUpdate();
-		},
-
-		render: function render() {
-			if (this.state.model.transactions.length == 0) {
-				var content = _react2.default.createElement(
-					'tr',
-					null,
-					_react2.default.createElement(
-						'td',
-						{ colSpan: '4' },
-						_react2.default.createElement(
-							'em',
-							null,
-							'Denna verifikation saknar bokförda poster'
-						)
-					)
-				);
-			} else {
-				var content = this.state.model.transactions.map(function (row, i) {
-					return _react2.default.createElement(
-						'tr',
-						{ key: i },
-						_react2.default.createElement(
-							'td',
-							null,
-							_react2.default.createElement(
-								_reactRouter.Link,
-								{ to: "/economy/account/" + row.account_number },
-								row.account_number,
-								' ',
-								row.account_title
-							)
-						),
-						_react2.default.createElement(
-							'td',
-							null,
-							row.title
-						),
-						_react2.default.createElement(
-							'td',
-							{ className: 'uk-text-right' },
-							_react2.default.createElement(_Currency2.default, { value: row.balance })
-						)
-					);
-				});
-			}
-
-			if (this.state.model.entity_id == 0) {
-				var title = "Skapa verifikation";
-			} else {
-				var title = this.state.model.instruction_number === null ? 'Preliminär verifikation' : 'Verifikation ' + this.state.model.instruction_number;
-				title = title + " - " + this.state.model.title;
-			}
-
-			if (this.state.model.files.length == 0) {
-				var files = _react2.default.createElement(
-					'tr',
-					null,
-					_react2.default.createElement(
-						'td',
-						{ colSpan: '4' },
-						_react2.default.createElement(
-							'em',
-							null,
-							'Det finns inga filer kopplade till denna verifikation'
-						)
-					)
-				);
-			} else {
-				var _this = this;
-				var files = this.state.model.files.map(function (file, i) {
-					return _react2.default.createElement(
-						'tr',
-						{ key: i },
-						_react2.default.createElement(
-							'td',
-							null,
-							_react2.default.createElement(
-								'a',
-								{ href: "/api/v2/economy/2015/file/" + _this.state.model.external_id + "/" + file },
-								file
-							)
-						)
-					);
-				});
-			}
-
-			return _react2.default.createElement(
-				'div',
-				null,
-				_react2.default.createElement(
-					'h2',
-					null,
-					title
-				),
-				_react2.default.createElement(
-					'form',
-					{ className: 'uk-form uk-form-horizontal' },
-					_react2.default.createElement(
-						'div',
-						{ className: 'uk-grid' },
-						_react2.default.createElement(
-							'div',
-							{ className: 'uk-width-1-6' },
-							_react2.default.createElement(
-								'label',
-								{ className: 'uk-form-label' },
-								'Verifikationsnr'
-							)
-						),
-						_react2.default.createElement(
-							'div',
-							{ className: 'uk-width-2-6' },
-							_react2.default.createElement(
-								'div',
-								{ className: 'uk-form-icon' },
-								_react2.default.createElement('i', { className: 'uk-icon-tag' }),
-								_react2.default.createElement('input', { type: 'text', value: this.state.model.instruction_number, disabled: true })
-							)
-						),
-						_react2.default.createElement(
-							'div',
-							{ className: 'uk-width-1-6' },
-							_react2.default.createElement(
-								'label',
-								{ className: 'uk-form-label' },
-								'Skapad'
-							)
-						),
-						_react2.default.createElement(
-							'div',
-							{ className: 'uk-width-2-6' },
-							_react2.default.createElement(
-								'div',
-								{ className: 'uk-form-icon' },
-								_react2.default.createElement('i', { className: 'uk-icon-calendar' }),
-								_react2.default.createElement('input', { type: 'text', value: this.state.model.created_at, disabled: true })
-							)
-						)
-					),
-					_react2.default.createElement(
-						'div',
-						{ className: 'uk-grid' },
-						_react2.default.createElement(
-							'div',
-							{ className: 'uk-width-1-6' },
-							_react2.default.createElement(
-								'label',
-								{ className: 'uk-form-label' },
-								'Bokföringsdatum'
-							)
-						),
-						_react2.default.createElement(
-							'div',
-							{ className: 'uk-width-2-6' },
-							_react2.default.createElement(
-								'div',
-								{ className: 'uk-form-icon' },
-								_react2.default.createElement('i', { className: 'uk-icon-calendar' }),
-								_react2.default.createElement('input', { type: 'text', value: this.state.model.accounting_date, onChange: this.handleChange })
-							)
-						),
-						_react2.default.createElement(
-							'div',
-							{ className: 'uk-width-1-6' },
-							_react2.default.createElement(
-								'label',
-								{ className: 'uk-form-label' },
-								'Ändrad'
-							)
-						),
-						_react2.default.createElement(
-							'div',
-							{ className: 'uk-width-2-6' },
-							_react2.default.createElement(
-								'div',
-								{ className: 'uk-form-icon' },
-								_react2.default.createElement('i', { className: 'uk-icon-calendar' }),
-								_react2.default.createElement('input', { type: 'text', value: this.state.model.updated_at, disabled: true })
-							)
-						)
-					),
-					_react2.default.createElement(
-						'div',
-						{ className: 'uk-grid' },
-						_react2.default.createElement(
-							'div',
-							{ className: 'uk-width-1-6' },
-							_react2.default.createElement(
-								'label',
-								{ className: 'uk-form-label' },
-								'Belopp'
-							)
-						),
-						_react2.default.createElement(
-							'div',
-							{ className: 'uk-width-2-6' },
-							_react2.default.createElement(
-								'div',
-								{ className: 'uk-form-icon' },
-								_react2.default.createElement('i', { className: 'uk-icon-usd' }),
-								_react2.default.createElement('input', { type: 'text', value: this.state.model.balance, disabled: true })
-							)
-						),
-						this.state.model.entity_id != 0 ? _react2.default.createElement(
-							'div',
-							{ className: 'uk-width-1-6' },
-							_react2.default.createElement(
-								'label',
-								{ className: 'uk-form-label' },
-								'Importerad från'
-							)
-						) : "",
-						this.state.model.entity_id != 0 ? _react2.default.createElement(
-							'div',
-							{ className: 'uk-width-2-6' },
-							_react2.default.createElement(
-								'div',
-								{ className: 'uk-form-icon' },
-								_react2.default.createElement('i', { className: 'uk-icon-institution' }),
-								_react2.default.createElement('input', { type: 'text', value: this.state.model.importer, disabled: true })
-							),
-							_react2.default.createElement(
-								'p',
-								null,
-								_react2.default.createElement(
-									'em',
-									null,
-									_react2.default.createElement(
-										_reactRouter.Link,
-										{ to: "/economy/instruction/" + this.state.model.id + "/import" },
-										'Visa data från import'
-									)
-								)
-							)
-						) : ""
-					),
-					_react2.default.createElement(
-						'div',
-						{ className: 'uk-grid' },
-						_react2.default.createElement(
-							'div',
-							{ className: 'uk-width-1-6' },
-							_react2.default.createElement(
-								'label',
-								{ className: 'uk-form-label' },
-								'Kommentar'
-							)
-						),
-						_react2.default.createElement(
-							'div',
-							{ className: 'uk-width-3-6' },
-							_react2.default.createElement('textarea', { value: this.state.model.description, onChange: this.handleChange })
-						)
-					)
-				),
-				_react2.default.createElement(
-					'table',
-					{ className: 'uk-table' },
-					_react2.default.createElement(
-						'thead',
-						null,
-						_react2.default.createElement(
-							'tr',
-							null,
-							_react2.default.createElement(
-								'th',
-								null,
-								'Konto'
-							),
-							_react2.default.createElement(
-								'th',
-								null,
-								'Kommentar'
-							),
-							_react2.default.createElement(
-								'th',
-								{ className: 'uk-text-right' },
-								'Belopp'
-							)
-						)
-					),
-					_react2.default.createElement(
-						'tbody',
-						null,
-						content
-					)
-				),
-				_react2.default.createElement(
-					'table',
-					{ className: 'uk-table' },
-					_react2.default.createElement(
-						'thead',
-						null,
-						_react2.default.createElement(
-							'tr',
-							null,
-							_react2.default.createElement(
-								'th',
-								null,
-								'Filnamn'
-							)
-						)
-					),
-					_react2.default.createElement(
-						'tbody',
-						null,
-						files
-					)
-				)
-			);
-		}
-	});
-
-	var EconomyAccountingInstructionImport = _react2.default.createClass({
-		displayName: 'EconomyAccountingInstructionImport',
-
-		mixins: [Backbone.React.Component.mixin],
-
-		render: function render() {
-			return _react2.default.createElement(
-				'div',
-				null,
-				_react2.default.createElement(
-					'h3',
-					null,
-					'Data från import'
-				),
-				_react2.default.createElement(
-					_reactRouter.Link,
-					{ to: "/economy/instruction/" + this.state.model.id },
-					'Tillbaka till verifikation'
-				),
-				_react2.default.createElement(
-					'form',
-					{ className: 'uk-form uk-form-horizontal' },
-					_react2.default.createElement(
-						'div',
-						{ className: 'uk-grid' },
-						_react2.default.createElement(
-							'div',
-							{ className: 'uk-width-1-2' },
-							_react2.default.createElement(
-								'div',
-								{ className: 'uk-form-row' },
-								_react2.default.createElement(
-									'label',
-									{ className: 'uk-form-label' },
-									'Importerad från'
-								),
-								_react2.default.createElement(
-									'div',
-									{ className: 'uk-form-controls' },
-									_react2.default.createElement(
-										'div',
-										{ className: 'uk-form-icon' },
-										_react2.default.createElement('i', { className: 'uk-icon-institution' }),
-										_react2.default.createElement('input', { type: 'text', value: this.state.model.importer, disabled: true })
-									)
-								)
-							),
-							_react2.default.createElement(
-								'div',
-								{ className: 'uk-form-row' },
-								_react2.default.createElement(
-									'label',
-									{ className: 'uk-form-label' },
-									'Externt id'
-								),
-								_react2.default.createElement(
-									'div',
-									{ className: 'uk-form-controls' },
-									_react2.default.createElement(
-										'div',
-										{ className: 'uk-form-icon' },
-										_react2.default.createElement('i', { className: 'uk-icon-database' }),
-										_react2.default.createElement('input', { type: 'text', value: this.state.model.external_id, disabled: true })
-									)
-								)
-							),
-							_react2.default.createElement(
-								'div',
-								{ className: 'uk-form-row' },
-								_react2.default.createElement(
-									'label',
-									{ className: 'uk-form-label' },
-									'Externt datum'
-								),
-								_react2.default.createElement(
-									'div',
-									{ className: 'uk-form-controls' },
-									_react2.default.createElement(
-										'div',
-										{ className: 'uk-form-icon' },
-										_react2.default.createElement('i', { className: 'uk-icon-database' }),
-										_react2.default.createElement('input', { type: 'text', value: this.state.model.external_date, disabled: true })
-									)
-								)
-							),
-							_react2.default.createElement(
-								'div',
-								{ className: 'uk-form-row' },
-								_react2.default.createElement(
-									'label',
-									{ className: 'uk-form-label' },
-									'Data'
-								),
-								_react2.default.createElement(
-									'div',
-									{ className: 'uk-form-controls' },
-									_react2.default.createElement('textarea', { value: this.state.model.external_data })
-								)
-							)
-						)
-					)
-				)
-			);
-		}
-	});
-
-	module.exports = {
-		EconomyAccountingInstructionsHandler: EconomyAccountingInstructionsHandler,
-		EconomyAccountingInstructionAddHandler: EconomyAccountingInstructionAddHandler,
-		EconomyAccountingInstructionHandler: EconomyAccountingInstructionHandler,
-		EconomyAccountingInstructionImportHandler: EconomyAccountingInstructionImportHandler,
-		EconomyAccountingInstructionList: EconomyAccountingInstructionList
-	};
-
-/***/ },
-/* 302 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var _backbone = __webpack_require__(237);
-
-	var _backbone2 = _interopRequireDefault(_backbone);
-
-	var _Instruction = __webpack_require__(303);
-
-	var _Instruction2 = _interopRequireDefault(_Instruction);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	var InstructionCollection = _backbone2.default.PageableCollection.extend({
-		model: _Instruction2.default,
-		url: "/economy/2015/instruction"
-	});
-
-	module.exports = InstructionCollection;
-
-/***/ },
-/* 303 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-
-	var _backbone = __webpack_require__(237);
-
-	var _backbone2 = _interopRequireDefault(_backbone);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	var InstructionModel = _backbone2.default.Model.fullExtend({
-		idAttribute: "instruction_number",
-		urlRoot: "/economy/2015/instruction",
-		defaults: {
-			entity_id: 0,
-			instruction_number: 0,
-			created_at: "0000-00-00T00:00:00Z",
-			updated_at: "0000-00-00T00:00:00Z",
-			accounting_date: "0000-00-00T00:00:00Z",
-			importer: "",
-			external_id: "",
-			external_date: "",
-			external_data: "",
-			description: "",
-			transactions: [],
-			files: [],
-			balance: 0
-		}
-	});
-
-	module.exports = InstructionModel;
-
-/***/ },
-/* 304 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var _react = __webpack_require__(1);
-
-	var _react2 = _interopRequireDefault(_react);
-
-	var _backboneReactComponent = __webpack_require__(244);
-
-	var _backboneReactComponent2 = _interopRequireDefault(_backboneReactComponent);
-
-	var _Account = __webpack_require__(300);
-
-	var _Account2 = _interopRequireDefault(_Account);
-
-	var _Account3 = __webpack_require__(305);
-
-	var _Account4 = _interopRequireDefault(_Account3);
-
-	var _Transaction = __webpack_require__(279);
-
-	var _Transaction2 = _interopRequireDefault(_Transaction);
-
-	var _reactRouter = __webpack_require__(172);
-
-	var _Currency = __webpack_require__(282);
-
-	var _Currency2 = _interopRequireDefault(_Currency);
-
-	var _BackboneTable = __webpack_require__(251);
-
-	var _BackboneTable2 = _interopRequireDefault(_BackboneTable);
-
-	var _Instruction = __webpack_require__(301);
-
-	var _Transactions = __webpack_require__(306);
-
-	var _Transactions2 = _interopRequireDefault(_Transactions);
-
-	var _TableDropdownMenu = __webpack_require__(253);
-
-	var _TableDropdownMenu2 = _interopRequireDefault(_TableDropdownMenu);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	var EconomyAccountsHandler = _react2.default.createClass({
-		displayName: 'EconomyAccountsHandler',
-
-		render: function render() {
-			return _react2.default.createElement(
-				'div',
-				null,
-				_react2.default.createElement(
-					'h2',
-					null,
-					'Konton'
-				),
-				_react2.default.createElement(
-					'p',
-					{ className: 'uk-float-left' },
-					'På denna sida ser du en lista över samtliga bokföringskonton, även de som inte har några bokförda verifikationer.'
-				),
-				_react2.default.createElement(
-					_reactRouter.Link,
-					{ to: "/economy/account/add", className: 'uk-button uk-button-primary uk-float-right' },
-					_react2.default.createElement('i', { className: 'uk-icon-plus-circle' }),
-					' Skapa nytt konto'
-				),
-				_react2.default.createElement(EconomyAccounts, { type: _Account4.default })
-			);
-		}
-	});
-
-	// Backbone
-
-
-	var EconomyAccountHandler = _react2.default.createClass({
-		displayName: 'EconomyAccountHandler',
-
-		getInitialState: function getInitialState() {
-			// Load account model
-			var account = new _Account2.default({
-				account_number: this.props.params.id
-			});
-			account.fetch();
-
-			return {
-				account_model: account
-			};
-		},
-
-		render: function render() {
-			return _react2.default.createElement(
-				'div',
-				null,
-				_react2.default.createElement(
-					'h2',
-					null,
-					'Konto'
-				),
-				_react2.default.createElement(EconomyAccount, { model: this.state.account_model }),
-				_react2.default.createElement(_Transactions2.default, { type: _Transaction2.default, filters: {
-						account_number: this.state.account_model.get("account_number")
-					} })
-			);
-		}
-	});
-
-	var EconomyAccountEditHandler = _react2.default.createClass({
-		displayName: 'EconomyAccountEditHandler',
-
-		getInitialState: function getInitialState() {
-			var id = this.props.params.id;
-
-			var account = new _Account2.default({ account_number: id });
-			account.fetch();
-
-			return {
-				model: account
-			};
-		},
-
-		render: function render() {
-			return _react2.default.createElement(
-				'div',
-				null,
-				_react2.default.createElement(
-					'h2',
-					null,
-					'Redigera konto'
-				),
-				_react2.default.createElement(EconomyAccount, { model: this.state.model })
-			);
-		}
-	});
-
-	var EconomyAccountAddHandler = _react2.default.createClass({
-		displayName: 'EconomyAccountAddHandler',
-
-		getInitialState: function getInitialState() {
-			var account = new _Account2.default();
-
-			return {
-				model: account
-			};
-		},
-
-		render: function render() {
-			return _react2.default.createElement(
-				'div',
-				null,
-				_react2.default.createElement(
-					'h2',
-					null,
-					'Skapa konto'
-				),
-				_react2.default.createElement(EconomyAccount, { model: this.state.model })
-			);
-		}
-	});
-
-	var EconomyAccounts = _react2.default.createClass({
-		displayName: 'EconomyAccounts',
-
-		mixins: [Backbone.React.Component.mixin, _BackboneTable2.default],
-
-		getInitialState: function getInitialState() {
-			return {
-				columns: 4
-			};
-		},
-
-		componentWillMount: function componentWillMount() {
-			this.state.collection.fetch();
-		},
-
-		removeTextMessage: function removeTextMessage(entity) {
-			return "Are you sure you want to remove account \"" + entity.account_number + " " + entity.title + "\"?";
-		},
-
-		removeErrorMessage: function removeErrorMessage() {
-			UIkit.modal.alert("Error deleting account");
-		},
-
-		renderHeader: function renderHeader() {
-			return [{
-				title: "#",
-				sort: "account_number"
-			}, {
-				title: "Konto",
-				sort: "title"
-			}, {
-				title: "Beskrivning",
-				sort: "description"
-			}, {
-				title: ""
-			}];
-		},
-
-		renderRow: function renderRow(row, i) {
-			return _react2.default.createElement(
-				'tr',
-				{ key: i },
-				_react2.default.createElement(
-					'td',
-					null,
-					_react2.default.createElement(
-						_reactRouter.Link,
-						{ to: "/settings/economy/account/" + row.account_number + "/edit" },
-						row.account_number
-					)
-				),
-				_react2.default.createElement(
-					'td',
-					null,
-					row.title
-				),
-				_react2.default.createElement(
-					'td',
-					null,
-					row.description
-				),
-				_react2.default.createElement(
-					'td',
-					null,
-					_react2.default.createElement(
-						_TableDropdownMenu2.default,
-						null,
-						_react2.default.createElement(
-							_reactRouter.Link,
-							{ to: "/settings/economy/account/" + row.account_number + "/edit" },
-							_react2.default.createElement('i', { className: 'uk-icon uk-icon-cog' }),
-							' Redigera konto'
-						),
-						this.removeButton(i, "Ta bort konto")
-					)
-				)
-			);
-		}
-	});
-
-	var EconomyAccount = _react2.default.createClass({
-		displayName: 'EconomyAccount',
-
-		mixins: [Backbone.React.Component.mixin],
-
-		handleChange: function handleChange(event) {
-			// Update the model with new value
-			var target = event.target;
-			var key = target.getAttribute("name");
-			this.state.model[key] = target.value;
-
-			// When we change the value of the model we have to rerender the component
-			this.forceUpdate();
-		},
-
-		render: function render() {
-			return _react2.default.createElement(
-				'div',
-				null,
-				_react2.default.createElement(
-					'form',
-					{ className: 'uk-form uk-form-horizontal' },
-					_react2.default.createElement(
-						'div',
-						{ className: 'uk-form-row' },
-						_react2.default.createElement(
-							'label',
-							{ className: 'uk-form-label' },
-							'Kontonummer'
-						),
-						_react2.default.createElement(
-							'div',
-							{ className: 'uk-form-controls' },
-							_react2.default.createElement(
-								'div',
-								{ className: 'uk-form-icon' },
-								_react2.default.createElement('i', { className: 'uk-icon-database' }),
-								_react2.default.createElement('input', { type: 'text', value: this.state.model.account_number, className: 'uk-form-width-large', onChange: this.handleChange })
-							)
-						)
-					),
-					_react2.default.createElement(
-						'div',
-						{ className: 'uk-form-row' },
-						_react2.default.createElement(
-							'label',
-							{ className: 'uk-form-label' },
-							'Titel'
-						),
-						_react2.default.createElement(
-							'div',
-							{ className: 'uk-form-controls' },
-							_react2.default.createElement(
-								'div',
-								{ className: 'uk-form-icon' },
-								_react2.default.createElement('i', { className: 'uk-icon-database' }),
-								_react2.default.createElement('input', { type: 'text', value: this.state.model.title, className: 'uk-form-width-large', onChange: this.handleChange })
-							)
-						)
-					),
-					_react2.default.createElement(
-						'div',
-						{ className: 'uk-form-row' },
-						_react2.default.createElement(
-							'label',
-							{ className: 'uk-form-label' },
-							'Beskrivning'
-						),
-						_react2.default.createElement(
-							'div',
-							{ className: 'uk-form-controls' },
-							_react2.default.createElement('textarea', { value: this.state.model.description, className: 'uk-form-width-large', onChange: this.handleChange })
-						)
-					),
-					_react2.default.createElement(
-						'div',
-						{ className: 'uk-form-row' },
-						_react2.default.createElement(
-							'label',
-							{ className: 'uk-form-label' },
-							'Balans'
-						),
-						_react2.default.createElement(
-							'div',
-							{ className: 'uk-form-controls' },
-							_react2.default.createElement(_Currency2.default, { value: this.state.model.balance })
-						)
-					)
-				)
-			);
-		}
-	});
-
-	module.exports = {
-		EconomyAccountsHandler: EconomyAccountsHandler,
-		EconomyAccountHandler: EconomyAccountHandler,
-		EconomyAccountEditHandler: EconomyAccountEditHandler,
-		EconomyAccountAddHandler: EconomyAccountAddHandler
-	};
-
-/***/ },
-/* 305 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var _backbone = __webpack_require__(237);
-
-	var _backbone2 = _interopRequireDefault(_backbone);
-
-	var _Account = __webpack_require__(300);
-
-	var _Account2 = _interopRequireDefault(_Account);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	var AccountCollection = _backbone2.default.PageableCollection.extend({
-		model: _Account2.default,
-		url: "/economy/2015/account"
-	});
-
-	module.exports = AccountCollection;
-
-/***/ },
-/* 306 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var _react = __webpack_require__(1);
-
-	var _react2 = _interopRequireDefault(_react);
-
-	var _backboneReactComponent = __webpack_require__(244);
-
-	var _backboneReactComponent2 = _interopRequireDefault(_backboneReactComponent);
-
-	var _BackboneTable = __webpack_require__(251);
-
-	var _BackboneTable2 = _interopRequireDefault(_BackboneTable);
-
-	var _reactRouter = __webpack_require__(172);
-
-	var _Currency = __webpack_require__(282);
-
-	var _Currency2 = _interopRequireDefault(_Currency);
-
-	var _Date = __webpack_require__(246);
-
-	var _Date2 = _interopRequireDefault(_Date);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	var Transactions = _react2.default.createClass({
-		displayName: 'Transactions',
-
-		mixins: [Backbone.React.Component.mixin, _BackboneTable2.default],
-
-		getInitialState: function getInitialState() {
-			return {
-				columns: 6
-			};
-		},
-
-		componentWillMount: function componentWillMount() {
-			this.fetch();
-		},
-
-		renderHeader: function renderHeader() {
-			return [{
-				title: "Bokföringsdatum"
-			}, {
-				title: "Verifikation"
-			}, {
-				title: "Transaktion"
-			}, {
-				title: "Belopp",
-				class: "uk-text-right"
-			}, {
-				title: "Saldo",
-				class: "uk-text-right"
-			}, {
-				title: ""
-			}];
-		},
-
-		renderRow: function renderRow(row, i) {
-			if (typeof row.files != "undefined") {
-				var icon = _react2.default.createElement('i', { className: 'uk-icon-file' });
-			} else {
-				var icon = "";
-			}
-
-			return _react2.default.createElement(
-				'tr',
-				{ key: i },
-				_react2.default.createElement(
-					'td',
-					null,
-					_react2.default.createElement(_Date2.default, { date: row.accounting_date })
-				),
-				_react2.default.createElement(
-					'td',
-					null,
-					_react2.default.createElement(
-						_reactRouter.Link,
-						{ to: "/economy/instruction/" + row.instruction_number },
-						row.instruction_number,
-						' ',
-						row.instruction_title
-					)
-				),
-				_react2.default.createElement(
-					'td',
-					null,
-					row.transaction_title
-				),
-				_react2.default.createElement(
-					'td',
-					{ className: 'uk-text-right' },
-					_react2.default.createElement(_Currency2.default, { value: row.amount, currency: 'SEK' })
-				),
-				_react2.default.createElement(
-					'td',
-					{ className: 'uk-text-right' },
-					_react2.default.createElement(_Currency2.default, { value: row.balance, currency: 'SEK' })
-				),
-				_react2.default.createElement(
-					'td',
-					null,
-					icon
-				)
-			);
-		}
-	});
-
-	module.exports = Transactions;
-
-/***/ },
-/* 307 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var _react = __webpack_require__(1);
-
-	var _react2 = _interopRequireDefault(_react);
-
-	var _backboneReactComponent = __webpack_require__(244);
-
-	var _backboneReactComponent2 = _interopRequireDefault(_backboneReactComponent);
-
-	var _Masterledger = __webpack_require__(299);
-
-	var _Masterledger2 = _interopRequireDefault(_Masterledger);
-
-	var _reactRouter = __webpack_require__(172);
-
-	var _Currency = __webpack_require__(282);
-
-	var _Currency2 = _interopRequireDefault(_Currency);
-
-	var _Date = __webpack_require__(246);
-
-	var _Date2 = _interopRequireDefault(_Date);
-
-	var _BackboneTable = __webpack_require__(251);
-
-	var _BackboneTable2 = _interopRequireDefault(_BackboneTable);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	var EconomyValuationSheetHandler = _react2.default.createClass({
-		displayName: 'EconomyValuationSheetHandler',
-
-		getInitialState: function getInitialState() {
-			return {
-				data: [],
-				fetched_data: false
-			};
-		},
-
-		componentDidMount: function componentDidMount() {
-			$.ajax({
-				url: "/api/v2/economy/2015/valuationsheet",
-				dataType: 'json',
-				cache: false,
-				success: function (data) {
-					this.setState({ data: data });
-					this.setState({ fetched_data: true });
-				}.bind(this),
-				error: function (xhr, status, err) {
-					console.error(this.props.url, status, err.toString());
-				}.bind(this)
-			});
-		},
-
-		renderRecursive: function renderRecursive(data) {
-			var depth = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 1;
-
-			var _this = this;
-			return data.map(function (row, i) {
-				return [_react2.default.createElement(
-					'tr',
-					null,
-					_react2.default.createElement(
-						'td',
-						{ colSpan: depth },
-						' '
-					),
-					_react2.default.createElement(
-						'td',
-						{ colSpan: 8 - depth },
-						_react2.default.createElement(
-							'h2',
-							{ style: { "marginBottom": 0 } },
-							row.title
-						),
-						_react2.default.createElement('div', { style: { "borderTop": "1px solid #666" } })
-					)
-				), function () {
-					if (typeof row.children != "undefined" && row.children.length > 0) {
-						return _this.renderRecursive(row.children, depth + 1);
-					} else {
-						if (typeof row.accounts != "undefined" && row.accounts.length > 0) {
-							return row.accounts.map(function (row, i) {
-								return _react2.default.createElement(
-									'tr',
-									{ key: i },
-									_react2.default.createElement(
-										'td',
-										{ colSpan: depth + 1 },
-										' '
-									),
-									_react2.default.createElement(
-										'td',
-										{ colSpan: 4 - depth },
-										_react2.default.createElement(
-											_reactRouter.Link,
-											{ to: "/economy/account/" + row.account_number },
-											row.account_number,
-											' ',
-											row.title
-										)
-									),
-									_react2.default.createElement(
-										'td',
-										{ className: 'uk-text-right' },
-										_react2.default.createElement(_Currency2.default, { value: row.balance_in })
-									),
-									_react2.default.createElement(
-										'td',
-										{ className: 'uk-text-right' },
-										_react2.default.createElement(_Currency2.default, { value: row.balance_period })
-									),
-									_react2.default.createElement(
-										'td',
-										{ className: 'uk-text-right' },
-										_react2.default.createElement(_Currency2.default, { value: row.balance_out })
-									)
-								);
-							});
-						} else {
-							return _react2.default.createElement(
-								'tr',
-								null,
-								_react2.default.createElement(
-									'td',
-									{ colSpan: depth + 1 },
-									' '
-								),
-								_react2.default.createElement(
-									'td',
-									{ colSpan: 5 - depth },
-									_react2.default.createElement(
-										'em',
-										null,
-										'Tom'
-									)
-								)
-							);
-						}
-					}
-				}(), _react2.default.createElement(
-					'tr',
-					null,
-					_react2.default.createElement(
-						'td',
-						{ colSpan: depth },
-						' '
-					),
-					_react2.default.createElement(
-						'td',
-						{ colSpan: 5 - depth, style: { "borderTop": "1px solid #666" } },
-						_react2.default.createElement(
-							'h3',
-							{ style: { "marginTop": 0 } },
-							'Summa ',
-							row.title
-						)
-					),
-					_react2.default.createElement(
-						'td',
-						{ style: { "borderTop": "1px solid #666" }, className: 'uk-text-right' },
-						_react2.default.createElement(_Currency2.default, { value: row.balance_in })
-					),
-					_react2.default.createElement(
-						'td',
-						{ style: { "borderTop": "1px solid #666" }, className: 'uk-text-right' },
-						_react2.default.createElement(_Currency2.default, { value: row.balance_period })
-					),
-					_react2.default.createElement(
-						'td',
-						{ style: { "borderTop": "1px solid #666" }, className: 'uk-text-right' },
-						_react2.default.createElement(_Currency2.default, { value: row.balance_out })
-					)
-				)];
-			});
-		},
-
-		render: function render() {
-			if (this.state.fetched_data === false) {
-				return _react2.default.createElement(
-					'p',
-					null,
-					'Loading data'
-				);
-			} else {
-				return _react2.default.createElement(
-					'div',
-					{ className: 'uk-width-1-1' },
-					_react2.default.createElement(
-						'h2',
-						null,
-						'Balansrapport ÅRL'
-					),
-					_react2.default.createElement(
-						'p',
-						null,
-						'Räkneskapsår ',
-						this.state.data.financial_year
-					),
-					_react2.default.createElement(
-						'p',
-						null,
-						'Period ',
-						this.state.data.period.from,
-						' - ',
-						this.state.data.period.to
-					),
-					_react2.default.createElement(
-						'p',
-						null,
-						'Utskriven: ',
-						this.state.data.created
-					),
-					_react2.default.createElement(
-						'p',
-						null,
-						'Senaste verifikation: ',
-						this.state.data.last_instruction
-					),
-					_react2.default.createElement(
-						'table',
-						{ style: { "width": "100%" } },
-						_react2.default.createElement(
-							'thead',
-							null,
-							_react2.default.createElement(
-								'tr',
-								null,
-								_react2.default.createElement(
-									'td',
-									{ width: '10' },
-									' '
-								),
-								_react2.default.createElement(
-									'td',
-									{ width: '30' },
-									' '
-								),
-								_react2.default.createElement(
-									'td',
-									{ width: '30' },
-									' '
-								),
-								_react2.default.createElement(
-									'td',
-									{ width: '30' },
-									' '
-								),
-								_react2.default.createElement('td', null),
-								_react2.default.createElement(
-									'td',
-									{ className: 'uk-text-right' },
-									'Ing saldo'
-								),
-								_react2.default.createElement(
-									'td',
-									{ className: 'uk-text-right' },
-									'Period'
-								),
-								_react2.default.createElement(
-									'td',
-									{ className: 'uk-text-right' },
-									'Utg saldo'
-								)
-							)
-						),
-						_react2.default.createElement(
-							'tbody',
-							null,
-							this.renderRecursive(this.state.data.children),
-							_react2.default.createElement(
-								'tr',
-								null,
-								_react2.default.createElement(
-									'td',
-									{ style: { "borderTop": "1px solid #666" }, colSpan: '5' },
-									'Beräknat resultat'
-								),
-								_react2.default.createElement(
-									'td',
-									{ style: { "borderTop": "1px solid #666" }, className: 'uk-text-right' },
-									_react2.default.createElement(_Currency2.default, { value: this.state.data.balance_in })
-								),
-								_react2.default.createElement(
-									'td',
-									{ style: { "borderTop": "1px solid #666" }, className: 'uk-text-right' },
-									_react2.default.createElement(_Currency2.default, { value: this.state.data.balance_period })
-								),
-								_react2.default.createElement(
-									'td',
-									{ style: { "borderTop": "1px solid #666" }, className: 'uk-text-right' },
-									_react2.default.createElement(_Currency2.default, { value: this.state.data.balance_out })
-								)
-							)
-						)
-					)
-				);
-			}
-		}
-	});
-
-	// Backbone
-
-
-	module.exports = EconomyValuationSheetHandler;
-
-/***/ },
-/* 308 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var _react = __webpack_require__(1);
-
-	var _react2 = _interopRequireDefault(_react);
-
-	var _backboneReactComponent = __webpack_require__(244);
-
-	var _backboneReactComponent2 = _interopRequireDefault(_backboneReactComponent);
-
-	var _Masterledger = __webpack_require__(299);
-
-	var _Masterledger2 = _interopRequireDefault(_Masterledger);
-
-	var _reactRouter = __webpack_require__(172);
-
-	var _Currency = __webpack_require__(282);
-
-	var _Currency2 = _interopRequireDefault(_Currency);
-
-	var _Date = __webpack_require__(246);
-
-	var _Date2 = _interopRequireDefault(_Date);
-
-	var _BackboneTable = __webpack_require__(251);
-
-	var _BackboneTable2 = _interopRequireDefault(_BackboneTable);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	var EconomyResultReportHandler = _react2.default.createClass({
-		displayName: 'EconomyResultReportHandler',
-
-		getInitialState: function getInitialState() {
-			return {
-				data: [],
-				fetched_data: false
-			};
-		},
-
-		componentDidMount: function componentDidMount() {
-			$.ajax({
-				url: "/api/v2/economy/2015/resultreport",
-				dataType: 'json',
-				cache: false,
-				success: function (data) {
-					this.setState({ data: data });
-					this.setState({ fetched_data: true });
-				}.bind(this),
-				error: function (xhr, status, err) {
-					console.error(this.props.url, status, err.toString());
-				}.bind(this)
-			});
-		},
-
-		renderRecursive: function renderRecursive(data) {
-			var depth = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 1;
-
-			var _this = this;
-			return data.map(function (row, i) {
-				return [_react2.default.createElement(
-					'tr',
-					null,
-					_react2.default.createElement(
-						'td',
-						{ colSpan: depth },
-						' '
-					),
-					_react2.default.createElement(
-						'td',
-						{ colSpan: 8 - depth },
-						_react2.default.createElement(
-							'h2',
-							{ style: { "marginBottom": 0 } },
-							row.title
-						),
-						_react2.default.createElement('div', { style: { "borderTop": "1px solid #666" } })
-					)
-				), function () {
-					if (typeof row.children != "undefined" && row.children.length > 0) {
-						return _this.renderRecursive(row.children, depth + 1);
-					} else {
-						if (typeof row.accounts != "undefined" && row.accounts.length > 0) {
-							return row.accounts.map(function (row, i) {
-								return _react2.default.createElement(
-									'tr',
-									{ key: i },
-									_react2.default.createElement(
-										'td',
-										{ colSpan: depth + 1 },
-										' '
-									),
-									_react2.default.createElement(
-										'td',
-										{ colSpan: 4 - depth },
-										_react2.default.createElement(
-											_reactRouter.Link,
-											{ to: "/economy/account/" + row.account_number },
-											row.account_number,
-											' ',
-											row.title
-										)
-									),
-									_react2.default.createElement(
-										'td',
-										{ className: 'uk-text-right' },
-										_react2.default.createElement(_Currency2.default, { value: row.balance_period })
-									),
-									_react2.default.createElement(
-										'td',
-										{ className: 'uk-text-right' },
-										_react2.default.createElement(_Currency2.default, { value: 0 })
-									)
-								);
-							});
-						} else {
-							return _react2.default.createElement(
-								'tr',
-								null,
-								_react2.default.createElement(
-									'td',
-									{ colSpan: depth + 1 },
-									' '
-								),
-								_react2.default.createElement(
-									'td',
-									{ colSpan: 5 - depth },
-									_react2.default.createElement(
-										'em',
-										null,
-										'Tom'
-									)
-								)
-							);
-						}
-					}
-				}(), _react2.default.createElement(
-					'tr',
-					null,
-					_react2.default.createElement(
-						'td',
-						{ colSpan: depth },
-						' '
-					),
-					_react2.default.createElement(
-						'td',
-						{ colSpan: 5 - depth, style: { "borderTop": "1px solid #666" } },
-						_react2.default.createElement(
-							'h3',
-							{ style: { "marginTop": 0 } },
-							'Summa ',
-							row.title
-						)
-					),
-					_react2.default.createElement(
-						'td',
-						{ style: { "borderTop": "1px solid #666" }, className: 'uk-text-right' },
-						_react2.default.createElement(_Currency2.default, { value: row.balance_period })
-					),
-					_react2.default.createElement(
-						'td',
-						{ style: { "borderTop": "1px solid #666" }, className: 'uk-text-right' },
-						_react2.default.createElement(_Currency2.default, { value: 0 })
-					)
-				)];
-			});
-		},
-
-		render: function render() {
-			if (this.state.fetched_data === false) {
-				return _react2.default.createElement(
-					'p',
-					null,
-					'Loading data'
-				);
-			} else {
-				return _react2.default.createElement(
-					'div',
-					{ className: 'uk-width-1-1' },
-					_react2.default.createElement(
-						'h2',
-						null,
-						'Resultatrapport ÅRL'
-					),
-					_react2.default.createElement(
-						'p',
-						null,
-						'Räkneskapsår ',
-						this.state.data.financial_year
-					),
-					_react2.default.createElement(
-						'p',
-						null,
-						'Period ',
-						this.state.data.period.from,
-						' - ',
-						this.state.data.period.to
-					),
-					_react2.default.createElement(
-						'p',
-						null,
-						'Utskriven: ',
-						this.state.data.created
-					),
-					_react2.default.createElement(
-						'p',
-						null,
-						'Senaste verifikation: ',
-						this.state.data.last_instruction
-					),
-					_react2.default.createElement(
-						'table',
-						{ style: { "width": "100%" } },
-						_react2.default.createElement(
-							'thead',
-							null,
-							_react2.default.createElement(
-								'tr',
-								null,
-								_react2.default.createElement(
-									'td',
-									{ width: '10' },
-									' '
-								),
-								_react2.default.createElement(
-									'td',
-									{ width: '30' },
-									' '
-								),
-								_react2.default.createElement(
-									'td',
-									{ width: '30' },
-									' '
-								),
-								_react2.default.createElement(
-									'td',
-									{ width: '30' },
-									' '
-								),
-								_react2.default.createElement('td', null),
-								_react2.default.createElement(
-									'td',
-									{ className: 'uk-text-right' },
-									'Period'
-								),
-								_react2.default.createElement(
-									'td',
-									{ className: 'uk-text-right' },
-									'Period fg. år'
-								)
-							)
-						),
-						_react2.default.createElement(
-							'tbody',
-							null,
-							this.renderRecursive(this.state.data.children),
-							_react2.default.createElement(
-								'tr',
-								null,
-								_react2.default.createElement(
-									'td',
-									{ style: { "borderTop": "1px solid #666" }, colSpan: '5' },
-									'Beräknat resultat'
-								),
-								_react2.default.createElement(
-									'td',
-									{ style: { "borderTop": "1px solid #666" }, className: 'uk-text-right' },
-									_react2.default.createElement(_Currency2.default, { value: this.state.data.balance_period })
-								),
-								_react2.default.createElement(
-									'td',
-									{ style: { "borderTop": "1px solid #666" }, className: 'uk-text-right' },
-									_react2.default.createElement(_Currency2.default, { value: this.state.data.balance_out })
-								)
-							)
-						)
-					)
-				);
-			}
-		}
-	});
-
-	// Backbone
-
-
-	module.exports = EconomyResultReportHandler;
-
-/***/ },
-/* 309 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var _react = __webpack_require__(1);
-
-	var _react2 = _interopRequireDefault(_react);
-
-	var _backboneReactComponent = __webpack_require__(244);
-
-	var _backboneReactComponent2 = _interopRequireDefault(_backboneReactComponent);
-
-	var _CostCenter = __webpack_require__(310);
-
-	var _CostCenter2 = _interopRequireDefault(_CostCenter);
-
-	var _CostCenter3 = __webpack_require__(311);
-
-	var _CostCenter4 = _interopRequireDefault(_CostCenter3);
-
-	var _reactRouter = __webpack_require__(172);
-
-	var _Currency = __webpack_require__(282);
-
-	var _Currency2 = _interopRequireDefault(_Currency);
-
-	var _BackboneTable = __webpack_require__(251);
-
-	var _BackboneTable2 = _interopRequireDefault(_BackboneTable);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	var EconomyCostCentersHandler = _react2.default.createClass({
-		displayName: 'EconomyCostCentersHandler',
-
-		render: function render() {
-			return _react2.default.createElement(
-				'div',
-				null,
-				_react2.default.createElement(
-					'h2',
-					null,
-					'Kostnadsställen'
-				),
-				_react2.default.createElement(EconomyCostCenters, { type: _CostCenter4.default })
-			);
-		}
-	});
-
-	// Backbone
-
-
-	var EconomyCostCenterHandler = _react2.default.createClass({
-		displayName: 'EconomyCostCenterHandler',
-
-		getInitialState: function getInitialState() {
-			var id = this.props.params.id;
-
-			var costcenter = new _CostCenter2.default({ id: id });
-			costcenter.fetch();
-
-			return {
-				model: costcenter
-			};
-		},
-
-		render: function render() {
-			return _react2.default.createElement(EconomyCostCenter, { model: this.state.model });
-		}
-	});
-
-	var EconomyCostCenters = _react2.default.createClass({
-		displayName: 'EconomyCostCenters',
-
-		mixins: [Backbone.React.Component.mixin, _BackboneTable2.default],
-
-		getInitialState: function getInitialState() {
-			return {
-				columns: 5
-			};
-		},
-
-		componentWillMount: function componentWillMount() {
-			this.state.collection.fetch();
-		},
-
-		renderHeader: function renderHeader() {
-			return [{
-				title: "#"
-			}, {
-				title: "Bokföringsdatum"
-			}, {
-				title: "Beskrivning"
-			}, {
-				title: "Belopp"
-			}];
-		},
-
-		renderRow: function renderRow(row, i) {
-			return _react2.default.createElement(
-				'tr',
-				{ key: i },
-				_react2.default.createElement(
-					'td',
-					null,
-					_react2.default.createElement(
-						_reactRouter.Link,
-						{ to: "/economy/instruction/" + row.id },
-						row.verification_number
-					)
-				),
-				_react2.default.createElement(
-					'td',
-					null,
-					row.accounting_date
-				),
-				_react2.default.createElement(
-					'td',
-					null,
-					row.title
-				),
-				_react2.default.createElement(
-					'td',
-					null,
-					row.amount
-				),
-				_react2.default.createElement(
-					'td',
-					null,
-					_react2.default.createElement(
-						_reactRouter.Link,
-						{ to: "/economy/instruction/" + row.id },
-						'Visa'
-					)
-				)
-			);
-		}
-	});
-
-	module.exports = {
-		EconomyCostCentersHandler: EconomyCostCentersHandler,
-		EconomyCostCenterHandler: EconomyCostCenterHandler
-	};
-
-/***/ },
-/* 310 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-
-	var _backbone = __webpack_require__(237);
-
-	var _backbone2 = _interopRequireDefault(_backbone);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	var CostCenterModel = _backbone2.default.Model.fullExtend({
-		idAttribute: "account_number",
-		urlRoot: "/economy/2015/costcenter",
-		defaults: {
-			created_at: "0000-00-00T00:00:00Z",
-			updated_at: "0000-00-00T00:00:00Z",
-			title: "",
-			description: ""
-		}
-	});
-
-	module.exports = CostCenterModel;
-
-/***/ },
-/* 311 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var _backbone = __webpack_require__(237);
-
-	var _backbone2 = _interopRequireDefault(_backbone);
-
-	var _CostCenter = __webpack_require__(310);
-
-	var _CostCenter2 = _interopRequireDefault(_CostCenter);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	var CostCenterCollection = _backbone2.default.PageableCollection.extend({
-		model: _CostCenter2.default,
-		url: "/economy/2015/costcenter"
-	});
-
-	module.exports = CostCenterCollection;
-
-/***/ },
-/* 312 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var _react = __webpack_require__(1);
-
-	var _react2 = _interopRequireDefault(_react);
-
-	var _backboneReactComponent = __webpack_require__(244);
-
-	var _backboneReactComponent2 = _interopRequireDefault(_backboneReactComponent);
-
-	var _Invoice = __webpack_require__(313);
-
-	var _Invoice2 = _interopRequireDefault(_Invoice);
-
-	var _Invoice3 = __webpack_require__(314);
-
-	var _Invoice4 = _interopRequireDefault(_Invoice3);
-
-	var _reactRouter = __webpack_require__(172);
-
-	var _Currency = __webpack_require__(282);
-
-	var _Currency2 = _interopRequireDefault(_Currency);
-
-	var _Date = __webpack_require__(246);
-
-	var _Date2 = _interopRequireDefault(_Date);
-
-	var _BackboneTable = __webpack_require__(251);
-
-	var _BackboneTable2 = _interopRequireDefault(_BackboneTable);
-
-	var _TableFilterBox = __webpack_require__(264);
-
-	var _TableFilterBox2 = _interopRequireDefault(_TableFilterBox);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	var InvoiceListHandler = _react2.default.createClass({
-		displayName: 'InvoiceListHandler',
-
-		getInitialState: function getInitialState() {
-			return {
-				filters: this.props.filters || {}
-			};
-		},
-
-		updateFilters: function updateFilters(newFilter) {
-			var filters = this.overrideFiltersFromProps(newFilter);
-			this.setState({
-				filters: filters
-			});
-		},
-
-		overrideFiltersFromProps: function overrideFiltersFromProps(filters) {
-			return filters;
-		},
-
-		render: function render() {
-			return _react2.default.createElement(
-				'div',
-				{ className: 'uk-width-1-1' },
-				_react2.default.createElement(
-					'h2',
-					null,
-					'Fakturor'
-				),
-				_react2.default.createElement(
-					'p',
-					{ className: 'uk-float-left' },
-					'På denna sida ser du en lista på samtliga fakturor för det valda bokföringsåret.'
-				),
-				_react2.default.createElement(
-					_reactRouter.Link,
-					{ to: "/economy/invoice/add", className: 'uk-button uk-button-primary uk-float-right' },
-					_react2.default.createElement('i', { className: 'uk-icon-plus-circle' }),
-					' Skapa ny faktura'
-				),
-				_react2.default.createElement(_TableFilterBox2.default, { onChange: this.updateFilters }),
-				_react2.default.createElement(InvoiceList, { type: _Invoice2.default, filters: this.state.filters })
-			);
-		}
-	});
-
-	// Backbone
-
-	InvoiceListHandler.title = "Visa fakturor";
-
-	var InvoiceHandler = _react2.default.createClass({
-		displayName: 'InvoiceHandler',
-
-		getInitialState: function getInitialState() {
-			var id = this.props.params.id;
-			var invoice = new _Invoice4.default({ id: id });
-			invoice.fetch();
-
-			return {
-				model: invoice
-			};
-		},
-
-		render: function render() {
-			return _react2.default.createElement(
-				'div',
-				null,
-				_react2.default.createElement(
-					'h2',
-					null,
-					'Faktura'
-				),
-				_react2.default.createElement(Invoice, { model: this.state.model })
-			);
-		}
-	});
-
-	var InvoiceAddHandler = _react2.default.createClass({
-		displayName: 'InvoiceAddHandler',
-
-		getInitialState: function getInitialState() {
-			var invoice = new _Invoice4.default();
-
-			return {
-				model: invoice
-			};
-		},
-
-		render: function render() {
-			return _react2.default.createElement(
-				'div',
-				null,
-				_react2.default.createElement(
-					'h2',
-					null,
-					'Skapa faktura'
-				),
-				_react2.default.createElement(Invoice, { model: this.state.model })
-			);
-		}
-	});
-
-	var InvoiceList = _react2.default.createClass({
-		displayName: 'InvoiceList',
-
-		mixins: [Backbone.React.Component.mixin, _BackboneTable2.default],
-
-		getInitialState: function getInitialState() {
-			return {
-				columns: 6
-			};
-		},
-
-		componentWillMount: function componentWillMount() {
-			this.state.collection.fetch();
-		},
-
-		renderHeader: function renderHeader() {
-			return [{
-				title: "#",
-				sort: "invoice_number"
-			}, {
-				title: "Förfallodatum",
-				sort: "date_expiry"
-			}, {
-				title: "Mottagare",
-				sort: "title"
-			}, {
-				title: "Referens",
-				sort: "your_reference"
-			}, {
-				title: "Belopp",
-				class: "uk-text-right",
-				sort: "_total"
-			}, {
-				title: "Status",
-				sort: "status"
-			}];
-		},
-
-		renderRow: function renderRow(row, i) {
-			if (row.status == "unpaid") {
-				row.status = "Obetald";
-			}
-
-			return _react2.default.createElement(
-				'tr',
-				{ key: i },
-				_react2.default.createElement(
-					'td',
-					null,
-					_react2.default.createElement(
-						_reactRouter.Link,
-						{ to: "/economy/invoice/" + row.invoice_number },
-						row.invoice_number
-					)
-				),
-				_react2.default.createElement(
-					'td',
-					null,
-					_react2.default.createElement(_Date2.default, { date: row.date_expiry })
-				),
-				_react2.default.createElement(
-					'td',
-					null,
-					row.title
-				),
-				_react2.default.createElement(
-					'td',
-					null,
-					row.your_reference
-				),
-				_react2.default.createElement(
-					'td',
-					{ className: 'uk-text-right' },
-					_react2.default.createElement(_Currency2.default, { value: row._total, currency: row.currency })
-				),
-				_react2.default.createElement(
-					'td',
-					null,
-					row.status
-				)
-			);
-		}
-	});
-
-	var Invoice = _react2.default.createClass({
-		displayName: 'Invoice',
-
-		mixins: [Backbone.React.Component.mixin],
-
-		render: function render() {
-			if (this.state.model.posts.length == 0) {
-				var content = _react2.default.createElement(
-					'tr',
-					null,
-					_react2.default.createElement(
-						'td',
-						{ colSpan: '4' },
-						_react2.default.createElement(
-							'em',
-							null,
-							'Denna faktura saknar innehåll'
-						)
-					)
-				);
-			} else {
-				var currency = this.state.model.currency;
-				var content = this.state.model.posts.map(function (row, i) {
-					// row.weight
-					// row.type
-
-					if (row.vat === null) {
-						row.vat = "0%";
-					}
-
-					return _react2.default.createElement(
-						'tr',
-						{ key: i },
-						_react2.default.createElement(
-							'td',
-							null,
-							row.title
-						),
-						_react2.default.createElement(
-							'td',
-							{ className: 'uk-text-right' },
-							_react2.default.createElement(_Currency2.default, { value: row.price, currency: currency })
-						),
-						_react2.default.createElement(
-							'td',
-							{ className: 'uk-text-right' },
-							row.amount,
-							' ',
-							row.unit
-						),
-						_react2.default.createElement(
-							'td',
-							{ className: 'uk-text-right' },
-							_react2.default.createElement(_Currency2.default, { value: row._total, currency: currency })
-						),
-						_react2.default.createElement(
-							'td',
-							{ className: 'uk-text-right' },
-							row.vat
-						)
-					);
-				});
-			}
-
-			return _react2.default.createElement(
-				'div',
-				{ className: 'invoice' },
-				_react2.default.createElement(
-					'a',
-					{ href: "/api/v2/economy/2015/invoice/" + this.state.model.invoice_number + "/export" },
-					'Exportera *.ODT'
-				),
-				_react2.default.createElement(
-					'div',
-					{ className: 'uk-grid' },
-					_react2.default.createElement(
-						'div',
-						{ className: 'uk-width-1-3 box' },
-						_react2.default.createElement(
-							'div',
-							{ className: 'title' },
-							'Mottagare'
-						),
-						_react2.default.createElement(
-							'div',
-							{ className: 'data' },
-							this.state.model.title
-						)
-					),
-					_react2.default.createElement(
-						'div',
-						{ className: 'uk-width-1-3 box' },
-						_react2.default.createElement(
-							'div',
-							{ className: 'title' },
-							'Belopp'
-						),
-						_react2.default.createElement(
-							'div',
-							{ className: 'data' },
-							_react2.default.createElement(_Currency2.default, { value: this.state.model._total, currency: currency })
-						)
-					),
-					_react2.default.createElement(
-						'div',
-						{ className: 'uk-width-1-3 box' },
-						_react2.default.createElement(
-							'div',
-							{ className: 'title' },
-							'Status'
-						),
-						_react2.default.createElement(
-							'div',
-							{ className: 'data' },
-							this.state.model.status
-						)
-					),
-					_react2.default.createElement(
-						'div',
-						{ className: 'uk-width-1-3 box' },
-						_react2.default.createElement(
-							'div',
-							{ className: 'title' },
-							'Er referens'
-						),
-						_react2.default.createElement(
-							'div',
-							{ className: 'data' },
-							this.state.model.your_reference
-						)
-					),
-					_react2.default.createElement(
-						'div',
-						{ className: 'uk-width-1-3 box' },
-						_react2.default.createElement(
-							'div',
-							{ className: 'title' },
-							'Fakturadatum'
-						),
-						_react2.default.createElement(
-							'div',
-							{ className: 'data' },
-							this.state.model.date_invoice
-						)
-					),
-					_react2.default.createElement(
-						'div',
-						{ className: 'uk-width-1-3 box' },
-						_react2.default.createElement(
-							'div',
-							{ className: 'title' },
-							'Fakturanummer'
-						),
-						_react2.default.createElement(
-							'div',
-							{ className: 'data' },
-							this.state.model.invoice_number
-						)
-					),
-					_react2.default.createElement(
-						'div',
-						{ className: 'uk-width-1-3 box' },
-						_react2.default.createElement(
-							'div',
-							{ className: 'title' },
-							'Vår referens'
-						),
-						_react2.default.createElement(
-							'div',
-							{ className: 'data' },
-							this.state.model.our_reference
-						)
-					),
-					_react2.default.createElement(
-						'div',
-						{ className: 'uk-width-1-3 box' },
-						_react2.default.createElement(
-							'div',
-							{ className: 'title' },
-							'Förfallodatum'
-						),
-						_react2.default.createElement(
-							'div',
-							{ className: 'data' },
-							this.state.model.date_expiry
-						)
-					),
-					_react2.default.createElement(
-						'div',
-						{ className: 'uk-width-1-3 box' },
-						_react2.default.createElement(
-							'div',
-							{ className: 'title' },
-							'Betalningsvillkor'
-						),
-						_react2.default.createElement(
-							'div',
-							{ className: 'data' },
-							this.state.model.conditions,
-							' dagar'
-						)
-					)
-				),
-				_react2.default.createElement(
-					'div',
-					{ className: 'box' },
-					_react2.default.createElement(
-						'div',
-						{ className: 'title' },
-						'Kommentar'
-					),
-					_react2.default.createElement(
-						'div',
-						{ className: 'data' },
-						_react2.default.createElement(
-							'pre',
-							null,
-							this.state.model.description
-						)
-					)
-				),
-				_react2.default.createElement(
-					'div',
-					{ className: 'box' },
-					_react2.default.createElement(
-						'div',
-						{ className: 'title' },
-						'Adress'
-					),
-					_react2.default.createElement(
-						'div',
-						{ className: 'data' },
-						_react2.default.createElement(
-							'pre',
-							null,
-							this.state.model.address
-						)
-					)
-				),
-				_react2.default.createElement(
-					'table',
-					{ className: 'uk-table uk-table-striped' },
-					_react2.default.createElement(
-						'thead',
-						null,
-						_react2.default.createElement(
-							'tr',
-							null,
-							_react2.default.createElement(
-								'th',
-								null,
-								'Titel'
-							),
-							_react2.default.createElement(
-								'th',
-								{ className: 'uk-text-right' },
-								'Pris'
-							),
-							_react2.default.createElement(
-								'th',
-								{ className: 'uk-text-right' },
-								'Antal'
-							),
-							_react2.default.createElement(
-								'th',
-								{ className: 'uk-text-right' },
-								'Totalt'
-							),
-							_react2.default.createElement(
-								'th',
-								{ className: 'uk-text-right' },
-								'MOMS'
-							)
-						)
-					),
-					_react2.default.createElement(
-						'tbody',
-						null,
-						content
-					)
-				)
-			);
-		}
-	});
-
-	module.exports = {
-		InvoiceListHandler: InvoiceListHandler,
-		InvoiceHandler: InvoiceHandler,
-		InvoiceAddHandler: InvoiceAddHandler
-	};
-
-/***/ },
-/* 313 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var _backbone = __webpack_require__(237);
-
-	var _backbone2 = _interopRequireDefault(_backbone);
-
-	var _Invoice = __webpack_require__(314);
-
-	var _Invoice2 = _interopRequireDefault(_Invoice);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	var InvoiceCollection = _backbone2.default.PageableCollection.extend({
-		model: _Invoice2.default,
-		url: "/economy/2015/invoice"
-	});
-
-	module.exports = InvoiceCollection;
-
-/***/ },
-/* 314 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-
-	var _backbone = __webpack_require__(237);
-
-	var _backbone2 = _interopRequireDefault(_backbone);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	var InvoiceModel = _backbone2.default.Model.fullExtend({
-		idAttribute: "invoice_number",
-		urlRoot: "/economy/2015/invoice",
-		defaults: {
-			created_at: "0000-00-00T00:00:00Z",
-			updated_at: "0000-00-00T00:00:00Z",
-			invoice_number: 0,
-			title: "",
-			description: "",
-			your_reference: "",
-			our_reference: "",
-			address: "",
-			posts: []
-		}
-	});
-
-	module.exports = InvoiceModel;
-
-/***/ },
-/* 315 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var _react = __webpack_require__(1);
-
-	var _react2 = _interopRequireDefault(_react);
-
-	var _reactRouter = __webpack_require__(172);
-
-	var _backboneReactComponent = __webpack_require__(244);
-
-	var _backboneReactComponent2 = _interopRequireDefault(_backboneReactComponent);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	var NavItem = _react2.default.createClass({
-		displayName: 'NavItem',
-
-		contextTypes: {
-			history: _react2.default.PropTypes.object
-		},
-
-		render: function render() {
-			if (this.props.navItem.external) {
-				return _react2.default.createElement(
-					'li',
-					null,
-					_react2.default.createElement(
-						'a',
-						{ href: this.props.navItem.target },
-						this.props.navItem.text
-					)
-				);
-			} else {
-				if (this.context.history.isActive(this.props.navItem.target)) {
-					var className = "uk-active";
-				} else {
-					var className = null;
-				}
-
-				return _react2.default.createElement(
-					'li',
-					{ className: className },
-					_react2.default.createElement(
-						_reactRouter.IndexLink,
-						{ activeClassName: 'uk-active', to: this.props.navItem.target },
-						_react2.default.createElement('i', { className: "uk-icon-" + this.props.navItem.icon }),
-						' ',
-						this.props.navItem.text
-					)
-				);
-			}
-		}
-	});
-
-	var Nav = _react2.default.createClass({
-		displayName: 'Nav',
-
-		mixins: [Backbone.React.Component.mixin],
-
-		contextTypes: {
-			history: _react2.default.PropTypes.object
-		},
-
-		render: function render() {
-			return _react2.default.createElement(
-				'nav',
-				{ className: 'uk-navbar' },
-				_react2.default.createElement(
-					'div',
-					{ className: 'uk-container uk-container-center' },
-					_react2.default.createElement(
-						_reactRouter.Link,
-						{ to: '/', className: 'uk-navbar-brand' },
-						this.state.model.brand
-					),
-					_react2.default.createElement(
-						'ul',
-						{ className: 'uk-navbar-nav uk-hidden-small uk-navbar-attached' },
-						this.state.model.navItems.map(function (navItem, i) {
-							return _react2.default.createElement(NavItem, { navItem: navItem, key: i });
-						})
-					),
-					_react2.default.createElement(
-						'div',
-						{ className: 'uk-navbar-flip' },
-						_react2.default.createElement('a', { className: 'uk-navbar-toggle uk-visible-small', 'data-uk-offcanvas': '{target:\'#sidenav\'}' })
-					)
-				)
-			);
-		}
-	});
-
-	var SideNav = _react2.default.createClass({
-		displayName: 'SideNav',
-
-		mixins: [Backbone.React.Component.mixin],
-
-		render: function render() {
-			return _react2.default.createElement(
-				'div',
-				{ id: 'sidenav', className: 'uk-offcanvas' },
-				_react2.default.createElement(
-					'div',
-					{ className: 'uk-offcanvas-bar' },
-					_react2.default.createElement(
-						'ul',
-						{ className: 'uk-nav uk-nav-offcanvas', 'data-uk-nav': true },
-						_react2.default.createElement(
-							'li',
-							null,
-							_react2.default.createElement(
-								_reactRouter.IndexLink,
-								{ to: '/' },
-								this.state.model.brand
-							)
-						),
-						this.state.model.navItems.map(function (navItem, i) {
-							return _react2.default.createElement(NavItem, { navItem: navItem, key: i });
-						})
-					)
-				)
-			);
-		}
-	});
-
-	var SideNav2 = _react2.default.createClass({
-		displayName: 'SideNav2',
-
-		mixins: [Backbone.React.Component.mixin],
-
-		contextTypes: {
-			history: _react2.default.PropTypes.object
-		},
-
-		render: function render() {
-			// Get the main category (level 0)
-			var activeItem = null;
-			for (var i = 0; i < this.state.model.navItems.length; i++) {
-				var item = this.state.model.navItems[i];
-				if (this.context.history.isActive(item.target)) {
-					activeItem = item;
-				}
-			}
-
-			// There is no active menu, or children.
-			if (activeItem === null || typeof activeItem.children == 'undefined') {
-				return false;
-			} else {
-				return _react2.default.createElement(
-					'div',
-					{ className: 'uk-panel uk-panel-box', 'data-uk-sticky': '{top:35}' },
-					_react2.default.createElement(
-						'ul',
-						{ className: 'uk-nav uk-nav-side', 'data-uk-scrollspy-nav': '{closest:\'li\', smoothscroll:true}' },
-						_react2.default.createElement(
-							'li',
-							{ className: 'uk-nav-header' },
-							activeItem.text
-						),
-						_react2.default.createElement('li', { className: 'uk-nav-divider' }),
-						activeItem.children.map(function (navItem, i) {
-							if (typeof navItem.type != "undefined" && navItem.type == "separator") {
-								return _react2.default.createElement('li', { key: i, className: 'uk-nav-divider' });
-							} else if (typeof navItem.type != "undefined" && navItem.type == "heading") {
-								return _react2.default.createElement(
-									'li',
-									{ key: i, className: 'uk-nav-header' },
-									navItem.text
-								);
-							} else {
-								return _react2.default.createElement(NavItem, { key: i, navItem: navItem, activeItem: activeItem });
-							}
-						})
-					)
-				);
-			}
-		}
-	});
-
-	var Breadcrumb = _react2.default.createClass({
-		displayName: 'Breadcrumb',
-
-		render: function render() {
-			//		const depth = this.props.routes.length;
-			return _react2.default.createElement('span', null);
-			return _react2.default.createElement(
-				'ul',
-				{ className: 'uk-breadcrumb' },
-				this.props.routes.map(function (item, index) {
-					return _react2.default.createElement(
-						'li',
-						{ key: index },
-						_react2.default.createElement(
-							_reactRouter.Link,
-							{
-								onlyActiveOnIndex: true,
-								activeClassName: 'uk-active',
-								to: item.path || '' },
-							item.component.title
-						)
-					);
-				})
-			);
-		}
-	});
-
-	module.exports = { Nav: Nav, SideNav: SideNav, SideNav2: SideNav2, Breadcrumb: Breadcrumb };
-
-/***/ },
-/* 316 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-
-	var _react = __webpack_require__(1);
-
-	var _react2 = _interopRequireDefault(_react);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	var SettingsGlobalHandler = _react2.default.createClass({
-		displayName: "SettingsGlobalHandler",
-
-		render: function render() {
-			return _react2.default.createElement(
-				"div",
-				null,
-				_react2.default.createElement(
-					"h2",
-					null,
-					"Inställningar"
-				),
-				_react2.default.createElement(
-					"p",
-					null,
-					"Diverse inställningar"
-				),
-				_react2.default.createElement(
-					"h3",
-					null,
-					"Aktiverade moduler"
-				),
-				_react2.default.createElement(
-					"ul",
-					{ className: "uk-list" },
-					_react2.default.createElement(
-						"li",
-						null,
-						_react2.default.createElement("i", { className: "uk-icon uk-icon-user" }),
-						" Medlemshantering"
-					),
-					_react2.default.createElement(
-						"li",
-						null,
-						_react2.default.createElement("i", { className: "uk-icon uk-icon-group" }),
-						" Grupper"
-					),
-					_react2.default.createElement(
-						"li",
-						null,
-						_react2.default.createElement("i", { className: "uk-icon uk-icon-key" }),
-						" Nycklar"
-					),
-					_react2.default.createElement(
-						"li",
-						null,
-						_react2.default.createElement("i", { className: "uk-icon uk-icon-shopping-basket" }),
-						" Försäljning"
-					),
-					_react2.default.createElement(
-						"li",
-						null,
-						_react2.default.createElement("i", { className: "uk-icon uk-icon-money" }),
-						" Ekonomi"
-					),
-					_react2.default.createElement(
-						"li",
-						null,
-						_react2.default.createElement("i", { className: "uk-icon uk-icon-envelope" }),
-						" Utskick"
-					),
-					_react2.default.createElement(
-						"li",
-						null,
-						_react2.default.createElement("i", { className: "uk-icon uk-icon-area-chart" }),
-						" Statistik"
-					)
-				)
-			);
-		}
-	});
-
-	module.exports = SettingsGlobalHandler;
-
-/***/ },
-/* 317 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var _react = __webpack_require__(1);
-
-	var _react2 = _interopRequireDefault(_react);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	var SettingsAutomationHandler = _react2.default.createClass({
-		displayName: 'SettingsAutomationHandler',
-
-		render: function render() {
-			return _react2.default.createElement(
-				'div',
-				null,
-				_react2.default.createElement(
-					'h2',
-					null,
-					'Automation'
-				),
-				_react2.default.createElement(
-					'p',
-					null,
-					'Här skall man kunna konfiguera diverse automation. Systemet bygger på att när ett event sker får man möjlighet att fånga upp detta för att sedan trigga ett nytt event.'
-				),
-				_react2.default.createElement(
-					'ul',
-					null,
-					_react2.default.createElement(
-						'li',
-						null,
-						'När en ny medlem registrerar sig',
-						_react2.default.createElement(
-							'ul',
-							null,
-							_react2.default.createElement(
-								'li',
-								null,
-								'Skicka ett mail enligt mall'
-							)
-						)
-					),
-					_react2.default.createElement(
-						'li',
-						null,
-						'När en produkt av typen labbavgift är betald',
-						_react2.default.createElement(
-							'ul',
-							null,
-							_react2.default.createElement(
-								'li',
-								null,
-								'Skicka ett kvitto via mail enligt mall'
-							),
-							_react2.default.createElement(
-								'li',
-								null,
-								'Lägg till en ny period för labbavgift i databasen'
-							)
-						)
-					),
-					_react2.default.createElement(
-						'li',
-						null,
-						'När ett medlemskap löper ut om 30 dagar',
-						_react2.default.createElement(
-							'ul',
-							null,
-							_react2.default.createElement(
-								'li',
-								null,
-								'Skicka ett mail enligt mall'
-							)
-						)
-					),
-					_react2.default.createElement(
-						'li',
-						null,
-						'När ett medlemskap löper ut om 7 dagar',
-						_react2.default.createElement(
-							'ul',
-							null,
-							_react2.default.createElement(
-								'li',
-								null,
-								'Skicka ett mail enligt mall'
-							)
-						)
-					),
-					_react2.default.createElement(
-						'li',
-						null,
-						'När ett medlemskap löpt ut',
-						_react2.default.createElement(
-							'ul',
-							null,
-							_react2.default.createElement(
-								'li',
-								null,
-								'Skicka ett mail enligt mall'
-							)
-						)
-					),
-					_react2.default.createElement(
-						'li',
-						null,
-						'Etc...'
-					)
-				)
-			);
-		}
-	});
-
-	module.exports = SettingsAutomationHandler;
-
-/***/ },
-/* 318 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-
-	var _react = __webpack_require__(1);
-
-	var _react2 = _interopRequireDefault(_react);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	var StatisticsHandler = _react2.default.createClass({
-		displayName: "StatisticsHandler",
-
-		render: function render() {
-			return _react2.default.createElement(
-				"div",
-				{ className: "uk-width-1-1" },
-				_react2.default.createElement(
-					"h2",
-					null,
-					"Statistik"
-				),
-				_react2.default.createElement(
-					"p",
-					null,
-					"Här är det tänkt att visas diverse statistik. Förslagsvis bygger vi en enkel, men kraftfull, statistikmotor i tre lager. Självklart med möjlighet att exportera *.csv och *.svg"
-				),
-				_react2.default.createElement("p", null),
-				_react2.default.createElement(
-					"ul",
-					null,
-					_react2.default.createElement(
-						"li",
-						null,
-						"1. Datakälla - Levererar den data som används för att generera statistik. Bör fungera med det befintliga API:t"
-					),
-					_react2.default.createElement(
-						"li",
-						null,
-						"2. Filter - Filtrerar / strukturerar / grupperar data på olika sätt",
-						_react2.default.createElement(
-							"ul",
-							null,
-							_react2.default.createElement(
-								"li",
-								null,
-								"Filter - filtrera på datumintervall etc"
-							),
-							_react2.default.createElement(
-								"li",
-								null,
-								"Gruppering - Beräkna min/max/avg för dagar, veckor, månader, etc"
-							)
-						)
-					),
-					_react2.default.createElement(
-						"li",
-						null,
-						"3. Generering av grafer - genererar interaktiva grafer med hjälp av lämpligt HTML5 / Javascript-bibliotek."
-					)
-				)
-			);
-		}
-	});
-
-	module.exports = StatisticsHandler;
-
-/***/ },
-/* 319 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-
-	var _react = __webpack_require__(1);
-
-	var _react2 = _interopRequireDefault(_react);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	var DashboardHandler = _react2.default.createClass({
-		displayName: "DashboardHandler",
-
-		render: function render() {
-			return _react2.default.createElement(
-				"div",
-				{ className: "uk-width-1-1" },
-				_react2.default.createElement(
-					"div",
-					{ className: "uk-panel uk-panel-box uk-panel-box-primary" },
-					_react2.default.createElement(
-						"h1",
-						{ className: "uk-heading-large" },
-						"Makerspace internal"
-					)
-				)
-			);
-		}
-	});
-
-	module.exports = DashboardHandler;
-
-/***/ },
-/* 320 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var _react = __webpack_require__(1);
-
-	var _react2 = _interopRequireDefault(_react);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	var ExportHandler = _react2.default.createClass({
-		displayName: 'ExportHandler',
-
-		render: function render() {
-			return _react2.default.createElement(
-				'div',
-				null,
-				_react2.default.createElement(
-					'h2',
-					null,
-					'Export'
-				),
-				_react2.default.createElement(
-					'p',
-					null,
-					'Kör en request mot API och plocka ut data med hjälp av samma filtreringsinställnigar som finns i övriga gränssnitt. Konvertera sedan detta till en *.csv, eller annat lämpligt format och låt användaren ladda hem en fil.'
-				)
-			);
-		}
-	});
-
-	module.exports = ExportHandler;
-
-/***/ },
-/* 321 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var _react = __webpack_require__(1);
-
-	var _react2 = _interopRequireDefault(_react);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	var MailTemplatesHandler = _react2.default.createClass({
-		displayName: 'MailTemplatesHandler',
-
-		render: function render() {
-			return _react2.default.createElement(
-				'div',
-				null,
-				_react2.default.createElement(
-					'h2',
-					null,
-					'Mallar'
-				),
-				_react2.default.createElement(
-					'p',
-					null,
-					'Mallar som används för att skicka mail'
-				)
-			);
-		}
-	});
-
-	module.exports = MailTemplatesHandler;
-
-/***/ },
-/* 322 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -54076,11 +43339,9 @@
 
 	var _reactRouter = __webpack_require__(172);
 
-	var _reactSelect = __webpack_require__(265);
+	var _auth = __webpack_require__(243);
 
-	var _config = __webpack_require__(242);
-
-	var _config2 = _interopRequireDefault(_config);
+	var _auth2 = _interopRequireDefault(_auth);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -54090,269 +43351,88 @@
 
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-	/**
-	 * TODO:
-	 *   Validate data before sending
-	 */
+	var Login = function (_React$Component) {
+		_inherits(Login, _React$Component);
 
-	var MailSendHandler = function (_React$Component) {
-		_inherits(MailSendHandler, _React$Component);
+		function Login() {
+			_classCallCheck(this, Login);
 
-		function MailSendHandler(props) {
-			_classCallCheck(this, MailSendHandler);
-
-			var _this = _possibleConstructorReturn(this, (MailSendHandler.__proto__ || Object.getPrototypeOf(MailSendHandler)).call(this, props));
-
-			_this.state = {
-				type: "email",
-				recipients: [],
-				subject: "",
-				body: ""
-			};
-			return _this;
+			return _possibleConstructorReturn(this, (Login.__proto__ || Object.getPrototypeOf(Login)).apply(this, arguments));
 		}
 
-		// Change the between E-mail and SMS
+		_createClass(Login, [{
+			key: 'login',
+			value: function login(e) {
+				e.preventDefault();
 
+				var username = this.refs.username.value;
+				var password = this.refs.password.value;
 
-		_createClass(MailSendHandler, [{
-			key: 'changeType',
-			value: function changeType() {
-				this.setState({
-					type: this.refs.type.value
-				});
-			}
-		}, {
-			key: 'changeSubject',
-			value: function changeSubject() {
-				this.setState({
-					subject: this.refs.subject.value
-				});
-			}
-		}, {
-			key: 'changeRecipient',
-			value: function changeRecipient(value) {
-				this.setState({
-					recipients: value
-				});
-
-				// Clear the search history so there is no drop down with old data after adding a recipient
-				this.refs.recps.setState({ options: [] });
-			}
-		}, {
-			key: 'changeBody',
-			value: function changeBody() {
-				this.setState({
-					body: this.refs.body.value
-				});
-
-				// Update the character counter
-				$("#characterCounter").html(this.refs.body.value.length);
-			}
-
-			// Disable client side filtering
-
-		}, {
-			key: 'filter',
-			value: function filter(option, filterString) {
-				return option;
-			}
-		}, {
-			key: 'search',
-			value: function search(input, callback) {
-				// Clear the search history so there is no drop down with old data when search text input is empty
-				if (!input) {
-					return Promise.resolve({ options: [] });
+				// Error handling
+				if (!username || !password) {
+					UIkit.modal.alert("Du måste fylla i användarnamn och lösenord");
+					return;
 				}
 
-				$.ajax({
-					method: "GET",
-					url: _config2.default.apiBasePath + "/member",
-					data: {
-						search: input
-					}
-				}).done(function (data) {
-					setTimeout(function () {
-						var autoComplete = [];
-
-						data.data.forEach(function (element, index, array) {
-							autoComplete.push({
-								label: element.firstname + " " + element.lastname + " (#" + element.member_number + ")",
-								value: element.member_number
-							});
-						});
-
-						callback(null, {
-							options: autoComplete
-						});
-					}, 100);
-				});
-			}
-		}, {
-			key: 'gotoMember',
-			value: function gotoMember(value, event) {
-				UIkit.modal.alert("TODO: Go to member " + value.label);
-			}
-
-			// Send an API request and queue the message to be sent
-
-		}, {
-			key: 'send',
-			value: function send(event) {
-				// Prevent the form from being submitted
-				event.preventDefault();
-
-				var type = this.state.type;
-				var recipients = this.state.recipients;
-				var subject = this.state.subject;
-				var body = this.state.body;
-
-				// Send API request
-				$.ajax({
-					method: "POST",
-					url: _config2.default.apiBasePath + "/mail",
-					data: JSON.stringify({
-						type: type,
-						recipients: recipients,
-						subject: subject,
-						body: body
-					})
-				}).done(function () {
-					// TODO: Falhantering
-					_reactRouter.browserHistory.push("/mail");
-				});
-			}
-		}, {
-			key: 'cancel',
-			value: function cancel(event) {
-				// Prevent the form from being submitted
-				event.preventDefault();
-
-				UIkit.modal.alert("TODO: Cancel");
+				_auth2.default.login(username, password);
 			}
 		}, {
 			key: 'render',
 			value: function render() {
 				return _react2.default.createElement(
 					'div',
-					null,
+					{ className: 'uk-vertical-align uk-text-center uk-height-1-1' },
 					_react2.default.createElement(
-						'h2',
-						null,
-						'Skapa utskick'
-					),
-					_react2.default.createElement(
-						'form',
-						{ className: 'uk-form uk-form-horizontal', onSubmit: this.send.bind(this) },
+						'div',
+						{ className: 'uk-vertical-align-middle', style: { width: "300px" } },
 						_react2.default.createElement(
-							'div',
-							{ className: 'uk-form-row' },
-							_react2.default.createElement(
-								'label',
-								{ className: 'uk-form-label', htmlFor: 'type' },
-								'Typ'
-							),
+							'form',
+							{ className: 'uk-panel uk-panel-box uk-form', onSubmit: this.login.bind(this) },
 							_react2.default.createElement(
 								'div',
-								{ className: 'uk-form-controls' },
+								{ className: 'uk-form-row' },
 								_react2.default.createElement(
-									'select',
-									{ id: 'type', ref: 'type', className: 'uk-form-width-medium', onChange: this.changeType.bind(this) },
-									_react2.default.createElement(
-										'option',
-										{ value: 'email' },
-										'E-post'
-									),
-									_react2.default.createElement(
-										'option',
-										{ value: 'sms' },
-										'SMS'
-									)
+									'h2',
+									null,
+									'Logga in'
 								)
-							)
-						),
-						_react2.default.createElement(
-							'div',
-							{ className: 'uk-form-row' },
-							_react2.default.createElement(
-								'label',
-								{ className: 'uk-form-label', htmlFor: 'recipient' },
-								'Mottagare'
 							),
 							_react2.default.createElement(
 								'div',
-								{ className: 'uk-form-controls' },
-								_react2.default.createElement(_reactSelect.Async, { ref: 'recps', multi: true, cache: false, name: 'recipients', filterOption: this.filter, loadOptions: this.search, value: this.state.recipients, onChange: this.changeRecipient.bind(this), onValueClick: this.gotoMember })
-							)
-						),
-						this.state.type == "email" ? _react2.default.createElement(
-							'div',
-							{ className: 'uk-form-row' },
-							_react2.default.createElement(
-								'label',
-								{ className: 'uk-form-label', htmlFor: 'subject' },
-								'Ärende'
-							),
-							_react2.default.createElement(
-								'div',
-								{ className: 'uk-form-controls' },
+								{ className: 'uk-form-row' },
 								_react2.default.createElement(
 									'div',
 									{ className: 'uk-form-icon' },
-									_react2.default.createElement('i', { className: 'uk-icon-commenting' }),
-									_react2.default.createElement('input', { ref: 'subject', type: 'text', id: 'subject', name: 'subject', className: 'uk-form-width-large', onChange: this.changeSubject.bind(this) })
+									_react2.default.createElement('i', { className: 'uk-icon-user' }),
+									_react2.default.createElement('input', { ref: 'username', className: 'uk-form-large uk-form-width-large', type: 'text', placeholder: 'Användarnamn' })
 								)
-							)
-						) : "",
-						_react2.default.createElement(
-							'div',
-							{ className: 'uk-form-row' },
-							_react2.default.createElement(
-								'label',
-								{ className: 'uk-form-label', htmlFor: 'body' },
-								'Meddelande'
 							),
 							_react2.default.createElement(
 								'div',
-								{ className: 'uk-form-controls' },
-								_react2.default.createElement('textarea', { id: 'body', ref: 'body', className: 'uk-form-width-large', rows: '8', onChange: this.changeBody.bind(this) })
-							)
-						),
-						_react2.default.createElement(
-							'div',
-							{ className: 'uk-form-row' },
-							_react2.default.createElement(
-								'div',
-								{ className: 'uk-form-controls' },
+								{ className: 'uk-form-row' },
 								_react2.default.createElement(
-									'p',
-									{ className: 'uk-float-left' },
-									_react2.default.createElement(
-										'span',
-										{ id: 'characterCounter' },
-										'0'
-									),
-									' tecken'
+									'div',
+									{ className: 'uk-form-icon' },
+									_react2.default.createElement('i', { className: 'uk-icon-lock' }),
+									_react2.default.createElement('input', { ref: 'password', className: 'uk-form-large uk-form-width-large', type: 'password', placeholder: 'Lösenord' })
 								)
-							)
-						),
-						_react2.default.createElement(
-							'div',
-							{ className: 'uk-form-row' },
+							),
 							_react2.default.createElement(
 								'div',
-								{ className: 'uk-form-controls' },
+								{ className: 'uk-form-row' },
 								_react2.default.createElement(
 									'button',
-									{ className: 'uk-float-left uk-button uk-button-danger', onClick: this.cancel },
-									_react2.default.createElement('i', { className: 'uk-icon uk-icon-close' }),
-									' Avbryt'
-								),
+									{ type: 'submit', className: 'uk-width-1-1 uk-button uk-button-primary uk-button-large' },
+									'Logga in'
+								)
+							),
+							_react2.default.createElement(
+								'div',
+								{ className: 'uk-form-row uk-text-small' },
 								_react2.default.createElement(
-									'button',
-									{ type: 'submit', className: 'uk-float-right uk-button uk-button-success' },
-									_react2.default.createElement('i', { className: 'uk-icon uk-icon-envelope' }),
-									' Skicka'
+									_reactRouter.Link,
+									{ className: 'uk-float-right uk-link uk-link-muted', to: '/resetpassword' },
+									'Glömt ditt lösenord?'
 								)
 							)
 						)
@@ -54361,119 +43441,13 @@
 			}
 		}]);
 
-		return MailSendHandler;
+		return Login;
 	}(_react2.default.Component);
 
-	MailSendHandler.title = "Skapa utskick";
-
-	module.exports = MailSendHandler;
+	module.exports = Login;
 
 /***/ },
-/* 323 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var _react = __webpack_require__(1);
-
-	var _react2 = _interopRequireDefault(_react);
-
-	var _Rfid = __webpack_require__(248);
-
-	var _Rfid2 = _interopRequireDefault(_Rfid);
-
-	var _Keys = __webpack_require__(250);
-
-	var _Keys2 = _interopRequireDefault(_Keys);
-
-	var _TableFilterBox = __webpack_require__(264);
-
-	var _TableFilterBox2 = _interopRequireDefault(_TableFilterBox);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	var KeysOverviewHandler = _react2.default.createClass({
-		displayName: 'KeysOverviewHandler',
-
-		getInitialState: function getInitialState() {
-			return {
-				filters: {}
-			};
-		},
-
-		edit: function edit(entity) {
-			UIkit.modal.alert("TODO: Parent edit" + entity);
-		},
-
-		overrideFiltersFromProps: function overrideFiltersFromProps(filters) {
-			console.log("overrideFiltersFromProps");
-
-			if (this.props.member_number !== undefined && this.props.member_number.length > 0) {
-				console.log("  member_number present");
-
-				if (!filters.relations) {
-					filters.relations = [];
-				}
-
-				filters.relations.push({
-					type: "member",
-					member_number: this.props.member_number
-				});
-			}
-
-			return filters;
-		},
-
-		updateFilters: function updateFilters(newFilter) {
-			var filters = this.overrideFiltersFromProps(newFilter);
-			this.setState({
-				filters: filters
-			});
-		},
-
-		componentWillReceiveProps: function componentWillReceiveProps(nextProps) {
-			console.log("componentWillReceiveProps");
-			if (nextProps.member_number != this.props.member_number) {
-				console.log("TODO: Filter on member number");
-				this.props.member_number = nextProps.member_number;
-
-				var filters = this.overrideFiltersFromProps(this.state.filters);
-				this.setState({
-					filters: filters
-				});
-			} else {
-				console.log("TODO: Turn off filter on member number");
-			}
-		},
-
-		render: function render() {
-			return _react2.default.createElement(
-				'div',
-				null,
-				_react2.default.createElement(
-					'h2',
-					null,
-					'Nycklar'
-				),
-				_react2.default.createElement(
-					'p',
-					null,
-					'Visa lista över samtliga nycklas i systemet'
-				),
-				_react2.default.createElement(_TableFilterBox2.default, { onChange: this.updateFilters }),
-				_react2.default.createElement(_Keys2.default, { type: _Rfid2.default, edit: this.edit, filters: this.state.filters })
-			);
-		}
-	});
-
-	// Backbone
-
-	KeysOverviewHandler.title = "Nycklar";
-
-	module.exports = KeysOverviewHandler;
-
-/***/ },
-/* 324 */
+/* 246 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_RESULT__;/*! UIkit 2.27.1 | http://www.getuikit.com | (c) 2014 YOOtheme | MIT License */
@@ -58380,7 +47354,7 @@
 
 
 /***/ },
-/* 325 */
+/* 247 */
 /***/ function(module, exports) {
 
 	/*! UIkit 2.27.1 | http://www.getuikit.com | (c) 2014 YOOtheme | MIT License */
@@ -58915,7 +47889,7 @@
 
 
 /***/ },
-/* 326 */
+/* 248 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*! UIkit 2.27.1 | http://www.getuikit.com | (c) 2014 YOOtheme | MIT License */
@@ -58931,7 +47905,7 @@
 	    }
 
 	    if (true) {
-	        !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(324)], __WEBPACK_AMD_DEFINE_RESULT__ = function(){
+	        !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(246)], __WEBPACK_AMD_DEFINE_RESULT__ = function(){
 	            return component || addon(UIkit);
 	        }.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
 	    }
@@ -59068,7 +48042,7 @@
 
 
 /***/ },
-/* 327 */
+/* 249 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*! UIkit 2.27.1 | http://www.getuikit.com | (c) 2014 YOOtheme | MIT License */
@@ -59081,7 +48055,7 @@
 	    }
 
 	    if (true) {
-	        !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(324)], __WEBPACK_AMD_DEFINE_RESULT__ = function(){
+	        !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(246)], __WEBPACK_AMD_DEFINE_RESULT__ = function(){
 	            return component || addon(UIkit);
 	        }.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
 	    }
@@ -59412,6 +48386,12603 @@
 	    return UI.autocomplete;
 	});
 
+
+/***/ },
+/* 250 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _reactRouter = __webpack_require__(172);
+
+	var _auth = __webpack_require__(243);
+
+	var _auth2 = _interopRequireDefault(_auth);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+	var LoginResetPassword = function (_React$Component) {
+		_inherits(LoginResetPassword, _React$Component);
+
+		function LoginResetPassword() {
+			_classCallCheck(this, LoginResetPassword);
+
+			return _possibleConstructorReturn(this, (LoginResetPassword.__proto__ || Object.getPrototypeOf(LoginResetPassword)).apply(this, arguments));
+		}
+
+		_createClass(LoginResetPassword, [{
+			key: 'cancel',
+			value: function cancel() {
+				_reactRouter.browserHistory.push("/");
+			}
+		}, {
+			key: 'submit',
+			value: function submit(e) {
+				e.preventDefault();
+
+				var username = this.refs.username.value;
+
+				// Error handling
+				if (!username) {
+					UIkit.modal.alert("Du måste fylla i din E-postadress");
+					return;
+				}
+
+				_auth2.default.requestPassword(username);
+
+				UIkit.modal.alert("Ett E-postmeddelande med information om hur du nollställer ditt lösenord har skickats till " + username);
+				_reactRouter.browserHistory.push("/");
+			}
+		}, {
+			key: 'render',
+			value: function render() {
+				return _react2.default.createElement(
+					'div',
+					{ className: 'uk-vertical-align uk-text-center uk-height-1-1' },
+					_react2.default.createElement(
+						'div',
+						{ className: 'uk-vertical-align-middle', style: { width: "300px" } },
+						_react2.default.createElement(
+							'div',
+							{ className: 'uk-text-left' },
+							_react2.default.createElement(
+								'form',
+								{ className: 'uk-panel uk-panel-box uk-form', onSubmit: this.submit.bind(this) },
+								_react2.default.createElement(
+									'div',
+									{ className: 'uk-form-row' },
+									_react2.default.createElement(
+										'h2',
+										null,
+										'Glömt ditt lösenord?'
+									)
+								),
+								_react2.default.createElement(
+									'div',
+									{ className: 'uk-form-row' },
+									_react2.default.createElement(
+										'p',
+										null,
+										'Fyll i ditt användarnamn så skickar vi instruktioner om hur du nollställer ditt lösenord.'
+									)
+								),
+								_react2.default.createElement(
+									'div',
+									{ className: 'uk-form-row' },
+									_react2.default.createElement(
+										'div',
+										{ className: 'uk-form-icon' },
+										_react2.default.createElement('i', { className: 'uk-icon-user' }),
+										_react2.default.createElement('input', { ref: 'username', className: 'uk-form-large uk-form-width-large', type: 'text', placeholder: 'Användarnamn' })
+									)
+								),
+								_react2.default.createElement(
+									'div',
+									{ className: 'uk-form-row' },
+									_react2.default.createElement(
+										'button',
+										{ type: 'submit', className: 'uk-width-1-1 uk-button uk-button-success uk-button-large' },
+										_react2.default.createElement('span', { className: 'uk-icon-check' }),
+										' Skicka E-post'
+									)
+								),
+								_react2.default.createElement(
+									'div',
+									{ className: 'uk-form-row' },
+									_react2.default.createElement(
+										'button',
+										{ type: 'button', onClick: this.cancel.bind(), className: 'uk-width-1-1 uk-button uk-button-danger uk-button-large' },
+										_react2.default.createElement('span', { className: 'uk-icon-close' }),
+										' Avbryt'
+									)
+								)
+							)
+						)
+					)
+				);
+			}
+		}]);
+
+		return LoginResetPassword;
+	}(_react2.default.Component);
+
+	module.exports = LoginResetPassword;
+
+/***/ },
+/* 251 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	module.exports = _react2.default.createClass({
+		displayName: "exports",
+
+		render: function render() {
+			return _react2.default.createElement(
+				"div",
+				{ className: "uk-width-1-1" },
+				_react2.default.createElement(
+					"div",
+					{ className: "uk-panel uk-panel-box uk-panel-box-primary" },
+					_react2.default.createElement(
+						"h1",
+						{ className: "uk-heading-large" },
+						"MakerAdmin"
+					)
+				)
+			);
+		}
+	});
+
+/***/ },
+/* 252 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _auth = __webpack_require__(243);
+
+	var _auth2 = _interopRequireDefault(_auth);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	module.exports = _react2.default.createClass({
+		displayName: 'exports',
+		componentDidMount: function componentDidMount() {
+			_auth2.default.logout();
+		},
+		render: function render() {
+			return _react2.default.createElement(
+				'p',
+				null,
+				'You are now logged out'
+			);
+		}
+	});
+
+/***/ },
+/* 253 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+
+	module.exports = {
+		childRoutes: [{
+			path: "economy",
+			indexRoute: {
+				component: __webpack_require__(254)
+			},
+			childRoutes: [
+			// Overview / Dashboard
+			{
+				path: "overview",
+				component: __webpack_require__(254)
+			},
+
+			// Master ledger
+			{
+				path: "masterledger",
+				component: __webpack_require__(255)
+			},
+
+			// Invoice
+			{
+				path: "invoice",
+				indexRoute: {
+					component: __webpack_require__(261)
+				},
+				childRoutes: [{
+					path: "list",
+					component: __webpack_require__(261)
+				}, {
+					path: "add",
+					component: __webpack_require__(266)
+				}, {
+					path: ":id",
+					component: __webpack_require__(269)
+				}]
+			},
+
+			// Instructions
+			{
+				path: "instruction",
+				component: __webpack_require__(270)
+			}, {
+				path: "instruction/add",
+				component: __webpack_require__(275)
+			}, {
+				path: "instruction/:id",
+				component: __webpack_require__(277)
+			}, {
+				path: "instruction/:id/import",
+				component: __webpack_require__(278)
+			},
+
+			// Reports
+			{
+				path: "valuationsheet",
+				component: __webpack_require__(279)
+			}, {
+				path: "resultreport",
+				component: __webpack_require__(280)
+			},
+
+			// Cost centers
+			{
+				path: "costcenter",
+				component: __webpack_require__(281)
+			}, {
+				path: "costcenter/:id",
+				component: __webpack_require__(285)
+			},
+
+			// Accounts
+			{
+				path: "account/:id",
+				component: __webpack_require__(287)
+			}]
+		},
+		// Settings
+		{
+			path: "settings",
+			childRoutes: [{
+				path: "economy",
+				childRoutes: [{
+					path: "debug",
+					component: __webpack_require__(382)
+				}, {
+					path: "account",
+					component: __webpack_require__(292)
+				}, {
+					path: "account/add",
+					component: __webpack_require__(295)
+				}, {
+					path: "account/:id",
+					component: __webpack_require__(287)
+				}, {
+					path: "account/:id/edit",
+					component: __webpack_require__(296)
+				}, {
+					path: "accountingperiod",
+					component: __webpack_require__(297)
+				}, {
+					path: "accountingperiod/add",
+					component: __webpack_require__(302)
+				}, {
+					path: "accountingperiod/:id",
+					component: __webpack_require__(304)
+				}, {
+					path: "accountingperiod/:id/edit",
+					component: __webpack_require__(305)
+				}]
+			}]
+		}]
+	};
+
+/***/ },
+/* 254 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	module.exports = _react2.default.createClass({
+		displayName: 'exports',
+
+		render: function render() {
+			return _react2.default.createElement(
+				'div',
+				null,
+				_react2.default.createElement(
+					'h2',
+					null,
+					'Översikt'
+				),
+				_react2.default.createElement(
+					'ul',
+					null,
+					_react2.default.createElement(
+						'li',
+						null,
+						'Samtliga obetalda fakturor + 3 senaste betalda'
+					),
+					_react2.default.createElement(
+						'li',
+						null,
+						'5 senaste skapade/ändrade verifikationerna'
+					),
+					_react2.default.createElement(
+						'li',
+						null,
+						'Saldo på konton (Bank, Stripe, PayPal, etc)'
+					),
+					_react2.default.createElement(
+						'li',
+						null,
+						'Datum för senaste synkroniseringar (Bank, Stripe, PayPal, etc)'
+					)
+				)
+			);
+		}
+	});
+
+/***/ },
+/* 255 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _backboneReactComponent = __webpack_require__(237);
+
+	var _backboneReactComponent2 = _interopRequireDefault(_backboneReactComponent);
+
+	var _BackboneTable = __webpack_require__(256);
+
+	var _BackboneTable2 = _interopRequireDefault(_BackboneTable);
+
+	var _Masterledger = __webpack_require__(258);
+
+	var _Masterledger2 = _interopRequireDefault(_Masterledger);
+
+	var _reactRouter = __webpack_require__(172);
+
+	var _Currency = __webpack_require__(260);
+
+	var _Currency2 = _interopRequireDefault(_Currency);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	var MasterLedgerHandler = _react2.default.createClass({
+		displayName: 'MasterLedgerHandler',
+
+		render: function render() {
+			return _react2.default.createElement(
+				'div',
+				null,
+				_react2.default.createElement(
+					'h2',
+					null,
+					'Huvudbok'
+				),
+				_react2.default.createElement(EconomyAccounts, { type: _Masterledger2.default })
+			);
+		}
+	});
+
+	// Backbone
+
+
+	var EconomyAccounts = _react2.default.createClass({
+		displayName: 'EconomyAccounts',
+
+		mixins: [Backbone.React.Component.mixin, _BackboneTable2.default],
+
+		getInitialState: function getInitialState() {
+			return {
+				columns: 3
+			};
+		},
+
+		componentWillMount: function componentWillMount() {
+			this.state.collection.fetch();
+		},
+
+		renderHeader: function renderHeader() {
+			return [{
+				title: "#",
+				sort: "account_number"
+			}, {
+				title: "Konto",
+				sort: "title"
+			}, {
+				title: "Kontobalans",
+				class: "uk-text-right"
+			}];
+		},
+
+		renderRow: function renderRow(row, i) {
+			return _react2.default.createElement(
+				'tr',
+				{ key: i },
+				_react2.default.createElement(
+					'td',
+					null,
+					_react2.default.createElement(
+						_reactRouter.Link,
+						{ to: "/economy/account/" + row.account_number },
+						row.account_number
+					)
+				),
+				_react2.default.createElement(
+					'td',
+					null,
+					row.title
+				),
+				_react2.default.createElement(
+					'td',
+					{ className: 'uk-text-right' },
+					_react2.default.createElement(_Currency2.default, { value: row.balance })
+				)
+			);
+		}
+	});
+
+	module.exports = MasterLedgerHandler;
+
+/***/ },
+/* 256 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _reactDom = __webpack_require__(34);
+
+	var _reactDom2 = _interopRequireDefault(_reactDom);
+
+	var _Common = __webpack_require__(257);
+
+	var _config = __webpack_require__(244);
+
+	var _config2 = _interopRequireDefault(_config);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	/// TODO: This Mixin's should handle auto refresh
+
+	/**
+	 * This is a mixin used with Backbone to provide error handlers.
+	 */
+	var BackboneTable = {
+		getInitialState: function getInitialState() {
+			var _this = this;
+
+			// Create an array with options used for extending the collection
+			var options = {
+				state: {
+					pageSize: _config2.default.pagination.pageSize
+				},
+
+				parseRecords: function parseRecords(resp, options) {
+					return resp.data;
+				},
+
+				parseState: function parseState(resp, queryParams, state, options) {
+					// Otherwise we just save the parameters to be used when initializing the paginator
+					_this.setState({
+						totalRecords: resp.total,
+						totalPages: resp.last_page,
+						pageSize: resp.per_page
+					});
+
+					// Hide the pagination if the total number of records is 0 or there is only 1 page
+					// When the pagination is hidden there is no way to get it back as the javascript stops when React removes the DOM node.
+					if (resp.last_page == 0 && resp.data.length > 0) {
+						// Note: For some reason Laravel only sends the pagination data on first request
+					} else {
+							if (resp.total == 0 || resp.last_page == 1) {
+								_this.setState({ showPagination: false });
+							} else {
+								_this.updatePagination(resp.last_page);
+							}
+						}
+				}
+			};
+
+			// Use a different URL, if specified
+			if (typeof this.props.url != "undefined") {
+				options.url = this.props.url;
+			}
+
+			// Extend the collection
+			var collection = this.props.type;
+			var ExtendedCollection = collection.extend(options);
+
+			// Create a new extended collection
+			// TODO: Does params really work?
+			var data = new ExtendedCollection(null, this.props.params);
+
+			this.pagination = [];
+
+			return {
+				status: "done",
+				collection: data,
+				showPagination: true,
+				sort_column: "",
+				sort_order: "asc",
+				filters: this.props.filters || {}
+			};
+		},
+
+		componentWillReceiveProps: function componentWillReceiveProps(nextProps) {
+			if (nextProps.filters != this.state.filters) {
+				this.setState({
+					filters: nextProps.filters
+				});
+
+				// TODO: setState() has a delay so we need to wait a moment
+				var _this = this;
+				setTimeout(function () {
+					_this.fetch();
+				}, 100);
+			}
+		},
+
+		initializePagination: function initializePagination(i) {
+			var _this = this;
+
+			// Initialize top and bottom pagination
+			for (var i = 1; i <= 2; i++) {
+				var name = "pag" + i;
+				var pag = _reactDom2.default.findDOMNode(this.refs[name]);
+
+				if (pag !== undefined) {
+					this.pagination[i] = UIkit.pagination(pag, {
+						items: this.state.totalRecords,
+						itemsOnPage: this.state.pageSize
+					});
+
+					$(pag).on("select.uk.pagination", function (e, pageIndex) {
+						// Update both paginators manually
+						_this.pagination[1].currentPage = pageIndex;
+						_this.pagination[2].currentPage = pageIndex;
+						_this.pagination[1].render(_this.pagination[1].pages);
+						_this.pagination[2].render(_this.pagination[1].pages);
+
+						// Send request to server
+						_this.fetch();
+					});
+				}
+			}
+		},
+
+		updatePagination: function updatePagination(last_page) {
+			// Initialize top and bottom pagination
+			for (var i = 1; i <= 2; i++) {
+				// If the paginator is already set up we need to update the parameters and rerender it
+				if (typeof this.pagination[i] != "undefined") {
+					this.pagination[i].pages = last_page;
+					this.pagination[i].render();
+				}
+			}
+		},
+
+		removeButton: function removeButton(i, text) {
+			if (text === undefined) {
+				var text = "Ta bort";
+			}
+
+			return _react2.default.createElement(
+				'a',
+				{ onClick: this.remove.bind(this, i), className: 'removebutton' },
+				_react2.default.createElement('i', { className: 'uk-icon uk-icon-remove' }),
+				' ',
+				text
+			);
+		},
+
+		remove: function remove(row) {
+			var _this = this;
+			var entity = this.getCollection().at(row);
+			UIkit.modal.confirm(this.removeTextMessage(entity.attributes), function () {
+				entity.destroy({
+					wait: true,
+					success: function success(model, response) {
+						if (response.status == "deleted") {
+							//						UIkit.modal.alert("Successfully deleted");
+						} else {
+								_this.removeErrorMessage();
+							}
+					},
+					error: function error() {
+						_this.removeErrorMessage();
+					}
+				});
+			});
+			return false;
+		},
+
+		componentWillMount: function componentWillMount() {
+			this.wrapper.setCollections(this.state.collection);
+
+			var _this = this;
+
+			// This event is fired when a request is sent to the server
+			this.state.collection.on("request", function () {
+				_this.setState({
+					status: "loading"
+				});
+			});
+
+			// This event is fired after a collection have been received from the server
+			this.state.collection.on("sync", function () {
+				_this.setState({
+					status: "done"
+				});
+			});
+
+			// This event is fired after a model have been successfully deleted.
+			this.state.collection.on("destroy", function () {
+				_this.setState({
+					status: "done"
+				});
+			});
+
+			// This event is fired when receiveing a collection from the server failed
+			this.state.collection.on("error", function (e) {
+				// If the pending flag is set to false this is probably and delete error or anything else that does not need to update the collection
+				if (e._pending === false) {
+					_this.setState({
+						status: "done"
+					});
+					return;
+				}
+
+				_this.setState({
+					status: "error"
+				});
+			});
+		},
+
+		componentDidMount: function componentDidMount() {
+			var _this = this;
+			window.requestAnimationFrame(function () {
+				_this.initializePagination();
+			});
+		},
+
+		// Fetch data from server
+		fetch: function fetch() {
+			var filters = this.state.filters;
+
+			// Pagination
+			var pageIndex = 0;
+			if (this.pagination[1]) {
+				// Get the current selected page from the top paginator
+				pageIndex = this.pagination[1].currentPage;
+			}
+
+			filters.page = pageIndex + 1;
+
+			// Apply sort
+			filters.sort_by = this.state.sort_column;
+			filters.sort_order = this.state.sort_order;
+
+			// Send request to server
+			this.getCollection().fetch({
+				data: filters
+			});
+		},
+
+		render: function render() {
+			var _this = this;
+
+			if (this.state.status == "loading") {
+				var loading = _react2.default.createElement(
+					'div',
+					{ className: 'loadingOverlay' },
+					_react2.default.createElement(
+						'div',
+						{ className: 'loadingWrapper' },
+						_react2.default.createElement(_Common.Loading, null)
+					)
+				);
+				var loadingClass = " backboneTableLoading";
+			}
+
+			if (this.state.status == "error") {
+				var content = _react2.default.createElement(
+					'tr',
+					{ key: '0' },
+					_react2.default.createElement(
+						'td',
+						{ colSpan: this.state.columns, className: 'uk-text-center' },
+						_react2.default.createElement(
+							'p',
+							null,
+							_react2.default.createElement(
+								'em',
+								null,
+								'Hämtning av data misslyckades.'
+							),
+							'  ',
+							_react2.default.createElement(
+								'button',
+								{ className: 'uk-button uk-button-primary uk-button-mini', onClick: this.tryAgain },
+								_react2.default.createElement('i', { className: 'uk-icon-refresh' }),
+								' Försök igen'
+							)
+						)
+					)
+				);
+			} else if (this.state.collection.length == 0) {
+				var content = _react2.default.createElement(
+					'tr',
+					{ key: '0' },
+					_react2.default.createElement(
+						'td',
+						{ colSpan: this.state.columns, className: 'uk-text-center' },
+						_react2.default.createElement(
+							'em',
+							null,
+							'Listan är tom'
+						)
+					)
+				);
+			} else {
+				var content = this.state.collection.map(this.renderRow);
+			}
+
+			return _react2.default.createElement(
+				'div',
+				null,
+				this.renderPagination(1),
+				_react2.default.createElement(
+					'div',
+					{ style: { position: "relative", "clear": "both" } },
+					_react2.default.createElement(
+						'table',
+						{ className: "uk-table uk-table-condensed uk-table-striped uk-table-hover" + loadingClass },
+						_react2.default.createElement(
+							'thead',
+							null,
+							_react2.default.createElement(
+								'tr',
+								null,
+								this.renderHeader().map(function (column, i) {
+									if (column.title) {
+										if (_this.state.sort_column == column.sort) {
+											var icon = _react2.default.createElement('i', { className: "uk-icon uk-icon-angle-" + (_this.state.sort_order == "asc" ? "up" : "down") });
+										}
+
+										return _react2.default.createElement(
+											'th',
+											{ key: i, className: column.class },
+											column.sort ? _react2.default.createElement(
+												'a',
+												{ 'data-sort': column.sort, onClick: _this.sort },
+												column.title,
+												' ',
+												icon
+											) : column.title
+										);
+									} else {
+										return _react2.default.createElement('th', { key: i });
+									}
+								})
+							)
+						),
+						_react2.default.createElement(
+							'tbody',
+							null,
+							content
+						)
+					),
+					loading
+				),
+				this.renderPagination(2)
+			);
+		},
+
+		sort: function sort(event) {
+			if (event.target.dataset.sort != this.state.sort_column) {
+				// Always start with ascending sort
+				var order = "asc";
+			} else {
+				// Toggle between asc/desc when the user is clicking the same column multiple times
+				var order = this.state.sort_order == "asc" ? "desc" : "asc";
+			}
+
+			// Save the sort order
+			this.setState({
+				sort_column: event.target.dataset.sort,
+				sort_order: order
+			});
+
+			// Request new sorted data from the server
+			// TODO: setState does not change the state asap
+			var _this = this;
+			setTimeout(function () {
+				_this.fetch();
+			}, 100);
+		},
+
+		tryAgain: function tryAgain() {
+			this.fetch();
+		},
+
+		renderPagination: function renderPagination(i) {
+			if (this.state.showPagination === true) {
+				return _react2.default.createElement(
+					'ul',
+					{ name: "pag" + i, ref: "pag" + i, className: 'uk-pagination' },
+					_react2.default.createElement(
+						'li',
+						{ className: '' },
+						_react2.default.createElement(
+							'a',
+							null,
+							_react2.default.createElement('i', { className: 'uk-icon-angle-double-left' })
+						)
+					)
+				);
+			}
+		}
+	};
+
+	module.exports = BackboneTable;
+
+/***/ },
+/* 257 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	var Loading = _react2.default.createClass({
+		displayName: "Loading",
+
+		render: function render() {
+			return _react2.default.createElement(
+				"span",
+				null,
+				_react2.default.createElement("i", { className: "uk-icon-refresh uk-icon-spin" }),
+				" Hämtar data..."
+			);
+		}
+	});
+
+	module.exports = {
+		Loading: Loading
+	};
+
+/***/ },
+/* 258 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _backbone = __webpack_require__(238);
+
+	var _backbone2 = _interopRequireDefault(_backbone);
+
+	var _Account = __webpack_require__(259);
+
+	var _Account2 = _interopRequireDefault(_Account);
+
+	var _config = __webpack_require__(244);
+
+	var _config2 = _interopRequireDefault(_config);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	var MasterledgerCollection = _backbone2.default.PageableCollection.extend({
+		model: _Account2.default,
+		url: "/economy/" + _config2.default.accountingPeriod + "/masterledger"
+	});
+
+	module.exports = MasterledgerCollection;
+
+/***/ },
+/* 259 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _backbone = __webpack_require__(238);
+
+	var _backbone2 = _interopRequireDefault(_backbone);
+
+	var _config = __webpack_require__(244);
+
+	var _config2 = _interopRequireDefault(_config);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	var AccountModel = _backbone2.default.Model.fullExtend({
+		idAttribute: "account_number",
+		urlRoot: "/economy/" + _config2.default.accountingPeriod + "/account",
+		defaults: {
+			created_at: "0000-00-00T00:00:00Z",
+			updated_at: "0000-00-00T00:00:00Z",
+			account_number: "",
+			title: "",
+			description: "",
+			balance: 0,
+			accounting_transaction: [],
+			instructions: []
+		}
+	});
+
+	module.exports = AccountModel;
+
+/***/ },
+/* 260 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	var Currency = _react2.default.createClass({
+		displayName: 'Currency',
+
+		render: function render() {
+			var formatter = new Intl.NumberFormat('sv-SE', {
+				/*
+	   style: 'currency',
+	   currency: 'SEK',
+	   */
+				minimumFractionDigits: 2,
+				maximumFractionDigits: 2
+			});
+
+			var value = formatter.format(this.props.value / 100);
+			return _react2.default.createElement(
+				'span',
+				null,
+				value,
+				' ',
+				this.props.currency
+			);
+		}
+	});
+
+	module.exports = Currency;
+
+/***/ },
+/* 261 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _Invoice = __webpack_require__(262);
+
+	var _Invoice2 = _interopRequireDefault(_Invoice);
+
+	var _reactRouter = __webpack_require__(172);
+
+	var _TableFilterBox = __webpack_require__(264);
+
+	var _TableFilterBox2 = _interopRequireDefault(_TableFilterBox);
+
+	var _InvoiceList = __webpack_require__(265);
+
+	var _InvoiceList2 = _interopRequireDefault(_InvoiceList);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	// Backbone
+
+
+	module.exports = _react2.default.createClass({
+		displayName: 'exports',
+
+		getInitialState: function getInitialState() {
+			return {
+				filters: this.props.filters || {}
+			};
+		},
+
+		updateFilters: function updateFilters(newFilter) {
+			var filters = this.overrideFiltersFromProps(newFilter);
+			this.setState({
+				filters: filters
+			});
+		},
+
+		overrideFiltersFromProps: function overrideFiltersFromProps(filters) {
+			return filters;
+		},
+
+		render: function render() {
+			return _react2.default.createElement(
+				'div',
+				{ className: 'uk-width-1-1' },
+				_react2.default.createElement(
+					'h2',
+					null,
+					'Fakturor'
+				),
+				_react2.default.createElement(
+					'p',
+					{ className: 'uk-float-left' },
+					'På denna sida ser du en lista på samtliga fakturor för det valda bokföringsåret.'
+				),
+				_react2.default.createElement(
+					_reactRouter.Link,
+					{ to: "/economy/invoice/add", className: 'uk-button uk-button-primary uk-float-right' },
+					_react2.default.createElement('i', { className: 'uk-icon-plus-circle' }),
+					' Skapa ny faktura'
+				),
+				_react2.default.createElement(_TableFilterBox2.default, { onChange: this.updateFilters }),
+				_react2.default.createElement(_InvoiceList2.default, { type: _Invoice2.default, filters: this.state.filters })
+			);
+		}
+	});
+	//InvoiceListHandler.title = "Visa fakturor";
+
+/***/ },
+/* 262 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _backbone = __webpack_require__(238);
+
+	var _backbone2 = _interopRequireDefault(_backbone);
+
+	var _Invoice = __webpack_require__(263);
+
+	var _Invoice2 = _interopRequireDefault(_Invoice);
+
+	var _config = __webpack_require__(244);
+
+	var _config2 = _interopRequireDefault(_config);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	var InvoiceCollection = _backbone2.default.PageableCollection.extend({
+		model: _Invoice2.default,
+		url: "/economy/" + _config2.default.accountingPeriod + "/invoice"
+	});
+
+	module.exports = InvoiceCollection;
+
+/***/ },
+/* 263 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _backbone = __webpack_require__(238);
+
+	var _backbone2 = _interopRequireDefault(_backbone);
+
+	var _config = __webpack_require__(244);
+
+	var _config2 = _interopRequireDefault(_config);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	var InvoiceModel = _backbone2.default.Model.fullExtend({
+		idAttribute: "invoice_number",
+		urlRoot: "/economy/" + _config2.default.accountingPeriod + "/invoice",
+		defaults: {
+			created_at: "0000-00-00T00:00:00Z",
+			updated_at: "0000-00-00T00:00:00Z",
+			invoice_number: 0,
+			title: "",
+			description: "",
+			your_reference: "",
+			our_reference: "",
+			address: "",
+			posts: []
+		}
+	});
+
+	module.exports = InvoiceModel;
+
+/***/ },
+/* 264 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	var TableFilterBox = _react2.default.createClass({
+		displayName: "TableFilterBox",
+
+		getInitialState: function getInitialState() {
+			this.filters = {};
+			return {};
+		},
+
+		buildNewFilterObject: function buildNewFilterObject() {
+			var newFilter = {};
+
+			// Filters
+			for (var key in this.filters) {
+				var value = this.filters[key];
+				console.log(key + ": " + value);
+				newFilter[key] = value;
+			}
+
+			// Search
+			if (this.refs.search.value != "") {
+				newFilter["search"] = this.refs.search.value;
+			}
+
+			// Debugging
+			console.log(newFilter);
+
+			this.props.onChange(newFilter);
+		},
+
+		changeFilterValue: function changeFilterValue(event) {
+			var target = event.target;
+			var key = target.getAttribute("name");
+			this.filters[key] = target.value;
+
+			this.buildNewFilterObject();
+		},
+
+		render: function render() {
+			return _react2.default.createElement(
+				"div",
+				{ className: "filterbox" },
+				_react2.default.createElement(
+					"div",
+					{ className: "uk-grid" },
+					_react2.default.createElement(
+						"div",
+						{ className: "uk-width-2-3" },
+						_react2.default.createElement(
+							"form",
+							{ className: "uk-form" },
+							_react2.default.createElement(
+								"div",
+								{ className: "uk-form-icon" },
+								_react2.default.createElement("i", { className: "uk-icon-search" }),
+								_react2.default.createElement("input", { ref: "search", type: "text", className: "uk-form-width-large", placeholder: "Skriv in ett sökord", onChange: this.buildNewFilterObject })
+							)
+						)
+					),
+					_react2.default.createElement(
+						"div",
+						{ className: "uk-width-1-3" },
+						_react2.default.createElement(
+							"div",
+							{ className: "uk-align-right2" },
+							_react2.default.createElement(
+								"button",
+								{ className: "uk-button uk-float-right", "data-uk-toggle": "{target:'#my-id'}" },
+								"Visa fler filter ",
+								_react2.default.createElement("i", { className: "uk-icon uk-icon-angle-down" })
+							)
+						)
+					)
+				),
+				_react2.default.createElement(
+					"div",
+					{ id: "my-id", className: "uk-hidden" },
+					_react2.default.createElement(
+						"label",
+						{ htmlFor: "filter_active", className: "uk-form-label" },
+						"Aktiv:"
+					),
+					_react2.default.createElement(
+						"select",
+						{ ref: "filter_active", id: "filter_active", name: "filter_active", onChange: this.changeFilterValue },
+						_react2.default.createElement(
+							"option",
+							{ value: "yes" },
+							"Ja"
+						),
+						_react2.default.createElement(
+							"option",
+							{ value: "no" },
+							"Nej"
+						),
+						_react2.default.createElement(
+							"option",
+							{ value: "auto" },
+							"Auto"
+						)
+					),
+					_react2.default.createElement(
+						"button",
+						{ className: "uk-button" },
+						_react2.default.createElement("i", { className: "uk-icon uk-icon-close" }),
+						" Nollställ filter"
+					)
+				)
+			);
+		}
+	});
+
+	module.exports = TableFilterBox;
+
+/***/ },
+/* 265 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _backboneReactComponent = __webpack_require__(237);
+
+	var _backboneReactComponent2 = _interopRequireDefault(_backboneReactComponent);
+
+	var _BackboneTable = __webpack_require__(256);
+
+	var _BackboneTable2 = _interopRequireDefault(_BackboneTable);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	module.exports = _react2.default.createClass({
+		displayName: 'exports',
+
+		mixins: [Backbone.React.Component.mixin, _BackboneTable2.default],
+
+		getInitialState: function getInitialState() {
+			return {
+				columns: 6
+			};
+		},
+
+		componentWillMount: function componentWillMount() {
+			this.state.collection.fetch();
+		},
+
+		renderHeader: function renderHeader() {
+			return [{
+				title: "#",
+				sort: "invoice_number"
+			}, {
+				title: "Förfallodatum",
+				sort: "date_expiry"
+			}, {
+				title: "Mottagare",
+				sort: "title"
+			}, {
+				title: "Referens",
+				sort: "your_reference"
+			}, {
+				title: "Belopp",
+				class: "uk-text-right",
+				sort: "_total"
+			}, {
+				title: "Status",
+				sort: "status"
+			}];
+		},
+
+		renderRow: function renderRow(row, i) {
+			if (row.status == "unpaid") {
+				row.status = "Obetald";
+			}
+
+			return _react2.default.createElement(
+				'tr',
+				{ key: i },
+				_react2.default.createElement(
+					'td',
+					null,
+					_react2.default.createElement(
+						Link,
+						{ to: "/economy/invoice/" + row.invoice_number },
+						row.invoice_number
+					)
+				),
+				_react2.default.createElement(
+					'td',
+					null,
+					_react2.default.createElement(DateField, { date: row.date_expiry })
+				),
+				_react2.default.createElement(
+					'td',
+					null,
+					row.title
+				),
+				_react2.default.createElement(
+					'td',
+					null,
+					row.your_reference
+				),
+				_react2.default.createElement(
+					'td',
+					{ className: 'uk-text-right' },
+					_react2.default.createElement(Currency, { value: row._total, currency: row.currency })
+				),
+				_react2.default.createElement(
+					'td',
+					null,
+					row.status
+				)
+			);
+		}
+	});
+
+/***/ },
+/* 266 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _Invoice = __webpack_require__(263);
+
+	var _Invoice2 = _interopRequireDefault(_Invoice);
+
+	var _Invoice3 = __webpack_require__(267);
+
+	var _Invoice4 = _interopRequireDefault(_Invoice3);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	// Backbone
+
+
+	module.exports = _react2.default.createClass({
+		displayName: 'exports',
+
+		getInitialState: function getInitialState() {
+			var invoice = new _Invoice2.default();
+
+			return {
+				model: invoice
+			};
+		},
+
+		render: function render() {
+			return _react2.default.createElement(
+				'div',
+				null,
+				_react2.default.createElement(
+					'h2',
+					null,
+					'Skapa faktura'
+				),
+				_react2.default.createElement(_Invoice4.default, { model: this.state.model })
+			);
+		}
+	});
+
+/***/ },
+/* 267 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _backboneReactComponent = __webpack_require__(237);
+
+	var _backboneReactComponent2 = _interopRequireDefault(_backboneReactComponent);
+
+	var _config = __webpack_require__(244);
+
+	var _config2 = _interopRequireDefault(_config);
+
+	var _Invoice = __webpack_require__(262);
+
+	var _Invoice2 = _interopRequireDefault(_Invoice);
+
+	var _Invoice3 = __webpack_require__(263);
+
+	var _Invoice4 = _interopRequireDefault(_Invoice3);
+
+	var _reactRouter = __webpack_require__(172);
+
+	var _Currency = __webpack_require__(260);
+
+	var _Currency2 = _interopRequireDefault(_Currency);
+
+	var _Date = __webpack_require__(268);
+
+	var _Date2 = _interopRequireDefault(_Date);
+
+	var _BackboneTable = __webpack_require__(256);
+
+	var _BackboneTable2 = _interopRequireDefault(_BackboneTable);
+
+	var _TableFilterBox = __webpack_require__(264);
+
+	var _TableFilterBox2 = _interopRequireDefault(_TableFilterBox);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	module.exports = _react2.default.createClass({
+		displayName: 'exports',
+
+		mixins: [Backbone.React.Component.mixin],
+
+		render: function render() {
+			if (this.state.model.posts.length == 0) {
+				var content = _react2.default.createElement(
+					'tr',
+					null,
+					_react2.default.createElement(
+						'td',
+						{ colSpan: '4' },
+						_react2.default.createElement(
+							'em',
+							null,
+							'Denna faktura saknar innehåll'
+						)
+					)
+				);
+			} else {
+				var currency = this.state.model.currency;
+				var content = this.state.model.posts.map(function (row, i) {
+					// row.weight
+					// row.type
+
+					if (row.vat === null) {
+						row.vat = "0%";
+					}
+
+					return _react2.default.createElement(
+						'tr',
+						{ key: i },
+						_react2.default.createElement(
+							'td',
+							null,
+							row.title
+						),
+						_react2.default.createElement(
+							'td',
+							{ className: 'uk-text-right' },
+							_react2.default.createElement(_Currency2.default, { value: row.price, currency: currency })
+						),
+						_react2.default.createElement(
+							'td',
+							{ className: 'uk-text-right' },
+							row.amount,
+							' ',
+							row.unit
+						),
+						_react2.default.createElement(
+							'td',
+							{ className: 'uk-text-right' },
+							_react2.default.createElement(_Currency2.default, { value: row._total, currency: currency })
+						),
+						_react2.default.createElement(
+							'td',
+							{ className: 'uk-text-right' },
+							row.vat
+						)
+					);
+				});
+			}
+
+			return _react2.default.createElement(
+				'div',
+				{ className: 'invoice' },
+				_react2.default.createElement(
+					'a',
+					{ href: "/economy/" + _config2.default.accountingPeriod + "/invoice/" + this.state.model.invoice_number + "/export" },
+					'Exportera *.ODT'
+				),
+				_react2.default.createElement(
+					'div',
+					{ className: 'uk-grid' },
+					_react2.default.createElement(
+						'div',
+						{ className: 'uk-width-1-3 box' },
+						_react2.default.createElement(
+							'div',
+							{ className: 'title' },
+							'Mottagare'
+						),
+						_react2.default.createElement(
+							'div',
+							{ className: 'data' },
+							this.state.model.title
+						)
+					),
+					_react2.default.createElement(
+						'div',
+						{ className: 'uk-width-1-3 box' },
+						_react2.default.createElement(
+							'div',
+							{ className: 'title' },
+							'Belopp'
+						),
+						_react2.default.createElement(
+							'div',
+							{ className: 'data' },
+							_react2.default.createElement(_Currency2.default, { value: this.state.model._total, currency: currency })
+						)
+					),
+					_react2.default.createElement(
+						'div',
+						{ className: 'uk-width-1-3 box' },
+						_react2.default.createElement(
+							'div',
+							{ className: 'title' },
+							'Status'
+						),
+						_react2.default.createElement(
+							'div',
+							{ className: 'data' },
+							this.state.model.status
+						)
+					),
+					_react2.default.createElement(
+						'div',
+						{ className: 'uk-width-1-3 box' },
+						_react2.default.createElement(
+							'div',
+							{ className: 'title' },
+							'Er referens'
+						),
+						_react2.default.createElement(
+							'div',
+							{ className: 'data' },
+							this.state.model.your_reference
+						)
+					),
+					_react2.default.createElement(
+						'div',
+						{ className: 'uk-width-1-3 box' },
+						_react2.default.createElement(
+							'div',
+							{ className: 'title' },
+							'Fakturadatum'
+						),
+						_react2.default.createElement(
+							'div',
+							{ className: 'data' },
+							this.state.model.date_invoice
+						)
+					),
+					_react2.default.createElement(
+						'div',
+						{ className: 'uk-width-1-3 box' },
+						_react2.default.createElement(
+							'div',
+							{ className: 'title' },
+							'Fakturanummer'
+						),
+						_react2.default.createElement(
+							'div',
+							{ className: 'data' },
+							this.state.model.invoice_number
+						)
+					),
+					_react2.default.createElement(
+						'div',
+						{ className: 'uk-width-1-3 box' },
+						_react2.default.createElement(
+							'div',
+							{ className: 'title' },
+							'Vår referens'
+						),
+						_react2.default.createElement(
+							'div',
+							{ className: 'data' },
+							this.state.model.our_reference
+						)
+					),
+					_react2.default.createElement(
+						'div',
+						{ className: 'uk-width-1-3 box' },
+						_react2.default.createElement(
+							'div',
+							{ className: 'title' },
+							'Förfallodatum'
+						),
+						_react2.default.createElement(
+							'div',
+							{ className: 'data' },
+							this.state.model.date_expiry
+						)
+					),
+					_react2.default.createElement(
+						'div',
+						{ className: 'uk-width-1-3 box' },
+						_react2.default.createElement(
+							'div',
+							{ className: 'title' },
+							'Betalningsvillkor'
+						),
+						_react2.default.createElement(
+							'div',
+							{ className: 'data' },
+							this.state.model.conditions,
+							' dagar'
+						)
+					)
+				),
+				_react2.default.createElement(
+					'div',
+					{ className: 'box' },
+					_react2.default.createElement(
+						'div',
+						{ className: 'title' },
+						'Kommentar'
+					),
+					_react2.default.createElement(
+						'div',
+						{ className: 'data' },
+						_react2.default.createElement(
+							'pre',
+							null,
+							this.state.model.description
+						)
+					)
+				),
+				_react2.default.createElement(
+					'div',
+					{ className: 'box' },
+					_react2.default.createElement(
+						'div',
+						{ className: 'title' },
+						'Adress'
+					),
+					_react2.default.createElement(
+						'div',
+						{ className: 'data' },
+						_react2.default.createElement(
+							'pre',
+							null,
+							this.state.model.address
+						)
+					)
+				),
+				_react2.default.createElement(
+					'table',
+					{ className: 'uk-table uk-table-striped' },
+					_react2.default.createElement(
+						'thead',
+						null,
+						_react2.default.createElement(
+							'tr',
+							null,
+							_react2.default.createElement(
+								'th',
+								null,
+								'Titel'
+							),
+							_react2.default.createElement(
+								'th',
+								{ className: 'uk-text-right' },
+								'Pris'
+							),
+							_react2.default.createElement(
+								'th',
+								{ className: 'uk-text-right' },
+								'Antal'
+							),
+							_react2.default.createElement(
+								'th',
+								{ className: 'uk-text-right' },
+								'Totalt'
+							),
+							_react2.default.createElement(
+								'th',
+								{ className: 'uk-text-right' },
+								'MOMS'
+							)
+						)
+					),
+					_react2.default.createElement(
+						'tbody',
+						null,
+						content
+					)
+				)
+			);
+		}
+	});
+
+	// Backbone
+
+/***/ },
+/* 268 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	var DateField = _react2.default.createClass({
+		displayName: 'DateField',
+
+		render: function render() {
+			var str = _react2.default.createElement(
+				'em',
+				null,
+				'Ej angivet'
+			);
+			if (this.props.date !== undefined && this.props.date != "") {
+				var options = {
+					year: 'numeric', month: 'numeric', day: 'numeric',
+					hour12: false
+				};
+
+				var str = new Intl.DateTimeFormat('sv-SE', options).format(Date.parse(this.props.date));
+			}
+			return _react2.default.createElement(
+				'span',
+				null,
+				str
+			);
+		}
+	});
+
+	module.exports = DateField;
+
+/***/ },
+/* 269 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _Invoice = __webpack_require__(263);
+
+	var _Invoice2 = _interopRequireDefault(_Invoice);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	module.exports = _react2.default.createClass({
+		displayName: 'exports',
+
+		getInitialState: function getInitialState() {
+			var id = this.props.params.id;
+			var invoice = new _Invoice2.default({ id: id });
+			invoice.fetch();
+
+			return {
+				model: invoice
+			};
+		},
+
+		render: function render() {
+			return _react2.default.createElement(
+				'div',
+				null,
+				_react2.default.createElement(
+					'h2',
+					null,
+					'Faktura'
+				),
+				_react2.default.createElement(Invoice, { model: this.state.model })
+			);
+		}
+	});
+
+	// Backbone
+
+/***/ },
+/* 270 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _Instruction = __webpack_require__(271);
+
+	var _Instruction2 = _interopRequireDefault(_Instruction);
+
+	var _reactRouter = __webpack_require__(172);
+
+	var _TableFilterBox = __webpack_require__(264);
+
+	var _TableFilterBox2 = _interopRequireDefault(_TableFilterBox);
+
+	var _Instructions = __webpack_require__(273);
+
+	var _Instructions2 = _interopRequireDefault(_Instructions);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	// Backbone
+
+
+	var EconomyAccountingInstructionsHandler = _react2.default.createClass({
+		displayName: 'EconomyAccountingInstructionsHandler',
+
+		getInitialState: function getInitialState() {
+			return {
+				filters: this.props.filters || {}
+			};
+		},
+
+		updateFilters: function updateFilters(newFilter) {
+			var filters = this.overrideFiltersFromProps(newFilter);
+			this.setState({
+				filters: filters
+			});
+		},
+
+		overrideFiltersFromProps: function overrideFiltersFromProps(filters) {
+			return filters;
+		},
+
+		render: function render() {
+			return _react2.default.createElement(
+				'div',
+				{ className: 'uk-width-1-1' },
+				_react2.default.createElement(
+					'h2',
+					null,
+					'Verifikationer'
+				),
+				_react2.default.createElement(
+					'p',
+					{ className: 'uk-float-left' },
+					'Lista över samtliga verifikationer i bokföringen'
+				),
+				_react2.default.createElement(
+					_reactRouter.Link,
+					{ to: '/economy/instruction/add', className: 'uk-button uk-button-primary uk-float-right' },
+					_react2.default.createElement('i', { className: 'uk-icon-plus-circle' }),
+					' Skapa ny verifikation'
+				),
+				_react2.default.createElement(_TableFilterBox2.default, { onChange: this.updateFilters }),
+				_react2.default.createElement(_Instructions2.default, { type: _Instruction2.default, filters: this.state.filters })
+			);
+		}
+	});
+	EconomyAccountingInstructionsHandler.title = "Visa verifikationer";
+
+	module.exports = EconomyAccountingInstructionsHandler;
+
+/***/ },
+/* 271 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _backbone = __webpack_require__(238);
+
+	var _backbone2 = _interopRequireDefault(_backbone);
+
+	var _Instruction = __webpack_require__(272);
+
+	var _Instruction2 = _interopRequireDefault(_Instruction);
+
+	var _config = __webpack_require__(244);
+
+	var _config2 = _interopRequireDefault(_config);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	var InstructionCollection = _backbone2.default.PageableCollection.extend({
+		model: _Instruction2.default,
+		url: "/economy/" + _config2.default.accountingPeriod + "/instruction"
+	});
+
+	module.exports = InstructionCollection;
+
+/***/ },
+/* 272 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _backbone = __webpack_require__(238);
+
+	var _backbone2 = _interopRequireDefault(_backbone);
+
+	var _config = __webpack_require__(244);
+
+	var _config2 = _interopRequireDefault(_config);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	var InstructionModel = _backbone2.default.Model.fullExtend({
+		idAttribute: "instruction_number",
+		urlRoot: "/economy/" + _config2.default.accountingPeriod + "/instruction",
+		defaults: {
+			entity_id: 0,
+			instruction_number: 0,
+			created_at: "0000-00-00T00:00:00Z",
+			updated_at: "0000-00-00T00:00:00Z",
+			accounting_date: "0000-00-00T00:00:00Z",
+			importer: "",
+			external_id: "",
+			external_date: "",
+			external_data: "",
+			description: "",
+			transactions: [],
+			files: [],
+			balance: 0
+		}
+	});
+
+	module.exports = InstructionModel;
+
+/***/ },
+/* 273 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _backboneReactComponent = __webpack_require__(237);
+
+	var _backboneReactComponent2 = _interopRequireDefault(_backboneReactComponent);
+
+	var _BackboneTable = __webpack_require__(256);
+
+	var _BackboneTable2 = _interopRequireDefault(_BackboneTable);
+
+	var _reactRouter = __webpack_require__(172);
+
+	var _Currency = __webpack_require__(260);
+
+	var _Currency2 = _interopRequireDefault(_Currency);
+
+	var _Date = __webpack_require__(268);
+
+	var _Date2 = _interopRequireDefault(_Date);
+
+	var _TableDropdownMenu = __webpack_require__(274);
+
+	var _TableDropdownMenu2 = _interopRequireDefault(_TableDropdownMenu);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	var EconomyAccountingInstructionList = _react2.default.createClass({
+		displayName: 'EconomyAccountingInstructionList',
+
+		mixins: [Backbone.React.Component.mixin, _BackboneTable2.default],
+
+		getInitialState: function getInitialState() {
+			return {
+				columns: 6
+			};
+		},
+
+		componentWillMount: function componentWillMount() {
+			this.state.collection.fetch();
+		},
+
+		renderHeader: function renderHeader() {
+			return [{
+				title: "#",
+				sort: "instruction_number"
+			}, {
+				title: "Bokföringsdatum",
+				sort: "accounting_date"
+			}, {
+				title: "Beskrivning",
+				sort: "title"
+			}, {
+				title: "Belopp",
+				class: "uk-text-right"
+			}, {
+				title: ""
+			}, {
+				title: ""
+			}];
+		},
+
+		removeTextMessage: function removeTextMessage(entity) {
+			return "Are you sure you want to remove instruction \"" + entity.instruction_number + " " + entity.title + "\"?";
+		},
+
+		removeErrorMessage: function removeErrorMessage() {
+			UIkit.modal.alert("Error deleting instruction");
+		},
+
+		renderRow: function renderRow(row, i) {
+			//		if(typeof row.files != "undefined")
+			if (row.has_vouchers) {
+				var icon = _react2.default.createElement('i', { className: 'uk-icon-file' });
+			} else {
+				var icon = "";
+			}
+
+			return _react2.default.createElement(
+				'tr',
+				{ key: i },
+				_react2.default.createElement(
+					'td',
+					null,
+					_react2.default.createElement(
+						_reactRouter.Link,
+						{ to: "/economy/instruction/" + row.instruction_number },
+						row.instruction_number
+					)
+				),
+				_react2.default.createElement(
+					'td',
+					null,
+					_react2.default.createElement(_Date2.default, { date: row.accounting_date })
+				),
+				_react2.default.createElement(
+					'td',
+					null,
+					row.title
+				),
+				_react2.default.createElement(
+					'td',
+					{ className: 'uk-text-right' },
+					_react2.default.createElement(_Currency2.default, { value: row.balance })
+				),
+				_react2.default.createElement(
+					'td',
+					null,
+					icon
+				),
+				_react2.default.createElement(
+					'td',
+					null,
+					_react2.default.createElement(
+						_TableDropdownMenu2.default,
+						null,
+						_react2.default.createElement(
+							_reactRouter.Link,
+							{ to: "/economy/instruction/" + row.instruction_number },
+							_react2.default.createElement('i', { className: 'uk-icon uk-icon-cog' }),
+							' Redigera verifikation'
+						),
+						this.removeButton(i, "Ta bort verifikation")
+					)
+				)
+			);
+		}
+	});
+
+	module.exports = EconomyAccountingInstructionList;
+
+/***/ },
+/* 274 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	var TableDropdownMenu = _react2.default.createClass({
+		displayName: "TableDropdownMenu",
+
+		render: function render() {
+			return _react2.default.createElement(
+				"div",
+				{ className: "uk-align-right uk-margin-remove" },
+				_react2.default.createElement(
+					"div",
+					{ "data-uk-dropdown": "{mode:'click'}", className: "uk-button-dropdown" },
+					_react2.default.createElement(
+						"button",
+						{ className: "uk-button uk-button-mini" },
+						_react2.default.createElement("i", { className: "uk-icon-angle-down" })
+					),
+					_react2.default.createElement(
+						"div",
+						{ className: "uk-dropdown uk-dropdown-small" },
+						_react2.default.createElement(
+							"ul",
+							{ className: "uk-nav uk-nav-dropdown" },
+							_react2.default.Children.map(this.props.children, function (child, i) {
+								return _react2.default.createElement(
+									"li",
+									{ className: "uk-dropdown-close" },
+									child
+								);
+							})
+						)
+					)
+				)
+			);
+		}
+	});
+
+	module.exports = TableDropdownMenu;
+
+/***/ },
+/* 275 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _Instruction = __webpack_require__(272);
+
+	var _Instruction2 = _interopRequireDefault(_Instruction);
+
+	var _Instruction3 = __webpack_require__(276);
+
+	var _Instruction4 = _interopRequireDefault(_Instruction3);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	// Backbone
+
+
+	module.exports = _react2.default.createClass({
+		displayName: 'exports',
+
+		getInitialState: function getInitialState() {
+			var instruction = new _Instruction2.default();
+
+			return {
+				model: instruction
+			};
+		},
+
+		render: function render() {
+			return _react2.default.createElement(_Instruction4.default, { model: this.state.model });
+		}
+	});
+
+/***/ },
+/* 276 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _config = __webpack_require__(244);
+
+	var _config2 = _interopRequireDefault(_config);
+
+	var _reactRouter = __webpack_require__(172);
+
+	var _Currency = __webpack_require__(260);
+
+	var _Currency2 = _interopRequireDefault(_Currency);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	var EconomyAccountingInstruction = _react2.default.createClass({
+		displayName: 'EconomyAccountingInstruction',
+
+		mixins: [Backbone.React.Component.mixin],
+
+		handleChange: function handleChange(event) {
+			// Update the model with new value
+			var target = event.target;
+			var key = target.getAttribute("name");
+			this.state.model[key] = target.value;
+
+			// When we change the value of the model we have to rerender the component
+			this.forceUpdate();
+		},
+
+		render: function render() {
+			if (this.state.model.transactions.length == 0) {
+				var content = _react2.default.createElement(
+					'tr',
+					null,
+					_react2.default.createElement(
+						'td',
+						{ colSpan: '4' },
+						_react2.default.createElement(
+							'em',
+							null,
+							'Denna verifikation saknar bokförda poster'
+						)
+					)
+				);
+			} else {
+				var content = this.state.model.transactions.map(function (row, i) {
+					return _react2.default.createElement(
+						'tr',
+						{ key: i },
+						_react2.default.createElement(
+							'td',
+							null,
+							_react2.default.createElement(
+								_reactRouter.Link,
+								{ to: "/economy/account/" + row.account_number },
+								row.account_number,
+								' ',
+								row.account_title
+							)
+						),
+						_react2.default.createElement(
+							'td',
+							null,
+							row.title
+						),
+						_react2.default.createElement(
+							'td',
+							{ className: 'uk-text-right' },
+							_react2.default.createElement(_Currency2.default, { value: row.balance })
+						)
+					);
+				});
+			}
+
+			if (this.state.model.entity_id == 0) {
+				var title = "Skapa verifikation";
+			} else {
+				var title = this.state.model.instruction_number === null ? 'Preliminär verifikation' : 'Verifikation ' + this.state.model.instruction_number;
+				title = title + " - " + this.state.model.title;
+			}
+
+			if (this.state.model.files.length == 0) {
+				var files = _react2.default.createElement(
+					'tr',
+					null,
+					_react2.default.createElement(
+						'td',
+						{ colSpan: '4' },
+						_react2.default.createElement(
+							'em',
+							null,
+							'Det finns inga filer kopplade till denna verifikation'
+						)
+					)
+				);
+			} else {
+				var _this = this;
+				var files = this.state.model.files.map(function (file, i) {
+					return _react2.default.createElement(
+						'tr',
+						{ key: i },
+						_react2.default.createElement(
+							'td',
+							null,
+							_react2.default.createElement(
+								'a',
+								{ href: "/economy/" + _config2.default.accountingPeriod + "/file/" + _this.state.model.external_id + "/" + file },
+								file
+							)
+						)
+					);
+				});
+			}
+
+			return _react2.default.createElement(
+				'div',
+				null,
+				_react2.default.createElement(
+					'h2',
+					null,
+					title
+				),
+				_react2.default.createElement(
+					'form',
+					{ className: 'uk-form uk-form-horizontal' },
+					_react2.default.createElement(
+						'div',
+						{ className: 'uk-grid' },
+						_react2.default.createElement(
+							'div',
+							{ className: 'uk-width-1-6' },
+							_react2.default.createElement(
+								'label',
+								{ className: 'uk-form-label' },
+								'Verifikationsnr'
+							)
+						),
+						_react2.default.createElement(
+							'div',
+							{ className: 'uk-width-2-6' },
+							_react2.default.createElement(
+								'div',
+								{ className: 'uk-form-icon' },
+								_react2.default.createElement('i', { className: 'uk-icon-tag' }),
+								_react2.default.createElement('input', { type: 'text', value: this.state.model.instruction_number, disabled: true })
+							)
+						),
+						_react2.default.createElement(
+							'div',
+							{ className: 'uk-width-1-6' },
+							_react2.default.createElement(
+								'label',
+								{ className: 'uk-form-label' },
+								'Skapad'
+							)
+						),
+						_react2.default.createElement(
+							'div',
+							{ className: 'uk-width-2-6' },
+							_react2.default.createElement(
+								'div',
+								{ className: 'uk-form-icon' },
+								_react2.default.createElement('i', { className: 'uk-icon-calendar' }),
+								_react2.default.createElement('input', { type: 'text', value: this.state.model.created_at, disabled: true })
+							)
+						)
+					),
+					_react2.default.createElement(
+						'div',
+						{ className: 'uk-grid' },
+						_react2.default.createElement(
+							'div',
+							{ className: 'uk-width-1-6' },
+							_react2.default.createElement(
+								'label',
+								{ className: 'uk-form-label' },
+								'Bokföringsdatum'
+							)
+						),
+						_react2.default.createElement(
+							'div',
+							{ className: 'uk-width-2-6' },
+							_react2.default.createElement(
+								'div',
+								{ className: 'uk-form-icon' },
+								_react2.default.createElement('i', { className: 'uk-icon-calendar' }),
+								_react2.default.createElement('input', { type: 'text', value: this.state.model.accounting_date, onChange: this.handleChange })
+							)
+						),
+						_react2.default.createElement(
+							'div',
+							{ className: 'uk-width-1-6' },
+							_react2.default.createElement(
+								'label',
+								{ className: 'uk-form-label' },
+								'Ändrad'
+							)
+						),
+						_react2.default.createElement(
+							'div',
+							{ className: 'uk-width-2-6' },
+							_react2.default.createElement(
+								'div',
+								{ className: 'uk-form-icon' },
+								_react2.default.createElement('i', { className: 'uk-icon-calendar' }),
+								_react2.default.createElement('input', { type: 'text', value: this.state.model.updated_at, disabled: true })
+							)
+						)
+					),
+					_react2.default.createElement(
+						'div',
+						{ className: 'uk-grid' },
+						_react2.default.createElement(
+							'div',
+							{ className: 'uk-width-1-6' },
+							_react2.default.createElement(
+								'label',
+								{ className: 'uk-form-label' },
+								'Belopp'
+							)
+						),
+						_react2.default.createElement(
+							'div',
+							{ className: 'uk-width-2-6' },
+							_react2.default.createElement(
+								'div',
+								{ className: 'uk-form-icon' },
+								_react2.default.createElement('i', { className: 'uk-icon-usd' }),
+								_react2.default.createElement('input', { type: 'text', value: this.state.model.balance, disabled: true })
+							)
+						),
+						this.state.model.entity_id != 0 ? _react2.default.createElement(
+							'div',
+							{ className: 'uk-width-1-6' },
+							_react2.default.createElement(
+								'label',
+								{ className: 'uk-form-label' },
+								'Importerad från'
+							)
+						) : "",
+						this.state.model.entity_id != 0 ? _react2.default.createElement(
+							'div',
+							{ className: 'uk-width-2-6' },
+							_react2.default.createElement(
+								'div',
+								{ className: 'uk-form-icon' },
+								_react2.default.createElement('i', { className: 'uk-icon-institution' }),
+								_react2.default.createElement('input', { type: 'text', value: this.state.model.importer, disabled: true })
+							),
+							_react2.default.createElement(
+								'p',
+								null,
+								_react2.default.createElement(
+									'em',
+									null,
+									_react2.default.createElement(
+										_reactRouter.Link,
+										{ to: "/economy/instruction/" + this.state.model.id + "/import" },
+										'Visa data från import'
+									)
+								)
+							)
+						) : ""
+					),
+					_react2.default.createElement(
+						'div',
+						{ className: 'uk-grid' },
+						_react2.default.createElement(
+							'div',
+							{ className: 'uk-width-1-6' },
+							_react2.default.createElement(
+								'label',
+								{ className: 'uk-form-label' },
+								'Kommentar'
+							)
+						),
+						_react2.default.createElement(
+							'div',
+							{ className: 'uk-width-3-6' },
+							_react2.default.createElement('textarea', { value: this.state.model.description, onChange: this.handleChange })
+						)
+					)
+				),
+				_react2.default.createElement(
+					'table',
+					{ className: 'uk-table' },
+					_react2.default.createElement(
+						'thead',
+						null,
+						_react2.default.createElement(
+							'tr',
+							null,
+							_react2.default.createElement(
+								'th',
+								null,
+								'Konto'
+							),
+							_react2.default.createElement(
+								'th',
+								null,
+								'Kommentar'
+							),
+							_react2.default.createElement(
+								'th',
+								{ className: 'uk-text-right' },
+								'Belopp'
+							)
+						)
+					),
+					_react2.default.createElement(
+						'tbody',
+						null,
+						content
+					)
+				),
+				_react2.default.createElement(
+					'table',
+					{ className: 'uk-table' },
+					_react2.default.createElement(
+						'thead',
+						null,
+						_react2.default.createElement(
+							'tr',
+							null,
+							_react2.default.createElement(
+								'th',
+								null,
+								'Filnamn'
+							)
+						)
+					),
+					_react2.default.createElement(
+						'tbody',
+						null,
+						files
+					)
+				)
+			);
+		}
+	});
+
+	module.exports = EconomyAccountingInstruction;
+
+/***/ },
+/* 277 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _Instruction = __webpack_require__(272);
+
+	var _Instruction2 = _interopRequireDefault(_Instruction);
+
+	var _Instruction3 = __webpack_require__(276);
+
+	var _Instruction4 = _interopRequireDefault(_Instruction3);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	// Backbone
+
+
+	module.exports = _react2.default.createClass({
+		displayName: 'exports',
+
+		getInitialState: function getInitialState() {
+			var instruction = new _Instruction2.default({ instruction_number: this.props.params.id });
+			instruction.fetch();
+
+			return {
+				model: instruction
+			};
+		},
+
+		render: function render() {
+			return _react2.default.createElement(_Instruction4.default, { model: this.state.model });
+		}
+	});
+
+/***/ },
+/* 278 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _Instruction = __webpack_require__(272);
+
+	var _Instruction2 = _interopRequireDefault(_Instruction);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	module.exports = _react2.default.createClass({
+		displayName: 'exports',
+
+		getInitialState: function getInitialState() {
+			var instruction = new _Instruction2.default({ instruction_number: this.props.params.id });
+			instruction.fetch();
+
+			return {
+				model: instruction
+			};
+		},
+
+		render: function render() {
+			return _react2.default.createElement(EconomyAccountingInstructionImport, { model: this.state.model });
+		}
+	});
+
+	// Backbone
+
+/***/ },
+/* 279 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _backboneReactComponent = __webpack_require__(237);
+
+	var _backboneReactComponent2 = _interopRequireDefault(_backboneReactComponent);
+
+	var _config = __webpack_require__(244);
+
+	var _config2 = _interopRequireDefault(_config);
+
+	var _Masterledger = __webpack_require__(258);
+
+	var _Masterledger2 = _interopRequireDefault(_Masterledger);
+
+	var _reactRouter = __webpack_require__(172);
+
+	var _Currency = __webpack_require__(260);
+
+	var _Currency2 = _interopRequireDefault(_Currency);
+
+	var _Date = __webpack_require__(268);
+
+	var _Date2 = _interopRequireDefault(_Date);
+
+	var _BackboneTable = __webpack_require__(256);
+
+	var _BackboneTable2 = _interopRequireDefault(_BackboneTable);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	module.exports = _react2.default.createClass({
+		displayName: 'exports',
+
+		getInitialState: function getInitialState() {
+			return {
+				data: [],
+				fetched_data: false
+			};
+		},
+
+		componentDidMount: function componentDidMount() {
+			$.ajax({
+				url: _config2.default.apiBasePath + "/economy/" + _config2.default.accountingPeriod + "/valuationsheet",
+				dataType: 'json',
+				cache: false,
+				success: function (data) {
+					this.setState({ data: data });
+					this.setState({ fetched_data: true });
+				}.bind(this),
+				error: function (xhr, status, err) {
+					console.error(this.props.url, status, err.toString());
+				}.bind(this)
+			});
+		},
+
+		renderRecursive: function renderRecursive(data) {
+			var depth = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 1;
+
+			var _this = this;
+			return data.map(function (row, i) {
+				return [_react2.default.createElement(
+					'tr',
+					null,
+					_react2.default.createElement(
+						'td',
+						{ colSpan: depth },
+						' '
+					),
+					_react2.default.createElement(
+						'td',
+						{ colSpan: 8 - depth },
+						_react2.default.createElement(
+							'h2',
+							{ style: { "marginBottom": 0 } },
+							row.title
+						),
+						_react2.default.createElement('div', { style: { "borderTop": "1px solid #666" } })
+					)
+				), function () {
+					if (typeof row.children != "undefined" && row.children.length > 0) {
+						return _this.renderRecursive(row.children, depth + 1);
+					} else {
+						if (typeof row.accounts != "undefined" && row.accounts.length > 0) {
+							return row.accounts.map(function (row, i) {
+								return _react2.default.createElement(
+									'tr',
+									{ key: i },
+									_react2.default.createElement(
+										'td',
+										{ colSpan: depth + 1 },
+										' '
+									),
+									_react2.default.createElement(
+										'td',
+										{ colSpan: 4 - depth },
+										_react2.default.createElement(
+											_reactRouter.Link,
+											{ to: "/economy/account/" + row.account_number },
+											row.account_number,
+											' ',
+											row.title
+										)
+									),
+									_react2.default.createElement(
+										'td',
+										{ className: 'uk-text-right' },
+										_react2.default.createElement(_Currency2.default, { value: row.balance_in })
+									),
+									_react2.default.createElement(
+										'td',
+										{ className: 'uk-text-right' },
+										_react2.default.createElement(_Currency2.default, { value: row.balance_period })
+									),
+									_react2.default.createElement(
+										'td',
+										{ className: 'uk-text-right' },
+										_react2.default.createElement(_Currency2.default, { value: row.balance_out })
+									)
+								);
+							});
+						} else {
+							return _react2.default.createElement(
+								'tr',
+								null,
+								_react2.default.createElement(
+									'td',
+									{ colSpan: depth + 1 },
+									' '
+								),
+								_react2.default.createElement(
+									'td',
+									{ colSpan: 5 - depth },
+									_react2.default.createElement(
+										'em',
+										null,
+										'Tom'
+									)
+								)
+							);
+						}
+					}
+				}(), _react2.default.createElement(
+					'tr',
+					null,
+					_react2.default.createElement(
+						'td',
+						{ colSpan: depth },
+						' '
+					),
+					_react2.default.createElement(
+						'td',
+						{ colSpan: 5 - depth, style: { "borderTop": "1px solid #666" } },
+						_react2.default.createElement(
+							'h3',
+							{ style: { "marginTop": 0 } },
+							'Summa ',
+							row.title
+						)
+					),
+					_react2.default.createElement(
+						'td',
+						{ style: { "borderTop": "1px solid #666" }, className: 'uk-text-right' },
+						_react2.default.createElement(_Currency2.default, { value: row.balance_in })
+					),
+					_react2.default.createElement(
+						'td',
+						{ style: { "borderTop": "1px solid #666" }, className: 'uk-text-right' },
+						_react2.default.createElement(_Currency2.default, { value: row.balance_period })
+					),
+					_react2.default.createElement(
+						'td',
+						{ style: { "borderTop": "1px solid #666" }, className: 'uk-text-right' },
+						_react2.default.createElement(_Currency2.default, { value: row.balance_out })
+					)
+				)];
+			});
+		},
+
+		render: function render() {
+			if (this.state.fetched_data === false) {
+				return _react2.default.createElement(
+					'p',
+					null,
+					'Loading data'
+				);
+			} else {
+				return _react2.default.createElement(
+					'div',
+					{ className: 'uk-width-1-1' },
+					_react2.default.createElement(
+						'h2',
+						null,
+						'Balansrapport ÅRL'
+					),
+					_react2.default.createElement(
+						'p',
+						null,
+						'Räkneskapsår ',
+						this.state.data.financial_year
+					),
+					_react2.default.createElement(
+						'p',
+						null,
+						'Period ',
+						this.state.data.period.from,
+						' - ',
+						this.state.data.period.to
+					),
+					_react2.default.createElement(
+						'p',
+						null,
+						'Utskriven: ',
+						this.state.data.created
+					),
+					_react2.default.createElement(
+						'p',
+						null,
+						'Senaste verifikation: ',
+						this.state.data.last_instruction
+					),
+					_react2.default.createElement(
+						'table',
+						{ style: { "width": "100%" } },
+						_react2.default.createElement(
+							'thead',
+							null,
+							_react2.default.createElement(
+								'tr',
+								null,
+								_react2.default.createElement(
+									'td',
+									{ width: '10' },
+									' '
+								),
+								_react2.default.createElement(
+									'td',
+									{ width: '30' },
+									' '
+								),
+								_react2.default.createElement(
+									'td',
+									{ width: '30' },
+									' '
+								),
+								_react2.default.createElement(
+									'td',
+									{ width: '30' },
+									' '
+								),
+								_react2.default.createElement('td', null),
+								_react2.default.createElement(
+									'td',
+									{ className: 'uk-text-right' },
+									'Ing saldo'
+								),
+								_react2.default.createElement(
+									'td',
+									{ className: 'uk-text-right' },
+									'Period'
+								),
+								_react2.default.createElement(
+									'td',
+									{ className: 'uk-text-right' },
+									'Utg saldo'
+								)
+							)
+						),
+						_react2.default.createElement(
+							'tbody',
+							null,
+							this.renderRecursive(this.state.data.children),
+							_react2.default.createElement(
+								'tr',
+								null,
+								_react2.default.createElement(
+									'td',
+									{ style: { "borderTop": "1px solid #666" }, colSpan: '5' },
+									'Beräknat resultat'
+								),
+								_react2.default.createElement(
+									'td',
+									{ style: { "borderTop": "1px solid #666" }, className: 'uk-text-right' },
+									_react2.default.createElement(_Currency2.default, { value: this.state.data.balance_in })
+								),
+								_react2.default.createElement(
+									'td',
+									{ style: { "borderTop": "1px solid #666" }, className: 'uk-text-right' },
+									_react2.default.createElement(_Currency2.default, { value: this.state.data.balance_period })
+								),
+								_react2.default.createElement(
+									'td',
+									{ style: { "borderTop": "1px solid #666" }, className: 'uk-text-right' },
+									_react2.default.createElement(_Currency2.default, { value: this.state.data.balance_out })
+								)
+							)
+						)
+					)
+				);
+			}
+		}
+	});
+
+	// Backbone
+
+/***/ },
+/* 280 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _backboneReactComponent = __webpack_require__(237);
+
+	var _backboneReactComponent2 = _interopRequireDefault(_backboneReactComponent);
+
+	var _config = __webpack_require__(244);
+
+	var _config2 = _interopRequireDefault(_config);
+
+	var _Masterledger = __webpack_require__(258);
+
+	var _Masterledger2 = _interopRequireDefault(_Masterledger);
+
+	var _reactRouter = __webpack_require__(172);
+
+	var _Currency = __webpack_require__(260);
+
+	var _Currency2 = _interopRequireDefault(_Currency);
+
+	var _Date = __webpack_require__(268);
+
+	var _Date2 = _interopRequireDefault(_Date);
+
+	var _BackboneTable = __webpack_require__(256);
+
+	var _BackboneTable2 = _interopRequireDefault(_BackboneTable);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	module.exports = _react2.default.createClass({
+		displayName: 'exports',
+
+		getInitialState: function getInitialState() {
+			return {
+				data: [],
+				fetched_data: false
+			};
+		},
+
+		componentDidMount: function componentDidMount() {
+			$.ajax({
+				url: _config2.default.apiBasePath + "/economy/" + _config2.default.accountingPeriod + "/resultreport",
+				dataType: 'json',
+				cache: false,
+				success: function (data) {
+					this.setState({ data: data });
+					this.setState({ fetched_data: true });
+				}.bind(this),
+				error: function (xhr, status, err) {
+					console.error(this.props.url, status, err.toString());
+				}.bind(this)
+			});
+		},
+
+		renderRecursive: function renderRecursive(data) {
+			var depth = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 1;
+
+			var _this = this;
+			return data.map(function (row, i) {
+				return [_react2.default.createElement(
+					'tr',
+					null,
+					_react2.default.createElement(
+						'td',
+						{ colSpan: depth },
+						' '
+					),
+					_react2.default.createElement(
+						'td',
+						{ colSpan: 8 - depth },
+						_react2.default.createElement(
+							'h2',
+							{ style: { "marginBottom": 0 } },
+							row.title
+						),
+						_react2.default.createElement('div', { style: { "borderTop": "1px solid #666" } })
+					)
+				), function () {
+					if (typeof row.children != "undefined" && row.children.length > 0) {
+						return _this.renderRecursive(row.children, depth + 1);
+					} else {
+						if (typeof row.accounts != "undefined" && row.accounts.length > 0) {
+							return row.accounts.map(function (row, i) {
+								return _react2.default.createElement(
+									'tr',
+									{ key: i },
+									_react2.default.createElement(
+										'td',
+										{ colSpan: depth + 1 },
+										' '
+									),
+									_react2.default.createElement(
+										'td',
+										{ colSpan: 4 - depth },
+										_react2.default.createElement(
+											_reactRouter.Link,
+											{ to: "/economy/account/" + row.account_number },
+											row.account_number,
+											' ',
+											row.title
+										)
+									),
+									_react2.default.createElement(
+										'td',
+										{ className: 'uk-text-right' },
+										_react2.default.createElement(_Currency2.default, { value: row.balance_period })
+									),
+									_react2.default.createElement(
+										'td',
+										{ className: 'uk-text-right' },
+										_react2.default.createElement(_Currency2.default, { value: 0 })
+									)
+								);
+							});
+						} else {
+							return _react2.default.createElement(
+								'tr',
+								null,
+								_react2.default.createElement(
+									'td',
+									{ colSpan: depth + 1 },
+									' '
+								),
+								_react2.default.createElement(
+									'td',
+									{ colSpan: 5 - depth },
+									_react2.default.createElement(
+										'em',
+										null,
+										'Tom'
+									)
+								)
+							);
+						}
+					}
+				}(), _react2.default.createElement(
+					'tr',
+					null,
+					_react2.default.createElement(
+						'td',
+						{ colSpan: depth },
+						' '
+					),
+					_react2.default.createElement(
+						'td',
+						{ colSpan: 5 - depth, style: { "borderTop": "1px solid #666" } },
+						_react2.default.createElement(
+							'h3',
+							{ style: { "marginTop": 0 } },
+							'Summa ',
+							row.title
+						)
+					),
+					_react2.default.createElement(
+						'td',
+						{ style: { "borderTop": "1px solid #666" }, className: 'uk-text-right' },
+						_react2.default.createElement(_Currency2.default, { value: row.balance_period })
+					),
+					_react2.default.createElement(
+						'td',
+						{ style: { "borderTop": "1px solid #666" }, className: 'uk-text-right' },
+						_react2.default.createElement(_Currency2.default, { value: 0 })
+					)
+				)];
+			});
+		},
+
+		render: function render() {
+			if (this.state.fetched_data === false) {
+				return _react2.default.createElement(
+					'p',
+					null,
+					'Loading data'
+				);
+			} else {
+				return _react2.default.createElement(
+					'div',
+					{ className: 'uk-width-1-1' },
+					_react2.default.createElement(
+						'h2',
+						null,
+						'Resultatrapport ÅRL'
+					),
+					_react2.default.createElement(
+						'p',
+						null,
+						'Räkneskapsår ',
+						this.state.data.financial_year
+					),
+					_react2.default.createElement(
+						'p',
+						null,
+						'Period ',
+						this.state.data.period.from,
+						' - ',
+						this.state.data.period.to
+					),
+					_react2.default.createElement(
+						'p',
+						null,
+						'Utskriven: ',
+						this.state.data.created
+					),
+					_react2.default.createElement(
+						'p',
+						null,
+						'Senaste verifikation: ',
+						this.state.data.last_instruction
+					),
+					_react2.default.createElement(
+						'table',
+						{ style: { "width": "100%" } },
+						_react2.default.createElement(
+							'thead',
+							null,
+							_react2.default.createElement(
+								'tr',
+								null,
+								_react2.default.createElement(
+									'td',
+									{ width: '10' },
+									' '
+								),
+								_react2.default.createElement(
+									'td',
+									{ width: '30' },
+									' '
+								),
+								_react2.default.createElement(
+									'td',
+									{ width: '30' },
+									' '
+								),
+								_react2.default.createElement(
+									'td',
+									{ width: '30' },
+									' '
+								),
+								_react2.default.createElement('td', null),
+								_react2.default.createElement(
+									'td',
+									{ className: 'uk-text-right' },
+									'Period'
+								),
+								_react2.default.createElement(
+									'td',
+									{ className: 'uk-text-right' },
+									'Period fg. år'
+								)
+							)
+						),
+						_react2.default.createElement(
+							'tbody',
+							null,
+							this.renderRecursive(this.state.data.children),
+							_react2.default.createElement(
+								'tr',
+								null,
+								_react2.default.createElement(
+									'td',
+									{ style: { "borderTop": "1px solid #666" }, colSpan: '5' },
+									'Beräknat resultat'
+								),
+								_react2.default.createElement(
+									'td',
+									{ style: { "borderTop": "1px solid #666" }, className: 'uk-text-right' },
+									_react2.default.createElement(_Currency2.default, { value: this.state.data.balance_period })
+								),
+								_react2.default.createElement(
+									'td',
+									{ style: { "borderTop": "1px solid #666" }, className: 'uk-text-right' },
+									_react2.default.createElement(_Currency2.default, { value: this.state.data.balance_out })
+								)
+							)
+						)
+					)
+				);
+			}
+		}
+	});
+
+	// Backbone
+
+/***/ },
+/* 281 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _CostCenter = __webpack_require__(282);
+
+	var _CostCenter2 = _interopRequireDefault(_CostCenter);
+
+	var _CostCenters = __webpack_require__(284);
+
+	var _CostCenters2 = _interopRequireDefault(_CostCenters);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	// Backbone
+
+
+	module.exports = _react2.default.createClass({
+		displayName: 'exports',
+
+		render: function render() {
+			return _react2.default.createElement(
+				'div',
+				null,
+				_react2.default.createElement(
+					'h2',
+					null,
+					'Kostnadsställen'
+				),
+				_react2.default.createElement(_CostCenters2.default, { type: _CostCenter2.default })
+			);
+		}
+	});
+
+/***/ },
+/* 282 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _backbone = __webpack_require__(238);
+
+	var _backbone2 = _interopRequireDefault(_backbone);
+
+	var _CostCenter = __webpack_require__(283);
+
+	var _CostCenter2 = _interopRequireDefault(_CostCenter);
+
+	var _config = __webpack_require__(244);
+
+	var _config2 = _interopRequireDefault(_config);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	var CostCenterCollection = _backbone2.default.PageableCollection.extend({
+		model: _CostCenter2.default,
+		url: "/economy/" + _config2.default.accountingPeriod + "/costcenter"
+	});
+
+	module.exports = CostCenterCollection;
+
+/***/ },
+/* 283 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _backbone = __webpack_require__(238);
+
+	var _backbone2 = _interopRequireDefault(_backbone);
+
+	var _config = __webpack_require__(244);
+
+	var _config2 = _interopRequireDefault(_config);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	var CostCenterModel = _backbone2.default.Model.fullExtend({
+		idAttribute: "account_number",
+		urlRoot: "/economy/" + _config2.default.accountingPeriod + "/costcenter",
+		defaults: {
+			created_at: "0000-00-00T00:00:00Z",
+			updated_at: "0000-00-00T00:00:00Z",
+			title: "",
+			description: ""
+		}
+	});
+
+	module.exports = CostCenterModel;
+
+/***/ },
+/* 284 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _backboneReactComponent = __webpack_require__(237);
+
+	var _backboneReactComponent2 = _interopRequireDefault(_backboneReactComponent);
+
+	var _BackboneTable = __webpack_require__(256);
+
+	var _BackboneTable2 = _interopRequireDefault(_BackboneTable);
+
+	var _reactRouter = __webpack_require__(172);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	//import Currency from '../Formatters/Currency'
+
+	var EconomyCostCenters = _react2.default.createClass({
+		displayName: 'EconomyCostCenters',
+
+		mixins: [Backbone.React.Component.mixin, _BackboneTable2.default],
+
+		getInitialState: function getInitialState() {
+			return {
+				columns: 5
+			};
+		},
+
+		componentWillMount: function componentWillMount() {
+			this.state.collection.fetch();
+		},
+
+		renderHeader: function renderHeader() {
+			return [{
+				title: "#"
+			}, {
+				title: "Bokföringsdatum"
+			}, {
+				title: "Beskrivning"
+			}, {
+				title: "Belopp"
+			}];
+		},
+
+		renderRow: function renderRow(row, i) {
+			return _react2.default.createElement(
+				'tr',
+				{ key: i },
+				_react2.default.createElement(
+					'td',
+					null,
+					_react2.default.createElement(
+						_reactRouter.Link,
+						{ to: "/economy/instruction/" + row.id },
+						row.verification_number
+					)
+				),
+				_react2.default.createElement(
+					'td',
+					null,
+					row.accounting_date
+				),
+				_react2.default.createElement(
+					'td',
+					null,
+					row.title
+				),
+				_react2.default.createElement(
+					'td',
+					null,
+					row.amount
+				),
+				_react2.default.createElement(
+					'td',
+					null,
+					_react2.default.createElement(
+						_reactRouter.Link,
+						{ to: "/economy/instruction/" + row.id },
+						'Visa'
+					)
+				)
+			);
+		}
+	});
+
+	module.exports = EconomyCostCenters;
+
+/***/ },
+/* 285 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _CostCenter = __webpack_require__(283);
+
+	var _CostCenter2 = _interopRequireDefault(_CostCenter);
+
+	var _CostCenter3 = __webpack_require__(286);
+
+	var _CostCenter4 = _interopRequireDefault(_CostCenter3);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	// Backbone
+
+
+	module.exports = _react2.default.createClass({
+		displayName: 'exports',
+
+		getInitialState: function getInitialState() {
+			var id = this.props.params.id;
+
+			var costcenter = new _CostCenter2.default({ id: id });
+			costcenter.fetch();
+
+			return {
+				model: costcenter
+			};
+		},
+
+		render: function render() {
+			return _react2.default.createElement(_CostCenter4.default, { model: this.state.model });
+		}
+	});
+
+/***/ },
+/* 286 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	var EconomyCostCenter = _react2.default.createClass({
+		displayName: 'EconomyCostCenter',
+
+		render: function render() {
+			return _react2.default.createElement(
+				'p',
+				null,
+				'TODO: Cost center'
+			);
+		}
+	});
+
+	module.exports = EconomyCostCenter;
+
+/***/ },
+/* 287 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _Account = __webpack_require__(259);
+
+	var _Account2 = _interopRequireDefault(_Account);
+
+	var _Transaction = __webpack_require__(288);
+
+	var _Transaction2 = _interopRequireDefault(_Transaction);
+
+	var _Account3 = __webpack_require__(290);
+
+	var _Account4 = _interopRequireDefault(_Account3);
+
+	var _Transactions = __webpack_require__(291);
+
+	var _Transactions2 = _interopRequireDefault(_Transactions);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	// Backbone
+
+
+	module.exports = _react2.default.createClass({
+		displayName: 'exports',
+
+		getInitialState: function getInitialState() {
+			// Load account model
+			var account = new _Account2.default({
+				account_number: this.props.params.id
+			});
+			account.fetch();
+
+			return {
+				account_model: account
+			};
+		},
+
+		render: function render() {
+			return _react2.default.createElement(
+				'div',
+				null,
+				_react2.default.createElement(
+					'h2',
+					null,
+					'Konto'
+				),
+				_react2.default.createElement(_Account4.default, { model: this.state.account_model }),
+				_react2.default.createElement(_Transactions2.default, { type: _Transaction2.default, filters: {
+						account_number: this.state.account_model.get("account_number")
+					} })
+			);
+		}
+	});
+
+/***/ },
+/* 288 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _backbone = __webpack_require__(238);
+
+	var _backbone2 = _interopRequireDefault(_backbone);
+
+	var _Transaction = __webpack_require__(289);
+
+	var _Transaction2 = _interopRequireDefault(_Transaction);
+
+	var _config = __webpack_require__(244);
+
+	var _config2 = _interopRequireDefault(_config);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	var TransactionCollection = _backbone2.default.PageableCollection.extend({
+		model: _Transaction2.default,
+		initialize: function initialize(models, options) {
+			this.id = options.id;
+		},
+
+		url: "/economy/" + _config2.default.accountingPeriod + "/transaction"
+	});
+
+	module.exports = TransactionCollection;
+
+/***/ },
+/* 289 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _backbone = __webpack_require__(238);
+
+	var _backbone2 = _interopRequireDefault(_backbone);
+
+	var _config = __webpack_require__(244);
+
+	var _config2 = _interopRequireDefault(_config);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	var TransactionModel = _backbone2.default.Model.fullExtend({
+		idAttribute: "entity_id",
+		urlRoot: "/economy/" + _config2.default.accountingPeriod + "/transaction",
+		defaults: {
+			created_at: "0000-00-00T00:00:00Z",
+			updated_at: "0000-00-00T00:00:00Z",
+			transaction_title: "",
+			transaction_description: "",
+			accounting_instruction: "",
+			accounting_account: "",
+			accounting_cost_center: "",
+			amount: 0,
+			external_id: "",
+			instruction_title: "",
+			instruction_number: 0,
+			accounting_date: "0000-00-00T00:00:00Z",
+			extid: 0,
+			balance: 0
+		}
+	});
+
+	module.exports = TransactionModel;
+
+/***/ },
+/* 290 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _backboneReactComponent = __webpack_require__(237);
+
+	var _backboneReactComponent2 = _interopRequireDefault(_backboneReactComponent);
+
+	var _Currency = __webpack_require__(260);
+
+	var _Currency2 = _interopRequireDefault(_Currency);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	var EconomyAccount = _react2.default.createClass({
+		displayName: 'EconomyAccount',
+
+		mixins: [Backbone.React.Component.mixin],
+
+		handleChange: function handleChange(event) {
+			// Update the model with new value
+			var target = event.target;
+			var key = target.getAttribute("name");
+			this.state.model[key] = target.value;
+
+			// When we change the value of the model we have to rerender the component
+			this.forceUpdate();
+		},
+
+		render: function render() {
+			return _react2.default.createElement(
+				'div',
+				null,
+				_react2.default.createElement(
+					'form',
+					{ className: 'uk-form uk-form-horizontal' },
+					_react2.default.createElement(
+						'div',
+						{ className: 'uk-form-row' },
+						_react2.default.createElement(
+							'label',
+							{ className: 'uk-form-label' },
+							'Kontonummer'
+						),
+						_react2.default.createElement(
+							'div',
+							{ className: 'uk-form-controls' },
+							_react2.default.createElement(
+								'div',
+								{ className: 'uk-form-icon' },
+								_react2.default.createElement('i', { className: 'uk-icon-database' }),
+								_react2.default.createElement('input', { type: 'text', value: this.state.model.account_number, className: 'uk-form-width-large', onChange: this.handleChange })
+							)
+						)
+					),
+					_react2.default.createElement(
+						'div',
+						{ className: 'uk-form-row' },
+						_react2.default.createElement(
+							'label',
+							{ className: 'uk-form-label' },
+							'Titel'
+						),
+						_react2.default.createElement(
+							'div',
+							{ className: 'uk-form-controls' },
+							_react2.default.createElement(
+								'div',
+								{ className: 'uk-form-icon' },
+								_react2.default.createElement('i', { className: 'uk-icon-database' }),
+								_react2.default.createElement('input', { type: 'text', value: this.state.model.title, className: 'uk-form-width-large', onChange: this.handleChange })
+							)
+						)
+					),
+					_react2.default.createElement(
+						'div',
+						{ className: 'uk-form-row' },
+						_react2.default.createElement(
+							'label',
+							{ className: 'uk-form-label' },
+							'Beskrivning'
+						),
+						_react2.default.createElement(
+							'div',
+							{ className: 'uk-form-controls' },
+							_react2.default.createElement('textarea', { value: this.state.model.description, className: 'uk-form-width-large', onChange: this.handleChange })
+						)
+					),
+					_react2.default.createElement(
+						'div',
+						{ className: 'uk-form-row' },
+						_react2.default.createElement(
+							'label',
+							{ className: 'uk-form-label' },
+							'Balans'
+						),
+						_react2.default.createElement(
+							'div',
+							{ className: 'uk-form-controls' },
+							_react2.default.createElement(_Currency2.default, { value: this.state.model.balance, currency: 'SEK' })
+						)
+					)
+				)
+			);
+		}
+	});
+
+	module.exports = EconomyAccount;
+
+/***/ },
+/* 291 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _backboneReactComponent = __webpack_require__(237);
+
+	var _backboneReactComponent2 = _interopRequireDefault(_backboneReactComponent);
+
+	var _BackboneTable = __webpack_require__(256);
+
+	var _BackboneTable2 = _interopRequireDefault(_BackboneTable);
+
+	var _reactRouter = __webpack_require__(172);
+
+	var _Currency = __webpack_require__(260);
+
+	var _Currency2 = _interopRequireDefault(_Currency);
+
+	var _Date = __webpack_require__(268);
+
+	var _Date2 = _interopRequireDefault(_Date);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	var Transactions = _react2.default.createClass({
+		displayName: 'Transactions',
+
+		mixins: [Backbone.React.Component.mixin, _BackboneTable2.default],
+
+		getInitialState: function getInitialState() {
+			return {
+				columns: 6
+			};
+		},
+
+		componentWillMount: function componentWillMount() {
+			this.fetch();
+		},
+
+		renderHeader: function renderHeader() {
+			return [{
+				title: "Bokföringsdatum"
+			}, {
+				title: "Verifikation"
+			}, {
+				title: "Transaktion"
+			}, {
+				title: "Belopp",
+				class: "uk-text-right"
+			}, {
+				title: "Saldo",
+				class: "uk-text-right"
+			}, {
+				title: ""
+			}];
+		},
+
+		renderRow: function renderRow(row, i) {
+			if (typeof row.files != "undefined") {
+				var icon = _react2.default.createElement('i', { className: 'uk-icon-file' });
+			} else {
+				var icon = "";
+			}
+
+			return _react2.default.createElement(
+				'tr',
+				{ key: i },
+				_react2.default.createElement(
+					'td',
+					null,
+					_react2.default.createElement(_Date2.default, { date: row.accounting_date })
+				),
+				_react2.default.createElement(
+					'td',
+					null,
+					_react2.default.createElement(
+						_reactRouter.Link,
+						{ to: "/economy/instruction/" + row.instruction_number },
+						row.instruction_number,
+						' ',
+						row.instruction_title
+					)
+				),
+				_react2.default.createElement(
+					'td',
+					null,
+					row.transaction_title
+				),
+				_react2.default.createElement(
+					'td',
+					{ className: 'uk-text-right' },
+					_react2.default.createElement(_Currency2.default, { value: row.amount, currency: 'SEK' })
+				),
+				_react2.default.createElement(
+					'td',
+					{ className: 'uk-text-right' },
+					_react2.default.createElement(_Currency2.default, { value: row.balance, currency: 'SEK' })
+				),
+				_react2.default.createElement(
+					'td',
+					null,
+					icon
+				)
+			);
+		}
+	});
+
+	module.exports = Transactions;
+
+/***/ },
+/* 292 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _Account = __webpack_require__(293);
+
+	var _Account2 = _interopRequireDefault(_Account);
+
+	var _reactRouter = __webpack_require__(172);
+
+	var _Accounts = __webpack_require__(294);
+
+	var _Accounts2 = _interopRequireDefault(_Accounts);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	module.exports = _react2.default.createClass({
+		displayName: 'exports',
+
+		render: function render() {
+			return _react2.default.createElement(
+				'div',
+				null,
+				_react2.default.createElement(
+					'h2',
+					null,
+					'Konton'
+				),
+				_react2.default.createElement(
+					'p',
+					{ className: 'uk-float-left' },
+					'På denna sida ser du en lista över samtliga bokföringskonton, även de som inte har några bokförda verifikationer.'
+				),
+				_react2.default.createElement(
+					_reactRouter.Link,
+					{ to: "/settings/economy/account/add", className: 'uk-button uk-button-primary uk-float-right' },
+					_react2.default.createElement('i', { className: 'uk-icon-plus-circle' }),
+					' Skapa nytt konto'
+				),
+				_react2.default.createElement(_Accounts2.default, { type: _Account2.default })
+			);
+		}
+	});
+
+	// Backbone
+
+/***/ },
+/* 293 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _backbone = __webpack_require__(238);
+
+	var _backbone2 = _interopRequireDefault(_backbone);
+
+	var _Account = __webpack_require__(259);
+
+	var _Account2 = _interopRequireDefault(_Account);
+
+	var _config = __webpack_require__(244);
+
+	var _config2 = _interopRequireDefault(_config);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	var AccountCollection = _backbone2.default.PageableCollection.extend({
+		model: _Account2.default,
+		url: "/economy/" + _config2.default.accountingPeriod + "/account"
+	});
+
+	module.exports = AccountCollection;
+
+/***/ },
+/* 294 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _backboneReactComponent = __webpack_require__(237);
+
+	var _backboneReactComponent2 = _interopRequireDefault(_backboneReactComponent);
+
+	var _BackboneTable = __webpack_require__(256);
+
+	var _BackboneTable2 = _interopRequireDefault(_BackboneTable);
+
+	var _reactRouter = __webpack_require__(172);
+
+	var _TableDropdownMenu = __webpack_require__(274);
+
+	var _TableDropdownMenu2 = _interopRequireDefault(_TableDropdownMenu);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	var EconomyAccounts = _react2.default.createClass({
+		displayName: 'EconomyAccounts',
+
+		mixins: [Backbone.React.Component.mixin, _BackboneTable2.default],
+
+		getInitialState: function getInitialState() {
+			return {
+				columns: 4
+			};
+		},
+
+		componentWillMount: function componentWillMount() {
+			this.state.collection.fetch();
+		},
+
+		removeTextMessage: function removeTextMessage(entity) {
+			return "Are you sure you want to remove account \"" + entity.account_number + " " + entity.title + "\"?";
+		},
+
+		removeErrorMessage: function removeErrorMessage() {
+			UIkit.modal.alert("Error deleting account");
+		},
+
+		renderHeader: function renderHeader() {
+			return [{
+				title: "#",
+				sort: "account_number"
+			}, {
+				title: "Konto",
+				sort: "title"
+			}, {
+				title: "Beskrivning",
+				sort: "description"
+			}, {
+				title: ""
+			}];
+		},
+
+		renderRow: function renderRow(row, i) {
+			return _react2.default.createElement(
+				'tr',
+				{ key: i },
+				_react2.default.createElement(
+					'td',
+					null,
+					_react2.default.createElement(
+						_reactRouter.Link,
+						{ to: "/settings/economy/account/" + row.account_number + "/edit" },
+						row.account_number
+					)
+				),
+				_react2.default.createElement(
+					'td',
+					null,
+					row.title
+				),
+				_react2.default.createElement(
+					'td',
+					null,
+					row.description
+				),
+				_react2.default.createElement(
+					'td',
+					null,
+					_react2.default.createElement(
+						_TableDropdownMenu2.default,
+						null,
+						_react2.default.createElement(
+							_reactRouter.Link,
+							{ to: "/settings/economy/account/" + row.account_number + "/edit" },
+							_react2.default.createElement('i', { className: 'uk-icon uk-icon-cog' }),
+							' Redigera konto'
+						),
+						this.removeButton(i, "Ta bort konto")
+					)
+				)
+			);
+		}
+	});
+
+	module.exports = EconomyAccounts;
+
+/***/ },
+/* 295 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _Account = __webpack_require__(259);
+
+	var _Account2 = _interopRequireDefault(_Account);
+
+	var _Account3 = __webpack_require__(290);
+
+	var _Account4 = _interopRequireDefault(_Account3);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	// Backbone
+
+
+	module.exports = _react2.default.createClass({
+		displayName: 'exports',
+
+		getInitialState: function getInitialState() {
+			var account = new _Account2.default();
+
+			return {
+				model: account
+			};
+		},
+
+		render: function render() {
+			return _react2.default.createElement(
+				'div',
+				null,
+				_react2.default.createElement(
+					'h2',
+					null,
+					'Skapa konto'
+				),
+				_react2.default.createElement(_Account4.default, { model: this.state.model })
+			);
+		}
+	});
+
+/***/ },
+/* 296 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _Account = __webpack_require__(259);
+
+	var _Account2 = _interopRequireDefault(_Account);
+
+	var _Account3 = __webpack_require__(290);
+
+	var _Account4 = _interopRequireDefault(_Account3);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	// Backbone
+
+
+	module.exports = _react2.default.createClass({
+		displayName: 'exports',
+
+		getInitialState: function getInitialState() {
+			var id = this.props.params.id;
+
+			var account = new _Account2.default({ account_number: id });
+			account.fetch();
+
+			return {
+				model: account
+			};
+		},
+
+		render: function render() {
+			return _react2.default.createElement(
+				'div',
+				null,
+				_react2.default.createElement(
+					'h2',
+					null,
+					'Redigera konto'
+				),
+				_react2.default.createElement(_Account4.default, { model: this.state.model })
+			);
+		}
+	});
+
+/***/ },
+/* 297 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _AccountingPeriods = __webpack_require__(298);
+
+	var _AccountingPeriods2 = _interopRequireDefault(_AccountingPeriods);
+
+	var _AccountingPeriods3 = __webpack_require__(300);
+
+	var _AccountingPeriods4 = _interopRequireDefault(_AccountingPeriods3);
+
+	var _reactRouter = __webpack_require__(172);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	module.exports = _react2.default.createClass({
+		displayName: 'exports',
+
+		render: function render() {
+			return _react2.default.createElement(
+				'div',
+				null,
+				_react2.default.createElement(
+					'h2',
+					null,
+					'Räkneskapsår'
+				),
+				_react2.default.createElement(
+					'p',
+					{ className: 'uk-float-left' },
+					'På denna sida ser du en lista över samtliga räkneskapsår.'
+				),
+				_react2.default.createElement(
+					_reactRouter.Link,
+					{ to: "/settings/economy/accountingperiod/add", className: 'uk-button uk-button-primary uk-float-right' },
+					_react2.default.createElement('i', { className: 'uk-icon-plus-circle' }),
+					' Skapa nytt räkneskapsår'
+				),
+				_react2.default.createElement(_AccountingPeriods4.default, { type: _AccountingPeriods2.default })
+			);
+		}
+	});
+
+	// Backbone
+
+/***/ },
+/* 298 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _backbone = __webpack_require__(238);
+
+	var _backbone2 = _interopRequireDefault(_backbone);
+
+	var _AccountingPeriod = __webpack_require__(299);
+
+	var _AccountingPeriod2 = _interopRequireDefault(_AccountingPeriod);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	var AccountingPeriodsCollection = _backbone2.default.PageableCollection.extend({
+		model: _AccountingPeriod2.default,
+		url: "/economy/accountingperiod"
+	});
+
+	module.exports = AccountingPeriodsCollection;
+
+/***/ },
+/* 299 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+
+	var _backbone = __webpack_require__(238);
+
+	var _backbone2 = _interopRequireDefault(_backbone);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	var AccountingPeriodModel = _backbone2.default.Model.fullExtend({
+		idAttribute: "accountingperiod_id",
+		urlRoot: "/economy/accountingperiod",
+		defaults: {
+			created_at: "0000-00-00T00:00:00Z",
+			updated_at: "0000-00-00T00:00:00Z",
+			title: "",
+			description: "",
+			name: "",
+			start: "0000-00-00T00:00:00Z",
+			end: "0000-00-00T00:00:00Z"
+		}
+	});
+
+	module.exports = AccountingPeriodModel;
+
+/***/ },
+/* 300 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _backboneReactComponent = __webpack_require__(237);
+
+	var _backboneReactComponent2 = _interopRequireDefault(_backboneReactComponent);
+
+	var _BackboneTable = __webpack_require__(256);
+
+	var _BackboneTable2 = _interopRequireDefault(_BackboneTable);
+
+	var _DateTime = __webpack_require__(301);
+
+	var _DateTime2 = _interopRequireDefault(_DateTime);
+
+	var _reactRouter = __webpack_require__(172);
+
+	var _TableDropdownMenu = __webpack_require__(274);
+
+	var _TableDropdownMenu2 = _interopRequireDefault(_TableDropdownMenu);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	var AccountingPeriods = _react2.default.createClass({
+		displayName: 'AccountingPeriods',
+
+		mixins: [Backbone.React.Component.mixin, _BackboneTable2.default],
+
+		getInitialState: function getInitialState() {
+			return {
+				columns: 7
+			};
+		},
+
+		componentWillMount: function componentWillMount() {
+			this.state.collection.fetch();
+		},
+
+		removeTextMessage: function removeTextMessage(entity) {
+			return "Are you sure you want to remove period \"" + entity.title + "\"?";
+		},
+
+		removeErrorMessage: function removeErrorMessage() {
+			UIkit.modal.alert("Error deleting period");
+		},
+
+		renderHeader: function renderHeader() {
+			return [{
+				title: "Namn",
+				sort: "name"
+			}, {
+				title: "Titel",
+				sort: "title"
+			}, {
+				title: "Beskrivning",
+				sort: "description"
+			}, {
+				title: "Startdatum",
+				sort: "start"
+			}, {
+				title: "Slutdatum",
+				sort: "end"
+			}, {
+				title: ""
+			}];
+		},
+
+		renderRow: function renderRow(row, i) {
+			return _react2.default.createElement(
+				'tr',
+				{ key: i },
+				_react2.default.createElement(
+					'td',
+					null,
+					_react2.default.createElement(
+						_reactRouter.Link,
+						{ to: "/settings/economy/accountingperiod/" + row.accountingperiod_id + "/edit" },
+						row.name
+					)
+				),
+				_react2.default.createElement(
+					'td',
+					null,
+					row.title
+				),
+				_react2.default.createElement(
+					'td',
+					null,
+					row.description
+				),
+				_react2.default.createElement(
+					'td',
+					null,
+					_react2.default.createElement(_DateTime2.default, { date: row.start })
+				),
+				_react2.default.createElement(
+					'td',
+					null,
+					_react2.default.createElement(_DateTime2.default, { date: row.end })
+				),
+				_react2.default.createElement(
+					'td',
+					null,
+					_react2.default.createElement(
+						_TableDropdownMenu2.default,
+						null,
+						_react2.default.createElement(
+							_reactRouter.Link,
+							{ to: "/settings/economy/accountingperiod/" + row.accountingperiod_id + "/edit" },
+							_react2.default.createElement('i', { className: 'uk-icon uk-icon-cog' }),
+							' Redigera konto'
+						),
+						this.removeButton(i, "Ta bort konto")
+					)
+				)
+			);
+		}
+	});
+
+	module.exports = AccountingPeriods;
+
+/***/ },
+/* 301 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	var DateTimeField = _react2.default.createClass({
+		displayName: 'DateTimeField',
+
+		render: function render() {
+			var str = _react2.default.createElement(
+				'em',
+				null,
+				'Ej angivet'
+			);
+			if (this.props.date !== undefined && this.props.date != "") {
+				var options = {
+					year: 'numeric', month: 'numeric', day: 'numeric',
+					hour: 'numeric', minute: 'numeric', second: 'numeric',
+					hour12: false
+				};
+
+				var str = new Intl.DateTimeFormat('sv-SE', options).format(Date.parse(this.props.date));
+			}
+
+			return _react2.default.createElement(
+				'span',
+				null,
+				str
+			);
+		}
+	});
+
+	module.exports = DateTimeField;
+
+/***/ },
+/* 302 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _Account = __webpack_require__(259);
+
+	var _Account2 = _interopRequireDefault(_Account);
+
+	var _AccountingPeriod = __webpack_require__(303);
+
+	var _AccountingPeriod2 = _interopRequireDefault(_AccountingPeriod);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	// Backbone
+
+
+	module.exports = _react2.default.createClass({
+		displayName: 'exports',
+
+		getInitialState: function getInitialState() {
+			var account = new _Account2.default();
+
+			return {
+				model: account
+			};
+		},
+
+		render: function render() {
+			return _react2.default.createElement(
+				'div',
+				null,
+				_react2.default.createElement(
+					'h2',
+					null,
+					'Skapa räkneskapsår'
+				),
+				_react2.default.createElement(_AccountingPeriod2.default, { model: this.state.model })
+			);
+		}
+	});
+
+/***/ },
+/* 303 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	var AccountingPeriod = _react2.default.createClass({
+		displayName: "AccountingPeriod",
+
+		mixins: [Backbone.React.Component.mixin],
+
+		handleChange: function handleChange(event) {
+			// Update the model with new value
+			var target = event.target;
+			var key = target.getAttribute("name");
+			this.state.model[key] = target.value;
+
+			// When we change the value of the model we have to rerender the component
+			this.forceUpdate();
+		},
+
+		render: function render() {
+			return _react2.default.createElement(
+				"div",
+				null,
+				_react2.default.createElement(
+					"form",
+					{ className: "uk-form uk-form-horizontal" },
+					_react2.default.createElement(
+						"div",
+						{ className: "uk-form-row" },
+						_react2.default.createElement(
+							"label",
+							{ className: "uk-form-label" },
+							"Namn"
+						),
+						_react2.default.createElement(
+							"div",
+							{ className: "uk-form-controls" },
+							_react2.default.createElement(
+								"div",
+								{ className: "uk-form-icon" },
+								_react2.default.createElement("i", { className: "uk-icon-database" }),
+								_react2.default.createElement("input", { type: "text", value: this.state.model.name, className: "uk-form-width-large", onChange: this.handleChange })
+							)
+						)
+					),
+					_react2.default.createElement(
+						"div",
+						{ className: "uk-form-row" },
+						_react2.default.createElement(
+							"label",
+							{ className: "uk-form-label" },
+							"Titel"
+						),
+						_react2.default.createElement(
+							"div",
+							{ className: "uk-form-controls" },
+							_react2.default.createElement(
+								"div",
+								{ className: "uk-form-icon" },
+								_react2.default.createElement("i", { className: "uk-icon-database" }),
+								_react2.default.createElement("input", { type: "text", value: this.state.model.title, className: "uk-form-width-large", onChange: this.handleChange })
+							)
+						)
+					),
+					_react2.default.createElement(
+						"div",
+						{ className: "uk-form-row" },
+						_react2.default.createElement(
+							"label",
+							{ className: "uk-form-label" },
+							"Beskrivning"
+						),
+						_react2.default.createElement(
+							"div",
+							{ className: "uk-form-controls" },
+							_react2.default.createElement(
+								"div",
+								{ className: "uk-form-icon" },
+								_react2.default.createElement("i", { className: "uk-icon-database" }),
+								_react2.default.createElement("textarea", { value: this.state.model.description, className: "uk-form-width-large", onChange: this.handleChange })
+							)
+						)
+					),
+					_react2.default.createElement(
+						"div",
+						{ className: "uk-form-row" },
+						_react2.default.createElement(
+							"label",
+							{ className: "uk-form-label" },
+							"Startdatum"
+						),
+						_react2.default.createElement(
+							"div",
+							{ className: "uk-form-controls" },
+							_react2.default.createElement("input", { type: "text", value: this.state.model.start, className: "uk-form-width-large", onChange: this.handleChange })
+						)
+					),
+					_react2.default.createElement(
+						"div",
+						{ className: "uk-form-row" },
+						_react2.default.createElement(
+							"label",
+							{ className: "uk-form-label" },
+							"Slutdatum"
+						),
+						_react2.default.createElement(
+							"div",
+							{ className: "uk-form-controls" },
+							_react2.default.createElement("input", { type: "text", value: this.state.model.end, className: "uk-form-width-large", onChange: this.handleChange })
+						)
+					)
+				)
+			);
+		}
+	});
+
+	module.exports = AccountingPeriod;
+
+/***/ },
+/* 304 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	module.exports = _react2.default.createClass({
+		displayName: 'exports',
+
+		render: function render() {
+			return _react2.default.createElement(
+				'div',
+				null,
+				_react2.default.createElement(
+					'p',
+					null,
+					'Show accounting period'
+				)
+			);
+		}
+	});
+
+/***/ },
+/* 305 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _AccountingPeriod = __webpack_require__(299);
+
+	var _AccountingPeriod2 = _interopRequireDefault(_AccountingPeriod);
+
+	var _AccountingPeriod3 = __webpack_require__(303);
+
+	var _AccountingPeriod4 = _interopRequireDefault(_AccountingPeriod3);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	// Backbone
+
+
+	module.exports = _react2.default.createClass({
+		displayName: 'exports',
+
+		getInitialState: function getInitialState() {
+			var id = this.props.params.id;
+
+			var accountingperiod = new _AccountingPeriod2.default({ accountingperiod_id: id });
+			accountingperiod.fetch();
+
+			return {
+				model: accountingperiod
+			};
+		},
+
+		render: function render() {
+			return _react2.default.createElement(
+				'div',
+				null,
+				_react2.default.createElement(
+					'h2',
+					null,
+					'Redigera räkneskapsår'
+				),
+				_react2.default.createElement(_AccountingPeriod4.default, { model: this.state.model })
+			);
+		}
+	});
+
+/***/ },
+/* 306 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+
+	module.exports = {
+		childRoutes: [{
+			path: "/members",
+			indexRoute: {
+				component: __webpack_require__(307)
+			},
+			childRoutes: [{
+				path: "add",
+				component: __webpack_require__(311)
+			}, {
+				path: ":id",
+				component: __webpack_require__(314)
+			}]
+		}, {
+			path: "/groups",
+			indexRoute: {
+				component: __webpack_require__(343)
+			},
+			childRoutes: [{
+				path: "add",
+				component: __webpack_require__(344)
+			}, {
+				path: ":id",
+				component: __webpack_require__(346)
+			}, {
+				path: ":id/edit",
+				component: __webpack_require__(348)
+			}]
+		}]
+	};
+
+/***/ },
+/* 307 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _Member = __webpack_require__(308);
+
+	var _Member2 = _interopRequireDefault(_Member);
+
+	var _reactRouter = __webpack_require__(172);
+
+	var _TableFilterBox = __webpack_require__(264);
+
+	var _TableFilterBox2 = _interopRequireDefault(_TableFilterBox);
+
+	var _Members = __webpack_require__(310);
+
+	var _Members2 = _interopRequireDefault(_Members);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	// Backbone
+
+
+	module.exports = _react2.default.createClass({
+		displayName: 'exports',
+
+		getInitialState: function getInitialState() {
+			return {
+				filters: this.props.filters || {}
+			};
+		},
+
+		updateFilters: function updateFilters(newFilter) {
+			var filters = this.overrideFiltersFromProps(newFilter);
+			this.setState({
+				filters: filters
+			});
+		},
+
+		overrideFiltersFromProps: function overrideFiltersFromProps(filters) {
+			return filters;
+		},
+
+		render: function render() {
+			return _react2.default.createElement(
+				'div',
+				null,
+				_react2.default.createElement(
+					'h2',
+					null,
+					'Medlemmar'
+				),
+				_react2.default.createElement(
+					'p',
+					{ className: 'uk-float-left' },
+					'På denna sida ser du en lista på samtliga medlemmar.'
+				),
+				_react2.default.createElement(
+					_reactRouter.Link,
+					{ to: '/members/add', className: 'uk-button uk-button-primary uk-float-right' },
+					_react2.default.createElement('i', { className: 'uk-icon-plus-circle' }),
+					' Skapa ny medlem'
+				),
+				_react2.default.createElement(_TableFilterBox2.default, { onChange: this.updateFilters }),
+				_react2.default.createElement(_Members2.default, { type: _Member2.default, filters: this.state.filters })
+			);
+		}
+	});
+	//MembersHandler.title = "Visa medlemmar";
+
+/***/ },
+/* 308 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _backbone = __webpack_require__(238);
+
+	var _backbone2 = _interopRequireDefault(_backbone);
+
+	var _Member = __webpack_require__(309);
+
+	var _Member2 = _interopRequireDefault(_Member);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	var MemberCollection = _backbone2.default.PageableCollection.extend({
+		model: _Member2.default,
+		url: "/membership/member"
+	});
+
+	module.exports = MemberCollection;
+
+/***/ },
+/* 309 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+
+	var _backbone = __webpack_require__(238);
+
+	var _backbone2 = _interopRequireDefault(_backbone);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	var MemberModel = _backbone2.default.Model.fullExtend({
+		idAttribute: "member_id",
+		urlRoot: "/membership/member",
+		defaults: {
+			created_at: "0000-00-00T00:00:00Z",
+			updated_at: "0000-00-00T00:00:00Z",
+			entity_id: 0,
+			member_number: null,
+			civicregno: "",
+			firstname: "",
+			lastname: "",
+			email: "",
+			phone: "",
+			address_street: "",
+			address_extra: "",
+			address_zipcode: "",
+			address_city: "",
+			address_country: "se"
+		}
+	});
+
+	module.exports = MemberModel;
+
+/***/ },
+/* 310 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _backboneReactComponent = __webpack_require__(237);
+
+	var _backboneReactComponent2 = _interopRequireDefault(_backboneReactComponent);
+
+	var _reactRouter = __webpack_require__(172);
+
+	var _BackboneTable = __webpack_require__(256);
+
+	var _BackboneTable2 = _interopRequireDefault(_BackboneTable);
+
+	var _Date = __webpack_require__(268);
+
+	var _Date2 = _interopRequireDefault(_Date);
+
+	var _TableDropdownMenu = __webpack_require__(274);
+
+	var _TableDropdownMenu2 = _interopRequireDefault(_TableDropdownMenu);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	module.exports = _react2.default.createClass({
+		displayName: 'exports',
+
+		mixins: [Backbone.React.Component.mixin, _BackboneTable2.default],
+
+		getInitialState: function getInitialState() {
+			return {
+				columns: 7
+			};
+		},
+
+		/*
+	 	// TODO: Få igång denna igen
+	 	fetch: function(search)
+	 	{
+	 		if(search !== undefined && search.length > 0)
+	 		{
+	 			// Update the paginator so that is tells us we're on page 1
+	 			this.pagination[1].currentPage = 0;
+	 			this.pagination[2].currentPage = 0;
+	 			this.pagination[1].render();
+	 			this.pagination[2].render();
+	 
+	 			// Make sure the Backbone collection will receive page 1
+	 			this.getCollection().state.currentPage = 1;
+	 		}
+	 	},
+	 */
+		componentWillMount: function componentWillMount() {
+			this.fetch();
+		},
+
+		removeTextMessage: function removeTextMessage(entity) {
+			return "Are you sure you want to remove member \"" + entity.firstname + " " + entity.lastname + "\"?";
+		},
+
+		removeErrorMessage: function removeErrorMessage() {
+			UIkit.modal.alert("Error deleting member");
+		},
+
+		renderRow: function renderRow(row, i) {
+			return _react2.default.createElement(
+				'tr',
+				{ key: i },
+				_react2.default.createElement(
+					'td',
+					null,
+					_react2.default.createElement(
+						_reactRouter.Link,
+						{ to: "/members/" + row.member_id },
+						row.member_id
+					)
+				),
+				_react2.default.createElement(
+					'td',
+					null,
+					'-'
+				),
+				_react2.default.createElement(
+					'td',
+					null,
+					row.firstname
+				),
+				_react2.default.createElement(
+					'td',
+					null,
+					row.lastname
+				),
+				_react2.default.createElement(
+					'td',
+					null,
+					row.email
+				),
+				_react2.default.createElement(
+					'td',
+					null,
+					_react2.default.createElement(_Date2.default, { date: row.created_at })
+				),
+				_react2.default.createElement(
+					'td',
+					null,
+					_react2.default.createElement(
+						_TableDropdownMenu2.default,
+						null,
+						_react2.default.createElement(
+							_reactRouter.Link,
+							{ to: "/members/" + row.member_id },
+							_react2.default.createElement('i', { className: 'uk-icon uk-icon-cog' }),
+							' Redigera medlem'
+						),
+						this.removeButton(i, "Ta bort medlem")
+					)
+				)
+			);
+		},
+
+		renderHeader: function renderHeader() {
+			return [{
+				title: "#",
+				sort: "member_id"
+			}, {
+				title: "Kön"
+			}, {
+				title: "Förnamn",
+				sort: "firstname"
+			}, {
+				title: "Efternamn",
+				sort: "lastname"
+			}, {
+				title: "E-post",
+				sort: "email"
+			}, {
+				title: "Blev medlem",
+				sort: "created_at"
+			}, {
+				title: ""
+			}];
+		}
+	});
+	//import config from '../config'
+
+/***/ },
+/* 311 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _Member = __webpack_require__(309);
+
+	var _Member2 = _interopRequireDefault(_Member);
+
+	var _MemberForm = __webpack_require__(312);
+
+	var _MemberForm2 = _interopRequireDefault(_MemberForm);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	// Backbone
+
+
+	module.exports = _react2.default.createClass({
+		displayName: 'exports',
+
+		getInitialState: function getInitialState() {
+			return {
+				model: new _Member2.default()
+			};
+		},
+
+		render: function render() {
+			return _react2.default.createElement(
+				'div',
+				null,
+				_react2.default.createElement(
+					'h2',
+					null,
+					'Skapa medlem'
+				),
+				_react2.default.createElement(_MemberForm2.default, { model: this.state.model })
+			);
+		}
+	});
+	//MemberAddHandler.title = "Skapa medlem";
+
+/***/ },
+/* 312 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _backboneReactComponent = __webpack_require__(237);
+
+	var _backboneReactComponent2 = _interopRequireDefault(_backboneReactComponent);
+
+	var _CountryDropdown = __webpack_require__(313);
+
+	var _CountryDropdown2 = _interopRequireDefault(_CountryDropdown);
+
+	var _DateTime = __webpack_require__(301);
+
+	var _DateTime2 = _interopRequireDefault(_DateTime);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	module.exports = _react2.default.createClass({
+		displayName: 'exports',
+
+		mixins: [Backbone.React.Component.mixin],
+
+		cancel: function cancel(event) {
+			// Prevent the form from being submitted
+			event.preventDefault();
+
+			UIkit.modal.alert("TODO: Clear form");
+		},
+
+		remove: function remove(event) {
+			// Prevent the form from being submitted
+			event.preventDefault();
+
+			UIkit.modal.alert("TODO: Remove");
+		},
+
+		save: function save(event) {
+			var _this = this;
+
+			// Prevent the form from being submitted
+			event.preventDefault();
+
+			this.getModel().save([], {
+				success: function success(model, response) {
+					if (response.status == "created") {
+						UIkit.modal.alert("Successfully created");
+						browserHistory.push("/members/" + response.entity.member_id);
+					} else if (response.status == "updated") {
+						UIkit.modal.alert("Successfully updated");
+					} else {
+						_this.error();
+					}
+				},
+				error: function error(model, response, options) {
+					_this.error();
+				}
+			});
+		},
+
+		error: function error() {
+			UIkit.modal.alert("Error saving model");
+		},
+
+		handleChange: function handleChange(event) {
+			// Update the model with new value
+			var target = event.target;
+			var key = target.getAttribute("name");
+			this.state.model[key] = target.value;
+
+			// When we change the value of the model we have to rerender the component
+			this.forceUpdate();
+		},
+
+		render: function render() {
+			return _react2.default.createElement(
+				'div',
+				{ className: 'meep' },
+				_react2.default.createElement(
+					'form',
+					{ className: 'uk-form' },
+					_react2.default.createElement(
+						'fieldset',
+						null,
+						_react2.default.createElement(
+							'legend',
+							null,
+							_react2.default.createElement('i', { className: 'uk-icon-user' }),
+							' Personuppgifter'
+						),
+						_react2.default.createElement(
+							'div',
+							{ className: 'uk-form-row' },
+							_react2.default.createElement(
+								'label',
+								{ htmlFor: 'civicregno', className: 'uk-form-label' },
+								this.state.model.civicregno ? "Personnummer" : ""
+							),
+							_react2.default.createElement(
+								'div',
+								{ className: 'uk-form-controls' },
+								_react2.default.createElement('input', { type: 'text', name: 'civicregno', id: 'civicregno', value: this.state.model.civicregno, placeholder: 'Personnummer', onChange: this.handleChange, className: 'uk-form-width-large' })
+							)
+						),
+						_react2.default.createElement(
+							'div',
+							{ className: 'uk-form-row' },
+							_react2.default.createElement(
+								'label',
+								{ htmlFor: 'firstname', className: 'uk-form-label' },
+								this.state.model.firstname ? "Förnamn" : ""
+							),
+							_react2.default.createElement(
+								'div',
+								{ className: 'uk-form-controls' },
+								_react2.default.createElement('input', { type: 'text', name: 'firstname', id: 'firstname', value: this.state.model.firstname, placeholder: 'Förnamn', onChange: this.handleChange, className: 'uk-form-width-large' })
+							)
+						),
+						_react2.default.createElement(
+							'div',
+							{ className: 'uk-form-row' },
+							_react2.default.createElement(
+								'label',
+								{ htmlFor: 'lastname', className: 'uk-form-label' },
+								this.state.model.lastname ? "Efternamn" : ""
+							),
+							_react2.default.createElement(
+								'div',
+								{ className: 'uk-form-controls' },
+								_react2.default.createElement('input', { type: 'text', name: 'lastname', id: 'lastname', value: this.state.model.lastname, placeholder: 'Efternamn', onChange: this.handleChange, className: 'uk-form-width-large' })
+							)
+						),
+						_react2.default.createElement(
+							'div',
+							{ className: 'uk-form-row' },
+							_react2.default.createElement(
+								'label',
+								{ htmlFor: 'email', className: 'uk-form-label' },
+								this.state.model.email ? "E-post" : ""
+							),
+							_react2.default.createElement(
+								'div',
+								{ className: 'uk-form-controls' },
+								_react2.default.createElement(
+									'div',
+									{ className: 'uk-form-icon' },
+									_react2.default.createElement('i', { className: 'uk-icon-envelope' }),
+									_react2.default.createElement('input', { type: 'text', name: 'email', id: 'email', value: this.state.model.email, placeholder: 'E-postadress', onChange: this.handleChange, className: 'uk-form-width-large' })
+								)
+							)
+						),
+						_react2.default.createElement(
+							'div',
+							{ className: 'uk-form-row' },
+							_react2.default.createElement(
+								'label',
+								{ htmlFor: 'phone', className: 'uk-form-label' },
+								this.state.model.phone ? "Telefonnummer" : ""
+							),
+							_react2.default.createElement(
+								'div',
+								{ className: 'uk-form-controls' },
+								_react2.default.createElement(
+									'div',
+									{ className: 'uk-form-icon' },
+									_react2.default.createElement('i', { className: 'uk-icon-phone' }),
+									_react2.default.createElement('input', { type: 'text', name: 'phone', id: 'phone', value: this.state.model.phone, placeholder: 'Telefonnummer', onChange: this.handleChange, className: 'uk-form-width-large' })
+								)
+							)
+						)
+					),
+					_react2.default.createElement(
+						'fieldset',
+						{ 'data-uk-margin': true },
+						_react2.default.createElement(
+							'legend',
+							null,
+							_react2.default.createElement('i', { className: 'uk-icon-home' }),
+							' Adress'
+						),
+						_react2.default.createElement(
+							'div',
+							{ className: 'uk-form-row' },
+							_react2.default.createElement(
+								'label',
+								{ htmlFor: 'address_street', className: 'uk-form-label' },
+								this.state.model.address_street ? "Address" : ""
+							),
+							_react2.default.createElement(
+								'div',
+								{ className: 'uk-form-controls' },
+								_react2.default.createElement('input', { type: 'text', name: 'address_street', id: 'address_street', value: this.state.model.address_street, placeholder: 'Adress inkl gatunummer och lägenhetsnummer', onChange: this.handleChange, className: 'uk-form-width-large' })
+							)
+						),
+						_react2.default.createElement(
+							'div',
+							{ className: 'uk-form-row' },
+							_react2.default.createElement(
+								'label',
+								{ htmlFor: 'address_extra', className: 'uk-form-label' },
+								this.state.model.address_extra ? "Address extra" : ""
+							),
+							_react2.default.createElement(
+								'div',
+								{ className: 'uk-form-controls' },
+								_react2.default.createElement('input', { type: 'text', name: 'address_extra', id: 'address_extra', value: this.state.model.address_extra, placeholder: 'Extra adressrad, t ex C/O adress', onChange: this.handleChange, className: 'uk-form-width-large' })
+							)
+						),
+						_react2.default.createElement(
+							'div',
+							{ className: 'uk-form-row' },
+							_react2.default.createElement(
+								'div',
+								{ className: 'zipcode' },
+								_react2.default.createElement(
+									'label',
+									{ htmlFor: 'address_zipcode', className: 'uk-form-label' },
+									this.state.model.address_zipcode ? "Postnummer" : ""
+								),
+								_react2.default.createElement(
+									'div',
+									{ className: 'uk-form-controls' },
+									_react2.default.createElement('input', { type: 'text', name: 'address_zipcode', id: 'address_zipcode', value: this.state.model.address_zipcode, placeholder: 'Postnummer', onChange: this.handleChange, className: 'uk-form-width-small' })
+								)
+							),
+							_react2.default.createElement(
+								'div',
+								{ className: 'city' },
+								_react2.default.createElement(
+									'label',
+									{ htmlFor: 'address_city', className: 'uk-form-label' },
+									this.state.model.address_city ? "Postort" : ""
+								),
+								_react2.default.createElement(
+									'div',
+									{ className: 'uk-form-controls' },
+									_react2.default.createElement('input', { type: 'text', name: 'address_city', id: 'address_city', value: this.state.model.address_city, placeholder: 'Postort', onChange: this.handleChange })
+								)
+							)
+						),
+						_react2.default.createElement(
+							'div',
+							{ className: 'uk-form-row' },
+							_react2.default.createElement(
+								'label',
+								{ htmlFor: '', className: 'uk-form-label' },
+								'Land'
+							),
+							_react2.default.createElement(
+								'div',
+								{ className: 'uk-form-controls' },
+								_react2.default.createElement(_CountryDropdown2.default, { country: this.state.model.address_country, onChange: this.changeCountry })
+							)
+						)
+					),
+					this.state.model.entity_id > 0 ? _react2.default.createElement(
+						'fieldset',
+						{ 'data-uk-margin': true },
+						_react2.default.createElement(
+							'legend',
+							null,
+							_react2.default.createElement('i', { className: 'uk-icon-tag' }),
+							' Metadata'
+						),
+						_react2.default.createElement(
+							'div',
+							{ className: 'uk-form-row' },
+							_react2.default.createElement(
+								'label',
+								{ className: 'uk-form-label' },
+								'Medlem sedan'
+							),
+							_react2.default.createElement(
+								'div',
+								{ className: 'uk-form-controls' },
+								_react2.default.createElement('i', { className: 'uk-icon-calendar' }),
+								' ',
+								_react2.default.createElement(_DateTime2.default, { date: this.state.model.created_at })
+							)
+						),
+						_react2.default.createElement(
+							'div',
+							{ className: 'uk-form-row' },
+							_react2.default.createElement(
+								'label',
+								{ className: 'uk-form-label' },
+								'Senast uppdaterad'
+							),
+							_react2.default.createElement(
+								'div',
+								{ className: 'uk-form-controls' },
+								_react2.default.createElement('i', { className: 'uk-icon-calendar' }),
+								' ',
+								_react2.default.createElement(_DateTime2.default, { date: this.state.model.updated_at })
+							)
+						)
+					) : "",
+					_react2.default.createElement(
+						'div',
+						{ className: 'uk-form-row' },
+						_react2.default.createElement(
+							'button',
+							{ className: 'uk-button uk-button-danger uk-float-left', onClick: this.cancel },
+							_react2.default.createElement('i', { className: 'uk-icon-close' }),
+							' Avbryt'
+						),
+						this.state.model.entity_id ? _react2.default.createElement(
+							'button',
+							{ className: 'uk-button uk-button-danger uk-float-left', onClick: this.remove },
+							_react2.default.createElement('i', { className: 'uk-icon-trash' }),
+							' Ta bort medlem'
+						) : "",
+						_react2.default.createElement(
+							'button',
+							{ className: 'uk-button uk-button-success uk-float-right', onClick: this.save },
+							_react2.default.createElement('i', { className: 'uk-icon-save' }),
+							' Spara personuppgifter'
+						)
+					)
+				)
+			);
+		},
+
+		changeCountry: function changeCountry(country) {
+			this.getModel().set({
+				address_country: country
+			});
+		}
+	});
+
+/***/ },
+/* 313 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	var CountryDropdown = _react2.default.createClass({
+		displayName: "CountryDropdown",
+
+		getInitialState: function getInitialState() {
+			this.continents = [{
+				name: "Africa",
+				countries: [{
+					name: "Algeria",
+					code: "dz"
+				}, {
+					name: "Angola",
+					code: "ao"
+				}, {
+					name: "Benin",
+					code: "bj"
+				}, {
+					name: "Botswana",
+					code: "bw"
+				}, {
+					name: "Burkina Faso",
+					code: "bf"
+				}, {
+					name: "Cameroon",
+					code: "cm"
+				}, {
+					name: "Cape Verde",
+					code: "cv"
+				}, {
+					name: "Central African Republic",
+					code: "cf"
+				}, {
+					name: "Chad",
+					code: "td"
+				}, {
+					name: "Comoros",
+					code: "km"
+				}, {
+					name: "Congo",
+					code: "cg"
+				}, {
+					name: "Congo, The Democratic Republic of the",
+					code: "cd"
+				}, {
+					name: "Cote d'Ivoire",
+					code: "ci"
+				}, {
+					name: "Djibouti",
+					code: "dj"
+				}, {
+					name: "Egypt",
+					code: "eg"
+				}, {
+					name: "Equatorial Guinea",
+					code: "gq"
+				}, {
+					name: "Eritrea",
+					code: "er"
+				}, {
+					name: "Ethiopia",
+					code: "et"
+				}, {
+					name: "Gabon",
+					code: "ga"
+				}, {
+					name: "Gambia",
+					code: "gm"
+				}, {
+					name: "Ghana",
+					code: "gh"
+				}, {
+					name: "Guinea",
+					code: "gn"
+				}, {
+					name: "Guinea-Bissau",
+					code: "gw"
+				}, {
+					name: "Kenya",
+					code: "ke"
+				}, {
+					name: "Lesotho",
+					code: "ls"
+				}, {
+					name: "Liberia",
+					code: "lr"
+				}, {
+					name: "Libya",
+					code: "ly"
+				}, {
+					name: "Madagascar",
+					code: "mg"
+				}, {
+					name: "Malawi",
+					code: "mw"
+				}, {
+					name: "Mali",
+					code: "ml"
+				}, {
+					name: "Mauritania",
+					code: "mr"
+				}, {
+					name: "Mauritius",
+					code: "mu"
+				}, {
+					name: "Mayotte",
+					code: "yt"
+				}, {
+					name: "Morocco",
+					code: "ma"
+				}, {
+					name: "Mozambique",
+					code: "mz"
+				}, {
+					name: "Namibia",
+					code: "na"
+				}, {
+					name: "Niger",
+					code: "ne"
+				}, {
+					name: "Nigeria",
+					code: "ng"
+				}, {
+					name: "Reunion",
+					code: "re"
+				}, {
+					name: "Rwanda",
+					code: "rw"
+				}, {
+					name: "Saint Helena",
+					code: "sh"
+				}, {
+					name: "Sao Tome and Principe",
+					code: "st"
+				}, {
+					name: "Senegal",
+					code: "sn"
+				}, {
+					name: "Seychelles",
+					code: "sc"
+				}, {
+					name: "Sierra Leone",
+					code: "sl"
+				}, {
+					name: "Somalia",
+					code: "so"
+				}, {
+					name: "South Africa",
+					code: "za"
+				}, {
+					name: "South Sudan",
+					code: "ss"
+				}, {
+					name: "Sudan",
+					code: "sd"
+				}, {
+					name: "Swaziland",
+					code: "sz"
+				}, {
+					name: "Tanzania",
+					code: "tz"
+				}, {
+					name: "Togo",
+					code: "tg"
+				}, {
+					name: "Tunisia",
+					code: "tn"
+				}, {
+					name: "Uganda",
+					code: "ug"
+				}, {
+					name: "Western Sahara",
+					code: "eh"
+				}, {
+					name: "Zambia",
+					code: "zm"
+				}, {
+					name: "Zimbabwe",
+					code: "zw"
+				}]
+			}, {
+				name: "America",
+				countries: [{
+					name: "Anguilla",
+					code: "ai"
+				}, {
+					name: "Antigua and Barbuda",
+					code: "ag"
+				}, {
+					name: "Argentina",
+					code: "ar"
+				}, {
+					name: "Aruba",
+					code: "aw"
+				}, {
+					name: "Bahamas",
+					code: "bs"
+				}, {
+					name: "Barbados",
+					code: "bb"
+				}, {
+					name: "Belize",
+					code: "bz"
+				}, {
+					name: "Bermuda",
+					code: "bm"
+				}, {
+					name: "Bolivia, Plurinational State of",
+					code: "bo"
+				}, {
+					name: "Brazil",
+					code: "br"
+				}, {
+					name: "Canada",
+					code: "ca"
+				}, {
+					name: "Cayman Islands",
+					code: "ky"
+				}, {
+					name: "Chile",
+					code: "cl"
+				}, {
+					name: "Colombia",
+					code: "co"
+				}, {
+					name: "Costa Rica",
+					code: "cr"
+				}, {
+					name: "Cuba",
+					code: "cu"
+				}, {
+					name: "Curacao",
+					code: "cw"
+				}, {
+					name: "Dominica",
+					code: "dm"
+				}, {
+					name: "Dominican Republic",
+					code: "do"
+				}, {
+					name: "Ecuador",
+					code: "ec"
+				}, {
+					name: "El Salvador",
+					code: "sv"
+				}, {
+					name: "Falkland Islands (Malvinas)",
+					code: "fk"
+				}, {
+					name: "French Guiana",
+					code: "gf"
+				}, {
+					name: "Greenland",
+					code: "gl"
+				}, {
+					name: "Grenada",
+					code: "gd"
+				}, {
+					name: "Guadeloupe",
+					code: "gp"
+				}, {
+					name: "Guatemala",
+					code: "gt"
+				}, {
+					name: "Guyana",
+					code: "gy"
+				}, {
+					name: "Haiti",
+					code: "ht"
+				}, {
+					name: "Honduras",
+					code: "hn"
+				}, {
+					name: "Jamaica",
+					code: "jm"
+				}, {
+					name: "Martinique",
+					code: "mq"
+				}, {
+					name: "Mexico",
+					code: "mx"
+				}, {
+					name: "Montserrat",
+					code: "ms"
+				}, {
+					name: "Netherlands Antilles",
+					code: "an"
+				}, {
+					name: "Nicaragua",
+					code: "ni"
+				}, {
+					name: "Panama",
+					code: "pa"
+				}, {
+					name: "Paraguay",
+					code: "py"
+				}, {
+					name: "Peru",
+					code: "pe"
+				}, {
+					name: "Puerto Rico",
+					code: "pr"
+				}, {
+					name: "Saint Kitts and Nevis",
+					code: "kn"
+				}, {
+					name: "Saint Lucia",
+					code: "lc"
+				}, {
+					name: "Saint Pierre and Miquelon",
+					code: "pm"
+				}, {
+					name: "Saint Vincent and the Grenadines",
+					code: "vc"
+				}, {
+					name: "Sint Maarten",
+					code: "sx"
+				}, {
+					name: "Suriname",
+					code: "sr"
+				}, {
+					name: "Trinidad and Tobago",
+					code: "tt"
+				}, {
+					name: "Turks and Caicos Islands",
+					code: "tc"
+				}, {
+					name: "United States",
+					code: "us"
+				}, {
+					name: "Uruguay",
+					code: "uy"
+				}, {
+					name: "Venezuela, Bolivarian Republic of",
+					code: "ve"
+				}, {
+					name: "Virgin Islands, British",
+					code: "vg"
+				}, {
+					name: "Virgin Islands, U.S.",
+					code: "vi"
+				}]
+			}, {
+				name: "Asia",
+				countries: [{
+					name: "Afghanistan",
+					code: "af"
+				}, {
+					name: "Armenia",
+					code: "am"
+				}, {
+					name: "Azerbaijan",
+					code: "az"
+				}, {
+					name: "Bahrain",
+					code: "bh"
+				}, {
+					name: "Bangladesh",
+					code: "bd"
+				}, {
+					name: "Bhutan",
+					code: "bt"
+				}, {
+					name: "Brunei Darussalam",
+					code: "bn"
+				}, {
+					name: "Cambodia",
+					code: "kh"
+				}, {
+					name: "China",
+					code: "cn"
+				}, {
+					name: "Cyprus",
+					code: "cy"
+				}, {
+					name: "Georgia",
+					code: "ge"
+				}, {
+					name: "Hong Kong",
+					code: "hk"
+				}, {
+					name: "India",
+					code: "in"
+				}, {
+					name: "Indonesia",
+					code: "id"
+				}, {
+					name: "Iran, Islamic Republic of",
+					code: "ir"
+				}, {
+					name: "Iraq",
+					code: "iq"
+				}, {
+					name: "Israel",
+					code: "il"
+				}, {
+					name: "Japan",
+					code: "jp"
+				}, {
+					name: "Jordan",
+					code: "jo"
+				}, {
+					name: "Kazakhstan",
+					code: "kz"
+				}, {
+					name: "Korea, Democratic People's Republic of",
+					code: "kp"
+				}, {
+					name: "Korea, Republic of",
+					code: "kr"
+				}, {
+					name: "Kuwait",
+					code: "kw"
+				}, {
+					name: "Kyrgyzstan",
+					code: "kg"
+				}, {
+					name: "Lao People's Democratic Republic",
+					code: "la"
+				}, {
+					name: "Lebanon",
+					code: "lb"
+				}, {
+					name: "Macao",
+					code: "mo"
+				}, {
+					name: "Malaysia",
+					code: "my"
+				}, {
+					name: "Maldives",
+					code: "mv"
+				}, {
+					name: "Mongolia",
+					code: "mn"
+				}, {
+					name: "Myanmar",
+					code: "mm"
+				}, {
+					name: "Nepal",
+					code: "np"
+				}, {
+					name: "Oman",
+					code: "om"
+				}, {
+					name: "Pakistan",
+					code: "pk"
+				}, {
+					name: "Palestinian Territory, Occupied",
+					code: "ps"
+				}, {
+					name: "Philippines",
+					code: "ph"
+				}, {
+					name: "Qatar",
+					code: "qa"
+				}, {
+					name: "Saudi Arabia",
+					code: "sa"
+				}, {
+					name: "Singapore",
+					code: "sg"
+				}, {
+					name: "Sri Lanka",
+					code: "lk"
+				}, {
+					name: "Syrian Arab Republic",
+					code: "sy"
+				}, {
+					name: "Taiwan, Province of China",
+					code: "tw"
+				}, {
+					name: "Tajikistan",
+					code: "tj"
+				}, {
+					name: "Thailand",
+					code: "th"
+				}, {
+					name: "Timor-Leste",
+					code: "tl"
+				}, {
+					name: "Turkey",
+					code: "tr"
+				}, {
+					name: "Turkmenistan",
+					code: "tm"
+				}, {
+					name: "United Arab Emirates",
+					code: "ae"
+				}, {
+					name: "Uzbekistan",
+					code: "uz"
+				}, {
+					name: "Viet Nam",
+					code: "vn"
+				}, {
+					name: "Yemen",
+					code: "ye"
+				}]
+			}, {
+				name: "Europe",
+				countries: [{
+					name: "Albania",
+					code: "al"
+				}, {
+					name: "Andorra",
+					code: "ad"
+				}, {
+					name: "Austria",
+					code: "at"
+				}, {
+					name: "Belarus",
+					code: "by"
+				}, {
+					name: "Belgium",
+					code: "be"
+				}, {
+					name: "Bosnia and Herzegovina",
+					code: "ba"
+				}, {
+					name: "Bulgaria",
+					code: "bg"
+				}, {
+					name: "Croatia",
+					code: "hr"
+				}, {
+					name: "Czech Republic",
+					code: "cz"
+				}, {
+					name: "Denmark",
+					code: "dk"
+				}, {
+					name: "Estonia",
+					code: "ee"
+				}, {
+					name: "Faroe Islands",
+					code: "fo"
+				}, {
+					name: "Finland",
+					code: "fi"
+				}, {
+					name: "France",
+					code: "fr"
+				}, {
+					name: "Germany",
+					code: "de"
+				}, {
+					name: "Gibraltar",
+					code: "gi"
+				}, {
+					name: "Greece",
+					code: "gr"
+				}, {
+					name: "Holy See (Vatican City State)",
+					code: "va"
+				}, {
+					name: "Hungary",
+					code: "hu"
+				}, {
+					name: "Iceland",
+					code: "is"
+				}, {
+					name: "Ireland",
+					code: "ie"
+				}, {
+					name: "Italy",
+					code: "it"
+				}, {
+					name: "Kosovo",
+					code: "xk"
+				}, {
+					name: "Latvia",
+					code: "lv"
+				}, {
+					name: "Liechtenstein",
+					code: "li"
+				}, {
+					name: "Lithuania",
+					code: "lt"
+				}, {
+					name: "Luxembourg",
+					code: "lu"
+				}, {
+					name: "Macedonia, The Former Yugoslav Republic of",
+					code: "mk"
+				}, {
+					name: "Malta",
+					code: "mt"
+				}, {
+					name: "Moldova, Republic of",
+					code: "md"
+				}, {
+					name: "Monaco",
+					code: "mc"
+				}, {
+					name: "Montenegro",
+					code: "me"
+				}, {
+					name: "Netherlands",
+					code: "nl"
+				}, {
+					name: "Norway",
+					code: "no"
+				}, {
+					name: "Poland",
+					code: "pl"
+				}, {
+					name: "Portugal",
+					code: "pt"
+				}, {
+					name: "Romania",
+					code: "ro"
+				}, {
+					name: "Russian Federation",
+					code: "ru"
+				}, {
+					name: "San Marino",
+					code: "sm"
+				}, {
+					name: "Serbia",
+					code: "rs"
+				}, {
+					name: "Slovakia",
+					code: "sk"
+				}, {
+					name: "Slovenia",
+					code: "si"
+				}, {
+					name: "Spain",
+					code: "es"
+				}, {
+					name: "Sweden",
+					code: "se"
+				}, {
+					name: "Switzerland",
+					code: "ch"
+				}, {
+					name: "Ukraine",
+					code: "ua"
+				}, {
+					name: "United Kingdom",
+					code: "gb"
+				}]
+			}, {
+				name: "Australia and Oceania",
+				countries: [{
+					name: "American Samoa",
+					code: "as"
+				}, {
+					name: "Australia",
+					code: "au"
+				}, {
+					name: "Cook Islands",
+					code: "ck"
+				}, {
+					name: "Fiji",
+					code: "fj"
+				}, {
+					name: "French Polynesia",
+					code: "pf"
+				}, {
+					name: "Guam",
+					code: "gu"
+				}, {
+					name: "Kiribati",
+					code: "ki"
+				}, {
+					name: "Marshall Islands",
+					code: "mh"
+				}, {
+					name: "Micronesia, Federated States of",
+					code: "fm"
+				}, {
+					name: "Nauru",
+					code: "nr"
+				}, {
+					name: "New Caledonia",
+					code: "nc"
+				}, {
+					name: "New Zealand",
+					code: "nz"
+				}, {
+					name: "Niue",
+					code: "nu"
+				}, {
+					name: "Norfolk Island",
+					code: "nf"
+				}, {
+					name: "Northern Mariana Islands",
+					code: "mp"
+				}, {
+					name: "Palau",
+					code: "pw"
+				}, {
+					name: "Papua New Guinea",
+					code: "pg"
+				}, {
+					name: "Pitcairn",
+					code: "pn"
+				}, {
+					name: "Samoa",
+					code: "ws"
+				}, {
+					name: "Solomon Islands",
+					code: "sb"
+				}, {
+					name: "Tokelau",
+					code: "tk"
+				}, {
+					name: "Tonga",
+					code: "to"
+				}, {
+					name: "Tuvalu",
+					code: "tv"
+				}, {
+					name: "Vanuatu",
+					code: "vu"
+				}, {
+					name: "Wallis and Futuna",
+					code: "wf"
+				}]
+			}, {
+				name: "Other areas",
+				countries: [{
+					name: "Bouvet Island",
+					code: "bv"
+				}, {
+					name: "British Indian Ocean Territory",
+					code: "io"
+				}, {
+					name: "Canary Islands",
+					code: "ic"
+				}, {
+					name: "Catalonia",
+					code: "catalonia"
+				}, {
+					name: "England",
+					code: "england"
+				}, {
+					name: "European Union",
+					code: "eu"
+				}, {
+					name: "French Southern Territories",
+					code: "tf"
+				}, {
+					name: "Guernsey",
+					code: "gg"
+				}, {
+					name: "Heard Island and McDonald Islands",
+					code: "hm"
+				}, {
+					name: "Isle of Man",
+					code: "im"
+				}, {
+					name: "Jersey",
+					code: "je"
+				}, {
+					name: "Kurdistan",
+					code: "kurdistan"
+				}, {
+					name: "Scotland",
+					code: "scotland"
+				}, {
+					name: "Somaliland",
+					code: "somaliland"
+				}, {
+					name: "South Georgia and the South Sandwich Islands",
+					code: "gs"
+				}, {
+					name: "Tibet",
+					code: "tibet"
+				}, {
+					name: "United States Minor Outlying Islands",
+					code: "um"
+				}, {
+					name: "Wales",
+					code: "wales"
+				}, {
+					name: "Zanzibar",
+					code: "zanzibar"
+				}]
+			}];
+
+			return {
+				country: this.props.country
+			};
+		},
+
+		render: function render() {
+			var _this = this;
+			var countries = [];
+			var num = 0;
+			this.continents.forEach(function (continent, index, array) {
+				var elm = _react2.default.createElement(
+					"li",
+					{ key: num, className: "uk-nav-header" },
+					continent.name
+				);
+				countries.push(elm);
+				num++;
+
+				continent.countries.forEach(function (country, index, array) {
+					var elm = _react2.default.createElement(
+						"li",
+						{ key: country.code },
+						_react2.default.createElement(
+							"a",
+							{ onClick: _this.selectCountry, "data-country": country.code, className: "uk-dropdown-close" },
+							_react2.default.createElement("span", { className: "flag flag-" + country.code }),
+							" ",
+							country.name
+						)
+					);
+					countries.push(elm);
+				});
+			});
+
+			return _react2.default.createElement(
+				"div",
+				{ "data-uk-dropdown": "{mode:'click'}", className: "uk-button-dropdown" },
+				_react2.default.createElement(
+					"button",
+					{ className: "uk-button uk-button-mini" },
+					_react2.default.createElement("span", { className: "flag flag-" + this.state.country }),
+					" ",
+					this.getCountryName(this.state.country),
+					" ",
+					_react2.default.createElement("i", { className: "uk-icon-angle-down" })
+				),
+				_react2.default.createElement(
+					"div",
+					{ className: "uk-dropdown uk-dropdown-scrollable uk-dropdown-small" },
+					_react2.default.createElement(
+						"ul",
+						{ className: "uk-nav uk-nav-dropdown" },
+						countries
+					)
+				)
+			);
+		},
+
+		// Update the country when the props are changed
+		componentWillReceiveProps: function componentWillReceiveProps(nextProps) {
+			this.setState({ country: nextProps.country.toLowerCase() });
+		},
+
+		// Send changes back to parent
+		selectCountry: function selectCountry(event) {
+			this.props.onChange(event.target.dataset.country);
+		},
+
+		// Get a readable name from a country code
+		getCountryName: function getCountryName(code) {
+			var name = "Unknown";
+
+			this.continents.forEach(function (continent, index, array) {
+				continent.countries.forEach(function (country, index, array) {
+					if (country.code == code) {
+						name = country.name;
+						return;
+					}
+				});
+
+				if (name != "Unknown") {
+					return;
+				}
+			});
+
+			return name;
+		}
+	});
+
+	module.exports = CountryDropdown;
+
+/***/ },
+/* 314 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _Member = __webpack_require__(309);
+
+	var _Member2 = _interopRequireDefault(_Member);
+
+	var _MemberForm = __webpack_require__(312);
+
+	var _MemberForm2 = _interopRequireDefault(_MemberForm);
+
+	var _GroupUserBox = __webpack_require__(315);
+
+	var _GroupUserBox2 = _interopRequireDefault(_GroupUserBox);
+
+	var _KeysUserBox = __webpack_require__(331);
+
+	var _KeysUserBox2 = _interopRequireDefault(_KeysUserBox);
+
+	var _SubscriptionUserBox = __webpack_require__(336);
+
+	var _SubscriptionUserBox2 = _interopRequireDefault(_SubscriptionUserBox);
+
+	var _TransactionUserBox = __webpack_require__(337);
+
+	var _TransactionUserBox2 = _interopRequireDefault(_TransactionUserBox);
+
+	var _MailUserBox = __webpack_require__(339);
+
+	var _MailUserBox2 = _interopRequireDefault(_MailUserBox);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	module.exports = _react2.default.createClass({
+		displayName: 'exports',
+
+		getInitialState: function getInitialState() {
+			var member = new _Member2.default({
+				member_id: this.props.params.id
+			});
+
+			var _this = this;
+			member.fetch({
+				success: function success() {
+					// This component does not use the ReactBackbone mixin, so we have to force redraw it when the Backbone model is loaded from the server
+					_this.forceUpdate();
+				}
+			});
+
+			//		this.title = "Meep";
+			return {
+				model: member
+			};
+		},
+
+		componentDidMount: function componentDidMount() {
+			// Ugly way to get the switcher javascript working
+			$.UIkit.init();
+			/*
+	  		var _this = this;
+	  		$("[data-uk-switcher]").on("show.uk.switcher", function(event, area)
+	  		{
+	  			if(area.context.id == "member_keys")
+	  			{
+	  				if(!this.keys_synced)
+	  				{
+	  					// Get the RFID keys associated with the member
+	  					_this.state.model.keys = 
+	  					_this.state.collection = _this.state.model.keys;
+	  
+	  					_this.state.model.keys.fetch();
+	  					this.keys_synced = true;
+	  				}
+	  			}
+	  		});
+	  */
+		},
+
+		render: function render() {
+			return _react2.default.createElement(
+				'div',
+				null,
+				_react2.default.createElement(
+					'h2',
+					null,
+					'Medlem #',
+					this.state.model.get("member_number"),
+					': ',
+					this.state.model.get("firstname"),
+					' ',
+					this.state.model.get("lastname")
+				),
+				_react2.default.createElement(
+					'ul',
+					{ className: 'uk-tab', 'data-uk-switcher': '{connect:\'#user-tabs\'}' },
+					_react2.default.createElement(
+						'li',
+						{ id: 'member_info' },
+						_react2.default.createElement(
+							'a',
+							null,
+							'Personuppgifter'
+						)
+					),
+					_react2.default.createElement(
+						'li',
+						{ id: 'member_groups' },
+						_react2.default.createElement(
+							'a',
+							null,
+							'Grupper'
+						)
+					),
+					_react2.default.createElement(
+						'li',
+						{ id: 'member_keys' },
+						_react2.default.createElement(
+							'a',
+							null,
+							'Nycklar'
+						)
+					),
+					_react2.default.createElement(
+						'li',
+						{ id: 'member_labaccess' },
+						_react2.default.createElement(
+							'a',
+							null,
+							'Prenumerationer'
+						)
+					),
+					_react2.default.createElement(
+						'li',
+						{ id: 'member_transactions' },
+						_react2.default.createElement(
+							'a',
+							null,
+							'Transaktioner'
+						)
+					),
+					_react2.default.createElement(
+						'li',
+						{ id: 'member_groups' },
+						_react2.default.createElement(
+							'a',
+							null,
+							'Utskick'
+						)
+					)
+				),
+				_react2.default.createElement(
+					'ul',
+					{ id: 'user-tabs', className: 'uk-switcher' },
+					_react2.default.createElement(
+						'li',
+						null,
+						_react2.default.createElement(_MemberForm2.default, { model: this.state.model })
+					),
+					_react2.default.createElement(
+						'li',
+						null,
+						_react2.default.createElement(_GroupUserBox2.default, { member_id: this.state.model.get("member_id") })
+					),
+					_react2.default.createElement(
+						'li',
+						null,
+						_react2.default.createElement(_KeysUserBox2.default, { member_id: this.state.model.get("member_id") })
+					),
+					_react2.default.createElement(
+						'li',
+						null,
+						_react2.default.createElement(_SubscriptionUserBox2.default, { member_id: this.state.model.get("member_id") })
+					),
+					_react2.default.createElement(
+						'li',
+						null,
+						_react2.default.createElement(_TransactionUserBox2.default, { member_id: this.state.model.get("member_id") })
+					),
+					_react2.default.createElement(
+						'li',
+						null,
+						_react2.default.createElement(_MailUserBox2.default, { member_id: this.state.model.get("member_id") })
+					)
+				)
+			);
+		}
+	});
+	//MemberHandler.title = "Visa medlem";
+
+
+	// Import functions from other modules
+
+
+	// Backbone
+
+/***/ },
+/* 315 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _Groups = __webpack_require__(316);
+
+	var _Group = __webpack_require__(317);
+
+	var _Group2 = _interopRequireDefault(_Group);
+
+	var _reactSelect = __webpack_require__(319);
+
+	var _config = __webpack_require__(244);
+
+	var _config2 = _interopRequireDefault(_config);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	var GroupUserBox = _react2.default.createClass({
+		displayName: 'GroupUserBox',
+
+		getInitialState: function getInitialState() {
+			return {
+				showEditForm: false,
+				addGroups: ""
+			};
+		},
+
+		add: function add() {
+			this.setState({
+				showEditForm: true
+			});
+		},
+
+		cancel: function cancel() {
+			this.setState({
+				showEditForm: false,
+				addGroups: ""
+			});
+		},
+
+		changeValue: function changeValue(value) {
+			this.setState({
+				addGroups: value
+			});
+
+			// Clear the search history so there is no drop down with old data after adding a recipient
+			this.refs.addgroups.setState({ options: [] });
+		},
+
+		// Disable client side filtering
+		filter: function filter(option, filterString) {
+			return option;
+		},
+
+		search: function search(input, callback) {
+			// Clear the search history so there is no drop down with old data when search text input is empty
+			if (!input) {
+				return Promise.resolve({ options: [] });
+			}
+
+			$.ajax({
+				method: "GET",
+				url: _config2.default.apiBasePath + "/group",
+				data: {
+					search: input
+				}
+			}).done(function (data) {
+				setTimeout(function () {
+					var autoComplete = [];
+
+					data.data.forEach(function (element, index, array) {
+						autoComplete.push({
+							label: element.title + ": " + element.description,
+							value: element.entity_id
+						});
+					});
+
+					callback(null, {
+						options: autoComplete
+					});
+				}, 100);
+			});
+		},
+
+		// Send an API request and queue the message to be sent
+		send: function send(event) {
+			var _this = this;
+
+			// Prevent the form from being submitted
+			event.preventDefault();
+
+			// Create a list of entity_id's that should relate to this entity
+			var entity2 = [];
+			this.state.addGroups.forEach(function (element, index, array) {
+				entity2.push(element.value);
+			});
+
+			// Send API request
+			$.ajax({
+				method: "POST",
+				url: _config2.default.apiBasePath + "/relation",
+				data: JSON.stringify({
+					entity1: [{
+						relations: [{
+							type: "member",
+							member_number: this.props.member_number
+						}]
+					}],
+					entity2: entity2
+				})
+			}).done(function () {
+				/*
+	   			_this.setState({
+	   				showEditForm: false,
+	   				addGroups: "",
+	   			});
+	   */
+			});
+		},
+
+		gotoGroup: function gotoGroup(value, event) {
+			UIkit.modal.alert("TODO: Go to member " + value.label);
+		},
+
+		render: function render() {
+			return _react2.default.createElement(
+				'span',
+				null,
+				'TODO: Groups'
+			);
+
+			if (this.state.showEditForm) {
+				return _react2.default.createElement(
+					'div',
+					null,
+					_react2.default.createElement(
+						'form',
+						{ className: 'uk-form uk-form-horizontal', onSubmit: this.send },
+						_react2.default.createElement(
+							'div',
+							{ className: 'uk-form-row' },
+							_react2.default.createElement(
+								'label',
+								{ className: 'uk-form-label', htmlFor: 'groups' },
+								'Lägg till användaren i följande grupper'
+							),
+							_react2.default.createElement(
+								'div',
+								{ className: 'uk-form-controls' },
+								_react2.default.createElement(_reactSelect.Async, { ref: 'addgroups', multi: true, cache: false, name: 'groups', value: this.state.addGroups, filterOption: this.filter, loadOptions: this.search, onChange: this.changeValue, onValueClick: this.gotoGroup })
+							)
+						),
+						_react2.default.createElement(
+							'div',
+							{ className: 'uk-form-row' },
+							_react2.default.createElement(
+								'div',
+								{ className: 'uk-form-controls' },
+								_react2.default.createElement(
+									'button',
+									{ className: 'uk-float-left uk-button uk-button-danger', onClick: this.cancel },
+									_react2.default.createElement('i', { className: 'uk-icon-close' }),
+									' Avbryt'
+								),
+								_react2.default.createElement(
+									'button',
+									{ className: 'uk-float-right uk-button uk-button-success', onClick: this.save },
+									_react2.default.createElement('i', { className: 'uk-icon-save' }),
+									' Spara'
+								)
+							)
+						)
+					)
+				);
+			} else {
+				return _react2.default.createElement(
+					'div',
+					null,
+					_react2.default.createElement(_Groups.Groups, { type: _Group2.default, url: "/membership/member/" + this.props.member_id + "/groups" }),
+					_react2.default.createElement(
+						'button',
+						{ className: 'uk-button uk-button-primary', onClick: this.add },
+						_react2.default.createElement('i', { className: 'uk-icon-plus-circle' }),
+						' Lägg till grupp'
+					)
+				);
+			}
+		}
+	});
+
+	// Backbone
+
+
+	module.exports = GroupUserBox;
+
+/***/ },
+/* 316 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _backboneReactComponent = __webpack_require__(237);
+
+	var _backboneReactComponent2 = _interopRequireDefault(_backboneReactComponent);
+
+	var _reactRouter = __webpack_require__(172);
+
+	var _BackboneTable = __webpack_require__(256);
+
+	var _BackboneTable2 = _interopRequireDefault(_BackboneTable);
+
+	var _TableDropdownMenu = __webpack_require__(274);
+
+	var _TableDropdownMenu2 = _interopRequireDefault(_TableDropdownMenu);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	module.exports = _react2.default.createClass({
+		displayName: 'exports',
+
+		mixins: [Backbone.React.Component.mixin, _BackboneTable2.default],
+
+		getInitialState: function getInitialState() {
+			return {
+				columns: 9
+			};
+		},
+
+		componentWillMount: function componentWillMount() {
+			this.fetch();
+		},
+
+		componentWillReceiveProps: function componentWillReceiveProps(nextProps) {
+			if (nextProps.filters != this.state.filters) {
+				this.setState({
+					filters: nextProps.filters
+				});
+
+				// TODO: setState() has a delay so we need to wait a moment
+				var _this = this;
+				setTimeout(function () {
+					_this.fetch();
+				}, 100);
+			}
+		},
+
+		removeTextMessage: function removeTextMessage(group) {
+			return "Are you sure you want to remove group \"" + group.title + "\"?";
+		},
+
+		removeErrorMessage: function removeErrorMessage() {
+			UIkit.modal.alert("Error deleting group");
+		},
+
+		renderHeader: function renderHeader() {
+			return [{
+				title: "Namn",
+				sort: "title"
+			}, {
+				title: "Beskrivning",
+				sort: "description"
+			}, {
+				title: "Antal medlemmar",
+				sort: "membercount"
+			}, {
+				title: ""
+			}];
+		},
+
+		renderRow: function renderRow(row, i) {
+			return _react2.default.createElement(
+				'tr',
+				{ key: i },
+				_react2.default.createElement(
+					'td',
+					null,
+					_react2.default.createElement(
+						_reactRouter.Link,
+						{ to: "/groups/" + row.group_id },
+						row.title
+					)
+				),
+				_react2.default.createElement(
+					'td',
+					null,
+					_react2.default.createElement(
+						_reactRouter.Link,
+						{ to: "/groups/" + row.group_id },
+						row.description
+					)
+				),
+				_react2.default.createElement(
+					'td',
+					null,
+					row.membercount
+				),
+				_react2.default.createElement(
+					'td',
+					null,
+					_react2.default.createElement(
+						_TableDropdownMenu2.default,
+						null,
+						_react2.default.createElement(
+							_reactRouter.Link,
+							{ to: "/groups/" + row.group_id + "/edit" },
+							_react2.default.createElement('i', { className: 'uk-icon uk-icon-cog' }),
+							' Redigera grupp'
+						),
+						this.removeButton(i, "Ta bort grupp")
+					)
+				)
+			);
+		}
+	});
+
+/***/ },
+/* 317 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _backbone = __webpack_require__(238);
+
+	var _backbone2 = _interopRequireDefault(_backbone);
+
+	var _Group = __webpack_require__(318);
+
+	var _Group2 = _interopRequireDefault(_Group);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	var GroupCollection = _backbone2.default.PageableCollection.extend({
+		model: _Group2.default,
+		url: "/membership/group"
+	});
+
+	module.exports = GroupCollection;
+
+/***/ },
+/* 318 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+
+	var _backbone = __webpack_require__(238);
+
+	var _backbone2 = _interopRequireDefault(_backbone);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	var GroupModel = _backbone2.default.Model.fullExtend({
+		idAttribute: "group_id",
+		urlRoot: "/membership/group",
+		defaults: {
+			created_at: "0000-00-00T00:00:00Z",
+			updated_at: "0000-00-00T00:00:00Z",
+			parent: "",
+			title: "",
+			description: ""
+		}
+	});
+
+	module.exports = GroupModel;
+
+/***/ },
+/* 319 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/*!
+	  Copyright (c) 2016 Jed Watson.
+	  Licensed under the MIT License (MIT), see
+	  http://jedwatson.github.io/react-select
+	*/
+
+	'use strict';
+
+	Object.defineProperty(exports, '__esModule', {
+		value: true
+	});
+
+	var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+	function _objectWithoutProperties(obj, keys) { var target = {}; for (var i in obj) { if (keys.indexOf(i) >= 0) continue; if (!Object.prototype.hasOwnProperty.call(obj, i)) continue; target[i] = obj[i]; } return target; }
+
+	function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _reactDom = __webpack_require__(34);
+
+	var _reactDom2 = _interopRequireDefault(_reactDom);
+
+	var _reactInputAutosize = __webpack_require__(320);
+
+	var _reactInputAutosize2 = _interopRequireDefault(_reactInputAutosize);
+
+	var _classnames = __webpack_require__(321);
+
+	var _classnames2 = _interopRequireDefault(_classnames);
+
+	var _utilsDefaultArrowRenderer = __webpack_require__(322);
+
+	var _utilsDefaultArrowRenderer2 = _interopRequireDefault(_utilsDefaultArrowRenderer);
+
+	var _utilsDefaultFilterOptions = __webpack_require__(323);
+
+	var _utilsDefaultFilterOptions2 = _interopRequireDefault(_utilsDefaultFilterOptions);
+
+	var _utilsDefaultMenuRenderer = __webpack_require__(325);
+
+	var _utilsDefaultMenuRenderer2 = _interopRequireDefault(_utilsDefaultMenuRenderer);
+
+	var _Async = __webpack_require__(326);
+
+	var _Async2 = _interopRequireDefault(_Async);
+
+	var _AsyncCreatable = __webpack_require__(327);
+
+	var _AsyncCreatable2 = _interopRequireDefault(_AsyncCreatable);
+
+	var _Creatable = __webpack_require__(328);
+
+	var _Creatable2 = _interopRequireDefault(_Creatable);
+
+	var _Option = __webpack_require__(329);
+
+	var _Option2 = _interopRequireDefault(_Option);
+
+	var _Value = __webpack_require__(330);
+
+	var _Value2 = _interopRequireDefault(_Value);
+
+	function stringifyValue(value) {
+		var valueType = typeof value;
+		if (valueType === 'string') {
+			return value;
+		} else if (valueType === 'object') {
+			return JSON.stringify(value);
+		} else if (valueType === 'number' || valueType === 'boolean') {
+			return String(value);
+		} else {
+			return '';
+		}
+	}
+
+	var stringOrNode = _react2['default'].PropTypes.oneOfType([_react2['default'].PropTypes.string, _react2['default'].PropTypes.node]);
+
+	var instanceId = 1;
+
+	var Select = _react2['default'].createClass({
+
+		displayName: 'Select',
+
+		propTypes: {
+			addLabelText: _react2['default'].PropTypes.string, // placeholder displayed when you want to add a label on a multi-value input
+			'aria-label': _react2['default'].PropTypes.string, // Aria label (for assistive tech)
+			'aria-labelledby': _react2['default'].PropTypes.string, // HTML ID of an element that should be used as the label (for assistive tech)
+			arrowRenderer: _react2['default'].PropTypes.func, // Create drop-down caret element
+			autoBlur: _react2['default'].PropTypes.bool, // automatically blur the component when an option is selected
+			autofocus: _react2['default'].PropTypes.bool, // autofocus the component on mount
+			autosize: _react2['default'].PropTypes.bool, // whether to enable autosizing or not
+			backspaceRemoves: _react2['default'].PropTypes.bool, // whether backspace removes an item if there is no text input
+			backspaceToRemoveMessage: _react2['default'].PropTypes.string, // Message to use for screenreaders to press backspace to remove the current item - {label} is replaced with the item label
+			className: _react2['default'].PropTypes.string, // className for the outer element
+			clearAllText: stringOrNode, // title for the "clear" control when multi: true
+			clearValueText: stringOrNode, // title for the "clear" control
+			clearable: _react2['default'].PropTypes.bool, // should it be possible to reset value
+			delimiter: _react2['default'].PropTypes.string, // delimiter to use to join multiple values for the hidden field value
+			disabled: _react2['default'].PropTypes.bool, // whether the Select is disabled or not
+			escapeClearsValue: _react2['default'].PropTypes.bool, // whether escape clears the value when the menu is closed
+			filterOption: _react2['default'].PropTypes.func, // method to filter a single option (option, filterString)
+			filterOptions: _react2['default'].PropTypes.any, // boolean to enable default filtering or function to filter the options array ([options], filterString, [values])
+			ignoreAccents: _react2['default'].PropTypes.bool, // whether to strip diacritics when filtering
+			ignoreCase: _react2['default'].PropTypes.bool, // whether to perform case-insensitive filtering
+			inputProps: _react2['default'].PropTypes.object, // custom attributes for the Input
+			inputRenderer: _react2['default'].PropTypes.func, // returns a custom input component
+			instanceId: _react2['default'].PropTypes.string, // set the components instanceId
+			isLoading: _react2['default'].PropTypes.bool, // whether the Select is loading externally or not (such as options being loaded)
+			joinValues: _react2['default'].PropTypes.bool, // joins multiple values into a single form field with the delimiter (legacy mode)
+			labelKey: _react2['default'].PropTypes.string, // path of the label value in option objects
+			matchPos: _react2['default'].PropTypes.string, // (any|start) match the start or entire string when filtering
+			matchProp: _react2['default'].PropTypes.string, // (any|label|value) which option property to filter on
+			menuBuffer: _react2['default'].PropTypes.number, // optional buffer (in px) between the bottom of the viewport and the bottom of the menu
+			menuContainerStyle: _react2['default'].PropTypes.object, // optional style to apply to the menu container
+			menuRenderer: _react2['default'].PropTypes.func, // renders a custom menu with options
+			menuStyle: _react2['default'].PropTypes.object, // optional style to apply to the menu
+			multi: _react2['default'].PropTypes.bool, // multi-value input
+			name: _react2['default'].PropTypes.string, // generates a hidden <input /> tag with this field name for html forms
+			noResultsText: stringOrNode, // placeholder displayed when there are no matching search results
+			onBlur: _react2['default'].PropTypes.func, // onBlur handler: function (event) {}
+			onBlurResetsInput: _react2['default'].PropTypes.bool, // whether input is cleared on blur
+			onChange: _react2['default'].PropTypes.func, // onChange handler: function (newValue) {}
+			onClose: _react2['default'].PropTypes.func, // fires when the menu is closed
+			onCloseResetsInput: _react2['default'].PropTypes.bool, // whether input is cleared when menu is closed through the arrow
+			onFocus: _react2['default'].PropTypes.func, // onFocus handler: function (event) {}
+			onInputChange: _react2['default'].PropTypes.func, // onInputChange handler: function (inputValue) {}
+			onInputKeyDown: _react2['default'].PropTypes.func, // input keyDown handler: function (event) {}
+			onMenuScrollToBottom: _react2['default'].PropTypes.func, // fires when the menu is scrolled to the bottom; can be used to paginate options
+			onOpen: _react2['default'].PropTypes.func, // fires when the menu is opened
+			onValueClick: _react2['default'].PropTypes.func, // onClick handler for value labels: function (value, event) {}
+			openAfterFocus: _react2['default'].PropTypes.bool, // boolean to enable opening dropdown when focused
+			openOnFocus: _react2['default'].PropTypes.bool, // always open options menu on focus
+			optionClassName: _react2['default'].PropTypes.string, // additional class(es) to apply to the <Option /> elements
+			optionComponent: _react2['default'].PropTypes.func, // option component to render in dropdown
+			optionRenderer: _react2['default'].PropTypes.func, // optionRenderer: function (option) {}
+			options: _react2['default'].PropTypes.array, // array of options
+			pageSize: _react2['default'].PropTypes.number, // number of entries to page when using page up/down keys
+			placeholder: stringOrNode, // field placeholder, displayed when there's no value
+			required: _react2['default'].PropTypes.bool, // applies HTML5 required attribute when needed
+			resetValue: _react2['default'].PropTypes.any, // value to use when you clear the control
+			scrollMenuIntoView: _react2['default'].PropTypes.bool, // boolean to enable the viewport to shift so that the full menu fully visible when engaged
+			searchable: _react2['default'].PropTypes.bool, // whether to enable searching feature or not
+			simpleValue: _react2['default'].PropTypes.bool, // pass the value to onChange as a simple value (legacy pre 1.0 mode), defaults to false
+			style: _react2['default'].PropTypes.object, // optional style to apply to the control
+			tabIndex: _react2['default'].PropTypes.string, // optional tab index of the control
+			tabSelectsValue: _react2['default'].PropTypes.bool, // whether to treat tabbing out while focused to be value selection
+			value: _react2['default'].PropTypes.any, // initial field value
+			valueComponent: _react2['default'].PropTypes.func, // value component to render
+			valueKey: _react2['default'].PropTypes.string, // path of the label value in option objects
+			valueRenderer: _react2['default'].PropTypes.func, // valueRenderer: function (option) {}
+			wrapperStyle: _react2['default'].PropTypes.object },
+
+		// optional style to apply to the component wrapper
+		statics: { Async: _Async2['default'], AsyncCreatable: _AsyncCreatable2['default'], Creatable: _Creatable2['default'] },
+
+		getDefaultProps: function getDefaultProps() {
+			return {
+				addLabelText: 'Add "{label}"?',
+				arrowRenderer: _utilsDefaultArrowRenderer2['default'],
+				autosize: true,
+				backspaceRemoves: true,
+				backspaceToRemoveMessage: 'Press backspace to remove {label}',
+				clearable: true,
+				clearAllText: 'Clear all',
+				clearValueText: 'Clear value',
+				delimiter: ',',
+				disabled: false,
+				escapeClearsValue: true,
+				filterOptions: _utilsDefaultFilterOptions2['default'],
+				ignoreAccents: true,
+				ignoreCase: true,
+				inputProps: {},
+				isLoading: false,
+				joinValues: false,
+				labelKey: 'label',
+				matchPos: 'any',
+				matchProp: 'any',
+				menuBuffer: 0,
+				menuRenderer: _utilsDefaultMenuRenderer2['default'],
+				multi: false,
+				noResultsText: 'No results found',
+				onBlurResetsInput: true,
+				onCloseResetsInput: true,
+				openAfterFocus: false,
+				optionComponent: _Option2['default'],
+				pageSize: 5,
+				placeholder: 'Select...',
+				required: false,
+				scrollMenuIntoView: true,
+				searchable: true,
+				simpleValue: false,
+				tabSelectsValue: true,
+				valueComponent: _Value2['default'],
+				valueKey: 'value'
+			};
+		},
+
+		getInitialState: function getInitialState() {
+			return {
+				inputValue: '',
+				isFocused: false,
+				isOpen: false,
+				isPseudoFocused: false,
+				required: false
+			};
+		},
+
+		componentWillMount: function componentWillMount() {
+			this._instancePrefix = 'react-select-' + (this.props.instanceId || ++instanceId) + '-';
+			var valueArray = this.getValueArray(this.props.value);
+
+			if (this.props.required) {
+				this.setState({
+					required: this.handleRequired(valueArray[0], this.props.multi)
+				});
+			}
+		},
+
+		componentDidMount: function componentDidMount() {
+			if (this.props.autofocus) {
+				this.focus();
+			}
+		},
+
+		componentWillReceiveProps: function componentWillReceiveProps(nextProps) {
+			var valueArray = this.getValueArray(nextProps.value, nextProps);
+
+			if (nextProps.required) {
+				this.setState({
+					required: this.handleRequired(valueArray[0], nextProps.multi)
+				});
+			}
+		},
+
+		componentWillUpdate: function componentWillUpdate(nextProps, nextState) {
+			if (nextState.isOpen !== this.state.isOpen) {
+				this.toggleTouchOutsideEvent(nextState.isOpen);
+				var handler = nextState.isOpen ? nextProps.onOpen : nextProps.onClose;
+				handler && handler();
+			}
+		},
+
+		componentDidUpdate: function componentDidUpdate(prevProps, prevState) {
+			// focus to the selected option
+			if (this.menu && this.focused && this.state.isOpen && !this.hasScrolledToOption) {
+				var focusedOptionNode = _reactDom2['default'].findDOMNode(this.focused);
+				var menuNode = _reactDom2['default'].findDOMNode(this.menu);
+				menuNode.scrollTop = focusedOptionNode.offsetTop;
+				this.hasScrolledToOption = true;
+			} else if (!this.state.isOpen) {
+				this.hasScrolledToOption = false;
+			}
+
+			if (this._scrollToFocusedOptionOnUpdate && this.focused && this.menu) {
+				this._scrollToFocusedOptionOnUpdate = false;
+				var focusedDOM = _reactDom2['default'].findDOMNode(this.focused);
+				var menuDOM = _reactDom2['default'].findDOMNode(this.menu);
+				var focusedRect = focusedDOM.getBoundingClientRect();
+				var menuRect = menuDOM.getBoundingClientRect();
+				if (focusedRect.bottom > menuRect.bottom || focusedRect.top < menuRect.top) {
+					menuDOM.scrollTop = focusedDOM.offsetTop + focusedDOM.clientHeight - menuDOM.offsetHeight;
+				}
+			}
+			if (this.props.scrollMenuIntoView && this.menuContainer) {
+				var menuContainerRect = this.menuContainer.getBoundingClientRect();
+				if (window.innerHeight < menuContainerRect.bottom + this.props.menuBuffer) {
+					window.scrollBy(0, menuContainerRect.bottom + this.props.menuBuffer - window.innerHeight);
+				}
+			}
+			if (prevProps.disabled !== this.props.disabled) {
+				this.setState({ isFocused: false }); // eslint-disable-line react/no-did-update-set-state
+				this.closeMenu();
+			}
+		},
+
+		componentWillUnmount: function componentWillUnmount() {
+			document.removeEventListener('touchstart', this.handleTouchOutside);
+		},
+
+		toggleTouchOutsideEvent: function toggleTouchOutsideEvent(enabled) {
+			if (enabled) {
+				document.addEventListener('touchstart', this.handleTouchOutside);
+			} else {
+				document.removeEventListener('touchstart', this.handleTouchOutside);
+			}
+		},
+
+		handleTouchOutside: function handleTouchOutside(event) {
+			// handle touch outside on ios to dismiss menu
+			if (this.wrapper && !this.wrapper.contains(event.target)) {
+				this.closeMenu();
+			}
+		},
+
+		focus: function focus() {
+			if (!this.input) return;
+			this.input.focus();
+
+			if (this.props.openAfterFocus) {
+				this.setState({
+					isOpen: true
+				});
+			}
+		},
+
+		blurInput: function blurInput() {
+			if (!this.input) return;
+			this.input.blur();
+		},
+
+		handleTouchMove: function handleTouchMove(event) {
+			// Set a flag that the view is being dragged
+			this.dragging = true;
+		},
+
+		handleTouchStart: function handleTouchStart(event) {
+			// Set a flag that the view is not being dragged
+			this.dragging = false;
+		},
+
+		handleTouchEnd: function handleTouchEnd(event) {
+			// Check if the view is being dragged, In this case
+			// we don't want to fire the click event (because the user only wants to scroll)
+			if (this.dragging) return;
+
+			// Fire the mouse events
+			this.handleMouseDown(event);
+		},
+
+		handleTouchEndClearValue: function handleTouchEndClearValue(event) {
+			// Check if the view is being dragged, In this case
+			// we don't want to fire the click event (because the user only wants to scroll)
+			if (this.dragging) return;
+
+			// Clear the value
+			this.clearValue(event);
+		},
+
+		handleMouseDown: function handleMouseDown(event) {
+			// if the event was triggered by a mousedown and not the primary
+			// button, or if the component is disabled, ignore it.
+			if (this.props.disabled || event.type === 'mousedown' && event.button !== 0) {
+				return;
+			}
+
+			if (event.target.tagName === 'INPUT') {
+				return;
+			}
+
+			// prevent default event handlers
+			event.stopPropagation();
+			event.preventDefault();
+
+			// for the non-searchable select, toggle the menu
+			if (!this.props.searchable) {
+				this.focus();
+				return this.setState({
+					isOpen: !this.state.isOpen
+				});
+			}
+
+			if (this.state.isFocused) {
+				// On iOS, we can get into a state where we think the input is focused but it isn't really,
+				// since iOS ignores programmatic calls to input.focus() that weren't triggered by a click event.
+				// Call focus() again here to be safe.
+				this.focus();
+
+				var input = this.input;
+				if (typeof input.getInput === 'function') {
+					// Get the actual DOM input if the ref is an <AutosizeInput /> component
+					input = input.getInput();
+				}
+
+				// clears the value so that the cursor will be at the end of input when the component re-renders
+				input.value = '';
+
+				// if the input is focused, ensure the menu is open
+				this.setState({
+					isOpen: true,
+					isPseudoFocused: false
+				});
+			} else {
+				// otherwise, focus the input and open the menu
+				this._openAfterFocus = true;
+				this.focus();
+			}
+		},
+
+		handleMouseDownOnArrow: function handleMouseDownOnArrow(event) {
+			// if the event was triggered by a mousedown and not the primary
+			// button, or if the component is disabled, ignore it.
+			if (this.props.disabled || event.type === 'mousedown' && event.button !== 0) {
+				return;
+			}
+			// If the menu isn't open, let the event bubble to the main handleMouseDown
+			if (!this.state.isOpen) {
+				return;
+			}
+			// prevent default event handlers
+			event.stopPropagation();
+			event.preventDefault();
+			// close the menu
+			this.closeMenu();
+		},
+
+		handleMouseDownOnMenu: function handleMouseDownOnMenu(event) {
+			// if the event was triggered by a mousedown and not the primary
+			// button, or if the component is disabled, ignore it.
+			if (this.props.disabled || event.type === 'mousedown' && event.button !== 0) {
+				return;
+			}
+			event.stopPropagation();
+			event.preventDefault();
+
+			this._openAfterFocus = true;
+			this.focus();
+		},
+
+		closeMenu: function closeMenu() {
+			if (this.props.onCloseResetsInput) {
+				this.setState({
+					isOpen: false,
+					isPseudoFocused: this.state.isFocused && !this.props.multi,
+					inputValue: ''
+				});
+			} else {
+				this.setState({
+					isOpen: false,
+					isPseudoFocused: this.state.isFocused && !this.props.multi,
+					inputValue: this.state.inputValue
+				});
+			}
+			this.hasScrolledToOption = false;
+		},
+
+		handleInputFocus: function handleInputFocus(event) {
+			if (this.props.disabled) return;
+			var isOpen = this.state.isOpen || this._openAfterFocus || this.props.openOnFocus;
+			if (this.props.onFocus) {
+				this.props.onFocus(event);
+			}
+			this.setState({
+				isFocused: true,
+				isOpen: isOpen
+			});
+			this._openAfterFocus = false;
+		},
+
+		handleInputBlur: function handleInputBlur(event) {
+			// The check for menu.contains(activeElement) is necessary to prevent IE11's scrollbar from closing the menu in certain contexts.
+			if (this.menu && (this.menu === document.activeElement || this.menu.contains(document.activeElement))) {
+				this.focus();
+				return;
+			}
+
+			if (this.props.onBlur) {
+				this.props.onBlur(event);
+			}
+			var onBlurredState = {
+				isFocused: false,
+				isOpen: false,
+				isPseudoFocused: false
+			};
+			if (this.props.onBlurResetsInput) {
+				onBlurredState.inputValue = '';
+			}
+			this.setState(onBlurredState);
+		},
+
+		handleInputChange: function handleInputChange(event) {
+			var newInputValue = event.target.value;
+
+			if (this.state.inputValue !== event.target.value && this.props.onInputChange) {
+				var nextState = this.props.onInputChange(newInputValue);
+				// Note: != used deliberately here to catch undefined and null
+				if (nextState != null && typeof nextState !== 'object') {
+					newInputValue = '' + nextState;
+				}
+			}
+
+			this.setState({
+				isOpen: true,
+				isPseudoFocused: false,
+				inputValue: newInputValue
+			});
+		},
+
+		handleKeyDown: function handleKeyDown(event) {
+			if (this.props.disabled) return;
+
+			if (typeof this.props.onInputKeyDown === 'function') {
+				this.props.onInputKeyDown(event);
+				if (event.defaultPrevented) {
+					return;
+				}
+			}
+
+			switch (event.keyCode) {
+				case 8:
+					// backspace
+					if (!this.state.inputValue && this.props.backspaceRemoves) {
+						event.preventDefault();
+						this.popValue();
+					}
+					return;
+				case 9:
+					// tab
+					if (event.shiftKey || !this.state.isOpen || !this.props.tabSelectsValue) {
+						return;
+					}
+					this.selectFocusedOption();
+					return;
+				case 13:
+					// enter
+					if (!this.state.isOpen) return;
+					event.stopPropagation();
+					this.selectFocusedOption();
+					break;
+				case 27:
+					// escape
+					if (this.state.isOpen) {
+						this.closeMenu();
+						event.stopPropagation();
+					} else if (this.props.clearable && this.props.escapeClearsValue) {
+						this.clearValue(event);
+						event.stopPropagation();
+					}
+					break;
+				case 38:
+					// up
+					this.focusPreviousOption();
+					break;
+				case 40:
+					// down
+					this.focusNextOption();
+					break;
+				case 33:
+					// page up
+					this.focusPageUpOption();
+					break;
+				case 34:
+					// page down
+					this.focusPageDownOption();
+					break;
+				case 35:
+					// end key
+					if (event.shiftKey) {
+						return;
+					}
+					this.focusEndOption();
+					break;
+				case 36:
+					// home key
+					if (event.shiftKey) {
+						return;
+					}
+					this.focusStartOption();
+					break;
+				default:
+					return;
+			}
+			event.preventDefault();
+		},
+
+		handleValueClick: function handleValueClick(option, event) {
+			if (!this.props.onValueClick) return;
+			this.props.onValueClick(option, event);
+		},
+
+		handleMenuScroll: function handleMenuScroll(event) {
+			if (!this.props.onMenuScrollToBottom) return;
+			var target = event.target;
+
+			if (target.scrollHeight > target.offsetHeight && !(target.scrollHeight - target.offsetHeight - target.scrollTop)) {
+				this.props.onMenuScrollToBottom();
+			}
+		},
+
+		handleRequired: function handleRequired(value, multi) {
+			if (!value) return true;
+			return multi ? value.length === 0 : Object.keys(value).length === 0;
+		},
+
+		getOptionLabel: function getOptionLabel(op) {
+			return op[this.props.labelKey];
+		},
+
+		/**
+	  * Turns a value into an array from the given options
+	  * @param	{String|Number|Array}	value		- the value of the select input
+	  * @param	{Object}		nextProps	- optionally specify the nextProps so the returned array uses the latest configuration
+	  * @returns	{Array}	the value of the select represented in an array
+	  */
+		getValueArray: function getValueArray(value, nextProps) {
+			var _this = this;
+
+			/** support optionally passing in the `nextProps` so `componentWillReceiveProps` updates will function as expected */
+			var props = typeof nextProps === 'object' ? nextProps : this.props;
+			if (props.multi) {
+				if (typeof value === 'string') value = value.split(props.delimiter);
+				if (!Array.isArray(value)) {
+					if (value === null || value === undefined) return [];
+					value = [value];
+				}
+				return value.map(function (value) {
+					return _this.expandValue(value, props);
+				}).filter(function (i) {
+					return i;
+				});
+			}
+			var expandedValue = this.expandValue(value, props);
+			return expandedValue ? [expandedValue] : [];
+		},
+
+		/**
+	  * Retrieve a value from the given options and valueKey
+	  * @param	{String|Number|Array}	value	- the selected value(s)
+	  * @param	{Object}		props	- the Select component's props (or nextProps)
+	  */
+		expandValue: function expandValue(value, props) {
+			var valueType = typeof value;
+			if (valueType !== 'string' && valueType !== 'number' && valueType !== 'boolean') return value;
+			var options = props.options;
+			var valueKey = props.valueKey;
+
+			if (!options) return;
+			for (var i = 0; i < options.length; i++) {
+				if (options[i][valueKey] === value) return options[i];
+			}
+		},
+
+		setValue: function setValue(value) {
+			var _this2 = this;
+
+			if (this.props.autoBlur) {
+				this.blurInput();
+			}
+			if (!this.props.onChange) return;
+			if (this.props.required) {
+				var required = this.handleRequired(value, this.props.multi);
+				this.setState({ required: required });
+			}
+			if (this.props.simpleValue && value) {
+				value = this.props.multi ? value.map(function (i) {
+					return i[_this2.props.valueKey];
+				}).join(this.props.delimiter) : value[this.props.valueKey];
+			}
+			this.props.onChange(value);
+		},
+
+		selectValue: function selectValue(value) {
+			var _this3 = this;
+
+			//NOTE: update value in the callback to make sure the input value is empty so that there are no styling issues (Chrome had issue otherwise)
+			this.hasScrolledToOption = false;
+			if (this.props.multi) {
+				this.setState({
+					inputValue: '',
+					focusedIndex: null
+				}, function () {
+					_this3.addValue(value);
+				});
+			} else {
+				this.setState({
+					isOpen: false,
+					inputValue: '',
+					isPseudoFocused: this.state.isFocused
+				}, function () {
+					_this3.setValue(value);
+				});
+			}
+		},
+
+		addValue: function addValue(value) {
+			var valueArray = this.getValueArray(this.props.value);
+			this.setValue(valueArray.concat(value));
+		},
+
+		popValue: function popValue() {
+			var valueArray = this.getValueArray(this.props.value);
+			if (!valueArray.length) return;
+			if (valueArray[valueArray.length - 1].clearableValue === false) return;
+			this.setValue(valueArray.slice(0, valueArray.length - 1));
+		},
+
+		removeValue: function removeValue(value) {
+			var valueArray = this.getValueArray(this.props.value);
+			this.setValue(valueArray.filter(function (i) {
+				return i !== value;
+			}));
+			this.focus();
+		},
+
+		clearValue: function clearValue(event) {
+			// if the event was triggered by a mousedown and not the primary
+			// button, ignore it.
+			if (event && event.type === 'mousedown' && event.button !== 0) {
+				return;
+			}
+			event.stopPropagation();
+			event.preventDefault();
+			this.setValue(this.getResetValue());
+			this.setState({
+				isOpen: false,
+				inputValue: ''
+			}, this.focus);
+		},
+
+		getResetValue: function getResetValue() {
+			if (this.props.resetValue !== undefined) {
+				return this.props.resetValue;
+			} else if (this.props.multi) {
+				return [];
+			} else {
+				return null;
+			}
+		},
+
+		focusOption: function focusOption(option) {
+			this.setState({
+				focusedOption: option
+			});
+		},
+
+		focusNextOption: function focusNextOption() {
+			this.focusAdjacentOption('next');
+		},
+
+		focusPreviousOption: function focusPreviousOption() {
+			this.focusAdjacentOption('previous');
+		},
+
+		focusPageUpOption: function focusPageUpOption() {
+			this.focusAdjacentOption('page_up');
+		},
+
+		focusPageDownOption: function focusPageDownOption() {
+			this.focusAdjacentOption('page_down');
+		},
+
+		focusStartOption: function focusStartOption() {
+			this.focusAdjacentOption('start');
+		},
+
+		focusEndOption: function focusEndOption() {
+			this.focusAdjacentOption('end');
+		},
+
+		focusAdjacentOption: function focusAdjacentOption(dir) {
+			var options = this._visibleOptions.map(function (option, index) {
+				return { option: option, index: index };
+			}).filter(function (option) {
+				return !option.option.disabled;
+			});
+			this._scrollToFocusedOptionOnUpdate = true;
+			if (!this.state.isOpen) {
+				this.setState({
+					isOpen: true,
+					inputValue: '',
+					focusedOption: this._focusedOption || options[dir === 'next' ? 0 : options.length - 1].option
+				});
+				return;
+			}
+			if (!options.length) return;
+			var focusedIndex = -1;
+			for (var i = 0; i < options.length; i++) {
+				if (this._focusedOption === options[i].option) {
+					focusedIndex = i;
+					break;
+				}
+			}
+			if (dir === 'next' && focusedIndex !== -1) {
+				focusedIndex = (focusedIndex + 1) % options.length;
+			} else if (dir === 'previous') {
+				if (focusedIndex > 0) {
+					focusedIndex = focusedIndex - 1;
+				} else {
+					focusedIndex = options.length - 1;
+				}
+			} else if (dir === 'start') {
+				focusedIndex = 0;
+			} else if (dir === 'end') {
+				focusedIndex = options.length - 1;
+			} else if (dir === 'page_up') {
+				var potentialIndex = focusedIndex - this.props.pageSize;
+				if (potentialIndex < 0) {
+					focusedIndex = 0;
+				} else {
+					focusedIndex = potentialIndex;
+				}
+			} else if (dir === 'page_down') {
+				var potentialIndex = focusedIndex + this.props.pageSize;
+				if (potentialIndex > options.length - 1) {
+					focusedIndex = options.length - 1;
+				} else {
+					focusedIndex = potentialIndex;
+				}
+			}
+
+			if (focusedIndex === -1) {
+				focusedIndex = 0;
+			}
+
+			this.setState({
+				focusedIndex: options[focusedIndex].index,
+				focusedOption: options[focusedIndex].option
+			});
+		},
+
+		getFocusedOption: function getFocusedOption() {
+			return this._focusedOption;
+		},
+
+		getInputValue: function getInputValue() {
+			return this.state.inputValue;
+		},
+
+		selectFocusedOption: function selectFocusedOption() {
+			if (this._focusedOption) {
+				return this.selectValue(this._focusedOption);
+			}
+		},
+
+		renderLoading: function renderLoading() {
+			if (!this.props.isLoading) return;
+			return _react2['default'].createElement(
+				'span',
+				{ className: 'Select-loading-zone', 'aria-hidden': 'true' },
+				_react2['default'].createElement('span', { className: 'Select-loading' })
+			);
+		},
+
+		renderValue: function renderValue(valueArray, isOpen) {
+			var _this4 = this;
+
+			var renderLabel = this.props.valueRenderer || this.getOptionLabel;
+			var ValueComponent = this.props.valueComponent;
+			if (!valueArray.length) {
+				return !this.state.inputValue ? _react2['default'].createElement(
+					'div',
+					{ className: 'Select-placeholder' },
+					this.props.placeholder
+				) : null;
+			}
+			var onClick = this.props.onValueClick ? this.handleValueClick : null;
+			if (this.props.multi) {
+				return valueArray.map(function (value, i) {
+					return _react2['default'].createElement(
+						ValueComponent,
+						{
+							id: _this4._instancePrefix + '-value-' + i,
+							instancePrefix: _this4._instancePrefix,
+							disabled: _this4.props.disabled || value.clearableValue === false,
+							key: 'value-' + i + '-' + value[_this4.props.valueKey],
+							onClick: onClick,
+							onRemove: _this4.removeValue,
+							value: value
+						},
+						renderLabel(value, i),
+						_react2['default'].createElement(
+							'span',
+							{ className: 'Select-aria-only' },
+							' '
+						)
+					);
+				});
+			} else if (!this.state.inputValue) {
+				if (isOpen) onClick = null;
+				return _react2['default'].createElement(
+					ValueComponent,
+					{
+						id: this._instancePrefix + '-value-item',
+						disabled: this.props.disabled,
+						instancePrefix: this._instancePrefix,
+						onClick: onClick,
+						value: valueArray[0]
+					},
+					renderLabel(valueArray[0])
+				);
+			}
+		},
+
+		renderInput: function renderInput(valueArray, focusedOptionIndex) {
+			var _this5 = this;
+
+			if (this.props.inputRenderer) {
+				return this.props.inputRenderer();
+			} else {
+				var _classNames;
+
+				var className = (0, _classnames2['default'])('Select-input', this.props.inputProps.className);
+				var isOpen = !!this.state.isOpen;
+
+				var ariaOwns = (0, _classnames2['default'])((_classNames = {}, _defineProperty(_classNames, this._instancePrefix + '-list', isOpen), _defineProperty(_classNames, this._instancePrefix + '-backspace-remove-message', this.props.multi && !this.props.disabled && this.state.isFocused && !this.state.inputValue), _classNames));
+
+				// TODO: Check how this project includes Object.assign()
+				var inputProps = _extends({}, this.props.inputProps, {
+					role: 'combobox',
+					'aria-expanded': '' + isOpen,
+					'aria-owns': ariaOwns,
+					'aria-haspopup': '' + isOpen,
+					'aria-activedescendant': isOpen ? this._instancePrefix + '-option-' + focusedOptionIndex : this._instancePrefix + '-value',
+					'aria-labelledby': this.props['aria-labelledby'],
+					'aria-label': this.props['aria-label'],
+					className: className,
+					tabIndex: this.props.tabIndex,
+					onBlur: this.handleInputBlur,
+					onChange: this.handleInputChange,
+					onFocus: this.handleInputFocus,
+					ref: function ref(_ref) {
+						return _this5.input = _ref;
+					},
+					required: this.state.required,
+					value: this.state.inputValue
+				});
+
+				if (this.props.disabled || !this.props.searchable) {
+					var _props$inputProps = this.props.inputProps;
+					var inputClassName = _props$inputProps.inputClassName;
+
+					var divProps = _objectWithoutProperties(_props$inputProps, ['inputClassName']);
+
+					return _react2['default'].createElement('div', _extends({}, divProps, {
+						role: 'combobox',
+						'aria-expanded': isOpen,
+						'aria-owns': isOpen ? this._instancePrefix + '-list' : this._instancePrefix + '-value',
+						'aria-activedescendant': isOpen ? this._instancePrefix + '-option-' + focusedOptionIndex : this._instancePrefix + '-value',
+						className: className,
+						tabIndex: this.props.tabIndex || 0,
+						onBlur: this.handleInputBlur,
+						onFocus: this.handleInputFocus,
+						ref: function (ref) {
+							return _this5.input = ref;
+						},
+						'aria-readonly': '' + !!this.props.disabled,
+						style: { border: 0, width: 1, display: 'inline-block' } }));
+				}
+
+				if (this.props.autosize) {
+					return _react2['default'].createElement(_reactInputAutosize2['default'], _extends({}, inputProps, { minWidth: '5px' }));
+				}
+				return _react2['default'].createElement(
+					'div',
+					{ className: className },
+					_react2['default'].createElement('input', inputProps)
+				);
+			}
+		},
+
+		renderClear: function renderClear() {
+			if (!this.props.clearable || !this.props.value || this.props.value === 0 || this.props.multi && !this.props.value.length || this.props.disabled || this.props.isLoading) return;
+			return _react2['default'].createElement(
+				'span',
+				{ className: 'Select-clear-zone', title: this.props.multi ? this.props.clearAllText : this.props.clearValueText,
+					'aria-label': this.props.multi ? this.props.clearAllText : this.props.clearValueText,
+					onMouseDown: this.clearValue,
+					onTouchStart: this.handleTouchStart,
+					onTouchMove: this.handleTouchMove,
+					onTouchEnd: this.handleTouchEndClearValue
+				},
+				_react2['default'].createElement('span', { className: 'Select-clear', dangerouslySetInnerHTML: { __html: '&times;' } })
+			);
+		},
+
+		renderArrow: function renderArrow() {
+			var onMouseDown = this.handleMouseDownOnArrow;
+			var arrow = this.props.arrowRenderer({ onMouseDown: onMouseDown });
+
+			return _react2['default'].createElement(
+				'span',
+				{
+					className: 'Select-arrow-zone',
+					onMouseDown: onMouseDown
+				},
+				arrow
+			);
+		},
+
+		filterOptions: function filterOptions(excludeOptions) {
+			var filterValue = this.state.inputValue;
+			var options = this.props.options || [];
+			if (this.props.filterOptions) {
+				// Maintain backwards compatibility with boolean attribute
+				var filterOptions = typeof this.props.filterOptions === 'function' ? this.props.filterOptions : _utilsDefaultFilterOptions2['default'];
+
+				return filterOptions(options, filterValue, excludeOptions, {
+					filterOption: this.props.filterOption,
+					ignoreAccents: this.props.ignoreAccents,
+					ignoreCase: this.props.ignoreCase,
+					labelKey: this.props.labelKey,
+					matchPos: this.props.matchPos,
+					matchProp: this.props.matchProp,
+					valueKey: this.props.valueKey
+				});
+			} else {
+				return options;
+			}
+		},
+
+		onOptionRef: function onOptionRef(ref, isFocused) {
+			if (isFocused) {
+				this.focused = ref;
+			}
+		},
+
+		renderMenu: function renderMenu(options, valueArray, focusedOption) {
+			if (options && options.length) {
+				return this.props.menuRenderer({
+					focusedOption: focusedOption,
+					focusOption: this.focusOption,
+					instancePrefix: this._instancePrefix,
+					labelKey: this.props.labelKey,
+					onFocus: this.focusOption,
+					onSelect: this.selectValue,
+					optionClassName: this.props.optionClassName,
+					optionComponent: this.props.optionComponent,
+					optionRenderer: this.props.optionRenderer || this.getOptionLabel,
+					options: options,
+					selectValue: this.selectValue,
+					valueArray: valueArray,
+					valueKey: this.props.valueKey,
+					onOptionRef: this.onOptionRef
+				});
+			} else if (this.props.noResultsText) {
+				return _react2['default'].createElement(
+					'div',
+					{ className: 'Select-noresults' },
+					this.props.noResultsText
+				);
+			} else {
+				return null;
+			}
+		},
+
+		renderHiddenField: function renderHiddenField(valueArray) {
+			var _this6 = this;
+
+			if (!this.props.name) return;
+			if (this.props.joinValues) {
+				var value = valueArray.map(function (i) {
+					return stringifyValue(i[_this6.props.valueKey]);
+				}).join(this.props.delimiter);
+				return _react2['default'].createElement('input', {
+					type: 'hidden',
+					ref: function (ref) {
+						return _this6.value = ref;
+					},
+					name: this.props.name,
+					value: value,
+					disabled: this.props.disabled });
+			}
+			return valueArray.map(function (item, index) {
+				return _react2['default'].createElement('input', { key: 'hidden.' + index,
+					type: 'hidden',
+					ref: 'value' + index,
+					name: _this6.props.name,
+					value: stringifyValue(item[_this6.props.valueKey]),
+					disabled: _this6.props.disabled });
+			});
+		},
+
+		getFocusableOptionIndex: function getFocusableOptionIndex(selectedOption) {
+			var options = this._visibleOptions;
+			if (!options.length) return null;
+
+			var focusedOption = this.state.focusedOption || selectedOption;
+			if (focusedOption && !focusedOption.disabled) {
+				var focusedOptionIndex = options.indexOf(focusedOption);
+				if (focusedOptionIndex !== -1) {
+					return focusedOptionIndex;
+				}
+			}
+
+			for (var i = 0; i < options.length; i++) {
+				if (!options[i].disabled) return i;
+			}
+			return null;
+		},
+
+		renderOuter: function renderOuter(options, valueArray, focusedOption) {
+			var _this7 = this;
+
+			var menu = this.renderMenu(options, valueArray, focusedOption);
+			if (!menu) {
+				return null;
+			}
+
+			return _react2['default'].createElement(
+				'div',
+				{ ref: function (ref) {
+						return _this7.menuContainer = ref;
+					}, className: 'Select-menu-outer', style: this.props.menuContainerStyle },
+				_react2['default'].createElement(
+					'div',
+					{ ref: function (ref) {
+							return _this7.menu = ref;
+						}, role: 'listbox', className: 'Select-menu', id: this._instancePrefix + '-list',
+						style: this.props.menuStyle,
+						onScroll: this.handleMenuScroll,
+						onMouseDown: this.handleMouseDownOnMenu },
+					menu
+				)
+			);
+		},
+
+		render: function render() {
+			var _this8 = this;
+
+			var valueArray = this.getValueArray(this.props.value);
+			var options = this._visibleOptions = this.filterOptions(this.props.multi ? this.getValueArray(this.props.value) : null);
+			var isOpen = this.state.isOpen;
+			if (this.props.multi && !options.length && valueArray.length && !this.state.inputValue) isOpen = false;
+			var focusedOptionIndex = this.getFocusableOptionIndex(valueArray[0]);
+
+			var focusedOption = null;
+			if (focusedOptionIndex !== null) {
+				focusedOption = this._focusedOption = options[focusedOptionIndex];
+			} else {
+				focusedOption = this._focusedOption = null;
+			}
+			var className = (0, _classnames2['default'])('Select', this.props.className, {
+				'Select--multi': this.props.multi,
+				'Select--single': !this.props.multi,
+				'is-disabled': this.props.disabled,
+				'is-focused': this.state.isFocused,
+				'is-loading': this.props.isLoading,
+				'is-open': isOpen,
+				'is-pseudo-focused': this.state.isPseudoFocused,
+				'is-searchable': this.props.searchable,
+				'has-value': valueArray.length
+			});
+
+			var removeMessage = null;
+			if (this.props.multi && !this.props.disabled && valueArray.length && !this.state.inputValue && this.state.isFocused && this.props.backspaceRemoves) {
+				removeMessage = _react2['default'].createElement(
+					'span',
+					{ id: this._instancePrefix + '-backspace-remove-message', className: 'Select-aria-only', 'aria-live': 'assertive' },
+					this.props.backspaceToRemoveMessage.replace('{label}', valueArray[valueArray.length - 1][this.props.labelKey])
+				);
+			}
+
+			return _react2['default'].createElement(
+				'div',
+				{ ref: function (ref) {
+						return _this8.wrapper = ref;
+					},
+					className: className,
+					style: this.props.wrapperStyle },
+				this.renderHiddenField(valueArray),
+				_react2['default'].createElement(
+					'div',
+					{ ref: function (ref) {
+							return _this8.control = ref;
+						},
+						className: 'Select-control',
+						style: this.props.style,
+						onKeyDown: this.handleKeyDown,
+						onMouseDown: this.handleMouseDown,
+						onTouchEnd: this.handleTouchEnd,
+						onTouchStart: this.handleTouchStart,
+						onTouchMove: this.handleTouchMove
+					},
+					_react2['default'].createElement(
+						'span',
+						{ className: 'Select-multi-value-wrapper', id: this._instancePrefix + '-value' },
+						this.renderValue(valueArray, isOpen),
+						this.renderInput(valueArray, focusedOptionIndex)
+					),
+					removeMessage,
+					this.renderLoading(),
+					this.renderClear(),
+					this.renderArrow()
+				),
+				isOpen ? this.renderOuter(options, !this.props.multi ? valueArray : null, focusedOption) : null
+			);
+		}
+
+	});
+
+	exports['default'] = Select;
+	module.exports = exports['default'];
+
+/***/ },
+/* 320 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+	var React = __webpack_require__(1);
+
+	var sizerStyle = { position: 'absolute', top: 0, left: 0, visibility: 'hidden', height: 0, overflow: 'scroll', whiteSpace: 'pre' };
+
+	var AutosizeInput = React.createClass({
+		displayName: 'AutosizeInput',
+
+		propTypes: {
+			className: React.PropTypes.string, // className for the outer element
+			defaultValue: React.PropTypes.any, // default field value
+			inputClassName: React.PropTypes.string, // className for the input element
+			inputStyle: React.PropTypes.object, // css styles for the input element
+			minWidth: React.PropTypes.oneOfType([// minimum width for input element
+			React.PropTypes.number, React.PropTypes.string]),
+			onChange: React.PropTypes.func, // onChange handler: function(newValue) {}
+			placeholder: React.PropTypes.string, // placeholder text
+			placeholderIsMinWidth: React.PropTypes.bool, // don't collapse size to less than the placeholder
+			style: React.PropTypes.object, // css styles for the outer element
+			value: React.PropTypes.any },
+		// field value
+		getDefaultProps: function getDefaultProps() {
+			return {
+				minWidth: 1
+			};
+		},
+		getInitialState: function getInitialState() {
+			return {
+				inputWidth: this.props.minWidth
+			};
+		},
+		componentDidMount: function componentDidMount() {
+			this.copyInputStyles();
+			this.updateInputWidth();
+		},
+		componentDidUpdate: function componentDidUpdate() {
+			this.updateInputWidth();
+		},
+		copyInputStyles: function copyInputStyles() {
+			if (!this.isMounted() || !window.getComputedStyle) {
+				return;
+			}
+			var inputStyle = window.getComputedStyle(this.refs.input);
+			if (!inputStyle) {
+				return;
+			}
+			var widthNode = this.refs.sizer;
+			widthNode.style.fontSize = inputStyle.fontSize;
+			widthNode.style.fontFamily = inputStyle.fontFamily;
+			widthNode.style.fontWeight = inputStyle.fontWeight;
+			widthNode.style.fontStyle = inputStyle.fontStyle;
+			widthNode.style.letterSpacing = inputStyle.letterSpacing;
+			if (this.props.placeholder) {
+				var placeholderNode = this.refs.placeholderSizer;
+				placeholderNode.style.fontSize = inputStyle.fontSize;
+				placeholderNode.style.fontFamily = inputStyle.fontFamily;
+				placeholderNode.style.fontWeight = inputStyle.fontWeight;
+				placeholderNode.style.fontStyle = inputStyle.fontStyle;
+				placeholderNode.style.letterSpacing = inputStyle.letterSpacing;
+			}
+		},
+		updateInputWidth: function updateInputWidth() {
+			if (!this.isMounted() || typeof this.refs.sizer.scrollWidth === 'undefined') {
+				return;
+			}
+			var newInputWidth = undefined;
+			if (this.props.placeholder && (!this.props.value || this.props.value && this.props.placeholderIsMinWidth)) {
+				newInputWidth = Math.max(this.refs.sizer.scrollWidth, this.refs.placeholderSizer.scrollWidth) + 2;
+			} else {
+				newInputWidth = this.refs.sizer.scrollWidth + 2;
+			}
+			if (newInputWidth < this.props.minWidth) {
+				newInputWidth = this.props.minWidth;
+			}
+			if (newInputWidth !== this.state.inputWidth) {
+				this.setState({
+					inputWidth: newInputWidth
+				});
+			}
+		},
+		getInput: function getInput() {
+			return this.refs.input;
+		},
+		focus: function focus() {
+			this.refs.input.focus();
+		},
+		blur: function blur() {
+			this.refs.input.blur();
+		},
+		select: function select() {
+			this.refs.input.select();
+		},
+		render: function render() {
+			var sizerValue = this.props.defaultValue || this.props.value || '';
+			var wrapperStyle = this.props.style || {};
+			if (!wrapperStyle.display) wrapperStyle.display = 'inline-block';
+			var inputStyle = _extends({}, this.props.inputStyle);
+			inputStyle.width = this.state.inputWidth + 'px';
+			inputStyle.boxSizing = 'content-box';
+			var inputProps = _extends({}, this.props);
+			inputProps.className = this.props.inputClassName;
+			inputProps.style = inputStyle;
+			// ensure props meant for `AutosizeInput` don't end up on the `input`
+			delete inputProps.inputClassName;
+			delete inputProps.inputStyle;
+			delete inputProps.minWidth;
+			delete inputProps.placeholderIsMinWidth;
+			return React.createElement(
+				'div',
+				{ className: this.props.className, style: wrapperStyle },
+				React.createElement('input', _extends({}, inputProps, { ref: 'input' })),
+				React.createElement(
+					'div',
+					{ ref: 'sizer', style: sizerStyle },
+					sizerValue
+				),
+				this.props.placeholder ? React.createElement(
+					'div',
+					{ ref: 'placeholderSizer', style: sizerStyle },
+					this.props.placeholder
+				) : null
+			);
+		}
+	});
+
+	module.exports = AutosizeInput;
+
+/***/ },
+/* 321 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
+	  Copyright (c) 2016 Jed Watson.
+	  Licensed under the MIT License (MIT), see
+	  http://jedwatson.github.io/classnames
+	*/
+	/* global define */
+
+	(function () {
+		'use strict';
+
+		var hasOwn = {}.hasOwnProperty;
+
+		function classNames () {
+			var classes = [];
+
+			for (var i = 0; i < arguments.length; i++) {
+				var arg = arguments[i];
+				if (!arg) continue;
+
+				var argType = typeof arg;
+
+				if (argType === 'string' || argType === 'number') {
+					classes.push(arg);
+				} else if (Array.isArray(arg)) {
+					classes.push(classNames.apply(null, arg));
+				} else if (argType === 'object') {
+					for (var key in arg) {
+						if (hasOwn.call(arg, key) && arg[key]) {
+							classes.push(key);
+						}
+					}
+				}
+			}
+
+			return classes.join(' ');
+		}
+
+		if (typeof module !== 'undefined' && module.exports) {
+			module.exports = classNames;
+		} else if (true) {
+			// register as 'classnames', consistent with npm package name
+			!(__WEBPACK_AMD_DEFINE_ARRAY__ = [], __WEBPACK_AMD_DEFINE_RESULT__ = function () {
+				return classNames;
+			}.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+		} else {
+			window.classNames = classNames;
+		}
+	}());
+
+
+/***/ },
+/* 322 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+
+	Object.defineProperty(exports, "__esModule", {
+		value: true
+	});
+	exports["default"] = arrowRenderer;
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	function arrowRenderer(_ref) {
+		var onMouseDown = _ref.onMouseDown;
+
+		return _react2["default"].createElement("span", {
+			className: "Select-arrow",
+			onMouseDown: onMouseDown
+		});
+	}
+
+	;
+	module.exports = exports["default"];
+
+/***/ },
+/* 323 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+	var _stripDiacritics = __webpack_require__(324);
+
+	var _stripDiacritics2 = _interopRequireDefault(_stripDiacritics);
+
+	function filterOptions(options, filterValue, excludeOptions, props) {
+		var _this = this;
+
+		if (props.ignoreAccents) {
+			filterValue = (0, _stripDiacritics2['default'])(filterValue);
+		}
+
+		if (props.ignoreCase) {
+			filterValue = filterValue.toLowerCase();
+		}
+
+		if (excludeOptions) excludeOptions = excludeOptions.map(function (i) {
+			return i[props.valueKey];
+		});
+
+		return options.filter(function (option) {
+			if (excludeOptions && excludeOptions.indexOf(option[props.valueKey]) > -1) return false;
+			if (props.filterOption) return props.filterOption.call(_this, option, filterValue);
+			if (!filterValue) return true;
+			var valueTest = String(option[props.valueKey]);
+			var labelTest = String(option[props.labelKey]);
+			if (props.ignoreAccents) {
+				if (props.matchProp !== 'label') valueTest = (0, _stripDiacritics2['default'])(valueTest);
+				if (props.matchProp !== 'value') labelTest = (0, _stripDiacritics2['default'])(labelTest);
+			}
+			if (props.ignoreCase) {
+				if (props.matchProp !== 'label') valueTest = valueTest.toLowerCase();
+				if (props.matchProp !== 'value') labelTest = labelTest.toLowerCase();
+			}
+			return props.matchPos === 'start' ? props.matchProp !== 'label' && valueTest.substr(0, filterValue.length) === filterValue || props.matchProp !== 'value' && labelTest.substr(0, filterValue.length) === filterValue : props.matchProp !== 'label' && valueTest.indexOf(filterValue) >= 0 || props.matchProp !== 'value' && labelTest.indexOf(filterValue) >= 0;
+		});
+	}
+
+	module.exports = filterOptions;
+
+/***/ },
+/* 324 */
+/***/ function(module, exports) {
+
+	'use strict';
+
+	var map = [{ 'base': 'A', 'letters': /[\u0041\u24B6\uFF21\u00C0\u00C1\u00C2\u1EA6\u1EA4\u1EAA\u1EA8\u00C3\u0100\u0102\u1EB0\u1EAE\u1EB4\u1EB2\u0226\u01E0\u00C4\u01DE\u1EA2\u00C5\u01FA\u01CD\u0200\u0202\u1EA0\u1EAC\u1EB6\u1E00\u0104\u023A\u2C6F]/g }, { 'base': 'AA', 'letters': /[\uA732]/g }, { 'base': 'AE', 'letters': /[\u00C6\u01FC\u01E2]/g }, { 'base': 'AO', 'letters': /[\uA734]/g }, { 'base': 'AU', 'letters': /[\uA736]/g }, { 'base': 'AV', 'letters': /[\uA738\uA73A]/g }, { 'base': 'AY', 'letters': /[\uA73C]/g }, { 'base': 'B', 'letters': /[\u0042\u24B7\uFF22\u1E02\u1E04\u1E06\u0243\u0182\u0181]/g }, { 'base': 'C', 'letters': /[\u0043\u24B8\uFF23\u0106\u0108\u010A\u010C\u00C7\u1E08\u0187\u023B\uA73E]/g }, { 'base': 'D', 'letters': /[\u0044\u24B9\uFF24\u1E0A\u010E\u1E0C\u1E10\u1E12\u1E0E\u0110\u018B\u018A\u0189\uA779]/g }, { 'base': 'DZ', 'letters': /[\u01F1\u01C4]/g }, { 'base': 'Dz', 'letters': /[\u01F2\u01C5]/g }, { 'base': 'E', 'letters': /[\u0045\u24BA\uFF25\u00C8\u00C9\u00CA\u1EC0\u1EBE\u1EC4\u1EC2\u1EBC\u0112\u1E14\u1E16\u0114\u0116\u00CB\u1EBA\u011A\u0204\u0206\u1EB8\u1EC6\u0228\u1E1C\u0118\u1E18\u1E1A\u0190\u018E]/g }, { 'base': 'F', 'letters': /[\u0046\u24BB\uFF26\u1E1E\u0191\uA77B]/g }, { 'base': 'G', 'letters': /[\u0047\u24BC\uFF27\u01F4\u011C\u1E20\u011E\u0120\u01E6\u0122\u01E4\u0193\uA7A0\uA77D\uA77E]/g }, { 'base': 'H', 'letters': /[\u0048\u24BD\uFF28\u0124\u1E22\u1E26\u021E\u1E24\u1E28\u1E2A\u0126\u2C67\u2C75\uA78D]/g }, { 'base': 'I', 'letters': /[\u0049\u24BE\uFF29\u00CC\u00CD\u00CE\u0128\u012A\u012C\u0130\u00CF\u1E2E\u1EC8\u01CF\u0208\u020A\u1ECA\u012E\u1E2C\u0197]/g }, { 'base': 'J', 'letters': /[\u004A\u24BF\uFF2A\u0134\u0248]/g }, { 'base': 'K', 'letters': /[\u004B\u24C0\uFF2B\u1E30\u01E8\u1E32\u0136\u1E34\u0198\u2C69\uA740\uA742\uA744\uA7A2]/g }, { 'base': 'L', 'letters': /[\u004C\u24C1\uFF2C\u013F\u0139\u013D\u1E36\u1E38\u013B\u1E3C\u1E3A\u0141\u023D\u2C62\u2C60\uA748\uA746\uA780]/g }, { 'base': 'LJ', 'letters': /[\u01C7]/g }, { 'base': 'Lj', 'letters': /[\u01C8]/g }, { 'base': 'M', 'letters': /[\u004D\u24C2\uFF2D\u1E3E\u1E40\u1E42\u2C6E\u019C]/g }, { 'base': 'N', 'letters': /[\u004E\u24C3\uFF2E\u01F8\u0143\u00D1\u1E44\u0147\u1E46\u0145\u1E4A\u1E48\u0220\u019D\uA790\uA7A4]/g }, { 'base': 'NJ', 'letters': /[\u01CA]/g }, { 'base': 'Nj', 'letters': /[\u01CB]/g }, { 'base': 'O', 'letters': /[\u004F\u24C4\uFF2F\u00D2\u00D3\u00D4\u1ED2\u1ED0\u1ED6\u1ED4\u00D5\u1E4C\u022C\u1E4E\u014C\u1E50\u1E52\u014E\u022E\u0230\u00D6\u022A\u1ECE\u0150\u01D1\u020C\u020E\u01A0\u1EDC\u1EDA\u1EE0\u1EDE\u1EE2\u1ECC\u1ED8\u01EA\u01EC\u00D8\u01FE\u0186\u019F\uA74A\uA74C]/g }, { 'base': 'OI', 'letters': /[\u01A2]/g }, { 'base': 'OO', 'letters': /[\uA74E]/g }, { 'base': 'OU', 'letters': /[\u0222]/g }, { 'base': 'P', 'letters': /[\u0050\u24C5\uFF30\u1E54\u1E56\u01A4\u2C63\uA750\uA752\uA754]/g }, { 'base': 'Q', 'letters': /[\u0051\u24C6\uFF31\uA756\uA758\u024A]/g }, { 'base': 'R', 'letters': /[\u0052\u24C7\uFF32\u0154\u1E58\u0158\u0210\u0212\u1E5A\u1E5C\u0156\u1E5E\u024C\u2C64\uA75A\uA7A6\uA782]/g }, { 'base': 'S', 'letters': /[\u0053\u24C8\uFF33\u1E9E\u015A\u1E64\u015C\u1E60\u0160\u1E66\u1E62\u1E68\u0218\u015E\u2C7E\uA7A8\uA784]/g }, { 'base': 'T', 'letters': /[\u0054\u24C9\uFF34\u1E6A\u0164\u1E6C\u021A\u0162\u1E70\u1E6E\u0166\u01AC\u01AE\u023E\uA786]/g }, { 'base': 'TZ', 'letters': /[\uA728]/g }, { 'base': 'U', 'letters': /[\u0055\u24CA\uFF35\u00D9\u00DA\u00DB\u0168\u1E78\u016A\u1E7A\u016C\u00DC\u01DB\u01D7\u01D5\u01D9\u1EE6\u016E\u0170\u01D3\u0214\u0216\u01AF\u1EEA\u1EE8\u1EEE\u1EEC\u1EF0\u1EE4\u1E72\u0172\u1E76\u1E74\u0244]/g }, { 'base': 'V', 'letters': /[\u0056\u24CB\uFF36\u1E7C\u1E7E\u01B2\uA75E\u0245]/g }, { 'base': 'VY', 'letters': /[\uA760]/g }, { 'base': 'W', 'letters': /[\u0057\u24CC\uFF37\u1E80\u1E82\u0174\u1E86\u1E84\u1E88\u2C72]/g }, { 'base': 'X', 'letters': /[\u0058\u24CD\uFF38\u1E8A\u1E8C]/g }, { 'base': 'Y', 'letters': /[\u0059\u24CE\uFF39\u1EF2\u00DD\u0176\u1EF8\u0232\u1E8E\u0178\u1EF6\u1EF4\u01B3\u024E\u1EFE]/g }, { 'base': 'Z', 'letters': /[\u005A\u24CF\uFF3A\u0179\u1E90\u017B\u017D\u1E92\u1E94\u01B5\u0224\u2C7F\u2C6B\uA762]/g }, { 'base': 'a', 'letters': /[\u0061\u24D0\uFF41\u1E9A\u00E0\u00E1\u00E2\u1EA7\u1EA5\u1EAB\u1EA9\u00E3\u0101\u0103\u1EB1\u1EAF\u1EB5\u1EB3\u0227\u01E1\u00E4\u01DF\u1EA3\u00E5\u01FB\u01CE\u0201\u0203\u1EA1\u1EAD\u1EB7\u1E01\u0105\u2C65\u0250]/g }, { 'base': 'aa', 'letters': /[\uA733]/g }, { 'base': 'ae', 'letters': /[\u00E6\u01FD\u01E3]/g }, { 'base': 'ao', 'letters': /[\uA735]/g }, { 'base': 'au', 'letters': /[\uA737]/g }, { 'base': 'av', 'letters': /[\uA739\uA73B]/g }, { 'base': 'ay', 'letters': /[\uA73D]/g }, { 'base': 'b', 'letters': /[\u0062\u24D1\uFF42\u1E03\u1E05\u1E07\u0180\u0183\u0253]/g }, { 'base': 'c', 'letters': /[\u0063\u24D2\uFF43\u0107\u0109\u010B\u010D\u00E7\u1E09\u0188\u023C\uA73F\u2184]/g }, { 'base': 'd', 'letters': /[\u0064\u24D3\uFF44\u1E0B\u010F\u1E0D\u1E11\u1E13\u1E0F\u0111\u018C\u0256\u0257\uA77A]/g }, { 'base': 'dz', 'letters': /[\u01F3\u01C6]/g }, { 'base': 'e', 'letters': /[\u0065\u24D4\uFF45\u00E8\u00E9\u00EA\u1EC1\u1EBF\u1EC5\u1EC3\u1EBD\u0113\u1E15\u1E17\u0115\u0117\u00EB\u1EBB\u011B\u0205\u0207\u1EB9\u1EC7\u0229\u1E1D\u0119\u1E19\u1E1B\u0247\u025B\u01DD]/g }, { 'base': 'f', 'letters': /[\u0066\u24D5\uFF46\u1E1F\u0192\uA77C]/g }, { 'base': 'g', 'letters': /[\u0067\u24D6\uFF47\u01F5\u011D\u1E21\u011F\u0121\u01E7\u0123\u01E5\u0260\uA7A1\u1D79\uA77F]/g }, { 'base': 'h', 'letters': /[\u0068\u24D7\uFF48\u0125\u1E23\u1E27\u021F\u1E25\u1E29\u1E2B\u1E96\u0127\u2C68\u2C76\u0265]/g }, { 'base': 'hv', 'letters': /[\u0195]/g }, { 'base': 'i', 'letters': /[\u0069\u24D8\uFF49\u00EC\u00ED\u00EE\u0129\u012B\u012D\u00EF\u1E2F\u1EC9\u01D0\u0209\u020B\u1ECB\u012F\u1E2D\u0268\u0131]/g }, { 'base': 'j', 'letters': /[\u006A\u24D9\uFF4A\u0135\u01F0\u0249]/g }, { 'base': 'k', 'letters': /[\u006B\u24DA\uFF4B\u1E31\u01E9\u1E33\u0137\u1E35\u0199\u2C6A\uA741\uA743\uA745\uA7A3]/g }, { 'base': 'l', 'letters': /[\u006C\u24DB\uFF4C\u0140\u013A\u013E\u1E37\u1E39\u013C\u1E3D\u1E3B\u017F\u0142\u019A\u026B\u2C61\uA749\uA781\uA747]/g }, { 'base': 'lj', 'letters': /[\u01C9]/g }, { 'base': 'm', 'letters': /[\u006D\u24DC\uFF4D\u1E3F\u1E41\u1E43\u0271\u026F]/g }, { 'base': 'n', 'letters': /[\u006E\u24DD\uFF4E\u01F9\u0144\u00F1\u1E45\u0148\u1E47\u0146\u1E4B\u1E49\u019E\u0272\u0149\uA791\uA7A5]/g }, { 'base': 'nj', 'letters': /[\u01CC]/g }, { 'base': 'o', 'letters': /[\u006F\u24DE\uFF4F\u00F2\u00F3\u00F4\u1ED3\u1ED1\u1ED7\u1ED5\u00F5\u1E4D\u022D\u1E4F\u014D\u1E51\u1E53\u014F\u022F\u0231\u00F6\u022B\u1ECF\u0151\u01D2\u020D\u020F\u01A1\u1EDD\u1EDB\u1EE1\u1EDF\u1EE3\u1ECD\u1ED9\u01EB\u01ED\u00F8\u01FF\u0254\uA74B\uA74D\u0275]/g }, { 'base': 'oi', 'letters': /[\u01A3]/g }, { 'base': 'ou', 'letters': /[\u0223]/g }, { 'base': 'oo', 'letters': /[\uA74F]/g }, { 'base': 'p', 'letters': /[\u0070\u24DF\uFF50\u1E55\u1E57\u01A5\u1D7D\uA751\uA753\uA755]/g }, { 'base': 'q', 'letters': /[\u0071\u24E0\uFF51\u024B\uA757\uA759]/g }, { 'base': 'r', 'letters': /[\u0072\u24E1\uFF52\u0155\u1E59\u0159\u0211\u0213\u1E5B\u1E5D\u0157\u1E5F\u024D\u027D\uA75B\uA7A7\uA783]/g }, { 'base': 's', 'letters': /[\u0073\u24E2\uFF53\u00DF\u015B\u1E65\u015D\u1E61\u0161\u1E67\u1E63\u1E69\u0219\u015F\u023F\uA7A9\uA785\u1E9B]/g }, { 'base': 't', 'letters': /[\u0074\u24E3\uFF54\u1E6B\u1E97\u0165\u1E6D\u021B\u0163\u1E71\u1E6F\u0167\u01AD\u0288\u2C66\uA787]/g }, { 'base': 'tz', 'letters': /[\uA729]/g }, { 'base': 'u', 'letters': /[\u0075\u24E4\uFF55\u00F9\u00FA\u00FB\u0169\u1E79\u016B\u1E7B\u016D\u00FC\u01DC\u01D8\u01D6\u01DA\u1EE7\u016F\u0171\u01D4\u0215\u0217\u01B0\u1EEB\u1EE9\u1EEF\u1EED\u1EF1\u1EE5\u1E73\u0173\u1E77\u1E75\u0289]/g }, { 'base': 'v', 'letters': /[\u0076\u24E5\uFF56\u1E7D\u1E7F\u028B\uA75F\u028C]/g }, { 'base': 'vy', 'letters': /[\uA761]/g }, { 'base': 'w', 'letters': /[\u0077\u24E6\uFF57\u1E81\u1E83\u0175\u1E87\u1E85\u1E98\u1E89\u2C73]/g }, { 'base': 'x', 'letters': /[\u0078\u24E7\uFF58\u1E8B\u1E8D]/g }, { 'base': 'y', 'letters': /[\u0079\u24E8\uFF59\u1EF3\u00FD\u0177\u1EF9\u0233\u1E8F\u00FF\u1EF7\u1E99\u1EF5\u01B4\u024F\u1EFF]/g }, { 'base': 'z', 'letters': /[\u007A\u24E9\uFF5A\u017A\u1E91\u017C\u017E\u1E93\u1E95\u01B6\u0225\u0240\u2C6C\uA763]/g }];
+
+	module.exports = function stripDiacritics(str) {
+		for (var i = 0; i < map.length; i++) {
+			str = str.replace(map[i].letters, map[i].base);
+		}
+		return str;
+	};
+
+/***/ },
+/* 325 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+	var _classnames = __webpack_require__(321);
+
+	var _classnames2 = _interopRequireDefault(_classnames);
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	function menuRenderer(_ref) {
+		var focusedOption = _ref.focusedOption;
+		var instancePrefix = _ref.instancePrefix;
+		var labelKey = _ref.labelKey;
+		var onFocus = _ref.onFocus;
+		var onSelect = _ref.onSelect;
+		var optionClassName = _ref.optionClassName;
+		var optionComponent = _ref.optionComponent;
+		var optionRenderer = _ref.optionRenderer;
+		var options = _ref.options;
+		var valueArray = _ref.valueArray;
+		var valueKey = _ref.valueKey;
+		var onOptionRef = _ref.onOptionRef;
+
+		var Option = optionComponent;
+
+		return options.map(function (option, i) {
+			var isSelected = valueArray && valueArray.indexOf(option) > -1;
+			var isFocused = option === focusedOption;
+			var optionClass = (0, _classnames2['default'])(optionClassName, {
+				'Select-option': true,
+				'is-selected': isSelected,
+				'is-focused': isFocused,
+				'is-disabled': option.disabled
+			});
+
+			return _react2['default'].createElement(
+				Option,
+				{
+					className: optionClass,
+					instancePrefix: instancePrefix,
+					isDisabled: option.disabled,
+					isFocused: isFocused,
+					isSelected: isSelected,
+					key: 'option-' + i + '-' + option[valueKey],
+					onFocus: onFocus,
+					onSelect: onSelect,
+					option: option,
+					optionIndex: i,
+					ref: function (ref) {
+						onOptionRef(ref, isFocused);
+					}
+				},
+				optionRenderer(option, i)
+			);
+		});
+	}
+
+	module.exports = menuRenderer;
+
+/***/ },
+/* 326 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, '__esModule', {
+		value: true
+	});
+
+	var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+	var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+	var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; desc = parent = undefined; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+	function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+
+	function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _Select = __webpack_require__(319);
+
+	var _Select2 = _interopRequireDefault(_Select);
+
+	var _utilsStripDiacritics = __webpack_require__(324);
+
+	var _utilsStripDiacritics2 = _interopRequireDefault(_utilsStripDiacritics);
+
+	var propTypes = {
+		autoload: _react2['default'].PropTypes.bool.isRequired, // automatically call the `loadOptions` prop on-mount; defaults to true
+		cache: _react2['default'].PropTypes.any, // object to use to cache results; set to null/false to disable caching
+		children: _react2['default'].PropTypes.func.isRequired, // Child function responsible for creating the inner Select component; (props: Object): PropTypes.element
+		ignoreAccents: _react2['default'].PropTypes.bool, // strip diacritics when filtering; defaults to true
+		ignoreCase: _react2['default'].PropTypes.bool, // perform case-insensitive filtering; defaults to true
+		loadingPlaceholder: _react.PropTypes.string.isRequired, // replaces the placeholder while options are loading
+		loadOptions: _react2['default'].PropTypes.func.isRequired, // callback to load options asynchronously; (inputValue: string, callback: Function): ?Promise
+		options: _react.PropTypes.array.isRequired, // array of options
+		placeholder: _react2['default'].PropTypes.oneOfType([// field placeholder, displayed when there's no value (shared with Select)
+		_react2['default'].PropTypes.string, _react2['default'].PropTypes.node]),
+		searchPromptText: _react2['default'].PropTypes.oneOfType([// label to prompt for search input
+		_react2['default'].PropTypes.string, _react2['default'].PropTypes.node])
+	};
+
+	var defaultProps = {
+		autoload: true,
+		cache: {},
+		children: defaultChildren,
+		ignoreAccents: true,
+		ignoreCase: true,
+		loadingPlaceholder: 'Loading...',
+		options: [],
+		searchPromptText: 'Type to search'
+	};
+
+	var Async = (function (_Component) {
+		_inherits(Async, _Component);
+
+		function Async(props, context) {
+			_classCallCheck(this, Async);
+
+			_get(Object.getPrototypeOf(Async.prototype), 'constructor', this).call(this, props, context);
+
+			this.state = {
+				isLoading: false,
+				options: props.options
+			};
+
+			this._onInputChange = this._onInputChange.bind(this);
+		}
+
+		_createClass(Async, [{
+			key: 'componentDidMount',
+			value: function componentDidMount() {
+				var autoload = this.props.autoload;
+
+				if (autoload) {
+					this.loadOptions('');
+				}
+			}
+		}, {
+			key: 'componentWillUpdate',
+			value: function componentWillUpdate(nextProps, nextState) {
+				var _this = this;
+
+				var propertiesToSync = ['options'];
+				propertiesToSync.forEach(function (prop) {
+					if (_this.props[prop] !== nextProps[prop]) {
+						_this.setState(_defineProperty({}, prop, nextProps[prop]));
+					}
+				});
+			}
+		}, {
+			key: 'loadOptions',
+			value: function loadOptions(inputValue) {
+				var _this2 = this;
+
+				var _props = this.props;
+				var cache = _props.cache;
+				var loadOptions = _props.loadOptions;
+
+				if (cache && cache.hasOwnProperty(inputValue)) {
+					this.setState({
+						options: cache[inputValue]
+					});
+
+					return;
+				}
+
+				var callback = function callback(error, data) {
+					if (callback === _this2._callback) {
+						_this2._callback = null;
+
+						var options = data && data.options || [];
+
+						if (cache) {
+							cache[inputValue] = options;
+						}
+
+						_this2.setState({
+							isLoading: false,
+							options: options
+						});
+					}
+				};
+
+				// Ignore all but the most recent request
+				this._callback = callback;
+
+				var promise = loadOptions(inputValue, callback);
+				if (promise) {
+					promise.then(function (data) {
+						return callback(null, data);
+					}, function (error) {
+						return callback(error);
+					});
+				}
+
+				if (this._callback && !this.state.isLoading) {
+					this.setState({
+						isLoading: true
+					});
+				}
+
+				return inputValue;
+			}
+		}, {
+			key: '_onInputChange',
+			value: function _onInputChange(inputValue) {
+				var _props2 = this.props;
+				var ignoreAccents = _props2.ignoreAccents;
+				var ignoreCase = _props2.ignoreCase;
+
+				if (ignoreAccents) {
+					inputValue = (0, _utilsStripDiacritics2['default'])(inputValue);
+				}
+
+				if (ignoreCase) {
+					inputValue = inputValue.toLowerCase();
+				}
+
+				return this.loadOptions(inputValue);
+			}
+		}, {
+			key: 'render',
+			value: function render() {
+				var _props3 = this.props;
+				var children = _props3.children;
+				var loadingPlaceholder = _props3.loadingPlaceholder;
+				var placeholder = _props3.placeholder;
+				var searchPromptText = _props3.searchPromptText;
+				var _state = this.state;
+				var isLoading = _state.isLoading;
+				var options = _state.options;
+
+				var props = {
+					noResultsText: isLoading ? loadingPlaceholder : searchPromptText,
+					placeholder: isLoading ? loadingPlaceholder : placeholder,
+					options: isLoading ? [] : options
+				};
+
+				return children(_extends({}, this.props, props, {
+					isLoading: isLoading,
+					onInputChange: this._onInputChange
+				}));
+			}
+		}]);
+
+		return Async;
+	})(_react.Component);
+
+	exports['default'] = Async;
+
+	Async.propTypes = propTypes;
+	Async.defaultProps = defaultProps;
+
+	function defaultChildren(props) {
+		return _react2['default'].createElement(_Select2['default'], props);
+	};
+	module.exports = exports['default'];
+
+/***/ },
+/* 327 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _Select = __webpack_require__(319);
+
+	var _Select2 = _interopRequireDefault(_Select);
+
+	var AsyncCreatable = _react2['default'].createClass({
+		displayName: 'AsyncCreatableSelect',
+
+		render: function render() {
+			var _this = this;
+
+			return _react2['default'].createElement(
+				_Select2['default'].Async,
+				this.props,
+				function (asyncProps) {
+					return _react2['default'].createElement(
+						_Select2['default'].Creatable,
+						_this.props,
+						function (creatableProps) {
+							return _react2['default'].createElement(_Select2['default'], _extends({}, asyncProps, creatableProps, {
+								onInputChange: function (input) {
+									creatableProps.onInputChange(input);
+									return asyncProps.onInputChange(input);
+								}
+							}));
+						}
+					);
+				}
+			);
+		}
+	});
+
+	module.exports = AsyncCreatable;
+
+/***/ },
+/* 328 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+	function _objectWithoutProperties(obj, keys) { var target = {}; for (var i in obj) { if (keys.indexOf(i) >= 0) continue; if (!Object.prototype.hasOwnProperty.call(obj, i)) continue; target[i] = obj[i]; } return target; }
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _Select = __webpack_require__(319);
+
+	var _Select2 = _interopRequireDefault(_Select);
+
+	var _utilsDefaultFilterOptions = __webpack_require__(323);
+
+	var _utilsDefaultFilterOptions2 = _interopRequireDefault(_utilsDefaultFilterOptions);
+
+	var _utilsDefaultMenuRenderer = __webpack_require__(325);
+
+	var _utilsDefaultMenuRenderer2 = _interopRequireDefault(_utilsDefaultMenuRenderer);
+
+	var Creatable = _react2['default'].createClass({
+		displayName: 'CreatableSelect',
+
+		propTypes: {
+			// Child function responsible for creating the inner Select component
+			// This component can be used to compose HOCs (eg Creatable and Async)
+			// (props: Object): PropTypes.element
+			children: _react2['default'].PropTypes.func,
+
+			// See Select.propTypes.filterOptions
+			filterOptions: _react2['default'].PropTypes.any,
+
+			// Searches for any matching option within the set of options.
+			// This function prevents duplicate options from being created.
+			// ({ option: Object, options: Array, labelKey: string, valueKey: string }): boolean
+			isOptionUnique: _react2['default'].PropTypes.func,
+
+			// Determines if the current input text represents a valid option.
+			// ({ label: string }): boolean
+			isValidNewOption: _react2['default'].PropTypes.func,
+
+			// See Select.propTypes.menuRenderer
+			menuRenderer: _react2['default'].PropTypes.any,
+
+			// Factory to create new option.
+			// ({ label: string, labelKey: string, valueKey: string }): Object
+			newOptionCreator: _react2['default'].PropTypes.func,
+
+			// See Select.propTypes.options
+			options: _react2['default'].PropTypes.array,
+
+			// Creates prompt/placeholder option text.
+			// (filterText: string): string
+			promptTextCreator: _react2['default'].PropTypes.func,
+
+			// Decides if a keyDown event (eg its `keyCode`) should result in the creation of a new option.
+			shouldKeyDownEventCreateNewOption: _react2['default'].PropTypes.func
+		},
+
+		// Default prop methods
+		statics: {
+			isOptionUnique: isOptionUnique,
+			isValidNewOption: isValidNewOption,
+			newOptionCreator: newOptionCreator,
+			promptTextCreator: promptTextCreator,
+			shouldKeyDownEventCreateNewOption: shouldKeyDownEventCreateNewOption
+		},
+
+		getDefaultProps: function getDefaultProps() {
+			return {
+				filterOptions: _utilsDefaultFilterOptions2['default'],
+				isOptionUnique: isOptionUnique,
+				isValidNewOption: isValidNewOption,
+				menuRenderer: _utilsDefaultMenuRenderer2['default'],
+				newOptionCreator: newOptionCreator,
+				promptTextCreator: promptTextCreator,
+				shouldKeyDownEventCreateNewOption: shouldKeyDownEventCreateNewOption
+			};
+		},
+
+		createNewOption: function createNewOption() {
+			var _props = this.props;
+			var isValidNewOption = _props.isValidNewOption;
+			var newOptionCreator = _props.newOptionCreator;
+			var _props$options = _props.options;
+			var options = _props$options === undefined ? [] : _props$options;
+			var shouldKeyDownEventCreateNewOption = _props.shouldKeyDownEventCreateNewOption;
+
+			if (isValidNewOption({ label: this.inputValue })) {
+				var option = newOptionCreator({ label: this.inputValue, labelKey: this.labelKey, valueKey: this.valueKey });
+				var _isOptionUnique = this.isOptionUnique({ option: option });
+
+				// Don't add the same option twice.
+				if (_isOptionUnique) {
+					options.unshift(option);
+
+					this.select.selectValue(option);
+				}
+			}
+		},
+
+		filterOptions: function filterOptions() {
+			var _props2 = this.props;
+			var filterOptions = _props2.filterOptions;
+			var isValidNewOption = _props2.isValidNewOption;
+			var options = _props2.options;
+			var promptTextCreator = _props2.promptTextCreator;
+
+			// TRICKY Check currently selected options as well.
+			// Don't display a create-prompt for a value that's selected.
+			// This covers async edge-cases where a newly-created Option isn't yet in the async-loaded array.
+			var excludeOptions = arguments[2] || [];
+
+			var filteredOptions = filterOptions.apply(undefined, arguments) || [];
+
+			if (isValidNewOption({ label: this.inputValue })) {
+				var _newOptionCreator = this.props.newOptionCreator;
+
+				var option = _newOptionCreator({
+					label: this.inputValue,
+					labelKey: this.labelKey,
+					valueKey: this.valueKey
+				});
+
+				// TRICKY Compare to all options (not just filtered options) in case option has already been selected).
+				// For multi-selects, this would remove it from the filtered list.
+				var _isOptionUnique2 = this.isOptionUnique({
+					option: option,
+					options: excludeOptions.concat(filteredOptions)
+				});
+
+				if (_isOptionUnique2) {
+					var _prompt = promptTextCreator(this.inputValue);
+
+					this._createPlaceholderOption = _newOptionCreator({
+						label: _prompt,
+						labelKey: this.labelKey,
+						valueKey: this.valueKey
+					});
+
+					filteredOptions.unshift(this._createPlaceholderOption);
+				}
+			}
+
+			return filteredOptions;
+		},
+
+		isOptionUnique: function isOptionUnique(_ref2) {
+			var option = _ref2.option;
+			var options = _ref2.options;
+			var isOptionUnique = this.props.isOptionUnique;
+
+			options = options || this.select.filterOptions();
+
+			return isOptionUnique({
+				labelKey: this.labelKey,
+				option: option,
+				options: options,
+				valueKey: this.valueKey
+			});
+		},
+
+		menuRenderer: function menuRenderer(params) {
+			var menuRenderer = this.props.menuRenderer;
+
+			return menuRenderer(_extends({}, params, {
+				onSelect: this.onOptionSelect
+			}));
+		},
+
+		onInputChange: function onInputChange(input) {
+			// This value may be needed in between Select mounts (when this.select is null)
+			this.inputValue = input;
+		},
+
+		onInputKeyDown: function onInputKeyDown(event) {
+			var shouldKeyDownEventCreateNewOption = this.props.shouldKeyDownEventCreateNewOption;
+
+			var focusedOption = this.select.getFocusedOption();
+
+			if (focusedOption && focusedOption === this._createPlaceholderOption && shouldKeyDownEventCreateNewOption({ keyCode: event.keyCode })) {
+				this.createNewOption();
+
+				// Prevent decorated Select from doing anything additional with this keyDown event
+				event.preventDefault();
+			}
+		},
+
+		onOptionSelect: function onOptionSelect(option, event) {
+			if (option === this._createPlaceholderOption) {
+				this.createNewOption();
+			} else {
+				this.select.selectValue(option);
+			}
+		},
+
+		render: function render() {
+			var _this = this;
+
+			var _props3 = this.props;
+			var _props3$children = _props3.children;
+			var children = _props3$children === undefined ? defaultChildren : _props3$children;
+			var newOptionCreator = _props3.newOptionCreator;
+			var shouldKeyDownEventCreateNewOption = _props3.shouldKeyDownEventCreateNewOption;
+
+			var restProps = _objectWithoutProperties(_props3, ['children', 'newOptionCreator', 'shouldKeyDownEventCreateNewOption']);
+
+			var props = _extends({}, restProps, {
+				allowCreate: true,
+				filterOptions: this.filterOptions,
+				menuRenderer: this.menuRenderer,
+				onInputChange: this.onInputChange,
+				onInputKeyDown: this.onInputKeyDown,
+				ref: function ref(_ref) {
+					_this.select = _ref;
+
+					// These values may be needed in between Select mounts (when this.select is null)
+					if (_ref) {
+						_this.labelKey = _ref.props.labelKey;
+						_this.valueKey = _ref.props.valueKey;
+					}
+				}
+			});
+
+			return children(props);
+		}
+	});
+
+	function defaultChildren(props) {
+		return _react2['default'].createElement(_Select2['default'], props);
+	};
+
+	function isOptionUnique(_ref3) {
+		var option = _ref3.option;
+		var options = _ref3.options;
+		var labelKey = _ref3.labelKey;
+		var valueKey = _ref3.valueKey;
+
+		return options.filter(function (existingOption) {
+			return existingOption[labelKey] === option[labelKey] || existingOption[valueKey] === option[valueKey];
+		}).length === 0;
+	};
+
+	function isValidNewOption(_ref4) {
+		var label = _ref4.label;
+
+		return !!label;
+	};
+
+	function newOptionCreator(_ref5) {
+		var label = _ref5.label;
+		var labelKey = _ref5.labelKey;
+		var valueKey = _ref5.valueKey;
+
+		var option = {};
+		option[valueKey] = label;
+		option[labelKey] = label;
+		option.className = 'Select-create-option-placeholder';
+		return option;
+	};
+
+	function promptTextCreator(label) {
+		return 'Create option "' + label + '"';
+	}
+
+	function shouldKeyDownEventCreateNewOption(_ref6) {
+		var keyCode = _ref6.keyCode;
+
+		switch (keyCode) {
+			case 9: // TAB
+			case 13: // ENTER
+			case 188:
+				// COMMA
+				return true;
+		}
+
+		return false;
+	};
+
+	module.exports = Creatable;
+
+/***/ },
+/* 329 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _classnames = __webpack_require__(321);
+
+	var _classnames2 = _interopRequireDefault(_classnames);
+
+	var Option = _react2['default'].createClass({
+		displayName: 'Option',
+
+		propTypes: {
+			children: _react2['default'].PropTypes.node,
+			className: _react2['default'].PropTypes.string, // className (based on mouse position)
+			instancePrefix: _react2['default'].PropTypes.string.isRequired, // unique prefix for the ids (used for aria)
+			isDisabled: _react2['default'].PropTypes.bool, // the option is disabled
+			isFocused: _react2['default'].PropTypes.bool, // the option is focused
+			isSelected: _react2['default'].PropTypes.bool, // the option is selected
+			onFocus: _react2['default'].PropTypes.func, // method to handle mouseEnter on option element
+			onSelect: _react2['default'].PropTypes.func, // method to handle click on option element
+			onUnfocus: _react2['default'].PropTypes.func, // method to handle mouseLeave on option element
+			option: _react2['default'].PropTypes.object.isRequired, // object that is base for that option
+			optionIndex: _react2['default'].PropTypes.number },
+		// index of the option, used to generate unique ids for aria
+		blockEvent: function blockEvent(event) {
+			event.preventDefault();
+			event.stopPropagation();
+			if (event.target.tagName !== 'A' || !('href' in event.target)) {
+				return;
+			}
+			if (event.target.target) {
+				window.open(event.target.href, event.target.target);
+			} else {
+				window.location.href = event.target.href;
+			}
+		},
+
+		handleMouseDown: function handleMouseDown(event) {
+			event.preventDefault();
+			event.stopPropagation();
+			this.props.onSelect(this.props.option, event);
+		},
+
+		handleMouseEnter: function handleMouseEnter(event) {
+			this.onFocus(event);
+		},
+
+		handleMouseMove: function handleMouseMove(event) {
+			this.onFocus(event);
+		},
+
+		handleTouchEnd: function handleTouchEnd(event) {
+			// Check if the view is being dragged, In this case
+			// we don't want to fire the click event (because the user only wants to scroll)
+			if (this.dragging) return;
+
+			this.handleMouseDown(event);
+		},
+
+		handleTouchMove: function handleTouchMove(event) {
+			// Set a flag that the view is being dragged
+			this.dragging = true;
+		},
+
+		handleTouchStart: function handleTouchStart(event) {
+			// Set a flag that the view is not being dragged
+			this.dragging = false;
+		},
+
+		onFocus: function onFocus(event) {
+			if (!this.props.isFocused) {
+				this.props.onFocus(this.props.option, event);
+			}
+		},
+		render: function render() {
+			var _props = this.props;
+			var option = _props.option;
+			var instancePrefix = _props.instancePrefix;
+			var optionIndex = _props.optionIndex;
+
+			var className = (0, _classnames2['default'])(this.props.className, option.className);
+
+			return option.disabled ? _react2['default'].createElement(
+				'div',
+				{ className: className,
+					onMouseDown: this.blockEvent,
+					onClick: this.blockEvent },
+				this.props.children
+			) : _react2['default'].createElement(
+				'div',
+				{ className: className,
+					style: option.style,
+					role: 'option',
+					onMouseDown: this.handleMouseDown,
+					onMouseEnter: this.handleMouseEnter,
+					onMouseMove: this.handleMouseMove,
+					onTouchStart: this.handleTouchStart,
+					onTouchMove: this.handleTouchMove,
+					onTouchEnd: this.handleTouchEnd,
+					id: instancePrefix + '-option-' + optionIndex,
+					title: option.title },
+				this.props.children
+			);
+		}
+	});
+
+	module.exports = Option;
+
+/***/ },
+/* 330 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _classnames = __webpack_require__(321);
+
+	var _classnames2 = _interopRequireDefault(_classnames);
+
+	var Value = _react2['default'].createClass({
+
+		displayName: 'Value',
+
+		propTypes: {
+			children: _react2['default'].PropTypes.node,
+			disabled: _react2['default'].PropTypes.bool, // disabled prop passed to ReactSelect
+			id: _react2['default'].PropTypes.string, // Unique id for the value - used for aria
+			onClick: _react2['default'].PropTypes.func, // method to handle click on value label
+			onRemove: _react2['default'].PropTypes.func, // method to handle removal of the value
+			value: _react2['default'].PropTypes.object.isRequired },
+
+		// the option object for this value
+		handleMouseDown: function handleMouseDown(event) {
+			if (event.type === 'mousedown' && event.button !== 0) {
+				return;
+			}
+			if (this.props.onClick) {
+				event.stopPropagation();
+				this.props.onClick(this.props.value, event);
+				return;
+			}
+			if (this.props.value.href) {
+				event.stopPropagation();
+			}
+		},
+
+		onRemove: function onRemove(event) {
+			event.preventDefault();
+			event.stopPropagation();
+			this.props.onRemove(this.props.value);
+		},
+
+		handleTouchEndRemove: function handleTouchEndRemove(event) {
+			// Check if the view is being dragged, In this case
+			// we don't want to fire the click event (because the user only wants to scroll)
+			if (this.dragging) return;
+
+			// Fire the mouse events
+			this.onRemove(event);
+		},
+
+		handleTouchMove: function handleTouchMove(event) {
+			// Set a flag that the view is being dragged
+			this.dragging = true;
+		},
+
+		handleTouchStart: function handleTouchStart(event) {
+			// Set a flag that the view is not being dragged
+			this.dragging = false;
+		},
+
+		renderRemoveIcon: function renderRemoveIcon() {
+			if (this.props.disabled || !this.props.onRemove) return;
+			return _react2['default'].createElement(
+				'span',
+				{ className: 'Select-value-icon',
+					'aria-hidden': 'true',
+					onMouseDown: this.onRemove,
+					onTouchEnd: this.handleTouchEndRemove,
+					onTouchStart: this.handleTouchStart,
+					onTouchMove: this.handleTouchMove },
+				'×'
+			);
+		},
+
+		renderLabel: function renderLabel() {
+			var className = 'Select-value-label';
+			return this.props.onClick || this.props.value.href ? _react2['default'].createElement(
+				'a',
+				{ className: className, href: this.props.value.href, target: this.props.value.target, onMouseDown: this.handleMouseDown, onTouchEnd: this.handleMouseDown },
+				this.props.children
+			) : _react2['default'].createElement(
+				'span',
+				{ className: className, role: 'option', 'aria-selected': 'true', id: this.props.id },
+				this.props.children
+			);
+		},
+
+		render: function render() {
+			return _react2['default'].createElement(
+				'div',
+				{ className: (0, _classnames2['default'])('Select-value', this.props.value.className),
+					style: this.props.value.style,
+					title: this.props.value.title
+				},
+				this.renderRemoveIcon(),
+				this.renderLabel()
+			);
+		}
+
+	});
+
+	module.exports = Value;
+
+/***/ },
+/* 331 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _Rfid = __webpack_require__(332);
+
+	var _Rfid2 = _interopRequireDefault(_Rfid);
+
+	var _Rfid3 = __webpack_require__(333);
+
+	var _Rfid4 = _interopRequireDefault(_Rfid3);
+
+	var _Keys = __webpack_require__(334);
+
+	var _Keys2 = _interopRequireDefault(_Keys);
+
+	var _Edit = __webpack_require__(335);
+
+	var _Edit2 = _interopRequireDefault(_Edit);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	// Backbone
+
+
+	var KeysUserBox = _react2.default.createClass({
+		displayName: 'KeysUserBox',
+
+		getInitialState: function getInitialState() {
+			return {
+				showEditForm: false
+			};
+		},
+
+		edit: function edit(model) {
+			// Load the entity into the edit form
+			this.setState({
+				showEditForm: true,
+				rfidModel: model
+			});
+		},
+
+		add: function add() {
+			var newRfid = new _Rfid4.default();
+
+			// Load the entity into the edit form
+			this.setState({
+				showEditForm: true,
+				rfidModel: newRfid
+			});
+		},
+
+		rfidClose: function rfidClose() {
+			this.state.rfidModel.trigger("destroy", this.state.rfidModel);
+
+			this.setState({
+				showEditForm: false
+			});
+		},
+
+		rfidSave: function rfidSave() {
+			this.setState({
+				showEditForm: false
+			});
+		},
+
+		render: function render() {
+			if (this.state.showEditForm) {
+				return _react2.default.createElement(_Edit2.default, { model: this.state.rfidModel, ref: 'edit', member_number: this.props.member_number, close: this.rfidClose, save: this.rfidSave });
+			} else {
+				return _react2.default.createElement(
+					'div',
+					null,
+					_react2.default.createElement(_Keys2.default, { type: _Rfid2.default,
+						filters: {
+							relations: [{
+								type: "member",
+								member_number: this.props.member_number
+							}]
+						},
+						edit: this.edit }),
+					_react2.default.createElement(
+						'button',
+						{ className: 'uk-button uk-button-primary', onClick: this.add },
+						_react2.default.createElement('i', { className: 'uk-icon-plus-circle' }),
+						' Lägg till ny RFID-tagg'
+					)
+				);
+			}
+		}
+	});
+
+	module.exports = KeysUserBox;
+
+/***/ },
+/* 332 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _backbone = __webpack_require__(238);
+
+	var _backbone2 = _interopRequireDefault(_backbone);
+
+	var _Rfid = __webpack_require__(333);
+
+	var _Rfid2 = _interopRequireDefault(_Rfid);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	var RfidCollection = _backbone2.default.PageableCollection.extend({
+		model: _Rfid2.default,
+		url: "/rfid"
+	});
+
+	module.exports = RfidCollection;
+
+/***/ },
+/* 333 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+
+	var _backbone = __webpack_require__(238);
+
+	var _backbone2 = _interopRequireDefault(_backbone);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	var RfidModel = _backbone2.default.Model.fullExtend({
+		idAttribute: "entity_id",
+		urlRoot: "/rfid",
+		defaults: {
+			created_at: "0000-00-00T00:00:00Z",
+			updated_at: "0000-00-00T00:00:00Z",
+			tagid: "",
+			description: "",
+			status: "inactive",
+			startdate: "0000-00-00T00:00:00Z",
+			enddate: "0000-00-00T00:00:00Z"
+		}
+	});
+
+	module.exports = RfidModel;
+
+/***/ },
+/* 334 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _BackboneTable = __webpack_require__(256);
+
+	var _BackboneTable2 = _interopRequireDefault(_BackboneTable);
+
+	var _TableDropdownMenu = __webpack_require__(274);
+
+	var _TableDropdownMenu2 = _interopRequireDefault(_TableDropdownMenu);
+
+	var _Rfid = __webpack_require__(333);
+
+	var _Rfid2 = _interopRequireDefault(_Rfid);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	var Keys = _react2.default.createClass({
+		displayName: 'Keys',
+
+		mixins: [Backbone.React.Component.mixin, _BackboneTable2.default],
+
+		getInitialState: function getInitialState() {
+			return {
+				columns: 4
+			};
+		},
+
+		componentWillMount: function componentWillMount() {
+			this.fetch();
+		},
+
+		componentWillReceiveProps: function componentWillReceiveProps(nextProps) {
+			if (nextProps.filters != this.state.filters) {
+				this.setState({
+					filters: nextProps.filters
+				});
+
+				// TODO: setState() has a delay so we need to wait a moment
+				var _this = this;
+				setTimeout(function () {
+					_this.fetch();
+				}, 100);
+			}
+		},
+
+		removeTextMessage: function removeTextMessage(entity) {
+			return "Are you sure you want to remove key \"" + entity.tagid + "\"?";
+		},
+
+		removeErrorMessage: function removeErrorMessage() {
+			UIkit.modal.alert("Error deleting key");
+		},
+
+		edit: function edit(row) {
+			// We need to load a new model because the model can not belong to two different components at the same time.
+			this.props.edit(this.getCollection().at(row).clone());
+		},
+
+		renderHeader: function renderHeader() {
+			return [{
+				title: "Status",
+				sort: "status"
+			}, {
+				title: "RFID",
+				sort: "tagid"
+			}, {
+				title: "Beskrivning",
+				sort: "description"
+			}, {
+				title: ""
+			}];
+		},
+
+		renderRow: function renderRow(row, i) {
+			return _react2.default.createElement(
+				'tr',
+				{ key: i },
+				_react2.default.createElement(
+					'td',
+					null,
+					function () {
+						switch (row.status) {
+							case "active":
+								return _react2.default.createElement(
+									'span',
+									null,
+									_react2.default.createElement('i', { className: 'uk-icon uk-icon-check key-active' }),
+									'Aktiv'
+								);
+							case "inactive":
+								return _react2.default.createElement(
+									'span',
+									null,
+									_react2.default.createElement('i', { className: 'uk-icon uk-icon-close key-inactive' }),
+									'Inaktiv'
+								);
+							case "auto":
+								return _react2.default.createElement(
+									'span',
+									null,
+									_react2.default.createElement('i', { className: 'uk-icon uk-icon-cog key-auto' }),
+									'Auto'
+								);
+						}
+					}()
+				),
+				_react2.default.createElement(
+					'td',
+					null,
+					row.tagid
+				),
+				_react2.default.createElement(
+					'td',
+					null,
+					row.description
+				),
+				_react2.default.createElement(
+					'td',
+					null,
+					_react2.default.createElement(
+						_TableDropdownMenu2.default,
+						null,
+						_react2.default.createElement(
+							'a',
+							{ onClick: this.edit.bind(this, i) },
+							_react2.default.createElement('i', { className: 'uk-icon uk-icon-cog' }),
+							' Redigera'
+						),
+						this.removeButton(i)
+					)
+				)
+			);
+		}
+	});
+
+	// Backbone
+
+
+	module.exports = Keys;
+
+/***/ },
+/* 335 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _backboneReactComponent = __webpack_require__(237);
+
+	var _backboneReactComponent2 = _interopRequireDefault(_backboneReactComponent);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	var Edit = _react2.default.createClass({
+		displayName: 'Edit',
+
+		mixins: [Backbone.React.Component.mixin],
+
+		getInitialState: function getInitialState() {
+			return {
+				error_column: "",
+				error_message: ""
+			};
+		},
+
+		cancel: function cancel(event) {
+			// Prevent the form from being submitted
+			event.preventDefault();
+
+			// Tell parent to close form
+			this.props.close();
+		},
+
+		remove: function remove(event) {
+			// Prevent the form from being submitted
+			event.preventDefault();
+
+			UIkit.modal.alert("TODO: Remove");
+		},
+
+		save: function save(event) {
+			var _this = this;
+
+			// Prevent the form from being submitted
+			event.preventDefault();
+
+			// Add a relation to the member and save the model
+			this.getModel().save({
+				relations: [{
+					type: "member",
+					member_number: this.props.member_number
+				}]
+			}, {
+				wait: true,
+				success: function success() {
+					_this.getModel().trigger("destroy", _this.getModel());
+
+					// Tell parent to save form
+					// For some reason a sync event is fired a few ms after React destroys the element, so we have to wait until the sync is done.
+					setTimeout(function () {
+						_this.props.save.call();
+					}, 10);
+				},
+				error: function error(model, xhr, options) {
+					if (xhr.status == 422) {
+						_this.setState({
+							error_column: xhr.responseJSON.column,
+							error_message: xhr.responseJSON.message
+						});
+					}
+				}
+			});
+		},
+
+		handleChange: function handleChange(event) {
+			// Update the model with new value
+			var target = event.target;
+			var key = target.getAttribute("name");
+			this.state.model[key] = target.value;
+
+			// When we change the value of the model we have to rerender the component
+			this.forceUpdate();
+		},
+
+		renderErrorMsg: function renderErrorMsg(column) {
+			if (this.state.error_column == column) {
+				return _react2.default.createElement(
+					'p',
+					{ className: 'uk-form-help-block error' },
+					'Error: ',
+					this.state.error_message
+				);
+			}
+		},
+
+		render: function render() {
+			var _this2 = this;
+
+			return _react2.default.createElement(
+				'form',
+				{ className: 'uk-form uk-form-horizontal' },
+				_react2.default.createElement(
+					'div',
+					{ className: '' },
+					_react2.default.createElement(
+						'h3',
+						null,
+						this.state.model.entity_id ? "Redigera RFID-tagg" : "Lägg till ny RFID-tagg"
+					),
+					_react2.default.createElement(
+						'div',
+						{ className: 'uk-form-row' },
+						_react2.default.createElement(
+							'label',
+							{ className: 'uk-form-label', htmlFor: 'tagid' },
+							'ID'
+						),
+						_react2.default.createElement(
+							'div',
+							{ className: 'uk-form-controls' },
+							_react2.default.createElement('input', { type: 'text', id: 'tagid', name: 'tagid', placeholder: 'Använd en RFID-läsare för att läsa av det unika numret på nyckeln', value: this.state.model.tagid, className: 'uk-form-width-large', onChange: this.handleChange }),
+							this.renderErrorMsg("tagid")
+						)
+					),
+					_react2.default.createElement(
+						'div',
+						{ className: 'uk-form-row' },
+						_react2.default.createElement(
+							'label',
+							{ className: 'uk-form-label', htmlFor: 'description' },
+							'Beskrivning'
+						),
+						_react2.default.createElement(
+							'div',
+							{ className: 'uk-form-controls' },
+							_react2.default.createElement('textarea', { id: 'description', name: 'description', placeholder: 'Det är valfritt att lägga in en beskrivning av nyckeln', value: this.state.model.description, className: 'uk-form-width-large', onChange: this.handleChange }),
+							this.renderErrorMsg("description")
+						)
+					),
+					_react2.default.createElement(
+						'div',
+						{ className: 'uk-form-row' },
+						_react2.default.createElement(
+							'label',
+							{ className: 'uk-form-label', htmlFor: 'status' },
+							'Status'
+						),
+						_react2.default.createElement(
+							'div',
+							{ className: 'uk-form-controls' },
+							_react2.default.createElement(
+								'select',
+								{ ref: 'status', id: 'status', name: 'status', value: this.state.model.status, className: 'uk-form-width-large', onChange: this.handleChange },
+								_react2.default.createElement(
+									'option',
+									{ value: 'active' },
+									'Aktiv'
+								),
+								_react2.default.createElement(
+									'option',
+									{ value: 'inactive' },
+									'Inaktiv'
+								),
+								_react2.default.createElement(
+									'option',
+									{ value: 'auto' },
+									'Auto'
+								)
+							),
+							this.renderErrorMsg("status")
+						)
+					),
+					_react2.default.createElement(
+						'div',
+						{ className: 'uk-form-row' },
+						_react2.default.createElement(
+							'div',
+							{ className: 'uk-form-controls' },
+							_react2.default.createElement(
+								'p',
+								null,
+								_react2.default.createElement('i', { className: 'uk-icon uk-icon-info-circle' }),
+								function () {
+									switch (_this2.state.model.status) {
+										case "active":
+											return "En aktiv nyckel är permanent aktiv inom de datum som specificeras nedan och påverkas altså inte av eventuella betalningar.";
+										case "inactive":
+											return "En inaktiv nyckel är permanent inaktiv och går ej att använda i passersystem förän den aktiveras igen.";
+										case "auto":
+											return "Auto-läget beräknar fram om nyckeln skall vara aktiv eller ej beroende på medlemmens eventuella betalningar.";
+									}
+								}()
+							)
+						)
+					),
+					this.state.model.status == "active" ? _react2.default.createElement(
+						'div',
+						{ className: 'uk-form-row' },
+						_react2.default.createElement(
+							'label',
+							{ className: 'uk-form-label', htmlFor: 'startdate' },
+							'Startdatum'
+						),
+						_react2.default.createElement(
+							'div',
+							{ className: 'uk-form-controls' },
+							_react2.default.createElement(
+								'div',
+								{ className: 'uk-form-icon' },
+								_react2.default.createElement('i', { className: 'uk-icon-calendar' }),
+								_react2.default.createElement('input', { type: 'text', id: 'startdate', name: 'startdate', value: this.state.model.startdate, className: 'uk-form-width-large', onChange: this.handleChange }),
+								this.renderErrorMsg("startdate")
+							)
+						)
+					) : "",
+					this.state.model.status == "active" ? _react2.default.createElement(
+						'div',
+						{ className: 'uk-form-row' },
+						_react2.default.createElement(
+							'label',
+							{ className: 'uk-form-label', htmlFor: 'enddate' },
+							'Slutdatum'
+						),
+						_react2.default.createElement(
+							'div',
+							{ className: 'uk-form-controls' },
+							_react2.default.createElement(
+								'div',
+								{ className: 'uk-form-icon' },
+								_react2.default.createElement('i', { className: 'uk-icon-calendar' }),
+								_react2.default.createElement('input', { type: 'text', id: 'enddate', name: 'enddate', value: this.state.model.enddate, className: 'uk-form-width-large', onChange: this.handleChange }),
+								this.renderErrorMsg("enddate")
+							)
+						)
+					) : "",
+					_react2.default.createElement(
+						'div',
+						{ className: 'uk-form-row' },
+						_react2.default.createElement(
+							'div',
+							{ className: 'uk-form-controls' },
+							_react2.default.createElement(
+								'button',
+								{ className: 'uk-button uk-button-danger uk-float-left', onClick: this.cancel },
+								_react2.default.createElement('i', { className: 'uk-icon-close' }),
+								' Avbryt'
+							),
+							this.state.model.entity_id ? _react2.default.createElement(
+								'button',
+								{ className: 'uk-button uk-button-danger uk-float-left', onClick: this.remove },
+								_react2.default.createElement('i', { className: 'uk-icon-trash' }),
+								' Ta bort nyckel'
+							) : "",
+							_react2.default.createElement(
+								'button',
+								{ className: 'uk-button uk-button-success uk-float-right', onClick: this.save },
+								_react2.default.createElement('i', { className: 'uk-icon-save' }),
+								' Spara nyckel'
+							)
+						)
+					)
+				)
+			);
+		}
+	});
+
+	module.exports = Edit;
+
+/***/ },
+/* 336 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	var SubscriptionUserBox = _react2.default.createClass({
+		displayName: 'SubscriptionUserBox',
+
+		render: function render() {
+			return _react2.default.createElement(
+				'span',
+				null,
+				'SubscriptionUserBox'
+			);
+		}
+	});
+
+	module.exports = SubscriptionUserBox;
+
+/***/ },
+/* 337 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _Transaction = __webpack_require__(288);
+
+	var _Transaction2 = _interopRequireDefault(_Transaction);
+
+	var _TransactionsUser = __webpack_require__(338);
+
+	var _TransactionsUser2 = _interopRequireDefault(_TransactionsUser);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	// Backbone
+
+
+	var TransactionUserBox = _react2.default.createClass({
+		displayName: 'TransactionUserBox',
+
+		render: function render() {
+			return _react2.default.createElement(
+				'div',
+				null,
+				_react2.default.createElement(_TransactionsUser2.default, { type: _Transaction2.default,
+					filters: {
+						relations: [{
+							type: "member",
+							member_number: this.props.member_number
+						}]
+					}
+				})
+			);
+		}
+	});
+
+	module.exports = TransactionUserBox;
+
+/***/ },
+/* 338 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _backboneReactComponent = __webpack_require__(237);
+
+	var _backboneReactComponent2 = _interopRequireDefault(_backboneReactComponent);
+
+	var _BackboneTable = __webpack_require__(256);
+
+	var _BackboneTable2 = _interopRequireDefault(_BackboneTable);
+
+	var _reactRouter = __webpack_require__(172);
+
+	var _Currency = __webpack_require__(260);
+
+	var _Currency2 = _interopRequireDefault(_Currency);
+
+	var _Date = __webpack_require__(268);
+
+	var _Date2 = _interopRequireDefault(_Date);
+
+	var _TableDropdownMenu = __webpack_require__(274);
+
+	var _TableDropdownMenu2 = _interopRequireDefault(_TableDropdownMenu);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	var TransactionsUser = _react2.default.createClass({
+		displayName: 'TransactionsUser',
+
+		mixins: [Backbone.React.Component.mixin, _BackboneTable2.default],
+
+		getInitialState: function getInitialState() {
+			return {
+				columns: 4
+			};
+		},
+
+		componentWillMount: function componentWillMount() {
+			this.fetch();
+		},
+
+		componentWillReceiveProps: function componentWillReceiveProps(nextProps) {
+			if (nextProps.filters != this.state.filters) {
+				this.setState({
+					filters: nextProps.filters
+				});
+
+				// TODO: setState() has a delay so we need to wait a moment
+				var _this = this;
+				setTimeout(function () {
+					_this.fetch();
+				}, 100);
+			}
+		},
+
+		renderHeader: function renderHeader() {
+			return [{
+				title: "Bokföringsdatum",
+				sort: "accounting_date"
+			}, {
+				title: "Transaktion",
+				sort: "transaction_title"
+			}, {
+				title: "Belopp",
+				class: "uk-text-right",
+				sort: "amount"
+			}, {
+				title: ""
+			}];
+		},
+
+		renderRow: function renderRow(row, i) {
+			return _react2.default.createElement(
+				'tr',
+				{ key: i },
+				_react2.default.createElement(
+					'td',
+					null,
+					_react2.default.createElement(_Date2.default, { date: row.accounting_date })
+				),
+				_react2.default.createElement(
+					'td',
+					null,
+					_react2.default.createElement(
+						_reactRouter.Link,
+						{ to: "/economy/instruction/" + row.instruction_number },
+						row.transaction_title
+					)
+				),
+				_react2.default.createElement(
+					'td',
+					{ className: 'uk-text-right' },
+					_react2.default.createElement(_Currency2.default, { value: row.amount, currency: 'SEK' })
+				),
+				_react2.default.createElement(
+					'td',
+					null,
+					_react2.default.createElement(
+						_TableDropdownMenu2.default,
+						null,
+						_react2.default.createElement(
+							_reactRouter.Link,
+							{ to: "/product/" + row.entity_id + "/edit" },
+							_react2.default.createElement('i', { className: 'uk-icon uk-icon-cog' }),
+							' Redigera metadata'
+						),
+						_react2.default.createElement(
+							_reactRouter.Link,
+							{ to: "/economy/instruction/" + row.instruction_number },
+							_react2.default.createElement('i', { className: 'uk-icon uk-icon-cog' }),
+							' Visa verifikation'
+						)
+					)
+				)
+			);
+		}
+	});
+
+	module.exports = TransactionsUser;
+
+/***/ },
+/* 339 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _Messages = __webpack_require__(340);
+
+	var _Messages2 = __webpack_require__(341);
+
+	var _Messages3 = _interopRequireDefault(_Messages2);
+
+	var _reactRouter = __webpack_require__(172);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	// Backbone
+
+
+	module.exports = _react2.default.createClass({
+		displayName: 'exports',
+
+		render: function render() {
+			return _react2.default.createElement(
+				'span',
+				null,
+				'TODO: Mail'
+			);
+
+			return _react2.default.createElement(
+				'div',
+				null,
+				_react2.default.createElement(_Messages.MessagesTable, { type: _Messages3.default,
+					filters: {
+						relations: [{
+							type: "member",
+							member_number: this.props.member_number
+						}]
+					}
+				}),
+				_react2.default.createElement(
+					_reactRouter.Link,
+					{ to: '/messages/new', className: 'uk-button uk-button-primary' },
+					_react2.default.createElement('i', { className: 'uk-icon-envelope' }),
+					' Skicka meddelande'
+				)
+			);
+		}
+	});
+
+/***/ },
+/* 340 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _reactRouter = __webpack_require__(172);
+
+	var _BackboneTable = __webpack_require__(256);
+
+	var _BackboneTable2 = _interopRequireDefault(_BackboneTable);
+
+	var _DateTime = __webpack_require__(301);
+
+	var _DateTime2 = _interopRequireDefault(_DateTime);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	module.exports = _react2.default.createClass({
+		displayName: 'exports',
+
+		mixins: [Backbone.React.Component.mixin, _BackboneTable2.default],
+
+		getInitialState: function getInitialState() {
+			return {
+				columns: 6
+			};
+		},
+
+		componentWillMount: function componentWillMount() {
+			this.fetch();
+		},
+
+		componentWillReceiveProps: function componentWillReceiveProps(nextProps) {
+			if (nextProps.filters != this.state.filters) {
+				this.setState({
+					filters: nextProps.filters
+				});
+
+				// TODO: setState() has a delay so we need to wait a moment
+				var _this = this;
+				setTimeout(function () {
+					_this.fetch();
+				}, 100);
+			}
+		},
+
+		renderHeader: function renderHeader() {
+			return [{
+				title: "Skapad",
+				sort: "created_at"
+			}, {
+				title: "Typ",
+				sort: "type"
+			}, {
+				title: "Status",
+				sort: "status"
+			}, {
+				title: "Meddelande",
+				sort: "description"
+			}, {
+				title: "Antal mottagare"
+			}];
+		},
+
+		renderRow: function renderRow(row, i) {
+			return _react2.default.createElement(
+				'tr',
+				{ key: i },
+				_react2.default.createElement(
+					'td',
+					null,
+					_react2.default.createElement(_DateTime2.default, { date: row.created_at })
+				),
+				_react2.default.createElement(
+					'td',
+					null,
+					row.type == "email" ? _react2.default.createElement(
+						'span',
+						null,
+						_react2.default.createElement('i', { className: 'uk-icon-envelope', title: 'E-mail' }),
+						' E-post'
+					) : _react2.default.createElement(
+						'span',
+						null,
+						_react2.default.createElement('i', { className: 'uk-icon-commenting', title: 'SMS' }),
+						' SMS'
+					)
+				),
+				_react2.default.createElement(
+					'td',
+					null,
+					function () {
+						switch (row.status) {
+							case "queued":
+								return _react2.default.createElement(
+									'span',
+									null,
+									'Köad ',
+									_react2.default.createElement(_DateTime2.default, { date: row.created_at })
+								);
+							case "failed":
+								return "Sändning misslyckades";
+							case "sent":
+								return _react2.default.createElement(
+									'span',
+									null,
+									'Skickad ',
+									_react2.default.createElement(_DateTime2.default, { date: row.date_sent })
+								);
+							default:
+								return "Okänt";
+						}
+					}()
+				),
+				_react2.default.createElement(
+					'td',
+					null,
+					row.type == "email" ? row.title : row.description
+				),
+				_react2.default.createElement(
+					'td',
+					null,
+					row.num_recipients,
+					' ',
+					_react2.default.createElement(
+						_reactRouter.Link,
+						{ to: "/messages/" + row.message_id + "/recipients" },
+						'Visa'
+					)
+				)
+			);
+		}
+	});
+
+/***/ },
+/* 341 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _backbone = __webpack_require__(238);
+
+	var _backbone2 = _interopRequireDefault(_backbone);
+
+	var _Message = __webpack_require__(342);
+
+	var _Message2 = _interopRequireDefault(_Message);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	var Messages = _backbone2.default.PageableCollection.extend({
+		model: _Message2.default,
+		url: "/messages"
+	});
+
+	module.exports = Messages;
+
+/***/ },
+/* 342 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+
+	var _backbone = __webpack_require__(238);
+
+	var _backbone2 = _interopRequireDefault(_backbone);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	var Message = _backbone2.default.Model.fullExtend({
+		idAttribute: "message_id",
+		urlRoot: "/messages",
+		defaults: {
+			created_at: "0000-00-00T00:00:00Z",
+			updated_at: "0000-00-00T00:00:00Z",
+			type: "",
+			recipients: 0,
+			title: "",
+			description: "",
+			status: 0
+		}
+	});
+
+	module.exports = Message;
+
+/***/ },
+/* 343 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _Group = __webpack_require__(317);
+
+	var _Group2 = _interopRequireDefault(_Group);
+
+	var _Groups = __webpack_require__(316);
+
+	var _Groups2 = _interopRequireDefault(_Groups);
+
+	var _reactRouter = __webpack_require__(172);
+
+	var _TableFilterBox = __webpack_require__(264);
+
+	var _TableFilterBox2 = _interopRequireDefault(_TableFilterBox);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	// Backbone
+
+
+	module.exports = _react2.default.createClass({
+		displayName: 'exports',
+
+		getInitialState: function getInitialState() {
+			return {
+				filters: {}
+			};
+		},
+
+		// TODO: Remove?
+		overrideFiltersFromProps: function overrideFiltersFromProps(filters) {
+			console.log("overrideFiltersFromProps");
+			return filters;
+		},
+
+		updateFilters: function updateFilters(newFilter) {
+			var filters = this.overrideFiltersFromProps(newFilter);
+			this.setState({
+				filters: filters
+			});
+		},
+
+		render: function render() {
+			return _react2.default.createElement(
+				'div',
+				null,
+				_react2.default.createElement(
+					'h2',
+					null,
+					'Grupper'
+				),
+				_react2.default.createElement(
+					'p',
+					{ className: 'uk-float-left' },
+					'På denna sida ser du en lista på samtliga grupper.'
+				),
+				_react2.default.createElement(
+					_reactRouter.Link,
+					{ className: 'uk-button uk-button-primary uk-float-right', to: '/groups/add' },
+					_react2.default.createElement('i', { className: 'uk-icon-plus-circle' }),
+					' Skapa ny grupp'
+				),
+				_react2.default.createElement(_TableFilterBox2.default, { onChange: this.updateFilters }),
+				_react2.default.createElement(_Groups2.default, { type: _Group2.default, filters: this.state.filters })
+			);
+		}
+	});
+	//GroupsHandler.title = "Visa grupper";
+
+/***/ },
+/* 344 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _Group = __webpack_require__(318);
+
+	var _Group2 = _interopRequireDefault(_Group);
+
+	var _Group3 = __webpack_require__(345);
+
+	var _Group4 = _interopRequireDefault(_Group3);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	// Backbone
+
+
+	module.exports = _react2.default.createClass({
+		displayName: 'exports',
+
+		getInitialState: function getInitialState() {
+			var newGroup = new _Group2.default();
+			return {
+				model: newGroup
+			};
+		},
+
+		render: function render() {
+			return _react2.default.createElement(
+				'div',
+				null,
+				_react2.default.createElement(_Group4.default, { model: this.state.model })
+			);
+		}
+	});
+
+/***/ },
+/* 345 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _backboneReactComponent = __webpack_require__(237);
+
+	var _backboneReactComponent2 = _interopRequireDefault(_backboneReactComponent);
+
+	var _reactRouter = __webpack_require__(172);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	module.exports = _react2.default.createClass({
+		displayName: 'exports',
+
+		mixins: [Backbone.React.Component.mixin],
+
+		getInitialState: function getInitialState() {
+			return {
+				error_column: "",
+				error_message: ""
+			};
+		},
+
+		cancel: function cancel(event) {
+			// Prevent the form from being submitted
+			event.preventDefault();
+
+			UIkit.modal.alert("TODO: Cancel");
+		},
+
+		remove: function remove(event) {
+			// Prevent the form from being submitted
+			event.preventDefault();
+
+			UIkit.modal.alert("TODO: Remove");
+		},
+
+		save: function save(event) {
+			var _this = this;
+
+			// Prevent the form from being submitted
+			event.preventDefault();
+
+			this.getModel().save([], {
+				success: function success(model, response) {
+					if (response.status == "created") {
+						_reactRouter.browserHistory.push("/groups");
+						UIkit.modal.alert("Successfully created");
+					} else if (response.status == "updated") {
+						_reactRouter.browserHistory.push("/groups");
+						UIkit.modal.alert("Successfully updated");
+					} else {
+						_this.error();
+					}
+				},
+				error: function error(model, xhr, options) {
+					if (xhr.status == 422) {
+						_this.setState({
+							error_column: xhr.responseJSON.column,
+							error_message: xhr.responseJSON.message
+						});
+					} else {
+
+						_this.error();
+					}
+				}
+			});
+		},
+
+		error: function error() {
+			UIkit.modal.alert("Error saving model");
+		},
+
+		handleChange: function handleChange(event) {
+			// Update the model with new value
+			var target = event.target;
+			var key = target.getAttribute("name");
+			this.state.model[key] = target.value;
+
+			// When we change the value of the model we have to rerender the component
+			this.forceUpdate();
+		},
+
+		renderErrorMsg: function renderErrorMsg(column) {
+			if (this.state.error_column == column) {
+				return _react2.default.createElement(
+					'p',
+					{ className: 'uk-form-help-block error' },
+					'Error: ',
+					this.state.error_message
+				);
+			}
+		},
+
+		render: function render() {
+			return _react2.default.createElement(
+				'div',
+				null,
+				_react2.default.createElement(
+					'h2',
+					null,
+					this.state.model.group_id ? "Redigera grupp" : "Skapa grupp"
+				),
+				_react2.default.createElement(
+					'form',
+					{ className: 'uk-form uk-form-horizontal', onSubmit: this.save },
+					_react2.default.createElement(
+						'div',
+						{ className: 'uk-form-row' },
+						_react2.default.createElement(
+							'label',
+							{ className: 'uk-form-label' },
+							'Namn'
+						),
+						_react2.default.createElement(
+							'div',
+							{ className: 'uk-form-controls' },
+							_react2.default.createElement(
+								'div',
+								{ className: 'uk-form-icon' },
+								_react2.default.createElement('i', { className: 'uk-icon-tag' }),
+								_react2.default.createElement('input', { type: 'text', name: 'title', className: 'uk-form-width-large', value: this.state.model.title, onChange: this.handleChange })
+							),
+							this.renderErrorMsg("title")
+						)
+					),
+					_react2.default.createElement(
+						'div',
+						{ className: 'uk-form-row' },
+						_react2.default.createElement(
+							'label',
+							{ className: 'uk-form-label' },
+							'Beskrivning'
+						),
+						_react2.default.createElement(
+							'div',
+							{ className: 'uk-form-controls' },
+							_react2.default.createElement('textarea', { name: 'description', className: 'uk-form-width-large', value: this.state.model.description, onChange: this.handleChange }),
+							this.renderErrorMsg("description")
+						)
+					),
+					_react2.default.createElement(
+						'div',
+						{ className: 'uk-form-row' },
+						_react2.default.createElement(
+							'div',
+							{ className: 'uk-form-controls' },
+							_react2.default.createElement(
+								'button',
+								{ className: 'uk-button uk-button-danger uk-float-left', onClick: this.cancel },
+								_react2.default.createElement('i', { className: 'uk-icon-close' }),
+								' Avbryt'
+							),
+							this.state.model.group_id ? _react2.default.createElement(
+								'button',
+								{ className: 'uk-button uk-button-danger uk-float-left', onClick: this.remove },
+								_react2.default.createElement('i', { className: 'uk-icon-trash' }),
+								' Ta bort grupp'
+							) : "",
+							_react2.default.createElement(
+								'button',
+								{ className: 'uk-button uk-button-success uk-float-right', onClick: this.save },
+								_react2.default.createElement('i', { className: 'uk-icon-save' }),
+								' Spara grupp'
+							)
+						)
+					)
+				)
+			);
+		}
+	});
+
+/***/ },
+/* 346 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _Group = __webpack_require__(318);
+
+	var _Group2 = _interopRequireDefault(_Group);
+
+	var _Member = __webpack_require__(308);
+
+	var _Member2 = _interopRequireDefault(_Member);
+
+	var _Group3 = __webpack_require__(345);
+
+	var _Group4 = _interopRequireDefault(_Group3);
+
+	var _GroupMembers = __webpack_require__(347);
+
+	var _GroupMembers2 = _interopRequireDefault(_GroupMembers);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	// Backbone
+
+
+	module.exports = _react2.default.createClass({
+		displayName: 'exports',
+
+		getInitialState: function getInitialState() {
+			var group = new _Group2.default({
+				group_id: this.props.params.id
+			});
+			group.fetch();
+
+			this.title = "Meep";
+			return {
+				model: group
+			};
+		},
+
+		render: function render() {
+			return _react2.default.createElement(
+				'div',
+				null,
+				_react2.default.createElement(_Group4.default, { model: this.state.model }),
+				_react2.default.createElement(_GroupMembers2.default, { type: _Member2.default, url: "/membership/group/" + this.props.params.id + "/members" })
+			);
+		}
+	});
+	//GroupHandler.title = "Visa grupp";
+
+/***/ },
+/* 347 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _backboneReactComponent = __webpack_require__(237);
+
+	var _backboneReactComponent2 = _interopRequireDefault(_backboneReactComponent);
+
+	var _BackboneTable = __webpack_require__(256);
+
+	var _BackboneTable2 = _interopRequireDefault(_BackboneTable);
+
+	var _reactRouter = __webpack_require__(172);
+
+	var _TableDropdownMenu = __webpack_require__(274);
+
+	var _TableDropdownMenu2 = _interopRequireDefault(_TableDropdownMenu);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	var GroupMembers = _react2.default.createClass({
+		displayName: 'GroupMembers',
+
+		mixins: [Backbone.React.Component.mixin, _BackboneTable2.default],
+
+		getInitialState: function getInitialState() {
+			return {
+				columns: 9
+			};
+		},
+
+		componentWillMount: function componentWillMount() {
+			this.fetch();
+		},
+
+		removeTextMessage: function removeTextMessage(group) {
+			// TODO
+			return "Are you sure you want to remove group \"" + group.title + "\"?";
+		},
+
+		removeErrorMessage: function removeErrorMessage() {
+			// TODO
+			UIkit.modal.alert("Error deleting group");
+		},
+
+		renderHeader: function renderHeader() {
+			return [{
+				title: "Medlemsnummer"
+			}, {
+				title: "Namn"
+			}, {
+				title: ""
+			}];
+		},
+
+		renderRow: function renderRow(row, i) {
+			return _react2.default.createElement(
+				'tr',
+				{ key: i },
+				_react2.default.createElement(
+					'td',
+					null,
+					_react2.default.createElement(
+						_reactRouter.Link,
+						{ to: "/members/" + row.member_number },
+						row.member_number
+					)
+				),
+				_react2.default.createElement(
+					'td',
+					null,
+					_react2.default.createElement(
+						_reactRouter.Link,
+						{ to: "/members/" + row.member_number },
+						row.firstname,
+						' ',
+						row.lastname
+					)
+				),
+				_react2.default.createElement(
+					'td',
+					null,
+					_react2.default.createElement(
+						_TableDropdownMenu2.default,
+						null,
+						this.removeButton(i, "Ta bort medlem ur grupp")
+					)
+				)
+			);
+		}
+	});
+
+	module.exports = GroupMembers;
+
+/***/ },
+/* 348 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _Group = __webpack_require__(318);
+
+	var _Group2 = _interopRequireDefault(_Group);
+
+	var _Group3 = __webpack_require__(345);
+
+	var _Group4 = _interopRequireDefault(_Group3);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	// Backbone
+
+
+	module.exports = _react2.default.createClass({
+		displayName: 'exports',
+
+		getInitialState: function getInitialState() {
+			var id = this.props.params.id;
+			var group = new _Group2.default({ group_id: id });
+			group.fetch();
+
+			this.title = "Meep";
+			return {
+				model: group
+			};
+		},
+
+		render: function render() {
+			return _react2.default.createElement(_Group4.default, { model: this.state.model });
+		}
+	});
+	//GroupEditHandler.title = "Visa grupp";
+
+/***/ },
+/* 349 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+
+	module.exports = {
+		childRoutes: [{
+			path: "/sales",
+			indexRoute: {
+				component: __webpack_require__(350)
+			},
+			childRoutes: [{
+				path: "overview",
+				component: __webpack_require__(350)
+			}, {
+				path: "products",
+				component: __webpack_require__(351)
+			}, {
+				path: "subscriptions",
+				component: __webpack_require__(355)
+			}, {
+				path: "history",
+				component: __webpack_require__(359)
+			}]
+		}]
+	};
+
+/***/ },
+/* 350 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	module.exports = _react2.default.createClass({
+		displayName: 'exports',
+
+		render: function render() {
+			return _react2.default.createElement(
+				'div',
+				null,
+				_react2.default.createElement(
+					'h2',
+					null,
+					'Översikt försäljning'
+				),
+				_react2.default.createElement('p', null)
+			);
+		}
+	});
+
+/***/ },
+/* 351 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _Product = __webpack_require__(352);
+
+	var _Product2 = _interopRequireDefault(_Product);
+
+	var _Products = __webpack_require__(354);
+
+	var _Products2 = _interopRequireDefault(_Products);
+
+	var _reactRouter = __webpack_require__(172);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	//import ProductModel from '../Models/Product'
+
+	module.exports = _react2.default.createClass({
+		displayName: 'exports',
+
+		render: function render() {
+			return _react2.default.createElement(
+				'div',
+				null,
+				_react2.default.createElement(
+					'h2',
+					null,
+					'Produkter'
+				),
+				_react2.default.createElement(
+					'p',
+					{ className: 'uk-float-left' },
+					'På denna sida ser du en lista på samtliga produkter som finns för försäljning.'
+				),
+				_react2.default.createElement(
+					_reactRouter.Link,
+					{ to: '/product/add', className: 'uk-button uk-button-primary uk-float-right' },
+					_react2.default.createElement('i', { className: 'uk-icon-plus-circle' }),
+					' Skapa ny produkt'
+				),
+				_react2.default.createElement(_Products2.default, { type: _Product2.default })
+			);
+		}
+	});
+
+	// Backbone
+
+/***/ },
+/* 352 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _backbone = __webpack_require__(238);
+
+	var _backbone2 = _interopRequireDefault(_backbone);
+
+	var _Product = __webpack_require__(353);
+
+	var _Product2 = _interopRequireDefault(_Product);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	var ProductCollection = _backbone2.default.PageableCollection.extend({
+		model: _Product2.default,
+		url: "/product"
+	});
+
+	module.exports = ProductCollection;
+
+/***/ },
+/* 353 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+
+	var _backbone = __webpack_require__(238);
+
+	var _backbone2 = _interopRequireDefault(_backbone);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	var ProductModel = _backbone2.default.Model.fullExtend({
+		idAttribute: "entity_id",
+		urlRoot: "/product",
+		defaults: {
+			created_at: "0000-00-00T00:00:00Z",
+			updated_at: "0000-00-00T00:00:00Z",
+			title: "",
+			description: "",
+			expiry_date: "",
+			price: 0,
+			interval: ""
+		}
+	});
+
+	module.exports = ProductModel;
+
+/***/ },
+/* 354 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _reactRouter = __webpack_require__(172);
+
+	var _BackboneTable = __webpack_require__(256);
+
+	var _BackboneTable2 = _interopRequireDefault(_BackboneTable);
+
+	var _Currency = __webpack_require__(260);
+
+	var _Currency2 = _interopRequireDefault(_Currency);
+
+	var _TableDropdownMenu = __webpack_require__(274);
+
+	var _TableDropdownMenu2 = _interopRequireDefault(_TableDropdownMenu);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	module.exports = _react2.default.createClass({
+		displayName: 'exports',
+
+		mixins: [Backbone.React.Component.mixin, _BackboneTable2.default],
+
+		getInitialState: function getInitialState() {
+			return {
+				columns: 7
+			};
+		},
+
+		componentWillMount: function componentWillMount() {
+			this.state.collection.fetch();
+		},
+
+		removeTextMessage: function removeTextMessage(entity) {
+			return "Are you sure you want to remove product \"" + entity.title + "\"?";
+		},
+
+		removeErrorMessage: function removeErrorMessage() {
+			UIkit.modal.alert("Error deleting product");
+		},
+
+		renderHeader: function renderHeader() {
+			return [{
+				title: "#",
+				sort: "entity_id"
+			}, {
+				title: "Namn",
+				sort: "title"
+			}, {
+				title: "Giltig till",
+				sort: "expiry_date"
+			}, {
+				title: "Prenumeration",
+				sort: "auto_extend"
+			}, {
+				title: "Giltighetstid",
+				sort: "interval"
+			}, {
+				title: "Pris",
+				sort: "price"
+			}, {
+				title: ""
+			}];
+		},
+
+		renderRow: function renderRow(row, i) {
+			return _react2.default.createElement(
+				'tr',
+				{ key: i },
+				_react2.default.createElement(
+					'td',
+					null,
+					row.entity_id
+				),
+				_react2.default.createElement(
+					'td',
+					null,
+					_react2.default.createElement(
+						_reactRouter.Link,
+						{ to: "/product/" + row.entity_id },
+						row.title
+					)
+				),
+				_react2.default.createElement(
+					'td',
+					null,
+					row.expiry_date
+				),
+				_react2.default.createElement(
+					'td',
+					null,
+					row.auto_extend
+				),
+				_react2.default.createElement(
+					'td',
+					null,
+					row.interval
+				),
+				_react2.default.createElement(
+					'td',
+					null,
+					_react2.default.createElement(_Currency2.default, { value: row.price })
+				),
+				_react2.default.createElement(
+					'td',
+					null,
+					_react2.default.createElement(
+						_TableDropdownMenu2.default,
+						null,
+						_react2.default.createElement(
+							_reactRouter.Link,
+							{ to: "/product/" + row.entity_id + "/edit" },
+							_react2.default.createElement('i', { className: 'uk-icon uk-icon-cog' }),
+							' Redigera produkt'
+						),
+						this.removeButton(i, "Ta bort produkt")
+					)
+				)
+			);
+		}
+	});
+	//import DateField from '../Formatters/Date'
+
+/***/ },
+/* 355 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _Subscription = __webpack_require__(356);
+
+	var _Subscription2 = _interopRequireDefault(_Subscription);
+
+	var _Subscriptions = __webpack_require__(358);
+
+	var _Subscriptions2 = _interopRequireDefault(_Subscriptions);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	// Backbone
+
+
+	module.exports = _react2.default.createClass({
+		displayName: 'exports',
+
+		render: function render() {
+			return _react2.default.createElement(
+				'div',
+				null,
+				_react2.default.createElement(
+					'h2',
+					null,
+					'Prenumerationer'
+				),
+				_react2.default.createElement(
+					'p',
+					null,
+					'På denna sida ser du en lista på samtliga prenumerationer.'
+				),
+				_react2.default.createElement(_Subscriptions2.default, { type: _Subscription2.default })
+			);
+		}
+	});
+	//SalesSubscriptionsHandler.title = "Visa prenumerationer";
+
+	//import SubscriptionModel from '../Models/Subscription'
+
+/***/ },
+/* 356 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _backbone = __webpack_require__(238);
+
+	var _backbone2 = _interopRequireDefault(_backbone);
+
+	var _Subscription = __webpack_require__(357);
+
+	var _Subscription2 = _interopRequireDefault(_Subscription);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	var SubscriptionCollection = _backbone2.default.PageableCollection.extend({
+		model: _Subscription2.default,
+		url: "/subscription"
+	});
+
+	module.exports = SubscriptionCollection;
+
+/***/ },
+/* 357 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+
+	var _backbone = __webpack_require__(238);
+
+	var _backbone2 = _interopRequireDefault(_backbone);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	var SubscriptionModel = _backbone2.default.Model.fullExtend({
+		idAttribute: "account_number",
+		urlRoot: "/subscription",
+		defaults: {
+			created_at: "0000-00-00T00:00:00Z",
+			updated_at: "0000-00-00T00:00:00Z",
+			title: "",
+			member_id: 0,
+			product_id: 0,
+			date_start: "0000-00-00T00:00:00Z"
+		}
+	});
+
+	module.exports = SubscriptionModel;
+
+/***/ },
+/* 358 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _backboneReactComponent = __webpack_require__(237);
+
+	var _backboneReactComponent2 = _interopRequireDefault(_backboneReactComponent);
+
+	var _BackboneTable = __webpack_require__(256);
+
+	var _BackboneTable2 = _interopRequireDefault(_BackboneTable);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	//import DateField from '../Formatters/Date'
+
+	module.exports = _react2.default.createClass({
+		displayName: 'exports',
+
+		mixins: [Backbone.React.Component.mixin, _BackboneTable2.default],
+
+		getInitialState: function getInitialState() {
+			return {
+				columns: 4
+			};
+		},
+
+		componentWillMount: function componentWillMount() {
+			this.state.collection.fetch();
+		},
+
+		renderHeader: function renderHeader() {
+			return [{
+				title: "Member"
+			}, {
+				title: "Startdatum"
+			}, {
+				title: "Beskrivning"
+			}, {
+				title: "Produkt"
+			}];
+		},
+
+		renderRow: function renderRow(row, i) {
+			return _react2.default.createElement(
+				'tr',
+				{ key: i },
+				_react2.default.createElement(
+					'td',
+					null,
+					row.member_id
+				),
+				_react2.default.createElement(
+					'td',
+					null,
+					row.date_start
+				),
+				_react2.default.createElement(
+					'td',
+					null,
+					row.title
+				),
+				_react2.default.createElement(
+					'td',
+					null,
+					row.product_id
+				)
+			);
+		}
+	});
+
+	//import { Link } from 'react-router'
+
+/***/ },
+/* 359 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _SalesHistory = __webpack_require__(360);
+
+	var _SalesHistory2 = _interopRequireDefault(_SalesHistory);
+
+	var _SalesHistory3 = __webpack_require__(361);
+
+	var _SalesHistory4 = _interopRequireDefault(_SalesHistory3);
+
+	var _TableFilterBox = __webpack_require__(264);
+
+	var _TableFilterBox2 = _interopRequireDefault(_TableFilterBox);
+
+	var _History = __webpack_require__(362);
+
+	var _History2 = _interopRequireDefault(_History);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	// Backbone
+
+
+	module.exports = _react2.default.createClass({
+		displayName: 'exports',
+
+		getInitialState: function getInitialState() {
+			return {
+				filters: this.props.filters || {}
+			};
+		},
+
+		updateFilters: function updateFilters(newFilter) {
+			var filters = this.overrideFiltersFromProps(newFilter);
+			this.setState({
+				filters: filters
+			});
+		},
+
+		overrideFiltersFromProps: function overrideFiltersFromProps(filters) {
+			return filters;
+		},
+
+		render: function render() {
+			return _react2.default.createElement(
+				'div',
+				null,
+				_react2.default.createElement(
+					'h2',
+					null,
+					'Försäljningshistorik'
+				),
+				_react2.default.createElement(
+					'p',
+					null,
+					'På denna sida ser du en lista på samtliga sålda produkter.'
+				),
+				_react2.default.createElement(_TableFilterBox2.default, { onChange: this.updateFilters }),
+				_react2.default.createElement(_History2.default, { type: _SalesHistory2.default, filters: this.state.filters })
+			);
+		}
+	});
+	//SalesHistoryHandler.title = "Visa försäljning";
+
+/***/ },
+/* 360 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _backbone = __webpack_require__(238);
+
+	var _backbone2 = _interopRequireDefault(_backbone);
+
+	var _SalesHistory = __webpack_require__(361);
+
+	var _SalesHistory2 = _interopRequireDefault(_SalesHistory);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	var SalesHistoryCollection = _backbone2.default.PageableCollection.extend({
+		model: _SalesHistory2.default,
+		url: "/sales/history"
+	});
+
+	module.exports = SalesHistoryCollection;
+
+/***/ },
+/* 361 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+
+	var _backbone = __webpack_require__(238);
+
+	var _backbone2 = _interopRequireDefault(_backbone);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	var SalesHistoryModel = _backbone2.default.Model.fullExtend({
+		idAttribute: "entity_id",
+		urlRoot: "/sales/history",
+		defaults: {
+			created_at: "0000-00-00T00:00:00Z",
+			updated_at: "0000-00-00T00:00:00Z",
+			recipient: "",
+			title: "",
+			description: ""
+		}
+	});
+
+	module.exports = SalesHistoryModel;
+
+/***/ },
+/* 362 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _backboneReactComponent = __webpack_require__(237);
+
+	var _backboneReactComponent2 = _interopRequireDefault(_backboneReactComponent);
+
+	var _reactRouter = __webpack_require__(172);
+
+	var _BackboneTable = __webpack_require__(256);
+
+	var _BackboneTable2 = _interopRequireDefault(_BackboneTable);
+
+	var _Currency = __webpack_require__(260);
+
+	var _Currency2 = _interopRequireDefault(_Currency);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	module.exports = _react2.default.createClass({
+		displayName: 'exports',
+
+		mixins: [Backbone.React.Component.mixin, _BackboneTable2.default],
+
+		componentWillMount: function componentWillMount() {
+			this.state.collection.fetch();
+		},
+
+		getInitialState: function getInitialState() {
+			return {
+				columns: 7
+			};
+		},
+
+		renderHeader: function renderHeader() {
+			return [{
+				title: "Datum",
+				sort: "accounting_date"
+			}, {
+				title: "Order",
+				sort: "extid"
+			}, {
+				title: "Medlem",
+				sort: "member_number"
+			}, {
+				title: "Beskrivning"
+			}, {
+				title: "Produkt",
+				sort: "product_title"
+			}, {
+				title: "Belopp",
+				class: "uk-text-right",
+				sort: "amount"
+			}];
+		},
+
+		renderRow: function renderRow(row, i) {
+			return _react2.default.createElement(
+				'tr',
+				{ key: i },
+				_react2.default.createElement(
+					'td',
+					null,
+					row.accounting_date
+				),
+				_react2.default.createElement(
+					'td',
+					null,
+					_react2.default.createElement(
+						_reactRouter.Link,
+						{ to: "/entity/" + row.entity_id },
+						row.extid
+					)
+				),
+				_react2.default.createElement(
+					'td',
+					null,
+					_react2.default.createElement(
+						_reactRouter.Link,
+						{ to: "/members/" + row.member_number },
+						row.member_firstname,
+						' ',
+						row.member_lastname
+					)
+				),
+				_react2.default.createElement(
+					'td',
+					null,
+					row.instruction_title
+				),
+				_react2.default.createElement(
+					'td',
+					null,
+					_react2.default.createElement(
+						_reactRouter.Link,
+						{ to: "/sales/products/" + row.product_id },
+						row.product_title
+					)
+				),
+				_react2.default.createElement(
+					'td',
+					{ className: 'uk-text-right' },
+					_react2.default.createElement(_Currency2.default, { value: -1 * row.amount })
+				)
+			);
+		}
+	});
+
+/***/ },
+/* 363 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+
+	module.exports = {
+		childRoutes: [{
+			path: "messages",
+			indexRoute: {
+				component: __webpack_require__(364)
+			},
+			childRoutes: [{
+				path: "new",
+				component: __webpack_require__(365)
+			}, {
+				path: ":id/recipients",
+				component: __webpack_require__(366)
+			}]
+		}, {
+			path: "settings",
+			childRoutes: [{
+				path: "mail/templates",
+				component: __webpack_require__(371)
+			}]
+		}]
+	};
+
+/***/ },
+/* 364 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _Messages = __webpack_require__(341);
+
+	var _Messages2 = _interopRequireDefault(_Messages);
+
+	var _reactRouter = __webpack_require__(172);
+
+	var _Messages3 = __webpack_require__(340);
+
+	var _Messages4 = _interopRequireDefault(_Messages3);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	module.exports = _react2.default.createClass({
+		displayName: 'exports',
+
+		render: function render() {
+			return _react2.default.createElement(
+				'div',
+				null,
+				_react2.default.createElement(
+					'h2',
+					null,
+					'Utskickshistorik'
+				),
+				_react2.default.createElement(
+					'p',
+					{ className: 'uk-float-left' },
+					'Visa lista över samtliga utskick.'
+				),
+				_react2.default.createElement(
+					_reactRouter.Link,
+					{ to: '/messages/new', className: 'uk-button uk-button-primary uk-float-right' },
+					_react2.default.createElement('i', { className: 'uk-icon-plus-circle' }),
+					' Skapa nytt utskick'
+				),
+				_react2.default.createElement(_Messages4.default, { type: _Messages2.default })
+			);
+		}
+	});
+	//Messages.title = "Utskickshistorik";
+
+
+	// Backbone
+
+/***/ },
+/* 365 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _reactRouter = __webpack_require__(172);
+
+	var _reactSelect = __webpack_require__(319);
+
+	var _config = __webpack_require__(244);
+
+	var _config2 = _interopRequireDefault(_config);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+	/**
+	 * TODO:
+	 *   Validate data before sending
+	 */
+
+	var MailSendHandler = function (_React$Component) {
+		_inherits(MailSendHandler, _React$Component);
+
+		function MailSendHandler(props) {
+			_classCallCheck(this, MailSendHandler);
+
+			var _this = _possibleConstructorReturn(this, (MailSendHandler.__proto__ || Object.getPrototypeOf(MailSendHandler)).call(this, props));
+
+			_this.state = {
+				type: "email",
+				recipients: [],
+				subject: "",
+				body: ""
+			};
+			return _this;
+		}
+
+		// Change the between E-mail and SMS
+
+
+		_createClass(MailSendHandler, [{
+			key: 'changeType',
+			value: function changeType() {
+				this.setState({
+					type: this.refs.type.value
+				});
+			}
+		}, {
+			key: 'changeSubject',
+			value: function changeSubject() {
+				this.setState({
+					subject: this.refs.subject.value
+				});
+			}
+		}, {
+			key: 'changeRecipient',
+			value: function changeRecipient(value) {
+				this.setState({
+					recipients: value
+				});
+
+				// Clear the search history so there is no drop down with old data after adding a recipient
+				this.refs.recps.setState({ options: [] });
+			}
+		}, {
+			key: 'changeBody',
+			value: function changeBody() {
+				this.setState({
+					body: this.refs.body.value
+				});
+
+				// Update the character counter
+				$("#characterCounter").html(this.refs.body.value.length);
+			}
+
+			// Disable client side filtering
+
+		}, {
+			key: 'filter',
+			value: function filter(option, filterString) {
+				return option;
+			}
+		}, {
+			key: 'search',
+			value: function search(input, callback) {
+				// Clear the search history so there is no drop down with old data when search text input is empty
+				if (!input) {
+					return Promise.resolve({ options: [] });
+				}
+
+				$.ajax({
+					method: "GET",
+					url: _config2.default.apiBasePath + "/membership/member",
+					data: {
+						search: input
+					}
+				}).done(function (data) {
+					setTimeout(function () {
+						var autoComplete = [];
+
+						data.data.forEach(function (element, index, array) {
+							autoComplete.push({
+								label: "Member:" + element.firstname + " " + element.lastname + " (#" + element.member_number + ")",
+								value: {
+									type: "member",
+									id: element.member_id
+								}
+							});
+						});
+
+						callback(null, {
+							options: autoComplete
+						});
+					}, 100);
+				});
+			}
+		}, {
+			key: 'gotoMember',
+			value: function gotoMember(value, event) {
+				UIkit.modal.alert("TODO: Go to member " + value.label);
+			}
+
+			// Send an API request and queue the message to be sent
+
+		}, {
+			key: 'send',
+			value: function send(event) {
+				// Prevent the form from being submitted
+				event.preventDefault();
+
+				var type = this.state.type;
+				var recipients = this.state.recipients;
+				var subject = this.state.subject;
+				var body = this.state.body;
+
+				// Filter recipients (Remove label)
+				var filteredRecipients = [];
+				recipients.forEach(function (element, index, array) {
+					filteredRecipients.push(element.value);
+				});
+				//		var filteredRecipients = recipients;
+
+				// Send API request
+				$.ajax({
+					method: "POST",
+					url: _config2.default.apiBasePath + "/messages",
+					dataType: "json",
+					contentType: "application/json; charset=utf-8",
+					data: JSON.stringify({
+						type: type,
+						recipients: filteredRecipients,
+						subject: subject,
+						body: body
+					})
+				}).done(function () {
+					// TODO: Falhantering
+					_reactRouter.browserHistory.push("/mail");
+				});
+			}
+		}, {
+			key: 'cancel',
+			value: function cancel(event) {
+				// Prevent the form from being submitted
+				event.preventDefault();
+
+				UIkit.modal.alert("TODO: Cancel");
+			}
+		}, {
+			key: 'render',
+			value: function render() {
+				return _react2.default.createElement(
+					'div',
+					null,
+					_react2.default.createElement(
+						'h2',
+						null,
+						'Skapa utskick'
+					),
+					_react2.default.createElement(
+						'form',
+						{ className: 'uk-form uk-form-horizontal', onSubmit: this.send.bind(this) },
+						_react2.default.createElement(
+							'div',
+							{ className: 'uk-form-row' },
+							_react2.default.createElement(
+								'label',
+								{ className: 'uk-form-label', htmlFor: 'type' },
+								'Typ'
+							),
+							_react2.default.createElement(
+								'div',
+								{ className: 'uk-form-controls' },
+								_react2.default.createElement(
+									'select',
+									{ id: 'type', ref: 'type', className: 'uk-form-width-medium', onChange: this.changeType.bind(this) },
+									_react2.default.createElement(
+										'option',
+										{ value: 'email' },
+										'E-post'
+									),
+									_react2.default.createElement(
+										'option',
+										{ value: 'sms' },
+										'SMS'
+									)
+								)
+							)
+						),
+						_react2.default.createElement(
+							'div',
+							{ className: 'uk-form-row' },
+							_react2.default.createElement(
+								'label',
+								{ className: 'uk-form-label', htmlFor: 'recipient' },
+								'Mottagare'
+							),
+							_react2.default.createElement(
+								'div',
+								{ className: 'uk-form-controls' },
+								_react2.default.createElement(_reactSelect.Async, { ref: 'recps', multi: true, cache: false, name: 'recipients', filterOption: this.filter, loadOptions: this.search, value: this.state.recipients, onChange: this.changeRecipient.bind(this), onValueClick: this.gotoMember })
+							)
+						),
+						this.state.type == "email" ? _react2.default.createElement(
+							'div',
+							{ className: 'uk-form-row' },
+							_react2.default.createElement(
+								'label',
+								{ className: 'uk-form-label', htmlFor: 'subject' },
+								'Ärende'
+							),
+							_react2.default.createElement(
+								'div',
+								{ className: 'uk-form-controls' },
+								_react2.default.createElement(
+									'div',
+									{ className: 'uk-form-icon' },
+									_react2.default.createElement('i', { className: 'uk-icon-commenting' }),
+									_react2.default.createElement('input', { ref: 'subject', type: 'text', id: 'subject', name: 'subject', className: 'uk-form-width-large', onChange: this.changeSubject.bind(this) })
+								)
+							)
+						) : "",
+						_react2.default.createElement(
+							'div',
+							{ className: 'uk-form-row' },
+							_react2.default.createElement(
+								'label',
+								{ className: 'uk-form-label', htmlFor: 'body' },
+								'Meddelande'
+							),
+							_react2.default.createElement(
+								'div',
+								{ className: 'uk-form-controls' },
+								_react2.default.createElement('textarea', { id: 'body', ref: 'body', className: 'uk-form-width-large', rows: '8', onChange: this.changeBody.bind(this) })
+							)
+						),
+						_react2.default.createElement(
+							'div',
+							{ className: 'uk-form-row' },
+							_react2.default.createElement(
+								'div',
+								{ className: 'uk-form-controls' },
+								_react2.default.createElement(
+									'p',
+									{ className: 'uk-float-left' },
+									_react2.default.createElement(
+										'span',
+										{ id: 'characterCounter' },
+										'0'
+									),
+									' tecken'
+								)
+							)
+						),
+						_react2.default.createElement(
+							'div',
+							{ className: 'uk-form-row' },
+							_react2.default.createElement(
+								'div',
+								{ className: 'uk-form-controls' },
+								_react2.default.createElement(
+									'button',
+									{ className: 'uk-float-left uk-button uk-button-danger', onClick: this.cancel },
+									_react2.default.createElement('i', { className: 'uk-icon uk-icon-close' }),
+									' Avbryt'
+								),
+								_react2.default.createElement(
+									'button',
+									{ type: 'submit', className: 'uk-float-right uk-button uk-button-success' },
+									_react2.default.createElement('i', { className: 'uk-icon uk-icon-envelope' }),
+									' Skicka'
+								)
+							)
+						)
+					)
+				);
+			}
+		}]);
+
+		return MailSendHandler;
+	}(_react2.default.Component);
+
+	MailSendHandler.title = "Skapa utskick";
+
+	module.exports = MailSendHandler;
+
+/***/ },
+/* 366 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _Message = __webpack_require__(342);
+
+	var _Message2 = _interopRequireDefault(_Message);
+
+	var _Recipients = __webpack_require__(367);
+
+	var _Recipients2 = _interopRequireDefault(_Recipients);
+
+	var _Recipients3 = __webpack_require__(369);
+
+	var _Recipients4 = _interopRequireDefault(_Recipients3);
+
+	var _Message3 = __webpack_require__(370);
+
+	var _Message4 = _interopRequireDefault(_Message3);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	//import { Link } from 'react-router'
+
+
+	// Backbone
+
+
+	module.exports = _react2.default.createClass({
+		displayName: 'exports',
+
+		getInitialState: function getInitialState() {
+			// Load message model
+			var message = new _Message2.default({
+				message_id: this.props.params.id
+			});
+			message.fetch();
+
+			return {
+				message_model: message
+			};
+		},
+
+		render: function render() {
+			return _react2.default.createElement(
+				'div',
+				null,
+				_react2.default.createElement(
+					'h2',
+					null,
+					'Utskick'
+				),
+				_react2.default.createElement(_Message4.default, { model: this.state.message_model }),
+				_react2.default.createElement(_Recipients4.default, { type: _Recipients2.default })
+			);
+		}
+	});
+	//Recipients.title = "";
+
+/***/ },
+/* 367 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _backbone = __webpack_require__(238);
+
+	var _backbone2 = _interopRequireDefault(_backbone);
+
+	var _Recipient = __webpack_require__(368);
+
+	var _Recipient2 = _interopRequireDefault(_Recipient);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	var Recipients = _backbone2.default.PageableCollection.extend({
+		model: _Recipient2.default,
+		//	url: "/messages/1/recipients",// TODO
+		url: function url() {
+			return "/messages/" + 123 + "/recipients";
+		}
+	});
+
+	module.exports = Recipients;
+
+/***/ },
+/* 368 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+
+	var _backbone = __webpack_require__(238);
+
+	var _backbone2 = _interopRequireDefault(_backbone);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	var Recipient = _backbone2.default.Model.fullExtend({
+		idAttribute: "recipient_id",
+		urlRoot: "/messages",
+		defaults: {
+			message_id: 0,
+			title: "",
+			description: "",
+			member_id: 0,
+			recipient: "",
+			date_sent: "0000-00-00T00:00:00Z",
+			status: 0
+		}
+	});
+
+	module.exports = Recipient;
+
+/***/ },
+/* 369 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _reactRouter = __webpack_require__(172);
+
+	var _BackboneTable = __webpack_require__(256);
+
+	var _BackboneTable2 = _interopRequireDefault(_BackboneTable);
+
+	var _DateTime = __webpack_require__(301);
+
+	var _DateTime2 = _interopRequireDefault(_DateTime);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	module.exports = _react2.default.createClass({
+		displayName: 'exports',
+
+		mixins: [Backbone.React.Component.mixin, _BackboneTable2.default],
+
+		getInitialState: function getInitialState() {
+			return {
+				columns: 6
+			};
+		},
+
+		componentWillMount: function componentWillMount() {
+			this.fetch();
+		},
+
+		componentWillReceiveProps: function componentWillReceiveProps(nextProps) {
+			if (nextProps.filters != this.state.filters) {
+				this.setState({
+					filters: nextProps.filters
+				});
+
+				// TODO: setState() has a delay so we need to wait a moment
+				var _this = this;
+				setTimeout(function () {
+					_this.fetch();
+				}, 100);
+			}
+		},
+
+		renderHeader: function renderHeader() {
+			return [{
+				title: "Medlem",
+				sort: "recipient_id"
+			}, {
+				title: "Rubrik",
+				sort: "title"
+			}, {
+				title: "Meddelande",
+				sort: "description"
+			}, {
+				title: "Mottagare",
+				sort: "recipient"
+			}, {
+				title: "Status",
+				sort: "status"
+			}];
+		},
+
+		renderRow: function renderRow(row, i) {
+			return _react2.default.createElement(
+				'tr',
+				{ key: i },
+				_react2.default.createElement(
+					'td',
+					null,
+					_react2.default.createElement(
+						_reactRouter.Link,
+						{ to: "/member/" + row.member_id },
+						row.member_id
+					)
+				),
+				_react2.default.createElement(
+					'td',
+					null,
+					row.title
+				),
+				_react2.default.createElement(
+					'td',
+					null,
+					row.description
+				),
+				_react2.default.createElement(
+					'td',
+					null,
+					row.recipient
+				),
+				_react2.default.createElement(
+					'td',
+					null,
+					function () {
+						switch (row.status) {
+							case "queued":
+								return _react2.default.createElement(
+									'span',
+									null,
+									'Köad ',
+									_react2.default.createElement(_DateTime2.default, { date: row.created_at })
+								);
+							case "failed":
+								return "Sändning misslyckades";
+							case "sent":
+								return _react2.default.createElement(
+									'span',
+									null,
+									'Skickad ',
+									_react2.default.createElement(_DateTime2.default, { date: row.date_sent })
+								);
+							default:
+								return "Okänt";
+						}
+					}()
+				)
+			);
+		}
+	});
+
+/***/ },
+/* 370 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	module.exports = _react2.default.createClass({
+		displayName: 'exports',
+
+		render: function render() {
+			return _react2.default.createElement(
+				'div',
+				null,
+				'Meddelande'
+			);
+		}
+	});
+
+/***/ },
+/* 371 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	module.exports = _react2.default.createClass({
+		displayName: 'exports',
+
+		render: function render() {
+			return _react2.default.createElement(
+				'div',
+				null,
+				_react2.default.createElement(
+					'h2',
+					null,
+					'Mallar'
+				),
+				_react2.default.createElement(
+					'p',
+					null,
+					'Mallar som används för att skicka mail'
+				)
+			);
+		}
+	});
+
+/***/ },
+/* 372 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+
+	module.exports = {
+		childRoutes: [{
+			path: "/keys",
+			indexRoute: {
+				component: __webpack_require__(373)
+			}
+		}]
+	};
+
+/***/ },
+/* 373 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _Rfid = __webpack_require__(332);
+
+	var _Rfid2 = _interopRequireDefault(_Rfid);
+
+	var _Keys = __webpack_require__(334);
+
+	var _Keys2 = _interopRequireDefault(_Keys);
+
+	var _TableFilterBox = __webpack_require__(264);
+
+	var _TableFilterBox2 = _interopRequireDefault(_TableFilterBox);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	module.exports = _react2.default.createClass({
+		displayName: 'exports',
+
+		getInitialState: function getInitialState() {
+			return {
+				filters: {}
+			};
+		},
+
+		edit: function edit(entity) {
+			UIkit.modal.alert("TODO: Parent edit" + entity);
+		},
+
+		overrideFiltersFromProps: function overrideFiltersFromProps(filters) {
+			console.log("overrideFiltersFromProps");
+
+			if (this.props.member_number !== undefined && this.props.member_number.length > 0) {
+				console.log("  member_number present");
+
+				if (!filters.relations) {
+					filters.relations = [];
+				}
+
+				filters.relations.push({
+					type: "member",
+					member_number: this.props.member_number
+				});
+			}
+
+			return filters;
+		},
+
+		updateFilters: function updateFilters(newFilter) {
+			var filters = this.overrideFiltersFromProps(newFilter);
+			this.setState({
+				filters: filters
+			});
+		},
+
+		componentWillReceiveProps: function componentWillReceiveProps(nextProps) {
+			console.log("componentWillReceiveProps");
+			if (nextProps.member_number != this.props.member_number) {
+				console.log("TODO: Filter on member number");
+				this.props.member_number = nextProps.member_number;
+
+				var filters = this.overrideFiltersFromProps(this.state.filters);
+				this.setState({
+					filters: filters
+				});
+			} else {
+				console.log("TODO: Turn off filter on member number");
+			}
+		},
+
+		render: function render() {
+			return _react2.default.createElement(
+				'div',
+				null,
+				_react2.default.createElement(
+					'h2',
+					null,
+					'Nycklar'
+				),
+				_react2.default.createElement(
+					'p',
+					null,
+					'Visa lista över samtliga nycklas i systemet'
+				),
+				_react2.default.createElement(_TableFilterBox2.default, { onChange: this.updateFilters }),
+				_react2.default.createElement(_Keys2.default, { type: _Rfid2.default, edit: this.edit, filters: this.state.filters })
+			);
+		}
+	});
+	//KeysOverviewHandler.title = "Nycklar";
+
+
+	// Backbone
+
+/***/ },
+/* 374 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+
+	module.exports = {
+		childRoutes: [{
+			path: "/statistics",
+			indexRoute: {
+				component: __webpack_require__(375)
+			}
+		}]
+	};
+
+/***/ },
+/* 375 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	module.exports = _react2.default.createClass({
+		displayName: "exports",
+
+		render: function render() {
+			return _react2.default.createElement(
+				"div",
+				{ className: "uk-width-1-1" },
+				_react2.default.createElement(
+					"h2",
+					null,
+					"Statistik"
+				),
+				_react2.default.createElement(
+					"p",
+					null,
+					"Här är det tänkt att visas diverse statistik. Förslagsvis bygger vi en enkel, men kraftfull, statistikmotor i tre lager. Självklart med möjlighet att exportera *.csv och *.svg"
+				),
+				_react2.default.createElement("p", null),
+				_react2.default.createElement(
+					"ul",
+					null,
+					_react2.default.createElement(
+						"li",
+						null,
+						"1. Datakälla - Levererar den data som används för att generera statistik. Bör fungera med det befintliga API:t"
+					),
+					_react2.default.createElement(
+						"li",
+						null,
+						"2. Filter - Filtrerar / strukturerar / grupperar data på olika sätt",
+						_react2.default.createElement(
+							"ul",
+							null,
+							_react2.default.createElement(
+								"li",
+								null,
+								"Filter - filtrera på datumintervall etc"
+							),
+							_react2.default.createElement(
+								"li",
+								null,
+								"Gruppering - Beräkna min/max/avg för dagar, veckor, månader, etc"
+							)
+						)
+					),
+					_react2.default.createElement(
+						"li",
+						null,
+						"3. Generering av grafer - genererar interaktiva grafer med hjälp av lämpligt HTML5 / Javascript-bibliotek."
+					)
+				)
+			);
+		}
+	});
+
+/***/ },
+/* 376 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	module.exports = _react2.default.createClass({
+		displayName: "exports",
+
+		render: function render() {
+			return _react2.default.createElement(
+				"div",
+				null,
+				_react2.default.createElement(
+					"h2",
+					null,
+					"Inställningar"
+				),
+				_react2.default.createElement(
+					"p",
+					null,
+					"Diverse inställningar"
+				),
+				_react2.default.createElement(
+					"h3",
+					null,
+					"Aktiverade moduler"
+				),
+				_react2.default.createElement(
+					"ul",
+					{ className: "uk-list" },
+					_react2.default.createElement(
+						"li",
+						null,
+						_react2.default.createElement("i", { className: "uk-icon uk-icon-user" }),
+						" Medlemshantering"
+					),
+					_react2.default.createElement(
+						"li",
+						null,
+						_react2.default.createElement("i", { className: "uk-icon uk-icon-group" }),
+						" Grupper"
+					),
+					_react2.default.createElement(
+						"li",
+						null,
+						_react2.default.createElement("i", { className: "uk-icon uk-icon-key" }),
+						" Nycklar"
+					),
+					_react2.default.createElement(
+						"li",
+						null,
+						_react2.default.createElement("i", { className: "uk-icon uk-icon-shopping-basket" }),
+						" Försäljning"
+					),
+					_react2.default.createElement(
+						"li",
+						null,
+						_react2.default.createElement("i", { className: "uk-icon uk-icon-money" }),
+						" Ekonomi"
+					),
+					_react2.default.createElement(
+						"li",
+						null,
+						_react2.default.createElement("i", { className: "uk-icon uk-icon-envelope" }),
+						" Utskick"
+					),
+					_react2.default.createElement(
+						"li",
+						null,
+						_react2.default.createElement("i", { className: "uk-icon uk-icon-area-chart" }),
+						" Statistik"
+					)
+				)
+			);
+		}
+	});
+
+/***/ },
+/* 377 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	module.exports = _react2.default.createClass({
+		displayName: 'exports',
+
+		render: function render() {
+			return _react2.default.createElement(
+				'div',
+				null,
+				_react2.default.createElement(
+					'h2',
+					null,
+					'Automation'
+				),
+				_react2.default.createElement(
+					'p',
+					null,
+					'Här skall man kunna konfiguera diverse automation. Systemet bygger på att när ett event sker får man möjlighet att fånga upp detta för att sedan trigga ett nytt event.'
+				),
+				_react2.default.createElement(
+					'ul',
+					null,
+					_react2.default.createElement(
+						'li',
+						null,
+						'När en ny medlem registrerar sig',
+						_react2.default.createElement(
+							'ul',
+							null,
+							_react2.default.createElement(
+								'li',
+								null,
+								'Skicka ett mail enligt mall'
+							)
+						)
+					),
+					_react2.default.createElement(
+						'li',
+						null,
+						'När en produkt av typen labbavgift är betald',
+						_react2.default.createElement(
+							'ul',
+							null,
+							_react2.default.createElement(
+								'li',
+								null,
+								'Skicka ett kvitto via mail enligt mall'
+							),
+							_react2.default.createElement(
+								'li',
+								null,
+								'Lägg till en ny period för labbavgift i databasen'
+							)
+						)
+					),
+					_react2.default.createElement(
+						'li',
+						null,
+						'När ett medlemskap löper ut om 30 dagar',
+						_react2.default.createElement(
+							'ul',
+							null,
+							_react2.default.createElement(
+								'li',
+								null,
+								'Skicka ett mail enligt mall'
+							)
+						)
+					),
+					_react2.default.createElement(
+						'li',
+						null,
+						'När ett medlemskap löper ut om 7 dagar',
+						_react2.default.createElement(
+							'ul',
+							null,
+							_react2.default.createElement(
+								'li',
+								null,
+								'Skicka ett mail enligt mall'
+							)
+						)
+					),
+					_react2.default.createElement(
+						'li',
+						null,
+						'När ett medlemskap löpt ut',
+						_react2.default.createElement(
+							'ul',
+							null,
+							_react2.default.createElement(
+								'li',
+								null,
+								'Skicka ett mail enligt mall'
+							)
+						)
+					),
+					_react2.default.createElement(
+						'li',
+						null,
+						'Etc...'
+					)
+				)
+			);
+		}
+	});
+
+/***/ },
+/* 378 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	module.exports = _react2.default.createClass({
+		displayName: 'exports',
+
+		render: function render() {
+			return _react2.default.createElement(
+				'h2',
+				null,
+				'404'
+			);
+		}
+	});
+
+/***/ },
+/* 379 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+
+	module.exports = {
+		path: "settings",
+		childRoutes: [{
+			path: "export",
+			component: __webpack_require__(380)
+		}, {
+			path: "import",
+			component: __webpack_require__(381)
+		}]
+	};
+
+/***/ },
+/* 380 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	module.exports = _react2.default.createClass({
+		displayName: 'exports',
+
+		render: function render() {
+			return _react2.default.createElement(
+				'div',
+				null,
+				_react2.default.createElement(
+					'h2',
+					null,
+					'Export'
+				),
+				_react2.default.createElement(
+					'p',
+					null,
+					'Kör en request mot API och plocka ut data med hjälp av samma filtreringsinställnigar som finns i övriga gränssnitt. Konvertera sedan detta till en *.csv, eller annat lämpligt format och låt användaren ladda hem en fil.'
+				)
+			);
+		}
+	});
+
+/***/ },
+/* 381 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	module.exports = _react2.default.createClass({
+		displayName: 'exports',
+
+		render: function render() {
+			return _react2.default.createElement(
+				'div',
+				null,
+				_react2.default.createElement(
+					'h2',
+					null,
+					'Import'
+				),
+				_react2.default.createElement(
+					'p',
+					null,
+					'Blablabla...'
+				)
+			);
+		}
+	});
+
+/***/ },
+/* 382 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	module.exports = _react2.default.createClass({
+		displayName: "exports",
+
+		render: function render() {
+			return _react2.default.createElement(
+				"div",
+				{ className: "uk-width-1-1" },
+				_react2.default.createElement(
+					"h2",
+					null,
+					"Debug"
+				)
+			);
+		}
+	});
 
 /***/ }
 /******/ ]);

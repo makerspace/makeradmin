@@ -6,81 +6,24 @@ require('uikit/dist/js/core/dropdown')
 require('uikit/dist/js/components/pagination')
 require('uikit/dist/js/components/autocomplete')
 
+// React stuff
 import React from 'react';
 import ReactDOM from 'react-dom';
 import {
 	Router,
-	Route,
-	IndexRoute,
-	IndexRedirect,
-	Link,
+	browserHistory,
 } from 'react-router'
-import Backbone from './Backbone/FullExtend'
-import { browserHistory } from 'react-router'
-
-// Member / group handlers
-import { MemberAddHandler } from './Member/Member'
-import { MemberHandler } from './Member/Member'
-import { MembersHandler } from './Member/Members'
-import { GroupHandler } from './Group/Group'
-import { GroupAddHandler } from './Group/Group'
-import { GroupEditHandler } from './Group/Group'
-import { GroupsHandler } from './Group/Groups'
-
-// Sales handlers
-import SalesOverviewHandler from './Sales/OverviewHandler'
-import { SalesProductsHandler } from './Sales/Products'
-import { SalesSubscriptionsHandler } from './Sales/Subscriptions'
-import { SalesHistoryHandler } from './Sales/History'
-
-// Economy handlers
-import MasterLedgerHandler from './Economy/MasterLedgerHandler'
-import { EconomyOverviewHandler } from './Economy/Other'
-import { EconomyDebugHandler } from './Economy/Other'
-import EconomyAccountingPeriodsHandler from './Economy/AccountingPeriodsHandler'
-import EconomyAccountingPeriodHandler from './Economy/AccountingPeriodsHandler'
-import EconomyAccountingPeriodAddHandler from './Economy/AccountingPeriodAddHandler'
-import EconomyAccountingPeriodEditHandler from './Economy/AccountingPeriodEditHandler'
-import EconomyAccountingInstructionsHandler from './Economy/InstructionsHandler'
-import EconomyAccountingInstructionAddHandler from './Economy/InstructionAddHandler'
-import EconomyAccountingInstructionHandler from './Economy/InstructionHandler'
-import EconomyAccountingInstructionImportHandler from './Economy/InstructionImportHandler'
-import EconomyAccountsHandler from './Economy/AccountsHandler'
-import EconomyAccountHandler from './Economy/AccountHandler'
-import EconomyAccountEditHandler from './Economy/AccountEditHandler'
-import EconomyAccountAddHandler from './Economy/AccountAddHandler'
-import EconomyValuationSheetHandler from './Economy/ValuationSheet'
-import EconomyResultReportHandler from './Economy/ResultReport'
-import EconomyCostCentersHandler from './Economy/CostCentersHandler'
-import EconomyCostCenterHandler from './Economy/CostCenterHandler'
-
-// Invoice handlers
-import { InvoiceListHandler, InvoiceHandler, InvoiceAddHandler } from './Economy/Invoice'
-
-// Other handlers
-import SettingsGlobalHandler from './Settings/Global'
-import SettingsAutomationHandler from './Settings/Automation'
-import StatisticsHandler from './Statistics'
-import DashboardHandler from './Dashboard'
-import ExportHandler from './Export/Export'
-
-import MailTemplatesHandler from './Mail/Templates'
-import MailSendHandler from './Mail/Send'
-import { MailHistoryHandler } from './Mail/History'
-import KeysOverviewHandler from './Keys/Overview'
-
-
 import {
 	Nav,
 	SideNav,
 	SideNav2,
 	Breadcrumb,
 } from './nav'
+import Backbone from './Backbone/FullExtend'
 
+// Login / OAuth
 import auth from './auth'
-import Login from './Login/Login'
-import LoginResetPassword from './Login/LoginResetPassword'
-import AccessTokensHandler from './Login/AccessTokensHandler'
+import Login from './Pages/Login/Login'
 
 var nav = new Backbone.Model({
 	brand: "MakerAdmin 1.0",
@@ -187,7 +130,7 @@ var nav = new Backbone.Model({
 		},
 		{
 			text: "Utskick",
-			target: "/mail",
+			target: "/messages",
 			icon: "envelope",
 		},
 		{
@@ -228,11 +171,11 @@ var nav = new Backbone.Model({
 				},
 				{
 					text: "Kontoplan",
-					target: "/settings/economy/accounts",
+					target: "/settings/economy/account",
 				},
 				{
 					text: "Räkneskapsår",
-					target: "/settings/economy/accountingperiods",
+					target: "/settings/economy/accountingperiod",
 				},
 				{
 					text: "Debug",
@@ -249,10 +192,6 @@ var nav = new Backbone.Model({
 					text: "Utskick",
 					target: "",
 					icon: "envelope",
-				},
-				{
-					text: "Utskick",
-					target: "/settings/mail",
 				},
 				{
 					text: "Mallar",
@@ -276,7 +215,7 @@ var nav = new Backbone.Model({
 				},
 				{
 					text: "Importera data",
-					target: "/settings/export",
+					target: "/settings/import",
 				},
 			],
 		},
@@ -343,107 +282,63 @@ var App = React.createClass({
 });
 App.title = "Internal"
 
-var NoMatch = React.createClass({
-	render: function()
-	{
-		return (<h2>404</h2>);
-	}
-});
+/*
+<Route path="tokens"     component={AccessTokensHandler} />
+*/
 
-var NotImplemented = React.createClass({
-	render: function()
-	{
-		return (<h2>Not implemented</h2>);
-	}
-});
-
-const Logout = React.createClass({
-	componentDidMount() {
-		auth.logout()
-	},
-
-	render() {
-		return <p>You are now logged out</p>
-	}
-})
+const rootRoute = {
+	childRoutes: [
+		{
+			path: "resetpassword",
+			component: require("./Pages/Login/ResetPassword"),
+		},
+		{
+			path: "/",
+			component: App,
+			indexRoute: {
+				component: require("./Pages/Dashboard"),
+			},
+			childRoutes: [
+				{
+					path: "logout",
+					component: require("./Pages/Login/Logout"),
+				},
+				require("./Economy/Routes"),
+				require("./Membership/Routes"),
+				require("./Sales/Routes"),
+				require("./Messages/Routes"),
+				require("./Keys/Routes"),
+				require("./Statistics/Routes"),
+				require("./Export/Routes"),
+				{
+					path: "settings",
+					indexRoute: {
+						component: require("./Pages/Settings/Global"),
+					},
+					childRoutes: [
+						{
+							path: "global",
+							indexRoute: {
+								component: require("./Pages/Settings/Global"),
+							},
+						},
+						{
+							path: "automation",
+							indexRoute: {
+								component: require("./Pages/Settings/Automation"),
+							},
+						},
+					]
+				},
+				{
+					path: "*",
+					component: require("./Pages/404"),
+				},
+			]
+		}
+	]
+}
 
 ReactDOM.render((
-	<Router history={browserHistory}>
-		<Route path="resetpassword" component={LoginResetPassword} />
-		<Route path="/" component={App} >
-			<IndexRoute component={DashboardHandler} />
-			<Route path="logout" component={Logout} />
-			<Route path="members">
-				<IndexRoute component={MembersHandler} />
-				<Route path="add"      component={MemberAddHandler} />
-				<Route path=":id"      component={MemberHandler} />
-			</Route>
-			<Route path="groups">
-				<IndexRoute component={GroupsHandler} />
-				<Route path="add"      component={GroupAddHandler} />
-				<Route path=":id"      component={GroupHandler} />
-				<Route path=":id/edit" component={GroupEditHandler} />
-			</Route>
-			<Route path="keys">
-				<IndexRoute component={KeysOverviewHandler} />
-			</Route>
-			<Route path="sales">
-				<IndexRedirect to="overview" />
-				<Route path="overview"          component={SalesOverviewHandler} />
-				<Route path="products"          component={SalesProductsHandler} />
-				<Route path="subscriptions"     component={SalesSubscriptionsHandler} />
-				<Route path="history"           component={SalesHistoryHandler} />
-			</Route>
-			<Route path="economy">
-				<IndexRedirect to="overview" />
-
-				<Route path="overview"         component={EconomyOverviewHandler} />
-				<Route path="masterledger"     component={MasterLedgerHandler} />
-
-				<Route path="invoice">
-					<IndexRedirect to="list" />
-					<Route path="list"     component={InvoiceListHandler} />
-					<Route path="add"      component={InvoiceAddHandler} />
-					<Route path=":id"      component={InvoiceHandler} />
-				</Route>
-
-				<Route path="instruction"       component={EconomyAccountingInstructionsHandler} />
-				<Route path="instruction/add"   component={EconomyAccountingInstructionAddHandler} />
-				<Route path="instruction/:id"   component={EconomyAccountingInstructionHandler} />
-				<Route path="instruction/:id/import" component={EconomyAccountingInstructionImportHandler} />
-
-				<Route path="valuationsheet"    component={EconomyValuationSheetHandler} />
-				<Route path="resultreport"      component={EconomyResultReportHandler} />
-
-				<Route path="costcenter"        component={EconomyCostCentersHandler} />
-				<Route path="costcenter/:id"    component={EconomyCostCenterHandler} />
-
-				<Route path="account/:id"       component={EconomyAccountHandler} />
-			</Route>
-			<Route path="mail">
-				<IndexRoute component={MailHistoryHandler} />
-				<Route path="send" component={MailSendHandler} />
-			</Route>
-			<Route path="statistics"     component={StatisticsHandler} />
-			<Route path="settings">
-				<IndexRedirect to="global" />
-				<Route path="global"     component={SettingsGlobalHandler} />
-				<Route path="tokens"     component={AccessTokensHandler} />
-				<Route path="automation" component={SettingsAutomationHandler} />
-				<Route path="export"     component={ExportHandler} />
-				<Route path="mail"       component={MailTemplatesHandler} />
-				<Route path="economy">
-					<Route path="debug"             component={EconomyDebugHandler} />
-					<Route path="accountingperiods"         component={EconomyAccountingPeriodsHandler} />
-					<Route path="accountingperiod/add"      component={EconomyAccountingPeriodAddHandler} />
-					<Route path="accountingperiod/:id"      component={EconomyAccountingPeriodHandler} />
-					<Route path="accountingperiod/:id/edit" component={EconomyAccountingPeriodEditHandler} />
-					<Route path="accounts"          component={EconomyAccountsHandler} />
-					<Route path="account/add"       component={EconomyAccountAddHandler} />
-					<Route path="account/:id/edit"  component={EconomyAccountEditHandler} />
-				</Route>
-			</Route>
-			<Route path="*" component={NoMatch}/>
-		</Route>
-	</Router>
+	<Router history={browserHistory} routes={rootRoute} />
 ), document.getElementById("main"));

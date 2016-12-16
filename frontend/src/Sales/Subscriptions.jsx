@@ -1,29 +1,11 @@
 import React from 'react'
 import BackboneReact from 'backbone-react-component'
 
-// Backbone
-import SubscriptionCollection from '../Backbone/Collections/Subscription'
-import SubscriptionModel from '../Backbone/Models/Subscription'
-
-import { Link } from 'react-router'
+//import { Link } from 'react-router'
 import BackboneTable from '../BackboneTable'
-import DateField from '../Formatters/Date'
+//import DateField from '../Formatters/Date'
 
-var SalesSubscriptionsHandler = React.createClass({
-	render: function()
-	{
-		return (
-			<div>
-				<h2>Prenumerationer</h2>
-				<p>På denna sida ser du en lista på samtliga prenumerationer.</p>
-				<Subscriptions type={SubscriptionCollection} />
-			</div>
-		);
-	},
-});
-SalesSubscriptionsHandler.title = "Visa prenumerationer";
-
-var Subscriptions = React.createClass({
+module.exports = React.createClass({
 	mixins: [Backbone.React.Component.mixin, BackboneTable],
 
 	getInitialState: function()
@@ -68,7 +50,3 @@ var Subscriptions = React.createClass({
 		);
 	},
 });
-
-module.exports = {
-	SalesSubscriptionsHandler
-}
