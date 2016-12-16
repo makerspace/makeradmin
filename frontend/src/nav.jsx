@@ -6,11 +6,7 @@ import {
 } from 'react-router'
 import BackboneReact from 'backbone-react-component'
 
-var NavItem = React.createClass({
-	contextTypes: {
-		history: React.PropTypes.object
-	},
-
+var NavItem = withRouter(React.createClass({
 	render: function()
 	{
 		if(this.props.navItem.external)
@@ -23,7 +19,7 @@ var NavItem = React.createClass({
 		}
 		else
 		{
-			if(this.context.history.isActive(this.props.navItem.target))
+			if(this.props.router.isActive(this.props.navItem.target))
 			{
 				var className = "uk-active";
 			}
@@ -43,7 +39,7 @@ var NavItem = React.createClass({
 			);
 		}
 	}
-});
+}));
 
 var Nav = React.createClass({
 	mixins: [Backbone.React.Component.mixin],
@@ -92,12 +88,8 @@ var SideNav = React.createClass({
 	}
 })
 
-var SideNav2 = React.createClass({
+var SideNav2 = withRouter(React.createClass({
 	mixins: [Backbone.React.Component.mixin],
-
-	contextTypes: {
-		history: React.PropTypes.object
-	},
 
 	render: function ()
 	{
@@ -106,7 +98,7 @@ var SideNav2 = React.createClass({
 		for(var i = 0; i < this.state.model.navItems.length; i++)
 		{
 			var item = this.state.model.navItems[i];
-			if(this.context.history.isActive(item.target))
+			if(this.props.router.isActive(item.target))
 			{
 				activeItem = item;
 			}
@@ -143,11 +135,12 @@ var SideNav2 = React.createClass({
 			);
 		}
 	},
-});
+}));
 
 var Breadcrumb = React.createClass({
 	render: function ()
 	{
+// TODO
 //		const depth = this.props.routes.length;
 return (<span></span>);
 		return (
