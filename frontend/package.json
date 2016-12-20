@@ -1,0 +1,43 @@
+{
+  "name": "makeradmin-frontend",
+  "version": "1.0.0",
+  "description": "git clone https://github.com/MakersOfSweden/MakerAdmin-Frontend cd ./MakerAdmin-Frontend/ ./docker/docker_build",
+  "main": "webpack.config.js",
+  "dependencies": {
+    "babel-core": "^6.9.0",
+    "babel-loader": "^6.2.5",
+    "babel-plugin-transform-es2015-classes": "^6.18.0",
+    "babel-plugin-transform-es2015-parameters": "^6.17.0",
+    "babel-plugin-transform-es2015-shorthand-properties": "^6.18.0",
+    "babel-plugin-transform-regenerator": "^6.16.1",
+    "babel-preset-es2015": "^6.14.0",
+    "babel-preset-react": "^6.11.1",
+    "backbone-react-component": "^0.10.0",
+    "backbone": "^1.3.3",
+    "backbone.paginator": "^2.0.5",
+    "history": "^2.1.2",
+    "jquery": "^3.1.1",
+    "json-loader": "^0.5.4",
+    "react-dom": "^15.3.2",
+    "react": "^15.3.2",
+    "react-router": "^2.8.1",
+    "react-select": "^1.0.0-rc.2",
+    "uikit": "^2.27.1",
+    "underscore": "^1.8.3",
+    "webpack": "^1.14.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MakersOfSweden/MakerAdmin-Frontend.git"
+  },
+  "author": "",
+  "license": "",
+  "bugs": {
+    "url": "https://github.com/MakersOfSweden/MakerAdmin-Frontend/issues"
+  },
+  "homepage": "https://github.com/MakersOfSweden/MakerAdmin-Frontend#readme"
+}
