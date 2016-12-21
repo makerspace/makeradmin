@@ -39,7 +39,7 @@ module.exports = React.createClass({
 				<Link to={"/economy/invoice/add"} className="uk-button uk-button-primary uk-float-right"><i className="uk-icon-plus-circle"></i> Skapa ny faktura</Link>
 
 				<TableFilterBox onChange={this.updateFilters} />
-				<InvoiceList type={InvoiceCollection} filters={this.state.filters} />
+				<InvoiceList type={InvoiceCollection} filters={this.state.filters} params={{period: this.props.params.period}} />
 			</div>
 		);
 	},

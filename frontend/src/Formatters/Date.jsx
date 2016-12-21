@@ -11,7 +11,14 @@ var DateField = React.createClass({
 				hour12: false
 			};
 
-			var str = new Intl.DateTimeFormat('sv-SE', options).format(Date.parse(this.props.date));
+			// Parse the date
+			var parsed_date = Date.parse(this.props.date);
+
+			// If the date was parsed successfully we should update the string
+			if(!isNaN(parsed_date))
+			{
+				var str = new Intl.DateTimeFormat("sv-SE", options).format(parsed_date);
+			}
 		}
 		return (<span>{str}</span>);
 	},

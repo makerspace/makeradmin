@@ -8,9 +8,10 @@ import EconomyAccount from '../../Account'
 module.exports = React.createClass({
 	getInitialState: function()
 	{
-		var id = this.props.params.id;
-
-		var account = new AccountModel({account_number: id});
+		var account = new AccountModel({
+			period: this.props.params.period,
+			account_number: this.props.params.id
+		});
 		account.fetch();
 
 		return {

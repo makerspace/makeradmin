@@ -19,22 +19,6 @@ module.exports = React.createClass({
 		this.fetch();
 	},
 
-	componentWillReceiveProps: function(nextProps)
-	{
-		if(nextProps.filters != this.state.filters)
-		{
-			this.setState({
-				filters: nextProps.filters
-			});
-
-			// TODO: setState() has a delay so we need to wait a moment
-			var _this = this;
-			setTimeout(function() {
-				_this.fetch();
-			}, 100);
-		}
-	},
-
 	renderHeader: function()
 	{
 		return [
@@ -52,10 +36,10 @@ module.exports = React.createClass({
 			},
 			{
 				title: "Meddelande",
-				sort: "description",
+				sort: "subject",
 			},
 			{
-				title: "Antal mottagare",
+				title: "Mottagare",
 			},
 		];
 	},
@@ -66,10 +50,14 @@ module.exports = React.createClass({
 			<tr key={i}>
 				<td><DateTimeField date={row.created_at} /></td>
 				<td>
-					{ row.type == "email" ?
-							<span><i className="uk-icon-envelope" title="E-mail"></i> E-post</span>
+					{
+							row.message_type == "email" ?
+								(<span><i className="uk-icon-envelope" title="E-post" /> E-post</span>)
 						:
-							<span><i className="uk-icon-commenting" title="SMS"></i> SMS</span>
+							row.message_type == "sms" ?
+								(<span><i className="uk-icon-commenting" title="SMS" /> SMS</span>)
+						:
+							row.message_type
 					}
 				</td>
 				<td>
@@ -82,8 +70,8 @@ module.exports = React.createClass({
 						}
 					})()}
 				</td>
-				<td>{ row.type == "email" ? row.title : row.description }</td>
-				<td>{row.num_recipients} <Link to={"/messages/" + row.message_id + "/recipients"}>Visa</Link></td>
+				<td><Link to={"/messages/" + row.message_id}>{row.subject}</Link></td>
+				<td>{row.num_recipients}st</td>
 			</tr>
 		);
 	},

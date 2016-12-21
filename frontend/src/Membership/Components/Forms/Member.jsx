@@ -1,10 +1,11 @@
 import React from 'react'
 import BackboneReact from 'backbone-react-component'
+import { withRouter } from 'react-router'
 
-import CountryDropdown from '../CountryDropdown'
-import DateTimeField from '../Formatters/DateTime'
+import CountryDropdown from '../../../CountryDropdown'
+import DateTimeField from '../../../Formatters/DateTime'
 
-module.exports = React.createClass({
+module.exports = withRouter(React.createClass({
 	mixins: [Backbone.React.Component.mixin],
 
 	cancel: function(event)
@@ -36,7 +37,7 @@ module.exports = React.createClass({
 				if(response.status == "created")
 				{
 					UIkit.modal.alert("Successfully created");
-					browserHistory.push("/members/" + response.entity.member_id);
+					this.props.router.push("/members/" + response.entity.member_id);
 				}
 				else if(response.status == "updated")
 				{
@@ -202,4 +203,4 @@ module.exports = React.createClass({
 			address_country: country
 		});
 	}
-});
+}));

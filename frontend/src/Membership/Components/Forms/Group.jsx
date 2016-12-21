@@ -1,11 +1,11 @@
 import React from 'react'
 import BackboneReact from 'backbone-react-component'
 
-import { Link, browserHistory } from 'react-router'
+import { Link, withRouter } from 'react-router'
+import GenericEntityFunctions from '../../../GenericEntityFunctions'
 
-
-module.exports = React.createClass({
-	mixins: [Backbone.React.Component.mixin],
+module.exports = withRouter(React.createClass({
+	mixins: [Backbone.React.Component.mixin, GenericEntityFunctions],
 
 	getInitialState: function()
 	{
@@ -14,23 +14,39 @@ module.exports = React.createClass({
 			error_message: "",
 		};
 	},
-
-	cancel: function(event)
+	removeTextMessage: function(group)
 	{
-		// Prevent the form from being submitted
-		event.preventDefault();
-
-		UIkit.modal.alert("TODO: Cancel");
+		return "Är du säker på att du vill ta bort gruppen \"" + group.title + "\"?";
 	},
 
-	remove: function(event)
+	removeErrorMessage: function()
 	{
-		// Prevent the form from being submitted
-		event.preventDefault();
-
-		UIkit.modal.alert("TODO: Remove");
+		UIkit.modal.alert("Fel uppstod vid borttagning av group");
 	},
 
+	removeSuccess: function(response)
+	{
+		UIkit.modal.alert("Successfully deleted");
+		this.props.router.push("/groups");
+	},
+
+	createdSuccess: function(response)
+	{
+		UIkit.modal.alert("Successfully created");
+		this.props.router.push("/groups/" + response.data.group_id);
+	},
+
+	updatedSuccess: function(response)
+	{
+		UIkit.modal.alert("Successfully updated");
+	},
+
+	saveError: function()
+	{
+		UIkit.modal.alert("Error saving model");
+	},
+
+/*
 	save: function(event)
 	{
 		var _this = this;
@@ -43,12 +59,12 @@ module.exports = React.createClass({
 			{
 				if(response.status == "created")
 				{
-					browserHistory.push("/groups");
+					this.props.router.push("/groups");
 					UIkit.modal.alert("Successfully created");
 				}
 				else if(response.status == "updated")
 				{
-					browserHistory.push("/groups");
+					this.props.router.push("/groups");
 					UIkit.modal.alert("Successfully updated");
 				}
 				else
@@ -73,18 +89,14 @@ module.exports = React.createClass({
 			},
 		});
 	},
-
-	error: function()
-	{
-		UIkit.modal.alert("Error saving model");
-	},
+*/
 
 	handleChange: function(event)
 	{
 		// Update the model with new value
 		var target = event.target;
 		var key = target.getAttribute("name");
-		this.state.model[key] = target.value;
+		this.getModel().set(key, target.value);
 
 		// When we change the value of the model we have to rerender the component
 		this.forceUpdate();
@@ -106,9 +118,20 @@ module.exports = React.createClass({
 			<div>
 				<h2>{this.state.model.group_id ? "Redigera grupp" : "Skapa grupp"}</h2>
 
-				<form className="uk-form uk-form-horizontal" onSubmit={this.save}>
+				<form className="uk-form uk-form-horizontal uk-margin-bottom" onSubmit={this.save}>
 					<div className="uk-form-row">
 						<label className="uk-form-label">Namn</label>
+						<div className="uk-form-controls">
+							<div className="uk-form-icon">
+								<i className="uk-icon-tag"></i>
+								<input type="text" name="name" className="uk-form-width-large" value={this.state.model.name} onChange={this.handleChange} />
+							</div>
+							{this.renderErrorMsg("name")}
+						</div>
+					</div>
+
+					<div className="uk-form-row">
+						<label className="uk-form-label">Titel</label>
 						<div className="uk-form-controls">
 							<div className="uk-form-icon">
 								<i className="uk-icon-tag"></i>
@@ -128,13 +151,13 @@ module.exports = React.createClass({
 
 					<div className="uk-form-row">
 						<div className="uk-form-controls">
-							<button className="uk-button uk-button-danger uk-float-left" onClick={this.cancel}><i className="uk-icon-close"></i> Avbryt</button>
-							{this.state.model.group_id ? <button className="uk-button uk-button-danger uk-float-left" onClick={this.remove}><i className="uk-icon-trash"></i> Ta bort grupp</button> : ""}
-							<button className="uk-button uk-button-success uk-float-right" onClick={this.save}><i className="uk-icon-save"></i> Spara grupp</button>
+							<Link to="/groups" className="uk-button uk-button-danger uk-float-left"><i className="uk-icon-close"></i> Avbryt</Link>
+							{this.state.model.group_id ? <button className="uk-button uk-button-danger uk-float-left" onClick={this.removeEntity}><i className="uk-icon-trash"></i> Ta bort grupp</button> : ""}
+							<button className="uk-button uk-button-success uk-float-right" onClick={this.saveEntity}><i className="uk-icon-save"></i> Spara grupp</button>
 						</div>
 					</div>
 				</form>
 			</div>
 		);
 	},
-});
+}));

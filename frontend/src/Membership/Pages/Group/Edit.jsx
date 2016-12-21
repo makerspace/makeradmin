@@ -3,7 +3,7 @@ import React from 'react'
 // Backbone
 import GroupModel from '../../Models/Group'
 
-import Group from '../../Group'
+import Group from '../../Components/Forms/Group'
 
 module.exports = React.createClass({
 	getInitialState: function()

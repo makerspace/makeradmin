@@ -5,7 +5,10 @@ import config from '../../config'
 var MasterledgerCollection = Backbone.PageableCollection.extend(
 {
 	model: AccountModel,
-	url: "/economy/" + config.accountingPeriod + "/masterledger",
+	url: function()
+	{
+		return "/economy/" + this.params.period + "/masterledger";
+	},
 });
 
 module.exports = MasterledgerCollection;

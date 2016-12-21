@@ -27,12 +27,13 @@ var EconomyAccountingInstruction = React.createClass({
 		}
 		else
 		{
+			var _this = this;
 			var content = this.state.model.transactions.map(function (row, i)
 			{
 				return (
 					<tr key={i}>
 						<td>
-							<Link to={"/economy/account/" + row.account_number}>{row.account_number} {row.account_title}</Link>
+							<Link to={"/economy/" + _this.state.model.period + "/account/" + row.account_number}>{row.account_number} {row.account_title}</Link>
 						</td>
 						<td>{row.title}</td>
 						<td className="uk-text-right"><Currency value={row.balance} /></td>
@@ -47,7 +48,7 @@ var EconomyAccountingInstruction = React.createClass({
 		}
 		else
 		{
-			var title = this.state.model.instruction_number === null ? 'Preliminär verifikation' : 'Verifikation ' + this.state.model.instruction_number;
+			var title = this.state.model.instruction_number === null ? "Preliminär verifikation" : "Verifikation " + this.state.model.instruction_number;
 			title = title + " - " + this.state.model.title;
 		}
 
@@ -62,7 +63,7 @@ var EconomyAccountingInstruction = React.createClass({
 			{
 				return (
 					<tr key={i}>
-						<td><a href={"/economy/" + config.accountingPeriod + "/file/" + _this.state.model.external_id + "/" + file}>{file}</a></td>
+						<td><a href={"/economy/" + this.props.params.period + "/file/" + _this.state.model.external_id + "/" + file}>{file}</a></td>
 					</tr>
 				);
 			})
@@ -135,7 +136,7 @@ var EconomyAccountingInstruction = React.createClass({
 									<i className="uk-icon-institution"></i>
 									<input type="text" value={this.state.model.importer} disabled />
 								</div>
-								<p><em><Link to={"/economy/instruction/" + this.state.model.id + "/import"}>Visa data från import</Link></em></p>
+								<p><em><Link to={"/economy/" + this.props.params.period + "/instruction/" + this.state.model.id + "/import"}>Visa data från import</Link></em></p>
 							</div>
 						: "" }
 					</div>

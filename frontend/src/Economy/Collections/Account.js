@@ -5,7 +5,10 @@ import config from '../../config'
 var AccountCollection = Backbone.PageableCollection.extend(
 {
 	model: AccountModel,
-	url: "/economy/" + config.accountingPeriod + "/account",
+	url: function()
+	{
+		return "/economy/" + this.params.period + "/account";
+	},
 });
 
 module.exports = AccountCollection;

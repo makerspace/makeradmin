@@ -17,7 +17,7 @@ module.exports = React.createClass({
 				<p className="uk-float-left">På denna sida ser du en lista över samtliga bokföringskonton, även de som inte har några bokförda verifikationer.</p>
 				<Link to={"/settings/economy/account/add"} className="uk-button uk-button-primary uk-float-right"><i className="uk-icon-plus-circle"></i> Skapa nytt konto</Link>
 
-				<EconomyAccounts type={AccountCollection} />
+				<EconomyAccounts type={AccountCollection} params={{period: this.props.params.period}} />
 			</div>
 		);
 	},

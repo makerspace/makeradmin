@@ -11,7 +11,7 @@ module.exports = React.createClass({
 		return (
 			<div>
 				<h2>Kostnadsställen</h2>
-				<EconomyCostCenters type={CostCenterCollection} />
+				<EconomyCostCenters type={CostCenterCollection} params={{period: this.props.params.period}} />
 			</div>
 		);
 	},

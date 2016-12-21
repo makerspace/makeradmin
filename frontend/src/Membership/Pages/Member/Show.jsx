@@ -3,14 +3,14 @@ import React from 'react'
 // Backbone
 import MemberModel from '../../Models/Member'
 
-import MemberForm from '../../MemberForm'
+import MemberForm from '../../Components/Forms/Member'
 
 // Import functions from other modules
 import GroupUserBox from '../../GroupUserBox'
 import KeysUserBox from '../../../Keys/KeysUserBox'
 import SubscriptionUserBox from '../../../Sales/SubscriptionUserBox'
 import TransactionUserBox from '../../../Economy/TransactionUserBox'
-import MailUserBox from '../../../Messages/MailUserBox'
+import MessagesUserBox from '../../../Messages/UserBox'
 
 module.exports = React.createClass({
 	getInitialState: function()
@@ -23,6 +23,7 @@ module.exports = React.createClass({
 		member.fetch({
 			success: function() {
 				// This component does not use the ReactBackbone mixin, so we have to force redraw it when the Backbone model is loaded from the server
+				// TODO: Is this one still needed? Seems to work in other components
 				_this.forceUpdate();
 			}
 		});
@@ -80,16 +81,16 @@ module.exports = React.createClass({
 						<GroupUserBox member_id={this.state.model.get("member_id")} />
 					</li>
 					<li>
-						<KeysUserBox member_id={this.state.model.get("member_id")} />
+						KeysUserBox member_id={this.state.model.get("member_id")} /
 					</li>
 					<li>
-						<SubscriptionUserBox member_id={this.state.model.get("member_id")} />
+						SubscriptionUserBox member_id={this.state.model.get("member_id")} /
 					</li>
 					<li>
-						<TransactionUserBox member_id={this.state.model.get("member_id")} />
+						TransactionUserBox member_id={this.state.model.get("member_id")} /
 					</li>
 					<li>
-						<MailUserBox member_id={this.state.model.get("member_id")} />
+						<MessagesUserBox member_id={this.state.model.get("member_id")} />
 					</li>
 				</ul>
 			</div>

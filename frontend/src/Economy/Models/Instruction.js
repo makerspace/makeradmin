@@ -4,7 +4,10 @@ import config from '../../config'
 var InstructionModel = Backbone.Model.fullExtend(
 {
 	idAttribute: "instruction_number",
-	urlRoot: "/economy/" + config.accountingPeriod + "/instruction",
+	urlRoot: function()
+	{
+		return "/economy/" + this.get("period") + "/instruction";
+	},
 	defaults: {
 		entity_id: 0,
 		instruction_number: 0,

@@ -1,12 +1,12 @@
 import React from 'react';
-import { browserHistory } from 'react-router'
+import { withRouter } from 'react-router'
 import auth from '../../auth';
 
-class LoginResetPassword extends React.Component
+module.exports = withRouter(class LoginResetPassword extends React.Component
 {
 	cancel()
 	{
-		browserHistory.push("/");
+		this.props.router.push("/");
 	}
 
 	submit(e)
@@ -25,7 +25,7 @@ class LoginResetPassword extends React.Component
 		auth.requestPassword(username);
 
 		UIkit.modal.alert("Ett E-postmeddelande med information om hur du nollställer ditt lösenord har skickats till " + username);
-		browserHistory.push("/");
+		this.props.router.push("/");
 	}
 
 	render()
@@ -63,6 +63,4 @@ class LoginResetPassword extends React.Component
 			</div>
 		);
 	}
-}
-
-module.exports = LoginResetPassword;
+});

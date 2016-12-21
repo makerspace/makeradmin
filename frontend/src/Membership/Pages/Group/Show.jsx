@@ -4,10 +4,11 @@ import React from 'react'
 import GroupModel from '../../Models/Group'
 import MemberCollection from '../../Collections/Member'
 
-import Group from '../../Group'
+import { withRouter } from 'react-router'
+import Group from '../../Components/Forms/Group'
 import GroupMembers from '../../GroupMembers'
 
-module.exports = React.createClass({
+module.exports = withRouter(React.createClass({
 	getInitialState: function()
 	{
 		var group = new GroupModel({
@@ -25,10 +26,10 @@ module.exports = React.createClass({
 	{
 		return (
 			<div>
-				<Group model={this.state.model} />
+				<Group model={this.state.model} route={this.props.route} />
 				<GroupMembers type={MemberCollection} url={"/membership/group/" + this.props.params.id + "/members"} />
 			</div>
 		);
 	},
-});
+}));
 //GroupHandler.title = "Visa grupp";

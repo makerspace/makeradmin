@@ -138,7 +138,7 @@ var Edit = React.createClass({
 				<div className="uk-form-row">
 					<div className="uk-form-controls">
 						<p>
-							<i className="uk-icon uk-icon-info-circle" />
+							<i className="uk-icon-info-circle" />
 							{(() => {
 								switch (this.state.model.status) {
 									case "active":   return "En aktiv nyckel är permanent aktiv inom de datum som specificeras nedan och påverkas altså inte av eventuella betalningar.";

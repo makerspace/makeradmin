@@ -1,14 +1,18 @@
 import Backbone from 'backbone'
 import Recipient from '../Models/Recipient'
 
-var Recipients = Backbone.PageableCollection.extend(
+module.exports = Backbone.PageableCollection.extend(
 {
 	model: Recipient,
-//	url: "/messages/1/recipients",// TODO
 	url: function()
 	{
-		return "/messages/" + 123 + "/recipients";
+		if(this.params.hasOwnProperty("member_id"))
+		{
+			return "/messages/user/" + this.params.member_id;
+		}
+		else
+		{
+			return "/messages/" + this.params.message_id + "/recipients";
+		}
 	}
 });
-
-module.exports = Recipients;

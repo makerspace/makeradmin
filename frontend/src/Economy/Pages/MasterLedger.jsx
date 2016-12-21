@@ -14,7 +14,7 @@ var MasterLedgerHandler = React.createClass({
 		return (
 			<div>
 				<h2>Huvudbok</h2>
-				<EconomyAccounts type={MasterledgerCollection} />
+				<EconomyAccounts type={MasterledgerCollection} params={{period: this.props.params.period}} />
 			</div>
 		);
 	},
@@ -57,7 +57,7 @@ var EconomyAccounts = React.createClass({
 	{
 		return (
 			<tr key={i}>
-				<td><Link to={"/economy/account/" + row.account_number}>{row.account_number}</Link></td>
+				<td><Link to={"/economy/" + this.props.params.period + "/account/" + row.account_number}>{row.account_number}</Link></td>
 				<td>{row.title}</td>
 				<td className="uk-text-right"><Currency value={row.balance} /></td>
 			</tr>

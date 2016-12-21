@@ -1,12 +1,12 @@
 import React from 'react'
 
 // Backbone
-import MessageModel from '../Models/Message'
-import RecipientsCollection from '../Collections/Recipients'
+import MessageModel from '../../Models/Message'
+import RecipientsCollection from '../../Collections/Recipients'
 
 //import { Link } from 'react-router'
-import RecipientsTable from '../Recipients'
-import Message from '../Message'
+import RecipientsTable from '../../Recipients'
+import Message from '../../Message'
 
 module.exports = React.createClass({
 getInitialState: function()
@@ -28,7 +28,8 @@ getInitialState: function()
 			<div>
 				<h2>Utskick</h2>
 				<Message model={this.state.message_model} />
-				<RecipientsTable type={RecipientsCollection} />
+
+				<RecipientsTable type={RecipientsCollection} params={{message_id: this.props.params.id}} />
 			</div>
 		);
 	},

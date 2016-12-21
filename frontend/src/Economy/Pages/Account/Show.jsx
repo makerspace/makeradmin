@@ -12,6 +12,7 @@ module.exports = React.createClass({
 	{
 		// Load account model
 		var account = new AccountModel({
+			period: this.props.params.period,
 			account_number: this.props.params.id
 		});
 		account.fetch();
@@ -23,15 +24,12 @@ module.exports = React.createClass({
 
 	render: function()
 	{
+		console.log("Period: " + this.props.params.period);
 		return (
 			<div>
 				<h2>Konto</h2>
 				<EconomyAccount model={this.state.account_model} />
-				<Transactions type={TransactionCollection} filters={
-					{
-						account_number: this.state.account_model.get("account_number")
-					}
-				}/>
+				<Transactions type={TransactionCollection} params={{period: this.props.params.period, account: this.props.params.id}} />
 			</div>
 		);
 	},

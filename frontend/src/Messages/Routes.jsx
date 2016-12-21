@@ -3,27 +3,34 @@ module.exports = {
 		{
 			path: "messages",
 			indexRoute: {
-				component: require("./Pages/List")
+				onEnter: (nextState, replace) => replace("/messages/history"),
 			},
 			childRoutes: [
 				{
-					path: "new",
-					component: require("./Pages/New")
+					path: "history",
+					component: require("./Pages/Messages/List")
 				},
 				{
-					path: ":id/recipients",
-					component: require("./Pages/Recipients")
+					path: "new",
+					component: require("./Pages/Messages/New")
+				},
+				{
+					path: "templates",
+					component: require("./Pages/Templates/List"),
+				},
+				{
+					path: "templates/new",
+					component: require("./Pages/Templates/Add"),
+				},
+				{
+					path: "templates/:id",
+					component: require("./Pages/Templates/Edit"),
+				},
+				{
+					path: ":id",
+					component: require("./Pages/Messages/Show")
 				},
 			]
-		},
-		{
-			path: "settings",
-			childRoutes: [
-				{
-					path: "mail/templates",
-					component: require("./Pages/Templates"),
-				},
-			],
 		},
 	]
 }

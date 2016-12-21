@@ -9,8 +9,10 @@ var TransactionCollection = Backbone.PageableCollection.extend(
 	{
 		this.id = options.id;
 	},
-
-	url: "/economy/" + config.accountingPeriod + "/transaction",
+	url: function(a)
+	{
+		return "/economy/" + this.params.period + "/account/" + this.params.account + "/transactions";
+	},
 });
 
 module.exports = TransactionCollection;

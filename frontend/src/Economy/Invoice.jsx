@@ -49,7 +49,7 @@ module.exports = React.createClass({
 
 		return (
 			<div className="invoice">
-				<a href={"/economy/" + config.accountingPeriod + "/invoice/" + this.state.model.invoice_number + "/export"}>Exportera *.ODT</a>
+				<a href={"/economy/" + this.props.params.period + "/invoice/" + this.state.model.invoice_number + "/export"}>Exportera *.ODT</a>
 
 				<div className="uk-grid">
 					<div className="uk-width-1-3 box">

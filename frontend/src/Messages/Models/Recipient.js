@@ -1,6 +1,6 @@
 import Backbone from 'backbone'
 
-var Recipient = Backbone.Model.fullExtend(
+module.exports = Backbone.Model.fullExtend(
 {
 	idAttribute: "recipient_id",
 	urlRoot: "/messages",
@@ -14,5 +14,3 @@ var Recipient = Backbone.Model.fullExtend(
 		status: 0,
 	},
 });
-
-module.exports = Recipient;

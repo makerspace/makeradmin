@@ -16,7 +16,7 @@ module.exports = React.createClass({
 				<p className="uk-float-left">På denna sida ser du en lista över samtliga räkneskapsår.</p>
 				<Link to={"/settings/economy/accountingperiod/add"} className="uk-button uk-button-primary uk-float-right"><i className="uk-icon-plus-circle"></i> Skapa nytt räkneskapsår</Link>
 
-				<EconomyAccountingPeriods type={AccountingPeriodsCollection} />
+				<EconomyAccountingPeriods type={AccountingPeriodsCollection} params={{period: this.props.params.period}} />
 			</div>
 		);
 	},

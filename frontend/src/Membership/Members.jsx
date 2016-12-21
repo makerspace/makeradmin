@@ -61,7 +61,7 @@ module.exports = React.createClass({
 				<td><DateField date={row.created_at} /></td>
 				<td>
 					<TableDropdownMenu>
-						<Link to={"/members/" + row.member_id}><i className="uk-icon uk-icon-cog"></i> Redigera medlem</Link>
+						<Link to={"/members/" + row.member_id}><i className="uk-icon-cog"></i> Redigera medlem</Link>
 						{this.removeButton(i, "Ta bort medlem")}
 					</TableDropdownMenu>
 				</td>

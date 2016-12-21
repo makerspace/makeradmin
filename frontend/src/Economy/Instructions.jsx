@@ -74,14 +74,14 @@ var EconomyAccountingInstructionList = React.createClass({
 
 		return (
 			<tr key={i}>
-				<td><Link to={"/economy/instruction/" + row.instruction_number}>{row.instruction_number}</Link></td>
+				<td><Link to={"/economy/" + this.props.params.period + "/instruction/" + row.instruction_number}>{row.instruction_number}</Link></td>
 				<td><DateField date={row.accounting_date}/></td>
 				<td>{row.title}</td>
 				<td className="uk-text-right"><Currency value={row.balance}/></td>
 				<td>{icon}</td>
 				<td>
 					<TableDropdownMenu>
-						<Link to={"/economy/instruction/" + row.instruction_number}><i className="uk-icon uk-icon-cog"/> Redigera verifikation</Link>
+						<Link to={"/economy/" + this.props.params.period + "/instruction/" + row.instruction_number}><i className="uk-icon-cog"/> Redigera verifikation</Link>
 						{this.removeButton(i, "Ta bort verifikation")}
 					</TableDropdownMenu>
 				</td>

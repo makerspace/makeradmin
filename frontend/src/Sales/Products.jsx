@@ -77,7 +77,7 @@ module.exports = React.createClass({
 				<td><Currency value={row.price} /></td>
 				<td>
 					<TableDropdownMenu>
-						<Link to={"/product/" + row.entity_id + "/edit"}><i className="uk-icon uk-icon-cog" /> Redigera produkt</Link>
+						<Link to={"/product/" + row.entity_id + "/edit"}><i className="uk-icon-cog" /> Redigera produkt</Link>
 						{this.removeButton(i, "Ta bort produkt")}
 					</TableDropdownMenu>
 				</td>

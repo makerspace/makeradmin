@@ -10,29 +10,13 @@ module.exports = React.createClass({
 	getInitialState: function()
 	{
 		return {
-			columns: 6,
+			columns: 4,
 		};
 	},
 
 	componentWillMount: function()
 	{
 		this.fetch();
-	},
-
-	componentWillReceiveProps: function(nextProps)
-	{
-		if(nextProps.filters != this.state.filters)
-		{
-			this.setState({
-				filters: nextProps.filters
-			});
-
-			// TODO: setState() has a delay so we need to wait a moment
-			var _this = this;
-			setTimeout(function() {
-				_this.fetch();
-			}, 100);
-		}
 	},
 
 	renderHeader: function()
@@ -43,14 +27,6 @@ module.exports = React.createClass({
 				sort: "recipient_id",
 			},
 			{
-				title: "Rubrik",
-				sort: "title",
-			},
-			{
-				title: "Meddelande",
-				sort: "description",
-			},
-			{
 				title: "Mottagare",
 				sort: "recipient",
 			},
@@ -58,28 +34,42 @@ module.exports = React.createClass({
 				title: "Status",
 				sort: "status",
 			},
+			{
+				title: "",
+			},
 		];
 	},
 
 	renderRow: function(row, i)
 	{
-		return (
-			<tr key={i}>
-				<td><Link to={"/member/" + row.member_id}>{row.member_id}</Link></td>
-				<td>{row.title}</td>
-				<td>{row.description}</td>
-				<td>{row.recipient}</td>
-				<td>
-					{(() => {
-						switch (row.status) {
-							case "queued": return <span>Köad <DateTimeField date={row.created_at} /></span>;
-							case "failed": return "Sändning misslyckades";
-							case "sent":   return <span>Skickad <DateTimeField date={row.date_sent} /></span>;
-							default:       return "Okänt";
-						}
-					})()}
-				</td>
-			</tr>
-		);
+		return [
+			(
+				<tr key={i}>
+					<td><Link to={"/members/" + row.member_id}>{row.member_id}</Link></td>
+					<td>{row.recipient}</td>
+					<td>
+						{(() => {
+							switch (row.status) {
+								case "queued": return <span>Köad <DateTimeField date={row.created_at} /></span>;
+								case "failed": return "Sändning misslyckades";
+								case "sent":   return <span>Skickad <DateTimeField date={row.date_sent} /></span>;
+								default:       return "Okänt";
+							}
+						})()}
+					</td>
+					<td className="uk-text-right">
+						<a data-uk-toggle={"{target: \"#recipient-" + row.recipient_id + "\"}"}>Visa meddelande <i className="uk-icon-angle-down" /></a>
+					</td>
+				</tr>
+			),
+			(
+				<tr id={"recipient-" + row.recipient_id} className="uk-hidden">
+					<td colSpan={4}>
+						<h3>{row.subject}</h3>
+						<p>{row.body}</p>
+					</td>
+				</tr>
+			)
+		];
 	},
 });

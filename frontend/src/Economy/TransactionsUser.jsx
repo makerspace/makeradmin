@@ -68,8 +68,8 @@ var TransactionsUser = React.createClass({
 				<td className="uk-text-right"><Currency value={row.amount} currency="SEK" /></td>
 				<td>
 					<TableDropdownMenu>
-						<Link to={"/product/" + row.entity_id + "/edit"}><i className="uk-icon uk-icon-cog" /> Redigera metadata</Link>
-						<Link to={"/economy/instruction/" + row.instruction_number}><i className="uk-icon uk-icon-cog" /> Visa verifikation</Link>
+						<Link to={"/product/" + row.entity_id + "/edit"}><i className="uk-icon-cog" /> Redigera metadata</Link>
+						<Link to={"/economy/instruction/" + row.instruction_number}><i className="uk-icon-cog" /> Visa verifikation</Link>
 					</TableDropdownMenu>
 				</td>
 			</tr>

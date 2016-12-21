@@ -66,11 +66,12 @@ var BackboneTable = {
 		var ExtendedCollection = collection.extend(options);
 
 		// Create a new extended collection
-		// TODO: Does params really work?
-		var data = new ExtendedCollection(null, this.props.params);
+		var data = new ExtendedCollection(null, null);
+
+		// Get the params props, used for things like building URL's with parameters etc
+		data.params = this.props.params;
 
 		this.pagination = [];
-
 		return {
 			status: "done",
 			collection: data,
@@ -83,7 +84,7 @@ var BackboneTable = {
 
 	componentWillReceiveProps: function(nextProps)
 	{
-		if(nextProps.filters != this.state.filters)
+		if(nextProps.hasOwnProperty("filters") && nextProps.filters != this.state.filters)
 		{
 			this.setState({
 				filters: nextProps.filters
@@ -151,7 +152,7 @@ var BackboneTable = {
 		}
 
 		return (
-			<a onClick={this.remove.bind(this, i)} className="removebutton"><i className="uk-icon uk-icon-remove"></i> {text}</a>
+			<a onClick={this.remove.bind(this, i)} className="removebutton"><i className="uk-icon-remove"></i> {text}</a>
 		);
 	},
 
@@ -240,7 +241,7 @@ var BackboneTable = {
 	// Fetch data from server
 	fetch: function()
 	{
-		var filters = this.state.filters
+		var filters = this.state.filters;
 
 		// Pagination
 		var pageIndex = 0;
@@ -317,7 +318,7 @@ var BackboneTable = {
 									{
 										if(_this.state.sort_column == column.sort)
 										{
-											var icon = <i className={"uk-icon uk-icon-angle-" + (_this.state.sort_order == "asc" ? "up" : "down")} />
+											var icon = <i className={"uk-icon-angle-" + (_this.state.sort_order == "asc" ? "up" : "down")} />
 										}
 
 										return (

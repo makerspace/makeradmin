@@ -5,7 +5,10 @@ import config from '../../config'
 var InstructionCollection = Backbone.PageableCollection.extend(
 {
 	model: InstructionModel,
-	url: "/economy/" + config.accountingPeriod + "/instruction",
+	url: function()
+	{
+		return "/economy/" + this.params.period + "/instruction";
+	},
 });
 
 module.exports = InstructionCollection;

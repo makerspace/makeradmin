@@ -23,7 +23,7 @@ module.exports = React.createClass({
 	componentDidMount: function()
 	{
 		$.ajax({
-			url: config.apiBasePath + "/economy/" + config.accountingPeriod + "/valuationsheet",
+			url: config.apiBasePath + "/economy/" + this.props.params.period + "/valuationsheet",
 			dataType: 'json',
 			cache: false,
 			success: function(data) {

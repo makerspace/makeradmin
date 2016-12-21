@@ -5,7 +5,10 @@ import config from '../../config'
 var CostCenterCollection = Backbone.PageableCollection.extend(
 {
 	model: CostCenterModel,
-	url: "/economy/" + config.accountingPeriod + "/costcenter",
+	url: function()
+	{
+		return "/economy/" + this.params.period + "/costcenter";
+	},
 });
 
 module.exports = CostCenterCollection;

@@ -61,7 +61,7 @@ var EconomyAccounts = React.createClass({
 				<td>{row.description}</td>
 				<td>
 					<TableDropdownMenu>
-						<Link to={"/settings/economy/account/" + row.account_number + "/edit"}><i className="uk-icon uk-icon-cog"></i> Redigera konto</Link>
+						<Link to={"/settings/economy/account/" + row.account_number + "/edit"}><i className="uk-icon-cog"></i> Redigera konto</Link>
 						{this.removeButton(i, "Ta bort konto")}
 					</TableDropdownMenu>
 				</td>

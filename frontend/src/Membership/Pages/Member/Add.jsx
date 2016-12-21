@@ -3,7 +3,7 @@ import React from 'react'
 // Backbone
 import MemberModel from '../../Models/Member'
 
-import MemberForm from '../../MemberForm'
+import MemberForm from '../../Components/Forms/Member'
 
 module.exports = React.createClass({
 	getInitialState: function()

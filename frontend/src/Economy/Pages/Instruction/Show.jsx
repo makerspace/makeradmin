@@ -8,7 +8,10 @@ import EconomyAccountingInstruction from '../../Instruction'
 module.exports = React.createClass({
 	getInitialState: function()
 	{
-		var instruction = new InstructionModel({instruction_number: this.props.params.id});
+		var instruction = new InstructionModel({
+			period: this.props.params.period,
+			instruction_number: this.props.params.id
+		});
 		instruction.fetch();
 
 		return {

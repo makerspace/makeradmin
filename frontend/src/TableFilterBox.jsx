@@ -55,7 +55,7 @@ var TableFilterBox = React.createClass({
 					</div>
 					<div className="uk-width-1-3">
 						<div className="uk-align-right2">
-							<button className="uk-button uk-float-right" data-uk-toggle="{target:'#my-id'}">Visa fler filter <i className="uk-icon uk-icon-angle-down" /></button>
+							<button className="uk-button uk-float-right" data-uk-toggle="{target:'#my-id'}">Visa fler filter <i className="uk-icon-angle-down" /></button>
 						</div>
 					</div>
 				</div>
@@ -71,7 +71,7 @@ var TableFilterBox = React.createClass({
 						<option value="auto">Auto</option>
 					</select>
 
-					<button className="uk-button"><i className="uk-icon uk-icon-close" /> Nollställ filter</button>
+					<button className="uk-button"><i className="uk-icon-close" /> Nollställ filter</button>
 				</div>
 			</div>
 		);

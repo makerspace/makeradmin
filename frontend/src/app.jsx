@@ -70,37 +70,37 @@ var nav = new Backbone.Model({
 		},
 		{
 			text: "Ekonomi",
-			target: "/economy",
+			target: "/economy/2016",
 			icon: "money",
 			children:
 			[
 				{
 					text: "Översikt",
-					target: "/economy/overview",
+					target: "/economy/2016/overview",
 				},
 				{
 					text: "Huvudbok",
-					target: "/economy/masterledger",
+					target: "/economy/2016/masterledger",
 				},
 				{
 					text: "Verifikationer",
-					target: "/economy/instruction",
+					target: "/economy/2016/instruction",
 					children:
 					[
 						{
 							text: "",
-							target: "/economy/instruction/:id",
+							target: "/economy/2016/instruction/:id",
 						},
 					],
 				},
 				{
 					text: "Fakturor",
-					target: "/economy/invoice",
+					target: "/economy/2016/invoice",
 					children:
 					[
 						{
 							text: "",
-							target: "/economy/invoice/:id",
+							target: "/economy/2016/invoice/:id",
 						},
 					],
 				},
@@ -111,11 +111,11 @@ var nav = new Backbone.Model({
 				},
 				{
 					text: "Balansrapport",
-					target: "/economy/valuationsheet",
+					target: "/economy/2016/valuationsheet",
 				},
 				{
 					text: "Resultatrapport",
-					target: "/economy/resultreport",
+					target: "/economy/2016/resultreport",
 				},
 				{
 					type: "heading",
@@ -124,7 +124,7 @@ var nav = new Backbone.Model({
 				},
 				{
 					text: "Kostnadsställen",
-					target: "/economy/costcenter",
+					target: "/economy/2016/costcenter",
 				},
 			],
 		},
@@ -132,6 +132,23 @@ var nav = new Backbone.Model({
 			text: "Utskick",
 			target: "/messages",
 			icon: "envelope",
+			children: [
+				{
+					text: "Historik",
+					target: "/messages/history",
+					icon: "list",
+				},
+				{
+					text: "Nytt utskick",
+					target: "/messages/new",
+					icon: "envelope",
+				},
+				{
+					text: "Mallar",
+					target: "/messages/templates",
+					icon: "file-text-o",
+				},
+			],
 		},
 		{
 			text: "Statistik",
@@ -182,26 +199,6 @@ var nav = new Backbone.Model({
 					target: "/settings/economy/debug",
 				},
 
-				// Utskick
-				{
-					type: "separator",
-					target: "",
-				},
-				{
-					type: "heading",
-					text: "Utskick",
-					target: "",
-					icon: "envelope",
-				},
-				{
-					text: "Mallar",
-					target: "/settings/mail/templates",
-				},
-				{
-					type: "separator",
-					target: "",
-				},
-
 				// Export
 				{
 					type: "heading",
@@ -216,6 +213,18 @@ var nav = new Backbone.Model({
 				{
 					text: "Importera data",
 					target: "/settings/import",
+				},
+
+				// About
+				{
+					type: "heading",
+					text: "About",
+					target: "",
+					icon: "about",
+				},
+				{
+					text: "About",
+					target: "/settings/about",
 				},
 			],
 		},
@@ -282,10 +291,6 @@ var App = React.createClass({
 });
 App.title = "Internal"
 
-/*
-<Route path="tokens"     component={AccessTokensHandler} />
-*/
-
 const rootRoute = {
 	childRoutes: [
 		{
@@ -318,15 +323,19 @@ const rootRoute = {
 					childRoutes: [
 						{
 							path: "global",
-							indexRoute: {
-								component: require("./Pages/Settings/Global"),
-							},
+							component: require("./Pages/Settings/Global"),
 						},
 						{
 							path: "automation",
-							indexRoute: {
-								component: require("./Pages/Settings/Automation"),
-							},
+							component: require("./Pages/Settings/Automation"),
+						},
+						{
+							path: "tokens",
+							component: require("./Pages/Login/AccessTokens"),
+						},
+						{
+							path: "about",
+							component: require("./Pages/About"),
 						},
 					]
 				},

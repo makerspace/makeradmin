@@ -2,11 +2,13 @@ import React from 'react'
 import BackboneReact from 'backbone-react-component'
 import BackboneTable from '../BackboneTable'
 
-import DateTime from '../Formatters/DateTime'
-import { Link } from 'react-router'
+import config from '../config'
+
+import DateField from '../Formatters/Date'
+import { Link, withRouter } from 'react-router'
 import TableDropdownMenu from '../TableDropdownMenu'
 
-var AccountingPeriods = React.createClass({
+var AccountingPeriods = withRouter(React.createClass({
 	mixins: [Backbone.React.Component.mixin, BackboneTable],
 
 	getInitialState: function()
@@ -43,21 +45,26 @@ var AccountingPeriods = React.createClass({
 				sort: "title",
 			},
 			{
-				title: "Beskrivning",
-				sort: "description",
-			},
-			{
-				title: "Startdatum",
+				title: "Period",
 				sort: "start",
-			},
-			{
-				title: "Slutdatum",
-				sort: "end",
 			},
 			{
 				title: "",
 			},
 		];
+	},
+
+	activatePeriod: function(period)
+	{
+/*
+		console.log("Aktivera räkneskapsår " + period);
+
+		// TODO: Set config
+		console.log("Gammalt val: " + config.accountingPeriod);
+		config.accountingPeriod = period;
+*/
+
+		this.props.router.push("/economy/" + period);
 	},
 
 	renderRow: function(row, i)
@@ -66,18 +73,17 @@ var AccountingPeriods = React.createClass({
 			<tr key={i}>
 				<td><Link to={"/settings/economy/accountingperiod/" + row.accountingperiod_id + "/edit"}>{row.name}</Link></td>
 				<td>{row.title}</td>
-				<td>{row.description}</td>
-				<td><DateTime date={row.start} /></td>
-				<td><DateTime date={row.end} /></td>
+				<td><DateField date={row.start} /> - <DateField date={row.end} /></td>
 				<td>
 					<TableDropdownMenu>
-						<Link to={"/settings/economy/accountingperiod/" + row.accountingperiod_id + "/edit"}><i className="uk-icon uk-icon-cog"></i> Redigera konto</Link>
-						{this.removeButton(i, "Ta bort konto")}
+						<a onClick={this.activatePeriod.bind(this, row.name)}><i className="uk-icon-check"></i> Välj räkneskaper</a>
+						<Link to={"/settings/economy/accountingperiod/" + row.accountingperiod_id + "/edit"}><i className="uk-icon-cog"></i> Redigera räkneskapsår</Link>
+						{this.removeButton(i, "Ta bort räkneskapsår")}
 					</TableDropdownMenu>
 				</td>
 			</tr>
 		);
 	},
-});
+}));
 
 module.exports = AccountingPeriods;

@@ -4,7 +4,10 @@ import config from '../../config'
 var TransactionModel = Backbone.Model.fullExtend(
 {
 	idAttribute: "entity_id",
-	urlRoot: "/economy/" + config.accountingPeriod + "/transaction",
+	urlRoot: function()
+	{
+		return "/economy/" + this.get("period") + "/transaction";
+	},
 	defaults: {
 		created_at: "0000-00-00T00:00:00Z",
 		updated_at: "0000-00-00T00:00:00Z",

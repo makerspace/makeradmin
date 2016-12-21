@@ -80,9 +80,9 @@ var Keys = React.createClass({
 				<td>
 					{(() => {
 						switch (row.status) {
-							case "active":   return <span><i className="uk-icon uk-icon-check key-active"></i>Aktiv</span>;
-							case "inactive": return <span><i className="uk-icon uk-icon-close key-inactive"></i>Inaktiv</span>;
-							case "auto":     return <span><i className="uk-icon uk-icon-cog key-auto"></i>Auto</span>;
+							case "active":   return <span><i className="uk-icon-check key-active"></i>Aktiv</span>;
+							case "inactive": return <span><i className="uk-icon-close key-inactive"></i>Inaktiv</span>;
+							case "auto":     return <span><i className="uk-icon-cog key-auto"></i>Auto</span>;
 						}
 					})()}
 				</td>
@@ -90,7 +90,7 @@ var Keys = React.createClass({
 				<td>{row.description}</td>
 				<td>
 					<TableDropdownMenu>
-						<a onClick={this.edit.bind(this, i)}><i className="uk-icon uk-icon-cog" /> Redigera</a>
+						<a onClick={this.edit.bind(this, i)}><i className="uk-icon-cog" /> Redigera</a>
 						{this.removeButton(i)}
 					</TableDropdownMenu>
 				</td>
