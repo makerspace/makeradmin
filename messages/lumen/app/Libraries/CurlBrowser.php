@@ -86,7 +86,7 @@ class CurlBrowser
 	/**
 	 *
 	 */
-	public function call($method, $url, $data)
+	public function call($method, $url, array $data = null)
 	{
 		curl_setopt($this->curl_handle, CURLOPT_CUSTOMREQUEST, $method);
 

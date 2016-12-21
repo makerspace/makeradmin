@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateMessagesQueueTable extends Migration
+class CreateMessagesTemplateTable extends Migration
 {
 	/**
 	 * Run the migrations.
@@ -13,20 +13,17 @@ class CreateMessagesQueueTable extends Migration
 	 */
 	public function up()
 	{
-		Schema::create("messages_queue", function (Blueprint $table)
+		Schema::create("messages_template", function (Blueprint $table)
 		{
-			$table->increments("messages_queue_id");
+			$table->increments("messages_template_id");
+
+			$table->string("name");
 			$table->string("title");
 			$table->text("description")->nullable();
 
-			$table->string("type");
-			$table->string("recipient");
-			$table->dateTimeTz("date_sent")->nullable();
-			$table->string("status");
-
 			$table->dateTimeTz("created_at")->default(DB::raw("CURRENT_TIMESTAMP"));
 			$table->dateTimeTz("updated_at")->default(DB::raw("CURRENT_TIMESTAMP"));
-			$table->softDeletes();
+			$table->dateTimeTz("deleted_at")->nullable();
 		});
 	}
 
@@ -37,6 +34,6 @@ class CreateMessagesQueueTable extends Migration
 	 */
 	public function down()
 	{
-		Schema::drop("messages_queue");
+		Schema::drop("messages_template");
 	}
 }
