@@ -19,6 +19,7 @@ $app->  post("membership/member",      "Member@create"); // Model: Create
 $app->   get("membership/member/{id}", "Member@read");   // Model: Read
 $app->   put("membership/member/{id}", "Member@update"); // Model: Update
 $app->delete("membership/member/{id}", "Member@delete"); // Model: Delete
+$app->   get("membership/member/{id}/groups", "Member@getGroups");    // Get collection with members
 
 // Groups
 $app->   get("membership/group",       "Group@list");    // Get collection
@@ -26,6 +27,7 @@ $app->  post("membership/group",       "Group@create");  // Model: Create
 $app->   get("membership/group/{id}",  "Group@read");    // Model: Read
 $app->   put("membership/group/{id}",  "Group@update");  // Model: Update
 $app->delete("membership/group/{id}",  "Group@delete");  // Model: Delete
+$app->   get("membership/group/{id}/members", "Group@getMembers");    // Get collection with members
 
 // Roles
 $app->   get("membership/role",        "Role@list");     // Get collection

@@ -36,7 +36,7 @@ class ServiceRegister extends Command
 		$result = $ch->call("POST", "http://" . config("service.gateway") . "/service/register", [
 			"name"     => config("service.name"),
 			"url"      => config("service.url"),
-			"endpoint" => "http://" . gethostbyname(gethostname()) . ":80" . config("service.url"),
+			"endpoint" => "http://" . gethostbyname(gethostname()) . ":80/",
 			"version"  => config("service.version"),
 		]);
 

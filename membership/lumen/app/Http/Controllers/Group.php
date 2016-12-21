@@ -51,6 +51,13 @@ class Group extends Controller
 	}
 
 /*
+http://mikehillyer.com/articles/managing-hierarchical-data-in-mysql/
+https://rogerkeays.com/how-to-move-a-node-in-nested-sets-with-sql
+https://www.percona.com/blog/2011/02/14/moving-subtrees-in-closure-table/
+http://stackoverflow.com/questions/2801285/move-node-in-nested-sets-tree
+https://github.com/werc/TreeTraversal
+http://we-rc.com/blog/2015/07/19/nested-set-model-practical-examples-part-i
+
 Full tree:
 	SELECT node.title
 	FROM membership_groups AS node,
@@ -140,11 +147,12 @@ Indented:
 		// Create new group
 		$entity = new GroupModel;
 		$entity->parent      = $json["parent"]      ?? "null";
+		$entity->name        = $json["name"]        ?? null;
 		$entity->title       = $json["title"]       ?? null;
 		$entity->description = $json["description"] ?? null;
 
 		// Validate input
-		$entity->validate();
+//		$entity->validate();
 
 		// Save the entity
 		$entity->save();
@@ -152,7 +160,7 @@ Indented:
 		// Send response to client
 		return Response()->json([
 			"status" => "created",
-			"entity" => $entity->toArray(),
+			"data" => $entity->toArray(),
 		], 201);
 	}
 
@@ -176,7 +184,10 @@ Indented:
 		}
 		else
 		{
-			return $entity->toArray();
+			// Send response to client
+			return Response()->json([
+				"data" => $entity->toArray(),
+			], 200);
 		}
 	}
 
@@ -203,6 +214,7 @@ Indented:
 
 		// Create new group
 		// TODO: Put in generic function
+		$entity->name        = $json["name"]        ?? null;
 		$entity->title       = $json["title"]       ?? null;
 		$entity->description = $json["description"] ?? null;
 
@@ -212,10 +224,10 @@ Indented:
 		// Save the entity
 		$entity->save();
 
-		// TODO: Standarized output
+		// Send response to client
 		return [
 			"status" => "updated",
-			"entity" => $entity->toArray(),
+			"data" => $entity->toArray(),
 		];
 	}
 
@@ -250,5 +262,47 @@ Indented:
 				"status" => "error",
 			];
 		}
+	}
+
+	/**
+	 * Get all members in a group
+	 */
+	function getMembers(Request $request, $group_id)
+	{
+		// Paging filter
+		$filters = [
+			"per_page" => $this->per_page($request), // TODO: Rename?
+			"group_id" => $group_id,
+		];
+
+		// Filter on relations
+/*
+		if(!empty($request->get("relations")))
+		{
+			$filters["relations"] = $request->get("relations");
+		}
+*/
+		// TODO: Filter on group membership
+
+		// Filter on search
+		if(!empty($request->get("search")))
+		{
+			$filters["search"] = $request->get("search");
+		}
+
+		// Sorting
+		if(!empty($request->get("sort_by")))
+		{
+			$order = ($request->get("sort_order") == "desc" ? "desc" : "asc");
+			$filters["sort"] = [$request->get("sort_by"), $order];
+		}
+
+		// Load data from database
+		$result = call_user_func("\App\Models\\Member::list", $filters);
+
+		// Return json array
+		return Response()->json(
+			$result
+		, 200);
 	}
 }

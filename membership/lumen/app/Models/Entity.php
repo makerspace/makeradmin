@@ -22,6 +22,7 @@ class Entity
 	protected $columns = [];
 	protected $sort = ["created_at", "desc"]; // An array with sorting options eg. ["entity_id", "desc"] or [["date_updated", "asc"],["date_created","desc"]]
 	protected $validation = [];               // Validation rules
+	protected $deletable = true;
 
 	/**
 	 * Constructor
@@ -90,19 +91,22 @@ class Entity
 			$query = $query->selectRaw("{$column["select"]} AS `{$name}`");
 		}
 
-		// Show deleted entities or not?
-		if($show_deleted === true)
+		if($this->deletable)
 		{
-			// Include the deleted_at column in output only when we show deleted content
-			$this->columns["deleted_at"] = [
-				"column" => "{$this->table}.deleted_at",
-				"select" => "{$this->table}.deleted_at",
-			];
-		}
-		else
-		{
-			// The deleted_at should be null, which means it is not yet deleted
-			$query = $query->whereNull("{$this->table}.deleted_at");
+			// Show deleted entities or not?
+			if($show_deleted === true)
+			{
+				// Include the deleted_at column in output only when we show deleted content
+				$this->columns["deleted_at"] = [
+					"column" => "{$this->table}.deleted_at",
+					"select" => "{$this->table}.deleted_at",
+				];
+			}
+			else
+			{
+				// The deleted_at should be null, which means it is not yet deleted
+				$query = $query->whereNull("{$this->table}.deleted_at");
+			}
 		}
 
 		// Return the query
@@ -176,6 +180,15 @@ class Entity
 				// Filter on arbritrary columns
 				else
 				{
+					// Translate the column name
+					if(array_key_exists($id, $this->columns))
+					{
+						list($table, $column) = explode(".", $this->columns[$id]["column"]);
+//						$id = $column;
+						$id = $this->columns[$id]["column"];
+					}
+
+					// Run the filter
 					if(!is_array($filter))
 					{
 						$query = $query->where($id, "=", $filter);
@@ -315,56 +328,12 @@ class Entity
 			return false;
 		}
 		
+		// The columns is fetched with an "column AS name", so no need to translate the $column_id
 		$data["entity_id"] = $data[$this->id_column];
 
 		// Create a new entity based on type
-		// TODO: Should not be a hardcoded list
-		$type = ($this->type !== null ? $this->type : $data["type"]);
-		switch($type)
-		{
-			case "accounting_account":
-				$entity = new AccountingAccount;
-				break;
-
-			case "accounting_instruction":
-				$entity = new AccountingInstruction;
-				break;
-
-			case "accounting_transaction":
-				$entity = new AccountingTransaction;
-				break;
-
-			case "group":
-				$entity = new Group;
-				break;
-
-			case "invoice":
-				$entity = new Invoice;
-				break;
-
-			case "mail":
-				$entity = new Mail;
-				break;
-
-			case "member":
-				$entity = new Member;
-				break;
-
-			case "product":
-				$entity = new Product;
-				break;
-
-			case "rfid":
-				$entity = new Rfid;
-				break;
-
-			case "subscription":
-				$entity = new Subscription;
-				break;
-
-			default:
-				$entity = new Entity;
-		}
+		$classname = get_class($this);
+		$entity = new $classname;
 
 		// Populate the entity with data
 		foreach($data as $key => $value)
@@ -484,7 +453,11 @@ class Entity
 			}
 */
 			list($table, $column) = explode(".", $data["column"]);
-			if(array_key_exists($column, $this->data))
+			if(array_key_exists($name, $this->data))
+			{
+				$inserts[$column] = $this->data[$name];
+			}
+			else if(array_key_exists($column, $this->data))
 			{
 				$inserts[$column] = $this->data[$column];
 			}
@@ -508,7 +481,7 @@ class Entity
 			if(!empty($inserts))
 			{
 				DB::table($this->table)
-					->where($this->id_column, $this->entity_id)
+					->where($this->columns[$this->id_column]["column"], $this->entity_id)
 					->update($inserts);
 			}
 		}
@@ -530,6 +503,7 @@ class Entity
 //			{
 //				$inserts["entity_id"] = $this->entity_id;
 				$this->entity_id = DB::table($this->table)->insertGetId($inserts);
+				$this->data[$this->id_column] = $this->entity_id;
 //			}
 		}
 
@@ -584,14 +558,14 @@ class Entity
 		{
 			// Permanent delete
 			DB::table($this->table)
-				->where($this->id_column, $this->entity_id)
+				->where($this->columns[$this->id_column]["column"], $this->entity_id)
 				->delete();
 		}
 		else
 		{
 			// Soft delete
 			DB::table($this->table)
-				->where($this->id_column, $this->entity_id)
+				->where($this->columns[$this->id_column]["column"], $this->entity_id)
 				->update(["deleted_at" => date("c")]);
 		}
 
@@ -639,7 +613,7 @@ class Entity
 	public function toArray()
 	{
 		$x = $this->data;
-		$x["entity_id"] = $this->entity_id;
+//		$x["entity_id"] = $this->entity_id;
 		return $x;
 	}
 

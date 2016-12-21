@@ -2,10 +2,12 @@
 
 namespace App\Exceptions;
 
+use Exception;
+
 /**
  *
  */
-class FilterNotFoundException extends \Exception
+class FilterNotFoundException extends Exception
 {
 	protected $column;
 	protected $data;

@@ -19,6 +19,7 @@ class CreateMembershipGroupsTable extends Migration
 			$table->integer("parent");
 			$table->integer("left");
 			$table->integer("right");
+			$table->string("name");
 			$table->string("title");
 			$table->text("description");
 			$table->timestamps();

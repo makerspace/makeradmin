@@ -28,6 +28,10 @@ class Group extends Entity
 			"column" => "membership_groups.updated_at",
 			"select" => "DATE_FORMAT(membership_groups.updated_at, '%Y-%m-%dT%H:%i:%sZ')",
 		],
+		"name" => [
+			"column" => "membership_groups.name",
+			"select" => "membership_groups.name",
+		],
 		"title" => [
 			"column" => "membership_groups.title",
 			"select" => "membership_groups.title",
@@ -39,7 +43,8 @@ class Group extends Entity
 	];
 	protected $sort = ["title", "asc"];
 	protected $validation = [
-		"title" => ["required"/*, "unique"*/],
+		"name"  => ["required"/*, "unique"*/],
+		"title" => ["required"],
 	];
 
 	public function _search($query, $search)
@@ -50,6 +55,7 @@ class Group extends Entity
 			$query = $query->where(function($query) use($word) {
 				// Build the search query
 				$query
+					->  where("membership_groups.name",        "like", "%".$word."%")
 					->  where("membership_groups.title",       "like", "%".$word."%")
 					->orWhere("membership_groups.description", "like", "%".$word."%");
 			});
@@ -70,12 +76,10 @@ class Group extends Entity
 		$query = $this->_applyFilter($query, $filters);
 
 		// Calculate total number of peoples in the group
-/*
 		$query = $query
-			->leftJoin("relation", "relation.entity2", "=", "entity.entity_id")
-			->selectRaw("(SELECT COUNT(*) FROM relation LEFT JOIN entity e ON e.entity_id = relation.entity1 WHERE relation.entity2 = entity.entity_id AND e.type=\"member\") AS membercount");
-*/
-// TODO: Member count
+			->leftJoin("membership_members_groups", "membership_members_groups.group_id", "=", "membership_groups.group_id")
+			->selectRaw("COUNT(membership_members_groups.member_id) AS num_members")
+			->groupBy("membership_groups.group_id");
 
 		// Sort
 		$query = $this->_applySorting($query);

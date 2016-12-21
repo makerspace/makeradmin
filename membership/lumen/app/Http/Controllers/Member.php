@@ -112,6 +112,8 @@ class Member extends Controller
 		$entity->address_city    = $json["address_city"]    ?? null;
 		$entity->address_country = $json["address_country"] ?? "se";
 		$entity->phone           = $json["phone"]           ?? null;
+		$entity->created_at      = $json["created_at"]      ?? null;
+		$entity->updated_at      = $json["updated_at"]      ?? null;
 
 /*
 		// Add relations
@@ -129,7 +131,7 @@ class Member extends Controller
 		// Send response to client
 		return Response()->json([
 			"status" => "created",
-			"entity" => $entity->toArray(),
+			"data" => $entity->toArray(),
 		], 201);
 	}
 
@@ -169,8 +171,10 @@ class Member extends Controller
 				$result["roles"][$role->role_id]["permissions"] = DB::table("membership_permissions")->where("role_id", $role->role_id)->get();
 			}
 
-			// Return result
-			return $result;
+			// Send response to client
+			return Response()->json([
+				"data" => $entity->toArray(),
+			], 200);
 		}
 	}
 
@@ -207,10 +211,10 @@ class Member extends Controller
 		// Save the entity
 		$entity->save();
 
-		// TODO: Standarized output
+		// Send response to client
 		return Response()->json([
 			"status" => "updated",
-			"entity" => $entity->toArray(),
+			"data" => $entity->toArray(),
 		], 200);
 	}
 
@@ -279,5 +283,42 @@ class Member extends Controller
 				"message" => "The username and/or password you specified was incorrect",
 			], 401);
 		}
+	}
+
+	public function getGroups(Request $request)
+	{
+/*
+		// TODO: Get roles from user
+		$roles = [2, 5];
+
+		// Get groups the where the user have a "view group" permission
+		$this->_loadPermissions($roles);
+		$groups = $this->_checkPermission("view group");
+*/
+		// Paging and permission filter
+		$filters = [
+			"per_page" => $this->per_page($request), // TODO: Rename?
+//			"group_id" => ["in", $groups],
+		];
+
+		// Filter on search
+		if(!empty($request->get("search")))
+		{
+			$filters["search"] = $request->get("search");
+		}
+
+		// Sorting
+		if(!empty($request->get("sort_by")))
+		{
+			$order = ($request->get("sort_order") == "desc" ? "desc" : "asc");
+			$filters["sort"] = [$request->get("sort_by"), $order];
+		}
+
+		// Load data from database
+		$result = call_user_func("\App\Models\\Group::list", $filters);
+
+		// Return json array
+		//TODO
+		return $result;
 	}
 }

@@ -25,7 +25,7 @@ $app = new Laravel\Lumen\Application(
 
 $app->withFacades();
 
-//$app->withEloquent();
+// $app->withEloquent();
 
 // Load configuration file
 $app->configure("service");
