@@ -152,8 +152,7 @@ class Login
 		// Get endpoint URL for membership module
 		if(($service = Service::getService("membership")) === false)
 		{
-			// If no service is specified we should just throw an generic error saying the service could not be contacted
-			throw new ServiceRequestTimeout;
+			return false;
 		}
 		$url = "{$service->endpoint}/membership/authenticate";
 

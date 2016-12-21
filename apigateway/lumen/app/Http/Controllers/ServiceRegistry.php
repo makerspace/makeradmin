@@ -11,6 +11,7 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use App\Exceptions\EntityValidationException;
 use App\Service;
 use App\Logger;
+use App\Login;
 use App\Libraries\CurlBrowser;
 
 /**
@@ -77,9 +78,9 @@ class ServiceRegistry extends Controller
 		$json = $request->json()->all();
 
 		// TODO: Better validation
-		if(empty($json["name"]))
+		if(empty($json["url"]))
 		{
-			throw new EntityValidationException("name", "required");
+			throw new EntityValidationException("url", "required");
 		}
 		if(empty($json["version"]))
 		{
@@ -90,7 +91,7 @@ class ServiceRegistry extends Controller
 
 		// Unregister the service
 		Service::unregister([
-			"name"    => $json["name"],
+			"url"     => $json["url"],
 			"version" => $json["version"],
 		]);
 
@@ -109,7 +110,27 @@ class ServiceRegistry extends Controller
 	{
 		$json = $request->json()->all();
 
-		// TODO: Check permissions
+		// Check permissions
+		$user = Auth::user();
+//		print_r($user);
+		// TODO: Send an API request to get the roles and permissions of the user
+
+		// Get a list of all groups where the user have a "api exec" permission
+		$groups = [];
+		foreach($user->roles as $role)
+		{
+			foreach($role->permissions as $permission)
+			{
+				if($permission->permission == "api exec")
+				{
+					$groups[] = $permission->group_id;
+				}
+			}
+		}
+		print_r($groups);
+		die("roles\n");
+
+
 
 		// List services
 		$result = Service::all();
@@ -125,13 +146,12 @@ class ServiceRegistry extends Controller
 	 *
 	 * Finds the appropriate micro service and sends a HTTP request to it
 	 */
-	public function handleRoute(Request $request, $p1, $p2 = null, $p3 = null, $p4 = null)
+	public function handleRoute(Request $request, $p1, $p2 = null, $p3 = null, $p4 = null, $p5 = null)
 	{
 		// Split the path into segments and get version + service
 		$path = explode("/", $request->path());
 		$service = $path[0];
 		$version = 1;// TODO: Get version from header
-
 
 		// Get the endpoint URL or throw an exception if no service was found
 		if(($service = Service::getService($service, $version)) === false)
@@ -146,7 +166,7 @@ class ServiceRegistry extends Controller
 		$user = Auth::user();
 		if($user)
 		{
-			$ch->setHeader("X-Member-Id", $user->user_id);
+			$ch->setHeader("X-Member-Id", $user->member_id);
 		}
 
 		// Append the query string parameters like ?sort_by=column etc to the URL
@@ -155,7 +175,9 @@ class ServiceRegistry extends Controller
 
 		// Get JSON and POST data
 		// TODO: Should not include query string parameters
-		$data = json_encode($request->all());
+//		$data = json_encode($request->all());
+		$data = $request->all();
+		$ch->useJson();
 
 		// Create a new url with the service endpoint url included
 		$url = $service->endpoint . "/" . implode("/", $path);

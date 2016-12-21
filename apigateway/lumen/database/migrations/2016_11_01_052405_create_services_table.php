@@ -22,7 +22,6 @@ class CreateServicesTable extends Migration
 			$table->string("version", 12);
 			$table->dateTimeTz("created_at")->default(DB::raw("CURRENT_TIMESTAMP"));
 			$table->dateTimeTz("updated_at")->default(DB::raw("CURRENT_TIMESTAMP"));
-//			$table->timestamps();
 			$table->softDeletes();
 
 			$table->index("url");

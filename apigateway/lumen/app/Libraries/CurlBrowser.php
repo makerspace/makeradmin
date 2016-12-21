@@ -55,11 +55,17 @@ class CurlBrowser
 		curl_close($this->curl_handle);
 	}
 
-	function Destroy()
+	/**
+	 *
+	 */
+	function destroy()
 	{
 		curl_close($this->curl_handle);
 	}
 
+	/**
+	 *
+	 */
 	function Log($message, $verbose_level = 1)
 	{
 		if($this->verbose >= $verbose_level)
@@ -72,12 +78,15 @@ class CurlBrowser
 	/**
 	 *
 	 */
-	public function SetReferer($url)
+	public function setReferer($url)
 	{
 		curl_setopt($this->curl_handle, CURLOPT_REFERER, $url);
 	}
 
-	public function call($method, $url, $data)
+	/**
+	 *
+	 */
+	public function call($method, $url, array $data = null)
 	{
 		curl_setopt($this->curl_handle, CURLOPT_CUSTOMREQUEST, $method);
 
