@@ -25,21 +25,23 @@ class Period extends Entity
 			"column" => "economy_accountingperiod.title",
 			"select" => "economy_accountingperiod.title",
 		],
+/*
 		"description" => [
 			"column" => "economy_accountingperiod.description",
 			"select" => "economy_accountingperiod.description",
 		],
+*/
 		"name" => [
 			"column" => "economy_accountingperiod.name",
 			"select" => "economy_accountingperiod.name",
 		],
 		"start" => [
 			"column" => "economy_accountingperiod.start",
-			"select" => "DATE_FORMAT(economy_accountingperiod.start, '%Y-%m-%dT%H:%i:%sZ')",
+			"select" => "DATE_FORMAT(economy_accountingperiod.start, '%Y-%m-%d')",
 		],
 		"end" => [
 			"column" => "economy_accountingperiod.end",
-			"select" => "DATE_FORMAT(economy_accountingperiod.end, '%Y-%m-%dT%H:%i:%sZ')",
+			"select" => "DATE_FORMAT(economy_accountingperiod.end, '%Y-%m-%d')",
 		],
 	];
 	protected $sort = ["start", "asc"];

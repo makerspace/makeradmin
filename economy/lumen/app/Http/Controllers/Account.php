@@ -7,6 +7,7 @@ use Illuminate\Http\Response;
 
 // Models
 use App\Models\Account as AccountModel;
+use App\Models\Transaction;
 
 // TODO: Remove
 use App\Traits\AccountingPeriod;
@@ -190,5 +191,58 @@ class Account extends Controller
 	function _accountNumberIsExisting($account_number)
 	{
 		return false;
+	}
+
+
+	/**
+	 *
+	 */
+	function transactions(Request $request, $accountingperiod, $account_number)
+	{
+		// Check that the specified accounting period exists
+		$accountingperiod_id = $this->_getAccountingPeriodId($accountingperiod);
+
+		// Paging filter
+		$filters = [
+			"per_page" => $this->per_page($request),
+			"account_number" => $account_number,
+			"accountingperiod" => $accountingperiod,
+		];
+
+/*
+		// Filter on relations
+		if($request->get("relations"))
+		{
+			$filters["relations"] = $request->get("relations");
+		}
+*/
+
+		// Filter on search
+		if(!empty($request->get("search")))
+		{
+			$filters["search"] = $request->get("search");
+		}
+
+		// Sorting
+		if(!empty($request->get("sort_by")))
+		{
+			$order = ($request->get("sort_order") == "desc" ? "desc" : "asc");
+			$filters["sort"] = [$request->get("sort_by"), $order];
+		}
+
+/*
+		// Filters
+		if(!empty($request->get("account_number")))
+		{
+			$filters["account_number"] = ["=", $request->get("account_number")];
+		}
+*/
+
+
+		// Load data from database
+		$result = Transaction::list($filters);
+
+		// Return json array
+		return $result;
 	}
 }

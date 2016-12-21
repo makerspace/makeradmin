@@ -80,12 +80,11 @@ class Instruction extends Controller
 		$entity->external_id          = $json["external_id"]         ?? null;
 		$entity->external_date        = $json["external_date"]       ?? null;
 		$entity->external_text        = $json["external_text"]       ?? null;
-		/*
-		$entity->external_data        = $json["external_data"]       ?? null;
-		*/
+//		$entity->external_data        = $json["external_data"]       ?? null;
 		$entity->verificationserie_id = $json["accounting_verification_serie"] ?? null;
 		$entity->transactions         = $json["transactions"];
 		$entity->accountingperiod_id  = $accountingperiod_id;
+//		$entity->accountingperiod     = $accountingperiod;
 
 		// Validate input
 		$entity->validate();
@@ -143,7 +142,7 @@ class Instruction extends Controller
 	}
 
 	/**
-	 *
+	 * Update an instruction
 	 */
 	function update(Request $request, $accountingperiod, $id)
 	{

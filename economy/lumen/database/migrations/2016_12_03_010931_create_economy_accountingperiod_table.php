@@ -17,11 +17,11 @@ class CreateEconomyAccountingperiodTable extends Migration
 		{
 			$table->increments("economy_accountingperiod_id");
 			$table->string("title");
-			$table->text("description")->nullable();
+//			$table->text("description")->nullable();
 
 			$table->string("name");
-			$table->dateTimeTz("start");
-			$table->dateTimeTz("end");
+			$table->date("start");
+			$table->date("end");
 
 			$table->dateTimeTz("created_at")->default(DB::raw("CURRENT_TIMESTAMP"));
 			$table->dateTimeTz("updated_at")->default(DB::raw("CURRENT_TIMESTAMP"));

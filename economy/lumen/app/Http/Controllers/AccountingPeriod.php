@@ -57,7 +57,7 @@ class AccountingPeriod extends Controller
 		// Create new period
 		$entity = new Period;
 		$entity->title       = $json["title"]       ?? null;
-		$entity->description = $json["description"] ?? null;
+//		$entity->description = $json["description"] ?? null;
 		$entity->name        = $json["name"]        ?? null;
 		$entity->start       = $json["start"]       ?? null;
 		$entity->end         = $json["end"]         ?? null;

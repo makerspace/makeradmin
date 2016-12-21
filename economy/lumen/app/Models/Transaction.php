@@ -78,6 +78,10 @@ class Transaction extends Entity
 		// Build base query
 		$query = $this->_buildLoadQuery();
 
+		// Load the instruction
+		$query = $query
+			->leftJoin("economy_instruction", "economy_instruction.economy_instruction_id", "=", "economy_transaction.economy_instruction_id");
+
 		// Go through filters
 		foreach($filters as $id => $filter)
 		{
@@ -96,8 +100,8 @@ class Transaction extends Entity
 			if("accountingperiod" == $id)
 			{
 				$query = $query
-					->leftJoin("economy_period", "economy_period.economy_period_id", "=", "economy_instruction.economy_period_id")
-					->where("economy_period.name", $op, $param);
+					->leftJoin("economy_accountingperiod", "economy_accountingperiod.economy_accountingperiod_id", "=", "economy_instruction.economy_accountingperiod_id")
+					->where("economy_accountingperiod.name", $op, $param);
 				unset($filters[$id]);
 			}
 			// Filter on accounting period
@@ -112,10 +116,6 @@ class Transaction extends Entity
 
 		// Apply standard filters like entity_id, relations, etc
 		$query = $this->_applyFilter($query, $filters);
-
-		// Load the instruction
-		$query = $query
-			->leftJoin("economy_instruction", "economy_instruction.economy_instruction_id", "=", "economy_transaction.economy_instruction_id");
 
 		// Sort
 		$query = $this->_applySorting($query);

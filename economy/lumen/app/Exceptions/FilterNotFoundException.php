@@ -4,6 +4,9 @@ namespace App\Exceptions;
 
 use Exception;
 
+/**
+ *
+ */
 class FilterNotFoundException extends Exception
 {
 	protected $column;

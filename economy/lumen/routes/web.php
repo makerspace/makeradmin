@@ -27,6 +27,7 @@ $app->group(array("namespace" => "App\Http\Controllers", "prefix" => "economy/{a
 	// Accounts
 	$app->   get("account",          "Account@list");        // Get collection
 	$app->  post("account",          "Account@create");      // Model: Create
+	$app->   get("account/{id}/transactions", "Account@transactions"); // Transactions collection
 	$app->   get("account/{id}",     "Account@read");        // Model: Read
 	$app->   put("account/{id}",     "Account@update");      // Model: Update
 	$app->delete("account/{id}",     "Account@delete");      // Model: Delete

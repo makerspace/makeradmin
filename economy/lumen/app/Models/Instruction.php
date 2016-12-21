@@ -5,16 +5,6 @@ use App\Models\Entity;
 use App\Models\Transaction;
 use DB;
 
-/*
-TODO
-
-public function Transactions()
-{
-	return $this->hasMany('App\Models\AccountingTransaction');
-}
-*/
-
-
 /**
  *
  */
@@ -326,7 +316,7 @@ class Instruction extends Entity
 				$entity = new Transaction;
 				$entity->instruction_id = $this->entity_id;
 				$entity->title          = $transaction["title"];
-				$entity->account_id     = $this->_getAccountEntityId($transaction["account_number"]);
+				$entity->account_id     = $this->_getAccountEntityId($this->data["accountingperiod_id"], $transaction["account_number"]);
 				$entity->amount         = $transaction["amount"];
 				$entity->costcenter_id  = $transaction["economy_cost_center"] ?? null;
 				$entity->external_id    = $transaction["external_id"] ?? null;
@@ -345,8 +335,13 @@ class Instruction extends Entity
 		return $result;
 	}
 
-	protected function _getAccountEntityId($account_number)
+	protected function _getAccountEntityId($accountingperiod_id, $account_number)
 	{
-		return DB::table("economy_account")->where("account_number", $account_number)->value("economy_account_id");
+		return DB::table("economy_account")
+//			->leftJoin("economy_accountingperiod", "economy_accountingperiod.economy_accountingperiod_id", "=", "economy_account.economy_accountingperiod_id")
+			->where("account_number", $account_number)
+//			->where("economy_accountingperiod.name", $accountingperiod)
+			->where("economy_accountingperiod_id", $accountingperiod_id)
+			->value("economy_account_id");
 	}
 }

@@ -1,5 +1,5 @@
 <?php
-namespace App\Http\Controllers\V2;
+namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -38,7 +38,7 @@ class Maintenance extends Controller
 			"UPDATE economy_instruction " .
 			"SET instruction_number = (@number :=  1 + @number) " .
 			"WHERE instruction_number != 0 OR instruction_number IS NULL " .
-			"ORDER BY economy_date"
+			"ORDER BY accounting_date"
 		);
 
 		return Response()->json([
