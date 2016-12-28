@@ -155,14 +155,15 @@ class Login
 			return false;
 		}
 		$url = "{$service->endpoint}/membership/authenticate";
-
 		// Make a request to the membership module and load the user object (including roles and permissions)
 		$ch = new CurlBrowser();
 		$result = $ch->call("GET", "{$service->endpoint}/membership/member/{$user_id}", []);
 
-		if($ch->getStatusCode() == 200 && ($json = $ch->getJson()) !== false && isset($json->member_id))
+		if($ch->getStatusCode() == 200 && ($json = $ch->getJson()) !== false && isset($json->data->member_id))
 		{
-			return $json;
+			$x = new \stdClass();
+			$x->user_id = $json->data->member_id;
+			return $x;
 		}
 		else
 		{

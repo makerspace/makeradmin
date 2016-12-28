@@ -100,7 +100,7 @@ class Authentication extends Controller
 	public function listTokens(Request $request)
 	{
 		// Get user id
-		$user_id = Auth::user()->member_id;
+		$user_id = Auth::user()->user_id;
 
 		// Get users access tokens from the database
 		$result = Login::getTokens($user_id);

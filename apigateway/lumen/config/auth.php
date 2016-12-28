@@ -3,7 +3,6 @@
 return [
 
 	'driver' => 'makerauth',
-	'model' => App\User::class,
 
 	/*
 	|--------------------------------------------------------------------------
@@ -19,29 +18,13 @@ return [
 	| they have less time to be guessed. You may change this as needed.
 	|
 	*/
-/*
-	'password' => [
-		'email' => 'emails.password',
-		'table' => 'password_resets',
-		'expire' => 60,
-	],
-*/
 
 	'guards' => [
 		'api' => [
 			'driver' => 'meep',
-			'provider' => 'users',
 		],
 	],
-
 	'defaults' => [
 		'guard' => 'api',
-	],
-
-	'providers' => [
-		'users' => [
-			'driver' => 'eloquent',
-			'model' => App\User::class,
-		],
 	],
 ];

@@ -23,7 +23,7 @@ class MakerGuard implements Guard
 			return false;
 		}
 
-		return $this->user->member_id;
+		return $this->user->user_id;
 	}
 
 	/**
