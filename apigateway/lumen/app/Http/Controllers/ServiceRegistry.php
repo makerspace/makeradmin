@@ -166,7 +166,7 @@ class ServiceRegistry extends Controller
 		$user = Auth::user();
 		if($user)
 		{
-			$ch->setHeader("X-Member-Id", $user->member_id);
+			$ch->setHeader("X-User-Id", $user->user_id);
 		}
 
 		// Append the query string parameters like ?sort_by=column etc to the URL

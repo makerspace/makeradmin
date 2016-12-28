@@ -39,7 +39,7 @@ class Login
 		Logger::logServiceTraffic($ch);
 
 		// Return the user_id or false if unsuccessful
-		if($ch->getStatusCode() == 200 && ($data = $ch->getJson()) !== false && isset($data->member_id))
+		if($ch->getStatusCode() == 200 && ($data = $ch->getJson()->data) !== false && isset($data->member_id))
 		{
 			return $data->member_id;
 		}
