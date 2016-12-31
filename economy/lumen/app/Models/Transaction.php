@@ -64,6 +64,10 @@ class Transaction extends Entity
 			"column" => "economy_instruction.external_id",
 			"select" => "economy_instruction.external_id",
 		],
+		"period" => [
+			"column" => "economy_accountingperiod.name",
+			"select" => "economy_accountingperiod.name",
+		],
 	];
 	protected $sort = ["accounting_date", "desc"];
 
@@ -81,6 +85,10 @@ class Transaction extends Entity
 		// Load the instruction
 		$query = $query
 			->leftJoin("economy_instruction", "economy_instruction.economy_instruction_id", "=", "economy_transaction.economy_instruction_id");
+
+		// Load the accounting period
+		$query = $query
+			->leftJoin("economy_accountingperiod", "economy_accountingperiod.economy_accountingperiod_id", "=", "economy_instruction.economy_accountingperiod_id");
 
 		// Go through filters
 		foreach($filters as $id => $filter)
@@ -100,7 +108,6 @@ class Transaction extends Entity
 			if("accountingperiod" == $id)
 			{
 				$query = $query
-					->leftJoin("economy_accountingperiod", "economy_accountingperiod.economy_accountingperiod_id", "=", "economy_instruction.economy_accountingperiod_id")
 					->where("economy_accountingperiod.name", $op, $param);
 				unset($filters[$id]);
 			}
