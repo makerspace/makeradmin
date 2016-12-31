@@ -73,7 +73,7 @@ class Message extends Entity
 		// Paginate
 		if($this->pagination != null)
 		{
-//			$query->paginate($this->pagination);
+			$query->paginate($this->pagination);
 		}
 
 		// Run the MySQL query

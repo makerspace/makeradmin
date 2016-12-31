@@ -71,6 +71,12 @@ class Recipient extends Entity
 		// Build base query
 		$query = $this->_buildLoadQuery();
 
+		// Include message type
+		$query = $query
+			->leftJoin("messages_message", "messages_message.messages_message_id", "=", "messages_recipient.messages_message_id")
+//			->groupBy("messages_message.messages_message_id")
+			->selectRaw("messages_message.message_type AS message_type");
+
 		// Apply standard filters like entity_id, relations, etc
 		$query = $this->_applyFilter($query, $filters);
 
@@ -80,7 +86,7 @@ class Recipient extends Entity
 		// Paginate
 		if($this->pagination != null)
 		{
-//			$query->paginate($this->pagination);
+			$query->paginate($this->pagination);
 		}
 
 		// Run the MySQL query

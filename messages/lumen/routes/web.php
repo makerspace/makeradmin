@@ -11,7 +11,6 @@
 |
 */
 
-// Mail
 $app->group(array(), function() use ($app)
 {
 	// Templates
