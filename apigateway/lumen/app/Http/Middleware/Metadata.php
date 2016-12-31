@@ -51,8 +51,8 @@ class Metadata
 		if(!isset($json->_meta))
 		{
 			$json->_meta = [
-				"service" => "apigateway",
-				"version" => "1.0",
+				"service" => config("service.name"),
+				"version" => config("service.version"),
 			];
 		}
 
