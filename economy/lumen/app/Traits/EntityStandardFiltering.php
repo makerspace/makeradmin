@@ -32,6 +32,13 @@ trait EntityStandardFiltering
 			$filters["sort"] = [$request->get("sort_by"), $order];
 		}
 
+		// Filter by id
+		if(!empty($request->get("ids")))
+		{
+			$ids = explode(",", $request->get("ids"));
+			$filters["ids"] = $ids;
+		}
+
 		// Load data from database
 		$result = call_user_func("\App\Models\\{$model}::list", $filters);
 
