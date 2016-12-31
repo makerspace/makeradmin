@@ -11,6 +11,8 @@
 |
 */
 
-$app->get('/', function () use ($app) {
-    return $app->version();
+$app->group(array(), function() use ($app)
+{
+	// MultiAccess
+	$app->   get("multiaccess", "MultiAccessSync@index");
 });
