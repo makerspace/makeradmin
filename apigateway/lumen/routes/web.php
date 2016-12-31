@@ -23,6 +23,10 @@ $app->   get("service/list",       "ServiceRegistry@list");
 // Test to see if the user is logged in or not
 $app->   get("test",               "ServiceRegistry@test")->middleware("auth");
 
+// Relations
+$app->   get("relations",          "Relations@relations");
+$app->   get("related",            "Relations@related");
+
 // An ugly way to catch all request as lumen does not support the any() and match() methods used in Laravel
 $app->get("/{p1}",                        "ServiceRegistry@handleRoute");
 $app->get("/{p1}/{p2}",                   "ServiceRegistry@handleRoute");

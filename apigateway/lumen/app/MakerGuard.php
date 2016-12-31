@@ -49,17 +49,6 @@ class MakerGuard implements Guard
 		}
 
 		return $this->user;
-
-/*
-		if(!$this->user_id)
-		{
-			return false;
-		}
-
-		$x = new \stdClass();
-		$x->user_id = $this->user_id;
-		return $x;
-*/
 	}
 
 	/**
