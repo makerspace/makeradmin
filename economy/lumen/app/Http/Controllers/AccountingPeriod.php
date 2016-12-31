@@ -71,7 +71,7 @@ class AccountingPeriod extends Controller
 		// Send response to client
 		return Response()->json([
 			"status" => "created",
-			"entity" => $entity->toArray(),
+			"data" => $entity->toArray(),
 		], 201);
 	}
 
@@ -94,7 +94,10 @@ class AccountingPeriod extends Controller
 		}
 		else
 		{
-			return $entity->toArray();
+			// Send response to client
+			return Response()->json([
+				"data" => $entity->toArray(),
+			], 200);
 		}
 	}
 

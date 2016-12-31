@@ -97,6 +97,10 @@ class Transactions extends Controller
 		{
 			// Return json array
 			return $result;
+			// Send response to client
+			return Response()->json([
+				"data" => $result->toArray(),
+			], 200);
 		}
 	}
 

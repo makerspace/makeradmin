@@ -23,7 +23,7 @@ class Costcenter extends Controller
 		// Send response to client
 		return Response()->json([
 			"status" => "not_implemented",
-			"entity" => [],
+			"data" => [],
 		], 201);
 	}
 
@@ -35,7 +35,7 @@ class Costcenter extends Controller
 		// Send response to client
 		return Response()->json([
 			"status" => "not_implemented",
-			"entity" => [],
+			"data" => [],
 		], 201);
 	}
 
@@ -47,7 +47,7 @@ class Costcenter extends Controller
 		// Send response to client
 		return Response()->json([
 			"status" => "not_implemented",
-			"entity" => [],
+			"data" => [],
 		], 201);
 	}
 
@@ -59,7 +59,7 @@ class Costcenter extends Controller
 		// Send response to client
 		return Response()->json([
 			"status" => "not_implemented",
-			"entity" => [],
+			"data" => [],
 		], 201);
 	}
 
@@ -71,7 +71,7 @@ class Costcenter extends Controller
 		// Send response to client
 		return Response()->json([
 			"status" => "not_implemented",
-			"entity" => [],
+			"data" => [],
 		], 201);
 	}
 }

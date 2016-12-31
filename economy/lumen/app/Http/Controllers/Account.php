@@ -76,11 +76,8 @@ class Account extends Controller
 			$filters["sort"] = [$request->get("sort_by"), $order];
 		}
 
-		// Load data from database
-		$result = call_user_func("\App\Models\Account::list", $filters);
-
 		// Return json array
-		return $result;
+		return AccountModel::list($filters);
 	}
 
 	/**
@@ -118,7 +115,7 @@ class Account extends Controller
 		// Send response to client
 		return Response()->json([
 			"status" => "created",
-			"entity" => $entity->toArray(),
+			"data" => $entity->toArray(),
 		], 201);
 	}
 
@@ -145,7 +142,10 @@ class Account extends Controller
 		}
 		else
 		{
-			return $entity->toArray();
+			// Send response to client
+			return Response()->json([
+				"data" => $entity->toArray(),
+			], 200);
 		}
 	}
 
