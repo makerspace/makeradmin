@@ -20,6 +20,9 @@ $app->group(array("namespace" => "App\Http\Controllers", "prefix" => "economy"),
 	$app->   get("accountingperiod/{id}", "AccountingPeriod@read");   // Model: Read
 	$app->   put("accountingperiod/{id}", "AccountingPeriod@update"); // Model: Update
 	$app->delete("accountingperiod/{id}", "AccountingPeriod@delete"); // Model: Delete
+
+	// Get a list of transactions independent of accounting period
+	$app->   get("transactions", "Transactions@transactions");   // Get collection
 });
 
 $app->group(array("namespace" => "App\Http\Controllers", "prefix" => "economy/{accountingperiod}"), function() use ($app)

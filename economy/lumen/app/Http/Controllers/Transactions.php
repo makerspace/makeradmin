@@ -119,4 +119,55 @@ class Transactions extends Controller
 	{
 		return ['error' => 'not implemented'];
 	}
+
+	/**
+	 * Get a list of transactions connected to a member
+	 */
+	function transactions(Request $request)
+	{
+		// Paging filter
+		$filters = [
+			"per_page" => $this->per_page($request),
+		];
+
+/*
+		// Filter on relations
+		if($request->get("relations"))
+		{
+			$filters["relations"] = $request->get("relations");
+		}
+*/
+
+		// Filter on search
+		if(!empty($request->get("search")))
+		{
+			$filters["search"] = $request->get("search");
+		}
+
+		// Sorting
+		if(!empty($request->get("sort_by")))
+		{
+			$order = ($request->get("sort_order") == "desc" ? "desc" : "asc");
+			$filters["sort"] = [$request->get("sort_by"), $order];
+		}
+
+		// Filter on account number
+		if(!empty($request->get("account_number")))
+		{
+			$filters["account_number"] = ["=", $request->get("account_number")];
+		}
+
+		// Filter on id's
+		if(!empty($request->get("ids")))
+		{
+			$ids = explode(",", $request->get("ids"));
+			$filters["ids"] = $ids;
+		}
+
+		// Load data from database
+		$result = Transaction::list($filters);
+
+		// Return json array
+		return $result;
+	}
 }
