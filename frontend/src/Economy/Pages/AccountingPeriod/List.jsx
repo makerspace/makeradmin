@@ -3,11 +3,11 @@ import React from 'react'
 // Backbone
 import AccountingPeriodsCollection from '../../Collections/AccountingPeriods'
 
-import EconomyAccountingPeriods from '../../AccountingPeriods'
+import EconomyAccountingPeriods from '../../Components/Tables/AccountingPeriods'
 
-import { Link } from 'react-router'
+import { Link, withRouter } from 'react-router'
 
-module.exports = React.createClass({
+module.exports = withRouter(React.createClass({
 	render: function()
 	{
 		return (
@@ -16,8 +16,10 @@ module.exports = React.createClass({
 				<p className="uk-float-left">På denna sida ser du en lista över samtliga räkneskapsår.</p>
 				<Link to={"/settings/economy/accountingperiod/add"} className="uk-button uk-button-primary uk-float-right"><i className="uk-icon-plus-circle"></i> Skapa nytt räkneskapsår</Link>
 
-				<EconomyAccountingPeriods type={AccountingPeriodsCollection} params={{period: this.props.params.period}} />
+				<EconomyAccountingPeriods
+					type={AccountingPeriodsCollection}
+				/>
 			</div>
 		);
 	},
-});
+}));

@@ -5,6 +5,7 @@ require('uikit')
 require('uikit/dist/js/core/dropdown')
 require('uikit/dist/js/components/pagination')
 require('uikit/dist/js/components/autocomplete')
+require('uikit/dist/js/components/notify')
 
 // React stuff
 import React from 'react';
@@ -31,13 +32,21 @@ var nav = new Backbone.Model({
 	[
 		{
 			text: "Medlemmar",
-			target: "/members",
+			target: "/membership",
 			icon: "user",
-		},
-		{
-			text: "Grupper",
-			target: "/groups",
-			icon: "group",
+			children:
+			[
+				{
+					text: "Medlemmar",
+					target: "/membership/members",
+					icon: "user",
+				},
+				{
+					text: "Grupper",
+					target: "/membership/groups",
+					icon: "group",
+				},
+			],
 		},
 		{
 			text: "Nycklar",
@@ -56,11 +65,11 @@ var nav = new Backbone.Model({
 				},
 				{
 					text: "Produkter",
-					target: "/sales/products",
+					target: "/sales/product",
 				},
 				{
 					text: "Prenumerationer",
-					target: "/sales/subscriptions",
+					target: "/sales/subscription",
 				},
 				{
 					text: "Historik",

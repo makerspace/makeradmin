@@ -1,14 +1,13 @@
 import Backbone from 'backbone'
 
-var MemberModel = Backbone.Model.fullExtend(
+module.exports = Backbone.Model.fullExtend(
 {
 	idAttribute: "member_id",
 	urlRoot: "/membership/member",
 	defaults: {
 		created_at: "0000-00-00T00:00:00Z",
 		updated_at: "0000-00-00T00:00:00Z",
-		entity_id: 0,
-		member_number: null,
+		member_number: "",
 		civicregno: "",
 		firstname: "",
 		lastname: "",
@@ -21,5 +20,3 @@ var MemberModel = Backbone.Model.fullExtend(
 		address_country: "se",
 	},
 });
-
-module.exports = MemberModel;

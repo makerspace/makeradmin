@@ -4,7 +4,7 @@ import React from 'react'
 import MessagesCollection from '../../Collections/Messages'
 
 import { Link } from 'react-router'
-import MessagesTable from '../../Messages'
+import MessagesTable from '../../Components/Tables/Messages'
 
 module.exports = React.createClass({
 	render: function()

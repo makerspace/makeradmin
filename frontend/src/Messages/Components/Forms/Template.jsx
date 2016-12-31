@@ -13,65 +13,56 @@ module.exports = withRouter(React.createClass({
 		return "Är du säker på att du vill ta bort utskicksmallen \"" + template.title + "\"?";
 	},
 
-	removeErrorMessage: function()
+	onRemove: function(entity)
 	{
-		UIkit.modal.alert("Fel uppstod vid borttagning av mall");
-	},
-
-	removeSuccess: function(response)
-	{
-		UIkit.modal.alert("Successfully deleted");
+		UIkit.notify("Successfully deleted", {status: "success"});
 		this.props.router.push("/messages/templates");
 	},
 
-	createdSuccess: function(response)
+	onRemoveError: function()
 	{
-		UIkit.modal.alert("Successfully created");
-		this.props.router.push("/messages/templates/" + response.data.template_id);
+		UIkit.notify("Fel uppstod vid borttagning av mall", {timeout: 0, status: "danger"});
 	},
 
-	updatedSuccess: function(response)
+	onCreate: function(model)
 	{
-		UIkit.modal.alert("Successfully updated");
+		UIkit.notify("Successfully created", {status: "success"});
+		this.props.router.push("/messages/templates/" + model.get("template_id"));
 	},
 
-	saveError: function()
+	onUpdate: function(model)
 	{
-		UIkit.modal.alert("Error saving model");
+		UIkit.notify("Successfully updated", {status: "success"});
+		this.props.router.push("/messages/templates");
 	},
 
-	handleChange: function(event)
+	onSaveError: function()
 	{
-		// Update the model with new value
-		var target = event.target;
-		var key = target.getAttribute("name");
-		this.getModel().set(key, target.value);
+		UIkit.notify("Error saving model", {timeout: 0, status: "danger"});
+	},
 
-		// When we change the value of the model we have to rerender the component
-		this.forceUpdate();
+	onCancel: function(entity)
+	{
+		this.props.router.push("/messages/templates");
 	},
 
 	// Disable the send button if there is not enough data in the form
 	enableSendButton: function()
 	{
-		// We need to have a delay so setState() has propely updated the state
-		setTimeout(() =>
+		// Validate data
+		if(
+			this.getModel().isDirty() &&
+			this.state.model.name.length > 0 &&
+			this.state.model.title.length > 0 &&
+			this.state.model.description.length > 0
+		)
 		{
-			var disableSend = true;
+			// Enable button
+			return true;
+		}
 
-			// Validate data
-			if(
-				this.state.model.name.length > 0 &&
-				this.state.model.title.length > 0 &&
-				this.state.model.description.length > 0
-			)
-			{
-				disableSend = false;
-			}
-
-			// Update the status of the button
-			this.setState({disableSend});
-		}, 100);
+		// Disable button
+		return false;
 	},
 
 	render: function()
@@ -99,13 +90,10 @@ module.exports = withRouter(React.createClass({
 					</div>
 				</div>
 
-
 				<div className="uk-form-row">
-					<Link className="uk-button uk-button-danger uk-float-left" to="/messages/templates"><i className="uk-icon-close"></i> Avbryt</Link>
-
-					{this.state.model.template_id ? <button className="uk-button uk-button-danger uk-float-left" onClick={this.removeEntity}><i className="uk-icon-trash"></i> Radera mall</button> : ""}
-
-					<button disabled={this.state.disableSend} onClick={this.saveEntity} className="uk-button uk-button-success uk-float-right"><i className="uk-icon-save"></i> Spara mall</button>
+					{this.cancelButton()}
+					{this.removeButton("Ta bort mall")}
+					{this.saveButton("Spara mall")}
 				</div>
 			</form>
 		);

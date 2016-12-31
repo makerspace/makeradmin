@@ -9,9 +9,8 @@ import { withRouter } from 'react-router'
 module.exports = withRouter(React.createClass({
 	getInitialState: function()
 	{
-		var newGroup = new GroupModel();
 		return {
-			model: newGroup,
+			model: new GroupModel(),
 		};
 	},
 
@@ -19,6 +18,7 @@ module.exports = withRouter(React.createClass({
 	{
 		return (
 			<div>
+				<h2>Skapa grupp</h2>
 				<Group model={this.state.model} route={this.props.route} />
 			</div>
 		);

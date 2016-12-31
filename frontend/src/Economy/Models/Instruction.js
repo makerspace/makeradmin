@@ -1,7 +1,7 @@
 import Backbone from 'backbone'
 import config from '../../config'
 
-var InstructionModel = Backbone.Model.fullExtend(
+module.exports = Backbone.Model.fullExtend(
 {
 	idAttribute: "instruction_number",
 	urlRoot: function()
@@ -24,5 +24,3 @@ var InstructionModel = Backbone.Model.fullExtend(
 		balance: 0,
 	},
 });
-
-module.exports = InstructionModel;

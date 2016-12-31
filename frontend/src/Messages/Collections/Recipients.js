@@ -4,15 +4,5 @@ import Recipient from '../Models/Recipient'
 module.exports = Backbone.PageableCollection.extend(
 {
 	model: Recipient,
-	url: function()
-	{
-		if(this.params.hasOwnProperty("member_id"))
-		{
-			return "/messages/user/" + this.params.member_id;
-		}
-		else
-		{
-			return "/messages/" + this.params.message_id + "/recipients";
-		}
-	}
+	// URL is always provided via the dataSource property in BackboneTable
 });

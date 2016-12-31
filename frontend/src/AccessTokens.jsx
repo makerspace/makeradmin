@@ -1,9 +1,9 @@
 import React from 'react';
 import BackboneTable from './BackboneTable'
-import DateTime from './Formatters/DateTime'
+import DateTime from './Components/DateTime'
 import auth from './auth'
 
-var AccessTokens = React.createClass(
+module.exports = React.createClass(
 {
 	mixins: [Backbone.React.Component.mixin, BackboneTable],
 
@@ -53,5 +53,3 @@ var AccessTokens = React.createClass(
 		);
 	},
 });
-
-module.exports = AccessTokens;

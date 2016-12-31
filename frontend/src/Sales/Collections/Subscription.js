@@ -1,10 +1,8 @@
 import Backbone from 'backbone'
 import SubscriptionModel from '../Models/Subscription'
 
-var SubscriptionCollection = Backbone.PageableCollection.extend(
+module.exports = Backbone.PageableCollection.extend(
 {
 	model: SubscriptionModel,
-	url: "/subscription",
+	url: "/sales/subscription",
 });
-
-module.exports = SubscriptionCollection;

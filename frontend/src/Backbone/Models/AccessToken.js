@@ -1,6 +1,6 @@
 import Backbone from 'backbone'
 
-var AccessTokenModel = Backbone.Model.fullExtend(
+module.exports = Backbone.Model.fullExtend(
 {
 	idAttribute: "token_id",
 	urlRoot: "/oauth/token",
@@ -11,5 +11,3 @@ var AccessTokenModel = Backbone.Model.fullExtend(
 		ip: "",
 	},
 });
-
-module.exports = AccessTokenModel;

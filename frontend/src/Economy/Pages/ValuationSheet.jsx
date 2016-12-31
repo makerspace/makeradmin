@@ -7,8 +7,8 @@ import config from '../../config'
 import MasterledgerCollection from '../Collections/Masterledger'
 
 import { Link } from 'react-router'
-import Currency from '../../Formatters/Currency'
-import DateField from '../../Formatters/Date'
+import Currency from '../../Components/Currency'
+import DateField from '../../Components/Date'
 import BackboneTable from '../../BackboneTable'
 
 module.exports = React.createClass({

@@ -3,6 +3,8 @@ import React from 'react'
 // Backbone
 import InvoiceModel from '../../Models/Invoice'
 
+import Invoice from '../../Components/Forms/Invoice'
+
 module.exports = React.createClass({
 	getInitialState: function()
 	{

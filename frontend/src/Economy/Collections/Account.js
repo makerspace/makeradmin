@@ -2,13 +2,8 @@ import Backbone from 'backbone'
 import AccountModel from '../Models/Account'
 import config from '../../config'
 
-var AccountCollection = Backbone.PageableCollection.extend(
+module.exports = Backbone.PageableCollection.extend(
 {
 	model: AccountModel,
-	url: function()
-	{
-		return "/economy/" + this.params.period + "/account";
-	},
+	// URL is always provided via the dataSource property in BackboneTable
 });
-
-module.exports = AccountCollection;

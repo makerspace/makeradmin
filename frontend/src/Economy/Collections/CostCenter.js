@@ -2,13 +2,8 @@ import Backbone from 'backbone'
 import CostCenterModel from '../Models/CostCenter'
 import config from '../../config'
 
-var CostCenterCollection = Backbone.PageableCollection.extend(
+module.exports = Backbone.PageableCollection.extend(
 {
 	model: CostCenterModel,
-	url: function()
-	{
-		return "/economy/" + this.params.period + "/costcenter";
-	},
+	// URL is always provided via the dataSource property in BackboneTable
 });
-
-module.exports = CostCenterCollection;

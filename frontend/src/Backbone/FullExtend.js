@@ -16,20 +16,24 @@ Backbone.sync = function(method, model, options)
 	options.url = config.apiBasePath + (typeof model.url == "function" ? model.url() : model.url);
 
 	// Add generic error handling to those models who doesn't implement own error handling
-	if(!options.error)
-	{
+	var oldError = options.error;
+//	if(!options.error)
+//	{
 		options.error = function(data, xhr, options)
 		{
-			if(xhr.status == 401)
+			if(data.status == 401)
 			{
-				UIkit.modal.alert("<h2>Error</h2>You are unauthorized to use this API resource. This could be because one of the following reasons:<br><br>1) You have been logged out from the API<br>2) You do not have permissions to access this resource");
+				UIkit.notify("<h2>Error</h2>You are unauthorized to use this API resource. This could be because one of the following reasons:<br><br>1) You have been logged out from the API<br>2) You do not have permissions to access this resource", {timeout: 0, status: "danger"});
 			}
 			else
 			{
-				UIkit.modal.alert("<h2>Error</h2>Received an unexpected result from the server<br><br>" + data.status + " " + data.statusText + "<br><br>" + data.responseText);
+				UIkit.notify("<h2>Error</h2>Received an unexpected result from the server<br><br>" + data.status + " " + data.statusText + "<br><br><pre>" + data.responseText + "</pre>", {timeout: 0, status: "danger"});
 			}
+
+			// Call the old error method
+			return oldError(data, xhr, options);
 		}
-	}
+//	}
 
 	// Inject our own success method
 	var _this = this;
@@ -43,11 +47,11 @@ Backbone.sync = function(method, model, options)
 		}
 
 		// Call the old success method
-		oldSuccess(model, response);
+		return oldSuccess(model, response);
 	}
 
 	// Call the stored original Backbone.sync method with extra headers argument added
-	var x = backboneSync(method, model, options);
+	return backboneSync(method, model, options);
 };
 
 Backbone.Model.fullExtend = function(protoProps, staticProps)
@@ -57,10 +61,11 @@ Backbone.Model.fullExtend = function(protoProps, staticProps)
 		var protoProps = [];
 	}
 
-	// TODO: Override the set() method so when React inputs a "" it is casted to NULL
-
 	// The state of attributes at last sync
 	protoProps["syncedAttributes"] = [];
+
+	// Attributes that should not affect the isDirty function
+	protoProps["ignoreAttributes"] = [];
 
 	// Preprocess the data received from the API
 	protoProps["parse"] = function(response, options)
@@ -71,22 +76,7 @@ Backbone.Model.fullExtend = function(protoProps, staticProps)
 			return response;
 		}
 
-		// Go through the data property
-		var processedResponse = {};
-		for(var key in response.data)
-		{
-			// Make sure all null's are changed to empty strings, because otherwise React will be whining when using those values in a <input value={...} />
-			if(response.hasOwnProperty(key) && response[key] === null)
-			{
-				processedResponse[key] =  "";
-			}
-			else
-			{
-				processedResponse[key] = response.data[key];
-			}
-		}
-
-		return processedResponse;
+		return response.data;
 	};
 
 	// A function used to check if any property have changed since last sync
@@ -105,21 +95,76 @@ Backbone.Model.fullExtend = function(protoProps, staticProps)
 				continue;
 			}
 
-			// A new model have changed:
-			//  * There is nothing in syncedAttributes
-			//  * There is a value in the form
-			//  * The attribute is not the same as default value
-			if(!this.syncedAttributes.hasOwnProperty(key) && this.attributes[key].length > 0 && this.attributes[key] != this.defaults[key])
+			// The attribute should not affect the dirty flag
+			// Very useful in dropdowns, etc
+			if(this.ignoreAttributes.indexOf(key) !== -1)
 			{
-				return true;
+				continue;
 			}
-			// Compare the old value with the new value, but only if there really is an old value, used when changing an existing entity
-			else if(this.syncedAttributes.hasOwnProperty(key) && this.syncedAttributes[key] != this.attributes[key])
+
+			// The attribute should not be in the ignorelist and it should have changed
+			if(this.attributeHasChanged(key))
 			{
 				return true;
 			}
 		};
 		return false;
+	}
+
+	// Return true if the specified attribute have changed since last sync
+	protoProps["attributeHasChanged"] = function(name)
+	{
+		// A new model have changed:
+		//  * There is nothing in syncedAttributes
+		//  * There is a value in the form
+		//  * The attribute is not the same as default value
+		if(!this.syncedAttributes.hasOwnProperty(name) && this.attributes[name].length > 0 && this.attributes[name] != this.defaults[name])
+		{
+			return true;
+		}
+		// An existing model have changed:
+		//  * There is data in syncedAttributes
+		//  * The new value is not the same as value from last sync
+		//  * 
+		else if(this.syncedAttributes.hasOwnProperty(name) && this.syncedAttributes[name] != this.attributes[name])
+		{
+			// This is okay since we cast null to "", se Model.set() override below
+			if(this.syncedAttributes[name] == null && this.attributes[name] === "")
+			{
+				return false;
+			}
+			return true;
+		}
+
+		return false;
+	}
+
+	// Make sure all null's are changed to empty strings, because otherwise React will be whining when using those values in a <input value={...} />
+	// TODO: Override the set() method so when React inputs a "" it is casted to NULL
+	// TODO: Make BackboneReact handle null's
+	protoProps["set"] = function(attributes, options)
+	{
+		// Attributes is an object with multiple attributes
+		if(typeof attributes === "object")
+		{
+			for(var key in attributes)
+			{
+				if(attributes[key] === null)
+				{
+					attributes[key] =  "";
+				}
+			}
+		}
+		// Attributes is a key and the value is in options
+		else
+		{
+			if(options === null)
+			{
+				options =  "";
+			}
+		}
+
+		return Backbone.Model.prototype.set.call(this, attributes, options);
 	}
 
 	// When destroying an entity we should not care about isDirty, so we have to make it satisfied
@@ -129,13 +174,11 @@ Backbone.Model.fullExtend = function(protoProps, staticProps)
 		this.syncedAttributes = this.attributes;
 
 		// Call the old destroy function
-		Backbone.Model.prototype.destroy.call(this, options);
+		return Backbone.Model.prototype.destroy.call(this, options);
 	}
 
 	// Call default extend method
-	var extended = Backbone.Model.extend.call(this, protoProps, staticProps);
-
-	return extended;
+	return Backbone.Model.extend.call(this, protoProps, staticProps);;
 };
 
 module.exports = Backbone

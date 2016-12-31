@@ -5,7 +5,7 @@ import AccessTokenCollection from '../../Backbone/Collections/AccessToken'
 
 import AccessTokens from '../../AccessTokens'
 
-class AccessTokensHandler extends React.Component
+module.exports = class AccessTokensHandler extends React.Component
 {
 	render()
 	{
@@ -16,5 +16,3 @@ class AccessTokensHandler extends React.Component
 		);
 	}
 }
-
-module.exports = AccessTokensHandler;

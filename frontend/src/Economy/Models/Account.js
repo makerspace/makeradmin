@@ -1,7 +1,7 @@
 import Backbone from 'backbone'
 import config from '../../config'
 
-var AccountModel = Backbone.Model.fullExtend(
+module.exports = Backbone.Model.fullExtend(
 {
 	idAttribute: "account_number",
 	urlRoot: function()
@@ -19,5 +19,3 @@ var AccountModel = Backbone.Model.fullExtend(
 		instructions: [],
 	},
 });
-
-module.exports = AccountModel;

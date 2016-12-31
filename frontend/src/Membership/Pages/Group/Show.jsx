@@ -6,13 +6,13 @@ import MemberCollection from '../../Collections/Member'
 
 import { withRouter } from 'react-router'
 import Group from '../../Components/Forms/Group'
-import GroupMembers from '../../GroupMembers'
+import GroupMembers from '../../Components/Tables/GroupMembers'
 
 module.exports = withRouter(React.createClass({
 	getInitialState: function()
 	{
 		var group = new GroupModel({
-			group_id: this.props.params.id
+			group_id: this.props.params.group_id
 		});
 		group.fetch();
 
@@ -27,7 +27,9 @@ module.exports = withRouter(React.createClass({
 		return (
 			<div>
 				<Group model={this.state.model} route={this.props.route} />
-				<GroupMembers type={MemberCollection} url={"/membership/group/" + this.props.params.id + "/members"} />
+				<GroupMembers type={MemberCollection} dataSource={{
+					url: "/membership/group/" + this.props.params.group_id + "/members"
+				}} />
 			</div>
 		);
 	},

@@ -24,7 +24,8 @@
     "react-select": "^1.0.0-rc.2",
     "uikit": "^2.27.2",
     "underscore": "^1.8.3",
-    "webpack": "^1.14.0"
+    "webpack": "^1.14.0",
+    "classnames": "^2.2.5"
   },
   "devDependencies": {},
   "scripts": {
@@ -35,7 +36,7 @@
     "url": "git+https://github.com/MakersOfSweden/MakerAdmin-Frontend.git"
   },
   "author": "",
-  "license": "",
+  "license": "GPLv3",
   "bugs": {
     "url": "https://github.com/MakersOfSweden/MakerAdmin-Frontend/issues"
   },

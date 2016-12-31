@@ -1,4 +1,4 @@
-var config = {
+module.exports = {
 	apiBasePath: "http://api.makeradmin.dev",
 	apiVersion: "1.0",
 	pagination: {
@@ -6,5 +6,3 @@ var config = {
 	},
 	accountingPeriod: "2015",
 }
-
-module.exports = config;

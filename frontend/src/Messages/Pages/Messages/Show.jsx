@@ -5,11 +5,11 @@ import MessageModel from '../../Models/Message'
 import RecipientsCollection from '../../Collections/Recipients'
 
 //import { Link } from 'react-router'
-import RecipientsTable from '../../Recipients'
-import Message from '../../Message'
+import RecipientsTable from '../../Components/Tables/Recipients'
+import Message from '../../Components/Message'
 
 module.exports = React.createClass({
-getInitialState: function()
+	getInitialState: function()
 	{
 		// Load message model
 		var message = new MessageModel({
@@ -29,7 +29,12 @@ getInitialState: function()
 				<h2>Utskick</h2>
 				<Message model={this.state.message_model} />
 
-				<RecipientsTable type={RecipientsCollection} params={{message_id: this.props.params.id}} />
+				<RecipientsTable
+					type={RecipientsCollection}
+					dataSource={{
+						url: "/messages/" + this.props.params.id + "/recipients",
+					}}
+				/>
 			</div>
 		);
 	},

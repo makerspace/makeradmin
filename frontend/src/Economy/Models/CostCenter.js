@@ -1,7 +1,7 @@
 import Backbone from 'backbone'
 import config from '../../config'
 
-var CostCenterModel = Backbone.Model.fullExtend(
+module.exports = Backbone.Model.fullExtend(
 {
 	idAttribute: "account_number",
 	urlRoot: function()
@@ -15,5 +15,3 @@ var CostCenterModel = Backbone.Model.fullExtend(
 		description: "",
 	},
 });
-
-module.exports = CostCenterModel;

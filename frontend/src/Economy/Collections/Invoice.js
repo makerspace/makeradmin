@@ -2,13 +2,8 @@ import Backbone from 'backbone'
 import InvoiceModel from '../Models/Invoice'
 import config from '../../config'
 
-var InvoiceCollection = Backbone.PageableCollection.extend(
+module.exports = Backbone.PageableCollection.extend(
 {
 	model: InvoiceModel,
-	url: function()
-	{
-		return "/economy/" + this.params.period + "/invoice";
-	},
+	// URL is always provided via the dataSource property in BackboneTable
 });
-
-module.exports = InvoiceCollection;

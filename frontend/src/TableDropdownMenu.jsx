@@ -1,10 +1,10 @@
 import React from 'react'
 
-var TableDropdownMenu = React.createClass({
+module.exports = React.createClass({
 	render: function()
 	{
 		return(
-			<div className="uk-align-right uk-margin-remove">
+			<div className="uk-align-right uk-text-left uk-margin-remove">
 				<div data-uk-dropdown="{mode:'click'}" className="uk-button-dropdown">
 					<button className="uk-button uk-button-mini"><i className="uk-icon-angle-down"></i></button>
 					<div className="uk-dropdown uk-dropdown-small">
@@ -19,5 +19,3 @@ var TableDropdownMenu = React.createClass({
 		);
 	}
 });
-
-module.exports = TableDropdownMenu;

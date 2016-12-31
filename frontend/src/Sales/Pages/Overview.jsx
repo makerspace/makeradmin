@@ -6,7 +6,7 @@ module.exports = React.createClass({
 		return (
 			<div>
 				<h2>Översikt försäljning</h2>
-				<p></p>
+				<p>MEEP MEEP</p>
 			</div>
 		);
 	},

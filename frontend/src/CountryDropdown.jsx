@@ -1,6 +1,6 @@
 import React from 'react'
 
-var CountryDropdown = React.createClass({
+module.exports = React.createClass({
 	getInitialState: function()
 	{
 		this.continents = [
@@ -1118,5 +1118,3 @@ var CountryDropdown = React.createClass({
 		return name;
 	},
 });
-
-module.exports = CountryDropdown

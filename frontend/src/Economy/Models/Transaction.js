@@ -1,9 +1,9 @@
 import Backbone from 'backbone'
 import config from '../../config'
 
-var TransactionModel = Backbone.Model.fullExtend(
+module.exports = Backbone.Model.fullExtend(
 {
-	idAttribute: "entity_id",
+	idAttribute: "entity_id",//TODO
 	urlRoot: function()
 	{
 		return "/economy/" + this.get("period") + "/transaction";
@@ -25,5 +25,3 @@ var TransactionModel = Backbone.Model.fullExtend(
 		balance: 0,
 	},
 });
-
-module.exports = TransactionModel;

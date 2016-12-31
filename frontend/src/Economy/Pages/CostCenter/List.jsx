@@ -3,7 +3,7 @@ import React from 'react'
 // Backbone
 import CostCenterCollection from '../../Collections/CostCenter'
 
-import EconomyCostCenters from './../../CostCenters'
+import EconomyCostCenters from './../../Components/Tables/CostCenters'
 
 module.exports = React.createClass({
 	render: function()
@@ -11,7 +11,12 @@ module.exports = React.createClass({
 		return (
 			<div>
 				<h2>Kostnadsställen</h2>
-				<EconomyCostCenters type={CostCenterCollection} params={{period: this.props.params.period}} />
+				<EconomyCostCenters
+					type={CostCenterCollection}
+					dataSource={{
+						url: "/economy/" + this.props.params.period + "/costcenter"
+					}}
+				/>
 			</div>
 		);
 	},

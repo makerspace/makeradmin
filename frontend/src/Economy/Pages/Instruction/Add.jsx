@@ -3,9 +3,10 @@ import React from 'react'
 // Backbone
 import InstructionModel from '../../Models/Instruction'
 
-import EconomyAccountingInstruction from '../../Instruction'
+import EconomyAccountingInstruction from '../../Components/Forms/Instruction'
+import { withRouter } from 'react-router'
 
-module.exports = React.createClass({
+module.exports = withRouter(React.createClass({
 	getInitialState: function()
 	{
 		var instruction = new InstructionModel();
@@ -17,6 +18,6 @@ module.exports = React.createClass({
 
 	render: function()
 	{
-		return (<EconomyAccountingInstruction model={this.state.model} />);
+		return (<EconomyAccountingInstruction model={this.state.model} route={this.props.route} />);
 	}
-});
+}));

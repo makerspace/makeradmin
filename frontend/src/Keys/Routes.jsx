@@ -3,8 +3,18 @@ module.exports = {
 		{
 			path: "/keys",
 			indexRoute: {
-				component: require("./Pages/Overview")
+				component: require("./Pages/List")
 			},
+			childRoutes: [
+				{
+					path: "add",
+					component: require("./Pages/Add")
+				},
+				{
+					path: ":id",
+					component: require("./Pages/Show")
+				},
+			]
 		}
 	]
 }

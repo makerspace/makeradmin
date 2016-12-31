@@ -1,10 +1,8 @@
 import Backbone from 'backbone'
 import ProductModel from '../Models/Product'
 
-var ProductCollection = Backbone.PageableCollection.extend(
+module.exports = Backbone.PageableCollection.extend(
 {
 	model: ProductModel,
-	url: "/product",
+	url: "/sales/product",
 });
-
-module.exports = ProductCollection;

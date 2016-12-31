@@ -4,15 +4,15 @@ import React from 'react'
 import GroupModel from '../../Models/Group'
 
 import Group from '../../Components/Forms/Group'
+import { withRouter } from 'react-router'
 
-module.exports = React.createClass({
+module.exports = withRouter(React.createClass({
 	getInitialState: function()
 	{
-		var id = this.props.params.id;
-		var group = new GroupModel({group_id: id});
+		console.log(this.props.params);
+		var group = new GroupModel({group_id: this.props.params.group_id});
 		group.fetch();
 
-		this.title = "Meep";
 		return {
 			model: group,
 		};
@@ -21,8 +21,11 @@ module.exports = React.createClass({
 	render: function()
 	{
 		return (
-			<Group model={this.state.model} />
+			<div>
+				<h2>Redigera grupp</h2>
+				<Group model={this.state.model} route={this.props.route} />
+			</div>
 		);
 	},
-});
+}));
 //GroupEditHandler.title = "Visa grupp";

@@ -4,8 +4,9 @@ import React from 'react'
 import MemberModel from '../../Models/Member'
 
 import MemberForm from '../../Components/Forms/Member'
+import { withRouter } from 'react-router'
 
-module.exports = React.createClass({
+module.exports = withRouter(React.createClass({
 	getInitialState: function()
 	{
 		return {
@@ -18,9 +19,9 @@ module.exports = React.createClass({
 		return (
 			<div>
 				<h2>Skapa medlem</h2>
-				<MemberForm model={this.state.model} />
+				<MemberForm model={this.state.model} route={this.props.route} />
 			</div>
 		);
 	},
-});
+}));
 //MemberAddHandler.title = "Skapa medlem";

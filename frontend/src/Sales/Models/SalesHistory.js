@@ -1,6 +1,6 @@
 import Backbone from 'backbone'
 
-var SalesHistoryModel = Backbone.Model.fullExtend(
+module.exports = Backbone.Model.fullExtend(
 {
 	idAttribute: "entity_id",
 	urlRoot: "/sales/history",
@@ -12,5 +12,3 @@ var SalesHistoryModel = Backbone.Model.fullExtend(
 		description: "",
 	},
 });
-
-module.exports = SalesHistoryModel;

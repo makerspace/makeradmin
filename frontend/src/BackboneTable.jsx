@@ -1,6 +1,6 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
-import { Loading } from './Common'
+import Loading from './Components/Loading'
 import config from './config'
 
 /// TODO: This Mixin's should handle auto refresh
@@ -56,9 +56,9 @@ var BackboneTable = {
 		};
 
 		// Use a different URL, if specified
-		if(typeof this.props.url != "undefined")
+		if(this.props.dataSource !== undefined && this.props.dataSource.url !== undefined)
 		{
-			options.url = this.props.url;
+			options.url = this.props.dataSource.url;
 		}
 
 		// Extend the collection
@@ -68,9 +68,6 @@ var BackboneTable = {
 		// Create a new extended collection
 		var data = new ExtendedCollection(null, null);
 
-		// Get the params props, used for things like building URL's with parameters etc
-		data.params = this.props.params;
-
 		this.pagination = [];
 		return {
 			status: "done",
@@ -79,6 +76,7 @@ var BackboneTable = {
 			sort_column: "",
 			sort_order: "asc",
 			filters: this.props.filters || {},
+			dataSource: this.props.dataSource || {},
 		};
 	},
 
@@ -144,6 +142,76 @@ var BackboneTable = {
 		}
 	},
 
+	edit: function(key)
+	{
+		if(this.props.hasOwnProperty("onEdit"))
+		{
+			this.props.onEdit(key);
+		}
+		else if(this.hasOwnProperty("onEdit"))
+		{
+			this.onEdit(key);
+		}
+	},
+
+	remove: function(entity)
+	{
+		var _this = this;
+		UIkit.modal.confirm(this.removeTextMessage(entity.attributes), function() {
+			entity.destroy({
+				wait: true,
+				success: function(model, response) {
+					if(response.status == "deleted")
+					{
+						if(_this.hasOwnProperty("removeSuccess"))
+						{
+							_this.removeSuccess();
+						}
+						else
+						{
+							UIkit.notify("Successfully deleted", {status: "success"});
+						}
+					}
+					else
+					{
+						if(_this.hasOwnProperty("removeErrorMessage"))
+						{
+							_this.removeErrorMessage();
+						}
+						else
+						{
+							UIkit.notify("Error while deleting", {timeout: 0, status: "danger"});
+						}
+					}
+				},
+				error: function()
+				{
+					if(_this.hasOwnProperty("removeErrorMessage"))
+					{
+						_this.removeErrorMessage();
+					}
+					else
+					{
+						UIkit.notify("Error while deleting", {timeout: 0, status: "danger"});
+					}
+				},
+			});
+		});
+		return false;
+	},
+
+	editButton: function(i, text)
+	{
+		if(text === undefined)
+		{
+			var text = "Redigera";
+		}
+
+		return (
+			<a onClick={this.edit.bind(this, this.getCollection().at(i))}><i className="uk-icon-cog" /> {text}</a>
+		);
+	},
+
 	removeButton: function(i, text)
 	{
 		if(text === undefined)
@@ -152,33 +220,8 @@ var BackboneTable = {
 		}
 
 		return (
-			<a onClick={this.remove.bind(this, i)} className="removebutton"><i className="uk-icon-remove"></i> {text}</a>
+			<a onClick={this.remove.bind(this, this.getCollection().at(i))} className="removebutton"><i className="uk-icon-trash"></i> {text}</a>
 		);
-	},
-
-	remove: function(row)
-	{
-		var _this = this;
-		var entity = this.getCollection().at(row);
-		UIkit.modal.confirm(this.removeTextMessage(entity.attributes), function() {
-			entity.destroy({
-				wait: true,
-				success: function(model, response) {
-					if(response.status == "deleted")
-					{
-//						UIkit.modal.alert("Successfully deleted");
-					}
-					else
-					{
-						_this.removeErrorMessage();
-					}
-				},
-				error: function() {
-					_this.removeErrorMessage();
-				},
-			});
-		});
-		return false;
 	},
 
 	componentWillMount: function()
@@ -241,7 +284,15 @@ var BackboneTable = {
 	// Fetch data from server
 	fetch: function()
 	{
-		var filters = this.state.filters;
+		// Merge query string parameters
+		if(this.state.dataSource !== undefined && this.state.dataSource.params !== undefined)
+		{
+			var filters = Object.assign(this.state.dataSource.params, this.state.filters);
+		}
+		else
+		{
+			var filters = Object.assign(this.state.filters);
+		}
 
 		// Pagination
 		var pageIndex = 0;

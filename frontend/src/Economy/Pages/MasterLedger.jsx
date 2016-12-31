@@ -6,63 +6,22 @@ import BackboneTable from '../../BackboneTable'
 import MasterledgerCollection from '../Collections/Masterledger'
 
 import { Link } from 'react-router'
-import Currency from '../../Formatters/Currency'
+import Currency from '../../Components/Currency'
+import EconomyAccounts from '../Components/Tables/Masterledger'
 
-var MasterLedgerHandler = React.createClass({
+module.exports = React.createClass({
 	render: function()
 	{
 		return (
 			<div>
 				<h2>Huvudbok</h2>
-				<EconomyAccounts type={MasterledgerCollection} params={{period: this.props.params.period}} />
+				<EconomyAccounts
+					type={MasterledgerCollection}
+					dataSource={{
+						url: "/economy/" + this.props.params.period + "/masterledger",
+					}}
+				/>
 			</div>
 		);
 	},
 });
-
-var EconomyAccounts = React.createClass({
-	mixins: [Backbone.React.Component.mixin, BackboneTable],
-
-	getInitialState: function()
-	{
-		return {
-			columns: 3,
-		};
-	},
-
-	componentWillMount: function()
-	{
-		this.state.collection.fetch();
-	},
-
-	renderHeader: function()
-	{
-		return [
-			{
-				title: "#",
-				sort: "account_number",
-			},
-			{
-				title: "Konto",
-				sort: "title",
-			},
-			{
-				title: "Kontobalans",
-				class: "uk-text-right",
-			},
-		];
-	},
-
-	renderRow: function(row, i)
-	{
-		return (
-			<tr key={i}>
-				<td><Link to={"/economy/" + this.props.params.period + "/account/" + row.account_number}>{row.account_number}</Link></td>
-				<td>{row.title}</td>
-				<td className="uk-text-right"><Currency value={row.balance} /></td>
-			</tr>
-		);
-	},
-});
-
-module.exports = MasterLedgerHandler;

@@ -1,6 +1,6 @@
 import React from 'react'
 
-var TableFilterBox = React.createClass({
+module.exports = React.createClass({
 	getInitialState: function()
 	{
 		this.filters = {};
@@ -77,5 +77,3 @@ var TableFilterBox = React.createClass({
 		);
 	},
 });
-
-module.exports = TableFilterBox

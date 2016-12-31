@@ -1,6 +1,6 @@
 import Backbone from 'backbone'
 
-var GroupModel = Backbone.Model.fullExtend(
+module.exports = Backbone.Model.fullExtend(
 {
 	idAttribute: "group_id",
 	urlRoot: "/membership/group",
@@ -13,5 +13,3 @@ var GroupModel = Backbone.Model.fullExtend(
 		description: "",
 	},
 });
-
-module.exports = GroupModel;

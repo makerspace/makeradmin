@@ -4,7 +4,7 @@ import React from 'react'
 import TemplatesCollection from '../../Collections/Templates'
 
 import { Link } from 'react-router'
-import Templates from '../../Templates'
+import Templates from '../../Components/Tables/Templates'
 
 module.exports = React.createClass({
 	render: function()
@@ -18,7 +18,7 @@ module.exports = React.createClass({
 					<Link to="/messages/templates/new" className="uk-button uk-button-primary uk-float-right"><i className="uk-icon-plus-circle"></i> Skapa ny mall</Link>
 				</div>
 
-				<Templates type={TemplatesCollection}/>
+				<Templates type={TemplatesCollection} />
 			</div>
 		);
 	},

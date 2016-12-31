@@ -3,7 +3,7 @@ import React from 'react'
 // Backbone
 import CostCenterModel from '../../Models/CostCenter'
 
-import EconomyCostCenter from '../../CostCenter'
+import EconomyCostCenter from '../../Components/Forms/CostCenter'
 
 module.exports = React.createClass({
 	getInitialState: function()

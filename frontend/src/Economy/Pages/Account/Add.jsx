@@ -3,7 +3,7 @@ import React from 'react'
 // Backbone
 import AccountModel from '../../Models/Account'
 
-import EconomyAccount from '../../Account'
+import EconomyAccount from '../../Components/Forms/Account'
 
 module.exports = React.createClass({
 	getInitialState: function()

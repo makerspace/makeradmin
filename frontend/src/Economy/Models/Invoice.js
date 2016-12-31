@@ -1,7 +1,7 @@
 import Backbone from 'backbone'
 import config from '../../config'
 
-var InvoiceModel = Backbone.Model.fullExtend(
+module.exports = Backbone.Model.fullExtend(
 {
 	idAttribute: "invoice_number",
 	urlRoot: function()
@@ -20,5 +20,3 @@ var InvoiceModel = Backbone.Model.fullExtend(
 		posts: [],
 	},
 });
-
-module.exports = InvoiceModel;

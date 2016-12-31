@@ -37,7 +37,7 @@ module.exports = {
 									component: require("./Pages/Invoice/Add")
 								},
 								{
-									path: ":id",
+									path: ":invoice_id",
 									component: require("./Pages/Invoice/Show")
 								},
 							],
@@ -53,11 +53,11 @@ module.exports = {
 							component: require("./Pages/Instruction/Add")
 						},
 						{
-							path: "instruction/:id",
+							path: "instruction/:instruction_number",
 							component: require("./Pages/Instruction/Show")
 						},
 						{
-							path: "instruction/:id/import",
+							path: "instruction/:instruction_number/import",
 							component: require("./Pages/Instruction/ShowImport")
 						},
 
@@ -77,13 +77,13 @@ module.exports = {
 							component: require("./Pages/CostCenter/List")
 						},
 						{
-							path: "costcenter/:id",
+							path: "costcenter/:costcenter_id",
 							component: require("./Pages/CostCenter/Show")
 						},
 
 						// Accounts
 						{
-							path: "account/:id",
+							path: "account/:account_number",
 							component: require("./Pages/Account/Show")
 						},
 					]
@@ -110,11 +110,11 @@ module.exports = {
 							component: require("./Pages/Account/Add")
 						},
 						{
-							path: "account/:id",
+							path: "account/:account_id",
 							component: require("./Pages/Account/Show")
 						},
 						{
-							path: "account/:id/edit",
+							path: "account/:account_id/edit",
 							component: require("./Pages/Account/Edit")
 						},
 						{
@@ -126,11 +126,11 @@ module.exports = {
 							component: require("./Pages/AccountingPeriod/Add")
 						},
 						{
-							path: "accountingperiod/:id",
+							path: "accountingperiod/:accountingperiod_id",
 							component: require("./Pages/AccountingPeriod/Show")
 						},
 						{
-							path: "accountingperiod/:id/edit",
+							path: "accountingperiod/:accountingperiod_id/edit",
 							component: require("./Pages/AccountingPeriod/Edit")
 						},
 					],

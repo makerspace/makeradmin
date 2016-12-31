@@ -4,156 +4,90 @@ import BackboneReact from 'backbone-react-component'
 import { Link, withRouter } from 'react-router'
 import GenericEntityFunctions from '../../../GenericEntityFunctions'
 
+import Input from '../../../Components/Form/Input'
+import Textarea from '../../../Components/Form/Textarea'
+
 module.exports = withRouter(React.createClass({
 	mixins: [Backbone.React.Component.mixin, GenericEntityFunctions],
 
 	getInitialState: function()
 	{
 		return {
-			error_column: "",
-			error_message: "",
+			error_column: "title",
+			error_message: "meep meep",
 		};
 	},
+
 	removeTextMessage: function(group)
 	{
 		return "Är du säker på att du vill ta bort gruppen \"" + group.title + "\"?";
 	},
 
-	removeErrorMessage: function()
+	onRemove: function(entity)
 	{
-		UIkit.modal.alert("Fel uppstod vid borttagning av group");
+		UIkit.notify("Successfully deleted", {status: "success"});
+		this.props.router.push("/membership/groups");
 	},
 
-	removeSuccess: function(response)
+	onRemoveError: function()
 	{
-		UIkit.modal.alert("Successfully deleted");
-		this.props.router.push("/groups");
+		UIkit.notify("Fel uppstod vid borttagning av group", {timeout: 0, status: "danger"});
 	},
 
-	createdSuccess: function(response)
+	onCreate: function(model)
 	{
-		UIkit.modal.alert("Successfully created");
-		this.props.router.push("/groups/" + response.data.group_id);
+		UIkit.notify("Successfully created", {status: "success"});
+		this.props.router.push("/membership/groups/" + model.get("group_id"));
 	},
 
-	updatedSuccess: function(response)
+	onUpdate: function(model)
 	{
-		UIkit.modal.alert("Successfully updated");
+		UIkit.notify("Successfully updated", {status: "success"});
+		this.props.router.push("/membership/groups");
 	},
 
-	saveError: function()
+	onSaveError: function()
 	{
-		UIkit.modal.alert("Error saving model");
+		UIkit.notify("Error saving model", {timeout: 0, status: "danger"});
 	},
 
-/*
-	save: function(event)
+	onCancel: function(entity)
 	{
-		var _this = this;
-
-		// Prevent the form from being submitted
-		event.preventDefault();
-
-		this.getModel().save([], {
-			success: function(model, response)
-			{
-				if(response.status == "created")
-				{
-					this.props.router.push("/groups");
-					UIkit.modal.alert("Successfully created");
-				}
-				else if(response.status == "updated")
-				{
-					this.props.router.push("/groups");
-					UIkit.modal.alert("Successfully updated");
-				}
-				else
-				{
-					_this.error();
-				}
-			},
-			error: function(model, xhr, options)
-			{
-				if(xhr.status == 422)
-				{
-					_this.setState({
-						error_column:  xhr.responseJSON.column,
-						error_message: xhr.responseJSON.message,
-					});
-				}
-				else
-				{
-
-					_this.error();
-				}
-			},
-		});
-	},
-*/
-
-	handleChange: function(event)
-	{
-		// Update the model with new value
-		var target = event.target;
-		var key = target.getAttribute("name");
-		this.getModel().set(key, target.value);
-
-		// When we change the value of the model we have to rerender the component
-		this.forceUpdate();
+		this.props.router.push("/membership/groups");
 	},
 
-	renderErrorMsg: function(column)
+	// Disable the send button if there is not enough data in the form
+	enableSendButton: function()
 	{
-		if(this.state.error_column == column)
+		// Validate required fields
+		if(
+			this.getModel().isDirty() &&
+			this.state.model.name.length > 0 &&
+			this.state.model.title.length > 0
+		)
 		{
-			return (
-				<p className="uk-form-help-block error">Error: {this.state.error_message}</p>
-			);
+			// Enable button
+			return true;
 		}
+
+		// Disable button
+		return false;
 	},
 
 	render: function()
 	{
 		return (
-			<div>
-				<h2>{this.state.model.group_id ? "Redigera grupp" : "Skapa grupp"}</h2>
+			<div className="meep">
+				<form className="uk-form uk-margin-bottom" onSubmit={this.save}>
+					<Input    model={this.getModel()} name="name"        title="Namn" />
+					<Input    model={this.getModel()} name="title"       title="Titel" icon="tag" />
+					<Textarea model={this.getModel()} name="description" title="Beskrivning" />
 
-				<form className="uk-form uk-form-horizontal uk-margin-bottom" onSubmit={this.save}>
-					<div className="uk-form-row">
-						<label className="uk-form-label">Namn</label>
+					<div className="uk-form-row uk-margin-top">
 						<div className="uk-form-controls">
-							<div className="uk-form-icon">
-								<i className="uk-icon-tag"></i>
-								<input type="text" name="name" className="uk-form-width-large" value={this.state.model.name} onChange={this.handleChange} />
-							</div>
-							{this.renderErrorMsg("name")}
-						</div>
-					</div>
-
-					<div className="uk-form-row">
-						<label className="uk-form-label">Titel</label>
-						<div className="uk-form-controls">
-							<div className="uk-form-icon">
-								<i className="uk-icon-tag"></i>
-								<input type="text" name="title" className="uk-form-width-large" value={this.state.model.title} onChange={this.handleChange} />
-							</div>
-							{this.renderErrorMsg("title")}
-						</div>
-					</div>
-
-					<div className="uk-form-row">
-						<label className="uk-form-label">Beskrivning</label>
-						<div className="uk-form-controls">
-							<textarea name="description" className="uk-form-width-large" value={this.state.model.description} onChange={this.handleChange}></textarea>
-							{this.renderErrorMsg("description")}
-						</div>
-					</div>
-
-					<div className="uk-form-row">
-						<div className="uk-form-controls">
-							<Link to="/groups" className="uk-button uk-button-danger uk-float-left"><i className="uk-icon-close"></i> Avbryt</Link>
-							{this.state.model.group_id ? <button className="uk-button uk-button-danger uk-float-left" onClick={this.removeEntity}><i className="uk-icon-trash"></i> Ta bort grupp</button> : ""}
-							<button className="uk-button uk-button-success uk-float-right" onClick={this.saveEntity}><i className="uk-icon-save"></i> Spara grupp</button>
+							{this.cancelButton()}
+							{this.removeButton("Ta bort grupp")}
+							{this.saveButton("Spara grupp")}
 						</div>
 					</div>
 				</form>

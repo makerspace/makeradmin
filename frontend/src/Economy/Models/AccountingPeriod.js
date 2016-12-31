@@ -1,6 +1,6 @@
 import Backbone from 'backbone'
 
-var AccountingPeriodModel = Backbone.Model.fullExtend(
+module.exports = Backbone.Model.fullExtend(
 {
 	idAttribute: "accountingperiod_id",
 	urlRoot: "/economy/accountingperiod",
@@ -14,5 +14,3 @@ var AccountingPeriodModel = Backbone.Model.fullExtend(
 		end: "0000-00-00T00:00:00Z",
 	},
 });
-
-module.exports = AccountingPeriodModel;

@@ -5,7 +5,7 @@ import SalesHistoryCollection from '../Collections/SalesHistory'
 import SalesHistoryModel from '../Models/SalesHistory'
 
 import TableFilterBox from '../../TableFilterBox'
-import History from '../History'
+import History from '../Components/Tables/History'
 
 module.exports = React.createClass({
 	getInitialState: function()

@@ -1,200 +1,52 @@
 import React from 'react'
 import BackboneReact from 'backbone-react-component'
-import { withRouter } from 'react-router'
+import { Link, withRouter } from 'react-router'
 
 import CountryDropdown from '../../../CountryDropdown'
-import DateTimeField from '../../../Formatters/DateTime'
+import DateTimeField from '../../../Components/DateTime'
+
+import GenericEntityFunctions from '../../../GenericEntityFunctions'
+
+import Input from '../../../Components/Form/Input'
 
 module.exports = withRouter(React.createClass({
-	mixins: [Backbone.React.Component.mixin],
+	mixins: [Backbone.React.Component.mixin, GenericEntityFunctions],
 
-	cancel: function(event)
+	removeTextMessage: function(member)
 	{
-		// Prevent the form from being submitted
-		event.preventDefault();
-
-		UIkit.modal.alert("TODO: Clear form");
+		return "Är du säker på att du vill ta bort medlemmen \"#" + member.member_number + " " + member.firstname + " " + member.lastname + "\"?";
 	},
 
-	remove: function(event)
+	onRemove: function(entity)
 	{
-		// Prevent the form from being submitted
-		event.preventDefault();
-
-		UIkit.modal.alert("TODO: Remove");
-	},
-	
-	save: function(event)
-	{
-		var _this = this;
-
-		// Prevent the form from being submitted
-		event.preventDefault();
-
-		this.getModel().save([], {
-			success: function(model, response)
-			{
-				if(response.status == "created")
-				{
-					UIkit.modal.alert("Successfully created");
-					this.props.router.push("/members/" + response.entity.member_id);
-				}
-				else if(response.status == "updated")
-				{
-					UIkit.modal.alert("Successfully updated");
-				}
-				else
-				{
-					_this.error();
-				}
-			},
-			error: function(model, response, options) {
-				_this.error();
-			},
-		});
+		UIkit.notify("Successfully deleted", {status: "success"});
+		this.props.router.push("/membership/members");
 	},
 
-	error: function()
+	onRemoveError: function()
 	{
-		UIkit.modal.alert("Error saving model");
+		UIkit.notify("Ett fel uppstod vid borttagning av medlem", {timeout: 0, status: "danger"});
 	},
 
-	handleChange: function(event)
+	onCreate: function(model)
 	{
-		// Update the model with new value
-		var target = event.target;
-		var key = target.getAttribute("name");
-		this.state.model[key] = target.value;
-
-		// When we change the value of the model we have to rerender the component
-		this.forceUpdate();
+		UIkit.notify("Successfully created", {status: "success"});
+		this.props.router.push("/membership/members/" + model.get("member_id"));
 	},
 
-	render: function()
+	onUpdate: function(model)
 	{
-		return (
-			<div className="meep">
-			<form className="uk-form">
-				<fieldset >
-					<legend><i className="uk-icon-user"></i> Personuppgifter</legend>
+		UIkit.notify("Successfully updated", {status: "success"});
+	},
 
-					<div className="uk-form-row">
-						<label htmlFor="civicregno" className="uk-form-label">{this.state.model.civicregno ? "Personnummer" : ""}</label>
-						<div className="uk-form-controls">
-							<input type="text" name="civicregno" id="civicregno" value={this.state.model.civicregno} placeholder="Personnummer" onChange={this.handleChange} className="uk-form-width-large" />
-						</div>
-					</div>
+	onSaveError: function()
+	{
+		UIkit.notify("Error saving member", {timeout: 0, status: "danger"});
+	},
 
-					<div className="uk-form-row">
-						<label htmlFor="firstname" className="uk-form-label">{this.state.model.firstname ? "Förnamn" : ""}</label>
-						<div className="uk-form-controls">
-							<input type="text" name="firstname" id="firstname" value={this.state.model.firstname} placeholder="Förnamn" onChange={this.handleChange} className="uk-form-width-large" />
-						</div>
-					</div>
-
-					<div className="uk-form-row">
-						<label htmlFor="lastname" className="uk-form-label">{this.state.model.lastname ? "Efternamn" : ""}</label>
-						<div className="uk-form-controls">
-							<input type="text" name="lastname" id="lastname" value={this.state.model.lastname} placeholder="Efternamn" onChange={this.handleChange} className="uk-form-width-large" />
-						</div>
-					</div>
-
-					<div className="uk-form-row">
-						<label htmlFor="email" className="uk-form-label">{this.state.model.email ? "E-post" : ""}</label>
-						<div className="uk-form-controls">
-							<div className="uk-form-icon">
-								<i className="uk-icon-envelope"></i>
-								<input type="text" name="email" id="email" value={this.state.model.email} placeholder="E-postadress" onChange={this.handleChange} className="uk-form-width-large" />
-							</div>
-						</div>
-					</div>
-
-					<div className="uk-form-row">
-						<label htmlFor="phone" className="uk-form-label">{this.state.model.phone ? "Telefonnummer" : ""}</label>
-						<div className="uk-form-controls">
-							<div className="uk-form-icon">
-								<i className="uk-icon-phone"></i>
-								<input type="text" name="phone" id="phone" value={this.state.model.phone} placeholder="Telefonnummer" onChange={this.handleChange} className="uk-form-width-large" />
-							</div>
-						</div>
-					</div>
-				</fieldset>
-
-				<fieldset data-uk-margin>
-					<legend><i className="uk-icon-home"></i> Adress</legend>
-
-					<div className="uk-form-row">
-						<label htmlFor="address_street" className="uk-form-label">{this.state.model.address_street ? "Address" : ""}</label>
-						<div className="uk-form-controls">
-							<input type="text" name="address_street" id="address_street" value={this.state.model.address_street} placeholder="Adress inkl gatunummer och lägenhetsnummer" onChange={this.handleChange} className="uk-form-width-large" />
-						</div>
-					</div>
-
-					<div className="uk-form-row">
-						<label htmlFor="address_extra" className="uk-form-label">{this.state.model.address_extra ? "Address extra" : ""}</label>
-						<div className="uk-form-controls">
-							<input type="text" name="address_extra" id="address_extra" value={this.state.model.address_extra} placeholder="Extra adressrad, t ex C/O adress" onChange={this.handleChange} className="uk-form-width-large" />
-						</div>
-					</div>
-
-					<div className="uk-form-row">
-						<div className="zipcode">
-							<label htmlFor="address_zipcode" className="uk-form-label">{this.state.model.address_zipcode ? "Postnummer" : ""}</label>
-							<div className="uk-form-controls">
-								<input type="text" name="address_zipcode" id="address_zipcode" value={this.state.model.address_zipcode} placeholder="Postnummer" onChange={this.handleChange} className="uk-form-width-small" />
-							</div>
-						</div>
-
-						<div className="city">
-							<label htmlFor="address_city" className="uk-form-label">{this.state.model.address_city ? "Postort" : ""}</label>
-							<div className="uk-form-controls">
-								<input type="text" name="address_city" id="address_city" value={this.state.model.address_city} placeholder="Postort" onChange={this.handleChange} />
-							</div>
-						</div>
-					</div>
-
-					<div className="uk-form-row">
-						<label htmlFor="" className="uk-form-label">Land</label>
-						<div className="uk-form-controls">
-							<CountryDropdown country={this.state.model.address_country} onChange={this.changeCountry} />
-						</div>
-					</div>
-				</fieldset>
-
-				{this.state.model.entity_id > 0 ?
-					<fieldset data-uk-margin>
-						<legend><i className="uk-icon-tag"></i> Metadata</legend>
-
-						<div className="uk-form-row">
-							<label className="uk-form-label">Medlem sedan</label>
-							<div className="uk-form-controls">
-								<i className="uk-icon-calendar"></i>
-								&nbsp;
-								<DateTimeField date={this.state.model.created_at} />
-							</div>
-						</div>
-
-						<div className="uk-form-row">
-							<label className="uk-form-label">Senast uppdaterad</label>
-							<div className="uk-form-controls">
-								<i className="uk-icon-calendar"></i>
-								&nbsp;
-								<DateTimeField date={this.state.model.updated_at} />
-							</div>
-						</div>
-					</fieldset>
-				: ""}
-
-				<div className="uk-form-row">
-					<button className="uk-button uk-button-danger uk-float-left" onClick={this.cancel}><i className="uk-icon-close"></i> Avbryt</button>
-
-					{this.state.model.entity_id ? <button className="uk-button uk-button-danger uk-float-left" onClick={this.remove}><i className="uk-icon-trash"></i> Ta bort medlem</button> : ""}
-
-					<button className="uk-button uk-button-success uk-float-right" onClick={this.save}><i className="uk-icon-save"></i> Spara personuppgifter</button>
-				</div>
-			</form>
-			</div>
-		);
+	onCancel: function(entity)
+	{
+		this.props.router.push("/membership/members");
 	},
 
 	changeCountry: function(country)
@@ -202,5 +54,88 @@ module.exports = withRouter(React.createClass({
 		this.getModel().set({
 			address_country: country
 		});
-	}
+	},
+
+	// Disable the send button if there is not enough data in the form
+	enableSendButton: function()
+	{
+		// Validate required fields
+		if(
+			this.getModel().isDirty() &&
+			this.state.model.firstname.length > 0 &&
+			this.state.model.email.length > 0
+		)
+		{
+			// Enable button
+			return true;
+		}
+
+		// Disable button
+		return false;
+	},
+
+	render: function()
+	{
+		return (
+			<div className="meep">
+				<form className="uk-form">
+					<fieldset >
+						<legend><i className="uk-icon-user"></i> Personuppgifter</legend>
+
+						<Input model={this.getModel()} name="civicregno" title="Personnummer" />
+						<Input model={this.getModel()} name="firstname"  title="Förnamn" />
+						<Input model={this.getModel()} name="lastname"   title="Efternamn" />
+						<Input model={this.getModel()} name="email"      title="E-post" />
+						<Input model={this.getModel()} name="phone"      title="Telefonnummer" />
+					</fieldset>
+
+					<fieldset data-uk-margin>
+						<legend><i className="uk-icon-home"></i> Adress</legend>
+
+						<Input model={this.getModel()} name="address_street"  title="Address" />
+						<Input model={this.getModel()} name="address_extra"   title="Address extra" placeholder="Extra adressrad, t ex C/O adress" />
+						<Input model={this.getModel()} name="address_zipcode" title="Postnummer" />
+						<Input model={this.getModel()} name="address_city"    title="Postort" />
+
+						<div className="uk-form-row">
+							<label htmlFor="" className="uk-form-label">Land</label>
+							<div className="uk-form-controls">
+								<CountryDropdown country={this.state.model.address_country} onChange={this.changeCountry} />
+							</div>
+						</div>
+					</fieldset>
+
+					{this.state.model.member_id > 0 ?
+						<fieldset data-uk-margin>
+							<legend><i className="uk-icon-tag"></i> Metadata</legend>
+
+							<div className="uk-form-row">
+								<label className="uk-form-label">Medlem sedan</label>
+								<div className="uk-form-controls">
+									<i className="uk-icon-calendar"></i>
+									&nbsp;
+									<DateTimeField date={this.state.model.created_at} />
+								</div>
+							</div>
+
+							<div className="uk-form-row">
+								<label className="uk-form-label">Senast uppdaterad</label>
+								<div className="uk-form-controls">
+									<i className="uk-icon-calendar"></i>
+									&nbsp;
+									<DateTimeField date={this.state.model.updated_at} />
+								</div>
+							</div>
+						</fieldset>
+					: ""}
+
+					<div className="uk-form-row">
+						{this.cancelButton()}
+						{this.removeButton("Ta bort medlem")}
+						{this.saveButton("Spara personuppgifter")}
+					</div>
+				</form>
+			</div>
+		);
+	},
 }));

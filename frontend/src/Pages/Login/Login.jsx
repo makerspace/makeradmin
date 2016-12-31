@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router'
 import auth from '../../auth';
 
-class Login extends React.Component
+module.exports = class Login extends React.Component
 {
 	login(e)
 	{
@@ -58,5 +58,3 @@ class Login extends React.Component
 		);
 	}
 }
-
-module.exports = Login;

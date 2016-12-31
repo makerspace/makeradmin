@@ -3,7 +3,7 @@ import React from 'react'
 // Backbone
 import AccountingPeriodModel from '../../Models/Account'
 
-import EconomyAccountingPeriod from '../../AccountingPeriod'
+import EconomyAccountingPeriod from '../../Components/Forms/AccountingPeriod'
 
 module.exports = React.createClass({
 	getInitialState: function()

@@ -3,12 +3,12 @@ import React from 'react'
 // Backbone
 import InstructionCollection from '../../Collections/Instruction'
 
-import { Link } from 'react-router'
+import { Link, withRouter } from 'react-router'
 import TableFilterBox from '../../../TableFilterBox'
 
-import EconomyAccountingInstructions from '../../Instructions'
+import EconomyAccountingInstructions from '../../Components/Tables/Instructions'
 
-var EconomyAccountingInstructionsHandler = React.createClass({
+module.exports = withRouter(React.createClass({
 	getInitialState: function()
 	{
 		return {
@@ -40,11 +40,15 @@ var EconomyAccountingInstructionsHandler = React.createClass({
 
 				<TableFilterBox onChange={this.updateFilters} />
 
-				<EconomyAccountingInstructions type={InstructionCollection} filters={this.state.filters} params={{period: this.props.params.period}} />
+				<EconomyAccountingInstructions
+					type={InstructionCollection}
+					filters={this.state.filters}
+					dataSource={{
+						url: "/economy/" + this.props.params.period + "/instruction"
+					}}
+				/>
 			</div>
 		);
 	}
-});
-EconomyAccountingInstructionsHandler.title = "Visa verifikationer";
-
-module.exports = EconomyAccountingInstructionsHandler
+}));
+//EconomyAccountingInstructionsHandler.title = "Visa verifikationer";
