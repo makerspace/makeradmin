@@ -6,8 +6,8 @@ use Exception;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Symfony\Component\HttpKernel\Exception\HttpException;
 use Laravel\Lumen\Exceptions\Handler as ExceptionHandler;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class Handler extends ExceptionHandler
 {
@@ -52,6 +52,15 @@ class Handler extends ExceptionHandler
 				"column"  => $e->getColumn(),
 				"message" => $e->getMessage(),
 			], 422);
+		}
+		else if($e instanceof \App\Exceptions\FilterNotFoundException)
+		{
+			return Response()->json([
+				"status"  => "error",
+				"column"  => $e->getColumn(),
+				"data"    => $e->getData(),
+				"message" => $e->getMessage(),
+			], 404);
 		}
 		else if($e instanceof \Symfony\Component\HttpKernel\Exception\NotFoundHttpException)
 		{
