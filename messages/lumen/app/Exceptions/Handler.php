@@ -45,12 +45,61 @@ class Handler extends ExceptionHandler
 	 */
 	public function render($request, Exception $e)
 	{
-		// When we're in production we want a generic error message via the API, and not a rendered HTML page
-		return Response()->json([
-			"status"  => "error",
-			"message" => "Caught unknown exception: {$e->getMessage()}",
-			"debug"   => $e->getTrace(),
-		], 500);
-//		return parent::render($request, $e);
+		if($e instanceof \App\Exceptions\EntityValidationException)
+		{
+			return Response()->json([
+				"status"  => "error",
+				"column"  => $e->getColumn(),
+				"message" => $e->getMessage(),
+			], 422);
+		}
+		else if($e instanceof \App\Exceptions\FilterNotFoundException)
+		{
+			return Response()->json([
+				"status"  => "error",
+				"column"  => $e->getColumn(),
+				"data"    => $e->getData(),
+				"message" => $e->getMessage(),
+			], 404);
+		}
+		else if($e instanceof \Symfony\Component\HttpKernel\Exception\NotFoundHttpException)
+		{
+			return Response()->json([
+				"status"  => "error",
+				"message" => "The route you specified could not be found",
+			], 404);
+		}
+		else if($e instanceof \Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException)
+		{
+			// When we're in production we want a generic error message via the API, and not a rendered HTML page
+			return Response()->json([
+				"status"  => "error",
+				"message" => "The method you specified is not allowed on this route",
+			], 404);
+		}
+		else
+		{
+			// Bulid a stripped down backtrace, so we don't get problems with recursions in the arguments
+			$trace = [];
+			foreach($e->getTrace() as $x)
+			{
+				$params = [];
+				$params["file"] = $x["file"] ?? null;
+				$params["line"] = $x["line"] ?? null;
+				$params["function"] = $x["function"];
+				$params["class"] = $x["class"] ?? null;
+				$params["args"] = [];//TODO
+
+				$trace[] = $params;
+			}
+
+			// When we're in production we want a generic error message via the API, and not a rendered HTML page
+			return Response()->json([
+				"status"  => "error",
+				"message" => "Caught unknown exception: {$e->getMessage()}",
+				"type"    => get_class($e),
+				"debug"   => $trace,
+			], 500);
+		}
 	}
 }
