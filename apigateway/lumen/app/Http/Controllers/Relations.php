@@ -1,7 +1,7 @@
 <?php
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
+//use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
@@ -19,6 +19,20 @@ use DB;
  */
 class Relations extends Controller
 {
+	public function createRelation(Request $request)
+	{
+		DB::table("relations")
+			->insert([
+				"url1" => $request->get("url1"),
+				"url2" => $request->get("url2"),
+			]);
+
+		// Send response
+		return Response()->json([
+			"status" => "ok",
+		], 200);
+	}
+
 	public function relations(Request $request)
 	{
 		$param = $request->get("param");
@@ -42,10 +56,11 @@ class Relations extends Controller
 
 		$relations = $this->_getRelations($param, $match);
 
+		// Extract a list of id's
 		$data = [];
 		foreach($relations as $relation)
 		{
-			$data[] = $relation[1];
+			$data[] = $relation[1];//TODO
 		}
 
 		if(empty($data))
@@ -72,30 +87,37 @@ class Relations extends Controller
 	protected function _getRelations($param, $match)
 	{
 		$data = [];
+		$regexp = str_replace("/", "\/", $match);
 
 		// Match column 1
-		$urls = DB::table("relations")
-			->where("url1", "=", $param)
-			->pluck("url2");
-		foreach($urls as $url)
+		$relations = DB::table("relations")
+			->where("url1", "LIKE", $param)
+			->select("url1", "url2")
+			->get();
+		foreach($relations as $relation)
 		{
-			$regexp = str_replace("/", "\/", $match);
-			if(preg_match("/^{$regexp}$/", $url, $matches))
+			if(preg_match("/^{$regexp}$/", $relation->url2, $matches))
 			{
-				$data[] = $matches;
+				$data[] = [
+					"url"     => $relation->url1,
+					"matches" => $matches
+				];
 			}
 		}
 
 		// Match column 2
-		$urls = DB::table("relations")
-			->where("url2", "=", $param)
-			->pluck("url1");
-		foreach($urls as $url)
+		$relations = DB::table("relations")
+			->where("url2", "LIKE", $param)
+			->select("url1", "url2")
+			->get();
+		foreach($relations as $relation)
 		{
-			$regexp = str_replace("/", "\/", $match);
-			if(preg_match("/^{$regexp}$/", $url, $matches))
+			if(preg_match("/^{$regexp}$/", $relation->url1, $matches))
 			{
-				$data[] = $matches;
+				$data[] = [
+					"url"     => $relation->url2,
+					"matches" => $matches
+				];
 			}
 		}
 

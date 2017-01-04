@@ -4,9 +4,9 @@ use Illuminate\Http\Response;
 use Illuminate\Http\Request;
 
 // TODO: Should only be included on OPTION requests?
-header("Access-Control-Allow-Origin: *");
-header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
-header("Access-Control-Allow-Headers: Origin, Content-Type, Accept, Authorization, X-Request-With, Access-Control-Allow-Origin");
+#header("Access-Control-Allow-Origin: *");
+#header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
+#header("Access-Control-Allow-Headers: Origin, Content-Type, Accept, Authorization, X-Request-With, Access-Control-Allow-Origin");
 //header("Access-Control-Allow-Credentials: true");
 
 // OAuth 2.0 stuff
@@ -24,8 +24,13 @@ $app->   get("service/list",       "ServiceRegistry@list");
 $app->   get("test",               "ServiceRegistry@test")->middleware("auth");
 
 // Relations
-$app->   get("relations",          "Relations@relations");
-$app->   get("related",            "Relations@related");
+$app->   get("relations",         "Relations@relations");// TODO: Remove this API
+$app->   get("relation",          "Relations@relation");
+$app->  post("relation",          "Relations@createRelation");
+$app->   get("related",           "Relations@related");
+
+// Facades
+$app->   get("facade",           "Facade@index");
 
 // An ugly way to catch all request as lumen does not support the any() and match() methods used in Laravel
 $app->get("/{p1}",                        "ServiceRegistry@handleRoute");
