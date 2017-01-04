@@ -50,6 +50,32 @@ class Template extends Controller
 	/**
 	 *
 	 */
+	function create(Request $request)
+	{
+		$json = $request->json()->all();
+
+		// Create new template
+		$entity = new TemplateModel;
+		$entity->name        = $json["name"]        ?? null;
+		$entity->title       = $json["title"]       ?? null;
+		$entity->description = $json["description"] ?? null;
+
+		// Validate input
+		$entity->validate();
+
+		// Save the entity
+		$entity->save();
+
+		// Send response to client
+		return Response()->json([
+			"status" => "created",
+			"data" => $entity->toArray(),
+		], 201);
+	}
+
+	/**
+	 *
+	 */
 	function update(Request $request, $template_id)
 	{
 		// Load the entity
@@ -89,32 +115,6 @@ class Template extends Controller
 	/**
 	 *
 	 */
-	function create(Request $request)
-	{
-		$json = $request->json()->all();
-
-		// Create new template
-		$entity = new TemplateModel;
-		$entity->name        = $json["name"]        ?? null;
-		$entity->title       = $json["title"]       ?? null;
-		$entity->description = $json["description"] ?? null;
-
-		// Validate input
-		$entity->validate();
-
-		// Save the entity
-		$entity->save();
-
-		// Send response to client
-		return Response()->json([
-			"status" => "created",
-			"data" => $entity->toArray(),
-		], 201);
-	}
-
-	/**
-	 *
-	 */
 	function delete(Request $request, $template_id)
 	{
 		// Load the entity
@@ -122,28 +122,6 @@ class Template extends Controller
 			"template_id" => ["=", $template_id]
 		]);
 
-		// Generate an error if there is no such member
-		if(false === $entity)
-		{
-			return Response()->json([
-				"status"  => "error",
-				"message" => "Could not find any member with specified member_id",
-			], 404);
-		}
-
-		if($entity->delete())
-		{
-			return Response()->json([
-				"status"  => "deleted",
-				"message" => "The member was successfully deleted",
-			], 200);
-		}
-		else
-		{
-			return Response()->json([
-				"status"  => "error",
-				"message" => "An error occured when trying to delete member",
-			], 500);
-		}
+		return $this->_delete($entity);
 	}
 }

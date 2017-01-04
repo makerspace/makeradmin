@@ -25,6 +25,32 @@ class Message extends Controller
 		return $this->_applyStandardFilters("Message", $request);
 	}
 
+
+	/**
+	 * Load a queued/sent messages
+	 */
+	function read(Request $request, $message_id)
+	{
+		// Load the product
+		$message = MessageModel::load([
+			"message_id" => ["=", $message_id]
+		]);
+
+		// Generate an error if there is no such product
+		if(false === $message)
+		{
+			return Response()->json([
+				"message" => "No product with specified product id",
+			], 404);
+		}
+		else
+		{
+			return Response()->json([
+				"data" => $message->toArray(),
+			], 200);
+		}
+	}
+
 	/**
 	 * Send a new message
 	 */
@@ -163,31 +189,6 @@ class Message extends Controller
 			"status" => "created",
 			"data" => $message->toArray(),
 		], 201);
-	}
-
-	/**
-	 * Load a queued/sent messages
-	 */
-	function read(Request $request, $message_id)
-	{
-		// Load the product
-		$message = MessageModel::load([
-			"message_id" => ["=", $message_id]
-		]);
-
-		// Generate an error if there is no such product
-		if(false === $message)
-		{
-			return Response()->json([
-				"message" => "No product with specified product id",
-			], 404);
-		}
-		else
-		{
-			return Response()->json([
-				"data" => $message->toArray(),
-			], 200);
-		}
 	}
 
 	/**

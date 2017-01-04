@@ -619,7 +619,7 @@ class Entity
 	public function toArray()
 	{
 		$x = $this->data;
-//		$x["entity_id"] = $this->entity_id;
+		$x["entity_id"] = $this->entity_id;
 		return $x;
 	}
 
