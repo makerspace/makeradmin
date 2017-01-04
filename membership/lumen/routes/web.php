@@ -20,6 +20,8 @@ $app->   get("membership/member/{id}", "Member@read");   // Model: Read
 $app->   put("membership/member/{id}", "Member@update"); // Model: Update
 $app->delete("membership/member/{id}", "Member@delete"); // Model: Delete
 $app->   get("membership/member/{id}/groups", "Member@getGroups");    // Get collection with members
+$app->  post("membership/member/{id}/groups/add", "Member@addGroup");    // Get collection with members
+$app->  post("membership/member/{id}/groups/remove", "Member@removeGroup");    // Get collection with members
 
 // Groups
 $app->   get("membership/group",       "Group@list");    // Get collection

@@ -24,12 +24,10 @@ class Member extends Entity
 			"column" => "membership_members.updated_at",
 			"select" => "DATE_FORMAT(membership_members.updated_at, '%Y-%m-%dT%H:%i:%sZ')",
 		],
-/*
 		"member_number" => [
-			"column" => "member.member_number",
-			"select" => "member.member_number",
+			"column" => "membership_members.member_number",
+			"select" => "membership_members.member_number",
 		],
-*/
 		"email" => [
 			"column" => "membership_members.email",
 			"select" => "membership_members.email",
@@ -107,8 +105,8 @@ class Member extends Entity
 					->orWhere("membership_members.address_zipcode", "like", "%".$word."%")
 					->orWhere("membership_members.address_city",    "like", "%".$word."%")
 					->orWhere("membership_members.phone",           "like", "%".$phone."%")
-					->orWhere("membership_members.civicregno",      "like", "%".$word."%");
-//					->orWhere("membership_members.member_number",   "like", "%".$word."%");
+					->orWhere("membership_members.civicregno",      "like", "%".$word."%")
+					->orWhere("membership_members.member_number",   "like", "%".$word."%");
 			});
 		}
 
@@ -137,7 +135,7 @@ class Member extends Entity
 				$param = $filter;
 			}
 
-			// Filter on accounting period
+			// Filter on group membership
 			if("group_id" == $id)
 			{
 				$query = $query

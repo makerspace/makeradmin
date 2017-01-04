@@ -32,6 +32,9 @@ class CreateMembershipMembersTable extends Migration
 			$table->timestamps();
 			$table->softDeletes();
 
+			//TODO
+			$table->integer("member_number");;
+
 			$table->index("email");
 		});
 	}

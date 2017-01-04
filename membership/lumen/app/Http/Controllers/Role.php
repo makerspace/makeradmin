@@ -46,7 +46,7 @@ class Role extends Controller
 		// Send response to client
 		return Response()->json([
 			"status" => "created",
-			"entity" => $entity->toArray(),
+			"data" => $entity->toArray(),
 		], 201);
 	}
 
@@ -70,7 +70,10 @@ class Role extends Controller
 		}
 		else
 		{
-			return $entity->toArray();
+			// Send response to client
+			return Response()->json([
+				"data" => $entity->toArray(),
+			], 200);
 		}
 	}
 
@@ -110,7 +113,7 @@ class Role extends Controller
 		// TODO: Standarized output
 		return Response()->json([
 			"status" => "updated",
-			"entity" => $entity->toArray(),
+			"data" => $entity->toArray(),
 		], 200);
 	}
 
@@ -120,32 +123,10 @@ class Role extends Controller
 	function delete(Request $request, $role_id)
 	{
 		// Load the entity
-		$entity = PermissionModel::load([
+		$entity = RoleModel::load([
 			"role_id" => ["=", $role_id]
 		]);
 
-		// Generate an error if there is no such role
-		if(false === $entity)
-		{
-			return Response()->json([
-				"status"  => "error",
-				"message" => "Could not find any role with specified role_id",
-			], 404);
-		}
-
-		if($entity->delete())
-		{
-			return Response()->json([
-				"status"  => "deleted",
-				"message" => "The role was successfully deleted",
-			], 200);
-		}
-		else
-		{
-			return Response()->json([
-				"status"  => "error",
-				"message" => "An error occured when trying to delete role",
-			], 500);
-		}
+		return $this->_delete($entity);
 	}
 }

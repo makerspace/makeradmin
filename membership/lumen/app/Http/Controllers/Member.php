@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
 use App\Models\Member as MemberModel;
+use App\Models\Group as GroupModel;
 
 use App\Traits\Pagination;
 use App\Traits\EntityStandardFiltering;
@@ -35,7 +36,7 @@ class Member extends Controller
 		}
 */
 		/*
-			En header specificerar vilken orgainsation/grupp man arbetar mot
+			En header specificerar vilken organisation/grupp man arbetar mot
 				Riksorg = allt
 				Förening / arbetsgrupp = begränsa till dess användare + kolla behörigheter
 				Användare = access denied
@@ -63,7 +64,59 @@ class Member extends Controller
 				Delete content
 		*/
 
-		return $this->_applyStandardFilters("Member", $request);
+
+		// Paging filter
+		$filters = [
+			"per_page" => $this->per_page($request), // TODO: Rename?
+		];
+
+		// Filter on member_id's
+		if(!empty($request->get("member_ids")))
+		{
+			$ids = explode(",", $request->get("member_ids"));
+			$filters["member_id"] = ["in", $ids];
+		}
+
+		// Filter on member_id's
+		if(!empty($request->get("member_number")))
+		{
+			$ids = explode(",", $request->get("member_number"));
+			$filters["member_number"] = ["in", $ids];
+		}
+/*
+		// Filter on relations
+		if(!empty($request->get("relations")))
+		{
+			$filters["relations"] = $request->get("relations");
+		}
+*/
+
+		// Filter on email
+		if(!empty($request->get("email")))
+		{
+			$filters["email"] = $request->get("email");
+		}
+
+		// Filter on search
+		if(!empty($request->get("search")))
+		{
+			$filters["search"] = $request->get("search");
+		}
+
+		// Sorting
+		if(!empty($request->get("sort_by")))
+		{
+			$order = ($request->get("sort_order") == "desc" ? "desc" : "asc");
+			$filters["sort"] = [$request->get("sort_by"), $order];
+		}
+
+		// Load data from database
+		$result = MemberModel::list($filters);
+
+		// Return json array
+		return Response()->json($result, 201);
+
+//		return $this->_applyStandardFilters("Member", $request);
 	}
 
 	/**
@@ -75,7 +128,6 @@ class Member extends Controller
 
 		// TODO: This should be removed
 		// Create a unique member number if not specified
-/*
 		if(!empty($json["member_number"]))
 		{
 			$member_number = $json["member_number"];
@@ -95,10 +147,10 @@ class Member extends Controller
 				$member_number = ($newest_member->member_number + 1);
 			}
 		}
-*/
+
 		// Create new member
 		$entity = new MemberModel;
-//		$entity->member_number   = $member_number;
+		$entity->member_number   = $member_number;
 		$entity->email           = $json["email"]           ?? null;
 		$entity->password        = $json["password"]        ?? null;
 		$entity->firstname       = $json["firstname"]       ?? null;
@@ -115,18 +167,37 @@ class Member extends Controller
 		$entity->created_at      = $json["created_at"]      ?? null;
 		$entity->updated_at      = $json["updated_at"]      ?? null;
 
-/*
-		// Add relations
-		if(!empty($json["relations"]))
-		{
-			$entity->addRelations($json["relations"]);
-		}
-*/
 		// Validate input
 		$entity->validate();
 
 		// Save the entity
 		$entity->save();
+
+		// Get member_id
+		$member_id = $entity->entity_id;
+
+		// Add member to groups
+		if(!empty($json["groups"]))
+		{
+			foreach($json["groups"] as $group)
+			{
+				$group_id = DB::table("membership_groups")
+					->where("name", "=", $group["name"])
+					->value("group_id");
+
+				if(!$group_id)
+				{
+					return Response()->json([
+						"status" => "error",
+						"message" => "No group found with name {$group["name"]}",
+					], 404);
+				}
+
+				DB::insert("REPLACE INTO membership_members_groups(member_id, group_id) VALUES(?, ?)", [$member_id, $group_id]);
+				// TODO: Add to group $group["name"]
+			}
+//			$entity->addRelations($json["relations"]);
+		}
 
 		// Send response to client
 		return Response()->json([
@@ -228,29 +299,7 @@ class Member extends Controller
 			"member_id" => ["=", $member_id]
 		]);
 
-		// Generate an error if there is no such member
-		if(false === $entity)
-		{
-			return Response()->json([
-				"status"  => "error",
-				"message" => "Could not find any member with specified member_id",
-			], 404);
-		}
-
-		if($entity->delete())
-		{
-			return Response()->json([
-				"status"  => "deleted",
-				"message" => "The member was successfully deleted",
-			], 200);
-		}
-		else
-		{
-			return Response()->json([
-				"status"  => "error",
-				"message" => "An error occured when trying to delete member",
-			], 500);
-		}
+		return $this->_delete($entity);
 	}
 
 	/**
@@ -285,7 +334,7 @@ class Member extends Controller
 		}
 	}
 
-	public function getGroups(Request $request)
+	public function getGroups(Request $request, $member_id)
 	{
 /*
 		// TODO: Get roles from user
@@ -298,6 +347,7 @@ class Member extends Controller
 		// Paging and permission filter
 		$filters = [
 			"per_page" => $this->per_page($request), // TODO: Rename?
+			"member_id" => $member_id,
 //			"group_id" => ["in", $groups],
 		];
 
@@ -315,10 +365,41 @@ class Member extends Controller
 		}
 
 		// Load data from database
-		$result = call_user_func("\App\Models\\Group::list", $filters);
+		$result = GroupModel::list($filters);
 
 		// Return json array
-		//TODO
-		return $result;
+		return Response()->json($result, 201);
+	}
+
+	public function addGroup(Request $request, $member_id)
+	{
+		$json = $request->json()->all();
+
+		// Add the group to the user
+		$data = [];
+		foreach($json["groups"] as $group_id)
+		{
+			DB::insert("REPLACE INTO membership_members_groups(member_id, group_id) VALUES(?, ?)", [$member_id, $group_id]);
+		}
+
+		return Response()->json([
+			"status"  => "ok",
+		], 200);
+	}
+
+	public function removeGroup(Request $request, $member_id)
+	{
+		$json = $request->json()->all();
+
+		// Add the group to the user
+		$data = [];
+		foreach($json["groups"] as $group_id)
+		{
+			DB::insert("DELETE FROM membership_members_groups WHERE member_id = ? AND group_id = ?", [$member_id, $group_id]);
+		}
+
+		return Response()->json([
+			"status"  => "ok",
+		], 200);
 	}
 }

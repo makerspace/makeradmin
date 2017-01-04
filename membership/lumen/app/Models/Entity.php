@@ -58,7 +58,7 @@ class Entity
 				// Sorting
 				else if("sort" == $id)
 				{
-					if(true)
+					if(!array_key_exists($filter[0], $this->columns))
 					{
 						throw new \App\Exceptions\FilterNotFoundException("sort_by", $filter, "Could not find the column you trying to sort by");
 					}
@@ -177,6 +177,13 @@ class Entity
 					}
 					unset($filters[$id]);
 				}
+				// Filter on transaction_id's
+				else if("ids" == $id)
+				{
+					$query = $query
+					->whereIn($this->columns[$this->id_column]["column"], $filter);
+					unset($filters[$id]);
+				}
 				// Filter on arbritrary columns
 				else
 				{
@@ -184,7 +191,6 @@ class Entity
 					if(array_key_exists($id, $this->columns))
 					{
 						list($table, $column) = explode(".", $this->columns[$id]["column"]);
-//						$id = $column;
 						$id = $this->columns[$id]["column"];
 					}
 
@@ -613,7 +619,7 @@ class Entity
 	public function toArray()
 	{
 		$x = $this->data;
-//		$x["entity_id"] = $this->entity_id;
+		$x["entity_id"] = $this->entity_id;
 		return $x;
 	}
 

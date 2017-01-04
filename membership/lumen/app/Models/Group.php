@@ -72,13 +72,37 @@ class Group extends Entity
 		// Build base query
 		$query = $this->_buildLoadQuery($filters);
 
+		// Go through filters
+		foreach($filters as $id => $filter)
+		{
+			if(is_array($filter) && count($filter) >= 2)
+			{
+				$op    = $filter[0];
+				$param = $filter[1];
+			}
+			else
+			{
+				$op    = "=";
+				$param = $filter;
+			}
+
+			// Filter on member_id
+			if("member_id" == $id)
+			{
+				$query = $query
+					->leftJoin("membership_members_groups", "membership_members_groups.group_id", "=", "membership_groups.group_id")
+					->where("membership_members_groups.member_id", $op, $param);
+				unset($filters[$id]);
+			}
+		}
+
 		// Apply standard filters like entity_id, relations, etc
 		$query = $this->_applyFilter($query, $filters);
 
 		// Calculate total number of peoples in the group
 		$query = $query
-			->leftJoin("membership_members_groups", "membership_members_groups.group_id", "=", "membership_groups.group_id")
-			->selectRaw("COUNT(membership_members_groups.member_id) AS num_members")
+			->leftJoin("membership_members_groups AS gm", "gm.group_id", "=", "membership_groups.group_id")
+			->selectRaw("COUNT(gm.member_id) AS num_members")
 			->groupBy("membership_groups.group_id");
 
 		// Sort

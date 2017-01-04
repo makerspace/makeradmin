@@ -1,11 +1,11 @@
 <?php
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
 use App\Models\Group as GroupModel;
+use App\Models\Member as MemberModel;
 use App\Models\Entity;
 
 use App\Traits\Pagination;
@@ -133,7 +133,7 @@ Indented:
 		$result = call_user_func("\App\Models\\Group::list", $filters);
 
 		// Return json array
-		return $result;
+		return Response()->json($result, 201);
 	}
 
 	/**
@@ -241,27 +241,7 @@ Indented:
 			"group_id" => $group_id,
 		]);
 
-		// Generate an error if there is no such group
-		if(false === $entity)
-		{
-			return Response()->json([
-				"status" => "error",
-				"message" => "No group with specified group_id",
-			], 404);
-		}
-
-		if($entity->delete())
-		{
-			return [
-				"status" => "deleted",
-			];
-		}
-		else
-		{
-			return [
-				"status" => "error",
-			];
-		}
+		return $this->_delete($entity);
 	}
 
 	/**
@@ -282,7 +262,6 @@ Indented:
 			$filters["relations"] = $request->get("relations");
 		}
 */
-		// TODO: Filter on group membership
 
 		// Filter on search
 		if(!empty($request->get("search")))
@@ -298,11 +277,9 @@ Indented:
 		}
 
 		// Load data from database
-		$result = call_user_func("\App\Models\\Member::list", $filters);
+		$result = MemberModel::list($filters);
 
 		// Return json array
-		return Response()->json(
-			$result
-		, 200);
+		return Response()->json($result, 200);
 	}
 }
