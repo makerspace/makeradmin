@@ -29,21 +29,27 @@ module.exports = {
 		// If we create a enableSendButton() function it will be called everytime a model have changed
 		// The enableSendButton() function should be used to validate the model and enable/disable the send/save button
 		this.getModel().on("change sync", function() {
-			if(_this.hasOwnProperty("enableSendButton"))
-			{
-				// We need to have a delay so setState() has propely updated the state
-				setTimeout(() =>
-				{
-					// The user might already have leaved the page via an onCreate or onUpdate handler
-					// Ignore this call if the model is destroyed
-					if(_this.wrapper !== undefined && _this.getModel() !== undefined)
-					{
-						// Note: We invert the result because we want the function to return true to activate the button, while disabled="" works the other way
-						_this.setState({disableSend: !_this.enableSendButton()});
-					}
-				}, 100);
-			}
+			_this.updateSendButton();
 		});
+	},
+
+	updateSendButton: function()
+	{
+		if(this.hasOwnProperty("enableSendButton"))
+		{
+			var _this = this;
+			// We need to have a delay so setState() has propely updated the state
+			setTimeout(() =>
+			{
+				// The user might already have leaved the page via an onCreate or onUpdate handler
+				// Ignore this call if the model is destroyed
+				if(_this.wrapper !== undefined && _this.getModel() !== undefined)
+				{
+					// Note: We invert the result because we want the function to return true to activate the button, while disabled="" works the other way
+					_this.setState({disableSend: !_this.enableSendButton()});
+				}
+			}, 100);
+		}
 	},
 
 	handleChange: function(event)
@@ -145,7 +151,7 @@ module.exports = {
 		// Prevent the form from being submitted
 		event.preventDefault();
 
-		this.getModel().save([], {
+		this.getModel().save(null, {
 			success: function(model, response)
 			{
 				if(response.status == "created")

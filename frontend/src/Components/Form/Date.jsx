@@ -39,7 +39,7 @@ module.exports = class FormInput extends React.Component
 				var str = _this.dateToStr(_this.state.model.changed[_this.props.name]);
 				// Save the data
 				_this.setState({
-//					value: /*_this.state.model.changed[_this.props.name]*/ str,
+					value: str,
 					isDirty: _this.state.model.attributeHasChanged(_this.props.name),
 				});
 			}
@@ -71,14 +71,14 @@ module.exports = class FormInput extends React.Component
 		return str;
 	}
 
-	// Take a readable string and make an ISO8601 timestamp of it
-
 	// The user have changed the text in the <input />
 	onChange(event)
 	{
 		// Do not try to parse the value if there is none
 		if(event.target.value.length == 0)
 		{
+			this.state.model.set(this.props.name, null);
+
 			this.setState({
 				error_column: "",
 				error_message: "",
@@ -98,6 +98,16 @@ module.exports = class FormInput extends React.Component
 				error_message: "Otillåtet datumformat",
 				value: event.target.value,
 			});
+
+			if(event.target.value == "")
+			{
+				this.state.model.set(this.props.name, null);
+			}
+
+			// Update dirty flag
+			this.setState({
+				isDirty: this.state.model.attributeHasChanged(this.props.name),
+			});
 		}
 		else
 		{
@@ -106,6 +116,11 @@ module.exports = class FormInput extends React.Component
 
 			// Save the new timestamp in the model
 			this.state.model.set(this.props.name, str);
+
+			// Update dirty flag
+			this.setState({
+				isDirty: this.state.model.attributeHasChanged(this.props.name),
+			});
 
 			// Save the data in the component state and clear errors
 			this.setState({

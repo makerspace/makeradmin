@@ -2,6 +2,7 @@ import Backbone from 'backbone'
 import PageableCollection from 'backbone.paginator'
 import auth from '../auth'
 import config from '../config'
+import _ from 'underscore'
 
 // Update the Backbone sync() method to work with our RESTful API with OAuth 2.0 authentication
 var backboneSync = Backbone.sync;
@@ -165,6 +166,30 @@ Backbone.Model.fullExtend = function(protoProps, staticProps)
 		}
 
 		return Backbone.Model.prototype.set.call(this, attributes, options);
+	}
+
+	// Override save so we can cast "" to null
+	protoProps["save"] = function(attrs, options)
+	{
+		options || (options = {});
+		attrs || (attrs = _.clone(this.attributes));
+
+		// Filter the data to send to the server
+		for(var key in attrs)
+		{
+			console.log(key);
+			if(attrs[key] == "")
+			{
+				attrs[key] = null;
+			}
+		}
+
+		options.data        = JSON.stringify(attrs);
+		options.contentType = "application/json; charset=utf-8";
+		options.dataType    = "json";
+
+		// Proxy the call to the original save function
+		return Backbone.Model.prototype.save.call(this, _.clone(attrs), options);
 	}
 
 	// When destroying an entity we should not care about isDirty, so we have to make it satisfied

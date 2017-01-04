@@ -49,6 +49,33 @@ var nav = new Backbone.Model({
 			],
 		},
 		{
+			text: "Automation",
+			target: "/auto",
+			icon: "coffee",
+			children:
+			[
+				{
+					text: "Översikt",
+					target: "/auto/overview",
+				},
+				{
+					type: "separator",
+				},
+				{
+					text: "Tictail-ordrar",
+					target: "/auto/tictail",
+				},
+				{
+					text: "Skapa verifikationer",
+					target: "/auto/verification",
+				},
+				{
+					text: "Multiaccess",
+					target: "/auto/multiaccess",
+				},
+			],
+		},
+		{
 			text: "Nycklar",
 			target: "/keys",
 			icon: "key",
@@ -324,6 +351,8 @@ const rootRoute = {
 				require("./Keys/Routes"),
 				require("./Statistics/Routes"),
 				require("./Export/Routes"),
+				require("./Tictail/Routes"),
+				require("./Auto/Routes"),
 				{
 					path: "settings",
 					indexRoute: {

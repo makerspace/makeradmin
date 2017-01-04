@@ -332,6 +332,7 @@ var BackboneTable = {
 
 		if(this.state.status == "error")
 		{
+			// Error while fetching collection
 			var content = (
 				<tr key="0">
 					<td colSpan={this.state.columns} className="uk-text-center">
@@ -344,6 +345,7 @@ var BackboneTable = {
 		}
 		else if(this.state.collection.length == 0)
 		{
+			// Collection is empty
 			var content = (
 				<tr key="0">
 					<td colSpan={this.state.columns} className="uk-text-center">
@@ -354,6 +356,7 @@ var BackboneTable = {
 		}
 		else
 		{
+			// Collection is an array
 			var content = this.state.collection.map(this.renderRow);
 		}
 
