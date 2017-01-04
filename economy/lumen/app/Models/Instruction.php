@@ -272,6 +272,9 @@ class Instruction extends Entity
 		// Create a new entity
 		$entity = new Instruction;
 
+		// The columns is fetched with an "column AS name", so no need to translate the $column_id
+		$entity->entity_id = $data[$this->id_column];
+
 		// Populate the entity with data
 		foreach($data as $key => $value)
 		{
@@ -284,6 +287,7 @@ class Instruction extends Entity
 			->join("economy_account", "economy_transaction.economy_account_id", "=", "economy_account.economy_account_id")
 			->where("economy_instruction.economy_instruction_id", "=", $entity->instruction_id)
 			->select(
+				"economy_transaction.economy_transaction_id AS transaction_id",
 				"economy_instruction.title",
 				"economy_instruction.description",
 				"economy_transaction.amount AS balance",
