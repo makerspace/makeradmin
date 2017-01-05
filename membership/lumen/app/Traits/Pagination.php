@@ -16,12 +16,8 @@ trait Pagination
 	{
 		// Use the specified per_page setting, if provided
 		$per_page = $request->get("per_page");
-/*
-		if(is_numeric($per_page) && $per_page > 1000)
-		{
-			$per_page = 1000;
-		}
-		else */if(is_numeric($per_page) && $per_page > 0)
+
+		if(is_numeric($per_page) && $per_page > 0)
 		{
 			$per_page = (int)$per_page;
 		}

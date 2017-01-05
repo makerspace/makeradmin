@@ -33,7 +33,7 @@ class ServiceRegister extends Command
 		// Send the request to API Gateway
 		$ch = new CurlBrowser();
 		$ch->useJson();
-		$result = $ch->call("POST", "http://" . config("service.gateway") . "/service/register", [
+		$result = $ch->call("POST", "http://" . config("service.gateway") . "/service/register", [], [
 			"name"     => config("service.name"),
 			"url"      => config("service.url"),
 			"endpoint" => "http://" . gethostbyname(gethostname()) . ":80/",

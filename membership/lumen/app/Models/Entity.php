@@ -60,7 +60,7 @@ class Entity
 				{
 					if(!array_key_exists($filter[0], $this->columns))
 					{
-						throw new \App\Exceptions\FilterNotFoundException("sort_by", $filter, "Could not find the column you trying to sort by");
+						throw new \App\Exceptions\FilterNotFoundException("sort_by", $filter[0], "Could not find the column you trying to sort by");
 					}
 
 					$this->sort = $filter;
@@ -324,6 +324,9 @@ class Entity
 
 		// Apply standard filters like entity_id, relations, etc
 		$query = $this->_applyFilter($query, $filters);
+
+		// Sort
+		$query = $this->_applySorting($query);
 
 		// Get data from database
 		$data = (array)$query->first();
