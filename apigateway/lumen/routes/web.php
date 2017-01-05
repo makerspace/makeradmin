@@ -9,6 +9,9 @@ header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
 header("Access-Control-Allow-Headers: Origin, Content-Type, Accept, Authorization, X-Request-With, Access-Control-Allow-Origin");
 //header("Access-Control-Allow-Credentials: true");
 
+// Tell client that this pre-flight info is valid for 20 days
+header("Access-Control-Max-Age: 1728000");
+
 // OAuth 2.0 stuff
 $app->  post("oauth/token",          "Authentication@login");
 $app->  post("oauth/resetpassword",  "Authentication@reset");

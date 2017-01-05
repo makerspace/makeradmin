@@ -209,13 +209,13 @@ class ServiceRegistry extends Controller
 	}
 
 	/**
-	 * Handles CORS requests
+	 * Handles CORS pre-flight requests
 	 *
 	 * This is an API, so everything should be allowed
 	 */
 	public function handleOptions(Request $request)
 	{
-		return response("", 200);
+		return response("", 201);
 	}
 
 	public function test()
