@@ -41,7 +41,7 @@ class IncludeUserId
 		$access_token = trim(preg_replace('/^(?:\s+)?Bearer\s/', '', $header));
 
 		// Find the access token in the database and set user_id if found
-		if(($user = Login::getUserFromAccessToken($access_token)) !== false)
+		if(($user = Login::getUserFromIdAccessToken($access_token)) !== false)
 		{
 			Login::updateToken($access_token);
 			$this->auth->guard($guard)->setUserObject($user);

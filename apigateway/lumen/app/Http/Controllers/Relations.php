@@ -60,7 +60,7 @@ class Relations extends Controller
 		$data = [];
 		foreach($relations as $relation)
 		{
-			$data[] = $relation[1];//TODO
+			$data[] = $relation["matches"][1];//TODO
 		}
 
 		if(empty($data))

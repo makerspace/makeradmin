@@ -30,7 +30,7 @@ class Login
 
 		// Send the request
 		$ch = new CurlBrowser();
-		$result = $ch->call("POST", "{$service->endpoint}/membership/authenticate", [
+		$result = $ch->call("POST", "{$service->endpoint}/membership/authenticate", [], [
 			"username" => $username,
 			"password" => $password,
 		]);
@@ -142,6 +142,29 @@ class Login
 	/**
 	 * Get the user object related to the access_token
 	 */
+	public static function getUserIdFromAccessToken($access_token)
+	{
+		// Get the user_id related to the access token
+		$user_id = DB::table("access_tokens")
+			->where("access_token", $access_token)
+			->value("user_id");
+
+		if($user_id)
+		{
+			// Create a new user object and add user_id
+			$x = new \stdClass();
+			$x->user_id = $user_id;
+			return $x;
+		}
+		else
+		{
+			return false;
+		}
+	}
+
+	/**
+	 * Get the user object related to the access_token
+	 */
 	public static function getUserFromAccessToken($access_token)
 	{
 		// Get the user_id related to the access token
@@ -154,10 +177,11 @@ class Login
 		{
 			return false;
 		}
+
 		$url = "{$service->endpoint}/membership/authenticate";
 		// Make a request to the membership module and load the user object (including roles and permissions)
 		$ch = new CurlBrowser();
-		$result = $ch->call("GET", "{$service->endpoint}/membership/member/{$user_id}", []);
+		$result = $ch->call("GET", "{$service->endpoint}/membership/member/{$user_id}");
 
 		if($ch->getStatusCode() == 200 && ($json = $ch->getJson()) !== false && isset($json->data->member_id))
 		{

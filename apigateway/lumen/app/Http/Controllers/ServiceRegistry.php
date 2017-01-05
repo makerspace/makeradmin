@@ -170,6 +170,7 @@ class ServiceRegistry extends Controller
 		}
 
 		// Get JSON and POST data
+		// TODO: Laravel is probably processing this data and creating a temp file
 		$e = explode(";", $request->header("Content-Type"));
 		$type = is_array($e) ? $e[0] : $request->header("Content-Type");
 		if($type == "application/json")
