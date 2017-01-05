@@ -43,7 +43,7 @@ trait EntityStandardFiltering
 		$result = call_user_func("\App\Models\\{$model}::list", $filters);
 
 		// Return json array
-		return Response()->json($result, 201);
+		return Response()->json($result, 200);
 	}
 
 	/**
