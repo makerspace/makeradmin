@@ -335,7 +335,8 @@ class Entity
 		}
 		
 		// The columns is fetched with an "column AS name", so no need to translate the $column_id
-		$data["entity_id"] = $data[$this->id_column];
+		// TODO: Does this one really work? See Instruction::_load
+		$this->entity_id = $data[$this->id_column];
 
 		// Create a new entity based on type
 		$classname = get_class($this);
@@ -619,7 +620,7 @@ class Entity
 	public function toArray()
 	{
 		$x = $this->data;
-//		$x["entity_id"] = $this->entity_id;
+		$x["entity_id"] = $this->entity_id;
 		return $x;
 	}
 
