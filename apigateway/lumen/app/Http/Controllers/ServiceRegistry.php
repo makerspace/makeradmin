@@ -169,21 +169,34 @@ class ServiceRegistry extends Controller
 			$ch->setHeader("X-User-Id", $user->user_id);
 		}
 
-		// Append the query string parameters like ?sort_by=column etc to the URL
-		// TODO: $request->all() is not correct
-		$ch->setQueryString($request->all());
-
 		// Get JSON and POST data
-		// TODO: Should not include query string parameters
-//		$data = json_encode($request->all());
-		$data = $request->all();
-		$ch->useJson();
+		$e = explode(";", $request->header("Content-Type"));
+		$type = is_array($e) ? $e[0] : $request->header("Content-Type");
+		if($type == "application/json")
+		{
+			$post = $request->json()->all();
+			$ch->useJson();
+		}
+		else if($type == "multipart/form-data")
+		{
+			// Change data from the the ISO-8859-1 HTTP to UTF-8
+			// TODO: Is this one affected by the encoding headers in HTTP and/or settings in server?
+			$post = utf8_encode($request->getContent());
+
+			// Forward the content-type
+			$ch->setHeader("Content-Type", $request->header("Content-Type"));
+		}
+		else
+		{
+			$post = [];
+		}
 
 		// Create a new url with the service endpoint url included
-		$url = $service->endpoint . "/" . implode("/", $path);
+		$url = $service->endpoint . implode("/", $path);
 
 		// Send the request
-		$result = $ch->call($request->method(), $url, $data);
+		// Forward the query string parameters like ?sort_by=column etc to the internal request
+		$result = $ch->call($request->method(), $url, $request->query->all(), $post);
 		$http_code = $ch->getStatusCode();
 
 		// Log the internal HTTP request

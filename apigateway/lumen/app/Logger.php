@@ -39,7 +39,17 @@ class Logger
 		// The query string parameters should not be included as it already is in $data["query"]
 		if($_SERVER["REQUEST_METHOD"] != "GET")
 		{
-			static::$data["request"]["data"] = $request->request->all();
+			$e = explode(";", $request->header("Content-Type"));
+			$type = is_array($e) ? $e[0] : $request->header("Content-Type");
+			if($type == "application/json")
+			{
+				static::$data["request"]["data"] = $request->request->all();
+			}
+			else
+			{
+				// TODO: Is this one affected by the encoding headers in HTTP and/or settings in server?
+				static::$data["request"]["data"] = utf8_encode($request->getContent());
+			}
 		}
 	}
 
