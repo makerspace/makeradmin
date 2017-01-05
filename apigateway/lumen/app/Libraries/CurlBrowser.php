@@ -86,24 +86,35 @@ class CurlBrowser
 	/**
 	 *
 	 */
-	public function call($method, $url, array $data = null)
+	public function call($method, $url, array $qs = null, $post = [])
 	{
+		// Set query string parameters
+		if($qs)
+		{
+			$this->setQueryString($qs);
+		}
+
+		// GET, POST, etc
 		curl_setopt($this->curl_handle, CURLOPT_CUSTOMREQUEST, $method);
 
 		// A POST, PUT or DELETE request should include the POST data
 		if(in_array($method, ["POST", "PUT", "DELETE"]))
 		{
-			$this->data = $data;
+			$this->data = $post;
 			curl_setopt($this->curl_handle, CURLOPT_POST, true);
 			if($this->json === true)
 			{
-				$dataStr = json_encode($data);
+				$dataStr = json_encode($post);
 				$this->setHeader("Content-Type", "application/json");
 				$this->setHeader("Content-Length", strlen($dataStr));
 			}
+			else if(is_array($post))
+			{
+				$dataStr = http_build_query($post, "", "&");
+			}
 			else
 			{
-				$dataStr = http_build_query($data, "", "&");
+				$dataStr = $post;
 			}
 			curl_setopt($this->curl_handle, CURLOPT_POSTFIELDS, $dataStr);
 		}
