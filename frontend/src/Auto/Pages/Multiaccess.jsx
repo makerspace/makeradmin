@@ -1,17 +1,35 @@
 import React from 'react'
-import MultiaccessTable from '../Components/Tables/Multiaccess'
-
-// Backbone
-import MultiaccessCollection from '../Collections/Multiaccess'
+import Multiaccess from '../Components/Multiaccess'
+import File from '../../Components/Form/File'
 
 module.exports = React.createClass({
+	getInitialState: function()
+	{
+		return {
+		};
+	},
+
+	componentDidMount: function()
+	{
+		this.setState({
+			filename: ""
+		});
+	},
+
+	uploadComplete: function(filename)
+	{
+		this.setState({filename});
+	},
+
 	render: function()
 	{
 		return (
 			<div>
-				<h1>Multiaccess differans</h1>
+				<h1>MultiAccess avstämning</h1>
 
-				<MultiaccessTable type={MultiaccessCollection} />
+				<File action="/multiaccess/upload" onFile={this.uploadComplete} />
+
+				<Multiaccess filename={this.state.filename} />
 			</div>
 		);
 	},

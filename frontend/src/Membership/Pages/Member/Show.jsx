@@ -28,7 +28,7 @@ module.exports = withRouter(React.createClass({
 		var member_id = this.props.params.member_id;
 		return (
 			<div>
-				<h2>Medlem #{this.props.params.member_id}: {this.state.model.get("firstname")} {this.state.model.get("lastname")}</h2>
+				<h2>Medlem #{this.state.model.get("member_number")}: {this.state.model.get("firstname")} {this.state.model.get("lastname")}</h2>
 
 				<ul className="uk-tab">
 					<li><Link to={"/membership/members/" + member_id}>Personuppgifter</Link></li>
