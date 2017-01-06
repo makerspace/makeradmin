@@ -1,26 +1,24 @@
 <?php
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
 use App\Models\Member as MemberModel;
 use App\Models\Group as GroupModel;
 
-use App\Traits\Pagination;
 use App\Traits\EntityStandardFiltering;
 
 use DB;
 
 class Member extends Controller
 {
-	use Pagination, EntityStandardFiltering;
+	use EntityStandardFiltering;
 
 	/**
 	 *
 	 */
-	function list(Request $request)
+	public function list(Request $request)
 	{
 /*
 		$user = $request->header("X-Username");
@@ -64,65 +62,23 @@ class Member extends Controller
 				Delete content
 		*/
 
+		// Get all query string parameters
+		$params = $request->query->all();
 
-		// Paging filter
-		$filters = [
-			"per_page" => $this->per_page($request), // TODO: Rename?
-		];
-
-		// Filter on member_id's
-		if(!empty($request->get("member_ids")))
+		// Filter on member_number's
+		if(!empty($params["member_number"]))
 		{
-			$ids = explode(",", $request->get("member_ids"));
-			$filters["member_id"] = ["in", $ids];
+			// Explode the list of id's
+			$params["member_number"] = explode(",", $params["member_number"]);
 		}
 
-		// Filter on member_id's
-		if(!empty($request->get("member_number")))
-		{
-			$ids = explode(",", $request->get("member_number"));
-			$filters["member_number"] = ["in", $ids];
-		}
-/*
-		// Filter on relations
-		if(!empty($request->get("relations")))
-		{
-			$filters["relations"] = $request->get("relations");
-		}
-*/
-
-		// Filter on email
-		if(!empty($request->get("email")))
-		{
-			$filters["email"] = $request->get("email");
-		}
-
-		// Filter on search
-		if(!empty($request->get("search")))
-		{
-			$filters["search"] = $request->get("search");
-		}
-
-		// Sorting
-		if(!empty($request->get("sort_by")))
-		{
-			$order = ($request->get("sort_order") == "desc" ? "desc" : "asc");
-			$filters["sort"] = [$request->get("sort_by"), $order];
-		}
-
-		// Load data from database
-		$result = MemberModel::list($filters);
-
-		// Return json array
-		return Response()->json($result, 201);
-
-//		return $this->_applyStandardFilters("Member", $request);
+		return $this->_list("Member", $params);
 	}
 
 	/**
 	 *
 	 */
-	function create(Request $request)
+	public function create(Request $request)
 	{
 		$json = $request->json()->all();
 
@@ -140,7 +96,7 @@ class Member extends Controller
 
 			if(empty($newest_member))
 			{
-				$member_number = 1;
+				$member_number = 1000;
 			}
 			else
 			{
@@ -164,8 +120,14 @@ class Member extends Controller
 		$entity->address_city    = $json["address_city"]    ?? null;
 		$entity->address_country = $json["address_country"] ?? "se";
 		$entity->phone           = $json["phone"]           ?? null;
-		$entity->created_at      = $json["created_at"]      ?? null;
-		$entity->updated_at      = $json["updated_at"]      ?? null;
+		if($json["created_at"] !== null)
+		{
+			$entity->created_at = $json["created_at"];
+		}
+		if($json["updated_at"] !== null)
+		{
+			$entity->updated_at = $json["updated_at"];
+		}
 
 		// Validate input
 		$entity->validate();
@@ -194,9 +156,7 @@ class Member extends Controller
 				}
 
 				DB::insert("REPLACE INTO membership_members_groups(member_id, group_id) VALUES(?, ?)", [$member_id, $group_id]);
-				// TODO: Add to group $group["name"]
 			}
-//			$entity->addRelations($json["relations"]);
 		}
 
 		// Send response to client
@@ -209,7 +169,7 @@ class Member extends Controller
 	/**
 	 *
 	 */
-	function read(Request $request, $member_id)
+	public function read(Request $request, $member_id)
 	{
 		// Load the entity
 		$entity = MemberModel::load([
@@ -252,54 +212,22 @@ class Member extends Controller
 	/**
 	 *
 	 */
-	function update(Request $request, $member_id)
+	public function update(Request $request, $member_id)
 	{
-		// Load the entity
-		$entity = MemberModel::load([
-			"member_id" => ["=", $member_id]
-		]);
-
-		// Generate an error if there is no such member
-		if(false === $entity)
-		{
-			return Response()->json([
-				"status" => "error",
-				"message" => "Could not find any member with specified member_id",
-			], 404);
-		}
-
-		$json = $request->json()->all();
-
-		// Populate the entity with new values
-		foreach($json as $key => $value)
-		{
-			$entity->{$key} = $value ?? null;
-		}
-
-		// Validate input
-		$entity->validate();
-
-		// Save the entity
-		$entity->save();
-
-		// Send response to client
-		return Response()->json([
-			"status" => "updated",
-			"data" => $entity->toArray(),
-		], 200);
+		$data = $request->json()->all();
+		return $this->_update("Member", [
+			"member_id" => $member_id
+		], $data);
 	}
 
 	/**
 	 *
 	 */
-	function delete(Request $request, $member_id)
+	public function delete(Request $request, $member_id)
 	{
-		// Load the entity
-		$entity = MemberModel::load([
-			"member_id" => ["=", $member_id]
+		return $this->_delete("Member", [
+			"member_id" => $member_id,
 		]);
-
-		return $this->_delete($entity);
 	}
 
 	/**
@@ -334,6 +262,9 @@ class Member extends Controller
 		}
 	}
 
+	/**
+	 * Get a list of groups of the member
+	 */
 	public function getGroups(Request $request, $member_id)
 	{
 /*
@@ -371,6 +302,9 @@ class Member extends Controller
 		return Response()->json($result, 201);
 	}
 
+	/**
+	 * Add a group to a member
+	 */
 	public function addGroup(Request $request, $member_id)
 	{
 		$json = $request->json()->all();
@@ -387,6 +321,9 @@ class Member extends Controller
 		], 200);
 	}
 
+	/**
+	 * Remove a group from a member
+	 */
 	public function removeGroup(Request $request, $member_id)
 	{
 		$json = $request->json()->all();

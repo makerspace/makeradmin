@@ -1,27 +1,20 @@
 <?php
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
-
-use App\Models\Role as RoleModel;
-
-use App\Traits\Pagination;
 use App\Traits\EntityStandardFiltering;
-
-use DB;
 
 class Role extends Controller
 {
-	use Pagination, EntityStandardFiltering;
+	use EntityStandardFiltering;
 
 	/**
 	 *
 	 */
 	function list(Request $request)
 	{
-		return $this->_applyStandardFilters("Role", $request);
+		$params = $request->query->all();
+		return $this->_list("Role", $params);
 	}
 
 	/**
@@ -29,25 +22,8 @@ class Role extends Controller
 	 */
 	function create(Request $request)
 	{
-		$json = $request->json()->all();
-
-		// Create new role
-		$entity = new RoleModel;
-		$entity->group_id    = $json["group_id"]    ?? null;
-		$entity->title       = $json["title"]       ?? null;
-		$entity->description = $json["description"] ?? null;
-
-		// Validate input
-		$entity->validate();
-
-		// Save the entity
-		$entity->save();
-
-		// Send response to client
-		return Response()->json([
-			"status" => "created",
-			"data" => $entity->toArray(),
-		], 201);
+		$data = $request->json()->all();
+		return $this->_create("Role", $data);
 	}
 
 	/**
@@ -55,26 +31,9 @@ class Role extends Controller
 	 */
 	function read(Request $request, $role_id)
 	{
-		// Load the entity
-		$entity = RoleModel::load([
+		return $this->_read("Role", [
 			"role_id" => $role_id
 		]);
-
-		// Generate an error if there is no such role
-		if(false === $entity)
-		{
-			return Response()->json([
-				"status" => "error",
-				"message" => "No role with specified role_id",
-			], 404);
-		}
-		else
-		{
-			// Send response to client
-			return Response()->json([
-				"data" => $entity->toArray(),
-			], 200);
-		}
 	}
 
 	/**
@@ -82,39 +41,10 @@ class Role extends Controller
 	 */
 	function update(Request $request, $role_id)
 	{
-		// Load the entity
-		$entity = RoleModel::load([
-			"role_id" => ["=", $role_id]
-		]);
-
-		// Generate an error if there is no such role
-		if(false === $entity)
-		{
-			return Response()->json([
-				"status" => "error",
-				"message" => "Could not find any role with specified role_id",
-			], 404);
-		}
-
-		$json = $request->json()->all();
-
-		// Populate the entity with new values
-		foreach($json as $key => $value)
-		{
-			$entity->{$key} = $value ?? null;
-		}
-
-		// Validate input
-		$entity->validate();
-
-		// Save the entity
-		$entity->save();
-
-		// TODO: Standarized output
-		return Response()->json([
-			"status" => "updated",
-			"data" => $entity->toArray(),
-		], 200);
+		$data = $request->json()->all();
+		return $this->_update("Role", [
+			"role_id" => $role_id
+		], $data);
 	}
 
 	/**
@@ -122,11 +52,8 @@ class Role extends Controller
 	 */
 	function delete(Request $request, $role_id)
 	{
-		// Load the entity
-		$entity = RoleModel::load([
+		return $this->_delete("Role", [
 			"role_id" => ["=", $role_id]
 		]);
-
-		return $this->_delete($entity);
 	}
 }

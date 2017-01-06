@@ -6,18 +6,14 @@ use Illuminate\Http\Response;
 
 use App\Models\Group as GroupModel;
 use App\Models\Member as MemberModel;
-use App\Models\Entity;
 
-use App\Traits\Pagination;
 use App\Traits\EntityStandardFiltering;
-
-use LucaDegasperi\OAuth2Server\Authorizer;
 
 use DB;
 
 class Group extends Controller
 {
-	use Pagination, EntityStandardFiltering;
+	use EntityStandardFiltering;
 
 	function _loadPermissions($roles)
 	{
@@ -133,7 +129,7 @@ Indented:
 		$result = call_user_func("\App\Models\\Group::list", $filters);
 
 		// Return json array
-		return Response()->json($result, 201);
+		return Response()->json($result, 200);
 	}
 
 	/**

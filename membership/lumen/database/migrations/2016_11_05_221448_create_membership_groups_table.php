@@ -22,8 +22,10 @@ class CreateMembershipGroupsTable extends Migration
 			$table->string("name");
 			$table->string("title");
 			$table->text("description");
-			$table->timestamps();
-			$table->softDeletes();
+
+			$table->dateTimeTz("created_at")->default(DB::raw("CURRENT_TIMESTAMP"));
+			$table->dateTimeTz("updated_at")->nullable();
+			$table->dateTimeTz("deleted_at")->nullable();
 
 			$table->index("parent");
 			$table->index("left");

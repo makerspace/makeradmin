@@ -81,7 +81,7 @@ class Member extends Entity
 			"select" => "membership_members.phone",
 		],
 	];
-	protected $sort = ["member_id", "desc"];
+	protected $sort = ["member_number", "desc"];
 	protected $validation = [
 		"firstname" => ["required"],
 		"email"     => ["required", "unique"],

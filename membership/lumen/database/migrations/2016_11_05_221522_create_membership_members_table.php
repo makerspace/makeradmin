@@ -19,7 +19,7 @@ class CreateMembershipMembersTable extends Migration
 			$table->string("email");
 			$table->string("password", 60)->nullable();
 			$table->string("firstname");
-			$table->string("lastname");
+			$table->string("lastname")->nullable();
 			$table->string("civicregno", 12)->nullable();
 			$table->string("company")->nullable();
 			$table->string("orgno", 12)->nullable();
@@ -29,8 +29,10 @@ class CreateMembershipMembersTable extends Migration
 			$table->string("address_city")->nullable();
 			$table->string("address_country", 2)->nullable();
 			$table->string("phone")->nullable();
-			$table->timestamps();
-			$table->softDeletes();
+
+			$table->dateTimeTz("created_at")->default(DB::raw("CURRENT_TIMESTAMP"));
+			$table->dateTimeTz("updated_at")->nullable();
+			$table->dateTimeTz("deleted_at")->nullable();
 
 			//TODO
 			$table->integer("member_number");;
