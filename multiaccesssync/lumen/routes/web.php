@@ -14,5 +14,6 @@
 $app->group(array(), function() use ($app)
 {
 	// MultiAccess
-	$app->   get("multiaccess", "MultiAccessSync@index");
+	$app->   get("multiaccess/file/{filename}", "MultiAccessSync@diff");
+	$app->  post("multiaccess/upload",          "MultiAccessSync@upload");
 });
