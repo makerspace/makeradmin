@@ -1,2 +1,6 @@
 #!/bin/bash
-docker exec -it makeradmin-apigateway /usr/local/bin/php artisan $*
+
+ABSOLUTE_PATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source $ABSOLUTE_PATH/config
+
+docker exec -it $CONTAINER_NAME /usr/bin/php /var/www/source/artisan $*

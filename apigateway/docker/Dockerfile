@@ -7,6 +7,7 @@ RUN    apt-get update \
     && curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
 # Install stuff in vendor/
+ADD composer.json /var/www/html/composer.json
 RUN composer update -d /var/www/html
 
 # HHVM configuration files

@@ -14,5 +14,5 @@ docker run -d \
     --name $CONTAINER_NAME \
     --net makeradmin \
     $arguments \
-    -v $ABSOLUTE_PATH/../lumen:/var/www/html \
+    -v $ABSOLUTE_PATH/../lumen:/var/www/source \
     $CONTAINER_TAG:$CONTAINER_VERSION
