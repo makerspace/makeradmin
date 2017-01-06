@@ -32,8 +32,8 @@ class CreateEconomyTransactionTable extends Migration
 			$table->string("external_id")->nullable();
 
 			$table->dateTimeTz("created_at")->default(DB::raw("CURRENT_TIMESTAMP"));
-			$table->dateTimeTz("updated_at")->default(DB::raw("CURRENT_TIMESTAMP"));
-			$table->softDeletes();
+			$table->dateTimeTz("updated_at")->nullable();
+			$table->dateTimeTz("deleted_at")->nullable();
 		});
 	}
 

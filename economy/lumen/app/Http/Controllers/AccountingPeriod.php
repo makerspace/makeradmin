@@ -1,7 +1,6 @@
 <?php
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
@@ -18,7 +17,7 @@ class AccountingPeriod extends Controller
 	/**
 	 *
 	 */
-	function list(Request $request)
+	public function list(Request $request)
 	{
 		// Standard filters
 		$filters = [
@@ -48,7 +47,7 @@ class AccountingPeriod extends Controller
 	/**
 	 *
 	 */
-	function create(Request $request)
+	public function create(Request $request)
 	{
 		$json = $request->json()->all();
 
@@ -78,7 +77,7 @@ class AccountingPeriod extends Controller
 	/**
 	 *
 	 */
-	function read(Request $request, $accountingperiod_id)
+	public function read(Request $request, $accountingperiod_id)
 	{
 		// Load the instruction entity
 		$entity = Period::load([
@@ -104,7 +103,7 @@ class AccountingPeriod extends Controller
 	/**
 	 *
 	 */
-	function update(Request $request, $accountingperiod_id)
+	public function update(Request $request, $accountingperiod_id)
 	{
 //		return ['error' => 'not implemented'];
 	}
@@ -112,7 +111,7 @@ class AccountingPeriod extends Controller
 	/**
 	 * Delete an instruction
 	 */
-	function delete(Request $request, $accountingperiod_id)
+	public function delete(Request $request, $accountingperiod_id)
 	{
 		// Load the instruction entity
 		$entity = Period::load([

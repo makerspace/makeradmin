@@ -1,7 +1,6 @@
 <?php
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
@@ -22,7 +21,7 @@ class Account extends Controller
 	 *
 	 * The masterledger is basically a list of accounts, but we only show accounts with a balance != 0
 	 */
-	function masterledger(Request $request, $accountingperiod)
+	public function masterledger(Request $request, $accountingperiod)
 	{
 		// Check that the specified accounting period exists
 		$this->_getAccountingPeriodId($accountingperiod);
@@ -47,7 +46,7 @@ class Account extends Controller
 	/**
 	 * Returns a list of accounts
 	 */
-	function list(Request $request, $accountingperiod)
+	public function list(Request $request, $accountingperiod)
 	{
 		// Check that the specified accounting period exists
 		$this->_getAccountingPeriodId($accountingperiod);
@@ -83,7 +82,7 @@ class Account extends Controller
 	/**
 	 * Create account
 	 */
-	function create(Request $request, $accountingperiod)
+	public function create(Request $request, $accountingperiod)
 	{
 		$json = $request->json()->all();
 
@@ -122,7 +121,7 @@ class Account extends Controller
 	/**
 	 * Returns an single account
 	 */
-	function read(Request $request, $accountingperiod, $account_number)
+	public function read(Request $request, $accountingperiod, $account_number)
 	{
 		// Check that the specified accounting period exists
 		$this->_getAccountingPeriodId($accountingperiod);
@@ -152,7 +151,7 @@ class Account extends Controller
 	/**
 	 *
 	 */
-	function update(Request $request, $accountingperiod, $id)
+	public function update(Request $request, $accountingperiod, $id)
 	{
 		return ['error' => 'not implemented'];
 	}
@@ -160,7 +159,7 @@ class Account extends Controller
 	/**
 	 *
 	 */
-	function delete(Request $request, $accountingperiod, $account_number)
+	public function delete(Request $request, $accountingperiod, $account_number)
 	{
 		// Check that the specified accounting period exists
 		$this->_getAccountingPeriodId($accountingperiod);
@@ -188,7 +187,7 @@ class Account extends Controller
 	/**
 	 * TODO: Kolla om kontot finns redan
 	 */
-	function _accountNumberIsExisting($account_number)
+	public function _accountNumberIsExisting($account_number)
 	{
 		return false;
 	}
@@ -197,7 +196,7 @@ class Account extends Controller
 	/**
 	 *
 	 */
-	function transactions(Request $request, $accountingperiod, $account_number)
+	public function transactions(Request $request, $accountingperiod, $account_number)
 	{
 		// Check that the specified accounting period exists
 		$accountingperiod_id = $this->_getAccountingPeriodId($accountingperiod);

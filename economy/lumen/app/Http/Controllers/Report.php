@@ -13,7 +13,7 @@ class Report extends Controller
 	/**
 	 *
 	 */
-	function valuationSheet(Request $request, $accountingperiod)
+	public function valuationSheet(Request $request, $accountingperiod)
 	{
 		// Check that the specified accounting period exists
 		$this->_getAccountingPeriodId($accountingperiod);
@@ -91,7 +91,7 @@ class Report extends Controller
 	/**
 	 *
 	 */
-	function resultReport(Request $request, $accountingperiod)
+	public function resultReport(Request $request, $accountingperiod)
 	{
 		// Check that the specified accounting period exists
 		$this->_getAccountingPeriodId($accountingperiod);
@@ -186,7 +186,7 @@ class Report extends Controller
 	/**
 	 *
 	 */
-	function _recursiveProcess($data)
+	protected function _recursiveProcess($data)
 	{
 		$accountingperiod = 2015; // TODO: Hardcoded
 

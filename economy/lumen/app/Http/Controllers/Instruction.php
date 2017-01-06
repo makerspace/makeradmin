@@ -1,7 +1,6 @@
 <?php
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
@@ -18,7 +17,7 @@ class Instruction extends Controller
 	/**
 	 *
 	 */
-	function list(Request $request, $accountingperiod)
+	public function list(Request $request, $accountingperiod)
 	{
 		// Check that the specified accounting period exists
 		$this->_getAccountingPeriodId($accountingperiod);
@@ -53,7 +52,7 @@ class Instruction extends Controller
 	/**
 	 *
 	 */
-	function create(Request $request, $accountingperiod)
+	public function create(Request $request, $accountingperiod)
 	{
 		$json = $request->json()->all();
 
@@ -102,7 +101,7 @@ class Instruction extends Controller
 	/**
 	 *
 	 */
-	function read(Request $request, $accountingperiod, $instruction_number)
+	public function read(Request $request, $accountingperiod, $instruction_number)
 	{
 		// Check that the specified accounting period exists, or throw an FilterNotFoundException
 		$this->_getAccountingPeriodId($accountingperiod);
@@ -147,7 +146,7 @@ class Instruction extends Controller
 	/**
 	 * Update an instruction
 	 */
-	function update(Request $request, $accountingperiod, $id)
+	public function update(Request $request, $accountingperiod, $id)
 	{
 		return ['error' => 'not implemented'];
 	}
@@ -155,7 +154,7 @@ class Instruction extends Controller
 	/**
 	 * Delete an instruction
 	 */
-	function delete(Request $request, $accountingperiod, $instruction_number)
+	public function delete(Request $request, $accountingperiod, $instruction_number)
 	{
 		// Check that the specified accounting period exists, or throw an FilterNotFoundException
 		$this->_getAccountingPeriodId($accountingperiod);

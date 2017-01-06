@@ -1,7 +1,6 @@
 <?php
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
@@ -18,7 +17,7 @@ class Transactions extends Controller
 	/**
 	 *
 	 */
-	function list(Request $request, $accountingperiod)
+	public function list(Request $request, $accountingperiod)
 	{
 		// Check that the specified accounting period exists
 //		$accountingperiod_id = $this->_getAccountingPeriodId($accountingperiod);
@@ -65,7 +64,7 @@ class Transactions extends Controller
 	/**
 	 *
 	 */
-	function create(Request $request, $accountingperiod)
+	public function create(Request $request, $accountingperiod)
 	{
 		return ['error' => 'not implemented'];
 	}
@@ -73,7 +72,7 @@ class Transactions extends Controller
 	/**
 	 *
 	 */
-	function read(Request $request, $accountingperiod, $account_number)
+	public function read(Request $request, $accountingperiod, $account_number)
 	{
 		// Check that the specified accounting period exists
 		$accountingperiod_id = $this->_getAccountingPeriodId($accountingperiod);
@@ -107,7 +106,7 @@ class Transactions extends Controller
 	/**
 	 *
 	 */
-	function update(Request $request, $accountingperiod, $id)
+	public function update(Request $request, $accountingperiod, $id)
 	{
 		return ['error' => 'not implemented'];
 	}
@@ -115,7 +114,7 @@ class Transactions extends Controller
 	/**
 	 *
 	 */
-	function delete(Request $request, $accountingperiod, $id)
+	public function delete(Request $request, $accountingperiod, $id)
 	{
 		return ['error' => 'not implemented'];
 	}
@@ -123,7 +122,7 @@ class Transactions extends Controller
 	/**
 	 * Get a list of transactions connected to a member
 	 */
-	function transactions(Request $request)
+	public function transactions(Request $request)
 	{
 		// Paging filter
 		$filters = [

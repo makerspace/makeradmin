@@ -25,8 +25,8 @@ class CreateEconomyAccountTable extends Migration
 			$table->foreign("economy_accountingperiod_id")->references("economy_accountingperiod_id")->on("economy_accountingperiod");
 
 			$table->dateTimeTz("created_at")->default(DB::raw("CURRENT_TIMESTAMP"));
-			$table->dateTimeTz("updated_at")->default(DB::raw("CURRENT_TIMESTAMP"));
-			$table->softDeletes();
+			$table->dateTimeTz("updated_at")->nullable();
+			$table->dateTimeTz("deleted_at")->nullable();
 		});
 	}
 

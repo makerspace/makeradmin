@@ -32,7 +32,7 @@ class Economy extends Controller
 	/**
 	 *
 	 */
-	function importSeb()
+	public function importSeb()
 	{
 		$s = new EconomyParserSEB();
 		$data = file_get_contents("/vagrant/Bokföring/Kontohändelser.csv");

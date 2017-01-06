@@ -1,7 +1,6 @@
 <?php
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
@@ -15,7 +14,7 @@ class Costcenter extends Controller
 	/**
 	 *
 	 */
-	function list(Request $request, $accountingperiod)
+	public function list(Request $request, $accountingperiod)
 	{
 		// Check that the specified accounting period exists
 		$x = $this->_getAccountingPeriodId($accountingperiod);
@@ -30,7 +29,7 @@ class Costcenter extends Controller
 	/**
 	 *
 	 */
-	function create(Request $request, $accountingperiod, $id)
+	public function create(Request $request, $accountingperiod, $id)
 	{
 		// Send response to client
 		return Response()->json([
@@ -42,7 +41,7 @@ class Costcenter extends Controller
 	/**
 	 *
 	 */
-	function read(Request $request, $accountingperiod, $id)
+	public function read(Request $request, $accountingperiod, $id)
 	{
 		// Send response to client
 		return Response()->json([
@@ -54,7 +53,7 @@ class Costcenter extends Controller
 	/**
 	 *
 	 */
-	function update(Request $request, $accountingperiod, $id)
+	public function update(Request $request, $accountingperiod, $id)
 	{
 		// Send response to client
 		return Response()->json([
@@ -66,7 +65,7 @@ class Costcenter extends Controller
 	/**
 	 *
 	 */
-	function delete(Request $request, $accountingperiod, $id)
+	public function delete(Request $request, $accountingperiod, $id)
 	{
 		// Send response to client
 		return Response()->json([

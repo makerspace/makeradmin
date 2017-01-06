@@ -12,7 +12,7 @@ class Maintenance extends Controller
 	/**
 	 * Returns all instructions where the sum of all transactions is not zero.
 	 */
-	function unbalancedInstructions(Request $request)
+	public function unbalancedInstructions(Request $request)
 	{
 		$query = "SELECT economy_instruction.*, SUM(economy_transaction.amount) AS meep " .
 		         "FROM economy_instruction " .
@@ -30,7 +30,7 @@ class Maintenance extends Controller
 	/**
 	 * This function updates the instruction numbers on all instructions except number 0.
 	 */
-	function updateInstructionNumbers(Request $request)
+	public function updateInstructionNumbers(Request $request)
 	{
 		DB::statement("SET @number = 0;");
 
