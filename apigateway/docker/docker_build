@@ -1,5 +1,6 @@
 #!/bin/bash
 
 ABSOLUTE_PATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source $ABSOLUTE_PATH/config
 
-docker build --tag=makeradmin/apigateway:1.0 $ABSOLUTE_PATH
+docker build --tag=$CONTAINER_TAG:$CONTAINER_VERSION $ABSOLUTE_PATH
