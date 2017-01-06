@@ -86,12 +86,13 @@ class CurlBrowser
 	/**
 	 *
 	 */
-	public function call($method, $url, array $qs = null, $post = [])
+	public function call($method, $url, array $qs = [], $post = [])
 	{
 		// Set query string parameters
-		if($qs)
+		$this->queryString = [];
+		foreach($qs as $key => $value)
 		{
-			$this->setQueryString($qs);
+			$this->queryString[$key] = $value;
 		}
 
 		// GET, POST, etc
@@ -261,7 +262,6 @@ class CurlBrowser
 			foreach(func_get_arg(0) as $key => $value)
 			{
 				$this->queryString[$key] = $value;
-
 			}
 		}
 		else
