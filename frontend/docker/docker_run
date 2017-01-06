@@ -1,9 +1,17 @@
 #!/bin/bash
 
 ABSOLUTE_PATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source $ABSOLUTE_PATH/config
 
+arguments=""
+for var in "$@"
+do
+    arguments="$arguments -e $var"
+done
+
+# Create the API Gateway container
 docker run -d \
-    --name makeradmin-frontend \
-    -e VIRTUAL_HOST=makeradmin.dev \
+    --name $CONTAINER_NAME \
+    $arguments \
     -v $ABSOLUTE_PATH/../dist:/var/www/html \
-    makeradmin/frontend:1.0
+    $CONTAINER_TAG:$CONTAINER_VERSION
