@@ -13,6 +13,5 @@ module.exports = Backbone.Model.fullExtend(
 		status: "inactive",
 		startdate: "",
 		enddate: "",
-		member_id: "",
 	},
 });

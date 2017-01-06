@@ -5,12 +5,12 @@ module.exports = Backbone.Model.fullExtend(
 	idAttribute: "accountingperiod_id",
 	urlRoot: "/economy/accountingperiod",
 	defaults: {
-		created_at: "0000-00-00T00:00:00Z",
-		updated_at: "0000-00-00T00:00:00Z",
+		created_at: "",
+		updated_at: "",
 		title: "",
 		description: "",
 		name: "",
-		start: "0000-00-00T00:00:00Z",
-		end: "0000-00-00T00:00:00Z",
+		start: "",
+		end: "",
 	},
 });

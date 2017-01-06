@@ -9,8 +9,8 @@ module.exports = Backbone.Model.fullExtend(
 		return "/economy/" + this.get("period") + "/transaction";
 	},
 	defaults: {
-		created_at: "0000-00-00T00:00:00Z",
-		updated_at: "0000-00-00T00:00:00Z",
+		created_at: "",
+		updated_at: "",
 		transaction_title: "",
 		transaction_description: "",
 		accounting_instruction: "",
@@ -20,7 +20,7 @@ module.exports = Backbone.Model.fullExtend(
 		external_id: "",
 		instruction_title: "",
 		instruction_number: 0,
-		accounting_date: "0000-00-00T00:00:00Z",
+		accounting_date: "",
 		extid: 0,
 		balance: 0,
 	},

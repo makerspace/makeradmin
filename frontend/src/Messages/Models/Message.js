@@ -5,8 +5,8 @@ module.exports = Backbone.Model.fullExtend(
 	idAttribute: "message_id",
 	urlRoot: "/messages",
 	defaults: {
-		created_at: "0000-00-00T00:00:00Z",
-		updated_at: "0000-00-00T00:00:00Z",
+		created_at: "",
+		updated_at: "",
 		subject: "",
 		body: "",
 		message_type: "email",

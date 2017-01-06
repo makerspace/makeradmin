@@ -11,9 +11,9 @@ module.exports = Backbone.Model.fullExtend(
 	defaults: {
 		entity_id: 0,
 		instruction_number: 0,
-		created_at: "0000-00-00T00:00:00Z",
-		updated_at: "0000-00-00T00:00:00Z",
-		accounting_date: "0000-00-00T00:00:00Z",
+		created_at: "",
+		updated_at: "",
+		accounting_date: "",
 		importer: "",
 		external_id: "",
 		external_date: "",

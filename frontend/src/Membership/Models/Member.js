@@ -5,8 +5,8 @@ module.exports = Backbone.Model.fullExtend(
 	idAttribute: "member_id",
 	urlRoot: "/membership/member",
 	defaults: {
-		created_at: "0000-00-00T00:00:00Z",
-		updated_at: "0000-00-00T00:00:00Z",
+		created_at: "",
+		updated_at: "",
 		member_number: "",
 		civicregno: "",
 		firstname: "",

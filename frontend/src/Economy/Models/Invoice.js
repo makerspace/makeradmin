@@ -9,8 +9,8 @@ module.exports = Backbone.Model.fullExtend(
 		return "/economy/" + this.get("period") + "/invoice";
 	},
 	defaults: {
-		created_at: "0000-00-00T00:00:00Z",
-		updated_at: "0000-00-00T00:00:00Z",
+		created_at: "",
+		updated_at: "",
 		invoice_number: 0,
 		title: "",
 		description: "",
