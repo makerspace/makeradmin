@@ -25,8 +25,6 @@ $app = new Laravel\Lumen\Application(
 
 $app->withFacades();
 
-// $app->withEloquent();
-
 // Load configuration file
 $app->configure("service");
 
@@ -98,6 +96,10 @@ $app->middleware([
 
 $app->group(['namespace' => 'App\Http\Controllers'], function ($app) {
 	require __DIR__.'/../routes/web.php';
+});
+
+$app->singleton('filesystem', function ($app) {
+	return $app->loadComponent('filesystems', 'Illuminate\Filesystem\FilesystemServiceProvider', 'filesystem');
 });
 
 return $app;
