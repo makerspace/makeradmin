@@ -177,7 +177,6 @@ Backbone.Model.fullExtend = function(protoProps, staticProps)
 		// Filter the data to send to the server
 		for(var key in attrs)
 		{
-			console.log(key);
 			if(attrs[key] == "")
 			{
 				attrs[key] = null;

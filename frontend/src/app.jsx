@@ -6,6 +6,7 @@ require('uikit/dist/js/core/dropdown')
 require('uikit/dist/js/components/pagination')
 require('uikit/dist/js/components/autocomplete')
 require('uikit/dist/js/components/notify')
+require('uikit/dist/js/components/upload')
 
 // React stuff
 import React from 'react';
