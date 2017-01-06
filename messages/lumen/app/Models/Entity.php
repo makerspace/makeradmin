@@ -60,7 +60,7 @@ class Entity
 				{
 					if(!array_key_exists($filter[0], $this->columns))
 					{
-						throw new \App\Exceptions\FilterNotFoundException("sort_by", $filter, "Could not find the column you trying to sort by");
+						throw new \App\Exceptions\FilterNotFoundException("sort_by", $filter[0], "Could not find the column you trying to sort by");
 					}
 
 					$this->sort = $filter;
@@ -178,10 +178,10 @@ class Entity
 					unset($filters[$id]);
 				}
 				// Filter on transaction_id's
-				else if("ids" == $id)
+				else if("entity_id" == $id)
 				{
 					$query = $query
-					->whereIn($this->columns[$this->id_column]["column"], $filter);
+						->whereIn($this->columns[$this->id_column]["column"], $filter);
 					unset($filters[$id]);
 				}
 				// Filter on arbritrary columns
@@ -201,13 +201,17 @@ class Entity
 					}
 					else
 					{
-						if($filter[0] == "in")
+						if(count($filter) == 2 && $filter[0] == "in")
 						{
 							$query = $query->whereIn($id, $filter[1]);
 						}
-						else
+						else if(count($filter) == 2)
 						{
 							$query = $query->where($id, $filter[0], $filter[1]);
+						}
+						else
+						{
+							$query = $query->whereIn($id, $filter);
 						}
 					}
 					unset($filters[$id]);
@@ -325,6 +329,9 @@ class Entity
 		// Apply standard filters like entity_id, relations, etc
 		$query = $this->_applyFilter($query, $filters);
 
+		// Sort
+		$query = $this->_applySorting($query);
+
 		// Get data from database
 		$data = (array)$query->first();
 
@@ -333,13 +340,13 @@ class Entity
 		{
 			return false;
 		}
-		
-		// The columns is fetched with an "column AS name", so no need to translate the $column_id
-		$data["entity_id"] = $data[$this->id_column];
 
 		// Create a new entity based on type
 		$classname = get_class($this);
 		$entity = new $classname;
+
+		// The columns is fetched with an "column AS name", so no need to translate the $column_id
+		$entity->entity_id = $data[$this->id_column];
 
 		// Populate the entity with data
 		foreach($data as $key => $value)

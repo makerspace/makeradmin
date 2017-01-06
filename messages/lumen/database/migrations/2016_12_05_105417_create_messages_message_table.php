@@ -24,7 +24,7 @@ class CreateMessagesMessageTable extends Migration
 			$table->string("status");
 
 			$table->dateTimeTz("created_at")->default(DB::raw("CURRENT_TIMESTAMP"));
-			$table->dateTimeTz("updated_at")->default(DB::raw("CURRENT_TIMESTAMP"));
+			$table->dateTimeTz("updated_at")->nullable();
 		});
 	}
 

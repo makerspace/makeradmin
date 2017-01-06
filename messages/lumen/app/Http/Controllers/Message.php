@@ -1,60 +1,33 @@
 <?php
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
 use App\Models\Message as MessageModel;
 use App\Models\Recipient as RecipientModel;
 
-use App\Traits\Pagination;
 use App\Traits\EntityStandardFiltering;
 
 use App\Libraries\CurlBrowser;
 
 class Message extends Controller
 {
-	use Pagination, EntityStandardFiltering;
+	use EntityStandardFiltering;
 
 	/**
 	 * Return a list of all queued/sent messages
 	 */
-	function list(Request $request)
+	public function list(Request $request)
 	{
-		return $this->_applyStandardFilters("Message", $request);
-	}
-
-
-	/**
-	 * Load a queued/sent messages
-	 */
-	function read(Request $request, $message_id)
-	{
-		// Load the product
-		$message = MessageModel::load([
-			"message_id" => ["=", $message_id]
-		]);
-
-		// Generate an error if there is no such product
-		if(false === $message)
-		{
-			return Response()->json([
-				"message" => "No product with specified product id",
-			], 404);
-		}
-		else
-		{
-			return Response()->json([
-				"data" => $message->toArray(),
-			], 200);
-		}
+		$params = $request->query->all();
+		return $this->_list("Message", $params);
 	}
 
 	/**
 	 * Send a new message
 	 */
-	function create(Request $request)
+	public function create(Request $request)
 	{
 		// TODO: Get the chunk size from configuration
 		$chunkSize = 2500;
@@ -191,10 +164,21 @@ class Message extends Controller
 		], 201);
 	}
 
+
+	/**
+	 * Load a queued/sent messages
+	 */
+	public function read(Request $request, $message_id)
+	{
+		return $this->_read("Message", [
+			"message_id" => $message_id
+		]);
+	}
+
 	/**
 	 * TODO: Preprocess all tokens in the message
 	 */
-	function _proprocessTokens($input, $member)
+	protected function _proprocessTokens($input, $member)
 	{
 		$input = str_replace("##expirydate##",    "2016-12-31",       $input); // TODO
 		$input = str_replace("##member_number##", $member->member_id, $input); // TODO: member_number
