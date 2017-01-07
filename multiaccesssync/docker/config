@@ -1,0 +1,3 @@
+CONTAINER_NAME=makeradmin-multiaccesssync
+CONTAINER_TAG=makeradmin/multiaccesssync
+CONTAINER_VERSION=1.0
