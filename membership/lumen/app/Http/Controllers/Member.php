@@ -250,7 +250,9 @@ class Member extends Controller
 		if($result && password_verify($password, $result->password))
 		{
 			return Response()->json([
-				"member_id" => $result->member_id,
+				"data" => [
+					"member_id" => $result->member_id,
+				]
 			], 200);
 		}
 		else
