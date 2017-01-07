@@ -11,7 +11,7 @@
 |
 */
 
-$app = require '/var/www/html/bootstrap/app.php';
+$app = require __DIR__.'/../bootstrap/app.php';
 
 /*
 |--------------------------------------------------------------------------
