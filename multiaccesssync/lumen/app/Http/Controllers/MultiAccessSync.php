@@ -139,7 +139,7 @@ class MultiAccessSync extends Controller
 
 		// Get all members in local database from API
 		$curl->call("GET", "http://" . config("service.gateway") . "/membership/member", [
-			"member_ids" => implode(", ", $member_ids),
+			"entity_id" => implode(", ", $member_ids),
 			"per_page" => 5000,
 		]);
 		$member_number_mapping = [];
