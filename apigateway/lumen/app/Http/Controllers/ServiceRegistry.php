@@ -50,9 +50,8 @@ class ServiceRegistry extends Controller
 		if(Service::getService($json["url"], $json["version"]))
 		{
 			return Response()->json([
-				"status"  => "error",
 				"message" => "A service does alredy exist with identical URL and version",
-			]);
+			], 409);
 		}
 
 		// Register the service
@@ -65,9 +64,8 @@ class ServiceRegistry extends Controller
 
 		// Send response
 		return Response()->json([
-			"status"  => "registered",
 			"message" => "The service was successfully registered",
-		], 200);
+		], 201);
 	}
 
 	/**
@@ -97,7 +95,6 @@ class ServiceRegistry extends Controller
 
 		// Send response
 		return Response()->json([
-			"status"  => "unregistered",
 			"message" => "The service was successfully unregistered",
 			"data"    => $json,
 		], 200);
@@ -224,14 +221,12 @@ class ServiceRegistry extends Controller
 		if(!$user)
 		{
 			return Response()->json([
-				"status"  => "ok",
-				"message" => "Hello not logged in user!",
+				"message" => "Hello unauthorized user!",
 			], 200);
 		}
 		else
 		{
 			return Response()->json([
-				"status"  => "ok",
 				"message" => "Hello user {$user->user_id}!",
 			], 200);
 		}

@@ -12,6 +12,9 @@ header("Access-Control-Allow-Headers: Origin, Content-Type, Accept, Authorizatio
 // Tell client that this pre-flight info is valid for 20 days
 header("Access-Control-Max-Age: 1728000");
 
+// Index page, test to see if the user is logged in or not
+$app->  get("/", "ServiceRegistry@test")->middleware("auth");
+
 // OAuth 2.0 stuff
 $app->  post("oauth/token",          "Authentication@login");
 $app->  post("oauth/resetpassword",  "Authentication@reset");
@@ -23,39 +26,40 @@ $app->  post("service/register",   "ServiceRegistry@register");
 $app->  post("service/unregister", "ServiceRegistry@unregister");
 $app->   get("service/list",       "ServiceRegistry@list");
 
-// Test to see if the user is logged in or not
-$app->   get("test",               "ServiceRegistry@test")->middleware("auth");
+// Require an authenticated user for these requests
+$app->group(["middleware" => "auth"], function() use ($app)
+{
+	// Relations
+	$app->   get("relations", ["middleware" => "auth", "uses" => "Relations@relations"]);// TODO: Remove this API
+	$app->   get("relation",  ["middleware" => "auth", "uses" => "Relations@relation"]);
+	$app->  post("relation",  ["middleware" => "auth", "uses" => "Relations@createRelation"]);
+	$app->   get("related",   ["middleware" => "auth", "uses" => "Relations@related"]);
 
-// Relations
-$app->   get("relations",         "Relations@relations");// TODO: Remove this API
-$app->   get("relation",          "Relations@relation");
-$app->  post("relation",          "Relations@createRelation");
-$app->   get("related",           "Relations@related");
+	// Facades
+	$app->   get("facade",    ["middleware" => "auth", "uses" => "Facade@index"]);
 
-// Facades
-$app->   get("facade",           "Facade@index");
-
-// An ugly way to catch all request as lumen does not support the any() and match() methods used in Laravel
-$app->get("/{p1}",                        "ServiceRegistry@handleRoute");
-$app->get("/{p1}/{p2}",                   "ServiceRegistry@handleRoute");
-$app->get("/{p1}/{p2}/{p3}",              "ServiceRegistry@handleRoute");
-$app->get("/{p1}/{p2}/{p3}/{p4}",         "ServiceRegistry@handleRoute");
-$app->get("/{p1}/{p2}/{p3}/{p4}/{p5}",    "ServiceRegistry@handleRoute");
-$app->put("/{p1}",                        "ServiceRegistry@handleRoute");
-$app->put("/{p1}/{p2}",                   "ServiceRegistry@handleRoute");
-$app->put("/{p1}/{p2}/{p3}",              "ServiceRegistry@handleRoute");
-$app->put("/{p1}/{p2}/{p3}/{p4}",         "ServiceRegistry@handleRoute");
-$app->put("/{p1}/{p2}/{p3}/{p4}/{p5}",    "ServiceRegistry@handleRoute");
-$app->post("/{p1}",                       "ServiceRegistry@handleRoute");
-$app->post("/{p1}/{p2}",                  "ServiceRegistry@handleRoute");
-$app->post("/{p1}/{p2}/{p3}",             "ServiceRegistry@handleRoute");
-$app->post("/{p1}/{p2}/{p3}/{p4}",        "ServiceRegistry@handleRoute");
-$app->post("/{p1}/{p2}/{p3}/{p4}/{p5}",   "ServiceRegistry@handleRoute");
-$app->delete("/{p1}",                     "ServiceRegistry@handleRoute");
-$app->delete("/{p1}/{p2}",                "ServiceRegistry@handleRoute");
-$app->delete("/{p1}/{p2}/{p3}",           "ServiceRegistry@handleRoute");
-$app->delete("/{p1}/{p2}/{p3}/{p4}",      "ServiceRegistry@handleRoute");
-$app->delete("/{p1}/{p2}/{p3}/{p4}/{p5}", "ServiceRegistry@handleRoute");
+	// An ugly way to catch all request as lumen does not support the any() and match() methods used in Laravel
+	$app->get("/{p1}",                        "ServiceRegistry@handleRoute");
+	$app->get("/{p1}/{p2}",                   "ServiceRegistry@handleRoute");
+	$app->get("/{p1}/{p2}/{p3}",              "ServiceRegistry@handleRoute");
+	$app->get("/{p1}/{p2}/{p3}/{p4}",         "ServiceRegistry@handleRoute");
+	$app->get("/{p1}/{p2}/{p3}/{p4}/{p5}",    "ServiceRegistry@handleRoute");
+	$app->put("/{p1}",                        "ServiceRegistry@handleRoute");
+	$app->put("/{p1}/{p2}",                   "ServiceRegistry@handleRoute");
+	$app->put("/{p1}/{p2}/{p3}",              "ServiceRegistry@handleRoute");
+	$app->put("/{p1}/{p2}/{p3}/{p4}",         "ServiceRegistry@handleRoute");
+	$app->put("/{p1}/{p2}/{p3}/{p4}/{p5}",    "ServiceRegistry@handleRoute");
+	$app->post("/{p1}",                       "ServiceRegistry@handleRoute");
+	$app->post("/{p1}/{p2}",                  "ServiceRegistry@handleRoute");
+	$app->post("/{p1}/{p2}/{p3}",             "ServiceRegistry@handleRoute");
+	$app->post("/{p1}/{p2}/{p3}/{p4}",        "ServiceRegistry@handleRoute");
+	$app->post("/{p1}/{p2}/{p3}/{p4}/{p5}",   "ServiceRegistry@handleRoute");
+	$app->delete("/{p1}",                     "ServiceRegistry@handleRoute");
+	$app->delete("/{p1}/{p2}",                "ServiceRegistry@handleRoute");
+	$app->delete("/{p1}/{p2}/{p3}",           "ServiceRegistry@handleRoute");
+	$app->delete("/{p1}/{p2}/{p3}/{p4}",      "ServiceRegistry@handleRoute");
+	$app->delete("/{p1}/{p2}/{p3}/{p4}/{p5}", "ServiceRegistry@handleRoute");
+});
 
 // Handle CORS requests
 $app->options("/",                         "ServiceRegistry@handleOptions");
