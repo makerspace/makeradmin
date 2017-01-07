@@ -75,7 +75,7 @@ class Relations extends Controller
 			unset($params["matchUrl"]);
 			unset($params["from"]);
 
-			$params["ids"] = implode(",", $data);
+			$params["entity_id"] = implode(",", $data);
 
 			$result = $this->_makeCall($from, $params);
 		}
@@ -150,11 +150,8 @@ class Relations extends Controller
 		// Create a new url with the service endpoint url included
 		$url = $service->endpoint . "/" . implode("/", $path);
 
-		// Set query string parameters
-		$ch->setQueryString($params);
-
 		// Send the request
-		$result = $ch->call("GET", $url);
+		$result = $ch->call("GET", $url, $params);
 		$http_code = $ch->getStatusCode();
 
 		// Log the internal HTTP request
