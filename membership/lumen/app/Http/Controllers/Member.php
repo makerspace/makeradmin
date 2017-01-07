@@ -83,13 +83,13 @@ class Member extends Controller
 		$json = $request->json()->all();
 
 		// TODO: This should be removed
-		// Create a unique member number if not specified
 		if(!empty($json["member_number"]))
 		{
 			$member_number = $json["member_number"];
 		}
 		else
 		{
+			// Create a unique member number if not specified
 			$newest_member = MemberModel::load([
 				["sort", ["member_number", "desc"]]
 			]);
@@ -267,39 +267,13 @@ class Member extends Controller
 	 */
 	public function getGroups(Request $request, $member_id)
 	{
-/*
-		// TODO: Get roles from user
-		$roles = [2, 5];
+		// Get all query string parameters
+		$params = $request->query->all();
 
-		// Get groups the where the user have a "view group" permission
-		$this->_loadPermissions($roles);
-		$groups = $this->_checkPermission("view group");
-*/
-		// Paging and permission filter
-		$filters = [
-			"per_page" => $this->per_page($request), // TODO: Rename?
-			"member_id" => $member_id,
-//			"group_id" => ["in", $groups],
-		];
+		// Filter on member
+		$params["member_id"] = $member_id;
 
-		// Filter on search
-		if(!empty($request->get("search")))
-		{
-			$filters["search"] = $request->get("search");
-		}
-
-		// Sorting
-		if(!empty($request->get("sort_by")))
-		{
-			$order = ($request->get("sort_order") == "desc" ? "desc" : "asc");
-			$filters["sort"] = [$request->get("sort_by"), $order];
-		}
-
-		// Load data from database
-		$result = GroupModel::list($filters);
-
-		// Return json array
-		return Response()->json($result, 201);
+		return $this->_list("Group", $params);
 	}
 
 	/**

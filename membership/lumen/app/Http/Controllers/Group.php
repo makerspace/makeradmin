@@ -99,37 +99,18 @@ Indented:
 	 */
 	function list(Request $request)
 	{
+		// Get all query string parameters
+		$params = $request->query->all();
+
 		// TODO: Get roles from user
 		$roles = [2, 5];
 
-		// Get groups the where the user have a "view group" permission
+		// Get groups the where the user have a "view group" permission and filter on those groups
 		$this->_loadPermissions($roles);
 		$groups = $this->_checkPermission("view group");
+		$params["group_id"] = ["in", $groups];
 
-		// Paging and permission filter
-		$filters = [
-			"per_page" => $this->per_page($request), // TODO: Rename?
-			"group_id" => ["in", $groups],
-		];
-
-		// Filter on search
-		if(!empty($request->get("search")))
-		{
-			$filters["search"] = $request->get("search");
-		}
-
-		// Sorting
-		if(!empty($request->get("sort_by")))
-		{
-			$order = ($request->get("sort_order") == "desc" ? "desc" : "asc");
-			$filters["sort"] = [$request->get("sort_by"), $order];
-		}
-
-		// Load data from database
-		$result = call_user_func("\App\Models\\Group::list", $filters);
-
-		// Return json array
-		return Response()->json($result, 200);
+		return $this->_list("Group", $params);
 	}
 
 	/**
@@ -165,26 +146,9 @@ Indented:
 	 */
 	function read(Request $request, $group_id)
 	{
-		// Load the group
-		$entity = GroupModel::load([
-			"group_id" => $group_id,
+		return $this->_read("Group", [
+			"group_id" => $group_id
 		]);
-
-		// Generate an error if there is no such group
-		if(false === $entity)
-		{
-			return Response()->json([
-				"status" => "error",
-				"message" => "No group with specified group_id",
-			], 404);
-		}
-		else
-		{
-			// Send response to client
-			return Response()->json([
-				"data" => $entity->toArray(),
-			], 200);
-		}
 	}
 
 	/**
@@ -192,39 +156,10 @@ Indented:
 	 */
 	function update(Request $request, $group_id)
 	{
-		// Load the group
-		$entity = GroupModel::load([
-			"group_id" => $group_id,
-		]);
-
-		// Generate an error if there is no such group
-		if(false === $entity)
-		{
-			return Response()->json([
-				"status" => "error",
-				"message" => "No group with specified group_id",
-			], 404);
-		}
-
-		$json = $request->json()->all();
-
-		// Create new group
-		// TODO: Put in generic function
-		$entity->name        = $json["name"]        ?? null;
-		$entity->title       = $json["title"]       ?? null;
-		$entity->description = $json["description"] ?? null;
-
-		// Validate input
-		$entity->validate();
-
-		// Save the entity
-		$entity->save();
-
-		// Send response to client
-		return [
-			"status" => "updated",
-			"data" => $entity->toArray(),
-		];
+		$data = $request->json()->all();
+		return $this->_update("Group", [
+			"group_id" => $group_id
+		], $data);
 	}
 
 	/**
@@ -232,12 +167,9 @@ Indented:
 	 */
 	function delete(Request $request, $group_id)
 	{
-		// Load the group
-		$entity = GroupModel::load([
+		return $this->_delete("Group", [
 			"group_id" => $group_id,
 		]);
-
-		return $this->_delete($entity);
 	}
 
 	/**
@@ -245,37 +177,12 @@ Indented:
 	 */
 	function getMembers(Request $request, $group_id)
 	{
-		// Paging filter
-		$filters = [
-			"per_page" => $this->per_page($request), // TODO: Rename?
-			"group_id" => $group_id,
-		];
+		// Get all query string parameters
+		$params = $request->query->all();
 
-		// Filter on relations
-/*
-		if(!empty($request->get("relations")))
-		{
-			$filters["relations"] = $request->get("relations");
-		}
-*/
+		// Filter on group
+		$params["group_id"] = $group_id;
 
-		// Filter on search
-		if(!empty($request->get("search")))
-		{
-			$filters["search"] = $request->get("search");
-		}
-
-		// Sorting
-		if(!empty($request->get("sort_by")))
-		{
-			$order = ($request->get("sort_order") == "desc" ? "desc" : "asc");
-			$filters["sort"] = [$request->get("sort_by"), $order];
-		}
-
-		// Load data from database
-		$result = MemberModel::list($filters);
-
-		// Return json array
-		return Response()->json($result, 200);
+		return $this->_list("Member", $params);
 	}
 }

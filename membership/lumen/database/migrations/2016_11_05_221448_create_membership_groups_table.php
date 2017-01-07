@@ -21,7 +21,7 @@ class CreateMembershipGroupsTable extends Migration
 			$table->integer("right");
 			$table->string("name");
 			$table->string("title");
-			$table->text("description");
+			$table->text("description")->nullable();
 
 			$table->dateTimeTz("created_at")->default(DB::raw("CURRENT_TIMESTAMP"));
 			$table->dateTimeTz("updated_at")->nullable();
