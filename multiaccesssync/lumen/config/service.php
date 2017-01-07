@@ -5,4 +5,5 @@ return [
 	'version' => '1.0',
 	'url'     => 'multiaccess',
 	'gateway' => getenv('APIGATEWAY'),
+	'bearer'  => getenv('BEARER'),
 ];

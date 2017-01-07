@@ -84,7 +84,7 @@ class CurlBrowser
 	}
 
 	/**
-	 *
+	 * Note: Headers are not cleared between calls
 	 */
 	public function call($method, $url, array $qs = [], $post = [])
 	{
