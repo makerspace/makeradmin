@@ -12,5 +12,6 @@ done
 # Create the API Gateway container
 docker run -d \
     --name $CONTAINER_NAME \
+    --net makeradmin \
     $arguments \
     $CONTAINER_TAG:$CONTAINER_VERSION
