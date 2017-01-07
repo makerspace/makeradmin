@@ -26,7 +26,6 @@ class Login
 			// If no service is specified we should just throw an generic error saying the service could not be contacted
 			throw new ServiceRequestTimeout;
 		}
-		$url = "{$service->endpoint}/membership/authenticate";
 
 		// Send the request
 		$ch = new CurlBrowser();
