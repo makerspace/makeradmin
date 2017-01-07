@@ -41026,10 +41026,6 @@
 
 	var _auth2 = _interopRequireDefault(_auth);
 
-	var _config = __webpack_require__(241);
-
-	var _config2 = _interopRequireDefault(_config);
-
 	var _underscore = __webpack_require__(236);
 
 	var _underscore2 = _interopRequireDefault(_underscore);
@@ -41045,7 +41041,7 @@
 		};
 
 		// Base path for API access
-		options.url = _config2.default.apiBasePath + (typeof model.url == "function" ? model.url() : model.url);
+		options.url = config.apiBasePath + (typeof model.url == "function" ? model.url() : model.url);
 
 		// Add generic error handling to those models who doesn't implement own error handling
 		var oldError = options.error;
@@ -42582,15 +42578,9 @@
 /* 240 */
 /***/ function(module, exports, __webpack_require__) {
 
-	'use strict';
+	"use strict";
 
 	var _reactRouter = __webpack_require__(178);
-
-	var _config = __webpack_require__(241);
-
-	var _config2 = _interopRequireDefault(_config);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	module.exports = {
 		/**
@@ -42625,7 +42615,7 @@
 		requestPassword: function requestPassword(username) {
 			$.ajax({
 				method: "POST",
-				url: _config2.default.apiBasePath + "/oauth/resetpassword",
+				url: config.apiBasePath + "/oauth/resetpassword",
 				data: {
 					username: username
 				}
@@ -42642,7 +42632,7 @@
 			// Login with OAuth 2.0
 			$.ajax({
 				method: "POST",
-				url: _config2.default.apiBasePath + "/oauth/token",
+				url: config.apiBasePath + "/oauth/token",
 				data: {
 					grant_type: "password",
 					username: username,
@@ -42671,7 +42661,7 @@
 			// Tell the server to delete the access token
 			$.ajax({
 				method: "DELETE",
-				url: _config2.default.apiBasePath + "/oauth/token/" + localStorage.token,
+				url: config.apiBasePath + "/oauth/token/" + localStorage.token,
 				headers: {
 					"Authorization": "Bearer " + localStorage.token
 				}
@@ -42691,21 +42681,7 @@
 	};
 
 /***/ },
-/* 241 */
-/***/ function(module, exports) {
-
-	"use strict";
-
-	module.exports = {
-		apiBasePath: "http://api.makeradmin.dev",
-		apiVersion: "1.0",
-		pagination: {
-			pageSize: 25
-		},
-		accountingPeriod: "2015"
-	};
-
-/***/ },
+/* 241 */,
 /* 242 */
 /***/ function(module, exports, __webpack_require__) {
 
@@ -48672,10 +48648,6 @@
 
 	var _Loading2 = _interopRequireDefault(_Loading);
 
-	var _config = __webpack_require__(241);
-
-	var _config2 = _interopRequireDefault(_config);
-
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	/// TODO: This Mixin's should handle auto refresh
@@ -48690,7 +48662,7 @@
 			// Create an array with options used for extending the collection
 			var options = {
 				state: {
-					pageSize: _config2.default.pagination.pageSize
+					pageSize: config.pagination.pageSize
 				},
 
 				parseRecords: function parseRecords(resp, options) {
@@ -49141,10 +49113,6 @@
 
 	var _Account2 = _interopRequireDefault(_Account);
 
-	var _config = __webpack_require__(241);
-
-	var _config2 = _interopRequireDefault(_config);
-
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	module.exports = _backbone2.default.PageableCollection.extend({
@@ -49155,15 +49123,11 @@
 /* 258 */
 /***/ function(module, exports, __webpack_require__) {
 
-	'use strict';
+	"use strict";
 
 	var _backbone = __webpack_require__(235);
 
 	var _backbone2 = _interopRequireDefault(_backbone);
-
-	var _config = __webpack_require__(241);
-
-	var _config2 = _interopRequireDefault(_config);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -49391,10 +49355,6 @@
 
 	var _Invoice2 = _interopRequireDefault(_Invoice);
 
-	var _config = __webpack_require__(241);
-
-	var _config2 = _interopRequireDefault(_config);
-
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	module.exports = _backbone2.default.PageableCollection.extend({
@@ -49405,15 +49365,11 @@
 /* 263 */
 /***/ function(module, exports, __webpack_require__) {
 
-	'use strict';
+	"use strict";
 
 	var _backbone = __webpack_require__(235);
 
 	var _backbone2 = _interopRequireDefault(_backbone);
-
-	var _config = __webpack_require__(241);
-
-	var _config2 = _interopRequireDefault(_config);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -49719,10 +49675,6 @@
 	var _backboneReactComponent = __webpack_require__(234);
 
 	var _backboneReactComponent2 = _interopRequireDefault(_backboneReactComponent);
-
-	var _config = __webpack_require__(241);
-
-	var _config2 = _interopRequireDefault(_config);
 
 	var _Invoice = __webpack_require__(262);
 
@@ -50224,10 +50176,6 @@
 
 	var _Instruction2 = _interopRequireDefault(_Instruction);
 
-	var _config = __webpack_require__(241);
-
-	var _config2 = _interopRequireDefault(_config);
-
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	module.exports = _backbone2.default.PageableCollection.extend({
@@ -50238,15 +50186,11 @@
 /* 272 */
 /***/ function(module, exports, __webpack_require__) {
 
-	'use strict';
+	"use strict";
 
 	var _backbone = __webpack_require__(235);
 
 	var _backbone2 = _interopRequireDefault(_backbone);
-
-	var _config = __webpack_require__(241);
-
-	var _config2 = _interopRequireDefault(_config);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -50504,10 +50448,6 @@
 	var _react = __webpack_require__(1);
 
 	var _react2 = _interopRequireDefault(_react);
-
-	var _config = __webpack_require__(241);
-
-	var _config2 = _interopRequireDefault(_config);
 
 	var _reactRouter = __webpack_require__(178);
 
@@ -51153,10 +51093,6 @@
 
 	var _backboneReactComponent2 = _interopRequireDefault(_backboneReactComponent);
 
-	var _config = __webpack_require__(241);
-
-	var _config2 = _interopRequireDefault(_config);
-
 	var _Masterledger = __webpack_require__(257);
 
 	var _Masterledger2 = _interopRequireDefault(_Masterledger);
@@ -51189,7 +51125,7 @@
 
 		componentDidMount: function componentDidMount() {
 			$.ajax({
-				url: _config2.default.apiBasePath + "/economy/" + this.props.params.period + "/valuationsheet",
+				url: config.apiBasePath + "/economy/" + this.props.params.period + "/valuationsheet",
 				dataType: 'json',
 				cache: false,
 				success: function (data) {
@@ -51465,10 +51401,6 @@
 
 	var _backboneReactComponent2 = _interopRequireDefault(_backboneReactComponent);
 
-	var _config = __webpack_require__(241);
-
-	var _config2 = _interopRequireDefault(_config);
-
 	var _Masterledger = __webpack_require__(257);
 
 	var _Masterledger2 = _interopRequireDefault(_Masterledger);
@@ -51501,7 +51433,7 @@
 
 		componentDidMount: function componentDidMount() {
 			$.ajax({
-				url: _config2.default.apiBasePath + "/economy/" + this.props.params.period + "/resultreport",
+				url: config.apiBasePath + "/economy/" + this.props.params.period + "/resultreport",
 				dataType: 'json',
 				cache: false,
 				success: function (data) {
@@ -51800,10 +51732,6 @@
 
 	var _CostCenter2 = _interopRequireDefault(_CostCenter);
 
-	var _config = __webpack_require__(241);
-
-	var _config2 = _interopRequireDefault(_config);
-
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	module.exports = _backbone2.default.PageableCollection.extend({
@@ -51814,15 +51742,11 @@
 /* 284 */
 /***/ function(module, exports, __webpack_require__) {
 
-	'use strict';
+	"use strict";
 
 	var _backbone = __webpack_require__(235);
 
 	var _backbone2 = _interopRequireDefault(_backbone);
-
-	var _config = __webpack_require__(241);
-
-	var _config2 = _interopRequireDefault(_config);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -52085,10 +52009,6 @@
 
 	var _Transaction2 = _interopRequireDefault(_Transaction);
 
-	var _config = __webpack_require__(241);
-
-	var _config2 = _interopRequireDefault(_config);
-
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	module.exports = _backbone2.default.PageableCollection.extend({
@@ -52102,15 +52022,11 @@
 /* 290 */
 /***/ function(module, exports, __webpack_require__) {
 
-	'use strict';
+	"use strict";
 
 	var _backbone = __webpack_require__(235);
 
 	var _backbone2 = _interopRequireDefault(_backbone);
-
-	var _config = __webpack_require__(241);
-
-	var _config2 = _interopRequireDefault(_config);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -52459,10 +52375,6 @@
 
 	var _Account2 = _interopRequireDefault(_Account);
 
-	var _config = __webpack_require__(241);
-
-	var _config2 = _interopRequireDefault(_config);
-
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	module.exports = _backbone2.default.PageableCollection.extend({
@@ -52790,10 +52702,6 @@
 	var _BackboneTable = __webpack_require__(255);
 
 	var _BackboneTable2 = _interopRequireDefault(_BackboneTable);
-
-	var _config = __webpack_require__(241);
-
-	var _config2 = _interopRequireDefault(_config);
 
 	var _Date = __webpack_require__(268);
 
@@ -55178,10 +55086,6 @@
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _config = __webpack_require__(241);
-
-	var _config2 = _interopRequireDefault(_config);
-
 	var _backboneReactComponent = __webpack_require__(234);
 
 	var _backboneReactComponent2 = _interopRequireDefault(_backboneReactComponent);
@@ -55227,7 +55131,7 @@
 			// Send API request
 			$.ajax({
 				method: "POST",
-				url: _config2.default.apiBasePath + "/membership/member/" + this.props.params.member_id + "/groups/remove",
+				url: config.apiBasePath + "/membership/member/" + this.props.params.member_id + "/groups/remove",
 				data: JSON.stringify({
 					groups: [group_id]
 				}),
@@ -55351,10 +55255,6 @@
 
 	var _reactSelect = __webpack_require__(326);
 
-	var _config = __webpack_require__(241);
-
-	var _config2 = _interopRequireDefault(_config);
-
 	var _reactRouter = __webpack_require__(178);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
@@ -55402,7 +55302,7 @@
 
 			$.ajax({
 				method: "GET",
-				url: _config2.default.apiBasePath + "/membership/group",
+				url: config.apiBasePath + "/membership/group",
 				data: {
 					search: input
 				}
@@ -55440,7 +55340,7 @@
 			// Send API request
 			$.ajax({
 				method: "POST",
-				url: _config2.default.apiBasePath + "/membership/member/" + this.props.params.member_id + "/groups/add",
+				url: config.apiBasePath + "/membership/member/" + this.props.params.member_id + "/groups/add",
 				data: JSON.stringify({
 					groups: groups
 				}),
@@ -59492,10 +59392,6 @@
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _config = __webpack_require__(241);
-
-	var _config2 = _interopRequireDefault(_config);
-
 	var _reactRouter = __webpack_require__(178);
 
 	var _reactSelect = __webpack_require__(326);
@@ -59663,7 +59559,7 @@
 		_executeSearch: function _executeSearch(type, input) {
 			return $.ajax({
 				method: "GET",
-				url: _config2.default.apiBasePath + "/membership/" + type,
+				url: config.apiBasePath + "/membership/" + type,
 				data: {
 					search: input
 				}
@@ -60146,10 +60042,6 @@
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _config = __webpack_require__(241);
-
-	var _config2 = _interopRequireDefault(_config);
-
 	var _backboneReactComponent = __webpack_require__(234);
 
 	var _backboneReactComponent2 = _interopRequireDefault(_backboneReactComponent);
@@ -60195,7 +60087,7 @@
 			// Send API request
 			$.ajax({
 				method: "POST",
-				url: _config2.default.apiBasePath + "/membership/member/" + member_id + "/groups/remove",
+				url: config.apiBasePath + "/membership/member/" + member_id + "/groups/remove",
 				data: JSON.stringify({
 					groups: [this.props.params.group_id]
 				}),
@@ -62403,10 +62295,6 @@
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _config = __webpack_require__(241);
-
-	var _config2 = _interopRequireDefault(_config);
-
 	var _Overview = __webpack_require__(407);
 
 	var _Overview2 = _interopRequireDefault(_Overview);
@@ -62431,7 +62319,7 @@
 				),
 				_react2.default.createElement(
 					'a',
-					{ target: '_blank', className: 'uk-button uk-button-primary', href: _config2.default.apiBasePath + "/tictail/download" },
+					{ target: '_blank', className: 'uk-button uk-button-primary', href: config.apiBasePath + "/tictail/download" },
 					'Ladda hem ordrar fr\xE5n Tictail'
 				),
 				_react2.default.createElement(_Overview2.default, { type: _Overview4.default })
@@ -62464,10 +62352,6 @@
 	var _Date = __webpack_require__(268);
 
 	var _Date2 = _interopRequireDefault(_Date);
-
-	var _config = __webpack_require__(241);
-
-	var _config2 = _interopRequireDefault(_config);
 
 	var _BackboneTable = __webpack_require__(255);
 
@@ -62538,7 +62422,7 @@
 					null,
 					row.storage ? _react2.default.createElement(
 						'a',
-						{ target: '_blank', href: _config2.default.apiBasePath + "/tictail/order/" + row.tictail.number },
+						{ target: '_blank', href: config.apiBasePath + "/tictail/order/" + row.tictail.number },
 						row.tictail.number,
 						'.json'
 					) : ""
@@ -62636,7 +62520,6 @@
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-	//import config from '../../config'
 	//import OverviewTable from '../Components/Tables/Overview'
 
 	// Backbone
@@ -62833,7 +62716,6 @@
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-	//import config from '../../config'
 	module.exports = _react2.default.createClass({
 		displayName: 'exports',
 
@@ -62866,10 +62748,6 @@
 	var _backboneReactComponent = __webpack_require__(234);
 
 	var _backboneReactComponent2 = _interopRequireDefault(_backboneReactComponent);
-
-	var _config = __webpack_require__(241);
-
-	var _config2 = _interopRequireDefault(_config);
 
 	var _reactRouter = __webpack_require__(178);
 
@@ -62947,7 +62825,7 @@
 					null,
 					_react2.default.createElement(
 						'a',
-						{ target: '_blank', href: _config2.default.apiBasePath + "/tictail/order/" + row.tictail_id },
+						{ target: '_blank', href: config.apiBasePath + "/tictail/order/" + row.tictail_id },
 						row.tictail_id,
 						'.json'
 					)
@@ -62972,7 +62850,7 @@
 						row.instruction_number
 					) : _react2.default.createElement(
 						'a',
-						{ target: '_blank', href: _config2.default.apiBasePath + "/auto/createinstruction/" + row.tictail_id },
+						{ target: '_blank', href: config.apiBasePath + "/auto/createinstruction/" + row.tictail_id },
 						'Skapa verifikation'
 					)
 				)
@@ -63089,10 +62967,6 @@
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _config = __webpack_require__(241);
-
-	var _config2 = _interopRequireDefault(_config);
-
 	var _reactRouter = __webpack_require__(178);
 
 	var _Date = __webpack_require__(268);
@@ -63114,7 +62988,7 @@
 		componentWillReceiveProps: function componentWillReceiveProps(props) {
 			if (props.filename !== "") {
 				$.ajax({
-					url: _config2.default.apiBasePath + "/multiaccess/file/" + props.filename,
+					url: config.apiBasePath + "/multiaccess/file/" + props.filename,
 					dataType: 'json',
 					cache: false,
 					success: function (data) {
@@ -63380,17 +63254,13 @@
 /* 418 */
 /***/ function(module, exports, __webpack_require__) {
 
-	'use strict';
+	"use strict";
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 	var _react = __webpack_require__(1);
 
 	var _react2 = _interopRequireDefault(_react);
-
-	var _config = __webpack_require__(241);
-
-	var _config2 = _interopRequireDefault(_config);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -63399,8 +63269,8 @@
 	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-	//import classNames from 'classnames/bind'
 
+	//import classNames from 'classnames/bind'
 
 	module.exports = function (_React$Component) {
 		_inherits(FormInput, _React$Component);
@@ -63427,11 +63297,11 @@
 		}
 
 		_createClass(FormInput, [{
-			key: 'componentDidMount',
+			key: "componentDidMount",
 			value: function componentDidMount() {
 				var _this = this;
 				var settings = {
-					action: _config2.default.apiBasePath + this.props.action,
+					action: config.apiBasePath + this.props.action,
 					allow: "*.(txt|xml|csv)",
 					loadstart: function loadstart() {
 						_this.setState({
@@ -63499,7 +63369,7 @@
 	   */
 			}
 		}, {
-			key: 'clearUpload',
+			key: "clearUpload",
 			value: function clearUpload() {
 				this.setState({ filename: "" });
 			}
@@ -63511,53 +63381,53 @@
 	  */
 
 		}, {
-			key: 'render',
+			key: "render",
 			value: function render() {
 				return _react2.default.createElement(
-					'div',
+					"div",
 					null,
 					_react2.default.createElement(
-						'div',
-						{ id: 'upload-drop', className: 'uk-placeholder' },
+						"div",
+						{ id: "upload-drop", className: "uk-placeholder" },
 						_react2.default.createElement(
-							'p',
+							"p",
 							null,
-							_react2.default.createElement('i', { className: 'uk-icon-cloud-upload uk-icon-medium uk-text-muted uk-margin-small-right' }),
+							_react2.default.createElement("i", { className: "uk-icon-cloud-upload uk-icon-medium uk-text-muted uk-margin-small-right" }),
 							this.state.filename ? _react2.default.createElement(
-								'span',
+								"span",
 								null,
 								this.state.filename,
-								' (',
+								" (",
 								_react2.default.createElement(
-									'a',
+									"a",
 									{ onClick: this.clearUpload.bind(this) },
-									'Ta bort'
+									"Ta bort"
 								),
-								')'
+								")"
 							) : _react2.default.createElement(
-								'span',
+								"span",
 								null,
-								'Ladda upp genom att dra och sl\xE4ppa en fil h\xE4r eller klicka p\xE5 ',
+								"Ladda upp genom att dra och sl\xE4ppa en fil h\xE4r eller klicka p\xE5 ",
 								_react2.default.createElement(
-									'a',
-									{ className: 'uk-form-file' },
-									'ladda upp',
-									_react2.default.createElement('input', { id: 'upload-select', className: 'uk-hidden', type: 'file' })
+									"a",
+									{ className: "uk-form-file" },
+									"ladda upp",
+									_react2.default.createElement("input", { id: "upload-select", className: "uk-hidden", type: "file" })
 								),
-								'.'
+								"."
 							)
 						),
 						this.state.progressbarVisible ? _react2.default.createElement(
-							'div',
+							"div",
 							null,
 							_react2.default.createElement(
-								'div',
-								{ id: 'progressbar', className: 'uk-progress' },
+								"div",
+								{ id: "progressbar", className: "uk-progress" },
 								_react2.default.createElement(
-									'div',
-									{ className: 'uk-progress-bar', style: { width: this.state.progressbarWidth + "%" } },
+									"div",
+									{ className: "uk-progress-bar", style: { width: this.state.progressbarWidth + "%" } },
 									this.state.progressbarWidth,
-									'%'
+									"%"
 								)
 							)
 						) : ""
@@ -63985,15 +63855,11 @@
 /* 425 */
 /***/ function(module, exports, __webpack_require__) {
 
-	'use strict';
+	"use strict";
 
 	var _react = __webpack_require__(1);
 
 	var _react2 = _interopRequireDefault(_react);
-
-	var _config = __webpack_require__(241);
-
-	var _config2 = _interopRequireDefault(_config);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -64009,178 +63875,178 @@
 	var ReactDomVersion = __webpack_require__(434).version;
 
 	module.exports = _react2.default.createClass({
-		displayName: 'exports',
+		displayName: "exports",
 
 		render: function render() {
 			return _react2.default.createElement(
-				'div',
+				"div",
 				null,
 				_react2.default.createElement(
-					'h2',
+					"h2",
 					null,
-					'Build'
+					"Build"
 				),
 				_react2.default.createElement(
-					'dl',
+					"dl",
 					null,
 					_react2.default.createElement(
-						'dt',
+						"dt",
 						null,
-						'Build date:'
+						"Build date:"
 					),
 					_react2.default.createElement(
-						'dd',
+						"dd",
 						null,
 						("2017-01-05 15:06:51")
 					),
 					_react2.default.createElement(
-						'dt',
+						"dt",
 						null,
-						'Build hash:'
+						"Build hash:"
 					),
 					_react2.default.createElement(
-						'dd',
+						"dd",
 						null,
 						("11ced44\n")
 					)
 				),
 				_react2.default.createElement(
-					'h2',
+					"h2",
 					null,
-					'API'
+					"API"
 				),
 				_react2.default.createElement(
-					'dl',
+					"dl",
 					null,
 					_react2.default.createElement(
-						'dt',
+						"dt",
 						null,
-						'API Version:'
+						"API Version:"
 					),
 					_react2.default.createElement(
-						'dd',
+						"dd",
 						null,
-						_config2.default.apiVersion
+						config.apiVersion
 					),
 					_react2.default.createElement(
-						'dt',
+						"dt",
 						null,
-						'API endpoint:'
+						"API endpoint:"
 					),
 					_react2.default.createElement(
-						'dd',
+						"dd",
 						null,
-						_config2.default.apiBasePath
+						config.apiBasePath
 					)
 				),
 				_react2.default.createElement(
-					'h2',
+					"h2",
 					null,
-					'Included dependencies:'
+					"Included dependencies:"
 				),
 				_react2.default.createElement(
-					'dl',
+					"dl",
 					null,
 					_react2.default.createElement(
-						'dt',
+						"dt",
 						null,
-						'React version:'
+						"React version:"
 					),
 					_react2.default.createElement(
-						'dd',
+						"dd",
 						null,
 						ReactVersion
 					),
 					_react2.default.createElement(
-						'dt',
+						"dt",
 						null,
-						'jQuery version:'
+						"jQuery version:"
 					),
 					_react2.default.createElement(
-						'dd',
+						"dd",
 						null,
 						JqueryVersion
 					),
 					_react2.default.createElement(
-						'dt',
+						"dt",
 						null,
-						'uikit version:'
+						"uikit version:"
 					),
 					_react2.default.createElement(
-						'dd',
+						"dd",
 						null,
 						UikitVersion
 					),
 					_react2.default.createElement(
-						'dt',
+						"dt",
 						null,
-						'Backbone version:'
+						"Backbone version:"
 					),
 					_react2.default.createElement(
-						'dd',
+						"dd",
 						null,
 						BackboneVersion
 					),
 					_react2.default.createElement(
-						'dt',
+						"dt",
 						null,
-						'backbone-react-component version:'
+						"backbone-react-component version:"
 					),
 					_react2.default.createElement(
-						'dd',
+						"dd",
 						null,
 						BackboneReactVersion
 					),
 					_react2.default.createElement(
-						'dt',
+						"dt",
 						null,
-						'backbone.paginator version:'
+						"backbone.paginator version:"
 					),
 					_react2.default.createElement(
-						'dd',
+						"dd",
 						null,
 						BackbonePaginatorVersion
 					),
 					_react2.default.createElement(
-						'dt',
+						"dt",
 						null,
-						'react-router version:'
+						"react-router version:"
 					),
 					_react2.default.createElement(
-						'dd',
+						"dd",
 						null,
 						ReactRouterVersion
 					),
 					_react2.default.createElement(
-						'dt',
+						"dt",
 						null,
-						'react-select version:'
+						"react-select version:"
 					),
 					_react2.default.createElement(
-						'dd',
+						"dd",
 						null,
 						ReactSelectVersion
 					),
 					_react2.default.createElement(
-						'dt',
+						"dt",
 						null,
-						'react-dom version:'
+						"react-dom version:"
 					),
 					_react2.default.createElement(
-						'dd',
+						"dd",
 						null,
 						ReactDomVersion
 					)
 				),
 				_react2.default.createElement(
-					'h2',
+					"h2",
 					null,
-					'License'
+					"License"
 				),
 				_react2.default.createElement(
-					'p',
+					"p",
 					null,
-					'GPL version 3'
+					"GPL version 3"
 				)
 			);
 		}
