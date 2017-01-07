@@ -62,7 +62,7 @@ class Login
 			"user_id"      => $user_id,
 			"access_token" => $bearer,
 			"expires"      => $expires,
-			"browser"      => $_SERVER["HTTP_USER_AGENT"],
+			"browser"      => $_SERVER["HTTP_USER_AGENT"] ?? null,
 			"ip"           => $_SERVER["REMOTE_ADDR"],
 		]);
 
@@ -131,7 +131,7 @@ class Login
 			->where("access_token", $access_token)
 			->update(
 				[
-					"browser" => $_SERVER["HTTP_USER_AGENT"],
+					"browser" => $_SERVER["HTTP_USER_AGENT"] ?? null,
 					"ip"      => $_SERVER["REMOTE_ADDR"],
 					"expires" => DB::raw("CURRENT_TIME"),
 				]

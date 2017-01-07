@@ -21,22 +21,22 @@ $app->  post("oauth/resetpassword",  "Authentication@reset");
 $app->   get("oauth/token",         ["middleware" => "auth", "uses" => "Authentication@listTokens"]);
 $app->delete("oauth/token/{token}", ["middleware" => "auth", "uses" => "Authentication@logout"]);
 
-// Service registry
-$app->  post("service/register",   "ServiceRegistry@register");
-$app->  post("service/unregister", "ServiceRegistry@unregister");
-$app->   get("service/list",       "ServiceRegistry@list");
-
 // Require an authenticated user for these requests
 $app->group(["middleware" => "auth"], function() use ($app)
 {
+	// Service registry
+	$app->  post("service/register",   "ServiceRegistry@register");
+	$app->  post("service/unregister", "ServiceRegistry@unregister");
+	$app->   get("service/list",       "ServiceRegistry@list");
+
 	// Relations
-	$app->   get("relations", ["middleware" => "auth", "uses" => "Relations@relations"]);// TODO: Remove this API
-	$app->   get("relation",  ["middleware" => "auth", "uses" => "Relations@relation"]);
-	$app->  post("relation",  ["middleware" => "auth", "uses" => "Relations@createRelation"]);
-	$app->   get("related",   ["middleware" => "auth", "uses" => "Relations@related"]);
+	$app->   get("relations", "Relations@relations");// TODO: Remove this API
+	$app->   get("relation",  "Relations@relation");
+	$app->  post("relation",  "Relations@createRelation");
+	$app->   get("related",   "Relations@related");
 
 	// Facades
-	$app->   get("facade",    ["middleware" => "auth", "uses" => "Facade@index"]);
+	$app->   get("facade",    "Facade@index");
 
 	// An ugly way to catch all request as lumen does not support the any() and match() methods used in Laravel
 	$app->get("/{p1}",                        "ServiceRegistry@handleRoute");
