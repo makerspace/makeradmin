@@ -14,6 +14,7 @@ class MultiAccessSync extends Controller
 	public function diff(Request $request, $filename)
 	{
 		$curl = new CurlBrowser;
+		$curl->setHeader("Authorization", "Bearer " . config("service.bearer"));
 
 		// Process an already uploaded file
 		if(!Storage::disk("uploads")->exists($filename))
