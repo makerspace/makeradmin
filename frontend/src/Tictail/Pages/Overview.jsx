@@ -1,5 +1,4 @@
 import React from 'react'
-import config from '../../config'
 import OverviewTable from '../Components/Tables/Overview'
 
 // Backbone

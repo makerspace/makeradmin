@@ -1,6 +1,5 @@
 import Backbone from 'backbone'
 import InstructionModel from '../Models/Instruction'
-import config from '../../config'
 
 module.exports = Backbone.PageableCollection.extend(
 {

@@ -1,5 +1,4 @@
 import React from 'react'
-//import config from '../../config'
 import TictailRelationsTable from '../Components/Tables/TictailRelations'
 
 // Backbone

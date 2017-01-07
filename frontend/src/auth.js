@@ -1,5 +1,4 @@
 import { browserHistory } from 'react-router'
-import config from './config'
 
 module.exports =
 {

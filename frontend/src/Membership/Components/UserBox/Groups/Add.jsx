@@ -1,7 +1,6 @@
 import React from 'react'
 
 import { Async } from 'react-select';
-import config from '../../../../config'
 import { Link, withRouter } from 'react-router'
 
 module.exports = withRouter(React.createClass(

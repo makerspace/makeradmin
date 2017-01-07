@@ -1,5 +1,4 @@
 import Backbone from 'backbone'
-import config from '../../config'
 
 module.exports = Backbone.Model.fullExtend(
 {

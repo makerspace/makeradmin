@@ -1,7 +1,5 @@
 import React from 'react'
 
-import config from '../../../config'
-
 import { Link, withRouter } from 'react-router'
 import Currency from '../../../Components/Currency'
 import GenericEntityFunctions from '../../../GenericEntityFunctions'

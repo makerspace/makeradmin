@@ -1,6 +1,5 @@
 import React from 'react'
 import BackboneReact from 'backbone-react-component'
-import config from '../../../config'
 import { Link } from 'react-router'
 
 // Backbone

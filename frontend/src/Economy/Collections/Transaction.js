@@ -1,6 +1,5 @@
 import Backbone from 'backbone'
 import TransactionModel from '../Models/Transaction'
-import config from '../../config'
 
 module.exports = Backbone.PageableCollection.extend(
 {

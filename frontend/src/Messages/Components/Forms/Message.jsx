@@ -1,5 +1,4 @@
 import React from 'react'
-import config from '../../../config'
 import { Link, withRouter } from 'react-router'
 import { Async } from 'react-select';
 import GenericEntityFunctions from '../../../GenericEntityFunctions'

@@ -1,5 +1,4 @@
 import React from 'react'
-import config from '../../../config'
 import BackboneReact from 'backbone-react-component'
 import BackboneTable from '../../../BackboneTable'
 import { Link, withRouter } from 'react-router'

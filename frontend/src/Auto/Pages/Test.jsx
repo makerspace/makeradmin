@@ -1,6 +1,5 @@
 import React from 'react'
 import { Link } from 'react-router'
-//import config from '../../config'
 //import OverviewTable from '../Components/Tables/Overview'
 
 // Backbone

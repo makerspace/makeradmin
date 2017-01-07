@@ -1,6 +1,5 @@
 import Backbone from 'backbone'
 import CostCenterModel from '../Models/CostCenter'
-import config from '../../config'
 
 module.exports = Backbone.PageableCollection.extend(
 {

@@ -1,5 +1,4 @@
 import React from 'react'
-import config from '../config'
 
 // Get versions of dependencies
 const ReactVersion    = require("json-loader!../../node_modules/react/package.json").version;

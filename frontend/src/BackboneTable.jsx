@@ -1,7 +1,6 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
 import Loading from './Components/Loading'
-import config from './config'
 
 /// TODO: This Mixin's should handle auto refresh
 

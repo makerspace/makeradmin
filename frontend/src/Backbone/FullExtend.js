@@ -1,7 +1,6 @@
 import Backbone from 'backbone'
 import PageableCollection from 'backbone.paginator'
 import auth from '../auth'
-import config from '../config'
 import _ from 'underscore'
 
 // Update the Backbone sync() method to work with our RESTful API with OAuth 2.0 authentication

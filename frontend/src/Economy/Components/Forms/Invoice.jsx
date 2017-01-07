@@ -1,8 +1,6 @@
 import React from 'react'
 import BackboneReact from 'backbone-react-component'
 
-import config from '../../../config'
-
 // Backbone
 import InvoiceCollection from '../../Collections/Invoice'
 import InvoiceModel from '../../Models/Invoice'

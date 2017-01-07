@@ -2,8 +2,6 @@ import React from 'react'
 import BackboneReact from 'backbone-react-component'
 import BackboneTable from '../../../BackboneTable'
 
-import config from '../../../config'
-
 import DateField from '../../../Components/Date'
 import { Link, withRouter } from 'react-router'
 import TableDropdownMenu from '../../../TableDropdownMenu'

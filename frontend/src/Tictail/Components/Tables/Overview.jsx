@@ -3,7 +3,6 @@ import BackboneReact from 'backbone-react-component'
 import { Link } from 'react-router'
 import Currency from '../../../Components/Currency'
 import DateField from '../../../Components/Date'
-import config from '../../../config'
 
 // Backbone
 import BackboneTable from '../../../BackboneTable'

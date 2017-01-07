@@ -1,6 +1,5 @@
 import React from 'react'
 //import classNames from 'classnames/bind'
-import config from '../../config'
 
 module.exports = class FormInput extends React.Component
 {
