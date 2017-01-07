@@ -3,4 +3,4 @@
 ABSOLUTE_PATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source $ABSOLUTE_PATH/config
 
-docker exec -it $CONTAINER_NAME /usr/bin/php /var/www/source/artisan $*
+docker exec -it $CONTAINER_NAME /usr/bin/php /var/www/html/artisan $*
