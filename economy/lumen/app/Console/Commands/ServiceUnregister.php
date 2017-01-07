@@ -33,6 +33,7 @@ class ServiceUnregister extends Command
 		// Send the request to API Gateway
 		$ch = new CurlBrowser();
 		$ch->useJson();
+		$ch->setHeader("Authorization", "Bearer " . config("service.bearer"));
 		$result = $ch->call("POST", "http://" . config("service.gateway") . "/service/unregister", [], [
 			"url"     => config("service.url"),
 			"version" => config("service.version"),
