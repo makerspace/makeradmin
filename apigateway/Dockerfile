@@ -6,14 +6,15 @@ RUN    apt-get update \
     && rm -r /var/lib/apt/lists/* \
     && curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
-# Install stuff in vendor/
-ADD composer.json /var/www/html/composer.json
-RUN composer update -d /var/www/html
+# Add all the lumen files
+ADD ./lumen /var/www/html/
+RUN composer install -d /var/www/html
 
 # HHVM configuration files
-ADD server.ini /etc/hhvm/server.ini
+ADD ./docker/server.ini /etc/hhvm/server.ini
 RUN touch /etc/hhvm/site.ini
 
 EXPOSE 80
 
-CMD ["/usr/bin/hhvm", "-m", "server", "-c", "/etc/hhvm/server.ini", "-c", "/etc/hhvm/site.ini"]
+COPY ./docker/myStartupScript.sh /usr/local/myscripts/myStartupScript.sh
+CMD ["/usr/local/myscripts/myStartupScript.sh"]
