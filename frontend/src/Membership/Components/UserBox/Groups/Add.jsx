@@ -1,7 +1,7 @@
 import React from 'react'
-
 import { Async } from 'react-select';
 import { Link, withRouter } from 'react-router'
+import auth from '../../../../auth'
 
 module.exports = withRouter(React.createClass(
 {
@@ -54,6 +54,9 @@ module.exports = withRouter(React.createClass(
 		$.ajax({
 			method: "GET",
 			url: config.apiBasePath + "/membership/group",
+			headers: {
+				"Authorization": "Bearer " + auth.getAccessToken()
+			},
 			data: {
 				search: input,
 			},
@@ -94,6 +97,9 @@ module.exports = withRouter(React.createClass(
 		$.ajax({
 			method: "POST",
 			url: config.apiBasePath + "/membership/member/" + this.props.params.member_id + "/groups/add",
+			headers: {
+				"Authorization": "Bearer " + auth.getAccessToken()
+			},
 			data: JSON.stringify({
 				groups: groups,
 			}),

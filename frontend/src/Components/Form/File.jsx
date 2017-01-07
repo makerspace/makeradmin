@@ -1,5 +1,6 @@
 import React from 'react'
 //import classNames from 'classnames/bind'
+import auth from '../../auth'
 
 module.exports = class FormInput extends React.Component
 {
@@ -27,6 +28,9 @@ module.exports = class FormInput extends React.Component
 		var settings = {
 			action: config.apiBasePath + this.props.action,
 			allow : "*.(txt|xml|csv)",
+			headers: {
+				"Authorization": "Bearer " + auth.getAccessToken()
+			},
 			loadstart: function()
 			{
 				_this.setState({

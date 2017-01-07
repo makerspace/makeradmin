@@ -3,6 +3,7 @@ import BackboneReact from 'backbone-react-component'
 import BackboneTable from '../../../BackboneTable'
 import { Link, withRouter } from 'react-router'
 import TableDropdownMenu from '../../../TableDropdownMenu'
+import auth from '../../../auth'
 
 module.exports = withRouter(React.createClass({
 	mixins: [Backbone.React.Component.mixin, BackboneTable],
@@ -37,6 +38,9 @@ module.exports = withRouter(React.createClass({
 		$.ajax({
 			method: "POST",
 			url: config.apiBasePath + "/membership/member/" + this.props.params.member_id + "/groups/remove",
+			headers: {
+				"Authorization": "Bearer " + auth.getAccessToken()
+			},
 			data: JSON.stringify({
 				groups: [group_id],
 			}),

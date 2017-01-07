@@ -2,6 +2,7 @@ import React from 'react'
 import { Link, withRouter } from 'react-router'
 import { Async } from 'react-select';
 import GenericEntityFunctions from '../../../GenericEntityFunctions'
+import auth from '../../../auth'
 
 // Backbone
 import TemplateModel from '../../Models/Template'
@@ -194,6 +195,9 @@ module.exports = withRouter(React.createClass({
 			{
 				method: "GET",
 				url: config.apiBasePath + "/membership/" + type,
+				headers: {
+					"Authorization": "Bearer " + auth.getAccessToken()
+				},
 				data: {
 					search: input,
 				},

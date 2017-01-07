@@ -1,6 +1,7 @@
 import React from 'react'
 import { Link } from 'react-router'
 import DateField from '../../Components/Date'
+import auth from '../../auth'
 
 module.exports = React.createClass({
 	getInitialState: function()
@@ -17,8 +18,11 @@ module.exports = React.createClass({
 		{
 			$.ajax({
 				url: config.apiBasePath + "/multiaccess/file/" + props.filename,
-				dataType: 'json',
+				dataType: "json",
 				cache: false,
+				headers: {
+					"Authorization": "Bearer " + auth.getAccessToken()
+				},
 				success: function(data)
 				{
 					this.setState({data: data});
