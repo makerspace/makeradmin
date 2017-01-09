@@ -84,7 +84,7 @@ class Message extends Controller
 			// If the recipient is a member, load member from API
 			$ch = new CurlBrowser;
 			// TODO: Gateway from config
-			$result = $ch->call("GET", "http://makeradmin-apigateway/membership/member?member_ids={$str_ids}&per_page={$chunkSize}");
+			$result = $ch->call("GET", "http://makeradmin-apigateway/membership/member?entity_id={$str_ids}&per_page={$chunkSize}");
 
 			// Send an error message if the API request was unsuccessful
 			if($ch->getStatusCode() != 200)
