@@ -61,15 +61,23 @@ class Account extends Entity
 			->selectRaw("COALESCE(SUM(amount), 0) AS balance");
 
 		// Go through filters
-		foreach($filters as $id => $filter)
+		foreach($filters as $column_id => $filter)
 		{
-			if(is_array($filter) && count($filter) >= 2)
+			if(is_array($filter) && count($filter) == 3)
 			{
+				$id    = $filter[0];
+				$op    = $filter[1];
+				$param = $filter[2];
+			}
+			else if(is_array($filter) && count($filter) == 2)
+			{
+				$id    = $column_id;
 				$op    = $filter[0];
 				$param = $filter[1];
 			}
 			else
 			{
+				$id    = $column_id;
 				$op    = "=";
 				$param = $filter;
 			}
@@ -80,34 +88,32 @@ class Account extends Entity
 				$query = $query
 					->leftJoin("economy_accountingperiod", "economy_accountingperiod.economy_accountingperiod_id", "=", "economy_account.economy_accountingperiod_id")
 					->where("economy_accountingperiod.name", $op, $param);
-				unset($filters[$id]);
+				unset($filters[$column_id]);
 			}
 			// Filter on account balance
 			else if("balance" == $id)
 			{
 				$query = $query->having("balance", $op, $param);
-				unset($filters[$id]);
+				unset($filters[$column_id]);
 			}
 			// Filter on number of transactions
 			else if("transactions" == $id)
 			{
 				$query = $query->selectRaw("COUNT(economy_transaction.economy_transaction_id) AS num_transactions");
 				$query = $query->having("num_transactions", $op, $param);
-				unset($filters[$id]);
+				unset($filters[$column_id]);
 			}
-/*
 			// Filter on account_number
 			else if("account_number" == $id)
 			{
-				$query = $query->where("economy_account.account_number", $filter[0], $filter[1]);
-				unset($filters[$id]);
+				$query = $query->where("economy_account.account_number", $op, $param);
+				unset($filters[$column_id]);
 			}
-*/
 			// Pagination
 			else if("per_page" == $id)
 			{
 				$this->pagination = $filter;
-				unset($filters[$id]);
+				unset($filters[$column_id]);
 			}
 		}
 
@@ -127,7 +133,8 @@ class Account extends Entity
 		$data = $query->get();
 
 		// Get ingoing balance
-		foreach($data as &$row)
+		$new_data = [];
+		foreach($data as $row)
 		{
 			// Instruction with number 0 is always ingoing balance
 			$ingoing = Instruction::load(
@@ -138,6 +145,7 @@ class Account extends Entity
 
 			if(empty($ingoing))
 			{
+				$new_data[] = $row;
 				continue;
 			}
 
@@ -153,8 +161,9 @@ class Account extends Entity
 					$row->balance_in = $balance->balance;
 				}
 			}
+
+			$new_data[] = $row;
 		}
-		unset($row);
 
 		/*
 		foreach($data as &$row)
@@ -167,7 +176,7 @@ class Account extends Entity
 		*/
 
 		$result = [
-			"data" => $data
+			"data" => $new_data
 		];
 
 		if($this->pagination != null)

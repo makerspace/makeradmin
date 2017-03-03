@@ -15,7 +15,7 @@ class Economy extends Controller
 	public function file(Request $request, $accountingperiod, $external_id, $file)
 	{
 //		echo "$accountingperiod {$external_id} $file";
-		$file = "/var/www/html/vouchers/{$external_id}/{$file}";
+		$file = "/var/www/html/vouchers/{$accountingperiod}/{$external_id}/{$file}";
 		if(file_exists($file))
 		{
 			$finfo = finfo_open(FILEINFO_MIME_TYPE);

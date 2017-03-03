@@ -35,6 +35,12 @@ class Transactions extends Controller
 			$filters["relations"] = $request->get("relations");
 		}
 
+                if($request->get("entity_id"))
+                {
+                        $filters["entity_id"] = $request->get("entity_id");
+                }
+
+
 		// Filter on search
 		if(!empty($request->get("search")))
 		{

@@ -69,7 +69,7 @@ class Transaction extends Entity
 			"select" => "economy_accountingperiod.name",
 		],
 	];
-	protected $sort = ["accounting_date", "desc"];
+	protected $sort = ["accounting_date", "asc"];
 
 	/**
 	 *
@@ -141,7 +141,7 @@ class Transaction extends Entity
 		{
 			if(!empty($row->extid))
 			{
-				$dir = "/var/www/html/vouchers/{$row->extid}";
+				$dir = "/var/www/html/vouchers/2016/{$row->extid}"; // TODO: Hardcoded value
 				if(file_exists($dir))
 				{
 					$row->files = "x";

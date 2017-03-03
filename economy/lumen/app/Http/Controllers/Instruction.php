@@ -125,7 +125,7 @@ class Instruction extends Controller
 			$files = [];
 			if(!empty($entity->external_id))
 			{
-				$dir = "/var/www/html/vouchers/{$entity->external_id}";
+				$dir = "/var/www/html/vouchers/{$accountingperiod}/{$entity->external_id}";
 				if(file_exists($dir))
 				{
 					foreach(glob("{$dir}/*") as $file)

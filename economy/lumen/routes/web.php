@@ -12,7 +12,7 @@
 */
 
 // Economy
-$app->group(array("namespace" => "App\Http\Controllers", "prefix" => "economy"), function() use ($app)
+$app->group(array("prefix" => "economy"), function() use ($app)
 {
 	// Accounting periods
 	$app->   get("accountingperiod",      "AccountingPeriod@list");   // Get collection
@@ -25,7 +25,7 @@ $app->group(array("namespace" => "App\Http\Controllers", "prefix" => "economy"),
 	$app->   get("transactions", "Transactions@transactions");   // Get collection
 });
 
-$app->group(array("namespace" => "App\Http\Controllers", "prefix" => "economy/{accountingperiod}"), function() use ($app)
+$app->group(array("prefix" => "economy/{accountingperiod}"), function() use ($app)
 {
 	// Accounts
 	$app->   get("account",          "Account@list");        // Get collection

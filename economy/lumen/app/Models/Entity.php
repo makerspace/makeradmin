@@ -130,6 +130,23 @@ class Entity
 			// Go through filters
 			foreach($filters as $id => $filter)
 			{
+				if(is_array($filter) && count($filter) == 3)
+				{
+					$id    = $filter[0];
+					$op    = $filter[1];
+					$param = $filter[2];
+				}
+				else if(is_array($filter) && count($filter) == 2)
+				{
+					$op    = $filter[0];
+					$param = $filter[1];
+				}
+				else
+				{
+					$op    = "=";
+					$param = $filter;
+				}
+
 				// Pagination
 				if("per_page" == $id)
 				{

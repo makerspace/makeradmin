@@ -20,10 +20,10 @@ class Report extends Controller
 
 		// TODO: Hardcoded data
 		$data = [
-			"financial_year" => "2015-01-01 - 2015-12-31",
+			"financial_year" => "2016-01-01 - 2016-12-31", // TODO: Hardcoded
 			"period" => [
-				"from" => "2015-01-01",
-				"to"   => "2015-12-31",
+				"from" => "2016-01-01", // TODO: Hardcoded
+				"to"   => "2016-12-31", // TODO: Hardcoded
 			],
 			"created"       => date("Y-m-d H:i:s"),
 			"last_instruction" => "A938",
@@ -98,10 +98,10 @@ class Report extends Controller
 
 		// TODO: Hardcoded data
 		$data = [
-			"financial_year" => "2015-01-01 - 2015-12-31",
+			"financial_year" => "2016-01-01 - 2016-12-31", // TODO: Hardcoded
 			"period" => [
-				"from" => "2015-01-01",
-				"to"   => "2015-12-31",
+				"from" => "2016-01-01", // TODO: Hardcoded
+				"to"   => "2016-12-31", // TODO: Hardcoded
 			],
 			"created"       => date("Y-m-d H:i:s"),
 			"last_instruction" => "A938",
@@ -172,7 +172,7 @@ class Report extends Controller
 							"accountfilter" => [
 								"from" => 8999,
 								"to"   => 8999,
-								"mul"  => 1,
+								"mul"  => -1,
 							],
 						],
 					],
@@ -188,7 +188,7 @@ class Report extends Controller
 	 */
 	protected function _recursiveProcess($data)
 	{
-		$accountingperiod = 2015; // TODO: Hardcoded
+		$accountingperiod = 2016; // TODO: Hardcoded
 
 		$data["balance_in"]     = 0;
 		$data["balance_period"] = 0;
@@ -198,9 +198,14 @@ class Report extends Controller
 		{
 			$accounts = Account::list(
 				[
+/*
 					["accountingperiod", "=", $accountingperiod],
 					["account_number", ">=", $data["accountfilter"]["from"]],
 					["account_number", "<=", $data["accountfilter"]["to"]],
+*/
+					1 => ["accountingperiod", "=", $accountingperiod],
+					2 => ["account_number",   ">=", $data["accountfilter"]["from"]],
+					3 => ["account_number",   "<=", $data["accountfilter"]["to"]],
 				]
 			);
 
@@ -211,6 +216,11 @@ class Report extends Controller
 				unset($account->balance);
 
 				// Calculate period
+				if(!isset($account->balance_in))
+				{
+					$account->balance_in = 0;
+				}
+
 				$account->balance_period = $account->balance_out - $account->balance_in;
 
 				// TODO: Olika konton reagerar olika på kredit / debet. Skall hämtas från kontoinställningar

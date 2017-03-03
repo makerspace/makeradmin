@@ -177,7 +177,7 @@ class Instruction extends Entity
 			$row->has_vouchers = false;
 			if(!empty($row->external_id))
 			{
-				$dir = "/var/www/html/vouchers/{$row->external_id}";
+				$dir = "/var/www/html/vouchers/2016/{$row->external_id}"; // TODO: Hardcoded value
 				if(file_exists($dir))
 				{
 					$row->has_vouchers = true;
