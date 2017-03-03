@@ -1,9 +1,9 @@
 import React from 'react'
 import BackboneReact from 'backbone-react-component'
 
-import { Link } from 'react-router'
+import { Link, withRouter } from 'react-router'
 
-module.exports = React.createClass({
+module.exports = withRouter(React.createClass({
 	mixins: [Backbone.React.Component.mixin],
 
 	render: function()
@@ -11,7 +11,7 @@ module.exports = React.createClass({
 		return (
 				<div>
 					<h3>Data från import</h3>
-					<Link to={"/economy/instruction/" + this.state.model.id}>Tillbaka till verifikation</Link>
+					<Link to={"/economy/" + this.props.params.period + "/instruction/" + this.state.model.instruction_number}>Tillbaka till verifikation</Link>
 					<form className="uk-form uk-form-horizontal">
 					<div className="uk-grid">
 						<div className="uk-width-1-2">
@@ -57,4 +57,4 @@ module.exports = React.createClass({
 				</div>
 		);
 	},
-});
+}));

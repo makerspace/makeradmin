@@ -148,6 +148,10 @@ module.exports = {
 	{
 		var _this = this;
 
+		// Clear the created_at and updated_at
+		this.getModel().set("created_at", null);
+		this.getModel().set("updated_at", null);
+
 		// Prevent the form from being submitted
 		event.preventDefault();
 

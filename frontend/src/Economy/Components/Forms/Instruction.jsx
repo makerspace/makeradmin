@@ -51,7 +51,7 @@ module.exports = withRouter(React.createClass({
 			{
 				return (
 					<tr key={i}>
-						<td><a href={"/economy/" + this.props.params.period + "/file/" + _this.state.model.external_id + "/" + file}>{file}</a></td>
+						<td><a href={"/economy/" + _this.props.params.period + "/file/" + _this.state.model.external_id + "/" + file}>{file}</a></td>
 					</tr>
 				);
 			})
@@ -124,7 +124,7 @@ module.exports = withRouter(React.createClass({
 									<i className="uk-icon-institution"></i>
 									<input type="text" value={this.state.model.importer} disabled />
 								</div>
-								<p><em><Link to={"/economy/" + this.props.params.period + "/instruction/" + this.state.model.id + "/import"}>Visa data från import</Link></em></p>
+								<p><em><Link to={"/economy/" + this.props.params.period + "/instruction/" + this.state.model.instruction_number + "/import"}>Visa data från import</Link></em></p>
 							</div>
 						: "" }
 					</div>
