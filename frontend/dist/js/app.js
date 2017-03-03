@@ -50543,7 +50543,7 @@
 							null,
 							_react2.default.createElement(
 								'a',
-								{ href: "/economy/" + this.props.params.period + "/file/" + _this.state.model.external_id + "/" + file },
+								{ href: "/economy/" + _this.props.params.period + "/file/" + _this.state.model.external_id + "/" + file },
 								file
 							)
 						)
@@ -50694,7 +50694,7 @@
 									null,
 									_react2.default.createElement(
 										_reactRouter.Link,
-										{ to: "/economy/" + this.props.params.period + "/instruction/" + this.state.model.id + "/import" },
+										{ to: "/economy/" + this.props.params.period + "/instruction/" + this.state.model.instruction_number + "/import" },
 										'Visa data fr\xE5n import'
 									)
 								)
@@ -50904,6 +50904,10 @@
 		saveEntity: function saveEntity(event) {
 			var _this = this;
 
+			// Clear the created_at and updated_at
+			this.getModel().set("created_at", null);
+			this.getModel().set("updated_at", null);
+
 			// Prevent the form from being submitted
 			event.preventDefault();
 
@@ -51057,13 +51061,21 @@
 
 	var _Instruction2 = _interopRequireDefault(_Instruction);
 
+	var _InstructionImport = __webpack_require__(435);
+
+	var _InstructionImport2 = _interopRequireDefault(_InstructionImport);
+
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+	// Backbone
 	module.exports = _react2.default.createClass({
 		displayName: 'exports',
 
 		getInitialState: function getInitialState() {
-			var instruction = new _Instruction2.default({ instruction_number: this.props.params.id });
+			var instruction = new _Instruction2.default({
+				period: this.props.params.period,
+				instruction_number: this.props.params.instruction_number
+			});
 			instruction.fetch();
 
 			return {
@@ -51072,11 +51084,9 @@
 		},
 
 		render: function render() {
-			return _react2.default.createElement(EconomyAccountingInstructionImport, { model: this.state.model });
+			return _react2.default.createElement(_InstructionImport2.default, { model: this.state.model });
 		}
 	});
-
-	// Backbone
 
 /***/ },
 /* 279 */
@@ -51091,6 +51101,10 @@
 	var _backboneReactComponent = __webpack_require__(234);
 
 	var _backboneReactComponent2 = _interopRequireDefault(_backboneReactComponent);
+
+	var _auth = __webpack_require__(240);
+
+	var _auth2 = _interopRequireDefault(_auth);
 
 	var _Masterledger = __webpack_require__(256);
 
@@ -51112,7 +51126,7 @@
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-	module.exports = _react2.default.createClass({
+	module.exports = (0, _reactRouter.withRouter)(_react2.default.createClass({
 		displayName: 'exports',
 
 		getInitialState: function getInitialState() {
@@ -51127,6 +51141,9 @@
 				url: config.apiBasePath + "/economy/" + this.props.params.period + "/valuationsheet",
 				dataType: 'json',
 				cache: false,
+				headers: {
+					"Authorization": "Bearer " + _auth2.default.getAccessToken()
+				},
 				success: function (data) {
 					this.setState({ data: data });
 					this.setState({ fetched_data: true });
@@ -51179,7 +51196,7 @@
 										{ colSpan: 4 - depth },
 										_react2.default.createElement(
 											_reactRouter.Link,
-											{ to: "/economy/account/" + row.account_number },
+											{ to: "/economy/" + _this.props.params.period + "/account/" + row.account_number },
 											row.account_number,
 											' ',
 											row.title
@@ -51382,7 +51399,7 @@
 				);
 			}
 		}
-	});
+	}));
 
 	// Backbone
 
@@ -51399,6 +51416,10 @@
 	var _backboneReactComponent = __webpack_require__(234);
 
 	var _backboneReactComponent2 = _interopRequireDefault(_backboneReactComponent);
+
+	var _auth = __webpack_require__(240);
+
+	var _auth2 = _interopRequireDefault(_auth);
 
 	var _Masterledger = __webpack_require__(256);
 
@@ -51420,7 +51441,7 @@
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-	module.exports = _react2.default.createClass({
+	module.exports = (0, _reactRouter.withRouter)(_react2.default.createClass({
 		displayName: 'exports',
 
 		getInitialState: function getInitialState() {
@@ -51435,6 +51456,9 @@
 				url: config.apiBasePath + "/economy/" + this.props.params.period + "/resultreport",
 				dataType: 'json',
 				cache: false,
+				headers: {
+					"Authorization": "Bearer " + _auth2.default.getAccessToken()
+				},
 				success: function (data) {
 					this.setState({ data: data });
 					this.setState({ fetched_data: true });
@@ -51487,7 +51511,7 @@
 										{ colSpan: 4 - depth },
 										_react2.default.createElement(
 											_reactRouter.Link,
-											{ to: "/economy/account/" + row.account_number },
+											{ to: "/economy/" + _this.props.params.period + "/account/" + row.account_number },
 											row.account_number,
 											' ',
 											row.title
@@ -51670,7 +51694,7 @@
 				);
 			}
 		}
-	});
+	}));
 
 	// Backbone
 
@@ -54623,8 +54647,8 @@
 				isDirty: false,
 				value: _this2.props.model.get(_this2.props.name),
 				model: _this2.props.model,
-				error_column: "name", // TODO
-				error_message: "Du måste ange ett unikt namn"
+				error_column: "", // TODO
+				error_message: ""
 			};
 			return _this2;
 		}
@@ -63941,7 +63965,7 @@
 					_react2.default.createElement(
 						"dd",
 						null,
-						("2017-01-07 22:43:38")
+						("2017-03-02 18:24:31")
 					),
 					_react2.default.createElement(
 						"dt",
@@ -63951,7 +63975,7 @@
 					_react2.default.createElement(
 						"dd",
 						null,
-						("8d8e6fe\n")
+						("f53e575\n")
 					)
 				),
 				_react2.default.createElement(
@@ -65239,6 +65263,130 @@
 			);
 		}
 	});
+
+/***/ },
+/* 435 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _backboneReactComponent = __webpack_require__(234);
+
+	var _backboneReactComponent2 = _interopRequireDefault(_backboneReactComponent);
+
+	var _reactRouter = __webpack_require__(178);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	module.exports = (0, _reactRouter.withRouter)(_react2.default.createClass({
+		displayName: 'exports',
+
+		mixins: [Backbone.React.Component.mixin],
+
+		render: function render() {
+			return _react2.default.createElement(
+				'div',
+				null,
+				_react2.default.createElement(
+					'h3',
+					null,
+					'Data fr\xE5n import'
+				),
+				_react2.default.createElement(
+					_reactRouter.Link,
+					{ to: "/economy/" + this.props.params.period + "/instruction/" + this.state.model.instruction_number },
+					'Tillbaka till verifikation'
+				),
+				_react2.default.createElement(
+					'form',
+					{ className: 'uk-form uk-form-horizontal' },
+					_react2.default.createElement(
+						'div',
+						{ className: 'uk-grid' },
+						_react2.default.createElement(
+							'div',
+							{ className: 'uk-width-1-2' },
+							_react2.default.createElement(
+								'div',
+								{ className: 'uk-form-row' },
+								_react2.default.createElement(
+									'label',
+									{ className: 'uk-form-label' },
+									'Importerad fr\xE5n'
+								),
+								_react2.default.createElement(
+									'div',
+									{ className: 'uk-form-controls' },
+									_react2.default.createElement(
+										'div',
+										{ className: 'uk-form-icon' },
+										_react2.default.createElement('i', { className: 'uk-icon-institution' }),
+										_react2.default.createElement('input', { type: 'text', value: this.state.model.importer, disabled: true })
+									)
+								)
+							),
+							_react2.default.createElement(
+								'div',
+								{ className: 'uk-form-row' },
+								_react2.default.createElement(
+									'label',
+									{ className: 'uk-form-label' },
+									'Externt id'
+								),
+								_react2.default.createElement(
+									'div',
+									{ className: 'uk-form-controls' },
+									_react2.default.createElement(
+										'div',
+										{ className: 'uk-form-icon' },
+										_react2.default.createElement('i', { className: 'uk-icon-database' }),
+										_react2.default.createElement('input', { type: 'text', value: this.state.model.external_id, disabled: true })
+									)
+								)
+							),
+							_react2.default.createElement(
+								'div',
+								{ className: 'uk-form-row' },
+								_react2.default.createElement(
+									'label',
+									{ className: 'uk-form-label' },
+									'Externt datum'
+								),
+								_react2.default.createElement(
+									'div',
+									{ className: 'uk-form-controls' },
+									_react2.default.createElement(
+										'div',
+										{ className: 'uk-form-icon' },
+										_react2.default.createElement('i', { className: 'uk-icon-database' }),
+										_react2.default.createElement('input', { type: 'text', value: this.state.model.external_date, disabled: true })
+									)
+								)
+							),
+							_react2.default.createElement(
+								'div',
+								{ className: 'uk-form-row' },
+								_react2.default.createElement(
+									'label',
+									{ className: 'uk-form-label' },
+									'Data'
+								),
+								_react2.default.createElement(
+									'div',
+									{ className: 'uk-form-controls' },
+									_react2.default.createElement('textarea', { value: this.state.model.external_data })
+								)
+							)
+						)
+					)
+				)
+			);
+		}
+	}));
 
 /***/ }
 /******/ ]);
