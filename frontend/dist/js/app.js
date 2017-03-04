@@ -50448,6 +50448,10 @@
 
 	var _react2 = _interopRequireDefault(_react);
 
+	var _auth = __webpack_require__(240);
+
+	var _auth2 = _interopRequireDefault(_auth);
+
 	var _reactRouter = __webpack_require__(178);
 
 	var _Currency = __webpack_require__(258);
@@ -50543,7 +50547,7 @@
 							null,
 							_react2.default.createElement(
 								'a',
-								{ href: "/economy/" + _this.props.params.period + "/file/" + _this.state.model.external_id + "/" + file },
+								{ href: config.apiBasePath + "/economy/" + _this.props.params.period + "/file/" + _this.state.model.external_id + "/" + file + "?bearer=" + _auth2.default.getAccessToken() },
 								file
 							)
 						)
@@ -63023,9 +63027,9 @@
 
 	var _reactRouter = __webpack_require__(178);
 
-	var _Date = __webpack_require__(267);
+	var _DateTime = __webpack_require__(314);
 
-	var _Date2 = _interopRequireDefault(_Date);
+	var _DateTime2 = _interopRequireDefault(_DateTime);
 
 	var _auth = __webpack_require__(240);
 
@@ -63090,41 +63094,43 @@
 									'p',
 									null,
 									'MultiAccess: ',
-									_react2.default.createElement(_Date2.default, { date: row.multiaccess_key.startdate })
+									_react2.default.createElement(_DateTime2.default, { date: row.multiaccess_key.startdate })
 								),
 								_react2.default.createElement(
 									'p',
 									null,
 									'MakerAdmin: ',
-									_react2.default.createElement(_Date2.default, { date: row.local_key.startdate })
+									_react2.default.createElement(_DateTime2.default, { date: row.local_key.startdate })
 								)
 							));
 						}
 
 						// Compare end date
-						if (row.multiaccess_key.enddate != row.local_key.enddate) {
-							errors.push(_react2.default.createElement(
-								'div',
-								null,
-								_react2.default.createElement(
-									'h4',
+						//					if(row.multiaccess_key.enddate != row.local_key.enddate)
+						if (Math.abs(new Date(row.multiaccess_key.enddate) - new Date(row.local_key.enddate)) > 36 * 3600 * 1000) // Less than 8 hours
+							{
+								errors.push(_react2.default.createElement(
+									'div',
 									null,
-									'Slutdatumet \xE4r fel'
-								),
-								_react2.default.createElement(
-									'p',
-									null,
-									'MultiAccess: ',
-									_react2.default.createElement(_Date2.default, { date: row.multiaccess_key.enddate })
-								),
-								_react2.default.createElement(
-									'p',
-									null,
-									'MakerAdmin: ',
-									_react2.default.createElement(_Date2.default, { date: row.local_key.enddate })
-								)
-							));
-						}
+									_react2.default.createElement(
+										'h4',
+										null,
+										'Slutdatumet \xE4r fel'
+									),
+									_react2.default.createElement(
+										'p',
+										null,
+										'MultiAccess: ',
+										_react2.default.createElement(_DateTime2.default, { date: row.multiaccess_key.enddate })
+									),
+									_react2.default.createElement(
+										'p',
+										null,
+										'MakerAdmin: ',
+										_react2.default.createElement(_DateTime2.default, { date: row.local_key.enddate })
+									)
+								));
+							}
 
 						// Compare tagid
 						if (row.multiaccess_key.tagid != row.local_key.tagid) {
