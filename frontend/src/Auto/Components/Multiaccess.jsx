@@ -1,6 +1,6 @@
 import React from 'react'
 import { Link } from 'react-router'
-import DateField from '../../Components/Date'
+import DateField from '../../Components/DateTime'
 import auth from '../../auth'
 
 module.exports = React.createClass({
@@ -63,7 +63,8 @@ module.exports = React.createClass({
 					}
 
 					// Compare end date
-					if(row.multiaccess_key.enddate != row.local_key.enddate)
+//					if(row.multiaccess_key.enddate != row.local_key.enddate)
+					if(Math.abs(new Date(row.multiaccess_key.enddate) - new Date(row.local_key.enddate)) > (36 * 3600 * 1000)) // Less than 8 hours
 					{
 						errors.push(
 							<div>
