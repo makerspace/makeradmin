@@ -76,11 +76,12 @@ class MultiAccessSync extends Controller
 			}
 
 			// Check permissions
+/*
 			if(!$this->_checkPermissions($user))
 			{
 				$users[$member_number]["errors"][] = "Något verkar vara fel med personens behörigheter";
 			}
-
+*/
 			if($d = strtotime((string)$user->Start))
 			{
 				$startdate = date("Y-m-d\TH:i:s\Z", $d);
