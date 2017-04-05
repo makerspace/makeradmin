@@ -7,7 +7,10 @@
     "require": {
         "php": ">=5.6.4",
         "laravel/lumen-framework": "5.3.*",
-        "vlucas/phpdotenv": "~2.2"
+        "vlucas/phpdotenv": "~2.2",
+        "mailgun/mailgun-php": "^2.1",
+        "php-http/guzzle6-adapter": "^1.1",
+        "php-http/message": "^1.5"
     },
     "require-dev": {
         "fzaninotto/faker": "~1.4",
