@@ -63159,6 +63159,14 @@
 
 	var _auth2 = _interopRequireDefault(_auth);
 
+	var _Key = __webpack_require__(340);
+
+	var _Key2 = _interopRequireDefault(_Key);
+
+	var _Member = __webpack_require__(310);
+
+	var _Member2 = _interopRequireDefault(_Member);
+
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	module.exports = _react2.default.createClass({
@@ -63191,7 +63199,40 @@
 			}
 		},
 
+		createLocalKey: function createLocalKey(key) {
+
+			// Create a new key
+			var newkey = new _Key2.default({
+				startdate: key.startdate,
+				enddate: key.enddate,
+				status: key.active ? "active" : "inactive",
+				tagid: key.tagid,
+				title: key.member_number
+			});
+			newkey.save(null, {
+				success: function success(key_model, response) {
+					alert("OK");
+					console.log("/membership/member/_" + key.member_number + " /keys/" + key_model.id);
+					/*
+	    				// Load member from member_number and get member_id
+	    				var m = new MemberModel({member_number: key.member_number});
+	    				console.log(m);
+	    
+	    				var member_number = key.member_number;
+	    				console.log("TODO: Load member with number " + member_number);
+	    
+	    				// TODO: Send API request
+	    				var member_id = 1234;
+	    
+	    				// Create relation
+	    				console.log("TODO: Create relation: /membership/member/" + member_id + " /keys/" + key_model.id);
+	    */
+				}
+			});
+		},
+
 		render: function render() {
+			var _this = this;
 			var date_mismatch = [];
 			var members = [];
 
@@ -63281,6 +63322,11 @@
 								'h4',
 								null,
 								'Nyckeln saknas i MakerAdmin'
+							),
+							_react2.default.createElement(
+								'button',
+								{ onClick: _this.createLocalKey.bind(_this, row.multiaccess_key) },
+								'Skapa nyckel'
 							)
 						));
 					}
