@@ -2,6 +2,8 @@ import React from 'react'
 import { Link } from 'react-router'
 import DateField from '../../Components/DateTime'
 import auth from '../../auth'
+import KeyModel from '../../Keys/Models/Key'
+import MemberModel from '../../Membership/Models/Member'
 
 module.exports = React.createClass({
 	getInitialState: function()
@@ -36,8 +38,44 @@ module.exports = React.createClass({
 		}
 	},
 
+	createLocalKey: function(key)
+	{
+
+		// Create a new key
+		var newkey = new KeyModel(
+			{
+				startdate: key.startdate,
+				enddate: key.enddate,
+				status: key.active ? "active" : "inactive",
+				tagid: key.tagid,
+				title: key.member_number,
+			}
+		);
+		newkey.save(null, {
+			success: function(key_model, response) {
+				alert("OK");
+				console.log("/membership/member/_" + key.member_number + " /keys/" + key_model.id);
+/*
+				// Load member from member_number and get member_id
+				var m = new MemberModel({member_number: key.member_number});
+				console.log(m);
+
+				var member_number = key.member_number;
+				console.log("TODO: Load member with number " + member_number);
+
+				// TODO: Send API request
+				var member_id = 1234;
+
+				// Create relation
+				console.log("TODO: Create relation: /membership/member/" + member_id + " /keys/" + key_model.id);
+*/
+			},
+		});
+	},
+
 	render: function()
 	{
+		var _this = this;
 		var date_mismatch = [];
 		var members = [];
 
@@ -105,6 +143,7 @@ module.exports = React.createClass({
 					errors.push(
 						<div>
 							<h4>Nyckeln saknas i MakerAdmin</h4>
+							<button onClick={_this.createLocalKey.bind(_this, row.multiaccess_key)}>Skapa nyckel</button>
 						</div>
 					);
 				}
