@@ -63192,6 +63192,9 @@
 		},
 
 		render: function render() {
+			var date_mismatch = [];
+			var members = [];
+
 			if (this.state.fetched_data == false) {
 				return _react2.default.createElement(
 					'p',
@@ -63199,62 +63202,20 @@
 					'Loading data'
 				);
 			} else {
-				var members = [];
 				this.state.data.data.map(function (row, i) {
 					var errors = [];
 
 					if (row.multiaccess_key.length != 0 && row.local_key.length != 0) {
 						// Compare start date
-						if (row.multiaccess_key.startdate != row.local_key.startdate) {
-							errors.push(_react2.default.createElement(
-								'div',
-								null,
-								_react2.default.createElement(
-									'h4',
-									null,
-									'Startdatumet \xE4r fel'
-								),
-								_react2.default.createElement(
-									'p',
-									null,
-									'MultiAccess: ',
-									_react2.default.createElement(_DateTime2.default, { date: row.multiaccess_key.startdate })
-								),
-								_react2.default.createElement(
-									'p',
-									null,
-									'MakerAdmin: ',
-									_react2.default.createElement(_DateTime2.default, { date: row.local_key.startdate })
-								)
-							));
+						// Compare end date (Less than 8 hours)
+						// Compare active
+						if (row.multiaccess_key.startdate != row.local_key.startdate || Math.abs(new Date(row.multiaccess_key.enddate) - new Date(row.local_key.enddate)) > 36 * 3600 * 1000 || row.multiaccess_key.active == false && row.local_key.status != "inactive" || row.multiaccess_key.active == true && row.local_key.status != "active") {
+							date_mismatch.push({
+								"multiaccess_key": row.multiaccess_key,
+								"member": row.member,
+								"local_key": row.local_key
+							});
 						}
-
-						// Compare end date
-						//					if(row.multiaccess_key.enddate != row.local_key.enddate)
-						if (Math.abs(new Date(row.multiaccess_key.enddate) - new Date(row.local_key.enddate)) > 36 * 3600 * 1000) // Less than 8 hours
-							{
-								errors.push(_react2.default.createElement(
-									'div',
-									null,
-									_react2.default.createElement(
-										'h4',
-										null,
-										'Slutdatumet \xE4r fel'
-									),
-									_react2.default.createElement(
-										'p',
-										null,
-										'MultiAccess: ',
-										_react2.default.createElement(_DateTime2.default, { date: row.multiaccess_key.enddate })
-									),
-									_react2.default.createElement(
-										'p',
-										null,
-										'MakerAdmin: ',
-										_react2.default.createElement(_DateTime2.default, { date: row.local_key.enddate })
-									)
-								));
-							}
 
 						// Compare tagid
 						if (row.multiaccess_key.tagid != row.local_key.tagid) {
@@ -63277,30 +63238,6 @@
 									null,
 									'MakerAdmin: ',
 									row.local_key.tagid
-								)
-							));
-						}
-
-						// Compare active
-						if (row.multiaccess_key.active == false && row.local_key.status != "inactive") {
-							errors.push(_react2.default.createElement(
-								'div',
-								null,
-								_react2.default.createElement(
-									'h4',
-									null,
-									'Nyckeln skall inaktiveras i MultiAccess'
-								)
-							));
-						}
-						if (row.multiaccess_key.active == true && row.local_key.status != "active") {
-							errors.push(_react2.default.createElement(
-								'div',
-								null,
-								_react2.default.createElement(
-									'h4',
-									null,
-									'Nyckeln skall aktiveras i MultiAccess'
 								)
 							));
 						}
@@ -63383,6 +63320,87 @@
 				return _react2.default.createElement(
 					'div',
 					{ className: 'multiaccess' },
+					_react2.default.createElement(
+						'h3',
+						null,
+						'Felaktiga datum'
+					),
+					_react2.default.createElement(
+						'table',
+						null,
+						_react2.default.createElement(
+							'thead',
+							null,
+							_react2.default.createElement(
+								'tr',
+								null,
+								_react2.default.createElement(
+									'th',
+									null,
+									'Medlem'
+								),
+								_react2.default.createElement(
+									'th',
+									null,
+									'MakerAdmin'
+								),
+								_react2.default.createElement(
+									'th',
+									null,
+									'MultiAccess'
+								),
+								_react2.default.createElement(
+									'th',
+									null,
+									'Meep'
+								)
+							)
+						),
+						_react2.default.createElement(
+							'tbody',
+							null,
+							date_mismatch.map(function (row, i) {
+								return _react2.default.createElement(
+									'tr',
+									{ key: i },
+									_react2.default.createElement(
+										'td',
+										null,
+										_react2.default.createElement('i', { className: 'uk-icon-user' }),
+										' ',
+										_react2.default.createElement(
+											_reactRouter.Link,
+											{ to: "/membership/members/" + row.member.member_id },
+											row.member.member_number,
+											' ',
+											row.member.firstname,
+											' ',
+											row.member.lastname
+										)
+									),
+									_react2.default.createElement(
+										'td',
+										null,
+										row.local_key.status != "active" ? _react2.default.createElement(
+											'em',
+											null,
+											'Inaktiv'
+										) : _react2.default.createElement(_DateTime2.default, { date: row.local_key.enddate })
+									),
+									_react2.default.createElement(
+										'td',
+										null,
+										row.multiaccess_key.active == false ? _react2.default.createElement(
+											'em',
+											null,
+											'Inaktiv'
+										) : _react2.default.createElement(_DateTime2.default, { date: row.multiaccess_key.enddate })
+									),
+									_react2.default.createElement('td', null)
+								);
+							})
+						)
+					),
 					members.map(function (row, i) {
 						if (row.errors.length > 0) {
 							return [_react2.default.createElement(
@@ -64095,7 +64113,7 @@
 					_react2.default.createElement(
 						"dd",
 						null,
-						("2017-03-04 13:15:19")
+						("2017-04-10 16:54:03")
 					),
 					_react2.default.createElement(
 						"dt",
@@ -64105,7 +64123,7 @@
 					_react2.default.createElement(
 						"dd",
 						null,
-						("2c38e5f\n")
+						("d093c93\n")
 					)
 				),
 				_react2.default.createElement(
