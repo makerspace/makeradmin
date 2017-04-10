@@ -38,41 +38,35 @@ module.exports = React.createClass({
 
 	render: function()
 	{
+		var date_mismatch = [];
+		var members = [];
+
 		if(this.state.fetched_data == false)
 		{
 			return (<p>Loading data</p>);
 		}
 		else
 		{
-			var members = [];
 			this.state.data.data.map(function (row, i) {
 				var errors = [];
 
 				if(row.multiaccess_key.length != 0 && row.local_key.length != 0)
 				{
 					// Compare start date
-					if(row.multiaccess_key.startdate != row.local_key.startdate)
+					// Compare end date (Less than 8 hours)
+					// Compare active
+					if(
+						(row.multiaccess_key.startdate != row.local_key.startdate) ||
+						(Math.abs(new Date(row.multiaccess_key.enddate) - new Date(row.local_key.enddate)) > (36 * 3600 * 1000)) ||
+						(row.multiaccess_key.active == false && row.local_key.status != "inactive") ||
+						(row.multiaccess_key.active == true && row.local_key.status != "active")
+					)
 					{
-						errors.push(
-							<div>
-								<h4>Startdatumet är fel</h4>
-								<p>MultiAccess: <DateField date={row.multiaccess_key.startdate} /></p>
-								<p>MakerAdmin: <DateField date={row.local_key.startdate} /></p>
-							</div>
-						);
-					}
-
-					// Compare end date
-//					if(row.multiaccess_key.enddate != row.local_key.enddate)
-					if(Math.abs(new Date(row.multiaccess_key.enddate) - new Date(row.local_key.enddate)) > (36 * 3600 * 1000)) // Less than 8 hours
-					{
-						errors.push(
-							<div>
-								<h4>Slutdatumet är fel</h4>
-								<p>MultiAccess: <DateField date={row.multiaccess_key.enddate} /></p>
-								<p>MakerAdmin: <DateField date={row.local_key.enddate} /></p>
-							</div>
-						);
+						date_mismatch.push({
+							"multiaccess_key": row.multiaccess_key,
+							"member": row.member,
+							"local_key": row.local_key,
+						});
 					}
 
 					// Compare tagid
@@ -83,24 +77,6 @@ module.exports = React.createClass({
 								<h4>RFID-taggen överensstämmer ej</h4>
 								<p>MultiAccess: {row.multiaccess_key.tagid}</p>
 								<p>MakerAdmin: {row.local_key.tagid}</p>
-							</div>
-						);
-					}
-
-					// Compare active
-					if(row.multiaccess_key.active == false && row.local_key.status != "inactive")
-					{
-						errors.push(
-							<div>
-								<h4>Nyckeln skall inaktiveras i MultiAccess</h4>
-							</div>
-						);
-					}
-					if(row.multiaccess_key.active == true && row.local_key.status != "active")
-					{
-						errors.push(
-							<div>
-								<h4>Nyckeln skall aktiveras i MultiAccess</h4>
 							</div>
 						);
 					}
@@ -160,6 +136,42 @@ module.exports = React.createClass({
 
 			return (
 				<div className="multiaccess">
+					<h3>Felaktiga datum</h3>
+					<table>
+						<thead>
+							<tr>
+								<th>Medlem</th>
+								<th>MakerAdmin</th>
+								<th>MultiAccess</th>
+								<th>Meep</th>
+							</tr>
+						</thead>
+						<tbody>
+							{date_mismatch.map(function (row, i) {
+								return (
+									<tr key={i}>
+										<td><i className="uk-icon-user" /> <Link to={"/membership/members/" + row.member.member_id}>{row.member.member_number} {row.member.firstname} {row.member.lastname}</Link></td>
+										<td>
+											{row.local_key.status != "active" ?
+													<em>Inaktiv</em>
+												:
+													<DateField date={row.local_key.enddate} />
+											}
+										</td>
+										<td>
+											{row.multiaccess_key.active == false ? 
+													<em>Inaktiv</em>
+												:
+													<DateField date={row.multiaccess_key.enddate} />
+											}
+										</td>
+										<td></td>
+									</tr>
+								);
+							})}
+						</tbody>
+					</table>
+
 					{members.map(function (row, i) {
 						if(row.errors.length > 0)
 						{
