@@ -49,16 +49,7 @@ Pseudo-kod
 
 Databasstruktur
 ---------------
-MultiAccess använder sig av en lokal MSSQL-databas. Denna databas synkas sedan över till en själva centralenheten i passersystemet. Det är oklart om denna synk går att trigga automatiskt, eller om man manuellt behöva trycka på rätt knapp i MultiAccess.
-
-
-Som ett första steg vill vi endast uppdatera slutdatum på befintliga medlemmar. Detta skall göras med en SQL-query liknande denna:
-
-`UPDATE Users SET Stop='2018-12-24' WHERE Name='1285' AND customerId=16 LIMIT 1;`
-
-`*customerId*` är 16 för Stockholm Makerspace
-
-`*Name*` är det medlemsnummer som medlemmen har i Makeradmin.
+Se Docs/Database.md
 
 
 Utvecklingsmiljö
@@ -69,4 +60,4 @@ Utvecklingsmiljö
 Installation
 ------------
 **TODO**: Lägg in instruktioner för hur man installerar och konfiguerar programmet i den riktiga miljön
-Följande parametrar behöver ändras i konfigurationsfilern: DbHost, DbUser, DbPassword, DbName, ApiUrl, ApiBearer, ApiPollInterval
+Följande parametrar behöver ändras i konfigurationsfilern: DbHost, DbUser, DbPassword, DbName, ApiUrl, ApiBearer, ApiPollInterval, KeyCustomerId, KeyAuthorityId
