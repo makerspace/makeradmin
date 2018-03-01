@@ -22,7 +22,7 @@ Skapa testdatabas
 -----------------
 Det här är en förenklad version av databasen som endast innehåller de tabeller och kolumner vi är intresserade av för tillfället.
 
-`
+```
 USE MultiAccess
 
 CREATE TABLE Users (Id int identity PRIMARY KEY NOT NULL, Name varchar(50) NOT NULL, Card varchar(12), Start datetime, Stop datetime, Blocked bit, customerId int, createdTime datetime)
@@ -32,7 +32,7 @@ CREATE TABLE AuthorityInUser (Id int identity PRIMARY KEY NOT NULL, UserId int N
 INSERT INTO Users (Name, Card, Stop, createdTime, customerId) VALUES('1099', '123456789', '2018-09-14 23:59:59.000', getdate(), 16)
 
 INSERT INTO AuthorityInUser (UserId, AuthorityId, flags) VALUES(SCOPE_IDENTITY(), 23, 0)
-`
+```
 
 
 Uppdatera slutdatum
