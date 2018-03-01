@@ -49,7 +49,7 @@ Pseudo-kod
 
 Databasstruktur
 ---------------
-Se Docs/Database.md
+Se [Docs/Database.md](Docs/Database.md)
 
 
 Utvecklingsmiljö
