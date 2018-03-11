@@ -20,7 +20,7 @@ trap shutdown SIGHUP SIGINT SIGTERM
 
 # Start HHVM as a background process
 echo "Starting HHVM"
-/usr/bin/hhvm -m daemon -c /etc/hhvm/server.ini -c /etc/hhvm/site.ini &
+/usr/bin/hhvm -vServer.AllowRunAsRoot=1 -m daemon -c /etc/hhvm/server.ini -c /etc/hhvm/site.ini &
 
 # Sleep forever (...or at least until the timestamp overflows :)
 # Note: We need to have the "& wait" to be able to trap signals while the sleep is running
