@@ -1,0 +1,66 @@
+version: "2"
+services:
+  db:
+    image: mysql
+    restart: always
+    volumes:
+       - dbdata:/var/lib/mysql
+    environment:
+      MYSQL_DATABASE: "something"
+      MYSQL_ROOT_HOST: "172.19.0.2"
+      MYSQL_USER: "testuser"
+      MYSQL_PASSWORD: "testpassword"
+      MYSQL_ROOT_PASSWORD: "example"
+    networks:
+      - makeradmin
+  api-gateway:
+    build: ./MakerAdmin-ApiGateway
+    ports:
+      - "8010:80"
+    networks:
+      - makeradmin
+    environment:
+        MYSQL_HOST: "db:3306"
+        MYSQL_DB: "something"
+        MYSQL_USER: "testuser"
+        MYSQL_PASS: "testpassword"
+  economy:
+    build: ./MakerAdmin-Economy
+    depends_on:
+      - api-gateway
+    networks:
+      - makeradmin
+  membership:
+    build: ./MakerAdmin-Membership
+    depends_on:
+      - api-gateway
+    networks:
+      - makeradmin
+  messages:
+    build: ./MakerAdmin-Messages
+    depends_on:
+      - api-gateway
+    networks:
+      - makeradmin
+  sales:
+    build: ./MakerAdmin-Sales
+    depends_on:
+      - api-gateway
+    networks:
+      - makeradmin
+  frontend:
+    build: ./MakerAdmin-Frontend
+    ports:
+      - "8009:80"
+    depends_on:
+      - economy
+      - membership
+      - messages
+      - sales
+    networks:
+      - makeradmin
+
+networks:
+  makeradmin:
+volumes:
+    dbdata:
