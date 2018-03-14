@@ -1,6 +1,9 @@
 Makeradmin
 ==========
 
+This is work in progress and may do absolutely anything or nothing at all
+-------------------------------------------------------------------------
+
 ~~~
 # clone this repository...
 cd repository
