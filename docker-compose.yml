@@ -1,11 +1,12 @@
 version: "2"
 services:
-  db:
+  db2:
     image: mysql
     restart: always
     volumes:
        - dbdata:/var/lib/mysql
     environment:
+      # Note: the config only seems to be updated when the container is initially created
       MYSQL_DATABASE: "something"
       MYSQL_ROOT_HOST: "172.19.0.2"
       MYSQL_USER: "testuser"
@@ -14,41 +15,67 @@ services:
     networks:
       - makeradmin
   api-gateway:
+    container_name: makeradmin-apigateway
     build: ./MakerAdmin-ApiGateway
     ports:
       - "8010:80"
     networks:
       - makeradmin
     environment:
-        MYSQL_HOST: "db:3306"
+        MYSQL_HOST: "db2:3306"
         MYSQL_DB: "something"
         MYSQL_USER: "testuser"
         MYSQL_PASS: "testpassword"
   economy:
+    container_name: makeradmin-economy
     build: ./MakerAdmin-Economy
+    environment:
+        MYSQL_HOST: "db2:3306"
+        MYSQL_DB: "something"
+        MYSQL_USER: "testuser"
+        MYSQL_PASS: "testpassword"
     depends_on:
       - api-gateway
     networks:
       - makeradmin
   membership:
+    container_name: makeradmin-membership
     build: ./MakerAdmin-Membership
+    environment:
+        MYSQL_HOST: "db2:3306"
+        MYSQL_DB: "something"
+        MYSQL_USER: "testuser"
+        MYSQL_PASS: "testpassword"
     depends_on:
       - api-gateway
     networks:
       - makeradmin
   messages:
+    container_name: makeradmin-messages
     build: ./MakerAdmin-Messages
+    environment:
+        MYSQL_HOST: "db2:3306"
+        MYSQL_DB: "something"
+        MYSQL_USER: "testuser"
+        MYSQL_PASS: "testpassword"
     depends_on:
       - api-gateway
     networks:
       - makeradmin
   sales:
+    container_name: makeradmin-sales
     build: ./MakerAdmin-Sales
+    environment:
+        MYSQL_HOST: "db2:3306"
+        MYSQL_DB: "something"
+        MYSQL_USER: "testuser"
+        MYSQL_PASS: "testpassword"
     depends_on:
       - api-gateway
     networks:
       - makeradmin
   frontend:
+    container_name: makeradmin-frontend
     build: ./MakerAdmin-Frontend
     ports:
       - "8009:80"
