@@ -7,5 +7,19 @@ mkdir -p /var/www/html/bootstrap/cache
 chown -R www-data:www-data /var/www/html/storage/
 chown -R www-data:www-data /var/www/html/bootstrap/cache/
 
+shutdown() {
+	echo Shutting down gateway
+	kill -QUIT `cat /var/run/hhvm/pid`
+	exit 0
+}
+
+# Stop HHVM gracefully when the script is shut down
+trap shutdown SIGHUP SIGINT SIGTERM
+
 # Start HHVM
-/usr/bin/hhvm -vServer.AllowRunAsRoot=1 -m server -c /etc/hhvm/server.ini -c /etc/hhvm/site.ini
+/usr/bin/hhvm -vServer.AllowRunAsRoot=1 -m server -c /etc/hhvm/server.ini -c /etc/hhvm/site.ini &
+
+# Sleep forever (...or at least until the timestamp overflows :)
+# Note: We need to have the "& wait" to be able to trap signals while the sleep is running
+echo "Sleeping"
+sleep inf & wait
