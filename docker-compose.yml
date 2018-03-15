@@ -8,7 +8,7 @@ services:
     environment:
       # Note: the config only seems to be updated when the container is initially created
       MYSQL_DATABASE: "something"
-      MYSQL_ROOT_HOST: "172.19.0.2"
+      MYSQL_ROOT_HOST: "db2"
       MYSQL_USER: "testuser"
       MYSQL_PASSWORD: "testpassword"
       MYSQL_ROOT_PASSWORD: "example"
@@ -26,6 +26,7 @@ services:
         MYSQL_DB: "something"
         MYSQL_USER: "testuser"
         MYSQL_PASS: "testpassword"
+        BEARER: "secret_service_key"
   economy:
     container_name: makeradmin-economy
     build: ./MakerAdmin-Economy
@@ -34,6 +35,8 @@ services:
         MYSQL_DB: "something"
         MYSQL_USER: "testuser"
         MYSQL_PASS: "testpassword"
+        APIGATEWAY: "api-gateway"
+        BEARER: "secret_service_key"
     depends_on:
       - api-gateway
     networks:
@@ -46,6 +49,8 @@ services:
         MYSQL_DB: "something"
         MYSQL_USER: "testuser"
         MYSQL_PASS: "testpassword"
+        APIGATEWAY: "api-gateway"
+        BEARER: "secret_service_key"
     depends_on:
       - api-gateway
     networks:
@@ -58,6 +63,8 @@ services:
         MYSQL_DB: "something"
         MYSQL_USER: "testuser"
         MYSQL_PASS: "testpassword"
+        APIGATEWAY: "api-gateway"
+        BEARER: "secret_service_key"
     depends_on:
       - api-gateway
     networks:
@@ -70,6 +77,8 @@ services:
         MYSQL_DB: "something"
         MYSQL_USER: "testuser"
         MYSQL_PASS: "testpassword"
+        APIGATEWAY: "api-gateway"
+        BEARER: "secret_service_key"
     depends_on:
       - api-gateway
     networks:
