@@ -42615,7 +42615,7 @@
 		requestPassword: function requestPassword(username) {
 			$.ajax({
 				method: "POST",
-				url: config.apiBasePath + "/oauth/resetpassword",
+				url: config.oauthBasePath + "/oauth/resetpassword",
 				data: {
 					username: username
 				}
@@ -42632,7 +42632,7 @@
 			// Login with OAuth 2.0
 			$.ajax({
 				method: "POST",
-				url: config.apiBasePath + "/oauth/token",
+				url: config.oauthBasePath + "/oauth/token",
 				data: {
 					grant_type: "password",
 					username: username,
@@ -42661,7 +42661,7 @@
 			// Tell the server to delete the access token
 			$.ajax({
 				method: "DELETE",
-				url: config.apiBasePath + "/oauth/token/" + localStorage.token,
+				url: config.oauthBasePath + "/oauth/token/" + localStorage.token,
 				headers: {
 					"Authorization": "Bearer " + localStorage.token
 				}
