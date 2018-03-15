@@ -148,6 +148,29 @@ class Login
 			->where("access_token", $access_token)
 			->value("user_id");
 
+		//TODO: Se till att fixa detta hack
+                if(!$user_id)
+		{
+			try{
+				$row_count = DB::table("access_tokens")->count();
+				if($row_count===0){
+					$expires = date("Y-m-d\TH:i:s\Z", strtotime("now + 3650 day"));
+					DB::table("access_tokens")->insert([
+						"user_id"      => 1,
+						"access_token" => getenv('BEARER'),
+						"expires"      => $expires,
+						"browser"      => "",
+						"ip"           => ""
+					]);
+				}
+			}catch(\Exception $e){
+			}
+			//Recheck access_token in database
+			$user_id = DB::table("access_tokens")
+				->where("access_token", $access_token)
+				->value("user_id");
+		}
+
 		if($user_id)
 		{
 			// Create a new user object and add user_id
