@@ -9,10 +9,9 @@ chown -R www-data:www-data /var/www/html/storage/
 chown -R www-data:www-data /var/www/html/bootstrap/cache/
 
 shutdown() {
-	echo Shutting down service
-	/usr/bin/php /var/www/html/artisan service:unregister
+	echo "Shutting down service"
+	/usr/bin/php -d hhvm.jit=0 /var/www/html/artisan service:unregister
 	kill -QUIT `cat /var/run/hhvm/pid`
-	echo Killed HHVM
 	exit 0
 }
 
@@ -20,7 +19,8 @@ shutdown() {
 trap shutdown SIGHUP SIGINT SIGTERM
 
 # Register the service immediately
-/usr/bin/php /var/www/html/artisan service:register
+# Disable the JIT because HHVM starts up really slowly with a JIT and this script is very short
+/usr/bin/php -d hhvm.jit=0 /var/www/html/artisan service:register
 
 # Start HHVM as a background process
 echo "Starting HHVM"
