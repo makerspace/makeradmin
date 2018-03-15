@@ -17,11 +17,14 @@ services:
   api-gateway:
     container_name: makeradmin-apigateway
     build: ./MakerAdmin-ApiGateway
+    depends_on:
+      - db2
     ports:
       - "8010:80"
     networks:
       - makeradmin
     environment:
+        APP_DEBUG: "true"
         MYSQL_HOST: "db2:3306"
         MYSQL_DB: "something"
         MYSQL_USER: "testuser"
