@@ -68,7 +68,7 @@ Not tested yet...
 Installing with pip: `pip install pymssql`
 
 ### [pyodbc](https://mkleehammer.github.io/pyodbc/)
-Seems to work fine.
+Works!
 Installing with pip: `pip install pyodbc`
 
 #### Example reading from MultiAccess with pyodbc
@@ -80,13 +80,8 @@ Installing with pip: `pip install pyodbc`
 >>> cursor.execute("select * from Users")
 <pyodbc.Cursor object at 0x00000252B06584E0>
 >>> cursor.fetchall()
-[('Name Namesson', '1234', '917000000', None, None, False, None, None, None, None, None, N
-one, None, None, None, None, None, None, None, None, None, None, None, None, None, 0, None
-, None, 1, None, None, None, False, None, None), ('Anders Andersson', None, '123456789', d
-atetime.datetime(2018, 3, 14, 0, 0), datetime.datetime(2018, 3, 15, 0, 0), None, None, Non
-e, None, None, None, None, None, None, None, None, None, None, None, None, None, None, Non
-e, None, None, 0, 1, datetime.datetime(2018, 3, 14, 20, 14, 12), 2, None, None, None, Fals
-e, None, None)]
+[('Name Namesson', '1234', '917000000', None, None, False, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, 0, None, None, 1, None, None, None, False, None, None),
+ ('Anders Andersson', None, '123456789', datetime.datetime(2018, 3, 14, 0, 0), datetime.datetime(2018, 3, 15, 0, 0), None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, 0, 1, datetime.datetime(2018, 3, 14, 20, 14, 12), 2, None, None, None, False, None, None)]
 
 >>> cursor.tables()
 >>> rows = cursor.fetchall()
@@ -102,7 +97,8 @@ Customer
 [...]
 Event
 [...]
-Users[...]
+Users
+[...]
 >>> len(rows)
 505
 ```
