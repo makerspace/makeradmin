@@ -4,7 +4,8 @@ services:
     image: mysql
     restart: always
     volumes:
-       - dbdata:/var/lib/mysql
+      - dbdata:/var/lib/mysql
+      - ./logs/mysql:/var/www/html/storage/logs
     environment:
       # Note: the config only seems to be updated when the container is initially created
       MYSQL_DATABASE: "something"
@@ -14,9 +15,13 @@ services:
       MYSQL_ROOT_PASSWORD: "example"
     networks:
       - makeradmin
+
   api-gateway:
+    image: makeradmin/apigateway:1.0
     container_name: makeradmin-apigateway
     build: ./MakerAdmin-ApiGateway
+    volumes:
+      - ./logs/apigateway:/var/www/html/storage/logs
     depends_on:
       - db2
     ports:
@@ -30,9 +35,14 @@ services:
         MYSQL_USER: "testuser"
         MYSQL_PASS: "testpassword"
         BEARER: "secret_service_key"
+
   economy:
+    image: makeradmin/economy:1.0
     container_name: makeradmin-economy
     build: ./MakerAdmin-Economy
+    volumes:
+      - ./logs/economy:/var/www/html/storage/logs
+      - ./data/economy-vouchers:/var/www/html/vouchers
     environment:
         MYSQL_HOST: "db2:3306"
         MYSQL_DB: "something"
@@ -44,9 +54,13 @@ services:
       - api-gateway
     networks:
       - makeradmin
+
   membership:
+    image: makeradmin/membership:1.0
     container_name: makeradmin-membership
     build: ./MakerAdmin-Membership
+    volumes:
+      - ./logs/membership:/var/www/html/storage/logs
     environment:
         MYSQL_HOST: "db2:3306"
         MYSQL_DB: "something"
@@ -58,9 +72,13 @@ services:
       - api-gateway
     networks:
       - makeradmin
+
   messages:
+    image: makeradmin/messages:1.0
     container_name: makeradmin-messages
     build: ./MakerAdmin-Messages
+    volumes:
+      - ./logs/messages:/var/www/html/storage/logs
     environment:
         MYSQL_HOST: "db2:3306"
         MYSQL_DB: "something"
@@ -72,9 +90,13 @@ services:
       - api-gateway
     networks:
       - makeradmin
+
   sales:
+    image: makeradmin/sales:1.0
     container_name: makeradmin-sales
     build: ./MakerAdmin-Sales
+    volumes:
+      - ./logs/sales:/var/www/html/storage/logs
     environment:
         MYSQL_HOST: "db2:3306"
         MYSQL_DB: "something"
@@ -86,7 +108,9 @@ services:
       - api-gateway
     networks:
       - makeradmin
+
   frontend:
+    image: makeradmin/frontend:1.0
     container_name: makeradmin-frontend
     build: ./MakerAdmin-Frontend
     ports:
@@ -102,4 +126,4 @@ services:
 networks:
   makeradmin:
 volumes:
-    dbdata:
+  dbdata:
