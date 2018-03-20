@@ -8,11 +8,11 @@ services:
       - ./logs/mysql:/var/www/html/storage/logs
     environment:
       # Note: the config only seems to be updated when the container is initially created
-      MYSQL_DATABASE: "something"
+      MYSQL_DATABASE: "${MYSQL_DB}"
       MYSQL_ROOT_HOST: "db2"
-      MYSQL_USER: "testuser"
-      MYSQL_PASSWORD: "testpassword"
-      MYSQL_ROOT_PASSWORD: "example"
+      MYSQL_USER: "${MYSQL_USER}"
+      MYSQL_PASSWORD: "${MYSQL_PASS}"
+      MYSQL_ROOT_PASSWORD: "${MYSQL_ROOT_PASSWORD}"
     networks:
       - makeradmin
 
@@ -30,11 +30,11 @@ services:
       - makeradmin
     environment:
         APP_DEBUG: "true"
-        MYSQL_HOST: "db2:3306"
-        MYSQL_DB: "something"
-        MYSQL_USER: "testuser"
-        MYSQL_PASS: "testpassword"
-        BEARER: "secret_service_key"
+        MYSQL_HOST: "db2:${MYSQL_PORT}"
+        MYSQL_DB: "${MYSQL_DB}"
+        MYSQL_USER: "${MYSQL_USER}"
+        MYSQL_PASS: "${MYSQL_PASS}"
+        BEARER: "${API_BEARER}"
 
   economy:
     image: makeradmin/economy:1.0
@@ -44,12 +44,12 @@ services:
       - ./logs/economy:/var/www/html/storage/logs
       - ./data/economy-vouchers:/var/www/html/vouchers
     environment:
-        MYSQL_HOST: "db2:3306"
-        MYSQL_DB: "something"
-        MYSQL_USER: "testuser"
-        MYSQL_PASS: "testpassword"
+        MYSQL_HOST: "db2:${MYSQL_PORT}"
+        MYSQL_DB: "${MYSQL_DB}"
+        MYSQL_USER: "${MYSQL_USER}"
+        MYSQL_PASS: "${MYSQL_PASS}"
         APIGATEWAY: "api-gateway"
-        BEARER: "secret_service_key"
+        BEARER: "${API_BEARER}"
     depends_on:
       - api-gateway
     networks:
@@ -62,12 +62,12 @@ services:
     volumes:
       - ./logs/membership:/var/www/html/storage/logs
     environment:
-        MYSQL_HOST: "db2:3306"
-        MYSQL_DB: "something"
-        MYSQL_USER: "testuser"
-        MYSQL_PASS: "testpassword"
+        MYSQL_HOST: "db2:${MYSQL_PORT}"
+        MYSQL_DB: "${MYSQL_DB}"
+        MYSQL_USER: "${MYSQL_USER}"
+        MYSQL_PASS: "${MYSQL_PASS}"
         APIGATEWAY: "api-gateway"
-        BEARER: "secret_service_key"
+        BEARER: "${API_BEARER}"
     depends_on:
       - api-gateway
     networks:
@@ -80,12 +80,12 @@ services:
     volumes:
       - ./logs/messages:/var/www/html/storage/logs
     environment:
-        MYSQL_HOST: "db2:3306"
-        MYSQL_DB: "something"
-        MYSQL_USER: "testuser"
-        MYSQL_PASS: "testpassword"
+        MYSQL_HOST: "db2:${MYSQL_PORT}"
+        MYSQL_DB: "${MYSQL_DB}"
+        MYSQL_USER: "${MYSQL_USER}"
+        MYSQL_PASS: "${MYSQL_PASS}"
         APIGATEWAY: "api-gateway"
-        BEARER: "secret_service_key"
+        BEARER: "${API_BEARER}"
     depends_on:
       - api-gateway
     networks:
@@ -98,12 +98,12 @@ services:
     volumes:
       - ./logs/sales:/var/www/html/storage/logs
     environment:
-        MYSQL_HOST: "db2:3306"
-        MYSQL_DB: "something"
-        MYSQL_USER: "testuser"
-        MYSQL_PASS: "testpassword"
+        MYSQL_HOST: "db2:${MYSQL_PORT}"
+        MYSQL_DB: "${MYSQL_DB}"
+        MYSQL_USER: "${MYSQL_USER}"
+        MYSQL_PASS: "${MYSQL_PASS}"
         APIGATEWAY: "api-gateway"
-        BEARER: "secret_service_key"
+        BEARER: "${API_BEARER}"
     depends_on:
       - api-gateway
     networks:
