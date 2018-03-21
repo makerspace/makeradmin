@@ -25,7 +25,7 @@ with service.create(name="Makerspace Member Login", url="member", port=80, versi
             if len(matching) == 0:
                 abort(400, "not found")
             if len(matching) > 1:
-                abort(400, "ambigious")
+                abort(400, "ambiguous")
             user_id = matching[0][0]
 
         # This should be sent via an email, but lets just return it for now
