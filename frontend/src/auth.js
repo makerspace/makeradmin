@@ -109,7 +109,7 @@ module.exports =
 				UIkit.modal.alert("<h2>Inloggningen misslyckades</h2>Tog emot ett oväntat svar från servern:<br><br>" + xhr.status + " " + xhr.statusText + "<br><br>" + xhr.responseText);
 			}
 		}).fail((xhr, textStatus, error) => {
-			if (xhr.responseJSON.status == "ambigious")
+			if (xhr.responseJSON.status == "ambiguous")
 			{
 				UIkit.modal.alert("<h2>Inloggningen misslyckades</h2>Det finns flera medlemmar som matchar '" + tag + "'. Välj något som är mer unikt, t.ex email eller medlemsnummer.");
 			}
