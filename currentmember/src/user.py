@@ -1,5 +1,4 @@
 from flask import Flask, request, abort
-import json
 
 import service
 from service import eprint, assert_get
@@ -17,35 +16,18 @@ with service.create(name="Makerspace Member Login", url="member", port=80, versi
         if data is None:
             abort(400, "missing json")
 
-        # The external search is maybe a bit too permissive, for example just entering a single digit that is included in e.g the zip-code includes that user in the search results
-        use_external_search = False
         user_tag = assert_get(data, "user_tag")
-        if use_external_search:
-            response = instance.gateway.get("membership/member?search=%s" % user_tag)
-            if response.status_code != 200:
-                return app.response_class(
-                    response=response.text,
-                    status=response.status_code
-                )
-
-            matching = assert_get(json.loads(response.text), "data")
+        with db.cursor() as cur:
+            if user_tag.isdigit():
+                cur.execute("SELECT member_id FROM membership_members WHERE member_number=%s", (user_tag,))
+            else:
+                cur.execute("SELECT member_id FROM membership_members WHERE email=%s", (user_tag,))
+            matching = cur.fetchall()
             if len(matching) == 0:
                 abort(400, "not found")
             if len(matching) > 1:
                 abort(400, "ambigious")
-            user_id = matching[0]["member_id"]
-        else:
-            with db.cursor() as cur:
-                if user_tag.isdigit():
-                    cur.execute("SELECT member_id FROM membership_members WHERE member_number=%s", (user_tag,))
-                else:
-                    cur.execute("SELECT member_id FROM membership_members WHERE email=%s", (user_tag,))
-                matching = cur.fetchall()
-                if len(matching) == 0:
-                    abort(400, "not found")
-                if len(matching) > 1:
-                    abort(400, "ambigious")
-                user_id = matching[0][0]
+            user_id = matching[0][0]
 
         # This should be sent via an email, but lets just return it for now
         return instance.gateway.post("oauth/force_token", {"user_id": user_id}).text
@@ -65,26 +47,4 @@ with service.create(name="Makerspace Member Login", url="member", port=80, versi
         user_id = assert_get(request.headers, "X-User-Id")
         return instance.gateway.get("related?param=/membership/member/%s&matchUrl=/keys/(.*)&from=keys&page=1&sort_by=&sort_order=asc&per_page=10000" % user_id).text
 
-    # def initialize_db():
-    #     with db.cursor() as cur:
-    #         cur.execute("CREATE TABLE IF NOT EXISTS member_access_tokens (user_id INT(11) NOT NULL, access_token VARCHAR(48) NOT NULL, expires datetime NOT NULL);")
-    #     db.connection.commit()
-
-    # eprint("Sending email...")
-    # eprint(instance.gateway.get("messages").text)
-
-    # r = instance.gateway.post("messages", {
-    #     "recipients": [
-    #         {
-    #             "type": "member",
-    #             "id": 1
-    #         },
-    #     ],
-    #     "message_type": "email",
-    #     "subject": "Hello This a test from MakerAdmin",
-    #     "body": "Trying to send an email from MakerAdmin"
-    # })
-    # eprint(r.text)
-
-    # initialize_db()
     instance.serve_indefinitely(app)
