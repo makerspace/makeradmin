@@ -11,7 +11,6 @@ with service.create(name="Makerspace Member Login", url="member", port=80, versi
 
     @app.route(instance.full_path("send_access_token"), methods=["POST"])
     def send_access_token():
-        eprint(request.data)
         data = request.get_json()
         if data is None:
             abort(400, "missing json")
