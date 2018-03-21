@@ -86,6 +86,45 @@ module.exports =
 		});
 	},
 
+	login_via_single_use_link(tag)
+	{
+		$.ajax({
+			method: "POST",
+			url: config.apiBasePath + "/member/send_access_token",
+			data: JSON.stringify({
+				user_tag: tag
+			}),
+			contentType: "application/json; charset=utf-8",
+			dataType: "json",
+		}).done((data, textStatus, xhr) => {
+			if (data.access_token !== undefined)
+			{
+				// TODO: Should be sent via an email, but this will do for now
+				localStorage.token = data.access_token;
+				this.onChange();
+			}
+			else
+			{
+				// TODO: Generic class for error messages?
+				UIkit.modal.alert("<h2>Inloggningen misslyckades</h2>Tog emot ett oväntat svar från servern:<br><br>" + xhr.status + " " + xhr.statusText + "<br><br>" + xhr.responseText);
+			}
+		}).fail((xhr, textStatus, error) => {
+			if (xhr.responseJSON.status == "ambigious")
+			{
+				UIkit.modal.alert("<h2>Inloggningen misslyckades</h2>Det finns flera medlemmar som matchar '" + tag + "'. Välj något som är mer unikt, t.ex email eller medlemsnummer.");
+			}
+			else if (xhr.responseJSON.status == "not found")
+			{
+				UIkit.modal.alert("<h2>Inloggningen misslyckades</h2>Ingen medlem med det namnet, email eller medlemsnummer existerar.");
+			}
+			else
+			{
+				// TODO: Generic class for error messages?
+				UIkit.modal.alert("<h2>Inloggningen misslyckades</h2>Tog emot ett oväntat svar från servern:<br><br>" + xhr.status + " " + xhr.statusText + "<br><br>" + xhr.responseText);
+			}
+		});
+	},
+
 	/**
 	 * Send an API logout request and remove the login token
 	 */
@@ -103,7 +142,6 @@ module.exports =
 		// Delete from localStorage and send user to login form
 		delete localStorage.token
 		this.onChange(false);
-		browserHistory.push("/");
 	},
 
 	/**

@@ -331,6 +331,10 @@ App.title = "Internal"
 const rootRoute = {
 	childRoutes: [
 		{
+			path: "member",
+			component: require("./User/Member"),
+		},
+		{
 			path: "resetpassword",
 			component: require("./Pages/Login/ResetPassword"),
 		},

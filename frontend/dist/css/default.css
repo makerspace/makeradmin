@@ -354,3 +354,42 @@ tr.toggle pre {
 .multiaccess .error {
 	margin-top: 10px;
 }
+
+/* Added by Aron Granberg, 2018-03 for the member section */
+
+.member-key-box {
+	margin-top: 10px;
+	margin-bottom: 10px;
+	display: flex;
+	align-items: center;
+}
+
+.member-key-icon {
+	padding: 5px;
+	color: white;
+	border-radius: 100px;
+	margin-right: 15px;
+	width: 21px;
+	height: 21px;
+	text-align: center;
+}
+
+.member-key-color-active {
+	background: #87c92b;
+}
+
+.member-key-color-warning {
+	background: #eca72f;
+}
+
+.member-key-tag {
+	min-width: 100px;
+}
+
+.member-key-color-inactive {
+	background: #c92b2b;
+}
+
+.member-key-status {
+	flex-grow: 1;
+}
