@@ -1,11 +1,11 @@
 from flask import abort, jsonify
 import pymysql
-import json
 import sys
 import os
 import requests
 import socket
 import signal
+
 
 class DB:
     def __init__(self, host, name, user, password):
@@ -13,7 +13,6 @@ class DB:
         self.name = name
         self.user = user
         self.password = password
-        self.table_prefix = ""
         self.connection = None
 
     def connect(self):
@@ -22,22 +21,24 @@ class DB:
     def cursor(self):
         return self.connection.cursor()
 
+
 class APIGateway:
     def __init__(self, host, key):
         self.host = host
         self.key = key
 
     def get(self, path, payload=None):
-        headers = { "Authorization": "Bearer " + self.key }
+        headers = {"Authorization": "Bearer " + self.key}
         return requests.get('http://' + self.host + "/" + path, params=payload, headers=headers)
 
     def post(self, path, payload):
-        headers = { "Authorization": "Bearer " + self.key }
+        headers = {"Authorization": "Bearer " + self.key}
         return requests.post('http://' + self.host + "/" + path, json=payload, headers=headers)
 
     def put(self, path, payload):
-        headers = { "Authorization": "Bearer " + self.key }
+        headers = {"Authorization": "Bearer " + self.key}
         return requests.put('http://' + self.host + "/" + path, json=payload, headers=headers)
+
 
 class Service:
     def __init__(self, name, url, port, version, db, gateway, debug):
@@ -70,7 +71,7 @@ class Service:
         }
         r = self.gateway.post("service/unregister", payload)
         if not r.ok:
-            raise Exception("Failed to register service: " + r.text)
+            raise Exception("Failed to unregister service: " + r.text)
 
     def wrap_error_codes(self, app):
         # Pretty ugly way to wrap all abort(code, message) calls so that they return proper json reponses
@@ -89,23 +90,23 @@ class Service:
     def serve_indefinitely(self, app):
         capture_signals()
         self.wrap_error_codes(app)
-        try:
-            app.run(host='0.0.0.0', debug=self.debug, port=self.port, use_reloader=False)
-        finally:
-            eprint("Closing database connection")
-            self.db.connection.close()
+        app.run(host='0.0.0.0', debug=self.debug, port=self.port, use_reloader=False)
 
     def __enter__(self):
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
+        eprint("Closing database connection")
+        self.db.connection.close()
         self.unregister()
+
 
 def assert_get(data, key):
     if key not in data:
         abort(400, "Missing required parameter " + key)
 
     return data[key]
+
 
 def _read_config():
     try:
@@ -128,10 +129,12 @@ def _read_config():
         sys.exit(1)
     return db, gateway, debug
 
+
 def eprint(s, **kwargs):
     ''' Print to stderr and flush the output stream '''
     print(s, **kwargs, file=sys.stderr)
     sys.stderr.flush()
+
 
 def capture_signals():
     def signal_handler(signal, frame):
@@ -141,9 +144,9 @@ def capture_signals():
     signal.signal(signal.SIGTERM, signal_handler)
     signal.signal(signal.SIGHUP, signal_handler)
 
+
 def create(name, url, port, version):
     db, gateway, debug = _read_config()
-    db.table_prefix = url + "_"
     service = Service(name, url, port, version, db, gateway, debug)
 
     service.unregister()
