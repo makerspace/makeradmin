@@ -55,8 +55,8 @@ class Message extends Controller
 			{
 				// If the recipient is a group, get group list from API
 				$ch = new CurlBrowser;
-				// TODO: Gateway from config
-				$result = $ch->call("GET", "http://makeradmin-apigateway/membership/group/{$recipient["id"]}/members?per_page={$chunkSize}");
+				$ch->setHeader("Authorization", "Bearer " . config("service.bearer"));
+				$result = $ch->call("GET", "http://" . config("service.gateway") . "/membership/group/{$recipient["id"]}/members?per_page={$chunkSize}");
 
 				// Send an error message if the API request was unsuccessful
 				if($ch->getStatusCode() != 200)
@@ -83,8 +83,8 @@ class Message extends Controller
 //			{
 			// If the recipient is a member, load member from API
 			$ch = new CurlBrowser;
-			// TODO: Gateway from config
-			$result = $ch->call("GET", "http://makeradmin-apigateway/membership/member?entity_id={$str_ids}&per_page={$chunkSize}");
+			$ch->setHeader("Authorization", "Bearer " . config("service.bearer"));
+			$result = $ch->call("GET", "http://" . config("service.gateway") . "/membership/member?entity_id={$str_ids}&per_page={$chunkSize}");
 
 			// Send an error message if the API request was unsuccessful
 			if($ch->getStatusCode() != 200)
