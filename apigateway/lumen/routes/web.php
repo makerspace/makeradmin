@@ -27,8 +27,11 @@ $app->  post("oauth/force_token", ["middleware" => "auth:service", "uses" => "Au
 // Some unauthenticated requests
 // TODO: Can this be handled in a nicer way?
 $app->post("member/send_access_token", "ServiceRegistry@handleRoute");
-$app->get("member/current", "ServiceRegistry@handleRoute");
-$app->put("member/current", "ServiceRegistry@handleRoute");
+$app->get("member/current", ["middleware" => "auth", "uses" => "ServiceRegistry@handleRoute"]);
+// TODO: Which one of put/post is it that is used. It should be put, right?
+$app->put("member/current", ["middleware" => "auth", "uses" => "ServiceRegistry@handleRoute"]);
+$app->post("member/current", ["middleware" => "auth", "uses" => "ServiceRegistry@handleRoute"]);
+$app->get("member/current/keys", ["middleware" => "auth", "uses" => "ServiceRegistry@handleRoute"]);
 
 // Service registry
 $app->post("service/register",   ["middleware" => "auth:service", "uses" => "ServiceRegistry@register"]);
