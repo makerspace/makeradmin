@@ -15,6 +15,9 @@ use Illuminate\Support\Facades\Auth;
  */
 class Login
 {
+	/** User ID of services */
+	const SERVICE_USER_ID = -1;
+
 	/**
 	 * Authenticate the user with the Membership service
 	 */
@@ -149,14 +152,18 @@ class Login
 			->value("user_id");
 
 		//TODO: Se till att fixa detta hack
-                if(!$user_id)
+		if(!$user_id)
 		{
+			// Because the count and the insert are not atomic, multiple services being registered at the same time can sometimes
+			// try to insert multiple access tokens. This will throw an exception because the access tokens are unique.
 			try{
 				$row_count = DB::table("access_tokens")->count();
 				if($row_count===0){
+					// Add access token for services
 					$expires = date("Y-m-d\TH:i:s\Z", strtotime("now + 3650 day"));
 					DB::table("access_tokens")->insert([
-						"user_id"      => 1,
+						// The first user has an ID of 1, so this will not cause conflicts. Note however that an id of 0 would cause problems because the code uses checks on the form 'if($user_id)' all the time and 0 is converted to false in php.
+						"user_id"      => Login::SERVICE_USER_ID,
 						"access_token" => getenv('BEARER'),
 						"expires"      => $expires,
 						"browser"      => "",
