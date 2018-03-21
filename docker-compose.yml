@@ -36,6 +36,39 @@ services:
         MYSQL_PASS: "${MYSQL_PASS}"
         BEARER: "${API_BEARER}"
 
+  current-member:
+    image: makeradmin/current-member:1.0
+    container_name: makeradmin-current-member
+    build: ./MakerAdmin-CurrentMember
+    environment:
+        MYSQL_HOST: "db2:${MYSQL_PORT}"
+        MYSQL_DB: "${MYSQL_DB}"
+        MYSQL_USER: "${MYSQL_USER}"
+        MYSQL_PASS: "${MYSQL_PASS}"
+        APIGATEWAY: "api-gateway"
+        BEARER: "${API_BEARER}"
+        APP_DEBUG: "true"
+    depends_on:
+      - api-gateway
+    networks:
+      - makeradmin
+
+  rfid:
+    image: makeradmin/rfid:1.0
+    container_name: makeradmin-rfid
+    build: ./MakerAdmin-RFID
+    environment:
+        MYSQL_HOST: "db2:${MYSQL_PORT}"
+        MYSQL_DB: "${MYSQL_DB}"
+        MYSQL_USER: "${MYSQL_USER}"
+        MYSQL_PASS: "${MYSQL_PASS}"
+        APIGATEWAY: "api-gateway"
+        BEARER: "${API_BEARER}"
+    depends_on:
+      - api-gateway
+    networks:
+      - makeradmin
+
   economy:
     image: makeradmin/economy:1.0
     container_name: makeradmin-economy
