@@ -16,7 +16,7 @@ sudo adduser your_username docker
 `make build`
 
 # Create (or migrate) all database tables, (run once)
-`make migrate`
+`make init-db`
 
 #Start MakerAdmin
 `make run`

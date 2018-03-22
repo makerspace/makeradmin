@@ -12,7 +12,10 @@ build:
 	docker-compose build
 
 run:
-	docker-compose up
+	touch secrets && . ./secrets && docker-compose up
 
-migrate:
-	./migrate.sh
+init-db:
+	./db_init.sh
+
+stop:
+	docker-compose down
