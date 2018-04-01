@@ -124,6 +124,26 @@ services:
     networks:
       - makeradmin
 
+  email-dispatcher:
+    image: makeradmin/messages-dispatcher-email:1.0
+    container_name: makeradmin-messages-dispatcher-email
+    build: ./MakerAdmin-MessagesDispatcherEmail
+    environment:
+        MYSQL_HOST: "db2:${MYSQL_PORT}"
+        MYSQL_DB: "${MYSQL_DB}"
+        MYSQL_USER: "${MYSQL_USER}"
+        MYSQL_PASS: "${MYSQL_PASS}"
+        APIGATEWAY: "api-gateway"
+        BEARER: "${API_BEARER}"
+        MAILGUN_DOMAIN: "sandboxf02432d388a340188a191b2f619cce81.mailgun.org"
+        MAILGUN_KEY: "key-845e04d3db27ab1fe10de27c8e49bbc7"
+        MAILGUN_FROM: "Excited User <excited@samples.mailgun.org>"
+    depends_on:
+      - api-gateway
+      - messages
+    networks:
+      - makeradmin
+
   sales:
     image: makeradmin/sales:1.0
     container_name: makeradmin-sales
