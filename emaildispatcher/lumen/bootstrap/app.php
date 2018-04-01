@@ -25,6 +25,9 @@ $app = new Laravel\Lumen\Application(
 
 $app->withFacades();
 
+// Load configuration file
+$app->configure("mailgun");
+
 // $app->withEloquent();
 
 /*
