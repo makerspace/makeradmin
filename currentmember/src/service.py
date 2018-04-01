@@ -24,9 +24,14 @@ class DB:
 
 
 class APIGateway:
-    def __init__(self, host, key):
+    def __init__(self, host, key, host_frontend, host_backend):
         self.host = host
         self.key = key
+        self.host_frontend = host_frontend
+        self.host_backend = host_backend
+
+    def get_frontend_url(self, path):
+        return "http://" + self.host_frontend + "/" + path
 
     def get(self, path, payload=None):
         headers = {"Authorization": "Bearer " + self.key}
@@ -118,7 +123,7 @@ def _read_config():
             password=os.environ["MYSQL_PASS"],
         )
 
-        gateway = APIGateway(os.environ["APIGATEWAY"], os.environ["BEARER"])
+        gateway = APIGateway(os.environ["APIGATEWAY"], os.environ["BEARER"], os.environ["HOST_FRONTEND"], os.environ["HOST_BACKEND"])
 
         debugStr = os.environ["APP_DEBUG"].lower()
         if debugStr == "true" or debugStr == "false":
@@ -127,6 +132,7 @@ def _read_config():
             raise Exception("APP_DEBUG environment variable must be either 'true' or 'false'. Found '{}'".format(debugStr))
     except Exception as e:
         eprint("Missing one or more configuration environment variables")
+        eprint(e)
         sys.exit(1)
     return db, gateway, debug
 

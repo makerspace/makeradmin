@@ -1,4 +1,5 @@
-from flask import Flask, request, abort
+from flask import Flask, request, abort, jsonify, render_template
+import base64
 
 import service
 from service import eprint, assert_get
@@ -29,7 +30,25 @@ with service.create(name="Makerspace Member Login", url="member", port=80, versi
             user_id = matching[0][0]
 
         # This should be sent via an email, but lets just return it for now
-        return instance.gateway.post("oauth/force_token", {"user_id": user_id}).text
+        response = instance.gateway.post("oauth/force_token", {"user_id": user_id}).json()
+        token = response["access_token"]
+        url = instance.gateway.get_frontend_url("member/login/" + token)
+
+        r = instance.gateway.post("messages", {
+            "recipients": [
+                {
+                    "type": "member",
+                    "id": user_id
+                },
+            ],
+            "message_type": "email",
+            "subject": "Log in to MakerAdmin",
+            "body": render_template("email_login.html", url=url, logo=logo_base64)
+        })
+        if not r.ok:
+            raise Exception(r.text)
+
+        return jsonify({ "status": "sent" })
 
     @app.route(instance.full_path("current"), methods=["GET", "POST"])
     def current_member():
