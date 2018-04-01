@@ -13,7 +13,7 @@ header("Access-Control-Allow-Headers: Origin, Content-Type, Accept, Authorizatio
 header("Access-Control-Max-Age: 1728000");
 
 // Index page, test to see if the user is logged in or not
-$app->  get("/", "ServiceRegistry@test")->middleware("auth:admins");
+$app->  get("/", ["middleware" => "auth:service", "uses" => "ServiceRegistry@test"]);
 
 // OAuth 2.0 stuff
 $app->  post("oauth/token",          "Authentication@login");
