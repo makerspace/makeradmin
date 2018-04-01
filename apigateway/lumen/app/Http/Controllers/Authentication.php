@@ -20,8 +20,6 @@ class Authentication extends Controller
 	 */
 	public function login(Request $request)
 	{
-		$username   = $request->get("username");
-		$password   = $request->get("password");
 		$grant_type = $request->get("grant_type");
 
 		// Too many failed attempts?
@@ -33,29 +31,60 @@ class Authentication extends Controller
 			], 429);
 		}
 
-		// Validate input
-		if($grant_type != "password")
+		if($grant_type == "password")
+		{
+			// Use password validation
+			// Validate input
+			$username   = $request->get("username");
+			$password   = $request->get("password");
+			
+			if(empty($username))
+			{
+				throw new EntityValidationException("username", "required");
+			}
+			
+
+			if(empty($password))
+			{
+				throw new EntityValidationException("password", "required");
+			}
+
+			// Send a request to membership module
+			$user_id = Login::authenticate($username, $password);
+			if(!$user_id)
+			{
+				Login::logFail($user_id);
+				return Response()->json([
+					"status"  => "error",
+					"message" => "The username and/or password you specified was incorrect",
+				], 401);
+			}
+		}
+		else
 		{
 			throw new EntityValidationException("grant_type", null, "Unknown grant type");
 		}
-		if(empty($username))
-		{
-			throw new EntityValidationException("username", "required");
-		}
-		if(empty($password))
-		{
-			throw new EntityValidationException("password", "required");
-		}
 
-		// Send a request to membership module
-		$user_id = Login::authenticate($username, $password);
-		if(!$user_id)
+		// Create a token and store in database
+		$token = Login::createToken($user_id);
+		Login::logSuccess($user_id);
+
+		// Send response
+		return Response()->json([
+			"access_token" => $token["access_token"],
+			"expires"      => $token["expires"],
+		], 200);
+	}
+
+	/**
+	 * Login and create an access token in the database if login was successful
+	 */
+	public function unauthenticated_login(Request $request)
+	{
+		$user_id = $request->get("user_id");
+		if(empty($user_id))
 		{
-			Login::logFail($user_id);
-			return Response()->json([
-				"status"  => "error",
-				"message" => "The username and/or password you specified was incorrect",
-			], 401);
+			throw new EntityValidationException("user_id", "required");
 		}
 
 		// Create a token and store in database

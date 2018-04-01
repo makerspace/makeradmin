@@ -5,6 +5,9 @@ namespace App;
 use Closure;
 use Illuminate\Contracts\Auth\Authenticatable;
 use \Illuminate\Contracts\Auth\Guard;
+use App\Exceptions\ServiceRequestTimeout;
+use App\Libraries\CurlBrowser;
+use App\Login;
 use DB;
 
 class MakerGuard implements Guard
@@ -24,6 +27,55 @@ class MakerGuard implements Guard
 		}
 
 		return $this->user->user_id;
+	}
+
+	/** Determine if the requester is another service */
+	public function is_service()
+	{
+		if(!$this->user)
+		{
+			return false;
+		}
+		return $this->user->user_id == Login::SERVICE_USER_ID;
+	}
+
+	/** Determine if the user is in the specified group */
+	public function check_group($group)
+	{
+		if ($group === null) die("No group specified for this route.");
+
+		// Check if there is any user logged in at all
+		if (!$this->check()) return false;
+
+		// The special service group only contains services.
+		// Used to ensure some routes can only be reached by the internal network
+		if ($group === "service") {
+			return $this->is_service();
+		}
+
+		// Get endpoint URL for membership module
+		if(($service = Service::getService("membership")) === false) {
+			// If no service is specified we should just throw an generic error saying the service could not be contacted
+			throw new ServiceRequestTimeout;
+		}
+
+		// Send the request
+		$ch = new CurlBrowser();
+		$result = $ch->call("GET", "{$service->endpoint}/membership/member/" . $this->user->user_id . "/groups");
+
+		// Log the internal HTTP request
+		Logger::logServiceTraffic($ch);
+
+		// Return the user_id or false if unsuccessful
+		if($ch->getStatusCode() == 200 && ($data = $ch->getJson()->data) !== false) {
+			foreach ($data as $user_group) {
+				if ($user_group->name === $group) {
+					return true;
+				}
+			}
+		}
+
+		return false;
 	}
 
 	/**

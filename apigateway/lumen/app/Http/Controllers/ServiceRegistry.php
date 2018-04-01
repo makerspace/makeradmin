@@ -166,6 +166,9 @@ class ServiceRegistry extends Controller
 			$ch->setHeader("X-User-Id", $user->user_id);
 		}
 
+		// Forward the authorization header
+		$ch->setHeader("Authorization", $request->header("Authorization"));
+
 		// Get JSON and POST data
 		// TODO: Laravel is probably processing this data and creating a temp file
 		$e = explode(";", $request->header("Content-Type"));

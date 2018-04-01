@@ -13,7 +13,7 @@ header("Access-Control-Allow-Headers: Origin, Content-Type, Accept, Authorizatio
 header("Access-Control-Max-Age: 1728000");
 
 // Index page, test to see if the user is logged in or not
-$app->  get("/", "ServiceRegistry@test")->middleware("auth");
+$app->  get("/", ["middleware" => "auth:service", "uses" => "ServiceRegistry@test"]);
 
 // OAuth 2.0 stuff
 $app->  post("oauth/token",          "Authentication@login");
@@ -21,12 +21,26 @@ $app->  post("oauth/resetpassword",  "Authentication@reset");
 $app->   get("oauth/token",         ["middleware" => "auth", "uses" => "Authentication@listTokens"]);
 $app->delete("oauth/token/{token}", ["middleware" => "auth", "uses" => "Authentication@logout"]);
 
+// Allow other services to get login tokens for any user
+$app->  post("oauth/force_token", ["middleware" => "auth:service", "uses" => "Authentication@unauthenticated_login"]);
+
+// Some unauthenticated requests
+// TODO: Can this be handled in a nicer way?
+$app->post("member/send_access_token", "ServiceRegistry@handleRoute");
+$app->get("member/current", ["middleware" => "auth", "uses" => "ServiceRegistry@handleRoute"]);
+// TODO: Which one of put/post is it that is used. It should be put, right?
+$app->put("member/current", ["middleware" => "auth", "uses" => "ServiceRegistry@handleRoute"]);
+$app->post("member/current", ["middleware" => "auth", "uses" => "ServiceRegistry@handleRoute"]);
+$app->get("member/current/keys", ["middleware" => "auth", "uses" => "ServiceRegistry@handleRoute"]);
+
+// Service registry
+$app->post("service/register",   ["middleware" => "auth:service", "uses" => "ServiceRegistry@register"]);
+$app->post("service/unregister", ["middleware" => "auth:service", "uses" => "ServiceRegistry@unregister"]);
+
 // Require an authenticated user for these requests
-$app->group(["middleware" => "auth"], function() use ($app)
+$app->group(["middleware" => "auth:admins"], function() use ($app)
 {
 	// Service registry
-	$app->  post("service/register",   "ServiceRegistry@register");
-	$app->  post("service/unregister", "ServiceRegistry@unregister");
 	$app->   get("service/list",       "ServiceRegistry@list");
 
 	// Relations
