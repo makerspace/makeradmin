@@ -77,12 +77,12 @@ class Send extends Command
 							'from'    => $mailgun_from,
 							'to'      => $email,
 							'subject' => $message->subject,
-							'text'    => $message->body
+							'html'    => $message->body
 						)
 					);
 
 					// Update the database and flag the E-mail as sent to this particular recipient
-					$meep = DB::table("messages_recipient")
+					DB::table("messages_recipient")
 						->where("messages_recipient_id", $message->recipient_id)
 						->update([
 							"status"    => "sent",
@@ -92,8 +92,16 @@ class Send extends Command
 
 					// TODO: Uppdatera status i messages
 				}
-				catch(Exception $e)
+				catch(\Exception $e)
 				{
+					DB::table("messages_recipient")
+						->where("messages_recipient_id", $message->recipient_id)
+						->update([
+							"status"    => "failed",
+							"date_sent" => date("Y-m-d H:i:s"),
+						]
+					);
+
 					// TODO: Error handling
 					echo "Error\n";
 				}
