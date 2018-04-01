@@ -32,59 +32,71 @@ class Send extends Command
 	 */
 	public function fire()
 	{
-		$this->info("Dispatching queued messages");
-
 		// Instantiate the Mailgunclient
-		$mgClient = new Mailgun(config("mailgun.key"))
+		$mgClient = new Mailgun(config("mailgun.key"));
 		$mailgun_domain = config("mailgun.domain");
 		$mailgun_from = config("mailgun.from");
+		$mailgun_to_override = config("mailgun.to");
 		$mailgun_limit = 10;
 
-		// Get all messages from database
-		$messages = DB::table("messages_recipient")
-			->leftJoin("messages_message", "messages_message.messages_message_id", "=", "messages_recipient.messages_message_id")
-			->selectRaw("messages_message.messages_message_id AS message_id")
-			->selectRaw("messages_recipient.messages_recipient_id AS recipient_id")
-			->selectRaw("messages_recipient.title AS subject")
-			->selectRaw("messages_recipient.description AS body")
-			->selectRaw("messages_recipient.recipient AS recipient")
-			->where("messages_recipient.status", "=", "queued")
-			->where("messages_message.message_type", "=", "email")
-			->limit($mailgun_limit)
-			->get();
+		while(true) {
+			sleep(4.0);
 
-		// Create an clean array with data
-		$list = [];
-		foreach($messages as $message)
-		{
-			echo "Sending mail to {$message->recipient}\n";
+			// Get all messages from database
+			$messages = DB::table("messages_recipient")
+				->leftJoin("messages_message", "messages_message.messages_message_id", "=", "messages_recipient.messages_message_id")
+				->selectRaw("messages_message.messages_message_id AS message_id")
+				->selectRaw("messages_recipient.messages_recipient_id AS recipient_id")
+				->selectRaw("messages_recipient.title AS subject")
+				->selectRaw("messages_recipient.description AS body")
+				->selectRaw("messages_recipient.recipient AS recipient")
+				->selectRaw("messages_recipient.member_id AS member_id")
+				->where("messages_recipient.status", "=", "queued")
+				->where("messages_message.message_type", "=", "email")
+				->limit($mailgun_limit)
+				->get();
 
-			try {
-				// Send the mail via Mailgun
-				$result = $mgClient->sendMessage($mailgun_domain,
-					array(
-						'from'    => $mailgun_from,
-						'to'      => 'Christian Antila <christian.antila@gmail.com>', // TODO
-						'subject' => $message->subject,
-						'text'    => $message->body
-					)
-				);
-
-				// Update the database and flag the E-mail as sent
-				$meep = DB::table("messages_recipient")
-					->where("messages_recipient_id", $message->recipient_id)
-					->update([
-						"status"    => "sent",
-						"date_sent" => date("Y-m-d H:i:s"),
-					]
-				);
-
-				// TODO: Uppdatera status i messages
-			}
-			catch(Exception $e)
+			// Create an clean array with data
+			$list = [];
+			foreach($messages as $message)
 			{
-				// TODO: Error handling
-				echo "Error\n";
+				echo "Sending mail to {$message->recipient}\n";
+
+				try {
+					// Get the member's email
+					$email = $message->recipient;
+
+					// Override recipient
+					if ($mailgun_to_override !== false) {
+						$email = $mailgun_to_override;
+					}
+
+					// Send the mail via Mailgun
+					$result = $mgClient->sendMessage($mailgun_domain,
+						array(
+							'from'    => $mailgun_from,
+							'to'      => $email,
+							'subject' => $message->subject,
+							'text'    => $message->body
+						)
+					);
+
+					// Update the database and flag the E-mail as sent to this particular recipient
+					$meep = DB::table("messages_recipient")
+						->where("messages_recipient_id", $message->recipient_id)
+						->update([
+							"status"    => "sent",
+							"date_sent" => date("Y-m-d H:i:s"),
+						]
+					);
+
+					// TODO: Uppdatera status i messages
+				}
+				catch(Exception $e)
+				{
+					// TODO: Error handling
+					echo "Error\n";
+				}
 			}
 		}
 	}
