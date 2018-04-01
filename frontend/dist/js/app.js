@@ -43557,7 +43557,7 @@
 					UIkit.modal.alert("<h2>Inloggningen misslyckades</h2>Tog emot ett oväntat svar från servern:<br><br>" + xhr.status + " " + xhr.statusText + "<br><br>" + xhr.responseText);
 				}
 			}).fail(function (xhr, textStatus, error) {
-				if (xhr.responseJSON.status == "ambigious") {
+				if (xhr.responseJSON.status == "ambiguous") {
 					UIkit.modal.alert("<h2>Inloggningen misslyckades</h2>Det finns flera medlemmar som matchar '" + tag + "'. Välj något som är mer unikt, t.ex email eller medlemsnummer.");
 				} else if (xhr.responseJSON.status == "not found") {
 					UIkit.modal.alert("<h2>Inloggningen misslyckades</h2>Ingen medlem med det namnet, email eller medlemsnummer existerar.");
@@ -66616,7 +66616,7 @@
 					_react2.default.createElement(
 						"dd",
 						null,
-						("2018-03-21 11:15:25")
+						("2018-04-01 10:24:12")
 					),
 					_react2.default.createElement(
 						"dt",
@@ -66626,7 +66626,7 @@
 					_react2.default.createElement(
 						"dd",
 						null,
-						("6ec5a3d\n")
+						("df38d8c\n")
 					)
 				),
 				_react2.default.createElement(
