@@ -8,14 +8,19 @@ force-update:
 	git pull
 	git submodule update --init --recursive --remote
 
-build:
+build: .env
 	docker-compose build
 
-run:
-	touch secrets && . ./secrets && docker-compose up
+run: .env
+	docker-compose up
 
-init-db:
+init-db: .env
 	./db_init.sh
+
+create-default-env: .env
+	@test -e .env 
+.env:
+	@cp -n .env.example .env
 
 stop:
 	docker-compose down
