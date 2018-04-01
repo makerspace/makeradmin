@@ -16,7 +16,8 @@ class DB:
         self.connection = None
 
     def connect(self):
-        self.connection = pymysql.connect(host=self.host.split(":")[0], port=int(self.host.split(":")[1]), db=self.name, user=self.user, password=self.password)
+        # Note autocommit is required to make updates from other services visible immediately
+        self.connection = pymysql.connect(host=self.host.split(":")[0], port=int(self.host.split(":")[1]), db=self.name, user=self.user, password=self.password, autocommit=True)
 
     def cursor(self):
         return self.connection.cursor()
