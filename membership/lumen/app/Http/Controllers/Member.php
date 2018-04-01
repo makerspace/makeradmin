@@ -120,11 +120,11 @@ class Member extends Controller
 		$entity->address_city    = $json["address_city"]    ?? null;
 		$entity->address_country = $json["address_country"] ?? "se";
 		$entity->phone           = $json["phone"]           ?? null;
-		if($json["created_at"] !== null)
+		if(@$json["created_at"] !== null)
 		{
 			$entity->created_at = $json["created_at"];
 		}
-		if($json["updated_at"] !== null)
+		if(@$json["updated_at"] !== null)
 		{
 			$entity->updated_at = $json["updated_at"];
 		}
