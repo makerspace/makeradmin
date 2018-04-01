@@ -46,6 +46,12 @@ module.exports =
 		})
 	},
 
+	setToken(token)
+	{
+		localStorage.token = token;
+		this.onChange(true);
+	},
+
 	/**
 	 * Send an API login request and save the login token
 	 */
@@ -97,17 +103,7 @@ module.exports =
 			contentType: "application/json; charset=utf-8",
 			dataType: "json",
 		}).done((data, textStatus, xhr) => {
-			if (data.access_token !== undefined)
-			{
-				// TODO: Should be sent via an email, but this will do for now
-				localStorage.token = data.access_token;
-				this.onChange();
-			}
-			else
-			{
-				// TODO: Generic class for error messages?
-				UIkit.modal.alert("<h2>Inloggningen misslyckades</h2>Tog emot ett oväntat svar från servern:<br><br>" + xhr.status + " " + xhr.statusText + "<br><br>" + xhr.responseText);
-			}
+			UIkit.notify("Ett mail har skickats med en inloggningslänk", {status: "success"});
 		}).fail((xhr, textStatus, error) => {
 			if (xhr.responseJSON.status == "ambiguous")
 			{

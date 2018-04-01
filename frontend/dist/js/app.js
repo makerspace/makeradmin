@@ -328,7 +328,13 @@
 	var rootRoute = {
 		childRoutes: [{
 			path: "member",
-			component: __webpack_require__(257)
+			indexRoute: {
+				component: __webpack_require__(257)
+			},
+			childRoutes: [{
+				path: "login/:token",
+				component: __webpack_require__(454)
+			}]
 		}, {
 			path: "resetpassword",
 			component: __webpack_require__(266)
@@ -43505,6 +43511,10 @@
 				}
 			});
 		},
+		setToken: function setToken(token) {
+			localStorage.token = token;
+			this.onChange(true);
+		},
 
 
 		/**
@@ -43537,8 +43547,6 @@
 			});
 		},
 		login_via_single_use_link: function login_via_single_use_link(tag) {
-			var _this2 = this;
-
 			$.ajax({
 				method: "POST",
 				url: config.apiBasePath + "/member/send_access_token",
@@ -43548,14 +43556,7 @@
 				contentType: "application/json; charset=utf-8",
 				dataType: "json"
 			}).done(function (data, textStatus, xhr) {
-				if (data.access_token !== undefined) {
-					// TODO: Should be sent via an email, but this will do for now
-					localStorage.token = data.access_token;
-					_this2.onChange();
-				} else {
-					// TODO: Generic class for error messages?
-					UIkit.modal.alert("<h2>Inloggningen misslyckades</h2>Tog emot ett oväntat svar från servern:<br><br>" + xhr.status + " " + xhr.statusText + "<br><br>" + xhr.responseText);
-				}
+				UIkit.notify("Ett mail har skickats med en inloggningslänk", { status: "success" });
 			}).fail(function (xhr, textStatus, error) {
 				if (xhr.responseJSON.status == "ambiguous") {
 					UIkit.modal.alert("<h2>Inloggningen misslyckades</h2>Det finns flera medlemmar som matchar '" + tag + "'. Välj något som är mer unikt, t.ex email eller medlemsnummer.");
@@ -50361,6 +50362,8 @@
 
 	var _react2 = _interopRequireDefault(_react);
 
+	var _reactRouter = __webpack_require__(184);
+
 	var _auth = __webpack_require__(249);
 
 	var _auth2 = _interopRequireDefault(_auth);
@@ -50371,6 +50374,7 @@
 		displayName: 'exports',
 		componentDidMount: function componentDidMount() {
 			_auth2.default.logout();
+			_reactRouter.browserHistory.push("/");
 		},
 		render: function render() {
 			return _react2.default.createElement(
@@ -66613,7 +66617,7 @@
 					_react2.default.createElement(
 						"dd",
 						null,
-						("2018-04-01 10:24:12")
+						("2018-04-01 16:07:06")
 					),
 					_react2.default.createElement(
 						"dt",
@@ -66623,7 +66627,7 @@
 					_react2.default.createElement(
 						"dd",
 						null,
-						("df38d8c\n")
+						("ac51f44\n")
 					)
 				),
 				_react2.default.createElement(
@@ -66845,6 +66849,69 @@
 			);
 		}
 	});
+
+/***/ }),
+/* 454 */
+/***/ (function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _reactRouter = __webpack_require__(184);
+
+	var _MemberLogin = __webpack_require__(258);
+
+	var _MemberLogin2 = _interopRequireDefault(_MemberLogin);
+
+	var _MemberView = __webpack_require__(259);
+
+	var _MemberView2 = _interopRequireDefault(_MemberView);
+
+	var _auth = __webpack_require__(249);
+
+	var _auth2 = _interopRequireDefault(_auth);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+	module.exports = (0, _reactRouter.withRouter)(function (_React$Component) {
+		_inherits(Login, _React$Component);
+
+		function Login() {
+			_classCallCheck(this, Login);
+
+			return _possibleConstructorReturn(this, (Login.__proto__ || Object.getPrototypeOf(Login)).apply(this, arguments));
+		}
+
+		_createClass(Login, [{
+			key: 'componentWillMount',
+			value: function componentWillMount() {
+				_auth2.default.setToken(this.props.params.token);
+				_reactRouter.browserHistory.push("/member");
+			}
+		}, {
+			key: 'render',
+			value: function render() {
+				return _react2.default.createElement(
+					'p',
+					null,
+					'Logging in...'
+				);
+			}
+		}]);
+
+		return Login;
+	}(_react2.default.Component));
 
 /***/ })
 /******/ ]);

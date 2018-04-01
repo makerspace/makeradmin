@@ -332,7 +332,15 @@ const rootRoute = {
 	childRoutes: [
 		{
 			path: "member",
-			component: require("./User/Member"),
+			indexRoute: {
+				component: require("./User/Member"),
+			},
+			childRoutes: [
+				{
+					path: "login/:token",
+					component: require("./User/Login"),
+				}
+			]
 		},
 		{
 			path: "resetpassword",
