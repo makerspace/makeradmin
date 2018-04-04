@@ -43,7 +43,7 @@ with service.create(name="Makerspace Member Login", url="member", port=80, versi
             ],
             "message_type": "email",
             "subject": "Log in to MakerAdmin",
-            "body": render_template("email_login.html", url=url, logo=logo_base64)
+            "body": render_template("email_login.html", url=url)
         })
         if not r.ok:
             raise Exception(r.text)
