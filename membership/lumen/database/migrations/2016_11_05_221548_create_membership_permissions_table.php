@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Support\Facades\DB;
 
 class CreateMembershipPermissionsTable extends Migration
 {
@@ -27,6 +28,23 @@ class CreateMembershipPermissionsTable extends Migration
 			$table->index("role_id");
 			$table->index("group_id");
 		});
+
+		DB::table("membership_groups")->insert([
+			"parent" => 0,
+			"left" => 0,
+			"right" => 0,
+			"name" => "admins",
+			"title" => "Administratörer",
+		]);
+		$admin_group_id = DB::table("membership_groups")
+			->where("name", "admins")
+			->value("group_id");
+		DB::table("membership_permissions")
+			->insert([
+				'role_id' => 2,
+				'permission' => 'view group',
+				'group_id' => $admin_group_id,
+			]);
 	}
 
 	/**
