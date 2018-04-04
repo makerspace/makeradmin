@@ -8,10 +8,10 @@ services:
       - ./logs/mysql:/var/www/html/storage/logs
     environment:
       # Note: the config only seems to be updated when the container is initially created
-      MYSQL_DATABASE: "${MYSQL_DB}"
+      # MYSQL_DATABASE: "${MYSQL_DB}"
       MYSQL_ROOT_HOST: "db2"
-      MYSQL_USER: "${MYSQL_USER}"
-      MYSQL_PASSWORD: "${MYSQL_PASS}"
+      # MYSQL_USER: "${MYSQL_USER}"
+      # MYSQL_PASSWORD: "${MYSQL_PASS}"
       MYSQL_ROOT_PASSWORD: "${MYSQL_ROOT_PASSWORD}"
     networks:
       - makeradmin
@@ -31,7 +31,7 @@ services:
     environment:
         APP_DEBUG: "true"
         MYSQL_HOST: "db2:${MYSQL_PORT}"
-        MYSQL_DB: "${MYSQL_DB}"
+        MYSQL_DB: "makeradmin-apigateway"
         MYSQL_USER: "${MYSQL_USER}"
         MYSQL_PASS: "${MYSQL_PASS}"
         BEARER: "${API_BEARER}"
@@ -42,11 +42,13 @@ services:
     build: ./MakerAdmin-CurrentMember
     environment:
         MYSQL_HOST: "db2:${MYSQL_PORT}"
-        MYSQL_DB: "${MYSQL_DB}"
+        MYSQL_DB: "makeradmin-membership"
         MYSQL_USER: "${MYSQL_USER}"
         MYSQL_PASS: "${MYSQL_PASS}"
         APIGATEWAY: "api-gateway"
         BEARER: "${API_BEARER}"
+        HOST_FRONTEND:
+        HOST_BACKEND:
         APP_DEBUG: "true"
     depends_on:
       - api-gateway
@@ -59,7 +61,7 @@ services:
     build: ./MakerAdmin-RFID
     environment:
         MYSQL_HOST: "db2:${MYSQL_PORT}"
-        MYSQL_DB: "${MYSQL_DB}"
+        MYSQL_DB: "makeradmin-rfid"
         MYSQL_USER: "${MYSQL_USER}"
         MYSQL_PASS: "${MYSQL_PASS}"
         APIGATEWAY: "api-gateway"
@@ -78,7 +80,7 @@ services:
       - ./data/economy-vouchers:/var/www/html/vouchers
     environment:
         MYSQL_HOST: "db2:${MYSQL_PORT}"
-        MYSQL_DB: "${MYSQL_DB}"
+        MYSQL_DB: "makeradmin-economy"
         MYSQL_USER: "${MYSQL_USER}"
         MYSQL_PASS: "${MYSQL_PASS}"
         APIGATEWAY: "api-gateway"
@@ -96,7 +98,7 @@ services:
       - ./logs/membership:/var/www/html/storage/logs
     environment:
         MYSQL_HOST: "db2:${MYSQL_PORT}"
-        MYSQL_DB: "${MYSQL_DB}"
+        MYSQL_DB: "makeradmin-membership"
         MYSQL_USER: "${MYSQL_USER}"
         MYSQL_PASS: "${MYSQL_PASS}"
         APIGATEWAY: "api-gateway"
@@ -114,7 +116,7 @@ services:
       - ./logs/messages:/var/www/html/storage/logs
     environment:
         MYSQL_HOST: "db2:${MYSQL_PORT}"
-        MYSQL_DB: "${MYSQL_DB}"
+        MYSQL_DB: "makeradmin-messages"
         MYSQL_USER: "${MYSQL_USER}"
         MYSQL_PASS: "${MYSQL_PASS}"
         APIGATEWAY: "api-gateway"
@@ -130,7 +132,7 @@ services:
     build: ./MakerAdmin-MessagesDispatcherEmail
     environment:
         MYSQL_HOST: "db2:${MYSQL_PORT}"
-        MYSQL_DB: "${MYSQL_DB}"
+        MYSQL_DB: "makeradmin-messages"
         MYSQL_USER: "${MYSQL_USER}"
         MYSQL_PASS: "${MYSQL_PASS}"
         APIGATEWAY: "api-gateway"
@@ -152,7 +154,7 @@ services:
       - ./logs/sales:/var/www/html/storage/logs
     environment:
         MYSQL_HOST: "db2:${MYSQL_PORT}"
-        MYSQL_DB: "${MYSQL_DB}"
+        MYSQL_DB: "makeradmin-sales"
         MYSQL_USER: "${MYSQL_USER}"
         MYSQL_PASS: "${MYSQL_PASS}"
         APIGATEWAY: "api-gateway"

@@ -13,9 +13,18 @@ init-db: .env
 	./db_init.sh
 
 create-default-env: .env
-	@test -e .env 
+	@test -e .env
 .env:
 	@cp -n .env.example .env
 
 stop:
+	@ # At first stop all containers that need to unregister (all but db2 and api-gateway)
+	@ docker-compose stop -t 30 frontend 
+	@ docker-compose stop -t 30 messages
+	@ docker-compose stop -t 30 email-dispatcher
+	@ docker-compose stop -t 30 sales
+	@ docker-compose stop -t 30 economy
+	@ docker-compose stop -t 30 current-member
+	@ docker-compose stop -t 30 rfid
+	@ docker-compose stop -t 30 membership
 	docker-compose down
