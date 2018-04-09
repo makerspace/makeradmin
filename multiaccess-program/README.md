@@ -1,3 +1,5 @@
+**TODO** Update this document.
+
 Synkroniseringsmodul mellan Makeradmin och MultiAccess
 ======================================================
 
@@ -52,10 +54,19 @@ Databasstruktur
 Se [Docs/Database.md](Docs/Database.md)
 
 
-Utvecklingsmiljö
-----------------
-**TODO**: Lägg in instruktioner om hur man får igång en utvecklingsmiljö för att testa, utveckla och ändra i programmet.
+## Development Environment
+--------------------------
 
+Written in Python (requires Python >= 3.6).
+
+### Install dependencies
+`make init`
+
+### Run tests
+`make test`
+
+### Create windows executables
+`make dist`
 
 Installation
 ------------

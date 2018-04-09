@@ -1,0 +1,10 @@
+# Keeping all dependencies in one file for simplicity. Pyinstaller
+# will only pick direct depencencies into the windows runtime.
+
+# Runtime dependencies
+pyodbc
+
+# Build/test dependencies
+pyinstaller
+pip
+nose

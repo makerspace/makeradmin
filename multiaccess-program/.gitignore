@@ -1,2 +1,7 @@
 **.html
 .envrc
+.direnv
+build
+dist
+.idea
+__pycache__
