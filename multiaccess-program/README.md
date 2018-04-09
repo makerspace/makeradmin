@@ -54,8 +54,8 @@ Databasstruktur
 Se [Docs/Database.md](Docs/Database.md)
 
 
-## Development Environment
---------------------------
+Development Environment
+------------------------
 
 Written in Python (requires Python >= 3.6).
 
