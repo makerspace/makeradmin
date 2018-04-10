@@ -4,11 +4,11 @@ block_cipher = None
 
 
 a = Analysis(
-    ['src/multi_access_export.py'],
+    ['multi_access_export.py'],
     pathex=['/home/ygram/src/MakerAdmin-MultiAccessSync'],
     binaries=[],
     datas=[],
-    hiddenimports=[],
+    hiddenimports=['pyodbc'],
     hookspath=[],
     runtime_hooks=[],
     excludes=[],
