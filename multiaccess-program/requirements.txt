@@ -3,6 +3,7 @@
 
 # Runtime dependencies
 pyodbc
+sqlalchemy
 
 # Build/test dependencies
 pyinstaller
