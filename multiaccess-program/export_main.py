@@ -2,8 +2,8 @@
 import argparse
 import sys
 from logging import basicConfig, INFO, getLogger
-from sqlalchemy import create_engine, MetaData
-from src.export import export_to_json
+from sqlalchemy import create_engine
+from destroyer.export import export_to_json
 
 
 basicConfig(format='%(asctime)s %(levelname)s [%(process)d/%(threadName)s %(pathname)s:%(lineno)d]: %(message)s',
