@@ -2,7 +2,10 @@
 init:
 	pip install -r requirements.txt --upgrade
 
-test:
+pep8:
+	python -m pycodestyle --ignore=W503,W504,W391,W293,E741,E701,E241,E402 --max-line-length=120 --exclude=.direnv,dist,build,.idea .
+
+test: pep8
 	nosetests test
 
 dist-sync:
