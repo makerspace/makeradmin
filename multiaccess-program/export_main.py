@@ -3,6 +3,8 @@ import argparse
 import sys
 from logging import basicConfig, INFO, getLogger
 from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+
 from destroyer.export import export_to_json
 
 
@@ -26,9 +28,11 @@ def main():
 
     logger.info(f"connecting to {args.db}")
 
-    db = create_engine(args.db)
+    engine = create_engine(args.db)
+ 
+    Session = sessionmaker(bind=engine)
     
-    content = export_to_json(db)
+    content = export_to_json(Session)
     if args.out:
         with open(args.out, 'w') as w:
             logger.info(f"writing json dump to {args.out}")
