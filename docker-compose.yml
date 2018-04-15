@@ -164,6 +164,20 @@ services:
     networks:
       - makeradmin
 
+  multiaccesssync:
+    image: makeradmin/multiaccesssync:1.0
+    container_name: makeradmin-multiaccesssync
+    build: ./MakerAdmin-MultiAccessSync
+    volumes:
+      - ./data/multiaccess-uploads:/var/www/html/storage/uploads
+    environment:
+      APIGATEWAY: api-gateway
+      BEARER: "${API_BEARER}"
+    depends_on:
+      - api-gateway
+    networks:
+      - makeradmin
+
   frontend:
     image: makeradmin/frontend:1.0
     container_name: makeradmin-frontend

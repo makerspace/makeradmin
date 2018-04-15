@@ -22,6 +22,7 @@ stop:
 	@ docker-compose stop -t 30 frontend 
 	@ docker-compose stop -t 30 messages
 	@ docker-compose stop -t 30 email-dispatcher
+	@ docker-compose stop -t 30 multiaccesssync
 	@ docker-compose stop -t 30 sales
 	@ docker-compose stop -t 30 economy
 	@ docker-compose stop -t 30 current-member
