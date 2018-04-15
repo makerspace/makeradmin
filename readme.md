@@ -15,7 +15,7 @@ You need to sign out and sign back in again for changes to take effect.
 ### Build docker images 
 `make build`
 
-### Create (or migrate) all database tables, (run once) 
+### Create (or migrate) all database tables, (run once, or twice if not working first time) 
 `make init-db`
 
 ### Configure your MakerAdmin system. 
@@ -28,3 +28,8 @@ MakerAdmin requires some variables to be defined for the system to work. These v
 At this point MakerAdmin should be up and running but there are no users.<br />
 `docker-compose run --rm --no-deps membership /usr/bin/php /var/www/html/artisan member:create username password`
 
+or:<br />
+`./create_user.py`
+
+To change password for existing user.<br />
+`docker-compose run --rm --no-deps membership /usr/bin/php /var/www/html/artisan member:password <email> <password>`
