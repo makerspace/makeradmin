@@ -6,6 +6,7 @@ test:
 	nosetests test
 
 dist-sync:
+	docker run -it --rm -v $(shell pwd):/src cdrx/pyinstaller-windows:python3 "/usr/bin/pyinstaller --onefile --clean -y --dist ./dist --workpath /tmp multi_access_sync.spec; chown -R --reference=. ./dist ./destroyer"
 
 dist-export:
 	docker run -it --rm -v $(shell pwd):/src cdrx/pyinstaller-windows:python3 "/usr/bin/pyinstaller --onefile --clean -y --dist ./dist --workpath /tmp multi_access_export.spec; chown -R --reference=. ./dist ./destroyer"
