@@ -14,7 +14,7 @@ dist: dist-sync dist-export
 
 clean:
 	rm -rf dist build
-	find src -name __pycache__ -prune -type d -exec rm -rf {} \;
+	find destroyer -name __pycache__ -prune -type d -exec rm -rf {} \;
 
 .PHONY: init test clean dist dist-sync dist-export
 
