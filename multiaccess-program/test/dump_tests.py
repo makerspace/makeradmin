@@ -1,6 +1,8 @@
 import unittest
 from src import dump
 from src import db_helper
+import pickle, json
+import os
 
 class Test(unittest.TestCase):
     def setUp(self):
@@ -11,3 +13,17 @@ class Test(unittest.TestCase):
 
     def test_tables(self):
         dump.tables(self.db)
+
+    def test_to_file_pickle(self):
+        out_file = "./dump.pkl"
+        dump.to_file(out_file)
+        print(f"Output file path: {os.path.realpath(out_file)}")
+        with open(out_file, "rb") as f:
+            obj_dump = pickle.load(f)
+
+    def test_to_file_json(self):
+        out_file = "./dump.json"
+        dump.to_file(out_file)
+        print(f"Output file path: {os.path.realpath(out_file)}")
+        with open(out_file, "r") as f:
+            obj_dump = json.load(f)

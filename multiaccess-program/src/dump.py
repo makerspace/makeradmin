@@ -12,9 +12,8 @@ def table(db, table_name):
     with db.connect() as connection:
         sql_statement = sqlalchemy.text(f"SELECT * from {table_name}")
         res = connection.execute(sql_statement)
-        rows = [d for d in res.fetchall()]
+        rows = list(res.cursor)
         table_info = {
-            "result": res,
             "rows": rows,
             "columns": db_info.get_column_names(db, table_name)
         }
@@ -32,14 +31,24 @@ def tables(db):
         table_dumps[table_name] = table_dump
     return table_dumps
 
-def dump_tables(filename, out_format="pickle"):
+from datetime import date, datetime
+def json_serial(obj):
+    """JSON serializer for objects not serializable by default json code"""
+    if isinstance(obj, (datetime, date)):
+        return obj.isoformat()
+    else:
+        return str(obj)
+    raise TypeError ("Type %s not serializable" % type(obj))
+
+def to_file(filename):
     assert isinstance(filename, str)
-    assert isinstance(out_format, str)
-    out_format = out_format.lower()
-    if out_format not in ("pickle", "json"): raise ValueError()
+    extension = filename.split(".")[-1]
     table_dump = tables(db_helper.create_default_engine())
-    if out_format is "pickle":
-        pickle.dump(table_dump, filename)
-    elif out_format is "json":
-        with open(filename, "w") as f:
-            json.dump(table_dump, fp=f)
+    if extension == "pkl":
+        with open(filename, "wb") as f:
+            pickle.dump(table_dump, file=f)
+    elif extension == "json":
+        with open(filename, "w", encoding="utf8") as f:
+            json.dump(table_dump, fp=f, default=json_serial)
+    else:
+        raise ValueError(f"The file extension '.{extension}' is not valid. Use '.pkl' or '.json'")
