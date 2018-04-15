@@ -25,12 +25,12 @@ class Test(DbBaseTest):
         self.assertEqual(
             [
                 dict(
-                    member_id=int(u1.name),
+                    member_number=int(u1.name),
                     rfid_tag=u1.card,
                     end_timestamp=dt_format(u1_stop),
                 ),
                 dict(
-                    member_id=int(u2.name),
+                    member_number=int(u2.name),
                     rfid_tag=u2.card,
                     end_timestamp=None,
                 ),
@@ -61,6 +61,6 @@ class Test(DbBaseTest):
         data = json.loads(export_to_json(self.session, c2.id))
 
         self.assertEqual(1, len(data))
-        self.assertEqual(int(u2.name), data[0]['member_id'])
+        self.assertEqual(int(u2.name), data[0]['member_number'])
 
 
