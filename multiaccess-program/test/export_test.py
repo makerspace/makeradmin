@@ -15,9 +15,8 @@ class Test(DbBaseTest):
             stop_timestamp=u1_stop,
             customer_id=customer.id,
         )
-        u2_stop = dt_cet_local(self.datetime())
         u2 = UserFactory(
-            stop_timestamp=u2_stop,
+            stop_timestamp=None,
             customer_id=customer.id,
         )
         
@@ -33,9 +32,35 @@ class Test(DbBaseTest):
                 dict(
                     member_id=int(u2.name),
                     rfid_tag=u2.card,
-                    end_timestamp=dt_format(u2_stop),
+                    end_timestamp=None,
                 ),
             ],
             data)
+
+    def test_export_bad_member_is_filterd(self):
+        customer = CustomerFactory()
+        u1 = UserFactory(
+            name="1234 Things",
+            customer_id=customer.id,
+        )
+        
+        data = json.loads(export_to_json(self.session, customer.id))
+
+        self.assertEqual([], data)
+        
+    def test_does_not_export_data_for_other_custoemr(self):
+        c1 = CustomerFactory()
+        u1 = UserFactory(customer_id=c1.id)
+
+        c2 = CustomerFactory()
+        u2 = UserFactory(customer_id=c2.id)
+        
+        c3 = CustomerFactory()
+        u3 = UserFactory(customer_id=c3.id)
+
+        data = json.loads(export_to_json(self.session, c2.id))
+
+        self.assertEqual(1, len(data))
+        self.assertEqual(int(u2.name), data[0]['member_id'])
 
 
