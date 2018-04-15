@@ -23,6 +23,8 @@ def main():
                         help="SQL Alchemy db engine spec.")
     parser.add_argument("-o", "--out", default=None,
                         help="File where to store json.")
+    parser.add_argument("-c", "--customer_id", default=16,
+                        help="Customer id to export.")
                         
     args = parser.parse_args()
 
@@ -32,7 +34,9 @@ def main():
  
     Session = sessionmaker(bind=engine)
     
-    content = export_to_json(Session)
+    session = Session()
+    
+    content = export_to_json(session, args.customer_id)
     if args.out:
         with open(args.out, 'w') as w:
             logger.info(f"writing json dump to {args.out}")
