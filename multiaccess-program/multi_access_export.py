@@ -24,14 +24,14 @@ def main():
                         
     args = parser.parse_args()
 
-    logger.info("connecting to %s" % args.db)
+    logger.info(f"connecting to {args.db}")
 
     db = create_engine(args.db)
     
     content = export_to_json(db)
     if args.out:
         with open(args.out, 'w') as w:
-            logger.info("writing json dump to %s" % args.out)
+            logger.info(f"writing json dump to {args.out}")
             w.write(content)
     else:
         print(content)
