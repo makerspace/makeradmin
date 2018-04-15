@@ -8,12 +8,16 @@ class Test(unittest.TestCase):
         with open("test/data/Users_columns.json", "r") as f:
             expected_columns = json.load(f)
         actual_columns = db_info.get_column_names(db_helper.create_default_engine(), "Users")
-        for c in expected_columns:
-            self.assertIn(c, actual_columns, f"Users table should contain the column {c}")
+        self.assertSetEqual(set(expected_columns), set(actual_columns), f"All columns in the User table should exist")
+
+    def test_AllTables(self):
+        with open("test/data/all_tables.json", "r") as f:
+            expected_tables = json.load(f)
+        actual_tables = db_info.get_all_table_names(db_helper.create_default_engine())
+        self.assertSetEqual(set(expected_tables), set(actual_tables), f"All tables should exist")
 
     def test_Tables(self):
-        with open("test/data/tables.json", "r") as f:
+        with open("test/data/base_tables.json", "r") as f:
             expected_tables = json.load(f)
         actual_tables = db_info.get_table_names(db_helper.create_default_engine())
-        for c in expected_tables:
-            self.assertIn(c, actual_tables, f"Users table should contain the column {c}")
+        self.assertSetEqual(set(expected_tables), set(actual_tables), f"All base tables should exist")
