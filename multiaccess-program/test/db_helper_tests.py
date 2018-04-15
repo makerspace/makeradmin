@@ -1,5 +1,5 @@
 import unittest
-import src.db_helper as db_helper
+from src import db_helper
 
 class Test(unittest.TestCase):
     def test_CreateDefaultEngine(self):

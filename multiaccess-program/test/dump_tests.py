@@ -1,6 +1,6 @@
 import unittest
-import src.dump as dump
-import src.db_helper as db_helper
+from src import dump
+from src import db_helper
 
 class Test(unittest.TestCase):
     def setUp(self):

@@ -1,6 +1,6 @@
 import unittest
-import src.db_info as db_info
-import src.db_helper as db_helper
+from src import db_info
+from src import db_helper
 import json
 
 class Test(unittest.TestCase):
