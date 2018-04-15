@@ -1,9 +1,9 @@
 
 init:
-	pip install -r requirements.txt --upgrade
+	python -m pip install -r requirements.txt --upgrade
 
 test:
-	nosetests test
+	python -m nose test
 
 dist-sync:
 
