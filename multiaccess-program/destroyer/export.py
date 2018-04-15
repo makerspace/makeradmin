@@ -10,7 +10,7 @@ logger = getLogger("makeradmin")
 
 def user_to_dict(user):
     try:
-        member_id = int(user.name)
+        member_number = int(user.name)
     except ValueError:
         logger.warning(f"can not convert {repr(user.name)} to int (row {user.id}), skipping")
         return None
@@ -21,7 +21,7 @@ def user_to_dict(user):
         end_timestamp = None
         
     return dict(
-        member_id=member_id,
+        member_number=member_number,
         rfid_tag=user.card,
         end_timestamp=end_timestamp,
     )
