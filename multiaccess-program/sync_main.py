@@ -28,8 +28,19 @@ def main():
     Session = sessionmaker(bind=engine)
     session = Session()
     return
-   
-    
+
+"""
+API data:
+member_id      debug  int
+member_number  use    int
+firstname      info   string
+lastname       info   string
+key_id         debug  int
+rfid_tag       use    string
+status         use    bool
+end_timestamp  use    string timestamp z
+"""
+
 if __name__ == '__main__':
 
     main()
