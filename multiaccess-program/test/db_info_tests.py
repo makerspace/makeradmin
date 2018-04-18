@@ -3,7 +3,9 @@ from src import db_info
 from src import db_helper
 import json
 
+
 class Test(unittest.TestCase):
+    
     def test_UsersColumns(self):
         with open("test/data/Users_columns.json", "r") as f:
             expected_columns = json.load(f)
@@ -21,3 +23,4 @@ class Test(unittest.TestCase):
             expected_tables = json.load(f)
         actual_tables = db_info.get_table_names(db_helper.create_default_engine())
         self.assertSetEqual(set(expected_tables), set(actual_tables), f"All base tables should exist")
+        

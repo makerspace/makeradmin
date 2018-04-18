@@ -1,12 +1,13 @@
 import sqlalchemy
 from src import db_info
 from src import db_helper
-import pickle, json
+import pickle
+import json
+from datetime import date, datetime
+
 
 def table(db, table_name):
-    '''
-    Get all rows of a table
-    '''
+    """ Get all rows of a table. """
     assert isinstance(db, sqlalchemy.engine.base.Engine)
     assert isinstance(table_name, str)
     with db.connect() as connection:
@@ -19,10 +20,9 @@ def table(db, table_name):
         }
         return table_info
 
+
 def tables(db):
-    '''
-    Get all rows of all tables in the database
-    '''
+    """ Get all rows of all tables in the database """
     assert isinstance(db, sqlalchemy.engine.base.Engine)
     table_names = db_info.get_table_names(db)
     table_dumps = {}
@@ -31,14 +31,13 @@ def tables(db):
         table_dumps[table_name] = table_dump
     return table_dumps
 
-from datetime import date, datetime
+
 def json_serial(obj):
     """JSON serializer for objects not serializable by default json code"""
     if isinstance(obj, (datetime, date)):
         return obj.isoformat()
-    else:
-        return str(obj)
-    raise TypeError ("Type %s not serializable" % type(obj))
+    return str(obj)
+
 
 def to_file(filename):
     assert isinstance(filename, str)
