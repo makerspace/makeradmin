@@ -1,6 +1,5 @@
 from datetime import timedelta, datetime
 from unittest import TestCase
-
 from test.util import classinstancemethod
 
 

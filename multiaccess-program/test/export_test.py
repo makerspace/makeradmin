@@ -1,6 +1,6 @@
 import json
 
-from destroyer.export import export_to_json
+from multi_access.export import export_to_json
 from test.db_base import DbBaseTest
 from test.factory import UserFactory, CustomerFactory
 from test.util import dt_format, dt_cet_local

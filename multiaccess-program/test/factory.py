@@ -1,7 +1,7 @@
 from factory import Sequence
 from factory.alchemy import SQLAlchemyModelFactory
 
-from destroyer import models
+from multi_access import models
 from test.db_base import Session
 
 
