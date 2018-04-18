@@ -12,13 +12,13 @@ dist-sync:
 	docker run -it --rm -v $(shell pwd):/src cdrx/pyinstaller-windows:python3 "/usr/bin/pyinstaller --onefile --clean -y --dist ./dist --workpath /tmp multi_access_sync.spec; chown -R --reference=. ./dist ./destroyer"
 
 dist-export:
-	docker run -it --rm -v $(shell pwd):/src cdrx/pyinstaller-windows:python3 "/usr/bin/pyinstaller --onefile --clean -y --dist ./dist --workpath /tmp multi_access_export.spec; chown -R --reference=. ./dist ./destroyer"
+	docker run -it --rm -v $(shell pwd):/src cdrx/pyinstaller-windows:python3 "/usr/bin/pyinstaller --onefile --clean -y --dist ./dist --workpath /tmp specs/multi_access_export.spec; chown -R --reference=. ./dist ./multi_access"
 
 dist: dist-sync dist-export
 
 clean:
 	rm -rf dist build
-	find destroyer -name __pycache__ -prune -type d -exec rm -rf {} \;
+	find . -name __pycache__ -prune -type d -exec rm -rf {} \;
 
 .PHONY: init test clean dist dist-sync dist-export
 

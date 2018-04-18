@@ -5,7 +5,7 @@ from logging import basicConfig, INFO, getLogger
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from destroyer.export import export_to_json
+from multi_access.export import export_to_json
 
 
 basicConfig(format='%(asctime)s %(levelname)s [%(process)d/%(threadName)s %(pathname)s:%(lineno)d]: %(message)s',

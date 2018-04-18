@@ -1,7 +1,7 @@
 import json
 from logging import getLogger
 
-from destroyer.models import User
+from multi_access.models import User
 from test.util import dt_format, dt_cet
 
 

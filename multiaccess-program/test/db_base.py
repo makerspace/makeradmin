@@ -1,7 +1,7 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 
-from destroyer.models import Base
+from multi_access.models import Base
 from test.base import BaseTest
 
 engine = create_engine('sqlite://')
