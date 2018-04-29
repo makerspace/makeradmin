@@ -17,11 +17,7 @@ class PEP240(object):
 
 def _get_column_names(cursor):
     table_description = cursor.description
-    column_names = []
-    for column_description in table_description:
-        column_description = PEP240(column_description)
-        column_names.append(column_description.name)
-    return column_names
+    return [PEP240(column_description).name for column_description in table_description]
 
 
 def get_column_names(db, table_name):
@@ -39,10 +35,7 @@ def get_table_names(db):
     with db.connect() as conn:
         res = conn.execute(sqlalchemy.text("SELECT * FROM information_schema.tables WHERE TABLE_TYPE = 'BASE TABLE'"))
         rows = res.fetchall()
-        table_names = []
-        for row in rows:
-            table_names.append(row.TABLE_NAME)
-        return table_names
+        return [row.TABLE_NAME for row in rows]
 
 
 def get_all_table_names(db):

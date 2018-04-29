@@ -1,6 +1,6 @@
 import sqlalchemy
-from src import db_info
-from src import db_helper
+from multi_access.dump import db_info
+from multi_access.dump import db_helper
 import pickle
 import json
 from datetime import date, datetime
@@ -25,11 +25,7 @@ def tables(db):
     """ Get all rows of all tables in the database """
     assert isinstance(db, sqlalchemy.engine.base.Engine)
     table_names = db_info.get_table_names(db)
-    table_dumps = {}
-    for table_name in table_names:
-        table_dump = table(db, table_name)
-        table_dumps[table_name] = table_dump
-    return table_dumps
+    return {table_name: table(db, table_name) for table_name in table_names}
 
 
 def json_serial(obj):
@@ -51,3 +47,4 @@ def to_file(filename):
             json.dump(table_dump, fp=f, default=json_serial)
     else:
         raise ValueError(f"The file extension '.{extension}' is not valid. Use '.pkl' or '.json'")
+    
