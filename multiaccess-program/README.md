@@ -62,6 +62,8 @@ Written in Python (requires Python >= 3.6).
 ### Install dependencies
 `make init`
 
+This installs the Python dependencies described in `requirements.txt`
+
 ### Run tests
 `make test`
 
