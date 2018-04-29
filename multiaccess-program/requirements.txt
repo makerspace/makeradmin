@@ -5,6 +5,7 @@
 pyodbc
 sqlalchemy
 pytz
+psutil
 
 # Build/test dependencies
 pyinstaller

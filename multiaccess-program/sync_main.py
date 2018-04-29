@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import argparse
 import sys
+import psutil
 from logging import basicConfig, INFO, getLogger
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -11,6 +12,13 @@ basicConfig(format='%(asctime)s %(levelname)s [%(process)d/%(threadName)s %(path
 
 
 logger = getLogger("makeradmin")
+
+
+def check_multi_access_running():
+    for process in psutil.process_iter():
+        if 'multiaccess' in process.name().lower():
+            return True
+    return False
 
 
 def main():
@@ -27,6 +35,21 @@ def main():
     engine = create_engine(args.db)
     Session = sessionmaker(bind=engine)
     session = Session()
+    
+    # Exit if MultiAccess is running
+    
+    logger.info("checking for running MultiAccess")
+    if check_multi_access_running():
+        logger.error("looks like MultiAccess is running, please exit MultiAccess and run again")
+        return
+    logger.info("found no running MultiAccess")
+    
+    # Log in to MakerAdmin
+    # Fetch from MakerAdmin
+    # Fetch relevant data from db
+    # Present diff of what will be changed
+    # Perorm changes
+    
     return
 
 
