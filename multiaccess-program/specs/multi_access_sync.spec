@@ -4,7 +4,7 @@ block_cipher = None
 
 
 a = Analysis(
-    ['sync_main.py'],
+    ['../sync_main.py'],
     pathex=['.'],
     binaries=[],
     datas=[],
