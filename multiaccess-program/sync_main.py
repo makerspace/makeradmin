@@ -9,6 +9,7 @@ from sqlalchemy.orm import sessionmaker
 from multi_access.auth import MakerAdminSimpleTokenAuth
 from multi_access.maker_admin import fetch_maker_admin_members
 from multi_access.multi_access import create_end_timestamp_diff, get_multi_access_members
+from multi_access.tui import Tui
 
 basicConfig(format='%(asctime)s %(levelname)s [%(process)d/%(threadName)s %(pathname)s:%(lineno)d]: %(message)s',
             stream=sys.stderr, level=INFO)
@@ -38,44 +39,43 @@ def main():
                         
     args = parser.parse_args()
 
-    logger.info(f"connecting to {args.db}")
+    with Tui() as ui:
 
-    engine = create_engine(args.db)
-    Session = sessionmaker(bind=engine)
-    session = Session()
+        ui.info__progress(f"connecting to {args.db}")
     
-    # Exit if MultiAccess is running
-    
-    logger.info("checking for running MultiAccess")
-    if check_multi_access_running():
-        logger.error("looks like MultiAccess is running, please exit MultiAccess and run again")
-        return
-    logger.info("found no running MultiAccess")
-    
-    # Fetch from MakerAdmin
-    
-    logger.info(f"getting member list from {args.maker_admin_url}")
-    auth = MakerAdminSimpleTokenAuth(access_token="FDyVvBXugvX90bnNeBpwlWbUlkPG5Mp6")
-    maker_admin_members = fetch_maker_admin_members(args.maker_admin_url, auth)
-    logger.info(f"got {len(maker_admin_members)} members")
+        engine = create_engine(args.db)
+        Session = sessionmaker(bind=engine)
+        session = Session()
         
-    # Fetch relevant data from db and diff it
-    
-    multi_access_members = get_multi_access_members(session)
-    problem_members = [m for m in multi_access_members if m.problems]
-    if problem_members:
-        logger.error('the following members have unexpected fields in maker admin, please fix them and run again')
-        for pm in problem_members:
-            logger.error(f'  {pm.member_number}: {", ".join(pm.problems)}')
-        return
+        # Exit if MultiAccess is running
         
-    diff = create_end_timestamp_diff(multi_access_members, maker_admin_members)
-    print(diff)
-    
-    # Present diff of what will be changed
-    # Preform changes
-    
-    return
+        ui.info__progress("checking for running MultiAccess")
+        if check_multi_access_running():
+            ui.fatal__error("looks like MultiAccess is running, please exit MultiAccess and run again")
+        ui.info__progress("found no running MultiAccess")
+        
+        # Fetch from MakerAdmin
+        
+        ui.info__progress(f"getting member list from {args.maker_admin_url}")
+        auth = MakerAdminSimpleTokenAuth(access_token="FDyVvBXugvX90bnNeBpwlWbUlkPG5Mp6")
+        maker_admin_members = fetch_maker_admin_members(args.maker_admin_url, auth)
+        ui.info__progress(f"got {len(maker_admin_members)} members")
+        
+        # Fetch relevant data from db and diff it
+        
+        multi_access_members = get_multi_access_members(session)
+        problem_members = [m for m in multi_access_members if m.problems]
+        if problem_members:
+            ui.fatal__problem_members(problem_members)
+        
+        ui.info__progress('diffing multi access users against maker admin members')
+        diff = create_end_timestamp_diff(multi_access_members, maker_admin_members)
+        print(diff)
+        
+        # Present diff of what will be changed
+        # Preform changes
+        
+        return
 
 
 if __name__ == '__main__':

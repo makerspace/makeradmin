@@ -8,7 +8,7 @@ from sqlalchemy.orm import sessionmaker
 from multi_access.export import export_to_json
 
 
-basicConfig(format='%(asctime)s %(levelname)s [%(process)d/%(threadName)s %(pathname)s:%(lineno)d]: %(message)s',
+basicConfig(format='%(asctime)s %(levelname)s [%(pathname)s:%(lineno)d]: %(message)s',
             stream=sys.stderr, level=INFO)
 
 
