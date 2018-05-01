@@ -8,6 +8,11 @@ pep8:
 test: pep8
 	python -m nose test
 
+win-test: 
+	python -m nose win-test
+
+all-test: test win-test
+
 dist-sync:
 
 dist-export:
