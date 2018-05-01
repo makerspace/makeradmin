@@ -6,6 +6,8 @@ from logging import basicConfig, INFO, getLogger
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
+from multi_access.auth import MakerAdminSimpleTokenAuth
+from multi_access.maker_admin import fetch_member_info
 
 basicConfig(format='%(asctime)s %(levelname)s [%(process)d/%(threadName)s %(pathname)s:%(lineno)d]: %(message)s',
             stream=sys.stderr, level=INFO)
@@ -27,6 +29,11 @@ def main():
     parser.add_argument("-d", "--db",
                         default='mssql://(local)\\SQLEXPRESS/MultiAccess?trusted_connection=yes&driver=SQL+Server',
                         help="SQL Alchemy db engine spec.")
+    parser.add_argument("-u", "--maker-admin-url",
+                        default='https://makeradmin.se',
+                        help="Base url of maker admin (for login and fetching of member info).")
+    parser.add_argument("--maker-admin-credentials-filename",
+                        help="Filename where credentials for maker admin are stored.")
                         
     args = parser.parse_args()
 
@@ -44,26 +51,23 @@ def main():
         return
     logger.info("found no running MultiAccess")
     
-    # Log in to MakerAdmin
     # Fetch from MakerAdmin
+    
+    logger.info(f"getting member list from {args.maker_admin_url}")
+    auth = MakerAdminSimpleTokenAuth(access_token="FDyVvBXugvX90bnNeBpwlWbUlkPG5Mp6")
+    try:
+        maker_admin_members = fetch_member_info(args.maker_admin_url, auth)
+    except Exception as e:
+        logger.exception("could not get member infos from maker admin")
+        return
+    logger.info(f"got {len(maker_admin_members)} members")
+        
     # Fetch relevant data from db
     # Present diff of what will be changed
     # Perorm changes
     
     return
 
-
-"""
-API data:
-member_id      debug  int
-member_number  use    int
-firstname      info   string
-lastname       info   string
-key_id         debug  int
-rfid_tag       use    string
-status         use    bool
-end_timestamp  use    string timestamp z
-"""
 
 if __name__ == '__main__':
 
