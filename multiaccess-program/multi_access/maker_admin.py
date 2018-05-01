@@ -9,7 +9,7 @@ MakerAdminMember = namedtuple('MemberInfo', [
     'lastname',       # string
     'key_id',         # int for debugging
     'rfid_tag',       # string
-    'status',         # bool          # TODO what does false and true mean? do not handle this at the moment
+    'blocked',        # bool
     'end_timestamp',  # string timestamp in zulu
 ])
 
