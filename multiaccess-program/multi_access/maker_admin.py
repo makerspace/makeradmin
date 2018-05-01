@@ -2,7 +2,7 @@ from collections import namedtuple
 
 import requests
 
-MemberInfo = namedtuple('MemberInfo', [
+MakerAdminMember = namedtuple('MemberInfo', [
     'member_id',      # int for debugging
     'member_number',  # int
     'firstname',      # string
@@ -15,8 +15,7 @@ MemberInfo = namedtuple('MemberInfo', [
 
 
 # TODO Write tests for this when we know how it should work.
-def fetch_member_info(url, auth):
-    """ Fetch and return list of MemberInfo, raises. """
-    
+def fetch_maker_admin_members(url, auth):
+    """ Fetch and return list of MakerAdminMember, raises exception on error. """
     r = requests.get(url, headers=auth.get_headers())
-    return [MemberInfo(**m) for m in r.json()]
+    return [MakerAdminMember(**m) for m in r.json()]

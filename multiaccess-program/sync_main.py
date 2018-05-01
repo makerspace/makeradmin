@@ -7,7 +7,8 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from multi_access.auth import MakerAdminSimpleTokenAuth
-from multi_access.maker_admin import fetch_member_info
+from multi_access.maker_admin import fetch_maker_admin_members
+from multi_access.multi_access import get_multi_access_members
 
 basicConfig(format='%(asctime)s %(levelname)s [%(process)d/%(threadName)s %(pathname)s:%(lineno)d]: %(message)s',
             stream=sys.stderr, level=INFO)
@@ -56,13 +57,16 @@ def main():
     logger.info(f"getting member list from {args.maker_admin_url}")
     auth = MakerAdminSimpleTokenAuth(access_token="FDyVvBXugvX90bnNeBpwlWbUlkPG5Mp6")
     try:
-        maker_admin_members = fetch_member_info(args.maker_admin_url, auth)
+        maker_admin_members = fetch_maker_admin_members(args.maker_admin_url, auth)
     except Exception as e:
         logger.exception("could not get member infos from maker admin")
         return
     logger.info(f"got {len(maker_admin_members)} members")
         
     # Fetch relevant data from db
+    
+    multi_access_members = get_multi_access_members(session)
+    
     # Present diff of what will be changed
     # Perorm changes
     
