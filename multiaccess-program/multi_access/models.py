@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, DateTime, Boolean, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
-
+from sqlalchemy.orm import relationship
 
 Base = declarative_base()
 
@@ -37,6 +37,7 @@ class User(Base):
     fi3 = Column("fi3", Integer())
     changed = Column("Changed", Integer())
     customer_id = Column("customerId", ForeignKey("Customer.Id"), index=True)
+    customer = relationship("Customer")
     created_timestamp = Column("createdTime", DateTime(timezone=False))
     portal_name = Column("PortalName", String(50))
     password = Column("Password", String(50))

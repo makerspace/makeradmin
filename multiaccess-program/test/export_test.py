@@ -3,7 +3,7 @@ import json
 from multi_access.export import export_to_json
 from test.db_base import DbBaseTest
 from test.factory import UserFactory, CustomerFactory
-from test.util import dt_format, dt_cet_local
+from multi_access.util import dt_format, dt_cet_local
 
 
 class Test(DbBaseTest):
@@ -13,11 +13,11 @@ class Test(DbBaseTest):
         u1_stop = dt_cet_local(self.datetime())
         u1 = UserFactory(
             stop_timestamp=u1_stop,
-            customer_id=customer.id,
+            customer=customer,
         )
         u2 = UserFactory(
             stop_timestamp=None,
-            customer_id=customer.id,
+            customer=customer,
         )
         
         data = json.loads(export_to_json(self.session, customer.id))
@@ -41,7 +41,7 @@ class Test(DbBaseTest):
         customer = CustomerFactory()
         u1 = UserFactory(
             name="1234 Things",
-            customer_id=customer.id,
+            customer=customer,
         )
         
         data = json.loads(export_to_json(self.session, customer.id))
@@ -50,13 +50,13 @@ class Test(DbBaseTest):
         
     def test_does_not_export_data_for_other_custoemr(self):
         c1 = CustomerFactory()
-        u1 = UserFactory(customer_id=c1.id)
+        u1 = UserFactory(customer=c1)
 
         c2 = CustomerFactory()
-        u2 = UserFactory(customer_id=c2.id)
+        u2 = UserFactory(customer=c2)
         
         c3 = CustomerFactory()
-        u3 = UserFactory(customer_id=c3.id)
+        u3 = UserFactory(customer=c3)
 
         data = json.loads(export_to_json(self.session, c2.id))
 

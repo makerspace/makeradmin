@@ -13,4 +13,5 @@ pyinstaller
 pip
 nose
 factory_boy
+hypothesis
 pycodestyle

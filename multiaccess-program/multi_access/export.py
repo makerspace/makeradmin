@@ -2,7 +2,7 @@ import json
 from logging import getLogger
 
 from multi_access.models import User
-from test.util import dt_format, dt_cet
+from multi_access.util import dt_format, dt_cet
 
 
 logger = getLogger("makeradmin")

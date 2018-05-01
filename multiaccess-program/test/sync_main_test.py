@@ -1,7 +1,5 @@
 from unittest import mock
 
-import psutil
-
 from sync_main import check_multi_access_running
 from test.base import BaseTest
 

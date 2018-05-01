@@ -1,6 +1,6 @@
 from datetime import timedelta, datetime
 from unittest import TestCase
-from test.util import classinstancemethod
+from multi_access.util import classinstancemethod
 
 
 class BaseTest(TestCase):
