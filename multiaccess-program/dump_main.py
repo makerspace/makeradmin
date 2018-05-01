@@ -25,6 +25,8 @@ def main():
     parser.add_argument("-e", "--extension", default='pkl',
                         help="Format pkl or json.")
     args = parser.parse_args()
+
+    directory = args.out_dir
     
     # Find out filename to dump to.
     
@@ -33,23 +35,23 @@ def main():
         raise SystemExit()
     
     def int_from_filename(filename):
-        if not path.isfile(path.join(args.out_dir, filename)):
+        if not path.isfile(path.join(directory, filename)):
             return 0
         m = re.match(r'dump-(\d+).' + args.extension, filename)
         if not m:
             return 0
         return int(m.group(1))
     
-    next_id = max(chain([0], (int_from_filename(f) for f in sorted(listdir(args.out_dir))))) + 1
+    next_id = max(chain([0], (int_from_filename(f) for f in sorted(listdir(directory))))) + 1
     
-    filename = path.join(args.out_dir, f'dump-{next_id:03}.{args.extension}')
+    filename = path.join(directory, f'dump-{next_id:03}.{args.extension}')
     
     # Dump db to file.
     
     logger.info(f'dumping to {filename} fron {args.db}')
     to_file(filename, db_name=args.db)
     logger.info(f'dump complete')
-
+    
     
 if __name__ == '__main__':
     main()
