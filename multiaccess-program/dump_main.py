@@ -42,7 +42,7 @@ def main():
     
     next_id = max(chain([0], (int_from_filename(f) for f in sorted(listdir(args.out_dir))))) + 1
     
-    filename = path.join(args.out_dir, f'dump-{next_id}.{args.extension}')
+    filename = path.join(args.out_dir, f'dump-{next_id:03}.{args.extension}')
     
     # Dump db to file.
     
