@@ -14,8 +14,20 @@ MakerAdminMember = namedtuple('MemberInfo', [
 ])
 
 
-# TODO Write tests for this it is known it should work.
-def fetch_maker_admin_members(url, auth):
-    """ Fetch and return list of MakerAdminMember, raises exception on error. """
-    r = requests.get(url, headers=auth.get_headers())
-    return [MakerAdminMember(**m) for m in r.json()]
+class MakerAdminClient(object):
+    
+    def __init__(self, base_url=None):
+        self.base_url = base_url
+    
+    # TODO Write tests for this it is known it should work.
+    def fetch_members(self, ui):
+        """ Fetch and return list of MakerAdminMember, raises exception on error. """
+        url = self.base_url + '/members'
+        ui.info__progress(f"getting member list from {url}")
+        
+        r = requests.get(url)
+        res = [MakerAdminMember(**m) for m in r.json()]
+        
+        ui.info__progress(f"got {len(res)} members")
+        
+        return res

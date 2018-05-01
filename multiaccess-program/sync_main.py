@@ -6,36 +6,30 @@ from logging import basicConfig, INFO, getLogger
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from multi_access.auth import MakerAdminSimpleTokenAuth
-from multi_access.maker_admin import fetch_maker_admin_members
+from multi_access.maker_admin import MakerAdminClient
 from multi_access.multi_access import create_end_timestamp_diff, get_multi_access_members
 from multi_access.tui import Tui
 
 logger = getLogger("makeradmin")
 
 
-def check_multi_access_running():
+def check_multi_access_running(ui):
+    ui.info__progress("checking for running MultiAccess")
     for process in psutil.process_iter():
         if 'multiaccess' in process.name().lower():
-            return True
-    return False
+            ui.fatal__error("looks like MultiAccess is running, please exit MultiAccess and run again")
+    ui.info__progress("found no running MultiAccess")
 
 
-def sync(ui, session, maker_admin_url):
+def sync(session=None, client=None, ui=None):
     
     # Exit if MultiAccess is running
     
-    ui.info__progress("checking for running MultiAccess")
-    if check_multi_access_running():
-        ui.fatal__error("looks like MultiAccess is running, please exit MultiAccess and run again")
-    ui.info__progress("found no running MultiAccess")
+    check_multi_access_running(ui)
     
     # Fetch from MakerAdmin
     
-    ui.info__progress(f"getting member list from {maker_admin_url}")
-    auth = MakerAdminSimpleTokenAuth()
-    maker_admin_members = fetch_maker_admin_members(maker_admin_url, auth)
-    ui.info__progress(f"got {len(maker_admin_members)} members")
+    maker_admin_members = client.fetch_members(ui)
     
     # Fetch relevant data from db and diff it
     
@@ -63,8 +57,8 @@ def main():
     parser.add_argument("-d", "--db",
                         default='mssql://(local)\\SQLEXPRESS/MultiAccess?trusted_connection=yes&driver=SQL+Server',
                         help="SQL Alchemy db engine spec.")
-    parser.add_argument("-u", "--maker-admin-url",
-                        default='https://makeradmin.se',
+    parser.add_argument("-u", "--maker-admin-base-url",
+                        default='https://api.makeradmin.se/auto/multiaccess',
                         help="Base url of maker admin (for login and fetching of member info).")
     parser.add_argument("--maker-admin-credentials-filename",
                         help="Filename where credentials for maker admin are stored.")
@@ -78,8 +72,10 @@ def main():
         engine = create_engine(args.db)
         Session = sessionmaker(bind=engine)
         session = Session()
+
+        client = MakerAdminClient(args.maker_admin_base_url)
         
-        sync(ui, session, args.maker_admin_url)
+        sync(session=session, ui=ui, client=client)
 
 
 if __name__ == '__main__':
