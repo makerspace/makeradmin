@@ -2,16 +2,20 @@ version: "2"
 services:
   db2:
     image: mysql
+    # The lumen library seems to use an older mysql client which is not able to connect if mysql uses the newer caching_sha2_password authentication plugin.
+    # Therefore we need to override the mysql starting command to set a config option to use the older password authentication plugin.
+    command: mysqld --default-authentication-plugin=mysql_native_password
     restart: always
     volumes:
       - dbdata:/var/lib/mysql
       - ./logs/mysql:/var/www/html/storage/logs
     environment:
-      # Note: the config only seems to be updated when the container is initially created
-      # MYSQL_DATABASE: "${MYSQL_DB}"
+      # Note: the config only seems to be updated when the container is initially created.
+      # If the db config needs to be changed then the db image and volume needs to be destroyed first.
+      MYSQL_DATABASE: "${MYSQL_DB}"
       MYSQL_ROOT_HOST: "db2"
-      # MYSQL_USER: "${MYSQL_USER}"
-      # MYSQL_PASSWORD: "${MYSQL_PASS}"
+      MYSQL_USER: "${MYSQL_USER}"
+      MYSQL_PASSWORD: "${MYSQL_PASS}"
       MYSQL_ROOT_PASSWORD: "${MYSQL_ROOT_PASSWORD}"
     networks:
       - makeradmin

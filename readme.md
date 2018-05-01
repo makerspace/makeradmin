@@ -1,35 +1,23 @@
 # Makeradmin
 ==========
 
-## This is work in progress and may do absolutely anything or nothing at all
--------------------------------------------------------------------------
-
 ### Install dependencies 
 `sudo apt-get install docker.io docker-compose`<br />
 `sudo adduser your_username docker`<br />
 You need to sign out and sign back in again for changes to take effect. 
 
-### Initialize submodules and pull latest commits 
-`make update`
+### Initialize everything
+`make firstrun`
 
-### Build docker images 
-`make build`
-
-### Create (or migrate) all database tables, (run once, or twice if not working first time) 
-`make init-db`
-
-### Configure your MakerAdmin system. 
-MakerAdmin requires some variables to be defined for the system to work. These variables are defined in the '.env' file. To create a file with default configuration run<br />
-`make create-default-env`
+This will initialize submodules, build docker images and configure the database. This may take quite some time.
+It will also generate a .env file with new random keys and passwords that the system will use.
 
 ### Start MakerAdmin 
 `make run` 
 
 At this point MakerAdmin should be up and running but there are no users.<br />
-`docker-compose run --rm --no-deps membership /usr/bin/php /var/www/html/artisan member:create username password`
 
-or:<br />
-`./create_user.py`
+`python3 create_user.py --first-name "Maker" --last-name "Makersson" --email "maker@example.com" --type admin`
 
 To change password for existing user.<br />
 `docker-compose run --rm --no-deps membership /usr/bin/php /var/www/html/artisan member:password <email> <password>`

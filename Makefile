@@ -12,10 +12,8 @@ run: .env
 init-db: .env
 	./db_init.sh
 
-create-default-env: .env
-	@test -e .env
 .env:
-	@cp -n .env.example .env
+	python3 create_env.py
 
 stop:
 	@ # At first stop all containers that need to unregister (all but db2 and api-gateway)
@@ -29,3 +27,10 @@ stop:
 	@ docker-compose stop -t 30 rfid
 	@ docker-compose stop -t 30 membership
 	docker-compose down
+
+firstrun:
+	make update
+	make .env
+	make build
+	make init-db
+	echo "\033[31mRun 'make run' to start MakerAdmin\033[0m"

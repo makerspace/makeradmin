@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-import requests;
+import requests
 import argparse
 
 # Read the .env file
@@ -7,6 +7,7 @@ env = {s[0]: (s[1] if len(s) > 1 else "") for s in (s.split("=") for s in open("
 
 # TODO: Need to read this port value from somewhere
 port = 8010
+
 
 class APIGateway:
     def __init__(self, host, key):
@@ -36,20 +37,24 @@ parser.add_argument("--type", choices=["user", "admin"], required=True)
 
 args = parser.parse_args()
 
-r = gateway.post("membership/member", payload={
-	"email": args.email,
-	"firstname": args.first_name,
-	"lastname": args.last_name,
-})
+try:
+    r = gateway.post("membership/member", payload={
+        "email": args.email,
+        "firstname": args.first_name,
+        "lastname": args.last_name,
+    })
+except Exception:
+    print("Could not connect to the membership service. Are you sure makeradmin is running?")
+    exit(1)
+
 assert r.ok, r.text
 user = r.json()["data"]
 
 if args.type == "admin":
-	admin_group_id = [g["group_id"] for g in gateway.get("membership/group").json()["data"] if g["name"] == "admins"][0]
-	r = gateway.post("membership/member/" + str(user["member_id"]) + "/groups/add", payload={
-		"groups": [admin_group_id]
-	})
-	assert r.ok, r.text
+    admin_group_id = [g["group_id"] for g in gateway.get("membership/group").json()["data"] if g["name"] == "admins"][0]
+    r = gateway.post("membership/member/" + str(user["member_id"]) + "/groups/add", payload={
+        "groups": [admin_group_id]
+    })
+    assert r.ok, r.text
 
 print("Done")
-
