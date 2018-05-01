@@ -8,7 +8,7 @@ from sqlalchemy.orm import sessionmaker
 
 from multi_access.auth import MakerAdminSimpleTokenAuth
 from multi_access.maker_admin import fetch_maker_admin_members
-from multi_access.multi_access import get_multi_access_members
+from multi_access.multi_access import create_end_timestamp_diff, get_multi_access_members
 
 basicConfig(format='%(asctime)s %(levelname)s [%(process)d/%(threadName)s %(pathname)s:%(lineno)d]: %(message)s',
             stream=sys.stderr, level=INFO)
@@ -56,19 +56,24 @@ def main():
     
     logger.info(f"getting member list from {args.maker_admin_url}")
     auth = MakerAdminSimpleTokenAuth(access_token="FDyVvBXugvX90bnNeBpwlWbUlkPG5Mp6")
-    try:
-        maker_admin_members = fetch_maker_admin_members(args.maker_admin_url, auth)
-    except Exception as e:
-        logger.exception("could not get member infos from maker admin")
-        return
+    maker_admin_members = fetch_maker_admin_members(args.maker_admin_url, auth)
     logger.info(f"got {len(maker_admin_members)} members")
         
-    # Fetch relevant data from db
+    # Fetch relevant data from db and diff it
     
     multi_access_members = get_multi_access_members(session)
+    problem_members = [m for m in multi_access_members if m.problems]
+    if problem_members:
+        logger.error('the following members have unexpected fields in maker admin, please fix them and run again')
+        for pm in problem_members:
+            logger.error(f'  {pm.member_number}: {", ".join(pm.problems)}')
+        return
+        
+    diff = create_end_timestamp_diff(multi_access_members, maker_admin_members)
+    print(diff)
     
     # Present diff of what will be changed
-    # Perorm changes
+    # Preform changes
     
     return
 
