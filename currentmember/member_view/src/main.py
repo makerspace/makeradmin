@@ -1,6 +1,4 @@
 from flask import Flask, request, abort, jsonify, render_template
-import base64
-
 import service
 from service import eprint, assert_get
 

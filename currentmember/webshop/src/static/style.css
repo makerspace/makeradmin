@@ -1,0 +1,258 @@
+.uk-button {
+  border-radius: 2px;
+}
+
+#root {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  color: #333;
+  justify-content: center;
+}
+
+#left-sidebar {
+  flex: 0 1 auto;
+  width: 250px;
+  box-shadow: rgba(0, 0, 0, 0.1) 0px 0px 10px 0px;
+  padding: 10px;
+}
+#left-sidebar li a {
+  display: inline-block;
+}
+
+#right-sidebar {
+  flex: 0 1 auto;
+  height: 100%;
+  width: 400px;
+  box-shadow: rgba(0, 0, 0, 0.1) 0px 0px 10px 0px;
+  padding: 10px;
+}
+
+#content {
+  max-width: 800px;
+  padding: 10px;
+  padding-top: 200px;
+  flex: 1 1 auto;
+  margin-bottom: 240px;
+}
+
+.product.active {
+  background: #bfddfc;
+}
+
+.product-list {
+  list-style: none;
+  padding-left: 10px;
+}
+
+.product:hover button, .product:hover a {
+  opacity: 1;
+}
+
+.number-add {
+  max-width: 80px;
+  min-width: 80px;
+  text-align: center;
+  padding: 0px;
+}
+
+.product {
+  font-size: 11pt;
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  transition: background 200ms;
+  padding: 4px;
+  margin-top: 2px;
+  margin-bottom: 2px;
+  border-radius: 3px;
+}
+.product a, .product button {
+  opacity: 0;
+  color: #fff;
+  margin-left: 4px;
+  margin-right: 4px;
+  text-transform: none;
+  transition: opacity 200ms;
+}
+.product .product-title {
+  flex: 1 1 auto;
+  padding-top: 5px;
+  margin-right: 10px;
+  padding-left: 10px;
+  white-space: nowrap;
+}
+.product input {
+  flex: 0 1 auto;
+  text-transform: none;
+  border-radius: 2px 0px 0px 2px;
+}
+.product .product-price {
+  padding-top: 5px;
+  margin-right: 10px;
+  padding-left: 10px;
+}
+.product .product-amount {
+  max-width: 45px;
+  border-left: 1px solid #EEE;
+  border-top: 1px solid #EEE;
+  border-bottom: 1px solid #EEE;
+  padding-right: 6px;
+  -moz-appearance: textfield;
+  text-align: right;
+  font-size: 10pt;
+}
+.product .product-amount ::-webkit-outer-spin-button, .product .product-amount ::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.product .product-unit {
+  border-top: 1px solid #EEE;
+  border-right: 1px solid #EEE;
+  border-bottom: 1px solid #EEE;
+  width: 40px;
+  padding-top: 3px;
+  text-align: center;
+  background: #EEE;
+  font-weight: bold;
+  color: #666;
+  margin-right: 5px;
+  border-radius: 0px 2px 2px 0px;
+}
+
+#edit.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+#edit {
+  position: fixed;
+  right: 10px;
+  width: 100px;
+  height: 50px;
+  top: 10px;
+  border: 1px solid #AAA;
+  border-radius: px;
+  opacity: 0;
+  transition: opacity 500ms;
+  visibility: hidden;
+}
+#edit span {
+  margin-right: 8px;
+}
+
+.edit.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.edit {
+  opacity: 0;
+  display: inline-block;
+  visibility: hidden;
+  transition: opacity 500ms;
+}
+
+.edit-invisible.active {
+  width: 0px;
+  min-width: 0px;
+  transition: width 500ms, min-width 500ms;
+  opacity: 0 !important;
+}
+
+.edit-display {
+  opacity: 1;
+  visibility: visible;
+  transition: all 500ms;
+}
+
+.edit-display.disabled {
+  opacity: 0;
+  width: 0px;
+  padding-left: 0px;
+  padding-right: 0px;
+  margin-left: 0px;
+  margin-right: 0px;
+  visibility: hidden;
+}
+
+.category-delete {
+  float: right;
+  line-height: 12px;
+  height: 28px;
+}
+
+#pay-module.open {
+  height: 240px;
+}
+
+#pay-module {
+  position: fixed;
+  bottom: 0px;
+  right: 0px;
+  left: 0px;
+  background: #FFF;
+  max-height: 40%;
+  height: 0px;
+  transition: height 0.6s;
+  border-top: 6px solid #7C7;
+  box-shadow: 0px 0px 20px 0px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+}
+#pay-module #cart {
+  list-style: none;
+  overflow-y: auto;
+  max-width: 600px;
+  padding: 20px 20px 0px 20px;
+  margin-bottom: 0px;
+  flex: 0.5;
+}
+#pay-module #pay {
+  max-width: 600px;
+  padding: 20px;
+  flex: 0.5;
+}
+
+#pay-button {
+  margin-top: 20px;
+  width: 80%;
+  margin-left: 10%;
+  margin-right: 10%;
+  text-transform: none;
+}
+
+/**
+ * The CSS shown here will not be introduced in the Quickstart guide, but shows
+ * how you can use CSS to style your Element's container.
+ */
+.StripeElement {
+  background-color: white;
+  padding: 10px 12px;
+  border-radius: 4px;
+  border: 1px solid transparent;
+  box-shadow: 0 1px 3px 0 #e6ebf1;
+  -webkit-transition: box-shadow 150ms ease;
+  transition: box-shadow 150ms ease;
+}
+
+#card-errors {
+  font-size: 10pt;
+  margin-left: 10px;
+  margin-top: 5px;
+}
+
+.StripeElement--focus {
+  box-shadow: 0 1px 3px 0 #cfd7df;
+}
+
+.StripeElement--invalid {
+  border-color: #fa755a;
+}
+
+.StripeElement--webkit-autofill {
+  background-color: #fefde5 !important;
+}
+
+/*# sourceMappingURL=static/style.css.map */

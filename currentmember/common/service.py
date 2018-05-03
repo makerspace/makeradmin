@@ -6,6 +6,7 @@ import requests
 import socket
 import signal
 
+SERVICE_USER_ID = -1
 
 class DB:
     def __init__(self, host, name, user, password):
@@ -47,7 +48,7 @@ class APIGateway:
 
 
 class Service:
-    def __init__(self, name, url, port, version, db, gateway, debug):
+    def __init__(self, name, url, port, version, db, gateway, debug, frontend):
         self.name = name
         self.url = url
         self.port = port
@@ -55,29 +56,33 @@ class Service:
         self.db = db
         self.debug = debug
         self.gateway = gateway
+        self.frontend = frontend
 
     def full_path(self, path):
         return "/" + self.url + "/" + path
 
     def register(self):
-        payload = {
-            "name": self.name,
-            "url": self.url,
-            "endpoint": "http://" + socket.gethostname() + ":" + str(self.port) + "/",
-            "version": self.version
-        }
-        r = self.gateway.post("service/register", payload)
-        if not r.ok:
-            raise Exception("Failed to register service: " + r.text)
+        # Frontend services do not register themselves as API endpoints
+        if not self.frontend:
+            payload = {
+                "name": self.name,
+                "url": self.url,
+                "endpoint": "http://" + socket.gethostname() + ":" + str(self.port) + "/",
+                "version": self.version
+            }
+            r = self.gateway.post("service/register", payload)
+            if not r.ok:
+                raise Exception("Failed to register service: " + r.text)
 
     def unregister(self):
-        payload = {
-            "url": self.url,
-            "version": self.version
-        }
-        r = self.gateway.post("service/unregister", payload)
-        if not r.ok:
-            raise Exception("Failed to unregister service: " + r.text)
+        if not self.frontend:
+            payload = {
+                "url": self.url,
+                "version": self.version
+            }
+            r = self.gateway.post("service/unregister", payload)
+            if not r.ok:
+                raise Exception("Failed to unregister service: " + r.text)
 
     def wrap_error_codes(self, app):
         # Pretty ugly way to wrap all abort(code, message) calls so that they return proper json reponses
@@ -114,7 +119,7 @@ def assert_get(data, key):
     return data[key]
 
 
-def _read_config():
+def read_config():
     try:
         db = DB(
             host=os.environ["MYSQL_HOST"],
@@ -153,13 +158,20 @@ def capture_signals():
 
 
 def create(name, url, port, version):
-    db, gateway, debug = _read_config()
-    service = Service(name, url, port, version, db, gateway, debug)
-
+    db, gateway, debug = read_config()
+    service = Service(name, url, port, version, db, gateway, debug, False)
     service.unregister()
     eprint("Registering service...")
     service.register()
 
+    eprint("Connecting to database...")
+    db.connect()
+    return service
+
+
+def create_frontend(url, port):
+    db, gateway, debug = read_config()
+    service = Service(None, url, port, None, db, gateway, debug, True)
     eprint("Connecting to database...")
     db.connect()
     return service
