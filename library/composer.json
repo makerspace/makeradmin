@@ -1,0 +1,20 @@
+{
+	"name" : "makeradmin/makeradmin-library",
+	"description" : "Common library for MakerAdmin modules",
+	"keywords" : [
+		"makeradmin"
+	],
+	"license" : "AGPL-3.0-only",
+	"type" : "library",
+	"require" : {
+		"php" : ">=5.6.4",
+		"laravel/lumen-framework" : "5.3.*"
+	},
+	"autoload" : {
+		"psr-4" : {
+			"Makeradmin\\" : "src/Makeradmin"
+		}
+	},
+	"minimum-stability" : "dev",
+	"prefer-stable" : true
+}
