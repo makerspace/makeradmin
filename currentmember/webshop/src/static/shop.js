@@ -94,7 +94,7 @@ $(document).ready(() => {
             <form class="product">
                 <span class="product-title">${item.name}</span>
                 <span class="product-price">${price} ${currency}/${baseStr}</span>
-                <input type="number" placeholder="0" class="product-amount edit-invisible"></input>
+                <input type="number" min=0 placeholder="0" class="product-amount edit-invisible"></input>
                 <span class="product-unit edit-invisible">${item.unit}</span>
                 <div class="product-actions">
                   <span class="edit-display disabled">
@@ -194,7 +194,7 @@ $(document).ready(() => {
             <form class="product">
             <span class="product-title">${item.name}</span>
             <span class="product-price">${item.price} ${currency}/${item.unit}</span>
-            <input type="number" placeholder="0" class="product-amount"></input>
+            <input type="number" min=0 placeholder="0" class="product-amount"></input>
             <span class="product-unit">${item.unit}</span>
             <button class="uk-button uk-button-small uk-button-danger product-remove" uk-icon="trash"></button>
           </form>

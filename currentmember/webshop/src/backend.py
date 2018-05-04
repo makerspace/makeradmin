@@ -61,7 +61,7 @@ if __name__ == "__main__":
                     if price is None:
                         abort(400, "Item " + str(item["id"]) + " does not exist")
                     if price[0] < 0:
-                        abort(400, "Item seems to have a negatice price. Not allowing purchasing that item just in case. Item: " + str(item["id"]))
+                        abort(400, "Item seems to have a negatice price. Not allowing purchases that item just in case. Item: " + str(item["id"]))
                     prices.append(price[0])
 
                 items = []

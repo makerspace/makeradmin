@@ -46,7 +46,7 @@ with service.create(name="Makerspace Member Login", url="member", port=80, versi
         if not r.ok:
             raise Exception(r.text)
 
-        return jsonify({ "status": "sent" })
+        return jsonify({"status": "sent"})
 
     @app.route(instance.full_path("current"), methods=["GET", "POST"])
     def current_member():
