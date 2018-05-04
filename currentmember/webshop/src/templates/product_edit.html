@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>{{ product.name }} - Makerspace Webshop</title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="{{ url('static/uikit/css/uikit.min.css') }}" />
+        <link rel="stylesheet" href="{{ url('static/style.css') }}" />
+        <script src='{{ url("static/uikit/js/uikit.min.js") }}'></script>
+        <script src='{{ url("static/uikit/js/uikit-icons.min.js") }}'></script>
+        <script src="https://code.jquery.com/jquery-3.3.1.min.js"
+              integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+              crossorigin="anonymous"></script>
+        <script src='{{ url("static/product_edit.js") }}'></script>
+    </head>
+    <body>
+        <form class="product-edit-form uk-form-stacked">
+            <input id="product-id" type="hidden" value="{{ product.id }}" />
+            <div>
+                <label for="name" class="uk-form-label">Product Name</label>
+                <input required id="name" class="uk-input" type="text" placeholder="" value="{{ product.name }}" />
+            </div>
+            <div>
+                <label for="category" class="uk-form-label">Category</label>
+                <select required id="category" class="uk-select">
+                    <option value="">Select a category...</option>
+                    {% for cat in categories %}
+                        <option value="{{ cat.id }}" {{ "selected" if product.category_id == cat.id else "" }}>{{ cat.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label for="unit" class="uk-form-label">Unit</label>
+                <input required id="unit" class="uk-input" type="text" placeholder="st/g/mm/etc." value="{{ product.unit }}" />
+            </div>
+            <div>
+                <label for="description" class="uk-form-label">Description</label>
+                <textarea required id="description" class="uk-textarea" cols="40" rows="8">{{ product.description }}</textarea>
+            </div>
+            <div>
+                <label for="price" class="uk-form-label">Price</label>
+                <div class="product-edit-price">
+                    <input required id="price" class="uk-input" type="number" step="0.01" min="0.01" placeholder="0" value="{{ product.price }}" />
+                    <span id="price-unit">kr/unit</span>
+                </div>
+            </div>
+            <button class="uk-button uk-button-primary">Save</button>
+        </form>
+    </body>
+</html>

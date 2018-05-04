@@ -11,10 +11,10 @@ $(document).ready(() => {
   const isAdmin = true;
 
   function showEdit() {
-    $("#edit").addClass("active");
+    $("#edit").toggleClass("active");
     $("#edit").click(() => {
-      $(".edit, .edit-display, .edit-invisible").addClass("active");
-      $(".edit, .edit-display").removeClass("disabled");
+      $(".edit, .edit-display, .edit-invisible").toggleClass("active");
+      $(".edit, .edit-display").toggleClass("disabled");
     })
   }
 
@@ -42,13 +42,13 @@ $(document).ready(() => {
   };
 
   // Create an instance of the card Element.
-  var card = elements.create('card', {style: style});
+  const card = elements.create('card', {style: style});
 
   // Add an instance of the card Element into the `card-element` <div>.
   card.mount('#card-element');
 
-  var currencyBase = 100;
-  var currency = "kr";
+  const currency = "kr";
+  const currencyBase = 100;
 
   var cart = [];
   var id2element = new Map();
@@ -57,65 +57,97 @@ $(document).ready(() => {
 
   var data = JSON.parse($("#product-data")[0].textContent);
 
-  for (const item of data) {
-    let base = 1;
-    let price = item.price;
-    if (price > 0 && (item.unit == "g" || item.unit == "mm" || item.unit == "ml")) {
-      while((price % 100) != 0) {
-        base *= 10;
-        price *= 10;
+  for (const cat of data) {
+    const catLi = `
+      <li><h3 id="category${cat.id}">${cat.name}</h3></li>
+    `;
+
+    $(".product-list").append($(catLi));
+    for (const item of cat.items) {
+      let base = 1;
+
+      // Do integer math for stability
+      // Calculate a reasonable pricing amount to show
+      // (e.g 5kr/100g instead of 0.05kr/g)
+      let price = (item.price*currencyBase)|0;
+      if (price > 0 && (item.unit == "g" || item.unit == "mm" || item.unit == "ml")) {
+        for (multiplier of [1, 100, 1000]) {
+          base = multiplier;
+
+          // Check if value is representable with at most one decimal
+          if(((price*base) % (currencyBase/10)) == 0) break;
+        }
+        price *= multiplier;
       }
-    }
+      price /= currencyBase;
 
-    price /= currencyBase;
-    let baseStr = base > 1 ? base + item.unit : item.unit;
+      let baseStr = base > 1 ? base + item.unit : item.unit;
 
-    const buttons = [];
-    const increments = [1, 10, 100];
-    for (const incr of increments) {
-      buttons.push(`<button class="edit-invisible uk-button uk-button-small uk-button-primary number-add" data-amount="${incr}">+${incr}${item.unit}</button>`);
-    }
+      const buttons = [];
+      const increments = [1, 10, 100];
+      for (const incr of increments) {
+        buttons.push(`<button class="uk-button uk-button-small uk-button-primary number-add" data-amount="${incr}">+${incr}${item.unit}</button>`);
+      }
 
-    const li = $(
-      `<li>
-          <form class="product">
-              <span class="product-title">${item.name}</span>
-              <span class="product-price">${price} ${currency}/${baseStr}</span>
-              <input type="number" placeholder="0" class="product-amount edit-invisible"></input>
-              <span class="product-unit edit-invisible">${item.unit}</span>
-              <a href="/webshop/product/${item.id}/edit" class="edit-display disabled product-edit uk-button uk-button-small uk-button-primary" uk-icon="pencil" />
-              <button class="edit-display disabled product-delete uk-button uk-button-small uk-button-danger" uk-icon="trash" />
-              ${ buttons.join("\n") }
-          </form>
-      </li>`);
-    id2element.set(item.id, li);
-    id2item.set(item.id, item);
+      const li = $(
+        `<li>
+            <form class="product">
+                <span class="product-title">${item.name}</span>
+                <span class="product-price">${price} ${currency}/${baseStr}</span>
+                <input type="number" placeholder="0" class="product-amount edit-invisible"></input>
+                <span class="product-unit edit-invisible">${item.unit}</span>
+                <div class="product-actions">
+                  <span class="edit-display disabled">
+                    <a href="product/${item.id}/edit" class="edit-display disabled product-edit uk-button uk-button-small uk-button-primary" uk-icon="pencil" />
+                    <button class="edit-display disabled product-delete uk-button uk-button-small uk-button-danger" uk-icon="trash" />
+                  </span>
+                  <span class="edit-invisible">
+                    ${ buttons.join("\n") }
+                  </span>
+                </div>
+            </form>
+        </li>`);
+      id2element.set(item.id, li);
+      id2item.set(item.id, item);
 
-    // Handle deleting products
-    li.find(".product-delete").click((ev) => {
-      ev.preventDefault();
-      UIkit.modal.confirm(`Are you sure you want to delete ${item.name}?`).then(
-        () => {
-          $.ajax({
-            type: "DELETE",
-            url: apiBasePath + "/webshop/product/" + item.id,
-            data: JSON.stringify({
-              id: item.id,
-            }),
-            contentType: "application/json; charset=utf-8",
-            dataType: "json",
-            headers: {
-              "Authorization": "Bearer " + localStorage.token
-            }
-          }).done(() => {
-            li.remove();
-          }).fail((xhr, textStatus, error) => {
-            UIkit.modal.alert("<h2>Error</h2>" + xhr.responseJSON.status);
-          });
+      // Handle deleting products
+      li.find(".product-delete").click((ev) => {
+        ev.preventDefault();
+        UIkit.modal.confirm(`Are you sure you want to delete ${item.name}?`).then(
+          () => {
+            $.ajax({
+              type: "DELETE",
+              url: apiBasePath + "/webshop/product/" + item.id,
+              data: JSON.stringify({
+                id: item.id,
+              }),
+              contentType: "application/json; charset=utf-8",
+              dataType: "json",
+              headers: {
+                "Authorization": "Bearer " + localStorage.token
+              }
+            }).done(() => {
+              li.remove();
+            }).fail((xhr, textStatus, error) => {
+              UIkit.modal.alert("<h2>Error</h2>" + xhr.responseJSON.status);
+            });
+        });
       });
-    });
 
-    $(".product-list").append(li);
+      $(li).find(".product-amount").on("input change", ev => {
+        refresh();
+        ev.preventDefault();
+      });
+
+      $(li).find(".number-add").click(ev => {
+        const amount = li.find(".product-amount");
+        amount.val((amount.val()|0)+($(ev.currentTarget).attr("data-amount")|0));
+        amount.change();
+        ev.preventDefault();
+      });
+
+      $(".product-list").append(li);
+    }
   }
 
   function sumCart(cart) {
@@ -146,9 +178,9 @@ $(document).ready(() => {
       $(elem).find(".product-active-dot").toggleClass("active", count > 0);
     }
 
-    let totalSum = sumCart(cart)/currencyBase;
+    let totalSum = sumCart(cart);
 
-    $("#pay-button").val("Betala " + totalSum + " " + currency);
+    $("#pay-button").val("Betala " + ((totalSum*currencyBase)|0)/currencyBase + " " + currency);
 
     $("#pay-module").toggleClass("open", cart.length > 0);
 
@@ -161,7 +193,7 @@ $(document).ready(() => {
           `<li>
             <form class="product">
             <span class="product-title">${item.name}</span>
-            <span class="product-price">${item.price/currencyBase} ${currency}/${item.unit}</span>
+            <span class="product-price">${item.price} ${currency}/${item.unit}</span>
             <input type="number" placeholder="0" class="product-amount"></input>
             <span class="product-unit">${item.unit}</span>
             <button class="uk-button uk-button-small uk-button-danger product-remove" uk-icon="trash"></button>
@@ -202,19 +234,6 @@ $(document).ready(() => {
     }
   }
 
-  $(".product-amount").on("input change", ev => {
-    refresh();
-    ev.preventDefault();
-  });
-
-  $(".number-add").click(ev => {
-    const product = $(ev.currentTarget).parent();
-    const amount = product.find(".product-amount");
-    amount.val((amount.val()|0)+($(ev.currentTarget).attr("data-amount")|0));
-    amount.change();
-    ev.preventDefault();
-  });
-
   $("#pay").submit((ev) => {
     ev.preventDefault();
     stripe.createToken(card).then(function(result) {
@@ -228,7 +247,7 @@ $(document).ready(() => {
           url: apiBasePath + "/webshop/pay",
           data: JSON.stringify({
             cart: cart,
-            expectedSum: sumCart(cart)/currencyBase,
+            expectedSum: sumCart(cart),
             stripeToken: result.token.id
           }),
           contentType: "application/json; charset=utf-8",
@@ -251,6 +270,56 @@ $(document).ready(() => {
       }
     });
   });
+
+  $(".category-delete").click(ev => {
+    ev.preventDefault();
+    const id = $(ev.currentTarget).attr("data-id");
+
+    UIkit.modal.confirm(`Are you sure you want to delete this category?`).then(
+      () => {
+        $.ajax({
+          type: "DELETE",
+          url: apiBasePath + "/webshop/category/" + id,
+          data: JSON.stringify({ id: id }),
+          contentType: "application/json; charset=utf-8",
+          dataType: "json",
+          headers: {
+            "Authorization": "Bearer " + localStorage.token
+          }
+        }).done(() => {
+          location.reload(true);
+        }).fail((xhr, textStatus, error) => {
+          UIkit.modal.alert("<h2>Error</h2>" + xhr.responseJSON.status);
+        });
+    });
+  });
+
+  $(".category-add").click(ev => {
+    ev.preventDefault();
+    UIkit.modal.prompt('Category Name', '').then(name => {
+      if (name == null) return;
+
+      $.ajax({
+        type: "POST",
+        url: apiBasePath + "/webshop/category",
+        data: JSON.stringify({ name: name }),
+        contentType: "application/json; charset=utf-8",
+        dataType: "json",
+        headers: {
+          "Authorization": "Bearer " + localStorage.token
+        }
+      }).done((data, textStatus, xhr) => {
+        // Reload the page to show the new category
+        location.reload(true);
+      }).fail((xhr, textStatus, error) => {
+        if (xhr.responseJSON.message == "Unauthorized") {
+          UIkit.modal.alert("<h2>Något gick fel</h2>Du har inte behörighet att lägga till en ny kategori");
+        } else {
+          UIkit.modal.alert("<h2>Något gick fel</h2>" + xhr.responseJSON.status);
+        }
+      });
+    });
+  })
 
   refresh();
 });

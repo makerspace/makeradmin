@@ -1,7 +1,10 @@
 CREATE TABLE `webshop_product_categories` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  PRIMARY KEY (`id`),
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `deleted_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
 );
 
 CREATE TABLE `webshop_product_images` (
@@ -9,18 +12,18 @@ CREATE TABLE `webshop_product_images` (
   `product_id` int(10) unsigned NOT NULL,
   `path` varchar(255) COLLATE utf8mb4_unicode_ci,
   `caption` text COLLATE utf8mb4_unicode_ci,
-  PRIMARY KEY (`id`),
+  PRIMARY KEY (`id`)
 );
 
 CREATE TABLE `webshop_products` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `category_id` int(10) unsigned,
+  `category_id` int(10) unsigned NOT NULL,
   `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   `description` text COLLATE utf8mb4_unicode_ci,
   `unit` varchar(30) COLLATE utf8mb4_unicode_ci,
   `price` decimal(15,2) NOT NULL,
   `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE SET CURRENT_TIMESTAMP,
+  `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `deleted_at` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `category_id_key` (category_id),
@@ -32,7 +35,15 @@ CREATE TABLE `webshop_product_variants` (
   `product_id` int(10) unsigned NOT NULL,
   `name` varchar(255) COLLATE utf8mb4_unicode_ci,
   `price` decimal(15,2) NOT NULL,
-  PRIMARY KEY (`id`),
+  PRIMARY KEY (`id`)
+);
+
+CREATE TABLE `webshop_transactions` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `member_id` int(10) unsigned NOT NULL,
+  `amount` decimal(15,2) NOT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
 );
 
 CREATE TABLE `webshop_transaction_contents` (
@@ -46,10 +57,3 @@ CREATE TABLE `webshop_transaction_contents` (
   CONSTRAINT transaction_constraint FOREIGN KEY (`transaction_id`) REFERENCES `webshop_transactions` (`id`)
 );
 
-CREATE TABLE `webshop_transactions` (
-  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `member_id` int(10) unsigned NOT NULL,
-  `amount` decimal(15,2) NOT NULL,
-  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`)
-);

@@ -56,17 +56,37 @@ $footer-height: 240px;
 .product-list {
 	list-style: none;
 	padding-left: 10px;
+
+	h3 {
+		margin-bottom: 0px;
+		margin-top: 20px;
+	}
 }
 
-.product:hover button, .product:hover a {
+.product:hover .product-actions {
 	opacity: 1.0;
+	visibility: visible;
 }
 
 .number-add {
-	max-width: 80px;
-	min-width: 80px;
 	text-align: center;
 	padding: 0px;
+	flex: 1;
+}
+
+.product-actions {
+	visibility: hidden;
+	opacity: 0;
+	transition: visibility 200ms, opacity 200ms;
+	position: relative;
+	width: 240px;
+}
+
+.product-actions span {
+	position: absolute;
+	width: 100%;
+	display: flex;
+	flex-direction: row;
 }
 
 .product {
@@ -74,20 +94,18 @@ $footer-height: 240px;
 	display: flex;
 	flex-direction: row;
 	width: 100%;
-	transition: background 200ms;
+	height: 30px;
 	padding: 4px;
 	margin-top: 2px;
 	margin-bottom: 2px;
 	border-radius: 3px;
 
 	a, button {
-		opacity: 0;
 		//background-color: #1e87f0;
 		color: #fff;
 		margin-left: 4px;
 		margin-right: 4px;
 		text-transform: none;
-		transition: opacity 200ms;
 	}
 
 	.product-title {
@@ -177,7 +195,8 @@ $footer-height: 240px;
 	width: 0px;
 	min-width: 0px;
 	transition: width 500ms, min-width 500ms;
-	opacity: 0 !important;
+	opacity: 0;
+	visibility: hidden;
 }
 
 .edit-display {
@@ -194,6 +213,15 @@ $footer-height: 240px;
 	margin-left: 0px;
 	margin-right: 0px;
 	visibility: hidden;
+}
+
+.product:hover .edit-display.active {
+	opacity: 1.0;
+	visibility: visible;
+}
+
+.product-add {
+	margin-left: 24px;
 }
 
 .category-add {
@@ -283,3 +311,60 @@ $footer-height: 240px;
 .StripeElement--webkit-autofill {
 	background-color: #fefde5 !important;
 }
+
+
+// Product edit form
+
+.product-edit-form {
+	width: 600px;
+	margin-top: 100px;
+	margin-left: auto;
+	margin-right: auto;
+
+	div {
+		margin-top: 5px;
+		//width: 100%;
+		//display: block;
+		//margin-top: 20px;
+	}
+
+	.product-edit-price {
+		display: flex;
+		flex-direction: row;
+
+		input {
+			display: inline-block;
+			border-top-right-radius: 0px;
+			border-bottom-right-radius: 0px;
+		}
+		span {
+			border-top-right-radius: 3px;
+			border-bottom-right-radius: 3px;
+			padding-left: 12px;
+			padding-right: 12px;
+			text-align: center;
+			display: inline-block;
+			background-color: #f9f9f9;
+			border-width: 1px 1px 1px 0px;
+			border-style: solid;
+			border-color: #e5e5e5;
+			font-weight: bold;
+			padding-top: 6px;
+		}
+	}
+
+	label {
+		padding-left: 1px;
+	}
+
+	input, textarea, select {
+		border-radius: 3px;
+	}
+
+	button {
+		margin-top: 20px;
+	}
+}
+
+
+

@@ -1,54 +1,55 @@
 #!/usr/bin/env python3
 
-import argparse
-from mygrations.mygrate import mygrate
 import service
 import os
-from io import StringIO
-import sys
-
-# argument parsing
-parser = argparse.ArgumentParser()
-parser.add_argument('-f', dest='force', action='store_true', help='Ignore errors/warnings and execute command anyway')
-args = parser.parse_args()
 
 db, gateway, debug = service.read_config()
-
-with open(".env", "w") as f:
-    f.write("DB_HOSTNAME={}\nDB_USERNAME={}\nDB_PASSWORD={}\nDB_DATABASE={}".format(db.host.split(":")[0], db.user, db.password, db.name))
-
-with open("mygrate.conf", "w") as f:
-    f.write("hostname_key=DB_HOSTNAME\nusername_key=DB_USERNAME\npassword_key=DB_PASSWORD\ndatabase_key=DB_DATABASE\nfiles_directory=database")
-
-# The mygrations module is not well behaved and just spits everything out on stdout, so we have to redirect it
-stdout_ = sys.stdout  # Keep track of the previous value.
-plan = StringIO()
-sys.stdout = plan
-
-# load up a mygrate object
-my = mygrate("plan", {
-    "force": args.force,
-    "version": False,
-    "env": ".env",
-    "config": "mygrate.conf",
-})
-
-# and execute
-my.execute()
-
-sys.stdout = stdout_  # restore the previous stdout.
-
-os.remove(".env")
-os.remove("mygrate.conf")
-
-planStr = plan.getvalue().strip()
-if "Errors found" in planStr:
-    print(planStr)
-    exit(1)
-
 db.connect()
-with db.cursor() as c:
-    for statement in planStr.split(";"):
-        if statement.strip() != "":
-            print(statement)
-            c.execute(statement)
+
+green = "\033[32m"
+reset = "\033[0m"
+
+with db.cursor() as cur:
+    # Disable 'table already exists' warning
+    cur.execute("SET sql_notes = 0")
+    # Create the migrations table
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS `migrations` (
+            `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+            `migration` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+            `batch` int(11) NOT NULL,
+            PRIMARY KEY (`id`)
+        )
+    """)
+    cur.execute("SET sql_notes = 1")
+
+    # Find all migration files (it is assumed that they are named as numbers)
+    files = [int(n.split(".sql")[0]) for n in os.listdir("database") if n.endswith(".sql")]
+    # Make sure they are sorted
+    files.sort()
+    anyMigrations = False
+    for migration in files:
+        name = str(migration)
+        sql = open("database/" + name + ".sql").read()
+
+        # Divide the sql query into a number of commands
+        batches = [b.strip() for b in sql.split(";") if b.strip() != ""]
+
+        # Check how many (if any) commands from this file have been previously executed
+        cur.execute("SELECT batch FROM `migrations` WHERE migration=%s", (name,))
+        batch = cur.fetchone()
+        if batch is None:
+            cur.execute("INSERT INTO `migrations` (migration,batch) VALUES (%s,%s)", (name, 0))
+            batch = 0
+        else:
+            batch = batch[0]
+
+        for i in range(batch, len(batches)):
+            anyMigrations = True
+            print(green + "Running migration " + name + " batch " + str(i) + "..." + reset)
+            print(batches[i])
+            cur.execute(batches[i])
+            cur.execute("UPDATE `migrations` SET batch=%s WHERE migration=%s", (i+1,name))
+
+    if not anyMigrations:
+        print(green + "Nothing to migrate." + reset)

@@ -14,308 +14,30 @@
         <script src="https://js.stripe.com/v3/"></script>
         <script src='{{ url("static/shop.js") }}'></script>
         <script id="product-data", type="application/json">
-            [
-                {
-                    "id": 0,
-                    "name": "Vändskär DCGT-0702-STEEL",
-                    "price": 11000,
-                    "unit": "st",
-                    "increments": [1, 10]
-                },
-                {
-                    "id": 1,
-                    "name": "Vändskär DCMT-0702-ALU",
-                    "price": 9000,
-                    "unit": "st",
-                    "increments": [1, 10]
-                },
-                {
-                    "id": 2,
-                    "name": "Vändskär WNMG-0604-STEEL",
-                    "price": 13500,
-                    "unit": "st",
-                    "increments": [1, 10]
-                },
-                {
-                    "id": 3,
-                    "name": "Vändskär WNMG-0604-ALU",
-                    "price": 11000,
-                    "unit": "st",
-                    "increments": [1, 10]
-                },
-                {
-                    "id": 4,
-                    "name": "Vändskär RCMT-0803-STEEL",
-                    "price": 10000,
-                    "unit": "st",
-                    "increments": [1, 10]
-                },
-                {
-                    "id": 5,
-                    "name": "Vändskär RCGT-0803-ALU",
-                    "price": 11000,
-                    "unit": "st",
-                    "increments": [1, 10]
-                },
-                {
-                    "id": 6,
-                    "name": "Vändskär MGMN-200-STEEL",
-                    "price": 12000,
-                    "unit": "st",
-                    "increments": [1, 10]
-                },
-                {
-                    "id": 7,
-                    "name": "Vändskär MGGN-20-ALU",
-                    "price": 12000,
-                    "unit": "st",
-                    "increments": [1, 10]
-                },
-                {
-                    "id": 8,
-                    "name": "Vändskär ER-16-AG60-STEEL",
-                    "price": 7500,
-                    "unit": "st",
-                    "increments": [1, 10]
-                },
-                {
-                    "id": 9,
-                    "name": "Vändskär ER-16-AG60-ALU",
-                    "price": 7500,
-                    "unit": "st",
-                    "increments": [1, 10]
-                },
-                {
-                    "id": 10,
-                    "name": "Vändskär IR-16-AG60-STEEL",
-                    "price": 7500,
-                    "unit": "st",
-                    "increments": [1, 10]
-                },
-                {
-                    "id": 11,
-                    "name": "Vändskär IR-16-AG60-ALU",
-                    "price": 7500,
-                    "unit": "st",
-                    "increments": [1, 10]
-                },
-                {
-                    "id": 12,
-                    "name": "Sparskär HSS 10x10mm",
-                    "price": 9000,
-                    "unit": "st",
-                    "increments": [1, 10]
-                },
-                {
-                    "id": 13,
-                    "name": "Pinnfräs för Plast",
-                    "price": 5000,
-                    "unit": "st",
-                    "increments": [1, 10]
-                },
-                {
-                    "id": 14,
-                    "name": "Pinnfräs för Aluminium",
-                    "price": 12500,
-                    "unit": "st",
-                    "increments": [1, 10]
-                },
-                {
-                    "id": 15,
-                    "name": "Fullradiefräs för Aluminium",
-                    "price": 14000,
-                    "unit": "st",
-                    "increments": [1, 10]
-                },
-                {
-                    "id": 16,
-                    "name": "Gravyrfräs 30 grader 0.1mm",
-                    "price": 2500,
-                    "unit": "st",
-                    "increments": [1, 10]
-                },
-                {
-                    "id": 17,
-                    "name": "Pinnfräs för Stål",
-                    "price": 4500,
-                    "unit": "st",
-                    "increments": [1, 10]
-                },
-                {
-                    "id": 18,
-                    "name": "Akrylplast",
-                    "price": 5,
-                    "unit": "g",
-                    "increments": [1, 10]
-                },
-                {
-                    "id": 19,
-                    "name": "Använding av Laserskärare",
-                    "price": 100,
-                    "unit": "s",
-                    "increments": [1, 10]
-                },
-                {
-                    "id": 20,
-                    "name": "Björkplywood",
-                    "price": 8900,
-                    "unit": "st",
-                    "increments": [1, 10]
-                },
-                {
-                    "id": 21,
-                    "name": "MDF",
-                    "price": 8900,
-                    "unit": "st",
-                    "increments": [1, 10]
-                },
-                {
-                    "id": 22,
-                    "name": "Stämpelgummi",
-                    "price": 10000,
-                    "unit": "st",
-                    "increments": [1, 10]
-                },
-                {
-                    "id": 23,
-                    "name": "Textiltransfer",
-                    "price": 15,
-                    "unit": "mm",
-                    "increments": [1, 10]
-                },
-                {
-                    "id": 24,
-                    "name": "Textiltransfer Special",
-                    "price": 23,
-                    "unit": "mm",
-                    "increments": [1, 10]
-                },
-                {
-                    "id": 25,
-                    "name": "Självhäftande Vinyl",
-                    "price": 7.5,
-                    "unit": "mm",
-                    "increments": [1, 10, 100]
-                },
-                {
-                    "id": 26,
-                    "name": "Stål",
-                    "price": 4,
-                    "unit": "g",
-                    "increments": [1, 10, 100]
-                },
-                {
-                    "id": 27,
-                    "name": "Aluminium",
-                    "price": 4.5,
-                    "unit": "g",
-                    "increments": [1, 10, 100]
-                },
-                {
-                    "id": 28,
-                    "name": "Plast",
-                    "price": 7.5,
-                    "unit": "g",
-                    "increments": [1, 10, 100]
-                },
-                {
-                    "id": 29,
-                    "name": "Mässing",
-                    "price": 7.5,
-                    "unit": "g",
-                    "increments": [1, 10, 100]
-                },
-                {
-                    "id": 30,
-                    "name": "Akrylplast 20mm",
-                    "price": 35000,
-                    "unit": "st",
-                    "increments": [1, 10]
-                },
-                {
-                    "id": 31,
-                    "name": "Donation",
-                    "price": 10000,
-                    "unit": "st",
-                    "increments": [1, 10]
-                },
-                {
-                    "id": 32,
-                    "name": "Tygkasse",
-                    "price": 10000,
-                    "unit": "st",
-                    "increments": [1, 10]
-                },
-                {
-                    "id": 33,
-                    "name": "Gåvokort",
-                    "price": 65000,
-                    "unit": "st",
-                    "increments": [1, 10]
-                },
-                {
-                    "id": 35,
-                    "name": "Labbavgift 1 Månad",
-                    "price": 30000,
-                    "unit": "mån",
-                    "increments": [1, 10]
-                },
-                {
-                    "id": 39,
-                    "name": "Startpaket",
-                    "price": 65000,
-                    "unit": "st",
-                    "increments": [1, 10]
-                },
-                {
-                    "id": 40,
-                    "name": "Medlemsavgift 1 år",
-                    "price": 20000,
-                    "unit": "år",
-                    "increments": [1, 10]
-                },
-                {
-                    "id": 41,
-                    "name": "Utskrift (A4 papper)",
-                    "price": 100,
-                    "unit": "st",
-                    "increments": [1, 10]
-                }
-            ]
+            {{ product_json|safe }}
         </script>
     </head>
     <body>
         <div id="root">
             <div id="left-sidebar">
                 <img src='{{ url("static/images/logo-transparent-500px-300x210.png") }}' />
-                <h2>Categories</h2>
+                <h3>Kategorier</h3>
                 <ul class="uk-nav uk-nav-default">
-                    <li class="uk-active"><a href="#">Allt</a></li>
-                    <li><a href="">Something</a><button class="category-delete edit uk-button uk-button-danger uk-button-small" uk-icon="trash"></button></li>
-                    <li><a href="">Förbrukningsmaterial</a><button class="category-delete edit uk-button uk-button-danger uk-button-small" uk-icon="trash"></button></li>
-                    <li><a href="">Övrigt</a><button class="category-delete edit uk-button uk-button-danger uk-button-small" uk-icon="trash"></button></li>
-                    <li><button class="category-add" uk-icon="plus-circle"></li>
+                    {% for cat in categories %}
+                        <li>
+                            <a href="#category{{ cat.id }}" uk-scroll>{{ cat.name }}</a>
+                            <button data-id="{{ cat.id }}" class="category-delete edit uk-button uk-button-danger uk-button-small" uk-icon="trash"></button>
+                        </li>
+                    {% endfor %}
+                    <button class="uk-button uk-button-primary uk-button-small edit category-add" uk-icon="plus"></button>
                 </ul>
 
             </div>
             <div id="content">
                 <button id="edit" class="uk-icon-button" uk-icon="icon: pencil"><span>Edit</span></button>
                 <ul class="product-list">
-                    {% for i in range(0) %}
-                        <li>
-                            <form class="product">
-                                <span class="product-title">Aluminum Endmill</span>
-                                <span class="product-price">0.79kr/g</span>
-                                <input type="number" placeholder="0" class="product-amount"></input>
-                                <span class="product-unit">g</span>
-                                <button class="uk-button uk-button-small uk-button-primary number-add1">+1st</button>
-                                <button class="uk-button uk-button-small uk-button-primary number-add10">+10st</button>
-                                <button class="uk-button uk-button-small uk-button-primary number-add100">+100st</button>
-                            </form>
-                            {# <div class="">Description...</div> #}
-                        </li>
-                    {% endfor %}
                 </ul>
+                <a class="uk-button uk-button-primary uk-button-small edit product-add" href="product/create" uk-icon="plus"></a>
             </div>
             {# <div id="right-sidebar">
                 <h2>Items</h2>
@@ -328,7 +50,6 @@
                             <span class="product-total-cost">200kr</span>
                             <button class="uk-button uk-button-default uk-button-small" uk-icon="trash" />
                         </form>
-                        {# <div class="">Description...</div> #}
                     </li>
                 </ul>
             </div> #}
