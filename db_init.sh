@@ -1,6 +1,6 @@
 #!/bin/bash
 set -e
-CONTAINERS=( api-gateway membership messages sales economy rfid )
+CONTAINERS=( api-gateway membership messages sales economy rfid webshop )
 DB_RUNNING=`docker-compose ps -q db2`
 [ -z "$DB_RUNNING" ] && docker-compose up -d db2
 printf "Waiting for database "
@@ -21,5 +21,6 @@ for container in "${CONTAINERS[@]}"; do
   docker-compose exec db2 bash -c "mysql -uroot --password=\"\${MYSQL_ROOT_PASSWORD}\" -e \"\
     FLUSH PRIVILEGES;\""
   docker-compose run --rm --no-deps $container bash -c "if [ -f /var/www/html/artisan ]; then /usr/bin/php -d hhvm.jit=0 /var/www/html/artisan --force migrate; else echo \"artisan not found, skipping migration for $container\"; fi"
+  docker-compose run --rm --no-deps $container bash -c "if [ -f /var/www/service/migrate.py ]; then echo 'Migrating using Python'; python3 /var/www/service/migrate.py; fi"
 done
 [ -z "$DB_RUNNING" ] && docker-compose down
