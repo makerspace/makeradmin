@@ -43,10 +43,38 @@ services:
   current-member:
     image: makeradmin/current-member:1.0
     container_name: makeradmin-current-member
-    build: ./MakerAdmin-CurrentMember
+    build:
+      context: ./MakerAdmin-CurrentMember/
+      dockerfile: member_view/Dockerfile
     environment:
         MYSQL_HOST: "db2:${MYSQL_PORT}"
         MYSQL_DB: "makeradmin-membership"
+        MYSQL_USER: "${MYSQL_USER}"
+        MYSQL_PASS: "${MYSQL_PASS}"
+        APIGATEWAY: "api-gateway"
+        BEARER: "${API_BEARER}"
+        HOST_FRONTEND:
+        HOST_BACKEND:
+        APP_DEBUG: "true"
+    depends_on:
+      - api-gateway
+    networks:
+      - makeradmin
+
+  webshop:
+    image: makeradmin/webshop:1.0
+    container_name: makeradmin-webshop
+    volumes:
+      - "./MakerAdmin-CurrentMember/webshop/src/static:/var/www/service/static"
+      - "./MakerAdmin-CurrentMember/webshop/src/templates:/var/www/service/templates"
+    build:
+      context: ./MakerAdmin-CurrentMember/
+      dockerfile: webshop/Dockerfile
+    ports:
+      - "8011:80"
+    environment:
+        MYSQL_HOST: "db2:${MYSQL_PORT}"
+        MYSQL_DB: "makeradmin-webshop"
         MYSQL_USER: "${MYSQL_USER}"
         MYSQL_PASS: "${MYSQL_PASS}"
         APIGATEWAY: "api-gateway"
