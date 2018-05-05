@@ -98,8 +98,15 @@ class Service:
             except:
                 pass
 
+    def add_route_list(self, app):
+        '''Adds an endpoint (/routes) for listing all routes of the service'''
+        @app.route(self.full_path("routes"))
+        def site_map():
+            return jsonify({"data": [{"url": rule.rule, "methods": list(rule.methods)} for rule in app.url_map.iter_rules()]})
+
     def serve_indefinitely(self, app):
         capture_signals()
+        self.add_route_list(app)
         self.wrap_error_codes(app)
         app.run(host='0.0.0.0', debug=self.debug, port=self.port, use_reloader=False)
 
