@@ -43,7 +43,7 @@ $app->configure("mailgun");
 
 $app->singleton(
 	Illuminate\Contracts\Debug\ExceptionHandler::class,
-	App\Exceptions\Handler::class
+	Makeradmin\Exceptions\Handler::class
 );
 
 $app->singleton(

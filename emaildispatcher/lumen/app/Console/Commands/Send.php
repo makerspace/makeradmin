@@ -3,7 +3,6 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
-use App\Libraries\CurlBrowser;
 
 use DB;
 

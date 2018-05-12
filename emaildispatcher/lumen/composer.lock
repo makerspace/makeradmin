@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "b65c80539e14f2bec23e9266445f5898",
+    "content-hash": "bf1c904ea321bb976a3021d6f8ae0e9a",
     "packages": [
         {
             "name": "clue/stream-filter",
@@ -1484,6 +1484,40 @@
             ],
             "description": "The Mailgun SDK provides methods for all API functions.",
             "time": "2016-08-10T16:58:18+00:00"
+        },
+        {
+            "name": "makeradmin/makeradmin-library",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/makerspace/MakerAdmin-Library.git",
+                "reference": "6283ce4a72f2e5e1ab1cd57fddf62f921f92edb9"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/makerspace/MakerAdmin-Library/zipball/6283ce4a72f2e5e1ab1cd57fddf62f921f92edb9",
+                "reference": "6283ce4a72f2e5e1ab1cd57fddf62f921f92edb9",
+                "shasum": ""
+            },
+            "require": {
+                "laravel/lumen-framework": "5.3.*",
+                "php": ">=5.6.4"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Makeradmin\\": "src/Makeradmin"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "AGPL-3.0-only"
+            ],
+            "description": "Common library for MakerAdmin modules",
+            "keywords": [
+                "makeradmin"
+            ],
+            "time": "2018-05-03T23:11:27+00:00"
         },
         {
             "name": "monolog/monolog",
@@ -2990,12 +3024,12 @@
             "version": "0.9.9",
             "source": {
                 "type": "git",
-                "url": "https://github.com/padraic/mockery.git",
+                "url": "https://github.com/mockery/mockery.git",
                 "reference": "6fdb61243844dc924071d3404bb23994ea0b6856"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/padraic/mockery/zipball/6fdb61243844dc924071d3404bb23994ea0b6856",
+                "url": "https://api.github.com/repos/mockery/mockery/zipball/6fdb61243844dc924071d3404bb23994ea0b6856",
                 "reference": "6fdb61243844dc924071d3404bb23994ea0b6856",
                 "shasum": ""
             },
@@ -4312,7 +4346,9 @@
     ],
     "aliases": [],
     "minimum-stability": "dev",
-    "stability-flags": [],
+    "stability-flags": {
+        "makeradmin/makeradmin-library": 20
+    },
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {

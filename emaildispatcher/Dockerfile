@@ -11,7 +11,8 @@ RUN    apt-get update \
 # and thus improve build times significantly if no dependencies have changed.
 ADD ./lumen/composer.json /var/www/html/
 ADD ./lumen/composer.lock /var/www/html/
-RUN composer install --no-scripts --no-autoloader -d /var/www/html
+RUN    composer install --no-scripts --no-autoloader -d /var/www/html \
+    && composer update makeradmin/makeradmin-library --no-scripts --no-autoloader -d /var/www/html
 
 # Add all the other lumen files
 ADD ./lumen /var/www/html/
