@@ -4,6 +4,8 @@ namespace App\Console;
 
 use Illuminate\Console\Scheduling\Schedule;
 use Laravel\Lumen\Console\Kernel as ConsoleKernel;
+use Makeradmin\Console\Commands\ServiceRegister;
+use Makeradmin\Console\Commands\ServiceUnregister;
 
 class Kernel extends ConsoleKernel
 {
@@ -15,8 +17,8 @@ class Kernel extends ConsoleKernel
 	protected $commands = [
 		Commands\CreateUser::class,
 		Commands\ChangePassword::class,
-		Commands\ServiceRegister::class,
-		Commands\ServiceUnregister::class,
+		ServiceRegister::class,
+		ServiceUnregister::class,
 	];
 
 	/**

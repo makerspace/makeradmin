@@ -2,7 +2,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Traits\EntityStandardFiltering;
+use Makeradmin\Traits\EntityStandardFiltering;
 
 class Role extends Controller
 {

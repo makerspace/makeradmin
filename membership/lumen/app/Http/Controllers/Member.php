@@ -7,7 +7,7 @@ use Illuminate\Http\Response;
 use App\Models\Member as MemberModel;
 use App\Models\Group as GroupModel;
 
-use App\Traits\EntityStandardFiltering;
+use Makeradmin\Traits\EntityStandardFiltering;
 
 use DB;
 
