@@ -3,10 +3,10 @@ namespace App\Models;
 
 use DB;
 
-use \App\Exceptions\FilterNotFoundException;
-use \App\Exceptions\EntityValidationException;
+use \Makeradmin\Exceptions\FilterNotFoundException;
+use \Makeradmin\Exceptions\EntityValidationException;
 
-
+//TODO: Replace this class by Makeradmin\Models\Entity.
 /**
  * Entity class
  */
@@ -60,7 +60,7 @@ class Entity
 				{
 					if(!array_key_exists($filter[0], $this->columns))
 					{
-						throw new \App\Exceptions\FilterNotFoundException("sort_by", $filter[0], "Could not find the column you trying to sort by");
+						throw new \Makeradmin\Exceptions\FilterNotFoundException("sort_by", $filter[0], "Could not find the column you trying to sort by");
 					}
 
 					$this->sort = $filter;
@@ -669,7 +669,7 @@ class Entity
 				{
 					if(empty($this->data[$field]))
 					{
-						throw new EntityValidationException($field, "The value can not be empty");
+						throw new EntityValidationException($field, null, "The value can not be empty");
 					}
 				}
 				// The value should be unique in database (except from deleted entities)
@@ -686,7 +686,7 @@ class Entity
 					// A unique value collision is not fatal if it is from the same entity thas is being validated (itself)... or else we could not save an entity
 					if(!empty($result) && ($result->entity_id != $this->entity_id))
 					{
-						throw new EntityValidationException($field, "The value needs to be unique in the database");
+						throw new EntityValidationException($field, null, "The value needs to be unique in the database");
 					}
 				}
 				// Validate a date according to ISO8601 standard
@@ -711,7 +711,7 @@ class Entity
 				}
 				else
 				{
-					throw new EntityValidationException($field, "Unknown validation rule {$rule}");
+					throw new EntityValidationException($field, null, "Unknown validation rule {$rule}");
 				}
 			}
 		}

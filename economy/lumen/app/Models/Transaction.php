@@ -1,5 +1,7 @@
 <?php
 namespace App\Models;
+
+use App\Models\Entity;
 use DB;
 
 class Transaction extends Entity

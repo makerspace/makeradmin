@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use Laravel\Lumen\Routing\Controller as BaseController;
-use App\Exceptions\FilterNotFoundException;
+use Makeradmin\Exceptions\FilterNotFoundException;
 use DB;
 
 class Controller extends BaseController
