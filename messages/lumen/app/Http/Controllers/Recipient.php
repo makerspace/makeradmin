@@ -2,9 +2,9 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Traits\EntityStandardFiltering;
+use Makeradmin\Traits\EntityStandardFiltering;
 
-//use App\Libraries\CurlBrowser;
+//use Makeradmin\Libraries\CurlBrowser;
 
 class Recipient extends Controller
 {

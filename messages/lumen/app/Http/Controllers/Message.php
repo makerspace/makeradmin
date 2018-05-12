@@ -7,9 +7,9 @@ use Illuminate\Http\Response;
 use App\Models\Message as MessageModel;
 use App\Models\Recipient as RecipientModel;
 
-use App\Traits\EntityStandardFiltering;
+use Makeradmin\Traits\EntityStandardFiltering;
 
-use App\Libraries\CurlBrowser;
+use Makeradmin\Libraries\CurlBrowser;
 
 class Message extends Controller
 {

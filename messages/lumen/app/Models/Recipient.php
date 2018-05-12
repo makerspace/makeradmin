@@ -1,7 +1,7 @@
 <?php
 namespace App\Models;
 
-use App\Models\Entity;
+use Makeradmin\Models\Entity;
 use DB;
 
 /**
