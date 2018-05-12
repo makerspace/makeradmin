@@ -3,7 +3,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use App\Libraries\CurlBrowser;
+use Makeradmin\Libraries\CurlBrowser;
 use Illuminate\Support\Facades\Storage;
 
 class MultiAccessSync extends Controller
