@@ -10,7 +10,7 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 use App\Service;
 use App\Logger;
-use App\Libraries\CurlBrowser;
+use Makeradmin\Libraries\CurlBrowser;
 
 use DB;
 

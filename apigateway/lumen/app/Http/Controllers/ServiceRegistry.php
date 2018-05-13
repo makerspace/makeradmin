@@ -8,11 +8,11 @@ use Illuminate\Support\Facades\Auth;
 
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
-use App\Exceptions\EntityValidationException;
+use Makeradmin\Exceptions\EntityValidationException;
 use App\Service;
 use App\Logger;
 use App\Login;
-use App\Libraries\CurlBrowser;
+use Makeradmin\Libraries\CurlBrowser;
 
 /**
  * Controller for the service registry

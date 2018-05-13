@@ -43,7 +43,7 @@ $app->configure("service");
 
 $app->singleton(
 	Illuminate\Contracts\Debug\ExceptionHandler::class,
-	App\Exceptions\Handler::class
+	Makeradmin\Exceptions\Handler::class
 );
 
 $app->singleton(
@@ -66,7 +66,7 @@ $app->singleton(
 $app->middleware([
 	App\Http\Middleware\Logging::class,
 	App\Http\Middleware\PrettifyJson::class,
-	App\Http\Middleware\Metadata::class,
+	Makeradmin\Http\Middleware\Metadata::class,
 	App\Http\Middleware\IncludeUserId::class,
 ]);
 

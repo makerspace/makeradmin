@@ -7,7 +7,7 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 
 use App\Login;
-use App\Exceptions\EntityValidationException;
+use Makeradmin\Exceptions\EntityValidationException;
 use DB;
 
 /**
