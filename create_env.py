@@ -1,4 +1,6 @@
 import secrets
+import argparse
+import os
 
 config = {
     "MYSQL_DB": "makerdata",
@@ -19,5 +21,13 @@ config = {
     "HOST_FRONTEND": "localhost:8009",
 }
 
-with open(".env", "w") as f:
-    f.write("\n".join(key + "=" + value for (key, value) in config.items()))
+parser = argparse.ArgumentParser(description='Create a default \'.env\' file with secrets if it doesn\'t exist')
+parser.add_argument('--force','-f', dest='force', action='store_true', help='overwrite existing \'.env\' file')
+args = parser.parse_args()
+
+if not args.force and os.path.isfile(".env"):
+    print('.env file already exists, touching')
+    os.utime(".env", None)
+else:
+    with open(".env", "w") as f:
+        f.write("\n".join(key + "=" + value for (key, value) in config.items()))
