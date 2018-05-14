@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 use App\Service;
-use App\Logger;
+use Makeradmin\Logger;
 use Makeradmin\Libraries\CurlBrowser;
 
 use DB;

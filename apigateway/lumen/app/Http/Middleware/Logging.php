@@ -4,7 +4,7 @@ namespace App\Http\Middleware;
 
 use Illuminate\Http\Response;
 use Closure;
-use App\Logger;
+use Makeradmin\Logger;
 
 class Logging
 {

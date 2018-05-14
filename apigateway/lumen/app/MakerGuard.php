@@ -5,6 +5,7 @@ namespace App;
 use Closure;
 use Illuminate\Contracts\Auth\Authenticatable;
 use \Illuminate\Contracts\Auth\Guard;
+use Makeradmin\Logger;
 use Makeradmin\Exceptions\ServiceRequestTimeout;
 use Makeradmin\Libraries\CurlBrowser;
 use App\Login;

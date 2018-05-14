@@ -1816,12 +1816,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/makerspace/MakerAdmin-Library.git",
-                "reference": "6283ce4a72f2e5e1ab1cd57fddf62f921f92edb9"
+                "reference": "00b6178d3baa9c5dc30e096b749d9e528ba9bd09"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/makerspace/MakerAdmin-Library/zipball/6283ce4a72f2e5e1ab1cd57fddf62f921f92edb9",
-                "reference": "6283ce4a72f2e5e1ab1cd57fddf62f921f92edb9",
+                "url": "https://api.github.com/repos/makerspace/MakerAdmin-Library/zipball/00b6178d3baa9c5dc30e096b749d9e528ba9bd09",
+                "reference": "00b6178d3baa9c5dc30e096b749d9e528ba9bd09",
                 "shasum": ""
             },
             "require": {
@@ -1842,7 +1842,7 @@
             "keywords": [
                 "makeradmin"
             ],
-            "time": "2018-05-03T23:11:27+00:00"
+            "time": "2018-05-14T15:57:19+00:00"
         },
         {
             "name": "monolog/monolog",

@@ -10,7 +10,7 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 use Makeradmin\Exceptions\EntityValidationException;
 use App\Service;
-use App\Logger;
+use Makeradmin\Logger;
 use App\Login;
 use Makeradmin\Libraries\CurlBrowser;
 

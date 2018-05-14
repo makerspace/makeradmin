@@ -4,7 +4,7 @@ namespace App;
 
 use DB;
 use Makeradmin\Exceptions\ServiceRequestTimeout;
-use App\Logger;
+use Makeradmin\Logger;
 use Makeradmin\Libraries\CurlBrowser;
 use Illuminate\Support\Facades\Auth;
 
