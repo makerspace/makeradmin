@@ -6,6 +6,9 @@ logger = getLogger("makeradmin")
 class Tui(object):
     """ A tui abstractions, let's see how this works. """
 
+    def login(self):
+        self.info__progress("Login not implemented yet.")
+
     @staticmethod
     def info__progress(msg):
         logger.info(msg)

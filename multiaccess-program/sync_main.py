@@ -66,7 +66,9 @@ def main():
     args = parser.parse_args()
 
     with Tui() as ui:
-
+        
+        ui.login()
+        
         ui.info__progress(f"connecting to {args.db}")
     
         engine = create_engine(args.db)

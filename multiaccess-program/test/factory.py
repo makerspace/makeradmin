@@ -44,5 +44,5 @@ class MakerAdminMemberFactory(Factory):
     lastname = Faker('last_name')
     key_id = Sequence(lambda n: n)
     rfid_tag = LazyFunction(partial(uniqueid, length=12))
-    status = False
+    blocked = False
     end_timestamp = Faker('future_datetime')

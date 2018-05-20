@@ -19,7 +19,7 @@ class MakerAdminClient(object):
     def __init__(self, base_url=None):
         self.base_url = base_url
     
-    # TODO Write tests for this it is known it should work.
+    # TODO Write tests for when this it is known it should work.
     def fetch_members(self, ui):
         """ Fetch and return list of MakerAdminMember, raises exception on error. """
         url = self.base_url + '/members'
