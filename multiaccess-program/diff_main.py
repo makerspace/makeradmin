@@ -31,14 +31,19 @@ class settable_wrapper(object):
     def __hash__(self):
         return hash(str(self))
 
+    def assert_arguments_are_class_instances(func):
+        def wrapper(*args):
+            for arg in args:
+                assert isinstance(arg, settable_wrapper), "Can only compare 'settable_wrapper' objects"
+            return func(*args)
+        return wrapper
+
+    @assert_arguments_are_class_instances
     def __lt__(self, other):
-        assert isinstance(self, settable_wrapper), "Can only compare 'settable_wrapper' objects"
-        assert isinstance(other, settable_wrapper), "Can only compare 'settable_wrapper' objects"
         return repr(self) < repr(other)
 
+    @assert_arguments_are_class_instances
     def __eq__(self, other):
-        assert isinstance(self, settable_wrapper), "Can only compare 'settable_wrapper' objects"
-        assert isinstance(other, settable_wrapper), "Can only compare 'settable_wrapper' objects"
         return repr(self) == repr(other)
 
     def __repr__(self):
