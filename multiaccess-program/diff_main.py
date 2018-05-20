@@ -11,6 +11,56 @@ from multi_access.dump.dump import from_file
 logger = getLogger("makeradmin")
 
 
+class settable_wrapper(object):
+    """Really ugly wrapper for making objects hashable and comparable so that they can be converted to 'set'"""
+
+    def __init__(self, obj):
+        try:
+            repr(obj)
+        except Exception as e:
+            logging.error(f"Could not 'repr' the object {obj}, and thus not hash it")
+            raise e
+        self.obj = obj
+
+    def __getattr__(self, attr):
+        try:
+            return getattr(self.obj, attr)
+        except Exception as e:
+            raise e
+
+    def __hash__(self):
+        return hash(str(self))
+
+    def __lt__(self, other):
+        assert isinstance(self, settable_wrapper), "Can only compare 'settable_wrapper' objects"
+        assert isinstance(other, settable_wrapper), "Can only compare 'settable_wrapper' objects"
+        return repr(self) < repr(other)
+
+    def __eq__(self, other):
+        assert isinstance(self, settable_wrapper), "Can only compare 'settable_wrapper' objects"
+        assert isinstance(other, settable_wrapper), "Can only compare 'settable_wrapper' objects"
+        return repr(self) == repr(other)
+
+    def __repr__(self):
+        return repr(self.obj)
+
+    def __str__(self):
+        return str(self.obj)
+
+
+def monkeypatch_settable(obj):
+    try:
+        hash(obj)
+    except TypeError as e:
+        obj = settable_wrapper(obj)
+    finally:
+        return obj
+
+
+def monkeypatch_settable_for_list(list_obj):
+    return [monkeypatch_settable(i) for i in list_obj]
+
+
 def print_diff(old, new):
     
     # Sanity checking tables and colums should be same.
@@ -25,11 +75,11 @@ def print_diff(old, new):
         
         # Check for duplicates or algorithm won't work.
         
-        old_rows = old_table['rows']
+        old_rows = monkeypatch_settable_for_list(old_table['rows'])
         old_set = set(old_rows)
         assert(len(old_rows) == len(set(old_rows)))
         
-        new_rows = new_table['rows']
+        new_rows = monkeypatch_settable_for_list(new_table['rows'])
         new_set = set(new_rows)
         assert(len(new_rows) == len(set(new_rows)))
     
