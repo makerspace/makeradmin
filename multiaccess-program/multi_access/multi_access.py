@@ -24,7 +24,7 @@ class EndTimestampDiff(object):
         self.timestamp_diffs = ma_member.end_timestamp != db_member.user.stop_timestamp
 
     def describe_update(self):
-        res = f'member #{self.ma_member.member_number} ({self.ma_member.firstname} {self.ma_member.lastname})'
+        res = f'#{self.ma_member.member_number} ({self.ma_member.firstname} {self.ma_member.lastname})'
         
         if self.timestamp_diffs:
             res += f', end timestamp {self.db_member.user.stop_timestamp} => {self.ma_member.end_timestamp}'
@@ -35,10 +35,11 @@ class EndTimestampDiff(object):
         return res
     
     def update(self, session, ui):
-        ui.info__progress(f'updating: {self.describe_update()}')
+        ui.info__progress(f'updating {self.describe_update()}')
         user = session.query(User).get(self.db_member.user.id)
         user.stop_timestamp = self.ma_member.end_timestamp
         user.blocked = self.ma_member.blocked
+        session.commit()
         
         
 def get_multi_access_members(session, customer_id):

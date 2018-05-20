@@ -41,6 +41,10 @@ def sync(session=None, client=None, ui=None, customer_id=16):
     ui.info__progress('diffing multi access users against maker admin members')
     diffs = create_end_timestamp_diff(db_members, ma_members)
     
+    if not diffs:
+        ui.info__progress('nothing to update')
+        return
+    
     # Present diff of what will be changed
 
     ui.prompt(heading=f'the following {len(diffs)} updates will be made',

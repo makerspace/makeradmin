@@ -21,7 +21,7 @@ class Test(DbBaseTest):
         c = CustomerFactory()
 
         old_stop = dt_cet_local(self.datetime(days=30))
-        UserFactory(stop_timestamp=old_stop, name="1001", customer=c)
+        u = UserFactory(stop_timestamp=old_stop, name="1001", customer=c)
         
         new_stop = self.datetime(days=50)
         m = MakerAdminMemberFactory(member_number=1001, end_timestamp=new_stop)
@@ -30,5 +30,5 @@ class Test(DbBaseTest):
         
         sync(session=self.session, client=self.client, ui=self.ui, customer_id=c.id)
         
-        u = self.session.query(User).filter_by(name="1001").one()
+        u = self.session.query(User).get(u.id)
         self.assertEqual(dt_cet_local(new_stop), u.stop_timestamp)

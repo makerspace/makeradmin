@@ -3,6 +3,8 @@ from collections import namedtuple
 
 import requests
 
+from multi_access.util import dt_parse
+
 MakerAdminMember = namedtuple('MakerAdminMember', [
     'member_id',      # int for debugging
     'member_number',  # int
@@ -55,7 +57,7 @@ class MakerAdminClient(object):
     def fetch_members(self, ui):
         """ Fetch and return list of MakerAdminMember, raises exception on error. """
         if self.members_filename:
-            ui.info__progress(f"getting members from member file {self.members_filename}")
+            ui.info__progress(f"getting members from file {self.members_filename}")
             with open(self.members_filename) as f:
                 data = json.load(f)
         else:
@@ -63,6 +65,9 @@ class MakerAdminClient(object):
             ui.info__progress(f"downloading member list from")
             r = self.gateway.get("auto/multiaccess/members")
             data = r.json()
+            
+        for m in data:
+            m['end_timestamp'] = dt_parse(m['end_timestamp'])
             
         res = [MakerAdminMember(**m) for m in data]
 

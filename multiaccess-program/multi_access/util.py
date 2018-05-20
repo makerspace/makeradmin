@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from pytz import timezone
 
 
@@ -19,6 +21,9 @@ utc = timezone("UTC")
 dt_utc_fmt = '%Y-%m-%dT%H:%M:%S.%fZ'
 
 
+# TODO Create test cases for this shit I have no idea when and how to use it.
+
+
 def dt_cet_local(dt):
     """ Convert dt with timezone to a time in cet in local time. """
     return cet.localize(dt).replace(tzinfo=None)
@@ -28,6 +33,11 @@ def dt_cet(dt):
     """ Return unlocalized datetime as CET. """
     return cet.localize(dt)
 
+
+def dt_parse(s):
+    """ Parse a string in utc and return an unlocalized datetime in CET. """
+    return datetime.strptime(s, dt_utc_fmt)
+    
 
 def dt_format(dt):
     return dt.astimezone(utc).strftime(dt_utc_fmt)
