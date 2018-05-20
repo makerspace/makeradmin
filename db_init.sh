@@ -1,6 +1,8 @@
 #!/bin/bash
 set -e
-CONTAINERS=( api-gateway membership messages sales economy rfid webshop )
+# If the user invokes the script as e.g "./db_init sales economy" then only migrate the sales and economy
+# modules. Otherwise use the hard coded list of modules.
+CONTAINERS="${@:-api-gateway membership messages sales economy rfid webshop}"
 DB_RUNNING=`docker-compose ps -q db2`
 [ -z "$DB_RUNNING" ] && docker-compose up -d db2
 printf "Waiting for database "
