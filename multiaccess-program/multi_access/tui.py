@@ -1,3 +1,4 @@
+from getpass import getpass
 from logging import getLogger
 
 logger = getLogger("makeradmin")
@@ -6,13 +7,15 @@ logger = getLogger("makeradmin")
 class Tui(object):
     """ A tui abstractions, let's see how this works. """
 
-    def login(self, gateway):
-        username = input("Username (email): ")
-        password = input("Password: ")
-        gateway.login(username, password)
+    @staticmethod
+    def promt__login():
+        print("login to maker admin")
+        username = input("    username (email): ")
+        password = getpass("    password: ")
+        return username, password
 
     @staticmethod
-    def prompt(heading=None, lines=None):
+    def prompt__update_db(heading=None, lines=None):
         """ Propmt to the user and give the choise of stopping (raiss SystemExit) or continuing. """
         print()
         print(heading)
@@ -20,7 +23,7 @@ class Tui(object):
             print("    ", line)
         print()
         try:
-            # TODO Make it accept "go" to continue because windows prompt is retarded.
+            # TODO Make it accept "go" to continue because windows prompt__update_db is retarded.
             input("enter to continue, ctrl-c to abort: ")
         except KeyboardInterrupt:
             raise SystemExit()
@@ -33,8 +36,6 @@ class Tui(object):
     def fatal__error(msg):
         logger.error(msg)
         raise SystemExit()
-        # TODO Is it ugly to have control flow in the tui code like this, or is it nice because it makes it harder to
-        # introduce bugs where the program is not aborted on fatal errors (because this is easier to test)?
 
     @staticmethod
     def fatal__problem_members(problem_members):

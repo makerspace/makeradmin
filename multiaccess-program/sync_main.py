@@ -47,8 +47,8 @@ def sync(session=None, client=None, ui=None, customer_id=16):
     
     # Present diff of what will be changed
 
-    ui.prompt(heading=f'the following {len(diffs)} updates will be made',
-              lines=[d.describe_update() for d in diffs])
+    ui.prompt__update_db(heading=f'the following {len(diffs)} updates will be made',
+                         lines=[d.describe_update() for d in diffs])
     
     # Preform changes
     
@@ -79,7 +79,7 @@ def main():
     args = parser.parse_args()
 
     with Tui() as ui:
-        client = MakerAdminClient(args.maker_admin_base_url, args.members_filename)
+        client = MakerAdminClient(ui=ui, base_url=args.maker_admin_base_url, members_filename=args.members_filename)
         # TODO Move to client.
         # if args.maker_admin_credentials_filename is not None:
         #     username, password = open(args.maker_admin_credentials_filename).read().strip().split('\n')

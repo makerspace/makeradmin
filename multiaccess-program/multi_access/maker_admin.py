@@ -1,5 +1,7 @@
 import json
 from collections import namedtuple
+from os.path import join
+from tempfile import gettempdir
 
 import requests
 
@@ -17,43 +19,43 @@ MakerAdminMember = namedtuple('MakerAdminMember', [
 ])
 
 
-class APIGateway:
-    
-    def __init__(self, host, key=""):
-        self.host = host
-        self.key = key
-
-    def login(self, username, password):
-        r = self.post("oauth/token", {"grant_type": "password", "username": username, "password": password})
-        if not r.ok:
-            raise Exception("Failed to login\n" + r.text)
-        self.key = r.json()["access_token"]
-
-    def _transport(self, url):
-        if not url.startswith("http://") and not url.startswith("https://"):
-            url = "http://" + url
-        return url
-
-    def _headers(self):
-        return {"Authorization": "Bearer " + self.key}
-
-    def get(self, path, payload=None):
-        return requests.get(self._transport(self.host + "/" + path), params=payload, headers=self._headers())
-
-    def post(self, path, payload):
-        return requests.post(self._transport(self.host + "/" + path), json=payload, headers=self._headers())
-
-    def put(self, path, payload):
-        return requests.put(self._transport(self.host + "/" + path), json=payload, headers=self._headers())
-
-
 class MakerAdminClient(object):
     
-    def __init__(self, base_url, members_filename=None):
-        self.gateway = APIGateway(base_url)
+    def __init__(self, ui=None, base_url=None, members_filename=None):
+        self.ui = ui
+        self.base_url = base_url
         self.members_filename = members_filename
+        self.token = 'nokey'
+        self.tokenfile = join(gettempdir(), 'LFP7EL5K6SFF.TXT')
+        try:
+            with open(self.tokenfile) as r:
+                self.token = r.read().strip()
+        except OSError:
+            pass
+        
+    def login(self):
+        username, password = self.ui.promt__login()
+        r = requests.post(self.base_url + "/oauth/token",
+                          {"grant_type": "password", "username": username, "password": password})
+        
+        if not r.ok:
+            return
+        self.token = r.json()["access_token"]
+        with open(self.tokenfile, 'w') as w:
+            w.write(self.token)
+    
+    def get_and_login_if_needed(self, url):
+        for i in range(3):
+            r = requests.get(url, headers={'Authorization': 'Bearer ' + self.token})
+            if r.ok:
+                return r.json()
+            elif r.status_code == 401:
+                self.login()
+            else:
+                self.ui.fatal__error(f"failed to get data, got ({r.status_code}):\n" + r.text)
+        else:
+            self.ui.fatal__error("failed to login")
 
-    # TODO Write tests for when this it is known it should work.
     def fetch_members(self, ui):
         """ Fetch and return list of MakerAdminMember, raises exception on error. """
         if self.members_filename:
@@ -61,11 +63,10 @@ class MakerAdminClient(object):
             with open(self.members_filename) as f:
                 data = json.load(f)
         else:
-            # TODO Ask for pwd here.
-            ui.info__progress(f"downloading member list from")
-            r = self.gateway.get("auto/multiaccess/members")
-            data = r.json()
-            
+            url = self.base_url + '/multiaccess/memberdata'
+            ui.info__progress(f"getting members from {url}")
+            data = self.get_and_login_if_needed(url)['data']
+
         for m in data:
             m['end_timestamp'] = dt_parse(m['end_timestamp'])
             

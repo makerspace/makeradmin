@@ -13,7 +13,7 @@ class Test(DbBaseTest):
     
     def setUp(self):
         super().setUp()
-        self.client = MakerAdminClient(base_url="http://makeradmin.se")
+        self.client = MakerAdminClient(base_url="https://makeradmin.se")
         self.ui = Tui()
 
     @patch('builtins.input', lambda m: '')
