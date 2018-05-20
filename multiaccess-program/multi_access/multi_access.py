@@ -20,7 +20,7 @@ class EndTimestampDiff(object):
         self.db_member = db_member
         self.ma_member = ma_member
 
-        self.blocked_diffs = ma_member.blocked != db_member.user.blocked
+        self.blocked_diffs = ma_member.blocked != bool(db_member.user.blocked)  # In multi access NULL means false.
         self.timestamp_diffs = ma_member.end_timestamp != db_member.user.stop_timestamp
 
     def describe_update(self):

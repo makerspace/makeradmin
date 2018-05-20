@@ -10,7 +10,6 @@ requests
 
 # Build/test dependencies
 pyinstaller
-pip
 nose
 factory_boy
 hypothesis

@@ -63,7 +63,7 @@ class MakerAdminClient(object):
             ui.info__progress(f"downloading member list from")
             r = self.gateway.get("auto/multiaccess/members")
             data = r.json()
-
+            
         res = [MakerAdminMember(**m) for m in data]
 
         ui.info__progress(f"got {len(res)} members")
