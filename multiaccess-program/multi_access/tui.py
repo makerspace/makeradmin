@@ -20,6 +20,7 @@ class Tui(object):
             print("    ", line)
         print()
         try:
+            # TODO Make it accept "go" to continue because windows prompt is retarded.
             input("enter to continue, ctrl-c to abort: ")
         except KeyboardInterrupt:
             raise SystemExit()
