@@ -90,7 +90,9 @@ services:
   rfid:
     image: makeradmin/rfid:1.0
     container_name: makeradmin-rfid
-    build: ./MakerAdmin-RFID
+    build:
+      context: ./MakerAdmin-CurrentMember/
+      dockerfile: rfid/Dockerfile
     environment:
         MYSQL_HOST: "db2:${MYSQL_PORT}"
         MYSQL_DB: "makeradmin-rfid"
@@ -98,6 +100,9 @@ services:
         MYSQL_PASS: "${MYSQL_PASS}"
         APIGATEWAY: "api-gateway"
         BEARER: "${API_BEARER}"
+        HOST_FRONTEND:
+        HOST_BACKEND:
+        APP_DEBUG: "true"
     depends_on:
       - api-gateway
     networks:
