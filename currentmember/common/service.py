@@ -59,7 +59,7 @@ class Service:
         self.frontend = frontend
 
     def full_path(self, path):
-        return "/" + self.url + "/" + path
+        return "/" + self.url + ("/" + path if path != "" else "")
 
     def register(self):
         # Frontend services do not register themselves as API endpoints
@@ -141,7 +141,7 @@ def read_config():
         if debugStr == "true" or debugStr == "false":
             debug = debugStr == "true"
         else:
-            raise Exception("APP_DEBUG environment variable must be either 'true' or 'false'. Found '{}'".format(debugStr))
+            raise Exception(f"APP_DEBUG environment variable must be either 'true' or 'false'. Found '{debugStr}'")
     except Exception as e:
         eprint("Missing one or more configuration environment variables")
         eprint(e)
@@ -183,7 +183,7 @@ def create_frontend(url, port):
     return service
 
 
-def route_helper(f, json=False):
+def route_helper(f, json=False, status="ok"):
     @wraps(f)
     def wrapper(*args, **kwargs):
         if json:
@@ -195,27 +195,42 @@ def route_helper(f, json=False):
             res = f(data, *args, **kwargs) if json else f(*args, **kwargs)
         except NotFound:
             return jsonify({"status": "not found"}), 404
+        except Exception as e:
+            eprint(e)
+            raise e
 
-        if res is not None:
+        if res is None:
+            return jsonify({"status": status})
+        else:
             return jsonify({
-                "status": "ok",
-                "data": res
+                "data": res,
+                "status": status
             })
-        return jsonify({"status": "ok"})
+
     return wrapper
 
 
 class Entity:
-    def __init__(self, table, columns, read_transforms={}, write_transforms={}):
+    def __init__(self, table, columns, read_transforms={}, write_transforms={}, exposed_column_names={}):
+        '''
+        table: The name of the table in the database
+        columns: List of column names in the database (excluding the id column which is implicit)
+        read_transforms: Map from column names to lambda functions which are run on every value that is read from the database
+        write_transforms: Map from column names to lambda functions which are run on every value that is written to the database
+        exposed_column_names: Map from column names to the name of the field as seen by users of this API (e.g you can rename 'id' to show up as 'object_id' when using the API for example)
+        '''
         self.table = table
         self.columns = columns
         self.all_columns = self.columns[:]
         self.all_columns.insert(0, "id")
+        self.column_name2exposed_name = exposed_column_names
         self.read_transforms = read_transforms
         self.write_transforms = write_transforms
         self.db = None
 
         for c in self.all_columns:
+            if c not in self.column_name2exposed_name:
+                self.column_name2exposed_name[c] = c
             if c not in read_transforms:
                 read_transforms[c] = lambda x: x
             if c not in write_transforms:
@@ -226,44 +241,50 @@ class Entity:
 
     def get(self, id):
         with self.db.cursor() as cur:
-            cur.execute("SELECT {} FROM {} WHERE id=%s".format(self.all_fields, self.table), (id,))
+            cur.execute(f"SELECT {self.all_fields} FROM {self.table} WHERE id=%s", (id,))
             item = cur.fetchone()
             if item is None:
                 raise NotFound()
 
-            return {
-                self.all_columns[i]: self.read_transforms[self.all_columns[i]](item[i]) for i in range(len(self.all_columns))
-            }
+            return self._convert_to_dict(item)
+
+    def _convert_to_row(self, data):
+        return [self.write_transforms[col](data[self.column_name2exposed_name[col]]) for col in self.columns]
+
+    def _convert_to_dict(self, row):
+        return {
+            self.column_name2exposed_name[self.all_columns[i]]: self.read_transforms[self.all_columns[i]](row[i]) for i in range(len(self.all_columns))
+        }
 
     def put(self, data, id):
         with self.db.cursor() as cur:
-            values = [self.write_transforms[col](data[col]) for col in self.columns]
-            cur.execute("UPDATE {} SET {} WHERE id=%s".format(self.table, ",".join(col + "=%s" for col in self.columns)), (*values, id))
+            values = self._convert_to_row(data)
+            cols = ','.join(col + '=%s' for col in self.columns)
+            cur.execute(f"UPDATE {self.table} SET {cols} WHERE id=%s", (*values, id))
 
     def post(self, data):
         with self.db.cursor() as cur:
-            values = [self.write_transforms[col](data[col]) for col in self.columns]
-            cur.execute("INSERT INTO {} ({}) VALUES({})".format(self.table, self.fields, ",".join(["%s"] * len(self.columns))), values)
-
-            return {"id": cur.lastrowid}
+            values = self._convert_to_row(data)
+            cols = ','.join('%s' for col in self.columns)
+            cur.execute(f"INSERT INTO {self.table} ({self.fields}) VALUES({cols})", values)
+            return self.get(cur.lastrowid)
 
     def delete(self, id):
          with self.db.cursor() as cur:
-            cur.execute("UPDATE {} SET deleted_at=CURRENT_TIMESTAMP WHERE id=%s".format(self.table), (id,))
+            cur.execute(f"UPDATE {self.table} SET deleted_at=CURRENT_TIMESTAMP WHERE id=%s", (id,))
 
     def list(self, where="deleted_at IS NULL", where_values=[]):
         with self.db.cursor() as cur:
-            cur.execute("SELECT {} FROM {} {}".format(self.all_fields, self.table, "WHERE " + where if where is not None else ""), where_values)
+            where = "WHERE " + where if where is not None else ""
+            cur.execute(f"SELECT {self.all_fields} FROM {self.table} {where}", where_values)
             rows = cur.fetchall()
-            return [{
-                self.all_columns[i]: self.read_transforms[self.all_columns[i]](item[i]) for i in range(len(self.all_columns))
-            } for item in rows]
+            return [self._convert_to_dict(row) for row in rows]
 
     def add_routes(self, app, endpoint):
         # Note: Many methods here return other methods that we then call.
         # The endpoint keyword argument is just because flask needs something unique, it doesn't matter what it is for our purposes
-        app.route(endpoint + "/<int:id>", endpoint=endpoint+".get", methods=["GET"])(route_helper(self.get))
-        app.route(endpoint + "/<int:id>", endpoint=endpoint+".put", methods=["PUT"])(route_helper(self.put, json=True))
-        app.route(endpoint + "/<int:id>", endpoint=endpoint+".delete", methods=["DELETE"])(route_helper(self.delete))
-        app.route(endpoint + "", endpoint=endpoint+".post", methods=["POST"])(route_helper(self.post, json=True))
-        app.route(endpoint + "", endpoint=endpoint+".list", methods=["GET"])(route_helper(self.list))
+        app.route(endpoint + "/<int:id>", endpoint=endpoint+".get", methods=["GET"])(route_helper(self.get, status="ok"))
+        app.route(endpoint + "/<int:id>", endpoint=endpoint+".put", methods=["PUT"])(route_helper(self.put, json=True, status="updated"))
+        app.route(endpoint + "/<int:id>", endpoint=endpoint+".delete", methods=["DELETE"])(route_helper(self.delete, status="deleted"))
+        app.route(endpoint + "", endpoint=endpoint+".post", methods=["POST"])(route_helper(self.post, json=True, status="created"))
+        app.route(endpoint + "", endpoint=endpoint+".list", methods=["GET"])(route_helper(self.list, status="ok"))

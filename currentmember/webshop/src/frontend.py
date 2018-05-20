@@ -14,7 +14,7 @@ with service.create_frontend(url="shop", port=80) as instance:
     product_entity.db = db
     category_entity.db = db
 
-    @app.route(instance.full_path(""))
+    @app.route(instance.full_path("/"))
     def home():
         with db.cursor() as cur:
             # Get all categories, as some products may exist in deleted categories
