@@ -1,6 +1,6 @@
 import unittest
-from src import dump
-from src import db_helper
+from multi_access.dump import dump
+from multi_access.dump import db_helper
 import pickle
 import json
 import os
