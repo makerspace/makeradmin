@@ -9,7 +9,7 @@ test: pep8
 	python -m nose test
 
 win-test: 
-	python -m nose win-test
+	python -m nose win_test
 
 all-test: test win-test
 
