@@ -61,7 +61,8 @@ def main():
                         default='https://api.makeradmin.se',
                         help="Base url of maker admin (for login and fetching of member info).")
     parser.add_argument("--maker-admin-credentials-filename",
-                        help="Filename where credentials for maker admin are stored. Should contain a two lines with username on the first and password on the second.")
+                        help="Filename where credentials for maker admin are stored. Should contain a two lines"
+                             " with username on the first and password on the second.")
                         
     args = parser.parse_args()
 

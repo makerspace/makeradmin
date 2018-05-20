@@ -13,13 +13,14 @@ MakerAdminMember = namedtuple('MemberInfo', [
     'end_timestamp',  # string timestamp in zulu
 ])
 
+
 class APIGateway:
     def __init__(self, host, key=""):
         self.host = host
         self.key = key
 
     def login(self, username, password):
-        r = self.post("oauth/token", { "grant_type": "password", "username": username, "password": password })
+        r = self.post("oauth/token", {"grant_type": "password", "username": username, "password": password})
         if not r.ok:
             raise Exception("Failed to login\n" + r.text)
         self.key = r.json()["access_token"]

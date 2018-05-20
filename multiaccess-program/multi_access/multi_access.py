@@ -29,7 +29,8 @@ def get_multi_access_members(session, customer_id=16):
 def create_end_timestamp_diff(multi_access_users, maker_admin_members):
     """ Creates a list of diffing members ignoring everything but status and timestamp. The list conntains all
     members where multi access does not match maker admin. """
-    pass
+    print(multi_access_users)
+    print(maker_admin_members)
 
 
 def update_timestamps(end_timstamp_diff):
