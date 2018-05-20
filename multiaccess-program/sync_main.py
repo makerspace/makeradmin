@@ -58,24 +58,27 @@ def main():
                         default='mssql://(local)\\SQLEXPRESS/MultiAccess?trusted_connection=yes&driver=SQL+Server',
                         help="SQL Alchemy db engine spec.")
     parser.add_argument("-u", "--maker-admin-base-url",
-                        default='https://api.makeradmin.se/auto/multiaccess',
+                        default='https://api.makeradmin.se',
                         help="Base url of maker admin (for login and fetching of member info).")
     parser.add_argument("--maker-admin-credentials-filename",
-                        help="Filename where credentials for maker admin are stored.")
+                        help="Filename where credentials for maker admin are stored. Should contain a two lines with username on the first and password on the second.")
                         
     args = parser.parse_args()
 
     with Tui() as ui:
         
-        ui.login()
-        
+        client = MakerAdminClient(args.maker_admin_base_url)
+        if args.maker_admin_credentials_filename is not None:
+            username, password = open(args.maker_admin_credentials_filename).read().strip().split('\n')
+            client.gateway.login(username, password)
+        else:
+            ui.login(client.gateway)
+
         ui.info__progress(f"connecting to {args.db}")
     
         engine = create_engine(args.db)
         Session = sessionmaker(bind=engine)
         session = Session()
-
-        client = MakerAdminClient(args.maker_admin_base_url)
         
         sync(session=session, ui=ui, client=client)
 

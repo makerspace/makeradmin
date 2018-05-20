@@ -2,12 +2,13 @@ from logging import getLogger
 
 logger = getLogger("makeradmin")
 
-
 class Tui(object):
     """ A tui abstractions, let's see how this works. """
 
-    def login(self):
-        self.info__progress("Login not implemented yet.")
+    def login(self, gateway):
+        username = input("Username (email): ")
+        password = input("Password: ")
+        gateway.login(username, password)
 
     @staticmethod
     def info__progress(msg):
