@@ -21,7 +21,7 @@ def check_multi_access_running(ui):
     ui.info__progress("found no running MultiAccess")
 
 
-def sync(session=None, client=None, ui=None):
+def sync(session=None, client=None, ui=None, customer_id=16):
     
     # Exit if MultiAccess is running
     
@@ -29,20 +29,23 @@ def sync(session=None, client=None, ui=None):
     
     # Fetch from MakerAdmin
     
-    maker_admin_members = client.fetch_members(ui)
+    ma_members = client.fetch_members(ui)
     
     # Fetch relevant data from db and diff it
     
-    multi_access_members = get_multi_access_members(session)
-    problem_members = [m for m in multi_access_members if m.problems]
+    db_members = get_multi_access_members(session, customer_id)
+    problem_members = [m for m in db_members if m.problems]
     if problem_members:
         ui.fatal__problem_members(problem_members)
     
     ui.info__progress('diffing multi access users against maker admin members')
-    diff = create_end_timestamp_diff(multi_access_members, maker_admin_members)
-    print(diff)
+    diffs = create_end_timestamp_diff(db_members, ma_members)
     
     # Present diff of what will be changed
+
+    ui.prompt(heading="the following members will be updated",
+              lines=[d.describe_update() for d in diffs])
+    
     # Preform changes
     
     return
@@ -60,6 +63,8 @@ def main():
     parser.add_argument("-u", "--maker-admin-base-url",
                         default='https://api.makeradmin.se',
                         help="Base url of maker admin (for login and fetching of member info).")
+    parser.add_argument("-m", "--members-filename", default=None,
+                        help="Provide members in a file instead of fetching from make admin.")
     parser.add_argument("--maker-admin-credentials-filename",
                         help="Filename where credentials for maker admin are stored. Should contain a two lines"
                              " with username on the first and password on the second.")
@@ -67,13 +72,13 @@ def main():
     args = parser.parse_args()
 
     with Tui() as ui:
-        
-        client = MakerAdminClient(args.maker_admin_base_url)
-        if args.maker_admin_credentials_filename is not None:
-            username, password = open(args.maker_admin_credentials_filename).read().strip().split('\n')
-            client.gateway.login(username, password)
-        else:
-            ui.login(client.gateway)
+        client = MakerAdminClient(args.maker_admin_base_url, args.members_filename)
+        # TODO Move to client.
+        # if args.maker_admin_credentials_filename is not None:
+        #     username, password = open(args.maker_admin_credentials_filename).read().strip().split('\n')
+        #     client.gateway.login(username, password)
+        # else:
+        #     ui.login(client.gateway)
 
         ui.info__progress(f"connecting to {args.db}")
     

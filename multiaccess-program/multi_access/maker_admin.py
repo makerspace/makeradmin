@@ -1,8 +1,9 @@
+import json
 from collections import namedtuple
 
 import requests
 
-MakerAdminMember = namedtuple('MemberInfo', [
+MakerAdminMember = namedtuple('MakerAdminMember', [
     'member_id',      # int for debugging
     'member_number',  # int
     'firstname',      # string
@@ -15,6 +16,7 @@ MakerAdminMember = namedtuple('MemberInfo', [
 
 
 class APIGateway:
+    
     def __init__(self, host, key=""):
         self.host = host
         self.key = key
@@ -45,16 +47,24 @@ class APIGateway:
 
 class MakerAdminClient(object):
     
-    def __init__(self, base_url):
+    def __init__(self, base_url, members_filename=None):
         self.gateway = APIGateway(base_url)
+        self.members_filename = members_filename
 
     # TODO Write tests for when this it is known it should work.
     def fetch_members(self, ui):
         """ Fetch and return list of MakerAdminMember, raises exception on error. """
-        ui.info__progress(f"Downloading member list...")
-        r = self.gateway.get("auto/multiaccess/members")
+        if self.members_filename:
+            ui.info__progress(f"getting members from member file {self.members_filename}")
+            with open(self.members_filename) as f:
+                data = json.load(f)
+        else:
+            # TODO Ask for pwd here.
+            ui.info__progress(f"downloading member list from")
+            r = self.gateway.get("auto/multiaccess/members")
+            data = r.json()
 
-        res = [MakerAdminMember(**m) for m in r.json()]
+        res = [MakerAdminMember(**m) for m in data]
 
         ui.info__progress(f"got {len(res)} members")
 

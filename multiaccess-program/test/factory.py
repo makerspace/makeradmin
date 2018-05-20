@@ -15,12 +15,14 @@ def uniqueid(length=12):
     return ''.join(choice(string.ascii_letters + string.digits + "_-") for _ in range(length))
 
 
+# TODO How do I make a singleton version of this, so it defaults to only create one instance unless stating othervise?
 class CustomerFactory(SQLAlchemyModelFactory):
     class Meta:
         model = models.Customer
         sqlalchemy_session = Session
         sqlalchemy_session_persistence = 'flush'
-
+      
+    id = Sequence(lambda n: n + 1)
     name = Sequence(lambda n: f"customer-{n}")
 
 
@@ -32,6 +34,7 @@ class UserFactory(SQLAlchemyModelFactory):
     name = Sequence(lambda n: str(1001 + n))
     card = Sequence(lambda n: str(100000000001 + n))
     customer = SubFactory(CustomerFactory)
+    blocked = False
     
 
 class MakerAdminMemberFactory(Factory):

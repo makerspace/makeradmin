@@ -12,6 +12,19 @@ class Tui(object):
         gateway.login(username, password)
 
     @staticmethod
+    def prompt(heading=None, lines=None):
+        """ Propmt to the user and give the choise of stopping (raiss SystemExit) or continuing. """
+        print()
+        print(heading)
+        for line in lines:
+            print("    ", line)
+        print()
+        try:
+            input("enter to continue, ctrl-c to abort: ")
+        except KeyboardInterrupt:
+            raise SystemExit()
+
+    @staticmethod
     def info__progress(msg):
         logger.info(msg)
 
