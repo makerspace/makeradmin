@@ -44,7 +44,7 @@ class settable_wrapper(object):
 
     @assert_arguments_are_class_instances
     def __eq__(self, other):
-        return repr(self) == repr(other)
+        return self.obj == other.obj
 
     def __repr__(self):
         return repr(self.obj)
