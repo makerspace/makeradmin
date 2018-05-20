@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import argparse
+import os
 import re
 import sys
 from itertools import chain
@@ -27,6 +28,10 @@ def main():
     args = parser.parse_args()
 
     directory = args.out_dir
+
+    if not os.path.isdir(directory):
+        logger.error(f"The output directory '{directory}' does not exist")
+        raise SystemExit()
     
     # Find out filename to dump to.
     
