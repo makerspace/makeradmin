@@ -55,6 +55,9 @@ for item in data:
         cur.execute("SELECT id FROM webshop_product_categories WHERE name=%s", (category,))
         cat_id = cur.fetchone()
         if cat_id is None:
-            print("No such category: " + category)
-            exit(1)
+            cur.execute("INSERT INTO webshop_product_categories (name) VALUES(%s)", (category,))
+
+        cur.execute("SELECT id FROM webshop_product_categories WHERE name=%s", (category,))
+        cat_id = cur.fetchone()
+        assert(cat_id is not None)
         cur.execute("INSERT INTO webshop_products (name,category_id,description,unit,price) VALUES(%s,%s,%s,%s,%s)", (name,cat_id[0],description,unit,price))
