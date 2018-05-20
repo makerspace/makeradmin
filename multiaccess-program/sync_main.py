@@ -80,15 +80,8 @@ def main():
 
     with Tui() as ui:
         client = MakerAdminClient(ui=ui, base_url=args.maker_admin_base_url, members_filename=args.members_filename)
-        # TODO Move to client.
-        # if args.maker_admin_credentials_filename is not None:
-        #     username, password = open(args.maker_admin_credentials_filename).read().strip().split('\n')
-        #     client.gateway.login(username, password)
-        # else:
-        #     ui.login(client.gateway)
 
         ui.info__progress(f"connecting to {args.db}")
-    
         engine = create_engine(args.db)
         Session = sessionmaker(bind=engine)
         session = Session()
