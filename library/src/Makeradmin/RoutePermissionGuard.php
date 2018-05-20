@@ -16,14 +16,20 @@ class RoutePermissionGuard
 	protected $default_permission;
 	protected $group_permission_defined;
 
-	public function __construct(Application $app, string $default_permission = 'service') {
-		$app->routeMiddleware(['permission' => CheckPermission::class]);
+	public function __construct(Application $app) {
 		$this->app = $app;
-		$this->default_permission = $default_permission;
 		$this->group_permission_defined = [];
+		$this->default_permission = 'service';
 	}
 
-	protected static function hasPermission(array $attributes): bool {
+	public static function create(Application $app, $default_permission = 'service') {
+		$app->routeMiddleware(['permission' => CheckPermission::class]);
+		$instance = new self($app);
+		$instance->default_permission = $default_permission;
+		return $instance;
+	}
+
+	protected static function hasPermission(array $attributes) {
 		if (
 			array_key_exists('middleware', $attributes) &&
 			!empty($am = $attributes['middleware']) &&
@@ -38,7 +44,7 @@ class RoutePermissionGuard
 		return false;
 	}
 
-	protected function groupPermissionDefined(): bool {
+	protected function groupPermissionDefined() {
 		return end($this->group_permission_defined);
 	}
 
@@ -50,7 +56,7 @@ class RoutePermissionGuard
 		} elseif (!is_array($action)) {
 			return ['middleware' => 'permission:'.$this->default_permission, $action];
 		} elseif (static::hasPermission($action)) {
-			return action;
+			return $action;
 		}
 		return array_merge_recursive(['middleware' => 'permission:'.$this->default_permission], $action);
 	}

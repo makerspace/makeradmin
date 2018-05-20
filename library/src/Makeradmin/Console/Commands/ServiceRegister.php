@@ -3,7 +3,8 @@
 namespace Makeradmin\Console\Commands;
 
 use Illuminate\Console\Command;
-use \Makeradmin\Libraries\CurlBrowser;
+use Makeradmin\Libraries\CurlBrowser;
+use Makeradmin\SecurityHelper;
 
 class ServiceRegister extends Command
 {
@@ -30,6 +31,17 @@ class ServiceRegister extends Command
 	{
 		$this->info("Register service");
 
+		$permissions = SecurityHelper::checkRoutePermissions($this->getLaravel());
+
+		if ($permissions['succeeded'] == false) {
+			$this->info("Error: Some routes are missing permission definition");
+			$this->info("       Use RoutePermissionGuard to insert default permission");
+			$permission_json = json_encode($permissions,JSON_PRETTY_PRINT);
+			$this->info("$permission_json");
+			// TODO: Uncomment return when services supports permissions 
+			// return;
+		}
+
 		// Send the request to API Gateway
 		$ch = new CurlBrowser();
 		$ch->useJson();
@@ -39,6 +51,12 @@ class ServiceRegister extends Command
 			"url"      => config("service.url"),
 			"endpoint" => "http://" . gethostbyname(gethostname()) . ":80/",
 			"version"  => config("service.version"),
+		]);
+		print_r($ch->getJson());
+
+		$result = $ch->call("POST", "http://" . config("service.gateway") . "/membership/permission/register", [], [
+			'service'     => config('service.name'),
+			'permissions' => implode(',', $permissions['permissions']),
 		]);
 
 		print_r($ch->getJson());
