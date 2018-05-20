@@ -20,22 +20,27 @@ class EndTimestampDiff(object):
         self.db_member = db_member
         self.ma_member = ma_member
 
+        self.blocked_diffs = ma_member.blocked != db_member.user.blocked
+        self.timestamp_diffs = ma_member.end_timestamp != db_member.user.stop_timestamp
+
     def describe_update(self):
         res = f'member #{self.ma_member.member_number} ({self.ma_member.firstname} {self.ma_member.lastname})'
         
-        db_end_timestamp = self.db_member.user.stop_timestamp
-        ma_end_timestamp = self.ma_member.end_timestamp
-        if ma_end_timestamp != db_end_timestamp:
-            res += f', end timestamp {db_end_timestamp} => {ma_end_timestamp}'
+        if self.timestamp_diffs:
+            res += f', end timestamp {self.db_member.user.stop_timestamp} => {self.ma_member.end_timestamp}'
         
-        db_blocked = self.db_member.user.blocked
-        ma_blocked = self.ma_member.blocked
-        if db_blocked != ma_blocked:
-            res += f', blocked {db_blocked} => {ma_blocked}'
+        if self.blocked_diffs:
+            res += f', blocked {self.db_member.user.blocked} => {self.ma_member.blocked}'
             
         return res
     
-
+    def update(self, session, ui):
+        ui.info__progress(f'updating: {self.describe_update()}')
+        user = session.query(User).get(self.db_member.user.id)
+        user.stop_timestamp = self.ma_member.end_timestamp
+        user.blocked = self.ma_member.blocked
+        
+        
 def get_multi_access_members(session, customer_id):
     """ Get relevant multi access members from database. """
     return [DbMember(u) for u in session.query(User).filter_by(customer_id=customer_id)]
@@ -55,7 +60,6 @@ def create_end_timestamp_diff(db_members, ma_members):
     return diffs
 
 
-def update_timestamps(end_timstamp_diff):
-    """ Update all timestamps/status in maker admin included in the diff. Double checks that nothing changed in multi
-    access since the member data was read (in this case raises exception). """
-    pass
+def update_diffs(session, ui, diffs):
+    for diff in diffs:
+        diff.update(session, ui)

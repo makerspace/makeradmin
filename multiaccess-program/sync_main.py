@@ -7,7 +7,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from multi_access.maker_admin import MakerAdminClient
-from multi_access.multi_access import create_end_timestamp_diff, get_multi_access_members
+from multi_access.multi_access import create_end_timestamp_diff, get_multi_access_members, update_diffs
 from multi_access.tui import Tui
 
 logger = getLogger("makeradmin")
@@ -43,10 +43,13 @@ def sync(session=None, client=None, ui=None, customer_id=16):
     
     # Present diff of what will be changed
 
-    ui.prompt(heading="the following members will be updated",
+    ui.prompt(heading=f'the following {len(diffs)} updates will be made',
               lines=[d.describe_update() for d in diffs])
     
     # Preform changes
+    
+    update_diffs(session, ui, diffs)
+    ui.info__progress('finished updating db')
     
     return
     
