@@ -30,6 +30,10 @@ The frontend uses SASS (.scss) stylesheets. These will be automatically compiled
 
 To see all routes of the service, access the /path/to/service/routes endpoint which will list them all.
 
+RFID
+----
+Replacement for the original MakerAdmin-RFID service, but implemented in only a few lines of code.
+
 Common
 ------
 Contains common code used by several services
