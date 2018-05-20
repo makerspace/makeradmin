@@ -8,10 +8,10 @@ pep8:
 test: pep8
 	python -m nose test
 
-win-test: 
-	python -m nose win_test
+target-test: 
+	python -m nose test/target
 
-all-test: test win-test
+all-test: test target-test
 
 dist-sync:
 
