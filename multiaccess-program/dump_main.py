@@ -15,7 +15,8 @@ logger = getLogger("makeradmin")
 
 def main():
 
-    basicConfig(format='%(asctime)s %(levelname)s [%(pathname)s:%(lineno)d]: %(message)s', stream=sys.stderr, level=INFO)
+    basicConfig(format='%(asctime)s %(levelname)s [%(pathname)s:%(lineno)d]: %(message)s',
+                stream=sys.stderr, level=INFO)
 
     parser = argparse.ArgumentParser()
     parser.add_argument("-d", "--db",
