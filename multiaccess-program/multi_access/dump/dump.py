@@ -53,4 +53,15 @@ def to_file(filename, db_name=None):
             )
     else:
         raise ValueError(f"The file extension '.{extension}' is not valid. Use '.pkl' or '.json'")
-    
+
+
+def from_file(filename):
+    extension = filename.split(".")[-1]
+    if extension == "pkl":
+        with open(filename, "rb") as f:
+            return pickle.load(f)
+    elif extension == "json":
+        with open(filename, "r", encoding="utf8") as f:
+            return json.load(f)
+    else:
+        raise ValueError(f"The file extension '.{extension}' is not valid. Can only read '.pkl' or '.json'")

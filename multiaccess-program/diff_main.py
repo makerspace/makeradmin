@@ -6,19 +6,9 @@ import re
 import sys
 from logging import basicConfig, INFO, getLogger
 from os import path, listdir
+from multi_access.dump.dump import from_file
 
 logger = getLogger("makeradmin")
-
-
-def read_dump(filename):
-    if filename.endswith(".pkl"):
-        with open(filename, "rb") as f:
-            return pickle.load(f)
-    elif filename.endswith(".json"):
-        with open(filename, "r", encoding="utf8") as f:
-            return json.load(f)
-    else:
-        raise Exception(f"unknown filetype {filename}")
 
 
 def print_diff(old, new):
@@ -81,7 +71,7 @@ def main():
     prev_dump = None
     for filename in filenames:
         logger.info(f'loading dump file {filename}')
-        next_dump = read_dump(filename)
+        next_dump = from_file(filename)
         if prev_dump:
             logger.info(f'diffing to previous dump')
             print_diff(prev_dump, next_dump)

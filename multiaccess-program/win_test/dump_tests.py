@@ -21,12 +21,10 @@ class Test(unittest.TestCase):
         out_file = "./dump.pkl"
         dump.to_file(out_file)
         print(f"Output file path: {os.path.realpath(out_file)}")
-        with open(out_file, "rb") as f:
-            pickle.load(f)
+        dump.from_file(out_file)
 
     def test_to_file_json(self):
         out_file = "./dump.json"
         dump.to_file(out_file)
         print(f"Output file path: {os.path.realpath(out_file)}")
-        with open(out_file, "r") as f:
-            json.load(f)
+        dump.from_file(out_file)
