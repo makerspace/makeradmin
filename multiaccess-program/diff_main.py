@@ -72,6 +72,7 @@ def print_diff(old, new):
     assert(set(old.keys()) == set(new.keys()))
     
     tables = sorted(old.keys())
+    table_summary = {k: {"added": set(), "removed": set()} for k in tables}
     
     for table in tables:
         old_table = old[table]
@@ -97,7 +98,16 @@ def print_diff(old, new):
             diff = sorted([('ADD', d) for d in added] + [('DEL', d) for d in removed], key=lambda x: x[1])
             for what, d in diff:
                 print(f"   {what}: {d!r}")
-        
+
+            table_summary[table] = {"added": added, "removed": removed}
+
+    print("\nDiff summary:")
+    for table in tables:
+        n_added = len(table_summary[table]["added"])
+        n_removed = len(table_summary[table]["removed"])
+        if n_added > 0 or n_removed > 0:
+            print(f"{table:>17s} (+{n_added}, -{n_removed}): {n_added*'+'}{n_removed*'-'}")
+
 
 def main():
 
