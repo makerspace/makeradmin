@@ -1,7 +1,7 @@
 version: "2"
 services:
   db2:
-    image: mysql
+    image: mysql:5.7
     # The lumen library seems to use an older mysql client which is not able to connect if mysql uses the newer caching_sha2_password authentication plugin.
     # Therefore we need to override the mysql starting command to set a config option to use the older password authentication plugin.
     command: mysqld --default-authentication-plugin=mysql_native_password
@@ -20,16 +20,28 @@ services:
     networks:
       - makeradmin
 
+  servicebase:
+    image: makeradmin/servicebase:1.0
+    container_name: makeradmin-servicebase
+    build:
+      context: ./MakerAdmin-ServiceBase
+    networks:
+      - makeradmin
+
   api-gateway:
     image: makeradmin/apigateway:1.0
     container_name: makeradmin-apigateway
-    build: ./MakerAdmin-ApiGateway
+    build:
+      context: ./MakerAdmin-ApiGateway
+      dockerfile: ${PWD}/MakerAdmin-ServiceBase/DockerfileService
     volumes:
       - ./logs/apigateway:/var/www/html/storage/logs
     depends_on:
       - db2
     ports:
       - "8010:80"
+    depends_on:
+      - servicebase
     networks:
       - makeradmin
     environment:
@@ -62,7 +74,9 @@ services:
   rfid:
     image: makeradmin/rfid:1.0
     container_name: makeradmin-rfid
-    build: ./MakerAdmin-RFID
+    build:
+      context: ./MakerAdmin-RFID
+      dockerfile: ${PWD}/MakerAdmin-ServiceBase/DockerfileService
     environment:
         MYSQL_HOST: "db2:${MYSQL_PORT}"
         MYSQL_DB: "makeradmin-rfid"
@@ -78,7 +92,9 @@ services:
   economy:
     image: makeradmin/economy:1.0
     container_name: makeradmin-economy
-    build: ./MakerAdmin-Economy
+    build:
+      context: ./MakerAdmin-Economy
+      dockerfile: ${PWD}/MakerAdmin-ServiceBase/DockerfileService
     volumes:
       - ./logs/economy:/var/www/html/storage/logs
       - ./data/economy-vouchers:/var/www/html/vouchers
@@ -97,7 +113,9 @@ services:
   membership:
     image: makeradmin/membership:1.0
     container_name: makeradmin-membership
-    build: ./MakerAdmin-Membership
+    build:
+      context: ./MakerAdmin-Membership
+      dockerfile: ${PWD}/MakerAdmin-ServiceBase/DockerfileService
     volumes:
       - ./logs/membership:/var/www/html/storage/logs
     environment:
@@ -115,7 +133,9 @@ services:
   messages:
     image: makeradmin/messages:1.0
     container_name: makeradmin-messages
-    build: ./MakerAdmin-Messages
+    build:
+      context: ./MakerAdmin-Messages
+      dockerfile: ${PWD}/MakerAdmin-ServiceBase/DockerfileService
     volumes:
       - ./logs/messages:/var/www/html/storage/logs
     environment:
@@ -133,7 +153,9 @@ services:
   email-dispatcher:
     image: makeradmin/messages-dispatcher-email:1.0
     container_name: makeradmin-messages-dispatcher-email
-    build: ./MakerAdmin-MessagesDispatcherEmail
+    build:
+      context: ./MakerAdmin-MessagesDispatcherEmail
+      dockerfile: ${PWD}/MakerAdmin-ServiceBase/DockerfileService
     environment:
         MYSQL_HOST: "db2:${MYSQL_PORT}"
         MYSQL_DB: "makeradmin-messages"
@@ -153,7 +175,9 @@ services:
   sales:
     image: makeradmin/sales:1.0
     container_name: makeradmin-sales
-    build: ./MakerAdmin-Sales
+    build:
+      context: ./MakerAdmin-Sales
+      dockerfile: ${PWD}/MakerAdmin-ServiceBase/DockerfileService
     volumes:
       - ./logs/sales:/var/www/html/storage/logs
     environment:
@@ -171,7 +195,9 @@ services:
   multiaccesssync:
     image: makeradmin/multiaccesssync:1.0
     container_name: makeradmin-multiaccesssync
-    build: ./MakerAdmin-MultiAccessSync
+    build:
+      context: ./MakerAdmin-MultiAccessSync
+      dockerfile: ${PWD}/MakerAdmin-ServiceBase/DockerfileService
     volumes:
       - ./data/multiaccess-uploads:/var/www/html/storage/uploads
     environment:
