@@ -31,6 +31,13 @@ class CreateMembershipGroupsTable extends Migration
 			$table->index("left");
 			$table->index("right");
 		});
+		DB::table("membership_groups")->insert([
+			"parent" => 0,
+			"left" => 0,
+			"right" => 0,
+			"name" => "admins",
+			"title" => "Administratörer",
+		]);
 	}
 
 	/**

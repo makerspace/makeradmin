@@ -37,10 +37,8 @@ class Permission extends Entity
 			"select" => "membership_permissions.group_id",
 		],
 	];
-	protected $sort = ["title", "desc"];
+	protected $sort = ["permission_id", "desc"];
 	protected $validation = [
-		"role_id"    => ["required"],
-		"permission" => ["required"],
-		"group_id"   => ["required"],
+		"permission" => ["required", "unique"],
 	];
 }

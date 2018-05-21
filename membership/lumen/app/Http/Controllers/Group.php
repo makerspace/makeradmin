@@ -106,21 +106,6 @@ Indented:
 	{
 		// Get all query string parameters
 		$params = $request->query->all();
-
-		$user_id = $request->header("X-User-Id");
-		// Services have admin rights, always
-		if ($user_id !== "-1") {
-			// Hard code roles for the time being
-			// $roles = $this->_get_user_roles($user_id);
-			$roles = [2, 5];
-			//error_log(print_r($roles, true));
-
-			// Get groups the where the user have a "view group" permission and filter on those groups
-			$this->_loadPermissions($roles);
-			$groups = $this->_checkPermission("view group");
-			$params["group_id"] = ["in", $groups];
-		}
-
 		return $this->_list("Group", $params);
 	}
 

@@ -17,34 +17,16 @@ class CreateMembershipPermissionsTable extends Migration
 		Schema::create("membership_permissions", function (Blueprint $table)
 		{
 			$table->increments("permission_id");
-			$table->integer("role_id");
+			$table->integer("role_id")->default(0);
 			$table->string("permission");
-			$table->integer("group_id");
+			$table->integer("group_id")->default(0);
 
 			$table->dateTimeTz("created_at")->default(DB::raw("CURRENT_TIMESTAMP"));
 			$table->dateTimeTz("updated_at")->nullable();
 			$table->dateTimeTz("deleted_at")->nullable();
 
-			$table->index("role_id");
-			$table->index("group_id");
+			$table->unique('permission');
 		});
-
-		DB::table("membership_groups")->insert([
-			"parent" => 0,
-			"left" => 0,
-			"right" => 0,
-			"name" => "admins",
-			"title" => "Administratörer",
-		]);
-		$admin_group_id = DB::table("membership_groups")
-			->where("name", "admins")
-			->value("group_id");
-		DB::table("membership_permissions")
-			->insert([
-				'role_id' => 2,
-				'permission' => 'view group',
-				'group_id' => $admin_group_id,
-			]);
 	}
 
 	/**

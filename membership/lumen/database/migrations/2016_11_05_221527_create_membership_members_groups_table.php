@@ -20,6 +20,7 @@ class CreateMembershipMembersGroupsTable extends Migration
 
 			$table->index("member_id");
 			$table->index("group_id");
+			$table->unique(["member_id", "group_id"]);
 		});
 	}
 

@@ -1,5 +1,7 @@
 <?php
 
+use Makeradmin\RoutePermissionGuard;
+
 require_once __DIR__.'/../vendor/autoload.php';
 
 try {
@@ -64,9 +66,9 @@ $app->middleware([
 	Makeradmin\Http\Middleware\Metadata::class,
 ]);
 
-// $app->routeMiddleware([
-//     'auth' => App\Http\Middleware\Authenticate::class,
-// ]);
+$app->routeMiddleware([
+	'permission' => Makeradmin\Http\Middleware\CheckPermission::class,
+]);
 
 /*
 |--------------------------------------------------------------------------
@@ -93,8 +95,10 @@ $app->middleware([
 | can respond to, as well as the controllers that may handle them.
 |
 */
-
-$app->group(['namespace' => 'App\Http\Controllers'], function ($app) {
+$routeGuard = RoutePermissionGuard::create($app);
+$routeGuard->group([
+	'namespace' => 'App\Http\Controllers',
+], function ($app) {
 	require __DIR__.'/../routes/web.php';
 });
 

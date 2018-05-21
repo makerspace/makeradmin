@@ -189,22 +189,29 @@ class Member extends Controller
 			// Convert user object to array
 			$result = $entity->toArray();
 
-			// Get roles and permission for user
-			$result["roles"] = [];
-			$roles = DB::table("membership_roles")
-				->join("membership_members_roles", "membership_members_roles.role_id", "membership_roles.role_id")
-				->select("membership_roles.role_id", "membership_roles.group_id", "membership_roles.title", "membership_roles.description")
+			// Get groups and permission for user
+			// TODO: Groups are arranged into a hierarchy which should be expanded
+			$result["groups"] = [];
+			$groups = DB::table("membership_members_groups")
+				->join("membership_groups", "membership_groups.group_id", "membership_members_groups.group_id")
+				->select("membership_groups.group_id", "membership_groups.parent", "membership_groups.name", "membership_groups.title")
 				->where("member_id", $member_id)
 				->get();
-			foreach($roles as $role)
+			foreach($groups as $group)
 			{
-				$result["roles"][$role->role_id] = (array)$role;
-				$result["roles"][$role->role_id]["permissions"] = DB::table("membership_permissions")->where("role_id", $role->role_id)->get();
+				$group_id = $group->group_id * 1;
+				$result["groups"][$group_id] = (array)$group;
+				$group_permissions = DB::table("membership_permissions")
+					->join("membership_group_permissions", "membership_group_permissions.permission_id", "membership_permissions.permission_id")
+					->where("membership_group_permissions.group_id", $group->group_id)
+					->pluck("permission")
+					->all();
+				$result["groups"][$group_id]["permissions"] = $group_permissions;
 			}
 
 			// Send response to client
 			return Response()->json([
-				"data" => $entity->toArray(),
+				"data" => $result,
 			], 200);
 		}
 	}
@@ -313,6 +320,29 @@ class Member extends Controller
 
 		return Response()->json([
 			"status"  => "ok",
+		], 200);
+	}
+
+	/**
+	 * Get all permissions for a member
+	 */
+	public function getPermissions(Request $request, $member_id)
+	{
+		// Get permissions for user
+		// TODO: Groups are arranged into a hierarchy which should be expanded
+		$permissions = DB::table("membership_members_groups")
+			->join("membership_group_permissions", "membership_group_permissions.group_id", "membership_members_groups.group_id")
+			->join("membership_permissions", "membership_permissions.permission_id", "membership_group_permissions.permission_id")
+			->where('member_id', $member_id)
+			->distinct()
+			->pluck('permission');
+
+		$result = [];
+		$result["permissions"] = implode(",", $permissions->all());
+		
+		// Send response to client
+		return Response()->json([
+			"data" => $result,
 		], 200);
 	}
 }
