@@ -1,5 +1,5 @@
 import unittest
-from src import db_helper
+from multi_access.dump import db_helper
 import sqlalchemy
 
 

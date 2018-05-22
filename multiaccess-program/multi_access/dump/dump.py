@@ -35,16 +35,33 @@ def json_serial(obj):
     return str(obj)
 
 
-def to_file(filename):
+def to_file(filename, db_name=None):
     assert isinstance(filename, str)
     extension = filename.split(".")[-1]
-    table_dump = tables(db_helper.create_default_engine())
+    table_dump = tables(db_helper.create_default_engine(db_name))
     if extension == "pkl":
         with open(filename, "wb") as f:
             pickle.dump(table_dump, file=f)
     elif extension == "json":
         with open(filename, "w", encoding="utf8") as f:
-            json.dump(table_dump, fp=f, default=json_serial)
+            json.dump(
+                table_dump,
+                fp=f,
+                default=json_serial,
+                ensure_ascii=True,
+                indent=2
+            )
     else:
         raise ValueError(f"The file extension '.{extension}' is not valid. Use '.pkl' or '.json'")
-    
+
+
+def from_file(filename):
+    extension = filename.split(".")[-1]
+    if extension == "pkl":
+        with open(filename, "rb") as f:
+            return pickle.load(f)
+    elif extension == "json":
+        with open(filename, "r", encoding="utf8") as f:
+            return json.load(f)
+    else:
+        raise ValueError(f"The file extension '.{extension}' is not valid. Can only read '.pkl' or '.json'")
