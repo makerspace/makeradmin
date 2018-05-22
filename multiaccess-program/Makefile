@@ -9,10 +9,10 @@ pep8:
 test: pep8
 	python3 -m nose test
 
-win-test: 
-	python3 -m nose win-test
+target-test: 
+	python3 -m nose test/target
 
-all-test: test win-test
+all-test: test target-test
 
 dist-sync:
 	docker run -it --rm -v $(shell pwd):/src cdrx/pyinstaller-windows:python3 "/usr/bin/pyinstaller --onefile --clean -y --dist ./dist --workpath /tmp specs/multi_access_sync.spec; chown -R --reference=. ./dist ./multi_access"
