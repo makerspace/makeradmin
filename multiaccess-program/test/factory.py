@@ -10,7 +10,6 @@ from multi_access.maker_admin import MakerAdminMember
 from test.db_base import Session
 
 
-# TODO Possible to use hypotesis for random generation?
 def uniqueid(length=12):
     return ''.join(choice(string.ascii_letters + string.digits + "_-") for _ in range(length))
 

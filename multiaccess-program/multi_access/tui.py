@@ -23,8 +23,8 @@ class Tui(object):
             print("    ", line)
         print()
         try:
-            # TODO Make it accept "go" to continue because windows prompt__update_db is retarded.
-            input("enter to continue, ctrl-c to abort: ")
+            if input("enter to continue, ctrl-c to abort: ").strip() != 'go':
+                raise KeyboardInterrupt()
         except KeyboardInterrupt:
             raise SystemExit()
 
