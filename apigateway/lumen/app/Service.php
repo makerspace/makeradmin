@@ -20,6 +20,11 @@ class Service
 		$result = DB::table("services")
 			->where("url", "=", $service)
 			->first();
+
+		// TODO: Add signing token to service?
+		if ($result && !isset($result->signing_token)){
+			$result->signing_token = '';
+		}
 		return $result ? $result : false;
 	}
 

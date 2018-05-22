@@ -144,7 +144,8 @@ class Relations extends Controller
 		$user = Auth::user();
 		if($user)
 		{
-			$ch->setHeader("X-User-Id", $user->user_id);
+			$signed_permissions = SecurityHelper::signPermissionString($user->permissions, $service->signing_token);
+			SecurityHelper::addPermissionHeaders($ch, $user->user_id, $signed_permissions);
 		}
 
 		// Create a new url with the service endpoint url included

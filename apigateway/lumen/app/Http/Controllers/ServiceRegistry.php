@@ -11,7 +11,7 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Makeradmin\Exceptions\EntityValidationException;
 use App\Service;
 use Makeradmin\Logger;
-use App\Login;
+use Makeradmin\SecurityHelper;
 use Makeradmin\Libraries\CurlBrowser;
 
 /**
@@ -161,9 +161,11 @@ class ServiceRegistry extends Controller
 
 		// Add a header with authentication information
 		$user = Auth::user();
-		if($user)
-		{
-			$ch->setHeader("X-User-Id", $user->user_id);
+		if ($user) {
+			$signed_permissions = SecurityHelper::signPermissionString($user->permissions, $service->signing_token);
+			SecurityHelper::addPermissionHeaders($ch, $user->user_id, $signed_permissions);
+		} else {
+			SecurityHelper::addPermissionHeadersUnauthorized($ch);
 		}
 
 		// Forward the authorization header

@@ -6,9 +6,9 @@ use Closure;
 use Illuminate\Contracts\Auth\Authenticatable;
 use \Illuminate\Contracts\Auth\Guard;
 use Makeradmin\Logger;
+use Makeradmin\SecurityHelper;
 use Makeradmin\Exceptions\ServiceRequestTimeout;
 use Makeradmin\Libraries\CurlBrowser;
-use App\Login;
 use DB;
 
 class MakerGuard implements Guard
@@ -62,6 +62,8 @@ class MakerGuard implements Guard
 
 		// Send the request
 		$ch = new CurlBrowser();
+		$signed_permissions = SecurityHelper::signPermissionString('service', $service->signing_token);
+		SecurityHelper::addPermissionHeaders($ch, Login::SERVICE_USER_ID, $signed_permissions);
 		$result = $ch->call("GET", "{$service->endpoint}/membership/member/" . $this->user->user_id . "/groups");
 
 		// Log the internal HTTP request

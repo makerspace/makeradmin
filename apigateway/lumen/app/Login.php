@@ -5,6 +5,7 @@ namespace App;
 use DB;
 use Makeradmin\Exceptions\ServiceRequestTimeout;
 use Makeradmin\Logger;
+use Makeradmin\SecurityHelper;
 use Makeradmin\Libraries\CurlBrowser;
 use Illuminate\Support\Facades\Auth;
 
@@ -32,6 +33,8 @@ class Login
 
 		// Send the request
 		$ch = new CurlBrowser();
+		$signed_permissions = SecurityHelper::signPermissionString('service', $service->signing_token);
+		SecurityHelper::addPermissionHeaders($ch, Login::SERVICE_USER_ID, $signed_permissions);
 		$result = $ch->call("POST", "{$service->endpoint}/membership/authenticate", [], [
 			"username" => $username,
 			"password" => $password,
@@ -122,6 +125,20 @@ class Login
 	}
 
 	/**
+	 * Read access token data from database
+	 */
+	public static function getAccessTokenData($access_token)
+	{
+		$result = DB::table("access_tokens")
+			->where("access_token", $access_token)
+			->first();
+		if (isset($result->user_id)){
+			$result->user_id *= 1; // Convert user_id to numeric;
+		}
+		return $result;
+	}
+
+	/**
 	 * Update the access token
 	 *
 	 * Extend expiry date
@@ -142,14 +159,79 @@ class Login
 	}
 
 	/**
+	 * Get the user object related to the user_id
+	 */
+	public static function getUserFromId($user_id){
+		if ((!is_int($user_id)) || $user_id <= 0) {
+			return null;
+		}
+		// Get endpoint URL for membership module
+		if(($service = Service::getService("membership")) === false)
+		{
+			// If no service is specified we should just throw an generic error saying the service could not be contacted
+			throw new ServiceRequestTimeout;
+		}
+
+		// Make a request to the membership module and load the user object (including groups and permissions)
+		$ch = new CurlBrowser();
+		$signed_permissions = SecurityHelper::signPermissionString('service', $service->signing_token);
+		SecurityHelper::addPermissionHeaders($ch, Login::SERVICE_USER_ID, $signed_permissions);
+		$result = $ch->call("GET", "{$service->endpoint}/membership/member/{$user_id}");
+
+		if($ch->getStatusCode() == 200 && ($json = $ch->getJson()) !== false && isset($json->data->member_id))
+		{
+			$user = (object) $json->data;
+			return $user;
+		}
+		return null;
+	}
+
+	/**
+	 * Get the permissions assigned to a user
+	 */
+	public static function getUserPermissionsFromId($user_id){
+		if ((!is_int($user_id)) || $user_id <= 0) {
+			return null;
+		}
+		// Get endpoint URL for membership module
+		if(($service = Service::getService("membership")) === false)
+		{
+			// If no service is specified we should just throw an generic error saying the service could not be contacted
+			throw new ServiceRequestTimeout;
+		}
+
+		// Make a request to the membership module and load the user object (including groups and permissions)
+		$ch = new CurlBrowser();
+		$signed_permissions = SecurityHelper::signPermissionString('service', $service->signing_token);
+		SecurityHelper::addPermissionHeaders($ch, Login::SERVICE_USER_ID, $signed_permissions);
+		$result = $ch->call("GET", "{$service->endpoint}/membership/member/{$user_id}/permissions");
+
+		if($ch->getStatusCode() == 200 && ($json = $ch->getJson()) !== false && isset($json->data->permissions)){
+			return $json->data->permissions;
+		}
+		return null;
+	}
+
+	public static function updateUserPermissions($user_id){
+		$permissions = self::getUserPermissionsFromId($user_id);
+		if (is_null($permissions)) {
+			return false;
+		}
+		DB::table("access_tokens")
+			->where('user_id', $user_id)
+			->update(['permissions' => $permissions]);
+
+		return $permissions;
+	}
+
+	/**
 	 * Get the user object related to the access_token
 	 */
 	public static function getUserIdFromAccessToken($access_token)
 	{
 		// Get the user_id related to the access token
-		$user_id = DB::table("access_tokens")
-			->where("access_token", $access_token)
-			->value("user_id");
+		$access_token_data = self::getAccessTokenData($access_token);
+		$user_id = isset($access_token_data->user_id) ? $access_token_data->user_id : false;
 
 		//TODO: Se till att fixa detta hack
 		if(!$user_id)
@@ -167,28 +249,32 @@ class Login
 						"access_token" => getenv('BEARER'),
 						"expires"      => $expires,
 						"browser"      => "",
+						"permissions"  => 'service',
 						"ip"           => ""
 					]);
 				}
 			}catch(\Exception $e){
 			}
 			//Recheck access_token in database
-			$user_id = DB::table("access_tokens")
-				->where("access_token", $access_token)
-				->value("user_id");
+			$access_token_data = self::getAccessTokenData($access_token);
+			$user_id = isset($access_token_data->user_id) ? $access_token_data->user_id : false;
 		}
 
 		if($user_id)
 		{
 			// Create a new user object and add user_id
-			$x = new \stdClass();
-			$x->user_id = $user_id;
-			return $x;
+			$user_permissions = $access_token_data->permissions;
+			if (is_null($user_permissions)) {
+				$user_permissions = self::updateUserPermissions($user_id);
+			}
+			if (is_string($user_permissions)) {
+				$x = new \stdClass();
+				$x->user_id = $user_id;
+				$x->permissions = $user_permissions;
+				return $x;
+			}
 		}
-		else
-		{
-			return false;
-		}
+		return false;
 	}
 
 	/**
@@ -201,27 +287,11 @@ class Login
 			->where("access_token", $access_token)
 			->value("user_id");
 
-		// Get endpoint URL for membership module
-		if(($service = Service::getService("membership")) === false)
-		{
-			return false;
+		$user = self::getUserFromId($user_id);
+		if ($user !== null) {
+			$user->user_id = $user->member_id;
 		}
-
-		$url = "{$service->endpoint}/membership/authenticate";
-		// Make a request to the membership module and load the user object (including roles and permissions)
-		$ch = new CurlBrowser();
-		$result = $ch->call("GET", "{$service->endpoint}/membership/member/{$user_id}");
-
-		if($ch->getStatusCode() == 200 && ($json = $ch->getJson()) !== false && isset($json->data->member_id))
-		{
-			$x = new \stdClass();
-			$x->user_id = $json->data->member_id;
-			return $x;
-		}
-		else
-		{
-			return false;
-		}
+		return $user;
 	}
 
 	/**
