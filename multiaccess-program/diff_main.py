@@ -11,14 +11,14 @@ from multi_access.dump.dump import from_file
 logger = getLogger("makeradmin")
 
 
-class settable_wrapper(object):
+class SettableWrapper(object):
     """Really ugly wrapper for making objects hashable and comparable so that they can be converted to 'set'"""
 
     def __init__(self, obj):
         try:
             repr(obj)
         except Exception as e:
-            logging.error(f"Could not 'repr' the object {obj}, and thus not hash it")
+            logger.error(f"Could not 'repr' the object {obj}, and thus not hash it")
             raise e
         self.obj = obj
 
@@ -34,7 +34,7 @@ class settable_wrapper(object):
     def assert_arguments_are_class_instances(func):
         def wrapper(*args):
             for arg in args:
-                assert isinstance(arg, settable_wrapper), "Can only compare 'settable_wrapper' objects"
+                assert isinstance(arg, SettableWrapper), "Can only compare 'SettableWrapper' objects"
             return func(*args)
         return wrapper
 
@@ -57,7 +57,7 @@ def monkeypatch_settable(obj):
     try:
         hash(obj)
     except TypeError as e:
-        obj = settable_wrapper(obj)
+        obj = SettableWrapper(obj)
     finally:
         return obj
 
