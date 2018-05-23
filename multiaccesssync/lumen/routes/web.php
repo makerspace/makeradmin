@@ -14,6 +14,6 @@
 $app->group(array(), function() use ($app)
 {
 	// MultiAccess
-	$app->   get("multiaccess/file/{filename}", "MultiAccessSync@diff");
-	$app->  post("multiaccess/upload",          "MultiAccessSync@upload");
+	$app->   get("multiaccess/file/{filename}", ['middleware' => 'permission:sync_view', 'uses' => "MultiAccessSync@diff"]);
+	$app->  post("multiaccess/upload",          ['middleware' => 'permission:sync_view', 'uses' => "MultiAccessSync@upload"]);
 });
