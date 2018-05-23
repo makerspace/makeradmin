@@ -2,10 +2,20 @@ import secrets
 import argparse
 import os
 
+parser = argparse.ArgumentParser(description='Create a default \'.env\' file with secrets if it doesn\'t exist')
+parser.add_argument('--force','-f', dest='force', action='store_true', help='overwrite existing \'.env\' file')
+parser.add_argument('--project','-p', default='makeradmin', help='Set name prefix for containers (default=makeradmin)')
+args = parser.parse_args()
+
+if not args.project.isidentifier():
+    print('Error: Project name must of form [a-zA-Z_][a-zA-Z0-9_]*')
+    quit()
+
 config = {
+    "COMPOSE_PROJECT_NAME": args.project;
     "MYSQL_DB": "makerdata",
     "MYSQL_PORT": "3306",
-    "MYSQL_USER": "testuser",
+    "MYSQL_USER": "makeradmin",
     "MYSQL_PASS": secrets.token_hex(16),
     "MYSQL_ROOT_PASSWORD": secrets.token_hex(16),
     # Note: This must fit into the access_tokens table in the database
@@ -15,15 +25,11 @@ config = {
     "TICTAIL_STORE": "",
     "MAILGUN_DOMAIN": "",
     "MAILGUN_KEY": "",
-    "MAILGUN_FROM": "Excited User <excited@samples.mailgun.org>",
+    "MAILGUN_FROM": "MakerAdmin <excited@samples.mailgun.org>",
     "MAILGUN_TO_OVERRIDE": "",
     "HOST_BACKEND": "localhost:8010",
     "HOST_FRONTEND": "localhost:8009",
 }
-
-parser = argparse.ArgumentParser(description='Create a default \'.env\' file with secrets if it doesn\'t exist')
-parser.add_argument('--force','-f', dest='force', action='store_true', help='overwrite existing \'.env\' file')
-args = parser.parse_args()
 
 if not args.force and os.path.isfile(".env"):
     print('.env file already exists, touching')
