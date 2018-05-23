@@ -14,18 +14,18 @@
 $app->group(array(), function() use ($app)
 {
 	// Templates
-	$app->   get("messages/templates",      "Template@list");   // Get collection
-	$app->  post("messages/templates",      "Template@create"); // Model: Create
-	$app->   get("messages/templates/{id}", "Template@read");   // Model: Read
-	$app->   put("messages/templates/{id}", "Template@update"); // Model: Update
-	$app->delete("messages/templates/{id}", "Template@delete"); // Model: Delete
+	$app->   get("messages/templates",      ['middleware' => 'permission:message_view', 'uses' => "Template@list"]);   // Get collection
+	$app->  post("messages/templates",      ['middleware' => 'permission:message_send', 'uses' => "Template@create"]); // Model: Create
+	$app->   get("messages/templates/{id}", ['middleware' => 'permission:message_view', 'uses' => "Template@read"]);   // Model: Read
+	$app->   put("messages/templates/{id}", ['middleware' => 'permission:message_send', 'uses' => "Template@update"]); // Model: Update
+	$app->delete("messages/templates/{id}", ['middleware' => 'permission:message_send', 'uses' => "Template@delete"]); // Model: Delete
 
 	// Messages
-	$app-> get("messages",                 "Message@list");     // Get collection (List sent messages)
-	$app->post("messages",                 "Message@create");   // Model: Create (Send new message)
-	$app-> get("messages/{id}",            "Message@read");     // Model: Read (Get sent message)
+	$app-> get("messages",                 ['middleware' => 'permission:message_view', 'uses' => "Message@list"]);     // Get collection (List sent messages)
+	$app->post("messages",                 ['middleware' => 'permission:message_send', 'uses' => "Message@create"]);   // Model: Create (Send new message)
+	$app-> get("messages/{id}",            ['middleware' => 'permission:message_view', 'uses' => "Message@read"]);     // Model: Read (Get sent message)
 
 	// Recipients
-	$app-> get("messages/user/{id}",       "Recipient@userlist"); // Get collection (List sent messages for specific user)
-	$app-> get("messages/{id}/recipients", "Recipient@list");   // Get collection (List recipients in sent message)
+	$app-> get("messages/user/{id}",       ['middleware' => 'permission:message_view', 'uses' => "Recipient@userlist"]); // Get collection (List sent messages for specific user)
+	$app-> get("messages/{id}/recipients", ['middleware' => 'permission:message_view', 'uses' => "Recipient@list"]);   // Get collection (List recipients in sent message)
 });
