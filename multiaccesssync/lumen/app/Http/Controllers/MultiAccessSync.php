@@ -8,6 +8,121 @@ use Illuminate\Support\Facades\Storage;
 
 class MultiAccessSync extends Controller
 {
+	protected function read_XML(string $string)
+	{
+		$xml_data = simplexml_load_string($string);
+		$users_data = [];
+		foreach ($xml_data->User as $user)
+		{
+			// Cast the name to a integer
+			$member_number = (int)$user->name;
+			if($d = strtotime((string)$user->Start))
+			{
+				$startdate = date("Y-m-d\TH:i:s\Z", $d);
+			}
+			else
+			{
+				$startdate = null;
+			}
+			
+			if($d = strtotime((string)$user->Stop))
+			{
+				$enddate = date("Y-m-d\TH:i:s\Z", $d);
+			}
+			else
+			{
+				$enddate = null;
+			}
+			
+			$user_data = [
+				"member_number" => $member_number,
+				"tagid"         => (string)$user->Card,
+				"blocked"        => (bool) ($user->pulBlock == 0),
+				"startdate"     => $startdate,
+				"enddate"       => $enddate,
+				"errors" => [],
+			];
+			
+			// If casting failed, user string instead
+			if($member_number == 0)
+			{
+				$user_data["member_number"] = (string)$user->name;
+				// The name should not be empty
+				$user_data["errors"][] = "The name should not be empty";
+			}
+			/*
+			 // The tagid should not be empty
+			 if(empty($user->Card))
+			 {
+			 $user_data["errors"][] = "The tagid should not be empty";
+			 }
+			 */
+			// Check customer name
+			if($user->CustomerName != "Stockholm Makerspace")
+			{
+				$user_data["errors"][] = "Customer should be \"Stockholm Makerspace\"";
+			}
+			
+			// Check permissions
+			/*
+			 if(!$this->_checkPermissions($user))
+			 {
+			 $user_data["errors"][] = "Något verkar vara fel med personens behörigheter";
+			 }
+			 */
+			$users_data[] = $user_data;
+		}
+		return $users_data;
+	}
+
+	protected function read_json(string $string)
+	{
+		$data = json_decode($string);
+		$users_data = [];
+		foreach ($data as $user)
+		{
+			// Cast the name to a integer
+			
+			$member_number = (int)($user->member_number);
+/*			if($d = strtotime((string)$user->start_timestamp)) {
+				$startdate = date("Y-m-d\TH:i:s\Z", $d);
+			} else {
+				$startdate = null;
+			}
+			*/
+			$startdate = null;
+			if($d = strtotime((string)$user->end_timestamp)) {
+				$enddate = date("Y-m-d\TH:i:s\Z", $d);
+			} else {
+				$enddate = null;
+			}
+			$user_data = [
+				"member_number" => $member_number,
+				"tagid"         => (string)$user->rfid_tag,
+				//"active"        => (bool) $user->status,
+				"startdate"     => $startdate,
+				"enddate"       => $enddate,
+				"errors" => [],
+			];
+			
+			// If casting failed, user string instead
+			if($member_number == 0)
+			{
+				$user_data["member_number"] = (string)$user->member_number;
+				$user_data["errors"][] = "The name should not be empty";
+			}
+
+			// The tagid should not be empty
+			if(empty($user->rfid_tag))
+			{
+				$user_data["errors"][] = "The tagid should not be empty";
+			}
+			
+			$users_data[] = $user_data;
+		}
+		return $users_data;
+	}
+	
 	/**
 	 * Cross-check databases and report differences
 	 */
@@ -27,90 +142,39 @@ class MultiAccessSync extends Controller
 
 		$data = Storage::disk("uploads")->get($filename);
 
-		$xml = simplexml_load_string($data);
+		$file_ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+		$multiaccess_user_data = [];
+		if($file_ext == "xml") {
+			$multiaccess_user_data = $this->read_XML($data);
+		} elseif ($file_ext == "json") {
+			$multiaccess_user_data = $this->read_json($data);
+		}
 
 		// Go through all RFID keys
 		$users = [];
 		$member_numbers = [];
-		foreach($xml->User as $user)
+		foreach($multiaccess_user_data as $user)
 		{
-			// Caste the name to a integer
-			$member_number = (int)$user->name;
+			$member_number = $user["member_number"];
 
-			// If casting failed, user string instead
-			if($member_number == 0)
+			// If member_number is an int, add to list of members we should load
+			if (is_int($member_number))
 			{
-				$member_number = (string)$user->name;
-			}
-			else
-			{
-				// If casting was successful, add to list of members we should load
 				$member_numbers[] = $member_number;
 			}
+			$user_data_errors = $user["errors"];
+			unset($user["errors"]);
 
 			// Save data in a new clean array
 			$users[$member_number] = [
-				"multiaccess_key" => [],
+				"multiaccess_key" => $user,
 				"local_key" => [],
 				"member" => [],
-				"errors" => [],
-			];
-
-
-			// The name should not be empty
-			if(empty($user->name))
-			{
-				$users[$member_number]["errors"][] = "The name should not be empty";
-			}
-/*
-			// The tagid should not be empty
-			if(empty($user->Card))
-			{
-				$users[$member_number]["errors"][] = "The tagid should not be empty";
-			}
-*/
-			// Check customer name
-			if($user->CustomerName != "Stockholm Makerspace")
-			{
-				$users[$member_number]["errors"][] = "Customer should be \"Stockholm Makerspace\"";
-			}
-
-			// Check permissions
-/*
-			if(!$this->_checkPermissions($user))
-			{
-				$users[$member_number]["errors"][] = "Något verkar vara fel med personens behörigheter";
-			}
-*/
-			if($d = strtotime((string)$user->Start))
-			{
-				$startdate = date("Y-m-d\TH:i:s\Z", $d);
-			}
-			else
-			{
-				$startdate = null;
-			}
-
-			if($d = strtotime((string)$user->Stop))
-			{
-				$enddate = date("Y-m-d\TH:i:s\Z", $d);
-			}
-			else
-			{
-				$enddate = null;
-			}
-
-			// Save data in a new clean array
-			$users[$member_number]["multiaccess_key"] = [
-				"member_number" => $member_number,
-				"tagid"         => (string)$user->Card,
-				"active"        => (bool) ($user->pulBlock == 0),
-				"startdate"     => $startdate,
-				"enddate"       => $enddate,
+				"errors" => $user_data_errors,
 			];
 		}
 
-		// Get all members in xml file from API
+		// Get all members in data file from API
 		$curl->call("GET", "http://" . config("service.gateway") . "/membership/member", [
 			"member_number" => implode(", ", $member_numbers),
 			"per_page" => 5000,
@@ -147,8 +211,33 @@ class MultiAccessSync extends Controller
 		$member_number_mapping = [];
 		foreach($curl->GetJson()->data as $member)
 		{
-			$users[$member->member_number]["member"] = (array)$member;
+			$current_member = [];
+			$member_data = (array)$member;
+			if (!empty($member)) {
+				$current_member["member_id"] = $member_data["member_id"];
+				$current_member["member_number"] = $member_data["member_number"];
+				$current_member["firstname"] = $member_data["firstname"];
+				$current_member["lastname"] = $member_data["lastname"];
+				//$current_member["key_id"] = $member_data["key_id"];
+				//$current_member["rfid_tag"] = $member_data["tagid"];
+				//$current_member["status"] = $member_data["status"];
+				//$current_member["end_timestamp"] = $member_data["enddate"];
+			}
+			$users[$member->member_number]["member"] = $current_member;
 			$member_number_mapping[$member->member_id] = $member->member_number;
+			if(!array_key_exists("local_key", $users[$member->member_number]))
+			{
+				$users[$member->member_number]["local_key"] = [];
+			}
+			if(!array_key_exists("multiaccess_key", $users[$member->member_number]))
+			{
+				$users[$member->member_number]["multiaccess_key"] = [];
+			}
+			if(!array_key_exists("errors", $users[$member->member_number]))
+			{
+				$users[$member->member_number]["errors"] = [];
+			}
+			
 		}
 
 		// Get all keys from API
@@ -196,6 +285,51 @@ class MultiAccessSync extends Controller
 		// Send response to client
 		return Response()->json([
 			"data" => array_values($users),
+		], 200);
+	}
+
+	/**
+	 *
+	 */
+	public function dumpmembers(Request $request)
+	{
+		$curl = new CurlBrowser;
+		$curl->setHeader("Authorization", "Bearer " . config("service.bearer"));
+		
+		$members = [];
+
+		// Get all members from API
+		$curl->call("GET", "http://" . config("service.gateway") . "/membership/member", [
+			"per_page" => 5000,
+		]);
+		foreach($curl->GetJson()->data as $member)
+		{
+			$current_member = [];
+			if (!empty($member)) {
+				$member_data = (array)$member;
+				$member_id = (int)$member_data["member_id"];
+				assert($member_id != 0);
+				$member_number = (int)$member_data["member_number"];
+				assert($member_number != 0);
+				
+				$current_member["member_id"] = $member_id;
+				$current_member["member_number"] = $member_number;
+				$current_member["firstname"] = $member_data["firstname"];
+				$current_member["lastname"] = $member_data["lastname"];
+				$curl->call("GET", "http://" . config("service.gateway") . "/relations", [
+					"param" => "/membership/member/".$member_id,
+					"matchUrl" => "/keys/(.*)",
+					'from' => 'keys',
+				]);
+				$current_member['keys'] = $curl->GetJson()->data;
+				
+				$members[$member_id] = $current_member;
+			}
+		}
+
+		// Send response to client
+		return Response()->json([
+			"data" => array_values($members),
 		], 200);
 	}
 
@@ -262,7 +396,12 @@ class MultiAccessSync extends Controller
 		{
 			// Store the uploaded file
 			$data = file_get_contents((string)$file);
-			$filename = date("Y-m-d\TH:i:s\Z").".xml";
+			$file_ext = ".json";
+			if(strtolower(substr($data,0,5))=="<?xml")
+			{
+				$file_ext = ".xml";
+			}
+			$filename = date("Y-m-d\TH:i:s\Z").$file_ext;
 			Storage::disk("uploads")->put($filename, $data);
 
 			// Send response to client
