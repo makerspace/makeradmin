@@ -26,5 +26,5 @@ if [ "$APP_DEBUG" == "true" ]; then
 fi
 
 # Exec replaces the shell with the service process which among other things allows signals to be sent directly to the service (e.g when docker wants to stop the container)
-exec gunicorn -b :80 frontend:app&
-exec gunicorn -b :8000 backend:app
+exec gunicorn -b :80 frontend:instance.app&
+exec gunicorn -b :8000 backend:instance.app

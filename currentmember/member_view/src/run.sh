@@ -6,4 +6,4 @@ set -e
 ./wait-for api-gateway:80
 
 # Exec replaces the shell with the service process which among other things allows signals to be sent directly to the service (e.g when docker wants to stop the container)
-exec gunicorn -b :80 main:app
+exec gunicorn -b :80 main:instance.app

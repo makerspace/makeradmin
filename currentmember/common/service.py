@@ -1,4 +1,4 @@
-from flask import abort, jsonify, request
+from flask import abort, jsonify, request, Flask
 from werkzeug.exceptions import NotFound
 import pymysql
 import sys
@@ -58,9 +58,17 @@ class Service:
         self.debug = debug
         self.gateway = gateway
         self.frontend = frontend
+        self.app = Flask(name, static_url_path=self.full_path("static"))
 
     def full_path(self, path):
         return "/" + self.url + ("/" + path if path != "" else "")
+
+    def route(self, path: str, **kwargs):
+        path = self.full_path(path)
+
+        def wrapper(f):
+            return self.app.route(path, **kwargs)(f)
+        return wrapper
 
     def register(self):
         # Frontend services do not register themselves as API endpoints
@@ -85,10 +93,10 @@ class Service:
             if not r.ok:
                 raise Exception("Failed to unregister service: " + r.text)
 
-    def wrap_error_codes(self, app):
+    def wrap_error_codes(self):
         # Pretty ugly way to wrap all abort(code, message) calls so that they return proper json reponses
         def create_wrapper(status_code):
-            @app.errorhandler(status_code)
+            @self.app.errorhandler(status_code)
             def custom_error(error):
                 response = jsonify({'status': error.description})
                 response.status_code = status_code
@@ -99,15 +107,15 @@ class Service:
             except:
                 pass
 
-    def add_route_list(self, app):
+    def add_route_list(self):
         '''Adds an endpoint (/routes) for listing all routes of the service'''
-        @app.route(self.full_path("routes"))
+        @self.route("routes")
         def site_map():
-            return jsonify({"data": [{"url": rule.rule, "methods": list(rule.methods)} for rule in app.url_map.iter_rules()]})
+            return jsonify({"data": [{"url": rule.rule, "methods": list(rule.methods)} for rule in self.app.url_map.iter_rules()]})
 
-    def serve_indefinitely(self, app):
-        self.add_route_list(app)
-        self.wrap_error_codes(app)
+    def serve_indefinitely(self):
+        self.add_route_list()
+        self.wrap_error_codes()
 
         def signal_handler(signal, frame):
             eprint("Closing database connection")
@@ -118,7 +126,7 @@ class Service:
         for sig in [signal.SIGINT, signal.SIGTERM, signal.SIGHUP]:
             signal.signal(sig, signal_handler)
 
-        # app.run(host='0.0.0.0', debug=self.debug, port=self.port, use_reloader=False)
+        # self.app.run(host='0.0.0.0', debug=self.debug, port=self.port, use_reloader=False)
 
 
 def assert_get(data, key):
@@ -180,7 +188,7 @@ def create(name, url, port, version):
 
 def create_frontend(url, port):
     db, gateway, debug = read_config()
-    service = Service(None, url, port, None, db, gateway, debug, True)
+    service = Service("frontend", url, port, None, db, gateway, debug, True)
     eprint("Connecting to database...")
     db.connect()
     return service
@@ -283,11 +291,11 @@ class Entity:
             rows = cur.fetchall()
             return [self._convert_to_dict(row) for row in rows]
 
-    def add_routes(self, app, endpoint):
+    def add_routes(self, service, endpoint):
         # Note: Many methods here return other methods that we then call.
         # The endpoint keyword argument is just because flask needs something unique, it doesn't matter what it is for our purposes
-        app.route(endpoint + "/<int:id>", endpoint=endpoint+".get", methods=["GET"])(route_helper(self.get, status="ok"))
-        app.route(endpoint + "/<int:id>", endpoint=endpoint+".put", methods=["PUT"])(route_helper(self.put, json=True, status="updated"))
-        app.route(endpoint + "/<int:id>", endpoint=endpoint+".delete", methods=["DELETE"])(route_helper(self.delete, status="deleted"))
-        app.route(endpoint + "", endpoint=endpoint+".post", methods=["POST"])(route_helper(self.post, json=True, status="created"))
-        app.route(endpoint + "", endpoint=endpoint+".list", methods=["GET"])(route_helper(self.list, status="ok"))
+        service.route(endpoint + "/<int:id>", endpoint=endpoint+".get", methods=["GET"])(route_helper(self.get, status="ok"))
+        service.route(endpoint + "/<int:id>", endpoint=endpoint+".put", methods=["PUT"])(route_helper(self.put, json=True, status="updated"))
+        service.route(endpoint + "/<int:id>", endpoint=endpoint+".delete", methods=["DELETE"])(route_helper(self.delete, status="deleted"))
+        service.route(endpoint + "", endpoint=endpoint+".post", methods=["POST"])(route_helper(self.post, json=True, status="created"))
+        service.route(endpoint + "", endpoint=endpoint+".list", methods=["GET"])(route_helper(self.list, status="ok"))

@@ -3,13 +3,12 @@ import service
 from service import eprint, assert_get
 
 instance = service.create(name="Makerspace Member Login", url="member", port=80, version="1.0")
-app = Flask(__name__)
 
 # Grab the database so that we can use it inside requests
 db = instance.db
 
 
-@app.route(instance.full_path("send_access_token"), methods=["POST"])
+@instance.route("send_access_token", methods=["POST"])
 def send_access_token():
     data = request.get_json()
     if data is None:
@@ -50,7 +49,7 @@ def send_access_token():
     return jsonify({"status": "sent"})
 
 
-@app.route(instance.full_path("current"), methods=["GET", "POST"])
+@instance.route("current", methods=["GET", "POST"])
 def current_member():
     user_id = assert_get(request.headers, "X-User-Id")
 
@@ -60,11 +59,11 @@ def current_member():
         return instance.gateway.put("membership/member/%s" % user_id, request.get_json()).text
 
 
-@app.route(instance.full_path("current/keys"), methods=["GET"])
+@instance.route("current/keys", methods=["GET"])
 def key_info():
     ''' List of keys that the current logged in member has '''
     user_id = assert_get(request.headers, "X-User-Id")
     return instance.gateway.get("related?param=/membership/member/%s&matchUrl=/keys/(.*)&from=keys&page=1&sort_by=&sort_order=asc&per_page=10000" % user_id).text
 
 
-instance.serve_indefinitely(app)
+instance.serve_indefinitely()

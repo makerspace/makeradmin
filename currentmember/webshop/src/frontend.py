@@ -5,7 +5,6 @@ import json
 from webshop_entities import category_entity, product_entity
 
 instance = service.create_frontend(url="shop", port=80)
-app = Flask(__name__, static_url_path=instance.full_path("static"))
 
 # Grab the database so that we can use it inside requests
 db = instance.db
@@ -14,7 +13,7 @@ product_entity.db = db
 category_entity.db = db
 
 
-@app.route(instance.full_path("/"))
+@instance.route("/")
 def home():
     with db.cursor() as cur:
         # Get all categories, as some products may exist in deleted categories
@@ -46,14 +45,14 @@ def home():
     return render_template("shop.html", product_json=product_json, categories=categories, url=instance.full_path)
 
 
-@app.route(instance.full_path("product/<int:id>/edit"))
+@instance.route("product/<int:id>/edit")
 def product_edit(id):
     categories = category_entity.list()
     product = product_entity.get(id)
     return render_template("product_edit.html", product=product, categories=categories, url=instance.full_path)
 
 
-@app.route(instance.full_path("product/create"))
+@instance.route("product/create")
 def product_create():
     categories = category_entity.list()
 
@@ -69,4 +68,4 @@ def product_create():
     return render_template("product_edit.html", product=product, categories=categories, url=instance.full_path)
 
 
-instance.serve_indefinitely(app)
+instance.serve_indefinitely()

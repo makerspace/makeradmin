@@ -16,14 +16,13 @@ key_entity = Entity(
 )
 
 instance = service.create(name="RFID", url="keys", port=80, version="1.0")
-app = Flask(__name__)
 gateway = instance.gateway
 
 key_entity.db = instance.db
-key_entity.add_routes(app, instance.full_path(""))
+key_entity.add_routes(instance, "")
 
 
-@app.route(instance.full_path("update_times"), methods=["POST"])
+@instance.route("update_times", methods=["POST"])
 def update_keys():
     '''
     Completes all orders for purchasing lab access and updates existing keys with new dates.
@@ -76,4 +75,4 @@ def update_keys():
                     assert r.ok, r.text
 
 
-instance.serve_indefinitely(app)
+instance.serve_indefinitely()

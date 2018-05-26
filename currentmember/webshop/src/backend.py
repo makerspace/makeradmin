@@ -8,7 +8,6 @@ from webshop_entities import category_entity, product_entity, transaction_entity
 CartItem = namedtuple('CartItem', 'id count amount')
 
 instance = service.create(name="Makerspace Webshop Backend", url="webshop", port=8000, version="1.0")
-app = Flask(__name__)
 
 # Grab the database so that we can use it inside requests
 db = instance.db
@@ -29,19 +28,19 @@ currency = "sek"
 # E.g to update product with id 42 you would issue a PUT request to
 # /path/to/service/product/42
 product_entity.db = db
-product_entity.add_routes(app, instance.full_path("product"))
+product_entity.add_routes(instance, instance.full_path("product"))
 
 category_entity.db = db
-category_entity.add_routes(app, instance.full_path("category"))
+category_entity.add_routes(instance, instance.full_path("category"))
 
 transaction_entity.db = db
-transaction_entity.add_routes(app, instance.full_path("transaction"))
+transaction_entity.add_routes(instance, instance.full_path("transaction"))
 
 transaction_content_entity.db = db
-transaction_content_entity.add_routes(app, instance.full_path("transaction_content"))
+transaction_content_entity.add_routes(instance, instance.full_path("transaction_content"))
 
 
-@app.route(instance.full_path("transaction/<int:id>/content"), methods=["GET"])
+@instance.route("transaction/<int:id>/content", methods=["GET"])
 @route_helper
 def transaction_contents(id):
     return transaction_content_entity.list("deleted_at IS NULL AND transaction_id=%s", id)
@@ -121,7 +120,7 @@ def stripe_payment(amount, token):
         return jsonify({"status": "Failed"}), 400
 
 
-@app.route(instance.full_path("pay"), methods=["POST"])
+@instance.route("pay", methods=["POST"])
 def pay():
     data = request.get_json()
     if data is None:
@@ -138,12 +137,11 @@ def pay():
     if error_response is not None:
         return error_response
 
-    with db.cursor() as cur:
-        transaction_id = transaction_entity.post({"user_id": user_id, "amount": amount})["id"]
-        for item in items:
-            transaction_content_entity.post({"transaction_id": transaction_id, "product_id": item.id, "count": item.count, "amount": item.amount})
+    transaction_id = transaction_entity.post({"user_id": user_id, "amount": total_amount})["id"]
+    for item in items:
+        transaction_content_entity.post({"transaction_id": transaction_id, "product_id": item.id, "count": item.count, "amount": item.amount})
 
     return jsonify({"status": "ok", "data": {"transaction_id": transaction_id}})
 
 
-instance.serve_indefinitely(app)
+instance.serve_indefinitely()
