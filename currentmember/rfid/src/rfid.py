@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, abort
 import service
 from service import Entity, eprint
 from dateutil import parser
