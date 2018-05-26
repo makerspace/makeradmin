@@ -49,21 +49,26 @@ def transaction_contents(id):
 def process_cart(cart):
     with db.cursor() as cur:
         prices = []
+        multiples = []
         for item in cart:
-            cur.execute("SELECT price FROM webshop_products WHERE id=%s AND deleted_at IS NULL", item["id"])
-            price = cur.fetchone()
-            if price is None:
+            cur.execute("SELECT price,smallest_multiple FROM webshop_products WHERE id=%s AND deleted_at IS NULL", item["id"])
+            tup = cur.fetchone()
+            if tup is None:
                 abort(400, "Item " + str(item["id"]) + " does not exist")
-            if price[0] < 0:
+            price, smallest_multiple = tup
+            if price < 0:
                 abort(400, "Item seems to have a negatice price. Not allowing purchases that item just in case. Item: " + str(item["id"]))
-            prices.append(price[0])
+            prices.append(price)
+            multiples.append(smallest_multiple)
 
         items = []
         with localcontext() as ctx:
-            for price, item in zip(prices, cart):
+            for price, smallest_multiple, item in zip(prices, multiples, cart):
                 count = int(item["count"])
                 if count <= 0:
                     abort(400, "Can only buy positive amounts of item " + str(item["id"]))
+                if (count % smallest_multiple) != 0:
+                    abort(400, f"Can only buy item {item['id']} in multiples of {smallest_multiple}, found {count}")
 
                 item_amount = price * count
                 items.append(CartItem(item["id"], count, item_amount))
@@ -120,14 +125,23 @@ def stripe_payment(amount, token):
         return jsonify({"status": "Failed"}), 400
 
 
+duplicatePurchaseRands = set()
+
+
 @instance.route("pay", methods=["POST"])
 def pay():
     data = request.get_json()
     if data is None:
         abort(400, "missing json")
 
-    user_id = assert_get(request.headers, "X-User-Id")
-    if user_id == SERVICE_USER_ID:
+    # The frontend will add a per-page random value to the request.
+    # This will try to prevent duplicate payments due to sending the payment request twice
+    duplicatePurchaseRand = assert_get(data, "duplicatePurchaseRand")
+    if duplicatePurchaseRand in duplicatePurchaseRands:
+        abort(400, "duplicate")
+
+    member_id = assert_get(request.headers, "X-User-Id")
+    if member_id == SERVICE_USER_ID:
         abort(400, "Services cannot purchase anything")
 
     total_amount, items = validate_payment(data["cart"], data["expectedSum"])
@@ -137,9 +151,10 @@ def pay():
     if error_response is not None:
         return error_response
 
-    transaction_id = transaction_entity.post({"user_id": user_id, "amount": total_amount})["id"]
+    duplicatePurchaseRands.add(duplicatePurchaseRand)
+    transaction_id = transaction_entity.post({"member_id": member_id, "amount": total_amount})["id"]
     for item in items:
-        transaction_content_entity.post({"transaction_id": transaction_id, "product_id": item.id, "count": item.count, "amount": item.amount})
+        transaction_content_entity.post({"transaction_id": transaction_id, "product_id": item.id, "count": item.count, "amount": item.amount, "completed": False})
 
     return jsonify({"status": "ok", "data": {"transaction_id": transaction_id}})
 

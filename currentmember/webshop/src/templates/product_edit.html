@@ -45,8 +45,15 @@
                 </div>
             </div>
             <div>
+                <label for="unit" class="uk-form-label">Smallest multiple</label>
+                <div class="product-edit-price">
+                    <input required id="smallest_multiple" class="uk-input" type="number" placeholder="Purchases must be made in multiples of this value" value="{{ product.smallest_multiple }}" />
+                    <span id="multiple-unit">unit</span>
+                </div>
+            </div>
+            <div>
                 <label for="unit" class="uk-form-label">Action</label>
-                <input required id="action" class="uk-input" type="text" placeholder="e.g add_membership_days:42, only for special products" value="{{ product.action }}" />
+                <input id="action" class="uk-input" type="text" placeholder="e.g add_lab_access_days:42, only for special products" value="{{ product.action }}" />
             </div>
             <button class="uk-button uk-button-primary">Save</button>
         </form>

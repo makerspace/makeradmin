@@ -59,3 +59,4 @@ CREATE TABLE `webshop_transaction_contents` (
 
 ALTER TABLE `webshop_products` ADD `action` varchar(255);
 ALTER TABLE `webshop_transaction_contents` ADD `completed` int(1) NOT NULL;
+ALTER TABLE `webshop_products` ADD `smallest_multiple` int(10) NOT NULL DEFAULT 1;

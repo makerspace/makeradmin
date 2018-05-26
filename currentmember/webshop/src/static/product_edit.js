@@ -4,6 +4,7 @@ $(document).ready(() => {
 
     $("#unit").on("input change", ev => {
         $("#price-unit").html(currency + "/" + $(ev.currentTarget).val());
+        $("#multiple-unit").html($(ev.currentTarget).val());
     });
     $("#unit").change();
 
@@ -29,6 +30,7 @@ $(document).ready(() => {
                 price: $("#price").val(),
                 unit: $("#unit").val(),
                 action: $("#action").val(),
+                smallest_multiple: $("#smallest_multiple").val(),
             }),
             contentType: "application/json; charset=utf-8",
             dataType: "json",

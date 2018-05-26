@@ -8,7 +8,7 @@ from service import Entity
 # Decimal("0.2") = Decimal('0.2')
 product_entity = Entity(
     table="webshop_products",
-    columns=["name", "category_id", "description", "unit", "price"],
+    columns=["name", "category_id", "description", "unit", "price", "smallest_multiple"],
     write_transforms={"price": lambda x: Decimal(str(x))},
     read_transforms={"price": lambda x: str(x)},
 )

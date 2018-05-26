@@ -22,7 +22,7 @@ def home():
 
         data = []
         for cat in categories:
-            cur.execute("SELECT id,name,unit,price FROM webshop_products WHERE category_id=%s AND deleted_at IS NULL ORDER BY name", (cat["id"],))
+            cur.execute("SELECT id,name,unit,price,smallest_multiple FROM webshop_products WHERE category_id=%s AND deleted_at IS NULL ORDER BY name", (cat["id"],))
             products = cur.fetchall()
             if len(products) > 0:
                 data.append({
@@ -34,6 +34,7 @@ def home():
                             "name": item[1],
                             "unit": item[2],
                             "price": str(item[3]),
+                            "smallest_multiple": str(item[4]),
                         } for item in products
                     ]
                 })

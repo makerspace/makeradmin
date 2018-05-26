@@ -9,6 +9,8 @@ $(document).ready(() => {
   // TODO: Figure out from access token
   // Preferably without an extra HTTP request
   const isAdmin = true;
+  // Used to prevent clicking the 'Pay' button twice
+  const duplicatePurchaseRand = (100000000*Math.random())|0
 
   function showEdit() {
     $("#edit").toggleClass("active");
@@ -64,27 +66,18 @@ $(document).ready(() => {
 
     $(".product-list").append($(catLi));
     for (const item of cat.items) {
-      let base = 1;
+      let price = item.price;
+      console.log(item);
+      price *= item.smallest_multiple;
 
-      // Do integer math for stability
-      // Calculate a reasonable pricing amount to show
-      // (e.g 5kr/100g instead of 0.05kr/g)
-      let price = (item.price*currencyBase)|0;
-      if (price > 0 && (item.unit == "g" || item.unit == "mm" || item.unit == "ml")) {
-        for (multiplier of [1, 100, 1000]) {
-          base = multiplier;
-
-          // Check if value is representable with at most one decimal
-          if(((price*base) % (currencyBase/10)) == 0) break;
-        }
-        price *= multiplier;
-      }
-      price /= currencyBase;
-
-      let baseStr = base > 1 ? base + item.unit : item.unit;
+      let baseStr = item.smallest_multiple > 1 ? item.smallest_multiple + item.unit : item.unit;
 
       const buttons = [];
-      const increments = [1, 10, 100];
+      let increments = [1, 10, 100];
+      if (item.smallest_multiple != 1) {
+        increments = [item.smallest_multiple, 2*item.smallest_multiple, 3*item.smallest_multiple];
+      }
+
       for (const incr of increments) {
         buttons.push(`<button class="uk-button uk-button-small uk-button-primary number-add" data-amount="${incr}">+${incr}${item.unit}</button>`);
       }
@@ -94,7 +87,7 @@ $(document).ready(() => {
             <form class="product">
                 <span class="product-title">${item.name}</span>
                 <span class="product-price">${price} ${currency}/${baseStr}</span>
-                <input type="number" min=0 placeholder="0" class="product-amount edit-invisible"></input>
+                <input type="number" min=0 step=${item.smallest_multiple} placeholder="0" class="product-amount edit-invisible"></input>
                 <span class="product-unit edit-invisible">${item.unit}</span>
                 <div class="product-actions">
                   <span class="edit-display disabled">
@@ -134,9 +127,14 @@ $(document).ready(() => {
         });
       });
 
-      $(li).find(".product-amount").on("input change", ev => {
+      $(li).find(".product-amount").on("input", ev => {
         refresh();
-        ev.preventDefault();
+      });
+
+      $(li).find(".product-amount").on("change", ev => {
+        let newAmount = (Math.ceil($(ev.currentTarget).val() / item.smallest_multiple)*item.smallest_multiple)|0;
+        $(ev.currentTarget).val(newAmount);
+        refresh();
       });
 
       $(li).find(".number-add").click(ev => {
@@ -168,11 +166,13 @@ $(document).ready(() => {
       let selected = amountElem1.is(":focus");
       if (amountElem2 !== null) selected |= amountElem2.is(":focus");
 
-      var count = amountElem1.val()|0;
+      let raw_count = amountElem1.val()|0;
+      let count = (Math.ceil(raw_count / id2item.get(id).smallest_multiple)*id2item.get(id).smallest_multiple)|0;
       if (count > 0 || selected) {
         cart.push({
           id: id,
           count: count,
+          raw_count: raw_count,
         });
       }
       $(elem).find(".product-active-dot").toggleClass("active", count > 0);
@@ -180,7 +180,7 @@ $(document).ready(() => {
 
     let totalSum = sumCart(cart);
 
-    $("#pay-button").val("Betala " + ((totalSum*currencyBase)|0)/currencyBase + " " + currency);
+    $("#pay-button").find("span").html("Betala " + ((totalSum*currencyBase)|0)/currencyBase + " " + currency);
 
     $("#pay-module").toggleClass("open", cart.length > 0);
 
@@ -194,7 +194,7 @@ $(document).ready(() => {
             <form class="product">
             <span class="product-title">${item.name}</span>
             <span class="product-price">${item.price} ${currency}/${item.unit}</span>
-            <input type="number" min=0 placeholder="0" class="product-amount"></input>
+            <input type="number" min=0 step=${item.smallest_multiple} placeholder="0" class="product-amount"></input>
             <span class="product-unit">${item.unit}</span>
             <button class="uk-button uk-button-small uk-button-danger product-remove" uk-icon="trash"></button>
           </form>
@@ -206,16 +206,22 @@ $(document).ready(() => {
           amount.change();
           ev.preventDefault();
         });
-        li.find(".product-amount").on("input change", ev => {
+        li.find(".product-amount").on("input", ev => {
           const amountElem = $(id2element.get(item.id)).find(".product-amount");
           amountElem.val($(ev.currentTarget).val());
-          amountElem.change();
+          refresh();
+        });
+        li.find(".product-amount").on("change", ev => {
+          const amountElem = $(id2element.get(item.id)).find(".product-amount");
+          const newAmount = (Math.ceil($(ev.currentTarget).val() / item.smallest_multiple)*item.smallest_multiple)|0;
+          amountElem.val(newAmount);
+          refresh();
         });
         id2cartItem.set(item.id, li);
         $("#cart").append(li);
       }
 
-      $(id2cartItem.get(item.id)).find(".product-amount").val(cartItem.count);
+      $(id2cartItem.get(item.id)).find(".product-amount").val(cartItem.raw_count);
 
       marked.add(item.id);
     }
@@ -234,13 +240,27 @@ $(document).ready(() => {
     }
   }
 
+  let waitingForPaymentResponse = false;
   $("#pay").submit((ev) => {
     ev.preventDefault();
+
+    // Don't allow any clicks while waiting for a response from the server
+    if (waitingForPaymentResponse) {
+      return;
+    }
+
+    waitingForPaymentResponse = true;
+
+    $(".pay-spinner").toggleClass("pay-spinner-visible", true);
+    let errorElement = document.getElementById('card-errors');
+    errorElement.textContent = "";
+
     stripe.createToken(card).then(function(result) {
       if (result.error) {
+        $(".pay-spinner").toggleClass("pay-spinner-visible", false);
         // Inform the user if there was an error.
-        var errorElement = document.getElementById('card-errors');
         errorElement.textContent = result.error.message;
+        waitingForPaymentResponse = false;
       } else {
         $.ajax({
           type: "POST",
@@ -248,7 +268,8 @@ $(document).ready(() => {
           data: JSON.stringify({
             cart: cart,
             expectedSum: sumCart(cart),
-            stripeToken: result.token.id
+            stripeToken: result.token.id,
+            duplicatePurchaseRand: duplicatePurchaseRand,
           }),
           contentType: "application/json; charset=utf-8",
           dataType: "json",
@@ -256,17 +277,18 @@ $(document).ready(() => {
             "Authorization": "Bearer " + localStorage.token
           }
         }).done((data, textStatus, xhr) => {
+          $(".pay-spinner").toggleClass("pay-spinner-visible", false);
+          waitingForPaymentResponse = false;
           UIkit.modal.alert("Betalningen har genomförts");
         }).fail((xhr, textStatus, error) => {
+          $(".pay-spinner").toggleClass("pay-spinner-visible", false);
+          waitingForPaymentResponse = false;
           if (xhr.responseJSON.message == "Unauthorized") {
             UIkit.modal.alert("<h2>Betalningen misslyckades</h2>Du är inte inloggad");
           } else {
             UIkit.modal.alert("<h2>Betalningen misslyckades</h2>" + xhr.responseJSON.status);
           }
         });
-        // Send the token to your server.
-        //stripeTokenHandler(result.token);
-        console.log(result.token);
       }
     });
   });

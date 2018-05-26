@@ -233,6 +233,16 @@ $footer-height: 240px;
 	height: 28px;
 }
 
+.pay-spinner {
+	visibility: hidden;
+	position: absolute;
+	left: 5px;
+	top: 4px;
+}
+
+.pay-spinner.pay-spinner-visible {
+	visibility: visible;
+}
 
 #pay-module.open {
 	height: $footer-height;
@@ -276,6 +286,7 @@ $footer-height: 240px;
 	margin-left: 10%;
 	margin-right: 10%;
 	text-transform: none;
+	position: relative;
 }
 
 
