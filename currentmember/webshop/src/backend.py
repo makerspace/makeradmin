@@ -1,6 +1,6 @@
 from flask import Flask, request, abort, jsonify
 import service
-from service import eprint, assert_get, SERVICE_USER_ID, Entity
+from service import eprint, assert_get, SERVICE_USER_ID, Entity, route_helper
 import stripe
 from decimal import Decimal, Rounded, localcontext
 from collections import namedtuple
@@ -22,6 +22,16 @@ product_entity = Entity(
 category_entity = Entity(
     table="webshop_product_categories",
     columns=["name"]
+)
+
+transaction_content_entity = Entity(
+    table="webshop_transaction_contents",
+    columns=["transaction_id", "product_id", "count", "amount", "completed"]
+)
+
+transaction_entity = Entity(
+    table="webshop_transactions",
+    columns=["member_id", "amount"],
 )
 
 if __name__ == "__main__":
@@ -51,6 +61,17 @@ if __name__ == "__main__":
 
         category_entity.db = db
         category_entity.add_routes(app, instance.full_path("category"))
+
+        transaction_entity.db = db
+        transaction_entity.add_routes(app, instance.full_path("transaction"))
+
+        transaction_content_entity.db = db
+        transaction_content_entity.add_routes(app, instance.full_path("transaction_content"))
+
+        @app.route(instance.full_path("transaction/<int:id>/content"), methods=["GET"])
+        @route_helper
+        def transaction_contents(id):
+            return transaction_content_entity.list("deleted_at IS NULL AND transaction_id=%s", id)
 
         def process_cart(cart):
             with db.cursor() as cur:
@@ -141,11 +162,9 @@ if __name__ == "__main__":
                 return error_response
 
             with db.cursor() as cur:
-                cur.execute("INSERT INTO webshop_transactions (member_id,amount) VALUES(%s,%s)", (user_id, total_amount))
-                transaction_id = cur.lastrowid
-                cur.executemany("INSERT INTO webshop_transaction_contents (transaction_id,product_id,count,amount) VALUES(%s,%s,%s,%s)",
-                                [(transaction_id, item.id, item.count, item.amount) for item in items]
-                                )
+                transaction_id = transaction_entity.post({"user_id": user_id, "amount": amount})["id"]
+                for item in items:
+                    transaction_content_entity.post({"transaction_id": transaction_id, "product_id": item.id, "count": item.count, "amount": item.amount})
 
             return jsonify({"status": "ok", "data": {"transaction_id": transaction_id}})
 
