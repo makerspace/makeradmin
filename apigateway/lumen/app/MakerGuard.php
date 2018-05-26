@@ -40,6 +40,16 @@ class MakerGuard implements Guard
 		return $this->user->user_id == Login::SERVICE_USER_ID;
 	}
 
+	/** Determine if the requester is external service */
+	public function is_external_service()
+	{
+		if(!$this->user)
+		{
+			return false;
+		}
+		return $this->user->user_id < Login::SERVICE_USER_ID;
+	}
+
 	/** Determine if the user is in the specified group */
 	public function check_group($group)
 	{
@@ -52,6 +62,10 @@ class MakerGuard implements Guard
 		// Used to ensure some routes can only be reached by the internal network
 		if ($group === "service") {
 			return $this->is_service();
+		}
+
+		if ($group === "admins" && $this->is_external_service()) {
+			return true;
 		}
 
 		// Get endpoint URL for membership module
