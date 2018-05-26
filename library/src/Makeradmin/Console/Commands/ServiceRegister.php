@@ -46,16 +46,17 @@ class ServiceRegister extends Command
 		$ch = new CurlBrowser();
 		$ch->useJson();
 		$ch->setHeader("Authorization", "Bearer " . config("service.bearer"));
-		$result = $ch->call("POST", "http://" . config("service.gateway") . "/service/register", [], [
+		$ch->call("POST", "http://" . config("service.gateway") . "/service/register", [], [
 			"name"     => config("service.name"),
 			"url"      => config("service.url"),
 			"endpoint" => "http://" . gethostbyname(gethostname()) . ":80/",
 			"version"  => config("service.version"),
 		]);
+		$result = $ch->getJson();
 		if ($result->message == "The service was successfully registered") {
 			print("Service registered");
 		} else {
-			print_r($ch->getJson());
+			print_r($result);
 		}
 
 		$ch->call("POST", "http://" . config("service.gateway") . "/membership/permission/register", [], [
