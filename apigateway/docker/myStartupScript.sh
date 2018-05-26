@@ -1,4 +1,7 @@
 #!/bin/bash
+set -e
+# Wait for database to be ready
+/usr/local/myscripts/wait-for "$MYSQL_HOST"
 
 mkdir -p /var/www/html/storage
 mkdir -p /var/www/html/bootstrap/cache
