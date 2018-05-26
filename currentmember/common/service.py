@@ -6,6 +6,7 @@ import os
 import requests
 import socket
 import signal
+from time import sleep
 from functools import wraps
 
 SERVICE_USER_ID = -1
@@ -166,9 +167,18 @@ def capture_signals():
 def create(name, url, port, version):
     db, gateway, debug = read_config()
     service = Service(name, url, port, version, db, gateway, debug, False)
-    service.unregister()
+
+    try:
+        service.unregister()
+    except:
+        # Python sometimes starts so quickly that the API-Gateway module has not managed to initialize itself yet
+        # So the initial unregister call may fail. If it does, wait for a few seconds and then try again.
+        sleep(2)
+        service.unregister()
+
     eprint("Registering service...")
     service.register()
+
 
     eprint("Connecting to database...")
     db.connect()
