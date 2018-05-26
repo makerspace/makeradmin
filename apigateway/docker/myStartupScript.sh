@@ -16,6 +16,9 @@ shutdown() {
 # Stop HHVM gracefully when the script is shut down
 trap shutdown SIGHUP SIGINT SIGTERM
 
+# Disable the JIT because HHVM starts up really slowly with a JIT and this script is very short
+/usr/bin/php -d hhvm.jit=0 /var/www/html/artisan db:init
+
 # Start HHVM
 /usr/bin/hhvm -vServer.AllowRunAsRoot=1 -m server -c /etc/hhvm/server.ini -c /etc/hhvm/site.ini &
 
