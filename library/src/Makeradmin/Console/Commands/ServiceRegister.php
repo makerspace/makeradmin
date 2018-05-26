@@ -29,7 +29,7 @@ class ServiceRegister extends Command
 	 */
 	public function fire()
 	{
-		$this->info("Register service");
+		$this->info("Registering service...");
 
 		$permissions = SecurityHelper::checkRoutePermissions($this->getLaravel());
 
@@ -54,7 +54,7 @@ class ServiceRegister extends Command
 		]);
 		$result = $ch->getJson();
 		if ($result->message == "The service was successfully registered") {
-			print("Service registered");
+			print("Service registered\n");
 		} else {
 			print_r($result);
 		}
