@@ -1,4 +1,6 @@
 #!/bin/bash
+set -e
+python3 migrate.py --assert-up-to-date
 
 function refresh() {
 	sass static/style.scss static/style.css
