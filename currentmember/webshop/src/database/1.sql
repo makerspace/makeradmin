@@ -57,3 +57,5 @@ CREATE TABLE `webshop_transaction_contents` (
   CONSTRAINT transaction_constraint FOREIGN KEY (`transaction_id`) REFERENCES `webshop_transactions` (`id`)
 );
 
+ALTER TABLE `webshop_products` ADD `action` varchar(255);
+ALTER TABLE `webshop_transaction_contents` ADD `completed` int(1) NOT NULL;

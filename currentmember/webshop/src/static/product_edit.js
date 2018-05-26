@@ -28,6 +28,7 @@ $(document).ready(() => {
                 description: $("#description").val(),
                 price: $("#price").val(),
                 unit: $("#unit").val(),
+                action: $("#action").val(),
             }),
             contentType: "application/json; charset=utf-8",
             dataType: "json",

@@ -44,6 +44,10 @@
                     <span id="price-unit">kr/unit</span>
                 </div>
             </div>
+            <div>
+                <label for="unit" class="uk-form-label">Action</label>
+                <input required id="action" class="uk-input" type="text" placeholder="e.g add_membership_days:42, only for special products" value="{{ product.action }}" />
+            </div>
             <button class="uk-button uk-button-primary">Save</button>
         </form>
     </body>
