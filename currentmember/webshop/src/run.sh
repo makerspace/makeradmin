@@ -1,5 +1,10 @@
 #!/bin/bash
 set -e
+# Wait for database to be ready
+./wait-for "$MYSQL_HOST"
+# Wait for api-gateway to be ready
+./wait-for api-gateway:80
+
 python3 migrate.py --assert-up-to-date
 
 function refresh() {
