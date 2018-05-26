@@ -120,6 +120,13 @@ class Member extends Controller
 		$entity->address_city    = $json["address_city"]    ?? null;
 		$entity->address_country = $json["address_country"] ?? "se";
 		$entity->phone           = $json["phone"]           ?? null;
+
+		if ($json["unhashed_password"]) {
+			$entity->password = password_hash($entity->password, PASSWORD_DEFAULT);
+		}
+
+		error_log($entity->password);
+		error_log($json["password"]);
 		if(@$json["created_at"] !== null)
 		{
 			$entity->created_at = $json["created_at"];
