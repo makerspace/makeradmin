@@ -2,6 +2,8 @@
 namespace App\Console\Commands;
 use Illuminate\Console\Command;
 use App\Login;
+use DB;
+
 class InitDB extends Command
 {
 	/**
@@ -21,8 +23,10 @@ class InitDB extends Command
 	 *
 	 * @return void
 	 */
-	public function fire()
-	{
+	public function fire() {
+		// Delete all existing entries in the services table to clean up any old data from previous runs
+		// (obviously no services are currently registered as the api-gateway just started)
+		DB::table("services")->delete();
 		Login::initializeAccessTokens();
 	}
 }
