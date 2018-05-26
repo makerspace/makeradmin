@@ -106,18 +106,19 @@ class Service:
             return jsonify({"data": [{"url": rule.rule, "methods": list(rule.methods)} for rule in app.url_map.iter_rules()]})
 
     def serve_indefinitely(self, app):
-        capture_signals()
         self.add_route_list(app)
         self.wrap_error_codes(app)
-        app.run(host='0.0.0.0', debug=self.debug, port=self.port, use_reloader=False)
 
-    def __enter__(self):
-        return self
+        def signal_handler(signal, frame):
+            eprint("Closing database connection")
+            self.db.connection.close()
+            self.unregister()
+            exit(0)
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        eprint("Closing database connection")
-        self.db.connection.close()
-        self.unregister()
+        for sig in [signal.SIGINT, signal.SIGTERM, signal.SIGHUP]:
+            signal.signal(sig, signal_handler)
+
+        # app.run(host='0.0.0.0', debug=self.debug, port=self.port, use_reloader=False)
 
 
 def assert_get(data, key):
@@ -154,14 +155,6 @@ def eprint(s, **kwargs):
     ''' Print to stderr and flush the output stream '''
     print(s, **kwargs, file=sys.stderr)
     sys.stderr.flush()
-
-
-def capture_signals():
-    def signal_handler(signal, frame):
-        raise KeyboardInterrupt()
-
-    for sig in [signal.SIGINT, signal.SIGTERM, signal.SIGHUP]:
-        signal.signal(sig, signal_handler)
 
 
 def create(name, url, port, version):

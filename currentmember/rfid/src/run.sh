@@ -7,4 +7,4 @@ set -e
 
 python3 migrate.py --assert-up-to-date
 # Exec replaces the shell with the service process which among other things allows signals to be sent directly to the service (e.g when docker wants to stop the container)
-exec python3 rfid.py
+exec gunicorn -b :80 rfid:app
