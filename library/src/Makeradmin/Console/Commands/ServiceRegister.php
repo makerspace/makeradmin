@@ -52,13 +52,15 @@ class ServiceRegister extends Command
 			"endpoint" => "http://" . gethostbyname(gethostname()) . ":80/",
 			"version"  => config("service.version"),
 		]);
-		print_r($ch->getJson());
+		if ($result->message == "The service was successfully registered") {
+			print("Service registered");
+		} else {
+			print_r($ch->getJson());
+		}
 
-		$result = $ch->call("POST", "http://" . config("service.gateway") . "/membership/permission/register", [], [
+		$ch->call("POST", "http://" . config("service.gateway") . "/membership/permission/register", [], [
 			'service'     => config('service.name'),
 			'permissions' => implode(',', $permissions['permissions']),
 		]);
-
-		print_r($ch->getJson());
 	}
 }
