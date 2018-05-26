@@ -1,7 +1,7 @@
 version: "2"
 services:
   db2:
-    image: mysql
+    image: mysql:5.7
     # The lumen library seems to use an older mysql client which is not able to connect if mysql uses the newer caching_sha2_password authentication plugin.
     # Therefore we need to override the mysql starting command to set a config option to use the older password authentication plugin.
     command: mysqld --default-authentication-plugin=mysql_native_password
@@ -20,42 +20,51 @@ services:
     networks:
       - makeradmin
 
+  servicebase:
+    image: makeradmin/servicebase:1.0
+    build:
+      context: ./MakerAdmin-ServiceBase
+    networks:
+      - makeradmin
+
   api-gateway:
     image: makeradmin/apigateway:1.0
-    container_name: makeradmin-apigateway
-    build: ./MakerAdmin-ApiGateway
+    build:
+      context: ./MakerAdmin-ApiGateway
+      dockerfile: ${PWD}/MakerAdmin-ServiceBase/DockerfileService
     volumes:
       - ./logs/apigateway:/var/www/html/storage/logs
     depends_on:
       - db2
     ports:
       - "8010:80"
+    depends_on:
+      - servicebase
     networks:
       - makeradmin
     environment:
-        APP_DEBUG: "true"
-        MYSQL_HOST: "db2:${MYSQL_PORT}"
-        MYSQL_DB: "makeradmin-apigateway"
-        MYSQL_USER: "${MYSQL_USER}"
-        MYSQL_PASS: "${MYSQL_PASS}"
-        BEARER: "${API_BEARER}"
+      APP_DEBUG: "true"
+      MYSQL_HOST: "db2:${MYSQL_PORT}"
+      MYSQL_DB: "makeradmin-apigateway"
+      MYSQL_USER: "${MYSQL_USER}"
+      MYSQL_PASS: "${MYSQL_PASS}"
+      BEARER: "${API_BEARER}"
 
   current-member:
     image: makeradmin/current-member:1.0
-    container_name: makeradmin-current-member
     build:
       context: ./MakerAdmin-CurrentMember/
       dockerfile: member_view/Dockerfile
     environment:
-        MYSQL_HOST: "db2:${MYSQL_PORT}"
-        MYSQL_DB: "makeradmin-membership"
-        MYSQL_USER: "${MYSQL_USER}"
-        MYSQL_PASS: "${MYSQL_PASS}"
-        APIGATEWAY: "api-gateway"
-        BEARER: "${API_BEARER}"
-        HOST_FRONTEND:
-        HOST_BACKEND:
-        APP_DEBUG: "true"
+      MYSQL_HOST: "db2:${MYSQL_PORT}"
+      MYSQL_DB: "makeradmin-membership"
+      MYSQL_USER: "${MYSQL_USER}"
+      MYSQL_PASS: "${MYSQL_PASS}"
+      APIGATEWAY: "api-gateway"
+      BEARER: "${API_BEARER}"
+      HOST_FRONTEND:
+      HOST_BACKEND:
+      APP_DEBUG: "true"
     depends_on:
       - api-gateway
     networks:
@@ -89,20 +98,19 @@ services:
 
   rfid:
     image: makeradmin/rfid:1.0
-    container_name: makeradmin-rfid
     build:
       context: ./MakerAdmin-CurrentMember/
       dockerfile: rfid/Dockerfile
     environment:
-        MYSQL_HOST: "db2:${MYSQL_PORT}"
-        MYSQL_DB: "makeradmin-rfid"
-        MYSQL_USER: "${MYSQL_USER}"
-        MYSQL_PASS: "${MYSQL_PASS}"
-        APIGATEWAY: "api-gateway"
-        BEARER: "${API_BEARER}"
-        HOST_FRONTEND:
-        HOST_BACKEND:
-        APP_DEBUG: "true"
+      MYSQL_HOST: "db2:${MYSQL_PORT}"
+      MYSQL_DB: "makeradmin-rfid"
+      MYSQL_USER: "${MYSQL_USER}"
+      MYSQL_PASS: "${MYSQL_PASS}"
+      APIGATEWAY: "api-gateway"
+      BEARER: "${API_BEARER}"
+      HOST_FRONTEND:
+      HOST_BACKEND:
+      APP_DEBUG: "true"
     depends_on:
       - api-gateway
     networks:
@@ -110,18 +118,19 @@ services:
 
   economy:
     image: makeradmin/economy:1.0
-    container_name: makeradmin-economy
-    build: ./MakerAdmin-Economy
+    build:
+      context: ./MakerAdmin-Economy
+      dockerfile: ${PWD}/MakerAdmin-ServiceBase/DockerfileService
     volumes:
       - ./logs/economy:/var/www/html/storage/logs
       - ./data/economy-vouchers:/var/www/html/vouchers
     environment:
-        MYSQL_HOST: "db2:${MYSQL_PORT}"
-        MYSQL_DB: "makeradmin-economy"
-        MYSQL_USER: "${MYSQL_USER}"
-        MYSQL_PASS: "${MYSQL_PASS}"
-        APIGATEWAY: "api-gateway"
-        BEARER: "${API_BEARER}"
+      MYSQL_HOST: "db2:${MYSQL_PORT}"
+      MYSQL_DB: "makeradmin-economy"
+      MYSQL_USER: "${MYSQL_USER}"
+      MYSQL_PASS: "${MYSQL_PASS}"
+      APIGATEWAY: "api-gateway"
+      BEARER: "${API_BEARER}"
     depends_on:
       - api-gateway
     networks:
@@ -129,17 +138,18 @@ services:
 
   membership:
     image: makeradmin/membership:1.0
-    container_name: makeradmin-membership
-    build: ./MakerAdmin-Membership
+    build:
+      context: ./MakerAdmin-Membership
+      dockerfile: ${PWD}/MakerAdmin-ServiceBase/DockerfileService
     volumes:
       - ./logs/membership:/var/www/html/storage/logs
     environment:
-        MYSQL_HOST: "db2:${MYSQL_PORT}"
-        MYSQL_DB: "makeradmin-membership"
-        MYSQL_USER: "${MYSQL_USER}"
-        MYSQL_PASS: "${MYSQL_PASS}"
-        APIGATEWAY: "api-gateway"
-        BEARER: "${API_BEARER}"
+      MYSQL_HOST: "db2:${MYSQL_PORT}"
+      MYSQL_DB: "makeradmin-membership"
+      MYSQL_USER: "${MYSQL_USER}"
+      MYSQL_PASS: "${MYSQL_PASS}"
+      APIGATEWAY: "api-gateway"
+      BEARER: "${API_BEARER}"
     depends_on:
       - api-gateway
     networks:
@@ -147,17 +157,18 @@ services:
 
   messages:
     image: makeradmin/messages:1.0
-    container_name: makeradmin-messages
-    build: ./MakerAdmin-Messages
+    build:
+      context: ./MakerAdmin-Messages
+      dockerfile: ${PWD}/MakerAdmin-ServiceBase/DockerfileService
     volumes:
       - ./logs/messages:/var/www/html/storage/logs
     environment:
-        MYSQL_HOST: "db2:${MYSQL_PORT}"
-        MYSQL_DB: "makeradmin-messages"
-        MYSQL_USER: "${MYSQL_USER}"
-        MYSQL_PASS: "${MYSQL_PASS}"
-        APIGATEWAY: "api-gateway"
-        BEARER: "${API_BEARER}"
+      MYSQL_HOST: "db2:${MYSQL_PORT}"
+      MYSQL_DB: "makeradmin-messages"
+      MYSQL_USER: "${MYSQL_USER}"
+      MYSQL_PASS: "${MYSQL_PASS}"
+      APIGATEWAY: "api-gateway"
+      BEARER: "${API_BEARER}"
     depends_on:
       - api-gateway
     networks:
@@ -165,18 +176,19 @@ services:
 
   email-dispatcher:
     image: makeradmin/messages-dispatcher-email:1.0
-    container_name: makeradmin-messages-dispatcher-email
-    build: ./MakerAdmin-MessagesDispatcherEmail
+    build:
+      context: ./MakerAdmin-MessagesDispatcherEmail
+      dockerfile: ${PWD}/MakerAdmin-ServiceBase/DockerfileService
     environment:
-        MYSQL_HOST: "db2:${MYSQL_PORT}"
-        MYSQL_DB: "makeradmin-messages"
-        MYSQL_USER: "${MYSQL_USER}"
-        MYSQL_PASS: "${MYSQL_PASS}"
-        APIGATEWAY: "api-gateway"
-        BEARER: "${API_BEARER}"
-        MAILGUN_DOMAIN: "${MAILGUN_DOMAIN}"
-        MAILGUN_KEY: "${MAILGUN_KEY}"
-        MAILGUN_FROM: "${MAILGUN_FROM}"
+      MYSQL_HOST: "db2:${MYSQL_PORT}"
+      MYSQL_DB: "makeradmin-messages"
+      MYSQL_USER: "${MYSQL_USER}"
+      MYSQL_PASS: "${MYSQL_PASS}"
+      APIGATEWAY: "api-gateway"
+      BEARER: "${API_BEARER}"
+      MAILGUN_DOMAIN: "${MAILGUN_DOMAIN}"
+      MAILGUN_KEY: "${MAILGUN_KEY}"
+      MAILGUN_FROM: "${MAILGUN_FROM}"
     depends_on:
       - api-gateway
       - messages
@@ -185,17 +197,18 @@ services:
 
   sales:
     image: makeradmin/sales:1.0
-    container_name: makeradmin-sales
-    build: ./MakerAdmin-Sales
+    build:
+      context: ./MakerAdmin-Sales
+      dockerfile: ${PWD}/MakerAdmin-ServiceBase/DockerfileService
     volumes:
       - ./logs/sales:/var/www/html/storage/logs
     environment:
-        MYSQL_HOST: "db2:${MYSQL_PORT}"
-        MYSQL_DB: "makeradmin-sales"
-        MYSQL_USER: "${MYSQL_USER}"
-        MYSQL_PASS: "${MYSQL_PASS}"
-        APIGATEWAY: "api-gateway"
-        BEARER: "${API_BEARER}"
+      MYSQL_HOST: "db2:${MYSQL_PORT}"
+      MYSQL_DB: "makeradmin-sales"
+      MYSQL_USER: "${MYSQL_USER}"
+      MYSQL_PASS: "${MYSQL_PASS}"
+      APIGATEWAY: "api-gateway"
+      BEARER: "${API_BEARER}"
     depends_on:
       - api-gateway
     networks:
@@ -203,8 +216,9 @@ services:
 
   multiaccesssync:
     image: makeradmin/multiaccesssync:1.0
-    container_name: makeradmin-multiaccesssync
-    build: ./MakerAdmin-MultiAccessSync
+    build:
+      context: ./MakerAdmin-MultiAccessSync
+      dockerfile: ${PWD}/MakerAdmin-ServiceBase/DockerfileService
     volumes:
       - ./data/multiaccess-uploads:/var/www/html/storage/uploads
     environment:
@@ -217,8 +231,9 @@ services:
 
   frontend:
     image: makeradmin/frontend:1.0
-    container_name: makeradmin-frontend
     build: ./MakerAdmin-Frontend
+    environment:
+      HOST_BACKEND:
     ports:
       - "8009:80"
     depends_on:
