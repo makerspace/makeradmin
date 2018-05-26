@@ -10,7 +10,7 @@ run: .env
 	docker-compose up
 
 init-db: .env
-	./db_init.sh
+	python3 db_init.py
 
 .env:
 	python3 create_env.py
