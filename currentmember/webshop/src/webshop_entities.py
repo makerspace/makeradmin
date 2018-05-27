@@ -29,6 +29,7 @@ transaction_content_entity = Entity(
 transaction_entity = Entity(
     table="webshop_transactions",
     columns=["member_id", "amount"],
+    read_columns=["created_at"],
     write_transforms={"amount": lambda x: Decimal(str(x))},
     read_transforms={"amount": lambda x: str(x)},
     allow_delete=False,

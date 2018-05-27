@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Köphistorik - Makerspace Webshop</title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="{{ url('static/uikit/css/uikit.min.css') }}" />
+        <link rel="stylesheet" href="{{ url('static/style.css') }}" />
+        <script src='{{ url("static/uikit/js/uikit.min.js") }}'></script>
+        <script src='{{ url("static/uikit/js/uikit-icons.min.js") }}'></script>
+        <script src="https://code.jquery.com/jquery-3.3.1.min.js"
+              integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+              crossorigin="anonymous"></script>
+    </head>
+    <body>
+        <div id="purchase-history">
+            <h1>Köphistorik</h1>
+            <h2>{{ member.firstname }} {{ member.lastname }} - #{{ member.member_number }}</h2>
+            {% for transaction, cart in history %}
+                <div class="history-item">
+                    <h3>{{ transaction.created_at.strftime("%Y-%m-%d") }}</h3>
+                    <div class="receipt-items">
+                        {% for product, cartItem in cart %}
+                            <div class="receipt-item">
+                                <span class="product-title">{{ product.name }}</span>
+                                <span class="receipt-item-count">{{ cartItem.count }} {{ product.unit }}</span>
+                                <span class="receipt-item-amount">{{ cartItem.amount }} {{ currency }}</span>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <div class="receipt-amount">
+                        <span>{{ transaction.amount }} {{ currency }}</span>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </body>
+</html>

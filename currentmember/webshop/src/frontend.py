@@ -48,6 +48,22 @@ def home():
     return render_template("shop.html", product_json=product_json, categories=categories, url=instance.full_path)
 
 
+@instance.route("member/<int:id>/history")
+def purchase_history(id):
+    # TODO: All these database lookups could probably be optimized
+    member = instance.gateway.get(f"membership/member/{id}").json()["data"]
+    transactions = transaction_entity.list("member_id=%s", id)
+    transactions.reverse()
+    carts = []
+    for tr in transactions:
+        items = transaction_content_entity.list("transaction_id=%s", tr["id"])
+        products = [product_entity.get(item["product_id"]) for item in items]
+        carts.append(zip(products,items))
+
+    history = zip(transactions, carts)
+    return render_template("history.html", member=member, history=history, currency="kr", url=instance.full_path)
+
+
 @instance.route("product/<int:id>/edit")
 def product_edit(id):
     categories = category_entity.list()

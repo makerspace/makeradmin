@@ -225,7 +225,7 @@ DEFAULT_WHERE = object()
 
 
 class Entity:
-    def __init__(self, table, columns, read_transforms={}, write_transforms={}, exposed_column_names={}, allow_delete=True):
+    def __init__(self, table, columns, read_columns=[], read_transforms={}, write_transforms={}, exposed_column_names={}, allow_delete=True):
         '''
         table: The name of the table in the database
         columns: List of column names in the database (excluding the id column which is implicit)
@@ -235,7 +235,7 @@ class Entity:
         '''
         self.table = table
         self.columns = columns
-        self.all_columns = self.columns[:]
+        self.all_columns = self.columns[:] + read_columns
         self.all_columns.insert(0, "id")
         self.column_name2exposed_name = exposed_column_names
         self.read_transforms = read_transforms
