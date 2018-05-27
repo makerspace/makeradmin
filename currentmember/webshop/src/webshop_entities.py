@@ -20,10 +20,16 @@ category_entity = Entity(
 
 transaction_content_entity = Entity(
     table="webshop_transaction_contents",
-    columns=["transaction_id", "product_id", "count", "amount", "completed"]
+    columns=["transaction_id", "product_id", "count", "amount", "completed"],
+    write_transforms={"amount": lambda x: Decimal(str(x))},
+    read_transforms={"amount": lambda x: str(x)},
+    allow_delete=False,
 )
 
 transaction_entity = Entity(
     table="webshop_transactions",
     columns=["member_id", "amount"],
+    write_transforms={"amount": lambda x: Decimal(str(x))},
+    read_transforms={"amount": lambda x: str(x)},
+    allow_delete=False,
 )

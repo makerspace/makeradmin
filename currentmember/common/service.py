@@ -1,5 +1,5 @@
 from flask import abort, jsonify, request, Flask
-from werkzeug.exceptions import NotFound
+from werkzeug.exceptions import NotFound, MethodNotAllowed
 import pymysql
 import sys
 import os
@@ -221,8 +221,11 @@ def route_helper(f, json=False, status="ok"):
     return wrapper
 
 
+DEFAULT_WHERE = object()
+
+
 class Entity:
-    def __init__(self, table, columns, read_transforms={}, write_transforms={}, exposed_column_names={}):
+    def __init__(self, table, columns, read_transforms={}, write_transforms={}, exposed_column_names={}, allow_delete=True):
         '''
         table: The name of the table in the database
         columns: List of column names in the database (excluding the id column which is implicit)
@@ -238,6 +241,7 @@ class Entity:
         self.read_transforms = read_transforms
         self.write_transforms = write_transforms
         self.db = None
+        self.allow_delete = allow_delete
 
         for c in self.all_columns:
             if c not in self.column_name2exposed_name:
@@ -255,7 +259,7 @@ class Entity:
             cur.execute(f"SELECT {self.all_fields} FROM {self.table} WHERE id=%s", (id,))
             item = cur.fetchone()
             if item is None:
-                raise NotFound()
+                raise NotFound(f"No item with id '{id}' in table {self.table}")
 
             return self._convert_to_dict(item)
 
@@ -281,10 +285,16 @@ class Entity:
             return self.get(cur.lastrowid)
 
     def delete(self, id):
-         with self.db.cursor() as cur:
+        if not self.allow_delete:
+            return MethodNotAllowed()
+
+        with self.db.cursor() as cur:
             cur.execute(f"UPDATE {self.table} SET deleted_at=CURRENT_TIMESTAMP WHERE id=%s", (id,))
 
-    def list(self, where="deleted_at IS NULL", where_values=[]):
+    def list(self, where=DEFAULT_WHERE, where_values=[]):
+        if where == DEFAULT_WHERE:
+            where = "deleted_at IS NULL" if self.allow_delete else None
+
         with self.db.cursor() as cur:
             where = "WHERE " + where if where is not None else ""
             cur.execute(f"SELECT {self.all_fields} FROM {self.table} {where}", where_values)
@@ -296,6 +306,7 @@ class Entity:
         # The endpoint keyword argument is just because flask needs something unique, it doesn't matter what it is for our purposes
         service.route(endpoint + "/<int:id>", endpoint=endpoint+".get", methods=["GET"])(route_helper(self.get, status="ok"))
         service.route(endpoint + "/<int:id>", endpoint=endpoint+".put", methods=["PUT"])(route_helper(self.put, json=True, status="updated"))
-        service.route(endpoint + "/<int:id>", endpoint=endpoint+".delete", methods=["DELETE"])(route_helper(self.delete, status="deleted"))
+        if self.allow_delete:
+            service.route(endpoint + "/<int:id>", endpoint=endpoint+".delete", methods=["DELETE"])(route_helper(self.delete, status="deleted"))
         service.route(endpoint + "", endpoint=endpoint+".post", methods=["POST"])(route_helper(self.post, json=True, status="created"))
         service.route(endpoint + "", endpoint=endpoint+".list", methods=["GET"])(route_helper(self.list, status="ok"))
