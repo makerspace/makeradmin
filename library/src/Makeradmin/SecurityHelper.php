@@ -16,7 +16,7 @@ class SecurityHelper {
 		$used_permissions = [];
 		$succeeded = true;
 		$info = [];
-		$routes = $app->getRoutes();
+		$routes = $app->router->getRoutes();
 		foreach ($routes as $uri => $object) {
 			$action = $object['action'];
 			if (array_key_exists('middleware', $action) && !empty($middlwares = $action['middleware'])) {

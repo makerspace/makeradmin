@@ -12,12 +12,12 @@ use Makeradmin\Http\Middleware\CheckPermission;
  */
 class RoutePermissionGuard
 {
-	protected $app;
+	protected $router;
 	protected $default_permission;
 	protected $group_permission_defined;
 
 	public function __construct(Application $app) {
-		$this->app = $app;
+		$this->router = $app->router;
 		$this->group_permission_defined = [];
 		$this->default_permission = 'service';
 	}
@@ -71,7 +71,7 @@ class RoutePermissionGuard
 	public function group(array $attributes, Closure $callback)
 	{
 		$group_permission_defined[] = $this->groupPermissionDefined() || static::hasPermission($attributes);
-		$this->app->group($attributes, function($unused) use ($callback) {
+		$this->router->group($attributes, function($unused) use ($callback) {
 			call_user_func($callback, $this);
 		});
 		array_pop($group_permission_defined);
@@ -87,7 +87,7 @@ class RoutePermissionGuard
 	public function get($uri, $action)
 	{
 		$safe_action = $this->ensurePermission($action);
-		$this->app->get($uri, $safe_action);
+		$this->router->get($uri, $safe_action);
 		return $this;
 	}
 
@@ -101,7 +101,7 @@ class RoutePermissionGuard
 	public function post($uri, $action)
 	{
 		$safe_action = $this->ensurePermission($action);
-		$this->app->post($uri, $safe_action);
+		$this->router->post($uri, $safe_action);
 		return $this;
 	}
 
@@ -115,7 +115,7 @@ class RoutePermissionGuard
 	public function put($uri, $action)
 	{
 		$safe_action = $this->ensurePermission($action);
-		$this->app->put($uri, $safe_action);
+		$this->router->put($uri, $safe_action);
 		return $this;
 	}
 
@@ -129,7 +129,7 @@ class RoutePermissionGuard
 	public function patch($uri, $action)
 	{
 		$safe_action = $this->ensurePermission($action);
-		$this->app->patch($uri, $safe_action);
+		$this->router->patch($uri, $safe_action);
 		return $this;
 	}
 
@@ -143,7 +143,7 @@ class RoutePermissionGuard
 	public function delete($uri, $action)
 	{
 		$safe_action = $this->ensurePermission($action);
-		$this->app->delete($uri, $safe_action);
+		$this->router->delete($uri, $safe_action);
 		return $this;
 	}
 
@@ -157,7 +157,7 @@ class RoutePermissionGuard
 	public function options($uri, $action)
 	{
 		$safe_action = $this->ensurePermission($action);
-		$this->app->options($uri, $safe_action);
+		$this->router->options($uri, $safe_action);
 		return $this;
 	}
 
@@ -172,6 +172,6 @@ class RoutePermissionGuard
 	public function addRoute($method, $uri, $action)
 	{
 		$safe_action = $this->ensurePermission($action);
-		$this->app->addRoute($method, $uri, $safe_action);
+		$this->router->addRoute($method, $uri, $safe_action);
 	}
 }

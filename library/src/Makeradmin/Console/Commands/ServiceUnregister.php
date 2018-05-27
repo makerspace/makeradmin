@@ -26,7 +26,7 @@ class ServiceUnregister extends Command
 	 *
 	 * @return void
 	 */
-	public function fire()
+	public function handle()
 	{
 		// Send the request to API Gateway
 		$ch = new CurlBrowser();
