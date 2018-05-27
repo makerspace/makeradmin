@@ -93,6 +93,11 @@ module.exports = withRouter(class Member extends React.Component
 					</fieldset>
 					<KeyView />
 
+					<fieldset >
+						<legend><i className="uk-icon-shopping-cart"></i> Köphistorik</legend>
+						<a className="uk-button uk-button-default uk-margin-top" href={"/shop/member/" + this.state.model.get('member_id') + "/history"}>Visa köphistorik</a>
+					</fieldset>
+
 					<div className="uk-form-row">
 						<button className="uk-button uk-button-success uk-float-right uk-margin-right" onClick={this.saveEntity.bind(this)}><i className="uk-icon-save"></i> Spara</button>
 						<button type="button" onClick={this.props.logout} className="uk-button uk-button-secondary uk-float-right uk-margin-right"><span className="uk-icon-sign-out" /> Logga ut</button>
