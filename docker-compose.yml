@@ -23,15 +23,15 @@ services:
   servicebase:
     image: makeradmin/servicebase:1.0
     build:
-      context: ./MakerAdmin-ServiceBase
+      context: ./servicebase
     networks:
       - makeradmin
 
   api-gateway:
     image: makeradmin/apigateway:1.0
     build:
-      context: ./MakerAdmin-ApiGateway
-      dockerfile: ${PWD}/MakerAdmin-ServiceBase/DockerfileService
+      context: ./apigateway
+      dockerfile: ${PWD}/servicebase/DockerfileService
     volumes:
       - ./logs/apigateway:/var/www/html/storage/logs
     depends_on:
@@ -53,7 +53,7 @@ services:
   current-member:
     image: makeradmin/current-member:1.0
     build:
-      context: ./MakerAdmin-CurrentMember/
+      context: ./currentmember/
       dockerfile: member_view/Dockerfile
     environment:
       MYSQL_HOST: "db2:${MYSQL_PORT}"
@@ -72,12 +72,11 @@ services:
 
   webshop:
     image: makeradmin/webshop:1.0
-    container_name: makeradmin-webshop
     volumes:
       - "./MakerAdmin-CurrentMember/webshop/src/static:/var/www/service/static"
       - "./MakerAdmin-CurrentMember/webshop/src/templates:/var/www/service/templates"
     build:
-      context: ./MakerAdmin-CurrentMember/
+      context: ./currentmember/
       dockerfile: webshop/Dockerfile
     ports:
       - "8011:80"
@@ -99,7 +98,7 @@ services:
   rfid:
     image: makeradmin/rfid:1.0
     build:
-      context: ./MakerAdmin-CurrentMember/
+      context: ./currentmember/
       dockerfile: rfid/Dockerfile
     environment:
       MYSQL_HOST: "db2:${MYSQL_PORT}"
@@ -119,8 +118,8 @@ services:
   economy:
     image: makeradmin/economy:1.0
     build:
-      context: ./MakerAdmin-Economy
-      dockerfile: ${PWD}/MakerAdmin-ServiceBase/DockerfileService
+      context: ./economy
+      dockerfile: ${PWD}/servicebase/DockerfileService
     volumes:
       - ./logs/economy:/var/www/html/storage/logs
       - ./data/economy-vouchers:/var/www/html/vouchers
@@ -139,8 +138,8 @@ services:
   membership:
     image: makeradmin/membership:1.0
     build:
-      context: ./MakerAdmin-Membership
-      dockerfile: ${PWD}/MakerAdmin-ServiceBase/DockerfileService
+      context: ./membership
+      dockerfile: ${PWD}/servicebase/DockerfileService
     volumes:
       - ./logs/membership:/var/www/html/storage/logs
     environment:
@@ -158,8 +157,8 @@ services:
   messages:
     image: makeradmin/messages:1.0
     build:
-      context: ./MakerAdmin-Messages
-      dockerfile: ${PWD}/MakerAdmin-ServiceBase/DockerfileService
+      context: ./messages
+      dockerfile: ${PWD}/servicebase/DockerfileService
     volumes:
       - ./logs/messages:/var/www/html/storage/logs
     environment:
@@ -177,8 +176,8 @@ services:
   email-dispatcher:
     image: makeradmin/messages-dispatcher-email:1.0
     build:
-      context: ./MakerAdmin-MessagesDispatcherEmail
-      dockerfile: ${PWD}/MakerAdmin-ServiceBase/DockerfileService
+      context: ./emaildispatcher
+      dockerfile: ${PWD}/servicebase/DockerfileService
     environment:
       MYSQL_HOST: "db2:${MYSQL_PORT}"
       MYSQL_DB: "makeradmin-messages"
@@ -198,8 +197,8 @@ services:
   sales:
     image: makeradmin/sales:1.0
     build:
-      context: ./MakerAdmin-Sales
-      dockerfile: ${PWD}/MakerAdmin-ServiceBase/DockerfileService
+      context: ./sales
+      dockerfile: ${PWD}/servicebase/DockerfileService
     volumes:
       - ./logs/sales:/var/www/html/storage/logs
     environment:
@@ -217,8 +216,8 @@ services:
   multiaccesssync:
     image: makeradmin/multiaccesssync:1.0
     build:
-      context: ./MakerAdmin-MultiAccessSync
-      dockerfile: ${PWD}/MakerAdmin-ServiceBase/DockerfileService
+      context: ./multiaccesssync
+      dockerfile: ${PWD}/servicebase/DockerfileService
     volumes:
       - ./data/multiaccess-uploads:/var/www/html/storage/uploads
     environment:
@@ -231,7 +230,7 @@ services:
 
   frontend:
     image: makeradmin/frontend:1.0
-    build: ./MakerAdmin-Frontend
+    build: ./frontend
     environment:
       HOST_BACKEND:
     ports:
