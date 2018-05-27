@@ -2,7 +2,7 @@ from flask import Flask, render_template
 import service
 from service import eprint
 import json
-from webshop_entities import category_entity, product_entity
+from webshop_entities import category_entity, product_entity, transaction_entity, transaction_content_entity
 
 instance = service.create_frontend(url="shop", port=80)
 
@@ -11,6 +11,8 @@ db = instance.db
 
 product_entity.db = db
 category_entity.db = db
+transaction_entity.db = db
+transaction_content_entity.db = db
 
 
 @instance.route("/")
@@ -67,6 +69,15 @@ def product_create():
     }
 
     return render_template("product_edit.html", product=product, categories=categories, url=instance.full_path)
+
+
+@instance.route("receipt/<int:id>")
+def receipt(id):
+    transaction = transaction_entity.get(id)
+    items = transaction_content_entity.list("transaction_id=%s", id)
+    products = [product_entity.get(item["id"]) for item in items]
+
+    return render_template("receipt.html", cart=zip(products,items), transaction=transaction, currency="kr", url=instance.full_path)
 
 
 instance.serve_indefinitely()

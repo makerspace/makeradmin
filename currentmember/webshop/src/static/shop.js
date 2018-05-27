@@ -279,7 +279,8 @@ $(document).ready(() => {
         }).done((data, textStatus, xhr) => {
           $(".pay-spinner").toggleClass("pay-spinner-visible", false);
           waitingForPaymentResponse = false;
-          UIkit.modal.alert("Betalningen har genomförts");
+          window.location.href = "receipt/" + xhr.responseJSON.data.transaction_id;
+          // UIkit.modal.alert("Betalningen har genomförts");
         }).fail((xhr, textStatus, error) => {
           $(".pay-spinner").toggleClass("pay-spinner-visible", false);
           waitingForPaymentResponse = false;

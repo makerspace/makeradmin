@@ -1,4 +1,4 @@
-from flask import Flask, request, abort, jsonify
+from flask import request, abort, jsonify, render_template
 import service
 from service import eprint, assert_get, SERVICE_USER_ID, route_helper
 import stripe
@@ -43,7 +43,7 @@ transaction_content_entity.add_routes(instance, "transaction_content")
 @instance.route("transaction/<int:id>/content", methods=["GET"])
 @route_helper
 def transaction_contents(id):
-    return transaction_content_entity.list("deleted_at IS NULL AND transaction_id=%s", id)
+    return transaction_content_entity.list("transaction_id=%s", id)
 
 
 def process_cart(cart):
@@ -71,9 +71,11 @@ def process_cart(cart):
                     abort(400, f"Can only buy item {item['id']} in multiples of {smallest_multiple}, found {count}")
 
                 item_amount = price * count
+                eprint(item_amount)
                 items.append(CartItem(item["id"], count, item_amount))
 
             total_amount = sum(item.amount for item in items)
+            eprint(total_amount)
             if ctx.flags[Rounded]:
                 # This can possibly happen with huge values, I suppose they will be caught below anyway but it's good to catch in any case
                 abort(400, "Rounding ocurred during price calculations")
@@ -125,6 +127,28 @@ def stripe_payment(amount, token):
         return jsonify({"status": "Failed"}), 400
 
 
+def send_receipt_email(member_id, transaction_id):
+    transaction = transaction_entity.get(transaction_id)
+    items = transaction_content_entity.list("transaction_id=%s", transaction_id)
+    products = [product_entity.get(item["id"]) for item in items]
+
+    r = instance.gateway.post("messages", {
+        "recipients": [
+            {
+                "type": "member",
+                "id": member_id
+            },
+        ],
+        "message_type": "email",
+        "subject": "Kvitto - Stockholm Makerspace",
+        "body": render_template("receipt_email.html", cart=zip(products,items), transaction=transaction, currency="kr", frontend_url=instance.gateway.get_frontend_url)
+    })
+
+    if not r.ok:
+        eprint("Failed to send receipt email")
+        eprint(r.text)
+
+
 duplicatePurchaseRands = set()
 
 
@@ -156,6 +180,7 @@ def pay():
     for item in items:
         transaction_content_entity.post({"transaction_id": transaction_id, "product_id": item.id, "count": item.count, "amount": item.amount, "completed": False})
 
+    send_receipt_email(member_id, transaction_id)
     return jsonify({"status": "ok", "data": {"transaction_id": transaction_id}})
 
 

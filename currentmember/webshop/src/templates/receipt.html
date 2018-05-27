@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Tack för ditt köp - Makerspace Webshop</title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="{{ url('static/uikit/css/uikit.min.css') }}" />
+        <link rel="stylesheet" href="{{ url('static/style.css') }}" />
+        <script src='{{ url("static/uikit/js/uikit.min.js") }}'></script>
+        <script src='{{ url("static/uikit/js/uikit-icons.min.js") }}'></script>
+        <script src="https://code.jquery.com/jquery-3.3.1.min.js"
+              integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+              crossorigin="anonymous"></script>
+    </head>
+    <body>
+        <div id="receipt">
+            <div class="receipt-image">
+                <img src='{{ url("static/images/logo-transparent-500px-300x210.png") }}' />
+            </div>
+            <h1>Tack för ditt köp!</h1>
+            <div>
+                {% for product, cartItem in cart %}
+                    <div class="receipt-item">
+                        <span class="product-title">{{ product.name }}</span>
+                        <span class="receipt-item-count">{{ cartItem.count }} {{ product.unit }}</span>
+                        <span class="receipt-item-amount">{{ cartItem.amount }} {{ currency }}</span>
+                    </div>
+                {% endfor %}
+            </div>
+            <div class="receipt-amount">
+                <span>{{ transaction.amount }} {{ currency }}</span>
+            </div>
+            <div class="receipt-message">
+                Ett kvitto har också skickats via email.
+            </div>
+            <div class="receipt-buttons">
+                <a href='/member'>Medlemsvy</a>
+                <a href='{{ url("") }}'>Webshop</a>
+            </div>
+        </div>
+    </body>
+</html>
