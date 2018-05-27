@@ -58,29 +58,29 @@
 
 	var _nav = __webpack_require__(242);
 
-	var _FullExtend = __webpack_require__(247);
+	var _FullExtend = __webpack_require__(248);
 
 	var _FullExtend2 = _interopRequireDefault(_FullExtend);
 
-	var _auth = __webpack_require__(249);
+	var _auth = __webpack_require__(250);
 
 	var _auth2 = _interopRequireDefault(_auth);
 
-	var _Login = __webpack_require__(250);
+	var _Login = __webpack_require__(251);
 
 	var _Login2 = _interopRequireDefault(_Login);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	// Load jQuery and UIkit
-	global.jQuery = __webpack_require__(246);
+	global.jQuery = __webpack_require__(247);
 	global.$ = global.jQuery;
-	__webpack_require__(251);
 	__webpack_require__(252);
 	__webpack_require__(253);
 	__webpack_require__(254);
 	__webpack_require__(255);
 	__webpack_require__(256);
+	__webpack_require__(257);
 
 	// React stuff
 
@@ -329,25 +329,25 @@
 		childRoutes: [{
 			path: "member",
 			indexRoute: {
-				component: __webpack_require__(257)
+				component: __webpack_require__(258)
 			},
 			childRoutes: [{
 				path: "login/:token",
-				component: __webpack_require__(454)
+				component: __webpack_require__(261)
 			}]
 		}, {
 			path: "resetpassword",
-			component: __webpack_require__(266)
+			component: __webpack_require__(262)
 		}, {
 			path: "/",
 			component: App,
 			indexRoute: {
-				component: __webpack_require__(267)
+				component: __webpack_require__(263)
 			},
 			childRoutes: [{
 				path: "logout",
-				component: __webpack_require__(268)
-			}, __webpack_require__(269), __webpack_require__(324), __webpack_require__(386), __webpack_require__(401), __webpack_require__(414), __webpack_require__(418), __webpack_require__(420), __webpack_require__(423), __webpack_require__(428), {
+				component: __webpack_require__(264)
+			}, __webpack_require__(265), __webpack_require__(321), __webpack_require__(386), __webpack_require__(401), __webpack_require__(414), __webpack_require__(418), __webpack_require__(420), __webpack_require__(423), __webpack_require__(428), {
 				path: "settings",
 				indexRoute: {
 					component: __webpack_require__(437)
@@ -28058,7 +28058,7 @@
 
 	  // Set up Backbone appropriately for the environment. Start with AMD.
 	  if (true) {
-	    !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(245), __webpack_require__(246), exports], __WEBPACK_AMD_DEFINE_RESULT__ = function(_, $, exports) {
+	    !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(245), __webpack_require__(247), exports], __WEBPACK_AMD_DEFINE_RESULT__ = function(_, $, exports) {
 	      // Export global even in AMD case in case this script is loaded with
 	      // others that may still expect a global Backbone.
 	      root.Backbone = factory(root, exports, _, $);
@@ -29969,9 +29969,9 @@
 /* 245 */
 /***/ (function(module, exports, __webpack_require__) {
 
-	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;//     Underscore.js 1.8.3
+	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/* WEBPACK VAR INJECTION */(function(global, module) {//     Underscore.js 1.9.0
 	//     http://underscorejs.org
-	//     (c) 2009-2015 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+	//     (c) 2009-2018 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
 	//     Underscore may be freely distributed under the MIT license.
 
 	(function() {
@@ -29979,29 +29979,32 @@
 	  // Baseline setup
 	  // --------------
 
-	  // Establish the root object, `window` in the browser, or `exports` on the server.
-	  var root = this;
+	  // Establish the root object, `window` (`self`) in the browser, `global`
+	  // on the server, or `this` in some virtual machines. We use `self`
+	  // instead of `window` for `WebWorker` support.
+	  var root = typeof self == 'object' && self.self === self && self ||
+	            typeof global == 'object' && global.global === global && global ||
+	            this ||
+	            {};
 
 	  // Save the previous value of the `_` variable.
 	  var previousUnderscore = root._;
 
 	  // Save bytes in the minified (but not gzipped) version:
-	  var ArrayProto = Array.prototype, ObjProto = Object.prototype, FuncProto = Function.prototype;
+	  var ArrayProto = Array.prototype, ObjProto = Object.prototype;
+	  var SymbolProto = typeof Symbol !== 'undefined' ? Symbol.prototype : null;
 
 	  // Create quick reference variables for speed access to core prototypes.
-	  var
-	    push             = ArrayProto.push,
-	    slice            = ArrayProto.slice,
-	    toString         = ObjProto.toString,
-	    hasOwnProperty   = ObjProto.hasOwnProperty;
+	  var push = ArrayProto.push,
+	      slice = ArrayProto.slice,
+	      toString = ObjProto.toString,
+	      hasOwnProperty = ObjProto.hasOwnProperty;
 
 	  // All **ECMAScript 5** native function implementations that we hope to use
 	  // are declared here.
-	  var
-	    nativeIsArray      = Array.isArray,
-	    nativeKeys         = Object.keys,
-	    nativeBind         = FuncProto.bind,
-	    nativeCreate       = Object.create;
+	  var nativeIsArray = Array.isArray,
+	      nativeKeys = Object.keys,
+	      nativeCreate = Object.create;
 
 	  // Naked function reference for surrogate-prototype-swapping.
 	  var Ctor = function(){};
@@ -30014,10 +30017,12 @@
 	  };
 
 	  // Export the Underscore object for **Node.js**, with
-	  // backwards-compatibility for the old `require()` API. If we're in
+	  // backwards-compatibility for their old module API. If we're in
 	  // the browser, add `_` as a global object.
-	  if (true) {
-	    if (typeof module !== 'undefined' && module.exports) {
+	  // (`nodeType` is checked to ensure that `module`
+	  // and `exports` are not HTML elements.)
+	  if (typeof exports != 'undefined' && !exports.nodeType) {
+	    if (typeof module != 'undefined' && !module.nodeType && module.exports) {
 	      exports = module.exports = _;
 	    }
 	    exports._ = _;
@@ -30026,7 +30031,7 @@
 	  }
 
 	  // Current version.
-	  _.VERSION = '1.8.3';
+	  _.VERSION = '1.9.0';
 
 	  // Internal function that returns an efficient (for current engines) version
 	  // of the passed-in callback, to be repeatedly applied in other Underscore
@@ -30037,9 +30042,7 @@
 	      case 1: return function(value) {
 	        return func.call(context, value);
 	      };
-	      case 2: return function(value, other) {
-	        return func.call(context, value, other);
-	      };
+	      // The 2-argument case is omitted because we’re not using it.
 	      case 3: return function(value, index, collection) {
 	        return func.call(context, value, index, collection);
 	      };
@@ -30052,34 +30055,51 @@
 	    };
 	  };
 
-	  // A mostly-internal function to generate callbacks that can be applied
-	  // to each element in a collection, returning the desired result — either
-	  // identity, an arbitrary callback, a property matcher, or a property accessor.
+	  var builtinIteratee;
+
+	  // An internal function to generate callbacks that can be applied to each
+	  // element in a collection, returning the desired result — either `identity`,
+	  // an arbitrary callback, a property matcher, or a property accessor.
 	  var cb = function(value, context, argCount) {
+	    if (_.iteratee !== builtinIteratee) return _.iteratee(value, context);
 	    if (value == null) return _.identity;
 	    if (_.isFunction(value)) return optimizeCb(value, context, argCount);
-	    if (_.isObject(value)) return _.matcher(value);
+	    if (_.isObject(value) && !_.isArray(value)) return _.matcher(value);
 	    return _.property(value);
 	  };
-	  _.iteratee = function(value, context) {
+
+	  // External wrapper for our callback generator. Users may customize
+	  // `_.iteratee` if they want additional predicate/iteratee shorthand styles.
+	  // This abstraction hides the internal-only argCount argument.
+	  _.iteratee = builtinIteratee = function(value, context) {
 	    return cb(value, context, Infinity);
 	  };
 
-	  // An internal function for creating assigner functions.
-	  var createAssigner = function(keysFunc, undefinedOnly) {
-	    return function(obj) {
-	      var length = arguments.length;
-	      if (length < 2 || obj == null) return obj;
-	      for (var index = 1; index < length; index++) {
-	        var source = arguments[index],
-	            keys = keysFunc(source),
-	            l = keys.length;
-	        for (var i = 0; i < l; i++) {
-	          var key = keys[i];
-	          if (!undefinedOnly || obj[key] === void 0) obj[key] = source[key];
-	        }
+	  // Some functions take a variable number of arguments, or a few expected
+	  // arguments at the beginning and then a variable number of values to operate
+	  // on. This helper accumulates all remaining arguments past the function’s
+	  // argument length (or an explicit `startIndex`), into an array that becomes
+	  // the last argument. Similar to ES6’s "rest parameter".
+	  var restArguments = function(func, startIndex) {
+	    startIndex = startIndex == null ? func.length - 1 : +startIndex;
+	    return function() {
+	      var length = Math.max(arguments.length - startIndex, 0),
+	          rest = Array(length),
+	          index = 0;
+	      for (; index < length; index++) {
+	        rest[index] = arguments[index + startIndex];
 	      }
-	      return obj;
+	      switch (startIndex) {
+	        case 0: return func.call(this, rest);
+	        case 1: return func.call(this, arguments[0], rest);
+	        case 2: return func.call(this, arguments[0], arguments[1], rest);
+	      }
+	      var args = Array(startIndex + 1);
+	      for (index = 0; index < startIndex; index++) {
+	        args[index] = arguments[index];
+	      }
+	      args[startIndex] = rest;
+	      return func.apply(this, args);
 	    };
 	  };
 
@@ -30093,18 +30113,27 @@
 	    return result;
 	  };
 
-	  var property = function(key) {
+	  var shallowProperty = function(key) {
 	    return function(obj) {
 	      return obj == null ? void 0 : obj[key];
 	    };
 	  };
 
+	  var deepGet = function(obj, path) {
+	    var length = path.length;
+	    for (var i = 0; i < length; i++) {
+	      if (obj == null) return void 0;
+	      obj = obj[path[i]];
+	    }
+	    return length ? obj : void 0;
+	  };
+
 	  // Helper for collection methods to determine whether a collection
-	  // should be iterated as an array or as an object
+	  // should be iterated as an array or as an object.
 	  // Related: http://people.mozilla.org/~jorendorff/es6-draft.html#sec-tolength
 	  // Avoids a very nasty iOS 8 JIT bug on ARM-64. #2094
 	  var MAX_ARRAY_INDEX = Math.pow(2, 53) - 1;
-	  var getLength = property('length');
+	  var getLength = shallowProperty('length');
 	  var isArrayLike = function(collection) {
 	    var length = getLength(collection);
 	    return typeof length == 'number' && length >= 0 && length <= MAX_ARRAY_INDEX;
@@ -30146,30 +30175,29 @@
 	  };
 
 	  // Create a reducing function iterating left or right.
-	  function createReduce(dir) {
-	    // Optimized iterator function as using arguments.length
-	    // in the main function will deoptimize the, see #1991.
-	    function iterator(obj, iteratee, memo, keys, index, length) {
+	  var createReduce = function(dir) {
+	    // Wrap code that reassigns argument variables in a separate function than
+	    // the one that accesses `arguments.length` to avoid a perf hit. (#1991)
+	    var reducer = function(obj, iteratee, memo, initial) {
+	      var keys = !isArrayLike(obj) && _.keys(obj),
+	          length = (keys || obj).length,
+	          index = dir > 0 ? 0 : length - 1;
+	      if (!initial) {
+	        memo = obj[keys ? keys[index] : index];
+	        index += dir;
+	      }
 	      for (; index >= 0 && index < length; index += dir) {
 	        var currentKey = keys ? keys[index] : index;
 	        memo = iteratee(memo, obj[currentKey], currentKey, obj);
 	      }
 	      return memo;
-	    }
+	    };
 
 	    return function(obj, iteratee, memo, context) {
-	      iteratee = optimizeCb(iteratee, context, 4);
-	      var keys = !isArrayLike(obj) && _.keys(obj),
-	          length = (keys || obj).length,
-	          index = dir > 0 ? 0 : length - 1;
-	      // Determine the initial value if none is provided.
-	      if (arguments.length < 3) {
-	        memo = obj[keys ? keys[index] : index];
-	        index += dir;
-	      }
-	      return iterator(obj, iteratee, memo, keys, index, length);
+	      var initial = arguments.length >= 3;
+	      return reducer(obj, optimizeCb(iteratee, context, 4), memo, initial);
 	    };
-	  }
+	  };
 
 	  // **Reduce** builds up a single result from a list of values, aka `inject`,
 	  // or `foldl`.
@@ -30180,12 +30208,8 @@
 
 	  // Return the first value which passes a truth test. Aliased as `detect`.
 	  _.find = _.detect = function(obj, predicate, context) {
-	    var key;
-	    if (isArrayLike(obj)) {
-	      key = _.findIndex(obj, predicate, context);
-	    } else {
-	      key = _.findKey(obj, predicate, context);
-	    }
+	    var keyFinder = isArrayLike(obj) ? _.findIndex : _.findKey;
+	    var key = keyFinder(obj, predicate, context);
 	    if (key !== void 0 && key !== -1) return obj[key];
 	  };
 
@@ -30240,14 +30264,26 @@
 	  };
 
 	  // Invoke a method (with arguments) on every item in a collection.
-	  _.invoke = function(obj, method) {
-	    var args = slice.call(arguments, 2);
-	    var isFunc = _.isFunction(method);
-	    return _.map(obj, function(value) {
-	      var func = isFunc ? method : value[method];
-	      return func == null ? func : func.apply(value, args);
+	  _.invoke = restArguments(function(obj, path, args) {
+	    var contextPath, func;
+	    if (_.isFunction(path)) {
+	      func = path;
+	    } else if (_.isArray(path)) {
+	      contextPath = path.slice(0, -1);
+	      path = path[path.length - 1];
+	    }
+	    return _.map(obj, function(context) {
+	      var method = func;
+	      if (!method) {
+	        if (contextPath && contextPath.length) {
+	          context = deepGet(context, contextPath);
+	        }
+	        if (context == null) return void 0;
+	        method = context[path];
+	      }
+	      return method == null ? method : method.apply(context, args);
 	    });
-	  };
+	  });
 
 	  // Convenience version of a common use case of `map`: fetching a property.
 	  _.pluck = function(obj, key) {
@@ -30270,20 +30306,20 @@
 	  _.max = function(obj, iteratee, context) {
 	    var result = -Infinity, lastComputed = -Infinity,
 	        value, computed;
-	    if (iteratee == null && obj != null) {
+	    if (iteratee == null || typeof iteratee == 'number' && typeof obj[0] != 'object' && obj != null) {
 	      obj = isArrayLike(obj) ? obj : _.values(obj);
 	      for (var i = 0, length = obj.length; i < length; i++) {
 	        value = obj[i];
-	        if (value > result) {
+	        if (value != null && value > result) {
 	          result = value;
 	        }
 	      }
 	    } else {
 	      iteratee = cb(iteratee, context);
-	      _.each(obj, function(value, index, list) {
-	        computed = iteratee(value, index, list);
+	      _.each(obj, function(v, index, list) {
+	        computed = iteratee(v, index, list);
 	        if (computed > lastComputed || computed === -Infinity && result === -Infinity) {
-	          result = value;
+	          result = v;
 	          lastComputed = computed;
 	        }
 	      });
@@ -30295,20 +30331,20 @@
 	  _.min = function(obj, iteratee, context) {
 	    var result = Infinity, lastComputed = Infinity,
 	        value, computed;
-	    if (iteratee == null && obj != null) {
+	    if (iteratee == null || typeof iteratee == 'number' && typeof obj[0] != 'object' && obj != null) {
 	      obj = isArrayLike(obj) ? obj : _.values(obj);
 	      for (var i = 0, length = obj.length; i < length; i++) {
 	        value = obj[i];
-	        if (value < result) {
+	        if (value != null && value < result) {
 	          result = value;
 	        }
 	      }
 	    } else {
 	      iteratee = cb(iteratee, context);
-	      _.each(obj, function(value, index, list) {
-	        computed = iteratee(value, index, list);
+	      _.each(obj, function(v, index, list) {
+	        computed = iteratee(v, index, list);
 	        if (computed < lastComputed || computed === Infinity && result === Infinity) {
-	          result = value;
+	          result = v;
 	          lastComputed = computed;
 	        }
 	      });
@@ -30316,21 +30352,13 @@
 	    return result;
 	  };
 
-	  // Shuffle a collection, using the modern version of the
-	  // [Fisher-Yates shuffle](http://en.wikipedia.org/wiki/Fisher–Yates_shuffle).
+	  // Shuffle a collection.
 	  _.shuffle = function(obj) {
-	    var set = isArrayLike(obj) ? obj : _.values(obj);
-	    var length = set.length;
-	    var shuffled = Array(length);
-	    for (var index = 0, rand; index < length; index++) {
-	      rand = _.random(0, index);
-	      if (rand !== index) shuffled[index] = shuffled[rand];
-	      shuffled[rand] = set[index];
-	    }
-	    return shuffled;
+	    return _.sample(obj, Infinity);
 	  };
 
-	  // Sample **n** random values from a collection.
+	  // Sample **n** random values from a collection using the modern version of the
+	  // [Fisher-Yates shuffle](http://en.wikipedia.org/wiki/Fisher–Yates_shuffle).
 	  // If **n** is not specified, returns a single random element.
 	  // The internal `guard` argument allows it to work with `map`.
 	  _.sample = function(obj, n, guard) {
@@ -30338,17 +30366,28 @@
 	      if (!isArrayLike(obj)) obj = _.values(obj);
 	      return obj[_.random(obj.length - 1)];
 	    }
-	    return _.shuffle(obj).slice(0, Math.max(0, n));
+	    var sample = isArrayLike(obj) ? _.clone(obj) : _.values(obj);
+	    var length = getLength(sample);
+	    n = Math.max(Math.min(n, length), 0);
+	    var last = length - 1;
+	    for (var index = 0; index < n; index++) {
+	      var rand = _.random(index, last);
+	      var temp = sample[index];
+	      sample[index] = sample[rand];
+	      sample[rand] = temp;
+	    }
+	    return sample.slice(0, n);
 	  };
 
 	  // Sort the object's values by a criterion produced by an iteratee.
 	  _.sortBy = function(obj, iteratee, context) {
+	    var index = 0;
 	    iteratee = cb(iteratee, context);
-	    return _.pluck(_.map(obj, function(value, index, list) {
+	    return _.pluck(_.map(obj, function(value, key, list) {
 	      return {
 	        value: value,
-	        index: index,
-	        criteria: iteratee(value, index, list)
+	        index: index++,
+	        criteria: iteratee(value, key, list)
 	      };
 	    }).sort(function(left, right) {
 	      var a = left.criteria;
@@ -30362,9 +30401,9 @@
 	  };
 
 	  // An internal function used for aggregate "group by" operations.
-	  var group = function(behavior) {
+	  var group = function(behavior, partition) {
 	    return function(obj, iteratee, context) {
-	      var result = {};
+	      var result = partition ? [[], []] : {};
 	      iteratee = cb(iteratee, context);
 	      _.each(obj, function(value, index) {
 	        var key = iteratee(value, index, obj);
@@ -30393,10 +30432,15 @@
 	    if (_.has(result, key)) result[key]++; else result[key] = 1;
 	  });
 
+	  var reStrSymbol = /[^\ud800-\udfff]|[\ud800-\udbff][\udc00-\udfff]|[\ud800-\udfff]/g;
 	  // Safely create a real, live array from anything iterable.
 	  _.toArray = function(obj) {
 	    if (!obj) return [];
 	    if (_.isArray(obj)) return slice.call(obj);
+	    if (_.isString(obj)) {
+	      // Keep surrogate pair characters together
+	      return obj.match(reStrSymbol);
+	    }
 	    if (isArrayLike(obj)) return _.map(obj, _.identity);
 	    return _.values(obj);
 	  };
@@ -30409,14 +30453,9 @@
 
 	  // Split a collection into two arrays: one whose elements all satisfy the given
 	  // predicate, and one whose elements all do not satisfy the predicate.
-	  _.partition = function(obj, predicate, context) {
-	    predicate = cb(predicate, context);
-	    var pass = [], fail = [];
-	    _.each(obj, function(value, key, obj) {
-	      (predicate(value, key, obj) ? pass : fail).push(value);
-	    });
-	    return [pass, fail];
-	  };
+	  _.partition = group(function(result, value, pass) {
+	    result[pass ? 0 : 1].push(value);
+	  }, true);
 
 	  // Array Functions
 	  // ---------------
@@ -30425,7 +30464,7 @@
 	  // values in the array. Aliased as `head` and `take`. The **guard** check
 	  // allows it to work with `_.map`.
 	  _.first = _.head = _.take = function(array, n, guard) {
-	    if (array == null) return void 0;
+	    if (array == null || array.length < 1) return void 0;
 	    if (n == null || guard) return array[0];
 	    return _.initial(array, array.length - n);
 	  };
@@ -30440,7 +30479,7 @@
 	  // Get the last element of an array. Passing **n** will return the last N
 	  // values in the array.
 	  _.last = function(array, n, guard) {
-	    if (array == null) return void 0;
+	    if (array == null || array.length < 1) return void 0;
 	    if (n == null || guard) return array[array.length - 1];
 	    return _.rest(array, Math.max(0, array.length - n));
 	  };
@@ -30454,21 +30493,23 @@
 
 	  // Trim out all falsy values from an array.
 	  _.compact = function(array) {
-	    return _.filter(array, _.identity);
+	    return _.filter(array, Boolean);
 	  };
 
 	  // Internal implementation of a recursive `flatten` function.
-	  var flatten = function(input, shallow, strict, startIndex) {
-	    var output = [], idx = 0;
-	    for (var i = startIndex || 0, length = getLength(input); i < length; i++) {
+	  var flatten = function(input, shallow, strict, output) {
+	    output = output || [];
+	    var idx = output.length;
+	    for (var i = 0, length = getLength(input); i < length; i++) {
 	      var value = input[i];
 	      if (isArrayLike(value) && (_.isArray(value) || _.isArguments(value))) {
-	        //flatten current level of array or arguments object
-	        if (!shallow) value = flatten(value, shallow, strict);
-	        var j = 0, len = value.length;
-	        output.length += len;
-	        while (j < len) {
-	          output[idx++] = value[j++];
+	        // Flatten current level of array or arguments object.
+	        if (shallow) {
+	          var j = 0, len = value.length;
+	          while (j < len) output[idx++] = value[j++];
+	        } else {
+	          flatten(value, shallow, strict, output);
+	          idx = output.length;
 	        }
 	      } else if (!strict) {
 	        output[idx++] = value;
@@ -30483,12 +30524,15 @@
 	  };
 
 	  // Return a version of the array that does not contain the specified value(s).
-	  _.without = function(array) {
-	    return _.difference(array, slice.call(arguments, 1));
-	  };
+	  _.without = restArguments(function(array, otherArrays) {
+	    return _.difference(array, otherArrays);
+	  });
 
 	  // Produce a duplicate-free version of the array. If the array has already
 	  // been sorted, you have the option of using a faster algorithm.
+	  // The faster algorithm will not work with an iteratee if the iteratee
+	  // is not a one-to-one function, so providing an iteratee will disable
+	  // the faster algorithm.
 	  // Aliased as `unique`.
 	  _.uniq = _.unique = function(array, isSorted, iteratee, context) {
 	    if (!_.isBoolean(isSorted)) {
@@ -30502,7 +30546,7 @@
 	    for (var i = 0, length = getLength(array); i < length; i++) {
 	      var value = array[i],
 	          computed = iteratee ? iteratee(value, i, array) : value;
-	      if (isSorted) {
+	      if (isSorted && !iteratee) {
 	        if (!i || seen !== computed) result.push(value);
 	        seen = computed;
 	      } else if (iteratee) {
@@ -30519,9 +30563,9 @@
 
 	  // Produce an array that contains the union: each distinct element from all of
 	  // the passed-in arrays.
-	  _.union = function() {
-	    return _.uniq(flatten(arguments, true, true));
-	  };
+	  _.union = restArguments(function(arrays) {
+	    return _.uniq(flatten(arrays, true, true));
+	  });
 
 	  // Produce an array that contains every item shared between all the
 	  // passed-in arrays.
@@ -30531,7 +30575,8 @@
 	    for (var i = 0, length = getLength(array); i < length; i++) {
 	      var item = array[i];
 	      if (_.contains(result, item)) continue;
-	      for (var j = 1; j < argsLength; j++) {
+	      var j;
+	      for (j = 1; j < argsLength; j++) {
 	        if (!_.contains(arguments[j], item)) break;
 	      }
 	      if (j === argsLength) result.push(item);
@@ -30541,21 +30586,15 @@
 
 	  // Take the difference between one array and a number of other arrays.
 	  // Only the elements present in just the first array will remain.
-	  _.difference = function(array) {
-	    var rest = flatten(arguments, true, true, 1);
+	  _.difference = restArguments(function(array, rest) {
+	    rest = flatten(rest, true, true);
 	    return _.filter(array, function(value){
 	      return !_.contains(rest, value);
 	    });
-	  };
-
-	  // Zip together multiple lists into a single array -- elements that share
-	  // an index go together.
-	  _.zip = function() {
-	    return _.unzip(arguments);
-	  };
+	  });
 
 	  // Complement of _.zip. Unzip accepts an array of arrays and groups
-	  // each array's elements on shared indices
+	  // each array's elements on shared indices.
 	  _.unzip = function(array) {
 	    var length = array && _.max(array, getLength).length || 0;
 	    var result = Array(length);
@@ -30566,9 +30605,13 @@
 	    return result;
 	  };
 
+	  // Zip together multiple lists into a single array -- elements that share
+	  // an index go together.
+	  _.zip = restArguments(_.unzip);
+
 	  // Converts lists into objects. Pass either a single array of `[key, value]`
 	  // pairs, or two parallel arrays of the same length -- one of keys, and one of
-	  // the corresponding values.
+	  // the corresponding values. Passing by pairs is the reverse of _.pairs.
 	  _.object = function(list, values) {
 	    var result = {};
 	    for (var i = 0, length = getLength(list); i < length; i++) {
@@ -30581,8 +30624,8 @@
 	    return result;
 	  };
 
-	  // Generator function to create the findIndex and findLastIndex functions
-	  function createPredicateIndexFinder(dir) {
+	  // Generator function to create the findIndex and findLastIndex functions.
+	  var createPredicateIndexFinder = function(dir) {
 	    return function(array, predicate, context) {
 	      predicate = cb(predicate, context);
 	      var length = getLength(array);
@@ -30592,9 +30635,9 @@
 	      }
 	      return -1;
 	    };
-	  }
+	  };
 
-	  // Returns the first index on an array-like that passes a predicate test
+	  // Returns the first index on an array-like that passes a predicate test.
 	  _.findIndex = createPredicateIndexFinder(1);
 	  _.findLastIndex = createPredicateIndexFinder(-1);
 
@@ -30611,15 +30654,15 @@
 	    return low;
 	  };
 
-	  // Generator function to create the indexOf and lastIndexOf functions
-	  function createIndexFinder(dir, predicateFind, sortedIndex) {
+	  // Generator function to create the indexOf and lastIndexOf functions.
+	  var createIndexFinder = function(dir, predicateFind, sortedIndex) {
 	    return function(array, item, idx) {
 	      var i = 0, length = getLength(array);
 	      if (typeof idx == 'number') {
 	        if (dir > 0) {
-	            i = idx >= 0 ? idx : Math.max(idx + length, i);
+	          i = idx >= 0 ? idx : Math.max(idx + length, i);
 	        } else {
-	            length = idx >= 0 ? Math.min(idx + 1, length) : idx + length + 1;
+	          length = idx >= 0 ? Math.min(idx + 1, length) : idx + length + 1;
 	        }
 	      } else if (sortedIndex && idx && length) {
 	        idx = sortedIndex(array, item);
@@ -30634,7 +30677,7 @@
 	      }
 	      return -1;
 	    };
-	  }
+	  };
 
 	  // Return the position of the first occurrence of an item in an array,
 	  // or -1 if the item is not included in the array.
@@ -30651,7 +30694,9 @@
 	      stop = start || 0;
 	      start = 0;
 	    }
-	    step = step || 1;
+	    if (!step) {
+	      step = stop < start ? -1 : 1;
+	    }
 
 	    var length = Math.max(Math.ceil((stop - start) / step), 0);
 	    var range = Array(length);
@@ -30663,11 +30708,23 @@
 	    return range;
 	  };
 
+	  // Chunk a single array into multiple arrays, each containing `count` or fewer
+	  // items.
+	  _.chunk = function(array, count) {
+	    if (count == null || count < 1) return [];
+	    var result = [];
+	    var i = 0, length = array.length;
+	    while (i < length) {
+	      result.push(slice.call(array, i, i += count));
+	    }
+	    return result;
+	  };
+
 	  // Function (ahem) Functions
 	  // ------------------
 
 	  // Determines whether to execute a function as a constructor
-	  // or a normal function with the provided arguments
+	  // or a normal function with the provided arguments.
 	  var executeBound = function(sourceFunc, boundFunc, context, callingContext, args) {
 	    if (!(callingContext instanceof boundFunc)) return sourceFunc.apply(context, args);
 	    var self = baseCreate(sourceFunc.prototype);
@@ -30679,45 +30736,46 @@
 	  // Create a function bound to a given object (assigning `this`, and arguments,
 	  // optionally). Delegates to **ECMAScript 5**'s native `Function.bind` if
 	  // available.
-	  _.bind = function(func, context) {
-	    if (nativeBind && func.bind === nativeBind) return nativeBind.apply(func, slice.call(arguments, 1));
+	  _.bind = restArguments(function(func, context, args) {
 	    if (!_.isFunction(func)) throw new TypeError('Bind must be called on a function');
-	    var args = slice.call(arguments, 2);
-	    var bound = function() {
-	      return executeBound(func, bound, context, this, args.concat(slice.call(arguments)));
-	    };
+	    var bound = restArguments(function(callArgs) {
+	      return executeBound(func, bound, context, this, args.concat(callArgs));
+	    });
 	    return bound;
-	  };
+	  });
 
 	  // Partially apply a function by creating a version that has had some of its
 	  // arguments pre-filled, without changing its dynamic `this` context. _ acts
-	  // as a placeholder, allowing any combination of arguments to be pre-filled.
-	  _.partial = function(func) {
-	    var boundArgs = slice.call(arguments, 1);
+	  // as a placeholder by default, allowing any combination of arguments to be
+	  // pre-filled. Set `_.partial.placeholder` for a custom placeholder argument.
+	  _.partial = restArguments(function(func, boundArgs) {
+	    var placeholder = _.partial.placeholder;
 	    var bound = function() {
 	      var position = 0, length = boundArgs.length;
 	      var args = Array(length);
 	      for (var i = 0; i < length; i++) {
-	        args[i] = boundArgs[i] === _ ? arguments[position++] : boundArgs[i];
+	        args[i] = boundArgs[i] === placeholder ? arguments[position++] : boundArgs[i];
 	      }
 	      while (position < arguments.length) args.push(arguments[position++]);
 	      return executeBound(func, bound, this, this, args);
 	    };
 	    return bound;
-	  };
+	  });
+
+	  _.partial.placeholder = _;
 
 	  // Bind a number of an object's methods to that object. Remaining arguments
 	  // are the method names to be bound. Useful for ensuring that all callbacks
 	  // defined on an object belong to it.
-	  _.bindAll = function(obj) {
-	    var i, length = arguments.length, key;
-	    if (length <= 1) throw new Error('bindAll must be passed function names');
-	    for (i = 1; i < length; i++) {
-	      key = arguments[i];
+	  _.bindAll = restArguments(function(obj, keys) {
+	    keys = flatten(keys, false, false);
+	    var index = keys.length;
+	    if (index < 1) throw new Error('bindAll must be passed function names');
+	    while (index--) {
+	      var key = keys[index];
 	      obj[key] = _.bind(obj[key], obj);
 	    }
-	    return obj;
-	  };
+	  });
 
 	  // Memoize an expensive function by storing its results.
 	  _.memoize = function(func, hasher) {
@@ -30733,12 +30791,11 @@
 
 	  // Delays a function for the given number of milliseconds, and then calls
 	  // it with the arguments supplied.
-	  _.delay = function(func, wait) {
-	    var args = slice.call(arguments, 2);
-	    return setTimeout(function(){
+	  _.delay = restArguments(function(func, wait, args) {
+	    return setTimeout(function() {
 	      return func.apply(null, args);
 	    }, wait);
-	  };
+	  });
 
 	  // Defers a function, scheduling it to run after the current call stack has
 	  // cleared.
@@ -30750,17 +30807,18 @@
 	  // but if you'd like to disable the execution on the leading edge, pass
 	  // `{leading: false}`. To disable execution on the trailing edge, ditto.
 	  _.throttle = function(func, wait, options) {
-	    var context, args, result;
-	    var timeout = null;
+	    var timeout, context, args, result;
 	    var previous = 0;
 	    if (!options) options = {};
+
 	    var later = function() {
 	      previous = options.leading === false ? 0 : _.now();
 	      timeout = null;
 	      result = func.apply(context, args);
 	      if (!timeout) context = args = null;
 	    };
-	    return function() {
+
+	    var throttled = function() {
 	      var now = _.now();
 	      if (!previous && options.leading === false) previous = now;
 	      var remaining = wait - (now - previous);
@@ -30779,6 +30837,14 @@
 	      }
 	      return result;
 	    };
+
+	    throttled.cancel = function() {
+	      clearTimeout(timeout);
+	      previous = 0;
+	      timeout = context = args = null;
+	    };
+
+	    return throttled;
 	  };
 
 	  // Returns a function, that, as long as it continues to be invoked, will not
@@ -30786,35 +30852,32 @@
 	  // N milliseconds. If `immediate` is passed, trigger the function on the
 	  // leading edge, instead of the trailing.
 	  _.debounce = function(func, wait, immediate) {
-	    var timeout, args, context, timestamp, result;
+	    var timeout, result;
 
-	    var later = function() {
-	      var last = _.now() - timestamp;
-
-	      if (last < wait && last >= 0) {
-	        timeout = setTimeout(later, wait - last);
-	      } else {
-	        timeout = null;
-	        if (!immediate) {
-	          result = func.apply(context, args);
-	          if (!timeout) context = args = null;
-	        }
-	      }
+	    var later = function(context, args) {
+	      timeout = null;
+	      if (args) result = func.apply(context, args);
 	    };
 
-	    return function() {
-	      context = this;
-	      args = arguments;
-	      timestamp = _.now();
-	      var callNow = immediate && !timeout;
-	      if (!timeout) timeout = setTimeout(later, wait);
-	      if (callNow) {
-	        result = func.apply(context, args);
-	        context = args = null;
+	    var debounced = restArguments(function(args) {
+	      if (timeout) clearTimeout(timeout);
+	      if (immediate) {
+	        var callNow = !timeout;
+	        timeout = setTimeout(later, wait);
+	        if (callNow) result = func.apply(this, args);
+	      } else {
+	        timeout = _.delay(later, wait, this, args);
 	      }
 
 	      return result;
+	    });
+
+	    debounced.cancel = function() {
+	      clearTimeout(timeout);
+	      timeout = null;
 	    };
+
+	    return debounced;
 	  };
 
 	  // Returns the first function passed as an argument to the second,
@@ -30869,18 +30932,20 @@
 	  // often you call it. Useful for lazy initialization.
 	  _.once = _.partial(_.before, 2);
 
+	  _.restArguments = restArguments;
+
 	  // Object Functions
 	  // ----------------
 
 	  // Keys in IE < 9 that won't be iterated by `for key in ...` and thus missed.
 	  var hasEnumBug = !{toString: null}.propertyIsEnumerable('toString');
 	  var nonEnumerableProps = ['valueOf', 'isPrototypeOf', 'toString',
-	                      'propertyIsEnumerable', 'hasOwnProperty', 'toLocaleString'];
+	    'propertyIsEnumerable', 'hasOwnProperty', 'toLocaleString'];
 
-	  function collectNonEnumProps(obj, keys) {
+	  var collectNonEnumProps = function(obj, keys) {
 	    var nonEnumIdx = nonEnumerableProps.length;
 	    var constructor = obj.constructor;
-	    var proto = (_.isFunction(constructor) && constructor.prototype) || ObjProto;
+	    var proto = _.isFunction(constructor) && constructor.prototype || ObjProto;
 
 	    // Constructor is a special case.
 	    var prop = 'constructor';
@@ -30892,10 +30957,10 @@
 	        keys.push(prop);
 	      }
 	    }
-	  }
+	  };
 
 	  // Retrieve the names of an object's own properties.
-	  // Delegates to **ECMAScript 5**'s native `Object.keys`
+	  // Delegates to **ECMAScript 5**'s native `Object.keys`.
 	  _.keys = function(obj) {
 	    if (!_.isObject(obj)) return [];
 	    if (nativeKeys) return nativeKeys(obj);
@@ -30927,22 +30992,22 @@
 	    return values;
 	  };
 
-	  // Returns the results of applying the iteratee to each element of the object
-	  // In contrast to _.map it returns an object
+	  // Returns the results of applying the iteratee to each element of the object.
+	  // In contrast to _.map it returns an object.
 	  _.mapObject = function(obj, iteratee, context) {
 	    iteratee = cb(iteratee, context);
-	    var keys =  _.keys(obj),
-	          length = keys.length,
-	          results = {},
-	          currentKey;
-	      for (var index = 0; index < length; index++) {
-	        currentKey = keys[index];
-	        results[currentKey] = iteratee(obj[currentKey], currentKey, obj);
-	      }
-	      return results;
+	    var keys = _.keys(obj),
+	        length = keys.length,
+	        results = {};
+	    for (var index = 0; index < length; index++) {
+	      var currentKey = keys[index];
+	      results[currentKey] = iteratee(obj[currentKey], currentKey, obj);
+	    }
+	    return results;
 	  };
 
 	  // Convert an object into a list of `[key, value]` pairs.
+	  // The opposite of _.object.
 	  _.pairs = function(obj) {
 	    var keys = _.keys(obj);
 	    var length = keys.length;
@@ -30964,7 +31029,7 @@
 	  };
 
 	  // Return a sorted list of the function names available on the object.
-	  // Aliased as `methods`
+	  // Aliased as `methods`.
 	  _.functions = _.methods = function(obj) {
 	    var names = [];
 	    for (var key in obj) {
@@ -30973,14 +31038,33 @@
 	    return names.sort();
 	  };
 
+	  // An internal function for creating assigner functions.
+	  var createAssigner = function(keysFunc, defaults) {
+	    return function(obj) {
+	      var length = arguments.length;
+	      if (defaults) obj = Object(obj);
+	      if (length < 2 || obj == null) return obj;
+	      for (var index = 1; index < length; index++) {
+	        var source = arguments[index],
+	            keys = keysFunc(source),
+	            l = keys.length;
+	        for (var i = 0; i < l; i++) {
+	          var key = keys[i];
+	          if (!defaults || obj[key] === void 0) obj[key] = source[key];
+	        }
+	      }
+	      return obj;
+	    };
+	  };
+
 	  // Extend a given object with all the properties in passed-in object(s).
 	  _.extend = createAssigner(_.allKeys);
 
-	  // Assigns a given object with all the own properties in the passed-in object(s)
+	  // Assigns a given object with all the own properties in the passed-in object(s).
 	  // (https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object/assign)
 	  _.extendOwn = _.assign = createAssigner(_.keys);
 
-	  // Returns the first key on an object that passes a predicate test
+	  // Returns the first key on an object that passes a predicate test.
 	  _.findKey = function(obj, predicate, context) {
 	    predicate = cb(predicate, context);
 	    var keys = _.keys(obj), key;
@@ -30990,16 +31074,21 @@
 	    }
 	  };
 
+	  // Internal pick helper function to determine if `obj` has key `key`.
+	  var keyInObj = function(value, key, obj) {
+	    return key in obj;
+	  };
+
 	  // Return a copy of the object only containing the whitelisted properties.
-	  _.pick = function(object, oiteratee, context) {
-	    var result = {}, obj = object, iteratee, keys;
+	  _.pick = restArguments(function(obj, keys) {
+	    var result = {}, iteratee = keys[0];
 	    if (obj == null) return result;
-	    if (_.isFunction(oiteratee)) {
+	    if (_.isFunction(iteratee)) {
+	      if (keys.length > 1) iteratee = optimizeCb(iteratee, keys[1]);
 	      keys = _.allKeys(obj);
-	      iteratee = optimizeCb(oiteratee, context);
 	    } else {
-	      keys = flatten(arguments, false, false, 1);
-	      iteratee = function(value, key, obj) { return key in obj; };
+	      iteratee = keyInObj;
+	      keys = flatten(keys, false, false);
 	      obj = Object(obj);
 	    }
 	    for (var i = 0, length = keys.length; i < length; i++) {
@@ -31008,20 +31097,22 @@
 	      if (iteratee(value, key, obj)) result[key] = value;
 	    }
 	    return result;
-	  };
+	  });
 
-	   // Return a copy of the object without the blacklisted properties.
-	  _.omit = function(obj, iteratee, context) {
+	  // Return a copy of the object without the blacklisted properties.
+	  _.omit = restArguments(function(obj, keys) {
+	    var iteratee = keys[0], context;
 	    if (_.isFunction(iteratee)) {
 	      iteratee = _.negate(iteratee);
+	      if (keys.length > 1) context = keys[1];
 	    } else {
-	      var keys = _.map(flatten(arguments, false, false, 1), String);
+	      keys = _.map(flatten(keys, false, false), String);
 	      iteratee = function(value, key) {
 	        return !_.contains(keys, key);
 	      };
 	    }
 	    return _.pick(obj, iteratee, context);
-	  };
+	  });
 
 	  // Fill in a given object with default properties.
 	  _.defaults = createAssigner(_.allKeys, true);
@@ -31063,12 +31154,23 @@
 
 
 	  // Internal recursive comparison function for `isEqual`.
-	  var eq = function(a, b, aStack, bStack) {
+	  var eq, deepEq;
+	  eq = function(a, b, aStack, bStack) {
 	    // Identical objects are equal. `0 === -0`, but they aren't identical.
 	    // See the [Harmony `egal` proposal](http://wiki.ecmascript.org/doku.php?id=harmony:egal).
 	    if (a === b) return a !== 0 || 1 / a === 1 / b;
-	    // A strict comparison is necessary because `null == undefined`.
-	    if (a == null || b == null) return a === b;
+	    // `null` or `undefined` only equal to itself (strict comparison).
+	    if (a == null || b == null) return false;
+	    // `NaN`s are equivalent, but non-reflexive.
+	    if (a !== a) return b !== b;
+	    // Exhaust primitive checks
+	    var type = typeof a;
+	    if (type !== 'function' && type !== 'object' && typeof b != 'object') return false;
+	    return deepEq(a, b, aStack, bStack);
+	  };
+
+	  // Internal recursive comparison function for `isEqual`.
+	  deepEq = function(a, b, aStack, bStack) {
 	    // Unwrap any wrapped objects.
 	    if (a instanceof _) a = a._wrapped;
 	    if (b instanceof _) b = b._wrapped;
@@ -31085,7 +31187,7 @@
 	        return '' + a === '' + b;
 	      case '[object Number]':
 	        // `NaN`s are equivalent, but non-reflexive.
-	        // Object(NaN) is equivalent to NaN
+	        // Object(NaN) is equivalent to NaN.
 	        if (+a !== +a) return +b !== +b;
 	        // An `egal` comparison is performed for other numeric values.
 	        return +a === 0 ? 1 / +a === 1 / b : +a === +b;
@@ -31095,6 +31197,8 @@
 	        // millisecond representations. Note that invalid dates with millisecond representations
 	        // of `NaN` are not equivalent.
 	        return +a === +b;
+	      case '[object Symbol]':
+	        return SymbolProto.valueOf.call(a) === SymbolProto.valueOf.call(b);
 	    }
 
 	    var areArrays = className === '[object Array]';
@@ -31185,8 +31289,8 @@
 	    return type === 'function' || type === 'object' && !!obj;
 	  };
 
-	  // Add some isType methods: isArguments, isFunction, isString, isNumber, isDate, isRegExp, isError.
-	  _.each(['Arguments', 'Function', 'String', 'Number', 'Date', 'RegExp', 'Error'], function(name) {
+	  // Add some isType methods: isArguments, isFunction, isString, isNumber, isDate, isRegExp, isError, isMap, isWeakMap, isSet, isWeakSet.
+	  _.each(['Arguments', 'Function', 'String', 'Number', 'Date', 'RegExp', 'Error', 'Symbol', 'Map', 'WeakMap', 'Set', 'WeakSet'], function(name) {
 	    _['is' + name] = function(obj) {
 	      return toString.call(obj) === '[object ' + name + ']';
 	    };
@@ -31201,8 +31305,9 @@
 	  }
 
 	  // Optimize `isFunction` if appropriate. Work around some typeof bugs in old v8,
-	  // IE 11 (#1621), and in Safari 8 (#1929).
-	  if (typeof /./ != 'function' && typeof Int8Array != 'object') {
+	  // IE 11 (#1621), Safari 8 (#1929), and PhantomJS (#2236).
+	  var nodelist = root.document && root.document.childNodes;
+	  if (typeof /./ != 'function' && typeof Int8Array != 'object' && typeof nodelist != 'function') {
 	    _.isFunction = function(obj) {
 	      return typeof obj == 'function' || false;
 	    };
@@ -31210,12 +31315,12 @@
 
 	  // Is a given object a finite number?
 	  _.isFinite = function(obj) {
-	    return isFinite(obj) && !isNaN(parseFloat(obj));
+	    return !_.isSymbol(obj) && isFinite(obj) && !isNaN(parseFloat(obj));
 	  };
 
-	  // Is the given value `NaN`? (NaN is the only number which does not equal itself).
+	  // Is the given value `NaN`?
 	  _.isNaN = function(obj) {
-	    return _.isNumber(obj) && obj !== +obj;
+	    return _.isNumber(obj) && isNaN(obj);
 	  };
 
 	  // Is a given value a boolean?
@@ -31235,8 +31340,19 @@
 
 	  // Shortcut function for checking if an object has a given property directly
 	  // on itself (in other words, not on a prototype).
-	  _.has = function(obj, key) {
-	    return obj != null && hasOwnProperty.call(obj, key);
+	  _.has = function(obj, path) {
+	    if (!_.isArray(path)) {
+	      return obj != null && hasOwnProperty.call(obj, path);
+	    }
+	    var length = path.length;
+	    for (var i = 0; i < length; i++) {
+	      var key = path[i];
+	      if (obj == null || !hasOwnProperty.call(obj, key)) {
+	        return false;
+	      }
+	      obj = obj[key];
+	    }
+	    return !!length;
 	  };
 
 	  // Utility Functions
@@ -31263,12 +31379,24 @@
 
 	  _.noop = function(){};
 
-	  _.property = property;
+	  // Creates a function that, when passed an object, will traverse that object’s
+	  // properties down the given `path`, specified as an array of keys or indexes.
+	  _.property = function(path) {
+	    if (!_.isArray(path)) {
+	      return shallowProperty(path);
+	    }
+	    return function(obj) {
+	      return deepGet(obj, path);
+	    };
+	  };
 
 	  // Generates a function for a given object that returns a given property.
 	  _.propertyOf = function(obj) {
-	    return obj == null ? function(){} : function(key) {
-	      return obj[key];
+	    if (obj == null) {
+	      return function(){};
+	    }
+	    return function(path) {
+	      return !_.isArray(path) ? obj[path] : deepGet(obj, path);
 	    };
 	  };
 
@@ -31303,7 +31431,7 @@
 	    return new Date().getTime();
 	  };
 
-	   // List of HTML entities for escaping.
+	  // List of HTML entities for escaping.
 	  var escapeMap = {
 	    '&': '&amp;',
 	    '<': '&lt;',
@@ -31319,7 +31447,7 @@
 	    var escaper = function(match) {
 	      return map[match];
 	    };
-	    // Regexes for identifying a key that needs to be escaped
+	    // Regexes for identifying a key that needs to be escaped.
 	    var source = '(?:' + _.keys(map).join('|') + ')';
 	    var testRegexp = RegExp(source);
 	    var replaceRegexp = RegExp(source, 'g');
@@ -31331,14 +31459,24 @@
 	  _.escape = createEscaper(escapeMap);
 	  _.unescape = createEscaper(unescapeMap);
 
-	  // If the value of the named `property` is a function then invoke it with the
-	  // `object` as context; otherwise, return it.
-	  _.result = function(object, property, fallback) {
-	    var value = object == null ? void 0 : object[property];
-	    if (value === void 0) {
-	      value = fallback;
+	  // Traverses the children of `obj` along `path`. If a child is a function, it
+	  // is invoked with its parent as context. Returns the value of the final
+	  // child, or `fallback` if any child is undefined.
+	  _.result = function(obj, path, fallback) {
+	    if (!_.isArray(path)) path = [path];
+	    var length = path.length;
+	    if (!length) {
+	      return _.isFunction(fallback) ? fallback.call(obj) : fallback;
 	    }
-	    return _.isFunction(value) ? value.call(object) : value;
+	    for (var i = 0; i < length; i++) {
+	      var prop = obj == null ? void 0 : obj[path[i]];
+	      if (prop === void 0) {
+	        prop = fallback;
+	        i = length; // Ensure we don't continue iterating.
+	      }
+	      obj = _.isFunction(prop) ? prop.call(obj) : prop;
+	    }
+	    return obj;
 	  };
 
 	  // Generate a unique integer id (unique within the entire client session).
@@ -31352,9 +31490,9 @@
 	  // By default, Underscore uses ERB-style template delimiters, change the
 	  // following template settings to use alternative delimiters.
 	  _.templateSettings = {
-	    evaluate    : /<%([\s\S]+?)%>/g,
-	    interpolate : /<%=([\s\S]+?)%>/g,
-	    escape      : /<%-([\s\S]+?)%>/g
+	    evaluate: /<%([\s\S]+?)%>/g,
+	    interpolate: /<%=([\s\S]+?)%>/g,
+	    escape: /<%-([\s\S]+?)%>/g
 	  };
 
 	  // When customizing `templateSettings`, if you don't want to define an
@@ -31365,15 +31503,15 @@
 	  // Certain characters need to be escaped so that they can be put into a
 	  // string literal.
 	  var escapes = {
-	    "'":      "'",
-	    '\\':     '\\',
-	    '\r':     'r',
-	    '\n':     'n',
+	    "'": "'",
+	    '\\': '\\',
+	    '\r': 'r',
+	    '\n': 'n',
 	    '\u2028': 'u2028',
 	    '\u2029': 'u2029'
 	  };
 
-	  var escaper = /\\|'|\r|\n|\u2028|\u2029/g;
+	  var escapeRegExp = /\\|'|\r|\n|\u2028|\u2029/g;
 
 	  var escapeChar = function(match) {
 	    return '\\' + escapes[match];
@@ -31398,7 +31536,7 @@
 	    var index = 0;
 	    var source = "__p+='";
 	    text.replace(matcher, function(match, escape, interpolate, evaluate, offset) {
-	      source += text.slice(index, offset).replace(escaper, escapeChar);
+	      source += text.slice(index, offset).replace(escapeRegExp, escapeChar);
 	      index = offset + match.length;
 
 	      if (escape) {
@@ -31409,7 +31547,7 @@
 	        source += "';\n" + evaluate + "\n__p+='";
 	      }
 
-	      // Adobe VMs need the match returned to produce the correct offest.
+	      // Adobe VMs need the match returned to produce the correct offset.
 	      return match;
 	    });
 	    source += "';\n";
@@ -31421,8 +31559,9 @@
 	      "print=function(){__p+=__j.call(arguments,'');};\n" +
 	      source + 'return __p;\n';
 
+	    var render;
 	    try {
-	      var render = new Function(settings.variable || 'obj', '_', source);
+	      render = new Function(settings.variable || 'obj', '_', source);
 	    } catch (e) {
 	      e.source = source;
 	      throw e;
@@ -31453,7 +31592,7 @@
 	  // underscore functions. Wrapped objects may be chained.
 
 	  // Helper function to continue chaining intermediate results.
-	  var result = function(instance, obj) {
+	  var chainResult = function(instance, obj) {
 	    return instance._chain ? _(obj).chain() : obj;
 	  };
 
@@ -31464,9 +31603,10 @@
 	      _.prototype[name] = function() {
 	        var args = [this._wrapped];
 	        push.apply(args, arguments);
-	        return result(this, func.apply(_, args));
+	        return chainResult(this, func.apply(_, args));
 	      };
 	    });
+	    return _;
 	  };
 
 	  // Add all of the Underscore functions to the wrapper object.
@@ -31479,7 +31619,7 @@
 	      var obj = this._wrapped;
 	      method.apply(obj, arguments);
 	      if ((name === 'shift' || name === 'splice') && obj.length === 0) delete obj[0];
-	      return result(this, obj);
+	      return chainResult(this, obj);
 	    };
 	  });
 
@@ -31487,7 +31627,7 @@
 	  _.each(['concat', 'join', 'slice'], function(name) {
 	    var method = ArrayProto[name];
 	    _.prototype[name] = function() {
-	      return result(this, method.apply(this._wrapped, arguments));
+	      return chainResult(this, method.apply(this._wrapped, arguments));
 	    };
 	  });
 
@@ -31501,7 +31641,7 @@
 	  _.prototype.valueOf = _.prototype.toJSON = _.prototype.value;
 
 	  _.prototype.toString = function() {
-	    return '' + this._wrapped;
+	    return String(this._wrapped);
 	  };
 
 	  // AMD registration happens at the end for compatibility with AMD loaders
@@ -31516,11 +31656,28 @@
 	      return _;
 	    }.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
 	  }
-	}.call(this));
+	}());
 
+	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }()), __webpack_require__(246)(module)))
 
 /***/ }),
 /* 246 */
+/***/ (function(module, exports) {
+
+	module.exports = function(module) {
+		if(!module.webpackPolyfill) {
+			module.deprecate = function() {};
+			module.paths = [];
+			// module.parent = undefined by default
+			module.children = [];
+			module.webpackPolyfill = 1;
+		}
+		return module;
+	}
+
+
+/***/ }),
+/* 247 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
@@ -41890,7 +42047,7 @@
 
 
 /***/ }),
-/* 247 */
+/* 248 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -41901,11 +42058,11 @@
 
 	var _backbone2 = _interopRequireDefault(_backbone);
 
-	var _backbone3 = __webpack_require__(248);
+	var _backbone3 = __webpack_require__(249);
 
 	var _backbone4 = _interopRequireDefault(_backbone3);
 
-	var _auth = __webpack_require__(249);
+	var _auth = __webpack_require__(250);
 
 	var _auth2 = _interopRequireDefault(_auth);
 
@@ -42084,7 +42241,7 @@
 	module.exports = _backbone2.default;
 
 /***/ }),
-/* 248 */
+/* 249 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	/*
@@ -42167,10 +42324,10 @@
 
 	  function queryStringToParams (qs) {
 	    var kvp, k, v, ls, params = {}, decode = decodeURIComponent;
-	    var kvps = qs.split('&');
+	    var kvps = qs.split("&");
 	    for (var i = 0, l = kvps.length; i < l; i++) {
 	      var param = kvps[i];
-	      kvp = param.split('='), k = kvp[0], v = kvp[1];
+	      kvp = param.split("="), k = kvp[0], v = kvp[1];
 	      if (v == null) v = true;
 	      k = decode(k), v = decode(v), ls = params[k];
 	      if (_isArray(ls)) ls.push(v);
@@ -42578,7 +42735,7 @@
 	            }
 	            else if (removedIndex >= pageStart && removedIndex < pageEnd) {
 	              if (nextModel = fullCol.at(pageEnd - 1)) {
-	                runOnceAtLastHandler(pageCol, event, function() {
+	                runOnceAtLastHandler(pageCol, event, function () {
 	                  pageCol.push(nextModel, {onRemove: true});
 	                });
 	              }
@@ -42653,6 +42810,8 @@
 
 	       @private
 
+	       @param {Object} state
+
 	       @throws {TypeError} If `totalRecords`, `pageSize`, `currentPage` or
 	       `firstPage` is not a finite integer.
 
@@ -42701,7 +42860,7 @@
 	          throw new RangeError("`currentPage` must be firstPage <= currentPage " +
 	                               (firstPage ? "<" : "<=") +
 	                               " totalPages if " + firstPage + "-based. Got " +
-	                               currentPage + '.');
+	                               currentPage + ".");
 	        }
 	      }
 
@@ -43012,6 +43171,7 @@
 	       current page of this collection to the page for the provided item offset
 	       in client mode.
 
+	       @param {number} offset
 	       @param {Object} options {@linkPageableCollection#getPage} options.
 
 	       @chainable
@@ -43083,12 +43243,12 @@
 	        var relations = ["first", "prev", "next"];
 	        _each(linkHeader.split(","), function (linkValue) {
 	          var linkParts = linkValue.split(";");
-	          var url = linkParts[0].replace(URL_TRIM_RE, '');
+	          var url = linkParts[0].replace(URL_TRIM_RE, "");
 	          var params = linkParts.slice(1);
 	          _each(params, function (param) {
 	            var paramParts = param.split("=");
-	            var key = paramParts[0].replace(PARAM_TRIM_RE, '');
-	            var value = paramParts[1].replace(PARAM_TRIM_RE, '');
+	            var key = paramParts[0].replace(PARAM_TRIM_RE, "");
+	            var value = paramParts[1].replace(PARAM_TRIM_RE, "");
 	            if (key == "rel" && _contains(relations, value)) links[value] = url;
 	          });
 	        });
@@ -43129,7 +43289,7 @@
 	       @fires PageableCollection#pageable:state:change
 
 	       @param {Object} resp The deserialized response data from the server.
-	       @param {Object} the options for the ajax request
+	       @param {Object} options The options for the ajax request
 
 	       @return {Array.<Object>} An array of model objects
 	    */
@@ -43255,7 +43415,7 @@
 	      // dedup query params
 	      var url = options.url || this.url || "";
 	      if (_isFunction(url)) url = url.call(this);
-	      var qsi = url.indexOf('?');
+	      var qsi = url.indexOf("?");
 	      if (qsi != -1) {
 	        _extend(data, queryStringToParams(url.slice(qsi + 1)));
 	        url = url.slice(0, qsi);
@@ -43365,6 +43525,8 @@
 	       @param {(function(Backbone.Model, string): Object) | string} sortValue -
 	       See PageableCollection#setSorting.
 
+	       @return {function(Backbone.Model, string): number}
+
 	       See [Backbone.Collection.comparator](http://backbonejs.org/#Collection-comparator).
 	    */
 	    _makeComparator: function (sortKey, order, sortValue) {
@@ -43375,9 +43537,11 @@
 
 	      if (!sortKey || !order) return;
 
-	      if (!sortValue) sortValue = function (model, attr) {
-	        return model.get(attr);
-	      };
+	      if (!sortValue) {
+	        sortValue = function (model, attr) {
+	          return model.get(attr);
+	        };
+	      }
 
 	      return function (left, right) {
 	        var l = sortValue(left, sortKey), r = sortValue(right, sortKey), t;
@@ -43413,6 +43577,8 @@
 	       `"client"`, `"server"` otherwise.
 	       @param {boolean} options.full = true
 	       @param {(function(Backbone.Model, string): Object) | string} options.sortValue
+
+	       @return {PageableCollection} this
 	    */
 	    setSorting: function (sortKey, order, options) {
 
@@ -43465,7 +43631,7 @@
 
 
 /***/ }),
-/* 249 */
+/* 250 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -43596,7 +43762,7 @@
 	};
 
 /***/ }),
-/* 250 */
+/* 251 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -43609,7 +43775,7 @@
 
 	var _reactRouter = __webpack_require__(184);
 
-	var _auth = __webpack_require__(249);
+	var _auth = __webpack_require__(250);
 
 	var _auth2 = _interopRequireDefault(_auth);
 
@@ -43715,7 +43881,7 @@
 	}(_react2.default.Component);
 
 /***/ }),
-/* 251 */
+/* 252 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_RESULT__;/*! UIkit 2.27.4 | http://www.getuikit.com | (c) 2014 YOOtheme | MIT License */
@@ -47637,7 +47803,7 @@
 
 
 /***/ }),
-/* 252 */
+/* 253 */
 /***/ (function(module, exports) {
 
 	/*! UIkit 2.27.4 | http://www.getuikit.com | (c) 2014 YOOtheme | MIT License */
@@ -48177,7 +48343,7 @@
 
 
 /***/ }),
-/* 253 */
+/* 254 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*! UIkit 2.27.4 | http://www.getuikit.com | (c) 2014 YOOtheme | MIT License */
@@ -48193,7 +48359,7 @@
 	    }
 
 	    if (true) {
-	        !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(251)], __WEBPACK_AMD_DEFINE_RESULT__ = function(){
+	        !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(252)], __WEBPACK_AMD_DEFINE_RESULT__ = function(){
 	            return component || addon(UIkit2);
 	        }.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
 	    }
@@ -48330,7 +48496,7 @@
 
 
 /***/ }),
-/* 254 */
+/* 255 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*! UIkit 2.27.4 | http://www.getuikit.com | (c) 2014 YOOtheme | MIT License */
@@ -48343,7 +48509,7 @@
 	    }
 
 	    if (true) {
-	        !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(251)], __WEBPACK_AMD_DEFINE_RESULT__ = function(){
+	        !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(252)], __WEBPACK_AMD_DEFINE_RESULT__ = function(){
 	            return component || addon(UIkit2);
 	        }.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
 	    }
@@ -48676,7 +48842,7 @@
 
 
 /***/ }),
-/* 255 */
+/* 256 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*! UIkit 2.27.4 | http://www.getuikit.com | (c) 2014 YOOtheme | MIT License */
@@ -48689,7 +48855,7 @@
 	    }
 
 	    if (true) {
-	        !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(251)], __WEBPACK_AMD_DEFINE_RESULT__ = function(){
+	        !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(252)], __WEBPACK_AMD_DEFINE_RESULT__ = function(){
 	            return component || addon(UIkit2);
 	        }.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
 	    }
@@ -48871,7 +49037,7 @@
 
 
 /***/ }),
-/* 256 */
+/* 257 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*! UIkit 2.27.4 | http://www.getuikit.com | (c) 2014 YOOtheme | MIT License */
@@ -48884,7 +49050,7 @@
 	    }
 
 	    if (true) {
-	        !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(251)], __WEBPACK_AMD_DEFINE_RESULT__ = function(){
+	        !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(252)], __WEBPACK_AMD_DEFINE_RESULT__ = function(){
 	            return component || addon(UIkit2);
 	        }.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
 	    }
@@ -49139,7 +49305,7 @@
 
 
 /***/ }),
-/* 257 */
+/* 258 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -49152,15 +49318,15 @@
 
 	var _reactRouter = __webpack_require__(184);
 
-	var _MemberLogin = __webpack_require__(258);
+	var _MemberLogin = __webpack_require__(259);
 
 	var _MemberLogin2 = _interopRequireDefault(_MemberLogin);
 
-	var _MemberView = __webpack_require__(259);
+	var _MemberView = __webpack_require__(260);
 
 	var _MemberView2 = _interopRequireDefault(_MemberView);
 
-	var _auth = __webpack_require__(249);
+	var _auth = __webpack_require__(250);
 
 	var _auth2 = _interopRequireDefault(_auth);
 
@@ -49230,7 +49396,7 @@
 	}(_react2.default.Component));
 
 /***/ }),
-/* 258 */
+/* 259 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -49243,7 +49409,7 @@
 
 	var _reactRouter = __webpack_require__(184);
 
-	var _auth = __webpack_require__(249);
+	var _auth = __webpack_require__(250);
 
 	var _auth2 = _interopRequireDefault(_auth);
 
@@ -49339,7 +49505,7 @@
 	}(_react2.default.Component));
 
 /***/ }),
-/* 259 */
+/* 260 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -49352,23 +49518,23 @@
 
 	var _reactRouter = __webpack_require__(184);
 
-	var _DateTime = __webpack_require__(260);
+	var _DateTime = __webpack_require__(329);
 
 	var _DateTime2 = _interopRequireDefault(_DateTime);
 
-	var _Member = __webpack_require__(261);
+	var _Member = __webpack_require__(454);
 
 	var _Member2 = _interopRequireDefault(_Member);
 
-	var _Input = __webpack_require__(262);
+	var _Input = __webpack_require__(330);
 
 	var _Input2 = _interopRequireDefault(_Input);
 
-	var _GenericEntityFunctions = __webpack_require__(264);
+	var _GenericEntityFunctions = __webpack_require__(290);
 
 	var _GenericEntityFunctions2 = _interopRequireDefault(_GenericEntityFunctions);
 
-	var _KeyView = __webpack_require__(265);
+	var _KeyView = __webpack_require__(455);
 
 	var _KeyView2 = _interopRequireDefault(_KeyView);
 
@@ -49499,6 +49665,21 @@
 						),
 						_react2.default.createElement(_KeyView2.default, null),
 						_react2.default.createElement(
+							'fieldset',
+							null,
+							_react2.default.createElement(
+								'legend',
+								null,
+								_react2.default.createElement('i', { className: 'uk-icon-shopping-cart' }),
+								' K\xF6phistorik'
+							),
+							_react2.default.createElement(
+								'a',
+								{ className: 'uk-button uk-button-default uk-margin-top', href: "/shop/member/" + this.state.model.get('member_id') + "/history" },
+								'Visa k\xF6phistorik'
+							)
+						),
+						_react2.default.createElement(
 							'div',
 							{ className: 'uk-form-row' },
 							_react2.default.createElement(
@@ -49523,82 +49704,67 @@
 	}(_react2.default.Component));
 
 /***/ }),
-/* 260 */
+/* 261 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 	var _react = __webpack_require__(1);
 
 	var _react2 = _interopRequireDefault(_react);
 
+	var _reactRouter = __webpack_require__(184);
+
+	var _MemberLogin = __webpack_require__(259);
+
+	var _MemberLogin2 = _interopRequireDefault(_MemberLogin);
+
+	var _MemberView = __webpack_require__(260);
+
+	var _MemberView2 = _interopRequireDefault(_MemberView);
+
+	var _auth = __webpack_require__(250);
+
+	var _auth2 = _interopRequireDefault(_auth);
+
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-	module.exports = _react2.default.createClass({
-		displayName: 'exports',
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-		render: function render() {
-			var str = _react2.default.createElement(
-				'em',
-				null,
-				'Ej angivet'
-			);
-			if (this.props.date !== undefined && this.props.date != "") {
-				var options = {
-					year: 'numeric', month: 'numeric', day: 'numeric',
-					hour: 'numeric', minute: 'numeric', second: 'numeric',
-					hour12: false
-				};
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
-				// Parse the date
-				var parsed_date = Date.parse(this.props.date);
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-				// If the date was parsed successfully we should update the string
-				if (!isNaN(parsed_date)) {
-					var str = new Intl.DateTimeFormat("sv-SE", options).format(parsed_date);
-				}
+	module.exports = (0, _reactRouter.withRouter)(function (_React$Component) {
+		_inherits(Login, _React$Component);
+
+		function Login() {
+			_classCallCheck(this, Login);
+
+			return _possibleConstructorReturn(this, (Login.__proto__ || Object.getPrototypeOf(Login)).apply(this, arguments));
+		}
+
+		_createClass(Login, [{
+			key: 'componentWillMount',
+			value: function componentWillMount() {
+				_auth2.default.setToken(this.props.params.token);
+				_reactRouter.browserHistory.push("/member");
 			}
+		}, {
+			key: 'render',
+			value: function render() {
+				return _react2.default.createElement(
+					'p',
+					null,
+					'Logging in...'
+				);
+			}
+		}]);
 
-			return _react2.default.createElement(
-				'span',
-				null,
-				str
-			);
-		}
-	});
-
-/***/ }),
-/* 261 */
-/***/ (function(module, exports, __webpack_require__) {
-
-	"use strict";
-
-	var _backbone = __webpack_require__(244);
-
-	var _backbone2 = _interopRequireDefault(_backbone);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	module.exports = _backbone2.default.Model.fullExtend({
-		url: function url() {
-			return "/member/current";
-		},
-		defaults: {
-			created_at: "",
-			updated_at: "",
-			member_number: "",
-			civicregno: "",
-			firstname: "",
-			lastname: "",
-			email: "",
-			phone: "",
-			address_street: "",
-			address_extra: "",
-			address_zipcode: "",
-			address_city: "",
-			address_country: "se"
-		}
-	});
+		return Login;
+	}(_react2.default.Component));
 
 /***/ }),
 /* 262 */
@@ -49612,598 +49778,9 @@
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _bind = __webpack_require__(263);
-
-	var _bind2 = _interopRequireDefault(_bind);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-	module.exports = function (_React$Component) {
-		_inherits(FormInput, _React$Component);
-
-		function FormInput(props) {
-			_classCallCheck(this, FormInput);
-
-			var _this2 = _possibleConstructorReturn(this, (FormInput.__proto__ || Object.getPrototypeOf(FormInput)).call(this, props));
-
-			_this2.state = {
-				selected: false,
-				isDirty: false,
-				value: _this2.props.model.get(_this2.props.name),
-				model: _this2.props.model,
-				error_column: "", // TODO
-				error_message: ""
-			};
-			return _this2;
-		}
-
-		_createClass(FormInput, [{
-			key: 'componentDidMount',
-			value: function componentDidMount() {
-				var _this = this;
-
-				// A sync event is fired when the model is saved
-				// When the model is saved the field is no longer dirty
-				this.state.model.on("sync", function (event) {
-					_this.setState({
-						isDirty: _this.state.model.attributeHasChanged(_this.props.name)
-					});
-				});
-
-				// Update this component when the model is changed
-				this.state.model.on("change", function () {
-					if (_this.state.model.changed[_this.props.name] !== undefined) {
-						_this.setState({
-							value: _this.state.model.changed[_this.props.name],
-							isDirty: _this.state.model.attributeHasChanged(_this.props.name)
-						});
-					}
-				});
-			}
-		}, {
-			key: 'onChange',
-			value: function onChange(event) {
-				this.state.model.set(this.props.name, event.target.value);
-			}
-		}, {
-			key: 'onFocus',
-			value: function onFocus() {
-				this.setState({ selected: true });
-			}
-		}, {
-			key: 'onBlur',
-			value: function onBlur() {
-				this.setState({ selected: false });
-			}
-		}, {
-			key: 'render',
-			value: function render() {
-				var classes = (0, _bind2.default)({
-					"uk-form-row": true,
-					"selected": this.state.selected,
-					"changed": this.state.isDirty,
-					"error": this.state.error_column == this.props.name
-				});
-				classes += " " + this.props.name;
-
-				return _react2.default.createElement(
-					'div',
-					{ className: classes },
-					_react2.default.createElement(
-						'label',
-						{ htmlFor: this.props.name, className: 'uk-form-label' },
-						this.props.title
-					),
-					_react2.default.createElement(
-						'div',
-						{ className: 'uk-form-controls' },
-						this.props.icon ? _react2.default.createElement(
-							'div',
-							{ className: 'uk-form-icon' },
-							_react2.default.createElement('i', { className: "uk-icon-" + this.props.icon }),
-							_react2.default.createElement('input', { type: 'text', name: this.props.name, id: this.props.name, disabled: this.props.disabled, value: this.state.value, placeholder: this.props.placeholder ? this.props.placeholder : this.props.title, onChange: this.onChange.bind(this), className: 'uk-form-width-large', onFocus: this.onFocus.bind(this), onBlur: this.onBlur.bind(this) })
-						) : _react2.default.createElement('input', { type: 'text', name: this.props.name, id: this.props.name, disabled: this.props.disabled, value: this.state.value, placeholder: this.props.placeholder ? this.props.placeholder : this.props.title, onChange: this.onChange.bind(this), className: 'uk-form-width-large', onFocus: this.onFocus.bind(this), onBlur: this.onBlur.bind(this) }),
-						this.state.error_column == this.props.name ? _react2.default.createElement(
-							'p',
-							{ className: 'uk-form-help-block error' },
-							this.state.error_message
-						) : ""
-					)
-				);
-			}
-		}]);
-
-		return FormInput;
-	}(_react2.default.Component);
-
-/***/ }),
-/* 263 */
-/***/ (function(module, exports, __webpack_require__) {
-
-	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
-	  Copyright (c) 2016 Jed Watson.
-	  Licensed under the MIT License (MIT), see
-	  http://jedwatson.github.io/classnames
-	*/
-	/* global define */
-
-	(function () {
-		'use strict';
-
-		var hasOwn = {}.hasOwnProperty;
-
-		function classNames () {
-			var classes = [];
-
-			for (var i = 0; i < arguments.length; i++) {
-				var arg = arguments[i];
-				if (!arg) continue;
-
-				var argType = typeof arg;
-
-				if (argType === 'string' || argType === 'number') {
-					classes.push(this && this[arg] || arg);
-				} else if (Array.isArray(arg)) {
-					classes.push(classNames.apply(this, arg));
-				} else if (argType === 'object') {
-					for (var key in arg) {
-						if (hasOwn.call(arg, key) && arg[key]) {
-							classes.push(this && this[key] || key);
-						}
-					}
-				}
-			}
-
-			return classes.join(' ');
-		}
-
-		if (typeof module !== 'undefined' && module.exports) {
-			module.exports = classNames;
-		} else if (true) {
-			// register as 'classnames', consistent with npm package name
-			!(__WEBPACK_AMD_DEFINE_ARRAY__ = [], __WEBPACK_AMD_DEFINE_RESULT__ = function () {
-				return classNames;
-			}.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
-		} else {
-			window.classNames = classNames;
-		}
-	}());
-
-
-/***/ }),
-/* 264 */
-/***/ (function(module, exports, __webpack_require__) {
-
-	"use strict";
-
-	var _react = __webpack_require__(1);
-
-	var _react2 = _interopRequireDefault(_react);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	module.exports = {
-		getInitialState: function getInitialState() {
-			return {
-				disableSend: true,
-				ignoreExitHook: false
-			};
-		},
-
-		componentDidMount: function componentDidMount() {
-			var _this2 = this;
-
-			var _this = this;
-
-			// User should get a warning if trying to leave the page when there is any unsaved data in the form
-			this.props.router.setRouteLeaveHook(this.props.route, function () {
-				// TODO: När den här funktionen väl är registrerad verkar den ligga kvar tills nästa sidladdning,
-				// så om modellen försvinner kommer den gnälla. En bättre lösning vore att avregistrera exit handlern,
-				// när den inte längre behövs. Det här problemet dyker upp lite överallt.
-				// TODO: Verkar vara fixat nu?
-				if (_this2.state.ignoreExitHook !== true && /*this.wrapper !== undefined && this.getModel() !== undefined &&*/_this2.getModel().isDirty()) {
-					return "Du har information som inte är sparad. Är du säker på att du vill lämna sidan?";
-				}
-			});
-
-			// If we create a enableSendButton() function it will be called everytime a model have changed
-			// The enableSendButton() function should be used to validate the model and enable/disable the send/save button
-			this.getModel().on("change sync", function () {
-				_this.updateSendButton();
-			});
-		},
-
-		updateSendButton: function updateSendButton() {
-			if (this.hasOwnProperty("enableSendButton")) {
-				var _this = this;
-				// We need to have a delay so setState() has propely updated the state
-				setTimeout(function () {
-					// The user might already have leaved the page via an onCreate or onUpdate handler
-					// Ignore this call if the model is destroyed
-					if (_this.wrapper !== undefined && _this.getModel() !== undefined) {
-						// Note: We invert the result because we want the function to return true to activate the button, while disabled="" works the other way
-						_this.setState({ disableSend: !_this.enableSendButton() });
-					}
-				}, 100);
-			}
-		},
-
-		handleChange: function handleChange(event) {
-			// Update the model with new value
-			var target = event.target;
-			var key = target.getAttribute("name");
-			this.getModel().set(key, target.value);
-
-			// When we change the value of the model we have to rerender the component
-			this.forceUpdate();
-		},
-
-		// Generic cancel function
-		cancel: function cancel(entity) {
-			if (this.props.hasOwnProperty("onCancel")) {
-				this.props.onCancel(entity);
-			} else if (this.hasOwnProperty("onCancel")) {
-				this.onCancel(entity);
-			}
-		},
-
-		// Generic remove function
-		removeEntity: function removeEntity(event) {
-			var _this = this;
-
-			// Prevent the form from being submitted
-			event.preventDefault();
-
-			// Ask the user from confirmation and then try to remove
-			var entity = this.getModel();
-			UIkit.modal.confirm(this.removeTextMessage(entity.attributes), function () {
-				entity.destroy({
-					wait: true,
-					success: function success(model, response) {
-						if (response.status == "deleted") {
-							if (_this.props.hasOwnProperty("onRemove")) {
-								_this.props.onRemove();
-							} else if (_this.hasOwnProperty("onRemove")) {
-								_this.onRemove();
-							} else {
-								UIkit.notify("Successfully deleted", { status: "success" });
-							}
-						} else {
-							if (_this.props.hasOwnProperty("onRemoveError")) {
-								_this.props.onRemoveError(_this.getModel());
-							} else if (_this.hasOwnProperty("onRemoveError")) {
-								_this.onRemoveError(_this.getModel());
-							} else {
-								UIkit.notify("Error while deleting", { timeout: 0, status: "danger" });
-							}
-						}
-					},
-					error: function error() {
-						if (_this.props.hasOwnProperty("onRemoveError")) {
-							_this.props.onRemoveError(_this.getModel());
-						} else if (_this.hasOwnProperty("onRemoveError")) {
-							_this.onRemoveError(_this.getModel());
-						} else {
-							UIkit.notify("Error while deleting", { timeout: 0, status: "danger" });
-						}
-					}
-				});
-			});
-			return false;
-		},
-
-		// Generic save function
-		saveEntity: function saveEntity(event) {
-			var _this = this;
-
-			// Clear the created_at and updated_at
-			this.getModel().set("created_at", null);
-			this.getModel().set("updated_at", null);
-
-			// Prevent the form from being submitted
-			event.preventDefault();
-
-			this.getModel().save(null, {
-				success: function success(model, response) {
-					if (response.status == "created") {
-						if (_this.props.hasOwnProperty("onCreate")) {
-							_this.props.onCreate(_this.getModel());
-						} else if (_this.hasOwnProperty("onCreate")) {
-							_this.onCreate(_this.getModel());
-						} else {
-							UIkit.notify("Successfully saved", { status: "success" });
-						}
-					} else if (response.status == "updated") {
-						if (_this.props.hasOwnProperty("onUpdate")) {
-							_this.props.onUpdate(_this.getModel());
-						} else if (_this.hasOwnProperty("onUpdate")) {
-							_this.onUpdate(_this.getModel());
-						} else {
-							UIkit.notify("Successfully updated", { status: "success" });
-						}
-					} else {
-						if (_this.props.hasOwnProperty("onSaveError")) {
-							_this.props.onSaveError(_this.getModel());
-						} else if (_this.hasOwnProperty("onSaveError")) {
-							_this.onSaveError(_this.getModel());
-						} else {
-							UIkit.notify("Error while saving", { timeout: 0, status: "danger" });
-						}
-					}
-				},
-				error: function error(model, response, options) {
-					if (response.status == 422) {
-						_this.setState({
-							error_column: response.responseJSON.column,
-							error_message: response.responseJSON.message
-						});
-					} else {
-						if (_this.props.hasOwnProperty("onSaveError")) {
-							_this.props.onSaveError(_this.getModel());
-						} else if (_this.hasOwnProperty("onSaveError")) {
-							_this.onSaveError(_this.getModel());
-						} else {
-							UIkit.notify("Error while saving", { timeout: 0, status: "danger" });
-						}
-					}
-				}
-			});
-		},
-
-		// Render the cancel button
-		cancelButton: function cancelButton() {
-			return _react2.default.createElement(
-				"a",
-				{ className: "uk-button uk-button-danger uk-float-left", onClick: this.cancel },
-				_react2.default.createElement("i", { className: "uk-icon-close" }),
-				" Avbryt"
-			);
-		},
-
-		// Render the remove button
-		removeButton: function removeButton(text) {
-			if (this.getModel().id === undefined) {
-				return;
-			}
-
-			if (text === undefined) {
-				var text = "Spara";
-			}
-
-			return _react2.default.createElement(
-				"a",
-				{ className: "uk-button uk-button-danger uk-float-left", onClick: this.removeEntity },
-				_react2.default.createElement("i", { className: "uk-icon-trash" }),
-				" ",
-				text
-			);
-		},
-
-		// Render the save button
-		saveButton: function saveButton(text) {
-			if (text === undefined) {
-				var text = "Spara";
-			}
-
-			return _react2.default.createElement(
-				"button",
-				{ className: "uk-button uk-button-success uk-float-right", disabled: this.state.disableSend, onClick: this.saveEntity },
-				_react2.default.createElement("i", { className: "uk-icon-save" }),
-				" ",
-				text
-			);
-		}
-	};
-
-/***/ }),
-/* 265 */
-/***/ (function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-	var _react = __webpack_require__(1);
-
-	var _react2 = _interopRequireDefault(_react);
-
 	var _reactRouter = __webpack_require__(184);
 
-	var _DateTime = __webpack_require__(260);
-
-	var _DateTime2 = _interopRequireDefault(_DateTime);
-
-	var _Member = __webpack_require__(261);
-
-	var _Member2 = _interopRequireDefault(_Member);
-
-	var _Input = __webpack_require__(262);
-
-	var _Input2 = _interopRequireDefault(_Input);
-
-	var _GenericEntityFunctions = __webpack_require__(264);
-
-	var _GenericEntityFunctions2 = _interopRequireDefault(_GenericEntityFunctions);
-
-	var _auth = __webpack_require__(249);
-
-	var _auth2 = _interopRequireDefault(_auth);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-	// import CountryDropdown from '../../../CountryDropdown'
-
-
-	module.exports = (0, _reactRouter.withRouter)(function (_React$Component) {
-		_inherits(Member, _React$Component);
-
-		function Member(props) {
-			_classCallCheck(this, Member);
-
-			var _this = _possibleConstructorReturn(this, (Member.__proto__ || Object.getPrototypeOf(Member)).call(this, props));
-
-			_this.state = {
-				keys: null
-			};
-
-			$.ajax({
-				method: "GET",
-				url: config.apiBasePath + "/member/current/keys",
-				cache: false,
-				headers: {
-					"Authorization": "Bearer " + _auth2.default.getAccessToken()
-				}
-			}).done(function (data, textStatus, xhr) {
-				console.log(data);
-				_this.setState({
-					keys: data.data
-				});
-			}).fail(function (xhr, textStatus, error) {
-				UIkit.modal.alert("<h2>Misslyckades med att hämta nycklar</h2>Tog emot ett oväntat svar från servern:<br><br>" + xhr.status + " " + xhr.statusText + "<br><br>" + xhr.responseText);
-			});
-			return _this;
-		}
-
-		_createClass(Member, [{
-			key: 'renderKeys',
-			value: function renderKeys(keys) {
-				if (keys == null) {
-					return _react2.default.createElement(
-						'p',
-						null,
-						'Laddar...'
-					);
-				} else {
-					var prefix = keys.length > 1 ? "Nyckeln" : "Din nyckel";
-					var arr = keys.map(function (key) {
-						var text = "";
-						var icon = "";
-						var color = "";
-						var sortKey = 0;
-						var id = key.key_id;
-
-						if (key.startdate != null && key.enddate != null && key.status == "active") {
-							var start = Date.parse(key.startdate);
-							var end = Date.parse(key.enddate);
-
-							var millisecondsPerHour = 1000 * 3600;
-							var millisecondsPerDay = millisecondsPerHour * 24;
-							sortKey = end - Date.now();
-
-							if (Date.now() >= start) {
-								var remainingDays = Math.floor((end - Date.now()) / millisecondsPerDay);
-
-								if (remainingDays < -1) {
-									text = prefix + " är ogiltig sedan " + -remainingDays + " dagar.";
-									icon = "uk-icon-times";
-									color = "member-key-color-inactive";
-								} else if (remainingDays < 0) {
-									text = prefix + " gick ut idag.";
-									icon = "uk-icon-times";
-									color = "member-key-color-inactive";
-								} else if (remainingDays < 1) {
-									var remainingHours = Math.ceil((end - Date.now()) / millisecondsPerHour);
-									text = prefix + " är giltig i mindre än " + remainingHours + " timmar till.";
-									icon = "uk-icon-check";
-									color = "member-key-color-warning";
-								} else if (remainingDays < 14) {
-									text = prefix + " är endast giltig i " + remainingDays + " dagar till. Kom ihåg att förnya den innan nästa nyckelutlämning.";
-									icon = "uk-icon-check";
-									color = "member-key-color-warning";
-								} else {
-									text = prefix + " är giltig i " + remainingDays + " dagar till.";
-									icon = "uk-icon-check";
-									color = "member-key-color-active";
-								}
-							} else {
-								sortKey = 0;
-								var _remainingDays = Math.floor((end - Date.now()) / millisecondsPerDay);
-								text = prefix + " blir aktiv " + start.toLocaleDateString("sv-se");
-								icon = "uk-icon-times";
-								color = "member-key-color-inactive";
-							}
-						} else {
-							sortKey = -1e28;
-							text = prefix + " är inaktiv.";
-							icon = "uk-icon-times";
-							color = "member-key-color-inactive";
-						}
-
-						return {
-							key: key, text: text, icon: icon, color: color, sortKey: sortKey, id: id
-						};
-					});
-					arr.sort(function (a, b) {
-						return b.sortKey - a.sortKey;
-					});
-					return arr.map(function (o) {
-						return _react2.default.createElement(
-							'div',
-							{ key: o.id, className: 'member-key-box' },
-							_react2.default.createElement('div', { className: "uk-icon-small member-key-icon " + o.icon + " " + o.color }),
-							_react2.default.createElement(
-								'div',
-								{ className: 'member-key-tag' },
-								o.key.tagid
-							),
-							_react2.default.createElement(
-								'div',
-								{ className: 'member-key-status' },
-								o.text
-							)
-						);
-					});
-				}
-			}
-		}, {
-			key: 'render',
-			value: function render() {
-				console.log("Rendering: ");
-				console.log(this.state.keys);
-				return _react2.default.createElement(
-					'fieldset',
-					{ 'data-uk-margin': true },
-					_react2.default.createElement(
-						'legend',
-						null,
-						_react2.default.createElement('i', { className: 'uk-icon-key' }),
-						' Nycklar'
-					),
-					this.renderKeys(this.state.keys)
-				);
-			}
-		}]);
-
-		return Member;
-	}(_react2.default.Component));
-
-/***/ }),
-/* 266 */
-/***/ (function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-	var _react = __webpack_require__(1);
-
-	var _react2 = _interopRequireDefault(_react);
-
-	var _reactRouter = __webpack_require__(184);
-
-	var _auth = __webpack_require__(249);
+	var _auth = __webpack_require__(250);
 
 	var _auth2 = _interopRequireDefault(_auth);
 
@@ -50321,7 +49898,7 @@
 	}(_react2.default.Component));
 
 /***/ }),
-/* 267 */
+/* 263 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -50353,7 +49930,7 @@
 	});
 
 /***/ }),
-/* 268 */
+/* 264 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -50364,7 +49941,7 @@
 
 	var _reactRouter = __webpack_require__(184);
 
-	var _auth = __webpack_require__(249);
+	var _auth = __webpack_require__(250);
 
 	var _auth2 = _interopRequireDefault(_auth);
 
@@ -50386,7 +49963,7 @@
 	});
 
 /***/ }),
-/* 269 */
+/* 265 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -50397,76 +49974,76 @@
 			childRoutes: [{
 				path: ":period",
 				indexRoute: {
-					component: __webpack_require__(270)
+					component: __webpack_require__(266)
 				},
 				childRoutes: [
 				// Overview / Dashboard
 				{
 					path: "overview",
-					component: __webpack_require__(270)
+					component: __webpack_require__(266)
 				},
 
 				// Master ledger
 				{
 					path: "masterledger",
-					component: __webpack_require__(271)
+					component: __webpack_require__(267)
 				},
 
 				// Invoice
 				{
 					path: "invoice",
 					indexRoute: {
-						component: __webpack_require__(278)
+						component: __webpack_require__(274)
 					},
 					childRoutes: [{
 						path: "list",
-						component: __webpack_require__(278)
+						component: __webpack_require__(274)
 					}, {
 						path: "add",
-						component: __webpack_require__(283)
+						component: __webpack_require__(279)
 					}, {
 						path: ":invoice_id",
-						component: __webpack_require__(286)
+						component: __webpack_require__(282)
 					}]
 				},
 
 				// Instructions
 				{
 					path: "instruction",
-					component: __webpack_require__(287)
+					component: __webpack_require__(283)
 				}, {
 					path: "instruction/add",
-					component: __webpack_require__(292)
+					component: __webpack_require__(288)
 				}, {
 					path: "instruction/:instruction_number",
-					component: __webpack_require__(294)
+					component: __webpack_require__(291)
 				}, {
 					path: "instruction/:instruction_number/import",
-					component: __webpack_require__(295)
+					component: __webpack_require__(292)
 				},
 
 				// Reports
 				{
 					path: "valuationsheet",
-					component: __webpack_require__(297)
+					component: __webpack_require__(294)
 				}, {
 					path: "resultreport",
-					component: __webpack_require__(298)
+					component: __webpack_require__(295)
 				},
 
 				// Cost centers
 				{
 					path: "costcenter",
-					component: __webpack_require__(299)
+					component: __webpack_require__(296)
 				}, {
 					path: "costcenter/:costcenter_id",
-					component: __webpack_require__(303)
+					component: __webpack_require__(300)
 				},
 
 				// Accounts
 				{
 					path: "account/:account_number",
-					component: __webpack_require__(305)
+					component: __webpack_require__(302)
 				}]
 			}]
 		},
@@ -50477,38 +50054,38 @@
 				path: "economy",
 				childRoutes: [{
 					path: "debug",
-					component: __webpack_require__(310)
+					component: __webpack_require__(307)
 				}, {
 					path: "account",
-					component: __webpack_require__(311)
+					component: __webpack_require__(308)
 				}, {
 					path: "account/add",
-					component: __webpack_require__(314)
+					component: __webpack_require__(311)
 				}, {
 					path: "account/:account_id",
-					component: __webpack_require__(305)
+					component: __webpack_require__(302)
 				}, {
 					path: "account/:account_id/edit",
-					component: __webpack_require__(315)
+					component: __webpack_require__(312)
 				}, {
 					path: "accountingperiod",
-					component: __webpack_require__(316)
+					component: __webpack_require__(313)
 				}, {
 					path: "accountingperiod/add",
-					component: __webpack_require__(320)
+					component: __webpack_require__(317)
 				}, {
 					path: "accountingperiod/:accountingperiod_id",
-					component: __webpack_require__(322)
+					component: __webpack_require__(319)
 				}, {
 					path: "accountingperiod/:accountingperiod_id/edit",
-					component: __webpack_require__(323)
+					component: __webpack_require__(320)
 				}]
 			}]
 		}]
 	};
 
 /***/ }),
-/* 270 */
+/* 266 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -50560,7 +50137,7 @@
 	});
 
 /***/ }),
-/* 271 */
+/* 267 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -50573,21 +50150,21 @@
 
 	var _backboneReactComponent2 = _interopRequireDefault(_backboneReactComponent);
 
-	var _BackboneTable = __webpack_require__(272);
+	var _BackboneTable = __webpack_require__(268);
 
 	var _BackboneTable2 = _interopRequireDefault(_BackboneTable);
 
-	var _Masterledger = __webpack_require__(274);
+	var _Masterledger = __webpack_require__(270);
 
 	var _Masterledger2 = _interopRequireDefault(_Masterledger);
 
 	var _reactRouter = __webpack_require__(184);
 
-	var _Currency = __webpack_require__(276);
+	var _Currency = __webpack_require__(272);
 
 	var _Currency2 = _interopRequireDefault(_Currency);
 
-	var _Masterledger3 = __webpack_require__(277);
+	var _Masterledger3 = __webpack_require__(273);
 
 	var _Masterledger4 = _interopRequireDefault(_Masterledger3);
 
@@ -50617,7 +50194,7 @@
 	});
 
 /***/ }),
-/* 272 */
+/* 268 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -50630,7 +50207,7 @@
 
 	var _reactDom2 = _interopRequireDefault(_reactDom);
 
-	var _Loading = __webpack_require__(273);
+	var _Loading = __webpack_require__(269);
 
 	var _Loading2 = _interopRequireDefault(_Loading);
 
@@ -51061,7 +50638,7 @@
 	module.exports = BackboneTable;
 
 /***/ }),
-/* 273 */
+/* 269 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -51086,7 +50663,7 @@
 	});
 
 /***/ }),
-/* 274 */
+/* 270 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -51095,7 +50672,7 @@
 
 	var _backbone2 = _interopRequireDefault(_backbone);
 
-	var _Account = __webpack_require__(275);
+	var _Account = __webpack_require__(271);
 
 	var _Account2 = _interopRequireDefault(_Account);
 
@@ -51107,7 +50684,7 @@
 	});
 
 /***/ }),
-/* 275 */
+/* 271 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -51136,7 +50713,7 @@
 	});
 
 /***/ }),
-/* 276 */
+/* 272 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -51172,7 +50749,7 @@
 	});
 
 /***/ }),
-/* 277 */
+/* 273 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -51181,13 +50758,13 @@
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _BackboneTable = __webpack_require__(272);
+	var _BackboneTable = __webpack_require__(268);
 
 	var _BackboneTable2 = _interopRequireDefault(_BackboneTable);
 
 	var _reactRouter = __webpack_require__(184);
 
-	var _Currency = __webpack_require__(276);
+	var _Currency = __webpack_require__(272);
 
 	var _Currency2 = _interopRequireDefault(_Currency);
 
@@ -51249,7 +50826,7 @@
 	}));
 
 /***/ }),
-/* 278 */
+/* 274 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -51258,17 +50835,17 @@
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _Invoice = __webpack_require__(279);
+	var _Invoice = __webpack_require__(275);
 
 	var _Invoice2 = _interopRequireDefault(_Invoice);
 
 	var _reactRouter = __webpack_require__(184);
 
-	var _TableFilterBox = __webpack_require__(281);
+	var _TableFilterBox = __webpack_require__(277);
 
 	var _TableFilterBox2 = _interopRequireDefault(_TableFilterBox);
 
-	var _InvoiceList = __webpack_require__(282);
+	var _InvoiceList = __webpack_require__(278);
 
 	var _InvoiceList2 = _interopRequireDefault(_InvoiceList);
 
@@ -51329,7 +50906,7 @@
 	//InvoiceListHandler.title = "Visa fakturor";
 
 /***/ }),
-/* 279 */
+/* 275 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -51338,7 +50915,7 @@
 
 	var _backbone2 = _interopRequireDefault(_backbone);
 
-	var _Invoice = __webpack_require__(280);
+	var _Invoice = __webpack_require__(276);
 
 	var _Invoice2 = _interopRequireDefault(_Invoice);
 
@@ -51350,7 +50927,7 @@
 	});
 
 /***/ }),
-/* 280 */
+/* 276 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -51380,7 +50957,7 @@
 	});
 
 /***/ }),
-/* 281 */
+/* 277 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -51503,7 +51080,7 @@
 	});
 
 /***/ }),
-/* 282 */
+/* 278 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -51516,7 +51093,7 @@
 
 	var _backboneReactComponent2 = _interopRequireDefault(_backboneReactComponent);
 
-	var _BackboneTable = __webpack_require__(272);
+	var _BackboneTable = __webpack_require__(268);
 
 	var _BackboneTable2 = _interopRequireDefault(_BackboneTable);
 
@@ -51607,7 +51184,7 @@
 	});
 
 /***/ }),
-/* 283 */
+/* 279 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -51616,11 +51193,11 @@
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _Invoice = __webpack_require__(280);
+	var _Invoice = __webpack_require__(276);
 
 	var _Invoice2 = _interopRequireDefault(_Invoice);
 
-	var _Invoice3 = __webpack_require__(284);
+	var _Invoice3 = __webpack_require__(280);
 
 	var _Invoice4 = _interopRequireDefault(_Invoice3);
 
@@ -51651,7 +51228,7 @@
 	});
 
 /***/ }),
-/* 284 */
+/* 280 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -51664,29 +51241,29 @@
 
 	var _backboneReactComponent2 = _interopRequireDefault(_backboneReactComponent);
 
-	var _Invoice = __webpack_require__(279);
+	var _Invoice = __webpack_require__(275);
 
 	var _Invoice2 = _interopRequireDefault(_Invoice);
 
-	var _Invoice3 = __webpack_require__(280);
+	var _Invoice3 = __webpack_require__(276);
 
 	var _Invoice4 = _interopRequireDefault(_Invoice3);
 
 	var _reactRouter = __webpack_require__(184);
 
-	var _Currency = __webpack_require__(276);
+	var _Currency = __webpack_require__(272);
 
 	var _Currency2 = _interopRequireDefault(_Currency);
 
-	var _Date = __webpack_require__(285);
+	var _Date = __webpack_require__(281);
 
 	var _Date2 = _interopRequireDefault(_Date);
 
-	var _BackboneTable = __webpack_require__(272);
+	var _BackboneTable = __webpack_require__(268);
 
 	var _BackboneTable2 = _interopRequireDefault(_BackboneTable);
 
-	var _TableFilterBox = __webpack_require__(281);
+	var _TableFilterBox = __webpack_require__(277);
 
 	var _TableFilterBox2 = _interopRequireDefault(_TableFilterBox);
 
@@ -51980,7 +51557,7 @@
 	// Backbone
 
 /***/ }),
-/* 285 */
+/* 281 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -52023,7 +51600,7 @@
 	});
 
 /***/ }),
-/* 286 */
+/* 282 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -52032,11 +51609,11 @@
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _Invoice = __webpack_require__(280);
+	var _Invoice = __webpack_require__(276);
 
 	var _Invoice2 = _interopRequireDefault(_Invoice);
 
-	var _Invoice3 = __webpack_require__(284);
+	var _Invoice3 = __webpack_require__(280);
 
 	var _Invoice4 = _interopRequireDefault(_Invoice3);
 
@@ -52071,7 +51648,7 @@
 	});
 
 /***/ }),
-/* 287 */
+/* 283 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -52080,17 +51657,17 @@
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _Instruction = __webpack_require__(288);
+	var _Instruction = __webpack_require__(284);
 
 	var _Instruction2 = _interopRequireDefault(_Instruction);
 
 	var _reactRouter = __webpack_require__(184);
 
-	var _TableFilterBox = __webpack_require__(281);
+	var _TableFilterBox = __webpack_require__(277);
 
 	var _TableFilterBox2 = _interopRequireDefault(_TableFilterBox);
 
-	var _Instructions = __webpack_require__(290);
+	var _Instructions = __webpack_require__(286);
 
 	var _Instructions2 = _interopRequireDefault(_Instructions);
 
@@ -52151,7 +51728,7 @@
 	//EconomyAccountingInstructionsHandler.title = "Visa verifikationer";
 
 /***/ }),
-/* 288 */
+/* 284 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -52160,7 +51737,7 @@
 
 	var _backbone2 = _interopRequireDefault(_backbone);
 
-	var _Instruction = __webpack_require__(289);
+	var _Instruction = __webpack_require__(285);
 
 	var _Instruction2 = _interopRequireDefault(_Instruction);
 
@@ -52172,7 +51749,7 @@
 	});
 
 /***/ }),
-/* 289 */
+/* 285 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -52206,7 +51783,7 @@
 	});
 
 /***/ }),
-/* 290 */
+/* 286 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -52219,21 +51796,21 @@
 
 	var _backboneReactComponent2 = _interopRequireDefault(_backboneReactComponent);
 
-	var _BackboneTable = __webpack_require__(272);
+	var _BackboneTable = __webpack_require__(268);
 
 	var _BackboneTable2 = _interopRequireDefault(_BackboneTable);
 
 	var _reactRouter = __webpack_require__(184);
 
-	var _Currency = __webpack_require__(276);
+	var _Currency = __webpack_require__(272);
 
 	var _Currency2 = _interopRequireDefault(_Currency);
 
-	var _Date = __webpack_require__(285);
+	var _Date = __webpack_require__(281);
 
 	var _Date2 = _interopRequireDefault(_Date);
 
-	var _TableDropdownMenu = __webpack_require__(291);
+	var _TableDropdownMenu = __webpack_require__(287);
 
 	var _TableDropdownMenu2 = _interopRequireDefault(_TableDropdownMenu);
 
@@ -52342,7 +51919,7 @@
 	}));
 
 /***/ }),
-/* 291 */
+/* 287 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -52389,7 +51966,7 @@
 	});
 
 /***/ }),
-/* 292 */
+/* 288 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -52398,11 +51975,11 @@
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _Instruction = __webpack_require__(289);
+	var _Instruction = __webpack_require__(285);
 
 	var _Instruction2 = _interopRequireDefault(_Instruction);
 
-	var _Instruction3 = __webpack_require__(293);
+	var _Instruction3 = __webpack_require__(289);
 
 	var _Instruction4 = _interopRequireDefault(_Instruction3);
 
@@ -52429,7 +52006,7 @@
 	// Backbone
 
 /***/ }),
-/* 293 */
+/* 289 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -52440,11 +52017,11 @@
 
 	var _reactRouter = __webpack_require__(184);
 
-	var _Currency = __webpack_require__(276);
+	var _Currency = __webpack_require__(272);
 
 	var _Currency2 = _interopRequireDefault(_Currency);
 
-	var _GenericEntityFunctions = __webpack_require__(264);
+	var _GenericEntityFunctions = __webpack_require__(290);
 
 	var _GenericEntityFunctions2 = _interopRequireDefault(_GenericEntityFunctions);
 
@@ -52769,7 +52346,232 @@
 	}));
 
 /***/ }),
-/* 294 */
+/* 290 */
+/***/ (function(module, exports, __webpack_require__) {
+
+	"use strict";
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	module.exports = {
+		getInitialState: function getInitialState() {
+			return {
+				disableSend: true,
+				ignoreExitHook: false
+			};
+		},
+
+		componentDidMount: function componentDidMount() {
+			var _this2 = this;
+
+			var _this = this;
+
+			// User should get a warning if trying to leave the page when there is any unsaved data in the form
+			this.props.router.setRouteLeaveHook(this.props.route, function () {
+				// TODO: När den här funktionen väl är registrerad verkar den ligga kvar tills nästa sidladdning,
+				// så om modellen försvinner kommer den gnälla. En bättre lösning vore att avregistrera exit handlern,
+				// när den inte längre behövs. Det här problemet dyker upp lite överallt.
+				// TODO: Verkar vara fixat nu?
+				if (_this2.state.ignoreExitHook !== true && /*this.wrapper !== undefined && this.getModel() !== undefined &&*/_this2.getModel().isDirty()) {
+					return "Du har information som inte är sparad. Är du säker på att du vill lämna sidan?";
+				}
+			});
+
+			// If we create a enableSendButton() function it will be called everytime a model have changed
+			// The enableSendButton() function should be used to validate the model and enable/disable the send/save button
+			this.getModel().on("change sync", function () {
+				_this.updateSendButton();
+			});
+		},
+
+		updateSendButton: function updateSendButton() {
+			if (this.hasOwnProperty("enableSendButton")) {
+				var _this = this;
+				// We need to have a delay so setState() has propely updated the state
+				setTimeout(function () {
+					// The user might already have leaved the page via an onCreate or onUpdate handler
+					// Ignore this call if the model is destroyed
+					if (_this.wrapper !== undefined && _this.getModel() !== undefined) {
+						// Note: We invert the result because we want the function to return true to activate the button, while disabled="" works the other way
+						_this.setState({ disableSend: !_this.enableSendButton() });
+					}
+				}, 100);
+			}
+		},
+
+		handleChange: function handleChange(event) {
+			// Update the model with new value
+			var target = event.target;
+			var key = target.getAttribute("name");
+			this.getModel().set(key, target.value);
+
+			// When we change the value of the model we have to rerender the component
+			this.forceUpdate();
+		},
+
+		// Generic cancel function
+		cancel: function cancel(entity) {
+			if (this.props.hasOwnProperty("onCancel")) {
+				this.props.onCancel(entity);
+			} else if (this.hasOwnProperty("onCancel")) {
+				this.onCancel(entity);
+			}
+		},
+
+		// Generic remove function
+		removeEntity: function removeEntity(event) {
+			var _this = this;
+
+			// Prevent the form from being submitted
+			event.preventDefault();
+
+			// Ask the user from confirmation and then try to remove
+			var entity = this.getModel();
+			UIkit.modal.confirm(this.removeTextMessage(entity.attributes), function () {
+				entity.destroy({
+					wait: true,
+					success: function success(model, response) {
+						if (response.status == "deleted") {
+							if (_this.props.hasOwnProperty("onRemove")) {
+								_this.props.onRemove();
+							} else if (_this.hasOwnProperty("onRemove")) {
+								_this.onRemove();
+							} else {
+								UIkit.notify("Successfully deleted", { status: "success" });
+							}
+						} else {
+							if (_this.props.hasOwnProperty("onRemoveError")) {
+								_this.props.onRemoveError(_this.getModel());
+							} else if (_this.hasOwnProperty("onRemoveError")) {
+								_this.onRemoveError(_this.getModel());
+							} else {
+								UIkit.notify("Error while deleting", { timeout: 0, status: "danger" });
+							}
+						}
+					},
+					error: function error() {
+						if (_this.props.hasOwnProperty("onRemoveError")) {
+							_this.props.onRemoveError(_this.getModel());
+						} else if (_this.hasOwnProperty("onRemoveError")) {
+							_this.onRemoveError(_this.getModel());
+						} else {
+							UIkit.notify("Error while deleting", { timeout: 0, status: "danger" });
+						}
+					}
+				});
+			});
+			return false;
+		},
+
+		// Generic save function
+		saveEntity: function saveEntity(event) {
+			var _this = this;
+
+			// Clear the created_at and updated_at
+			this.getModel().set("created_at", null);
+			this.getModel().set("updated_at", null);
+
+			// Prevent the form from being submitted
+			event.preventDefault();
+
+			this.getModel().save(null, {
+				success: function success(model, response) {
+					if (response.status == "created") {
+						if (_this.props.hasOwnProperty("onCreate")) {
+							_this.props.onCreate(_this.getModel());
+						} else if (_this.hasOwnProperty("onCreate")) {
+							_this.onCreate(_this.getModel());
+						} else {
+							UIkit.notify("Successfully saved", { status: "success" });
+						}
+					} else if (response.status == "updated") {
+						if (_this.props.hasOwnProperty("onUpdate")) {
+							_this.props.onUpdate(_this.getModel());
+						} else if (_this.hasOwnProperty("onUpdate")) {
+							_this.onUpdate(_this.getModel());
+						} else {
+							UIkit.notify("Successfully updated", { status: "success" });
+						}
+					} else {
+						if (_this.props.hasOwnProperty("onSaveError")) {
+							_this.props.onSaveError(_this.getModel());
+						} else if (_this.hasOwnProperty("onSaveError")) {
+							_this.onSaveError(_this.getModel());
+						} else {
+							UIkit.notify("Error while saving", { timeout: 0, status: "danger" });
+						}
+					}
+				},
+				error: function error(model, response, options) {
+					if (response.status == 422) {
+						_this.setState({
+							error_column: response.responseJSON.column,
+							error_message: response.responseJSON.message
+						});
+					} else {
+						if (_this.props.hasOwnProperty("onSaveError")) {
+							_this.props.onSaveError(_this.getModel());
+						} else if (_this.hasOwnProperty("onSaveError")) {
+							_this.onSaveError(_this.getModel());
+						} else {
+							UIkit.notify("Error while saving", { timeout: 0, status: "danger" });
+						}
+					}
+				}
+			});
+		},
+
+		// Render the cancel button
+		cancelButton: function cancelButton() {
+			return _react2.default.createElement(
+				"a",
+				{ className: "uk-button uk-button-danger uk-float-left", onClick: this.cancel },
+				_react2.default.createElement("i", { className: "uk-icon-close" }),
+				" Avbryt"
+			);
+		},
+
+		// Render the remove button
+		removeButton: function removeButton(text) {
+			if (this.getModel().id === undefined) {
+				return;
+			}
+
+			if (text === undefined) {
+				var text = "Spara";
+			}
+
+			return _react2.default.createElement(
+				"a",
+				{ className: "uk-button uk-button-danger uk-float-left", onClick: this.removeEntity },
+				_react2.default.createElement("i", { className: "uk-icon-trash" }),
+				" ",
+				text
+			);
+		},
+
+		// Render the save button
+		saveButton: function saveButton(text) {
+			if (text === undefined) {
+				var text = "Spara";
+			}
+
+			return _react2.default.createElement(
+				"button",
+				{ className: "uk-button uk-button-success uk-float-right", disabled: this.state.disableSend, onClick: this.saveEntity },
+				_react2.default.createElement("i", { className: "uk-icon-save" }),
+				" ",
+				text
+			);
+		}
+	};
+
+/***/ }),
+/* 291 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -52778,11 +52580,11 @@
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _Instruction = __webpack_require__(289);
+	var _Instruction = __webpack_require__(285);
 
 	var _Instruction2 = _interopRequireDefault(_Instruction);
 
-	var _Instruction3 = __webpack_require__(293);
+	var _Instruction3 = __webpack_require__(289);
 
 	var _Instruction4 = _interopRequireDefault(_Instruction3);
 
@@ -52813,7 +52615,7 @@
 	// Backbone
 
 /***/ }),
-/* 295 */
+/* 292 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -52822,11 +52624,11 @@
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _Instruction = __webpack_require__(289);
+	var _Instruction = __webpack_require__(285);
 
 	var _Instruction2 = _interopRequireDefault(_Instruction);
 
-	var _InstructionImport = __webpack_require__(296);
+	var _InstructionImport = __webpack_require__(293);
 
 	var _InstructionImport2 = _interopRequireDefault(_InstructionImport);
 
@@ -52854,7 +52656,7 @@
 	});
 
 /***/ }),
-/* 296 */
+/* 293 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -52978,7 +52780,7 @@
 	}));
 
 /***/ }),
-/* 297 */
+/* 294 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -52991,25 +52793,25 @@
 
 	var _backboneReactComponent2 = _interopRequireDefault(_backboneReactComponent);
 
-	var _auth = __webpack_require__(249);
+	var _auth = __webpack_require__(250);
 
 	var _auth2 = _interopRequireDefault(_auth);
 
-	var _Masterledger = __webpack_require__(274);
+	var _Masterledger = __webpack_require__(270);
 
 	var _Masterledger2 = _interopRequireDefault(_Masterledger);
 
 	var _reactRouter = __webpack_require__(184);
 
-	var _Currency = __webpack_require__(276);
+	var _Currency = __webpack_require__(272);
 
 	var _Currency2 = _interopRequireDefault(_Currency);
 
-	var _Date = __webpack_require__(285);
+	var _Date = __webpack_require__(281);
 
 	var _Date2 = _interopRequireDefault(_Date);
 
-	var _BackboneTable = __webpack_require__(272);
+	var _BackboneTable = __webpack_require__(268);
 
 	var _BackboneTable2 = _interopRequireDefault(_BackboneTable);
 
@@ -53293,7 +53095,7 @@
 	// Backbone
 
 /***/ }),
-/* 298 */
+/* 295 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -53306,25 +53108,25 @@
 
 	var _backboneReactComponent2 = _interopRequireDefault(_backboneReactComponent);
 
-	var _auth = __webpack_require__(249);
+	var _auth = __webpack_require__(250);
 
 	var _auth2 = _interopRequireDefault(_auth);
 
-	var _Masterledger = __webpack_require__(274);
+	var _Masterledger = __webpack_require__(270);
 
 	var _Masterledger2 = _interopRequireDefault(_Masterledger);
 
 	var _reactRouter = __webpack_require__(184);
 
-	var _Currency = __webpack_require__(276);
+	var _Currency = __webpack_require__(272);
 
 	var _Currency2 = _interopRequireDefault(_Currency);
 
-	var _Date = __webpack_require__(285);
+	var _Date = __webpack_require__(281);
 
 	var _Date2 = _interopRequireDefault(_Date);
 
-	var _BackboneTable = __webpack_require__(272);
+	var _BackboneTable = __webpack_require__(268);
 
 	var _BackboneTable2 = _interopRequireDefault(_BackboneTable);
 
@@ -53588,7 +53390,7 @@
 	// Backbone
 
 /***/ }),
-/* 299 */
+/* 296 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -53597,11 +53399,11 @@
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _CostCenter = __webpack_require__(300);
+	var _CostCenter = __webpack_require__(297);
 
 	var _CostCenter2 = _interopRequireDefault(_CostCenter);
 
-	var _CostCenters = __webpack_require__(302);
+	var _CostCenters = __webpack_require__(299);
 
 	var _CostCenters2 = _interopRequireDefault(_CostCenters);
 
@@ -53631,7 +53433,7 @@
 	});
 
 /***/ }),
-/* 300 */
+/* 297 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -53640,7 +53442,7 @@
 
 	var _backbone2 = _interopRequireDefault(_backbone);
 
-	var _CostCenter = __webpack_require__(301);
+	var _CostCenter = __webpack_require__(298);
 
 	var _CostCenter2 = _interopRequireDefault(_CostCenter);
 
@@ -53652,7 +53454,7 @@
 	});
 
 /***/ }),
-/* 301 */
+/* 298 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -53677,7 +53479,7 @@
 	});
 
 /***/ }),
-/* 302 */
+/* 299 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -53690,7 +53492,7 @@
 
 	var _backboneReactComponent2 = _interopRequireDefault(_backboneReactComponent);
 
-	var _BackboneTable = __webpack_require__(272);
+	var _BackboneTable = __webpack_require__(268);
 
 	var _BackboneTable2 = _interopRequireDefault(_BackboneTable);
 
@@ -53769,7 +53571,7 @@
 	});
 
 /***/ }),
-/* 303 */
+/* 300 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -53778,11 +53580,11 @@
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _CostCenter = __webpack_require__(301);
+	var _CostCenter = __webpack_require__(298);
 
 	var _CostCenter2 = _interopRequireDefault(_CostCenter);
 
-	var _CostCenter3 = __webpack_require__(304);
+	var _CostCenter3 = __webpack_require__(301);
 
 	var _CostCenter4 = _interopRequireDefault(_CostCenter3);
 
@@ -53809,7 +53611,7 @@
 	});
 
 /***/ }),
-/* 304 */
+/* 301 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -53833,7 +53635,7 @@
 	});
 
 /***/ }),
-/* 305 */
+/* 302 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -53842,19 +53644,19 @@
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _Account = __webpack_require__(275);
+	var _Account = __webpack_require__(271);
 
 	var _Account2 = _interopRequireDefault(_Account);
 
-	var _Transaction = __webpack_require__(306);
+	var _Transaction = __webpack_require__(303);
 
 	var _Transaction2 = _interopRequireDefault(_Transaction);
 
-	var _Account3 = __webpack_require__(308);
+	var _Account3 = __webpack_require__(305);
 
 	var _Account4 = _interopRequireDefault(_Account3);
 
-	var _Transactions = __webpack_require__(309);
+	var _Transactions = __webpack_require__(306);
 
 	var _Transactions2 = _interopRequireDefault(_Transactions);
 
@@ -53909,7 +53711,7 @@
 	// Backbone
 
 /***/ }),
-/* 306 */
+/* 303 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -53918,7 +53720,7 @@
 
 	var _backbone2 = _interopRequireDefault(_backbone);
 
-	var _Transaction = __webpack_require__(307);
+	var _Transaction = __webpack_require__(304);
 
 	var _Transaction2 = _interopRequireDefault(_Transaction);
 
@@ -53933,7 +53735,7 @@
 	});
 
 /***/ }),
-/* 307 */
+/* 304 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -53968,7 +53770,7 @@
 	});
 
 /***/ }),
-/* 308 */
+/* 305 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -53981,11 +53783,11 @@
 
 	var _backboneReactComponent2 = _interopRequireDefault(_backboneReactComponent);
 
-	var _GenericEntityFunctions = __webpack_require__(264);
+	var _GenericEntityFunctions = __webpack_require__(290);
 
 	var _GenericEntityFunctions2 = _interopRequireDefault(_GenericEntityFunctions);
 
-	var _Currency = __webpack_require__(276);
+	var _Currency = __webpack_require__(272);
 
 	var _Currency2 = _interopRequireDefault(_Currency);
 
@@ -54077,7 +53879,7 @@
 	}));
 
 /***/ }),
-/* 309 */
+/* 306 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -54090,17 +53892,17 @@
 
 	var _backboneReactComponent2 = _interopRequireDefault(_backboneReactComponent);
 
-	var _BackboneTable = __webpack_require__(272);
+	var _BackboneTable = __webpack_require__(268);
 
 	var _BackboneTable2 = _interopRequireDefault(_BackboneTable);
 
 	var _reactRouter = __webpack_require__(184);
 
-	var _Currency = __webpack_require__(276);
+	var _Currency = __webpack_require__(272);
 
 	var _Currency2 = _interopRequireDefault(_Currency);
 
-	var _Date = __webpack_require__(285);
+	var _Date = __webpack_require__(281);
 
 	var _Date2 = _interopRequireDefault(_Date);
 
@@ -54191,7 +53993,7 @@
 	}));
 
 /***/ }),
-/* 310 */
+/* 307 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -54219,7 +54021,7 @@
 	});
 
 /***/ }),
-/* 311 */
+/* 308 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -54228,13 +54030,13 @@
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _Account = __webpack_require__(312);
+	var _Account = __webpack_require__(309);
 
 	var _Account2 = _interopRequireDefault(_Account);
 
 	var _reactRouter = __webpack_require__(184);
 
-	var _Accounts = __webpack_require__(313);
+	var _Accounts = __webpack_require__(310);
 
 	var _Accounts2 = _interopRequireDefault(_Accounts);
 
@@ -54276,7 +54078,7 @@
 	// Backbone
 
 /***/ }),
-/* 312 */
+/* 309 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -54285,7 +54087,7 @@
 
 	var _backbone2 = _interopRequireDefault(_backbone);
 
-	var _Account = __webpack_require__(275);
+	var _Account = __webpack_require__(271);
 
 	var _Account2 = _interopRequireDefault(_Account);
 
@@ -54297,7 +54099,7 @@
 	});
 
 /***/ }),
-/* 313 */
+/* 310 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -54310,13 +54112,13 @@
 
 	var _backboneReactComponent2 = _interopRequireDefault(_backboneReactComponent);
 
-	var _BackboneTable = __webpack_require__(272);
+	var _BackboneTable = __webpack_require__(268);
 
 	var _BackboneTable2 = _interopRequireDefault(_BackboneTable);
 
 	var _reactRouter = __webpack_require__(184);
 
-	var _TableDropdownMenu = __webpack_require__(291);
+	var _TableDropdownMenu = __webpack_require__(287);
 
 	var _TableDropdownMenu2 = _interopRequireDefault(_TableDropdownMenu);
 
@@ -54403,7 +54205,7 @@
 	});
 
 /***/ }),
-/* 314 */
+/* 311 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -54412,11 +54214,11 @@
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _Account = __webpack_require__(275);
+	var _Account = __webpack_require__(271);
 
 	var _Account2 = _interopRequireDefault(_Account);
 
-	var _Account3 = __webpack_require__(308);
+	var _Account3 = __webpack_require__(305);
 
 	var _Account4 = _interopRequireDefault(_Account3);
 
@@ -54450,7 +54252,7 @@
 	});
 
 /***/ }),
-/* 315 */
+/* 312 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -54459,11 +54261,11 @@
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _Account = __webpack_require__(275);
+	var _Account = __webpack_require__(271);
 
 	var _Account2 = _interopRequireDefault(_Account);
 
-	var _Account3 = __webpack_require__(308);
+	var _Account3 = __webpack_require__(305);
 
 	var _Account4 = _interopRequireDefault(_Account3);
 
@@ -54500,7 +54302,7 @@
 	});
 
 /***/ }),
-/* 316 */
+/* 313 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -54509,11 +54311,11 @@
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _AccountingPeriods = __webpack_require__(317);
+	var _AccountingPeriods = __webpack_require__(314);
 
 	var _AccountingPeriods2 = _interopRequireDefault(_AccountingPeriods);
 
-	var _AccountingPeriods3 = __webpack_require__(319);
+	var _AccountingPeriods3 = __webpack_require__(316);
 
 	var _AccountingPeriods4 = _interopRequireDefault(_AccountingPeriods3);
 
@@ -54554,7 +54356,7 @@
 	// Backbone
 
 /***/ }),
-/* 317 */
+/* 314 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -54563,7 +54365,7 @@
 
 	var _backbone2 = _interopRequireDefault(_backbone);
 
-	var _AccountingPeriod = __webpack_require__(318);
+	var _AccountingPeriod = __webpack_require__(315);
 
 	var _AccountingPeriod2 = _interopRequireDefault(_AccountingPeriod);
 
@@ -54575,7 +54377,7 @@
 	});
 
 /***/ }),
-/* 318 */
+/* 315 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -54601,7 +54403,7 @@
 	});
 
 /***/ }),
-/* 319 */
+/* 316 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -54614,17 +54416,17 @@
 
 	var _backboneReactComponent2 = _interopRequireDefault(_backboneReactComponent);
 
-	var _BackboneTable = __webpack_require__(272);
+	var _BackboneTable = __webpack_require__(268);
 
 	var _BackboneTable2 = _interopRequireDefault(_BackboneTable);
 
-	var _Date = __webpack_require__(285);
+	var _Date = __webpack_require__(281);
 
 	var _Date2 = _interopRequireDefault(_Date);
 
 	var _reactRouter = __webpack_require__(184);
 
-	var _TableDropdownMenu = __webpack_require__(291);
+	var _TableDropdownMenu = __webpack_require__(287);
 
 	var _TableDropdownMenu2 = _interopRequireDefault(_TableDropdownMenu);
 
@@ -54731,7 +54533,7 @@
 	}));
 
 /***/ }),
-/* 320 */
+/* 317 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -54740,11 +54542,11 @@
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _Account = __webpack_require__(275);
+	var _Account = __webpack_require__(271);
 
 	var _Account2 = _interopRequireDefault(_Account);
 
-	var _AccountingPeriod = __webpack_require__(321);
+	var _AccountingPeriod = __webpack_require__(318);
 
 	var _AccountingPeriod2 = _interopRequireDefault(_AccountingPeriod);
 
@@ -54777,7 +54579,7 @@
 	});
 
 /***/ }),
-/* 321 */
+/* 318 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -54786,7 +54588,7 @@
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _GenericEntityFunctions = __webpack_require__(264);
+	var _GenericEntityFunctions = __webpack_require__(290);
 
 	var _GenericEntityFunctions2 = _interopRequireDefault(_GenericEntityFunctions);
 
@@ -54895,7 +54697,7 @@
 	});
 
 /***/ }),
-/* 322 */
+/* 319 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -54923,7 +54725,7 @@
 	});
 
 /***/ }),
-/* 323 */
+/* 320 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -54932,11 +54734,11 @@
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _AccountingPeriod = __webpack_require__(318);
+	var _AccountingPeriod = __webpack_require__(315);
 
 	var _AccountingPeriod2 = _interopRequireDefault(_AccountingPeriod);
 
-	var _AccountingPeriod3 = __webpack_require__(321);
+	var _AccountingPeriod3 = __webpack_require__(318);
 
 	var _AccountingPeriod4 = _interopRequireDefault(_AccountingPeriod3);
 
@@ -54972,7 +54774,7 @@
 	});
 
 /***/ }),
-/* 324 */
+/* 321 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -54988,11 +54790,11 @@
 			childRoutes: [{
 				path: "members",
 				indexRoute: {
-					component: __webpack_require__(325)
+					component: __webpack_require__(322)
 				},
 				childRoutes: [{
 					path: "add",
-					component: __webpack_require__(329)
+					component: __webpack_require__(326)
 				}, {
 					path: ":member_id",
 					component: __webpack_require__(332),
@@ -55060,7 +54862,7 @@
 	};
 
 /***/ }),
-/* 325 */
+/* 322 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -55069,17 +54871,17 @@
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _Member = __webpack_require__(326);
+	var _Member = __webpack_require__(323);
 
 	var _Member2 = _interopRequireDefault(_Member);
 
 	var _reactRouter = __webpack_require__(184);
 
-	var _TableFilterBox = __webpack_require__(281);
+	var _TableFilterBox = __webpack_require__(277);
 
 	var _TableFilterBox2 = _interopRequireDefault(_TableFilterBox);
 
-	var _Members = __webpack_require__(328);
+	var _Members = __webpack_require__(325);
 
 	var _Members2 = _interopRequireDefault(_Members);
 
@@ -55134,7 +54936,7 @@
 	//MembersHandler.title = "Visa medlemmar";
 
 /***/ }),
-/* 326 */
+/* 323 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -55143,7 +54945,7 @@
 
 	var _backbone2 = _interopRequireDefault(_backbone);
 
-	var _Member = __webpack_require__(327);
+	var _Member = __webpack_require__(324);
 
 	var _Member2 = _interopRequireDefault(_Member);
 
@@ -55155,7 +54957,7 @@
 	});
 
 /***/ }),
-/* 327 */
+/* 324 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -55187,7 +54989,7 @@
 	});
 
 /***/ }),
-/* 328 */
+/* 325 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -55202,15 +55004,15 @@
 
 	var _reactRouter = __webpack_require__(184);
 
-	var _BackboneTable = __webpack_require__(272);
+	var _BackboneTable = __webpack_require__(268);
 
 	var _BackboneTable2 = _interopRequireDefault(_BackboneTable);
 
-	var _Date = __webpack_require__(285);
+	var _Date = __webpack_require__(281);
 
 	var _Date2 = _interopRequireDefault(_Date);
 
-	var _TableDropdownMenu = __webpack_require__(291);
+	var _TableDropdownMenu = __webpack_require__(287);
 
 	var _TableDropdownMenu2 = _interopRequireDefault(_TableDropdownMenu);
 
@@ -55337,7 +55139,7 @@
 	});
 
 /***/ }),
-/* 329 */
+/* 326 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -55346,11 +55148,11 @@
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _Member = __webpack_require__(327);
+	var _Member = __webpack_require__(324);
 
 	var _Member2 = _interopRequireDefault(_Member);
 
-	var _Member3 = __webpack_require__(330);
+	var _Member3 = __webpack_require__(327);
 
 	var _Member4 = _interopRequireDefault(_Member3);
 
@@ -55386,7 +55188,7 @@
 	// Backbone
 
 /***/ }),
-/* 330 */
+/* 327 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -55401,19 +55203,19 @@
 
 	var _reactRouter = __webpack_require__(184);
 
-	var _CountryDropdown = __webpack_require__(331);
+	var _CountryDropdown = __webpack_require__(328);
 
 	var _CountryDropdown2 = _interopRequireDefault(_CountryDropdown);
 
-	var _DateTime = __webpack_require__(260);
+	var _DateTime = __webpack_require__(329);
 
 	var _DateTime2 = _interopRequireDefault(_DateTime);
 
-	var _GenericEntityFunctions = __webpack_require__(264);
+	var _GenericEntityFunctions = __webpack_require__(290);
 
 	var _GenericEntityFunctions2 = _interopRequireDefault(_GenericEntityFunctions);
 
-	var _Input = __webpack_require__(262);
+	var _Input = __webpack_require__(330);
 
 	var _Input2 = _interopRequireDefault(_Input);
 
@@ -55577,7 +55379,7 @@
 	}));
 
 /***/ }),
-/* 331 */
+/* 328 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -56458,6 +56260,227 @@
 	});
 
 /***/ }),
+/* 329 */
+/***/ (function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	module.exports = _react2.default.createClass({
+		displayName: 'exports',
+
+		render: function render() {
+			var str = _react2.default.createElement(
+				'em',
+				null,
+				'Ej angivet'
+			);
+			if (this.props.date !== undefined && this.props.date != "") {
+				var options = {
+					year: 'numeric', month: 'numeric', day: 'numeric',
+					hour: 'numeric', minute: 'numeric', second: 'numeric',
+					hour12: false
+				};
+
+				// Parse the date
+				var parsed_date = Date.parse(this.props.date);
+
+				// If the date was parsed successfully we should update the string
+				if (!isNaN(parsed_date)) {
+					var str = new Intl.DateTimeFormat("sv-SE", options).format(parsed_date);
+				}
+			}
+
+			return _react2.default.createElement(
+				'span',
+				null,
+				str
+			);
+		}
+	});
+
+/***/ }),
+/* 330 */
+/***/ (function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _bind = __webpack_require__(331);
+
+	var _bind2 = _interopRequireDefault(_bind);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+	module.exports = function (_React$Component) {
+		_inherits(FormInput, _React$Component);
+
+		function FormInput(props) {
+			_classCallCheck(this, FormInput);
+
+			var _this2 = _possibleConstructorReturn(this, (FormInput.__proto__ || Object.getPrototypeOf(FormInput)).call(this, props));
+
+			_this2.state = {
+				selected: false,
+				isDirty: false,
+				value: _this2.props.model.get(_this2.props.name),
+				model: _this2.props.model,
+				error_column: "", // TODO
+				error_message: ""
+			};
+			return _this2;
+		}
+
+		_createClass(FormInput, [{
+			key: 'componentDidMount',
+			value: function componentDidMount() {
+				var _this = this;
+
+				// A sync event is fired when the model is saved
+				// When the model is saved the field is no longer dirty
+				this.state.model.on("sync", function (event) {
+					_this.setState({
+						isDirty: _this.state.model.attributeHasChanged(_this.props.name)
+					});
+				});
+
+				// Update this component when the model is changed
+				this.state.model.on("change", function () {
+					if (_this.state.model.changed[_this.props.name] !== undefined) {
+						_this.setState({
+							value: _this.state.model.changed[_this.props.name],
+							isDirty: _this.state.model.attributeHasChanged(_this.props.name)
+						});
+					}
+				});
+			}
+		}, {
+			key: 'onChange',
+			value: function onChange(event) {
+				this.state.model.set(this.props.name, event.target.value);
+			}
+		}, {
+			key: 'onFocus',
+			value: function onFocus() {
+				this.setState({ selected: true });
+			}
+		}, {
+			key: 'onBlur',
+			value: function onBlur() {
+				this.setState({ selected: false });
+			}
+		}, {
+			key: 'render',
+			value: function render() {
+				var classes = (0, _bind2.default)({
+					"uk-form-row": true,
+					"selected": this.state.selected,
+					"changed": this.state.isDirty,
+					"error": this.state.error_column == this.props.name
+				});
+				classes += " " + this.props.name;
+
+				return _react2.default.createElement(
+					'div',
+					{ className: classes },
+					_react2.default.createElement(
+						'label',
+						{ htmlFor: this.props.name, className: 'uk-form-label' },
+						this.props.title
+					),
+					_react2.default.createElement(
+						'div',
+						{ className: 'uk-form-controls' },
+						this.props.icon ? _react2.default.createElement(
+							'div',
+							{ className: 'uk-form-icon' },
+							_react2.default.createElement('i', { className: "uk-icon-" + this.props.icon }),
+							_react2.default.createElement('input', { type: 'text', name: this.props.name, id: this.props.name, disabled: this.props.disabled, value: this.state.value, placeholder: this.props.placeholder ? this.props.placeholder : this.props.title, onChange: this.onChange.bind(this), className: 'uk-form-width-large', onFocus: this.onFocus.bind(this), onBlur: this.onBlur.bind(this) })
+						) : _react2.default.createElement('input', { type: 'text', name: this.props.name, id: this.props.name, disabled: this.props.disabled, value: this.state.value, placeholder: this.props.placeholder ? this.props.placeholder : this.props.title, onChange: this.onChange.bind(this), className: 'uk-form-width-large', onFocus: this.onFocus.bind(this), onBlur: this.onBlur.bind(this) }),
+						this.state.error_column == this.props.name ? _react2.default.createElement(
+							'p',
+							{ className: 'uk-form-help-block error' },
+							this.state.error_message
+						) : ""
+					)
+				);
+			}
+		}]);
+
+		return FormInput;
+	}(_react2.default.Component);
+
+/***/ }),
+/* 331 */
+/***/ (function(module, exports, __webpack_require__) {
+
+	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
+	  Copyright (c) 2016 Jed Watson.
+	  Licensed under the MIT License (MIT), see
+	  http://jedwatson.github.io/classnames
+	*/
+	/* global define */
+
+	(function () {
+		'use strict';
+
+		var hasOwn = {}.hasOwnProperty;
+
+		function classNames () {
+			var classes = [];
+
+			for (var i = 0; i < arguments.length; i++) {
+				var arg = arguments[i];
+				if (!arg) continue;
+
+				var argType = typeof arg;
+
+				if (argType === 'string' || argType === 'number') {
+					classes.push(this && this[arg] || arg);
+				} else if (Array.isArray(arg)) {
+					classes.push(classNames.apply(this, arg));
+				} else if (argType === 'object') {
+					for (var key in arg) {
+						if (hasOwn.call(arg, key) && arg[key]) {
+							classes.push(this && this[key] || key);
+						}
+					}
+				}
+			}
+
+			return classes.join(' ');
+		}
+
+		if (typeof module !== 'undefined' && module.exports) {
+			module.exports = classNames;
+		} else if (true) {
+			// register as 'classnames', consistent with npm package name
+			!(__WEBPACK_AMD_DEFINE_ARRAY__ = [], __WEBPACK_AMD_DEFINE_RESULT__ = function () {
+				return classNames;
+			}.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+		} else {
+			window.classNames = classNames;
+		}
+	}());
+
+
+/***/ }),
 /* 332 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -56469,7 +56492,7 @@
 
 	var _reactRouter = __webpack_require__(184);
 
-	var _Member = __webpack_require__(327);
+	var _Member = __webpack_require__(324);
 
 	var _Member2 = _interopRequireDefault(_Member);
 
@@ -56592,11 +56615,11 @@
 
 	var _reactRouter = __webpack_require__(184);
 
-	var _Member = __webpack_require__(327);
+	var _Member = __webpack_require__(324);
 
 	var _Member2 = _interopRequireDefault(_Member);
 
-	var _Member3 = __webpack_require__(330);
+	var _Member3 = __webpack_require__(327);
 
 	var _Member4 = _interopRequireDefault(_Member3);
 
@@ -56644,11 +56667,11 @@
 
 	var _reactRouter = __webpack_require__(184);
 
-	var _BackboneTable = __webpack_require__(272);
+	var _BackboneTable = __webpack_require__(268);
 
 	var _BackboneTable2 = _interopRequireDefault(_BackboneTable);
 
-	var _TableDropdownMenu = __webpack_require__(291);
+	var _TableDropdownMenu = __webpack_require__(287);
 
 	var _TableDropdownMenu2 = _interopRequireDefault(_TableDropdownMenu);
 
@@ -56784,17 +56807,17 @@
 
 	var _backboneReactComponent2 = _interopRequireDefault(_backboneReactComponent);
 
-	var _BackboneTable = __webpack_require__(272);
+	var _BackboneTable = __webpack_require__(268);
 
 	var _BackboneTable2 = _interopRequireDefault(_BackboneTable);
 
 	var _reactRouter = __webpack_require__(184);
 
-	var _TableDropdownMenu = __webpack_require__(291);
+	var _TableDropdownMenu = __webpack_require__(287);
 
 	var _TableDropdownMenu2 = _interopRequireDefault(_TableDropdownMenu);
 
-	var _auth = __webpack_require__(249);
+	var _auth = __webpack_require__(250);
 
 	var _auth2 = _interopRequireDefault(_auth);
 
@@ -56958,7 +56981,7 @@
 
 	var _reactRouter = __webpack_require__(184);
 
-	var _auth = __webpack_require__(249);
+	var _auth = __webpack_require__(250);
 
 	var _auth2 = _interopRequireDefault(_auth);
 
@@ -60455,11 +60478,11 @@
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _BackboneTable = __webpack_require__(272);
+	var _BackboneTable = __webpack_require__(268);
 
 	var _BackboneTable2 = _interopRequireDefault(_BackboneTable);
 
-	var _TableDropdownMenu = __webpack_require__(291);
+	var _TableDropdownMenu = __webpack_require__(287);
 
 	var _TableDropdownMenu2 = _interopRequireDefault(_TableDropdownMenu);
 
@@ -60601,13 +60624,13 @@
 
 	var _backboneReactComponent2 = _interopRequireDefault(_backboneReactComponent);
 
-	var _GenericEntityFunctions = __webpack_require__(264);
+	var _GenericEntityFunctions = __webpack_require__(290);
 
 	var _GenericEntityFunctions2 = _interopRequireDefault(_GenericEntityFunctions);
 
 	var _reactRouter = __webpack_require__(184);
 
-	var _Input = __webpack_require__(262);
+	var _Input = __webpack_require__(330);
 
 	var _Input2 = _interopRequireDefault(_Input);
 
@@ -60816,7 +60839,7 @@
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _bind = __webpack_require__(263);
+	var _bind = __webpack_require__(331);
 
 	var _bind2 = _interopRequireDefault(_bind);
 
@@ -61017,7 +61040,7 @@
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _bind = __webpack_require__(263);
+	var _bind = __webpack_require__(331);
 
 	var _bind2 = _interopRequireDefault(_bind);
 
@@ -61344,11 +61367,11 @@
 
 	var _reactRouter = __webpack_require__(184);
 
-	var _BackboneTable = __webpack_require__(272);
+	var _BackboneTable = __webpack_require__(268);
 
 	var _BackboneTable2 = _interopRequireDefault(_BackboneTable);
 
-	var _Date = __webpack_require__(285);
+	var _Date = __webpack_require__(281);
 
 	var _Date2 = _interopRequireDefault(_Date);
 
@@ -61418,7 +61441,7 @@
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _Transaction = __webpack_require__(306);
+	var _Transaction = __webpack_require__(303);
 
 	var _Transaction2 = _interopRequireDefault(_Transaction);
 
@@ -61461,21 +61484,21 @@
 
 	var _backboneReactComponent2 = _interopRequireDefault(_backboneReactComponent);
 
-	var _BackboneTable = __webpack_require__(272);
+	var _BackboneTable = __webpack_require__(268);
 
 	var _BackboneTable2 = _interopRequireDefault(_BackboneTable);
 
 	var _reactRouter = __webpack_require__(184);
 
-	var _Currency = __webpack_require__(276);
+	var _Currency = __webpack_require__(272);
 
 	var _Currency2 = _interopRequireDefault(_Currency);
 
-	var _Date = __webpack_require__(285);
+	var _Date = __webpack_require__(281);
 
 	var _Date2 = _interopRequireDefault(_Date);
 
-	var _TableDropdownMenu = __webpack_require__(291);
+	var _TableDropdownMenu = __webpack_require__(287);
 
 	var _TableDropdownMenu2 = _interopRequireDefault(_TableDropdownMenu);
 
@@ -61617,11 +61640,11 @@
 
 	var _reactRouter = __webpack_require__(184);
 
-	var _BackboneTable = __webpack_require__(272);
+	var _BackboneTable = __webpack_require__(268);
 
 	var _BackboneTable2 = _interopRequireDefault(_BackboneTable);
 
-	var _DateTime = __webpack_require__(260);
+	var _DateTime = __webpack_require__(329);
 
 	var _DateTime2 = _interopRequireDefault(_DateTime);
 
@@ -61866,11 +61889,11 @@
 
 	var _reactRouter = __webpack_require__(184);
 
-	var _BackboneTable = __webpack_require__(272);
+	var _BackboneTable = __webpack_require__(268);
 
 	var _BackboneTable2 = _interopRequireDefault(_BackboneTable);
 
-	var _DateTime = __webpack_require__(260);
+	var _DateTime = __webpack_require__(329);
 
 	var _DateTime2 = _interopRequireDefault(_DateTime);
 
@@ -62022,11 +62045,11 @@
 
 	var _reactSelect = __webpack_require__(340);
 
-	var _GenericEntityFunctions = __webpack_require__(264);
+	var _GenericEntityFunctions = __webpack_require__(290);
 
 	var _GenericEntityFunctions2 = _interopRequireDefault(_GenericEntityFunctions);
 
-	var _auth = __webpack_require__(249);
+	var _auth = __webpack_require__(250);
 
 	var _auth2 = _interopRequireDefault(_auth);
 
@@ -62392,7 +62415,7 @@
 
 	var _reactRouter = __webpack_require__(184);
 
-	var _TableFilterBox = __webpack_require__(281);
+	var _TableFilterBox = __webpack_require__(277);
 
 	var _TableFilterBox2 = _interopRequireDefault(_TableFilterBox);
 
@@ -62509,11 +62532,11 @@
 
 	var _reactRouter = __webpack_require__(184);
 
-	var _GenericEntityFunctions = __webpack_require__(264);
+	var _GenericEntityFunctions = __webpack_require__(290);
 
 	var _GenericEntityFunctions2 = _interopRequireDefault(_GenericEntityFunctions);
 
-	var _Input = __webpack_require__(262);
+	var _Input = __webpack_require__(330);
 
 	var _Input2 = _interopRequireDefault(_Input);
 
@@ -62618,7 +62641,7 @@
 
 	var _Group2 = _interopRequireDefault(_Group);
 
-	var _Member = __webpack_require__(326);
+	var _Member = __webpack_require__(323);
 
 	var _Member2 = _interopRequireDefault(_Member);
 
@@ -62679,17 +62702,17 @@
 
 	var _backboneReactComponent2 = _interopRequireDefault(_backboneReactComponent);
 
-	var _BackboneTable = __webpack_require__(272);
+	var _BackboneTable = __webpack_require__(268);
 
 	var _BackboneTable2 = _interopRequireDefault(_BackboneTable);
 
 	var _reactRouter = __webpack_require__(184);
 
-	var _TableDropdownMenu = __webpack_require__(291);
+	var _TableDropdownMenu = __webpack_require__(287);
 
 	var _TableDropdownMenu2 = _interopRequireDefault(_TableDropdownMenu);
 
-	var _auth = __webpack_require__(249);
+	var _auth = __webpack_require__(250);
 
 	var _auth2 = _interopRequireDefault(_auth);
 
@@ -63022,15 +63045,15 @@
 
 	var _reactRouter = __webpack_require__(184);
 
-	var _BackboneTable = __webpack_require__(272);
+	var _BackboneTable = __webpack_require__(268);
 
 	var _BackboneTable2 = _interopRequireDefault(_BackboneTable);
 
-	var _Currency = __webpack_require__(276);
+	var _Currency = __webpack_require__(272);
 
 	var _Currency2 = _interopRequireDefault(_Currency);
 
-	var _TableDropdownMenu = __webpack_require__(291);
+	var _TableDropdownMenu = __webpack_require__(287);
 
 	var _TableDropdownMenu2 = _interopRequireDefault(_TableDropdownMenu);
 
@@ -63297,11 +63320,11 @@
 
 	var _reactRouter = __webpack_require__(184);
 
-	var _BackboneTable = __webpack_require__(272);
+	var _BackboneTable = __webpack_require__(268);
 
 	var _BackboneTable2 = _interopRequireDefault(_BackboneTable);
 
-	var _Date = __webpack_require__(285);
+	var _Date = __webpack_require__(281);
 
 	var _Date2 = _interopRequireDefault(_Date);
 
@@ -63386,7 +63409,7 @@
 
 	var _SalesHistory4 = _interopRequireDefault(_SalesHistory3);
 
-	var _TableFilterBox = __webpack_require__(281);
+	var _TableFilterBox = __webpack_require__(277);
 
 	var _TableFilterBox2 = _interopRequireDefault(_TableFilterBox);
 
@@ -63499,11 +63522,11 @@
 
 	var _reactRouter = __webpack_require__(184);
 
-	var _BackboneTable = __webpack_require__(272);
+	var _BackboneTable = __webpack_require__(268);
 
 	var _BackboneTable2 = _interopRequireDefault(_BackboneTable);
 
-	var _Currency = __webpack_require__(276);
+	var _Currency = __webpack_require__(272);
 
 	var _Currency2 = _interopRequireDefault(_Currency);
 
@@ -63715,11 +63738,11 @@
 
 	var _reactRouter = __webpack_require__(184);
 
-	var _BackboneTable = __webpack_require__(272);
+	var _BackboneTable = __webpack_require__(268);
 
 	var _BackboneTable2 = _interopRequireDefault(_BackboneTable);
 
-	var _DateTime = __webpack_require__(260);
+	var _DateTime = __webpack_require__(329);
 
 	var _DateTime2 = _interopRequireDefault(_DateTime);
 
@@ -63969,19 +63992,19 @@
 
 	var _reactRouter = __webpack_require__(184);
 
-	var _BackboneTable = __webpack_require__(272);
+	var _BackboneTable = __webpack_require__(268);
 
 	var _BackboneTable2 = _interopRequireDefault(_BackboneTable);
 
-	var _DateTime = __webpack_require__(260);
+	var _DateTime = __webpack_require__(329);
 
 	var _DateTime2 = _interopRequireDefault(_DateTime);
 
-	var _TableDropdownMenu = __webpack_require__(291);
+	var _TableDropdownMenu = __webpack_require__(287);
 
 	var _TableDropdownMenu2 = _interopRequireDefault(_TableDropdownMenu);
 
-	var _bind = __webpack_require__(263);
+	var _bind = __webpack_require__(331);
 
 	var _bind2 = _interopRequireDefault(_bind);
 
@@ -64177,7 +64200,7 @@
 
 	var _reactRouter = __webpack_require__(184);
 
-	var _GenericEntityFunctions = __webpack_require__(264);
+	var _GenericEntityFunctions = __webpack_require__(290);
 
 	var _GenericEntityFunctions2 = _interopRequireDefault(_GenericEntityFunctions);
 
@@ -64424,7 +64447,7 @@
 
 	var _backboneReactComponent2 = _interopRequireDefault(_backboneReactComponent);
 
-	var _DateTime = __webpack_require__(260);
+	var _DateTime = __webpack_require__(329);
 
 	var _DateTime2 = _interopRequireDefault(_DateTime);
 
@@ -64552,7 +64575,7 @@
 
 	var _Keys4 = _interopRequireDefault(_Keys3);
 
-	var _TableFilterBox = __webpack_require__(281);
+	var _TableFilterBox = __webpack_require__(277);
 
 	var _TableFilterBox2 = _interopRequireDefault(_TableFilterBox);
 
@@ -64985,15 +65008,15 @@
 
 	var _reactRouter = __webpack_require__(184);
 
-	var _Currency = __webpack_require__(276);
+	var _Currency = __webpack_require__(272);
 
 	var _Currency2 = _interopRequireDefault(_Currency);
 
-	var _Date = __webpack_require__(285);
+	var _Date = __webpack_require__(281);
 
 	var _Date2 = _interopRequireDefault(_Date);
 
-	var _BackboneTable = __webpack_require__(272);
+	var _BackboneTable = __webpack_require__(268);
 
 	var _BackboneTable2 = _interopRequireDefault(_BackboneTable);
 
@@ -65391,7 +65414,7 @@
 
 	var _reactRouter = __webpack_require__(184);
 
-	var _BackboneTable = __webpack_require__(272);
+	var _BackboneTable = __webpack_require__(268);
 
 	var _BackboneTable2 = _interopRequireDefault(_BackboneTable);
 
@@ -65609,11 +65632,11 @@
 
 	var _reactRouter = __webpack_require__(184);
 
-	var _DateTime = __webpack_require__(260);
+	var _DateTime = __webpack_require__(329);
 
 	var _DateTime2 = _interopRequireDefault(_DateTime);
 
-	var _auth = __webpack_require__(249);
+	var _auth = __webpack_require__(250);
 
 	var _auth2 = _interopRequireDefault(_auth);
 
@@ -65621,7 +65644,7 @@
 
 	var _Key2 = _interopRequireDefault(_Key);
 
-	var _Member = __webpack_require__(327);
+	var _Member = __webpack_require__(324);
 
 	var _Member2 = _interopRequireDefault(_Member);
 
@@ -65975,7 +65998,7 @@
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _auth = __webpack_require__(249);
+	var _auth = __webpack_require__(250);
 
 	var _auth2 = _interopRequireDefault(_auth);
 
@@ -66496,15 +66519,15 @@
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _BackboneTable = __webpack_require__(272);
+	var _BackboneTable = __webpack_require__(268);
 
 	var _BackboneTable2 = _interopRequireDefault(_BackboneTable);
 
-	var _DateTime = __webpack_require__(260);
+	var _DateTime = __webpack_require__(329);
 
 	var _DateTime2 = _interopRequireDefault(_DateTime);
 
-	var _auth = __webpack_require__(249);
+	var _auth = __webpack_require__(250);
 
 	var _auth2 = _interopRequireDefault(_auth);
 
@@ -66617,7 +66640,7 @@
 					_react2.default.createElement(
 						"dd",
 						null,
-						("2018-04-01 16:07:06")
+						("2018-05-27 16:30:52")
 					),
 					_react2.default.createElement(
 						"dt",
@@ -66627,7 +66650,7 @@
 					_react2.default.createElement(
 						"dd",
 						null,
-						("ac51f44\n")
+						("b82aea6\n")
 					)
 				),
 				_react2.default.createElement(
@@ -66776,55 +66799,55 @@
 /* 444 */
 /***/ (function(module, exports) {
 
-	module.exports = {"_args":[["react@15.6.2","/root/makersofsweden/MakerAdmin-Frontend"]],"_from":"react@15.6.2","_id":"react@15.6.2","_inCache":true,"_installable":true,"_location":"/react","_nodeVersion":"6.9.0","_npmOperationalInternal":{"host":"s3://npm-registry-packages","tmp":"tmp/react-15.6.2.tgz_1506384625607_0.1477106052916497"},"_npmUser":{"email":"npm@sophiebits.com","name":"sophiebits"},"_npmVersion":"3.10.8","_phantomChildren":{},"_requested":{"name":"react","raw":"react@15.6.2","rawSpec":"15.6.2","scope":null,"spec":"15.6.2","type":"version"},"_requiredBy":["/"],"_resolved":"https://registry.npmjs.org/react/-/react-15.6.2.tgz","_shasum":"dba0434ab439cfe82f108f0f511663908179aa72","_shrinkwrap":null,"_spec":"react@15.6.2","_where":"/root/makersofsweden/MakerAdmin-Frontend","browserify":{"transform":["loose-envify"]},"bugs":{"url":"https://github.com/facebook/react/issues"},"dependencies":{"create-react-class":"^15.6.0","fbjs":"^0.8.9","loose-envify":"^1.1.0","object-assign":"^4.1.0","prop-types":"^15.5.10"},"description":"React is a JavaScript library for building user interfaces.","devDependencies":{},"directories":{},"dist":{"shasum":"dba0434ab439cfe82f108f0f511663908179aa72","tarball":"https://registry.npmjs.org/react/-/react-15.6.2.tgz"},"engines":{"node":">=0.10.0"},"files":["LICENSE","addons.js","addons/","dist/","lib/","react.js"],"homepage":"https://facebook.github.io/react/","keywords":["react"],"license":"MIT","main":"react.js","maintainers":[{"name":"sophiebits","email":"npm2@sophiebits.com"},{"name":"flarnie","email":"flarnie.npm@gmail.com"},{"name":"gaearon","email":"dan.abramov@gmail.com"},{"name":"trueadm","email":"dg@domgan.com"},{"name":"brianvaughn","email":"briandavidvaughn@gmail.com"},{"name":"fb","email":"opensource+npm@fb.com"}],"name":"react","optionalDependencies":{},"readme":"ERROR: No README data found!","repository":{"type":"git","url":"git+https://github.com/facebook/react.git"},"scripts":{},"version":"15.6.2"}
+	module.exports = {"_from":"react@^15.4.1","_id":"react@15.6.2","_inBundle":false,"_integrity":"sha1-26BDSrQ5z+gvEI8PURZjkIF5qnI=","_location":"/react","_phantomChildren":{},"_requested":{"type":"range","registry":true,"raw":"react@^15.4.1","name":"react","escapedName":"react","rawSpec":"^15.4.1","saveSpec":null,"fetchSpec":"^15.4.1"},"_requiredBy":["/"],"_resolved":"https://registry.npmjs.org/react/-/react-15.6.2.tgz","_shasum":"dba0434ab439cfe82f108f0f511663908179aa72","_spec":"react@^15.4.1","_where":"/Users/arong/MakerAdmin-Hub/MakerAdmin-Frontend","browserify":{"transform":["loose-envify"]},"bugs":{"url":"https://github.com/facebook/react/issues"},"bundleDependencies":false,"dependencies":{"create-react-class":"^15.6.0","fbjs":"^0.8.9","loose-envify":"^1.1.0","object-assign":"^4.1.0","prop-types":"^15.5.10"},"deprecated":false,"description":"React is a JavaScript library for building user interfaces.","engines":{"node":">=0.10.0"},"files":["LICENSE","addons.js","react.js","addons/","dist/","lib/"],"homepage":"https://facebook.github.io/react/","keywords":["react"],"license":"MIT","main":"react.js","name":"react","repository":{"type":"git","url":"git+https://github.com/facebook/react.git"},"version":"15.6.2"}
 
 /***/ }),
 /* 445 */
 /***/ (function(module, exports) {
 
-	module.exports = {"_args":[["jquery@3.3.1","/root/makersofsweden/MakerAdmin-Frontend"]],"_from":"jquery@3.3.1","_id":"jquery@3.3.1","_inCache":true,"_installable":true,"_location":"/jquery","_nodeVersion":"9.3.0","_npmOperationalInternal":{"host":"s3://npm-registry-packages","tmp":"tmp/jquery-3.3.1.tgz_1516469230473_0.5458589680492878"},"_npmUser":{"email":"4timmywil@gmail.com","name":"timmywil"},"_npmVersion":"5.6.0","_phantomChildren":{},"_requested":{"name":"jquery","raw":"jquery@3.3.1","rawSpec":"3.3.1","scope":null,"spec":"3.3.1","type":"version"},"_requiredBy":["/"],"_resolved":"https://registry.npmjs.org/jquery/-/jquery-3.3.1.tgz","_shasum":"958ce29e81c9790f31be7792df5d4d95fc57fbca","_shrinkwrap":null,"_spec":"jquery@3.3.1","_where":"/root/makersofsweden/MakerAdmin-Frontend","author":{"name":"JS Foundation and other contributors","url":"https://github.com/jquery/jquery/blob/3.3.1/AUTHORS.txt"},"bugs":{"url":"https://github.com/jquery/jquery/issues"},"commitplease":{"components":["Ajax","Attributes","Build","CSS","Callbacks","Core","Data","Deferred","Deprecated","Dimensions","Docs","Effects","Event","Manipulation","Offset","Queue","Release","Selector","Serialize","Support","Tests","Traversing","Wrap"],"markerPattern":"^((clos|fix|resolv)(e[sd]|ing))|^(refs?)","nohook":true,"ticketPattern":"^((Closes|Fixes) ([a-zA-Z]{2,}-)[0-9]+)|^(Refs? [^#])"},"dependencies":{},"description":"JavaScript library for DOM operations","devDependencies":{"babel-core":"7.0.0-beta.0","babel-plugin-transform-es2015-for-of":"7.0.0-beta.0","commitplease":"2.7.10","core-js":"2.4.1","eslint-config-jquery":"1.0.1","grunt":"1.0.1","grunt-babel":"7.0.0","grunt-cli":"1.2.0","grunt-compare-size":"0.4.2","grunt-contrib-uglify":"3.0.1","grunt-contrib-watch":"1.0.0","grunt-eslint":"20.0.0","grunt-git-authors":"3.2.0","grunt-jsonlint":"1.1.0","grunt-karma":"2.0.0","grunt-newer":"1.3.0","grunt-npmcopy":"0.1.0","gzip-js":"0.3.2","husky":"0.14.3","insight":"0.8.4","jsdom":"5.6.1","karma":"1.7.0","karma-browserstack-launcher":"1.3.0","karma-chrome-launcher":"2.2.0","karma-firefox-launcher":"1.0.1","karma-qunit":"1.2.1","load-grunt-tasks":"3.5.2","native-promise-only":"0.8.1","promises-aplus-tests":"2.1.2","q":"1.5.0","qunit-assert-step":"1.0.3","qunitjs":"1.23.1","raw-body":"2.2.0","requirejs":"2.3.3","sinon":"2.3.7","sizzle":"2.3.3","strip-json-comments":"2.0.1","testswarm":"1.1.0","uglify-js":"3.3.4"},"directories":{},"dist":{"integrity":"sha512-Ubldcmxp5np52/ENotGxlLe6aGMvmF4R8S6tZjsP6Knsaxd/xp3Zrh50cG93lR6nPXyUFwzN3ZSOQI0wRJNdGg==","shasum":"958ce29e81c9790f31be7792df5d4d95fc57fbca","tarball":"https://registry.npmjs.org/jquery/-/jquery-3.3.1.tgz"},"gitHead":"9e8ec3d10fad04748176144f108d7355662ae75e","homepage":"https://jquery.com","keywords":["browser","javascript","jquery","library"],"license":"MIT","main":"dist/jquery.js","maintainers":[{"name":"dmethvin","email":"dave.methvin@gmail.com"},{"name":"mgol","email":"m.goleb@gmail.com"},{"name":"scott.gonzalez","email":"scott.gonzalez@gmail.com"},{"name":"timmywil","email":"4timmywil@gmail.com"}],"name":"jquery","optionalDependencies":{},"readme":"ERROR: No README data found!","repository":{"type":"git","url":"git+https://github.com/jquery/jquery.git"},"scripts":{"build":"npm install && grunt","commitmsg":"node node_modules/commitplease","jenkins":"npm run test:browserless","precommit":"grunt lint:newer qunit_fixture","start":"grunt watch","test":"grunt && grunt test:slow && grunt karma:main","test:browser":"grunt && grunt karma:main","test:browserless":"grunt && grunt test:slow"},"title":"jQuery","version":"3.3.1"}
+	module.exports = {"_from":"jquery@^3.1.1","_id":"jquery@3.3.1","_inBundle":false,"_integrity":"sha512-Ubldcmxp5np52/ENotGxlLe6aGMvmF4R8S6tZjsP6Knsaxd/xp3Zrh50cG93lR6nPXyUFwzN3ZSOQI0wRJNdGg==","_location":"/jquery","_phantomChildren":{},"_requested":{"type":"range","registry":true,"raw":"jquery@^3.1.1","name":"jquery","escapedName":"jquery","rawSpec":"^3.1.1","saveSpec":null,"fetchSpec":"^3.1.1"},"_requiredBy":["/"],"_resolved":"https://registry.npmjs.org/jquery/-/jquery-3.3.1.tgz","_shasum":"958ce29e81c9790f31be7792df5d4d95fc57fbca","_spec":"jquery@^3.1.1","_where":"/Users/arong/MakerAdmin-Hub/MakerAdmin-Frontend","author":{"name":"JS Foundation and other contributors","url":"https://github.com/jquery/jquery/blob/3.3.1/AUTHORS.txt"},"bugs":{"url":"https://github.com/jquery/jquery/issues"},"bundleDependencies":false,"commitplease":{"nohook":true,"components":["Docs","Tests","Build","Support","Release","Core","Ajax","Attributes","Callbacks","CSS","Data","Deferred","Deprecated","Dimensions","Effects","Event","Manipulation","Offset","Queue","Selector","Serialize","Traversing","Wrap"],"markerPattern":"^((clos|fix|resolv)(e[sd]|ing))|^(refs?)","ticketPattern":"^((Closes|Fixes) ([a-zA-Z]{2,}-)[0-9]+)|^(Refs? [^#])"},"dependencies":{},"deprecated":false,"description":"JavaScript library for DOM operations","devDependencies":{"babel-core":"7.0.0-beta.0","babel-plugin-transform-es2015-for-of":"7.0.0-beta.0","commitplease":"2.7.10","core-js":"2.4.1","eslint-config-jquery":"1.0.1","grunt":"1.0.1","grunt-babel":"7.0.0","grunt-cli":"1.2.0","grunt-compare-size":"0.4.2","grunt-contrib-uglify":"3.0.1","grunt-contrib-watch":"1.0.0","grunt-eslint":"20.0.0","grunt-git-authors":"3.2.0","grunt-jsonlint":"1.1.0","grunt-karma":"2.0.0","grunt-newer":"1.3.0","grunt-npmcopy":"0.1.0","gzip-js":"0.3.2","husky":"0.14.3","insight":"0.8.4","jsdom":"5.6.1","karma":"1.7.0","karma-browserstack-launcher":"1.3.0","karma-chrome-launcher":"2.2.0","karma-firefox-launcher":"1.0.1","karma-qunit":"1.2.1","load-grunt-tasks":"3.5.2","native-promise-only":"0.8.1","promises-aplus-tests":"2.1.2","q":"1.5.0","qunit-assert-step":"1.0.3","qunitjs":"1.23.1","raw-body":"2.2.0","requirejs":"2.3.3","sinon":"2.3.7","sizzle":"2.3.3","strip-json-comments":"2.0.1","testswarm":"1.1.0","uglify-js":"3.3.4"},"homepage":"https://jquery.com","keywords":["jquery","javascript","browser","library"],"license":"MIT","main":"dist/jquery.js","name":"jquery","repository":{"type":"git","url":"git+https://github.com/jquery/jquery.git"},"scripts":{"build":"npm install && grunt","commitmsg":"node node_modules/commitplease","jenkins":"npm run test:browserless","precommit":"grunt lint:newer qunit_fixture","start":"grunt watch","test":"grunt && grunt test:slow && grunt karma:main","test:browser":"grunt && grunt karma:main","test:browserless":"grunt && grunt test:slow"},"title":"jQuery","version":"3.3.1"}
 
 /***/ }),
 /* 446 */
 /***/ (function(module, exports) {
 
-	module.exports = {"_args":[["uikit@2.27.4","/root/makersofsweden/MakerAdmin-Frontend"]],"_from":"uikit@2.27.4","_id":"uikit@2.27.4","_inCache":true,"_installable":true,"_location":"/uikit","_nodeVersion":"7.7.4","_npmOperationalInternal":{"host":"s3://npm-registry-packages","tmp":"tmp/uikit-2.27.4.tgz_1496219361441_0.4906960509251803"},"_npmUser":{"email":"artur@agentejo.com","name":"aheinze"},"_npmVersion":"4.1.2","_phantomChildren":{},"_requested":{"name":"uikit","raw":"uikit@2.27.4","rawSpec":"2.27.4","scope":null,"spec":"2.27.4","type":"version"},"_requiredBy":["/"],"_resolved":"https://registry.npmjs.org/uikit/-/uikit-2.27.4.tgz","_shasum":"dc0a2dde23f4fbf47fb393c7056fd794f771f255","_shrinkwrap":null,"_spec":"uikit@2.27.4","_where":"/root/makersofsweden/MakerAdmin-Frontend","author":{"email":"info@getuikit.com","name":"UIkit","url":"http://www.getuikit.com"},"bugs":{"url":"https://github.com/uikit/uikit/issues"},"dependencies":{"node-promise":"^0.5.10"},"description":"UIkit is a lightweight and modular front-end framework for developing fast and powerful web interfaces.","devDependencies":{"browser-sync":"^2.6.5","del":"^0.1.2","glob":"^4.0.5","gulp":"^3.8.8","gulp-concat":"^2.3.4","gulp-header":"1.0.5","gulp-ignore":"^1.2.0","gulp-less":"latest","gulp-minify-css":"^1.1.1","gulp-rename":"^1.2.0","gulp-replace":"^0.4.0","gulp-rimraf":"latest","gulp-tap":"latest","gulp-uglify":"^0.3.1","gulp-util":"latest","gulp-watch":"^0.6.9","gulp-zip":"^2.0.2","mkdirp":"latest","promise":"latest","run-sequence":"^0.3.6"},"directories":{},"dist":{"shasum":"dc0a2dde23f4fbf47fb393c7056fd794f771f255","tarball":"https://registry.npmjs.org/uikit/-/uikit-2.27.4.tgz"},"gitHead":"f56c1de3beb90c00d2eb91eb974f4b7486946b7e","homepage":"http://www.getuikit.com","keywords":[],"licenses":[{"type":"MIT","url":"https://github.com/uikit/uikit/blob/master/LICENSE.md"}],"main":"dist/js/uikit.js","maintainers":[{"name":"aheinze","email":"artur@agentejo.com"},{"name":"janschoenherr","email":"jan@yootheme.com"},{"name":"saschadube","email":"sascha.dube@gmail.com"}],"name":"uikit","optionalDependencies":{},"readme":"ERROR: No README data found!","repository":{"type":"git","url":"git://github.com/uikit/uikit.git"},"scripts":{},"title":"UIkit","version":"2.27.4"}
+	module.exports = {"_from":"uikit@^2.27.2","_id":"uikit@2.27.4","_inBundle":false,"_integrity":"sha1-3Aot3iP0+/R/s5PHBW/XlPdx8lU=","_location":"/uikit","_phantomChildren":{},"_requested":{"type":"range","registry":true,"raw":"uikit@^2.27.2","name":"uikit","escapedName":"uikit","rawSpec":"^2.27.2","saveSpec":null,"fetchSpec":"^2.27.2"},"_requiredBy":["/"],"_resolved":"https://registry.npmjs.org/uikit/-/uikit-2.27.4.tgz","_shasum":"dc0a2dde23f4fbf47fb393c7056fd794f771f255","_spec":"uikit@^2.27.2","_where":"/Users/arong/MakerAdmin-Hub/MakerAdmin-Frontend","author":{"name":"UIkit","email":"info@getuikit.com","url":"http://www.getuikit.com"},"bugs":{"url":"https://github.com/uikit/uikit/issues"},"bundleDependencies":false,"dependencies":{"node-promise":"^0.5.10"},"deprecated":false,"description":"UIkit is a lightweight and modular front-end framework for developing fast and powerful web interfaces.","devDependencies":{"browser-sync":"^2.6.5","del":"^0.1.2","glob":"^4.0.5","gulp":"^3.8.8","gulp-concat":"^2.3.4","gulp-header":"1.0.5","gulp-ignore":"^1.2.0","gulp-less":"latest","gulp-minify-css":"^1.1.1","gulp-rename":"^1.2.0","gulp-replace":"^0.4.0","gulp-rimraf":"latest","gulp-tap":"latest","gulp-uglify":"^0.3.1","gulp-util":"latest","gulp-watch":"^0.6.9","gulp-zip":"^2.0.2","mkdirp":"latest","promise":"latest","run-sequence":"^0.3.6"},"homepage":"http://www.getuikit.com","keywords":[],"licenses":[{"type":"MIT","url":"https://github.com/uikit/uikit/blob/master/LICENSE.md"}],"main":"dist/js/uikit.js","name":"uikit","repository":{"type":"git","url":"git://github.com/uikit/uikit.git"},"title":"UIkit","version":"2.27.4"}
 
 /***/ }),
 /* 447 */
 /***/ (function(module, exports) {
 
-	module.exports = {"_args":[["backbone@1.3.3","/root/makersofsweden/MakerAdmin-Frontend"]],"_from":"backbone@1.3.3","_id":"backbone@1.3.3","_inCache":true,"_installable":true,"_location":"/backbone","_nodeVersion":"5.9.0","_npmOperationalInternal":{"host":"packages-12-west.internal.npmjs.com","tmp":"tmp/backbone-1.3.3.tgz_1459878357109_0.31128784036263824"},"_npmUser":{"email":"justin+npm@ridgewell.name","name":"jridgewell"},"_npmVersion":"3.7.3","_phantomChildren":{},"_requested":{"name":"backbone","raw":"backbone@1.3.3","rawSpec":"1.3.3","scope":null,"spec":"1.3.3","type":"version"},"_requiredBy":["/","/backbone.paginator"],"_resolved":"https://registry.npmjs.org/backbone/-/backbone-1.3.3.tgz","_shasum":"4cc80ea7cb1631ac474889ce40f2f8bc683b2999","_shrinkwrap":null,"_spec":"backbone@1.3.3","_where":"/root/makersofsweden/MakerAdmin-Frontend","author":{"name":"Jeremy Ashkenas"},"bugs":{"url":"https://github.com/jashkenas/backbone/issues"},"dependencies":{"underscore":">=1.8.3"},"description":"Give your JS App some Backbone with Models, Views, Collections, and Events.","devDependencies":{"coffee-script":"1.7.1","docco":"0.7.0","eslint":"1.10.x","karma":"^0.13.13","karma-phantomjs-launcher":"^0.1.4","karma-qunit":"^0.1.5","qunitjs":"^1.18.0","uglify-js":"^2.4.17"},"directories":{},"dist":{"shasum":"4cc80ea7cb1631ac474889ce40f2f8bc683b2999","tarball":"https://registry.npmjs.org/backbone/-/backbone-1.3.3.tgz"},"files":["LICENSE","backbone-min.js","backbone-min.map","backbone.js"],"gitHead":"8ec88604732944f197b352a6be22c8216ea9d3a1","homepage":"https://github.com/jashkenas/backbone#readme","keywords":["browser","client","controller","model","router","server","view"],"license":"MIT","main":"backbone.js","maintainers":[{"name":"braddunbar","email":"dunbarb2@gmail.com"},{"name":"jashkenas","email":"jashkenas@gmail.com"},{"name":"jridgewell","email":"justin+npm@ridgewell.name"}],"name":"backbone","optionalDependencies":{},"readme":"ERROR: No README data found!","repository":{"type":"git","url":"git+https://github.com/jashkenas/backbone.git"},"scripts":{"build":"uglifyjs backbone.js --mangle --source-map backbone-min.map -o backbone-min.js","doc":"docco backbone.js && docco examples/todos/todos.js examples/backbone.localStorage.js","lint":"eslint backbone.js test/*.js","test":"karma start && coffee test/model.coffee && npm run lint"},"url":"http://backbonejs.org","version":"1.3.3"}
+	module.exports = {"_from":"backbone@^1.3.3","_id":"backbone@1.3.3","_inBundle":false,"_integrity":"sha1-TMgOp8sWMaxHSInOQPL4vGg7KZk=","_location":"/backbone","_phantomChildren":{},"_requested":{"type":"range","registry":true,"raw":"backbone@^1.3.3","name":"backbone","escapedName":"backbone","rawSpec":"^1.3.3","saveSpec":null,"fetchSpec":"^1.3.3"},"_requiredBy":["/","/backbone.paginator"],"_resolved":"https://registry.npmjs.org/backbone/-/backbone-1.3.3.tgz","_shasum":"4cc80ea7cb1631ac474889ce40f2f8bc683b2999","_spec":"backbone@^1.3.3","_where":"/Users/arong/MakerAdmin-Hub/MakerAdmin-Frontend","author":{"name":"Jeremy Ashkenas"},"bugs":{"url":"https://github.com/jashkenas/backbone/issues"},"bundleDependencies":false,"dependencies":{"underscore":">=1.8.3"},"deprecated":false,"description":"Give your JS App some Backbone with Models, Views, Collections, and Events.","devDependencies":{"coffee-script":"1.7.1","docco":"0.7.0","eslint":"1.10.x","karma":"^0.13.13","karma-phantomjs-launcher":"^0.1.4","karma-qunit":"^0.1.5","qunitjs":"^1.18.0","uglify-js":"^2.4.17"},"files":["backbone.js","backbone-min.js","backbone-min.map","LICENSE"],"homepage":"https://github.com/jashkenas/backbone#readme","keywords":["model","view","controller","router","server","client","browser"],"license":"MIT","main":"backbone.js","name":"backbone","repository":{"type":"git","url":"git+https://github.com/jashkenas/backbone.git"},"scripts":{"build":"uglifyjs backbone.js --mangle --source-map backbone-min.map -o backbone-min.js","doc":"docco backbone.js && docco examples/todos/todos.js examples/backbone.localStorage.js","lint":"eslint backbone.js test/*.js","test":"karma start && coffee test/model.coffee && npm run lint"},"url":"http://backbonejs.org","version":"1.3.3"}
 
 /***/ }),
 /* 448 */
 /***/ (function(module, exports) {
 
-	module.exports = {"_args":[["backbone-react-component@0.10.0","/root/makersofsweden/MakerAdmin-Frontend"]],"_from":"backbone-react-component@0.10.0","_id":"backbone-react-component@0.10.0","_inCache":true,"_installable":true,"_location":"/backbone-react-component","_nodeVersion":"2.4.0","_npmUser":{"email":"magalhas@gmail.com","name":"magalhas"},"_npmVersion":"2.13.0","_phantomChildren":{},"_requested":{"name":"backbone-react-component","raw":"backbone-react-component@0.10.0","rawSpec":"0.10.0","scope":null,"spec":"0.10.0","type":"version"},"_requiredBy":["/"],"_resolved":"https://registry.npmjs.org/backbone-react-component/-/backbone-react-component-0.10.0.tgz","_shasum":"0fdcf4d137e810468d47d5c8c4f10e40db989c2f","_shrinkwrap":null,"_spec":"backbone-react-component@0.10.0","_where":"/root/makersofsweden/MakerAdmin-Frontend","author":{"email":"magalhas@gmail.com","name":"José Magalhães"},"bugs":{"url":"https://github.com/magalhas/backbone-react-component/issues"},"dependencies":{"underscore":"^1.8.3"},"description":"Backbone.React.Component is a wrapper for React.Component and brings all the power of Facebook's React to Backbone.js","devDependencies":{"backbone":"^1.2.3","grunt":"^0.4.5","grunt-contrib-clean":"^0.6.0","grunt-contrib-copy":"^0.8.1","grunt-contrib-jasmine":"^0.9.1","grunt-contrib-uglify":"^0.9.2","grunt-docco":"^0.4.0","grunt-gh-pages":"^0.10.0","jquery":"^2.1.4","react":"^0.14.0","react-dom":"^0.14.0"},"directories":{},"dist":{"shasum":"0fdcf4d137e810468d47d5c8c4f10e40db989c2f","tarball":"https://registry.npmjs.org/backbone-react-component/-/backbone-react-component-0.10.0.tgz"},"engines":{"node":">=0.10"},"filename":"backbone-react-component.js","gitHead":"5deb12005e531d32e945c68c39364f79891ff3b7","homepage":"https://github.com/magalhas/backbone-react-component#readme","keywords":["backbone","client","collections","data binding","models","react","react-component","server"],"licenses":[{"type":"MIT","url":"https://github.com/magalhas/backbone-react-component/blob/master/LICENSE-MIT"}],"main":"lib/component","maintainers":[{"name":"magalhas","email":"magalhas@gmail.com"}],"name":"backbone-react-component","optionalDependencies":{},"peerDependencies":{"backbone":"^1.2.3","react":"^0.14.0"},"readme":"ERROR: No README data found!","repository":{"type":"git","url":"git+https://github.com/magalhas/backbone-react-component.git"},"scripts":{"prepublish":"grunt build && grunt doc","test":"grunt test"},"version":"0.10.0"}
+	module.exports = {"_from":"backbone-react-component@^0.10.0","_id":"backbone-react-component@0.10.0","_inBundle":false,"_integrity":"sha1-D9z00TfoEEaNR9XIxPEOQNuYnC8=","_location":"/backbone-react-component","_phantomChildren":{},"_requested":{"type":"range","registry":true,"raw":"backbone-react-component@^0.10.0","name":"backbone-react-component","escapedName":"backbone-react-component","rawSpec":"^0.10.0","saveSpec":null,"fetchSpec":"^0.10.0"},"_requiredBy":["/"],"_resolved":"https://registry.npmjs.org/backbone-react-component/-/backbone-react-component-0.10.0.tgz","_shasum":"0fdcf4d137e810468d47d5c8c4f10e40db989c2f","_spec":"backbone-react-component@^0.10.0","_where":"/Users/arong/MakerAdmin-Hub/MakerAdmin-Frontend","author":{"name":"José Magalhães","email":"magalhas@gmail.com"},"bugs":{"url":"https://github.com/magalhas/backbone-react-component/issues"},"bundleDependencies":false,"dependencies":{"underscore":"^1.8.3"},"deprecated":false,"description":"Backbone.React.Component is a wrapper for React.Component and brings all the power of Facebook's React to Backbone.js","devDependencies":{"backbone":"^1.2.3","grunt":"^0.4.5","grunt-contrib-clean":"^0.6.0","grunt-contrib-copy":"^0.8.1","grunt-contrib-jasmine":"^0.9.1","grunt-contrib-uglify":"^0.9.2","grunt-docco":"^0.4.0","grunt-gh-pages":"^0.10.0","jquery":"^2.1.4","react":"^0.14.0","react-dom":"^0.14.0"},"engines":{"node":">=0.10"},"filename":"backbone-react-component.js","homepage":"https://github.com/magalhas/backbone-react-component#readme","keywords":["backbone","react","data binding","models","collections","server","client","react-component"],"licenses":[{"type":"MIT","url":"https://github.com/magalhas/backbone-react-component/blob/master/LICENSE-MIT"}],"main":"lib/component","name":"backbone-react-component","peerDependencies":{"backbone":"^1.2.3","react":"^0.14.0"},"repository":{"type":"git","url":"git+https://github.com/magalhas/backbone-react-component.git"},"scripts":{"prepublish":"grunt build && grunt doc","test":"grunt test"},"version":"0.10.0"}
 
 /***/ }),
 /* 449 */
 /***/ (function(module, exports) {
 
-	module.exports = {"_args":[["backbone.paginator@2.0.6","/root/makersofsweden/MakerAdmin-Frontend"]],"_from":"backbone.paginator@2.0.6","_id":"backbone.paginator@2.0.6","_inCache":true,"_installable":true,"_location":"/backbone.paginator","_nodeVersion":"6.10.3","_npmOperationalInternal":{"host":"s3://npm-registry-packages","tmp":"tmp/backbone.paginator-2.0.6.tgz_1496450146785_0.5540393211413175"},"_npmUser":{"email":"wyuenho@gmail.com","name":"wyuenho"},"_npmVersion":"3.10.10","_phantomChildren":{},"_requested":{"name":"backbone.paginator","raw":"backbone.paginator@2.0.6","rawSpec":"2.0.6","scope":null,"spec":"2.0.6","type":"version"},"_requiredBy":["/"],"_resolved":"https://registry.npmjs.org/backbone.paginator/-/backbone.paginator-2.0.6.tgz","_shasum":"2c6365bec7e90d3927494919bc4894cea0a46400","_shrinkwrap":null,"_spec":"backbone.paginator@2.0.6","_where":"/root/makersofsweden/MakerAdmin-Frontend","author":{"email":"wyuenho@gmail.com","name":"Jimmy Yuen Ho Wong"},"bugs":{"url":"https://github.com/backbone-paginator/backbone.paginator/issues"},"dependencies":{"backbone":"1.1.2 || 1.2.3 || ^1.3.2","underscore":"^1.8.0"},"description":"A pageable Backbone.Collection superset. Supports server-side/client-side/infinite pagination and sorting.","devDependencies":{"grunt":"^1.0.1","grunt-cli":"^1.2.0","grunt-contrib-clean":"^1.1.0","grunt-contrib-connect":"^1.0.2","grunt-contrib-uglify":"^3.0.1","grunt-documentation":"^1.2.3","grunt-karma":"^2.0.0","jquery":"^2.2.1","karma":"^1.7.0","karma-chrome-launcher":"^2.1.1","karma-coverage":"^1.1.1","karma-firefox-launcher":"^1.0.1","karma-qunit":"^1.2.1","karma-safari-launcher":"^1.0.0","lodash":"^4.17.4","qunitjs":"^1.23.1","sinon":"^2.3.2"},"directories":{},"dist":{"shasum":"2c6365bec7e90d3927494919bc4894cea0a46400","tarball":"https://registry.npmjs.org/backbone.paginator/-/backbone.paginator-2.0.6.tgz"},"gitHead":"d80ca918ef6ca79a022490dbea75b60cd1a5acc6","homepage":"https://github.com/backbone-paginator/backbone.paginator#readme","keywords":["backbone"],"license":"MIT","main":"lib/backbone.paginator.js","maintainers":[{"name":"addyosmani","email":"addyosmani@gmail.com"},{"name":"wyuenho","email":"wyuenho@gmail.com"}],"name":"backbone.paginator","optionalDependencies":{},"readme":"ERROR: No README data found!","repository":{"type":"git","url":"git://github.com/backbone-paginator/backbone.paginator.git"},"scripts":{"test":"karma start --single-run --browsers Chrome,Firefox"},"version":"2.0.6"}
+	module.exports = {"_from":"backbone.paginator@^2.0.5","_id":"backbone.paginator@2.0.8","_inBundle":false,"_integrity":"sha512-8XS2CTbjnwMbJ/3Traa1te2RPecOGbZ9tc52T89pzo6NXlVEJDFnC++dp7CQLBUZpgk3g0veX8mUbEF4wbD2NQ==","_location":"/backbone.paginator","_phantomChildren":{},"_requested":{"type":"range","registry":true,"raw":"backbone.paginator@^2.0.5","name":"backbone.paginator","escapedName":"backbone.paginator","rawSpec":"^2.0.5","saveSpec":null,"fetchSpec":"^2.0.5"},"_requiredBy":["/"],"_resolved":"https://registry.npmjs.org/backbone.paginator/-/backbone.paginator-2.0.8.tgz","_shasum":"3a7e34f0a8b97b096333587ed3048556b9eafdcb","_spec":"backbone.paginator@^2.0.5","_where":"/Users/arong/MakerAdmin-Hub/MakerAdmin-Frontend","author":{"name":"Jimmy Yuen Ho Wong","email":"wyuenho@gmail.com"},"browserslist":["> 5%"],"bugs":{"url":"https://github.com/backbone-paginator/backbone.paginator/issues"},"bundleDependencies":false,"dependencies":{"backbone":"1.1.2 || 1.2.3 || ^1.3.2","underscore":"^1.8.0"},"deprecated":false,"description":"A pageable Backbone.Collection superset. Supports server-side/client-side/infinite pagination and sorting.","devDependencies":{"eslint":"^3.19.0","eslint-config-google":"^0.8.0","eslint-plugin-compat":"^1.0.3","grunt":"^1.0.1","grunt-cli":"^1.2.0","grunt-contrib-clean":"^1.1.0","grunt-contrib-connect":"^1.0.2","grunt-contrib-uglify":"^3.0.1","grunt-documentation":"^1.2.3","grunt-karma":"^2.0.0","jquery":"^3.3.1","karma":"^1.7.0","karma-chrome-launcher":"^2.1.1","karma-coverage":"^1.1.1","karma-firefox-launcher":"^1.0.1","karma-qunit":"^1.2.1","karma-safari-launcher":"^1.0.0","lodash":"^4.17.4","qunitjs":"^1.23.1","sinon":"^2.3.2"},"homepage":"https://github.com/backbone-paginator/backbone.paginator#readme","keywords":["backbone"],"license":"MIT","main":"lib/backbone.paginator.js","name":"backbone.paginator","repository":{"type":"git","url":"git://github.com/backbone-paginator/backbone.paginator.git"},"scripts":{"format":"eslint --fix ./lib/backbone.paginator.js test/**/*.js","lint":"eslint ./lib/backbone.paginator.js test/**/*.js","test":"karma start --single-run --browsers Chrome,Firefox"},"version":"2.0.8"}
 
 /***/ }),
 /* 450 */
 /***/ (function(module, exports) {
 
-	module.exports = {"_args":[["react-router@3.2.1","/root/makersofsweden/MakerAdmin-Frontend"]],"_from":"react-router@3.2.1","_id":"react-router@3.2.1","_inCache":true,"_installable":true,"_location":"/react-router","_nodeVersion":"9.3.0","_npmOperationalInternal":{"host":"s3://npm-registry-packages","tmp":"tmp/react-router_3.2.1_1520447183190_0.3904475707802775"},"_npmUser":{"email":"timdorr@timdorr.com","name":"timdorr"},"_npmVersion":"5.7.1","_phantomChildren":{"invariant":"2.2.4","loose-envify":"1.3.1","object-assign":"4.1.1","strict-uri-encode":"1.1.0"},"_requested":{"name":"react-router","raw":"react-router@3.2.1","rawSpec":"3.2.1","scope":null,"spec":"3.2.1","type":"version"},"_requiredBy":["/"],"_resolved":"https://registry.npmjs.org/react-router/-/react-router-3.2.1.tgz","_shasum":"b9a3279962bdfbe684c8bd0482b81ef288f0f244","_shrinkwrap":null,"_spec":"react-router@3.2.1","_where":"/root/makersofsweden/MakerAdmin-Frontend","authors":["Michael Jackson","Ryan Florence"],"browserify":{"transform":["loose-envify"]},"bugs":{"url":"https://github.com/ReactTraining/react-router/issues"},"dependencies":{"create-react-class":"^15.5.1","history":"^3.0.0","hoist-non-react-statics":"^2.3.1","invariant":"^2.2.1","loose-envify":"^1.2.0","prop-types":"^15.5.6","warning":"^3.0.0"},"description":"A complete routing library for React","devDependencies":{"babel-cli":"^6.11.4","babel-core":"^6.13.2","babel-eslint":"^7.2.1","babel-loader":"^6.2.4","babel-plugin-add-module-exports":"^0.2.1","babel-plugin-dev-expression":"^0.2.1","babel-plugin-istanbul":"^4.1.1","babel-polyfill":"^6.13.0","babel-preset-es2015":"^6.13.2","babel-preset-react":"^6.11.1","babel-preset-stage-1":"^6.13.0","babel-register":"^6.11.6","bundle-loader":"^0.5.4","codecov":"^3.0.0","cross-env":"^5.1.3","css-loader":"^0.27.3","eslint":"^3.2.0","eslint-config-rackt":"^1.1.1","eslint-plugin-react":"^6.2.2","expect":"^1.20.2","express":"^4.14.0","express-urlrewrite":"^1.2.0","gzip-size":"^4.1.0","karma":"^2.0.0","karma-browserstack-launcher":"^1.0.1","karma-chrome-launcher":"^2.0.0","karma-coverage":"^1.1.1","karma-mocha":"^1.1.1","karma-mocha-reporter":"^2.0.5","karma-sourcemap-loader":"^0.3.7","karma-webpack":"^2.0.3","mocha":"^5.0.4","pretty-bytes":"^4.0.2","qs":"^6.2.1","react":"^16.0.0-rc","react-addons-css-transition-group":"^15.6.0","react-dom":"^16.0.0-rc","rimraf":"^2.5.4","style-loader":"^0.16.1","webpack":"^1.13.1","webpack-dev-middleware":"^1.6.1"},"directories":{},"dist":{"fileCount":93,"integrity":"sha512-SXkhC0nr3G0ltzVU07IN8jYl0bB6FsrDIqlLC9dK3SITXqyTJyM7yhXlUqs89w3Nqi5OkXsfRUeHX+P874HQrg==","shasum":"b9a3279962bdfbe684c8bd0482b81ef288f0f244","tarball":"https://registry.npmjs.org/react-router/-/react-router-3.2.1.tgz","unpackedSize":559354},"files":["*.md","docs","es","lib","umd"],"gitHead":"afa0560326eebc4ac426bb206ffd2b07f5448964","homepage":"https://github.com/ReactTraining/react-router#readme","jsnext:main":"es/index","keywords":["react","react-component","route","router","routes","routing"],"license":"MIT","main":"lib/index","maintainers":[{"name":"mjackson","email":"npm@mjackson.me"},{"name":"timdorr","email":"timdorr@timdorr.com"}],"module":"es/index","name":"react-router","optionalDependencies":{},"peerDependencies":{"react":"^0.14.0 || ^15.0.0 || ^16.0.0"},"readme":"ERROR: No README data found!","repository":{"type":"git","url":"git+https://github.com/ReactTraining/react-router.git"},"scripts":{"build":"npm run build-cjs && npm run build-es","build-cjs":"rimraf lib && cross-env BABEL_ENV=cjs babel ./modules -d lib --ignore __tests__","build-es":"rimraf es && cross-env BABEL_ENV=es babel ./modules -d es --ignore __tests__","build-min":"cross-env NODE_ENV=production webpack -p modules/index.js umd/ReactRouter.min.js","build-umd":"cross-env NODE_ENV=development webpack modules/index.js umd/ReactRouter.js","lint":"eslint examples modules scripts tools *.js","start":"node examples/server.js","test":"npm run lint && npm run test-node && npm run test-browser","test-browser":"cross-env NODE_ENV=test karma start","test-node":"cross-env NODE_ENV=test mocha --require babel-register tests.node.js"},"tags":["react","router"],"version":"3.2.1"}
+	module.exports = {"_from":"react-router@^3.0.0","_id":"react-router@3.2.1","_inBundle":false,"_integrity":"sha512-SXkhC0nr3G0ltzVU07IN8jYl0bB6FsrDIqlLC9dK3SITXqyTJyM7yhXlUqs89w3Nqi5OkXsfRUeHX+P874HQrg==","_location":"/react-router","_phantomChildren":{"invariant":"2.2.4","loose-envify":"1.3.1","object-assign":"4.1.1","strict-uri-encode":"1.1.0"},"_requested":{"type":"range","registry":true,"raw":"react-router@^3.0.0","name":"react-router","escapedName":"react-router","rawSpec":"^3.0.0","saveSpec":null,"fetchSpec":"^3.0.0"},"_requiredBy":["/"],"_resolved":"https://registry.npmjs.org/react-router/-/react-router-3.2.1.tgz","_shasum":"b9a3279962bdfbe684c8bd0482b81ef288f0f244","_spec":"react-router@^3.0.0","_where":"/Users/arong/MakerAdmin-Hub/MakerAdmin-Frontend","authors":["Ryan Florence","Michael Jackson"],"browserify":{"transform":["loose-envify"]},"bugs":{"url":"https://github.com/ReactTraining/react-router/issues"},"bundleDependencies":false,"dependencies":{"create-react-class":"^15.5.1","history":"^3.0.0","hoist-non-react-statics":"^2.3.1","invariant":"^2.2.1","loose-envify":"^1.2.0","prop-types":"^15.5.6","warning":"^3.0.0"},"deprecated":false,"description":"A complete routing library for React","devDependencies":{"babel-cli":"^6.11.4","babel-core":"^6.13.2","babel-eslint":"^7.2.1","babel-loader":"^6.2.4","babel-plugin-add-module-exports":"^0.2.1","babel-plugin-dev-expression":"^0.2.1","babel-plugin-istanbul":"^4.1.1","babel-polyfill":"^6.13.0","babel-preset-es2015":"^6.13.2","babel-preset-react":"^6.11.1","babel-preset-stage-1":"^6.13.0","babel-register":"^6.11.6","bundle-loader":"^0.5.4","codecov":"^3.0.0","cross-env":"^5.1.3","css-loader":"^0.27.3","eslint":"^3.2.0","eslint-config-rackt":"^1.1.1","eslint-plugin-react":"^6.2.2","expect":"^1.20.2","express":"^4.14.0","express-urlrewrite":"^1.2.0","gzip-size":"^4.1.0","karma":"^2.0.0","karma-browserstack-launcher":"^1.0.1","karma-chrome-launcher":"^2.0.0","karma-coverage":"^1.1.1","karma-mocha":"^1.1.1","karma-mocha-reporter":"^2.0.5","karma-sourcemap-loader":"^0.3.7","karma-webpack":"^2.0.3","mocha":"^5.0.4","pretty-bytes":"^4.0.2","qs":"^6.2.1","react":"^16.0.0-rc","react-addons-css-transition-group":"^15.6.0","react-dom":"^16.0.0-rc","rimraf":"^2.5.4","style-loader":"^0.16.1","webpack":"^1.13.1","webpack-dev-middleware":"^1.6.1"},"files":["*.md","docs","es","lib","umd"],"homepage":"https://github.com/ReactTraining/react-router#readme","jsnext:main":"es/index","keywords":["react","react-component","routing","route","routes","router"],"license":"MIT","main":"lib/index","module":"es/index","name":"react-router","peerDependencies":{"react":"^0.14.0 || ^15.0.0 || ^16.0.0"},"repository":{"type":"git","url":"git+https://github.com/ReactTraining/react-router.git"},"scripts":{"build":"npm run build-cjs && npm run build-es","build-cjs":"rimraf lib && cross-env BABEL_ENV=cjs babel ./modules -d lib --ignore __tests__","build-es":"rimraf es && cross-env BABEL_ENV=es babel ./modules -d es --ignore __tests__","build-min":"cross-env NODE_ENV=production webpack -p modules/index.js umd/ReactRouter.min.js","build-umd":"cross-env NODE_ENV=development webpack modules/index.js umd/ReactRouter.js","lint":"eslint examples modules scripts tools *.js","start":"node examples/server.js","test":"npm run lint && npm run test-node && npm run test-browser","test-browser":"cross-env NODE_ENV=test karma start","test-node":"cross-env NODE_ENV=test mocha --require babel-register tests.node.js"},"tags":["react","router"],"version":"3.2.1"}
 
 /***/ }),
 /* 451 */
 /***/ (function(module, exports) {
 
-	module.exports = {"_args":[["react-select@1.2.1","/root/makersofsweden/MakerAdmin-Frontend"]],"_from":"react-select@1.2.1","_id":"react-select@1.2.1","_inCache":true,"_installable":true,"_location":"/react-select","_nodeVersion":"8.4.0","_npmOperationalInternal":{"host":"s3://npm-registry-packages","tmp":"tmp/react-select-1.2.1.tgz_1515814937320_0.9773863151203841"},"_npmUser":{"email":"jed.watson@me.com","name":"jedwatson"},"_npmVersion":"5.4.0","_phantomChildren":{},"_requested":{"name":"react-select","raw":"react-select@1.2.1","rawSpec":"1.2.1","scope":null,"spec":"1.2.1","type":"version"},"_requiredBy":["/"],"_resolved":"https://registry.npmjs.org/react-select/-/react-select-1.2.1.tgz","_shasum":"a2fe58a569eb14dcaa6543816260b97e538120d1","_shrinkwrap":null,"_spec":"react-select@1.2.1","_where":"/root/makersofsweden/MakerAdmin-Frontend","author":{"name":"Jed Watson"},"bugs":{"url":"https://github.com/JedWatson/react-select/issues"},"dependencies":{"classnames":"^2.2.4","prop-types":"^15.5.8","react-input-autosize":"^2.1.2"},"description":"A Select control built with and for ReactJS","devDependencies":{"babel-cli":"^6.26.0","babel-core":"^6.26.0","babel-loader":"^7.1.1","babel-plugin-external-helpers":"^6.22.0","babel-plugin-istanbul":"^4.1.4","babel-plugin-transform-react-remove-prop-types":"^0.4.8","babel-preset-env":"^1.6.1","babel-preset-react":"^6.24.1","babel-preset-stage-0":"^6.24.1","babel-register":"^6.26.0","chai":"^4.1.2","coveralls":"^2.11.12","create-react-class":"^15.5.2","cross-env":"^5.0.5","css-loader":"^0.28.7","eslint":"^4.6.1","eslint-plugin-react":"^7.3.0","extract-text-webpack-plugin":"^3.0.0","gh-pages":"^1.1.0","html-loader":"^0.5.1","html-webpack-plugin":"^2.30.1","husky":"^0.14.3","isomorphic-fetch":"^2.2.1","istanbul":"^0.4.5","jsdom":"^9.12.0","less":"^2.7.2","less-loader":"^4.0.5","less-plugin-clean-css":"^1.5.1","lint-staged":"^4.3.0","mocha":"^3.0.2","nps":"^5.7.1","nps-utils":"^1.3.0","nyc":"^11.1.0","react":"^15.5.0","react-addons-shallow-compare":"^15.5.0","react-dom":"^15.5.0","react-gravatar":"^2.4.5","react-highlight-words":"^0.8.1","react-test-renderer":"^15.6.1","react-virtualized":"^9.9.0","react-virtualized-select":"^3.1.0","rollup":"^0.49.2","rollup-plugin-babel":"^3.0.2","rollup-plugin-commonjs":"^8.2.0","rollup-plugin-node-resolve":"^3.0.0","rollup-plugin-uglify":"^2.0.1","sinon":"^3.2.1","style-loader":"^0.18.2","uglify-es":"^3.0.28","unexpected":"^10.35.0","unexpected-dom":"^4.0.0","unexpected-react":"^4.1.0","unexpected-sinon":"^10.4.0","webpack":"^3.5.5","webpack-dev-server":"^2.7.1"},"directories":{},"dist":{"integrity":"sha512-vaCgT2bEl+uTyE/uKOEgzE5Dc/wLtzhnBvoHCeuLoJWc4WuadN6WQDhoL42DW+TziniZK2Gaqe/wUXydI3NSaQ==","shasum":"a2fe58a569eb14dcaa6543816260b97e538120d1","tarball":"https://registry.npmjs.org/react-select/-/react-select-1.2.1.tgz"},"files":["dist","less","lib","scss"],"gitHead":"82910d9225f7aff73ac5052da9dc1e7f52f13de7","homepage":"https://github.com/JedWatson/react-select#readme","jsnext:main":"dist/react-select.es.js","keywords":["combobox","form","input","multiselect","react","react-component","select","ui"],"license":"MIT","lint-staged":{"*.js":"eslint"},"main":"lib/index.js","maintainers":[{"name":"brianvaughn","email":"briandavidvaughn@gmail.com"},{"name":"jedwatson","email":"jed.watson@me.com"}],"module":"dist/react-select.es.js","name":"react-select","optionalDependencies":{},"peerDependencies":{"react":"^0.14.9 || ^15.3.0 || ^16.0.0-rc || ^16.0","react-dom":"^0.14.9 || ^15.3.0 || ^16.0.0-rc || ^16.0"},"readme":"ERROR: No README data found!","repository":{"type":"git","url":"git+https://github.com/JedWatson/react-select.git"},"scripts":{"build":"nps build","cover":"cross-env NODE_ENV=test nyc --reporter=lcov --reporter=text mocha","coveralls":"cross-env NODE_ENV=test nyc --reporter=lcov --reporter=text mocha && cat coverage/lcov.info | coveralls","deploy":"cross-env NODE_ENV=production nps publish","lint":"eslint .","precommit":"lint-staged && yarn run test","start":"webpack-dev-server --progress","test":"cross-env NODE_ENV=test mocha --compilers js:babel-core/register"},"style":"dist/react-select.min.css","version":"1.2.1"}
+	module.exports = {"_from":"react-select@^1.0.0-rc.2","_id":"react-select@1.2.1","_inBundle":false,"_integrity":"sha512-vaCgT2bEl+uTyE/uKOEgzE5Dc/wLtzhnBvoHCeuLoJWc4WuadN6WQDhoL42DW+TziniZK2Gaqe/wUXydI3NSaQ==","_location":"/react-select","_phantomChildren":{},"_requested":{"type":"range","registry":true,"raw":"react-select@^1.0.0-rc.2","name":"react-select","escapedName":"react-select","rawSpec":"^1.0.0-rc.2","saveSpec":null,"fetchSpec":"^1.0.0-rc.2"},"_requiredBy":["/"],"_resolved":"https://registry.npmjs.org/react-select/-/react-select-1.2.1.tgz","_shasum":"a2fe58a569eb14dcaa6543816260b97e538120d1","_spec":"react-select@^1.0.0-rc.2","_where":"/Users/arong/MakerAdmin-Hub/MakerAdmin-Frontend","author":{"name":"Jed Watson"},"bugs":{"url":"https://github.com/JedWatson/react-select/issues"},"bundleDependencies":false,"dependencies":{"classnames":"^2.2.4","prop-types":"^15.5.8","react-input-autosize":"^2.1.2"},"deprecated":false,"description":"A Select control built with and for ReactJS","devDependencies":{"babel-cli":"^6.26.0","babel-core":"^6.26.0","babel-loader":"^7.1.1","babel-plugin-external-helpers":"^6.22.0","babel-plugin-istanbul":"^4.1.4","babel-plugin-transform-react-remove-prop-types":"^0.4.8","babel-preset-env":"^1.6.1","babel-preset-react":"^6.24.1","babel-preset-stage-0":"^6.24.1","babel-register":"^6.26.0","chai":"^4.1.2","coveralls":"^2.11.12","create-react-class":"^15.5.2","cross-env":"^5.0.5","css-loader":"^0.28.7","eslint":"^4.6.1","eslint-plugin-react":"^7.3.0","extract-text-webpack-plugin":"^3.0.0","gh-pages":"^1.1.0","html-loader":"^0.5.1","html-webpack-plugin":"^2.30.1","husky":"^0.14.3","isomorphic-fetch":"^2.2.1","istanbul":"^0.4.5","jsdom":"^9.12.0","less":"^2.7.2","less-loader":"^4.0.5","less-plugin-clean-css":"^1.5.1","lint-staged":"^4.3.0","mocha":"^3.0.2","nps":"^5.7.1","nps-utils":"^1.3.0","nyc":"^11.1.0","react":"^15.5.0","react-addons-shallow-compare":"^15.5.0","react-dom":"^15.5.0","react-gravatar":"^2.4.5","react-highlight-words":"^0.8.1","react-test-renderer":"^15.6.1","react-virtualized":"^9.9.0","react-virtualized-select":"^3.1.0","rollup":"^0.49.2","rollup-plugin-babel":"^3.0.2","rollup-plugin-commonjs":"^8.2.0","rollup-plugin-node-resolve":"^3.0.0","rollup-plugin-uglify":"^2.0.1","sinon":"^3.2.1","style-loader":"^0.18.2","uglify-es":"^3.0.28","unexpected":"^10.35.0","unexpected-dom":"^4.0.0","unexpected-react":"^4.1.0","unexpected-sinon":"^10.4.0","webpack":"^3.5.5","webpack-dev-server":"^2.7.1"},"files":["dist","less","lib","scss"],"homepage":"https://github.com/JedWatson/react-select#readme","jsnext:main":"dist/react-select.es.js","keywords":["combobox","form","input","multiselect","react","react-component","select","ui"],"license":"MIT","lint-staged":{"*.js":"eslint"},"main":"lib/index.js","module":"dist/react-select.es.js","name":"react-select","peerDependencies":{"react":"^0.14.9 || ^15.3.0 || ^16.0.0-rc || ^16.0","react-dom":"^0.14.9 || ^15.3.0 || ^16.0.0-rc || ^16.0"},"repository":{"type":"git","url":"git+https://github.com/JedWatson/react-select.git"},"scripts":{"build":"nps build","cover":"cross-env NODE_ENV=test nyc --reporter=lcov --reporter=text mocha","coveralls":"cross-env NODE_ENV=test nyc --reporter=lcov --reporter=text mocha && cat coverage/lcov.info | coveralls","deploy":"cross-env NODE_ENV=production nps publish","lint":"eslint .","precommit":"lint-staged && yarn run test","start":"webpack-dev-server --progress","test":"cross-env NODE_ENV=test mocha --compilers js:babel-core/register"},"style":"dist/react-select.min.css","version":"1.2.1"}
 
 /***/ }),
 /* 452 */
 /***/ (function(module, exports) {
 
-	module.exports = {"_args":[["react-dom@15.6.2","/root/makersofsweden/MakerAdmin-Frontend"]],"_from":"react-dom@15.6.2","_id":"react-dom@15.6.2","_inCache":true,"_installable":true,"_location":"/react-dom","_nodeVersion":"6.9.0","_npmOperationalInternal":{"host":"s3://npm-registry-packages","tmp":"tmp/react-dom-15.6.2.tgz_1506384629718_0.17134208767674863"},"_npmUser":{"email":"npm@sophiebits.com","name":"sophiebits"},"_npmVersion":"3.10.8","_phantomChildren":{},"_requested":{"name":"react-dom","raw":"react-dom@15.6.2","rawSpec":"15.6.2","scope":null,"spec":"15.6.2","type":"version"},"_requiredBy":["/"],"_resolved":"https://registry.npmjs.org/react-dom/-/react-dom-15.6.2.tgz","_shasum":"41cfadf693b757faf2708443a1d1fd5a02bef730","_shrinkwrap":null,"_spec":"react-dom@15.6.2","_where":"/root/makersofsweden/MakerAdmin-Frontend","browserify":{"transform":["loose-envify"]},"bugs":{"url":"https://github.com/facebook/react/issues"},"dependencies":{"fbjs":"^0.8.9","loose-envify":"^1.1.0","object-assign":"^4.1.0","prop-types":"^15.5.10"},"description":"React package for working with the DOM.","devDependencies":{},"directories":{},"dist":{"shasum":"41cfadf693b757faf2708443a1d1fd5a02bef730","tarball":"https://registry.npmjs.org/react-dom/-/react-dom-15.6.2.tgz"},"files":["LICENSE","README.md","dist/","index.js","lib/","server.js","test-utils.js"],"homepage":"https://facebook.github.io/react/","keywords":["react"],"license":"MIT","main":"index.js","maintainers":[{"name":"sophiebits","email":"npm2@sophiebits.com"},{"name":"flarnie","email":"flarnie.npm@gmail.com"},{"name":"zpao","email":"paul@oshannessy.com"},{"name":"trueadm","email":"dg@domgan.com"},{"name":"gaearon","email":"dan.abramov@gmail.com"},{"name":"brianvaughn","email":"briandavidvaughn@gmail.com"},{"name":"fb","email":"opensource+npm@fb.com"}],"name":"react-dom","optionalDependencies":{},"peerDependencies":{"react":"^15.6.2"},"readme":"ERROR: No README data found!","repository":{"type":"git","url":"git+https://github.com/facebook/react.git"},"scripts":{"start":"node server.js"},"version":"15.6.2"}
+	module.exports = {"_from":"react-dom@^15.4.1","_id":"react-dom@15.6.2","_inBundle":false,"_integrity":"sha1-Qc+t9pO3V/rycIRDodH9WgK+9zA=","_location":"/react-dom","_phantomChildren":{},"_requested":{"type":"range","registry":true,"raw":"react-dom@^15.4.1","name":"react-dom","escapedName":"react-dom","rawSpec":"^15.4.1","saveSpec":null,"fetchSpec":"^15.4.1"},"_requiredBy":["/"],"_resolved":"https://registry.npmjs.org/react-dom/-/react-dom-15.6.2.tgz","_shasum":"41cfadf693b757faf2708443a1d1fd5a02bef730","_spec":"react-dom@^15.4.1","_where":"/Users/arong/MakerAdmin-Hub/MakerAdmin-Frontend","browserify":{"transform":["loose-envify"]},"bugs":{"url":"https://github.com/facebook/react/issues"},"bundleDependencies":false,"dependencies":{"fbjs":"^0.8.9","loose-envify":"^1.1.0","object-assign":"^4.1.0","prop-types":"^15.5.10"},"deprecated":false,"description":"React package for working with the DOM.","files":["LICENSE","README.md","dist/","lib/","index.js","server.js","test-utils.js"],"homepage":"https://facebook.github.io/react/","keywords":["react"],"license":"MIT","main":"index.js","name":"react-dom","peerDependencies":{"react":"^15.6.2"},"repository":{"type":"git","url":"git+https://github.com/facebook/react.git"},"scripts":{"start":"node server.js"},"version":"15.6.2"}
 
 /***/ }),
 /* 453 */
@@ -66854,6 +66877,40 @@
 /* 454 */
 /***/ (function(module, exports, __webpack_require__) {
 
+	"use strict";
+
+	var _backbone = __webpack_require__(244);
+
+	var _backbone2 = _interopRequireDefault(_backbone);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	module.exports = _backbone2.default.Model.fullExtend({
+		url: function url() {
+			return "/member/current";
+		},
+		defaults: {
+			member_id: "",
+			created_at: "",
+			updated_at: "",
+			member_number: "",
+			civicregno: "",
+			firstname: "",
+			lastname: "",
+			email: "",
+			phone: "",
+			address_street: "",
+			address_extra: "",
+			address_zipcode: "",
+			address_city: "",
+			address_country: "se"
+		}
+	});
+
+/***/ }),
+/* 455 */
+/***/ (function(module, exports, __webpack_require__) {
+
 	'use strict';
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -66864,15 +66921,23 @@
 
 	var _reactRouter = __webpack_require__(184);
 
-	var _MemberLogin = __webpack_require__(258);
+	var _DateTime = __webpack_require__(329);
 
-	var _MemberLogin2 = _interopRequireDefault(_MemberLogin);
+	var _DateTime2 = _interopRequireDefault(_DateTime);
 
-	var _MemberView = __webpack_require__(259);
+	var _Member = __webpack_require__(454);
 
-	var _MemberView2 = _interopRequireDefault(_MemberView);
+	var _Member2 = _interopRequireDefault(_Member);
 
-	var _auth = __webpack_require__(249);
+	var _Input = __webpack_require__(330);
+
+	var _Input2 = _interopRequireDefault(_Input);
+
+	var _GenericEntityFunctions = __webpack_require__(290);
+
+	var _GenericEntityFunctions2 = _interopRequireDefault(_GenericEntityFunctions);
+
+	var _auth = __webpack_require__(250);
 
 	var _auth2 = _interopRequireDefault(_auth);
 
@@ -66884,33 +66949,150 @@
 
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
+	// import CountryDropdown from '../../../CountryDropdown'
+
+
 	module.exports = (0, _reactRouter.withRouter)(function (_React$Component) {
-		_inherits(Login, _React$Component);
+		_inherits(Member, _React$Component);
 
-		function Login() {
-			_classCallCheck(this, Login);
+		function Member(props) {
+			_classCallCheck(this, Member);
 
-			return _possibleConstructorReturn(this, (Login.__proto__ || Object.getPrototypeOf(Login)).apply(this, arguments));
+			var _this = _possibleConstructorReturn(this, (Member.__proto__ || Object.getPrototypeOf(Member)).call(this, props));
+
+			_this.state = {
+				keys: null
+			};
+
+			$.ajax({
+				method: "GET",
+				url: config.apiBasePath + "/member/current/keys",
+				cache: false,
+				headers: {
+					"Authorization": "Bearer " + _auth2.default.getAccessToken()
+				}
+			}).done(function (data, textStatus, xhr) {
+				console.log(data);
+				_this.setState({
+					keys: data.data
+				});
+			}).fail(function (xhr, textStatus, error) {
+				UIkit.modal.alert("<h2>Misslyckades med att hämta nycklar</h2>Tog emot ett oväntat svar från servern:<br><br>" + xhr.status + " " + xhr.statusText + "<br><br>" + xhr.responseText);
+			});
+			return _this;
 		}
 
-		_createClass(Login, [{
-			key: 'componentWillMount',
-			value: function componentWillMount() {
-				_auth2.default.setToken(this.props.params.token);
-				_reactRouter.browserHistory.push("/member");
+		_createClass(Member, [{
+			key: 'renderKeys',
+			value: function renderKeys(keys) {
+				if (keys == null) {
+					return _react2.default.createElement(
+						'p',
+						null,
+						'Laddar...'
+					);
+				} else {
+					var prefix = keys.length > 1 ? "Nyckeln" : "Din nyckel";
+					var arr = keys.map(function (key) {
+						var text = "";
+						var icon = "";
+						var color = "";
+						var sortKey = 0;
+						var id = key.key_id;
+
+						if (key.startdate != null && key.enddate != null && key.status == "active") {
+							var start = Date.parse(key.startdate);
+							var end = Date.parse(key.enddate);
+
+							var millisecondsPerHour = 1000 * 3600;
+							var millisecondsPerDay = millisecondsPerHour * 24;
+							sortKey = end - Date.now();
+
+							if (Date.now() >= start) {
+								var remainingDays = Math.floor((end - Date.now()) / millisecondsPerDay);
+
+								if (remainingDays < -1) {
+									text = prefix + " är ogiltig sedan " + -remainingDays + " dagar.";
+									icon = "uk-icon-times";
+									color = "member-key-color-inactive";
+								} else if (remainingDays < 0) {
+									text = prefix + " gick ut idag.";
+									icon = "uk-icon-times";
+									color = "member-key-color-inactive";
+								} else if (remainingDays < 1) {
+									var remainingHours = Math.ceil((end - Date.now()) / millisecondsPerHour);
+									text = prefix + " är giltig i mindre än " + remainingHours + " timmar till.";
+									icon = "uk-icon-check";
+									color = "member-key-color-warning";
+								} else if (remainingDays < 14) {
+									text = prefix + " är endast giltig i " + remainingDays + " dagar till. Kom ihåg att förnya den innan nästa nyckelutlämning.";
+									icon = "uk-icon-check";
+									color = "member-key-color-warning";
+								} else {
+									text = prefix + " är giltig i " + remainingDays + " dagar till.";
+									icon = "uk-icon-check";
+									color = "member-key-color-active";
+								}
+							} else {
+								sortKey = 0;
+								var _remainingDays = Math.floor((end - Date.now()) / millisecondsPerDay);
+								text = prefix + " blir aktiv " + start.toLocaleDateString("sv-se");
+								icon = "uk-icon-times";
+								color = "member-key-color-inactive";
+							}
+						} else {
+							sortKey = -1e28;
+							text = prefix + " är inaktiv.";
+							icon = "uk-icon-times";
+							color = "member-key-color-inactive";
+						}
+
+						return {
+							key: key, text: text, icon: icon, color: color, sortKey: sortKey, id: id
+						};
+					});
+					arr.sort(function (a, b) {
+						return b.sortKey - a.sortKey;
+					});
+					return arr.map(function (o) {
+						return _react2.default.createElement(
+							'div',
+							{ key: o.id, className: 'member-key-box' },
+							_react2.default.createElement('div', { className: "uk-icon-small member-key-icon " + o.icon + " " + o.color }),
+							_react2.default.createElement(
+								'div',
+								{ className: 'member-key-tag' },
+								o.key.tagid
+							),
+							_react2.default.createElement(
+								'div',
+								{ className: 'member-key-status' },
+								o.text
+							)
+						);
+					});
+				}
 			}
 		}, {
 			key: 'render',
 			value: function render() {
+				console.log("Rendering: ");
+				console.log(this.state.keys);
 				return _react2.default.createElement(
-					'p',
-					null,
-					'Logging in...'
+					'fieldset',
+					{ 'data-uk-margin': true },
+					_react2.default.createElement(
+						'legend',
+						null,
+						_react2.default.createElement('i', { className: 'uk-icon-key' }),
+						' Nycklar'
+					),
+					this.renderKeys(this.state.keys)
 				);
 			}
 		}]);
 
-		return Login;
+		return Member;
 	}(_react2.default.Component));
 
 /***/ })
