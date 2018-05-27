@@ -132,8 +132,10 @@ $(document).ready(() => {
       });
 
       $(li).find(".product-amount").on("change", ev => {
-        let newAmount = (Math.ceil($(ev.currentTarget).val() / item.smallest_multiple)*item.smallest_multiple)|0;
-        $(ev.currentTarget).val(newAmount);
+        if ($(ev.currentTarget).val() != "") {
+          let newAmount = (Math.ceil($(ev.currentTarget).val() / item.smallest_multiple)*item.smallest_multiple)|0;
+          $(ev.currentTarget).val(newAmount);
+        }
         refresh();
       });
 
@@ -202,7 +204,7 @@ $(document).ready(() => {
         );
         li.find(".product-remove").click(ev => {
           const amount = $(id2element.get(item.id)).find(".product-amount");
-          amount.val(0);
+          amount.val("");
           amount.change();
           ev.preventDefault();
         });
