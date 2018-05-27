@@ -63,6 +63,8 @@ def process_cart(cart):
 
         items = []
         with localcontext() as ctx:
+            ctx.clear_flags()
+
             for price, smallest_multiple, item in zip(prices, multiples, cart):
                 count = int(item["count"])
                 if count <= 0:
