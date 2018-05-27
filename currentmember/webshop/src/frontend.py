@@ -75,7 +75,7 @@ def product_create():
 def receipt(id):
     transaction = transaction_entity.get(id)
     items = transaction_content_entity.list("transaction_id=%s", id)
-    products = [product_entity.get(item["id"]) for item in items]
+    products = [product_entity.get(item["product_id"]) for item in items]
 
     return render_template("receipt.html", cart=zip(products,items), transaction=transaction, currency="kr", url=instance.full_path)
 

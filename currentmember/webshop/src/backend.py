@@ -73,11 +73,9 @@ def process_cart(cart):
                     abort(400, f"Can only buy item {item['id']} in multiples of {smallest_multiple}, found {count}")
 
                 item_amount = price * count
-                eprint(item_amount)
                 items.append(CartItem(item["id"], count, item_amount))
 
             total_amount = sum(item.amount for item in items)
-            eprint(total_amount)
             if ctx.flags[Rounded]:
                 # This can possibly happen with huge values, I suppose they will be caught below anyway but it's good to catch in any case
                 abort(400, "Rounding ocurred during price calculations")
@@ -132,7 +130,7 @@ def stripe_payment(amount, token):
 def send_receipt_email(member_id, transaction_id):
     transaction = transaction_entity.get(transaction_id)
     items = transaction_content_entity.list("transaction_id=%s", transaction_id)
-    products = [product_entity.get(item["id"]) for item in items]
+    products = [product_entity.get(item["product_id"]) for item in items]
 
     r = instance.gateway.post("messages", {
         "recipients": [
@@ -183,6 +181,7 @@ def pay():
         transaction_content_entity.post({"transaction_id": transaction_id, "product_id": item.id, "count": item.count, "amount": item.amount, "completed": False})
 
     send_receipt_email(member_id, transaction_id)
+    eprint("Payment complete. id: " + str(transaction_id))
     return jsonify({"status": "ok", "data": {"transaction_id": transaction_id}})
 
 
