@@ -2,7 +2,7 @@ from flask import Flask, render_template
 import service
 from service import eprint
 import json
-from webshop_entities import category_entity, product_entity, transaction_entity, transaction_content_entity, action_entity
+from webshop_entities import category_entity, product_entity, transaction_entity, transaction_content_entity, action_entity, membership_products
 
 instance = service.create_frontend(url="shop", port=80)
 
@@ -16,8 +16,7 @@ transaction_content_entity.db = db
 action_entity.db = db
 
 
-@instance.route("/")
-def home():
+def product_data():
     with db.cursor() as cur:
         # Get all categories, as some products may exist in deleted categories
         # (it is up to an admin to move them to another category)
@@ -44,9 +43,20 @@ def home():
 
         # Only show existing columns in the sidebar
         categories = category_entity.list()
+        return data, categories
 
-    product_json = json.dumps(data)
-    return render_template("shop.html", product_json=product_json, categories=categories, url=instance.full_path)
+
+@instance.route("/")
+def home():
+    all_products, categories = product_data()
+    return render_template("shop.html", product_json=json.dumps(all_products), categories=categories, url=instance.full_path)
+
+
+@instance.route("register")
+def register_member():
+    products = membership_products(db)
+    all_products, _ = product_data()
+    return render_template("register.html", product_json=json.dumps(all_products), products=products, currency="kr", url=instance.full_path)
 
 
 @instance.route("member/<int:id>/history")

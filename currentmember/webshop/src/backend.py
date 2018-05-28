@@ -4,7 +4,7 @@ from service import eprint, assert_get, SERVICE_USER_ID, route_helper
 import stripe
 from decimal import Decimal, Rounded, localcontext
 from collections import namedtuple
-from webshop_entities import category_entity, product_entity, transaction_entity, transaction_content_entity, product_action_entity, webshop_completed_actions
+from webshop_entities import category_entity, product_entity, transaction_entity, transaction_content_entity, product_action_entity, webshop_completed_actions, membership_products
 CartItem = namedtuple('CartItem', 'id count amount')
 
 instance = service.create(name="Makerspace Webshop Backend", url="webshop", port=8000, version="1.0")
@@ -105,6 +105,63 @@ def member_transactions(id):
     return transactions
 
 
+@instance.route("register", methods=["POST"])
+@route_helper
+def register():
+    data = request.get_json()
+    if data is None:
+        abort(400, "missing json")
+
+    products = membership_products(db)
+
+    purchase = assert_get(data, "purchase")
+    if len(purchase["cart"]) != 1:
+        abort(400, "cart must contain exactly 1 item")
+    item = purchase["cart"][0]
+    if item["count"] != 1:
+        abort(400, "exactly 1 item must be purchased")
+    if item["id"] not in (p["id"] for p in products):
+        abort(400, f"product {item['id']} is not one of the allowed ones")
+
+    # Register the new member
+    r = instance.gateway.post("membership/member", data["member"])
+    if not r.ok:
+        # Ideally should just return r.text, but the helper code for routes screws that up a bit right now
+        abort(r.status_code, r.json()["message"])
+
+    member = r.json()["data"]
+    eprint(member)
+
+    # Construct the purchase object again, using user data is always risky
+    purchase = {
+        "cart": [
+            {
+                "id": item["id"],
+                "count": 1
+            }
+        ],
+        "expectedSum": purchase["expectedSum"],
+        "stripeToken": purchase["stripeToken"],
+        "duplicatePurchaseRand": purchase["duplicatePurchaseRand"],
+    }
+
+    try:
+        member_id = member["member_id"]
+        # Get a login token for the new user
+        token = instance.gateway.post("oauth/force_token", {"user_id": member_id}).json()["access_token"]
+
+        # Note this will throw if the payment failed
+        payment_result = pay(member_id=member_id, data=purchase)
+        # Add the token to the response so that the user can be logged in immediately
+        payment_result["token"] = token
+        return payment_result
+    except:
+        # Something went wrong (possibly the payment didn't go through), so delete the member again
+        r = instance.gateway.delete(f"membership/member/{member_id}")
+        assert(r.ok)
+        raise
+
+
 def process_cart(cart):
     with db.cursor() as cur:
         prices = []
@@ -176,14 +233,13 @@ def stripe_payment(amount, token):
             source=token,
         )
         eprint(charge)
-        return None
     except stripe.StripeError as e:
         eprint("Stripe Charge Failed")
-        return jsonify({"status": str(e)}), 400
+        abort(400, str(e))
     except Exception as e:
         eprint("Stripe Charge Failed")
         eprint(e)
-        return jsonify({"status": "Failed"}), 400
+        abort(400, "failed")
 
 
 def send_receipt_email(member_id, transaction_id):
@@ -212,27 +268,30 @@ duplicatePurchaseRands = set()
 
 
 @instance.route("pay", methods=["POST"])
-def pay():
+@route_helper
+def pay_route():
     data = request.get_json()
     if data is None:
         abort(400, "missing json")
 
+    member_id = int(assert_get(request.headers, "X-User-Id"))
+    return pay(member_id, data)
+
+
+def pay(member_id, data):
     # The frontend will add a per-page random value to the request.
     # This will try to prevent duplicate payments due to sending the payment request twice
     duplicatePurchaseRand = assert_get(data, "duplicatePurchaseRand")
     if duplicatePurchaseRand in duplicatePurchaseRands:
         abort(400, "duplicate")
 
-    member_id = int(assert_get(request.headers, "X-User-Id"))
     if member_id <= 0:
         abort(400, "Services and other special member IDs cannot purchase anything")
 
     total_amount, items = validate_payment(data["cart"], data["expectedSum"])
 
     token = assert_get(data, "stripeToken")
-    error_response = stripe_payment(total_amount, token)
-    if error_response is not None:
-        return error_response
+    stripe_payment(total_amount, token)
 
     duplicatePurchaseRands.add(duplicatePurchaseRand)
     transaction_id = transaction_entity.post({"member_id": member_id, "amount": total_amount})["id"]
@@ -241,7 +300,7 @@ def pay():
 
     send_receipt_email(member_id, transaction_id)
     eprint("Payment complete. id: " + str(transaction_id))
-    return jsonify({"status": "ok", "data": {"transaction_id": transaction_id}})
+    return {"transaction_id": transaction_id}
 
 
 instance.serve_indefinitely()

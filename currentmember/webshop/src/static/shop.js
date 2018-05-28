@@ -10,7 +10,7 @@ $(document).ready(() => {
   // Preferably without an extra HTTP request
   const isAdmin = true;
   // Used to prevent clicking the 'Pay' button twice
-  const duplicatePurchaseRand = (100000000*Math.random())|0
+  const duplicatePurchaseRand = (100000000*Math.random())|0;
 
   function showEdit() {
     $("#edit").toggleClass("active");
