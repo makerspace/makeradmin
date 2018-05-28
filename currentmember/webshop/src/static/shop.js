@@ -276,13 +276,13 @@ $(document).ready(() => {
 
     waitingForPaymentResponse = true;
 
-    $(".pay-spinner").toggleClass("pay-spinner-visible", true);
+    $(".progress-spinner").toggleClass("progress-spinner-visible", true);
     let errorElement = document.getElementById('card-errors');
     errorElement.textContent = "";
 
     stripe.createToken(card).then(function(result) {
       if (result.error) {
-        $(".pay-spinner").toggleClass("pay-spinner-visible", false);
+        $(".progress-spinner").toggleClass("progress-spinner-visible", false);
         // Inform the user if there was an error.
         errorElement.textContent = result.error.message;
         waitingForPaymentResponse = false;
@@ -302,13 +302,13 @@ $(document).ready(() => {
             "Authorization": "Bearer " + localStorage.token
           }
         }).done((data, textStatus, xhr) => {
-          $(".pay-spinner").toggleClass("pay-spinner-visible", false);
+          $(".progress-spinner").toggleClass("progress-spinner-visible", false);
           waitingForPaymentResponse = false;
           localStorage.setItem("cart", "");
           window.location.href = "receipt/" + xhr.responseJSON.data.transaction_id;
           // UIkit.modal.alert("Betalningen har genomförts");
         }).fail((xhr, textStatus, error) => {
-          $(".pay-spinner").toggleClass("pay-spinner-visible", false);
+          $(".progress-spinner").toggleClass("progress-spinner-visible", false);
           waitingForPaymentResponse = false;
           if (xhr.responseJSON.message == "Unauthorized") {
             UIkit.modal.alert("<h2>Betalningen misslyckades</h2>Du är inte inloggad");

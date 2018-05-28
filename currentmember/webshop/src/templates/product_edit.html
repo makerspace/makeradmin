@@ -12,9 +12,12 @@
               integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
               crossorigin="anonymous"></script>
         <script src='{{ url("static/product_edit.js") }}'></script>
+        <script id="action-data", type="application/json">
+            {{ action_json|safe }}
+        </script>
     </head>
     <body>
-        <form class="product-edit-form uk-form-stacked">
+        <form class="product-edit-form uk-form-stacked uk-margin-bottom">
             <input id="product-id" type="hidden" value="{{ product.id }}" />
             <div>
                 <label for="name" class="uk-form-label">Product Name</label>
@@ -52,10 +55,31 @@
                 </div>
             </div>
             <div>
-                <label for="unit" class="uk-form-label">Action</label>
-                <input id="action" class="uk-input" type="text" placeholder="e.g add_lab_access_days:42, only for special products" value="{{ product.action }}" />
+                <label class="uk-form-label">Actions</label>
+                <div id="action-list" class="uk-margin-bottom">
+                </div>
+                <a href="#add-action-modal" class="uk-button uk-button-default" uk-toggle>Add action</a>
             </div>
-            <button class="uk-button uk-button-primary">Save</button>
+            <button id="product-save" class="uk-button uk-button-primary">
+                <div class="progress-spinner" uk-spinner></div>
+                <span>Save</span>
+            </button>
         </form>
+        <div id="add-action-modal" uk-modal>
+            <div class="uk-modal-dialog">
+                <div class="uk-modal-body">
+                    <h2 class="uk-modal-title">Add new action</h2>
+                    <select id="add-action-category" class="uk-select">
+                        {% for cat in action_categories %}
+                            <option value="{{ cat.id }}">{{ cat.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="uk-modal-footer uk-text-right">
+                    <button class="uk-button uk-button-default uk-modal-close" type="button">Cancel</button>
+                    <button id="add-action" class="uk-button uk-button-primary" type="button">Add</button>
+                </div>
+            </div>
+        </div>
     </body>
 </html>

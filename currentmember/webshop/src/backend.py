@@ -4,7 +4,7 @@ from service import eprint, assert_get, SERVICE_USER_ID, route_helper
 import stripe
 from decimal import Decimal, Rounded, localcontext
 from collections import namedtuple
-from webshop_entities import category_entity, product_entity, transaction_entity, transaction_content_entity
+from webshop_entities import category_entity, product_entity, transaction_entity, transaction_content_entity, product_action_entity, webshop_completed_actions
 CartItem = namedtuple('CartItem', 'id count amount')
 
 instance = service.create(name="Makerspace Webshop Backend", url="webshop", port=8000, version="1.0")
@@ -39,11 +39,70 @@ transaction_entity.add_routes(instance, "transaction")
 transaction_content_entity.db = db
 transaction_content_entity.add_routes(instance, "transaction_content")
 
+product_action_entity.db = db
+product_action_entity.add_routes(instance, "product_action")
+
+webshop_completed_actions.db = db
+webshop_completed_actions.add_routes(instance, "completed_actions")
+
+
+@instance.route("pending_actions", methods=["GET"])
+@route_helper
+def pending_actions():
+    '''
+    Finds every item in a transaction and checks the actions it has, then checks to see if all those actions have been completed (and are not deleted).
+    The actions that are valid for a transaction are precisely those that existed at the time the transaction was made. Therefore if an action is added to a product
+    in the future, that action will *not* be retroactively applied to all existing transactions.
+    '''
+
+    with db.cursor() as cur:
+        # Note webshop_completed_actions.content_id IS NULL makes this a check for all actions that are *not* in the webshop_completed_actions table (i.e not completed).
+        cur.execute("""
+            SELECT webshop_transaction_contents.id, webshop_transaction_contents.transaction_id, webshop_transaction_contents.product_id,
+                webshop_transaction_contents.count, webshop_transaction_contents.amount, webshop_product_actions.value, webshop_actions.id, webshop_actions.name, webshop_transactions.member_id
+            FROM webshop_transaction_contents
+            INNER JOIN webshop_product_actions ON webshop_product_actions.product_id=webshop_transaction_contents.product_id
+            LEFT JOIN webshop_completed_actions ON webshop_transaction_contents.id=webshop_completed_actions.content_id
+            INNER JOIN webshop_actions ON webshop_actions.id=webshop_product_actions.action_id
+            INNER JOIN webshop_transactions ON webshop_transactions.id=webshop_transaction_contents.transaction_id
+            WHERE webshop_completed_actions.content_id IS NULL
+            AND webshop_transactions.created_at>webshop_product_actions.created_at
+            AND (webshop_transactions.created_at<webshop_product_actions.deleted_at OR webshop_product_actions.deleted_at IS NULL)
+            """)
+
+        return [
+            {
+                "item": {
+                    "id": v[0],
+                    "transaction_id": v[1],
+                    "product_id": v[2],
+                    "count": v[3],
+                    "amount": str(v[4]),
+                    "action_value": v[5],
+                },
+                "action": {
+                    "id": v[6],
+                    "name": v[7],
+                },
+                "member_id": v[8],
+            } for v in cur.fetchall()
+        ]
+
 
 @instance.route("transaction/<int:id>/content", methods=["GET"])
 @route_helper
 def transaction_contents(id):
     return transaction_content_entity.list("transaction_id=%s", id)
+
+
+@instance.route("member/<int:id>/transactions", methods=["GET"])
+@route_helper
+def member_transactions(id):
+    transactions = transaction_entity.list("member_id=%s", id)
+    for tr in transactions:
+        tr["content"] = transaction_content_entity.list("transaction_id=%s", tr["id"])
+
+    return transactions
 
 
 def process_cart(cart):
@@ -164,7 +223,7 @@ def pay():
     if duplicatePurchaseRand in duplicatePurchaseRands:
         abort(400, "duplicate")
 
-    member_id = assert_get(request.headers, "X-User-Id")
+    member_id = int(assert_get(request.headers, "X-User-Id"))
     if member_id <= 0:
         abort(400, "Services and other special member IDs cannot purchase anything")
 
@@ -178,7 +237,7 @@ def pay():
     duplicatePurchaseRands.add(duplicatePurchaseRand)
     transaction_id = transaction_entity.post({"member_id": member_id, "amount": total_amount})["id"]
     for item in items:
-        transaction_content_entity.post({"transaction_id": transaction_id, "product_id": item.id, "count": item.count, "amount": item.amount, "completed": False})
+        transaction_content_entity.post({"transaction_id": transaction_id, "product_id": item.id, "count": item.count, "amount": item.amount})
 
     send_receipt_email(member_id, transaction_id)
     eprint("Payment complete. id: " + str(transaction_id))

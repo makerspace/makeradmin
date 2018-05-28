@@ -233,15 +233,19 @@ $footer-height: 240px;
 	height: 28px;
 }
 
-.pay-spinner {
-	visibility: hidden;
+.progress-spinner {
+	// visibility: hidden;
+	opacity: 0;
+	transition: opacity 0.2s linear 0.2s;
 	position: absolute;
 	left: 5px;
 	top: 4px;
 }
 
-.pay-spinner.pay-spinner-visible {
-	visibility: visible;
+.progress-spinner.progress-spinner-visible {
+	opacity: 1;
+	transition: opacity 0.0s linear 0s;
+	// visibility: visible;
 }
 
 #pay-module.open {
@@ -286,9 +290,15 @@ $footer-height: 240px;
 	margin-left: 10%;
 	margin-right: 10%;
 	text-transform: none;
+
+	// Required for progress spinner
 	position: relative;
 }
 
+#product-save {
+	// Required for progress spinner
+	position: relative;
+}
 
 /**
  * The CSS shown here will not be introduced in the Quickstart guide, but shows
@@ -332,7 +342,7 @@ $footer-height: 240px;
 	margin-left: auto;
 	margin-right: auto;
 
-	div {
+	>div {
 		margin-top: 5px;
 		//width: 100%;
 		//display: block;
@@ -372,8 +382,9 @@ $footer-height: 240px;
 		border-radius: 3px;
 	}
 
-	button {
+	button#product-save {
 		margin-top: 20px;
+		min-width: 120px;
 	}
 }
 

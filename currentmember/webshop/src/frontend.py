@@ -2,7 +2,7 @@ from flask import Flask, render_template
 import service
 from service import eprint
 import json
-from webshop_entities import category_entity, product_entity, transaction_entity, transaction_content_entity
+from webshop_entities import category_entity, product_entity, transaction_entity, transaction_content_entity, action_entity
 
 instance = service.create_frontend(url="shop", port=80)
 
@@ -13,6 +13,7 @@ product_entity.db = db
 category_entity.db = db
 transaction_entity.db = db
 transaction_content_entity.db = db
+action_entity.db = db
 
 
 @instance.route("/")
@@ -68,7 +69,26 @@ def purchase_history(id):
 def product_edit(id):
     categories = category_entity.list()
     product = product_entity.get(id)
-    return render_template("product_edit.html", product=product, categories=categories, url=instance.full_path)
+
+    # Find the ids and names of all actions that this product has
+    with db.cursor() as cur:
+        cur.execute("SELECT webshop_product_actions.id,webshop_actions.id,webshop_actions.name,webshop_product_actions.value FROM webshop_product_actions INNER JOIN webshop_actions ON webshop_product_actions.action_id=webshop_actions.id WHERE webshop_product_actions.product_id=%s AND webshop_product_actions.deleted_at IS NULL", id)
+        actions = cur.fetchall()
+        eprint(actions)
+        actions = [{
+            "id": a[0],
+            "action_id": a[1],
+            "name": a[2],
+            "value": a[3],
+        } for a in actions]
+
+    action_categories = action_entity.list()
+    action_json = json.dumps({
+        "actions": actions,
+        "action_categories": action_categories
+    })
+
+    return render_template("product_edit.html", action_json=action_json, action_categories=action_categories, product=product, categories=categories, url=instance.full_path)
 
 
 @instance.route("product/create")
@@ -82,9 +102,16 @@ def product_create():
         "unit": "",
         "price": 0.0,
         "id": "new",
+        "smallest_multiple": 1,
     }
 
-    return render_template("product_edit.html", product=product, categories=categories, url=instance.full_path)
+    action_categories = action_entity.list()
+    action_json = json.dumps({
+        "actions": [],
+        "action_categories": action_categories
+    })
+
+    return render_template("product_edit.html", action_json=action_json, action_categories=action_categories, product=product, categories=categories, url=instance.full_path)
 
 
 @instance.route("receipt/<int:id>")
