@@ -21,24 +21,18 @@ utc = timezone("UTC")
 dt_utc_fmt = '%Y-%m-%dT%H:%M:%S.%fZ'
 
 
-# TODO Create test cases for this shit I have no idea when and how to use it.
-
-
-def dt_cet_local(dt):
-    """ Convert dt with timezone to a time in cet in local time. """
-    return cet.localize(dt).replace(tzinfo=None)
-
-
-def dt_cet(dt):
-    """ Return unlocalized datetime as CET. """
-    return cet.localize(dt)
+def cet_to_utc(dt):
+    """ Convert a naive dt in cet to naive time in utc. """
+    return cet.localize(dt, is_dst=None).astimezone(utc).replace(tzinfo=None)
 
 
 def dt_parse(s):
-    """ Parse a string in utc and return an unlocalized datetime in CET. """
+    """ Parse a string standard maker admin format in utc without timezone. """
     return datetime.strptime(s, dt_utc_fmt)
     
 
 def dt_format(dt):
-    return dt.astimezone(utc).strftime(dt_utc_fmt)
+    """ Format dt in utc in maker admin standard format. """
+    assert not dt.tzinfo or dt.tzinfo == utc
+    return dt.strftime(dt_utc_fmt)
     

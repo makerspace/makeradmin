@@ -6,7 +6,6 @@ from multi_access.tui import Tui
 from sync_main import sync
 from test.db_base import DbBaseTest
 from test.factory import UserFactory, MakerAdminMemberFactory, CustomerFactory
-from multi_access.util import dt_cet_local
 
 
 class Test(DbBaseTest):
@@ -20,7 +19,7 @@ class Test(DbBaseTest):
     def test_super_simple_sync_updates_one_end_timestamp(self):
         c = CustomerFactory()
 
-        old_stop = dt_cet_local(self.datetime(days=30))
+        old_stop = self.datetime(days=30)
         u = UserFactory(stop_timestamp=old_stop, name="1001", customer=c)
         
         new_stop = self.datetime(days=50)
@@ -31,13 +30,13 @@ class Test(DbBaseTest):
         sync(session=self.session, client=self.client, ui=self.ui, customer_id=c.id)
         
         u = self.session.query(User).get(u.id)
-        self.assertEqual(dt_cet_local(new_stop), u.stop_timestamp)
+        self.assertEqual(new_stop, u.stop_timestamp)
 
     @patch('builtins.input', lambda m: '')
     def test_no_update_is_made_when_user_breaks(self):
         c = CustomerFactory()
 
-        old_stop = dt_cet_local(self.datetime(days=30))
+        old_stop = self.datetime(days=30)
         u = UserFactory(stop_timestamp=old_stop, name="1001", customer=c)
         
         new_stop = self.datetime(days=50)
@@ -49,4 +48,4 @@ class Test(DbBaseTest):
             sync(session=self.session, client=self.client, ui=self.ui, customer_id=c.id)
         
         u = self.session.query(User).get(u.id)
-        self.assertEqual(dt_cet_local(old_stop), u.stop_timestamp)
+        self.assertEqual(old_stop, u.stop_timestamp)

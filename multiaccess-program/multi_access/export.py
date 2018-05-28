@@ -2,8 +2,7 @@ import json
 from logging import getLogger
 
 from multi_access.models import User
-from multi_access.util import dt_format, dt_cet
-
+from multi_access.util import dt_format, cet_to_utc
 
 logger = getLogger("makeradmin")
 
@@ -16,7 +15,10 @@ def user_to_dict(user):
         return None
 
     if user.stop_timestamp:
-        end_timestamp = dt_format(dt_cet(user.stop_timestamp))
+        print(user.stop_timestamp)
+        utc = cet_to_utc(user.stop_timestamp)
+        print(utc)
+        end_timestamp = dt_format(utc)
     else:
         end_timestamp = None
         

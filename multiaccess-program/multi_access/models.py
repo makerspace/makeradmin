@@ -13,8 +13,8 @@ class User(Base):
     name = Column("Name", String(length=50), nullable=False, index=True)
     code = Column("Code", String(10))
     card = Column("Card", String(12))
-    start_timestamp = Column("Start", DateTime(timezone=False))
-    stop_timestamp = Column("Stop", DateTime(timezone=False))
+    start_timestamp = Column("Start", DateTime(timezone=False))  # Local timezone for the house.
+    stop_timestamp = Column("Stop", DateTime(timezone=False))    # Local timezone for the house.
     blocked = Column("Blocked", Boolean())
     f0 = Column("f0", String(50))
     f1 = Column("f1", String(50))

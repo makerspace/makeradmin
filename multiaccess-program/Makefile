@@ -20,6 +20,9 @@ dist-sync:
 dist-export:
 	docker run -it --rm -v $(shell pwd):/src cdrx/pyinstaller-windows:python3 "/usr/bin/pyinstaller --onefile --clean -y --dist ./dist --workpath /tmp specs/multi_access_export.spec; chown -R --reference=. ./dist ./multi_access"
 
+dist-dump:
+	docker run -it --rm -v $(shell pwd):/src cdrx/pyinstaller-windows:python3 "/usr/bin/pyinstaller --onefile --clean -y --dist ./dist --workpath /tmp specs/multi_access_dump.spec; chown -R --reference=. ./dist ./multi_access"
+
 dist: dist-sync dist-export
 
 clean:
