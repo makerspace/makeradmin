@@ -1,10 +1,8 @@
 from flask import Flask, abort
 import service
-from service import Entity, eprint
+from service import Entity, eprint, route_helper
 from dateutil import parser
 from datetime import datetime, timedelta
-
-lab_action = "add_lab_access_days"
 
 key_entity = Entity(
     table="rfid",
@@ -23,6 +21,7 @@ key_entity.add_routes(instance, "")
 
 
 @instance.route("update_times", methods=["POST"])
+@route_helper
 def update_keys():
     '''
     Completes all orders for purchasing lab access and updates existing keys with new dates.
@@ -30,49 +29,50 @@ def update_keys():
     If a user has multiple keys, all of them are updated with new dates.
     '''
     now = datetime.now().astimezone()
-    transactions = gateway.get("webshop/transaction").json()["data"]
+    pending_actions = gateway.get("webshop/pending_actions").json()["data"]
 
-    for transaction in transactions:
-        member_id = transaction["member_id"]
-        # Get the individual items in the transaction
-        contents = gateway.get(f"webshop/transaction/{transaction['id']}/content").json()
+    for pending in pending_actions:
+        member_id = pending["member_id"]
+        item = pending["item"]
+        action = pending["action"]
 
-        for item in contents:
-            if not item["completed"]:
-                # Get the product data from the transaction
-                product = gateway.get(f"webshop/product/{item['product_id']}").json()["data"]
-                # Check if the product has the appropriate action field for modifying membership
-                if product["action"].startswith(lab_action + ":"):
-                    days_to_add_str = product["action"].split(":")[1]
-                    try:
-                        days_to_add = int(days_to_add_str) * item["count"]
-                    except ValueError:
-                        abort(400, f"Invalid action {product['action']} in product {product['name']}, parameter after colon should be an integer")
+        r = gateway.post("webshop/completed_actions", {
+            "content_id": item["id"],
+            "action_id": action["id"],
+        })
+        assert r.ok, r.text
+        continue
 
-                    # Get all the member's keys
-                    # These will be on the form /keys/<int>
-                    member_key_urls = gateway.get(f"related?param=/membership/member/{member_id}&matchUrl=/keys/(.*)&page=1&sort_by=&sort_order=asc&per_page=10000").json()["data"]
-                    member_keys = [key_entity.get(int(url.split("/")[-1])) for url in member_key_urls]
+        if action["name"] == "add_labaccess_days":
+            days_to_add = int(item["action_value"]) * int(item["count"])
+            assert(days_to_add >= 0)
 
-                    if len(member_keys) == 0:
-                        # To make sure that a member that purchases lab access before keys are handed out
-                        # will still get their key activated when he/she gets a key.
-                        eprint("Member has no keys, skipping the order")
-                        continue
+            # Get all the member's keys
+            # These will be on the form /keys/<int>
+            member_key_urls = gateway.get(f"related?param=/membership/member/{member_id}&matchUrl=/keys/(.*)&page=1&sort_by=&sort_order=asc&per_page=10000").json()["data"]
+            member_keys = [key_entity.get(int(url.split("/")[-1])) for url in member_key_urls]
 
-                    for key in member_keys:
-                        # A bit inefficient, but we want to have nice objects that e.g have datetime fields instead of strings
-                        key = key_entity.get(key["key_id"])
-                        if now > key["enddate"]:
-                            # Need to move forward the start date to start anew
-                            key["startdate"] = key["enddate"] = now
+            if len(member_keys) == 0:
+                # To make sure that a member that purchases lab access before keys are handed out
+                # will still get their key activated when he/she gets a key.
+                eprint("Member has no keys, skipping the order")
+                continue
 
-                        key["enddate"] += timedelta(days=days_to_add)
-                        key_entity.put(key["key_id"], key)
+            for key in member_keys:
+                # A bit inefficient, but we want to have nice objects that e.g have datetime fields instead of strings
+                key = key_entity.get(key["key_id"])
+                if now > key["enddate"]:
+                    # Need to move forward the start date to start anew
+                    key["startdate"] = key["enddate"] = now
 
-                    item["completed"] = True
-                    r = gateway.put(f"webshop/transaction_content/{item['id']}", item)
-                    assert r.ok, r.text
+                key["enddate"] += timedelta(days=days_to_add)
+                key_entity.put(key["key_id"], key)
+
+            r = gateway.post("webshop/completed_actions", {
+                "content_id": item["id"],
+                "action_id": action["id"],
+            })
+            assert r.ok, r.text
 
 
 instance.serve_indefinitely()
