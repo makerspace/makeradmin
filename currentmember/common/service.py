@@ -47,6 +47,9 @@ class APIGateway:
     def put(self, path, payload):
         return requests.put('http://' + self.host + "/" + path, json=payload, headers=self.auth_headers)
 
+    def delete(self, path):
+        return requests.delete('http://' + self.host + "/" + path, headers=self.auth_headers)
+
 
 class Service:
     def __init__(self, name, url, port, version, db, gateway, debug, frontend):
