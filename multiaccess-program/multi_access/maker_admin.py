@@ -5,7 +5,26 @@ from tempfile import gettempdir
 
 import requests
 
-from multi_access.util import dt_parse
+from multi_access.util import dt_parse, utc_to_cet
+from jsonschema import validate, ValidationError
+
+schema = dict(
+    type="array",
+    items=dict(
+        type="object",
+        properties=dict(
+            member_id=dict(type="integer"),
+            member_number=dict(type="integer"),
+            firstname=dict(type="string"),
+            lastname=dict(type="string"),
+            key_id=dict(type="integer"),
+            rfid_tag=dict(type="string", pattern=r"^\w+$"),
+            blocked=dict(type="boolean"),
+            end_timestamp=dict(type="string"),
+        )
+    )
+)
+
 
 MakerAdminMember = namedtuple('MakerAdminMember', [
     'member_id',      # int for debugging
@@ -66,9 +85,13 @@ class MakerAdminClient(object):
             url = self.base_url + '/multiaccess/memberdata'
             ui.info__progress(f"getting members from {url}")
             data = self.get_and_login_if_needed(url)['data']
-
+            
+        try:
+            validate(data, schema=schema)
+        except ValidationError as e:
+            raise ValueError("Failed to parse member data.") from e
         for m in data:
-            m['end_timestamp'] = dt_parse(m['end_timestamp'])
+            m['end_timestamp'] = utc_to_cet(dt_parse(m['end_timestamp']))
             
         res = [MakerAdminMember(**m) for m in data]
 

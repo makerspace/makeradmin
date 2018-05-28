@@ -22,8 +22,15 @@ dt_utc_fmt = '%Y-%m-%dT%H:%M:%S.%fZ'
 
 
 def cet_to_utc(dt):
-    """ Convert a naive dt in cet to naive time in utc. """
+    """ Convert a naive dt in cet to naive dt in utc. """
+    assert not dt.tzinfo
     return cet.localize(dt, is_dst=None).astimezone(utc).replace(tzinfo=None)
+
+
+def utc_to_cet(dt):
+    """ Convert a naive dt in utc to naive dt in cet. """
+    assert not dt.tzinfo
+    return utc.localize(dt, is_dst=None).astimezone(cet).replace(tzinfo=None)
 
 
 def dt_parse(s):
