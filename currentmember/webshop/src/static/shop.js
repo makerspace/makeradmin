@@ -52,7 +52,6 @@ $(document).ready(() => {
   const currency = "kr";
   const currencyBase = 100;
 
-  var cart = [];
   var id2element = new Map();
   var id2cartItem = new Map();
   var id2item = new Map();
@@ -150,6 +149,28 @@ $(document).ready(() => {
     }
   }
 
+  function parseCartFromStorage() {
+    let cart = [];
+    try {
+      cart = JSON.parse(localStorage.getItem("cart"));
+    } catch (e) {}
+
+    if (!Array.isArray(cart)) {
+      cart = [];
+    }
+
+    for (const item of cart) {
+      const element = id2element.get(item.id);
+      if (element !== null && element !== undefined) {
+        element.find(".product-amount").val(item.count);
+        element.find(".product-amount").change();
+      }
+    }
+  }
+
+  let cart = [];
+  parseCartFromStorage();
+
   function sumCart(cart) {
     let totalSum = 0;
     for (let item of cart) {
@@ -179,6 +200,8 @@ $(document).ready(() => {
       }
       $(elem).find(".product-active-dot").toggleClass("active", count > 0);
     }
+
+    localStorage.cart = JSON.stringify(cart);
 
     let totalSum = sumCart(cart);
 
@@ -281,6 +304,7 @@ $(document).ready(() => {
         }).done((data, textStatus, xhr) => {
           $(".pay-spinner").toggleClass("pay-spinner-visible", false);
           waitingForPaymentResponse = false;
+          localStorage.setItem("cart", "");
           window.location.href = "receipt/" + xhr.responseJSON.data.transaction_id;
           // UIkit.modal.alert("Betalningen har genomförts");
         }).fail((xhr, textStatus, error) => {
