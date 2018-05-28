@@ -15,7 +15,11 @@
     <body>
         <div id="purchase-history">
             <h1>Köphistorik</h1>
-            <h2>{{ member.firstname }} {{ member.lastname }} - #{{ member.member_number }}</h2>
+            <div class="receipt-buttons">
+                <a href='/member'><span uk-icon="user"></span> Medlemsvy</a>
+                <a href='{{ url("") }}'><span uk-icon="cart"></span> Webshop</a>
+            </div>
+            <h2>#{{ member.member_number }}: {{ member.firstname }} {{ member.lastname }}</h2>
             {% for transaction, cart in history %}
                 <div class="history-item">
                     <h3>{{ transaction.created_at.strftime("%Y-%m-%d") }}</h3>
