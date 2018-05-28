@@ -78,12 +78,12 @@ $(document).ready(() => {
       }
 
       for (const incr of increments) {
-        buttons.push(`<button class="uk-button uk-button-small uk-button-primary number-add" data-amount="${incr}">+${incr}${item.unit}</button>`);
+        buttons.push(`<button type="button" class="uk-button uk-button-small uk-button-primary number-add" data-amount="${incr}">+${incr}${item.unit}</button>`);
       }
 
       const li = $(
         `<li>
-            <form class="product">
+            <div class="product">
                 <span class="product-title">${item.name}</span>
                 <span class="product-price">${price} ${currency}/${baseStr}</span>
                 <input type="number" min=0 step=${item.smallest_multiple} placeholder="0" class="product-amount edit-invisible"></input>
@@ -91,13 +91,13 @@ $(document).ready(() => {
                 <div class="product-actions">
                   <span class="edit-display disabled">
                     <a href="product/${item.id}/edit" class="edit-display disabled product-edit uk-button uk-button-small uk-button-primary" uk-icon="pencil" />
-                    <button class="edit-display disabled product-delete uk-button uk-button-small uk-button-danger" uk-icon="trash" />
+                    <button type="button" class="edit-display disabled product-delete uk-button uk-button-small uk-button-danger" uk-icon="trash" />
                   </span>
                   <span class="edit-invisible">
                     ${ buttons.join("\n") }
                   </span>
                 </div>
-            </form>
+            </div>
         </li>`);
       id2element.set(item.id, li);
       id2item.set(item.id, item);
@@ -221,7 +221,7 @@ $(document).ready(() => {
             <span class="product-price">${item.price} ${currency}/${item.unit}</span>
             <input type="number" min=0 step=${item.smallest_multiple} placeholder="0" class="product-amount"></input>
             <span class="product-unit">${item.unit}</span>
-            <button class="uk-button uk-button-small uk-button-danger product-remove" uk-icon="trash"></button>
+            <button type="button" class="uk-button uk-button-small uk-button-danger product-remove" uk-icon="trash"></button>
           </form>
           </li>`
         );
