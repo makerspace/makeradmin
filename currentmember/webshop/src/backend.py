@@ -165,8 +165,8 @@ def pay():
         abort(400, "duplicate")
 
     member_id = assert_get(request.headers, "X-User-Id")
-    if member_id == SERVICE_USER_ID:
-        abort(400, "Services cannot purchase anything")
+    if member_id <= 0:
+        abort(400, "Services and other special member IDs cannot purchase anything")
 
     total_amount, items = validate_payment(data["cart"], data["expectedSum"])
 
