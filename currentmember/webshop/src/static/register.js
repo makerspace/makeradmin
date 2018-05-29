@@ -107,10 +107,10 @@ $(document).ready(() => {
               lastname: $("#lastname").val(),
               email: $("#email").val(),
               phone: $("#phone").val(),
-              address_street: $("#address_street").val(),
-              address_extra: $("#address_extra").val(),
-              address_zipcode: $("#address_zipcode").val(),
-              address_city: $("#address_city").val(),
+              address_street: "", // $("#address_street").val(),
+              address_extra: "", // $("#address_extra").val(),
+              address_zipcode: "", // $("#address_zipcode").val(),
+              address_city: "", // $("#address_city").val(),
             },
             purchase: {
               cart: cart,
@@ -127,7 +127,6 @@ $(document).ready(() => {
         }).done((data, textStatus, xhr) => {
           $(".pay-spinner").toggleClass("pay-spinner-visible", false);
           waitingForPaymentResponse = false;
-          localStorage.setItem("cart", "");
           localStorage.setItem("token", xhr.responseJSON.data.token);
           window.location.href = "receipt/" + xhr.responseJSON.data.transaction_id;
         }).fail((xhr, textStatus, error) => {
