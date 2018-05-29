@@ -29,6 +29,7 @@ class UserFactory(SQLAlchemyModelFactory):
     class Meta:
         model = models.User
         sqlalchemy_session = Session
+        sqlalchemy_session_persistence = 'flush'
     
     name = Sequence(lambda n: str(1001 + n))
     card = Sequence(lambda n: str(100000000001 + n))

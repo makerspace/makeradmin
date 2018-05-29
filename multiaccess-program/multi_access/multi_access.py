@@ -41,6 +41,9 @@ class EndTimestampDiff(object):
         user.blocked = self.ma_member.blocked
         session.commit()
         
+    def __eq__(self, other):
+        return self.db_member == other.db_member and self.ma_member == other.ma_member
+        
         
 def get_multi_access_members(session, customer_id):
     """ Get relevant multi access members from database. """

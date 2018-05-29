@@ -48,5 +48,3 @@ class ParseTest(BaseTest):
         test_bad(end_timestamp="2018-05-03T10:13:41.3330")
         test_bad(end_timestamp="20180503T10:13:41.333000Z")
         test_bad(end_timestamp="2018-05-03T10:13:41.333000+0200")
-        
-        

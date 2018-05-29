@@ -40,17 +40,16 @@ MakerAdminMember = namedtuple('MakerAdminMember', [
 
 class MakerAdminClient(object):
     
-    def __init__(self, ui=None, base_url=None, members_filename=None):
+    def __init__(self, ui=None, base_url=None, members_filename=None, tokenfilename=None):
         self.ui = ui
         self.base_url = base_url
         self.members_filename = members_filename
-        self.token = 'nokey'
-        self.tokenfile = join(gettempdir(), 'LFP7EL5K6SFF.TXT')
+        self.tokenfile = tokenfilename or join(gettempdir(), 'LFP7EL5K6SFF.TXT')
         try:
             with open(self.tokenfile) as r:
                 self.token = r.read().strip()
         except OSError:
-            pass
+            self.token = 'nokey'
         
     def login(self):
         username, password = self.ui.promt__login()
