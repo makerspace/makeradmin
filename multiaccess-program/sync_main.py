@@ -7,7 +7,8 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from multi_access.maker_admin import MakerAdminClient
-from multi_access.multi_access import create_end_timestamp_diff, get_multi_access_members, update_diffs
+from multi_access.multi_access import create_end_timestamp_diff, get_multi_access_members, update_diffs, \
+    create_member_diff
 from multi_access.tui import Tui
 
 logger = getLogger("makeradmin")
@@ -21,7 +22,7 @@ def check_multi_access_running(ui):
     ui.info__progress("found no running MultiAccess")
 
 
-def sync(session=None, client=None, ui=None, customer_id=16):
+def sync(session=None, client=None, ui=None, customer_id=16, skip_end_time_diff=False, skip_member_diff=False):
     
     # Exit if MultiAccess is running
     
@@ -39,7 +40,11 @@ def sync(session=None, client=None, ui=None, customer_id=16):
         ui.fatal__problem_members(problem_members)
     
     ui.info__progress('diffing multi access users against maker admin members')
-    diffs = create_end_timestamp_diff(db_members, ma_members)
+    diffs = []
+    if not skip_end_time_diff:
+        diffs += create_end_timestamp_diff(db_members, ma_members)
+    if not skip_member_diff:
+        diffs += create_member_diff(db_members, ma_members)
     
     if not diffs:
         ui.info__progress('nothing to update')
@@ -63,10 +68,15 @@ def main():
     basicConfig(format='%(asctime)s %(levelname)s [%(process)d/%(threadName)s %(pathname)s:%(lineno)d]: %(message)s',
                 stream=sys.stderr, level=INFO)
 
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser("Fetch member list from makeradmin.se or local file, then prompt user with"
+                                     " changes to make (update end time (and block/unblock) and add new members).")
     parser.add_argument("-d", "--db",
                         default='mssql://(local)\\SQLEXPRESS/MultiAccess?trusted_connection=yes&driver=SQL+Server',
                         help="SQL Alchemy db engine spec.")
+    parser.add_argument("--skip-end-time-diff", action="store_true",
+                        help="Don't change members with changed end time or blocked flag.")
+    parser.add_argument("--skip-member-diff", action="store_true",
+                        help="Don't change member list.")
     parser.add_argument("-u", "--maker-admin-base-url",
                         default='https://api.makeradmin.se',
                         help="Base url of maker admin (for login and fetching of member info).")
@@ -84,7 +94,9 @@ def main():
         Session = sessionmaker(bind=engine)
         session = Session()
         
-        sync(session=session, ui=ui, client=client)
+        sync(session=session, ui=ui, client=client,
+             skip_end_time_diff=args.skip_end_time_diff,
+             skip_member_diff=args.skip_member_diff)
 
 
 if __name__ == '__main__':

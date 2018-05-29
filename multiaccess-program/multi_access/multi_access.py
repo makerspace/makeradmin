@@ -24,7 +24,7 @@ class EndTimestampDiff(object):
         self.timestamp_diffs = ma_member.end_timestamp != db_member.user.stop_timestamp
 
     def describe_update(self):
-        res = f'#{self.ma_member.member_number} ({self.ma_member.firstname} {self.ma_member.lastname})'
+        res = f'update #{self.ma_member.member_number} ({self.ma_member.firstname} {self.ma_member.lastname})'
         
         if self.timestamp_diffs:
             res += f', end timestamp {self.db_member.user.stop_timestamp} => {self.ma_member.end_timestamp}'
@@ -44,6 +44,29 @@ class EndTimestampDiff(object):
     def __eq__(self, other):
         return self.db_member == other.db_member and self.ma_member == other.ma_member
         
+
+class MemberMissingDiff(object):
+    
+    def __init__(self, ma_member=None):
+        self.m = ma_member
+
+    def describe_update(self):
+        return (
+            f'add     #{self.m.member_number} ({self.m.firstname} {self.m.lastname})'
+            f', tag {self.m.rfid_tag}, end timestamp {self.m.end_timestamp}, blocked {self.m.blocked}'
+        )
+    
+    def update(self, session, ui):
+        ui.info__progress(self.describe_update())
+        # TODO
+        # user = session.query(User).get(self.db_member.user.id)
+        # user.stop_timestamp = self.ma_member.end_timestamp
+        # user.blocked = self.ma_member.blocked
+        # session.commit()
+        
+    def __eq__(self, other):
+        return self.m == other.m
+        
         
 def get_multi_access_members(session, customer_id):
     """ Get relevant multi access members from database. """
@@ -61,6 +84,16 @@ def create_end_timestamp_diff(db_members, ma_members):
         ((db_members.get(m), ma_members.get(m)) for m in db_members.keys())
         if dbm and mam and (dbm.user.blocked != mam.blocked or dbm.user.stop_timestamp != mam.end_timestamp)
     ]
+    return diffs
+
+
+def create_member_diff(db_members, ma_members):
+    """ Creates a list of diffing members where the member exists in ma_members but not in db_members. """
+    ma_members = {m.member_number: m for m in ma_members}
+    for m in db_members:
+        ma_members.pop(m.member_number, None)
+    
+    diffs = [MemberMissingDiff(mam) for mam in ma_members]
     return diffs
 
 
