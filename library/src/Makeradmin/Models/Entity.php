@@ -310,7 +310,7 @@ class Entity
 	 *
 	 * Create an instance of the class and call the function non-static
 	 */
-	public static function load($filters, $show_deleted = false)
+	public static function load($filters, $show_deleted = true)
 	{
 		return (new static())->_load($filters, $show_deleted);
 	}
@@ -318,13 +318,13 @@ class Entity
 	/**
 	 * Same as above, but called non-statically
 	 */
-	protected function _load($filters, $show_deleted = false)
+	protected function _load($filters, $show_deleted = true)
 	{
 		// Preprocessing (join or type and sorting)
 		$this->_preprocessFilters($filters);
 
 		// Build base query
-		$query = $this->_buildLoadQuery();
+		$query = $this->_buildLoadQuery($show_deleted);
 
 		// Apply standard filters like entity_id, relations, etc
 		$query = $this->_applyFilter($query, $filters);
