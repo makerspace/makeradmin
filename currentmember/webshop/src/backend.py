@@ -105,9 +105,35 @@ def member_transactions(id):
     return transactions
 
 
+def copy_dict(source, fields):
+    return {key: source[key] for key in fields if key in source}
+
+
+def send_new_member_email(member_id):
+    r = instance.gateway.post("messages", {
+        "recipients": [
+            {
+                "type": "member",
+                "id": member_id
+            },
+        ],
+        "message_type": "email",
+        "subject": "Välkommen till Stockholm Makerspace",
+        "body": render_template("new_member_email.html", frontend_url=instance.gateway.get_frontend_url)
+    })
+
+    if not r.ok:
+        eprint("Failed to send new member email")
+        eprint(r.text)
+
+
 @instance.route("register", methods=["POST"])
 @route_helper
 def register():
+    ''' Register a new member.
+        See frontend.py:register_member
+    '''
+
     data = request.get_json()
     if data is None:
         abort(400, "missing json")
@@ -123,14 +149,22 @@ def register():
     if item["id"] not in (p["id"] for p in products):
         abort(400, f"product {item['id']} is not one of the allowed ones")
 
-    # Register the new member
-    r = instance.gateway.post("membership/member", data["member"])
+    # Register the new member.
+    # We need to copy the member info for security reasons.
+    # Otherwise an attacker could inject evil inputs like for example the 'groups' field which is a list of groups the member should be added to.
+    # It would be quite a security risk if the member could add itself to the admins group when registering.
+    valid_member_fields = [
+        "member_number", "email", "password", "firstname", "lastname", "civicregno", "company",
+        "orgno", "address_street", "address_extra", "address_zipcode", "address_city", "address_country", "phone"
+    ]
+    member = copy_dict(data["member"], valid_member_fields)
+    member["validate_only"] = True
+    r = instance.gateway.post("membership/member", member)
     if not r.ok:
         # Ideally should just return r.text, but the helper code for routes screws that up a bit right now
         abort(r.status_code, r.json()["message"])
 
     member = r.json()["data"]
-    eprint(member)
 
     # Construct the purchase object again, using user data is always risky
     purchase = {
@@ -154,6 +188,8 @@ def register():
         payment_result = pay(member_id=member_id, data=purchase)
         # Add the token to the response so that the user can be logged in immediately
         payment_result["token"] = token
+
+        send_new_member_email(member["member_id"])
         return payment_result
     except:
         # Something went wrong (possibly the payment didn't go through), so delete the member again
