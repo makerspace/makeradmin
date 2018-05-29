@@ -662,7 +662,7 @@ class Entity
 					$result = $this::load([
 						"type" => $this->type,
 						$field => $this->data[$field]
-					]);
+					], false);
 //					print_r($result);
 //					die("load");
 
