@@ -26,7 +26,7 @@ class CreateUser extends Command
 	 *
 	 * @return void
 	 */
-	public function fire()
+	public function handle()
 	{
 		$this->info("Creating new member");
 
