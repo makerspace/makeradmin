@@ -29,7 +29,7 @@ class Send extends Command
 	 *
 	 * @return void
 	 */
-	public function fire()
+	public function handle()
 	{
 		// Instantiate the Mailgunclient
 		$mgClient = new Mailgun(config("mailgun.key"));
