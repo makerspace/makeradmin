@@ -23,7 +23,7 @@ class InitDB extends Command
 	 *
 	 * @return void
 	 */
-	public function fire() {
+	public function handle() {
 		// Delete all existing entries in the services table to clean up any old data from previous runs
 		// (obviously no services are currently registered as the api-gateway just started)
 		DB::table("services")->delete();
