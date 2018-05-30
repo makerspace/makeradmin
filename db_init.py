@@ -37,7 +37,7 @@ for container in containers:
     if o2 != b'mysql: [Warning] Using a password on the command line interface can be insecure.\r\n':
         print(o2.decode('utf-8'))
 
-    migrate_artisan = f"if [ -f /var/www/html/artisan ]; then /usr/bin/php -d hhvm.jit=0 /var/www/html/artisan --force migrate; else echo \"artisan not found, skipping migration for {container}\"; fi"
+    migrate_artisan = f"if [ -f /var/www/html/artisan ]; then php /var/www/html/artisan --force migrate; else echo \"artisan not found, skipping migration for {container}\"; fi"
     call(["docker-compose", "run", "--rm", "--no-deps", container, "bash", "-c", migrate_artisan])
     migrate_python = f"if [ -f /var/www/service/migrate.py ]; then echo 'Migrating using Python'; python3 /var/www/service/migrate.py; fi"
     call(["docker-compose", "run", "--rm", "--no-deps", container, "bash", "-c", migrate_python])
