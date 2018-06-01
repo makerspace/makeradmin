@@ -11,6 +11,7 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use App\Service;
 use Makeradmin\Logger;
 use Makeradmin\Libraries\CurlBrowser;
+use Makeradmin\SecurityHelper;
 
 use DB;
 
