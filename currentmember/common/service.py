@@ -307,9 +307,10 @@ class Entity:
     def add_routes(self, service, endpoint):
         # Note: Many methods here return other methods that we then call.
         # The endpoint keyword argument is just because flask needs something unique, it doesn't matter what it is for our purposes
-        service.route(endpoint + "/<int:id>", endpoint=endpoint+".get", methods=["GET"])(route_helper(self.get, status="ok"))
-        service.route(endpoint + "/<int:id>", endpoint=endpoint+".put", methods=["PUT"])(route_helper(self.put, json=True, status="updated"))
+        id_string = "<int:id>" if endpoint == "" else "/<int:id>"
+        service.route(endpoint + id_string, endpoint=endpoint+".get", methods=["GET"])(route_helper(self.get, status="ok"))
+        service.route(endpoint + id_string, endpoint=endpoint+".put", methods=["PUT"])(route_helper(self.put, json=True, status="updated"))
         if self.allow_delete:
-            service.route(endpoint + "/<int:id>", endpoint=endpoint+".delete", methods=["DELETE"])(route_helper(self.delete, status="deleted"))
+            service.route(endpoint + id_string, endpoint=endpoint+".delete", methods=["DELETE"])(route_helper(self.delete, status="deleted"))
         service.route(endpoint + "", endpoint=endpoint+".post", methods=["POST"])(route_helper(self.post, json=True, status="created"))
         service.route(endpoint + "", endpoint=endpoint+".list", methods=["GET"])(route_helper(self.list, status="ok"))
