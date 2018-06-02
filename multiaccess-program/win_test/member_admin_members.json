@@ -1,12 +1,13 @@
 [
     {
-        "member_id":     1,
-        "member_number": 1039,
+        "member_id":     3006,
+        "member_number": 3006,
         "firstname":     "Sune",
         "lastname":      "Arnesson",
         "key_id":        1,
-        "rfid_tag":      "dasciwajcjaslgfvemk",
+        "rfid_tag":      "444444444444",
         "blocked":       false,
-        "end_timestamp": "2019-01-01T12:13:14.123456Z"
+        "end_timestamp": "2021-01-01T12:13:14.123456Z"
     }
 ]
+  

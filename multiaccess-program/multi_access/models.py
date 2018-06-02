@@ -61,12 +61,14 @@ class AuthorityInUser(Base):
 
     __tablename__ = 'AuthorityInUser'
     
-    id = Column("Id", Integer(), primary_key=True, autoincrement=True, nullable=False)
-    user_id = Column("UserId", ForeignKey("Users.Id"), nullable=False)
-    authority_id = Column("AuthorityId", ForeignKey("Authority.Id"), nullable=False)
-    removed_date = Column("removeDate", DateTime(timezone=False))
+    # Not using id column here since we don't use it and sqlalchemy produces bad sql with it.
+    # id = Column("Id", Integer(), primary_key=True, autoincrement=True, nullable=False)
+    user_id = Column("UserId", ForeignKey("Users.Id"), nullable=False, primary_key=True)
+    authority_id = Column("AuthorityId", ForeignKey("Authority.Id"), nullable=False, primary_key=True)
+    removed_date = Column("removedDate", DateTime(timezone=False))
     start_timestamp = Column("start", DateTime(timezone=False))
     stop_timestamp = Column("stop", DateTime(timezone=False))
+    flags = Column("Flags",  Integer())
     
     # Actually foreign key to Operators, but we don't touch that table and it is always Null.
     created_by = Column("CreatedBy",  Integer())

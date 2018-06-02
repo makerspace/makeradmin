@@ -18,7 +18,7 @@ schema = dict(
             firstname=dict(type="string"),
             lastname=dict(type="string"),
             key_id=dict(type="integer"),
-            rfid_tag=dict(type="string", pattern=r"^\w+$"),
+            rfid_tag=dict(type="string", pattern=r"^\w+$", maxLength=12),
             blocked=dict(type="boolean"),
             end_timestamp=dict(type="string"),
         )
@@ -88,7 +88,7 @@ class MakerAdminClient(object):
         try:
             validate(data, schema=schema)
         except ValidationError as e:
-            raise ValueError("Failed to parse member data.") from e
+            raise ValueError(f"Failed to parse member data: {str(e)}") from e
         for m in data:
             m['end_timestamp'] = utc_to_cet(dt_parse(m['end_timestamp']))
             

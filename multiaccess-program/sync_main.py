@@ -27,12 +27,13 @@ def check_multi_access_running(ui):
     ui.info__progress("found no running MultiAccess")
 
 
-def sync(session=None, client=None, ui=None, customer_id=16, what=None):
+def sync(session=None, client=None, ui=None, customer_id=None, authority_id=None, what=None, ignore_running=False):
     what = what or WHAT_ALL
     
     # Exit if MultiAccess is running
     
-    check_multi_access_running(ui)
+    if not ignore_running:
+        check_multi_access_running(ui)
     
     # Fetch from MakerAdmin
     
@@ -63,7 +64,7 @@ def sync(session=None, client=None, ui=None, customer_id=16, what=None):
     
     # Preform changes
     
-    update_diffs(session, ui, diffs)
+    update_diffs(session, ui, diffs, customer_id=customer_id, authority_id=authority_id)
     ui.info__progress('finished updating db')
     
     return
@@ -75,7 +76,8 @@ def main():
                 stream=sys.stderr, level=INFO)
 
     parser = argparse.ArgumentParser("Fetch member list from makeradmin.se or local file, then prompt user with"
-                                     " changes to make,")
+                                     " changes to make,",
+                                     formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument("-d", "--db",
                         default='mssql://(local)\\SQLEXPRESS/MultiAccess?trusted_connection=yes&driver=SQL+Server',
                         help="SQL Alchemy db engine spec.")
@@ -88,7 +90,13 @@ def main():
     parser.add_argument("-m", "--members-filename", default=None,
                         help="Provide members in a file instead of fetching from maker admin (same format as response"
                              " from maker admin).")
-                        
+    parser.add_argument("--customer-id", default=16, type=int,
+                        help="MultiAcces custoemr primary key to use to get and add users.")
+    parser.add_argument("--authority-id", default=23, type=int,
+                        help="MultiAcces authority primary key to add ny default to new users.")
+    parser.add_argument("--ignore-running", action='store_true',
+                        help="Ignore the check for if MultiAcces is running, do not use this.")
+    
     args = parser.parse_args()
 
     what = args.what.split(',')
@@ -104,7 +112,8 @@ def main():
         Session = sessionmaker(bind=engine)
         session = Session()
         
-        sync(session=session, ui=ui, client=client, what=what)
+        sync(session=session, ui=ui, client=client, customer_id=args.customer_id, authority_id=args.authority_id,
+             ignore_running=args.ignore_running)
 
 
 if __name__ == '__main__':

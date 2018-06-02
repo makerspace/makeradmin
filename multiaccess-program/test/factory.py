@@ -15,6 +15,18 @@ def uniqueid(length=12):
 
 
 # TODO How do I make a singleton version of this, so it defaults to only create one instance unless stating othervise?
+class AuthorityFactory(SQLAlchemyModelFactory):
+    class Meta:
+        model = models.Authority
+        sqlalchemy_session = Session
+        sqlalchemy_session_persistence = 'flush'
+      
+    id = Sequence(lambda n: n + 1)
+    name = Sequence(lambda n: f"stockholm makerspace {n}")
+    flags = 0
+
+
+# TODO How do I make a singleton version of this, so it defaults to only create one instance unless stating othervise?
 class CustomerFactory(SQLAlchemyModelFactory):
     class Meta:
         model = models.Customer
@@ -22,7 +34,7 @@ class CustomerFactory(SQLAlchemyModelFactory):
         sqlalchemy_session_persistence = 'flush'
       
     id = Sequence(lambda n: n + 1)
-    name = Sequence(lambda n: f"customer-{n}")
+    name = Sequence(lambda n: f"stockholm makerspace {n}")
 
 
 class UserFactory(SQLAlchemyModelFactory):

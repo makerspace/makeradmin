@@ -12,7 +12,7 @@ valid_member = dict(
     firstname="Kim",
     lastname="Larsson",
     key_id=22,
-    rfid_tag="1232134333340",
+    rfid_tag="123213433334",
     blocked=False,
     end_timestamp="2018-05-28T10:10:10.000000Z",
 )

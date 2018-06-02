@@ -5,7 +5,7 @@ from multi_access.models import User
 from multi_access.tui import Tui
 from sync_main import sync
 from test.db_base import DbBaseTest
-from test.factory import UserFactory, MakerAdminMemberFactory, CustomerFactory
+from test.factory import UserFactory, MakerAdminMemberFactory, CustomerFactory, AuthorityFactory
 
 
 class Test(DbBaseTest):
@@ -18,6 +18,7 @@ class Test(DbBaseTest):
     @patch('builtins.input', lambda m: 'go')
     def test_super_simple_sync_updates_one_end_timestamp(self):
         c = CustomerFactory()
+        a = AuthorityFactory()
 
         old_stop = self.datetime(days=30)
         u = UserFactory(stop_timestamp=old_stop, name="1001", customer=c)
@@ -27,7 +28,7 @@ class Test(DbBaseTest):
         
         self.client.fetch_members = MagicMock(return_value=[m])
         
-        sync(session=self.session, client=self.client, ui=self.ui, customer_id=c.id)
+        sync(session=self.session, client=self.client, ui=self.ui, customer_id=c.id, authority_id=a.id)
         
         u = self.session.query(User).get(u.id)
         self.assertEqual(new_stop, u.stop_timestamp)
@@ -35,6 +36,7 @@ class Test(DbBaseTest):
     @patch('builtins.input', lambda m: '')
     def test_no_update_is_made_when_user_breaks(self):
         c = CustomerFactory()
+        a = AuthorityFactory()
 
         old_stop = self.datetime(days=30)
         u = UserFactory(stop_timestamp=old_stop, name="1001", customer=c)
@@ -45,7 +47,7 @@ class Test(DbBaseTest):
         self.client.fetch_members = MagicMock(return_value=[m])
         
         with self.assertRaises(SystemExit):
-            sync(session=self.session, client=self.client, ui=self.ui, customer_id=c.id)
+            sync(session=self.session, client=self.client, ui=self.ui, customer_id=c.id, authority_id=a.id)
         
         u = self.session.query(User).get(u.id)
         self.assertEqual(old_stop, u.stop_timestamp)
