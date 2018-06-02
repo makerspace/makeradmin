@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/makerspace/MakerAdmin-MultiAccessProgram.svg?branch=travis-ci-integration)](https://travis-ci.org/makerspace/MakerAdmin-MultiAccessProgram)
+
 **TODO** Update this document.
 
 Synkroniseringsmodul mellan Makeradmin och MultiAccess
