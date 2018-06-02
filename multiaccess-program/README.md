@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/makerspace/MakerAdmin-MultiAccessProgram.svg?branch=travis-ci-integration)](https://travis-ci.org/makerspace/MakerAdmin-MultiAccessProgram)
+[![Build Status](https://travis-ci.org/makerspace/MakerAdmin-MultiAccessProgram.svg?branch=master)](https://travis-ci.org/makerspace/MakerAdmin-MultiAccessProgram)
 
 **TODO** Update this document.
 
