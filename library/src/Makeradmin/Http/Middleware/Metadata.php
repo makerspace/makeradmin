@@ -50,7 +50,7 @@ class Metadata
 		// Add metadata to the response
 		if(!isset($json->metadata))
 		{
-			$json->metadata = [
+			$json->{'metadata'} = [
 				"service" => config("service.name"),
 				"version" => config("service.version"),
 				"date"    => date("Y-m-d\TH:i:s\Z"),
