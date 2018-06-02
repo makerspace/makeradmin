@@ -14,6 +14,11 @@ from multi_access.tui import Tui
 logger = getLogger("makeradmin")
 
 
+WHAT_TIME = 'time'
+WHAT_MEMBERS = 'memebrs'
+WHAT_ALL = {WHAT_TIME, WHAT_MEMBERS}
+
+
 def check_multi_access_running(ui):
     ui.info__progress("checking for running MultiAccess")
     for process in psutil.process_iter():
@@ -22,7 +27,8 @@ def check_multi_access_running(ui):
     ui.info__progress("found no running MultiAccess")
 
 
-def sync(session=None, client=None, ui=None, customer_id=16, skip_end_time_diff=False, skip_member_diff=False):
+def sync(session=None, client=None, ui=None, customer_id=16, what=None):
+    what = what or WHAT_ALL
     
     # Exit if MultiAccess is running
     
@@ -41,9 +47,9 @@ def sync(session=None, client=None, ui=None, customer_id=16, skip_end_time_diff=
     
     ui.info__progress('diffing multi access users against maker admin members')
     diffs = []
-    if not skip_end_time_diff:
+    if WHAT_TIME in what:
         diffs += create_end_timestamp_diff(db_members, ma_members)
-    if not skip_member_diff:
+    if WHAT_MEMBERS in what:
         diffs += create_member_diff(db_members, ma_members)
     
     if not diffs:
@@ -69,14 +75,13 @@ def main():
                 stream=sys.stderr, level=INFO)
 
     parser = argparse.ArgumentParser("Fetch member list from makeradmin.se or local file, then prompt user with"
-                                     " changes to make (update end time (and block/unblock) and add new members).")
+                                     " changes to make,")
     parser.add_argument("-d", "--db",
                         default='mssql://(local)\\SQLEXPRESS/MultiAccess?trusted_connection=yes&driver=SQL+Server',
                         help="SQL Alchemy db engine spec.")
-    parser.add_argument("--skip-end-time-diff", action="store_true",
-                        help="Don't change members with changed end time or blocked flag.")
-    parser.add_argument("--skip-member-diff", action="store_true",
-                        help="Don't change member list.")
+    parser.add_argument("-w", "--what", default=",".join(WHAT_ALL),
+                        help="What to diff, comma separated list. 'time' will diff time and block/ublock. "
+                             "'members' will diff member lists, creating members in MultAccess if needed.")
     parser.add_argument("-u", "--maker-admin-base-url",
                         default='https://api.makeradmin.se',
                         help="Base url of maker admin (for login and fetching of member info).")
@@ -86,6 +91,11 @@ def main():
                         
     args = parser.parse_args()
 
+    what = args.what.split(',')
+    for w in what:
+        if w not in WHAT_ALL:
+            raise argparse.ArgumentError(f"Unknown argument '{w}' to what.")
+
     with Tui() as ui:
         client = MakerAdminClient(ui=ui, base_url=args.maker_admin_base_url, members_filename=args.members_filename)
 
@@ -94,9 +104,7 @@ def main():
         Session = sessionmaker(bind=engine)
         session = Session()
         
-        sync(session=session, ui=ui, client=client,
-             skip_end_time_diff=args.skip_end_time_diff,
-             skip_member_diff=args.skip_member_diff)
+        sync(session=session, ui=ui, client=client, what=what)
 
 
 if __name__ == '__main__':
