@@ -118,7 +118,7 @@ def main():
         session = Session()
         
         sync(session=session, ui=ui, client=client, customer_id=args.customer_id, authority_id=args.authority_id,
-             ignore_running=args.ignore_running)
+             ignore_running=args.ignore_running, what=what)
 
 
 if __name__ == '__main__':

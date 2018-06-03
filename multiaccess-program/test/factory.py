@@ -10,7 +10,6 @@ from multi_access.maker_admin import MakerAdminMember
 from test.db_base import Session
 
 
-# TODO How do I make a singleton version of this, so it defaults to only create one instance unless stating othervise?
 class AuthorityFactory(SQLAlchemyModelFactory):
     class Meta:
         model = models.Authority
@@ -22,7 +21,6 @@ class AuthorityFactory(SQLAlchemyModelFactory):
     flags = 0
 
 
-# TODO How do I make a singleton version of this, so it defaults to only create one instance unless stating othervise?
 class CustomerFactory(SQLAlchemyModelFactory):
     class Meta:
         model = models.Customer

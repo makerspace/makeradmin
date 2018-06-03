@@ -239,6 +239,11 @@ class TestMemberBlockDiff(DbBaseTest):
         
         self.assertEqual([BlockMember(d)], diff_blocked([d], []))
 
+    def test_no_block_diff_if_already_blocked(self):
+        d = DbMember(UserFactory(name="1001", blocked=True))
+        
+        self.assertEqual([], diff_blocked([d], []))
+
     def test_excessive_ma_user_creates_no_diff(self):
         m = MakerAdminMemberFactory(member_number=1001)
         

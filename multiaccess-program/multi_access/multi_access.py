@@ -3,9 +3,6 @@ from datetime import datetime, timedelta
 from multi_access.models import User, AuthorityInUser, Authority, Customer
 
 
-# TODO Add changing of key.
-
-
 class DbMember(object):
     
     def __init__(self, user):
@@ -80,13 +77,13 @@ class AddMember(object):
             f', tag {self.m.rfid_tag}, end timestamp {self.m.end_timestamp}'
         )
 
-    # TODO Check changed and blocked for readl (null or false)
     def update(self, session, ui, customer_id=None, authority_id=None):
         ui.info__progress(self.describe_update())
         u = User(
             name=str(self.m.member_number),
             stop_timestamp=self.m.end_timestamp,
             card=self.m.rfid_tag,
+            changed=0,
             customer_id=customer_id,
             created_timestamp=datetime.now(),
         )
@@ -138,7 +135,7 @@ def diff_member_missing(db_members, ma_members):
 
 def diff_blocked(db_members, ma_members):
     """ Creates a list of members that should not have access (not in ma_members). """
-    db_dict = {m.member_number: m for m in db_members}
+    db_dict = {m.member_number: m for m in db_members if not m.user.blocked}
     for m in ma_members:
         db_dict.pop(m.member_number, None)
     

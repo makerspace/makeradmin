@@ -1,0 +1,15 @@
+[
+    {
+        "member_id":     3017,
+        "member_number": 3017,
+        "firstname":     "Sune",
+        "lastname":      "Arnesson",
+        "keys": [{
+            "key_id":        1,
+            "rfid_tag":      "144444444444",
+            "blocked":       false,
+            "end_timestamp": "2021-01-01T12:13:14+00:00"
+        }]
+    }
+]
+  
