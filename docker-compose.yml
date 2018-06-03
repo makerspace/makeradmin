@@ -73,8 +73,8 @@ services:
   webshop:
     image: makeradmin/webshop:1.0
     volumes:
-      - "./MakerAdmin-CurrentMember/webshop/src/static:/var/www/service/static"
-      - "./MakerAdmin-CurrentMember/webshop/src/templates:/var/www/service/templates"
+      - "./currentmember/webshop/src/static:/var/www/service/static"
+      - "./currentmember/webshop/src/templates:/var/www/service/templates"
     build:
       context: ./currentmember/
       dockerfile: webshop/Dockerfile
