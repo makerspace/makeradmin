@@ -25,6 +25,7 @@ class DB:
         self.connection = pymysql.connect(host=self.host.split(":")[0], port=int(self.host.split(":")[1]), db=self.name, user=self.user, password=self.password, autocommit=True)
 
     def cursor(self):
+        self.connection.ping(reconnect=True)
         return self.connection.cursor()
 
 
