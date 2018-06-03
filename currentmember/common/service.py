@@ -66,6 +66,7 @@ class Service:
         self.gateway = gateway
         self.frontend = frontend
         self.app = Flask(name, static_url_path=self.full_path("static"))
+        self._used_permissions = set()
 
     def full_path(self, path):
         return "/" + self.url + ("/" + path if path != "" else "")
@@ -74,6 +75,9 @@ class Service:
         if permission == DEFAULT_PERMISSION:
             # Backend uses authentication by default, frontends are public by default
             permission = None if self.frontend else "service"
+
+        if permission is not None:
+            self._used_permissions.add(permission)
 
         path = self.full_path(path)
 
@@ -114,7 +118,7 @@ class Service:
             if not r.ok:
                 raise Exception("Failed to unregister service: " + r.text)
 
-    def wrap_error_codes(self):
+    def _wrap_error_codes(self):
         # Pretty ugly way to wrap all abort(code, message) calls so that they return proper json reponses
         def create_wrapper(status_code):
             @self.app.errorhandler(status_code)
@@ -134,9 +138,17 @@ class Service:
         def site_map():
             return jsonify({"data": [{"url": rule.rule, "methods": list(rule.methods)} for rule in self.app.url_map.iter_rules()]})
 
+    def _register_permissions(self):
+        eprint("Registering permissions (" + ",".join(self._used_permissions) + ")")
+        self.gateway.post("membership/permission/register", {
+            "service": self.name,
+            "permissions": ",".join(self._used_permissions)
+        })
+
     def serve_indefinitely(self):
         self.add_route_list()
-        self.wrap_error_codes()
+        self._wrap_error_codes()
+        self._register_permissions()
 
         def signal_handler(signal, frame):
             eprint("Closing database connection")
@@ -322,13 +334,13 @@ class Entity:
             rows = cur.fetchall()
             return [self._convert_to_dict(row) for row in rows]
 
-    def add_routes(self, service, endpoint):
+    def add_routes(self, service, endpoint, read_permission=DEFAULT_PERMISSION, write_permission=DEFAULT_PERMISSION):
         # Note: Many methods here return other methods that we then call.
         # The endpoint keyword argument is just because flask needs something unique, it doesn't matter what it is for our purposes
         id_string = "<int:id>" if endpoint == "" else "/<int:id>"
-        service.route(endpoint + id_string, endpoint=endpoint+".get", methods=["GET"])(route_helper(self.get, status="ok"))
-        service.route(endpoint + id_string, endpoint=endpoint+".put", methods=["PUT"])(route_helper(self.put, json=True, status="updated"))
+        service.route(endpoint + id_string, endpoint=endpoint+".get", methods=["GET"], permission=read_permission)(route_helper(self.get, status="ok"))
+        service.route(endpoint + id_string, endpoint=endpoint+".put", methods=["PUT"], permission=write_permission)(route_helper(self.put, json=True, status="updated"))
         if self.allow_delete:
-            service.route(endpoint + id_string, endpoint=endpoint+".delete", methods=["DELETE"])(route_helper(self.delete, status="deleted"))
-        service.route(endpoint + "", endpoint=endpoint+".post", methods=["POST"])(route_helper(self.post, json=True, status="created"))
-        service.route(endpoint + "", endpoint=endpoint+".list", methods=["GET"])(route_helper(self.list, status="ok"))
+            service.route(endpoint + id_string, endpoint=endpoint+".delete", methods=["DELETE"], permission=write_permission)(route_helper(self.delete, status="deleted"))
+        service.route(endpoint + "", endpoint=endpoint+".post", methods=["POST"], permission=write_permission)(route_helper(self.post, json=True, status="created"))
+        service.route(endpoint + "", endpoint=endpoint+".list", methods=["GET"], permission=read_permission)(route_helper(self.list, status="ok"))
