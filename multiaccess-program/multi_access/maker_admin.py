@@ -38,6 +38,9 @@ MakerAdminMember = namedtuple('MakerAdminMember', [
 ])
 
 
+# TODO Fix to use new format.
+
+
 class MakerAdminClient(object):
     
     def __init__(self, ui=None, base_url=None, members_filename=None, tokenfilename=None):

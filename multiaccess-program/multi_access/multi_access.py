@@ -3,6 +3,9 @@ from datetime import datetime, timedelta
 from multi_access.models import User, AuthorityInUser, Authority, Customer
 
 
+# TODO Add changing of key.
+
+
 class DbMember(object):
     
     def __init__(self, user):
@@ -116,6 +119,9 @@ def create_member_diff(db_members, ma_members):
     
     diffs = [MemberMissingDiff(mam) for member_number, mam in ma_members.items()]
     return diffs
+
+
+# TODO Add tests.
 
 
 def update_diffs(session, ui, diffs, customer_id=None, authority_id=None):

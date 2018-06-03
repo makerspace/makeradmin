@@ -9,6 +9,12 @@ pep8:
 test: pep8
 	python3 -m nose test
 
+coverage:
+	rm -rf coverage .coverage
+	coverage3 run $(shell which nosetests) test
+	coverage3 html -d coverage --omit=test*,*.pyenv*
+	firefox coverage/index.html
+
 target-test: 
 	python3 -m nose test/target
 
@@ -26,8 +32,8 @@ dist-dump:
 dist: dist-sync dist-export
 
 clean:
-	rm -rf dist build
+	rm -rf dist build coverage
 	find . -name __pycache__ -prune -type d -exec rm -rf {} \;
 
-.PHONY: init test clean dist dist-sync dist-export
+.PHONY: init test clean dist dist-sync dist-export coverage
 

@@ -13,5 +13,5 @@ requests
 pyinstaller
 nose
 factory_boy
-hypothesis
 pycodestyle
+coverage

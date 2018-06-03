@@ -7,3 +7,5 @@ dist
 __pycache__
 db.sqlite
 dumps
+coverage
+.coverage
