@@ -1,12 +1,14 @@
 from random import shuffle
 
-from multi_access.multi_access import DbMember, create_end_timestamp_diff, EndTimestampDiff
+from multi_access.models import User, AuthorityInUser
+from multi_access.multi_access import DbMember, create_end_timestamp_diff, EndTimestampDiff, create_member_diff, \
+    MemberMissingDiff, update_diffs
 from multi_access.tui import Tui
 from test.db_base import DbBaseTest
-from test.factory import UserFactory, MakerAdminMemberFactory
+from test.factory import UserFactory, MakerAdminMemberFactory, CustomerFactory, AuthorityFactory
 
 
-class Test(DbBaseTest):
+class TestMemberUpdateDiff(DbBaseTest):
     
     def setUp(self):
         super().setUp()
@@ -102,4 +104,81 @@ class Test(DbBaseTest):
         self.assertEqual(self.datetime(days=2), u.stop_timestamp)
         self.assertTrue(u.blocked)
         
+       
+class TestMemberAddDff(DbBaseTest):
+    
+    def setUp(self):
+        super().setUp()
+        self.tui = Tui()
+    
+    def test_simple_no_diff(self):
+        d = DbMember(UserFactory(name="1001"))
+        m = MakerAdminMemberFactory(member_number=1001)
         
+        self.assertEqual([], create_member_diff([d], [m]))
+
+    def test_multiple_unsorted_no_diff(self):
+        ds = [DbMember(UserFactory(name=str(i))) for i in range(1001, 1010)]
+        shuffle(ds)
+        ms = [MakerAdminMemberFactory(member_number=i) for i in range(1001, 1010)]
+        shuffle(ms)
+        
+        self.assertEqual([], create_member_diff(ds, ms))
+        
+    def test_simple_diff_add_one_user(self):
+        m = MakerAdminMemberFactory(member_number=1001)
+        
+        self.assertEqual([MemberMissingDiff(m)], create_member_diff([], [m]))
+
+    def test_excessive_db_user_creates_no_diff(self):
+        d = DbMember(UserFactory(name="1001"))
+        
+        self.assertEqual([], create_member_diff([d], []))
+
+    def test_multiple_diffs_and_multiple_non_diffs_works(self):
+        ds = [DbMember(UserFactory(name=n)) for n in ["1001", "1002", "1003"]]
+        ms = [MakerAdminMemberFactory(member_number=n) for n in [1001, 1003, 1004, 1005]]
+        
+        diffs = [d.m.member_number for d in create_member_diff(ds, ms)]
+        self.assertCountEqual([1004, 1005], diffs)
+        
+    def test_update_diff_adds_member_and_auth(self):
+        c = CustomerFactory()
+        a = AuthorityFactory()
+        m = MakerAdminMemberFactory(member_number=1001, rfid_tag='4444', end_timestamp=self.datetime(), blocked=True)
+        
+        MemberMissingDiff(m).update(self.session, self.tui, customer_id=c.id, authority_id=a.id)
+        
+        users = self.session.query(User).all()
+        print(users)
+        self.assertEqual(1, len(users))
+        
+        u = users[0]
+        self.assertEqual("1001", u.name)
+        self.assertEqual(self.datetime(), u.stop_timestamp)
+        self.assertEqual(True, u.blocked)
+        self.assertEqual("4444", u.card)
+        self.assertEqual(c.id, u.customer_id)
+        
+        auths = self.session.query(AuthorityInUser).filter_by(user_id=u.id).all()
+        self.assertEqual(1, len(auths))
+        
+        auth = auths[0]
+        self.assertEqual(a.id, auth.authority_id)
+
+    def test_update_diffs_fails_on_sanity_check_if_wrong_customer_name(self):
+        c = CustomerFactory(name="makerspace stockholm")
+        a = AuthorityFactory()
+        m = MakerAdminMemberFactory()
+        
+        with self.assertRaises(Exception):
+            update_diffs(self.session, self.tui, [MemberMissingDiff(m)], customer_id=c.id, authority_id=a.id)
+
+    def test_update_diffs_fails_on_sanity_check_if_wrong_authority_name(self):
+        c = CustomerFactory()
+        a = AuthorityFactory(name="makerspace stockholm")
+        m = MakerAdminMemberFactory()
+        
+        with self.assertRaises(Exception):
+            update_diffs(self.session, self.tui, [MemberMissingDiff(m)], customer_id=c.id, authority_id=a.id)
+

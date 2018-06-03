@@ -46,6 +46,9 @@ class User(Base):
     pt_first_name = Column("PTFirstName", String(50))
     pt_last_name = Column("PTLastName", String(50))
 
+    def __repr__(self):
+        return f'User<id={self.id}, name={self.name}>'
+
 
 class Authority(Base):
     
