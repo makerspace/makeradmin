@@ -75,7 +75,6 @@ class MakerAdminClient(object):
             if r.ok:
                 return r.json()
             elif r.status_code == 401:
-                print(r.content, r.status_code)
                 self.login()
             else:
                 self.ui.fatal__error(f"failed to get data, got ({r.status_code}):\n" + r.text)
@@ -92,8 +91,6 @@ class MakerAdminClient(object):
             url = self.base_url + '/multiaccess/memberdata'
             ui.info__progress(f"getting members from {url}")
             data = self.get_and_login_if_needed(url)['data']
-            from pprint import pprint
-            pprint(data)
             
         res = self.response_data_to_members(data)
         
