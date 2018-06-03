@@ -121,9 +121,6 @@ def create_member_diff(db_members, ma_members):
     return diffs
 
 
-# TODO Add tests.
-
-
 def update_diffs(session, ui, diffs, customer_id=None, authority_id=None):
     # Sanity check customer_id and authority_id.
     customer = session.query(Customer).get(customer_id)
