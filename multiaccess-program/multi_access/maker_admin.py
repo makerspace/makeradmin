@@ -24,7 +24,7 @@ schema = dict(
                     type="object",
                     properties=dict(
                         key_id=dict(type="integer"),
-                        rfid_tag=dict(type="string", pattern=r"^\w+$", maxLength=12),
+                        rfid_tag=dict(type="string", pattern=r"^\d+$", maxLength=12),
                         blocked=dict(type="boolean"),
                         end_timestamp=dict(type=["string", "null"]),
                         start_timestamp=dict(type=["string", "null"]),
