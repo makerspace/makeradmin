@@ -1,10 +1,10 @@
 $(document).ready(() => {
   // Create a Stripe client.
   var stripe = Stripe('pk_test_bzZLzeh8RXxM8nnEloZdisTp');
-  let apiBasePath = "http://" + window.location.hostname + ":8010";
+  const apiBasePath = "http://" + window.location.hostname + ":8010";
 
   // Create an instance of Elements.
-  var elements = stripe.elements({ locale: "sv" });
+  const elements = stripe.elements({ locale: "sv" });
 
   // TODO: Figure out from access token
   // Preferably without an extra HTTP request
@@ -26,7 +26,7 @@ $(document).ready(() => {
 
   // Custom styling can be passed to options when creating an Element.
   // (Note that this demo uses a wider set of styles than the guide below.)
-  var style = {
+  const style = {
     base: {
       color: '#32325d',
       lineHeight: '18px',
@@ -52,11 +52,11 @@ $(document).ready(() => {
   const currency = "kr";
   const currencyBase = 100;
 
-  var id2element = new Map();
-  var id2cartItem = new Map();
-  var id2item = new Map();
+  const id2element = new Map();
+  const id2cartItem = new Map();
+  const id2item = new Map();
 
-  var data = JSON.parse($("#product-data")[0].textContent);
+  const data = JSON.parse($("#product-data")[0].textContent);
 
   for (const cat of data) {
     const catLi = `
