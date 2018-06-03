@@ -7,7 +7,7 @@ use Makeradmin\Exceptions\ServiceRequestTimeout;
 use Makeradmin\Logger;
 use Makeradmin\SecurityHelper;
 use Makeradmin\Libraries\CurlBrowser;
-use Illuminate\Support\Facades\Auth;
+use App\MakerGuard as Auth;
 
 /**
  * TODO:
@@ -94,7 +94,7 @@ class Login
 		// Remove access token from databas
 		$num = DB::table("access_tokens")
 			->where("access_token", $access_token)
-			->where("user_id",      Auth::user()->user_id)
+			->where("user_id",      Auth::get()->user()->user_id)
 			->delete();
 
 		// One line should have been removed

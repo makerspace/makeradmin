@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 //use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Illuminate\Support\Facades\Auth;
+use App\MakerGuard as Auth;
 
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
@@ -142,7 +142,7 @@ class Relations extends Controller
 		$ch = new CurlBrowser;
 
 		// Add a header with authentication information
-		$user = Auth::user();
+		$user = Auth::get()->user();
 		if($user)
 		{
 			$signed_permissions = SecurityHelper::signPermissionString($user->permissions, $service->signing_token);

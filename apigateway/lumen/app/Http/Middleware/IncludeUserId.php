@@ -3,7 +3,7 @@
 namespace App\Http\Middleware;
 
 use Closure;
-use Illuminate\Contracts\Auth\Factory as Auth;
+use App\MakerGuard;
 use App\Login;
 
 class IncludeUserId
@@ -18,10 +18,9 @@ class IncludeUserId
 	/**
 	 * Create a new middleware instance.
 	 *
-	 * @param  \Illuminate\Contracts\Auth\Factory  $auth
 	 * @return void
 	 */
-	public function __construct(Auth $auth)
+	public function __construct(MakerGuard $auth)
 	{
 		$this->auth = $auth;
 	}
@@ -44,7 +43,7 @@ class IncludeUserId
 		if(($user = Login::getUserIdFromAccessToken($access_token)) !== false)
 		{
 			Login::updateToken($access_token);
-			$this->auth->guard($guard)->setUserObject($user);
+			$this->auth->setUserObject($user);
 		}
 
 		return $next($request);

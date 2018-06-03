@@ -3,7 +3,6 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Support\Facades\Auth;
 use App\MakerGuard;
 
 class AuthServiceProvider extends ServiceProvider
@@ -24,9 +23,7 @@ class AuthServiceProvider extends ServiceProvider
 	 */
 	public function boot()
 	{
-		Auth::extend("meep", function ($app, $name, array $config)
-		{
-			// Return an instance of Illuminate\Contracts\Auth\Guard...
+		$this->app->singleton('App\MakerGuard', function($app) {
 			return new MakerGuard();
 		});
 	}

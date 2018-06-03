@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Illuminate\Support\Facades\Auth;
+use App\MakerGuard as Auth;
 
 use App\Login;
 use Makeradmin\Exceptions\EntityValidationException;
@@ -129,7 +129,7 @@ class Authentication extends Controller
 	public function listTokens(Request $request)
 	{
 		// Get user id
-		$user_id = Auth::user()->user_id;
+		$user_id = Auth::get()->user()->user_id;
 
 		// Get users access tokens from the database
 		$result = Login::getTokens($user_id);

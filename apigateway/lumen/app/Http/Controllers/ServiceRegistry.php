@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Illuminate\Support\Facades\Auth;
+use App\MakerGuard as Auth;
 
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
@@ -108,8 +108,8 @@ class ServiceRegistry extends Controller
 		$json = $request->json()->all();
 
 		// Check permissions
-		$user = Auth::user();
-//		print_r($user);
+		$user = Auth::get()->user();
+
 		// TODO: Send an API request to get the roles and permissions of the user
 
 		// Get a list of all groups where the user have a "api exec" permission
@@ -126,8 +126,6 @@ class ServiceRegistry extends Controller
 		}
 		print_r($groups);
 		die("roles\n");
-
-
 
 		// List services
 		$result = Service::all();
@@ -160,7 +158,7 @@ class ServiceRegistry extends Controller
 		$ch = new CurlBrowser;
 
 		// Add a header with authentication information
-		$user = Auth::user();
+		$user = Auth::get()->user();
 		if ($user) {
 			$signed_permissions = SecurityHelper::signPermissionString($user->permissions, $service->signing_token);
 			SecurityHelper::addPermissionHeaders($ch, $user->user_id, $signed_permissions);
@@ -222,7 +220,7 @@ class ServiceRegistry extends Controller
 
 	public function test()
 	{
-		$user = Auth::user();
+		$user = Auth::get()->user();
 		if(!$user)
 		{
 			return Response()->json([

@@ -3,7 +3,6 @@
 namespace App\Http\Middleware;
 
 use Closure;
-use Illuminate\Contracts\Auth\Factory as Auth;
 use App\MakerGuard;
 
 class Authenticate
@@ -18,10 +17,9 @@ class Authenticate
 	/**
 	 * Create a new middleware instance.
 	 *
-	 * @param  \Illuminate\Contracts\Auth\Factory  $auth
 	 * @return void
 	 */
-	public function __construct(Auth $auth)
+	public function __construct(MakerGuard $auth)
 	{
 		$this->auth = $auth;
 	}
@@ -36,11 +34,14 @@ class Authenticate
 	 */
 	public function handle($request, Closure $next, $group = null)
 	{
-		// I'm tired of this overengineering
-		$guard = $this->auth->guard(null);
-		// Services are assumed to have full access to everything.
-		// If the user is not a service then check if it is in the specified group (or just logged in if no group was specified)
-		if (!$guard->is_service() && ($group === null ? !$guard->check() : !$guard->check_group($group))) {
+		$guard = $this->auth;
+
+		if ($group === "public") $valid = True;
+		else if ($group === "service") $valid = $guard->is_service();
+		else if ($group === null) $valid = $guard->check(); // Check if a user (or a service) is logged in
+		else die("Unknown group '" . $group . "'");
+
+		if (!$valid) {
 			return Response()->json([
 				"status" => "error",
 				"message" => "Unauthorized",
