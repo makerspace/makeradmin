@@ -74,6 +74,6 @@ class SecurityHelper {
 
 	public static function verifyPassword($password){
 		// XXX: Enforce rules for passwords.
-		return strlen($password) < 6;
+		return strlen($password) >= 6;
 	}
 }
