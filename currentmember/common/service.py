@@ -52,6 +52,9 @@ class APIGateway:
         return requests.delete('http://' + self.host + "/" + path, headers=self.auth_headers)
 
 
+DEFAULT_PERMISSION = object()
+
+
 class Service:
     def __init__(self, name, url, port, version, db, gateway, debug, frontend):
         self.name = name
@@ -67,11 +70,25 @@ class Service:
     def full_path(self, path):
         return "/" + self.url + ("/" + path if path != "" else "")
 
-    def route(self, path: str, **kwargs):
+    def route(self, path: str, permission=DEFAULT_PERMISSION, **kwargs):
+        if permission == DEFAULT_PERMISSION:
+            # Backend uses authentication by default, frontends are public by default
+            permission = None if self.frontend else "service"
+
         path = self.full_path(path)
 
         def wrapper(f):
-            return self.app.route(path, **kwargs)(f)
+            @wraps(f)
+            def auth(*args, **kwargs):
+                if permission is not None:
+                    permissionsStr = request.headers["X-User-Permissions"] if "X-User-Permissions" in request.headers else ""
+                    permissions = permissionsStr.split(",")
+                    if permission not in permissions:
+                        abort(403, "user does not have the " + str(permission) + " permission")
+
+                return f(*args, **kwargs)
+
+            return self.app.route(path, **kwargs)(auth)
         return wrapper
 
     def register(self):

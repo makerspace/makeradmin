@@ -8,7 +8,7 @@ instance = service.create(name="Makerspace Member Login", url="member", port=80,
 db = instance.db
 
 
-@instance.route("send_access_token", methods=["POST"])
+@instance.route("send_access_token", methods=["POST"], permission=None)
 def send_access_token():
     data = request.get_json()
     if data is None:
@@ -49,7 +49,7 @@ def send_access_token():
     return jsonify({"status": "sent"})
 
 
-@instance.route("current", methods=["GET", "POST"])
+@instance.route("current", methods=["GET", "POST"], permission=None)
 def current_member():
     user_id = assert_get(request.headers, "X-User-Id")
 
@@ -59,7 +59,7 @@ def current_member():
         return instance.gateway.put("membership/member/%s" % user_id, request.get_json()).text
 
 
-@instance.route("current/keys", methods=["GET"])
+@instance.route("current/keys", methods=["GET"], permission=None)
 def key_info():
     ''' List of keys that the current logged in member has '''
     user_id = assert_get(request.headers, "X-User-Id")

@@ -95,7 +95,7 @@ def transaction_contents(id):
     return transaction_content_entity.list("transaction_id=%s", id)
 
 
-@instance.route("member/<int:id>/transactions", methods=["GET"])
+@instance.route("member/<int:id>/transactions", methods=["GET"], permission=None)
 @route_helper
 def member_history(id):
     '''
@@ -141,7 +141,7 @@ def send_new_member_email(member_id):
         eprint(r.text)
 
 
-@instance.route("register", methods=["POST"])
+@instance.route("register", methods=["POST"], permission=None)
 @route_helper
 def register():
     ''' Register a new member.
@@ -317,7 +317,7 @@ def send_receipt_email(member_id, transaction_id):
 duplicatePurchaseRands = set()
 
 
-@instance.route("pay", methods=["POST"])
+@instance.route("pay", methods=["POST"], permission=None)
 @route_helper
 def pay_route():
     data = request.get_json()
