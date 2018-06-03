@@ -53,11 +53,8 @@ class MakerAdminMemberFactory(Factory):
     class Meta:
         model = MakerAdminMember
         
-    member_id = Sequence(lambda n: n + 1)
     member_number = Sequence(lambda n: n + 1001)
     firstname = Faker('first_name')
     lastname = Faker('last_name')
-    key_id = Sequence(lambda n: n)
     rfid_tag = LazyFunction(partial(uniqueid, length=12))
-    blocked = False
     end_timestamp = Faker('future_datetime')

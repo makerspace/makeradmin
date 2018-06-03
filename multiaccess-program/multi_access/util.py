@@ -1,5 +1,4 @@
-from datetime import datetime
-
+import iso8601
 from pytz import timezone
 
 
@@ -18,7 +17,6 @@ class classinstancemethod(object):
 
 cet = timezone("Europe/Stockholm")
 utc = timezone("UTC")
-dt_utc_fmt = '%Y-%m-%dT%H:%M:%S.%fZ'
 
 
 def cet_to_utc(dt):
@@ -27,19 +25,21 @@ def cet_to_utc(dt):
     return cet.localize(dt, is_dst=None).astimezone(utc).replace(tzinfo=None)
 
 
-def utc_to_cet(dt):
-    """ Convert a naive dt in utc to naive dt in cet. """
-    assert not dt.tzinfo
-    return utc.localize(dt, is_dst=None).astimezone(cet).replace(tzinfo=None)
+def to_cet(dt):
+    """ Convert a datetime with timezone to naive dt in cet. """
+    assert dt.tzinfo
+    return dt.astimezone(cet).replace(tzinfo=None)
 
 
 def dt_parse(s):
-    """ Parse a string standard maker admin format in utc without timezone. """
-    return datetime.strptime(s, dt_utc_fmt)
+    """ Parse a datetime from maker admin with timezone offset. """
+    dt = iso8601.parse_date(s)
+    assert dt.tzinfo
+    return dt
     
 
 def dt_format(dt):
-    """ Format dt in utc in maker admin standard format. """
+    """ Format dt in utc to something that maker admin can parse. """
     assert not dt.tzinfo or dt.tzinfo == utc
-    return dt.strftime(dt_utc_fmt)
+    return dt.strftime('%Y-%m-%dT%H:%M:%S.%fZ')
     

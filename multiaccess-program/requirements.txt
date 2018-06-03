@@ -8,6 +8,7 @@ sqlalchemy
 pytz
 psutil
 requests
+iso8601
 
 # Build/test dependencies
 pyinstaller

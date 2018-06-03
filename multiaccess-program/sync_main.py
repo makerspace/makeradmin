@@ -7,16 +7,17 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from multi_access.maker_admin import MakerAdminClient
-from multi_access.multi_access import create_end_timestamp_diff, get_multi_access_members, update_diffs, \
-    create_member_diff
+from multi_access.multi_access import diff_end_timestamp, get_multi_access_members, update_diffs, \
+    diff_missing_member, diff_blocked
 from multi_access.tui import Tui
 
 logger = getLogger("makeradmin")
 
 
 WHAT_TIME = 'time'
-WHAT_MEMBERS = 'memebrs'
-WHAT_ALL = {WHAT_TIME, WHAT_MEMBERS}
+WHAT_ADD = 'add'
+WHAT_BLOCK = 'block'
+WHAT_ALL = {WHAT_TIME, WHAT_ADD, WHAT_BLOCK}
 
 
 def check_multi_access_running(ui):
@@ -49,9 +50,11 @@ def sync(session=None, client=None, ui=None, customer_id=None, authority_id=None
     ui.info__progress('diffing multi access users against maker admin members')
     diffs = []
     if WHAT_TIME in what:
-        diffs += create_end_timestamp_diff(db_members, ma_members)
-    if WHAT_MEMBERS in what:
-        diffs += create_member_diff(db_members, ma_members)
+        diffs += diff_end_timestamp(db_members, ma_members)
+    if WHAT_ADD in what:
+        diffs += diff_missing_member(db_members, ma_members)
+    if WHAT_BLOCK in what:
+        diffs += diff_blocked(db_members, ma_members)
     
     if not diffs:
         ui.info__progress('nothing to update')
@@ -82,8 +85,10 @@ def main():
                         default='mssql://(local)\\SQLEXPRESS/MultiAccess?trusted_connection=yes&driver=SQL+Server',
                         help="SQL Alchemy db engine spec.")
     parser.add_argument("-w", "--what", default=",".join(WHAT_ALL),
-                        help="What to diff, comma separated list. 'time' will diff time and block/ublock. "
-                             "'members' will diff member lists, creating members in MultAccess if needed.")
+                        help=f"What to update, comma separated list."
+                             f" '{WHAT_TIME}' will update end times."
+                             f" '{WHAT_ADD}' will add members in MultAccess."
+                             f" '{WHAT_BLOCK}' will block members that should not have access.")
     parser.add_argument("-u", "--maker-admin-base-url",
                         default='https://api.makeradmin.se',
                         help="Base url of maker admin (for login and fetching of member info).")

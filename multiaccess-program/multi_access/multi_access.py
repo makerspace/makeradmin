@@ -18,14 +18,28 @@ class DbMember(object):
             self.member_number = None
             self.problems.append(f'bad "Identitet" (medlemsnummer) should be integer was "{user.name}"')
 
+
+class BlockMember(object):
+    """ Found a diffing member in multi access that needs to be blocked. """
     
-class EndTimestampDiff(object):
+    def __init__(self, db_member=None):
+        self.db_member = db_member
+
+    def describe_update(self):
+        return f'blocking    #{self.db_member.user.name}, blocked False => True'
+    
+    def update(self, session, ui, customer_id=None, authority_id=None):
+        user = session.query(User).get(self.db_member.user.id)
+        user.blocked = True
+        session.commit()
+    
+
+class TimeUpdate(object):
     
     def __init__(self, db_member=None, ma_member=None):
         self.db_member = db_member
         self.ma_member = ma_member
 
-        self.blocked_diffs = ma_member.blocked != bool(db_member.user.blocked)  # In multi access NULL means false.
         self.timestamp_diffs = self.timestamps_diff(ma_member.end_timestamp, db_member.user.stop_timestamp)
         # TODO Add test for no diff i same second.
 
@@ -34,46 +48,39 @@ class EndTimestampDiff(object):
         return abs(t1 - t2) > timedelta(seconds=1)
 
     def describe_update(self):
-        res = f'update #{self.ma_member.member_number} ({self.ma_member.firstname} {self.ma_member.lastname})'
-        
-        if self.timestamp_diffs:
-            res += f', end timestamp {self.db_member.user.stop_timestamp} => {self.ma_member.end_timestamp}'
-        
-        if self.blocked_diffs:
-            res += f', blocked {self.db_member.user.blocked} => {self.ma_member.blocked}'
-            
-        return res
+        return (
+            f'time update #{self.ma_member.member_number} ({self.ma_member.firstname} {self.ma_member.lastname})'
+            f', end timestamp {self.db_member.user.stop_timestamp} => {self.ma_member.end_timestamp}'
+        )
     
     def update(self, session, ui, customer_id=None, authority_id=None):
-        ui.info__progress(f'updating {self.describe_update()}')
         user = session.query(User).get(self.db_member.user.id)
         user.stop_timestamp = self.ma_member.end_timestamp
-        user.blocked = self.ma_member.blocked
+        user.blocked = False
         session.commit()
         
     def __eq__(self, other):
         return self.db_member == other.db_member and self.ma_member == other.ma_member
         
 
-class MemberMissingDiff(object):
+class AddMember(object):
     
     def __init__(self, ma_member=None):
         self.m = ma_member
 
     def describe_update(self):
         return (
-            f'add     #{self.m.member_number} ({self.m.firstname} {self.m.lastname})'
-            f', tag {self.m.rfid_tag}, end timestamp {self.m.end_timestamp}, blocked {self.m.blocked}'
+            f'add member  #{self.m.member_number} ({self.m.firstname} {self.m.lastname})'
+            f', tag {self.m.rfid_tag}, end timestamp {self.m.end_timestamp}'
         )
-    
+
+    # TODO Check changed and blocked for readl (null or false)
     def update(self, session, ui, customer_id=None, authority_id=None):
         ui.info__progress(self.describe_update())
         u = User(
             name=str(self.m.member_number),
             stop_timestamp=self.m.end_timestamp,
             card=self.m.rfid_tag,
-            blocked=self.m.blocked,
-            changed=False,
             customer_id=customer_id,
             created_timestamp=datetime.now(),
         )
@@ -96,28 +103,38 @@ def get_multi_access_members(session, customer_id):
     return [DbMember(u) for u in session.query(User).filter_by(customer_id=customer_id)]
 
 
-def create_end_timestamp_diff(db_members, ma_members):
+def diff_end_timestamp(db_members, ma_members):
     """ Creates a list of diffing members ignoring everything but blocked and timestamp. The list contains all
-    members where multi access does not match maker admin. Ignoring members that does not exist in either source. """
+    members where multi access does not match maker admin. Ignoring members that does not exist in either source.
+    Blocked members should already have been filtered, making sure all ma_members are not blocked. """
     ma_members = {m.member_number: m for m in ma_members}
     db_members = {m.member_number: m for m in db_members}
     
     diffs = [
-        EndTimestampDiff(dbm, mam) for dbm, mam in
+        TimeUpdate(dbm, mam) for dbm, mam in
         ((db_members.get(m), ma_members.get(m)) for m in db_members.keys())
-        if dbm and mam and (dbm.user.blocked != mam.blocked or
-                            EndTimestampDiff.timestamps_diff(dbm.user.stop_timestamp, mam.end_timestamp))
+        if dbm and mam and (dbm.user.blocked or TimeUpdate.timestamps_diff(dbm.user.stop_timestamp, mam.end_timestamp))
     ]
     return diffs
 
 
-def create_member_diff(db_members, ma_members):
+def diff_missing_member(db_members, ma_members):
     """ Creates a list of diffing members where the member exists in ma_members but not in db_members. """
-    ma_members = {m.member_number: m for m in ma_members}
+    ma_dict = {m.member_number: m for m in ma_members}
     for m in db_members:
-        ma_members.pop(m.member_number, None)
+        ma_dict.pop(m.member_number, None)
     
-    diffs = [MemberMissingDiff(mam) for member_number, mam in ma_members.items()]
+    diffs = [AddMember(mam) for member_number, mam in ma_dict.items()]
+    return diffs
+
+
+def diff_blocked(db_members, ma_members):
+    """ Creates a list of members that should not have access (not in ma_members). """
+    db_dict = {m.member_number: m for m in db_members}
+    for m in ma_members:
+        db_dict.pop(m.member_number, None)
+    
+    diffs = [BlockMember(dbm) for member_number, dbm in db_dict.items()]
     return diffs
 
 
@@ -134,5 +151,8 @@ def update_diffs(session, ui, diffs, customer_id=None, authority_id=None):
                         f" in name, was '{authority.name}'.")
     
     # Perform the updates.
+    ui.info__progress("Updating members.")
     for diff in diffs:
+        ui.info__progress(diff.describe_update())
         diff.update(session, ui, customer_id=customer_id, authority_id=authority_id)
+    ui.info__progress("All members updated.")

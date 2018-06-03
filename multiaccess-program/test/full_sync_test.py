@@ -57,7 +57,7 @@ class Test(DbBaseTest):
         c = CustomerFactory()
         a = AuthorityFactory()
 
-        m = MakerAdminMemberFactory(member_number=1001, end_timestamp=self.datetime(), blocked=False, rfid_tag="123")
+        m = MakerAdminMemberFactory(member_number=1001, end_timestamp=self.datetime(), rfid_tag="123")
         
         self.client.fetch_members = MagicMock(return_value=[m])
         
@@ -69,7 +69,7 @@ class Test(DbBaseTest):
         u = users[0]
         self.assertEqual("1001", u.name)
         self.assertEqual(self.datetime(), u.stop_timestamp)
-        self.assertEqual(False, u.blocked)
+        self.assertEqual(False, bool(u.blocked))
         self.assertEqual("123", u.card)
         self.assertEqual(c.id, u.customer_id)
         
@@ -78,6 +78,17 @@ class Test(DbBaseTest):
         
         auth = auths[0]
         self.assertEqual(a.id, auth.authority_id)
+
+    @patch('builtins.input', lambda m: 'go')
+    def test_block_one_member(self):
+        c = CustomerFactory()
+        a = AuthorityFactory()
+
+        u = UserFactory(stop_timestamp=self.datetime(), name="1001", customer=c)
         
+        self.client.fetch_members = MagicMock(return_value=[])
         
+        sync(session=self.session, client=self.client, ui=self.ui, customer_id=c.id, authority_id=a.id)
         
+        u = self.session.query(User).get(u.id)
+        self.assertTrue(u.blocked)

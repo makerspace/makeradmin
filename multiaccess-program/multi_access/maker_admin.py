@@ -4,8 +4,9 @@ from os.path import join
 from tempfile import gettempdir
 
 import requests
+from iso8601 import ParseError
 
-from multi_access.util import dt_parse, utc_to_cet
+from multi_access.util import dt_parse, to_cet
 from jsonschema import validate, ValidationError
 
 schema = dict(
@@ -17,28 +18,31 @@ schema = dict(
             member_number=dict(type="integer"),
             firstname=dict(type="string"),
             lastname=dict(type="string"),
-            key_id=dict(type="integer"),
-            rfid_tag=dict(type="string", pattern=r"^\w+$", maxLength=12),
-            blocked=dict(type="boolean"),
-            end_timestamp=dict(type="string"),
+            keys=dict(
+                type="array",
+                items=dict(
+                    type="object",
+                    properties=dict(
+                        key_id=dict(type="integer"),
+                        rfid_tag=dict(type="string", pattern=r"^\w+$", maxLength=12),
+                        blocked=dict(type="boolean"),
+                        end_timestamp=dict(type=["string", "null"]),
+                        start_timestamp=dict(type=["string", "null"]),
+                    ),
+                )
+            )
         )
     )
 )
 
 
 MakerAdminMember = namedtuple('MakerAdminMember', [
-    'member_id',      # int for debugging
     'member_number',  # int
     'firstname',      # string
     'lastname',       # string
-    'key_id',         # int for debugging
     'rfid_tag',       # string
-    'blocked',        # bool
     'end_timestamp',  # string timestamp in zulu
 ])
-
-
-# TODO Fix to use new format.
 
 
 class MakerAdminClient(object):
@@ -71,6 +75,7 @@ class MakerAdminClient(object):
             if r.ok:
                 return r.json()
             elif r.status_code == 401:
+                print(r.content, r.status_code)
                 self.login()
             else:
                 self.ui.fatal__error(f"failed to get data, got ({r.status_code}):\n" + r.text)
@@ -87,16 +92,45 @@ class MakerAdminClient(object):
             url = self.base_url + '/multiaccess/memberdata'
             ui.info__progress(f"getting members from {url}")
             data = self.get_and_login_if_needed(url)['data']
+            from pprint import pprint
+            pprint(data)
             
+        res = self.response_data_to_members(data)
+        
+        ui.info__progress(f"got {len(res)} members")
+
+        return res
+
+    @staticmethod
+    def response_data_to_members(data):
+        """ Convert data object form server or file to filtered MakerAdminMember list (also parse timestamp). """
+        
         try:
             validate(data, schema=schema)
         except ValidationError as e:
             raise ValueError(f"Failed to parse member data: {str(e)}") from e
-        for m in data:
-            m['end_timestamp'] = utc_to_cet(dt_parse(m['end_timestamp']))
-            
-        res = [MakerAdminMember(**m) for m in data]
 
-        ui.info__progress(f"got {len(res)} members")
+        def create_maker_admin(item):
+            """ Create a member object form data item, return None if blocked or no usable key. """
 
-        return res
+            try:
+                keys = sorted([(k['rfid_tag'], to_cet(dt_parse(k['end_timestamp'])))
+                               for k in item['keys'] if not k['blocked'] and k['end_timestamp'] and k['rfid_tag']],
+                              key=lambda x: x[1])
+                
+                if not keys:
+                    return None
+                
+                rfid_tag, end_timestamp = keys[-1]
+                
+                return MakerAdminMember(
+                    member_number=item['member_number'],
+                    firstname=item['firstname'],
+                    lastname=item['lastname'],
+                    rfid_tag=rfid_tag,
+                    end_timestamp=end_timestamp,
+                )
+            except ParseError as e:
+                raise ValueError(f"Failed to parse timestamp: {str(e)}")
+                
+        return [ma for ma in (create_maker_admin(d) for d in data) if ma]
