@@ -11,6 +11,49 @@
         <script src="https://code.jquery.com/jquery-3.3.1.min.js"
               integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
               crossorigin="anonymous"></script>
+        <script>
+            let member_id = {{ member.member_id }};
+            const currency = "kr";
+            const apiBasePath = "http://" + window.location.hostname + ":8010";
+
+            $(document).ready(() => {
+                $.ajax({
+                  type: "GET",
+                  url: apiBasePath + "/webshop/member/" + member_id + "/transactions",
+                  dataType: "json",
+                  headers: {
+                    "Authorization": "Bearer " + localStorage.token
+                  }
+                }).done((data, textStatus, xhr) => {
+                    const rootElement = $("#history-contents");
+                    rootElement.html("");
+
+                    for (let transaction of xhr.responseJSON.data) {
+                        let cartItems = "";
+                        for (let item of transaction.content) {
+                            cartItems += `<div class="receipt-item">
+                                        <span class="product-title">${item.product.name}</span>
+                                        <span class="receipt-item-count">${item.count} ${item.product.unit}</span>
+                                        <span class="receipt-item-amount">${item.amount} ${currency}</span>
+                                    </div>`;
+                        }
+
+                        let elem = $(`<div class="history-item">
+                            <h3>${ new Date(transaction.created_at).toLocaleDateString("se-SV") }</h3>
+                            <div class="receipt-items">
+                                ${cartItems}
+                            </div>
+                            <div class="receipt-amount">
+                                <span>${transaction.amount} ${currency}</span>
+                            </div>
+                        </div>`);
+                        rootElement.append(elem);
+                    }
+                }).fail((xhr, textStatus, error) => {
+                    UIkit.modal.alert("<h2>Misslyckades med att hämta köphistorik</h2>" + xhr.responseJSON.status);
+                });
+            });
+        </script>
     </head>
     <body>
         <div id="purchase-history">
@@ -20,23 +63,9 @@
                 <a href='{{ url("") }}'><span uk-icon="cart"></span> Webshop</a>
             </div>
             <h2>#{{ member.member_number }}: {{ member.firstname }} {{ member.lastname }}</h2>
-            {% for transaction, cart in history %}
-                <div class="history-item">
-                    <h3>{{ transaction.created_at.strftime("%Y-%m-%d") }}</h3>
-                    <div class="receipt-items">
-                        {% for product, cartItem in cart %}
-                            <div class="receipt-item">
-                                <span class="product-title">{{ product.name }}</span>
-                                <span class="receipt-item-count">{{ cartItem.count }} {{ product.unit }}</span>
-                                <span class="receipt-item-amount">{{ cartItem.amount }} {{ currency }}</span>
-                            </div>
-                        {% endfor %}
-                    </div>
-                    <div class="receipt-amount">
-                        <span>{{ transaction.amount }} {{ currency }}</span>
-                    </div>
-                </div>
-            {% endfor %}
+            <div id="history-contents">
+                <div uk-spinner></div>
+            </div>
         </div>
     </body>
 </html>

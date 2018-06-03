@@ -97,10 +97,24 @@ def transaction_contents(id):
 
 @instance.route("member/<int:id>/transactions", methods=["GET"])
 @route_helper
-def member_transactions(id):
+def member_history(id):
+    '''
+    Helper for listing the full transaction history of a member, with product info included.
+    '''
+
+    user_id = int(assert_get(request.headers, "X-User-Id"))
+    if id != user_id:
+        abort(403)
+
+    # TODO: All these database lookups could probably be optimized
     transactions = transaction_entity.list("member_id=%s", id)
+    transactions.reverse()
     for tr in transactions:
-        tr["content"] = transaction_content_entity.list("transaction_id=%s", tr["id"])
+        items = transaction_content_entity.list("transaction_id=%s", tr["id"])
+        for item in items:
+            item["product"] = product_entity.get(item["product_id"])
+
+        tr["content"] = items
 
     return transactions
 

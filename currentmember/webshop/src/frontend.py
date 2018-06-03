@@ -1,4 +1,4 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, abort
 import service
 from service import eprint
 import json
@@ -62,17 +62,14 @@ def register_member():
 @instance.route("member/<int:id>/history")
 def purchase_history(id):
     # TODO: All these database lookups could probably be optimized
-    member = instance.gateway.get(f"membership/member/{id}").json()["data"]
-    transactions = transaction_entity.list("member_id=%s", id)
-    transactions.reverse()
-    carts = []
-    for tr in transactions:
-        items = transaction_content_entity.list("transaction_id=%s", tr["id"])
-        products = [product_entity.get(item["product_id"]) for item in items]
-        carts.append(zip(products,items))
+    r = instance.gateway.get(f"membership/member/{id}")
+    if r.status_code == 404:
+        return render_template("member_404.html", url=instance.full_path), r.status_code
+    elif not r.ok:
+        abort(r.status_code, r.json()["message"])
 
-    history = zip(transactions, carts)
-    return render_template("history.html", member=member, history=history, currency="kr", url=instance.full_path)
+    member = r.json()["data"]
+    return render_template("history.html", member=member, url=instance.full_path)
 
 
 @instance.route("product/<int:id>/edit")
