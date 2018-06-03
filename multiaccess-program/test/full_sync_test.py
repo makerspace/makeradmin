@@ -1,7 +1,7 @@
 from unittest.mock import MagicMock, patch
 
 from multi_access.maker_admin import MakerAdminClient
-from multi_access.models import User
+from multi_access.models import User, AuthorityInUser
 from multi_access.tui import Tui
 from sync_main import sync
 from test.db_base import DbBaseTest
@@ -16,7 +16,7 @@ class Test(DbBaseTest):
         self.ui = Tui()
 
     @patch('builtins.input', lambda m: 'go')
-    def test_super_simple_sync_updates_one_end_timestamp(self):
+    def test_sync_updates_one_end_timestamp(self):
         c = CustomerFactory()
         a = AuthorityFactory()
 
@@ -51,3 +51,33 @@ class Test(DbBaseTest):
         
         u = self.session.query(User).get(u.id)
         self.assertEqual(old_stop, u.stop_timestamp)
+
+    @patch('builtins.input', lambda m: 'go')
+    def test_add_one_member(self):
+        c = CustomerFactory()
+        a = AuthorityFactory()
+
+        m = MakerAdminMemberFactory(member_number=1001, end_timestamp=self.datetime(), blocked=False, rfid_tag="123")
+        
+        self.client.fetch_members = MagicMock(return_value=[m])
+        
+        sync(session=self.session, client=self.client, ui=self.ui, customer_id=c.id, authority_id=a.id)
+        
+        users = self.session.query(User).all()
+        self.assertEqual(1, len(users))
+        
+        u = users[0]
+        self.assertEqual("1001", u.name)
+        self.assertEqual(self.datetime(), u.stop_timestamp)
+        self.assertEqual(False, u.blocked)
+        self.assertEqual("123", u.card)
+        self.assertEqual(c.id, u.customer_id)
+        
+        auths = self.session.query(AuthorityInUser).filter_by(user_id=u.id).all()
+        self.assertEqual(1, len(auths))
+        
+        auth = auths[0]
+        self.assertEqual(a.id, auth.authority_id)
+        
+        
+        
