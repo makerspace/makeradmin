@@ -7,17 +7,17 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from multi_access.maker_admin import MakerAdminClient
-from multi_access.multi_access import diff_end_timestamp, get_multi_access_members, update_diffs, \
-    diff_missing_member, diff_blocked
+from multi_access.multi_access import diff_member_update, get_multi_access_members, update_diffs, \
+    diff_member_missing, diff_blocked
 from multi_access.tui import Tui
 
 logger = getLogger("makeradmin")
 
 
-WHAT_TIME = 'time'
+WHAT_UPDATE = 'update'
 WHAT_ADD = 'add'
 WHAT_BLOCK = 'block'
-WHAT_ALL = {WHAT_TIME, WHAT_ADD, WHAT_BLOCK}
+WHAT_ALL = {WHAT_UPDATE, WHAT_ADD, WHAT_BLOCK}
 
 
 def check_multi_access_running(ui):
@@ -49,10 +49,10 @@ def sync(session=None, client=None, ui=None, customer_id=None, authority_id=None
     
     ui.info__progress('diffing multi access users against maker admin members')
     diffs = []
-    if WHAT_TIME in what:
-        diffs += diff_end_timestamp(db_members, ma_members)
+    if WHAT_UPDATE in what:
+        diffs += diff_member_update(db_members, ma_members)
     if WHAT_ADD in what:
-        diffs += diff_missing_member(db_members, ma_members)
+        diffs += diff_member_missing(db_members, ma_members)
     if WHAT_BLOCK in what:
         diffs += diff_blocked(db_members, ma_members)
     
@@ -86,7 +86,7 @@ def main():
                         help="SQL Alchemy db engine spec.")
     parser.add_argument("-w", "--what", default=",".join(WHAT_ALL),
                         help=f"What to update, comma separated list."
-                             f" '{WHAT_TIME}' will update end times."
+                             f" '{WHAT_UPDATE}' will update end times and rfid_tag."
                              f" '{WHAT_ADD}' will add members in MultAccess."
                              f" '{WHAT_BLOCK}' will block members that should not have access.")
     parser.add_argument("-u", "--maker-admin-base-url",

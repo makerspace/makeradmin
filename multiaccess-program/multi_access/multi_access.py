@@ -26,37 +26,43 @@ class BlockMember(object):
         self.db_member = db_member
 
     def describe_update(self):
-        return f'blocking    #{self.db_member.user.name}, blocked False => True'
+        return f'blocking      #{self.db_member.user.name}, blocked False => True'
     
     def update(self, session, ui, customer_id=None, authority_id=None):
         user = session.query(User).get(self.db_member.user.id)
         user.blocked = True
         session.commit()
     
+    def __eq__(self, other):
+        return self.db_member == other.db_member
 
-class TimeUpdate(object):
+
+class UpdateMember(object):
     
     def __init__(self, db_member=None, ma_member=None):
         self.db_member = db_member
         self.ma_member = ma_member
 
         self.timestamp_diffs = self.timestamps_diff(ma_member.end_timestamp, db_member.user.stop_timestamp)
-        # TODO Add test for no diff i same second.
+        self.tag_diffs = self.db_member.user.card != self.ma_member.rfid_tag
 
     @staticmethod
     def timestamps_diff(t1, t2):
         return abs(t1 - t2) > timedelta(seconds=1)
 
     def describe_update(self):
-        return (
-            f'time update #{self.ma_member.member_number} ({self.ma_member.firstname} {self.ma_member.lastname})'
-            f', end timestamp {self.db_member.user.stop_timestamp} => {self.ma_member.end_timestamp}'
-        )
+        res = f'member update #{self.ma_member.member_number} ({self.ma_member.firstname} {self.ma_member.lastname})'
+        if self.timestamp_diffs:
+            res += f', end timestamp {self.db_member.user.stop_timestamp} => {self.ma_member.end_timestamp}'
+        if self.tag_diffs:
+            res += f', tag {self.db_member.user.card} => {self.ma_member.rfid_tag}'
+        return res
     
     def update(self, session, ui, customer_id=None, authority_id=None):
         user = session.query(User).get(self.db_member.user.id)
         user.stop_timestamp = self.ma_member.end_timestamp
         user.blocked = False
+        user.card = self.ma_member.rfid_tag
         session.commit()
         
     def __eq__(self, other):
@@ -70,7 +76,7 @@ class AddMember(object):
 
     def describe_update(self):
         return (
-            f'add member  #{self.m.member_number} ({self.m.firstname} {self.m.lastname})'
+            f'member add    #{self.m.member_number} ({self.m.firstname} {self.m.lastname})'
             f', tag {self.m.rfid_tag}, end timestamp {self.m.end_timestamp}'
         )
 
@@ -103,7 +109,7 @@ def get_multi_access_members(session, customer_id):
     return [DbMember(u) for u in session.query(User).filter_by(customer_id=customer_id)]
 
 
-def diff_end_timestamp(db_members, ma_members):
+def diff_member_update(db_members, ma_members):
     """ Creates a list of diffing members ignoring everything but blocked and timestamp. The list contains all
     members where multi access does not match maker admin. Ignoring members that does not exist in either source.
     Blocked members should already have been filtered, making sure all ma_members are not blocked. """
@@ -111,14 +117,16 @@ def diff_end_timestamp(db_members, ma_members):
     db_members = {m.member_number: m for m in db_members}
     
     diffs = [
-        TimeUpdate(dbm, mam) for dbm, mam in
+        UpdateMember(dbm, mam) for dbm, mam in
         ((db_members.get(m), ma_members.get(m)) for m in db_members.keys())
-        if dbm and mam and (dbm.user.blocked or TimeUpdate.timestamps_diff(dbm.user.stop_timestamp, mam.end_timestamp))
+        if dbm and mam and (dbm.user.blocked
+                            or dbm.user.card != mam.rfid_tag
+                            or UpdateMember.timestamps_diff(dbm.user.stop_timestamp, mam.end_timestamp))
     ]
     return diffs
 
 
-def diff_missing_member(db_members, ma_members):
+def diff_member_missing(db_members, ma_members):
     """ Creates a list of diffing members where the member exists in ma_members but not in db_members. """
     ma_dict = {m.member_number: m for m in ma_members}
     for m in db_members:

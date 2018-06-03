@@ -10,10 +10,6 @@ from multi_access.maker_admin import MakerAdminMember
 from test.db_base import Session
 
 
-def uniqueid(length=12):
-    return ''.join(choice(string.ascii_letters + string.digits + "_-") for _ in range(length))
-
-
 # TODO How do I make a singleton version of this, so it defaults to only create one instance unless stating othervise?
 class AuthorityFactory(SQLAlchemyModelFactory):
     class Meta:
@@ -56,5 +52,5 @@ class MakerAdminMemberFactory(Factory):
     member_number = Sequence(lambda n: n + 1001)
     firstname = Faker('first_name')
     lastname = Faker('last_name')
-    rfid_tag = LazyFunction(partial(uniqueid, length=12))
+    rfid_tag = Sequence(lambda n: str(100000000001 + n))
     end_timestamp = Faker('future_datetime')
