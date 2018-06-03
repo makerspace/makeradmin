@@ -28,19 +28,19 @@ currency = "sek"
 # E.g to update product with id 42 you would issue a PUT request to
 # /path/to/service/product/42
 product_entity.db = db
-product_entity.add_routes(instance, "product")
+product_entity.add_routes(instance, "product", read_permission=None, write_permission="webshop")
 
 category_entity.db = db
-category_entity.add_routes(instance, "category")
+category_entity.add_routes(instance, "category", read_permission=None, write_permission="webshop")
+
+product_action_entity.db = db
+product_action_entity.add_routes(instance, "product_action", read_permission=None, write_permission="webshop")
 
 transaction_entity.db = db
 transaction_entity.add_routes(instance, "transaction")
 
 transaction_content_entity.db = db
 transaction_content_entity.add_routes(instance, "transaction_content")
-
-product_action_entity.db = db
-product_action_entity.add_routes(instance, "product_action")
 
 webshop_completed_actions.db = db
 webshop_completed_actions.add_routes(instance, "completed_actions")
