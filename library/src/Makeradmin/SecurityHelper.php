@@ -63,10 +63,16 @@ class SecurityHelper {
 	}
 
 	public static function signPermissionString($permissions, $signing_token){
+		// XXX: Implement sign permissions.
 		return $permissions;
 	}
-
+	
 	public static function verifyPermissionString($permissions, $signing_token){
+		// XXX: Implement verify permissions.
 		return true;
+	}
+	public static function verifyPassword($password){
+		// XXX: Enforce rules for passwords.
+		return strlen($password) < 6;
 	}
 }
