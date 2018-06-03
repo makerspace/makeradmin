@@ -9,24 +9,6 @@ use Closure;
 class Metadata
 {
 	/**
-	 * The authentication guard factory instance.
-	 *
-	 * @var \Illuminate\Contracts\Auth\Factory
-	 */
-	protected $auth;
-
-	/**
-	 * Create a new middleware instance.
-	 *
-	 * @param  \Illuminate\Contracts\Auth\Factory  $auth
-	 * @return void
-	 */
-	public function __construct(Auth $auth)
-	{
-		$this->auth = $auth;
-	}
-
-	/**
 	 * Handle an incoming request.
 	 *
 	 * @param  \Illuminate\Http\Request  $request
