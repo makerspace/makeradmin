@@ -8,6 +8,7 @@ key_entity = Entity(
     table="rfid",
     columns=["title", "description", "tagid", "status", "startdate", "enddate"],
     write_transforms={"startdate": lambda x: None if x is None else parser.parse(x), "enddate": lambda x: None if x is None else parser.parse(x)},
+    select_transforms={"startdate": Entity.select_datetime, "enddate": Entity.select_datetime},
     # Expose the 'id' field as 'key_id'
     # Mostly for backwards compatibility with the old RFID module
     exposed_column_names={"id": "key_id"}

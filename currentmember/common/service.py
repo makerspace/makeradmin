@@ -258,7 +258,12 @@ DEFAULT_WHERE = object()
 
 
 class Entity:
-    def __init__(self, table, columns, read_columns=[], read_transforms={}, write_transforms={}, exposed_column_names={}, allow_delete=True):
+    _comparison_operators = {"eq": "=", "ne": "<>", "lt": "<", "gt": ">", "le": "<=", "ge": ">="}
+    @staticmethod
+    def select_datetime(column):
+        return f"DATE_FORMAT({column}, '%%Y-%%m-%%dT%%H:%%i:%%sZ')"
+
+    def __init__(self, table, columns, read_columns=[], read_transforms={}, write_transforms={}, exposed_column_names={}, column_alias={}, select_transforms = {}, allow_delete=True):
         '''
         table: The name of the table in the database
         columns: List of column names in the database (excluding the id column which is implicit)
@@ -273,6 +278,8 @@ class Entity:
         self.column_name2exposed_name = exposed_column_names
         self.read_transforms = read_transforms
         self.write_transforms = write_transforms
+        self.column_alias = column_alias
+        self.column_alias.update({"entity_id": "id"})
         self.db = None
         self.allow_delete = allow_delete
 
@@ -285,11 +292,11 @@ class Entity:
                 write_transforms[c] = lambda x: x
 
         self.fields = ",".join(self.columns)
-        self.all_fields = ",".join(self.all_columns)
+        self.select_fields = ",".join([select_transforms[col](col) if col in select_transforms else col for col in self.all_columns])
 
     def get(self, id):
         with self.db.cursor() as cur:
-            cur.execute(f"SELECT {self.all_fields} FROM {self.table} WHERE id=%s", (id,))
+            cur.execute(f"SELECT {self.select_fields} FROM {self.table} WHERE id=%s", (id,))
             item = cur.fetchone()
             if item is None:
                 raise NotFound(f"No item with id '{id}' in table {self.table}")
@@ -324,13 +331,32 @@ class Entity:
         with self.db.cursor() as cur:
             cur.execute(f"UPDATE {self.table} SET deleted_at=CURRENT_TIMESTAMP WHERE id=%s", (id,))
 
+    def _format_column_filter(self, column, values):
+        where_format = column
+        if len(values) == 1:
+            where_format = where_format + "=%s"
+        elif len(values) == 2 and values[0] in Entity._comparison_operators:
+            where_format = where_format + Entity._comparison_operators[values[0].lower()] + "%s"
+            values = [values[1]]
+        elif len(values) >= 2:
+            where_format = where_format + " in (" + ",".join(["%s"] * len(values)) + ")"
+        else:
+            raise Exception("Unknown condition for column " + column)
+        return (where_format, tuple(map(self.write_transforms[column], values)))
+
     def list(self, where=DEFAULT_WHERE, where_values=[]):
         if where == DEFAULT_WHERE:
-            where = "deleted_at IS NULL" if self.allow_delete else None
+            filters = {col: request.args[alias].split(",") for alias, col in self.column_alias.items() if alias in request.args and request.args[alias]}
+            filters.update({col: request.args[val].split(",") for col, val in self.column_name2exposed_name.items() if val in request.args and request.args[val]})
+            filter_data = [self._format_column_filter(col, val) for col, val in filters.items()]
+            where = " and ".join([val[0] for val in filter_data])
+            where_values = tuple([val_i for val in filter_data for val_i in val[1] ])
+            if self.allow_delete and not "deleted_at" in filters:
+                where = where + " and deleted_at IS NULL" if where else "deleted_at IS NULL"
 
         with self.db.cursor() as cur:
-            where = "WHERE " + where if where is not None else ""
-            cur.execute(f"SELECT {self.all_fields} FROM {self.table} {where}", where_values)
+            where = "WHERE " + where if where else ""
+            cur.execute(f"SELECT {self.select_fields} FROM {self.table} {where}", where_values)
             rows = cur.fetchall()
             return [self._convert_to_dict(row) for row in rows]
 
