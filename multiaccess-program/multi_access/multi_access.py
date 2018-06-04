@@ -78,7 +78,6 @@ class AddMember(object):
         )
 
     def update(self, session, ui, customer_id=None, authority_id=None):
-        ui.info__progress(self.describe_update())
         u = User(
             name=str(self.m.member_number),
             stop_timestamp=self.m.end_timestamp,
