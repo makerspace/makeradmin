@@ -272,24 +272,24 @@ class Entity:
         exposed_column_names: Map from column names to the name of the field as seen by users of this API (e.g you can rename 'id' to show up as 'object_id' when using the API for example)
         '''
         self.table = table
-        self.columns = columns
+        self.columns = columns[:]
         self.all_columns = self.columns[:] + read_columns
         self.all_columns.insert(0, "id")
-        self.column_name2exposed_name = exposed_column_names
-        self.read_transforms = read_transforms
-        self.write_transforms = write_transforms
-        self.column_alias = column_alias
-        self.column_alias.update({"entity_id": "id"})
+        self.column_name2exposed_name = dict(exposed_column_names)
+        self.read_transforms = dict(read_transforms)
+        self.write_transforms = dict(write_transforms)
+        self.column_alias = dict(column_alias)
+        self.column_alias["entity_id"] = "id"
         self.db = None
         self.allow_delete = allow_delete
 
         for c in self.all_columns:
             if c not in self.column_name2exposed_name:
                 self.column_name2exposed_name[c] = c
-            if c not in read_transforms:
-                read_transforms[c] = lambda x: x
-            if c not in write_transforms:
-                write_transforms[c] = lambda x: x
+            if c not in self.read_transforms:
+                self.read_transforms[c] = lambda x: x
+            if c not in self.write_transforms:
+                self.write_transforms[c] = lambda x: x
 
         self.fields = ",".join(self.columns)
         self.select_fields = ",".join([select_transforms[col](col) if col in select_transforms else col for col in self.all_columns])
