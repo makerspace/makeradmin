@@ -284,7 +284,15 @@ class GetMembersTest(DbBaseTest):
 
     def test_fails_fatally_on_problem_member(self):
         c = CustomerFactory()
-        UserFactory(name="1001 SUNE", customer=c)
+        UserFactory(name="SUNE 1001", customer=c)
         
         with self.assertRaises(SystemExit):
             get_multi_access_members(self.session, self.tui, customer_id=c.id)
+
+    def test_get_members_ignores_after_whitespace(self):
+        c = CustomerFactory()
+        UserFactory(name="1001 SUNE", customer=c)
+        
+        u, = get_multi_access_members(self.session, self.tui, customer_id=c.id)
+        
+        self.assertEqual(1001, u.member_number)

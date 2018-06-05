@@ -11,7 +11,7 @@ class DbMember(object):
         self.problems = []
         
         try:
-            self.member_number = int(user.name)
+            self.member_number = int(user.name.split()[0])
         except (ValueError, TypeError) as e:
             self.member_number = None
             self.problems.append(f'bad "Identitet" (medlemsnummer) should be integer was "{user.name}"')

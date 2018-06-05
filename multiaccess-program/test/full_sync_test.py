@@ -21,7 +21,7 @@ class Test(DbBaseTest):
         a = AuthorityFactory()
 
         old_stop = self.datetime(days=30)
-        u = UserFactory(stop_timestamp=old_stop, name="1001", customer=c)
+        u = UserFactory(stop_timestamp=old_stop, name="1001 KUNO", customer=c)
         
         new_stop = self.datetime(days=50)
         m = MakerAdminMemberFactory(member_number=1001, end_timestamp=new_stop)
@@ -32,6 +32,7 @@ class Test(DbBaseTest):
         
         u = self.session.query(User).get(u.id)
         self.assertEqual(new_stop, u.stop_timestamp)
+        self.assertEqual("1001 KUNO", u.name)
 
     @patch('builtins.input', lambda m: 'go')
     def test_sync_updates_rfid_tag(self):
