@@ -50,6 +50,22 @@ class Test(DbBaseTest):
         u = self.session.query(User).get(u.id)
         self.assertEqual("2", u.card)
 
+    @patch('builtins.input', lambda m: 'go')
+    def test_sync_updates_member_without_end_timestamp_to_no_end_timestamp_in_multi_access(self):
+        c = CustomerFactory()
+        a = AuthorityFactory()
+
+        u = UserFactory(stop_timestamp=self.datetime(), name="1001", customer=c, card="1")
+        
+        m = MakerAdminMemberFactory(member_number=1001, end_timestamp=None, rfid_tag="2")
+        
+        self.client.fetch_members = MagicMock(return_value=[m])
+        
+        sync(session=self.session, client=self.client, ui=self.ui, customer_id=c.id, authority_id=a.id)
+        
+        u = self.session.query(User).get(u.id)
+        self.assertEqual(None, u.stop_timestamp)
+
     @patch('builtins.input', lambda m: '')
     def test_no_update_is_made_when_user_breaks(self):
         c = CustomerFactory()

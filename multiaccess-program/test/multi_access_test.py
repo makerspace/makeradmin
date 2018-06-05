@@ -30,19 +30,37 @@ class TestUpdateDiff(DbBaseTest):
         
         self.assertEqual([], diff_member_update(ds, ms))
         
-    def test_simple_diff_on_timestamp(self):
-        d = DbMember(UserFactory(stop_timestamp=self.datetime(days=1), name="1001", blocked=False))
-        m = MakerAdminMemberFactory(member_number=1001, end_timestamp=self.datetime())
+    def test_diff_on_timestamp(self):
+        d = DbMember(UserFactory(stop_timestamp=self.datetime(days=1), name="1001", blocked=False, card="1"))
+        m = MakerAdminMemberFactory(member_number=1001, end_timestamp=self.datetime(), rfid_tag="1")
         
         self.assertEqual([UpdateMember(d, m)], diff_member_update([d], [m]))
 
-    def test_simple_diff_on_blocked(self):
-        d = DbMember(UserFactory(stop_timestamp=self.datetime(), name="1001", blocked=True))
-        m = MakerAdminMemberFactory(member_number=1001, end_timestamp=self.datetime())
+    def test_diff_on_timestamp_vs_no_timestamp(self):
+        d = DbMember(UserFactory(stop_timestamp=self.datetime(), name="1001", blocked=False, card="1"))
+        m = MakerAdminMemberFactory(member_number=1001, end_timestamp=None, rfid_tag="1")
         
         self.assertEqual([UpdateMember(d, m)], diff_member_update([d], [m]))
 
-    def test_simple_diff_tag(self):
+    def test_diff_no_timestamp_vs_timestamp(self):
+        d = DbMember(UserFactory(stop_timestamp=None, name="1001", blocked=False, card="1"))
+        m = MakerAdminMemberFactory(member_number=1001, end_timestamp=self.datetime(), rfid_tag="1")
+        
+        self.assertEqual([UpdateMember(d, m)], diff_member_update([d], [m]))
+
+    def test_no_timestamp_vs_no_timestamp_creates_no_diff(self):
+        d = DbMember(UserFactory(stop_timestamp=None, name="1001", blocked=False, card="1"))
+        m = MakerAdminMemberFactory(member_number=1001, end_timestamp=None, rfid_tag="1")
+        
+        self.assertEqual([], diff_member_update([d], [m]))
+
+    def test_diff_on_blocked(self):
+        d = DbMember(UserFactory(stop_timestamp=self.datetime(), name="1001", blocked=True, card="1"))
+        m = MakerAdminMemberFactory(member_number=1001, end_timestamp=self.datetime(), rfid_tag="1")
+        
+        self.assertEqual([UpdateMember(d, m)], diff_member_update([d], [m]))
+
+    def test_diff_on_tag(self):
         d = DbMember(UserFactory(stop_timestamp=self.datetime(), name="1001", card="1"))
         m = MakerAdminMemberFactory(member_number=1001, end_timestamp=self.datetime(), rfid_tag="2")
         
@@ -54,9 +72,9 @@ class TestUpdateDiff(DbBaseTest):
         
         self.assertEqual([], diff_member_update([d], [m]))
 
-    def test_two_different_members_creates_no__diff(self):
-        d = DbMember(UserFactory(stop_timestamp=self.datetime(), name="1002"))
-        m = MakerAdminMemberFactory(member_number=1001, end_timestamp=self.datetime())
+    def test_two_different_members_creates_no_diff(self):
+        d = DbMember(UserFactory(stop_timestamp=self.datetime(), name="1002", card="1"))
+        m = MakerAdminMemberFactory(member_number=1001, end_timestamp=self.datetime(), rfid_tag="1")
         
         self.assertEqual([], diff_member_update([d], [m]))
 

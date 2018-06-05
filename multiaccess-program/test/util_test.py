@@ -17,6 +17,7 @@ class Test(BaseTest):
                          to_cet(datetime(2018, 1, 22, 9, tzinfo=timezone(timedelta(hours=0)))))
         self.assertEqual(datetime(2018, 5, 22, 10),
                          to_cet(datetime(2018, 5, 22, 10, tzinfo=timezone(timedelta(hours=2)))))
+        self.assertEqual(None, to_cet(None))
 
     def test_dt_format(self):
         self.assertEqual("2018-05-22T10:00:00.000000Z", dt_format(datetime(2018, 5, 22, 10)))
@@ -28,4 +29,5 @@ class Test(BaseTest):
                          dt_parse("2018-05-22T10:00:00+02:00"))
         self.assertEqual(datetime(2018, 5, 22, 10, tzinfo=timezone(timedelta(hours=-1))),
                          dt_parse("2018-05-22T10:00:00-01:00"))
+        self.assertEqual(None, dt_parse(None))
 

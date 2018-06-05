@@ -46,6 +46,11 @@ class UpdateMember(object):
 
     @staticmethod
     def timestamps_diff(t1, t2):
+        print(t1, t2)
+        if t1 is None and t2 is None:
+            return False
+        if t1 is None or t2 is None:
+            return True
         return abs(t1 - t2) > timedelta(seconds=1)
 
     def describe_update(self):

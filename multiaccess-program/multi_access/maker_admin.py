@@ -112,7 +112,7 @@ class MakerAdminClient(object):
 
             try:
                 keys = sorted([(k['rfid_tag'], to_cet(dt_parse(k['end_timestamp'])))
-                               for k in item['keys'] if not k['blocked'] and k['end_timestamp'] and k['rfid_tag']],
+                               for k in item['keys'] if not k['blocked'] and k['rfid_tag']],
                               key=lambda x: x[1])
                 
                 if not keys:

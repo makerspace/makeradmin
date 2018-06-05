@@ -1,8 +1,7 @@
-from copy import copy, deepcopy
+from copy import deepcopy
 from datetime import datetime
 
 from multi_access.maker_admin import MakerAdminClient
-from multi_access.util import dt_parse
 from test.base import BaseTest
 
 
@@ -31,6 +30,16 @@ class ParseTest(BaseTest):
         self.assertEqual("123213433334", m.rfid_tag)
         self.assertEqual(datetime(2018, 5, 28, 10, 10, 10), m.end_timestamp)
 
+    def test_parse_valid_with_no_end_timestamp(self):
+        obj = deepcopy(valid_member)
+        obj['keys'][0]['end_timestamp'] = None
+        m, = MakerAdminClient.response_data_to_members([obj])
+        self.assertEqual(1001, m.member_number)
+        self.assertEqual("Kim", m.firstname)
+        self.assertEqual("Larsson", m.lastname)
+        self.assertEqual("123213433334", m.rfid_tag)
+        self.assertEqual(None, m.end_timestamp)
+
     def test_parse_bad_member(self):
         def test_bad(**kwargs):
             obj = deepcopy(valid_member)
@@ -57,11 +66,6 @@ class ParseTest(BaseTest):
     def test_blocked_key_is_filtered(self):
         obj = deepcopy(valid_member)
         obj['keys'][0]['blocked'] = True
-        self.assertEqual([], MakerAdminClient.response_data_to_members([obj]))
-
-    def test_no_end_timestamp_is_filtered(self):
-        obj = deepcopy(valid_member)
-        obj['keys'][0]['end_timestamp'] = None
         self.assertEqual([], MakerAdminClient.response_data_to_members([obj]))
 
     def test_no_keys_is_filtered(self):

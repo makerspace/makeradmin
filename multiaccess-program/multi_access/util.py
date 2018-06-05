@@ -27,12 +27,16 @@ def cet_to_utc(dt):
 
 def to_cet(dt):
     """ Convert a datetime with timezone to naive dt in cet. """
+    if dt is None:
+        return None
     assert dt.tzinfo
     return dt.astimezone(cet).replace(tzinfo=None)
 
 
 def dt_parse(s):
     """ Parse a datetime from maker admin with timezone offset. """
+    if s is None:
+        return None
     dt = iso8601.parse_date(s)
     assert dt.tzinfo
     return dt
