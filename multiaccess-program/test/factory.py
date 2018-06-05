@@ -1,8 +1,4 @@
-import string
-from functools import partial
-from random import choice
-
-from factory import Sequence, Factory, LazyFunction, Faker, SubFactory
+from factory import Sequence, Factory, Faker, SubFactory
 from factory.alchemy import SQLAlchemyModelFactory
 
 from multi_access import models

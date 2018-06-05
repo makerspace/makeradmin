@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import argparse
 import sys
+
 import psutil
 from logging import basicConfig, INFO, getLogger
 from sqlalchemy import create_engine
@@ -42,10 +43,9 @@ def sync(session=None, client=None, ui=None, customer_id=None, authority_id=None
     
     # Fetch relevant data from db and diff it
     
-    db_members = get_multi_access_members(session, customer_id)
-    problem_members = [m for m in db_members if m.problems]
-    if problem_members:
-        ui.fatal__problem_members(problem_members)
+    db_members = get_multi_access_members(session, ui, customer_id)
+    
+    # Diff maker data.
     
     ui.info__progress('diffing multi access users against maker admin members')
     diffs = []
@@ -62,7 +62,7 @@ def sync(session=None, client=None, ui=None, customer_id=None, authority_id=None
     
     # Present diff of what will be changed
 
-    ui.prompt__update_db(heading=f'the following {len(diffs)} updates will be made',
+    ui.prompt__update_db(heading=f'the following {len(diffs)} changes will be made',
                          lines=[d.describe_update() for d in diffs])
     
     # Preform changes

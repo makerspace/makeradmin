@@ -1,3 +1,4 @@
+from collections import Counter
 from datetime import datetime, timedelta
 
 from multi_access.models import User, AuthorityInUser, Authority, Customer
@@ -100,10 +101,20 @@ class AddMember(object):
         return self.m == other.m
         
         
-def get_multi_access_members(session, customer_id):
-    """ Get relevant multi access members from database. """
-    return [DbMember(u) for u in session.query(User).filter_by(customer_id=customer_id)]
-
+def get_multi_access_members(session, ui, customer_id):
+    """ Get relevant multi access members from database, and perform santiy checks. """
+    db_members = [DbMember(u) for u in session.query(User).filter_by(customer_id=customer_id)]
+    
+    problem_members = [m for m in db_members if m.problems]
+    if problem_members:
+        ui.fatal__problem_members(problem_members)
+        
+    duplicate_member_ids = [k for k, v in Counter((m.member_number for m in db_members)).items() if v > 1]
+    if duplicate_member_ids:
+        ui.fatal__error(f"duplicate member ids {duplicate_member_ids} in MultiAccess")
+        
+    return db_members
+    
 
 def diff_member_update(db_members, ma_members):
     """ Creates a list of diffing members ignoring everything but blocked and timestamp. The list contains all

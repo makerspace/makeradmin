@@ -2,7 +2,7 @@ from random import shuffle
 
 from multi_access.models import User, AuthorityInUser
 from multi_access.multi_access import DbMember, diff_member_update, UpdateMember, diff_member_missing, \
-    AddMember, update_diffs, diff_blocked, BlockMember
+    AddMember, update_diffs, diff_blocked, BlockMember, get_multi_access_members
 from multi_access.tui import Tui
 from test.db_base import DbBaseTest
 from test.factory import UserFactory, MakerAdminMemberFactory, CustomerFactory, AuthorityFactory
@@ -266,3 +266,25 @@ class TestMemberBlockDiff(DbBaseTest):
         self.assertEqual(self.datetime(days=1), u.stop_timestamp)
         self.assertEqual("1", u.card)
         self.assertTrue(u.blocked)
+
+
+class GetMembersTest(DbBaseTest):
+
+    def setUp(self):
+        super().setUp()
+        self.tui = Tui()
+    
+    def test_duplicate_member_id_fails_fatally(self):
+        c = CustomerFactory()
+        UserFactory(name="1001", customer=c)
+        UserFactory(name="1001", customer=c)
+        
+        with self.assertRaises(SystemExit):
+            get_multi_access_members(self.session, self.tui, customer_id=c.id)
+
+    def test_fails_fatally_on_problem_member(self):
+        c = CustomerFactory()
+        UserFactory(name="1001 SUNE", customer=c)
+        
+        with self.assertRaises(SystemExit):
+            get_multi_access_members(self.session, self.tui, customer_id=c.id)
