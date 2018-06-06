@@ -87,7 +87,7 @@ class Service:
                 if permission is not None:
                     permissionsStr = request.headers["X-User-Permissions"] if "X-User-Permissions" in request.headers else ""
                     permissions = permissionsStr.split(",")
-                    if permission not in permissions:
+                    if permission not in permissions and "service" not in permissions:
                         abort(403, "user does not have the " + str(permission) + " permission")
 
                 return f(*args, **kwargs)
