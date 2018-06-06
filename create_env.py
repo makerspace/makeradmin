@@ -12,7 +12,7 @@ if not args.project.isidentifier():
     quit()
 
 config = {
-    "COMPOSE_PROJECT_NAME": args.project;
+    "COMPOSE_PROJECT_NAME": args.project,
     "MYSQL_DB": "makerdata",
     "MYSQL_PORT": "3306",
     "MYSQL_USER": "makeradmin",

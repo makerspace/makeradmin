@@ -1,3 +1,5 @@
 .env
 logs
 __pycache__/
+.idea
+.envrc

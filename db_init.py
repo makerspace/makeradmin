@@ -2,7 +2,7 @@ from subprocess import call, check_output, STDOUT
 import sys
 from time import sleep
 
-containers = ["api-gateway", "membership", "messages", "sales", "economy", "rfid", "webshop"]
+containers = ["api-gateway", "membership", "messages", "economy", "rfid", "webshop"]
 
 if len(sys.argv) > 1:
     containers = sys.argv[1:]
