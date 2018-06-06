@@ -14,7 +14,7 @@ test: build pep8
 coverage:
 	rm -rf coverage .coverage
 	coverage3 run $(shell which nosetests) test
-	coverage3 html -d coverage --omit=test*,*.pyenv*
+	coverage3 html -d coverage --omit="test*,*.pyenv*,*/site-packages/*,*/nosetests"
 	firefox coverage/index.html
 
 target-test: 
