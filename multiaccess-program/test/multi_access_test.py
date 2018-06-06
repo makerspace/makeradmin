@@ -66,27 +66,27 @@ class TestUpdateDiff(DbBaseTest):
         
         self.assertEqual([UpdateMember(d, m)], UpdateMember.find_diffs([d], [m]))
 
-    def test_2_hour_1_second_diff_creates_diff(self):
+    def test_2_second_diff_creates_diff(self):
         d = DbMember(UserFactory(stop_timestamp=self.datetime(), name="1001", blocked=False, card="1"))
-        m = MakerAdminMemberFactory(member_number=1001, end_timestamp=self.datetime(hours=2, seconds=1), rfid_tag="1")
+        m = MakerAdminMemberFactory(member_number=1001, end_timestamp=self.datetime(seconds=2), rfid_tag="1")
         
         self.assertEqual([UpdateMember(d, m)], UpdateMember.find_diffs([d], [m]))
 
-    def test_2_hour_diff_creates_no_diff(self):
+    def test_half_second_diff_creates_no_diff(self):
         d = DbMember(UserFactory(stop_timestamp=self.datetime(milliseconds=1), name="1001", blocked=False, card="1"))
-        m = MakerAdminMemberFactory(member_number=1001, end_timestamp=self.datetime(hours=2), rfid_tag="1")
+        m = MakerAdminMemberFactory(member_number=1001, end_timestamp=self.datetime(milliseconds=500), rfid_tag="1")
         
         self.assertEqual([], UpdateMember.find_diffs([d], [m]))
 
-    def test_negative_2_hour_diff_creates_no_diff(self):
+    def test_negative_half_second_diff_creates_no_diff(self):
         d = DbMember(UserFactory(stop_timestamp=self.datetime(), name="1001", blocked=False, card="1"))
-        m = MakerAdminMemberFactory(member_number=1001, end_timestamp=self.datetime(hours=-2), rfid_tag="1")
+        m = MakerAdminMemberFactory(member_number=1001, end_timestamp=self.datetime(milliseconds=-500), rfid_tag="1")
         
         self.assertEqual([], UpdateMember.find_diffs([d], [m]))
 
-    def test_negative_2_hour_1_second_diff_creates_diff(self):
+    def test_negative_2_second_diff_creates_diff(self):
         d = DbMember(UserFactory(stop_timestamp=self.datetime(), name="1001", blocked=False, card="1"))
-        m = MakerAdminMemberFactory(member_number=1001, end_timestamp=self.datetime(hours=-2, seconds=-1), rfid_tag="1")
+        m = MakerAdminMemberFactory(member_number=1001, end_timestamp=self.datetime(seconds=-2), rfid_tag="1")
         
         self.assertEqual([UpdateMember(d, m)], UpdateMember.find_diffs([d], [m]))
 

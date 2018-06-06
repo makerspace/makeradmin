@@ -63,7 +63,7 @@ class UpdateMember(object):
             return False
         if t1 is None or t2 is None:
             return True
-        return abs(t1 - t2) > timedelta(hours=2)
+        return abs(t1 - t2) > timedelta(seconds=1)
     
     @classmethod
     def tags_diff(cls, dbm, mam):
@@ -72,7 +72,13 @@ class UpdateMember(object):
     def describe_update(self):
         res = f'member update #{self.ma_member.member_number} ({self.ma_member.firstname} {self.ma_member.lastname})'
         if self.timestamps_diff(self.db_member, self.ma_member):
-            res += f', end timestamp {self.db_member.user.stop_timestamp} => {self.ma_member.end_timestamp}'
+            t1 = self.db_member.user.stop_timestamp
+            t2 = self.ma_member.end_timestamp
+            if t1 is not None and t2 is not None:
+                diff = f" ({str(t1 - t2)})"
+            else:
+                diff = ""
+            res += f', end timestamp {self.db_member.user.stop_timestamp} => {self.ma_member.end_timestamp} {diff}'
         if self.tags_diff(self.db_member, self.ma_member):
             res += f', tag {self.db_member.user.card} => {self.ma_member.rfid_tag}'
         return res
