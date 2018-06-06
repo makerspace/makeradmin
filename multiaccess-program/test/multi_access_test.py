@@ -66,11 +66,29 @@ class TestUpdateDiff(DbBaseTest):
         
         self.assertEqual([UpdateMember(d, m)], diff_member_update([d], [m]))
 
-    def test_milisecond_diff_creates_no_diff(self):
+    def test_2_hour_1_second_diff_creates_diff(self):
+        d = DbMember(UserFactory(stop_timestamp=self.datetime(), name="1001", blocked=False, card="1"))
+        m = MakerAdminMemberFactory(member_number=1001, end_timestamp=self.datetime(hours=2, seconds=1), rfid_tag="1")
+        
+        self.assertEqual([UpdateMember(d, m)], diff_member_update([d], [m]))
+
+    def test_2_hour_diff_creates_no_diff(self):
         d = DbMember(UserFactory(stop_timestamp=self.datetime(milliseconds=1), name="1001", blocked=False, card="1"))
-        m = MakerAdminMemberFactory(member_number=1001, end_timestamp=self.datetime(), rfid_tag="1")
+        m = MakerAdminMemberFactory(member_number=1001, end_timestamp=self.datetime(hours=2), rfid_tag="1")
         
         self.assertEqual([], diff_member_update([d], [m]))
+
+    def test_negative_2_hour_diff_creates_no_diff(self):
+        d = DbMember(UserFactory(stop_timestamp=self.datetime(), name="1001", blocked=False, card="1"))
+        m = MakerAdminMemberFactory(member_number=1001, end_timestamp=self.datetime(hours=-2), rfid_tag="1")
+        
+        self.assertEqual([], diff_member_update([d], [m]))
+
+    def test_negative_2_hour_1_second_diff_creates_diff(self):
+        d = DbMember(UserFactory(stop_timestamp=self.datetime(), name="1001", blocked=False, card="1"))
+        m = MakerAdminMemberFactory(member_number=1001, end_timestamp=self.datetime(hours=-2, seconds=-1), rfid_tag="1")
+        
+        self.assertEqual([UpdateMember(d, m)], diff_member_update([d], [m]))
 
     def test_two_different_members_creates_no_diff(self):
         d = DbMember(UserFactory(stop_timestamp=self.datetime(), name="1002", card="1"))

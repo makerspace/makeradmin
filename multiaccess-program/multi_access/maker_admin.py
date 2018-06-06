@@ -58,13 +58,20 @@ class MakerAdminClient(object):
         except OSError:
             self.token = 'nokey'
         
+    def show_response_error_message(self, msg, r):
+        try:
+            self.ui.info__progress(f"{msg} ({r.status_code}): {r.json()['message']}")
+        except (KeyError, ValueError):
+            self.ui.info__progress(f"{msg} ({r.status_code})")
+        
     def login(self):
         username, password = self.ui.promt__login()
         r = requests.post(self.base_url + "/oauth/token",
                           {"grant_type": "password", "username": username, "password": password})
-        
         if not r.ok:
+            self.show_response_error_message("login failed")
             return
+        self.ui.info__progress("login successful")
         self.token = r.json()["access_token"]
         with open(self.tokenfile, 'w') as w:
             w.write(self.token)
@@ -75,6 +82,7 @@ class MakerAdminClient(object):
             if r.ok:
                 return r.json()
             elif r.status_code == 401:
+                self.show_response_error_message("failed to get members")
                 self.login()
             else:
                 self.ui.fatal__error(f"failed to get data, got ({r.status_code}):\n" + r.text)

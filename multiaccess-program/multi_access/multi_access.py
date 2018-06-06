@@ -41,23 +41,29 @@ class UpdateMember(object):
         self.db_member = db_member
         self.ma_member = ma_member
 
-        self.timestamp_diffs = self.timestamps_diff(ma_member.end_timestamp, db_member.user.stop_timestamp)
-        self.tag_diffs = self.db_member.user.card != self.ma_member.rfid_tag
+    @classmethod
+    def diff(cls, dbm, mam):
+        return dbm.user.blocked or cls.tags_diff(dbm, mam) or cls.timestamps_diff(dbm, mam)
 
-    @staticmethod
-    def timestamps_diff(t1, t2):
-        print(t1, t2)
+    @classmethod
+    def timestamps_diff(cls, dbm, mam):
+        t1 = dbm.user.stop_timestamp
+        t2 = mam.end_timestamp
         if t1 is None and t2 is None:
             return False
         if t1 is None or t2 is None:
             return True
-        return abs(t1 - t2) > timedelta(seconds=1)
-
+        return abs(t1 - t2) > timedelta(hours=2)
+    
+    @classmethod
+    def tags_diff(cls, dbm, mam):
+        return dbm.user.card != mam.rfid_tag
+    
     def describe_update(self):
         res = f'member update #{self.ma_member.member_number} ({self.ma_member.firstname} {self.ma_member.lastname})'
-        if self.timestamp_diffs:
+        if self.timestamps_diff(self.db_member, self.ma_member):
             res += f', end timestamp {self.db_member.user.stop_timestamp} => {self.ma_member.end_timestamp}'
-        if self.tag_diffs:
+        if self.tags_diff(self.db_member, self.ma_member):
             res += f', tag {self.db_member.user.card} => {self.ma_member.rfid_tag}'
         return res
     
@@ -131,9 +137,7 @@ def diff_member_update(db_members, ma_members):
     diffs = [
         UpdateMember(dbm, mam) for dbm, mam in
         ((db_members.get(m), ma_members.get(m)) for m in db_members.keys())
-        if dbm and mam and (dbm.user.blocked
-                            or dbm.user.card != mam.rfid_tag
-                            or UpdateMember.timestamps_diff(dbm.user.stop_timestamp, mam.end_timestamp))
+        if dbm and mam and UpdateMember.diff(dbm, mam)
     ]
     return diffs
 
