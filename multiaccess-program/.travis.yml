@@ -1,5 +1,15 @@
 language: python
 python:
   - 3.6
-script:
-  - make test
+install:
+  - make init
+
+jobs:
+  include:
+    - script:
+      - make test
+    - script:
+      - make dist
+      sudo: required
+      services:
+        - docker
