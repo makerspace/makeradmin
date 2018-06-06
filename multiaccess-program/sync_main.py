@@ -12,6 +12,11 @@ from multi_access.multi_access import diff_member_update, get_multi_access_membe
     diff_member_missing, diff_blocked
 from multi_access.tui import Tui
 
+try:
+    from source_revision import source_revision
+except ImportError:
+    source_revision = 'unknown'
+
 logger = getLogger("makeradmin")
 
 
@@ -78,8 +83,8 @@ def main():
     basicConfig(format='%(asctime)s %(levelname)s [%(process)d/%(threadName)s %(pathname)s:%(lineno)d]: %(message)s',
                 stream=sys.stderr, level=INFO)
 
-    parser = argparse.ArgumentParser("Fetch member list from makeradmin.se or local file, then prompt user with"
-                                     " changes to make,",
+    parser = argparse.ArgumentParser("Fetches member list from makeradmin.se or local file, then prompt user with"
+                                     f" changes to make. Built from source revision {source_revision}.",
                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument("-d", "--db",
                         default='mssql://(local)\\SQLEXPRESS/MultiAccess?trusted_connection=yes&driver=SQL+Server',

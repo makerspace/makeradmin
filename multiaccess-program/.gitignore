@@ -9,3 +9,4 @@ db.sqlite
 dumps
 coverage
 .coverage
+source_revision.py
