@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/makerspace/MakerAdmin-MultiAccessProgram.svg?branch=master)](https://travis-ci.org/makerspace/MakerAdmin-MultiAccessProgram)
+[![Build Status](https://travis-ci.org/makerspace/multiaccess-program.svg?branch=add-and-update-members)](https://travis-ci.org/makerspace/multiaccess-program)
 
 # Program to Update MultiAccess With Data from MakerAdmin
 
