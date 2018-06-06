@@ -30,7 +30,17 @@ class BlockMember(object):
         user = session.query(User).get(self.db_member.user.id)
         user.blocked = True
         session.commit()
-    
+        
+    @staticmethod
+    def find_diffs(db_members, ma_members):
+        """ Creates a list of members that should not have access (not in ma_members). """
+        db_dict = {m.member_number: m for m in db_members if not m.user.blocked}
+        for m in ma_members:
+            db_dict.pop(m.member_number, None)
+        
+        diffs = [BlockMember(dbm) for member_number, dbm in db_dict.items()]
+        return diffs
+
     def __eq__(self, other):
         return self.db_member == other.db_member
 
@@ -73,7 +83,22 @@ class UpdateMember(object):
         user.blocked = False
         user.card = self.ma_member.rfid_tag
         session.commit()
+
+    @staticmethod
+    def find_diffs(db_members, ma_members):
+        """ Creates a list of diffing members ignoring everything but blocked and timestamp. The list contains all
+        members where multi access does not match maker admin. Ignoring members that does not exist in either source.
+        Blocked members should already have been filtered, making sure all ma_members are not blocked. """
+        ma_members = {m.member_number: m for m in ma_members}
+        db_members = {m.member_number: m for m in db_members}
         
+        diffs = [
+            UpdateMember(dbm, mam) for dbm, mam in
+            ((db_members.get(m), ma_members.get(m)) for m in db_members.keys())
+            if dbm and mam and UpdateMember.diff(dbm, mam)
+        ]
+        return diffs
+
     def __eq__(self, other):
         return self.db_member == other.db_member and self.ma_member == other.ma_member
         
@@ -108,6 +133,16 @@ class AddMember(object):
         ))
         session.commit()
         
+    @staticmethod
+    def find_diffs(db_members, ma_members):
+        """ Creates a list of diffing members where the member exists in ma_members but not in db_members. """
+        ma_dict = {m.member_number: m for m in ma_members}
+        for m in db_members:
+            ma_dict.pop(m.member_number, None)
+        
+        diffs = [AddMember(mam) for member_number, mam in ma_dict.items()]
+        return diffs
+
     def __eq__(self, other):
         return self.m == other.m
         
@@ -126,41 +161,6 @@ def get_multi_access_members(session, ui, customer_id):
         
     return db_members
     
-
-def diff_member_update(db_members, ma_members):
-    """ Creates a list of diffing members ignoring everything but blocked and timestamp. The list contains all
-    members where multi access does not match maker admin. Ignoring members that does not exist in either source.
-    Blocked members should already have been filtered, making sure all ma_members are not blocked. """
-    ma_members = {m.member_number: m for m in ma_members}
-    db_members = {m.member_number: m for m in db_members}
-    
-    diffs = [
-        UpdateMember(dbm, mam) for dbm, mam in
-        ((db_members.get(m), ma_members.get(m)) for m in db_members.keys())
-        if dbm and mam and UpdateMember.diff(dbm, mam)
-    ]
-    return diffs
-
-
-def diff_member_missing(db_members, ma_members):
-    """ Creates a list of diffing members where the member exists in ma_members but not in db_members. """
-    ma_dict = {m.member_number: m for m in ma_members}
-    for m in db_members:
-        ma_dict.pop(m.member_number, None)
-    
-    diffs = [AddMember(mam) for member_number, mam in ma_dict.items()]
-    return diffs
-
-
-def diff_blocked(db_members, ma_members):
-    """ Creates a list of members that should not have access (not in ma_members). """
-    db_dict = {m.member_number: m for m in db_members if not m.user.blocked}
-    for m in ma_members:
-        db_dict.pop(m.member_number, None)
-    
-    diffs = [BlockMember(dbm) for member_number, dbm in db_dict.items()]
-    return diffs
-
 
 def update_diffs(session, ui, diffs, customer_id=None, authority_id=None):
     # Sanity check customer_id and authority_id.

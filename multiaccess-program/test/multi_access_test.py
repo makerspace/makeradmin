@@ -1,8 +1,8 @@
 from random import shuffle
 
 from multi_access.models import User, AuthorityInUser
-from multi_access.multi_access import DbMember, diff_member_update, UpdateMember, diff_member_missing, \
-    AddMember, update_diffs, diff_blocked, BlockMember, get_multi_access_members
+from multi_access.multi_access import DbMember, UpdateMember, AddMember, update_diffs, BlockMember, \
+    get_multi_access_members
 from multi_access.tui import Tui
 from test.db_base import DbBaseTest
 from test.factory import UserFactory, MakerAdminMemberFactory, CustomerFactory, AuthorityFactory
@@ -18,7 +18,7 @@ class TestUpdateDiff(DbBaseTest):
         d = DbMember(UserFactory(stop_timestamp=self.datetime(), name="1001", card="3"))
         m = MakerAdminMemberFactory(member_number=1001, end_timestamp=self.datetime(), rfid_tag="3")
         
-        self.assertEqual([], diff_member_update([d], [m]))
+        self.assertEqual([], UpdateMember.find_diffs([d], [m]))
 
     def test_multiple_unsorted_no_diff(self):
         ds = [DbMember(UserFactory(stop_timestamp=self.datetime(days=i), name=str(i), card=str(i)))
@@ -28,73 +28,73 @@ class TestUpdateDiff(DbBaseTest):
               for i in range(1001, 1010)]
         shuffle(ms)
         
-        self.assertEqual([], diff_member_update(ds, ms))
+        self.assertEqual([], UpdateMember.find_diffs(ds, ms))
         
     def test_diff_on_timestamp(self):
         d = DbMember(UserFactory(stop_timestamp=self.datetime(days=1), name="1001", blocked=False, card="1"))
         m = MakerAdminMemberFactory(member_number=1001, end_timestamp=self.datetime(), rfid_tag="1")
         
-        self.assertEqual([UpdateMember(d, m)], diff_member_update([d], [m]))
+        self.assertEqual([UpdateMember(d, m)], UpdateMember.find_diffs([d], [m]))
 
     def test_diff_on_timestamp_vs_no_timestamp(self):
         d = DbMember(UserFactory(stop_timestamp=self.datetime(), name="1001", blocked=False, card="1"))
         m = MakerAdminMemberFactory(member_number=1001, end_timestamp=None, rfid_tag="1")
         
-        self.assertEqual([UpdateMember(d, m)], diff_member_update([d], [m]))
+        self.assertEqual([UpdateMember(d, m)], UpdateMember.find_diffs([d], [m]))
 
     def test_diff_no_timestamp_vs_timestamp(self):
         d = DbMember(UserFactory(stop_timestamp=None, name="1001", blocked=False, card="1"))
         m = MakerAdminMemberFactory(member_number=1001, end_timestamp=self.datetime(), rfid_tag="1")
         
-        self.assertEqual([UpdateMember(d, m)], diff_member_update([d], [m]))
+        self.assertEqual([UpdateMember(d, m)], UpdateMember.find_diffs([d], [m]))
 
     def test_no_timestamp_vs_no_timestamp_creates_no_diff(self):
         d = DbMember(UserFactory(stop_timestamp=None, name="1001", blocked=False, card="1"))
         m = MakerAdminMemberFactory(member_number=1001, end_timestamp=None, rfid_tag="1")
         
-        self.assertEqual([], diff_member_update([d], [m]))
+        self.assertEqual([], UpdateMember.find_diffs([d], [m]))
 
     def test_diff_on_blocked(self):
         d = DbMember(UserFactory(stop_timestamp=self.datetime(), name="1001", blocked=True, card="1"))
         m = MakerAdminMemberFactory(member_number=1001, end_timestamp=self.datetime(), rfid_tag="1")
         
-        self.assertEqual([UpdateMember(d, m)], diff_member_update([d], [m]))
+        self.assertEqual([UpdateMember(d, m)], UpdateMember.find_diffs([d], [m]))
 
     def test_diff_on_tag(self):
         d = DbMember(UserFactory(stop_timestamp=self.datetime(), name="1001", card="1"))
         m = MakerAdminMemberFactory(member_number=1001, end_timestamp=self.datetime(), rfid_tag="2")
         
-        self.assertEqual([UpdateMember(d, m)], diff_member_update([d], [m]))
+        self.assertEqual([UpdateMember(d, m)], UpdateMember.find_diffs([d], [m]))
 
     def test_2_hour_1_second_diff_creates_diff(self):
         d = DbMember(UserFactory(stop_timestamp=self.datetime(), name="1001", blocked=False, card="1"))
         m = MakerAdminMemberFactory(member_number=1001, end_timestamp=self.datetime(hours=2, seconds=1), rfid_tag="1")
         
-        self.assertEqual([UpdateMember(d, m)], diff_member_update([d], [m]))
+        self.assertEqual([UpdateMember(d, m)], UpdateMember.find_diffs([d], [m]))
 
     def test_2_hour_diff_creates_no_diff(self):
         d = DbMember(UserFactory(stop_timestamp=self.datetime(milliseconds=1), name="1001", blocked=False, card="1"))
         m = MakerAdminMemberFactory(member_number=1001, end_timestamp=self.datetime(hours=2), rfid_tag="1")
         
-        self.assertEqual([], diff_member_update([d], [m]))
+        self.assertEqual([], UpdateMember.find_diffs([d], [m]))
 
     def test_negative_2_hour_diff_creates_no_diff(self):
         d = DbMember(UserFactory(stop_timestamp=self.datetime(), name="1001", blocked=False, card="1"))
         m = MakerAdminMemberFactory(member_number=1001, end_timestamp=self.datetime(hours=-2), rfid_tag="1")
         
-        self.assertEqual([], diff_member_update([d], [m]))
+        self.assertEqual([], UpdateMember.find_diffs([d], [m]))
 
     def test_negative_2_hour_1_second_diff_creates_diff(self):
         d = DbMember(UserFactory(stop_timestamp=self.datetime(), name="1001", blocked=False, card="1"))
         m = MakerAdminMemberFactory(member_number=1001, end_timestamp=self.datetime(hours=-2, seconds=-1), rfid_tag="1")
         
-        self.assertEqual([UpdateMember(d, m)], diff_member_update([d], [m]))
+        self.assertEqual([UpdateMember(d, m)], UpdateMember.find_diffs([d], [m]))
 
     def test_two_different_members_creates_no_diff(self):
         d = DbMember(UserFactory(stop_timestamp=self.datetime(), name="1002", card="1"))
         m = MakerAdminMemberFactory(member_number=1001, end_timestamp=self.datetime(), rfid_tag="1")
         
-        self.assertEqual([], diff_member_update([d], [m]))
+        self.assertEqual([], UpdateMember.find_diffs([d], [m]))
 
     def test_multiple_diffs_and_multiple_non_diffs_works(self):
         d1 = DbMember(UserFactory(stop_timestamp=self.datetime(days=1), name="1001", card="1", blocked=False))
@@ -110,7 +110,7 @@ class TestUpdateDiff(DbBaseTest):
         m5 = MakerAdminMemberFactory(member_number=1005, rfid_tag="5", end_timestamp=self.datetime(days=5))
         mx = MakerAdminMemberFactory(member_number=3001, rfid_tag="1", end_timestamp=self.datetime(days=1))
         
-        diffs = diff_member_update([d1, d2, d3, d4, d5, dx], [mx, m1, m2, m3, m4, m5])
+        diffs = UpdateMember.find_diffs([d1, d2, d3, d4, d5, dx], [mx, m1, m2, m3, m4, m5])
         self.assertIn(UpdateMember(d2, m2), diffs)
         self.assertIn(UpdateMember(d4, m4), diffs)
         self.assertIn(UpdateMember(d5, m5), diffs)
@@ -182,7 +182,7 @@ class TestMemberAddDiff(DbBaseTest):
         d = DbMember(UserFactory(name="1001"))
         m = MakerAdminMemberFactory(member_number=1001)
         
-        self.assertEqual([], diff_member_missing([d], [m]))
+        self.assertEqual([], AddMember.find_diffs([d], [m]))
 
     def test_multiple_unsorted_no_diff(self):
         ds = [DbMember(UserFactory(name=str(i))) for i in range(1001, 1010)]
@@ -190,23 +190,23 @@ class TestMemberAddDiff(DbBaseTest):
         ms = [MakerAdminMemberFactory(member_number=i) for i in range(1001, 1010)]
         shuffle(ms)
         
-        self.assertEqual([], diff_member_missing(ds, ms))
+        self.assertEqual([], AddMember.find_diffs(ds, ms))
         
     def test_simple_diff_add_one_user(self):
         m = MakerAdminMemberFactory(member_number=1001)
         
-        self.assertEqual([AddMember(m)], diff_member_missing([], [m]))
+        self.assertEqual([AddMember(m)], AddMember.find_diffs([], [m]))
 
     def test_excessive_db_user_creates_no_diff(self):
         d = DbMember(UserFactory(name="1001"))
         
-        self.assertEqual([], diff_member_missing([d], []))
+        self.assertEqual([], AddMember.find_diffs([d], []))
 
     def test_multiple_diffs_and_multiple_non_diffs_works(self):
         ds = [DbMember(UserFactory(name=n)) for n in ["1001", "1002", "1003"]]
         ms = [MakerAdminMemberFactory(member_number=n) for n in [1001, 1003, 1004, 1005]]
         
-        diffs = [d.m.member_number for d in diff_member_missing(ds, ms)]
+        diffs = [d.m.member_number for d in AddMember.find_diffs(ds, ms)]
         self.assertCountEqual([1004, 1005], diffs)
         
     def test_update_diff_adds_member_and_auth(self):
@@ -260,7 +260,7 @@ class TestMemberBlockDiff(DbBaseTest):
         d = DbMember(UserFactory(name="1001"))
         m = MakerAdminMemberFactory(member_number=1001)
         
-        self.assertEqual([], diff_blocked([d], [m]))
+        self.assertEqual([], BlockMember.find_diffs([d], [m]))
 
     def test_multiple_unsorted_no_diff(self):
         ds = [DbMember(UserFactory(name=str(i))) for i in range(1001, 1010)]
@@ -268,28 +268,28 @@ class TestMemberBlockDiff(DbBaseTest):
         ms = [MakerAdminMemberFactory(member_number=i) for i in range(1001, 1010)]
         shuffle(ms)
         
-        self.assertEqual([], diff_blocked(ds, ms))
+        self.assertEqual([], BlockMember.find_diffs(ds, ms))
         
     def test_simple_diff_block_one_user(self):
         d = DbMember(UserFactory(name="1001"))
         
-        self.assertEqual([BlockMember(d)], diff_blocked([d], []))
+        self.assertEqual([BlockMember(d)], BlockMember.find_diffs([d], []))
 
     def test_no_block_diff_if_already_blocked(self):
         d = DbMember(UserFactory(name="1001", blocked=True))
         
-        self.assertEqual([], diff_blocked([d], []))
+        self.assertEqual([], BlockMember.find_diffs([d], []))
 
     def test_excessive_ma_user_creates_no_diff(self):
         m = MakerAdminMemberFactory(member_number=1001)
         
-        self.assertEqual([], diff_blocked([], [m]))
+        self.assertEqual([], BlockMember.find_diffs([], [m]))
 
     def test_multiple_diffs_and_multiple_non_diffs_works(self):
         ds = [DbMember(UserFactory(name=n)) for n in ["1001", "1002", "1003"]]
         ms = [MakerAdminMemberFactory(member_number=n) for n in [1001, 1003, 1004, 1005]]
         
-        diffs = [d.db_member.member_number for d in diff_blocked(ds, ms)]
+        diffs = [d.db_member.member_number for d in BlockMember.find_diffs(ds, ms)]
         self.assertCountEqual([1002], diffs)
         
     def test_update_diff_blocks_member(self):

@@ -8,8 +8,8 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from multi_access.maker_admin import MakerAdminClient
-from multi_access.multi_access import diff_member_update, get_multi_access_members, update_diffs, \
-    diff_member_missing, diff_blocked
+from multi_access.multi_access import get_multi_access_members, update_diffs, \
+    UpdateMember, AddMember, BlockMember
 from multi_access.tui import Tui
 
 try:
@@ -55,11 +55,11 @@ def sync(session=None, client=None, ui=None, customer_id=None, authority_id=None
     ui.info__progress('diffing multi access users against maker admin members')
     diffs = []
     if WHAT_UPDATE in what:
-        diffs += diff_member_update(db_members, ma_members)
+        diffs += UpdateMember.find_diffs(db_members, ma_members)
     if WHAT_ADD in what:
-        diffs += diff_member_missing(db_members, ma_members)
+        diffs += AddMember.find_diffs(db_members, ma_members)
     if WHAT_BLOCK in what:
-        diffs += diff_blocked(db_members, ma_members)
+        diffs += BlockMember.find_diffs(db_members, ma_members)
     
     if not diffs:
         ui.info__progress('nothing to update')
