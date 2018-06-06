@@ -18,7 +18,7 @@ instance = service.create(name="RFID", url="keys", port=80, version="1.0")
 gateway = instance.gateway
 
 key_entity.db = instance.db
-key_entity.add_routes(instance, "", read_permission=None, write_permission="keys")
+key_entity.add_routes(instance, "", read_permission="keys_view", write_permission="keys_edit")
 
 
 @instance.route("update_times", methods=["POST"])
