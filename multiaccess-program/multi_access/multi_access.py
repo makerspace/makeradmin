@@ -75,7 +75,7 @@ class UpdateMember(object):
             t1 = self.db_member.user.stop_timestamp
             t2 = self.ma_member.end_timestamp
             if t1 is not None and t2 is not None:
-                diff = f" ({str(float((t1 - t2).total_seconds())/60.0)} hours)"
+                diff = f" ({str(float((t2 - t1).total_seconds())/3600.0)} hours)"
             else:
                 diff = ""
             res += f', end timestamp {self.db_member.user.stop_timestamp} => {self.ma_member.end_timestamp} {diff}'
