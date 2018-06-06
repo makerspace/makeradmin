@@ -142,6 +142,8 @@ services:
       dockerfile: ${PWD}/servicebase/DockerfileService
     volumes:
       - ./logs/membership:/var/www/html/storage/logs
+      - ./membership/lumen/routes:/var/www/html/routes
+      - ./membership/lumen/app:/var/www/html/app
     environment:
       MYSQL_HOST: "db2:${MYSQL_PORT}"
       MYSQL_DB: "makeradmin-membership"
