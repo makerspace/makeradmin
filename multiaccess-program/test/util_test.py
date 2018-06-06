@@ -12,9 +12,9 @@ class Test(BaseTest):
 
     def test_to_cet(self):
         self.assertEqual(datetime(2018, 5, 22, 10),
-                         to_cet(datetime(2018, 5, 22, 8, tzinfo=timezone(timedelta(hours=0)))))
+                         to_cet(datetime(2018, 5, 22, 8, tzinfo=timezone(timedelta(hours=0)))), "Summer time")
         self.assertEqual(datetime(2018, 1, 22, 10),
-                         to_cet(datetime(2018, 1, 22, 9, tzinfo=timezone(timedelta(hours=0)))))
+                         to_cet(datetime(2018, 1, 22, 9, tzinfo=timezone(timedelta(hours=0)))), "Winter time")
         self.assertEqual(datetime(2018, 5, 22, 10),
                          to_cet(datetime(2018, 5, 22, 10, tzinfo=timezone(timedelta(hours=2)))))
         self.assertEqual(None, to_cet(None))
