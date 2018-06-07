@@ -49,14 +49,10 @@ def send_access_token():
     return jsonify({"status": "sent"})
 
 
-@instance.route("current", methods=["GET", "POST"], permission=None)
+@instance.route("current", methods=["GET"], permission=None)
 def current_member():
     user_id = assert_get(request.headers, "X-User-Id")
-
-    if request.method == "GET":
-        return instance.gateway.get("membership/member/%s" % user_id).text
-    else:
-        return instance.gateway.put("membership/member/%s" % user_id, request.get_json()).text
+    return instance.gateway.get("membership/member/%s" % user_id).text
 
 
 @instance.route("current/keys", methods=["GET"], permission=None)

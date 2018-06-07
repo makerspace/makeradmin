@@ -58,7 +58,7 @@ module.exports = withRouter(class Member extends React.Component
 					<fieldset >
 						<legend><i className="uk-icon-user"></i> Personuppgifter</legend>
 
-						<Input model={this.getModel()} name="civicregno" title="Personnummer" />
+						{/*<Input model={this.getModel()} name="civicregno" title="Personnummer" />*/}
 						<Input model={this.getModel()} name="firstname"  title="Förnamn" />
 						<Input model={this.getModel()} name="lastname"   title="Efternamn" />
 						<Input model={this.getModel()} name="email"      title="E-post" />
@@ -99,7 +99,7 @@ module.exports = withRouter(class Member extends React.Component
 					</fieldset>
 
 					<div className="uk-form-row">
-						<button className="uk-button uk-button-success uk-float-right uk-margin-right" onClick={this.saveEntity.bind(this)}><i className="uk-icon-save"></i> Spara</button>
+						{/*<button className="uk-button uk-button-success uk-float-right uk-margin-right" onClick={this.saveEntity.bind(this)}><i className="uk-icon-save"></i> Spara</button>*/}
 						<button type="button" onClick={this.props.logout} className="uk-button uk-button-secondary uk-float-right uk-margin-right"><span className="uk-icon-sign-out" /> Logga ut</button>
 					</div>
 				</form>
