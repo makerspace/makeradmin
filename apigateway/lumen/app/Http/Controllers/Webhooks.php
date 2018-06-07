@@ -32,14 +32,10 @@ class Webhooks extends Controller
 		
 		// Initialize cURL
 		$ch = new CurlBrowser;
-		foreach($request->headers as $name => $value){
-			$ch->setHeader($name, $value);
-		}
-
+		$ch->setHeader("Authorization", $request->header("Authorization"));
+		$ch->setHeader("Stripe-Signature", $request->header("Stripe-Signature"));
+		
 		$post = $request->getContent();
-			
-		// Forward the content-type
-		$ch->setHeader("Content-Type", $request->header("Content-Type"));
 
 		// Create a new url with the service endpoint url included
 		$url = $service->endpoint . $request->path();
