@@ -28,6 +28,7 @@ $app->  post("oauth/force_token", ["middleware" => "auth:service", "uses" => "Au
 // TODO: Can this be handled in a nicer way?
 $app->post("member/send_access_token", "ServiceRegistry@handleRoute");
 $app->post("webshop/register", "ServiceRegistry@handleRoute");
+$app->post("webshop/stripe_callback", "ServiceRegistry@handleRoute");
 
 // Service registry
 $app->post("service/register",   ["middleware" => "auth:service", "uses" => "ServiceRegistry@register"]);

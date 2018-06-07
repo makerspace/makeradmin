@@ -219,7 +219,7 @@ def register():
         raise
 
 
-@instance.route("stripe_callback", methods=["POST"])
+@instance.route("stripe_callback", methods=["POST"], permission=None)
 @route_helper
 def stripe_callback():
     payload = request.body
