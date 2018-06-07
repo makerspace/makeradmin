@@ -431,7 +431,7 @@ def pay(member_id, data):
     source = create_stripe_source(transaction_id, card_source, total_amount)
     eprint(source)
 
-    status = source.redirect.status
+    status = source.status
     if status == "pending":
         # Redirect the user to do the 3D secure confirmation step
         webshop_stripe_pending.post({ "transaction_id": transaction_id, "stripe_token": source.id })
@@ -444,9 +444,8 @@ def pay(member_id, data):
         # This can happen in some cases when 3D secure is sort of supported
         # but the user does not need to perform any steps for it.
         token = source
-    elif status == "not_required":
-        # Try a normal payment
-        token = card_source
+    elif status == "canceled" or status == "consumed":
+        abort(500, f"Found unexpected stripe source status '{status}'")
     else:
         eprint(f"Unknown stripe source status '{status}'")
         abort(500, f"Unknown stripe source status '{status}'")
