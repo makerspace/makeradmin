@@ -1,0 +1,525 @@
+
+$primary-color: #333;
+$footer-height: 240px;
+
+.uk-button {
+	border-radius: 2px;
+}
+
+#root {
+	// position: absolute;
+	width: 100%;
+	// left: 0px;
+	// right: 0px;
+	display: flex;
+	flex-direction: row;
+	color: $primary-color;
+	justify-content: center;
+}
+
+#left-sidebar {
+	flex: 0 1 auto;
+	width: 250px;
+	box-shadow: rgba(0,0,0,0.1) 0px 0px 10px 0px;
+	padding: 10px;
+	// background: #222;
+	// h2 {
+	// 	color: white;
+	// }
+
+	// Required for the delete button to be placed on the same row as the category
+	li a {
+		display: inline-block;
+	}
+}
+
+#right-sidebar {
+	flex: 0 1 auto;
+	height: 100%;
+	width: 400px;
+	box-shadow: rgba(0,0,0,0.1) 0px 0px 10px 0px;
+	padding: 10px;
+}
+
+#content {
+	max-width: 800px;
+	padding: 10px;
+	padding-top: 200px;
+	flex: 1 1 auto;
+	margin-bottom: $footer-height;
+}
+
+.product.active {
+	background: #bfddfc;
+}
+
+.product-list {
+	list-style: none;
+	padding-left: 10px;
+
+	h3 {
+		margin-bottom: 0px;
+		margin-top: 20px;
+	}
+}
+
+.product:hover .product-actions {
+	opacity: 1.0;
+	visibility: visible;
+}
+
+.number-add {
+	text-align: center;
+	padding: 0px;
+	flex: 1;
+}
+
+.product-actions {
+	visibility: hidden;
+	opacity: 0;
+	transition: visibility 200ms, opacity 200ms;
+	position: relative;
+	width: 240px;
+}
+
+.product-actions span {
+	position: absolute;
+	width: 100%;
+	display: flex;
+	flex-direction: row;
+}
+
+.product {
+	font-size: 11pt;
+	display: flex;
+	flex-direction: row;
+	width: 100%;
+	height: 30px;
+	padding: 4px;
+	margin-top: 2px;
+	margin-bottom: 2px;
+	border-radius: 3px;
+
+	a, button {
+		//background-color: #1e87f0;
+		color: #fff;
+		margin-left: 4px;
+		margin-right: 4px;
+		text-transform: none;
+	}
+
+	.product-title {
+		flex: 1 1 auto;
+		padding-top: 5px;
+		margin-right: 10px;
+		padding-left: 10px;
+		white-space: nowrap;
+	}
+	input {
+		flex: 0 1 auto;
+		text-transform: none;
+		border-radius: 2px 0px 0px 2px;
+	}
+
+	.product-price {
+		padding-top: 5px;
+		margin-right: 10px;
+		padding-left: 10px;
+	}
+	.product-amount {
+		max-width: 45px;
+		border-left: 1px solid #EEE;
+		border-top: 1px solid #EEE;
+		border-bottom: 1px solid #EEE;
+		padding-right: 6px;
+
+		::-webkit-outer-spin-button, ::-webkit-inner-spin-button {
+		    -webkit-appearance: none;
+		    margin: 0;
+		}
+
+		-moz-appearance: textfield;
+		text-align: right;
+		font-size: 10pt;
+	}
+
+	.product-unit {
+		border-top: 1px solid #EEE;
+		border-right: 1px solid #EEE;
+		border-bottom: 1px solid #EEE;
+		width: 40px;
+		padding-top: 3px;
+		text-align: center;
+		background: #EEE;
+		font-weight: bold;
+		color: #666;
+		margin-right: 5px;
+		border-radius: 0px 2px 2px 0px;
+	}
+}
+
+#edit.active {
+	opacity: 1;
+	visibility: visible;
+}
+
+#edit {
+	position: fixed;
+	right: 10px;
+	width: 100px;
+	height: 50px;
+	top: 10px;
+	border: 1px solid #AAA;
+	border-radius: px;
+	opacity: 0;
+	transition: opacity 500ms;
+	visibility: hidden;
+
+	span {
+		margin-right: 8px;
+	}
+}
+
+.edit.active {
+	opacity: 1;
+	visibility: visible;
+}
+.edit {
+	opacity: 0;
+	display: inline-block;
+	visibility: hidden;
+	transition: opacity 500ms;
+}
+
+.edit-invisible.active {
+	width: 0px;
+	min-width: 0px;
+	transition: width 500ms, min-width 500ms;
+	opacity: 0;
+	visibility: hidden;
+}
+
+.edit-display {
+	opacity: 1;
+	visibility: visible;
+	transition: all 500ms;
+}
+
+.edit-display.disabled {
+	opacity: 0;
+	width: 0px;
+	padding-left: 0px;
+	padding-right: 0px;
+	margin-left: 0px;
+	margin-right: 0px;
+	visibility: hidden;
+}
+
+.product:hover .edit-display.active {
+	opacity: 1.0;
+	visibility: visible;
+}
+
+.product-add {
+	margin-left: 24px;
+}
+
+.category-add {
+}
+
+.category-delete {
+	float: right;
+	line-height: 12px;
+	height: 28px;
+}
+
+.progress-spinner {
+	// visibility: hidden;
+	opacity: 0;
+	transition: opacity 0.2s linear 0.2s;
+	position: absolute;
+	left: 5px;
+	top: 4px;
+}
+
+.progress-spinner.progress-spinner-visible {
+	opacity: 1;
+	transition: opacity 0.0s linear 0s;
+	// visibility: visible;
+}
+
+#pay-module.open {
+	height: $footer-height;
+}
+
+#pay-module {
+	position: fixed;
+	bottom: 0px;
+	right: 0px;
+	left: 0px;
+	background: #FFF;
+	max-height: 40%;
+	height: 0px;
+	transition: height 0.6s;
+	border-top: 6px solid #7C7;
+	box-shadow: 0px 0px 20px 0px rgba(0,0,0,0.2);
+
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+
+	#cart {
+		list-style: none;
+		overflow-y: auto;
+		max-width: 600px;
+		padding: 20px 20px 0px 20px;
+		margin-bottom: 0px;
+		flex: 0.5;
+	}
+
+	#pay {
+		max-width: 600px;
+		padding: 20px;
+		flex: 0.5;
+	}
+}
+
+#pay-button {
+	margin-top: 20px;
+	width: 80%;
+	margin-left: 10%;
+	margin-right: 10%;
+	text-transform: none;
+
+	// Required for progress spinner
+	position: relative;
+}
+
+#product-save {
+	// Required for progress spinner
+	position: relative;
+}
+
+/**
+ * The CSS shown here will not be introduced in the Quickstart guide, but shows
+ * how you can use CSS to style your Element's container.
+ */
+.StripeElement {
+	background-color: white;
+	// height: 40px;
+	padding: 10px 12px;
+	border-radius: 4px;
+	border: 1px solid transparent;
+	box-shadow: 0 1px 3px 0 #e6ebf1;
+	-webkit-transition: box-shadow 150ms ease;
+	transition: box-shadow 150ms ease;
+}
+
+#card-errors {
+	font-size: 10pt;
+	margin-left: 10px;
+	margin-top: 5px;
+}
+
+.StripeElement--focus {
+	box-shadow: 0 1px 3px 0 #cfd7df;
+}
+
+.StripeElement--invalid {
+	border-color: #fa755a;
+}
+
+.StripeElement--webkit-autofill {
+	background-color: #fefde5 !important;
+}
+
+
+// Product edit form
+
+.product-edit-form {
+	width: 600px;
+	margin-top: 100px;
+	margin-left: auto;
+	margin-right: auto;
+
+	>div {
+		margin-top: 5px;
+		//width: 100%;
+		//display: block;
+		//margin-top: 20px;
+	}
+
+	.product-edit-price {
+		display: flex;
+		flex-direction: row;
+
+		input {
+			display: inline-block;
+			border-top-right-radius: 0px;
+			border-bottom-right-radius: 0px;
+		}
+		span {
+			border-top-right-radius: 3px;
+			border-bottom-right-radius: 3px;
+			padding-left: 12px;
+			padding-right: 12px;
+			text-align: center;
+			display: inline-block;
+			background-color: #f9f9f9;
+			border-width: 1px 1px 1px 0px;
+			border-style: solid;
+			border-color: #e5e5e5;
+			font-weight: bold;
+			padding-top: 6px;
+		}
+	}
+
+	label {
+		padding-left: 1px;
+	}
+
+	input, textarea, select {
+		border-radius: 3px;
+	}
+
+	button#product-save {
+		margin-top: 20px;
+		min-width: 120px;
+	}
+}
+
+
+.receipt-item {
+	display: flex;
+	flex-direction: row;
+	border-bottom: 1px solid #EEE;
+
+	.product-title {
+		flex: 5;
+	}
+
+	.receipt-item-count {
+		flex: 1;
+		min-width: 100px;
+		text-align: right;
+	}
+
+	.receipt-item-amount {
+		flex: 1;
+		min-width: 100px;
+		text-align: right;
+	}
+}
+
+#receipt {
+	padding-top: 100px;
+	box-sizing: content-box;
+	min-width: 400px;
+	max-width: 550px;
+	padding-left: 20px;
+	padding-right: 20px;
+	margin-left: auto;
+	margin-right: auto;
+
+	.receipt-amount {
+		margin-top: 20px;
+		margin-bottom: 20px;
+		text-align: right;
+		font-size: 24pt;
+	}
+
+
+	.receipt-buttons {
+		text-align: center;
+		a {
+			color: #8bbdef;
+			padding-left: 5px;
+			padding-right: 5px;
+		}
+	}
+
+	h1 {
+		text-align: center;
+		margin-bottom: 40px;
+	}
+
+	.receipt-image {
+		text-align: center;
+
+		// Fix width and height to ensure page layout doesn't change as the image is loaded
+		img {
+			height: 210px;
+			width: 300px;
+		}
+	}
+}
+
+.receipt-message {
+	text-align: center;
+	color: #CCC;
+}
+
+#purchase-history {
+	padding-top: 100px;
+	box-sizing: content-box;
+	min-width: 400px;
+	max-width: 580px;
+	padding-left: 20px;
+	padding-right: 20px;
+	margin-left: auto;
+	margin-right: auto;
+
+	h3 {
+		background: #469ABE;
+		margin-bottom: 0px;
+
+		padding-left: 20px;
+		padding-right: 20px;
+		padding-bottom: 5px;
+		padding-top: 5px;
+
+		font-size: 16pt;
+		color: #FFF;
+	}
+
+	h1 {
+		margin-bottom: 0px;
+	}
+
+	.receipt-buttons {
+		color: #8bbdef;
+	}
+
+	.history-item {
+		color: #fff;
+		overflow: hidden;
+		border-radius: 4px;
+		margin-bottom: 20px;
+
+		box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.4);
+
+		.receipt-items {
+			background: #2785AD;
+			padding-left: 20px;
+			padding-right: 20px;
+			padding-top: 10px;
+			padding-bottom: 10px;
+		}
+
+		.receipt-item {
+			border-bottom: none;
+		}
+	}
+
+	.receipt-amount {
+		background: #07719F;
+		margin-top: 0px;
+		margin-bottom: 0px;
+		padding-right: 20px;
+		padding-top: 5px;
+		padding-bottom: 5px;
+
+		text-align: right;
+		font-size: 18pt;
+	}
+}
