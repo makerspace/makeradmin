@@ -222,8 +222,8 @@ def register():
 @instance.route("stripe_callback", methods=["POST"], permission=None)
 @route_helper
 def stripe_callback():
-    payload = request.body
-    sig_header = request.META['HTTP_STRIPE_SIGNATURE']
+    payload = request.data
+    sig_header = request.headers['STRIPE_SIGNATURE']
     event = None
 
     try:
