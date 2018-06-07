@@ -5,7 +5,9 @@ import stripe
 import os
 from decimal import Decimal, Rounded, localcontext
 from collections import namedtuple
-from webshop_entities import category_entity, product_entity, transaction_entity, transaction_content_entity, product_action_entity, webshop_completed_actions, membership_products
+from webshop_entities import category_entity, product_entity, transaction_entity, transaction_content_entity, product_action_entity, webshop_completed_actions, membership_products, webshop_stripe_pending
+from typing import Set
+
 CartItem = namedtuple('CartItem', 'id count amount')
 
 instance = service.create(name="Makerspace Webshop Backend", url="webshop", port=8000, version="1.0")
@@ -44,6 +46,8 @@ transaction_content_entity.add_routes(instance, "transaction_content")
 
 webshop_completed_actions.db = db
 webshop_completed_actions.add_routes(instance, "completed_actions")
+
+webshop_stripe_pending.db = db
 
 
 @instance.route("pending_actions", methods=["GET"])
@@ -213,6 +217,43 @@ def register():
         raise
 
 
+@instance.route("stripe_callback", methods=["GET"])
+@route_helper
+def stripe_callback():
+    payload = request.body
+    sig_header = request.META['HTTP_STRIPE_SIGNATURE']
+    event = None
+
+    try:
+        event = stripe.Webhook.construct_event(
+          payload, sig_header, endpoint_secret
+        )
+    except ValueError as e:
+        # Invalid payload
+        return abort(400)
+    except stripe.error.SignatureVerificationError as e:
+        # Invalid signature
+        return abort(400)
+
+    if event.type in ["source.chargeable", "source.failed", "source.canceled"]:
+        source = event.data.object
+        with db.cursor() as cur:
+            cur.execute("SELECT transaction_id FROM webshop_transactions INNER JOIN webshop_stripe_pending ON webshop_transactions.id=webshop_stripe_pending.transaction_id WHERE webshop_stripe_pending.stripe_token=%s", (source.id,))
+            transaction_id = cur.fetchone()
+            if transaction_id is None:
+                abort(400, f"no transaction exists for that token ({source.id})")
+
+        if event.type == "source.chargeable":
+            # Payment should happen now
+            stripe_payment(transaction_id, source)
+        else:
+            # Payment failed
+            tr = transaction_entity.get(transaction_id)
+            tr["status"] = "failed"
+            transaction_entity.put(tr, transaction_id)
+            eprint("Marked transaction as failed")
+
+
 def process_cart(cart):
     with db.cursor() as cur:
         prices = []
@@ -263,10 +304,13 @@ def validate_payment(cart, expected_amount):
     if total_amount > 10000:
         abort(400, "Not allowing purchases above 10000 kr to avoid mistakes")
 
+    # Assert that the amount can be converted to a valid stripe amount
+    convert_to_stripe_amount(total_amount)
+
     return total_amount, items
 
 
-def stripe_payment(amount, token):
+def convert_to_stripe_amount(amount: Decimal):
     # Ensure that the amount to pay is in whole cents (ören)
     # This shouldn't be able to fail as all products in the database have prices in cents, but you never know.
     stripe_amount = amount * stripe_currency_base
@@ -274,7 +318,16 @@ def stripe_payment(amount, token):
         raise Exception("Amount did not convert purely to cents: " + str(amount))
 
     # The amount is stored as a Decimal, convert it to an int
-    stripe_amount = int(stripe_amount)
+    return int(stripe_amount)
+
+
+def stripe_payment(transaction_id: int, token: str):
+    transaction = transaction_entity.get(transaction_id)
+
+    if transaction["status"] != "pending":
+        raise Exception("To complete a payment, it must be currently pending")
+
+    stripe_amount = convert_to_stripe_amount(Decimal(transaction["amount"]))
 
     try:
         charge = stripe.Charge.create(
@@ -292,8 +345,14 @@ def stripe_payment(amount, token):
         eprint(e)
         abort(400, "failed")
 
+    transaction["status"] = "completed"
+    transaction_entity.put(transaction, transaction_id)
 
-def send_receipt_email(member_id, transaction_id):
+    send_receipt_email(transaction["member_id"], transaction_id)
+    eprint("Payment complete. id: " + str(transaction_id))
+
+
+def send_receipt_email(member_id: int, transaction_id: int):
     transaction = transaction_entity.get(transaction_id)
     items = transaction_content_entity.list("transaction_id=%s", transaction_id)
     products = [product_entity.get(item["product_id"]) for item in items]
@@ -315,7 +374,7 @@ def send_receipt_email(member_id, transaction_id):
         eprint(r.text)
 
 
-duplicatePurchaseRands = set()
+duplicatePurchaseRands: Set[int] = set()
 
 
 @instance.route("pay", methods=["POST"], permission=None)
@@ -327,6 +386,29 @@ def pay_route():
 
     member_id = int(assert_get(request.headers, "X-User-Id"))
     return pay(member_id, data)
+
+
+def add_transaction_to_db(member_id: int, total_amount: Decimal, items):
+    transaction_id = transaction_entity.post({"member_id": member_id, "amount": total_amount, "status": "pending"})["id"]
+    for item in items:
+        transaction_content_entity.post({"transaction_id": transaction_id, "product_id": item.id, "count": item.count, "amount": item.amount})
+    return transaction_id
+
+
+def create_stripe_source(transaction_id: int, card_source: str, total_amount: Decimal):
+    stripe_amount = convert_to_stripe_amount(total_amount)
+    eprint("Token: " + str(card_source))
+    return stripe.Source.create(
+        amount=stripe_amount,
+        currency=currency,
+        type='three_d_secure',
+        three_d_secure={
+            'card': card_source,
+        },
+        redirect={
+            'return_url': instance.gateway.get_frontend_url(f"shop/receipt/{transaction_id}")
+        },
+    )
 
 
 def pay(member_id, data):
@@ -341,16 +423,36 @@ def pay(member_id, data):
 
     total_amount, items = validate_payment(data["cart"], data["expectedSum"])
 
-    token = assert_get(data, "stripeToken")
-    stripe_payment(total_amount, token)
+    transaction_id = add_transaction_to_db(member_id, total_amount, items)
+    card_source = assert_get(data, "stripeSource")
+
+    source = create_stripe_source(transaction_id, card_source, total_amount)
+    eprint(source)
+
+    status = source.redirect.status
+    if status == "pending":
+        # Redirect the user to do the 3D secure confirmation step
+        webshop_stripe_pending.post({ "transaction_id": transaction_id, "stripe_token": source.id })
+        return { "redirect": source.redirect.url }
+    elif status == "failed":
+        # The card does not support 3D secure
+        # Try a normal payment
+        token = card_source
+    elif status == "chargeable":
+        # This can happen in some cases when 3D secure is sort of supported
+        # but the user does not need to perform any steps for it.
+        token = source
+    elif status == "not_required":
+        # Try a normal payment
+        token = card_source
+    else:
+        eprint(f"Unknown stripe source status '{status}'")
+        abort(500, f"Unknown stripe source status '{status}'")
+
+    stripe_payment(transaction_id, token)
 
     duplicatePurchaseRands.add(duplicatePurchaseRand)
-    transaction_id = transaction_entity.post({"member_id": member_id, "amount": total_amount})["id"]
-    for item in items:
-        transaction_content_entity.post({"transaction_id": transaction_id, "product_id": item.id, "count": item.count, "amount": item.amount})
 
-    send_receipt_email(member_id, transaction_id)
-    eprint("Payment complete. id: " + str(transaction_id))
     return {"transaction_id": transaction_id}
 
 

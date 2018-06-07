@@ -18,22 +18,28 @@
             <div class="receipt-image">
                 <img src='{{ url("static/images/logo-transparent-500px-300x210.png") }}' />
             </div>
-            <h1>Tack för ditt köp!</h1>
-            <div>
-                {% for product, cartItem in cart %}
-                    <div class="receipt-item">
-                        <span class="product-title">{{ product.name }}</span>
-                        <span class="receipt-item-count">{{ cartItem.count }} {{ product.unit }}</span>
-                        <span class="receipt-item-amount">{{ cartItem.amount }} {{ currency }}</span>
-                    </div>
-                {% endfor %}
-            </div>
-            <div class="receipt-amount">
-                <span>{{ transaction.amount }} {{ currency }}</span>
-            </div>
-            <div class="receipt-message">
-                Ett kvitto har också skickats via email.
-            </div>
+            {% if transaction.status == "failed" %}
+                <h1>Din betalning misslyckades</h1>
+            {% elif transaction.status == "pending" %}
+                <h1>Din betalning har inte bekräftats ännu</h1>
+            {% elif transaction.status == "completed" %}
+                <h1>Tack för ditt köp!</h1>
+                <div>
+                    {% for product, cartItem in cart %}
+                        <div class="receipt-item">
+                            <span class="product-title">{{ product.name }}</span>
+                            <span class="receipt-item-count">{{ cartItem.count }} {{ product.unit }}</span>
+                            <span class="receipt-item-amount">{{ cartItem.amount }} {{ currency }}</span>
+                        </div>
+                    {% endfor %}
+                </div>
+                <div class="receipt-amount">
+                    <span>{{ transaction.amount }} {{ currency }}</span>
+                </div>
+                <div class="receipt-message">
+                    Ett kvitto har också skickats via email.
+                </div>
+            {% endif %}
             <div class="receipt-buttons">
                 <a href='/member'>Medlemsvy</a>
                 <a href='{{ url("") }}'>Webshop</a>
