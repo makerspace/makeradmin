@@ -31,6 +31,7 @@ config = {
     "HOST_FRONTEND": "http://localhost:8009",
     "STRIPE_PRIVATE_KEY": "",
     "STRIPE_PUBLIC_KEY": "",
+    "STRIPE_SIGNING_SECRET": "",
 }
 
 if not args.force and os.path.isfile(".env"):

@@ -92,6 +92,7 @@ services:
         APP_DEBUG: "true"
         STRIPE_PRIVATE_KEY:
         STRIPE_PUBLIC_KEY:
+        STRIPE_SIGNING_SECRET:
     depends_on:
       - api-gateway
     networks:

@@ -16,6 +16,8 @@ instance = service.create(name="Makerspace Webshop Backend", url="webshop", port
 db = instance.db
 
 stripe.api_key = os.environ["STRIPE_PRIVATE_KEY"]
+stripe_signing_secret = os.environ["STRIPE_SIGNING_SECRET"]
+
 # All stripe calculations are done with cents (ören in Sweden)
 stripe_currency_base = 100
 currency = "sek"
