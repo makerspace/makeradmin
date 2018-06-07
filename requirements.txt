@@ -1,0 +1,3 @@
+# Requirements file for utils.
+requests
+pip

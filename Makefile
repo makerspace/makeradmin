@@ -4,6 +4,9 @@ build: .env
 run: .env
 	docker-compose up
 
+init:
+	python3 -m pip install --upgrade -r requirements.txt
+
 init-db: .env
 	python3 db_init.py
 
