@@ -29,6 +29,8 @@ config = {
     "MAILGUN_TO_OVERRIDE": "",
     "HOST_BACKEND": "localhost:8010",
     "HOST_FRONTEND": "localhost:8009",
+    "STRIPE_PRIVATE_KEY": "",
+    "STRIPE_PUBLIC_KEY": "",
 }
 
 if not args.force and os.path.isfile(".env"):

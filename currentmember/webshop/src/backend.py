@@ -2,6 +2,7 @@ from flask import request, abort, jsonify, render_template
 import service
 from service import eprint, assert_get, SERVICE_USER_ID, route_helper
 import stripe
+import os
 from decimal import Decimal, Rounded, localcontext
 from collections import namedtuple
 from webshop_entities import category_entity, product_entity, transaction_entity, transaction_content_entity, product_action_entity, webshop_completed_actions, membership_products
@@ -12,8 +13,7 @@ instance = service.create(name="Makerspace Webshop Backend", url="webshop", port
 # Grab the database so that we can use it inside requests
 db = instance.db
 
-# TODO: Get from env
-stripe.api_key = "sk_test_4CJly7zar1Ahq8bmKn1wk5Ya"
+stripe.api_key = os.environ["STRIPE_PRIVATE_KEY"]
 # All stripe calculations are done with cents (ören in Sweden)
 stripe_currency_base = 100
 currency = "sek"
@@ -66,6 +66,7 @@ def pending_actions():
             INNER JOIN webshop_actions ON webshop_actions.id=webshop_product_actions.action_id
             INNER JOIN webshop_transactions ON webshop_transactions.id=webshop_transaction_contents.transaction_id
             WHERE webshop_completed_actions.content_id IS NULL
+            AND webshop.transactions.status='complete'
             AND webshop_transactions.created_at>webshop_product_actions.created_at
             AND (webshop_transactions.created_at<webshop_product_actions.deleted_at OR webshop_product_actions.deleted_at IS NULL)
             """)

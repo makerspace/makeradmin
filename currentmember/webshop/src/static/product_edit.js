@@ -1,6 +1,6 @@
 $(document).ready(() => {
-    let apiBasePath = "http://" + window.location.hostname + ":8010";
-    let currency = "kr";
+    const apiBasePath = window.apiBasePath;
+    const currency = "kr";
 
     $("#unit").on("input change", ev => {
         $("#price-unit").html(currency + "/" + $(ev.currentTarget).val());

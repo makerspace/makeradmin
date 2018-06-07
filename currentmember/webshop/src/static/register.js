@@ -1,7 +1,7 @@
 $(document).ready(() => {
   // Create a Stripe client.
-  const stripe = Stripe('pk_test_bzZLzeh8RXxM8nnEloZdisTp');
-  let apiBasePath = "http://" + window.location.hostname + ":8010";
+  const stripe = Stripe(window.stripeKey);
+  const apiBasePath = window.apiBasePath;
 
   // Create an instance of Elements.
   const elements = stripe.elements({ locale: "sv" });

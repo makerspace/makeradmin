@@ -90,6 +90,8 @@ services:
         HOST_FRONTEND:
         HOST_BACKEND:
         APP_DEBUG: "true"
+        STRIPE_PRIVATE_KEY:
+        STRIPE_PUBLIC_KEY:
     depends_on:
       - api-gateway
     networks:
