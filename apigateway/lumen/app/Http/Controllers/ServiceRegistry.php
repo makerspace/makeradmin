@@ -168,6 +168,7 @@ class ServiceRegistry extends Controller
 
 		// Forward the authorization header
 		$ch->setHeader("Authorization", $request->header("Authorization"));
+		$ch->setHeader("Stripe-Signature", $request->header("Stripe-Signature"));
 
 		// Get JSON and POST data
 		// TODO: Laravel is probably processing this data and creating a temp file

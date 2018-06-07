@@ -223,12 +223,13 @@ def register():
 @route_helper
 def stripe_callback():
     payload = request.data
-    sig_header = request.headers['STRIPE_SIGNATURE']
+    eprint("Headers: " + str(request.headers))
+    sig_header = request.headers['Stripe-Signature']
     event = None
 
     try:
         event = stripe.Webhook.construct_event(
-          payload, sig_header, endpoint_secret
+          payload, sig_header, stripe_signing_secret
         )
     except ValueError as e:
         # Invalid payload
