@@ -1,0 +1,3 @@
+CONTAINER_NAME=makeradmin-apigateway
+CONTAINER_TAG=makeradmin/apigateway
+CONTAINER_VERSION=1.0
