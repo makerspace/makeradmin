@@ -38,13 +38,15 @@ $app->post("service/unregister", ["middleware" => "auth:service", "uses" => "Ser
 $app->group(["middleware" => "auth"], function() use ($app)
 {
 	// Service registry
-	$app->   get("service/list",       "ServiceRegistry@list");
+	//TODO: Change required permission
+	$app->   get("service/list",       ["middleware" => "permission:member_view", "uses" => "ServiceRegistry@list"]);
 
 	// Relations
-	$app->   get("relations", "Relations@relations");// TODO: Remove this API
-	$app->   get("relation",  "Relations@relation");
-	$app->  post("relation",  "Relations@createRelation");
-	$app->   get("related",   "Relations@related");
+	//TODO: Change required permission
+	$app->   get("relations", ["middleware" => "permission:member_view", "uses" => "Relations@relations"]);// TODO: Remove this API
+	$app->   get("relation",  ["middleware" => "permission:member_view", "uses" => "Relations@relation"]);
+	$app->  post("relation",  ["middleware" => "permission:member_view", "uses" => "Relations@createRelation"]);
+	$app->   get("related",   ["middleware" => "permission:member_view", "uses" => "Relations@related"]);
 
 	// Facades
 	$app->   get("facade",    "Facade@index");
