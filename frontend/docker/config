@@ -1,0 +1,3 @@
+CONTAINER_NAME=makeradmin-frontend
+CONTAINER_TAG=makeradmin/frontend
+CONTAINER_VERSION=1.0
