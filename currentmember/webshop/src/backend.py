@@ -237,6 +237,7 @@ def stripe_callback():
         # Invalid signature
         return abort(400)
 
+    eprint(f"Received stripe callback of type {event.type}")
     if event.type in ["source.chargeable", "source.failed", "source.canceled"]:
         source = event.data.object
         with db.cursor() as cur:
