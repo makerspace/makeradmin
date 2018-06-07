@@ -6,6 +6,8 @@ services:
     # Therefore we need to override the mysql starting command to set a config option to use the older password authentication plugin.
     command: mysqld --default-authentication-plugin=mysql_native_password
     restart: always
+    ports:
+      - "3306:3306"
     volumes:
       - dbdata:/var/lib/mysql
       - ./logs/mysql:/var/www/html/storage/logs
