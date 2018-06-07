@@ -1,0 +1,19 @@
+#!/bin/bash
+
+ABSOLUTE_PATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source $ABSOLUTE_PATH/config
+
+arguments=""
+for var in "$@"
+do
+    arguments="$arguments -e $var"
+done
+
+# Create the API Gateway container
+docker run -d \
+    --name $CONTAINER_NAME \
+    --net makeradmin \
+    -e APP_DEBUG=true \
+    $arguments \
+    -v $ABSOLUTE_PATH/../lumen:/var/www/html \
+    $CONTAINER_TAG:$CONTAINER_VERSION

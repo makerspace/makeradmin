@@ -1,0 +1,3 @@
+CONTAINER_NAME=makeradmin-membership
+CONTAINER_TAG=makeradmin/membership
+CONTAINER_VERSION=1.0
