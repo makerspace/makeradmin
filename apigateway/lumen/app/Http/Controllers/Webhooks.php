@@ -36,6 +36,8 @@ class Webhooks extends Controller
 		$ch->setHeader("Stripe-Signature", $request->header("Stripe-Signature"));
 		
 		$post = $request->getContent();
+		$ch->setHeader("Content-Type", "application/json");
+		$ch->setHeader("Content-Length", strlen($post));
 
 		// Create a new url with the service endpoint url included
 		$url = $service->endpoint . $request->path();
