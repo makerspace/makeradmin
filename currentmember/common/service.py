@@ -9,7 +9,7 @@ import signal
 from time import sleep
 from functools import wraps
 from dataclasses import dataclass
-from typing import Callable, Type
+from typing import Callable, Type, Optional
 from datetime import datetime
 from dateutil import parser
 from decimal import Decimal
@@ -42,7 +42,10 @@ class APIGateway:
         self.auth_headers = {"Authorization": "Bearer " + key}
 
     def get_frontend_url(self, path):
-        return "http://" + self.host_frontend + "/" + path
+        host = self.host_frontend
+        if not host.startswith("http"):
+            host = "http://" + host
+        return host + "/" + path
 
     def get(self, path, payload=None):
         return requests.get('http://' + self.host + "/" + path, params=payload, headers=self.auth_headers)
@@ -271,15 +274,15 @@ class Column:
     '''Name of the corresponding column in the database table'''
     db_column: str
     '''Type of the field. If set to Decimal or DateTime then read and write will be automatically filled with sensible defaults (unless overriden manually)'''
-    dtype: Type = None
+    dtype: Optional[Type] = None
     '''Functions which is run on every value that is read from the database. If None, the field will not be read from the database.'''
-    read: Callable = identity
+    read: Optional[Callable] = identity
     '''Functions which is run on every value that is written to the database. If None, the field cannot be written to.'''
-    write: Callable = identity
+    write: Optional[Callable] = identity
     '''Name of the column in the exposed API. If None, it will be the same as db_column'''
-    exposed_name: str = None
+    exposed_name: Optional[str] = None
     '''Name alias which can be used in filters'''
-    alias: str = None
+    alias: Optional[str] = None
 
     def __post_init__(self):
         self.exposed_name = self.exposed_name or self.db_column
