@@ -1,17 +1,22 @@
 from flask import Flask, abort
 import service
 from service import Entity, eprint, route_helper
-from dateutil import parser
 from datetime import datetime, timedelta
+from service import Column
 
 key_entity = Entity(
     table="rfid",
-    columns=["title", "description", "tagid", "status", "startdate", "enddate"],
-    write_transforms={"startdate": lambda x: None if x is None else parser.parse(x), "enddate": lambda x: None if x is None else parser.parse(x)},
-    select_transforms={"startdate": Entity.select_datetime, "enddate": Entity.select_datetime},
-    # Expose the 'id' field as 'key_id'
-    # Mostly for backwards compatibility with the old RFID module
-    exposed_column_names={"id": "key_id"}
+    columns=[
+        # Expose the 'id' field as 'key_id'
+        # Mostly for backwards compatibility with the old RFID module
+        Column("id", write=None, exposed_name="key_id"),
+        "title",
+        "description",
+        "tagid",
+        "status",
+        Column("startdate", dtype=datetime),
+        Column("enddate", dtype=datetime),
+    ],
 )
 
 instance = service.create(name="RFID", url="keys", port=80, version="1.0")

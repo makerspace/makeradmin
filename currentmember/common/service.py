@@ -8,6 +8,11 @@ import socket
 import signal
 from time import sleep
 from functools import wraps
+from dataclasses import dataclass
+from typing import Callable, Type
+from datetime import datetime
+from dateutil import parser
+from decimal import Decimal
 
 SERVICE_USER_ID = -1
 
@@ -257,46 +262,65 @@ def route_helper(f, json=False, status="ok"):
 DEFAULT_WHERE = object()
 
 
-class Entity:
-    _comparison_operators = {"eq": "=", "ne": "<>", "lt": "<", "gt": ">", "le": "<=", "ge": ">="}
-    @staticmethod
-    def select_datetime(column):
-        return f"DATE_FORMAT({column}, '%%Y-%%m-%%dT%%H:%%i:%%sZ')"
+def identity(x):
+    return x
 
-    def __init__(self, table, columns, read_columns=[], read_transforms={}, write_transforms={}, exposed_column_names={}, column_alias={}, select_transforms = {}, allow_delete=True):
+
+@dataclass
+class Column:
+    '''Name of the corresponding column in the database table'''
+    db_column: str
+    '''Type of the field. If set to Decimal or DateTime then read and write will be automatically filled with sensible defaults (unless overriden manually)'''
+    dtype: Type = None
+    '''Functions which is run on every value that is read from the database. If None, the field will not be read from the database.'''
+    read: Callable = identity
+    '''Functions which is run on every value that is written to the database. If None, the field cannot be written to.'''
+    write: Callable = identity
+    '''Name of the column in the exposed API. If None, it will be the same as db_column'''
+    exposed_name: str = None
+    '''Name alias which can be used in filters'''
+    alias: str = None
+
+    def __post_init__(self):
+        self.exposed_name = self.exposed_name or self.db_column
+        if self.dtype == datetime:
+            self.read = (lambda x: x.isoformat()) if self.read == identity else self.read
+            self.write = (lambda x: None if x is None else parser.parse(x)) if self.write == identity else self.write
+        elif self.dtype == Decimal:
+            self.read = (lambda x: str(x)) if self.read == identity else self.read
+            self.write = (lambda x: Decimal(str(x))) if self.write == identity else self.write
+
+
+class Entity:
+    def __init__(self, table, columns, allow_delete=True):
         '''
-        table: The name of the table in the database
-        columns: List of column names in the database (excluding the id column which is implicit)
-        read_transforms: Map from column names to lambda functions which are run on every value that is read from the database
-        write_transforms: Map from column names to lambda functions which are run on every value that is written to the database
-        exposed_column_names: Map from column names to the name of the field as seen by users of this API (e.g you can rename 'id' to show up as 'object_id' when using the API for example)
+        table: The name of the table in the database.
+        columns: List of column names in the database (excluding the id column which is implicit).
+        allow_delete: Allow deleting an entity in the database. Or false, trying to call delete will raise a MethodNotAllowed exception.
         '''
         self.table = table
-        self.columns = columns[:]
-        self.all_columns = self.columns[:] + read_columns
-        self.all_columns.insert(0, "id")
-        self.column_name2exposed_name = dict(exposed_column_names)
-        self.read_transforms = dict(read_transforms)
-        self.write_transforms = dict(write_transforms)
-        self.column_alias = dict(column_alias)
-        self.column_alias["entity_id"] = "id"
+        self.columns = [Column(c) if isinstance(c, str) else c for c in columns]
+
+        if "id" not in [c.db_column for c in self.columns]:
+            self.columns.insert(0, Column("id"))
+
+        for c in self.columns:
+            c.exposed_name = c.exposed_name or c.db_column
+            # Override settings in existing id column
+            if c.db_column == "id":
+                c.write = None
+                c.alias = c.alias or "entity_id"
+
+        self._readable = [c for c in self.columns if c.read is not None]
+        self._writeable = [c for c in self.columns if c.write is not None]
         self.db = None
         self.allow_delete = allow_delete
 
-        for c in self.all_columns:
-            if c not in self.column_name2exposed_name:
-                self.column_name2exposed_name[c] = c
-            if c not in self.read_transforms:
-                self.read_transforms[c] = lambda x: x
-            if c not in self.write_transforms:
-                self.write_transforms[c] = lambda x: x
-
-        self.fields = ",".join(self.columns)
-        self.select_fields = ",".join([select_transforms[col](col) if col in select_transforms else col for col in self.all_columns])
+        self._read_fields = ",".join(c.db_column for c in self._readable)
 
     def get(self, id):
         with self.db.cursor() as cur:
-            cur.execute(f"SELECT {self.select_fields} FROM {self.table} WHERE id=%s", (id,))
+            cur.execute(f"SELECT {self._read_fields} FROM {self.table} WHERE id=%s", (id,))
             item = cur.fetchone()
             if item is None:
                 raise NotFound(f"No item with id '{id}' in table {self.table}")
@@ -304,24 +328,24 @@ class Entity:
             return self._convert_to_dict(item)
 
     def _convert_to_row(self, data):
-        return [self.write_transforms[col](data[self.column_name2exposed_name[col]]) for col in self.columns]
+        return [c.write(data[c.exposed_name]) for c in self._writeable]
 
     def _convert_to_dict(self, row):
-        return {
-            self.column_name2exposed_name[self.all_columns[i]]: self.read_transforms[self.all_columns[i]](row[i]) for i in range(len(self.all_columns))
-        }
+        assert len(row) == len(self._readable)
+        return {c.exposed_name: c.read(item) for c, item in zip(self._readable, row)}
 
     def put(self, data, id):
         with self.db.cursor() as cur:
             values = self._convert_to_row(data)
-            cols = ','.join(col + '=%s' for col in self.columns)
+            cols = ','.join(col.db_column + '=%s' for col in self._writeable)
             cur.execute(f"UPDATE {self.table} SET {cols} WHERE id=%s", (*values, id))
 
     def post(self, data):
         with self.db.cursor() as cur:
             values = self._convert_to_row(data)
-            cols = ','.join('%s' for col in self.columns)
-            cur.execute(f"INSERT INTO {self.table} ({self.fields}) VALUES({cols})", values)
+            cols = ','.join('%s' for col in self._writeable)
+            write_fields = ",".join(c.db_column for c in self._writeable)
+            cur.execute(f"INSERT INTO {self.table} ({write_fields}) VALUES({cols})", values)
             return self.get(cur.lastrowid)
 
     def delete(self, id):
@@ -332,31 +356,24 @@ class Entity:
             cur.execute(f"UPDATE {self.table} SET deleted_at=CURRENT_TIMESTAMP WHERE id=%s", (id,))
 
     def _format_column_filter(self, column, values):
-        where_format = column
-        if len(values) == 1:
-            where_format = where_format + "=%s"
-        elif len(values) == 2 and values[0] in Entity._comparison_operators:
-            where_format = where_format + Entity._comparison_operators[values[0].lower()] + "%s"
-            values = [values[1]]
-        elif len(values) >= 2:
-            where_format = where_format + " in (" + ",".join(["%s"] * len(values)) + ")"
-        else:
-            raise Exception("Unknown condition for column " + column)
-        return (where_format, tuple(map(self.write_transforms[column], values)))
+        return (f"{column.db_column} in ({','.join(['%s'] * len(values))})", list(map(column.write or (lambda x: x), values)))
 
     def list(self, where=DEFAULT_WHERE, where_values=[]):
         if where == DEFAULT_WHERE:
-            filters = {col: request.args[alias].split(",") for alias, col in self.column_alias.items() if alias in request.args and request.args[alias]}
-            filters.update({col: request.args[val].split(",") for col, val in self.column_name2exposed_name.items() if val in request.args and request.args[val]})
-            filter_data = [self._format_column_filter(col, val) for col, val in filters.items()]
-            where = " and ".join([val[0] for val in filter_data])
-            where_values = tuple([val_i for val in filter_data for val_i in val[1] ])
-            if self.allow_delete and not "deleted_at" in filters:
-                where = where + " and deleted_at IS NULL" if where else "deleted_at IS NULL"
+            name2col = {c.exposed_name: c for c in self._readable}
+            name2col.update({c.alias: c for c in self._readable if c.alias is not None})
+
+            filter_data = [self._format_column_filter(name2col[key], value.split(",")) for key,value in request.args.items() if key in name2col]
+
+            if self.allow_delete:
+                filter_data.append(("deleted_at IS NULL", []))
+
+            where = " and ".join(val[0] for val in filter_data)
+            where_values = tuple(val_i for val in filter_data for val_i in val[1])
 
         with self.db.cursor() as cur:
             where = "WHERE " + where if where else ""
-            cur.execute(f"SELECT {self.select_fields} FROM {self.table} {where}", where_values)
+            cur.execute(f"SELECT {self._read_fields} FROM {self.table} {where}", where_values)
             rows = cur.fetchall()
             return [self._convert_to_dict(row) for row in rows]
 

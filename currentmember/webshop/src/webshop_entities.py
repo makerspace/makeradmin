@@ -1,5 +1,6 @@
 from decimal import Decimal
-from service import Entity
+from datetime import datetime
+from service import Entity, Column
 
 # Note Decimal(str(x)) ensures it is a reasonable value that is saved.
 # For example
@@ -8,9 +9,7 @@ from service import Entity
 # Decimal("0.2") = Decimal('0.2')
 product_entity = Entity(
     table="webshop_products",
-    columns=["name", "category_id", "description", "unit", "price", "smallest_multiple"],
-    write_transforms={"price": lambda x: Decimal(str(x))},
-    read_transforms={"price": lambda x: str(x)},
+    columns=["name", "category_id", "description", "unit", Column("price", dtype=Decimal), "smallest_multiple"],
 )
 
 category_entity = Entity(
@@ -20,18 +19,17 @@ category_entity = Entity(
 
 transaction_content_entity = Entity(
     table="webshop_transaction_contents",
-    columns=["transaction_id", "product_id", "count", "amount"],
-    write_transforms={"amount": lambda x: Decimal(str(x))},
-    read_transforms={"amount": lambda x: str(x)},
+    columns=["transaction_id", "product_id", "count", Column("amount", dtype=Decimal)],
     allow_delete=False,
 )
 
 transaction_entity = Entity(
     table="webshop_transactions",
-    columns=["member_id", "amount"],
-    read_columns=["created_at"],
-    write_transforms={"amount": lambda x: Decimal(str(x))},
-    read_transforms={"amount": lambda x: str(x)},
+    columns=[
+        "member_id",
+        Column("created_at", dtype=datetime, write=None),
+        Column("amount", dtype=Decimal)
+    ],
     allow_delete=False,
 )
 
