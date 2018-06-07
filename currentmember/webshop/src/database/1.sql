@@ -96,3 +96,16 @@ INSERT INTO webshop_actions (name) VALUES('add_labaccess_days');
 ALTER TABLE `webshop_product_actions` ADD `created_at` datetime DEFAULT CURRENT_TIMESTAMP;
 ALTER TABLE `webshop_product_actions` ADD `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP;
 ALTER TABLE `webshop_product_actions` ADD `deleted_at` datetime DEFAULT NULL;
+
+ALTER TABLE `webshop_transactions` ADD `status` enum('pending','completed', 'failed') COLLATE utf8mb4_unicode_ci NOT NULL;
+
+# For stripe
+CREATE TABLE `webshop_stripe_pending` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `transaction_id` int(10) unsigned NOT NULL,
+  `stripe_token` varchar(255) NOT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `token_key` (stripe_token),
+  CONSTRAINT transaction_constraint2 FOREIGN KEY (`transaction_id`) REFERENCES `webshop_transactions` (`id`)
+);

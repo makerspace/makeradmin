@@ -27,8 +27,12 @@ config = {
     "MAILGUN_KEY": "",
     "MAILGUN_FROM": "MakerAdmin <excited@samples.mailgun.org>",
     "MAILGUN_TO_OVERRIDE": "",
-    "HOST_BACKEND": "localhost:8010",
-    "HOST_FRONTEND": "localhost:8009",
+    "HOST_BACKEND": "http://localhost:8010",
+    "HOST_FRONTEND": "http://localhost:8009",
+    "STRIPE_PRIVATE_KEY": "",
+    "STRIPE_PUBLIC_KEY": "",
+    "STRIPE_SIGNING_SECRET": "",
+    "APP_DEBUG": "false",
 }
 
 if not args.force and os.path.isfile(".env"):

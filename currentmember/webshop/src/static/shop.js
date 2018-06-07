@@ -1,7 +1,7 @@
 $(document).ready(() => {
   // Create a Stripe client.
-  var stripe = Stripe('pk_test_bzZLzeh8RXxM8nnEloZdisTp');
-  const apiBasePath = "http://" + window.location.hostname + ":8010";
+  const stripe = Stripe(window.stripeKey);
+  const apiBasePath = window.apiBasePath; // "http://" + window.location.hostname + ":8010";
 
   // Create an instance of Elements.
   const elements = stripe.elements({ locale: "sv" });
@@ -280,7 +280,7 @@ $(document).ready(() => {
     let errorElement = document.getElementById('card-errors');
     errorElement.textContent = "";
 
-    stripe.createToken(card).then(function(result) {
+    stripe.createSource(card).then(function(result) {
       if (result.error) {
         $(".progress-spinner").toggleClass("progress-spinner-visible", false);
         // Inform the user if there was an error.
@@ -293,7 +293,7 @@ $(document).ready(() => {
           data: JSON.stringify({
             cart: cart,
             expectedSum: sumCart(cart),
-            stripeToken: result.token.id,
+            stripeSource: result.source.id,
             duplicatePurchaseRand: duplicatePurchaseRand,
           }),
           contentType: "application/json; charset=utf-8",
@@ -305,7 +305,11 @@ $(document).ready(() => {
           $(".progress-spinner").toggleClass("progress-spinner-visible", false);
           waitingForPaymentResponse = false;
           localStorage.setItem("cart", "");
-          window.location.href = "receipt/" + xhr.responseJSON.data.transaction_id;
+          if (xhr.responseJSON.data.redirect !== undefined) {
+            window.location.href = xhr.responseJSON.data.redirect;
+          } else {
+            window.location.href = "receipt/" + xhr.responseJSON.data.transaction_id;
+          }
           // UIkit.modal.alert("Betalningen har genomförts");
         }).fail((xhr, textStatus, error) => {
           $(".progress-spinner").toggleClass("progress-spinner-visible", false);

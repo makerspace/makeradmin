@@ -43,7 +43,7 @@ services:
     networks:
       - makeradmin
     environment:
-      APP_DEBUG: "true"
+      APP_DEBUG:
       MYSQL_HOST: "db2:${MYSQL_PORT}"
       MYSQL_DB: "makeradmin-apigateway"
       MYSQL_USER: "${MYSQL_USER}"
@@ -64,7 +64,7 @@ services:
       BEARER: "${API_BEARER}"
       HOST_FRONTEND:
       HOST_BACKEND:
-      APP_DEBUG: "true"
+      APP_DEBUG:
     depends_on:
       - api-gateway
     networks:
@@ -81,15 +81,18 @@ services:
     ports:
       - "8011:80"
     environment:
-        MYSQL_HOST: "db2:${MYSQL_PORT}"
-        MYSQL_DB: "makeradmin-webshop"
-        MYSQL_USER: "${MYSQL_USER}"
-        MYSQL_PASS: "${MYSQL_PASS}"
-        APIGATEWAY: "api-gateway"
-        BEARER: "${API_BEARER}"
-        HOST_FRONTEND:
-        HOST_BACKEND:
-        APP_DEBUG: "true"
+      MYSQL_HOST: "db2:${MYSQL_PORT}"
+      MYSQL_DB: "makeradmin-webshop"
+      MYSQL_USER: "${MYSQL_USER}"
+      MYSQL_PASS: "${MYSQL_PASS}"
+      APIGATEWAY: "api-gateway"
+      BEARER: "${API_BEARER}"
+      HOST_FRONTEND:
+      HOST_BACKEND:
+      APP_DEBUG:
+      STRIPE_PRIVATE_KEY:
+      STRIPE_PUBLIC_KEY:
+      STRIPE_SIGNING_SECRET:
     depends_on:
       - api-gateway
     networks:
@@ -109,7 +112,7 @@ services:
       BEARER: "${API_BEARER}"
       HOST_FRONTEND:
       HOST_BACKEND:
-      APP_DEBUG: "true"
+      APP_DEBUG:
     depends_on:
       - api-gateway
     networks:

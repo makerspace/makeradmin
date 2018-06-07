@@ -2,6 +2,7 @@ from flask import Flask, render_template, abort
 import service
 from service import eprint
 import json
+import os
 from webshop_entities import category_entity, product_entity, transaction_entity, transaction_content_entity, action_entity, membership_products
 
 instance = service.create_frontend(url="shop", port=80)
@@ -15,6 +16,14 @@ transaction_entity.db = db
 transaction_content_entity.db = db
 action_entity.db = db
 
+host_backend = os.environ["HOST_BACKEND"]
+if not host_backend.startswith("http"):
+    host_backend = "https://" + host_backend
+
+meta = {
+    "apiBasePath": host_backend,
+    "stripePublicKey": os.environ["STRIPE_PUBLIC_KEY"]
+}
 
 def product_data():
     with db.cursor() as cur:
@@ -49,14 +58,14 @@ def product_data():
 @instance.route("/")
 def home():
     all_products, categories = product_data()
-    return render_template("shop.html", product_json=json.dumps(all_products), categories=categories, url=instance.full_path)
+    return render_template("shop.html", product_json=json.dumps(all_products), categories=categories, url=instance.full_path, meta=meta)
 
 
 @instance.route("register")
 def register_member():
     products = membership_products(db)
     all_products, _ = product_data()
-    return render_template("register.html", product_json=json.dumps(all_products), products=products, currency="kr", url=instance.full_path)
+    return render_template("register.html", product_json=json.dumps(all_products), products=products, currency="kr", url=instance.full_path, meta=meta)
 
 
 @instance.route("member/<int:id>/history")
@@ -69,7 +78,7 @@ def purchase_history(id):
         abort(r.status_code, r.json()["message"])
 
     member = r.json()["data"]
-    return render_template("history.html", member=member, url=instance.full_path)
+    return render_template("history.html", member=member, url=instance.full_path, meta=meta)
 
 
 @instance.route("product/<int:id>/edit")
@@ -95,7 +104,7 @@ def product_edit(id):
         "action_categories": action_categories
     })
 
-    return render_template("product_edit.html", action_json=action_json, action_categories=action_categories, product=product, categories=categories, url=instance.full_path)
+    return render_template("product_edit.html", action_json=action_json, action_categories=action_categories, product=product, categories=categories, url=instance.full_path, meta=meta)
 
 
 @instance.route("product/create")
@@ -118,7 +127,7 @@ def product_create():
         "action_categories": action_categories
     })
 
-    return render_template("product_edit.html", action_json=action_json, action_categories=action_categories, product=product, categories=categories, url=instance.full_path)
+    return render_template("product_edit.html", action_json=action_json, action_categories=action_categories, product=product, categories=categories, url=instance.full_path, meta=meta)
 
 
 @instance.route("receipt/<int:id>")
@@ -127,7 +136,7 @@ def receipt(id):
     items = transaction_content_entity.list("transaction_id=%s", id)
     products = [product_entity.get(item["product_id"]) for item in items]
 
-    return render_template("receipt.html", cart=zip(products,items), transaction=transaction, currency="kr", url=instance.full_path)
+    return render_template("receipt.html", cart=zip(products,items), transaction=transaction, currency="kr", url=instance.full_path, meta=meta)
 
 
 instance.serve_indefinitely()

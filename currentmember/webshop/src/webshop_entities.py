@@ -27,6 +27,7 @@ transaction_entity = Entity(
     table="webshop_transactions",
     columns=[
         "member_id",
+        Column("status"),
         Column("created_at", dtype=datetime, write=None),
         Column("amount", dtype=Decimal)
     ],
@@ -49,6 +50,10 @@ webshop_completed_actions = Entity(
     columns=["content_id", "action_id"],
 )
 
+webshop_stripe_pending = Entity(
+    table="webshop_stripe_pending",
+    columns=["transaction_id", "stripe_token"],
+)
 
 def membership_products(db):
     # Find all products which gives a member membership
