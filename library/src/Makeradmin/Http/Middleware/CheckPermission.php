@@ -4,10 +4,11 @@ namespace Makeradmin\Http\Middleware;
 
 use Closure;
 use \Illuminate\Http\Request;
+use Makeradmin\SecurityHelper;
 
 class CheckPermission
 {
-	const DEFAULT_REQUIRED_PERMISSION = 'service';
+	const DEFAULT_REQUIRED_PERMISSION = SecurityHelper::DEFAULT_REQUIRED_PERMISSION;
 	/**
 	 * Create a new middleware instance.
 	 *
@@ -25,18 +26,12 @@ class CheckPermission
 	 * @return mixed
 	 */
 	public function handle(Request $request, Closure $next, $required_permission = DEFAULT_REQUIRED_PERMISSION) {
-		$user_permissions_string = $request->header("X-User-Permissions");
-		//TODO: validate $user_permissions_string
-		$permissions = explode(",", $user_permissions_string);
-		if (empty($required_permission)) {
-			$required_permission = DEFAULT_REQUIRED_PERMISSION;
-		}
-		$has_permission = 
-			in_array('service', $permissions) || // Services can access anything
-			in_array($required_permission, $permissions) ||
-			$required_permission === 'public';
+		//TODO: add signing token string from config
+		$user_permissions = SecurityHelper::verifyPermissionString($request->header("X-User-Permissions"), ''/*config(service.signing_token')*/);
 
-		if ($has_permission === true) {
+		if ($user_permissions !== false &&
+			SecurityHelper::checkPermission($required_permission, $user_permissions) === true) 
+		{
 			$response = $next($request);
 			return $response;
 		} else {

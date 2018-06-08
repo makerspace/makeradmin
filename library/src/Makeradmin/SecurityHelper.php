@@ -10,6 +10,7 @@ use Makeradmin\Libraries\CurlBrowser;
 class SecurityHelper {
 	const PERMISSION_PREFIX = 'permission';
 	const PREFIX_LENGTH = 10;
+	const DEFAULT_REQUIRED_PERMISSION = 'service';
 
 	public static function checkRoutePermissions(Application $app) {
 
@@ -47,6 +48,21 @@ class SecurityHelper {
 	}
 
 	/**
+	 * Check if the user_permissions contains the required permission.
+	 */
+	public static function checkPermission($required_permission, $user_permissions) {
+		$permissions = explode(",", $user_permissions);
+		if (empty($required_permission)) {
+			$required_permission = DEFAULT_REQUIRED_PERMISSION;
+		}
+		$has_permission =
+			in_array('service', $permissions) || // Services can access anything
+			in_array($required_permission, $permissions) ||
+			$required_permission === 'public';
+		return $has_permission;
+	}
+
+	/**
 	 * Add user_id and permissions headers to CurlBrowser
 	 */
 	public static function addPermissionHeaders(CurlBrowser $ch, $user_id, $signed_user_permissions = '') {
@@ -69,7 +85,7 @@ class SecurityHelper {
 
 	public static function verifyPermissionString($permissions, $signing_token){
 		// XXX: Implement verify permissions.
-		return true;
+		return $permissions;
 	}
 
 	public static function verifyPassword($password){
