@@ -36,6 +36,8 @@ services:
       dockerfile: ${PWD}/servicebase/DockerfileService
     volumes:
       - ./logs/apigateway:/var/www/html/storage/logs
+      - ./apigateway/lumen/routes:/var/www/html/routes
+      - ./apigateway/lumen/app:/var/www/html/app
     depends_on:
       - db2
     ports:
@@ -83,15 +85,18 @@ services:
     ports:
       - "8011:80"
     environment:
-        MYSQL_HOST: "db2:${MYSQL_PORT}"
-        MYSQL_DB: "makeradmin-webshop"
-        MYSQL_USER: "${MYSQL_USER}"
-        MYSQL_PASS: "${MYSQL_PASS}"
-        APIGATEWAY: "api-gateway"
-        BEARER: "${API_BEARER}"
-        HOST_FRONTEND:
-        HOST_BACKEND:
-        APP_DEBUG: "true"
+      MYSQL_HOST: "db2:${MYSQL_PORT}"
+      MYSQL_DB: "makeradmin-webshop"
+      MYSQL_USER: "${MYSQL_USER}"
+      MYSQL_PASS: "${MYSQL_PASS}"
+      APIGATEWAY: "api-gateway"
+      BEARER: "${API_BEARER}"
+      HOST_FRONTEND:
+      HOST_BACKEND:
+      APP_DEBUG:
+      STRIPE_PRIVATE_KEY:
+      STRIPE_PUBLIC_KEY:
+      STRIPE_SIGNING_SECRET:
     depends_on:
       - api-gateway
     networks:
@@ -125,6 +130,8 @@ services:
     volumes:
       - ./logs/economy:/var/www/html/storage/logs
       - ./data/economy-vouchers:/var/www/html/vouchers
+      - ./economy/lumen/routes:/var/www/html/routes
+      - ./economy/lumen/app:/var/www/html/app
     environment:
       MYSQL_HOST: "db2:${MYSQL_PORT}"
       MYSQL_DB: "makeradmin-economy"
@@ -165,6 +172,8 @@ services:
       dockerfile: ${PWD}/servicebase/DockerfileService
     volumes:
       - ./logs/messages:/var/www/html/storage/logs
+      - ./messages/lumen/routes:/var/www/html/routes
+      - ./messages/lumen/app:/var/www/html/app
     environment:
       MYSQL_HOST: "db2:${MYSQL_PORT}"
       MYSQL_DB: "makeradmin-messages"
@@ -182,6 +191,9 @@ services:
     build:
       context: ./emaildispatcher
       dockerfile: ${PWD}/servicebase/DockerfileService
+    volumes:
+      - ./emaildispatcher/lumen/routes:/var/www/html/routes
+      - ./emaildispatcher/lumen/app:/var/www/html/app
     environment:
       MYSQL_HOST: "db2:${MYSQL_PORT}"
       MYSQL_DB: "makeradmin-messages"
@@ -205,6 +217,8 @@ services:
       dockerfile: ${PWD}/servicebase/DockerfileService
     volumes:
       - ./data/multiaccess-uploads:/var/www/html/storage/uploads
+      - ./multiaccesssync/lumen/routes:/var/www/html/routes
+      - ./multiaccesssync/lumen/app:/var/www/html/app
     environment:
       APIGATEWAY: api-gateway
       BEARER: "${API_BEARER}"
