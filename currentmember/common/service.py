@@ -287,7 +287,7 @@ class Column:
     def __post_init__(self):
         self.exposed_name = self.exposed_name or self.db_column
         if self.dtype == datetime:
-            self.read = (lambda x: x.isoformat()) if self.read == identity else self.read
+            self.read = (lambda x: None if x is None else x.isoformat()) if self.read == identity else self.read
             self.write = (lambda x: None if x is None else parser.parse(x)) if self.write == identity else self.write
         elif self.dtype == Decimal:
             self.read = (lambda x: str(x)) if self.read == identity else self.read
