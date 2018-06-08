@@ -34,20 +34,18 @@ $app->post("webshop/stripe_callback", "Webhooks@stripe");
 $app->post("service/register",   ["middleware" => "auth:service", "uses" => "ServiceRegistry@register"]);
 $app->post("service/unregister", ["middleware" => "auth:service", "uses" => "ServiceRegistry@unregister"]);
 
-// Service registry
-//TODO: Change required permission
-$app->   get("service/list",       ["middleware" => "auth:service", "uses" => "ServiceRegistry@list"]);
-
-// Relations
-//TODO: Change required permission
-$app->   get("relations", ["middleware" => "auth:service", "uses" => "Relations@relations"]);// TODO: Remove this API
-$app->   get("relation",  ["middleware" => "auth:service", "uses" => "Relations@relation"]);
-$app->  post("relation",  ["middleware" => "auth:service", "uses" => "Relations@createRelation"]);
-$app->   get("related",   ["middleware" => "auth:service", "uses" => "Relations@related"]);
-
 // Require an authenticated user for these requests
 $app->group(["middleware" => "auth"], function() use ($app)
 {
+	// Service registry
+	$app->   get("service/list", ["middleware" => "permission:service", "uses" => "ServiceRegistry@list"]);
+
+	// Relations
+	$app->   get("relations",    ["middleware" => "permission:member_view", "uses" => "Relations@relations"]);// TODO: Remove this API
+	$app->   get("relation",     ["middleware" => "permission:member_view", "uses" => "Relations@relation"]);
+	$app->  post("relation",     ["middleware" => "permission:member_view", "uses" => "Relations@createRelation"]);
+	$app->   get("related",      ["middleware" => "permission:member_view", "uses" => "Relations@related"]);
+
 	// Facades
 	$app->   get("facade",    "Facade@index");
 
