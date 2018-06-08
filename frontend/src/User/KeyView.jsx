@@ -50,15 +50,14 @@ module.exports = withRouter(class Member extends React.Component
 				let sortKey = 0;
 				const id = key.key_id;
 
-				if (key.startdate != null && key.enddate != null && key.status == "active") {
-					const start = Date.parse(key.startdate);
+				if (key.enddate != null && key.status == "active") {
 					const end = Date.parse(key.enddate);
 
 					const millisecondsPerHour = 1000 * 3600;
 					const millisecondsPerDay = millisecondsPerHour * 24;
 					sortKey = end - Date.now();
 
-					if (Date.now() >= start) {
+					if (key.startdate == null || Date.now() >= Date.parse(key.startdate)) {
 						const remainingDays = Math.floor((end - Date.now()) / millisecondsPerDay);
 
 						if (remainingDays < -1) {
@@ -83,11 +82,26 @@ module.exports = withRouter(class Member extends React.Component
 							icon = "uk-icon-check";
 							color = "member-key-color-active";
 						}
-					} else {
+					} else if (end >= Date.now() && end >= Date.parse(key.startdate)) {
 						sortKey = 0;
 						const remainingDays = Math.floor((end - Date.now()) / millisecondsPerDay);
-						text = prefix + " blir aktiv " + start.toLocaleDateString("sv-se");
+						text = prefix + " blir aktiv " + Date.parse(key.startdate).toLocaleDateString("sv-se");
 						icon = "uk-icon-times";
+						color = "member-key-color-inactive";
+					} else {
+						sortKey = -1e27;
+						text = prefix + " är inaktiv.";
+						icon = "uk-icon-times";
+						color = "member-key-color-inactive";
+					}
+				} else if (key.enddate == null && key.status == "active") {
+					if (key.startdate == null || Date.now() >= Date.parse(key.startdate)) {
+						text = prefix + " är giltig tills vidare.";
+						icon = "uk-icon-check";
+						color = "member-key-color-active";
+					} else {
+						text = prefix + " är inte giltig än.";
+						icon = "uk-icon-check";
 						color = "member-key-color-inactive";
 					}
 				} else {
