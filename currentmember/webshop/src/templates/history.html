@@ -15,7 +15,7 @@
         <script>
             let member_id = {{ member.member_id }};
             const currency = "kr";
-            const apiBasePath = "http://" + window.location.hostname + ":8010";
+            const apiBasePath = window.apiBasePath;
 
             $(document).ready(() => {
                 $.ajax({
