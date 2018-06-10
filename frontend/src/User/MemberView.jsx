@@ -7,6 +7,7 @@ import MemberModel from './Models/Member'
 import Input from '../Components/Form/Input.jsx'
 import GenericEntityFunctions from '../GenericEntityFunctions'
 import KeyView from './KeyView.jsx'
+import auth from '../auth'
 
 module.exports = withRouter(class Member extends React.Component
 {
@@ -16,11 +17,22 @@ module.exports = withRouter(class Member extends React.Component
 		var member = new MemberModel({
 		});
 
-		member.fetch({success: () => {
-			// Since we do not use BackboneReact we have to update the view manually
-			this.forceUpdate();
-			console.log("Updated" + member.email + " " + member.created_at);
-		}});
+		member.fetch({
+			success: () => {
+				// Since we do not use BackboneReact we have to update the view manually
+				this.forceUpdate();
+				console.log("Updated" + member.email + " " + member.created_at);
+			},
+			error: (dummy1, data, dummy2) => {
+				if (data.status == 401) {
+					// Unauthorized, logging out user
+					auth.logout();
+				} else {
+					UIkit.notify("<h2>Error</h2>Received an unexpected result from the server<br><br>" + data.status + " " + data.statusText + "<br><br><pre>" + data.responseText + "</pre>", {timeout: 0, status: "danger"});
+				}
+			},
+			disableErrorNotifications: true
+		});
 
 		member.on("change sync", () => {
 			this.forceUpdate();

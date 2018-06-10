@@ -17,8 +17,7 @@ Backbone.sync = function(method, model, options)
 
 	// Add generic error handling to those models who doesn't implement own error handling
 	var oldError = options.error;
-//	if(!options.error)
-//	{
+	if(!options.disableErrorNotifications) {
 		options.error = function(data, xhr, options)
 		{
 			if(data.status == 401)
@@ -33,7 +32,7 @@ Backbone.sync = function(method, model, options)
 			// Call the old error method
 			return oldError(data, xhr, options);
 		}
-//	}
+	}
 
 	// Inject our own success method
 	var _this = this;

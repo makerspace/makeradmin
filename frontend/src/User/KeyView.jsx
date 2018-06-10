@@ -31,7 +31,9 @@ module.exports = withRouter(class Member extends React.Component
 				keys: data.data
 			});
 		}).fail((xhr, textStatus, error) => {
-			UIkit.modal.alert("<h2>Misslyckades med att hämta nycklar</h2>Tog emot ett oväntat svar från servern:<br><br>" + xhr.status + " " + xhr.statusText + "<br><br>" + xhr.responseText);
+			if (xhr.status != 401) {
+				UIkit.modal.alert("<h2>Misslyckades med att hämta nycklar</h2>Tog emot ett oväntat svar från servern:<br><br>" + xhr.status + " " + xhr.statusText + "<br><br>" + xhr.responseText);
+			}
 		});
 	}
 
