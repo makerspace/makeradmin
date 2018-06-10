@@ -12,6 +12,9 @@
               integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
               crossorigin="anonymous"></script>
         {% include 'meta.html' %}
+        {% if transaction.status == "pending" %}
+            <meta http-equiv="refresh" content="3">
+        {% endif %}
     </head>
     <body>
         <div id="receipt">
