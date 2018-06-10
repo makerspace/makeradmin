@@ -11,7 +11,7 @@ module.exports = withRouter(class Login extends React.Component
 	componentWillMount()
 	{
 		auth.setToken(this.props.params.token);
-		browserHistory.push("/member");
+		browserHistory.push("/" + this.props.location.query.redirect);
 	}
 
 	render()

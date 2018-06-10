@@ -1,6 +1,8 @@
 from flask import Flask, request, abort, jsonify, render_template
 import service
 from service import eprint, assert_get
+import urllib.parse
+
 
 instance = service.create(name="Makerspace Member Login", url="member", port=80, version="1.0")
 
@@ -13,6 +15,10 @@ def send_access_token():
     data = request.get_json()
     if data is None:
         abort(400, "missing json")
+
+    redirect = "member"
+    if "redirect" in data:
+        redirect = data["redirect"]
 
     user_tag = assert_get(data, "user_tag")
     with db.cursor() as cur:
@@ -30,7 +36,7 @@ def send_access_token():
     # This should be sent via an email, but lets just return it for now
     response = instance.gateway.post("oauth/force_token", {"user_id": user_id}).json()
     token = response["access_token"]
-    url = instance.gateway.get_frontend_url("member/login/" + token)
+    url = instance.gateway.get_frontend_url(f"member/login/{token}?redirect=" + urllib.parse.quote_plus(redirect))
 
     r = instance.gateway.post("messages", {
         "recipients": [
