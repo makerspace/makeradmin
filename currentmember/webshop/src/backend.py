@@ -353,7 +353,7 @@ def stripe_payment(transaction_id: int, token: str):
     eprint("Payment complete. id: " + str(transaction_id))
 
     # Check if this transaction is a new member registration
-    if webshop_pending_registrations.list("transaction_id", [transaction_id]):
+    if webshop_pending_registrations.list("transaction_id=%s", [transaction_id]):
         activate_member(transaction["member_id"])
         # If so, activate the member and 
 
