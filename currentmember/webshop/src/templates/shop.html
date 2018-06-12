@@ -58,28 +58,39 @@
         <div id="pay-module">
             <ul id="cart">
             </ul>
-            <form id="pay">
-                <h3>Betala med kort</h3>
-                <form action="/charge" method="post" id="payment-form">
-                    <div class="form-row">
-                        {# <label for="card-element">
-                          Credit or debit card
-                        </label> #}
-                        <div id="card-element">
-                          <!-- A Stripe Element will be inserted here. -->
+            <div id="pay-right">
+                <div id="pay-login">
+                    <h3>Du är inte inloggad</h3>
+                    <form class="uk-form-stacked">
+                        <input required id="email" class="uk-input" type="text" placeholder="Email" />
+                        <button id="login-button" type="button" class="uk-button uk-button-default uk-button-primary">
+                            Logga in
+                        </button>
+                    </form>
+                </div>
+                <form id="pay">
+                    <h3>Betala med kort</h3>
+                    <form action="/charge" method="post" id="payment-form">
+                        <div class="form-row">
+                            {# <label for="card-element">
+                              Credit or debit card
+                            </label> #}
+                            <div id="card-element">
+                              <!-- A Stripe Element will be inserted here. -->
+                            </div>
+
+                            <!-- Used to display form errors. -->
+                            <div id="card-errors" role="alert"></div>
                         </div>
 
-                        <!-- Used to display form errors. -->
-                        <div id="card-errors" role="alert"></div>
-                    </div>
-
-                    <button type="submit" id="pay-button" class="uk-button uk-button-default uk-button-primary">
-                        <div class="progress-spinner" uk-spinner></div>
-                        <span>Betala</span>
-                    </button>
+                        <button type="submit" id="pay-button" class="uk-button uk-button-default uk-button-primary">
+                            <div class="progress-spinner" uk-spinner></div>
+                            <span>Betala</span>
+                        </button>
+                        </form>
                     </form>
                 </form>
-            </form>
+            </div>
         </div>
     </body>
 </html>

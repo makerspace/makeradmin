@@ -20,6 +20,51 @@ $(document).ready(() => {
     })
   }
 
+  function setLoggedIn (loggedIn) {
+    console.log("Logged in " + loggedIn);
+    $("#pay-login").toggleClass("active", !loggedIn);
+    $("#pay").toggleClass("active", loggedIn);
+  }
+
+  setLoggedIn(localStorage.token !== undefined && localStorage.token !== null);
+
+  function refreshLoggedIn () {
+    $.ajax({
+      type: "GET",
+      url: apiBasePath + "/member/current",
+      headers: {
+        "Authorization": "Bearer " + localStorage.token
+      }
+    }).done(() => {
+      setLoggedIn(true);
+    }).fail((xhr, textStatus, error) => {
+      if (xhr.responseJSON.message == "Unauthorized") {
+        setLoggedIn(false);
+      } else {
+        UIkit.modal.alert("<h2>Error</h2>" + xhr.responseJSON.status + "\n" + xhr.responseJSON.message);
+      }
+    });
+  }
+
+  $("#login-button").click(() => {
+    $.ajax({
+      type: "POST",
+      url: apiBasePath + "/member/send_access_token",
+      data: JSON.stringify({
+        user_tag: $("#email").val(),
+        redirect: "shop"
+      }),
+      contentType: "application/json; charset=utf-8",
+      dataType: "json",
+    }).done(() => {
+      UIkit.modal.alert("En inloggningslänk har skickats via email");
+    }).fail((xhr, textStatus, error) => {
+      UIkit.modal.alert("<h2>Error</h2>" + xhr.responseJSON.status + " " + xhr.responseJSON.message);
+    });
+  });
+
+  refreshLoggedIn();
+
   if (isAdmin) {
     showEdit();
   }
@@ -66,7 +111,6 @@ $(document).ready(() => {
     $(".product-list").append($(catLi));
     for (const item of cat.items) {
       let price = item.price;
-      console.log(item);
       price *= item.smallest_multiple;
 
       let baseStr = item.smallest_multiple > 1 ? item.smallest_multiple + item.unit : item.unit;
@@ -251,14 +295,11 @@ $(document).ready(() => {
       marked.add(item.id);
     }
 
-    console.log(marked);
-    console.log(id2cartItem);
     var toDelete = [];
     for (var key of id2cartItem.keys()) {
       if (!marked.has(key)) toDelete.push(key);
     }
 
-    console.log(toDelete);
     for (var i = 0; i < toDelete.length; i++) {
       $(id2cartItem.get(toDelete[i])).remove();
       id2cartItem.delete(toDelete[i]);

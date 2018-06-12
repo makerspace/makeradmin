@@ -277,10 +277,18 @@ $footer-height: 240px;
 		flex: 0.5;
 	}
 
-	#pay {
+	#pay-right {
 		max-width: 600px;
 		padding: 20px;
 		flex: 0.5;
+
+		button {
+			margin-top: 20px;
+			width: 80%;
+			margin-left: 10%;
+			margin-right: 10%;
+			text-transform: none;
+		}
 	}
 }
 
@@ -293,6 +301,22 @@ $footer-height: 240px;
 
 	// Required for progress spinner
 	position: relative;
+}
+
+#pay-login {
+	display: none;
+}
+
+#pay-login.active {
+	display: block;
+}
+
+#pay {
+	display: none;
+}
+
+#pay.active {
+	display: block;
 }
 
 #product-save {
