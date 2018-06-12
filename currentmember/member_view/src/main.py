@@ -1,6 +1,6 @@
 from flask import Flask, request, abort, jsonify, render_template
 import service
-from service import eprint, assert_get
+from service import eprint, assert_get, route_helper
 import urllib.parse
 
 
@@ -60,6 +60,17 @@ def current_member():
     user_id = assert_get(request.headers, "X-User-Id")
     return instance.gateway.get("membership/member/%s" % user_id).text
 
+
+@instance.route("current/permissions", methods=["GET"], permission=None)
+@route_helper
+def permissions():
+    user_id = assert_get(request.headers, "X-User-Id")
+    permissionsStr = request.headers["X-User-Permissions"].strip() if "X-User-Permissions" in request.headers else ""
+    permissions = permissionsStr.split(",") if permissionsStr != "" else []
+    return {
+        "member_id": user_id,
+        "permissions": permissions,
+    }
 
 @instance.route("current/keys", methods=["GET"], permission=None)
 def key_info():
