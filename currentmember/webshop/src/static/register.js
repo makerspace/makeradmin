@@ -124,10 +124,13 @@ $(document).ready(() => {
             "Authorization": "Bearer " + localStorage.token
           }
         }).done((data, textStatus, xhr) => {
-          $(".pay-spinner").toggleClass("pay-spinner-visible", false);
+          $(".progress-spinner").toggleClass("progress-spinner-visible", false);
           waitingForPaymentResponse = false;
-          localStorage.setItem("token", xhr.responseJSON.data.token);
-          window.location.href = "receipt/" + xhr.responseJSON.data.transaction_id;
+          if (xhr.responseJSON.data.redirect !== undefined) {
+            window.location.href = xhr.responseJSON.data.redirect;
+          } else {
+            window.location.href = "receipt/" + xhr.responseJSON.data.transaction_id;
+          }
         }).fail((xhr, textStatus, error) => {
           $(".pay-spinner").toggleClass("pay-spinner-visible", false);
           waitingForPaymentResponse = false;

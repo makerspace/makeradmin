@@ -55,6 +55,11 @@ webshop_stripe_pending = Entity(
     columns=["transaction_id", "stripe_token"],
 )
 
+webshop_pending_registrations = Entity(
+    table="webshop_pending_registrations",
+    columns=["transaction_id"],
+)
+
 def membership_products(db):
     # Find all products which gives a member membership
     # Note: Assumes a product never contains multiple actions of the same type.

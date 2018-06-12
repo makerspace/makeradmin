@@ -109,3 +109,11 @@ CREATE TABLE `webshop_stripe_pending` (
   KEY `token_key` (stripe_token),
   CONSTRAINT transaction_constraint2 FOREIGN KEY (`transaction_id`) REFERENCES `webshop_transactions` (`id`)
 );
+
+CREATE TABLE `webshop_pending_registrations` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `transaction_id` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `transaction_key` (transaction_id),
+  CONSTRAINT transaction_constraint3 FOREIGN KEY (`transaction_id`) REFERENCES `webshop_transactions` (`id`)
+);

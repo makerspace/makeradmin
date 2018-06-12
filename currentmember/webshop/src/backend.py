@@ -5,7 +5,7 @@ import stripe
 import os
 from decimal import Decimal, Rounded, localcontext
 from collections import namedtuple
-from webshop_entities import category_entity, product_entity, transaction_entity, transaction_content_entity, product_action_entity, webshop_completed_actions, membership_products, webshop_stripe_pending
+from webshop_entities import category_entity, product_entity, transaction_entity, transaction_content_entity, product_action_entity, webshop_completed_actions, membership_products, webshop_stripe_pending, webshop_pending_registrations
 from typing import Set
 
 CartItem = namedtuple('CartItem', 'id count amount')
@@ -48,6 +48,8 @@ transaction_content_entity.add_routes(instance, "transaction_content")
 
 webshop_completed_actions.db = db
 webshop_completed_actions.add_routes(instance, "completed_actions")
+
+webshop_pending_registrations.db = db
 
 webshop_stripe_pending.db = db
 
@@ -182,8 +184,16 @@ def register():
     member["validate_only"] = True
     r = instance.gateway.post("membership/member", member)
     if not r.ok:
-        # Ideally should just return r.text, but the helper code for routes screws that up a bit right now
+        # Ideally should just return r.text, but the helper code for routes screws that up a bit right now.
+        # This may happen when for example a user with the same email exists.
         abort(r.status_code, r.json()["message"])
+
+    member_id = member["member_id"]
+
+    # Delete the member immediately, this is because the member is not yet activated because
+    # the payment has not yet been done. The member will be un-deleted when the payment goes through.
+    r = instance.gateway.delete(f"membership/member/{member_id}")
+    assert(r.ok)
 
     member = r.json()["data"]
 
@@ -201,21 +211,9 @@ def register():
     }
 
     try:
-        member_id = member["member_id"]
-        # Get a login token for the new user
-        token = instance.gateway.post("oauth/force_token", {"user_id": member_id}).json()["access_token"]
-
         # Note this will throw if the payment failed
-        payment_result = pay(member_id=member_id, data=purchase)
-        # Add the token to the response so that the user can be logged in immediately
-        payment_result["token"] = token
-
-        send_new_member_email(member["member_id"])
-        return payment_result
+        return pay(member_id=member_id, data=purchase, activates_member=True)
     except:
-        # Something went wrong (possibly the payment didn't go through), so delete the member again
-        r = instance.gateway.delete(f"membership/member/{member_id}")
-        assert(r.ok)
         raise
 
 
@@ -355,6 +353,18 @@ def stripe_payment(transaction_id: int, token: str):
     send_receipt_email(transaction["member_id"], transaction_id)
     eprint("Payment complete. id: " + str(transaction_id))
 
+    # Check if this transaction is a new member registration
+    if webshop_pending_registrations.list("transaction_id", [transaction_id]):
+        activate_member(transaction["member_id"])
+        # If so, activate the member and 
+
+
+def activate_member(member_id: int):
+    # Make the member not be deleted
+    r = instance.gateway.post("membership/member", { "deleted_at": None })
+    assert r.ok
+    send_new_member_email(member_id)
+
 
 def send_receipt_email(member_id: int, transaction_id: int):
     transaction = transaction_entity.get(transaction_id)
@@ -415,7 +425,7 @@ def create_stripe_source(transaction_id: int, card_source: str, total_amount: De
     )
 
 
-def pay(member_id, data):
+def pay(member_id, data, activates_member=False):
     # The frontend will add a per-page random value to the request.
     # This will try to prevent duplicate payments due to sending the payment request twice
     duplicatePurchaseRand = assert_get(data, "duplicatePurchaseRand")
@@ -428,6 +438,11 @@ def pay(member_id, data):
     total_amount, items = validate_payment(data["cart"], data["expectedSum"])
 
     transaction_id = add_transaction_to_db(member_id, total_amount, items)
+
+    if activates_member:
+        # Mark this transaction as one that is for registering a member
+        webshop_pending_registrations.post({"transaction_id": transaction_id})
+
     card_source = assert_get(data, "stripeSource")
 
     source = create_stripe_source(transaction_id, card_source, total_amount)
