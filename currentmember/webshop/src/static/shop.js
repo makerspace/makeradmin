@@ -39,7 +39,7 @@ $(document).ready(() => {
         setLoggedIn(false);
       } else if (xhr.status == 200) {
         setLoggedIn(true);
-        const permissions = xhr.responseJSON.permissions;
+        const permissions = xhr.responseJSON.data.permissions;
         if (permissions.indexOf(webshop_edit_permission) !== -1) showEdit();
       } else {
         UIkit.modal.alert("<h2>Error</h2>" + xhr.responseJSON.status + "\n" + xhr.responseJSON.message);
