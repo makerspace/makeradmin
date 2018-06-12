@@ -242,6 +242,18 @@ class Member extends Controller
 		]);
 	}
 
+	public function activate(Request $request, $member_id)
+	{
+		DB::table("membership_members")
+			->where("member_id", $member_id)
+			->update(["deleted_at" => null]);
+
+		return Response()->json([
+			"status"  => "activated",
+			"message" => "The member was successfully activated",
+		], 200);
+	}
+
 	/**
 	 * Authenticate a user
 	 */
