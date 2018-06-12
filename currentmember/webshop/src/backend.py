@@ -360,7 +360,7 @@ def stripe_payment(transaction_id: int, token: str):
 
 def activate_member(member_id: int):
     # Make the member not be deleted
-    r = instance.gateway.post("membership/member", { "deleted_at": None })
+    r = instance.gateway.put("membership/member", { "deleted_at": None })
     assert r.ok
     send_new_member_email(member_id)
 
