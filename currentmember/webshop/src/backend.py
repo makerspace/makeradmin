@@ -100,13 +100,13 @@ def pending_actions():
 
 @instance.route("transaction/<int:id>/content", methods=["GET"])
 @route_helper
-def transaction_contents(id):
+def transaction_contents(id: int):
     return transaction_content_entity.list("transaction_id=%s", id)
 
 
 @instance.route("member/<int:id>/transactions", methods=["GET"], permission=None)
 @route_helper
-def member_history(id):
+def member_history(id: int):
     '''
     Helper for listing the full transaction history of a member, with product info included.
     '''
@@ -292,7 +292,7 @@ def process_cart(cart):
     return total_amount, items
 
 
-def validate_payment(cart, expected_amount):
+def validate_payment(cart, expected_amount: Decimal):
     if len(cart) == 0:
         abort(400, "No items in cart")
 
@@ -349,18 +349,17 @@ def stripe_payment(transaction_id: int, token: str):
     transaction["status"] = "completed"
     transaction_entity.put(transaction, transaction_id)
 
-    send_receipt_email(transaction["member_id"], transaction_id)
-    eprint("Payment complete. id: " + str(transaction_id))
-
     # Check if this transaction is a new member registration
     if webshop_pending_registrations.list("transaction_id=%s", [transaction_id]):
         activate_member(transaction["member_id"])
-        # If so, activate the member and 
+
+    send_receipt_email(transaction["member_id"], transaction_id)
+    eprint("Payment complete. id: " + str(transaction_id))
 
 
 def activate_member(member_id: int):
     # Make the member not be deleted
-    r = instance.gateway.put("membership/member", { "deleted_at": None })
+    r = instance.gateway.put(f"membership/member/{member_id}", {"deleted_at": None})
     assert r.ok
     send_new_member_email(member_id)
 
@@ -424,7 +423,7 @@ def create_stripe_source(transaction_id: int, card_source: str, total_amount: De
     )
 
 
-def pay(member_id, data, activates_member=False):
+def pay(member_id: int, data, activates_member: bool = False):
     # The frontend will add a per-page random value to the request.
     # This will try to prevent duplicate payments due to sending the payment request twice
     duplicatePurchaseRand = assert_get(data, "duplicatePurchaseRand")
