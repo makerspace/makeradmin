@@ -2,13 +2,11 @@ $(document).ready(() => {
   // Create a Stripe client.
   const stripe = Stripe(window.stripeKey);
   const apiBasePath = window.apiBasePath;
+  const webshop_edit_permission = "webshop_edit";
 
   // Create an instance of Elements.
   const elements = stripe.elements({ locale: "sv" });
 
-  // TODO: Figure out from access token
-  // Preferably without an extra HTTP request
-  const isAdmin = true;
   // Used to prevent clicking the 'Pay' button twice
   const duplicatePurchaseRand = (100000000*Math.random())|0;
 
@@ -21,7 +19,6 @@ $(document).ready(() => {
   }
 
   function setLoggedIn (loggedIn) {
-    console.log("Logged in " + loggedIn);
     $("#pay-login").toggleClass("active", !loggedIn);
     $("#pay").toggleClass("active", loggedIn);
   }
@@ -31,15 +28,19 @@ $(document).ready(() => {
   function refreshLoggedIn () {
     $.ajax({
       type: "GET",
-      url: apiBasePath + "/member/current",
+      url: apiBasePath + "/member/current/permissions",
       headers: {
         "Authorization": "Bearer " + localStorage.token
       }
     }).done(() => {
       setLoggedIn(true);
     }).fail((xhr, textStatus, error) => {
-      if (xhr.responseJSON.message == "Unauthorized") {
+      if (xhr.status == 401) {
         setLoggedIn(false);
+      } else if (xhr.status == 200) {
+        setLoggedIn(true);
+        const permissions = xhr.responseJSON.permissions;
+        if (permissions.indexOf(webshop_edit_permission) !== -1) showEdit();
       } else {
         UIkit.modal.alert("<h2>Error</h2>" + xhr.responseJSON.status + "\n" + xhr.responseJSON.message);
       }
@@ -64,10 +65,6 @@ $(document).ready(() => {
   });
 
   refreshLoggedIn();
-
-  if (isAdmin) {
-    showEdit();
-  }
 
   // Custom styling can be passed to options when creating an Element.
   // (Note that this demo uses a wider set of styles than the guide below.)
