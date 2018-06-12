@@ -233,10 +233,10 @@ def stripe_callback():
         )
     except ValueError as e:
         # Invalid payload
-        return abort(400)
+        abort(400)
     except stripe.error.SignatureVerificationError as e:
         # Invalid signature
-        return abort(400)
+        abort(400)
 
     eprint(f"Received stripe callback of type {event.type}")
     if event.type in ["source.chargeable", "source.failed", "source.canceled"]:
