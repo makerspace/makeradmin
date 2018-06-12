@@ -196,7 +196,7 @@ def register():
             }
         ],
         "expectedSum": purchase["expectedSum"],
-        "stripeToken": purchase["stripeToken"],
+        "stripeSource": purchase["stripeSource"],
         "duplicatePurchaseRand": purchase["duplicatePurchaseRand"],
     }
 
