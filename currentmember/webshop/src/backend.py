@@ -188,14 +188,13 @@ def register():
         # This may happen when for example a user with the same email exists.
         abort(r.status_code, r.json()["message"])
 
+    member = r.json()["data"]
     member_id = member["member_id"]
 
     # Delete the member immediately, this is because the member is not yet activated because
     # the payment has not yet been done. The member will be un-deleted when the payment goes through.
     r = instance.gateway.delete(f"membership/member/{member_id}")
     assert(r.ok)
-
-    member = r.json()["data"]
 
     # Construct the purchase object again, using user data is always risky
     purchase = {
