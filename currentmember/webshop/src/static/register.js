@@ -89,9 +89,8 @@ $(document).ready(() => {
     $(".pay-spinner").toggleClass("pay-spinner-visible", true);
     let errorElement = document.getElementById('card-errors');
     errorElement.textContent = "";
-    
 
-    stripe.createToken(card).then(function(result) {
+    stripe.createSource(card).then(function(result) {
       if (result.error) {
         $(".pay-spinner").toggleClass("pay-spinner-visible", false);
         // Inform the user if there was an error.
@@ -115,7 +114,7 @@ $(document).ready(() => {
             purchase: {
               cart: cart,
               expectedSum: sumCart(cart),
-              stripeToken: result.token.id,
+              stripeSource: result.source.id,
               duplicatePurchaseRand: duplicatePurchaseRand,
             }
           }),
