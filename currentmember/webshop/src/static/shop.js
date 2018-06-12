@@ -32,7 +32,7 @@ $(document).ready(() => {
       headers: {
         "Authorization": "Bearer " + localStorage.token
       }
-    }).done(() => {
+    }).done((data, textStatus, xhr) => {
       setLoggedIn(true);
       const permissions = xhr.responseJSON.data.permissions;
       if (permissions.indexOf(webshop_edit_permission) !== -1) showEdit();
