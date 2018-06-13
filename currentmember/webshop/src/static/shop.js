@@ -23,8 +23,6 @@ $(document).ready(() => {
     $("#pay").toggleClass("active", loggedIn);
   }
 
-  setLoggedIn(localStorage.token !== undefined && localStorage.token !== null);
-
   function refreshLoggedIn () {
     $.ajax({
       type: "GET",
@@ -45,9 +43,7 @@ $(document).ready(() => {
     });
   }
 
-  $("#pay-login form").submit(ev => {
-    ev.preventDefault();
-
+  function login() {
     $.ajax({
       type: "POST",
       url: apiBasePath + "/member/send_access_token",
@@ -66,9 +62,7 @@ $(document).ready(() => {
         UIkit.modal.alert("<h2>Error</h2>" + xhr.responseJSON.status + " " + xhr.responseJSON.message);
       }
     });
-  });
-
-  refreshLoggedIn();
+  }
 
   // Custom styling can be passed to options when creating an Element.
   // (Note that this demo uses a wider set of styles than the guide below.)
@@ -101,7 +95,6 @@ $(document).ready(() => {
   const id2element = new Map();
   const id2cartItem = new Map();
   const id2item = new Map();
-
   const data = JSON.parse($("#product-data")[0].textContent);
 
   for (const cat of data) {
@@ -213,9 +206,6 @@ $(document).ready(() => {
     }
   }
 
-  let cart = [];
-  parseCartFromStorage();
-
   function sumCart(cart) {
     let totalSum = 0;
     for (let item of cart) {
@@ -308,9 +298,8 @@ $(document).ready(() => {
   }
 
   let waitingForPaymentResponse = false;
-  $("#pay").submit((ev) => {
-    ev.preventDefault();
 
+  function pay() {
     // Don't allow any clicks while waiting for a response from the server
     if (waitingForPaymentResponse) {
       return;
@@ -364,12 +353,9 @@ $(document).ready(() => {
         });
       }
     });
-  });
+  }
 
-  $(".category-delete").click(ev => {
-    ev.preventDefault();
-    const id = $(ev.currentTarget).attr("data-id");
-
+  function tryDeleteCategory(id) {
     UIkit.modal.confirm(`Are you sure you want to delete this category?`).then(
       () => {
         $.ajax({
@@ -387,10 +373,9 @@ $(document).ready(() => {
           UIkit.modal.alert("<h2>Error</h2>" + xhr.responseJSON.status);
         });
     });
-  });
+  }
 
-  $(".category-add").click(ev => {
-    ev.preventDefault();
+  function addCategory() {
     UIkit.modal.prompt('Category Name', '').then(name => {
       if (name == null) return;
 
@@ -414,7 +399,35 @@ $(document).ready(() => {
         }
       });
     });
+  }
+
+  $("#pay-login form").submit(ev => {
+    ev.preventDefault();
+    login();
+  });
+
+  setLoggedIn(localStorage.token !== undefined && localStorage.token !== null);
+  refreshLoggedIn();
+
+  let cart = [];
+  parseCartFromStorage();
+
+  $("#pay").submit((ev) => {
+    ev.preventDefault();
+    pay();
+  });
+
+  $(".category-delete").click(ev => {
+    ev.preventDefault();
+    const id = $(ev.currentTarget).attr("data-id");
+    tryDeleteCategory(id);
+  });
+
+  $(".category-add").click(ev => {
+    ev.preventDefault();
+    addCategory();
   })
 
   refresh();
+  showEdit();
 });

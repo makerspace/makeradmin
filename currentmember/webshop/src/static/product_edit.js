@@ -8,20 +8,17 @@ $(document).ready(() => {
     });
     $("#unit").change();
 
-    let done = true;
-
-    let data = JSON.parse($("#action-data")[0].textContent);
-    let action_categories = data.action_categories;
-    let actions = data.actions;
-    let deletedActionIDs = [];
+    const data = JSON.parse($("#action-data")[0].textContent);
+    const action_categories = data.action_categories;
+    const deletedActionIDs = [];
 
     function add_action(action) {
         options = ""
-        for (let cat of action_categories) {
+        for (const cat of action_categories) {
             options += `<option value="${ cat.id }" ${ action.action_id == cat.id ? "selected" : "" }>${cat.name}</option>`;
         }
 
-        let element = $(
+        const element = $(
             `<div data-id="${ action.id }" class="product-action uk-flex uk-margin">
                 <select required class="uk-select uk-margin-right">
                     ${options}
@@ -42,40 +39,45 @@ $(document).ready(() => {
         $("#action-list").append(element);
     }
 
-    for (let action of actions) {
+    for (const action of data.actions) {
         add_action(action);
     }
 
-    // Wow: So much code!
-    // Should probably simplify this...
-    $(".product-edit-form").submit(ev => {
-        if (!done) return;
-
-        ev.preventDefault();
-        id = $("#product-id").val();
-        const type = id == "new" ? "POST" : "PUT";
-        const url = apiBasePath + "/webshop/product" + (id == "new" ? "" : "/" + id);
-        $(".progress-spinner").toggleClass("progress-spinner-visible", true);
-
-        $.ajax({
+    function ajax(type, url, data) {
+        return $.ajax({
             type: type,
             url: url,
-            data: JSON.stringify({
-                id: id,
-                name: $("#name").val(),
-                category_id: $("#category").val(),
-                description: $("#description").val(),
-                price: $("#price").val(),
-                unit: $("#unit").val(),
-                smallest_multiple: $("#smallest_multiple").val(),
-            }),
+            data: JSON.stringify(data),
             contentType: "application/json; charset=utf-8",
             dataType: "json",
             headers: {
                 "Authorization": "Bearer " + localStorage.token
             }
+        });
+    }
+
+    let isSaving = false;
+    // Wow: So much code!
+    // Should probably simplify this...
+    $(".product-edit-form").submit(ev => {
+        ev.preventDefault();
+        if (isSaving) return;
+
+        id = $("#product-id").val();
+        const type = id == "new" ? "POST" : "PUT";
+        const url = apiBasePath + "/webshop/product" + (id == "new" ? "" : "/" + id);
+        $(".progress-spinner").toggleClass("progress-spinner-visible", true);
+
+        ajax(type, url, {
+            id: id,
+            name: $("#name").val(),
+            category_id: $("#category").val(),
+            description: $("#description").val(),
+            price: $("#price").val(),
+            unit: $("#unit").val(),
+            smallest_multiple: $("#smallest_multiple").val(),
         }).done((data, textStatus, xhr) => {
-            done = true;
+            isSaving = false;
             if (id == "new") {
                 // Update the form with the created product id
                 id = xhr.responseJSON.data.id;
@@ -86,26 +88,15 @@ $(document).ready(() => {
             for (const element of $(".product-action")) {
                 const id2 = $(element).attr("data-id");
                 const value = $(element).find("input").val();
-                const categoryID = $(element).find("select").val();
-                console.log(element);
-                console.log(id2 + " " + value + " " + categoryID);
+                const actionID = $(element).find("select").val();
 
                 const type2 = id2 == "new" ? "POST" : "PUT";
                 const url2 = apiBasePath + "/webshop/product_action" + (id2 == "new" ? "" : "/" + id2);
-                $.ajax({
-                    type: type2,
-                    url: url2,
-                    data: JSON.stringify({
-                        id: id2,
-                        product_id: id,
-                        action_id: categoryID,
-                        value: value
-                    }),
-                    contentType: "application/json; charset=utf-8",
-                    dataType: "json",
-                    headers: {
-                        "Authorization": "Bearer " + localStorage.token
-                    }
+                ajax(type2, url2, {
+                    id: id2,
+                    product_id: id,
+                    action_id: actionID,
+                    value: value
                 }).done((data, textStatus, xhr) => {
                     if (id2 == "new") {
                         // Update the form with the action id
@@ -113,7 +104,6 @@ $(document).ready(() => {
                     }
                     // UIkit.modal.alert("Saved action");
                 }).fail((xhr, textStatus, error) => {
-                    done = true;
                     if (xhr.responseJSON.message == "Unauthorized") {
                         UIkit.modal.alert("<h2>Failed to save action</h2>You are not logged in");
                     } else {
@@ -125,19 +115,8 @@ $(document).ready(() => {
             for (const id2 of deletedActionIDs) {
                 if (id2 !== "new") {
                     const url2 = apiBasePath + "/webshop/product_action/" + id2;
-                    $.ajax({
-                        type: "DELETE",
-                        url: url2,
-                        data: "{}",
-                        contentType: "application/json; charset=utf-8",
-                        dataType: "json",
-                        headers: {
-                            "Authorization": "Bearer " + localStorage.token
-                        }
-                    }).done((data, textStatus, xhr) => {
-                        // UIkit.modal.alert("Deleted action");
+                    ajax("DELETE", url2, {
                     }).fail((xhr, textStatus, error) => {
-                        done = true;
                         if (xhr.responseJSON.message == "Unauthorized") {
                             UIkit.modal.alert("<h2>Failed to delete action</h2>You are not logged in");
                         } else {
@@ -151,8 +130,8 @@ $(document).ready(() => {
             // UIkit.modal.alert("Saved");
             $(".progress-spinner").toggleClass("progress-spinner-visible", false);
         }).fail((xhr, textStatus, error) => {
+            isSaving = false;
             $(".progress-spinner").toggleClass("progress-spinner-visible", false);
-            done = true;
             if (xhr.responseJSON.message == "Unauthorized") {
                 UIkit.modal.alert("<h2>Failed to save product</h2>You are not logged in");
             } else {
@@ -161,7 +140,7 @@ $(document).ready(() => {
         });
     });
 
-    $("#add-action").click((ev) => {
+    $("#add-action").click(ev => {
         ev.preventDefault();
         new UIkit.modal('#add-action-modal').hide();
 
