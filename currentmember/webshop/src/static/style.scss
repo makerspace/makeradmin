@@ -173,11 +173,18 @@ $footer-height: 240px;
 	border-radius: px;
 	opacity: 0;
 	transition: opacity 500ms;
+	transition: background 500ms;
 	visibility: hidden;
 
 	span {
 		margin-right: 8px;
 	}
+}
+
+#edit.edit-mode {
+	background: #f0506e;
+	color: #FFF;
+	border: 1px solid #962d41;
 }
 
 .edit.active {
@@ -205,7 +212,7 @@ $footer-height: 240px;
 	transition: all 500ms;
 }
 
-.edit-display.disabled {
+.edit-display:not(.active) {
 	opacity: 0;
 	width: 0px;
 	padding-left: 0px;

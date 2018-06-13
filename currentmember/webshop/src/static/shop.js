@@ -10,11 +10,20 @@ $(document).ready(() => {
   // Used to prevent clicking the 'Pay' button twice
   const duplicatePurchaseRand = (100000000*Math.random())|0;
 
-  function showEdit() {
+  let editMode = false;
+
+  function setEditMode(value) {
+    editMode = value;
+    $(".edit, .edit-display, .edit-invisible").toggleClass("active", editMode);
+    $("#edit").toggleClass("edit-mode", editMode);
+    $("#edit").attr("uk-icon", editMode ? "close" : "pencil");
+    refresh();
+  }
+
+  function showEditButton() {
     $("#edit").toggleClass("active");
     $("#edit").click(() => {
-      $(".edit, .edit-display, .edit-invisible").toggleClass("active");
-      $(".edit, .edit-display").toggleClass("disabled");
+      setEditMode(!editMode);
     })
   }
 
@@ -46,7 +55,7 @@ $(document).ready(() => {
     }).done((data, textStatus, xhr) => {
       setLoggedIn(true);
       const permissions = xhr.responseJSON.data.permissions;
-      if (permissions.indexOf(webshop_edit_permission) !== -1) showEdit();
+      if (permissions.indexOf(webshop_edit_permission) !== -1) showEditButton();
     }).fail((xhr, textStatus, error) => {
       if (xhr.status == 401) {
         setLoggedIn(false);
@@ -134,9 +143,9 @@ $(document).ready(() => {
                 <input type="number" min=0 step=${item.smallest_multiple} placeholder="0" class="product-amount edit-invisible"></input>
                 <span class="product-unit edit-invisible">${item.unit}</span>
                 <div class="product-actions">
-                  <span class="edit-display disabled">
-                    <a href="product/${item.id}/edit" class="edit-display disabled product-edit uk-button uk-button-small uk-button-primary" uk-icon="pencil" />
-                    <button type="button" class="edit-display disabled product-delete uk-button uk-button-small uk-button-danger" uk-icon="trash" />
+                  <span class="edit-display">
+                    <a href="product/${item.id}/edit" class="edit-display product-edit uk-button uk-button-small uk-button-primary" uk-icon="pencil" />
+                    <button type="button" class="edit-display product-delete uk-button uk-button-small uk-button-danger" uk-icon="trash" />
                   </span>
                   <span class="edit-invisible">
                     ${ buttons.join("\n") }
@@ -230,7 +239,6 @@ $(document).ready(() => {
           raw_count: raw_count,
         });
       }
-      $(elem).find(".product-active-dot").toggleClass("active", count > 0);
     }
 
     localStorage.cart = JSON.stringify(cart);
@@ -239,7 +247,7 @@ $(document).ready(() => {
 
     $("#pay-button").find("span").html("Betala " + ((totalSum*currencyBase)|0)/currencyBase + " " + currency);
 
-    $("#pay-module").toggleClass("open", cart.length > 0);
+    $("#pay-module").toggleClass("open", cart.length > 0 && !editMode);
 
     var marked = new Set();
     for (var i = 0; i < cart.length; i++) {
@@ -402,5 +410,9 @@ $(document).ready(() => {
   })
 
   refresh();
-  showEdit();
+
+  if (window.location.hash == "#edit") {
+    showEditButton();
+    setEditMode(true);
+  }
 });
