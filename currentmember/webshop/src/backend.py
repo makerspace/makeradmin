@@ -338,13 +338,18 @@ def stripe_payment(transaction_id: int, token: str):
             source=token,
         )
         eprint(charge)
+    except stripe.CardError as e:
+        body = e.json_body
+        err = body.get('error', {})
+        eprint("Stripe Charge Failed\n" + str(err))
+        abort(400, err.get("message"))
     except stripe.StripeError as e:
-        eprint("Stripe Charge Failed")
-        abort(400, str(e))
+        eprint("Stripe Charge Failed\n" + str(e))
+        abort(400, "payment failed")
     except Exception as e:
         eprint("Stripe Charge Failed")
         eprint(e)
-        abort(400, "failed")
+        abort(400, "payment failed")
 
     transaction["status"] = "completed"
     transaction_entity.put(transaction, transaction_id)
