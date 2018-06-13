@@ -10,7 +10,7 @@ $(document).ready(() => {
 
     const data = JSON.parse($("#action-data")[0].textContent);
     const action_categories = data.action_categories;
-    const deletedActionIDs = [];
+    let deletedActionIDs = [];
 
     function add_action(action) {
         options = ""
@@ -77,7 +77,6 @@ $(document).ready(() => {
             unit: $("#unit").val(),
             smallest_multiple: $("#smallest_multiple").val(),
         }).done((data, textStatus, xhr) => {
-            isSaving = false;
             if (id == "new") {
                 // Update the form with the created product id
                 id = xhr.responseJSON.data.id;
@@ -85,6 +84,7 @@ $(document).ready(() => {
                 history.replaceState(history.state, "Edit Product", id + "/edit");
             }
 
+            const futures = [];
             for (const element of $(".product-action")) {
                 const id2 = $(element).attr("data-id");
                 const value = $(element).find("input").val();
@@ -92,12 +92,15 @@ $(document).ready(() => {
 
                 const type2 = id2 == "new" ? "POST" : "PUT";
                 const url2 = apiBasePath + "/webshop/product_action" + (id2 == "new" ? "" : "/" + id2);
-                ajax(type2, url2, {
+                const future = ajax(type2, url2, {
                     id: id2,
                     product_id: id,
                     action_id: actionID,
                     value: value
-                }).done((data, textStatus, xhr) => {
+                });
+                futures.push(future);
+
+                future.done((data, textStatus, xhr) => {
                     if (id2 == "new") {
                         // Update the form with the action id
                         $(element).attr("data-id", xhr.responseJSON.data.id);
@@ -115,8 +118,10 @@ $(document).ready(() => {
             for (const id2 of deletedActionIDs) {
                 if (id2 !== "new") {
                     const url2 = apiBasePath + "/webshop/product_action/" + id2;
-                    ajax("DELETE", url2, {
-                    }).fail((xhr, textStatus, error) => {
+                    const future = ajax("DELETE", url2, {});
+                    futures.push(future);
+
+                    future.fail((xhr, textStatus, error) => {
                         if (xhr.responseJSON.message == "Unauthorized") {
                             UIkit.modal.alert("<h2>Failed to delete action</h2>You are not logged in");
                         } else {
@@ -127,8 +132,14 @@ $(document).ready(() => {
             }
             deletedActionIDs = [];
 
-            // UIkit.modal.alert("Saved");
-            $(".progress-spinner").toggleClass("progress-spinner-visible", false);
+            $.when(futures).fail(() => {
+                isSaving = false;
+                // UIkit.modal.alert("Saved");
+                $(".progress-spinner").toggleClass("progress-spinner-visible", false);
+            }).done(() => {
+                // Redirect the user back to the webshop
+                window.location.href = "/shop#edit";
+            });
         }).fail((xhr, textStatus, error) => {
             isSaving = false;
             $(".progress-spinner").toggleClass("progress-spinner-visible", false);
