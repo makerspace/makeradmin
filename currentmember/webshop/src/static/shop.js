@@ -45,7 +45,9 @@ $(document).ready(() => {
     });
   }
 
-  $("#login-button").click(() => {
+  $("#pay-login form").submit(ev => {
+    ev.preventDefault();
+
     $.ajax({
       type: "POST",
       url: apiBasePath + "/member/send_access_token",
@@ -58,7 +60,11 @@ $(document).ready(() => {
     }).done(() => {
       UIkit.modal.alert("En inloggningslänk har skickats via email");
     }).fail((xhr, textStatus, error) => {
-      UIkit.modal.alert("<h2>Error</h2>" + xhr.responseJSON.status + " " + xhr.responseJSON.message);
+      if (xhr.responseJSON.status == "not found") {
+        UIkit.modal.alert("Ingen medlem med denna email hittades");
+      } else {
+        UIkit.modal.alert("<h2>Error</h2>" + xhr.responseJSON.status + " " + xhr.responseJSON.message);
+      }
     });
   });
 
