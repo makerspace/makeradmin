@@ -23,6 +23,19 @@ $(document).ready(() => {
     $("#pay").toggleClass("active", loggedIn);
   }
 
+  function ajax(type, url, data) {
+      return $.ajax({
+          type: type,
+          url: url,
+          data: JSON.stringify(data),
+          contentType: "application/json; charset=utf-8",
+          dataType: "json",
+          headers: {
+              "Authorization": "Bearer " + localStorage.token
+          }
+      });
+  }
+
   function refreshLoggedIn () {
     $.ajax({
       type: "GET",
@@ -44,15 +57,9 @@ $(document).ready(() => {
   }
 
   function login() {
-    $.ajax({
-      type: "POST",
-      url: apiBasePath + "/member/send_access_token",
-      data: JSON.stringify({
-        user_tag: $("#email").val(),
-        redirect: "shop"
-      }),
-      contentType: "application/json; charset=utf-8",
-      dataType: "json",
+    ajax("POST", apiBasePath + "/member/send_access_token", {
+      user_tag: $("#email").val(),
+      redirect: "shop"
     }).done(() => {
       UIkit.modal.alert("En inloggningslänk har skickats via email");
     }).fail((xhr, textStatus, error) => {
@@ -145,17 +152,7 @@ $(document).ready(() => {
         ev.preventDefault();
         UIkit.modal.confirm(`Are you sure you want to delete ${item.name}?`).then(
           () => {
-            $.ajax({
-              type: "DELETE",
-              url: apiBasePath + "/webshop/product/" + item.id,
-              data: JSON.stringify({
-                id: item.id,
-              }),
-              contentType: "application/json; charset=utf-8",
-              dataType: "json",
-              headers: {
-                "Authorization": "Bearer " + localStorage.token
-              }
+            ajax("DELETE", apiBasePath + "/webshop/product/" + item.id, {
             }).done(() => {
               li.remove();
             }).fail((xhr, textStatus, error) => {
@@ -318,20 +315,11 @@ $(document).ready(() => {
         errorElement.textContent = result.error.message;
         waitingForPaymentResponse = false;
       } else {
-        $.ajax({
-          type: "POST",
-          url: apiBasePath + "/webshop/pay",
-          data: JSON.stringify({
-            cart: cart,
-            expectedSum: sumCart(cart),
-            stripeSource: result.source.id,
-            duplicatePurchaseRand: duplicatePurchaseRand,
-          }),
-          contentType: "application/json; charset=utf-8",
-          dataType: "json",
-          headers: {
-            "Authorization": "Bearer " + localStorage.token
-          }
+        ajax("POST", apiBasePath + "/webshop/pay", {
+          cart: cart,
+          expectedSum: sumCart(cart),
+          stripeSource: result.source.id,
+          duplicatePurchaseRand: duplicatePurchaseRand,
         }).done((data, textStatus, xhr) => {
           $(".progress-spinner").toggleClass("progress-spinner-visible", false);
           waitingForPaymentResponse = false;
@@ -358,15 +346,7 @@ $(document).ready(() => {
   function tryDeleteCategory(id) {
     UIkit.modal.confirm(`Are you sure you want to delete this category?`).then(
       () => {
-        $.ajax({
-          type: "DELETE",
-          url: apiBasePath + "/webshop/category/" + id,
-          data: JSON.stringify({ id: id }),
-          contentType: "application/json; charset=utf-8",
-          dataType: "json",
-          headers: {
-            "Authorization": "Bearer " + localStorage.token
-          }
+        ajax("DELETE", apiBasePath + "/webshop/category/" + id, {
         }).done(() => {
           location.reload(true);
         }).fail((xhr, textStatus, error) => {
@@ -379,15 +359,8 @@ $(document).ready(() => {
     UIkit.modal.prompt('Category Name', '').then(name => {
       if (name == null) return;
 
-      $.ajax({
-        type: "POST",
-        url: apiBasePath + "/webshop/category",
-        data: JSON.stringify({ name: name }),
-        contentType: "application/json; charset=utf-8",
-        dataType: "json",
-        headers: {
-          "Authorization": "Bearer " + localStorage.token
-        }
+      ajax("POST", apiBasePath + "/webshop/category", {
+        name: name
       }).done((data, textStatus, xhr) => {
         // Reload the page to show the new category
         location.reload(true);
