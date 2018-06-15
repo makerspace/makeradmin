@@ -296,60 +296,59 @@ class MultiAccessSync extends Controller
 		$curl = new CurlBrowser;
 		$curl->setHeader("Authorization", "Bearer " . config("service.bearer"));
 
-		$key_field_name_map = [
-			'key_id' => 'key_id',
-			'rfid_tag' => 'tagid',
-			'blocked' => 'status',
-			'start_timestamp' => 'startdate',
-			'end_timestamp' => 'enddate',
-		];
-		$members = [];
-
-		// Get all members from API
-		$curl->call("GET", "http://" . config("service.gateway") . "/membership/member", [
+		// Get all keys
+		$curl->call("GET", "http://" . config("service.gateway") . "/keys", [
 			"per_page" => 5000,
 		]);
-		foreach($curl->GetJson()->data as $member)
-		{
+		$keys = $curl->GetJson()->data;
+		$key_member_ids = array_unique(array_column($keys,'title'));
+
+		// Get all members with keys
+		$curl->call("GET", "http://" . config("service.gateway") . "/membership/member", [
+			'member_number' => implode(',', $key_member_ids),
+			"per_page" => 5000,
+		]);
+		$key_members = $curl->GetJson()->data;
+
+		$member_keys = [];
+		foreach ($key_members as $member) {
 			$current_member = [];
 			if (!empty($member)) {
-				$member_data = (array)$member;
-				$member_id = (int)$member_data["member_id"];
-				assert($member_id != 0);
-				$member_number = (int)$member_data["member_number"];
-				assert($member_number != 0);
+				$member_id = (int) $member->member_id;
+				assert($member_id !== 0);
+				$member_number = (int) $member->member_number;
+				assert($member_number !== 0);
 
-				$current_member["member_id"] = $member_id;
-				$current_member["member_number"] = $member_number;
-				$current_member["firstname"] = $member_data["firstname"];
-				$current_member["lastname"] = $member_data["lastname"];
-				$curl->call("GET", "http://" . config("service.gateway") . "/related", [
-					"param" => "/membership/member/".$member_id,
-					"matchUrl" => "/keys/(.*)",
-					'from' => 'keys',
-				]);
-				$member_keys = (array)($curl->GetJson()->data);
-				if (!empty($member_keys)) {
-					$current_member['keys'] = array_map(function($key){
-						$lab_startdate = strtotime($key->startdate) ?: null;
-						$lab_enddate = strtotime($key->enddate) ?: null;
-						return [
-							'key_id' => $key->key_id,
-							'rfid_tag' => $key->tagid,
-							'blocked' => $key->status === 'inactive',
-							'start_timestamp' => $lab_startdate !== null ? date('c', $lab_startdate) : null,
-							'end_timestamp' => $lab_enddate !== null ? date('c', $lab_enddate) : null,
-						];
-					},$member_keys);
+				$current_member['member_id'] = $member_id;
+				$current_member['member_number'] = $member_number;
+				$current_member['firstname'] = $member->firstname;
+				$current_member['lastname'] = $member->lastname;
+				$current_member['keys'] = [];
+			}
+			$member_keys[$member_number] = $current_member;
+		}
 
-					$members[$member_id] = $current_member;
-				}
+		foreach ($keys as $key) {
+			$member_number = (int) $key->title;
+			assert($member_number !== 0);
+			if (array_key_exists($member_number, $member_keys)) {
+				$lab_startdate = strtotime($key->startdate) ?: null;
+				$lab_enddate = strtotime($key->enddate) ?: null;
+				$current_key = [
+					'key_id' => $key->key_id,
+					'rfid_tag' => $key->tagid,
+					'blocked' => $key->status === 'inactive',
+					'start_timestamp' => $lab_startdate !== null ? date('c', $lab_startdate) : null,
+					'end_timestamp' => $lab_enddate !== null ? date('c', $lab_enddate) : null ];
+				$member_keys[$member_number]['keys'][] = $current_key;
+			} else {
+				error_log("Key ".$key->key_id." has invalid member");
 			}
 		}
 
 		// Send response to client
 		return Response()->json([
-			"data" => array_values($members),
+			"data" => array_values($member_keys),
 		], 200);
 	}
 
