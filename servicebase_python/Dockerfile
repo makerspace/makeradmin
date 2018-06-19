@@ -7,10 +7,4 @@ RUN pip3 install flask flask-compress fuzzywuzzy jsonpickle PyMySQL python-dateu
 
 # Add all the source files
 RUN mkdir -p /var/www/service/
-COPY member_view/src /var/www/service/
-COPY common /var/www/service/
-
-EXPOSE 80
-
-WORKDIR "/var/www/service"
-CMD ["./run.sh"]
+COPY . /var/www/service/

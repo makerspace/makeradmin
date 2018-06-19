@@ -27,6 +27,13 @@ services:
     networks:
       - makeradmin
 
+  servicebase_python:
+    image: makeradmin/servicebase_python:1.0
+    build:
+      context: ./servicebase_python
+    networks:
+      - makeradmin
+
   api-gateway:
     image: makeradmin/apigateway:1.0
     build:
@@ -52,9 +59,7 @@ services:
 
   current-member:
     image: makeradmin/current-member:1.0
-    build:
-      context: ./currentmember/
-      dockerfile: member_view/Dockerfile
+    build: member_view
     environment:
       MYSQL_HOST: "db2:${MYSQL_PORT}"
       MYSQL_DB: "makeradmin-membership"
@@ -73,11 +78,9 @@ services:
   webshop:
     image: makeradmin/webshop:1.0
     volumes:
-      - "./currentmember/webshop/src/static:/var/www/service/static"
-      - "./currentmember/webshop/src/templates:/var/www/service/templates"
-    build:
-      context: ./currentmember/
-      dockerfile: webshop/Dockerfile
+      - "./webshop/src/static:/var/www/service/static"
+      - "./webshop/src/templates:/var/www/service/templates"
+    build: webshop
     ports:
       - "8011:80"
     environment:
@@ -100,9 +103,7 @@ services:
 
   rfid:
     image: makeradmin/rfid:1.0
-    build:
-      context: ./currentmember/
-      dockerfile: rfid/Dockerfile
+    build: rfid
     environment:
       MYSQL_HOST: "db2:${MYSQL_PORT}"
       MYSQL_DB: "makeradmin-rfid"
