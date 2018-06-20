@@ -132,7 +132,7 @@ $(document).ready(() => {
             }
             deletedActionIDs = [];
 
-            $.when(futures).fail(() => {
+            $.when.apply($,futures).fail(() => {
                 isSaving = false;
                 // UIkit.modal.alert("Saved");
                 $(".progress-spinner").toggleClass("progress-spinner-visible", false);
