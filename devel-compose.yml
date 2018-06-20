@@ -29,6 +29,13 @@ services:
     networks:
       - makeradmin
 
+  servicebase_python:
+    image: makeradmin/servicebase_python:1.0
+    build:
+      context: ./servicebase_python
+    networks:
+      - makeradmin
+
   api-gateway:
     image: makeradmin/apigateway:1.0
     build:
@@ -56,9 +63,7 @@ services:
 
   current-member:
     image: makeradmin/current-member:1.0
-    build:
-      context: ./currentmember/
-      dockerfile: member_view/Dockerfile
+    build: member_view
     environment:
       MYSQL_HOST: "db2:${MYSQL_PORT}"
       MYSQL_DB: "makeradmin-membership"
@@ -71,17 +76,16 @@ services:
       APP_DEBUG: "true"
     depends_on:
       - api-gateway
+      - servicebase_python
     networks:
       - makeradmin
 
   webshop:
     image: makeradmin/webshop:1.0
     volumes:
-      - "./currentmember/webshop/src/static:/var/www/service/static"
-      - "./currentmember/webshop/src/templates:/var/www/service/templates"
-    build:
-      context: ./currentmember/
-      dockerfile: webshop/Dockerfile
+      - "./webshop/src/static:/var/www/service/static"
+      - "./webshop/src/templates:/var/www/service/templates"
+    build: webshop
     ports:
       - "8011:80"
     environment:
@@ -93,20 +97,19 @@ services:
       BEARER: "${API_BEARER}"
       HOST_FRONTEND:
       HOST_BACKEND:
-      APP_DEBUG:
+      APP_DEBUG: "true"
       STRIPE_PRIVATE_KEY:
       STRIPE_PUBLIC_KEY:
       STRIPE_SIGNING_SECRET:
     depends_on:
       - api-gateway
+      - servicebase_python
     networks:
       - makeradmin
 
   rfid:
     image: makeradmin/rfid:1.0
-    build:
-      context: ./currentmember/
-      dockerfile: rfid/Dockerfile
+    build: rfid
     environment:
       MYSQL_HOST: "db2:${MYSQL_PORT}"
       MYSQL_DB: "makeradmin-rfid"
@@ -119,6 +122,7 @@ services:
       APP_DEBUG: "true"
     depends_on:
       - api-gateway
+      - servicebase_python
     networks:
       - makeradmin
 
@@ -230,6 +234,8 @@ services:
   frontend:
     image: makeradmin/frontend:1.0
     build: ./frontend
+    volumes:
+      - ./frontend/dist:/var/www/html/
     environment:
       HOST_BACKEND:
     ports:
