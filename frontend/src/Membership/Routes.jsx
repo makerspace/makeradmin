@@ -56,6 +56,10 @@ module.exports = {
 									],
 								},
 								{
+									path: "permissions",
+									component: require("./Components/UserBox/Permissions/List"),
+								},
+								{
 									path: "subscriptions",
 									component: require("../Sales/Components/UserBox/Subscriptions/List"),
 								},
@@ -92,10 +96,39 @@ module.exports = {
 						{
 							path: ":group_id",
 							component: require("./Pages/Group/Show"),
-						},
-						{
-							path: ":group_id/edit",
-							component: require("./Pages/Group/Edit"),
+							indexRoute: {
+								component: require("./Components/GroupBox/Groups/Show"),
+							},
+							childRoutes: [
+								{
+									path: "info",
+									component: require("./Components/GroupBox/Groups/Show"),
+								},
+								{
+									path: "members",
+									indexRoute: {
+										component: require("./Components/GroupBox/Member/List"),
+									},
+									childRoutes: [
+										{
+											path: "add",
+											component: require("./Components/GroupBox/Member/Add"),
+										},
+									],
+								},
+								{
+									path: "permissions",
+									indexRoute: {
+										component: require("./Components/GroupBox/Permissions/List"),
+									},
+									childRoutes: [
+										{
+											path: "add",
+											component: require("./Components/GroupBox/Permissions/Add"),
+										},
+									],
+								},
+							],
 						},
 					],
 				},

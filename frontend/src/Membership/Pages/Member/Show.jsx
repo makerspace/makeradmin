@@ -34,6 +34,7 @@ module.exports = withRouter(React.createClass({
 					<li><Link to={"/membership/members/" + member_id}>Personuppgifter</Link></li>
 					<li><Link to={"/membership/members/" + member_id + "/groups"}>Grupper</Link></li>
 					<li><Link to={"/membership/members/" + member_id + "/keys"}>Nycklar</Link></li>
+					<li><Link to={"/membership/members/" + member_id + "/permissions"}>Behörigheter</Link></li>
 					<li><Link to={"/membership/members/" + member_id + "/subscriptions"}>Prenumerationer</Link></li>
 					<li><Link to={"/membership/members/" + member_id + "/transactions"}>Transaktioner</Link></li>
 					<li><Link to={"/membership/members/" + member_id + "/messages"}>Utskick</Link></li>

@@ -206,8 +206,8 @@ class Login
 		SecurityHelper::addPermissionHeaders($ch, Login::SERVICE_USER_ID, $signed_permissions);
 		$result = $ch->call("GET", "{$service->endpoint}/membership/member/{$user_id}/permissions");
 
-		if($ch->getStatusCode() == 200 && ($json = $ch->getJson()) !== false && isset($json->data->permissions)){
-			return $json->data->permissions;
+		if($ch->getStatusCode() == 200 && ($json = $ch->getJson()) !== false && isset($json->data)){
+			return implode(',', array_column($json->data,'permission'));
 		}
 		return null;
 	}

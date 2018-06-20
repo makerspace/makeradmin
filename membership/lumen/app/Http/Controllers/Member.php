@@ -352,14 +352,12 @@ class Member extends Controller
 			->join("membership_permissions", "membership_permissions.permission_id", "membership_group_permissions.permission_id")
 			->where('member_id', $member_id)
 			->distinct()
-			->pluck('permission');
+			->select('membership_group_permissions.permission_id','permission')
+			->get();
 
-		$result = [];
-		$result["permissions"] = implode(",", $permissions->all());
-		
 		// Send response to client
 		return Response()->json([
-			"data" => $result,
+			"data" => $permissions,
 		], 200);
 	}
 }

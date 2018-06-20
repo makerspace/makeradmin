@@ -181,4 +181,61 @@ Indented:
 
 		return $this->_list("Member", $params);
 	}
+
+	/**
+	 * Get all permissions for a group
+	 */
+	function listPermissions(Request $request, $group_id) {
+		// Get permissions for group
+		// TODO: Groups are arranged into a hierarchy which should be expanded
+		$permissions = DB::table("membership_group_permissions")
+			->join("membership_permissions", "membership_permissions.permission_id",
+			"membership_group_permissions.permission_id")
+			->where('membership_group_permissions.group_id', $group_id)
+			->select('membership_permissions.permission_id','permission')
+			->get();
+
+		// Send response to client
+		return Response()->json([
+			"data" => $permissions
+		], 200);
+	}
+
+	/**
+	 * Add a permission to a group
+	 */
+	public function addPermissions(Request $request, $group_id)
+	{
+		$json = $request->json()->all();
+
+		// Add the group to the user
+		$data = [];
+		foreach($json["permissions"] as $permission_id)
+		{
+			DB::insert("REPLACE INTO membership_group_permissions(group_id, permission_id) VALUES(?, ?)", [$group_id, $permission_id]);
+		}
+
+		return Response()->json([
+			"status"  => "ok",
+		], 200);
+	}
+
+	/**
+	 * Remove a permission from a group
+	 */
+	public function removePermissions(Request $request, $group_id)
+	{
+		$json = $request->json()->all();
+
+		// Add the group to the user
+		$data = [];
+		foreach($json["permissions"] as $permission_id)
+		{
+			DB::insert("DELETE FROM membership_group_permissions WHERE group_id = ? AND permission_id = ?", [$group_id, $permission_id]);
+		}
+
+		return Response()->json([
+			"status"  => "ok",
+		], 200);
+	}
 }

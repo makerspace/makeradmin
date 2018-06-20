@@ -2,11 +2,8 @@ import React from 'react'
 
 // Backbone
 import GroupModel from '../../Models/Group'
-import MemberCollection from '../../Collections/Member'
 
-import { withRouter } from 'react-router'
-import Group from '../../Components/Forms/Group'
-import GroupMembers from '../../Components/Tables/GroupMembers'
+import { Link, withRouter } from 'react-router'
 
 module.exports = withRouter(React.createClass({
 	getInitialState: function()
@@ -14,7 +11,13 @@ module.exports = withRouter(React.createClass({
 		var group = new GroupModel({
 			group_id: this.props.params.group_id
 		});
-		group.fetch();
+
+		var _this = this;
+		group.fetch({success: function()
+		{
+			// Since we do not use BackboneReact we have to update the view manually
+			_this.forceUpdate();
+		}});
 
 		this.title = "Meep";
 		return {
@@ -24,12 +27,18 @@ module.exports = withRouter(React.createClass({
 
 	render: function()
 	{
+		const group_id = this.props.params.group_id;
 		return (
 			<div>
-				<Group model={this.state.model} route={this.props.route} />
-				<GroupMembers type={MemberCollection} dataSource={{
-					url: "/membership/group/" + this.props.params.group_id + "/members"
-				}} />
+				<h2>Grupp {this.state.model.get("title")}</h2>
+
+				<ul className="uk-tab">
+					<li><Link to={"/membership/groups/" + group_id}>Information</Link></li>
+					<li><Link to={"/membership/groups/" + group_id + "/members"}>Medlemmar</Link></li>
+					<li><Link to={"/membership/groups/" + group_id + "/permissions"}>Behörigheter</Link></li>
+				</ul>
+
+				{this.props.children}
 			</div>
 		);
 	},

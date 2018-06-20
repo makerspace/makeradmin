@@ -41,4 +41,19 @@ class Permission extends Entity
 	protected $validation = [
 		"permission" => ["required", "unique"],
 	];
+
+	public function _search($query, $search)
+	{
+		$words = explode(" ", $search);
+		foreach($words as $word)
+		{
+			$query = $query->where(function($query) use($word) {
+				// Build the search query
+				$query
+				->  where("membership_permissions.permission",    "like", "%".$word."%")
+				->orWhere("membership_permissions.permission_id", "like", "%".$word."%");
+			});
+		}
+		return $query;
+	}
 }
