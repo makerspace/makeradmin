@@ -126,13 +126,10 @@ $(document).ready(() => {
       let baseStr = item.smallest_multiple > 1 ? item.smallest_multiple + item.unit : item.unit;
 
       const buttons = [];
-      let increments = [1, 10, 100];
-      if (item.smallest_multiple != 1) {
-        increments = [item.smallest_multiple, 2*item.smallest_multiple, 3*item.smallest_multiple];
-      }
+      let increments = [1];
 
       for (const incr of increments) {
-        buttons.push(`<button type="button" class="uk-button uk-button-small uk-button-primary number-add" data-amount="${incr}">+${incr}${item.unit}</button>`);
+        buttons.push(`<button type="button" class="uk-button uk-button-small uk-button-primary number-add" data-amount="${incr}">+</button>`);
       }
 
       const li = $(
