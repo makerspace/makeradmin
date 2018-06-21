@@ -1,6 +1,7 @@
 from decimal import Decimal
 from datetime import datetime
-from service import Entity, Column
+from service import Entity, Column, DB
+from typing import List, Dict, Any
 
 # Note Decimal(str(x)) ensures it is a reasonable value that is saved.
 # For example
@@ -60,7 +61,8 @@ webshop_pending_registrations = Entity(
     columns=["transaction_id"],
 )
 
-def membership_products(db):
+
+def membership_products(db: DB) -> List[Dict[str,Any]]:
     # Find all products which gives a member membership
     # Note: Assumes a product never contains multiple actions of the same type.
     # If this doesn't hold we will get duplicates of that product in the list.

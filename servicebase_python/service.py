@@ -18,7 +18,7 @@ SERVICE_USER_ID = -1
 
 
 class DB:
-    def __init__(self, host, name, user, password):
+    def __init__(self, host: str, name: str, user: str, password: str) -> None:
         self.host = host
         self.name = name
         self.user = user
@@ -35,7 +35,7 @@ class DB:
 
 
 class APIGateway:
-    def __init__(self, host, key, host_frontend, host_backend):
+    def __init__(self, host: str, key: str, host_frontend: str, host_backend: str) -> None:
         self.host = host
         self.host_frontend = host_frontend
         self.host_backend = host_backend
@@ -47,16 +47,16 @@ class APIGateway:
             host = "http://" + host
         return host + "/" + path
 
-    def get(self, path, payload=None):
+    def get(self, path, payload=None) -> requests.Response:
         return requests.get('http://' + self.host + "/" + path, params=payload, headers=self.auth_headers)
 
-    def post(self, path, payload):
+    def post(self, path, payload) -> requests.Response:
         return requests.post('http://' + self.host + "/" + path, json=payload, headers=self.auth_headers)
 
-    def put(self, path, payload):
+    def put(self, path, payload) -> requests.Response:
         return requests.put('http://' + self.host + "/" + path, json=payload, headers=self.auth_headers)
 
-    def delete(self, path):
+    def delete(self, path) -> requests.Response:
         return requests.delete('http://' + self.host + "/" + path, headers=self.auth_headers)
 
 
@@ -71,7 +71,7 @@ def _format_datetime(date: Union[str, datetime]):
 
 
 class Service:
-    def __init__(self, name: str, url: str, port: int, version: str, db: DB, gateway: APIGateway, debug: bool, frontend: bool) -> None:
+    def __init__(self, name: str, url: str, port: int, version: Optional[str], db: DB, gateway: APIGateway, debug: bool, frontend: bool) -> None:
         self.name = name
         self.url = url
         self.port = port

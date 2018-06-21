@@ -28,7 +28,7 @@ key_entity.add_routes(instance, "", read_permission="keys_view", write_permissio
 
 @instance.route("update_times", methods=["POST"])
 @route_helper
-def update_keys():
+def update_keys() -> None:
     '''
     Completes all orders for purchasing lab access and updates existing keys with new dates.
     If a user has no key yet, then the order will remain as not completed.

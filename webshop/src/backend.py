@@ -6,9 +6,14 @@ import os
 from decimal import Decimal, Rounded, localcontext
 from collections import namedtuple
 from webshop_entities import category_entity, product_entity, transaction_entity, transaction_content_entity, product_action_entity, webshop_completed_actions, membership_products, webshop_stripe_pending, webshop_pending_registrations
-from typing import Set
+from typing import Set, List, Dict, Any, NamedTuple, Tuple
 
-CartItem = namedtuple('CartItem', 'id count amount')
+
+class CartItem(NamedTuple):
+    id: int
+    count: int
+    amount: Decimal
+
 
 instance = service.create(name="Makerspace Webshop Backend", url="webshop", port=8000, version="1.0")
 
@@ -56,7 +61,7 @@ webshop_stripe_pending.db = db
 
 @instance.route("pending_actions", methods=["GET"])
 @route_helper
-def pending_actions():
+def pending_actions() -> List[Dict[str,Any]]:
     '''
     Finds every item in a transaction and checks the actions it has, then checks to see if all those actions have been completed (and are not deleted).
     The actions that are valid for a transaction are precisely those that existed at the time the transaction was made. Therefore if an action is added to a product
@@ -101,13 +106,13 @@ def pending_actions():
 # TODO: More restrictive permissions?
 @instance.route("transaction/<int:id>/content", methods=["GET"])
 @route_helper
-def transaction_contents(id: int):
+def transaction_contents(id: int) -> Dict[str,Any]:
     return transaction_content_entity.list("transaction_id=%s", id)
 
 
 @instance.route("member/current/transactions", methods=["GET"], permission=None)
 @route_helper
-def member_history():
+def member_history() -> Dict[str,Any]:
     '''
     Helper for listing the full transaction history of a member, with product info included.
     '''
@@ -126,11 +131,11 @@ def member_history():
     return transactions
 
 
-def copy_dict(source, fields):
+def copy_dict(source: Dict[str,Any], fields: List[str]) -> Dict[str,Any]:
     return {key: source[key] for key in fields if key in source}
 
 
-def send_new_member_email(member_id):
+def send_new_member_email(member_id: int) -> None:
     r = instance.gateway.post("messages", {
         "recipients": [
             {
@@ -150,7 +155,7 @@ def send_new_member_email(member_id):
 
 @instance.route("register", methods=["POST"], permission=None)
 @route_helper
-def register():
+def register() -> Dict[str, int]:
     ''' Register a new member.
         See frontend.py:register_member
     '''
@@ -207,16 +212,13 @@ def register():
         "duplicatePurchaseRand": purchase["duplicatePurchaseRand"],
     }
 
-    try:
-        # Note this will throw if the payment failed
-        return pay(member_id=member_id, data=purchase, activates_member=True)
-    except:
-        raise
+    # Note this will throw if the payment fails
+    return pay(member_id=member_id, data=purchase, activates_member=True)
 
 
 @instance.route("stripe_callback", methods=["POST"], permission=None)
 @route_helper
-def stripe_callback():
+def stripe_callback() -> None:
     payload = request.data
     eprint("Headers: " + str(request.headers))
     sig_header = request.headers['Stripe-Signature']
@@ -253,13 +255,13 @@ def stripe_callback():
             eprint("Marked transaction as failed")
 
 
-def process_cart(cart):
+def process_cart(cart: List[Dict[str,Any]]) -> Tuple[Decimal, List[CartItem]]:
     with db.cursor() as cur:
         prices = []
         multiples = []
         for item in cart:
             cur.execute("SELECT price,smallest_multiple FROM webshop_products WHERE id=%s AND deleted_at IS NULL", item["id"])
-            tup = cur.fetchone()
+            tup: Tuple[Decimal, int] = cur.fetchone()
             if tup is None:
                 abort(400, "Item " + str(item["id"]) + " does not exist")
             price, smallest_multiple = tup
@@ -271,6 +273,7 @@ def process_cart(cart):
         items = []
         with localcontext() as ctx:
             ctx.clear_flags()
+            total_amount = Decimal(0)
 
             for price, smallest_multiple, item in zip(prices, multiples, cart):
                 count = int(item["count"])
@@ -281,8 +284,8 @@ def process_cart(cart):
 
                 item_amount = price * count
                 items.append(CartItem(item["id"], count, item_amount))
+                total_amount += item_amount
 
-            total_amount = sum(item.amount for item in items)
             if ctx.flags[Rounded]:
                 # This can possibly happen with huge values, I suppose they will be caught below anyway but it's good to catch in any case
                 abort(400, "Rounding ocurred during price calculations")
@@ -290,7 +293,7 @@ def process_cart(cart):
     return total_amount, items
 
 
-def validate_payment(cart, expected_amount: Decimal):
+def validate_payment(cart: List[Dict[str,Any]], expected_amount: Decimal) -> Tuple[Decimal, List[CartItem]]:
     if len(cart) == 0:
         abort(400, "No items in cart")
 
@@ -309,7 +312,7 @@ def validate_payment(cart, expected_amount: Decimal):
     return total_amount, items
 
 
-def convert_to_stripe_amount(amount: Decimal):
+def convert_to_stripe_amount(amount: Decimal) -> int:
     # Ensure that the amount to pay is in whole cents (ören)
     # This shouldn't be able to fail as all products in the database have prices in cents, but you never know.
     stripe_amount = amount * stripe_currency_base
@@ -320,7 +323,7 @@ def convert_to_stripe_amount(amount: Decimal):
     return int(stripe_amount)
 
 
-def stripe_payment(transaction_id: int, token: str):
+def stripe_payment(transaction_id: int, token: str) -> None:
     transaction = transaction_entity.get(transaction_id)
 
     if transaction["status"] != "pending":
@@ -360,7 +363,7 @@ def stripe_payment(transaction_id: int, token: str):
     eprint("Payment complete. id: " + str(transaction_id))
 
 
-def activate_member(member_id: int):
+def activate_member(member_id: int) -> None:
     # Make the member not be deleted
     r = instance.gateway.post(f"membership/member/{member_id}/activate", {})
     assert r.ok
@@ -368,7 +371,7 @@ def activate_member(member_id: int):
     send_new_member_email(member_id)
 
 
-def send_receipt_email(member_id: int, transaction_id: int):
+def send_receipt_email(member_id: int, transaction_id: int) -> None:
     transaction = transaction_entity.get(transaction_id)
     items = transaction_content_entity.list("transaction_id=%s", transaction_id)
     products = [product_entity.get(item["product_id"]) for item in items]
@@ -400,7 +403,7 @@ duplicatePurchaseRands: Set[int] = set()
 
 @instance.route("pay", methods=["POST"], permission=None)
 @route_helper
-def pay_route():
+def pay_route() -> Dict[str,int]:
     data = request.get_json()
     if data is None:
         abort(400, "missing json")
@@ -409,14 +412,14 @@ def pay_route():
     return pay(member_id, data)
 
 
-def add_transaction_to_db(member_id: int, total_amount: Decimal, items):
+def add_transaction_to_db(member_id: int, total_amount: Decimal, items: List[CartItem]) -> int:
     transaction_id = transaction_entity.post({"member_id": member_id, "amount": total_amount, "status": "pending"})["id"]
     for item in items:
         transaction_content_entity.post({"transaction_id": transaction_id, "product_id": item.id, "count": item.count, "amount": item.amount})
     return transaction_id
 
 
-def create_stripe_source(transaction_id: int, card_source: str, total_amount: Decimal):
+def create_stripe_source(transaction_id: int, card_source: str, total_amount: Decimal) -> stripe.Source:
     stripe_amount = convert_to_stripe_amount(total_amount)
     eprint("Token: " + str(card_source))
     return stripe.Source.create(
@@ -432,7 +435,7 @@ def create_stripe_source(transaction_id: int, card_source: str, total_amount: De
     )
 
 
-def pay(member_id: int, data, activates_member: bool = False):
+def pay(member_id: int, data: Dict[str, Any], activates_member: bool = False) -> Dict[str, int]:
     # The frontend will add a per-page random value to the request.
     # This will try to prevent duplicate payments due to sending the payment request twice
     duplicatePurchaseRand = assert_get(data, "duplicatePurchaseRand")

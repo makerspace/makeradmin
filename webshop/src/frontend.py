@@ -4,6 +4,7 @@ from service import eprint
 import json
 import os
 from webshop_entities import category_entity, product_entity, transaction_entity, transaction_content_entity, action_entity, membership_products
+from typing import Set, List, Dict, Any, NamedTuple, Tuple
 
 instance = service.create_frontend(url="shop", port=80)
 
@@ -25,11 +26,12 @@ meta = {
     "stripePublicKey": os.environ["STRIPE_PUBLIC_KEY"]
 }
 
-def product_data():
+
+def product_data() -> Tuple[List[Dict[str,Any]], List[Dict[str,Any]]]:
     with db.cursor() as cur:
         # Get all categories, as some products may exist in deleted categories
         # (it is up to an admin to move them to another category)
-        categories = category_entity.list(where=None)
+        categories: List[Dict[str,Any]] = category_entity.list(where=None)
 
         data = []
         for cat in categories:
@@ -56,25 +58,25 @@ def product_data():
 
 
 @instance.route("/")
-def home():
+def home() -> str:
     all_products, categories = product_data()
     return render_template("shop.html", product_json=json.dumps(all_products), categories=categories, url=instance.full_path, meta=meta)
 
 
 @instance.route("register")
-def register_member():
+def register_member() -> str:
     products = membership_products(db)
     all_products, _ = product_data()
     return render_template("register.html", product_json=json.dumps(all_products), products=products, currency="kr", url=instance.full_path, meta=meta)
 
 
 @instance.route("member/history")
-def purchase_history():
+def purchase_history() -> str:
     return render_template("history.html", url=instance.full_path, meta=meta)
 
 
 @instance.route("product/<int:id>/edit")
-def product_edit(id):
+def product_edit(id: int) -> str:
     categories = category_entity.list()
     product = product_entity.get(id)
 
@@ -100,7 +102,7 @@ def product_edit(id):
 
 
 @instance.route("product/create")
-def product_create():
+def product_create() -> str:
     categories = category_entity.list()
 
     product = {
@@ -123,7 +125,7 @@ def product_create():
 
 
 @instance.route("receipt/<int:id>")
-def receipt(id):
+def receipt(id: int) -> str:
     transaction = transaction_entity.get(id)
     items = transaction_content_entity.list("transaction_id=%s", id)
     products = [product_entity.get(item["product_id"]) for item in items]
