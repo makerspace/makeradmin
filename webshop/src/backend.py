@@ -98,25 +98,23 @@ def pending_actions():
         ]
 
 
+# TODO: More restrictive permissions?
 @instance.route("transaction/<int:id>/content", methods=["GET"])
 @route_helper
 def transaction_contents(id: int):
     return transaction_content_entity.list("transaction_id=%s", id)
 
 
-@instance.route("member/<int:id>/transactions", methods=["GET"], permission=None)
+@instance.route("member/current/transactions", methods=["GET"], permission=None)
 @route_helper
-def member_history(id: int):
+def member_history():
     '''
     Helper for listing the full transaction history of a member, with product info included.
     '''
-
-    user_id = int(assert_get(request.headers, "X-User-Id"))
-    if id != user_id:
-        abort(403)
+    user_id = assert_get(request.headers, "X-User-Id")
 
     # TODO: All these database lookups could probably be optimized
-    transactions = transaction_entity.list("member_id=%s", id)
+    transactions = transaction_entity.list("member_id=%s", user_id)
     transactions.reverse()
     for tr in transactions:
         items = transaction_content_entity.list("transaction_id=%s", tr["id"])
@@ -366,6 +364,7 @@ def activate_member(member_id: int):
     # Make the member not be deleted
     r = instance.gateway.post(f"membership/member/{member_id}/activate", {})
     assert r.ok
+
     send_new_member_email(member_id)
 
 
@@ -373,6 +372,11 @@ def send_receipt_email(member_id: int, transaction_id: int):
     transaction = transaction_entity.get(transaction_id)
     items = transaction_content_entity.list("transaction_id=%s", transaction_id)
     products = [product_entity.get(item["product_id"]) for item in items]
+
+    r = instance.gateway.get(f"membership/member/{id}")
+    assert r.ok
+
+    member = r.json()["data"]
 
     r = instance.gateway.post("messages", {
         "recipients": [
@@ -383,7 +387,7 @@ def send_receipt_email(member_id: int, transaction_id: int):
         ],
         "message_type": "email",
         "subject": "Kvitto - Stockholm Makerspace",
-        "body": render_template("receipt_email.html", cart=zip(products,items), transaction=transaction, currency="kr", frontend_url=instance.gateway.get_frontend_url)
+        "body": render_template("receipt_email.html", cart=zip(products,items), transaction=transaction, currency="kr", member=member, frontend_url=instance.gateway.get_frontend_url)
     })
 
     if not r.ok:
