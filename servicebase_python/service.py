@@ -9,7 +9,7 @@ import signal
 from time import sleep
 from functools import wraps
 from dataclasses import dataclass
-from typing import Callable, Type, Optional
+from typing import Callable, Type, Optional, Set, Dict, Union
 from datetime import datetime
 from dateutil import parser
 from decimal import Decimal
@@ -63,8 +63,15 @@ class APIGateway:
 DEFAULT_PERMISSION = object()
 
 
+def _format_datetime(date: Union[str, datetime]):
+    if not isinstance(date, datetime):
+        date = parser.parse(date)
+
+    return date.strftime("%Y-%m-%d %H:%M")
+
+
 class Service:
-    def __init__(self, name, url, port, version, db, gateway, debug, frontend):
+    def __init__(self, name: str, url: str, port: int, version: str, db: DB, gateway: APIGateway, debug: bool, frontend: bool) -> None:
         self.name = name
         self.url = url
         self.port = port
@@ -74,9 +81,10 @@ class Service:
         self.gateway = gateway
         self.frontend = frontend
         self.app = Flask(name, static_url_path=self.full_path("static"))
-        self._used_permissions = set()
+        self.app.jinja_env.filters['format_datetime'] = _format_datetime
+        self._used_permissions: Set[str] = set()
 
-    def full_path(self, path):
+    def full_path(self, path: str):
         return "/" + self.url + ("/" + path if path != "" else "")
 
     def route(self, path: str, permission=DEFAULT_PERMISSION, **kwargs):
@@ -142,7 +150,7 @@ class Service:
 
     def add_route_list(self):
         '''Adds an endpoint (/routes) for listing all routes of the service'''
-        @self.route("routes")
+        @self.route("routes", permission=None)
         def site_map():
             return jsonify({"data": [{"url": rule.rule, "methods": list(rule.methods)} for rule in self.app.url_map.iter_rules()]})
 
@@ -170,7 +178,7 @@ class Service:
         # self.app.run(host='0.0.0.0', debug=self.debug, port=self.port, use_reloader=False)
 
 
-def assert_get(data, key):
+def assert_get(data: Dict, key: str):
     if key not in data:
         abort(400, "Missing required parameter " + key)
 
@@ -202,7 +210,8 @@ def read_config():
 
 def eprint(s, **kwargs):
     ''' Print to stderr and flush the output stream '''
-    print(s, **kwargs, file=sys.stderr)
+    kwargs["file"] = sys.stderr
+    print(s, **kwargs)
     sys.stderr.flush()
 
 
