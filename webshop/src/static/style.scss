@@ -63,7 +63,7 @@ $footer-height: 240px;
 	}
 }
 
-.product:hover .product-actions {
+.product-actions:hover {
 	opacity: 1.0;
 	visibility: visible;
 }
@@ -75,11 +75,10 @@ $footer-height: 240px;
 }
 
 .product-actions {
-	visibility: hidden;
-	opacity: 0;
-	transition: visibility 200ms, opacity 200ms;
+	opacity: 0.5;
+	transition: opacity 200ms;
 	position: relative;
-	width: 240px;
+	width: 50px;
 }
 
 .product-actions span {
@@ -452,14 +451,6 @@ $footer-height: 240px;
 	margin-left: auto;
 	margin-right: auto;
 
-	.receipt-amount {
-		margin-top: 20px;
-		margin-bottom: 20px;
-		text-align: right;
-		font-size: 24pt;
-	}
-
-
 	.receipt-buttons {
 		text-align: center;
 		a {
@@ -500,6 +491,23 @@ $footer-height: 240px;
 	margin-left: auto;
 	margin-right: auto;
 
+	h1 {
+		margin-bottom: 0px;
+	}
+
+	.receipt-buttons {
+		color: #8bbdef;
+	}
+}
+
+.history-item {
+	color: #fff;
+	overflow: hidden;
+	border-radius: 4px;
+	margin-bottom: 20px;
+
+	box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.4);
+
 	h3 {
 		background: #469ABE;
 		margin-bottom: 0px;
@@ -509,48 +517,44 @@ $footer-height: 240px;
 		padding-bottom: 5px;
 		padding-top: 5px;
 
-		font-size: 16pt;
-		color: #FFF;
-	}
-
-	h1 {
-		margin-bottom: 0px;
-	}
-
-	.receipt-buttons {
-		color: #8bbdef;
-	}
-
-	.history-item {
-		color: #fff;
-		overflow: hidden;
-		border-radius: 4px;
-		margin-bottom: 20px;
-
-		box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.4);
-
-		.receipt-items {
-			background: #2785AD;
-			padding-left: 20px;
-			padding-right: 20px;
-			padding-top: 10px;
-			padding-bottom: 10px;
+		a {
+			font-size: 16pt;
+			color: #FFF;
 		}
+	}
 
-		.receipt-item {
-			border-bottom: none;
-		}
+	.receipt-id {
+		color: rgba(255, 255, 255, 0.5);
+		float: right;
+	}
+
+	.receipt-items {
+		background: #2785AD;
+		padding-left: 20px;
+		padding-right: 20px;
+		padding-top: 10px;
+		padding-bottom: 10px;
+	}
+
+	.receipt-item {
+		border-bottom: none;
 	}
 
 	.receipt-amount {
 		background: #07719F;
 		margin-top: 0px;
 		margin-bottom: 0px;
+		padding-left: 20px;
 		padding-right: 20px;
 		padding-top: 5px;
 		padding-bottom: 5px;
-
-		text-align: right;
 		font-size: 18pt;
+		display: flex;
+		flex-direction: row;
+
+		.receipt-amount-value {
+			flex: 5;
+			text-align: right;
+		}
 	}
 }

@@ -27,24 +27,36 @@
                 <h1>Din betalning har inte bekräftats ännu</h1>
             {% elif transaction.status == "completed" %}
                 <h1>Tack för ditt köp!</h1>
-                <div>
-                    {% for product, cartItem in cart %}
+                <div class="history-item">
+                    <h3><a href="/shop/receipt/{{transaction.id}}">{{ transaction.created_at|format_datetime }}</a><span class="receipt-id">Kvitto {{ transaction.id }}</span></h3>
+                    <div class="receipt-items">
+                        {% for product, cartItem in cart %}
+                            <div class="receipt-item">
+                                <span class="product-title">{{ product.name }}</span>
+                                <span class="receipt-item-count">{{ cartItem.count }} {{ product.unit }}</span>
+                                <span class="receipt-item-amount">{{ cartItem.amount }} {{ currency }}</span>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <div class="receipt-amount">
+                        <span>Summa</span>
+                        <span class="receipt-amount-value">{{ transaction.amount }} {{ currency }}</span>
+                    </div>
+                    <div class="receipt-items">
                         <div class="receipt-item">
-                            <span class="product-title">{{ product.name }}</span>
-                            <span class="receipt-item-count">{{ cartItem.count }} {{ product.unit }}</span>
-                            <span class="receipt-item-amount">{{ cartItem.amount }} {{ currency }}</span>
+                            <span class="product-title">Medlem</span>
+                            <span class="receipt-item-amount" style="min-width: 200px;">{{ member.firstname }} {{ member.lastname }} #{{ member.member_number }}</span>
                         </div>
-                    {% endfor %}
-                </div>
-                <div class="receipt-amount">
-                    <span>{{ transaction.amount }} {{ currency }}</span>
+                    </div>
                 </div>
                 <div class="receipt-message">
-                    Ett kvitto har också skickats via email.
+                    <p>Ett kvitto har också skickats via email.</p>
+                    <p>Stockholm Makerspace - Drottning Kristinas väg 53, 114 28 Stockholm</p>
                 </div>
             {% endif %}
             <div class="receipt-buttons">
                 <a href='/member'>Medlemsvy</a>
+                <a href='{{ url("member/history") }}'>Köphistorik</a>
                 <a href='{{ url("") }}'>Webshop</a>
             </div>
         </div>

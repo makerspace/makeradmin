@@ -68,17 +68,9 @@ def register_member():
     return render_template("register.html", product_json=json.dumps(all_products), products=products, currency="kr", url=instance.full_path, meta=meta)
 
 
-@instance.route("member/<int:id>/history")
-def purchase_history(id):
-    # TODO: All these database lookups could probably be optimized
-    r = instance.gateway.get(f"membership/member/{id}")
-    if r.status_code == 404:
-        return render_template("member_404.html", url=instance.full_path), r.status_code
-    elif not r.ok:
-        abort(r.status_code, r.json()["message"])
-
-    member = r.json()["data"]
-    return render_template("history.html", member=member, url=instance.full_path, meta=meta)
+@instance.route("member/history")
+def purchase_history():
+    return render_template("history.html", url=instance.full_path, meta=meta)
 
 
 @instance.route("product/<int:id>/edit")
@@ -135,8 +127,11 @@ def receipt(id):
     transaction = transaction_entity.get(id)
     items = transaction_content_entity.list("transaction_id=%s", id)
     products = [product_entity.get(item["product_id"]) for item in items]
+    r = instance.gateway.get(f"membership/member/{transaction['member_id']}")
+    assert r.ok
+    member = r.json()["data"]
 
-    return render_template("receipt.html", cart=zip(products,items), transaction=transaction, currency="kr", url=instance.full_path, meta=meta)
+    return render_template("receipt.html", cart=zip(products,items), transaction=transaction, currency="kr", member=member, url=instance.full_path, meta=meta)
 
 
 instance.serve_indefinitely()

@@ -13,25 +13,31 @@
               crossorigin="anonymous"></script>
         {% include("meta.html") %}
         <script>
-            let member_id = {{ member.member_id }};
             const currency = "kr";
             const apiBasePath = window.apiBasePath;
 
             $(document).ready(() => {
-                $.ajax({
-                  type: "GET",
-                  url: apiBasePath + "/webshop/member/" + member_id + "/transactions",
-                  dataType: "json",
-                  headers: {
-                    "Authorization": "Bearer " + localStorage.token
-                  }
-                }).done((data, textStatus, xhr) => {
+                function ajax(type, url, data) {
+                    return $.ajax({
+                        type: type,
+                        url: url,
+                        data: JSON.stringify(data),
+                        contentType: "application/json; charset=utf-8",
+                        dataType: "json",
+                        headers: {
+                        "Authorization": "Bearer " + localStorage.token
+                        }
+                    });
+                }
+
+                ajax("GET", apiBasePath + "/webshop/member/current/transactions", {})
+                .done((data, textStatus, xhr) => {
                     const rootElement = $("#history-contents");
                     rootElement.html("");
 
-                    for (let transaction of xhr.responseJSON.data) {
+                    for (const transaction of xhr.responseJSON.data) {
                         let cartItems = "";
-                        for (let item of transaction.content) {
+                        for (const item of transaction.content) {
                             cartItems += `<div class="receipt-item">
                                         <span class="product-title">${item.product.name}</span>
                                         <span class="receipt-item-count">${item.count} ${item.product.unit}</span>
@@ -39,19 +45,27 @@
                                     </div>`;
                         }
 
-                        let elem = $(`<div class="history-item">
-                            <h3>${ new Date(transaction.created_at).toLocaleDateString("se-SV") }</h3>
+                        const elem = $(`<div class="history-item">
+                            <h3><a href="/shop/receipt/${transaction.id}">${ new Date(transaction.created_at).toLocaleDateString("se-SV") }</a></h3>
                             <div class="receipt-items">
                                 ${cartItems}
                             </div>
                             <div class="receipt-amount">
-                                <span>${transaction.amount} ${currency}</span>
+                                <span class="receipt-amount-value">${transaction.amount} ${currency}</span>
                             </div>
                         </div>`);
                         rootElement.append(elem);
                     }
                 }).fail((xhr, textStatus, error) => {
                     UIkit.modal.alert("<h2>Misslyckades med att hämta köphistorik</h2>" + xhr.responseJSON.status);
+                });
+
+                ajax("GET", apiBasePath + "member/current", {})
+                .done((data, textStatus, xhr) => {
+                    const member = xhr.responseJSON.data;
+                    $("#member-header").html(`#${member.member_number} ${member.firstname} ${member.lastname}`);
+                }).fail((xhr, textStatus, error) => {
+                    UIkit.modal.alert("<h2>Misslyckades med att hämta medlemsinformation</h2>" + xhr.responseJSON.status);
                 });
             });
         </script>
@@ -63,7 +77,7 @@
                 <a href='/member'><span uk-icon="user"></span> Medlemsvy</a>
                 <a href='{{ url("") }}'><span uk-icon="cart"></span> Webshop</a>
             </div>
-            <h2>#{{ member.member_number }}: {{ member.firstname }} {{ member.lastname }}</h2>
+            <h2 id="member-header"></h2>
             <div id="history-contents">
                 <div uk-spinner></div>
             </div>
