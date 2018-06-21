@@ -56,6 +56,9 @@
             </div> #}
         </div>
         <div id="pay-module">
+            <div uk-icon="chevron-up" id="pay-module-open-button" uk-icon="chevron-up">
+                <span></span>
+            </div>
             <ul id="cart">
             </ul>
             <div id="pay-right">
@@ -69,7 +72,7 @@
                     </form>
                 </div>
                 <form id="pay">
-                    <h3>Betala med kort</h3>
+                    <h3>Betala med kort via Stripe</h3>
                     <form action="/charge" method="post" id="payment-form">
                         <div class="form-row">
                             {# <label for="card-element">

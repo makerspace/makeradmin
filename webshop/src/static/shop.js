@@ -244,7 +244,21 @@ $(document).ready(() => {
 
     $("#pay-button").find("span").html("Betala " + ((totalSum*currencyBase)|0)/currencyBase + " " + currency);
 
-    $("#pay-module").toggleClass("open", cart.length > 0 && !editMode);
+    $("#pay-module").toggleClass("non-empty", cart.length > 0 && !editMode);
+    let payOpenMessage = "";
+    switch(cart.length) {
+      case 0:
+        payOpenMessage = `Inga produkter i varukorgen`;
+        break;
+      case 1:
+        payOpenMessage = `1 produkt i varukorgen`;
+        break;
+      default:
+        payOpenMessage = `${cart.length} produkter i varukorgen`;
+        break;
+    }
+
+    $("#pay-module-open-button span").html(payOpenMessage);
 
     var marked = new Set();
     for (var i = 0; i < cart.length; i++) {
@@ -378,6 +392,14 @@ $(document).ready(() => {
       });
     });
   }
+
+  let payModuleOpen = false;
+  $("#pay-module-open-button").click(ev => {
+    ev.preventDefault();
+    payModuleOpen = !payModuleOpen;
+    $("#pay-module").toggleClass("open", payModuleOpen);
+    $("#pay-module-open-button").attr("uk-icon", payModuleOpen ? "chevron-down" : "chevron-up");
+  })
 
   $("#pay-login form").submit(ev => {
     ev.preventDefault();
