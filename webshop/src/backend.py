@@ -376,7 +376,7 @@ def send_receipt_email(member_id: int, transaction_id: int) -> None:
     items = transaction_content_entity.list("transaction_id=%s", transaction_id)
     products = [product_entity.get(item["product_id"]) for item in items]
 
-    r = instance.gateway.get(f"membership/member/{id}")
+    r = instance.gateway.get(f"membership/member/{member_id}")
     assert r.ok
 
     member = r.json()["data"]
