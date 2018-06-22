@@ -23,6 +23,14 @@ module.exports = {
 					component: require("./Pages/Product/Edit"),
 				},
 				{
+					path: "order",
+					component: require("./Pages/Order/List"),
+				},
+				{
+					path: "order/:id",
+					component: require("./Pages/Order/View"),
+				},
+				{
 					path: "subscription",
 					component: require("./Pages/Subscription/List"),
 				},

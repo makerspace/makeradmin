@@ -2,7 +2,7 @@ var webpack = require('webpack');
 
 // Get git info from command line
 var commitHash = require("child_process")
-	.execSync("sh -c 'find /data/src/ -type f -exec md5sum {} \\; | sort -k 2 | md5sum'")
+	.execSync("sh -c 'find ./src/ -type f -exec md5sum {} \\; | sort -k 2 | md5sum'")
 	.toString();
 
 // Get the build date

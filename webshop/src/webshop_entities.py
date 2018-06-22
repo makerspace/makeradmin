@@ -10,7 +10,16 @@ from typing import List, Dict, Any
 # Decimal("0.2") = Decimal('0.2')
 product_entity = Entity(
     table="webshop_products",
-    columns=["name", "category_id", "description", "unit", Column("price", dtype=Decimal), "smallest_multiple"],
+    columns=[
+        "name",
+        "category_id",
+        "description",
+        "unit",
+        Column("price", dtype=Decimal),
+        "smallest_multiple",
+        Column("created_at", dtype=datetime, write=None),
+        Column("updated_at", dtype=datetime, write=None)
+    ],
 )
 
 category_entity = Entity(
@@ -47,8 +56,8 @@ product_action_entity = Entity(
 )
 
 webshop_completed_actions = Entity(
-    table="webshop_completed_actions",
-    columns=["content_id", "action_id"],
+    table="webshop_transaction_performed_actions",
+    columns=["transaction_action_id", "value"],
 )
 
 webshop_stripe_pending = Entity(

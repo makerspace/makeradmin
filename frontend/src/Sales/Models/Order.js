@@ -2,13 +2,13 @@ import Backbone from 'backbone'
 
 module.exports = Backbone.Model.fullExtend(
 {
-	idAttribute: "account_number",
-	urlRoot: "/webshop/subscription",
+	idAttribute: "id",
+	urlRoot: "/webshop/transaction",
 	defaults: {
 		created_at: "",
 		updated_at: "",
-		title: "",
-		product_id: 0,
-		date_start: "",
+		member_id: "",
+        status: "",
+        amount: 0,
 	},
 });

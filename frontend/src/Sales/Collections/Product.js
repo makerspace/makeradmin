@@ -4,5 +4,5 @@ import ProductModel from '../Models/Product'
 module.exports = Backbone.PageableCollection.extend(
 {
 	model: ProductModel,
-	url: "/sales/product",
+	url: "/webshop/product",
 });

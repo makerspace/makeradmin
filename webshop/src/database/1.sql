@@ -117,3 +117,47 @@ CREATE TABLE `webshop_pending_registrations` (
   KEY `transaction_key` (transaction_id),
   CONSTRAINT transaction_constraint3 FOREIGN KEY (`transaction_id`) REFERENCES `webshop_transactions` (`id`)
 );
+
+CREATE TABLE `webshop_transaction_actions` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `content_id` int(10) unsigned NOT NULL,
+  `action_id` int(10) unsigned NOT NULL,
+  `value` int(10),
+  `status` enum('pending','partial','completed') COLLATE utf8mb4_unicode_ci NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `content_key` (content_id),
+  CONSTRAINT content_constraint2 FOREIGN KEY (`content_id`) REFERENCES `webshop_transaction_contents` (`id`),
+  CONSTRAINT action_constraint3 FOREIGN KEY (`action_id`) REFERENCES `webshop_actions` (`id`)
+);
+
+INSERT INTO `webshop_transaction_actions` (`content_id`,`action_id`,`value`,`status`)
+SELECT `webshop_transaction_contents`.`id` AS `content_id`, `webshop_product_actions`.`action_id`,
+       SUM(`webshop_transaction_contents`.`count` * `webshop_product_actions`.`value`) AS `value`, 
+       IF(ISNULL(`webshop_completed_actions`.`created_at`), 'pending','completed') AS `status`
+FROM `webshop_transactions`
+INNER JOIN `webshop_transaction_contents` ON `webshop_transaction_contents`.`transaction_id` = `webshop_transactions`.`id`
+INNER JOIN `webshop_product_actions` ON `webshop_product_actions`.`product_id` = `webshop_transaction_contents`.`product_id`
+LEFT JOIN `webshop_completed_actions` ON `webshop_transaction_contents`.`id` = `webshop_completed_actions`.`content_id`
+WHERE (`webshop_transactions`.`created_at` < `webshop_product_actions`.`deleted_at` OR `webshop_product_actions`.`deleted_at` IS NULL)
+      AND `webshop_transactions`.`created_at` > `webshop_product_actions`.`created_at`
+GROUP BY `webshop_transaction_contents`.`id`, `webshop_product_actions`.`action_id`, `webshop_transaction_contents`.`transaction_id`, 
+         `webshop_completed_actions`.`created_at`;
+
+CREATE TABLE `webshop_transaction_performed_actions` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `transaction_action_id` int(10) unsigned NOT NULL,
+  `value` int(10),
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  CONSTRAINT content_action_constraint FOREIGN KEY (`transaction_action_id`) REFERENCES `webshop_transaction_actions` (`id`)
+);
+
+INSERT INTO `webshop_transaction_performed_actions` (`transaction_action_id`,`value`,`created_at`)
+SELECT `webshop_transaction_actions`.`id` AS `transaction_action_id`, `webshop_transaction_actions`.`value`, 
+       `webshop_completed_actions`.`created_at`
+FROM `webshop_transaction_actions`
+INNER JOIN `webshop_completed_actions`
+       ON  `webshop_completed_actions`.`content_id` = `webshop_transaction_actions`.`content_id`
+       AND `webshop_completed_actions`.`action_id`  = `webshop_transaction_actions`.`action_id`
+WHERE `webshop_transaction_actions`.`status` = 'completed';
+
