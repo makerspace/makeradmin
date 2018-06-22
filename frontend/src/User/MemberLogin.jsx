@@ -44,7 +44,7 @@ module.exports = withRouter(class MemberLogin extends React.Component
 							</div>
 
 							<div className="uk-form-row">
-								<button type="submit" className="uk-width-1-1 uk-button uk-button-primary uk-button-large"><span className="uk-icon-check" /> Logga in</button>
+								<button type="submit" className="uk-width-1-1 uk-button uk-button-primary uk-button-large"><span className="uk-icon-check" /> Gå vidare</button>
 							</div>
 
 							{/*<div className="uk-form-row">

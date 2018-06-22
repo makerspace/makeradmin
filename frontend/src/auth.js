@@ -103,7 +103,7 @@ module.exports =
 			contentType: "application/json; charset=utf-8",
 			dataType: "json",
 		}).done((data, textStatus, xhr) => {
-			UIkit.notify("Ett mail har skickats med en inloggningslänk", {status: "success"});
+			UIkit.modal.alert("Ett mail har skickats till dig med en magisk inloggningslänk, använd den för att slutföra din inloggning.", {status: "success"});
 		}).fail((xhr, textStatus, error) => {
 			if (xhr.responseJSON.status == "ambiguous")
 			{
