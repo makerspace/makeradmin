@@ -191,6 +191,7 @@ def gateway_from_envfile(path):
     host = env["HOST_BACKEND"].replace("http://", "").replace("https://", "")
     return APIGateway(host, env["API_BEARER"], env["HOST_FRONTEND"], env["HOST_BACKEND"])
 
+
 def read_config():
     try:
         db = DB(
