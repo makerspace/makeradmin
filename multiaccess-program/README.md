@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.org/makerspace/multiaccess-program.svg?branch=add-and-update-members)](https://travis-ci.org/makerspace/multiaccess-program)
+[![Coverage Status](https://coveralls.io/repos/github/makerspace/multiaccess-program/badge.svg)](https://coveralls.io/github/makerspace/multiaccess-program)
 
 # Program to Update MultiAccess With Data from MakerAdmin
 
