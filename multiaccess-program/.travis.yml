@@ -13,6 +13,7 @@ jobs:
     - script:
         - make test
       after_script:
+        - make coverage
         - coveralls
     - script:
         - make dist
