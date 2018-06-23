@@ -16,3 +16,4 @@ nose
 factory_boy
 pycodestyle
 coverage
+coveralls
