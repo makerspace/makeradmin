@@ -1,3 +1,4 @@
+PY_SOURCE_FILES=$(shell find . -type f -name "*.py")
 
 build:
 	echo "source_revision = '$(shell git rev-parse --short HEAD)$(shell if ! git diff-index --quiet HEAD --; then echo -dirty; fi)'" > source_revision.py
@@ -12,10 +13,12 @@ pep8:
 test: build pep8
 	python3 -m nose test
 
-coverage:
-	rm -rf coverage .coverage
-	coverage3 run $(shell which nosetests) test
-	coverage3 html -d coverage --omit="test*,*.pyenv*,*/site-packages/*,*/nosetests"
+.coverage: $(PY_SOURCE_FILES)
+	coverage3 run --omit="test*,*.pyenv*,*/site-packages/*,*/nosetests"--omit="test*,*.pyenv*,*/site-packages/*,*/nosetests" $(shell which nosetests) test
+coverage: .coverage
+
+show-coverage: coverage
+	coverage3 html -d coverage
 	firefox coverage/index.html
 
 target-test: 
@@ -35,7 +38,7 @@ dist-dump: build
 dist: dist-sync dist-export dist-dump
 
 clean:
-	rm -rf dist build coverage source_revision.py
+	rm -rf dist build .coverage coverage source_revision.py
 	find . -name __pycache__ -prune -type d -exec rm -rf {} \;
 
 .PHONY: init test clean dist dist-sync dist-export coverage
