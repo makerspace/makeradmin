@@ -1,0 +1,15 @@
+FROM node:8-alpine
+
+RUN mkdir /frontend
+
+COPY ./package.json /frontend/
+
+WORKDIR /frontend
+
+RUN npm install
+
+COPY ./webpack.config.js /frontend/
+
+COPY  ./src/ /frontend/src
+
+CMD ["node", "node_modules/webpack/bin/webpack.js", "--watch", "--config", "webpack.config.js"]

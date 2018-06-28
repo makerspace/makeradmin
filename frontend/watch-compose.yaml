@@ -1,0 +1,14 @@
+version: "2"
+volumes:
+  node_modules:
+services:
+  frontend_watch:
+    image: makeradmin/frontend_watch:1.0
+    build:
+      context: .
+      dockerfile: ./WatchDockerfile
+    ports:
+      - "8009:8009"
+    volumes:
+      - .:/frontend
+      - node_modules:/frontend/node_modules
