@@ -145,6 +145,7 @@ def send_new_member_email(member_id: int) -> None:
         ],
         "message_type": "email",
         "subject": "Välkommen till Stockholm Makerspace",
+        "subject_en": "Welcome to the Stockholm Makerspace",
         "body": render_template("new_member_email.html", frontend_url=instance.gateway.get_frontend_url)
     })
 
@@ -390,6 +391,7 @@ def send_receipt_email(member_id: int, transaction_id: int) -> None:
         ],
         "message_type": "email",
         "subject": "Kvitto - Stockholm Makerspace",
+        "subject_en": "Receipt - Stockholm Makerspace",
         "body": render_template("receipt_email.html", cart=zip(products,items), transaction=transaction, currency="kr", member=member, frontend_url=instance.gateway.get_frontend_url)
     })
 
@@ -443,7 +445,7 @@ def pay(member_id: int, data: Dict[str, Any], activates_member: bool = False) ->
         abort(400, "duplicate")
 
     if member_id <= 0:
-        abort(400, "Services and other special member IDs cannot purchase anything")
+        abort(400, "You must be a member to purchase materials and tools.")
 
     total_amount, items = validate_payment(data["cart"], data["expectedSum"])
 
