@@ -1,76 +1,88 @@
 [
+
+  /* Övrigt */
+
   {
     "name": "Medlemsavgift",
+    "name_en": "Membership",
     "suffix": "",
-    "image": "https://imgix.ttcdn.co/i/product/original/0/67717-56826182d1994b2aa4de43412599434d.png?q=100&auto=format%2Ccompress&w=2000.jpeg",
+    "image": "webshopbilder/ovrigt/medlemsavgift.png",
     "price": "200",
     "category": "Övrigt",
-    "description": "\n<p>Det här är vår medlemsavgift för 1st 365 dagarsperiod (ett år)<br/><br/>Avgiften är för \nnärvarande satt till 200 SEK per år, och du behöver ha betalt denna och \ndärmed vara medlem i föreningen för att kunna vara labbmedlem.<br/></p><p>Läs mer om vad som gäller för medlemskap och labbmedlemskap i denna länk: <a href=\"http://www.makerspace.se/medlemskap\" rel=\"nofollow\" target=\"_blank\">http://www.makerspace.se/medlemskap</a></p>***<br/>This is the membership fee for 1pcs 365-day period (one year)<br/><br/>The current fee is 200 SEK per year, and you must have a paid yearly membership to be a lab member.<br/><br/>Read more about membership and lab access here: <a href=\"http://www.makerspace.se/medlemskap\" rel=\"nofollow\" target=\"_blank\">http://www.makerspace.se/medlemskap</a>\n"
+    "description": "\n<p>Det här är vår medlemsavgift för 1 x 365-dagarsperiod (ett år)</p>
+    <p>Observera att medlemskap krävs för att kunna vara labbmedlem.</p>
+    <p>Läs mer om vad som gäller för medlemskap och labbmedlemskap i denna länk: <a href="http://www.makerspace.se/medlemskap" rel="nofollow" target="_blank">http://www.makerspace.se/medlemskap</a></p>\n",
+    "description_en": "\n<p>This is the membership fee for 1 x 365-day period (one year).</p>
+    <p>Note that you need to be a member to purchase lab access.</p>
+    <p>Read more about membership and lab access here: <a href="http://www.makerspace.se/membership" rel="nofollow" target="_blank">http://www.makerspace.se/membership</a></p>\n"
   },
   {
-    "name": "Labbavgift 1 Månad",
+    "name": "Labbavgift, 1 Månad",
+    "name_en": "Lab access fee, 1 Month",
     "suffix": "",
-    "image": "https://imgix.ttcdn.co/i/product/original/0/67717-13f896be7ec246629c5528f579c0e72d.jpeg",
+    "image": "webshopbilder/ovrigt/labbavgift_1m.jpeg",
     "price": "300",
     "category": "Övrigt",
-    "description": "\n<p>1 månad / 30 dagar labbaccess<br/></p>\n<p>Få egen 24/7-access till lokalen under 3 månaders tid och realisera dina mest fantastiska projekt!\n\n<br/></p><p>Observera att det krävs att du är medlem i föreningen!<br/></p><p>\n\n\n\nOm du redan har en nyckeltagg aktiveras din labbavgift vid nästa nyckelutlämning (du behöver inte vara närvarande) och läggs till som dagar från och med utgången av din nuvarande labbavgift, eller som dagar från nyckelutlämningens datum om den har gått ut, så vi rekommenderar att du betalar redan innan din tidigare period går ut för att undvika avbrott och samtidigt få minsta möjliga manuella hantering.\n\n<br/><br/>Om du inte sedan tidigare har en nyckeltagg så ska du komma på en nyckelutlämningskväll varpå labbavgiften aktiveras från och med att du får ut din nyckeltagg.\n\n</p><p>Läs mer om som gäller för medlemskap och labbmedlemskap i denna länk: <a href=\"http://www.makerspace.se/medlemskap\" rel=\"nofollow\" target=\"_blank\">http://www.makerspace.se/medlemskap</a></p><p><a href=\"http://www.makerspace.se/medlemskap\" rel=\"nofollow\" target=\"_blank\"></a></p>\n"
-  },
-  {
-    "name": "Labbavgift 3 Månader",
-    "suffix": "",
-    "image": "https://imgix.ttcdn.co/i/product/original/0/67717-a39eaeaf7e0c4f058792f3ba1f75ccbe.jpeg",
-    "price": "900",
-    "category": "Övrigt",
-    "description": "\n<p>3 månader / 90 dagars labbaccess<br/></p><p>\n\nFå egen 24/7-access till lokalen under 3 månaders tid och realisera dina mest fantastiska projekt!\n\n<br/></p><p>Observera att det krävs att du är medlem i föreningen!<br/></p><p>\n\n\n\nOm du redan har en nyckeltagg aktiveras din labbavgift vid nästa nyckelutlämning (du behöver inte vara närvarande) och läggs till som dagar från och med utgången av din nuvarande labbavgift, eller som dagar från nyckelutlämningens datum om den har gått ut, så vi rekommenderar att du betalar redan innan din tidigare period går ut för att undvika avbrott och samtidigt få minsta möjliga manuella hantering.\n\n<br/><br/>Om du inte sedan tidigare har en nyckeltagg så ska du komma på en nyckelutlämningskväll varpå labbavgiften aktiveras från och med att du får ut din nyckeltagg.\n\n</p><p>Läs mer om som gäller för medlemskap och labbmedlemskap i denna länk: <a href=\"http://www.makerspace.se/medlemskap\" rel=\"nofollow\" target=\"_blank\">http://www.makerspace.se/medlemskap</a></p>\n<p><a href=\"http://www.makerspace.se/medlemskap\" rel=\"nofollow\" target=\"_blank\"></a><br/></p>\n"
-  },
-  {
-    "name": "Labbavgift 6 Månader",
-    "suffix": "",
-    "image": "https://imgix.ttcdn.co/i/product/original/0/67717-a1bac18a6c1c4093aa62f4be682a4cfb.jpeg",
-    "price": "1800",
-    "category": "Övrigt",
-    "description": "\n<p>6 månader / 180 dagars labbaccess<br/><br/>Få egen 24/7-access till lokalen under 3 månaders tid och realisera dina mest fantastiska projekt!</p><p>Observera att det krävs att du är medlem i föreningen!<br/></p><p>\n\n\n\nOm du redan har en nyckeltagg aktiveras din labbavgift vid nästa nyckelutlämning (du behöver inte vara närvarande) och läggs till som dagar från och med utgången av din nuvarande labbavgift, eller som dagar från nyckelutlämningens datum om den har gått ut, så vi rekommenderar att du betalar redan innan din tidigare period går ut för att undvika avbrott och samtidigt få minsta möjliga manuella hantering.\n\n<br/><br/>Om du inte sedan tidigare har en nyckeltagg så ska du komma på en nyckelutlämningskväll varpå labbavgiften aktiveras från och med att du får ut din nyckeltagg.\n\n</p><p>Läs mer om som gäller för medlemskap och labbmedlemskap i denna länk: <a href=\"http://www.makerspace.se/medlemskap\" rel=\"nofollow\" target=\"_blank\">http://www.makerspace.se/medlemskap</a></p>\n<p></p>\n<p><a href=\"http://www.makerspace.se/medlemskap\" rel=\"nofollow\" target=\"_blank\"></a><br/></p>\n"
-  },
-  {
-    "name": "Labbavgift 12 Månader",
-    "suffix": "",
-    "image": "https://imgix.ttcdn.co/i/product/original/0/67717-7b057f53a3314f5fa7c354d79b407fbf.jpeg",
-    "price": "3600",
-    "category": "Övrigt",
-    "description": "\n                        12 månader / 365 dagars Labbaccess<br/><p></p>\n<p>Få egen 24/7-access till lokalen under 3 månaders tid och realisera dina mest fantastiska projekt!\n\n<br/></p><p>Observera att det krävs att du är medlem i föreningen!<br/></p><p>\n\n\n\nOm du redan har en nyckeltagg aktiveras din labbavgift vid nästa nyckelutlämning (du behöver inte vara närvarande) och läggs till som dagar från och med utgången av din nuvarande labbavgift, eller som dagar från nyckelutlämningens datum om den har gått ut, så vi rekommenderar att du betalar redan innan din tidigare period går ut för att undvika avbrott och samtidigt få minsta möjliga manuella hantering.\n\n<br/><br/>Om du inte sedan tidigare har en nyckeltagg så ska du komma på en nyckelutlämningskväll varpå labbavgiften aktiveras från och med att du får ut din nyckeltagg.\n\n</p><p>Läs mer om som gäller för medlemskap och labbmedlemskap i denna länk: <a href=\"http://www.makerspace.se/medlemskap\" rel=\"nofollow\" target=\"_blank\">http://www.makerspace.se/medlemskap</a></p>\n"
+    "description": "\n<p>1 månad / 30 dagar labbaccess</p>
+    <p>Få egen 24/7-access till lokalen under 1 månaders tid och realisera dina mest fantastiska projekt!</p>
+    <p>Observera att det krävs att du är medlem i föreningen!</p>
+    <p>Läs mer om vad som gäller för medlemskap och labbmedlemskap i denna länk: <a href="http://www.makerspace.se/medlemskap" rel="nofollow" target="_blank">http://www.makerspace.se/medlemskap</a></p>\n",
+    "description_en": "\n<p>1 month / 30 days lab access</p>
+    <p>Get 24/7-access to the facility for 1 month's time and make your project dreams reality!</p>
+    <p>Note that you already need to be a member to purchase lab access!</p>
+    <p>Read more about the rules for membership and lab access at this link: <a href="https://www.makerspace.se/membership" rel="nofollow" target="_blank">https://www.makerspace.se/membership</a></p>\n",
   },
   {
     "name": "Startpaket",
+    "name_en": "Starter pack",
     "suffix": "",
-    "image": "https://imgix.ttcdn.co/i/product/original/0/67717-5697c604d8e04f57871cc73e8468dc14.jpeg",
+    "image": "webshopbilder/ovrigt/startpaket.jpeg",
     "price": "650",
     "category": "Övrigt",
-    "description": "\n                        Vårt startpaket!<br/><br/>Väljer du detta alternativ så får du ett medlemskap som gäller 365 dagar och 2 månaders (60 dagars) labbavgift till ett rabatterat pris. <br/><b><br/>Startpaketet är endast giltigt för nyblivna labbmedlemmar eller dig som inte har varit medlem under de senaste 12 månaderna.</b><br/><br/>Om du inte sedan tidigare har en nyckeltagg så får du efter du har köpt detta erbjudande komma ner på en nyckelutlämningskväll (ca en var annan till var tredje vecka, du hittar dessa i kalendariet på makerspace.se) där du hämtar din nyckel och aktiverar ditt medlemskap.<br/><br/>***<br/><br/>Our starter packet!<br/><br/>Choose this alternative to get a membership for 365 days and 2 months (60 days) or lab access at a discounted pris. <br/><b>The starter packet is only available to new members, or to those who didn't pay for a membership in the last 12 months (but have maybe been members before then).</b><br/><br/>If you don't already have a key, you will get one along with this purchase when you come by to activate your key (\"nyckelutlämningskväll\", one every other or third week, see dates on makerspace.se).<br/>\n"
+    "description": "\n<p>Vårt startpaket!</p>
+    <p>Väljer du detta alternativ så får du ett medlemskap som gäller 365 dagar och 2 månaders (60 dagars) labbavgift till ett rabatterat pris.</p>
+    <p><b>Startpaketet är endast giltigt för nyblivna labbmedlemmar eller dig som inte har varit medlem under de senaste 12 månaderna.</b></p>
+    <p>Om du inte sedan tidigare har en nyckeltagg så får du efter du har köpt detta erbjudande komma ner på en nyckelutlämningskväll (circa en var annan till var tredje vecka, du hittar dessa i kalendariet på makerspace.se) där du hämtar din nyckel och aktiverar ditt medlemskap.</p>\n",
+    "description_en": "\n<p>Our starter pack!</p>
+    <p>Choose this alternative to get a membership for 365 days and 2 months (60 days) or lab access at a discounted price.</p>
+    <p><b>The starter pack is only available to new members, or to those who didn't pay for a membership in the last 12 months (but have maybe been members before then).</b></p>
+    <p>If you don't already have a key, you will get one along with this purchase when you come by to activate your key ("nyckelutlämning", one every other or third week, see the calendar on makerspace.se).</p>\n"
   },
   {
     "name": "Donation",
+    "name_en": "Donation",
     "suffix": "",
-    "image": "https://imgix.ttcdn.co/i/product/original/0/67717-bc3d40b0b44942b1bc2637a3ed7d49ac.jpeg",
+    "image": "webshopbilder/ovrigt/donation.jpeg",
     "price": "100",
     "category": "Övrigt",
-    "description": "\n                        Donation till föreningen.  <br/><br/>Vi tar tacksamt emot en donation som kommer hjälpa föreningen att utvecklas och bli ännu bättre.<br/><br/>Vill du ge mer än 100 kr går det bra att lägga till denna produkt fler gånger i kundvagnen.<br/><br/>***<br/><br/>Donation to the organisation.<br/><br/>We thanks you for your donation which will help us grow and develop.<br/><br/>If you'd like to give more than 100 SEK, just add this product several times on the shopping cart.\n                    "
-  },
-  {
-    "name": "Tygkasse",
-    "suffix": "",
-    "image": "https://imgix.ttcdn.co/i/product/original/0/67717-c2e9d7d20ace47089a0c32a57f79d825.jpeg",
-    "price": "100",
-    "category": "Övrigt",
-    "description": "\n                        Snygg tygkasse i naturfärgad ekologisk bomull med Makerspaceloggan tryckt i svart.<br/><br/>Kan endast hämtas på Makerspace eller leveras till din labbmedlemslåda, välj fraktalternativ i kassan.<br/><br/>***<br/><br/>A smart-looking cloth bag in un-dyed ecological cotton with the Stockholm Makerspace logo printed in black.<br/><br/>Can only be picked up at the Makerspace or delivered to a lab member's storage bin, see shipping option.\n                    "
-  },
+    "description": "\n<p>Donation till föreningen.</p>
+    <p>Vi tar tacksamt emot en donation som kommer hjälpa föreningen att utvecklas och bli ännu bättre.</p>\n",
+    "description_en": "\n<p>Donation to the organisation.</p>
+    <p>We thank you for your donation which will help us grow and develop.</p>\n",
+  /* },
   {
     "name": "Gåvokort",
+    "name_en": "Gift card",
     "suffix": "",
-    "image": "https://imgix.ttcdn.co/i/product/original/0/67717-12cc94fd752544119b8f4a217c346790.png?q=100&auto=format%2Ccompress&w=2000.jpeg",
+    "image": "webshopbilder/ovrigt/giftcard.png",
     "price": "650",
     "category": "Övrigt",
-    "description": "\n                        \n\nGe bort ett medlemskap och två månaders labbavgift till någon av dina vänner som ännu inte har upptäckt Stockholm Makerspace!<br/><br/>Labbtiden gäller i 60 dagar från aktivering.<br/><br/>Skriv namnet på personen du vill ge startpaketet i kommentaren när du checkar ut.<br/>Aktivering av labbtid sker mot uppvisande av legitimation samt ordernumret du får i bekräftelsemailet på en nyckelutlämning (se kalendariet)<br/><br/>Det skickas inte ut någon form av fysiskt gåvokort, det litar vi på att du kan skapa själv :-)<br/><br/><b><i></i></b><i>Observera att mottagaren måste vara 16 år eller äldre för att kunna vara labbmedlem i Stockholm Makerspace!</i><br/>\n"
-  },
+    "description": "\n<p>Ge bort ett medlemskap och två månaders labbavgift till någon av dina vänner som ännu inte har upptäckt Stockholm Makerspace!</p>
+    <p>Labbtiden gäller i 60 dagar från aktivering.</p>
+    <p>Skriv namnet på personen du vill ge startpaketet i kommentaren när du checkar ut.</p>
+    <p>Aktivering av labbtid sker mot uppvisande av legitimation samt ordernumret du får i bekräftelsemailet på en nyckelutlämning (se kalendariet)</p>
+    <p><b>Observera att det skickas inte ut någon form av fysiskt gåvokort, det litar vi på att du kan skapa själv.</b></p>
+    <p><b>Observera att mottagaren måste vara 16 år eller äldre för att kunna vara labbmedlem i Stockholm Makerspace!</b><br/>\n",
+    "description_en": "\n<p>Gift a membership and 2 months of lab acces to a friend who hasn't yet discovered the Stockholm Makerspace!</p>
+    <p>Lab access is valid for 60 days from activation.</p>
+    <p>Write the recipients name in the comments when you check out.</p>
+    <p>Activation of lab access time happens at a \"nyckelutlämning\" (see the calendar), upon showing an ID and a copy of the order/receipt.</p>
+    <p><b>Note that nothing physical is mailed out, we trust you to make something awesome.</b></p>
+    <p><b>Note that the recipient must 16 years or older to be a lab member at the Stockholm Makerspace!</b><br/>\n"
+  }, */
+
+/* Material */
+
   {
     "name": "Akrylplast 100g",
     "suffix": "",
@@ -215,6 +227,9 @@
     "category": "Material",
     "description": "\n<div>\n<b>OBS. Allt förbrukningsmaterial säljs endast till labbmedlemmar i Stockholm Makerspace och endast på plats, vi säljer inget till extern part och skickar inget. OBS.</b><br/><br/>Skivor av akrylplast, 20mm tjocka. Till exempel för användning i laserskäraren, men går även att fräsa utmärkt i med cnc-fräsen!</div><div><br/></div><div>Begagnade, kan ha mindre repor osv, därför även det låga priset </div><div>(Nypris ligger på strax över 700kr för samma bit, och du behöver oftast köpa en stor skiva.)</div><div><br/></div><div>Finns i hyllan bredvid laserskäraren.</div><div><br/></div><div>Storlek ca 59x39cm</div>\n"
   },
+
+  /* Verktyg */
+
   {
     "name": "Vändskär DCGT-0702-STEEL",
     "suffix": "",
