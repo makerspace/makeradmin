@@ -25,6 +25,13 @@ $app->   get("membership/member/{id}/groups",        ['middleware' => 'permissio
 $app->  post("membership/member/{id}/groups/add",    ['middleware' => 'permission:group_member_add',    'uses' => "Member@addGroup"]);    // Get collection with members
 $app->  post("membership/member/{id}/groups/remove", ['middleware' => 'permission:group_member_remove', 'uses' => "Member@removeGroup"]);    // Get collection with members
 
+// Keys
+$app->   get("membership/keys",      ['middleware' => 'permission:keys_view'], "Key@list");   // Get collection
+$app->  post("membership/keys",      ['middleware' => 'permission:keys_edit'], "Key@create"); // Model: Create
+$app->   get("membership/keys/{id}", ['middleware' => 'permission:keys_view'], "Key@read");   // Model: Read
+$app->   put("membership/keys/{id}", ['middleware' => 'permission:keys_edit'], "Key@update"); // Model: Update
+$app->delete("membership/keys/{id}", ['middleware' => 'permission:keys_edit'], "Key@delete"); // Model: Delete
+
 // Groups
 $app->   get("membership/group",       ['middleware' => 'permission:group_view',   'uses' => "Group@list"]);    // Get collection
 $app->  post("membership/group",       ['middleware' => 'permission:group_create', 'uses' => "Group@create"]);  // Model: Create
