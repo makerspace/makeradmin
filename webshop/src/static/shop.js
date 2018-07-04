@@ -223,6 +223,8 @@ $(document).ready(() => {
   }
 
   function refresh() {
+    let sortOrder = new Map();
+    for (let i = 0; i < cart.length; i++) sortOrder.set(cart[i].id, i);
     cart = [];
     
     // $(".product-list").find(".product-amount").each(function() {
@@ -239,9 +241,13 @@ $(document).ready(() => {
           id: id,
           count: count,
           raw_count: raw_count,
+          sort_key: sortOrder.has(id) ? sortOrder.get(id) : 1000
         });
       }
     }
+
+    // Keep cart sorted the same as the cart before the refresh
+    cart.sort((a,b) => a.sort_key - b.sort_key);
 
     localStorage.cart = JSON.stringify(cart);
 
