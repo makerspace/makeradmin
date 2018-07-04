@@ -167,6 +167,11 @@ $(document).ready(() => {
         });
       });
 
+      // Select everything in the textfield when clicking on it
+      $(li).find(".product-amount").on("click", function() {
+        this.select();
+      });
+
       $(li).find(".product-amount").on("input", ev => {
         refresh();
       });
@@ -281,6 +286,10 @@ $(document).ready(() => {
           amount.val("");
           amount.change();
           ev.preventDefault();
+        });
+        // Select everything in the textfield when clicking on it
+        li.find(".product-amount").on("click", function() {
+          this.select();
         });
         li.find(".product-amount").on("input", ev => {
           const amountElem = $(id2element.get(item.id)).find(".product-amount");
