@@ -57,6 +57,13 @@ $(document).ready(() => {
     }
 
     let isSaving = false;
+
+    $("#product-cancel").click(ev => {
+        ev.preventDefault();
+        // Redirect the user back to the webshop
+        window.location.href = "/shop#edit";
+    });
+
     // Wow: So much code!
     // Should probably simplify this...
     $(".product-edit-form").submit(ev => {
