@@ -236,10 +236,16 @@ $footer-height: 240px;
 .category-add {
 }
 
-.category-delete {
-	float: right;
-	line-height: 12px;
-	height: 28px;
+.category-edit-box {
+	position: absolute;
+	right: 0px;
+	display: inline-block;
+
+	.category-delete, .category-edit {
+		margin: 2px;
+		line-height: 12px;
+		height: 28px;
+	}
 }
 
 .progress-spinner {

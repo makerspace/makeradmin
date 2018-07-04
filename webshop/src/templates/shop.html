@@ -28,7 +28,10 @@
                         {% for cat in categories %}
                             <li>
                                 <a href="#category{{ cat.id }}" uk-scroll>{{ cat.name }}</a>
-                                <button data-id="{{ cat.id }}" class="category-delete edit uk-button uk-button-danger uk-button-small" uk-icon="trash"></button>
+                                <div class="category-edit-box">
+                                    <button data-id="{{ cat.id }}" data-name="{{ cat.name }}" class="category-edit edit uk-button uk-button-primary uk-button-small" uk-icon="pencil"></button>
+                                    <button data-id="{{ cat.id }}" class="category-delete edit uk-button uk-button-danger uk-button-small" uk-icon="trash"></button>
+                                </div>
                             </li>
                         {% endfor %}
                         <button type="button" class="uk-button uk-button-primary uk-button-small edit category-add" uk-icon="plus"></button>

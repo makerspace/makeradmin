@@ -390,6 +390,25 @@ $(document).ready(() => {
     });
   }
 
+  function editCategory(id, placeholder_name) {
+    UIkit.modal.prompt('Category Name', placeholder_name).then(name => {
+      if (name == null) return;
+
+      ajax("PUT", apiBasePath + "/webshop/category/" + id, {
+        name: name
+      }).done((data, textStatus, xhr) => {
+        // Reload the page to show the new category
+        location.reload(true);
+      }).fail((xhr, textStatus, error) => {
+        if (xhr.responseJSON.message == "Unauthorized") {
+          UIkit.modal.alert("<h2>Något gick fel</h2>Du har inte behörighet att ändra kategorier");
+        } else {
+          UIkit.modal.alert("<h2>Något gick fel</h2>" + xhr.responseJSON.status);
+        }
+      });
+    });
+  }
+
   function addCategory() {
     UIkit.modal.prompt('Category Name', '').then(name => {
       if (name == null) return;
@@ -439,10 +458,16 @@ $(document).ready(() => {
     tryDeleteCategory(id);
   });
 
+  $(".category-edit").click(ev => {
+    ev.preventDefault();
+    const id = $(ev.currentTarget).attr("data-id");
+    editCategory(id, $(ev.currentTarget).attr("data-name"));
+  });
+
   $(".category-add").click(ev => {
     ev.preventDefault();
     addCategory();
-  })
+  });
 
   refresh();
 
