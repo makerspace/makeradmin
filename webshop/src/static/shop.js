@@ -3,6 +3,7 @@ $(document).ready(() => {
   const stripe = Stripe(window.stripeKey);
   const apiBasePath = window.apiBasePath;
   const webshop_edit_permission = "webshop_edit";
+  const service_permission = "service";
 
   // Create an instance of Elements.
   const elements = stripe.elements({ locale: "sv" });
@@ -55,7 +56,7 @@ $(document).ready(() => {
     }).done((data, textStatus, xhr) => {
       setLoggedIn(true);
       const permissions = xhr.responseJSON.data.permissions;
-      if (permissions.indexOf(webshop_edit_permission) !== -1) showEditButton();
+      if (permissions.indexOf(webshop_edit_permission) !== -1 || permissions.indexOf(service_permission) !== -1) showEditButton();
     }).fail((xhr, textStatus, error) => {
       if (xhr.status == 401) {
         setLoggedIn(false);
