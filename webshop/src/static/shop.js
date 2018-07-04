@@ -137,7 +137,7 @@ $(document).ready(() => {
             <div class="product">
                 <span class="product-title">${item.name}</span>
                 <span class="product-price">${price} ${currency}/${baseStr}</span>
-                <input type="number" min=0 step=${item.smallest_multiple} placeholder="0" class="product-amount edit-invisible"></input>
+                <input type="number" min=0 max=9999 step=${item.smallest_multiple} placeholder="0" class="product-amount edit-invisible"></input>
                 <span class="product-unit edit-invisible">${item.unit}</span>
                 <div class="product-actions">
                   <span class="edit-display">
