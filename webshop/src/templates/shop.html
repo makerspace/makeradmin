@@ -21,18 +21,19 @@
     <body>
         <div id="root">
             <div id="left-sidebar">
-                <img src='{{ url("static/images/logo-transparent-500px-300x210.png") }}' />
-                <h3>Kategorier</h3>
-                <ul class="uk-nav uk-nav-default">
-                    {% for cat in categories %}
-                        <li>
-                            <a href="#category{{ cat.id }}" uk-scroll>{{ cat.name }}</a>
-                            <button data-id="{{ cat.id }}" class="category-delete edit uk-button uk-button-danger uk-button-small" uk-icon="trash"></button>
-                        </li>
-                    {% endfor %}
-                    <button type="button" class="uk-button uk-button-primary uk-button-small edit category-add" uk-icon="plus"></button>
-                </ul>
-
+                <div class="sidebar-fixed-content">
+                    <img src='{{ url("static/images/logo-transparent-500px-300x210.png") }}' />
+                    <h3>Kategorier</h3>
+                    <ul class="uk-nav uk-nav-default">
+                        {% for cat in categories %}
+                            <li>
+                                <a href="#category{{ cat.id }}" uk-scroll>{{ cat.name }}</a>
+                                <button data-id="{{ cat.id }}" class="category-delete edit uk-button uk-button-danger uk-button-small" uk-icon="trash"></button>
+                            </li>
+                        {% endfor %}
+                        <button type="button" class="uk-button uk-button-primary uk-button-small edit category-add" uk-icon="plus"></button>
+                    </ul>
+                </div>
             </div>
             <div id="content">
                 <button id="edit" class="uk-icon-button" uk-icon="icon: pencil"><span>Edit</span></button>
