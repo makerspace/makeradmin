@@ -22,7 +22,7 @@ $(document).ready(() => {
   }
 
   function showEditButton() {
-    $("#edit").toggleClass("active");
+    $("#edit").toggleClass("active", true);
     $("#edit").click(() => {
       setEditMode(!editMode);
     })
