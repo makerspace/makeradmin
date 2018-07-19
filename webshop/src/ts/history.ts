@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const elem = document.createElement("div");
             elem.innerHTML = `<div class="history-item">
-                <h3><a href="/shop/receipt/${transaction.id}">${ new Date(transaction.created_at).toLocaleDateString("se-SV") }</a></h3>
+                <h3><a href="/shop/receipt/${transaction.id}">${ new Date(transaction.created_at).toLocaleDateString("sv-SE") }</a></h3>
                 <div class="receipt-items">
                     ${cartItems}
                 </div>
