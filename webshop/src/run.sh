@@ -8,7 +8,13 @@ set -e
 python3 migrate.py --assert-up-to-date
 
 function refresh() {
-	sass static/style.scss static/style.css
+	# the OR is to ensure that the whole script won't exit even if the sass translation threw an error
+	sass scss/style.scss static/style.css || true
+}
+
+function refresh_ts() {
+	# the OR is to ensure that the whole script won't exit even if the program threw an error
+	(cd ts && ./build.sh) || true
 }
 
 refresh

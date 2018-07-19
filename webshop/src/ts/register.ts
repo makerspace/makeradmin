@@ -1,4 +1,9 @@
-$(document).ready(() => {
+/// <reference path="../node_modules/@types/stripe-v3/index.d.ts" />
+import Cart from "./cart"
+import * as common from "./common"
+declare var UIkit: any;
+
+document.addEventListener('DOMContentLoaded', () => {
   // Create a Stripe client.
   const stripe = Stripe(window.stripeKey);
   const apiBasePath = window.apiBasePath;
@@ -34,12 +39,9 @@ $(document).ready(() => {
   // Used to prevent clicking the 'Pay' button twice
   const duplicatePurchaseRand = (100000000*Math.random())|0;
 
-  const currency = "kr";
-  const currencyBase = 100;
-
   const id2item = new Map();
 
-  const data = JSON.parse($("#product-data")[0].textContent);
+  const data = JSON.parse(document.querySelector("#product-data").textContent);
 
   for (const cat of data) {
     for (const item of cat.items) {
@@ -47,36 +49,34 @@ $(document).ready(() => {
     }
   }
 
-  let cart = [];
-
-  function sumCart(cart) {
-    let totalSum = 0;
-    for (let item of cart) {
-      totalSum += item.count * id2item.get(item.id).price;
-    }
-    return totalSum;
-  }
+  let cart : Cart = new Cart([]);
 
   function refresh() {
-    let checked = $(".uk-radio:checked");
+    let checked = document.querySelectorAll(".uk-radio:checked");
+
     // Should only have 1 checked radio button
     if (checked.length !== 1) throw "more than one checked radio button";
 
-    cart = [{
-      id: $(checked[0]).val()|0,
+    cart = new Cart([{
+      id: Number((<HTMLInputElement>checked[0]).value),
       count: 1,
-    }];
+    }]);
 
-    const totalSum = sumCart(cart);
-    $("#pay-button").find("span").html("Betala " + ((totalSum*currencyBase)|0)/currencyBase + " " + currency);
+    const totalSum = cart.sum(id2item);
+    document.querySelector("#pay-button").querySelector("span").innerHTML = "Betala " + Cart.formatCurrency(totalSum);
   }
 
-  $(".uk-radio").on("change input", ev => {
-    refresh();
+  [].forEach.call(document.querySelectorAll(".uk-radio"), (el: HTMLElement) => {
+    el.addEventListener("change", ev => {
+      refresh();
+    });
+    el.addEventListener("input", ev => {
+      refresh();
+    });
   });
 
   let waitingForPaymentResponse = false;
-  $("#pay-button").click((ev) => {
+  document.querySelector("#pay-button").addEventListener("click", ev => {
     ev.preventDefault();
 
     // Don't allow any clicks while waiting for a response from the server
@@ -86,60 +86,53 @@ $(document).ready(() => {
 
     waitingForPaymentResponse = true;
 
-    $(".pay-spinner").toggleClass("pay-spinner-visible", true);
+    const spinner = document.querySelector(".progress-spinner");
+    spinner.classList.add("progress-spinner-visible");
     let errorElement = document.getElementById('card-errors');
     errorElement.textContent = "";
 
     stripe.createSource(card).then(function(result) {
       if (result.error) {
-        $(".pay-spinner").toggleClass("pay-spinner-visible", false);
+        spinner.classList.remove("progress-spinner-visible");
         // Inform the user if there was an error.
         errorElement.textContent = result.error.message;
         waitingForPaymentResponse = false;
       } else {
-        $.ajax({
-          type: "POST",
-          url: apiBasePath + "/webshop/register",
-          data: JSON.stringify({
+        common.ajax("POST", apiBasePath + "/webshop/register", {
             member: {
-              firstname: $("#firstname").val(),
-              lastname: $("#lastname").val(),
-              email: $("#email").val(),
-              phone: $("#phone").val(),
+              firstname: common.getValue("#firstname"),
+              lastname: common.getValue("#lastname"),
+              email: common.getValue("#email"),
+              phone: common.getValue("#phone"),
               address_street: "", // $("#address_street").val(),
               address_extra: "", // $("#address_extra").val(),
               address_zipcode: "", // $("#address_zipcode").val(),
               address_city: "", // $("#address_city").val(),
             },
             purchase: {
-              cart: cart,
-              expectedSum: sumCart(cart),
+              cart: cart.items,
+              expectedSum: cart.sum(id2item),
               stripeSource: result.source.id,
               duplicatePurchaseRand: duplicatePurchaseRand,
             }
-          }),
-          contentType: "application/json; charset=utf-8",
-          dataType: "json",
-          headers: {
-            "Authorization": "Bearer " + localStorage.token
+          }).then(json => {
+            spinner.classList.remove("progress-spinner-visible");
+            waitingForPaymentResponse = false;
+            if (json.data.redirect !== undefined) {
+              window.location.href = json.data.redirect;
+            } else {
+              window.location.href = "receipt/" + json.data.transaction_id;
+            }
+          }).catch(json => {
+            spinner.classList.remove("progress-spinner-visible");
+            waitingForPaymentResponse = false;
+            if (json.status == "The value needs to be unique in the database") {
+              UIkit.modal.alert("<h2>Registreringen misslyckades</h2>En användare med denna email är redan registrerad");
+            } else {
+              UIkit.modal.alert("<h2>Betalningen misslyckades</h2>" + common.get_error(json));
+            }
           }
-        }).done((data, textStatus, xhr) => {
-          $(".progress-spinner").toggleClass("progress-spinner-visible", false);
-          waitingForPaymentResponse = false;
-          if (xhr.responseJSON.data.redirect !== undefined) {
-            window.location.href = xhr.responseJSON.data.redirect;
-          } else {
-            window.location.href = "receipt/" + xhr.responseJSON.data.transaction_id;
-          }
-        }).fail((xhr, textStatus, error) => {
-          $(".pay-spinner").toggleClass("pay-spinner-visible", false);
-          waitingForPaymentResponse = false;
-          if (xhr.responseJSON.status == "The value needs to be unique in the database") {
-            UIkit.modal.alert("<h2>Registreringen misslyckades</h2>En användare med denna email är redan registrerad");
-          } else {
-            UIkit.modal.alert("<h2>Betalningen misslyckades</h2>" + xhr.responseJSON.status);
-          }
-        });
+        );
       }
     });
   });

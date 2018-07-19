@@ -5,6 +5,8 @@ import json
 import os
 from webshop_entities import category_entity, product_entity, transaction_entity, transaction_content_entity, action_entity, membership_products
 from typing import Set, List, Dict, Any, NamedTuple, Tuple
+from decimal import Decimal
+
 
 instance = service.create_frontend(url="shop", port=80)
 
@@ -47,7 +49,7 @@ def product_data() -> Tuple[List[Dict[str,Any]], List[Dict[str,Any]]]:
                             "name": item[1],
                             "unit": item[2],
                             "price": str(item[3]),
-                            "smallest_multiple": str(item[4]),
+                            "smallest_multiple": item[4],
                         } for item in products
                     ]
                 })
@@ -63,6 +65,12 @@ def home() -> str:
     return render_template("shop.html", product_json=json.dumps(all_products), categories=categories, url=instance.full_path, meta=meta)
 
 
+@instance.route("cart")
+def cart() -> str:
+    all_products, categories = product_data()
+    return render_template("cart.html", product_json=json.dumps(all_products), categories=categories, url=instance.full_path, meta=meta)
+
+
 @instance.route("register")
 def register_member() -> str:
     products = membership_products(db)
@@ -74,6 +82,12 @@ def register_member() -> str:
 def purchase_history() -> str:
     return render_template("history.html", url=instance.full_path, meta=meta)
 
+
+@instance.route("product/<int:id>")
+def product_view(id: int) -> str:
+    product = product_entity.get(id)
+    all_products, categories = product_data()
+    return render_template("product.html", product=product, product_json=json.dumps(all_products), Decimal=Decimal, categories=categories, currency="kr", url=instance.full_path, meta=meta)
 
 @instance.route("product/<int:id>/edit")
 def product_edit(id: int) -> str:
