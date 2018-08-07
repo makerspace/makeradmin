@@ -19,7 +19,7 @@ export function ajax(type: string, url: string, data: object): Promise<any> {
 		var xhr = new XMLHttpRequest();
 		xhr.open(type, url);
 		xhr.setRequestHeader('Content-Type', 'application/json; charset=utf-8');
-		xhr.setRequestHeader('Authorization', "Bearer " + localStorage.token);
+		xhr.setRequestHeader('Authorization', "Bearer " + localStorage.getItem("token"));
 		xhr.onload = () => {
 			if (xhr.status >= 200 && xhr.status <= 300) {
 				resolve(JSON.parse(xhr.responseText));

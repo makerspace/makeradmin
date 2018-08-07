@@ -79,7 +79,7 @@ export default class Cart {
 	}
 
 	saveToStorage() {
-		localStorage.cart = JSON.stringify(this.items);
+		localStorage.setItem("cart", JSON.stringify(this.items));
 	}
 
 	static fromStorage() : Cart {

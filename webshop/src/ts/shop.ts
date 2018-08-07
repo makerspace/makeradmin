@@ -191,7 +191,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  setLoggedIn(localStorage.token !== undefined && localStorage.token !== null);
+  setLoggedIn(localStorage.getItem("token") !== undefined && localStorage.getItem("token") !== null);
   common.refreshLoggedIn((loggedIn, permissions) => {
     setLoggedIn(loggedIn);
     if (loggedIn && (permissions.indexOf(webshop_edit_permission) !== -1 || permissions.indexOf(service_permission) !== -1)) showEditButton();
