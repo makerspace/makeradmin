@@ -71,16 +71,24 @@ class UpdateMember(object):
     
     def describe_update(self):
         res = f'member update #{self.ma_member.member_number} ({self.ma_member.firstname} {self.ma_member.lastname})'
+        now = datetime.now()
+        
         if self.timestamps_diff(self.db_member, self.ma_member):
+            day_secs = 24 * 3600
             t1 = self.db_member.user.stop_timestamp
             t2 = self.ma_member.end_timestamp
-            if t1 is not None and t2 is not None:
-                diff = f" ({float((t2 - t1).total_seconds())/(24.0 * 3600.0):.3f} days)"
+            if t1 and t2 and t1 > t2:
+                res += f", end timestamp {t1} => {t2} ({((t2 - t1).total_seconds() / day_secs):.1f} days!!!!!!!!!!!!)"
+            elif t1 and t2 and t1 > now:
+                res += f", end timestamp {t1} => {t2} (extending {((t2 - t1).total_seconds() / day_secs):.1f} days)"
+            elif t2:
+                res += f", end timestamp {t1} => {t2} (new period {((t2 - now).total_seconds() / day_secs):.1f} days)"
             else:
-                diff = ""
-            res += f', end timestamp {self.db_member.user.stop_timestamp} => {self.ma_member.end_timestamp} {diff}'
+                res += f", end timestamp {t1} => {t2}"
+                
         if self.tags_diff(self.db_member, self.ma_member):
             res += f', tag {self.db_member.user.card} => {self.ma_member.rfid_tag}'
+            
         return res
     
     def update(self, session, ui, customer_id=None, authority_id=None):
