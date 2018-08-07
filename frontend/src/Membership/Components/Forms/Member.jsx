@@ -12,6 +12,11 @@ import Input from '../../../Components/Form/Input'
 module.exports = withRouter(React.createClass({
 	mixins: [Backbone.React.Component.mixin, GenericEntityFunctions],
 
+	componentWillMount: function(){
+		// The groups attribute should not affect the isDirty() function on the model
+		this.getModel().ignoreAttributes.push("groups");
+	},
+
 	removeTextMessage: function(member)
 	{
 		return "Är du säker på att du vill ta bort medlemmen \"#" + member.member_number + " " + member.firstname + " " + member.lastname + "\"?";

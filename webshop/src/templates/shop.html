@@ -8,11 +8,7 @@
         <link rel="stylesheet" href="{{ url('static/style.css') }}" />
         <script src='{{ url("static/uikit/js/uikit.min.js") }}'></script>
         <script src='{{ url("static/uikit/js/uikit-icons.min.js") }}'></script>
-        <script src="https://code.jquery.com/jquery-3.3.1.min.js"
-              integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
-              crossorigin="anonymous"></script>
-        <script src="https://js.stripe.com/v3/"></script>
-        <script src='{{ url("static/shop.js") }}'></script>
+        <script src='{{ url("static/js/shop.js") }}'></script>
         <script id="product-data", type="application/json">
             {{ product_json|safe }}
         </script>
@@ -21,78 +17,39 @@
     <body>
         <div id="root">
             <div id="left-sidebar">
-                <img src='{{ url("static/images/logo-transparent-500px-300x210.png") }}' />
-                <h3>Kategorier</h3>
-                <ul class="uk-nav uk-nav-default">
-                    {% for cat in categories %}
+                <div class="sidebar-fixed-content">
+                    <img src='{{ url("static/images/logo-transparent-500px-300x210.png") }}' />
+                    <h3>Kategorier</h3>
+                    <ul class="uk-nav uk-nav-default">
+                        {% for cat in categories %}
+                            <li>
+                                <a href="#category{{ cat.id }}" uk-scroll><span uk-icon="tag"></span> {{ cat.name }}</a>
+                                <div class="category-edit-box">
+                                    <button data-id="{{ cat.id }}" data-name="{{ cat.name }}" class="category-edit edit uk-button uk-button-primary uk-button-small" uk-icon="pencil"></button>
+                                    <button data-id="{{ cat.id }}" class="category-delete edit uk-button uk-button-danger uk-button-small" uk-icon="trash"></button>
+                                </div>
+                            </li>
+                        {% endfor %}
                         <li>
-                            <a href="#category{{ cat.id }}" uk-scroll>{{ cat.name }}</a>
-                            <button data-id="{{ cat.id }}" class="category-delete edit uk-button uk-button-danger uk-button-small" uk-icon="trash"></button>
+                            <button type="button" class="uk-button uk-button-primary uk-button-small edit category-add" uk-icon="plus"></button>
                         </li>
-                    {% endfor %}
-                    <button type="button" class="uk-button uk-button-primary uk-button-small edit category-add" uk-icon="plus"></button>
-                </ul>
-
+                        <li>
+                            <a href="cart"><span uk-icon="cart"></span> Min kundvagn<span id="cart-sum"></span></a>
+                        </li>
+                        <li>
+                            <a href="member/history"><span uk-icon="history"></span> Min köphistorik</a>
+                        </li>
+                        <li>
+                            <a href="/member"><span uk-icon="user"></span> Medlemsvy</a>
+                        </li>
+                    </ul>
+                </div>
             </div>
             <div id="content">
                 <button id="edit" class="uk-icon-button" uk-icon="icon: pencil"><span>Edit</span></button>
                 <ul class="product-list">
                 </ul>
                 <a class="uk-button uk-button-primary uk-button-small edit product-add" href="product/create" uk-icon="plus"></a>
-            </div>
-            {# <div id="right-sidebar">
-                <h2>Items</h2>
-                <ul uk-accordion>
-                    <li>
-                        <form class="product">
-                            <span class="product-title">Aluminum Endmill</span>
-                            <input type="number" placeholder="0" class="product-amount"></input>
-                            <span class="product-unit">g</span>
-                            <span class="product-total-cost">200kr</span>
-                            <button class="uk-button uk-button-default uk-button-small" uk-icon="trash" />
-                        </form>
-                    </li>
-                </ul>
-            </div> #}
-        </div>
-        <div id="pay-module">
-            <div uk-icon="chevron-up" id="pay-module-open-button" uk-icon="chevron-up">
-                <span></span>
-            </div>
-            <ul id="cart">
-            </ul>
-            <div id="pay-right">
-                <div id="pay-login">
-                    <h3>Du är inte inloggad</h3>
-                    <form class="uk-form-stacked">
-                        <input required id="email" class="uk-input" type="text" placeholder="Email" />
-                        <button id="login-button" type="submit" class="uk-button uk-button-default uk-button-primary">
-                            Logga in
-                        </button>
-                    </form>
-                </div>
-                <form id="pay">
-                    <h3>Betala med kort via Stripe</h3>
-                    <form action="/charge" method="post" id="payment-form">
-                        <div class="form-row">
-                            {# <label for="card-element">
-                              Credit or debit card
-                            </label> #}
-                            <div id="card-element">
-                              <!-- A Stripe Element will be inserted here. -->
-                            </div>
-
-                            <!-- Used to display form errors. -->
-                            <div id="card-errors" role="alert"></div>
-                        </div>
-
-                        <button type="submit" id="pay-button" class="uk-button uk-button-default uk-button-primary">
-                            <div class="progress-spinner" uk-spinner></div>
-                            <span>Betala</span>
-                        </button>
-                        </form>
-                    </form>
-                </form>
             </div>
         </div>
     </body>

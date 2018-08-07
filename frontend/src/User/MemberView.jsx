@@ -105,9 +105,10 @@ module.exports = withRouter(class Member extends React.Component
 					</fieldset>
 					<KeyView />
 
-					<fieldset >
-						<legend><i className="uk-icon-shopping-cart"></i> Köphistorik</legend>
-						<a className="uk-button uk-button-default uk-margin-top" href={"/shop/member/" + this.state.model.get('member_id') + "/history"}>Visa köphistorik</a>
+					<fieldset>
+						<legend><i className="uk-icon-shopping-cart"></i> Webshop</legend>
+						<a className="uk-button uk-button-default uk-margin-top" href="/shop/member/history">Visa köphistorik</a>
+						<a className="uk-button uk-button-default uk-margin-top uk-margin-left" href="/shop/">Gå till webshoppen</a>
 					</fieldset>
 
 					<div className="uk-form-row">

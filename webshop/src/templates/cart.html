@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Kundvagn - Makerspace Webshop</title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="{{ url('static/uikit/css/uikit.min.css') }}" />
+        <link rel="stylesheet" href="{{ url('static/style.css') }}" />
+        <script src='{{ url("static/uikit/js/uikit.min.js") }}'></script>
+        <script src='{{ url("static/uikit/js/uikit-icons.min.js") }}'></script>
+        <script src="https://js.stripe.com/v3/"></script>
+        <script src='{{ url("static/js/cartpage.js") }}'></script>
+        <script id="product-data", type="application/json">
+            {{ product_json|safe }}
+        </script>
+        {% include 'meta.html' %}
+    </head>
+    <body>
+        <div id="single-page-content" class="cartpage">
+            <div class="header-logo">
+                <a href="/shop"><img src='{{ url("static/images/logo-transparent-500px-300x210.png") }}' /></a>
+            </div>
+            <ul id="cart">
+            </ul>
+            <div id="pay-module">
+                <div id="pay-login">
+                    <h3>Du måste logga in för att kunna betala</h3>
+                    <form class="uk-form-stacked">
+                        <input required id="email" class="uk-input" type="text" placeholder="Email" />
+                        <button id="login-button" type="submit" class="uk-button uk-button-default uk-button-primary">
+                            Logga in
+                        </button>
+                    </form>
+                </div>
+                <form id="pay">
+                    <h3>Betala med kort via Stripe</h3>
+                    <form action="/charge" method="post" id="payment-form">
+                        <div class="form-row">
+                            {# <label for="card-element">
+                              Credit or debit card
+                            </label> #}
+                            <div id="card-element">
+                              <!-- A Stripe Element will be inserted here. -->
+                            </div>
+
+                            <!-- Used to display form errors. -->
+                            <div id="card-errors" role="alert"></div>
+                        </div>
+
+                        <button type="submit" id="pay-button" class="uk-button uk-button-default uk-button-primary">
+                            <div class="progress-spinner" uk-spinner></div>
+                            <span>Betala<span id='cart-sum'></span></span>
+                        </button>
+                        </form>
+                    </form>
+                </form>
+            </div>
+            <div class="text-navigation-footer">
+                <a href='/member'>Medlemsvy</a>
+                <a href='{{ url("member/history") }}'>Köphistorik</a>
+                <a href='{{ url("") }}'>Webshop</a>
+            </div>
+        </div>
+    </body>
+</html>

@@ -8,11 +8,8 @@
         <link rel="stylesheet" href="{{ url('static/style.css') }}" />
         <script src='{{ url("static/uikit/js/uikit.min.js") }}'></script>
         <script src='{{ url("static/uikit/js/uikit-icons.min.js") }}'></script>
-        <script src="https://code.jquery.com/jquery-3.3.1.min.js"
-              integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
-              crossorigin="anonymous"></script>
         <script src="https://js.stripe.com/v3/"></script>
-        <script src='{{ url("static/register.js") }}'></script>
+        <script src='{{ url("static/js/register.js") }}'></script>
         <script id="product-data", type="application/json">
             {{ product_json|safe }}
         </script>
@@ -20,8 +17,8 @@
     </head>
     <body>
         <form class="product-edit-form uk-form-stacked uk-margin-xlarge-bottom">
-            <div>
-                <img class="uk-margin-auto" style="display: block;" src='{{ url("static/images/logo-transparent-500px-300x210.png") }}' />
+            <div class="header-logo">
+                <img src='{{ url("static/images/logo-transparent-500px-300x210.png") }}' />
             </div>
             <h1>Bli medlem</h1>
             <div>

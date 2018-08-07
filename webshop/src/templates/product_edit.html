@@ -8,10 +8,7 @@
         <link rel="stylesheet" href="{{ url('static/style.css') }}" />
         <script src='{{ url("static/uikit/js/uikit.min.js") }}'></script>
         <script src='{{ url("static/uikit/js/uikit-icons.min.js") }}'></script>
-        <script src="https://code.jquery.com/jquery-3.3.1.min.js"
-              integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
-              crossorigin="anonymous"></script>
-        <script src='{{ url("static/product_edit.js") }}'></script>
+        <script src='{{ url("static/js/product_edit.js") }}'></script>
         <script id="action-data", type="application/json">
             {{ action_json|safe }}
         </script>
@@ -61,10 +58,16 @@
                 </div>
                 <a href="#add-action-modal" class="uk-button uk-button-default" uk-toggle>Add action</a>
             </div>
-            <button id="product-save" class="uk-button uk-button-primary">
-                <div class="progress-spinner" uk-spinner></div>
-                <span>Save</span>
-            </button>
+            <div class="uk-form-controls">
+                <button id="product-cancel" class="uk-button uk-button-primary">
+                    <div class="progress-spinner" uk-spinner></div>
+                    <span>Cancel</span>
+                </button>
+                <button id="product-save" class="uk-button uk-button-primary">
+                    <div class="progress-spinner" uk-spinner></div>
+                    <span>Save</span>
+                </button>
+            </div>
         </form>
         <div id="add-action-modal" uk-modal>
             <div class="uk-modal-dialog">
