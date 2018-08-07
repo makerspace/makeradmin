@@ -1,3 +1,4 @@
+jsonschema
 # Keeping all dependencies in one file for simplicity. Pyinstaller
 # will only pick direct depencencies into the windows runtime.
 
@@ -5,10 +6,14 @@
 pyodbc
 sqlalchemy
 pytz
+psutil
+requests
+iso8601
 
 # Build/test dependencies
 pyinstaller
-pip
 nose
 factory_boy
 pycodestyle
+coverage
+coveralls

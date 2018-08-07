@@ -1,23 +1,23 @@
 import json
+from datetime import datetime
 
 from multi_access.export import export_to_json
 from test.db_base import DbBaseTest
 from test.factory import UserFactory, CustomerFactory
-from test.util import dt_format, dt_cet_local
 
 
 class Test(DbBaseTest):
     
     def test_simple_export_case(self):
         customer = CustomerFactory()
-        u1_stop = dt_cet_local(self.datetime())
+        u1_stop = datetime(2018, 5, 28, 18, 38, 0)
         u1 = UserFactory(
             stop_timestamp=u1_stop,
-            customer_id=customer.id,
+            customer=customer,
         )
         u2 = UserFactory(
             stop_timestamp=None,
-            customer_id=customer.id,
+            customer=customer,
         )
         
         data = json.loads(export_to_json(self.session, customer.id))
@@ -27,7 +27,7 @@ class Test(DbBaseTest):
                 dict(
                     member_number=int(u1.name),
                     rfid_tag=u1.card,
-                    end_timestamp=dt_format(u1_stop),
+                    end_timestamp="2018-05-28T16:38:00.000000Z",
                 ),
                 dict(
                     member_number=int(u2.name),
@@ -41,7 +41,7 @@ class Test(DbBaseTest):
         customer = CustomerFactory()
         u1 = UserFactory(
             name="1234 Things",
-            customer_id=customer.id,
+            customer=customer,
         )
         
         data = json.loads(export_to_json(self.session, customer.id))
@@ -50,13 +50,13 @@ class Test(DbBaseTest):
         
     def test_does_not_export_data_for_other_custoemr(self):
         c1 = CustomerFactory()
-        u1 = UserFactory(customer_id=c1.id)
+        u1 = UserFactory(customer=c1)
 
         c2 = CustomerFactory()
-        u2 = UserFactory(customer_id=c2.id)
+        u2 = UserFactory(customer=c2)
         
         c3 = CustomerFactory()
-        u3 = UserFactory(customer_id=c3.id)
+        u3 = UserFactory(customer=c3)
 
         data = json.loads(export_to_json(self.session, c2.id))
 

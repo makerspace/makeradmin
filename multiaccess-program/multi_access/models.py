@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, DateTime, Boolean, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
-
+from sqlalchemy.orm import relationship
 
 Base = declarative_base()
 
@@ -13,8 +13,8 @@ class User(Base):
     name = Column("Name", String(length=50), nullable=False, index=True)
     code = Column("Code", String(10))
     card = Column("Card", String(12))
-    start_timestamp = Column("Start", DateTime(timezone=False))
-    stop_timestamp = Column("Stop", DateTime(timezone=False))
+    start_timestamp = Column("Start", DateTime(timezone=False))  # Local timezone for the house.
+    stop_timestamp = Column("Stop", DateTime(timezone=False))    # Local timezone for the house.
     blocked = Column("Blocked", Boolean())
     f0 = Column("f0", String(50))
     f1 = Column("f1", String(50))
@@ -37,6 +37,7 @@ class User(Base):
     fi3 = Column("fi3", Integer())
     changed = Column("Changed", Integer())
     customer_id = Column("customerId", ForeignKey("Customer.Id"), index=True)
+    customer = relationship("Customer")
     created_timestamp = Column("createdTime", DateTime(timezone=False))
     portal_name = Column("PortalName", String(50))
     password = Column("Password", String(50))
@@ -44,6 +45,9 @@ class User(Base):
     pul_block = Column("pulBlock", Boolean(), nullable=False, default=False)
     pt_first_name = Column("PTFirstName", String(50))
     pt_last_name = Column("PTLastName", String(50))
+
+    def __repr__(self):
+        return f'User<id={self.id}, name={self.name}>'
 
 
 class Authority(Base):
@@ -60,12 +64,14 @@ class AuthorityInUser(Base):
 
     __tablename__ = 'AuthorityInUser'
     
-    id = Column("Id", Integer(), primary_key=True, autoincrement=True, nullable=False)
-    user_id = Column("UserId", ForeignKey("Users.Id"), nullable=False)
-    authority_id = Column("AuthorityId", ForeignKey("Authority.Id"), nullable=False)
-    removed_date = Column("removeDate", DateTime(timezone=False))
+    # Not using id column here since we don't use it and sqlalchemy produces bad sql with it.
+    # id = Column("Id", Integer(), primary_key=True, autoincrement=True, nullable=False)
+    user_id = Column("UserId", ForeignKey("Users.Id"), nullable=False, primary_key=True)
+    authority_id = Column("AuthorityId", ForeignKey("Authority.Id"), nullable=False, primary_key=True)
+    removed_date = Column("removedDate", DateTime(timezone=False))
     start_timestamp = Column("start", DateTime(timezone=False))
     stop_timestamp = Column("stop", DateTime(timezone=False))
+    flags = Column("Flags",  Integer())
     
     # Actually foreign key to Operators, but we don't touch that table and it is always Null.
     created_by = Column("CreatedBy",  Integer())
