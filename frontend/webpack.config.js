@@ -20,8 +20,9 @@ module.exports = {
 	// Compile into a js.app
 	output:
 	{
-		filename: "app.js",
-		path: __dirname + "/dist/js",
+	    filename: "app.js",
+            publicPath: "/dist/js/",
+	    path: __dirname + "/dist/js",
 	},
 
 	// Include *.js and *.jsx files
