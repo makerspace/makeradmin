@@ -12,4 +12,8 @@ COPY ./webpack.config.js /frontend/
 
 COPY  ./src/ /frontend/src
 
-CMD ["node", "node_modules/webpack/bin/webpack.js", "--watch", "--config", "webpack.config.js"]
+COPY  ./dist/ /frontend/dist
+
+EXPOSE 8080
+
+CMD ["node", "node_modules/.bin/webpack-dev-server", "--config", "webpack.config.js", "--host", "0.0.0.0", "--watch"]

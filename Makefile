@@ -25,9 +25,9 @@ stop:
 firstrun: .env build init-db
 	echo "\033[31mRun 'make run' to start MakerAdmin\033[0m"
 
-frontend-watch:
-	docker-compose -f frontend/watch-compose.yaml rm -f
+frontend-dev-server:
+	docker-compose -f frontend/dev-server-compose.yaml rm -f
 	docker volume rm makeradmin_node_modules
-	docker-compose -f frontend/watch-compose.yaml up
+	docker-compose -f frontend/dev-server-compose.yaml up --build
 
 .PHONY: build init-db
