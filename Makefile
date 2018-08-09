@@ -26,7 +26,7 @@ firstrun: .env build init-db
 	echo "\033[31mRun 'make run' to start MakerAdmin\033[0m"
 
 frontend-dev-server:
-	mkdir frontend/node_modules
+	mkdir -p frontend/node_modules
 	docker-compose -f frontend/dev-server-compose.yaml rm -f
 	docker volume rm makeradmin_node_modules
 	docker-compose -f frontend/dev-server-compose.yaml up --build
