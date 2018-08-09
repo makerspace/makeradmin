@@ -21,7 +21,7 @@ module.exports = {
 	output:
 	{
 	    filename: "app.js",
-            publicPath: "/dist/js/",
+            publicPath: "/js/",
 	    path: __dirname + "/dist/js",
 	},
 
@@ -51,5 +51,11 @@ module.exports = {
 			__COMMIT_HASH__: JSON.stringify(commitHash),
 			__BUILD_DATE__: JSON.stringify(buildDate),
 		})
-	]
+	],
+    devServer: {
+        host: "0.0.0.0",
+        contentBase: "./dist",
+        hot: true,
+    }
+    
 }
