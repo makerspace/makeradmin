@@ -11,9 +11,8 @@ module.exports = withRouter(React.createClass(
 {
 	getInitialState: function()
 	{
-		return {
-			model: new KeyModel({member_id: this.props.params.member_id}),
-		};
+		const model = new KeyModel({member_id: this.props.params.member_id});
+		return {model};
 	},
 
 	closeForm: function()

@@ -1,4 +1,4 @@
-import React from 'react'
+import React from 'react';
 
 module.exports = {
 	getInitialState: function()
@@ -11,7 +11,7 @@ module.exports = {
 
 	componentDidMount: function()
 	{
-		var _this = this;
+		let _this = this;
 
 		// User should get a warning if trying to leave the page when there is any unsaved data in the form
 		this.props.router.setRouteLeaveHook(this.props.route, () =>
@@ -20,11 +20,12 @@ module.exports = {
 			// så om modellen försvinner kommer den gnälla. En bättre lösning vore att avregistrera exit handlern,
 			// när den inte längre behövs. Det här problemet dyker upp lite överallt.
 			// TODO: Verkar vara fixat nu?
-			if(this.state.ignoreExitHook !== true && /*this.wrapper !== undefined && this.getModel() !== undefined &&*/ this.getModel().isDirty())
+			if (this.state.ignoreExitHook !== true && /*this.wrapper !== undefined && this.getModel() !== undefined &&*/ this.getModel().isDirty())
 			{
 				return "Du har information som inte är sparad. Är du säker på att du vill lämna sidan?";
 			}
-		})
+			return null;
+		});
 
 		// If we create a enableSendButton() function it will be called everytime a model have changed
 		// The enableSendButton() function should be used to validate the model and enable/disable the send/save button
@@ -66,14 +67,16 @@ module.exports = {
 	// Generic cancel function
 	cancel: function(entity)
 	{
-		if(this.props.hasOwnProperty("onCancel"))
-		{
-			this.props.onCancel(entity);
-		}
-		else if(this.hasOwnProperty("onCancel"))
-		{
-			this.onCancel(entity);
-		}
+		this.setState({ignoreExitHook: true}, () => {
+			if (this.props.hasOwnProperty("onCancel"))
+			{
+				this.props.onCancel(entity);
+			}
+			else if (this.hasOwnProperty("onCancel"))
+			{
+				this.onCancel(entity);
+			}
+        });
 	},
 
 	// Generic remove function

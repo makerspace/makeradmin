@@ -57,7 +57,8 @@
     },
     "globals": {
       "require": true,
-      "module": true
+        "module": true,
+        "console": true
     },
     "parser": "babel-eslint",
     "plugins": [
