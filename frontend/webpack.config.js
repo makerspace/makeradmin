@@ -3,7 +3,7 @@ const path = require('path');
 
 var src = path.resolve(__dirname, "src")
 
-var mode = process.env.WEBPACK_SERVE || process.env.DEVELOPMENT ? 'development' : 'production'
+var mode = process.env.DEVELOPMENT ? 'development' : 'production'
 console.info("mode: " + mode);
 
 // Get git info from command line
@@ -58,16 +58,9 @@ module.exports = {
     mode: mode,
     
     // Config for webpack-serve.
-    serve: {
-        content: "dist",
-        dev: {
-            publicPath: "/js",
-        }
-    },
-
-// TODO     devServer: {
-// TODO         host: "0.0.0.0",
-// TODO         contentBase: "./dist",
-// TODO         hot: true,
-// TODO     }
+    devServer: {
+        host: "0.0.0.0",
+        contentBase: "./dist",
+        historyApiFallback: true,
+    }
 }
