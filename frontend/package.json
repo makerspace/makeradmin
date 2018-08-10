@@ -8,7 +8,7 @@
     "backbone-react-component": "^1.0.0",
     "backbone.paginator": "^2.0.5",
     "classnames": "^2.2.5",
-    "history": "^2.1.2",
+    "history": "^4.7.2",
     "jquery": "^3.1.1",
     "json-loader": "^0.5.4",
     "react": "^15.6.2",
