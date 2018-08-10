@@ -18,4 +18,4 @@ EXPOSE 8080
 
 ENV DEVELOPMENT=1
 
-CMD ["./node_modules/.bin/webpack-dev-server"]
+CMD ["npm", "start"]

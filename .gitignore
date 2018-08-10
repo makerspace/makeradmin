@@ -4,3 +4,4 @@ __pycache__/
 .idea
 .envrc
 .mypy_cache
+package-lock.json
