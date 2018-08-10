@@ -13,11 +13,15 @@ COPY ./docker/nginx_default_host /etc/nginx/conf.d/default.conf
 RUN mkdir -p /var/www/html
 COPY ./dist/ /var/www/html
 
-RUN cd /data && \
-    npm install && \
-    node /data/node_modules/webpack/bin/webpack.js --config /data/webpack.config.js && \
-    mv -f /data/dist/js/app.js /var/www/html/js/ && \
-    rm -rf /data
+WORKDIR /data
+
+RUN npm install
+
+RUN node /data/node_modules/webpack/bin/webpack.js --config /data/webpack.config.js --progress
+
+WORKDIR /
+
+RUN mv -f /data/dist/js/app.js /var/www/html/js/ && rm -rf /data
 
 EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]
