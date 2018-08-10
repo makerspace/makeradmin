@@ -1,17 +1,17 @@
-import React from 'react'
-import { withRouter } from 'react-router'
+import React from 'react';
+import { withRouter } from 'react-router';
 
 // Backbone
-import KeyModel from '../../Models/Key'
+import KeyModel from '../../Models/Key';
 
-import Keys from '../Tables/Keys'
-import Key from '../Forms/Key'
+import Key from '../Forms/Key';
 
 module.exports = withRouter(React.createClass(
 {
 	getInitialState: function()
 	{
 		const model = new KeyModel({member_id: this.props.params.member_id});
+		model.ignoreAttributes.push('member_id');
 		return {model};
 	},
 
