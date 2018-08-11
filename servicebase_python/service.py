@@ -10,7 +10,7 @@ from time import sleep
 from functools import wraps
 from dataclasses import dataclass
 from typing import Callable, Type, Optional, Set, Dict, Union
-from datetime import datetime
+from datetime import datetime, timedelta
 from dateutil import parser
 from decimal import Decimal
 
@@ -417,3 +417,38 @@ class Entity:
             service.route(endpoint + id_string, endpoint=endpoint+".delete", methods=["DELETE"], permission=write_permission)(route_helper(self.delete, status="deleted"))
         service.route(endpoint + "", endpoint=endpoint+".post", methods=["POST"], permission=write_permission)(route_helper(self.post, json=True, status="created"))
         service.route(endpoint + "", endpoint=endpoint+".list", methods=["GET"], permission=read_permission)(route_helper(self.list, status="ok"))
+
+
+class CanNotBuyStartPackage(BackendException):
+    def __init__(self):
+        super().__init__(sv=f"Startpaket kan bara köpas en gång om året.",
+                         en=f"Starterpack can only be bought once a year.")
+            
+            
+def filter_start_package(name=None, member=None):
+    if not member:
+        return
+
+    try:
+        end_date_str = member['data']['labaccess_end']
+    except KeyError as e:
+        raise BackendException(f"Could not get member end_date, this is a bug: {e}")
+
+    if not end_date_str:
+        return
+
+    try:
+        end_date = parser.parse(end_date_str)
+    
+    except ValueError as e:
+        raise BackendException(f"Could not parse member end_date, this is a bug: {e}")
+    
+    if end_date < datetime.now() + timedelta(days=30*9):
+        raise CanNotBuyStartPackage()
+    
+
+product_filters = {
+    "start_package": filter_start_package,
+}
+
+

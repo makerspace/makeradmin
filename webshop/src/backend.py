@@ -346,27 +346,33 @@ def stripe_callback() -> None:
             eprint("Marked transaction as failed")
 
 
-def process_cart(cart: List[Dict[str,Any]]) -> Tuple[Decimal, List[CartItem]]:
+def process_cart(member_id, cart: List[Dict[str,Any]]) -> Tuple[Decimal, List[CartItem]]:
+    items = []
     with db.cursor() as cur:
-        prices = []
-        multiples = []
-        for item in cart:
-            cur.execute("SELECT price,smallest_multiple FROM webshop_products WHERE id=%s AND deleted_at IS NULL", item["id"])
-            tup: Tuple[Decimal, int] = cur.fetchone()
-            if tup is None:
-                raise NoSuchItem(str(item["id"]))
-            price, smallest_multiple = tup
-            if price < 0:
-                abort(400, "Item seems to have a negatice price. Not allowing purchases that item just in case. Item: " + str(item["id"]))
-            prices.append(price)
-            multiples.append(smallest_multiple)
-
-        items = []
+        member = None
+        if member_id:
+            try:
+                member = instance.gateway.get(f"membership/member/{member_id}/membership").json()
+            except:  # TODO Don't catch all.
+                pass
+        
         with localcontext() as ctx:
             ctx.clear_flags()
             total_amount = Decimal(0)
+        
+            for item in cart:
+                cur.execute("SELECT name,price,smallest_multiple,filter FROM webshop_products WHERE id=%s AND deleted_at IS NULL", item["id"])
+                tup: Tuple[str, Decimal, int, str] = cur.fetchone()
+                if tup is None:
+                    raise NoSuchItem(str(item["id"]))
+                name, price, smallest_multiple, product_filter = tup
+                
+                if product_filter:
+                    service.product_filters[product_filter](name=name, member=member)
+                
+                if price < 0:
+                    abort(400, "Item seems to have a negatice price. Not allowing purchases that item just in case. Item: " + str(item["id"]))
 
-            for price, smallest_multiple, item in zip(prices, multiples, cart):
                 count = int(item["count"])
                 if count <= 0:
                     raise NonNegativeItemCount(str(item["id"]))
@@ -376,7 +382,7 @@ def process_cart(cart: List[Dict[str,Any]]) -> Tuple[Decimal, List[CartItem]]:
                 item_amount = price * count
                 items.append(CartItem(item["id"], count, item_amount))
                 total_amount += item_amount
-
+                
             if ctx.flags[Rounded]:
                 # This can possibly happen with huge values, I suppose they will be caught below anyway but it's good to catch in any case
                 raise RoundingError()
@@ -384,11 +390,11 @@ def process_cart(cart: List[Dict[str,Any]]) -> Tuple[Decimal, List[CartItem]]:
     return total_amount, items
 
 
-def validate_payment(cart: List[Dict[str,Any]], expected_amount: Decimal) -> Tuple[Decimal, List[CartItem]]:
+def validate_payment(member_id, cart: List[Dict[str,Any]], expected_amount: Decimal) -> Tuple[Decimal, List[CartItem]]:
     if len(cart) == 0:
         raise EmptyCart()
 
-    total_amount, items = process_cart(cart)
+    total_amount, items = process_cart(member_id, cart)
 
     # Ensure that the frontend hasn't calculated the amount to pay incorrectly
     if abs(total_amount - Decimal(expected_amount)) > Decimal("0.01"):
@@ -537,7 +543,7 @@ def pay(member_id: int, data: Dict[str, Any], activates_member: bool = False) ->
     if member_id <= 0:
         raise NotMember()
 
-    total_amount, items = validate_payment(data["cart"], data["expectedSum"])
+    total_amount, items = validate_payment(member_id, data["cart"], data["expectedSum"])
 
     transaction_id = add_transaction_to_db(member_id, total_amount, items)
 

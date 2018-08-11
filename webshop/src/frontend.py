@@ -4,7 +4,7 @@ from service import eprint
 import json
 import os
 from webshop_entities import category_entity, product_entity, transaction_entity, transaction_content_entity, \
-    action_entity, membership_products, product_filters
+    action_entity, membership_products
 from typing import List, Dict, Any, Tuple
 from decimal import Decimal
 
@@ -120,7 +120,7 @@ def product_edit(id: int) -> str:
         "action_categories": action_categories
     })
 
-    filters = sorted(product_filters.keys())
+    filters = sorted(service.product_filters.keys())
 
     return render_template("product_edit.html", action_json=action_json,
                            filters=filters, action_categories=action_categories,

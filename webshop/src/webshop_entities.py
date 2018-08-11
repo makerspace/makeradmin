@@ -10,11 +10,6 @@ from typing import List, Dict, Any
 # Decimal("0.2") = Decimal('0.2')
 
 
-product_filters = {
-    "start_package": lambda x: x,
-}
-
-
 product_entity = Entity(
     table="webshop_products",
     columns=["name", "category_id", "description", "unit", "filter", Column("price", dtype=Decimal), "smallest_multiple"],
