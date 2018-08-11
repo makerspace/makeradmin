@@ -5,3 +5,5 @@ __pycache__/
 .envrc
 .mypy_cache
 package-lock.json
+# For VIM temp files
+*.swp
