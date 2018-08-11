@@ -1,4 +1,5 @@
-import iso8601
+from datetime import time, datetime
+
 from pytz import timezone
 
 
@@ -25,21 +26,18 @@ def cet_to_utc(dt):
     return cet.localize(dt, is_dst=None).astimezone(utc).replace(tzinfo=None)
 
 
-def to_cet(dt):
-    """ Convert a datetime with timezone to naive dt in cet. """
-    if dt is None:
+def to_cet_23_59_59(d):
+    """ Convert a date with timezone to naive dt in cet 23:59:59. """
+    if d is None:
         return None
-    assert dt.tzinfo
-    return dt.astimezone(cet).replace(tzinfo=None)
+    return datetime.combine(d, time(23, 59, 59))
 
 
-def dt_parse(s):
-    """ Parse a datetime from maker admin with timezone offset. """
+def date_parse(s):
+    """ Parse a date from maker admin. """
     if s is None:
         return None
-    dt = iso8601.parse_date(s)
-    assert dt.tzinfo
-    return dt
+    return datetime.strptime(s, "%Y-%m-%d").date()
     
 
 def dt_format(dt):

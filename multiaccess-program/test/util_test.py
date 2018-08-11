@@ -1,6 +1,6 @@
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, date
 
-from multi_access.util import cet_to_utc, dt_format, utc, cet, dt_parse, to_cet
+from multi_access.util import cet_to_utc, dt_format, utc, cet, date_parse, to_cet_23_59_59
 from test.base import BaseTest
 
 
@@ -11,13 +11,10 @@ class Test(BaseTest):
         self.assertEqual(datetime(2018, 1, 22, 10), cet_to_utc(datetime(2018, 1, 22, 11)))
 
     def test_to_cet(self):
-        self.assertEqual(datetime(2018, 5, 22, 10),
-                         to_cet(datetime(2018, 5, 22, 8, tzinfo=timezone(timedelta(hours=0)))), "Summer time")
-        self.assertEqual(datetime(2018, 1, 22, 10),
-                         to_cet(datetime(2018, 1, 22, 9, tzinfo=timezone(timedelta(hours=0)))), "Winter time")
-        self.assertEqual(datetime(2018, 5, 22, 10),
-                         to_cet(datetime(2018, 5, 22, 10, tzinfo=timezone(timedelta(hours=2)))))
-        self.assertEqual(None, to_cet(None))
+        self.assertEqual(datetime(2018, 5, 22, 23, 59, 59), to_cet_23_59_59(date(2018, 5, 22)))
+        self.assertEqual(datetime(2018, 1, 22, 23, 59, 59), to_cet_23_59_59(date(2018, 1, 22)))
+        self.assertEqual(datetime(2018, 5, 22, 23, 59, 59), to_cet_23_59_59(date(2018, 5, 22)))
+        self.assertEqual(None, to_cet_23_59_59(None))
 
     def test_dt_format(self):
         self.assertEqual("2018-05-22T10:00:00.000000Z", dt_format(datetime(2018, 5, 22, 10)))
@@ -25,9 +22,7 @@ class Test(BaseTest):
         with self.assertRaises(AssertionError): dt_format(datetime(2018, 5, 22, 10, tzinfo=cet))
 
     def test_dt_parse(self):
-        self.assertEqual(datetime(2018, 5, 22, 10, tzinfo=timezone(timedelta(hours=2))),
-                         dt_parse("2018-05-22T10:00:00+02:00"))
-        self.assertEqual(datetime(2018, 5, 22, 10, tzinfo=timezone(timedelta(hours=-1))),
-                         dt_parse("2018-05-22T10:00:00-01:00"))
-        self.assertEqual(None, dt_parse(None))
+        self.assertEqual(date(2018, 5, 22), date_parse("2018-05-22"))
+        self.assertEqual(date(2018, 5, 22), date_parse("2018-05-22"))
+        self.assertEqual(None, date_parse(None))
 

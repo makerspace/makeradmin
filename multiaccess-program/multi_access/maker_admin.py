@@ -4,8 +4,9 @@ from collections import namedtuple
 import requests
 from iso8601 import ParseError
 
-from multi_access.util import dt_parse, to_cet
 from jsonschema import validate, ValidationError
+
+from multi_access.util import to_cet_23_59_59, date_parse
 
 schema = dict(
     type="array",
@@ -16,6 +17,8 @@ schema = dict(
             member_number=dict(type="integer"),
             firstname=dict(type="string"),
             lastname=dict(type="string"),
+            end_date=dict(type=["string", "null"]),
+            start_date=dict(type=["string", "null"]),
             keys=dict(
                 type="array",
                 items=dict(
@@ -23,9 +26,6 @@ schema = dict(
                     properties=dict(
                         key_id=dict(type="integer"),
                         rfid_tag=dict(type="string", pattern=r"^\d+$", maxLength=12),
-                        blocked=dict(type="boolean"),
-                        end_timestamp=dict(type=["string", "null"]),
-                        start_timestamp=dict(type=["string", "null"]),
                     ),
                 )
             )
@@ -39,7 +39,7 @@ MakerAdminMember = namedtuple('MakerAdminMember', [
     'firstname',      # string
     'lastname',       # string
     'rfid_tag',       # string
-    'end_timestamp',  # string timestamp in zulu
+    'end_timestamp',  # datetime
 ])
 
 
@@ -116,21 +116,18 @@ class MakerAdminClient(object):
             """ Create a member object form data item, return None if blocked or no usable key. """
 
             try:
-                keys = sorted([(k['rfid_tag'], to_cet(dt_parse(k['end_timestamp'])))
-                               for k in item['keys'] if not k['blocked'] and k['rfid_tag']],
-                              key=lambda x: x[1])
-                
+                keys = item['keys']
                 if not keys:
                     return None
                 
-                rfid_tag, end_timestamp = keys[-1]
+                rfid_tag = sorted(keys, key=lambda x: x['key_id'])[-1]['rfid_tag']
                 
                 return MakerAdminMember(
                     member_number=item['member_number'],
                     firstname=item['firstname'],
                     lastname=item['lastname'],
                     rfid_tag=rfid_tag,
-                    end_timestamp=end_timestamp,
+                    end_timestamp=to_cet_23_59_59(date_parse(item['end_date'])),
                 )
             except ParseError as e:
                 raise ValueError(f"Failed to parse timestamp: {str(e)}")

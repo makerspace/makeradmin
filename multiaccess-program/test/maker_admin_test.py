@@ -10,12 +10,11 @@ valid_member = dict(
     member_number=1001,
     firstname="Kim",
     lastname="Larsson",
+    start_date="2018-04-28",
+    end_date="2018-05-28",
     keys=[dict(
         key_id=22,
         rfid_tag="123213433334",
-        blocked=False,
-        start_timestamp="2018-04-28T10:10:10+02:00",
-        end_timestamp="2018-05-28T10:10:10+02:00",
     )],
 )
 
@@ -28,11 +27,11 @@ class ParseTest(BaseTest):
         self.assertEqual("Kim", m.firstname)
         self.assertEqual("Larsson", m.lastname)
         self.assertEqual("123213433334", m.rfid_tag)
-        self.assertEqual(datetime(2018, 5, 28, 10, 10, 10), m.end_timestamp)
+        self.assertEqual(datetime(2018, 5, 28, 23, 59, 59), m.end_timestamp)
 
     def test_parse_valid_with_no_end_timestamp(self):
         obj = deepcopy(valid_member)
-        obj['keys'][0]['end_timestamp'] = None
+        obj['end_date'] = None
         m, = MakerAdminClient.response_data_to_members([obj])
         self.assertEqual(1001, m.member_number)
         self.assertEqual("Kim", m.firstname)
@@ -51,6 +50,7 @@ class ParseTest(BaseTest):
         test_bad(member_number="not a number")
         test_bad(firstname=123)
         test_bad(lastname=3334)
+        test_bad(end_date="XYZ")
 
         def test_bad_key(**kwargs):
             obj = deepcopy(valid_member)
@@ -60,13 +60,6 @@ class ParseTest(BaseTest):
 
         test_bad_key(key_id=False)
         test_bad_key(rfid_tag=244)
-        test_bad_key(blocked="status")
-        test_bad_key(end_timestamp="XYZ")
-
-    def test_blocked_key_is_filtered(self):
-        obj = deepcopy(valid_member)
-        obj['keys'][0]['blocked'] = True
-        self.assertEqual([], MakerAdminClient.response_data_to_members([obj]))
 
     def test_no_keys_is_filtered(self):
         obj = deepcopy(valid_member)
@@ -80,36 +73,25 @@ class ParseTest(BaseTest):
                 member_number=1001,
                 firstname="Kim",
                 lastname="Larsson",
+                end_date="2018-05-28",
                 keys=[
                     dict(
-                        key_id=1,
-                        rfid_tag="1",
-                        blocked=False,
-                        start_timestamp=None,
-                        end_timestamp="2018-05-28T10:00:00+02:00",
+                        key_id=4,
+                        rfid_tag="4",
                     ),
                     dict(
                         key_id=2,
                         rfid_tag="2",
-                        blocked=True,
-                        start_timestamp=None,
-                        end_timestamp="2018-05-28T18:00:00+02:00",
+                    ),
+                    dict(
+                        key_id=1,
+                        rfid_tag="1",
                     ),
                     dict(
                         key_id=3,
                         rfid_tag="3",
-                        blocked=False,
-                        start_timestamp=None,
-                        end_timestamp="2018-05-28T12:00:00+02:00",
                     ),
-                    dict(
-                        key_id=4,
-                        rfid_tag="4",
-                        blocked=False,
-                        start_timestamp=None,
-                        end_timestamp="2018-05-28T13:00:00+04:00",
-                    )
                 ],
             )
         ])
-        self.assertEqual("3", m.rfid_tag)
+        self.assertEqual("4", m.rfid_tag)
