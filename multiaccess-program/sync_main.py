@@ -26,7 +26,7 @@ WHAT_BLOCK = 'block'
 WHAT_ALL = {WHAT_UPDATE, WHAT_ADD, WHAT_BLOCK}
 
 
-def check_multi_access_running():
+def is_multi_access_running():
     for process in psutil.process_iter():
         if 'multiaccess' in process.name().lower():
             return True
@@ -41,12 +41,12 @@ def sync(session=None, client=None, ui=None, customer_id=None, authority_id=None
     
     if not ignore_running:
         ui.info__progress("checking for running MultiAccess")
-        if check_multi_access_running():
+        if is_multi_access_running():
             ui.info__progress("looks like MultiAccess is running, please exit MultiAccess and run again")
             return
 
     # Log in to the MakerAdmin server unless we are already logged in
-    if not client.isLoggedIn():
+    if not client.is_logged_in():
         while not client.login():
             pass
 
@@ -141,7 +141,7 @@ def main():
 
             session.close()
 
-            input("Press enter to update the database again")
+            input("press enter to update the database again")
 
 
 if __name__ == '__main__':
