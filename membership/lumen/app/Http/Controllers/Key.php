@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Makeradmin\Traits\EntityStandardFiltering;
 
-class Rfid extends Controller
+class Key extends Controller
 {
 	use EntityStandardFiltering;
 
@@ -24,10 +24,6 @@ class Rfid extends Controller
 	public function create(Request $request)
 	{
 		$data = $request->json()->all();
-
-		// Default values
-		$data["status"] = $data["status"] ?? "inactive";
-
 		return $this->_create("Key", $data);
 	}
 

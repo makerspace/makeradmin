@@ -13,17 +13,13 @@ class CreateRfidTable extends Migration
      */
     public function up()
     {
-        Schema::create("membership_rfid", function (Blueprint $table)
+        Schema::create("membership_keys", function (Blueprint $table)
         {
             $table->increments("rfid_id");
+            $table->integer('member_id')->unsigned();
             $table->foreign('member_id')->references('member_id')->on('membership_members');
-            $table->string("title")->nullable();
             $table->text("description")->nullable();
             $table->string("tagid");
-            $table->string("status");
-
-            $table->dateTimeTz("startdate")->nullable();
-            $table->dateTimeTz("enddate")->nullable();
 
             $table->dateTimeTz("created_at")->default(DB::raw("CURRENT_TIMESTAMP"));
             $table->dateTimeTz("updated_at")->nullable();
@@ -40,6 +36,6 @@ class CreateRfidTable extends Migration
      */
     public function down()
     {
-        Schema::drop("membership_rfid");
+        Schema::drop("membership_keys");
     }
 }

@@ -73,11 +73,10 @@ def permissions() -> Dict[str,Any]:
         "permissions": permissions,
     }
 
-@instance.route("current/keys", methods=["GET"], permission=None)
-def key_info() -> str:
-    ''' List of keys that the current logged in member has '''
+@instance.route("current/membership", methods=["GET"], permission=None)
+def membership_info() -> str:
+    ''' If the user has lab access and how long '''
     user_id = assert_get(request.headers, "X-User-Id")
-    return instance.gateway.get("related?param=/membership/member/%s&matchUrl=/keys/(.*)&from=keys&page=1&sort_by=&sort_order=asc&per_page=10000" % user_id).text
-
+    return instance.gateway.get(f"membership/member/{user_id}/membership").text
 
 instance.serve_indefinitely()

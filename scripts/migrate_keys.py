@@ -30,4 +30,18 @@ for key in keys:
 for key, member in zip(keys, matching_members):
 	member = matching[0]
 	key["member_id"] = member["member_id"]
-	gateway.post(f"membership/key", key)
+	print("Creating key " + key["tagid"])
+	if key["status"] == "active":
+		span = {
+			"member_id": member["member_id"],
+			"startdate": key["startdate"],
+			"enddate": key["enddate"],
+			"type": "labaccess",
+			"creation_reason": "migrated"
+		}
+
+		r = gateway.post(f"membership/member/{member['member_id']}/addMembershipSpan", span)
+		assert r.ok, r.text
+
+	r = gateway.post(f"membership/keys", key)
+	assert r.ok, r.text

@@ -19,18 +19,22 @@ $app->  post("membership/member",      ['middleware' => 'permission:member_creat
 $app->   get("membership/member/{id}", ['middleware' => 'permission:member_view',   'uses' => "Member@read"]);   // Model: Read
 $app->   put("membership/member/{id}", ['middleware' => 'permission:member_edit',   'uses' => "Member@update"]); // Model: Update
 $app->delete("membership/member/{id}", ['middleware' => 'permission:member_delete', 'uses' => "Member@delete"]); // Model: Delete
+$app->   get("membership/member/{id}/keys", ['middleware' => 'permission:member_view',   'uses' => "Member@getKeys"]);
 $app->  post("membership/member/{id}/activate", ['middleware' => 'permission:service', 'uses' => "Member@activate"]); // Model: Activate
+$app->  post("membership/member/{id}/addMembershipSpan",    ['middleware' => 'permission:member_edit', 'uses' => "Member@addMembershipSpan"]);
+$app->  post("membership/member/{id}/addMembershipDays",    ['middleware' => 'permission:member_edit', 'uses' => "Member@addMembershipDays"]);
+$app->  get("membership/member/{id}/membership",    ['middleware' => 'permission:member_view', 'uses' => "Member@getMembership"]); // Get if a member has an active membership
 $app->   get("membership/member/{id}/permissions",   ['middleware' => 'permission:permission_view',     'uses' => "Member@getPermissions"]);    // Get a member's permissions
 $app->   get("membership/member/{id}/groups",        ['middleware' => 'permission:group_member_view',   'uses' => "Member@getGroups"]);    // Get collection with members
 $app->  post("membership/member/{id}/groups/add",    ['middleware' => 'permission:group_member_add',    'uses' => "Member@addGroup"]);    // Get collection with members
 $app->  post("membership/member/{id}/groups/remove", ['middleware' => 'permission:group_member_remove', 'uses' => "Member@removeGroup"]);    // Get collection with members
 
 // Keys
-$app->   get("membership/keys",      ['middleware' => 'permission:keys_view'], "Key@list");   // Get collection
-$app->  post("membership/keys",      ['middleware' => 'permission:keys_edit'], "Key@create"); // Model: Create
-$app->   get("membership/keys/{id}", ['middleware' => 'permission:keys_view'], "Key@read");   // Model: Read
-$app->   put("membership/keys/{id}", ['middleware' => 'permission:keys_edit'], "Key@update"); // Model: Update
-$app->delete("membership/keys/{id}", ['middleware' => 'permission:keys_edit'], "Key@delete"); // Model: Delete
+$app->   get("membership/keys",      ['middleware' => 'permission:keys_view', 'uses' => "Key@list"]);   // Get collection
+$app->  post("membership/keys",      ['middleware' => 'permission:keys_edit', 'uses' => "Key@create"]); // Model: Create
+$app->   get("membership/keys/{id}", ['middleware' => 'permission:keys_view', 'uses' => "Key@read"]);   // Model: Read
+$app->   put("membership/keys/{id}", ['middleware' => 'permission:keys_edit', 'uses' => "Key@update"]); // Model: Update
+$app->delete("membership/keys/{id}", ['middleware' => 'permission:keys_edit', 'uses' => "Key@delete"]); // Model: Delete
 
 // Groups
 $app->   get("membership/group",       ['middleware' => 'permission:group_view',   'uses' => "Group@list"]);    // Get collection

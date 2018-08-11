@@ -20,7 +20,7 @@ module.exports = withRouter(class Member extends React.Component
 
 		$.ajax({
 			method: "GET",
-			url: config.apiBasePath + "/member/current/keys",
+			url: config.apiBasePath + "/member/current/membership",
 			cache: false,
 			headers: {
 				"Authorization": "Bearer " + auth.getAccessToken()
@@ -28,7 +28,14 @@ module.exports = withRouter(class Member extends React.Component
 		}).done((data, textStatus, xhr) => {
 			console.log(data);
 			this.setState({
-				keys: data.data
+				info_labaccess: {
+					active: data.data.has_labaccess,
+					enddate: data.data.labaccess_end,
+				},
+				info_membership: {
+					active: data.data.has_membership,
+					enddate: data.data.membership_end,
+				}
 			});
 		}).fail((xhr, textStatus, error) => {
 			if (xhr.status != 401) {
@@ -37,102 +44,70 @@ module.exports = withRouter(class Member extends React.Component
 		});
 	}
 
-	renderKeys(keys)
+	renderInfo(info, prefix)
 	{
-		if (keys == null) {
+		if (info == null) {
 			return (
 				<p>Laddar...</p>
 			);
 		} else {
-			let prefix = keys.length > 1 ? "Nyckeln" : "Din nyckel";
-			let arr = keys.map(key => {
-				let text = "";
-				let icon = "";
-				let color = "";
-				let sortKey = 0;
-				const id = key.key_id;
+			let text = "";
+			let icon = "";
+			let color = "";
 
-				if (key.enddate != null && key.status == "active") {
-					const end = Date.parse(key.enddate);
+			const end = Date.parse(info.enddate);
 
-					const millisecondsPerHour = 1000 * 3600;
-					const millisecondsPerDay = millisecondsPerHour * 24;
-					sortKey = end - Date.now();
+			const millisecondsPerHour = 1000 * 3600;
+			const millisecondsPerDay = millisecondsPerHour * 24;
 
-					if (key.startdate == null || Date.now() >= Date.parse(key.startdate)) {
-						const remainingDays = Math.floor((end - Date.now()) / millisecondsPerDay);
+			if (info.active) {
+				const remainingDays = Math.floor((end - Date.now()) / millisecondsPerDay);
 
-						if (remainingDays < -1) {
-							text = prefix + " är ogiltig sedan " + (-remainingDays) + " dagar.";
-							icon = "uk-icon-times";
-							color = "member-key-color-inactive";
-						} else if (remainingDays < 0) {
-							text = prefix + " gick ut idag.";
-							icon = "uk-icon-times";
-							color = "member-key-color-inactive";
-						} else if (remainingDays < 1) {
-							const remainingHours = Math.ceil((end - Date.now()) / millisecondsPerHour);
-							text = prefix + " är giltig i mindre än " + remainingHours + " timmar till.";
-							icon = "uk-icon-check";
-							color = "member-key-color-warning";
-						} else if (remainingDays < 14) {
-							text = prefix + " är endast giltig i " + remainingDays + " dagar till. Kom ihåg att förnya den innan nästa nyckelutlämning.";
-							icon = "uk-icon-check";
-							color = "member-key-color-warning";
-						} else {
-							text = prefix + " är giltig i " + remainingDays + " dagar till.";
-							icon = "uk-icon-check";
-							color = "member-key-color-active";
-						}
-					} else if (end >= Date.now() && end >= Date.parse(key.startdate)) {
-						sortKey = 0;
-						const remainingDays = Math.floor((end - Date.now()) / millisecondsPerDay);
-						text = prefix + " blir aktiv " + Date.parse(key.startdate).toLocaleDateString("sv-se");
-						icon = "uk-icon-times";
-						color = "member-key-color-inactive";
-					} else {
-						sortKey = -1e27;
-						text = prefix + " är inaktiv.";
-						icon = "uk-icon-times";
-						color = "member-key-color-inactive";
-					}
-				} else if (key.enddate == null && key.status == "active") {
-					if (key.startdate == null || Date.now() >= Date.parse(key.startdate)) {
-						text = prefix + " är giltig tills vidare.";
-						icon = "uk-icon-check";
-						color = "member-key-color-active";
-					} else {
-						text = prefix + " är inte giltig än.";
-						icon = "uk-icon-check";
-						color = "member-key-color-inactive";
-					}
-				} else {
-					sortKey = -1e28;
-					text = prefix + " är inaktiv.";
+				if (remainingDays < -1) {
+					text = prefix + " är ogiltig sedan " + (-remainingDays) + " dagar.";
 					icon = "uk-icon-times";
 					color = "member-key-color-inactive";
+				} else if (remainingDays < 0) {
+					text = prefix + " gick ut idag.";
+					icon = "uk-icon-times";
+					color = "member-key-color-inactive";
+				} else if (remainingDays < 1) {
+					const remainingHours = Math.ceil((end - Date.now()) / millisecondsPerHour);
+					text = prefix + " är giltig i mindre än " + remainingHours + " timmar till.";
+					icon = "uk-icon-check";
+					color = "member-key-color-warning";
+				} else if (remainingDays < 14) {
+					text = prefix + " är endast giltig i " + remainingDays + " dagar till. Kom ihåg att förnya den innan nästa nyckelutlämning.";
+					icon = "uk-icon-check";
+					color = "member-key-color-warning";
+				} else {
+					text = prefix + " är giltig i " + remainingDays + " dagar till.";
+					icon = "uk-icon-check";
+					color = "member-key-color-active";
 				}
+			} else {
+				text = prefix + " är inaktiv.";
+				icon = "uk-icon-times";
+				color = "member-key-color-inactive";
+			}
 
-				return {
-					key, text, icon, color, sortKey, id
-				}
-			});
-			arr.sort((a,b) => b.sortKey - a.sortKey);
-			return arr.map(o => (
-				<div key={o.id} className="member-key-box"><div className={"uk-icon-small member-key-icon " + o.icon + " " + o.color}></div><div className="member-key-tag">{o.key.tagid}</div><div className="member-key-status">{o.text}</div></div>
-			));
+			return (
+				<div className="member-key-box"><div className={"uk-icon-small member-key-icon " + icon + " " + color}></div><div className="member-key-status">{text}</div></div>
+			);
 		}
 	}
 
 	render()
 	{
-		console.log("Rendering: ");
-		console.log(this.state.keys);
 		return (
 			<fieldset data-uk-margin>
-				<legend><i className="uk-icon-key"></i> Nycklar</legend>
-				{this.renderKeys(this.state.keys)}
+				<legend><i className="uk-icon-key"></i> Medlemsskap</legend>
+				{this.renderInfo(this.state.info_labaccess, "Din labaccess")}
+				<p>Om du köper ny labaccess i webshoppen så kommer den aktiveras vid nästa nyckelutlämning.</p>
 			</fieldset>
 		);
+
+		// Disabled until membership is actually supported
+		// {this.renderInfo(this.state.info_membership, "Ditt medlemsskap")}
 	}
 });
