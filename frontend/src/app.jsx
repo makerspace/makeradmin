@@ -11,17 +11,9 @@ require('uikit/dist/js/components/upload')
 // React stuff
 import React from 'react';
 import ReactDOM from 'react-dom';
-import {
-	Router,
-	browserHistory,
-} from 'react-router'
-import {
-	Nav,
-	SideNav,
-	SideNav2,
-	Breadcrumb,
-} from './nav'
-import Backbone from './Backbone/FullExtend'
+import {Router,	browserHistory} from 'react-router';
+import {Nav, SideNav, SideNav2, Breadcrumb} from './nav';
+import Backbone from './Backbone/FullExtend';
 
 // Login / OAuth
 import auth from './auth'
@@ -99,75 +91,6 @@ var nav = new Backbone.Model({
 					text: "Ordrar",
 					target: "/sales/order",
 				},
-/*				{
-					text: "Prenumerationer",
-					target: "/sales/subscription",
-				},
-				{
-					text: "Historik",
-					target: "/sales/history",
-				},
-*/
-			],
-		},
-		{
-			text: "Ekonomi",
-			target: "/economy/2016",
-			icon: "money",
-			children:
-			[
-				{
-					text: "Översikt",
-					target: "/economy/2016/overview",
-				},
-				{
-					text: "Huvudbok",
-					target: "/economy/2016/masterledger",
-				},
-				{
-					text: "Verifikationer",
-					target: "/economy/2016/instruction",
-					children:
-					[
-						{
-							text: "",
-							target: "/economy/2016/instruction/:id",
-						},
-					],
-				},
-				{
-					text: "Fakturor",
-					target: "/economy/2016/invoice",
-					children:
-					[
-						{
-							text: "",
-							target: "/economy/2016/invoice/:id",
-						},
-					],
-				},
-				{
-					type: "heading",
-					text: "Rapporter",
-					target: "",
-				},
-				{
-					text: "Balansrapport",
-					target: "/economy/2016/valuationsheet",
-				},
-				{
-					text: "Resultatrapport",
-					target: "/economy/2016/resultreport",
-				},
-				{
-					type: "heading",
-					text: "Statistik",
-					target: "",
-				},
-				{
-					text: "Kostnadsställen",
-					target: "/economy/2016/costcenter",
-				},
 			],
 		},
 		{
@@ -221,26 +144,6 @@ var nav = new Backbone.Model({
 					target: "",
 				},
 
-				// Ekonomi
-				{
-					type: "heading",
-					text: "Ekonomi",
-					target: "",
-					icon: "money",
-				},
-				{
-					text: "Kontoplan",
-					target: "/settings/economy/account",
-				},
-				{
-					text: "Räkneskapsår",
-					target: "/settings/economy/accountingperiod",
-				},
-				{
-					text: "Debug",
-					target: "/settings/economy/debug",
-				},
-
 				// Export
 				{
 					type: "heading",
@@ -283,7 +186,7 @@ var App = React.createClass({
 	{
 		return {
 			isLoggedIn: auth.isLoggedIn()
-		}
+		};
 	},
 
 	updateAuth(isLoggedIn)
@@ -362,7 +265,6 @@ const rootRoute = {
 					path: "logout",
 					component: require("./Pages/Login/Logout"),
 				},
-				require("./Economy/Routes"),
 				require("./Membership/Routes"),
 				require("./Sales/Routes"),
 				require("./Messages/Routes"),

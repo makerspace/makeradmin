@@ -1,9 +1,9 @@
-import React from 'react'
+import React from 'react';
 
 // Backbone
-import TransactionCollection from '../../Collections/Transaction'
+import TransactionCollection from '../../Collections/Transaction';
 
-import TransactionsUser from '../../Components/Tables/TransactionsUser'
+import TransactionsUser from '../../Components/Tables/TransactionsUser';
 
 module.exports = React.createClass(
 {
