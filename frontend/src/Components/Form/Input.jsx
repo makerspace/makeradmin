@@ -1,13 +1,21 @@
 import React from 'react'
 import classNames from 'classnames/bind'
+import PropTypes from 'prop-types'
 
-module.exports = class FormInput extends React.Component
+module.exports = React.createClass(
 {
-	constructor(props)
-	{
-		super(props);
+	propTypes: {
+		formrow: PropTypes.bool,
+	},
 
-		this.state = {
+	getDefaultProps: function(){
+		return {
+			formrow: true,
+		};
+	},
+
+	getInitialState: function(){
+		return {
 			selected: false,
 			isDirty: false,
 			value: this.props.model.get(this.props.name),
@@ -15,9 +23,9 @@ module.exports = class FormInput extends React.Component
 			error_column: "", // TODO
 			error_message: "",
 		};
-	}
+	},
 
-	componentDidMount()
+	componentDidMount: function()
 	{
 		var _this = this;
 
@@ -41,27 +49,27 @@ module.exports = class FormInput extends React.Component
 				});
 			}
 		});
-	}
+	},
 
-	onChange(event)
+	onChange: function(event)
 	{
 		this.state.model.set(this.props.name, event.target.value);
-	}
+	},
 
-	onFocus()
+	onFocus: function()
 	{
 		this.setState({selected: true});
-	}
+	},
 
-	onBlur()
+	onBlur: function()
 	{
 		this.setState({selected: false});
-	}
+	},
 
-	render()
+	render: function()
 	{
 		var classes = classNames({
-			"uk-form-row": true,
+			"uk-form-row": this.props.formrow,
 			"selected": this.state.selected,
 			"changed": this.state.isDirty,
 			"error": this.state.error_column == this.props.name,
@@ -75,10 +83,10 @@ module.exports = class FormInput extends React.Component
 					{this.props.icon ? 
 						<div className="uk-form-icon">
 							<i className={"uk-icon-" + this.props.icon}></i>
-							<input type="text" name={this.props.name} id={this.props.name} disabled={this.props.disabled} value={this.state.value} placeholder={this.props.placeholder ? this.props.placeholder : this.props.title} onChange={this.onChange.bind(this)} className="uk-form-width-large" onFocus={this.onFocus.bind(this)} onBlur={this.onBlur.bind(this)} />
+							<input type="text" name={this.props.name} id={this.props.name} disabled={this.props.disabled} value={this.state.value} placeholder={this.props.placeholder ? this.props.placeholder : this.props.title} onChange={this.onChange} className="uk-form-width-large" onFocus={this.onFocus} onBlur={this.onBlur} />
 						</div>
 					:
-						<input type="text" name={this.props.name} id={this.props.name} disabled={this.props.disabled} value={this.state.value} placeholder={this.props.placeholder ? this.props.placeholder : this.props.title} onChange={this.onChange.bind(this)} className="uk-form-width-large" onFocus={this.onFocus.bind(this)} onBlur={this.onBlur.bind(this)} />
+						<input type="text" name={this.props.name} id={this.props.name} disabled={this.props.disabled} value={this.state.value} placeholder={this.props.placeholder ? this.props.placeholder : this.props.title} onChange={this.onChange} className="uk-form-width-large" onFocus={this.onFocus} onBlur={this.onBlur} />
 					}
 					{this.state.error_column == this.props.name ?
 						<p className="uk-form-help-block error">{this.state.error_message}</p>
@@ -86,5 +94,5 @@ module.exports = class FormInput extends React.Component
 				</div>
 			</div>
 		);
-	}
-}
+	},
+});
