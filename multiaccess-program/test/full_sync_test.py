@@ -13,6 +13,8 @@ class Test(DbBaseTest):
     def setUp(self):
         super().setUp()
         self.client = MakerAdminClient(base_url="https://makeradmin.se")
+        self.client.login = MagicMock(return_value=True)
+        self.client.ship_orders = MagicMock(return_value=None)
         self.ui = Tui()
 
     @patch('builtins.input', lambda m: 'go')
@@ -44,7 +46,7 @@ class Test(DbBaseTest):
         m = MakerAdminMemberFactory(member_number=1001, end_timestamp=self.datetime(), rfid_tag="2")
         
         self.client.fetch_members = MagicMock(return_value=[m])
-        
+
         sync(session=self.session, client=self.client, ui=self.ui, customer_id=c.id, authority_id=a.id)
         
         u = self.session.query(User).get(u.id)
@@ -147,7 +149,7 @@ class Test(DbBaseTest):
         u6 = UserFactory(stop_timestamp=self.datetime(), name="1006", card="6", blocked=None, customer=other_customer)
         u7 = UserFactory(stop_timestamp=self.datetime(), name="1007", card="7", blocked=None, customer=other_customer)
         u8 = UserFactory(stop_timestamp=self.datetime(), name="1008", card="8", blocked=None, customer=other_customer)
-        
+
         self.client.fetch_members = MagicMock(return_value=[
             # Updates.
             MakerAdminMemberFactory(member_number=1001, end_timestamp=self.datetime(days=1), rfid_tag="1"),

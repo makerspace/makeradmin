@@ -47,47 +47,39 @@ MakerAdminMember = namedtuple('MakerAdminMember', [
 
 class MakerAdminClient(object):
     
-    def __init__(self, ui=None, base_url=None, members_filename=None, tokenfilename=None):
+    def __init__(self, ui=None, base_url=None, members_filename=None):
         self.ui = ui
         self.base_url = base_url
         self.members_filename = members_filename
-        self.tokenfile = tokenfilename or join(gettempdir(), 'LFP7EL5K6SFF.TXT')
-        try:
-            with open(self.tokenfile) as r:
-                self.token = r.read().strip()
-        except OSError:
-            self.token = 'nokey'
-        
+        self.token = ""
+
     def show_response_error_message(self, msg, r):
         try:
             self.ui.info__progress(f"{msg} ({r.status_code}): {r.json()['message']}")
         except (KeyError, ValueError):
             self.ui.info__progress(f"{msg} ({r.status_code})")
-        
+
+    def isLoggedIn(self):
+        r = requests.get(self.base_url + "/member/permissions", headers={'Authorization': 'Bearer ' + self.token})
+        return r.ok
+
     def login(self):
         username, password = self.ui.promt__login()
         r = requests.post(self.base_url + "/oauth/token",
                           {"grant_type": "password", "username": username, "password": password})
         if not r.ok:
             self.show_response_error_message("login failed", r)
-            return
+            return False
         self.ui.info__progress("login successful")
         self.token = r.json()["access_token"]
-        with open(self.tokenfile, 'w') as w:
-            w.write(self.token)
+        return True
     
-    def get_and_login_if_needed(self, url):
-        for i in range(3):
-            r = requests.get(url, headers={'Authorization': 'Bearer ' + self.token})
-            if r.ok:
-                return r.json()
-            elif r.status_code == 401:
-                self.show_response_error_message("failed to get members", r)
-                self.login()
-            else:
-                self.ui.fatal__error(f"failed to get data, got ({r.status_code}):\n" + r.text)
+    def _get_json(self, url):
+        r = requests.get(url, headers={'Authorization': 'Bearer ' + self.token})
+        if r.ok:
+            return r.json()
         else:
-            self.ui.fatal__error("failed to login")
+            self.ui.fatal__error(f"failed to get data, got ({r.status_code}):\n" + r.text)
 
     def ship_orders(self, ui):
         ui.info__progress(f"shipping pending orders")
@@ -105,7 +97,7 @@ class MakerAdminClient(object):
         else:
             url = self.base_url + '/multiaccess/memberdata'
             ui.info__progress(f"getting members from {url}")
-            data = self.get_and_login_if_needed(url)['data']
+            data = self._get_json(url)['data']
             
         res = self.response_data_to_members(data)
         

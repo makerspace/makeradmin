@@ -26,12 +26,12 @@ WHAT_BLOCK = 'block'
 WHAT_ALL = {WHAT_UPDATE, WHAT_ADD, WHAT_BLOCK}
 
 
-def check_multi_access_running(ui):
-    ui.info__progress("checking for running MultiAccess")
+def check_multi_access_running():
     for process in psutil.process_iter():
         if 'multiaccess' in process.name().lower():
-            ui.fatal__error("looks like MultiAccess is running, please exit MultiAccess and run again")
-    ui.info__progress("found no running MultiAccess")
+            return True
+
+    return False
 
 
 def sync(session=None, client=None, ui=None, customer_id=None, authority_id=None, what=None, ignore_running=False):
@@ -40,9 +40,18 @@ def sync(session=None, client=None, ui=None, customer_id=None, authority_id=None
     # Exit if MultiAccess is running
     
     if not ignore_running:
-        check_multi_access_running(ui)
+        ui.info__progress("checking for running MultiAccess")
+        if check_multi_access_running():
+            ui.info__progress("looks like MultiAccess is running, please exit MultiAccess and run again")
+            return
+
+    # Log in to the MakerAdmin server unless we are already logged in
+    if not client.isLoggedIn():
+        while not client.login():
+            pass
 
     # Run actions on MakerAdmin (ship orders and update key timestamps)
+
     client.ship_orders(ui)
 
     # Fetch from MakerAdmin
@@ -122,11 +131,17 @@ def main():
 
         ui.info__progress(f"connecting to {args.db}")
         engine = create_engine(args.db)
-        Session = sessionmaker(bind=engine)
-        session = Session()
-        
-        sync(session=session, ui=ui, client=client, customer_id=args.customer_id, authority_id=args.authority_id,
-             ignore_running=args.ignore_running, what=what)
+
+        while True:
+            Session = sessionmaker(bind=engine)
+            session = Session()
+            
+            sync(session=session, ui=ui, client=client, customer_id=args.customer_id, authority_id=args.authority_id,
+                 ignore_running=args.ignore_running, what=what)
+
+            session.close()
+
+            input("Press enter to update the database again")
 
 
 if __name__ == '__main__':
