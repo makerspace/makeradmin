@@ -23,7 +23,7 @@ stop:
 	docker-compose down
 
 firstrun: .env build init-db
-	echo "\033[31mRun 'make run' to start MakerAdmin\033[0m"
+	echo -e "\e[31mRun 'make run' to start MakerAdmin\e[0m"
 
 frontend-dev-server:
 	mkdir -p frontend/node_modules
