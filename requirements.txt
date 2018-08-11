@@ -1,3 +1,7 @@
 # Requirements file for utils.
 requests
 pip
+flask
+pymysql
+dataclasses
+python-dateutil
