@@ -66,7 +66,7 @@ module.exports = withRouter(React.createClass(
 
 				data.data.forEach(function(element, index, array){
 					autoComplete.push({
-						label: element.firstname + " " + element.lastname,
+						label: "#"+element.member_number + ": " +element.firstname + " " + element.lastname,
 						value: element.member_id,
 					});
 				});
