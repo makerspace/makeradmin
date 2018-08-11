@@ -9,7 +9,9 @@ sudo adduser your_username docker
 ~~~
 You need to sign out and sign back in again for changes to take effect. 
 
-#### Python
+#### Python and npm
+*Note*: Python 3.6 or higher is required.
+
 ~~~
 sudo apt-get install npm
 make init
