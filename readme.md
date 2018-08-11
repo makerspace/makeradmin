@@ -1,3 +1,4 @@
+[![Build Status](https://travis-ci.org/makerspace/makeradmin.svg?branch=master)](https://travis-ci.org/makerspace/makeradmin)
 # Makeradmin
 
 ### Install dependencies 
