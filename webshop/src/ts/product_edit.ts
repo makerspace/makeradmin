@@ -79,6 +79,7 @@ document.addEventListener('DOMContentLoaded', () => {
             price: common.getValue("#price"),
             unit: common.getValue("#unit"),
             smallest_multiple: common.getValue("#smallest_multiple"),
+            filter: common.getValue("#filter"),
         }).then(json => {
             if (id == "new") {
                 // Update the form with the created product id

@@ -4,7 +4,7 @@ from service import eprint
 import json
 import os
 from webshop_entities import category_entity, product_entity, transaction_entity, transaction_content_entity, \
-    action_entity, membership_products, filter_entity
+    action_entity, membership_products, product_filters
 from typing import List, Dict, Any, Tuple
 from decimal import Decimal
 
@@ -19,7 +19,6 @@ category_entity.db = db
 transaction_entity.db = db
 transaction_content_entity.db = db
 action_entity.db = db
-filter_entity.db = db
 
 host_backend = os.environ["HOST_BACKEND"]
 if not host_backend.startswith("http"):
@@ -121,15 +120,10 @@ def product_edit(id: int) -> str:
         "action_categories": action_categories
     })
 
-    with db.cursor() as cur:
-        cur.execute("SELECT filter_id FROM webshop_product_filters WHERE product_id=%s", id)
-        selected_filter = cur.fetchone()
-        eprint(selected_filter)
-    
-    filter_categories = filter_entity.list()
+    filters = sorted(product_filters.keys())
 
-    return render_template("product_edit.html", action_json=action_json, selected_filter=selected_filter,
-                           filter_categories=filter_categories, action_categories=action_categories,
+    return render_template("product_edit.html", action_json=action_json,
+                           filters=filters, action_categories=action_categories,
                            product=product, categories=categories, url=instance.full_path, meta=meta)
 
 

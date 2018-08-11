@@ -61,10 +61,10 @@
             <div>
                 <label class="uk-form-label">Filters</label>
                 <div class="uk-flex uk-margin">
-                    <select class="uk-select uk-margin-right">
+                    <select id="filter" class="uk-select uk-margin-right">
                         <option value="">No filter</option>
-                        {% for cat in filter_categories %}
-                            <option value="{{ cat.id }}" {% if selected_filter == cat %}selected{% endif %}>{{ cat.id }}</option>
+                        {% for filter in filters %}
+                            <option value="{{ filter }}" {% if filter == product.filter %}selected{% endif %}>{{ filter }}</option>
                         {% endfor %}
                     </select>
                 </div>

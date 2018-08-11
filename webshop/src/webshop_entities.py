@@ -8,9 +8,16 @@ from typing import List, Dict, Any
 # Decimal(0.2) = Decimal('0.200000000000000011102230246251565404236316680908203125')
 # but
 # Decimal("0.2") = Decimal('0.2')
+
+
+product_filters = {
+    "start_package": lambda x: x,
+}
+
+
 product_entity = Entity(
     table="webshop_products",
-    columns=["name", "category_id", "description", "unit", Column("price", dtype=Decimal), "smallest_multiple"],
+    columns=["name", "category_id", "description", "unit", "filter", Column("price", dtype=Decimal), "smallest_multiple"],
 )
 
 category_entity = Entity(
@@ -33,17 +40,6 @@ transaction_entity = Entity(
         Column("amount", dtype=Decimal)
     ],
     allow_delete=False,
-)
-
-filter_entity = Entity(
-    table="webshop_filters",
-    columns=["id"],
-    allow_delete=False,
-)
-
-product_filter_entity = Entity(
-    table="webshop_product_filters",
-    columns=["product_id", "filter_id"],
 )
 
 action_entity = Entity(
