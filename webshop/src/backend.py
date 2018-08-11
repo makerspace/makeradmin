@@ -270,6 +270,22 @@ def transaction_actions(id: int):
 def transaction_events(id: int):
     return transaction_content_entity.list("transaction_id=%s", id)
 
+@instance.route("transactions_extended_info", methods=["GET"], permission="webshop")
+@route_helper
+def list_orders():
+    transactions = transaction_entity.list()
+    member_ids = ",".join(set([str(t["member_id"]) for t in transactions]))
+
+    r = instance.gateway.get(f"membership/member?member_id={member_ids}")
+    assert(r.ok)
+
+    member_data = {d["member_id"]: d for d in r.json()["data"]}
+    for t in transactions:
+        member = member_data[t["member_id"]]
+        t["member_name"] = f"{member['firstname']} {member['lastname']}"
+        t["member_number"] = member['member_number']
+
+    return transactions
 
 @instance.route("member/current/transactions", methods=["GET"], permission=None)
 @route_helper

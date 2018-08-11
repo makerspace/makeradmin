@@ -60,10 +60,6 @@ module.exports = {
 									component: require("./Components/UserBox/Permissions/List"),
 								},
 								{
-									path: "subscriptions",
-									component: require("../Sales/Components/UserBox/Subscriptions/List"),
-								},
-								{
 									path: "transactions",
 									component: require("../Economy/Components/UserBox/List"),
 								},
