@@ -70,6 +70,6 @@ Bye
 
 ### Viewing MakerAdmin etc.
 Go to:
-* [the makeradmin web site](localhost:8009)
-* [the web shop](localhost:8010/shop)
+* [the makeradmin web site](http://localhost:8009)
+* [the web shop](http://localhost:8010/shop)
 
