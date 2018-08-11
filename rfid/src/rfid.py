@@ -51,11 +51,11 @@ def update_keys() -> None:
             member_key_urls = gateway.get(f"related?param=/membership/member/{member_id}&matchUrl=/keys/(.*)&page=1&sort_by=&sort_order=asc&per_page=10000").json()["data"]
             member_keys = [key_entity.get(int(url.split("/")[-1])) for url in member_key_urls]
 
-            # if len(member_keys) == 0:
-            #     # To make sure that a member that purchases lab access before keys are handed out
-            #     # will still get their key activated when he/she gets a key.
-            #     eprint("Member has no keys, skipping the order")
-            #     continue
+            if len(member_keys) == 0:
+                # To make sure that a member that purchases lab access before keys are handed out
+                # will still get their key activated when he/she gets a key.
+                eprint("Member has no keys, skipping the order")
+                continue
 
             for key in member_keys:
                 # A bit inefficient, but we want to have nice objects that e.g have datetime fields instead of strings
