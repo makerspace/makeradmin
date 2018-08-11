@@ -18,8 +18,8 @@ SERVICE_USER_ID = -1
 
 
 class BackendException(Exception):
-    def __init__(self, tag: str, sv: str, en: Optional[str]) -> None:
-        self.tag = tag
+    def __init__(self, sv: str=None, en: Optional[str]=None, tag: Optional[str]=None) -> None:
+        self.tag = tag or self.__class__.__name__
         self.message_sv = sv
         self.message_en = en
 

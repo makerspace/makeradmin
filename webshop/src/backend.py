@@ -1,12 +1,11 @@
-from flask import request, abort, jsonify, render_template
+from flask import request, abort, render_template
 import service
-from service import eprint, assert_get, SERVICE_USER_ID, route_helper, BackendException
+from service import eprint, assert_get, route_helper, BackendException
 import stripe
 import os
 from decimal import Decimal, Rounded, localcontext
-from collections import namedtuple
 from webshop_entities import category_entity, product_entity, transaction_entity, transaction_content_entity, product_action_entity, webshop_completed_actions, membership_products, webshop_stripe_pending, webshop_pending_registrations
-from typing import Set, List, Dict, Any, NamedTuple, Tuple, Optional
+from typing import Set, List, Dict, Any, NamedTuple, Tuple
 
 
 class CartItem(NamedTuple):
@@ -17,107 +16,93 @@ class CartItem(NamedTuple):
 
 # Errors
 
-def TooSmallAmount():
-    return BackendException(tag="TooSmallAmount", sv="För litet belopp. Det minsta beloppet som kan handlas för är 50 cent (ca 5 kr).", en=None)
+class TooSmallAmount(BackendException):
+    def __init__(self):
+        super().__init__(sv="För litet belopp. Det minsta beloppet som kan handlas för är 50 cent (ca 5 kr).")
 
 
-def TooLargeAmount(threshold: int):
-    return BackendException(
-        tag="TooLargeAmount",
-        sv=f"Köp för över {threshold} kr är inte tillåtna för att undvika misstag. Behöver du köpa för så mycket, dela upp köpet i mindre delar.",
-        en=f"Not allowing purchases above {threshold} kr to avoid mistakes."
-    )
+class TooLargeAmount(BackendException):
+    def __init__(self, threshold):
+        super().__init__(sv=f"Köp för över {threshold} kr är inte tillåtna för att undvika misstag."
+                            f" Behöver du köpa för så mycket, dela upp köpet i mindre delar.",
+                         en=f"Not allowing purchases above {threshold} kr to avoid mistakes.")
 
 
-def NonMatchingSums(expected_sum, actual_sum):
-    return BackendException(
-        tag="NonMatchingSums",
-        sv="Den förväntade summan att betala var " + str(expected_amount) + ", men produkterna i varukorgen kostar egentligen totalt " + str(total_amount) + ".",
-        en="Expected total amount to pay to be " + str(expected_amount) + " but the cart items actually sum to " + str(total_amount) + "."
-    )
+class NonMatchingSums(BackendException):
+    def __init__(self, expected_sum, actual_sum):
+        super().__init__(sv=f"Den förväntade summan att betala var {expected_sum}, men produkterna i varukorgen kostar egentligen totalt {total_sum}.",
+                         en=f"Expected total amount to pay to be {expected_sum} but the cart items actually sum to {total_sum}.")
 
 
-def NotMember():
-    return BackendException(
-        tag="NotMember",
-        sv="Du måste vara en medlem för att kunna köpa material och verktyg.",
-        en="You must be a member to purchase materials and tools."
-    )
+class NotMember(BackendException):
+    def __init__(self):
+        super().__init__(sv="Du måste vara en medlem för att kunna köpa material och verktyg.",
+                         en="You must be a member to purchase materials and tools.")
 
 
-def DuplicateTransaction():
-    return BackendException(tag="DuplicateTransaction", sv="Du har redan gjort en betalning för detta.", en=None)
+class DuplicateTransaction(BackendException):
+    def __init__(self):
+        super().__init__(sv="Du har redan gjort en betalning för detta.")
 
 
-def MissingJson():
-    return BackendException(tag="MissingJson", sv="Ingen json data skickades med anropet. Detta ser ut som en bugg.", en=None)
+class MissingJson(BackendException):
+    def __init__(self):
+        super().__init__(sv="Ingen json data skickades med anropet. Detta ser ut som en bugg.")
 
 
-def NotPurelyCents(value):
-    return BackendException(tag="NotPurelyCents", sv=f"Beloppet kunde inte konverteras till ett helt antal ören ({str(value)}).", en=None)
+class NotPurelyCents(BackendException):
+    def __init__(self, value):
+        super().__init__(sv=f"Beloppet kunde inte konverteras till ett helt antal ören ({value}).")
 
 
-def NotAllowedToPurchase(product):
-    return BackendException(tag="NotAllowedToPurchase", sv=f"Det är inte tillåtet att köpa produkten med id {product['id']}.", en=None)
+class NotAllowedToPurchase(BackendException):
+    def __init__(self, product):
+        super().__init__(sv=f"Det är inte tillåtet att köpa produkten med id {product['id']}.")
 
 
-def CartMustContainNItems(n: int):
-    return BackendException(tag="CartMustContainNItems", sv=f"Köpet måste innehålla exakt {n} sak.", en=None)
+class CartMustContainNItems(BackendException):
+    def __init__(self, n):
+        super().__init__(sv=f"Köpet måste innehålla exakt {n} sak.")
 
 
-def NonNegativeItemCount(item):
-    return BackendException(
-        tag="NonNegativeItemCount",
-        sv=f"Kan endast köpa ett positivt antal av produkt {item}.",
-        en=f"Can only buy positive amounts of item {item}."
-    )
+class NonNegativeItemCount(BackendException):
+    def __init__(self, item):
+        super().__init__(sv=f"Kan endast köpa ett positivt antal av produkt {item}.",
+                         en=f"Can only buy positive amounts of item {item}.")
 
 
-def InvalidItemCountMultiple(item, smallest_multiple, count):
-    return BackendException(
-        tag="InvalidItemCountMultiple",
-        sv=f"Produkten {item} kan endast köpas i multipler av {smallest_multiple}, i varukorgen så fanns {count} enheter.",
-        en=f"Can only buy item {item} in multiples of {smallest_multiple}, found {count}."
-    )
+class InvalidItemCountMultiple(BackendException):
+    def __init__(self, item, smallest_multiple, count):
+        super().__init__(sv=f"Produkten {item} kan endast köpas i multipler av {smallest_multiple},"
+                            f" i varukorgen så fanns {count} enheter.",
+                         en=f"Can only buy item {item} in multiples of {smallest_multiple}, found {count}.")
 
 
-def RoundingError():
-    return BackendException(
-        tag="RoundingError",
-        sv="Ett avrundningsfel skedde när priset skulle beräknas.",
-        en="Rounding ocurred during price calculations."
-    )
+class RoundingError(BackendException):
+    def __init__(self):
+        super().__init__(sv="Ett avrundningsfel skedde när priset skulle beräknas.",
+                         en="Rounding ocurred during price calculations.")
 
 
-def EmptyCart():
-    return BackendException(
-        tag="EmptyCart",
-        sv="Inga produkter i varukorgen.",
-        en="No items in cart."
-    )
+class EmptyCart(BackendException):
+    def __init__(self):
+        super().__init__(sv="Inga produkter i varukorgen.",
+                         en="No items in cart.")
 
 
-def NoSuchItem(item: str):
-    return BackendException(
-        tag="NoSuchItem",
-        sv=f"Produkten {item} finns inte.",
-        en=f"Item {item} does not exist."
-    )
+class NoSuchItem(BackendException):
+    def __init__(self, item: str):
+        super().__init__(sv=f"Produkten {item} finns inte.",
+                         en=f"Item {item} does not exist.")
 
 
-def PaymentFailed(error: str = None):
-    if error is not None:
-        return BackendException(
-            tag="PaymentFailed",
-            sv=f"Betalningen misslyckades, stripe säger {error}.",
-            en=f"Payment failed, stripe says {error}."
-        )
-    else:
-        return BackendException(
-            tag="PaymentFailed",
-            sv=f"Betalningen misslyckades.",
-            en=f"Payment failed."
-        )
+class PaymentFailed(BackendException):
+    def __init__(self, error: str=None):
+        if error is not None:
+            super().__init__(sv=f"Betalningen misslyckades, stripe säger {error}.",
+                             en=f"Payment failed, stripe says {error}.")
+        else:
+            super().__init__(sv=f"Betalningen misslyckades.", en=f"Payment failed.")
 
 
 instance = service.create(name="Makerspace Webshop Backend", url="webshop", port=8000, version="1.0")
@@ -510,7 +495,7 @@ duplicatePurchaseRands: Set[int] = set()
 
 @instance.route("pay", methods=["POST"], permission=None)
 @route_helper
-def pay_route() -> Dict[str,int]:
+def pay_route() -> Dict[str, int]:
     data = request.get_json()
     if data is None:
         raise MissingJson()
