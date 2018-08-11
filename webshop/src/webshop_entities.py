@@ -12,7 +12,17 @@ from typing import List, Dict, Any
 
 product_entity = Entity(
     table="webshop_products",
-    columns=["name", "category_id", "description", "unit", "filter", Column("price", dtype=Decimal), "smallest_multiple"],
+    columns=[
+        "name",
+        "category_id",
+        "description",
+        "unit",
+        "filter",
+        Column("price", dtype=Decimal),
+        "smallest_multiple",
+        Column("created_at", dtype=datetime, write=None),
+        Column("updated_at", dtype=datetime, write=None)
+    ],
 )
 
 category_entity = Entity(
@@ -48,14 +58,14 @@ product_action_entity = Entity(
     columns=["product_id", "action_id", "value"],
 )
 
-webshop_completed_actions = Entity(
-    table="webshop_completed_actions",
-    columns=["content_id", "action_id"],
-)
-
 webshop_stripe_pending = Entity(
     table="webshop_stripe_pending",
     columns=["transaction_id", "stripe_token"],
+)
+
+webshop_transaction_actions = Entity(
+    table="webshop_transaction_actions",
+    columns=["content_id", "action_id", "value", "status", Column("completed_at", dtype=datetime)],
 )
 
 webshop_pending_registrations = Entity(

@@ -4,6 +4,11 @@
             <img style="margin-bottom: 15px;" width=200px src="https://www.makerspace.se/wp-content/uploads/2015/06/logo-transparent-500px-300x210.png" />
         </td>
     </tr>
+    <tr>
+        <td align="center" colspan="3">
+            <p>Tack för ditt köp {{member.firstname}} (#{{member.member_number}})!</p>
+        </td>
+    </tr>
     {% for product, cartItem in cart %}
         <tr>
             <td align="left">
@@ -24,7 +29,8 @@
     </tr>
     <tr>
         <td align="center" colspan="3">
-            <a href='{{ frontend_url("shop/receipt/" + (transaction.id|string)) }}'>Se detta kvitto på nätet</a>
+            <p>Stockholm Makerspace - Drottning Kristinas väg 53, 114 28 Stockholm</p>
+            <p>Kvittonummer: {{ transaction.id }}. <a href='{{ frontend_url("shop/receipt/" + (transaction.id|string)) }}'>Se detta kvitto på nätet</a></p>
         </td>
     </tr>
 </table>

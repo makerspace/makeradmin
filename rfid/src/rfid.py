@@ -1,8 +1,9 @@
-from flask import Flask, abort
+from flask import Flask, abort, render_template
 import service
 from service import Entity, eprint, route_helper
 from datetime import datetime, timedelta
 from service import Column
+from dateutil import parser
 
 key_entity = Entity(
     table="rfid",
@@ -26,6 +27,28 @@ key_entity.db = instance.db
 key_entity.add_routes(instance, "", read_permission="keys_view", write_permission="keys_edit")
 
 
+def send_key_updated_email(member_id: int, extended_days: int, end_date: datetime) -> None:
+    r = instance.gateway.get(f"membership/member/{member_id}")
+    assert r.ok
+    member = r.json()["data"]
+
+    r = instance.gateway.post("messages", {
+        "recipients": [
+            {
+                "type": "member",
+                "id": member_id
+            },
+        ],
+        "message_type": "email",
+        "subject": "Din labaccess har utökats",
+        "subject_en": "Your lab access has been extended",
+        "body": render_template("updated_key_time_email.html", frontend_url=instance.gateway.get_frontend_url, member=member, extended_days=extended_days, end_date=end_date.strftime("%Y-%m-%d"))
+    })
+
+    if not r.ok:
+        eprint("Failed to send key updated email")
+        eprint(r.text)
+
 @instance.route("update_times", methods=["POST"])
 @route_helper
 def update_keys() -> None:
@@ -42,43 +65,19 @@ def update_keys() -> None:
         item = pending["item"]
         action = pending["action"]
 
-        r = gateway.post("webshop/completed_actions", {
-            "content_id": item["id"],
-            "action_id": action["id"],
-        })
-        assert r.ok, r.text
-        continue
-
         if action["name"] == "add_labaccess_days":
-            days_to_add = int(item["action_value"]) * int(item["count"])
+            days_to_add = int(pending["pending_action"]["value"])
             assert(days_to_add >= 0)
-
-            # Get all the member's keys
-            # These will be on the form /keys/<int>
-            member_key_urls = gateway.get(f"related?param=/membership/member/{member_id}&matchUrl=/keys/(.*)&page=1&sort_by=&sort_order=asc&per_page=10000").json()["data"]
-            member_keys = [key_entity.get(int(url.split("/")[-1])) for url in member_key_urls]
-
-            if len(member_keys) == 0:
-                # To make sure that a member that purchases lab access before keys are handed out
-                # will still get their key activated when he/she gets a key.
-                eprint("Member has no keys, skipping the order")
-                continue
-
-            for key in member_keys:
-                # A bit inefficient, but we want to have nice objects that e.g have datetime fields instead of strings
-                key = key_entity.get(key["key_id"])
-                if now > key["enddate"]:
-                    # Need to move forward the start date to start anew
-                    key["startdate"] = key["enddate"] = now
-
-                key["enddate"] += timedelta(days=days_to_add)
-                key_entity.put(key["key_id"], key)
-
-            r = gateway.post("webshop/completed_actions", {
-                "content_id": item["id"],
-                "action_id": action["id"],
-            })
+            r = gateway.post(f"membership/member/{member_id}/addMembershipSpan", { type: "labaccess", days: days_to_add })
             assert r.ok, r.text
+
+            r = gateway.get(f"membership/member/{member_id}/membership")
+            assert r.ok, r.text
+            new_end_date = parser.parse(r.json()["data"]["labaccess_end"])
+
+            r = gateway.put(f"webshop/transaction_action/{pending['pending_action']['id']}", { "status": "completed", "completed_at": str(now) })
+            assert r.ok, r.text
+            send_key_updated_email(member_id, days_to_add, new_end_date)
 
 
 instance.serve_indefinitely()

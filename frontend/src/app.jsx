@@ -96,6 +96,10 @@ var nav = new Backbone.Model({
 					target: "/sales/product",
 				},
 				{
+					text: "Ordrar",
+					target: "/sales/order",
+				},
+/*				{
 					text: "Prenumerationer",
 					target: "/sales/subscription",
 				},
@@ -103,6 +107,7 @@ var nav = new Backbone.Model({
 					text: "Historik",
 					target: "/sales/history",
 				},
+*/
 			],
 		},
 		{

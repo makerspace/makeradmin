@@ -13,7 +13,7 @@ Backbone.sync = function(method, model, options)
 	};
 
 	// Base path for API access
-	options.url = config.apiBasePath + (typeof model.url == "function" ? model.url() : model.url);
+	options.url = config.apiBasePath + (typeof model.url == "function" ? model.url(model) : model.url);
 
 	// Add generic error handling to those models who doesn't implement own error handling
 	var oldError = options.error;

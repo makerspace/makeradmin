@@ -2,15 +2,16 @@ import Backbone from 'backbone'
 
 module.exports = Backbone.Model.fullExtend(
 {
-	idAttribute: "entity_id",
-	urlRoot: "/sales/product",
+	idAttribute: "id",
+	urlRoot: "/webshop/product",
 	defaults: {
 		created_at: "",
 		updated_at: "",
-		title: "",
+		name: "",
 		description: "",
-		expiry_date: "",
+		category_id: "",
 		price: 0,
-		interval: "",
+		unit: "",
+		smallest_multiple: 1,
 	},
 });

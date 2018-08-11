@@ -11,7 +11,7 @@ module.exports = React.createClass({
 	getInitialState: function()
 	{
 		return {
-			columns: 9,
+			columns: 3,
 		};
 	},
 

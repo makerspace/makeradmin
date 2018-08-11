@@ -118,4 +118,20 @@ CREATE TABLE `webshop_pending_registrations` (
   CONSTRAINT transaction_constraint3 FOREIGN KEY (`transaction_id`) REFERENCES `webshop_transactions` (`id`)
 );
 
+CREATE TABLE `webshop_transaction_actions` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `content_id` int(10) unsigned NOT NULL,
+  `action_id` int(10) unsigned NOT NULL,
+  `value` int(10),
+  `status` enum('pending','completed') COLLATE utf8mb4_unicode_ci NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `content_key` (content_id),
+  CONSTRAINT content_constraint2 FOREIGN KEY (`content_id`) REFERENCES `webshop_transaction_contents` (`id`),
+  CONSTRAINT action_constraint3 FOREIGN KEY (`action_id`) REFERENCES `webshop_actions` (`id`)
+);
+
+DROP TABLE webshop_completed_actions;
+
+ALTER TABLE `webshop_transaction_actions` ADD `completed_at` datetime DEFAULT NULL;
+
 ALTER TABLE `webshop_products` ADD `filter` varchar(255) DEFAULT NULL;

@@ -70,7 +70,10 @@ class APIGateway:
 DEFAULT_PERMISSION = object()
 
 
-def _format_datetime(date: Union[str, datetime]):
+def format_datetime(date: Union[str, datetime]):
+    if date is None:
+        return None
+
     if not isinstance(date, datetime):
         date = parser.parse(date)
 
@@ -88,7 +91,7 @@ class Service:
         self.gateway = gateway
         self.frontend = frontend
         self.app = Flask(name, static_url_path=self.full_path("static"))
-        self.app.jinja_env.filters['format_datetime'] = _format_datetime
+        self.app.jinja_env.filters['format_datetime'] = format_datetime
         self._used_permissions: Set[str] = set()
 
     def full_path(self, path: str):
@@ -355,22 +358,28 @@ class Entity:
 
             return self._convert_to_dict(item)
 
-    def _convert_to_row(self, data):
-        return [c.write(data[c.exposed_name]) for c in self._writeable]
+    def _convert_to_row(self, data, fields):
+        return [c.write(data[c.exposed_name]) for c in fields]
 
     def _convert_to_dict(self, row):
         assert len(row) == len(self._readable)
         return {c.exposed_name: c.read(item) for c, item in zip(self._readable, row)}
 
     def put(self, data, id):
+        # Allow updating only a few fields
+        # Check which fields the object has, and update only those
+        fields = [col for col in self._writeable if col.exposed_name in data]
+        if len(fields) == 0:
+            abort(400, "No matching fields in the data, are you field names correct?")
+
         with self.db.cursor() as cur:
-            values = self._convert_to_row(data)
-            cols = ','.join(col.db_column + '=%s' for col in self._writeable)
+            values = self._convert_to_row(data, fields)
+            cols = ','.join(col.db_column + '=%s' for col in fields)
             cur.execute(f"UPDATE {self.table} SET {cols} WHERE id=%s", (*values, id))
 
     def post(self, data):
         with self.db.cursor() as cur:
-            values = self._convert_to_row(data)
+            values = self._convert_to_row(data, self._writeable)
             cols = ','.join('%s' for col in self._writeable)
             write_fields = ",".join(c.db_column for c in self._writeable)
             cur.execute(f"INSERT INTO {self.table} ({write_fields}) VALUES({cols})", values)

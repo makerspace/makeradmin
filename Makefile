@@ -8,6 +8,9 @@ run: .env
 dev: .env
 	docker-compose -f devel-compose.yml up --build
 
+install:
+	sudo apt-get install docker-io docker-compose
+
 init-npm:
 	cd frontend && npm install 
 
@@ -26,7 +29,7 @@ stop:
 	docker-compose down
 
 firstrun: .env build init-db
-	echo "\033[31mRun 'make run' to start MakerAdmin\033[0m"
+	echo -e "\e[31mRun 'make run' to start MakerAdmin\e[0m"
 
 frontend-dev-server:
 	mkdir -p frontend/node_modules
@@ -34,4 +37,4 @@ frontend-dev-server:
 	docker volume rm makeradmin_node_modules
 	docker-compose -f frontend/dev-server-compose.yaml up --build
 
-.PHONY: build init-db
+.PHONY: build firstrun frontend-dev-server init init-db init-npm init-pip install run stop

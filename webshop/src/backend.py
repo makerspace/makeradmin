@@ -1,10 +1,10 @@
 from flask import request, abort, render_template
 import service
-from service import eprint, assert_get, route_helper, BackendException
+from service import eprint, assert_get, route_helper, BackendException, format_datetime
 import stripe
 import os
 from decimal import Decimal, Rounded, localcontext
-from webshop_entities import category_entity, product_entity, transaction_entity, transaction_content_entity, product_action_entity, webshop_completed_actions, membership_products, webshop_stripe_pending, webshop_pending_registrations
+from webshop_entities import category_entity, product_entity, action_entity, transaction_entity, transaction_content_entity, product_action_entity, membership_products, webshop_stripe_pending, webshop_pending_registrations, webshop_transaction_actions
 from typing import Set, List, Dict, Any, NamedTuple, Tuple
 
 
@@ -132,17 +132,20 @@ product_entity.add_routes(instance, "product", read_permission=None, write_permi
 category_entity.db = db
 category_entity.add_routes(instance, "category", read_permission=None, write_permission="webshop_edit")
 
+action_entity.db = db
+action_entity.add_routes(instance, "action", read_permission=None, write_permission="webshop_edit")
+
 product_action_entity.db = db
 product_action_entity.add_routes(instance, "product_action", read_permission=None, write_permission="webshop_edit")
 
 transaction_entity.db = db
-transaction_entity.add_routes(instance, "transaction")
+transaction_entity.add_routes(instance, "transaction", read_permission="webshop")
 
 transaction_content_entity.db = db
-transaction_content_entity.add_routes(instance, "transaction_content")
+transaction_content_entity.add_routes(instance, "transaction_content", read_permission="webshop")
 
-webshop_completed_actions.db = db
-webshop_completed_actions.add_routes(instance, "completed_actions")
+webshop_transaction_actions.db = db
+webshop_transaction_actions.add_routes(instance, "transaction_action")
 
 webshop_pending_registrations.db = db
 
@@ -159,19 +162,17 @@ def pending_actions() -> List[Dict[str,Any]]:
     '''
 
     with db.cursor() as cur:
-        # Note webshop_completed_actions.content_id IS NULL makes this a check for all actions that are *not* in the webshop_completed_actions table (i.e not completed).
         cur.execute("""
-            SELECT webshop_transaction_contents.id, webshop_transaction_contents.transaction_id, webshop_transaction_contents.product_id,
-                webshop_transaction_contents.count, webshop_transaction_contents.amount, webshop_product_actions.value, webshop_actions.id, webshop_actions.name, webshop_transactions.member_id
-            FROM webshop_transaction_contents
-            INNER JOIN webshop_product_actions ON webshop_product_actions.product_id=webshop_transaction_contents.product_id
-            LEFT JOIN webshop_completed_actions ON webshop_transaction_contents.id=webshop_completed_actions.content_id
-            INNER JOIN webshop_actions ON webshop_actions.id=webshop_product_actions.action_id
-            INNER JOIN webshop_transactions ON webshop_transactions.id=webshop_transaction_contents.transaction_id
-            WHERE webshop_completed_actions.content_id IS NULL
-            AND webshop.transactions.status='complete'
-            AND webshop_transactions.created_at>webshop_product_actions.created_at
-            AND (webshop_transactions.created_at<webshop_product_actions.deleted_at OR webshop_product_actions.deleted_at IS NULL)
+            SELECT webshop_transaction_contents.id, webshop_transaction_contents.transaction_id, webshop_transaction_contents.product_id, webshop_transaction_contents.count,
+                webshop_transaction_contents.amount, webshop_transaction_actions.value,
+                webshop_actions.id, webshop_actions.name,
+                webshop_transactions.member_id,
+                webshop_transaction_actions.id
+            FROM webshop_transaction_actions
+            INNER JOIN webshop_actions              ON webshop_transaction_actions.action_id      = webshop_actions.id
+            INNER JOIN webshop_transaction_contents ON webshop_transaction_actions.content_id     = webshop_transaction_contents.id
+            INNER JOIN webshop_transactions         ON webshop_transaction_contents.transaction_id= webshop_transactions.id
+            WHERE webshop_transaction_actions.status='pending' AND webshop_transactions.status='completed'
             """)
 
         return [
@@ -182,11 +183,14 @@ def pending_actions() -> List[Dict[str,Any]]:
                     "product_id": v[2],
                     "count": v[3],
                     "amount": str(v[4]),
-                    "action_value": v[5],
                 },
                 "action": {
                     "id": v[6],
                     "name": v[7],
+                },
+                "pending_action": {
+                    "id": v[9],
+                    "value": v[5],
                 },
                 "member_id": v[8],
             } for v in cur.fetchall()
@@ -194,11 +198,79 @@ def pending_actions() -> List[Dict[str,Any]]:
 
 
 # TODO: More restrictive permissions?
-@instance.route("transaction/<int:id>/content", methods=["GET"])
+@instance.route("transaction/<int:id>/content", methods=["GET"], permission="webshop")
 @route_helper
 def transaction_contents(id: int) -> Dict[str,Any]:
+    '''
+    Return all content related to a transaction
+    '''
+
+    with db.cursor() as cur:
+        cur.execute("""
+            SELECT webshop_transaction_contents.id AS content_id, webshop_products.name AS product_name,
+                   webshop_products.id AS product_id, webshop_transaction_contents.count, webshop_transaction_contents.amount
+            FROM webshop_transaction_contents
+            INNER JOIN webshop_products ON webshop_products.id = webshop_transaction_contents.product_id
+            WHERE  webshop_transaction_contents.transaction_id = %s
+            """, id)
+        return [
+            {
+                "content_id": v[0],
+                "product_name": v[1],
+                "product_id": v[2],
+                "count": v[3],
+                "amount": str(v[4]),
+            } for v in cur.fetchall()
+        ]
+
+@instance.route("transaction/<int:id>/actions", methods=["GET"], permission="webshop")
+@route_helper
+def transaction_actions(id: int):
+    '''
+    Return all actions related to a transaction
+    '''
+
+    with db.cursor() as cur:
+        cur.execute("""
+            SELECT webshop_actions.id AS action_id, webshop_actions.name AS action, 
+                    webshop_transaction_contents.id AS content_id, webshop_transaction_actions.value, webshop_transaction_actions.status, webshop_transaction_actions.completed_at
+            FROM webshop_transaction_contents
+            INNER JOIN webshop_transaction_actions ON webshop_transaction_actions.content_id = webshop_transaction_contents.id
+            INNER JOIN webshop_actions ON webshop_actions.id = webshop_transaction_actions.action_id
+            WHERE webshop_transaction_contents.transaction_id = %s
+            """, id)
+        return [
+            {
+                "action_id": v[0],
+                "action": v[1],
+                "content_id": v[2],
+                "value": v[3],
+                "status": v[4],
+                "completed_at": format_datetime(v[5]),
+            } for v in cur.fetchall()
+        ]
+
+@instance.route("transaction/<int:id>/events", methods=["GET"], permission="webshop")
+@route_helper
+def transaction_events(id: int):
     return transaction_content_entity.list("transaction_id=%s", id)
 
+@instance.route("transactions_extended_info", methods=["GET"], permission="webshop")
+@route_helper
+def list_orders():
+    transactions = transaction_entity.list()
+    member_ids = ",".join(set([str(t["member_id"]) for t in transactions]))
+
+    r = instance.gateway.get(f"membership/member?member_id={member_ids}")
+    assert(r.ok)
+
+    member_data = {d["member_id"]: d for d in r.json()["data"]}
+    for t in transactions:
+        member = member_data[t["member_id"]]
+        t["member_name"] = f"{member['firstname']} {member['lastname']}"
+        t["member_number"] = member['member_number']
+
+    return transactions
 
 @instance.route("member/current/transactions", methods=["GET"], permission=None)
 @route_helper
@@ -513,7 +585,16 @@ def pay_route() -> Dict[str, int]:
 def add_transaction_to_db(member_id: int, total_amount: Decimal, items: List[CartItem]) -> int:
     transaction_id = transaction_entity.post({"member_id": member_id, "amount": total_amount, "status": "pending"})["id"]
     for item in items:
-        transaction_content_entity.post({"transaction_id": transaction_id, "product_id": item.id, "count": item.count, "amount": item.amount})
+        item_content = transaction_content_entity.post({"transaction_id": transaction_id, "product_id": item.id, "count": item.count, "amount": item.amount})
+        with db.cursor() as cur:
+            cur.execute("""
+                INSERT INTO webshop_transaction_actions (content_id, action_id, value, status)
+                SELECT %s AS content_id, action_id, SUM(%s * value) AS value, 'pending' AS status 
+                FROM webshop_product_actions 
+                WHERE product_id=%s AND deleted_at IS NULL
+                GROUP BY action_id
+                """, (item_content["id"], item.count, item.id))
+
     return transaction_id
 
 

@@ -1,0 +1,26 @@
+language: python
+
+sudo: required
+services:
+  - docker
+
+python:
+  - "3.6"
+  - "3.7-dev"
+
+before_install:
+  - docker --version
+  - docker-compose --version
+  - sudo apt-get install -y npm
+  # BATS for bash testing
+  - git clone https://github.com/sstephenson/bats.git
+  - export PATH="bats/bin:$PATH"
+
+install:
+  - make firstrun
+
+script:
+  # Same as `make run`, but with -d at the end to make it exit when all have been started
+  - docker-compose up -d
+  - bats tests/bats/
+
