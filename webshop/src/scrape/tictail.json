@@ -1,20 +1,13 @@
 [
-
-  /* Övrigt */
-
   {
-    "name": "Medlemsavgift",
-    "name_en": "Membership",
-    "suffix": "",
-    "image": "webshopbilder/ovrigt/medlemsavgift.png",
-    "price": "200",
-    "category": "Övrigt",
-    "description": "\n<p>Det här är vår medlemsavgift för 1 x 365-dagarsperiod (ett år)</p>
-    <p>Observera att medlemskap krävs för att kunna vara labbmedlem.</p>
-    <p>Läs mer om vad som gäller för medlemskap och labbmedlemskap i denna länk: <a href="http://www.makerspace.se/medlemskap" rel="nofollow" target="_blank">http://www.makerspace.se/medlemskap</a></p>\n",
-    "description_en": "\n<p>This is the membership fee for 1 x 365-day period (one year).</p>
-    <p>Note that you need to be a member to purchase lab access.</p>
-    <p>Read more about membership and lab access here: <a href="http://www.makerspace.se/membership" rel="nofollow" target="_blank">http://www.makerspace.se/membership</a></p>\n"
+      "name": "Medlemsavgift",
+      "name_en": "Membership",
+      "suffix": "",
+      "image": "webshopbilder/ovrigt/medlemsavgift.png",
+      "price": "200",
+      "category": "Övrigt",
+      "description": "<p>Det här är vår medlemsavgift för 1 x 365-dagarsperiod (ett år)</p><p>Observera att medlemskap krävs för att kunna vara labbmedlem.</p><p>Läs mer om vad som gäller för medlemskap och labbmedlemskap i denna länk: <a href='http://www.makerspace.se/medlemskap' rel='nofollow' target='_blank'>http://www.makerspace.se/medlemskap</a></p>",
+      "description_en": "<p>This is the membership fee for 1 x 365-day period (one year).</p><p>Note that you need to be a member to purchase lab access.</p><p>Read more about membership and lab access here: <a href='http://www.makerspace.se/membership' rel='nofollow' target='_blank'>http://www.makerspace.se/membership</a></p>"
   },
   {
     "name": "Labbavgift, 1 Månad",
@@ -23,14 +16,8 @@
     "image": "webshopbilder/ovrigt/labbavgift_1m.jpeg",
     "price": "300",
     "category": "Övrigt",
-    "description": "\n<p>1 månad / 30 dagar labbaccess</p>
-    <p>Få egen 24/7-access till lokalen under 1 månaders tid och realisera dina mest fantastiska projekt!</p>
-    <p>Observera att det krävs att du är medlem i föreningen!</p>
-    <p>Läs mer om vad som gäller för medlemskap och labbmedlemskap i denna länk: <a href="http://www.makerspace.se/medlemskap" rel="nofollow" target="_blank">http://www.makerspace.se/medlemskap</a></p>\n",
-    "description_en": "\n<p>1 month / 30 days lab access</p>
-    <p>Get 24/7-access to the facility for 1 month's time and make your project dreams reality!</p>
-    <p>Note that you already need to be a member to purchase lab access!</p>
-    <p>Read more about the rules for membership and lab access at this link: <a href="https://www.makerspace.se/membership" rel="nofollow" target="_blank">https://www.makerspace.se/membership</a></p>\n",
+    "description": "<p>1 månad / 30 dagar labbaccess</p><p>Få egen 24/7-access till lokalen under 1 månaders tid och realisera dina mest fantastiska projekt!</p><p>Observera att det krävs att du är medlem i föreningen!</p><p>Läs mer om vad som gäller för medlemskap och labbmedlemskap i denna länk: <a href='http://www.makerspace.se/medlemskap' rel='nofollow' target='_blank'>http://www.makerspace.se/medlemskap</a></p>",
+    "description_en": "<p>1 month / 30 days lab access</p><p>Get 24/7-access to the facility for 1 month's time and make your project dreams reality!</p><p>Note that you already need to be a member to purchase lab access!</p><p>Read more about the rules for membership and lab access at this link: <a href='https://www.makerspace.se/membership' rel='nofollow' target='_blank'>https://www.makerspace.se/membership</a></p>"
   },
   {
     "name": "Startpaket",
@@ -39,14 +26,8 @@
     "image": "webshopbilder/ovrigt/startpaket.jpeg",
     "price": "650",
     "category": "Övrigt",
-    "description": "\n<p>Vårt startpaket!</p>
-    <p>Väljer du detta alternativ så får du ett medlemskap som gäller 365 dagar och 2 månaders (60 dagars) labbavgift till ett rabatterat pris.</p>
-    <p><b>Startpaketet är endast giltigt för nyblivna labbmedlemmar eller dig som inte har varit medlem under de senaste 12 månaderna.</b></p>
-    <p>Om du inte sedan tidigare har en nyckeltagg så får du efter du har köpt detta erbjudande komma ner på en nyckelutlämningskväll (circa en var annan till var tredje vecka, du hittar dessa i kalendariet på makerspace.se) där du hämtar din nyckel och aktiverar ditt medlemskap.</p>\n",
-    "description_en": "\n<p>Our starter pack!</p>
-    <p>Choose this alternative to get a membership for 365 days and 2 months (60 days) or lab access at a discounted price.</p>
-    <p><b>The starter pack is only available to new members, or to those who didn't pay for a membership in the last 12 months (but have maybe been members before then).</b></p>
-    <p>If you don't already have a key, you will get one along with this purchase when you come by to activate your key ("nyckelutlämning", one every other or third week, see the calendar on makerspace.se).</p>\n"
+    "description": "<p>Vårt startpaket!</p><p>Väljer du detta alternativ så får du ett medlemskap som gäller 365 dagar och 2 månaders (60 dagars) labbavgift till ett rabatterat pris.</p><p><b>Startpaketet är endast giltigt för nyblivna labbmedlemmar eller dig som inte har varit medlem under de senaste 12 månaderna.</b></p><p>Om du inte sedan tidigare har en nyckeltagg så får du efter du har köpt detta erbjudande komma ner på en nyckelutlämningskväll (circa en var annan till var tredje vecka, du hittar dessa i kalendariet på makerspace.se) där du hämtar din nyckel och aktiverar ditt medlemskap.</p>",
+    "description_en": "<p>Our starter pack!</p><p>Choose this alternative to get a membership for 365 days and 2 months (60 days) or lab access at a discounted price.</p><p><b>The starter pack is only available to new members, or to those who didn't pay for a membership in the last 12 months (but have maybe been members before then).</b></p><p>If you don't already have a key, you will get one along with this purchase when you come by to activate your key (\"nyckelutlämning\", one every other or third week, see the calendar on makerspace.se).</p>"
   },
   {
     "name": "Donation",
@@ -55,34 +36,9 @@
     "image": "webshopbilder/ovrigt/donation.jpeg",
     "price": "100",
     "category": "Övrigt",
-    "description": "\n<p>Donation till föreningen.</p>
-    <p>Vi tar tacksamt emot en donation som kommer hjälpa föreningen att utvecklas och bli ännu bättre.</p>\n",
-    "description_en": "\n<p>Donation to the organisation.</p>
-    <p>We thank you for your donation which will help us grow and develop.</p>\n",
-  /* },
-  {
-    "name": "Gåvokort",
-    "name_en": "Gift card",
-    "suffix": "",
-    "image": "webshopbilder/ovrigt/giftcard.png",
-    "price": "650",
-    "category": "Övrigt",
-    "description": "\n<p>Ge bort ett medlemskap och två månaders labbavgift till någon av dina vänner som ännu inte har upptäckt Stockholm Makerspace!</p>
-    <p>Labbtiden gäller i 60 dagar från aktivering.</p>
-    <p>Skriv namnet på personen du vill ge startpaketet i kommentaren när du checkar ut.</p>
-    <p>Aktivering av labbtid sker mot uppvisande av legitimation samt ordernumret du får i bekräftelsemailet på en nyckelutlämning (se kalendariet)</p>
-    <p><b>Observera att det skickas inte ut någon form av fysiskt gåvokort, det litar vi på att du kan skapa själv.</b></p>
-    <p><b>Observera att mottagaren måste vara 16 år eller äldre för att kunna vara labbmedlem i Stockholm Makerspace!</b><br/>\n",
-    "description_en": "\n<p>Gift a membership and 2 months of lab acces to a friend who hasn't yet discovered the Stockholm Makerspace!</p>
-    <p>Lab access is valid for 60 days from activation.</p>
-    <p>Write the recipients name in the comments when you check out.</p>
-    <p>Activation of lab access time happens at a \"nyckelutlämning\" (see the calendar), upon showing an ID and a copy of the order/receipt.</p>
-    <p><b>Note that nothing physical is mailed out, we trust you to make something awesome.</b></p>
-    <p><b>Note that the recipient must 16 years or older to be a lab member at the Stockholm Makerspace!</b><br/>\n"
-  }, */
-
-/* Material */
-
+    "description": "<p>Donation till föreningen.</p><p>Vi tar tacksamt emot en donation som kommer hjälpa föreningen att utvecklas och bli ännu bättre.</p>",
+    "description_en": "<p>Donation to the organisation.</p><p>We thank you for your donation which will help us grow and develop.</p>"
+  },
   {
     "name": "Akrylplast, 100g",
     "name_en": "Akrylplast, 100g",
@@ -90,12 +46,8 @@
     "image": "webshopbilder/material/akrylplast.jpeg",
     "price": "5",
     "category": "Material",
-    "description": "\n<p>Akrylplast, pris per 100g, avrunda uppåt till närmaste 100g.</p>
-    <p>Skivor i varierande dimensioner och tjocklekar. Till exempel för användning i laserskäraren. Finns i dedikerade pallar bredvid laserskäraren.</p>
-    <p>OBS För 20mm tjocka akrylplast-skivor, se separat produkt.</p>\n",
-    "description_en": "\n<p>Acrylic, price per 100g, round up to the nearet 100g.</p>
-    <p>Sheets in various dimensions and thickenesses. For use in the laser cutter, for example. Found in the dedicated storage next to the laser cuttter.</p>
-    <p>NOTE For 20mm-thick acrylic sheets, see seperate product.</p>\n"
+    "description": "<p>Akrylplast, pris per 100g, avrunda uppåt till närmaste 100g.</p><p>Skivor i varierande dimensioner och tjocklekar. Till exempel för användning i laserskäraren. Finns i dedikerade pallar bredvid laserskäraren.</p><p>OBS För 20mm tjocka akrylplast-skivor, se separat produkt.</p>",
+    "description_en": "<p>Acrylic, price per 100g, round up to the nearet 100g.</p><p>Sheets in various dimensions and thickenesses. For use in the laser cutter, for example. Found in the dedicated storage next to the laser cuttter.</p><p>NOTE For 20mm-thick acrylic sheets, see seperate product.</p>"
   },
   {
     "name": "Akrylplast, 20mm",
@@ -104,10 +56,8 @@
     "image": "webshopbilder/material/akrylplast-20mm.jpeg",
     "price": "350",
     "category": "Material",
-    "description": "\n<p>Skivor av akrylplast, 20mm tjocka. Storlek ca 59x39cm.</p>
-    <p>Till exempel för användning i laserskäraren, men går även att fräsa utmärkt i med cnc-fräsen! Begagnade (kan ha mindre repor, osv) därför det låga priset. (Nypris ligger på strax över 700kr för samma bit, och du behöver oftast köpa en stor skiva). Finns i hyllan bredvid laserskäraren.</p>\n",
-    "description_en": "\n<p>Acrylic sheet, 20mm thick. Approx 59x39cm.</p>
-    <p>For use in the laser cutter, for example, but can also be milled with our CNC mill! The sheets are used (they may have some scratches, etc), hence the low price. (New acrylic costs over 700kr for the same size, and you usually have to buy a large sheet). Found in the shelves next to the laser cuttter.</p>\n"
+    "description": "<p>Skivor av akrylplast, 20mm tjocka. Storlek ca 59x39cm.</p><p>Till exempel för användning i laserskäraren, men går även att fräsa utmärkt i med cnc-fräsen! Begagnade (kan ha mindre repor, osv) därför det låga priset. (Nypris ligger på strax över 700kr för samma bit, och du behöver oftast köpa en stor skiva). Finns i hyllan bredvid laserskäraren.</p>",
+    "description_en": "<p>Acrylic sheet, 20mm thick. Approx 59x39cm.</p><p>For use in the laser cutter, for example, but can also be milled with our CNC mill! The sheets are used (they may have some scratches, etc), hence the low price. (New acrylic costs over 700kr for the same size, and you usually have to buy a large sheet). Found in the shelves next to the laser cuttter.</p>"
   },
   {
     "name": "Använding av Laserskärare",
@@ -116,8 +66,8 @@
     "image": "webshopbilder/material/driftskostnad-laserskarare.jpeg",
     "price": "1",
     "category": "Material",
-    "description": "\n<p>För att täcka driftskostnaderna på lasern så kostar den 1kr/min att använda. Lägg till så många av den här produkten i din kundvagn som motsvarar din användning av lasern.</p>\n",
-    "description_en": "\n<p>Running the lase cutter costs 1 kr/min of use. Add as many of this product to your cart as needed to cover you usage.</p>\n"
+    "description": "<p>För att täcka driftskostnaderna på lasern så kostar den 1kr/min att använda. Lägg till så många av den här produkten i din kundvagn som motsvarar din användning av lasern.</p>",
+    "description_en": "<p>Running the lase cutter costs 1 kr/min of use. Add as many of this product to your cart as needed to cover you usage.</p>"
   },
   {
     "name": "Björkplywood",
@@ -126,10 +76,8 @@
     "image": "webshopbilder/material/bjorkplywood.png",
     "price": 89.0,
     "category": "Material",
-    "description": "\n<p>Björkplywood av kvalitet B/BB som är godkänd att köra i vår laserskärare.</p>
-    <p>Interiörlimmad plywood skär mycket bättre än WBP-limmad i lasern.</p>\n",
-    "description_en": "\n<p>Birch B/BB plywood that is approved for use in our laser cutter.</p>
-    <p>Interlaced plywood cuts much better in the laser cutter than WBP-glued plywood.</p>\n"
+    "description": "<p>Björkplywood av kvalitet B/BB som är godkänd att köra i vår laserskärare.</p><p>Interiörlimmad plywood skär mycket bättre än WBP-limmad i lasern.</p>",
+    "description_en": "<p>Birch B/BB plywood that is approved for use in our laser cutter.</p><p>Interlaced plywood cuts much better in the laser cutter than WBP-glued plywood.</p>"
   },
   {
     "name": "Björkplywood",
@@ -138,10 +86,8 @@
     "image": "webshopbilder/material/bjorkplywood.png",
     "price": 99.0,
     "category": "Material",
-    "description": "\n<p>Björkplywood av kvalitet B/BB som är godkänd att köra i vår laserskärare.</p>
-    <p>Interiörlimmad plywood skär mycket bättre än WBP-limmad i lasern.</p>\n",
-    "description_en": "\n<p>Birch B/BB plywood that is approved for use in our laser cutter.</p>
-    <p>Interlaced plywood cuts much better in the laser cutter than WBP-glued plywood.</p>\n"
+    "description": "<p>Björkplywood av kvalitet B/BB som är godkänd att köra i vår laserskärare.</p><p>Interiörlimmad plywood skär mycket bättre än WBP-limmad i lasern.</p>",
+    "description_en": "<p>Birch B/BB plywood that is approved for use in our laser cutter.</p><p>Interlaced plywood cuts much better in the laser cutter than WBP-glued plywood.</p>"
   },
   {
     "name": "Björkplywood",
@@ -150,10 +96,8 @@
     "image": "webshopbilder/material/bjorkplywood.png",
     "price": 129.0,
     "category": "Material",
-    "description": "\n<p>Björkplywood av kvalitet B/BB som är godkänd att köra i vår laserskärare.</p>
-    <p>Interiörlimmad plywood skär mycket bättre än WBP-limmad i lasern.</p>\n",
-    "description_en": "\n<p>Birch B/BB plywood that is approved for use in our laser cutter.</p>
-    <p>Interlaced plywood cuts much better in the laser cutter than WBP-glued plywood.</p>\n"
+    "description": "<p>Björkplywood av kvalitet B/BB som är godkänd att köra i vår laserskärare.</p><p>Interiörlimmad plywood skär mycket bättre än WBP-limmad i lasern.</p>",
+    "description_en": "<p>Birch B/BB plywood that is approved for use in our laser cutter.</p><p>Interlaced plywood cuts much better in the laser cutter than WBP-glued plywood.</p>"
   },
   {
     "name": "MDF",
@@ -162,12 +106,8 @@
     "image": "webshopbilder/material/mdf.png",
     "price": 89.0,
     "category": "Material",
-    "description": "\n<p>MDF som är godkänd att köra i vår laserskärare.</p>
-    <p>Denna MDF skär bättre än vanlig MDF i lasern och sätter inte igen filtret lika fort.</p>
-    <p>Den är FSC-märkt och dessutom är den Svanen-märkt & godkänd enligt Carb2-direktivet, vilket bland annat betyder att den inte innehåller någon tillsatt formaldehyd, som limmet i vanlig MDF innehåller i stora mängder. Tillverkaren är Medite och MDFen är från deras serie Medite Premier: <a href=\"https://mdfosb.com/sv/medite/products/medite-premier\" rel=\"nofollow\" target=\"_blank\">https://mdfosb.com/sv/medite/products/medite-premier</a></p>\n",
-    "description_en": "\n<p>MDF that is approved for use in our laser cutter.</p>
-    <p>This MDF cuts better than standard MDF in the laser cutter and doesn't clog the filter as quickly.</p>
-    <p>It is FSC-certified, and is also Nordic swan marked and CARB2 compliant, meaning it doesn't contain any formeldehyde unlike standard MDF panels. It is produced by Medite and is from their Medite Premier series: <a href=\"https://mdfosb.com/sv/medite/products/medite-premier\" rel=\"nofollow\" target=\"_blank\">https://mdfosb.com/sv/medite/products/medite-premier</a></p>\n"
+    "description": "<p>MDF som är godkänd att köra i vår laserskärare.</p><p>Denna MDF skär bättre än vanlig MDF i lasern och sätter inte igen filtret lika fort.</p><p>Den är FSC-märkt och dessutom är den Svanen-märkt & godkänd enligt Carb2-direktivet, vilket bland annat betyder att den inte innehåller någon tillsatt formaldehyd, som limmet i vanlig MDF innehåller i stora mängder. Tillverkaren är Medite och MDFen är från deras serie Medite Premier: <a href=\"https://mdfosb.com/sv/medite/products/medite-premier\" rel=\"nofollow\" target=\"_blank\">https://mdfosb.com/sv/medite/products/medite-premier</a></p>",
+    "description_en": "<p>MDF that is approved for use in our laser cutter.</p><p>This MDF cuts better than standard MDF in the laser cutter and doesn't clog the filter as quickly.</p><p>It is FSC-certified, and is also Nordic swan marked and CARB2 compliant, meaning it doesn't contain any formeldehyde unlike standard MDF panels. It is produced by Medite and is from their Medite Premier series: <a href=\"https://mdfosb.com/sv/medite/products/medite-premier\" rel=\"nofollow\" target=\"_blank\">https://mdfosb.com/sv/medite/products/medite-premier</a></p>"
   },
   {
     "name": "MDF",
@@ -176,12 +116,8 @@
     "image": "webshopbilder/material/mdf.png",
     "price": 99.0,
     "category": "Material",
-    "description": "\n<p>MDF som är godkänd att köra i vår laserskärare.</p>
-    <p>Denna MDF skär bättre än vanlig MDF i lasern och sätter inte igen filtret lika fort.</p>
-    <p>Den är FSC-märkt och dessutom är den Svanen-märkt & godkänd enligt Carb2-direktivet, vilket bland annat betyder att den inte innehåller någon tillsatt formaldehyd, som limmet i vanlig MDF innehåller i stora mängder. Tillverkaren är Medite och MDFen är från deras serie Medite Premier: <a href=\"https://mdfosb.com/sv/medite/products/medite-premier\" rel=\"nofollow\" target=\"_blank\">https://mdfosb.com/sv/medite/products/medite-premier</a></p>\n",
-    "description_en": "\n<p>MDF that is approved for use in our laser cutter.</p>
-    <p>This MDF cuts better than standard MDF in the laser cutter and doesn't clog the filter as quickly.</p>
-    <p>It is FSC-certified, and is also Nordic swan marked and CARB2 compliant, meaning it doesn't contain any formeldehyde unlike standard MDF panels. It is produced by Medite and is from their Medite Premier series: <a href=\"https://mdfosb.com/sv/medite/products/medite-premier\" rel=\"nofollow\" target=\"_blank\">https://mdfosb.com/sv/medite/products/medite-premier</a></p>\n"
+    "description": "<p>MDF som är godkänd att köra i vår laserskärare.</p><p>Denna MDF skär bättre än vanlig MDF i lasern och sätter inte igen filtret lika fort.</p><p>Den är FSC-märkt och dessutom är den Svanen-märkt & godkänd enligt Carb2-direktivet, vilket bland annat betyder att den inte innehåller någon tillsatt formaldehyd, som limmet i vanlig MDF innehåller i stora mängder. Tillverkaren är Medite och MDFen är från deras serie Medite Premier: <a href=\"https://mdfosb.com/sv/medite/products/medite-premier\" rel=\"nofollow\" target=\"_blank\">https://mdfosb.com/sv/medite/products/medite-premier</a></p>",
+    "description_en": "<p>MDF that is approved for use in our laser cutter.</p><p>This MDF cuts better than standard MDF in the laser cutter and doesn't clog the filter as quickly.</p><p>It is FSC-certified, and is also Nordic swan marked and CARB2 compliant, meaning it doesn't contain any formeldehyde unlike standard MDF panels. It is produced by Medite and is from their Medite Premier series: <a href=\"https://mdfosb.com/sv/medite/products/medite-premier\" rel=\"nofollow\" target=\"_blank\">https://mdfosb.com/sv/medite/products/medite-premier</a></p>"
   },
   {
     "name": "MDF",
@@ -190,12 +126,8 @@
     "image": "webshopbilder/material/mdf.png",
     "price": 129.0,
     "category": "Material",
-    "description": "\n<p>MDF som är godkänd att köra i vår laserskärare.</p>
-    <p>Denna MDF skär bättre än vanlig MDF i lasern och sätter inte igen filtret lika fort.</p>
-    <p>Den är FSC-märkt och dessutom är den Svanen-märkt & godkänd enligt Carb2-direktivet, vilket bland annat betyder att den inte innehåller någon tillsatt formaldehyd, som limmet i vanlig MDF innehåller i stora mängder. Tillverkaren är Medite och MDFen är från deras serie Medite Premier: <a href=\"https://mdfosb.com/sv/medite/products/medite-premier\" rel=\"nofollow\" target=\"_blank\">https://mdfosb.com/sv/medite/products/medite-premier</a></p>\n",
-    "description_en": "\n<p>MDF that is approved for use in our laser cutter.</p>
-    <p>This MDF cuts better than standard MDF in the laser cutter and doesn't clog the filter as quickly.</p>
-    <p>It is FSC-certified, and is also Nordic swan marked and CARB2 compliant, meaning it doesn't contain any formeldehyde unlike standard MDF panels. It is produced by Medite and is from their Medite Premier series: <a href=\"https://mdfosb.com/sv/medite/products/medite-premier\" rel=\"nofollow\" target=\"_blank\">https://mdfosb.com/sv/medite/products/medite-premier</a></p>\n"
+    "description": "<p>MDF som är godkänd att köra i vår laserskärare.</p><p>Denna MDF skär bättre än vanlig MDF i lasern och sätter inte igen filtret lika fort.</p><p>Den är FSC-märkt och dessutom är den Svanen-märkt & godkänd enligt Carb2-direktivet, vilket bland annat betyder att den inte innehåller någon tillsatt formaldehyd, som limmet i vanlig MDF innehåller i stora mängder. Tillverkaren är Medite och MDFen är från deras serie Medite Premier: <a href=\"https://mdfosb.com/sv/medite/products/medite-premier\" rel=\"nofollow\" target=\"_blank\">https://mdfosb.com/sv/medite/products/medite-premier</a></p>",
+    "description_en": "<p>MDF that is approved for use in our laser cutter.</p><p>This MDF cuts better than standard MDF in the laser cutter and doesn't clog the filter as quickly.</p><p>It is FSC-certified, and is also Nordic swan marked and CARB2 compliant, meaning it doesn't contain any formeldehyde unlike standard MDF panels. It is produced by Medite and is from their Medite Premier series: <a href=\"https://mdfosb.com/sv/medite/products/medite-premier\" rel=\"nofollow\" target=\"_blank\">https://mdfosb.com/sv/medite/products/medite-premier</a></p>"
   },
   {
     "name": "MDF",
@@ -204,12 +136,8 @@
     "image": "webshopbilder/material/mdf.png",
     "price": 149.0,
     "category": "Material",
-    "description": "\n<p>MDF som är godkänd att köra i vår laserskärare.</p>
-    <p>Denna MDF skär bättre än vanlig MDF i lasern och sätter inte igen filtret lika fort.</p>
-    <p>Den är FSC-märkt och dessutom är den Svanen-märkt & godkänd enligt Carb2-direktivet, vilket bland annat betyder att den inte innehåller någon tillsatt formaldehyd, som limmet i vanlig MDF innehåller i stora mängder. Tillverkaren är Medite och MDFen är från deras serie Medite Premier: <a href=\"https://mdfosb.com/sv/medite/products/medite-premier\" rel=\"nofollow\" target=\"_blank\">https://mdfosb.com/sv/medite/products/medite-premier</a></p>\n",
-    "description_en": "\n<p>MDF that is approved for use in our laser cutter.</p>
-    <p>This MDF cuts better than standard MDF in the laser cutter and doesn't clog the filter as quickly.</p>
-    <p>It is FSC-certified, and is also Nordic swan marked and CARB2 compliant, meaning it doesn't contain any formeldehyde unlike standard MDF panels. It is produced by Medite and is from their Medite Premier series: <a href=\"https://mdfosb.com/sv/medite/products/medite-premier\" rel=\"nofollow\" target=\"_blank\">https://mdfosb.com/sv/medite/products/medite-premier</a></p>\n"
+    "description": "<p>MDF som är godkänd att köra i vår laserskärare.</p><p>Denna MDF skär bättre än vanlig MDF i lasern och sätter inte igen filtret lika fort.</p><p>Den är FSC-märkt och dessutom är den Svanen-märkt & godkänd enligt Carb2-direktivet, vilket bland annat betyder att den inte innehåller någon tillsatt formaldehyd, som limmet i vanlig MDF innehåller i stora mängder. Tillverkaren är Medite och MDFen är från deras serie Medite Premier: <a href=\"https://mdfosb.com/sv/medite/products/medite-premier\" rel=\"nofollow\" target=\"_blank\">https://mdfosb.com/sv/medite/products/medite-premier</a></p>",
+    "description_en": "<p>MDF that is approved for use in our laser cutter.</p><p>This MDF cuts better than standard MDF in the laser cutter and doesn't clog the filter as quickly.</p><p>It is FSC-certified, and is also Nordic swan marked and CARB2 compliant, meaning it doesn't contain any formeldehyde unlike standard MDF panels. It is produced by Medite and is from their Medite Premier series: <a href=\"https://mdfosb.com/sv/medite/products/medite-premier\" rel=\"nofollow\" target=\"_blank\">https://mdfosb.com/sv/medite/products/medite-premier</a></p>"
   },
   {
     "name": "Stämpelgummi",
@@ -218,8 +146,8 @@
     "image": "webshopbilder/material/stampelgummi_2.jpeg",
     "price": "100",
     "category": "Material",
-    "description": "\n<p>A5 ark av stämpelgummi för användning i vår laserskärare.</p>\n",
-    "description_en": "\n<p>A5 sheet of stamp rubber for use in the laser cutter.</p>\n"
+    "description": "<p>A5 ark av stämpelgummi för användning i vår laserskärare.</p>",
+    "description_en": "<p>A5 sheet of stamp rubber for use in the laser cutter.</p>"
   },
   {
     "name": "Textiltransfer, 100mm",
@@ -228,8 +156,8 @@
     "image": "webshopbilder/material/textiltransfer-100mm.jpeg",
     "price": "15",
     "category": "Material",
-    "description": "\n<p>Textiltransfer, pris per 100mm, avrunda uppåt till närmaste 100mm.</p>\n",
-    "description_en": "\n<p>Textile transfer paper, price per 100mm, round up to the nearest 100mm.</p>\n"
+    "description": "<p>Textiltransfer, pris per 100mm, avrunda uppåt till närmaste 100mm.</p>",
+    "description_en": "<p>Textile transfer paper, price per 100mm, round up to the nearest 100mm.</p>"
   },
   {
     "name": "Textiltransfer Special, 100mm",
@@ -238,8 +166,8 @@
     "image": "webshopbilder/material/textiltransfer-100mm.jpeg",
     "price": "22.50",
     "category": "Material",
-    "description": "\n<p>Textiltransfer, pris per 100mm, avrunda uppåt till närmaste 100mm.</p>\n",
-    "description_en": "\n<p>Textile transfer paper, price per 100mm, round up to the nearest 100mm.</p>\n"
+    "description": "<p>Textiltransfer, pris per 100mm, avrunda uppåt till närmaste 100mm.</p>",
+    "description_en": "<p>Textile transfer paper, price per 100mm, round up to the nearest 100mm.</p>"
   },
   {
     "name": "Självhäftande Vinyl, 100mm",
@@ -248,8 +176,8 @@
     "image": "webshopbilder/material/sjalvhaftande-vinyl.jpeg",
     "price": "7.50",
     "category": "Material",
-    "description": "\n<p>nSjälvhäftande vinyl, pris per 100mm, avrunda uppåt till närmaste 100mm.</p>\n",
-    "description_en": "\n<p>Textile transfer paper, price per 100mm, round up to the nearest 100mm.</p>\n"
+    "description": "<p>nSjälvhäftande vinyl, pris per 100mm, avrunda uppåt till närmaste 100mm.</p>",
+    "description_en": "<p>Textile transfer paper, price per 100mm, round up to the nearest 100mm.</p>"
   },
   {
     "name": "Stål, 100g",
@@ -258,8 +186,8 @@
     "image": "webshopbilder/material/stal-100g.jpeg",
     "price": "4",
     "category": "Material",
-    "description": "\n<p>Stål, pris per 100g, avrunda uppåt till närmaste 100g.</p>\n",
-    "description_en": "\n<p>Steel, price per 100g, round up to the nearest 100g.</p>\n"
+    "description": "<p>Stål, pris per 100g, avrunda uppåt till närmaste 100g.</p>",
+    "description_en": "<p>Steel, price per 100g, round up to the nearest 100g.</p>"
   },
   {
     "name": "Aluminium, 100g",
@@ -268,8 +196,8 @@
     "image": "webshopbilder/material/aluminium-100g.jpeg",
     "price": "4.50",
     "category": "Material",
-    "description": "\n<p>Aluminium, pris per 100g, avrunda uppåt till närmaste 100g.</p>\n",
-    "description_en": "\n<p>Aluminum, price per 100g, round up to the nearest 100g.</p>\n"
+    "description": "<p>Aluminium, pris per 100g, avrunda uppåt till närmaste 100g.</p>",
+    "description_en": "<p>Aluminum, price per 100g, round up to the nearest 100g.</p>"
   },
   {
     "name": "Plast 100g",
@@ -278,8 +206,8 @@
     "image": "webshopbilder/material/plast-100g.jpeg",
     "price": "7.50",
     "category": "Material",
-    "description": "\n<p>Plast, pris per 100g, avrunda uppåt till närmaste 100g.</p>\n",
-    "description_en": "\n<p>Plastic, price per 100g, round up to the nearest 100g.</p>\n"
+    "description": "<p>Plast, pris per 100g, avrunda uppåt till närmaste 100g.</p>",
+    "description_en": "<p>Plastic, price per 100g, round up to the nearest 100g.</p>"
   },
   {
     "name": "Mässing, 100g",
@@ -288,12 +216,9 @@
     "image": "webshopbilder/material/massing-100g.jpeg",
     "price": "7.50",
     "category": "Material",
-    "description": "\n<p>Mässing, pris per 100g, avrunda uppåt till närmaste 100g.</p>\n",
-    "description_en": "\n<p>Brass, price per 100g, round up to the nearest 100g.</p>\n"
+    "description": "<p>Mässing, pris per 100g, avrunda uppåt till närmaste 100g.</p>",
+    "description_en": "<p>Brass, price per 100g, round up to the nearest 100g.</p>"
   },
-
-  /* Verktyg */
-
   {
     "name": "Vändskär",
     "name_en": "Cutting insert",
@@ -301,8 +226,8 @@
     "image": "webshopbilder/verktyg/vs-dcgt-0702-steel.jpeg",
     "price": "110",
     "category": "Verktyg",
-    "description": "\n<p>DCGT 070204 Carbide insert for turning. Coated for steel- general use.</p>\n",
-    "description_en": "\n<p>DCGT 070204 Carbide insert for turning. Coated for steel- general use.</p>\n"
+    "description": "<p>DCGT 070204 Carbide insert for turning. Coated for steel- general use.</p>",
+    "description_en": "<p>DCGT 070204 Carbide insert for turning. Coated for steel- general use.</p>"
   },
   {
     "name": "Vändskär",
@@ -311,8 +236,8 @@
     "image": "webshopbilder/verktyg/vs-dcmt-0702-alu.jpeg",
     "price": "90",
     "category": "Verktyg",
-    "description": "\n<p>DCMT 070204 Carbide insert for turning. Ground and polished for aluminium and non-ferrous metals.</p>\n",
-    "description_en": "\n<p>DCMT 070204 Carbide insert for turning. Ground and polished for aluminium and non-ferrous metals.</p>\n"
+    "description": "<p>DCMT 070204 Carbide insert for turning. Ground and polished for aluminium and non-ferrous metals.</p>",
+    "description_en": "<p>DCMT 070204 Carbide insert for turning. Ground and polished for aluminium and non-ferrous metals.</p>"
   },
   {
     "name": "Vändskär",
@@ -321,8 +246,8 @@
     "image": "webshopbilder/verktyg/vs-wnmg-0604-steel.jpeg",
     "price": "135",
     "category": "Verktyg",
-    "description": "\n<p>WNMG 060404 Carbide insert for turning. Coated for steel- general use.</p>\n",
-    "description_en": "\n<p>WNMG 060404 Carbide insert for turning. Coated for steel- general use.</p>\n"
+    "description": "<p>WNMG 060404 Carbide insert for turning. Coated for steel- general use.</p>",
+    "description_en": "<p>WNMG 060404 Carbide insert for turning. Coated for steel- general use.</p>"
   },
   {
     "name": "Vändskär",
@@ -331,8 +256,8 @@
     "image": "webshopbilder/verktyg/vs-wnmg-0604-alu.jpeg",
     "price": "110",
     "category": "Verktyg",
-    "description": "\n<p>WNMG 060404 Carbide insert for turning. Ground and polished for aluminium and non-ferrous metals.</p>\n",
-    "description_en": "\n<p>WNMG 060404 Carbide insert for turning. Ground and polished for aluminium and non-ferrous metals.</p>\n"
+    "description": "<p>WNMG 060404 Carbide insert for turning. Ground and polished for aluminium and non-ferrous metals.</p>",
+    "description_en": "<p>WNMG 060404 Carbide insert for turning. Ground and polished for aluminium and non-ferrous metals.</p>"
   },
   {
     "name": "Vändskär",
@@ -341,8 +266,8 @@
     "image": "webshopbilder/verktyg/vs-rcmt-0803-steel.jpeg",
     "price": "100",
     "category": "Verktyg",
-    "description": "\n<p>RCMT 0803 Carbide insert for turning. Coated for steel- general use.</p>\n",
-    "description_en": "\n<p>RCMT 0803 Carbide insert for turning. Coated for steel- general use.</p>\n"
+    "description": "<p>RCMT 0803 Carbide insert for turning. Coated for steel- general use.</p>",
+    "description_en": "<p>RCMT 0803 Carbide insert for turning. Coated for steel- general use.</p>"
   },
   {
     "name": "Vändskär",
@@ -351,8 +276,8 @@
     "image": "webshopbilder/verktyg/vs-rcgt-0803-alu.jpeg",
     "price": "110",
     "category": "Verktyg",
-    "description": "\n<p>RCGT 0803 Carbide insert for turning. Ground and polished for aluminium and non-ferrous metals.</p>\n",
-    "description_en": "\n<p>RCGT 0803 Carbide insert for turning. Ground and polished for aluminium and non-ferrous metals.</p>\n"
+    "description": "<p>RCGT 0803 Carbide insert for turning. Ground and polished for aluminium and non-ferrous metals.</p>",
+    "description_en": "<p>RCGT 0803 Carbide insert for turning. Ground and polished for aluminium and non-ferrous metals.</p>"
   },
   {
     "name": "Vändskär",
@@ -361,8 +286,8 @@
     "image": "webshopbilder/verktyg/vs-mgmn-200-steel.jpeg",
     "price": "120",
     "category": "Verktyg",
-    "description": "\n<p>Grooving insert, 2mm wide. Coated for steel- general use.</p>\n",
-    "description_en": "\n<p>Grooving insert, 2mm wide. Coated for steel- general use.</p>\n"
+    "description": "<p>Grooving insert, 2mm wide. Coated for steel- general use.</p>",
+    "description_en": "<p>Grooving insert, 2mm wide. Coated for steel- general use.</p>"
   },
   {
     "name": "Vändskär",
@@ -371,8 +296,8 @@
     "image": "webshopbilder/verktyg/vs-mggn-20-alu.jpeg",
     "price": "120",
     "category": "Verktyg",
-    "description": "\n<p>Grooving insert, 2mm wide. For aluminum and non-ferrous metals.</p>\n",
-    "description_en": "\n<p>Grooving insert, 2mm wide. For aluminum and non-ferrous metals.</p>\n"
+    "description": "<p>Grooving insert, 2mm wide. For aluminum and non-ferrous metals.</p>",
+    "description_en": "<p>Grooving insert, 2mm wide. For aluminum and non-ferrous metals.</p>"
   },
   {
     "name": "Vändskär",
@@ -381,8 +306,8 @@
     "image": "webshopbilder/verktyg/vs-er-16-ag60-steel.jpeg",
     "price": "75",
     "category": "Verktyg",
-    "description": "\n<p>16ER-AG60 Carbide external 60deg threading insert. Coated for steel- general use.</p>\n",
-    "description_en": "\n<p>16ER-AG60 Carbide external 60deg threading insert. Coated for steel- general use.</p>\n"
+    "description": "<p>16ER-AG60 Carbide external 60deg threading insert. Coated for steel- general use.</p>",
+    "description_en": "<p>16ER-AG60 Carbide external 60deg threading insert. Coated for steel- general use.</p>"
   },
   {
     "name": "Vändskär",
@@ -391,8 +316,8 @@
     "image": "webshopbilder/verktyg/vs-er-16-ag60-alu.jpeg",
     "price": "75",
     "category": "Verktyg",
-    "description": "\n<p>16ER-AG60 Carbide external 60deg threading insert. Ground and polished for aluminium and non-ferrous metals.</p>\n",
-    "description_en": "\n<p>16ER-AG60 Carbide external 60deg threading insert. Ground and polished for aluminium and non-ferrous metals.</p>\n"
+    "description": "<p>16ER-AG60 Carbide external 60deg threading insert. Ground and polished for aluminium and non-ferrous metals.</p>",
+    "description_en": "<p>16ER-AG60 Carbide external 60deg threading insert. Ground and polished for aluminium and non-ferrous metals.</p>"
   },
   {
     "name": "Vändskär",
@@ -401,8 +326,8 @@
     "image": "webshopbilder/verktyg/vs-ir-16-ag60-steel.jpeg",
     "price": "75",
     "category": "Verktyg",
-    "description": "\n<p>16IR-AG60 Carbide Internal 60deg threading insert. Coated for steel- general use.</p>\n",
-    "description_en": "\n<p>16IR-AG60 Carbide Internal 60deg threading insert. Coated for steel- general use.</p>\n"
+    "description": "<p>16IR-AG60 Carbide Internal 60deg threading insert. Coated for steel- general use.</p>",
+    "description_en": "<p>16IR-AG60 Carbide Internal 60deg threading insert. Coated for steel- general use.</p>"
   },
   {
     "name": "Vändskär",
@@ -411,8 +336,8 @@
     "image": "webshopbilder/verktyg/vs-ir-16-ag60-alu.jpeg",
     "price": "75",
     "category": "Verktyg",
-    "description": "\n<p>16IR-AG60 Carbide internal 60deg threading insert. Ground and polished for aluminium and non-ferrous metals.</p>\n",
-    "description_en": "\n<p>16IR-AG60 Carbide internal 60deg threading insert. Ground and polished for aluminium and non-ferrous metals.</p>\n"
+    "description": "<p>16IR-AG60 Carbide internal 60deg threading insert. Ground and polished for aluminium and non-ferrous metals.</p>",
+    "description_en": "<p>16IR-AG60 Carbide internal 60deg threading insert. Ground and polished for aluminium and non-ferrous metals.</p>"
   },
   {
     "name": "Sparskär",
@@ -421,8 +346,8 @@
     "image": "webshopbilder/verktyg/sparskar.jpeg",
     "price": "90",
     "category": "Verktyg",
-    "description": "\n<p>HSS Lathe blank.</p>\n",
-    "description_en": "\n<p>HSS Lathe blank.</p>\n"
+    "description": "<p>HSS Lathe blank.</p>",
+    "description_en": "<p>HSS Lathe blank.</p>"
   },
   {
     "name": "Pinnfräs för plast",
@@ -431,8 +356,8 @@
     "image": "webshopbilder/verktyg/pinnfras-for-plast.jpeg",
     "price": 50.0,
     "category": "Verktyg",
-    "description": "\n<p>Carbide end mill, single flute spiral, for plastics.</p>\n",
-    "description_en": "\n<p>Carbide end mill, single flute spiral, for plastics.</p>\n"
+    "description": "<p>Carbide end mill, single flute spiral, for plastics.</p>",
+    "description_en": "<p>Carbide end mill, single flute spiral, for plastics.</p>"
   },
   {
     "name": "Pinnfräs för plast",
@@ -441,8 +366,8 @@
     "image": "webshopbilder/verktyg/pinnfras-for-plast.jpeg",
     "price": 65.0,
     "category": "Verktyg",
-    "description": "\n<p>Carbide end mill, single flute spiral, for plastics.</p>\n",
-    "description_en": "\n<p>Carbide end mill, single flute spiral, for plastics.</p>\n"
+    "description": "<p>Carbide end mill, single flute spiral, for plastics.</p>",
+    "description_en": "<p>Carbide end mill, single flute spiral, for plastics.</p>"
   },
   {
     "name": "Pinnfräs för plast",
@@ -451,8 +376,8 @@
     "image": "webshopbilder/verktyg/pinnfras-for-plast.jpeg",
     "price": 125.0,
     "category": "Verktyg",
-    "description": "\n<p>Carbide end mill, single flute spiral, for plastics.</p>\n",
-    "description_en": "\n<p>Carbide end mill, single flute spiral, for plastics.</p>\n"
+    "description": "<p>Carbide end mill, single flute spiral, for plastics.</p>",
+    "description_en": "<p>Carbide end mill, single flute spiral, for plastics.</p>"
   },
   {
     "name": "Pinnfräs för aluminium",
@@ -461,8 +386,8 @@
     "image": "webshopbilder/verktyg/pinnfras-for-alu.jpeg",
     "price": 110.0,
     "category": "Verktyg",
-    "description": "\n<p>End mill, uncoated carbide for aluminum and non-ferrous metals.</p>\n",
-    "description_en": "\n<p>End mill, uncoated carbide for aluminum and non-ferrous metals.</p>\n"
+    "description": "<p>End mill, uncoated carbide for aluminum and non-ferrous metals.</p>",
+    "description_en": "<p>End mill, uncoated carbide for aluminum and non-ferrous metals.</p>"
   },
   {
     "name": "Pinnfräs för aluminium",
@@ -471,8 +396,8 @@
     "image": "webshopbilder/verktyg/pinnfras-for-alu.jpeg",
     "price": 125.0,
     "category": "Verktyg",
-    "description": "\n<p>End mill, uncoated carbide for aluminum and non-ferrous metals.</p>\n",
-    "description_en": "\n<p>End mill, uncoated carbide for aluminum and non-ferrous metals.</p>\n"
+    "description": "<p>End mill, uncoated carbide for aluminum and non-ferrous metals.</p>",
+    "description_en": "<p>End mill, uncoated carbide for aluminum and non-ferrous metals.</p>"
   },
   {
     "name": "Pinnfräs för aluminium",
@@ -481,8 +406,8 @@
     "image": "webshopbilder/verktyg/pinnfras-for-alu.jpeg",
     "price": 120.0,
     "category": "Verktyg",
-    "description": "\n<p>End mill, uncoated carbide for aluminum and non-ferrous metals.</p>\n",
-    "description_en": "\n<p>End mill, uncoated carbide for aluminum and non-ferrous metals.</p>\n"
+    "description": "<p>End mill, uncoated carbide for aluminum and non-ferrous metals.</p>",
+    "description_en": "<p>End mill, uncoated carbide for aluminum and non-ferrous metals.</p>"
   },
   {
     "name": "Pinnfräs för aluminium",
@@ -491,8 +416,8 @@
     "image": "webshopbilder/verktyg/pinnfras-for-alu.jpeg",
     "price": 165.0,
     "category": "Verktyg",
-    "description": "\n<p>End mill, uncoated carbide for aluminum and non-ferrous metals.</p>\n",
-    "description_en": "\n<p>End mill, uncoated carbide for aluminum and non-ferrous metals.</p>\n"
+    "description": "<p>End mill, uncoated carbide for aluminum and non-ferrous metals.</p>",
+    "description_en": "<p>End mill, uncoated carbide for aluminum and non-ferrous metals.</p>"
   },
   {
     "name": "Pinnfräs för aluminium",
@@ -501,8 +426,8 @@
     "image": "webshopbilder/verktyg/pinnfras-for-alu.jpeg",
     "price": 275.0,
     "category": "Verktyg",
-    "description": "\n<p>End mill, uncoated carbide for aluminum and non-ferrous metals.</p>\n",
-    "description_en": "\n<p>End mill, uncoated carbide for aluminum and non-ferrous metals.</p>\n"
+    "description": "<p>End mill, uncoated carbide for aluminum and non-ferrous metals.</p>",
+    "description_en": "<p>End mill, uncoated carbide for aluminum and non-ferrous metals.</p>"
   },
   {
     "name": "Pinnfräs för aluminium",
@@ -511,8 +436,8 @@
     "image": "webshopbilder/verktyg/pinnfras-for-alu.jpeg",
     "price": 140.0,
     "category": "Verktyg",
-    "description": "\n<p>End mill, uncoated carbide for aluminum and non-ferrous metals.</p>\n",
-    "description_en": "\n<p>End mill, uncoated carbide for aluminum and non-ferrous metals.</p>\n"
+    "description": "<p>End mill, uncoated carbide for aluminum and non-ferrous metals.</p>",
+    "description_en": "<p>End mill, uncoated carbide for aluminum and non-ferrous metals.</p>"
   },
   {
     "name": "Fullradiefräs för aluminium",
@@ -521,8 +446,8 @@
     "image": "webshopbilder/verktyg/fullradiefras-for-alu.jpeg",
     "price": 175.0,
     "category": "Verktyg",
-    "description": "\n<p>Ball nose end mill, 2 flute, uncoated carbide for aluminum and non-ferrous metals.</p>\n",
-    "description_en": "\n<p>Ball nose end mill, 2 flute, uncoated carbide for aluminum and non-ferrous metals.</p>\n"
+    "description": "<p>Ball nose end mill, 2 flute, uncoated carbide for aluminum and non-ferrous metals.</p>",
+    "description_en": "<p>Ball nose end mill, 2 flute, uncoated carbide for aluminum and non-ferrous metals.</p>"
   },
   {
     "name": "Fullradiefräs för aluminium",
@@ -531,8 +456,8 @@
     "image": "webshopbilder/verktyg/fullradiefras-for-alu.jpeg",
     "price": 295.0,
     "category": "Verktyg",
-    "description": "\n<p>Ball nose end mill, 2 flute, uncoated carbide for aluminum and non-ferrous metals.</p>\n",
-    "description_en": "\n<p>Ball nose end mill, 2 flute, uncoated carbide for aluminum and non-ferrous metals.</p>\n"
+    "description": "<p>Ball nose end mill, 2 flute, uncoated carbide for aluminum and non-ferrous metals.</p>",
+    "description_en": "<p>Ball nose end mill, 2 flute, uncoated carbide for aluminum and non-ferrous metals.</p>"
   },
   {
     "name": "Gravyrfräs",
@@ -541,8 +466,8 @@
     "image": "webshopbilder/verktyg/gravyrfras-30-grader-01mm.jpeg",
     "price": "25",
     "category": "Verktyg",
-    "description": "\n<p>0.1mm 30deg carbide half-round engraving bit.</p>\n",
-    "description_en": "\n<p>0.1mm 30deg carbide half-round engraving bit.</p>\n"
+    "description": "<p>0.1mm 30deg carbide half-round engraving bit.</p>",
+    "description_en": "<p>0.1mm 30deg carbide half-round engraving bit.</p>"
   },
   {
     "name": "Pinnfräs för stål",
@@ -551,8 +476,8 @@
     "image": "webshopbilder/verktyg/pinnfras-for-stal.jpeg",
     "price": 45.0,
     "category": "Verktyg",
-    "description": "\n<p>End Mill HSS-E, 3 Flute, TiN coated for general use.</p>\n",
-    "description_en": "\n<p>End Mill HSS-E, 3 Flute, TiN coated for general use.</p>\n"
+    "description": "<p>End Mill HSS-E, 3 Flute, TiN coated for general use.</p>",
+    "description_en": "<p>End Mill HSS-E, 3 Flute, TiN coated for general use.</p>"
   },
   {
     "name": "Pinnfräs för stål",
@@ -561,8 +486,8 @@
     "image": "webshopbilder/verktyg/pinnfras-for-stal.jpeg",
     "price": 50.0,
     "category": "Verktyg",
-    "description": "\n<p>End Mill HSS-E, 3 Flute, TiN coated for general use.</p>\n",
-    "description_en": "\n<p>End Mill HSS-E, 3 Flute, TiN coated for general use.</p>\n"
+    "description": "<p>End Mill HSS-E, 3 Flute, TiN coated for general use.</p>",
+    "description_en": "<p>End Mill HSS-E, 3 Flute, TiN coated for general use.</p>"
   },
   {
     "name": "Pinnfräs för stål",
@@ -571,8 +496,8 @@
     "image": "webshopbilder/verktyg/pinnfras-for-stal.jpeg",
     "price": 60.0,
     "category": "Verktyg",
-    "description": "\n<p>End Mill HSS-E, 3 Flute, TiN coated for general use.</p>\n",
-    "description_en": "\n<p>End Mill HSS-E, 3 Flute, TiN coated for general use.</p>\n"
+    "description": "<p>End Mill HSS-E, 3 Flute, TiN coated for general use.</p>",
+    "description_en": "<p>End Mill HSS-E, 3 Flute, TiN coated for general use.</p>"
   },
   {
     "name": "Pinnfräs för stål",
@@ -581,7 +506,7 @@
     "image": "webshopbilder/verktyg/pinnfras-for-stal.jpeg",
     "price": 90.0,
     "category": "Verktyg",
-    "description": "\n<p>End Mill HSS-E, 3 Flute, TiN coated for general use.</p>\n",
-    "description_en": "\n<p>End Mill HSS-E, 3 Flute, TiN coated for general use.</p>\n"
+    "description": "<p>End Mill HSS-E, 3 Flute, TiN coated for general use.</p>",
+    "description_en": "<p>End Mill HSS-E, 3 Flute, TiN coated for general use.</p>"
   }
 ]

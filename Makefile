@@ -5,6 +5,9 @@ build: .env
 run: .env
 	docker-compose up
 
+dev: .env
+	docker-compose -f devel-compose.yml up --build
+
 init-npm:
 	cd frontend && npm install 
 

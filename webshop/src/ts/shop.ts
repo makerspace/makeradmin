@@ -198,16 +198,20 @@ document.addEventListener('DOMContentLoaded', () => {
   });
   refreshUIFromCart(Cart.fromStorage());
 
-  document.querySelector(".category-delete").addEventListener("click", ev => {
-    ev.preventDefault();
-    const id = Number((<HTMLElement>ev.currentTarget).getAttribute("data-id"));
-    tryDeleteCategory(id);
+  document.querySelectorAll(".category-delete").forEach(el => {
+      el.addEventListener("click", ev => {
+          ev.preventDefault();
+          const id = Number((<HTMLElement>ev.currentTarget).getAttribute("data-id"));
+          tryDeleteCategory(id);
+      });
   });
 
-  document.querySelector(".category-edit").addEventListener("click", ev => {
-    ev.preventDefault();
-    const id = Number((<HTMLElement>ev.currentTarget).getAttribute("data-id"));
-    editCategory(id, (<HTMLElement>ev.currentTarget).getAttribute("data-name"));
+  document.querySelectorAll(".category-edit").forEach(el => {
+      el.addEventListener("click", ev => {
+          ev.preventDefault();
+          const id = Number((<HTMLElement>ev.currentTarget).getAttribute("data-id"));
+          editCategory(id, (<HTMLElement>ev.currentTarget).getAttribute("data-name"));
+      });
   });
 
   document.querySelector(".category-add").addEventListener("click", ev => {

@@ -83,7 +83,8 @@ services:
   webshop:
     image: makeradmin/webshop:1.0
     volumes:
-      - "./webshop/src/static:/var/www/service/static"
+      - "./webshop/src/ts:/var/www/service/ts"
+      - "./webshop/src/scss:/var/www/service/scss"
       - "./webshop/src/templates:/var/www/service/templates"
     build: webshop
     ports:
