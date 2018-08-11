@@ -41,7 +41,10 @@ def sync(session=None, client=None, ui=None, customer_id=None, authority_id=None
     
     if not ignore_running:
         check_multi_access_running(ui)
-    
+
+    # Run actions on MakerAdmin (ship orders and update key timestamps)
+    client.ship_orders(ui)
+
     # Fetch from MakerAdmin
     
     ma_members = client.fetch_members(ui)
