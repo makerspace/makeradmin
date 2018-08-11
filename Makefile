@@ -5,6 +5,9 @@ build: .env
 run: .env
 	docker-compose up
 
+install:
+	sudo apt-get install docker-io docker-compose
+
 init-npm:
 	cd frontend && npm install 
 
@@ -31,4 +34,4 @@ frontend-dev-server:
 	docker volume rm makeradmin_node_modules
 	docker-compose -f frontend/dev-server-compose.yaml up --build
 
-.PHONY: build init-db
+.PHONY: build firstrun frontend-dev-server init init-db init-npm init-pip install run stop
