@@ -13,6 +13,7 @@ class Test(DbBaseTest):
     def setUp(self):
         super().setUp()
         self.client = MakerAdminClient(base_url="https://makeradmin.se")
+        self.client.is_logged_in = MagicMock(return_value=True)
         self.client.login = MagicMock(return_value=True)
         self.client.ship_orders = MagicMock(return_value=None)
         self.ui = Tui()
