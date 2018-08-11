@@ -1,11 +1,19 @@
 # Makeradmin
 
 ### Install dependencies 
+
+#### Docker
 ~~~
 sudo apt-get install docker.io docker-compose
 sudo adduser your_username docker
 ~~~
 You need to sign out and sign back in again for changes to take effect. 
+
+#### Python
+~~~
+sudo apt-get install npm
+make init
+~~~
 
 ### Initialize everything
 ~~~
