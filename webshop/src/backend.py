@@ -1,4 +1,6 @@
 from flask import request, abort, render_template
+from requests import RequestException
+
 import service
 from service import eprint, assert_get, route_helper, BackendException, format_datetime
 import stripe
@@ -425,7 +427,7 @@ def process_cart(member_id, cart: List[Dict[str,Any]]) -> Tuple[Decimal, List[Ca
         if member_id:
             try:
                 member = instance.gateway.get(f"membership/member/{member_id}/membership").json()
-            except:  # TODO Don't catch all.
+            except RequestException:
                 pass
         
         with localcontext() as ctx:
