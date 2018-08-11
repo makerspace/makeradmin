@@ -30,14 +30,6 @@ module.exports = {
 					path: "order/:id",
 					component: require("./Pages/Order/View"),
 				},
-				{
-					path: "subscription",
-					component: require("./Pages/Subscription/List"),
-				},
-				{
-					path: "history",
-					component: require("./Pages/History"),
-				},
 			]
 		}
 	]

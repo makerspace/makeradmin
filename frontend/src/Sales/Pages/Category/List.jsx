@@ -1,11 +1,10 @@
 import React from 'react'
 
 // Backbone
-import SalesHistoryCollection from '../Collections/SalesHistory'
-import SalesHistoryModel from '../Models/SalesHistory'
+import OrderCollection from '../../Collections/Order'
 
-import TableFilterBox from '../../TableFilterBox'
-import History from '../Components/Tables/History'
+import TableFilterBox from '../../../TableFilterBox'
+import Orders from '../../Components/Tables/Orders'
 
 module.exports = React.createClass({
 	getInitialState: function()
@@ -32,12 +31,10 @@ module.exports = React.createClass({
 	{
 		return (
 			<div>
-				<h2>Försäljningshistorik</h2>
-				<p>På denna sida ser du en lista på samtliga sålda produkter.</p>
+				<h2>Kategorier</h2>
 				<TableFilterBox onChange={this.updateFilters} />
-				<History type={SalesHistoryCollection} filters={this.state.filters} />
+				<Orders type={OrderCollection} filters={this.state.filters} />
 			</div>
 		);
 	},
 });
-//SalesHistoryHandler.title = "Visa försäljning";

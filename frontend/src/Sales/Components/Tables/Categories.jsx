@@ -1,9 +1,7 @@
 import React from 'react'
-import BackboneReact from 'backbone-react-component'
 
 import { Link } from 'react-router'
 import BackboneTable from '../../../BackboneTable'
-import DateField from '../../../Components/Date'
 
 module.exports = React.createClass({
 	mixins: [Backbone.React.Component.mixin, BackboneTable],
@@ -11,7 +9,7 @@ module.exports = React.createClass({
 	getInitialState: function()
 	{
 		return {
-			columns: 4,
+			columns: 3,
 		};
 	},
 
@@ -24,18 +22,15 @@ module.exports = React.createClass({
 	{
 		return [
 			{
-				title: "Medlem",
+				title: "Id",
+				sort: "id",
 			},
 			{
-				title: "Startdatum",
-				sort: "date_start",
+				title: "Namn",
+				sort: "name",
 			},
 			{
-				title: "Beskrivning",
-				sort: "description",
-			},
-			{
-				title: "Produkt",
+				title: "",
 			},
 		];
 	},
@@ -44,10 +39,13 @@ module.exports = React.createClass({
 	{
 		return (
 			<tr key={i}>
-				<td>{row.member_id}</td>
-				<td><DateField date={row.date_start} /></td>
-				<td>{row.title}</td>
-				<td><Link to={"/sales/product/" + row.product_id}>Visa</Link></td>
+				<td><Link to={"/sales/category/" + row.id}>{row.id}</Link></td>
+				<td><Link to={"/sales/category/" + row.id}>{row.name}</Link></td>
+				<td>
+					<TableDropdownMenu>
+						{this.removeButton(i, "Ta bort kategori")}
+					</TableDropdownMenu>
+				</td>
 			</tr>
 		);
 	},

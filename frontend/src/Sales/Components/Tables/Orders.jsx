@@ -23,16 +23,16 @@ module.exports = React.createClass({
 	{
 		return [
 			{
-				title: "Status",
-				sort: "status",
+				title: "Order",
+				sort: "id",
 			},
 			{
 				title: "Datum",
 				sort: "created_at",
 			},
 			{
-				title: "Order",
-				sort: "id",
+				title: "Payment",
+				sort: "status",
 			},
 			{
 				title: "Medlem",
@@ -50,10 +50,10 @@ module.exports = React.createClass({
 	{
 		return (
 			<tr key={i}>
-				<td>{row.status}</td>
-				<td>{row.created_at}</td>
 				<td><Link to={"/sales/order/" + row.id}>{row.id}</Link></td>
-				<td><Link to={"/membership/members/" + row.member_id}>{row.member_id}</Link></td>
+				<td>{row.created_at}</td>
+				<td>{row.status}</td>
+				<td><Link to={"/membership/members/" + row.member_id}>{row.member_number}: {row.member_name}</Link></td>
 				<td className="uk-text-right"><Currency value={100 * row.amount} /> kr</td>
 			</tr>
 		);
