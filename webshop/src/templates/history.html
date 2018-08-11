@@ -8,67 +8,8 @@
         <link rel="stylesheet" href="{{ url('static/style.css') }}" />
         <script src='{{ url("static/uikit/js/uikit.min.js") }}'></script>
         <script src='{{ url("static/uikit/js/uikit-icons.min.js") }}'></script>
-        <script src="https://code.jquery.com/jquery-3.3.1.min.js"
-              integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
-              crossorigin="anonymous"></script>
+        <script src='{{ url("static/js/history.js") }}'></script>
         {% include("meta.html") %}
-        <script>
-            const currency = "kr";
-            const apiBasePath = window.apiBasePath;
-
-            $(document).ready(() => {
-                function ajax(type, url, data) {
-                    return $.ajax({
-                        type: type,
-                        url: url,
-                        data: JSON.stringify(data),
-                        contentType: "application/json; charset=utf-8",
-                        dataType: "json",
-                        headers: {
-                        "Authorization": "Bearer " + localStorage.token
-                        }
-                    });
-                }
-
-                ajax("GET", apiBasePath + "/webshop/member/current/transactions", {})
-                .done((data, textStatus, xhr) => {
-                    const rootElement = $("#history-contents");
-                    rootElement.html("");
-
-                    for (const transaction of xhr.responseJSON.data) {
-                        let cartItems = "";
-                        for (const item of transaction.content) {
-                            cartItems += `<div class="receipt-item">
-                                        <span class="product-title">${item.product.name}</span>
-                                        <span class="receipt-item-count">${item.count} ${item.product.unit}</span>
-                                        <span class="receipt-item-amount">${item.amount} ${currency}</span>
-                                    </div>`;
-                        }
-
-                        const elem = $(`<div class="history-item">
-                            <h3><a href="/shop/receipt/${transaction.id}">${ new Date(transaction.created_at).toLocaleDateString("se-SV") }</a></h3>
-                            <div class="receipt-items">
-                                ${cartItems}
-                            </div>
-                            <div class="receipt-amount">
-                                <span class="receipt-amount-value">${transaction.amount} ${currency}</span>
-                            </div>
-                        </div>`);
-                        rootElement.append(elem);
-                    }
-                }).fail((xhr, textStatus, error) => {
-                    UIkit.modal.alert("<h2>Misslyckades med att hämta köphistorik</h2>" + xhr.responseJSON.status);
-                });
-
-                ajax("GET", apiBasePath + "member/current", {})
-                .done((data, textStatus, xhr) => {
-                    const member = xhr.responseJSON.data;
-                    $("#member-header").html(`#${member.member_number} ${member.firstname} ${member.lastname}`);
-                }).fail((xhr, textStatus, error) => {
-                    UIkit.modal.alert("<h2>Misslyckades med att hämta medlemsinformation</h2>" + xhr.responseJSON.status);
-                });
-            });
-        </script>
     </head>
     <body>
         <div id="purchase-history">

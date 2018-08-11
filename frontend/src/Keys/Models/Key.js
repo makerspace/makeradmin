@@ -1,6 +1,6 @@
-import Backbone from 'backbone'
+import Backbone from 'backbone';
 
-module.exports = Backbone.Model.fullExtend(
+export default Backbone.Model.fullExtend(
 {
 	idAttribute: "key_id",
 	urlRoot: "/keys",

@@ -1,8 +1,14 @@
 var webpack = require('webpack');
+const path = require('path');
+
+var src = path.resolve(__dirname, "src")
+
+var mode = process.env.DEVELOPMENT ? 'development' : 'production'
+console.info("mode: " + mode);
 
 // Get git info from command line
 var commitHash = require("child_process")
-	.execSync("sh -c 'find ./src/ -type f -exec md5sum {} \\; | sort -k 2 | md5sum'")
+	.execSync("sh -c 'find " + src + " -type f -exec md5sum {} \\; | sort -k 2 | md5sum'")
 	.toString();
 
 // Get the build date
@@ -14,41 +20,47 @@ var options = {
 var buildDate = new Intl.DateTimeFormat('sv-SE', options).format(new Date());
 
 module.exports = {
-	context: __dirname + "/src",
-	entry: "./app.jsx",
+    context: src,
+    entry: "./app.jsx",
 
-	// Compile into a js.app
-	output:
-	{
-		filename: "app.js",
-		path: __dirname + "/dist/js",
-	},
+    // Compile into a js.app
+    output:
+    {
+	filename: "app.js",
+        publicPath: "js",
+	path: path.resolve(__dirname, "dist/js"),
+    },
+    
+    // Preprocess *.jsx files
+    module: {
+        rules: [
+            {
+                test: /\.(js|jsx)$/,
+                exclude: /node_modules/,
+                use: ['babel-loader'],
+            },
+        ]
+    },
 
-	// Include *.js and *.jsx files
-	resolve: {
-		extensions: ["", ".js", ".jsx"]
-	},
+    // Files to include.
+    resolve: {
+        extensions: ['*', '.js', '.jsx']
+    },
 
-	// Preprocess *.jsx files
-	module: {
-		loaders:
-		[
-			{
-				test: /\.jsx?$/,
-				exclude: /node_modules/,
-				loader: "babel-loader",
-				query: {
-					presets: ["es2015", "react"]
-				}
-			},
-		],
-	},
-
-	// Include build information (build date, git hash)
-	plugins: [
-		new webpack.DefinePlugin({
-			__COMMIT_HASH__: JSON.stringify(commitHash),
-			__BUILD_DATE__: JSON.stringify(buildDate),
-		})
-	]
+    // Include build information (build date, git hash)
+    plugins: [
+        new webpack.DefinePlugin({
+            __COMMIT_HASH__: JSON.stringify(commitHash),
+            __BUILD_DATE__: JSON.stringify(buildDate),
+        })
+    ],
+    
+    mode: mode,
+    
+    // Config for webpack-serve.
+    devServer: {
+        host: "0.0.0.0",
+        contentBase: "./dist",
+        historyApiFallback: true,
+    }
 }

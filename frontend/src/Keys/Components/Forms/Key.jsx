@@ -6,7 +6,7 @@ import Input from '../../../Components/Form/Input'
 import Date from '../../../Components/Form/Date'
 import Textarea from '../../../Components/Form/Textarea'
 
-module.exports = withRouter(React.createClass({
+export default withRouter(React.createClass({
 	mixins: [Backbone.React.Component.mixin, GenericEntityFunctions],
 
 	removeTextMessage: function(key)

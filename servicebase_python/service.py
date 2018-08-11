@@ -17,6 +17,13 @@ from decimal import Decimal
 SERVICE_USER_ID = -1
 
 
+class BackendException(Exception):
+    def __init__(self, tag: str, sv: str, en: Optional[str]) -> None:
+        self.tag = tag
+        self.message_sv = sv
+        self.message_en = en
+
+
 class DB:
     def __init__(self, host: str, name: str, user: str, password: str) -> None:
         self.host = host
@@ -263,6 +270,8 @@ def route_helper(f, json=False, status="ok"):
             res = f(data, *args, **kwargs) if json else f(*args, **kwargs)
         except NotFound:
             return jsonify({"status": "not found"}), 404
+        except BackendException as e:
+            return jsonify({"status": e.tag, "message_sv": e.message_sv, "message_en": e.message_en}), 400
         except Exception as e:
             eprint(e)
             raise e

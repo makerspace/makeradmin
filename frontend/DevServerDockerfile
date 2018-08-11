@@ -1,0 +1,21 @@
+FROM node:8-alpine
+
+RUN mkdir /frontend
+
+COPY ./package.json /frontend/
+
+WORKDIR /frontend
+
+RUN npm install
+
+COPY ./webpack.config.js /frontend/
+
+COPY  ./src/ /frontend/src
+
+COPY  ./dist/ /frontend/dist
+
+EXPOSE 8080
+
+ENV DEVELOPMENT=1
+
+CMD ["npm", "start"]
