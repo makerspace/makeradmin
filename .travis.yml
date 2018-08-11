@@ -27,7 +27,7 @@ script:
   - bats tests/bats/
 
 cache:
-  bundler: true
+  timeout: 600
   directories:
     - $HOME/docker
 
