@@ -428,13 +428,6 @@ def stripe_callback() -> None:
 def process_cart(member_id, cart: List[Dict[str,Any]]) -> Tuple[Decimal, List[CartItem]]:
     items = []
     with db.cursor() as cur:
-        member = None
-        if member_id:
-            try:
-                member = instance.gateway.get(f"membership/member/{member_id}/membership").json()
-            except RequestException:
-                pass
-        
         with localcontext() as ctx:
             ctx.clear_flags()
             total_amount = Decimal(0)
@@ -447,8 +440,8 @@ def process_cart(member_id, cart: List[Dict[str,Any]]) -> Tuple[Decimal, List[Ca
                 name, price, smallest_multiple, product_filter = tup
                 
                 if product_filter:
-                    service.product_filters[product_filter](name=name, member=member)
-                
+                    service.product_filters[product_filter](name=name, member_id=member_id)
+
                 if price < 0:
                     abort(400, "Item seems to have a negatice price. Not allowing purchases that item just in case. Item: " + str(item["id"]))
 

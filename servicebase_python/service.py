@@ -430,11 +430,13 @@ class Entity:
 
 class CanNotBuyStartPackage(BackendException):
     def __init__(self):
-        super().__init__(sv=f"Startpaket kan bara köpas en gång om året.",
-                         en=f"Starterpack can only be bought once a year.")
+        super().__init__(sv=f"Startpaket kan bara köpas om du inte har haft labaccess de på 9 månader (30*9 days).",
+                         en=f"Starterpack can only be bought if you haven't had lab acccess during the last 9 months (30*9 days).")
             
             
-def filter_start_package(name=None, member=None):
+def filter_start_package(name=None, member_id=None):
+    member = instance.gateway.get(f"membership/member/{member_id}/membership").json()
+
     if not member:
         return
 
