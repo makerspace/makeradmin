@@ -224,7 +224,7 @@ def read_config():
 
 def eprint(s, **kwargs):
     ''' Print to stderr and flush the output stream '''
-    kwargs["file"] = sys.stderr
+    kwargs.setdefault("file", sys.stderr)
     print(s, **kwargs)
     sys.stderr.flush()
 
@@ -401,9 +401,11 @@ class Entity:
 
         with self.db.cursor() as cur:
             where = "WHERE " + where if where else ""
-            cur.execute(f"SELECT {self._read_fields} FROM {self.table} {where}", where_values)
+            sql = f"SELECT {self._read_fields} FROM {self.table} {where}"
+            cur.execute(sql, where_values)
             rows = cur.fetchall()
-            return [self._convert_to_dict(row) for row in rows]
+            res = [self._convert_to_dict(row) for row in rows]
+            return res
 
     def add_routes(self, service, endpoint, read_permission=DEFAULT_PERMISSION, write_permission=DEFAULT_PERMISSION):
         # Note: Many methods here return other methods that we then call.

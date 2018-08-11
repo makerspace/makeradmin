@@ -1,10 +1,11 @@
-from flask import Flask, render_template, abort
+from flask import render_template
 import service
 from service import eprint
 import json
 import os
-from webshop_entities import category_entity, product_entity, transaction_entity, transaction_content_entity, action_entity, membership_products
-from typing import Set, List, Dict, Any, NamedTuple, Tuple
+from webshop_entities import category_entity, product_entity, transaction_entity, transaction_content_entity, \
+    action_entity, membership_products, filter_entity
+from typing import List, Dict, Any, Tuple
 from decimal import Decimal
 
 
@@ -18,6 +19,7 @@ category_entity.db = db
 transaction_entity.db = db
 transaction_content_entity.db = db
 action_entity.db = db
+filter_entity.db = db
 
 host_backend = os.environ["HOST_BACKEND"]
 if not host_backend.startswith("http"):
@@ -29,7 +31,7 @@ meta = {
 }
 
 
-def product_data() -> Tuple[List[Dict[str,Any]], List[Dict[str,Any]]]:
+def product_data() -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
     with db.cursor() as cur:
         # Get all categories, as some products may exist in deleted categories
         # (it is up to an admin to move them to another category)
@@ -37,7 +39,8 @@ def product_data() -> Tuple[List[Dict[str,Any]], List[Dict[str,Any]]]:
 
         data = []
         for cat in categories:
-            cur.execute("SELECT id,name,unit,price,smallest_multiple FROM webshop_products WHERE category_id=%s AND deleted_at IS NULL ORDER BY name", (cat["id"],))
+            cur.execute("SELECT id,name,unit,price,smallest_multiple FROM webshop_products"
+                        " WHERE category_id=%s AND deleted_at IS NULL ORDER BY name", (cat["id"],))
             products = cur.fetchall()
             if len(products) > 0:
                 data.append({
@@ -62,13 +65,15 @@ def product_data() -> Tuple[List[Dict[str,Any]], List[Dict[str,Any]]]:
 @instance.route("/")
 def home() -> str:
     all_products, categories = product_data()
-    return render_template("shop.html", product_json=json.dumps(all_products), categories=categories, url=instance.full_path, meta=meta)
+    return render_template("shop.html", product_json=json.dumps(all_products), categories=categories,
+                           url=instance.full_path, meta=meta)
 
 
 @instance.route("cart")
 def cart() -> str:
     all_products, categories = product_data()
-    return render_template("cart.html", product_json=json.dumps(all_products), categories=categories, url=instance.full_path, meta=meta)
+    return render_template("cart.html", product_json=json.dumps(all_products), categories=categories,
+                           url=instance.full_path, meta=meta)
 
 
 @instance.route("register")
@@ -89,6 +94,7 @@ def product_view(id: int) -> str:
     all_products, categories = product_data()
     return render_template("product.html", product=product, product_json=json.dumps(all_products), Decimal=Decimal, categories=categories, currency="kr", url=instance.full_path, meta=meta)
 
+
 @instance.route("product/<int:id>/edit")
 def product_edit(id: int) -> str:
     categories = category_entity.list()
@@ -96,7 +102,10 @@ def product_edit(id: int) -> str:
 
     # Find the ids and names of all actions that this product has
     with db.cursor() as cur:
-        cur.execute("SELECT webshop_product_actions.id,webshop_actions.id,webshop_actions.name,webshop_product_actions.value FROM webshop_product_actions INNER JOIN webshop_actions ON webshop_product_actions.action_id=webshop_actions.id WHERE webshop_product_actions.product_id=%s AND webshop_product_actions.deleted_at IS NULL", id)
+        cur.execute("SELECT webshop_product_actions.id,webshop_actions.id,webshop_actions.name,webshop_product_actions.value"
+                    " FROM webshop_product_actions"
+                    " INNER JOIN webshop_actions ON webshop_product_actions.action_id=webshop_actions.id"
+                    " WHERE webshop_product_actions.product_id=%s AND webshop_product_actions.deleted_at IS NULL", id)
         actions = cur.fetchall()
         eprint(actions)
         actions = [{
@@ -112,7 +121,16 @@ def product_edit(id: int) -> str:
         "action_categories": action_categories
     })
 
-    return render_template("product_edit.html", action_json=action_json, action_categories=action_categories, product=product, categories=categories, url=instance.full_path, meta=meta)
+    with db.cursor() as cur:
+        cur.execute("SELECT filter_id FROM webshop_product_filters WHERE product_id=%s", id)
+        selected_filter = cur.fetchone()
+        eprint(selected_filter)
+    
+    filter_categories = filter_entity.list()
+
+    return render_template("product_edit.html", action_json=action_json, selected_filter=selected_filter,
+                           filter_categories=filter_categories, action_categories=action_categories,
+                           product=product, categories=categories, url=instance.full_path, meta=meta)
 
 
 @instance.route("product/create")

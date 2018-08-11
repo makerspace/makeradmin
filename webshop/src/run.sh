@@ -19,7 +19,10 @@ function refresh_ts() {
 
 refresh
 
+GUNICORN_FLAGS=""
+
 if [ "$APP_DEBUG" == "true" ]; then
+        GUNICORN_FLAGS=" --reload"
 	function watch_sass() {
 		echo "Starting sass watch process"
 		while inotifywait -qq -r -e modify,create,delete scss; do
@@ -47,5 +50,5 @@ fi
 # However running the servers behind nginx (and using the sync class) resolves all problems
 # as nginx handles all the persistent connections.
 # --log-level=DEBUG
-exec gunicorn --worker-class sync --workers=3 -b :80 frontend:instance.app&
-exec gunicorn --worker-class sync --workers=1 -b :8000 backend:instance.app
+exec gunicorn $GUNICORN_FLAGS --worker-class sync --workers=3 -b :80 frontend:instance.app&
+exec gunicorn $GUNICORN_FLAGS --worker-class sync --workers=1 -b :8000 backend:instance.app

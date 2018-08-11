@@ -217,7 +217,7 @@ def transaction_contents(id: int) -> Dict[str,Any]:
 
 @instance.route("member/current/transactions", methods=["GET"], permission=None)
 @route_helper
-def member_history() -> Dict[str,Any]:
+def member_history() -> Dict[str, Any]:
     '''
     Helper for listing the full transaction history of a member, with product info included.
     '''
@@ -236,7 +236,7 @@ def member_history() -> Dict[str,Any]:
     return transactions
 
 
-def copy_dict(source: Dict[str,Any], fields: List[str]) -> Dict[str,Any]:
+def copy_dict(source: Dict[str, Any], fields: List[str]) -> Dict[str, Any]:
     return {key: source[key] for key in fields if key in source}
 
 

@@ -58,6 +58,17 @@
                 </div>
                 <a href="#add-action-modal" class="uk-button uk-button-default" uk-toggle>Add action</a>
             </div>
+            <div>
+                <label class="uk-form-label">Filters</label>
+                <div class="uk-flex uk-margin">
+                    <select class="uk-select uk-margin-right">
+                        <option value="">No filter</option>
+                        {% for cat in filter_categories %}
+                            <option value="{{ cat.id }}" {% if selected_filter == cat %}selected{% endif %}>{{ cat.id }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
             <div class="uk-form-controls">
                 <button id="product-cancel" class="uk-button uk-button-primary">
                     <div class="progress-spinner" uk-spinner></div>

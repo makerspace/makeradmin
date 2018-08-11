@@ -1,0 +1,11 @@
+setuptools
+flask
+flask-compress
+jsonpickle
+PyMySQL
+python-dateutil
+requests
+gunicorn
+blinker
+dataclasses
+stripe

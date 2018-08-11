@@ -35,6 +35,17 @@ transaction_entity = Entity(
     allow_delete=False,
 )
 
+filter_entity = Entity(
+    table="webshop_filters",
+    columns=["id"],
+    allow_delete=False,
+)
+
+product_filter_entity = Entity(
+    table="webshop_product_filters",
+    columns=["product_id", "filter_id"],
+)
+
 action_entity = Entity(
     table="webshop_actions",
     columns=["name"],

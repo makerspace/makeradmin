@@ -117,3 +117,18 @@ CREATE TABLE `webshop_pending_registrations` (
   KEY `transaction_key` (transaction_id),
   CONSTRAINT transaction_constraint3 FOREIGN KEY (`transaction_id`) REFERENCES `webshop_transactions` (`id`)
 );
+
+CREATE TABLE `webshop_filters` (
+  `id` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+);
+
+INSERT INTO `webshop_filters` (id) VALUES ('start_package');
+
+CREATE TABLE `webshop_product_filters` (
+  `product_id` int(10) unsigned NOT NULL,
+  `filter_id` varchar(255) NOT NULL,
+  PRIMARY KEY (`product_id`, `filter_id`),
+  CONSTRAINT product_filters_filter_constraint FOREIGN KEY (`product_id`) REFERENCES `webshop_products` (`id`),
+  CONSTRAINT product_filters_product_constraint FOREIGN KEY (`filter_id`) REFERENCES `webshop_filters` (`id`)
+);

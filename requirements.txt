@@ -1,3 +1,4 @@
 # Requirements file for utils.
 requests
 pip
+-r servicebase_python/requirements.txt
