@@ -8,8 +8,8 @@ python:
   - 3.7
 
 before_install:
-  - sudo apt-get install -y docker-compose
-  - apt-get install npm
+  - sudo apt-get install -y docker-io docker-compose
+  - sudo apt-get install -y npm
 
 install:
   - make firstrun
