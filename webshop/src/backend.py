@@ -8,6 +8,8 @@ import os
 from decimal import Decimal, Rounded, localcontext
 from webshop_entities import category_entity, product_entity, action_entity, transaction_entity, transaction_content_entity, product_action_entity, membership_products, webshop_stripe_pending, webshop_pending_registrations, webshop_transaction_actions
 from typing import Set, List, Dict, Any, NamedTuple, Tuple
+from datetime import datetime
+from dateutil import parser
 
 
 class CartItem(NamedTuple):
@@ -156,7 +158,10 @@ webshop_stripe_pending.db = db
 
 @instance.route("pending_actions", methods=["GET"])
 @route_helper
-def pending_actions() -> List[Dict[str,Any]]:
+def pending_actions():
+    return _pending_actions()
+
+def _pending_actions() -> List[Dict[str,Any]]:
     '''
     Finds every item in a transaction and checks the actions it has, then checks to see if all those actions have been completed (and are not deleted).
     The actions that are valid for a transaction are precisely those that existed at the time the transaction was made. Therefore if an action is added to a product
@@ -672,6 +677,59 @@ def pay(member_id: int, data: Dict[str, Any], activates_member: bool = False) ->
     duplicatePurchaseRands.add(duplicatePurchaseRand)
 
     return {"transaction_id": transaction_id}
+
+
+def send_key_updated_email(member_id: int, extended_days: int, end_date: datetime) -> None:
+    r = instance.gateway.get(f"membership/member/{member_id}")
+    assert r.ok
+    member = r.json()["data"]
+
+    r = instance.gateway.post("messages", {
+        "recipients": [
+            {
+                "type": "member",
+                "id": member_id
+            },
+        ],
+        "message_type": "email",
+        "subject": "Din labaccess har utökats",
+        "subject_en": "Your lab access has been extended",
+        "body": render_template("updated_key_time_email.html", frontend_url=instance.gateway.get_frontend_url, member=member, extended_days=extended_days, end_date=end_date.strftime("%Y-%m-%d"))
+    })
+
+    if not r.ok:
+        eprint("Failed to send key updated email")
+        eprint(r.text)
+
+
+@instance.route("ship_orders", methods=["POST"])
+@route_helper
+def ship_orders() -> None:
+    '''
+    Completes all orders for purchasing lab access and updates existing keys with new dates.
+    If a user has no key yet, then the order will remain as not completed.
+    If a user has multiple keys, all of them are updated with new dates.
+    '''
+    now = datetime.now().astimezone()
+    actions = _pending_actions()
+
+    for pending in actions:
+        member_id = pending["member_id"]
+        item = pending["item"]
+        action = pending["action"]
+
+        if action["name"] == "add_labaccess_days":
+            days_to_add = int(pending["pending_action"]["value"])
+            assert(days_to_add >= 0)
+            r = instance.gateway.post(f"membership/member/{member_id}/addMembershipDays", { "type": "labaccess", "days": days_to_add })
+            assert r.ok, r.text
+
+            r = instance.gateway.get(f"membership/member/{member_id}/membership")
+            assert r.ok, r.text
+            new_end_date = parser.parse(r.json()["data"]["labaccess_end"])
+
+            webshop_transaction_actions.put({ "status": "completed", "completed_at": str(now) }, pending['pending_action']['id'])
+            send_key_updated_email(member_id, days_to_add, new_end_date)
 
 
 instance.serve_indefinitely()
