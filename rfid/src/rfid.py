@@ -1,4 +1,4 @@
-from flask import Flask, abort
+from flask import Flask, abort, render_template
 import service
 from service import Entity, eprint, route_helper
 from datetime import datetime, timedelta
@@ -25,6 +25,28 @@ gateway = instance.gateway
 key_entity.db = instance.db
 key_entity.add_routes(instance, "", read_permission="keys_view", write_permission="keys_edit")
 
+
+def send_key_updated_email(member_id: int, extended_days: int, end_date: datetime) -> None:
+    r = instance.gateway.get(f"membership/member/{member_id}")
+    assert r.ok
+    member = r.json()["data"]
+
+    r = instance.gateway.post("messages", {
+        "recipients": [
+            {
+                "type": "member",
+                "id": member_id
+            },
+        ],
+        "message_type": "email",
+        "subject": "Din labaccess har utökats",
+        "subject_en": "Your lab access has been extended",
+        "body": render_template("updated_key_time_email.html", frontend_url=instance.gateway.get_frontend_url, member=member, extended_days=extended_days, end_date=end_date.strftime("%Y-%m-%d"))
+    })
+
+    if not r.ok:
+        eprint("Failed to send key updated email")
+        eprint(r.text)
 
 @instance.route("update_times", methods=["POST"])
 @route_helper
@@ -69,6 +91,7 @@ def update_keys() -> None:
 
             r = gateway.put(f"webshop/transaction_action/{pending['pending_action']['id']}", { "status": "completed", "completed_at": str(now) })
             assert r.ok, r.text
+            send_key_updated_email(member_id, days_to_add, key["enddate"])
 
 
 instance.serve_indefinitely()
