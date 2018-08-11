@@ -1,9 +1,13 @@
 PY_SOURCE_FILES=$(shell find . -type f -name "*.py")
+UNAME_S=$(shell uname -s)
 
 build:
 	echo "source_revision = '$(shell git rev-parse --short HEAD)$(shell if ! git diff-index --quiet HEAD --; then echo -dirty; fi)'" > source_revision.py
 
 init:
+ifeq ($(UNAME_S),Darwin)
+	brew install unixodbc
+endif
 	python3 -m pip install pip --upgrade
 	python3 -m pip install -r requirements.txt --upgrade
 
