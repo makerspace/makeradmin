@@ -1,11 +1,11 @@
 from flask import request, abort, jsonify, render_template
 import service
-from service import eprint, assert_get, SERVICE_USER_ID, route_helper, BackendException
+from service import eprint, assert_get, SERVICE_USER_ID, route_helper, BackendException, format_datetime
 import stripe
 import os
 from decimal import Decimal, Rounded, localcontext
 from collections import namedtuple
-from webshop_entities import category_entity, product_entity, action_entity, transaction_entity, transaction_content_entity, product_action_entity, webshop_completed_actions, membership_products, webshop_stripe_pending, webshop_pending_registrations
+from webshop_entities import category_entity, product_entity, action_entity, transaction_entity, transaction_content_entity, product_action_entity, membership_products, webshop_stripe_pending, webshop_pending_registrations, webshop_transaction_actions
 from typing import Set, List, Dict, Any, NamedTuple, Tuple, Optional
 
 
@@ -159,8 +159,8 @@ transaction_entity.add_routes(instance, "transaction", read_permission="webshop"
 transaction_content_entity.db = db
 transaction_content_entity.add_routes(instance, "transaction_content", read_permission="webshop")
 
-webshop_completed_actions.db = db
-webshop_completed_actions.add_routes(instance, "completed_actions", read_permission="webshop")
+webshop_transaction_actions.db = db
+webshop_transaction_actions.add_routes(instance, "transaction_action")
 
 webshop_pending_registrations.db = db
 
@@ -177,19 +177,17 @@ def pending_actions() -> List[Dict[str,Any]]:
     '''
 
     with db.cursor() as cur:
-        # Note webshop_completed_actions.content_id IS NULL makes this a check for all actions that are *not* in the webshop_completed_actions table (i.e not completed).
         cur.execute("""
-            SELECT webshop_transaction_contents.id, webshop_transaction_contents.transaction_id, webshop_transaction_contents.product_id,
-                webshop_transaction_contents.count, webshop_transaction_contents.amount, webshop_product_actions.value, webshop_actions.id, webshop_actions.name, webshop_transactions.member_id
-            FROM webshop_transaction_contents
-            INNER JOIN webshop_product_actions ON webshop_product_actions.product_id=webshop_transaction_contents.product_id
-            LEFT JOIN webshop_completed_actions ON webshop_transaction_contents.id=webshop_completed_actions.content_id
-            INNER JOIN webshop_actions ON webshop_actions.id=webshop_product_actions.action_id
-            INNER JOIN webshop_transactions ON webshop_transactions.id=webshop_transaction_contents.transaction_id
-            WHERE webshop_completed_actions.content_id IS NULL
-            AND webshop.transactions.status='complete'
-            AND webshop_transactions.created_at>webshop_product_actions.created_at
-            AND (webshop_transactions.created_at<webshop_product_actions.deleted_at OR webshop_product_actions.deleted_at IS NULL)
+            SELECT webshop_transaction_contents.id, webshop_transaction_contents.transaction_id, webshop_transaction_contents.product_id, webshop_transaction_contents.count,
+                webshop_transaction_contents.amount, webshop_transaction_actions.value,
+                webshop_actions.id, webshop_actions.name,
+                webshop_transactions.member_id,
+                webshop_transaction_actions.id
+            FROM webshop_transaction_actions
+            INNER JOIN webshop_actions              ON webshop_transaction_actions.action_id      = webshop_actions.id
+            INNER JOIN webshop_transaction_contents ON webshop_transaction_actions.content_id     = webshop_transaction_contents.id
+            INNER JOIN webshop_transactions         ON webshop_transaction_contents.transaction_id= webshop_transactions.id
+            WHERE webshop_transaction_actions.status='pending' AND webshop_transactions.status='completed'
             """)
 
         return [
@@ -200,11 +198,14 @@ def pending_actions() -> List[Dict[str,Any]]:
                     "product_id": v[2],
                     "count": v[3],
                     "amount": str(v[4]),
-                    "action_value": v[5],
                 },
                 "action": {
                     "id": v[6],
                     "name": v[7],
+                },
+                "pending_action": {
+                    "id": v[9],
+                    "value": v[5],
                 },
                 "member_id": v[8],
             } for v in cur.fetchall()
@@ -247,14 +248,11 @@ def transaction_actions(id: int):
     with db.cursor() as cur:
         cur.execute("""
             SELECT webshop_actions.id AS action_id, webshop_actions.name AS action, 
-                    webshop_transaction_contents.id AS content_id, webshop_transaction_actions.value,
-                    CAST(IFNULL(SUM(performed.value),0) AS signed) AS performed_value
+                    webshop_transaction_contents.id AS content_id, webshop_transaction_actions.value, webshop_transaction_actions.status, webshop_transaction_actions.completed_at
             FROM webshop_transaction_contents
             INNER JOIN webshop_transaction_actions ON webshop_transaction_actions.content_id = webshop_transaction_contents.id
             INNER JOIN webshop_actions ON webshop_actions.id = webshop_transaction_actions.action_id
-            LEFT JOIN webshop_transaction_performed_actions AS performed ON performed.transaction_action_id = webshop_transaction_actions.id
             WHERE webshop_transaction_contents.transaction_id = %s
-            GROUP BY webshop_actions.id, webshop_actions.name, webshop_transaction_contents.id, webshop_transaction_actions.value
             """, id)
         return [
             {
@@ -262,7 +260,8 @@ def transaction_actions(id: int):
                 "action": v[1],
                 "content_id": v[2],
                 "value": v[3],
-                "performed_value": v[4],
+                "status": v[4],
+                "completed_at": format_datetime(v[5]),
             } for v in cur.fetchall()
         ]
 

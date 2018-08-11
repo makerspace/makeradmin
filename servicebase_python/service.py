@@ -70,7 +70,10 @@ class APIGateway:
 DEFAULT_PERMISSION = object()
 
 
-def _format_datetime(date: Union[str, datetime]):
+def format_datetime(date: Union[str, datetime]):
+    if date is None:
+        return None
+
     if not isinstance(date, datetime):
         date = parser.parse(date)
 
@@ -88,7 +91,7 @@ class Service:
         self.gateway = gateway
         self.frontend = frontend
         self.app = Flask(name, static_url_path=self.full_path("static"))
-        self.app.jinja_env.filters['format_datetime'] = _format_datetime
+        self.app.jinja_env.filters['format_datetime'] = format_datetime
         self._used_permissions: Set[str] = set()
 
     def full_path(self, path: str):

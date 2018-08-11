@@ -55,14 +55,14 @@ product_action_entity = Entity(
     columns=["product_id", "action_id", "value"],
 )
 
-webshop_completed_actions = Entity(
-    table="webshop_transaction_performed_actions",
-    columns=["transaction_action_id", "value"],
-)
-
 webshop_stripe_pending = Entity(
     table="webshop_stripe_pending",
     columns=["transaction_id", "stripe_token"],
+)
+
+webshop_transaction_actions = Entity(
+    table="webshop_transaction_actions",
+    columns=["content_id", "action_id", "value", "status", Column("completed_at", dtype=datetime)],
 )
 
 webshop_pending_registrations = Entity(
