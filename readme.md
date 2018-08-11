@@ -68,6 +68,17 @@ mysql> exit
 Bye
 ```
 
+### Adding items to the shop
+The file [`webshop/src/scrape/tictail.json`](./webshop/src/scrape/tictail.json) contains a list of the items that can be bought with attributes. They must be imported to the docker container's database:
+```bash
+docker exec -it makeradmin_webshop_1 bash -c "cd scrape && python3 tictail2db.py"
+```
+
+The docker container corresponding to the webshop must be rebuilt when it is changed (and then imported anew):
+```bash
+docker-compose up -d --build webshop
+```
+
 ### Viewing MakerAdmin etc.
 Go to:
 * [the makeradmin web site](http://localhost:8009)
