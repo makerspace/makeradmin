@@ -58,7 +58,8 @@ class MakerAdminClient(object):
             self.ui.info__progress(f"{msg} ({r.status_code})")
 
     def is_logged_in(self):
-        r = requests.get(self.base_url + "/member/permissions", headers={'Authorization': 'Bearer ' + self.token})
+        url = self.base_url + "/membership/permission"
+        r = requests.get(url, headers={'Authorization': 'Bearer ' + self.token})
         return r.ok
 
     def login(self):
