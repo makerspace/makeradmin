@@ -17,6 +17,6 @@ $app->group(array(), function() use ($app)
 	$app->   get("multiaccess/file/{filename}", ['middleware' => 'permission:sync_view', 'uses' => "MultiAccessSync@diff"]);
 	$app->  post("multiaccess/upload",          ['middleware' => 'permission:sync_view', 'uses' => "MultiAccessSync@upload"]);
 
-	// External data fetch TODO: remove
+	// External data fetch.
 	$app->   get("multiaccess/memberdata",      ['middleware' => 'permission:sync_service_external', 'uses' => "MultiAccessSync@dumpmembers"]);
 });

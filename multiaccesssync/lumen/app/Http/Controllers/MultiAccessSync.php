@@ -322,8 +322,7 @@ class MultiAccessSync extends Controller
 			$current_member['member_number'] = $member_number;
 			$current_member['firstname'] = $member->firstname;
 			$current_member['lastname'] = $member->lastname;
-			$current_member['has_labaccess'] = $member->membership->has_labaccess;
-			$current_member['end_timestamp'] = $member->membership->labaccess_end !== null ? date('c', strtotime($member->membership->labaccess_end)) : null;
+			$current_member['end_date'] = $member->membership->labaccess_end;
 			$current_member['keys'] = [];
 			$member_keys[$member_id] = $current_member;
 		}
