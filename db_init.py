@@ -19,25 +19,36 @@ print(" done")
 
 sleep(1)
 for container in containers:
+    # This is how the names appear to be formatted.
+    # If necessary 'docker-compose ps -q {container}' can be used, but that is a lot slower
+    container_name = "makeradmin_" + container + "_1"
     print(f"Initializing database for {container}...")
-    inner_bash2 = 'printf "%s|%s|%s" "${MYSQL_DB}" "${MYSQL_USER}" "${MYSQL_PASS}"'
-    mysql_db, mysql_user, mysql_pass = check_output(["docker-compose", "run", "--rm", "--no-deps", container, "bash", "-c", inner_bash2]).decode('utf-8').split("|")
+
+    # Get environment variables for the docker container
+    env = dict(
+        row.split("=") for row in
+        check_output([
+            "docker", "inspect", "-f", "{{range $index, $value := .Config.Env}}{{println $value}}{{end}}", container_name
+        ]).decode('utf-8').strip().split("\n")
+    )
+    mysql_db, mysql_user, mysql_pass = env["MYSQL_DB"], env["MYSQL_USER"], env["MYSQL_PASS"]
+
     # Note "{{x}}" escapes to "{x}"
-    inner_bash3 = f"""mysql -uroot --password="${{MYSQL_ROOT_PASSWORD}}" -e "
+    inner_bash3 = f"""
+    mysql -uroot --password="${{MYSQL_ROOT_PASSWORD}}" -e "
     CREATE USER IF NOT EXISTS \`{mysql_user}\`@'%' IDENTIFIED BY '{mysql_pass}';
     CREATE DATABASE IF NOT EXISTS \`{mysql_db}\`;
     GRANT ALL ON \`{mysql_db}\`.* TO \`{mysql_user}\`@'%';
     FLUSH PRIVILEGES;"
-  """
+    mysql -uroot --password="${{MYSQL_ROOT_PASSWORD}}" -e "FLUSH PRIVILEGES;"
+    """
     o1 = check_output(["docker-compose", "exec", "db2", "bash", "-c", inner_bash3], stderr=STDOUT)
-    if o1 != b'mysql: [Warning] Using a password on the command line interface can be insecure.\r\n':
-        print(o1.decode('utf-8'))
+    print("\n".join(line for line in o1.decode('utf-8').strip().replace('\r', '').split('\n') if line != 'mysql: [Warning] Using a password on the command line interface can be insecure.'))
 
-    o2 = check_output(["docker-compose", "exec", "db2", "bash", "-c", 'mysql -uroot --password="${MYSQL_ROOT_PASSWORD}" -e "FLUSH PRIVILEGES;"'], stderr=STDOUT)
-    if o2 != b'mysql: [Warning] Using a password on the command line interface can be insecure.\r\n':
-        print(o2.decode('utf-8'))
-
-    migrate_artisan = f"if [ -f /var/www/html/artisan ]; then php /var/www/html/artisan --force migrate; else echo \"artisan not found, skipping migration for {container}\"; fi"
-    call(["docker-compose", "run", "--rm", "--no-deps", container, "bash", "-c", migrate_artisan])
-    migrate_python = f"if [ -f /var/www/service/migrate.py ]; then echo 'Migrating using Python'; python3 /var/www/service/migrate.py; fi"
-    call(["docker-compose", "run", "--rm", "--no-deps", container, "bash", "-c", migrate_python])
+    migrate = f"""
+        if [ -f /var/www/html/artisan ]; then php /var/www/html/artisan --force migrate;
+        elif [ -f /var/www/service/migrate.py ]; then echo 'Migrating using Python'; python3 /var/www/service/migrate.py;
+        else echo \"No migration script found. Skipping migration for {container}\";
+        fi
+    """
+    call(["docker-compose", "run", "--rm", "--no-deps", container, "bash", "-c", migrate])
