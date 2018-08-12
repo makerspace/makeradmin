@@ -112,6 +112,8 @@ def main():
     parser.add_argument("-m", "--members-filename", default=None,
                         help="Provide members in a file instead of fetching from maker admin (same format as response"
                              " from maker admin).")
+    parser.add_argument("-t", "--token", default="",
+                        help="Provide token on command line instead of prompting for login.")
     parser.add_argument("--customer-id", default=16, type=int,
                         help="MultiAcces custoemr primary key to use to get and add users.")
     parser.add_argument("--authority-id", default=23, type=int,
@@ -127,7 +129,8 @@ def main():
             raise argparse.ArgumentError(f"Unknown argument '{w}' to what.")
 
     with Tui() as ui:
-        client = MakerAdminClient(ui=ui, base_url=args.maker_admin_base_url, members_filename=args.members_filename)
+        client = MakerAdminClient(ui=ui, base_url=args.maker_admin_base_url, members_filename=args.members_filename,
+                                  token=args.token)
 
         ui.info__progress(f"connecting to {args.db}")
         engine = create_engine(args.db)

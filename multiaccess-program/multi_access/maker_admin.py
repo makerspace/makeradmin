@@ -45,11 +45,11 @@ MakerAdminMember = namedtuple('MakerAdminMember', [
 
 class MakerAdminClient(object):
     
-    def __init__(self, ui=None, base_url=None, members_filename=None):
+    def __init__(self, ui=None, base_url=None, members_filename=None, token=""):
         self.ui = ui
         self.base_url = base_url
         self.members_filename = members_filename
-        self.token = ""
+        self.token = token
 
     def show_response_error_message(self, msg, r):
         try:
