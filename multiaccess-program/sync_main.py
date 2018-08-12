@@ -20,10 +20,11 @@ except ImportError:
 logger = getLogger("makeradmin")
 
 
+WHAT_ORDERS = 'orders'
 WHAT_UPDATE = 'update'
 WHAT_ADD = 'add'
 WHAT_BLOCK = 'block'
-WHAT_ALL = {WHAT_UPDATE, WHAT_ADD, WHAT_BLOCK}
+WHAT_ALL = {WHAT_ORDERS, WHAT_UPDATE, WHAT_ADD, WHAT_BLOCK}
 
 
 def is_multi_access_running():
@@ -52,7 +53,8 @@ def sync(session=None, client=None, ui=None, customer_id=None, authority_id=None
 
     # Run actions on MakerAdmin (ship orders and update key timestamps)
 
-    client.ship_orders(ui)
+    if WHAT_ORDERS in what:
+        client.ship_orders(ui)
 
     # Fetch from MakerAdmin
     
@@ -103,9 +105,11 @@ def main():
                         help="SQL Alchemy db engine spec.")
     parser.add_argument("-w", "--what", default=",".join(WHAT_ALL),
                         help=f"What to update, comma separated list."
+                             f" '{WHAT_ORDERS}' tell maker admin to perform order actions before updating members."
                              f" '{WHAT_UPDATE}' will update end times and rfid_tag."
                              f" '{WHAT_ADD}' will add members in MultAccess."
-                             f" '{WHAT_BLOCK}' will block members that should not have access.")
+                             f" '{WHAT_BLOCK}' will block members that should not have access."
+                        )
     parser.add_argument("-u", "--maker-admin-base-url",
                         default='https://api.makeradmin.se',
                         help="Base url of maker admin (for login and fetching of member info).")
