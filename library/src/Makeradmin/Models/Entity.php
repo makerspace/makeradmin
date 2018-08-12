@@ -19,7 +19,9 @@ class Entity
 	protected $relations = [];    // An array with information about relations to other entities
 	protected $type = null;       // The type of the entity, eg. "member"
 	protected $join = null;       // Specify the relation table we should join, if any
+	protected $expands = [];    // Specify which extra information to add to response. 
 	protected $columns = [];
+	protected $expandable_fields = [];
 	protected $sort = ["created_at", "desc"]; // An array with sorting options eg. ["entity_id", "desc"] or [["date_updated", "asc"],["date_created","desc"]]
 	protected $validation = [];               // Validation rules
 	protected $deletable = true;
@@ -52,6 +54,16 @@ class Entity
 //						$this->join = $this->type;
 					}
 
+					// Remove the filter to prevent further processing
+					unset($filters[$id]);
+				}
+				if ($id == "expand") {
+					$expand_fields = explode(",", $filter);
+					foreach ($expand_fields as $expand){
+						if (array_key_exists($expand, $this->expandable_fields)) {
+							$this->expands[] = $this->expandable_fields[$id];
+						}
+					}
 					// Remove the filter to prevent further processing
 					unset($filters[$id]);
 				}
@@ -89,6 +101,33 @@ class Entity
 		foreach($this->columns as $name => $column)
 		{
 			$query = $query->selectRaw("{$column["select"]} AS `{$name}`");
+		}
+
+		// Collect expand data
+		if (is_array($this->expands) && !empty($this->expands)) {
+			foreach($this->expands as $expand) {
+				if (!array_key_exists('selects', $expand) || empty($expand['selects'])) {
+					continue;
+				}
+				$base_table = $this->table;
+				if (array_key_exists('join_table', $expand)) {
+					if (!array_key_exists('column',$expand)) {
+						continue;
+					}
+					$self_column = $expand['column'];
+					$join_table = $expand['join_table'];
+					$join_column = array_key_exists('join_column', $expand) ? $expand['join_column'] : $self_column;
+					$query = $query->join($join_table, "{$join_table}.{$join_column}", "=", "{$this->table}.{$self_column}");
+					$base_table = $join_table;
+				}
+				foreach ($expand['selects'] as $name => $select) {
+					if (is_int($name)) {
+						$query = $query->selectRaw("{$base_table}.{$select} AS `{$select}`");
+					} else {
+						$query = $query->selectRaw("{$select} AS `{$name}`");
+					}
+				}
+			}
 		}
 
 		if($this->deletable)
