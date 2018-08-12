@@ -43,10 +43,9 @@ services:
       - ./logs/apigateway:/var/www/html/storage/logs
     depends_on:
       - db2
+      - servicebase
     ports:
       - "8010:80"
-    depends_on:
-      - servicebase
     networks:
       - makeradmin
     environment:
