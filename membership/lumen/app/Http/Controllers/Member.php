@@ -75,7 +75,25 @@ class Member extends Controller
 			$params["member_number"] = explode(",", $params["member_number"]);
 		}
 
-		return $this->_list("Member", $params);
+		$include_membership = empty($params["include_membership"]) ? false : filter_var($params["include_membership"], FILTER_VALIDATE_BOOLEAN);
+		
+		unset($params["include_membership"]);
+
+		$response = $this->_list("Member", $params);
+
+		if (!empty($include_membership) && $include_membership) {
+			// Modify the response to include membership data
+			$result = $response->getData()->data;
+			foreach ($result as $user) {
+				$user->membership = $this->_getMembership($user->member_id);
+			}
+			return Response()->json([
+				"status" => "ok",
+				"data" => $result,
+			], 200);
+		} else {
+			return $response;
+		}
 	}
 
 	/**
@@ -433,10 +451,11 @@ class Member extends Controller
 		DB::insert("INSERT INTO membership_spans(member_id, type, startdate, enddate) VALUES(?, ?, ?, ?)", [$member_id, $json['type'], $last_period, $endtime]);
 		return $this->getMembership($request, $member_id);
 	}
+
 	/**
 	 * Get membership times
 	 */
-	public function getMembership(Request $request, $member_id)
+	private function _getMembership($member_id)
 	{
 		// Check if the current time is covered by any span of valid membership times
 		$current_period = DB::table("membership_spans")
@@ -470,14 +489,23 @@ class Member extends Controller
 		}
 
 		// Send response to client
+		return [
+			"has_labaccess" => $labaccess,
+			"has_membership" => $membership,
+			"labaccess_end" => $labaccess_time,
+			"membership_end" => $membership_time,
+		];
+	}
+
+	/**
+	 * Get membership times
+	 */
+	public function getMembership(Request $request, $member_id)
+	{
+		// Send response to client
 		return Response()->json([
 			"status"  => "ok",
-			"data" => [
-				"has_labaccess" => $labaccess,
-				"has_membership" => $membership,
-				"labaccess_end" => $labaccess_time,
-				"membership_end" => $membership_time,
-			]
+			"data" => $this->_getMembership($member_id)
 		], 200);
 	}
 
