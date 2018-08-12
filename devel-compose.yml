@@ -45,12 +45,12 @@ services:
       - ./logs/apigateway:/var/www/html/storage/logs
       - ./apigateway/lumen/routes:/var/www/html/routes
       - ./apigateway/lumen/app:/var/www/html/app
+      - ./library/src:/var/www/html/vendor/makeradmin/makeradmin-library/src
     depends_on:
       - db2
+      - servicebase
     ports:
       - "8010:80"
-    depends_on:
-      - servicebase
     networks:
       - makeradmin
     environment:
@@ -137,6 +137,7 @@ services:
       - ./data/economy-vouchers:/var/www/html/vouchers
       - ./economy/lumen/routes:/var/www/html/routes
       - ./economy/lumen/app:/var/www/html/app
+      - ./library/src:/var/www/html/vendor/makeradmin/makeradmin-library/src
     environment:
       MYSQL_HOST: "db2:${MYSQL_PORT}"
       MYSQL_DB: "makeradmin-economy"
@@ -158,6 +159,7 @@ services:
       - ./logs/membership:/var/www/html/storage/logs
       - ./membership/lumen/routes:/var/www/html/routes
       - ./membership/lumen/app:/var/www/html/app
+      - ./library/src:/var/www/html/vendor/makeradmin/makeradmin-library/src
     environment:
       MYSQL_HOST: "db2:${MYSQL_PORT}"
       MYSQL_DB: "makeradmin-membership"
@@ -179,6 +181,7 @@ services:
       - ./logs/messages:/var/www/html/storage/logs
       - ./messages/lumen/routes:/var/www/html/routes
       - ./messages/lumen/app:/var/www/html/app
+      - ./library/src:/var/www/html/vendor/makeradmin/makeradmin-library/src
     environment:
       MYSQL_HOST: "db2:${MYSQL_PORT}"
       MYSQL_DB: "makeradmin-messages"
@@ -199,6 +202,7 @@ services:
     volumes:
       - ./emaildispatcher/lumen/routes:/var/www/html/routes
       - ./emaildispatcher/lumen/app:/var/www/html/app
+      - ./library/src:/var/www/html/vendor/makeradmin/makeradmin-library/src
     environment:
       MYSQL_HOST: "db2:${MYSQL_PORT}"
       MYSQL_DB: "makeradmin-messages"
@@ -224,6 +228,7 @@ services:
       - ./data/multiaccess-uploads:/var/www/html/storage/uploads
       - ./multiaccesssync/lumen/routes:/var/www/html/routes
       - ./multiaccesssync/lumen/app:/var/www/html/app
+      - ./library/src:/var/www/html/vendor/makeradmin/makeradmin-library/src
     environment:
       APIGATEWAY: api-gateway
       BEARER: "${API_BEARER}"
