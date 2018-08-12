@@ -1,27 +1,33 @@
 from subprocess import call, check_output, STDOUT
 import sys
 from time import sleep
+import argparse
+import multiprocessing
 
 containers = ["api-gateway", "membership", "messages", "economy", "rfid", "webshop"]
 
-if len(sys.argv) > 1:
-    containers = sys.argv[1:]
+parser = argparse.ArgumentParser(description='Initialize the database and run migrations')
+parser.add_argument('--project-name','-p', help='Use a different docker composer project name', default="makeradmin")
+parser.add_argument('--containers','-c', nargs="*", default=containers, help='All containers to update')
+args = parser.parse_args()
 
-call("docker-compose up -d db2", shell=True)
-db_hash = check_output("docker-compose ps -q db2", shell=True).decode('utf-8')
-assert(db_hash != "")
+containers = args.containers
+
+call(["docker-compose", "-p", args.project_name, "up", "-d", "db2"])
 
 print("Waiting for database", end="")
 inner_bash = 'while ! mysql -uroot --password="${MYSQL_ROOT_PASSWORD}" -e "" &> /dev/null; do printf "." && sleep 1; done'
-call(["docker-compose", "exec", "db2", "bash", "-c", inner_bash])
+call(["docker-compose", "-p", args.project_name, "exec", "db2", "bash", "-c", inner_bash])
 
 print(" done")
 
 sleep(1)
-for container in containers:
+
+
+def init_container(container):
     # This is how the names appear to be formatted.
     # If necessary 'docker-compose ps -q {container}' can be used, but that is a lot slower
-    container_name = "makeradmin_" + container + "_1"
+    container_name = f"{args.project_name}_{container}_1"
     print(f"Initializing database for {container}...")
 
     # Get environment variables for the docker container
@@ -42,8 +48,11 @@ for container in containers:
     FLUSH PRIVILEGES;"
     mysql -uroot --password="${{MYSQL_ROOT_PASSWORD}}" -e "FLUSH PRIVILEGES;"
     """
-    o1 = check_output(["docker-compose", "exec", "db2", "bash", "-c", inner_bash3], stderr=STDOUT)
-    print("\n".join(line for line in o1.decode('utf-8').strip().replace('\r', '').split('\n') if line != 'mysql: [Warning] Using a password on the command line interface can be insecure.'))
+    o1 = check_output(["docker-compose", "-p", args.project_name, "exec", "db2", "bash", "-c", inner_bash3], stderr=STDOUT)
+    o1 = o1.decode('utf-8').strip().replace('\r', '')
+    o1 = o1.replace("mysql: [Warning] Using a password on the command line interface can be insecure.", "").strip()
+    if o1 != "":
+        print(o1)
 
     migrate = f"""
         if [ -f /var/www/html/artisan ]; then php /var/www/html/artisan --force migrate;
@@ -51,4 +60,7 @@ for container in containers:
         else echo \"No migration script found. Skipping migration for {container}\";
         fi
     """
-    call(["docker-compose", "run", "--rm", "--no-deps", container, "bash", "-c", migrate])
+    call(["docker-compose", "-p", args.project_name, "run", "--rm", "--no-deps", container, "bash", "-c", migrate])
+
+for container in containers:
+    init_container(container)
