@@ -78,14 +78,14 @@ class MakerAdminClient(object):
         if r.ok:
             return r.json()
         else:
-            self.ui.fatal__error(f"failed to get data, got ({r.status_code}):\n{r.text}")
+            self.ui.fatal__error(f"failed to get data from {url}, got ({r.status_code}):\n{r.text}")
 
     def ship_orders(self, ui):
         ui.info__progress(f"shipping pending orders")
         url = self.base_url + '/keys/update_times'
         r = requests.post(url, headers={'Authorization': 'Bearer ' + self.token})
         if not r.ok:
-            self.ui.fatal__error(f"failed to ship orders, got ({r.status_code}):\n{r.text}")
+            self.ui.fatal__error(f"failed to ship orders using {url}, got ({r.status_code}):\n{r.text}")
 
     def fetch_members(self, ui):
         """ Fetch and return list of MakerAdminMember, raises exception on error. """
