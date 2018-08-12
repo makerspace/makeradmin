@@ -107,7 +107,6 @@ class MakerAdminClient(object):
     @staticmethod
     def response_data_to_members(data):
         """ Convert data object form server or file to filtered MakerAdminMember list (also parse timestamp). """
-        
         try:
             validate(data, schema=schema)
         except ValidationError as e:

@@ -147,9 +147,9 @@ def main():
                  ignore_running=args.ignore_running, what=what)
 
             session.close()
-
-            input("press enter to update the database again")
-
+            
+            ui.prompt__run_again()
+            
 
 if __name__ == '__main__':
 

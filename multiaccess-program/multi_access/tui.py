@@ -29,6 +29,15 @@ class Tui(object):
             raise SystemExit()
 
     @staticmethod
+    def prompt__run_again():
+        try:
+            print()
+            if input("press enter to run again again, ctrl-c or 'exit' to exit: ").strip() == 'exit':
+                raise KeyboardInterrupt()
+        except KeyboardInterrupt:
+            raise SystemExit()
+
+    @staticmethod
     def info__progress(msg):
         logger.info(msg)
 
