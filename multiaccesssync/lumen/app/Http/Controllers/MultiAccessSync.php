@@ -297,7 +297,7 @@ class MultiAccessSync extends Controller
 		$curl->setHeader("Authorization", "Bearer " . config("service.bearer"));
 
 		// Get all keys
-		$curl->call("GET", "http://" . config("service.gateway") . "/membership/keys", [
+		$curl->call("GET", "http://" . config("service.gateway") . "/membership/key", [
 			"per_page" => 5000,
 		]);
 		$keys = $curl->GetJson()->data;
@@ -331,8 +331,6 @@ class MultiAccessSync extends Controller
 		foreach ($keys as $key) {
 			$member_id = $key->member_id;
 			if (array_key_exists($member_id, $member_keys)) {
-				$lab_startdate = strtotime($key->startdate) ?: null;
-				$lab_enddate = strtotime($key->enddate) ?: null;
 				$current_key = [
 					'key_id' => $key->key_id,
 					'rfid_tag' => $key->tagid,

@@ -38,16 +38,8 @@ module.exports = withRouter(React.createClass({
 	{
 		return [
 			{
-				title: "Status",
-				sort: "status",
-			},
-			{
 				title: "RFID",
 				sort: "tagid",
-			},
-			{
-				title: "Titel",
-				sort: "title",
 			},
 			{
 				title: "Kommentarer",
@@ -63,17 +55,7 @@ module.exports = withRouter(React.createClass({
 	{
 		return (
 			<tr key={i}>
-				<td>
-					{(() => {
-						switch (row.status) {
-							case "active":   return <span><i className="uk-icon-check key-active"></i> Aktiv</span>;
-							case "inactive": return <span><i className="uk-icon-close key-inactive"></i> Inaktiv</span>;
-							case "auto":     return <span><i className="uk-icon-cog key-auto"></i> Auto</span>;
-						}
-					})()}
-				</td>
 				<td><Link to={this.state.linkPrefix + "/keys/" + row.key_id}>{row.tagid}</Link></td>
-				<td><Link to={this.state.linkPrefix + "/keys/" + row.key_id}>{row.title}</Link></td>
 				<td><Link to={this.state.linkPrefix + "/keys/" + row.key_id}>{row.description}</Link></td>
 				<td>
 					<TableDropdownMenu>

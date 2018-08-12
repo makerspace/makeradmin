@@ -42,5 +42,5 @@ for key, member in zip(keys, matching_members):
         r = gateway.post(f"membership/member/{member['member_id']}/addMembershipSpan", span)
         assert r.ok, r.text
 
-    r = gateway.post(f"membership/keys", key)
+    r = gateway.post(f"membership/key", key)
     assert r.ok, r.text
