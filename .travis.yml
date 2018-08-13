@@ -23,4 +23,4 @@ script:
   # Same as `make run`, but with -d at the end to make it exit when all have been started
   - docker-compose up -d
   - bats tests/bats/
-
+  - make test
