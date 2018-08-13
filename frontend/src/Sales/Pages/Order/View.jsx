@@ -36,10 +36,6 @@ module.exports = React.createClass({
 				<OrderActions type={Backbone.PageableCollection.extend({model: OrderActionModel})} dataSource={{
 					url: "/webshop/transaction/" + this.props.params.id + "/actions"
 				}} />
-				<h3>Orderhändelser</h3>
-				<OrderEvents type={Backbone.PageableCollection.extend({model: OrderEventModel})} dataSource={{
-					url: "/webshop/transaction/" + this.props.params.id + "/events"
-				}} />
 			</div>
 		);
 	},
