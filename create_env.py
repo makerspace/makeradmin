@@ -4,15 +4,10 @@ import os
 
 parser = argparse.ArgumentParser(description='Create a default \'.env\' file with secrets if it doesn\'t exist')
 parser.add_argument('--force','-f', dest='force', action='store_true', help='overwrite existing \'.env\' file')
-parser.add_argument('--project','-p', default='makeradmin', help='Set name prefix for containers (default=makeradmin)')
 args = parser.parse_args()
 
-if not args.project.isidentifier():
-    print('Error: Project name must of form [a-zA-Z_][a-zA-Z0-9_]*')
-    quit()
-
 config = {
-    "COMPOSE_PROJECT_NAME": args.project,
+    "COMPOSE_PROJECT_NAME": "makeradmin",
     "MYSQL_DB": "makerdata",
     "MYSQL_PORT": "3306",
     "MYSQL_USER": "makeradmin",

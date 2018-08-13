@@ -197,7 +197,8 @@ def assert_get(data: Dict, key: str):
 
 def gateway_from_envfile(path):
     # Read the .env file
-    env = {s[0]: (s[1] if len(s) > 1 else "") for s in (s.split("=") for s in open(".env").read().split('\n'))}
+    with open(".env") as f:
+        env = {s[0]: (s[1] if len(s) > 1 else "") for s in (s.split("=") for s in f.read().split('\n'))}
     host = env["HOST_BACKEND"].replace("http://", "").replace("https://", "")
     return APIGateway(host, env["API_BEARER"], env["HOST_FRONTEND"], env["HOST_BACKEND"])
 

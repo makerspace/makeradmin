@@ -1,0 +1,11 @@
+version: "2"
+services:
+  api-gateway:
+    ports:
+      - "8010:80"
+  webshop:
+    ports:
+      - "8011:80"
+  frontend:
+    ports:
+      - "8009:80"

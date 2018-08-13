@@ -119,7 +119,7 @@ Indented:
 
 		// Create new group
 		$entity = new GroupModel;
-		$entity->parent      = $json["parent"]      ?? "null";
+		$entity->parent      = $json["parent"]      ?? 0;
 		$entity->name        = $json["name"]        ?? null;
 		$entity->title       = $json["title"]       ?? null;
 		$entity->description = $json["description"] ?? null;

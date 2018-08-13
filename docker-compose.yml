@@ -44,8 +44,6 @@ services:
     depends_on:
       - db2
       - servicebase
-    ports:
-      - "8010:80"
     networks:
       - makeradmin
     environment:
@@ -82,8 +80,6 @@ services:
       - "./webshop/src/scss:/var/www/service/scss"
       - "./webshop/src/templates:/var/www/service/templates"
     build: webshop
-    ports:
-      - "8011:80"
     environment:
       MYSQL_HOST: "db2:${MYSQL_PORT}"
       MYSQL_DB: "makeradmin-webshop"
@@ -221,8 +217,6 @@ services:
     build: ./frontend
     environment:
       HOST_BACKEND:
-    ports:
-      - "8009:80"
     networks:
       - makeradmin
 

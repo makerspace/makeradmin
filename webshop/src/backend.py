@@ -695,7 +695,7 @@ def send_key_updated_email(member_id: int, extended_days: int, end_date: datetim
         eprint(r.text)
 
 
-@instance.route("ship_orders", methods=["POST"])
+@instance.route("ship_orders", methods=["POST"], permission="webshop")
 @route_helper
 def ship_orders() -> None:
     '''
