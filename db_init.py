@@ -19,6 +19,9 @@ print("Waiting for database", end="")
 inner_bash = 'while ! mysql -uroot --password="${MYSQL_ROOT_PASSWORD}" -e "" &> /dev/null; do printf "." && sleep 1; done'
 call(["docker-compose", "-p", args.project_name, "exec", "db2", "bash", "-c", inner_bash])
 
+# Make sure all docker containers are created (but not necessarily started)
+call(["docker-compose", "-p", args.project_name, "up", "--no-start"])
+
 print(" done")
 
 sleep(1)
