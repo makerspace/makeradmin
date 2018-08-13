@@ -4,7 +4,7 @@ FROM makeradmin/servicebase:1.0
 ADD ./lumen /var/www/html/
 
 # Run composer and update makeradmin-library
-RUN composer update makeradmin/makeradmin-library --no-suggest --no-dev -d /var/www/html
+RUN composer install --no-suggest --no-dev -d /var/www/html
 
 RUN mkdir -p /var/www/html/storage/logs
 

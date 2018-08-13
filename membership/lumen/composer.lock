@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "4d1bb9bd23bca5195a4e1cf2938f97ba",
+    "content-hash": "97bc45ffa0c724e24dfcea1018f1e666",
     "packages": [
         {
             "name": "doctrine/inflector",
@@ -1397,42 +1397,6 @@
                 "storage"
             ],
             "time": "2018-05-07T08:44:23+00:00"
-        },
-        {
-            "name": "makeradmin/makeradmin-library",
-            "version": "dev-lumen_5_6",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/makerspace/MakerAdmin-Library.git",
-                "reference": "4d8709d10785d71d8d83603b18023b9025a8af79"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/makerspace/MakerAdmin-Library/zipball/4d8709d10785d71d8d83603b18023b9025a8af79",
-                "reference": "4d8709d10785d71d8d83603b18023b9025a8af79",
-                "shasum": ""
-            },
-            "require": {
-                "laravel/lumen-framework": "5.6.*",
-                "league/flysystem": "^1.0",
-                "php": ">=7.1.3",
-                "vlucas/phpdotenv": "~2.2"
-            },
-            "type": "library",
-            "autoload": {
-                "psr-4": {
-                    "Makeradmin\\": "src/Makeradmin"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "AGPL-3.0-only"
-            ],
-            "description": "Common library for MakerAdmin modules",
-            "keywords": [
-                "makeradmin"
-            ],
-            "time": "2018-05-27T21:07:43+00:00"
         },
         {
             "name": "monolog/monolog",
@@ -4030,9 +3994,7 @@
     ],
     "aliases": [],
     "minimum-stability": "dev",
-    "stability-flags": {
-        "makeradmin/makeradmin-library": 20
-    },
+    "stability-flags": [],
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {

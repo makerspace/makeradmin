@@ -14,10 +14,13 @@ RUN    export DEBIAN_FRONTEND=noninteractive; \
     && mkdir -p /run/php \
     && ln -s /usr/sbin/php-fpm7.2 /usr/sbin/php-fpm
 
+# Add library
+ADD ./src/Makeradmin /var/www/html/library/
+
 # Add and install common dependencies
 ADD ./lumen/composer.json /var/www/html/
 ADD ./lumen/composer.lock /var/www/html/
-RUN composer update makeradmin/makeradmin-library --no-scripts --no-autoloader --no-suggest --no-dev -d /var/www/html
+RUN composer install --no-scripts --no-autoloader --no-suggest --no-dev -d /var/www/html
 
 # Webserver configuration files
 ADD ./docker/nginx.conf /etc/nginx/nginx.conf
