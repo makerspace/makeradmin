@@ -5,10 +5,8 @@ import Backbone from 'backbone'
 import OrderRowCollection from '../../Collections/OrderRow'
 import OrderRows from '../../Components/Tables/OrderRows'
 import OrderActions from '../../Components/Tables/OrderActions'
-import OrderEvents from '../../Components/Tables/OrderEvents'
 import OrderModel from '../../Models/Order'
 import OrderActionModel from '../../Models/OrderAction'
-import OrderEventModel from '../../Models/OrderEvent'
 
 module.exports = React.createClass({
 	getInitialState: function()
