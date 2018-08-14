@@ -67,13 +67,11 @@ module.exports = withRouter(React.createClass(
 				data.data.forEach(function(element, index, array){
 					autoComplete.push({
 						label: "#"+element.member_number + ": " +element.firstname + " " + element.lastname,
-						value: element.member_id,
+						member_id: element.member_id,
 					});
 				});
 
-				callback(null, {
-					options: autoComplete,
-				});
+				callback(autoComplete);
 			}, 100);
 
 		});
@@ -93,7 +91,7 @@ module.exports = withRouter(React.createClass(
 			// Send API request
 			futures.push($.ajax({
 				method: "POST",
-				url: config.apiBasePath + "/membership/member/" + element.value + "/groups/add",
+				url: config.apiBasePath + "/membership/member/" + element.member_id + "/groups/add",
 				headers: {
 					"Authorization": "Bearer " + auth.getAccessToken()
 				},
@@ -124,7 +122,7 @@ module.exports = withRouter(React.createClass(
 							Lägg till följande användare i gruppen
 						</label>
 						<div className="uk-form-controls">
-							<Async ref="addmembers" multi cache={false} name="members" value={this.state.addMembers} filterOption={this.filter} loadOptions={this.search} onChange={this.changeValue} onValueClick={this.gotoMember} />
+							<Async ref="addmembers" isMulti cache={false} name="members" value={this.state.addMembers} filterOption={this.filter} getOptionValue={e => e.member_id} getOptionLabel={e => e.label} loadOptions={this.search} onChange={this.changeValue} onValueClick={this.gotoMember} />
 						</div>
 					</div>
 
