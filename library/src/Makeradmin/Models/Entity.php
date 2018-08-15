@@ -57,7 +57,7 @@ class Entity
 					// Remove the filter to prevent further processing
 					unset($filters[$id]);
 				}
-				if ($id == "expand") {
+				else if ($id == "expand") {
 					$expand_fields = explode(",", $filter);
 					foreach ($expand_fields as $expand){
 						if (array_key_exists($expand, $this->expandable_fields)) {
