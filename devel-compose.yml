@@ -26,6 +26,17 @@ services:
     image: makeradmin/servicebase:1.0
     build:
       context: ./library
+      dockerfile: DockerfileServiceBase
+    networks:
+      - makeradmin
+
+  library:
+    image: makeradmin/library:1.0
+    build:
+      context: ./library
+      dockerfile: Dockerfile
+    depends_on:
+      - servicebase
     networks:
       - makeradmin
 
@@ -49,6 +60,7 @@ services:
     depends_on:
       - db2
       - servicebase
+      - library
     ports:
       - "8010:80"
     networks:
