@@ -55,6 +55,7 @@ services:
     depends_on:
       - db2
       - servicebase
+      - library
     networks:
       - makeradmin
     environment:
