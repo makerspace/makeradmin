@@ -15,6 +15,7 @@ before_install:
   # BATS for bash testing
   - git clone https://github.com/sstephenson/bats.git
   - export PATH="bats/bin:$PATH"
+  - pip3 install -r requirements.txt
 
 install:
   - make firstrun
