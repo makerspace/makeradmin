@@ -40,6 +40,18 @@ class Key extends Entity
 			"select" => "membership_keys.tagid",
 		],
 	];
+	protected $expands = [
+		'member' => [
+			'column' => 'member_id',
+			'join_table' => 'membership_members',
+			'join_column' => 'member_id',
+			'selects' => [
+				'member_number',
+				'firstname',
+				'lastname',
+			],
+		],
+	];
 	protected $sort = ["created_at", "desc"];
 	protected $validation = [
 //		"tagid" => ["unique", "required"],

@@ -1,0 +1,28 @@
+FROM makeradmin/servicebase:1.0
+
+# Add and install module dependencies
+ADD ./lumen/composer.json /var/www/html/
+ADD ./lumen/composer.lock /var/www/html/
+RUN composer install --no-scripts --no-autoloader --no-suggest --no-dev -d /var/www/html
+
+# Add all the other lumen files
+ADD ./lumen /var/www/html/
+
+# Add library files
+COPY --from=makeradmin/library:1.0 /var/www/html/library/ /var/www/html/library/
+
+# Run composer scripts and autoload
+RUN composer dumpautoload --no-dev -d /var/www/html
+
+RUN mkdir -p /var/www/html/storage/logs
+
+# Make sure webserver can access server files
+RUN chown -R www-data:www-data /var/www/html
+
+VOLUME /var/www/html/storage/logs
+
+EXPOSE 80
+
+COPY ./docker/myStartupScript.sh /usr/local/myscripts/myStartupScript.sh
+
+CMD ["/usr/local/myscripts/myStartupScript.sh"]

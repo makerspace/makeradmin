@@ -62,18 +62,7 @@ module.exports = withRouter(React.createClass(
 			},
 		}).done(function(data) {
 			setTimeout(function() {
-				var autoComplete = [];
-
-				data.data.forEach(function(element, index, array){
-					autoComplete.push({
-						label: element.title,
-						value: element.group_id,
-					});
-				});
-
-				callback(null, {
-					options: autoComplete,
-				});
+				callback(data.data);
 			}, 100);
 
 		});
@@ -90,7 +79,7 @@ module.exports = withRouter(React.createClass(
 		// Create a list of entity_id's that should relate to this entity
 		var groups = [];
 		this.state.addGroups.forEach(function(element, index, array) {
-			groups.push(element.value);
+			groups.push(element.group_id);
 		});
 
 		// Send API request
@@ -125,7 +114,7 @@ module.exports = withRouter(React.createClass(
 							Lägg till användaren i följande grupper
 						</label>
 						<div className="uk-form-controls">
-							<Async ref="addgroups" multi cache={false} name="groups" value={this.state.addGroups} filterOption={this.filter} loadOptions={this.search} onChange={this.changeValue} onValueClick={this.gotoGroup} />
+							<Async ref="addgroups" isMulti cache={false} name="groups" value={this.state.addGroups} getOptionValue={e => e.group_id} getOptionLabel={e => e.title} filterOption={this.filter} loadOptions={this.search} onChange={this.changeValue} onValueClick={this.gotoGroup} />
 						</div>
 					</div>
 

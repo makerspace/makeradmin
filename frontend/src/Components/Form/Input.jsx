@@ -51,6 +51,17 @@ module.exports = React.createClass(
 		});
 	},
 
+	componentDidUpdate: function(prevProps, prevState) {
+		if (this.props.model != prevProps.model) {
+			let model = this.props.model;
+			let value = this.props.model.get(this.props.name);
+			this.setState({
+				model: model,
+				value: value,
+			});
+		}
+	},
+
 	onChange: function(event)
 	{
 		this.state.model.set(this.props.name, event.target.value);

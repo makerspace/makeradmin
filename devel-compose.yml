@@ -25,7 +25,18 @@ services:
   servicebase:
     image: makeradmin/servicebase:1.0
     build:
-      context: ./servicebase
+      context: ./library
+      dockerfile: DockerfileServiceBase
+    networks:
+      - makeradmin
+
+  library:
+    image: makeradmin/library:1.0
+    build:
+      context: ./library
+      dockerfile: Dockerfile
+    depends_on:
+      - servicebase
     networks:
       - makeradmin
 
@@ -40,17 +51,18 @@ services:
     image: makeradmin/apigateway:1.0
     build:
       context: ./apigateway
-      dockerfile: ${PWD}/servicebase/DockerfileService
+      dockerfile: ${PWD}/library/DockerfileService
     volumes:
       - ./logs/apigateway:/var/www/html/storage/logs
       - ./apigateway/lumen/routes:/var/www/html/routes
       - ./apigateway/lumen/app:/var/www/html/app
+      - ./library/src/Makeradmin:/var/www/html/library
     depends_on:
       - db2
+      - servicebase
+      - library
     ports:
       - "8010:80"
-    depends_on:
-      - servicebase
     networks:
       - makeradmin
     environment:
@@ -131,12 +143,13 @@ services:
     image: makeradmin/economy:1.0
     build:
       context: ./economy
-      dockerfile: ${PWD}/servicebase/DockerfileService
+      dockerfile: ${PWD}/library/DockerfileService
     volumes:
       - ./logs/economy:/var/www/html/storage/logs
       - ./data/economy-vouchers:/var/www/html/vouchers
       - ./economy/lumen/routes:/var/www/html/routes
       - ./economy/lumen/app:/var/www/html/app
+      - ./library/src/Makeradmin:/var/www/html/library
     environment:
       MYSQL_HOST: "db2:${MYSQL_PORT}"
       MYSQL_DB: "makeradmin-economy"
@@ -153,11 +166,12 @@ services:
     image: makeradmin/membership:1.0
     build:
       context: ./membership
-      dockerfile: ${PWD}/servicebase/DockerfileService
+      dockerfile: ${PWD}/library/DockerfileService
     volumes:
       - ./logs/membership:/var/www/html/storage/logs
       - ./membership/lumen/routes:/var/www/html/routes
       - ./membership/lumen/app:/var/www/html/app
+      - ./library/src/Makeradmin:/var/www/html/library
     environment:
       MYSQL_HOST: "db2:${MYSQL_PORT}"
       MYSQL_DB: "makeradmin-membership"
@@ -174,11 +188,12 @@ services:
     image: makeradmin/messages:1.0
     build:
       context: ./messages
-      dockerfile: ${PWD}/servicebase/DockerfileService
+      dockerfile: ${PWD}/library/DockerfileService
     volumes:
       - ./logs/messages:/var/www/html/storage/logs
       - ./messages/lumen/routes:/var/www/html/routes
       - ./messages/lumen/app:/var/www/html/app
+      - ./library/src/Makeradmin:/var/www/html/library
     environment:
       MYSQL_HOST: "db2:${MYSQL_PORT}"
       MYSQL_DB: "makeradmin-messages"
@@ -195,10 +210,11 @@ services:
     image: makeradmin/messages-dispatcher-email:1.0
     build:
       context: ./emaildispatcher
-      dockerfile: ${PWD}/servicebase/DockerfileService
+      dockerfile: ${PWD}/library/DockerfileService
     volumes:
       - ./emaildispatcher/lumen/routes:/var/www/html/routes
       - ./emaildispatcher/lumen/app:/var/www/html/app
+      - ./library/src/Makeradmin:/var/www/html/library
     environment:
       MYSQL_HOST: "db2:${MYSQL_PORT}"
       MYSQL_DB: "makeradmin-messages"
@@ -219,11 +235,12 @@ services:
     image: makeradmin/multiaccesssync:1.0
     build:
       context: ./multiaccesssync
-      dockerfile: ${PWD}/servicebase/DockerfileService
+      dockerfile: ${PWD}/library/DockerfileService
     volumes:
       - ./data/multiaccess-uploads:/var/www/html/storage/uploads
       - ./multiaccesssync/lumen/routes:/var/www/html/routes
       - ./multiaccesssync/lumen/app:/var/www/html/app
+      - ./library/src/Makeradmin:/var/www/html/library
     environment:
       APIGATEWAY: api-gateway
       BEARER: "${API_BEARER}"

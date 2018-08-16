@@ -36,11 +36,8 @@ module.exports = withRouter(React.createClass({
 				class: "uk-text-right",
 			},
 			{
-				title: "Utfört Antal",
+				title: "Utförd",
 				class: "uk-text-right",
-			},
-			{
-				title: "",
 			},
 		];
 	},
@@ -53,8 +50,7 @@ module.exports = withRouter(React.createClass({
 				<td>{row.content_id}</td>
 				<td>{row.action}</td>
 				<td className="uk-text-right">{row.value}</td>
-				<td className="uk-text-right">{row.performed_value}</td>
-				<td>Utför</td>
+				<td className="uk-text-right">{row.completed_at ? row.completed_at : 'pending'}</td>
 			</tr>
 		);
 	},

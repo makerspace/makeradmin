@@ -85,9 +85,7 @@ module.exports = React.createClass(
 					});
 				});
 
-				callback(null, {
-					options: autoComplete,
-				});
+				callback(autoComplete);
 			}, 100);
 		});
 	},
@@ -125,7 +123,7 @@ module.exports = React.createClass(
 			<div className={classes}>
 				<label htmlFor={this.props.name} className="uk-form-label">{this.props.title}</label>
 				<div>
-					<Async multi={false} cache={false} name={this.props.name} value={this.state.value} filterOption={this.filter} loadOptions={this.search} onChange={this.onChange} onFocus={this.onFocus} onBlur={this.onBlur} />
+					<Async isMulti={false} cache={false} name={this.props.name} value={this.state.value} filterOption={this.filter} loadOptions={this.search} onChange={this.onChange} onFocus={this.onFocus} onBlur={this.onBlur} />
 				</div>
 			</div>
 		);
