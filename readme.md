@@ -18,6 +18,11 @@ Python 3.6 or higher is required.
 sudo apt-get install npm
 ```
 
+### Dependencies for Python and npm
+```bash
+make init
+```
+
 ## Initialize everything
 ```
 make firstrun

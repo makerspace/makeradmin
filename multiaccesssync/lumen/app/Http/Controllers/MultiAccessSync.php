@@ -297,50 +297,44 @@ class MultiAccessSync extends Controller
 		$curl->setHeader("Authorization", "Bearer " . config("service.bearer"));
 
 		// Get all keys
-		$curl->call("GET", "http://" . config("service.gateway") . "/keys", [
+		$curl->call("GET", "http://" . config("service.gateway") . "/membership/key", [
 			"per_page" => 5000,
 		]);
 		$keys = $curl->GetJson()->data;
-		$key_member_ids = array_unique(array_column($keys,'title'));
 
 		// Get all members with keys
 		$curl->call("GET", "http://" . config("service.gateway") . "/membership/member", [
-			'member_number' => implode(',', $key_member_ids),
+			'include_membership' => true,
 			"per_page" => 5000,
 		]);
+
 		$key_members = $curl->GetJson()->data;
 
 		$member_keys = [];
 		foreach ($key_members as $member) {
 			$current_member = [];
-			if (!empty($member)) {
-				$member_id = (int) $member->member_id;
-				assert($member_id !== 0);
-				$member_number = (int) $member->member_number;
-				assert($member_number !== 0);
+			$member_id = (int) $member->member_id;
+			assert($member_id !== 0);
+			$member_number = (int) $member->member_number;
+			assert($member_number !== 0);
 
-				$current_member['member_id'] = $member_id;
-				$current_member['member_number'] = $member_number;
-				$current_member['firstname'] = $member->firstname;
-				$current_member['lastname'] = $member->lastname;
-				$current_member['keys'] = [];
-			}
-			$member_keys[$member_number] = $current_member;
+			$current_member['member_id'] = $member_id;
+			$current_member['member_number'] = $member_number;
+			$current_member['firstname'] = $member->firstname;
+			$current_member['lastname'] = $member->lastname;
+			$current_member['end_date'] = $member->membership->labaccess_end;
+			$current_member['keys'] = [];
+			$member_keys[$member_id] = $current_member;
 		}
 
 		foreach ($keys as $key) {
-			$member_number = (int) $key->title;
-			assert($member_number !== 0);
-			if (array_key_exists($member_number, $member_keys)) {
-				$lab_startdate = strtotime($key->startdate) ?: null;
-				$lab_enddate = strtotime($key->enddate) ?: null;
+			$member_id = $key->member_id;
+			if (array_key_exists($member_id, $member_keys)) {
 				$current_key = [
 					'key_id' => $key->key_id,
 					'rfid_tag' => $key->tagid,
-					'blocked' => $key->status === 'inactive',
-					'start_timestamp' => $lab_startdate !== null ? date('c', $lab_startdate) : null,
-					'end_timestamp' => $lab_enddate !== null ? date('c', $lab_enddate) : null ];
-				$member_keys[$member_number]['keys'][] = $current_key;
+				];
+				$member_keys[$member_id]['keys'][] = $current_key;
 			} else {
 				error_log("Key ".$key->key_id." has invalid member");
 			}

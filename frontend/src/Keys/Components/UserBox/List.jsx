@@ -20,14 +20,8 @@ module.exports = withRouter(React.createClass(
 			<div>
 				<Keys
 					type={KeysCollection}
-					linkPrefix={"/membership/members/" + this.props.params.member_id}
 					dataSource={{
-						url: "/related",
-						params: {
-							param: "/membership/member/" + this.props.params.member_id,
-							matchUrl: "/keys/(.*)",
-							from: "keys",
-						}
+						url: "/membership/member/" + this.props.params.member_id + "/keys"
 					}}
 					onEdit={this.onEdit}
 					route={this.props.route}

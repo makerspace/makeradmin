@@ -28,6 +28,9 @@ init-db: .env
 stop:
 	docker-compose down
 
+test:
+	python3 -m unittest tests
+
 firstrun: .env build init-db
 	echo -e "\e[31mRun 'make run' to start MakerAdmin\e[0m"
 

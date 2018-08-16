@@ -62,18 +62,7 @@ module.exports = withRouter(React.createClass(
 			},
 		}).done(function(data) {
 			setTimeout(function() {
-				var autoComplete = [];
-
-				data.data.forEach(function(element, index, array){
-					autoComplete.push({
-						label: element.permission,
-						value: element.permission_id,
-					});
-				});
-
-				callback(null, {
-					options: autoComplete,
-				});
+				callback(data.data);
 			}, 100);
 
 		});
@@ -90,7 +79,7 @@ module.exports = withRouter(React.createClass(
 		// Create a list of entity_id's that should relate to this entity
 		var permissions = [];
 		this.state.addPermissions.forEach(function(element, index, array) {
-			permissions.push(element.value);
+			permissions.push(element.permission_id);
 		});
 
 		// Send API request
@@ -125,7 +114,17 @@ module.exports = withRouter(React.createClass(
 							Lägg följande behörigheter till grupp
 						</label>
 						<div className="uk-form-controls">
-							<Async ref="addpermissions" multi cache={false} name="permissions" value={this.state.addPermissions} filterOption={this.filter} loadOptions={this.search} onChange={this.changeValue} onValueClick={this.gotoPermission} />
+							<Async 
+								ref="addpermissions"
+								isMulti
+								cache={false}
+								name="permissions"
+								value={this.state.addPermissions}
+								getOptionValue={e => e.permission_id}
+								getOptionLabel={e => e.permission}
+								loadOptions={this.search}
+								onChange={this.changeValue}
+								onValueClick={this.gotoPermission} />
 						</div>
 					</div>
 

@@ -4,5 +4,5 @@ import KeyModel from '../Models/Key'
 module.exports = Backbone.PageableCollection.extend(
 {
 	model: KeyModel,
-	url: "/keys",
+	url: "/membership/key?expand=member",
 });

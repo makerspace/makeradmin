@@ -182,9 +182,7 @@ module.exports = withRouter(React.createClass({
 
 			// Merge the result together and send to the auto complete callback
 			var list = members.concat(groups);
-			callback(null, {
-				options: list,
-			});
+			callback(list);
 		});
 	},
 
@@ -273,7 +271,7 @@ module.exports = withRouter(React.createClass({
 							Mottagare
 						</label>
 						<div className="uk-form-controls">
-							<Async ref="recps" multi cache={false} name="recipients" filterOption={this.filter} loadOptions={this.search} value={this.state.recipients} onChange={this.changeRecipient} onValueClick={this.gotoMember} />
+							<Async ref="recps" isMulti cache={false} name="recipients" filterOption={this.filter} getOptionValue={e => e.value} getOptionLabel={e => e.label} loadOptions={this.search} value={this.state.recipients} onChange={this.changeRecipient} onValueClick={this.gotoMember} />
 						</div>
 					</div>
 				: ""}

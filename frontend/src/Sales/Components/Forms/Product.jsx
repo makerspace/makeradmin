@@ -16,11 +16,7 @@ var ProductActionModel = Backbone.Model.fullExtend({
 		action_id: null,
 		value: "",
 		name: "",
-},
-});
-
-var ProductActionCollection = Backbone.Collection.extend({
-	model: ProductActionModel,
+	},
 });
 
 module.exports = withRouter(React.createClass({
@@ -28,9 +24,10 @@ module.exports = withRouter(React.createClass({
 
 	getInitialState: function(){
 		return {
-			actions: new ProductActionCollection,
+			actions: new Array(),
 			availible_actions: new Map(),
 			removed_actions: [],
+			all_actions: null,
 		};
 	},
 
@@ -67,7 +64,7 @@ module.exports = withRouter(React.createClass({
 				action.name = all_actions.get(element.action_id).name;
 				actions_array.push(new ProductActionModel(action));
 			});
-			let actions = new ProductActionCollection(actions_array);
+			let actions = actions_array;
 			_this.setState({
 				actions: actions,
 				availible_actions: availible_actions,
@@ -126,6 +123,7 @@ module.exports = withRouter(React.createClass({
 			let actionModel = new ProductActionModel({
 				id: null,
 				action_id: first_action_id,
+				value: 0,
 			});
 			let availible_actions = new Map(prevState.availible_actions);
 			availible_actions.delete(first_action_id);
@@ -139,19 +137,19 @@ module.exports = withRouter(React.createClass({
 	removeAction: function(index)
 	{
 		this.setState((prevState) => {
-			let removed_action_id = prevState.actions[index].action_id;
+			let removed_id = prevState.actions[index].id;
 			let actions = prevState.actions.filter((element,idx,array) => {return idx != index;});
 
 			let availible_actions = new Map(prevState.all_actions);
-			actions.forEach((action) => {availible_actions.delete(action.action_id)});
+			actions.forEach((action) => {availible_actions.delete(action.get('action_id'));});
 
 			let newState = {
 				actions: actions,
 				availible_actions: availible_actions,
 			};
 
-			if (removed_action_id) {
-				newState.removed_actions = [...prevState.removed_actions, removed_action_id];
+			if (removed_id) {
+				newState.removed_actions = [...prevState.removed_actions, removed_id];
 			}
 			return newState;
 		});
@@ -181,15 +179,15 @@ module.exports = withRouter(React.createClass({
 		let _this = this;
 		const getLabel = (element) => {return element.name;};
 		const getValue = (element) => {return element.id;};
+		const getActionLabel = function(element){return _this.state.all_actions ? _this.state.all_actions.get(element.action_id).name : "" + element.action_id;};
+		const getActionValue = function(element){return element.action_id;};
 		let action_options = Array.from(this.state.availible_actions.values());
 		var action_contents = this.state.actions.map(function(value, index, array){
-			const getLabel = function(element){return _this.state.all_actions ? _this.state.all_actions.get(element.action_id).name : "" + element.action_id;};
-			const getValue = function(element){return element.action_id;};
 			const options = [_this.state.all_actions.get(value.get('action_id')), ...action_options];
 			return (
 				<div key={index} className="uk-form-row uk-grid">
 				<div className="uk-width-3-6">
-					<Select model={value} formrow={false} name={"action_id"} title="Åtgärd" options={options} getLabel={getLabel} getValue={getValue} />
+					<Select model={value} formrow={false} name={"action_id"} title="Åtgärd" options={options} getLabel={getActionLabel} getValue={getActionValue} />
 				</div>
 				<div className="uk-width-2-6">
 					<Input model={value} formrow={false} name={"value"} title="Värde" />

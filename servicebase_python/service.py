@@ -197,7 +197,8 @@ def assert_get(data: Dict, key: str):
 
 def gateway_from_envfile(path):
     # Read the .env file
-    env = {s[0]: (s[1] if len(s) > 1 else "") for s in (s.split("=") for s in open(".env").read().split('\n'))}
+    with open(".env") as f:
+        env = {s[0]: (s[1] if len(s) > 1 else "") for s in (s.split("=") for s in f.read().split('\n'))}
     host = env["HOST_BACKEND"].replace("http://", "").replace("https://", "")
     return APIGateway(host, env["API_BEARER"], env["HOST_FRONTEND"], env["HOST_BACKEND"])
 
@@ -430,11 +431,13 @@ class Entity:
 
 class CanNotBuyStartPackage(BackendException):
     def __init__(self):
-        super().__init__(sv=f"Startpaket kan bara köpas en gång om året.",
-                         en=f"Starterpack can only be bought once a year.")
+        super().__init__(sv=f"Startpaket kan bara köpas om du inte har haft labaccess de på 9 månader (30*9 days).",
+                         en=f"Starterpack can only be bought if you haven't had lab acccess during the last 9 months (30*9 days).")
             
             
-def filter_start_package(name=None, member=None):
+def filter_start_package(name=None, member_id=None):
+    member = instance.gateway.get(f"membership/member/{member_id}/membership").json()
+
     if not member:
         return
 

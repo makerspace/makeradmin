@@ -11,7 +11,6 @@ module.exports = withRouter(React.createClass(
 	getInitialState: function()
 	{
 		const model = new KeyModel({member_id: this.props.params.member_id});
-		model.ignoreAttributes.push('member_id');
 		return {model};
 	},
 

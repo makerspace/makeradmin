@@ -73,16 +73,24 @@ module.exports = React.createClass(
 		}
 	},
 
-	componentDidUpdate: function (prevProps){
+	componentDidUpdate: function (prevProps, prevState) {
 		if (this.props.options != prevProps.options){
 			this.resetOptions();
+		}
+		if (this.props.model != prevProps.model) {
+			let model = (typeof this.props.model !== 'undefined') ? this.props.model : false;
+			let value = model ? {value: this.props.model.get(this.props.name)} : this.state.value;
+			this.setState({
+				model: model,
+				value: value,
+			});
 		}
 	},
 
 	toOption: function(element) {
 		return {
 			label: this.props.getLabel(element),
-			value: this.props.getValue ? this.props.getValue(element) : element[this.props.name],
+			value: this.props.getValue ? this.props.getValue(element) : element.get(this.props.name),
 		};
 	},
 
@@ -167,7 +175,9 @@ module.exports = React.createClass(
 						name={this.props.name}
 						options={this.state.options}
 						value={this.state.value}
-						multi={false}
+						isMulti={false}
+						getOptionValue={e => e.value}
+						getOptionLabel={e => e.label}
 						clearable={this.props.clearable}
 						searchable={this.props.searchable}
 						onChange={this.onChange}
