@@ -43,28 +43,32 @@ class DB:
 
 class APIGateway:
     def __init__(self, host: str, key: str, host_frontend: str, host_backend: str) -> None:
-        self.host = host
-        self.host_frontend = host_frontend
-        self.host_backend = host_backend
+        self.host = self._ensure_protocol(host)
+        self.host_frontend = self._ensure_protocol(host_frontend)
+        self.host_backend = self._ensure_protocol(host_backend)
         self.auth_headers = {"Authorization": "Bearer " + key}
+
+    @staticmethod
+    def _ensure_protocol(host: str) -> str:
+        if not host.startswith("http://") and not host.startswith("https://"):
+            host = "http://" +  host
+        return host
 
     def get_frontend_url(self, path):
         host = self.host_frontend
-        if not host.startswith("http"):
-            host = "http://" + host
         return host + "/" + path
 
     def get(self, path, payload=None) -> requests.Response:
-        return requests.get('http://' + self.host + "/" + path, params=payload, headers=self.auth_headers)
+        return requests.get(self.host + "/" + path, params=payload, headers=self.auth_headers)
 
     def post(self, path, payload) -> requests.Response:
-        return requests.post('http://' + self.host + "/" + path, json=payload, headers=self.auth_headers)
+        return requests.post(self.host + "/" + path, json=payload, headers=self.auth_headers)
 
     def put(self, path, payload) -> requests.Response:
-        return requests.put('http://' + self.host + "/" + path, json=payload, headers=self.auth_headers)
+        return requests.put(self.host + "/" + path, json=payload, headers=self.auth_headers)
 
     def delete(self, path) -> requests.Response:
-        return requests.delete('http://' + self.host + "/" + path, headers=self.auth_headers)
+        return requests.delete(self.host + "/" + path, headers=self.auth_headers)
 
 
 DEFAULT_PERMISSION = object()
@@ -199,7 +203,7 @@ def gateway_from_envfile(path):
     # Read the .env file
     with open(".env") as f:
         env = {s[0]: (s[1] if len(s) > 1 else "") for s in (s.split("=") for s in f.read().split('\n'))}
-    host = env["HOST_BACKEND"].replace("http://", "").replace("https://", "")
+    host = env["HOST_BACKEND"]
     return APIGateway(host, env["API_BEARER"], env["HOST_FRONTEND"], env["HOST_BACKEND"])
 
 
