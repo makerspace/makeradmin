@@ -273,9 +273,13 @@ def list_orders():
 
     member_data = {d["member_id"]: d for d in r.json()["data"]}
     for t in transactions:
-        member = member_data[t["member_id"]]
-        t["member_name"] = f"{member['firstname']} {member['lastname']}"
-        t["member_number"] = member['member_number']
+        if t["member_id"] not in member_data:
+            t["member_name"] = "Unknown member"
+            t["member_number"] = None
+        else:
+            member = member_data[t["member_id"]]
+            t["member_name"] = f"{member['firstname']} {member['lastname']}"
+            t["member_number"] = member['member_number']
 
     return transactions
 
