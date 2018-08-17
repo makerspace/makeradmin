@@ -398,11 +398,9 @@ class Member extends Controller
 	public function addMembershipSpan(Request $request, $member_id)
 	{
 		$json = $request->json()->all();
-		DB::insert("INSERT INTO membership_spans(member_id, type, startdate, enddate) VALUES(?, ?, ?, ?)", [$member_id, $json['type'], $json['startdate'], $json['enddate']]);
+		DB::insert("INSERT INTO membership_spans(member_id, type, startdate, enddate, creation_reason) VALUES(?, ?, ?, ?, ?)", [$member_id, $json['type'], $json['startdate'], $json['enddate'], $json['creation_reason']]);
 
-		return Response()->json([
-			"status"  => "ok"
-		], 200);
+		return $this->getMembership($request, $member_id);
 	}
 
 	public function addMembershipDays(Request $request, $member_id)
@@ -419,6 +417,13 @@ class Member extends Controller
 			return Response()->json([
 				"status"  => "error",
 				"message" => "Missing parameter 'days'",
+			], 400);
+		}
+
+		if (empty($json['creation_reason']) || $json['creation_reason'] == null) {
+			return Response()->json([
+				"status"  => "error",
+				"message" => "Missing parameter 'creation_reason'",
 			], 400);
 		}
 
@@ -448,7 +453,7 @@ class Member extends Controller
 			], 400);
 		}
 
-		DB::insert("INSERT INTO membership_spans(member_id, type, startdate, enddate) VALUES(?, ?, ?, ?)", [$member_id, $json['type'], $last_period, $endtime]);
+		DB::insert("INSERT INTO membership_spans(member_id, type, startdate, enddate, creation_reason) VALUES(?, ?, ?, ?, ?)", [$member_id, $json['type'], $last_period, $endtime, $json['creation_reason']]);
 		return $this->getMembership($request, $member_id);
 	}
 

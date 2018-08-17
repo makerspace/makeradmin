@@ -3,6 +3,7 @@ from time import sleep
 import servicebase_python.service
 import unittest
 import json
+from datetime import datetime, timedelta
 from requests import Response
 
 project_name = "test"
@@ -12,6 +13,49 @@ def strip_entity_id(obj):
     copy = dict(obj)
     del copy["entity_id"]
     return copy
+
+
+class MemberDummies():
+        def __init__(self, test, count):
+            self.test = test
+            self.count = count
+            self.created_members = None
+
+        def __enter__(self):
+            member_template = {
+                "email": "blah",
+                "firstname": "test",
+                "lastname": "testsson",
+                "civicregno": "012345679",
+                "company": "ACME",
+                "orgno": "01234",
+                "address_street": "Teststreet",
+                "address_extra": "N/A",
+                "address_zipcode": 1234,  # Note: not a string apparently
+                "address_city": "Test Town",
+                "address_country": "TS",  # Note: max length 2
+                "phone": "0123456",
+            }
+
+            # Create a bunch of members
+            members = []
+            for i in range(10):
+                m = dict(member_template)
+                # The email needs to be completely unique in the database
+                # even among previously deleted members
+                m["email"] = "dummy_" + str(i)
+                members.append(m)
+
+            self.created_members = [
+                self.test.post("membership/member", member, 201, expected_result={"status": "created", "data": member})["data"]
+                for member in members
+            ]
+
+            return self.created_members
+
+        def __exit__(self, type, value, traceback):
+            for member in self.created_members:
+                self.test.delete(f"membership/member/{member['member_id']}", 200, expected_result={"status": "deleted"})
 
 
 class MakerAdminTest(unittest.TestCase):
@@ -159,80 +203,108 @@ class MakerAdminTest(unittest.TestCase):
         ''' Test various things to do with groups '''
         previous_groups = self.get(f"membership/group", 200)["data"]
 
-        member_template = {
-            "email": "blah",
-            "firstname": "test",
-            "lastname": "testsson",
-            "civicregno": "012345679",
-            "company": "ACME",
-            "orgno": "01234",
-            "address_street": "Teststreet",
-            "address_extra": "N/A",
-            "address_zipcode": 1234,  # Note: not a string apparently
-            "address_city": "Test Town",
-            "address_country": "TS",  # Note: max length 2
-            "phone": "0123456",
-        }
+        with MemberDummies(self, 10) as created_members:
+            groups = [{
+                "name": "science_group" + str(i),
+                "title": "Aperture Science Volounteer Group",
+                "description": "Volounteers for being exposed to neurotoxin",
+            } for i in range(10)]
 
-        # Create a bunch of members
-        members = []
-        for i in range(10):
-            m = dict(member_template)
-            m["email"] = "email_" + str(i)
-            members.append(m)
+            created_groups = [
+                self.post("membership/group", group, 201, expected_result={"status": "created", "data": group})["data"]
+                for group in groups
+            ]
 
-        created_members = [
-            self.post("membership/member", member, 201, expected_result={"status": "created", "data": member})["data"]
-            for member in members
-        ]
+            # Make sure the get method returns the same result as the post method
+            for group in created_groups:
+                self.get(f"membership/group/{group['group_id']}", 200, expected_result={"data": group})
 
-        groups = [{
-            "name": "science_group" + str(i),
-            "title": "Aperture Science Volounteer Group",
-            "description": "Volounteers for being exposed to neurotoxin",
-        } for i in range(10)]
-
-        created_groups = [
-            self.post("membership/group", group, 201, expected_result={"status": "created", "data": group})["data"]
-            for group in groups
-        ]
-
-        # Make sure the get method returns the same result as the post method
-        for group in created_groups:
-            self.get(f"membership/group/{group['group_id']}", 200, expected_result={"data": group})
-
-        # List all groups
-        # Inconsistency: list views do not include entity_id
-        self.get(f"membership/group", 200, expected_result={"data": previous_groups + list(map(strip_entity_id, created_groups))})
-
-        for member, group in zip(created_members, created_groups):
-            member_id = member["member_id"]
-            group_id = group["group_id"]
-
-            self.post(f"membership/member/{member_id}/groups/add", {"groups": [group_id]}, 200, expected_result={"status": "ok"})
-
+            # List all groups
             # Inconsistency: list views do not include entity_id
-            group2 = strip_entity_id(group)
+            self.get(f"membership/group", 200, expected_result={"data": previous_groups + list(map(strip_entity_id, created_groups))})
 
-            member2 = strip_entity_id(member)
+            for member, group in zip(created_members, created_groups):
+                member_id = member["member_id"]
+                group_id = group["group_id"]
 
-            # Make sure the member has been added to the group
-            self.get(f"membership/member/{member_id}/groups", 200, expected_result={"data": [group2]})
-            self.get(f"membership/group/{group_id}/members", 200, expected_result={"data": [member2]})
+                self.post(f"membership/member/{member_id}/groups/add", {"groups": [group_id]}, 200, expected_result={"status": "ok"})
 
-            # Remove the member from the group
-            self.post(f"membership/member/{member_id}/groups/remove", {"groups": [group_id]}, 200, expected_result={"status": "ok"})
+                # Inconsistency: list views do not include entity_id
+                group2 = strip_entity_id(group)
 
-            # Make sure the member has been removed from the group
-            self.get(f"membership/member/{member_id}/groups", 200, expected_result={"data": []})
+                member2 = strip_entity_id(member)
 
-        for group in created_groups:
-            self.delete(f"membership/group/{group['group_id']}", 200, expected_result={"status": "deleted"})
-            # Note that deleted groups still show up when explicitly accessed, but they should not show up in lists (this is checked for below)
-            self.get(f"membership/group/{group['group_id']}", 200, expected_result={"data": group})
+                # Make sure the member has been added to the group
+                self.get(f"membership/member/{member_id}/groups", 200, expected_result={"data": [group2]})
+                self.get(f"membership/group/{group_id}/members", 200, expected_result={"data": [member2]})
 
-        for member in created_members:
-            self.delete(f"membership/member/{member['member_id']}", 200, expected_result={"status": "deleted"})
+                # Remove the member from the group
+                self.post(f"membership/member/{member_id}/groups/remove", {"groups": [group_id]}, 200, expected_result={"status": "ok"})
 
-        # Make sure all groups have been deleted
-        self.get(f"membership/group", 200, expected_result={"data": previous_groups})
+                # Make sure the member has been removed from the group
+                self.get(f"membership/member/{member_id}/groups", 200, expected_result={"data": []})
+
+            for group in created_groups:
+                self.delete(f"membership/group/{group['group_id']}", 200, expected_result={"status": "deleted"})
+                # Note that deleted groups still show up when explicitly accessed, but they should not show up in lists (this is checked for below)
+                self.get(f"membership/group/{group['group_id']}", 200, expected_result={"data": group})
+
+            # Make sure all groups have been deleted
+            self.get(f"membership/group", 200, expected_result={"data": previous_groups})
+
+    def test_membership(self):
+        with MemberDummies(self, 5) as created_members:
+
+            for i, member in enumerate(created_members):
+                member_id = member['member_id']
+                self.get(f"/membership/member/{member_id}/membership", 200, expected_result={
+                    "status": "ok",
+                    "data": {
+                        "has_labaccess": False,
+                        "has_membership": False,
+                        "labaccess_end": None,
+                        "membership_end": None
+                    }
+                })
+
+                self.post(f"/membership/member/{member_id}/addMembershipDays", {"type": "labaccess", "days": 10, "creation_reason": "test"}, 200, expected_result={
+                    "status": "ok",
+                    "data": {
+                        "has_labaccess": True,
+                        "has_membership": False,
+                        "labaccess_end": (datetime.now() + timedelta(days=10)).strftime("%Y-%m-%d"),
+                        "membership_end": None
+                    }
+                })
+
+                self.post(f"/membership/member/{member_id}/addMembershipDays", {"type": "labaccess", "days": 15, "creation_reason": "test"}, 200, expected_result={
+                    "status": "ok",
+                    "data": {
+                        "has_labaccess": True,
+                        "has_membership": False,
+                        "labaccess_end": (datetime.now() + timedelta(days=25)).strftime("%Y-%m-%d"),
+                        "membership_end": None
+                    }
+                })
+
+                self.post(f"/membership/member/{member_id}/addMembershipSpan", {
+                        "type": "membership",
+                        "startdate": (datetime.now() + timedelta(days=i-2)).strftime("%Y-%m-%d"),
+                        "enddate": (datetime.now() + timedelta(days=35)).strftime("%Y-%m-%d"),
+                        "creation_reason": "test"
+                    },
+                    200, expected_result={
+                        "status": "ok",
+                        "data": {
+                            "has_labaccess": True,
+                            "has_membership": i <= 2,
+                            "labaccess_end": (datetime.now() + timedelta(days=25)).strftime("%Y-%m-%d"),
+                            "membership_end": (datetime.now() + timedelta(days=35)).strftime("%Y-%m-%d")
+                        }
+                    }
+                )
+
+                self.post(f"/membership/member/{member_id}/addMembershipDays", {"type": "labaccess", "days": -1, "creation_reason": "test"}, 400, expected_result={"status": "error"})
+                self.post(f"/membership/member/{member_id}/addMembershipDays", {"type": "lulz", "days": 10, "creation_reason": "test"}, 400, expected_result={"status": "error"})
+                self.post(f"/membership/member/{member_id}/addMembershipDays", {"type": "labaccess", "days": 10, "creation_reason": None}, 400, expected_result={"status": "error"})
+                self.post(f"/membership/member/{member_id}/addMembershipDays", {"type": "labaccess", "days": 10}, 400, expected_result={"status": "error"})

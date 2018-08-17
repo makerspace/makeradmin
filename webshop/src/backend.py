@@ -714,7 +714,13 @@ def ship_orders() -> None:
         if action["name"] == "add_labaccess_days":
             days_to_add = int(pending["pending_action"]["value"])
             assert(days_to_add >= 0)
-            r = instance.gateway.post(f"membership/member/{member_id}/addMembershipDays", { "type": "labaccess", "days": days_to_add })
+            r = instance.gateway.post(f"membership/member/{member_id}/addMembershipDays",
+                {
+                    "type": "labaccess",
+                    "days": days_to_add,
+                    "creation_reason": f"action: {pending['pending_action']['id']}, transaction_id: {item['transaction_id']}",
+                }
+            )
             assert r.ok, r.text
 
             r = instance.gateway.get(f"membership/member/{member_id}/membership")
