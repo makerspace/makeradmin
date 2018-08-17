@@ -268,7 +268,7 @@ def list_orders():
     transactions = transaction_entity.list()
     member_ids = ",".join(set([str(t["member_id"]) for t in transactions]))
 
-    r = instance.gateway.get(f"membership/member?member_id={member_ids}")
+    r = instance.gateway.get(f"membership/member?entity_id={member_ids}")
     assert(r.ok)
 
     member_data = {d["member_id"]: d for d in r.json()["data"]}
