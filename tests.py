@@ -304,6 +304,23 @@ class MakerAdminTest(unittest.TestCase):
                     }
                 )
 
+                self.post(f"/membership/member/{member_id}/addMembershipSpan", {
+                        "type": "special_labaccess",
+                        "startdate": (datetime.now() - timedelta(days=20)).strftime("%Y-%m-%d"),
+                        "enddate": (datetime.now() + timedelta(days=40)).strftime("%Y-%m-%d"),
+                        "creation_reason": "test"
+                    },
+                    200, expected_result={
+                        "status": "ok",
+                        "data": {
+                            "has_labaccess": True,
+                            "has_membership": i <= 2,
+                            "labaccess_end": (datetime.now() + timedelta(days=40)).strftime("%Y-%m-%d"),
+                            "membership_end": (datetime.now() + timedelta(days=35)).strftime("%Y-%m-%d")
+                        }
+                    }
+                )
+
                 self.post(f"/membership/member/{member_id}/addMembershipDays", {"type": "labaccess", "days": -1, "creation_reason": "test"}, 400, expected_result={"status": "error"})
                 self.post(f"/membership/member/{member_id}/addMembershipDays", {"type": "lulz", "days": 10, "creation_reason": "test"}, 400, expected_result={"status": "error"})
                 self.post(f"/membership/member/{member_id}/addMembershipDays", {"type": "labaccess", "days": 10, "creation_reason": None}, 400, expected_result={"status": "error"})

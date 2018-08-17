@@ -13,6 +13,7 @@ use DB;
 
 const SPAN_LABACCESS = "labaccess";
 const SPAN_MEMBERSHIP = "membership";
+const SPAN_SPECIAL_LABACCESS = "special_labaccess";
 
 class Member extends Controller
 {
@@ -398,6 +399,14 @@ class Member extends Controller
 	public function addMembershipSpan(Request $request, $member_id)
 	{
 		$json = $request->json()->all();
+
+		if ($json['type'] != SPAN_LABACCESS && $json['type'] != SPAN_MEMBERSHIP && $json['type'] != SPAN_SPECIAL_LABACCESS) {
+			return Response()->json([
+				"status"  => "error",
+				"message" => "Unknown membership type {$json['type']}",
+			], 400);
+		}
+
 		DB::insert("INSERT INTO membership_spans(member_id, type, startdate, enddate, creation_reason) VALUES(?, ?, ?, ?, ?)", [$member_id, $json['type'], $json['startdate'], $json['enddate'], $json['creation_reason']]);
 
 		return $this->getMembership($request, $member_id);
@@ -409,7 +418,7 @@ class Member extends Controller
 		if (empty($json['type'])) {
 			return Response()->json([
 				"status"  => "error",
-				"message" => "Missing parameter 'type' (" . SPAN_LABACCESS . ", " . SPAN_MEMBERSHIP . ")",
+				"message" => "Missing parameter 'type' (" . SPAN_LABACCESS . ", " . SPAN_MEMBERSHIP . ", " . SPAN_SPECIAL_LABACCESS . ")",
 			], 400);
 		}
 
@@ -446,7 +455,7 @@ class Member extends Controller
 
 		$endtime = date('Y-m-d', strtotime("+{$days} days", strtotime($last_period)));
 
-		if ($json['type'] != SPAN_LABACCESS && $json['type'] != SPAN_MEMBERSHIP) {
+		if ($json['type'] != SPAN_LABACCESS && $json['type'] != SPAN_MEMBERSHIP && $json['type'] != SPAN_SPECIAL_LABACCESS) {
 			return Response()->json([
 				"status"  => "error",
 				"message" => "Unknown membership type {$json['type']}",
@@ -463,42 +472,37 @@ class Member extends Controller
 	private function _getMembership($member_id)
 	{
 		// Check if the current time is covered by any span of valid membership times
-		$current_period = DB::table("membership_spans")
+		$labaccess = DB::table("membership_spans")
 			->where('member_id', $member_id)
-			->whereRaw('startdate<=NOW() AND NOW()<enddate')
-			->select('type', 'enddate')
-			->groupBy('type')
-			->get();
+			->whereRaw("(type=? OR type=?)", [SPAN_LABACCESS, SPAN_SPECIAL_LABACCESS])
+			->whereRaw("startdate<=NOW() AND NOW()<=enddate")
+			->value('enddate') !== null;
+
+		$membership = DB::table("membership_spans")
+			->where('member_id', $member_id)
+			->where("type", SPAN_MEMBERSHIP)
+			->whereRaw("startdate<=NOW() AND NOW()<=enddate")
+			->value('enddate') !== null;
 
 		// Find the latest enddate of any membership span.
 		// This is the time the member's membership ends.
 		// (at least unless someone has been manually tweaking the database to create some sort of gap before that time)
-		$last_period = DB::table("membership_spans")
+		$labaccess_time = DB::table("membership_spans")
 			->where('member_id', $member_id)
-			->selectRaw('type, MAX(enddate) as enddate')
-			->groupBy('type')
-			->get();
+			->whereRaw("(type=? OR type=?)", [SPAN_LABACCESS, SPAN_SPECIAL_LABACCESS])
+			->max("enddate");
 
-		$labaccess = false;
-		$membership = false;
-		foreach ($current_period as $period) {
-			if ($period->type == SPAN_LABACCESS) $labaccess = true;
-			if ($period->type == SPAN_MEMBERSHIP) $membership = true;
-		}
-
-		$labaccess_time = null;
-		$membership_time = null;
-		foreach ($last_period as $period) {
-			if ($period->type == SPAN_LABACCESS) $labaccess_time = $period->enddate;
-			if ($period->type == SPAN_MEMBERSHIP) $membership_time = $period->enddate;
-		}
+		$membership_time = DB::table("membership_spans")
+			->where('member_id', $member_id)
+			->where("type", SPAN_MEMBERSHIP)
+			->max("enddate");
 
 		// Send response to client
 		return [
 			"has_labaccess" => $labaccess,
 			"has_membership" => $membership,
 			"labaccess_end" => $labaccess_time,
-			"membership_end" => $membership_time,
+			"membership_end" => $membership_time
 		];
 	}
 
