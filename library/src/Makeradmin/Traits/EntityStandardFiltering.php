@@ -24,7 +24,7 @@ trait EntityStandardFiltering
 
 			unset($params["per_page"]);
 		}
-		$params["per_page"] = $per_page ?? 25;
+		$params["per_page"] = $per_page;
 
 		// Pagination
 		if(array_key_exists("page", $params))
