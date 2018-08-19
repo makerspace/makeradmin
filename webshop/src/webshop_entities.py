@@ -1,7 +1,8 @@
 from decimal import Decimal
 from datetime import datetime
 from service import Entity, Column, DB
-from typing import List, Dict, Any
+from typing import List, Dict, Any, NamedTuple
+from dataclasses import dataclass
 
 # Note Decimal(str(x)) ensures it is a reasonable value that is saved.
 # For example
@@ -87,3 +88,11 @@ def membership_products(db: DB) -> List[Dict[str,Any]]:
         """)
         products = [{"id": v[0], "name": v[1], "price": v[2]} for v in cur.fetchall()]
         return products
+
+
+@dataclass
+class CartItem:
+    name: str
+    id: int
+    count: int
+    amount: Decimal

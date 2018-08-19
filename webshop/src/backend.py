@@ -6,107 +6,16 @@ from service import eprint, assert_get, route_helper, BackendException, format_d
 import stripe
 import os
 from decimal import Decimal, Rounded, localcontext
-from webshop_entities import category_entity, product_entity, action_entity, transaction_entity, transaction_content_entity, product_action_entity, membership_products, webshop_stripe_pending, webshop_pending_registrations, webshop_transaction_actions
-from typing import Set, List, Dict, Any, NamedTuple, Tuple
+from webshop_entities import category_entity, product_entity, action_entity, transaction_entity, transaction_content_entity, product_action_entity
+from webshop_entities import membership_products, webshop_stripe_pending, webshop_pending_registrations, webshop_transaction_actions
+from webshop_entities import CartItem
+from typing import Set, List, Dict, Any, Tuple
 from datetime import datetime
 from dateutil import parser
-
-
-class CartItem(NamedTuple):
-    id: int
-    count: int
-    amount: Decimal
-
+import errors
+from filters import product_filters
 
 # Errors
-
-class TooSmallAmount(BackendException):
-    def __init__(self):
-        super().__init__(sv="För litet belopp. Det minsta beloppet som kan handlas för är 50 cent (ca 5 kr).")
-
-
-class TooLargeAmount(BackendException):
-    def __init__(self, threshold):
-        super().__init__(sv=f"Köp för över {threshold} kr är inte tillåtna för att undvika misstag."
-                            f" Behöver du köpa för så mycket, dela upp köpet i mindre delar.",
-                         en=f"Not allowing purchases above {threshold} kr to avoid mistakes.")
-
-
-class NonMatchingSums(BackendException):
-    def __init__(self, expected_sum, actual_sum):
-        super().__init__(sv=f"Den förväntade summan att betala var {expected_sum}, men produkterna i varukorgen kostar egentligen totalt {total_sum}.",
-                         en=f"Expected total amount to pay to be {expected_sum} but the cart items actually sum to {total_sum}.")
-
-
-class NotMember(BackendException):
-    def __init__(self):
-        super().__init__(sv="Du måste vara en medlem för att kunna köpa material och verktyg.",
-                         en="You must be a member to purchase materials and tools.")
-
-
-class DuplicateTransaction(BackendException):
-    def __init__(self):
-        super().__init__(sv="Du har redan gjort en betalning för detta.")
-
-
-class MissingJson(BackendException):
-    def __init__(self):
-        super().__init__(sv="Ingen json data skickades med anropet. Detta ser ut som en bugg.")
-
-
-class NotPurelyCents(BackendException):
-    def __init__(self, value):
-        super().__init__(sv=f"Beloppet kunde inte konverteras till ett helt antal ören ({value}).")
-
-
-class NotAllowedToPurchase(BackendException):
-    def __init__(self, product):
-        super().__init__(sv=f"Det är inte tillåtet att köpa produkten med id {product['id']}.")
-
-
-class CartMustContainNItems(BackendException):
-    def __init__(self, n):
-        super().__init__(sv=f"Köpet måste innehålla exakt {n} sak.")
-
-
-class NonNegativeItemCount(BackendException):
-    def __init__(self, item):
-        super().__init__(sv=f"Kan endast köpa ett positivt antal av produkt {item}.",
-                         en=f"Can only buy positive amounts of item {item}.")
-
-
-class InvalidItemCountMultiple(BackendException):
-    def __init__(self, item, smallest_multiple, count):
-        super().__init__(sv=f"Produkten {item} kan endast köpas i multipler av {smallest_multiple},"
-                            f" i varukorgen så fanns {count} enheter.",
-                         en=f"Can only buy item {item} in multiples of {smallest_multiple}, found {count}.")
-
-
-class RoundingError(BackendException):
-    def __init__(self):
-        super().__init__(sv="Ett avrundningsfel skedde när priset skulle beräknas.",
-                         en="Rounding ocurred during price calculations.")
-
-
-class EmptyCart(BackendException):
-    def __init__(self):
-        super().__init__(sv="Inga produkter i varukorgen.",
-                         en="No items in cart.")
-
-
-class NoSuchItem(BackendException):
-    def __init__(self, item: str):
-        super().__init__(sv=f"Produkten {item} finns inte.",
-                         en=f"Item {item} does not exist.")
-
-
-class PaymentFailed(BackendException):
-    def __init__(self, error: str=None):
-        if error is not None:
-            super().__init__(sv=f"Betalningen misslyckades, stripe säger {error}.",
-                             en=f"Payment failed, stripe says {error}.")
-        else:
-            super().__init__(sv=f"Betalningen misslyckades.", en=f"Payment failed.")
 
 
 instance = service.create(name="Makerspace Webshop Backend", url="webshop", port=8000, version="1.0")
@@ -161,6 +70,7 @@ webshop_stripe_pending.db = db
 def pending_actions():
     return _pending_actions()
 
+
 def _pending_actions() -> List[Dict[str,Any]]:
     '''
     Finds every item in a transaction and checks the actions it has, then checks to see if all those actions have been completed (and are not deleted).
@@ -207,7 +117,7 @@ def _pending_actions() -> List[Dict[str,Any]]:
 # TODO: More restrictive permissions?
 @instance.route("transaction/<int:id>/content", methods=["GET"], permission="webshop")
 @route_helper
-def transaction_contents(id: int) -> Dict[str,Any]:
+def transaction_contents(id: int) -> List[Dict]:
     '''
     Return all content related to a transaction
     '''
@@ -229,6 +139,7 @@ def transaction_contents(id: int) -> Dict[str,Any]:
                 "amount": str(v[4]),
             } for v in cur.fetchall()
         ]
+
 
 @instance.route("transaction/<int:id>/actions", methods=["GET"], permission="webshop")
 @route_helper
@@ -257,10 +168,12 @@ def transaction_actions(id: int):
             } for v in cur.fetchall()
         ]
 
+
 @instance.route("transaction/<int:id>/events", methods=["GET"], permission="webshop")
 @route_helper
 def transaction_events(id: int):
     return transaction_content_entity.list("transaction_id=%s", id)
+
 
 @instance.route("transactions_extended_info", methods=["GET"], permission="webshop")
 @route_helper
@@ -268,14 +181,18 @@ def list_orders():
     transactions = transaction_entity.list()
     member_ids = ",".join(set([str(t["member_id"]) for t in transactions]))
 
-    r = instance.gateway.get(f"membership/member?member_id={member_ids}")
+    r = instance.gateway.get(f"membership/member?entity_id={member_ids}")
     assert(r.ok)
 
     member_data = {d["member_id"]: d for d in r.json()["data"]}
     for t in transactions:
-        member = member_data[t["member_id"]]
-        t["member_name"] = f"{member['firstname']} {member['lastname']}"
-        t["member_number"] = member['member_number']
+        if t["member_id"] not in member_data:
+            t["member_name"] = "Unknown member"
+            t["member_number"] = None
+        else:
+            member = member_data[t["member_id"]]
+            t["member_name"] = f"{member['firstname']} {member['lastname']}"
+            t["member_number"] = member['member_number']
 
     return transactions
 
@@ -332,18 +249,18 @@ def register() -> Dict[str, int]:
 
     data = request.get_json()
     if data is None:
-        raise MissingJson()
+        raise errors.MissingJson()
 
     products = membership_products(db)
 
     purchase = assert_get(data, "purchase")
     if len(purchase["cart"]) != 1:
-        raise CartMustContainNItems(1)
+        raise errors.CartMustContainNItems(1)
     item = purchase["cart"][0]
     if item["count"] != 1:
-        raise CartMustContainNItems(1)
+        raise errors.CartMustContainNItems(1)
     if item["id"] not in (p["id"] for p in products):
-        raise NotAllowedToPurchase(item['id'])
+        raise errors.NotAllowedToPurchase(item['id'])
 
     # Register the new member.
     # We need to copy the member info for security reasons.
@@ -392,12 +309,9 @@ def stripe_callback() -> None:
     payload = request.data
     eprint("Headers: " + str(request.headers))
     sig_header = request.headers['Stripe-Signature']
-    event = None
 
     try:
-        event = stripe.Webhook.construct_event(
-          payload, sig_header, stripe_signing_secret
-        )
+        event = stripe.Webhook.construct_event(payload, sig_header, stripe_signing_secret)
     except ValueError as e:
         # Invalid payload
         abort(400)
@@ -425,55 +339,56 @@ def stripe_callback() -> None:
             eprint("Marked transaction as failed")
 
 
-def process_cart(member_id, cart: List[Dict[str,Any]]) -> Tuple[Decimal, List[CartItem]]:
+def process_cart(member_id: int, cart: List[Dict[str,Any]]) -> Tuple[Decimal, List[CartItem]]:
     items = []
     with db.cursor() as cur:
         with localcontext() as ctx:
             ctx.clear_flags()
             total_amount = Decimal(0)
-        
+
             for item in cart:
                 cur.execute("SELECT name,price,smallest_multiple,filter FROM webshop_products WHERE id=%s AND deleted_at IS NULL", item["id"])
                 tup: Tuple[str, Decimal, int, str] = cur.fetchone()
                 if tup is None:
-                    raise NoSuchItem(str(item["id"]))
+                    raise errors.NoSuchItem(str(item["id"]))
                 name, price, smallest_multiple, product_filter = tup
-                
-                if product_filter:
-                    service.product_filters[product_filter](name=name, member_id=member_id)
 
                 if price < 0:
                     abort(400, "Item seems to have a negatice price. Not allowing purchases that item just in case. Item: " + str(item["id"]))
 
                 count = int(item["count"])
                 if count <= 0:
-                    raise NonNegativeItemCount(str(item["id"]))
+                    raise errors.NonNegativeItemCount(str(item["id"]))
                 if (count % smallest_multiple) != 0:
-                    raise InvalidItemCountMultiple(str(item["id"]), smallest_multiple, count)
+                    raise errors.InvalidItemCountMultiple(str(item["id"]), smallest_multiple, count)
 
                 item_amount = price * count
-                items.append(CartItem(item["id"], count, item_amount))
+                cart_item = CartItem(name, item["id"], count, item_amount)
+                items.append(cart_item)
                 total_amount += item_amount
-                
+
+                if product_filter:
+                    product_filters[product_filter](gateway=instance.gateway, item=cart_item, member_id=member_id)
+
             if ctx.flags[Rounded]:
                 # This can possibly happen with huge values, I suppose they will be caught below anyway but it's good to catch in any case
-                raise RoundingError()
+                raise errors.RoundingError()
 
     return total_amount, items
 
 
-def validate_payment(member_id, cart: List[Dict[str,Any]], expected_amount: Decimal) -> Tuple[Decimal, List[CartItem]]:
+def validate_payment(member_id: int, cart: List[Dict[str,Any]], expected_amount: Decimal) -> Tuple[Decimal, List[CartItem]]:
     if len(cart) == 0:
-        raise EmptyCart()
+        raise errors.EmptyCart()
 
     total_amount, items = process_cart(member_id, cart)
 
     # Ensure that the frontend hasn't calculated the amount to pay incorrectly
     if abs(total_amount - Decimal(expected_amount)) > Decimal("0.01"):
-        return NonMatchingSums(expected_amount, total_amount)
+        raise errors.NonMatchingSums(expected_amount, total_amount)
 
     if total_amount > 10000:
-        raise TooLargeAmount(10000)
+        raise errors.TooLargeAmount(10000)
 
     # Assert that the amount can be converted to a valid stripe amount
     convert_to_stripe_amount(total_amount)
@@ -486,7 +401,7 @@ def convert_to_stripe_amount(amount: Decimal) -> int:
     # This shouldn't be able to fail as all products in the database have prices in cents, but you never know.
     stripe_amount = amount * stripe_currency_base
     if (stripe_amount % 1) != 0:
-        raise NotPurelyCents(amount)
+        raise errors.NotPurelyCents(amount)
 
     # The amount is stored as a Decimal, convert it to an int
     return int(stripe_amount)
@@ -512,14 +427,14 @@ def stripe_payment(transaction_id: int, token: str) -> None:
         body = e.json_body
         err = body.get('error', {})
         eprint("Stripe Charge Failed\n" + str(err))
-        raise PaymentFailed(err.get("message"))
+        raise errors.PaymentFailed(err.get("message"))
     except stripe.StripeError as e:
         eprint("Stripe Charge Failed\n" + str(e))
-        raise PaymentFailed()
+        raise errors.PaymentFailed()
     except Exception as e:
         eprint("Stripe Charge Failed")
         eprint(e)
-        raise PaymentFailed()
+        raise errors.PaymentFailed()
 
     transaction["status"] = "completed"
     transaction_entity.put(transaction, transaction_id)
@@ -576,7 +491,7 @@ duplicatePurchaseRands: Set[int] = set()
 def pay_route() -> Dict[str, int]:
     data = request.get_json()
     if data is None:
-        raise MissingJson()
+        raise errors.MissingJson()
 
     member_id = int(assert_get(request.headers, "X-User-Id"))
     return pay(member_id, data)
@@ -619,10 +534,10 @@ def pay(member_id: int, data: Dict[str, Any], activates_member: bool = False) ->
     # This will try to prevent duplicate payments due to sending the payment request twice
     duplicatePurchaseRand = assert_get(data, "duplicatePurchaseRand")
     if duplicatePurchaseRand in duplicatePurchaseRands:
-        raise DuplicateTransaction()
+        raise errors.DuplicateTransaction()
 
     if member_id <= 0:
-        raise NotMember()
+        raise errors.NotMember()
 
     total_amount, items = validate_payment(member_id, data["cart"], data["expectedSum"])
 
@@ -638,7 +553,7 @@ def pay(member_id: int, data: Dict[str, Any], activates_member: bool = False) ->
         source = create_stripe_source(transaction_id, card_source, total_amount)
     except stripe.error.InvalidRequestError as e:
         if "Amount must convert to at least" in str(e):
-            return TooSmallAmount()
+            raise errors.TooSmallAmount()
         else:
             eprint("Stripe Charge Failed")
             eprint(e)
@@ -714,7 +629,13 @@ def ship_orders() -> None:
         if action["name"] == "add_labaccess_days":
             days_to_add = int(pending["pending_action"]["value"])
             assert(days_to_add >= 0)
-            r = instance.gateway.post(f"membership/member/{member_id}/addMembershipDays", { "type": "labaccess", "days": days_to_add })
+            r = instance.gateway.post(f"membership/member/{member_id}/addMembershipDays",
+                {
+                    "type": "labaccess",
+                    "days": days_to_add,
+                    "creation_reason": f"action: {pending['pending_action']['id']}, transaction_id: {item['transaction_id']}",
+                }
+            )
             assert r.ok, r.text
 
             r = instance.gateway.get(f"membership/member/{member_id}/membership")

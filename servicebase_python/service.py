@@ -43,28 +43,32 @@ class DB:
 
 class APIGateway:
     def __init__(self, host: str, key: str, host_frontend: str, host_backend: str) -> None:
-        self.host = host
-        self.host_frontend = host_frontend
-        self.host_backend = host_backend
+        self.host = self._ensure_protocol(host)
+        self.host_frontend = self._ensure_protocol(host_frontend)
+        self.host_backend = self._ensure_protocol(host_backend)
         self.auth_headers = {"Authorization": "Bearer " + key}
+
+    @staticmethod
+    def _ensure_protocol(host: str) -> str:
+        if not host.startswith("http://") and not host.startswith("https://"):
+            host = "http://" +  host
+        return host
 
     def get_frontend_url(self, path):
         host = self.host_frontend
-        if not host.startswith("http"):
-            host = "http://" + host
         return host + "/" + path
 
     def get(self, path, payload=None) -> requests.Response:
-        return requests.get('http://' + self.host + "/" + path, params=payload, headers=self.auth_headers)
+        return requests.get(self.host + "/" + path, params=payload, headers=self.auth_headers)
 
     def post(self, path, payload) -> requests.Response:
-        return requests.post('http://' + self.host + "/" + path, json=payload, headers=self.auth_headers)
+        return requests.post(self.host + "/" + path, json=payload, headers=self.auth_headers)
 
     def put(self, path, payload) -> requests.Response:
-        return requests.put('http://' + self.host + "/" + path, json=payload, headers=self.auth_headers)
+        return requests.put(self.host + "/" + path, json=payload, headers=self.auth_headers)
 
     def delete(self, path) -> requests.Response:
-        return requests.delete('http://' + self.host + "/" + path, headers=self.auth_headers)
+        return requests.delete(self.host + "/" + path, headers=self.auth_headers)
 
 
 DEFAULT_PERMISSION = object()
@@ -199,7 +203,7 @@ def gateway_from_envfile(path):
     # Read the .env file
     with open(".env") as f:
         env = {s[0]: (s[1] if len(s) > 1 else "") for s in (s.split("=") for s in f.read().split('\n'))}
-    host = env["HOST_BACKEND"].replace("http://", "").replace("https://", "")
+    host = env["HOST_BACKEND"]
     return APIGateway(host, env["API_BEARER"], env["HOST_FRONTEND"], env["HOST_BACKEND"])
 
 
@@ -427,40 +431,3 @@ class Entity:
             service.route(endpoint + id_string, endpoint=endpoint+".delete", methods=["DELETE"], permission=write_permission)(route_helper(self.delete, status="deleted"))
         service.route(endpoint + "", endpoint=endpoint+".post", methods=["POST"], permission=write_permission)(route_helper(self.post, json=True, status="created"))
         service.route(endpoint + "", endpoint=endpoint+".list", methods=["GET"], permission=read_permission)(route_helper(self.list, status="ok"))
-
-
-class CanNotBuyStartPackage(BackendException):
-    def __init__(self):
-        super().__init__(sv=f"Startpaket kan bara köpas om du inte har haft labaccess de på 9 månader (30*9 days).",
-                         en=f"Starterpack can only be bought if you haven't had lab acccess during the last 9 months (30*9 days).")
-            
-            
-def filter_start_package(name=None, member_id=None):
-    member = instance.gateway.get(f"membership/member/{member_id}/membership").json()
-
-    if not member:
-        return
-
-    try:
-        end_date_str = member['data']['labaccess_end']
-    except KeyError as e:
-        raise BackendException(f"Could not get member end_date, this is a bug: {e}")
-
-    if not end_date_str:
-        return
-
-    try:
-        end_date = parser.parse(end_date_str)
-    
-    except ValueError as e:
-        raise BackendException(f"Could not parse member end_date, this is a bug: {e}")
-    
-    if end_date < datetime.now() + timedelta(days=30*9):
-        raise CanNotBuyStartPackage()
-    
-
-product_filters = {
-    "start_package": filter_start_package,
-}
-
-

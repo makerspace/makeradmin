@@ -12,6 +12,7 @@ trait EntityStandardFiltering
 		$filters = [];
 
 		// Number of entities per page
+		$per_page = null;
 		if(array_key_exists("per_page", $params))
 		{
 			// Use the specified per_page setting, if provided
@@ -20,11 +21,13 @@ trait EntityStandardFiltering
 			if(is_numeric($per_page) && $per_page > 0)
 			{
 				$per_page = (int)$per_page;
+			} else {
+				$per_page = null;
 			}
 
 			unset($params["per_page"]);
 		}
-		$params["per_page"] = $per_page ?? 25;
+		$params["per_page"] = $per_page;
 
 		// Pagination
 		if(array_key_exists("page", $params))

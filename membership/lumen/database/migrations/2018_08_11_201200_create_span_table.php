@@ -20,7 +20,7 @@ class CreateSpanTable extends Migration
             $table->foreign('member_id')->references('member_id')->on('membership_members');
             $table->date("startdate");
             $table->date("enddate");
-            $table->enum('type', array('labaccess', 'membership'));
+            $table->enum('type', array('labaccess', 'membership')); // Note: modified in a later migration (add_span_type)
             $table->string("creation_reason")->nullable();
             $table->dateTimeTz("created_at")->default(DB::raw("CURRENT_TIMESTAMP"));
             $table->index("span_id");

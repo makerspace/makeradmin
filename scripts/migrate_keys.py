@@ -3,6 +3,8 @@ import os
 sys.path.insert(1, os.path.join(sys.path[0], '../servicebase_python'))
 import service
 from service import eprint
+from datetime import datetime
+
 
 gateway = service.gateway_from_envfile(".env")
 
@@ -31,6 +33,12 @@ for key, member in zip(keys, matching_members):
     key["member_id"] = member["member_id"]
     print("Creating key " + key["tagid"])
     if key["status"] == "active":
+        start = key["startdate"]
+
+        # If the key does not have a start date, set the current date as the start date
+        if start is None:
+            start = service.format_datetime(datetime.now())
+
         span = {
             "member_id": member["member_id"],
             "startdate": key["startdate"],

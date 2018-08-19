@@ -7,6 +7,7 @@ from webshop_entities import category_entity, product_entity, transaction_entity
     action_entity, membership_products
 from typing import List, Dict, Any, Tuple
 from decimal import Decimal
+from filters import product_filters
 
 
 instance = service.create_frontend(url="shop", port=80)
@@ -120,7 +121,7 @@ def product_edit(id: int) -> str:
         "action_categories": action_categories
     })
 
-    filters = sorted(service.product_filters.keys())
+    filters = sorted(product_filters.keys())
 
     return render_template("product_edit.html", action_json=action_json,
                            filters=filters, action_categories=action_categories,
