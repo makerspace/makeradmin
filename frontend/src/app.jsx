@@ -42,33 +42,6 @@ var nav = new Backbone.Model({
 			],
 		},
 		{
-			text: "Automation",
-			target: "/auto",
-			icon: "coffee",
-			children:
-			[
-				{
-					text: "Översikt",
-					target: "/auto/overview",
-				},
-				{
-					type: "separator",
-				},
-				{
-					text: "Tictail-ordrar",
-					target: "/auto/tictail",
-				},
-				{
-					text: "Skapa verifikationer",
-					target: "/auto/verification",
-				},
-				{
-					text: "Multiaccess",
-					target: "/auto/multiaccess",
-				},
-			],
-		},
-		{
 			text: "Nycklar",
 			target: "/keys",
 			icon: "key",
@@ -134,10 +107,6 @@ var nav = new Backbone.Model({
 				{
 					text: "Access tokens",
 					target: "/settings/tokens",
-				},
-				{
-					text: "Automation",
-					target: "/settings/automation",
 				},
 				{
 					type: "separator",
@@ -272,7 +241,6 @@ const rootRoute = {
 				require("./Statistics/Routes"),
 				require("./Export/Routes"),
 				require("./Tictail/Routes"),
-				require("./Auto/Routes"),
 				{
 					path: "settings",
 					indexRoute: {
@@ -282,10 +250,6 @@ const rootRoute = {
 						{
 							path: "global",
 							component: require("./Pages/Settings/Global"),
-						},
-						{
-							path: "automation",
-							component: require("./Pages/Settings/Automation"),
 						},
 						{
 							path: "tokens",
