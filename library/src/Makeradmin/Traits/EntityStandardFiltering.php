@@ -12,6 +12,7 @@ trait EntityStandardFiltering
 		$filters = [];
 
 		// Number of entities per page
+		$per_page = null;
 		if(array_key_exists("per_page", $params))
 		{
 			// Use the specified per_page setting, if provided
