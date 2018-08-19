@@ -20,6 +20,8 @@ trait EntityStandardFiltering
 			if(is_numeric($per_page) && $per_page > 0)
 			{
 				$per_page = (int)$per_page;
+			} else {
+				$per_page = null;
 			}
 
 			unset($params["per_page"]);
