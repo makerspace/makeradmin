@@ -63,19 +63,21 @@ class MakerAdminTest(unittest.TestCase):
     
     @classmethod
     def _wait_for_startup(cls):
-        for i in range(400):
+        last_error = None
+        for i in range(100):
             sleep(0.5)
             try:
                 if cls.gateway.get("membership/member").ok:
-                    # Extra sleep for safety (technically this method only checks for if the membership service has started)
+                    # Extra sleep for safety (technically this method only checks for if the membership service has
+                    # started)
                     sleep(0.5)
                     return
-            except Exception:
+            except Exception as e:
+                last_error = str(e)
                 # Ignore any exceptions
                 # Until the services are up and running the connection may fail in any number of ways
-                pass
 
-        raise Exception("Timeout while waiting for services to start")
+        raise Exception(f"Timeout while waiting for services to start, last_error: {last_error}")
 
     def assertSubset(self, subset, obj):
         if isinstance(subset, list):
@@ -124,7 +126,7 @@ class MakerAdminTest(unittest.TestCase):
 
         cls.gateway = servicebase_python.service.gateway_from_envfile(".env")
         # Test backend uses a different port than the one in the .env file
-        cls.gateway.host = "localhost:9010"
+        cls.gateway.host = "http://localhost:9010"
 
         print("Waiting for services to start...")
         MakerAdminTest._wait_for_startup()
