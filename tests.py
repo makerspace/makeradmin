@@ -15,7 +15,8 @@ def strip_entity_id(obj):
     return copy
 
 
-class MemberDummies():
+class MemberDummies:
+    
         def __init__(self, test, count):
             self.test = test
             self.count = count
@@ -59,16 +60,17 @@ class MemberDummies():
 
 
 class MakerAdminTest(unittest.TestCase):
+    
     @classmethod
     def _wait_for_startup(cls):
-        for i in range(100):
+        for i in range(400):
             sleep(0.5)
             try:
                 if cls.gateway.get("membership/member").ok:
                     # Extra sleep for safety (technically this method only checks for if the membership service has started)
                     sleep(0.5)
                     return
-            except:
+            except Exception:
                 # Ignore any exceptions
                 # Until the services are up and running the connection may fail in any number of ways
                 pass
