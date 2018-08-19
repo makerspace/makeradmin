@@ -95,46 +95,13 @@ var nav = new Backbone.Model({
 			icon: "cog",
 			children:
 			[
-				// Inställningar
 				{
-					text: "Globala inställningar",
-					target: "/settings/global",
+					text: "About",
+					target: "/settings/about",
 				},
 				{
 					text: "Access tokens",
 					target: "/settings/tokens",
-				},
-				{
-					type: "separator",
-					target: "",
-				},
-
-				// Export
-				{
-					type: "heading",
-					text: "Export",
-					target: "",
-					icon: "download",
-				},
-				{
-					text: "Exportera data",
-					target: "/settings/export",
-				},
-				{
-					text: "Importera data",
-					target: "/settings/import",
-				},
-
-				// About
-				{
-					type: "heading",
-					text: "About",
-					target: "",
-					icon: "about",
-				},
-				{
-					text: "About",
-					target: "/settings/about",
 				},
 			],
 		},
@@ -146,7 +113,7 @@ var nav = new Backbone.Model({
 	]
 });
 
-var App = React.createClass({
+const App = React.createClass({
 	getInitialState()
 	{
 		return {
@@ -190,16 +157,14 @@ var App = React.createClass({
 				</div>
 			);
 		}
-		else
-		{
-			return (
-				<Login />
-			);
-		}
+
+		return (
+			<Login />
+		);
 
 	}
 });
-App.title = "Internal"
+App.title = "Internal";
 
 const rootRoute = {
 	childRoutes: [
@@ -235,18 +200,13 @@ const rootRoute = {
 				require("./Messages/Routes"),
 				require("./Keys/Routes"),
 				require("./Statistics/Routes"),
-				require("./Export/Routes"),
 				require("./Tictail/Routes"),
 				{
 					path: "settings",
 					indexRoute: {
-						component: require("./Pages/Settings/Global"),
+						component: require("./Pages/About"),
 					},
 					childRoutes: [
-						{
-							path: "global",
-							component: require("./Pages/Settings/Global"),
-						},
 						{
 							path: "tokens",
 							component: require("./Pages/Login/AccessTokens"),
@@ -264,7 +224,8 @@ const rootRoute = {
 			]
 		}
 	]
-}
+};
+
 
 ReactDOM.render((
 	<Router history={browserHistory} routes={rootRoute} />
