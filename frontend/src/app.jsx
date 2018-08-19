@@ -53,10 +53,6 @@ var nav = new Backbone.Model({
 			children:
 			[
 				{
-					text: "Översikt",
-					target: "/sales/overview",
-				},
-				{
 					text: "Produkter",
 					target: "/sales/product",
 				},

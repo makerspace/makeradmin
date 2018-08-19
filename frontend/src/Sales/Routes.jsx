@@ -3,13 +3,9 @@ module.exports = {
 		{
 			path: "/sales",
 			indexRoute: {
-				component: require("./Pages/Overview"),
+				component: require("./Pages/Product/List"),
 			},
 			childRoutes: [
-				{
-					path: "overview",
-					component: require("./Pages/Overview"),
-				},
 				{
 					path: "product",
 					component: require("./Pages/Product/List"),
@@ -33,4 +29,4 @@ module.exports = {
 			]
 		}
 	]
-}
+};
