@@ -18,7 +18,7 @@ module.exports = {
 						},
 						{
 							path: ":member_id",
-							component: require("./Pages/Member/Show"),
+							component: require("./Pages/Member/Show").default,
 							indexRoute: {
 								component: require("./Components/UserBox/User/Show"),
 							},

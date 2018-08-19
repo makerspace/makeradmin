@@ -103,6 +103,7 @@ module.exports = withRouter(class Member extends React.Component
 							</div>
 						</div>
 					</fieldset>
+					
 					<KeyView />
 
 					<fieldset>
