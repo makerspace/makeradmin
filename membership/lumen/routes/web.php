@@ -36,6 +36,13 @@ $app->   get("membership/key/{id}", ['middleware' => 'permission:keys_view', 'us
 $app->   put("membership/key/{id}", ['middleware' => 'permission:keys_edit', 'uses' => "Key@update"]); // Model: Update
 $app->delete("membership/key/{id}", ['middleware' => 'permission:keys_edit', 'uses' => "Key@delete"]); // Model: Delete
 
+// Spans
+$app->   get("membership/span",      ['middleware' => 'permission:span_view',  'uses' => "Span@list"]);       // Get collection
+$app->  post("membership/span",      ['middleware' => 'permission:span_manage',  'uses' => "Span@create"]);   // Model: Create
+$app->   get("membership/span/{id}", ['middleware' => 'permission:span_view',  'uses' => "Span@read"]);       // Model: Read
+$app->   put("membership/span/{id}", ['middleware' => 'permission:span_manage',  'uses' => "Span@update"]);   // Model: Update
+$app->delete("membership/span/{id}", ['middleware' => 'permission:span_manage',  'uses' => "Span@delete"]);   // Model: Delete
+
 // Groups
 $app->   get("membership/group",       ['middleware' => 'permission:group_view',   'uses' => "Group@list"]);    // Get collection
 $app->  post("membership/group",       ['middleware' => 'permission:group_create', 'uses' => "Group@create"]);  // Model: Create
