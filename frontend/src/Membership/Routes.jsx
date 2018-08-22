@@ -20,7 +20,7 @@ module.exports = {
 							path: ":member_id",
 							component: require("./Pages/Member/Show").default,
 							indexRoute: {
-								component: require("./Components/UserBox/User/Show"),
+								component: require("./Components/UserBox/User/Show").default,
 							},
 							childRoutes: [
 								{

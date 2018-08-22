@@ -1,35 +1,20 @@
-import React from 'react'
-import Groups from '../../Tables/Groups'
-import { Link } from 'react-router'
-
-// Backbone
-import MemberModel from '../../../Models/Member'
-
-import MemberForm from '../../Forms/Member'
-
-module.exports = React.createClass(
-{
-	getInitialState: function()
-	{
-		var member = new MemberModel({
-			member_id: this.props.params.member_id
-		});
-
-		var _this = this;
-		member.fetch();
-
-		return {
-			model: member,
-		};
-	},
+import React from 'react';
+import PropTypes from 'prop-types';
+import MemberModel from '../../../Models/Member';
+import Member from '../../Forms/Member';
 
 
-	render: function()
-	{
-		return (
-			<div>
-				<MemberForm model={this.state.model} route={this.props.route} />
-			</div>
-		);
-	},
-});
+export default class Show extends React.Component {
+	render() {
+        return (
+            <div>
+                <Member model={this.context.member} route={this.props.route}/>
+            </div>
+        );
+    }
+}
+
+
+Show.contextTypes = {
+    member: PropTypes.instanceOf(MemberModel)
+};

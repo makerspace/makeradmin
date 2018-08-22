@@ -1,13 +1,15 @@
-import React from 'react'
-import BackboneReact from 'backbone-react-component'
-import { Link, withRouter } from 'react-router'
+import React from 'react';
+import BackboneReact from 'backbone-react-component';
+import {Link, withRouter} from 'react-router';
 
 import CountryDropdown from '../../../CountryDropdown'
 import DateTimeField from '../../../Components/DateTime'
 
 import GenericEntityFunctions from '../../../GenericEntityFunctions'
 
-import Input from '../../../Components/Form/Input'
+import Input from '../../../Components/Form/Input';
+
+
 
 module.exports = withRouter(React.createClass({
 	mixins: [Backbone.React.Component.mixin, GenericEntityFunctions],
