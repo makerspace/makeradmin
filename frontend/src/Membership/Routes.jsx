@@ -6,6 +6,12 @@ module.exports = {
 				onEnter: (nextState, replace) => replace("/membership/members"),
 			},
 			childRoutes: [
+                {
+                    path:       "membersx",
+                    indexRoute: {
+                        component: require("./MemberList").default,
+                    },
+                },
 				{
 					path: "members",
 					indexRoute: {
