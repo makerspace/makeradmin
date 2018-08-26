@@ -40,11 +40,12 @@ class Key extends Entity
 			"select" => "membership_keys.tagid",
 		],
 	];
-	protected $expands = [
+	protected $expandable_fields = [
 		'member' => [
 			'column' => 'member_id',
 			'join_table' => 'membership_members',
 			'join_column' => 'member_id',
+			'join_type' => 'left',
 			'selects' => [
 				'member_number',
 				'firstname',

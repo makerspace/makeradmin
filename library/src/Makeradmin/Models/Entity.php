@@ -19,9 +19,10 @@ class Entity
 	protected $relations = [];    // An array with information about relations to other entities
 	protected $type = null;       // The type of the entity, eg. "member"
 	protected $join = null;       // Specify the relation table we should join, if any
-	protected $expands = [];    // Specify which extra information to add to response. 
+	private   $expands = [];      // Specify which extra information to add to response.
 	protected $columns = [];
 	protected $expandable_fields = [];
+	protected $default_expands = [];
 	protected $sort = ["created_at", "desc"]; // An array with sorting options eg. ["entity_id", "desc"] or [["date_updated", "asc"],["date_created","desc"]]
 	protected $validation = [];               // Validation rules
 	protected $deletable = true;
@@ -61,7 +62,7 @@ class Entity
 					$expand_fields = explode(",", $filter);
 					foreach ($expand_fields as $expand){
 						if (array_key_exists($expand, $this->expandable_fields)) {
-							$this->expands[] = $this->expandable_fields[$id];
+							$this->expands[] = $this->expandable_fields[$expand];
 						}
 					}
 					// Remove the filter to prevent further processing
@@ -117,7 +118,14 @@ class Entity
 					$self_column = $expand['column'];
 					$join_table = $expand['join_table'];
 					$join_column = array_key_exists('join_column', $expand) ? $expand['join_column'] : $self_column;
-					$query = $query->join($join_table, "{$join_table}.{$join_column}", "=", "{$this->table}.{$self_column}");
+					$join_type = array_key_exists('join_type', $expand) ? $expand['join_type'] : "inner";
+					if ("inner" == $join_type) {
+						$query = $query->join($join_table, "{$join_table}.{$join_column}", "=", "{$this->table}.{$self_column}");
+					} else if ("left" == $join_type) {
+						$query = $query->leftJoin($join_table, "{$join_table}.{$join_column}", "=", "{$this->table}.{$self_column}");
+					} else if ("right" == $join_type) {
+						$query = $query->rightJoin($join_table, "{$join_table}.{$join_column}", "=", "{$this->table}.{$self_column}");
+					}
 					$base_table = $join_table;
 				}
 				foreach ($expand['selects'] as $name => $select) {

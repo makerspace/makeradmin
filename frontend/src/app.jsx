@@ -39,6 +39,11 @@ var nav = new Backbone.Model({
 					target: "/membership/groups",
 					icon: "group",
 				},
+				{
+					text: "Medlemsperioder",
+					target: "/membership/spans",
+					icon: "clock-o",
+				},
 			],
 		},
 		{
