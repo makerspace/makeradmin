@@ -418,7 +418,8 @@ class Member extends Controller
 		];
 
 		try {
-			$result = SpanModel::create_entity($span_data);
+			$span_model = new SpanModel;
+			$result = $span_model->create_entity($span_data);
 			if ($result->status() != 200){
 				return $result;
 			}
@@ -493,7 +494,8 @@ class Member extends Controller
 		];
 
 		try {
-			$result = SpanModel::create_entity($span_data);
+			$span_model = new SpanModel;
+			$result = $span_model->create_entity($span_data);
 			if ($result->status() != 200){
 				return $result;
 			}
