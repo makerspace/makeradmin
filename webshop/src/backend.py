@@ -633,7 +633,7 @@ def ship_orders() -> None:
                 {
                     "type": "labaccess",
                     "days": days_to_add,
-                    "creation_reason": f"action: {pending['pending_action']['id']}, transaction_id: {item['transaction_id']}",
+                    "creation_reason": f"transaction_action_id: {pending['pending_action']['id']}, transaction_id: {item['transaction_id']}",
                 }
             )
             assert r.ok, r.text
