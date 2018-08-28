@@ -43,6 +43,14 @@ class Span extends Entity
 			"column" => "membership_spans.created_at",
 			"select" => "DATE_FORMAT(membership_spans.created_at, '%Y-%m-%dT%H:%i:%sZ')",
 		],
+		"deleted_at" => [
+			"column" => "membership_spans.deleted_at",
+			"select" => "DATE_FORMAT(membership_spans.deleted_at, '%Y-%m-%dT%H:%i:%sZ')",
+		],
+		"deletion_reason" => [
+			"column" => "membership_spans.deletion_reason",
+			"select" => "membership_spans.deletion_reason",
+		],
 	];
 
 	protected $expandable_fields = [
@@ -60,6 +68,11 @@ class Span extends Entity
 	];
 	protected $sort = ["created_at", "desc"];
 	protected $validation = [
+		"member_id"       => ["required"],
+		"startdate"       => ["required"],
+		"enddate"         => ["required"],
+		"span_type"       => ["required"],
+		"creation_reason" => ["required", "unique"],
 	];
 
 	public function _search($query, $search)

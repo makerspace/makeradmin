@@ -28,6 +28,14 @@ class Span extends Controller
 	}
 
 	/**
+	 * Create new span for member
+	 */
+	public function create_entity($data)
+	{
+		return $this->_create("Span", $data);
+	}
+
+	/**
 	 *
 	 */
 	public function read(Request $request, $span_id)

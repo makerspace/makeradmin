@@ -727,7 +727,7 @@ class Entity
 					// A unique value collision is not fatal if it is from the same entity thas is being validated (itself)... or else we could not save an entity
 					if(!empty($result) && ($result->entity_id != $this->entity_id))
 					{
-						throw new EntityValidationException($field, null, "The value needs to be unique in the database");
+						throw new EntityValidationException($field, "unique");
 					}
 				}
 				// Validate a date according to ISO8601 standard

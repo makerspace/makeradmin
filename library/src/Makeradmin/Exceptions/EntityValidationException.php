@@ -10,12 +10,16 @@ use \Exception;
 class EntityValidationException extends Exception
 {
 	protected $column;
+	protected $type;
 
 	function __construct($column, $type, $message = null)
 	{
 		$this->column = $column;
+		$this->type = $type;
 		if ($type == "required") {
 			$this->message = "The field is required";
+		} else if ($type == "unique") {
+			$this->message = "The value needs to be unique in the database";
 		} else {
 			$this->message = $message;
 		}
@@ -24,5 +28,10 @@ class EntityValidationException extends Exception
 	function getColumn()
 	{
 		return $this->column;
+	}
+
+	function getType()
+	{
+		return $this->type;
 	}
 }
