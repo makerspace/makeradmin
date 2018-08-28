@@ -222,9 +222,13 @@ def copy_dict(source: Dict[str, Any], fields: List[str]) -> Dict[str, Any]:
 
 
 def send_new_member_email(member_id: int) -> None:
+    print("====== Getting member")
     r = instance.gateway.get(f"membership/member/{member_id}")
     assert r.ok
     member = r.json()["data"]
+    print("====== Generating email body")
+    email_body = render_template("new_member_email.html", member=member, frontend_url=instance.gateway.get_frontend_url)
+    print("====== Sending new member email")
 
     r = instance.gateway.post("messages", {
         "recipients": [
@@ -236,12 +240,13 @@ def send_new_member_email(member_id: int) -> None:
         "message_type": "email",
         "subject": "Välkommen till Stockholm Makerspace",
         "subject_en": "Welcome to the Stockholm Makerspace",
-        "body": render_template("new_member_email.html", member=member, frontend_url=instance.gateway.get_frontend_url)
+        "body": email_body
     })
 
     if not r.ok:
         eprint("Failed to send new member email")
         eprint(r.text)
+    print("====== Sent email body")
 
 
 @instance.route("register", methods=["POST"], permission=None)
@@ -303,6 +308,7 @@ def register() -> Dict[str, int]:
         "duplicatePurchaseRand": purchase["duplicatePurchaseRand"],
     }
 
+    print("====== Trying to pay")
     # Note this will throw if the payment fails
     return pay(member_id=member_id, data=purchase, activates_member=True)
 
@@ -447,14 +453,17 @@ def stripe_payment(transaction_id: int, token: str) -> None:
     if webshop_pending_registrations.list("transaction_id=%s", [transaction_id]):
         activate_member(transaction["member_id"])
 
+    print("====== Sending receipt email")
     send_receipt_email(transaction["member_id"], transaction_id)
     eprint("Payment complete. id: " + str(transaction_id))
 
 
 def activate_member(member_id: int) -> None:
+    print("====== Activating member")
     # Make the member not be deleted
     r = instance.gateway.post(f"membership/member/{member_id}/activate", {})
     assert r.ok
+    print("====== Activated member")
 
     send_new_member_email(member_id)
 
