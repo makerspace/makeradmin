@@ -222,6 +222,10 @@ def copy_dict(source: Dict[str, Any], fields: List[str]) -> Dict[str, Any]:
 
 
 def send_new_member_email(member_id: int) -> None:
+    r = instance.gateway.get(f"membership/member/{member_id}")
+    assert r.ok
+    member = r.json()["data"]
+
     r = instance.gateway.post("messages", {
         "recipients": [
             {
@@ -232,7 +236,7 @@ def send_new_member_email(member_id: int) -> None:
         "message_type": "email",
         "subject": "Välkommen till Stockholm Makerspace",
         "subject_en": "Welcome to the Stockholm Makerspace",
-        "body": render_template("new_member_email.html", frontend_url=instance.gateway.get_frontend_url)
+        "body": render_template("new_member_email.html", member=member, frontend_url=instance.gateway.get_frontend_url)
     })
 
     if not r.ok:
