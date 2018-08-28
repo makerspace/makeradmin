@@ -15,8 +15,8 @@ schema = dict(
         properties=dict(
             member_id=dict(type="integer"),
             member_number=dict(type="integer"),
-            firstname=dict(type="string"),
-            lastname=dict(type="string"),
+            firstname=dict(type=["string", "null"]),
+            lastname=dict(type=["string", "null"]),
             end_date=dict(type=["string", "null"]),
             start_date=dict(type=["string", "null"]),
             keys=dict(
