@@ -100,7 +100,7 @@ class MakerAdminClient(object):
             
         res = self.response_data_to_members(data)
         
-        ui.info__progress(f"got {len(res)} members")
+        ui.info__progress(f"got {len(data)} members ({len(res)} with keys)")
 
         return res
 
