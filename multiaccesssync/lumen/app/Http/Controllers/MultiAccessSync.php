@@ -347,58 +347,6 @@ class MultiAccessSync extends Controller
 	}
 
 	/**
-	 * Check that the key have the correct permissions
-	 */
-	protected function _checkPermissions($user)
-	{
-		// The user does only have the "Member" permissions
-		if(
-			$user->Authorities->Authority->count() == 1 &&
-			$user->Authorities->Authority[0]->Name == "DKV 53 Stockholm Makerspace - Medlem" &&
-			$user->Authorities->Authority[0]->Start == "" &&
-			$user->Authorities->Authority[0]->Stop == "" &&
-			$user->Authorities->Authority[0]->Blocked == 0
-		)
-		{
-			return true;
-		}
-
-		// The user has both "Member" and "Styrelsen" permission
-		if(
-			$user->Authorities->Authority->count() == 2 &&
-			$user->Authorities->Authority[0]->Name == "DKV 53 Stockholm Makerspace - Medlem" &&
-			$user->Authorities->Authority[0]->Start == "" &&
-			$user->Authorities->Authority[0]->Stop == "" &&
-			$user->Authorities->Authority[0]->Blocked == 0 &&
-			$user->Authorities->Authority[1]->Name == "DKV 53 Stockholm Makerspace - Styrelsen" &&
-			$user->Authorities->Authority[1]->Start == "" &&
-			$user->Authorities->Authority[1]->Stop == "" &&
-			$user->Authorities->Authority[1]->Blocked == 0
-		)
-		{
-			return true;
-		}
-
-		// The user has both "Member" and "Styrelsen" permission - reverse direction
-		if(
-			$user->Authorities->Authority->count() == 2 &&
-			$user->Authorities->Authority[0]->Name == "DKV 53 Stockholm Makerspace - Styrelsen" &&
-			$user->Authorities->Authority[0]->Start == "" &&
-			$user->Authorities->Authority[0]->Stop == "" &&
-			$user->Authorities->Authority[0]->Blocked == 0 &&
-			$user->Authorities->Authority[1]->Name == "DKV 53 Stockholm Makerspace - Medlem" &&
-			$user->Authorities->Authority[1]->Start == "" &&
-			$user->Authorities->Authority[1]->Stop == "" &&
-			$user->Authorities->Authority[1]->Blocked == 0
-		)
-		{
-			return true;
-		}
-
-		return false;
-	}
-
-	/**
 	 * Upload an *.xml export from MultiAccess
 	 */
 	public function upload(Request $request)
