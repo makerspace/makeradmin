@@ -136,7 +136,7 @@ class MakerAdminTest(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         print("\nStopping containers...")
-        check_output(["docker-compose", "-p", project_name, "stop -t 60"], stderr=STDOUT)
+        check_output(["docker-compose", "-p", project_name, "stop", "-t", "60"], stderr=STDOUT)
         check_output(["docker-compose", "-p", project_name, "down"], stderr=STDOUT)
 
     def get(self, url, status_code=200, *, expected_result={}):
@@ -272,7 +272,7 @@ class MakerAdminTest(unittest.TestCase):
                     }
                 })
 
-                self.post(f"/membership/member/{member_id}/addMembershipDays", {"type": "labaccess", "days": 10, "creation_reason": "test"}, 200, expected_result={
+                self.post(f"/membership/member/{member_id}/addMembershipDays", {"type": "labaccess", "days": 10, "creation_reason": f"test_{member_id}"}, 200, expected_result={
                     "status": "ok",
                     "data": {
                         "has_labaccess": True,
@@ -282,7 +282,7 @@ class MakerAdminTest(unittest.TestCase):
                     }
                 })
 
-                self.post(f"/membership/member/{member_id}/addMembershipDays", {"type": "labaccess", "days": 15, "creation_reason": "test2"}, 200, expected_result={
+                self.post(f"/membership/member/{member_id}/addMembershipDays", {"type": "labaccess", "days": 15, "creation_reason": f"test2_{member_id}"}, 200, expected_result={
                     "status": "ok",
                     "data": {
                         "has_labaccess": True,
@@ -296,7 +296,7 @@ class MakerAdminTest(unittest.TestCase):
                         "type": "membership",
                         "startdate": (datetime.now() + timedelta(days=i-2)).strftime("%Y-%m-%d"),
                         "enddate": (datetime.now() + timedelta(days=35)).strftime("%Y-%m-%d"),
-                        "creation_reason": "test3"
+                        "creation_reason": f"test3_{member_id}"
                     },
                     200, expected_result={
                         "status": "ok",
@@ -313,7 +313,7 @@ class MakerAdminTest(unittest.TestCase):
                         "type": "special_labaccess",
                         "startdate": (datetime.now() - timedelta(days=20)).strftime("%Y-%m-%d"),
                         "enddate": (datetime.now() + timedelta(days=40)).strftime("%Y-%m-%d"),
-                        "creation_reason": "test4"
+                        "creation_reason": f"test4_{member_id}"
                     },
                     200, expected_result={
                         "status": "ok",
@@ -326,7 +326,7 @@ class MakerAdminTest(unittest.TestCase):
                     }
                 )
 
-                self.post(f"/membership/member/{member_id}/addMembershipDays", {"type": "labaccess", "days": -1, "creation_reason": "test5"}, 400, expected_result={"status": "error"})
-                self.post(f"/membership/member/{member_id}/addMembershipDays", {"type": "lulz", "days": 10, "creation_reason": "test6"}, 400, expected_result={"status": "error"})
+                self.post(f"/membership/member/{member_id}/addMembershipDays", {"type": "labaccess", "days": -1, "creation_reason": f"test5_{member_id}"}, 400, expected_result={"status": "error"})
+                self.post(f"/membership/member/{member_id}/addMembershipDays", {"type": "lulz", "days": 10, "creation_reason": f"test6_{member_id}"}, 400, expected_result={"status": "error"})
                 self.post(f"/membership/member/{member_id}/addMembershipDays", {"type": "labaccess", "days": 10, "creation_reason": None}, 400, expected_result={"status": "error"})
                 self.post(f"/membership/member/{member_id}/addMembershipDays", {"type": "labaccess", "days": 10}, 400, expected_result={"status": "error"})

@@ -418,14 +418,14 @@ class Member extends Controller
 		];
 
 		try {
-			$span_model = new SpanModel;
-			$result = $span_model->create_entity($span_data);
-			if ($result->status() != 200){
-				return $result;
-			}
+			$this->_create_span($span_data);
 		} catch (EntityValidationException $e) {
 			if ($e->getType() == 'unique' && $e->getColumn() == 'creation_reason'){
 				//TODO: Validate data is same
+				return Response()->json([
+					"status"  => "error",
+					"message" => "Span with creation_reason {$json['creation_reason']} already exists",
+				], 400);
 			} else {
 				throw $e;
 			}
@@ -494,19 +494,34 @@ class Member extends Controller
 		];
 
 		try {
-			$span_model = new SpanModel;
-			$result = $span_model->create_entity($span_data);
-			if ($result->status() != 200){
-				return $result;
-			}
+			$this->_create_span($span_data);
 		} catch (EntityValidationException $e) {
 			if ($e->getType() == 'unique' && $e->getColumn() == 'creation_reason'){
 				//TODO: Validate data is same
+				return Response()->json([
+					"status"  => "error",
+					"message" => "Span with creation_reason {$json['creation_reason']} already exists",
+				], 400);
 			} else {
 				throw $e;
 			}
 		}
 		return $this->getMembership($request, $member_id);
+	}
+
+	/**
+	 * Create new span
+	 */
+	private function _create_span($span_data){
+		$fields = ['member_id','startdate','enddate','span_type','creation_reason'];
+		$entity = new SpanModel();
+		foreach ($fields as $field) {
+			$entity->{$field} = $span_data[$field] ?? null;
+		}
+		// Validate input
+		$entity->validate();
+		// Save entity
+		return $entity->save();
 	}
 
 	/**
