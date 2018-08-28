@@ -433,12 +433,12 @@ def stripe_payment(transaction_id: int, token: str) -> None:
             source=token,
         )
         eprint(charge)
-    except stripe.CardError as e:
+    except stripe.error.CardError as e:
         body = e.json_body
         err = body.get('error', {})
         eprint("Stripe Charge Failed\n" + str(err))
         raise errors.PaymentFailed(err.get("message"))
-    except stripe.StripeError as e:
+    except stripe.error.StripeError as e:
         eprint("Stripe Charge Failed\n" + str(e))
         raise errors.PaymentFailed()
     except Exception as e:
