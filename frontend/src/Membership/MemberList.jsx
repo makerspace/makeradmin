@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router';
 import { get } from "../gateway";
+import Date from '../Components/Date';
 
 
 class SearchBox extends React.Component {
@@ -32,8 +33,18 @@ class SearchBox extends React.Component {
 class Row extends React.Component {
     
     render() {
-        const {item} = this.props;
-        return <tr><td>{item.member_id}</td></tr>;
+        const {item, removeItem} = this.props;
+        return (
+			<tr>
+				<td><Link to={"/membership/members/" + item.member_id}>{item.member_number}</Link></td>
+				<td>-</td>
+				<td>{item.firstname}</td>
+				<td>{item.lastname}</td>
+				<td>{item.email}</td>
+				<td><Date date={item.created_at}/></td>
+                <td><a onClick={() => removeItem(item)} className="removebutton"><i className="uk-icon-trash"/></a></td>
+			</tr>
+        );
     }
 }
 
@@ -41,11 +52,62 @@ class Row extends React.Component {
 class Table extends React.Component {
     
     render() {
-        const {items, rowComponent} = this.props;
+        const {items, removeItem, rowComponent} = this.props;
         
-        const rows = items.map((item, i)  => React.createElement(rowComponent, {item, key: i}));
+        const rows = items.map((item, i)  => React.createElement(rowComponent, {item, removeItem, key: i}));
         
-        return <table><tbody>{rows}</tbody></table>;
+        const pagination1 = null;
+        const pagination2 = null;
+        const loadinClass = "";
+        const loading = "";
+        
+        return (
+            <tbody>
+            {rows}
+            </tbody>
+        );
+        
+        return (
+            <div>
+                {pagination1}
+				<div style={{position: "relative", "clear": "both"}}>
+					<table className={"uk-table uk-table-condensed uk-table-striped uk-table-hover" + loadinClass}>
+						<thead>
+							<tr>
+								{this.renderHeader().map(function(column, i) {
+									if(column.title)
+									{
+										// if(_this.state.sort_column == column.sort)
+										// {
+										// 	var icon = <i className={"uk-icon-angle-" + (_this.state.sort_order == "asc" ? "up" : "down")} />
+										// }
+
+										return (
+											<th key={i} className={column.class}>
+												{
+												    /* column.sort ?
+													<a data-sort={column.sort} onClick={_this.sort}>{column.title} {icon}</a>
+													: column.title
+													*/
+												}
+											</th>
+										);
+									}
+									else {
+										return (<th key={i}></th>);
+									}
+								})}
+							</tr>
+						</thead>
+						<tbody>
+							{rows}
+						</tbody>
+					</table>
+					{loading}
+				</div>
+				{pagination2}
+			</div>
+        );
     }
 }
 
@@ -76,6 +138,10 @@ class MemberList extends React.Component {
         });
     }
     
+    removeItem(item) {
+        console.info("remove item" + item);
+    }
+    
 	render() {
 		return (
 			<div>
@@ -85,7 +151,7 @@ class MemberList extends React.Component {
 				<Link to="/membership/membersx/add" className="uk-button uk-button-primary uk-float-right"><i className="uk-icon-plus-circle"/> Skapa ny medlem</Link>
 
 				<SearchBox onChange={(filters) => this.setState({filters})} />
-                <Table columns={[]} onSort={() => 1} rowComponent={Row} items={this.state.members}/>
+                <Table columns={[]} onSort={() => 1} rowComponent={Row} removeItem={this.removeItem} items={this.state.members}/>
 			</div>
 		);
 	}
