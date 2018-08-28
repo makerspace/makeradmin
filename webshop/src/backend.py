@@ -336,7 +336,7 @@ def stripe_callback() -> None:
             cur.execute("SELECT transaction_id FROM webshop_transactions INNER JOIN webshop_stripe_pending ON webshop_transactions.id=webshop_stripe_pending.transaction_id WHERE webshop_stripe_pending.stripe_token=%s", (source.id,))
             transaction_id = cur.fetchone()
             if transaction_id is None:
-                abort(400, f"no transaction exists for that token ({source.id})")
+                abort(200, f"no transaction exists for that token ({source.id}). Ignoring this event.")
 
         if event.type == "source.chargeable":
             # Payment should happen now
