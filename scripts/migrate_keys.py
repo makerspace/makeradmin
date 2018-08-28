@@ -56,7 +56,7 @@ for key, member in zip(keys, matching_members):
             "startdate": start,
             "enddate": key["enddate"],
             "type": "labaccess",
-            "creation_reason": "migrated"
+            "creation_reason": "migrated key:" + str(key['tagid'])
         }
 
         if end is None:
