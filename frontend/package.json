@@ -57,6 +57,8 @@
       "es6": true
     },
     "globals": {
+      "config": true,
+      "global": true,
       "require": true,
       "module": true,
       "console": true

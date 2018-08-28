@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router';
+import { get } from "../gateway";
 
 
 class SearchBox extends React.Component {
@@ -16,7 +17,8 @@ class SearchBox extends React.Component {
 						<form className="uk-form">
 							<div className="uk-form-icon">
 								<i className="uk-icon-search"/>
-								<input ref="search" type="text" className="uk-form-width-large" placeholder="Skriv in ett sökord" onChange={() => this.props.onChange({search: this.refs.search.value})} />
+								<input ref="search" type="text" className="uk-form-width-large" placeholder="Skriv in ett sökord"
+                                       onChange={() => this.props.onChange({search: this.refs.search.value})} />
 							</div>
 						</form>
 					</div>
@@ -27,9 +29,11 @@ class SearchBox extends React.Component {
 }
 
 
-class Item extends React.Component {
+class Row extends React.Component {
     
     render() {
+        const {item} = this.props;
+        return <tr><td>{item.member_id}</td></tr>;
     }
 }
 
@@ -37,6 +41,11 @@ class Item extends React.Component {
 class Table extends React.Component {
     
     render() {
+        const {items, rowComponent} = this.props;
+        
+        const rows = items.map((item, i)  => React.createElement(rowComponent, {item, key: i}));
+        
+        return <table><tbody>{rows}</tbody></table>;
     }
 }
 
@@ -62,11 +71,12 @@ class MemberList extends React.Component {
     }
     
     fetch() {
+        get("/membership/member?page=1&sort_by=&sort_order=asc&per_page=25", data => {
+            this.setState({members: data.data});
+        });
     }
     
 	render() {
-        const members = this.state.members.map(m => <Item key={m.id} member={m}/>);
-  
 		return (
 			<div>
 				<h2>Medlemmar</h2>
@@ -75,8 +85,7 @@ class MemberList extends React.Component {
 				<Link to="/membership/membersx/add" className="uk-button uk-button-primary uk-float-right"><i className="uk-icon-plus-circle"/> Skapa ny medlem</Link>
 
 				<SearchBox onChange={(filters) => this.setState({filters})} />
-                <Table columns={headers} onSort={() => 1} rows={members}/>
-				{/*<Members type={MemberCollection} filters={this.state.filters} />*/}
+                <Table columns={[]} onSort={() => 1} rowComponent={Row} items={this.state.members}/>
 			</div>
 		);
 	}
