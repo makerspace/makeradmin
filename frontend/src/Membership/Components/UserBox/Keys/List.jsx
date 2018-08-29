@@ -2,10 +2,9 @@ import React from 'react'
 import { Link, withRouter } from 'react-router'
 
 // Backbone
-import KeysCollection from '../../Collections/Keys'
+import KeysCollection from '../../../Collections/Key'
 
-import Keys from '../Tables/Keys'
-import Key from '../Forms/Key'
+import Keys from '../../Tables/Keys'
 
 module.exports = withRouter(React.createClass(
 {

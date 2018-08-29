@@ -48,16 +48,16 @@ module.exports = {
 								{
 									path: "keys",
 									indexRoute: {
-										component: require("../Keys/Components/UserBox/List"),
+										component: require("./Components/UserBox/Keys/List"),
 									},
 									childRoutes: [
 										{
 											path: "add",
-											component: require("../Keys/Components/UserBox/Add"),
+											component: require("./Components/UserBox/Keys/Add"),
 										},
 										{
 											path: ":key_id",
-											component: require("../Keys/Components/UserBox/Edit"),
+											component: require("./Components/UserBox/Keys/Edit"),
 										},
 									],
 								},
@@ -133,6 +133,22 @@ module.exports = {
 							],
 						},
 					],
+				},
+				{
+					path: "keys",
+					indexRoute: {
+						component: require("./Pages/Key/List")
+					},
+					childRoutes: [
+						{
+							path: "add",
+							component: require("./Pages/Key/Add")
+						},
+						{
+							path: ":id",
+							component: require("./Pages/Key/Show")
+						},
+					]
 				},
 				{
 					path: "spans",

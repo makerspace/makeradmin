@@ -45,16 +45,16 @@ var nav = new Backbone.Model({
 					icon: "group",
 				},
 				{
+					text: "Nycklar",
+					target: "/membership/keys",
+					icon: "key",
+				},
+						{
 					text: "Medlemsperioder",
 					target: "/membership/spans",
 					icon: "clock-o",
 				},
 			],
-		},
-		{
-			text: "Nycklar",
-			target: "/keys",
-			icon: "key",
 		},
 		{
 			text: "Försäljning",
@@ -63,12 +63,12 @@ var nav = new Backbone.Model({
 			children:
 			[
 				{
-					text: "Produkter",
-					target: "/sales/product",
-				},
-				{
 					text: "Ordrar",
 					target: "/sales/order",
+				},
+				{
+					text: "Produkter",
+					target: "/sales/product",
 				},
 			],
 		},
@@ -174,7 +174,7 @@ const App = React.createClass({
 
 	}
 });
-App.title = "Internal";
+App.title = "MakerAdmin";
 
 const rootRoute = {
 	childRoutes: [
@@ -208,7 +208,6 @@ const rootRoute = {
 				require("./Membership/Routes"),
 				require("./Sales/Routes"),
 				require("./Messages/Routes"),
-				require("./Keys/Routes"),
 				require("./Statistics/Routes"),
 				require("./Tictail/Routes"),
 				{
