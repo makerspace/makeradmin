@@ -17,7 +17,7 @@ export default withRouter(React.createClass({
 	onRemove: function(entity)
 	{
 		UIkit.notify("Successfully deleted", {status: "success"});
-		this.props.router.push("/keys");
+		this.props.router.push("/membership/keys");
 	},
 
 	onRemoveError: function(entity)
@@ -27,13 +27,13 @@ export default withRouter(React.createClass({
 
 	onCreate: function(entity)
 	{
-		this.props.router.push("/keys/" + entity.get("key_id"));
+		this.props.router.push("/membership/keys/" + entity.get("key_id"));
 		UIkit.notify("Successfully created", {status: "success"});
 	},
 
 	onUpdate: function(entity)
 	{
-		this.props.router.push("/keys");
+		this.props.router.push("/membership/keys");
 		UIkit.notify("Successfully updated", {status: "success"});
 	},
 
@@ -44,7 +44,7 @@ export default withRouter(React.createClass({
 
 	onCancel: function(entity)
 	{
-		this.props.router.push("/keys");
+		this.props.router.push("/membership/keys");
 	},
 
 	renderErrorMsg: function(column)

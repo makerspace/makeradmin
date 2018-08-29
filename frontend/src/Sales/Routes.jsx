@@ -3,9 +3,17 @@ module.exports = {
 		{
 			path: "/sales",
 			indexRoute: {
-				component: require("./Pages/Product/List"),
+				onEnter: (nextState, replace) => replace("/sales/order"),
 			},
 			childRoutes: [
+				{
+					path: "order",
+					component: require("./Pages/Order/List"),
+				},
+				{
+					path: "order/:id",
+					component: require("./Pages/Order/View"),
+				},
 				{
 					path: "product",
 					component: require("./Pages/Product/List"),
@@ -17,14 +25,6 @@ module.exports = {
 				{
 					path: "product/:id",
 					component: require("./Pages/Product/Edit"),
-				},
-				{
-					path: "order",
-					component: require("./Pages/Order/List"),
-				},
-				{
-					path: "order/:id",
-					component: require("./Pages/Order/View"),
 				},
 			]
 		}

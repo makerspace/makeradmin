@@ -2,9 +2,9 @@ import React from 'react';
 import { withRouter } from 'react-router';
 
 // Backbone
-import KeyModel from '../../Models/Key';
+import KeyModel from '../../../Models/Key';
 
-import Key from '../Forms/Key';
+import Key from '../../Forms/Key';
 
 module.exports = withRouter(React.createClass(
 {

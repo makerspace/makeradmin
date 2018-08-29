@@ -1,10 +1,10 @@
 import React from 'react'
 
 // Backbone
-import KeysCollection from '../Collections/Keys'
+import KeysCollection from '../../Collections/Key'
 
-import Keys from '../Components/Tables/Keys'
-import TableFilterBox from '../../TableFilterBox'
+import Keys from '../../Components/Tables/Keys'
+import TableFilterBox from '../../../TableFilterBox'
 import { Link } from 'react-router'
 
 module.exports = React.createClass({
