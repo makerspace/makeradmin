@@ -641,6 +641,12 @@ def ship_orders() -> None:
         action = pending["action"]
 
         if action["name"] == "add_labaccess_days":
+            r = instance.gateway.get(f"membership/member/{member_id}/keys")
+            assert r.ok, r.text
+            if len(r.json()["data"]) == 0:
+                # Skip this member because it has no keys
+                continue
+
             days_to_add = int(pending["pending_action"]["value"])
             assert(days_to_add >= 0)
             r = instance.gateway.post(f"membership/member/{member_id}/addMembershipDays",
