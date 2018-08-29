@@ -6,7 +6,6 @@ import Member from "../Models/Member";
 import * as _ from "underscore";
 
 
-// TODO Delete
 // TODO Snurr
 
 
@@ -139,7 +138,7 @@ class MemberList extends React.Component {
     }
 
     removeItem(item) {
-        console.info("remove item", item);
+        this.collection.removeItem(item);
     }
     
     render() {

@@ -20,3 +20,10 @@ export function showError(message) {
     );
     UIkit.notify(message, {timeout: 0, status: "danger"});
 }
+
+
+export function confirmModal(message) {
+    return new Promise((resolve, reject) => {
+        UIkit.modal.confirm(message, resolve, reject);
+    });
+}
