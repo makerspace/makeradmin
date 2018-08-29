@@ -5,16 +5,15 @@ import * as _ from "underscore";
 // Handle collection of a model class. Support stateful interaction with server.
 //
 // type: type of model that this is a collection of
-// onUpdate: callback data is received from server
+// onUpdate: callback data is received from server {items, pageIndex, pageCount}
 // pageSize: size of pages when pagination is enabled (0 = infinite = pagination turned off).
 export default class Collection {
     constructor({type, onUpdate, pageSize = 25}) {
         this.type = type;
         this.onUpdate = onUpdate;
         this.pageSize = pageSize;
-        this.pageIndex = 0;
-        this.pageCount = 1;
-        
+
+        this.page = {index: 1, count: 1};
         this.sort = {};
         this.filter = {};
         
@@ -33,12 +32,18 @@ export default class Collection {
         this.fetch();
     }
     
+    // Change current page index (1-indexed).
+    updatePage(index) {
+        this.page.index = Math.min(index, this.page.count);
+        this.fetch();
+    }
+    
     fetch() {
         let params = {
         };
         
         if (this.pageSize !== 0) {
-            params.page = this.pageIndex;
+            params.page = this.page.index;
             params.per_page = this.pageSize;
         }
         
@@ -55,13 +60,10 @@ export default class Collection {
             url: this.type.model.root,
             params,
             success: data => {
-                if (!data) {
-                    this.onUpdate([]);
-                }
-                else {
-                    // TODO this.onUpdate(data.data.map(item => new this.type(item)));
-                    this.onUpdate(data.data);
-                }
+                this.page.count = data.last_page;
+                this.page.index = Math.min(this.page.count, this.page.index);
+                // TODO this.onUpdate(data.data.map(item => new this.type(item)));
+                this.onUpdate({items: data.data, page: this.page});
             }
         });
     }

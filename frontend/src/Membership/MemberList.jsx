@@ -3,9 +3,9 @@ import { Link } from 'react-router';
 import Date from '../Components/Date';
 import Collection from "../Models/Collection";
 import Member from "../Models/Member";
+import * as _ from "underscore";
 
 
-// TODO Pagination
 // TODO Delete
 // TODO Snurr
 
@@ -86,20 +86,36 @@ class Table extends React.Component {
         return <th key={i}/>;
     }
 
+    renderPagination() {
+        const {page, updatePage} = this.props;
+        if (!page.count || page.count <= 1) {
+            return "";
+        }
+        
+        return (
+            <ul className="uk-pagination">
+                {_.range(1, page.count + 1).map(i => {
+                    if (i === page.index) {
+                        return <li key={i} className="uk-active"><span>{i}</span></li>;
+                    }
+                    return <li key={i}><a href="#" onClick={() => updatePage(i)}>{i}</a></li>;
+                })}
+            </ul>
+        );
+    }
+    
     render() {
         const {items, removeItem, rowComponent, columns} = this.props;
         
         const rows = items.map((item, i)  => React.createElement(rowComponent, {item, removeItem, key: i}));
         const headers = columns.map((c, i) => this.renderHeading(c, i));
-
-        const pagination1 = null;
-        const pagination2 = null;
+        const pagination = this.renderPagination();
         const loadinClass = "";
         const loading = "";
         
         return (
             <div>
-                {pagination1}
+                {pagination}
                 <div style={{position: "relative", "clear": "both"}}>
                     <table className={"uk-table uk-table-condensed uk-table-striped uk-table-hover" + loadinClass}>
                         <thead><tr>{headers}</tr></thead>
@@ -107,7 +123,7 @@ class Table extends React.Component {
 					</table>
 					{loading}
 				</div>
-				{pagination2}
+				{pagination}
 			</div>
         );
     }
@@ -118,8 +134,8 @@ class MemberList extends React.Component {
 
     constructor(props) {
         super(props);
-        this.state = {members: []};
-        this.collection = new Collection({type: Member, onUpdate: members => this.setState({members})});
+        this.state = {items: [], page: {}};
+        this.collection = new Collection({type: Member, onUpdate: ({items, page}) => this.setState({items, page})});
     }
 
     removeItem(item) {
@@ -135,6 +151,8 @@ class MemberList extends React.Component {
 			{title: "Blev medlem", sort: "created_at"},
 			{title: ""},
 		];
+        
+        const {items, page} = this.state;
   
 		return (
 			<div>
@@ -144,7 +162,15 @@ class MemberList extends React.Component {
 				<Link to="/membership/membersx/add" className="uk-button uk-button-primary uk-float-right"><i className="uk-icon-plus-circle"/> Skapa ny medlem</Link>
 
 				<SearchBox onChange={filters => this.collection.updateFilter(filters)} />
-                <Table onSort={sort => this.collection.updateSort(sort)} rowComponent={Row} columns={columns} removeItem={(item) => this.removeItem(item)} items={this.state.members}/>
+                <Table
+                    onSort={sort => this.collection.updateSort(sort)}
+                    rowComponent={Row}
+                    columns={columns}
+                    items={items}
+                    removeItem={(item) => this.removeItem(item)}
+                    page={page}
+                    updatePage={index => this.collection.updatePage(index)}
+                />
 			</div>
 		);
 	}
