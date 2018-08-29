@@ -57,19 +57,23 @@ class Login
 	/**
 	 * Create a access token for a user and store it in database
 	 */
-	public static function createToken($user_id)
+	public static function createUserToken($user_id)
 	{
+		if ($user_id <= 0){
+			throw new \Exception("user_id must be a positive number");
+		}
 		// Create a cryptographically safe access token
 		$bearer = static::createAccessToken();
 
 		// Insert into database
-		$expires = date("Y-m-d\TH:i:s\Z", strtotime("now + 30 day"));
+		$expires = (new \DateTime("now + 5 min", new \DateTimeZone("UTC")))->format('Y-m-d\TH:i:s');
 		$tokens = DB::table("access_tokens")->insert([
 			"user_id"      => $user_id,
 			"access_token" => $bearer,
 			"expires"      => $expires,
 			"browser"      => $_SERVER["HTTP_USER_AGENT"] ?? null,
 			"ip"           => $_SERVER["REMOTE_ADDR"],
+			"lifetime"     => 1209600, // Lifetime 14 days = 60*60*24*14
 		]);
 
 		// Return result
@@ -104,7 +108,7 @@ class Login
 	/**
 	 * Return all tokens for a user
 	 */
-	public static function getTokens($user_id)
+	public static function getUserTokens($user_id)
 	{
 		// TODO: Check expiry date
 		return DB::Table("access_tokens")
@@ -131,9 +135,20 @@ class Login
 	{
 		$result = DB::table("access_tokens")
 			->where("access_token", $access_token)
+			->select("user_id", "access_token", DB::raw("DATE_FORMAT(expires, '%Y-%m-%dT%H:%i:%sZ') as expires"),
+			"browser", "permissions", "ip", "lifetime")
 			->first();
-		if (isset($result->user_id)){
-			$result->user_id *= 1; // Convert user_id to numeric;
+
+		if ($result) {
+			$now = new \DateTime();
+			$expires = \DateTime::createFromFormat(\DateTime::ISO8601, $result->expires);
+			if ($expires <= $now) {
+				$result = null;
+				DB::table("access_tokens")->where("access_token", $access_token)->delete();
+			} else if (isset($result->user_id)) {
+				$result->user_id *= 1; // Convert user_id to numeric;
+			}
+		} else {
 		}
 		return $result;
 	}
@@ -153,7 +168,7 @@ class Login
 				[
 					"browser" => $_SERVER["HTTP_USER_AGENT"] ?? null,
 					"ip"      => $_SERVER["REMOTE_ADDR"],
-					"expires" => DB::raw("CURRENT_TIME"),
+					"expires" => DB::raw("DATE_ADD(NOW(), INTERVAL CAST(lifetime AS UNSIGNED) SECOND)"),
 				]
 			);
 	}
@@ -229,7 +244,7 @@ class Login
 		DB::table("access_tokens")->where("user_id", Login::SERVICE_USER_ID)->delete();
 
 		// Add access token for services
-		$expires = date("Y-m-d\TH:i:s\Z", strtotime("now + 3650 day"));
+		$expires = (new \DateTime("now + 3650 day", new \DateTimeZone("UTC")))->format('Y-m-d\TH:i:s');
 		DB::table("access_tokens")->insert([
 			// The first user has an ID of 1, so this will not cause conflicts. Note however that an id of 0 would cause problems because the code uses checks on the form 'if($user_id)' all the time and 0 is converted to false in php.
 			"user_id"      => Login::SERVICE_USER_ID,
@@ -237,7 +252,8 @@ class Login
 			"expires"      => $expires,
 			"browser"      => "",
 			"permissions"  => 'service',
-			"ip"           => ""
+			"ip"           => "",
+			"lifetime"     => 315360000, // Lifetime of approx 10 years = 60 * 60 * 24 * 365 * 10 s 
 		]);
 	}
 
@@ -273,9 +289,8 @@ class Login
 	public static function getUserFromAccessToken($access_token)
 	{
 		// Get the user_id related to the access token
-		$user_id = DB::table("access_tokens")
-			->where("access_token", $access_token)
-			->value("user_id");
+		$access_token_data = self::getAccessTokenData($access_token);
+		$user_id = isset($access_token_data->user_id) ? $access_token_data->user_id : false;
 
 		$user = self::getUserFromId($user_id);
 		if ($user !== null) {

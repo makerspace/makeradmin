@@ -66,7 +66,7 @@ class Authentication extends Controller
 		}
 
 		// Create a token and store in database
-		$token = Login::createToken($user_id);
+		$token = Login::createUserToken($user_id);
 		Login::logSuccess($user_id);
 
 		// Send response
@@ -88,7 +88,7 @@ class Authentication extends Controller
 		}
 
 		// Create a token and store in database
-		$token = Login::createToken($user_id);
+		$token = Login::createUserToken($user_id);
 		Login::logSuccess($user_id);
 
 		// Send response
@@ -132,7 +132,7 @@ class Authentication extends Controller
 		$user_id = Auth::get()->user()->user_id;
 
 		// Get users access tokens from the database
-		$result = Login::getTokens($user_id);
+		$result = Login::getUserTokens($user_id);
 
 		// Send response
 		return Response()->json([
