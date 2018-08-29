@@ -81,6 +81,26 @@ class Member extends Entity
 			"select" => "membership_members.phone",
 		],
 	];
+	protected $expandable_fields = [
+		'spans' => [
+			'column' => 'member_id',
+			'join_sub_query' => "
+				SELECT `member_id`, JSON_OBJECTAGG(`type`,`span`) as `spans` FROM (
+					SELECT `member_id`, type, JSON_ARRAYAGG(JSON_OBJECT('span_id', `span_id`, 'start_date', `startdate`, 'enddate', `enddate`)) as `span`
+					FROM `membership_spans`
+					WHERE enddate >= NOW()
+					GROUP BY `member_id`, `type`
+				)
+				AS `member_span_array`
+				GROUP BY `member_id`",
+			'join_table' => 'member_spans',
+			'join_column' => 'member_id',
+			'join_type' => 'left',
+			'selects' => [
+				'spans',
+			],
+		],
+	];
 	protected $sort = ["member_number", "desc"];
 	protected $validation = [
 		"firstname" => ["required"],

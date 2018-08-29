@@ -222,6 +222,14 @@ def copy_dict(source: Dict[str, Any], fields: List[str]) -> Dict[str, Any]:
 
 
 def send_new_member_email(member_id: int) -> None:
+    eprint("====== Getting member")
+    r = instance.gateway.get(f"membership/member/{member_id}")
+    assert r.ok
+    member = r.json()["data"]
+    eprint("====== Generating email body")
+    email_body = render_template("new_member_email.html", member=member, frontend_url=instance.gateway.get_frontend_url)
+    eprint("====== Sending new member email")
+
     r = instance.gateway.post("messages", {
         "recipients": [
             {
@@ -232,12 +240,13 @@ def send_new_member_email(member_id: int) -> None:
         "message_type": "email",
         "subject": "Välkommen till Stockholm Makerspace",
         "subject_en": "Welcome to the Stockholm Makerspace",
-        "body": render_template("new_member_email.html", frontend_url=instance.gateway.get_frontend_url)
+        "body": email_body
     })
 
     if not r.ok:
         eprint("Failed to send new member email")
         eprint(r.text)
+    eprint("====== Sent email body")
 
 
 @instance.route("register", methods=["POST"], permission=None)
@@ -299,6 +308,7 @@ def register() -> Dict[str, int]:
         "duplicatePurchaseRand": purchase["duplicatePurchaseRand"],
     }
 
+    eprint("====== Trying to pay")
     # Note this will throw if the payment fails
     return pay(member_id=member_id, data=purchase, activates_member=True)
 
@@ -326,7 +336,8 @@ def stripe_callback() -> None:
             cur.execute("SELECT transaction_id FROM webshop_transactions INNER JOIN webshop_stripe_pending ON webshop_transactions.id=webshop_stripe_pending.transaction_id WHERE webshop_stripe_pending.stripe_token=%s", (source.id,))
             transaction_id = cur.fetchone()
             if transaction_id is None:
-                abort(400, f"no transaction exists for that token ({source.id})")
+                eprint("Got callback, but no transaction exists for that token ({source.id}). Ignoring this event (this is usually fine)")
+                return None
 
         if event.type == "source.chargeable":
             # Payment should happen now
@@ -423,12 +434,12 @@ def stripe_payment(transaction_id: int, token: str) -> None:
             source=token,
         )
         eprint(charge)
-    except stripe.CardError as e:
+    except stripe.error.CardError as e:
         body = e.json_body
         err = body.get('error', {})
         eprint("Stripe Charge Failed\n" + str(err))
         raise errors.PaymentFailed(err.get("message"))
-    except stripe.StripeError as e:
+    except stripe.error.StripeError as e:
         eprint("Stripe Charge Failed\n" + str(e))
         raise errors.PaymentFailed()
     except Exception as e:
@@ -443,14 +454,17 @@ def stripe_payment(transaction_id: int, token: str) -> None:
     if webshop_pending_registrations.list("transaction_id=%s", [transaction_id]):
         activate_member(transaction["member_id"])
 
+    eprint("====== Sending receipt email")
     send_receipt_email(transaction["member_id"], transaction_id)
     eprint("Payment complete. id: " + str(transaction_id))
 
 
 def activate_member(member_id: int) -> None:
+    eprint("====== Activating member")
     # Make the member not be deleted
     r = instance.gateway.post(f"membership/member/{member_id}/activate", {})
     assert r.ok
+    eprint("====== Activated member")
 
     send_new_member_email(member_id)
 
@@ -633,7 +647,7 @@ def ship_orders() -> None:
                 {
                     "type": "labaccess",
                     "days": days_to_add,
-                    "creation_reason": f"action: {pending['pending_action']['id']}, transaction_id: {item['transaction_id']}",
+                    "creation_reason": f"transaction_action_id: {pending['pending_action']['id']}, transaction_id: {item['transaction_id']}",
                 }
             )
             assert r.ok, r.text

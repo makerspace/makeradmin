@@ -116,15 +116,26 @@ class Entity
 						continue;
 					}
 					$self_column = $expand['column'];
+					$join_sub_query = $expand['join_sub_query'] ?? null;
 					$join_table = $expand['join_table'];
 					$join_column = array_key_exists('join_column', $expand) ? $expand['join_column'] : $self_column;
 					$join_type = array_key_exists('join_type', $expand) ? $expand['join_type'] : "inner";
-					if ("inner" == $join_type) {
-						$query = $query->join($join_table, "{$join_table}.{$join_column}", "=", "{$this->table}.{$self_column}");
-					} else if ("left" == $join_type) {
-						$query = $query->leftJoin($join_table, "{$join_table}.{$join_column}", "=", "{$this->table}.{$self_column}");
-					} else if ("right" == $join_type) {
-						$query = $query->rightJoin($join_table, "{$join_table}.{$join_column}", "=", "{$this->table}.{$self_column}");
+					if ($join_sub_query !== null) {
+						if ("inner" == $join_type) {
+							$query = $query->joinSub($join_sub_query, $join_table, "{$join_table}.{$join_column}", "=", "{$this->table}.{$self_column}");
+						} else if ("left" == $join_type) {
+							$query = $query->leftJoinSub($join_sub_query, $join_table, "{$join_table}.{$join_column}", "=", "{$this->table}.{$self_column}");
+						} else if ("right" == $join_type) {
+							$query = $query->rightJoinSub($join_sub_query, $join_table, "{$join_table}.{$join_column}", "=", "{$this->table}.{$self_column}");
+						}
+					} else {
+						if ("inner" == $join_type) {
+							$query = $query->join($join_table, "{$join_table}.{$join_column}", "=", "{$this->table}.{$self_column}");
+						} else if ("left" == $join_type) {
+							$query = $query->leftJoin($join_table, "{$join_table}.{$join_column}", "=", "{$this->table}.{$self_column}");
+						} else if ("right" == $join_type) {
+							$query = $query->rightJoin($join_table, "{$join_table}.{$join_column}", "=", "{$this->table}.{$self_column}");
+						}
 					}
 					$base_table = $join_table;
 				}
@@ -716,7 +727,7 @@ class Entity
 					// A unique value collision is not fatal if it is from the same entity thas is being validated (itself)... or else we could not save an entity
 					if(!empty($result) && ($result->entity_id != $this->entity_id))
 					{
-						throw new EntityValidationException($field, null, "The value needs to be unique in the database");
+						throw new EntityValidationException($field, "unique");
 					}
 				}
 				// Validate a date according to ISO8601 standard

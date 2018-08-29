@@ -6,8 +6,10 @@ use Illuminate\Http\Response;
 
 use App\Models\Member as MemberModel;
 use App\Models\Group as GroupModel;
+use App\Models\Span as SpanModel;
 
 use Makeradmin\Traits\EntityStandardFiltering;
+use Makeradmin\Exceptions\EntityValidationException;
 
 use DB;
 
@@ -407,7 +409,27 @@ class Member extends Controller
 			], 400);
 		}
 
-		DB::insert("INSERT INTO membership_spans(member_id, type, startdate, enddate, creation_reason) VALUES(?, ?, ?, ?, ?)", [$member_id, $json['type'], $json['startdate'], $json['enddate'], $json['creation_reason']]);
+		$span_data = [
+			'member_id' => $member_id,
+			'startdate' => $json['startdate'],
+			'enddate' => $json['enddate'],
+			'span_type' => $json['type'],
+			'creation_reason' => $json['creation_reason'],
+		];
+
+		try {
+			$this->_create_span($span_data);
+		} catch (EntityValidationException $e) {
+			if ($e->getType() == 'unique' && $e->getColumn() == 'creation_reason'){
+				//TODO: Validate data is same
+				return Response()->json([
+					"status"  => "error",
+					"message" => "Span with creation_reason {$json['creation_reason']} already exists",
+				], 400);
+			} else {
+				throw $e;
+			}
+		}
 
 		return $this->getMembership($request, $member_id);
 	}
@@ -439,6 +461,7 @@ class Member extends Controller
 		$last_period = DB::table("membership_spans")
 			->where('member_id', $member_id)
 			->where('type', $json['type'])
+			->whereNull('deleted_at')
 			->max('enddate');
 
 		if ($last_period == null) {
@@ -462,8 +485,43 @@ class Member extends Controller
 			], 400);
 		}
 
-		DB::insert("INSERT INTO membership_spans(member_id, type, startdate, enddate, creation_reason) VALUES(?, ?, ?, ?, ?)", [$member_id, $json['type'], $last_period, $endtime, $json['creation_reason']]);
+		$span_data = [
+			'member_id' => $member_id,
+			'startdate' => $last_period,
+			'enddate' => $endtime,
+			'span_type' => $json['type'],
+			'creation_reason' => $json['creation_reason'],
+		];
+
+		try {
+			$this->_create_span($span_data);
+		} catch (EntityValidationException $e) {
+			if ($e->getType() == 'unique' && $e->getColumn() == 'creation_reason'){
+				//TODO: Validate data is same
+				return Response()->json([
+					"status"  => "error",
+					"message" => "Span with creation_reason {$json['creation_reason']} already exists",
+				], 400);
+			} else {
+				throw $e;
+			}
+		}
 		return $this->getMembership($request, $member_id);
+	}
+
+	/**
+	 * Create new span
+	 */
+	private function _create_span($span_data){
+		$fields = ['member_id','startdate','enddate','span_type','creation_reason'];
+		$entity = new SpanModel();
+		foreach ($fields as $field) {
+			$entity->{$field} = $span_data[$field] ?? null;
+		}
+		// Validate input
+		$entity->validate();
+		// Save entity
+		return $entity->save();
 	}
 
 	/**
@@ -471,17 +529,21 @@ class Member extends Controller
 	 */
 	private function _getMembership($member_id)
 	{
+		$today = date("Y-m-d");
+
 		// Check if the current time is covered by any span of valid membership times
 		$labaccess = DB::table("membership_spans")
 			->where('member_id', $member_id)
-			->whereRaw("(type=? OR type=?)", [SPAN_LABACCESS, SPAN_SPECIAL_LABACCESS])
-			->whereRaw("startdate<=NOW() AND NOW()<=enddate")
+			->whereIn("type", [SPAN_LABACCESS, SPAN_SPECIAL_LABACCESS])
+			->whereDate("startdate", "<=", $today)
+			->whereDate("enddate", ">=", $today)
 			->value('enddate') !== null;
 
 		$membership = DB::table("membership_spans")
 			->where('member_id', $member_id)
 			->where("type", SPAN_MEMBERSHIP)
-			->whereRaw("startdate<=NOW() AND NOW()<=enddate")
+			->whereDate("startdate", "<=", $today)
+			->whereDate("enddate", ">=", $today)
 			->value('enddate') !== null;
 
 		// Find the latest enddate of any membership span.
@@ -489,7 +551,7 @@ class Member extends Controller
 		// (at least unless someone has been manually tweaking the database to create some sort of gap before that time)
 		$labaccess_time = DB::table("membership_spans")
 			->where('member_id', $member_id)
-			->whereRaw("(type=? OR type=?)", [SPAN_LABACCESS, SPAN_SPECIAL_LABACCESS])
+			->whereIn("type", [SPAN_LABACCESS, SPAN_SPECIAL_LABACCESS])
 			->max("enddate");
 
 		$membership_time = DB::table("membership_spans")
@@ -502,7 +564,7 @@ class Member extends Controller
 			"has_labaccess" => $labaccess,
 			"has_membership" => $membership,
 			"labaccess_end" => $labaccess_time,
-			"membership_end" => $membership_time
+			"membership_end" => $membership_time,
 		];
 	}
 
