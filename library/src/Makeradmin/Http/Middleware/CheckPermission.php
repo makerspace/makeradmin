@@ -37,8 +37,8 @@ class CheckPermission
 		} else {
 			return Response()->json([
 				"status" => "error",
-				"message" => "Unauthorized",
-			], 401);
+				"message" => "Forbidden",
+			], 403);
 		}
 	}
 }
