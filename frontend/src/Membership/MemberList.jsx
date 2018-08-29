@@ -1,7 +1,13 @@
 import React from 'react';
 import { Link } from 'react-router';
-import { get } from "../gateway";
 import Date from '../Components/Date';
+import Collection from "../Models/Collection";
+import Member from "../Models/Member";
+
+
+// TODO Pagination
+// TODO Delete
+// TODO Snurr
 
 
 class SearchBox extends React.Component {
@@ -18,7 +24,7 @@ class SearchBox extends React.Component {
 						<form className="uk-form">
 							<div className="uk-form-icon">
 								<i className="uk-icon-search"/>
-								<input ref="search" type="text" className="uk-form-width-large" placeholder="Skriv in ett sökord"
+								<input ref="search" tabIndex="1" type="text" className="uk-form-width-large" placeholder="Skriv in ett sökord"
                                        onChange={() => this.props.onChange({search: this.refs.search.value})} />
 							</div>
 						</form>
@@ -37,7 +43,6 @@ class Row extends React.Component {
         return (
 			<tr>
 				<td><Link to={"/membership/members/" + item.member_id}>{item.member_number}</Link></td>
-				<td>-</td>
 				<td>{item.firstname}</td>
 				<td>{item.lastname}</td>
 				<td>{item.email}</td>
@@ -51,57 +56,54 @@ class Row extends React.Component {
 
 class Table extends React.Component {
     
+    constructor(props) {
+        super(props);
+        this.state = {sort: {key: null, order: 'up'}};
+    }
+    
+    renderHeading(c, i) {
+        const sortState = this.state.sort;
+        const {onSort} = this.props;
+        if (c.title) {
+            let title;
+            if (c.sort) {
+                const sortIcon = <i className={"uk-icon-angle-" + sortState.order}/>;
+                const onClick = () => {
+                    const sort = {key: c.sort, order: sortState.key === c.sort && sortState.order === 'down' ? 'up' : 'down'};
+                    onSort(sort);
+                    this.setState({sort});
+                };
+                title = (
+                    <a data-sort={c.sort} onClick={onClick}>
+                        {c.title} {c.sort === sortState.key ? sortIcon : ''}
+                    </a>);
+            }
+            else {
+                title = c.title;
+            }
+            return <th key={i} className={c.class}>{title}</th>;
+        }
+        return <th key={i}/>;
+    }
+
     render() {
-        const {items, removeItem, rowComponent} = this.props;
+        const {items, removeItem, rowComponent, columns} = this.props;
         
         const rows = items.map((item, i)  => React.createElement(rowComponent, {item, removeItem, key: i}));
-        
+        const headers = columns.map((c, i) => this.renderHeading(c, i));
+
         const pagination1 = null;
         const pagination2 = null;
         const loadinClass = "";
         const loading = "";
         
         return (
-            <tbody>
-            {rows}
-            </tbody>
-        );
-        
-        return (
             <div>
                 {pagination1}
-				<div style={{position: "relative", "clear": "both"}}>
-					<table className={"uk-table uk-table-condensed uk-table-striped uk-table-hover" + loadinClass}>
-						<thead>
-							<tr>
-								{this.renderHeader().map(function(column, i) {
-									if(column.title)
-									{
-										// if(_this.state.sort_column == column.sort)
-										// {
-										// 	var icon = <i className={"uk-icon-angle-" + (_this.state.sort_order == "asc" ? "up" : "down")} />
-										// }
-
-										return (
-											<th key={i} className={column.class}>
-												{
-												    /* column.sort ?
-													<a data-sort={column.sort} onClick={_this.sort}>{column.title} {icon}</a>
-													: column.title
-													*/
-												}
-											</th>
-										);
-									}
-									else {
-										return (<th key={i}></th>);
-									}
-								})}
-							</tr>
-						</thead>
-						<tbody>
-							{rows}
-						</tbody>
+                <div style={{position: "relative", "clear": "both"}}>
+                    <table className={"uk-table uk-table-condensed uk-table-striped uk-table-hover" + loadinClass}>
+                        <thead><tr>{headers}</tr></thead>
+						<tbody>{rows}</tbody>
 					</table>
 					{loading}
 				</div>
@@ -117,32 +119,23 @@ class MemberList extends React.Component {
     constructor(props) {
         super(props);
         this.state = {members: []};
-        this.filters = {};
-        this.sort = null;
-        this.fetch();
+        this.collection = new Collection({type: Member, onUpdate: members => this.setState({members})});
     }
 
-    sort(key) {
-        this.sort = key;
-        this.fetch();
-    }
-    
-    filter(filters) {
-        this.filters = filters;
-        this.fetch();
-    }
-    
-    fetch() {
-        get("/membership/member?page=1&sort_by=&sort_order=asc&per_page=25", data => {
-            this.setState({members: data.data});
-        });
-    }
-    
     removeItem(item) {
-        console.info("remove item" + item);
+        console.info("remove item", item);
     }
     
-	render() {
+    render() {
+        const columns = [
+            {title: "#", sort: "member_id"},
+			{title: "Förnamn", sort: "firstname"},
+			{title: "Efternamn", sort: "lastname"},
+			{title: "E-post", sort: "email"},
+			{title: "Blev medlem", sort: "created_at"},
+			{title: ""},
+		];
+  
 		return (
 			<div>
 				<h2>Medlemmar</h2>
@@ -150,12 +143,11 @@ class MemberList extends React.Component {
 				<p className="uk-float-left">På denna sida ser du en lista på samtliga medlemmar.</p>
 				<Link to="/membership/membersx/add" className="uk-button uk-button-primary uk-float-right"><i className="uk-icon-plus-circle"/> Skapa ny medlem</Link>
 
-				<SearchBox onChange={(filters) => this.setState({filters})} />
-                <Table columns={[]} onSort={() => 1} rowComponent={Row} removeItem={this.removeItem} items={this.state.members}/>
+				<SearchBox onChange={filters => this.collection.updateFilter(filters)} />
+                <Table onSort={sort => this.collection.updateSort(sort)} rowComponent={Row} columns={columns} removeItem={(item) => this.removeItem(item)} items={this.state.members}/>
 			</div>
 		);
 	}
-
 }
 
 export default MemberList;

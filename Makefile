@@ -37,7 +37,7 @@ firstrun: .env build init-db
 frontend-dev-server:
 	mkdir -p frontend/node_modules
 	docker-compose -f frontend/dev-server-compose.yaml rm -f
-	docker volume rm makeradmin_node_modules
+	docker volume rm makeradmin_node_modules || true
 	docker-compose -f frontend/dev-server-compose.yaml up --build
 
 .PHONY: build firstrun frontend-dev-server init init-db init-npm init-pip install run stop

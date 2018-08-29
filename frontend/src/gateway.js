@@ -1,16 +1,19 @@
 import {showError, showPermissionDenied} from "./message";
 import * as auth from "./auth";
+import * as _ from "underscore";
 
 
-export function get(url, success) {
+export function get({url, params = {}, success}) {
     const options = {
         method: 'GET',
         headers: {
             'Authorization': 'Bearer ' + auth.getAccessToken()
         }
     };
+
+    url = config.apiBasePath + url + '?' + _.map(params, (v, k) => encodeURIComponent(k) + '=' + encodeURIComponent(v)).join('&');
     
-    fetch(config.apiBasePath + url, options)
+    fetch(url, options)
         .then(response => {
             if (response.ok) {
                 return response.json();
