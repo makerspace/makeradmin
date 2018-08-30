@@ -6,19 +6,29 @@ import {confirmModal} from "../message";
 // Handle collection of a model class. Support stateful interaction with server.
 //
 // type: type of model that this is a collection of
-// onUpdate: callback data is received from server {items, pageIndex, pageCount}
 // pageSize: size of pages when pagination is enabled (0 = infinite = pagination turned off).
 export default class Collection {
-    constructor({type, onUpdate, pageSize = 25}) {
+    constructor({type, pageSize = 25}) {
         this.type = type;
-        this.onUpdate = onUpdate;
         this.pageSize = pageSize;
 
+        this.items = [];
         this.page = {index: 1, count: 1};
         this.sort = {};
         this.filter = {};
+
+        this.subscribers = {};
+        this.subscriberId = 0;
         
         this.fetch();
+    }
+    
+    // Subscribe to data from server {items, page}, returns function for unsubscribing.
+    subscribe(cb) {
+        const id = this.subscriberId++;
+        this.subscribers[id] = cb;
+        cb({items: this.items, page: this.page});
+        return () => delete this.subscribers[id];
     }
     
     // Update sort order, key is one of model attributes, order is up/asc or down/desc.
@@ -47,7 +57,7 @@ export default class Collection {
         
         // TODO Fix id.
         // TODO Move to item.
-        confirmModal(`Are you sure you want to remove member ${item.firstname} ${item.lastname}?`)
+        confirmModal(`Are you sure you want to remove member ${item.firstname} {item.lastname}?`)
             .then(() => {
                 return del({url: this.type.model.root + '/' + item.member_id});
             })
@@ -79,7 +89,8 @@ export default class Collection {
             this.page.count = data.last_page;
             this.page.index = Math.min(this.page.count, this.page.index);
             // TODO this.onUpdate(data.data.map(item => new this.type(item)));
-            this.onUpdate({items: data.data, page: this.page});
+            this.items = data.data;
+            _.values(this.subscribers).forEach(s => s({items: this.items, page: this.page}));
         });
     }
 }

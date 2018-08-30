@@ -53,23 +53,33 @@ class Row extends React.Component {
 }
 
 
-class Table extends React.Component {
+class CollectionTable extends React.Component {
     
     constructor(props) {
         super(props);
-        this.state = {sort: {key: null, order: 'up'}};
+        this.state = {sort: {key: null, order: 'up'}, items: [], page: {}};
+    }
+    
+    componentDidMount() {
+        const {collection} = this.props;
+        this.unsubscribe = collection.subscribe(s => this.setState(s));
+    }
+    
+    componentWillUnmount() {
+        this.unsubscribe();
     }
     
     renderHeading(c, i) {
         const sortState = this.state.sort;
-        const {onSort} = this.props;
+        const {collection} = this.props;
+        
         if (c.title) {
             let title;
             if (c.sort) {
                 const sortIcon = <i className={"uk-icon-angle-" + sortState.order}/>;
                 const onClick = () => {
                     const sort = {key: c.sort, order: sortState.key === c.sort && sortState.order === 'down' ? 'up' : 'down'};
-                    onSort(sort);
+                    collection.updateSort(sort);
                     this.setState({sort});
                 };
                 title = (
@@ -86,7 +96,9 @@ class Table extends React.Component {
     }
 
     renderPagination() {
-        const {page, updatePage} = this.props;
+        const {collection} = this.props;
+        const {page} = this.state;
+        
         if (!page.count || page.count <= 1) {
             return "";
         }
@@ -97,30 +109,30 @@ class Table extends React.Component {
                     if (i === page.index) {
                         return <li key={i} className="uk-active"><span>{i}</span></li>;
                     }
-                    return <li key={i}><a href="#" onClick={() => updatePage(i)}>{i}</a></li>;
+                    return <li key={i}><a href="#" onClick={() => collection.updatePage(i)}>{i}</a></li>;
                 })}
             </ul>
         );
     }
     
     render() {
-        const {items, removeItem, rowComponent, columns} = this.props;
+        const {collection, rowComponent, columns} = this.props;
+        const {items} = this.state;
         
-        const rows = items.map((item, i)  => React.createElement(rowComponent, {item, removeItem, key: i}));
+        const rows = items.map((item, i)  => React.createElement(rowComponent, {item, removeItem: () => collection.removeItem(item), key: i}));
         const headers = columns.map((c, i) => this.renderHeading(c, i));
         const pagination = this.renderPagination();
-        const loadinClass = "";
-        const loading = "";
+        const loading = false;
+        const loadinClass = loading ? "backboneTableLoading" : "";
         
         return (
             <div>
                 {pagination}
                 <div style={{position: "relative", "clear": "both"}}>
-                    <table className={"uk-table uk-table-condensed uk-table-striped uk-table-hover" + loadinClass}>
+                    <table className={"uk-table uk-table-condensed uk-table-striped uk-table-hover " + loadinClass}>
                         <thead><tr>{headers}</tr></thead>
 						<tbody>{rows}</tbody>
 					</table>
-					{loading}
 				</div>
 				{pagination}
 			</div>
@@ -133,14 +145,9 @@ class MemberList extends React.Component {
 
     constructor(props) {
         super(props);
-        this.state = {items: [], page: {}};
-        this.collection = new Collection({type: Member, onUpdate: ({items, page}) => this.setState({items, page})});
+        this.collection = new Collection({type: Member});
     }
 
-    removeItem(item) {
-        this.collection.removeItem(item);
-    }
-    
     render() {
         const columns = [
             {title: "#", sort: "member_id"},
@@ -151,8 +158,6 @@ class MemberList extends React.Component {
 			{title: ""},
 		];
         
-        const {items, page} = this.state;
-  
 		return (
 			<div>
 				<h2>Medlemmar</h2>
@@ -161,14 +166,10 @@ class MemberList extends React.Component {
 				<Link to="/membership/membersx/add" className="uk-button uk-button-primary uk-float-right"><i className="uk-icon-plus-circle"/> Skapa ny medlem</Link>
 
 				<SearchBox onChange={filters => this.collection.updateFilter(filters)} />
-                <Table
-                    onSort={sort => this.collection.updateSort(sort)}
+                <CollectionTable
                     rowComponent={Row}
+                    collection={this.collection}
                     columns={columns}
-                    items={items}
-                    removeItem={(item) => this.removeItem(item)}
-                    page={page}
-                    updatePage={index => this.collection.updatePage(index)}
                 />
 			</div>
 		);
