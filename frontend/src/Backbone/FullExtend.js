@@ -22,7 +22,11 @@ Backbone.sync = function(method, model, options)
 		{
 			if(data.status == 401)
 			{
-				UIkit.notify("<h2>Error</h2>You are unauthorized to use this API resource. This could be because one of the following reasons:<br><br>1) You have been logged out from the API<br>2) You do not have permissions to access this resource", {timeout: 0, status: "danger"});
+				auth.logout();
+			}
+			else if(data.status == 403)
+			{
+				UIkit.notify("<h2>Error</h2>You are unauthorized to use this API resource. This could be because one of the following reason:<br><br>You do not have permissions to access this resource", {timeout: 0, status: "danger"});
 			}
 			else
 			{
