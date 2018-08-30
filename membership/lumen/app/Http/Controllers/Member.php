@@ -421,11 +421,20 @@ class Member extends Controller
 			$this->_create_span($span_data);
 		} catch (EntityValidationException $e) {
 			if ($e->getType() == 'unique' && $e->getColumn() == 'creation_reason'){
-				//TODO: Validate data is same
-				return Response()->json([
-					"status"  => "error",
-					"message" => "Span with creation_reason {$json['creation_reason']} already exists",
-				], 400);
+				$old_span = SpanModel::load(['creation_reason' => $json['creation_reason']], false);
+				if (
+					$old_span->member_id == $span_data['member_id'] &&
+					$old_span->startdate == $span_data['startdate'] &&
+					$old_span->enddate == $span_data['enddate'] &&
+					$old_span->span_type == $span_data['span_type']
+				) {
+					// TODO: Report already exists?
+				} else {
+					return Response()->json([
+						"status" => "error",
+						"message" => "Span with creation_reason {$json['creation_reason']} already exists"
+					], 400);
+				}
 			} else {
 				throw $e;
 			}
@@ -497,11 +506,21 @@ class Member extends Controller
 			$this->_create_span($span_data);
 		} catch (EntityValidationException $e) {
 			if ($e->getType() == 'unique' && $e->getColumn() == 'creation_reason'){
-				//TODO: Validate data is same
-				return Response()->json([
-					"status"  => "error",
-					"message" => "Span with creation_reason {$json['creation_reason']} already exists",
-				], 400);
+				$old_span = SpanModel::load(['creation_reason' => $json['creation_reason']], false);
+				$old_start = \DateTime::createFromFormat ('Y-m-d', $old_span->startdate);
+				$old_duration = \DateTime::createFromFormat ('Y-m-d', $old_span->enddate)->diff($old_start);
+				if (
+					$old_span->member_id == $span_data['member_id'] &&
+					$old_duration->d == $days && 
+					$old_span->span_type == $span_data['span_type']
+				) {
+					// TODO: Report already exists?
+				} else {
+					return Response()->json([
+						"status"  => "error",
+						"message" => "Different span with same creation_reason {$json['creation_reason']} already exists, old days {$old_duration->days}",
+					], 400);
+				}
 			} else {
 				throw $e;
 			}
@@ -576,7 +595,7 @@ class Member extends Controller
 		// Send response to client
 		return Response()->json([
 			"status"  => "ok",
-			"data" => $this->_getMembership($member_id)
+			"data" => $this->_getMembership($member_id),
 		], 200);
 	}
 

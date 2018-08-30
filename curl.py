@@ -13,7 +13,7 @@ args = parser.parse_args()
 if args.type == "GET":
 	r = gateway.get(args.url)
 elif args.type == "POST":
-	r = gateway.post(args.url, json.loads(args.data))
+	r = gateway.post(args.url, json.loads(args.data) if args.data is not None else {})
 
 print(r.status_code)
 print(r.text)

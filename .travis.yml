@@ -18,7 +18,7 @@ before_install:
   - pip3 install -r requirements.txt
 
 install:
-  - make firstrun
+  - make build
 
 script:
   # Same as `make run`, but with -d at the end to make it exit when all have been started

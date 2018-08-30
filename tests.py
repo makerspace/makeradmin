@@ -292,6 +292,20 @@ class MakerAdminTest(unittest.TestCase):
                     }
                 })
 
+                self.post(f"/membership/member/{member_id}/addMembershipDays", {"type": "labaccess", "days": 15, "creation_reason": f"test2_{member_id}"}, 200, expected_result={
+                    "status": "ok",
+                    "data": {
+                        "has_labaccess": True,
+                        "has_membership": False,
+                        "labaccess_end": (datetime.now() + timedelta(days=25)).strftime("%Y-%m-%d"),
+                        "membership_end": None
+                    }
+                })
+
+                self.post(f"/membership/member/{member_id}/addMembershipDays", {"type": "labaccess", "days": 14, "creation_reason": f"test2_{member_id}"}, 400, expected_result={
+                    "status": "error",
+                })
+
                 self.post(f"/membership/member/{member_id}/addMembershipSpan", {
                         "type": "membership",
                         "startdate": (datetime.now() + timedelta(days=i-2)).strftime("%Y-%m-%d"),
@@ -323,6 +337,34 @@ class MakerAdminTest(unittest.TestCase):
                             "labaccess_end": (datetime.now() + timedelta(days=40)).strftime("%Y-%m-%d"),
                             "membership_end": (datetime.now() + timedelta(days=35)).strftime("%Y-%m-%d")
                         }
+                    }
+                )
+
+                self.post(f"/membership/member/{member_id}/addMembershipSpan", {
+                        "type": "special_labaccess",
+                        "startdate": (datetime.now() - timedelta(days=20)).strftime("%Y-%m-%d"),
+                        "enddate": (datetime.now() + timedelta(days=40)).strftime("%Y-%m-%d"),
+                        "creation_reason": f"test4_{member_id}"
+                    },
+                    200, expected_result={
+                        "status": "ok",
+                        "data": {
+                            "has_labaccess": True,
+                            "has_membership": i <= 2,
+                            "labaccess_end": (datetime.now() + timedelta(days=40)).strftime("%Y-%m-%d"),
+                            "membership_end": (datetime.now() + timedelta(days=35)).strftime("%Y-%m-%d")
+                        }
+                    }
+                )
+
+                self.post(f"/membership/member/{member_id}/addMembershipSpan", {
+                        "type": "special_labaccess",
+                        "startdate": (datetime.now() - timedelta(days=20)).strftime("%Y-%m-%d"),
+                        "enddate": (datetime.now() + timedelta(days=30)).strftime("%Y-%m-%d"),
+                        "creation_reason": f"test4_{member_id}"
+                    },
+                    400, expected_result={
+                        "status": "error",
                     }
                 )
 
