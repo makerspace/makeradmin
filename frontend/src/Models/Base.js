@@ -1,4 +1,5 @@
 import * as _ from "underscore";
+import {del} from "../gateway";
 
 
 export default class Base {
@@ -35,7 +36,7 @@ export default class Base {
             });
         });
 
-        Object.defineProperty(this, 'id', {get: () => this.data[model.idAttribute]});
+        Object.defineProperty(this, 'id', {get: () => this.saved[model.id]});
     }
     
     reset() {
@@ -43,6 +44,14 @@ export default class Base {
     }
     
     remove() {
+        if (!this.id) {
+            return Promise.resolve(null);
+        }
         
+        return del({url: this.constructor.model.root + '/' + this.id});
+    }
+    
+    removeConfirmMessage() {
+        throw new Error(`removeConfirmMessage not implemented in ${this.constructor.name}`);
     }
 }

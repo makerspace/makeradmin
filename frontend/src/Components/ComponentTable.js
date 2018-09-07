@@ -1,5 +1,6 @@
 import React from 'react';
 import * as _ from "underscore";
+import {confirmModal} from "../message";
 
 
 export default class CollectionTable extends React.Component {
@@ -67,11 +68,15 @@ export default class CollectionTable extends React.Component {
         );
     }
     
+    removeItem(item) {
+        return confirmModal(item.removeConfirmMessage()).then(() => this.props.collection.removeItem(item), () => null);
+    }
+    
     render() {
-        const {collection, rowComponent, columns} = this.props;
+        const {rowComponent, columns} = this.props;
         const {items, loading} = this.state;
         
-        const rows = items.map((item, i)  => React.createElement(rowComponent, {item, removeItem: () => collection.removeItem(item), key: i}));
+        const rows = items.map((item, i)  => React.createElement(rowComponent, {item, removeItem: () => this.removeItem(item), key: i}));
         const headers = columns.map((c, i) => this.renderHeading(c, i));
         const pagination = this.renderPagination();
 			

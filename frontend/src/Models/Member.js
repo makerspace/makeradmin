@@ -2,6 +2,9 @@ import Base from './Base';
 
 
 export default class Member extends Base {
+    removeConfirmMessage() {
+        return `Are you sure you want to remove member ${this.firstname} ${this.lastname}?`;
+    }
 }
 
 Member.model = {

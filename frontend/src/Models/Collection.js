@@ -1,6 +1,5 @@
-import {del, get} from "../gateway";
+import {get} from "../gateway";
 import * as _ from "underscore";
-import {confirmModal} from "../message";
 
 
 // Handle collection of a model class. Support stateful interaction with server.
@@ -51,19 +50,7 @@ export default class Collection {
     
     // Remove an item in this collection.
     removeItem(item) {
-        if (!item.member_id) {
-            return;
-        }
-        
-        // TODO Fix id.
-        // TODO Move to item.
-        confirmModal(`Are you sure you want to remove member ${item.firstname} ${item.lastname}?`)
-            .then(() => {
-                return del({url: this.type.model.root + '/' + item.member_id});
-            })
-            .then(() => {
-                this.fetch();
-            });
+        return item.remove().then(() => this.fetch());
     }
     
     fetch() {
