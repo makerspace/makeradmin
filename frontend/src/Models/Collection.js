@@ -67,8 +67,7 @@ export default class Collection {
     }
     
     fetch() {
-        let params = {
-        };
+        let params = {};
         
         if (this.pageSize !== 0) {
             params.page = this.page.index;
@@ -88,8 +87,7 @@ export default class Collection {
             if (!data) return;
             this.page.count = data.last_page;
             this.page.index = Math.min(this.page.count, this.page.index);
-            // TODO this.onUpdate(data.data.map(item => new this.type(item)));
-            this.items = data.data;
+            this.items = data.data.map(m => new this.type(m));
             _.values(this.subscribers).forEach(s => s({items: this.items, page: this.page}));
         });
     }
