@@ -4,9 +4,7 @@ import Date from '../Components/Date';
 import Collection from "../Models/Collection";
 import Member from "../Models/Member";
 import * as _ from "underscore";
-
-
-// TODO Snurr
+import Loading from '../Components/Loading';
 
 
 class SearchBox extends React.Component {
@@ -57,12 +55,12 @@ class CollectionTable extends React.Component {
     
     constructor(props) {
         super(props);
-        this.state = {sort: {key: null, order: 'up'}, items: [], page: {}};
+        this.state = {sort: {key: null, order: 'up'}, items: [], page: {}, loading: true};
     }
     
     componentDidMount() {
         const {collection} = this.props;
-        this.unsubscribe = collection.subscribe(s => this.setState(s));
+        this.unsubscribe = collection.subscribe(({page, items}) => this.setState({page, items, loading: false}));
     }
     
     componentWillUnmount() {
@@ -79,8 +77,8 @@ class CollectionTable extends React.Component {
                 const sortIcon = <i className={"uk-icon-angle-" + sortState.order}/>;
                 const onClick = () => {
                     const sort = {key: c.sort, order: sortState.key === c.sort && sortState.order === 'down' ? 'up' : 'down'};
+                    this.setState({sort, loading: true});
                     collection.updateSort(sort);
-                    this.setState({sort});
                 };
                 title = (
                     <a data-sort={c.sort} onClick={onClick}>
@@ -109,7 +107,10 @@ class CollectionTable extends React.Component {
                     if (i === page.index) {
                         return <li key={i} className="uk-active"><span>{i}</span></li>;
                     }
-                    return <li key={i}><a href="#" onClick={() => collection.updatePage(i)}>{i}</a></li>;
+                    return <li key={i}><a href="#" onClick={() => {
+                        this.setState({loading: true});
+                        collection.updatePage(i);
+                    }}>{i}</a></li>;
                 })}
             </ul>
         );
@@ -117,22 +118,26 @@ class CollectionTable extends React.Component {
     
     render() {
         const {collection, rowComponent, columns} = this.props;
-        const {items} = this.state;
+        const {items, loading} = this.state;
         
         const rows = items.map((item, i)  => React.createElement(rowComponent, {item, removeItem: () => collection.removeItem(item), key: i}));
         const headers = columns.map((c, i) => this.renderHeading(c, i));
         const pagination = this.renderPagination();
-        const loading = false;
-        const loadinClass = loading ? "backboneTableLoading" : "";
-        
+			
         return (
             <div>
                 {pagination}
                 <div style={{position: "relative", "clear": "both"}}>
-                    <table className={"uk-table uk-table-condensed uk-table-striped uk-table-hover " + loadinClass}>
+                    <table className={"uk-table uk-table-condensed uk-table-striped uk-table-hover" + (loading ? " backboneTableLoading" : "")}>
                         <thead><tr>{headers}</tr></thead>
 						<tbody>{rows}</tbody>
 					</table>
+                    {loading ?
+                     <div className="loadingOverlay">
+                         <div className="loadingWrapper">
+                             <span><i className="uk-icon-refresh uk-icon-spin"/> Hämtar data...</span>
+                         </div>
+                     </div>  : ''}
 				</div>
 				{pagination}
 			</div>
@@ -177,89 +182,3 @@ class MemberList extends React.Component {
 }
 
 export default MemberList;
-
-/*
-
-import MemberCollection from './Collections/Member';
-import Members from './Components/Tables/Members';
-
-module.exports = React.createClass({
-	mixins: [Backbone.React.Component.mixin, BackboneTable],
-
-	getInitialState: function()
-	{
-		return {
-			columns: 7,
-		};
-	},
-
-	componentWillMount: function()
-	{
-		this.fetch();
-	},
-
-	removeTextMessage: function(member)
-	{
-		return "Are you sure you want to remove member \"" + member.firstname + " " + member.lastname + "\"?";
-	},
-
-	removeErrorMessage: function()
-	{
-		UIkit.notify("Ett fel uppstod vid borttagning av medlem", {timeout: 0, status: "danger"});
-	},
-
-	renderRow: function(row, i)
-	{
-		return (
-			<tr key={i}>
-				<td><Link to={"/membership/members/" + row.member_id}>{row.member_number}</Link></td>
-				<td>-</td>
-				<td>{row.firstname}</td>
-				<td>{row.lastname}</td>
-				<td>{row.email}</td>
-				<td><DateField date={row.created_at} /></td>
-				<td>
-					<TableDropdownMenu>
-						<Link to={"/membership/members/" + row.member_id}><i className="uk-icon-cog"></i> Redigera medlem</Link>
-						{this.removeButton(i, "Ta bort medlem")}
-					</TableDropdownMenu>
-				</td>
-			</tr>
-		);
-	},
-
-	renderHeader: function()
-	{
-		return [
-			{
-				title: "#",
-				sort: "member_id",
-			},
-			{
-				title: "Kön",
-			},
-			{
-				title: "Förnamn",
-				sort: "firstname",
-			},
-			{
-				title: "Efternamn",
-				sort: "lastname",
-			},
-			{
-				title: "E-post",
-				sort: "email",
-			},
-			{
-				title: "Blev medlem",
-				sort: "created_at",
-			},
-			{
-				title: "",
-			},
-		];
-	},
-});
-
-
-*/

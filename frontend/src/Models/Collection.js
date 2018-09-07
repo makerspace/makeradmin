@@ -57,7 +57,7 @@ export default class Collection {
         
         // TODO Fix id.
         // TODO Move to item.
-        confirmModal(`Are you sure you want to remove member ${item.firstname} {item.lastname}?`)
+        confirmModal(`Are you sure you want to remove member ${item.firstname} ${item.lastname}?`)
             .then(() => {
                 return del({url: this.type.model.root + '/' + item.member_id});
             })
