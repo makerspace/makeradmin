@@ -11,6 +11,12 @@ module.exports = {
                     indexRoute: {
                         component: require("./MemberList").default,
                     },
+					childRoutes: [
+                        {
+                            path:      "add",
+                            component: require("./MemberAdd").default,
+                        }
+					],
                 },
 				{
 					path: "members",
