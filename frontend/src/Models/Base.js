@@ -11,7 +11,7 @@ export default class Base {
             this.saved = Object.assign({}, model.attributes, data);
         }
         else {
-            this.unsaved = Object.assign({}, model.attributes);
+            this.unsaved = {};
             this.saved   = Object.assign({}, model.attributes);
         }
 
@@ -32,7 +32,15 @@ export default class Base {
                     
                     return model.attributes[v];
                 },
-                set: (v) => this.unsaved[key] = v
+                set: (v) => {
+                    if (v === this.saved[key]) {
+                        delete this.unsaved[key];
+                    }
+                    else {
+                        this.unsaved[key] = v;
+                    }
+                }
+                
             });
         });
 
@@ -49,6 +57,17 @@ export default class Base {
         }
         
         return del({url: this.constructor.model.root + '/' + this.id});
+    }
+    
+    isUnsaved() {
+        return !this.id || this.isDirty();
+    }
+    
+    isDirty(key) {
+        if (!key) {
+            return !_.isEmpty(this.unsaved);
+        }
+        return !_.isUndefined(this.unsaved[key]);
     }
     
     removeConfirmMessage() {

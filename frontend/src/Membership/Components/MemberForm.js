@@ -17,7 +17,7 @@ class Input extends React.Component {
     }
     
     render() {
-        const {value, error_column, error_message, selected, isDirty} = this.state;
+        const {value, error_column, error_message, selected, isDirty}         = this.state;
         const {model, name, title, icon, disabled, placeholder, formrow} = this.props;
         
         const classes = classNames(name,
@@ -25,30 +25,24 @@ class Input extends React.Component {
                                        "uk-form-row": formrow,
                                        "selected": selected,
                                        "changed": isDirty,
-                                       "error": error_column === name,
+                                       "error":       error_column === name,
                                    });
+        
+        const input = <input id={name} name={name} type="text" placeholder={placeholder || title} className="uk-form-width-large"
+                             value={value} disabled={disabled}
+                             onChange={(event) => {
+                                 const v    = event.target.value;
+                                 model[name] = v;
+                                 this.setState({value: v, isDirty: model.isDirty(name)});
+                             }}
+                             onFocus={() => this.setState({selected: true})}
+                             onBlur={() => this.setState({selected: false})}/>;
         
         return (
             <div className={classes}>
                 <label htmlFor={name} className="uk-form-label">{title}</label>
                 <div className="uk-form-controls">
-                    {icon
-                     ?
-                     <div className="uk-form-icon">
-                         <i className={"uk-icon-" + icon}/>
-                         <input type="text" name={name} id={name} disabled={disabled}
-                                value={value}
-                                placeholder={placeholder ? placeholder : title}
-                                onChange={this.onChange} className="uk-form-width-large" onFocus={this.onFocus}
-                                onBlur={this.onBlur}/>
-                     </div>
-                     :
-                     <input type="text" name={name} id={name} disabled={disabled}
-                            value={value}
-                            placeholder={placeholder ? placeholder : title}
-                            onChange={this.onChange} className="uk-form-width-large" onFocus={this.onFocus}
-                            onBlur={this.onBlur}/>
-                    }
+                    {icon ? <div className="uk-form-icon"><i className={"uk-icon-" + icon}/>{input}</div> : input}
                     {error_column === name ? <p className="uk-form-help-block error">{error_message}</p> : ""}
                 </div>
             </div>
@@ -59,13 +53,9 @@ class Input extends React.Component {
 Input.defaultProps = {
     formrow: true,
 };
-    
-
-
 
 const CountryDropdown = () => <div/>;
 const DateTimeField = () => <div/>;
-
 
 export default class MemberAdd extends React.Component {
 
