@@ -276,10 +276,10 @@ def register() -> Dict[str, int]:
     # Otherwise an attacker could inject evil inputs like for example the 'groups' field which is a list of groups the member should be added to.
     # It would be quite a security risk if the member could add itself to the admins group when registering.
     valid_member_fields = [
-        "member_number", "email", "password", "firstname", "lastname", "civicregno", "company",
+        "email", "firstname", "lastname", "civicregno", "company",
         "orgno", "address_street", "address_extra", "address_zipcode", "address_city", "address_country", "phone"
     ]
-    member = copy_dict(data["member"], valid_member_fields)
+    member = copy_dict(assert_get(data, "member"), valid_member_fields)
     member["validate_only"] = True
     member["create_deleted"] = True
     r = instance.gateway.post("membership/member", member)
