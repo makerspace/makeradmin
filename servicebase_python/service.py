@@ -24,6 +24,12 @@ class BackendException(Exception):
         self.message_en = en
 
 
+class MissingFieldException(BackendException):
+    def __init__(self, field):
+        super().__init__(sv=f"Fältet {field} fattas.",
+                         en=f"Missing the field {field}.")
+
+
 class DB:
     def __init__(self, host: str, name: str, user: str, password: str) -> None:
         self.host = host
@@ -48,6 +54,9 @@ class APIGateway:
         self.host_backend = self._ensure_protocol(host_backend)
         self.auth_headers = {"Authorization": "Bearer " + key}
 
+    def _get_headers(self, token):
+        return self.auth_headers if token is None else {"Authorization": "Bearer " + token}
+
     @staticmethod
     def _ensure_protocol(host: str) -> str:
         if not host.startswith("http://") and not host.startswith("https://"):
@@ -58,17 +67,17 @@ class APIGateway:
         host = self.host_frontend
         return host + "/" + path
 
-    def get(self, path, payload=None) -> requests.Response:
-        return requests.get(self.host + "/" + path, params=payload, headers=self.auth_headers)
+    def get(self, path, payload=None, token=None) -> requests.Response:
+        return requests.get(self.host + "/" + path, params=payload, headers=self._get_headers(token))
 
-    def post(self, path, payload) -> requests.Response:
-        return requests.post(self.host + "/" + path, json=payload, headers=self.auth_headers)
+    def post(self, path, payload, token=None) -> requests.Response:
+        return requests.post(self.host + "/" + path, json=payload, headers=self._get_headers(token))
 
-    def put(self, path, payload) -> requests.Response:
-        return requests.put(self.host + "/" + path, json=payload, headers=self.auth_headers)
+    def put(self, path, payload, token=None) -> requests.Response:
+        return requests.put(self.host + "/" + path, json=payload, headers=self._get_headers(token))
 
-    def delete(self, path) -> requests.Response:
-        return requests.delete(self.host + "/" + path, headers=self.auth_headers)
+    def delete(self, path, token=None) -> requests.Response:
+        return requests.delete(self.host + "/" + path, headers=self._get_headers(token))
 
 
 DEFAULT_PERMISSION = object()
@@ -364,6 +373,9 @@ class Entity:
             return self._convert_to_dict(item)
 
     def _convert_to_row(self, data, fields):
+        for c in fields:
+            if c.exposed_name not in data:
+                raise MissingFieldException(c.exposed_name)
         return [c.write(data[c.exposed_name]) for c in fields]
 
     def _convert_to_dict(self, row):
