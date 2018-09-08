@@ -301,6 +301,7 @@ def register() -> Dict[str, int]:
         ],
         "expectedSum": purchase["expectedSum"],
         "stripeSource": purchase["stripeSource"],
+        "stripeThreeDSecure": purchase["stripeThreeDSecure"],
         "duplicatePurchaseRand": purchase["duplicatePurchaseRand"],
     }
 
@@ -678,6 +679,9 @@ def pay(member_id: int, data: Dict[str, Any], activates_member: bool = False) ->
     if member_id <= 0:
         raise errors.NotMember()
 
+    card_source_id = assert_get(data, "stripeSource")
+    card_three_d_secure = assert_get(data, "stripeThreeDSecure")
+
     total_amount, items = validate_payment(member_id, data["cart"], data["expectedSum"])
 
     transaction_id = add_transaction_to_db(member_id, total_amount, items)
@@ -686,8 +690,6 @@ def pay(member_id: int, data: Dict[str, Any], activates_member: bool = False) ->
         # Mark this transaction as one that is for registering a member
         webshop_pending_registrations.post({"transaction_id": transaction_id})
 
-    card_source_id = assert_get(data, "stripeSource")
-    card_three_d_secure = assert_get(data, "stripeThreeDSecure")
     webshop_stripe_pending.post({ "transaction_id": transaction_id, "stripe_token": card_source_id})
 
     result = {}
