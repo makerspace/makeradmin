@@ -400,7 +400,8 @@ class MakerAdminTest(unittest.TestCase):
 
     def test_purchase(self):
         if not stripe.api_key:
-            return
+            self.skipTest("No Stripe API key set in the .env file")
+
         def prepare_purchase(source, productsAndCounts):
             global duplicatePurchaseRand
             duplicatePurchaseRand += 1
