@@ -295,6 +295,7 @@ class Member extends Controller
 		$result = DB::table("membership_members")
 			->select("member_id", "password")
 			->where("email", $username)
+			->whereNull('deleted_at')
 			->first();
 
 		// Verify the password hash
