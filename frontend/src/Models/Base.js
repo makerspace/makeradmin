@@ -1,5 +1,5 @@
 import * as _ from "underscore";
-import {del} from "../gateway";
+import {del, post} from "../gateway";
 
 
 export default class Base {
@@ -70,13 +70,29 @@ export default class Base {
         this.notify();
     }
     
-    // Rmove this entity.
+    // Rmove this entity, returns promise.
     remove() {
         if (!this.id) {
             return Promise.resolve(null);
         }
         
         return del({url: this.constructor.model.root + '/' + this.id});
+    }
+    
+    // Save or create, returns promise.
+    save() {
+        const data = Object.assign({}, this.saved, this.unsaved);
+
+        if (this.id) {
+            throw new Error("TODO");
+        }
+        else {
+            return post({url: this.constructor.model.root, data}).then(d => {
+                this.saved = d.data;
+                this.unsaved = {};
+                this.notify();
+            });
+        }
     }
     
     // Returns true if unsaved.

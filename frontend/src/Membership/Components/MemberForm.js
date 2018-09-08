@@ -58,6 +58,7 @@ Input.defaultProps = {
 const CountryDropdown = () => <div/>;
 const DateTimeField = () => <div/>;
 
+// TODO Maybe not really a reusable component, check usages later.
 export default class MemberAdd extends React.Component {
 
     constructor(props) {
@@ -69,17 +70,20 @@ export default class MemberAdd extends React.Component {
     
     componentDidMount() {
         const {model} = this.props;
-        this.unsubscribe = model.subscribe(() => this.setState({saveDisabled: !model.isDirty()}));
+        this.unsubscribe = model.subscribe(() => this.setState({saveDisabled: !model.canSave()}));
     }
     
     componentWillUnmount() {
         this.unsubscribe();
     }
 
-    removeButton() {return null;}
+    remove() {
+        console.info("remove");
+        // TODO Implement remove.
+    }
     
     render() {
-        const {model, onCancel} = this.props;
+        const {model, onCancel, onSave} = this.props;
         const {saveDisabled} = this.state;
         
 		return (
@@ -139,22 +143,14 @@ export default class MemberAdd extends React.Component {
 
 					<div className="uk-form-row">
                         <a className="uk-button uk-button-danger uk-float-left" onClick={onCancel}><i className="uk-icon-close"/> Avbryt</a>
-						{this.removeButton("Ta bort medlem")}
-                        <button className="uk-button uk-button-success uk-float-right" disabled={saveDisabled} onClick={this.save}><i className="uk-icon-save"/> {model.id ? 'Spara' : 'Skapa'}</button>
+                        {model.id ? <a className="uk-button uk-button-danger uk-float-left" onClick={null}><i className="uk-icon-trash"/> Ta bort medlem</a> : ""}
+                        <button type="button" className="uk-button uk-button-success uk-float-right" disabled={saveDisabled} onClick={onSave}><i className="uk-icon-save"/> {model.id ? 'Spara' : 'Skapa'}</button>
 					</div>
 				</form>
 			</div>
 		);
 	}
 }
-
-
-
-
-
-
-
-
 
 /*
 

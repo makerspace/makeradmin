@@ -16,10 +16,14 @@ class MemberAdd extends React.Component {
 		return (
 			<div>
 				<h2>Skapa medlem</h2>
-				<MemberForm model={this.model} onCancel={() => {
-                    this.model.reset();
-                    browserHistory.goBack();
-				}}/>
+				<MemberForm
+                    model={this.model}
+                    onCancel={() => {
+                        this.model.reset();
+                        browserHistory.goBack();
+                    }}
+                    onSave={() => this.model.save().then(() => browserHistory.replace('/membership/membersx/' + this.model.id))}
+                />
 			</div>
 		);
 	}

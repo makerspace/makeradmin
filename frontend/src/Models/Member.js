@@ -5,14 +5,19 @@ export default class Member extends Base {
     removeConfirmMessage() {
         return `Are you sure you want to remove member ${this.firstname} ${this.lastname}?`;
     }
+    
+    canSave() {
+        return this.isDirty() && this.email.length > 0 && this.firstname.length > 0;
+    }
 }
 
 Member.model = {
     id: "member_id",
     root: "/membership/member",
     attributes: {
-        created_at: "",
-        updated_at: "",
+        member_id: 0,
+        created_at: null,
+        updated_at: null,
         member_number: "",
         civicregno: "",
         firstname: "",
@@ -26,4 +31,3 @@ Member.model = {
         address_country: "se",
     },
 };
-
