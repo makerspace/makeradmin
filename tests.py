@@ -391,6 +391,8 @@ class MakerAdminTest(unittest.TestCase):
                 self.post(f"/membership/member/{member_id}/addMembershipDays", {"type": "labaccess", "days": 10}, 400, expected_result={"status": "error"})
 
     def test_purchase(self):
+        if not stripe.api_key:
+            return
         with MemberDummies(self, 2) as created_members:
             for i, (member, password) in enumerate(created_members):
                 member_id = member['member_id']
