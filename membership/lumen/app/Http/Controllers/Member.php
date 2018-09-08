@@ -158,7 +158,7 @@ class Member extends Controller
 			$entity->updated_at = $json["updated_at"];
 		}
 		if (isset($json["create_deleted"]) && $json["create_deleted"] === true) {
-			$entity->deleted_at = $entity->created_at ?? DB::raw("NOW()");
+			$entity->deleted_at = $entity->created_at ?? date("c");
 		}
 
 		// Validate input
