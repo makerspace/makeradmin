@@ -8,14 +8,14 @@ class MemberAdd extends React.Component {
 
     constructor(props) {
         super(props);
-        this.state = {model: new Member()};
+        this.model = new Member();
     }
 
     render() {
 		return (
 			<div>
 				<h2>Skapa medlem</h2>
-				<MemberForm model={this.state.model} route={this.props.route} />
+				<MemberForm model={this.model}/>
 			</div>
 		);
 	}
