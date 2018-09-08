@@ -11,13 +11,20 @@ class Input extends React.Component {
             value: '',
             selected: false,
             isDirty: false,
-            error_column: null,
-            error_message: null,
         };
+    }
+
+    componentDidMount() {
+        const {model, name} = this.props;
+        this.unsubscribe = model.subscribe(() => this.setState({value: model[name], isDirty: model.isDirty(name)}));
+    }
+    
+    componentWillUnmount() {
+        this.unsubscribe();
     }
     
     render() {
-        const {value, error_column, error_message, selected, isDirty}         = this.state;
+        const {value, selected, isDirty} = this.state;
         const {model, name, title, icon, disabled, placeholder, formrow} = this.props;
         
         const classes = classNames(name,
@@ -25,16 +32,11 @@ class Input extends React.Component {
                                        "uk-form-row": formrow,
                                        "selected": selected,
                                        "changed": isDirty,
-                                       "error":       error_column === name,
                                    });
         
         const input = <input id={name} name={name} type="text" placeholder={placeholder || title} className="uk-form-width-large"
                              value={value} disabled={disabled}
-                             onChange={(event) => {
-                                 const v    = event.target.value;
-                                 model[name] = v;
-                                 this.setState({value: v, isDirty: model.isDirty(name)});
-                             }}
+                             onChange={(event) => model[name] = event.target.value}
                              onFocus={() => this.setState({selected: true})}
                              onBlur={() => this.setState({selected: false})}/>;
         
@@ -43,7 +45,6 @@ class Input extends React.Component {
                 <label htmlFor={name} className="uk-form-label">{title}</label>
                 <div className="uk-form-controls">
                     {icon ? <div className="uk-form-icon"><i className={"uk-icon-" + icon}/>{input}</div> : input}
-                    {error_column === name ? <p className="uk-form-help-block error">{error_message}</p> : ""}
                 </div>
             </div>
         );
@@ -61,15 +62,25 @@ export default class MemberAdd extends React.Component {
 
     constructor(props) {
         super(props);
-        this.state = {model: {}};
+        this.state = {
+            saveDisabled: true,
+        };
+    }
+    
+    componentDidMount() {
+        const {model} = this.props;
+        this.unsubscribe = model.subscribe(() => this.setState({saveDisabled: !model.isDirty()}));
+    }
+    
+    componentWillUnmount() {
+        this.unsubscribe();
     }
 
-    cancelButton() {return null;}
     removeButton() {return null;}
-    saveButton() {return null;}
     
     render() {
-        const {model} = this.props;
+        const {model, onCancel} = this.props;
+        const {saveDisabled} = this.state;
         
 		return (
 			<div className="meep">
@@ -99,35 +110,37 @@ export default class MemberAdd extends React.Component {
 							</div>
 						</div>
 					</fieldset>
-
-					{this.state.model.member_id > 0 ?
-						<fieldset data-uk-margin>
-							<legend><i className="uk-icon-tag"/> Metadata</legend>
-
-							<div className="uk-form-row">
-								<label className="uk-form-label">Medlem sedan</label>
-								<div className="uk-form-controls">
-									<i className="uk-icon-calendar"/>
-									&nbsp;
-									<DateTimeField date={model.created_at} />
-								</div>
-							</div>
-
-							<div className="uk-form-row">
-								<label className="uk-form-label">Senast uppdaterad</label>
-								<div className="uk-form-controls">
-									<i className="uk-icon-calendar"/>
-									&nbsp;
-									<DateTimeField date={model.updated_at} />
-								</div>
-							</div>
-						</fieldset>
-					: ""}
+     
+					{model.id
+                     ?
+                     <fieldset data-uk-margin>
+                         <legend><i className="uk-icon-tag"/> Metadata</legend>
+                         
+                         <div className="uk-form-row">
+                             <label className="uk-form-label">Medlem sedan</label>
+                             <div className="uk-form-controls">
+                                 <i className="uk-icon-calendar"/>
+                                 &nbsp;
+                                 <DateTimeField date={model.created_at} />
+                             </div>
+                         </div>
+                         
+                         <div className="uk-form-row">
+                             <label className="uk-form-label">Senast uppdaterad</label>
+                             <div className="uk-form-controls">
+                                 <i className="uk-icon-calendar"/>
+                                 &nbsp;
+                                 <DateTimeField date={model.updated_at} />
+                             </div>
+                         </div>
+                     </fieldset>
+                     :
+                     ""}
 
 					<div className="uk-form-row">
-						{this.cancelButton()}
+                        <a className="uk-button uk-button-danger uk-float-left" onClick={onCancel}><i className="uk-icon-close"/> Avbryt</a>
 						{this.removeButton("Ta bort medlem")}
-						{this.saveButton("Spara personuppgifter")}
+                        <button className="uk-button uk-button-success uk-float-right" disabled={saveDisabled} onClick={this.save}><i className="uk-icon-save"/> {model.id ? 'Spara' : 'Skapa'}</button>
 					</div>
 				</form>
 			</div>

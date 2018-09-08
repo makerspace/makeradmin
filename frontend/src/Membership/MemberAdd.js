@@ -2,6 +2,7 @@ import React from 'react';
 
 import MemberForm from './Components/MemberForm';
 import Member from "../Models/Member";
+import {browserHistory} from 'react-router';
 
 
 class MemberAdd extends React.Component {
@@ -15,7 +16,10 @@ class MemberAdd extends React.Component {
 		return (
 			<div>
 				<h2>Skapa medlem</h2>
-				<MemberForm model={this.model}/>
+				<MemberForm model={this.model} onCancel={() => {
+                    this.model.reset();
+                    browserHistory.goBack();
+				}}/>
 			</div>
 		);
 	}

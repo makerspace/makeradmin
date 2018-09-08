@@ -29,7 +29,7 @@ export default class Collection {
         cb({items: this.items, page: this.page});
         return () => delete this.subscribers[id];
     }
-    
+
     // Update sort order, key is one of model attributes, order is up/asc or down/desc.
     updateSort({key, order = 'down'}) {
         this.sort = {key, order: {up: 'asc', asc: 'asc', down: 'desc', desc: 'desc'}[order]};

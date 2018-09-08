@@ -4,6 +4,9 @@ import {del} from "../gateway";
 
 export default class Base {
     constructor(data=null) {
+        this.subscribers = {};
+        this.subscriberId = 0;
+        
         const model = this.constructor.model;
         
         if (data) {
@@ -39,6 +42,7 @@ export default class Base {
                     else {
                         this.unsaved[key] = v;
                     }
+                    this.notify();
                 }
                 
             });
@@ -47,10 +51,26 @@ export default class Base {
         Object.defineProperty(this, 'id', {get: () => this.saved[model.id]});
     }
     
-    reset() {
-        this.unsaved = Object.assign({}, this.saved);
+    // Subscribe to changes, returns function for unsubscribing.
+    subscribe(cb) {
+        const id = this.subscriberId++;
+        this.subscribers[id] = cb;
+        cb();
+        return () => delete this.subscribers[id];
     }
     
+    // Notify subscribers that something changed.
+    notify() {
+        _.values(this.subscribers).forEach(s => s());
+    }
+
+    // Reset data to saved state.
+    reset() {
+        this.unsaved = Object.assign({}, this.saved);
+        this.notify();
+    }
+    
+    // Rmove this entity.
     remove() {
         if (!this.id) {
             return Promise.resolve(null);
@@ -59,10 +79,12 @@ export default class Base {
         return del({url: this.constructor.model.root + '/' + this.id});
     }
     
+    // Returns true if unsaved.
     isUnsaved() {
         return !this.id || this.isDirty();
     }
     
+    // Returns true if any field changed.
     isDirty(key) {
         if (!key) {
             return !_.isEmpty(this.unsaved);
@@ -70,6 +92,7 @@ export default class Base {
         return !_.isUndefined(this.unsaved[key]);
     }
     
+    // Return message for remove confirmation.
     removeConfirmMessage() {
         throw new Error(`removeConfirmMessage not implemented in ${this.constructor.name}`);
     }
