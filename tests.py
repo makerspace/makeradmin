@@ -1,3 +1,9 @@
+#
+# Useful tip:
+# When writing unit tests, add the code below inside a unit test to start a REPL inside the unit test to prototype things without having to restart all containers every single time
+# import code
+# code.InteractiveConsole(locals=locals()).interact()
+#
 from subprocess import call, check_output, STDOUT
 from time import sleep
 import servicebase_python.service
@@ -5,6 +11,7 @@ import unittest
 import json
 from datetime import datetime, timedelta
 from requests import Response
+import stripe
 
 project_name = "test"
 
@@ -16,7 +23,6 @@ def strip_entity_id(obj):
 
 
 class MemberDummies:
-    
         def __init__(self, test, count):
             self.test = test
             self.count = count
@@ -45,14 +51,19 @@ class MemberDummies:
                 # The email needs to be completely unique in the database
                 # even among previously deleted members
                 m["email"] = "dummy_" + str(i)
+                # Let php hash the password
+                m["unhashed_password"] = True
+                m["password"] = "passwd_" + str(i)
                 members.append(m)
 
-            self.created_members = [
-                self.test.post("membership/member", member, 201, expected_result={"status": "created", "data": member})["data"]
-                for member in members
-            ]
+            self.created_members = []
+            for member in members:
+                response_member = dict(member)
+                del response_member["password"]
+                del response_member["unhashed_password"]
+                self.created_members.append(self.test.post("membership/member", member, 201, expected_result={"status": "created", "data": response_member})["data"])
 
-            return self.created_members
+            return zip(self.created_members, [member["password"] for member in members])
 
         def __exit__(self, type, value, traceback):
             for member in self.created_members:
@@ -133,23 +144,29 @@ class MakerAdminTest(unittest.TestCase):
 
         print("Services have started")
 
+        # Read the .env file
+        with open(".env") as f:
+            env = {s[0]: (s[1] if len(s) > 1 else "") for s in (s.split("=") for s in f.read().split('\n'))}
+
+        stripe.api_key = env["STRIPE_PUBLIC_KEY"]
+
     @classmethod
     def tearDownClass(cls):
         print("\nStopping containers...")
-        check_output(["docker-compose", "-p", project_name, "stop", "-t", "60"], stderr=STDOUT)
+        # check_output(["docker-compose", "-p", project_name, "stop", "-t", "60"], stderr=STDOUT)
         check_output(["docker-compose", "-p", project_name, "down"], stderr=STDOUT)
 
-    def get(self, url, status_code=200, *, expected_result={}):
-        return self.assertResponseSubset(self.gateway.get(url), status_code, expected_result)
+    def get(self, url, status_code=200, *, expected_result={}, token=None):
+        return self.assertResponseSubset(self.gateway.get(url, token), status_code, expected_result)
 
-    def delete(self, url, status_code=200, *, expected_result={}):
-        return self.assertResponseSubset(self.gateway.delete(url), status_code, expected_result)
+    def delete(self, url, status_code=200, *, expected_result={}, token=None):
+        return self.assertResponseSubset(self.gateway.delete(url, token), status_code, expected_result)
 
-    def post(self, url, payload={}, status_code=200, *, expected_result={}):
-        return self.assertResponseSubset(self.gateway.post(url, payload), status_code, expected_result)
+    def post(self, url, payload={}, status_code=200, *, expected_result={}, token=None):
+        return self.assertResponseSubset(self.gateway.post(url, payload, token), status_code, expected_result)
 
-    def put(self, url, payload={}, status_code=200, *, expected_result={}):
-        return self.assertResponseSubset(self.gateway.put(url, payload), status_code, expected_result)
+    def put(self, url, payload={}, status_code=200, *, expected_result={}, token=None):
+        return self.assertResponseSubset(self.gateway.put(url, payload, token=None), status_code, expected_result)
 
     def test_member(self):
         ''' Test various things to do with members '''
@@ -228,7 +245,7 @@ class MakerAdminTest(unittest.TestCase):
             # Inconsistency: list views do not include entity_id
             self.get(f"membership/group", 200, expected_result={"data": previous_groups + list(map(strip_entity_id, created_groups))})
 
-            for member, group in zip(created_members, created_groups):
+            for (member, password), group in zip(created_members, created_groups):
                 member_id = member["member_id"]
                 group_id = group["group_id"]
 
@@ -260,7 +277,7 @@ class MakerAdminTest(unittest.TestCase):
     def test_membership(self):
         with MemberDummies(self, 5) as created_members:
 
-            for i, member in enumerate(created_members):
+            for i, (member, password) in enumerate(created_members):
                 member_id = member['member_id']
                 self.get(f"/membership/member/{member_id}/membership", 200, expected_result={
                     "status": "ok",
@@ -372,3 +389,147 @@ class MakerAdminTest(unittest.TestCase):
                 self.post(f"/membership/member/{member_id}/addMembershipDays", {"type": "lulz", "days": 10, "creation_reason": f"test6_{member_id}"}, 400, expected_result={"status": "error"})
                 self.post(f"/membership/member/{member_id}/addMembershipDays", {"type": "labaccess", "days": 10, "creation_reason": None}, 400, expected_result={"status": "error"})
                 self.post(f"/membership/member/{member_id}/addMembershipDays", {"type": "labaccess", "days": 10}, 400, expected_result={"status": "error"})
+
+    def test_purchase(self):
+        with MemberDummies(self, 2) as created_members:
+            for i, (member, password) in enumerate(created_members):
+                member_id = member['member_id']
+
+                category = {
+                    "name": "Blah"
+                }
+                created_category = self.post(f"/webshop/category", category, 200, expected_result={"status": "created", "data": category})["data"]
+
+                product1 = {
+                    "name": "Meh",
+                    "price": "12.30",
+                    "description": "This is a description",
+                    "unit": "st",
+                    "smallest_multiple": 1,
+                    "filter": None,
+                    "category_id": created_category["id"],
+                }
+                created_product1 = self.post(f"/webshop/product", product1, 200, expected_result={"status": "created", "data": product1})["data"]
+
+                product2 = {
+                    "name": "Meh2",
+                    "price": "1.20",
+                    "description": "This is not a description",
+                    "unit": "mm",
+                    "smallest_multiple": 100,
+                    "filter": None,
+                    "category_id": created_category["id"],
+                }
+                created_product2 = self.post(f"/webshop/product", product2, 200, expected_result={"status": "created", "data": product2})["data"]
+
+                token = self.post(f"/oauth/token", {"grant_type": "password", "username": member["email"], "password": password}, 200)["access_token"]
+
+                STRIPE_TEST_CARD = {
+                    "number": '4242424242424242',
+                    "exp_month": 12,
+                    "exp_year": 2019,
+                    "cvc": '123'
+                }
+
+                source = stripe.Source.create(type="card", token=stripe.Token.create(card=STRIPE_TEST_CARD).id)
+                purchase = {
+                    "cart": [
+                        {
+                            "id": created_product1["id"],
+                            "count": 3,
+                        },
+                        {
+                            "id": created_product2["id"],
+                            "count": 100,
+                        }
+                    ],
+                    "expectedSum": "156.9",
+                    "duplicatePurchaseRand": i*100 + 0,
+                    "stripeSource": source.id,
+                    "stripeThreeDSecure": source["card"]["three_d_secure"]
+                }
+
+                # Make a valid purchase
+                transaction_id = self.post(f"/webshop/pay", purchase, 200, token=token, expected_result={"status": "ok"})["data"]["transaction_id"]
+
+                # Verify the transaction
+                self.get(f"/webshop/transaction/{transaction_id}", 200, token=token, expected_result={
+                    "status": "ok",
+                    "data": {
+                        "amount": "156.90",
+                        "member_id": member_id,
+                        "status": "completed"
+                    },
+                })
+
+                # Verify the contents
+                self.get(f"/webshop/transaction/{transaction_id}/content", 200, token=token, expected_result={
+                    "status": "ok",
+                    "data": [
+                        {
+                            "amount": "36.90",
+                            "count": 3,
+                            "product_id": created_product1["id"],
+                            "product_name": "Meh"
+                        },
+                        {
+                            "amount": "120.00",
+                            "count": 100,
+                            "product_id": created_product2["id"],
+                            "product_name": "Meh2"
+                        }
+                    ]
+                })
+
+                # Make some invalid purchases
+
+                source = stripe.Source.create(type="card", token=stripe.Token.create(card=STRIPE_TEST_CARD).id)
+
+                # Product 2 can only be purchased in multiples of 100
+                purchase = {
+                    "cart": [
+                        {
+                            "id": created_product2["id"],
+                            "count": 7,
+                        }
+                    ],
+                    "expectedSum": "8.40",
+                    "duplicatePurchaseRand": i*100 + 1,
+                    "stripeSource": source.id,
+                    "stripeThreeDSecure": source["card"]["three_d_secure"]
+                }
+                self.post(f"/webshop/pay", purchase, 400, token=token, expected_result={"status": "InvalidItemCountMultiple"})
+
+                # Invalid expected sum
+                purchase = {
+                    "cart": [
+                        {
+                            "id": created_product1["id"],
+                            "count": 3,
+                        },
+                        {
+                            "id": created_product2["id"],
+                            "count": 100,
+                        }
+                    ],
+                    "expectedSum": "19.20",
+                    "duplicatePurchaseRand": i*100 + 2,
+                    "stripeSource": source.id,
+                    "stripeThreeDSecure": source["card"]["three_d_secure"]
+                }
+                self.post(f"/webshop/pay", purchase, 400, token=token, expected_result={"status": "NonMatchingSums"})
+
+                # Negative amounts
+                purchase = {
+                    "cart": [
+                        {
+                            "id": created_product1["id"],
+                            "count": -3,
+                        }
+                    ],
+                    "expectedSum": "19.20",
+                    "duplicatePurchaseRand": i*100 + 3,
+                    "stripeSource": source.id,
+                    "stripeThreeDSecure": source["card"]["three_d_secure"]
+                }
+                self.post(f"/webshop/pay", purchase, 400, token=token, expected_result={"status": "NonNegativeItemCount"})
