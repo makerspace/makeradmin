@@ -147,6 +147,7 @@ document.addEventListener('DOMContentLoaded', () => {
 					cart: cart.items,
 					expectedSum: cart.sum(id2item),
 					stripeSource: result.source.id,
+					stripeThreeDSecure: result.source.card.three_d_secure,
 					duplicatePurchaseRand: duplicatePurchaseRand,
 				}).then(json => {
 					spinner.classList.remove("progress-spinner-visible");
