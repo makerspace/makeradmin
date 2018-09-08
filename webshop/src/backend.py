@@ -480,7 +480,7 @@ def convert_to_stripe_amount(amount: Decimal) -> int:
     # The amount is stored as a Decimal, convert it to an int
     return int(stripe_amount)
 
-def create_stripe_payment(transaction_id: int, token: str) -> None:
+def create_stripe_payment(transaction_id: int, token: str) -> stripe.Charge:
     transaction = transaction_entity.get(transaction_id)
 
     if transaction["status"] != "pending":
@@ -624,7 +624,7 @@ def handle_card_source(transaction_id: int, card_source_id: str, total_amount: D
     elif status == "failed":
         fail_transaction(transaction_id, 500, "Payment failed")
     elif status in {"canceled", "pending"}:
-        fail_transaction(500, f"Found unexpected stripe source status '{status}', aborting transaction {transaction_id}")
+        fail_transaction(transaction_id, 500, f"Found unexpected stripe source status '{status}', aborting transaction {transaction_id}")
     elif status == "consumed":
         # Not necessarily an error but shouldn't happen.
         abort(500, f"Stripe source already marked as 'consumed'")
