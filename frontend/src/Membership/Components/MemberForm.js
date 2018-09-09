@@ -1,6 +1,7 @@
 import React from 'react';
 // import Input from '../../Components/Form/Input';
 import classNames from 'classnames/bind';
+import CountryDropdown from '../../CountryDropdown';
 
 
 class Input extends React.Component {
@@ -55,7 +56,6 @@ Input.defaultProps = {
     formrow: true,
 };
 
-const CountryDropdown = () => <div/>;
 const DateTimeField = () => <div/>;
 
 // TODO Maybe not really a reusable component, check usages later.
@@ -110,7 +110,7 @@ export default class MemberAdd extends React.Component {
 						<div className="uk-form-row">
 							<label htmlFor="" className="uk-form-label">Land</label>
 							<div className="uk-form-controls">
-								<CountryDropdown country={model.address_country} onChange={this.changeCountry} />
+								<CountryDropdown country={model.address_country} onChange={c => model.address_country = c} />
 							</div>
 						</div>
 					</fieldset>
