@@ -632,7 +632,7 @@ def create_three_d_secure_source(transaction_id: int, card_source_id: str, total
 
 def handle_card_source(transaction_id: int, card_source_id: str, total_amount: Decimal) -> Dict[str,int]:
     card_source = stripe.Source.retrieve(card_source_id)
-    if card_source.type != 'card' or card_source.card.three_d_secure not in {'not_supported', 'optional'}:
+    if card_source.type != 'card' or card_source.card.three_d_secure != 'not_supported':
         abort(500, f'Synchronous charges should only be made for cards not supporting 3D Secure')
 
     status = card_source.status
@@ -709,7 +709,7 @@ def pay(member_id: int, data: Dict[str, Any], activates_member: bool = False) ->
     webshop_stripe_pending.post({"transaction_id": transaction_id, "stripe_token": card_source_id})
 
     result = {}
-    if card_three_d_secure in {'not_supported', 'optional'}:
+    if card_three_d_secure == 'not_supported':
         result = handle_card_source(transaction_id, card_source_id, total_amount)
     else:
         result = handle_three_d_secure_source(transaction_id, card_source_id, total_amount)
