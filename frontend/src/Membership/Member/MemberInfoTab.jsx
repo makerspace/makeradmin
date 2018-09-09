@@ -7,7 +7,11 @@ export default class MemberInfoTab extends React.Component {
 	render() {
         return (
             <div>
-                <MemberForm member={this.context.member} />
+                <MemberForm
+                    member={this.context.member}
+                    onCancel={() => this.context.member.reset()}
+                    onSave={() => this.context.member.save()}
+                />
             </div>
         );
     }

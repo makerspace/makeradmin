@@ -68,6 +68,29 @@ export function post({url, data}) {
         .catch(handleError('Error when creating:'));
 }
 
+export function put({url, data}) {
+    const options = {
+        method: 'PUT',
+        headers: {
+            'Authorization': 'Bearer ' + auth.getAccessToken(),
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+    };
+
+    url = config.apiBasePath + url;
+
+    return fetch(url, options)
+        .then(handleResponse)
+        .then(data => {
+            if ("updated" === data.status) {
+                return data;
+            }
+            throw new Error(JSON.stringify(data));
+        })
+        .catch(handleError('Error when saving:'));
+}
+
 export function del({url}) {
     const options = {
         method: 'DELETE',

@@ -1,5 +1,5 @@
 import * as _ from "underscore";
-import {del, get, post} from "../gateway";
+import {del, get, put, post} from "../gateway";
 
 
 export default class Base {
@@ -97,15 +97,18 @@ export default class Base {
         const data = Object.assign({}, this.saved, this.unsaved);
 
         if (this.id) {
-            throw new Error("TODO");
-        }
-        else {
-            return post({url: this.constructor.model.root, data}).then(d => {
+            return put({url: this.constructor.model.root + '/' + this.id, data}).then(d => {
                 this.saved = d.data;
                 this.unsaved = {};
                 this.notify();
             });
         }
+    
+        return post({url: this.constructor.model.root, data}).then(d => {
+            this.saved = d.data;
+            this.unsaved = {};
+            this.notify();
+        });
     }
     
     // Returns true if unsaved.
