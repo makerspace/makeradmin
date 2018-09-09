@@ -1,5 +1,5 @@
 import * as _ from "underscore";
-import {del, post} from "../gateway";
+import {del, get, post} from "../gateway";
 
 
 export default class Base {
@@ -8,7 +8,7 @@ export default class Base {
         this.subscriberId = 0;
         
         const model = this.constructor.model;
-        
+
         if (data) {
             this.unsaved = {};
             this.saved = Object.assign({}, model.attributes, data);
@@ -78,6 +78,19 @@ export default class Base {
         
         return del({url: this.constructor.model.root + '/' + this.id});
     }
+
+    // Refresh datra from server, requires id in data, returns promise.
+    refresh() {
+        if (!this.id) {
+            throw new Error("Refresh requires id.");
+        }
+        
+        return get({url: this.constructor.model.root + '/' + this.id}).then(d => {
+            this.saved = d.data;
+            this.unsaved = {};
+            this.notify();
+        });
+    }
     
     // Save or create, returns promise.
     save() {
@@ -113,3 +126,4 @@ export default class Base {
         throw new Error(`removeConfirmMessage not implemented in ${this.constructor.name}`);
     }
 }
+

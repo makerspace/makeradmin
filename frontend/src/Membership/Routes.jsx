@@ -7,15 +7,28 @@ module.exports = {
 			},
 			childRoutes: [
                 {
-                    path:       "membersx",
+                    path: "membersx",
                     indexRoute: {
                         component: require("./MemberList").default,
                     },
 					childRoutes: [
                         {
-                            path:      "add",
+                            path: "add",
                             component: require("./MemberAdd").default,
-                        }
+                        },
+                        {
+                            path: ":member_id",
+                            component:  require("./Member").default,
+                            indexRoute: {
+                                component: require("./Member/MemberInfoTab").default,
+							},
+							childRoutes: [
+								{
+									path: "info",
+									component: require("./Member/MemberInfoTab").default,
+								},
+							]
+                        },
 					],
                 },
 				{

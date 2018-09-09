@@ -1,7 +1,9 @@
 import React from 'react';
+// TODO Replace global input if it works.
 // import Input from '../../Components/Form/Input';
 import classNames from 'classnames/bind';
 import CountryDropdown from '../../CountryDropdown';
+import DateTime from "../../Components/Form/DateTime";
 
 
 class Input extends React.Component {
@@ -17,7 +19,7 @@ class Input extends React.Component {
 
     componentDidMount() {
         const {model, name} = this.props;
-        this.unsubscribe = model.subscribe(() => this.setState({value: model[name], isDirty: model.isDirty(name)}));
+        this.unsubscribe = model.subscribe(() => this.setState({value: model[name] === null ? '' : model[name], isDirty: model.isDirty(name)}));
     }
     
     componentWillUnmount() {
@@ -56,10 +58,8 @@ Input.defaultProps = {
     formrow: true,
 };
 
-const DateTimeField = () => <div/>;
-
 // TODO Maybe not really a reusable component, check usages later.
-export default class MemberAdd extends React.Component {
+export default class MemberForm extends React.Component {
 
     constructor(props) {
         super(props);
@@ -69,8 +69,8 @@ export default class MemberAdd extends React.Component {
     }
     
     componentDidMount() {
-        const {model} = this.props;
-        this.unsubscribe = model.subscribe(() => this.setState({saveDisabled: !model.canSave()}));
+        const {member} = this.props;
+        this.unsubscribe = member.subscribe(() => this.setState({saveDisabled: !member.canSave()}));
     }
     
     componentWillUnmount() {
@@ -83,7 +83,7 @@ export default class MemberAdd extends React.Component {
     }
     
     render() {
-        const {model, onCancel, onSave} = this.props;
+        const {member, onCancel, onSave} = this.props;
         const {saveDisabled} = this.state;
         
 		return (
@@ -92,30 +92,30 @@ export default class MemberAdd extends React.Component {
 					<fieldset >
 						<legend><i className="uk-icon-user"/> Personuppgifter</legend>
 
-						<Input model={model} name="civicregno" title="Personnummer" />
-						<Input model={model} name="firstname"  title="Förnamn" />
-						<Input model={model} name="lastname"   title="Efternamn" />
-						<Input model={model} name="email"      title="E-post" />
-						<Input model={model} name="phone"      title="Telefonnummer" />
+						<Input model={member} name="civicregno" title="Personnummer" />
+						<Input model={member} name="firstname" title="Förnamn" />
+						<Input model={member} name="lastname" title="Efternamn" />
+						<Input model={member} name="email" title="E-post" />
+						<Input model={member} name="phone" title="Telefonnummer" />
 					</fieldset>
 
 					<fieldset data-uk-margin>
 						<legend><i className="uk-icon-home"/> Adress</legend>
 
-						<Input model={model} name="address_street"  title="Address" />
-						<Input model={model} name="address_extra"   title="Address extra" placeholder="Extra adressrad, t ex C/O adress" />
-						<Input model={model} name="address_zipcode" title="Postnummer" />
-						<Input model={model} name="address_city"    title="Postort" />
+						<Input model={member} name="address_street" title="Address" />
+						<Input model={member} name="address_extra" title="Address extra" placeholder="Extra adressrad, t ex C/O adress" />
+						<Input model={member} name="address_zipcode" title="Postnummer" />
+						<Input model={member} name="address_city" title="Postort" />
 
 						<div className="uk-form-row">
 							<label htmlFor="" className="uk-form-label">Land</label>
 							<div className="uk-form-controls">
-								<CountryDropdown country={model.address_country} onChange={c => model.address_country = c} />
+								<CountryDropdown country={member.address_country} onChange={c => member.address_country = c} />
 							</div>
 						</div>
 					</fieldset>
      
-					{model.id
+					{member.id
                      ?
                      <fieldset data-uk-margin>
                          <legend><i className="uk-icon-tag"/> Metadata</legend>
@@ -125,7 +125,7 @@ export default class MemberAdd extends React.Component {
                              <div className="uk-form-controls">
                                  <i className="uk-icon-calendar"/>
                                  &nbsp;
-                                 <DateTimeField date={model.created_at} />
+                                 <DateTime date={member.created_at} />
                              </div>
                          </div>
                          
@@ -134,7 +134,7 @@ export default class MemberAdd extends React.Component {
                              <div className="uk-form-controls">
                                  <i className="uk-icon-calendar"/>
                                  &nbsp;
-                                 <DateTimeField date={model.updated_at} />
+                                 <DateTime date={member.updated_at} />
                              </div>
                          </div>
                      </fieldset>
@@ -143,8 +143,8 @@ export default class MemberAdd extends React.Component {
 
 					<div className="uk-form-row">
                         <a className="uk-button uk-button-danger uk-float-left" onClick={onCancel}><i className="uk-icon-close"/> Avbryt</a>
-                        {model.id ? <a className="uk-button uk-button-danger uk-float-left" onClick={null}><i className="uk-icon-trash"/> Ta bort medlem</a> : ""}
-                        <button type="button" className="uk-button uk-button-success uk-float-right" disabled={saveDisabled} onClick={onSave}><i className="uk-icon-save"/> {model.id ? 'Spara' : 'Skapa'}</button>
+                        {member.id ? <a className="uk-button uk-button-danger uk-float-left" onClick={null}><i className="uk-icon-trash"/> Ta bort medlem</a> : ""}
+                        <button type="button" className="uk-button uk-button-success uk-float-right" disabled={saveDisabled} onClick={onSave}><i className="uk-icon-save"/> {member.id ? 'Spara' : 'Skapa'}</button>
 					</div>
 				</form>
 			</div>
@@ -170,7 +170,7 @@ module.exports = withRouter(React.createClass({
 	mixins: [Backbone.React.Component.mixin, GenericEntityFunctions],
 
 	componentWillMount: function(){
-		// The groups attribute should not affect the isDirty() function on the model
+		// The groups attribute should not affect the isDirty() function on the member
 		this.getModel().ignoreAttributes.push("groups");
 	},
 
@@ -190,13 +190,13 @@ module.exports = withRouter(React.createClass({
 		UIkit.notify("Ett fel uppstod vid borttagning av medlem", {timeout: 0, status: "danger"});
 	},
 
-	onCreate: function(model)
+	onCreate: function(member)
 	{
 		UIkit.notify("Successfully created", {status: "success"});
-		this.props.router.push("/membership/members/" + model.get("member_id"));
+		this.props.router.push("/membership/members/" + member.get("member_id"));
 	},
 
-	onUpdate: function(model)
+	onUpdate: function(member)
 	{
 		UIkit.notify("Successfully updated", {status: "success"});
 	},
@@ -224,8 +224,8 @@ module.exports = withRouter(React.createClass({
 		// Validate required fields
 		if(
 			this.getModel().isDirty() &&
-			this.state.model.firstname.length > 0 &&
-			this.state.model.email.length > 0
+			this.state.member.firstname.length > 0 &&
+			this.state.member.email.length > 0
 		)
 		{
 			// Enable button
@@ -244,30 +244,30 @@ module.exports = withRouter(React.createClass({
 					<fieldset >
 						<legend><i className="uk-icon-user"></i> Personuppgifter</legend>
 
-						<Input model={this.getModel()} name="civicregno" title="Personnummer" />
-						<Input model={this.getModel()} name="firstname"  title="Förnamn" />
-						<Input model={this.getModel()} name="lastname"   title="Efternamn" />
-						<Input model={this.getModel()} name="email"      title="E-post" />
-						<Input model={this.getModel()} name="phone"      title="Telefonnummer" />
+						<Input member={this.getModel()} name="civicregno" title="Personnummer" />
+						<Input member={this.getModel()} name="firstname"  title="Förnamn" />
+						<Input member={this.getModel()} name="lastname"   title="Efternamn" />
+						<Input member={this.getModel()} name="email"      title="E-post" />
+						<Input member={this.getModel()} name="phone"      title="Telefonnummer" />
 					</fieldset>
 
 					<fieldset data-uk-margin>
 						<legend><i className="uk-icon-home"></i> Adress</legend>
 
-						<Input model={this.getModel()} name="address_street"  title="Address" />
-						<Input model={this.getModel()} name="address_extra"   title="Address extra" placeholder="Extra adressrad, t ex C/O adress" />
-						<Input model={this.getModel()} name="address_zipcode" title="Postnummer" />
-						<Input model={this.getModel()} name="address_city"    title="Postort" />
+						<Input member={this.getModel()} name="address_street"  title="Address" />
+						<Input member={this.getModel()} name="address_extra"   title="Address extra" placeholder="Extra adressrad, t ex C/O adress" />
+						<Input member={this.getModel()} name="address_zipcode" title="Postnummer" />
+						<Input member={this.getModel()} name="address_city"    title="Postort" />
 
 						<div className="uk-form-row">
 							<label htmlFor="" className="uk-form-label">Land</label>
 							<div className="uk-form-controls">
-								<CountryDropdown country={this.state.model.address_country} onChange={this.changeCountry} />
+								<CountryDropdown country={this.state.member.address_country} onChange={this.changeCountry} />
 							</div>
 						</div>
 					</fieldset>
 
-					{this.state.model.member_id > 0 ?
+					{this.state.member.member_id > 0 ?
 						<fieldset data-uk-margin>
 							<legend><i className="uk-icon-tag"></i> Metadata</legend>
 
@@ -276,7 +276,7 @@ module.exports = withRouter(React.createClass({
 								<div className="uk-form-controls">
 									<i className="uk-icon-calendar"></i>
 									&nbsp;
-									<DateTimeField date={this.state.model.created_at} />
+									<DateTimeField date={this.state.member.created_at} />
 								</div>
 							</div>
 
@@ -285,7 +285,7 @@ module.exports = withRouter(React.createClass({
 								<div className="uk-form-controls">
 									<i className="uk-icon-calendar"></i>
 									&nbsp;
-									<DateTimeField date={this.state.model.updated_at} />
+									<DateTimeField date={this.state.member.updated_at} />
 								</div>
 							</div>
 						</fieldset>

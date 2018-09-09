@@ -38,7 +38,7 @@ class Row extends React.Component {
         const {item, removeItem} = this.props;
         return (
 			<tr>
-				<td><Link to={"/membership/members/" + item.id}>{item.member_number}</Link></td>
+				<td><Link to={"/membership/membersx/" + item.id}>{item.member_number}</Link></td>
 				<td>{item.firstname}</td>
 				<td>{item.lastname}</td>
 				<td>{item.email}</td>

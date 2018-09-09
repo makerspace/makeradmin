@@ -9,7 +9,7 @@ class MemberAdd extends React.Component {
 
     constructor(props) {
         super(props);
-        this.model = new Member();
+        this.member = new Member();
     }
 
     render() {
@@ -17,12 +17,12 @@ class MemberAdd extends React.Component {
 			<div>
 				<h2>Skapa medlem</h2>
 				<MemberForm
-                    model={this.model}
+                    member={this.member}
                     onCancel={() => {
-                        this.model.reset();
+                        this.member.reset();
                         browserHistory.goBack();
                     }}
-                    onSave={() => this.model.save().then(() => browserHistory.replace('/membership/membersx/' + this.model.id))}
+                    onSave={() => this.member.save().then(() => browserHistory.replace('/membership/membersx/' + this.member.id))}
                 />
 			</div>
 		);
