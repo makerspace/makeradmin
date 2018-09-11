@@ -35,7 +35,7 @@ class MemberComponent extends React.Component {
 				<h2>Medlem #{member_number}: {firstname} {lastname}</h2>
 
 				<ul className="uk-tab">
-					<li><Link to={"/membership/membersx/" + member_id + "/info"}>Personuppgifter</Link></li>
+					<li className='uk-active'><Link to={"/membership/membersx/" + member_id + "/info"}>Personuppgifter</Link></li>
 					<li><Link to={"/membership/membersx/" + member_id + "/groups"}>Grupper</Link></li>
 					<li><Link to={"/membership/membersx/" + member_id + "/keys"}>Nycklar</Link></li>
 					<li><Link to={"/membership/membersx/" + member_id + "/permissions"}>Behörigheter</Link></li>
