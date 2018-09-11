@@ -70,7 +70,7 @@ class Group extends Entity
 		$this->_preprocessFilters($filters);
 
 		// Build base query
-		$query = $this->_buildLoadQuery($filters);
+		$query = $this->_buildLoadQuery();
 
 		// Go through filters
 		foreach($filters as $id => $filter)
