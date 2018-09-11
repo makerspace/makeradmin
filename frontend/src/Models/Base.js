@@ -52,10 +52,10 @@ export default class Base {
     }
     
     // Subscribe to changes, returns function for unsubscribing.
-    subscribe(cb) {
+    subscribe(callback) {
         const id = this.subscriberId++;
-        this.subscribers[id] = cb;
-        cb();
+        this.subscribers[id] = callback;
+        callback();
         return () => delete this.subscribers[id];
     }
     
@@ -66,11 +66,12 @@ export default class Base {
 
     // Reset data to saved state.
     reset() {
+        // TODO Chech why this does not work,
         this.unsaved = Object.assign({}, this.saved);
         this.notify();
     }
     
-    // Rmove this entity, returns promise.
+    // Remove this entity, returns promise.
     remove() {
         if (!this.id) {
             return Promise.resolve(null);
@@ -79,7 +80,7 @@ export default class Base {
         return del({url: this.constructor.model.root + '/' + this.id});
     }
 
-    // Refresh datra from server, requires id in data, returns promise.
+    // Refresh data from server, requires id in data, returns promise.
     refresh() {
         if (!this.id) {
             throw new Error("Refresh requires id.");

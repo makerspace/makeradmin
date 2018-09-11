@@ -32,22 +32,20 @@ class SearchBox extends React.Component {
 }
 
 
-class Row extends React.Component {
-    
-    render() {
-        const {item, removeItem} = this.props;
-        return (
-			<tr>
-				<td><Link to={"/membership/membersx/" + item.id}>{item.member_number}</Link></td>
-				<td>{item.firstname}</td>
-				<td>{item.lastname}</td>
-				<td>{item.email}</td>
-				<td><Date date={item.created_at}/></td>
-                <td><a onClick={() => removeItem(item)} className="removebutton"><i className="uk-icon-trash"/></a></td>
-			</tr>
-        );
-    }
-}
+const Row = props => {
+	const {item, removeItem} = props;
+	return (
+		<tr>
+			<td><Link to={"/membership/membersx/" + item.id}>{item.member_number}</Link></td>
+			<td>{item.firstname}</td>
+			<td>{item.lastname}</td>
+			<td>{item.email}</td>
+			<td><Date date={item.created_at}/></td>
+			<td><a onClick={() => removeItem(item)} className="removebutton"><i className="uk-icon-trash"/></a></td>
+		</tr>
+	);
+};
+// TODO Paginering vid sökning är skum.
 
 
 class MemberList extends React.Component {

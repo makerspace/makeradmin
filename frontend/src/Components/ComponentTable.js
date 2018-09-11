@@ -19,28 +19,28 @@ export default class CollectionTable extends React.Component {
         this.unsubscribe();
     }
     
-    renderHeading(c, i) {
+    renderHeading(column, i) {
         const sortState = this.state.sort;
         const {collection} = this.props;
         
-        if (c.title) {
+        if (column.title) {
             let title;
-            if (c.sort) {
+            if (column.sort) {
                 const sortIcon = <i className={"uk-icon-angle-" + sortState.order}/>;
                 const onClick = () => {
-                    const sort = {key: c.sort, order: sortState.key === c.sort && sortState.order === 'down' ? 'up' : 'down'};
+                    const sort = {key: column.sort, order: sortState.key === column.sort && sortState.order === 'down' ? 'up' : 'down'};
                     this.setState({sort, loading: true});
                     collection.updateSort(sort);
                 };
                 title = (
-                    <a data-sort={c.sort} onClick={onClick}>
-                        {c.title} {c.sort === sortState.key ? sortIcon : ''}
+                    <a data-sort={column.sort} onClick={onClick}>
+                        {column.title} {column.sort === sortState.key ? sortIcon : ''}
                     </a>);
             }
             else {
-                title = c.title;
+                title = column.title;
             }
-            return <th key={i} className={c.class}>{title}</th>;
+            return <th key={i} className={column.class}>{title}</th>;
         }
         return <th key={i}/>;
     }

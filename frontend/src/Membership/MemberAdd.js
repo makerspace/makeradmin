@@ -12,6 +12,8 @@ class MemberAdd extends React.Component {
         this.member = new Member();
     }
 
+    // TODO Remove avbryt use browser.
+    
     render() {
 		return (
 			<div>

@@ -23,10 +23,10 @@ export default class Collection {
     }
     
     // Subscribe to data from server {items, page}, returns function for unsubscribing.
-    subscribe(cb) {
+    subscribe(callback) {
         const id = this.subscriberId++;
-        this.subscribers[id] = cb;
-        cb({items: this.items, page: this.page});
+        this.subscribers[id] = callback;
+        callback({items: this.items, page: this.page});
         return () => delete this.subscribers[id];
     }
 
