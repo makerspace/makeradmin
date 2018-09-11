@@ -63,7 +63,10 @@ class MemberDummies:
                 response_member = dict(member)
                 del response_member["password"]
                 del response_member["unhashed_password"]
-                self.created_members.append(self.test.post("membership/member", member, 201, expected_result={"status": "created", "data": response_member})["data"])
+                created_member = self.test.post("membership/member", member, 201, expected_result={"status": "created", "data": response_member})["data"]
+                # Makes many units tests easier because they can avoid having to compare the deleted_at field
+                del created_member["deleted_at"]
+                self.created_members.append(created_member)
 
             return zip(self.created_members, [member["password"] for member in members])
 

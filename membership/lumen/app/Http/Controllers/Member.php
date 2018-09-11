@@ -192,6 +192,13 @@ class Member extends Controller
 			}
 		}
 
+		// Load the entity again before we return it.
+		// This is required to make sure things like created_at are set properly
+		// (as that field is set by the database, not in php)
+		$filters = (array)$request->query->all();
+		$filters['member_id'] = $member_id;
+		$entity = MemberModel::load($filters);
+
 		// Send response to client
 		return Response()->json([
 			"status" => "created",
