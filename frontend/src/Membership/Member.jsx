@@ -1,10 +1,10 @@
 import React from 'react';
 import {Link, withRouter} from 'react-router';
-import Member from "../Models/Member";
 import PropTypes from 'prop-types';
+import Member from "../Models/Member";
 
 
-class Show extends React.Component {
+class MemberComponent extends React.Component {
 	
 	constructor(props) {
 		super(props);
@@ -48,8 +48,8 @@ class Show extends React.Component {
     }
 }
 
-Show.childContextTypes = {
+MemberComponent.childContextTypes = {
     member: PropTypes.instanceOf(Member)
 };
 
-export default withRouter(Show);
+export default withRouter(MemberComponent);

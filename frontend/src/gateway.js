@@ -106,6 +106,7 @@ export function del({url}) {
     url = config.apiBasePath + url;
     
     return fetch(url, options)
+        .then(parseJson)
         .then(handleResponse)
         .then(data => {
             if ("deleted" === data.status) {

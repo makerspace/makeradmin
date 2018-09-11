@@ -4,6 +4,7 @@ import React from 'react';
 import classNames from 'classnames/bind';
 import CountryDropdown from '../../CountryDropdown';
 import DateTime from "../../Components/Form/DateTime";
+import {confirmModal} from "../../message";
 
 
 class Input extends React.Component {
@@ -77,13 +78,8 @@ export default class MemberForm extends React.Component {
         this.unsubscribe();
     }
 
-    remove() {
-        console.info("remove");
-        // TODO Implement remove.
-    }
-    
     render() {
-        const {member, onCancel, onSave} = this.props;
+        const {member, onCancel, onSave, onRemove} = this.props;
         const {saveDisabled} = this.state;
         
 		return (
@@ -143,7 +139,7 @@ export default class MemberForm extends React.Component {
 
 					<div className="uk-form-row">
                         <a className="uk-button uk-button-danger uk-float-left" onClick={onCancel}><i className="uk-icon-close"/> Avbryt</a>
-                        {member.id ? <a className="uk-button uk-button-danger uk-float-left" onClick={null}><i className="uk-icon-trash"/> Ta bort medlem</a> : ""}
+                        {member.id ? <a className="uk-button uk-button-danger uk-float-left" onClick={onRemove}><i className="uk-icon-trash"/> Ta bort medlem</a> : ""}
                         <button type="button" className="uk-button uk-button-success uk-float-right" disabled={saveDisabled} onClick={onSave}><i className="uk-icon-save"/> {member.id ? 'Spara' : 'Skapa'}</button>
 					</div>
 				</form>
