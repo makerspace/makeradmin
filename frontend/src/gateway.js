@@ -3,12 +3,10 @@ import * as auth from "./auth";
 import * as _ from "underscore";
 
 
-// TODO Handle error better, use json response.
-
-
-const handleResponse = response => {
+const handleResponse = ({response, data}) => {
+    
     if (response.ok) {
-        return response.json();
+        return data;
     }
     
     if (response.status === 401) {
@@ -16,18 +14,21 @@ const handleResponse = response => {
         return null;
     }
     
-    throw new Error(response.status + " " + response.statusText);
+    throw new Error(response.status + " " + response.statusText + "\n" + JSON.stringify(data, null, 2));
 };
+
+
+const parseJson = response => response.json().then(data => ({response, data}));
 
 
 const handleError = message => error => {
     showError(
         "<h2>Error</h2>"+
-        message + "<br><br>" +
-        "<pre>" + error + "</pre>"
+        message + "<br>" +
+        "<pre>" + error.message + "</pre>"
     );
+    return Promise.reject(null);
 };
-
 
 
 export function get({url, params = {}}) {
@@ -41,6 +42,7 @@ export function get({url, params = {}}) {
     url = config.apiBasePath + url + '?' + _.map(params, (v, k) => encodeURIComponent(k) + '=' + encodeURIComponent(v)).join('&');
     
     return fetch(url, options)
+        .then(parseJson)
         .then(handleResponse)
         .catch(handleError('Error when getting data from server:'));
 }
@@ -58,6 +60,7 @@ export function post({url, data}) {
     url = config.apiBasePath + url;
 
     return fetch(url, options)
+        .then(parseJson)
         .then(handleResponse)
         .then(data => {
             if ("created" === data.status) {
@@ -81,6 +84,7 @@ export function put({url, data}) {
     url = config.apiBasePath + url;
 
     return fetch(url, options)
+        .then(parseJson)
         .then(handleResponse)
         .then(data => {
             if ("updated" === data.status) {

@@ -109,6 +109,7 @@ export default class Base {
             this.unsaved = {};
             this.notify();
         });
+        
     }
     
     // Returns true if unsaved.
