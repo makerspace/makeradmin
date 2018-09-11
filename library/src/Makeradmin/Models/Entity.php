@@ -26,6 +26,7 @@ class Entity
 	protected $sort = ["created_at", "desc"]; // An array with sorting options eg. ["entity_id", "desc"] or [["date_updated", "asc"],["date_created","desc"]]
 	protected $validation = [];               // Validation rules
 	protected $deletable = true;
+	protected $show_deleted = false;       // Specify if deleted items should be displayed/accessible.
 
 	/**
 	 * Constructor
@@ -79,6 +80,13 @@ class Entity
 					$this->sort = $filter;
 					unset($filters[$id]);
 				}
+				else if("show_deleted" == $id)
+				{
+					if ($filter === 'true') {
+						$this->show_deleted = true;
+					}
+					unset($filters[$id]);
+				}
 			}
 		}
 	}
@@ -86,7 +94,7 @@ class Entity
 	/**
 	 * Build the base query with selecting entity types, tables, columns, join, sort and filtering removed items.
 	 */
-	protected function _buildLoadQuery($show_deleted = false)
+	protected function _buildLoadQuery()
 	{
 		// Get all entities
 		$query = DB::table($this->table);
@@ -96,6 +104,21 @@ class Entity
 		{
 			die("join");
 //			$query = $query->join($this->join, "{$this->join}.entity_id", "=", "entity.entity_id");
+		}
+
+		if($this->deletable)
+		{
+			// Show deleted entities or not?
+			if($this->show_deleted === true)
+			{
+				// Include the deleted_at column in output only when we show deleted content
+				$this->include_deleted_at();
+			}
+			else
+			{
+				// The deleted_at should be null, which means it is not yet deleted
+				$query = $query->whereNull("{$this->table}.deleted_at");
+			}
 		}
 
 		// Get columns
@@ -146,24 +169,6 @@ class Entity
 						$query = $query->selectRaw("{$select} AS `{$name}`");
 					}
 				}
-			}
-		}
-
-		if($this->deletable)
-		{
-			// Show deleted entities or not?
-			if($show_deleted === true)
-			{
-				// Include the deleted_at column in output only when we show deleted content
-				$this->columns["deleted_at"] = [
-					"column" => "{$this->table}.deleted_at",
-					"select" => "{$this->table}.deleted_at",
-				];
-			}
-			else
-			{
-				// The deleted_at should be null, which means it is not yet deleted
-				$query = $query->whereNull("{$this->table}.deleted_at");
 			}
 		}
 
@@ -330,7 +335,7 @@ class Entity
 		$this->_preprocessFilters($filters);
 
 		// Build base query
-		$query = $this->_buildLoadQuery($filters);
+		$query = $this->_buildLoadQuery();
 
 		// Apply standard filters like entity_id, relations, etc
 		$query = $this->_applyFilter($query, $filters);
@@ -382,7 +387,8 @@ class Entity
 		$this->_preprocessFilters($filters);
 
 		// Build base query
-		$query = $this->_buildLoadQuery($show_deleted);
+		$this->show_deleted = $show_deleted;
+		$query = $this->_buildLoadQuery();
 
 		// Apply standard filters like entity_id, relations, etc
 		$query = $this->_applyFilter($query, $filters);
@@ -607,6 +613,17 @@ class Entity
 		}
 
 		return true;
+	}
+
+	/**
+	 * Include deleted_at column (and show deleted)
+	 */
+	public function include_deleted_at()
+	{
+		$this->columns["deleted_at"] = [
+			"column" => "{$this->table}.deleted_at",
+			"select" => "{$this->table}.deleted_at",
+		];
 	}
 
 	/**

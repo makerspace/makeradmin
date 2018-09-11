@@ -63,7 +63,10 @@ class MemberDummies:
                 response_member = dict(member)
                 del response_member["password"]
                 del response_member["unhashed_password"]
-                self.created_members.append(self.test.post("membership/member", member, 201, expected_result={"status": "created", "data": response_member})["data"])
+                created_member = self.test.post("membership/member", member, 201, expected_result={"status": "created", "data": response_member})["data"]
+                # Makes many units tests easier because they can avoid having to compare the deleted_at field
+                del created_member["deleted_at"]
+                self.created_members.append(created_member)
 
             return zip(self.created_members, [member["password"] for member in members])
 
@@ -225,7 +228,7 @@ class MakerAdminTest(unittest.TestCase):
         for m in [new_member, new_member2]:
             self.delete(f"membership/member/{m['member_id']}", 200, expected_result={"status": "deleted"})
             # Note that deleted members still show up when explicitly accessed, but they should not show up in lists (this is checked for below)
-            self.get(f"membership/member/{m['member_id']}", 200, expected_result={"data": m})
+            self.get(f"membership/member/{m['member_id']}", 200, expected_result={"data": {k: m[k] for k in m if k not in {"deleted_at"}}})
 
         self.get(f"membership/member", 200, expected_result={"data": previous_members})
 
@@ -401,6 +404,8 @@ class MakerAdminTest(unittest.TestCase):
     def test_purchase(self):
         if not stripe.api_key:
             self.skipTest("No Stripe API key set in the .env file")
+
+        stripe_start_timestamp = self.put(f"/webshop/process_stripe_events", {}, 200)['data']['start']
 
         def prepare_purchase(source, productsAndCounts):
             global duplicatePurchaseRand
@@ -627,4 +632,8 @@ class MakerAdminTest(unittest.TestCase):
                     },
                 })["data"]["member_id"]
 
-                self.get(f"/membership/member/{registered_member_id}", 200, expected_result={"data": register["member"]})
+                before_activation = self.get(f"/membership/member/{registered_member_id}", 200, expected_result={"data": register["member"]})["data"]
+                self.assertIsNotNone(before_activation['deleted_at'])
+                self.put(f"/webshop/process_stripe_events", {'start': stripe_start_timestamp}, 200)
+                after_activation = self.get(f"/membership/member/{registered_member_id}", 200, expected_result={"data": register["member"]})["data"]
+                self.assertIsNone(after_activation['deleted_at'])

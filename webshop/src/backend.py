@@ -14,6 +14,7 @@ from datetime import datetime
 from dateutil import parser
 import errors
 from filters import product_filters
+from werkzeug.exceptions import HTTPException
 
 # Errors
 
@@ -268,6 +269,8 @@ def register() -> Dict[str, int]:
     item = purchase["cart"][0]
     if item["count"] != 1:
         raise errors.CartMustContainNItems(1)
+    if "id" not in item:
+        abort(400, "Missing parameter 'id' on item in cart")
     if item["id"] not in (p["id"] for p in products):
         raise errors.NotAllowedToPurchase(item['id'])
 
@@ -421,6 +424,36 @@ def stripe_callback() -> None:
         stripe_handle_source_callback(event_subtype, event)
     elif event_type == 'charge':
         stripe_handle_charge_callback(event_subtype, event)
+
+def _reprocess_stripe_event(event):
+    try:
+        eprint(f"Processing stripe event of type {event.type}")
+        (event_type, event_subtype) = tuple(event.type.split('.', 1))
+        if event_type == 'source':
+            stripe_handle_source_callback(event_subtype, event)
+        elif event_type == 'charge':
+            stripe_handle_charge_callback(event_subtype, event)
+    except HTTPException as e:
+        # Catch and ignore all event processing errors
+        pass
+
+@instance.route("process_stripe_events", methods=["PUT"])
+@route_helper
+def process_stripe_events():
+    payload = request.get_json()
+    last_start = None
+
+    if 'start' not in payload or payload['start'] is None:
+        # If no start timestamp is given only process latest event
+        event = stripe.Event.list(limit=1).data[0]
+        _reprocess_stripe_event(event)
+        last_start = event.created
+    else:
+        events = stripe.Event.list(limit=1, created={'gt': payload['start']})
+        last_start = events.data[0].created
+        for event in events.auto_paging_iter():
+            _reprocess_stripe_event(event)
+    return {'start': last_start}
 
 
 def process_cart(member_id: int, cart: List[Dict[str,Any]]) -> Tuple[Decimal, List[CartItem]]:
@@ -675,7 +708,7 @@ def handle_three_d_secure_source(transaction_id: int, card_source_id: str, total
             fail_transaction(transaction_id, 500, f"Invalid value for source.redirect.url, '{source.redirect.url}'")
         # Redirect the user to do the 3D secure confirmation step
         if source.redirect.status == 'pending':
-            return {"redirect": source.redirect.url}
+            return {"transaction_id": transaction_id, "redirect": source.redirect.url}
     elif status == "failed":
         fail_transaction(transaction_id, 400, "Payment failed")
     else:
