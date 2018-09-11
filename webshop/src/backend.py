@@ -269,6 +269,8 @@ def register() -> Dict[str, int]:
     item = purchase["cart"][0]
     if item["count"] != 1:
         raise errors.CartMustContainNItems(1)
+    if "id" not in item:
+        abort(400, "Missing parameter 'id' on item in cart")
     if item["id"] not in (p["id"] for p in products):
         raise errors.NotAllowedToPurchase(item['id'])
 
