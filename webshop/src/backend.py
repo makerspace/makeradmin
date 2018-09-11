@@ -276,11 +276,12 @@ def register() -> Dict[str, int]:
     # Otherwise an attacker could inject evil inputs like for example the 'groups' field which is a list of groups the member should be added to.
     # It would be quite a security risk if the member could add itself to the admins group when registering.
     valid_member_fields = [
-        "member_number", "email", "password", "firstname", "lastname", "civicregno", "company",
+        "email", "firstname", "lastname", "civicregno", "company",
         "orgno", "address_street", "address_extra", "address_zipcode", "address_city", "address_country", "phone"
     ]
-    member = copy_dict(data["member"], valid_member_fields)
+    member = copy_dict(assert_get(data, "member"), valid_member_fields)
     member["validate_only"] = True
+    member["create_deleted"] = True
     r = instance.gateway.post("membership/member", member)
     if not r.ok:
         # Ideally should just return r.text, but the helper code for routes screws that up a bit right now.
@@ -289,11 +290,6 @@ def register() -> Dict[str, int]:
 
     member = r.json()["data"]
     member_id = member["member_id"]
-
-    # Delete the member immediately, this is because the member is not yet activated because
-    # the payment has not yet been done. The member will be un-deleted when the payment goes through.
-    r = instance.gateway.delete(f"membership/member/{member_id}")
-    assert(r.ok)
 
     # Construct the purchase object again, using user data is always risky
     purchase = {
@@ -305,12 +301,102 @@ def register() -> Dict[str, int]:
         ],
         "expectedSum": purchase["expectedSum"],
         "stripeSource": purchase["stripeSource"],
+        "stripeThreeDSecure": purchase["stripeThreeDSecure"],
         "duplicatePurchaseRand": purchase["duplicatePurchaseRand"],
     }
 
     eprint("====== Trying to pay")
     # Note this will throw if the payment fails
     return pay(member_id=member_id, data=purchase, activates_member=True)
+
+
+def complete_transaction(transaction_id: int):
+    tr = transaction_entity.get(transaction_id)
+    if tr['status'] == 'pending':
+        tr["status"] = "completed"
+        transaction_entity.put(tr, transaction_id)
+    elif tr['status'] not in {'completed'}:
+        eprint(f"Unable to set transaction {transaction_id} to completed!")
+
+
+def _fail_transaction(transaction_id: int):
+    with db.cursor() as cur:
+        affected_rows = cur.execute("UPDATE webshop_transactions AS tt SET tt.status = 'failed' WHERE tt.status = 'pending' AND tt.id = %s", (transaction_id,))
+        if affected_rows != 1:
+            eprint(f"Unable to set transaction {transaction_id} to failed!")
+
+
+def fail_transaction(transaction_id: int, error_code: int, reason: str):
+    _fail_transaction(transaction_id)
+    abort(error_code, reason)
+
+
+def _fail_stripe_source(source_id: str):
+    with db.cursor() as cur:
+        affected_rows = cur.execute("UPDATE webshop_transactions AS tt INNER JOIN webshop_stripe_pending AS sp ON tt.id = sp.transaction_id SET tt.status = 'failed' WHERE sp.stripe_token = %s and tt.status = 'pending'", (source_id,))
+        if affected_rows != 1:
+            eprint(f"Unable to set status to 'failed' for transaction corresponding to source {source_id}")
+
+
+def fail_stripe_source(source_id: str, error_code: int, reason: str):
+    _fail_stripe_source(source_id)
+    abort(error_code, reason)
+
+
+def source_to_transaction_id(source_id: str):
+    with db.cursor() as cur:
+        cur.execute("SELECT transaction_id FROM webshop_transactions INNER JOIN webshop_stripe_pending ON webshop_transactions.id=webshop_stripe_pending.transaction_id WHERE webshop_stripe_pending.stripe_token=%s", (source_id,))
+        return cur.fetchone()
+
+
+def stripe_handle_source_callback(subtype: str, event) -> None:
+    if subtype in ["chargeable", "failed", "canceled"]:
+        source = event.data.object
+        transaction_id = source_to_transaction_id(source.id)
+        if transaction_id is None:
+            eprint(f"Got callback, but no transaction exists for that token ({source.id}). Ignoring this event (this is usually fine)")
+            return None
+
+        if subtype == "chargeable":
+            # Asynchronous charge should only be initiated from a 3D Secure source
+            if source.type == 'three_d_secure':
+                # Payment should happen now
+                try:
+                    create_stripe_payment(transaction_id, source.id)
+                except Exception as e:
+                    eprint(f"Error in create_stripe_payment: {str(e)}. Source '{source.id}' for transaction {transaction_id}")
+            elif source.type == 'card':
+                # All 'card' type sources that should be charged are handled synchonously, not here.
+                return None
+            else:
+                # Unknown source type, log and do nothing
+                eprint(f'Unexpected source type {source.type} in stripe webhook')
+                eprint(source)
+                return None
+        else:
+            # Payment failed
+            eprint("Mark transaction as failed")
+            _fail_transaction(transaction_id)
+
+
+def stripe_handle_charge_callback(subtype: str, event) -> None:
+    charge = event.data.object
+    if subtype == 'succeeded':
+        transaction_id = source_to_transaction_id(charge.source.id)
+        if transaction_id is None:
+            abort(400, f"Unknown charge '{charge.id}' succeeded, no transaction found for charge source '{charge.source.id}'!")
+        else:
+            handle_payment_success(transaction_id)
+    elif subtype == 'failed':
+        _fail_stripe_source(charge.source.id)
+        eprint(f"Charge '{charge.id}' failed with message '{charge.failure_message}'")
+    elif subtype.startswith('dispute'):
+        # TODO: log disputes for display in admin frontend.
+        pass
+    elif subtype.startswith('refund'):
+        # TODO: log refund for display in admin frontend.
+        # TODO: option in frontend to roll back actions.
+        pass
 
 
 @instance.route("stripe_callback", methods=["POST"], permission=None)
@@ -330,24 +416,11 @@ def stripe_callback() -> None:
         abort(400)
 
     eprint(f"Received stripe callback of type {event.type}")
-    if event.type in ["source.chargeable", "source.failed", "source.canceled"]:
-        source = event.data.object
-        with db.cursor() as cur:
-            cur.execute("SELECT transaction_id FROM webshop_transactions INNER JOIN webshop_stripe_pending ON webshop_transactions.id=webshop_stripe_pending.transaction_id WHERE webshop_stripe_pending.stripe_token=%s", (source.id,))
-            transaction_id = cur.fetchone()
-            if transaction_id is None:
-                eprint("Got callback, but no transaction exists for that token ({source.id}). Ignoring this event (this is usually fine)")
-                return None
-
-        if event.type == "source.chargeable":
-            # Payment should happen now
-            stripe_payment(transaction_id, source)
-        else:
-            # Payment failed
-            tr = transaction_entity.get(transaction_id)
-            tr["status"] = "failed"
-            transaction_entity.put(tr, transaction_id)
-            eprint("Marked transaction as failed")
+    (event_type, event_subtype) = tuple(event.type.split('.', 1))
+    if event_type == 'source':
+        stripe_handle_source_callback(event_subtype, event)
+    elif event_type == 'charge':
+        stripe_handle_charge_callback(event_subtype, event)
 
 
 def process_cart(member_id: int, cart: List[Dict[str,Any]]) -> Tuple[Decimal, List[CartItem]]:
@@ -418,7 +491,7 @@ def convert_to_stripe_amount(amount: Decimal) -> int:
     return int(stripe_amount)
 
 
-def stripe_payment(transaction_id: int, token: str) -> None:
+def create_stripe_payment(transaction_id: int, token: str) -> stripe.Charge:
     transaction = transaction_entity.get(transaction_id)
 
     if transaction["status"] != "pending":
@@ -426,29 +499,20 @@ def stripe_payment(transaction_id: int, token: str) -> None:
 
     stripe_amount = convert_to_stripe_amount(Decimal(transaction["amount"]))
 
-    try:
-        charge = stripe.Charge.create(
-            amount=stripe_amount,
-            currency=currency,
-            description='Example charge',
-            source=token,
-        )
-        eprint(charge)
-    except stripe.error.CardError as e:
-        body = e.json_body
-        err = body.get('error', {})
-        eprint("Stripe Charge Failed\n" + str(err))
-        raise errors.PaymentFailed(err.get("message"))
-    except stripe.error.StripeError as e:
-        eprint("Stripe Charge Failed\n" + str(e))
-        raise errors.PaymentFailed()
-    except Exception as e:
-        eprint("Stripe Charge Failed")
-        eprint(e)
-        raise errors.PaymentFailed()
+    return stripe.Charge.create(
+        amount=stripe_amount,
+        currency=currency,
+        description=f'Charge for transaction id {transaction_id}',
+        source=token,
+    )
 
-    transaction["status"] = "completed"
-    transaction_entity.put(transaction, transaction_id)
+
+def handle_payment_success(transaction_id: int):
+    complete_transaction(transaction_id)
+    transaction = transaction_entity.get(transaction_id)
+    if transaction['status'] != 'completed':
+        eprint(f"handle_payment_success called but transaction marked as '{transaction['status']}', aborting!")
+        return
 
     # Check if this transaction is a new member registration
     if webshop_pending_registrations.list("transaction_id=%s", [transaction_id]):
@@ -457,6 +521,29 @@ def stripe_payment(transaction_id: int, token: str) -> None:
     eprint("====== Sending receipt email")
     send_receipt_email(transaction["member_id"], transaction_id)
     eprint("Payment complete. id: " + str(transaction_id))
+
+
+def card_stripe_payment(transaction_id: int, token: str) -> None:
+    try:
+        charge = create_stripe_payment(transaction_id, token)
+        if charge.status == 'succeeded':
+            # Avoid delay of feedback to customer, could be skipped and handled when webhook is called.
+            complete_transaction(transaction_id)
+    except stripe.error.CardError as e:
+        body = e.json_body
+        err = body.get('error', {})
+        eprint("Stripe Charge Failed\n" + str(err))
+        _fail_transaction(transaction_id)
+        raise errors.PaymentFailed(err.get("message"))
+    except stripe.error.StripeError as e:
+        eprint("Stripe Charge Failed\n" + str(e))
+        _fail_transaction(transaction_id)
+        raise errors.PaymentFailed()
+    except Exception as e:
+        eprint("Stripe Charge Failed")
+        eprint(e)
+        _fail_transaction(transaction_id)
+        raise errors.PaymentFailed()
 
 
 def activate_member(member_id: int) -> None:
@@ -518,8 +605,8 @@ def add_transaction_to_db(member_id: int, total_amount: Decimal, items: List[Car
         with db.cursor() as cur:
             cur.execute("""
                 INSERT INTO webshop_transaction_actions (content_id, action_id, value, status)
-                SELECT %s AS content_id, action_id, SUM(%s * value) AS value, 'pending' AS status 
-                FROM webshop_product_actions 
+                SELECT %s AS content_id, action_id, SUM(%s * value) AS value, 'pending' AS status
+                FROM webshop_product_actions
                 WHERE product_id=%s AND deleted_at IS NULL
                 GROUP BY action_id
                 """, (item_content["id"], item.count, item.id))
@@ -527,15 +614,15 @@ def add_transaction_to_db(member_id: int, total_amount: Decimal, items: List[Car
     return transaction_id
 
 
-def create_stripe_source(transaction_id: int, card_source: str, total_amount: Decimal) -> stripe.Source:
+def create_three_d_secure_source(transaction_id: int, card_source_id: str, total_amount: Decimal) -> stripe.Source:
     stripe_amount = convert_to_stripe_amount(total_amount)
-    eprint("Token: " + str(card_source))
+    eprint("Token: " + str(card_source_id))
     return stripe.Source.create(
         amount=stripe_amount,
         currency=currency,
         type='three_d_secure',
         three_d_secure={
-            'card': card_source,
+            'card': card_source_id,
         },
         redirect={
             'return_url': instance.gateway.get_frontend_url(f"shop/receipt/{transaction_id}")
@@ -543,7 +630,62 @@ def create_stripe_source(transaction_id: int, card_source: str, total_amount: De
     )
 
 
-def pay(member_id: int, data: Dict[str, Any], activates_member: bool = False) -> Dict[str, int]:
+def handle_card_source(transaction_id: int, card_source_id: str, total_amount: Decimal) -> Dict[str,int]:
+    card_source = stripe.Source.retrieve(card_source_id)
+    if card_source.type != 'card' or card_source.card.three_d_secure != 'not_supported':
+        abort(500, f'Synchronous charges should only be made for cards not supporting 3D Secure')
+
+    status = card_source.status
+    if status == "chargeable":
+        card_stripe_payment(transaction_id, card_source_id)
+    elif status == "failed":
+        fail_transaction(transaction_id, 400, "Payment failed")
+    elif status == "consumed":
+        # Not necessarily an error but shouldn't happen.
+        abort(500, f"Stripe source already marked as 'consumed'")
+    else:
+        eprint(f"Unknown stripe source status '{status}'")
+        fail_transaction(transaction_id, 500, f"Unknown stripe source status '{status}'")
+
+    return {"transaction_id": transaction_id}
+
+
+def handle_three_d_secure_source(transaction_id: int, card_source_id: str, total_amount: Decimal) -> Dict[str,Any]:
+    try:
+        source = create_three_d_secure_source(transaction_id, card_source_id, total_amount)
+    except stripe.error.InvalidRequestError as e:
+        if "Amount must convert to at least" in str(e):
+            _fail_transaction(transaction_id)
+            raise errors.TooSmallAmount()
+        else:
+            eprint("Stripe Charge Failed")
+            eprint(e)
+            fail_transaction(transaction_id, 400, "payment failed")
+
+    webshop_stripe_pending.post({"transaction_id": transaction_id, "stripe_token": source.id})
+    eprint(source)
+
+    status = source.status
+    if status in {"pending", "chargeable"}:
+        # Assert 3d secure is pending redirect
+        if source.redirect.status not in {'pending', 'not_required'}:
+            fail_transaction(transaction_id, 500, f"Unexpected value for source.redirect.status, '{source.redirect.status}'")
+        # Assert 3d secure is pending redirect
+        if not source.redirect.url:
+            fail_transaction(transaction_id, 500, f"Invalid value for source.redirect.url, '{source.redirect.url}'")
+        # Redirect the user to do the 3D secure confirmation step
+        if source.redirect.status == 'pending':
+            return {"redirect": source.redirect.url}
+    elif status == "failed":
+        fail_transaction(transaction_id, 400, "Payment failed")
+    else:
+        eprint(f"Unknown stripe source status '{status}'")
+        fail_transaction(transaction_id, 500, f"Unknown stripe source status '{status}'")
+
+    return {"transaction_id": transaction_id}
+
+
+def pay(member_id: int, data: Dict[str, Any], activates_member: bool = False) -> Dict[str, Any]:
     # The frontend will add a per-page random value to the request.
     # This will try to prevent duplicate payments due to sending the payment request twice
     duplicatePurchaseRand = assert_get(data, "duplicatePurchaseRand")
@@ -553,6 +695,9 @@ def pay(member_id: int, data: Dict[str, Any], activates_member: bool = False) ->
     if member_id <= 0:
         raise errors.NotMember()
 
+    card_source_id = assert_get(data, "stripeSource")
+    card_three_d_secure = assert_get(data, "stripeThreeDSecure")
+
     total_amount, items = validate_payment(member_id, data["cart"], data["expectedSum"])
 
     transaction_id = add_transaction_to_db(member_id, total_amount, items)
@@ -561,44 +706,16 @@ def pay(member_id: int, data: Dict[str, Any], activates_member: bool = False) ->
         # Mark this transaction as one that is for registering a member
         webshop_pending_registrations.post({"transaction_id": transaction_id})
 
-    card_source = assert_get(data, "stripeSource")
+    webshop_stripe_pending.post({"transaction_id": transaction_id, "stripe_token": card_source_id})
 
-    try:
-        source = create_stripe_source(transaction_id, card_source, total_amount)
-    except stripe.error.InvalidRequestError as e:
-        if "Amount must convert to at least" in str(e):
-            raise errors.TooSmallAmount()
-        else:
-            eprint("Stripe Charge Failed")
-            eprint(e)
-            abort(400, "payment failed")
-
-    eprint(source)
-
-    status = source.status
-    if status == "pending":
-        # Redirect the user to do the 3D secure confirmation step
-        webshop_stripe_pending.post({ "transaction_id": transaction_id, "stripe_token": source.id })
-        return { "redirect": source.redirect.url }
-    elif status == "failed":
-        # The card does not support 3D secure
-        # Try a normal payment
-        token = card_source
-    elif status == "chargeable":
-        # This can happen in some cases when 3D secure is sort of supported
-        # but the user does not need to perform any steps for it.
-        token = source
-    elif status == "canceled" or status == "consumed":
-        abort(500, f"Found unexpected stripe source status '{status}'")
+    result = {}
+    if card_three_d_secure == 'not_supported':
+        result = handle_card_source(transaction_id, card_source_id, total_amount)
     else:
-        eprint(f"Unknown stripe source status '{status}'")
-        abort(500, f"Unknown stripe source status '{status}'")
-
-    stripe_payment(transaction_id, token)
+        result = handle_three_d_secure_source(transaction_id, card_source_id, total_amount)
 
     duplicatePurchaseRands.add(duplicatePurchaseRand)
-
-    return {"transaction_id": transaction_id}
+    return result
 
 
 def send_key_updated_email(member_id: int, extended_days: int, end_date: datetime) -> None:
@@ -662,7 +779,7 @@ def ship_orders() -> None:
             assert r.ok, r.text
             new_end_date = parser.parse(r.json()["data"]["labaccess_end"])
 
-            webshop_transaction_actions.put({ "status": "completed", "completed_at": str(now) }, pending['pending_action']['id'])
+            webshop_transaction_actions.put({"status": "completed", "completed_at": str(now) }, pending['pending_action']['id'])
             send_key_updated_email(member_id, days_to_add, new_end_date)
 
 
