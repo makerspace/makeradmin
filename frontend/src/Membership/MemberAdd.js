@@ -12,18 +12,12 @@ class MemberAdd extends React.Component {
         this.member = new Member();
     }
 
-    // TODO Remove avbryt use browser.
-    
     render() {
 		return (
 			<div>
 				<h2>Skapa medlem</h2>
 				<MemberForm
                     member={this.member}
-                    onCancel={() => {
-                        this.member.reset();
-                        browserHistory.goBack();
-                    }}
                     onSave={() => this.member.save().then(() => browserHistory.replace('/membership/membersx/' + this.member.id))}
                 />
 			</div>

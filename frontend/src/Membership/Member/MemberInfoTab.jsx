@@ -13,7 +13,6 @@ class MemberInfoTab extends React.Component {
             <div>
                 <MemberForm
                     member={this.context.member}
-                    onCancel={() => this.context.member.reset()}
                     onSave={() => this.context.member.save()}
                     onRemove={() => {
                         const {member} = this.context;
