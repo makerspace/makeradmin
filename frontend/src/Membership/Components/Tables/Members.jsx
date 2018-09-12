@@ -16,23 +16,6 @@ module.exports = React.createClass({
 		};
 	},
 
-/*
-	// TODO: Få igång denna igen
-	fetch: function(search)
-	{
-		if(search !== undefined && search.length > 0)
-		{
-			// Update the paginator so that is tells us we're on page 1
-			this.pagination[1].currentPage = 0;
-			this.pagination[2].currentPage = 0;
-			this.pagination[1].render();
-			this.pagination[2].render();
-
-			// Make sure the Backbone collection will receive page 1
-			this.getCollection().state.currentPage = 1;
-		}
-	},
-*/
 	componentWillMount: function()
 	{
 		this.fetch();

@@ -73,7 +73,7 @@ export default class Collection {
         return get({url: this.type.model.root, params}).then(data => {
             if (!data) return;
             this.page.count = data.last_page;
-            this.page.index = Math.min(this.page.count, this.page.index);
+            this.page.index = Math.min(this.page.count, this.page.index || 1);
             this.items = data.data.map(m => new this.type(m));
             _.values(this.subscribers).forEach(s => s({items: this.items, page: this.page}));
         });
