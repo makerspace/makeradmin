@@ -12,7 +12,7 @@ module.exports = class FormInput extends React.Component
 			isDirty: false,
 			value: this.dateToStr(this.props.model.get(this.props.name)),
 			model: this.props.model,
-			error_column: "", // TODO
+			error_column: "",
 			error_message: "",
 		};
 	}
@@ -35,7 +35,6 @@ module.exports = class FormInput extends React.Component
 		{
 			if(_this.state.model.changed[_this.props.name] !== undefined)
 			{
-				// TODO: The date is not updated if the model is changed
 				var str = _this.dateToStr(_this.state.model.changed[_this.props.name]);
 				// Save the data
 				_this.setState({

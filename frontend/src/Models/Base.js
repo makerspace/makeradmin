@@ -66,8 +66,7 @@ export default class Base {
 
     // Reset data to saved state.
     reset() {
-        // TODO Chech why this does not work,
-        this.unsaved = Object.assign({}, this.saved);
+        this.unsaved = {};
         this.notify();
     }
     

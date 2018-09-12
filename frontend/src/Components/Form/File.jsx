@@ -12,14 +12,6 @@ module.exports = class FormInput extends React.Component
 			progressbarWidth: 0,
 			filename: "",
 		};
-/*
-			selected: false,
-			isDirty: false,
-			value: this.props.model.get(this.props.name),
-			model: this.props.model,
-			error_column: "name", // TODO
-			error_message: "Du måste ange ett unikt namn",
-*/
 	}
 
 	componentDidMount()

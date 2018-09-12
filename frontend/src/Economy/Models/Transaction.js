@@ -2,7 +2,7 @@ import Backbone from 'backbone'
 
 module.exports = Backbone.Model.fullExtend(
 {
-	idAttribute: "entity_id",//TODO
+	idAttribute: "entity_id",
 	urlRoot: function()
 	{
 		return "/economy/" + this.get("period") + "/transaction";

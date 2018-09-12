@@ -45,7 +45,6 @@ const Row = props => {
 		</tr>
 	);
 };
-// TODO Paginering vid sökning är skum.
 
 
 class MemberList extends React.Component {

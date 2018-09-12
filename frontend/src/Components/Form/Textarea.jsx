@@ -12,7 +12,7 @@ module.exports = class FormInput extends React.Component
 			isDirty: false,
 			value: this.props.model.get(this.props.name),
 			model: this.props.model,
-			error_column: "", // TODO
+			error_column: "",
 			error_message: "",
 		};
 	}

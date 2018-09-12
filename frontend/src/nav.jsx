@@ -140,7 +140,6 @@ var SideNav2 = withRouter(React.createClass({
 var Breadcrumb = React.createClass({
 	render: function ()
 	{
-// TODO
 //		const depth = this.props.routes.length;
 return (<span></span>);
 		return (
