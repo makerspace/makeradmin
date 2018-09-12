@@ -20,12 +20,24 @@ module.exports = {
                             path: ":member_id",
                             component:  require("./MemberBox").default,
                             indexRoute: {
-                                component: require("./Member/MemberInfoTab").default,
+                                component: require("./MemberBoxInfo").default,
 							},
 							childRoutes: [
 								{
 									path: "info",
-									component: require("./Member/MemberInfoTab").default,
+									component: require("./MemberBoxInfo").default,
+								},
+								{
+									path: "groups",
+									indexRoute: {
+										component: require("./MemberBoxGroupList").default,
+									},
+									childRoutes: [
+										{
+											path: "add",
+											component: require("./MemberBoxGroupAdd").default,
+										},
+									],
 								},
 							]
                         },

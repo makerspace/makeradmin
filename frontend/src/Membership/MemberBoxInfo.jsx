@@ -1,11 +1,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import Member from "../../Models/Member";
-import MemberForm from "../Components/MemberForm";
-import {confirmModal} from "../../message";
+import Member from "../Models/Member";
+import MemberForm from "./Components/MemberForm";
+import {confirmModal} from "../message";
 import {withRouter} from "react-router";
 
-class MemberInfoTab extends React.Component {
+class MemberBoxInfo extends React.Component {
 	render() {
         const {router} = this.props;
         
@@ -28,9 +28,9 @@ class MemberInfoTab extends React.Component {
     }
 }
 
-MemberInfoTab.contextTypes = {
+MemberBoxInfo.contextTypes = {
     member: PropTypes.instanceOf(Member)
 };
 
 
-export default withRouter(MemberInfoTab);
+export default withRouter(MemberBoxInfo);
