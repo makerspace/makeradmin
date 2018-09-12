@@ -53,8 +53,6 @@ export default class CollectionTable extends React.Component {
             return "";
         }
         
-        console.info(page);
-        
         return (
             <ul className="uk-pagination">
                 {_.range(1, page.count + 1).map(i => {

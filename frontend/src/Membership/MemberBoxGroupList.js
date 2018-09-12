@@ -2,13 +2,19 @@ import React from 'react';
 import Collection from "../Models/Collection";
 import {Link} from "react-router";
 import Group from "../Models/Group";
-import CollectionTable from "../Components/ComponentTable";
+import CollectionTable from "../Components/CollectionTable";
+import {post} from "../gateway";
 
 
-const Row = props => {
-	const {item, removeItem} = props;
+const Row = member_id => props => {
+	const {item} = props;
 	
-	// TODO Remove button should remove buttom from member.
+	// TODO Delete done by post, but post expects create response.
+	const removeItem = i => {
+        post({url: "/membership/member/" + member_id + "/groups/remove", data: {groups: [i.id]}})
+            .then(() => {this.collection.fetch();}, () => null);
+    };
+	
 	return (
 		<tr>
 			<td><Link to={"/membership/membersx/" + item.id}>{item.title}</Link></td>
@@ -23,7 +29,7 @@ class MemberBoxGroupList extends React.Component {
 
     constructor(props) {
         super(props);
-        this.collection = new Collection({type: Group});
+        this.collection = new Collection({type: Group, filter: {member_id: props.params.member_id}});
     }
 
     render() {
@@ -37,7 +43,7 @@ class MemberBoxGroupList extends React.Component {
         
 		return (
 			<div>
-                <CollectionTable rowComponent={Row} collection={this.collection} columns={columns} />
+                <CollectionTable rowComponent={Row(member_id)} collection={this.collection} columns={columns} />
 				<Link to={"/membership/membersx/" + member_id + "/groups/add"} className="uk-button uk-button-primary"><i className="uk-icon-plus-circle"/> Lägg till gruppp</Link>
 			</div>
 		);

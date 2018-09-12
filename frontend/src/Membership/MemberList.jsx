@@ -3,7 +3,7 @@ import { Link } from 'react-router';
 import Date from '../Components/Date';
 import Collection from "../Models/Collection";
 import Member from "../Models/Member";
-import CollectionTable from "../Components/ComponentTable";
+import CollectionTable from "../Components/CollectionTable";
 
 
 class SearchBox extends React.Component {

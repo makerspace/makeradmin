@@ -7,14 +7,14 @@ import * as _ from "underscore";
 // type: type of model that this is a collection of
 // pageSize: size of pages when pagination is enabled (0 = infinite = pagination turned off).
 export default class Collection {
-    constructor({type, pageSize = 25}) {
+    constructor({type, pageSize = 25, filter = {}, sort = {}}) {
         this.type = type;
         this.pageSize = pageSize;
 
         this.items = [];
         this.page = {index: 1, count: 1};
-        this.sort = {};
-        this.filter = {};
+        this.sort = sort;
+        this.filter = filter;
 
         this.subscribers = {};
         this.subscriberId = 0;
