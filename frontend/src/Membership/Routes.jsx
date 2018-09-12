@@ -18,7 +18,7 @@ module.exports = {
                         },
                         {
                             path: ":member_id",
-                            component:  require("./Member").default,
+                            component:  require("./MemberBox").default,
                             indexRoute: {
                                 component: require("./Member/MemberInfoTab").default,
 							},

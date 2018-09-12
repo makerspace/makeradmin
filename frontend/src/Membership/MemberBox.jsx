@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import Member from "../Models/Member";
 
 
-class MemberComponent extends React.Component {
+class MemberBox extends React.Component {
 	
 	constructor(props) {
 		super(props);
@@ -48,8 +48,8 @@ class MemberComponent extends React.Component {
     }
 }
 
-MemberComponent.childContextTypes = {
+MemberBox.childContextTypes = {
     member: PropTypes.instanceOf(Member)
 };
 
-export default withRouter(MemberComponent);
+export default withRouter(MemberBox);
