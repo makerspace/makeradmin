@@ -483,11 +483,9 @@ class Member extends Controller
 			->where('member_id', $member_id)
 			->where('type', $json['type'])
 			->whereNull('deleted_at')
-			->max('enddate');
+			->selectRaw('GREATEST(max(enddate), NOW())');
 
-		if ($last_period == null) {
-			$last_period = date("Y-m-d");
-		}
+		assert($last_period != null);
 
 		$days = (int)$json['days'];
 		if ($days <= 0) {

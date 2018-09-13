@@ -300,6 +300,25 @@ class MakerAdminTest(unittest.TestCase):
                     }
                 })
 
+                # Test multiple code paths
+                if (i % 2) == 0:
+                    self.post(f"/membership/member/{member_id}/addMembershipSpan", {
+                            "type": "membership",
+                            "startdate": (datetime.now() + timedelta(days=-100)).strftime("%Y-%m-%d"),
+                            "enddate": (datetime.now() + timedelta(days=-20)).strftime("%Y-%m-%d"),
+                            "creation_reason": f"test30_{member_id}"
+                        },
+                        200, expected_result={
+                            "status": "ok",
+                            "data": {
+                                "has_labaccess": False,
+                                "has_membership": False,
+                                "labaccess_end": None,
+                                "membership_end": (datetime.now() + timedelta(days=-20)).strftime("%Y-%m-%d")
+                            }
+                        }
+                    )
+
                 self.post(f"/membership/member/{member_id}/addMembershipDays", {"type": "labaccess", "days": 10, "creation_reason": f"test_{member_id}"}, 200, expected_result={
                     "status": "ok",
                     "data": {
