@@ -34,7 +34,9 @@ See [Docs/Database.md](Docs/Database.md)
 Written in Python (requires Python >= 3.6).
 
 ### Install Dependencies
-`make init`
+You may need to install `unixodbc-dev` on ubuntu.
+
+`sudo make init`
 
 This installs the Python dependencies described in `requirements.txt`
 
