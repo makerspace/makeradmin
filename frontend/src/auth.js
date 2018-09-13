@@ -12,7 +12,6 @@ module.exports =
 			return false;
 		}
 
-		// TODO: Validate token
 		var validToken = true;
 		if(validToken)
 		{
@@ -86,7 +85,6 @@ module.exports =
 			}
 			else
 			{
-				// TODO: Generic class for error messages?
 				UIkit.modal.alert("<h2>Inloggningen misslyckades</h2>Tog emot ett oväntat svar från servern:<br><br>" + data.status + " " + data.statusText + "<br><br>" + data.responseText);
 			}
 		});
@@ -115,7 +113,6 @@ module.exports =
 			}
 			else
 			{
-				// TODO: Generic class for error messages?
 				UIkit.modal.alert("<h2>Inloggningen misslyckades</h2>Tog emot ett oväntat svar från servern:<br><br>" + xhr.status + " " + xhr.statusText + "<br><br>" + xhr.responseText);
 			}
 		});

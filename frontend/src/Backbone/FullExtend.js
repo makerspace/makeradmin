@@ -143,8 +143,8 @@ Backbone.Model.fullExtend = function(protoProps, staticProps)
 	}
 
 	// Make sure all null's are changed to empty strings, because otherwise React will be whining when using those values in a <input value={...} />
-	// TODO: Override the set() method so when React inputs a "" it is casted to NULL
-	// TODO: Make BackboneReact handle null's
+	//  Override the set() method so when React inputs a "" it is casted to NULL
+	//  Make BackboneReact handle null's
 	protoProps["set"] = function(attributes, options)
 	{
 		// Attributes is an object with multiple attributes

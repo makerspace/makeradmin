@@ -2,8 +2,6 @@ import React from 'react'
 import ReactDOM from 'react-dom'
 import Loading from './Components/Loading'
 
-/// TODO: This Mixin's should handle auto refresh
-
 /**
  * This is a mixin used with Backbone to provide error handlers.
  */
@@ -87,7 +85,7 @@ var BackboneTable = {
 				filters: nextProps.filters
 			});
 
-			// TODO: setState() has a delay so we need to wait a moment
+			// setState() has a delay so we need to wait a moment
 			var _this = this;
 			setTimeout(function() {
 				_this.fetch();
@@ -421,7 +419,7 @@ var BackboneTable = {
 		});
 
 		// Request new sorted data from the server
-		// TODO: setState does not change the state asap
+		// setState does not change the state asap
 		var _this = this;
 		setTimeout(function() {
 			_this.fetch();

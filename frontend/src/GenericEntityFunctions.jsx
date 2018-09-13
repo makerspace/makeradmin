@@ -16,10 +16,10 @@ module.exports = {
 		// User should get a warning if trying to leave the page when there is any unsaved data in the form
 		this.props.router.setRouteLeaveHook(this.props.route, () =>
 		{
-			// TODO: När den här funktionen väl är registrerad verkar den ligga kvar tills nästa sidladdning,
+			// TOD När den här funktionen väl är registrerad verkar den ligga kvar tills nästa sidladdning,
 			// så om modellen försvinner kommer den gnälla. En bättre lösning vore att avregistrera exit handlern,
 			// när den inte längre behövs. Det här problemet dyker upp lite överallt.
-			// TODO: Verkar vara fixat nu?
+			// TOD Verkar vara fixat nu?
 			if (this.state.ignoreExitHook !== true && /*this.wrapper !== undefined && this.getModel() !== undefined &&*/ this.getModel().isDirty())
 			{
 				return "Du har information som inte är sparad. Är du säker på att du vill lämna sidan?";

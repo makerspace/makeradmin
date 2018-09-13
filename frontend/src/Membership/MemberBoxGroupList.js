@@ -3,16 +3,20 @@ import Collection from "../Models/Collection";
 import {Link} from "react-router";
 import Group from "../Models/Group";
 import CollectionTable from "../Components/CollectionTable";
-import {post} from "../gateway";
+import {del} from "../gateway";
 
 
-const Row = member_id => props => {
+const Row = (collection, member_id) => props => {
 	const {item} = props;
 	
-	// TODO Delete done by post, but post expects create response.
 	const removeItem = i => {
-        post({url: "/membership/member/" + member_id + "/groups/remove", data: {groups: [i.id]}})
-            .then(() => {this.collection.fetch();}, () => null);
+        del({
+                url: "/membership/member/" + member_id + "/groups/remove",
+                data: {groups: [i.id]},
+                options: {method: 'POST'},
+                expectedDataStatus: null,
+        })
+            .then(() => {collection.fetch();}, () => null);
     };
 	
 	return (
@@ -43,7 +47,7 @@ class MemberBoxGroupList extends React.Component {
         
 		return (
 			<div>
-                <CollectionTable rowComponent={Row(member_id)} collection={this.collection} columns={columns} />
+                <CollectionTable rowComponent={Row(this.collection, member_id)} collection={this.collection} columns={columns} />
 				<Link to={"/membership/membersx/" + member_id + "/groups/add"} className="uk-button uk-button-primary"><i className="uk-icon-plus-circle"/> Lägg till gruppp</Link>
 			</div>
 		);

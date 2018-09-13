@@ -32,7 +32,7 @@ module.exports = React.createClass(
 			options: options,
 			model: model,
 			value: value,
-			error_column: "", // TODO
+			error_column: "",
 		};
 	},
 
