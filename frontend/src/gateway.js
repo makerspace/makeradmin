@@ -19,7 +19,8 @@ export function request({url, params, data, options, errorMessage, expectedDataS
                             data ? {body: JSON.stringify(data)} : {},
                             options);
     
-    url = config.apiBasePath + url + '?' + _.map(params, (v, k) => encodeURIComponent(k) + '=' + encodeURIComponent(v)).join('&');
+    const urlParams = _.map(params, (v, k) => encodeURIComponent(k) + '=' + encodeURIComponent(v)).join('&');
+    url = config.apiBasePath + url + (urlParams ? '?' + urlParams : '');
     
      return fetch(url, options)
         .then(response => response.json().then(responseData => ({response, responseData})))

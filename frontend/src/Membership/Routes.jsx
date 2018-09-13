@@ -29,15 +29,7 @@ module.exports = {
 								},
 								{
 									path: "groups",
-									indexRoute: {
-										component: require("./MemberBoxGroupList").default,
-									},
-									childRoutes: [
-										{
-											path: "add",
-											component: require("./MemberBoxGroupAdd").default,
-										},
-									],
+									component: require("./MemberBoxGroupList").default,
 								},
 							]
                         },
