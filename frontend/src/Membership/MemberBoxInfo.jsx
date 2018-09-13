@@ -10,7 +10,7 @@ class MemberBoxInfo extends React.Component {
         const {router} = this.props;
         
         return (
-            <div>
+            <div className='uk-margin-top'>
                 <MemberForm
                     member={this.context.member}
                     onSave={() => this.context.member.save()}

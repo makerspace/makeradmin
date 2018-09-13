@@ -36,7 +36,8 @@ class MemberBoxGroupList extends React.Component {
     constructor(props) {
         super(props);
         this.collection = new Collection({type: Group, filter: {member_id: props.params.member_id}});
-        this.state = {selectedGropuIds: [], options: [], selectedOption: null};
+        this.state = {options: [], selectedOption: null};
+        
         get({url: '/membership/group'}).then(data => this.setState({options: data.data}));
     }
 
@@ -45,14 +46,16 @@ class MemberBoxGroupList extends React.Component {
         get({url: '/membership/group', params}).then(data => callback(data.data));
     }
     
-    addGroups(member_id, selectedGropuIds) {
-        post({
-                 url: "/membership/member/" + member_id + "/groups/add",
-                 data: {groups: selectedGropuIds},
-                 expectedDataStatus: null,
-             })
+    selectOption(member_id, group) {
+        this.setState({selectedOption: group});
+        
+        if (_.isEmpty(group)) {
+            return;
+        }
+        
+        post({url: "/membership/member/" + member_id + "/groups/add", data: {groups: [group.group_id]}, expectedDataStatus: null})
             .then(() => {
-                this.setState({selectedGropuIds: []});
+                this.setState({selectedOption: null});
                 return this.collection.fetch();
             });
     }
@@ -65,24 +68,24 @@ class MemberBoxGroupList extends React.Component {
 		];
   
         const {member_id} = this.props.params;
-        const {selectedGropuIds, options} = this.state;
+        const {selectedOption, options} = this.state;
         
 		return (
 			<div>
-                <div className="uk-grid uk-margin-top">
-                    <div className="uk-width-4-5">
-                        <Select
-                            isMulti
-                            options={options}
-                            getOptionValue={g => g.group_id}
-                            getOptionLabel={g => g.title}
-                            onChange={groups => this.setState({selectedGropuIds: groups.map(g => g.group_id)})}
+                <div className="uk-margin-top uk-form uk-form-stacked">
+                    <label className="uk-form-label" htmlFor="group">
+                        Lägg till grupp:
+                    </label>
+                    <div className="uk-form-controls">
+                        <Select name="group"
+                                className="uk-select"
+                                tabIndex={1}
+                                options={options}
+                                value={selectedOption}
+                                getOptionValue={g => g.group_id}
+                                getOptionLabel={g => g.title}
+                                onChange={group => this.selectOption(member_id, group)}
                         />
-                    </div>
-                    <div className="uk-width-1-5">
-                        <button disabled={_.isEmpty(selectedGropuIds)} className="uk-button uk-button-primary" onClick={() => this.addGroups(member_id, selectedGropuIds)}>
-                            <i className="uk-icon-plus-circle"/> Lägg till
-                        </button>
                     </div>
                 </div>
                 <div className="uk-margin-top">
