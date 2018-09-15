@@ -3,29 +3,19 @@ import Collection from "../Models/Collection";
 import {Link} from "react-router";
 import Group from "../Models/Group";
 import CollectionTable from "../Components/CollectionTable";
-import {del, get, post} from "../gateway";
+import {get} from "../gateway";
 import Select from "react-select";
 import * as _ from "underscore";
 
 
-const Row = (collection, member_id) => props => {
+const Row = collection => props => {
 	const {item} = props;
-	
-	const removeItem = i => {
-        del({
-                url: "/membership/member/" + member_id + "/groups/remove",
-                data: {groups: [i.id]},
-                options: {method: 'POST'},
-                expectedDataStatus: null,
-        })
-            .then(() => {collection.fetch();}, () => null);
-    };
 	
 	return (
 		<tr>
 			<td><Link to={"/membership/groups/" + item.id}>{item.title}</Link></td>
 			<td>{item.num_members}</td>
-			<td><a onClick={() => removeItem(item)} className="removebutton"><i className="uk-icon-trash"/></a></td>
+			<td><a onClick={() => collection.remove(item)} className="removebutton"><i className="uk-icon-trash"/></a></td>
 		</tr>
 	);
 };
@@ -35,17 +25,12 @@ class MemberBoxGroups extends React.Component {
 
     constructor(props) {
         super(props);
-        this.collection = new Collection({type: Group, filter: {member_id: props.params.member_id}});
+        this.collection = new Collection({type: Group, url: `/membership/member/${props.params.member_id}/groups`, idListName: 'groups'});
         this.state = {options: [], selectedOption: null};
         
         get({url: '/membership/group'}).then(data => this.setState({options: data.data}));
     }
 
-    loadOptions(inputValue, callback) {
-        const params = inputValue ? {search: inputValue} : null;
-        get({url: '/membership/group', params}).then(data => callback(data.data));
-    }
-    
     selectOption(member_id, group) {
         this.setState({selectedOption: group});
         
@@ -53,11 +38,7 @@ class MemberBoxGroups extends React.Component {
             return;
         }
         
-        post({url: "/membership/member/" + member_id + "/groups/add", data: {groups: [group.group_id]}, expectedDataStatus: null})
-            .then(() => {
-                this.setState({selectedOption: null});
-                return this.collection.fetch();
-            });
+        this.collection.add(new Group(group)).then(this.setState({selectedOption: null}));
     }
     
     render() {

@@ -69,7 +69,7 @@ export default class CollectionTable extends React.Component {
     }
     
     removeItem(item) {
-        return confirmModal(item.removeConfirmMessage()).then(() => this.props.collection.removeItem(item), () => null);
+        return confirmModal(item.removeConfirmMessage()).then(() => item.remove(), () => null);
     }
     
     render() {

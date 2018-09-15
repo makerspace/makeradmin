@@ -71,6 +71,7 @@ export default class Base {
     }
     
     // Remove this entity, returns promise.
+    // TODO Rename to delete.
     remove() {
         if (!this.id) {
             return Promise.resolve(null);

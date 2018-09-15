@@ -1,4 +1,4 @@
-import {get} from "../gateway";
+import {del, get, post} from "../gateway";
 import * as _ from "underscore";
 
 
@@ -6,11 +6,16 @@ import * as _ from "underscore";
 //
 // type: type of model that this is a collection of
 // pageSize: size of pages when pagination is enabled (0 = infinite = pagination turned off).
+// url: override url, useful for collection of grops on member for example
+// idListName: used for add and remove if collection supports it by pushing id list to to <url>/remove or <url>/add
+// TODO Change server to handle remove from in a more convenient way
 export default class Collection {
-    constructor({type, pageSize = 25, filter = {}, sort = {}}) {
+    constructor({type, pageSize = 25, filter = {}, sort = {}, url=null, idListName=null}) {
         this.type = type;
         this.pageSize = pageSize;
-
+        this.url = url || type.model.root;
+        this.idListName = idListName;
+        
         this.items = [];
         this.page = {index: 1, count: 1};
         this.sort = sort;
@@ -48,11 +53,26 @@ export default class Collection {
         this.fetch();
     }
     
-    // Remove an item in this collection.
-    removeItem(item) {
-        return item.remove().then(() => this.fetch());
+    // Remove an item from this collection.
+    remove(item) {
+        if (!this.idListName) {
+            throw new Error(`Container for ${this.type.constructor.name} does not support remove.`);
+        }
+        
+        return post({url: this.url + "/remove", data: {[this.idListName]: [item.id]}, expectedDataStatus: null})
+            .then(() => this.fetch());
     }
-    
+
+    // Add an item to this collection.
+    add(item) {
+        if (!this.idListName) {
+            throw new Error(`Container for ${this.type.constructor.name} does not support add.`);
+        }
+
+        return post({url: this.url + "/add", data: {[this.idListName]: [item.id]}, expectedDataStatus: null})
+            .then(() => this.fetch());
+    }
+
     fetch() {
         let params = {};
         
@@ -70,7 +90,7 @@ export default class Collection {
             params[k] = v;
         });
         
-        return get({url: this.type.model.root, params}).then(data => {
+        return get({url: this.url, params}).then(data => {
             if (!data) return;
             this.page.count = data.last_page;
             this.page.index = Math.min(this.page.count, this.page.index || 1);
