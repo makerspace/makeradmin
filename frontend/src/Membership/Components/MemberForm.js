@@ -2,10 +2,11 @@ import React from 'react';
 import CountryDropdown from '../../CountryDropdown';
 import DateTime from "../../Components/Form/DateTime";
 import Input2 from "../../Components/Form/Input2";
+import {withRouter} from "react-router";
 
 
 // TODO Maybe not really a reusable component, check usages later.
-export default class MemberForm extends React.Component {
+class MemberForm extends React.Component {
 
     constructor(props) {
         super(props);
@@ -29,7 +30,7 @@ export default class MemberForm extends React.Component {
         
         return (
             <div className="meep">
-                <form className="uk-form">
+                <form className="uk-form" onSubmit={(e) => {e.preventDefault(); onSave(); return false;}}>
                     <fieldset >
                         <legend><i className="uk-icon-user"/> Personuppgifter</legend>
 
@@ -84,7 +85,7 @@ export default class MemberForm extends React.Component {
 
                     <div className="uk-form-row">
                         {member.id ? <a className="uk-button uk-button-danger uk-float-left" onClick={onDelete}><i className="uk-icon-trash"/> Ta bort medlem</a> : ""}
-                        <button type="button" className="uk-button uk-button-success uk-float-right" disabled={saveDisabled} onClick={onSave}><i className="uk-icon-save"/> {member.id ? 'Spara' : 'Skapa'}</button>
+                        <button className="uk-button uk-button-success uk-float-right" disabled={saveDisabled}><i className="uk-icon-save"/> {member.id ? 'Spara' : 'Skapa'}</button>
                     </div>
                 </form>
             </div>
@@ -92,4 +93,5 @@ export default class MemberForm extends React.Component {
     }
 }
 
-// TODO Back with changes warning no longer works.
+
+export default withRouter(MemberForm);
