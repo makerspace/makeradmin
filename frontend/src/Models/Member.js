@@ -2,8 +2,9 @@ import Base from './Base';
 
 
 export default class Member extends Base {
-    removeConfirmMessage() {
-        return `Are you sure you want to remove member ${this.firstname} ${this.lastname}?`;
+    
+    deleteConfirmMessage() {
+        return `Are you sure you want to delete member ${this.firstname} ${this.lastname}?`;
     }
     
     canSave() {

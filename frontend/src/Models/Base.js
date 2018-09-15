@@ -70,9 +70,8 @@ export default class Base {
         this.notify();
     }
     
-    // Remove this entity, returns promise.
-    // TODO Rename to delete.
-    remove() {
+    // Delete this entity, returns promise.
+    del() {
         if (!this.id) {
             return Promise.resolve(null);
         }
@@ -126,9 +125,9 @@ export default class Base {
         return !_.isUndefined(this.unsaved[key]);
     }
     
-    // Return message for remove confirmation.
-    removeConfirmMessage() {
-        throw new Error(`removeConfirmMessage not implemented in ${this.constructor.name}`);
+    // Return message for delete confirmation.
+    deleteConfirmMessage() {
+        throw new Error(`deleteConfirmMessage not implemented in ${this.constructor.name}`);
     }
 }
 

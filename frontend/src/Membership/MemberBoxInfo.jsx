@@ -14,10 +14,10 @@ class MemberBoxInfo extends React.Component {
                 <MemberForm
                     member={this.context.member}
                     onSave={() => this.context.member.save()}
-                    onRemove={() => {
+                    onDelete={() => {
                         const {member} = this.context;
-                        return confirmModal(member.removeConfirmMessage())
-                            .then(() => member.remove(), () => false)
+                        return confirmModal(member.deleteConfirmMessage())
+                            .then(() => member.del(), () => false)
                             .then(() => {
                                 router.push("/membership/membersx/");
                             });

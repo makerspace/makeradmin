@@ -2,8 +2,9 @@ import Base from './Base';
 
 
 export default class Group extends Base {
-    removeConfirmMessage() {
-        return `Are you sure you want to remove group ${this.title}?`;
+	
+    deleteConfirmMessage() {
+        return `Are you sure you want to delete group ${this.title}?`;
     }
     
     canSave() {

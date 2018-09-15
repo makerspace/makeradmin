@@ -24,7 +24,7 @@ export default class MemberForm extends React.Component {
     }
 
     render() {
-        const {member, onSave, onRemove} = this.props;
+        const {member, onSave, onDelete} = this.props;
         const {saveDisabled} = this.state;
         
 		return (
@@ -83,7 +83,7 @@ export default class MemberForm extends React.Component {
                      ""}
 
 					<div className="uk-form-row">
-                        {member.id ? <a className="uk-button uk-button-danger uk-float-left" onClick={onRemove}><i className="uk-icon-trash"/> Ta bort medlem</a> : ""}
+                        {member.id ? <a className="uk-button uk-button-danger uk-float-left" onClick={onDelete}><i className="uk-icon-trash"/> Ta bort medlem</a> : ""}
                         <button type="button" className="uk-button uk-button-success uk-float-right" disabled={saveDisabled} onClick={onSave}><i className="uk-icon-save"/> {member.id ? 'Spara' : 'Skapa'}</button>
 					</div>
 				</form>

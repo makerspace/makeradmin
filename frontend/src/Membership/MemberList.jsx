@@ -33,7 +33,7 @@ class SearchBox extends React.Component {
 
 
 const Row = props => {
-	const {item, removeItem} = props;
+	const {item, deleteItem} = props;
 	return (
 		<tr>
 			<td><Link to={"/membership/membersx/" + item.id}>{item.member_number}</Link></td>
@@ -41,7 +41,7 @@ const Row = props => {
 			<td>{item.lastname}</td>
 			<td>{item.email}</td>
 			<td><Date date={item.created_at}/></td>
-			<td><a onClick={() => removeItem(item)} className="removebutton"><i className="uk-icon-trash"/></a></td>
+			<td><a onClick={() => deleteItem(item)} className="removebutton"><i className="uk-icon-trash"/></a></td>
 		</tr>
 	);
 };

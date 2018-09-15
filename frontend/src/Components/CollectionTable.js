@@ -68,15 +68,15 @@ export default class CollectionTable extends React.Component {
         );
     }
     
-    removeItem(item) {
-        return confirmModal(item.removeConfirmMessage()).then(() => item.remove(), () => null);
+    deleteItem(collection, item) {
+        return confirmModal(item.deleteConfirmMessage()).then(() => item.del()).then(() => collection.fetch(), () => null);
     }
     
     render() {
-        const {rowComponent, columns} = this.props;
+        const {rowComponent, columns, collection} = this.props;
         const {items, loading} = this.state;
         
-        const rows = items.map((item, i)  => React.createElement(rowComponent, {item, removeItem: () => this.removeItem(item), key: i}));
+        const rows = items.map((item, i)  => React.createElement(rowComponent, {item, deleteItem: () => this.deleteItem(collection, item), key: i}));
         const headers = columns.map((c, i) => this.renderHeading(c, i));
         const pagination = this.renderPagination();
 			
