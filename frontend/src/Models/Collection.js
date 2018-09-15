@@ -1,4 +1,4 @@
-import {del, get, post} from "../gateway";
+import {get, post} from "../gateway";
 import * as _ from "underscore";
 
 

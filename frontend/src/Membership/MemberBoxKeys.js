@@ -7,19 +7,19 @@ import {confirmModal} from "../message";
 
 
 const Row = collection => props => {
-	const {item} = props;
-	
-	const deleteKey = () => {
+    const {item} = props;
+    
+    const deleteKey = () => {
         return confirmModal(item.deleteConfirmMessage()).then(() => item.del()).then(() => collection.fetch(), () => null);
     };
-	
-	return (
-		<tr>
-			<td><Link to={"/membership/keys/" + item.id}>{item.tagid}</Link></td>
-			<td>{item.description}</td>
-			<td><a onClick={deleteKey} className="removebutton"><i className="uk-icon-trash"/></a></td>
-		</tr>
-	);
+    
+    return (
+        <tr>
+            <td><Link to={"/membership/keys/" + item.id}>{item.tagid}</Link></td>
+            <td>{item.description}</td>
+            <td><a onClick={deleteKey} className="removebutton"><i className="uk-icon-trash"/></a></td>
+        </tr>
+    );
 };
 
 
@@ -33,14 +33,21 @@ class MemberBoxKeys extends React.Component {
     render() {
         const columns = [
             {title: "RFID", sort: "tagid"},
-			{title: "Kommentar"},
-			{title: ""},
-		];
+            {title: "Kommentar"},
+            {title: ""},
+        ];
 
         const {member_id} = this.props.params;
 
         return (
             <div>
+                <div className="uk-margin-top uk-form uk-form-stacked">
+                    <label className="uk-form-label" htmlFor="group">
+                        Lägg till nyckel:
+                    </label>
+                    <div className="uk-form-controls">
+                    </div>
+                </div>
                 <div className="uk-margin-top">
                     <CollectionTable rowComponent={Row(this.collection, member_id)} collection={this.collection} columns={columns} />
                 </div>

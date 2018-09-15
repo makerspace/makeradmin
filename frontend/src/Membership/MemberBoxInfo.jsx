@@ -6,7 +6,7 @@ import {confirmModal} from "../message";
 import {withRouter} from "react-router";
 
 class MemberBoxInfo extends React.Component {
-	render() {
+    render() {
         const {router} = this.props;
         
         return (

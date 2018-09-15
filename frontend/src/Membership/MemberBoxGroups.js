@@ -9,15 +9,15 @@ import * as _ from "underscore";
 
 
 const Row = collection => props => {
-	const {item} = props;
-	
-	return (
-		<tr>
-			<td><Link to={"/membership/groups/" + item.id}>{item.title}</Link></td>
-			<td>{item.num_members}</td>
-			<td><a onClick={() => collection.remove(item)} className="removebutton"><i className="uk-icon-trash"/></a></td>
-		</tr>
-	);
+    const {item} = props;
+    
+    return (
+        <tr>
+            <td><Link to={"/membership/groups/" + item.id}>{item.title}</Link></td>
+            <td>{item.num_members}</td>
+            <td><a onClick={() => collection.remove(item)} className="removebutton"><i className="uk-icon-trash"/></a></td>
+        </tr>
+    );
 };
 
 
@@ -44,15 +44,15 @@ class MemberBoxGroups extends React.Component {
     render() {
         const columns = [
             {title: "Titel", sort: "title"},
-			{title: "Antal medlemmar"},
-			{title: ""},
-		];
+            {title: "Antal medlemmar"},
+            {title: ""},
+        ];
   
         const {member_id} = this.props.params;
         const {selectedOption, options} = this.state;
         
-		return (
-			<div>
+        return (
+            <div>
                 <div className="uk-margin-top uk-form uk-form-stacked">
                     <label className="uk-form-label" htmlFor="group">
                         Lägg till grupp:
@@ -72,9 +72,9 @@ class MemberBoxGroups extends React.Component {
                 <div className="uk-margin-top">
                     <CollectionTable rowComponent={Row(this.collection, member_id)} collection={this.collection} columns={columns} />
                 </div>
-			</div>
-		);
-	}
+            </div>
+        );
+    }
 }
 
 export default MemberBoxGroups;

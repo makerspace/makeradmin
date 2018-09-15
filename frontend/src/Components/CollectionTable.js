@@ -79,24 +79,24 @@ export default class CollectionTable extends React.Component {
         const rows = items.map((item, i)  => React.createElement(rowComponent, {item, deleteItem: () => this.deleteItem(collection, item), key: i}));
         const headers = columns.map((c, i) => this.renderHeading(c, i));
         const pagination = this.renderPagination();
-			
+
         return (
             <div>
                 {pagination}
                 <div style={{position: "relative", "clear": "both"}}>
                     <table className={"uk-table uk-table-condensed uk-table-striped uk-table-hover" + (loading ? " backboneTableLoading" : "")}>
                         <thead><tr>{headers}</tr></thead>
-						<tbody>{rows}</tbody>
-					</table>
+                        <tbody>{rows}</tbody>
+                    </table>
                     {loading ?
                      <div className="loadingOverlay">
                          <div className="loadingWrapper">
                              <span><i className="uk-icon-refresh uk-icon-spin"/> Hämtar data...</span>
                          </div>
                      </div>  : ''}
-				</div>
-				{pagination}
-			</div>
+                </div>
+                {pagination}
+            </div>
         );
     }
 }
