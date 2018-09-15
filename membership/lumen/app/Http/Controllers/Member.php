@@ -485,7 +485,7 @@ class Member extends Controller
 			->whereNull('deleted_at')
 			->max('enddate');
 
-		if ($last_period == null) {
+		if ($last_period == null || date_create_from_format('Y-m-d', $last_period) < date_create()) {
 			$last_period = date("Y-m-d");
 		}
 
