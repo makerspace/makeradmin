@@ -29,7 +29,23 @@ module.exports = {
 								},
 								{
 									path: "groups",
-									component: require("./MemberBoxGroupList").default,
+									component: require("./MemberBoxGroups").default,
+								},
+								{
+									path: "keys",
+									component: require("./MemberBoxKeys").default,
+								},
+								{
+									path: "permissions",
+									component: require("./MemberBoxPermissions").default,
+								},
+								{
+									path: "transactions",
+									component: require("./MemberBoxTransactions").default,
+								},
+								{
+									path: "messages",
+									component: require("./MemberBoxMessages").default,
 								},
 							]
                         },

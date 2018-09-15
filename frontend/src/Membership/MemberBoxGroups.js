@@ -31,7 +31,7 @@ const Row = (collection, member_id) => props => {
 };
 
 
-class MemberBoxGroupList extends React.Component {
+class MemberBoxGroups extends React.Component {
 
     constructor(props) {
         super(props);
@@ -96,4 +96,4 @@ class MemberBoxGroupList extends React.Component {
 	}
 }
 
-export default MemberBoxGroupList;
+export default MemberBoxGroups;
