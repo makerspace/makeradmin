@@ -5,9 +5,9 @@ import Member from "../Models/Member";
 
 
 class MemberBox extends React.Component {
-	
-	constructor(props) {
-		super(props);
+    
+    constructor(props) {
+        super(props);
         this.member = new Member({member_id: props.params.member_id});
         this.member.refresh();
         this.state = {member_id: 0, firstname: "", lastname: ""};
@@ -27,24 +27,24 @@ class MemberBox extends React.Component {
     }
     
     render() {
-		const {member_id} = this.props.params;
+        const {member_id} = this.props.params;
         const {member_number, firstname, lastname} = this.state;
-		
-		return (
-			<div>
-				<h2>Medlem #{member_number}: {firstname} {lastname}</h2>
+        
+        return (
+            <div>
+                <h2>Medlem #{member_number}: {firstname} {lastname}</h2>
 
-				<ul className="uk-tab">
-					<li><Link to={"/membership/membersx/" + member_id + "/info"}>Personuppgifter</Link></li>
-					<li><Link to={"/membership/membersx/" + member_id + "/groups"}>Grupper</Link></li>
-					<li><Link to={"/membership/membersx/" + member_id + "/keys"}>Nycklar</Link></li>
-					<li><Link to={"/membership/membersx/" + member_id + "/permissions"}>Behörigheter</Link></li>
-					<li><Link to={"/membership/membersx/" + member_id + "/transactions"}>Transaktioner</Link></li>
-					<li><Link to={"/membership/membersx/" + member_id + "/messages"}>Utskick</Link></li>
-				</ul>
+                <ul className="uk-tab">
+                    <li><Link to={"/membership/membersx/" + member_id + "/info"}>Personuppgifter</Link></li>
+                    <li><Link to={"/membership/membersx/" + member_id + "/groups"}>Grupper</Link></li>
+                    <li><Link to={"/membership/membersx/" + member_id + "/keys"}>Nycklar</Link></li>
+                    <li><Link to={"/membership/membersx/" + member_id + "/permissions"}>Behörigheter</Link></li>
+                    <li><Link to={"/membership/membersx/" + member_id + "/transactions"}>Transaktioner</Link></li>
+                    <li><Link to={"/membership/membersx/" + member_id + "/messages"}>Utskick</Link></li>
+                </ul>
                 {this.props.children}
-			</div>
-		);
+            </div>
+        );
     }
 }
 

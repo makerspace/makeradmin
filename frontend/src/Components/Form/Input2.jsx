@@ -25,7 +25,7 @@ export default class Input2 extends React.Component {
     
     render() {
         const {value, selected, isDirty} = this.state;
-        const {model, name, title, icon, disabled, placeholder, formrow} = this.props;
+        const {model, name, title, icon, disabled, placeholder, formrow, tabIndex} = this.props;
         
         const classes = classNames(name,
                                    {
@@ -36,6 +36,7 @@ export default class Input2 extends React.Component {
         
         const input = <input id={name} name={name} type="text" placeholder={placeholder || title} className="uk-form-width-large"
                              value={value} disabled={disabled}
+                             tabIndex={tabIndex}
                              onChange={(event) => model[name] = event.target.value}
                              onFocus={() => this.setState({selected: true})}
                              onBlur={() => this.setState({selected: false})}/>;

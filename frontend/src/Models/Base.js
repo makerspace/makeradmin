@@ -7,17 +7,9 @@ export default class Base {
         this.subscribers = {};
         this.subscriberId = 0;
         
+        this.reset(data);
+
         const model = this.constructor.model;
-
-        if (data) {
-            this.unsaved = {};
-            this.saved = Object.assign({}, model.attributes, data);
-        }
-        else {
-            this.unsaved = {};
-            this.saved   = Object.assign({}, model.attributes);
-        }
-
         _.keys(model.attributes).forEach(key => {
             Object.defineProperty(this, key, {
                 get: () => {
@@ -64,9 +56,17 @@ export default class Base {
         _.values(this.subscribers).forEach(s => s());
     }
 
-    // Reset data to saved state.
-    reset() {
-        this.unsaved = {};
+    // Reset to empty/data state.
+    reset(data) {
+        const model = this.constructor.model;
+        if (data) {
+            this.unsaved = {};
+            this.saved = Object.assign({}, model.attributes, data);
+        }
+        else {
+            this.unsaved = {};
+            this.saved   = Object.assign({}, model.attributes);
+        }
         this.notify();
     }
     

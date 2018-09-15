@@ -13,16 +13,16 @@ class MemberAdd extends React.Component {
     }
 
     render() {
-		return (
-			<div>
-				<h2>Skapa medlem</h2>
-				<MemberForm
+        return (
+            <div>
+                <h2>Skapa medlem</h2>
+                <MemberForm
                     member={this.member}
-					onSave={() => this.member.save().then(() => browserHistory.replace('/membership/membersx/' + this.member.id))}
+                    onSave={() => this.member.save().then(() => browserHistory.replace('/membership/membersx/' + this.member.id))}
                 />
-			</div>
-		);
-	}
+            </div>
+        );
+    }
 }
 
 export default MemberAdd;

@@ -8,7 +8,7 @@ export default class Key extends Base {
     }
     
     canSave() {
-        return false;
+        return this.isDirty() && this.tagid.length > 0;
     }
 }
 

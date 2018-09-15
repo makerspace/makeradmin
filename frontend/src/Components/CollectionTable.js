@@ -73,10 +73,14 @@ export default class CollectionTable extends React.Component {
     }
     
     render() {
-        const {rowComponent, columns, collection} = this.props;
+        const {rowComponent, columns, collection, emptyMessage} = this.props;
         const {items, loading} = this.state;
         
-        const rows = items.map((item, i)  => React.createElement(rowComponent, {item, deleteItem: () => this.deleteItem(collection, item), key: i}));
+        let rows = items.map((item, i)  => React.createElement(rowComponent, {item, deleteItem: () => this.deleteItem(collection, item), key: i}));
+        if  (!rows.length && emptyMessage) {
+            rows = <tr><td colSpan={columns.length} className='uk-text-center'><em>{emptyMessage}</em></td></tr>;
+        }
+        
         const headers = columns.map((c, i) => this.renderHeading(c, i));
         const pagination = this.renderPagination();
 

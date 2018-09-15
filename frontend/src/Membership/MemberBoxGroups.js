@@ -55,7 +55,7 @@ class MemberBoxGroups extends React.Component {
             <div>
                 <div className="uk-margin-top uk-form uk-form-stacked">
                     <label className="uk-form-label" htmlFor="group">
-                        Lägg till grupp:
+                        Lägg till i grupp
                     </label>
                     <div className="uk-form-controls">
                         <Select name="group"
@@ -70,7 +70,7 @@ class MemberBoxGroups extends React.Component {
                     </div>
                 </div>
                 <div className="uk-margin-top">
-                    <CollectionTable rowComponent={Row(this.collection, member_id)} collection={this.collection} columns={columns} />
+                    <CollectionTable emptyMessage="Inte med i några grupper" rowComponent={Row(this.collection, member_id)} collection={this.collection} columns={columns} />
                 </div>
             </div>
         );

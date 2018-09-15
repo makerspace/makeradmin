@@ -1,17 +1,17 @@
 module.exports = {
-	childRoutes: [
-		{
-			path: "/membership",
-			indexRoute: {
-				onEnter: (nextState, replace) => replace("/membership/members"),
-			},
-			childRoutes: [
+    childRoutes: [
+        {
+            path: "/membership",
+            indexRoute: {
+                onEnter: (nextState, replace) => replace("/membership/members"),
+            },
+            childRoutes: [
                 {
                     path: "membersx",
                     indexRoute: {
                         component: require("./MemberList").default,
                     },
-					childRoutes: [
+                    childRoutes: [
                         {
                             path: "add",
                             component: require("./MemberAdd").default,
@@ -21,35 +21,35 @@ module.exports = {
                             component:  require("./MemberBox").default,
                             indexRoute: {
                                 component: require("./MemberBoxInfo").default,
-							},
-							childRoutes: [
-								{
-									path: "info",
-									component: require("./MemberBoxInfo").default,
-								},
-								{
-									path: "groups",
-									component: require("./MemberBoxGroups").default,
-								},
-								{
-									path: "keys",
-									component: require("./MemberBoxKeys").default,
-								},
-								{
-									path: "permissions",
-									component: require("./MemberBoxPermissions").default,
-								},
-								{
-									path: "transactions",
-									component: require("./MemberBoxTransactions").default,
-								},
-								{
-									path: "messages",
-									component: require("./MemberBoxMessages").default,
-								},
-							]
+                            },
+                            childRoutes: [
+                                {
+                                    path: "info",
+                                    component: require("./MemberBoxInfo").default,
+                                },
+                                {
+                                    path: "groups",
+                                    component: require("./MemberBoxGroups").default,
+                                },
+                                {
+                                    path: "keys",
+                                    component: require("./MemberBoxKeys").default,
+                                },
+                                {
+                                    path: "permissions",
+                                    component: require("./MemberBoxPermissions").default,
+                                },
+                                {
+                                    path: "transactions",
+                                    component: require("./MemberBoxTransactions").default,
+                                },
+                                {
+                                    path: "messages",
+                                    component: require("./MemberBoxMessages").default,
+                                },
+                            ]
                         },
-					],
+                    ],
                 },
 				{
 					path: "members",
