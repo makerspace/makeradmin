@@ -25,7 +25,7 @@ class MemberBoxGroups extends React.Component {
 
     constructor(props) {
         super(props);
-        this.collection = new Collection({type: Group, url: `/membership/member/${props.params.member_id}/groups`, idListName: 'groups'});
+        this.collection = new Collection({type: Group, url: `/membership/member/${props.params.member_id}/groups`, idListName: 'groups', pageSize: 0});
         this.state = {options: [], selectedOption: null};
         
         get({url: '/membership/group'}).then(data => this.setState({options: data.data}));

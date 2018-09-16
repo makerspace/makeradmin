@@ -39,7 +39,7 @@ class MemberBox extends React.Component {
                     <li><Link to={"/membership/membersx/" + member_id + "/groups"}>Grupper</Link></li>
                     <li><Link to={"/membership/membersx/" + member_id + "/keys"}>Nycklar</Link></li>
                     <li><Link to={"/membership/membersx/" + member_id + "/permissions"}>Behörigheter</Link></li>
-                    <li><Link to={"/membership/membersx/" + member_id + "/transactions"}>Transaktioner</Link></li>
+                    <li><Link to={"/membership/membersx/" + member_id + "/orders"}>Ordrar</Link></li>
                     <li><Link to={"/membership/membersx/" + member_id + "/messages"}>Utskick</Link></li>
                 </ul>
                 {this.props.children}

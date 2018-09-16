@@ -16,7 +16,7 @@ export default class Collection {
         this.url = url || type.model.root;
         this.idListName = idListName;
         
-        this.items = [];
+        this.items = null;
         this.page = {index: 1, count: 1};
         this.sort = sort;
         this.filter = filter;

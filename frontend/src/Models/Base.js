@@ -125,6 +125,11 @@ export default class Base {
         return !_.isUndefined(this.unsaved[key]);
     }
     
+    // Return true if save is a good idea given the internal state.
+    canSave() {
+        return this.isDirty();
+    }
+    
     // Return message for delete confirmation.
     deleteConfirmMessage() {
         throw new Error(`deleteConfirmMessage not implemented in ${this.constructor.name}`);

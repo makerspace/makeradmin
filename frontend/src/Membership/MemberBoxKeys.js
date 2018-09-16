@@ -30,7 +30,7 @@ class MemberBoxKeys extends React.Component {
     constructor(props) {
         super(props);
         const {member_id} = props.params;
-        this.collection = new Collection({type: Key, url: `/membership/member/${member_id}/keys`, idListName: 'keys'});
+        this.collection = new Collection({type: Key, url: `/membership/member/${member_id}/keys`, idListName: 'keys', pageSize: 0});
         this.key = new Key({member_id});
         this.state = {saveEnabled: false};
     }

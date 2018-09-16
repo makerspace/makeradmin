@@ -40,8 +40,8 @@ module.exports = {
                                     component: require("./MemberBoxPermissions").default,
                                 },
                                 {
-                                    path: "transactions",
-                                    component: require("./MemberBoxTransactions").default,
+                                    path: "orders",
+                                    component: require("./MemberBoxOrders").default,
                                 },
                                 {
                                     path: "messages",

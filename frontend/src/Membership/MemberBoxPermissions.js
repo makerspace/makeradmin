@@ -11,12 +11,12 @@ class MemberBoxPermissions extends React.Component {
 
     constructor(props) {
         super(props);
-        this.collection = new Collection({type: Permission, url: `/membership/member/${props.params.member_id}/permissions`});
+        this.collection = new Collection({type: Permission, url: `/membership/member/${props.params.member_id}/permissions`, pageSize: 0});
     }
     
     render() {
         const columns = [
-            {title: "Behörighet", sort: "permission"},
+            {title: "Behörighet"},
         ];
 
         return (

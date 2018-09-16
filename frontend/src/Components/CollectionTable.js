@@ -7,7 +7,7 @@ export default class CollectionTable extends React.Component {
     
     constructor(props) {
         super(props);
-        this.state = {sort: {key: null, order: 'up'}, items: [], page: {}, loading: true};
+        this.state = {sort: {key: null, order: 'up'}, items: null, page: {}, loading: true};
     }
     
     componentDidMount() {
@@ -76,9 +76,12 @@ export default class CollectionTable extends React.Component {
         const {rowComponent, columns, collection, emptyMessage} = this.props;
         const {items, loading} = this.state;
         
-        let rows = items.map((item, i)  => React.createElement(rowComponent, {item, deleteItem: () => this.deleteItem(collection, item), key: i}));
-        if  (!rows.length && emptyMessage) {
-            rows = <tr><td colSpan={columns.length} className='uk-text-center'><em>{emptyMessage}</em></td></tr>;
+        let rows = "";
+        if (items !== null) {
+            rows = items.map((item, i) => React.createElement(rowComponent, {item, deleteItem: () => this.deleteItem(collection, item), key: i}));
+            if (!rows.length && emptyMessage) {
+                rows = <tr><td colSpan={columns.length} className='uk-text-center'><em>{emptyMessage}</em></td></tr>;
+            }
         }
         
         const headers = columns.map((c, i) => this.renderHeading(c, i));
