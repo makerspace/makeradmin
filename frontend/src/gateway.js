@@ -90,3 +90,6 @@ export function del({
 {
     return request({url, data, params, options, errorMessage, expectedDataStatus});
 }
+
+
+window.get = get;

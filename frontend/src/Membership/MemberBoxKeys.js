@@ -5,6 +5,7 @@ import CollectionTable from "../Components/CollectionTable";
 import Key from "../Models/Key";
 import {confirmModal} from "../message";
 import Input2 from "../Components/Form/Input2";
+import DateTime from "../Components/Form/DateTime";
 
 
 const Row = collection => props => {
@@ -18,7 +19,7 @@ const Row = collection => props => {
         <tr>
             <td><Link to={"/membership/keys/" + item.id}>{item.tagid}</Link></td>
             <td>{item.description}</td>
-            <td>{item.created_at}</td>
+            <td><DateTime date={item.created_at}/></td>
             <td><a onClick={deleteKey} className="removebutton"><i className="uk-icon-trash"/></a></td>
         </tr>
     );

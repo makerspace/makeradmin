@@ -1,0 +1,56 @@
+import React from 'react';
+import Base from './Base';
+
+
+export default class Message extends Base {
+    
+    del() {
+        throw new Error("Message delete not supported.");
+    }
+}
+
+Message.model = {
+    id: "message_id",
+    root: "/messages",
+    attributes: {
+        body: "",
+        created_at: null,
+        updated_at: null,
+        entity_id: 0,
+        message_id: 0,
+        message_type: "",
+        num_recipients: 0,
+        recipient: "",
+        status: "",
+        subject: "",
+        date_sent: null,
+    },
+};
+
+
+Message.typeIcon = message => {
+    switch (message.message_type) {
+        case "email":
+            return <i className="uk-icon-envelope" title="E-post"/>;
+        case "sms":
+            return <i className="uk-icon-commenting" title="SMS"/>;
+        default:
+            return message.message_type;
+    }
+};
+
+
+Message.statusText = message => {
+    switch (message.status) {
+        case "queued":
+            return "Köad";
+        case "failed":
+            return "Misslycad";
+        case "sent":
+            return "Skickad";
+        default:
+            return "Okänt";
+    }
+};
+
+

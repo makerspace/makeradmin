@@ -45,7 +45,15 @@ module.exports = {
                                 },
                                 {
                                     path: "messages",
-                                    component: require("./MemberBoxMessages").default,
+                                    indexRoute: {
+                                        component: require("./MemberBoxMessages").default,
+                                    },
+                                    childRoutes: [
+                                        {
+                                            path: "new",
+                                            component: require("./MemberBoxNewMessage").default,
+                                        },
+                                    ],
                                 },
                             ]
                         },

@@ -3,6 +3,7 @@ import {Link} from "react-router";
 import OrderExtended from "../Models/OrderExtended";
 import Collection from "../Models/Collection";
 import CollectionTable from "../Components/CollectionTable";
+import DateTime from "../Components/Form/DateTime";
 
 
 // TODO Change to use Order and don't show member link.
@@ -11,7 +12,7 @@ const Row = props => {
     return (
         <tr>
             <td><Link to={"/sales/order/" + item.id}>{item.id}</Link></td>
-            <td>{item.created_at}</td>
+            <td><DateTime date={item.created_at}/></td>
             <td>{item.status}</td>
             <td><Link to={"/membership/membersx/" + item.member_id}>{item.member_number}: {item.member_name}</Link></td>
             <td>{item.amount}</td>
@@ -30,7 +31,7 @@ class MemberBoxOrders extends React.Component {
     render() {
         const columns = [
             {title: "Order"},
-            {title: "Datum"},
+            {title: "Skapad"},
             {title: "Status"},
             {title: "Medlem"},
             {title: "Belopp"},
