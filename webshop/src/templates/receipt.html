@@ -24,7 +24,7 @@
                 <h1>Din betalning har inte bekräftats ännu. Var god vänta.</h1>
             {% elif transaction.status == "completed" %}
                 <h1>Tack för ditt köp!</h1>
-                <div class="history-item">
+                <div class="history-item history-item-{{transaction.status}}">
                     <h3><a href="/shop/receipt/{{transaction.id}}">{{ transaction.created_at|format_datetime }}</a><span class="receipt-id">Kvitto {{ transaction.id }}</span></h3>
                     <div class="receipt-items">
                         {% for product, cartItem in cart %}

@@ -522,6 +522,30 @@ html, body {
 	}
 }
 
+.history-item-pending, .history-item-completed {
+	h3 {
+		background: #469ABE;
+	}
+	.receipt-items {
+		background: #2785AD;
+	}
+	.receipt-amount {
+		background: #07719F;
+	}
+}
+
+.history-item-failed {
+	h3 {
+		background: #BE4646;
+	}
+	.receipt-items {
+		background: #AD2727;
+	}
+	.receipt-amount {
+		background: #9F1107;
+	}
+}
+
 .history-item {
 	color: #fff;
 	overflow: hidden;
@@ -531,7 +555,6 @@ html, body {
 	box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.4);
 
 	h3 {
-		background: #469ABE;
 		margin-bottom: 0px;
 
 		padding-left: 20px;
@@ -551,7 +574,6 @@ html, body {
 	}
 
 	.receipt-items {
-		background: #2785AD;
 		padding-left: 20px;
 		padding-right: 20px;
 		padding-top: 10px;
@@ -563,7 +585,6 @@ html, body {
 	}
 
 	.receipt-amount {
-		background: #07719F;
 		margin-top: 0px;
 		margin-bottom: 0px;
 		padding-left: 20px;
