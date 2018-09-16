@@ -37,6 +37,7 @@ const Row = props => {
     return (
         <tr>
             <td><Link to={"/membership/groups/" + item.id}>{item.title}</Link></td>
+            <td><Link to={"/membership/groups/" + item.id}>{item.name}</Link></td>
             <td>{item.num_members}</td>
             <td><a onClick={() => deleteItem(item)} className="removebutton"><i className="uk-icon-trash"/></a></td>
         </tr>
@@ -54,6 +55,7 @@ class GroupList extends React.Component {
     render() {
         const columns = [
             {title: "Titel", sort: "title"},
+            {title: "Namn", sort: "name"},
             {title: "Antal medlemmar"},
             {title: ""},
         ];

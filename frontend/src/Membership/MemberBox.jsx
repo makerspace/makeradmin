@@ -8,9 +8,9 @@ class MemberBox extends React.Component {
     
     constructor(props) {
         super(props);
-        this.member = new Member({member_id: props.params.member_id});
-        this.member.refresh();
-        this.state = {member_id: 0, firstname: "", lastname: ""};
+        const {member_id} = props.params;
+        this.member = Member.get(member_id);
+        this.state = {member_id, firstname: "", lastname: ""};
     }
 
     getChildContext() {

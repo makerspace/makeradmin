@@ -70,16 +70,16 @@ module.exports = {
                             component: require("./GroupAdd").default,
                         },
                         {
-							path: ":group_id",
-							component: require("./Pages/Group/Show"),
-							indexRoute: {
-								component: require("./Components/GroupBox/Groups/Show"),
-							},
-							childRoutes: [
-								{
-									path: "info",
-									component: require("./Components/GroupBox/Groups/Show"),
-								},
+                            path: ":group_id",
+                            component: require("./GroupBox").default,
+                            indexRoute: {
+                                component: require("./GroupBoxEditInfo").default,
+                            },
+                            childRoutes: [
+                                {
+                                    path: "info",
+                                    component: require("./GroupBoxEditInfo").default,
+                                },
 								{
 									path: "members",
 									indexRoute: {
