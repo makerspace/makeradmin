@@ -1,19 +1,29 @@
 import React from 'react';
 import Collection from "../Models/Collection";
-import {Link} from "react-router";
 import CollectionTable from "../Components/CollectionTable";
-import {del, get, post} from "../gateway";
-import * as _ from "underscore";
+import Permission from "../Models/Permission";
+
+
+const Row = props => <tr><td>{props.item.permission}</td></tr>;
 
 
 class MemberBoxPermissions extends React.Component {
 
     constructor(props) {
         super(props);
+        this.collection = new Collection({type: Permission, url: `/membership/member/${props.params.member_id}/permissions`});
     }
     
     render() {
-        return <h1>Permissions</h1>;
+        const columns = [
+            {title: "Behörighet", sort: "permission"},
+        ];
+
+        return (
+            <div className="uk-margin-top">
+                <CollectionTable emptyMessage="Medlemmen har inga behörigheter" rowComponent={Row} collection={this.collection} columns={columns} />
+            </div>
+        );
     }
 }
 
