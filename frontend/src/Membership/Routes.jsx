@@ -59,17 +59,17 @@ module.exports = {
                         },
                     ],
                 },
-				{
-					path: "groups",
-					indexRoute: {
-						component: require("./Pages/Group/List"),
-					},
-					childRoutes: [
-						{
-							path: "add",
-							component: require("./Pages/Group/Add"),
-						},
-						{
+                {
+                    path: "groups",
+                    indexRoute: {
+                        component: require("./GroupList").default,
+                    },
+                    childRoutes: [
+                        {
+                            path: "add",
+                            component: require("./GroupAdd").default,
+                        },
+                        {
 							path: ":group_id",
 							component: require("./Pages/Group/Show"),
 							indexRoute: {

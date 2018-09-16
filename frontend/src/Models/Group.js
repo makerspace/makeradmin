@@ -8,7 +8,7 @@ export default class Group extends Base {
     }
     
     canSave() {
-        return false;
+        return this.isDirty() && this.title;
     }
 }
 
