@@ -18,7 +18,7 @@ class MemberAdd extends React.Component {
                 <h2>Skapa medlem</h2>
                 <MemberForm
                     member={this.member}
-                    onSave={() => this.member.save().then(() => browserHistory.replace('/membership/membersx/' + this.member.id))}
+                    onSave={() => this.member.save().then(() => browserHistory.replace('/membership/members/' + this.member.id))}
                 />
             </div>
         );

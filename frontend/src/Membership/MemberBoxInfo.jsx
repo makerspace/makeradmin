@@ -19,7 +19,7 @@ class MemberBoxInfo extends React.Component {
                         return confirmModal(member.deleteConfirmMessage())
                             .then(() => member.del(), () => false)
                             .then(() => {
-                                router.push("/membership/membersx/");
+                                router.push("/membership/members/");
                             });
                     }}
                 />

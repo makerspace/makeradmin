@@ -36,7 +36,7 @@ const Row = props => {
     const {item, deleteItem} = props;
     return (
         <tr>
-            <td><Link to={"/membership/membersx/" + item.id}>{item.member_number}</Link></td>
+            <td><Link to={"/membership/members/" + item.id}>{item.member_number}</Link></td>
             <td>{item.firstname}</td>
             <td>{item.lastname}</td>
             <td>{item.email}</td>
@@ -69,7 +69,7 @@ class MemberList extends React.Component {
                 <h2>Medlemmar</h2>
 
                 <p className="uk-float-left">På denna sida ser du en lista på samtliga medlemmar.</p>
-                <Link to="/membership/membersx/add" className="uk-button uk-button-primary uk-float-right"><i className="uk-icon-plus-circle"/> Skapa ny medlem</Link>
+                <Link to="/membership/members/add" className="uk-button uk-button-primary uk-float-right"><i className="uk-icon-plus-circle"/> Skapa ny medlem</Link>
 
                 <SearchBox onChange={filters => this.collection.updateFilter(filters)} />
                 <CollectionTable rowComponent={Row} collection={this.collection} columns={columns} />

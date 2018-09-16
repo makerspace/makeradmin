@@ -30,11 +30,6 @@ var nav = new Backbone.Model({
 			children:
 			[
 				{
-					text: "MedlemmarX",
-					target: "/membership/membersx",
-					icon: "user",
-				},
-				{
 					text: "Medlemmar",
 					target: "/membership/members",
 					icon: "user",

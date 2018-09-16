@@ -35,12 +35,12 @@ class MemberBox extends React.Component {
                 <h2>Medlem #{member_number}: {firstname} {lastname}</h2>
 
                 <ul className="uk-tab">
-                    <li><Link to={"/membership/membersx/" + member_id + "/info"}>Personuppgifter</Link></li>
-                    <li><Link to={"/membership/membersx/" + member_id + "/groups"}>Grupper</Link></li>
-                    <li><Link to={"/membership/membersx/" + member_id + "/keys"}>Nycklar</Link></li>
-                    <li><Link to={"/membership/membersx/" + member_id + "/permissions"}>Behörigheter</Link></li>
-                    <li><Link to={"/membership/membersx/" + member_id + "/orders"}>Ordrar</Link></li>
-                    <li><Link to={"/membership/membersx/" + member_id + "/messages"}>Utskick</Link></li>
+                    <li><Link to={"/membership/members/" + member_id + "/info"}>Personuppgifter</Link></li>
+                    <li><Link to={"/membership/members/" + member_id + "/groups"}>Grupper</Link></li>
+                    <li><Link to={"/membership/members/" + member_id + "/keys"}>Nycklar</Link></li>
+                    <li><Link to={"/membership/members/" + member_id + "/permissions"}>Behörigheter</Link></li>
+                    <li><Link to={"/membership/members/" + member_id + "/orders"}>Ordrar</Link></li>
+                    <li><Link to={"/membership/members/" + member_id + "/messages"}>Utskick</Link></li>
                 </ul>
                 {this.props.children}
             </div>

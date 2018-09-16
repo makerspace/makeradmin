@@ -38,7 +38,7 @@ class MemberBoxMessages extends React.Component {
         return (
             <div className="uk-margin-top">
                 <CollectionTable rowComponent={Row} collection={this.collection} columns={columns} />
-                <Link to={"/membership/membersx/" + this.props.params.member_id + "/messages/new"} className="uk-button uk-button-primary"><i className="uk-icon-envelope" /> Skicka meddelande</Link>
+                <Link to={"/membership/members/" + this.props.params.member_id + "/messages/new"} className="uk-button uk-button-primary"><i className="uk-icon-envelope" /> Skicka meddelande</Link>
             </div>
         
         );

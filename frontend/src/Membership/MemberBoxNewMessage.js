@@ -14,7 +14,7 @@ class MemberBoxMessages extends React.Component {
     onSend() {
         const {router, params} = this.props;
         this.message.save().then(() => {
-            router.push("/membership/membersx/" + params.member_id + "/messages");
+            router.push("/membership/members/" + params.member_id + "/messages");
             notifySuccess("Ditt meddelande har skickats");
         });
     }

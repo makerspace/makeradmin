@@ -7,7 +7,7 @@ module.exports = {
             },
             childRoutes: [
                 {
-                    path: "membersx",
+                    path: "members",
                     indexRoute: {
                         component: require("./MemberList").default,
                     },
@@ -59,79 +59,6 @@ module.exports = {
                         },
                     ],
                 },
-				{
-					path: "members",
-					indexRoute: {
-						component: require("./Pages/Member/List"),
-					},
-					childRoutes: [
-						{
-							path: "add",
-							component: require("./Pages/Member/Add"),
-						},
-						{
-							path: ":member_id",
-							component: require("./Pages/Member/Show").default,
-							indexRoute: {
-								component: require("./Components/UserBox/User/Show").default,
-							},
-							childRoutes: [
-								{
-									path: "info",
-									component: require("./Components/UserBox/User/Show"),
-								},
-								{
-									path: "groups",
-									indexRoute: {
-										component: require("./Components/UserBox/Groups/List"),
-									},
-									childRoutes: [
-										{
-											path: "add",
-											component: require("./Components/UserBox/Groups/Add"),
-										},
-									],
-								},
-								{
-									path: "keys",
-									indexRoute: {
-										component: require("./Components/UserBox/Keys/List"),
-									},
-									childRoutes: [
-										{
-											path: "add",
-											component: require("./Components/UserBox/Keys/Add"),
-										},
-										{
-											path: ":key_id",
-											component: require("./Components/UserBox/Keys/Edit"),
-										},
-									],
-								},
-								{
-									path: "permissions",
-									component: require("./Components/UserBox/Permissions/List"),
-								},
-								{
-									path: "transactions",
-									component: require("../Economy/Components/UserBox/List"),
-								},
-								{
-									path: "messages",
-									indexRoute: {
-										component: require("../Messages/Components/UserBox/List"),
-									},
-									childRoutes: [
-										{
-											path: "new",
-											component: require("../Messages/Components/UserBox/New"),
-										},
-									],
-								},
-							],
-						},
-					],
-				},
 				{
 					path: "groups",
 					indexRoute: {
