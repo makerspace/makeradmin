@@ -4,7 +4,7 @@ import * as _ from "underscore";
 
 
 // TODO Rename to Input when Input is no longer used.
-export default class Input2 extends React.Component {
+export default class Textarea2 extends React.Component {
 
     constructor(props) {
         super(props);
@@ -26,7 +26,7 @@ export default class Input2 extends React.Component {
     
     render() {
         const {value, selected, isDirty} = this.state;
-        const {model, name, title, icon, disabled, placeholder, formrow, tabIndex} = this.props;
+        const {model, name, title, icon, disabled, placeholder, formrow, tabIndex, rows} = this.props;
         
         const classes = classNames(name,
                                    {
@@ -35,25 +35,26 @@ export default class Input2 extends React.Component {
                                        "changed": isDirty,
                                    });
         
-        const input = <input id={name} name={name} type="text" placeholder={placeholder} className="uk-form-width-large"
-                             value={value} disabled={disabled}
-                             tabIndex={tabIndex}
-                             onChange={(event) => model[name] = event.target.value}
-                             onFocus={() => this.setState({selected: true})}
-                             onBlur={() => this.setState({selected: false})}/>;
+        const textarea = <textarea id={name} name={name} placeholder={placeholder} className="uk-form-width-large"
+                                   value={value} disabled={disabled}
+                                   tabIndex={tabIndex}
+                                   rows={rows || 8}
+                                   onChange={(e) => model[name] = e.target.value}
+                                   onFocus={() => this.setState({selected: true})}
+                                   onBlur={() => this.setState({selected: false})}/>;
         
         return (
             <div className={classes}>
                 <label htmlFor={name} className="uk-form-label">{title}</label>
                 <div className="uk-form-controls">
-                    {icon ? <div className="uk-form-icon"><i className={"uk-icon-" + icon}/>{input}</div> : input}
+                    {icon ? <div className="uk-form-icon"><i className={"uk-icon-" + icon}/>{textarea}</div> : textarea}
                 </div>
             </div>
         );
     }
 }
 
-Input2.defaultProps = {
+Textarea2.defaultProps = {
     formrow: true,
 };
 

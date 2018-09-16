@@ -39,7 +39,7 @@ class MemberBoxOrders extends React.Component {
 
         return (
             <div className="uk-margin-top">
-                <CollectionTable rowComponent={Row} collection={this.collection} columns={columns} />
+                <CollectionTable emptyMessage="Ingar ordrar" rowComponent={Row} collection={this.collection} columns={columns} />
             </div>
         );
     }

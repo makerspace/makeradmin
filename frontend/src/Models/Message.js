@@ -7,6 +7,10 @@ export default class Message extends Base {
     del() {
         throw new Error("Message delete not supported.");
     }
+    
+    canSave() {
+        return this.body && this.recipients && this.recipients.length && (this.message_type !== 'email' || this.subject);
+    }
 }
 
 Message.model = {
@@ -18,9 +22,9 @@ Message.model = {
         updated_at: null,
         entity_id: 0,
         message_id: 0,
-        message_type: "",
+        message_type: "email",
         num_recipients: 0,
-        recipient: "",
+        recipients: [],
         status: "",
         subject: "",
         date_sent: null,

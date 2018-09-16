@@ -1,20 +1,31 @@
 import React from 'react';
-import Collection from "../Models/Collection";
-import {Link} from "react-router";
-import CollectionTable from "../Components/CollectionTable";
-import {del, get, post} from "../gateway";
-import * as _ from "underscore";
-
+import MessageForm from '../Messages/Components/MessageForm';
+import Message from "../Models/Message";
+import { notifySuccess } from "../message";
+import {withRouter} from "react-router";
 
 class MemberBoxMessages extends React.Component {
 
     constructor(props) {
         super(props);
+        this.message = new Message({recipients: [{type: "member", id: props.params.member_id}]});
+    }
+    
+    onSend() {
+        const {router, params} = this.props;
+        this.message.save().then(() => {
+            router.push("/membership/membersx/" + params.member_id + "/messages");
+            notifySuccess("Ditt meddelande har skickats");
+        });
     }
     
     render() {
-        return <h1>Messages</h1>;
+        return (
+            <div className="uk-margin-top">
+                <MessageForm recipientSelect={false} message={this.message} onSave={() => this.onSend()}/>
+            </div>
+        );
     }
 }
 
-export default MemberBoxMessages;
+export default withRouter(MemberBoxMessages);

@@ -3,6 +3,7 @@ import Collection from "../Models/Collection";
 import CollectionTable from "../Components/CollectionTable";
 import Message from "../Models/Message";
 import DateTime from "../Components/Form/DateTime";
+import {Link} from "react-router";
 
 
 const Row = props => {
@@ -13,7 +14,7 @@ const Row = props => {
             <td>{Message.statusText(item)}</td>
             <td><DateTime date={item.created_at}/></td>
             <td>{Message.typeIcon(item)} {item.recipient}</td>
-            <td>{item.subject}</td>
+            <td><Link to={"/messages/" + item.id}>{item.subject}</Link></td>
         </tr>
     );
 };
@@ -31,13 +32,15 @@ class MemberBoxMessages extends React.Component {
             {title: "Status", sort: "status"},
             {title: "Skapad", sort: "created_at"},
             {title: "Mottagare", sort: "recipient"},
-            {title: "Rubrik", sort: "subject"},
+            {title: "Meddelande", sort: "subject"},
         ];
 
         return (
             <div className="uk-margin-top">
                 <CollectionTable rowComponent={Row} collection={this.collection} columns={columns} />
+                <Link to={"/membership/membersx/" + this.props.params.member_id + "/messages/new"} className="uk-button uk-button-primary"><i className="uk-icon-envelope" /> Skicka meddelande</Link>
             </div>
+        
         );
     }
 }

@@ -27,3 +27,8 @@ export function confirmModal(message) {
         UIkit.modal.confirm(message, resolve, reject);
     });
 }
+
+
+export function notifySuccess(message) {
+    UIkit.notify(message,  {status: "success"});
+}
