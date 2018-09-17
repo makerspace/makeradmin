@@ -104,19 +104,19 @@ module.exports = {
                         },
                     ]
                 },
-				{
-					path: "spans",
-					indexRoute: {
-						component: require("./Pages/Span/List"),
-					},
-					childRoutes: [
-						{
-							path: ":span_id",
-							component: require("./Pages/Span/Show"),
-						},
-					],
-				},
-			]
-		},
-	]
-}
+                {
+                    path: "spans",
+                    indexRoute: {
+                        component: require("./SpanList").default,
+                    },
+                    childRoutes: [
+                        {
+                            path: ":span_id",
+                            component: require("./SpanShow").default,
+                        },
+                    ],
+                },
+            ]
+        },
+    ]
+};

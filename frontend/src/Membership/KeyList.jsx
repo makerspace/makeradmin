@@ -7,7 +7,7 @@ import CollectionTable from "../Components/CollectionTable";
 import DateTime from "../Components/Form/DateTime";
 
 
-// TODO This view could be reused (member, key, group).
+// TODO This view could be reused (member, key, group, span).
 
 class SearchBox extends React.Component {
     

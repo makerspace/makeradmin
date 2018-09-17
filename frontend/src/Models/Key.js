@@ -18,10 +18,11 @@ Key.model = {
     attributes: {
         key_id: 0,
         member_id: null,
-        member_number: null,
         created_at: null,
         updated_at: null,
         description: "",
         tagid: "",
+        // extend="member"
+        member_number: null,
     },
 };
