@@ -4,8 +4,7 @@ import Base from './Base';
 export default class Permission extends Base {
     
     deleteConfirmMessage() {
-        throw new Error("TBD");
-        // return `Are you sure you want to delete permission ${this.permission}?`;
+        throw new Error("Order delete not supported.");
     }
     
     canSave() {

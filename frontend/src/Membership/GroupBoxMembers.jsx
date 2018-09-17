@@ -1,5 +1,4 @@
 import React from 'react';
-import Group from "../Models/Group";
 import {Link} from "react-router";
 import {Async} from "react-select";
 import Collection from "../Models/Collection";
