@@ -7,10 +7,11 @@ import * as _ from "underscore";
 // type: type of model that this is a collection of
 // pageSize: size of pages when pagination is enabled (0 = infinite = pagination turned off).
 // url: override url, useful for collection of grops on member for example
+// expand: expand to include related model in request
 // idListName: used for add and remove if collection supports it by pushing id list to to <url>/remove or <url>/add
 // TODO Change server to handle remove from in a more convenient way
 export default class Collection {
-    constructor({type, pageSize = 25, filter = {}, sort = {}, url=null, idListName=null}) {
+    constructor({type, pageSize = 25, expand = null, filter = {}, sort = {}, url=null, idListName=null}) {
         this.type = type;
         this.pageSize = pageSize;
         this.url = url || type.model.root;
@@ -20,6 +21,7 @@ export default class Collection {
         this.page = {index: 1, count: 1};
         this.sort = sort;
         this.filter = filter;
+        this.expand = expand;
 
         this.subscribers = {};
         this.subscriberId = 0;
@@ -84,6 +86,10 @@ export default class Collection {
         if (!_.isEmpty(this.sort)) {
             params.sort_by = this.sort.key || '';
             params.sort_order = this.sort.order || '';
+        }
+        
+        if (this.expand) {
+            params.expand = this.expand;
         }
         
         _.each(this.filter, (v, k) => {

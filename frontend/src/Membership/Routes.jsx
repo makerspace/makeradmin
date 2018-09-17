@@ -92,22 +92,18 @@ module.exports = {
                         },
                     ],
                 },
-				{
-					path: "keys",
-					indexRoute: {
-						component: require("./Pages/Key/List")
-					},
-					childRoutes: [
-						{
-							path: "add",
-							component: require("./Pages/Key/Add")
-						},
-						{
-							path: ":id",
-							component: require("./Pages/Key/Show")
-						},
-					]
-				},
+                {
+                    path: "keys",
+                    indexRoute: {
+                        component: require("./KeyList").default
+                    },
+                    childRoutes: [
+                        {
+                            path: ":key_id",
+                            component: require("./KeyEdit").default
+                        },
+                    ]
+                },
 				{
 					path: "spans",
 					indexRoute: {

@@ -1,6 +1,5 @@
 import * as React from "react";
 import classNames from 'classnames/bind';
-import * as _ from "underscore";
 
 
 // TODO Rename to Input when Input is no longer used.

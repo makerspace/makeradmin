@@ -19,11 +19,11 @@ class MemberBox extends React.Component {
 
     componentDidMount() {
         const member = this.member;
-        this.unsubscribeMember = member.subscribe(() => this.setState({member_number: member.member_number, firstname: member.firstname, lastname: member.lastname}));
+        this.unsubscribe = member.subscribe(() => this.setState({member_number: member.member_number, firstname: member.firstname, lastname: member.lastname}));
     }
     
     componentWillUnmount() {
-        this.unsubscribeMember();
+        this.unsubscribe();
     }
     
     render() {
