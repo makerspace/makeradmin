@@ -80,34 +80,18 @@ module.exports = {
                                     path: "info",
                                     component: require("./GroupBoxEditInfo").default,
                                 },
-								{
-									path: "members",
-									indexRoute: {
-										component: require("./Components/GroupBox/Member/List"),
-									},
-									childRoutes: [
-										{
-											path: "add",
-											component: require("./Components/GroupBox/Member/Add"),
-										},
-									],
-								},
-								{
-									path: "permissions",
-									indexRoute: {
-										component: require("./Components/GroupBox/Permissions/List"),
-									},
-									childRoutes: [
-										{
-											path: "add",
-											component: require("./Components/GroupBox/Permissions/Add"),
-										},
-									],
-								},
-							],
-						},
-					],
-				},
+                                {
+                                    path: "members",
+                                    component: require("./GroupBoxMembers").default,
+                                },
+                                {
+                                    path: "permissions",
+                                    component: require("./GroupBoxPermissions").default,
+                                },
+                            ],
+                        },
+                    ],
+                },
 				{
 					path: "keys",
 					indexRoute: {

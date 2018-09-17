@@ -6,6 +6,7 @@ import {confirmModal} from "../message";
 import {withRouter} from "react-router";
 
 class GroupBoxEditInfo extends React.Component {
+    
     render() {
         const {router} = this.props;
         

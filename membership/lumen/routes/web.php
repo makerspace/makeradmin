@@ -49,7 +49,10 @@ $app->  post("membership/group",       ['middleware' => 'permission:group_create
 $app->   get("membership/group/{id}",  ['middleware' => 'permission:group_view',   'uses' => "Group@read"]);    // Model: Read
 $app->   put("membership/group/{id}",  ['middleware' => 'permission:group_edit',   'uses' => "Group@update"]);  // Model: Update
 $app->delete("membership/group/{id}",  ['middleware' => 'permission:group_delete', 'uses' => "Group@delete"]);  // Model: Delete
-$app->   get("membership/group/{id}/members", ['middleware' => 'permission:group_member_view',  'uses' => "Group@getMembers"]);    // Get collection with members
+
+$app->   get("membership/group/{id}/members",        ['middleware' => 'permission:group_member_view',   'uses' => "Group@getMembers"]);    // Get collection with members
+$app->  post("membership/group/{id}/members/add",    ['middleware' => 'permission:group_member_add',    'uses' => "Group@addMembers"]);   
+$app->  post("membership/group/{id}/members/remove", ['middleware' => 'permission:group_member_remove', 'uses' => "Group@removeMembers"]);
 
 $app->   get("membership/group/{id}/permissions",        ['middleware' => 'permission:permission_view',   'uses' => "Group@listPermissions"]);  // Model: Create
 $app->  post("membership/group/{id}/permissions/add",    ['middleware' => 'permission:permission_manage', 'uses' => "Group@addPermissions"]);  // Model: Create

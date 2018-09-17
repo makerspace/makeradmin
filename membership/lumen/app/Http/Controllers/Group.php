@@ -183,6 +183,42 @@ Indented:
 	}
 
 	/**
+	 * Add a member to group
+	 */
+	public function addMembers(Request $request, $group_id)
+	{
+		$json = $request->json()->all();
+
+		$data = [];
+		foreach($json["members"] as $member_id)
+		{
+			DB::insert("REPLACE INTO membership_members_groups(member_id, group_id) VALUES(?, ?)", [$member_id, $group_id]);
+		}
+
+		return Response()->json([
+			"status"  => "ok",
+		], 200);
+	}
+
+	/**
+	 * Remove a member from a group
+	 */
+	public function removeMembers(Request $request, $group_id)
+	{
+		$json = $request->json()->all();
+
+		$data = [];
+		foreach($json["members"] as $member_id)
+		{
+			DB::insert("DELETE FROM membership_members_groups WHERE member_id = ? AND group_id = ?", [$member_id, $group_id]);
+		}
+
+		return Response()->json([
+			"status"  => "ok",
+		], 200);
+	}
+   
+	/**
 	 * Get all permissions for a group
 	 */
 	function listPermissions(Request $request, $group_id) {
