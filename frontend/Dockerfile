@@ -5,7 +5,7 @@ RUN apk add --update nodejs-npm && rm -rf /var/cache/apk/*
 RUN mkdir -p /data/src && mkdir -p /data/dist/js
 
 # Copy package file first, to avoid having to install dependencies every time a source file is updated
-COPY ./webpack.config.js ./package.json /data/
+COPY ./webpack.config.js ./member.webpack.config.js ./package.json /data/
 WORKDIR /data
 RUN npm install
 
@@ -18,11 +18,17 @@ COPY ./docker/nginx_default_host /etc/nginx/conf.d/default.conf
 RUN mkdir -p /var/www/html
 COPY ./dist/ /var/www/html
 
-RUN node /data/node_modules/webpack/bin/webpack.js --config /data/webpack.config.js --progress
+RUN node /data/node_modules/webpack/bin/webpack.js --config /data/webpack.config.js --progress && \
+    node /data/node_modules/webpack/bin/webpack.js --config /data/member.webpack.config.js --progress
 
 WORKDIR /
 
-RUN mv -f /data/dist/js/app.js /var/www/html/js/ && rm -rf /data
+RUN mv -f /data/dist/js/app.js /var/www/html/js/ && \
+    mv -f /data/dist/js/member_app.js /var/www/html/js/ && \
+    rm -rf /data
+
+
 
 EXPOSE 80
+
 CMD ["nginx", "-g", "daemon off;"]
