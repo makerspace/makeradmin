@@ -22,7 +22,7 @@ refresh
 GUNICORN_FLAGS=""
 
 if [ "$APP_DEBUG" == "true" ]; then
-        GUNICORN_FLAGS=" --reload"
+	GUNICORN_FLAGS=" --reload"
 	function watch_sass() {
 		echo "Starting sass watch process"
 		while inotifywait -qq -r -e modify,create,delete scss; do

@@ -59,6 +59,11 @@ product_action_entity = Entity(
     columns=["product_id", "action_id", "value"],
 )
 
+product_image_entity = Entity(
+    table="webshop_product_images",
+    columns=["product_id", "path", "caption"],
+)
+
 webshop_stripe_pending = Entity(
     table="webshop_stripe_pending",
     columns=["transaction_id", "stripe_token"],

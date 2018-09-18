@@ -417,6 +417,7 @@ class Entity:
             name2col = {c.exposed_name: c for c in self._readable}
             name2col.update({c.alias: c for c in self._readable if c.alias is not None})
 
+            # TODO: Using the global requests variable here is not very good style. It can break things if one request tries to list other unrelated entities.
             filter_data = [self._format_column_filter(name2col[key], value.split(",")) for key,value in request.args.items() if key in name2col]
 
             if self.allow_delete:
@@ -433,7 +434,7 @@ class Entity:
             res = [self._convert_to_dict(row) for row in rows]
             return res
 
-    def add_routes(self, service, endpoint, read_permission=DEFAULT_PERMISSION, write_permission=DEFAULT_PERMISSION):
+    def add_routes(self, service, endpoint, read_permission=DEFAULT_PERMISSION, write_permission=DEFAULT_PERMISSION, allow_post=True):
         # Note: Many methods here return other methods that we then call.
         # The endpoint keyword argument is just because flask needs something unique, it doesn't matter what it is for our purposes
         id_string = "<int:id>" if endpoint == "" else "/<int:id>"
@@ -441,5 +442,6 @@ class Entity:
         service.route(endpoint + id_string, endpoint=endpoint+".put", methods=["PUT"], permission=write_permission)(route_helper(self.put, json=True, status="updated"))
         if self.allow_delete:
             service.route(endpoint + id_string, endpoint=endpoint+".delete", methods=["DELETE"], permission=write_permission)(route_helper(self.delete, status="deleted"))
-        service.route(endpoint + "", endpoint=endpoint+".post", methods=["POST"], permission=write_permission)(route_helper(self.post, json=True, status="created"))
+        if allow_post:
+            service.route(endpoint + "", endpoint=endpoint+".post", methods=["POST"], permission=write_permission)(route_helper(self.post, json=True, status="created"))
         service.route(endpoint + "", endpoint=endpoint+".list", methods=["GET"], permission=read_permission)(route_helper(self.list, status="ok"))
