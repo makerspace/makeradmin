@@ -423,6 +423,11 @@ html, body {
 		margin-top: 20px;
 		min-width: 120px;
 	}
+
+	.product-image img {
+		max-height: 100px;
+		margin-right: 5px;
+	}
 }
 
 
@@ -722,6 +727,18 @@ html, body {
 			&:hover {
 				background: #00628f;
 			}
+		}
+	}
+
+	.product-image {
+		display: flex;
+		flex-direction: row;
+		justify-content: center;
+
+		img {
+			border-radius: 3px;
+			margin: 5px;
+			max-width: 100%;
 		}
 	}
 }

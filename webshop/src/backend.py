@@ -7,7 +7,7 @@ import stripe
 import os
 from decimal import Decimal, Rounded, localcontext
 from webshop_entities import category_entity, product_entity, action_entity, transaction_entity, transaction_content_entity, product_action_entity
-from webshop_entities import membership_products, webshop_stripe_pending, webshop_pending_registrations, webshop_transaction_actions
+from webshop_entities import membership_products, webshop_stripe_pending, webshop_pending_registrations, webshop_transaction_actions, product_image_entity
 from webshop_entities import CartItem
 from typing import Set, List, Dict, Any, Tuple
 from datetime import datetime
@@ -15,6 +15,10 @@ from dateutil import parser
 import errors
 from filters import product_filters
 from werkzeug.exceptions import HTTPException
+from werkzeug.datastructures import FileStorage
+from flask_uploads import UploadSet, configure_uploads, IMAGES
+import base64
+import io
 
 # Errors
 
@@ -64,6 +68,48 @@ webshop_transaction_actions.add_routes(instance, "transaction_action")
 webshop_pending_registrations.db = db
 
 webshop_stripe_pending.db = db
+
+# Configure upload directory for images
+product_images = UploadSet('productimages', IMAGES)
+# This is a horrible way to configure paths, but oh well...
+instance.app.config['UPLOADED_PRODUCTIMAGES_DEST'] = 'static/product_images'
+configure_uploads(instance.app, product_images)
+
+
+product_image_entity.db = db
+product_image_entity.add_routes(instance, "product_image", read_permission=None, write_permission="webshop_edit", allow_post=False)
+
+
+# The post route is handled separately for the image entity as it requires an upload
+@instance.route("product_image", methods=["POST"], permission="webshop_edit")
+@route_helper
+def upload_image():
+    data = request.get_json()
+    if data is None:
+        raise errors.MissingJson()
+
+    product_id = int(assert_get(data, "product_id"))
+    image = base64.b64decode(assert_get(data, "image"))
+    image_name = assert_get(data, "image_name")
+    if len(image) > 10_000_000:
+        abort(400, "File too large")
+
+    product = product_entity.get(product_id)
+    if product is None:
+        abort(404, "No such product")
+
+    filename = product_images.save(FileStorage(io.BytesIO(image), filename=product["name"] + "_" + image_name))
+    return product_image_entity.post({
+        "product_id": product["id"],
+        "path": filename,
+        "caption": data["caption"] if "caption" in data else None
+    })
+
+
+@instance.route("product/<int:id>/images", methods=["GET"], permission=None)
+@route_helper
+def images_for_product(id: int):
+    return product_image_entity.list("product_id=%s AND deleted_at IS NULL", id)
 
 
 @instance.route("pending_actions", methods=["GET"])

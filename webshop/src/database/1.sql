@@ -7,6 +7,7 @@ CREATE TABLE `webshop_product_categories` (
   PRIMARY KEY (`id`)
 );
 
+# Replaced below
 CREATE TABLE `webshop_product_images` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `product_id` int(10) unsigned NOT NULL,
@@ -135,3 +136,14 @@ DROP TABLE webshop_completed_actions;
 ALTER TABLE `webshop_transaction_actions` ADD `completed_at` datetime DEFAULT NULL;
 
 ALTER TABLE `webshop_products` ADD `filter` varchar(255) DEFAULT NULL;
+
+DROP TABLE IF EXISTS `webshop_product_images`;
+CREATE TABLE `webshop_product_images` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `product_id` int(10) unsigned NOT NULL,
+  `path` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `caption` text COLLATE utf8mb4_unicode_ci,
+  `deleted_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT image_product_constraint FOREIGN KEY (`product_id`) REFERENCES `webshop_products` (`id`)
+);

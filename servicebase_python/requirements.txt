@@ -1,6 +1,7 @@
 setuptools
 flask
 flask-compress
+flask-uploads
 jsonpickle
 PyMySQL
 python-dateutil

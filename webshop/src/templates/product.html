@@ -40,12 +40,13 @@
                     <p>{{ product.description|safe }}</p>
                 </div>
 
-
-                <!-- <div>
-                    <a class="uk-inline" href="../docs/images/photo.jpg" data-caption="Caption 1">
-                        <img src="../docs/images/photo.jpg" alt="">
-                    </a>
-                </div> -->
+                {% for image in images %}
+                    <div>
+                        <a class="product-image uk-inline" href='{{url("static/product_images/" + image.path)}}' data-caption="{{image.caption}}">
+                            <img src='{{url("static/product_images/" + image.path)}}' alt="">
+                        </a>
+                    </div>
+                {% endfor %}
             </div>
         </div>
     </body>

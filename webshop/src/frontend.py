@@ -4,7 +4,7 @@ from service import eprint
 import json
 import os
 from webshop_entities import category_entity, product_entity, transaction_entity, transaction_content_entity, \
-    action_entity, membership_products
+    action_entity, membership_products, product_image_entity
 from typing import List, Dict, Any, Tuple
 from decimal import Decimal
 from filters import product_filters
@@ -20,6 +20,7 @@ category_entity.db = db
 transaction_entity.db = db
 transaction_content_entity.db = db
 action_entity.db = db
+product_image_entity.db = db
 
 host_backend = os.environ["HOST_BACKEND"]
 if not host_backend.startswith("http"):
@@ -91,14 +92,18 @@ def purchase_history() -> str:
 @instance.route("product/<int:id>")
 def product_view(id: int) -> str:
     product = product_entity.get(id)
+    images = product_image_entity.list("product_id=%s AND deleted_at IS NULL", product["id"])
     all_products, categories = product_data()
-    return render_template("product.html", product=product, product_json=json.dumps(all_products), Decimal=Decimal, categories=categories, currency="kr", url=instance.full_path, meta=meta)
+    return render_template(
+        "product.html", product=product, images=images, product_json=json.dumps(all_products), Decimal=Decimal, categories=categories, currency="kr", url=instance.full_path, meta=meta
+    )
 
 
 @instance.route("product/<int:id>/edit")
 def product_edit(id: int) -> str:
     categories = category_entity.list()
     product = product_entity.get(id)
+    images = product_image_entity.list("product_id=%s AND deleted_at IS NULL", product["id"])
 
     # Find the ids and names of all actions that this product has
     with db.cursor() as cur:
@@ -118,7 +123,8 @@ def product_edit(id: int) -> str:
     action_categories = action_entity.list()
     action_json = json.dumps({
         "actions": actions,
-        "action_categories": action_categories
+        "action_categories": action_categories,
+        "images": images
     })
 
     filters = sorted(product_filters.keys())
