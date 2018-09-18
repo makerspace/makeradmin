@@ -20,7 +20,7 @@ const Row = props => {
 };
 
 
-class MemberBoxOrders extends React.Component {
+class OrderList extends React.Component {
 
     constructor(props) {
         super(props);
@@ -46,4 +46,4 @@ class MemberBoxOrders extends React.Component {
 }
 
 
-export default MemberBoxOrders;
+export default OrderList;

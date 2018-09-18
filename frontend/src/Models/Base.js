@@ -135,7 +135,7 @@ export default class Base {
         throw new Error(`deleteConfirmMessage not implemented in ${this.constructor.name}`);
     }
     
-    // Create and empty model with known id and refresh it, returns promise.
+    // Create and empty model with known id and refresh it, returns model.
     static get(id) {
         const model = new this({[this.model.id]: id});
         model.refresh();

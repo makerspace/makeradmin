@@ -10,10 +10,10 @@ module.exports = {
                     path: "order",
                     component: require("./OrderList").default,
                 },
-				{
-					path: "order/:id",
-					component: require("./Pages/Order/View"),
-				},
+                {
+                    path: "order/:id",
+                    component: require("./OrderShow").default,
+                },
 				{
 					path: "product",
 					component: require("./Pages/Product/List"),
