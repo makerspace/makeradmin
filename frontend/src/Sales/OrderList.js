@@ -13,6 +13,7 @@ const Row = props => {
             <td><Link to={"/sales/order/" + item.id}>{item.id}</Link></td>
             <td><DateTime date={item.created_at}/></td>
             <td>{item.status}</td>
+            <td><Link to={"/membership/members/" + item.member_id}>#{item.member_number}: {item.member_name}</Link></td>
             <td className='uk-text-right'>{item.amount} kr</td>
         </tr>
     );
@@ -23,7 +24,7 @@ class MemberBoxOrders extends React.Component {
 
     constructor(props) {
         super(props);
-        this.collection = new Collection({type: Order, url: "/webshop/transactions_extended_info", filter: {member_id: props.params.member_id}});
+        this.collection = new Collection({type: Order, url: "/webshop/transactions_extended_info"});
     }
     
     render() {
@@ -31,11 +32,13 @@ class MemberBoxOrders extends React.Component {
             {title: "Order"},
             {title: "Skapad"},
             {title: "Status"},
+            {title: "Medlem"},
             {title: "Belopp"},
         ];
 
         return (
             <div className="uk-margin-top">
+                <h2>Inkommna ordrar</h2>
                 <CollectionTable emptyMessage="Ingar ordrar" rowComponent={Row} collection={this.collection} columns={columns} />
             </div>
         );

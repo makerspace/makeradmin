@@ -15,6 +15,9 @@ Order.model = {
         amount: 0,
         created_at: null,
         member_id: 0,
-        status: ""
+        status: "",
+        // extend="member"
+        member_number: 0,
+        member_name: "",
     },
 };

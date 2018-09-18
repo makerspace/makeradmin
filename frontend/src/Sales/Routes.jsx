@@ -1,15 +1,15 @@
 module.exports = {
-	childRoutes: [
-		{
-			path: "/sales",
-			indexRoute: {
-				onEnter: (nextState, replace) => replace("/sales/order"),
-			},
-			childRoutes: [
-				{
-					path: "order",
-					component: require("./Pages/Order/List"),
-				},
+    childRoutes: [
+        {
+            path: "/sales",
+            indexRoute: {
+                onEnter: (nextState, replace) => replace("/sales/order"),
+            },
+            childRoutes: [
+                {
+                    path: "order",
+                    component: require("./OrderList").default,
+                },
 				{
 					path: "order/:id",
 					component: require("./Pages/Order/View"),
