@@ -54,14 +54,14 @@ class OrderShow extends React.Component {
                             {title: "Antal"},
                             {title: "Summa", class: 'uk-text-right'}
                         ]}
-                        rowComponent={({item}) => {
-                            return (<tr>
+                        rowComponent={({item}) =>
+                            <tr>
                                 <td><Link to={"/sales/product/" + item.product_id}>{item.product_name}</Link></td>
                                 <td className="uk-text-right"><Currency value={100 * item.amount / item.count}/> kr</td>
                                 <td>{item.count}</td>
                                 <td className="uk-text-right"><Currency value={100 * item.amount} /> kr</td>
-                            </tr>);
-                        }}
+                            </tr>
+                        }
                     />
                 </div>
                 <div className="uk-margin-top">

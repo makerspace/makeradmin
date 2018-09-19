@@ -14,10 +14,10 @@ module.exports = {
                     path: "order/:id",
                     component: require("./OrderShow").default,
                 },
-				{
-					path: "product",
-					component: require("./Pages/Product/List"),
-				},
+                {
+                    path: "product",
+                    component: require("./ProductList").default,
+                },
 				{
 					path: "product/add",
 					component: require("./Pages/Product/Add"),
