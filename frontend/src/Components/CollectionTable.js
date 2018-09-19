@@ -73,7 +73,7 @@ export default class CollectionTable extends React.Component {
     }
     
     render() {
-        const {rowComponent, columns, collection, emptyMessage} = this.props;
+        const {rowComponent, columns, collection, emptyMessage, className} = this.props;
         const {items, loading} = this.state;
         
         let rows = "";
@@ -88,7 +88,7 @@ export default class CollectionTable extends React.Component {
         const pagination = this.renderPagination();
 
         return (
-            <div>
+            <div className={className}>
                 {pagination}
                 <div style={{position: "relative", "clear": "both"}}>
                     <table className={"uk-table uk-table-condensed uk-table-striped uk-table-hover" + (loading ? " backboneTableLoading" : "")}>

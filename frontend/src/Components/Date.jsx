@@ -1,6 +1,7 @@
 import React from 'react';
 import * as _ from "underscore";
 
+// Fix all data show components.
 const DateComponent = props => {
     
     if (!_.isEmpty(props.date)) {

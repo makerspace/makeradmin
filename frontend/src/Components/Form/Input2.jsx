@@ -2,6 +2,7 @@ import * as React from "react";
 import classNames from 'classnames/bind';
 
 
+// TODO Remove local meep stying, use uk.
 // TODO Rename to Input when Input is no longer used.
 export default class Input2 extends React.Component {
 
@@ -25,7 +26,7 @@ export default class Input2 extends React.Component {
     
     render() {
         const {value, selected, isDirty} = this.state;
-        const {model, name, title, icon, disabled, placeholder, formrow, tabIndex} = this.props;
+        const {model, name, title, icon, disabled, placeholder, formrow, tabIndex, type} = this.props;
         
         const classes = classNames(name,
                                    {
@@ -34,8 +35,10 @@ export default class Input2 extends React.Component {
                                        "changed": isDirty,
                                    });
         
-        const input = <input id={name} name={name} type="text" placeholder={placeholder} className="uk-form-width-large"
-                             value={value} disabled={disabled}
+        const input = <input id={name} name={name} placeholder={placeholder} className="uk-width-1-1"
+                             value={value}
+                             disabled={disabled}
+                             type={type || "text"}
                              tabIndex={tabIndex}
                              onChange={(event) => model[name] = event.target.value}
                              onFocus={() => this.setState({selected: true})}
@@ -43,7 +46,7 @@ export default class Input2 extends React.Component {
         
         return (
             <div className={classes}>
-                <label htmlFor={name} className="uk-form-label">{title}</label>
+                <label className="uk-form-label" htmlFor={name}>{title}</label>
                 <div className="uk-form-controls">
                     {icon ? <div className="uk-form-icon"><i className={"uk-icon-" + icon}/>{input}</div> : input}
                 </div>

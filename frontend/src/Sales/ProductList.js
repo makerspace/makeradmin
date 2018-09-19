@@ -29,8 +29,10 @@ class ProductList extends React.Component {
         return (
             <div className="uk-margin-top">
                 <h2>Produkter</h2>
-                
+                <p className="uk-float-left">På denna sida ser du en lista på samtliga produkter som finns för försäljning.</p>
+                <Link className="uk-button uk-button-primary uk-margin-bottom uk-float-right" to="/sales/product/add"><i className="uk-icon-plus-circle"/> Skapa ny produkt</Link>
                 <CollectionTable
+                    className="uk-margin-top"
                     collection={this.collection}
                     emptyMessage="Inga produkter"
                     columns={[

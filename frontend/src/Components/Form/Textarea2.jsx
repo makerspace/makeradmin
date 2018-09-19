@@ -1,8 +1,7 @@
 import * as React from "react";
 import classNames from 'classnames/bind';
-import * as _ from "underscore";
 
-
+// TODO Fix all forms selected and isDirty.
 // TODO Rename to Input when Input is no longer used.
 export default class Textarea2 extends React.Component {
 
@@ -35,7 +34,7 @@ export default class Textarea2 extends React.Component {
                                        "changed": isDirty,
                                    });
         
-        const textarea = <textarea id={name} name={name} placeholder={placeholder} className="uk-form-width-large"
+        const textarea = <textarea id={name} name={name} placeholder={placeholder} className="uk-width-1-1"
                                    value={value} disabled={disabled}
                                    tabIndex={tabIndex}
                                    rows={rows || 8}
@@ -45,7 +44,7 @@ export default class Textarea2 extends React.Component {
         
         return (
             <div className={classes}>
-                <label htmlFor={name} className="uk-form-label">{title}</label>
+                <label className="uk-form-label" htmlFor={name}>{title}</label>
                 <div className="uk-form-controls">
                     {icon ? <div className="uk-form-icon"><i className={"uk-icon-" + icon}/>{textarea}</div> : textarea}
                 </div>

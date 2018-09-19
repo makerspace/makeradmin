@@ -18,15 +18,15 @@ module.exports = {
                     path: "product",
                     component: require("./ProductList").default,
                 },
-				{
-					path: "product/add",
-					component: require("./Pages/Product/Add"),
-				},
-				{
-					path: "product/:id",
-					component: require("./Pages/Product/Edit"),
-				},
-			]
-		}
-	]
+                {
+                    path: "product/add",
+                    component: require("./ProductAdd").default,
+                },
+                {
+                    path: "product/:id",
+                    component: require("./ProductEdit").default,
+                },
+            ]
+        }
+    ]
 };

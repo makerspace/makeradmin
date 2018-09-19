@@ -2,6 +2,7 @@ import React from 'react';
 import { withRouter } from 'react-router';
 import Input2 from "../../Components/Form/Input2";
 import Textarea2 from "../../Components/Form/Textarea2";
+import {Async} from "react-select";
 
 // TODO Maybe not really a reusable component, check usages later (and move it to better place).
 
