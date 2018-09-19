@@ -393,6 +393,7 @@ class Entity:
             values = self._convert_to_row(data, fields)
             cols = ','.join(col.db_column + '=%s' for col in fields)
             cur.execute(f"UPDATE {self.table} SET {cols} WHERE id=%s", (*values, id))
+            return self.get(id)
 
     def post(self, data):
         with self.db.cursor() as cur:

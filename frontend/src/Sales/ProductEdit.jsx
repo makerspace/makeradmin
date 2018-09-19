@@ -30,9 +30,8 @@ class ProductEdit extends React.Component {
                     route={this.props.route}
                     onSave={() => this.product.save()}
                     onDelete={() => {
-                        const {group} = this.context;
-                        return confirmModal(group.deleteConfirmMessage())
-                            .then(() => group.del(), () => false)
+                        return confirmModal(this.product.deleteConfirmMessage())
+                            .then(() => this.product.del(), () => false)
                             .then(() => {
                                 this.props.router.push("/sales/product/");
                             });

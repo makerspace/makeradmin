@@ -2,6 +2,9 @@ import React from 'react';
 import Input2 from "./Form/Input2";
 import Textarea2 from "./Form/Textarea2";
 import Date2 from "./Form/Date2";
+import {get} from "../gateway";
+import * as _ from "underscore";
+import Select2 from "./Form/Select2";
 
 
 class ProductForm extends React.Component {
@@ -32,8 +35,8 @@ class ProductForm extends React.Component {
                     <fieldset className="uk-margin-top">
                         <legend><i className="uk-icon-shopping-cart"/> Produkt</legend>
                         <Input2    model={model} name="name"              title="Produktnamn" />
-                        {/*<Select    model={model} name="category_id"       title="Kategori"  getLabel={getLabel} getValue={getValue} dataSource={config.apiBasePath + "/webshop/category"} />*/}
-                        <Textarea2 model={model} name="description"       title="Beskrivning"/>
+                        <Select2   model={model} name="category_id"       title="Kategori"  getLabel={o => o.name} getValue={o => o.id} dataSource={"/webshop/category"} />
+                        <Textarea2 model={model} name="description"       title="Beskrivning" rows="4"/>
                         <Input2    model={model} name="unit"              title="Enhet" />
                         <Input2    model={model} name="price"             title="Pris (SEK)" type="number"/>
                         <Input2    model={model} name="smallest_multiple" title="Multipel "  type="number"/>
