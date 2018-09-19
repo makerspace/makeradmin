@@ -3,23 +3,9 @@ import {Link} from "react-router";
 import Order from "../Models/Order";
 import Collection from "../Models/Collection";
 import CollectionTable from "../Components/CollectionTable";
-import DateTime from "../Components/Form/DateTime";
 import OrderRow from "../Models/OrderRow";
 import OrderAction from "../Models/OrderAction";
-
-
-const Row = props => {
-    const {item} = props;
-    return (
-        <tr>
-            <td><Link to={"/sales/order/" + item.id}>{item.id}</Link></td>
-            <td><DateTime date={item.created_at}/></td>
-            <td>{item.status}</td>
-            <td><Link to={"/membership/members/" + item.member_id}>#{item.member_number}: {item.member_name}</Link></td>
-            <td className='uk-text-right'>{item.amount} kr</td>
-        </tr>
-    );
-};
+import Currency from "../Components/Currency";
 
 
 class OrderShow extends React.Component {
@@ -60,33 +46,43 @@ class OrderShow extends React.Component {
                 <div className="uk-margin-top">
                     <h3>Orderrader</h3>
                     <CollectionTable
+                        emptyMessage="Listan är tom"
                         collection={this.orderRows}
                         columns={[
-                            {title: "Rad"},
                             {title: "Produkt"},
-                            {title: "Pris"},
+                            {title: "Pris", class: 'uk-text-right'},
                             {title: "Antal"},
-                            {title: "Summa"},
+                            {title: "Summa", class: 'uk-text-right'}
                         ]}
-                        rowComponent={(item) =>
-                            "hej"
-                        }
+                        rowComponent={({item}) => {
+                            return (<tr>
+                                <td><Link to={"/sales/product/" + item.product_id}>{item.product_name}</Link></td>
+                                <td className="uk-text-right"><Currency value={100 * item.amount / item.count}/> kr</td>
+                                <td>{item.count}</td>
+                                <td className="uk-text-right"><Currency value={100 * item.amount} /> kr</td>
+                            </tr>);
+                        }}
                     />
                 </div>
                 <div className="uk-margin-top">
                     <h3>Ordereffekter</h3>
                     <CollectionTable
+                        emptyMessage="Listan är tom"
                         collection={this.orderActions}
                         columns={[
-                            {title: "Rad"},
                             {title: "Orderrad"},
                             {title: "Åtgärd"},
-                            {title: "Antal"},
-                            {title: "Utförd"},
+                            {title: "Antal", class: 'uk-text-right'},
+                            {title: "Utförd", class: 'uk-text-right'},
                         ]}
-                        rowComponent={(item) =>
-                            "hej"
-                        }
+                        rowComponent={({item}) => {
+                            return (<tr>
+                                <td>{item.content_id}</td>
+                                <td>{item.action}</td>
+                                <td className="uk-text-right">{item.value}</td>
+                                <td className="uk-text-right">{item.completed_at ? item.completed_at : 'pending'}</td>
+                            </tr>);
+                        }}
                     />
                 </div>
             </div>

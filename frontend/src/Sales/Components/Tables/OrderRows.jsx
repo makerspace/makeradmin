@@ -49,7 +49,7 @@ module.exports = withRouter(React.createClass({
 			<tr key={i}>
 				<td className="uk-text-right">{i+1}</td>
 				<td><Link to={"/sales/product/" + row.product_id}>{row.product_name}</Link></td>
-				<td className="uk-text-right"><Currency value={100 * row.amount / row.count} /> kr</td>
+				<td className="uk-text-right"><Currency value={100 * row.amount / row.count} currency="kr"/></td>
 				<td>{row.count}</td>
 				<td className="uk-text-right"><Currency value={100 * row.amount} /> kr</td>
 			</tr>
