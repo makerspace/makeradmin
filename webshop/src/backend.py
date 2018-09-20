@@ -608,6 +608,15 @@ def card_stripe_payment(transaction_id: int, token: str) -> None:
         if charge.status == 'succeeded':
             # Avoid delay of feedback to customer, could be skipped and handled when webhook is called.
             complete_transaction(transaction_id)
+    except stripe.error.InvalidRequestError as e:
+        if "Amount must convert to at least" in str(e):
+            _fail_transaction(transaction_id)
+            raise errors.TooSmallAmount()
+        else:
+            eprint("Stripe Charge Failed")
+            eprint(e)
+            _fail_transaction(transaction_id)
+            raise errors.PaymentFailed()
     except stripe.error.CardError as e:
         body = e.json_body
         err = body.get('error', {})
