@@ -15,7 +15,7 @@ module.exports = withRouter(class Member extends React.Component
 		super(props);
 
 		this.state = {
-			keys: null,
+			pendingLabaccessDays: 0,
 		};
 
 		$.ajax({
@@ -26,7 +26,6 @@ module.exports = withRouter(class Member extends React.Component
 				"Authorization": "Bearer " + auth.getAccessToken()
 			}
 		}).done((data, textStatus, xhr) => {
-			console.log(data);
 			this.setState({
 				info_labaccess: {
 					active: data.data.has_labaccess,
@@ -41,6 +40,24 @@ module.exports = withRouter(class Member extends React.Component
 			if (xhr.status != 401) {
 				UIkit.modal.alert("<h2>Misslyckades med att hämta nycklar</h2>Tog emot ett oväntat svar från servern:<br><br>" + xhr.status + " " + xhr.statusText + "<br><br>" + xhr.responseText);
 			}
+		});
+
+		$.ajax({
+			method: "GET",
+			url: config.apiBasePath + "/webshop/member/current/pending_actions",
+			cache: false,
+			headers: {
+				"Authorization": "Bearer " + auth.getAccessToken()
+			}
+		}).done((data, textStatus, xhr) => {
+			let pendingLabaccessDays = 0;
+			let actions = data.data;
+			for (let pending of actions) {
+				if (pending.action.name == "add_labaccess_days") {
+					pendingLabaccessDays += pending.pending_action.value;
+				}
+			}
+			this.setState({pendingLabaccessDays: pendingLabaccessDays});
 		});
 	}
 
@@ -99,11 +116,19 @@ module.exports = withRouter(class Member extends React.Component
 
 	render()
 	{
+		let pendingAccess = "";
+		if (this.state.pendingLabaccessDays > 0) {
+			pendingAccess = <p>Du har {this.state.pendingLabaccessDays} dagar som kommer att läggas till på din labaccess vid nästa nyckelutlämning.</p>;
+		} else {
+			pendingAccess = <p>Om du köper ny labaccess i webshoppen så kommer den aktiveras vid nästa nyckelutlämning.</p>;
+		}
+
 		return (
 			<fieldset data-uk-margin>
 				<legend><i className="uk-icon-key"></i> Medlemsskap</legend>
 				{this.renderInfo(this.state.info_labaccess, "Din labaccess")}
-				<p>Om du köper ny labaccess i webshoppen så kommer den aktiveras vid nästa nyckelutlämning.</p>
+				{pendingAccess}
+				
 			</fieldset>
 		);
 

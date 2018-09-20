@@ -112,13 +112,20 @@ def images_for_product(id: int):
     return product_image_entity.list("product_id=%s AND deleted_at IS NULL", id)
 
 
+@instance.route("member/current/pending_actions", methods=["GET"], permission=None)
+@route_helper
+def pending_actions_for_member():
+    user_id = assert_get(request.headers, "X-User-Id")
+    return _pending_actions(user_id)
+
+
 @instance.route("pending_actions", methods=["GET"])
 @route_helper
 def pending_actions():
     return _pending_actions()
 
 
-def _pending_actions() -> List[Dict[str,Any]]:
+def _pending_actions(member_id: int=None) -> List[Dict[str,Any]]:
     '''
     Finds every item in a transaction and checks the actions it has, then checks to see if all those actions have been completed (and are not deleted).
     The actions that are valid for a transaction are precisely those that existed at the time the transaction was made. Therefore if an action is added to a product
@@ -126,7 +133,7 @@ def _pending_actions() -> List[Dict[str,Any]]:
     '''
 
     with db.cursor() as cur:
-        cur.execute("""
+        query = """
             SELECT webshop_transaction_contents.id, webshop_transaction_contents.transaction_id, webshop_transaction_contents.product_id, webshop_transaction_contents.count,
                 webshop_transaction_contents.amount, webshop_transaction_actions.value,
                 webshop_actions.id, webshop_actions.name,
@@ -137,7 +144,11 @@ def _pending_actions() -> List[Dict[str,Any]]:
             INNER JOIN webshop_transaction_contents ON webshop_transaction_actions.content_id     = webshop_transaction_contents.id
             INNER JOIN webshop_transactions         ON webshop_transaction_contents.transaction_id= webshop_transactions.id
             WHERE webshop_transaction_actions.status='pending' AND webshop_transactions.status='completed'
-            """)
+        """
+        if member_id is not None:
+            query += " AND webshop_transactions.member_id=%s"
+
+        cur.execute(query, (member_id,) if member_id is not None else None)
 
         return [
             {
