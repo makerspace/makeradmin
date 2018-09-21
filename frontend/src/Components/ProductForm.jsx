@@ -5,70 +5,100 @@ import Date2 from "./Form/Date2";
 import {get} from "../gateway";
 import * as _ from "underscore";
 import Select2 from "./Form/Select2";
+import ReactSelect from "react-select";
+import ProductAction from "../Models/ProductAction";
 
 
 class ProductForm extends React.Component {
     constructor(props) {
         super(props);
-        this.state = {saveDisabled: true};
+        this.state = {
+            saveDisabled: true,
+            actions: this.props.actions.map(a => a.copy()),
+            actionTypes: [],
+            actionType: null,
+        };
+        get({url: "/webshop/action"}).then(data => this.setState({actionTypes: data.data}));
     }
     
     componentDidMount() {
-        const {model} = this.props;
-        this.unsubscribe = model.subscribe(() => this.setState({saveDisabled: !model.canSave()}));
+        const {product} = this.props;
+        this.unsubscribe = product.subscribe(() => this.setState({saveDisabled: !product.canSave()}));
     }
     
     componentWillUnmount() {
         this.unsubscribe();
     }
 
+    
+    static addAction(prevState) {
+        const newAction = new ProductAction({action_id: prevState.actionType.id});
+        console.info("newAction", newAction);
+        const newActions = prevState.actions.concat([newAction]);
+        console.info("newActions", newActions);
+        return {actions: newActions};
+    }
+    
     render() {
-        const {model, onDelete, onSave} = this.props;
-        const {saveDisabled} = this.state;
+        const {product, onDelete, onSave} = this.props;
+        const {saveDisabled, actions, actionTypes, actionType} = this.state;
         
-        const action_contents = "";
-        const availible_actions = {};
+        const renderAction = action => {
+            return <div key={action.action_id}>{action.action_id}</div>;
+        };
         
+        console.info("actions", actions);
+        const availableActionTypes = actionTypes.filter(type => -1 === _.findIndex(actions, action => type.id === action.action_id));
+
         return (
             <div className="uk-margin-top">
-                <form className="uk-form uk-form-stacked" onSubmit={(e) => {e.preventDefault(); onSave(); return false;}}>
+                <form className="uk-form uk-form-stacked" onSubmit={(e) => {e.preventDefault(); onSave(actions); return false;}}>
                     <fieldset className="uk-margin-top">
                         <legend><i className="uk-icon-shopping-cart"/> Produkt</legend>
-                        <Input2    model={model} name="name"              title="Produktnamn" />
-                        <Select2   model={model} name="category_id"       title="Kategori"  getLabel={o => o.name} getValue={o => o.id} dataSource={"/webshop/category"} />
-                        <Textarea2 model={model} name="description"       title="Beskrivning" rows="4"/>
-                        <Input2    model={model} name="unit"              title="Enhet" />
-                        <Input2    model={model} name="price"             title="Pris (SEK)" type="number"/>
-                        <Input2    model={model} name="smallest_multiple" title="Multipel "  type="number"/>
+                        <Input2 model={product} name="name" title="Produktnamn" />
+                        <Select2 model={product} name="category_id" title="Kategori" getLabel={o => o.name} getValue={o => o.id} dataSource={"/webshop/category"} />
+                        <Textarea2 model={product} name="description" title="Beskrivning" rows="4"/>
+                        <Input2 model={product} name="unit" title="Enhet" />
+                        <Input2 model={product} name="price" title="Pris (SEK)" type="number"/>
+                        <Input2 model={product} name="smallest_multiple" title="Multipel " type="number"/>
                     </fieldset>
                     <fieldset className="uk-margin-top">
                         <legend><i className="uk-icon-magic"/> Åtgärder</legend>
                         <div>
-                            {action_contents}
+                            {actions.map(renderAction)}
                         </div>
                         {
-                            availible_actions.size
+                            _.isEmpty(availableActionTypes)
                             ?
-                            <a className="uk-button uk-button-success uk-float-left" onClick={this.addAction}><i className="uk-icon-plus"/> Lägg till åtgärd</a>
+                            ""
                             :
-                            <div/>
+                            <div>
+                                <ReactSelect className="uk-width-3-5 uk-float-left"
+                                             value={actionType}
+                                             options={availableActionTypes}
+                                             getOptionValue={o => o.id}
+                                             getOptionLabel={o => o.name}
+                                             onChange={o=> this.setState({actionType: o})}
+                                />
+                                <button type="button" className="uk-button uk-button-success uk-float-right" disabled={!actionType} onClick={() => this.setState(ProductForm.addAction)}><i className="uk-icon-plus"/> Lägg till åtgärd</button>
+                            </div>
                         }
                     </fieldset>
 
                     {
-                        model.id
+                        product.id
                         ?
                         <fieldset className="uk-margin-top">
                             <legend><i className="uk-icon-tag"/> Metadata</legend>
-                            <Date2 model={model} name="created_at" title="Skapad"/>
-                            <Date2 model={model} name="updated_at" title="Uppdaterad"/>
+                            <Date2 model={product} name="created_at" title="Skapad"/>
+                            <Date2 model={product} name="updated_at" title="Uppdaterad"/>
                         </fieldset>
                         :
                         ""
                     }
                     <fieldset className="uk-margin-top">
-                        {model.id ? <a className="uk-button uk-button-danger uk-float-left" onClick={onDelete}><i className="uk-icon-trash"/> Ta bort produkt</a> : ""}
-                        <button className="uk-button uk-button-success uk-float-right" disabled={saveDisabled}><i className="uk-icon-save"/> {model.id ? 'Spara' : 'Skapa'}</button>
+                        {product.id ? <a className="uk-button uk-button-danger uk-float-left" onClick={onDelete}><i className="uk-icon-trash"/> Ta bort produkt</a> : ""}
+                        <button className="uk-button uk-button-success uk-float-right" disabled={saveDisabled}><i className="uk-icon-save"/> {product.id ? 'Spara' : 'Skapa'}</button>
                     </fieldset>
                 </form>
             </div>

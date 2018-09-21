@@ -13,12 +13,20 @@ class GroupAdd extends React.Component {
     }
 
     render() {
+        
+        const onSave = (actions) => {
+            this.product
+                .save()
+                .then(() => Promise.all(actions.map(a => a.save())))
+                .then(() => browserHistory.replace('/sales/product/' + this.product.id));
+        };
+        
         return (
             <div>
                 <h2>Skapa grupp</h2>
                 <ProductForm
-                    model={this.product}
-                    onSave={() => this.product.save().then(() => browserHistory.replace('/sales/product/' + this.product.id))}
+                    product={this.product}
+                    onSave={onSave}
                 />
             </div>
         );

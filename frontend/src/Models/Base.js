@@ -112,6 +112,11 @@ export default class Base {
         
     }
     
+    // Return a new shallow copy of object with id property set to 0.
+    copy() {
+        return new this(Object.assign({}, this.saved, {[this.constructor.id]: 0}));
+    }
+    
     // Returns true if unsaved.
     isUnsaved() {
         return !this.id || this.isDirty();
