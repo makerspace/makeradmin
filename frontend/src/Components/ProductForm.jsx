@@ -9,47 +9,96 @@ import ReactSelect from "react-select";
 import ProductAction from "../Models/ProductAction";
 
 
+const filterAvailableActions = (actions, actionTypes) => {
+      return actionTypes.filter(type => -1 === _.findIndex(actions, action => type.id === action.action_id));
+};
+
+
+const filterSelectedActionType = (selectedActionType, availableActionTypes) => {
+    if (_.isEmpty(availableActionTypes)) {
+        return null;
+    }
+    if (selectedActionType && -1 !== _.findIndex(availableActionTypes, type => type.id === selectedActionType.id)) {
+        return selectedActionType;
+    }
+    return availableActionTypes[0];
+};
+
+
+const setActionTypes = actionTypes => prevState => {
+    const availableActionTypes = filterAvailableActions(prevState.actions, actionTypes);
+    const selectedActionType = filterSelectedActionType(prevState.selectedActionType, availableActionTypes);
+    return {
+        actionTypes,
+        availableActionTypes,
+        selectedActionType,
+    };
+};
+
+
+const addAction = prevState => {
+    const newAction = new ProductAction({action_id: prevState.selectedActionType.id});
+    const actions = prevState.actions.concat([newAction]);
+    const availableActionTypes = filterAvailableActions(actions, prevState.actionTypes);
+    const selectedActionType = filterSelectedActionType(prevState.selectedActionType, availableActionTypes);
+    return {
+        actions,
+        availableActionTypes,
+        selectedActionType,
+    };
+};
+
+
+const removeAction = action => prevState => {
+    const actions = _.filter(prevState.actions, a => a.action_id !== action.action_id);
+    const availableActionTypes = filterAvailableActions(actions, prevState.actionTypes);
+    const selectedActionType = filterSelectedActionType(prevState.selectedActionType, availableActionTypes);
+    return {
+        actions,
+        availableActionTypes,
+        selectedActionType,
+    };
+};
+
+
+const replaceActions = actions => prevState => {
+    const availableActionTypes = filterAvailableActions(actions, prevState.actionTypes);
+    const selectedActionType = filterSelectedActionType(prevState.selectedActionType, availableActionTypes);
+    return {
+        actions,
+        availableActionTypes,
+        selectedActionType,
+    };
+};
+
+
 class ProductForm extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            saveDisabled: true,
-            actions: this.props.actions.map(a => a.copy()),
+            actions: props.actions.map(a => a.copy()),
             actionTypes: [],
-            actionType: null,
+            availableActionTypes: [],
+            selectedActionType: null,
         };
-        get({url: "/webshop/action"}).then(data => this.setState({actionTypes: data.data}));
-    }
-    
-    componentDidMount() {
-        const {product} = this.props;
-        this.unsubscribe = product.subscribe(() => this.setState({saveDisabled: !product.canSave()}));
-    }
-    
-    componentWillUnmount() {
-        this.unsubscribe();
+        get({url: "/webshop/action"}).then(data => this.setState(setActionTypes(data.data)));
     }
 
-    
-    static addAction(prevState) {
-        const newAction = new ProductAction({action_id: prevState.actionType.id});
-        console.info("newAction", newAction);
-        const newActions = prevState.actions.concat([newAction]);
-        console.info("newActions", newActions);
-        return {actions: newActions};
+
+    componentWillReceiveProps(nextProps) {
+        console.info("new props", nextProps);
+        return replaceActions(nextProps.action);
     }
     
     render() {
         const {product, onDelete, onSave} = this.props;
-        const {saveDisabled, actions, actionTypes, actionType} = this.state;
+        const {actions, availableActionTypes, selectedActionType} = this.state;
+        console.info(this.props.actions, this.state.actions);
         
         const renderAction = action => {
-            return <div key={action.action_id}>{action.action_id}</div>;
+            return <div key={action.action_id}>{action.action_id} <button type="button" onClick={() => this.setState(removeAction(action))}>remove</button></div>;
         };
         
-        console.info("actions", actions);
-        const availableActionTypes = actionTypes.filter(type => -1 === _.findIndex(actions, action => type.id === action.action_id));
-
         return (
             <div className="uk-margin-top">
                 <form className="uk-form uk-form-stacked" onSubmit={(e) => {e.preventDefault(); onSave(actions); return false;}}>
@@ -74,17 +123,19 @@ class ProductForm extends React.Component {
                             :
                             <div>
                                 <ReactSelect className="uk-width-3-5 uk-float-left"
-                                             value={actionType}
+                                             value={selectedActionType}
                                              options={availableActionTypes}
                                              getOptionValue={o => o.id}
                                              getOptionLabel={o => o.name}
-                                             onChange={o=> this.setState({actionType: o})}
+                                             onChange={o=> this.setState({selectedActionType: o})}
                                 />
-                                <button type="button" className="uk-button uk-button-success uk-float-right" disabled={!actionType} onClick={() => this.setState(ProductForm.addAction)}><i className="uk-icon-plus"/> Lägg till åtgärd</button>
+                                <button type="button" className="uk-button uk-button-success uk-float-right" onClick={() => this.setState(addAction)}><i className="uk-icon-plus"/> Lägg till åtgärd</button>
                             </div>
                         }
                     </fieldset>
-
+                    <fieldset className="uk-margin-top">
+                        <legend><i className="uk-icon-filter"/> Filter</legend>
+                    </fieldset>
                     {
                         product.id
                         ?
@@ -98,7 +149,7 @@ class ProductForm extends React.Component {
                     }
                     <fieldset className="uk-margin-top">
                         {product.id ? <a className="uk-button uk-button-danger uk-float-left" onClick={onDelete}><i className="uk-icon-trash"/> Ta bort produkt</a> : ""}
-                        <button className="uk-button uk-button-success uk-float-right" disabled={saveDisabled}><i className="uk-icon-save"/> {product.id ? 'Spara' : 'Skapa'}</button>
+                        <button className="uk-button uk-button-success uk-float-right"><i className="uk-icon-save"/> {product.id ? 'Spara' : 'Skapa'}</button>
                     </fieldset>
                 </form>
             </div>

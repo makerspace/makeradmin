@@ -15,14 +15,14 @@ class ProductEdit extends React.Component {
         this.product = Product.get(id);
         this.state = {actions: []};
         get({url: "/webshop/product_action", params: {product_id: this.props.params.id}})
-            .then((data) => this.setState({actions: data.data.map(d => ProductAction(d))}));
+            .then((data) => this.setState({actions: data.data.map(d => new ProductAction(d))}));
     }
     
     render() {
         const onSave = (actions) => {
             this.product.save()
                 .then(() => Promise.all(this.state.actions.map(a => a.del())))
-                .then(() => Promise.all(actions.map(a => a.save())))
+                .then(() => Promise.all(actions.map(a => {a.product_id = this.product.id; return a.save();})))
                 .then(() => this.setState({actions}));
         };
         

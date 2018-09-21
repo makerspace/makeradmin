@@ -17,7 +17,7 @@ class GroupAdd extends React.Component {
         const onSave = (actions) => {
             this.product
                 .save()
-                .then(() => Promise.all(actions.map(a => a.save())))
+                .then(() => Promise.all(actions.map(a => {a.product_id = this.product.id; return a.save();})))
                 .then(() => browserHistory.replace('/sales/product/' + this.product.id));
         };
         
