@@ -15,7 +15,7 @@ module.exports = withRouter(class Member extends React.Component
 		super(props);
 
 		this.state = {
-			keys: null,
+			pendingLabaccessDays: 0,
 		};
 
 		$.ajax({
@@ -26,7 +26,6 @@ module.exports = withRouter(class Member extends React.Component
 				"Authorization": "Bearer " + auth.getAccessToken()
 			}
 		}).done((data, textStatus, xhr) => {
-			console.log(data);
 			this.setState({
 				info_labaccess: {
 					active: data.data.has_labaccess,
@@ -42,9 +41,27 @@ module.exports = withRouter(class Member extends React.Component
 				UIkit.modal.alert("<h2>Misslyckades med att hämta nycklar</h2>Tog emot ett oväntat svar från servern:<br><br>" + xhr.status + " " + xhr.statusText + "<br><br>" + xhr.responseText);
 			}
 		});
+
+		$.ajax({
+			method: "GET",
+			url: config.apiBasePath + "/webshop/member/current/pending_actions",
+			cache: false,
+			headers: {
+				"Authorization": "Bearer " + auth.getAccessToken()
+			}
+		}).done((data, textStatus, xhr) => {
+			let pendingLabaccessDays = 0;
+			let actions = data.data;
+			for (let pending of actions) {
+				if (pending.action.name == "add_labaccess_days") {
+					pendingLabaccessDays += pending.pending_action.value;
+				}
+			}
+			this.setState({pendingLabaccessDays: pendingLabaccessDays});
+		});
 	}
 
-	renderInfo(info, prefix)
+	renderInfo(info, templateStrings)
 	{
 		if (info == null) {
 			return (
@@ -64,29 +81,29 @@ module.exports = withRouter(class Member extends React.Component
 				const remainingDays = Math.floor((end - Date.now()) / millisecondsPerDay);
 
 				if (remainingDays < -1) {
-					text = prefix + " är ogiltig sedan " + (-remainingDays) + " dagar.";
+					text = templateStrings[0](-remainingDays);
 					icon = "uk-icon-times";
 					color = "member-key-color-inactive";
 				} else if (remainingDays < 0) {
-					text = prefix + " gick ut idag.";
+					text = templateStrings[1]();
 					icon = "uk-icon-times";
 					color = "member-key-color-inactive";
 				} else if (remainingDays < 1) {
 					const remainingHours = Math.ceil((end - Date.now()) / millisecondsPerHour);
-					text = prefix + " är giltig i mindre än " + remainingHours + " timmar till.";
+					text = templateStrings[2](remainingHours);
 					icon = "uk-icon-check";
 					color = "member-key-color-warning";
 				} else if (remainingDays < 14) {
-					text = prefix + " är endast giltig i " + remainingDays + " dagar till. Kom ihåg att förnya den innan nästa nyckelutlämning.";
+					text = templateStrings[3](remainingDays);
 					icon = "uk-icon-check";
 					color = "member-key-color-warning";
 				} else {
-					text = prefix + " är giltig i " + remainingDays + " dagar till.";
+					text = templateStrings[4](remainingDays);
 					icon = "uk-icon-check";
 					color = "member-key-color-active";
 				}
 			} else {
-				text = prefix + " är inaktiv.";
+				text = templateStrings[5]();
 				icon = "uk-icon-times";
 				color = "member-key-color-inactive";
 			}
@@ -99,15 +116,39 @@ module.exports = withRouter(class Member extends React.Component
 
 	render()
 	{
+		let labaccessStrings = [
+			(days) => `Din labaccess är ogiltig sedan ${days} dagar.`,
+			() => `Din labaccess gick ut idag.`,
+			(hours) => `Din labaccess är giltig i mindre än ${hours} timmar till.`,
+			(days) => `Din labaccess är endast giltig i ${days} dagar till. Kom ihåg att förnya den innan nästa nyckelutlämning.`,
+			(days) => `Din labaccess är giltig i ${days} dagar till.`,
+			() => `Din labaccess är inaktiv.`,
+		];
+
+		let membershipStrings = [
+			(days) => `Ditt föreningsmedlemsskap är ogiltigt sedan ${days} dagar.`,
+			() => `Ditt föreningsmedlemsskap gick ut idag.`,
+			(hours) => `Ditt föreningsmedlemsskap är giltigt i mindre än ${hours} timmar till.`,
+			(days) => `Ditt föreningsmedlemsskap är endast giltigt i ${days} dagar till.`,
+			(days) => `Ditt föreningsmedlemsskap är giltigt i ${days} dagar till.`,
+			() => `Ditt föreningsmedlemsskap är inaktivt.`,
+		];
+
+		let calendarURL = "https://www.makerspace.se/kalendarium";
+		let pendingAccess = "";
+		if (this.state.pendingLabaccessDays > 0) {
+			pendingAccess = <p>Du har {this.state.pendingLabaccessDays} dagar som kommer att läggas till på din labaccess vid nästa <a href={calendarURL}>nyckelutlämning</a>.</p>;
+		} else {
+			pendingAccess = <p>Om du köper ny labaccess i webshoppen så kommer den aktiveras vid nästa <a href={calendarURL}>nyckelutlämning</a>.</p>;
+		}
+
 		return (
 			<fieldset data-uk-margin>
 				<legend><i className="uk-icon-key"></i> Medlemsskap</legend>
-				{this.renderInfo(this.state.info_labaccess, "Din labaccess")}
-				<p>Om du köper ny labaccess i webshoppen så kommer den aktiveras vid nästa nyckelutlämning.</p>
+				{this.renderInfo(this.state.info_membership, membershipStrings)}
+				{this.renderInfo(this.state.info_labaccess, labaccessStrings)}
+				{pendingAccess}
 			</fieldset>
 		);
-
-		// Disabled until membership is actually supported
-		// {this.renderInfo(this.state.info_membership, "Ditt medlemsskap")}
 	}
 });
