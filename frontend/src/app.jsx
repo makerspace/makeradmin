@@ -13,7 +13,6 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import {Router,	browserHistory} from 'react-router';
 import {Nav, SideNav} from './nav';
-import Backbone from './Backbone/FullExtend';
 
 // Login / OAuth
 import auth from './auth';
