@@ -19,13 +19,13 @@ module.exports = {
                     component: require("./TemplateList").default,
                 },
                 {
-					path: "templates/new",
-					component: require("./Pages/Templates/Add"),
-				},
-				{
-					path: "templates/:id",
-					component: require("./Pages/Templates/Edit"),
-				},
+                    path: "templates/new",
+                    component: require("./TemplateAdd").default,
+                },
+                {
+                    path: "templates/:id",
+                    component: require("./TemplateEdit").default,
+                },
 				{
 					path: ":id",
 					component: require("./Pages/Messages/Show")

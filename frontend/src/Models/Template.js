@@ -8,7 +8,7 @@ export default class Template extends Base {
     }
     
     canSave() {
-        return this.name;
+        return this.isDirty() && this.name;
     }
 }
 
