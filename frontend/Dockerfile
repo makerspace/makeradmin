@@ -5,7 +5,7 @@ RUN apk add --update nodejs-npm && rm -rf /var/cache/apk/*
 RUN mkdir -p /data/src && mkdir -p /data/dist/js
 
 # Copy package file first, to avoid having to install dependencies every time a source file is updated
-COPY ./webpack.config.js ./member.webpack.config.js ./package.json /data/
+COPY ./webpack.config.js ./member.webpack.config.js ./package.json ./package-lock.json /data/
 WORKDIR /data
 RUN npm install
 

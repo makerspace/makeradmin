@@ -4,7 +4,6 @@ __pycache__/
 .idea
 .envrc
 .mypy_cache
-package-lock.json
 # For VIM temp files
 *.swp
 webshop_product_images/

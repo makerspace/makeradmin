@@ -2,7 +2,7 @@ FROM node:8-alpine
 
 RUN mkdir /frontend
 
-COPY ./package.json /frontend/
+COPY ./package.json ./package-lock.json /frontend/
 
 WORKDIR /frontend
 
