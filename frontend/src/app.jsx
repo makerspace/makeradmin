@@ -21,183 +21,171 @@ import Login from './Pages/Login/Login'
 
 const nav = {
     brand: "MakerAdmin 1.0",
-    items:
-        [
-            {
-                text: "Medlemmar",
-                target: "/membership",
-                icon: "user",
-                children:
-                    [
-                        {
-                            text: "Medlemmar",
-                            target: "/membership/members",
-                            icon: "user",
-                        },
-                        {
-                            text: "Grupper",
-                            target: "/membership/groups",
-                            icon: "group",
-                        },
-                        {
-                            text: "Nycklar",
-                            target: "/membership/keys",
-                            icon: "key",
-                        },
-                        {
-                            text: "Medlemsperioder",
-                            target: "/membership/spans",
-                            icon: "clock-o",
-                        },
-                    ],
-            },
-            {
-                text: "Försäljning",
-                target: "/sales",
-                icon: "shopping-basket",
-                children:
-                    [
-                        {
-                            text: "Ordrar",
-                            target: "/sales/order",
-                        },
-                        {
-                            text: "Produkter",
-                            target: "/sales/product",
-                        },
-                    ],
-            },
-            {
-                text: "Utskick",
-                target: "/messages",
-                icon: "envelope",
-                children: [
+    items: [
+        {
+            text: "Medlemmar",
+            target: "/membership",
+            icon: "user",
+            children:
+                [
                     {
-                        text: "Historik",
-                        target: "/messages/history",
-                        icon: "list",
+                        text: "Medlemmar",
+                        target: "/membership/members",
+                        icon: "user",
                     },
                     {
-                        text: "Nytt utskick",
-                        target: "/messages/new",
-                        icon: "envelope",
+                        text: "Grupper",
+                        target: "/membership/groups",
+                        icon: "group",
                     },
                     {
-                        text: "Mallar",
-                        target: "/messages/templates",
-                        icon: "file-text-o",
+                        text: "Nycklar",
+                        target: "/membership/keys",
+                        icon: "key",
+                    },
+                    {
+                        text: "Medlemsperioder",
+                        target: "/membership/spans",
+                        icon: "clock-o",
                     },
                 ],
-            },
-            {
-                text: "Statistik",
-                target: "/statistics",
-                icon: "area-chart",
-            },
-            {
-                text: "Inställningar",
-                target: "/settings",
-                icon: "cog",
-                children:
-                    [
-                        {
-                            text: "About",
-                            target: "/settings/about",
-                        },
-                        {
-                            text: "Access tokens",
-                            target: "/settings/tokens",
-                        },
-                    ],
-            },
-            {
-                text: "Logga ut",
-                target: "/logout",
-                icon: "sign-out",
-            },
-        ]
+        },
+        {
+            text: "Försäljning",
+            target: "/sales",
+            icon: "shopping-basket",
+            children:
+                [
+                    {
+                        text: "Ordrar",
+                        target: "/sales/order",
+                    },
+                    {
+                        text: "Produkter",
+                        target: "/sales/product",
+                    },
+                ],
+        },
+        {
+            text: "Utskick",
+            target: "/messages",
+            icon: "envelope",
+            children: [
+                {
+                    text: "Historik",
+                    target: "/messages/history",
+                    icon: "list",
+                },
+                {
+                    text: "Nytt utskick",
+                    target: "/messages/new",
+                    icon: "envelope",
+                },
+                {
+                    text: "Mallar",
+                    target: "/messages/templates",
+                    icon: "file-text-o",
+                },
+            ],
+        },
+        {
+            text: "Statistik",
+            target: "/statistics",
+            icon: "area-chart",
+        },
+        {
+            text: "Inställningar",
+            target: "/settings",
+            icon: "cog",
+            children:
+                [
+                    {
+                        text: "About",
+                        target: "/settings/about",
+                    },
+                    {
+                        text: "Access tokens",
+                        target: "/settings/tokens",
+                    },
+                ],
+        },
+        {
+            text: "Logga ut",
+            target: "/logout",
+            icon: "sign-out",
+        },
+    ]
 };
 
-const App = React.createClass({
-	getInitialState()
-	{
-		return {
-			isLoggedIn: auth.isLoggedIn()
-		};
-	},
 
-	updateAuth(isLoggedIn)
-	{
-		this.setState({
-			isLoggedIn
-		});
-	},
+class App extends React.Component {
+    
+    constructor(props) {
+        super(props);
+        this.state = {
+            isLoggedIn: auth.isLoggedIn()
+        };
+    }
+    
+    componentDidMount() {
+        auth.onChange = isLoggedIn => this.setState({isLoggedIn});
+    }
 
-	componentWillMount()
-	{
-		auth.onChange = this.updateAuth;
-	},
+    render() {
+        if (this.state.isLoggedIn) {
+            return (
+                <div>
+                    <Nav nav={nav} />
+                    <div className="uk-container uk-container-center uk-margin-top">
+                        <div className="uk-grid">
+                            <div className="uk-width-medium-1-4">
+                                <SideNav nav={nav} />
+                            </div>
 
-	render: function()
-	{
-		if(this.state.isLoggedIn)
-		{
-			return (
-				<div>
-					<Nav nav={nav} />
-					<div className="uk-container uk-container-center uk-margin-top">
-						<div className="uk-grid">
-							<div className="uk-width-medium-1-4">
-								<SideNav nav={nav} />
-							</div>
+                            <div className="uk-width-medium-3-4">
+                                {this.props.children}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
 
-							<div className="uk-width-medium-3-4">
-								{this.props.children}
-							</div>
-						</div>
-					</div>
-				</div>
-			);
-		}
-
-		return (
-			<Login />
-		);
-
-	}
-});
+        return <Login/>;
+    }
+}
 App.title = "MakerAdmin";
 
 const rootRoute = {
     childRoutes: [
         require("./User/Routes"),
         {
-			path: "resetpassword",
-			component: require("./Pages/Login/ResetPassword"),
-		},
-		{
-			path: "/",
-			component: App,
-			indexRoute: {
-				component: require("./Pages/Dashboard"),
-			},
-			childRoutes: [
-				{
-					path: "logout",
-					component: require("./Pages/Login/Logout"),
-				},
+            path: "resetpassword",
+            component: require("./Pages/Login/ResetPassword"),
+        },
+        {
+            path: "/",
+            component: App,
+            indexRoute: {
+                component: require("./Pages/Dashboard"),
+            },
+            childRoutes: [
+                {
+                    path: "logout",
+                    component: require("./Pages/Login/Logout"),
+                },
                 require("./Membership/Routes"),
                 require("./Sales/Routes"),
                 require("./Messages/Routes"),
                 require("./Statistics/Routes"),
                 require("./Settings/Routes"),
-				{
-					path: "*",
-					component: require("./Pages/404"),
-				},
-			]
-		}
-	]
+                {
+                    path: "*",
+                    component: require("./Pages/404"),
+                },
+            ]
+        }
+    ]
 };
 
 
