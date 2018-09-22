@@ -16,6 +16,8 @@ class MessageList extends React.Component {
     render() {
         return (
             <div className="uk-margin-top">
+                <h2>Utskickshistorik</h2>
+                <p>Lista över samtliga utskick.</p>
                 <CollectionTable
                     collection={this.collection}
                     columns={[

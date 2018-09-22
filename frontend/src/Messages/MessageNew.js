@@ -31,6 +31,7 @@ class MessageNew extends React.Component {
     render() {
         return (
             <div className="uk-margin-top">
+                <h2>Skapa utskick</h2>
                 <MessageForm recipientSelect={true} message={this.message} onSave={() => this.onSend()}/>
             </div>
         );

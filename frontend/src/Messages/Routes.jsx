@@ -14,11 +14,11 @@ module.exports = {
                     path: "new",
                     component: require("./MessageNew").default
                 },
-				{
-					path: "templates",
-					component: require("./Pages/Templates/List"),
-				},
-				{
+                {
+                    path: "templates",
+                    component: require("./TemplateList").default,
+                },
+                {
 					path: "templates/new",
 					component: require("./Pages/Templates/Add"),
 				},
@@ -33,4 +33,4 @@ module.exports = {
 			]
 		},
 	]
-}
+};
