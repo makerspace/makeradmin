@@ -10,10 +10,10 @@ module.exports = {
                     path: "history",
                     component: require("./MessageList").default
                 },
-				{
-					path: "new",
-					component: require("./Pages/Messages/New")
-				},
+                {
+                    path: "new",
+                    component: require("./MessageNew").default
+                },
 				{
 					path: "templates",
 					component: require("./Pages/Templates/List"),

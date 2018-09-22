@@ -35,7 +35,7 @@ export default class Input2 extends React.Component {
                                        "changed": isDirty,
                                    });
         
-        const input = <input id={name} name={name} placeholder={placeholder} className="uk-input"
+        const input = <input id={name} name={name} placeholder={placeholder} className="uk-input uk-width-1-1"
                              value={value}
                              disabled={disabled}
                              type={type || "text"}

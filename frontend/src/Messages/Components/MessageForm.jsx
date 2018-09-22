@@ -3,8 +3,35 @@ import { withRouter } from 'react-router';
 import Input2 from "../../Components/Form/Input2";
 import Textarea2 from "../../Components/Form/Textarea2";
 import {Async} from "react-select";
+import { get } from "../../gateway";
+import Group from "../../Models/Group";
+import Member from "../../Models/Member";
+
 
 // TODO Maybe not really a reusable component, check usages later (and move it to better place).
+
+
+const groupOption = d => {
+    const id = d[Group.model.id];
+    const type = "group";
+    return {
+        id,
+        type,
+        label: `Grupp: ${d.title}`,
+        value: type + id,
+    };
+};
+
+const memberOption = d => {
+    const id = d[Member.model.id];
+    const type = "member";
+    return {
+        id,
+        type,
+        label: `Medlem: ${d.firstname} ${d.lastname} (#${d.member_number})`,
+        value: type + id,
+    };
+};
 
 class MessageForm extends React.Component {
 
@@ -22,6 +49,7 @@ class MessageForm extends React.Component {
             this.setState({
                               sendDisabled: !message.canSave(),
                               message_type: message.message_type,
+                              recipients: message.recipients,
                           });
         });
     }
@@ -30,10 +58,20 @@ class MessageForm extends React.Component {
         this.unsubscribe();
     }
 
+    loadOptions(inputValue, callback) {
+        Promise.all([
+                        get({url: '/membership/group', params: {search: inputValue, sort_by: "name", sort_order: "asc"}}),
+                        get({url: '/membership/member', params: {search: inputValue, sort_by: "firstname", sort_order: "asc"}}),
+                    ])
+               .then(([{data: groups}, {data: members}]) => callback(groups.map(d => groupOption(d)).concat(members.map(d => memberOption(d)))));
+    }
+    
     render() {
+        
+        
         const {message, onSave: onSend, recipientSelect} = this.props;
-        const {sendDisabled, message_type} = this.state;
-        //
+        const {sendDisabled, message_type, recipients} = this.state;
+        
         return (
             <form className="uk-form uk-form-horizontal" onSubmit={(e) => {e.preventDefault(); onSend(); return false;}}>
                 <div className="uk-form-row">
@@ -56,7 +94,17 @@ class MessageForm extends React.Component {
                             Mottagare
                         </label>
                         <div className="uk-form-controls">
-                            <Async ref="recps" isMulti cache={false} name="recipients" filterOption={this.filter} getOptionValue={e => e.value} getOptionLabel={e => e.label} loadOptions={this.search} value={this.state.recipients} onChange={this.changeRecipient} onValueClick={this.gotoMember} />
+                            <Async ref="recps"
+                                   name="recipients"
+                                   isMulti
+                                   cache={false}
+                                   placeholder="Type to search for member or group"
+                                   getOptionValue={e => e.value}
+                                   getOptionLabel={e => e.label}
+                                   loadOptions={(v, c) => this.loadOptions(v, c)}
+                                   value={recipients}
+                                   onChange={values => message.recipients = values}
+                            />
                         </div>
                     </div>
                     :

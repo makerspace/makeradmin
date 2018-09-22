@@ -154,6 +154,7 @@ export default ProductForm;
 
 
 /*
+TODO Remvoe.
 var ProductActionModel = Backbone.Model.fullExtend({
 	idAttribute: "id",
 	urlRoot: "/webshop/product_action",
