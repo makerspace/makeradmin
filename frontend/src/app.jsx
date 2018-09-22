@@ -19,7 +19,7 @@ import Backbone from './Backbone/FullExtend';
 import auth from './auth'
 import Login from './Pages/Login/Login'
 
-var nav = new Backbone.Model({
+const nav = new Backbone.Model({
 	brand: "MakerAdmin 1.0",
 	navItems:
 	[
@@ -215,6 +215,4 @@ const rootRoute = {
 };
 
 
-ReactDOM.render((
-	<Router history={browserHistory} routes={rootRoute} />
-), document.getElementById("main"));
+ReactDOM.render(<Router history={browserHistory} routes={rootRoute} />, document.getElementById("main"));
