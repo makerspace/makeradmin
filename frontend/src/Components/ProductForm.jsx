@@ -147,6 +147,8 @@ class ProductForm extends React.Component {
     }
 }
 
+// TODO Image upload should be supported.
+
 
 export default ProductForm;
 
