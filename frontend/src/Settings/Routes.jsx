@@ -3,7 +3,7 @@ module.exports = {
         {
             path: "settings",
             indexRoute: {
-                component: require("./About").default,
+                onEnter: (nextState, replace) => replace("/settings/about"),
             },
             childRoutes: [
                 {

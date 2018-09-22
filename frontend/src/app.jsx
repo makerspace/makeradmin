@@ -19,104 +19,104 @@ import Backbone from './Backbone/FullExtend';
 import auth from './auth';
 import Login from './Pages/Login/Login'
 
-const nav = new Backbone.Model({
-	brand: "MakerAdmin 1.0",
-	navItems:
-	[
-		{
-			text: "Medlemmar",
-			target: "/membership",
-			icon: "user",
-			children:
-			[
-				{
-					text: "Medlemmar",
-					target: "/membership/members",
-					icon: "user",
-				},
-				{
-					text: "Grupper",
-					target: "/membership/groups",
-					icon: "group",
-				},
-				{
-					text: "Nycklar",
-					target: "/membership/keys",
-					icon: "key",
-				},
-						{
-					text: "Medlemsperioder",
-					target: "/membership/spans",
-					icon: "clock-o",
-				},
-			],
-		},
-		{
-			text: "Försäljning",
-			target: "/sales",
-			icon: "shopping-basket",
-			children:
-			[
-				{
-					text: "Ordrar",
-					target: "/sales/order",
-				},
-				{
-					text: "Produkter",
-					target: "/sales/product",
-				},
-			],
-		},
-		{
-			text: "Utskick",
-			target: "/messages",
-			icon: "envelope",
-			children: [
-				{
-					text: "Historik",
-					target: "/messages/history",
-					icon: "list",
-				},
-				{
-					text: "Nytt utskick",
-					target: "/messages/new",
-					icon: "envelope",
-				},
-				{
-					text: "Mallar",
-					target: "/messages/templates",
-					icon: "file-text-o",
-				},
-			],
-		},
-		{
-			text: "Statistik",
-			target: "/statistics",
-			icon: "area-chart",
-		},
-		{
-			text: "Inställningar",
-			target: "/settings",
-			icon: "cog",
-			children:
-			[
-				{
-					text: "About",
-					target: "/settings/about",
-				},
-				{
-					text: "Access tokens",
-					target: "/settings/tokens",
-				},
-			],
-		},
-		{
-			text: "Logga ut",
-			target: "/logout",
-			icon: "sign-out",
-		},
-	]
-});
+const nav = {
+    brand: "MakerAdmin 1.0",
+    items:
+        [
+            {
+                text: "Medlemmar",
+                target: "/membership",
+                icon: "user",
+                children:
+                    [
+                        {
+                            text: "Medlemmar",
+                            target: "/membership/members",
+                            icon: "user",
+                        },
+                        {
+                            text: "Grupper",
+                            target: "/membership/groups",
+                            icon: "group",
+                        },
+                        {
+                            text: "Nycklar",
+                            target: "/membership/keys",
+                            icon: "key",
+                        },
+                        {
+                            text: "Medlemsperioder",
+                            target: "/membership/spans",
+                            icon: "clock-o",
+                        },
+                    ],
+            },
+            {
+                text: "Försäljning",
+                target: "/sales",
+                icon: "shopping-basket",
+                children:
+                    [
+                        {
+                            text: "Ordrar",
+                            target: "/sales/order",
+                        },
+                        {
+                            text: "Produkter",
+                            target: "/sales/product",
+                        },
+                    ],
+            },
+            {
+                text: "Utskick",
+                target: "/messages",
+                icon: "envelope",
+                children: [
+                    {
+                        text: "Historik",
+                        target: "/messages/history",
+                        icon: "list",
+                    },
+                    {
+                        text: "Nytt utskick",
+                        target: "/messages/new",
+                        icon: "envelope",
+                    },
+                    {
+                        text: "Mallar",
+                        target: "/messages/templates",
+                        icon: "file-text-o",
+                    },
+                ],
+            },
+            {
+                text: "Statistik",
+                target: "/statistics",
+                icon: "area-chart",
+            },
+            {
+                text: "Inställningar",
+                target: "/settings",
+                icon: "cog",
+                children:
+                    [
+                        {
+                            text: "About",
+                            target: "/settings/about",
+                        },
+                        {
+                            text: "Access tokens",
+                            target: "/settings/tokens",
+                        },
+                    ],
+            },
+            {
+                text: "Logga ut",
+                target: "/logout",
+                icon: "sign-out",
+            },
+        ]
+};
 
 const App = React.createClass({
 	getInitialState()
@@ -144,11 +144,11 @@ const App = React.createClass({
 		{
 			return (
 				<div>
-					<Nav model={nav} />
+					<Nav nav={nav} />
 					<div className="uk-container uk-container-center uk-margin-top">
 						<div className="uk-grid">
 							<div className="uk-width-medium-1-4">
-								<SideNav model={nav} />
+								<SideNav nav={nav} />
 							</div>
 
 							<div className="uk-width-medium-3-4">
