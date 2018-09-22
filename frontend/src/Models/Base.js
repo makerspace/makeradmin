@@ -109,12 +109,13 @@ export default class Base {
             this.unsaved = {};
             this.notify();
         });
-        
     }
     
     // Return a new shallow copy of object with id property set to 0.
     copy() {
-        return new this(Object.assign({}, this.saved, {[this.constructor.id]: 0}));
+        const copy = new this.constructor();
+        copy.unsaved = Object.assign({}, this.saved, this.unsaved, {[this.constructor.model.id]: 0});
+        return copy;
     }
     
     // Returns true if unsaved.

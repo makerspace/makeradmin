@@ -41,7 +41,7 @@ export default class Select2 extends React.Component {
                                value={options.filter(o => o.id === value)[0]}
                                getOptionValue={getValue}
                                getOptionLabel={getLabel}
-                               onChange={v => model[name] = v}
+                               onChange={o => model[name] = getValue(o)}
                                isDisabled={!options.length}
                         />;
 
