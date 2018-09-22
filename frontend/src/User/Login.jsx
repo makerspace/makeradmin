@@ -1,8 +1,6 @@
 import React from 'react';
 import { withRouter } from 'react-router'
 
-import MemberLogin from './MemberLogin'
-import MemberView from './MemberView'
 import auth from '../auth'
 
 module.exports = withRouter(class Login extends React.Component

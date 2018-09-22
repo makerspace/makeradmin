@@ -1,11 +1,6 @@
 import React from 'react';
 import { withRouter } from 'react-router'
 
-// import CountryDropdown from '../../../CountryDropdown'
-import DateTimeField from '../Components/DateTime'
-import MemberModel from './Models/Member'
-import Input from '../Components/Form/Input.jsx'
-import GenericEntityFunctions from '../GenericEntityFunctions'
 import auth from '../auth'
 
 module.exports = withRouter(class Member extends React.Component

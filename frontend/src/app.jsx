@@ -16,7 +16,7 @@ import {Nav, SideNav, SideNav2, Breadcrumb} from './nav';
 import Backbone from './Backbone/FullExtend';
 
 // Login / OAuth
-import auth from './auth'
+import auth from './auth';
 import Login from './Pages/Login/Login'
 
 const nav = new Backbone.Model({
@@ -172,20 +172,9 @@ const App = React.createClass({
 App.title = "MakerAdmin";
 
 const rootRoute = {
-	childRoutes: [
-		{
-			path: "member",
-			indexRoute: {
-				component: require("./User/Member"),
-			},
-			childRoutes: [
-				{
-					path: "login/:token",
-					component: require("./User/Login"),
-				}
-			]
-		},
-		{
+    childRoutes: [
+        require("./User/Routes"),
+        {
 			path: "resetpassword",
 			component: require("./Pages/Login/ResetPassword"),
 		},
