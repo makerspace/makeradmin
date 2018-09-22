@@ -200,27 +200,11 @@ const rootRoute = {
 					path: "logout",
 					component: require("./Pages/Login/Logout"),
 				},
-				require("./Membership/Routes"),
-				require("./Sales/Routes"),
-				require("./Messages/Routes"),
-				require("./Statistics/Routes"),
-				require("./Tictail/Routes"),
-				{
-					path: "settings",
-					indexRoute: {
-						component: require("./Pages/About"),
-					},
-					childRoutes: [
-						{
-							path: "tokens",
-							component: require("./Pages/Login/AccessTokens"),
-						},
-						{
-							path: "about",
-							component: require("./Pages/About"),
-						},
-					]
-				},
+                require("./Membership/Routes"),
+                require("./Sales/Routes"),
+                require("./Messages/Routes"),
+                require("./Statistics/Routes"),
+                require("./Settings/Routes"),
 				{
 					path: "*",
 					component: require("./Pages/404"),
