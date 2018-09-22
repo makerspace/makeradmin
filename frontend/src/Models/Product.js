@@ -31,6 +31,10 @@ export default class Product extends Base {
         return `Are you sure you want to product ${this.name}?`;
     }
     
+    del() {
+        return Promise.all(this.savedActions.map(a => a.del())).then(super.del());
+    }
+    
     save() {
         return super.save()
                     .then(() => {
