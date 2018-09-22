@@ -8,15 +8,13 @@ require('uikit/dist/js/components/autocomplete')
 require('uikit/dist/js/components/notify')
 require('uikit/dist/js/components/upload')
 
-// React stuff
 import React from 'react';
 import ReactDOM from 'react-dom';
 import {Router,	browserHistory} from 'react-router';
 import {Nav, SideNav} from './nav';
-
-// Login / OAuth
 import auth from './auth';
-import Login from './Pages/Login/Login'
+import Login from './Login';
+
 
 const nav = {
     brand: "MakerAdmin 1.0",
@@ -160,18 +158,18 @@ const rootRoute = {
         require("./User/Routes"),
         {
             path: "resetpassword",
-            component: require("./Pages/Login/ResetPassword"),
+            component: require("./ResetPassword"),
         },
         {
             path: "/",
             component: App,
             indexRoute: {
-                component: require("./Pages/Dashboard"),
+                component: require("./Dashboard").default,
             },
             childRoutes: [
                 {
                     path: "logout",
-                    component: require("./Pages/Login/Logout"),
+                    component: require("./Logout").default,
                 },
                 require("./Membership/Routes"),
                 require("./Sales/Routes"),
@@ -180,7 +178,7 @@ const rootRoute = {
                 require("./Settings/Routes"),
                 {
                     path: "*",
-                    component: require("./Pages/404"),
+                    component: require("./404").default,
                 },
             ]
         }

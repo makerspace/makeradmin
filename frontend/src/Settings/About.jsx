@@ -4,9 +4,6 @@ import React from 'react';
 const ReactVersion    = require("../../node_modules/react/package.json").version;
 const JqueryVersion = require("../../node_modules/jquery/package.json").version;
 const UikitVersion = require("../../node_modules/uikit/package.json").version;
-const BackboneVersion = require("../../node_modules/backbone/package.json").version;
-const BackboneReactVersion = require("../../node_modules/backbone-react-component//package.json").version;
-const BackbonePaginatorVersion = require("../../node_modules/backbone.paginator//package.json").version;
 const ReactRouterVersion = require("../../node_modules/react-router/package.json").version;
 const ReactSelectVersion = require("../../node_modules/react-select/package.json").version;
 const ReactDomVersion = require("../../node_modules/react-dom/package.json").version;
@@ -43,15 +40,6 @@ export default () => {
 
                 <dt>uikit version:</dt>
                 <dd>{UikitVersion}</dd>
-
-                <dt>Backbone version:</dt>
-                <dd>{BackboneVersion}</dd>
-
-                <dt>backbone-react-component version:</dt>
-                <dd>{BackboneReactVersion}</dd>
-
-                <dt>backbone.paginator version:</dt>
-                <dd>{BackbonePaginatorVersion}</dd>
 
                 <dt>react-router version:</dt>
                 <dd>{ReactRouterVersion}</dd>
