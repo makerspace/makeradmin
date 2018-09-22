@@ -1,7 +1,7 @@
 module.exports = {
     path: "member",
     indexRoute: {
-        component: require("./Member"),
+        component: require("./Member").default,
     },
     childRoutes: [
         {
