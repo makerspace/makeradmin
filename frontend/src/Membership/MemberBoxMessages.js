@@ -11,8 +11,8 @@ const Row = props => {
     
     return (
         <tr>
-            <td>{Message.statusText(item)}</td>
             <td><DateTime date={item.created_at}/></td>
+            <td>{Message.statusText(item)}</td>
             <td>{Message.typeIcon(item)} {item.recipient}</td>
             <td><Link to={"/messages/" + item.id}>{item.subject}</Link></td>
         </tr>
@@ -29,8 +29,8 @@ class MemberBoxMessages extends React.Component {
 
     render() {
         const columns = [
-            {title: "Status", sort: "status"},
             {title: "Skapad", sort: "created_at"},
+            {title: "Status", sort: "status"},
             {title: "Mottagare", sort: "recipient"},
             {title: "Meddelande", sort: "subject"},
         ];

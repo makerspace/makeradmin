@@ -24,7 +24,7 @@ Message.model = {
         message_id: 0,
         message_type: "email",
         num_recipients: 0,
-        recipients: [],
+        recipient: "",
         status: "",
         subject: "",
         date_sent: null,
