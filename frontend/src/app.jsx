@@ -12,7 +12,7 @@ require('uikit/dist/js/components/upload')
 import React from 'react';
 import ReactDOM from 'react-dom';
 import {Router,	browserHistory} from 'react-router';
-import {Nav, SideNav, SideNav2} from './nav';
+import {Nav, SideNav} from './nav';
 import Backbone from './Backbone/FullExtend';
 
 // Login / OAuth
@@ -145,12 +145,10 @@ const App = React.createClass({
 			return (
 				<div>
 					<Nav model={nav} />
-					<SideNav model={nav} />
-
 					<div className="uk-container uk-container-center uk-margin-top">
 						<div className="uk-grid">
 							<div className="uk-width-medium-1-4">
-								<SideNav2 model={nav} />
+								<SideNav model={nav} />
 							</div>
 
 							<div className="uk-width-medium-3-4">

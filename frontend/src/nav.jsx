@@ -56,36 +56,13 @@ var Nav = React.createClass({
 							return (<NavItem navItem={navItem} key={i} />);
 						})}
 					</ul>
-					<div className="uk-navbar-flip">
-						<a className="uk-navbar-toggle uk-visible-small" data-uk-offcanvas="{target:'#sidenav'}"></a>
-					</div>
 				</div>
 			</nav>
 		);
 	}
 });
 
-var SideNav = React.createClass({
-	mixins: [Backbone.React.Component.mixin],
-
-	render: function ()
-	{
-		return (
-			<div id="sidenav" className="uk-offcanvas">
-				<div className="uk-offcanvas-bar">
-					<ul className="uk-nav uk-nav-offcanvas" data-uk-nav>
-						<li><IndexLink to="/">{this.state.model.brand}</IndexLink></li>
-						{this.state.model.navItems.map(function (navItem, i) {
-							return (<NavItem navItem={navItem} key={i} />);
-						})}
-					</ul>
-				</div>
-			</div>
-		);
-	}
-})
-
-var SideNav2 = withRouter(React.createClass({
+var SideNav = withRouter(React.createClass({
 	mixins: [Backbone.React.Component.mixin],
 
 	render: function ()
@@ -134,4 +111,4 @@ var SideNav2 = withRouter(React.createClass({
 	},
 }));
 
-module.exports = { Nav, SideNav, SideNav2 }
+module.exports = { Nav, SideNav }
