@@ -6,7 +6,7 @@ import { notifySuccess } from "../message";
 import {withRouter} from "react-router";
 
 
-class MessageNew extends React.Component {
+class MessageAdd extends React.Component {
 
     constructor(props) {
         super(props);
@@ -38,4 +38,4 @@ class MessageNew extends React.Component {
     }
 }
 
-export default withRouter(MessageNew);
+export default withRouter(MessageAdd);

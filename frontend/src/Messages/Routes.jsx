@@ -12,7 +12,7 @@ module.exports = {
                 },
                 {
                     path: "new",
-                    component: require("./MessageNew").default
+                    component: require("./MessageAdd").default
                 },
                 {
                     path: "templates",
@@ -26,11 +26,11 @@ module.exports = {
                     path: "templates/:id",
                     component: require("./TemplateEdit").default,
                 },
-				{
-					path: ":id",
-					component: require("./Pages/Messages/Show")
-				},
-			]
-		},
-	]
+                {
+                    path: ":id",
+                    component: require("./MessageShow").default
+                },
+            ]
+        },
+    ]
 };
