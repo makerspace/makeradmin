@@ -9,11 +9,13 @@ export default class Select2 extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            options: [],
+            options: props.options || [],
             isDirty: false,
             value: null,
         };
-        get({url: props.dataSource}).then(data => this.setState({options: data.data}), () => null);
+        if (props.dataSource) {
+            get({url: props.dataSource}).then(data => this.setState({options: data.data}), () => null);
+        }
     }
 
     componentDidMount() {
@@ -44,8 +46,7 @@ export default class Select2 extends React.Component {
                                onChange={o => model[name] = getValue(o)}
                                isDisabled={!options.length}
                         />;
-
-                        
+        
         return (
             <div className={classes}>
                 <label className="uk-form-label" htmlFor={name}>{title}</label>

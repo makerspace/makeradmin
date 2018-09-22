@@ -26,7 +26,7 @@ export default class Input2 extends React.Component {
     
     render() {
         const {value, selected, isDirty} = this.state;
-        const {model, name, title, icon, disabled, placeholder, formrow, tabIndex, type} = this.props;
+        const {model, name, title, icon, disabled, placeholder, formrow, tabIndex, type, label} = this.props;
         
         const classes = classNames(name,
                                    {
@@ -35,7 +35,7 @@ export default class Input2 extends React.Component {
                                        "changed": isDirty,
                                    });
         
-        const input = <input id={name} name={name} placeholder={placeholder} className="uk-width-1-1"
+        const input = <input id={name} name={name} placeholder={placeholder} className="uk-input"
                              value={value}
                              disabled={disabled}
                              type={type || "text"}
@@ -46,7 +46,13 @@ export default class Input2 extends React.Component {
         
         return (
             <div className={classes}>
-                <label className="uk-form-label" htmlFor={name}>{title}</label>
+                {
+                    label
+                    ?
+                    <label className="uk-form-label" htmlFor={name}>{title}</label>
+                    :
+                    null
+                }
                 <div className="uk-form-controls">
                     {icon ? <div className="uk-form-icon"><i className={"uk-icon-" + icon}/>{input}</div> : input}
                 </div>
@@ -57,5 +63,6 @@ export default class Input2 extends React.Component {
 
 Input2.defaultProps = {
     formrow: true,
+    label: true,
 };
 

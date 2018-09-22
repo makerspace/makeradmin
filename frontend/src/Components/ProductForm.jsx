@@ -73,11 +73,20 @@ class ProductForm extends React.Component {
     
     render() {
         const {product, onDelete, onSave} = this.props;
-        const {actions, availableActionTypes, selectedActionType, saveDisabled} = this.state;
+        const {actions, availableActionTypes, selectedActionType, saveDisabled, actionTypes} = this.state;
         
-        const renderAction = action => {
-            return <div key={action.action_id}>{action.action_id} <button type="button" onClick={() => product.removeAction(action)}>remove</button></div>;
-        };
+        const actionName = action => (_.find(actionTypes, a => action.action_id === a.id) || {}).name;
+        
+        const renderAction = (action, i) => (
+            <div key={i} className="form-row uk-grid">
+                <div className="uk-with-1-6">{actionName(action)}</div>
+                <div className="uk-with-1-6"><strong>Värde</strong></div>
+                <div className="uk-with-3-6"><Input2 model={action} label={false} formrow={false} name={"value"}/></div>
+                <div className="uk-with-1-6">
+                    <a className="uk-button uk-button-danger" onClick={() => product.removeAction(action)}><i className="uk-icon-trash-o"/></a>
+                </div>
+            </div>
+        );
         
         return (
             <div className="uk-margin-top">
@@ -115,6 +124,7 @@ class ProductForm extends React.Component {
                     </fieldset>
                     <fieldset className="uk-margin-top">
                         <legend><i className="uk-icon-filter"/> Filter</legend>
+                        <Select2 model={product} name="filter" title="Filter" getLabel={o => o.name} getValue={o => o.id} options={[{id: "", name: "No filter"}, {id: "start_package", name: "Startpaket"}]}/>
                     </fieldset>
                     {
                         product.id

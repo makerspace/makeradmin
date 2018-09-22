@@ -75,6 +75,7 @@ export default class Product extends Base {
         return get({url: ProductAction.model.root, params: {product_id: this.id}})
             .then(({data}) => {
                 this.savedActions = data.map(d => new ProductAction(d));
+                this.unsavedActions = null;
                 this.notify();
             });
     }
