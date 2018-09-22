@@ -12,7 +12,7 @@ require('uikit/dist/js/components/upload')
 import React from 'react';
 import ReactDOM from 'react-dom';
 import {Router,	browserHistory} from 'react-router';
-import {Nav, SideNav, SideNav2, Breadcrumb} from './nav';
+import {Nav, SideNav, SideNav2} from './nav';
 import Backbone from './Backbone/FullExtend';
 
 // Login / OAuth
@@ -154,7 +154,6 @@ const App = React.createClass({
 							</div>
 
 							<div className="uk-width-medium-3-4">
-								<Breadcrumb routes={this.props.routes}/>
 								{this.props.children}
 							</div>
 						</div>

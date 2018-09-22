@@ -1,9 +1,6 @@
-import React from 'react'
-import {
-	Link,
-	IndexLink,
-	withRouter,
-} from 'react-router'
+import React from 'react';
+
+import {Link, IndexLink, withRouter} from 'react-router';
 import BackboneReact from 'backbone-react-component'
 
 var NavItem = withRouter(React.createClass({
@@ -137,26 +134,4 @@ var SideNav2 = withRouter(React.createClass({
 	},
 }));
 
-var Breadcrumb = React.createClass({
-	render: function ()
-	{
-//		const depth = this.props.routes.length;
-return (<span></span>);
-		return (
-			<ul className="uk-breadcrumb">
-				{this.props.routes.map((item, index) =>
-					<li key={index}>
-						<Link
-							onlyActiveOnIndex={true}
-							activeClassName="uk-active"
-							to={item.path || ''}>
-							{item.component.title}
-						</Link>
-					</li>
-				)}
-			</ul>
-		);
-	},
-});
-
-module.exports = { Nav, SideNav, SideNav2, Breadcrumb }
+module.exports = { Nav, SideNav, SideNav2 }
