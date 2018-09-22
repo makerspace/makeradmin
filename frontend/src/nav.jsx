@@ -3,40 +3,20 @@ import React from 'react';
 import {Link, IndexLink, withRouter} from 'react-router';
 import BackboneReact from 'backbone-react-component'
 
-var NavItem = withRouter(React.createClass({
-	render: function()
-	{
-		if(this.props.navItem.external)
-		{
-			return (
-				<li>
-					<a href={this.props.navItem.target}>{this.props.navItem.text}</a>
-				</li>
-			);
-		}
-		else
-		{
-			if(this.props.router.isActive(this.props.navItem.target))
-			{
-				var className = "uk-active";
-			}
-			else
-			{
-				var className = null;
-			}
 
-			return (
-				<li className={className}>
-					<IndexLink activeClassName="uk-active" to={this.props.navItem.target}>
-						<i className={"uk-icon-" + this.props.navItem.icon}></i>
-						&nbsp;
-						{this.props.navItem.text}
-					</IndexLink>
-				</li>
-			);
-		}
-	}
-}));
+const NavItem = withRouter(props => {
+    const {navItem, router} = props;
+    const {target, text, icon} = navItem;
+    
+    return (
+        <li className={router.isActive(target) ? "uk-active" : null}>
+            <IndexLink activeClassName="uk-active" to={target}>
+                <i className={"uk-icon-" + icon}/>&nbsp;{text}
+            </IndexLink>
+        </li>
+    );
+});
+
 
 var Nav = React.createClass({
 	mixins: [Backbone.React.Component.mixin],
