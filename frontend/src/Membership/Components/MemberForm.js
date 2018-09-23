@@ -1,5 +1,5 @@
 import React from 'react';
-import CountryDropdown from '../../CountryDropdown';
+import CountryDropdown from '../../Components/CountryDropdown';
 import DateTime from "../../Components/Form/DateTime";
 import Input2 from "../../Components/Form/Input2";
 import {withRouter} from "react-router";

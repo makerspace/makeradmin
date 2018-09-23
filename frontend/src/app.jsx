@@ -13,7 +13,7 @@ import ReactDOM from 'react-dom';
 import {Router,	browserHistory} from 'react-router';
 import {Nav, SideNav} from './nav';
 import auth from './auth';
-import Login from './Login';
+import Login from './Components/Login';
 
 
 const nav = {
@@ -158,18 +158,18 @@ const rootRoute = {
         require("./User/Routes"),
         {
             path: "resetpassword",
-            component: require("./ResetPassword"),
+            component: require("./Components/ResetPassword"),
         },
         {
             path: "/",
             component: App,
             indexRoute: {
-                component: require("./Dashboard").default,
+                component: require("./Components/Dashboard").default,
             },
             childRoutes: [
                 {
                     path: "logout",
-                    component: require("./Logout").default,
+                    component: require("./Components/Logout").default,
                 },
                 require("./Membership/Routes"),
                 require("./Sales/Routes"),
@@ -178,7 +178,7 @@ const rootRoute = {
                 require("./Settings/Routes"),
                 {
                     path: "*",
-                    component: require("./404").default,
+                    component: require("./Components/404").default,
                 },
             ]
         }

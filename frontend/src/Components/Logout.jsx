@@ -1,6 +1,6 @@
 import React from 'react';
 import { browserHistory } from 'react-router';
-import auth from './auth';
+import auth from '../auth';
 
 export default class Logout extends React.Component {
     

@@ -1,6 +1,6 @@
 import React from 'react';
 import { withRouter } from 'react-router'
-import auth from './auth';
+import auth from '../auth';
 
 module.exports = withRouter(class LoginResetPassword extends React.Component
 {
