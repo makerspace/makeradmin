@@ -28,7 +28,7 @@ class Auth {
     }
     
     login(username, password) {
-        fetch(config.apiBasePath + "/oath/token",
+        fetch(config.apiBasePath + "/oauth/token",
             {
                 body:    JSON.stringify({grant_type: "password", username, password}),
                 method:  "POST",
@@ -60,7 +60,7 @@ class Auth {
 
     logout() {
         // Tell the server to delete the access token
-        fetch(config.apiBasePath + "/token/resetpassword",
+        fetch(config.apiBasePath + "/oauth/token/" + this.getAccessToken(),
             {
                 method:  "DELETE",
                 headers: {'Content-Type': 'application/json; charset=UTF-8', "Authorization": "Bearer " + this.getAccessToken()},
