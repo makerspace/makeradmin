@@ -52,7 +52,7 @@ class MemberForm extends React.Component {
                         <div className="uk-form-row">
                             <label htmlFor="" className="uk-form-label">Land</label>
                             <div className="uk-form-controls">
-                                <CountryDropdown country={member.address_country} onChange={c => member.address_country = c} />
+                                <CountryDropdown model={member} name="address_country"/>
                             </div>
                         </div>
                     </fieldset>
