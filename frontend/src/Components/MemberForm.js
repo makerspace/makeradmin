@@ -1,7 +1,7 @@
 import React from 'react';
 import CountryDropdown from './CountryDropdown';
 import DateTimeShow from "./DateTimeShow";
-import Input2 from "./Form/Input2";
+import TextInput from "./TextInput";
 import {withRouter} from "react-router";
 
 
@@ -33,20 +33,20 @@ class MemberForm extends React.Component {
                     <fieldset >
                         <legend><i className="uk-icon-user"/> Personuppgifter</legend>
 
-                        <Input2 model={member} name="civicregno" title="Personnummer" />
-                        <Input2 model={member} name="firstname" title="Förnamn" />
-                        <Input2 model={member} name="lastname" title="Efternamn" />
-                        <Input2 model={member} name="email" title="E-post" />
-                        <Input2 model={member} name="phone" title="Telefonnummer" />
+                        <TextInput model={member} name="civicregno" title="Personnummer" />
+                        <TextInput model={member} name="firstname" title="Förnamn" />
+                        <TextInput model={member} name="lastname" title="Efternamn" />
+                        <TextInput model={member} name="email" title="E-post" />
+                        <TextInput model={member} name="phone" title="Telefonnummer" />
                     </fieldset>
 
                     <fieldset data-uk-margin>
                         <legend><i className="uk-icon-home"/> Adress</legend>
 
-                        <Input2 model={member} name="address_street" title="Address" />
-                        <Input2 model={member} name="address_extra" title="Address extra" placeholder="Extra adressrad, t ex C/O adress" />
-                        <Input2 model={member} name="address_zipcode" title="Postnummer" />
-                        <Input2 model={member} name="address_city" title="Postort" />
+                        <TextInput model={member} name="address_street" title="Address" />
+                        <TextInput model={member} name="address_extra" title="Address extra" placeholder="Extra adressrad, t ex C/O adress" />
+                        <TextInput model={member} name="address_zipcode" title="Postnummer" />
+                        <TextInput model={member} name="address_city" title="Postort" />
 
                         <div className="uk-form-row">
                             <label htmlFor="" className="uk-form-label">Land</label>

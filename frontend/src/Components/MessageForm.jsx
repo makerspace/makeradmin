@@ -1,7 +1,7 @@
 import React from 'react';
 import { withRouter } from 'react-router';
-import Input2 from "./Form/Input2";
-import Textarea2 from "./Form/Textarea2";
+import TextInput from "./TextInput";
+import Textarea from "./Textarea";
 import {Async} from "react-select";
 import { get } from "../gateway";
 import Group from "../Models/Group";
@@ -108,8 +108,8 @@ class MessageForm extends React.Component {
                     ""
                 }
 
-                {message_type === "email" ? <Input2 model={message} name="subject" title="Ärende"/> : ""}
-                <Textarea2 model={message} name="body" title="Meddelande"/>
+                {message_type === "email" ? <TextInput model={message} name="subject" title="Ärende"/> : ""}
+                <Textarea model={message} name="body" title="Meddelande"/>
 
                 <div className="uk-form-row">
                     <div className="uk-form-controls">

@@ -1,7 +1,7 @@
 import React from "react";
 import classNames from 'classnames/bind';
 
-export default class Textarea2 extends React.Component {
+export default class Textarea extends React.Component {
 
     constructor(props) {
         super(props);
@@ -51,7 +51,7 @@ export default class Textarea2 extends React.Component {
     }
 }
 
-Textarea2.defaultProps = {
+Textarea.defaultProps = {
     formrow: true,
 };
 

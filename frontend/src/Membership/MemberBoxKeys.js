@@ -4,7 +4,7 @@ import {Link} from "react-router";
 import CollectionTable from "../Components/CollectionTable";
 import Key from "../Models/Key";
 import {confirmModal} from "../message";
-import Input2 from "../Components/Form/Input2";
+import TextInput from "../Components/TextInput";
 import DateTimeShow from "../Components/DateTimeShow";
 
 
@@ -72,8 +72,8 @@ class MemberBoxKeys extends React.Component {
                         <form className="uk-form" onSubmit={(e) => {e.preventDefault(); this.createKey(); return false;}}>
                             <div className="uk-grid">
                                 <div className="uk-width-1-1">
-                                    <Input2 model={this.key} tabIndex="1" name="tagid" title="RFID" placeholder="Använd en RFID-läsare för att läsa av det unika numret på nyckeln" />
-                                    <Input2 model={this.key} tabIndex="2" name="description" title="Beskrivning" placeholder="Det är valfritt att lägga in en beskrivning av nyckeln" />
+                                    <TextInput model={this.key} tabIndex="1" name="tagid" title="RFID" placeholder="Använd en RFID-läsare för att läsa av det unika numret på nyckeln" />
+                                    <TextInput model={this.key} tabIndex="2" name="description" title="Beskrivning" placeholder="Det är valfritt att lägga in en beskrivning av nyckeln" />
 
                                     <div className="uk-form-row uk-margin-top">
                                         <div className="uk-form-controls">

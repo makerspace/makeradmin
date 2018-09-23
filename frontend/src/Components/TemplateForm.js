@@ -1,7 +1,7 @@
 import React from 'react';
-import Input2 from "./Form/Input2";
+import TextInput from "./TextInput";
 import {withRouter} from "react-router";
-import Textarea2 from "./Form/Textarea2";
+import Textarea from "./Textarea";
 
 
 class TemplateForm extends React.Component {
@@ -28,9 +28,9 @@ class TemplateForm extends React.Component {
         
         return (
             <form className="uk-form uk-form-stacked" onSubmit={(e) => {e.preventDefault(); onSave(); return false;}}>
-                <Input2 model={template} name="name" title="Namn"/>
-                <Input2 model={template} name="title" title="Titel"/>
-                <Textarea2 model={template} name="description" title="Meddelande"/>
+                <TextInput model={template} name="name" title="Namn"/>
+                <TextInput model={template} name="title" title="Titel"/>
+                <Textarea model={template} name="description" title="Meddelande"/>
                 
                 <div className="uk-form-row">
                     <div className="uk-form-row">

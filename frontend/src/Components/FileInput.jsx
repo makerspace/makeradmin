@@ -1,8 +1,8 @@
 import React from 'react'
 //import classNames from 'classnames/bind'
-import auth from '../../auth'
+import auth from '../auth'
 
-module.exports = class FormInput extends React.Component
+module.exports = class FileInput extends React.Component
 {
 	constructor(props)
 	{

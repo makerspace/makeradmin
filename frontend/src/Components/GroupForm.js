@@ -1,7 +1,7 @@
 import React from 'react';
-import Input2 from "./Form/Input2";
+import TextInput from "./TextInput";
 import {withRouter} from "react-router";
-import Textarea2 from "./Form/Textarea2";
+import Textarea from "./Textarea";
 
 
 class GroupForm extends React.Component {
@@ -29,9 +29,9 @@ class GroupForm extends React.Component {
         return (
             <div className="meep">
                 <form className="uk-form uk-margin-bottom" onSubmit={(e) => {e.preventDefault(); onSave(); return false;}}>
-                    <Input2    model={group} name="name"        title="Namn" />
-                    <Input2    model={group} name="title"       title="Titel" icon="tag" />
-                    <Textarea2 model={group} name="description" title="Beskrivning" />
+                    <TextInput model={group} name="name" title="Namn" />
+                    <TextInput model={group} name="title" title="Titel" icon="tag" />
+                    <Textarea model={group} name="description" title="Beskrivning" />
                     
                     <div className="uk-form-row uk-margin-top">
                         <div className="uk-form-controls">

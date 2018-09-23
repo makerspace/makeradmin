@@ -2,9 +2,7 @@ import React from "react";
 import classNames from 'classnames/bind';
 
 
-// TODO Remove local meep stying, use uk.
-// TODO Rename to Input when Input is no longer used.
-export default class Input2 extends React.Component {
+export default class TextInput extends React.Component {
 
     constructor(props) {
         super(props);
@@ -61,7 +59,7 @@ export default class Input2 extends React.Component {
     }
 }
 
-Input2.defaultProps = {
+TextInput.defaultProps = {
     formrow: true,
     label: true,
 };

@@ -1,6 +1,6 @@
 import React from 'react';
-import Input2 from "./Form/Input2";
-import Textarea2 from "./Form/Textarea2";
+import TextInput from "./TextInput";
+import Textarea from "./Textarea";
 import DateTimeInput from "./DateTimeInput";
 import {get} from "../gateway";
 import * as _ from "underscore";
@@ -81,7 +81,7 @@ class ProductForm extends React.Component {
             <div key={i} className="form-row uk-grid">
                 <div className="uk-with-1-6">{actionName(action)}</div>
                 <div className="uk-with-1-6"><strong>Värde</strong></div>
-                <div className="uk-with-3-6"><Input2 model={action} label={false} formrow={false} name={"value"}/></div>
+                <div className="uk-with-3-6"><TextInput model={action} label={false} formrow={false} name={"value"}/></div>
                 <div className="uk-with-1-6">
                     <a className="uk-button uk-button-danger" onClick={() => product.removeAction(action)}><i className="uk-icon-trash-o"/></a>
                 </div>
@@ -93,12 +93,12 @@ class ProductForm extends React.Component {
                 <form className="uk-form uk-form-stacked" onSubmit={(e) => {e.preventDefault(); onSave(); return false;}}>
                     <fieldset className="uk-margin-top">
                         <legend><i className="uk-icon-shopping-cart"/> Produkt</legend>
-                        <Input2 model={product} name="name" title="Produktnamn" />
+                        <TextInput model={product} name="name" title="Produktnamn" />
                         <Select2 model={product} name="category_id" title="Kategori" getLabel={o => o.name} getValue={o => o.id} dataSource={"/webshop/category"} />
-                        <Textarea2 model={product} name="description" title="Beskrivning" rows="4"/>
-                        <Input2 model={product} name="unit" title="Enhet" />
-                        <Input2 model={product} name="price" title="Pris (SEK)" type="number"/>
-                        <Input2 model={product} name="smallest_multiple" title="Multipel " type="number"/>
+                        <Textarea model={product} name="description" title="Beskrivning" rows="4"/>
+                        <TextInput model={product} name="unit" title="Enhet" />
+                        <TextInput model={product} name="price" title="Pris (SEK)" type="number"/>
+                        <TextInput model={product} name="smallest_multiple" title="Multipel " type="number"/>
                     </fieldset>
                     <fieldset className="uk-margin-top">
                         <legend><i className="uk-icon-magic"/> Åtgärder</legend>

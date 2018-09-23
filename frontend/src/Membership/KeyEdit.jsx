@@ -1,7 +1,7 @@
 import React from 'react';
 import Key from "../Models/Key";
-import Input2 from "../Components/Form/Input2";
-import Textarea2 from "../Components/Form/Textarea2";
+import TextInput from "../Components/TextInput";
+import Textarea from "../Components/Textarea";
 import DateTimeInput from "../Components/DateTimeInput";
 import {withRouter} from "react-router";
 import {confirmModal} from "../message";
@@ -54,8 +54,8 @@ class KeyEdit extends React.Component {
                                     </div>
                                 </div>
                                 
-                                <Input2 model={this.key} name="tagid" title="RFID" placeholder="Använd en RFID-läsare för att läsa av det unika numret på nyckeln" />
-                                <Textarea2 model={this.key} name="description" title="Beskrivning" placeholder="Det är valfritt att lägga in en beskrivning av nyckeln" />
+                                <TextInput model={this.key} name="tagid" title="RFID" placeholder="Använd en RFID-läsare för att läsa av det unika numret på nyckeln" />
+                                <Textarea model={this.key} name="description" title="Beskrivning" placeholder="Det är valfritt att lägga in en beskrivning av nyckeln" />
                                 
                                 <div className="uk-form-row uk-margin-top">
                                     <div className="uk-form-controls">
