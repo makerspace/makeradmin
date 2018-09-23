@@ -4,7 +4,7 @@ import Textarea from "./Textarea";
 import DateTimeInput from "./DateTimeInput";
 import {get} from "../gateway";
 import * as _ from "underscore";
-import Select2 from "./Form/Select2";
+import SelectInput from "./SelectInput";
 import ReactSelect from "react-select";
 import ProductAction from "../Models/ProductAction";
 
@@ -94,7 +94,7 @@ class ProductForm extends React.Component {
                     <fieldset className="uk-margin-top">
                         <legend><i className="uk-icon-shopping-cart"/> Produkt</legend>
                         <TextInput model={product} name="name" title="Produktnamn" />
-                        <Select2 model={product} name="category_id" title="Kategori" getLabel={o => o.name} getValue={o => o.id} dataSource={"/webshop/category"} />
+                        <SelectInput model={product} name="category_id" title="Kategori" getLabel={o => o.name} getValue={o => o.id} dataSource={"/webshop/category"} />
                         <Textarea model={product} name="description" title="Beskrivning" rows="4"/>
                         <TextInput model={product} name="unit" title="Enhet" />
                         <TextInput model={product} name="price" title="Pris (SEK)" type="number"/>
@@ -124,7 +124,7 @@ class ProductForm extends React.Component {
                     </fieldset>
                     <fieldset className="uk-margin-top">
                         <legend><i className="uk-icon-filter"/> Filter</legend>
-                        <Select2 model={product} name="filter" title="Filter" getLabel={o => o.name} getValue={o => o.id} options={[{id: "", name: "No filter"}, {id: "start_package", name: "Startpaket"}]}/>
+                        <SelectInput model={product} name="filter" title="Filter" getLabel={o => o.name} getValue={o => o.id} options={[{id: "", name: "No filter"}, {id: "start_package", name: "Startpaket"}]}/>
                     </fieldset>
                     {
                         product.id

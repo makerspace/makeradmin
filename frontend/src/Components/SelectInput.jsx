@@ -1,10 +1,10 @@
 import React from "react";
 import classNames from 'classnames/bind';
-import {get} from "../../gateway";
+import {get} from "../gateway";
 import Select from "react-select";
 
 
-export default class Select2 extends React.Component {
+export default class SelectInput extends React.Component {
 
     constructor(props) {
         super(props);
