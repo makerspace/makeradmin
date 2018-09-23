@@ -1,4 +1,3 @@
-// TODO Upgrade uikit.
 global.jQuery = require('jquery');
 global.$ = global.jQuery;
 require('uikit');
