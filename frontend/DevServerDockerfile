@@ -8,13 +8,14 @@ WORKDIR /frontend
 
 RUN npm install
 
-COPY ./webpack.config.js /frontend/
+COPY ./webpack.config.js ./member.webpack.config.js /frontend/
 
 COPY  ./src/ /frontend/src
 
 COPY  ./dist/ /frontend/dist
 
 EXPOSE 8080
+EXPOSE 8081
 
 ENV DEVELOPMENT=1
 

@@ -60,7 +60,10 @@ module.exports = {
     // Config for webpack-serve.
     devServer: {
         host: "0.0.0.0",
+        port: 8081,
         contentBase: "./dist",
-        historyApiFallback: true,
-    }
+        historyApiFallback: {
+            index: "member.html",
+        }, 
+   }
 }

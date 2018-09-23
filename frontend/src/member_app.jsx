@@ -12,33 +12,30 @@ require('uikit/dist/js/components/upload')
 import React from 'react';
 import ReactDOM from 'react-dom';
 import {Router,	browserHistory} from 'react-router';
-import Backbone from './Backbone/FullExtend';
 
 const rootRoute = {
-	childRoutes: [
-		{
-			path: "/",
-			indexRoute: {
-				component: require("./User/Member"),
-			},
-			childRoutes: [
-				{
-					path: "member",
-					onEnter: (nextState, replace) => replace("/"),
-				},
-				{
-					path: "login/:token",
-					component: require("./User/Login"),
-				},
-				{
-					path: "*",
-					component: require("./Pages/404"),
-				},
-			]
-		},
-	]
+    childRoutes: [
+        {
+            path: "/",
+            indexRoute: {
+                component: require("./User/Member").default,
+            },
+            childRoutes: [
+                {
+                    path: "member",
+                    onEnter: (nextState, replace) => replace("/"),
+                },
+                {
+                    path: "login/:token",
+                    component: require("./User/Login"),
+                },
+                {
+                    path: "*",
+                    component: require("./Components/404").default,
+                },
+            ]
+        },
+    ]
 };
 
-ReactDOM.render((
-	<Router history={browserHistory} routes={rootRoute} />
-), document.getElementById("main"));
+ReactDOM.render(<Router history={browserHistory} routes={rootRoute}/>, document.getElementById("main"));
