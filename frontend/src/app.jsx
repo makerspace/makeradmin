@@ -158,7 +158,7 @@ const rootRoute = {
         require("./User/Routes"),
         {
             path: "resetpassword",
-            component: require("./Components/ResetPassword"),
+            component: require("./Components/ResetPassword").default,
         },
         {
             path: "/",
