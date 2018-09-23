@@ -1,6 +1,6 @@
 import React from 'react';
 import CountryDropdown from './CountryDropdown';
-import DateTime from "./Form/DateTime";
+import DateTime from "./DateTime";
 import Input2 from "./Form/Input2";
 import {withRouter} from "react-router";
 

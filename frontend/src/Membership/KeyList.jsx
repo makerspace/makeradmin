@@ -4,7 +4,7 @@ import Date from '../Components/DateShow';
 import Collection from "../Models/Collection";
 import Key from "../Models/Key";
 import CollectionTable from "../Components/CollectionTable";
-import DateTime from "../Components/Form/DateTime";
+import DateTime from "../Components/DateTime";
 
 
 class SearchBox extends React.Component {

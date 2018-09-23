@@ -3,7 +3,7 @@ import Collection from "../Models/Collection";
 import AccessToken from "../Models/AccessToken";
 import CollectionTable from "../Components/CollectionTable";
 import auth from "../auth";
-import DateTime from "../Components/Form/DateTime";
+import DateTime from "../Components/DateTime";
 
 
 export default class AccessTokenList extends React.Component {

@@ -5,7 +5,7 @@ import {confirmModal} from "../message";
 import Message from "../Models/Message";
 import Collection from "../Models/Collection";
 import CollectionTable from "../Components/CollectionTable";
-import DateTime from "../Components/Form/DateTime";
+import DateTime from "../Components/DateTime";
 
 
 const status = item => {

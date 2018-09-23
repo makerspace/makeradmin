@@ -3,7 +3,7 @@ import { Link } from 'react-router';
 import Date from '../Components/DateShow';
 import Collection from "../Models/Collection";
 import CollectionTable from "../Components/CollectionTable";
-import DateTime from "../Components/Form/DateTime";
+import DateTime from "../Components/DateTime";
 import Span from "../Models/Span";
 import {confirmModal} from "../message";
 

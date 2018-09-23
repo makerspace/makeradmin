@@ -2,7 +2,7 @@ import React from 'react';
 import Collection from "../Models/Collection";
 import CollectionTable from "../Components/CollectionTable";
 import Message from "../Models/Message";
-import DateTime from "../Components/Form/DateTime";
+import DateTime from "../Components/DateTime";
 import {Link} from "react-router";
 
 

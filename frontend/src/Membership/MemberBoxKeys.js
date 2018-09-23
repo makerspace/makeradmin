@@ -5,7 +5,7 @@ import CollectionTable from "../Components/CollectionTable";
 import Key from "../Models/Key";
 import {confirmModal} from "../message";
 import Input2 from "../Components/Form/Input2";
-import DateTime from "../Components/Form/DateTime";
+import DateTime from "../Components/DateTime";
 
 
 const Row = collection => props => {
