@@ -3,7 +3,7 @@ import {Link} from "react-router";
 import Order from "../Models/Order";
 import Collection from "../Models/Collection";
 import CollectionTable from "../Components/CollectionTable";
-import DateTime from "../Components/DateTime";
+import DateTimeShow from "../Components/DateTimeShow";
 
 
 const Row = props => {
@@ -11,7 +11,7 @@ const Row = props => {
     return (
         <tr>
             <td><Link to={"/sales/order/" + item.id}>{item.id}</Link></td>
-            <td><DateTime date={item.created_at}/></td>
+            <td><DateTimeShow date={item.created_at}/></td>
             <td>{item.status}</td>
             <td><Link to={"/membership/members/" + item.member_id}>#{item.member_number}: {item.member_name}</Link></td>
             <td className='uk-text-right'>{item.amount} kr</td>

@@ -3,7 +3,7 @@ import Collection from "../Models/Collection";
 import AccessToken from "../Models/AccessToken";
 import CollectionTable from "../Components/CollectionTable";
 import auth from "../auth";
-import DateTime from "../Components/DateTime";
+import DateTimeShow from "../Components/DateTimeShow";
 
 
 export default class AccessTokenList extends React.Component {
@@ -30,7 +30,7 @@ export default class AccessTokenList extends React.Component {
                         <td>{item.access_token}</td>
                         <td>{item.browser}</td>
                         <td>{item.ip}</td>
-                        <td><DateTime date={item.expires} /></td>
+                        <td><DateTimeShow date={item.expires} /></td>
                     </tr>
                 )}
             />

@@ -5,17 +5,17 @@ import {confirmModal} from "../message";
 import Message from "../Models/Message";
 import Collection from "../Models/Collection";
 import CollectionTable from "../Components/CollectionTable";
-import DateTime from "../Components/DateTime";
+import DateTimeShow from "../Components/DateTimeShow";
 
 
 const status = item => {
     switch (item.status) {
         case "queued":
-            return <span>Köad <DateTime date={item.created_at}/></span>;
+            return <span>Köad <DateTimeShow date={item.created_at}/></span>;
         case "failed":
             return "Sändning misslyckades";
         case "sent":
-            return <span>Skickad <DateTime date={item.date_sent}/></span>;
+            return <span>Skickad <DateTimeShow date={item.date_sent}/></span>;
         default:
             return "Okänt";
     }
@@ -47,7 +47,7 @@ class MessageShow extends React.Component {
                 <h2>Utskick</h2>
                 <div className="uk-panel uk-panel-box uk-margin-bottom">
                     <dl>
-                        <dt>Skapad</dt><dd><DateTime date={message.created_at}/></dd>
+                        <dt>Skapad</dt><dd><DateTimeShow date={message.created_at}/></dd>
                         <dt>Typ</dt><dd>{Message.typeIcon(message)} {Message.typeText(message)}</dd>
                         <dt>Status</dt><dd>{Message.statusText(message)}</dd>
                         <dt>Antal mottagare</dt><dd>{message.num_recipients}</dd>
@@ -76,8 +76,8 @@ class MessageShow extends React.Component {
                             <tr>
                                 <td><Link to={"/membership/members/" + item.recipient_id}>{item.recipient}</Link></td>
                                 <td>{Message.statusText(item)}</td>
-                                <td><DateTime date={item.created_at}/></td>
-                                <td><DateTime date={item.date_sent}/></td>
+                                <td><DateTimeShow date={item.created_at}/></td>
+                                <td><DateTimeShow date={item.date_sent}/></td>
                             </tr>
                     )}
                 />

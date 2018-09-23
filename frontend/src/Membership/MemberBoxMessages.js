@@ -2,7 +2,7 @@ import React from 'react';
 import Collection from "../Models/Collection";
 import CollectionTable from "../Components/CollectionTable";
 import Message from "../Models/Message";
-import DateTime from "../Components/DateTime";
+import DateTimeShow from "../Components/DateTimeShow";
 import {Link} from "react-router";
 
 
@@ -11,7 +11,7 @@ const Row = props => {
     
     return (
         <tr>
-            <td><DateTime date={item.created_at}/></td>
+            <td><DateTimeShow date={item.created_at}/></td>
             <td>{Message.statusText(item)}</td>
             <td>{Message.typeIcon(item)} {item.recipient}</td>
             <td><Link to={"/messages/" + item.id}>{item.subject}</Link></td>

@@ -1,6 +1,6 @@
 import React from 'react';
 import CountryDropdown from './CountryDropdown';
-import DateTime from "./DateTime";
+import DateTimeShow from "./DateTimeShow";
 import Input2 from "./Form/Input2";
 import {withRouter} from "react-router";
 
@@ -66,7 +66,7 @@ class MemberForm extends React.Component {
                              <div className="uk-form-controls">
                                  <i className="uk-icon-calendar"/>
                                  &nbsp;
-                                 <DateTime date={member.created_at} />
+                                 <DateTimeShow date={member.created_at} />
                              </div>
                          </div>
                          
@@ -75,7 +75,7 @@ class MemberForm extends React.Component {
                              <div className="uk-form-controls">
                                  <i className="uk-icon-calendar"/>
                                  &nbsp;
-                                 <DateTime date={member.updated_at} />
+                                 <DateTimeShow date={member.updated_at} />
                              </div>
                          </div>
                      </fieldset>

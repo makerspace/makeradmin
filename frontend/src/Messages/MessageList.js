@@ -2,7 +2,7 @@ import React from 'react';
 import Collection from "../Models/Collection";
 import CollectionTable from "../Components/CollectionTable";
 import Message from "../Models/Message";
-import DateTime from "../Components/DateTime";
+import DateTimeShow from "../Components/DateTimeShow";
 import {Link} from "react-router";
 
 
@@ -29,7 +29,7 @@ class MessageList extends React.Component {
                     ]}
                     rowComponent={({item}) => (
                         <tr>
-                            <td><DateTime date={item.created_at}/></td>
+                            <td><DateTimeShow date={item.created_at}/></td>
                             <td>{Message.statusText(item)}</td>
                             <td>{Message.typeIcon(item)}</td>
                             <td>{item.num_recipients} st</td>

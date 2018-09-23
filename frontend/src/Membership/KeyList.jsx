@@ -4,7 +4,7 @@ import Date from '../Components/DateShow';
 import Collection from "../Models/Collection";
 import Key from "../Models/Key";
 import CollectionTable from "../Components/CollectionTable";
-import DateTime from "../Components/DateTime";
+import DateTimeShow from "../Components/DateTimeShow";
 
 
 class SearchBox extends React.Component {
@@ -39,7 +39,7 @@ const Row = props => {
         <tr>
             <td><Link to={"/membership/keys/" + item.id}>{item.tagid}</Link></td>
             <td><Link to={"/membership/members/" + item.member_id + "/keys"}>{item.member_number}</Link></td>
-            <td><DateTime date={item.created_at}/></td>
+            <td><DateTimeShow date={item.created_at}/></td>
             <td>{item.description}</td>
         </tr>
     );

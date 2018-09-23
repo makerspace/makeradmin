@@ -3,7 +3,7 @@ import { Link } from 'react-router';
 import Date from '../Components/DateShow';
 import Collection from "../Models/Collection";
 import CollectionTable from "../Components/CollectionTable";
-import DateTime from "../Components/DateTime";
+import DateTimeShow from "../Components/DateTimeShow";
 import Span from "../Models/Span";
 import {confirmModal} from "../message";
 
@@ -14,9 +14,9 @@ const Row = deleteItem => props => {
         <tr>
             <td><Link to={"/membership/spans/" + item.id}>{item.id}</Link></td>
             <td><Link to={"/membership/spans/" + item.id}>{item.span_type}</Link></td>
-            <td><DateTime date={item.created_at}/></td>
+            <td><DateTimeShow date={item.created_at}/></td>
             <td>{item.creation_reason}</td>
-            <td><DateTime date={item.deleted_at}/></td>
+            <td><DateTimeShow date={item.deleted_at}/></td>
             <td><Link to={"/membership/members/" + item.member_id}>#{item.member_number}: {item.firstname} {item.lastname}</Link></td>
             <td><Date date={item.startdate}/></td>
             <td><Date date={item.enddate}/></td>
