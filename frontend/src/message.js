@@ -1,4 +1,7 @@
-import UIkit from 'uikit';
+// TODO Upgrade uikit.
+global.jQuery = require('jquery');
+global.$ = global.jQuery;
+require('uikit');
 
 
 export function showPermissionDenied(message) {
@@ -19,6 +22,11 @@ export function showError(message) {
         "Unknown error."
     );
     UIkit.notify(message, {timeout: 0, status: "danger"});
+}
+
+
+export function showSuccess(message) {
+    UIkit.notify(message, {timeout: 0, status: "success"});
 }
 
 
