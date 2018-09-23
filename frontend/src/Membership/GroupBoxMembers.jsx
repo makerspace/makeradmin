@@ -4,7 +4,7 @@ import {Async} from "react-select";
 import Collection from "../Models/Collection";
 import Member from "../Models/Member";
 import CollectionTable from "../Components/CollectionTable";
-import Date from "../Components/Date";
+import Date from "../Components/DateShow";
 import { get } from "../gateway";
 import * as _ from "underscore";
 

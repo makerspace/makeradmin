@@ -1,7 +1,7 @@
 import React from 'react';
 import Input2 from "./Form/Input2";
 import Textarea2 from "./Form/Textarea2";
-import Date2 from "./Form/Date2";
+import DateTimeInput from "./DateTimeInput";
 import {get} from "../gateway";
 import * as _ from "underscore";
 import Select2 from "./Form/Select2";
@@ -131,8 +131,8 @@ class ProductForm extends React.Component {
                         ?
                         <fieldset className="uk-margin-top">
                             <legend><i className="uk-icon-tag"/> Metadata</legend>
-                            <Date2 model={product} name="created_at" title="Skapad"/>
-                            <Date2 model={product} name="updated_at" title="Uppdaterad"/>
+                            <DateTimeInput model={product} name="created_at" title="Skapad"/>
+                            <DateTimeInput model={product} name="updated_at" title="Uppdaterad"/>
                         </fieldset>
                         :
                         ""

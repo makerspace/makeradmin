@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router';
-import Date from '../Components/Date';
+import Date from '../Components/DateShow';
 import Collection from "../Models/Collection";
 import CollectionTable from "../Components/CollectionTable";
 import DateTime from "../Components/Form/DateTime";

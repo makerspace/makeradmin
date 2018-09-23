@@ -2,7 +2,7 @@ import React from 'react';
 import Key from "../Models/Key";
 import Input2 from "../Components/Form/Input2";
 import Textarea2 from "../Components/Form/Textarea2";
-import Date2 from "../Components/Form/Date2";
+import DateTimeInput from "../Components/DateTimeInput";
 import {withRouter} from "react-router";
 import {confirmModal} from "../message";
 
@@ -47,10 +47,10 @@ class KeyEdit extends React.Component {
                             <div className="uk-width-1-1">
                                 <div className="uk-grid">
                                     <div className="uk-width-1-2">
-                                        <Date2 model={this.key} name="created_at" title="Skapad" disabled={true} />
+                                        <DateTimeInput model={this.key} name="created_at" title="Skapad" disabled={true} />
                                     </div>
                                     <div className="uk-width-1-2">
-                                        <Date2 model={this.key} name="updated_at" title="Ändrad" disabled={true} />
+                                        <DateTimeInput model={this.key} name="updated_at" title="Ändrad" disabled={true} />
                                     </div>
                                 </div>
                                 
