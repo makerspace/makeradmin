@@ -1,5 +1,5 @@
 import {showError, showPermissionDenied} from "./message";
-import * as auth from "./auth";
+import auth from "./auth";
 import * as _ from "underscore";
 
 
