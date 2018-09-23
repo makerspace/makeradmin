@@ -18,13 +18,14 @@ COPY ./docker/nginx_default_host /etc/nginx/conf.d/default.conf
 RUN mkdir -p /var/www/html
 COPY ./dist/ /var/www/html
 
-RUN node /data/node_modules/webpack/bin/webpack.js --config /data/webpack.config.js --progress && \
-    node /data/node_modules/webpack/bin/webpack.js --config /data/member.webpack.config.js --progress
+RUN node /data/node_modules/webpack/bin/webpack.js --config /data/webpack.config.js --progress
+
+# TODO   node /data/node_modules/webpack/bin/webpack.js --config /data/member.webpack.config.js --progress
 
 WORKDIR /
 
 RUN mv -f /data/dist/js/app.js /var/www/html/js/ && \
-    mv -f /data/dist/js/member_app.js /var/www/html/js/ && \
+# TODO    mv -f /data/dist/js/member_app.js /var/www/html/js/ && \
     rm -rf /data
 
 
