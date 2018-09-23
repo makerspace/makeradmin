@@ -7,31 +7,50 @@ import {get} from "../gateway";
 import Select from "react-select";
 import * as _ from "underscore";
 
-
-const Row = collection => props => {
-    const {item} = props;
-    
-    return (
-        <tr>
-            <td><Link to={"/membership/groups/" + item.id}>{item.title}</Link></td>
-            <td>{item.num_members}</td>
-            <td><a onClick={() => collection.remove(item)} className="removebutton"><i className="uk-icon-trash"/></a></td>
-        </tr>
-    );
+const filterOptions = (items, options) => {
+    const current = new Set(items.map(i => i.id));
+    return options.filter(o => !current.has(o.group_id));
 };
 
 
-// TODO Filter member groups from options.
+const updateItems = items => prevState => {
+    return {
+        showOptions: filterOptions(items, prevState.options),
+        items,
+    };
+};
+
+const updateOptions = options => prevState => {
+    return {
+        showOptions: filterOptions(prevState.items, options),
+        options,
+    };
+};
+
+
 class MemberBoxGroups extends React.Component {
 
     constructor(props) {
         super(props);
         this.collection = new Collection({type: Group, url: `/membership/member/${props.params.member_id}/groups`, idListName: 'groups', pageSize: 0});
-        this.state = {options: [], selectedOption: null};
+        this.state = {
+            items: [],
+            options: [],
+            showOptions: [],
+            selectedOption: null,
+        };
 
-        get({url: '/membership/group'}).then(data => this.setState({options: data.data}));
+        get({url: '/membership/group'}).then(data => this.setState(updateOptions(data.data)));
     }
 
+    componentDidMount() {
+        this.unsubscribe = this.collection.subscribe(({items}) => this.setState(updateItems(items || [])));
+    }
+    
+    componentWillUnmount() {
+        this.unsubscribe();
+    }
+    
     selectOption(member_id, group) {
         this.setState({selectedOption: group});
         
@@ -43,14 +62,8 @@ class MemberBoxGroups extends React.Component {
     }
     
     render() {
-        const columns = [
-            {title: "Titel", sort: "title"},
-            {title: "Antal medlemmar"},
-            {title: ""},
-        ];
-  
         const {member_id} = this.props.params;
-        const {selectedOption, options} = this.state;
+        const {selectedOption, showOptions} = this.state;
         
         return (
             <div>
@@ -62,7 +75,7 @@ class MemberBoxGroups extends React.Component {
                         <Select name="group"
                                 className="uk-select"
                                 tabIndex={1}
-                                options={options}
+                                options={showOptions}
                                 value={selectedOption}
                                 getOptionValue={g => g.group_id}
                                 getOptionLabel={g => g.title}
@@ -71,7 +84,22 @@ class MemberBoxGroups extends React.Component {
                     </div>
                 </div>
                 <div className="uk-margin-top">
-                    <CollectionTable emptyMessage="Inte med i några grupper" rowComponent={Row(this.collection, member_id)} collection={this.collection} columns={columns} />
+                    <CollectionTable
+                        emptyMessage="Inte med i några grupper"
+                        collection={this.collection}
+                        columns={[
+                            {title: "Titel", sort: "title"},
+                            {title: "Antal medlemmar"},
+                            {title: ""},
+                        ]}
+                        rowComponent={({item}) => (
+                            <tr>
+                                <td><Link to={"/membership/groups/" + item.id}>{item.title}</Link></td>
+                                <td>{item.num_members}</td>
+                                <td><a onClick={() => this.collection.remove(item)} className="removebutton"><i className="uk-icon-trash"/></a></td>
+                            </tr>
+                        )}
+                    />
                 </div>
             </div>
         );
