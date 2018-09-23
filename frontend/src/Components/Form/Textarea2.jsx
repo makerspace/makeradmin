@@ -1,8 +1,6 @@
 import React from "react";
 import classNames from 'classnames/bind';
 
-// TODO Fix all forms selected and isDirty.
-// TODO Rename to Input when Input is no longer used.
 export default class Textarea2 extends React.Component {
 
     constructor(props) {

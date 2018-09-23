@@ -24,7 +24,6 @@ const Row = collection => props => {
 };
 
 
-// TODO Generalise this type of view, it exists everywhere.
 class GroupBoxMembers extends React.Component {
 
     constructor(props) {

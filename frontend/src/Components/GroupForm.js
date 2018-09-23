@@ -1,10 +1,9 @@
 import React from 'react';
-import Input2 from "../../Components/Form/Input2";
+import Input2 from "./Form/Input2";
 import {withRouter} from "react-router";
-import Textarea2 from "../../Components/Form/Textarea2";
+import Textarea2 from "./Form/Textarea2";
 
 
-// TODO Maybe not really a reusable component, check usages later (and move it to better place).
 class GroupForm extends React.Component {
 
     constructor(props) {

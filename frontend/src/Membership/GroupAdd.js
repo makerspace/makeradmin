@@ -1,6 +1,6 @@
 import React from 'react';
 
-import GroupForm from './Components/GroupForm';
+import GroupForm from '../Components/GroupForm';
 import {browserHistory} from 'react-router';
 import Group from "../Models/Group";
 

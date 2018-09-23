@@ -8,7 +8,6 @@ class SpanShow extends React.Component {
     constructor(props) {
         super(props);
         const {span_id} = props.params;
-        // TODO Implement expand on object.
         this.span = Span.get(span_id);
         this.state = {data: {}};
     }

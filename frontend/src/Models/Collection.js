@@ -8,8 +8,8 @@ import * as _ from "underscore";
 // pageSize: size of pages when pagination is enabled (0 = infinite = pagination turned off).
 // url: override url, useful for collection of grops on member for example
 // expand: expand to include related model in request
-// idListName: used for add and remove if collection supports it by pushing id list to to <url>/remove or <url>/add
-// TODO Change server to handle remove from in a more convenient way
+// idListName: used for add and remove if collection supports it by pushing id list to to <url>/remove or <url>/add,
+//             this could be simpler if server handled removes in a better way
 export default class Collection {
     constructor({type, pageSize = 25, expand = null, filter = {}, sort = {}, url=null, idListName=null}) {
         this.type = type;

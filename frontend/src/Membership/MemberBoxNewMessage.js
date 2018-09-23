@@ -1,5 +1,5 @@
 import React from 'react';
-import MessageForm from '../Messages/Components/MessageForm';
+import MessageForm from '../Components/MessageForm';
 import Message from "../Models/Message";
 import { notifySuccess } from "../message";
 import {withRouter} from "react-router";

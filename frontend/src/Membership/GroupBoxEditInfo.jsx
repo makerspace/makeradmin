@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import Group from "../Models/Group";
-import GroupForm from "./Components/GroupForm";
+import GroupForm from "../Components/GroupForm";
 import {confirmModal} from "../message";
 import {withRouter} from "react-router";
 

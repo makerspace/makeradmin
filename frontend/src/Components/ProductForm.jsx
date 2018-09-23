@@ -144,10 +144,10 @@ class ProductForm extends React.Component {
                 </form>
             </div>
         );
+        // Image upload not yet supported.
     }
 }
 
-// TODO Image upload should be supported.
 
 
 export default ProductForm;

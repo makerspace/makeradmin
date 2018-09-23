@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import Member from "../Models/Member";
-import MemberForm from "./Components/MemberForm";
+import MemberForm from "../Components/MemberForm";
 import {confirmModal} from "../message";
 import {withRouter} from "react-router";
 

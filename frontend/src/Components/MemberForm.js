@@ -1,11 +1,10 @@
 import React from 'react';
-import CountryDropdown from '../../Components/CountryDropdown';
-import DateTime from "../../Components/Form/DateTime";
-import Input2 from "../../Components/Form/Input2";
+import CountryDropdown from './CountryDropdown';
+import DateTime from "./Form/DateTime";
+import Input2 from "./Form/Input2";
 import {withRouter} from "react-router";
 
 
-// TODO Maybe not really a reusable component, check usages later (and move it to better place).
 class MemberForm extends React.Component {
 
     constructor(props) {

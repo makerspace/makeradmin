@@ -49,7 +49,7 @@ module.exports = class FormInput extends React.Component
 					});
 				}, 1000);
 
-				// TODO: Error handling
+				// Fix error handling
 				if(xhr.status == 201)
 				{
 					// Save the filename
@@ -69,7 +69,6 @@ module.exports = class FormInput extends React.Component
 			}
 		};
 
-		// TODO: Do something better...
 		var select = UIkit.uploadSelect($("#upload-select"), settings),
 		drop = UIkit.uploadDrop($("#upload-drop"), settings);
 /*

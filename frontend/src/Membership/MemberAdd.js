@@ -1,6 +1,6 @@
 import React from 'react';
 
-import MemberForm from './Components/MemberForm';
+import MemberForm from '../Components/MemberForm';
 import Member from "../Models/Member";
 import {browserHistory} from 'react-router';
 
