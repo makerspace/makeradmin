@@ -76,7 +76,7 @@ export default class CollectionTable extends React.Component {
         const {rowComponent, columns, collection, emptyMessage, className} = this.props;
         const {items, loading} = this.state;
         
-        let rows = "";
+        let rows = null;
         if (items !== null) {
             rows = items.map((item, i) => React.createElement(rowComponent, {item, deleteItem: () => this.deleteItem(collection, item), key: i}));
             if (!rows.length && emptyMessage) {
@@ -100,7 +100,7 @@ export default class CollectionTable extends React.Component {
                          <div className="loadingWrapper">
                              <span><i className="uk-icon-refresh uk-icon-spin"/> Hämtar data...</span>
                          </div>
-                     </div>  : ''}
+                     </div>  : null}
                 </div>
                 {pagination}
             </div>
