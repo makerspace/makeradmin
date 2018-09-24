@@ -56,7 +56,7 @@ const commonSettings = {
 
 if (process.env.DEVELOPMENT) {
     console.info("webpack development mode");
-    
+
     module.exports = merge(commonSettings, {
         mode: "development",
         devtool: "inline-source-map",
@@ -73,26 +73,17 @@ else {
     console.info("webpack production mode");
 
     const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
+    const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
     
+
     module.exports = merge(commonSettings, {
         mode: "production",
         devtool: "source-map",
-        optimization: {
-            minimizer: [
-                new UglifyJsPlugin({
-                    uglifyOptions: {
-                        compress: {warnings: false},
-                        mangle: false,
-                        beautify: true,
-                    },
-                    sourceMap: true,
-                }),
-            ],
-        },
         plugins: [
             new webpack.LoaderOptionsPlugin({
                 minimize: true,
-            })
+            }),
+            // new BundleAnalyzerPlugin(),
         ],
     });
 }
