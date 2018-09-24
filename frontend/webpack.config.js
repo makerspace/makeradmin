@@ -1,10 +1,8 @@
-var webpack = require('webpack');
 const path = require('path');
+const merge = require('webpack-merge');
+const webpack = require('webpack');
 
 var src = path.resolve(__dirname, "src")
-
-var mode = process.env.DEVELOPMENT ? 'development' : 'production'
-console.info("mode: " + mode);
 
 // Get git info from command line
 var commitHash = require("child_process")
@@ -19,7 +17,7 @@ var options = {
 };
 var buildDate = new Intl.DateTimeFormat('sv-SE', options).format(new Date());
 
-module.exports = {
+const commonSettings = {
     context: src,
     entry: "./app.jsx",
 
@@ -54,13 +52,47 @@ module.exports = {
             __BUILD_DATE__: JSON.stringify(buildDate),
         })
     ],
+}
+
+if (process.env.DEVELOPMENT) {
+    console.info("webpack development mode");
     
-    mode: mode,
+    module.exports = merge(commonSettings, {
+        mode: "development",
+        devtool: "inline-source-map",
+        plugins: [
+        ],
+        devServer: {
+            host: "0.0.0.0",
+            contentBase: "./dist",
+            historyApiFallback: true,           
+        },
+    });
+}
+else {
+    console.info("webpack production mode");
+
+    const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
     
-    // Config for webpack-serve.
-    devServer: {
-        host: "0.0.0.0",
-        contentBase: "./dist",
-        historyApiFallback: true,
-    }
+    module.exports = merge(commonSettings, {
+        mode: "production",
+        devtool: "source-map",
+        optimization: {
+            minimizer: [
+                new UglifyJsPlugin({
+                    uglifyOptions: {
+                        compress: {warnings: false},
+                        mangle: false,
+                        beautify: true,
+                    },
+                    sourceMap: true,
+                }),
+            ],
+        },
+        plugins: [
+            new webpack.LoaderOptionsPlugin({
+                minimize: true,
+            })
+        ],
+    });
 }

@@ -24,6 +24,7 @@ RUN node /data/node_modules/webpack/bin/webpack.js --config /data/member.webpack
 WORKDIR /
 
 RUN mv -f /data/dist/js/app.js /var/www/html/js/ && \
+    mv -f /data/dist/js/app.js.map /var/www/html/js/ && \
     mv -f /data/dist/js/member_app.js /var/www/html/js/ && \
     rm -rf /data
 

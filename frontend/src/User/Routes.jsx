@@ -6,7 +6,7 @@ module.exports = {
     childRoutes: [
         {
             path: "login/:token",
-            component: require("./Login"),
+            component: require("./Login").default,
         }
     ]
 };

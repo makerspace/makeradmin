@@ -3,7 +3,7 @@ import { withRouter } from 'react-router'
 
 import auth from '../auth'
 
-module.exports = withRouter(class Login extends React.Component
+class Login extends React.Component
 {
 	componentWillMount()
 	{
@@ -17,4 +17,6 @@ module.exports = withRouter(class Login extends React.Component
 			<p>Logging in...</p>
 		)
 	}
-});
+}
+
+export default withRouter(Login);
