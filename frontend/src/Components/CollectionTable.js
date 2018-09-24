@@ -76,7 +76,7 @@ export default class CollectionTable extends React.Component {
         const {rowComponent, columns, collection, emptyMessage, className} = this.props;
         const {items, loading} = this.state;
         
-        let rows = null;
+        let rows = "";
         if (items !== null) {
             rows = items.map((item, i) => React.createElement(rowComponent, {item, deleteItem: () => this.deleteItem(collection, item), key: i}));
             if (!rows.length && emptyMessage) {
