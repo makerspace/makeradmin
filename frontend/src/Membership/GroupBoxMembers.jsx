@@ -71,7 +71,7 @@ class GroupBoxMembers extends React.Component {
                             placeholder="Type to search for member"
                             value={selectedOption}
                             getOptionValue={m => m.member_id}
-                            getOptionLabel={m => "#" + m.member_number + ": " + m.firstname + " " + m.lastname + " <" + m.email + ">"}
+                            getOptionLabel={m => "#" + m.member_number + ": " + m.firstname + " " + (m.lastname || "") + " <" + m.email + ">"}
                             loadOptions={(v, c) => this.loadOptions(v, c)}
                             onChange={member => this.selectOption(member)}
                         />
