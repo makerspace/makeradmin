@@ -1,16 +1,15 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import Member from "../Models/Member";
-import {withRouter} from "react-router";
 
 
 class MemberBoxOverview extends React.Component {
     render() {
-        const {router} = this.props;
+        const {member} = this.context;
         
         return (
             <div className='uk-margin-top'>
-                Översikt.
+                {member.member_number} {member.firstname} {member.lastname}
             </div>
         );
     }
@@ -21,4 +20,4 @@ MemberBoxOverview.contextTypes = {
 };
 
 
-export default withRouter(MemberBoxOverview);
+export default MemberBoxOverview;
