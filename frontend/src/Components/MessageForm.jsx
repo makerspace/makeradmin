@@ -22,10 +22,11 @@ const groupOption = d => {
 const memberOption = d => {
     const id = d[Member.model.id];
     const type = "member";
+    const lastname = d.lastname || "";
     return {
         id,
         type,
-        label: `Medlem: ${d.firstname} ${d.lastname} (#${d.member_number})`,
+        label: `Medlem: ${d.firstname} ${lastname} (#${d.member_number})`,
         value: type + id,
     };
 };
