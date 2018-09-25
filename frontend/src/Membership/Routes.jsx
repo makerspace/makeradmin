@@ -20,12 +20,19 @@ module.exports = {
                             path: ":member_id",
                             component:  require("./MemberBox").default,
                             indexRoute: {
-                                component: require("./MemberBoxInfo").default,
+                                onEnter: (nextState, replace) => {
+                                    console.info(nextState);
+                                    return replace("/membership/members/" + nextState.params.member_id + "/overview/");
+                                },
                             },
                             childRoutes: [
                                 {
-                                    path: "info",
-                                    component: require("./MemberBoxInfo").default,
+                                    path: "overview",
+                                    component: require("./MemberBoxOverview").default,
+                                },
+                                {
+                                    path: "member-data",
+                                    component: require("./MemberBoxMemberData").default,
                                 },
                                 {
                                     path: "groups",
@@ -54,6 +61,10 @@ module.exports = {
                                             component: require("./MemberBoxNewMessage").default,
                                         },
                                     ],
+                                },
+                                {
+                                    path: "spans",
+                                    component: require("./MemberBoxSpans").default,
                                 },
                             ]
                         },

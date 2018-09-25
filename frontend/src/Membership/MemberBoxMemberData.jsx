@@ -5,7 +5,8 @@ import MemberForm from "../Components/MemberForm";
 import {confirmModal} from "../message";
 import {withRouter} from "react-router";
 
-class MemberBoxInfo extends React.Component {
+
+class MemberBoxMemberData extends React.Component {
     render() {
         const {router} = this.props;
         
@@ -28,9 +29,9 @@ class MemberBoxInfo extends React.Component {
     }
 }
 
-MemberBoxInfo.contextTypes = {
+MemberBoxMemberData.contextTypes = {
     member: PropTypes.instanceOf(Member)
 };
 
 
-export default withRouter(MemberBoxInfo);
+export default withRouter(MemberBoxMemberData);
