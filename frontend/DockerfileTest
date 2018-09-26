@@ -1,0 +1,7 @@
+FROM makeradmin/frontend-base:1.0
+
+WORKDIR /data
+
+RUN npm run eslint
+
+RUN npm run test
