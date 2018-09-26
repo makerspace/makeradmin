@@ -32,10 +32,11 @@ class KeyEdit extends React.Component {
         
         const onDelete = () => {
             return confirmModal(this.key.deleteConfirmMessage())
-                .then(() => this.key.del(), () => false)
+                .then(() => this.key.del())
                 .then(() => {
                     router.push("/membership/keys/");
-                });
+                })
+                .catch(() => null);
         };
 
         return (

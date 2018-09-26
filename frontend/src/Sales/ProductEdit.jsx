@@ -23,10 +23,11 @@ class ProductEdit extends React.Component {
                     onSave={() => this.product.save()}
                     onDelete={() => {
                         return confirmModal(this.product.deleteConfirmMessage())
-                            .then(() => this.product.del(), () => false)
+                            .then(() => this.product.del())
                             .then(() => {
                                 this.props.router.push("/sales/product/");
-                            });
+                            })
+                            .catch(() => null);
                     }}
                 />
             </div>

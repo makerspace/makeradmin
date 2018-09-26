@@ -21,10 +21,11 @@ class TemplateEdit extends React.Component {
                     onSave={() => this.template.save()}
                     onDelete={() => {
                         return confirmModal(this.template.deleteConfirmMessage())
-                            .then(() => this.template.del(), () => false)
+                            .then(() => this.template.del())
                             .then(() => {
                                 this.props.router.push("/messages/templates/");
-                            });
+                            })
+                            .catch(() => null);
                     }}
                     
                 />
