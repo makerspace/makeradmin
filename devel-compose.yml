@@ -249,6 +249,12 @@ services:
     networks:
       - makeradmin
 
+  frontend-base:
+    image: makeradmin/frontend-base:1.0
+    build:
+      context: ./frontend
+      dockerfile: DockerfileBase
+      
   frontend:
     image: makeradmin/frontend:1.0
     build: ./frontend
@@ -256,6 +262,8 @@ services:
       HOST_BACKEND:
     ports:
       - "8009:80"
+    depends_on:
+      - frontend-base
     networks:
       - makeradmin
 

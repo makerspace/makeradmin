@@ -225,11 +225,19 @@ services:
     networks:
       - makeradmin
 
+  frontend-base:
+    image: makeradmin/frontend-base:1.0
+    build:
+      context: ./frontend
+      dockerfile: DockerfileBase
+
   frontend:
     image: makeradmin/frontend:1.0
     build: ./frontend
     environment:
       HOST_BACKEND:
+    depends_on:
+      - frontend-base
     networks:
       - makeradmin
 
