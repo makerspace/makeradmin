@@ -89,3 +89,12 @@ Go to:
 * [the makeradmin web site](http://localhost:8009)
 * [the web shop](http://localhost:8010/shop)
 
+### Frontend js dev-server
+To run a webpack-dev-server inside a docker container (will node, npm
+and node_modules inside the image and mount js source files from local
+file system).
+
+```make frontend-dev-server```
+Then go to:
+* (http://localhost:8080)
+
