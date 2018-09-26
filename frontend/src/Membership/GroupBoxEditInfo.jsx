@@ -18,10 +18,11 @@ class GroupBoxEditInfo extends React.Component {
                     onDelete={() => {
                         const {group} = this.context;
                         return confirmModal(group.deleteConfirmMessage())
-                            .then(() => group.del(), () => false)
+                            .then(() => group.del())
                             .then(() => {
                                 router.push("/membership/groups/");
-                            });
+                            })
+                            .catch(() => null);
                     }}
                 />
             </div>

@@ -60,12 +60,15 @@ class Auth {
 
     logout() {
         // Tell the server to delete the access token
-        fetch(config.apiBasePath + "/oauth/token/" + this.getAccessToken(),
-            {
-                method:  "DELETE",
-                headers: {'Content-Type': 'application/json; charset=UTF-8', "Authorization": "Bearer " + this.getAccessToken()},
-            })
-            .then(() => null, () => null);
+        const token = this.getAccessToken();
+        if (token) {
+            fetch(config.apiBasePath + "/oauth/token/" + token,
+                {
+                    method:  "DELETE",
+                    headers: {'Content-Type': 'application/json; charset=UTF-8', "Authorization": "Bearer " + token},
+                })
+                .then(() => null, () => null);
+        }
         
         // Delete from localStorage and send user to login form.
         delete localStorage.token;
@@ -98,6 +101,9 @@ class Auth {
             .catch(() => {
                 showError("<h2>Inloggningen misslyckades</h2>Kunde inte kommunicera med servern.");
             });
+    }
+    
+    onChange() {
     }
 }
 

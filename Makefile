@@ -28,6 +28,10 @@ init-db: .env
 stop:
 	docker-compose down
 
+test-admin-js:
+	npm --prefix frontend run eslint
+	npm --prefix frontend run test
+
 test:
 	python3 -m unittest tests
 

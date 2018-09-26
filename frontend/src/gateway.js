@@ -21,8 +21,7 @@ export function request({url, params, data, options, errorMessage, expectedDataS
     
     const urlParams = _.map(params, (v, k) => encodeURIComponent(k) + '=' + encodeURIComponent(v)).join('&');
     url = config.apiBasePath + url + (urlParams ? '?' + urlParams : '');
-    
-     return fetch(url, options)
+    return fetch(url, options)
         .then(response => response.json().then(responseData => ({response, responseData})))
         .then(({response, responseData}) => {
             if (response.ok && (!expectedDataStatus || responseData.status === expectedDataStatus)) {
@@ -30,6 +29,11 @@ export function request({url, params, data, options, errorMessage, expectedDataS
             }
             
             if (response.status === 401) {
+                auth.logout();
+                return null;
+            }
+            
+            if (response.status === 403) {
                 showPermissionDenied();
                 return null;
             }

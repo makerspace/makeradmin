@@ -32,10 +32,11 @@ class KeyEdit extends React.Component {
         
         const onDelete = () => {
             return confirmModal(this.key.deleteConfirmMessage())
-                .then(() => this.key.del(), () => false)
+                .then(() => this.key.del())
                 .then(() => {
                     router.push("/membership/keys/");
-                });
+                })
+                .catch(() => null);
         };
 
         return (
@@ -55,7 +56,7 @@ class KeyEdit extends React.Component {
                                 </div>
                                 
                                 <TextInput model={this.key} name="tagid" title="RFID" placeholder="Använd en RFID-läsare för att läsa av det unika numret på nyckeln" />
-                                <Textarea model={this.key} name="description" title="Beskrivning" placeholder="Det är valfritt att lägga in en beskrivning av nyckeln" />
+                                <Textarea model={this.key} name="description" title="Kommentar" placeholder="Det är valfritt att lägga in en kommenter av nyckeln" />
                                 
                                 <div className="uk-form-row uk-margin-top">
                                     <div className="uk-form-controls">

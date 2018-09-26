@@ -34,7 +34,7 @@ class TemplateForm extends React.Component {
                 
                 <div className="uk-form-row">
                     <div className="uk-form-row">
-                        {template.id ? <a className="uk-button uk-button-danger uk-float-left" onClick={onDelete}><i className="uk-icon-trash"/> Ta bort medlem</a> : ""}
+                        {template.id ? <a className="uk-button uk-button-danger uk-float-left" onClick={onDelete}><i className="uk-icon-trash"/> Ta bort mall</a> : ""}
                         <button className="uk-button uk-button-success uk-float-right" disabled={saveDisabled}><i className="uk-icon-save"/> {template.id ? 'Spara' : 'Skapa'}</button>
                     </div>
                 </div>

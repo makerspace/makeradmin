@@ -20,12 +20,17 @@
     "@babel/core": "^7.0.0",
     "@babel/preset-env": "^7.0.0",
     "@babel/preset-react": "^7.0.0",
+    "@babel/register": "^7.0.0",
+    "babel-core": "^7.0.0-0",
     "babel-eslint": "^8.2.6",
+    "babel-jest": "^23.6.0",
     "babel-loader": "^8.0.2",
+    "enzyme": "^3.6.0",
     "eslint": "^5.6.0",
     "eslint-plugin-react": "^7.11.1",
+    "jest": "^23.5.0",
     "uglifyjs-webpack-plugin": "^2.0.1",
-    "webpack": "^4.19.1",
+    "webpack": "^4.20.2",
     "webpack-bundle-analyzer": "^3.0.2",
     "webpack-cli": "^3.1.1",
     "webpack-dev-server": "^3.1.9",
@@ -33,7 +38,8 @@
   },
   "scripts": {
     "start": "./node_modules/.bin/webpack-dev-server",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest",
+    "eslint": "eslint src"
   },
   "repository": {
     "type": "git",
@@ -58,6 +64,7 @@
     },
     "globals": {
       "config": true,
+      "UIkit": true,
       "global": true,
       "require": true,
       "module": true,

@@ -73,7 +73,7 @@ class MemberBoxKeys extends React.Component {
                             <div className="uk-grid">
                                 <div className="uk-width-1-1">
                                     <TextInput model={this.key} tabIndex="1" name="tagid" title="RFID" placeholder="Använd en RFID-läsare för att läsa av det unika numret på nyckeln" />
-                                    <TextInput model={this.key} tabIndex="2" name="description" title="Beskrivning" placeholder="Det är valfritt att lägga in en beskrivning av nyckeln" />
+                                    <TextInput model={this.key} tabIndex="2" name="description" title="Kommentar" placeholder="Det är valfritt att lägga in en kommentar av nyckeln" />
 
                                     <div className="uk-form-row uk-margin-top">
                                         <div className="uk-form-controls">
