@@ -1,25 +1,9 @@
 import React from 'react';
 import {Link, withRouter} from "react-router";
-import TemplateForm from "../Components/TemplateForm";
-import {confirmModal} from "../message";
 import Message from "../Models/Message";
 import Collection from "../Models/Collection";
 import CollectionTable from "../Components/CollectionTable";
 import DateTimeShow from "../Components/DateTimeShow";
-
-
-const status = item => {
-    switch (item.status) {
-        case "queued":
-            return <span>Köad <DateTimeShow date={item.created_at}/></span>;
-        case "failed":
-            return "Sändning misslyckades";
-        case "sent":
-            return <span>Skickad <DateTimeShow date={item.date_sent}/></span>;
-        default:
-            return "Okänt";
-    }
-};
 
 
 class MessageShow extends React.Component {
