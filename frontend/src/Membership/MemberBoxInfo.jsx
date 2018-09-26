@@ -17,10 +17,11 @@ class MemberBoxInfo extends React.Component {
                     onDelete={() => {
                         const {member} = this.context;
                         return confirmModal(member.deleteConfirmMessage())
-                            .then(() => member.del(), () => false)
+                            .then(() => member.del())
                             .then(() => {
                                 router.push("/membership/members/");
-                            });
+                            })
+                            .catch(() => null);
                     }}
                 />
             </div>
