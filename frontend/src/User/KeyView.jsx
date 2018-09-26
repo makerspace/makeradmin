@@ -12,19 +12,28 @@ export default class Member extends React.Component {
         };
         
         get({url: "/member/current/membership"})
-            .then(data => this.setState({
-                                            info_labaccess: {
-                                                active: data.data.has_labaccess,
-                                                enddate: data.data.labaccess_end,
-                                            },
-                                            info_membership: {
-                                                active: data.data.has_membership,
-                                                enddate: data.data.membership_end,
-                                            }
-                                        }));
+            .then(data => {
+                if (!data || !data.data) {
+                    return;
+                }
+    
+                this.setState({
+                                  info_labaccess:  {
+                                      active:  data.data.has_labaccess,
+                                      enddate: data.data.labaccess_end,
+                                  },
+                                  info_membership: {
+                                      active:  data.data.has_membership,
+                                      enddate: data.data.membership_end,
+                                  }
+                              });
+            });
         
         get({url: "/webshop/member/current/pending_actions"})
             .then(data => {
+                if (!data || !data.data) {
+                    return;
+                }
                 let pendingLabaccessDays = 0;
                 let actions = data.data;
                 for (let pending of actions) {
