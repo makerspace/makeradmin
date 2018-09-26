@@ -72,16 +72,16 @@ module.exports = withRouter(class Member extends React.Component
 			let icon = "";
 			let color = "";
 
-			const end = Date.parse(info.enddate);
-
 			const millisecondsPerHour = 1000 * 3600;
 			const millisecondsPerDay = millisecondsPerHour * 24;
+
+			const end = Date.parse(info.enddate) + millisecondsPerDay;
 
 			if (info.active) {
 				const remainingDays = Math.floor((end - Date.now()) / millisecondsPerDay);
 
 				if (remainingDays < -1) {
-					text = templateStrings[0](-remainingDays);
+					text = templateStrings[0](info.enddate, -remainingDays);
 					icon = "uk-icon-times";
 					color = "member-key-color-inactive";
 				} else if (remainingDays < 0) {
@@ -94,11 +94,11 @@ module.exports = withRouter(class Member extends React.Component
 					icon = "uk-icon-check";
 					color = "member-key-color-warning";
 				} else if (remainingDays < 14) {
-					text = templateStrings[3](remainingDays);
+					text = templateStrings[3](info.enddate, remainingDays);
 					icon = "uk-icon-check";
 					color = "member-key-color-warning";
 				} else {
-					text = templateStrings[4](remainingDays);
+					text = templateStrings[4](info.enddate, remainingDays);
 					icon = "uk-icon-check";
 					color = "member-key-color-active";
 				}
@@ -117,20 +117,20 @@ module.exports = withRouter(class Member extends React.Component
 	render()
 	{
 		let labaccessStrings = [
-			(days) => `Din labaccess är ogiltig sedan ${days} dagar.`,
-			() => `Din labaccess gick ut idag.`,
+			(enddate, days) => `Din labaccess är ogiltig sedan ${days} dagar (${enddate}).`,
+			() => `Din labaccess gick ut igår.`,
 			(hours) => `Din labaccess är giltig i mindre än ${hours} timmar till.`,
-			(days) => `Din labaccess är endast giltig i ${days} dagar till. Kom ihåg att förnya den innan nästa nyckelutlämning.`,
-			(days) => `Din labaccess är giltig i ${days} dagar till.`,
+			(enddate, days) => `Din labaccess är giltig t.o.m. ${enddate} (endast ${days} dagar till). Kom ihåg att förnya den innan nästa nyckelutlämning.`,
+			(enddate, days) => `Din labaccess är giltig t.o.m. ${enddate} (${days} dagar till ).`,
 			() => `Din labaccess är inaktiv.`,
 		];
 
 		let membershipStrings = [
-			(days) => `Ditt föreningsmedlemsskap är ogiltigt sedan ${days} dagar.`,
-			() => `Ditt föreningsmedlemsskap gick ut idag.`,
-			(hours) => `Ditt föreningsmedlemsskap är giltigt i mindre än ${hours} timmar till.`,
-			(days) => `Ditt föreningsmedlemsskap är endast giltigt i ${days} dagar till.`,
-			(days) => `Ditt föreningsmedlemsskap är giltigt i ${days} dagar till.`,
+			(enddate, days) => `Ditt föreningsmedlemsskap är ogiltigt sedan ${days} dagar (${enddate}).`,
+			() => `Ditt föreningsmedlemsskap gick ut igår.`,
+			(hours) => `Ditt föreningsmedlemsskap går ut idag.`,
+			(enddate, days) => `Ditt föreningsmedlemsskap är giltigt t.o.m. ${enddate} (endast ${days} dagar till).`,
+			(enddate, days) => `Ditt föreningsmedlemsskap är giltigt t.o.m. ${enddate} (${days} dagar till).`,
 			() => `Ditt föreningsmedlemsskap är inaktivt.`,
 		];
 
