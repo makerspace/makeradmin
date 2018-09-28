@@ -568,6 +568,7 @@ class Member extends Controller
 			->whereIn("type", [SPAN_LABACCESS, SPAN_SPECIAL_LABACCESS])
 			->whereDate("startdate", "<=", $today)
 			->whereDate("enddate", ">=", $today)
+			->whereNull("deleted_at")
 			->value('enddate') !== null;
 
 		$membership = DB::table("membership_spans")
@@ -575,6 +576,7 @@ class Member extends Controller
 			->where("type", SPAN_MEMBERSHIP)
 			->whereDate("startdate", "<=", $today)
 			->whereDate("enddate", ">=", $today)
+			->whereNull("deleted_at")
 			->value('enddate') !== null;
 
 		// Find the latest enddate of any membership span.
@@ -583,11 +585,13 @@ class Member extends Controller
 		$labaccess_time = DB::table("membership_spans")
 			->where('member_id', $member_id)
 			->whereIn("type", [SPAN_LABACCESS, SPAN_SPECIAL_LABACCESS])
+			->whereNull("deleted_at")
 			->max("enddate");
 
 		$membership_time = DB::table("membership_spans")
 			->where('member_id', $member_id)
 			->where("type", SPAN_MEMBERSHIP)
+			->whereNull("deleted_at")
 			->max("enddate");
 
 		// Send response to client
