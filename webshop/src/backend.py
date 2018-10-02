@@ -19,6 +19,7 @@ from werkzeug.datastructures import FileStorage
 from flask_uploads import UploadSet, configure_uploads, IMAGES
 import base64
 import io
+from dataclasses import dataclass
 
 # Errors
 
@@ -375,6 +376,8 @@ def complete_transaction(transaction_id: int):
     if tr['status'] == 'pending':
         tr["status"] = "completed"
         transaction_entity.put(tr, transaction_id)
+        # Unclear if this is a performance issue or not, hopefully there shouldn't be that many pending actions, so this will be quick
+        ship_orders(labaccess=False)
     elif tr['status'] not in {'completed'}:
         eprint(f"Unable to set transaction {transaction_id} to completed!")
 
@@ -807,7 +810,7 @@ def pay(member_id: int, data: Dict[str, Any], activates_member: bool = False) ->
 
     webshop_stripe_pending.post({"transaction_id": transaction_id, "stripe_token": card_source_id})
 
-    result = {}
+    result: Dict[str, Any] = {}
     if card_three_d_secure == 'not_supported':
         result = handle_card_source(transaction_id, card_source_id, total_amount)
     else:
@@ -840,46 +843,117 @@ def send_key_updated_email(member_id: int, extended_days: int, end_date: datetim
         eprint(r.text)
 
 
+def send_membership_updated_email(member_id: int, extended_days: int, end_date: datetime) -> None:
+    r = instance.gateway.get(f"membership/member/{member_id}")
+    assert r.ok
+    member = r.json()["data"]
+
+    r = instance.gateway.post("messages", {
+        "recipients": [
+            {
+                "type": "member",
+                "id": member_id
+            },
+        ],
+        "message_type": "email",
+        "subject": "Ditt medlemsskap har utökats",
+        "subject_en": "Your membership has been extended",
+        "body": render_template("updated_membership_time_email.html", frontend_url=instance.gateway.get_frontend_url, member=member, extended_days=extended_days, end_date=end_date.strftime("%Y-%m-%d"))
+    })
+
+    if not r.ok:
+        eprint("Failed to send membership updated email")
+        eprint(r.text)
+
+
 @instance.route("ship_orders", methods=["POST"], permission="webshop")
 @route_helper
-def ship_orders() -> None:
+def ship_orders_route() -> None:
+    ship_orders(True)
+
+
+@dataclass
+class PendingAction:
+    member_id: int
+    action_name: str
+    action_value: int
+    pending_action_id: int
+    transaction: Dict[str,Any]
+
+
+def complete_pending_action(action: PendingAction) -> None:
+    now = datetime.now().astimezone()
+    webshop_transaction_actions.put({"status": "completed", "completed_at": str(now)}, action.pending_action_id)
+
+
+def ship_orders(labaccess: bool) -> None:
     '''
     Completes all orders for purchasing lab access and updates existing keys with new dates.
     If a user has no key yet, then the order will remain as not completed.
     If a user has multiple keys, all of them are updated with new dates.
     '''
-    now = datetime.now().astimezone()
     actions = _pending_actions()
 
     for pending in actions:
-        member_id = pending["member_id"]
-        item = pending["item"]
-        action = pending["action"]
+        action = PendingAction(
+            member_id=pending["member_id"],
+            action_name=pending["action"]["name"],
+            action_value=int(pending["pending_action"]["value"]),
+            pending_action_id=pending['pending_action']['id'],
+            transaction=pending["item"]
+        )
 
-        if action["name"] == "add_labaccess_days":
-            r = instance.gateway.get(f"membership/member/{member_id}/keys")
-            assert r.ok, r.text
-            if len(r.json()["data"]) == 0:
-                # Skip this member because it has no keys
-                continue
+        if labaccess and action.action_name == "add_labaccess_days":
+            ship_add_labaccess_action(action)
 
-            days_to_add = int(pending["pending_action"]["value"])
-            assert(days_to_add >= 0)
-            r = instance.gateway.post(f"membership/member/{member_id}/addMembershipDays",
-                {
-                    "type": "labaccess",
-                    "days": days_to_add,
-                    "creation_reason": f"transaction_action_id: {pending['pending_action']['id']}, transaction_id: {item['transaction_id']}",
-                }
-            )
-            assert r.ok, r.text
+        if action.action_name == "add_membership_days":
+            ship_add_membership_action(action)
 
-            r = instance.gateway.get(f"membership/member/{member_id}/membership")
-            assert r.ok, r.text
-            new_end_date = parser.parse(r.json()["data"]["labaccess_end"])
 
-            webshop_transaction_actions.put({"status": "completed", "completed_at": str(now) }, pending['pending_action']['id'])
-            send_key_updated_email(member_id, days_to_add, new_end_date)
+def ship_add_labaccess_action(action: PendingAction):
+    r = instance.gateway.get(f"membership/member/{action.member_id}/keys")
+    assert r.ok, r.text
+    if len(r.json()["data"]) == 0:
+        # Skip this member because it has no keys
+        return
+
+    days_to_add = action.action_value
+    assert(days_to_add >= 0)
+    r = instance.gateway.post(f"membership/member/{action.member_id}/addMembershipDays",
+        {
+            "type": "labaccess",
+            "days": days_to_add,
+            "creation_reason": f"transaction_action_id: {action.pending_action_id}, transaction_id: {action.transaction['transaction_id']}",
+        }
+    )
+    assert r.ok, r.text
+
+    r = instance.gateway.get(f"membership/member/{action.member_id}/membership")
+    assert r.ok, r.text
+    new_end_date = parser.parse(r.json()["data"]["labaccess_end"])
+
+    complete_pending_action(action)
+    send_key_updated_email(action.member_id, days_to_add, new_end_date)
+
+
+def ship_add_membership_action(action: PendingAction):
+    days_to_add = action.action_value
+    assert(days_to_add >= 0)
+    r = instance.gateway.post(f"membership/member/{action.member_id}/addMembershipDays",
+        {
+            "type": "membership",
+            "days": days_to_add,
+            "creation_reason": f"transaction_action_id: {action.pending_action_id}, transaction_id: {action.transaction['transaction_id']}",
+        }
+    )
+    assert r.ok, r.text
+
+    r = instance.gateway.get(f"membership/member/{action.member_id}/membership")
+    assert r.ok, r.text
+    new_end_date = parser.parse(r.json()["data"]["membership_end"])
+
+    complete_pending_action(action)
+    send_membership_updated_email(action.member_id, days_to_add, new_end_date)
 
 
 instance.serve_indefinitely()

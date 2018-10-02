@@ -27,7 +27,7 @@ const rootRoute = {
                 },
                 {
                     path: "login/:token",
-                    component: require("./User/Login"),
+                    component: require("./User/Login").default,
                 },
                 {
                     path: "*",

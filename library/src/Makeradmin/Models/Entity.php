@@ -121,12 +121,6 @@ class Entity
 			}
 		}
 
-		// Get columns
-		foreach($this->columns as $name => $column)
-		{
-			$query = $query->selectRaw("{$column["select"]} AS `{$name}`");
-		}
-
 		// Collect expand data
 		if (is_array($this->expands) && !empty($this->expands)) {
 			foreach($this->expands as $expand) {
@@ -164,12 +158,18 @@ class Entity
 				}
 				foreach ($expand['selects'] as $name => $select) {
 					if (is_int($name)) {
-						$query = $query->selectRaw("{$base_table}.{$select} AS `{$select}`");
+						$this->columns[$select] = ['select' => "{$base_table}.{$select}"];
 					} else {
-						$query = $query->selectRaw("{$select} AS `{$name}`");
+						$this->columns[$name] = ['select' => "{$select}"];
 					}
 				}
 			}
+		}
+
+		// Get columns
+		foreach($this->columns as $name => $column)
+		{
+			$query = $query->selectRaw("{$column["select"]} AS `{$name}`");
 		}
 
 		// Return the query
