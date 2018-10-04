@@ -1,10 +1,17 @@
 import Base from './Base';
 
-
+// Spans are startdate - enddate (inclusive - inclusive) but some spans are overlapping.
 export default class Span extends Base {
-    
     deleteConfirmMessage() {
         return `Are you sure you want to delete span ${this.id}?`;
+    }
+    
+    start() {
+        return new Date(this.startdate + "T00:00:00.000Z");
+    }
+    
+    end() {
+        return new Date(this.enddate + "T23:59:59.999Z");
     }
 }
 

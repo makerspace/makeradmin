@@ -33,7 +33,9 @@ export default class Collection {
     subscribe(callback) {
         const id = this.subscriberId++;
         this.subscribers[id] = callback;
-        callback({items: this.items, page: this.page});
+        if (this.items) {
+            callback({items: this.items, page: this.page});
+        }
         return () => delete this.subscribers[id];
     }
 

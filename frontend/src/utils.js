@@ -1,6 +1,17 @@
 import * as _ from "underscore";
 
 
+// eslint-disable-next-line
+export const assert = expression => console.assert(expression);
+
+
+const utcDateFormat = Intl.DateTimeFormat("sv-SE", {timeZone: "UTC", year: 'numeric', month: 'numeric', day: 'numeric'});
+
+
+export const formatUtcDate = date => utcDateFormat.format(date);
+
+
+
 export const dateToStr = date => {
     if (!_.isEmpty(date)) {
         const options = {
