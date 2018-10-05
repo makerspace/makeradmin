@@ -165,7 +165,7 @@ trait EntityStandardFiltering
 	/**
 	 * Generic delete function for entities
 	 */
-	protected function _delete($model, $data)
+	protected function _delete($model, $data, $permanent = false)
 	{
 		// Load the entity
 		$entity = call_user_func("\App\Models\\{$model}::load", $data);
@@ -179,7 +179,7 @@ trait EntityStandardFiltering
 			], 404);
 		}
 
-		if($entity->delete())
+		if($entity->delete($permanent))
 		{
 			return Response()->json([
 				"status"  => "deleted",

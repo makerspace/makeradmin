@@ -25,7 +25,7 @@ class Entity
 	protected $default_expands = [];
 	protected $sort = ["created_at", "desc"]; // An array with sorting options eg. ["entity_id", "desc"] or [["date_updated", "asc"],["date_created","desc"]]
 	protected $validation = [];               // Validation rules
-	protected $deletable = true;
+	protected $soft_deletable = true;
 	protected $show_deleted = false;       // Specify if deleted items should be displayed/accessible.
 
 	/**
@@ -106,7 +106,7 @@ class Entity
 //			$query = $query->join($this->join, "{$this->join}.entity_id", "=", "entity.entity_id");
 		}
 
-		if($this->deletable)
+		if($this->soft_deletable)
 		{
 			// Show deleted entities or not?
 			if($this->show_deleted === true)

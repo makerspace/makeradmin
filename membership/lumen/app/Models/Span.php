@@ -13,7 +13,7 @@ class Span extends Entity
 	protected $type = "span";
 	protected $table = "membership_spans";
 	protected $id_column = "span_id";
-	protected $deletable = false;
+	protected $soft_deletable = false;
 	protected $columns = [
 		"span_id" => [
 			"column" => "membership_spans.span_id",

@@ -12,7 +12,7 @@ class Message extends Entity
 	protected $type = "message";
 	protected $table = "messages_message";
 	protected $id_column = "message_id";
-	protected $deletable = false;
+	protected $soft_deletable = false;
 	protected $columns = [
 		"message_id" => [
 			"column" => "messages_message.messages_message_id",

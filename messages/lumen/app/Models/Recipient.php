@@ -12,7 +12,7 @@ class Recipient extends Entity
 	protected $type = "recipient";
 	protected $table = "messages_recipient";
 	protected $id_column = "recipient_id";
-	protected $deletable = false;
+	protected $soft_deletable = false;
 	protected $columns = [
 		"recipient_id" => [
 			"column" => "messages_recipient.messages_recipient_id",

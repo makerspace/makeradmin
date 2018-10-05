@@ -12,7 +12,7 @@ class Template extends Entity
 	protected $type = "template";
 	protected $table = "messages_template";
 	protected $id_column = "template_id";
-	protected $deletable = true;
+	protected $soft_deletable = true;
 	protected $columns = [
 		"template_id" => [
 			"column" => "messages_template.messages_template_id",

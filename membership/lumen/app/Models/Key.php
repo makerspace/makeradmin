@@ -13,7 +13,7 @@ class Key extends Entity
 	protected $type = "key";
 	protected $table = "membership_keys";
 	protected $id_column = "key_id";
-	protected $deletable = true;
+	protected $soft_deletable = true;
 	protected $columns = [
 		"key_id" => [
 			"column" => "membership_keys.rfid_id",
