@@ -13,6 +13,7 @@ use App\Service;
 use Makeradmin\Logger;
 use Makeradmin\SecurityHelper;
 use Makeradmin\Libraries\CurlBrowser;
+use Makeradmin\Libraries\CurlMultiPartData;
 
 /**
  * Controller for the service registry
@@ -181,12 +182,8 @@ class ServiceRegistry extends Controller
 		}
 		else if($type == "multipart/form-data")
 		{
-			// Change data from the the ISO-8859-1 HTTP to UTF-8
-			// TODO: Is this one affected by the encoding headers in HTTP and/or settings in server?
-			$post = utf8_encode($request->getContent());
-
-			// Forward the content-type
-			$ch->setHeader("Content-Type", $request->header("Content-Type"));
+			$post = new CurlMultiPartData($request->all());
+			$ch->setHeader("Content-Type", $type);
 		}
 		else
 		{

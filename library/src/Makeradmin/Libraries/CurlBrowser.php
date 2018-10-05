@@ -109,6 +109,10 @@ class CurlBrowser
 				$this->setHeader("Content-Type", "application/json");
 				$this->setHeader("Content-Length", strlen($dataStr));
 			}
+			else if(is_object($post))
+			{
+				$dataStr = $post->post_fields();
+			}
 			else if(is_array($post))
 			{
 				$dataStr = http_build_query($post, "", "&");
