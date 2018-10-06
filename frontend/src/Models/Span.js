@@ -1,4 +1,5 @@
 import Base from './Base';
+import {parseUtcDate} from "../utils";
 
 // Spans are startdate - enddate (inclusive - inclusive) but some spans are overlapping.
 export default class Span extends Base {
@@ -6,12 +7,12 @@ export default class Span extends Base {
         return `Are you sure you want to delete span ${this.id}?`;
     }
     
-    start() {
-        return new Date(this.startdate + "T00:00:00.000Z");
+    getStart() {
+        return new Date(parseUtcDate(this.startdate));
     }
     
-    end() {
-        return new Date(this.enddate + "T23:59:59.999Z");
+    getEnd() {
+        return new Date(parseUtcDate(this.enddate));
     }
 }
 

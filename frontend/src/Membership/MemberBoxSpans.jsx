@@ -6,58 +6,131 @@ import {confirmModal} from "../message";
 import CollectionTable from "../Components/CollectionTable";
 import DateTimeShow from "../Components/DateTimeShow";
 import DateShow from "../Components/DateShow";
-import {assert, formatUtcDate} from "../utils";
+import {assert, formatUtcDate, parseUtcDate} from "../utils";
+import DayPickerInput from 'react-day-picker/DayPickerInput';
+import 'react-day-picker/lib/style.css';
 import * as _ from "underscore";
+import Base from "../Models/Base";
 
 
-// Collection of spans of the same type that creates an unbroken period in time, overlaps may exist.
-class Period {
-    
-    constructor(spans) {
-        this.spans = spans;
-        for (let i = 1; i < spans.length; ++i) {
-            assert(spans[i - 1].start() <= spans[i].start());
-        }
+// In memory model representing a date period.
+class DatePeriod extends Base {
+    constructor(data) {
+        super({...data, id: ++DatePeriod.counter});
     }
     
-    end() {
-        return new Date(Math.max(...this.spans.map(s => s.end())));
+    getIsoStart() {
+        return formatUtcDate(this.start);
     }
     
-    start() {
-        return new Date(Math.min(...this.spans.map(s => s.start())));
+    setIsoStart(d) {
+        this.start = parseUtcDate(d);
+    }
+
+    getIsoEnd() {
+        return formatUtcDate(this.end);
+    }
+    
+    setIsoEnd(d) {
+        this.end = parseUtcDate(d);
+    }
+    
+}
+
+DatePeriod.counter = 0;
+
+DatePeriod.model = {
+    id: "id",
+    attributes: {
+        start: null,
+        end: null,
+    },
+};
+
+// In memory module representing a list of date periods.
+class DatePeriodList extends Base {
+    remove(period) {
+        this.periods = this.periods.filter(p => p !== period);
+    }
+    
+    add(period) {
+        this.periods.push(period);
+        this.notify();
+    }
+}
+
+DatePeriodList.model = {
+    attributes: {
+        category: "",
+        periods: [],
+    },
+};
+
+
+class DatePeriodInput extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {start: "", end: ""};
+    }
+
+    render() {
+    }
+}
+
+
+class DatePeriodsInput extends React.Component {
+    constructor(props) {
+        super(props);
+    }
+
+    render() {
+        return <DayPickerInput/>;
     }
 }
 
 
 // Return true if span1 end overlaps or is adjacent to span2 start.
 const isConnected = (span1, span2) => {
-    assert(span1.start() <= span2.start());
-    return span2.start() - span1.end() <= 1;
+    assert(span1.getStart() <= span2.getStart());
+    return span2.getStart() - span1.getEnd() <= 24 * 3600 * 1000;
 };
 
 
 // Return assembled periods for non deleted spans in a category.
 const filterPeriods = (items, category) => {
     const spans = items.filter(i => !i.deleted_at &&  i.span_type === category).sort((a, b) => a.startdate > b.startdate);
-    const res = [];
-    let current = [];
-    for (let i = 0; i < spans.length; ++i) {
-        const last = current[current.length - 1];
-        const span = spans[i];
-        if (_.isEmpty(current) || isConnected(last, span)) {
-            current.push(span);
-        }
-        else {
-            res.push(new Period(current));
-            current = [];
-        }
+    const periods = [];
+    
+    while (!_.isEmpty(spans)) {
+        let i = 1;
+        while (i < spans.length && isConnected(spans[i - 1], spans[i])) ++i;
+        const periodSpans = spans.splice(0, i);
+        periods.push(new DatePeriod({
+                                    start: new Date(Math.min(...periodSpans.map(s => s.getStart()))),
+                                    end: new Date(Math.max(...periodSpans.map(s => s.getEnd()))),
+                                }));
     }
-    if (!_.isEmpty(current)) {
-        res.push(new Period(current));
-    }
-    console.info(category, res);
-    return res;
+    return new DatePeriodList({category, periods});
+    // const res = [];
+    // let current = [];
+    // for (let i = 0; i < spans.length; ++i) {
+    //     const last = current[current.length - 1];
+    //     const span = spans[i];
+    //     if (_.isEmpty(current) || isConnected(last, span)) {
+    //         current.push(span);
+    //     }
+    //     else {
+    //         res.push(new Period({
+    //                                 start: new Date(Math.min(...current.map(s => s.getStart()))),
+    //                                 end: new Date(Math.max(...current.map(s => s.getEnd()))),
+    //                             }));
+    //         current = [];
+    //     }
+    // }
+    // if (!_.isEmpty(current)) {
+    //     res.push(new Period(current));
+    // }
+    // return res;
 };
 
 
@@ -74,15 +147,22 @@ class MemberBoxSpans extends React.Component {
             this.setState({items});
         });
     }
+
+    renderPeriods(periods) {
+        console.info(periods);
+        return (
+            <form>
+                <ul>{periods.periods.map((p, i) => <li key={i}><input type="text" value={p.getIsoStart()}/><input type="text" value={p.getIsoEnd()}/></li>)}</ul>
+            </form>
+        );
+    }
     
     render() {
         const {items} = this.state;
         
         const deleteItem = item => confirmModal(item.deleteConfirmMessage()).then(() => item.del()).then(() => this.collection.fetch(), () => null);
         
-        const renderPeriods = periods => <ul>{periods.map((p, i) => <li key={i}>{formatUtcDate(p.start())} - {formatUtcDate(p.end())}</li>)}</ul>;
-        
-        const renderCategory = category => <div key={category}><strong>{category}:</strong>{renderPeriods(filterPeriods(items, category))}</div>;
+        const renderCategory = category => <div key={category}><strong>{category}:</strong>{this.renderPeriods(filterPeriods(items, category))}</div>;
         
         return (
             <div className="uk-margin-top">

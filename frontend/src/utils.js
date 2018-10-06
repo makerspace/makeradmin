@@ -11,6 +11,8 @@ const utcDateFormat = Intl.DateTimeFormat("sv-SE", {timeZone: "UTC", year: 'nume
 export const formatUtcDate = date => utcDateFormat.format(date);
 
 
+export const parseUtcDate = str => new Date(str + "T00:00:00.000Z");
+
 
 export const dateToStr = date => {
     if (!_.isEmpty(date)) {
