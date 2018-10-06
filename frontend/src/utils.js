@@ -14,6 +14,9 @@ export const formatUtcDate = date => utcDateFormat.format(date);
 export const parseUtcDate = str => new Date(str + "T00:00:00.000Z");
 
 
+export const utcToday = () => {const d = new Date(); d.setUTCHours(0, 0, 0, 0); return d;};
+
+
 export const dateToStr = date => {
     if (!_.isEmpty(date)) {
         const options = {
@@ -49,3 +52,6 @@ export const dateTimeToStr = date => {
     }
     return "";
 };
+
+
+export const deepcopy = data => JSON.parse(JSON.stringify(data));

@@ -6,7 +6,7 @@ import {confirmModal} from "../message";
 import CollectionTable from "../Components/CollectionTable";
 import DateTimeShow from "../Components/DateTimeShow";
 import DateShow from "../Components/DateShow";
-import {assert, formatUtcDate, parseUtcDate} from "../utils";
+import {assert, formatUtcDate, parseUtcDate, utcToday} from "../utils";
 import DayPickerInput from 'react-day-picker/DayPickerInput';
 import 'react-day-picker/lib/style.css';
 import * as _ from "underscore";
@@ -57,6 +57,12 @@ class DatePeriodList extends Base {
         this.periods.push(period);
         this.notify();
     }
+    
+    replace(periods) {
+        this.periods.length = 0;
+        this.periods.push(...periods);
+        this.notify();
+    }
 }
 
 DatePeriodList.model = {
@@ -70,29 +76,67 @@ DatePeriodList.model = {
 class DatePeriodInput extends React.Component {
     constructor(props) {
         super(props);
-        this.state = {start: "", end: ""};
+        this.state = {start: utcToday(), end: utcToday()};
+    }
+    
+    componentDidMount() {
+        const {period} = this.props;
+        period.subscribe(() => {
+            this.setState({start: period.start, end: period.end});
+        });
     }
 
     render() {
+        const format = d => formatUtcDate(d);
+        const {period} = this.props;
+        const {start, end} = this.state;
+        
+        return (
+            <span>
+                <DayPickerInput value={start} formatDate={format} onDayChange={d => {if (d) period.start = d;}}/>
+                -
+                <DayPickerInput value={end} formatDate={format} onDayChange={d => {if (d) period.end = d;}}/>
+            </span>
+        );
     }
 }
 
 
-class DatePeriodsInput extends React.Component {
+class DatePeriodListInput extends React.Component {
     constructor(props) {
         super(props);
+        this.state = {periods: []};
     }
 
+    componentDidMount() {
+        const {periods} = this.props;
+        periods.subscribe(() => {
+            this.setState({periods: periods.periods});
+        });
+    }
+    
     render() {
-        return <DayPickerInput/>;
+        const {category} = this.props.periods;
+        const {periods} = this.state;
+        
+        return (
+            <div>
+                {periods.length}
+                <h4>{category}</h4>
+                {periods.map(p => <div key={p.id}><DatePeriodInput key={p.id} period={p}/><a onClick={() => this.props.periods.remove(p)} className="removebutton"><i className="uk-icon-trash"/></a></div>)}
+                <button className="uk-button uk-button-small uk-button-success" onClick={() => {
+                    this.props.periods.add(new DatePeriod({start: utcToday(), end: utcToday()}));
+                }}>Add</button>
+            </div>
+        );
     }
 }
 
 
 // Return true if span1 end overlaps or is adjacent to span2 start.
 const isConnected = (span1, span2) => {
-    assert(span1.getStart() <= span2.getStart());
-    return span2.getStart() - span1.getEnd() <= 24 * 3600 * 1000;
+    assert(span1.start <= span2.start);
+    return span2.start - span1.end <= 24 * 3600 * 1000;
 };
 
 
@@ -106,31 +150,11 @@ const filterPeriods = (items, category) => {
         while (i < spans.length && isConnected(spans[i - 1], spans[i])) ++i;
         const periodSpans = spans.splice(0, i);
         periods.push(new DatePeriod({
-                                    start: new Date(Math.min(...periodSpans.map(s => s.getStart()))),
-                                    end: new Date(Math.max(...periodSpans.map(s => s.getEnd()))),
+                                    start: new Date(Math.min(...periodSpans.map(s => s.start))),
+                                    end: new Date(Math.max(...periodSpans.map(s => s.end))),
                                 }));
     }
-    return new DatePeriodList({category, periods});
-    // const res = [];
-    // let current = [];
-    // for (let i = 0; i < spans.length; ++i) {
-    //     const last = current[current.length - 1];
-    //     const span = spans[i];
-    //     if (_.isEmpty(current) || isConnected(last, span)) {
-    //         current.push(span);
-    //     }
-    //     else {
-    //         res.push(new Period({
-    //                                 start: new Date(Math.min(...current.map(s => s.getStart()))),
-    //                                 end: new Date(Math.max(...current.map(s => s.getEnd()))),
-    //                             }));
-    //         current = [];
-    //     }
-    // }
-    // if (!_.isEmpty(current)) {
-    //     res.push(new Period(current));
-    // }
-    // return res;
+    return periods;
 };
 
 
@@ -139,35 +163,28 @@ class MemberBoxSpans extends React.Component {
     constructor(props) {
         super(props);
         this.collection = new Collection({type: Span, filter: {member_id: props.params.member_id}, pageSize: 0});
+        this.categories = [
+            new DatePeriodList({category: 'labaccess'}),
+            new DatePeriodList({category: 'special_labaccess'}),
+            new DatePeriodList({category: 'membership'}),
+        ];
         this.state = {items: []};
     }
 
     componentDidMount() {
         this.collection.subscribe(({items}) => {
+            this.categories.forEach(periods => periods.replace(filterPeriods(items, periods.category)));
             this.setState({items});
         });
     }
-
-    renderPeriods(periods) {
-        console.info(periods);
-        return (
-            <form>
-                <ul>{periods.periods.map((p, i) => <li key={i}><input type="text" value={p.getIsoStart()}/><input type="text" value={p.getIsoEnd()}/></li>)}</ul>
-            </form>
-        );
-    }
     
     render() {
-        const {items} = this.state;
-        
         const deleteItem = item => confirmModal(item.deleteConfirmMessage()).then(() => item.del()).then(() => this.collection.fetch(), () => null);
-        
-        const renderCategory = category => <div key={category}><strong>{category}:</strong>{this.renderPeriods(filterPeriods(items, category))}</div>;
         
         return (
             <div className="uk-margin-top">
                 <h2>Medlemsperioder</h2>
-                {["labaccess", "special_labaccess", "membership"].map(renderCategory)}
+                {this.categories.map(periods => <DatePeriodListInput key={periods.category} periods={periods}/>)}
                 <h2>Spans</h2>
                 <CollectionTable
                     collection={this.collection}

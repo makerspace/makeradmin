@@ -1,5 +1,6 @@
 import * as _ from "underscore";
 import {del, get, put, post} from "../gateway";
+import {deepcopy} from "../utils";
 
 
 export default class Base {
@@ -61,11 +62,11 @@ export default class Base {
         const model = this.constructor.model;
         if (data) {
             this.unsaved = {};
-            this.saved = Object.assign({}, model.attributes, data);
+            this.saved = Object.assign(deepcopy(model.attributes), data);
         }
         else {
             this.unsaved = {};
-            this.saved   = Object.assign({}, model.attributes);
+            this.saved   = deepcopy(model.attributes);
         }
         this.notify();
     }

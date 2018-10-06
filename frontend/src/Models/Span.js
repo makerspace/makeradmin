@@ -7,11 +7,11 @@ export default class Span extends Base {
         return `Are you sure you want to delete span ${this.id}?`;
     }
     
-    getStart() {
+    get start() {
         return new Date(parseUtcDate(this.startdate));
     }
     
-    getEnd() {
+    get end() {
         return new Date(parseUtcDate(this.enddate));
     }
 }
