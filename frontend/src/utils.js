@@ -11,7 +11,7 @@ const utcDateFormat = Intl.DateTimeFormat("sv-SE", {timeZone: "UTC", year: 'nume
 export const formatUtcDate = date => utcDateFormat.format(date);
 
 
-export const parseUtcDate = str => new Date(str + "T00:00:00.000Z");
+export const parseUtcDate = str => /\d{4}-\d{2}-\d{2}/.test(str) ? new Date(str + "T00:00:00.000Z") : null;
 
 
 export const utcToday = () => {const d = new Date(); d.setUTCHours(0, 0, 0, 0); return d;};
