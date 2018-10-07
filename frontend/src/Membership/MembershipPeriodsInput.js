@@ -2,6 +2,7 @@ import React from 'react';
 import CategoryPeriods from "../Models/CategoryPeriods";
 import CategoryPeriodsInput from "../Components/CategoryPeriodsInput";
 import {calculateSpanDiff, filterPeriods} from "../Models/Span";
+import {formatUtcDate} from "../utils";
 
 
 export default class MembershipPeriodsInput extends React.Component {
@@ -42,12 +43,17 @@ export default class MembershipPeriodsInput extends React.Component {
             // subscriptions on spans will start causing changes of category periods.
             const deleteSpans = [];
             const addSpans = [];
-            this.categoryPeriodsList.forEach(cp => {
-                cp.merge();
-                calculateSpanDiff({items: this.props.spans.items, categoryPeriods: cp, member_id, deleteSpans, addSpans});
+            // TODO Only testing labaccess
+            this.categoryPeriodsList.forEach((cp, i) => {
+                if (i === 0) {
+                    cp.merge();
+                    calculateSpanDiff({items: this.props.spans.items, categoryPeriods: cp, member_id, deleteSpans, addSpans});
+                }
             });
-            // console.info("delete", deleteSpans);
-            // console.info("add", addSpans);
+            console.info("delete");
+            deleteSpans.forEach(s => console.info("  " + formatUtcDate(s.start) + " - " + formatUtcDate(s.end)));
+            console.info("add");
+            addSpans.forEach(s => console.info("  " + formatUtcDate(s.start) + " - " + formatUtcDate(s.end)));
         };
         
         return (

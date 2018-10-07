@@ -92,7 +92,7 @@ export const calculateSpanDiff = ({items, categoryPeriods, member_id, deleteSpan
         addSpans.push(new Span({
                                    startdate: formatUtcDate(start),
                                    enddate: formatUtcDate(end),
-                                   category,
+                                   span_type: category,
                                    member_id,
                                }));
     };
