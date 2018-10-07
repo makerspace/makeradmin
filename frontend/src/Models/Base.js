@@ -29,7 +29,7 @@ export default class Base {
                     return model.attributes[v];
                 },
                 set: (v) => {
-                    if (v === this.saved[key]) {
+                    if (_.isEqual(v, this.saved[key])) {
                         delete this.unsaved[key];
                     }
                     else {

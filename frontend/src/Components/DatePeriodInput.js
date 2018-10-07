@@ -29,9 +29,10 @@ export default class DatePeriodInput extends React.Component {
                 <DayPickerInput
                     inputProps={{
                         size: 10,
+                        className: "uk-form-input" + (start ? "" : " uk-form-danger"),
                         style: {
                             marginTop: "2px",
-                            ...(!start && {borderColor: "red"}),
+                            ...(period.isDirty("start") && {fontWeight: "bold"}),
                             ...(historicStart && {color: "brown"}),
                         }
                     }}
