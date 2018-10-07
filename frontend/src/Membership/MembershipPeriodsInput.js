@@ -34,31 +34,36 @@ export const filterPeriods = (items, category) => {
 export default class MembershipPeriodsInput extends React.Component {
     constructor(props) {
         super(props);
+        this.unsubscribe = [];
         this.categories = [
             new DatePeriodList({category: 'labaccess'}),
             new DatePeriodList({category: 'membership'}),
             new DatePeriodList({category: 'special_labaccess'}),
         ];
-        this.state = {showHistoric: true};
+        this.state = {showHistoric: true, saveDisabled: true};
     }
 
     componentDidMount() {
-        this.unsubscribe = this.props.spans.subscribe(({items}) => {
+        this.unsubscribe.push(this.props.spans.subscribe(({items}) => {
             this.categories.forEach(periods => periods.replace(filterPeriods(items, periods.category)));
+        }));
+        this.categories.forEach(category => {
+            this.unsubscribe.push(category.subscribe(() => this.setState({saveDisabled: !this.categories.some(c => c.isDirty())})));
         });
     }
 
     componentWillUnmount() {
-        this.unsubscribe();
+        this.unsubscribe.forEach(u => u());
     }
 
     render() {
-        const {showHistoric} = this.state;
+        const {showHistoric, saveDisabled} = this.state;
         return (
             <form className="uk-form">
                 <label className="uk-label" htmlFor="showHistoric">Visa historiska</label>
                 <input id="showHistoric" className="uk-checkbox" type="checkbox" checked={showHistoric} onChange={e => this.setState({showHistoric: e.target.checked})}/>
                 {this.categories.map(periods => <DatePeriodListInput key={periods.category} periods={periods} showHistoric={showHistoric}/>)}
+                <button disabled={saveDisabled} className="uk-button uk-button-success uk-float-right"><i className="uk-icon-save"/> Spara</button>
             </form>
         );
     }
