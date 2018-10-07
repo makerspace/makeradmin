@@ -21,9 +21,6 @@ export default class DatePeriodInput extends React.Component {
         const {start, end} = this.state;
 
         const today = utcToday();
-        const historicStart = start && start < today;
-        const historicEnd = end && end < today;
-        
         const historicStyle = {color: "darkcyan"};
         
         return (
@@ -32,10 +29,10 @@ export default class DatePeriodInput extends React.Component {
                     <DayPickerInput
                         inputProps={{
                             size: 10,
-                            className: "uk-input" + (start ? "" : " uk-form-danger"),
+                            className: "uk-input" + (period.isValid("start") ? "" : " uk-form-danger"),
                             style: {
                                 marginTop: "2px",
-                                ...(historicStart && historicStyle),
+                                ...(start && start < today && historicStyle),
                             }
                         }}
                         placeholder="YYYY-MM-DD"
@@ -49,11 +46,11 @@ export default class DatePeriodInput extends React.Component {
                 <span className={period.isDirty("end") ? "ma-changed" : ""}>
                     <DayPickerInput
                         inputProps={{
-                            className: "uk-input" + (end ? "" : " uk-form-danger"),
+                            className: "uk-input" + (period.isValid("end") ? "" : " uk-form-danger"),
                             size: 10,
                             style: {
                                 marginTop: "2px",
-                                ...(historicEnd && historicStyle),
+                                ...(end && end < today && historicStyle),
                             }
                         }}
                         placeholder="YYYY-MM-DD"

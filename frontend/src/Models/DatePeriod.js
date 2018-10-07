@@ -5,6 +5,18 @@ export default class DatePeriod extends Base {
     constructor(data) {
         super({...data, id: ++DatePeriod.counter});
     }
+    
+    isValid(key) {
+        if (key && !this[key]) {
+            return false;
+        }
+        return this.start <= this.end;
+    }
+    
+    // TODO All models should have isValid, canSave should be implemented as (any isDirty && all isValid) for composites.
+    canSave() {
+        return this.isDirty() && this.isValid();
+    }
 }
 
 DatePeriod.counter = 0;

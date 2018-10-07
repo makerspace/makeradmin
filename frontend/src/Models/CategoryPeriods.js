@@ -1,8 +1,9 @@
 import Base from "./Base";
 import * as _ from "underscore";
+import {mergePeriods} from "./Span";
 
-// In memory module representing a list of date periods.
-export default class DatePeriodList extends Base {
+// In memory module representing a list of date periods in the same span category.
+export default class CategoryPeriods extends Base {
     
     constructor(data) {
         super(data);
@@ -29,6 +30,12 @@ export default class DatePeriodList extends Base {
         periods.forEach(p => this.unsubscribe[p.id] = p.subscribe(() => this.notify()));
         this.notify();
     }
+
+    // Should be called after edit and before save to eliminate any overlapping periods.
+    merge() {
+        this.periods.sort((a, b) => a.start > b.start);
+        this.replace(mergePeriods(this.periods));
+    }
     
     isDirty(key) {
         if (key === 'periods') {
@@ -41,9 +48,17 @@ export default class DatePeriodList extends Base {
         
         return super.isDirty() || this.periods.some(p => p.isDirty());
     }
+    
+    isValid() {
+        return this.periods.every(p => p.isValid());
+    }
+    
+    canSave() {
+        return this.isDirty() && this.isValid();
+    }
 }
 
-DatePeriodList.model = {
+CategoryPeriods.model = {
     attributes: {
         category: "",
         periods: [],

@@ -1,5 +1,5 @@
 import Base from './Base';
-import {assert, parseUtcDate} from "../utils";
+import {addToDate, assert, formatUtcDate, parseUtcDate} from "../utils";
 import DatePeriod from "./DatePeriod";
 import * as _ from "underscore";
 
@@ -38,29 +38,132 @@ Span.model = {
     },
 };
 
+// TODO Most of the functions here needs some tests. Test a lot with one day spans.
 
-// Return true if span1 end overlaps or is adjacent to span2 start.
-export const isConnected = (span1, span2) => {
-    assert(span1.start <= span2.start);
-    return span2.start - span1.end <= 24 * 3600 * 1000;
+export const DAY_MILLIS = 24 * 3600 * 1000;
+
+
+// Find overlapping and adjacent periods/spans, needs to be sorted on start.
+export const isConnected = (a, b) => {
+    assert(a.start <= b.start);
+    return b.start - a.end <= DAY_MILLIS;
 };
+
+
+// Merge overlapping periods/spans and return new period list, input needs to be sorted on start.
+export const mergePeriods = toMergePeriods => {
+    const oldPeriods = toMergePeriods.slice();
+    const newPeriods = [];
+    while (!_.isEmpty(oldPeriods)) {
+        let i = 1;
+        while (i < oldPeriods.length && isConnected(oldPeriods[i - 1], oldPeriods[i])) ++i;
+        const periods = oldPeriods.splice(0, i);
+        newPeriods.push(new DatePeriod({
+                                           start: new Date(Math.min(...periods.map(s => s.start))),
+                                           end: new Date(Math.max(...periods.map(s => s.end))),
+                                       }));
+    }
+    return newPeriods;
+};
+
+
+// Filter not deleted spans for one category, return sorted.
+export const filterCategory = (spans, category) =>
+    spans.filter(i => !i.deleted_at &&  i.span_type === category).sort((a, b) => a.startdate > b.startdate);
 
 
 // Return assembled periods for non deleted spans in a category.
-export const filterPeriods = (items, category) => {
-    const spans = items.filter(i => !i.deleted_at &&  i.span_type === category).sort((a, b) => a.startdate > b.startdate);
-    const periods = [];
+export const filterPeriods = (spans, category) =>
+    mergePeriods(filterCategory(spans, category));
+
+
+// Given the category periods and spans, calculate additions and deletions needed and add them to respective lists.
+// Spans may have overlaps, periods may not overlap each other.
+export const calculateSpanDiff = ({items, categoryPeriods, member_id, deleteSpans, addSpans}) => {
+    const {periods, category} = categoryPeriods;
+    const spans = filterCategory(items, category);
+    // Walk trough both lists and decide what spans to delete/keep/add.
     
-    while (!_.isEmpty(spans)) {
-        let i = 1;
-        while (i < spans.length && isConnected(spans[i - 1], spans[i])) ++i;
-        const periodSpans = spans.splice(0, i);
-        periods.push(new DatePeriod({
-                                    start: new Date(Math.min(...periodSpans.map(s => s.start))),
-                                    end: new Date(Math.max(...periodSpans.map(s => s.end))),
-                                }));
+    let pi = 0;
+    let si = 0;
+    
+    const addSpan = (start, end) => {
+        assert(start <= end);
+        addSpans.push(new Span({
+                                   startdate: formatUtcDate(start),
+                                   enddate: formatUtcDate(end),
+                                   category,
+                                   member_id,
+                               }));
+    };
+    
+    const deleteSpan = span => {
+        assert(span.id);
+        deleteSpans.push(span);
+    };
+    
+    while (true) {
+        if (si === spans.length) {
+            // Out of spans, add rest of periods as spans.
+            for (let i = pi; i < periods.length; ++i) {
+                const {start, end} = periods[i];
+                addSpan(start, end);
+            }
+            return;
+        }
+
+        if (pi === periods.length) {
+            // Out of periods, delete rest of spans.
+            spans.slice(si).forEach(s => deleteSpan(s));
+            return;
+        }
+
+        const period = periods[pi];
+        
+        // Remove all spans that ends before the next period.
+        while (si < spans.length && spans[si].end < period.start) {
+            deleteSpan(spans[si]);
+            ++si;
+        }
+        
+        // Replace all spans overlapping start of period with a span from start of period to next span.
+        while (si < spans.length && spans[si].start < period.start && spans[si].end >= period.start) {
+            deleteSpan(spans[si]);
+            ++si;
+        }
+        
+        if (si === spans.length) {
+            continue;
+        }
+
+        // Go through all spans with start inside the period, make sure there is no inside gaps, spans are not sorted
+        // by end date.
+        let gapStart = period.start;
+        while (si < spans.length && spans[si].start <= period.end && gapStart < period.end) {
+            const span = spans[si];
+            if (span.end > period.end || span.end < gapStart) {
+                // Span overlaps end, or it does not help filling the gap, delete and ignore.
+                deleteSpan(span);
+            }
+            else if (gapStart.getTime() === span.start.getTime()) {
+                // Keep span.
+                gapStart = addToDate(span.start, DAY_MILLIS);
+            }
+            else {
+                // Add span to fill period to start of span, then keep span.
+                addSpan(gapStart, addToDate(span.start, -DAY_MILLIS));
+                gapStart = addToDate(span.start, DAY_MILLIS);
+            }
+            ++si;
+        }
+        // Fill the last gap if there is one.
+        if (gapStart <= period.end) {
+            addSpan(gapStart, period.end);
+        }
+        
+        ++pi;
     }
-    return periods;
 };
+
 
 

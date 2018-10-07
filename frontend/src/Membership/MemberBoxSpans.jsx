@@ -34,7 +34,7 @@ class MemberBoxSpans extends React.Component {
         return (
             <div className="uk-margin-top">
                 <h2>Medlemsperioder</h2>
-                <MembershipPeriodsInput spans={this.collection}/>
+                <MembershipPeriodsInput spans={this.collection} member_id={this.props.params.member_id}/>
                 <h2>Spans</h2>
                 <CollectionTable
                     collection={this.collection}

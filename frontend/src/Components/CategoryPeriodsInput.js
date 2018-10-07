@@ -4,7 +4,7 @@ import DatePeriodInput from "./DatePeriodInput";
 import DatePeriod from "../Models/DatePeriod";
 
 
-export default class DatePeriodListInput extends React.Component {
+export default class CategoryPeriodsInput extends React.Component {
     
     constructor(props) {
         super(props);
@@ -12,14 +12,14 @@ export default class DatePeriodListInput extends React.Component {
     }
 
     componentDidMount() {
-        const {periods} = this.props;
-        periods.subscribe(() => {
-            this.setState({periods: periods.periods});
+        const {categoryPeriods} = this.props;
+        categoryPeriods.subscribe(() => {
+            this.setState({periods: categoryPeriods.periods});
         });
     }
     
     render() {
-        const {category} = this.props.periods;
+        const {category} = this.props.categoryPeriods;
         const {showHistoric} = this.props;
         const {periods} = this.state;
         
@@ -41,7 +41,7 @@ export default class DatePeriodListInput extends React.Component {
                         <div key={p.id}>
                             <DatePeriodInput key={p.id} period={p}/>
                             &nbsp;
-                            <a onClick={() => this.props.periods.remove(p)} className="removebutton"><i className="uk-icon-trash"/></a>
+                            <a onClick={() => this.props.categoryPeriods.remove(p)} className="removebutton"><i className="uk-icon-trash"/></a>
                         </div>
                     );
                 })}
@@ -49,7 +49,7 @@ export default class DatePeriodListInput extends React.Component {
                     const period = new DatePeriod();
                     period.start = utcToday();
                     period.end = utcToday();
-                    this.props.periods.add(period);
+                    this.props.categoryPeriods.add(period);
                 }}>Lägg till period</button>
             </div>
         );

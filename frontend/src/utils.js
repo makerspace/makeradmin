@@ -27,6 +27,9 @@ export const parseUtcDate = str => {
 export const utcToday = () => {const d = new Date(); d.setUTCHours(0, 0, 0, 0); return d;};
 
 
+export const addToDate = (date, millis) => new Date(date.getTime() + millis);
+
+
 export const dateToStr = date => {
     if (!_.isEmpty(date)) {
         const options = {
