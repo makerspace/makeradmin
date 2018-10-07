@@ -33,7 +33,6 @@ test-admin-js:
 	npm --prefix frontend run test
 
 test:
-	docker build -f frontend/DockerfileTest frontend
 	python3 -m unittest tests
 
 firstrun: .env build init-db

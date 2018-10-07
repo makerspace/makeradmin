@@ -32,7 +32,11 @@ export default class MembershipPeriodsInput extends React.Component {
     render() {
         const {showHistoric, saveDisabled} = this.state;
         
-        const onSave = () => null;
+        const onSave = () => {
+            const {deleteSpans, addSpans} = calculateSpanDiff({spans: this.props.items, categories: this.categories});
+            console.info("delete", deleteSpans);
+            console.info("add", addSpans);
+        };
         
         return (
             <form className="uk-form" onSubmit={(e) => {e.preventDefault(); onSave(); return false;}}>
