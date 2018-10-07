@@ -24,44 +24,45 @@ export default class DatePeriodInput extends React.Component {
         const historicStart = start && start < today;
         const historicEnd = end && end < today;
         
-        const editedStyle = {textDecoration: "underline solid #b0c0ff"};
         const historicStyle = {color: "grey"};
         
         return (
             <span>
-                <DayPickerInput
-                    inputProps={{
-                        size: 10,
-                        className: "uk-input" + (start ? "" : " uk-form-danger"),
-                        style: {
-                            marginTop: "2px",
-                            ...(period.isDirty("start") && editedStyle),
-                            ...(historicStart &&  historicStyle),
-                        }
-                    }}
-                    placeholder="YYYY-MM-DD"
-                    value={start || ""}
-                    parseDate={parseUtcDate}
-                    formatDate={formatUtcDate}
-                    onDayChange={d => period.start = d || null}
-                />
+                <span className={period.isDirty("start") ? "ma-changed" : ""}>
+                    <DayPickerInput
+                        inputProps={{
+                            size: 10,
+                            className: "uk-input" + (start ? "" : " uk-form-danger"),
+                            style: {
+                                marginTop: "2px",
+                                ...(historicStart &&  historicStyle),
+                            }
+                        }}
+                        placeholder="YYYY-MM-DD"
+                        value={start || ""}
+                        parseDate={parseUtcDate}
+                        formatDate={formatUtcDate}
+                        onDayChange={d => period.start = d || null}
+                    />
+                </span>
                 &nbsp;-&nbsp;
-                <DayPickerInput
-                    inputProps={{
-                        className: "uk-input" + (start ? "" : " uk-form-danger"),
-                        size: 10,
-                        style: {
-                            marginTop: "2px",
-                            ...(period.isDirty("end") && editedStyle),
-                            ...(historicEnd && historicStyle),
-                        }
-                    }}
-                    placeholder="YYYY-MM-DD"
-                    value={end || ""}
-                    parseDate={parseUtcDate}
-                    formatDate={formatUtcDate}
-                    onDayChange={d => period.end = d || null}
-                />
+                <span className={period.isDirty("start") ? "ma-changed" : ""}>
+                    <DayPickerInput
+                        inputProps={{
+                            className: "uk-input" + (start ? "" : " uk-form-danger") + (period.isDirty("start") ? " ma-input-changed" : ""),
+                            size: 10,
+                            style: {
+                                marginTop: "2px",
+                                ...(historicEnd && historicStyle),
+                            }
+                        }}
+                        placeholder="YYYY-MM-DD"
+                        value={end || ""}
+                        parseDate={parseUtcDate}
+                        formatDate={formatUtcDate}
+                        onDayChange={d => period.end = d || null}
+                    />
+                </span>
             </span>
         );
     }

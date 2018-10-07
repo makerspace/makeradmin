@@ -252,7 +252,17 @@ html, body, #main {
 
 .meep .changed label::before {
 	content: "* ";
-	color: red;
+}
+
+span.ma-changed {
+    position: relative;
+}
+
+.ma-changed::after {
+    position: absolute;
+    right: 8px;
+    top: -0.1em;
+    content: "*";
 }
 
 /* Filterbox */
