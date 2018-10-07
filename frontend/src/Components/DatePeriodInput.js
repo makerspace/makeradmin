@@ -35,7 +35,7 @@ export default class DatePeriodInput extends React.Component {
                             className: "uk-input" + (start ? "" : " uk-form-danger"),
                             style: {
                                 marginTop: "2px",
-                                ...(historicStart &&  historicStyle),
+                                ...(historicStart && historicStyle),
                             }
                         }}
                         placeholder="YYYY-MM-DD"
@@ -46,10 +46,10 @@ export default class DatePeriodInput extends React.Component {
                     />
                 </span>
                 &nbsp;-&nbsp;
-                <span className={period.isDirty("start") ? "ma-changed" : ""}>
+                <span className={period.isDirty("end") ? "ma-changed" : ""}>
                     <DayPickerInput
                         inputProps={{
-                            className: "uk-input" + (start ? "" : " uk-form-danger") + (period.isDirty("start") ? " ma-input-changed" : ""),
+                            className: "uk-input" + (end ? "" : " uk-form-danger"),
                             size: 10,
                             style: {
                                 marginTop: "2px",
