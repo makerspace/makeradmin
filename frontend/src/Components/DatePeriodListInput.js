@@ -45,8 +45,11 @@ export default class DatePeriodListInput extends React.Component {
                         </div>
                     );
                 })}
-                <button style={{marginTop: "2px"}} className="uk-button uk-button-small uk-button-success" onClick={() => {
-                    this.props.periods.add(new DatePeriod({start: utcToday(), end: utcToday()}));
+                <button type="button" style={{marginTop: "2px"}} className="uk-button uk-button-small uk-button-success" onClick={() => {
+                    const period = new DatePeriod();
+                    period.start = utcToday();
+                    period.end = utcToday();
+                    this.props.periods.add(period);
                 }}>Lägg till period</button>
             </div>
         );

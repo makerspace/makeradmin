@@ -55,10 +55,10 @@ export default class MembershipPeriodsInput extends React.Component {
     render() {
         const {showHistoric} = this.state;
         return (
-            <div>
+            <form className="uk-form">
                 <label>Visa historiska</label><input type="checkbox" checked={showHistoric} onChange={e => this.setState({showHistoric: e.target.checked})}/>
                 {this.categories.map(periods => <DatePeriodListInput key={periods.category} periods={periods} showHistoric={showHistoric}/>)}
-            </div>
+            </form>
         );
     }
 }
