@@ -1,5 +1,0 @@
-FROM makeradmin/frontend-base:1.0
-
-RUN npm --prefix /data run eslint
-
-RUN npm --prefix /data run test

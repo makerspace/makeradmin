@@ -24,7 +24,7 @@ export default class DatePeriodInput extends React.Component {
         const historicStart = start && start < today;
         const historicEnd = end && end < today;
         
-        const historicStyle = {color: "grey"};
+        const historicStyle = {color: "darkcyan"};
         
         return (
             <span>
