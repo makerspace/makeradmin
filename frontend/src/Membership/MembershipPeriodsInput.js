@@ -2,7 +2,7 @@ import React from 'react';
 import CategoryPeriods from "../Models/CategoryPeriods";
 import CategoryPeriodsInput from "../Components/CategoryPeriodsInput";
 import {calculateSpanDiff, filterPeriods} from "../Models/Span";
-import {formatUtcDate} from "../utils";
+import auth from '../auth';
 
 
 export default class MembershipPeriodsInput extends React.Component {
@@ -36,24 +36,25 @@ export default class MembershipPeriodsInput extends React.Component {
 
     render() {
         const {showHistoric, saveDisabled} = this.state;
-        const {member_id} = this.props;
+        const {member_id, spans} = this.props;
         
         const onSave = () => {
             // Important, need to collect spans to delete and add before doing anything, when spans changes
             // subscriptions on spans will start causing changes of category periods.
             const deleteSpans = [];
             const addSpans = [];
-            // TODO Only testing labaccess
-            this.categoryPeriodsList.forEach((cp, i) => {
-                if (i === 0) {
-                    cp.merge();
-                    calculateSpanDiff({items: this.props.spans.items, categoryPeriods: cp, member_id, deleteSpans, addSpans});
-                }
+            this.categoryPeriodsList.forEach(cp => {
+                cp.merge();
+                calculateSpanDiff({items: this.props.spans.items, categoryPeriods: cp, member_id, deleteSpans, addSpans});
             });
-            console.info("delete");
-            deleteSpans.forEach(s => console.info("  " + formatUtcDate(s.start) + " - " + formatUtcDate(s.end)));
-            console.info("add");
-            addSpans.forEach(s => console.info("  " + formatUtcDate(s.start) + " - " + formatUtcDate(s.end)));
+
+            const deleteIds = deleteSpans.map(s => s.id).join(",");
+            addSpans.forEach(s => s.creation_reason = "gui_edit:" + auth.getUsername() + " replacing:" + deleteIds);
+            
+            const promises = [];
+            promises.push(...deleteSpans.map(s => s.del()));
+            promises.push(...addSpans.map(s => s.save()));
+            Promise.all(promises).then(() => spans.fetch());
         };
         
         return (

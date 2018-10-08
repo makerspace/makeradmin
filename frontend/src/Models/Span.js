@@ -1,5 +1,5 @@
 import Base from './Base';
-import {addToDate, assert, formatUtcDate, parseUtcDate, utcToday} from "../utils";
+import {addToDate, assert, formatUtcDate, parseUtcDate} from "../utils";
 import DatePeriod from "./DatePeriod";
 import * as _ from "underscore";
 
@@ -38,7 +38,6 @@ Span.model = {
     },
 };
 
-// TODO Most of the functions here needs some tests. Test a lot with one day spans.
 
 export const DAY_MILLIS = 24 * 3600 * 1000;
 
@@ -59,9 +58,9 @@ export const mergePeriods = toMergePeriods => {
         while (i < oldPeriods.length && isConnected(oldPeriods[i - 1], oldPeriods[i])) ++i;
         const periods = oldPeriods.splice(0, i);
         newPeriods.push(new DatePeriod({
-                                           start: new Date(Math.min(...periods.map(s => s.start))),
-                                           end: new Date(Math.max(...periods.map(s => s.end))),
-                                       }));
+            start: new Date(Math.min(...periods.map(s => s.start))),
+            end: new Date(Math.max(...periods.map(s => s.end))),
+        }));
     }
     return newPeriods;
 };
@@ -90,11 +89,11 @@ export const calculateSpanDiff = ({items, categoryPeriods, member_id, deleteSpan
     const addSpan = (start, end) => {
         assert(start <= end);
         addSpans.push(new Span({
-                                   startdate: formatUtcDate(start),
-                                   enddate: formatUtcDate(end),
-                                   span_type: category,
-                                   member_id,
-                               }));
+            startdate: formatUtcDate(start),
+            enddate: formatUtcDate(end),
+            span_type: category,
+            member_id,
+        }));
     };
     
     const deleteSpan = span => {

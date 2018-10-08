@@ -11,6 +11,15 @@ class Auth {
         localStorage.token = token;
         this.onChange(true);
     }
+
+    getUsername() {
+        return localStorage.username;
+    }
+    
+    setUsername(username) {
+        localStorage.username = username;
+        this.onChange(true);
+    }
     
     isLoggedIn() {
         return typeof(this.getAccessToken()) !== "undefined";
@@ -53,6 +62,7 @@ class Auth {
             })
             .then(data => {
                 this.setToken(data.access_token);
+                this.setUsername(username);
                 this.onChange(true);
             })
             .catch(() => null);
