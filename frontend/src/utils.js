@@ -6,7 +6,7 @@ window._ = _;
 export const assert = expression => console.assert(expression);
 
 
-const utcDateFormat = Intl.DateTimeFormat("sv-SE", {timeZone: "UTC", year: 'numeric', month: 'numeric', day: 'numeric'});
+const utcDateFormat = Intl.DateTimeFormat("sv-SE", {timeZone: "UTC", year: 'numeric', month: '2-digit', day: '2-digit'});
 
 
 export const formatUtcDate = date => utcDateFormat.format(date);
@@ -33,7 +33,7 @@ export const addToDate = (date, millis) => new Date(date.getTime() + millis);
 export const dateToStr = date => {
     if (!_.isEmpty(date)) {
         const options = {
-            year: 'numeric', month: 'numeric', day: 'numeric',
+            year: 'numeric', month: '2-digit', day: '2-digit',
             hour12: false
         };
         
