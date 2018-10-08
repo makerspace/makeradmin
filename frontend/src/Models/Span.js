@@ -77,14 +77,6 @@ export const filterPeriods = (spans, category) =>
     mergePeriods(filterCategory(spans, category));
 
 
-// TODO Remove
-const log = console.info;
-const day = dt => (dt - utcToday()) / DAY_MILLIS;
-const log_add = (msg, start, end) => {
-    log(msg, day(start), day(end));
-};
-
-
 // Given the category periods and spans, calculate additions and deletions needed and add them to respective lists.
 // Spans may have overlaps, periods may not overlap each other.
 export const calculateSpanDiff = ({items, categoryPeriods, member_id, deleteSpans, addSpans}) => {
@@ -111,12 +103,10 @@ export const calculateSpanDiff = ({items, categoryPeriods, member_id, deleteSpan
     };
     
     while (true) {
-        log("top si", si, "pi", pi);
         if (si === spans.length) {
             // Out of spans, add rest of periods as spans.
             for (let i = pi; i < periods.length; ++i) {
                 const {start, end} = periods[i];
-                log_add("out of spans", start, end);
                 addSpan(start, end);
             }
             return;
@@ -124,7 +114,6 @@ export const calculateSpanDiff = ({items, categoryPeriods, member_id, deleteSpan
 
         if (pi === periods.length) {
             // Out of periods, delete rest of spans.
-            log("deleting all from", si);
             spans.slice(si).forEach(s => deleteSpan(s));
             return;
         }
@@ -133,14 +122,12 @@ export const calculateSpanDiff = ({items, categoryPeriods, member_id, deleteSpan
         
         // Remove all spans that ends before the next period.
         while (si < spans.length && spans[si].end < period.start) {
-            log("delete, ends berfore peropd", spans[si].id);
             deleteSpan(spans[si]);
             ++si;
         }
         
         // Remove all spans overlapping start of period.
         while (si < spans.length && spans[si].start < period.start && spans[si].end >= period.start) {
-            log("delete, overlaps start of period", spans[si].id);
             deleteSpan(spans[si]);
             ++si;
         }
@@ -149,36 +136,28 @@ export const calculateSpanDiff = ({items, categoryPeriods, member_id, deleteSpan
             continue;
         }
 
-        log("mid, si", si);
-        
         // Go through all spans with start inside the period, make sure there is no inside gaps, spans are not sorted
         // by end date.
         let gapStart = period.start;
-        while (si < spans.length && spans[si].start <= period.end && gapStart < period.end) {
-            log("gapStart", day(gapStart));
+        while (si < spans.length && spans[si].start <= period.end && gapStart <= period.end) {
             const span = spans[si];
             if (span.end > period.end || span.end < gapStart) {
                 // Span overlaps end, or it does not help filling the gap, delete and ignore.
-                log("delete, span ends after period", span.id);
                 deleteSpan(span);
             }
-            else if (gapStart.getTime() === span.start.getTime()) {
-                // Keep span.
-                log("keep span ", day(span.start), day(span.end));
+            else if (span.start <= gapStart && gapStart <= span.end) {
+                // Keep span as it helps to cover the period.
                 gapStart = addToDate(span.end, DAY_MILLIS);
             }
             else {
                 // Add span to fill period to start of span, then keep span.
-                log("fill start of period ", day(gapStart), day(addToDate(span.start, -DAY_MILLIS)));
                 addSpan(gapStart, addToDate(span.start, -DAY_MILLIS));
-                gapStart = addToDate(span.start, DAY_MILLIS);
+                gapStart = addToDate(span.end, DAY_MILLIS);
             }
             ++si;
         }
-        log("near end, si", si);
         // Fill the last gap if there is one.
         if (gapStart <= period.end) {
-            log_add("fill gap to end of period,", gapStart, period.end);
             addSpan(gapStart, period.end);
         }
         
