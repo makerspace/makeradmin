@@ -69,7 +69,7 @@ return [
     |
     */
 
-    'migrations' => 'migrations',
+    'migrations' => 'migrations_apigateway',
 
     /*
     |--------------------------------------------------------------------------
