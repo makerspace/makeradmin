@@ -13,7 +13,6 @@ export default class DatePeriod extends Base {
         return this.start <= this.end;
     }
     
-    // TODO All models should have isValid, canSave should be implemented as (any isDirty && all isValid) for composites.
     canSave() {
         return this.isDirty() && this.isValid();
     }
