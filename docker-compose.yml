@@ -61,7 +61,7 @@ services:
     environment:
       APP_DEBUG:
       MYSQL_HOST: "db2:${MYSQL_PORT}"
-      MYSQL_DB: "makeradmin-apigateway"
+      MYSQL_DB: "makeradmin"
       MYSQL_USER: "${MYSQL_USER}"
       MYSQL_PASS: "${MYSQL_PASS}"
       BEARER: "${API_BEARER}"
@@ -160,7 +160,7 @@ services:
       - ./logs/membership:/var/www/html/storage/logs
     environment:
       MYSQL_HOST: "db2:${MYSQL_PORT}"
-      MYSQL_DB: "makeradmin-membership"
+      MYSQL_DB: "makeradmin"
       MYSQL_USER: "${MYSQL_USER}"
       MYSQL_PASS: "${MYSQL_PASS}"
       APIGATEWAY: "api-gateway"
@@ -179,7 +179,7 @@ services:
       - ./logs/messages:/var/www/html/storage/logs
     environment:
       MYSQL_HOST: "db2:${MYSQL_PORT}"
-      MYSQL_DB: "makeradmin-messages"
+      MYSQL_DB: "makeradmin"
       MYSQL_USER: "${MYSQL_USER}"
       MYSQL_PASS: "${MYSQL_PASS}"
       APIGATEWAY: "api-gateway"
@@ -196,7 +196,7 @@ services:
       dockerfile: ${PWD}/library/DockerfileService
     environment:
       MYSQL_HOST: "db2:${MYSQL_PORT}"
-      MYSQL_DB: "makeradmin-messages"
+      MYSQL_DB: "makeradmin"
       MYSQL_USER: "${MYSQL_USER}"
       MYSQL_PASS: "${MYSQL_PASS}"
       APIGATEWAY: "api-gateway"
