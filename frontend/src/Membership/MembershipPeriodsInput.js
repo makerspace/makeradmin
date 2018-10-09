@@ -49,7 +49,8 @@ export default class MembershipPeriodsInput extends React.Component {
             });
 
             const deleteIds = deleteSpans.map(s => s.id).join(",");
-            addSpans.forEach(s => s.creation_reason = "gui_edit:" + auth.getUsername() + " replacing:" + deleteIds);
+            const timestamp = new Date().getTime().toString();
+            addSpans.forEach((s, i) => s.creation_reason = (timestamp + i + " gui_edit:" + auth.getUsername() + " replacing:" + deleteIds).slice(0, 255));
             
             const promises = [];
             promises.push(...deleteSpans.map(s => s.del()));

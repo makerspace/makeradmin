@@ -19,17 +19,18 @@ def delete_all_spans(member_id):
         print("delete", response.status_code)
         
 
-def create_span(member_id, startdate, enddate, span_type):
+def create_span(member_id, startdate, enddate, span_type, creation_reason=None):
     payload = dict(
         member_id=member_id,
         startdate=startdate,
         enddate=enddate,
         span_type=span_type,
+        creation_reason=creation_reason,
     )
 
     response = gateway.post("membership/span", payload=payload)
     print("create", response.status_code)
-    # pprint(json.loads(response.content.decode()))
+    pprint(json.loads(response.content.decode()))
 
 
 member_id = 76
