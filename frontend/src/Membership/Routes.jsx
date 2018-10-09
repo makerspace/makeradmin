@@ -21,15 +21,10 @@ module.exports = {
                             component:  require("./MemberBox").default,
                             indexRoute: {
                                 onEnter: (nextState, replace) => {
-                                    console.info(nextState);
-                                    return replace("/membership/members/" + nextState.params.member_id + "/overview/");
+                                    return replace("/membership/members/" + nextState.params.member_id + "/member-data/");
                                 },
                             },
                             childRoutes: [
-                                {
-                                    path: "overview",
-                                    component: require("./MemberBoxOverview").default,
-                                },
                                 {
                                     path: "member-data",
                                     component: require("./MemberBoxMemberData").default,
