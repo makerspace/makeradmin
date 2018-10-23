@@ -12,13 +12,18 @@ db.connect()
 green = "\033[32m"
 red = "\033[31m"
 reset = "\033[0m"
+table_prefix = os.environ["TABLE_PREFIX"]
+if table_prefix is None or table_prefix == "":
+    print("No table prefix set (TABLE_PREFIX environment variable)")
+    exit(1)
 
+migrations_table = f"migrations_{table_prefix}"
 with db.cursor() as cur:
     # Disable 'table already exists' warning
     cur.execute("SET sql_notes = 0")
     # Create the migrations table
-    cur.execute("""
-        CREATE TABLE IF NOT EXISTS `migrations` (
+    cur.execute(f"""
+        CREATE TABLE IF NOT EXISTS `{migrations_table}` (
             `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
             `migration` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
             `batch` int(11) NOT NULL,
@@ -40,10 +45,10 @@ with db.cursor() as cur:
         batches = [b.strip() for b in sql.split(";") if b.strip() != ""]
 
         # Check how many (if any) commands from this file have been previously executed
-        cur.execute("SELECT batch FROM `migrations` WHERE migration=%s", (name,))
+        cur.execute(f"SELECT batch FROM `{migrations_table}` WHERE migration=%s", (name,))
         batch = cur.fetchone()
         if batch is None:
-            cur.execute("INSERT INTO `migrations` (migration,batch) VALUES (%s,%s)", (name, 0))
+            cur.execute(f"INSERT INTO `{migrations_table}` (migration,batch) VALUES (%s,%s)", (name, 0))
             batch = 0
         else:
             batch = batch[0]
@@ -57,7 +62,7 @@ with db.cursor() as cur:
             print(green + "Running migration " + name + " batch " + str(i) + "..." + reset)
             print(batches[i])
             cur.execute(batches[i])
-            cur.execute("UPDATE `migrations` SET batch=%s WHERE migration=%s", (i+1,name))
+            cur.execute(f"UPDATE `{migrations_table}` SET batch=%s WHERE migration=%s", (i+1,name))
 
     if not anyMigrations and not check:
         print(green + "Nothing to migrate." + reset)
