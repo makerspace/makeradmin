@@ -1,5 +1,6 @@
 from service import BackendException
 from decimal import Decimal
+from typing import Dict, Any
 
 
 class TooSmallAmount(BackendException):
@@ -42,7 +43,7 @@ class NotPurelyCents(BackendException):
 
 
 class NotAllowedToPurchase(BackendException):
-    def __init__(self, product):
+    def __init__(self, product: Dict[str,Any]) -> None:
         super().__init__(sv=f"Det är inte tillåtet att köpa produkten med id {product['id']}.")
 
 

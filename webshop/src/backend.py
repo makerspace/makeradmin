@@ -330,7 +330,7 @@ def register() -> Dict[str, int]:
     if "id" not in item:
         abort(400, "Missing parameter 'id' on item in cart")
     if item["id"] not in (p["id"] for p in products):
-        raise errors.NotAllowedToPurchase(item['id'])
+        raise errors.NotAllowedToPurchase(item)
 
     # Register the new member.
     # We need to copy the member info for security reasons.
@@ -376,8 +376,12 @@ def complete_transaction(transaction_id: int):
     if tr['status'] == 'pending':
         tr["status"] = "completed"
         transaction_entity.put(tr, transaction_id)
-        # Unclear if this is a performance issue or not, hopefully there shouldn't be that many pending actions, so this will be quick
-        ship_orders(labaccess=False)
+        try:
+            # Unclear if this is a performance issue or not, hopefully there shouldn't be that many pending actions, so this will be quick
+            ship_orders(labaccess=False)
+        except Exception as e:
+            eprint("Failed to ship orders")
+            eprint(e)
     elif tr['status'] not in {'completed'}:
         eprint(f"Unable to set transaction {transaction_id} to completed!")
 
