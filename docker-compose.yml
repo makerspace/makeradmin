@@ -114,45 +114,6 @@ services:
     networks:
       - makeradmin
 
-  rfid:
-    image: makeradmin/rfid:1.0
-    build: rfid
-    environment:
-      MYSQL_HOST: "db2:${MYSQL_PORT}"
-      MYSQL_DB: "makeradmin-rfid"
-      MYSQL_USER: "${MYSQL_USER}"
-      MYSQL_PASS: "${MYSQL_PASS}"
-      APIGATEWAY: "api-gateway"
-      BEARER: "${API_BEARER}"
-      HOST_FRONTEND:
-      HOST_BACKEND:
-      APP_DEBUG:
-    depends_on:
-      - api-gateway
-      - servicebase_python
-    networks:
-      - makeradmin
-
-  economy:
-    image: makeradmin/economy:1.0
-    build:
-      context: ./economy
-      dockerfile: ${PWD}/library/DockerfileService
-    volumes:
-      - ./logs/economy:/var/www/html/storage/logs
-      - ./data/economy-vouchers:/var/www/html/vouchers
-    environment:
-      MYSQL_HOST: "db2:${MYSQL_PORT}"
-      MYSQL_DB: "makeradmin-economy"
-      MYSQL_USER: "${MYSQL_USER}"
-      MYSQL_PASS: "${MYSQL_PASS}"
-      APIGATEWAY: "api-gateway"
-      BEARER: "${API_BEARER}"
-    depends_on:
-      - api-gateway
-    networks:
-      - makeradmin
-
   membership:
     image: makeradmin/membership:1.0
     build:

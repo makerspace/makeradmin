@@ -4,7 +4,7 @@ from time import sleep
 import argparse
 import multiprocessing
 
-containers = ["api-gateway", "membership", "messages", "economy", "rfid", "webshop"]
+containers = ["api-gateway", "membership", "messages", "webshop"]
 
 parser = argparse.ArgumentParser(description='Initialize the database and run migrations')
 parser.add_argument('--project-name','-p', help='Use a different docker composer project name', default=None)
