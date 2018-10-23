@@ -7,4 +7,5 @@ rollup /tmp/ts_output/product_edit.js --file ../static/js/product_edit.js --form
 rollup /tmp/ts_output/product.js --file ../static/js/product.js --format iife -m
 rollup /tmp/ts_output/history.js --file ../static/js/history.js --format iife -m
 rollup /tmp/ts_output/cartpage.js --file ../static/js/cartpage.js --format iife -m
+rollup /tmp/ts_output/member.js --file ../static/js/member.js --format iife -m
 rm -rf /tmp/ts_output

@@ -155,7 +155,6 @@ App.title = "MakerAdmin";
 
 const rootRoute = {
     childRoutes: [
-        require("./User/Routes"),
         {
             path: "resetpassword",
             component: require("./Components/ResetPassword").default,
