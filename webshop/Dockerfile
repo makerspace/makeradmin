@@ -12,10 +12,14 @@ RUN cd /var/www/service; npm install
 # Install typescript compiler and bundler (need to be command line tools)
 RUN npm install -g typescript rollup
 
-COPY src /var/www/service/
+# Copy typescript and build it
+# Do this before copying the rest of the sources to make rebuilding quicker if no .ts files are changed
+COPY src/ts /var/www/service/ts
 
 # Build typescript
 RUN cd /var/www/service/ts; ./build.sh
+
+COPY src /var/www/service/
 
 EXPOSE 80
 
