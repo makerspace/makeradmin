@@ -10,6 +10,8 @@
   "license": "ISC",
   "devDependencies": {},
   "dependencies": {
-    "@types/stripe-v3": "^3.0.8"
+    "@types/stripe-v3": "^3.0.8",
+    "chart.js": "^2.7.3",
+    "moment": "^2.22.2"
   }
 }

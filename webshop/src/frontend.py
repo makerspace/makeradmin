@@ -169,4 +169,8 @@ def receipt(id: int) -> str:
     return render_template("receipt.html", cart=zip(products,items), transaction=transaction, currency="kr", member=member, url=instance.full_path, meta=meta)
 
 
+@instance.route("statistics")
+def statistics() -> str:
+    return render_template("statistics.html", url=instance.full_path, meta=meta)
+
 instance.serve_indefinitely()

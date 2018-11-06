@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Statistik - Stockholm Makerspace</title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="{{ url('static/uikit/css/uikit.min.css') }}" />
+        <link rel="stylesheet" href="{{ url('static/style.css') }}" />
+        <script src='{{ url("static/uikit/js/uikit.min.js") }}'></script>
+        <script src='{{ url("static/uikit/js/uikit-icons.min.js") }}'></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.13.0/moment.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.3/Chart.min.js"></script>
+        {% include 'meta.html' %}
+        <script src='{{ url("static/js/statistics.js") }}'></script>
+    </head>
+    <body>
+        <div id="single-page-content">
+            <h1>Statistik för Stockholm Makerspace</h1>
+        </div>
+    </body>
+</html>
