@@ -77,7 +77,7 @@ document.addEventListener('DOMContentLoaded', () => {
             () => `Din labaccess gick ut igår.`,
             (hours: number) => `Din labaccess är giltig i mindre än ${hours} timmar till.`,
             (enddate: string, days: number) => `Din labaccess är giltig t.o.m. ${enddate} (endast ${days} dagar till). Kom ihåg att förnya den innan nästa nyckelutlämning.`,
-            (enddate: string, days: number) => `Din labaccess är giltig t.o.m. ${enddate} (${days} dagar till ).`,
+            (enddate: string, days: number) => `Din labaccess är giltig t.o.m. ${enddate} (${days} dagar till).`,
             () => `Din labaccess är inaktiv.`,
         ];
 
