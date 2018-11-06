@@ -8,7 +8,7 @@ WORKDIR /frontend
 
 RUN npm install
 
-COPY ./webpack.config.js ./member.webpack.config.js /frontend/
+COPY ./webpack.config.js /frontend/
 
 COPY  ./src/ /frontend/src
 

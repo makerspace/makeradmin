@@ -3,7 +3,6 @@ volumes:
   node_modules:
 services:
   frontend_dev_server:
-    # Uncomment to use member webpack: command: ./node_modules/.bin/webpack-dev-server --config member.webpack.config.js
     image: makeradmin/frontend_dev_server:1.0
     build:
       context: .
