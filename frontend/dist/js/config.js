@@ -1,5 +1,5 @@
 var config = {
-	apiBasePath: "http://" + window.location.hostname + ":8010",
+	apiBasePath: %API_HOSTNAME%,
 	apiVersion: "1.0",
 	pagination: {
 		pageSize: 25,

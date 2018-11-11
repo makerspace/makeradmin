@@ -1,3 +1,6 @@
+upstream webshop_server {
+	server webshop:80;
+}
 server {
 	listen 80 default_server;
 	listen [::]:80 default_server;
@@ -9,5 +12,9 @@ server {
 
 	location / {
 		try_files $uri $uri/ /index.html;
+	}
+
+	location /shop/ {
+		proxy_pass http://webshop_server;
 	}
 }

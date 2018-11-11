@@ -34,4 +34,5 @@ COPY --from=0 /data/dist/ /var/www/html
 
 EXPOSE 80
 
-CMD ["nginx", "-g", "daemon off;"]
+COPY ./docker/docker_entrypoint.sh /usr/local/myscripts/docker_entrypoint.sh
+CMD ["/usr/local/myscripts/docker_entrypoint.sh"]
