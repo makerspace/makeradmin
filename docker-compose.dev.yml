@@ -19,11 +19,6 @@ services:
     environment:
       APP_DEBUG: "true"
 
-  webshop:
-    ports:
-      - "8011:80"
-      - "8012:8001"
-
   membership:
     volumes:
       - ./membership/lumen/routes:/var/www/html/routes
@@ -50,6 +45,8 @@ services:
       - ./library/src/Makeradmin:/var/www/html/library
 
   webshop:
+    ports:
+      - "8011:80"
     volumes:
       - "./webshop/src/ts:/var/www/service/ts"
       - "./webshop/src/scss:/var/www/service/scss"

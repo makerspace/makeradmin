@@ -1,9 +1,14 @@
-from flask import render_template
+from flask import render_template, Flask
 from service import create_frontend
 import os
 
 
 instance = create_frontend("member", url="member", port=None)
+
+
+app = Flask(__name__)
+app.register_blueprint(instance.blueprint)
+
 
 host_backend = os.environ["HOST_BACKEND"]
 if not host_backend.startswith("http"):

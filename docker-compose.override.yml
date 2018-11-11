@@ -6,7 +6,6 @@ services:
   webshop:
     ports:
       - "8011:80"
-      - "8012:8001"
   frontend:
     ports:
       - "8009:80"

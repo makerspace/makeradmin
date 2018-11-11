@@ -51,5 +51,5 @@ fi
 # as nginx handles all the persistent connections.
 # --log-level=DEBUG
 exec gunicorn $GUNICORN_FLAGS --access-logfile - --worker-class sync --workers=3 -b :80 app:app&
-exec gunicorn $GUNICORN_FLAGS --worker-class sync --workers=1 -b :8000 backend:app&
-exec gunicorn $GUNICORN_FLAGS --worker-class sync --workers=1 -b :9000 statistics:app
+exec gunicorn $GUNICORN_FLAGS --access-logfile - --worker-class sync --workers=1 -b :8000 backend:app&
+exec gunicorn $GUNICORN_FLAGS --access-logfile - --worker-class sync --workers=1 -b :9000 statistics:app
