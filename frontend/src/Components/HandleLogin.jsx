@@ -6,7 +6,6 @@ import auth from '../auth';
 class HandleLogin extends React.Component
 {
     componentDidMount() {
-        console.info("LOGGING IN");
         auth.setToken(this.props.params.token);
         window.location.replace("/");
     }
