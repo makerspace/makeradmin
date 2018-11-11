@@ -10,7 +10,7 @@ from decimal import Decimal
 from filters import product_filters
 
 
-instance = service.create_frontend(url="shop", port=80)
+instance = service.create_frontend("shop", url="shop", port=None)
 
 # Grab the database so that we can use it inside requests
 db = instance.db

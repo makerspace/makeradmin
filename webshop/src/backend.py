@@ -1,4 +1,4 @@
-from flask import request, abort, render_template
+from flask import request, abort, render_template, Flask
 from requests import RequestException
 
 import service
@@ -25,6 +25,9 @@ from dataclasses import dataclass
 
 
 instance = service.create(name="Makerspace Webshop Backend", url="webshop", port=8000, version="1.0")
+
+app = Flask(__name__)
+app.register_blueprint(instance.blueprint)
 
 # Grab the database so that we can use it inside requests
 db = instance.db
@@ -73,8 +76,8 @@ webshop_stripe_pending.db = db
 # Configure upload directory for images
 product_images = UploadSet('productimages', IMAGES)
 # This is a horrible way to configure paths, but oh well...
-instance.app.config['UPLOADED_PRODUCTIMAGES_DEST'] = 'static/product_images'
-configure_uploads(instance.app, product_images)
+app.config['UPLOADED_PRODUCTIMAGES_DEST'] = 'static/product_images'
+configure_uploads(app, product_images)
 
 
 product_image_entity.db = db

@@ -1,4 +1,4 @@
-from flask import abort, jsonify, request, Flask
+from flask import abort, jsonify, request, Flask, Blueprint
 from werkzeug.exceptions import NotFound, MethodNotAllowed
 import pymysql
 import sys
@@ -103,9 +103,8 @@ class Service:
         self.debug = debug
         self.gateway = gateway
         self.frontend = frontend
-        self.app = Flask(name, static_url_path=self.full_path("static"))
-        self.app.jinja_env.filters['format_datetime'] = format_datetime
         self._used_permissions: Set[str] = set()
+        self.blueprint = Blueprint(name, __name__)
 
     def full_path(self, path: str):
         return "/" + self.url + ("/" + path if path != "" else "")
@@ -131,7 +130,7 @@ class Service:
 
                 return f(*args, **kwargs)
 
-            return self.app.route(path, **kwargs)(auth)
+            return self.blueprint.route(path, **kwargs)(auth)
         return wrapper
 
     def register(self):
@@ -267,9 +266,9 @@ def create(name, url, port, version):
     return service
 
 
-def create_frontend(url, port):
+def create_frontend(name, url, port):
     db, gateway, debug = read_config()
-    service = Service("frontend", url, port, None, db, gateway, debug, True)
+    service = Service(name, url, port, None, db, gateway, debug, True)
     eprint("Connecting to database...")
     db.connect()
     return service
@@ -439,10 +438,10 @@ class Entity:
         # Note: Many methods here return other methods that we then call.
         # The endpoint keyword argument is just because flask needs something unique, it doesn't matter what it is for our purposes
         id_string = "<int:id>" if endpoint == "" else "/<int:id>"
-        service.route(endpoint + id_string, endpoint=endpoint+".get", methods=["GET"], permission=read_permission)(route_helper(self.get, status="ok"))
-        service.route(endpoint + id_string, endpoint=endpoint+".put", methods=["PUT"], permission=write_permission)(route_helper(self.put, json=True, status="updated"))
+        service.route(endpoint + id_string, endpoint=endpoint + "-get", methods=["GET"], permission=read_permission)(route_helper(self.get, status="ok"))
+        service.route(endpoint + id_string, endpoint=endpoint + "-put", methods=["PUT"], permission=write_permission)(route_helper(self.put, json=True, status="updated"))
         if self.allow_delete:
-            service.route(endpoint + id_string, endpoint=endpoint+".delete", methods=["DELETE"], permission=write_permission)(route_helper(self.delete, status="deleted"))
+            service.route(endpoint + id_string, endpoint=endpoint + "-delete", methods=["DELETE"], permission=write_permission)(route_helper(self.delete, status="deleted"))
         if allow_post:
-            service.route(endpoint + "", endpoint=endpoint+".post", methods=["POST"], permission=write_permission)(route_helper(self.post, json=True, status="created"))
-        service.route(endpoint + "", endpoint=endpoint+".list", methods=["GET"], permission=read_permission)(route_helper(self.list, status="ok"))
+            service.route(endpoint + "", endpoint=endpoint + "-post", methods=["POST"], permission=write_permission)(route_helper(self.post, json=True, status="created"))
+        service.route(endpoint + "", endpoint=endpoint + "-list", methods=["GET"], permission=read_permission)(route_helper(self.list, status="ok"))

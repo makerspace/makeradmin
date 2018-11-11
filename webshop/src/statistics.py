@@ -3,14 +3,15 @@
 # so it is easy to just put it here.
 #
 
-from flask import render_template
+from flask import Flask
 import service
-from service import eprint, route_helper
-import json
-import os
-from typing import List, Dict, Any, Tuple
-from datetime import datetime, timedelta
+from service import route_helper
+from typing import List, Tuple
+from datetime import datetime
 instance = service.create(name="Makerspace Statistics Backend", url="statistics", port=9000, version="1.0")
+
+app = Flask(__name__)
+app.register_blueprint(instance.blueprint)
 
 # Grab the database so that we can use it inside requests
 db = instance.db

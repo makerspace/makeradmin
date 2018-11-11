@@ -50,7 +50,6 @@ fi
 # However running the servers behind nginx (and using the sync class) resolves all problems
 # as nginx handles all the persistent connections.
 # --log-level=DEBUG
-exec gunicorn $GUNICORN_FLAGS --worker-class sync --workers=3 -b :80 frontend:instance.app&
-exec gunicorn $GUNICORN_FLAGS --worker-class sync --workers=1 -b :8000 backend:instance.app&
-exec gunicorn $GUNICORN_FLAGS --worker-class sync --workers=2 -b :8001 member:instance.app&
-exec gunicorn $GUNICORN_FLAGS --worker-class sync --workers=1 -b :9000 statistics:instance.app
+exec gunicorn $GUNICORN_FLAGS --access-logfile - --worker-class sync --workers=3 -b :80 app:app&
+exec gunicorn $GUNICORN_FLAGS --worker-class sync --workers=1 -b :8000 backend:app&
+exec gunicorn $GUNICORN_FLAGS --worker-class sync --workers=1 -b :9000 statistics:app

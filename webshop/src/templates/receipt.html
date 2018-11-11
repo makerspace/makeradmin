@@ -4,10 +4,10 @@
         <title>Tack för ditt köp - Makerspace Webshop</title>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link rel="stylesheet" href="{{ url('static/uikit/css/uikit.min.css') }}" />
-        <link rel="stylesheet" href="{{ url('static/style.css') }}" />
-        <script src='{{ url("static/uikit/js/uikit.min.js") }}'></script>
-        <script src='{{ url("static/uikit/js/uikit-icons.min.js") }}'></script>
+        <link rel="stylesheet" href="{{ STATIC }}/uikit/css/uikit.min.css" />
+        <link rel="stylesheet" href="{{ STATIC }}/style.css" />
+        <script src='{{ STATIC }}/uikit/js/uikit.min.js'></script>
+        <script src='{{ STATIC }}/uikit/js/uikit-icons.min.js'></script>
         {% include 'meta.html' %}
         {% if transaction.status == "pending" %}
             <meta http-equiv="refresh" content="3">
@@ -16,7 +16,7 @@
     <body>
         <div id="single-page-content" class="receipt">
             <div class="header-logo">
-                <a href="/shop"><img src='{{ url("static/images/logo-transparent-500px-300x210.png") }}' /></a>
+                <a href="/shop"><img src='{{ STATIC }}/images/logo-transparent-500px-300x210.png' /></a>
             </div>
             {% if transaction.status == "failed" %}
                 <h1>Din betalning misslyckades</h1>
