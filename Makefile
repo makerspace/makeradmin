@@ -6,7 +6,7 @@ run: .env
 	docker-compose up
 
 dev: .env
-	docker-compose -f devel-compose.yml up --build
+	docker-compose -f docker-compose.yml -f docker-compose.dev.yml up --build
 
 install:
 	sudo apt-get install docker-io docker-compose
@@ -21,6 +21,7 @@ init: init-pip init-npm
 
 init-db: .env
 	python3 db_init.py
+	docker exec -it makeradmin_webshop_1 bash -c "cd scrape && python3 tictail2db.py"
 
 .env:
 	python3 create_env.py

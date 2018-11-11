@@ -1,0 +1,55 @@
+version: "2"
+
+services:
+  db2:
+    ports:
+      - "3306:3306"
+      
+  api-gateway:
+    volumes:
+      - ./apigateway/lumen/routes:/var/www/html/routes
+      - ./apigateway/lumen/app:/var/www/html/app
+      - ./library/src/Makeradmin:/var/www/html/library
+    ports:
+      - "8010:80"
+    environment:
+      APP_DEBUG: "true"
+      
+  current-member:
+    environment:
+      APP_DEBUG: "true"
+
+  webshop:
+    ports:
+      - "8011:80"
+      - "8012:8001"
+
+  membership:
+    volumes:
+      - ./membership/lumen/routes:/var/www/html/routes
+      - ./membership/lumen/app:/var/www/html/app
+      - ./library/src/Makeradmin:/var/www/html/library
+
+  messages:
+    volumes:
+      - ./messages/lumen/routes:/var/www/html/routes
+      - ./messages/lumen/app:/var/www/html/app
+      - ./library/src/Makeradmin:/var/www/html/library
+
+  email-dispatcher:
+    volumes:
+      - ./emaildispatcher/lumen/routes:/var/www/html/routes
+      - ./emaildispatcher/lumen/app:/var/www/html/app
+      - ./library/src/Makeradmin:/var/www/html/library
+
+  multiaccesssync:
+    volumes:
+      - ./data/multiaccess-uploads:/var/www/html/storage/uploads
+      - ./multiaccesssync/lumen/routes:/var/www/html/routes
+      - ./multiaccesssync/lumen/app:/var/www/html/app
+      - ./library/src/Makeradmin:/var/www/html/library
+
+    
+  frontend:
+    ports:
+      - "8009:80"

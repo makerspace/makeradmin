@@ -1,20 +1,21 @@
 upstream webshop_server {
-	server webshop:80;
+    server webshop:80;
 }
+
 server {
-	listen 80 default_server;
-	listen [::]:80 default_server;
+    listen 80 default_server;
+    listen [::]:80 default_server;
 
-	server_name _;
+    server_name _;
 
-	root /var/www/html;
-	index index.html;
+    root /var/www/html;
+    index index.html;
 
-	location / {
-		try_files $uri $uri/ /index.html;
-	}
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
 
-	location /shop/ {
-		proxy_pass http://webshop_server;
-	}
+    location /shop/ {
+        proxy_pass http://webshop_server;
+    }
 }

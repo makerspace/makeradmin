@@ -61,3 +61,6 @@ for item in data:
         cat_id = cur.fetchone()
         assert(cat_id is not None)
         cur.execute("INSERT INTO webshop_products (name,category_id,description,unit,price) VALUES(%s,%s,%s,%s,%s)", (name,cat_id[0],description,unit,price))
+
+        # This relies on product_ids that may not be the ones we expect.
+        cur.execute("INSERT INTO  webshop_product_actions (product_id, action_id, value) VALUES (101, 1, 365), (102, 2, 30), (103, 1, 365), (103, 2, 90)")
