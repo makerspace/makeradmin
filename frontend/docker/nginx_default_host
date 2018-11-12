@@ -18,4 +18,8 @@ server {
     location /shop/ {
         proxy_pass http://webshop_server;
     }
+    
+    location /member/ {
+        proxy_pass http://webshop_server;
+    }
 }

@@ -173,4 +173,5 @@ def receipt(id: int) -> str:
 def statistics() -> str:
     return render_template("statistics.html", url=instance.full_path, meta=meta)
 
+
 instance.serve_indefinitely()

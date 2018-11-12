@@ -10,9 +10,6 @@ from typing import List, Tuple
 from datetime import datetime
 instance = service.create(name="Makerspace Statistics Backend", url="statistics", port=9000, version="1.0")
 
-app = Flask(__name__)
-app.register_blueprint(instance.blueprint)
-
 # Grab the database so that we can use it inside requests
 db = instance.db
 
@@ -83,3 +80,8 @@ def lasertime():
 		results = cur.fetchall()
 		results = [(date, int(count)) for (date, count) in results]
 		return results
+
+
+app = Flask(__name__)
+app.register_blueprint(instance.blueprint)
+

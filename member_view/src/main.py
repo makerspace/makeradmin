@@ -3,11 +3,11 @@ import service
 from service import eprint, assert_get, route_helper
 import urllib.parse
 from typing import Dict, Any
+from logging import getLogger
 
+logger = getLogger('makeradmin')
 
-instance = service.create(name="Makerspace Member Login", url="member", port=80, version="1.0")
-
-
+instance = service.create(name="member", url="member", port=80, version="1.0")
 
 # Grab the database so that we can use it inside requests
 db = instance.db
@@ -67,7 +67,7 @@ def current_member() -> str:
 
 @instance.route("current/permissions", methods=["GET"], permission=None)
 @route_helper
-def permissions() -> Dict[str,Any]:
+def permissions() -> Dict[str, Any]:
     user_id = assert_get(request.headers, "X-User-Id")
     permissionsStr = request.headers["X-User-Permissions"].strip() if "X-User-Permissions" in request.headers else ""
     permissions = permissionsStr.split(",") if permissionsStr != "" else []
@@ -83,3 +83,9 @@ def membership_info() -> str:
     return instance.gateway.get(f"membership/member/{user_id}/membership").text
 
 instance.serve_indefinitely()
+
+
+app = Flask(__name__)
+app.register_blueprint(instance.blueprint)
+
+

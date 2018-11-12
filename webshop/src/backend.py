@@ -26,9 +26,6 @@ from dataclasses import dataclass
 
 instance = service.create(name="Makerspace Webshop Backend", url="webshop", port=8000, version="1.0")
 
-app = Flask(__name__)
-app.register_blueprint(instance.blueprint)
-
 # Grab the database so that we can use it inside requests
 db = instance.db
 
@@ -72,13 +69,6 @@ webshop_transaction_actions.add_routes(instance, "transaction_action")
 webshop_pending_registrations.db = db
 
 webshop_stripe_pending.db = db
-
-# Configure upload directory for images
-product_images = UploadSet('productimages', IMAGES)
-# This is a horrible way to configure paths, but oh well...
-app.config['UPLOADED_PRODUCTIMAGES_DEST'] = 'static/product_images'
-configure_uploads(app, product_images)
-
 
 product_image_entity.db = db
 product_image_entity.add_routes(instance, "product_image", read_permission=None, write_permission="webshop_edit", allow_post=False)
@@ -964,3 +954,16 @@ def ship_add_membership_action(action: PendingAction):
 
 
 instance.serve_indefinitely()
+
+
+app = Flask(__name__)
+app.register_blueprint(instance.blueprint)
+
+
+# Configure upload directory for images
+product_images = UploadSet('productimages', IMAGES)
+# This is a horrible way to configure paths, but oh well...
+app.config['UPLOADED_PRODUCTIMAGES_DEST'] = 'static/product_images'
+configure_uploads(app, product_images)
+
+

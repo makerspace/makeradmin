@@ -22,3 +22,9 @@ meta = {
 @instance.route("/")
 def member():
     return render_template("member.html", meta=meta)
+
+
+@instance.route("login/<string:token>", methods=["GET"], permission=None)
+def login(token):
+    return render_template("login.html", token=token)
+

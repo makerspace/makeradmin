@@ -21,7 +21,8 @@ refresh
 
 GUNICORN_FLAGS=""
 
-if [ "$APP_DEBUG" == "true" ]; then
+if [ "$APP_DEBUG" = "true" ]; then
+	echo "Running app in devel mode."
 	GUNICORN_FLAGS=" --reload"
 	function watch_sass() {
 		echo "Starting sass watch process"

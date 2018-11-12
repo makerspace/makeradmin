@@ -1,4 +1,6 @@
-from flask import abort, jsonify, request, Flask, Blueprint
+from logging import getLogger, basicConfig, INFO
+
+from flask import abort, jsonify, request, Flask, Blueprint, current_app
 from werkzeug.exceptions import NotFound, MethodNotAllowed
 import pymysql
 import sys
@@ -15,6 +17,13 @@ from dateutil import parser
 from decimal import Decimal
 
 SERVICE_USER_ID = -1
+
+
+basicConfig(format='%(asctime)s %(levelname)s [%(process)d/%(threadName)s %(pathname)s:%(lineno)d]: %(message)s',
+            stream=sys.stderr, level=INFO)
+
+
+logger = getLogger('makeradmin')
 
 
 class BackendException(Exception):
@@ -129,7 +138,7 @@ class Service:
                         abort(403, "user does not have the " + str(permission) + " permission")
 
                 return f(*args, **kwargs)
-
+            
             return self.blueprint.route(path, **kwargs)(auth)
         return wrapper
 
@@ -174,7 +183,7 @@ class Service:
         '''Adds an endpoint (/routes) for listing all routes of the service'''
         @self.route("routes", permission=None)
         def site_map():
-            return jsonify({"data": [{"url": rule.rule, "methods": list(rule.methods)} for rule in self.app.url_map.iter_rules()]})
+            return jsonify({"data": [{"url": rule.rule, "methods": list(rule.methods)} for rule in current_app.url_map.iter_rules()]})
 
     def _register_permissions(self):
         eprint("Registering permissions (" + ",".join(self._used_permissions) + ")")
@@ -196,8 +205,6 @@ class Service:
 
         for sig in [signal.SIGINT, signal.SIGTERM, signal.SIGHUP]:
             signal.signal(sig, signal_handler)
-
-        # self.app.run(host='0.0.0.0', debug=self.debug, port=self.port, use_reloader=False)
 
 
 def assert_get(data: Dict, key: str):
