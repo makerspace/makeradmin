@@ -2,9 +2,8 @@ from flask import render_template
 import service
 from service import eprint
 import json
-import os
 from webshop_entities import category_entity, product_entity, transaction_entity, transaction_content_entity, \
-    action_entity, membership_products, product_image_entity
+    action_entity, product_image_entity
 from typing import List, Dict, Any, Tuple
 from decimal import Decimal
 from filters import product_filters
