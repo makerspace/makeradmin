@@ -957,7 +957,7 @@ def ship_add_membership_action(action: PendingAction):
     send_membership_updated_email(action.member_id, days_to_add, new_end_date)
 
 
-def get_product_data() -> Dict[str, List[Dict[str, Any]]]:
+def get_product_data():
     with db.cursor() as cur:
         # Get all categories, as some products may exist in deleted categories
         # (it is up to an admin to move them to another category)
@@ -988,7 +988,6 @@ def get_product_data() -> Dict[str, List[Dict[str, Any]]]:
         return data, categories
 
 
-# TODO Used?
 @instance.route("product_data", methods=["GET"], permission=None)
 @route_helper
 def product_data():
@@ -1001,7 +1000,6 @@ def product_data():
 def register_page_data():
     data, _ = get_product_data()
     products = membership_products(db)
-    logger.info(products)
     return {"data": data, "products": products}
 
 

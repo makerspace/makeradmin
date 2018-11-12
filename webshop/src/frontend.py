@@ -56,9 +56,7 @@ def product_data() -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
 
 @instance.route("/")
 def home() -> str:
-    all_products, categories = product_data()
-    return render_template("shop.html", product_json=json.dumps(all_products), categories=categories,
-                           url=instance.full_path)
+    return render_template("shop.html")
 
 
 @instance.route("cart")
@@ -68,7 +66,6 @@ def cart() -> str:
                            url=instance.full_path)
 
 
-# TODO Move membership_products to backend.
 @instance.route("register")
 def register_member() -> str:
     return render_template("register.html")

@@ -2,10 +2,24 @@ import Cart from "./cart"
 import * as common from "./common"
 declare var UIkit: any;
 
-document.addEventListener('DOMContentLoaded', () => {
+common.onGetAndDocumentLoaded("/webshop/product_data", (value: any) => {
+    const {categories, data} = value;
   const apiBasePath = window.apiBasePath;
   const webshop_edit_permission = "webshop_edit";
   const service_permission = "service";
+
+    let categoriesUl = document.getElementById("categories");
+    let fixedLi = categoriesUl.firstChild;
+    categories.forEach((category: any) => {
+        let li = document.createElement("li");
+        li.innerHTML = `
+            <a href="#category${category.id}" uk-scroll><span uk-icon="tag"></span> ${category.name}</a>
+            <div class="category-edit-box">
+                <button data-id="${category.id}" data-name="${category.name}" class="category-edit edit uk-button uk-button-primary uk-button-small" uk-icon="pencil"/>
+                <button data-id="${category.id}" class="category-delete edit uk-button uk-button-danger uk-button-small" uk-icon="trash"/>
+            </div>`;
+        categoriesUl.insertBefore(li, fixedLi);
+    });
 
   let editMode = false;
 
@@ -51,7 +65,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const id2element = new Map<number, HTMLElement>();
   const id2cartItem = new Map();
   const id2item = new Map();
-  const data = JSON.parse(document.querySelector("#product-data").textContent);
 
   for (const cat of data) {
     const catLi = `

@@ -8,11 +8,8 @@
         <link rel="stylesheet" href="{{ STATIC }}/style.css" />
         <script src='{{ STATIC }}/uikit/js/uikit.min.js'></script>
         <script src='{{ STATIC }}/uikit/js/uikit-icons.min.js'></script>
-        <script src='{{ STATIC }}/js/shop.js'></script>
-        <script id="product-data", type="application/json">
-            {{ product_json|safe }}
-        </script>
         {% include 'meta.html' %}
+        <script src='{{ STATIC }}/js/shop.js'></script>
     </head>
     <body>
         <div id="root">
@@ -20,16 +17,7 @@
                 <div class="sidebar-fixed-content">
                     <img src='{{ STATIC }}/images/logo-transparent-500px-300x210.png' />
                     <h3>Kategorier</h3>
-                    <ul class="uk-nav uk-nav-default">
-                        {% for cat in categories %}
-                            <li>
-                                <a href="#category{{ cat.id }}" uk-scroll><span uk-icon="tag"></span> {{ cat.name }}</a>
-                                <div class="category-edit-box">
-                                    <button data-id="{{ cat.id }}" data-name="{{ cat.name }}" class="category-edit edit uk-button uk-button-primary uk-button-small" uk-icon="pencil"></button>
-                                    <button data-id="{{ cat.id }}" class="category-delete edit uk-button uk-button-danger uk-button-small" uk-icon="trash"></button>
-                                </div>
-                            </li>
-                        {% endfor %}
+                    <ul id="categories" class="uk-nav uk-nav-default">
                         <li>
                             <button type="button" class="uk-button uk-button-primary uk-button-small edit category-add" uk-icon="plus"></button>
                         </li>
