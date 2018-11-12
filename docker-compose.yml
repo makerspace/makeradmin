@@ -193,6 +193,8 @@ services:
     build: ./frontend
     environment:
       HOST_BACKEND:
+    depends_on:
+      - webshop
     networks:
       - makeradmin
 
