@@ -71,8 +71,7 @@ def cart() -> str:
 # TODO Move membership_products to backend.
 @instance.route("register")
 def register_member() -> str:
-    products = membership_products(db)
-    return render_template("register.html", products=products)
+    return render_template("register.html")
 
 
 @instance.route("member/history")

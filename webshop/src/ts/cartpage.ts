@@ -2,7 +2,7 @@
 import Cart from "./cart"
 import * as common from "./common"
 declare var UIkit: any;
- 
+
 
 common.onGetAndDocumentLoaded("/webshop/product_data", (value: any) => {
     const {data, categories} = value;
