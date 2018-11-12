@@ -1,3 +1,5 @@
+import os
+
 from flask import Flask, redirect, url_for
 
 import frontend
@@ -15,6 +17,19 @@ def root():
     return redirect(url_for("member.member"))
 
 
+host_backend = os.environ["HOST_BACKEND"]
+if not host_backend.startswith("http"):
+    host_backend = "https://" + host_backend
+
+
 @app.context_processor
-def static():
-    return dict(STATIC="/static")
+def context():
+    return dict(
+        STATIC="/static",
+        meta=dict(
+            apiBasePath=host_backend,
+            stripePublicKey=os.environ["STRIPE_PUBLIC_KEY"],
+        )
+    )
+
+

@@ -1,3 +1,5 @@
+from logging import getLogger
+
 from flask import request, abort, render_template, Flask
 from requests import RequestException
 
@@ -21,7 +23,8 @@ import base64
 import io
 from dataclasses import dataclass
 
-# Errors
+
+logger = getLogger('makeradmin')
 
 
 instance = service.create(name="Makerspace Webshop Backend", url="webshop", port=8000, version="1.0")
@@ -69,6 +72,7 @@ webshop_transaction_actions.add_routes(instance, "transaction_action")
 webshop_pending_registrations.db = db
 
 webshop_stripe_pending.db = db
+
 
 product_image_entity.db = db
 product_image_entity.add_routes(instance, "product_image", read_permission=None, write_permission="webshop_edit", allow_post=False)
@@ -119,7 +123,7 @@ def pending_actions():
     return _pending_actions()
 
 
-def _pending_actions(member_id: int=None) -> List[Dict[str,Any]]:
+def _pending_actions(member_id: int=None) -> List[Dict[str, Any]]:
     '''
     Finds every item in a transaction and checks the actions it has, then checks to see if all those actions have been completed (and are not deleted).
     The actions that are valid for a transaction are precisely those that existed at the time the transaction was made. Therefore if an action is added to a product
@@ -953,8 +957,55 @@ def ship_add_membership_action(action: PendingAction):
     send_membership_updated_email(action.member_id, days_to_add, new_end_date)
 
 
-instance.serve_indefinitely()
+def get_product_data() -> Dict[str, List[Dict[str, Any]]]:
+    with db.cursor() as cur:
+        # Get all categories, as some products may exist in deleted categories
+        # (it is up to an admin to move them to another category)
+        categories: List[Dict[str, Any]] = category_entity.list(where=None)
 
+        data = []
+        for cat in categories:
+            cur.execute("SELECT id,name,unit,price,smallest_multiple FROM webshop_products"
+                        " WHERE category_id=%s AND deleted_at IS NULL ORDER BY name", (cat["id"],))
+            products = cur.fetchall()
+            if len(products) > 0:
+                data.append({
+                    "id": cat["id"],
+                    "name": cat["name"],
+                    "items": [
+                        {
+                            "id": item[0],
+                            "name": item[1],
+                            "unit": item[2],
+                            "price": str(item[3]),
+                            "smallest_multiple": item[4],
+                        } for item in products
+                    ]
+                })
+
+        # Only show existing columns in the sidebar
+        categories = category_entity.list()
+        return data, categories
+
+
+# TODO Used?
+@instance.route("product_data", methods=["GET"], permission=None)
+@route_helper
+def product_data():
+    data, categories = get_product_data()
+    return {"data": data, "categories": categories}
+
+
+@instance.route("register_page_data", methods=["GET"], permission=None)
+@route_helper
+def register_page_data():
+    data, _ = get_product_data()
+    products = membership_products(db)
+    logger.info(products)
+    return {"data": data, "products": products}
+
+
+instance.serve_indefinitely()
 
 app = Flask(__name__)
 app.register_blueprint(instance.blueprint)

@@ -1,3 +1,5 @@
+
+
 declare var UIkit: any;
 
 declare global {
@@ -38,6 +40,12 @@ export function ajax(type: string, url: string, data: object): Promise<any> {
 	});
 }
 
+export function documentLoaded() {
+    return new Promise((resolve, reject) => {
+        document.addEventListener('DOMContentLoaded', () => resolve());
+    });
+}
+
 export function refreshLoggedIn(callback: (loggedIn: boolean, permissions: string[]) => void) {
 	const apiBasePath = window.apiBasePath;
 	ajax("GET", apiBasePath + "/member/current/permissions", null)
@@ -57,3 +65,20 @@ export function refreshLoggedIn(callback: (loggedIn: boolean, permissions: strin
 export function getValue(selector: string): string {
 	return (<HTMLInputElement>document.querySelector(selector)).value;
 }
+
+export function onGetAndDocumentLoaded(url: string, callback: any) {
+    Promise
+        .all([
+            ajax("GET", window.apiBasePath + url, {}),
+            documentLoaded()
+        ])
+        .catch(json => {
+            UIkit.modal.alert("<h2>Error</h2>" + get_error(json));
+        })
+        .then((res: any) => {
+            const data :any = res[0].data;
+            callback(data);
+        })
+}
+
+

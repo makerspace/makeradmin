@@ -9,11 +9,8 @@
         <script src='{{ STATIC }}/uikit/js/uikit.min.js'></script>
         <script src='{{ STATIC }}/uikit/js/uikit-icons.min.js'></script>
         <script src="https://js.stripe.com/v3/"></script>
-        <script src='{{ STATIC }}/js/cartpage.js'></script>
-        <script id="product-data", type="application/json">
-            {{ product_json|safe }}
-        </script>
         {% include 'meta.html' %}
+        <script src='{{ STATIC }}/js/cartpage.js'></script>
     </head>
     <body>
         <div id="single-page-content" class="cartpage">

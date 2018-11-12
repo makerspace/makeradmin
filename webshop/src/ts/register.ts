@@ -3,13 +3,21 @@ import Cart from "./cart"
 import * as common from "./common"
 declare var UIkit: any;
 
-document.addEventListener('DOMContentLoaded', () => {
+
+common.onGetAndDocumentLoaded("/webshop/register_page_data", (value: any) => {
+    const {data, products} = value;
+
   // Create a Stripe client.
   const stripe = Stripe(window.stripeKey);
   const apiBasePath = window.apiBasePath;
 
   // Create an instance of Elements.
   const elements = stripe.elements({ locale: "sv" });
+
+    // Add membership products
+    products.forEach((product: any) => {
+        document.querySelector("#products").innerHTML += `<div><input class="uk-radio" type="radio" value="${product.id}" name="product" checked/> ${product.name}: ${product.price} kr</div>`;
+    });
 
   // Custom styling can be passed to options when creating an Element.
   // (Note that this demo uses a wider set of styles than the guide below.)
@@ -41,8 +49,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const id2item = new Map();
 
-  const data = JSON.parse(document.querySelector("#product-data").textContent);
-
   for (const cat of data) {
     for (const item of cat.items) {
       id2item.set(item.id, item);
@@ -55,7 +61,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let checked = document.querySelectorAll(".uk-radio:checked");
 
     // Should only have 1 checked radio button
-    if (checked.length !== 1) throw "more than one checked radio button";
+    if (checked.length !== 1) throw new Error("expected one checked radio button was " + checked.length);
 
     cart = new Cart([{
       id: Number((<HTMLInputElement>checked[0]).value),

@@ -2,10 +2,10 @@
 import Cart from "./cart"
 import * as common from "./common"
 declare var UIkit: any;
+ 
 
-document.addEventListener('DOMContentLoaded', () => {
-	const apiBasePath = window.apiBasePath;
-	const data = JSON.parse(document.querySelector("#product-data").textContent);
+common.onGetAndDocumentLoaded("/webshop/product_data", (value: any) => {
+    const {data, categories} = value;
 	const id2item = new Map<number, any>();
 
 	// Used to prevent clicking the 'Pay' button twice
@@ -143,7 +143,7 @@ document.addEventListener('DOMContentLoaded', () => {
 				waitingForPaymentResponse = false;
 			} else {
 				let cart = Cart.fromStorage();
-				common.ajax("POST", apiBasePath + "/webshop/pay", {
+				common.ajax("POST", window.apiBasePath + "/webshop/pay", {
 					cart: cart.items,
 					expectedSum: cart.sum(id2item),
 					stripeSource: result.source.id,
@@ -173,7 +173,7 @@ document.addEventListener('DOMContentLoaded', () => {
 	}
 
 	function login() {
-		common.ajax("POST", apiBasePath + "/member/send_access_token", {
+		common.ajax("POST", window.apiBasePath + "/member/send_access_token", {
 			user_tag: (<HTMLInputElement>document.querySelector("#email")).value,
 			redirect: "shop/cart"
 		}).then(json => {

@@ -80,7 +80,7 @@ webshop_pending_registrations = Entity(
 )
 
 
-def membership_products(db: DB) -> List[Dict[str,Any]]:
+def membership_products(db: DB) -> List[Dict[str, Any]]:
     # Find all products which gives a member membership
     # Note: Assumes a product never contains multiple actions of the same type.
     # If this doesn't hold we will get duplicates of that product in the list.
@@ -91,7 +91,7 @@ def membership_products(db: DB) -> List[Dict[str,Any]]:
             INNER JOIN webshop_actions ON webshop_actions.id=webshop_product_actions.action_id
             WHERE webshop_actions.name='add_membership_days' AND webshop_product_actions.deleted_at IS NULL
         """)
-        products = [{"id": v[0], "name": v[1], "price": v[2]} for v in cur.fetchall()]
+        products = [{"id": v[0], "name": v[1], "price": float(v[2])} for v in cur.fetchall()]
         return products
 
 

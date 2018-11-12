@@ -60,6 +60,7 @@ services:
       - ./webshop/src/app.py:/var/www/service/app.py
       - ./webshop/src/member.py:/var/www/service/member.py
       - ./webshop/src/backend.py:/var/www/service/backend.py
+      - ./webshop/src/webshop_entities.py:/var/www/service/webshop_entities.py
       - ./servicebase_python/service.py:/var/www/service/service.py
       - ./servicebase_python/migrate.py:/var/www/service/migrate.py
     environment:

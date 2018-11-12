@@ -9,11 +9,8 @@
         <script src='{{ STATIC }}/uikit/js/uikit.min.js'></script>
         <script src='{{ STATIC }}/uikit/js/uikit-icons.min.js'></script>
         <script src="https://js.stripe.com/v3/"></script>
-        <script src='{{ STATIC }}/js/register.js'></script>
-        <script id="product-data", type="application/json">
-            {{ product_json|safe }}
-        </script>
         {% include 'meta.html' %}
+        <script src='{{ STATIC }}/js/register.js'></script>
     </head>
     <body>
         <form class="product-edit-form uk-form-stacked uk-margin-xlarge-bottom">
@@ -54,11 +51,7 @@
                 <input id="address_city" class="uk-input" type="text" placeholder="" />
             </div> -->
 
-            {% for product in products %}
-            <div>
-                <input class="uk-radio" type="radio" value="{{ product.id }}" name="product" checked> {{ product.name }}: {{ product.price }} {{ currency }}
-            </div>
-            {% endfor %}
+            <div id="products"></div>
 
             <p>Startpaketet ger dig årsmedlemsskap i föreningen samt 60 dagars labaccess till ett paketpris. Labaccessen börjar räknas efter uthämtad nyckel på en nyckelutlämning (se kalendarium för nästa tillfälle).</p>
             <p>Du kan istället välja att köpa endast årsmedlemsskap i föreningen. Labaccess kan köpas separat i <a href="/shop">webshoppen</a>. Detta är något dyrare än paketpriset.</p>

@@ -22,15 +22,6 @@ transaction_content_entity.db = db
 action_entity.db = db
 product_image_entity.db = db
 
-host_backend = os.environ["HOST_BACKEND"]
-if not host_backend.startswith("http"):
-    host_backend = "https://" + host_backend
-
-meta = {
-    "apiBasePath": host_backend,
-    "stripePublicKey": os.environ["STRIPE_PUBLIC_KEY"]
-}
-
 
 def product_data() -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
     with db.cursor() as cur:
@@ -67,26 +58,26 @@ def product_data() -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
 def home() -> str:
     all_products, categories = product_data()
     return render_template("shop.html", product_json=json.dumps(all_products), categories=categories,
-                           url=instance.full_path, meta=meta)
+                           url=instance.full_path)
 
 
 @instance.route("cart")
 def cart() -> str:
     all_products, categories = product_data()
     return render_template("cart.html", product_json=json.dumps(all_products), categories=categories,
-                           url=instance.full_path, meta=meta)
+                           url=instance.full_path)
 
 
+# TODO Move membership_products to backend.
 @instance.route("register")
 def register_member() -> str:
     products = membership_products(db)
-    all_products, _ = product_data()
-    return render_template("register.html", product_json=json.dumps(all_products), products=products, currency="kr", url=instance.full_path, meta=meta)
+    return render_template("register.html", products=products)
 
 
 @instance.route("member/history")
 def purchase_history() -> str:
-    return render_template("history.html", url=instance.full_path, meta=meta)
+    return render_template("history.html", url=instance.full_path)
 
 
 @instance.route("product/<int:id>")
@@ -95,7 +86,7 @@ def product_view(id: int) -> str:
     images = product_image_entity.list("product_id=%s AND deleted_at IS NULL", product["id"])
     all_products, categories = product_data()
     return render_template(
-        "product.html", product=product, images=images, product_json=json.dumps(all_products), Decimal=Decimal, categories=categories, currency="kr", url=instance.full_path, meta=meta
+        "product.html", product=product, images=images, product_json=json.dumps(all_products), Decimal=Decimal, categories=categories, currency="kr", url=instance.full_path
     )
 
 
@@ -131,7 +122,7 @@ def product_edit(id: int) -> str:
 
     return render_template("product_edit.html", action_json=action_json,
                            filters=filters, action_categories=action_categories,
-                           product=product, categories=categories, url=instance.full_path, meta=meta)
+                           product=product, categories=categories, url=instance.full_path)
 
 
 @instance.route("product/create")
@@ -154,7 +145,7 @@ def product_create() -> str:
         "action_categories": action_categories
     })
 
-    return render_template("product_edit.html", action_json=action_json, action_categories=action_categories, product=product, categories=categories, url=instance.full_path, meta=meta)
+    return render_template("product_edit.html", action_json=action_json, action_categories=action_categories, product=product, categories=categories, url=instance.full_path)
 
 
 @instance.route("receipt/<int:id>")
@@ -166,12 +157,12 @@ def receipt(id: int) -> str:
     assert r.ok
     member = r.json()["data"]
 
-    return render_template("receipt.html", cart=zip(products,items), transaction=transaction, currency="kr", member=member, url=instance.full_path, meta=meta)
+    return render_template("receipt.html", cart=zip(products,items), transaction=transaction, currency="kr", member=member, url=instance.full_path)
 
 
 @instance.route("statistics")
 def statistics() -> str:
-    return render_template("statistics.html", url=instance.full_path, meta=meta)
+    return render_template("statistics.html", url=instance.full_path)
 
 
 instance.serve_indefinitely()
