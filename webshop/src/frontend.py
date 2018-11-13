@@ -72,7 +72,7 @@ def register_member() -> str:
 
 @instance.route("member/history")
 def purchase_history() -> str:
-    return render_template("history.html", url=instance.full_path)
+    return render_template("history.html")
 
 
 @instance.route("product/<int:id>")
