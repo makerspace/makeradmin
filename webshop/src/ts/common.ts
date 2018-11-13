@@ -7,6 +7,7 @@ declare global {
 		stripeKey: string;
 		apiBasePath: string;
 		productId: number;
+		transactionId: number;
 	}
 }
 

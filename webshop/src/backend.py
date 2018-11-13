@@ -17,7 +17,7 @@ from datetime import datetime
 from dateutil import parser
 import errors
 from filters import product_filters
-from werkzeug.exceptions import HTTPException
+from werkzeug.exceptions import HTTPException, NotFound
 from werkzeug.datastructures import FileStorage
 from flask_uploads import UploadSet, configure_uploads, IMAGES
 import base64
@@ -989,6 +989,7 @@ def get_product_data():
         return data, categories
 
 
+# TODO Should be accessible without token.
 @instance.route("product_data", methods=["GET"], permission=None)
 @route_helper
 def product_data():
@@ -996,6 +997,7 @@ def product_data():
     return {"data": data, "categories": categories}
 
 
+# TODO Should be accessible without token.
 @instance.route("product_data/<int:product_id>/", methods=["GET"], permission=None)
 @route_helper
 def product_view_data(product_id: int):
@@ -1038,6 +1040,27 @@ def product_edit_data(product_id: int):
         "filters": filters,
         "images": images,
         "action_categories": action_categories,
+    }
+
+
+@instance.route("receipt/<int:transaction_id>", methods=["GET"], permission=None)
+@route_helper
+def receipt(transaction_id: int):
+    member_id = int(assert_get(request.headers, "X-User-Id"))
+    transaction = transaction_entity.get(transaction_id)
+    if transaction.get('member_id') != member_id:
+        raise NotFound()
+    
+    items = transaction_content_entity.list("transaction_id=%s", transaction_id)
+    products = [product_entity.get(item["product_id"]) for item in items]
+    r = instance.gateway.get(f"membership/member/{member_id}")
+    assert r.ok
+    member = r.json()["data"]
+
+    return {
+        "cart": list(zip(products, items)),
+        "transaction": transaction,
+        "member": member,
     }
 
 

@@ -1,6 +1,7 @@
 #!/bin/bash
 set -e
 tsc --outDir /tmp/ts_output
+rollup /tmp/ts_output/receipt.js --file ../static/js/receipt.js --format iife -m
 rollup /tmp/ts_output/shop.js --file ../static/js/shop.js --format iife -m
 rollup /tmp/ts_output/register.js --file ../static/js/register.js --format iife -m
 rollup /tmp/ts_output/product_edit.js --file ../static/js/product_edit.js --format iife -m

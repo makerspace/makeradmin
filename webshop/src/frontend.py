@@ -68,24 +68,17 @@ def product_create() -> str:
         "action_categories": action_categories
     })
 
-    return render_template("product_edit.html", action_json=action_json, action_categories=action_categories, product=product, categories=categories, url=instance.full_path)
+    return render_template("product_edit.html", action_json=action_json, action_categories=action_categories, product=product, categories=categories)
 
 
-@instance.route("receipt/<int:id>")
-def receipt(id: int) -> str:
-    transaction = transaction_entity.get(id)
-    items = transaction_content_entity.list("transaction_id=%s", id)
-    products = [product_entity.get(item["product_id"]) for item in items]
-    r = instance.gateway.get(f"membership/member/{transaction['member_id']}")
-    assert r.ok
-    member = r.json()["data"]
-
-    return render_template("receipt.html", cart=zip(products,items), transaction=transaction, currency="kr", member=member, url=instance.full_path)
+@instance.route("receipt/<int:transaction_id>")
+def receipt(transaction_id: int) -> str:
+    return render_template("receipt.html", transaction_id=transaction_id)
 
 
 @instance.route("statistics")
 def statistics() -> str:
-    return render_template("statistics.html", url=instance.full_path)
+    return render_template("statistics.html")
 
 
 instance.serve_indefinitely()
