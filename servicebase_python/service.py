@@ -114,6 +114,7 @@ class Service:
         self.frontend = frontend
         self._used_permissions: Set[str] = set()
         self.blueprint = Blueprint(name, __name__)
+        self.blueprint.context_processor(lambda: dict(url=self.full_path))
 
     def full_path(self, path: str):
         return "/" + self.url + ("/" + path if path != "" else "")
