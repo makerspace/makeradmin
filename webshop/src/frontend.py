@@ -60,9 +60,7 @@ def home() -> str:
 
 @instance.route("cart")
 def cart() -> str:
-    all_products, categories = product_data()
-    return render_template("cart.html", product_json=json.dumps(all_products), categories=categories,
-                           url=instance.full_path)
+    return render_template("cart.html")
 
 
 @instance.route("register")
