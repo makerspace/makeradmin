@@ -996,6 +996,15 @@ def product_data():
     return {"data": data, "categories": categories}
 
 
+@instance.route("product_data/<int:product_id>/", methods=["GET"], permission=None)
+@route_helper
+def product_view_data(product_id: int):
+    product = product_entity.get(product_id)
+    images = product_image_entity.list("product_id=%s AND deleted_at IS NULL", product_id)
+    data, categories = get_product_data()
+    return {"product": product, "images": images, "data": data}
+
+
 @instance.route("product_edit_data/<int:product_id>/", methods=["GET"], permission="webshop_edit")
 @route_helper
 def product_edit_data(product_id: int):

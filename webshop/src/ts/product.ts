@@ -2,12 +2,31 @@ import Cart from "./cart"
 import * as common from "./common"
 declare var UIkit: any;
 
-document.addEventListener('DOMContentLoaded', () => {
-	const productID = Number(document.querySelector(".product-view").getAttribute("data-id"));
+common.onGetAndDocumentLoaded("/webshop/product_data/" + window.productId, (value: any) => {
+    const {product, data, images} = value;
+
+    document.getElementById("name").innerText = product.name;
+
+    const productPrice = product.price * product.smallest_multiple;
+    const productUnit = product.smallest_multiple === 1 ? product.unit : `${product.smallest_multiple}${product.unit}`;
+    document.getElementById("price").innerText = `${productPrice} kr/${productUnit}`;
+
+    document.getElementById("smallest-multiple").setAttribute("step", product.smallest_multiple);
+
+    document.getElementById("unit").innerText = product.unit;
+
+    document.getElementById("description").innerHTML = product.description;
+
+    const imagesDiv = document.getElementById("images");
+    images.forEach((image: any) => {
+        imagesDiv.innerHTML +=
+            `<a class="product-image uk-inline" href='/static/product_images/${image.path}' data-caption="${image.caption}">
+                 <img src='/static/product_images/${image.path}' alt="">
+             </a>`;
+    });
 
 	const productAmount = <HTMLInputElement>document.querySelector(".product-amount");
 
-	const data = JSON.parse(document.querySelector("#product-data").textContent);
 	const id2item = new Map<number, any>();
 
 	for (const cat of data) {
@@ -16,7 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
 		}
 	}
 
-	const item = id2item.get(productID);
+	const item = id2item.get(window.productId);
 
 	function updateCartSum(cart: Cart) {
 		if (cart.items.length > 0) {
@@ -27,7 +46,7 @@ document.addEventListener('DOMContentLoaded', () => {
 	}
 
 	function updateCountFromCart(cart: Cart) {
-		productAmount.value = "" + cart.getItemCount(productID);
+		productAmount.value = "" + cart.getItemCount(window.productId);
 		updateCartSum(cart);
 	}
 
@@ -37,7 +56,7 @@ document.addEventListener('DOMContentLoaded', () => {
 	function setCartItem (updateField: boolean) {
 		let newAmount = Cart.adjustItemCount(Number(productAmount.value), item);
 		const cart = Cart.fromStorage();
-		cart.setItem(productID, newAmount);
+		cart.setItem(window.productId, newAmount);
 		cart.saveToStorage();
 		if (updateField) productAmount.value = "" + newAmount;
 		updateCartSum(cart);

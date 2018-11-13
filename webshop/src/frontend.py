@@ -1,12 +1,8 @@
 from flask import render_template
 import service
-from service import eprint
 import json
 from webshop_entities import category_entity, product_entity, transaction_entity, transaction_content_entity, \
     action_entity, product_image_entity
-from typing import List, Dict, Any, Tuple
-from decimal import Decimal
-from filters import product_filters
 
 
 instance = service.create_frontend("shop", url="shop", port=None)
@@ -20,37 +16,6 @@ transaction_entity.db = db
 transaction_content_entity.db = db
 action_entity.db = db
 product_image_entity.db = db
-
-
-def product_data() -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
-    with db.cursor() as cur:
-        # Get all categories, as some products may exist in deleted categories
-        # (it is up to an admin to move them to another category)
-        categories: List[Dict[str,Any]] = category_entity.list(where=None)
-
-        data = []
-        for cat in categories:
-            cur.execute("SELECT id,name,unit,price,smallest_multiple FROM webshop_products"
-                        " WHERE category_id=%s AND deleted_at IS NULL ORDER BY name", (cat["id"],))
-            products = cur.fetchall()
-            if len(products) > 0:
-                data.append({
-                    "id": cat["id"],
-                    "name": cat["name"],
-                    "items": [
-                        {
-                            "id": item[0],
-                            "name": item[1],
-                            "unit": item[2],
-                            "price": str(item[3]),
-                            "smallest_multiple": item[4],
-                        } for item in products
-                    ]
-                })
-
-        # Only show existing columns in the sidebar
-        categories = category_entity.list()
-        return data, categories
 
 
 @instance.route("/")
@@ -73,14 +38,9 @@ def purchase_history() -> str:
     return render_template("history.html")
 
 
-@instance.route("product/<int:id>")
-def product_view(id: int) -> str:
-    product = product_entity.get(id)
-    images = product_image_entity.list("product_id=%s AND deleted_at IS NULL", product["id"])
-    all_products, categories = product_data()
-    return render_template(
-        "product.html", product=product, images=images, product_json=json.dumps(all_products), Decimal=Decimal, categories=categories, currency="kr", url=instance.full_path
-    )
+@instance.route("product/<product_id>")
+def product_view(product_id: int) -> str:
+    return render_template("product.html", product_id=product_id)
 
 
 @instance.route("product/<int:product_id>/edit")
