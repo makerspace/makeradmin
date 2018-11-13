@@ -1,3 +1,4 @@
+import json
 from logging import getLogger
 
 from flask import request, abort, render_template, Flask
@@ -993,6 +994,42 @@ def get_product_data():
 def product_data():
     data, categories = get_product_data()
     return {"data": data, "categories": categories}
+
+
+@instance.route("product_edit_data/<int:product_id>/", methods=["GET"], permission="webshop_edit")
+@route_helper
+def product_edit_data(product_id: int):
+    _, categories = get_product_data()
+    product = product_entity.get(product_id)
+    images = product_image_entity.list("product_id=%s AND deleted_at IS NULL", product_id)
+
+    # Find the ids and names of all actions that this product has
+    with db.cursor() as cur:
+        cur.execute("SELECT webshop_product_actions.id,webshop_actions.id,webshop_actions.name,webshop_product_actions.value"
+                    " FROM webshop_product_actions"
+                    " INNER JOIN webshop_actions ON webshop_product_actions.action_id=webshop_actions.id"
+                    " WHERE webshop_product_actions.product_id=%s AND webshop_product_actions.deleted_at IS NULL", product_id)
+        actions = cur.fetchall()
+        eprint(actions)
+        actions = [{
+            "id": a[0],
+            "action_id": a[1],
+            "name": a[2],
+            "value": a[3],
+        } for a in actions]
+
+    action_categories = action_entity.list()
+
+    filters = sorted(product_filters.keys())
+
+    return {
+        "categories": categories,
+        "product": product,
+        "actions": actions,
+        "filters": filters,
+        "images": images,
+        "action_categories": action_categories,
+    }
 
 
 @instance.route("register_page_data", methods=["GET"], permission=None)

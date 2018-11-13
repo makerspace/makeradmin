@@ -2,8 +2,33 @@ import * as common from "./common"
 import Cart from "./cart"
 declare var UIkit: any;
 
-document.addEventListener('DOMContentLoaded', () => {
+
+common.onGetAndDocumentLoaded("/webshop/product_edit_data/" + window.productId, (value: any) => {
+    const {categories, product, actions, images, filters, action_categories} = value;
     const apiBasePath = window.apiBasePath;
+
+    let categorySelect = document.getElementById("category");
+    categories.forEach((category: any) => {
+        const selected = product.category_id === category.id ? "selected" : "";
+        categorySelect.innerHTML += `<option value="${category.id}" ${selected}>${category.name}</option>`;
+    });
+
+    let filterSelect = document.getElementById("filter");
+    filters.forEach((filter: any) => {
+        const selected = product.filter === filter ? "selected" : "";
+        filterSelect.innerHTML += `<option value="${filter}" ${selected}>${filter}</option>`;
+    });
+
+    let actionSelect = document.getElementById("add-action-category");
+    action_categories.forEach((action: any) => {
+        actionSelect.innerHTML += `<option value="${action.id}">${action.name}</option>`;
+    });
+
+    document.getElementById("name").setAttribute("value", product.name);
+    document.getElementById("unit").setAttribute("value", product.unit);
+    document.getElementById("price").setAttribute("value", product.price);
+    document.getElementById("description").innerText = product.description;
+    document.getElementById("smallest_multiple").setAttribute("value", product.smallest_multiple);
 
     const updateUnit = () => {
         const unit = (<HTMLInputElement>document.querySelector("#unit")).value;
@@ -11,11 +36,10 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelector("#multiple-unit").innerHTML = unit;
     };
 
+
     document.querySelector("#unit").addEventListener("input", ev => updateUnit());
     updateUnit();
 
-    const data = JSON.parse(document.querySelector("#action-data").textContent);
-    const action_categories = data.action_categories;
     let deletedActionIDs : (number|string)[] = [];
     let deletedImageIDs : (number|string)[] = [];
 
@@ -48,7 +72,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelector("#action-list").appendChild(element);
     }
 
-    for (const action of data.actions) {
+    for (const action of actions) {
         addAction(action);
     }
 
@@ -82,7 +106,7 @@ document.addEventListener('DOMContentLoaded', () => {
         imageList.appendChild(element);
     }
 
-    for (const image of data.images) {
+    for (const image of images) {
         addImage("/shop/static/product_images/" + image.path, image.path, image.id);
     }
 
@@ -250,7 +274,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    document.querySelector("#add-action").addEventListener("click", ev => {
+    document.getElementById("add-action").addEventListener("click", ev => {
         ev.preventDefault();
         new UIkit.modal('#add-action-modal').hide();
 

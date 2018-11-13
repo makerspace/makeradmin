@@ -6,6 +6,7 @@ declare global {
 	interface Window {
 		stripeKey: string;
 		apiBasePath: string;
+		productId: number;
 	}
 }
 

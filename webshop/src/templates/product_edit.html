@@ -1,54 +1,49 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>{{ product.name }} - Makerspace Webshop</title>
+        <title>Makerspace Webshop</title>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <link rel="stylesheet" href="{{ STATIC }}/uikit/css/uikit.min.css" />
         <link rel="stylesheet" href="{{ STATIC }}/style.css" />
         <script src='{{ STATIC }}/uikit/js/uikit.min.js'></script>
         <script src='{{ STATIC }}/uikit/js/uikit-icons.min.js'></script>
-        <script src='{{ STATIC }}/js/product_edit.js'></script>
-        <script id="action-data", type="application/json">
-            {{ action_json|safe }}
-        </script>
+        <script>window.productId = {{ product_id }};</script>
         {% include 'meta.html' %}
+        <script src='{{ STATIC }}/js/product_edit.js'></script>
     </head>
     <body>
         <form class="product-edit-form uk-form-stacked uk-margin-bottom">
-            <input id="product-id" type="hidden" value="{{ product.id }}" />
+            <input id="product-id" type="hidden" value="{{ product_id }}" />
             <div>
                 <label for="name" class="uk-form-label">Product Name</label>
-                <input required id="name" class="uk-input" type="text" placeholder="" value="{{ product.name }}" />
+                <input required id="name" class="uk-input" type="text" placeholder=""/>
             </div>
             <div>
                 <label for="category" class="uk-form-label">Category</label>
                 <select required id="category" class="uk-select">
                     <option value="">Select a category...</option>
-                    {% for cat in categories %}
-                        <option value="{{ cat.id }}" {{ "selected" if product.category_id == cat.id else "" }}>{{ cat.name }}</option>
-                    {% endfor %}
                 </select>
             </div>
             <div>
                 <label for="unit" class="uk-form-label">Unit</label>
-                <input required id="unit" class="uk-input" type="text" placeholder="st/g/mm/etc." value="{{ product.unit }}" />
+                <input required id="unit" class="uk-input" type="text" placeholder="st/g/mm/etc."/>
             </div>
             <div>
                 <label for="description" class="uk-form-label">Description</label>
-                <textarea required id="description" class="uk-textarea" cols="40" rows="8">{{ product.description }}</textarea>
+                <textarea required id="description" class="uk-textarea" cols="40" rows="8"></textarea>
             </div>
             <div>
                 <label for="price" class="uk-form-label">Price</label>
                 <div class="product-edit-price">
-                    <input required id="price" class="uk-input" type="number" step="0.01" min="0.01" placeholder="0" value="{{ product.price }}" />
+                    <input required id="price" class="uk-input" type="number" step="0.01" min="0.01" placeholder="0"/>
                     <span id="price-unit">kr/unit</span>
                 </div>
             </div>
             <div>
                 <label for="unit" class="uk-form-label">Smallest multiple</label>
                 <div class="product-edit-price">
-                    <input required id="smallest_multiple" class="uk-input" type="number" placeholder="Purchases must be made in multiples of this value" value="{{ product.smallest_multiple }}" />
+                    <input required id="smallest_multiple" class="uk-input" type="number" placeholder="Purchases must be made in multiples of this value"/>
                     <span id="multiple-unit">unit</span>
                 </div>
             </div>
@@ -63,9 +58,6 @@
                 <div class="uk-flex uk-margin">
                     <select id="filter" class="uk-select uk-margin-right">
                         <option value="">No filter</option>
-                        {% for filter in filters %}
-                            <option value="{{ filter }}" {% if filter == product.filter %}selected{% endif %}>{{ filter }}</option>
-                        {% endfor %}
                     </select>
                 </div>
             </div>
@@ -93,11 +85,7 @@
             <div class="uk-modal-dialog">
                 <div class="uk-modal-body">
                     <h2 class="uk-modal-title">Add new action</h2>
-                    <select id="add-action-category" class="uk-select">
-                        {% for cat in action_categories %}
-                            <option value="{{ cat.id }}">{{ cat.name }}</option>
-                        {% endfor %}
-                    </select>
+                    <select id="add-action-category" class="uk-select"></select>
                 </div>
                 <div class="uk-modal-footer uk-text-right">
                     <button class="uk-button uk-button-default uk-modal-close" type="button">Cancel</button>

@@ -85,39 +85,9 @@ def product_view(id: int) -> str:
     )
 
 
-@instance.route("product/<int:id>/edit")
-def product_edit(id: int) -> str:
-    categories = category_entity.list()
-    product = product_entity.get(id)
-    images = product_image_entity.list("product_id=%s AND deleted_at IS NULL", product["id"])
-
-    # Find the ids and names of all actions that this product has
-    with db.cursor() as cur:
-        cur.execute("SELECT webshop_product_actions.id,webshop_actions.id,webshop_actions.name,webshop_product_actions.value"
-                    " FROM webshop_product_actions"
-                    " INNER JOIN webshop_actions ON webshop_product_actions.action_id=webshop_actions.id"
-                    " WHERE webshop_product_actions.product_id=%s AND webshop_product_actions.deleted_at IS NULL", id)
-        actions = cur.fetchall()
-        eprint(actions)
-        actions = [{
-            "id": a[0],
-            "action_id": a[1],
-            "name": a[2],
-            "value": a[3],
-        } for a in actions]
-
-    action_categories = action_entity.list()
-    action_json = json.dumps({
-        "actions": actions,
-        "action_categories": action_categories,
-        "images": images
-    })
-
-    filters = sorted(product_filters.keys())
-
-    return render_template("product_edit.html", action_json=action_json,
-                           filters=filters, action_categories=action_categories,
-                           product=product, categories=categories, url=instance.full_path)
+@instance.route("product/<int:product_id>/edit")
+def product_edit(product_id: int) -> str:
+    return render_template("product_edit.html", product_id=product_id)
 
 
 @instance.route("product/create")
