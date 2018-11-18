@@ -6,4 +6,4 @@ __pycache__/
 .mypy_cache
 # For VIM temp files
 *.swp
-webshop_product_images/
+.webshop_product_images/
