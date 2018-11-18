@@ -2,14 +2,13 @@ version: "2"
 volumes:
   node_modules:
 services:
-  frontend_dev_server:
-    image: makeradmin/frontend_dev_server:1.0
+  admin_dev_server:
+    image: makeradmin/admin_dev_server:1.0
     build:
       context: .
       dockerfile: ./DevServerDockerfile
     ports:
       - "8080:8080"
-      - "8081:8081"
     volumes:
-      - .:/frontend
-      - node_modules:/frontend/node_modules
+      - .:/admin
+      - node_modules:/admin/node_modules

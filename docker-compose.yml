@@ -188,9 +188,9 @@ services:
     networks:
       - makeradmin
 
-  frontend:
-    image: makeradmin/frontend:1.0
-    build: ./frontend
+  admin:
+    image: makeradmin/admin:1.0
+    build: ./admin
     environment:
       HOST_BACKEND:
     depends_on:

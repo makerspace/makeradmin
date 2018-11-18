@@ -1,0 +1,21 @@
+FROM node:8-alpine
+
+RUN mkdir /admin
+
+COPY ./package.json ./package-lock.json /admin/
+
+WORKDIR /admin
+
+RUN npm install
+
+COPY ./webpack.config.js /admin/
+
+COPY  ./src/ /admin/src
+
+COPY  ./dist/ /admin/dist
+
+EXPOSE 8080
+
+ENV DEVELOPMENT=1
+
+CMD ["npm", "start"]

@@ -66,7 +66,7 @@ services:
     environment:
       APP_DEBUG: "true"
     
-  frontend:
+  admin:
     ports:
       - "8009:80"
     environment:

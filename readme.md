@@ -94,7 +94,7 @@ To run a webpack-dev-server inside a docker container (will node, npm
 and node_modules inside the image and mount js source files from local
 file system).
 
-```make frontend-dev-server```
+```make admin-dev-server```
 Then go to:
 * (http://localhost:8080)
 
