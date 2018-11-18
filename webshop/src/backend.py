@@ -1011,23 +1011,37 @@ def product_view_data(product_id: int):
 @route_helper
 def product_edit_data(product_id: int):
     _, categories = get_product_data()
-    product = product_entity.get(product_id)
-    images = product_image_entity.list("product_id=%s AND deleted_at IS NULL", product_id)
+    
+    if product_id:
+        product = product_entity.get(product_id)
 
-    # Find the ids and names of all actions that this product has
-    with db.cursor() as cur:
-        cur.execute("SELECT webshop_product_actions.id,webshop_actions.id,webshop_actions.name,webshop_product_actions.value"
-                    " FROM webshop_product_actions"
-                    " INNER JOIN webshop_actions ON webshop_product_actions.action_id=webshop_actions.id"
-                    " WHERE webshop_product_actions.product_id=%s AND webshop_product_actions.deleted_at IS NULL", product_id)
-        actions = cur.fetchall()
-        eprint(actions)
-        actions = [{
-            "id": a[0],
-            "action_id": a[1],
-            "name": a[2],
-            "value": a[3],
-        } for a in actions]
+        # Find the ids and names of all actions that this product has
+        with db.cursor() as cur:
+            cur.execute("SELECT webshop_product_actions.id,webshop_actions.id,webshop_actions.name,webshop_product_actions.value"
+                        " FROM webshop_product_actions"
+                        " INNER JOIN webshop_actions ON webshop_product_actions.action_id=webshop_actions.id"
+                        " WHERE webshop_product_actions.product_id=%s AND webshop_product_actions.deleted_at IS NULL", product_id)
+            actions = cur.fetchall()
+            actions = [{
+                "id": a[0],
+                "action_id": a[1],
+                "name": a[2],
+                "value": a[3],
+            } for a in actions]
+            
+        images = product_image_entity.list("product_id=%s AND deleted_at IS NULL", product_id)
+    else:
+        product = {
+            "category_id": "",
+            "name": "",
+            "description": "",
+            "unit": "",
+            "price": 0.0,
+            "id": "new",
+            "smallest_multiple": 1,
+        }
+        actions = []
+        images = []
 
     action_categories = action_entity.list()
 

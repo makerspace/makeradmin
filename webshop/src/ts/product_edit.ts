@@ -136,14 +136,13 @@ common.onGetAndDocumentLoaded("/webshop/product_edit_data/" + window.productId, 
         ev.preventDefault();
         if (isSaving) return;
 
-        let id = (<HTMLInputElement>document.querySelector("#product-id")).value;
-        const type = id == "new" ? "POST" : "PUT";
-        const url = apiBasePath + "/webshop/product" + (id == "new" ? "" : "/" + id);
+        const type = window.productId === 0 ? "POST" : "PUT";
+        const url = apiBasePath + "/webshop/product" + (window.productId === 0 ? "" : "/" + window.productId);
         const spinner = document.querySelector(".progress-spinner");
         spinner.classList.add("progress-spinner-visible");
 
         common.ajax(type, url, {
-            id: id,
+            id: window.productId,
             name: common.getValue("#name"),
             category_id: common.getValue("#category"),
             description: common.getValue("#description"),
@@ -152,11 +151,10 @@ common.onGetAndDocumentLoaded("/webshop/product_edit_data/" + window.productId, 
             smallest_multiple: common.getValue("#smallest_multiple"),
             filter: common.getValue("#filter"),
         }).then(json => {
-            if (id == "new") {
+            if (window.productId === 0) {
                 // Update the form with the created product id
-                id = json.data.id;
-                (<HTMLInputElement>document.querySelector("#product-id")).value = "" + id;
-                history.replaceState(history.state, "Edit Product", id + "/edit");
+                window.productId = json.data.id;
+                history.replaceState(history.state, "Edit Product", window.productId + "/edit");
             }
 
             const futures : Promise<any>[] = [];
@@ -169,7 +167,7 @@ common.onGetAndDocumentLoaded("/webshop/product_edit_data/" + window.productId, 
                 const url2 = apiBasePath + "/webshop/product_action" + (id2 == "new" ? "" : "/" + id2);
                 const future = common.ajax(type2, url2, {
                     id: id2,
-                    product_id: id,
+                    product_id: window.productId,
                     action_id: actionID,
                     value: value
                 });
@@ -218,7 +216,7 @@ common.onGetAndDocumentLoaded("/webshop/product_edit_data/" + window.productId, 
                     // This will extract the Base64 data
                     const imageData = element.getElementsByTagName("img")[0].src.split(",")[1];
                     const future = common.ajax("POST", url2, {
-                        product_id: id,
+                        product_id: window.productId,
                         image: imageData, // This will be some Base64 encoded image data for new images
                         image_name: element.getAttribute("data-name"), // This is something that includes the file extension, will be used to save the file to reasonable path
                     });

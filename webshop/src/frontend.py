@@ -1,21 +1,8 @@
 from flask import render_template
 import service
-import json
-from webshop_entities import category_entity, product_entity, transaction_entity, transaction_content_entity, \
-    action_entity, product_image_entity
 
 
 instance = service.create_frontend("shop", url="shop", port=None)
-
-# Grab the database so that we can use it inside requests
-db = instance.db
-
-product_entity.db = db
-category_entity.db = db
-transaction_entity.db = db
-transaction_content_entity.db = db
-action_entity.db = db
-product_image_entity.db = db
 
 
 @instance.route("/")
@@ -50,25 +37,7 @@ def product_edit(product_id: int) -> str:
 
 @instance.route("product/create")
 def product_create() -> str:
-    categories = category_entity.list()
-
-    product = {
-        "category_id": "",
-        "name": "",
-        "description": "",
-        "unit": "",
-        "price": 0.0,
-        "id": "new",
-        "smallest_multiple": 1,
-    }
-
-    action_categories = action_entity.list()
-    action_json = json.dumps({
-        "actions": [],
-        "action_categories": action_categories
-    })
-
-    return render_template("product_edit.html", action_json=action_json, action_categories=action_categories, product=product, categories=categories)
+    return render_template("product_edit.html", product_id=0)
 
 
 @instance.route("receipt/<int:transaction_id>")
