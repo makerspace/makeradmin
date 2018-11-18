@@ -64,7 +64,18 @@ services:
       - ./servicebase_python/migrate.py:/var/www/service/migrate.py
     environment:
       APP_DEBUG: "true"
-    
+
+  public:
+    ports:
+      - "8011:80"
+    volumes:
+      - ./public/ts:/var/www/service/ts
+      - ./public/scss:/var/www/service/scss
+      - ./public/templates:/var/www/service/templates
+      - ./public/app.py:/var/www/service/app.py
+    environment:
+      APP_DEBUG: "true"
+      
   admin:
     ports:
       - "8009:80"

@@ -3,23 +3,23 @@ FROM node:8-alpine
 RUN apk add --no-cache tzdata
 ENV TZ Europe/Stockholm
 
-RUN mkdir -p /data/src && mkdir -p /data/dist/js
+RUN mkdir -p /work/src && mkdir -p /work/dist/js
 
 # Copy package file first, to avoid having to install dependencies every time a source file is updated
-COPY ./webpack.config.js ./package.json ./package-lock.json /data/
+COPY ./webpack.config.js ./package.json ./package-lock.json /work/
 
-WORKDIR /data
+WORKDIR /work
 
 RUN npm install
 
-COPY ./src/ /data/src
-COPY ./jestSetup.js /data/
+COPY ./src/ /work/src
+COPY ./jestSetup.js /work/
 
 RUN npm run eslint
 
 RUN npm run test
 
-RUN /data/node_modules/.bin/webpack --config /data/webpack.config.js
+RUN /work/node_modules/.bin/webpack --config /work/webpack.config.js
 
 FROM nginx:alpine
 
@@ -29,8 +29,7 @@ COPY ./docker/nginx_default_host /etc/nginx/conf.d/default.conf
 # Add files to web root
 RUN mkdir -p /var/www/html
 COPY ./dist/ /var/www/html
-COPY --from=0 /data/dist/ /var/www/html
-
+COPY --from=0 /work/dist/ /var/www/html
 
 EXPOSE 80
 

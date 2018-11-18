@@ -114,6 +114,19 @@ services:
     networks:
       - makeradmin
 
+  public:
+    image: makeradmin/public:1.0
+    volumes:
+      - "./.webshop_product_images:/var/www/service/static/product_images"
+    build: public
+    environment:
+      APIGATEWAY: "api-gateway"
+      HOST_BACKEND:
+      STRIPE_PUBLIC_KEY:
+      APP_DEBUG:
+    networks:
+      - makeradmin
+      
   membership:
     image: makeradmin/membership:1.0
     build:

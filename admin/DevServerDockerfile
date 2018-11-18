@@ -1,18 +1,18 @@
 FROM node:8-alpine
 
-RUN mkdir /admin
+RUN mkdir /work
 
-COPY ./package.json ./package-lock.json /admin/
+COPY ./package.json ./package-lock.json /work/
 
-WORKDIR /admin
+WORKDIR /work
 
 RUN npm install
 
-COPY ./webpack.config.js /admin/
+COPY ./webpack.config.js /work/
 
-COPY  ./src/ /admin/src
+COPY  ./src/ /work/src
 
-COPY  ./dist/ /admin/dist
+COPY  ./dist/ /work/dist
 
 EXPOSE 8080
 

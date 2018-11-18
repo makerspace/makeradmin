@@ -13,6 +13,7 @@ install:
 
 init-npm:
 	cd admin && npm install 
+	cd public && npm install 
 
 init-pip:
 	python3 -m pip install --upgrade -r requirements.txt

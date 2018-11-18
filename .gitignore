@@ -7,3 +7,4 @@ __pycache__/
 # For VIM temp files
 *.swp
 .webshop_product_images/
+node_modules
