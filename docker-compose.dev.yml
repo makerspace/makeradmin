@@ -65,14 +65,20 @@ services:
     environment:
       APP_DEBUG: "true"
 
+  backend:
+    volumes:
+      - ./backend/src:/work/src
+    environment:
+      APP_DEBUG: "true"
+      
   public:
     ports:
       - "8011:80"
     volumes:
-      - ./public/ts:/var/www/service/ts
-      - ./public/scss:/var/www/service/scss
-      - ./public/templates:/var/www/service/templates
-      - ./public/app.py:/var/www/service/app.py
+      - ./public/ts:/work/ts
+      - ./public/scss:/work/scss
+      - ./public/templates:/work/templates
+      - ./public/public.py:/work/public.py
     environment:
       APP_DEBUG: "true"
       

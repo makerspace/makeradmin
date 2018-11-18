@@ -10,26 +10,27 @@ ENV PATH="/dart-sass:${PATH}"
 RUN pip3 install flask gunicorn
 
 # Install javascript dependencies
-COPY package-lock.json /var/www/service/package-lock.json
-COPY package.json /var/www/service/package.json
-RUN cd /var/www/service; npm install
+COPY package-lock.json /work/package-lock.json
+COPY package.json /work/package.json
+RUN cd /work; npm install
 # Install typescript compiler and bundler (need to be command line tools)
 RUN npm install -g typescript rollup
 
 # Copy typescript and build it
 # Do this before copying the rest of the sources to make rebuilding quicker if no .ts files are changed
-COPY ts /var/www/service/ts
+COPY ts /work/ts
 
-COPY static /var/www/service/static
+COPY static /work/static
 
 # Build typescript
-RUN cd /var/www/service/ts; ./build.sh
+RUN cd /work/ts; ./build.sh
 
-COPY run.sh /var/www/service/run.sh
-COPY public.py /var/www/service/public.py
-COPY templates /var/www/service/templates
+COPY run.sh /work/run.sh
+COPY public.py /work/public.py
+COPY templates /work/templates
 
 EXPOSE 80
 
-WORKDIR "/var/www/service"
+WORKDIR "/work"
+
 CMD ["./run.sh"]

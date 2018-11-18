@@ -33,13 +33,13 @@ with db.cursor() as cur:
     cur.execute("SET sql_notes = 1")
 
     # Find all migration files (it is assumed that they are named as numbers)
-    files = [int(n.split(".sql")[0]) for n in os.listdir("database") if n.endswith(".sql")]
+    files = [int(n.split(".sql")[0]) for n in os.listdir("src/database") if n.endswith(".sql")]
     # Make sure they are sorted
     files.sort()
     anyMigrations = False
     for migration in files:
         name = str(migration)
-        sql = open("database/" + name + ".sql").read()
+        sql = open("src/database/" + name + ".sql").read()
 
         # Divide the sql query into a number of commands
         batches = [b.strip() for b in sql.split(";") if b.strip() != ""]
