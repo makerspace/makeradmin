@@ -87,14 +87,14 @@ def login(token):
     return render_template("login.html", token=token)
 
 
-app = Flask(__name__, static_url_path="/static")
+app = Flask(__name__, static_url_path="/static", static_folder="../static")
 app.register_blueprint(shop)
 app.register_blueprint(member)
 
 
 @app.route("/")
 def root():
-    return redirect(url_for("member.member"))
+    return redirect(url_for("member.show_member"))
 
 
 api_base_url = os.environ["HOST_BACKEND"]

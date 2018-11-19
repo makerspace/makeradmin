@@ -53,7 +53,7 @@ services:
       - ./public/ts:/work/ts
       - ./public/scss:/work/scss
       - ./public/templates:/work/templates
-      - ./public/public.py:/work/public.py
+      - ./public/src:/work/src
     environment:
       APP_DEBUG: "true"
       

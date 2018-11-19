@@ -26,8 +26,7 @@ COPY static /work/static
 RUN cd /work/ts; ./build.sh
 
 COPY run.sh /work/run.sh
-COPY public.py /work/public.py
-COPY templates /work/templates
+COPY src /work/src
 
 EXPOSE 80
 

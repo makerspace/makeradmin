@@ -155,7 +155,7 @@ class Service:
         }
         r = self.gateway.post("service/register", payload)
         if not r.ok:
-            logger.error(f"failed to register service {self.name}, ignoring: {r.json().get('message')}")
+            logger.warning(f"failed to register service {self.name}, ignoring: {r.json().get('message')}")
 
     def unregister(self):
         logger.info(f"unregistering service {self.name}, url: {self.url}")

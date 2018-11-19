@@ -45,4 +45,4 @@ fi
 # as nginx handles all the persistent connections.
 # --log-level=DEBUG
 echo "starting gunicorn"
-exec gunicorn $GUNICORN_FLAGS --access-logfile - --worker-class sync --workers=2 -b :80 public:app
+exec gunicorn $GUNICORN_FLAGS --access-logfile - --worker-class sync --chdir src --workers=2 -b :80 public:app
