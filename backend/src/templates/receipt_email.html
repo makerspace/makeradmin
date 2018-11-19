@@ -30,7 +30,7 @@
     <tr>
         <td align="center" colspan="3">
             <p>Stockholm Makerspace - Drottning Kristinas väg 53, 114 28 Stockholm</p>
-            <p>Kvittonummer: {{ transaction.id }}. <a href='{{ frontend_url("shop/receipt/" + (transaction.id|string)) }}'>Se detta kvitto på nätet</a></p>
+            <p>Kvittonummer: {{ transaction.id }}. <a href='{{ frontend_url("/shop/receipt/" + (transaction.id|string)) }}'>Se detta kvitto på nätet</a></p>
         </td>
     </tr>
 </table>

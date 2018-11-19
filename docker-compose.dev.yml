@@ -52,7 +52,6 @@ services:
     volumes:
       - ./public/ts:/work/ts
       - ./public/scss:/work/scss
-      - ./public/templates:/work/templates
       - ./public/src:/work/src
     environment:
       APP_DEBUG: "true"

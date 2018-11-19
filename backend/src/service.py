@@ -75,7 +75,7 @@ class APIGateway:
 
     def get_frontend_url(self, path):
         host = self.host_frontend
-        return host + "/" + path
+        return f"{host}{path}"
 
     def get(self, path, payload=None, token=None) -> requests.Response:
         return requests.get(self.host + "/" + path, params=payload, headers=self._get_headers(token))

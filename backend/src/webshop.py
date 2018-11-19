@@ -1,11 +1,9 @@
-import json
 from logging import getLogger
 
-from flask import request, abort, render_template, Flask
-from requests import RequestException
+from flask import request, abort, render_template
 
 import service
-from service import eprint, assert_get, route_helper, BackendException, format_datetime
+from service import eprint, assert_get, route_helper, format_datetime
 import stripe
 import os
 from decimal import Decimal, Rounded, localcontext
@@ -19,7 +17,6 @@ import errors
 from filters import product_filters
 from werkzeug.exceptions import HTTPException, NotFound
 from werkzeug.datastructures import FileStorage
-from flask_uploads import UploadSet, configure_uploads, IMAGES
 import base64
 import io
 from dataclasses import dataclass
@@ -680,7 +677,7 @@ def send_receipt_email(member_id: int, transaction_id: int) -> None:
         "message_type": "email",
         "subject": "Kvitto - Stockholm Makerspace",
         "subject_en": "Receipt - Stockholm Makerspace",
-        "body": render_template("receipt_email.html", cart=zip(products,items), transaction=transaction, currency="kr", member=member, frontend_url=instance.gateway.get_frontend_url)
+        "body": render_template("receipt_email.html", cart=zip(products, items), transaction=transaction, currency="kr", member=member, frontend_url=instance.gateway.get_frontend_url)
     })
 
     if not r.ok:
@@ -989,7 +986,6 @@ def get_product_data():
         return data, categories
 
 
-# TODO Should be accessible without token.
 @instance.route("product_data", methods=["GET"], permission=None)
 @route_helper
 def product_data():
@@ -997,7 +993,6 @@ def product_data():
     return {"data": data, "categories": categories}
 
 
-# TODO Should be accessible without token.
 @instance.route("product_data/<int:product_id>/", methods=["GET"], permission=None)
 @route_helper
 def product_view_data(product_id: int):
