@@ -3,7 +3,7 @@ services:
   api-gateway:
     ports:
       - "9010:80"
-  webshop:
+  public:
     ports:
       - "9011:80"
   admin:

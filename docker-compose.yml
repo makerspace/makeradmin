@@ -59,54 +59,6 @@ services:
       MYSQL_PASS: "${MYSQL_PASS}"
       BEARER: "${API_BEARER}"
 
-#  current-member:
-#    image: makeradmin/current-member:1.0
-#    build: member_view
-#    environment:
-#      TABLE_PREFIX: "current_member"
-#      MYSQL_HOST: "db2:${MYSQL_PORT}"
-#      MYSQL_DB: "makeradmin"
-#      MYSQL_USER: "${MYSQL_USER}"
-#      MYSQL_PASS: "${MYSQL_PASS}"
-#      APIGATEWAY: "api-gateway"
-#      BEARER: "${API_BEARER}"
-#      HOST_FRONTEND:
-#      HOST_BACKEND:
-#      APP_DEBUG:
-#    depends_on:
-#      - api-gateway
-#      - servicebase_python
-#    networks:
-#      - makeradmin
-#
-#  webshop:
-#    image: makeradmin/webshop:1.0
-#    volumes:
-#      - "./webshop/src/ts:/var/www/service/ts"
-#      - "./webshop/src/scss:/var/www/service/scss"
-#      - "./webshop/src/templates:/var/www/service/templates"
-#      - "./.webshop_product_images:/var/www/service/static/product_images"
-#    build: webshop
-#    environment:
-#      TABLE_PREFIX: "webshop"
-#      MYSQL_HOST: "db2:${MYSQL_PORT}"
-#      MYSQL_DB: "makeradmin"
-#      MYSQL_USER: "${MYSQL_USER}"
-#      MYSQL_PASS: "${MYSQL_PASS}"
-#      APIGATEWAY: "api-gateway"
-#      BEARER: "${API_BEARER}"
-#      HOST_FRONTEND:
-#      HOST_BACKEND:
-#      APP_DEBUG:
-#      STRIPE_PRIVATE_KEY:
-#      STRIPE_PUBLIC_KEY:
-#      STRIPE_SIGNING_SECRET:
-#    depends_on:
-#      - api-gateway
-#      - servicebase_python
-#    networks:
-#      - makeradmin
-
   backend:
     image: makeradmin/backend:1.0
     build: backend
