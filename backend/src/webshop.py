@@ -484,6 +484,7 @@ def stripe_callback() -> None:
     elif event_type == 'charge':
         stripe_handle_charge_callback(event_subtype, event)
 
+
 def _reprocess_stripe_event(event):
     try:
         eprint(f"Processing stripe event of type {event.type}")
@@ -495,6 +496,7 @@ def _reprocess_stripe_event(event):
     except HTTPException as e:
         # Catch and ignore all event processing errors
         pass
+
 
 @instance.route("process_stripe_events", methods=["PUT"])
 @route_helper

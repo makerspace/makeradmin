@@ -1,6 +1,6 @@
 from logging import getLogger, basicConfig, INFO
 
-from flask import abort, jsonify, request, Flask, Blueprint, current_app
+from flask import abort, jsonify, request, Blueprint, current_app
 from werkzeug.exceptions import NotFound, MethodNotAllowed
 import pymysql
 import sys
@@ -12,7 +12,7 @@ from time import sleep
 from functools import wraps
 from dataclasses import dataclass
 from typing import Callable, Type, Optional, Set, Dict, Union
-from datetime import datetime, timedelta
+from datetime import datetime
 from dateutil import parser
 from decimal import Decimal
 
