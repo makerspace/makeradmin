@@ -51,12 +51,11 @@ def init_container(container):
 
     # Note "{{x}}" escapes to "{x}"
     inner_bash3 = f"""
-    mysql -uroot --password="${{MYSQL_ROOT_PASSWORD}}" -e "
+    mysql -uroot -p"${{MYSQL_ROOT_PASSWORD}}" -e "
     CREATE USER IF NOT EXISTS \`{mysql_user}\`@'%' IDENTIFIED BY '{mysql_pass}';
     CREATE DATABASE IF NOT EXISTS \`{mysql_db}\`;
     GRANT ALL ON \`{mysql_db}\`.* TO \`{mysql_user}\`@'%';
     FLUSH PRIVILEGES;"
-    mysql -uroot --password="${{MYSQL_ROOT_PASSWORD}}" -e "FLUSH PRIVILEGES;"
     """
     o1 = check_output(["docker-compose", *project_name_args, "exec", "db2", "bash", "-c", inner_bash3], stderr=STDOUT)
     o1 = o1.decode('utf-8').strip().replace('\r', '')

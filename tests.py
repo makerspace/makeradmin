@@ -254,7 +254,7 @@ class MakerAdminTest(unittest.TestCase):
 
             # List all groups
             # Inconsistency: list views do not include entity_id
-            self.get(f"membership/group", 200, expected_result={"data": previous_groups + list(map(strip_entity_id, created_groups))})
+            self.get(f"membership/group?sort_by=group_id&sort_order=asc", 200, expected_result={"data": previous_groups + list(map(strip_entity_id, created_groups))})
 
             for (member, password), group in zip(created_members, created_groups):
                 member_id = member["member_id"]
