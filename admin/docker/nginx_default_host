@@ -1,5 +1,5 @@
-upstream webshop_server {
-    server webshop:80;
+upstream public_server {
+    server public:80;
 }
 
 server {
@@ -16,10 +16,10 @@ server {
     }
 
     location /shop/ {
-        proxy_pass http://webshop_server;
+        proxy_pass http://public_server;
     }
     
     location /member/ {
-        proxy_pass http://webshop_server;
+        proxy_pass http://public_server;
     }
 }

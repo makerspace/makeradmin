@@ -19,11 +19,11 @@ from decimal import Decimal
 SERVICE_USER_ID = -1
 
 
+logger = getLogger('makeradmin')
+
+
 basicConfig(format='%(asctime)s %(levelname)s [%(process)d/%(threadName)s %(pathname)s:%(lineno)d]: %(message)s',
             stream=sys.stderr, level=INFO)
-
-
-logger = getLogger('makeradmin')
 
 
 class BackendException(Exception):
@@ -49,6 +49,7 @@ class DB:
 
     def connect(self):
         # Note autocommit is required to make updates from other services visible immediately
+        logger.info(f"connecting to database {self.host}")
         self.connection = pymysql.connect(host=self.host.split(":")[0], port=int(self.host.split(":")[1]), db=self.name, user=self.user, password=self.password, autocommit=True)
 
     def cursor(self):
@@ -69,7 +70,7 @@ class APIGateway:
     @staticmethod
     def _ensure_protocol(host: str) -> str:
         if not host.startswith("http://") and not host.startswith("https://"):
-            host = "http://" +  host
+            host = "http://" + host
         return host
 
     def get_frontend_url(self, path):
@@ -144,27 +145,27 @@ class Service:
         return wrapper
 
     def register(self):
-        # Frontend services do not register themselves as API endpoints
-        if not self.frontend:
-            payload = {
-                "name": self.name,
-                "url": self.url,
-                "endpoint": "http://" + socket.gethostname() + ":" + str(self.port) + "/",
-                "version": self.version
-            }
-            r = self.gateway.post("service/register", payload)
-            if not r.ok:
-                raise Exception("Failed to register service: " + r.text)
+        endpoint = "http://" + socket.gethostname() + ":" + str(self.port) + "/"
+        logger.info(f"registering service {self.name}, url: {self.url}, endpoint: {endpoint}")
+        payload = {
+            "name": self.name,
+            "url": self.url,
+            "endpoint": endpoint,
+            "version": self.version
+        }
+        r = self.gateway.post("service/register", payload)
+        if not r.ok:
+            logger.error(f"failed to register service {self.name}, ignoring: {r.json().get('message')}")
 
     def unregister(self):
-        if not self.frontend:
-            payload = {
-                "url": self.url,
-                "version": self.version
-            }
-            r = self.gateway.post("service/unregister", payload)
-            if not r.ok:
-                raise Exception("Failed to unregister service: " + r.text)
+        logger.info(f"unregistering service {self.name}, url: {self.url}")
+        payload = {
+            "url": self.url,
+            "version": self.version
+        }
+        r = self.gateway.post("service/unregister", payload)
+        if not r.ok:
+            raise Exception("Failed to unregister service: " + r.text)
 
     def _wrap_error_codes(self):
         # Pretty ugly way to wrap all abort(code, message) calls so that they return proper json reponses
@@ -187,10 +188,11 @@ class Service:
             return jsonify({"data": [{"url": rule.rule, "methods": list(rule.methods)} for rule in current_app.url_map.iter_rules()]})
 
     def _register_permissions(self):
-        eprint("Registering permissions (" + ",".join(self._used_permissions) + ")")
+        permissions = ",".join(self._used_permissions)
+        logger.info(f"{self.name} registering permissions ({permissions})")
         self.gateway.post("membership/permission/register", {
             "service": self.name,
-            "permissions": ",".join(self._used_permissions)
+            "permissions": permissions,
         })
 
     def serve_indefinitely(self):
@@ -265,11 +267,8 @@ def create(name, url, port, version):
         sleep(2)
         service.unregister()
 
-    eprint("Registering service...")
     service.register()
 
-
-    eprint("Connecting to database...")
     db.connect()
     return service
 

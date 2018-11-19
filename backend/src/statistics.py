@@ -3,12 +3,11 @@
 # so it is easy to just put it here.
 #
 
-from flask import Flask
 import service
 from service import route_helper
 from typing import List, Tuple
 from datetime import datetime
-instance = service.create(name="Makerspace Statistics Backend", url="statistics", port=9000, version="1.0")
+instance = service.create(name="statistics", url="statistics", port=80, version="1.0")
 
 # Grab the database so that we can use it inside requests
 db = instance.db
@@ -80,8 +79,3 @@ def lasertime():
 		results = cur.fetchall()
 		results = [(date, int(count)) for (date, count) in results]
 		return results
-
-
-app = Flask(__name__)
-app.register_blueprint(instance.blueprint)
-

@@ -33,4 +33,4 @@ fi
 # However running the servers behind nginx (and using the sync class) resolves all problems
 # as nginx handles all the persistent connections.
 echo "starting gunicorn"
-exec gunicorn $GUNICORN_FLAGS --access-logfile - --worker-class sync --workers=5 -b :80 src.app:app
+exec gunicorn $GUNICORN_FLAGS --access-logfile - --worker-class sync --chdir src --workers=4 -b :80 backend:app
