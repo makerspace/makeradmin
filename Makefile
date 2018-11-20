@@ -22,7 +22,9 @@ init: init-pip init-npm
 
 init-db: .env
 	python3 db_init.py
-	docker exec -it makeradmin_webshop_1 bash -c "cd scrape && python3 tictail2db.py"
+
+insert-devel-data: .env
+	docker exec -it makeradmin_backend_1 bash -c "cd /work/src/scrape && python3 tictail2db.py"
 
 .env:
 	python3 create_env.py
