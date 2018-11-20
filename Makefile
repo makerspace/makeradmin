@@ -8,8 +8,9 @@ run: .env
 dev: .env
 	docker-compose -f docker-compose.yml -f docker-compose.dev.yml up --build
 
-install:
-	sudo apt-get install docker-io docker-compose
+test: .env
+	docker-compose -p test -f docker-compose.yml -f docker-compose.test.yml down || true
+	docker-compose -p test -f docker-compose.yml -f docker-compose.test.yml up --build --abort-on-container-exit
 
 init-npm:
 	cd admin && npm install 
@@ -36,9 +37,6 @@ test-admin-js:
 	npm --prefix admin run eslint
 	npm --prefix admin run test
 
-test:
-	python3 -m unittest tests
-
 firstrun: .env build init-db
 	echo -e "\e[31mRun 'make run' to start MakerAdmin\e[0m"
 
@@ -48,4 +46,4 @@ admin-dev-server:
 	docker volume rm -f makeradmin_node_modules
 	docker-compose -f admin/dev-server-compose.yaml up --build
 
-.PHONY: build firstrun admin-dev-server init init-db init-npm init-pip install run stop
+.PHONY: build firstrun admin-dev-server init init-db init-npm init-pip install run stop test dev

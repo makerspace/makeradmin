@@ -1,11 +1,34 @@
 version: "3"
+
 services:
+
   api-gateway:
     ports:
       - "9010:80"
+      
   public:
     ports:
       - "9011:80"
+      
   admin:
     ports:
       - "9009:80"
+
+  servicebase:
+    command: ["/bin/sleep", "3600"]
+
+  library:
+    command: ["/bin/sleep", "3600"]
+      
+  test:
+    image: makeradmin/test:1.0
+    build:
+      context: ./test
+    networks:
+      - makeradmin
+    command:
+      - "/work/run.sh"
+    depends_on:
+      - admin
+      - public
+      - api-gateway
