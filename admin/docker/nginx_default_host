@@ -24,6 +24,6 @@ server {
     }
 
     location /static/ {
-        proxy_pass http://webshop_server;
+        proxy_pass http://public_server;
     }
 }
