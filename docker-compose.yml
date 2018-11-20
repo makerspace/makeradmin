@@ -76,6 +76,9 @@ services:
       STRIPE_PRIVATE_KEY:
       STRIPE_PUBLIC_KEY:
       STRIPE_SIGNING_SECRET:
+      VIRTUAL_HOST: "${HOST_BACKEND}"
+      LETSENCRYPT_HOST: "${HOST_BACKEND}"
+      LETSENCRYPT_EMAIL: "${ADMIN_EMAIL}"
     depends_on:
       - api-gateway
     networks:
@@ -91,6 +94,9 @@ services:
       HOST_BACKEND:
       STRIPE_PUBLIC_KEY:
       APP_DEBUG:
+      VIRTUAL_HOST: "${HOST_PUBLIC}"
+      LETSENCRYPT_HOST: "${HOST_PUBLIC}"
+      LETSENCRYPT_EMAIL: "${ADMIN_EMAIL}"
     networks:
       - makeradmin
       
@@ -173,6 +179,9 @@ services:
     build: ./admin
     environment:
       HOST_BACKEND:
+      VIRTUAL_HOST: "${HOST_FRONTEND}"
+      LETSENCRYPT_HOST: "${HOST_FRONTEND}"
+      LETSENCRYPT_EMAIL: "${ADMIN_EMAIL}"
     networks:
       - makeradmin
 
