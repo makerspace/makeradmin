@@ -29,7 +29,9 @@ make firstrun
 ```
 
 This will initialize submodules, build docker images and configure the database. This may take quite some time.
-It will also generate a .env file with new random keys and passwords that the system will use.
+It will also generate a `.env` file with new random keys and passwords that the system will use.
+
+If you are deploying on a server you need to configure hosts and other system by editing the `.env` file.
 
 ## Start MakerAdmin, web shop, etc.
 ```
@@ -57,14 +59,12 @@ $ ./mysql.sh
 
 Add persmissions for users (any that you added above)
 ```
-mysql> use makeradmin-membership
+mysql> use makeradmin
 
 mysql> insert into membership_group_permissions (group_id, permission_id) select 1, permission_id from membership_permissions where permission != 'service';
 Query OK, 25 rows affected (0.04 sec)
 Records: 25  Duplicates: 0  Warnings: 0
 
-mysql> use makeradmin-apigateway
-Database changed
 mysql> update access_tokens set permissions = null where user_id > 0;
 Query OK, 2 rows affected (0.02 sec)
 Rows matched: 2  Changed: 2  Warnings: 0
@@ -76,7 +76,7 @@ Bye
 ### Adding items to the shop
 The file [`webshop/src/scrape/tictail.json`](./webshop/src/scrape/tictail.json) contains a list of the items that can be bought with attributes. They must be imported to the docker container's database:
 ```bash
-docker exec -it makeradmin_webshop_1 bash -c "cd scrape && python3 tictail2db.py"
+docker-compose exec webshop bash -c "cd scrape && python3 tictail2db.py"
 ```
 
 The docker container corresponding to the webshop must be rebuilt when it is changed (and then imported anew):
