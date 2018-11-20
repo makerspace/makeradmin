@@ -22,4 +22,8 @@ server {
     location /member/ {
         proxy_pass http://public_server;
     }
+
+    location /static/ {
+        proxy_pass http://webshop_server;
+    }
 }
