@@ -21,4 +21,8 @@ set -e
 
 cd /work
 
-pytest .
+export PATH="/work:$PATH"
+
+Xvfb :64 &
+
+DISPLAY=:64 pytest .

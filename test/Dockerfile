@@ -1,15 +1,35 @@
 FROM python:3.7-alpine
 
-RUN apk update && apk add bash netcat-openbsd less curl build-base python3-dev libffi-dev libressl-dev && rm -rf /var/cache/apk/*
-
-COPY requirements.txt /tmp
-
-RUN pip install -r /tmp/requirements.txt
+RUN apk update \
+    && apk add \
+        bash \
+        netcat-openbsd \
+        less \
+        curl \
+        build-base \
+        python3-dev \
+        libffi-dev \
+        libressl-dev \
+        chromium \
+        xvfb \
+    && rm -rf /var/cache/apk/*
 
 RUN mkdir -p /work/
 
-COPY run.sh /work/run.sh
+WORKDIR /work
 
-COPY src /work/src
+RUN wget -q https://chromedriver.storage.googleapis.com/2.44/chromedriver_linux64.zip
 
-WORKDIR "/work"
+RUN unzip chromedriver_linux64.zip
+
+COPY requirements.txt .
+
+RUN pip install -r requirements.txt
+
+COPY run.sh .
+
+COPY src ./src
+
+RUN adduser -s /bin/bash -D -u 1000 pytest
+
+USER pytest
