@@ -1,4 +1,4 @@
-version: "2"
+version: "3"
 services:
   db2:
     image: mysql:5.7
@@ -58,6 +58,9 @@ services:
       MYSQL_USER: "${MYSQL_USER}"
       MYSQL_PASS: "${MYSQL_PASS}"
       BEARER: "${API_BEARER}"
+      VIRTUAL_HOST: "${HOST_BACKEND}"
+      LETSENCRYPT_HOST: "${HOST_BACKEND}"
+      LETSENCRYPT_EMAIL: "${ADMIN_EMAIL}"
 
   backend:
     image: makeradmin/backend:1.0
@@ -76,9 +79,6 @@ services:
       STRIPE_PRIVATE_KEY:
       STRIPE_PUBLIC_KEY:
       STRIPE_SIGNING_SECRET:
-      VIRTUAL_HOST: "${HOST_BACKEND}"
-      LETSENCRYPT_HOST: "${HOST_BACKEND}"
-      LETSENCRYPT_EMAIL: "${ADMIN_EMAIL}"
     depends_on:
       - api-gateway
     networks:
