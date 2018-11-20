@@ -66,7 +66,7 @@ def init_container(container):
 
     migrate = f"""
         if [ -f /var/www/html/artisan ]; then php /var/www/html/artisan --force migrate;
-        elif [ -f /var/www/service/migrate.py ]; then echo 'Migrating using Python'; python3 /var/www/service/migrate.py;
+        elif [ -f /work/src/migrate.py ]; then echo 'Migrating using Python'; python3 /work/src/migrate.py;
         else echo \"No migration script found. Skipping migration for {container}\";
         fi
     """
