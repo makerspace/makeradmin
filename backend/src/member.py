@@ -39,7 +39,7 @@ def send_access_token():
     # This should be sent via an email, but lets just return it for now
     response = instance.gateway.post("oauth/force_token", {"user_id": user_id}).json()
     token = response["access_token"]
-    url = instance.gateway.get_frontend_url(f"member/login/{token}?redirect=" + urllib.parse.quote_plus(redirect))
+    url = instance.gateway.get_frontend_url(f"/member/login/{token}?redirect=" + urllib.parse.quote_plus(redirect))
     eprint(f"Sending login link {url!r} to user_id {user_id}.")
     
     r = instance.gateway.post("messages", {

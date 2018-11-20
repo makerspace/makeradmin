@@ -728,7 +728,7 @@ def create_three_d_secure_source(transaction_id: int, card_source_id: str, total
             'card': card_source_id,
         },
         redirect={
-            'return_url': instance.gateway.get_frontend_url(f"shop/receipt/{transaction_id}")
+            'return_url': instance.gateway.get_frontend_url(f"/shop/receipt/{transaction_id}")
         },
     )
 
