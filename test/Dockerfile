@@ -10,9 +10,6 @@ RUN apk update \
         python3-dev \
         libffi-dev \
         libressl-dev \
-        chromium \
-        chromium-chromedriver \
-        xvfb \
     && rm -rf /var/cache/apk/*
 
 RUN mkdir -p /work/
@@ -26,7 +23,3 @@ RUN pip install -r requirements.txt
 COPY run.sh .
 
 COPY src ./src
-
-# RUN adduser -s /bin/bash -D -u 1000 pytest
-# 
-# USER pytest

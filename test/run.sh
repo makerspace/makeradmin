@@ -4,6 +4,7 @@ function wait_for {
     local command="$*"
     for i in $(seq 1 100); do
         if ${command}; then
+            echo "wait for '${command} completed"
             return
         fi
         sleep 0.2
@@ -15,16 +16,11 @@ function wait_for {
 wait_for nc -z db2 3306
 wait_for nc -z admin 80
 wait_for nc -z public 80
+wait_for nc -z selenium 4444
 wait_for curl --silent --fail --output /dev/null http://api-gateway:80/webshop/product_data
 
 set -e
 
 cd /work
 
-export PATH="/work:$PATH"
-
-Xvfb :64 &
-
-echo $PATH
-
-DISPLAY=:64 pytest .
+pytest .

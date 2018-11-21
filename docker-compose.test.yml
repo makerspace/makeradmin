@@ -19,7 +19,16 @@ services:
 
   library:
     command: ["/bin/sleep", "3600"]
-      
+
+  selenium:
+    image: selenium/standalone-chrome-debug
+    networks:
+      - makeradmin
+    ports:
+      - '4444'
+    volumes:
+      - /dev/shm:/dev/shm
+  
   test:
     image: makeradmin/test:1.0
     build:
@@ -32,3 +41,6 @@ services:
       - admin
       - public
       - api-gateway
+      - selenium
+    environment:
+      - WEBDRIVER_TYPE=REMOTE_CHROME
