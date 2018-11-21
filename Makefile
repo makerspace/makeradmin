@@ -12,6 +12,9 @@ test: .env
 	docker-compose -p test -f docker-compose.yml -f docker-compose.test.yml down || true
 	docker-compose -p test -f docker-compose.yml -f docker-compose.test.yml up --build --abort-on-container-exit
 
+dev-test:
+	pytest --workers auto test
+
 init-npm:
 	cd admin && npm install 
 	cd public && npm install 

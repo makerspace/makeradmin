@@ -44,3 +44,4 @@ services:
       - selenium
     environment:
       - WEBDRIVER_TYPE=REMOTE_CHROME
+      - TEST_MODE=DOCKER
