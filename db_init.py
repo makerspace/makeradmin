@@ -30,13 +30,9 @@ sleep(1)
 
 
 def init_container(container):
-    if args.project_name is not None:
-        # This is how the names are formatted according to the documentation
-        container_name = f"{args.project_name}_{container}_1"
-    else:
-        # This call takes quite a long time (0.7 seconds on my machine)
-        # which adds up to a lot when running tests, therefore a shortcut is used above if possible.
-        container_name = check_output(["docker-compose", *project_name_args, "ps", "-q", container]).decode('utf-8').strip()
+    # This call takes quite a long time (0.7 seconds on my machine)
+    # which adds up to a lot when running tests, therefore a shortcut is used above if possible.
+    container_name = check_output(["docker-compose", *project_name_args, "ps", "-q", container]).decode('utf-8').strip()
 
     print(f"Initializing database for {container}...")
 

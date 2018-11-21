@@ -1,4 +1,7 @@
 
+TEST_COMPOSE=docker-compose -p test -f docker-compose.yml -f docker-compose.test.yml
+DEV_COMPOSE=docker-compose -f docker-compose.yml -f docker-compose.dev.yml
+
 build: .env
 	docker-compose build
 
@@ -6,11 +9,14 @@ run: .env
 	docker-compose up
 
 dev: .env
-	docker-compose -f docker-compose.yml -f docker-compose.dev.yml up --build
+	$(DEV_COMPOSE) up --build
 
 test: .env
-	docker-compose -p test -f docker-compose.yml -f docker-compose.test.yml down || true
-	docker-compose -p test -f docker-compose.yml -f docker-compose.test.yml up --build --abort-on-container-exit
+	$(TEST_COMPOSE) down || true
+	docker volume rm test_dbdata || true
+	$(TEST_COMPOSE) build
+	python3 db_init.py --project-name test
+	$(TEST_COMPOSE) up --abort-on-container-exit
 
 dev-test:
 	pytest --workers auto test
