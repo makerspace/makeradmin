@@ -22,6 +22,8 @@ COPY ts /work/ts
 
 COPY static /work/static
 
+COPY scss /work/scss
+
 # Build typescript
 RUN cd /work/ts; ./build.sh
 
