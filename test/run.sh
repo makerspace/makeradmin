@@ -2,14 +2,15 @@
 
 function wait_for {
     local command="$*"
+    echo "wait_for '${command}'"
     for i in $(seq 1 100); do
         if ${command}; then
-            echo "wait for '${command} completed"
+            echo "wait_for '${command}' complete"
             return
         fi
         sleep 0.2
     done
-    echo "wait for '${command} timed out"
+    echo "wait_for '${command}' timed out"
     exit 1
 }
 
