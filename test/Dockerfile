@@ -11,16 +11,13 @@ RUN apk update \
         libffi-dev \
         libressl-dev \
         chromium \
+        chromium-chromedriver \
         xvfb \
     && rm -rf /var/cache/apk/*
 
 RUN mkdir -p /work/
 
 WORKDIR /work
-
-RUN wget -q https://chromedriver.storage.googleapis.com/2.44/chromedriver_linux64.zip
-
-RUN unzip chromedriver_linux64.zip
 
 COPY requirements.txt .
 
@@ -30,6 +27,6 @@ COPY run.sh .
 
 COPY src ./src
 
-RUN adduser -s /bin/bash -D -u 1000 pytest
-
-USER pytest
+# RUN adduser -s /bin/bash -D -u 1000 pytest
+# 
+# USER pytest

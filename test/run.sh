@@ -25,4 +25,6 @@ export PATH="/work:$PATH"
 
 Xvfb :64 &
 
+echo $PATH
+
 DISPLAY=:64 pytest .
