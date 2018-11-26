@@ -1,4 +1,4 @@
-from .base import SeleniumTest
+from base import SeleniumTest
 
 
 class Test(SeleniumTest):
