@@ -1,4 +1,6 @@
 import os
+from collections import Mapping
+
 import requests
 
 from unittest import TestCase
@@ -78,7 +80,32 @@ def get_path(obj, path):
             return None
     return obj
     
-
+    
+def merge_paths(**kwargs):
+    """
+    Return dict of path => value with paths on the form segment__segment__segment built by merging kwargs where each
+    kwarg can be a full path, a partial path ending in a dict of paths or a dict. If there are conflicts the last
+    value will be used.
+    
+    Examples:
+        megrge_paths(a__path=1, a={'b': 2}, {'c': 3}) => {'a__path': 1, 'a__b': 2, 'c': 3}
+        megrge_paths(a__path=1, a={'path': 2}) => {'a__path': 2}
+    """
+    res = {}
+    
+    def flatten(key, obj):
+        if isinstance(obj, Mapping):
+            for k, o in obj.items():
+                flatten(f"{key}__{k}", o)
+        else:
+            res[key] = obj
+    
+    for key, obj in kwargs.items():
+        flatten(key, obj)
+    
+    return res
+    
+    
 class ApiResponse:
     
     def __init__(self, response, test):
@@ -90,13 +117,11 @@ class ApiResponse:
             self.test.assertEqual(code, self.response.status_code,
                                   msg=f"bad status, url: {self.response.url}, content: {self.response.text}")
         
-        # TODO Flatten and merge kwargs.
-        #
-        # data = self.response.json()
-        # for path, expected_value in kwargs.items():
-        #     value = get_path(data, path)
-        #     self.test.assertEqual(expected_value, value,
-        #                           msg=f"bad value at path '{path}', url: {self.response.url}, content: {self.response.text}")
+        data = self.response.json()
+        for path, expected_value in merge_paths(**kwargs).items():
+            value = get_path(data, path)
+            self.test.assertEqual(expected_value, value,
+                                  msg=f"bad value at path '{path}', url: {self.response.url}, content: {self.response.text}")
         
         return self
     

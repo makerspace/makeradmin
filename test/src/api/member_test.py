@@ -7,15 +7,17 @@ class Test(ApiTest):
     def test_create_member(self):
         member = MemberFactory()
         
+        print(member)
+        
         member_id, member_number = self\
             .post("membership/member", json=member)\
             .expect(code=201, data=member)\
             .get('data__member_id', 'data__member_number')
-
+        
         self.assertTrue(member_id)
         self.assertTrue(member_number)
         
-        self.get(f"membership/member/{member_id}").expect(code=200, data=member, data__member__member_id=member_id)
+        self.get(f"membership/member/{member_id}").expect(code=200, data=member, data__member_id=member_id)
 
     def test_member(self):
         ''' Test various things to do with members '''
