@@ -2,7 +2,7 @@ FROM ubuntu:latest
 
 RUN apt-get update && apt-get install -y curl python3 python3-pip netcat
 
-RUN apt-get install -y inotify-tools wget npm curl
+RUN apt-get update && apt-get install -y inotify-tools wget npm curl
 
 RUN wget https://github.com/sass/dart-sass/releases/download/1.3.0/dart-sass-1.3.0-linux-x64.tar.gz --quiet -O sass.tar.gz && tar -xf sass.tar.gz && rm sass.tar.gz
 ENV PATH="/dart-sass:${PATH}"
