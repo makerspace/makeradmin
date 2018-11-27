@@ -1,8 +1,7 @@
 import os
-import unittest
-from os.path import dirname
-
 import requests
+
+from unittest import TestCase
 from selenium.webdriver import DesiredCapabilities
 from selenium.webdriver.remote import webdriver as remote
 from selenium.webdriver.chrome import webdriver as chrome
@@ -12,7 +11,7 @@ webdriver_type = os.environ.get('WEBDRIVER_TYPE', 'CHROME')
 keep_browser = os.environ.get('KEEP_BROWSER')
 test_mode = os.environ.get('TEST_MODE', 'DEV')
 try:
-    with open(f"{dirname(__file__)}/../../../.env") as f:
+    with open(f"{os.path.dirname(__file__)}/../../../.env") as f:
         env = {s[0]: (s[1] if len(s) > 1 else "") for s in (s.split("=") for s in f.read().split('\n'))}
 except OSError:
     env = {}
@@ -37,7 +36,7 @@ def get_env(name):
     return env[name]
 
 
-class TestCase(unittest.TestCase):
+class TestCaseBase(TestCase):
     
     @classmethod
     def setUpClass(self):
@@ -56,7 +55,7 @@ class TestCase(unittest.TestCase):
             raise Exception(f"unknown test_mode {test_mode}")
 
 
-class SeleniumTest(TestCase):
+class SeleniumTest(TestCaseBase):
     
     @classmethod
     def setUpClass(self):
@@ -109,7 +108,7 @@ class ApiResponse:
         return result
     
 
-class ApiTest(TestCase):
+class ApiTest(TestCaseBase):
     
     @classmethod
     def setUpClass(self):

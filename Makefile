@@ -19,7 +19,7 @@ test: .env
 	$(TEST_COMPOSE) up --abort-on-container-exit
 
 dev-test:
-	pytest --workers auto test
+	(cd test/src && python3 -m pytest --workers auto test)
 
 init-npm:
 	cd admin && npm install 

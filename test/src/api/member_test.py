@@ -1,5 +1,5 @@
-from lib.base import ApiTest
-from lib.factory import MemberFactory
+from library.base import ApiTest
+from library.factory import MemberFactory
 
 
 class Test(ApiTest):
