@@ -1,6 +1,3 @@
-[![Build Status](https://travis-ci.org/makerspace/multiaccess-program.svg?branch=add-and-update-members)](https://travis-ci.org/makerspace/multiaccess-program)
-[![Coverage Status](https://coveralls.io/repos/github/makerspace/multiaccess-program/badge.svg)](https://coveralls.io/github/makerspace/multiaccess-program)
-
 # Program to Update MultiAccess With Data from MakerAdmin
 
 A Windows program that will fetch data from MakerAdmin (or a file)
@@ -22,8 +19,7 @@ maintained. The version used in the Makerspace buiding is 7.16.6.
 
 MakerAdmin is the system for administrating members of Stockholm
 Makerspace, there is an API endpoint used by this program to fetch
-member information
-[https://github.com/makerspace/MakerAdmin-MultiAccessSync].
+member information.
 
 ## Database Structure
 
