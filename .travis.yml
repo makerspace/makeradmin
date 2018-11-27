@@ -17,6 +17,8 @@ jobs:
       after_script:
         - make -C multiaccess-program/ coverage
         #- coveralls
+      env:
+        COMMENT: "multiaccess-program: tests"
 
     # Multiaccess-program make dist
     - install:
@@ -26,6 +28,8 @@ jobs:
       sudo: required
       services:
         - docker
+      env:
+        COMMENT: "multiaccess-program: build executable"
 
     # Makeradmin database
     - before_install:
@@ -46,4 +50,6 @@ jobs:
       sudo: required
       services:
         - docker
+      env:
+        COMMENT: "makeradmin: build docker containers"
 
