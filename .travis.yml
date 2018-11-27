@@ -1,27 +1,49 @@
 language: python
-
-sudo: required
-services:
-  - docker
-
 python:
-  - "3.6"
   - "3.7-dev"
 
-before_install:
-  - docker --version
-  - docker-compose --version
-  - sudo apt-get install -y npm
-  # BATS for bash testing
-  - git clone https://github.com/sstephenson/bats.git
-  - export PATH="bats/bin:$PATH"
-  - pip3 install -r requirements.txt
+env:
+  global:
+    COVERALLS_REPO_TOKEN:
+      secure: blablabla
 
-install:
-  - make build
+jobs:
+  include:
+    # Multiaccess-program tests
+    - install:
+        - make -C multiaccess-program/ init
+      script:
+        - make -C multiaccess-program/ test
+      after_script:
+        - make -C multiaccess-program/ coverage
+        #- coveralls
 
-script:
-  # Same as `make run`, but with -d at the end to make it exit when all have been started
-  - docker-compose up -d
-  - bats tests/bats/
-  - make test
+    # Multiaccess-program make dist
+    - install:
+        - make -C multiaccess-program/ init
+      script:
+        - make -C multiaccess-program/ dist
+      sudo: required
+      services:
+        - docker
+
+    # Makeradmin database
+    - before_install:
+        - docker --version
+        - docker-compose --version
+        - sudo apt-get install -y npm
+        # BATS for bash testing
+        - git clone https://github.com/sstephenson/bats.git
+        - export PATH="bats/bin:$PATH"
+        - pip3 install -r requirements.txt
+      install:
+        - make build
+      script:
+        # Same as `make run`, but with -d at the end to make it exit when all have been started
+        - docker-compose up -d
+        - bats tests/bats/
+        - make test
+      sudo: required
+      services:
+        - docker
+
