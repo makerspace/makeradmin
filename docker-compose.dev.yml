@@ -1,4 +1,4 @@
-version: "2"
+version: "3"
 
 services:
   db2:
@@ -15,14 +15,6 @@ services:
     environment:
       APP_DEBUG: "true"
       
-  current-member:
-    environment:
-      APP_DEBUG: "true"
-    volumes:
-      - ./member_view/src/main.py:/var/www/service/main.py
-      - ./servicebase_python/service.py:/var/www/service/service.py
-      - ./servicebase_python/migrate.py:/var/www/service/migrate.py
-
   membership:
     volumes:
       - ./membership/lumen/routes:/var/www/html/routes
@@ -48,25 +40,23 @@ services:
       - ./multiaccesssync/lumen/app:/var/www/html/app
       - ./library/src/Makeradmin:/var/www/html/library
 
-  webshop:
+  backend:
+    volumes:
+      - ./backend/src:/work/src
+    environment:
+      APP_DEBUG: "true"
+      
+  public:
     ports:
       - "8011:80"
     volumes:
-      - ./webshop/src/ts:/var/www/service/ts
-      - ./webshop/src/scss:/var/www/service/scss
-      - ./webshop/src/templates:/var/www/service/templates
-      - ./webshop_product_images:/var/www/service/static/product_images
-      - ./webshop/src/frontend.py:/var/www/service/frontend.py
-      - ./webshop/src/app.py:/var/www/service/app.py
-      - ./webshop/src/member.py:/var/www/service/member.py
-      - ./webshop/src/backend.py:/var/www/service/backend.py
-      - ./webshop/src/webshop_entities.py:/var/www/service/webshop_entities.py
-      - ./servicebase_python/service.py:/var/www/service/service.py
-      - ./servicebase_python/migrate.py:/var/www/service/migrate.py
+      - ./public/ts:/work/ts
+      - ./public/scss:/work/scss
+      - ./public/src:/work/src
     environment:
       APP_DEBUG: "true"
-    
-  frontend:
+      
+  admin:
     ports:
       - "8009:80"
     environment:

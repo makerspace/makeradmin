@@ -1,4 +1,4 @@
-version: "2"
+version: "3"
 services:
   db2:
     image: mysql:8
@@ -38,13 +38,6 @@ services:
     networks:
       - makeradmin
 
-  servicebase_python:
-    image: makeradmin/servicebase_python:1.0
-    build:
-      context: ./servicebase_python
-    networks:
-      - makeradmin
-
   api-gateway:
     image: makeradmin/apigateway:1.0
     build:
@@ -65,35 +58,13 @@ services:
       MYSQL_USER: "${MYSQL_USER}"
       MYSQL_PASS: "${MYSQL_PASS}"
       BEARER: "${API_BEARER}"
+      VIRTUAL_HOST: "${HOST_BACKEND}"
+      LETSENCRYPT_HOST: "${HOST_BACKEND}"
+      LETSENCRYPT_EMAIL: "${ADMIN_EMAIL}"
 
-  current-member:
-    image: makeradmin/current-member:1.0
-    build: member_view
-    environment:
-      TABLE_PREFIX: "current_member"
-      MYSQL_HOST: "db2:${MYSQL_PORT}"
-      MYSQL_DB: "makeradmin"
-      MYSQL_USER: "${MYSQL_USER}"
-      MYSQL_PASS: "${MYSQL_PASS}"
-      APIGATEWAY: "api-gateway"
-      BEARER: "${API_BEARER}"
-      HOST_FRONTEND:
-      HOST_BACKEND:
-      APP_DEBUG:
-    depends_on:
-      - api-gateway
-      - servicebase_python
-    networks:
-      - makeradmin
-
-  webshop:
-    image: makeradmin/webshop:1.0
-    volumes:
-      - "./webshop/src/ts:/var/www/service/ts"
-      - "./webshop/src/scss:/var/www/service/scss"
-      - "./webshop/src/templates:/var/www/service/templates"
-      - "./webshop_product_images:/var/www/service/static/product_images"
-    build: webshop
+  backend:
+    image: makeradmin/backend:1.0
+    build: backend
     environment:
       TABLE_PREFIX: "webshop"
       MYSQL_HOST: "db2:${MYSQL_PORT}"
@@ -110,10 +81,25 @@ services:
       STRIPE_SIGNING_SECRET:
     depends_on:
       - api-gateway
-      - servicebase_python
     networks:
       - makeradmin
-
+      
+  public:
+    image: makeradmin/public:1.0
+    volumes:
+      - "./.webshop_product_images:/work/static/product_images"
+    build: public
+    environment:
+      APIGATEWAY: "api-gateway"
+      HOST_BACKEND:
+      STRIPE_PUBLIC_KEY:
+      APP_DEBUG:
+      VIRTUAL_HOST: "${HOST_PUBLIC}"
+      LETSENCRYPT_HOST: "${HOST_PUBLIC}"
+      LETSENCRYPT_EMAIL: "${ADMIN_EMAIL}"
+    networks:
+      - makeradmin
+      
   membership:
     image: makeradmin/membership:1.0
     build:
@@ -188,13 +174,14 @@ services:
     networks:
       - makeradmin
 
-  frontend:
-    image: makeradmin/frontend:1.0
-    build: ./frontend
+  admin:
+    image: makeradmin/admin:1.0
+    build: ./admin
     environment:
       HOST_BACKEND:
-    depends_on:
-      - webshop
+      VIRTUAL_HOST: "${HOST_FRONTEND}"
+      LETSENCRYPT_HOST: "${HOST_FRONTEND}"
+      LETSENCRYPT_EMAIL: "${ADMIN_EMAIL}"
     networks:
       - makeradmin
 

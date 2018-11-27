@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Köphistorik - Makerspace Webshop</title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="{{ STATIC }}/uikit/css/uikit.min.css" />
+        <link rel="stylesheet" href="{{ STATIC }}/style.css" />
+        <script src='{{ STATIC }}/uikit/js/uikit.min.js'></script>
+        <script src='{{ STATIC }}/uikit/js/uikit-icons.min.js'></script>
+        {% include("meta.html") %}
+        <script src='{{ STATIC }}/js/history.js'></script>
+    </head>
+    <body>
+        <div id="purchase-history">
+            <h1>Köphistorik</h1>
+            <div class="receipt-buttons">
+                <a href='/member'><span uk-icon="user"></span> Medlemsvy</a>
+                <a href='{{ url("/") }}'><span uk-icon="cart"></span> Webshop</a>
+            </div>
+            <h2 id="member-header"></h2>
+            <div id="history-contents">
+                <div uk-spinner></div>
+            </div>
+        </div>
+    </body>
+</html>

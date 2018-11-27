@@ -24,6 +24,8 @@ config = {
     "MAILGUN_TO_OVERRIDE": "",
     "HOST_BACKEND": "http://localhost:8010",
     "HOST_FRONTEND": "http://localhost:8009",
+    "HOST_PUBLIC": "http://localhost:8011",
+    "ADMIN_EMAIL": "",
     "STRIPE_PRIVATE_KEY": "",
     "STRIPE_PUBLIC_KEY": "",
     "STRIPE_SIGNING_SECRET": "",

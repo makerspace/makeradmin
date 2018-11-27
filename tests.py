@@ -6,22 +6,66 @@
 #
 from subprocess import call, check_output, STDOUT
 from time import sleep
-import servicebase_python.service
 import unittest
 import json
 from datetime import datetime, timedelta
+
+import requests
 from requests import Response
 import stripe
 from decimal import Decimal
 from requests import sessions
 
+
 project_name = "test"
 duplicatePurchaseRand = 0
+
 
 def strip_entity_id(obj):
     copy = dict(obj)
     del copy["entity_id"]
     return copy
+
+
+class APIGateway:
+    def __init__(self, host: str, key: str, host_frontend: str, host_backend: str) -> None:
+        self.host = self._ensure_protocol(host)
+        self.host_frontend = self._ensure_protocol(host_frontend)
+        self.host_backend = self._ensure_protocol(host_backend)
+        self.auth_headers = {"Authorization": "Bearer " + key}
+
+    def _get_headers(self, token):
+        return self.auth_headers if token is None else {"Authorization": "Bearer " + token}
+
+    @staticmethod
+    def _ensure_protocol(host: str) -> str:
+        if not host.startswith("http://") and not host.startswith("https://"):
+            host = "http://" + host
+        return host
+
+    def get_frontend_url(self, path):
+        host = self.host_frontend
+        return f"{host}{path}"
+
+    def get(self, path, payload=None, token=None) -> requests.Response:
+        return requests.get(self.host + "/" + path, params=payload, headers=self._get_headers(token))
+
+    def post(self, path, payload, token=None) -> requests.Response:
+        return requests.post(self.host + "/" + path, json=payload, headers=self._get_headers(token))
+
+    def put(self, path, payload, token=None) -> requests.Response:
+        return requests.put(self.host + "/" + path, json=payload, headers=self._get_headers(token))
+
+    def delete(self, path, token=None) -> requests.Response:
+        return requests.delete(self.host + "/" + path, headers=self._get_headers(token))
+
+
+def gateway_from_envfile(path):
+    # Read the .env file
+    with open(".env") as f:
+        env = {s[0]: (s[1] if len(s) > 1 else "") for s in (s.split("=") for s in f.read().split('\n'))}
+    host = env["HOST_BACKEND"]
+    return APIGateway(host, env["API_BEARER"], env["HOST_FRONTEND"], env["HOST_BACKEND"])
 
 
 class MemberDummies:
@@ -140,7 +184,7 @@ class MakerAdminTest(unittest.TestCase):
         # Start all test containers
         call(["docker-compose", "-p", project_name, "-f", "docker-compose.yml", "-f", "docker-compose.test.yml", "up", "-d"])
 
-        cls.gateway = servicebase_python.service.gateway_from_envfile(".env")
+        cls.gateway = gateway_from_envfile(".env")
         # Test backend uses a different port than the one in the .env file
         cls.gateway.host = "http://localhost:9010"
 
