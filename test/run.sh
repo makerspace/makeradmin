@@ -22,6 +22,6 @@ wait_for curl --silent --fail --output /dev/null http://api-gateway:80/webshop/p
 
 set -e
 
-cd /work
+cd /work/src
 
-pytest .
+python3 -m pytest .
