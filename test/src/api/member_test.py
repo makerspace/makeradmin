@@ -7,8 +7,6 @@ class Test(ApiTest):
     def test_create_member(self):
         member = MemberFactory()
         
-        print(member)
-        
         member_id, member_number = self\
             .post("membership/member", json=member)\
             .expect(code=201, data=member)\

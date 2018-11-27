@@ -8,3 +8,4 @@ __pycache__/
 *.swp
 .webshop_product_images/
 node_modules
+.pytest_cache
