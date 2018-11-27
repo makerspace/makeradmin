@@ -1,0 +1,12 @@
+flask
+flask-compress
+flask-uploads
+jsonpickle
+PyMySQL
+python-dateutil
+requests
+gunicorn
+blinker
+dataclasses
+stripe
+werkzeug

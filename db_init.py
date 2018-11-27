@@ -4,7 +4,7 @@ from time import sleep
 import argparse
 import multiprocessing
 
-containers = ["api-gateway", "membership", "messages", "webshop"]
+containers = ["api-gateway", "membership", "messages", "backend"]
 
 parser = argparse.ArgumentParser(description='Initialize the database and run migrations')
 parser.add_argument('--project-name','-p', help='Use a different docker composer project name', default=None)
@@ -66,7 +66,7 @@ def init_container(container):
 
     migrate = f"""
         if [ -f /var/www/html/artisan ]; then php /var/www/html/artisan --force migrate;
-        elif [ -f /var/www/service/migrate.py ]; then echo 'Migrating using Python'; python3 /var/www/service/migrate.py;
+        elif [ -f /work/src/migrate.py ]; then echo 'Migrating using Python'; python3 /work/src/migrate.py;
         else echo \"No migration script found. Skipping migration for {container}\";
         fi
     """

@@ -1,0 +1,14 @@
+version: "2"
+volumes:
+  node_modules:
+services:
+  admin_dev_server:
+    image: makeradmin/admin_dev_server:1.0
+    build:
+      context: .
+      dockerfile: ./DevServerDockerfile
+    ports:
+      - "8080:8080"
+    volumes:
+      - .:/admin
+      - node_modules:/admin/node_modules
