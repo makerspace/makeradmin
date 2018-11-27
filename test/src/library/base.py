@@ -132,6 +132,10 @@ class ApiResponse:
             return result[0]
         return result
     
+    def print(self):
+        print(self.response.text)
+        return self
+    
 
 class ApiTest(TestCaseBase):
     
@@ -146,6 +150,16 @@ class ApiTest(TestCaseBase):
         url = self.host + "/" + path
         return ApiResponse(requests.post(url, json=json, headers=headers), self)
         
+    def put(self, path=None, json=None, headers=None):
+        headers = headers or {"Authorization": "Bearer " + self.token}
+        url = self.host + "/" + path
+        return ApiResponse(requests.put(url, json=json, headers=headers), self)
+
+    def delete(self, path=None, json=None, headers=None):
+        headers = headers or {"Authorization": "Bearer " + self.token}
+        url = self.host + "/" + path
+        return ApiResponse(requests.delete(url, json=json, headers=headers), self)
+
     def get(self, path=None, params=None, headers=None):
         headers = headers or {"Authorization": "Bearer " + self.token}
         url = self.host + "/" + path

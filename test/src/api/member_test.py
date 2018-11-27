@@ -4,7 +4,7 @@ from library.factory import MemberFactory
 
 class Test(ApiTest):
     
-    def test_create_member(self):
+    def test_create_and_get_member(self):
         member = MemberFactory()
         
         member_id, member_number = self\
@@ -16,59 +16,66 @@ class Test(ApiTest):
         self.assertTrue(member_number)
         
         self.get(f"membership/member/{member_id}").expect(code=200, data=member, data__member_id=member_id)
+    
+    def test_create_member_with_existing_email_fails(self):
+        member = MemberFactory()
+        self.post("membership/member", json=member).expect(code=201)
+        self.post("membership/member", json=member).expect(code=422, status="error", column="email")
 
-    def test_member(self):
-        ''' Test various things to do with members '''
-        previous_members = self.get(f"membership/member", 200)["data"]
+    def test_create_member_gives_new_member_numbers_and_ids(self):
+        member1 = MemberFactory()
+        member2 = MemberFactory()
+        
+        id1, number1 = \
+            self.post("membership/member", json=member1).expect(code=201).get('data__member_id', 'data__member_number')
+        
+        id2, number2 = \
+            self.post("membership/member", json=member2).expect(code=201).get('data__member_id', 'data__member_number')
+        
+        self.assertNotEqual(id1, id2)
+        self.assertNotEqual(number1, number2)
 
-        member = {
-            "email": "blah",
-            "firstname": "test",
-            "lastname": "testsson",
-            "civicregno": "012345679",
-            "company": "ACME",
-            "orgno": "01234",
-            "address_street": "Teststreet",
-            "address_extra": "N/A",
-            "address_zipcode": 1234,  # Note: not a string apparently
-            "address_city": "Test Town",
-            "address_country": "TS",  # Note: max length 2
-            "phone": "0123456",
-        }
-        new_member = self.post("membership/member", member, 201, expected_result={"status": "created", "data": member})["data"]
-        self.assertIn("member_id", new_member)
-        self.assertIn("member_number", new_member)
+    def test_update_member(self):
+        member = MemberFactory()
+        
+        member_id = self.post("membership/member", json=member).expect(code=201).get('data__member_id')
+        self.get(f"membership/member/{member_id}").expect(code=200, data__firstname=member['firstname'])
+        self.put(f"membership/member/{member_id}", json={**member, 'firstname': 'Kuno'}).expect(code=200)
+        self.get(f"membership/member/{member_id}").expect(code=200, data__firstname='Kuno')
 
-        self.post("membership/member", member, 422, expected_result={"status": "error", "column": "email"})
-        self.get(f"membership/member/{new_member['member_id']}", 200, expected_result={"data": member})
+    def test_list_members(self):
+        before = self.get("membership/member").get('data')
+        
+        member1 = MemberFactory()
+        member1_id = self.post("membership/member", json=member1).expect(code=201).get('data__member_id')
 
-        member2 = dict(member)
-        member2["email"] = "blah2"
-        new_member2 = self.post("membership/member", member2, 201, expected_result={"status": "created", "data": member2})["data"]
+        member2 = MemberFactory()
+        member2_id = self.post("membership/member", json=member2).expect(code=201).get('data__member_id')
 
-        self.assertNotEqual(new_member["member_number"], new_member2["member_number"])
+        after = self.get("membership/member").get('data')
+        
+        self.assertEqual(len(before) + 2, len(after))
 
-        for key in member.keys():
-            val = member[key]
-            if isinstance(val, int):
-                val ^= 5324
-            elif isinstance(val, str):
-                # Modify the string without changing the length (many fields are length limited)
-                s = ""
-                for c in val:
-                    s += chr(ord(c) + 13)
-                val = s
-            member[key] = val
+        ids = {m['member_id'] for m in after}
 
-        self.put(f"membership/member/{new_member['member_id']}", member, 200, expected_result={"status": "updated", "data": member})
-        new_member = self.get(f"membership/member/{new_member['member_id']}", 200, expected_result={"data": member})["data"]
+        self.assertIn(member1_id, ids)
+        self.assertIn(member2_id, ids)
 
-        for m in [new_member, new_member2]:
-            self.delete(f"membership/member/{m['member_id']}", 200, expected_result={"status": "deleted"})
-            # Note that deleted members still show up when explicitly accessed, but they should not show up in lists (this is checked for below)
-            self.get(f"membership/member/{m['member_id']}", 200, expected_result={"data": {k: m[k] for k in m if k not in {"deleted_at"}}})
+    def test_deleted_members_does_not_show_up_in_list(self):
+        member = MemberFactory()
+        member_id = self.post("membership/member", json=member).expect(code=201).get('data__member_id')
 
-        self.get(f"membership/member", 200, expected_result={"data": previous_members})
+        before = self.get("membership/member").get('data')
+        self.assertIn(member_id, {m['member_id'] for m in before})
+        
+        self.delete(f"membership/member/{member_id}").expect(code=200)
+        
+        after = self.get("membership/member").get('data')
+        self.assertNotIn(member_id, {m['member_id'] for m in after})
 
-
-pass
+    def test_deleted_member_can_still_be_retrieved(self):
+        member = MemberFactory()
+        member_id = self.post("membership/member", json=member).expect(code=201).get('data__member_id')
+        self.delete(f"membership/member/{member_id}").expect(code=200)
+        self.get(f"membership/member/{member_id}").expect(code=200, data=member)
+        
