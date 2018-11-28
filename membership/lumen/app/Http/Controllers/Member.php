@@ -479,14 +479,27 @@ class Member extends Controller
 			], 400);
 		}
 
+		if (!empty($json['default_start_date'])) {
+			$default_start_date = date_create_from_format('Y-m-d\TH:i:sO', $json['default_start_date']);
+			if (!$default_start_date) {
+				return Response()->json([
+					"status"  => "error",
+					"message" => "Error parsing datetime string 'default_start_date', expected format 'Y-m-d\TH:i:sO'",
+				], 400);
+			}
+		} else {
+			$default_start_date = date_create();
+		}
+		$default_start_date->setTimezone(timezone_open("Europe/Stockholm"));
+
 		$last_period = DB::table("membership_spans")
 			->where('member_id', $member_id)
 			->where('type', $json['type'])
 			->whereNull('deleted_at')
 			->max('enddate');
 
-		if ($last_period == null || date_create_from_format('Y-m-d', $last_period) < date_create()) {
-			$last_period = date("Y-m-d");
+		if ($last_period == null || date_create_from_format('Y-m-d', $last_period) < $default_start_date) {
+			$last_period = $default_start_date->format("Y-m-d");
 		}
 
 		$days = (int)$json['days'];

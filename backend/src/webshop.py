@@ -134,7 +134,8 @@ def _pending_actions(member_id: int=None) -> List[Dict[str, Any]]:
                 webshop_transaction_contents.amount, webshop_transaction_actions.value,
                 webshop_actions.id, webshop_actions.name,
                 webshop_transactions.member_id,
-                webshop_transaction_actions.id
+                webshop_transaction_actions.id,
+                DATE_FORMAT(webshop_transactions.created_at, '%Y-%m-%dT%H:%i:%s+0000')
             FROM webshop_transaction_actions
             INNER JOIN webshop_actions              ON webshop_transaction_actions.action_id      = webshop_actions.id
             INNER JOIN webshop_transaction_contents ON webshop_transaction_actions.content_id     = webshop_transaction_contents.id
@@ -164,6 +165,7 @@ def _pending_actions(member_id: int=None) -> List[Dict[str, Any]]:
                     "value": v[5],
                 },
                 "member_id": v[8],
+                "created_at": v[10],
             } for v in cur.fetchall()
         ]
 
@@ -880,6 +882,7 @@ class PendingAction:
     action_value: int
     pending_action_id: int
     transaction: Dict[str,Any]
+    created_at: str
 
 
 def complete_pending_action(action: PendingAction) -> None:
@@ -944,6 +947,7 @@ def ship_add_membership_action(action: PendingAction):
         {
             "type": "membership",
             "days": days_to_add,
+            "default_start_date": action.created_at,
             "creation_reason": f"transaction_action_id: {action.pending_action_id}, transaction_id: {action.transaction['transaction_id']}",
         }
     )
