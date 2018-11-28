@@ -135,7 +135,7 @@ def _pending_actions(member_id: int=None) -> List[Dict[str, Any]]:
                 webshop_actions.id, webshop_actions.name,
                 webshop_transactions.member_id,
                 webshop_transaction_actions.id,
-                DATE_FORMAT(webshop_transactions.created_at, '%Y-%m-%dT%H:%i:%s+0000')
+                DATE_FORMAT(webshop_transactions.created_at, '%%Y-%%m-%%dT%%H:%%i:%%s+0000')
             FROM webshop_transaction_actions
             INNER JOIN webshop_actions              ON webshop_transaction_actions.action_id      = webshop_actions.id
             INNER JOIN webshop_transaction_contents ON webshop_transaction_actions.content_id     = webshop_transaction_contents.id
@@ -145,7 +145,7 @@ def _pending_actions(member_id: int=None) -> List[Dict[str, Any]]:
         if member_id is not None:
             query += " AND webshop_transactions.member_id=%s"
 
-        cur.execute(query, (member_id,) if member_id is not None else None)
+        cur.execute(query, (member_id,) if member_id is not None else tuple())
 
         return [
             {
@@ -904,7 +904,8 @@ def ship_orders(labaccess: bool) -> None:
             action_name=pending["action"]["name"],
             action_value=int(pending["pending_action"]["value"]),
             pending_action_id=pending['pending_action']['id'],
-            transaction=pending["item"]
+            transaction=pending["item"],
+            created_at=pending["created_at"]
         )
 
         if labaccess and action.action_name == "add_labaccess_days":
