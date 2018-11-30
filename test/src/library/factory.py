@@ -1,14 +1,23 @@
-from string import ascii_letters
+import os
+from random import choice, seed
+from string import ascii_letters, digits
 
 from factory import Faker, Factory, LazyAttribute, Sequence
 from factory.fuzzy import FuzzyText
+
+
+seed(os.urandom(8))
+
+
+def unique_str(length=12):
+    return ''.join(choice(ascii_letters + digits) for _ in range(length))
 
 
 class MemberFactory(Factory):
     class Meta:
         model = dict
     
-    email = Faker('email')
+    email = Sequence(lambda n: f"{n}.{unique_str()}@bmail.make")
     firstname = Faker('first_name')
     lastname = Faker('last_name')
     password = LazyAttribute(lambda o: "1q2w3e")
