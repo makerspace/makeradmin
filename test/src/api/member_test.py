@@ -52,14 +52,15 @@ class Test(ApiTest):
         member2 = MemberFactory()
         member2_id = self.post("membership/member", json=member2).expect(code=201).get('data__member_id')
 
+        ids_before = {m['member_id'] for m in before}
+        self.assertNotIn(member1_id, ids_before)
+        self.assertNotIn(member2_id, ids_before)
+
         after = self.get("membership/member").get('data')
-        
-        self.assertEqual(len(before) + 2, len(after))
 
-        ids = {m['member_id'] for m in after}
-
-        self.assertIn(member1_id, ids)
-        self.assertIn(member2_id, ids)
+        ids_after = {m['member_id'] for m in after}
+        self.assertIn(member1_id, ids_after)
+        self.assertIn(member2_id, ids_after)
 
     def test_deleted_members_does_not_show_up_in_list(self):
         member = MemberFactory()
