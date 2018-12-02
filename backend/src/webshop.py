@@ -283,7 +283,7 @@ def send_new_member_email(member_id: int) -> None:
     assert r.ok
     member = r.json()["data"]
     eprint("====== Generating email body")
-    email_body = render_template("new_member_email.html", member=member, frontend_url=instance.gateway.get_public_url)
+    email_body = render_template("new_member_email.html", member=member, public_url=instance.gateway.get_public_url)
     eprint("====== Sending new member email")
 
     r = instance.gateway.post("messages", {
@@ -681,7 +681,7 @@ def send_receipt_email(member_id: int, transaction_id: int) -> None:
         "message_type": "email",
         "subject": "Kvitto - Stockholm Makerspace",
         "subject_en": "Receipt - Stockholm Makerspace",
-        "body": render_template("receipt_email.html", cart=zip(products, items), transaction=transaction, currency="kr", member=member, frontend_url=instance.gateway.get_public_url)
+        "body": render_template("receipt_email.html", cart=zip(products, items), transaction=transaction, currency="kr", member=member, public_url=instance.gateway.get_public_url)
     })
 
     if not r.ok:
@@ -838,7 +838,7 @@ def send_key_updated_email(member_id: int, extended_days: int, end_date: datetim
         "message_type": "email",
         "subject": "Din labaccess har utökats",
         "subject_en": "Your lab access has been extended",
-        "body": render_template("updated_key_time_email.html", frontend_url=instance.gateway.get_public_url, member=member, extended_days=extended_days, end_date=end_date.strftime("%Y-%m-%d"))
+        "body": render_template("updated_key_time_email.html", public_url=instance.gateway.get_public_url, member=member, extended_days=extended_days, end_date=end_date.strftime("%Y-%m-%d"))
     })
 
     if not r.ok:
@@ -861,7 +861,7 @@ def send_membership_updated_email(member_id: int, extended_days: int, end_date: 
         "message_type": "email",
         "subject": "Ditt medlemsskap har utökats",
         "subject_en": "Your membership has been extended",
-        "body": render_template("updated_membership_time_email.html", frontend_url=instance.gateway.get_public_url, member=member, extended_days=extended_days, end_date=end_date.strftime("%Y-%m-%d"))
+        "body": render_template("updated_membership_time_email.html", public_url=instance.gateway.get_public_url, member=member, extended_days=extended_days, end_date=end_date.strftime("%Y-%m-%d"))
     })
 
     if not r.ok:
