@@ -75,6 +75,7 @@ services:
       BEARER: "${API_BEARER}"
       HOST_FRONTEND:
       HOST_BACKEND:
+      HOST_PUBLIC:
       APP_DEBUG:
       STRIPE_PRIVATE_KEY:
       STRIPE_PUBLIC_KEY:

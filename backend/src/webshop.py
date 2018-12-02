@@ -134,7 +134,8 @@ def _pending_actions(member_id: int=None) -> List[Dict[str, Any]]:
                 webshop_transaction_contents.amount, webshop_transaction_actions.value,
                 webshop_actions.id, webshop_actions.name,
                 webshop_transactions.member_id,
-                webshop_transaction_actions.id
+                webshop_transaction_actions.id,
+                DATE_FORMAT(webshop_transactions.created_at, '%%Y-%%m-%%dT%%H:%%i:%%s+0000')
             FROM webshop_transaction_actions
             INNER JOIN webshop_actions              ON webshop_transaction_actions.action_id      = webshop_actions.id
             INNER JOIN webshop_transaction_contents ON webshop_transaction_actions.content_id     = webshop_transaction_contents.id
@@ -144,7 +145,7 @@ def _pending_actions(member_id: int=None) -> List[Dict[str, Any]]:
         if member_id is not None:
             query += " AND webshop_transactions.member_id=%s"
 
-        cur.execute(query, (member_id,) if member_id is not None else None)
+        cur.execute(query, (member_id,) if member_id is not None else tuple())
 
         return [
             {
@@ -164,6 +165,7 @@ def _pending_actions(member_id: int=None) -> List[Dict[str, Any]]:
                     "value": v[5],
                 },
                 "member_id": v[8],
+                "created_at": v[10],
             } for v in cur.fetchall()
         ]
 
@@ -281,7 +283,7 @@ def send_new_member_email(member_id: int) -> None:
     assert r.ok
     member = r.json()["data"]
     eprint("====== Generating email body")
-    email_body = render_template("new_member_email.html", member=member, frontend_url=instance.gateway.get_frontend_url)
+    email_body = render_template("new_member_email.html", member=member, public_url=instance.gateway.get_public_url)
     eprint("====== Sending new member email")
 
     r = instance.gateway.post("messages", {
@@ -679,7 +681,7 @@ def send_receipt_email(member_id: int, transaction_id: int) -> None:
         "message_type": "email",
         "subject": "Kvitto - Stockholm Makerspace",
         "subject_en": "Receipt - Stockholm Makerspace",
-        "body": render_template("receipt_email.html", cart=zip(products, items), transaction=transaction, currency="kr", member=member, frontend_url=instance.gateway.get_frontend_url)
+        "body": render_template("receipt_email.html", cart=zip(products, items), transaction=transaction, currency="kr", member=member, public_url=instance.gateway.get_public_url)
     })
 
     if not r.ok:
@@ -728,7 +730,7 @@ def create_three_d_secure_source(transaction_id: int, card_source_id: str, total
             'card': card_source_id,
         },
         redirect={
-            'return_url': instance.gateway.get_frontend_url(f"/shop/receipt/{transaction_id}")
+            'return_url': instance.gateway.get_public_url(f"/shop/receipt/{transaction_id}")
         },
     )
 
@@ -836,7 +838,7 @@ def send_key_updated_email(member_id: int, extended_days: int, end_date: datetim
         "message_type": "email",
         "subject": "Din labaccess har utökats",
         "subject_en": "Your lab access has been extended",
-        "body": render_template("updated_key_time_email.html", frontend_url=instance.gateway.get_frontend_url, member=member, extended_days=extended_days, end_date=end_date.strftime("%Y-%m-%d"))
+        "body": render_template("updated_key_time_email.html", public_url=instance.gateway.get_public_url, member=member, extended_days=extended_days, end_date=end_date.strftime("%Y-%m-%d"))
     })
 
     if not r.ok:
@@ -859,7 +861,7 @@ def send_membership_updated_email(member_id: int, extended_days: int, end_date: 
         "message_type": "email",
         "subject": "Ditt medlemsskap har utökats",
         "subject_en": "Your membership has been extended",
-        "body": render_template("updated_membership_time_email.html", frontend_url=instance.gateway.get_frontend_url, member=member, extended_days=extended_days, end_date=end_date.strftime("%Y-%m-%d"))
+        "body": render_template("updated_membership_time_email.html", public_url=instance.gateway.get_public_url, member=member, extended_days=extended_days, end_date=end_date.strftime("%Y-%m-%d"))
     })
 
     if not r.ok:
@@ -880,6 +882,7 @@ class PendingAction:
     action_value: int
     pending_action_id: int
     transaction: Dict[str,Any]
+    created_at: str
 
 
 def complete_pending_action(action: PendingAction) -> None:
@@ -901,7 +904,8 @@ def ship_orders(labaccess: bool) -> None:
             action_name=pending["action"]["name"],
             action_value=int(pending["pending_action"]["value"]),
             pending_action_id=pending['pending_action']['id'],
-            transaction=pending["item"]
+            transaction=pending["item"],
+            created_at=pending["created_at"]
         )
 
         if labaccess and action.action_name == "add_labaccess_days":
@@ -944,6 +948,7 @@ def ship_add_membership_action(action: PendingAction):
         {
             "type": "membership",
             "days": days_to_add,
+            "default_start_date": action.created_at,
             "creation_reason": f"transaction_action_id: {action.pending_action_id}, transaction_id: {action.transaction['transaction_id']}",
         }
     )

@@ -28,10 +28,10 @@ def strip_entity_id(obj):
 
 
 class APIGateway:
-    def __init__(self, host: str, key: str, host_frontend: str, host_backend: str) -> None:
+    def __init__(self, host: str, key: str, host_backend: str, host_public: str) -> None:
         self.host = self._ensure_protocol(host)
-        self.host_frontend = self._ensure_protocol(host_frontend)
         self.host_backend = self._ensure_protocol(host_backend)
+        self.host_public = self._ensure_protocol(host_public)
         self.auth_headers = {"Authorization": "Bearer " + key}
 
     def _get_headers(self, token):
@@ -43,8 +43,8 @@ class APIGateway:
             host = "http://" + host
         return host
 
-    def get_frontend_url(self, path):
-        host = self.host_frontend
+    def get_public_url(self, path):
+        host = self.host_public
         return f"{host}{path}"
 
     def get(self, path, payload=None, token=None) -> requests.Response:
@@ -65,7 +65,7 @@ def gateway_from_envfile(path):
     with open(".env") as f:
         env = {s[0]: (s[1] if len(s) > 1 else "") for s in (s.split("=") for s in f.read().split('\n'))}
     host = env["HOST_BACKEND"]
-    return APIGateway(host, env["API_BEARER"], env["HOST_FRONTEND"], env["HOST_BACKEND"])
+    return APIGateway(host, env["API_BEARER"], env["HOST_BACKEND"], env["HOST_PUBLIC"])
 
 
 class MemberDummies:
@@ -238,10 +238,22 @@ class MakerAdminTest(unittest.TestCase):
                     }
                 })
 
-                now = datetime.now()
+                now = datetime.utcnow()
                 membership_end = None
 
                 # Test multiple code paths
+                if (i % 3) == 0:
+                    self.post(f"/membership/member/{member_id}/addMembershipDays", {"type": "membership", "days": 1, "default_start_date": "2000-01-01T00:00:00+0000","creation_reason": f"test31_{member_id}"}, 200, expected_result={
+                        "status": "ok",
+                        "data": {
+                            "has_labaccess": False,
+                            "has_membership": False,
+                            "labaccess_end": None,
+                            "membership_end": "2000-01-02"
+                        }
+                    })
+                    membership_end = "2000-01-02"
+
                 if (i % 2) == 0:
                     self.post(f"/membership/member/{member_id}/addMembershipSpan", {
                             "type": "membership",
@@ -361,6 +373,7 @@ class MakerAdminTest(unittest.TestCase):
                 self.post(f"/membership/member/{member_id}/addMembershipDays", {"type": "lulz", "days": 10, "creation_reason": f"test6_{member_id}"}, 400, expected_result={"status": "error"})
                 self.post(f"/membership/member/{member_id}/addMembershipDays", {"type": "labaccess", "days": 10, "creation_reason": None}, 400, expected_result={"status": "error"})
                 self.post(f"/membership/member/{member_id}/addMembershipDays", {"type": "labaccess", "days": 10}, 400, expected_result={"status": "error"})
+                self.post(f"/membership/member/{member_id}/addMembershipDays", {"type": "membership", "days": 10, "default_start_date": "now", "creation_reason": f"test7_{member_id}"}, 400, expected_result={"status": "error"})
 
     def test_purchase(self):
         if not stripe.api_key:

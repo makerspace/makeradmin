@@ -58,10 +58,9 @@ class DB:
 
 
 class APIGateway:
-    def __init__(self, host: str, key: str, host_frontend: str, host_backend: str) -> None:
+    def __init__(self, host: str, key: str, host_backend: str, host_public: str) -> None:
         self.host = self._ensure_protocol(host)
-        self.host_frontend = self._ensure_protocol(host_frontend)
-        self.host_backend = self._ensure_protocol(host_backend)
+        self.host_public = self._ensure_protocol(host_public)
         self.auth_headers = {"Authorization": "Bearer " + key}
 
     def _get_headers(self, token):
@@ -73,8 +72,8 @@ class APIGateway:
             host = "http://" + host
         return host
 
-    def get_frontend_url(self, path):
-        host = self.host_frontend
+    def get_public_url(self, path):
+        host = self.host_public
         return f"{host}{path}"
 
     def get(self, path, payload=None, token=None) -> requests.Response:
@@ -222,7 +221,7 @@ def gateway_from_envfile(path):
     with open(".env") as f:
         env = {s[0]: (s[1] if len(s) > 1 else "") for s in (s.split("=") for s in f.read().split('\n'))}
     host = env["HOST_BACKEND"]
-    return APIGateway(host, env["API_BEARER"], env["HOST_FRONTEND"], env["HOST_BACKEND"])
+    return APIGateway(host, env["API_BEARER"], env["HOST_BACKEND"], env["HOST_PUBLIC"])
 
 
 def read_config():
@@ -234,7 +233,7 @@ def read_config():
             password=os.environ["MYSQL_PASS"],
         )
 
-        gateway = APIGateway(os.environ["APIGATEWAY"], os.environ["BEARER"], os.environ["HOST_FRONTEND"], os.environ["HOST_BACKEND"])
+        gateway = APIGateway(os.environ["APIGATEWAY"], os.environ["BEARER"], os.environ["HOST_BACKEND"], os.environ["HOST_PUBLIC"])
 
         debugStr = os.environ["APP_DEBUG"].lower()
         if debugStr == "true" or debugStr == "false":
