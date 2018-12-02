@@ -75,5 +75,11 @@ class Test(ApiTest):
         member_id = member['member_id']
         
         self.delete(f"membership/member/{member_id}").expect(code=200)
-        self.get(f"membership/member/{member_id}").expect(code=200, data=member)
+        
+        member.pop("deleted_at")
+        self.assertIsNotNone(self
+                             .get(f"membership/member/{member_id}")
+                             .expect(code=200, data=member)
+                             .get('data__deleted_at'))
+        
         

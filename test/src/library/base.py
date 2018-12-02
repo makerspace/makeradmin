@@ -1,5 +1,6 @@
 import os
 from collections.abc import Mapping
+from datetime import datetime, timedelta
 
 import requests
 
@@ -57,6 +58,12 @@ class TestCaseBase(TestCase):
         else:
             raise Exception(f"unknown test_mode {test_mode}")
 
+        self.now = datetime.now()
+        self.today = self.now.date()
+        
+    def date(self, days=0):
+        return self.today + timedelta(days=days)
+        
 
 class SeleniumTest(TestCaseBase):
     
