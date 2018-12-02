@@ -45,12 +45,9 @@ class Test(ApiTest):
 
     def test_list_members(self):
         before = self.get("membership/member").get('data')
-        
-        member1 = MemberFactory()
-        member1_id = self.post("membership/member", json=member1).expect(code=201).get('data__member_id')
 
-        member2 = MemberFactory()
-        member2_id = self.post("membership/member", json=member2).expect(code=201).get('data__member_id')
+        member1_id = self.api_create_member()['member_id']
+        member2_id = self.api_create_member()['member_id']
 
         ids_before = {m['member_id'] for m in before}
         self.assertNotIn(member1_id, ids_before)
@@ -63,9 +60,8 @@ class Test(ApiTest):
         self.assertIn(member2_id, ids_after)
 
     def test_deleted_members_does_not_show_up_in_list(self):
-        member = MemberFactory()
-        member_id = self.post("membership/member", json=member).expect(code=201).get('data__member_id')
-
+        member_id = self.api_create_member()['member_id']
+        
         before = self.get("membership/member").get('data')
         self.assertIn(member_id, {m['member_id'] for m in before})
         
@@ -75,8 +71,9 @@ class Test(ApiTest):
         self.assertNotIn(member_id, {m['member_id'] for m in after})
 
     def test_deleted_member_can_still_be_retrieved(self):
-        member = MemberFactory()
-        member_id = self.post("membership/member", json=member).expect(code=201).get('data__member_id')
+        member = self.api_create_member()
+        member_id = member['member_id']
+        
         self.delete(f"membership/member/{member_id}").expect(code=200)
         self.get(f"membership/member/{member_id}").expect(code=200, data=member)
         

@@ -8,6 +8,7 @@ from selenium.webdriver import DesiredCapabilities
 from selenium.webdriver.remote import webdriver as remote
 from selenium.webdriver.chrome import webdriver as chrome
 
+from library.factory import MemberFactory, GroupFactory
 
 webdriver_type = os.environ.get('WEBDRIVER_TYPE', 'CHROME')
 keep_browser = os.environ.get('KEEP_BROWSER')
@@ -125,6 +126,10 @@ class ApiResponse:
         
         return self
     
+    @property
+    def data(self):
+        return self.get('data')
+    
     def get(self, *paths):
         data = self.response.json()
         result = [get_path(data, path) for path in paths]
@@ -164,3 +169,11 @@ class ApiTest(TestCaseBase):
         headers = headers or {"Authorization": "Bearer " + self.token}
         url = self.host + "/" + path
         return ApiResponse(requests.get(url, params=params, headers=headers), self)
+
+    def api_create_member(self, **kwargs):
+        return self.post("membership/member", json=MemberFactory(**kwargs)).expect(code=201, status='created').data
+
+    def api_create_group(self, **kwargs):
+        return self.post("membership/group", json=GroupFactory(**kwargs)).expect(code=201, status='created').data
+
+

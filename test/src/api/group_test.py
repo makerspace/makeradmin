@@ -6,62 +6,58 @@ class Test(ApiTest):
     
     def test_create_and_get(self):
         group = GroupFactory()
+        group_id = self\
+            .post("membership/group", group)\
+            .expect(code=201, status="created", data=group)\
+            .get('data__group_id')
+
+        self.assertTrue(group_id)
+
+        self.get(f"membership/group/{group_id}").expect(code=200, data=group, data__group_id=group_id)
+
+    def test_list_groups(self):
+        before = self.get("membership/group").get('data')
         
+        group1_id = self.api_create_group()['group_id']
+        group2_id = self.api_create_group()['group_id']
 
+        ids_before = {g['group_id'] for g in before}
+        self.assertNotIn(group1_id, ids_before)
+        self.assertNotIn(group2_id, ids_before)
 
-    def test_groups(self):
-        # TODO 
-        return 
+        after = self.get("membership/group").get('data')
+
+        ids_after = {g['group_id'] for g in after}
+        self.assertIn(group1_id, ids_after)
+        self.assertIn(group2_id, ids_after)
+
+    def test_add_and_remove_member_in_group(self):
+        member_id = self.api_create_member()['member_id']
+        group_id = self.api_create_group()['group_id']
+
+        self.get(f"membership/member/{member_id}/groups").expect(code=200, data=[])
+        self.get(f"membership/group/{group_id}/members").expect(code=200, data=[])
+
+        self.post(f"membership/member/{member_id}/groups/add", {"groups": [group_id]}).expect(code=200, status='ok')
+
+        self.assertEqual([group_id],
+                         [g['group_id'] for g in
+                          self.get(f"membership/member/{member_id}/groups").expect(code=200).data])
+
+        self.assertEqual([member_id],
+                         [m['member_id'] for m in
+                          self.get(f"membership/group/{group_id}/members").expect(code=200).data])
+
+        self.post(f"membership/member/{member_id}/groups/remove", {"groups": [group_id]}).expect(code=200, status="ok")
         
-        ''' Test various things to do with groups '''
-        previous_groups = self.get(f"membership/group", 200)["data"]
+        self.get(f"membership/member/{member_id}/groups").expect(code=200, data=[])
+        self.get(f"membership/group/{group_id}/members").expect(code=200, data=[])
 
-        with MemberDummies(self, 10) as created_members:
-            groups = [{
-                "name": "science_group" + str(i),
-                "title": "Aperture Science Volounteer Group",
-                "description": "Volounteers for being exposed to neurotoxin",
-            } for i in range(10)]
-
-            created_groups = [
-                self.post("membership/group", group, 201, expected_result={"status": "created", "data": group})["data"]
-                for group in groups
-            ]
-
-            # Make sure the get method returns the same result as the post method
-            for group in created_groups:
-                self.get(f"membership/group/{group['group_id']}", 200, expected_result={"data": group})
-
-            # List all groups
-            # Inconsistency: list views do not include entity_id
-            self.get(f"membership/group?sort_by=group_id&sort_order=asc", 200, expected_result={"data": previous_groups + list(map(strip_entity_id, created_groups))})
-
-            for (member, password), group in zip(created_members, created_groups):
-                member_id = member["member_id"]
-                group_id = group["group_id"]
-
-                self.post(f"membership/member/{member_id}/groups/add", {"groups": [group_id]}, 200, expected_result={"status": "ok"})
-
-                # Inconsistency: list views do not include entity_id
-                group2 = strip_entity_id(group)
-
-                member2 = strip_entity_id(member)
-
-                # Make sure the member has been added to the group
-                self.get(f"membership/member/{member_id}/groups", 200, expected_result={"data": [group2]})
-                self.get(f"membership/group/{group_id}/members", 200, expected_result={"data": [member2]})
-
-                # Remove the member from the group
-                self.post(f"membership/member/{member_id}/groups/remove", {"groups": [group_id]}, 200, expected_result={"status": "ok"})
-
-                # Make sure the member has been removed from the group
-                self.get(f"membership/member/{member_id}/groups", 200, expected_result={"data": []})
-
-            for group in created_groups:
-                self.delete(f"membership/group/{group['group_id']}", 200, expected_result={"status": "deleted"})
-                # Note that deleted groups still show up when explicitly accessed, but they should not show up in lists (this is checked for below)
-                self.get(f"membership/group/{group['group_id']}", 200, expected_result={"data": group})
-
-            # Make sure all groups have been deleted
-            self.get(f"membership/group", 200, expected_result={"data": previous_groups})
-
+    def test_deleted_group_does_not_show_up_in_list(self):
+        group_id = self.api_create_group()['group_id']
+        
+        self.assertIn(group_id, [g['group_id'] for g in self.get("membership/group").data])
+        
+        self.delete(f"membership/group/{group_id}").expect(code=200, status="deleted")
+        
+        self.assertNotIn(group_id, [g['group_id'] for g in self.get("membership/group").data])

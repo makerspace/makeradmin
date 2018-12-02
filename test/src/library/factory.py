@@ -9,7 +9,7 @@ from factory.fuzzy import FuzzyText
 seed(os.urandom(8))
 
 
-def unique_str(length=12):
+def random_str(length=12):
     return ''.join(choice(ascii_letters + digits) for _ in range(length))
 
 
@@ -27,7 +27,7 @@ class MemberFactory(Factory):
     address_country = Faker('country_code', representation="alpha-2")
     phone = Sequence(lambda n: f'070-{n:07d}')
     civicregno = Sequence(lambda n: f"19901011{9944 + n:04d}")
-    email = LazyAttribute(lambda o: f'{o.firstname}.{o.lastname}+{unique_str(6)}@bmail.com'.lower())
+    email = LazyAttribute(lambda o: f'{o.firstname}.{o.lastname}+{random_str(6)}@bmail.com'.lower())
 
 
 class GroupFactory(Factory):
