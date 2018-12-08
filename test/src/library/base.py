@@ -150,6 +150,9 @@ class ApiResponse:
     
 
 class ApiTest(TestCaseBase):
+
+    ADD_MEMBERSHIP_DAYS = 1
+    ADD_LABACCESS_DAYS = 2
     
     @classmethod
     def setUpClass(self):
@@ -186,5 +189,12 @@ class ApiTest(TestCaseBase):
         
     def api_create_product(self, **kwargs):
         return self.post("webshop/product", json=ProductFactory(**kwargs)).expect(code=200, status='created').data
-    
 
+    def api_create_product_action(self, **kwargs):
+        action = {
+            "product_id": 0,
+            "action_id": self.ADD_MEMBERSHIP_DAYS,
+            "value": 365
+        }
+        action.update(**kwargs)
+        return self.post(f"/webshop/product_action", action).expect(code=200, status='created').data

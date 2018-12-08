@@ -31,6 +31,7 @@ $app->post("webshop/register", "ServiceRegistry@handleRoute");
 $app->post("webshop/stripe_callback", "Webhooks@stripe");
 $app->get("webshop/product_data",      "ServiceRegistry@handleRoute");
 $app->get("webshop/product_data/{p3}", "ServiceRegistry@handleRoute");
+$app->get("webshop/register_page_data", "ServiceRegistry@handleRoute");
 
 // Service registry
 $app->post("service/register",   ["middleware" => "auth:service", "uses" => "ServiceRegistry@register"]);
