@@ -1,4 +1,5 @@
 from random import randint
+from time import time
 
 import stripe
 
@@ -96,11 +97,13 @@ class Test(ApiTest):
         )
 
     def test_registring_new_member(self):
+        start_timestamp = int(time())
+
         self.api_create_product_action(product_id=self.p1_id, action_id=self.ADD_MEMBERSHIP_DAYS, value=365)
 
         source = stripe.Source.create(type="card", token=stripe.Token.create(card=VALID_NON_3DS_CARD).id)
 
-        member = MemberFactory()
+        member = MemberFactory(password=None)
 
         register = {
             "purchase": {
@@ -118,80 +121,24 @@ class Test(ApiTest):
             "member": member
         }
 
-        transaction_id, member_id = self\
+        transaction_id = self\
             .post(f"/webshop/register", register, headers={})\
+            .expect(code=200, status="ok")\
+            .get('data__transaction_id')
+
+        member_id = self\
+            .get(f"/webshop/transaction/{transaction_id}")\
             .expect(code=200, status="ok", data__amount="12.30", data__status="completed")\
-            .get('data__transaction_id', 'data__member_id')
+            .get('data__member_id')
 
-        before_activation = self.get(f"/membership/member/{member_id}").expect(code=200, data=member)
-        # self.assertIsNotNone(before_activation['deleted_at'])
-        # self.put(f"/webshop/process_stripe_events", {'start': stripe_start_timestamp}, 200)
-        # after_activation = self.get(f"/membership/member/{registered_member_id}", 200, expected_result={"data": register["member"]})["data"]
-        # self.assertIsNone(after_activation['deleted_at'])
-        
-        return
-        
-        # TODO
-        # Test registering a new member
-
-        actions = self.get("/webshop/action")["data"]
-        add_membership_days = [a for a in actions if a["name"] == 'add_membership_days'][0]
-
-        action = {
-            "product_id": created_product1["id"],
-            "action_id": add_membership_days["id"],
-            "value": 10
-        }
-        # Add action to product 1
-        self.post(f"/webshop/product_action", action, 200, expected_result={"status": "created", "data": action})["data"]
-
-        source = stripe.Source.create(type="card", token=stripe.Token.create(card=STRIPE_TEST_CARD).id)
-        duplicatePurchaseRand += 1
-        register = {
-            "purchase": {
-                "cart": [
-                    {
-                        "id": created_product1["id"],
-                        "count": 1,
-                    }
-                ],
-                "expectedSum": "12.30",
-                "duplicatePurchaseRand": duplicatePurchaseRand,
-                "stripeSource": source.id,
-                "stripeThreeDSecure": source["card"]["three_d_secure"]
-            },
-            "member": {
-                "email": f"register{i}@test3",
-                "firstname": "test",
-                "lastname": "testsson",
-                "civicregno": "012345679",
-                "company": "ACME",
-                "orgno": "01235",
-                "address_street": "Teststreet",
-                "address_extra": "N/A",
-                "address_zipcode": 1235,  # Note: not a string apparently
-                "address_city": "Testy Town",
-                "address_country": "TS",  # Note: max length 2
-                "phone": "01234567",
-            }
-        }
-        transaction_id = self.post(f"/webshop/register", register, 200, token=token, expected_result={"status": "ok"})["data"]["transaction_id"]
-        registered_member_id = self.get(f"/webshop/transaction/{transaction_id}", 200, token=token, expected_result={
-            "status": "ok",
-            "data": {
-                "amount": "12.30",
-                "status": "completed"
-            },
-        })["data"]["member_id"]
-
-        before_activation = self.get(f"/membership/member/{registered_member_id}", 200, expected_result={"data": register["member"]})["data"]
+        before_activation = self.get(f"/membership/member/{member_id}").expect(code=200, data=member).data
         self.assertIsNotNone(before_activation['deleted_at'])
-        self.put(f"/webshop/process_stripe_events", {'start': stripe_start_timestamp}, 200)
-        after_activation = self.get(f"/membership/member/{registered_member_id}", 200, expected_result={"data": register["member"]})["data"]
+        
+        # TODO Fake stripe callback here instead.
+        self.put("/webshop/process_stripe_events", {"source_id": source.id, "start": start_timestamp}).expect(code=200)
+        
+        after_activation = self.get(f"/membership/member/{member_id}").expect(code=200, data=member).data
         self.assertIsNone(after_activation['deleted_at'])
-
-
-
 
     def test_count_not_of_correct_multiple_fails_purchase(self):
         purchase = {

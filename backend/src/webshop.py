@@ -503,19 +503,16 @@ def _reprocess_stripe_event(event):
 @route_helper
 def process_stripe_events():
     payload = request.get_json()
-    last_start = None
-
-    if 'start' not in payload or payload['start'] is None:
-        # If no start timestamp is given only process latest event
-        event = stripe.Event.list(limit=1).data[0]
-        _reprocess_stripe_event(event)
-        last_start = event.created
-    else:
-        events = stripe.Event.list(limit=1, created={'gt': payload['start']})
-        last_start = events.data[0].created
-        for event in events.auto_paging_iter():
+    source_id = payload.get('source_id', None)
+    start = payload.get('start', None)
+    logger.info(source_id)
+    
+    events = stripe.Event.list(created={'gt': start} if start else None)
+    for event in events.auto_paging_iter():
+        logger.info(event)
+        obj = event.get('data', {}).get('object', {})
+        if source_id and source_id in (obj.get('source', {}).get('id'), obj.get('id')) or not source_id:
             _reprocess_stripe_event(event)
-    return {'start': last_start}
 
 
 def process_cart(member_id: int, cart: List[Dict[str,Any]]) -> Tuple[Decimal, List[CartItem]]:
