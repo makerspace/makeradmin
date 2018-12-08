@@ -377,10 +377,9 @@ def complete_transaction(transaction_id: int):
             # Unclear if this is a performance issue or not, hopefully there shouldn't be that many pending actions, so this will be quick
             ship_orders(labaccess=False)
         except Exception as e:
-            eprint("Failed to ship orders")
-            eprint(e)
+            logger.exception(f"failed to ship orders in transaction {transaction_id}")
     elif tr['status'] not in {'completed'}:
-        eprint(f"Unable to set transaction {transaction_id} to completed!")
+        logger.error(f"unable to set transaction {transaction_id} to completed")
 
 
 def _fail_transaction(transaction_id: int):

@@ -19,7 +19,7 @@ class MemberFactory(Factory):
     
     firstname = Faker('first_name')
     lastname = Faker('last_name')
-    password = LazyFunction(lambda: "$2y$10$NcNoheVsKVo2Agz3FLeI8.fhAgbmRV/NoJMqPC67ZXiqgqfE5DE.S")
+    password = LazyFunction(lambda: "$2y$10$NcNoheVsKVo2Agz3FLeI8.fhAgbmRV/NoJMqPC67ZXiqgqfE5DE.S")  # 1q2w3e
     address_street = Faker('street_name')
     address_extra = LazyFunction(lambda: "N/A")
     address_zipcode = Sequence(lambda n: 10200 + n)
@@ -37,3 +37,23 @@ class GroupFactory(Factory):
     name = FuzzyText(length=12, chars=ascii_letters, prefix='group-')
     title = Faker('catch_phrase')
     description = Faker('bs')
+
+
+class CategoryFactory(Factory):
+    class Meta:
+        model = dict
+    
+    name = FuzzyText(length=12, chars=ascii_letters, prefix='category-')
+
+
+class ProductFactory(Factory):
+    class Meta:
+        model = dict
+    
+    name = FuzzyText(length=12, chars=ascii_letters, prefix='product-')
+    price = LazyFunction(lambda: 100.0)
+    description = Faker('bs')
+    unit = LazyFunction(lambda: "st")
+    smallest_multiple = LazyFunction(lambda: 1)
+    filter = LazyFunction(lambda: None)
+    category_id = LazyFunction(lambda: None)

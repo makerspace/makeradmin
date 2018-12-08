@@ -9,7 +9,7 @@ from selenium.webdriver import DesiredCapabilities
 from selenium.webdriver.remote import webdriver as remote
 from selenium.webdriver.chrome import webdriver as chrome
 
-from library.factory import MemberFactory, GroupFactory
+from library.factory import MemberFactory, GroupFactory, CategoryFactory, ProductFactory
 
 webdriver_type = os.environ.get('WEBDRIVER_TYPE', 'CHROME')
 keep_browser = os.environ.get('KEEP_BROWSER')
@@ -157,25 +157,23 @@ class ApiTest(TestCaseBase):
         self.token = get_env("API_BEARER")
         self.host = get_env("HOST_BACKEND")
 
-    def post(self, path=None, json=None, headers=None):
-        headers = headers or {"Authorization": "Bearer " + self.token}
+    def request(self, method, path, **kwargs):
+        token = kwargs.pop('token', self.token)
+        headers = kwargs.pop('headers', {"Authorization": "Bearer " + token})
         url = self.host + "/" + path
-        return ApiResponse(requests.post(url, json=json, headers=headers), self)
+        return ApiResponse(requests.request(method, url=url, headers=headers, **kwargs), self)
+
+    def post(self, path, json=None, **kwargs):
+        return self.request("post", path, json=json, **kwargs)
+
+    def put(self, path, json=None, **kwargs):
+        return self.request("put", path, json=json, **kwargs)
+
+    def delete(self, path, json=None, **kwargs):
+        return self.request("delete", path, json=json, **kwargs)
         
-    def put(self, path=None, json=None, headers=None):
-        headers = headers or {"Authorization": "Bearer " + self.token}
-        url = self.host + "/" + path
-        return ApiResponse(requests.put(url, json=json, headers=headers), self)
-
-    def delete(self, path=None, json=None, headers=None):
-        headers = headers or {"Authorization": "Bearer " + self.token}
-        url = self.host + "/" + path
-        return ApiResponse(requests.delete(url, json=json, headers=headers), self)
-
-    def get(self, path=None, params=None, headers=None):
-        headers = headers or {"Authorization": "Bearer " + self.token}
-        url = self.host + "/" + path
-        return ApiResponse(requests.get(url, params=params, headers=headers), self)
+    def get(self, path, params=None, **kwargs):
+        return self.request("get", path, params=params, **kwargs)
 
     def api_create_member(self, **kwargs):
         return self.post("membership/member", json=MemberFactory(**kwargs)).expect(code=201, status='created').data
@@ -183,4 +181,10 @@ class ApiTest(TestCaseBase):
     def api_create_group(self, **kwargs):
         return self.post("membership/group", json=GroupFactory(**kwargs)).expect(code=201, status='created').data
 
+    def api_create_category(self, **kwargs):
+        return self.post("webshop/category", json=CategoryFactory(**kwargs)).expect(code=200, status='created').data
+        
+    def api_create_product(self, **kwargs):
+        return self.post("webshop/product", json=ProductFactory(**kwargs)).expect(code=200, status='created').data
+    
 
