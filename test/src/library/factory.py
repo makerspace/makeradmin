@@ -9,6 +9,9 @@ from factory.fuzzy import FuzzyText
 seed(os.urandom(8))
 
 
+PASSWORD = '1q2w3e'
+
+
 def random_str(length=12):
     return ''.join(choice(ascii_letters + digits) for _ in range(length))
 

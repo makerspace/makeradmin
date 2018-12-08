@@ -27,7 +27,7 @@ basicConfig(format='%(asctime)s %(levelname)s [%(process)d/%(threadName)s %(path
 
 
 class BackendException(Exception):
-    def __init__(self, sv: str=None, en: Optional[str]=None, tag: Optional[str]=None) -> None:
+    def __init__(self, sv=None, en=None, tag=None):
         self.tag = tag or self.__class__.__name__
         self.message_sv = sv
         self.message_en = en
@@ -294,9 +294,6 @@ def route_helper(f, json=False, status="ok"):
             return jsonify({"status": "not found"}), 404
         except BackendException as e:
             return jsonify({"status": e.tag, "message_sv": e.message_sv, "message_en": e.message_en}), 400
-        except Exception as e:
-            eprint(e)
-            raise e
 
         if res is None:
             return jsonify({"status": status})

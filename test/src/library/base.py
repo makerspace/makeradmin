@@ -154,11 +154,11 @@ class ApiTest(TestCaseBase):
     @classmethod
     def setUpClass(self):
         super().setUpClass()
-        self.token = get_env("API_BEARER")
+        self.api_token = get_env("API_BEARER")
         self.host = get_env("HOST_BACKEND")
 
     def request(self, method, path, **kwargs):
-        token = kwargs.pop('token', self.token)
+        token = kwargs.pop('token', self.api_token)
         headers = kwargs.pop('headers', {"Authorization": "Bearer " + token})
         url = self.host + "/" + path
         return ApiResponse(requests.request(method, url=url, headers=headers, **kwargs), self)
