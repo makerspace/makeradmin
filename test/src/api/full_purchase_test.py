@@ -4,7 +4,7 @@ from unittest import skip, skipIf
 
 import stripe
 
-from library.base import ApiTest
+from library.api import ApiTest
 from library.factory import PASSWORD, MemberFactory
 
 

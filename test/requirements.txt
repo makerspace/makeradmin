@@ -1,6 +1,6 @@
 pytest
 pytest-parallel
 selenium
-factory_boy
+faker
 requests
 stripe
