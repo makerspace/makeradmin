@@ -26,8 +26,8 @@ config = {
     "HOST_FRONTEND": "http://localhost:8009",
     "HOST_PUBLIC": "http://localhost:8011",
     "ADMIN_EMAIL": "",
-    "STRIPE_PRIVATE_KEY": "",
-    "STRIPE_PUBLIC_KEY": "",
+    "STRIPE_PRIVATE_KEY": os.environ.get("STRIPE_PRIVATE_KEY", ""),
+    "STRIPE_PUBLIC_KEY": os.environ.get("STRIPE_PUBLIC_KEY", ""),
     "STRIPE_SIGNING_SECRET": "",
     "APP_DEBUG": "false",
 }
@@ -38,5 +38,3 @@ if not args.force and os.path.isfile(".env"):
 else:
     with open(".env", "w") as f:
         f.write("\n".join(key + "=" + value for (key, value) in config.items()))
-
-print(os.environ["TEST_ENCRYPTED_ENV"][:4].upper())
