@@ -47,4 +47,6 @@ services:
       TEST_MODE: "DOCKER"
       API_BEARER: "${API_BEARER}"
       HOST_BACKEND: "http://api-gateway:80"
-      
+      STRIPE_PRIVATE_KEY: "${STRIPE_PRIVATE_KEY}"
+      STRIPE_PUBLIC_KEY: "${STRIPE_PUBLIC_KEY}"
+

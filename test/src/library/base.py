@@ -21,7 +21,8 @@ except OSError:
 
 
 def get_env(name):
-    """ Read variable from os environment, if not exists try to read from .env-file. """
+    """ Read variable from os environment, if not exists try to read from .env-file. Inside the test container the
+    .env-file is not available all variables should be provided through the docker-compose.test.yml file. """
     if name in os.environ:
         return os.environ[name]
     
