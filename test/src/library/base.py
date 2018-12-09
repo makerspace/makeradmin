@@ -5,6 +5,8 @@ from datetime import datetime, timedelta
 import requests
 
 from unittest import TestCase
+
+import stripe
 from selenium.webdriver import DesiredCapabilities
 from selenium.webdriver.remote import webdriver as remote
 from selenium.webdriver.chrome import webdriver as chrome
@@ -159,6 +161,7 @@ class ApiTest(TestCaseBase):
         super().setUpClass()
         self.api_token = get_env("API_BEARER")
         self.host = get_env("HOST_BACKEND")
+        stripe.api_key = get_env("STRIPE_PUBLIC_KEY")
 
     def request(self, method, path, **kwargs):
         token = kwargs.pop('token', self.api_token)

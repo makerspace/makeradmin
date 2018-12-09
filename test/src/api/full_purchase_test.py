@@ -4,7 +4,7 @@ from unittest import skip, skipIf
 
 import stripe
 
-from library.base import ApiTest, get_env
+from library.base import ApiTest
 from library.factory import PASSWORD, MemberFactory
 
 
@@ -18,10 +18,6 @@ def card(number):
 
 
 VALID_NON_3DS_CARD = card("378282246310005")
-
-
-# TODO Make this better.
-stripe.api_key = get_env("STRIPE_PUBLIC_KEY")
 
 
 class Test(ApiTest):
