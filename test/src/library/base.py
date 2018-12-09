@@ -13,14 +13,25 @@ from selenium.webdriver.chrome import webdriver as chrome
 
 from library.factory import MemberFactory, GroupFactory, CategoryFactory, ProductFactory
 
-webdriver_type = os.environ.get('WEBDRIVER_TYPE', 'CHROME')
-keep_browser = os.environ.get('KEEP_BROWSER')
-test_mode = os.environ.get('TEST_MODE', 'DEV')
 try:
     with open(f"{os.path.dirname(__file__)}/../../../.env") as f:
         env = {s[0]: (s[1] if len(s) > 1 else "") for s in (s.split("=") for s in f.read().split('\n'))}
 except OSError:
     env = {}
+
+
+def get_env(name):
+    """ Read variable from os environment, if not exists try to read from .env-file. """
+    if name in os.environ:
+        return os.environ[name]
+    
+    return env[name]
+
+
+stripe.api_key = get_env("STRIPE_PUBLIC_KEY")
+webdriver_type = os.environ.get('WEBDRIVER_TYPE', 'CHROME')
+keep_browser = os.environ.get('KEEP_BROWSER')
+test_mode = os.environ.get('TEST_MODE', 'DEV')
 
 
 def create_webdriver():
@@ -32,14 +43,6 @@ def create_webdriver():
                                 desired_capabilities=DesiredCapabilities.CHROME)
     
     raise Exception(f"bad webdriver type {webdriver_type}")
-
-
-def get_env(name):
-    """ Read variable from os environment, if not exists try to read from .env-file. """
-    if name in os.environ:
-        return os.environ[name]
-    
-    return env[name]
 
 
 class TestCaseBase(TestCase):
@@ -161,7 +164,6 @@ class ApiTest(TestCaseBase):
         super().setUpClass()
         self.api_token = get_env("API_BEARER")
         self.host = get_env("HOST_BACKEND")
-        stripe.api_key = get_env("STRIPE_PUBLIC_KEY")
 
     def request(self, method, path, **kwargs):
         token = kwargs.pop('token', self.api_token)
