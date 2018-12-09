@@ -39,7 +39,7 @@ html, body {
 
 		.sidebar-fixed-content {
 			width: 250px - 10px/2;
-			// TODO position: fixed;
+			position: fixed;
 			top: 0px;
 			bottom: 0px;
 		}

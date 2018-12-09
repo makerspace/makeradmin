@@ -1,11 +1,11 @@
-from library.base import ApiTest
-from library.factory import random_str
+from library.api import ApiTest
+from library.util import random_str
 
 
 class Test(ApiTest):
 
     def test_new_member_does_not_have_labaccess_or_membership(self):
-        member_id = self.api_create_member()['member_id']
+        member_id = self.api.create_member()['member_id']
         self.get(f"/membership/member/{member_id}/membership").expect(
             code=200,
             status="ok",
@@ -16,7 +16,7 @@ class Test(ApiTest):
         )
 
     def test_bad_combinations_of_post_data(self):
-        member_id = self.api_create_member()['member_id']
+        member_id = self.api.create_member()['member_id']
         url = f"/membership/member/{member_id}/addMembershipDays"
         self.post(url, {"type": "labaccess", "days": -1, "creation_reason": random_str()}).expect(code=400, status="error")
         self.post(url, {"type": "lulz", "days": 10, "creation_reason": random_str()}).expect(code=400, status="error")
@@ -25,7 +25,7 @@ class Test(ApiTest):
         self.post(url, {"type": "membership", "days": 10, "default_start_date": "now", "creation_reason": random_str()}).expect(code=400, status="error")
 
     def test_add_membership_days_by_adding_days(self):
-        member_id = self.api_create_member()['member_id']
+        member_id = self.api.create_member()['member_id']
         
         self.post(f"/membership/member/{member_id}/addMembershipDays",
                   {
@@ -43,7 +43,7 @@ class Test(ApiTest):
                     )
 
     def test_add_membership_days_to_an_existing_span(self):
-        member_id = self.api_create_member()['member_id']
+        member_id = self.api.create_member()['member_id']
 
         self.post(f"/membership/member/{member_id}/addMembershipSpan",
                   {
@@ -72,7 +72,7 @@ class Test(ApiTest):
                     )
 
     def test_add_membership_days_by_adding_span(self):
-        member_id = self.api_create_member()['member_id']
+        member_id = self.api.create_member()['member_id']
         
         self.post(f"/membership/member/{member_id}/addMembershipSpan",
                   {
@@ -90,7 +90,7 @@ class Test(ApiTest):
                     )
 
     def test_add_membership_span_in_the_past_does_not_give_membership(self):
-        member_id = self.api_create_member()['member_id']
+        member_id = self.api.create_member()['member_id']
         
         self.post(f"/membership/member/{member_id}/addMembershipSpan",
                   {
@@ -108,7 +108,7 @@ class Test(ApiTest):
                     )
 
     def test_add_membership_span_in_the_future_does_not_give_membership(self):
-        member_id = self.api_create_member()['member_id']
+        member_id = self.api.create_member()['member_id']
         
         self.post(f"/membership/member/{member_id}/addMembershipSpan",
                   {
@@ -126,7 +126,7 @@ class Test(ApiTest):
                     )
 
     def test_add_membership_span_in_future_and_past_does_not_give_membership(self):
-        member_id = self.api_create_member()['member_id']
+        member_id = self.api.create_member()['member_id']
         
         self.post(f"/membership/member/{member_id}/addMembershipSpan",
                   {
@@ -155,7 +155,7 @@ class Test(ApiTest):
                     )
 
     def test_add_labaccess_days_by_adding_days(self):
-        member_id = self.api_create_member()['member_id']
+        member_id = self.api.create_member()['member_id']
         
         self.post(f"/membership/member/{member_id}/addMembershipDays",
                   {
@@ -173,7 +173,7 @@ class Test(ApiTest):
                     )
 
     def test_add_labaccess_days_to_an_existing_span(self):
-        member_id = self.api_create_member()['member_id']
+        member_id = self.api.create_member()['member_id']
 
         self.post(f"/membership/member/{member_id}/addMembershipSpan",
                   {
@@ -202,7 +202,7 @@ class Test(ApiTest):
                     )
 
     def test_add_overlapping_span_does_still_give_labaccess(self):
-        member_id = self.api_create_member()['member_id']
+        member_id = self.api.create_member()['member_id']
 
         self.post(f"/membership/member/{member_id}/addMembershipSpan",
                   {
@@ -231,7 +231,7 @@ class Test(ApiTest):
                     )
 
     def test_spans_before_and_after_today_does_not_give_labacess(self):
-        member_id = self.api_create_member()['member_id']
+        member_id = self.api.create_member()['member_id']
 
         self.post(f"/membership/member/{member_id}/addMembershipSpan",
                   {

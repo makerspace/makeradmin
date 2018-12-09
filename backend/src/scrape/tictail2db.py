@@ -13,6 +13,7 @@ db.connect()
 
 data = json.loads(open("tictail.json", encoding="utf-8").read())
 seen_names = set()
+
 for item in data:
     name = item["name"].strip()
     suffix = item["suffix"].strip()
@@ -62,5 +63,9 @@ for item in data:
         assert(cat_id is not None)
         cur.execute("INSERT INTO webshop_products (name,category_id,description,unit,price) VALUES(%s,%s,%s,%s,%s)", (name,cat_id[0],description,unit,price))
 
-        # This relies on product_ids that may not be the ones we expect.
-        cur.execute("INSERT INTO  webshop_product_actions (product_id, action_id, value) VALUES (101, 1, 365), (102, 2, 30), (103, 1, 365), (103, 2, 90)")
+
+with db.cursor() as cur:
+    cur.execute("SELECT id FROM webshop_products WHERE name = 'Medlemsavgift'")
+    id = cur.fetchone()[0]
+
+    cur.execute(f"INSERT INTO  webshop_product_actions (product_id, action_id, value) VALUES ({id}, 1, 365), ({id + 1}, 2, 30), ({id + 2}, 1, 365), ({id + 2}, 2, 90)")

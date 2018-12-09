@@ -1,8 +1,13 @@
 #!/usr/bin/env python3
 import argparse
-import servicebase_python.service
+import sys
+import os
 
-gateway = servicebase_python.service.gateway_from_envfile(".env")
+sys.path.append(os.path.join(os.path.dirname(__file__), "backend/src"))
+
+import service
+
+gateway = service.gateway_from_envfile(".env")
 
 parser = argparse.ArgumentParser(description='Create a new MakerAdmin user')
 parser.add_argument("--first-name", help="First name of the user", required=True)

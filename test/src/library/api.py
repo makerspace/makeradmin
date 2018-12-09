@@ -1,6 +1,7 @@
 import requests
 
 from library.base import TestCaseBase
+from library.obj import ADD_MEMBERSHIP_DAYS
 from library.util import get_env, merge_paths, get_path
 
 
@@ -50,6 +51,10 @@ class ApiFactory:
         self.api_token = get_env("API_BEARER")
         
         self.member = None
+        self.group = None
+        self.category = None
+        self.product = None
+        self.action = None
     
     def request(self, method, path, **kwargs):
         token = kwargs.pop('token', self.api_token)
@@ -75,28 +80,40 @@ class ApiFactory:
         return self.member
 
     def create_group(self, **kwargs):
-        return self.post("membership/group", json=GroupFactory(**kwargs)).expect(code=201, status='created').data
+        obj = self.obj.create_group(**kwargs)
+        self.group = self.post("membership/group", json=obj).expect(code=201, status='created').data
+        return self.group
 
     def create_category(self, **kwargs):
-        return self.post("webshop/category", json=CategoryFactory(**kwargs)).expect(code=200, status='created').data
+        obj = self.obj.create_category(**kwargs)
+        self.category = self.post("webshop/category", json=obj).expect(code=200, status='created').data
+        return self.category
         
-    def create_product(self, **kwargs):
-        return self.post("webshop/product", json=ProductFactory(**kwargs)).expect(code=200, status='created').data
+    def delete_category(self, id=None):
+        return self.delete(f"webshop/category/{id or self.category['id']}").expect(code=200, status='deleted').data
 
+    def create_product(self, **kwargs):
+        if self.category:
+            kwargs.setdefault('category_id', self.category['id'])
+            
+        obj = self.obj.create_product(**kwargs)
+        self.product = self.post("webshop/product", json=obj).expect(code=200, status='created').data
+        return self.product
+    
+    def delete_product(self, id=None):
+        return self.delete(f"webshop/product/{id or self.product['id']}").expect(code=200, status='deleted').data
+        
     def create_product_action(self, **kwargs):
-        action = {
-            "product_id": 0,
-            "action_id": self.ADD_MEMBERSHIP_DAYS,
-            "value": 365
-        }
-        action.update(**kwargs)
-        return self.post(f"/webshop/product_action", action).expect(code=200, status='created').data
+        if self.product:
+            kwargs.setdefault('product_id', self.product['id'])
+        
+        obj = self.obj.create_product_action(**kwargs)
+        self.action = self.post(f"/webshop/product_action", json=obj).expect(code=200, status='created').data
+        return self.action
 
 
 class ApiTest(TestCaseBase):
-
-    ADD_MEMBERSHIP_DAYS = 1
-    ADD_LABACCESS_DAYS = 2
+    api = None
     
     @classmethod
     def setUpClass(self):

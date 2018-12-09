@@ -1,4 +1,5 @@
 from random import randint
+from string import ascii_letters
 
 from faker import Faker
 
@@ -7,33 +8,10 @@ from library.util import random_str
 DEFAULT_PASSWORD = '1q2w3e'
 DEFAULT_PASSWORD_HASH = "$2y$10$NcNoheVsKVo2Agz3FLeI8.fhAgbmRV/NoJMqPC67ZXiqgqfE5DE.S"
 
+ADD_MEMBERSHIP_DAYS = 1
+ADD_LABACCESS_DAYS = 2
 
-# class MemberFactory(Factory):
-#     class Meta:
-#         model = dict
-#
-#     firstname = Faker('first_name')
-#     lastname = Faker('last_name')
-#     password = LazyFunction(lambda: "$2y$10$NcNoheVsKVo2Agz3FLeI8.fhAgbmRV/NoJMqPC67ZXiqgqfE5DE.S")  # 1q2w3e
-#     address_street = Faker('street_name')
-#     address_extra = LazyFunction(lambda: "N/A")
-#     address_zipcode = Sequence(lambda n: 10200 + n)
-#     address_city = Faker('city')
-#     address_country = Faker('country_code', representation="alpha-2")
-#     phone = Sequence(lambda n: f'070-{n:07d}')
-#     civicregno = Sequence(lambda n: f"19901011{9944 + n:04d}")
-#     email = LazyAttribute(lambda o: f'{o.firstname}.{o.lastname}+{random_str(6)}@bmail.com'.lower())
-#
-#
-# class GroupFactory(Factory):
-#     class Meta:
-#         model = dict
-#
-#     name = FuzzyText(length=12, chars=ascii_letters, prefix='group-')
-#     title = Faker('catch_phrase')
-#     description = Faker('bs')
-#
-#
+
 # class CategoryFactory(Factory):
 #     class Meta:
 #         model = dict
@@ -61,6 +39,10 @@ class ObjFactory:
         self.fake = Faker('sv_SE')
         
         self.member = None
+        self.group = None
+        self.category = None
+        self.product = None
+        self.action = None
     
     def create_member(self, **kwargs):
         firstname = self.fake.first_name()
@@ -82,11 +64,44 @@ class ObjFactory:
         self.member = obj
         return self.member
         
-    def create_group(self, **kwarg):
-        pass
+    def create_group(self, **kwargs):
+        obj = dict(
+            name=f"group-{random_str(12)}",
+            title=self.fake.catch_phrase(),
+            description=self.fake.bs(),
+        )
+        obj.update(kwargs)
+        self.group = obj
+        return self.group
 
-    def create_cagetory(self, **kwarg):
-        pass
+    def create_category(self, **kwargs):
+        obj = dict(
+            name=f"category-{random_str(12)}",
+        )
+        obj.update(kwargs)
+        self.category = obj
+        return self.category
 
-    def create_product(self, **kwarg):
-        pass
+    def create_product(self, **kwargs):
+        obj = dict(
+            name=f"product-{random_str(12)}",
+            price=100.0,
+            description=self.fake.bs(),
+            unit="st",
+            smallest_multiple=1,
+            filter=None,
+            category_id=None,
+        )
+        obj.update(kwargs)
+        self.product = obj
+        return self.product
+
+    def create_product_action(self, **kwargs):
+        obj = dict(
+            product_id=0,
+            action_id=ADD_MEMBERSHIP_DAYS,
+            value=365,
+        )
+        obj.update(**kwargs)
+        self.action = obj
+        return self.action

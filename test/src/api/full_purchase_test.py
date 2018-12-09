@@ -5,7 +5,7 @@ from unittest import skip, skipIf
 import stripe
 
 from library.api import ApiTest
-from library.factory import PASSWORD, MemberFactory
+from library.obj import DEFAULT_PASSWORD, ADD_MEMBERSHIP_DAYS
 
 
 def card(number):
@@ -25,36 +25,40 @@ class Test(ApiTest):
     @classmethod
     def setUpClass(self):
         super().setUpClass()
+        self.category = self.api.create_category()
+        cat_id = self.category['id']
+        
+        self.p1_price = 12.3
+        self.p1 = self.api.create_product(price=self.p1_price, unit="st", smallest_multiple=1, category_id=cat_id)
+        self.p1_id = self.p1['id']
+        
+        self.p2_price = 1.2
+        self.p2 = self.api.create_product(price=self.p2_price, unit="mm", smallest_multiple=100, category_id=cat_id)
+        self.p2_id = self.p2['id']
+        self.p2_price = float(self.p2['price'])
+
+    @classmethod
+    def tearDownClass(self):
+        self.api.delete_product(self.p1_id)
+        self.api.delete_product(self.p2_id)
+        self.api.delete_category()
+        super().tearDownClass()
 
     @skipIf(not stripe.api_key, "webshop tests require stripe api key in .env file")
     def setUp(self):
         super().setUp()
         
-        # TODO Move to setup class when possible.
-        self.category = self.api_create_category()
-        cat_id = self.category['id']
-        
-        self.p1_price = 12.3
-        self.p1 = self.api_create_product(price=self.p1_price, unit="st", smallest_multiple=1, category_id=cat_id)
-        self.p1_id = self.p1['id']
-        
-        self.p2_price = 1.2
-        self.p2 = self.api_create_product(price=self.p2_price, unit="mm", smallest_multiple=100, category_id=cat_id)
-        self.p2_id = self.p2['id']
-        self.p2_price = float(self.p2['price'])
-
-        self.member = self.api_create_member()
+        self.member = self.api.create_member()
         self.member_id = self.member['member_id']
         
-        pwd = '1q2w3e'
-
         self.token = self\
-            .post("/oauth/token", {"grant_type": "password", "username": self.member["email"], "password": PASSWORD})\
+            .post("/oauth/token", {"grant_type": "password",
+                                   "username": self.member["email"],
+                                   "password": DEFAULT_PASSWORD})\
             .expect(code=200)\
             .get("access_token")
         
     def test_valid_purchase_from_existing_member(self):
-        
         p1_count = 100
         p2_count = 500
         
@@ -95,11 +99,11 @@ class Test(ApiTest):
     def test_registring_new_member(self):
         start_timestamp = int(time())
 
-        self.api_create_product_action(product_id=self.p1_id, action_id=self.ADD_MEMBERSHIP_DAYS, value=365)
+        self.api.create_product_action(product_id=self.p1_id, action_id=ADD_MEMBERSHIP_DAYS, value=365)
 
         source = stripe.Source.create(type="card", token=stripe.Token.create(card=VALID_NON_3DS_CARD).id)
 
-        member = MemberFactory(password=None)
+        member = self.obj.create_member(password=None)
 
         register = {
             "purchase": {
@@ -130,7 +134,6 @@ class Test(ApiTest):
         before_activation = self.get(f"/membership/member/{member_id}").expect(code=200, data=member).data
         self.assertIsNotNone(before_activation['deleted_at'])
         
-        # TODO Fake stripe callback here instead.
         self.put("/webshop/process_stripe_events", {"source_id": source.id, "start": start_timestamp}).expect(code=200)
         
         after_activation = self.get(f"/membership/member/{member_id}").expect(code=200, data=member).data
