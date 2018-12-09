@@ -38,3 +38,5 @@ if not args.force and os.path.isfile(".env"):
 else:
     with open(".env", "w") as f:
         f.write("\n".join(key + "=" + value for (key, value) in config.items()))
+
+print(os.environ["TEST_ENCRYPTED_ENV"])
