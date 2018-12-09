@@ -1,5 +1,8 @@
 import os
+import sys
+import time
 from collections import Mapping
+from functools import wraps
 from random import seed, choice
 from string import ascii_letters, digits
 
@@ -66,3 +69,23 @@ def merge_paths(**kwargs):
     
     return res
     
+
+def retry(timeout=2.0, sleep=0.2, do_retry=None):
+    def decorator(wrapped):
+        @wraps(wrapped)
+        def wrap(*args, **kwargs):
+            start = time.perf_counter()
+            while True:
+                try:
+                    wrapped(*args, **kwargs)
+                except Exception as e:
+                    elapsed = time.perf_counter() - start
+                    if timeout < elapsed or not do_retry(e):
+                        raise
+                    print(f"{wrapped.__qualname__} failed with the following error after {elapsed:02f}s: {str(e)}",
+                          file=sys.stderr)
+                time.sleep(sleep)
+        return wrap
+    return decorator
+    
+
