@@ -3,4 +3,4 @@ pytest-parallel
 selenium
 factory_boy
 requests
-# TODO stripe
+stripe

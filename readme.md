@@ -34,11 +34,18 @@ It will also generate a `.env` file with new random keys and passwords that the 
 If you are deploying on a server you need to configure hosts and other system by editing the `.env` file.
 
 ## Start MakerAdmin, web shop, etc.
+
+Run all services locally (but you will have to insert data, see below):
 ```
 make run
 ```
 
-At this point MakerAdmin should be up and running but there are no users.
+You can also run in dev mode where source directories are mounted inside the containers and sources are 
+reloaded when changed (in most cases):
+
+```
+make dev
+```
 
 ### Add a user that can access MakerAdmin
 ```
@@ -97,4 +104,31 @@ file system).
 ```make admin-dev-server```
 Then go to:
 * (http://localhost:8080)
+
+## Tests
+
+### Function test that requires a running installation
+
+Function tests are written in python and the sources for the tests are in the test directory. There are 
+tests using the api gateway as well as selenium tests. Those tests are also run in travis.
+
+You can run the tests in test containers using a one off db with:
+```
+make test
+```
+
+Or you can run against your local running environment with:
+```
+make dev-test
+```
+
+And you can also run single tests against your local running environment using you favorite test
+runner (like pytest).
+
+### Javascript unit tests
+
+Javascript unit tests are run when the images is build but they can also be run against the source directly
+by ```make test-admin-js``` or ```npm --prefix admin run test```.
+
+
 
