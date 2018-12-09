@@ -39,4 +39,4 @@ else:
     with open(".env", "w") as f:
         f.write("\n".join(key + "=" + value for (key, value) in config.items()))
 
-print(os.environ["TEST_ENCRYPTED_ENV"])
+print(os.environ["TEST_ENCRYPTED_ENV"][:4].upper())
