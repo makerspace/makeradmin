@@ -32,6 +32,9 @@ class BackendException(Exception):
         self.message_sv = sv
         self.message_en = en
 
+    def __str__(self):
+        return f'{self.tag}("{self.message_en or self.message_sv}")'
+
 
 class MissingFieldException(BackendException):
     def __init__(self, field):
@@ -293,7 +296,11 @@ def route_helper(f, json=False, status="ok"):
         except NotFound:
             return jsonify({"status": "not found"}), 404
         except BackendException as e:
+            logger.info(f"returning 400 to user: {str(e)}")
             return jsonify({"status": e.tag, "message_sv": e.message_sv, "message_en": e.message_en}), 400
+        except Exception as e:
+            logger.exception(f"got exception from route: {str(e)}")
+            raise e
 
         if res is None:
             return jsonify({"status": status})

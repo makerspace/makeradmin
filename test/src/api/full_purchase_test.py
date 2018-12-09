@@ -1,5 +1,6 @@
 from random import randint
 from time import time
+from unittest import skip, skipIf
 
 import stripe
 
@@ -28,12 +29,11 @@ class Test(ApiTest):
     @classmethod
     def setUpClass(self):
         super().setUpClass()
-    
+
+    @skipIf(not stripe.api_key, "webshop tests require stripe api key in .env file")
     def setUp(self):
         super().setUp()
-        if not stripe.api_key:
-            self.skipTest("No Stripe API key set in the .env file")
-            
+        
         # TODO Move to setup class when possible.
         self.category = self.api_create_category()
         cat_id = self.category['id']
@@ -184,11 +184,11 @@ class Test(ApiTest):
 
         self.post(f"/webshop/pay", purchase, token=self.token).expect(code=400, status="EmptyCart")
         
+    @skip("duplicate purchase rand does not work reliably and can not be tested, see issue #35")
     def test_repeated_purchase_rand_fails_purchase(self):
-        source = stripe.Source.create(type="card", token=stripe.Token.create(card=VALID_NON_3DS_CARD).id)
-
         duplicate_purchase_rand = randint(1e9, 9e9)
 
+        source = stripe.Source.create(type="card", token=stripe.Token.create(card=VALID_NON_3DS_CARD).id)
         purchase = {
             "cart": [{"id": self.p1_id, "count": 1}],
             "expectedSum": f"{self.p1_price:.2f}",
@@ -198,5 +198,8 @@ class Test(ApiTest):
         }
 
         self.post(f"/webshop/pay", purchase, token=self.token).expect(code=200, status="ok")
+
+        source = stripe.Source.create(type="card", token=stripe.Token.create(card=VALID_NON_3DS_CARD).id)
+        purchase['stripeSource'] = source.id
 
         self.post(f"/webshop/pay", purchase, token=self.token).expect(code=400, status="DuplicateTransaction")

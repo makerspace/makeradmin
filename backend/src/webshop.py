@@ -505,11 +505,8 @@ def process_stripe_events():
     payload = request.get_json()
     source_id = payload.get('source_id', None)
     start = payload.get('start', None)
-    logger.info(source_id)
-    
     events = stripe.Event.list(created={'gt': start} if start else None)
     for event in events.auto_paging_iter():
-        logger.info(event)
         obj = event.get('data', {}).get('object', {})
         if source_id and source_id in (obj.get('source', {}).get('id'), obj.get('id')) or not source_id:
             _reprocess_stripe_event(event)
@@ -745,7 +742,7 @@ def handle_card_source(transaction_id: int, card_source_id: str, total_amount: D
         # Not necessarily an error but shouldn't happen.
         abort(500, f"Stripe source already marked as 'consumed'")
     else:
-        eprint(f"Unknown stripe source status '{status}'")
+        logger.error(f"Unknown stripe source status '{status}'")
         fail_transaction(transaction_id, 500, f"Unknown stripe source status '{status}'")
 
     return {"transaction_id": transaction_id}
