@@ -12,6 +12,11 @@ stripe.api_key = get_env("STRIPE_PUBLIC_KEY")
 test_mode = os.environ.get('TEST_MODE', 'DEV')
 
 
+VALID_NON_3DS_CARD_NO = "378282246310005"
+
+EXPIRES_CVC_ZIP = "4242424242424"
+
+
 class TestCaseBase(TestCase):
     
     @classmethod

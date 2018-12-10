@@ -46,9 +46,9 @@ class SeleniumTest(ApiTest):
         WebDriverWait(self.webdriver, timeout, sleep).until(cond)
 
     def wait_for_page(self, title=None):
-        self.wait(lambda b: b.execute_script('return (document.readyState == "complete");'))
+        self.wait(lambda w: w.execute_script('return (document.readyState == "complete");'))
         if title:
-            self.wait(lambda b: b.title == title)
+            self.wait(lambda w: w.title == title)
 
     def login_member(self, member=None):
         member = member or self.api.member
@@ -66,13 +66,17 @@ class SeleniumTest(ApiTest):
             def get():
                 return self.webdriver.find_element_by_id(id)
         elif name:
-            def get(): return self.webdriver.find_element_by_name(name)
+            def get():
+                return self.webdriver.find_element_by_name(name)
         elif tag:
-            def get(): return self.webdriver.find_element_by_tag_name(tag)
+            def get():
+                return self.webdriver.find_element_by_tag_name(tag)
         elif css:
-            def get(): return self.webdriver.find_element_by_css_selector(css)
+            def get():
+                return self.webdriver.find_element_by_css_selector(css)
         elif xpath:
-            def get(): return self.webdriver.find_element_by_xpath(xpath)
+            def get():
+                return self.webdriver.find_element_by_xpath(xpath)
         else:
             raise Exception("missing parameter")
         
@@ -81,3 +85,4 @@ class SeleniumTest(ApiTest):
     def browse_shop(self):
         self.webdriver.get(f"{self.public_url}/shop")
         self.wait_for_page(title="Makerspace Webshop")
+        

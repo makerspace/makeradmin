@@ -80,7 +80,7 @@ common.onGetAndDocumentLoaded("/webshop/product_data", (value: any) => {
 
       const li = document.createElement("li");
       li.innerHTML = 
-        `<div class="product">
+        `<div id="product-${item.id}" class="product">
               <a class="product-title" href="product/${item.id}">${item.name}</a>
               <span class="product-price">${price} ${Cart.currency}/${baseStr}</span>
               <input type="number" min=0 max=9999 step=${item.smallest_multiple} placeholder="0" class="product-amount edit-invisible"></input>

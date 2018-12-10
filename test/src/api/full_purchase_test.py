@@ -5,6 +5,7 @@ from unittest import skip, skipIf
 import stripe
 
 from library.api import ApiTest
+from library.base import VALID_NON_3DS_CARD_NO
 from library.obj import DEFAULT_PASSWORD, ADD_MEMBERSHIP_DAYS
 
 
@@ -17,7 +18,7 @@ def card(number):
     }
 
 
-VALID_NON_3DS_CARD = card("378282246310005")
+VALID_NON_3DS_CARD = card(VALID_NON_3DS_CARD_NO)
 
 
 class Test(ApiTest):

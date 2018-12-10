@@ -77,12 +77,13 @@ def retry(timeout=2.0, sleep=0.2, do_retry=None):
             start = time.perf_counter()
             while True:
                 try:
-                    wrapped(*args, **kwargs)
+                    return wrapped(*args, **kwargs)
                 except Exception as e:
                     elapsed = time.perf_counter() - start
-                    if timeout < elapsed or not do_retry(e):
+                    if elapsed > timeout or not do_retry(e):
                         raise
-                    print(f"{wrapped.__qualname__} failed with the following error after {elapsed:02f}s: {str(e)}",
+                    print(f"{wrapped.__qualname__} failed with the following error after {elapsed:02f}s:"
+                          f" {e.__class__.__name__} {str(e)}",
                           file=sys.stderr)
                 time.sleep(sleep)
         return wrap
