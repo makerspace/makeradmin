@@ -9,7 +9,7 @@ from string import ascii_letters, digits
 seed(os.urandom(8))
 
 
-SELENIUM_TIMEOUT = float(os.environ.get('SELENIUM_TIMEOUT', '4.0'))
+SELENIUM_TIMEOUT = float(os.environ.get('SELENIUM_TIMEOUT', '2.4'))
 SLEEP = 0.2
 
 
