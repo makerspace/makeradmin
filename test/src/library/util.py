@@ -9,6 +9,10 @@ from string import ascii_letters, digits
 seed(os.urandom(8))
 
 
+SELENIUM_TIMEOUT = float(os.environ.get('SELENIUM_TIMEOUT', '4.0'))
+SLEEP = 0.2
+
+
 def random_str(length=12):
     return ''.join(choice(ascii_letters + digits) for _ in range(length))
 
@@ -70,7 +74,7 @@ def merge_paths(**kwargs):
     return res
     
 
-def retry(timeout=2.0, sleep=0.2, do_retry=None):
+def retry(timeout=SELENIUM_TIMEOUT, sleep=SLEEP, do_retry=None):
     def decorator(wrapped):
         @wraps(wrapped)
         def wrap(*args, **kwargs):

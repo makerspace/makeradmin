@@ -2,6 +2,7 @@ import time
 
 from library.base import VALID_NON_3DS_CARD_NO, EXPIRES_CVC_ZIP
 from library.selenium import SeleniumTest
+from library.util import SELENIUM_TIMEOUT
 
 
 class Test(SeleniumTest):
@@ -48,7 +49,7 @@ class Test(SeleniumTest):
 
         # Recipt
         
-        self.assertIn("Kvitto", self.wait_for_element(css=".receipt-id", timeout=24).text)
+        self.assertIn("Kvitto", self.wait_for_element(css=".receipt-id", timeout=SELENIUM_TIMEOUT * 8).text)
         
         self.assertIn(f"{product['price']} kr", self.wait_for_element(css=".receipt-amount-value").text)
         

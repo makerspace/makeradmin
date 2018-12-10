@@ -12,26 +12,6 @@ ADD_MEMBERSHIP_DAYS = 1
 ADD_LABACCESS_DAYS = 2
 
 
-# class CategoryFactory(Factory):
-#     class Meta:
-#         model = dict
-#
-#     name = FuzzyText(length=12, chars=ascii_letters, prefix='category-')
-#
-#
-# class ProductFactory(Factory):
-#     class Meta:
-#         model = dict
-#
-#     name = FuzzyText(length=12, chars=ascii_letters, prefix='product-')
-#     price = LazyFunction(lambda: 100.0)
-#     description = Faker('bs')
-#     unit = LazyFunction(lambda: "st")
-#     smallest_multiple = LazyFunction(lambda: 1)
-#     filter = LazyFunction(lambda: None)
-#     category_id = LazyFunction(lambda: None)
-
-
 class ObjFactory:
     """ Create dicts representing entities. """
     

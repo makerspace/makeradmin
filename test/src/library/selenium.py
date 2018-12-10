@@ -1,8 +1,4 @@
 import os
-import sys
-import time
-from functools import wraps
-from time import process_time
 
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver import DesiredCapabilities
@@ -12,7 +8,7 @@ from selenium.webdriver.support.wait import WebDriverWait
 
 from library.api import ApiTest
 from library.obj import DEFAULT_PASSWORD
-from library.util import retry
+from library.util import retry, SELENIUM_TIMEOUT, SLEEP
 
 webdriver_type = os.environ.get('WEBDRIVER_TYPE', 'CHROME')
 keep_browser = os.environ.get('KEEP_BROWSER')
@@ -42,7 +38,7 @@ class SeleniumTest(ApiTest):
             self.webdriver.close()
         super().tearDownClass()
 
-    def wait(self, cond=None, ret=None, timeout=2.0, sleep=0.1):
+    def wait(self, cond=None, ret=None, timeout=SELENIUM_TIMEOUT, sleep=SLEEP):
         WebDriverWait(self.webdriver, timeout, sleep).until(cond)
 
     def wait_for_page(self, title=None):
@@ -61,7 +57,8 @@ class SeleniumTest(ApiTest):
         
         self.webdriver.get(f"{self.public_url}/member/login/{token}")
 
-    def wait_for_element(self, id=None, name=None, tag=None, css=None, xpath=None, timeout=2.0, sleep=0.2):
+    def wait_for_element(self, id=None, name=None, tag=None, css=None, xpath=None,
+                         timeout=SELENIUM_TIMEOUT, sleep=SLEEP):
         if id:
             def get():
                 return self.webdriver.find_element_by_id(id)
