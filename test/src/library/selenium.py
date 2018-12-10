@@ -1,4 +1,5 @@
 import os
+from unittest import skipIf
 
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver import DesiredCapabilities
@@ -12,6 +13,7 @@ from library.util import retry, SELENIUM_TIMEOUT, SLEEP
 
 webdriver_type = os.environ.get('WEBDRIVER_TYPE', 'CHROME')
 keep_browser = os.environ.get('KEEP_BROWSER')
+skip_selenium_tests = os.environ.get('SKIP_SELENIUM_TESTS', 0)
 
 
 def create_webdriver():
@@ -31,6 +33,10 @@ class SeleniumTest(ApiTest):
     def setUpClass(self):
         super().setUpClass()
         self.webdriver = create_webdriver()
+        
+    @skipIf(skip_selenium_tests, "selenium tests disabled")
+    def setUp(self):
+        super().setUp()
     
     @classmethod
     def tearDownClass(self):
