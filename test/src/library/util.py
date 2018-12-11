@@ -1,7 +1,7 @@
 import os
 import sys
 import time
-from collections import Mapping
+from collections.abc import Mapping
 from functools import wraps
 from random import seed, choice
 from string import ascii_letters, digits

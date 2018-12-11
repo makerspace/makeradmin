@@ -30,7 +30,7 @@ class ObjFactory:
         obj = dict(
             firstname=firstname,
             lastname=lastname,
-            password=DEFAULT_PASSWORD_HASH,
+            password=None,
             address_street=self.fake.street_name(),
             address_extra="N/A",
             address_zipcode=randint(10000, 99999),

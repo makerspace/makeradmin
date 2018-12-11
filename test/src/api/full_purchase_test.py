@@ -6,7 +6,7 @@ import stripe
 
 from library.api import ApiTest
 from library.base import VALID_NON_3DS_CARD_NO
-from library.obj import DEFAULT_PASSWORD, ADD_MEMBERSHIP_DAYS
+from library.obj import DEFAULT_PASSWORD, ADD_MEMBERSHIP_DAYS, DEFAULT_PASSWORD_HASH
 
 
 def card(number):
@@ -49,7 +49,7 @@ class Test(ApiTest):
     def setUp(self):
         super().setUp()
         
-        self.member = self.api.create_member()
+        self.member = self.api.create_member(password=DEFAULT_PASSWORD_HASH)
         self.member_id = self.member['member_id']
         
         self.token = self\

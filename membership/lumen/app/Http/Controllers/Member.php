@@ -228,6 +228,7 @@ class Member extends Controller
 		{
 			// Convert user object to array
 			$result = $entity->toArray();
+			$result['password'] = null;
 
 			// Get groups and permission for user
 			// TODO: Groups are arranged into a hierarchy which should be expanded

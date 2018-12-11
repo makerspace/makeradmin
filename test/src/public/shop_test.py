@@ -1,6 +1,10 @@
 import time
+from unittest import skipIf
+
+import stripe
 
 from library.base import VALID_NON_3DS_CARD_NO, EXPIRES_CVC_ZIP
+from library.obj import DEFAULT_PASSWORD_HASH
 from library.selenium import SeleniumTest
 from library.util import SELENIUM_TIMEOUT
 
@@ -8,6 +12,7 @@ from library.util import SELENIUM_TIMEOUT
 class Test(SeleniumTest):
     
     @classmethod
+    @skipIf(not stripe.api_key, "webshop tests require stripe api key in .env file")
     def setUpClass(self):
         super().setUpClass()
         self.api.create_category()
@@ -20,7 +25,7 @@ class Test(SeleniumTest):
         super().tearDownClass()
     
     def test_buying_an_item_in_shop_works(self):
-        member = self.api.create_member()
+        member = self.api.create_member(password=DEFAULT_PASSWORD_HASH)
         product = self.api.product
         self.login_member()
         
@@ -37,7 +42,7 @@ class Test(SeleniumTest):
     
         # Cart
     
-        self.webdriver.switch_to.frame(self.wait_for_element(tag="iframe"))
+        self.webdriver.switch_to.frame(self.wait_for_element(tag="iframe", timeout=SELENIUM_TIMEOUT))
 
         card = self.wait_for_element(name="cardnumber")
         card.send_keys(VALID_NON_3DS_CARD_NO)
