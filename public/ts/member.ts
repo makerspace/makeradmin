@@ -179,7 +179,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Probably Unauthorized, redirect to login page.
         if (e.message == "Unauthorized") {
             // Render login
-            login.render_login(root);
+            login.render_login(root, null);
         } else {
             UIkit.modal.alert("<h2>Failed to load member info</h2>");
         }

@@ -11,6 +11,22 @@ declare global {
 	}
 }
 
+export function formatDateTime(str: any) {
+    const options = {
+        year: 'numeric', month: 'numeric', day: 'numeric',
+        hour: 'numeric', minute: 'numeric', second: 'numeric',
+        hour12: false
+    };
+        
+    const parsed_date = Date.parse(str);
+        
+    // If the date was parsed successfully we should update the string
+    if (!isNaN(parsed_date)) {
+        return new Intl.DateTimeFormat("sv-SE", options).format(parsed_date);
+    }
+    return "";
+}
+
 export function get_error(json: any) {
 	if (typeof json.message_sv === 'string') return json.message_sv;
 	if (typeof json.message === 'string') return json.message;
@@ -28,6 +44,9 @@ export function ajax(type: string, url: string, data: object): Promise<any> {
 			if (xhr.status >= 200 && xhr.status <= 300) {
 				resolve(JSON.parse(xhr.responseText));
 			}
+			else if (xhr.status === 401) {
+			    reject({status: "unauthorized", message: JSON.parse(xhr.responseText).message})
+            }
 			else reject(JSON.parse(xhr.responseText));
 		};
 		xhr.onerror = () => {

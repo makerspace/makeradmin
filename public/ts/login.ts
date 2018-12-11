@@ -47,10 +47,11 @@ export function logout() {
 	window.location.href = "/";
 }
 
-export function render_login(root: HTMLElement) {
+export function render_login(root: HTMLElement, heading: string) {
+    heading = heading || "Logga in";
 	root.innerHTML = `<form className="uk-panel uk-panel-box uk-form">
             <div className="uk-form-row">
-                <h2>Logga in</h2>
+                <h1>${heading}</h1>
             </div>
             
             <div className="uk-form-row">
