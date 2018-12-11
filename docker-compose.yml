@@ -55,8 +55,8 @@ services:
       APP_DEBUG:
       MYSQL_HOST: "db2:${MYSQL_PORT}"
       MYSQL_DB: "makeradmin"
-      MYSQL_USER: "${MYSQL_USER}"
-      MYSQL_PASS: "${MYSQL_PASS}"
+      MYSQL_USER:
+      MYSQL_PASS:
       BEARER: "${API_BEARER}"
       VIRTUAL_HOST: "${HOST_BACKEND}"
       LETSENCRYPT_HOST: "${HOST_BACKEND}"
@@ -69,8 +69,8 @@ services:
       TABLE_PREFIX: "webshop"
       MYSQL_HOST: "db2:${MYSQL_PORT}"
       MYSQL_DB: "makeradmin"
-      MYSQL_USER: "${MYSQL_USER}"
-      MYSQL_PASS: "${MYSQL_PASS}"
+      MYSQL_USER:
+      MYSQL_PASS:
       APIGATEWAY: "api-gateway"
       BEARER: "${API_BEARER}"
       HOST_FRONTEND:
@@ -111,8 +111,8 @@ services:
     environment:
       MYSQL_HOST: "db2:${MYSQL_PORT}"
       MYSQL_DB: "makeradmin"
-      MYSQL_USER: "${MYSQL_USER}"
-      MYSQL_PASS: "${MYSQL_PASS}"
+      MYSQL_USER:
+      MYSQL_PASS:
       APIGATEWAY: "api-gateway"
       BEARER: "${API_BEARER}"
     depends_on:
@@ -130,8 +130,8 @@ services:
     environment:
       MYSQL_HOST: "db2:${MYSQL_PORT}"
       MYSQL_DB: "makeradmin"
-      MYSQL_USER: "${MYSQL_USER}"
-      MYSQL_PASS: "${MYSQL_PASS}"
+      MYSQL_USER:
+      MYSQL_PASS:
       APIGATEWAY: "api-gateway"
       BEARER: "${API_BEARER}"
     depends_on:
@@ -147,13 +147,14 @@ services:
     environment:
       MYSQL_HOST: "db2:${MYSQL_PORT}"
       MYSQL_DB: "makeradmin"
-      MYSQL_USER: "${MYSQL_USER}"
-      MYSQL_PASS: "${MYSQL_PASS}"
+      MYSQL_USER:
+      MYSQL_PASS:
       APIGATEWAY: "api-gateway"
       BEARER: "${API_BEARER}"
-      MAILGUN_DOMAIN: "${MAILGUN_DOMAIN}"
-      MAILGUN_KEY: "${MAILGUN_KEY}"
-      MAILGUN_FROM: "${MAILGUN_FROM}"
+      MAILGUN_DOMAIN:
+      MAILGUN_KEY:
+      MAILGUN_FROM:
+      MAILGUN_TO_OVERRIDE:
     depends_on:
       - api-gateway
       - messages
