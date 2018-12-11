@@ -9,14 +9,16 @@ function showError(message: string) {
     UIkit.notification(message, {timeout: 0, status: "danger"});
 }
 
-function login_via_single_use_link(tag: string) {
+function login_via_single_use_link(tag: string, redirect: string) {
 	const apiBasePath = window.apiBasePath;
 
-    common.ajax("POST", apiBasePath + "/member/send_access_token",
-            {
-            	user_tag: tag
-            }
-    ).then(json => {
+    const data: any = {user_tag: tag};
+    if (redirect) {
+        data['redirect'] = redirect;
+    }
+	
+    common.ajax("POST", apiBasePath + "/member/send_access_token", data)
+    .then(json => {
     	// Yay, success, refresh page
     	if (json.status === "sent") {
             showSuccess("Ett mail har skickats till dig med en inloggningslänk, använd den för att logga in.");
@@ -47,30 +49,26 @@ export function logout() {
 	window.location.href = "/";
 }
 
-export function render_login(root: HTMLElement, heading: string) {
+export function render_login(root: HTMLElement, heading: string, redirect: string) {
     heading = heading || "Logga in";
-	root.innerHTML = `<form className="uk-panel uk-panel-box uk-form">
-            <div className="uk-form-row">
-                <h1>${heading}</h1>
-            </div>
-            
-            <div className="uk-form-row">
-                <div className="uk-form-icon">
-                    <i className="uk-icon-user"/>
-                    <input autoFocus ref="tag" className="uk-form-large uk-form-width-large" type="text" placeholder="Email/Medlemsnummer"/>
-                </div>
-            </div>
-            
-            <div className="uk-form-row">
-                <button className="uk-width-1-1 uk-button uk-button-primary uk-button-large"><span className="uk-icon-check"/>
-                	Gå vidare
-                </button>
-            </div>
-        </form>`;
-	const element = <HTMLElement>root.firstChild;
-	console.log(element);
-	const tagInput = <HTMLInputElement>element.getElementsByTagName("input")[0];
-	element.onsubmit = e => {
+	root.innerHTML = `
+            <div>
+                <h1 style="text-align: center;">${heading}</h1>
+                <form class="uk-form">
+                        <div class="uk-form-row" style="margin: 16px 0;">
+                            <input autoFocus ref="tag" class="uk-form-large uk-width-1-1" type="text" placeholder="Email/Medlemsnummer"/>
+                        </div>
+                        
+                        <div class="uk-form-row" style="margin: 16px 0;">
+                            <button class="uk-width-1-1 uk-button uk-button-primary uk-button-large"><span class="uk-icon-check"/>
+                            	Gå vidare
+                            </button>
+                        </div>
+                </form>
+            </div>`;
+	const form = <HTMLElement>root.getElementsByTagName("form")[0];
+	const tagInput = <HTMLInputElement>root.getElementsByTagName("input")[0];
+	form.onsubmit = e => {
 		e.preventDefault();
         const tag = tagInput.value;
 
@@ -80,6 +78,9 @@ export function render_login(root: HTMLElement, heading: string) {
             return;
         }
 
-        login_via_single_use_link(tag);
+        // TODO Add register test.
+        // TODO Redirect to correct page efter login.
+        // TODO Seding mail no longer works.
+        login_via_single_use_link(tag, redirect);
 	}
 }

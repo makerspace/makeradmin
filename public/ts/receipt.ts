@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     function showLogin() {
-        render_login(content, "Logga in för att se kvittot");
+        render_login(content, "Logga in för att se kvittot", 'receipt/' + window.transactionId);
     }
 
     function completed(cart: any, transaction: any, member: any) {
