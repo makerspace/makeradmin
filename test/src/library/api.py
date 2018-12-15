@@ -1,8 +1,8 @@
 import requests
 
 from library.base import TestCaseBase
-from library.obj import ADD_MEMBERSHIP_DAYS
-from library.util import get_env, merge_paths, get_path
+from library.test_config import API_BEARER
+from library.util import merge_paths, get_path
 
 
 class ApiResponse:
@@ -48,7 +48,7 @@ class ApiFactory:
     def __init__(self, obj_factory=None, base_url=None):
         self.obj = obj_factory
         self.base_url = base_url
-        self.api_token = get_env("API_BEARER")
+        self.api_token = API_BEARER
         
         self.member = None
         self.group = None

@@ -1,4 +1,3 @@
-import os
 from datetime import datetime, timedelta
 
 from unittest import TestCase
@@ -6,11 +5,9 @@ from unittest import TestCase
 import stripe
 
 from library.obj import ObjFactory
-from library.util import get_env
+from library.test_config import STRIPE_PUBLIC_KEY, HOST_FRONTEND, HOST_PUBLIC, HOST_BACKEND
 
-stripe.api_key = get_env("STRIPE_PUBLIC_KEY")
-test_mode = os.environ.get('TEST_MODE', 'DEV')
-
+stripe.api_key = STRIPE_PUBLIC_KEY
 
 VALID_NON_3DS_CARD_NO = "378282246310005"
 
@@ -24,21 +21,18 @@ class TestCaseBase(TestCase):
         super().setUpClass()
         self.obj = ObjFactory()
         
-        if test_mode == 'DEV':
-            self.admin_url = 'http://localhost:8009'
-            self.public_url = 'http://localhost:8011'
-            self.api_url = 'http://localhost:8010'
-            
-        elif test_mode == 'DOCKER':
-            self.admin_url = 'http://admin:80'
-            self.public_url = 'http://public:80'
-            self.api_url = 'http://api-gateway:80'
-            
-        else:
-            raise Exception(f"unknown test_mode {test_mode}")
+        self.admin_url = HOST_FRONTEND
+        self.public_url = HOST_PUBLIC
+        self.api_url = HOST_BACKEND
 
         self.now = datetime.now()
         self.today = self.now.date()
         
     def date(self, days=0):
         return self.today + timedelta(days=days)
+
+    def this_test_failed(self):
+        result = self.defaultTestResult()
+        self._feedErrorsToResult(result, self._outcome.errors)
+        return result.errors or result.failures
+

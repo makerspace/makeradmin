@@ -22,6 +22,8 @@ wait_for curl --silent --fail --output /dev/null http://api-gateway:80/webshop/p
 
 set -e
 
+rm -rf /work/.test/selenium-screenshots
+
 cd /work/src
 
 python3 -m pytest . --workers auto -ra

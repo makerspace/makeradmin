@@ -6,7 +6,7 @@ import stripe
 from library.base import VALID_NON_3DS_CARD_NO, EXPIRES_CVC_ZIP
 from library.obj import DEFAULT_PASSWORD_HASH
 from library.selenium import SeleniumTest
-from library.util import SELENIUM_TIMEOUT
+from library.util import SELENIUM_BASE_TIMEOUT
 
 
 class Test(SeleniumTest):
@@ -28,7 +28,7 @@ class Test(SeleniumTest):
         member = self.api.create_member(password=DEFAULT_PASSWORD_HASH)
         product = self.api.product
         self.login_member()
-        
+
         # Shop
         
         self.browse_shop()
@@ -42,7 +42,7 @@ class Test(SeleniumTest):
     
         # Cart
     
-        self.webdriver.switch_to.frame(self.wait_for_element(tag="iframe", timeout=SELENIUM_TIMEOUT))
+        self.webdriver.switch_to.frame(self.wait_for_element(tag="iframe", timeout=SELENIUM_BASE_TIMEOUT))
 
         card = self.wait_for_element(name="cardnumber")
         card.send_keys(VALID_NON_3DS_CARD_NO)
@@ -54,7 +54,7 @@ class Test(SeleniumTest):
 
         # Recipt
         
-        self.assertIn("Kvitto", self.wait_for_element(css=".receipt-id", timeout=SELENIUM_TIMEOUT * 12).text)
+        self.assertIn("Kvitto", self.wait_for_element(css=".receipt-id", timeout=SELENIUM_BASE_TIMEOUT * 12).text)
         
         self.assertIn(f"{product['price']} kr", self.wait_for_element(css=".receipt-amount-value").text)
         
