@@ -1,4 +1,4 @@
-from logging import getLogger, basicConfig, INFO
+from logging import getLogger, basicConfig, INFO, WARNING
 
 from flask import abort, jsonify, request, Blueprint, current_app
 from werkzeug.exceptions import NotFound, MethodNotAllowed
@@ -19,11 +19,12 @@ from decimal import Decimal
 SERVICE_USER_ID = -1
 
 
-logger = getLogger('makeradmin')
-
-
 basicConfig(format='%(asctime)s %(levelname)s [%(process)d/%(threadName)s %(pathname)s:%(lineno)d]: %(message)s',
             stream=sys.stderr, level=INFO)
+getLogger('stripe').setLevel(WARNING)
+
+
+logger = getLogger('makeradmin')
 
 
 class BackendException(Exception):
