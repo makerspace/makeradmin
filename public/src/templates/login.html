@@ -3,7 +3,9 @@
     <body>
         <script>
             localStorage.token = "{{ token }}";
-            window.location.replace("/");
+            let url = new URL(window.location);
+            let redirect = url.searchParams.get("redirect");
+            window.location.replace(redirect || "/");
         </script>
     </body>
 </html>
