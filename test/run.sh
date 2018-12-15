@@ -24,4 +24,4 @@ set -e
 
 cd /work/src
 
-python3 -m pytest . --workers auto
+python3 -m pytest . --workers auto -ra

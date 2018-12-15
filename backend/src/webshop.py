@@ -339,7 +339,8 @@ def register() -> Dict[str, int]:
     ]
     member = copy_dict(assert_get(data, "member"), valid_member_fields)
     member["validate_only"] = True
-    member["create_deleted"] = True
+    # Disabled create deleted (possibly temporarily) since it prevents user from log in and see receipt.
+    # member["create_deleted"] = True
     r = instance.gateway.post("membership/member", member)
     if not r.ok:
         # Ideally should just return r.text, but the helper code for routes screws that up a bit right now.

@@ -51,4 +51,3 @@ services:
       STRIPE_PUBLIC_KEY:
       SELENIUM_TIMEOUT:
       SKIP_SELENIUM_TESTS:
-

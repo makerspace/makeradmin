@@ -133,7 +133,7 @@ class Test(ApiTest):
             .get('data__member_id')
 
         before_activation = self.get(f"/membership/member/{member_id}").expect(code=200, data=member).data
-        self.assertIsNotNone(before_activation['deleted_at'])
+        self.assertIsNone(before_activation['deleted_at'])
         
         self.put("/webshop/process_stripe_events", {"source_id": source.id, "start": start_timestamp}).expect(code=200)
         
