@@ -47,17 +47,17 @@ create_span(member_id, "2018-05-20", "2019-05-20", "membership")
 
 create_span(member_id, "2018-05-10", "2019-05-10", "special_labaccess")
 
-# insert into membership_group_permissions (id, group_id,
-# permission_id) values ( 1, 1, 1), ( 2, 1, 2),( 3, 1, 3), ( 4, 1, 4),
-# ( 5, 1, 5), ( 6, 1, 6), ( 7, 1, 7), ( 8, 1, 8), ( 9, 1, 9), (10, 1,
-# 10), (11, 1, 11), (12, 1, 12), (13, 1, 13), (14, 1, 14), (15, 1,
-# 15), (16, 1, 16), (17, 1, 17), (18, 1, 18), (19, 1, 19), (20, 1,
-# 20);
-
+"""
 insert into membership_group_permissions (id, group_id,
 permission_id) values ( 1, 1, 1), ( 2, 1, 2),( 3, 1, 3), ( 4, 1, 4),
 ( 5, 1, 5), ( 6, 1, 6), ( 7, 1, 7), ( 8, 1, 8), ( 9, 1, 9), (10, 1,
 10), (11, 1, 11), (12, 1, 12), (13, 1, 13), (14, 1, 14), (15, 1,
 15), (16, 1, 16), (17, 1, 17), (18, 1, 18), (19, 1, 19), (20, 1,
 20);
+"""
 
+
+"""
+date -u +%s
+curl -X PUT http://localhost:8010/webshop/process_stripe_events -d '{"source_id": "src_1Dgf3ELA7yYBn2H1gHYkdBNe", "start": null}' -H "Content-Type: application/json"  -H 'Authorization: Bearer f1671e0cfdb61d4cd7b280e72173e385' -v
+"""
