@@ -1,39 +1,22 @@
-import time
-from unittest import skipIf
-
-import stripe
-
-from library.base import VALID_NON_3DS_CARD_NO, EXPIRES_CVC_ZIP
-from library.obj import DEFAULT_PASSWORD_HASH
+from library.base import VALID_NON_3DS_CARD_NO, EXPIRES_CVC_ZIP, ShopTestMixin
 from library.selenium import SeleniumTest
 from library.util import SELENIUM_BASE_TIMEOUT
 
 
-class Test(SeleniumTest):
+class Test(ShopTestMixin, SeleniumTest):
     
-    @classmethod
-    @skipIf(not stripe.api_key, "webshop tests require stripe api key in .env file")
-    def setUpClass(self):
-        super().setUpClass()
-        self.api.create_category()
-        self.api.create_product(price=200, unit="st", smallest_multiple=1)
-        
-    @classmethod
-    def tearDownClass(self):
-        self.api.delete_product()
-        self.api.delete_category()
-        super().tearDownClass()
+    products = [
+        dict(price=200, unit="st", smallest_multiple=1),
+    ]
     
     def test_buying_an_item_in_shop_works(self):
-        member = self.api.create_member(password=DEFAULT_PASSWORD_HASH)
-        product = self.api.product
         self.login_member()
 
         # Shop
         
         self.browse_shop()
         
-        div = self.wait_for_element(id=f"product-{product['id']}")
+        div = self.wait_for_element(id=f"product-{self.p0_id}")
         self.assertEqual(self.api.product['name'], div.find_element_by_class_name('product-title').text)
         
         div.find_element_by_css_selector('button.number-add').click()
@@ -51,14 +34,13 @@ class Test(SeleniumTest):
         self.webdriver.switch_to.default_content()
         
         self.wait_for_element(id='pay-button').click()
+        self.assertIn("Kvitto", self.wait_for_element(css=".receipt-id", timeout=SELENIUM_BASE_TIMEOUT * 12).text)
 
         # Recipt
         
-        self.assertIn("Kvitto", self.wait_for_element(css=".receipt-id", timeout=SELENIUM_BASE_TIMEOUT * 12).text)
+        self.assertIn(f"{self.p0_price} kr", self.wait_for_element(css=".receipt-amount-value").text)
         
-        self.assertIn(f"{product['price']} kr", self.wait_for_element(css=".receipt-amount-value").text)
-        
-        self.assertIn(f"{member['firstname']} {member['lastname']} #{member['member_number']}",
+        self.assertIn(f"{self.member['firstname']} {self.member['lastname']} #{self.member['member_number']}",
                       self.wait_for_element(id="receipt-content").text)
 
         # Check actual transaction.
@@ -68,11 +50,11 @@ class Test(SeleniumTest):
         self.get(f"/webshop/transaction/{transaction_id}").expect(
             code=200,
             status="ok",
-            data__amount=product['price'],
-            data__member_id=member['member_id'],
+            data__amount=self.p0_price,
+            data__member_id=self.member_id,
             data__status="completed",
         )
 
         data = self.get(f"/webshop/transaction/{transaction_id}/content").expect(code=200, status="ok").data
-        self.assertEqual(product['id'], data[0]['product_id'])
+        self.assertEqual(self.p0_id, data[0]['product_id'])
         self.assertEqual(1, len(data))

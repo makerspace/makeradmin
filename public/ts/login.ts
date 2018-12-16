@@ -43,12 +43,6 @@ function login_via_single_use_link(tag: string, redirect: string) {
     );
 }
 
-export function logout() {
-	localStorage.setItem("token", null);
-	// TODO: Correct URL?
-	window.location.href = "/";
-}
-
 export function render_login(root: HTMLElement, heading: string, redirect: string) {
     heading = heading || "Logga in";
 	root.innerHTML = `

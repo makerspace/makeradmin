@@ -343,9 +343,10 @@ def register() -> Dict[str, int]:
     # member["create_deleted"] = True
     r = instance.gateway.post("membership/member", member)
     if not r.ok:
-        # Ideally should just return r.text, but the helper code for routes screws that up a bit right now.
-        # This may happen when for example a user with the same email exists.
-        abort(r.status_code, r.json()["message"])
+        data = r.json()
+        if r.status_code == 422 and data['type'] == 'unique' and data['column'] == 'email':
+            raise errors.RegisterEmailAlreadyExists()
+        abort(r.status_code, data["message"])
 
     member = r.json()["data"]
     member_id = member["member_id"]
@@ -364,9 +365,15 @@ def register() -> Dict[str, int]:
         "duplicatePurchaseRand": purchase["duplicatePurchaseRand"],
     }
 
-    eprint("====== Trying to pay")
     # Note this will throw if the payment fails
-    return pay(member_id=member_id, data=purchase, activates_member=True)
+    result = pay(member_id=member_id, data=purchase, activates_member=True)
+    
+    # If the pay succeeded (not same as the payment is completed) and the member does not already exists,
+    # the user will be logged in.
+    response = instance.gateway.post("oauth/force_token", {"user_id": member_id}).json()
+    result['token'] = response["access_token"]
+    
+    return result
 
 
 def complete_transaction(transaction_id: int):

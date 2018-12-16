@@ -75,14 +75,7 @@ class SeleniumTest(ApiTest):
             self.wait(lambda w: w.title == title)
 
     def login_member(self, member=None):
-        member = member or self.api.member
-        token = self\
-            .post("/oauth/token", {"grant_type": "password",
-                                   "username": member["email"],
-                                   "password": DEFAULT_PASSWORD})\
-            .expect(code=200)\
-            .get("access_token")
-        
+        token = self.api.login_member(member)
         self.webdriver.get(f"{self.public_url}/member/login/{token}")
 
     def wait_for_element(self, id=None, name=None, tag=None, css=None, xpath=None,

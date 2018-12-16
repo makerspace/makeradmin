@@ -1,5 +1,6 @@
 import * as common from "./common"
 import * as login from "./login"
+import {logout} from "./common";
 declare var UIkit: any;
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -173,7 +174,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         root.querySelector("#logout").addEventListener("click", (e) => {
             e.preventDefault();
-            login.logout();
+            logout();
         });
     }).catch(e => {
         // Probably Unauthorized, redirect to login page.

@@ -103,3 +103,14 @@ export function onGetAndDocumentLoaded(url: string, callback: any) {
 }
 
 
+export function logout() {
+    localStorage.setItem("token", null);
+    window.location.href = "/";
+}
+
+
+export function login(token: string) {
+    localStorage.setItem("token", token);
+}
+
+
