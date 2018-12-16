@@ -50,7 +50,7 @@ class Test(ShopTestMixin, ApiTest):
 
         member_id = self\
             .get(f"/webshop/transaction/{transaction_id}")\
-            .expect(code=200, status="ok", data__amount="12.30", data__status="completed")\
+            .expect(code=200, status="ok", data__amount="300.00", data__status="completed")\
             .get('data__member_id')
 
         before_activation = self.get(f"/membership/member/{member_id}").expect(code=200, data=member).data

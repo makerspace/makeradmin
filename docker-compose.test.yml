@@ -38,7 +38,12 @@ services:
       - '4444'
     volumes:
       - /dev/shm:/dev/shm
-  
+
+  email-dispatcher:
+    environment:
+      MAILGUN_DOMAIN: ""
+      MAILGUN_KEY: ""
+      
   test:
     image: makeradmin/test:1.0
     build:
@@ -65,3 +70,4 @@ services:
       SKIP_SELENIUM_TESTS:
       SELENIUM_BASE_TIMEOUT:
       SELENIUM_SCREENSHOT_DIR: "/work/.test/selenium-screenshots"
+      

@@ -38,7 +38,7 @@ class Test(ShopTestMixin, SeleniumTest):
 
         # Recipt
         
-        self.assertIn(f"{self.p0_price} kr", self.wait_for_element(css=".receipt-amount-value").text)
+        self.assertIn(f"{self.p0_price:.2f} kr", self.wait_for_element(css=".receipt-amount-value").text)
         
         self.assertIn(f"{self.member['firstname']} {self.member['lastname']} #{self.member['member_number']}",
                       self.wait_for_element(id="receipt-content").text)
@@ -50,7 +50,7 @@ class Test(ShopTestMixin, SeleniumTest):
         self.get(f"/webshop/transaction/{transaction_id}").expect(
             code=200,
             status="ok",
-            data__amount=self.p0_price,
+            data__amount=f"{self.p0_price:.2f}",
             data__member_id=self.member_id,
             data__status="completed",
         )

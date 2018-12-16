@@ -24,7 +24,7 @@ class Test(ShopTestMixin, ApiTest):
             {"id": self.p1_id, "count": p1_count},
         ]
         
-        source = stripe.Source.create(type="card", token=stripe.Token.create(card=self.VALID_NON_3DS_CARD).id)
+        source = stripe.Source.create(type="card", token=stripe.Token.create(card=self.card(VALID_NON_3DS_CARD_NO)).id)
         
         purchase = {
             "cart": cart,
