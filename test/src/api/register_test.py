@@ -109,4 +109,4 @@ class Test(ShopTestMixin, ApiTest):
 
         self\
             .post(f"/webshop/register", register, headers={})\
-            .expect(data__token=None, code=400, status="NonMatchingSums")\
+            .expect(data__token=None, code=400)\
