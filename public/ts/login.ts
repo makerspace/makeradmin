@@ -72,9 +72,6 @@ export function render_login(root: HTMLElement, heading: string, redirect: strin
             return;
         }
 
-        // TODO Add register test.
-        // TODO Redirect to correct page efter login.
-        // TODO Seding mail no longer works.
         login_via_single_use_link(tag, redirect);
 	}
 }
