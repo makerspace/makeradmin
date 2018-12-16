@@ -35,8 +35,6 @@ WEBDRIVER_TYPE = os.environ.get('WEBDRIVER_TYPE', 'CHROME')
 
 KEEP_BROWSER = os.environ.get('KEEP_BROWSER')
 
-SKIP_SELENIUM_TESTS = os.environ.get('SKIP_SELENIUM_TESTS', 0)
-
 SELENIUM_BASE_TIMEOUT = float(os.environ.get('SELENIUM_BASE_TIMEOUT', '4.0'))
 
 SLEEP = 0.2

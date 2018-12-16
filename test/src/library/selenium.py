@@ -1,7 +1,6 @@
 import os
 import sys
 from logging import getLogger
-from unittest import skipIf
 
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver import DesiredCapabilities
@@ -10,8 +9,7 @@ from selenium.webdriver.chrome import webdriver as chrome
 from selenium.webdriver.support.wait import WebDriverWait
 
 from library.api import ApiTest
-from library.obj import DEFAULT_PASSWORD
-from library.test_config import SKIP_SELENIUM_TESTS, KEEP_BROWSER, WEBDRIVER_TYPE, SELENIUM_SCREENSHOT_DIR
+from library.test_config import KEEP_BROWSER, WEBDRIVER_TYPE, SELENIUM_SCREENSHOT_DIR
 from library.util import retry, SELENIUM_BASE_TIMEOUT, SLEEP
 
 logger = getLogger('makeradmin')
@@ -35,10 +33,6 @@ class SeleniumTest(ApiTest):
         super().setUpClass()
         self.webdriver = create_webdriver()
         
-    @skipIf(SKIP_SELENIUM_TESTS, "selenium tests disabled")
-    def setUp(self):
-        super().setUp()
-    
     def tearDown(self):
         if self.this_test_failed():
             if not os.path.exists(SELENIUM_SCREENSHOT_DIR):
