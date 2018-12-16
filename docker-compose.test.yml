@@ -67,7 +67,7 @@ services:
       HOST_PUBLIC: 'http://public'
       STRIPE_PRIVATE_KEY:
       STRIPE_PUBLIC_KEY:
-      SKIP_SELENIUM_TESTS:
+      TEST_PARALELLISM:
       SELENIUM_BASE_TIMEOUT:
       SELENIUM_SCREENSHOT_DIR: "/work/.test/selenium-screenshots"
       

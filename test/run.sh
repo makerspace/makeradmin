@@ -20,10 +20,14 @@ wait_for nc -z public 80
 wait_for nc -z selenium 4444
 wait_for curl --silent --fail --output /dev/null http://api-gateway:80/webshop/product_data
 
+if [ -z "$TEST_PARALELLISM" ]; then
+    TEST_PARALELLISM="auto"
+fi
+
 set -e
 
 rm -rf /work/.test/selenium-screenshots
 
 cd /work/src
 
-python3 -m pytest . --workers auto -ra
+python3 -m pytest . --workers $TEST_PARALELLISM -ra
