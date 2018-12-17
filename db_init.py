@@ -1,6 +1,5 @@
 #!python3
 from subprocess import call, check_output, STDOUT
-import sys
 from time import sleep
 import argparse
 
@@ -20,41 +19,35 @@ call(["docker-compose", *project_name_args, "up", "-d", "db2"])
 print("Waiting for database", end="")
 cmd = 'while ! mysql -uroot --password="${MYSQL_ROOT_PASSWORD}" -e "" &> /dev/null; do printf "." && sleep 1; done'
 call(["docker-compose", *project_name_args, "exec", "db2", "bash", "-c", cmd])
+print(" done")
 
 # Make sure all docker containers are created (but not necessarily started)
 # This is important when running unit tests.
-call(["docker-compose", *project_name_args, "up", "--no-start"])
+#call(["docker-compose", *project_name_args, "up", "--no-start"])
 
-print(" done")
 
 sleep(1)
 
 
-def init_container(container):
+with open('.env') as f:
+    env = {s[0]: (s[1] if len(s) > 1 else "") for s in (s.split("=") for s in f.read().split('\n'))}
+
+
+for container in containers:
     # This call takes quite a long time (0.7 seconds on my machine)
     # which adds up to a lot when running tests, therefore a shortcut is used above if possible.
-    container_name = check_output(["docker-compose", *project_name_args, "ps", "-q", container]).decode('utf-8').strip()
-
     print(f"Initializing database for {container}...")
 
-    # Get environment variables for the docker container
-    env = dict(
-        row.split("=") for row in
-        check_output([
-            "docker", "inspect", "-f", "{{range $index, $value := .Config.Env}}{{println $value}}{{end}}", container_name
-        ]).decode('utf-8').strip().split("\n")
-    )
     mysql_db, mysql_user, mysql_pass = env["MYSQL_DB"], env["MYSQL_USER"], env["MYSQL_PASS"]
 
-    # Note "{{x}}" escapes to "{x}"
-    inner_bash3 = f"""
+    cmd = f"""
     mysql -uroot -p"${{MYSQL_ROOT_PASSWORD}}" -e "
     CREATE USER IF NOT EXISTS \`{mysql_user}\`@'%' IDENTIFIED BY '{mysql_pass}';
-    CREATE DATABASE IF NOT EXISTS \`{mysql_db}\`;
-    GRANT ALL ON \`{mysql_db}\`.* TO \`{mysql_user}\`@'%';
+    CREATE DATABASE IF NOT EXISTS \`makeradmin\`;
+    GRANT ALL ON \`makeradmin\`.* TO \`{mysql_user}\`@'%';
     FLUSH PRIVILEGES;"
     """
-    o1 = check_output(["docker-compose", *project_name_args, "exec", "db2", "bash", "-c", inner_bash3], stderr=STDOUT)
+    o1 = check_output(["docker-compose", *project_name_args, "exec", "db2", "bash", "-c", cmd], stderr=STDOUT)
     o1 = o1.decode('utf-8').strip().replace('\r', '')
     o1 = o1.replace("mysql: [Warning] Using a password on the command line interface can be insecure.", "").strip()
     if o1 != "":
@@ -67,6 +60,3 @@ def init_container(container):
         fi
     """
     call(["docker-compose", *project_name_args, "run", "--rm", "--no-deps", container, "bash", "-c", migrate])
-
-for container in containers:
-    init_container(container)
