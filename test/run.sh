@@ -31,4 +31,4 @@ rm -rf /work/.test/selenium-screenshots
 
 cd /work/src
 
-python3 -m pytest . --workers $TEST_PARALELLISM -ra -v -s
+python3 -m pytest . --workers $TEST_PARALELLISM -ra
