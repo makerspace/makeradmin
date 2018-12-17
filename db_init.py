@@ -1,14 +1,15 @@
+#!python3
 from subprocess import call, check_output, STDOUT
 import sys
 from time import sleep
 import argparse
-import multiprocessing
+
 
 containers = ["api-gateway", "membership", "messages", "backend"]
 
 parser = argparse.ArgumentParser(description='Initialize the database and run migrations')
-parser.add_argument('--project-name','-p', help='Use a different docker composer project name', default=None)
-parser.add_argument('--containers','-c', nargs="*", default=containers, help='All containers to update')
+parser.add_argument('--project-name', '-p', help='Use a different docker composer project name', default=None)
+parser.add_argument('--containers', '-c', nargs="*", default=containers, help='All containers to update')
 args = parser.parse_args()
 
 project_name_args = ["-p", args.project_name] if args.project_name is not None else []
@@ -17,8 +18,8 @@ containers = args.containers
 call(["docker-compose", *project_name_args, "up", "-d", "db2"])
 
 print("Waiting for database", end="")
-inner_bash = 'while ! mysql -uroot --password="${MYSQL_ROOT_PASSWORD}" -e "" &> /dev/null; do printf "." && sleep 1; done'
-call(["docker-compose", *project_name_args, "exec", "db2", "bash", "-c", inner_bash])
+cmd = 'while ! mysql -uroot --password="${MYSQL_ROOT_PASSWORD}" -e "" &> /dev/null; do printf "." && sleep 1; done'
+call(["docker-compose", *project_name_args, "exec", "db2", "bash", "-c", cmd])
 
 # Make sure all docker containers are created (but not necessarily started)
 # This is important when running unit tests.

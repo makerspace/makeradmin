@@ -25,9 +25,10 @@ if [ -z "$TEST_PARALELLISM" ]; then
 fi
 
 set -e
+set -x
 
 rm -rf /work/.test/selenium-screenshots
 
 cd /work/src
 
-python3 -m pytest . --workers $TEST_PARALELLISM -ra
+python3 -m pytest . --workers $TEST_PARALELLISM -ra -v -s
