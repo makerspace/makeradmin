@@ -20,7 +20,6 @@ class Test(ShopTestMixin, ApiTest):
     ]
 
     def test_registring_new_member_works_and_returns_token(self):
-        print(f"TODO test_registring_new_member_works_and_returns_token", file=sys.stderr)
         start_timestamp = int(time())
 
         source = stripe.Source.create(type="card", token=stripe.Token.create(card=self.card(VALID_NON_3DS_CARD_NO)).id)
@@ -64,7 +63,6 @@ class Test(ShopTestMixin, ApiTest):
         self.assertIsNone(after_activation['deleted_at'])
 
     def test_registring_with_existing_member_email_does_not_work_and_does_not_return_token(self):
-        print(f"TODO test_registring_with_existing_member_email_does_not_work_and_does_not_return_token", file=sys.stderr)
         source = stripe.Source.create(type="card", token=stripe.Token.create(card=self.card(VALID_NON_3DS_CARD_NO)).id)
 
         member = self.api.create_member()
@@ -90,7 +88,6 @@ class Test(ShopTestMixin, ApiTest):
             .expect(data__token=None, code=400, status="RegisterEmailAlreadyExists")\
 
     def test_registring_with_failed_payment_does_not_work_and_does_not_return_token(self):
-        print(f"TODO test_registring_with_failed_payment_does_not_work_and_does_not_return_token", file=sys.stderr)
         source = stripe.Source.create(type="card", token=stripe.Token.create(card=self.card(EXPIRED_3DS_CARD_NO)).id)
 
         member = self.obj.create_member()

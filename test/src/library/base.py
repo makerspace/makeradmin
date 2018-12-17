@@ -1,4 +1,5 @@
 import sys
+from copy import copy
 from datetime import datetime, timedelta
 
 from unittest import TestCase, skipIf
@@ -68,22 +69,15 @@ class ShopTestMixin:
     def setUpClass(self):
         super().setUpClass()
         self.category = self.api.create_category()
-        print(f"TODO created category {self.category['id']}", file=sys.stderr)
         
         for i, product_kwargs in enumerate(self.products):
+            product_kwargs = copy(product_kwargs)
             action_kwargs = product_kwargs.pop('action', None)
             product = self.api.create_product(**product_kwargs)
             product_id = int(product['id'])
-            print(f"TODO created product {product_id}", file=sys.stderr)
             product_price = float(product['price'])
             if action_kwargs:
-                print(f"TODO creating action for product {product_id}: {action_kwargs}", file=sys.stderr)
-                try:
-                    self.api.create_product_action(product_id=product_id, **action_kwargs)
-                except Exception as e:
-                    print(e)
-                    raise
-                print(f"TODO created product {product_id} action {self.api.action['id']}", file=sys.stderr)
+                self.api.create_product_action(product_id=product_id, **action_kwargs)
             setattr(self, f'p{i}', product)
             setattr(self, f'p{i}_id', product_id)
             setattr(self, f'p{i}_price', product_price)
@@ -91,9 +85,7 @@ class ShopTestMixin:
     @classmethod
     def tearDownClass(self):
         for i in range(len(self.products)):
-            print(f"TODO deleting product {getattr(self, f'p{i}_id')}", file=sys.stderr)
             self.api.delete_product(getattr(self, f'p{i}_id'))
-        print(f"TODO deleting category {self.api.category['id']}", file=sys.stderr)
         self.api.delete_category()
         super().tearDownClass()
 
