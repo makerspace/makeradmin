@@ -77,8 +77,13 @@ class ShopTestMixin:
             print(f"TODO created product {product_id}", file=sys.stderr)
             product_price = float(product['price'])
             if action_kwargs:
-                self.api.create_product_action(product_id=product_id, **action_kwargs)
-                print(f"TODO created productcreted product {product_id} action {self.api.action['id']}", file=sys.stderr)
+                print(f"TODO creating action for product {product_id}: {action_kwargs}", file=sys.stderr)
+                try:
+                    self.api.create_product_action(product_id=product_id, **action_kwargs)
+                except Exception as e:
+                    print(e)
+                    raise
+                print(f"TODO created product {product_id} action {self.api.action['id']}", file=sys.stderr)
             setattr(self, f'p{i}', product)
             setattr(self, f'p{i}_id', product_id)
             setattr(self, f'p{i}_price', product_price)
