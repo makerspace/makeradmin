@@ -96,6 +96,15 @@ Go to:
 * [the makeradmin web site](http://localhost:8009)
 * [the web shop](http://localhost:8011/shop)
 
+### Logging in
+Go to [the member page](http://localhost:8011/member) and fill in the email address corresponding to the user created previously. A link will then be printed in the terminal (where `make dev` is run) that allows you to login. E.g.
+
+```
+[...]
+public_1            | 10.0.2.2 - - [18/Dec/2018:20:50:23 +0000] "GET / HTTP/1.1" 302 223 "http://localhost:8011/member/login/XHCgGQZGrjuG6bO7TVPkikTfQVRo6Eqn?redirect=member" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.110 Safari/537.36"
+[...]
+```
+
 ### Frontend js dev-server
 To run a webpack-dev-server inside a docker container (will node, npm
 and node_modules inside the image and mount js source files from local
