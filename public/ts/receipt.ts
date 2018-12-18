@@ -37,7 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
         content.innerHTML = `
             <h1>Tack för ditt köp!</h1>
             <div class="history-item history-item-${transaction.status}">
-                <h3>${createdAt}<span class="receipt-id">Kvitto ${transaction.id}</span></h3>
+                <h3>Kvitto ${transaction.id}<span class="receipt-date">${createdAt}</span></h3>
                     <div class="receipt-items">
                         ${cartHtml}
                     </div>

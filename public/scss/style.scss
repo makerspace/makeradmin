@@ -531,7 +531,7 @@ form input.readonly-input {
 	}
 }
 
-.history-item-pending, .history-item-completed {
+.history-item-completed {
 	h3 {
 		background: #469ABE;
 	}
@@ -540,6 +540,18 @@ form input.readonly-input {
 	}
 	.receipt-amount {
 		background: #07719F;
+	}
+}
+
+.history-item-pending {
+	h3 {
+		background: #BE9A46;
+	}
+	.receipt-items {
+		background: #AD8527;
+	}
+	.receipt-amount {
+		background: #9F7107;
 	}
 }
 
@@ -579,7 +591,17 @@ form input.readonly-input {
 
 	.receipt-id {
 		color: rgba(255, 255, 255, 0.5);
+		float: left;
+	}
+
+	.receipt-date {
+		color: rgba(255, 255, 255, 0.5);
 		float: right;
+	}
+
+	.receipt-payment-status {
+		color: rgba(255, 255, 255, 0.5);
+		float: left;
 	}
 
 	.receipt-items {
