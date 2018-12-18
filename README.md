@@ -81,9 +81,9 @@ Bye
 ```
 
 ### Adding items to the shop
-The file [`webshop/src/scrape/tictail.json`](./webshop/src/scrape/tictail.json) contains a list of the items that can be bought with attributes. They must be imported to the docker container's database:
+The file [`backend/src/scrape/tictail.json`](./backend/src/scrape/tictail.json) contains a list of the items that can be bought with attributes. They must be imported to the docker container's database:
 ```bash
-docker-compose exec webshop bash -c "cd scrape && python3 tictail2db.py"
+docker-compose exec backend bash -c "cd src/scrape && python tictail2db.py"
 ```
 
 The docker container corresponding to the webshop must be rebuilt when it is changed (and then imported anew):
