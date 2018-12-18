@@ -5,12 +5,22 @@ services:
   api-gateway:
     ports:
       - "9010:80"
-      
+
+  backend:
+    environment:
+      HOST_FRONTEND: 'http://admin'
+      HOST_BACKEND: 'http://api-gateway'
+      HOST_PUBLIC: 'http://public'
+
   public:
+    environment:
+      HOST_BACKEND: 'http://api-gateway'
     ports:
       - "9011:80"
       
   admin:
+    environment:
+      HOST_BACKEND: 'http://api-gateway'
     ports:
       - "9009:80"
 
@@ -28,7 +38,12 @@ services:
       - '4444'
     volumes:
       - /dev/shm:/dev/shm
-  
+
+  email-dispatcher:
+    environment:
+      MAILGUN_DOMAIN: ""
+      MAILGUN_KEY: ""
+      
   test:
     image: makeradmin/test:1.0
     build:
@@ -37,6 +52,8 @@ services:
       - makeradmin
     command:
       - "/work/run.sh"
+    volumes:
+      - .test:/work/.test
     depends_on:
       - admin
       - public
@@ -44,11 +61,13 @@ services:
       - selenium
     environment:
       WEBDRIVER_TYPE: "REMOTE_CHROME"
-      TEST_MODE: "DOCKER"
       API_BEARER: "${API_BEARER}"
-      HOST_BACKEND: "http://api-gateway:80"
-      STRIPE_PRIVATE_KEY: "${STRIPE_PRIVATE_KEY}"
-      STRIPE_PUBLIC_KEY: "${STRIPE_PUBLIC_KEY}"
-      SELENIUM_TIMEOUT: "${SELENIUM_TIMEOUT}"
-      SKIP_SELENIUM_TESTS: "${SKIP_SELENIUM_TESTS}"
-
+      HOST_FRONTEND: 'http://admin'
+      HOST_BACKEND: 'http://api-gateway'
+      HOST_PUBLIC: 'http://public'
+      STRIPE_PRIVATE_KEY:
+      STRIPE_PUBLIC_KEY:
+      TEST_PARALELLISM:
+      SELENIUM_BASE_TIMEOUT:
+      SELENIUM_SCREENSHOT_DIR: "/work/.test/selenium-screenshots"
+      

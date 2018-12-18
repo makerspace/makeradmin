@@ -1,6 +1,7 @@
 /// <reference path="../node_modules/@types/stripe-v3/index.d.ts" />
 import Cart from "./cart"
 import * as common from "./common"
+import {login} from "./common";
 declare var UIkit: any;
 
 
@@ -125,6 +126,10 @@ common.onGetAndDocumentLoaded("/webshop/register_page_data", (value: any) => {
           }).then(json => {
             spinner.classList.remove("progress-spinner-visible");
             waitingForPaymentResponse = false;
+            const token :string = json.data.token;
+            if (token) {
+                login(token);
+            }
             if (json.data.redirect !== undefined) {
               window.location.href = json.data.redirect;
             } else {
@@ -133,7 +138,7 @@ common.onGetAndDocumentLoaded("/webshop/register_page_data", (value: any) => {
           }).catch(json => {
             spinner.classList.remove("progress-spinner-visible");
             waitingForPaymentResponse = false;
-            if (json.status == "The value needs to be unique in the database") {
+            if (json.status == "RegisterEmailAlreadyExists") {
               UIkit.modal.alert("<h2>Registreringen misslyckades</h2>En användare med denna email är redan registrerad");
             } else {
               UIkit.modal.alert("<h2>Betalningen misslyckades</h2>" + common.get_error(json));

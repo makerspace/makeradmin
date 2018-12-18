@@ -1,5 +1,6 @@
 import * as common from "./common"
 import * as login from "./login"
+import {logout} from "./common";
 declare var UIkit: any;
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -173,13 +174,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
         root.querySelector("#logout").addEventListener("click", (e) => {
             e.preventDefault();
-            login.logout();
+            logout();
         });
     }).catch(e => {
         // Probably Unauthorized, redirect to login page.
         if (e.message == "Unauthorized") {
             // Render login
-            login.render_login(root);
+            login.render_login(root, null, null);
         } else {
             UIkit.modal.alert("<h2>Failed to load member info</h2>");
         }

@@ -1,8 +1,9 @@
 import requests
 
 from library.base import TestCaseBase
-from library.obj import ADD_MEMBERSHIP_DAYS
-from library.util import get_env, merge_paths, get_path
+from library.obj import DEFAULT_PASSWORD
+from library.test_config import API_BEARER
+from library.util import merge_paths, get_path
 
 
 class ApiResponse:
@@ -48,9 +49,10 @@ class ApiFactory:
     def __init__(self, obj_factory=None, base_url=None):
         self.obj = obj_factory
         self.base_url = base_url
-        self.api_token = get_env("API_BEARER")
+        self.api_token = API_BEARER
         
         self.member = None
+        self.token = None
         self.group = None
         self.category = None
         self.product = None
@@ -78,6 +80,16 @@ class ApiFactory:
         obj = self.obj.create_member(**kwargs)
         self.member = self.post("membership/member", json=obj).expect(code=201, status='created').data
         return self.member
+
+    def login_member(self, member=None):
+        member = member or self.member
+        self.token = self\
+            .post("/oauth/token", {"grant_type": "password",
+                                   "username": member["email"],
+                                   "password": DEFAULT_PASSWORD})\
+            .expect(code=200)\
+            .get("access_token")
+        return self.token
 
     def create_group(self, **kwargs):
         obj = self.obj.create_group(**kwargs)

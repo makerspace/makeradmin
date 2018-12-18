@@ -63,6 +63,7 @@ class ObjFactory:
         return self.category
 
     def create_product(self, **kwargs):
+        category_id = kwargs.pop('category_id', None) or (self.category and self.category['id'])
         obj = dict(
             name=f"product-{random_str(12)}",
             price=100.0,
@@ -70,7 +71,7 @@ class ObjFactory:
             unit="st",
             smallest_multiple=1,
             filter=None,
-            category_id=None,
+            category_id=category_id,
         )
         obj.update(kwargs)
         self.product = obj

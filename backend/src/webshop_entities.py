@@ -90,6 +90,7 @@ def membership_products(db: DB) -> List[Dict[str, Any]]:
             INNER JOIN webshop_product_actions ON webshop_products.id=webshop_product_actions.product_id
             INNER JOIN webshop_actions ON webshop_actions.id=webshop_product_actions.action_id
             WHERE webshop_actions.name='add_membership_days' AND webshop_product_actions.deleted_at IS NULL
+                  AND webshop_products.deleted_at IS NULL
         """)
         products = [{"id": v[0], "name": v[1], "price": float(v[2])} for v in cur.fetchall()]
         return products

@@ -3,7 +3,7 @@ import argparse
 import os
 
 parser = argparse.ArgumentParser(description='Create a default \'.env\' file with secrets if it doesn\'t exist')
-parser.add_argument('--force','-f', dest='force', action='store_true', help='overwrite existing \'.env\' file')
+parser.add_argument('--force', '-f', dest='force', action='store_true', help='overwrite existing \'.env\' file')
 args = parser.parse_args()
 
 config = {

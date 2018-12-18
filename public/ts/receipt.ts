@@ -1,4 +1,6 @@
 import * as common from "./common"
+import {formatDateTime} from "./common";
+import {render_login} from "./login";
 declare var UIkit: any;
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -11,6 +13,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function failed() {
         content.innerHTML = `<h1>Din betalning misslyckades</h1>`;
+    }
+    
+    function showLogin() {
+        render_login(content, "Logga in för att se kvittot", '/shop/receipt/' + window.transactionId);
     }
 
     function completed(cart: any, transaction: any, member: any) {
@@ -26,9 +32,8 @@ document.addEventListener('DOMContentLoaded', () => {
             `;
         }).join("");
 
-        // TODO Improved formatting.
-        const createdAt = new Date(transaction.created_at).toLocaleString();
-
+        const createdAt = formatDateTime(transaction.created_at);
+        
         content.innerHTML = `
             <h1>Tack för ditt köp!</h1>
             <div class="history-item history-item-${transaction.status}">
@@ -71,7 +76,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             })
             .catch(json => {
-                pending();
+                if (json.status === "unauthorized") {
+                    showLogin();
+                }
+                else {
+                    pending();
+                }
             });
     }
 

@@ -215,3 +215,4 @@ function addLaserChart(root: HTMLElement, data: any) {
 	const ctx = canvas.getContext('2d');
 	const chart = new Chart(ctx, config);
 }
+ 

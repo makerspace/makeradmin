@@ -6,37 +6,13 @@ from functools import wraps
 from random import seed, choice
 from string import ascii_letters, digits
 
+from library.test_config import SELENIUM_BASE_TIMEOUT, SLEEP
+
 seed(os.urandom(8))
-
-
-SELENIUM_TIMEOUT = float(os.environ.get('SELENIUM_TIMEOUT', '2.4'))
-SLEEP = 0.2
 
 
 def random_str(length=12):
     return ''.join(choice(ascii_letters + digits) for _ in range(length))
-
-
-env = None
-
-
-def get_env(name):
-    """ Read variable from os environment, if not exists try to read from .env-file. Inside the test container the
-    .env-file is not available all variables should be provided through the docker-compose.test.yml file. """
-    
-    global env
-    if env is None:
-        try:
-            filename = os.path.abspath(f"{os.path.dirname(__file__)}/../../../.env")
-            with open(filename) as f:
-                env = {s[0]: (s[1] if len(s) > 1 else "") for s in (s.split("=") for s in f.read().split('\n'))}
-        except OSError:
-            env = {}
-    
-    if name in os.environ:
-        return os.environ[name]
-    
-    return env[name]
 
 
 def get_path(obj, path):
@@ -74,7 +50,7 @@ def merge_paths(**kwargs):
     return res
     
 
-def retry(timeout=SELENIUM_TIMEOUT, sleep=SLEEP, do_retry=None):
+def retry(timeout=SELENIUM_BASE_TIMEOUT, sleep=SLEEP, do_retry=None):
     def decorator(wrapped):
         @wraps(wrapped)
         def wrap(*args, **kwargs):

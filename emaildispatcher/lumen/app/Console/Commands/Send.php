@@ -59,7 +59,6 @@ class Send extends Command
 			$list = [];
 			foreach($messages as $message)
 			{
-				echo "Sending mail to {$message->recipient}\n";
 
 				try {
 					// Get the member's email
@@ -68,6 +67,10 @@ class Send extends Command
 					// Override recipient
 					if ($mailgun_to_override !== false) {
 						$email = $mailgun_to_override;
+						echo "Sending mail to {$message->recipient} (overriding to $email)\n";
+					}
+					else {
+						echo "Sending mail to {$message->recipient}\n";
 					}
 
 					// Send the mail via Mailgun
