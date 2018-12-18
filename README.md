@@ -88,7 +88,7 @@ docker-compose exec backend bash -c "cd src/scrape && python tictail2db.py"
 
 The docker container corresponding to the webshop must be rebuilt when it is changed (and then imported anew):
 ```bash
-docker-compose up -d --build webshop
+docker-compose up -d --build public
 ```
 
 ### Viewing MakerAdmin etc.
