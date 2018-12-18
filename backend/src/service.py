@@ -1,6 +1,6 @@
-from logging import getLogger, basicConfig, INFO
+from logging import getLogger, basicConfig, INFO, WARNING
 
-from flask import abort, jsonify, request, Blueprint, current_app
+from flask import jsonify, request, Blueprint, current_app, make_response
 from werkzeug.exceptions import NotFound, MethodNotAllowed
 import pymysql
 import sys
@@ -15,15 +15,21 @@ from typing import Callable, Type, Optional, Set, Dict, Union
 from datetime import datetime
 from dateutil import parser
 from decimal import Decimal
+from flask import abort as flask_abort
 
 SERVICE_USER_ID = -1
+
+
+basicConfig(format='%(asctime)s %(levelname)s [%(process)d/%(threadName)s %(pathname)s:%(lineno)d]: %(message)s',
+            stream=sys.stderr, level=INFO)
+getLogger('stripe').setLevel(WARNING)
 
 
 logger = getLogger('makeradmin')
 
 
-basicConfig(format='%(asctime)s %(levelname)s [%(process)d/%(threadName)s %(pathname)s:%(lineno)d]: %(message)s',
-            stream=sys.stderr, level=INFO)
+def abort(code, tag):
+    flask_abort(make_response(jsonify(status=tag), code))
 
 
 class BackendException(Exception):

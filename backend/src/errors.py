@@ -43,8 +43,13 @@ class NotPurelyCents(BackendException):
 
 
 class NotAllowedToPurchase(BackendException):
-    def __init__(self, product: Dict[str,Any]) -> None:
+    def __init__(self, product: Dict[str, Any]) -> None:
         super().__init__(sv=f"Det är inte tillåtet att köpa produkten med id {product['id']}.")
+
+
+class RegisterEmailAlreadyExists(BackendException):
+    def __init__(self):
+        super().__init__(sv=f"Emailadress finns redan registerad, förläng medlemskap i shoppen.")
 
 
 class CartMustContainNItems(BackendException):

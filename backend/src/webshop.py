@@ -1,9 +1,9 @@
 from logging import getLogger
 
-from flask import request, abort, render_template
+from flask import request, render_template
 
 import service
-from service import eprint, assert_get, route_helper, format_datetime
+from service import eprint, assert_get, route_helper, format_datetime, abort
 import stripe
 import os
 from decimal import Decimal, Rounded, localcontext
@@ -339,12 +339,14 @@ def register() -> Dict[str, int]:
     ]
     member = copy_dict(assert_get(data, "member"), valid_member_fields)
     member["validate_only"] = True
-    member["create_deleted"] = True
+    # Disabled create deleted (possibly temporarily) since it prevents user from log in and see receipt.
+    # member["create_deleted"] = True
     r = instance.gateway.post("membership/member", member)
     if not r.ok:
-        # Ideally should just return r.text, but the helper code for routes screws that up a bit right now.
-        # This may happen when for example a user with the same email exists.
-        abort(r.status_code, r.json()["message"])
+        data = r.json()
+        if r.status_code == 422 and data['type'] == 'unique' and data['column'] == 'email':
+            raise errors.RegisterEmailAlreadyExists()
+        abort(r.status_code, data["message"])
 
     member = r.json()["data"]
     member_id = member["member_id"]
@@ -363,9 +365,15 @@ def register() -> Dict[str, int]:
         "duplicatePurchaseRand": purchase["duplicatePurchaseRand"],
     }
 
-    eprint("====== Trying to pay")
     # Note this will throw if the payment fails
-    return pay(member_id=member_id, data=purchase, activates_member=True)
+    result = pay(member_id=member_id, data=purchase, activates_member=True)
+    
+    # If the pay succeeded (not same as the payment is completed) and the member does not already exists,
+    # the user will be logged in.
+    response = instance.gateway.post("oauth/force_token", {"user_id": member_id}).json()
+    result['token'] = response["access_token"]
+    
+    return result
 
 
 def complete_transaction(transaction_id: int):
@@ -417,7 +425,7 @@ def stripe_handle_source_callback(subtype: str, event) -> None:
         source = event.data.object
         transaction_id = source_to_transaction_id(source.id)
         if transaction_id is None:
-            eprint(f"Got callback, but no transaction exists for that token ({source.id}). Ignoring this event (this is usually fine)")
+            logger.info(f"Got callback, but no transaction exists for that token ({source.id}). Ignoring this event (this is usually fine)")
             return None
 
         if subtype == "chargeable":
@@ -427,18 +435,17 @@ def stripe_handle_source_callback(subtype: str, event) -> None:
                 try:
                     create_stripe_payment(transaction_id, source.id)
                 except Exception as e:
-                    eprint(f"Error in create_stripe_payment: {str(e)}. Source '{source.id}' for transaction {transaction_id}")
+                    logger.error(f"Error in create_stripe_payment: {str(e)}. Source '{source.id}' for transaction {transaction_id}")
             elif source.type == 'card':
                 # All 'card' type sources that should be charged are handled synchonously, not here.
                 return None
             else:
                 # Unknown source type, log and do nothing
-                eprint(f'Unexpected source type {source.type} in stripe webhook')
-                eprint(source)
+                logger.warning(f'Unexpected source type {source.type} in stripe webhook: {source}')
                 return None
         else:
             # Payment failed
-            eprint("Mark transaction as failed")
+            logger.info("Mark transaction as failed")
             _fail_transaction(transaction_id)
 
 
@@ -452,7 +459,7 @@ def stripe_handle_charge_callback(subtype: str, event) -> None:
             handle_payment_success(transaction_id)
     elif subtype == 'failed':
         _fail_stripe_source(charge.source.id)
-        eprint(f"Charge '{charge.id}' failed with message '{charge.failure_message}'")
+        logger.info(f"Charge '{charge.id}' failed with message '{charge.failure_message}'")
     elif subtype.startswith('dispute'):
         # TODO: log disputes for display in admin frontend.
         pass
@@ -488,7 +495,7 @@ def stripe_callback() -> None:
 
 def _reprocess_stripe_event(event):
     try:
-        eprint(f"Processing stripe event of type {event.type}")
+        logger.info(f"Processing stripe event of type {event.type}")
         (event_type, event_subtype) = tuple(event.type.split('.', 1))
         if event_type == 'source':
             stripe_handle_source_callback(event_subtype, event)
@@ -502,14 +509,18 @@ def _reprocess_stripe_event(event):
 @instance.route("process_stripe_events", methods=["PUT"])
 @route_helper
 def process_stripe_events():
-    payload = request.get_json()
+    payload = request.get_json() or {}
     source_id = payload.get('source_id', None)
     start = payload.get('start', None)
+    logger.info(f"getting stripe events with start {start} and source_id {source_id}")
     events = stripe.Event.list(created={'gt': start} if start else None)
+    logger.info(f"got {len(events)} events")
     for event in events.auto_paging_iter():
         obj = event.get('data', {}).get('object', {})
         if source_id and source_id in (obj.get('source', {}).get('id'), obj.get('id')) or not source_id:
             _reprocess_stripe_event(event)
+        else:
+            logger.info(f"skipping event, not matching source_id")
 
 
 def process_cart(member_id: int, cart: List[Dict[str,Any]]) -> Tuple[Decimal, List[CartItem]]:

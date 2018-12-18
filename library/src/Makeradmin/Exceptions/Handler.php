@@ -50,6 +50,7 @@ class Handler extends ExceptionHandler
 			return Response()->json([
 				"status"  => "error",
 				"column"  => $e->getColumn(),
+				"type"  => $e->getType(),
 				"message" => $e->getMessage(),
 			], 422);
 		}

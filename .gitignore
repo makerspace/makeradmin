@@ -9,3 +9,5 @@ __pycache__/
 .webshop_product_images/
 node_modules
 .pytest_cache
+.test/selenium-screenshots
+
