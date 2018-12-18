@@ -94,7 +94,7 @@ docker-compose up -d --build webshop
 ### Viewing MakerAdmin etc.
 Go to:
 * [the makeradmin web site](http://localhost:8009)
-* [the web shop](http://localhost:8010/shop)
+* [the web shop](http://localhost:8011/shop)
 
 ### Frontend js dev-server
 To run a webpack-dev-server inside a docker container (will node, npm
