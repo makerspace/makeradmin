@@ -105,6 +105,9 @@ public_1            | 10.0.2.2 - - [18/Dec/2018:20:50:23 +0000] "GET / HTTP/1.1"
 [...]
 ```
 
+### "Paying" with fake Stripe key
+You will not be able to go to the checkout unless you have a Stripe key in the .env-file. If this is set up, you can use [Stripe's fake cards](https://stripe.com/docs/testing#cards) for completing the purchase.
+
 ### Frontend js dev-server
 To run a webpack-dev-server inside a docker container (will node, npm
 and node_modules inside the image and mount js source files from local
