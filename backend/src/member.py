@@ -1,13 +1,12 @@
-from flask import Flask, request, abort, jsonify, render_template
-import service
-from service import eprint, assert_get, route_helper
+from flask import request, jsonify, render_template
+from service import assert_get, route_helper, create, abort
 import urllib.parse
 from typing import Dict, Any
 from logging import getLogger
 
 logger = getLogger('makeradmin')
 
-instance = service.create(name="member", url="member", port=80, version="1.0")
+instance = create(name="member", url="member", port=80, version="1.0")
 
 # Grab the database so that we can use it inside requests
 db = instance.db
