@@ -8,7 +8,7 @@ args = parser.parse_args()
 
 config = {
     "COMPOSE_PROJECT_NAME": "makeradmin",
-    "MYSQL_DB": "makerdata",
+    "MYSQL_DB": "makeradmin",
     "MYSQL_PORT": "3306",
     "MYSQL_USER": "makeradmin",
     "MYSQL_PASS": secrets.token_hex(16),
