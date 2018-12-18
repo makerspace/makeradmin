@@ -5,6 +5,15 @@ declare var UIkit: any;
 document.addEventListener('DOMContentLoaded', () => {
     const apiBasePath = window.apiBasePath;
 
+    function format_receipt_status(transaction_status: string) {
+        switch(transaction_status){
+            case "pending": return "Ej bekräftad";
+            case "completed": return "Lyckad";
+            case "failed": return "Misslyckad";
+        };
+        return "Okänd status";
+    }
+
     common.ajax("GET", apiBasePath + "/webshop/member/current/transactions", null)
     .then(json => {
         const rootElement = document.querySelector("#history-contents");
@@ -23,11 +32,15 @@ document.addEventListener('DOMContentLoaded', () => {
             const elem = document.createElement("div");
             // transaction.status is one of {pending | completed | failed}
             elem.innerHTML = `<div class="history-item history-item-${transaction.status}">
-                <h3><a href="/shop/receipt/${transaction.id}">${ new Date(transaction.created_at).toLocaleDateString("sv-SE") }</a></h3>
+                <h3>
+                    <a href="/shop/receipt/${transaction.id}">Kvitto ${transaction.id}</a>
+                    <span class="receipt-date"><a href="/shop/receipt/${transaction.id}">${ new Date(transaction.created_at).toLocaleDateString("sv-SE") }</a></span>
+                </h3>
                 <div class="receipt-items">
                     ${cartItems}
                 </div>
                 <div class="receipt-amount">
+                    <span class="receipt-payment-status">${format_receipt_status(transaction.status)}</span>
                     <span class="receipt-amount-value">${Cart.formatCurrency(Number(transaction.amount))}</span>
                 </div>
             </div>`;
