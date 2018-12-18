@@ -63,6 +63,24 @@ services:
       LETSENCRYPT_HOST: "${HOST_BACKEND}"
       LETSENCRYPT_EMAIL: "${ADMIN_EMAIL}"
 
+  api:
+    image: makeradmin/api:1.0
+    build:
+      context: ./api
+    depends_on:
+      - db2
+    networks:
+      - makeradmin
+    environment:
+      APP_DEBUG:
+      MYSQL_HOST: "db2:${MYSQL_PORT}"
+      MYSQL_DB: "makeradmin"
+      MYSQL_USER:
+      MYSQL_PASS:
+      VIRTUAL_HOST: "${HOST_BACKEND}"
+      LETSENCRYPT_HOST: "${HOST_BACKEND}"
+      LETSENCRYPT_EMAIL: "${ADMIN_EMAIL}"
+      
   backend:
     image: makeradmin/backend:1.0
     build: backend

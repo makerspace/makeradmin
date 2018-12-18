@@ -14,6 +14,14 @@ services:
       - "8010:80"
     environment:
       APP_DEBUG: "true"
+
+  api:
+    volumes:
+      - ./api/src:/work/src
+    ports:
+      - "8012:80"
+    environment:
+      APP_DEBUG: "true"
       
   membership:
     volumes:
