@@ -18,7 +18,7 @@ def send_access_token():
     if data is None:
         abort(400, "missing json")
 
-    redirect = "member"
+    redirect = "/member"
     if "redirect" in data:
         redirect = data["redirect"]
 
