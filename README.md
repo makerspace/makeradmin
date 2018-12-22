@@ -81,20 +81,32 @@ Bye
 ```
 
 ### Adding items to the shop
-The file [`webshop/src/scrape/tictail.json`](./webshop/src/scrape/tictail.json) contains a list of the items that can be bought with attributes. They must be imported to the docker container's database:
+The file [`backend/src/scrape/tictail.json`](./backend/src/scrape/tictail.json) contains a list of the items that can be bought with attributes. They must be imported to the docker container's database:
 ```bash
-docker-compose exec webshop bash -c "cd scrape && python3 tictail2db.py"
+docker-compose exec backend bash -c "cd src/scrape && python tictail2db.py"
 ```
 
 The docker container corresponding to the webshop must be rebuilt when it is changed (and then imported anew):
 ```bash
-docker-compose up -d --build webshop
+docker-compose up -d --build public
 ```
 
 ### Viewing MakerAdmin etc.
 Go to:
 * [the makeradmin web site](http://localhost:8009)
-* [the web shop](http://localhost:8010/shop)
+* [the web shop](http://localhost:8011/shop)
+
+### Logging in
+Go to [the member page](http://localhost:8011/member) and fill in the email address corresponding to the user created previously. A link will then be printed in the terminal (where `make dev` is run) that allows you to login. E.g.
+
+```
+[...]
+public_1            | 10.0.2.2 - - [18/Dec/2018:20:50:23 +0000] "GET / HTTP/1.1" 302 223 "http://localhost:8011/member/login/XHCgGQZGrjuG6bO7TVPkikTfQVRo6Eqn?redirect=member" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.110 Safari/537.36"
+[...]
+```
+
+### "Paying" with fake Stripe key
+You will not be able to go to the checkout unless you have a Stripe key in the .env-file. If this is set up, you can use [Stripe's fake cards](https://stripe.com/docs/testing#cards) for completing the purchase.
 
 ### Frontend js dev-server
 To run a webpack-dev-server inside a docker container (will node, npm
