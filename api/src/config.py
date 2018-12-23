@@ -59,6 +59,18 @@ COMPONENT_CONFIGS = [
         module='membership',
         url='/membership/',
         legacy_table='membership_member',
-    )
+    ),
+    ComponentConfig(
+        name='shop',
+        module='shop',
+        url='/shop/',
+        legacy_table='webshop_products',
+    ),
+    ComponentConfig(
+        name='messages',
+        module='messages',
+        url='/messages/',
+        legacy_table='messages_message',
+    ),
 ]
 

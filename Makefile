@@ -31,7 +31,7 @@ init-pip:
 init: init-pip init-npm
 
 init-db: .env
-	python3 db_init.py
+	docker-compose run api bash -c "cd /work/src && python3 migrate.py"
 
 insert-devel-data: .env
 	docker-compose run backend bash -c "cd /work/src/scrape && python3 tictail2db.py"
