@@ -12,8 +12,6 @@ services:
     environment:
       # Note: the config only seems to be updated when the container is initially created.
       # If the db config needs to be changed then the db image and volume needs to be destroyed first.
-      # TODO Why makerdata here?
-      MYSQL_DATABASE: "${MYSQL_DB}"
       MYSQL_ROOT_HOST: "db2"
       MYSQL_USER: "${MYSQL_USER}"
       MYSQL_PASSWORD: "${MYSQL_PASS}"

@@ -1,6 +1,6 @@
 FROM python:3.7-alpine
 
-RUN apk update && apk add bash netcat-openbsd less curl build-base python3-dev libffi-dev libressl-dev && rm -rf /var/cache/apk/*
+RUN apk update && apk add bash netcat-openbsd less curl build-base python3-dev libffi-dev libressl-dev linux-headers && rm -rf /var/cache/apk/*
 
 RUN mkdir -p /work/
 
