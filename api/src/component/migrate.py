@@ -77,7 +77,8 @@ def migrate(session_factory, table_names, component_configs):
             migration_sql = "INSERT INTO migrations VALUES (:id, :component, :name, :applied_at)"
             migration_args = {'id': migration.id, 'component': component_config.name, 'name': migration.name,
                               'applied_at': datetime.utcnow()}
-            
+
+            # TODO Make migrations with IF EXISTS robout instead, we still want to drop old tables.
             if migration.id == 1 and component_config.legacy_table in table_names:
                 logger.info(f"skipping {migration.name}, legacy table already present")
                 session.execute(migration_sql, migration_args)
