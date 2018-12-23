@@ -2,12 +2,12 @@ import re
 from collections import namedtuple
 from importlib import import_module
 from inspect import getfile
-
+from datetime import datetime
 from component.logging import logger
 from importlib.util import module_from_spec
 from importlib.util import spec_from_loader
 from importlib.machinery import SourceFileLoader
-from os.path import basename, splitext, dirname
+from os.path import basename, splitext, dirname, join
 from os import listdir
 
 
@@ -45,7 +45,7 @@ def migrate(session_factory, table_names, component_configs):
         
         migrations = []
         for filename in listdir(migrations_package_dir):
-            m = re.match(r'^((\d+)_.*\.py)$', filename)
+            m = re.match(r'^((\d+)_.*)\.py$', filename)
 
             if filename == '__init__.py':
                 continue
@@ -57,21 +57,33 @@ def migrate(session_factory, table_names, component_configs):
         
         migrations.sort(key=lambda m: m.id)
         
-        applied = [Migration(i, n) for i, n in
-                   session.execute("SELECT id, name FROM migrations WHERE component = %s ORDER BY ID",
-                                   component_config.name)]
-        print(migrations, applied)
+        applied = {i: Migration(i, n) for i, n in
+                   session.execute("SELECT id, name FROM migrations WHERE component = :component ORDER BY ID",
+                                   {'component': component_config.name})}
+        session.commit()
         
-        return
-        
-        print(table_names)
-    
-        try:
-            session.execute(f"SELECT 1 FROM {migration_table} LIMIT 1")
-        except:
-            raise
-        
-        module = load_module_from_file(filename)
+        for i, migration in enumerate(migrations, start=1):
+            if i != migration.id:
+                raise Exception(f"migrations should be numbered in sequence {migration.name} was not")
+
+            if migration.id in applied:
+                continue
+                
+            if migration.id == 1 and component_config.legacy_table in table_names:
+                logger.info(f"skipping {migration.name}, legacy table already present")
+                session.execute("INSERT INTO migrations VALUES (:id, :component, :name, :applied_at)",
+                                {'id': migration.id, 'component': component_config.name, 'name': migration.name,
+                                 'applied_at': datetime.utcnow()})
+                session.commit()
+            else:
+                logger.info(f"applying {migration.name}")
+                module = load_module_from_file(join(migrations_package_dir, migration.name + '.py'))
+                getattr(module, 'run')(session)
+                if not session.dirty:
+                    raise Exception("session not dirty, you should not commit in migration, resolve this manually")
+                session.commit()
+
+    logger.info("migration complete")
     
     session.close()
     
