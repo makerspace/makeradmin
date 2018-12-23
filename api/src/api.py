@@ -14,6 +14,7 @@ from membership.models import Base as MembershipBase, Member
 app = Flask(__name__)
 
 engine = create_engine('sqlite:////tmp/test.db', convert_unicode=True)
+# TODO Make sure app survives db disconnect.
 
 session: Union[Session, scoped_session] = scoped_session(sessionmaker(autocommit=False, autoflush=False, bind=engine))
 # TODO Base.query = db_session.query_property()

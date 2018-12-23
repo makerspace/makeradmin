@@ -4,8 +4,6 @@ from importlib import import_module
 from inspect import getfile
 from datetime import datetime
 
-import sqlparse
-
 from component.logging import logger
 from importlib.util import module_from_spec
 from importlib.util import spec_from_loader
@@ -87,7 +85,8 @@ def migrate(session_factory, table_names, component_configs):
             else:
                 logger.info(f"applying {migration.name}")
                 with open(join(migrations_dir, migration.name + '.sql')) as r:
-                    for sql in sqlparse.split(r.read()):
+                    lines = "\n".join(l for l in r if not l.startswith('--'))
+                    for sql in lines.split(';'):
                         session.execute(sql)
                 session.commit()
 

@@ -12,6 +12,7 @@ services:
     environment:
       # Note: the config only seems to be updated when the container is initially created.
       # If the db config needs to be changed then the db image and volume needs to be destroyed first.
+      MYSQL_DATABASE: "${MYSQL_DB}"
       MYSQL_ROOT_HOST: "db2"
       MYSQL_USER: "${MYSQL_USER}"
       MYSQL_PASSWORD: "${MYSQL_PASS}"
@@ -71,8 +72,9 @@ services:
       - makeradmin
     environment:
       APP_DEBUG:
-      MYSQL_HOST: "db2:${MYSQL_PORT}"
-      MYSQL_DB: "makeradmin"
+      MYSQL_HOST: db2
+      MYSQL_DB:
+      MYSQL_PORT:
       MYSQL_USER:
       MYSQL_PASS:
       VIRTUAL_HOST: "${HOST_BACKEND}"

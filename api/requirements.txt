@@ -3,4 +3,3 @@ sqlalchemy
 gunicorn
 rocky>=1,<2
 PyMySQL
-sqlparse
