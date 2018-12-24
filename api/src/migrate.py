@@ -20,6 +20,7 @@ with log_exception(status=1):
         raise Exception(f"could not connect to db at {host}:{port}")
     
     engine = create_engine(get_db_engine_config())
+    
     table_names = inspect(engine).get_table_names()
     session_factory = sessionmaker(autocommit=False, autoflush=False, bind=engine)
     migrate(session_factory, table_names, COMPONENT_CONFIGS)

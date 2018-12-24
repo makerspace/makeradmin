@@ -1,25 +1,7 @@
 #!/bin/bash
 set -e
 
-function wait_for {
-    local host="$1"
-    local port="$2"
-    for i in $(seq 1 100); do
-        if nc -z "$host" "$port"; then
-            return
-        fi
-        sleep 0.2
-    done
-    echo "wait for $host:$port timed out"
-    exit 1
-}
-
-# TODO Move wait to python.
-wait_for "${MYSQL_HOST%%:*}" "${MYSQL_HOST##*:}"
-
-
-echo "migrating"
-python3 src/migrate.py --assert-up-to-date
+python3 ./migrate.py
 
 GUNICORN_FLAGS=""
 
@@ -34,4 +16,4 @@ fi
 # However running the servers behind nginx (and using the sync class) resolves all problems
 # as nginx handles all the persistent connections.
 echo "starting gunicorn"
-exec gunicorn ${GUNICORN_FLAGS} --access-logfile - --worker-class sync --chdir src --workers=4 -b :80 api:app
+exec gunicorn ${GUNICORN_FLAGS} --access-logfile - --worker-class sync --workers=4 -b :80 api:app

@@ -14,6 +14,6 @@ COPY src /work/src
 
 EXPOSE 80
 
-WORKDIR "/work"
+WORKDIR "/work/src"
 
-CMD ["./run.sh"]
+CMD ["/work/run.sh"]

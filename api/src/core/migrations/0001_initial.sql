@@ -24,6 +24,28 @@ CREATE TABLE IF NOT EXISTS `login` (
 
 DROP TABLE IF EXISTS `migrations_apigateway`;
 
+-- TODO Remove when api-gateway is removed, but keep it until then beacuse api-gateway can't survive without it.
+CREATE TABLE  IF NOT EXISTS `services` (
+  `service_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `url` varchar(255) COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `endpoint` varchar(255) COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `version` varchar(12) COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime DEFAULT NULL,
+  `deleted_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`service_id`),
+  KEY `services_url_index` (`url`),
+  KEY `services_version_index` (`version`),
+  KEY `services_deleted_at_index` (`deleted_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- TODO Remove when api-gateway is removed, but keep it until then beacuse api-gateway can't survive without it.
+CREATE TABLE IF NOT EXISTS `relations` (
+  `url1` varchar(255) COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `url2` varchar(255) COLLATE utf8mb4_0900_ai_ci NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
 -- enable warnings
 SET sql_notes = 1;
 
