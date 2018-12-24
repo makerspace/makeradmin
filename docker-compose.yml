@@ -49,6 +49,7 @@ services:
       - db2
       - servicebase
       - library
+      - api
     networks:
       - makeradmin
     environment:

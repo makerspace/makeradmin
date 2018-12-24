@@ -17,9 +17,6 @@ function wait_for {
 wait_for "${MYSQL_HOST%%:*}" "${MYSQL_HOST##*:}"
 wait_for api-gateway 80
 
-echo "migrating"
-python3 src/migrate.py --assert-up-to-date
-
 GUNICORN_FLAGS=""
 
 if [ "$APP_DEBUG" = "true" ]; then
