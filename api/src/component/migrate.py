@@ -24,28 +24,35 @@ def load_module_from_file(filename):
 Migration = namedtuple("Migration", "id,name")
 
 
+def read_sql(filename):
+    with open(filename) as r:
+        content = "\n".join(l for l in r if not l.startswith('--'))
+        return (sql for sql in (s.strip() for s in content.split(';')) if sql)
+
+
 def migrate(session_factory, table_names, component_configs):
     session = session_factory()
 
     if 'migrations' not in table_names:
         logger.info("creating migrations table")
+        session.execute("ALTER DATABASE makeradmin CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci");
         session.execute("CREATE TABLE migrations ("
                         "    id INTEGER NOT NULL,"
-                        "    component VARCHAR(255) COLLATE utf8mb4_unicode_ci NOT NULL,"
-                        "    name VARCHAR(255) COLLATE utf8mb4_unicode_ci NOT NULL,"
+                        "    component VARCHAR(255) COLLATE utf8mb4_0900_ai_ci NOT NULL,"
+                        "    name VARCHAR(255) COLLATE utf8mb4_0900_ai_ci NOT NULL,"
                         "    applied_at DATETIME NOT NULL,"
-                        "    PRIMARY KEY (id)"
-                        ")")
+                        "    PRIMARY KEY (component, id)"
+                        ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci")
         session.commit()
         
     for component_config in component_configs:
-        logger.info(f"migrating {component_config.name}")
+        logger.info(f"{component_config.name}, migrating")
     
         component_module = import_module(component_config.module)
         component_package_dir = dirname(getfile(component_module))
         migrations_dir = join(component_package_dir, 'migrations')
         if not exists(migrations_dir):
-            logger.info(f"migrations dir {migrations_dir} does not exist, skipping component")
+            logger.info(f"{component_config.name}, migrations dir {migrations_dir} does not exist, skipping component")
             continue
         
         migrations = []
@@ -65,7 +72,8 @@ def migrate(session_factory, table_names, component_configs):
                                    {'component': component_config.name})}
         session.commit()
         
-        logger.info(f"{len(migrations) - len(applied)} migations to apply, {len(applied)} migrations already applied")
+        logger.info(f"{component_config.name}, {len(migrations) - len(applied)} migations to apply"
+                    f", {len(applied)} migrations already applied")
         
         for i, migration in enumerate(migrations, start=1):
             if i != migration.id:
@@ -74,24 +82,17 @@ def migrate(session_factory, table_names, component_configs):
             if migration.id in applied:
                 continue
 
-            migration_sql = "INSERT INTO migrations VALUES (:id, :component, :name, :applied_at)"
-            migration_args = {'id': migration.id, 'component': component_config.name, 'name': migration.name,
-                              'applied_at': datetime.utcnow()}
+            logger.info(f"{component_config.name}, applying {migration.name}")
 
-            # TODO Make migrations with IF EXISTS robout instead, we still want to drop old tables.
-            if migration.id == 1 and component_config.legacy_table in table_names:
-                logger.info(f"skipping {migration.name}, legacy table already present")
-                session.execute(migration_sql, migration_args)
-                session.commit()
-            else:
-                logger.info(f"applying {migration.name}")
-                with open(join(migrations_dir, migration.name + '.sql')) as r:
-                    lines = "\n".join(l for l in r if not l.startswith('--'))
-                    for sql in lines.split(';'):
-                        session.execute(sql)
-                session.commit()
+            for sql in read_sql(join(migrations_dir, migration.name + '.sql')):
+                session.execute(sql)
+                
+            session.execute("INSERT INTO migrations VALUES (:id, :component, :name, :applied_at)",
+                            {'id': migration.id, 'component': component_config.name, 'name': migration.name,
+                             'applied_at': datetime.utcnow()})
+            session.commit()
 
-    logger.info("migration complete")
+    logger.info("migrations complete")
     
     session.close()
     
