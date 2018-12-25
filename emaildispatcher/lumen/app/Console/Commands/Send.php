@@ -65,7 +65,7 @@ class Send extends Command
 					$email = $message->recipient;
 
 					// Override recipient
-					if ($mailgun_to_override !== false) {
+					if (!empty($mailgun_to_override)) {
 						$email = $mailgun_to_override;
 						echo "Sending mail to {$message->recipient} (overriding to $email)\n";
 					}
