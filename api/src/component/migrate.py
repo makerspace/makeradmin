@@ -8,7 +8,7 @@ from component.logging import logger
 from importlib.util import module_from_spec
 from importlib.util import spec_from_loader
 from importlib.machinery import SourceFileLoader
-from os.path import basename, splitext, dirname, join, isdir, exists
+from os.path import basename, splitext, dirname, join, exists
 from os import listdir
 
 
