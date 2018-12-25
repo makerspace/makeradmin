@@ -9,6 +9,8 @@ from component import ComponentConfig, logger
 class DockerEnvFile(Dict):
     """ Config reader to read from docker .env file. """
     
+    # TODO use python-dotenv instead
+    
     def __init__(self, filename, name=None, **kwargs):
         if not exists(filename):
             logger.info(f"docker .env file {filename} does not exist, skipping")
