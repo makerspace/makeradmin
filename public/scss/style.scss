@@ -22,6 +22,7 @@ html, body {
 	// right: 0px;
 	display: flex;
 	flex-direction: row;
+	min-height: 100%;
 	@include media("<=tablet") {
 		flex-direction: column;
 	}
@@ -62,21 +63,9 @@ html, body {
 	li a {
 		display: inline-block;
 	}
-}
 
-#content {
-	max-width: 800px;
-	padding: 10px;
-	overflow: hidden;
-	@include media(">tablet") {
-		padding-top: 200px;
-	}
-	flex: 1 1 auto;
-
-	.product-amount, .product-price, .product-unit {
-		@include media("<=tablet") {
-			display: none;
-		}
+	.uk-nav-default {
+		margin-top: 20px;
 	}
 }
 
@@ -216,11 +205,13 @@ html, body {
 .edit.active {
 	opacity: 1;
 	visibility: visible;
+	display: inline-block;
 }
 .edit {
 	opacity: 0;
-	display: inline-block;
-	visibility: hidden;
+	// display: inline-block;
+	// visibility: hidden;
+	display: none;
 	transition: opacity 500ms;
 }
 
@@ -466,6 +457,31 @@ form input.readonly-input {
 	}
 }
 
+#content {
+	max-width: 800px;
+	padding: 10px;
+	overflow: hidden;
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+	margin-bottom: 60px;
+
+	@include media(">tablet") {
+		padding-top: 100px;
+	}
+	flex: 1 1 auto;
+
+	.product-amount, .product-price, .product-unit {
+		@include media("<=tablet") {
+			display: none;
+		}
+	}
+}
+
+.content-centering {
+	max-width: 600px;
+}
+
 #single-page-content {
 	box-sizing: content-box;
 	min-width: 320px;
@@ -476,6 +492,12 @@ form input.readonly-input {
 	@include media(">550px") {
 		margin-top: 100px;
 		margin-bottom: 50px;
+	}
+}
+
+.purchase-history {
+	h1 {
+		margin-bottom: 0px;
 	}
 }
 
@@ -512,28 +534,13 @@ form input.readonly-input {
 	color: #CCC;
 }
 
-#purchase-history {
-	padding-top: 100px;
-	box-sizing: content-box;
-	min-width: 400px;
-	max-width: 580px;
-	padding-left: 20px;
-	padding-right: 20px;
-	margin-left: auto;
-	margin-right: auto;
-
-	h1 {
-		margin-bottom: 0px;
-	}
-
-	.text-navigation-footer {
-		color: #8bbdef;
-	}
-}
-
 .history-item-completed {
-	h3 {
+	.receipt-header {
 		background: #469ABE;
+		transition: background 100ms;
+	}
+	a.receipt-header:hover {
+		background: saturate(darken(#469ABE, 5%), 12%);
 	}
 	.receipt-items {
 		background: #2785AD;
@@ -544,8 +551,12 @@ form input.readonly-input {
 }
 
 .history-item-pending {
-	h3 {
+	.receipt-header {
 		background: #BE9A46;
+		transition: background 100ms;
+	}
+	a.receipt-header:hover {
+		background: saturate(darken(#BE9A46, 5%), 12%);
 	}
 	.receipt-items {
 		background: #AD8527;
@@ -556,8 +567,12 @@ form input.readonly-input {
 }
 
 .history-item-failed {
-	h3 {
+	.receipt-header {
 		background: #BE4646;
+		transition: background 100ms;
+	}
+	a.receipt-header:hover {
+		background: saturate(darken(#BE4646, 5%), 12%);
 	}
 	.receipt-items {
 		background: #AD2727;
@@ -575,23 +590,24 @@ form input.readonly-input {
 
 	box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.4);
 
-	h3 {
+	.receipt-header {
+		display: block;
 		margin-bottom: 0px;
 
 		padding-left: 20px;
 		padding-right: 20px;
 		padding-bottom: 5px;
 		padding-top: 5px;
+		color: white;
 
-		a {
+		&:hover {
+			text-decoration: none;
+		}
+
+		span {
 			font-size: 16pt;
 			color: #FFF;
 		}
-	}
-
-	.receipt-id {
-		color: rgba(255, 255, 255, 0.5);
-		float: left;
 	}
 
 	.receipt-date {
@@ -801,7 +817,7 @@ form input.readonly-input {
 }
 
 #cart {
-	padding-top: 20px;
+	padding-top: 0px;
 	padding-bottom: 10px;
 	list-style: none;
 	padding-left: 0px;
@@ -817,10 +833,18 @@ form input.readonly-input {
 	}
 }
 
+.cart-header {
+	margin-left: 12px;
+}
+
 .cartpage {
 	.text-navigation-footer {
 		margin-top: 30px;
 	}
+
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
 }
 
 .empty-cart {
@@ -831,6 +855,10 @@ form input.readonly-input {
 }
 
 // For membership page
+
+.member-form {
+	max-width: 600px;
+}
 
 .member-key-box {
 	margin-top: 10px;

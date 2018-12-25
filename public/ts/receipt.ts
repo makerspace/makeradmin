@@ -3,7 +3,9 @@ import {formatDateTime} from "./common";
 import {render_login} from "./login";
 declare var UIkit: any;
 
-document.addEventListener('DOMContentLoaded', () => {
+common.documentLoaded().then(() => {
+    common.addSidebarListeners();
+
     const content = document.getElementById("receipt-content");
 
     function pending() {
@@ -37,25 +39,28 @@ document.addEventListener('DOMContentLoaded', () => {
         content.innerHTML = `
             <h1>Tack för ditt köp!</h1>
             <div class="history-item history-item-${transaction.status}">
-                <h3 class="receipt-id">Kvitto ${transaction.id}<span class="receipt-date">${createdAt}</span></h3>
-                    <div class="receipt-items">
-                        ${cartHtml}
-                    </div>
-                    <div class="receipt-amount">
-                        <span>Summa</span>
-                        <span class="receipt-amount-value">${transaction.amount} kr</span>
-                    </div>
-                    <div class="receipt-items">
-                        <div class="receipt-item">
-                            <span class="product-title">Medlem</span>
-                            <span class="receipt-item-amount" style="min-width: 200px;">${member.firstname} ${member.lastname} #${member.member_number}</span>
-                        </div>
+                <span class="receipt-id receipt-header">
+                    <span>Kvitto ${transaction.id}</span>
+                    <span class="receipt-date">${createdAt}</span>
+                </span>
+                <div class="receipt-items">
+                    ${cartHtml}
+                </div>
+                <div class="receipt-amount">
+                    <span>Summa</span>
+                    <span class="receipt-amount-value">${transaction.amount} kr</span>
+                </div>
+                <div class="receipt-items">
+                    <div class="receipt-item">
+                        <span class="product-title">Medlem</span>
+                        <span class="receipt-item-amount" style="min-width: 200px;">${member.firstname} ${member.lastname} #${member.member_number}</span>
                     </div>
                 </div>
-                <div class="receipt-message">
-                    <p>Ett kvitto har också skickats via email.</p>
-                    <p>Stockholm Makerspace - Drottning Kristinas väg 53, 114 28 Stockholm</p>
-                </div>
+            </div>
+            <div class="receipt-message">
+                <p>Ett kvitto har också skickats via email.</p>
+                <p>Stockholm Makerspace - Drottning Kristinas väg 53, 114 28 Stockholm</p>
+            </div>
         `;
     }
 

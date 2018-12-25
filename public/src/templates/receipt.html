@@ -1,3 +1,4 @@
+{% from "sidebar.html" import sidebar with context %}
 <!DOCTYPE html>
 <html>
     <head>
@@ -15,15 +16,12 @@
         <script src='{{ STATIC }}/js/receipt.js'></script>
     </head>
     <body>
-        <div id="single-page-content" class="receipt">
-            <div class="header-logo">
-                <a href="/shop"><img src='{{ STATIC }}/images/logo-transparent-500px-300x210.png' /></a>
-            </div>
-            <div id="receipt-content"></div>
-            <div class="text-navigation-footer">
-                <a href='/member'>Medlemsvy</a>
-                <a href='{{ url("/member/history") }}'>Köphistorik</a>
-                <a href='{{ url("/") }}'>Webshop</a>
+        <div id="root">
+            {{ sidebar("") }}
+            <div id="content" class="receipt">
+                <div class="content-centering">
+                    <div id="receipt-content"></div>
+                </div>
             </div>
         </div>
     </body>

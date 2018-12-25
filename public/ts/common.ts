@@ -102,6 +102,15 @@ export function onGetAndDocumentLoaded(url: string, callback: any) {
         })
 }
 
+export function addSidebarListeners() {
+	const logoutButton = document.querySelector("#logout");
+	if (logoutButton != null) {
+		logoutButton.addEventListener("click", (e) => {
+	        e.preventDefault();
+	        logout();
+	    });
+	}
+}
 
 export function logout() {
     localStorage.setItem("token", null);
