@@ -4,7 +4,7 @@
 ## Install 
 
 ### Docker
-```
+```bash
 sudo apt-get install docker.io docker-compose
 sudo adduser your_username docker
 ```
@@ -14,7 +14,7 @@ You need to sign out and sign back in again for changes to take effect.
 Python 3.6 or higher is required.
 
 ### npm
-```
+```bash
 sudo apt-get install npm
 ```
 
@@ -24,30 +24,38 @@ make init
 ```
 
 ## Initialize everything
-```
+```bash
 make firstrun
 ```
 
-This will initialize submodules, build docker images and configure the database. This may take quite some time.
+This will build docker images and configure the database. This may take quite some time.
 It will also generate a `.env` file with new random keys and passwords that the system will use.
 
-If you are deploying on a server you need to configure hosts and other system by editing the `.env` file.
+You will be prompted for if you want to create a new admin user, it is recommended to do this here.
+
+If you are deploying on a server you need to configure hosts and other settings by editing the `.env` file.
+If you do modify the `.env` file you need to restart the services afterwards by running
+
+```bash
+docker-compose up -d --build
+```
 
 ## Start MakerAdmin, web shop, etc.
 
 Run all services locally (but you will have to insert data, see below):
-```
+```bash
 make run
 ```
 
 You can also run in dev mode where source directories are mounted inside the containers and sources are 
 reloaded when changed (in most cases):
 
-```
+```bash
 make dev
 ```
 
-### Add a user that can access MakerAdmin
+### Adding new users that can access MakerAdmin
+This can be done from the web UI, but it can be convenient to do it from the commandline too
 ```
 python3 create_user.py --first-name "Maker" --last-name "Makersson" --email "maker@example.com" --type admin
 ```
@@ -58,30 +66,16 @@ docker-compose run --rm --no-deps membership /usr/bin/php /var/www/html/artisan 
 ```
 
 ### Adding permissions for all users to view data on MakerAdmin
-Start up Docker's mysql instance
 
-```
-$ ./mysql.sh
-```
+If the admins don't seem to have the permissions that they should have (possibly because you have upgraded makeradmin to a newer version)
+then you might have to update the permissions. Simply running the firstrun script again will do this:
 
-Add persmissions for users (any that you added above)
-```
-mysql> use makeradmin
-
-mysql> insert into membership_group_permissions (group_id, permission_id) select 1, permission_id from membership_permissions where permission != 'service';
-Query OK, 25 rows affected (0.04 sec)
-Records: 25  Duplicates: 0  Warnings: 0
-
-mysql> update access_tokens set permissions = null where user_id > 0;
-Query OK, 2 rows affected (0.02 sec)
-Rows matched: 2  Changed: 2  Warnings: 0
-
-mysql> exit
-Bye
+```bash
+make firstrun
 ```
 
 ### Adding items to the shop
-The file [`backend/src/scrape/tictail.json`](./backend/src/scrape/tictail.json) contains a list of the items that can be bought with attributes. They must be imported to the docker container's database:
+The file [`backend/src/scrape/tictail.json`](./backend/src/scrape/tictail.json) contains an example list of items that can be bought in the webshop. They must be imported to the docker container's database:
 ```bash
 docker-compose exec backend bash -c "cd src/scrape && python tictail2db.py"
 ```

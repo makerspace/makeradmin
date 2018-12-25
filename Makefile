@@ -46,8 +46,8 @@ test-admin-js:
 	npm --prefix admin run eslint
 	npm --prefix admin run test
 
-firstrun: .env build init-db
-	echo -e "\e[31mRun 'make run' to start MakerAdmin\e[0m"
+firstrun: .env build
+	python3 firstrun.py
 
 admin-dev-server:
 	mkdir -p admin/node_modules
