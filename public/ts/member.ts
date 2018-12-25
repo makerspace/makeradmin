@@ -3,7 +3,9 @@ import * as login from "./login"
 import {logout} from "./common";
 declare var UIkit: any;
 
-document.addEventListener('DOMContentLoaded', () => {
+common.documentLoaded().then(() => {
+    common.addSidebarListeners();
+
     const apiBasePath = window.apiBasePath;
 
     function renderInfo(info: any, templateStrings: any) {
@@ -108,7 +110,7 @@ document.addEventListener('DOMContentLoaded', () => {
             </fieldset>`;
     }
 
-    const root = <HTMLElement>document.querySelector("#single-page-content");
+    const root = <HTMLElement>document.querySelector("#content");
 
     const future1 = common.ajax("GET", apiBasePath + "/member/current", null);
     const future2 = common.ajax("GET", apiBasePath + "/member/current/membership", null);
@@ -118,7 +120,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const member = member_json.data;
         const membership = membership_json.data;
         root.innerHTML = `
-            <form class="product-edit-form uk-form uk-form-stacked uk-margin-bottom">
+            <form class="uk-form uk-form-stacked uk-margin-bottom">
                 <h2>Medlem ${member.member_number}: ${member.firstname} ${member.lastname}</h2>
                 <fieldset>
                     <legend><i uk-icon="user"></i> Personuppgifter</legend>
@@ -160,22 +162,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 </fieldset>
 
                 ${render_key_view(membership, pending_actions_json)}
-
-                <fieldset>
-                    <legend><i uk-icon="cart"></i> Webshop</legend>
-                    <a class="uk-button uk-button-default uk-margin-top" href="/shop/member/history">Visa köphistorik</a>
-                    <a class="uk-button uk-button-default uk-margin-top uk-margin-left" href="/shop/">Gå till webshoppen</a>
-                </fieldset>
-
-                <div class="uk-form-row">
-                    <button type="button" id="logout" class="uk-button uk-button-secondary uk-margin-left"><span uk-icon="sign-out"></span> Logga ut</button>
-                </div>
             </form>`;
-
-        root.querySelector("#logout").addEventListener("click", (e) => {
-            e.preventDefault();
-            logout();
-        });
     }).catch(e => {
         // Probably Unauthorized, redirect to login page.
         if (e.message == "Unauthorized") {

@@ -4,6 +4,8 @@ declare var UIkit: any;
 
 
 common.onGetAndDocumentLoaded("/webshop/product_edit_data/" + window.productId, (value: any) => {
+    common.addSidebarListeners();
+
     const {categories, product, actions, images, filters, action_categories} = value;
     const apiBasePath = window.apiBasePath;
 

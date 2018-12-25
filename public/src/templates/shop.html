@@ -1,3 +1,4 @@
+{% from "sidebar.html" import sidebar with context %}
 <!DOCTYPE html>
 <html>
     <head>
@@ -13,26 +14,7 @@
     </head>
     <body>
         <div id="root">
-            <div id="left-sidebar">
-                <div class="sidebar-fixed-content">
-                    <img src='{{ STATIC }}/images/logo-transparent-500px-300x210.png' />
-                    <h3>Kategorier</h3>
-                    <ul id="categories" class="uk-nav uk-nav-default">
-                        <li>
-                            <button type="button" class="uk-button uk-button-primary uk-button-small edit category-add" uk-icon="plus"></button>
-                        </li>
-                        <li>
-                            <a href="cart"><span uk-icon="cart"></span> Min kundvagn<span id="cart-sum"></span></a>
-                        </li>
-                        <li>
-                            <a href="member/history"><span uk-icon="history"></span> Min köphistorik</a>
-                        </li>
-                        <li>
-                            <a href="/member"><span uk-icon="user"></span> Medlemsvy</a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
+            {{ sidebar("shop") }}
             <div id="content">
                 <button id="edit" class="uk-icon-button" uk-icon="icon: pencil"><span>Edit</span></button>
                 <ul class="product-list">

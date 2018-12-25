@@ -3,6 +3,8 @@ import * as common from "./common"
 declare var UIkit: any;
 
 common.onGetAndDocumentLoaded("/webshop/product_data/" + window.productId, (value: any) => {
+    common.addSidebarListeners();
+
     const {product, data, images} = value;
 
     document.getElementById("name").innerText = product.name;

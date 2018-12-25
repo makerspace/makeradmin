@@ -5,6 +5,8 @@ declare var UIkit: any;
 
 
 common.onGetAndDocumentLoaded("/webshop/product_data", (value: any) => {
+	common.addSidebarListeners();
+
     const {data} = value;
 	const id2item = new Map<number, any>();
 

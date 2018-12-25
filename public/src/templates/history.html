@@ -1,3 +1,4 @@
+{% from "sidebar.html" import sidebar with context %}
 <!DOCTYPE html>
 <html>
     <head>
@@ -12,15 +13,16 @@
         <script src='{{ STATIC }}/js/history.js'></script>
     </head>
     <body>
-        <div id="purchase-history">
-            <h1>Köphistorik</h1>
-            <div class="receipt-buttons">
-                <a href='/member'><span uk-icon="user"></span> Medlemsvy</a>
-                <a href='{{ url("/") }}'><span uk-icon="cart"></span> Webshop</a>
-            </div>
-            <h2 id="member-header"></h2>
-            <div id="history-contents">
-                <div uk-spinner></div>
+        <div id="root">
+            {{ sidebar("history") }}
+            <div id="content" class="purchase-history">
+                <div class="content-centering">
+                    <h1>Köphistorik</h1>
+                    <h2 id="member-header"></h2>
+                    <div id="history-contents">
+                        <div uk-spinner></div>
+                    </div>
+                </div>
             </div>
         </div>
     </body>

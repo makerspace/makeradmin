@@ -3,15 +3,17 @@ import * as common from "./common"
 declare var UIkit: any;
 
 common.onGetAndDocumentLoaded("/webshop/product_data", (value: any) => {
+    common.addSidebarListeners();
+
     const {categories, data} = value;
   const apiBasePath = window.apiBasePath;
   const webshop_edit_permission = "webshop_edit";
   const service_permission = "service";
 
-    let categoriesUl = document.getElementById("categories");
-    let fixedLi = categoriesUl.firstChild;
+    const categoriesUl = document.getElementById("categories");
+    const fixedLi = categoriesUl.firstChild;
     categories.forEach((category: any) => {
-        let li = document.createElement("li");
+        const li = document.createElement("li");
         li.innerHTML = `
             <a href="#category${category.id}" uk-scroll><span uk-icon="tag"></span> ${category.name}</a>
             <div class="category-edit-box">
@@ -66,12 +68,13 @@ common.onGetAndDocumentLoaded("/webshop/product_data", (value: any) => {
   const id2cartItem = new Map();
   const id2item = new Map();
 
+  const productListElem = document.querySelector(".product-list");
   for (const cat of data) {
     const catLi = `
       <li><h3 id="category${cat.id}">${cat.name}</h3></li>
     `;
 
-    document.querySelector(".product-list").insertAdjacentHTML("beforeend", catLi);
+    productListElem.insertAdjacentHTML("beforeend", catLi);
     for (const item of cat.items) {
       let price = item.price;
       price *= item.smallest_multiple;
@@ -133,7 +136,7 @@ common.onGetAndDocumentLoaded("/webshop/product_data", (value: any) => {
         ev.preventDefault();
       });
 
-      document.querySelector(".product-list").appendChild(li);
+      productListElem.appendChild(li);
     }
   }
 

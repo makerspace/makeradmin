@@ -6,6 +6,8 @@ declare var UIkit: any;
 
 
 common.onGetAndDocumentLoaded("/webshop/register_page_data", (value: any) => {
+    common.addSidebarListeners();
+
     const {data, products} = value;
 
   // Create a Stripe client.

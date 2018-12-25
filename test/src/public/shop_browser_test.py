@@ -34,7 +34,7 @@ class Test(ShopTestMixin, SeleniumTest):
         self.webdriver.switch_to.default_content()
         
         self.wait_for_element(id='pay-button').click()
-        self.assertIn("Kvitto", self.wait_for_element(css=".receipt-id", timeout=SELENIUM_BASE_TIMEOUT * 12).text)
+        self.assertIn("Kvitto", self.wait_for_element(css=".receipt-header", timeout=SELENIUM_BASE_TIMEOUT * 12).text)
 
         # Recipt
         

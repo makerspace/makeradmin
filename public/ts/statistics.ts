@@ -6,7 +6,7 @@ declare var UIkit: any;
 declare var moment: any;
 declare var Chart: any;
 
-document.addEventListener('DOMContentLoaded', () => {
+common.documentLoaded().then(() => {
 	const apiBasePath = window.apiBasePath;
 	const webshop_edit_permission = "webshop_edit";
 	const service_permission = "service";

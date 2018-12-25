@@ -1,25 +1,31 @@
 import * as common from "./common"
+import * as login from "./login"
 import Cart from "./cart"
 declare var UIkit: any;
 
-document.addEventListener('DOMContentLoaded', () => {
+common.documentLoaded().then(() => {
+    common.addSidebarListeners();
+
     const apiBasePath = window.apiBasePath;
 
     function format_receipt_status(transaction_status: string) {
         switch(transaction_status){
             case "pending": return "Ej bekräftad";
-            case "completed": return "Lyckad";
+            case "completed": return "";
             case "failed": return "Misslyckad";
         };
         return "Okänd status";
     }
 
-    common.ajax("GET", apiBasePath + "/webshop/member/current/transactions", null)
-    .then(json => {
-        const rootElement = document.querySelector("#history-contents");
-        rootElement.innerHTML = "";
+    const future1 = common.ajax("GET", apiBasePath + "/webshop/member/current/transactions", null);
+    const future2 = common.ajax("GET", apiBasePath + "/member/current", null);
 
-        for (const transaction of json.data) {
+    const rootElement = <HTMLElement>document.querySelector("#history-contents");
+    rootElement.innerHTML = "";
+
+    Promise.all([future1, future2]).then(([transactionJson, memberJson]) => {
+
+        for (const transaction of transactionJson.data) {
             let cartItems = "";
             for (const item of transaction.content) {
                 cartItems += `<div class="receipt-item">
@@ -32,10 +38,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const elem = document.createElement("div");
             // transaction.status is one of {pending | completed | failed}
             elem.innerHTML = `<div class="history-item history-item-${transaction.status}">
-                <h3>
-                    <a href="/shop/receipt/${transaction.id}">Kvitto ${transaction.id}</a>
-                    <span class="receipt-date"><a href="/shop/receipt/${transaction.id}">${ new Date(transaction.created_at).toLocaleDateString("sv-SE") }</a></span>
-                </h3>
+                <a class="receipt-header" href="/shop/receipt/${transaction.id}">
+                    <span>Kvitto ${transaction.id}</span>
+                    <span class="receipt-date">${ new Date(transaction.created_at).toLocaleDateString("sv-SE") }</span>
+                </a>
                 <div class="receipt-items">
                     ${cartItems}
                 </div>
@@ -46,17 +52,17 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>`;
             rootElement.appendChild(elem.firstChild);
         }
-    })
-    .catch(json => {
-        UIkit.modal.alert("<h2>Misslyckades med att hämta köphistorik</h2>" + common.get_error(json));
-    });
 
-    common.ajax("GET", apiBasePath + "/member/current", null)
-    .then(json => {
-        const member = json.data;
+        const member = memberJson.data;
         document.querySelector("#member-header").textContent = `#${member.member_number} ${member.firstname} ${member.lastname}`;
     })
     .catch(json => {
-        UIkit.modal.alert("<h2>Misslyckades med att hämta medlemsinformation</h2>" + common.get_error(json));
+        // Probably Unauthorized, redirect to login page.
+        if (json.message == "Unauthorized") {
+            // Render login
+            login.render_login(rootElement, null, null);
+        } else {
+            UIkit.modal.alert("<h2>Misslyckades med att hämta köphistorik</h2>" + common.get_error(json));
+        }
     });
 });
