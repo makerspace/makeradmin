@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function format_receipt_status(transaction_status: string) {
         switch(transaction_status){
             case "pending": return "Ej bekräftad";
-            case "completed": return "Lyckad";
+            case "completed": return "";
             case "failed": return "Misslyckad";
         };
         return "Okänd status";
