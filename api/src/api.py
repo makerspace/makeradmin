@@ -4,7 +4,7 @@ from flask import Flask
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, scoped_session, Session
 
-from component import logger
+from service import logger
 from config import get_db_engine_config, config
 from util import wait_for, can_connect
 

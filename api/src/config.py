@@ -3,7 +3,7 @@ from os.path import abspath, join, basename, exists
 
 from rocky.config import Config, Dict, Env
 
-from component import ComponentConfig, logger
+from service import logger, InternalServiceConfig
 
 
 class DockerEnvFile(Dict):
@@ -49,30 +49,26 @@ def get_db_engine_config():
     return f"mysql+pymysql://{user}:{pwd}@{host}:{port}/{db}"
 
 
-COMPONENT_CONFIGS = [
-    ComponentConfig(
+SERVICE_CONFIGS = [
+    InternalServiceConfig(
         name='core',
         module='core',
-        url='/',
-        legacy_table='access_tokens',
+        path='/',
     ),
-    ComponentConfig(
+    InternalServiceConfig(
         name='membership',
         module='membership',
-        url='/membership/',
-        legacy_table='membership_member',
+        path='/membership/',
     ),
-    ComponentConfig(
+    InternalServiceConfig(
         name='shop',
         module='shop',
-        url='/shop/',
-        legacy_table='webshop_products',
+        path='/shop/',
     ),
-    ComponentConfig(
+    InternalServiceConfig(
         name='messages',
         module='messages',
-        url='/messages/',
-        legacy_table='messages_message',
+        path='/messages/',
     ),
 ]
 
