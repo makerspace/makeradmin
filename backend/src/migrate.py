@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 
-import service
+import backend_service
 import os
 import sys
 
 check = len(sys.argv) > 1 and sys.argv[1] == "--assert-up-to-date"
 
-db, gateway, debug = service.read_config()
+db, gateway, debug = backend_service.read_config()
 db.connect()
 
 green = "\033[32m"

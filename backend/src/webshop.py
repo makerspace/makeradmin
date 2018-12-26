@@ -2,8 +2,8 @@ from logging import getLogger
 
 from flask import request, render_template
 
-import service
-from service import eprint, assert_get, route_helper, format_datetime, abort
+import backend_service
+from backend_service import eprint, assert_get, route_helper, format_datetime, abort
 import stripe
 import os
 from decimal import Decimal, Rounded, localcontext
@@ -25,7 +25,7 @@ from dataclasses import dataclass
 logger = getLogger('makeradmin')
 
 
-instance = service.create(name="webshop", url="webshop", port=80, version="1.0")
+instance = backend_service.create(name="webshop", url="webshop", port=80, version="1.0")
 
 # Grab the database so that we can use it inside requests
 db = instance.db

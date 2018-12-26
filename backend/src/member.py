@@ -1,5 +1,5 @@
 from flask import request, jsonify, render_template
-from service import assert_get, route_helper, create, abort
+from backend_service import assert_get, route_helper, create, abort
 import urllib.parse
 from typing import Dict, Any
 from logging import getLogger

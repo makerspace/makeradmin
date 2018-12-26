@@ -1,14 +1,14 @@
 import sys
 import os
 sys.path.insert(1, os.path.join(sys.path[0], '../servicebase_python'))
-import service
-from service import eprint
+import backend_service
+from backend_service import eprint
 from datetime import datetime, timedelta
 import json
 import re
 
 
-gateway = service.gateway_from_envfile(".env")
+gateway = backend_service.gateway_from_envfile(".env")
 
 keys = gateway.get("keys").json()["data"]
 members = gateway.get("membership/member").json()["data"]
@@ -49,7 +49,7 @@ for key, member in zip(keys, matching_members):
 
         # If the key does not have a start date, set the current date as the start date
         if start is None:
-            start = service.format_datetime(datetime.now())
+            start = backend_service.format_datetime(datetime.now())
 
         span = {
             "member_id": member["member_id"],
@@ -72,7 +72,7 @@ for key, member in zip(keys, matching_members):
                 special_span = {
                     "member_id": member["member_id"],
                     "startdate": start,
-                    "enddate": service.format_datetime(special_end),
+                    "enddate": backend_service.format_datetime(special_end),
                     "type": "special_labaccess",
                     "creation_reason": "migrated"
                 }
@@ -85,7 +85,7 @@ for key, member in zip(keys, matching_members):
             if add_lab.group(0) not in {'n', 'no'}:
                 # Valid date was entered
                 lab_end = datetime.strptime('20'+add_lab.group(1) if len(add_lab.group(1)) == 8 else add_lab.group(1),'%Y-%m-%d')
-                span['enddate'] = service.format_datetime(lab_end)
+                span['enddate'] = backend_service.format_datetime(lab_end)
                 confirm_post(gateway, f"membership/member/{member['member_id']}/addMembershipSpan", span)
         else:
             r = gateway.post(f"membership/member/{member['member_id']}/addMembershipSpan", span)

@@ -7,10 +7,10 @@ from typing import Optional
 # Ugly
 sys.path.append(os.path.join(os.path.dirname(__file__), "backend/src"))
 
-import service
+import backend_service
 
 def create_user(first_name: str, last_name: str, email: str, user_type: str, password: Optional[str]):
-    gateway = service.gateway_from_envfile(".env")
+    gateway = backend_service.gateway_from_envfile(".env")
 
 
     try:

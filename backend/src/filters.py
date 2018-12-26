@@ -1,4 +1,4 @@
-from service import BackendException, APIGateway
+from backend_service import BackendException, APIGateway
 from dateutil import parser
 from datetime import datetime, timedelta
 from webshop_entities import CartItem

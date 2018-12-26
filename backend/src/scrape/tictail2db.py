@@ -6,9 +6,9 @@ import re
 import os
 
 sys.path.insert(1, os.path.join(sys.path[0], '..'))
-import service
+import backend_service
 
-db, gateway, debug = service.read_config()
+db, gateway, debug = backend_service.read_config()
 db.connect()
 
 data = json.loads(open("tictail.json", encoding="utf-8").read())
