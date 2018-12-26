@@ -4,6 +4,9 @@ set -e
 # Wait for database to be ready
 /usr/local/myscripts/wait-for "$MYSQL_HOST"
 
+# Wait for api to be ready (TODO temporary hack to prevent the api gateway from failing until api has migrated).
+/usr/local/myscripts/wait-for api:80
+
 mkdir -p /var/www/html/storage
 mkdir -p /var/www/html/bootstrap/cache
 

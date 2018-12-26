@@ -16,7 +16,7 @@ with log_exception(status=1):
     port = int(config.get('MYSQL_PORT'))
 
     logger.info(f"waiting for db to respond at {host}:{port}")
-    if not wait_for(lambda: can_connect(host, port), timeout=8, interval=0.5):
+    if not wait_for(lambda: can_connect(host, port), timeout=24, interval=0.5):
         raise Exception(f"could not connect to db at {host}:{port}")
     
     engine = create_engine(get_db_engine_config())
