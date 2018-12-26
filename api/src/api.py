@@ -1,31 +1,54 @@
-from typing import Union
-
 from flask import Flask
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, scoped_session, Session
 
-from service import logger
-from config import get_db_engine_config, config
-from util import wait_for, can_connect
+from db import connect
+from service.db import db_session_factory, db_session
+from services import services
 
 app = Flask(__name__)
+for path, service in services:
+    app.register_blueprint(service, path=path)
+    
 
-# TODO Duplicate code
-host = config.get('MYSQL_HOST')
-port = int(config.get('MYSQL_PORT'))
-logger.info(f"waiting for db to respond at {host}:{port}")
-if not wait_for(lambda: can_connect(host, port), timeout=24, interval=0.5):
-    raise Exception(f"could not connect to db at {host}:{port}")
-engine = create_engine(get_db_engine_config())
-# TODO Make sure app survives db disconnect.
+engine = connect()
 
-session: Union[Session, scoped_session] = scoped_session(sessionmaker(autocommit=False, autoflush=False, bind=engine))
+db_session_factory.init_with_engine(engine)
 
 
-# TODO Check signature, what happends with exception.
 @app.teardown_appcontext
 def shutdown_session(exception=None):
-    session.remove()
+    db_session.remove()
     
 
 # TODO Use Sentry?
+
+@app.route("/")
+def index():
+    return "/"
+    # // Index page, test to see if the user is logged in or not
+    # $app->  get("/", ["middleware" => "auth:service", "uses" => "ServiceRegistry@test"]);
+
+
+# TODO Make sure nobody calls this and remove it.
+@app.route("/service/register")
+def service_register():
+    return "ok", 200
+
+
+# TODO Make sure nobody calls this and remove it.
+@app.route("/service/unregister")
+def service_unregister():
+    return "ok", 200
+
+    
+# // OAuth 2.0 stuff
+# $app->  post("oauth/token",          "Authentication@login");
+# $app->  post("oauth/resetpassword",  "Authentication@reset");
+# $app->   get("oauth/token",         ["middleware" => "auth", "uses" => "Authentication@listTokens"]);
+# $app->delete("oauth/token/{token}", ["middleware" => "auth", "uses" => "Authentication@logout"]);
+#
+# // Allow other services to get login tokens for any user
+# $app->  post("oauth/force_token", ["middleware" => "auth:service", "uses" => "Authentication@unauthenticated_login"]);
+#
+# // Service registry
+# $app->post("service/register",   ["middleware" => "auth:service", "uses" => "ServiceRegistry@register"]);
+# $app->post("service/unregister", ["middleware" => "auth:service", "uses" => "ServiceRegistry@unregister"]);

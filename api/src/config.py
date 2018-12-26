@@ -3,7 +3,7 @@ from os.path import abspath, join, basename, exists
 
 from rocky.config import Config, Dict, Env
 
-from service import logger, InternalServiceConfig
+from service import logger
 
 
 class DockerEnvFile(Dict):
@@ -47,13 +47,3 @@ def get_db_engine_config():
     if not pwd: raise Exception("config MYSQL_PASS is required")
     
     return f"mysql+pymysql://{user}:{pwd}@{host}:{port}/{db}"
-
-
-SERVICE_CONFIGS = [
-    InternalServiceConfig(
-        name='core',
-        module='core',
-        path='/',
-    ),
-]
-
