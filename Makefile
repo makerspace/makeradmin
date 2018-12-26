@@ -30,6 +30,7 @@ init-pip:
 
 init: init-pip init-npm
 
+# TODO Remove this, db migrations will be done at container startup by each run script.
 init-db: .env
 	docker-compose run api bash -c "cd /work/src && python3 migrate.py"
 

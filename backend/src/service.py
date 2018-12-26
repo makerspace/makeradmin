@@ -154,7 +154,7 @@ class Service:
 
     def register(self):
         endpoint = "http://" + socket.gethostname() + ":" + str(self.port) + "/"
-        logger.info(f"registering service {self.name}, url: {self.url}, endpoint: {endpoint}")
+        # logger.info(f"registering service {self.name}, url: {self.url}, endpoint: {endpoint}")
         payload = {
             "name": self.name,
             "url": self.url,
@@ -163,10 +163,11 @@ class Service:
         }
         r = self.gateway.post("service/register", payload)
         if not r.ok:
-            logger.warning(f"failed to register service {self.name}, ignoring: {r.json().get('message')}")
+            pass
+            # logger.warning(f"failed to register service {self.name}, ignoring: {r.json().get('message')}")
 
     def unregister(self):
-        logger.info(f"unregistering service {self.name}, url: {self.url}")
+        # logger.info(f"unregistering service {self.name}, url: {self.url}")
         payload = {
             "url": self.url,
             "version": self.version

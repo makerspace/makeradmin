@@ -46,6 +46,8 @@ def migrate(session_factory, table_names, service_configs):
         session.commit()
         
     for service_config in service_configs:
+        # TODO Only for InternalServices and make it pythonic.
+        
         logger.info(f"{service_config.name}, migrating")
     
         service_module = import_module(service_config.module)

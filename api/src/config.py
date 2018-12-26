@@ -55,20 +55,5 @@ SERVICE_CONFIGS = [
         module='core',
         path='/',
     ),
-    InternalServiceConfig(
-        name='membership',
-        module='membership',
-        path='/membership/',
-    ),
-    InternalServiceConfig(
-        name='shop',
-        module='shop',
-        path='/shop/',
-    ),
-    InternalServiceConfig(
-        name='messages',
-        module='messages',
-        path='/messages/',
-    ),
 ]
 
