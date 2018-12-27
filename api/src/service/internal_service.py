@@ -5,7 +5,7 @@ from os.path import dirname, join, isdir, exists
 from flask import Blueprint, g, jsonify
 
 from service.api_definition import Arg, PUBLIC
-from service.error import PermissionDenied
+from service.error import Forbidden
 from service.migrate import migrate_service
 
 
@@ -46,7 +46,7 @@ class InternalService(Blueprint):
             @wraps(f)
             def view_wrapper(*args, **kwargs):
                 if permission != PUBLIC and permission not in g.permissions:
-                    raise PermissionDenied(message=f"user does not have the {permission} permission")
+                    raise Forbidden(message=f"user does not have the {permission} permission")
                 
                 Arg.fill_args(params, kwargs)
                 

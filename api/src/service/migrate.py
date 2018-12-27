@@ -27,7 +27,7 @@ def ensure_migrations_table(engine, session_factory):
         with closing(session_factory()) as session:
             session = session_factory()
             logger.info("creating migrations table")
-            session.execute("ALTER DATABASE makeradmin CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci");
+            session.execute("ALTER DATABASE makeradmin CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci")
             session.execute("CREATE TABLE migrations ("
                             "    id INTEGER NOT NULL,"
                             "    service VARCHAR(255) COLLATE utf8mb4_0900_ai_ci NOT NULL,"

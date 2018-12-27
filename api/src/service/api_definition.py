@@ -5,7 +5,7 @@ from inspect import signature
 
 from flask import request
 
-from service.error import ApiError
+from service.error import ApiError, UnprocessableEntity, BadRequest
 
 POST = 'POST'
 GET = 'GET'
@@ -16,8 +16,14 @@ PUT = 'PUT'
 PUBLIC = 'public'
 SERVICE = 'service'
 
+# Service user id
+SERVICE_USER_ID = -1
 
-# TODO Param (http) or arg (flask), how are post parameters handled in flask?
+# What
+BAD_VALUE = 'bad_value'
+REQUIRED = 'required'
+
+
 class Arg:
     """ Use as default argument on route to parse post args/url parameters into keyword arguments. """
     
@@ -47,16 +53,21 @@ class Arg:
         for name, param in args.items():
             value = request.args.get(name)
             if value is None and param.required:
-                raise ApiError(message=f'parameter {name} is required')
+                raise ApiError(message=f'Parameter {name} is required.', field=name, what=REQUIRED)
             try:
                 value = param.converter(value)
             except Exception as e:
-                raise ApiError(arg=name, message=f'failed to validate parameter {name}: {str(e)}')
+                raise UnprocessableEntity(field=name, what=BAD_VALUE,
+                                          message=f'Failed to validate parameter {name}: {str(e)}')
             kwargs[name] = value
 
 
-def symbol(value):
-    """ A string of only ascii aplhanum and _. """
-    if not re.match(r'[A-Za-z0-9_]+', value):
-        raise ValueError(f"'{value}' is not symbolic")
-    return value
+class Enum:
+    """ A string among a set of strings. """
+    def __init__(self, *values):
+        self.values = values
+        
+    def __call__(self, value):
+        if value in self.values:
+            return value
+        raise ValueError(f"Value {value} not among allowed values.")

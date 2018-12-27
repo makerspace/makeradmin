@@ -1,14 +1,29 @@
+from flask import request
+
+import membership
 from core import service
-from service.api_definition import POST, PUBLIC, Arg, symbol, DELETE, GET, SERVICE
-from service.db import db_session
+from core.models import Login, AccessToken
+from service.api_definition import POST, PUBLIC, Arg, DELETE, GET, SERVICE, Enum
+from service.error import ApiError
 
 TODO = "TODO"
 
 
-# $app->  post("oauth/token",          "Authentication@login");
 @service.route("/oauth/token", method=POST, permission=PUBLIC)
-def login(grant_type=Arg(symbol)):
-    return "login-" + ",".join(n for i, n in db_session.execute("SELECT user_id, access_token FROM access_tokens"))
+def login(grant_type=Arg(Enum('password')), username=Arg(str), password=Arg(str)):
+    assert grant_type
+
+    Login.check_should_throttle(request.remote_addr)
+
+    try:
+        member_id = membership.service.post('/authenticate', username=username, password=password).get('member_id')
+    except ApiError:
+        Login.register_login_failed(request.remote_addr)
+        raise
+    
+    Login.register_login_success(request.remote_addr, member_id)
+
+    return AccessToken.create_user_token(member_id)
 
 
 # $app->delete("oauth/token/{token}", ["middleware" => "auth", "uses" => "Authentication@logout"]);
