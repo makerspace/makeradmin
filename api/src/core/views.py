@@ -1,5 +1,4 @@
 from core import service
-from service import logger
 from service.db import db_session
 
 POST = 'POST'

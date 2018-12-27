@@ -1,14 +1,13 @@
 from collections import namedtuple
-
-import core
 from service.external_service import ExternalService
 
+import core
 
-Instance = namedtuple("Service", "path,service")
+
+Instance = namedtuple("Instance", "path,service")
 
 
 services = (
     Instance(path='', service=core.service),
-#    Instance(path='messages', service=ExternalService(name='messages', url='messages:80'))
+    Instance(path='messages', service=ExternalService(name='messages', url='messages:80'))
 )
-

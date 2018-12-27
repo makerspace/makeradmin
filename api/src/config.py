@@ -3,7 +3,7 @@ from os.path import abspath, join, basename, exists
 
 from rocky.config import Config, Dict, Env
 
-from service import logger
+from service.logging import logger
 
 
 class DockerEnvFile(Dict):
@@ -34,16 +34,12 @@ docker_env = DockerEnvFile(abspath(join(basename(__file__), '../../../.env')))
 config = Config(env, docker_env, default, log_level=INFO)
 
 
-def get_db_engine_config():
-    db_engine = config.get("DB_ENGINE")
-    if db_engine:
-        return db_engine
-    
+def get_mysql_config():
     host = config.get('MYSQL_HOST')
-    port = config.get('MYSQL_PORT')
+    port = int(config.get('MYSQL_PORT'))
     db = config.get('MYSQL_DB')
     user = config.get('MYSQL_USER')
     pwd = config.get('MYSQL_PASS', log_value=False)
     if not pwd: raise Exception("config MYSQL_PASS is required")
     
-    return f"mysql+pymysql://{user}:{pwd}@{host}:{port}/{db}"
+    return dict(host=host, port=port, db=db, user=user, pwd=pwd)

@@ -1,7 +1,7 @@
 from flask import Flask
 
-from db import connect
-from service.db import db_session_factory, db_session
+from config import get_mysql_config
+from service.db import db_session_factory, db_session, create_mysql_engine
 from services import services
 
 app = Flask(__name__)
@@ -9,7 +9,7 @@ for path, service in services:
     app.register_blueprint(service, path=path)
     
 
-engine = connect()
+engine = create_mysql_engine(**get_mysql_config())
 
 db_session_factory.init_with_engine(engine)
 
