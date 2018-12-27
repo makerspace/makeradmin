@@ -12,7 +12,7 @@ SERVICE = 'service'
 
 @service.route("/oauth/token") #, method=POST, permission=PUBLIC)
 def login():
-    return "login-" + ",".join(n for i, n in db_session.execute("SELECT id, name FROM migrations"))
+    return "login-" + ",".join(n for i, n in db_session.execute("SELECT user_id, access_token FROM access_tokens"))
 
 
 # @service.route("oath/token", method=GET, permission=SERVICE)
