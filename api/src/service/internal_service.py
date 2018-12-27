@@ -2,9 +2,9 @@ from functools import wraps
 from inspect import getmodule, stack, getfile
 from os.path import dirname, join, isdir, exists
 
-from flask import Blueprint, g
+from flask import Blueprint, g, jsonify
 
-from service.api_definition import Arg
+from service.api_definition import Arg, PUBLIC
 from service.error import PermissionDenied
 from service.migrate import migrate_service
 
@@ -34,7 +34,7 @@ class InternalService(Blueprint):
             
             migrate_service(session_factory, self.name, migrations_dir)
 
-    def route(self, path, permission=None, method=None, methods=None, **route_kwargs):
+    def route(self, path, permission=None, method=None, methods=None, status='ok', code=200, **route_kwargs):
         assert permission is not None, "permission is required"
         assert bool(method) != bool(methods), "exactly one of method and methods parameter shoule be set"
         
@@ -45,12 +45,13 @@ class InternalService(Blueprint):
             
             @wraps(f)
             def view_wrapper(*args, **kwargs):
-                if permission not in g.permissions:
+                if permission != PUBLIC and permission not in g.permissions:
                     raise PermissionDenied(message=f"user does not have the {permission} permission")
                 
                 Arg.fill_args(params, kwargs)
                 
-                return f(*args, **kwargs)
+                data = f(*args, **kwargs)
+                return jsonify({'status': status, 'data': data}), code
             
             return super(InternalService, self).route(path, methods=methods, **route_kwargs)(view_wrapper)
         return decorator
