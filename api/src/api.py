@@ -1,22 +1,27 @@
-from flask import Flask
+from flask import Flask, g, request
 
 from config import get_mysql_config
-from service.db import db_session_factory, db_session, create_mysql_engine
+from service.api_definition import PUBLIC
+from service.db import create_mysql_engine, shutdown_session
+from service.error import ApiError, error_handler
 from services import services
 
 app = Flask(__name__)
+
 for path, service in services:
     app.register_blueprint(service, path=path)
-    
+
+app.register_error_handler(ApiError, error_handler)
+app.teardown_appcontext(shutdown_session)
 
 engine = create_mysql_engine(**get_mysql_config())
 
-db_session_factory.init_with_engine(engine)
 
-
-@app.teardown_appcontext
-def shutdown_session(exception=None):
-    db_session.remove()
+# TODO Move to core.
+@app.before_request
+def authenticate_request():
+    print(request.method)
+    g.permissions = (PUBLIC,)
     
 
 # TODO Use Sentry?

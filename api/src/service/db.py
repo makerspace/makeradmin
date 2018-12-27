@@ -26,10 +26,18 @@ db_session_factory = SessionFactoryWrapper()
 db_session: Union[Session, scoped_session] = scoped_session(db_session_factory)
 
 
+def shutdown_session(exception=None):
+    db_session.remove()
+
+
 # TODO Make sure app survives db disconnect.
 def create_mysql_engine(host=None, port=None, db=None, user=None, pwd=None, timeout=24):
     logger.info(f"waiting for db to respond at {host}:{port}")
     if not wait_for(lambda: can_connect(host, port), timeout=timeout, interval=0.5):
         raise Exception(f"could not connect to db at {host}:{port} in {timeout} seconds")
     
-    return create_engine(f"mysql+pymysql://{user}:{pwd}@{host}:{port}/{db}")
+    engine = create_engine(f"mysql+pymysql://{user}:{pwd}@{host}:{port}/{db}")
+    
+    db_session_factory.init_with_engine(engine)
+    
+    return engine

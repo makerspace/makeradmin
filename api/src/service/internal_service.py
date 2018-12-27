@@ -1,7 +1,11 @@
+from functools import wraps
 from inspect import getmodule, stack, getfile
 from os.path import dirname, join, isdir, exists
 
-from flask import Blueprint
+from flask import Blueprint, g
+
+from service.api_definition import Arg
+from service.error import PermissionDenied
 from service.migrate import migrate_service
 
 
@@ -29,3 +33,24 @@ class InternalService(Blueprint):
                 raise Exception(f"service {self.name} migrations dir {migrations_dir} is missing")
             
             migrate_service(session_factory, self.name, migrations_dir)
+
+    def route(self, path, permission=None, method=None, methods=None, **route_kwargs):
+        assert permission is not None, "permission is required"
+        assert bool(method) != bool(methods), "exactly one of method and methods parameter shoule be set"
+        
+        methods = methods or (method,)
+        
+        def decorator(f):
+            params = Arg.get_args(f)
+            
+            @wraps(f)
+            def view_wrapper(*args, **kwargs):
+                if permission not in g.permissions:
+                    raise PermissionDenied(message=f"user does not have the {permission} permission")
+                
+                Arg.fill_args(params, kwargs)
+                
+                return f(*args, **kwargs)
+            
+            return super(InternalService, self).route(path, methods=methods, **route_kwargs)(view_wrapper)
+        return decorator
