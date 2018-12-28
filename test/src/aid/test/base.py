@@ -1,4 +1,3 @@
-import sys
 from copy import copy
 from datetime import datetime, timedelta
 
@@ -6,8 +5,8 @@ from unittest import TestCase, skipIf
 
 import stripe
 
-from library.obj import ObjFactory, DEFAULT_PASSWORD_HASH
-from library.test_config import STRIPE_PUBLIC_KEY, HOST_FRONTEND, HOST_PUBLIC, HOST_BACKEND
+from aid.test.obj import ObjFactory, DEFAULT_PASSWORD_HASH
+from aid.test.config import STRIPE_PUBLIC_KEY, HOST_FRONTEND, HOST_PUBLIC, HOST_BACKEND
 
 stripe.api_key = STRIPE_PUBLIC_KEY
 

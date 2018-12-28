@@ -4,8 +4,7 @@ import os
 env = None
 
 
-# TODO Use rocky / python-env.
-
+# TODO Use rocky / python-dotenv.
 def get_env(name):
     """ Read variable from os environment, if not exists try to read from .env-file. Inside the test container the
     .env-file is not available all variables should be provided through the docker-compose.test.yml file. """
@@ -13,7 +12,7 @@ def get_env(name):
     global env
     if env is None:
         try:
-            filename = os.path.abspath(f"{os.path.dirname(__file__)}/../../../.env")
+            filename = os.path.abspath(f"{os.path.dirname(__file__)}/../../../../.env")
             with open(filename) as f:
                 env = {s[0]: (s[1] if len(s) > 1 else "") for s in (s.split("=") for s in f.read().split('\n'))}
         except OSError:

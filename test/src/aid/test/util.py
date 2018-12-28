@@ -6,7 +6,7 @@ from functools import wraps
 from random import seed, choice
 from string import ascii_letters, digits
 
-from library.test_config import SELENIUM_BASE_TIMEOUT, SLEEP
+from aid.test.config import SELENIUM_BASE_TIMEOUT, SLEEP
 
 seed(os.urandom(8))
 

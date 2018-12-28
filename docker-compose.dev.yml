@@ -9,7 +9,7 @@ services:
     volumes:
       - ./apigateway/lumen/routes:/var/www/html/routes
       - ./apigateway/lumen/app:/var/www/html/app
-      - ./library/src/Makeradmin:/var/www/html/library
+      - ./test/src/Makeradmin:/var/www/html/test
     ports:
       - "8010:80"
     environment:
@@ -27,26 +27,26 @@ services:
     volumes:
       - ./membership/lumen/routes:/var/www/html/routes
       - ./membership/lumen/app:/var/www/html/app
-      - ./library/src/Makeradmin:/var/www/html/library
+      - ./test/src/Makeradmin:/var/www/html/test
 
   messages:
     volumes:
       - ./messages/lumen/routes:/var/www/html/routes
       - ./messages/lumen/app:/var/www/html/app
-      - ./library/src/Makeradmin:/var/www/html/library
+      - ./test/src/Makeradmin:/var/www/html/test
 
   email-dispatcher:
     volumes:
       - ./emaildispatcher/lumen/routes:/var/www/html/routes
       - ./emaildispatcher/lumen/app:/var/www/html/app
-      - ./library/src/Makeradmin:/var/www/html/library
+      - ./test/src/Makeradmin:/var/www/html/test
 
   multiaccesssync:
     volumes:
       - ./data/multiaccess-uploads:/var/www/html/storage/uploads
       - ./multiaccesssync/lumen/routes:/var/www/html/routes
       - ./multiaccesssync/lumen/app:/var/www/html/app
-      - ./library/src/Makeradmin:/var/www/html/library
+      - ./test/src/Makeradmin:/var/www/html/test
 
   backend:
     volumes:

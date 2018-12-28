@@ -1,9 +1,8 @@
 from random import randint
-from string import ascii_letters
 
 from faker import Faker
 
-from library.util import random_str
+from aid.test.util import random_str
 
 DEFAULT_PASSWORD = '1q2w3e'
 DEFAULT_PASSWORD_HASH = "$2y$10$NcNoheVsKVo2Agz3FLeI8.fhAgbmRV/NoJMqPC67ZXiqgqfE5DE.S"

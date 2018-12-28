@@ -8,9 +8,9 @@ from selenium.webdriver.remote import webdriver as remote
 from selenium.webdriver.chrome import webdriver as chrome
 from selenium.webdriver.support.wait import WebDriverWait
 
-from library.api import ApiTest
-from library.test_config import KEEP_BROWSER, WEBDRIVER_TYPE, SELENIUM_SCREENSHOT_DIR
-from library.util import retry, SELENIUM_BASE_TIMEOUT, SLEEP
+from aid.test.api import ApiTest
+from aid.test.config import KEEP_BROWSER, WEBDRIVER_TYPE, SELENIUM_SCREENSHOT_DIR
+from aid.test.util import retry, SELENIUM_BASE_TIMEOUT, SLEEP
 
 logger = getLogger('makeradmin')
 

@@ -1,8 +1,7 @@
-import os
 import re
 
-from library.api import ApiTest
-from library.obj import DEFAULT_PASSWORD_HASH, DEFAULT_PASSWORD
+from aid.test.api import ApiTest
+from aid.test.obj import DEFAULT_PASSWORD_HASH, DEFAULT_PASSWORD
 
 
 class Test(ApiTest):

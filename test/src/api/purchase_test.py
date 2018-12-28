@@ -3,8 +3,8 @@ from unittest import skip
 
 import stripe
 
-from library.api import ApiTest
-from library.base import ShopTestMixin, VALID_NON_3DS_CARD_NO
+from aid.test.api import ApiTest
+from aid.test.base import ShopTestMixin, VALID_NON_3DS_CARD_NO
 
 
 class Test(ShopTestMixin, ApiTest):

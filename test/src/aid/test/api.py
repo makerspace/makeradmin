@@ -1,9 +1,9 @@
 import requests
 
-from library.base import TestCaseBase
-from library.obj import DEFAULT_PASSWORD
-from library.test_config import API_BEARER
-from library.util import merge_paths, get_path
+from aid.test.base import TestCaseBase
+from aid.test.obj import DEFAULT_PASSWORD
+from aid.test.config import API_BEARER
+from aid.test.util import merge_paths, get_path
 
 
 class ApiResponse:

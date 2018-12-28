@@ -1,12 +1,11 @@
-import sys
 from random import randint
 from time import time
 
 import stripe
 
-from library.api import ApiTest
-from library.base import ShopTestMixin, VALID_NON_3DS_CARD_NO, EXPIRED_3DS_CARD_NO
-from library.obj import ADD_MEMBERSHIP_DAYS
+from aid.test.api import ApiTest
+from aid.test.base import ShopTestMixin, VALID_NON_3DS_CARD_NO, EXPIRED_3DS_CARD_NO
+from aid.test.obj import ADD_MEMBERSHIP_DAYS
 
 
 class Test(ShopTestMixin, ApiTest):
