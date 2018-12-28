@@ -43,7 +43,7 @@ def list_tokens():
 
 
 @service.route("/oauth/force_token", method=POST, permission=SERVICE)
-def force_token(user_id: Arg(int)):
+def force_token(user_id: int=Arg(int)):
     """ Create token for any user. """
     if user_id <= 0:
         raise UnprocessableEntity(fields='user_id', what=BAD_VALUE)

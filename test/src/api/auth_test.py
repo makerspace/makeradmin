@@ -14,21 +14,30 @@ class Test(ApiTest):
         
         # Using post parameters.
         token = self.api\
-            .post("/oauth/token", data=dict(grant_type='password', username=username, password=DEFAULT_PASSWORD))\
+            .post("/oauth/token",
+                  data=dict(grant_type='password', username=username, password=DEFAULT_PASSWORD),
+                  headers={})\
             .expect(code=200).get('access_token')
+        
         self.assertTrue(patten.match(token))
         # TODO Ideally check db here, token and login.
 
         # Using url parameters.
         token = self.api\
-            .post("/oauth/token", params=dict(grant_type='password', username=username, password=DEFAULT_PASSWORD))\
+            .post("/oauth/token",
+                  params=dict(grant_type='password', username=username, password=DEFAULT_PASSWORD),
+                  headers={})\
             .expect(code=200).get('access_token')
+        
         self.assertTrue(patten.match(token))
 
         # Using json content.
         token = self.api\
-            .post("/oauth/token", json=dict(grant_type='password', username=username, password=DEFAULT_PASSWORD))\
+            .post("/oauth/token",
+                  json=dict(grant_type='password', username=username, password=DEFAULT_PASSWORD),
+                  headers={})\
             .expect(code=200).get('access_token')
+        
         self.assertTrue(patten.match(token))
         
     def test_get_token_with_bad_parameters(self):
@@ -89,4 +98,4 @@ class Test(ApiTest):
         self.api.delete(f'/oauth/token/{token}', token=token).expect(code=200)
 
     def test_force_token_for_service_user_is_not_possible(self):
-        token = self.api.post("/oauth/force_token", data=dict(user_id=-1)).expect(code=500)  # TODO New code renders 422
+        self.api.post("/oauth/force_token", data=dict(user_id=-1)).expect(code=500)  # TODO New code renders 422

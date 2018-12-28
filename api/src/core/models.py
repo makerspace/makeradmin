@@ -93,15 +93,17 @@ class AccessToken(Base):
         g.user_id = None
         g.permissions = tuple()
         
+        authorization = request.headers.get('Authorization', None)
+        if authorization is None:
+            return
+
         bearer = 'Bearer '
-        auth = request.headers.get('Authorization', '').strip()
-        if not auth.startswith(bearer):
+        if not authorization.startswith(bearer):
             raise Unauthorized("Unauthorized.")
             
-        token = auth[len(bearer):].strip()
+        token = authorization[len(bearer):].strip()
         
         access_token = db_session.query(AccessToken).get(token)
-        
         if not access_token:
             raise Unauthorized("Invalid access token.")
         
