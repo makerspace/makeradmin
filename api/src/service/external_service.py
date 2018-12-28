@@ -5,7 +5,6 @@ from requests import RequestException
 
 from service.api_definition import SERVICE
 from service.error import InternalServerError, ApiError, EXCEPTION, GENERIC_ERROR_MESSAGE
-from service.logging import logger
 
 
 class ExternalService(Blueprint):

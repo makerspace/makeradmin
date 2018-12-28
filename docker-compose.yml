@@ -78,6 +78,7 @@ services:
       MYSQL_PORT:
       MYSQL_USER:
       MYSQL_PASS:
+      # TODO Rename to url
       MEMBERSHIP_HOST:
       SHOP_HOST:
       MEMBER_HOST:
