@@ -5,7 +5,7 @@ from inspect import signature
 
 from flask import request
 
-from service.error import ApiError, UnprocessableEntity, BadRequest
+from service.error import ApiError, UnprocessableEntity
 
 POST = 'POST'
 GET = 'GET'
@@ -53,11 +53,11 @@ class Arg:
         for name, param in args.items():
             value = request.args.get(name)
             if value is None and param.required:
-                raise ApiError(message=f'Parameter {name} is required.', field=name, what=REQUIRED)
+                raise ApiError(message=f'Parameter {name} is required.', fields=name, what=REQUIRED)
             try:
                 value = param.converter(value)
             except Exception as e:
-                raise UnprocessableEntity(field=name, what=BAD_VALUE,
+                raise UnprocessableEntity(fields=name, what=BAD_VALUE,
                                           message=f'Failed to validate parameter {name}: {str(e)}')
             kwargs[name] = value
 

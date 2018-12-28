@@ -27,6 +27,18 @@ default = Dict(name="default", src=dict(
     MYSQL_PORT=3306,
     MYSQL_USER='makeradmin',
     MYSQL_DB='makeradmin',
+    MEMBERSHIP_HOST='membership',
+    MEMBERSHIP_PORT=80,
+    SHOP_HOST='backend',
+    SHOP_PORT=80,
+    MEMBER_HOST='member',
+    MEMBER_PORT=80,
+    MESSAGES_HOST='messages',
+    MESSAGES_PORT=80,
+    EMAIL_DISPATCHER_HOST='email-dispatcher',
+    EMAIL_DISPATCHER_PORT=80,
+    MULTIACCESS_SYNC_HOST='multiaccesssync',
+    MULTIACCESS_SYNC_PORT=80,
 ))
 env = Env()
 docker_env = DockerEnvFile(abspath(join(basename(__file__), '../../../.env')))

@@ -4,7 +4,7 @@ from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 from rocky.process import log_exception
 from sqlalchemy.orm import sessionmaker
 
-from config import get_mysql_config
+from service.config import get_mysql_config
 from service.db import create_mysql_engine
 from service.migrate import ensure_migrations_table
 from services import services

@@ -1,6 +1,6 @@
 from flask import Flask, g, request
 
-from config import get_mysql_config
+from service.config import get_mysql_config
 from service.api_definition import PUBLIC
 from service.db import create_mysql_engine, shutdown_session
 from service.error import ApiError, error_handler
