@@ -1,15 +1,11 @@
-from logging import CRITICAL
-
 import requests
 
 from flask import Blueprint
 from requests import RequestException
 
 from service.api_definition import SERVICE
-from service.error import InternalServerError, ApiError
-
-
-GENERIC_ERROR_MESSAGE = "Something went wrong while trying to contact a service in our internal network."
+from service.error import InternalServerError, ApiError, EXCEPTION, GENERIC_ERROR_MESSAGE
+from service.logging import logger
 
 
 class ExternalService(Blueprint):
@@ -37,7 +33,7 @@ class ExternalService(Blueprint):
                 timeout=4,
             )
         except RequestException as e:
-            raise InternalServerError(GENERIC_ERROR_MESSAGE, log=f"failed to post to {url}: {str(e)}", level=CRITICAL)
+            raise InternalServerError(GENERIC_ERROR_MESSAGE, log=f"failed to post to {url}: {str(e)}", level=EXCEPTION)
 
         if response.status_code >= 500:
             raise ApiError.parse(response, message=GENERIC_ERROR_MESSAGE, log=f"failed to post to {url}")

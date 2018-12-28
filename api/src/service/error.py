@@ -1,24 +1,43 @@
-from logging import ERROR, CRITICAL
+from logging import ERROR
 
 from flask import jsonify
 
 from service.logging import logger
 
 
+# Internal log level to error log with exception.
+EXCEPTION = 333
+
+
+GENERIC_ERROR_MESSAGE = "Something went wrong while trying to contact a service in our internal network."
+
+
 def log(level, message):
-    if level == CRITICAL:
+    if level == EXCEPTION:
         logger.exception(message)
     else:
         logger.log(level, message)
 
 
-def error_handler(error):
+def db_error_handler(error):
+    logger.exception(f"error when communicating with db: {str(error)}")
+    response = jsonify(
+        message=GENERIC_ERROR_MESSAGE,
+        status="error",
+        field=None,
+        what=None
+    )
+    response.status_code = 500
+    return response
+    
+
+def api_error_handler(error):
     # TODO Maybe add a handler for db communication errors.
     
     if error.log is True:
-        logger.log(error.level, repr(error))
+        log(error.level, repr(error))
     elif error.log:
-        logger.log(error.level, error.log)
+        log(error.level, error.log)
     # TODO Remove this logging if it turns out to be used in too few places.
         
     return error.to_response()
@@ -34,11 +53,11 @@ class ApiError(Exception):
         """
         :param message human readable message of what went wrong, should be safe to show to end users
         :param status TODO is this really needed? we have http status code
-        :param fields comma separated list of db fields/request parameters that was wrong
-        :param what symbolic string of what went wrong
+        :param fields comma separated list of db fields/request parameters that was wrong, use when code is not enough
+        :param what symbolic string of what went wrong, only use when code and field is not specific enough
         :param code http status code
         :param log log when responding, if True all content will be logged, if a string that string will be logged
-        :param level use this level when logging, if CRITICAL full exception is logged
+        :param level use this level when logging, if EXCEPTION full exception is logged
         """
         if code: self.code = code
         self.status = status
