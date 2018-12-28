@@ -23,9 +23,7 @@ def login(grant_type=Arg(Enum('password')), username=Arg(str), password=Arg(str)
         raise
     
     Login.register_login_success(request.remote_addr, member_id)
-
-    # TODO We need to commit here, or do we do auto commit?
-
+    
     return AccessToken.create_user_token(member_id)
 
 

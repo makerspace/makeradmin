@@ -8,7 +8,7 @@ from sqlalchemy.ext.declarative import declarative_base
 
 import membership
 from service.db import db_session
-from service.error import TooManyRequests
+from service.error import TooManyRequests, Unauthorized
 
 Base = declarative_base()
 
@@ -55,7 +55,7 @@ class AccessToken(Base):
         db_session.add(AccessToken(
             user_id=user_id,
             access_token=access_token,
-            browser=request.user_agent,
+            browser=request.user_agent.string,
             ip=request.remote_addr,
             expires=expires,
             lifetime=int(timedelta(days=14).total_seconds()),
@@ -83,21 +83,20 @@ class AccessToken(Base):
         access_token = db_session.query(AccessToken).get(token)
         
         if not access_token:
-            return
+            raise Unauthorized("Invalid access token.")
         
         if access_token.permissions is None:
-            data = membership.service.service_get(f'/member/{access_token.user_id}/permissions')
-            permissions = data.get('permissions')
-            access_token.permissions = permissions
+            permissions = membership.service.service_get(f'/member/{access_token.user_id}/permissions')
+            access_token.permissions = ','.join(p['permission'] for p in permissions)
         
         access_token.ip = request.remote_addr
-        access_token.browser = request.user_agent
-        access_token.expires = datetime.utcnow() + timedelta(seconds=access_token.lifetime())
+        access_token.browser = request.user_agent.string
+        access_token.expires = datetime.utcnow() + timedelta(seconds=access_token.lifetime)
         
         g.user_id = access_token.user_id
         g.permissions = access_token.permissions.split(',')
         
-        # Commit token validation success even if request fails later.
+        # Commit token validation to make it stick even if request fails later.
         db_session.commit()
         
         # TODO Where is expiry checked? Remove it if not used?

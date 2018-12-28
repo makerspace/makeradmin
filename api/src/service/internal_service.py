@@ -5,6 +5,7 @@ from os.path import dirname, join, isdir, exists
 from flask import Blueprint, g, jsonify
 
 from service.api_definition import Arg, PUBLIC
+from service.db import db_session
 from service.error import Forbidden
 from service.migrate import migrate_service
 
@@ -34,7 +35,26 @@ class InternalService(Blueprint):
             
             migrate_service(session_factory, self.name, migrations_dir)
 
-    def route(self, path, permission=None, method=None, methods=None, status='ok', code=200, **route_kwargs):
+    def route(self, path, permission=None, method=None, methods=None, status='ok', code=200, commit=True,
+              **route_kwargs):
+        """
+        Enhanced Blueprint.route for internal services. The function should return a jsonable structure that will
+        be put in the data key in the response.
+        
+        Function args with default Arg object will be auto filled and validated from the request.
+        
+        Authorized user_id and permissions list will be set on the g object.
+        
+        :param path path from Blueprint.route
+        :param permission the permission required for the user to access this route
+        :param method same as methods=[method]
+        :param methods methods from Blueprint.rote
+        :param status status value of response
+        :param code response code
+        :param commit commit db_session just before returning if no exception was raised
+        :param route_kwargs all extra kwargs are forwarded to Blueprint.route
+        """
+        
         assert permission is not None, "permission is required"
         assert bool(method) != bool(methods), "exactly one of method and methods parameter shoule be set"
         
@@ -51,7 +71,13 @@ class InternalService(Blueprint):
                 Arg.fill_args(params, kwargs)
                 
                 data = f(*args, **kwargs)
-                return jsonify({'status': status, 'data': data}), code
+                
+                result = jsonify({'status': status, 'data': data}), code
+                
+                if commit:
+                    db_session.commit()
+                
+                return result
             
             return super(InternalService, self).route(path, methods=methods, **route_kwargs)(view_wrapper)
         return decorator

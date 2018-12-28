@@ -27,7 +27,7 @@ db_session: Union[Session, scoped_session] = scoped_session(db_session_factory)
 
 
 def shutdown_session(exception=None):
-    # TODO Make sure that a failed commit does renders a 500.
+    # TODO Make sure that a failed commit does render a 500.
     db_session.remove()
 
 
