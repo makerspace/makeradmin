@@ -16,12 +16,15 @@ def login(grant_type=Arg(Enum('password')), username=Arg(str), password=Arg(str)
     Login.check_should_throttle(request.remote_addr)
 
     try:
-        member_id = membership.service.post('/authenticate', username=username, password=password).get('member_id')
+        data = membership.service.service_post('/authenticate', username=username, password=password)
+        member_id = data.get('member_id')
     except ApiError:
         Login.register_login_failed(request.remote_addr)
         raise
     
     Login.register_login_success(request.remote_addr, member_id)
+
+    # TODO We need to commit here, or do we do auto commit?
 
     return AccessToken.create_user_token(member_id)
 

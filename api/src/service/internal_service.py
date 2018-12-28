@@ -46,7 +46,7 @@ class InternalService(Blueprint):
             @wraps(f)
             def view_wrapper(*args, **kwargs):
                 if permission != PUBLIC and permission not in g.permissions:
-                    raise Forbidden(message=f"user does not have the {permission} permission")
+                    raise Forbidden(message=f"'{permission}' permission is required for this operation.")
                 
                 Arg.fill_args(params, kwargs)
                 

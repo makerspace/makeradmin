@@ -2,10 +2,11 @@ import secrets
 from datetime import timedelta, datetime
 from string import ascii_letters, digits
 
-from flask import request
+from flask import request, g
 from sqlalchemy import Column, Integer, String, DateTime, Text
 from sqlalchemy.ext.declarative import declarative_base
 
+import membership
 from service.db import db_session
 from service.error import TooManyRequests
 
@@ -65,6 +66,41 @@ class AccessToken(Base):
     @classmethod
     def generate_token(self):
         return ''.join(secrets.choice(ascii_letters + digits) for _ in range(32))
+
+    @classmethod
+    def authenticate_request(self):
+        """ Update global object with user_id and permissions. """
+        g.user_id = None
+        g.permissions = tuple()
+        
+        bearer = 'Bearer '
+        auth = request.headers.get('Authorization', '').strip()
+        if not auth.startswith(bearer):
+            return
+            
+        token = auth[len(bearer):].strip()
+        
+        access_token = db_session.query(AccessToken).get(token)
+        
+        if not access_token:
+            return
+        
+        if access_token.permissions is None:
+            data = membership.service.service_get(f'/member/{access_token.user_id}/permissions')
+            permissions = data.get('permissions')
+            access_token.permissions = permissions
+        
+        access_token.ip = request.remote_addr
+        access_token.browser = request.user_agent
+        access_token.expires = datetime.utcnow() + timedelta(seconds=access_token.lifetime())
+        
+        g.user_id = access_token.user_id
+        g.permissions = access_token.permissions.split(',')
+        
+        # Commit token validation success even if request fails later.
+        db_session.commit()
+        
+        # TODO Where is expiry checked? Remove it if not used?
 
 
 class Login:

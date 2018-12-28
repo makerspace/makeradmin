@@ -7,17 +7,18 @@ from flask import request
 
 from service.error import ApiError, UnprocessableEntity
 
-POST = 'POST'
-GET = 'GET'
-DELETE = 'DELETE'
-PUT = 'PUT'
+POST = 'post'
+GET = 'get'
+DELETE = 'delete'
+PUT = 'put'
 
 # Permissions
 PUBLIC = 'public'
 SERVICE = 'service'
 
-# Service user id
+# Service credentials
 SERVICE_USER_ID = -1
+SERVICE_PERMISSIONS = (SERVICE,)
 
 # What
 BAD_VALUE = 'bad_value'
