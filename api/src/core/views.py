@@ -4,7 +4,7 @@ import membership
 from core import service
 from core.models import Login, AccessToken
 from service.api_definition import POST, PUBLIC, Arg, DELETE, GET, SERVICE, Enum, USER
-from service.error import ApiError
+from service.error import ApiError, NotFound
 
 TODO = "TODO"
 
@@ -32,16 +32,15 @@ def logout(token=None):
     return AccessToken.remove_token(token, g.user_id)
 
 
-# $app->  post("oauth/resetpassword",  "Authentication@reset");
 @service.route("/oauth/resetpassword", method=POST, permission=PUBLIC)
 def reset_password():
-    return ""
+    raise NotFound("Reset password functionality is not implemented yet.")
 
 
 # $app->   get("oauth/token",         ["middleware" => "auth", "uses" => "Authentication@listTokens"]);
-@service.route("/oauth/token", method=GET, permission=TODO)
+@service.route("/oauth/token", method=GET, permission=USER)
 def list_tokens():
-    return "list_tokens"
+    return AccessToken.list_for_user(g.user_id)
 
 
 # // Allow other services to get login tokens for any user

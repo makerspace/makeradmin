@@ -64,3 +64,17 @@ class Test(ApiTest):
         # Missing token in subsequent delete.
         self.api.delete(f'/oauth/token/{token}', token=token).expect(code=401)
         
+        # TODO Add checking of db.
+
+    def test_list_access_tokens(self):
+        self.api.create_member(password=DEFAULT_PASSWORD_HASH)
+        username = self.api.member['email']
+
+        token = self.api\
+            .post("/oauth/token", data=dict(grant_type='password', username=username, password=DEFAULT_PASSWORD))\
+            .expect(code=200).get('access_token')
+        
+        tokens = self.api.get(f'/oauth/token', token=token).expect(code=200).data
+        print(tokens)
+        
+        self.assertEqual([token], [t['access_token'] for t in tokens])

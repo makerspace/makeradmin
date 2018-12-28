@@ -77,6 +77,15 @@ class AccessToken(Base):
         
         return None
 
+    @classmethod
+    def list_for_user(self, user_id):
+        return [dict(
+            access_token=access_token.access_token,
+            browser=access_token.browser,
+            ip=access_token.ip,
+            expires=access_token.expires.isoformat(),
+        ) for access_token in db_session.query(AccessToken).filter(self.user_id == user_id)]
+
     # TODO This code needs unittests.
     @classmethod
     def authenticate_request(self):
