@@ -2,6 +2,7 @@
 # HTTP Methods
 import re
 from inspect import signature
+from typing import Any
 
 from flask import request
 
@@ -26,7 +27,7 @@ BAD_VALUE = 'bad_value'
 REQUIRED = 'required'
 
 
-class Arg:
+class Arg(Any):
     """ Use as default argument on route to parse post args/url parameters into keyword arguments. """
     
     def __init__(self, converter, required=True):

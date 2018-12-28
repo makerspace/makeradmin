@@ -78,3 +78,15 @@ class Test(ApiTest):
         print(tokens)
         
         self.assertEqual([token], [t['access_token'] for t in tokens])
+
+    def test_force_token_for_other_user_is_possible_for_service_user(self):
+        self.api.create_member()
+
+        token = self.api\
+            .post("/oauth/force_token", data=dict(user_id=self.api.member['member_id']))\
+            .expect(code=200).get('access_token')
+
+        self.api.delete(f'/oauth/token/{token}', token=token).expect(code=200)
+
+    def test_force_token_for_service_user_is_not_possible(self):
+        token = self.api.post("/oauth/force_token", data=dict(user_id=-1)).expect(code=500)  # TODO New code renders 422

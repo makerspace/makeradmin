@@ -3,10 +3,8 @@ from flask import request, g
 import membership
 from core import service
 from core.models import Login, AccessToken
-from service.api_definition import POST, PUBLIC, Arg, DELETE, GET, SERVICE, Enum, USER
-from service.error import ApiError, NotFound
-
-TODO = "TODO"
+from service.api_definition import POST, PUBLIC, Arg, DELETE, GET, SERVICE, Enum, USER, BAD_VALUE
+from service.error import ApiError, NotFound, UnprocessableEntity
 
 
 @service.route("/oauth/token", method=POST, permission=PUBLIC)
@@ -27,6 +25,7 @@ def login(grant_type=Arg(Enum('password')), username=Arg(str), password=Arg(str)
     return AccessToken.create_user_token(member_id)
 
 
+# TODO Can maybe be solved by generic entity stuff?
 @service.route("/oauth/token/<string:token>", method=DELETE, permission=USER)
 def logout(token=None):
     return AccessToken.remove_token(token, g.user_id)
@@ -37,14 +36,18 @@ def reset_password():
     raise NotFound("Reset password functionality is not implemented yet.")
 
 
-# $app->   get("oauth/token",         ["middleware" => "auth", "uses" => "Authentication@listTokens"]);
+# TODO Can maybe be solved by generic entity stuff?
 @service.route("/oauth/token", method=GET, permission=USER)
 def list_tokens():
     return AccessToken.list_for_user(g.user_id)
 
 
-# // Allow other services to get login tokens for any user
-# $app->  post("oauth/force_token", ["middleware" => "auth:service", "uses" => "Authentication@unauthenticated_login"]);
 @service.route("/oauth/force_token", method=POST, permission=SERVICE)
-def force_token():
-    return ""
+def force_token(user_id: Arg(int)):
+    """ Create token for any user. """
+    if user_id <= 0:
+        raise UnprocessableEntity(fields='user_id', what=BAD_VALUE)
+    
+    Login.register_login_success(request.remote_addr, user_id)
+    
+    return AccessToken.create_user_token(user_id)
