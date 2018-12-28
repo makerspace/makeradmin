@@ -115,6 +115,10 @@ class Forbidden(ApiError):
     code = 403
 
 
+class NotFound(ApiError):
+    code = 404
+
+
 class TooManyRequests(ApiError):
     code = 429
 
@@ -127,5 +131,5 @@ class InternalServerError(ApiError):
     code = 500
 
 
-errors = {e.code: e for e in [BadRequest, Unauthorized, Forbidden, TooManyRequests, UnprocessableEntity,
+errors = {e.code: e for e in [BadRequest, Unauthorized, Forbidden, NotFound, TooManyRequests, UnprocessableEntity,
                               InternalServerError]}

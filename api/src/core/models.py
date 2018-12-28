@@ -7,8 +7,9 @@ from sqlalchemy import Column, Integer, String, DateTime, Text
 from sqlalchemy.ext.declarative import declarative_base
 
 import membership
+from service.api_definition import SERVICE, USER
 from service.db import db_session
-from service.error import TooManyRequests, Unauthorized
+from service.error import TooManyRequests, Unauthorized, NotFound
 
 Base = declarative_base()
 
@@ -68,6 +69,16 @@ class AccessToken(Base):
         return ''.join(secrets.choice(ascii_letters + digits) for _ in range(32))
 
     @classmethod
+    def remove_token(self, token, user_id):
+        assert user_id > 0
+        
+        if not db_session.query(AccessToken).filter(self.user_id == user_id, self.access_token == token).delete():
+            raise NotFound("The access_token you specified could not be found in the database.")
+        
+        return None
+
+    # TODO This code needs unittests.
+    @classmethod
     def authenticate_request(self):
         """ Update global object with user_id and permissions. """
         g.user_id = None
@@ -76,7 +87,7 @@ class AccessToken(Base):
         bearer = 'Bearer '
         auth = request.headers.get('Authorization', '').strip()
         if not auth.startswith(bearer):
-            return
+            raise Unauthorized("Unauthorized.")
             
         token = auth[len(bearer):].strip()
         
@@ -86,8 +97,15 @@ class AccessToken(Base):
             raise Unauthorized("Invalid access token.")
         
         if access_token.permissions is None:
-            permissions = membership.service.service_get(f'/member/{access_token.user_id}/permissions')
-            access_token.permissions = ','.join(p['permission'] for p in permissions)
+            permissions = {
+                p['permission'] for p in membership.service.service_get(f'/member/{access_token.user_id}/permissions')
+            }
+            if access_token.user_id < 0:
+                permissions.add(SERVICE)
+            else:
+                permissions.add(USER)
+                
+            access_token.permissions = ','.join(permissions)
         
         access_token.ip = request.remote_addr
         access_token.browser = request.user_agent.string

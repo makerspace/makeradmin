@@ -45,4 +45,3 @@ SELENIUM_SCREENSHOT_DIR = os.environ.get('SELENIUM_SCREENSHOT_DIR',
                                                                       f"../../../.test/selenium-screenshots")))
 
 API_BEARER = get_env("API_BEARER")
-

@@ -1,9 +1,9 @@
-from flask import request
+from flask import request, g
 
 import membership
 from core import service
 from core.models import Login, AccessToken
-from service.api_definition import POST, PUBLIC, Arg, DELETE, GET, SERVICE, Enum
+from service.api_definition import POST, PUBLIC, Arg, DELETE, GET, SERVICE, Enum, USER
 from service.error import ApiError
 
 TODO = "TODO"
@@ -27,10 +27,9 @@ def login(grant_type=Arg(Enum('password')), username=Arg(str), password=Arg(str)
     return AccessToken.create_user_token(member_id)
 
 
-# $app->delete("oauth/token/{token}", ["middleware" => "auth", "uses" => "Authentication@logout"]);
-@service.route("/oauth/token/<string:token>", method=DELETE, permission=TODO)
+@service.route("/oauth/token/<string:token>", method=DELETE, permission=USER)
 def logout(token=None):
-    return ""
+    return AccessToken.remove_token(token, g.user_id)
 
 
 # $app->  post("oauth/resetpassword",  "Authentication@reset");

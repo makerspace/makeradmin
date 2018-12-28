@@ -61,7 +61,7 @@ class ApiFactory:
     def request(self, method, path, **kwargs):
         token = kwargs.pop('token', self.api_token)
         headers = kwargs.pop('headers', {"Authorization": "Bearer " + token})
-        url = self.base_url + "/" + path
+        url = self.base_url + path
         return ApiResponse(requests.request(method, url=url, headers=headers, **kwargs))
 
     def post(self, path, json=None, **kwargs):
@@ -78,7 +78,7 @@ class ApiFactory:
 
     def create_member(self, **kwargs):
         obj = self.obj.create_member(**kwargs)
-        self.member = self.post("membership/member", json=obj).expect(code=201, status='created').data
+        self.member = self.post("/membership/member", json=obj).expect(code=201, status='created').data
         return self.member
 
     def login_member(self, member=None):
@@ -93,27 +93,27 @@ class ApiFactory:
 
     def create_group(self, **kwargs):
         obj = self.obj.create_group(**kwargs)
-        self.group = self.post("membership/group", json=obj).expect(code=201, status='created').data
+        self.group = self.post("/membership/group", json=obj).expect(code=201, status='created').data
         return self.group
 
     def create_category(self, **kwargs):
         obj = self.obj.create_category(**kwargs)
-        self.category = self.post("webshop/category", json=obj).expect(code=200, status='created').data
+        self.category = self.post("/webshop/category", json=obj).expect(code=200, status='created').data
         return self.category
         
     def delete_category(self, id=None):
-        return self.delete(f"webshop/category/{id or self.category['id']}").expect(code=200, status='deleted').data
+        return self.delete(f"/webshop/category/{id or self.category['id']}").expect(code=200, status='deleted').data
 
     def create_product(self, **kwargs):
         if self.category:
             kwargs.setdefault('category_id', self.category['id'])
             
         obj = self.obj.create_product(**kwargs)
-        self.product = self.post("webshop/product", json=obj).expect(code=200, status='created').data
+        self.product = self.post("/webshop/product", json=obj).expect(code=200, status='created').data
         return self.product
     
     def delete_product(self, id=None):
-        return self.delete(f"webshop/product/{id or self.product['id']}").expect(code=200, status='deleted').data
+        return self.delete(f"/webshop/product/{id or self.product['id']}").expect(code=200, status='deleted').data
         
     def create_product_action(self, **kwargs):
         if self.product:

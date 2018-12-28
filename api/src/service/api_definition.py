@@ -13,8 +13,9 @@ DELETE = 'delete'
 PUT = 'put'
 
 # Permissions
-PUBLIC = 'public'
-SERVICE = 'service'
+PUBLIC = 'public'    # Anyone on the internet can access this endpoint.
+SERVICE = 'service'  # A service user (id < 0) needs to be authenticated, but no other permissions are needed.
+USER = 'user'        # A regular user (id > 0) needs to be authenticated, but no other permissions are needed.
 
 # Service credentials
 SERVICE_USER_ID = -1
