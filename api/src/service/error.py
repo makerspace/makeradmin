@@ -24,8 +24,8 @@ def db_error_handler(error):
     response = jsonify(
         message=GENERIC_ERROR_MESSAGE,
         status="error",
-        field=None,
-        what=None
+        fields=None,
+        what=None,
     )
     response.status_code = 500
     return response
@@ -66,7 +66,6 @@ class ApiError(Exception):
         self.what = what
         self.log = log
         self.level = level
-        # TODO How to do translated messages? Do we do only message keys?
         
     def __repr__(self):
         return f"{self.__class__.__name__}(code={self.code}, status={self.status}, fields={self.fields}" \
@@ -78,6 +77,9 @@ class ApiError(Exception):
             fields=self.fields,
             what=self.what,
             status=self.status,
+            # Legacy response fields, remove when not used any more.
+            column=self.fields,
+            type=self.what,
         )
         response.status_code = self.code
         return response
@@ -94,6 +96,10 @@ class ApiError(Exception):
         kwargs.setdefault('code', response.status_code)
         for key in ('message', 'fields', 'what', 'status'):
             kwargs.setdefault(key, data.get(key))
+            
+        # Legacy response fields, remove when not used any more.
+        kwargs.setdefault('fields', data.get('column'))
+        kwargs.setdefault('what', data.get('type'))
         return cls(**kwargs)
 
 
