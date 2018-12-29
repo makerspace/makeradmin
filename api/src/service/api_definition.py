@@ -1,14 +1,11 @@
-
-# HTTP Methods
-import re
 from inspect import signature
-from typing import Any
 
 from flask import request
 
 from service.error import ApiError, UnprocessableEntity
 from service.logging import logger
 
+# HTTP Methods
 POST = 'post'
 GET = 'get'
 DELETE = 'delete'

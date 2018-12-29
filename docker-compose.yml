@@ -97,7 +97,7 @@ services:
       MYSQL_DB: "makeradmin"
       MYSQL_USER:
       MYSQL_PASS:
-      APIGATEWAY: "api-gateway"
+      APIGATEWAY: ${APIGATEWAY:-api-gateway}
       BEARER: "${API_BEARER}"
       HOST_FRONTEND:
       HOST_BACKEND:
@@ -117,7 +117,6 @@ services:
       - "./.webshop_product_images:/work/static/product_images"
     build: public
     environment:
-      APIGATEWAY: "api-gateway"
       HOST_BACKEND:
       STRIPE_PUBLIC_KEY:
       APP_DEBUG:
@@ -139,7 +138,7 @@ services:
       MYSQL_DB: "makeradmin"
       MYSQL_USER:
       MYSQL_PASS:
-      APIGATEWAY: "api-gateway"
+      APIGATEWAY: ${APIGATEWAY:-api-gateway}
       BEARER: "${API_BEARER}"
     depends_on:
       - api-gateway
@@ -158,7 +157,7 @@ services:
       MYSQL_DB: "makeradmin"
       MYSQL_USER:
       MYSQL_PASS:
-      APIGATEWAY: "api-gateway"
+      APIGATEWAY: ${APIGATEWAY:-api-gateway}
       BEARER: "${API_BEARER}"
     depends_on:
       - api-gateway
@@ -175,7 +174,6 @@ services:
       MYSQL_DB: "makeradmin"
       MYSQL_USER:
       MYSQL_PASS:
-      APIGATEWAY: "api-gateway"
       BEARER: "${API_BEARER}"
       MAILGUN_DOMAIN:
       MAILGUN_KEY:
@@ -195,7 +193,7 @@ services:
     volumes:
       - ./data/multiaccess-uploads:/var/www/html/storage/uploads
     environment:
-      APIGATEWAY: api-gateway
+      APIGATEWAY: ${APIGATEWAY:-api-gateway}
       BEARER: "${API_BEARER}"
     depends_on:
       - api-gateway

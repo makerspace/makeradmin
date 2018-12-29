@@ -232,6 +232,19 @@ class Login
 		if (is_null($permissions)) {
 			return false;
 		}
+
+                $delimiter = ",";
+		if (empty($permissions)) {
+			$delimiter = "";
+		}
+
+		if ($user_id < 0) {
+			$permissions = $permissions . $delimiter . "service";
+		}
+		else {
+			$permissions = $permissions . $delimiter . "user";
+		}
+
 		DB::table("access_tokens")
 			->where('user_id', $user_id)
 			->update(['permissions' => $permissions]);

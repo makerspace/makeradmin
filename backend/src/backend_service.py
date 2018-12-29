@@ -88,7 +88,7 @@ class APIGateway:
     def get(self, path, payload=None, token=None) -> requests.Response:
         url = self.host + "/" + path
         headers = self._get_headers(token)
-        logger.info(f"getting url={url}, headers={headers}, params={payload}")
+        logger.info(f"getting url={url}, headers={headers}, params={payload}")  # TODO
         return requests.get(url, params=payload, headers=headers)
 
     def post(self, path, payload, token=None) -> requests.Response:
@@ -101,7 +101,7 @@ class APIGateway:
         return requests.delete(self.host + "/" + path, headers=self._get_headers(token))
 
 
-DEFAULT_PERMISSION = object()
+DEFAULT_PERMISSION = "service"
 
 
 def format_datetime(date: Union[str, datetime]):
@@ -115,7 +115,7 @@ def format_datetime(date: Union[str, datetime]):
 
 
 class Service:
-    def __init__(self, name: str, url: str, port: int, version: Optional[str], db: DB, gateway: APIGateway, debug: bool, frontend: bool) -> None:
+    def __init__(self, name: str, url: str, port: int, version: Optional[str], db: DB, gateway: APIGateway, debug: bool) -> None:
         self.name = name
         self.url = url
         self.port = port
@@ -123,7 +123,6 @@ class Service:
         self.db = db
         self.debug = debug
         self.gateway = gateway
-        self.frontend = frontend
         self._used_permissions: Set[str] = set()
         self.blueprint = Blueprint(name, __name__)
         self.blueprint.context_processor(lambda: dict(url=self.full_path))
@@ -132,10 +131,6 @@ class Service:
         return "/" + self.url + ("/" + path if path != "" else "")
 
     def route(self, path: str, permission=DEFAULT_PERMISSION, **kwargs):
-        if permission == DEFAULT_PERMISSION:
-            # Backend uses authentication by default, frontends are public by default
-            permission = None if self.frontend else "service"
-
         if permission is not None:
             self._used_permissions.add(permission)
 
@@ -145,8 +140,7 @@ class Service:
             @wraps(f)
             def auth(*args, **kwargs):
                 if permission is not None:
-                    permissionsStr = request.headers["X-User-Permissions"] if "X-User-Permissions" in request.headers else ""
-                    permissions = permissionsStr.split(",")
+                    permissions = request.headers.get("X-User-Permissions", "").split(",")
                     if permission not in permissions and "service" not in permissions:
                         abort(403, "user does not have the " + str(permission) + " permission")
 
@@ -167,7 +161,7 @@ class Service:
         r = self.gateway.post("service/register", payload)
         if not r.ok:
             pass
-            # logger.warning(f"failed to register service {self.name}, ignoring: {r.json().get('message')}")
+            # logger.warning(f"failed to register service {self.name} at {self.gateway.host}, ignoring: {r.json().get('message')}")
 
     def unregister(self):
         # logger.info(f"unregistering service {self.name}, url: {self.url}")
@@ -177,7 +171,7 @@ class Service:
         }
         r = self.gateway.post("service/unregister", payload)
         if not r.ok:
-            raise Exception("Failed to unregister service: " + r.text)
+            raise Exception(f"Failed to unregister service at {self.gateway.host}: {r.text}")
 
     def _wrap_error_codes(self):
         # Pretty ugly way to wrap all abort(code, message) calls so that they return proper json reponses
@@ -269,7 +263,7 @@ def eprint(s, **kwargs):
 
 def create(name, url, port, version):
     db, gateway, debug = read_config()
-    service = Service(name, url, port, version, db, gateway, debug, False)
+    service = Service(name, url, port, version, db, gateway, debug)
 
     try:
         service.unregister()
@@ -281,14 +275,6 @@ def create(name, url, port, version):
 
     service.register()
 
-    db.connect()
-    return service
-
-
-def create_frontend(name, url, port):
-    db, gateway, debug = read_config()
-    service = Service(name, url, port, None, db, gateway, debug, True)
-    eprint("Connecting to database...")
     db.connect()
     return service
 

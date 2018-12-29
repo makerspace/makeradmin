@@ -39,12 +39,16 @@ export function ajax(type: string, url: string, data: object): Promise<any> {
 		var xhr = new XMLHttpRequest();
 		xhr.open(type, url);
 		xhr.setRequestHeader('Content-Type', 'application/json; charset=utf-8');
-		xhr.setRequestHeader('Authorization', "Bearer " + localStorage.getItem("token"));
+		let token = localStorage.getItem("token");
+		if (token) {
+            xhr.setRequestHeader('Authorization', "Bearer " + token);
+        }
 		xhr.onload = () => {
 			if (xhr.status >= 200 && xhr.status <= 300) {
 				resolve(JSON.parse(xhr.responseText));
 			}
 			else if (xhr.status === 401) {
+			    removeToken();
 			    reject({status: "unauthorized", message: JSON.parse(xhr.responseText).message})
             }
 			else reject(JSON.parse(xhr.responseText));
@@ -112,8 +116,13 @@ export function addSidebarListeners() {
 	}
 }
 
+export function removeToken() {
+    delete localStorage.token;
+}
+
+
 export function logout() {
-    localStorage.setItem("token", null);
+    removeToken();
     window.location.href = "/";
 }
 

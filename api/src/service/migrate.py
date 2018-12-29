@@ -38,6 +38,13 @@ def ensure_migrations_table(engine, session_factory):
             session.commit()
 
 
+def clear_permission_cache(session_factory):
+    """ Clear permisssion cache as a part of every migrate/restart. """
+    with closing(session_factory()) as session:
+        session.execute("UPDATE access_tokens SET permissions = NULL")
+        session.commit()
+
+
 def migrate_service(session_factory, service_name, migrations_dir):
     
     with closing(session_factory()) as session:

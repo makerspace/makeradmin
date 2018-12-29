@@ -57,10 +57,12 @@ class ApiError(Exception):
     
     code = 400
 
-    def __init__(self, message=None, fields=None, what=None, status="error", code=None, log=None, level=ERROR):
+    def __init__(self, message=None, fields=None, what=None, status="error", service=None, code=None,
+                 log=None, level=ERROR):
         """
         :param message human readable message of what went wrong, should be safe to show to end users
         :param status TODO is this really needed? we have http status code
+        :param service this external service created this response
         :param fields comma separated list of db fields/request parameters that was wrong, use when code is not enough
         :param what symbolic string of what went wrong, only use when code and field is not specific enough
         :param code http status code
@@ -72,12 +74,13 @@ class ApiError(Exception):
         self.message = message
         self.fields = fields
         self.what = what
+        self.service = service
         self.log = log
         self.level = level
         
     def __repr__(self):
         return f"{self.__class__.__name__}(code={self.code}, status={self.status}, fields={self.fields}" \
-               f", what={self.what}, message='{self.message}')"
+               f", what={self.what}, message='{self.message}, service='{self.service}')"
     
     def to_response(self):
         response = jsonify(
@@ -85,6 +88,7 @@ class ApiError(Exception):
             fields=self.fields,
             what=self.what,
             status=self.status,
+            serivce=self.service,
             # Legacy response fields, remove when not used any more.
             column=self.fields,
             type=self.what,

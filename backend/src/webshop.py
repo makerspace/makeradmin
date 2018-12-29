@@ -108,7 +108,7 @@ def images_for_product(id: int):
     return product_image_entity.list("product_id=%s AND deleted_at IS NULL", id)
 
 
-@instance.route("member/current/pending_actions", methods=["GET"], permission=None)
+@instance.route("member/current/pending_actions", methods=["GET"], permission='user')
 @route_helper
 def pending_actions_for_member():
     user_id = assert_get(request.headers, "X-User-Id")
@@ -252,7 +252,7 @@ def list_orders():
 
     return transactions
 
-@instance.route("member/current/transactions", methods=["GET"], permission=None)
+@instance.route("member/current/transactions", methods=["GET"], permission='user')
 @route_helper
 def member_history() -> Dict[str, Any]:
     '''

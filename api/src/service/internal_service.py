@@ -56,8 +56,8 @@ class InternalService(Blueprint):
         :param flat_return some endpoints returns data flattened, most don't TODO fix this
         """
         
-        assert permission is not None, "permission is required"
-        assert bool(method) != bool(methods), "exactly one of method and methods parameter shoule be set"
+        assert permission is not None, "permission is required, use PUBLIC for no permission needed"
+        assert bool(method) != bool(methods), "exactly one of method and methods parameter should be set"
         
         methods = methods or (method,)
         

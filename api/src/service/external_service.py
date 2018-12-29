@@ -20,48 +20,55 @@ class ExternalService(Blueprint):
         @self.route("/", methods=(GET, PUT, POST, DELETE))
         @self.route("/<path:path>", methods=(GET, PUT, POST, DELETE))
         def upstream_service(path=""):
-            url = self.get_url(path)
-            logger.info(f"forwarding to external service at {url}")
-            response = self.raw_request(url, request.method, data=request.get_data(), params=request.args)
+            url = self.get_url("/" + path)
+            response = self.raw_request("forwarding", url, request.method,
+                                        data=request.get_data(), params=request.args)
             return response.content, response.status_code
         
     def migrate(self, *args, **kwargs):
         pass
 
     def get_url(self, path):
-        return f"{self.url}/{self.name}/{path}"
+        return f"{self.url}/{self.name}{path}"
 
-    @staticmethod
-    def raw_request(url, method, user_id=None, permissions=None, **kwargs):
-        user_id = user_id or g.user_id
+    def raw_request(self, what, url, method, user_id=None, permissions=None, **kwargs):
         permissions = permissions or g.permissions
+        headers = {
+            'X-User-Permissions': ','.join(permissions)
+        }
+
+        user_id = user_id or g.user_id
+        if user_id:
+            headers['X-User-Id'] = str(user_id)
+
+        # TODO Remove or level debug.
+        logger.info(f"{what} to {url}, user_id={user_id}, permissions={permissions}")
         
         try:
             response = requests.request(
                 method=method,
                 url=url,
-                headers={
-                    'X-User-Id': str(user_id),
-                    'X-User-Permissions': ','.join(permissions),
-                },
+                headers=headers,
                 timeout=4,
                 **kwargs,
             )
         except RequestException as e:
-            raise InternalServerError(GENERIC_ERROR_MESSAGE, log=f"{method} to {url} failed: {str(e)}", level=EXCEPTION)
+            raise InternalServerError(GENERIC_ERROR_MESSAGE, service=self.name,
+                                      log=f"{method} to {url} failed: {str(e)}", level=EXCEPTION)
 
         return response
 
     def request(self, path, method, **kwargs):
         url = self.get_url(path)
-        
-        response = self.raw_request(url, method, **kwargs)
+
+        response = self.raw_request("own request", url, method, **kwargs)
         
         if response.status_code >= 500:
-            raise ApiError.parse(response, message=GENERIC_ERROR_MESSAGE, log=f"{method} to {url} failed")
+            raise ApiError.parse(response, service=self.name, message=GENERIC_ERROR_MESSAGE,
+                                 log=f"{method} to {url} failed")
         
         if response.status_code >= 400:
-            raise ApiError.parse(response)
+            raise ApiError.parse(response, service=self.name)
 
         data = response.json()
         

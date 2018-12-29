@@ -57,13 +57,13 @@ def send_access_token():
     return jsonify({"status": "sent"})
 
 
-@instance.route("current", methods=["GET"], permission=None)
+@instance.route("current", methods=["GET"], permission='user')
 def current_member() -> str:
     user_id = assert_get(request.headers, "X-User-Id")
     return instance.gateway.get("membership/member/%s" % user_id).text
 
 
-@instance.route("current/permissions", methods=["GET"], permission=None)
+@instance.route("current/permissions", methods=["GET"], permission='user')
 @route_helper
 def permissions() -> Dict[str, Any]:
     user_id = assert_get(request.headers, "X-User-Id")
@@ -74,10 +74,12 @@ def permissions() -> Dict[str, Any]:
         "permissions": permissions,
     }
 
-@instance.route("current/membership", methods=["GET"], permission=None)
+
+@instance.route("current/membership", methods=["GET"], permission='user')
 def membership_info() -> str:
     ''' If the user has lab access and how long '''
     user_id = assert_get(request.headers, "X-User-Id")
     return instance.gateway.get(f"membership/member/{user_id}/membership").text
+
 
 instance.serve_indefinitely()

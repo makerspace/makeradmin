@@ -6,7 +6,7 @@ from sqlalchemy.orm import sessionmaker
 
 from service.config import get_mysql_config
 from service.db import create_mysql_engine
-from service.migrate import ensure_migrations_table
+from service.migrate import ensure_migrations_table, clear_permission_cache
 from services import services
 
 
@@ -21,3 +21,5 @@ with log_exception(status=1):
     
     for path, service in services:
         service.migrate(session_factory)
+    
+    clear_permission_cache(session_factory)
