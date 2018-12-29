@@ -20,6 +20,7 @@ USAGE
 }
 
 wait_for() {
+  echo "waiting for $HOST:$PORT"
   for i in `seq $TIMEOUT` ; do
     nc -z "$HOST" "$PORT" > /dev/null 2>&1
     
@@ -32,7 +33,7 @@ wait_for() {
     fi
     sleep 1
   done
-  echo "Operation timed out" >&2
+  echo "wait for $HOST:$PORT timed out after $TIMEOUT seconds" >&2
   exit 1
 }
 

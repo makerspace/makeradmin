@@ -58,6 +58,7 @@ services:
       MYSQL_DB: "makeradmin"
       MYSQL_USER:
       MYSQL_PASS:
+      APIGATEWAY: "${APIGATEWAY:-api}"
       BEARER: "${API_BEARER}"
       VIRTUAL_HOST: "${HOST_BACKEND}"
       LETSENCRYPT_HOST: "${HOST_BACKEND}"
@@ -97,7 +98,7 @@ services:
       MYSQL_DB: "makeradmin"
       MYSQL_USER:
       MYSQL_PASS:
-      APIGATEWAY: ${APIGATEWAY:-api-gateway}
+      APIGATEWAY: "${APIGATEWAY:-api}"
       BEARER: "${API_BEARER}"
       HOST_FRONTEND:
       HOST_BACKEND:
@@ -108,6 +109,7 @@ services:
       STRIPE_SIGNING_SECRET:
     depends_on:
       - api-gateway
+      - api
     networks:
       - makeradmin
       
@@ -138,10 +140,11 @@ services:
       MYSQL_DB: "makeradmin"
       MYSQL_USER:
       MYSQL_PASS:
-      APIGATEWAY: ${APIGATEWAY:-api-gateway}
+      APIGATEWAY: "${APIGATEWAY:-api}"
       BEARER: "${API_BEARER}"
     depends_on:
       - api-gateway
+      - api
     networks:
       - makeradmin
 
@@ -157,10 +160,11 @@ services:
       MYSQL_DB: "makeradmin"
       MYSQL_USER:
       MYSQL_PASS:
-      APIGATEWAY: ${APIGATEWAY:-api-gateway}
+      APIGATEWAY: "${APIGATEWAY:-api}"
       BEARER: "${API_BEARER}"
     depends_on:
       - api-gateway
+      - api
     networks:
       - makeradmin
 
@@ -174,6 +178,7 @@ services:
       MYSQL_DB: "makeradmin"
       MYSQL_USER:
       MYSQL_PASS:
+      APIGATEWAY: "${APIGATEWAY:-api}"
       BEARER: "${API_BEARER}"
       MAILGUN_DOMAIN:
       MAILGUN_KEY:
@@ -181,6 +186,7 @@ services:
       MAILGUN_TO_OVERRIDE:
     depends_on:
       - api-gateway
+      - api
       - messages
     networks:
       - makeradmin
@@ -193,10 +199,11 @@ services:
     volumes:
       - ./data/multiaccess-uploads:/var/www/html/storage/uploads
     environment:
-      APIGATEWAY: ${APIGATEWAY:-api-gateway}
+      APIGATEWAY: "${APIGATEWAY:-api}"
       BEARER: "${API_BEARER}"
     depends_on:
       - api-gateway
+      - api
     networks:
       - makeradmin
 

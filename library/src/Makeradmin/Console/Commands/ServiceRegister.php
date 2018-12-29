@@ -59,6 +59,7 @@ class ServiceRegister extends Command
 			print_r($result);
 		}
 
+         	print(config('service.url') . " registring permissions (" . implode(',', $permissions['permissions']) . ")\n");
 		$ch->call("POST", "http://" . config("service.gateway") . "/membership/permission/register", [], [
 			'service'     => config('service.name'),
 			'permissions' => implode(',', $permissions['permissions']),

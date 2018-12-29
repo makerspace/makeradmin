@@ -131,7 +131,7 @@ class Service:
         return "/" + self.url + ("/" + path if path != "" else "")
 
     def route(self, path: str, permission=DEFAULT_PERMISSION, **kwargs):
-        if permission is not None:
+        if permission and permission not in (DEFAULT_PERMISSION, 'user'):
             self._used_permissions.add(permission)
 
         path = self.full_path(path)

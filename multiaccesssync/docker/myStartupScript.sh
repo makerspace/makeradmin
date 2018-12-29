@@ -1,8 +1,8 @@
 #!/bin/bash
 set -e
 
-# Wait for api-gateway to be ready
-/usr/local/myscripts/wait-for api-gateway:80
+# Wait for api gateway to be ready
+/usr/local/myscripts/wait-for "$APIGATEWAY:80"
 
 # Not sure if these directories are needed, but let's create them anyway
 mkdir -p /var/www/html/storage/
@@ -25,6 +25,9 @@ trap shutdown SIGHUP SIGINT SIGTERM
 echo "Starting server"
 php-fpm -R
 nginx
+
+# Wait for membership or we can't register permissions
+/usr/local/myscripts/wait-for "membership:80"
 
 # Register the service immediately
 php /var/www/html/artisan service:register
