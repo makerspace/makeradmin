@@ -20,18 +20,22 @@ class ExternalService(Blueprint):
         @self.route("/", methods=(GET, PUT, POST, DELETE))
         @self.route("/<path:path>", methods=(GET, PUT, POST, DELETE))
         def upstream_service(path=""):
-            logger.info(f"forwarding to external service at {self.url}/{self.name}/{path}")
-            response = self.raw_request('/' + path, request.method, data=request.get_data(), params=request.args)
+            url = self.get_url(path)
+            logger.info(f"forwarding to external service at {url}")
+            response = self.raw_request(url, request.method, data=request.get_data(), params=request.args)
             return response.content, response.status_code
         
     def migrate(self, *args, **kwargs):
         pass
 
-    def raw_request(self, path, method, user_id=None, permissions=None, **kwargs):
+    def get_url(self, path):
+        return f"{self.url}/{self.name}/{path}"
+
+    @staticmethod
+    def raw_request(url, method, user_id=None, permissions=None, **kwargs):
         user_id = user_id or g.user_id
         permissions = permissions or g.permissions
         
-        url = f"{self.url}/{self.name}{path}"
         try:
             response = requests.request(
                 method=method,
@@ -49,7 +53,9 @@ class ExternalService(Blueprint):
         return response
 
     def request(self, path, method, **kwargs):
-        response = self.raw_request(path, method, **kwargs)
+        url = self.get_url(path)
+        
+        response = self.raw_request(url, method, **kwargs)
         
         if response.status_code >= 500:
             raise ApiError.parse(response, message=GENERIC_ERROR_MESSAGE, log=f"{method} to {url} failed")

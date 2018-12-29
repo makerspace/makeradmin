@@ -86,7 +86,10 @@ class APIGateway:
         return f"{host}{path}"
 
     def get(self, path, payload=None, token=None) -> requests.Response:
-        return requests.get(self.host + "/" + path, params=payload, headers=self._get_headers(token))
+        url = self.host + "/" + path
+        headers = self._get_headers(token)
+        logger.info(f"getting url={url}, headers={headers}, params={payload}")
+        return requests.get(url, params=payload, headers=headers)
 
     def post(self, path, payload, token=None) -> requests.Response:
         return requests.post(self.host + "/" + path, json=payload, headers=self._get_headers(token))
