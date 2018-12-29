@@ -118,6 +118,10 @@ class BadRequest(ApiError):
 class Unauthorized(ApiError):
     code = 401
     
+    def __init__(self, **kwargs):
+        # TODO Since the public javascript relies on message being this exact string it is not possible to override it.
+        super().__init__(message="Unauthorized", **kwargs)
+    
     
 class Forbidden(ApiError):
     code = 403
