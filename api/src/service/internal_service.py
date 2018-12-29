@@ -36,7 +36,7 @@ class InternalService(Blueprint):
             migrate_service(session_factory, self.name, migrations_dir)
 
     def route(self, path, permission=None, method=None, methods=None, status='ok', code=200, commit=True,
-              **route_kwargs):
+              flat_return=False, **route_kwargs):
         """
         Enhanced Blueprint.route for internal services. The function should return a jsonable structure that will
         be put in the data key in the response.
@@ -53,6 +53,7 @@ class InternalService(Blueprint):
         :param code response code
         :param commit commit db_session just before returning if no exception was raised
         :param route_kwargs all extra kwargs are forwarded to Blueprint.route
+        :param flat_return some endpoints returns data flattened, most don't TODO fix this
         """
         
         assert permission is not None, "permission is required"
@@ -72,7 +73,10 @@ class InternalService(Blueprint):
                 
                 data = f(*args, **kwargs)
                 
-                result = jsonify({'status': status, 'data': data}), code
+                if flat_return:
+                    result = jsonify({**data, 'status': status}), code
+                else:
+                    result = jsonify({'status': status, 'data': data}), code
                 
                 if commit:
                     db_session.commit()

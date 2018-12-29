@@ -10,6 +10,7 @@ import membership
 from service.api_definition import SERVICE, USER
 from service.db import db_session
 from service.error import TooManyRequests, Unauthorized, NotFound
+from service.logging import logger
 
 Base = declarative_base()
 
@@ -92,6 +93,13 @@ class AccessToken(Base):
         """ Update global object with user_id and permissions. """
         g.user_id = None
         g.permissions = tuple()
+
+        # TODO
+        # logger.info("DATA " + repr(request.get_data()))
+        # logger.info("HEADERS " + repr(request.headers))
+        # logger.info("ARGS " + repr(request.args))
+        # logger.info("FORM " + repr(request.form))
+        # logger.info("JSON " + repr(request.json))
         
         authorization = request.headers.get('Authorization', None)
         if authorization is None:

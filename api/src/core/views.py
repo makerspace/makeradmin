@@ -7,7 +7,7 @@ from service.api_definition import POST, PUBLIC, Arg, DELETE, GET, SERVICE, Enum
 from service.error import ApiError, NotFound, UnprocessableEntity
 
 
-@service.route("/oauth/token", method=POST, permission=PUBLIC)
+@service.route("/oauth/token", method=POST, permission=PUBLIC, flat_return=True)
 def login(grant_type=Arg(Enum('password')), username=Arg(str), password=Arg(str)):
     assert grant_type
 
@@ -42,7 +42,7 @@ def list_tokens():
     return AccessToken.list_for_user(g.user_id)
 
 
-@service.route("/oauth/force_token", method=POST, permission=SERVICE)
+@service.route("/oauth/force_token", method=POST, permission=SERVICE, flat_return=True)
 def force_token(user_id: int=Arg(int)):
     """ Create token for any user. """
     if user_id <= 0:

@@ -29,7 +29,7 @@ HOST_FRONTEND = get_env("HOST_FRONTEND")
 HOST_PUBLIC = get_env("HOST_PUBLIC")
 
 HOST_BACKEND = get_env("HOST_BACKEND")
-# TODO HOST_BACKEND = 'http://localhost:8012'
+HOST_BACKEND = 'http://localhost:8012'
 
 STRIPE_PUBLIC_KEY = get_env("STRIPE_PUBLIC_KEY")
 

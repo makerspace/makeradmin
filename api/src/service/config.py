@@ -29,7 +29,7 @@ default = Dict(name="default", src=dict(
     MYSQL_DB='makeradmin',
     MEMBERSHIP_URL='http://membership',
     SHOP_URL='http://backend',
-    MEMBER_URL='http://member',
+    MEMBER_URL='http://backend',
     MESSAGES_URL='http://messages',
     EMAIL_DISPATCHER_URL='http://email-dispatcher',
     MULTIACCESS_SYNC_URL='http://multiaccesssync',

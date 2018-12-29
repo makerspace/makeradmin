@@ -7,6 +7,7 @@ from typing import Any
 from flask import request
 
 from service.error import ApiError, UnprocessableEntity
+from service.logging import logger
 
 POST = 'post'
 GET = 'get'
@@ -28,7 +29,9 @@ REQUIRED = 'required'
 
 
 class Arg:
-    """ Use as default argument on route to parse post args/url parameters into keyword arguments. """
+    """ Use as default argument on route to parse parameters for the function from the request. It will try to get
+    each argument from url parameters, then post form data, then json body. If a value is found it will be converted
+    through a conversion function. """
     
     def __init__(self, converter, required=True):
         """
@@ -54,9 +57,21 @@ class Arg:
     def fill_args(args, kwargs):
         """ Fill params from request in kwargs, raises bad request on validation errors. """
         for name, param in args.items():
+            
             value = request.args.get(name)
+            
+            if value is None:
+                value = request.form.get(name)
+                
+            if value is None:
+                try:
+                    value = request.json.get(name)
+                except AttributeError:
+                    pass
+            
             if value is None and param.required:
                 raise ApiError(message=f'Parameter {name} is required.', fields=name, what=REQUIRED)
+            
             try:
                 value = param.converter(value)
             except Exception as e:

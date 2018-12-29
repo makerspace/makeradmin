@@ -1,10 +1,11 @@
 import requests
 
-from flask import Blueprint, g
+from flask import Blueprint, g, request
 from requests import RequestException
 
-from service.api_definition import POST, SERVICE_USER_ID, SERVICE_PERMISSIONS, GET
+from service.api_definition import POST, SERVICE_USER_ID, SERVICE_PERMISSIONS, GET, PUT, DELETE
 from service.error import InternalServerError, ApiError, EXCEPTION, GENERIC_ERROR_MESSAGE
+from service.logging import logger
 
 
 class ExternalService(Blueprint):
@@ -15,13 +16,20 @@ class ExternalService(Blueprint):
         super().__init__(name, name)
         self.name = name
         self.url = url
+
+        @self.route("/", methods=(GET, PUT, POST, DELETE))
+        @self.route("/<path:path>", methods=(GET, PUT, POST, DELETE))
+        def upstream_service(path=""):
+            logger.info(f"forwarding to external service at {self.url}/{self.name}/{path}")
+            response = self.raw_request('/' + path, request.method, data=request.get_data())
+            return response.content, response.status_code
         
     def migrate(self, *args, **kwargs):
         pass
 
-    def request(self, path, method, user_id=None, permissions=None, **kwargs):
+    def raw_request(self, path, method, user_id=None, permissions=None, **kwargs):
         user_id = user_id or g.user_id
-        permissions = permissions or g.user_permissions
+        permissions = permissions or g.permissions
         
         url = f"{self.url}/{self.name}{path}"
         try:
@@ -38,6 +46,11 @@ class ExternalService(Blueprint):
         except RequestException as e:
             raise InternalServerError(GENERIC_ERROR_MESSAGE, log=f"{method} to {url} failed: {str(e)}", level=EXCEPTION)
 
+        return response
+
+    def request(self, path, method, **kwargs):
+        response = self.raw_request(path, method, **kwargs)
+        
         if response.status_code >= 500:
             raise ApiError.parse(response, message=GENERIC_ERROR_MESSAGE, log=f"{method} to {url} failed")
         
