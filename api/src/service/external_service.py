@@ -21,7 +21,7 @@ class ExternalService(Blueprint):
         @self.route("/<path:path>", methods=(GET, PUT, POST, DELETE))
         def upstream_service(path=""):
             logger.info(f"forwarding to external service at {self.url}/{self.name}/{path}")
-            response = self.raw_request('/' + path, request.method, data=request.get_data())
+            response = self.raw_request('/' + path, request.method, data=request.get_data(), params=request.args)
             return response.content, response.status_code
         
     def migrate(self, *args, **kwargs):
