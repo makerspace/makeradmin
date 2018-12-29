@@ -19,7 +19,7 @@ def log(level, message):
         logger.log(level, message)
 
 
-def db_error_handler(error):
+def error_handler_db(error):
     logger.exception(f"error when communicating with db: {str(error)}")
     response = jsonify(
         message=GENERIC_ERROR_MESSAGE,
@@ -31,7 +31,7 @@ def db_error_handler(error):
     return response
     
 
-def api_error_handler(error):
+def error_handler_api(error):
     # TODO Maybe add a handler for db communication errors.
     
     if error.log is True:
@@ -41,6 +41,14 @@ def api_error_handler(error):
     # TODO Remove this logging if it turns out to be used in too few places.
         
     return error.to_response()
+
+
+def error_handler_500(error):
+    return jsonify(dict(message='Internal server error.', status='error')), 500
+
+
+def error_handler_404(error):
+    return jsonify(dict(message='Not found.', status='error')), 404
 
 
 class ApiError(Exception):
