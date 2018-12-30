@@ -102,13 +102,19 @@ class AccessToken(Base):
 
         bearer = 'Bearer '
         if not authorization.startswith(bearer):
-            raise Unauthorized("Unauthorized, can't find credentials.")
+            raise Unauthorized("Unauthorized, can't find credentials.", fields="bearer", what="required")
             
         token = authorization[len(bearer):].strip()
         
         access_token = db_session.query(AccessToken).get(token)
         if not access_token:
-            raise Unauthorized("Unauthorized, invalid access token.")
+            raise Unauthorized("Unauthorized, invalid access token.", fields="bearer", what="bad_value")
+        
+        # TODO BM Test this.
+        now = datetime.utcnow()
+        if access_token.expires < now:
+            db_session.query(AccessToken).filter(AccessToken.expires < now).delete()
+            raise Unauthorized("Unauthorized, expired access token.", fields="bearer", what="expired")
         
         if access_token.permissions is None:
             permissions = {
@@ -130,8 +136,6 @@ class AccessToken(Base):
         
         # Commit token validation to make it stick even if request fails later.
         db_session.commit()
-        
-        # TODO BM Where is expiry checked? Remove it if not used?
 
 
 class Login:
