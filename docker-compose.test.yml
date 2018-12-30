@@ -9,18 +9,18 @@ services:
   backend:
     environment:
       HOST_FRONTEND: 'http://admin'
-      HOST_BACKEND: 'http://api-gateway'
+      HOST_BACKEND: 'http://${APIGATEWAY:-api}'
       HOST_PUBLIC: 'http://public'
 
   public:
     environment:
-      HOST_BACKEND: 'http://api-gateway'
+      HOST_BACKEND: 'http://${APIGATEWAY:-api}'
     ports:
       - "9011:80"
       
   admin:
     environment:
-      HOST_BACKEND: 'http://api-gateway'
+      HOST_BACKEND: 'http://${APIGATEWAY:-api}'
     ports:
       - "9009:80"
 
@@ -63,8 +63,9 @@ services:
       WEBDRIVER_TYPE: "REMOTE_CHROME"
       API_BEARER: "${API_BEARER}"
       HOST_FRONTEND: 'http://admin'
-      HOST_BACKEND: 'http://api-gateway'
+      HOST_BACKEND: 'http://${APIGATEWAY:-api}'
       HOST_PUBLIC: 'http://public'
+      APIGATEWAY: "${APIGATEWAY:-api}"
       STRIPE_PRIVATE_KEY:
       STRIPE_PUBLIC_KEY:
       TEST_PARALELLISM:

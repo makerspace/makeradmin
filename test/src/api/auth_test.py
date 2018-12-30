@@ -98,4 +98,4 @@ class Test(ApiTest):
         self.api.delete(f'/oauth/token/{token}', token=token).expect(code=200)
 
     def test_force_token_for_service_user_is_not_possible(self):
-        self.api.post("/oauth/force_token", data=dict(user_id=-1)).expect(code=500)  # TODO New code renders 422
+        self.api.post("/oauth/force_token", data=dict(user_id=-1)).expect(code=422)

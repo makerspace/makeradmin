@@ -15,7 +15,6 @@ test: .env
 	$(TEST_COMPOSE) down || true
 	docker volume rm test_dbdata || true
 	$(TEST_COMPOSE) build
-	python3 db_init.py --project-name test
 	$(TEST_COMPOSE) up --abort-on-container-exit --exit-code-from test
 
 dev-test:

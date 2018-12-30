@@ -12,7 +12,7 @@ class ExternalService(Blueprint):
     """ Flask blueprint for external services that sends all requests to an external service. Authentication is done
     here and permission information is forwarded as HTTP headers. """
     
-    def __init__(self, name, url, timeout=8):
+    def __init__(self, name, url, timeout=30):
         super().__init__(name, name)
         self.name = name
         self.url = url
@@ -80,10 +80,10 @@ class ExternalService(Blueprint):
         return data.get('data')
 
     def user_post(self, path, **data):
-        return self.request(path, method=POST, data=data, content_type='application/json')
+        return self.request(path, method=POST, data=data)
 
     def service_post(self, path, **data):
-        return self.request(path, method=POST, data=data, content_type='application/json',
+        return self.request(path, method=POST, data=data,
                             user_id=SERVICE_USER_ID, permissions=SERVICE_PERMISSIONS)
 
     def user_get(self, path):
