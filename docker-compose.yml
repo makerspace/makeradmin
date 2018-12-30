@@ -74,6 +74,7 @@ services:
     networks:
       - makeradmin
     environment:
+      BEARER: "${API_BEARER}"
       APP_DEBUG:
       MYSQL_HOST: db2
       MYSQL_DB:

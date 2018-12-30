@@ -24,13 +24,14 @@ def clear_permission_cache(session_factory):
 def refresh_service_access_token(session_factory):
     """ Clear permisssion cache as a part of every db_init/restart. """
     
-    service_token = config.get('API_BEARER', env, docker_env, log_value=False)
-    assert service_token, "API_BEARER not configured"
+    service_token = config.get('BEARER', env, docker_env, log_value=False)
+    assert service_token, "BEARER not configured"
     
     with closing(session_factory()) as session:
         ten_years = timedelta(days=365 * 10)
         session.execute("DELETE FROM access_tokens WHERE access_token = :token", dict(token=service_token))
-        session.execute("INSERT INTO access_tokens VALUES (:user_id, :token, :expires, '', NULL, '', :lifetime)",
+        session.execute("INSERT INTO access_tokens (user_id, access_token, expires, lifetime, browser, ip)"
+                        "   VALUES (:user_id, :token, :expires, :lifetime, '', '')",
                         dict(user_id=SERVICE_USER_ID, token=service_token,
                              expires=datetime.utcnow() + ten_years, lifetime=ten_years.total_seconds()))
         session.commit()
