@@ -146,7 +146,7 @@ class Authentication extends Controller
 	 */
 	public function reset(Request $request)
 	{
-		// TODO: Validate input
+		// todo: Validate input
 
 		// Generate a reset password token and send an E-mail
 		Login::reset();
@@ -154,7 +154,7 @@ class Authentication extends Controller
 		// Send response
 		return Response()->json([
 			"status"  => "ok",
-			"message" => "TODO: Reset password",
+			"message" => "todo: Reset password",
 		], 200);
 	}
 }

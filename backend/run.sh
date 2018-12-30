@@ -34,4 +34,4 @@ fi
 # as nginx handles all the persistent connections.
 # Note: don't use more than one worker for the backend, otherwise we could in rare cases get race conditions as most of the actions the backend does are not atomic.
 echo "starting gunicorn"
-exec gunicorn $GUNICORN_FLAGS --access-logfile - --worker-class sync --chdir src --workers=1 -b :80 backend:app
+exec gunicorn $GUNICORN_FLAGS --access-logfile - --worker-class sync --chdir src --workers=4 -b :80 backend:app

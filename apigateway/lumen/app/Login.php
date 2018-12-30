@@ -10,7 +10,7 @@ use Makeradmin\Libraries\CurlBrowser;
 use App\MakerGuard as Auth;
 
 /**
- * TODO:
+ * todo:
  *   Skall gå att köra en hårdkodad authenticate när membership-modulen inte är registrerad, annars kan den ej registrera sig själv
  *   check for expiry date
  */
@@ -110,7 +110,7 @@ class Login
 	 */
 	public static function getUserTokens($user_id)
 	{
-		// TODO: Check expiry date
+		// todo: Check expiry date
 		return DB::Table("access_tokens")
 			->select("access_token", "browser", "ip")
 			->selectRaw("DATE_FORMAT(expires, '%Y-%m-%dT%H:%i:%sZ') AS expires")
@@ -123,9 +123,9 @@ class Login
 	 */
 	public static function reset()
 	{
-		// TODO: Check that the E-mail is existing
-		// TODO: Create a record in database with the reset token
-		// TODO: Send an E-mail to the user
+		// todo: Check that the E-mail is existing
+		// todo: Create a record in database with the reset token
+		// todo: Send an E-mail to the user
 	}
 
 	/**
@@ -341,7 +341,7 @@ class Login
 	/**
 	 * Figure out if the login should be throttled or not
 	 *
-	 * TODO: Values should be configured in a config
+	 * todo: Values should be configured in a config
 	 */
 	public static function shouldThrottle()
 	{

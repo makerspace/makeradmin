@@ -32,8 +32,6 @@ def error_handler_db(error):
     
 
 def error_handler_api(error):
-    # TODO Maybe add a handler for db communication errors.
-    
     if error.log is True:
         log(error.level, repr(error))
     elif error.log:

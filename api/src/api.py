@@ -35,9 +35,7 @@ engine = create_mysql_engine(**get_mysql_config())
 
 @app.route("/")
 def index():
-    return "/"
-    # // Index page, test to see if the user is logged in or not
-    # $app->  get("/", ["middleware" => "auth:service", "uses" => "ServiceRegistry@test"]);
+    return jsonify(dict(status="ok")), 200
 
 
 # TODO Make sure nobody calls this and remove it.

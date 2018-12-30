@@ -5,7 +5,7 @@ namespace App;
 use DB;
 
 /**
- * TODO:
+ * todo:
  *   All service should have an active flag? Could be useful for hotswapping services?
  *   deleted_at?
  */
@@ -16,12 +16,12 @@ class Service
 	 */
 	public static function getService($service, $version = null)
 	{
-		// TODO: Get the correct (or latest) version
+		// todo: Get the correct (or latest) version
 		$result = DB::table("services")
 			->where("url", "=", $service)
 			->first();
 
-		// TODO: Add signing token to service?
+		// todo: Add signing token to service?
 		if ($result && !isset($result->signing_token)){
 			$result->signing_token = '';
 		}

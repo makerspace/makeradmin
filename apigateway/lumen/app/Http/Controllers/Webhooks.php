@@ -20,7 +20,7 @@ class Webhooks extends Controller
 	 */
 	public function stripe(Request $request)
 	{
-		$version = 1;// TODO: Get version from header
+		$version = 1;// todo: Get version from header
 		// Get the endpoint URL or throw an exception if no service was found
 		if(($service = Service::getService("webshop", $version)) === false)
 		{

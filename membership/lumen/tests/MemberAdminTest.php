@@ -122,7 +122,7 @@ class MemberAdminTest extends TestCase
 		->seeJson([
 			"status" => "deleted",
 		])
-		->assertResponseStatus(200); //TODO: Another status code
+		->assertResponseStatus(200); //todo: Another status code
 	}
 
 	// Check that the member is deleted
@@ -136,7 +136,7 @@ class MemberAdminTest extends TestCase
 			->assertResponseStatus(404);
 	}
 
-	// TODO: Check that the member really is soft deleted
+	// todo: Check that the member really is soft deleted
 	public function test11()
 	{
 	}
@@ -228,9 +228,9 @@ class MemberAdminTest extends TestCase
 			->assertResponseStatus(404);
 	}
 
-	// TODO: Check that sorting is working
-	// TODO: Check that filtering is working
-	// TODO: Testa behörigheter
+	// todo: Check that sorting is working
+	// todo: Check that filtering is working
+	// todo: Testa behörigheter
 
 	public function test123()
 	{

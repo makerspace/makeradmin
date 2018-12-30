@@ -29,10 +29,10 @@ class Message extends Controller
 	 */
 	public function create(Request $request)
 	{
-		// TODO: Get the chunk size from configuration
+		// todo: Get the chunk size from configuration
 		$chunkSize = 2500;
 
-		// TODO: Validate
+		// todo: Validate
 		//   $json["recipients"][$i]["type"] == member|group
 		//   $json["recipients"][$i]["id"] is existing
 		//   $json["message_type"]
@@ -176,12 +176,12 @@ class Message extends Controller
 	}
 
 	/**
-	 * TODO: Preprocess all tokens in the message
+	 * todo: Preprocess all tokens in the message
 	 */
 	protected function _proprocessTokens($input, $member)
 	{
-		$input = str_replace("##expirydate##",    "2016-12-31",       $input); // TODO
-		$input = str_replace("##member_number##", $member->member_id, $input); // TODO: member_number
+		$input = str_replace("##expirydate##",    "2016-12-31",       $input); // todo
+		$input = str_replace("##member_number##", $member->member_id, $input); // todo: member_number
 		$input = str_replace("##firstname##",     $member->firstname, $input);
 		$input = str_replace("##lastname##",      $member->lastname,  $input);
 

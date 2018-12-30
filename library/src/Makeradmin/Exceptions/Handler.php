@@ -97,7 +97,7 @@ class Handler extends ExceptionHandler
 				$params["line"] = $x["line"] ?? null;
 				$params["function"] = $x["function"];
 				$params["class"] = $x["class"] ?? null;
-				$params["args"] = [];//TODO
+				$params["args"] = [];//todo
 
 				$trace[] = $params;
 			}

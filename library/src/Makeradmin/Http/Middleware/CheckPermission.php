@@ -26,7 +26,7 @@ class CheckPermission
 	 * @return mixed
 	 */
 	public function handle(Request $request, Closure $next, $required_permission = DEFAULT_REQUIRED_PERMISSION) {
-		//TODO: add signing token string from config
+		//todo: add signing token string from config
 		$user_permissions = SecurityHelper::verifyPermissionString($request->header("X-User-Permissions"), ''/*config(service.signing_token')*/);
 
 		if ($user_permissions !== false &&

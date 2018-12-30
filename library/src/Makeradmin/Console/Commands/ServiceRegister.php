@@ -38,7 +38,7 @@ class ServiceRegister extends Command
 			$this->info("       Use RoutePermissionGuard to insert default permission");
 			$permission_json = json_encode($permissions,JSON_PRETTY_PRINT);
 			$this->info("$permission_json");
-			// TODO: Uncomment return when services supports permissions 
+			// todo: Uncomment return when services supports permissions 
 			// return;
 		}
 

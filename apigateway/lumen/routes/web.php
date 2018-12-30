@@ -3,7 +3,7 @@
 use Illuminate\Http\Response;
 use Illuminate\Http\Request;
 
-// TODO: Should only be included on OPTION requests?
+// todo: Should only be included on OPTION requests?
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
 header("Access-Control-Allow-Headers: Origin, Content-Type, Accept, Authorization, X-Request-With, Access-Control-Allow-Origin");
@@ -25,7 +25,7 @@ $app->delete("oauth/token/{token}", ["middleware" => "auth", "uses" => "Authenti
 $app->  post("oauth/force_token", ["middleware" => "auth:service", "uses" => "Authentication@unauthenticated_login"]);
 
 // Some unauthenticated requests
-// TODO: Can this be handled in a nicer way?
+// todo: Can this be handled in a nicer way?
 $app->post("member/send_access_token", "ServiceRegistry@handleRoute");
 $app->post("webshop/register", "ServiceRegistry@handleRoute");
 $app->post("webshop/stripe_callback", "Webhooks@stripe");
@@ -44,7 +44,7 @@ $app->group(["middleware" => "auth"], function() use ($app)
 	$app->   get("service/list", ["middleware" => "permission:service", "uses" => "ServiceRegistry@list"]);
 
 	// Relations
-	$app->   get("relations",    ["middleware" => "permission:member_view", "uses" => "Relations@relations"]);// TODO: Remove this API
+	$app->   get("relations",    ["middleware" => "permission:member_view", "uses" => "Relations@relations"]);// todo: Remove this API
 	$app->   get("relation",     ["middleware" => "permission:member_view", "uses" => "Relations@relation"]);
 	$app->  post("relation",     ["middleware" => "permission:member_view", "uses" => "Relations@createRelation"]);
 	$app->   get("related",      ["middleware" => "permission:member_view", "uses" => "Relations@related"]);

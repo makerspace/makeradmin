@@ -170,7 +170,6 @@ def _pending_actions(member_id: int=None) -> List[Dict[str, Any]]:
         ]
 
 
-# TODO: More restrictive permissions?
 @instance.route("transaction/<int:id>/content", methods=["GET"], permission="webshop")
 @route_helper
 def transaction_contents(id: int) -> List[Dict]:
@@ -265,7 +264,6 @@ def member_history() -> Dict[str, Any]:
     '''
     user_id = assert_get(request.headers, "X-User-Id")
 
-    # TODO: All these database lookups could probably be optimized
     transactions = transaction_entity.list("member_id=%s", user_id)
     transactions.reverse()
     for tr in transactions:
@@ -466,11 +464,11 @@ def stripe_handle_charge_callback(subtype: str, event) -> None:
         _fail_stripe_source(charge.source.id)
         logger.info(f"Charge '{charge.id}' failed with message '{charge.failure_message}'")
     elif subtype.startswith('dispute'):
-        # TODO: log disputes for display in admin frontend.
+        # todo: log disputes for display in admin frontend.
         pass
     elif subtype.startswith('refund'):
-        # TODO: log refund for display in admin frontend.
-        # TODO: option in frontend to roll back actions.
+        # todo: log refund for display in admin frontend.
+        # todo: option in frontend to roll back actions.
         pass
 
 

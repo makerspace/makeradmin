@@ -64,7 +64,7 @@ class Permission extends Controller
 	{
 		$data = $request->json()->all();
 		$permissions = array_unique(explode(',',$data['permissions']), SORT_STRING);
-		// TODO: What status should be returned if no permissions were given?
+		// todo: What status should be returned if no permissions were given?
 		if(count($permissions) === 0) {
 			// Send response to client
 			return Response()->json([
@@ -73,7 +73,7 @@ class Permission extends Controller
 		}
 
 		// When count($permissions)==2 the first element is expected to be an operator (eg '=' or '<>')
-		// TODO: Fix underlying problem in Makeradmin\Models\Entity.php 
+		// todo: Fix underlying problem in Makeradmin\Models\Entity.php 
 		if (count($permissions) == 2) {
 			$permissions[] = $permissions[0];
 		}
@@ -99,7 +99,7 @@ class Permission extends Controller
 			}
 		}
 
-		// TODO: Should return error when any permission failed
+		// todo: Should return error when any permission failed
 		return Response()->json([
 			"status" => "created",
 			"data" => [

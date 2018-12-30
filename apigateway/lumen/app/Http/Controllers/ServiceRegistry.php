@@ -27,7 +27,7 @@ class ServiceRegistry extends Controller
 	{
 		$json = $request->json()->all();
 
-		// TODO: Better validation
+		// todo: Better validation
 		if(empty($json["name"]))
 		{
 			throw new EntityValidationException("name", "required");
@@ -45,7 +45,7 @@ class ServiceRegistry extends Controller
 			throw new EntityValidationException("version", "required");
 		}
 
-		// TODO: Check permissions
+		// todo: Check permissions
 
 		// Check that the service does not already exist
 		if(Service::getService($json["url"], $json["version"]))
@@ -76,7 +76,7 @@ class ServiceRegistry extends Controller
 	{
 		$json = $request->json()->all();
 
-		// TODO: Better validation
+		// todo: Better validation
 		if(empty($json["url"]))
 		{
 			throw new EntityValidationException("url", "required");
@@ -86,7 +86,7 @@ class ServiceRegistry extends Controller
 			throw new EntityValidationException("version", "required");
 		}
 
-		// TODO: Check permissions
+		// todo: Check permissions
 
 		// Unregister the service
 		Service::unregister([
@@ -111,7 +111,7 @@ class ServiceRegistry extends Controller
 		// Check permissions
 		$user = Auth::get()->user();
 
-		// TODO: Send an API request to get the roles and permissions of the user
+		// todo: Send an API request to get the roles and permissions of the user
 
 		// Get a list of all groups where the user have a "api exec" permission
 		$groups = [];
@@ -147,7 +147,7 @@ class ServiceRegistry extends Controller
 		// Split the path into segments and get version + service
 		$path = explode("/", $request->path());
 		$service = $path[0];
-		$version = 1;// TODO: Get version from header
+		$version = 1;// todo: Get version from header
 
 		// Get the endpoint URL or throw an exception if no service was found
 		if(($service = Service::getService($service, $version)) === false)
@@ -172,7 +172,7 @@ class ServiceRegistry extends Controller
 		$ch->setHeader("Stripe-Signature", $request->header("Stripe-Signature"));
 
 		// Get JSON and POST data
-		// TODO: Laravel is probably processing this data and creating a temp file
+		// todo: Laravel is probably processing this data and creating a temp file
 		$e = explode(";", $request->header("Content-Type"));
 		$type = is_array($e) ? $e[0] : $request->header("Content-Type");
 		if($type == "application/json")

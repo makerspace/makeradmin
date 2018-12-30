@@ -423,7 +423,6 @@ class Entity:
             name2col = {c.exposed_name: c for c in self._readable}
             name2col.update({c.alias: c for c in self._readable if c.alias is not None})
 
-            # TODO: Using the global requests variable here is not very good style. It can break things if one request tries to list other unrelated entities.
             filter_data = [self._format_column_filter(name2col[key], value.split(",")) for key,value in request.args.items() if key in name2col]
 
             if self.allow_delete:

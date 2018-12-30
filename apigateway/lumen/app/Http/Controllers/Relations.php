@@ -61,7 +61,7 @@ class Relations extends Controller
 		$data = [];
 		foreach($relations as $relation)
 		{
-			$data[] = $relation["matches"][1];//TODO
+			$data[] = $relation["matches"][1];//todo
 		}
 
 		if(empty($data))
@@ -130,7 +130,7 @@ class Relations extends Controller
 		// Split the path into segments and get version + service
 		$path = explode("/", $path);
 		$service = $path[0];
-		$version = 1;// TODO: Get version from header
+		$version = 1;// todo: Get version from header
 
 		// Get the endpoint URL or throw an exception if no service was found
 		if(($service = Service::getService($service, $version)) === false)

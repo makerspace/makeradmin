@@ -7301,7 +7301,7 @@ function Toggle (UIkit) {
                         return;
                     }
 
-                    // TODO better isToggled handling
+                    // todo better isToggled handling
                     var link;
                     if (closest(e.target, 'a[href="#"], button')
                         || (link = closest(e.target, 'a[href]')) && (

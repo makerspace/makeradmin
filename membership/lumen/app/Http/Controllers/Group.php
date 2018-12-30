@@ -223,7 +223,7 @@ Indented:
 	 */
 	function listPermissions(Request $request, $group_id) {
 		// Get permissions for group
-		// TODO: Groups are arranged into a hierarchy which should be expanded
+		// todo: Groups are arranged into a hierarchy which should be expanded
 		$permissions = DB::table("membership_group_permissions")
 			->join("membership_permissions", "membership_permissions.permission_id",
 			"membership_group_permissions.permission_id")
