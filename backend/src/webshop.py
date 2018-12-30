@@ -235,6 +235,10 @@ def transaction_events(id: int):
 @route_helper
 def list_orders():
     transactions = transaction_entity.list()
+
+    if not transactions:
+        return []
+    
     member_ids = ",".join(set([str(t["member_id"]) for t in transactions]))
 
     r = instance.gateway.get(f"membership/member?entity_id={member_ids}")
@@ -251,6 +255,7 @@ def list_orders():
             t["member_number"] = member['member_number']
 
     return transactions
+
 
 @instance.route("member/current/transactions", methods=["GET"], permission='user')
 @route_helper
@@ -286,7 +291,7 @@ def send_new_member_email(member_id: int) -> None:
     email_body = render_template("new_member_email.html", member=member, public_url=instance.gateway.get_public_url)
     eprint("====== Sending new member email")
 
-    r = instance.gateway.post("messages", {
+    r = instance.gateway.post("messages/message", {
         "recipients": [
             {
                 "type": "member",
@@ -675,7 +680,7 @@ def send_receipt_email(member_id: int, transaction_id: int) -> None:
 
     member = r.json()["data"]
 
-    r = instance.gateway.post("messages", {
+    r = instance.gateway.post("messages/message", {
         "recipients": [
             {
                 "type": "member",
@@ -832,7 +837,7 @@ def send_key_updated_email(member_id: int, extended_days: int, end_date: datetim
     assert r.ok
     member = r.json()["data"]
 
-    r = instance.gateway.post("messages", {
+    r = instance.gateway.post("messages/message", {
         "recipients": [
             {
                 "type": "member",
@@ -855,7 +860,7 @@ def send_membership_updated_email(member_id: int, extended_days: int, end_date: 
     assert r.ok
     member = r.json()["data"]
 
-    r = instance.gateway.post("messages", {
+    r = instance.gateway.post("messages/message", {
         "recipients": [
             {
                 "type": "member",
