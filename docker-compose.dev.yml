@@ -4,22 +4,23 @@ services:
   db2:
     ports:
       - "3306:3306"
-      
-  api-gateway:
-    volumes:
-      - ./apigateway/lumen/routes:/var/www/html/routes
-      - ./apigateway/lumen/app:/var/www/html/app
-      - ./test/src/Makeradmin:/var/www/html/test
-    ports:
-      - "8010:80"
-    environment:
-      APP_DEBUG: "true"
+
+  # TODO BM Remove
+  # api-gateway:
+  #   volumes:
+  #     - ./apigateway/lumen/routes:/var/www/html/routes
+  #     - ./apigateway/lumen/app:/var/www/html/app
+  #     - ./test/src/Makeradmin:/var/www/html/test
+  #   ports:
+  #     - "8010:80"
+  #   environment:
+  #     APP_DEBUG: "true"
 
   api:
     volumes:
       - ./api/src:/work/src
     ports:
-      - "8012:80"
+      - "8010:80"
     environment:
       APP_DEBUG: "true"
       

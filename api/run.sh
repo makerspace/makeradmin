@@ -10,8 +10,8 @@ if [ "$APP_DEBUG" = "true" ]; then
     WORKERS="4"
 fi
 
-echo "migrating"
-python3 ./migrate.py
+echo "initializing and migrating db"
+python3 ./init_db.py
 
 # Note: for some reason the workers seem to sometimes get blocked by persistent connections
 # (many browsers keep persistent connections to servers just in case they need them later).

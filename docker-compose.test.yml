@@ -2,10 +2,6 @@ version: "3"
 
 services:
 
-  api-gateway:
-    ports:
-      - "9010:80"
-
   backend:
     environment:
       HOST_FRONTEND: 'http://admin'
@@ -15,14 +11,10 @@ services:
   public:
     environment:
       HOST_BACKEND: 'http://${APIGATEWAY:-api}'
-    ports:
-      - "9011:80"
       
   admin:
     environment:
       HOST_BACKEND: 'http://${APIGATEWAY:-api}'
-    ports:
-      - "9009:80"
 
   servicebase:
     command: ["/bin/sleep", "3600"]
@@ -57,7 +49,7 @@ services:
     depends_on:
       - admin
       - public
-      - api-gateway
+      - api
       - selenium
     environment:
       WEBDRIVER_TYPE: "REMOTE_CHROME"
