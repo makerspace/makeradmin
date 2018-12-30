@@ -47,7 +47,7 @@ class ExternalService(Blueprint):
             headers['Content-Type'] = content_type
         
         # TODO Remove or level debug.
-        logger.info(f"{what} to {method} {url}, user_id={user_id}, permissions={permissions}, data={kwargs.get('data')}")
+        # logger.info(f"{what} to {method} {url}, user_id={user_id}, permissions={permissions}, data={kwargs.get('data')}")
         
         try:
             response = requests.request(

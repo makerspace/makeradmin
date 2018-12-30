@@ -27,11 +27,11 @@ db_session: Union[Session, scoped_session] = scoped_session(db_session_factory)
 
 
 def shutdown_session(exception=None):
-    # TODO Make sure that a failed commit does render a 500.
+    # TODO BM Make sure that a failed commit does render a 500.
     db_session.remove()
 
 
-# TODO Make sure app survives db disconnect.
+# TODO BM Make sure app survives db disconnect.
 def create_mysql_engine(host=None, port=None, db=None, user=None, pwd=None, timeout=24):
     logger.info(f"waiting for db to respond at {host}:{port}")
     if not wait_for(lambda: can_connect(host, port), timeout=timeout, interval=0.5):

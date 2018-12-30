@@ -24,7 +24,7 @@ CREATE TABLE IF NOT EXISTS `login` (
 
 DROP TABLE IF EXISTS `migrations_apigateway`;
 
--- TODO Remove when api-gateway is removed, but keep it until then beacuse api-gateway can't survive without it.
+-- TODO BM Remove when api-gateway is removed, but keep it until then beacuse api-gateway can't survive without it.
 CREATE TABLE  IF NOT EXISTS `services` (
   `service_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `name` varchar(255) COLLATE utf8mb4_0900_ai_ci NOT NULL,
@@ -40,7 +40,7 @@ CREATE TABLE  IF NOT EXISTS `services` (
   KEY `services_deleted_at_index` (`deleted_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
--- TODO Remove when api-gateway is removed, but keep it until then beacuse api-gateway can't survive without it.
+-- TODO BM Remove when api-gateway is removed, but keep it until then beacuse api-gateway can't survive without it.
 CREATE TABLE IF NOT EXISTS `relations` (
   `url1` varchar(255) COLLATE utf8mb4_0900_ai_ci NOT NULL,
   `url2` varchar(255) COLLATE utf8mb4_0900_ai_ci NOT NULL
@@ -53,7 +53,7 @@ SET sql_notes = 1;
 ALTER TABLE `access_tokens` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
 ALTER TABLE `login` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
 
--- TODO remove obsolete tables (when not needed, in new migration)
--- TODO DROP TABLE services;
--- TODO DROP TABLE relations;
--- TODO DROP TABLE migrations_apigateway
+-- TODO BM remove obsolete tables (when not needed, in new migration)
+-- TODO BM DROP TABLE services;
+-- TODO BM DROP TABLE relations;
+-- TODO BM DROP TABLE migrations_apigateway

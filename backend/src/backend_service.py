@@ -88,7 +88,7 @@ class APIGateway:
     def get(self, path, payload=None, token=None) -> requests.Response:
         url = self.host + "/" + path
         headers = self._get_headers(token)
-        logger.info(f"getting url={url}, headers={headers}, params={payload}")  # TODO Remove
+        # logger.info(f"getting url={url}, headers={headers}, params={payload}")  # TODO Remove
         return requests.get(url, params=payload, headers=headers)
 
     def post(self, path, payload, token=None) -> requests.Response:

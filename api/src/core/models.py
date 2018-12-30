@@ -10,15 +10,11 @@ import membership
 from service.api_definition import SERVICE, USER
 from service.db import db_session
 from service.error import TooManyRequests, Unauthorized, NotFound
-from service.logging import logger
 
 Base = declarative_base()
 
 
-# TODO Remove if possible:
-#    relations
-#    services
-
+# TODO BM Move actual code somewhere else.
 class AccessToken(Base):
     # mysql> describe access_tokens;
     # +--------------+------------------+------+-----+---------+-------+
@@ -87,14 +83,13 @@ class AccessToken(Base):
             expires=access_token.expires.isoformat(),
         ) for access_token in db_session.query(AccessToken).filter(self.user_id == user_id)]
 
-    # TODO This code needs unittests.
+    # TODO BM This code needs unittests.
     @classmethod
     def authenticate_request(self):
         """ Update global object with user_id and permissions. """
         g.user_id = None
         g.permissions = tuple()
 
-        # TODO
         # logger.info("DATA " + repr(request.get_data()))
         # logger.info("HEADERS " + repr(request.headers))
         # logger.info("ARGS " + repr(request.args))
@@ -136,7 +131,7 @@ class AccessToken(Base):
         # Commit token validation to make it stick even if request fails later.
         db_session.commit()
         
-        # TODO Where is expiry checked? Remove it if not used?
+        # TODO BM Where is expiry checked? Remove it if not used?
 
 
 class Login:

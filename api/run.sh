@@ -2,11 +2,12 @@
 set -e
 
 GUNICORN_FLAGS=""
-WORKERS="4"
+WORKERS="8"
 
 if [ "$APP_DEBUG" = "true" ]; then
     echo "running in devel mode"
     GUNICORN_FLAGS=" --reload"
+    WORKERS="4"
 fi
 
 echo "migrating"
