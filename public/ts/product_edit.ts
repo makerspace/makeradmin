@@ -1,5 +1,6 @@
 import * as common from "./common"
 import Cart from "./cart"
+import {UNAUTHORIZED} from "./common";
 declare var UIkit: any;
 
 
@@ -182,7 +183,7 @@ common.onGetAndDocumentLoaded("/webshop/product_edit_data/" + window.productId, 
                     }
                     // UIkit.modal.alert("Saved action");
                 }).catch (json => {
-                    if (json.message == "Unauthorized") {
+                    if (json.status === UNAUTHORIZED) {
                         UIkit.modal.alert("<h2>Failed to save action</h2>You are not logged in");
                     } else {
                         UIkit.modal.alert("<h2>Failed to save action</h2>" + common.get_error(json));
@@ -197,7 +198,7 @@ common.onGetAndDocumentLoaded("/webshop/product_edit_data/" + window.productId, 
                     futures.push(future);
 
                     future.catch(json => {
-                        if (json.message == "Unauthorized") {
+                        if (json.status === UNAUTHORIZED) {
                             UIkit.modal.alert("<h2>Failed to delete action</h2>You are not logged in");
                         } else {
                             UIkit.modal.alert("<h2>Failed to delete action</h2>" + common.get_error(json));
@@ -228,7 +229,7 @@ common.onGetAndDocumentLoaded("/webshop/product_edit_data/" + window.productId, 
                         // Update the form with the image id
                         element.setAttribute("data-id", json.data.id);
                     }).catch (json => {
-                        if (json.message == "Unauthorized") {
+                        if (json.status === UNAUTHORIZED) {
                             UIkit.modal.alert("<h2>Failed to save image</h2>You are not logged in");
                         } else {
                             UIkit.modal.alert("<h2>Failed to save image</h2>" + common.get_error(json));
@@ -245,7 +246,7 @@ common.onGetAndDocumentLoaded("/webshop/product_edit_data/" + window.productId, 
                     futures.push(future);
 
                     future.catch(json => {
-                        if (json.message == "Unauthorized") {
+                        if (json.status === UNAUTHORIZED) {
                             UIkit.modal.alert("<h2>Failed to delete image</h2>You are not logged in");
                         } else {
                             UIkit.modal.alert("<h2>Failed to delete image</h2>" + common.get_error(json));
@@ -266,7 +267,7 @@ common.onGetAndDocumentLoaded("/webshop/product_edit_data/" + window.productId, 
         }).catch(json => {
             isSaving = false;
             spinner.classList.remove("progress-spinner-visible");
-            if (json.message == "Unauthorized") {
+            if (json.status === UNAUTHORIZED) {
                 UIkit.modal.alert("<h2>Failed to save product</h2>You are not logged in");
             } else {
                 UIkit.modal.alert("<h2>Failed to save product</h2>" + common.get_error(json));

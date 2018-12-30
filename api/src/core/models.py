@@ -107,13 +107,13 @@ class AccessToken(Base):
 
         bearer = 'Bearer '
         if not authorization.startswith(bearer):
-            raise Unauthorized()
+            raise Unauthorized("Unauthorized, can't find credentials.")
             
         token = authorization[len(bearer):].strip()
         
         access_token = db_session.query(AccessToken).get(token)
         if not access_token:
-            raise Unauthorized()
+            raise Unauthorized("Unauthorized, invalid access token.")
         
         if access_token.permissions is None:
             permissions = {

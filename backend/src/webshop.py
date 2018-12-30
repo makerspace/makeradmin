@@ -701,7 +701,7 @@ def send_receipt_email(member_id: int, transaction_id: int) -> None:
 duplicatePurchaseRands: Set[int] = set()
 
 
-@instance.route("pay", methods=["POST"], permission=None)
+@instance.route("pay", methods=["POST"], permission='user')
 @route_helper
 def pay_route() -> Dict[str, int]:
     data = request.get_json()
@@ -1068,7 +1068,7 @@ def product_edit_data(product_id: int):
     }
 
 
-@instance.route("receipt/<int:transaction_id>", methods=["GET"], permission=None)
+@instance.route("receipt/<int:transaction_id>", methods=["GET"], permission='user')
 @route_helper
 def receipt(transaction_id: int):
     member_id = int(assert_get(request.headers, "X-User-Id"))

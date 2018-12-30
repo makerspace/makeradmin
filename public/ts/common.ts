@@ -11,6 +11,10 @@ declare global {
 	}
 }
 
+
+export const UNAUTHORIZED = "unauthorized";
+
+
 export function formatDateTime(str: any) {
     const options = {
         year: 'numeric', month: 'numeric', day: 'numeric',
@@ -47,9 +51,9 @@ export function ajax(type: string, url: string, data: object): Promise<any> {
 			if (xhr.status >= 200 && xhr.status <= 300) {
 				resolve(JSON.parse(xhr.responseText));
 			}
-			else if (xhr.status === 401) {
+			else if (xhr.status === 401 || xhr.status === 403) {
 			    removeToken();
-			    reject({status: "unauthorized", message: JSON.parse(xhr.responseText).message})
+			    reject({status: UNAUTHORIZED, message: JSON.parse(xhr.responseText).message})
             }
 			else reject(JSON.parse(xhr.responseText));
 		};
@@ -78,7 +82,7 @@ export function refreshLoggedIn(callback: (loggedIn: boolean, permissions: strin
 			callback(true, json.data.permissions);
 		})
 		.catch(json => {
-			if (json.message == "Unauthorized") {
+			if (json.status === UNAUTHORIZED) {
 				callback(false, null);
 			} else {
 				UIkit.modal.alert("<h2>Error</h2>" + json.status + "\n" + json.message);

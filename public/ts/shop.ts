@@ -1,5 +1,6 @@
 import Cart from "./cart"
 import * as common from "./common"
+import {UNAUTHORIZED} from "./common";
 declare var UIkit: any;
 
 common.onGetAndDocumentLoaded("/webshop/product_data", (value: any) => {
@@ -179,7 +180,7 @@ common.onGetAndDocumentLoaded("/webshop/product_data", (value: any) => {
         // Reload the page to show the new category
         location.reload(true);
       }).catch(json => {
-        if (json.message == "Unauthorized") {
+        if (json.status === UNAUTHORIZED) {
           UIkit.modal.alert("<h2>Något gick fel</h2>Du har inte behörighet att ändra kategorier");
         } else {
           UIkit.modal.alert("<h2>Något gick fel</h2>" + common.get_error(json));
@@ -198,7 +199,7 @@ common.onGetAndDocumentLoaded("/webshop/product_data", (value: any) => {
         // Reload the page to show the new category
         location.reload(true);
       }).catch(json => {
-        if (json.message == "Unauthorized") {
+        if (json.status === UNAUTHORIZED) {
           UIkit.modal.alert("<h2>Något gick fel</h2>Du har inte behörighet att lägga till en ny kategori");
         } else {
           UIkit.modal.alert("<h2>Något gick fel</h2>" + common.get_error(json));

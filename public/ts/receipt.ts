@@ -1,5 +1,5 @@
 import * as common from "./common"
-import {formatDateTime} from "./common";
+import {formatDateTime, UNAUTHORIZED} from "./common";
 import {render_login} from "./login";
 declare var UIkit: any;
 
@@ -81,7 +81,7 @@ common.documentLoaded().then(() => {
                 }
             })
             .catch(json => {
-                if (json.status === "unauthorized") {
+                if (json.status === UNAUTHORIZED) {
                     showLogin();
                 }
                 else {

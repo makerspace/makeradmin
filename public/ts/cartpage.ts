@@ -1,6 +1,7 @@
 /// <reference path="../node_modules/@types/stripe-v3/index.d.ts" />
 import Cart from "./cart"
 import * as common from "./common"
+import {UNAUTHORIZED} from "./common";
 declare var UIkit: any;
 
 
@@ -164,7 +165,7 @@ common.onGetAndDocumentLoaded("/webshop/product_data", (value: any) => {
 				}).catch(json => {
 					spinner.classList.remove("progress-spinner-visible");
 					waitingForPaymentResponse = false;
-					if (json.message == "Unauthorized") {
+					if (json.status === UNAUTHORIZED) {
 						UIkit.modal.alert("<h2>Betalningen misslyckades</h2>Du är inte inloggad");
 					} else {
 						UIkit.modal.alert("<h2>Betalningen misslyckades</h2>" + common.get_error(json));

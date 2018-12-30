@@ -1,6 +1,7 @@
 import * as common from "./common"
 import * as login from "./login"
 import Cart from "./cart"
+import {UNAUTHORIZED} from "./common";
 declare var UIkit: any;
 
 common.documentLoaded().then(() => {
@@ -58,7 +59,7 @@ common.documentLoaded().then(() => {
     })
     .catch(json => {
         // Probably Unauthorized, redirect to login page.
-        if (json.message == "Unauthorized") {
+        if (json.status === UNAUTHORIZED) {
             // Render login
             login.render_login(rootElement, null, null);
         } else {
