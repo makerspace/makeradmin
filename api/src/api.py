@@ -12,9 +12,9 @@ app = Flask(__name__)
 
 flask_cors.CORS(
     app,
+    max_age='1728000',
     allow_headers=['Origin', 'Content-Type', 'Accept', 'Authorization', 'X-Request-With',
                    'Access-Control-Allow-Origin'],
-    max_age='1728000',
 )
 
 for path, service in services:
