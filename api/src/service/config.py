@@ -1,24 +1,23 @@
 from logging import INFO
-from os.path import abspath, join, basename, exists
 
+from dotenv import dotenv_values, find_dotenv
 from rocky.config import Config, Dict, Env
 
 from service.logging import logger
 
 
-class DockerEnvFile(Dict):
+class DotEnvFile(Dict):
     """ Config reader to read from docker .env file. """
     
-    # TODO BM use python-dotenv instead
-    
-    def __init__(self, filename, name=None, **kwargs):
-        if not exists(filename):
-            logger.info(f"docker .env file {filename} does not exist, skipping")
+    def __init__(self, name=None, **kwargs):
+        filename = find_dotenv()
+        if not filename:
+            logger.info("could not find .env file, skipping")
             env = {}
         else:
-            with open(filename) as f:
-                env = {s[0]: (s[1] if len(s) > 1 else "") for s in (s.split("=") for s in f.read().split('\n'))}
-            
+            logger.info(f"loading .env file from {filename}")
+            env = dotenv_values()
+        
         super().__init__(env, name=name or filename, **kwargs)
 
 
@@ -35,9 +34,9 @@ default = Dict(name="default", src=dict(
     MULTIACCESS_SYNC_URL='http://multiaccesssync',
 ))
 env = Env()
-docker_env = DockerEnvFile(abspath(join(basename(__file__), '../../../.env')))
+dot_env = DotEnvFile()
 
-config = Config(env, docker_env, default, log_level=INFO)
+config = Config(env, dot_env, default, log_level=INFO)
 
 
 def get_mysql_config():

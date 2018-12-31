@@ -53,7 +53,7 @@ services:
       - selenium
     environment:
       WEBDRIVER_TYPE: "REMOTE_CHROME"
-      API_BEARER: "${API_BEARER}"
+      API_BEARER:
       HOST_FRONTEND: 'http://admin'
       HOST_BACKEND: 'http://${APIGATEWAY:-api}'
       HOST_PUBLIC: 'http://public'

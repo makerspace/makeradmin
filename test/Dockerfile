@@ -10,6 +10,7 @@ RUN apk update \
         python3-dev \
         libffi-dev \
         libressl-dev \
+       linux-headers \
     && rm -rf /var/cache/apk/*
 
 RUN mkdir -p /work/

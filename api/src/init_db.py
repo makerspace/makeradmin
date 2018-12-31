@@ -8,7 +8,7 @@ from rocky.process import log_exception
 from sqlalchemy.orm import sessionmaker
 
 from service.api_definition import SERVICE_USER_ID
-from service.config import get_mysql_config, config, env, docker_env
+from service.config import get_mysql_config, config
 from service.db import create_mysql_engine
 from service.migrate import ensure_migrations_table
 from services import services
@@ -24,8 +24,8 @@ def clear_permission_cache(session_factory):
 def refresh_service_access_token(session_factory):
     """ Clear permisssion cache as a part of every db_init/restart. """
     
-    service_token = config.get('BEARER', env, docker_env, log_value=False)
-    assert service_token, "BEARER not configured"
+    service_token = config.get('API_BEARER', log_value=False)
+    assert service_token, "API_BEARER not configured"
     
     with closing(session_factory()) as session:
         ten_years = timedelta(days=365 * 10)

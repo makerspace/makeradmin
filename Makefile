@@ -51,4 +51,4 @@ admin-dev-server:
 	docker volume rm -f makeradmin_node_modules
 	docker-compose -f admin/dev-server-compose.yaml up --build
 
-.PHONY: build firstrun admin-dev-server init init-db init-npm init-pip install run stop dev-test test dev
+.PHONY: build firstrun admin-dev-server init init-npm init-pip install run stop dev-test test dev

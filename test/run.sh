@@ -15,6 +15,7 @@ function wait_for {
 }
 
 wait_for nc -z db2 3306
+wait_for nc -z $APIGATEWAY 80
 wait_for nc -z admin 80
 wait_for nc -z public 80
 wait_for nc -z selenium 4444

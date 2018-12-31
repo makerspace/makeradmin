@@ -84,7 +84,6 @@ class Test(ApiTest):
             .expect(code=200).get('access_token')
         
         tokens = self.api.get(f'/oauth/token', token=token).expect(code=200).data
-        print(tokens)
         
         self.assertEqual([token], [t['access_token'] for t in tokens])
 
