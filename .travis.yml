@@ -17,7 +17,7 @@ python:
 before_install:
   - docker --version
   - docker-compose --version
-  - pip3 install docker-compose
+  - pip3 install -r requirements.txt
 
 install:
   - make build
