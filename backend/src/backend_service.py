@@ -150,28 +150,30 @@ class Service:
         return wrapper
 
     def register(self):
-        endpoint = "http://" + socket.gethostname() + ":" + str(self.port) + "/"
-        # logger.info(f"registering service {self.name}, url: {self.url}, endpoint: {endpoint}")
-        payload = {
-            "name": self.name,
-            "url": self.url,
-            "endpoint": endpoint,
-            "version": self.version
-        }
-        r = self.gateway.post("service/register", payload)
-        if not r.ok:
-            pass
-            # logger.warning(f"failed to register service {self.name} at {self.gateway.host}, ignoring: {r.json().get('message')}")
+        pass
+        # endpoint = "http://" + socket.gethostname() + ":" + str(self.port) + "/"
+        # # logger.info(f"registering service {self.name}, url: {self.url}, endpoint: {endpoint}")
+        # payload = {
+        #     "name": self.name,
+        #     "url": self.url,
+        #     "endpoint": endpoint,
+        #     "version": self.version
+        # }
+        # r = self.gateway.post("service/register", payload)
+        # if not r.ok:
+        #     pass
+        #     # logger.warning(f"failed to register service {self.name} at {self.gateway.host}, ignoring: {r.json().get('message')}")
 
     def unregister(self):
-        # logger.info(f"unregistering service {self.name}, url: {self.url}")
-        payload = {
-            "url": self.url,
-            "version": self.version
-        }
-        r = self.gateway.post("service/unregister", payload)
-        if not r.ok:
-            raise Exception(f"Failed to unregister service at {self.gateway.host}: {r.text}")
+        pass
+        # # logger.info(f"unregistering service {self.name}, url: {self.url}")
+        # payload = {
+        #     "url": self.url,
+        #     "version": self.version
+        # }
+        # r = self.gateway.post("service/unregister", payload)
+        # if not r.ok:
+        #     raise Exception(f"Failed to unregister service at {self.gateway.host}: {r.text}")
 
     def _wrap_error_codes(self):
         # Pretty ugly way to wrap all abort(code, message) calls so that they return proper json reponses

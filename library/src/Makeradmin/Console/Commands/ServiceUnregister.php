@@ -28,20 +28,20 @@ class ServiceUnregister extends Command
 	 */
 	public function handle()
 	{
-		// Send the request to API Gateway
-		$ch = new CurlBrowser();
-		$ch->useJson();
-		$ch->setHeader("Authorization", "Bearer " . config("service.bearer"));
-		$ch->call("POST", "http://" . config("service.gateway") . "/service/unregister", [], [
-			"url"     => config("service.url"),
-			"version" => config("service.version"),
-		]);
-		$result = $ch->getJson();
-
-		if ($result->message == "The service was successfully unregistered") {
-			print("Service unregistered\n");
-		} else {
-			print_r($result);
-		}
+		// // Send the request to API Gateway
+		// $ch = new CurlBrowser();
+		// $ch->useJson();
+		// $ch->setHeader("Authorization", "Bearer " . config("service.bearer"));
+		// $ch->call("POST", "http://" . config("service.gateway") . "/service/unregister", [], [
+		// 	"url"     => config("service.url"),
+		// 	"version" => config("service.version"),
+		// ]);
+		// $result = $ch->getJson();
+                //
+		// if ($result->message == "The service was successfully unregistered") {
+		// 	print("Service unregistered\n");
+		// } else {
+		// 	print_r($result);
+		// }
 	}
 }

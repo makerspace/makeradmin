@@ -1,7 +1,7 @@
--- create tables (if not already created by old php migrations)
-
 -- disable warnings or mysql will complain about table exists and deprecated collate
 SET sql_notes = 0;
+
+-- create tables (if not already created by old php migrations)
 
 CREATE TABLE IF NOT EXISTS `access_tokens` (
   `user_id` int(11) NOT NULL,
@@ -22,29 +22,10 @@ CREATE TABLE IF NOT EXISTS `login` (
   `date` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-DROP TABLE IF EXISTS `migrations_apigateway`;
-
--- TODO BM Remove when api-gateway is removed, but keep it until then beacuse api-gateway can't survive without it.
-CREATE TABLE  IF NOT EXISTS `services` (
-  `service_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) COLLATE utf8mb4_0900_ai_ci NOT NULL,
-  `url` varchar(255) COLLATE utf8mb4_0900_ai_ci NOT NULL,
-  `endpoint` varchar(255) COLLATE utf8mb4_0900_ai_ci NOT NULL,
-  `version` varchar(12) COLLATE utf8mb4_0900_ai_ci NOT NULL,
-  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` datetime DEFAULT NULL,
-  `deleted_at` datetime DEFAULT NULL,
-  PRIMARY KEY (`service_id`),
-  KEY `services_url_index` (`url`),
-  KEY `services_version_index` (`version`),
-  KEY `services_deleted_at_index` (`deleted_at`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
--- TODO BM Remove when api-gateway is removed, but keep it until then beacuse api-gateway can't survive without it.
-CREATE TABLE IF NOT EXISTS `relations` (
-  `url1` varchar(255) COLLATE utf8mb4_0900_ai_ci NOT NULL,
-  `url2` varchar(255) COLLATE utf8mb4_0900_ai_ci NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+-- drop tables that are no longer needed
+DROP TABLE IF EXISTS services;
+DROP TABLE IF EXISTS relations;
+DROP TABLE IF EXISTS migrations_apigateway;
 
 -- enable warnings
 SET sql_notes = 1;
@@ -53,7 +34,4 @@ SET sql_notes = 1;
 ALTER TABLE `access_tokens` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
 ALTER TABLE `login` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
 
--- TODO BM remove obsolete tables (when not needed, in new migration)
--- TODO BM DROP TABLE services;
--- TODO BM DROP TABLE relations;
--- TODO BM DROP TABLE migrations_apigateway
+-- TODO BM Test migration from old db on master.
