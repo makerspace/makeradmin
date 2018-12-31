@@ -1,4 +1,3 @@
-import time
 from functools import wraps
 from inspect import getmodule, stack, getfile
 from os.path import dirname, join, isdir, exists
@@ -8,7 +7,6 @@ from flask import Blueprint, g, jsonify
 from service.api_definition import Arg, PUBLIC
 from service.db import db_session
 from service.error import Forbidden
-from service.logging import logger
 from service.migrate import migrate_service
 
 

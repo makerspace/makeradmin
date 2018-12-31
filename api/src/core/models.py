@@ -3,7 +3,7 @@ from datetime import timedelta, datetime
 from string import ascii_letters, digits
 
 from flask import request, g
-from sqlalchemy import Column, Integer, String, DateTime, Text
+from sqlalchemy import Column, Integer, String, DateTime, Text, SmallInteger
 from sqlalchemy.ext.declarative import declarative_base
 
 import membership
@@ -83,7 +83,6 @@ class AccessToken(Base):
             expires=access_token.expires.isoformat(),
         ) for access_token in db_session.query(AccessToken).filter(self.user_id == user_id)]
 
-    # TODO BM This code needs unittests.
     @classmethod
     def authenticate_request(self):
         """ Update global object with user_id and permissions. """
@@ -110,7 +109,6 @@ class AccessToken(Base):
         if not access_token:
             raise Unauthorized("Unauthorized, invalid access token.", fields="bearer", what="bad_value")
         
-        # TODO BM Test this.
         now = datetime.utcnow()
         if access_token.expires < now:
             db_session.query(AccessToken).filter(AccessToken.expires < now).delete()
@@ -139,7 +137,7 @@ class AccessToken(Base):
 
 
 class Login:
-    # login table does not have a possible primary key, so no sqlalchemy model
+    # login table does not have a possible primary key, so no sqlalchemy model possible.
     # +---------+--------------+------+-----+-------------------+-------------------+
     # | Field   | Type         | Null | Key | Default           | Extra             |
     # +---------+--------------+------+-----+-------------------+-------------------+

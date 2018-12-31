@@ -2,6 +2,10 @@ version: "3"
 
 services:
 
+  api:
+    environment:
+      TEST: "true"
+
   backend:
     environment:
       HOST_FRONTEND: 'http://admin'
