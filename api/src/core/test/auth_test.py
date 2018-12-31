@@ -6,9 +6,10 @@ from sqlalchemy import create_engine
 
 from core import models
 from core.models import AccessToken
-from service.api_definition import USER, SERVICE
+from service.api_definition import USER, SERVICE, GET, PUBLIC, SERVICE_USER_ID
 from service.db import db_session_factory, db_session
-from service.error import Unauthorized
+from service.error import Unauthorized, Forbidden
+from service.internal_service import InternalService
 
 
 class Test(TestCase):
@@ -22,6 +23,8 @@ class Test(TestCase):
         models.Base.metadata.create_all(engine)
         
         db_session_factory.init_with_engine(engine)
+
+        self.service = InternalService('service')
         
     def test_user_id_and_permission_is_set_even_if_there_is_no_auth_header(self):
         with self.app.test_request_context():
@@ -133,5 +136,104 @@ class Test(TestCase):
     
         self.assertEqual(SERVICE, access_token.permissions)
     
-    
-    
+    def test_permission_is_required_for_view(self):
+        with self.assertRaises(AssertionError):
+            @self.service.route('/', method=GET, permission=None)
+            def view():
+                pass
+
+    def test_public_view_does_not_require_permissions(self):
+        @self.service.route('/', method=GET, permission=PUBLIC)
+        def view():
+            pass
+        
+        with self.app.test_request_context():
+            g.user_id = None
+            g.permissions = tuple()
+            view()
+
+        with self.app.test_request_context():
+            g.user_id = SERVICE_USER_ID
+            g.permissions = (SERVICE,)
+            view()
+
+        with self.app.test_request_context():
+            g.user_id = 1
+            g.permissions = (USER, 'webshop')
+            view()
+
+    def test_service_permission_check_works(self):
+        @self.service.route('/', method=GET, permission=SERVICE)
+        def view():
+            pass
+
+        with self.app.test_request_context():
+            g.user_id = SERVICE_USER_ID
+            g.permissions = (SERVICE,)
+            view()
+        
+        with self.app.test_request_context():
+            g.user_id = None
+            g.permissions = tuple()
+            with self.assertRaises(Forbidden):
+                view()
+
+        with self.app.test_request_context():
+            g.user_id = 1
+            g.permissions = (USER, 'webshop')
+            with self.assertRaises(Forbidden):
+                view()
+
+    def test_logged_in_user_permission_check_works(self):
+        @self.service.route('/', method=GET, permission=USER)
+        def view():
+            pass
+
+        with self.app.test_request_context():
+            g.user_id = 1
+            g.permissions = (USER, 'webshop')
+            view()
+
+        with self.app.test_request_context():
+            g.user_id = SERVICE_USER_ID
+            g.permissions = (SERVICE,)
+            with self.assertRaises(Forbidden):
+                view()
+        
+        with self.app.test_request_context():
+            g.user_id = None
+            g.permissions = tuple()
+            with self.assertRaises(Forbidden):
+                view()
+
+    def test_regular_permission_check_works(self):
+        @self.service.route('/', method=GET, permission='webshop')
+        def view():
+            pass
+
+        with self.app.test_request_context():
+            g.user_id = 1
+            g.permissions = (USER, 'webshop')
+            view()
+
+        with self.app.test_request_context():
+            g.user_id = SERVICE_USER_ID
+            g.permissions = (SERVICE,)
+            with self.assertRaises(Forbidden):
+                view()
+        
+        with self.app.test_request_context():
+            g.user_id = None
+            g.permissions = tuple()
+            with self.assertRaises(Forbidden):
+                view()
+
+
+
+
+
+
+
+
+
+
