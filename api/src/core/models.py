@@ -3,7 +3,7 @@ from datetime import timedelta, datetime
 from string import ascii_letters, digits
 
 from flask import request, g
-from sqlalchemy import Column, Integer, String, DateTime, Text, SmallInteger
+from sqlalchemy import Column, Integer, String, DateTime, Text
 from sqlalchemy.ext.declarative import declarative_base
 
 import membership

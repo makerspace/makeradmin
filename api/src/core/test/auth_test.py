@@ -16,6 +16,8 @@ class Test(TestCase):
     
     @classmethod
     def setUpClass(self):
+        # TODO Move this setup code to some common base class.
+        
         self.app = Flask(__name__)
 
         super().setUpClass()

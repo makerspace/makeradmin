@@ -20,7 +20,6 @@ class Test(ApiTest):
             .expect(code=200).get('access_token')
         
         self.assertTrue(patten.match(token))
-        # TODO BM Ideally check db here, token and login.
 
         # Using url parameters.
         token = self.api\
@@ -46,7 +45,6 @@ class Test(ApiTest):
 
         self.api.post("/oauth/token", data=dict(grant_type='not-correct'))\
             .expect(code=422, fields='grant_type', what='bad_value')
-        # TODO BM Ideally check db here, login and no token.
 
         self.api.post("/oauth/token",
                       data=dict(grant_type='password', username=username + 'wrong', password=DEFAULT_PASSWORD))\
@@ -72,8 +70,6 @@ class Test(ApiTest):
         
         # Missing token in subsequent delete.
         self.api.delete(f'/oauth/token/{token}', token=token).expect(code=401)
-        
-        # TODO BM Add checking of db.
 
     def test_list_access_tokens(self):
         self.api.create_member(password=DEFAULT_PASSWORD_HASH)
