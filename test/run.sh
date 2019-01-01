@@ -19,6 +19,7 @@ wait_for nc -z $APIGATEWAY 80
 wait_for nc -z admin 80
 wait_for nc -z public 80
 wait_for nc -z selenium 4444
+wait_for nc -z webshop 80
 wait_for curl --silent --fail --output /dev/null http://$APIGATEWAY:80/webshop/product_data
 
 if [ -z "$TEST_PARALELLISM" ]; then

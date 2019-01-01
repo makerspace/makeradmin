@@ -11,7 +11,7 @@ from service.db import db_session
 from service.error import TooManyRequests, ApiError, NotFound, Unauthorized
 
 
-def generate_token(self):
+def generate_token():
     return ''.join(secrets.choice(ascii_letters + digits) for _ in range(32))
 
 
