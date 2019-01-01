@@ -46,7 +46,6 @@ currency = "sek"
 # DELETE /path/to/service/product/id: deletes a product
 # E.g to update product with id 42 you would issue a PUT request to
 # /path/to/service/product/42
-# TODO Are those permissions ok?
 product_entity.db = db
 product_entity.add_routes(instance, "product", read_permission="webshop", write_permission="webshop_edit")
 

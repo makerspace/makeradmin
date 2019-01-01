@@ -23,6 +23,7 @@ SERVICE_PERMISSIONS = (SERVICE,)
 # What
 BAD_VALUE = 'bad_value'
 REQUIRED = 'required'
+EXPIRED = 'expired'
 
 
 class Arg:

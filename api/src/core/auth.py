@@ -6,7 +6,7 @@ from flask import g, request
 
 import membership
 from core.models import Login, AccessToken
-from service.api_definition import SERVICE, USER
+from service.api_definition import SERVICE, USER, REQUIRED, BAD_VALUE, EXPIRED
 from service.db import db_session
 from service.error import TooManyRequests, ApiError, NotFound, Unauthorized
 
@@ -99,18 +99,18 @@ def authenticate_request():
 
     bearer = 'Bearer '
     if not authorization.startswith(bearer):
-        raise Unauthorized("Unauthorized, can't find credentials.", fields="bearer", what="required")
+        raise Unauthorized("Unauthorized, can't find credentials.", fields="bearer", what=REQUIRED)
         
     token = authorization[len(bearer):].strip()
     
     access_token = db_session.query(AccessToken).get(token)
     if not access_token:
-        raise Unauthorized("Unauthorized, invalid access token.", fields="bearer", what="bad_value")
+        raise Unauthorized("Unauthorized, invalid access token.", fields="bearer", what=BAD_VALUE)
     
     now = datetime.utcnow()
     if access_token.expires < now:
         db_session.query(AccessToken).filter(AccessToken.expires < now).delete()
-        raise Unauthorized("Unauthorized, expired access token.", fields="bearer", what="expired")
+        raise Unauthorized("Unauthorized, expired access token.", fields="bearer", what=EXPIRED)
     
     if access_token.permissions is None:
         permissions = {
