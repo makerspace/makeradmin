@@ -116,7 +116,7 @@ Then go to:
 ### Function test that requires a running installation
 
 Function tests are written in python and the sources for the tests are in the test directory. There are 
-tests using the api gateway as well as selenium tests. Those tests are also run in travis.
+tests using the api as well as selenium tests. Those tests are also run in travis.
 
 You can run the tests in test containers using a one off db with:
 ```

@@ -38,33 +38,6 @@ services:
     networks:
       - makeradmin
 
-# TODO BM remove api-gateway      
-#   api-gateway:
-#     image: makeradmin/apigateway:1.0
-#     build:
-#       context: ./apigateway
-#       dockerfile: ${PWD}/library/DockerfileService
-#     volumes:
-#       - ./logs/apigateway:/var/www/html/storage/logs
-#     depends_on:
-#       - db2
-#       - servicebase
-#       - library
-#       - api
-#     networks:
-#       - makeradmin
-#     environment:
-#       APP_DEBUG:
-#       MYSQL_HOST: "db2:${MYSQL_PORT}"
-#       MYSQL_DB: "makeradmin"
-#       MYSQL_USER:
-#       MYSQL_PASS:
-#       APIGATEWAY: "${APIGATEWAY:-api}"
-#       BEARER: "${API_BEARER}"
-#       VIRTUAL_HOST: "${HOST_BACKEND}"
-#       LETSENCRYPT_HOST: "${HOST_BACKEND}"
-#       LETSENCRYPT_EMAIL: "${ADMIN_EMAIL}"
-
   api:
     image: makeradmin/api:1.0
     build:
@@ -100,7 +73,7 @@ services:
       MYSQL_DB: "makeradmin"
       MYSQL_USER:
       MYSQL_PASS:
-      APIGATEWAY: "${APIGATEWAY:-api}"
+      APIGATEWAY: "api"
       BEARER: "${API_BEARER}"
       HOST_FRONTEND:
       HOST_BACKEND:
@@ -120,6 +93,7 @@ services:
       - "./.webshop_product_images:/work/static/product_images"
     build: public
     environment:
+      APIGATEWAY: "api"
       HOST_BACKEND:
       STRIPE_PUBLIC_KEY:
       APP_DEBUG:
@@ -141,7 +115,7 @@ services:
       MYSQL_DB: "makeradmin"
       MYSQL_USER:
       MYSQL_PASS:
-      APIGATEWAY: "${APIGATEWAY:-api}"
+      APIGATEWAY: "api"
       BEARER: "${API_BEARER}"
     depends_on:
       - api
@@ -160,7 +134,7 @@ services:
       MYSQL_DB: "makeradmin"
       MYSQL_USER:
       MYSQL_PASS:
-      APIGATEWAY: "${APIGATEWAY:-api}"
+      APIGATEWAY: "api"
       BEARER: "${API_BEARER}"
     depends_on:
       - api
@@ -177,7 +151,7 @@ services:
       MYSQL_DB: "makeradmin"
       MYSQL_USER:
       MYSQL_PASS:
-      APIGATEWAY: "${APIGATEWAY:-api}"
+      APIGATEWAY: "api"
       BEARER: "${API_BEARER}"
       MAILGUN_DOMAIN:
       MAILGUN_KEY:
@@ -197,7 +171,7 @@ services:
     volumes:
       - ./data/multiaccess-uploads:/var/www/html/storage/uploads
     environment:
-      APIGATEWAY: "${APIGATEWAY:-api}"
+      APIGATEWAY: api
       BEARER: "${API_BEARER}"
     depends_on:
       - api

@@ -9,16 +9,16 @@ services:
   backend:
     environment:
       HOST_FRONTEND: 'http://admin'
-      HOST_BACKEND: 'http://${APIGATEWAY:-api}'
+      HOST_BACKEND: 'http://api'
       HOST_PUBLIC: 'http://public'
 
   public:
     environment:
-      HOST_BACKEND: 'http://${APIGATEWAY:-api}'
+      HOST_BACKEND: 'http://api'
       
   admin:
     environment:
-      HOST_BACKEND: 'http://${APIGATEWAY:-api}'
+      HOST_BACKEND: 'http://api'
 
   servicebase:
     command: ["/bin/sleep", "3600"]
@@ -59,9 +59,9 @@ services:
       WEBDRIVER_TYPE: "REMOTE_CHROME"
       API_BEARER:
       HOST_FRONTEND: 'http://admin'
-      HOST_BACKEND: 'http://${APIGATEWAY:-api}'
+      HOST_BACKEND: 'http://api'
       HOST_PUBLIC: 'http://public'
-      APIGATEWAY: "${APIGATEWAY:-api}"
+      APIGATEWAY: "api"
       STRIPE_PRIVATE_KEY:
       STRIPE_PUBLIC_KEY:
       TEST_PARALELLISM:
