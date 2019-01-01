@@ -1,3 +1,5 @@
+-- NOTE This file is not in use yet.
+
 -- create tables (if not already created by old php migrations)
 
 -- disable warnings or mysql will complain about table exists and deprecated collate
@@ -140,3 +142,4 @@ ALTER TABLE `membership_members_roles` CONVERT TO CHARACTER SET utf8mb4 COLLATE 
 ALTER TABLE `membership_permissions` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
 ALTER TABLE `membership_roles` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
 ALTER TABLE `membership_spans` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
+
