@@ -5,6 +5,7 @@ from flask import g, Flask
 from sqlalchemy import create_engine
 
 from core import models
+from core.auth import authenticate_request
 from core.models import AccessToken
 from service.api_definition import USER, SERVICE, GET, PUBLIC, SERVICE_USER_ID
 from service.db import db_session_factory, db_session
@@ -33,14 +34,14 @@ class Test(TestCase):
             self.assertFalse(hasattr(g, 'user_id'))
             self.assertFalse(hasattr(g, 'permissions'))
             
-            AccessToken.authenticate_request()
+            authenticate_request()
             
             self.assertIsNone(g.user_id)
             self.assertEqual(tuple(), g.permissions)
 
     def test_no_auth_header_sets_correct_user_and_permissions(self):
         with self.app.test_request_context():
-            AccessToken.authenticate_request()
+            authenticate_request()
             
             self.assertIsNone(g.user_id)
             self.assertEqual(tuple(), g.permissions)
@@ -51,14 +52,14 @@ class Test(TestCase):
     def test_empty_auth_or_bad_header_raises_unauthorized(self):
         with self.app.test_request_context(headers=dict(Authorization='')):
             with self.assertRaises(Unauthorized):
-                AccessToken.authenticate_request()
+                authenticate_request()
 
             self.assertIsNone(g.user_id)
             self.assertEqual(tuple(), g.permissions)
 
         with self.app.test_request_context(headers=dict(Authorization='dkopwkdw')):
             with self.assertRaises(Unauthorized):
-                AccessToken.authenticate_request()
+                authenticate_request()
 
             self.assertIsNone(g.user_id)
             self.assertEqual(tuple(), g.permissions)
@@ -71,7 +72,7 @@ class Test(TestCase):
         
         with self.app.test_request_context(headers=dict(Authorization='Bearer non-existent-token')):
             with self.assertRaises(Unauthorized):
-                AccessToken.authenticate_request()
+                authenticate_request()
 
             self.assertIsNone(g.user_id)
             self.assertEqual(tuple(), g.permissions)
@@ -87,7 +88,7 @@ class Test(TestCase):
     
         with self.app.test_request_context(headers=dict(Authorization='Bearer expired-1')):
             with self.assertRaises(Unauthorized):
-                AccessToken.authenticate_request()
+                authenticate_request()
 
             self.assertIsNone(g.user_id)
             self.assertEqual(tuple(), g.permissions)
@@ -106,7 +107,7 @@ class Test(TestCase):
             with self.app.test_request_context(headers=dict(Authorization='Bearer token-1'),
                                                environ_base={'REMOTE_ADDR': '127.0.0.1'}):
                 
-                AccessToken.authenticate_request()
+                authenticate_request()
     
                 self.assertEqual(8, g.user_id)
                 self.assertCountEqual([USER, 'webshop'], g.permissions)
@@ -127,7 +128,7 @@ class Test(TestCase):
             with self.app.test_request_context(headers=dict(Authorization='Bearer service-token'),
                                                environ_base={'REMOTE_ADDR': '127.0.0.1'}):
                 
-                AccessToken.authenticate_request()
+                authenticate_request()
     
                 self.assertEqual(-1, g.user_id)
                 self.assertCountEqual([SERVICE], g.permissions)
