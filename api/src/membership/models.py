@@ -1,7 +1,13 @@
+# TODO BM Check all sql, use sqlalchemy better.
+
+
 from datetime import datetime
 
 from sqlalchemy import Column, Integer, String, DateTime, Text, Date, Enum
 from sqlalchemy.ext.declarative import declarative_base
+
+from service.api_definition import REQUIRED
+from service.error import UnprocessableEntity
 
 Base = declarative_base()
 
@@ -44,7 +50,7 @@ class Member(Base):
     orgno = Column(String(12))
     address_street = Column(String(255))
     address_extra = Column(String(255))
-    address_zipcode= Column(Integer)
+    address_zipcode = Column(Integer)
     address_city = Column(String(255))
     address_country = Column(String(2))
     phone = Column(String(255))
@@ -78,9 +84,9 @@ class Group(Base):
     __tablename__ = 'membership_groups'
     
     group_id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
-    parent = Column(Integer, index=True, nullable=False)  # TODO What is this?
-    left = Column(Integer, index=True, nullable=False)  # TODO What is this?
-    right = Column(Integer, index=True, nullable=False)  # TODO What is this?
+    parent = Column(Integer, index=True, nullable=False, default=0)  # TODO What is this?
+    left = Column(Integer, index=True, nullable=False, default=0)  # TODO What is this?
+    right = Column(Integer, index=True, nullable=False, default=0)  # TODO What is this?
     name = Column(String(255), nullable=False)
     title = Column(String(255), nullable=False)
     description = Column(Text)
@@ -88,6 +94,25 @@ class Group(Base):
     updated_at = Column(DateTime)
     deleted_at = Column(DateTime)
 
+    def __repr__(self):
+        return f'Group(group_id={self.group_id}, name={self.name})'
+    
+    def validate(self):
+        # TODO Automate this.
+        if not self.name: raise UnprocessableEntity("name is required", fields='name', what=REQUIRED)
+        if not self.title: raise UnprocessableEntity("title is required", fields='title', what=REQUIRED)
+    
+    def json(self):
+        # TODO Automate this.
+        return dict(
+            group_id=self.group_id,
+            name=self.name,
+            title=self.title,
+            description=self.description,
+            created_at=self.created_at.isoformat() if self.created_at else None,
+            updated_at=self.updated_at.isoformat() if self.updated_at else None,
+            deleted_at=self.deleted_at.isoformat() if self.deleted_at else None,
+        )
 
 class Permission(Base):
     # mysql> describe membership_permissions;

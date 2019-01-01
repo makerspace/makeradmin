@@ -36,4 +36,11 @@ def index():
     return jsonify(dict(status="ok")), 200
 
 
+@app.route("/routes")
+def routes():
+    # TODO Fix machine readable.
+    # TODO Why do we serve static?
+    return "\n".join(sorted([f"{rule.rule}: {', '.join(sorted(rule.methods))}" for rule in app.url_map.iter_rules()]))
+
+
 # TODO Use Sentry?

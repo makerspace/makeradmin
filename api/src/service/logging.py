@@ -5,3 +5,6 @@ basicConfig(format='%(asctime)s %(levelname)s [%(process)d/%(threadName)s %(path
             stream=sys.stderr, level=INFO)
 
 logger = getLogger('makeradmin')
+
+# TODO BM Double check all sql queries everywhere.
+getLogger('sqlalchemy.engine').setLevel(INFO)

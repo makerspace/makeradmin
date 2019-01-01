@@ -4,7 +4,7 @@ from os.path import dirname, join, isdir, exists
 
 from flask import Blueprint, g, jsonify
 
-from service.api_definition import Arg, PUBLIC
+from service.api_definition import Arg, PUBLIC, GET, POST, PUT, DELETE, SERVICE, USER
 from service.db import db_session
 from service.error import Forbidden
 from service.migrate import migrate_service
@@ -66,7 +66,15 @@ class InternalService(Blueprint):
             
             @wraps(f)
             def view_wrapper(*args, **kwargs):
-                if permission != PUBLIC and permission not in g.permissions:
+                
+                # TODO Should we always allow service unless we require a user? What did the old code do?
+                has_permission = (
+                        permission == PUBLIC
+                        or permission in g.permissions
+                        or (SERVICE in g.permissions and permission != USER)
+                )
+                
+                if not has_permission:
                     raise Forbidden(message=f"'{permission}' permission is required for this operation.")
                 
                 Arg.fill_args(params, kwargs)
@@ -85,3 +93,46 @@ class InternalService(Blueprint):
             
             return super(InternalService, self).route(path, methods=methods, **route_kwargs)(view_wrapper)
         return decorator
+    
+    def entity_routes(self, path=None, entity=None, permissions=None):
+        """
+        Add routes to manipulate an entity (model). Routes will be added if there is a permission for it,
+        list: GET <path>, create: POST <path>, update: PUT <path>/<id>, read: GET <path>/<id>, delete: DELETE
+        <path>/<id>.
+        
+        :param path path to use for entity
+        :param entity object which supports the view methods needed
+        :param permissions dict with keys list,read,write,create and delete if not set that route will not be created
+        """
+        
+        list_permission = permissions.get('list')
+        if list_permission:
+            self.route(
+                path, permission=list_permission, method=GET
+            )(entity.list)
+        
+        create_permission = permissions.get('create')
+        if create_permission:
+            self.route(
+                path, permission=create_permission, method=POST, status='created', code=201
+            )(entity.create)
+
+        read_permission = permissions.get('read')
+        if read_permission:
+            self.route(
+                f"{path}/<int:entity_id>", permission=read_permission, method=GET
+            )(entity.read)
+
+        update_permission = permissions.get('update')
+        if update_permission:
+            self.route(
+                f"{path}/<int:entity_id>", permission=update_permission, method=PUT, status='updated',
+            )(entity.update)
+
+        delete_permission = permissions.get('delete')
+        if delete_permission:
+            self.route(
+                f"{path}/<int:entity_id>", permission=delete_permission, method=DELETE, status='deleted'
+            )(entity.delete)
+            
+            

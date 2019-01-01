@@ -6,7 +6,7 @@ from flask import g, request
 
 import membership
 from core.models import Login, AccessToken
-from service.api_definition import SERVICE, USER, REQUIRED, BAD_VALUE, EXPIRED
+from service.api_definition import SERVICE, USER, REQUIRED, BAD_VALUE, EXPIRED, SERVICE_USER_ID
 from service.db import db_session
 from service.error import TooManyRequests, ApiError, NotFound, Unauthorized
 
@@ -82,6 +82,11 @@ def list_for_user(user_id):
 
 def authenticate_request():
     """ Update global object with user_id and user permissions using token from request header. """
+
+    # TODO
+    g.user_id = SERVICE_USER_ID
+    g.permissions = (SERVICE,)
+    return
     
     # Make sure user_id and permissions is always set.
     g.user_id = None

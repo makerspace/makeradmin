@@ -60,3 +60,7 @@ class Test(ApiTest):
         self.delete(f"/membership/group/{group_id}").expect(code=200, status="deleted")
         
         self.assertNotIn(group_id, [g['group_id'] for g in self.get("/membership/group").data])
+
+    # TODO Test permissions.
+    # TODO Test filtering.
+    # TODO Test pagination.
