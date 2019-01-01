@@ -84,7 +84,6 @@ services:
       STRIPE_SIGNING_SECRET:
     depends_on:
       - api
-      - servicebase
     networks:
       - makeradmin
       
