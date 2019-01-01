@@ -33,5 +33,3 @@ SET sql_notes = 1;
 -- convert old existing tables to non deprecated char set and better collate
 ALTER TABLE `access_tokens` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
 ALTER TABLE `login` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
-
--- TODO BM Test migration from old db on master.
