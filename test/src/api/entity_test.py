@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from aid.test.api import ApiTest
 
 
@@ -57,6 +59,21 @@ class Test(ApiTest):
         
         self.assertTrue(data['deleted_at'] >= data['created_at'])
 
+    def test_primary_key__created_at_and_updated_at_is_filtered_on_update(self):
+        entity = self.api.create_group()
+        entity_id = entity['group_id']
 
+        t = datetime(2017, 1, 1).isoformat()
+
+        data = self\
+            .put(f"/membership/group/{entity_id}", json=dict(group_id=entity_id + 1, created_at=t, updated_at=t))\
+            .expect(code=200).data
+        
+        self.assertTrue(datetime.fromisoformat(data['updated_at']).year > 2017)
+        self.assertTrue(datetime.fromisoformat(data['created_at']).year > 2017)
+        self.assertEqual(entity_id, data['group_id'])
+
+        self.get(f"/membership/group/{entity_id}").expect(code=200, data__group_id=entity_id)
+        
     # TODO Test filtering.
     # TODO Test pagination.
