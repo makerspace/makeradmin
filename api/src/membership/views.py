@@ -1,15 +1,13 @@
-from flask import request, g
+import bcrypt as bcrypt
 
 from membership import service
 from membership.models import Member, Group
-from service.api_definition import POST, PUBLIC, Arg, DELETE, GET, SERVICE, Enum, USER, BAD_VALUE
+from service.api_definition import POST, PUBLIC, Arg, BAD_VALUE
+from service.db import db_session
 from service.entity import Entity
+from service.error import Forbidden
 
-
-@service.route("/authenticate", method=POST, permission=PUBLIC)
-def authenticate(username=Arg(str), password=Arg(str)):
-    """ Authenticate a member trough username and password, returns member if authenticated. """
-    pass
+# TODO Move implementations around.
 
 
 service.entity_routes(

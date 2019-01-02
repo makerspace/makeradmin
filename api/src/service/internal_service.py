@@ -4,11 +4,7 @@ from os.path import dirname, join, isdir, exists
 
 from flask import Blueprint, g, jsonify
 
-<<<<<<< HEAD
 from service.api_definition import Arg, PUBLIC, GET, POST, PUT, DELETE, SERVICE, USER
-=======
-from service.api_definition import Arg, PUBLIC, SERVICE, USER
->>>>>>> 43-api-python
 from service.db import db_session
 from service.error import Forbidden
 from service.migrate import migrate_service

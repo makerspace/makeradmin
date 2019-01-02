@@ -11,10 +11,14 @@ GET = 'get'
 DELETE = 'delete'
 PUT = 'put'
 
-# Permissions
+# Special permissions  # TODO Those permissions should be removed from the database, along with 47 legacy ones
 PUBLIC = 'public'    # Anyone on the internet can access this endpoint.
 SERVICE = 'service'  # A service user (id < 0) needs to be authenticated, but no other permissions are needed.
 USER = 'user'        # A regular user (id > 0) needs to be authenticated, but no other permissions are needed.
+
+# Regular permissions
+PERMISSION_VIEW = 'permission_view'
+WEBSHOP = 'webshop'
 
 # Service credentials
 SERVICE_USER_ID = -1

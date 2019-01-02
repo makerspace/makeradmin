@@ -6,6 +6,7 @@ from flask import g, request
 
 import membership
 from core.models import Login, AccessToken
+from membership.models import get_member_permissions
 from service.api_definition import SERVICE, USER, REQUIRED, BAD_VALUE, EXPIRED, SERVICE_USER_ID
 from service.db import db_session
 from service.error import TooManyRequests, ApiError, NotFound, Unauthorized
@@ -41,8 +42,7 @@ def login(ip, browser, username, password):
                               " Please try again later.")
 
     try:
-        data = membership.service.service_post('/authenticate', username=username, password=password)
-        member_id = data.get('member_id')
+        member_id = membership.models.authenticate(username=username, password=password)
     except ApiError:
         Login.register_login_failed(ip)
         raise
@@ -83,11 +83,6 @@ def list_for_user(user_id):
 def authenticate_request():
     """ Update global object with user_id and user permissions using token from request header. """
 
-    # TODO
-    g.user_id = SERVICE_USER_ID
-    g.permissions = (SERVICE,)
-    return
-    
     # Make sure user_id and permissions is always set.
     g.user_id = None
     g.permissions = tuple()
@@ -118,9 +113,8 @@ def authenticate_request():
         raise Unauthorized("Unauthorized, expired access token.", fields="bearer", what=EXPIRED)
     
     if access_token.permissions is None:
-        permissions = {
-            p['permission'] for p in membership.service.service_get(f'/member/{access_token.user_id}/permissions')
-        }
+        permissions = get_member_permissions(access_token.user_id)
+
         if access_token.user_id < 0:
             permissions.add(SERVICE)
         else:

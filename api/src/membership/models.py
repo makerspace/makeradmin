@@ -1,13 +1,14 @@
-# TODO BM Check all sql, use sqlalchemy better.
-
-
+import bcrypt
 from datetime import datetime
 
-from sqlalchemy import Column, Integer, String, DateTime, Text, Date, Enum
+from sqlalchemy import Column, Integer, String, DateTime, Text, Date, Enum, Table, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import relationship
 
-from service.api_definition import REQUIRED
-from service.error import UnprocessableEntity
+from service.api_definition import REQUIRED, BAD_VALUE
+from service.db import db_session
+from service.error import UnprocessableEntity, Forbidden
+from service.logging import logger
 
 Base = declarative_base()
 
@@ -63,6 +64,21 @@ class Member(Base):
         return f'Member(member_id={self.member_id}, member_number={self.member_number}, email={self.email})'
 
 
+member_group = Table(
+    # mysql> describe membership_members_groups;
+    # +-----------+---------+------+-----+---------+-------+
+    # | Field     | Type    | Null | Key | Default | Extra |
+    # +-----------+---------+------+-----+---------+-------+
+    # | member_id | int(11) | NO   | PRI | NULL    |       |
+    # | group_id  | int(11) | NO   | PRI | NULL    |       |
+    # +-----------+---------+------+-----+---------+-------+
+    'membership_members_groups',
+    Base.metadata,
+    Column('member_id', ForeignKey('membership_members.member_id'), primary_key=True),
+    Column('group_id', ForeignKey('membership_groups.group_id'), primary_key=True)
+)
+
+
 class Group(Base):
     # mysql> describe membership_groups;
     # +-------------+------------------+------+-----+-------------------+-------------------+
@@ -94,6 +110,10 @@ class Group(Base):
     updated_at = Column(DateTime)
     deleted_at = Column(DateTime)
 
+    members = relationship('Member',
+                           secondary=member_group,
+                           backref='groups')
+
     def __repr__(self):
         return f'Group(group_id={self.group_id}, name={self.name})'
     
@@ -113,6 +133,24 @@ class Group(Base):
             updated_at=self.updated_at.isoformat() if self.updated_at else None,
             deleted_at=self.deleted_at.isoformat() if self.deleted_at else None,
         )
+
+
+group_permission = Table(
+    # mysql> describe membership_group_permissions;
+    # +---------------+------------------+------+-----+---------+----------------+
+    # | Field         | Type             | Null | Key | Default | Extra          |
+    # +---------------+------------------+------+-----+---------+----------------+
+    # | id            | int(10) unsigned | NO   | PRI | NULL    | auto_increment |
+    # | group_id      | int(10) unsigned | NO   | MUL | NULL    |                |
+    # | permission_id | int(10) unsigned | NO   | MUL | NULL    |                |
+    # +---------------+------------------+------+-----+---------+----------------+
+    'membership_group_permissions',
+    Base.metadata,
+    Column('id', Integer, autoincrement=True, nullable=False, primary_key=True),
+    Column('group_id', ForeignKey('membership_groups.group_id'), nullable=False),
+    Column('permission_id', ForeignKey('membership_permissions.permission_id'), nullable=False)
+)
+
 
 class Permission(Base):
     # mysql> describe membership_permissions;
@@ -134,22 +172,14 @@ class Permission(Base):
     permission_id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
     role_id = Column(Integer, nullable=False)  # TODO Foreigh key? Ditch roles?
     permission = Column(String(255), nullable=False, unique=True)
-    group_id = Column(Integer,  nullable=False)  # TODO Foreign key. What is this? Not many to many?
+    group_id = Column(Integer,  nullable=False)  # TODO Foreign key. What is this? Ditch this?
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime)
     deleted_at = Column(DateTime)
 
-
-# TODO Many to many
-# mysql> describe membership_group_permissions;
-# +---------------+------------------+------+-----+---------+----------------+
-# | Field         | Type             | Null | Key | Default | Extra          |
-# +---------------+------------------+------+-----+---------+----------------+
-# | id            | int(10) unsigned | NO   | PRI | NULL    | auto_increment |
-# | group_id      | int(10) unsigned | NO   | MUL | NULL    |                |
-# | permission_id | int(10) unsigned | NO   | MUL | NULL    |                |
-# +---------------+------------------+------+-----+---------+----------------+
-# 3 rows in set (0.00 sec)
+    groups = relationship('Group',
+                          secondary=group_permission,
+                          backref='permissions')
 
 
 class Key(Base):
@@ -171,22 +201,14 @@ class Key(Base):
     __tablename__ = 'membership_keys'
 
     rfid_id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
-    member_id = Column(Integer, nullable=False)  # TODO Foreigh key? Index.
+    member_id = Column(Integer, ForeignKey('membership_members.member_id'), nullable=False)
     description = Column(Text)
     tagid = Column(String(255), nullable=False, index=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime)
     deleted_at = Column(DateTime)
     
-# TODO Many to many.
-# mysql> describe membership_members_groups;
-# +-----------+---------+------+-----+---------+-------+
-# | Field     | Type    | Null | Key | Default | Extra |
-# +-----------+---------+------+-----+---------+-------+
-# | member_id | int(11) | NO   | PRI | NULL    |       |
-# | group_id  | int(11) | NO   | PRI | NULL    |       |
-# +-----------+---------+------+-----+---------+-------+
-# 2 rows in set (0.00 sec)
+    member = relationship(Member, backref="keys")
 
 
 class Span(Base):
@@ -209,7 +231,7 @@ class Span(Base):
     __tablename__ = 'membership_spans'
 
     span_id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
-    member_id = Column(Integer, nullable=False)  # TODO Foreigh key?
+    member_id = Column(Integer, ForeignKey('membership_members.member_id'), nullable=False)
     startdate = Column(Date, nullable=False)  # Start date, inclusive
     enddate = Column(Date, nullable=False)    # End date, inclusive
     type = Column(Enum('labaccess', 'membership', 'special_labaccess'), nullable=False)
@@ -218,8 +240,42 @@ class Span(Base):
     updated_at = Column(DateTime)
     deleted_at = Column(DateTime)
     
+    member = relationship(Member, backref="spans")
 
 
+# TODO Move this somewhere. It is used by core and it should be clear that core is using membership, somewhere where
+# membership endpoints are implemented.
+def get_member_permissions(member_id=None):
+    """ Get all permissions for a memeber, returns set of permission strings. """
+    return set(
+        p for p, in
+        db_session
+        .query(Permission.permission)
+        .distinct()
+        .join(Group, Permission.groups)
+        .join(Member, Group.members)
+        .filter(Member.member_id == member_id)
+    )
 
 
+# TODO Move this somewhere.
+def verify_password(password, password_hash):
+    # TODO BM What did the php-code do? Should I encode to utf-8? Test unicode pwd using old implemnetation.
+    return bcrypt.checkpw(password.encode(), password_hash.encode())
 
+
+def hash_password(password):
+    bcrypt.hashpw(password=password.encode(), salt=bcrypt.gensalt())
+
+
+# TODO Move this somewhere, used in core but accesses membership models.
+def authenticate(username=None, password=None):
+    """ Authenticate a member trough username and password, returns member_id if authenticated. """
+    
+    member = db_session.query(Member).filter(Member.email == username).first()
+    
+    if not member or not verify_password(password, member.password):
+        raise Forbidden("The username and/or password you specified was incorrect.",
+                        fields='username,password', what=BAD_VALUE)
+    
+    return member.member_id

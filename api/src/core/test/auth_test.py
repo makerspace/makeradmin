@@ -7,7 +7,7 @@ from sqlalchemy import create_engine
 from core import models
 from core.auth import authenticate_request
 from core.models import AccessToken
-from service.api_definition import USER, SERVICE, GET, PUBLIC, SERVICE_USER_ID
+from service.api_definition import USER, SERVICE, GET, PUBLIC, SERVICE_USER_ID, WEBSHOP
 from service.db import db_session_factory, db_session
 from service.error import Unauthorized, Forbidden
 from service.internal_service import InternalService
@@ -102,7 +102,8 @@ class Test(TestCase):
                                    expires=datetime.utcnow() + timedelta(days=1)))
         db_session.commit()
 
-        with mock.patch('membership.service.service_get', return_value=[{'permission': 'webshop'}]) as get:
+        # TODO Use db here instead.
+        with mock.patch('membership.models.get_member_permissions', return_value={WEBSHOP}) as get:
 
             with self.app.test_request_context(headers=dict(Authorization='Bearer token-1'),
                                                environ_base={'REMOTE_ADDR': '127.0.0.1'}):
@@ -110,30 +111,31 @@ class Test(TestCase):
                 authenticate_request()
     
                 self.assertEqual(8, g.user_id)
-                self.assertCountEqual([USER, 'webshop'], g.permissions)
+                self.assertCountEqual([USER, WEBSHOP], g.permissions)
         
-            get.assert_called_once_with('/member/8/permissions')
+            get.assert_called_once_with(8)
             
         access_token = db_session.query(AccessToken).get('token-1')
         
-        self.assertCountEqual([USER, 'webshop'], access_token.permissions.split(','))
+        self.assertCountEqual([USER, WEBSHOP], access_token.permissions.split(','))
 
     def test_valid_service_auth_updates_access_token_and_sets_user_id_and_permission(self):
-        db_session.add(AccessToken(user_id=-1, access_token='service-token', browser='', ip='',
+        db_session.add(AccessToken(user_id=SERVICE_USER_ID, access_token='service-token', browser='', ip='',
                                    expires=datetime.utcnow() + timedelta(days=1)))
         db_session.commit()
 
-        with mock.patch('membership.service.service_get', return_value=[{'permission': 'service'}]) as get:
+        # TODO Use db here instead.
+        with mock.patch('membership.models.get_member_permissions', return_value={SERVICE}) as get:
             
             with self.app.test_request_context(headers=dict(Authorization='Bearer service-token'),
                                                environ_base={'REMOTE_ADDR': '127.0.0.1'}):
                 
                 authenticate_request()
     
-                self.assertEqual(-1, g.user_id)
+                self.assertEqual(SERVICE_USER_ID, g.user_id)
                 self.assertCountEqual([SERVICE], g.permissions)
         
-            get.assert_called_once_with('/member/-1/permissions')
+            get.assert_called_once_with(SERVICE_USER_ID)
     
         access_token = db_session.query(AccessToken).get('service-token')
     
