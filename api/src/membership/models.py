@@ -1,7 +1,7 @@
 import bcrypt
 from datetime import datetime
 
-from sqlalchemy import Column, Integer, String, DateTime, Text, Date, Enum, Table, ForeignKey, func
+from sqlalchemy import Column, Integer, String, DateTime, Text, Date, Enum, Table, ForeignKey, func, text
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 
@@ -170,9 +170,9 @@ class Permission(Base):
     __tablename__ = 'membership_permissions'
 
     permission_id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
-    role_id = Column(Integer, nullable=False, server_default=0)  # TODO Foreigh key? Ditch roles?
+    role_id = Column(Integer, nullable=False, server_default=text('0'))  # TODO Foreigh key? Ditch roles?
     permission = Column(String(255), nullable=False, unique=True)
-    group_id = Column(Integer,  nullable=False, server_default=0)  # TODO Foreign key. What is this? Ditch this?
+    group_id = Column(Integer,  nullable=False, server_default=text('0'))  # TODO Foreign key. What is this? Ditch this?
     created_at = Column(DateTime, server_default=func.now())
     updated_at = Column(DateTime)
     deleted_at = Column(DateTime)
