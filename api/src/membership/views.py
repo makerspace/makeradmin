@@ -12,7 +12,7 @@ from service.error import Forbidden
 
 service.entity_routes(
     path="/group",
-    entity=Entity(Group),
+    entity=Entity(Group, hidden_columns=('parent', 'left', 'right')),
     permission_list='group_view',
     permission_create='group_create',
     permission_read='group_view',
