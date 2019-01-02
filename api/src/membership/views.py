@@ -13,13 +13,11 @@ from service.error import Forbidden
 service.entity_routes(
     path="/group",
     entity=Entity(Group),
-    permissions=dict(
-        list='group_view',
-        create='group_create',
-        read='group_view',
-        edit='member_edit',
-        delete='group_delete',
-    ),
+    permission_list='group_view',
+    permission_create='group_create',
+    permission_read='group_view',
+    permission_update='member_edit',
+    permission_delete='group_delete',
 )
 
 

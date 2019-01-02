@@ -92,7 +92,8 @@ class InternalService(Blueprint):
             return super(InternalService, self).route(path, methods=methods, **route_kwargs)(view_wrapper)
         return decorator
     
-    def entity_routes(self, path=None, entity=None, permissions=None):
+    def entity_routes(self, path=None, entity=None, permission_list=None, permission_create=None, permission_read=None,
+                      permission_update=None, permission_delete=None):
         """
         Add routes to manipulate an entity (model). Routes will be added if there is a permission for it,
         list: GET <path>, create: POST <path>, update: PUT <path>/<id>, read: GET <path>/<id>, delete: DELETE
@@ -100,37 +101,36 @@ class InternalService(Blueprint):
         
         :param path path to use for entity
         :param entity object which supports the view methods needed
-        :param permissions dict with keys list,read,write,create and delete if not set that route will not be created
+        :param permission_list permission needed to list
+        :param permission_create permission needed to create
+        :param permission_read permission needed to read
+        :param permission_update permission needed to update
+        :param permission_delete permission needed to delete
         """
         
-        list_permission = permissions.get('list')
-        if list_permission:
+        if permission_list:
             self.route(
-                path, permission=list_permission, method=GET
+                path, permission=permission_list, method=GET
             )(entity.list)
         
-        create_permission = permissions.get('create')
-        if create_permission:
+        if permission_create:
             self.route(
-                path, permission=create_permission, method=POST, status='created', code=201
+                path, permission=permission_create, method=POST, status='created', code=201
             )(entity.create)
 
-        read_permission = permissions.get('read')
-        if read_permission:
+        if permission_read:
             self.route(
-                f"{path}/<int:entity_id>", permission=read_permission, method=GET
+                f"{path}/<int:entity_id>", permission=permission_read, method=GET
             )(entity.read)
 
-        update_permission = permissions.get('update')
-        if update_permission:
+        if permission_update:
             self.route(
-                f"{path}/<int:entity_id>", permission=update_permission, method=PUT, status='updated',
+                f"{path}/<int:entity_id>", permission=permission_update, method=PUT, status='updated',
             )(entity.update)
 
-        delete_permission = permissions.get('delete')
-        if delete_permission:
+        if permission_delete:
             self.route(
-                f"{path}/<int:entity_id>", permission=delete_permission, method=DELETE, status='deleted'
+                f"{path}/<int:entity_id>", permission=permission_delete, method=DELETE, status='deleted'
             )(entity.delete)
             
             

@@ -2,6 +2,7 @@ from flask import request
 from sqlalchemy import inspect
 
 from service.db import db_session
+from service.error import NotFound
 from service.logging import logger
 
 
@@ -53,7 +54,10 @@ class Entity:
     def read(self, entity_id):
         # TODO Catch not found.
         logger.info(f"read {entity_id} {self.model.__name__}")
-        return db_session.query(self.model).get(entity_id).json()
+        obj = db_session.query(self.model).get(entity_id)
+        if not obj:
+            raise NotFound("Could not find any entity with specified parameters.")
+        return obj.json()
 
     def update(self, entity_id):
         # TODO Test changing id.
