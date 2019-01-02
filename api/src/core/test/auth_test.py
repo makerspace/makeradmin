@@ -222,8 +222,7 @@ class Test(TestCase):
         with self.app.test_request_context():
             g.user_id = SERVICE_USER_ID
             g.permissions = (SERVICE,)
-            with self.assertRaises(Forbidden):
-                view()
+            view()
         
         with self.app.test_request_context():
             g.user_id = None
