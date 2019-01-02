@@ -15,7 +15,7 @@ class AccessToken(Base):
     ip = Column(String(255), nullable=False)
     expires = Column(DateTime, nullable=False)
     permissions = Column(Text)
-    lifetime = Column(Integer, nullable=False, default=300)
+    lifetime = Column(Integer, nullable=False, server_default=300)
 
     def __repr__(self):
         return f'AccessToken(user_id={self.access_token}, access_token={self.access_token})'

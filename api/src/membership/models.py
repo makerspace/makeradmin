@@ -1,7 +1,7 @@
 import bcrypt
 from datetime import datetime
 
-from sqlalchemy import Column, Integer, String, DateTime, Text, Date, Enum, Table, ForeignKey
+from sqlalchemy import Column, Integer, String, DateTime, Text, Date, Enum, Table, ForeignKey, func
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 
@@ -55,7 +55,7 @@ class Member(Base):
     address_city = Column(String(255))
     address_country = Column(String(2))
     phone = Column(String(255))
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, server_default=func.now())
     updated_at = Column(DateTime)
     deleted_at = Column(DateTime)
     member_number = Column(Integer)
@@ -103,10 +103,10 @@ class Group(Base):
     parent = Column(Integer, index=True, nullable=False, default=0)  # TODO What is this?
     left = Column(Integer, index=True, nullable=False, default=0)  # TODO What is this?
     right = Column(Integer, index=True, nullable=False, default=0)  # TODO What is this?
-    name = Column(String(255), nullable=False)
+    name = Column(String(255), nullable=False, info=dict(sune='arne'))
     title = Column(String(255), nullable=False)
     description = Column(Text)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, server_default=func.now())
     updated_at = Column(DateTime)
     deleted_at = Column(DateTime)
 
@@ -170,10 +170,10 @@ class Permission(Base):
     __tablename__ = 'membership_permissions'
 
     permission_id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
-    role_id = Column(Integer, nullable=False)  # TODO Foreigh key? Ditch roles?
+    role_id = Column(Integer, nullable=False, server_default=0)  # TODO Foreigh key? Ditch roles?
     permission = Column(String(255), nullable=False, unique=True)
-    group_id = Column(Integer,  nullable=False)  # TODO Foreign key. What is this? Ditch this?
-    created_at = Column(DateTime, default=datetime.utcnow)
+    group_id = Column(Integer,  nullable=False, server_default=0)  # TODO Foreign key. What is this? Ditch this?
+    created_at = Column(DateTime, server_default=func.now())
     updated_at = Column(DateTime)
     deleted_at = Column(DateTime)
 
@@ -204,7 +204,7 @@ class Key(Base):
     member_id = Column(Integer, ForeignKey('membership_members.member_id'), nullable=False)
     description = Column(Text)
     tagid = Column(String(255), nullable=False, index=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, server_default=func.now())
     updated_at = Column(DateTime)
     deleted_at = Column(DateTime)
     
@@ -236,7 +236,7 @@ class Span(Base):
     enddate = Column(Date, nullable=False)    # End date, inclusive
     type = Column(Enum('labaccess', 'membership', 'special_labaccess'), nullable=False)
     creation_reason = Column(String(255))
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, server_default=func.now())
     updated_at = Column(DateTime)
     deleted_at = Column(DateTime)
     

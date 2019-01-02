@@ -16,6 +16,8 @@ class Entity:
         assert len(model_inspect.primary_key) == 1, "this class only supports single column primary keys"
         
         self.pk = model_inspect.primary_key[0]
+
+        logger.info(repr(self.pk))
      
     @staticmethod
     def validate(entity):
@@ -52,8 +54,6 @@ class Entity:
         return entity.json()
         
     def read(self, entity_id):
-        # TODO Catch not found.
-        logger.info(f"read {entity_id} {self.model.__name__}")
         obj = db_session.query(self.model).get(entity_id)
         if not obj:
             raise NotFound("Could not find any entity with specified parameters.")
