@@ -3,7 +3,7 @@ from datetime import datetime
 
 from sqlalchemy import Column, Integer, String, DateTime, Text, Date, Enum, Table, ForeignKey, func, text
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, validates
 
 from service.api_definition import REQUIRED, BAD_VALUE
 from service.db import db_session
@@ -79,6 +79,12 @@ member_group = Table(
 )
 
 
+def not_empty(obj, key, value):
+    if not value:
+        raise UnprocessableEntity(f"'{key}' can not be empty.", fields=key, what=REQUIRED)
+    return value
+
+
 class Group(Base):
     # mysql> describe membership_groups;
     # +-------------+------------------+------+-----+-------------------+-------------------+
@@ -103,24 +109,21 @@ class Group(Base):
     parent = Column(Integer, index=True, nullable=False, default=0)  # TODO What is this?
     left = Column(Integer, index=True, nullable=False, default=0)  # TODO What is this?
     right = Column(Integer, index=True, nullable=False, default=0)  # TODO What is this?
-    name = Column(String(255), nullable=False, info=dict(sune='arne'))
+    name = Column(String(255), nullable=False)
     title = Column(String(255), nullable=False)
     description = Column(Text)
     created_at = Column(DateTime, server_default=func.now())
     updated_at = Column(DateTime)
     deleted_at = Column(DateTime)
-
+    
+    not_empty = validates('name', 'title')(not_empty)
+    
     members = relationship('Member',
                            secondary=member_group,
                            backref='groups')
 
     def __repr__(self):
         return f'Group(group_id={self.group_id}, name={self.name})'
-    
-    def validate(self):
-        # TODO Automate this.
-        if not self.name: raise UnprocessableEntity("name is required", fields='name', what=REQUIRED)
-        if not self.title: raise UnprocessableEntity("title is required", fields='title', what=REQUIRED)
     
     def json(self):
         # TODO Automate this.

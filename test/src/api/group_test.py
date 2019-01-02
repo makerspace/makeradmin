@@ -62,5 +62,3 @@ class Test(ApiTest):
         self.assertNotIn(group_id, [g['group_id'] for g in self.get("/membership/group").data])
 
     # TODO Test permissions.
-    # TODO Test filtering.
-    # TODO Test pagination.

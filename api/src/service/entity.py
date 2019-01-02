@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from flask import request
 from sqlalchemy import inspect
 
@@ -17,12 +19,6 @@ class Entity:
         
         self.pk = model_inspect.primary_key[0]
 
-        logger.info(repr(self.pk))
-     
-    @staticmethod
-    def validate(entity):
-        entity.validate()
-        
     def list(self):
         # TODO Implement pagination.
         # TODO Implement filters.
@@ -45,10 +41,9 @@ class Entity:
         # "version": "1.0",
         # "date": "2019-01-01T22:22:17Z"
         # }
-        logger.info(f"create {self.model.__name__}: {request.get_data()}")
-        # TODO Automate validation of input before creating object.
+        # TODO Filter data.
+        logger.info(f"create {self.model.__name__}: {request.json} {type(request.json)}")
         entity = self.model(**request.json)
-        self.validate(entity)
         db_session.add(entity)
         db_session.commit()
         return entity.json()
@@ -60,17 +55,16 @@ class Entity:
         return obj.json()
 
     def update(self, entity_id):
-        # TODO Test changing id.
-        # TODO Same as create.
-        entity = db_session.query(self.model).get(entity_id)
-        for k, v in request.json().items():
-            setattr(entity, k, v)
-        db_session.commit()
-        logger.info(f"update {entity_id} {self.model.__name__}")
-        return entity.json()
+        # TODO Test changing id, it works, we need to filter and validate input.
+        db_session.query(self.model).filter(self.pk == entity_id).update(request.json)
+        return self.read(entity_id)
 
     def delete(self, entity_id):
         logger.info(f"delete {entity_id} {self.model.__name__}")
         # TODO What if not exists?
-        count = db_session.query(self.model).filter(self.pk == entity_id).delete()
+        count = db_session.query(self.model).filter(self.pk == entity_id).update(dict(deleted_at=datetime.utcnow()))
         
+        assert count <= 1, "More than one entity matching primary key, this is a bug."
+        
+        if not count:
+            raise NotFound("Could not find any entity with specified parameters.")
