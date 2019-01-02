@@ -20,6 +20,7 @@ def log(level, message):
 
 
 def error_handler_db(error):
+    # TODO Add nice generic message for unique constraints.
     logger.exception(f"error when communicating with db: {str(error)}")
     response = jsonify(
         message=GENERIC_ERROR_MESSAGE,
@@ -47,6 +48,9 @@ def error_handler_500(error):
 
 def error_handler_404(error):
     return jsonify(dict(message='Not found.', status='error')), 404
+
+
+# TODO Add generic nice 400 handler (for things like bad content type and reading json).
 
 
 class ApiError(Exception):
