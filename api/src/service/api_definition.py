@@ -17,6 +17,14 @@ SERVICE = 'service'  # A service user (id < 0) needs to be authenticated, but no
 USER = 'user'        # A regular user (id > 0) needs to be authenticated, but no other permissions are needed.
 
 # Regular permissions
+MEMBER_VIEW = 'member_view'
+MEMBER_CREATE = 'member_create'
+MEMBER_EDIT = 'member_edit'
+MEMBER_DELETE = 'member_delete'
+GROUP_VIEW = 'group_view'
+GROUP_CREATE = 'group_create'
+GROUP_EDIT = 'member_edit'
+GROUP_DELETE = 'group_delete'
 PERMISSION_VIEW = 'permission_view'
 WEBSHOP = 'webshop'
 

@@ -2,11 +2,14 @@ from functools import wraps
 from inspect import getmodule, stack, getfile
 from os.path import dirname, join, isdir, exists
 
+import pymysql
 from flask import Blueprint, g, jsonify
+from sqlalchemy.exc import IntegrityError
 
 from service.api_definition import Arg, PUBLIC, GET, POST, PUT, DELETE, SERVICE, USER
 from service.db import db_session
-from service.error import Forbidden
+from service.error import Forbidden, GENERIC_ERROR_MESSAGE, UnprocessableEntity
+from service.logging import logger
 from service.migrate import migrate_service
 
 
@@ -66,26 +69,49 @@ class InternalService(Blueprint):
             
             @wraps(f)
             def view_wrapper(*args, **kwargs):
-                has_permission = (
-                        permission == PUBLIC
-                        or permission in g.permissions
-                        or (SERVICE in g.permissions and permission != USER)
-                )
-                
-                if not has_permission:
-                    raise Forbidden(message=f"'{permission}' permission is required for this operation.")
-                
-                Arg.fill_args(params, kwargs)
-                
-                data = f(*args, **kwargs)
-                
-                if flat_return:
-                    result = jsonify({**data, 'status': status}), code
-                else:
-                    result = jsonify({'status': status, 'data': data}), code
-                
-                if commit:
-                    db_session.commit()
+                try:
+                    has_permission = (
+                            permission == PUBLIC
+                            or permission in g.permissions
+                            or (SERVICE in g.permissions and permission != USER)
+                    )
+                    
+                    if not has_permission:
+                        raise Forbidden(message=f"'{permission}' permission is required for this operation.")
+                    
+                    Arg.fill_args(params, kwargs)
+                    
+                    data = f(*args, **kwargs)
+                    
+                    if flat_return:
+                        result = jsonify({**data, 'status': status}), code
+                    else:
+                        result = jsonify({'status': status, 'data': data}), code
+                    
+                    if commit:
+                        db_session.commit()
+                        
+                except IntegrityError as e:
+                    if isinstance(e.orig, pymysql.err.IntegrityError):
+                        # TODO Do ugly parse of db errors, protect the uglyness by tests.
+                        # logger.info(type(e))
+                        # logger.info(dir(e))
+                        # logger.info(repr(e))
+                        # logger.info(str(e))
+                        # logger.info(e.args)
+                        # logger.info(e.code)
+                        # logger.info(e.detail)
+                        # logger.info(e.instance)
+                        logger.info(e.orig)
+                        logger.info(type(e.orig))
+                        logger.info(repr(e.orig))
+                        logger.info(dir(e.orig))
+                        logger.info(e.orig.args)
+                        logger.info(e.orig.__dict__)
+                        
+                        # logger.info(e.params)
+                        # logger.info(e.statement)
+                    raise UnprocessableEntity("TODO")
                 
                 return result
             
@@ -110,27 +136,46 @@ class InternalService(Blueprint):
         
         if permission_list:
             self.route(
-                path, permission=permission_list, method=GET
+                path,
+                endpoint=entity.name + "_list",
+                permission=permission_list,
+                method=GET,
             )(entity.list)
         
         if permission_create:
             self.route(
-                path, permission=permission_create, method=POST, status='created', code=201
+                path,
+                endpoint=entity.name + "_create",
+                permission=permission_create,
+                method=POST,
+                status='created',
+                code=201,
             )(entity.create)
 
         if permission_read:
             self.route(
-                f"{path}/<int:entity_id>", permission=permission_read, method=GET
+                f"{path}/<int:entity_id>",
+                endpoint=entity.name + "_read",
+                permission=permission_read,
+                method=GET,
             )(entity.read)
 
         if permission_update:
             self.route(
-                f"{path}/<int:entity_id>", permission=permission_update, method=PUT, status='updated',
+                f"{path}/<int:entity_id>",
+                endpoint=entity.name + "_update",
+                permission=permission_update,
+                method=PUT,
+                status='updated',
             )(entity.update)
 
         if permission_delete:
             self.route(
-                f"{path}/<int:entity_id>", permission=permission_delete, method=DELETE, status='deleted'
+                f"{path}/<int:entity_id>",
+                endpoint=entity.name + "_delete",
+                permission=permission_delete,
+                method=DELETE,
+                status='deleted',
             )(entity.delete)
             
             

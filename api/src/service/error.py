@@ -1,6 +1,7 @@
 from logging import ERROR
 
 from flask import jsonify
+from sqlalchemy.exc import IntegrityError
 
 from service.logging import logger
 

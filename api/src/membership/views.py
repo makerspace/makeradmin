@@ -2,33 +2,44 @@ import bcrypt as bcrypt
 
 from membership import service
 from membership.models import Member, Group
-from service.api_definition import POST, PUBLIC, Arg, BAD_VALUE
+from service.api_definition import POST, PUBLIC, Arg, BAD_VALUE, MEMBER_VIEW, MEMBER_CREATE, MEMBER_EDIT, MEMBER_DELETE, \
+    GROUP_VIEW, GROUP_CREATE, GROUP_EDIT, GROUP_DELETE
 from service.db import db_session
-from service.entity import Entity
+from service.entity import Entity, not_empty
 from service.error import Forbidden
 
 # TODO Move implementations around.
 
+service.entity_routes(
+    path="/member",
+    entity=Entity(Member, validation=dict(email=not_empty, firstname=not_empty)),
+    permission_list=MEMBER_VIEW,
+    permission_create=MEMBER_CREATE,
+    permission_read=MEMBER_VIEW,
+    permission_update=MEMBER_EDIT,
+    permission_delete=MEMBER_DELETE,
+)
 
 service.entity_routes(
     path="/group",
-    entity=Entity(Group, hidden_columns=('parent', 'left', 'right')),
-    permission_list='group_view',
-    permission_create='group_create',
-    permission_read='group_view',
-    permission_update='member_edit',
-    permission_delete='group_delete',
+    entity=Entity(Group, hidden=('parent', 'left', 'right'), validation=dict(name=not_empty, title=not_empty)),
+    permission_list=GROUP_VIEW,
+    permission_create=GROUP_CREATE,
+    permission_read=GROUP_VIEW,
+    permission_update=GROUP_EDIT,
+    permission_delete=GROUP_DELETE,
 )
 
 
 # $app->  post("membership/authenticate", "Member@authenticate");   // Authenticate a member
 #
 # // Members
-# $app->   get("membership/member",      ['middleware' => 'permission:member_view',   'uses' => "Member@list"]);   // Get collection
-# $app->  post("membership/member",      ['middleware' => 'permission:member_create', 'uses' => "Member@create"]); // Model: Create
-# $app->   get("membership/member/{id}", ['middleware' => 'permission:member_view',   'uses' => "Member@read"]);   // Model: Read
-# $app->   put("membership/member/{id}", ['middleware' => 'permission:member_edit',   'uses' => "Member@update"]); // Model: Update
-# $app->delete("membership/member/{id}", ['middleware' => 'permission:member_delete', 'uses' => "Member@delete"]); // Model: Delete
+# DONE $app->   get("membership/member",      ['middleware' => 'permission:member_view',   'uses' => "Member@list"]);   // Get collection
+# DONE  $app->  post("membership/member",      ['middleware' => 'permission:member_create', 'uses' => "Member@create"]); // Model: Create
+# DONE  $app->   get("membership/member/{id}", ['middleware' => 'permission:member_view',   'uses' => "Member@read"]);   // Model: Read
+# DONE  $app->   put("membership/member/{id}", ['middleware' => 'permission:member_edit',   'uses' => "Member@update"]); // Model: Update
+# DONE  $app->delete("membership/member/{id}", ['middleware' => 'permission:member_delete', 'uses' => "Member@delete"]); // Model: Delete
+
 # $app->   get("membership/member/{id}/keys", ['middleware' => 'permission:member_view',   'uses' => "Member@getKeys"]);
 # $app->  post("membership/member/{id}/activate", ['middleware' => 'permission:service', 'uses' => "Member@activate"]); // Model: Activate
 # $app->  post("membership/member/{id}/addMembershipSpan",    ['middleware' => 'permission:member_edit', 'uses' => "Member@addMembershipSpan"]);
@@ -54,11 +65,11 @@ service.entity_routes(
 # $app->delete("membership/span/{id}", ['middleware' => 'permission:span_manage',  'uses' => "Span@delete"]);   // Model: Delete
 #
 # // Groups
-# $app->   get("membership/group",       ['middleware' => 'permission:group_view',   'uses' => "Group@list"]);    // Get collection
-# $app->  post("membership/group",       ['middleware' => 'permission:group_create', 'uses' => "Group@create"]);  // Model: Create
-# $app->   get("membership/group/{id}",  ['middleware' => 'permission:group_view',   'uses' => "Group@read"]);    // Model: Read
-# $app->   put("membership/group/{id}",  ['middleware' => 'permission:group_edit',   'uses' => "Group@update"]);  // Model: Update
-# $app->delete("membership/group/{id}",  ['middleware' => 'permission:group_delete', 'uses' => "Group@delete"]);  // Model: Delete
+# DONE $app->   get("membership/group",       ['middleware' => 'permission:group_view',   'uses' => "Group@list"]);    // Get collection
+# DONE $app->  post("membership/group",       ['middleware' => 'permission:group_create', 'uses' => "Group@create"]);  // Model: Create
+# DONE $app->   get("membership/group/{id}",  ['middleware' => 'permission:group_view',   'uses' => "Group@read"]);    // Model: Read
+# DONE $app->   put("membership/group/{id}",  ['middleware' => 'permission:group_edit',   'uses' => "Group@update"]);  // Model: Update
+# DONE $app->delete("membership/group/{id}",  ['middleware' => 'permission:group_delete', 'uses' => "Group@delete"]);  // Model: Delete
 #
 # $app->   get("membership/group/{id}/members",        ['middleware' => 'permission:group_member_view',   'uses' => "Group@getMembers"]);    // Get collection with members
 # $app->  post("membership/group/{id}/members/add",    ['middleware' => 'permission:group_member_add',    'uses' => "Group@addMembers"]);
@@ -68,12 +79,12 @@ service.entity_routes(
 # $app->  post("membership/group/{id}/permissions/add",    ['middleware' => 'permission:permission_manage', 'uses' => "Group@addPermissions"]);  // Model: Create
 # $app->  post("membership/group/{id}/permissions/remove", ['middleware' => 'permission:permission_manage', 'uses' => "Group@removePermissions"]);  // Model: Create
 #
-# // Roles
-# $app->   get("membership/role",        "Role@list");     // Get collection
-# $app->  post("membership/role",        "Role@create");   // Model: Create
-# $app->   get("membership/role/{id}",   "Role@read");     // Model: Read
-# $app->   put("membership/role/{id}",   "Role@update");   // Model: Update
-# $app->delete("membership/role/{id}",   "Role@delete");   // Model: Delete
+# IGNORE // Roles
+# IGNORE $app->   get("membership/role",        "Role@list");     // Get collection
+# IGNORE $app->  post("membership/role",        "Role@create");   // Model: Create
+# IGNORE $app->   get("membership/role/{id}",   "Role@read");     // Model: Read
+# IGNORE $app->   put("membership/role/{id}",   "Role@update");   // Model: Update
+# IGNORE $app->delete("membership/role/{id}",   "Role@delete");   // Model: Delete
 #
 # // Permissions
 # $app->   get("membership/permission",      ['middleware' => 'permission:permission_manage',  'uses' => "Permission@list"]);     // Get collection

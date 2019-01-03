@@ -59,6 +59,8 @@ class Member(Base):
     updated_at = Column(DateTime)
     deleted_at = Column(DateTime)
     member_number = Column(Integer)
+    # TODO BM Add unique constraint to member_number
+    # TODO BM Add auto increment to member_number
 
     def __repr__(self):
         return f'Member(member_id={self.member_id}, member_number={self.member_number}, email={self.email})'
@@ -77,12 +79,6 @@ member_group = Table(
     Column('member_id', ForeignKey('membership_members.member_id'), primary_key=True),
     Column('group_id', ForeignKey('membership_groups.group_id'), primary_key=True)
 )
-
-
-def not_empty(obj, key, value):
-    if not value:
-        raise UnprocessableEntity(f"'{key}' can not be empty.", fields=key, what=REQUIRED)
-    return value
 
 
 class Group(Base):
@@ -115,8 +111,6 @@ class Group(Base):
     created_at = Column(DateTime, server_default=func.now())
     updated_at = Column(DateTime)
     deleted_at = Column(DateTime)
-    
-    not_empty = validates('name', 'title')(not_empty)
     
     members = relationship('Member',
                            secondary=member_group,
