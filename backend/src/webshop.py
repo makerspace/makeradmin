@@ -199,7 +199,7 @@ def transaction_contents(id: int) -> List[Dict]:
 
 @instance.route("transaction/<int:id>/actions", methods=["GET"], permission="webshop")
 @route_helper
-def transaction_actions(id: int):
+def transaction_actions(id: int) -> List[Dict[str,Any]]:
     '''
     Return all actions related to a transaction
     '''
@@ -391,19 +391,19 @@ def complete_transaction(transaction_id: int):
         logger.error(f"unable to set transaction {transaction_id} to completed")
 
 
-def _fail_transaction(transaction_id: int):
+def _fail_transaction(transaction_id: int) -> None:
     with db.cursor() as cur:
         affected_rows = cur.execute("UPDATE webshop_transactions AS tt SET tt.status = 'failed' WHERE tt.status = 'pending' AND tt.id = %s", (transaction_id,))
         if affected_rows != 1:
             eprint(f"Unable to set transaction {transaction_id} to failed!")
 
 
-def fail_transaction(transaction_id: int, error_code: int, reason: str):
+def fail_transaction(transaction_id: int, error_code: int, reason: str) -> None:
     _fail_transaction(transaction_id)
     abort(error_code, reason)
 
 
-def _fail_stripe_source(source_id: str):
+def _fail_stripe_source(source_id: str) -> None:
     with db.cursor() as cur:
         affected_rows = cur.execute(
             "UPDATE webshop_transactions AS tt INNER JOIN webshop_stripe_pending AS sp ON tt.id = sp.transaction_id SET tt.status = 'failed' WHERE sp.stripe_token = %s and tt.status = 'pending'", (source_id,))
@@ -411,12 +411,12 @@ def _fail_stripe_source(source_id: str):
             eprint(f"Unable to set status to 'failed' for transaction corresponding to source {source_id}")
 
 
-def fail_stripe_source(source_id: str, error_code: int, reason: str):
+def fail_stripe_source(source_id: str, error_code: int, reason: str) -> None:
     _fail_stripe_source(source_id)
     abort(error_code, reason)
 
 
-def source_to_transaction_id(source_id: str):
+def source_to_transaction_id(source_id: str) -> int:
     with db.cursor() as cur:
         cur.execute("SELECT transaction_id FROM webshop_transactions INNER JOIN webshop_stripe_pending ON webshop_transactions.id=webshop_stripe_pending.transaction_id WHERE webshop_stripe_pending.stripe_token=%s", (source_id,))
         return cur.fetchone()
@@ -495,7 +495,7 @@ def stripe_callback() -> None:
         stripe_handle_charge_callback(event_subtype, event)
 
 
-def _reprocess_stripe_event(event):
+def _reprocess_stripe_event(event) -> None:
     try:
         logger.info(f"Processing stripe event of type {event.type}")
         (event_type, event_subtype) = tuple(event.type.split('.', 1))
@@ -510,7 +510,7 @@ def _reprocess_stripe_event(event):
 
 @instance.route("process_stripe_events", methods=["PUT"])
 @route_helper
-def process_stripe_events():
+def process_stripe_events() -> None:
     payload = request.get_json() or {}
     source_id = payload.get('source_id', None)
     start = payload.get('start', None)
@@ -609,7 +609,7 @@ def create_stripe_payment(transaction_id: int, token: str) -> stripe.Charge:
     )
 
 
-def handle_payment_success(transaction_id: int):
+def handle_payment_success(transaction_id: int) -> None:
     complete_transaction(transaction_id)
     transaction = transaction_entity.get(transaction_id)
     if transaction['status'] != 'completed':
@@ -921,7 +921,7 @@ def ship_orders(labaccess: bool) -> None:
             ship_add_membership_action(action)
 
 
-def ship_add_labaccess_action(action: PendingAction):
+def ship_add_labaccess_action(action: PendingAction) -> None:
     r = instance.gateway.get(f"membership/member/{action.member_id}/keys")
     assert r.ok, r.text
     if len(r.json()["data"]) == 0:
@@ -947,7 +947,7 @@ def ship_add_labaccess_action(action: PendingAction):
     send_key_updated_email(action.member_id, days_to_add, new_end_date)
 
 
-def ship_add_membership_action(action: PendingAction):
+def ship_add_membership_action(action: PendingAction) -> None:
     days_to_add = action.action_value
     assert(days_to_add >= 0)
     r = instance.gateway.post(f"membership/member/{action.member_id}/addMembershipDays",
@@ -968,7 +968,7 @@ def ship_add_membership_action(action: PendingAction):
     send_membership_updated_email(action.member_id, days_to_add, new_end_date)
 
 
-def get_product_data():
+def get_product_data() -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
     with db.cursor() as cur:
         # Get all categories, as some products may exist in deleted categories
         # (it is up to an admin to move them to another category)
