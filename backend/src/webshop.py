@@ -252,6 +252,7 @@ def list_orders():
 
     return transactions
 
+
 @instance.route("member/current/transactions", methods=["GET"], permission=None)
 @route_helper
 def member_history() -> Dict[str, Any]:
@@ -367,12 +368,12 @@ def register() -> Dict[str, int]:
 
     # Note this will throw if the payment fails
     result = pay(member_id=member_id, data=purchase, activates_member=True)
-    
+
     # If the pay succeeded (not same as the payment is completed) and the member does not already exists,
     # the user will be logged in.
     response = instance.gateway.post("oauth/force_token", {"user_id": member_id}).json()
     result['token'] = response["access_token"]
-    
+
     return result
 
 
@@ -404,7 +405,8 @@ def fail_transaction(transaction_id: int, error_code: int, reason: str):
 
 def _fail_stripe_source(source_id: str):
     with db.cursor() as cur:
-        affected_rows = cur.execute("UPDATE webshop_transactions AS tt INNER JOIN webshop_stripe_pending AS sp ON tt.id = sp.transaction_id SET tt.status = 'failed' WHERE sp.stripe_token = %s and tt.status = 'pending'", (source_id,))
+        affected_rows = cur.execute(
+            "UPDATE webshop_transactions AS tt INNER JOIN webshop_stripe_pending AS sp ON tt.id = sp.transaction_id SET tt.status = 'failed' WHERE sp.stripe_token = %s and tt.status = 'pending'", (source_id,))
         if affected_rows != 1:
             eprint(f"Unable to set status to 'failed' for transaction corresponding to source {source_id}")
 
@@ -523,7 +525,7 @@ def process_stripe_events():
             logger.info(f"skipping event, not matching source_id")
 
 
-def process_cart(member_id: int, cart: List[Dict[str,Any]]) -> Tuple[Decimal, List[CartItem]]:
+def process_cart(member_id: int, cart: List[Dict[str, Any]]) -> Tuple[Decimal, List[CartItem]]:
     items = []
     with db.cursor() as cur:
         with localcontext() as ctx:
@@ -561,7 +563,7 @@ def process_cart(member_id: int, cart: List[Dict[str,Any]]) -> Tuple[Decimal, Li
     return total_amount, items
 
 
-def validate_payment(member_id: int, cart: List[Dict[str,Any]], expected_amount: Decimal) -> Tuple[Decimal, List[CartItem]]:
+def validate_payment(member_id: int, cart: List[Dict[str, Any]], expected_amount: Decimal) -> Tuple[Decimal, List[CartItem]]:
     if len(cart) == 0:
         raise errors.EmptyCart()
 
@@ -739,7 +741,7 @@ def create_three_d_secure_source(transaction_id: int, card_source_id: str, total
     )
 
 
-def handle_card_source(transaction_id: int, card_source_id: str, total_amount: Decimal) -> Dict[str,int]:
+def handle_card_source(transaction_id: int, card_source_id: str, total_amount: Decimal) -> Dict[str, int]:
     card_source = stripe.Source.retrieve(card_source_id)
     if card_source.type != 'card' or card_source.card.three_d_secure != 'not_supported':
         abort(500, f'Synchronous charges should only be made for cards not supporting 3D Secure')
@@ -759,7 +761,7 @@ def handle_card_source(transaction_id: int, card_source_id: str, total_amount: D
     return {"transaction_id": transaction_id}
 
 
-def handle_three_d_secure_source(transaction_id: int, card_source_id: str, total_amount: Decimal) -> Dict[str,Any]:
+def handle_three_d_secure_source(transaction_id: int, card_source_id: str, total_amount: Decimal) -> Dict[str, Any]:
     try:
         source = create_three_d_secure_source(transaction_id, card_source_id, total_amount)
     except stripe.error.InvalidRequestError as e:
@@ -885,7 +887,7 @@ class PendingAction:
     action_name: str
     action_value: int
     pending_action_id: int
-    transaction: Dict[str,Any]
+    transaction: Dict[str, Any]
     created_at: str
 
 
@@ -929,12 +931,12 @@ def ship_add_labaccess_action(action: PendingAction):
     days_to_add = action.action_value
     assert(days_to_add >= 0)
     r = instance.gateway.post(f"membership/member/{action.member_id}/addMembershipDays",
-        {
-            "type": "labaccess",
-            "days": days_to_add,
-            "creation_reason": f"transaction_action_id: {action.pending_action_id}, transaction_id: {action.transaction['transaction_id']}",
-        }
-    )
+                              {
+                                  "type": "labaccess",
+                                  "days": days_to_add,
+                                  "creation_reason": f"transaction_action_id: {action.pending_action_id}, transaction_id: {action.transaction['transaction_id']}",
+                              }
+                              )
     assert r.ok, r.text
 
     r = instance.gateway.get(f"membership/member/{action.member_id}/membership")
@@ -949,13 +951,13 @@ def ship_add_membership_action(action: PendingAction):
     days_to_add = action.action_value
     assert(days_to_add >= 0)
     r = instance.gateway.post(f"membership/member/{action.member_id}/addMembershipDays",
-        {
-            "type": "membership",
-            "days": days_to_add,
-            "default_start_date": action.created_at,
-            "creation_reason": f"transaction_action_id: {action.pending_action_id}, transaction_id: {action.transaction['transaction_id']}",
-        }
-    )
+                              {
+                                  "type": "membership",
+                                  "days": days_to_add,
+                                  "default_start_date": action.created_at,
+                                  "creation_reason": f"transaction_action_id: {action.pending_action_id}, transaction_id: {action.transaction['transaction_id']}",
+                              }
+                              )
     assert r.ok, r.text
 
     r = instance.gateway.get(f"membership/member/{action.member_id}/membership")
@@ -1017,7 +1019,7 @@ def product_view_data(product_id: int):
 @route_helper
 def product_edit_data(product_id: int):
     _, categories = get_product_data()
-    
+
     if product_id:
         product = product_entity.get(product_id)
 
@@ -1034,7 +1036,7 @@ def product_edit_data(product_id: int):
                 "name": a[2],
                 "value": a[3],
             } for a in actions]
-            
+
         images = product_image_entity.list("product_id=%s AND deleted_at IS NULL", product_id)
     else:
         product = {
@@ -1070,7 +1072,7 @@ def receipt(transaction_id: int):
     transaction = transaction_entity.get(transaction_id)
     if transaction.get('member_id') != member_id:
         raise NotFound()
-    
+
     items = transaction_content_entity.list("transaction_id=%s", transaction_id)
     products = [product_entity.get(item["product_id"]) for item in items]
     r = instance.gateway.get(f"membership/member/{member_id}")
@@ -1093,4 +1095,3 @@ def register_page_data():
 
 
 instance.serve_indefinitely()
-

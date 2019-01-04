@@ -39,7 +39,7 @@ def send_access_token():
     token = response["access_token"]
     url = instance.gateway.get_public_url(f"/member/login/{token}?redirect=" + urllib.parse.quote_plus(redirect))
     logger.info(f"sending login link {url!r} to user_id {user_id}")
-    
+
     r = instance.gateway.post("messages", {
         "recipients": [
             {
@@ -74,10 +74,12 @@ def permissions() -> Dict[str, Any]:
         "permissions": permissions,
     }
 
+
 @instance.route("current/membership", methods=["GET"], permission=None)
 def membership_info() -> str:
     ''' If the user has lab access and how long '''
     user_id = assert_get(request.headers, "X-User-Id")
     return instance.gateway.get(f"membership/member/{user_id}/membership").text
+
 
 instance.serve_indefinitely()

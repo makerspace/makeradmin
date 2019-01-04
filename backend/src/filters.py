@@ -31,7 +31,7 @@ def filter_start_package(gateway: APIGateway, item: CartItem, member_id: int):
     except ValueError as e:
         raise BackendException(f"Could not parse member end_date, this is a bug: {e}")
 
-    if end_date < datetime.now() + timedelta(days=30*9):
+    if end_date < datetime.now() + timedelta(days=30 * 9):
         raise CanNotBuyStartPackage()
 
     if item.count > 1:

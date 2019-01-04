@@ -148,7 +148,7 @@ class Service:
                         abort(403, "user does not have the " + str(permission) + " permission")
 
                 return f(*args, **kwargs)
-            
+
             return self.blueprint.route(path, **kwargs)(auth)
         return wrapper
 
@@ -434,7 +434,7 @@ class Entity:
             name2col.update({c.alias: c for c in self._readable if c.alias is not None})
 
             # TODO: Using the global requests variable here is not very good style. It can break things if one request tries to list other unrelated entities.
-            filter_data = [self._format_column_filter(name2col[key], value.split(",")) for key,value in request.args.items() if key in name2col]
+            filter_data = [self._format_column_filter(name2col[key], value.split(",")) for key, value in request.args.items() if key in name2col]
 
             if self.allow_delete:
                 filter_data.append(("deleted_at IS NULL", []))
