@@ -4,7 +4,7 @@ from flask import Blueprint, g, request
 from requests import RequestException
 
 from service.api_definition import POST, SERVICE_USER_ID, SERVICE_PERMISSIONS, GET, PUT, DELETE
-from service.error import InternalServerError, ApiError, EXCEPTION, GENERIC_ERROR_MESSAGE
+from service.error import InternalServerError, ApiError, EXCEPTION, GENERIC_500_ERROR_MESSAGE
 from service.logging import logger
 
 
@@ -58,7 +58,7 @@ class ExternalService(Blueprint):
                 **kwargs,
             )
         except RequestException as e:
-            raise InternalServerError(GENERIC_ERROR_MESSAGE, service=self.name,
+            raise InternalServerError(GENERIC_500_ERROR_MESSAGE, service=self.name,
                                       log=f"{method} to {url} failed: {str(e)}", level=EXCEPTION)
 
         return response
@@ -69,7 +69,7 @@ class ExternalService(Blueprint):
         response = self.raw_request("own request", url, method, **kwargs)
         
         if response.status_code >= 500:
-            raise ApiError.parse(response, service=self.name, message=GENERIC_ERROR_MESSAGE,
+            raise ApiError.parse(response, service=self.name, message=GENERIC_500_ERROR_MESSAGE,
                                  log=f"{method} to {url} failed")
         
         if response.status_code >= 400:

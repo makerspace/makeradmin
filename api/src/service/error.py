@@ -1,7 +1,6 @@
 from logging import ERROR
 
 from flask import jsonify
-from sqlalchemy.exc import IntegrityError
 
 from service.logging import logger
 
@@ -10,7 +9,7 @@ from service.logging import logger
 EXCEPTION = 333
 
 
-GENERIC_ERROR_MESSAGE = "Something went wrong while trying to contact a service in our internal network."
+GENERIC_500_ERROR_MESSAGE = "Something went wrong while trying to contact a service in our internal network."
 
 
 def log(level, message):
@@ -24,7 +23,7 @@ def error_handler_db(error):
     # TODO Add nice generic message for unique constraints.
     logger.exception(f"error when communicating with db: {str(error)}")
     response = jsonify(
-        message=GENERIC_ERROR_MESSAGE,
+        message=GENERIC_500_ERROR_MESSAGE,
         status="error",
         fields=None,
         what=None,

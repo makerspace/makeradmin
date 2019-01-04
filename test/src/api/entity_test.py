@@ -1,6 +1,8 @@
 from datetime import datetime
+from random import randint
 
 from aid.test.api import ApiTest
+from service.api_definition import REQUIRED, NOT_UNIQUE
 
 
 class Test(ApiTest):
@@ -86,6 +88,22 @@ class Test(ApiTest):
         self.assertEqual('new_name', data['name'])
 
         self.get(f"/membership/group/{entity_id}").expect(code=200, data__group_id=entity_id)
+
+    def test_unique_constraint_fails_with_message(self):
+        entity_1 = self.obj.create_member(member_number=randint(1e8, 9e8))
+        email = entity_1['email']
+        entity_2 = self.obj.create_member(member_number=randint(1e8, 9e8), email=email)
+        
+        self.post("/membership/member", entity_1).expect(code=201)
+        self.post("/membership/member", entity_2).expect(code=422,
+                                                         what=NOT_UNIQUE,
+                                                         message=f"'{email}' already exists.")
+        
+    def test_not_null_constraint_fails_with_message(self):
+        member = self.obj.create_member()
+        member.pop('member_number', None)
+        
+        self.post("/membership/member", member).expect(code=422, what=REQUIRED, fields='member_number')
         
     # TODO Test filtering.
     # TODO Test pagination.

@@ -36,6 +36,7 @@ SERVICE_PERMISSIONS = (SERVICE,)
 BAD_VALUE = 'bad_value'
 REQUIRED = 'required'
 EXPIRED = 'expired'
+NOT_UNIQUE = 'not_unique'
 
 
 class Arg:

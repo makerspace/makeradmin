@@ -1,15 +1,16 @@
+import re
 from functools import wraps
 from inspect import getmodule, stack, getfile
 from os.path import dirname, join, isdir, exists
 
 import pymysql
 from flask import Blueprint, g, jsonify
+from pymysql.constants.ER import DUP_ENTRY, BAD_NULL_ERROR
 from sqlalchemy.exc import IntegrityError
 
-from service.api_definition import Arg, PUBLIC, GET, POST, PUT, DELETE, SERVICE, USER
+from service.api_definition import Arg, PUBLIC, GET, POST, PUT, DELETE, SERVICE, USER, REQUIRED, NOT_UNIQUE
 from service.db import db_session
-from service.error import Forbidden, GENERIC_ERROR_MESSAGE, UnprocessableEntity
-from service.logging import logger
+from service.error import Forbidden, UnprocessableEntity
 from service.migrate import migrate_service
 
 
@@ -93,25 +94,24 @@ class InternalService(Blueprint):
                         
                 except IntegrityError as e:
                     if isinstance(e.orig, pymysql.err.IntegrityError):
-                        # TODO Do ugly parse of db errors, protect the uglyness by tests.
-                        # logger.info(type(e))
-                        # logger.info(dir(e))
-                        # logger.info(repr(e))
-                        # logger.info(str(e))
-                        # logger.info(e.args)
-                        # logger.info(e.code)
-                        # logger.info(e.detail)
-                        # logger.info(e.instance)
-                        logger.info(e.orig)
-                        logger.info(type(e.orig))
-                        logger.info(repr(e.orig))
-                        logger.info(dir(e.orig))
-                        logger.info(e.orig.args)
-                        logger.info(e.orig.__dict__)
+                        # Not so nice parsing of db errors, but there is tests for it.
+                        errno, error = e.orig.args
+                        m = re.match(r".*?'([^']*)'.*", error)
+                        if m:
+                            thing = m.group(1)
+                        else:
+                            thing = None
+                            
+                        if errno == DUP_ENTRY:
+                            raise UnprocessableEntity(f"'{thing}' already exists." if thing else "Duplicate entry.",
+                                                      what=NOT_UNIQUE)
                         
-                        # logger.info(e.params)
-                        # logger.info(e.statement)
-                    raise UnprocessableEntity("TODO")
+                        if errno == BAD_NULL_ERROR:
+                            raise UnprocessableEntity(f"'{thing}' is required." if thing else "Required field missing.",
+                                                      fields=thing, what=REQUIRED)
+                        
+                    raise UnprocessableEntity("Could save entity using the sent data.",
+                                              log=f"unrecoginized integrity error: {str(e)}")
                 
                 return result
             
