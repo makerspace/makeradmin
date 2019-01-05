@@ -122,17 +122,15 @@ class Entity:
         return {k: conv(getattr(entity, k, None)) for k, conv in self.cols_to_obj.items()}
     
     def list(self, sort_by=Arg(str, required=False), sort_order=Arg(str, required=False),
-             search=Arg(str, required=False), page_size=Arg(int, required=False), page=Arg(int, required=False)):
-        # TODO Test sort that does not exist.
-        # TODO Implement pagination.
-        # TODO Implement search.
-        # TODO Sort.
-        # TODO Safety of sort_by?
+             search=Arg(str, required=False), page_size=Arg(int, required=False), page: int=Arg(int, required=False)):
+         # TODO Safety of sort_by?
+        if page is not None and page < 1:
+            raise UnprocessableEntity("Pagination page should be greater than 0.", fields='page', what=BAD_VALUE)
+        
         query = db_session.query(self.model).filter(self.model.deleted_at.is_(None))
 
         if search:
             expression = or_(*[self.columns[column_name].like(f"%{search}%") for column_name in self.search_columns])
-            # TODO Add a test case where like query matches integer column.
             query = query.filter(expression)
 
         sort_column = sort_by or self.default_sort_column
@@ -152,6 +150,7 @@ class Entity:
             
         return dict(
             total=count,
+            page=page,
             per_page=page_size,
             last_page=ceil(count / page_size),
             data=[self.to_obj(entity) for entity in query]

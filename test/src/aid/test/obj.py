@@ -30,6 +30,7 @@ class ObjFactory:
             firstname=firstname,
             lastname=lastname,
             password=None,
+            member_number=randint(1e8, 9e8),
             address_street=self.fake.street_name(),
             address_extra="N/A",
             address_zipcode=randint(10000, 99999),

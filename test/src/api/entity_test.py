@@ -2,6 +2,7 @@ from datetime import datetime
 from random import randint
 
 from aid.test.api import ApiTest
+from aid.test.util import random_str
 from service.api_definition import REQUIRED, NOT_UNIQUE
 
 
@@ -90,9 +91,9 @@ class Test(ApiTest):
         self.get(f"/membership/group/{entity_id}").expect(code=200, data__group_id=entity_id)
 
     def test_unique_constraint_fails_with_message(self):
-        entity_1 = self.obj.create_member(member_number=randint(1e8, 9e8))
+        entity_1 = self.obj.create_member()
         email = entity_1['email']
-        entity_2 = self.obj.create_member(member_number=randint(1e8, 9e8), email=email)
+        entity_2 = self.obj.create_member(email=email)
         
         self.post("/membership/member", entity_1).expect(code=201)
         self.post("/membership/member", entity_2).expect(code=422,
@@ -104,7 +105,69 @@ class Test(ApiTest):
         member.pop('member_number', None)
         
         self.post("/membership/member", member).expect(code=422, what=REQUIRED, fields='member_number')
-        
-    # TODO Test filtering.
-    # TODO Test pagination.
     
+    def test_search_for_text(self):
+        entity = self.api.create_group()
+        entity_id = entity['group_id']
+        
+        result = self.get(f"/membership/group?search={entity['title']}").expect(code=200, page=1, total=1).data[0]
+        
+        self.assertEqual(entity_id, result['group_id'])
+
+        self.get(f"/membership/group?search={random_str()}").expect(code=200, page=1, total=0, data=[])
+    
+    def test_search_for_number_column_works(self):
+        entity = self.api.create_member(member_number=randint(1e8, 9e8))
+        entity_id = entity['member_id']
+        
+        result = self.get(f"/membership/member?search={entity['member_number']}").expect(code=200).data[0]
+        
+        self.assertEqual(entity_id, result['member_id'])
+
+        self.get(f"/membership/group?search={randint(1e8, 9e8)}").expect(code=200, page=1, total=0, data=[])
+        
+    def test_pagination_and_sort(self):
+        firstname = random_str(12)
+        entity1 = self.api.create_member(firstname=firstname, lastname="d")
+        entity2 = self.api.create_member(firstname=firstname, lastname="c")
+        entity3 = self.api.create_member(firstname=firstname, lastname="a")
+        entity4 = self.api.create_member(firstname=firstname, lastname="b")
+        
+        entity1_id = entity1['member_id']
+        entity2_id = entity2['member_id']
+        entity3_id = entity3['member_id']
+        entity4_id = entity4['member_id']
+        
+        result = self\
+            .get(f"/membership/member?search={firstname}&sort_by=lastname&sort_order=asc&page_size=2")\
+            .expect(code=200, page=1, per_page=2, last_page=2, total=4)\
+            .data
+        
+        self.assertEqual([entity3_id, entity4_id], [e['member_id'] for e in result])
+
+        result = self\
+            .get(f"/membership/member?search={firstname}&sort_by=lastname&sort_order=asc&page_size=2&page=2")\
+            .expect(code=200, page=2, per_page=2, last_page=2, total=4)\
+            .data
+        
+        self.assertEqual([entity2_id, entity1_id], [e['member_id'] for e in result])
+        
+        result = self\
+            .get(f"/membership/member?search={firstname}&sort_by=lastname&sort_order=desc&page_size=3&page=1")\
+            .expect(code=200, page=1, per_page=3, last_page=2, total=4)\
+            .data
+        
+        self.assertEqual([entity1_id, entity2_id, entity4_id], [e['member_id'] for e in result])
+
+        result = self\
+            .get(f"/membership/member?search={firstname}&sort_by=lastname&sort_order=desc&page_size=3&page=2")\
+            .expect(code=200, page=2, per_page=3, last_page=2, total=4)\
+            .data
+        
+        self.assertEqual([entity3_id], [e['member_id'] for e in result])
+        
+        self.get(f"/membership/member?search={firstname}&sort_by=lastname&sort_order=desc&page_size=3&page=0")\
+            .expect(code=422)
+
+        self.get(f"/membership/member?search={firstname}&sort_by=lastname&sort_order=desc&page_size=3&page=3")\
+            .expect(code=200, data=[], page=3, per_page=3, last_page=2, total=4)

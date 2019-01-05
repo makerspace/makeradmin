@@ -3,7 +3,6 @@ from inspect import signature
 from flask import request
 
 from service.error import ApiError, UnprocessableEntity
-from service.logging import logger
 
 # HTTP Methods
 POST = 'post'
