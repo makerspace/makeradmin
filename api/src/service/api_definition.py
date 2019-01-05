@@ -80,14 +80,17 @@ class Arg:
                 except AttributeError:
                     pass
             
-            if value is None and param.required:
-                raise ApiError(message=f'Parameter {name} is required.', fields=name, what=REQUIRED)
+            if value is None:
+                if param.required:
+                    raise ApiError(message=f'Parameter {name} is required.', fields=name, what=REQUIRED)
             
-            try:
-                value = param.converter(value)
-            except Exception as e:
-                raise UnprocessableEntity(fields=name, what=BAD_VALUE,
-                                          message=f'Failed to validate parameter {name}: {str(e)}')
+            else:
+                try:
+                    value = param.converter(value)
+                except Exception as e:
+                    raise UnprocessableEntity(fields=name, what=BAD_VALUE,
+                                              message=f'Failed to validate parameter {name}: {str(e)}')
+                
             kwargs[name] = value
 
 

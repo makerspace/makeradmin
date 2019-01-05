@@ -1,12 +1,16 @@
 from datetime import datetime
+from math import ceil
 
 from flask import request
-from sqlalchemy import inspect, Integer, String, DateTime, Text
+from sqlalchemy import inspect, Integer, String, DateTime, Text, desc, asc, or_
 
-from service.api_definition import BAD_VALUE, REQUIRED
+from service.api_definition import BAD_VALUE, REQUIRED, Arg
 from service.db import db_session
 from service.error import NotFound, UnprocessableEntity
-from service.logging import logger
+
+
+ASC = 'asc'
+DESC = 'desc'
 
 
 def not_empty(key, value):
@@ -54,17 +58,24 @@ GLOBAl_READ_ONLY = ('created_at', 'updated_at', 'deleted_at')
 class Entity:
     """ Used to create a crud-able entity, subclass to provide additional functionality. """
     
-    def __init__(self, model, hidden=tuple(), read_only=tuple(), validation=None):
+    def __init__(self, model, hidden_columns=tuple(), read_only_columns=tuple(), validation=None,
+                 default_sort_column=None, default_sort_order=None, search_columns=tuple()):
         """
         :param model sqlalchemy orm model class
-        :param hidden columns that should be filtered in all operations
-        :param read_only columns that should be filtered on create and update (in addition to GLOBAl_READ_ONLY)
+        :param hidden_columns columns that should be filtered in all operations
+        :param read_only_columns columns that should be filtered on create and update (in addition to GLOBAl_READ_ONLY)
         :param validation map from column name to validation function run on create and update
+        :param default_sort_column column name
+        :param default_sort_order asc/desc
+        :param search_columns columns that should be used for text search (search param to list)
         """
         
         self.model = model
         self.name = model.__name__
         self.validation = validation or {}
+        self.default_sort_column = default_sort_column
+        self.default_sort_order = default_sort_order
+        self.search_columns = search_columns
         
         model_inspect = inspect(self.model)
         
@@ -72,19 +83,21 @@ class Entity:
         
         self.pk = model_inspect.primary_key[0]
         
+        self.columns = model_inspect.columns
+        
         self.cols_to_model = {
             k: to_model_converters[type(c.type)](k)
-            for k, c in model_inspect.columns.items()
+            for k, c in self.columns.items()
             if (not c.primary_key
                 and k not in GLOBAl_READ_ONLY
-                and k not in read_only
-                and k not in hidden)
+                and k not in read_only_columns
+                and k not in hidden_columns)
         }
         
         self.cols_to_obj = {
             k: to_obj_converters[type(c.type)]
-            for k, c in model_inspect.columns.items()
-            if k not in hidden
+            for k, c in self.columns.items()
+            if k not in hidden_columns
         }
     
     def validate_present(self, obj):
@@ -108,11 +121,40 @@ class Entity:
         """ Convert model to json compatible object. """
         return {k: conv(getattr(entity, k, None)) for k, conv in self.cols_to_obj.items()}
     
-    def list(self):
+    def list(self, sort_column=Arg(str, required=False), sort_order=Arg(str, required=False),
+             search=Arg(str, required=False), page_size=Arg(int, required=False), page=Arg(int, required=False)):
+        # TODO Test sort that does not exist.
         # TODO Implement pagination.
-        # TODO Implement filters.
+        # TODO Implement search.
         # TODO Sort.
-        return [self.to_obj(entity) for entity in db_session.query(self.model).filter(self.model.deleted_at.is_(None))]
+        query = db_session.query(self.model).filter(self.model.deleted_at.is_(None))
+
+        if search:
+            expression = or_(*[self.columns[column_name].like(f"%{search}%") for column_name in self.search_columns])
+            # TODO Add a test case where like query matches integer column.
+            query = query.filter(expression)
+
+        sort_column = sort_column or self.default_sort_column
+        sort_order = sort_order or self.default_sort_order
+        
+        if sort_column:
+            order = desc if sort_order == DESC else asc
+            query = query.order_by(order(sort_column))
+
+        count = query.count()
+
+        page_size = page_size or 25
+        page = page or 1
+        
+        if page_size:
+            query = query.limit(page_size).offset((page - 1) * page_size)
+            
+        return dict(
+            total=count,
+            per_page=page_size,
+            last_page=ceil(count / page_size),
+            data=[self.to_obj(entity) for entity in query]
+        )
     
     def create(self):
         input_data = self.to_model(request.json)
@@ -146,3 +188,13 @@ class Entity:
         
         if not count:
             raise NotFound("Could not find any entity with specified parameters.")
+
+
+class EntityWithPassword(Entity):
+    # TODO Class or additional parameter. Also hidden_columns is that something that is needed in many places?
+
+    def to_obj(self, entity):
+        obj = super().to_obj(entity)
+        obj.pop('password', None)
+        return obj
+    

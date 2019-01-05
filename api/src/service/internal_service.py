@@ -140,6 +140,7 @@ class InternalService(Blueprint):
                 endpoint=entity.name + "_list",
                 permission=permission_list,
                 method=GET,
+                flat_return=True,
             )(entity.list)
         
         if permission_create:

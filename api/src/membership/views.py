@@ -1,18 +1,21 @@
-import bcrypt as bcrypt
-
 from membership import service
 from membership.models import Member, Group
-from service.api_definition import POST, PUBLIC, Arg, BAD_VALUE, MEMBER_VIEW, MEMBER_CREATE, MEMBER_EDIT, MEMBER_DELETE, \
-    GROUP_VIEW, GROUP_CREATE, GROUP_EDIT, GROUP_DELETE
-from service.db import db_session
-from service.entity import Entity, not_empty
-from service.error import Forbidden
+from service.api_definition import MEMBER_VIEW, MEMBER_CREATE, MEMBER_EDIT, MEMBER_DELETE, GROUP_VIEW, GROUP_CREATE,\
+    GROUP_EDIT, GROUP_DELETE
+from service.entity import Entity, not_empty, EntityWithPassword, ASC, DESC
 
 # TODO Move implementations around.
 
 service.entity_routes(
     path="/member",
-    entity=Entity(Member, validation=dict(email=not_empty, firstname=not_empty)),
+    entity=EntityWithPassword(
+        Member,
+        validation=dict(email=not_empty, firstname=not_empty),
+        default_sort_column='member_number',
+        default_sort_order=DESC,
+        search_columns=('firstname', 'lastname', 'email', 'address_street', 'address_extra', 'address_zipcode',
+                        'address_city', 'phone', 'civicregno', 'member_number'),
+    ),
     permission_list=MEMBER_VIEW,
     permission_create=MEMBER_CREATE,
     permission_read=MEMBER_VIEW,
@@ -22,7 +25,14 @@ service.entity_routes(
 
 service.entity_routes(
     path="/group",
-    entity=Entity(Group, hidden=('parent', 'left', 'right'), validation=dict(name=not_empty, title=not_empty)),
+    entity=Entity(
+        Group,
+        validation=dict(name=not_empty, title=not_empty),
+        default_sort_column='title',
+        default_sort_order=ASC,
+        search_columns=('name', 'title', 'description'),
+        hidden_columns=('parent', 'left', 'right'),
+    ),
     permission_list=GROUP_VIEW,
     permission_create=GROUP_CREATE,
     permission_read=GROUP_VIEW,
