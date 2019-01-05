@@ -121,12 +121,13 @@ class Entity:
         """ Convert model to json compatible object. """
         return {k: conv(getattr(entity, k, None)) for k, conv in self.cols_to_obj.items()}
     
-    def list(self, sort_column=Arg(str, required=False), sort_order=Arg(str, required=False),
+    def list(self, sort_by=Arg(str, required=False), sort_order=Arg(str, required=False),
              search=Arg(str, required=False), page_size=Arg(int, required=False), page=Arg(int, required=False)):
         # TODO Test sort that does not exist.
         # TODO Implement pagination.
         # TODO Implement search.
         # TODO Sort.
+        # TODO Safety of sort_by?
         query = db_session.query(self.model).filter(self.model.deleted_at.is_(None))
 
         if search:
@@ -134,7 +135,7 @@ class Entity:
             # TODO Add a test case where like query matches integer column.
             query = query.filter(expression)
 
-        sort_column = sort_column or self.default_sort_column
+        sort_column = sort_by or self.default_sort_column
         sort_order = sort_order or self.default_sort_order
         
         if sort_column:

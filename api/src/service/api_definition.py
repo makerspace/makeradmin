@@ -76,7 +76,7 @@ class Arg:
                 
             if value is None:
                 try:
-                    value = request.json.get(name)
+                    value = request.get_json(silent=True).get(name)
                 except AttributeError:
                     pass
             
