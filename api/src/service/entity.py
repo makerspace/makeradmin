@@ -4,7 +4,7 @@ from math import ceil
 from flask import request
 from sqlalchemy import inspect, Integer, String, DateTime, Text, desc, asc, or_
 
-from service.api_definition import BAD_VALUE, REQUIRED, Arg
+from service.api_definition import BAD_VALUE, REQUIRED, Arg, symbol, Enum, natural0, natural1
 from service.db import db_session
 from service.error import NotFound, UnprocessableEntity
 
@@ -121,9 +121,10 @@ class Entity:
         """ Convert model to json compatible object. """
         return {k: conv(getattr(entity, k, None)) for k, conv in self.cols_to_obj.items()}
     
-    def list(self, sort_by=Arg(str, required=False), sort_order=Arg(str, required=False),
-             search=Arg(str, required=False), page_size=Arg(int, required=False), page: int=Arg(int, required=False)):
-         # TODO Safety of sort_by?
+    def list(self, sort_by=Arg(symbol, required=False), sort_order=Arg(Enum(DESC, ASC), required=False),
+             search=Arg(str, required=False), page_size=Arg(natural0, required=False),
+             page: natural1=Arg(int, required=False)):
+        
         if page is not None and page < 1:
             raise UnprocessableEntity("Pagination page should be greater than 0.", fields='page', what=BAD_VALUE)
         

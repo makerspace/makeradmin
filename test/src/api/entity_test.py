@@ -17,7 +17,11 @@ class Test(ApiTest):
 
         self.assertTrue(entity_id)
 
-        self.get(f"/membership/group/{entity_id}").expect(code=200, data=entity, data__group_id=entity_id)
+        data = self.get(f"/membership/group/{entity_id}").expect(code=200, data=entity, data__group_id=entity_id).data
+        
+        self.assertIsNotNone(data['created_at'])
+        self.assertIsNone(data['updated_at'])
+        self.assertIsNone(data['deleted_at'])
 
     def test_can_not_create_with_empty_data(self):
         self.post("/membership/group", dict()).expect(code=422)

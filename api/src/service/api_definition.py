@@ -1,3 +1,4 @@
+import re
 from inspect import signature
 
 from flask import request
@@ -102,3 +103,31 @@ class Enum:
         if value in self.values:
             return value
         raise ValueError(f"Value {value} not among allowed values.")
+
+
+symbol_regex = re.compile(r'[A-Za-z0-9_]+')
+
+
+def symbol(value):
+    """ A string which is only A-Za-z0-9 and _. """
+    if not symbol_regex.match(value):
+        raise ValueError(f"Value {value} is not a symbol.")
+    return value
+
+
+def natural0(value):
+    """ Natural including 0. """
+    value = int(value)
+    if value < 0:
+        raise ValueError(f"Value {value} should be 0 or higher.")
+    return value
+    
+
+def natural1(value):
+    """ Natural excluding 0. """
+    value = int(value)
+    if value < 1:
+        raise ValueError(f"Value {value} should be 1 or higher.")
+    return value
+    
+    
