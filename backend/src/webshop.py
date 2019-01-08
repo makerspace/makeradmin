@@ -198,7 +198,7 @@ def transaction_contents(id: int) -> List[Dict]:
 
 @instance.route("transaction/<int:id>/actions", methods=["GET"], permission="webshop")
 @route_helper
-def transaction_actions(id: int):
+def transaction_actions(id: int) -> List[Dict[str,Any]]:
     '''
     Return all actions related to a transaction
     '''
@@ -370,12 +370,12 @@ def register() -> Dict[str, int]:
 
     # Note this will throw if the payment fails
     result = pay(member_id=member_id, data=purchase, activates_member=True)
-    
+
     # If the pay succeeded (not same as the payment is completed) and the member does not already exists,
     # the user will be logged in.
     response = instance.gateway.post("oauth/force_token", {"user_id": member_id}).json()
     result['token'] = response["access_token"]
-    
+
     return result
 
 
@@ -393,31 +393,32 @@ def complete_transaction(transaction_id: int):
         logger.error(f"unable to set transaction {transaction_id} to completed")
 
 
-def _fail_transaction(transaction_id: int):
+def _fail_transaction(transaction_id: int) -> None:
     with db.cursor() as cur:
         affected_rows = cur.execute("UPDATE webshop_transactions AS tt SET tt.status = 'failed' WHERE tt.status = 'pending' AND tt.id = %s", (transaction_id,))
         if affected_rows != 1:
             eprint(f"Unable to set transaction {transaction_id} to failed!")
 
 
-def fail_transaction(transaction_id: int, error_code: int, reason: str):
+def fail_transaction(transaction_id: int, error_code: int, reason: str) -> None:
     _fail_transaction(transaction_id)
     abort(error_code, reason)
 
 
-def _fail_stripe_source(source_id: str):
+def _fail_stripe_source(source_id: str) -> None:
     with db.cursor() as cur:
-        affected_rows = cur.execute("UPDATE webshop_transactions AS tt INNER JOIN webshop_stripe_pending AS sp ON tt.id = sp.transaction_id SET tt.status = 'failed' WHERE sp.stripe_token = %s and tt.status = 'pending'", (source_id,))
+        affected_rows = cur.execute(
+            "UPDATE webshop_transactions AS tt INNER JOIN webshop_stripe_pending AS sp ON tt.id = sp.transaction_id SET tt.status = 'failed' WHERE sp.stripe_token = %s and tt.status = 'pending'", (source_id,))
         if affected_rows != 1:
             eprint(f"Unable to set status to 'failed' for transaction corresponding to source {source_id}")
 
 
-def fail_stripe_source(source_id: str, error_code: int, reason: str):
+def fail_stripe_source(source_id: str, error_code: int, reason: str) -> None:
     _fail_stripe_source(source_id)
     abort(error_code, reason)
 
 
-def source_to_transaction_id(source_id: str):
+def source_to_transaction_id(source_id: str) -> int:
     with db.cursor() as cur:
         cur.execute("SELECT transaction_id FROM webshop_transactions INNER JOIN webshop_stripe_pending ON webshop_transactions.id=webshop_stripe_pending.transaction_id WHERE webshop_stripe_pending.stripe_token=%s", (source_id,))
         return cur.fetchone()
@@ -496,7 +497,7 @@ def stripe_callback() -> None:
         stripe_handle_charge_callback(event_subtype, event)
 
 
-def _reprocess_stripe_event(event):
+def _reprocess_stripe_event(event) -> None:
     try:
         logger.info(f"Processing stripe event of type {event.type}")
         (event_type, event_subtype) = tuple(event.type.split('.', 1))
@@ -511,7 +512,7 @@ def _reprocess_stripe_event(event):
 
 @instance.route("process_stripe_events", methods=["PUT"])
 @route_helper
-def process_stripe_events():
+def process_stripe_events() -> None:
     payload = request.get_json() or {}
     source_id = payload.get('source_id', None)
     start = payload.get('start', None)
@@ -526,7 +527,7 @@ def process_stripe_events():
             logger.info(f"skipping event, not matching source_id")
 
 
-def process_cart(member_id: int, cart: List[Dict[str,Any]]) -> Tuple[Decimal, List[CartItem]]:
+def process_cart(member_id: int, cart: List[Dict[str, Any]]) -> Tuple[Decimal, List[CartItem]]:
     items = []
     with db.cursor() as cur:
         with localcontext() as ctx:
@@ -564,7 +565,7 @@ def process_cart(member_id: int, cart: List[Dict[str,Any]]) -> Tuple[Decimal, Li
     return total_amount, items
 
 
-def validate_payment(member_id: int, cart: List[Dict[str,Any]], expected_amount: Decimal) -> Tuple[Decimal, List[CartItem]]:
+def validate_payment(member_id: int, cart: List[Dict[str, Any]], expected_amount: Decimal) -> Tuple[Decimal, List[CartItem]]:
     if len(cart) == 0:
         raise errors.EmptyCart()
 
@@ -610,7 +611,7 @@ def create_stripe_payment(transaction_id: int, token: str) -> stripe.Charge:
     )
 
 
-def handle_payment_success(transaction_id: int):
+def handle_payment_success(transaction_id: int) -> None:
     complete_transaction(transaction_id)
     transaction = transaction_entity.get(transaction_id)
     if transaction['status'] != 'completed':
@@ -742,7 +743,7 @@ def create_three_d_secure_source(transaction_id: int, card_source_id: str, total
     )
 
 
-def handle_card_source(transaction_id: int, card_source_id: str, total_amount: Decimal) -> Dict[str,int]:
+def handle_card_source(transaction_id: int, card_source_id: str, total_amount: Decimal) -> Dict[str, int]:
     card_source = stripe.Source.retrieve(card_source_id)
     if card_source.type != 'card' or card_source.card.three_d_secure != 'not_supported':
         abort(500, f'Synchronous charges should only be made for cards not supporting 3D Secure')
@@ -762,7 +763,7 @@ def handle_card_source(transaction_id: int, card_source_id: str, total_amount: D
     return {"transaction_id": transaction_id}
 
 
-def handle_three_d_secure_source(transaction_id: int, card_source_id: str, total_amount: Decimal) -> Dict[str,Any]:
+def handle_three_d_secure_source(transaction_id: int, card_source_id: str, total_amount: Decimal) -> Dict[str, Any]:
     try:
         source = create_three_d_secure_source(transaction_id, card_source_id, total_amount)
     except stripe.error.InvalidRequestError as e:
@@ -888,7 +889,7 @@ class PendingAction:
     action_name: str
     action_value: int
     pending_action_id: int
-    transaction: Dict[str,Any]
+    transaction: Dict[str, Any]
     created_at: str
 
 
@@ -922,7 +923,7 @@ def ship_orders(labaccess: bool) -> None:
             ship_add_membership_action(action)
 
 
-def ship_add_labaccess_action(action: PendingAction):
+def ship_add_labaccess_action(action: PendingAction) -> None:
     r = instance.gateway.get(f"membership/member/{action.member_id}/keys")
     assert r.ok, r.text
     if len(r.json()["data"]) == 0:
@@ -932,12 +933,12 @@ def ship_add_labaccess_action(action: PendingAction):
     days_to_add = action.action_value
     assert(days_to_add >= 0)
     r = instance.gateway.post(f"membership/member/{action.member_id}/addMembershipDays",
-        {
-            "type": "labaccess",
-            "days": days_to_add,
-            "creation_reason": f"transaction_action_id: {action.pending_action_id}, transaction_id: {action.transaction['transaction_id']}",
-        }
-    )
+                              {
+                                  "type": "labaccess",
+                                  "days": days_to_add,
+                                  "creation_reason": f"transaction_action_id: {action.pending_action_id}, transaction_id: {action.transaction['transaction_id']}",
+                              }
+                              )
     assert r.ok, r.text
 
     r = instance.gateway.get(f"membership/member/{action.member_id}/membership")
@@ -948,17 +949,17 @@ def ship_add_labaccess_action(action: PendingAction):
     send_key_updated_email(action.member_id, days_to_add, new_end_date)
 
 
-def ship_add_membership_action(action: PendingAction):
+def ship_add_membership_action(action: PendingAction) -> None:
     days_to_add = action.action_value
     assert(days_to_add >= 0)
     r = instance.gateway.post(f"membership/member/{action.member_id}/addMembershipDays",
-        {
-            "type": "membership",
-            "days": days_to_add,
-            "default_start_date": action.created_at,
-            "creation_reason": f"transaction_action_id: {action.pending_action_id}, transaction_id: {action.transaction['transaction_id']}",
-        }
-    )
+                              {
+                                  "type": "membership",
+                                  "days": days_to_add,
+                                  "default_start_date": action.created_at,
+                                  "creation_reason": f"transaction_action_id: {action.pending_action_id}, transaction_id: {action.transaction['transaction_id']}",
+                              }
+                              )
     assert r.ok, r.text
 
     r = instance.gateway.get(f"membership/member/{action.member_id}/membership")
@@ -969,7 +970,7 @@ def ship_add_membership_action(action: PendingAction):
     send_membership_updated_email(action.member_id, days_to_add, new_end_date)
 
 
-def get_product_data():
+def get_product_data() -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
     with db.cursor() as cur:
         # Get all categories, as some products may exist in deleted categories
         # (it is up to an admin to move them to another category)
@@ -1020,7 +1021,7 @@ def product_view_data(product_id: int):
 @route_helper
 def product_edit_data(product_id: int):
     _, categories = get_product_data()
-    
+
     if product_id:
         product = product_entity.get(product_id)
 
@@ -1037,7 +1038,7 @@ def product_edit_data(product_id: int):
                 "name": a[2],
                 "value": a[3],
             } for a in actions]
-            
+
         images = product_image_entity.list("product_id=%s AND deleted_at IS NULL", product_id)
     else:
         product = {
@@ -1073,7 +1074,7 @@ def receipt(transaction_id: int):
     transaction = transaction_entity.get(transaction_id)
     if transaction.get('member_id') != member_id:
         raise NotFound()
-    
+
     items = transaction_content_entity.list("transaction_id=%s", transaction_id)
     products = [product_entity.get(item["product_id"]) for item in items]
     r = instance.gateway.get(f"membership/member/{member_id}")
@@ -1096,4 +1097,3 @@ def register_page_data():
 
 
 instance.serve_indefinitely()
-

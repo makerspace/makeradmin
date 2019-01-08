@@ -2,7 +2,7 @@ from flask import Flask
 from flask_uploads import UploadSet, IMAGES, configure_uploads
 
 import member
-import statistics
+import maker_statistics
 import webshop
 from backend_service import format_datetime
 
@@ -10,7 +10,7 @@ from backend_service import format_datetime
 app = Flask(__name__)
 app.jinja_env.filters['format_datetime'] = format_datetime
 app.register_blueprint(webshop.instance.blueprint)
-app.register_blueprint(statistics.instance.blueprint)
+app.register_blueprint(maker_statistics.instance.blueprint)
 app.register_blueprint(member.instance.blueprint)
 
 
