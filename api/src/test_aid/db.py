@@ -1,9 +1,7 @@
 from random import randint
-
 from faker import Faker
 
 
-# TODO Reuse obj.py.
 from core.models import AccessToken
 from membership.models import Member, Group, Permission
 from service.api_definition import SERVICE_USER_ID
