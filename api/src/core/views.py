@@ -13,7 +13,6 @@ def login(grant_type=Arg(Enum('password')), username=Arg(str), password=Arg(str)
     return auth.login(request.remote_addr, request.user_agent.string, username, password)
 
 
-# TODO Can maybe be solved by generic entity stuff?
 @service.route("/oauth/token/<string:token>", method=DELETE, permission=USER)
 def logout(token=None):
     """ Remove token from database, returns None. """
@@ -26,7 +25,6 @@ def reset_password():
     raise NotFound("Reset password functionality is not implemented yet.")
 
 
-# TODO Can maybe be solved by generic entity stuff?
 @service.route("/oauth/token", method=GET, permission=USER)
 def list_tokens():
     """ List all tokens for the authorized user. """
