@@ -1,9 +1,9 @@
 import requests
 
-from aid.test.base import TestCaseBase
-from aid.test.obj import DEFAULT_PASSWORD
-from aid.test.config import API_BEARER
-from aid.test.util import merge_paths, get_path
+from aid.systest.base import TestCaseBase
+from aid.systest.obj import DEFAULT_PASSWORD
+from aid.systest.config import API_BEARER
+from aid.systest.util import merge_paths, get_path
 
 
 class ApiResponse:

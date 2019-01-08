@@ -1,34 +1,21 @@
-from datetime import datetime, timedelta
-from unittest import TestCase, mock
+from flask import g
 
-from flask import g, Flask
-from sqlalchemy import create_engine
+import core
+import membership
 
 from core import models
 from core.auth import authenticate_request
 from core.models import AccessToken
-from service.api_definition import USER, SERVICE, GET, PUBLIC, SERVICE_USER_ID, WEBSHOP
-from service.db import db_session_factory, db_session
+from service.api_definition import USER, SERVICE, GET, PUBLIC, SERVICE_USER_ID
+from service.db import db_session
 from service.error import Unauthorized, Forbidden
-from service.internal_service import InternalService
+from test_aid.base import TestCaseBase
 
 
-class Test(TestCase):
+class Test(TestCaseBase):
+
+    models = [core.models, membership.models]
     
-    @classmethod
-    def setUpClass(self):
-        # TODO Move this setup code to some common base class.
-        
-        self.app = Flask(__name__)
-
-        super().setUpClass()
-        engine = create_engine('sqlite:///:memory:')
-        models.Base.metadata.create_all(engine)
-        
-        db_session_factory.init_with_engine(engine)
-
-        self.service = InternalService('service')
-        
     def test_user_id_and_permission_is_set_even_if_there_is_no_auth_header(self):
         with self.app.test_request_context():
             self.assertFalse(hasattr(g, 'user_id'))
@@ -65,10 +52,7 @@ class Test(TestCase):
             self.assertEqual(tuple(), g.permissions)
 
     def test_non_existing_access_token_raises_unauthorized(self):
-        # TODO Create factory.
-        db_session.add(AccessToken(user_id=1, access_token='aksdjsklj', browser='', ip='',
-                                   expires=datetime.utcnow() + timedelta(days=1)))
-        db_session.commit()
+        self.db.create_access_token(user_id=1)
         
         with self.app.test_request_context(headers=dict(Authorization='Bearer non-existent-token')):
             with self.assertRaises(Unauthorized):
@@ -78,13 +62,9 @@ class Test(TestCase):
             self.assertEqual(tuple(), g.permissions)
 
     def test_expired_token_raises_unautorized_and_removes_all_expired_tokens(self):
-        db_session.add(AccessToken(user_id=1, access_token='expired-1', browser='', ip='',
-                                   expires=datetime.utcnow() + timedelta(days=-1)))
-        db_session.add(AccessToken(user_id=2, access_token='expired-2', browser='', ip='',
-                                   expires=datetime.utcnow() + timedelta(days=-1)))
-        db_session.add(AccessToken(user_id=3, access_token='not-expired-1', browser='', ip='',
-                                   expires=datetime.utcnow() + timedelta(days=1)))
-        db_session.commit()
+        self.db.create_access_token(user_id=1, access_token='expired-1', expires=self.datetime(days=-1))
+        self.db.create_access_token(user_id=2, access_token='expired-2', expires=self.datetime(days=-1))
+        self.db.create_access_token(user_id=3, access_token='not-expired-1', expires=self.datetime(days=1))
     
         with self.app.test_request_context(headers=dict(Authorization='Bearer expired-1')):
             with self.assertRaises(Unauthorized):
@@ -98,46 +78,36 @@ class Test(TestCase):
         self.assertEqual('not-expired-1', access_token.access_token)
     
     def test_valid_user_auth_updates_access_token_and_sets_user_id_and_permission(self):
-        db_session.add(AccessToken(user_id=8, access_token='token-1', browser='', ip='',
-                                   expires=datetime.utcnow() + timedelta(days=1)))
-        db_session.commit()
+        permission = self.db.create_permission()
+        member = self.db.create_member()
+        group = self.db.create_group()
+        group.members.append(member)
+        group.permissions.append(permission)
+        
+        access_token = self.db.create_access_token(user_id=member.member_id, expires=self.datetime(days=1))
 
-        # TODO Use db here instead.
-        with mock.patch('membership.models.get_member_permissions', return_value={WEBSHOP}) as get:
+        with self.app.test_request_context(headers=dict(Authorization=f'Bearer {access_token.access_token}'),
+                                           environ_base={'REMOTE_ADDR': '127.0.0.1'}):
+            authenticate_request()
 
-            with self.app.test_request_context(headers=dict(Authorization='Bearer token-1'),
-                                               environ_base={'REMOTE_ADDR': '127.0.0.1'}):
-                
-                authenticate_request()
+            self.assertEqual(member.member_id, g.user_id)
+            self.assertCountEqual([USER, permission.permission], g.permissions)
     
-                self.assertEqual(8, g.user_id)
-                self.assertCountEqual([USER, WEBSHOP], g.permissions)
+        db_session.refresh(access_token)
         
-            get.assert_called_once_with(8)
-            
-        access_token = db_session.query(AccessToken).get('token-1')
-        
-        self.assertCountEqual([USER, WEBSHOP], access_token.permissions.split(','))
+        self.assertCountEqual([USER, permission.permission], access_token.permissions.split(','))
 
     def test_valid_service_auth_updates_access_token_and_sets_user_id_and_permission(self):
-        db_session.add(AccessToken(user_id=SERVICE_USER_ID, access_token='service-token', browser='', ip='',
-                                   expires=datetime.utcnow() + timedelta(days=1)))
-        db_session.commit()
+        access_token = self.db.create_access_token(user_id=SERVICE_USER_ID, expires=self.datetime(days=1))
 
-        # TODO Use db here instead.
-        with mock.patch('membership.models.get_member_permissions', return_value={SERVICE}) as get:
-            
-            with self.app.test_request_context(headers=dict(Authorization='Bearer service-token'),
-                                               environ_base={'REMOTE_ADDR': '127.0.0.1'}):
-                
-                authenticate_request()
+        with self.app.test_request_context(headers=dict(Authorization=f'Bearer {access_token.access_token}'),
+                                           environ_base={'REMOTE_ADDR': '127.0.0.1'}):
+            authenticate_request()
+
+            self.assertEqual(SERVICE_USER_ID, g.user_id)
+            self.assertCountEqual([SERVICE], g.permissions)
     
-                self.assertEqual(SERVICE_USER_ID, g.user_id)
-                self.assertCountEqual([SERVICE], g.permissions)
-        
-            get.assert_called_once_with(SERVICE_USER_ID)
-    
-        access_token = db_session.query(AccessToken).get('service-token')
+        db_session.refresh(access_token)
     
         self.assertEqual(SERVICE, access_token.permissions)
     
@@ -231,7 +201,6 @@ class Test(TestCase):
             g.permissions = tuple()
             with self.assertRaises(Forbidden):
                 view()
-
 
 
 

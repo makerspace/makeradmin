@@ -1,5 +1,5 @@
-from aid.test.api import ApiTest
-from aid.test.util import random_str
+from aid.systest.api import ApiTest
+from aid.systest.util import random_str
 
 
 class Test(ApiTest):

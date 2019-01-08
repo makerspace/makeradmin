@@ -2,7 +2,7 @@ from random import randint
 
 from faker import Faker
 
-from aid.test.util import random_str
+from aid.systest.util import random_str
 
 DEFAULT_PASSWORD = '1q2w3e'
 DEFAULT_PASSWORD_HASH = "$2y$10$NcNoheVsKVo2Agz3FLeI8.fhAgbmRV/NoJMqPC67ZXiqgqfE5DE.S"

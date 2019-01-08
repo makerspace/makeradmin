@@ -5,8 +5,8 @@ from unittest import TestCase, skipIf
 
 import stripe
 
-from aid.test.obj import ObjFactory, DEFAULT_PASSWORD_HASH
-from aid.test.config import STRIPE_PUBLIC_KEY, HOST_FRONTEND, HOST_PUBLIC, HOST_BACKEND
+from aid.systest.obj import ObjFactory, DEFAULT_PASSWORD_HASH
+from aid.systest.config import STRIPE_PUBLIC_KEY, HOST_FRONTEND, HOST_PUBLIC, HOST_BACKEND
 
 stripe.api_key = STRIPE_PUBLIC_KEY
 

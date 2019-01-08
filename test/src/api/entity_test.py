@@ -1,8 +1,8 @@
 from datetime import datetime
 from random import randint
 
-from aid.test.api import ApiTest
-from aid.test.util import random_str
+from aid.systest.api import ApiTest
+from aid.systest.util import random_str
 from service.api_definition import REQUIRED, NOT_UNIQUE
 
 
