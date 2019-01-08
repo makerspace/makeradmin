@@ -257,7 +257,6 @@ def get_member_permissions(member_id=None):
 
 # TODO Move this somewhere.
 def verify_password(password, password_hash):
-    # TODO BM What did the php-code do? Should I encode to utf-8? Test unicode pwd using old implemnetation.
     return bcrypt.checkpw(password.encode(), password_hash.encode())
 
 
