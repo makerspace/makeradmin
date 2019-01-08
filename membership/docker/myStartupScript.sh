@@ -5,7 +5,7 @@ set -e
 /usr/local/myscripts/wait-for "$APIGATEWAY:80"
 
 # Migrate
-php /var/www/html/artisan --force migrate;
+# disabled, api is doing migrations now, php /var/www/html/artisan --force migrate;
 
 # Not sure if these directories are needed, but let's create them anyway
 mkdir -p /var/www/html/storage/
