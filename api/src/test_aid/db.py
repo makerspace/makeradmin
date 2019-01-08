@@ -11,7 +11,6 @@ from service.db import db_session
 from test_aid.test_util import random_str
 
 
-# TODO Use obj.
 class DbFactory:
     """ Create entities directly in the db, uses db_session to access the db so it can be used for both remote db
     access and in memory db. """
@@ -42,35 +41,14 @@ class DbFactory:
         return self.access_token
         
     def create_member(self, **kwargs):
-        firstname = self.fake.first_name()
-        lastname = self.fake.last_name()
-        obj = dict(
-            firstname=firstname,
-            lastname=lastname,
-            password=None,
-            member_number=randint(1e8, 9e8),
-            address_street=self.fake.street_name(),
-            address_extra="N/A",
-            address_zipcode=randint(10000, 99999),
-            address_city=self.fake.city(),
-            address_country=self.fake.country_code(representation="alpha-2"),
-            phone=f'070-{randint(1e7, 9e7):07d}',
-            civicregno=f"19901011{randint(1000, 9999):04d}",
-            email=f'{firstname}.{lastname}+{random_str(6)}@bmail.com'.lower(),
-        )
-        obj.update(kwargs)
+        obj = self.obj.create_member(**kwargs)
         self.member = Member(**obj)
         db_session.add(self.member)
         db_session.commit()
         return self.member
 
     def create_group(self, **kwargs):
-        obj = dict(
-            name=f"group-{random_str(12)}",
-            title=self.fake.catch_phrase(),
-            description=self.fake.bs(),
-        )
-        obj.update(kwargs)
+        obj = self.obj.create_group(**kwargs)
         self.group = Group(**obj)
         db_session.add(self.group)
         db_session.commit()
