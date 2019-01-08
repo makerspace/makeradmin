@@ -2,5 +2,4 @@ requests
 pip
 docker-compose
 -r backend/requirements.txt
--r test/requirements.txt
 -r api/requirements.txt

@@ -9,7 +9,7 @@ from service.db import db_session_factory
 from service.internal_service import InternalService
 
 
-# TODO The systest and unittests have overlap, perhaps move systests to api when all service are converted?
+# TODO Combine whatever can be combined in systests and tests, the overlap was just overwhelming.
 class TestCaseBase(TestCase):
     """ Includes setup of flask and in memory db, if not wanted subclass unittest.TestCase directly. """
     
