@@ -1,9 +1,7 @@
 import requests
 
-from aid.systest.base import TestCaseBase
-from aid.systest.obj import DEFAULT_PASSWORD
-from aid.systest.config import API_BEARER
-from aid.systest.util import merge_paths, get_path
+from test_aid.obj import DEFAULT_PASSWORD
+from test_aid.test_util import get_path, merge_paths
 
 
 class ApiResponse:
@@ -46,10 +44,10 @@ class ApiResponse:
 
 class ApiFactory:
     
-    def __init__(self, obj_factory=None, base_url=None):
+    def __init__(self, obj_factory=None, base_url=None, api_token=None):
         self.obj = obj_factory
         self.base_url = base_url
-        self.api_token = API_BEARER
+        self.api_token = api_token
         
         self.member = None
         self.token = None
@@ -122,27 +120,3 @@ class ApiFactory:
         obj = self.obj.create_product_action(**kwargs)
         self.action = self.post(f"/webshop/product_action", json=obj).expect(code=200, status='created').data
         return self.action
-
-
-class ApiTest(TestCaseBase):
-    api = None
-    
-    @classmethod
-    def setUpClass(self):
-        super().setUpClass()
-        self.api = ApiFactory(obj_factory=self.obj, base_url=self.api_url)
-
-    def request(self, *args, **kwargs):
-        return self.api.request(*args, **kwargs)
-
-    def post(self, *args, **kwargs):
-        return self.api.post(*args, **kwargs)
-
-    def put(self, *args, **kwargs):
-        return self.api.put(*args, **kwargs)
-
-    def delete(self, *args, **kwargs):
-        return self.api.delete(*args, **kwargs)
-
-    def get(self, *args, **kwargs):
-        return self.api.get(*args, **kwargs)

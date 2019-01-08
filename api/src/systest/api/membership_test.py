@@ -1,5 +1,5 @@
-from aid.systest.api import ApiTest
-from aid.systest.util import random_str
+from test_aid.systest_base import ApiTest
+from test_aid.test_util import random_str
 
 
 class Test(ApiTest):
@@ -18,11 +18,17 @@ class Test(ApiTest):
     def test_bad_combinations_of_post_data(self):
         member_id = self.api.create_member()['member_id']
         url = f"/membership/member/{member_id}/addMembershipDays"
-        self.post(url, {"type": "labaccess", "days": -1, "creation_reason": random_str()}).expect(code=400, status="error")
-        self.post(url, {"type": "lulz", "days": 10, "creation_reason": random_str()}).expect(code=400, status="error")
-        self.post(url, {"type": "labaccess", "days": 10, "creation_reason": None}).expect(code=400, status="error")
-        self.post(url, {"type": "labaccess", "days": 10}).expect(code=400, status="error")
-        self.post(url, {"type": "membership", "days": 10, "default_start_date": "now", "creation_reason": random_str()}).expect(code=400, status="error")
+        self.post(url, {"type": "labaccess", "days": -1, "creation_reason": random_str()})\
+            .expect(code=400, status="error")
+        self.post(url, {"type": "lulz", "days": 10, "creation_reason": random_str()})\
+            .expect(code=400, status="error")
+        self.post(url, {"type": "labaccess", "days": 10, "creation_reason": None})\
+            .expect(code=400, status="error")
+        self.post(url, {"type": "labaccess", "days": 10})\
+            .expect(code=400, status="error")
+        self.post(url, {"type": "membership", "days": 10, "default_start_date": "now",
+                        "creation_reason": random_str()})\
+            .expect(code=400, status="error")
 
     def test_add_membership_days_by_adding_days(self):
         member_id = self.api.create_member()['member_id']

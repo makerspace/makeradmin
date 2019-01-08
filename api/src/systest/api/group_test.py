@@ -1,4 +1,4 @@
-from aid.systest.api import ApiTest
+from test_aid.systest_base import ApiTest
 
 
 class Test(ApiTest):

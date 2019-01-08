@@ -123,7 +123,7 @@ class Entity:
     
     def list(self, sort_by=Arg(symbol, required=False), sort_order=Arg(Enum(DESC, ASC), required=False),
              search=Arg(str, required=False), page_size=Arg(natural0, required=False),
-             page: natural1=Arg(int, required=False)):
+             page=Arg(natural1, required=False)):
         
         query = db_session.query(self.model).filter(self.model.deleted_at.is_(None))
 

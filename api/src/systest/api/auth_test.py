@@ -1,7 +1,7 @@
 import re
 
-from aid.systest.api import ApiTest
-from aid.systest.obj import DEFAULT_PASSWORD_HASH, DEFAULT_PASSWORD
+from test_aid.obj import DEFAULT_PASSWORD_HASH, DEFAULT_PASSWORD
+from test_aid.systest_base import ApiTest
 
 
 class Test(ApiTest):

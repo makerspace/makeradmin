@@ -1,12 +1,8 @@
 import os
-import sys
-import time
 from collections.abc import Mapping
-from functools import wraps
 from random import seed, choice
 from string import ascii_letters, digits
 
-from aid.systest.config import SELENIUM_BASE_TIMEOUT, SLEEP
 
 seed(os.urandom(8))
 
@@ -49,24 +45,16 @@ def merge_paths(**kwargs):
     
     return res
     
-
-def retry(timeout=SELENIUM_BASE_TIMEOUT, sleep=SLEEP, do_retry=None):
-    def decorator(wrapped):
-        @wraps(wrapped)
-        def wrap(*args, **kwargs):
-            start = time.perf_counter()
-            while True:
-                try:
-                    return wrapped(*args, **kwargs)
-                except Exception as e:
-                    elapsed = time.perf_counter() - start
-                    if elapsed > timeout or not do_retry(e):
-                        raise
-                    print(f"{wrapped.__qualname__} failed with the following error after {elapsed:02f}s:"
-                          f" {e.__class__.__name__} {str(e)}",
-                          file=sys.stderr)
-                time.sleep(sleep)
-        return wrap
-    return decorator
     
+class classinstancemethod(object):
+    """ Decorator for methods that can be used both in a class or instance contex. The first argument will be either
+    class or object, depending on how the method was called. """
+
+    def __init__(self, method):
+        self.method = method
+
+    def __get__(self, obj, typ=None):
+        def wrap(*args, **kwargs):
+            return self.method(obj or typ, *args, **kwargs)
+        return wrap
 

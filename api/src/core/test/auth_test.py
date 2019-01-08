@@ -2,7 +2,6 @@ from flask import g
 
 import core
 import membership
-from aid.test.base import TestCaseBase
 
 from core import models
 from core.auth import authenticate_request
@@ -10,9 +9,10 @@ from core.models import AccessToken
 from service.api_definition import USER, SERVICE, GET, PUBLIC, SERVICE_USER_ID
 from service.db import db_session
 from service.error import Unauthorized, Forbidden
+from test_aid.test_base import FlaskTestBase
 
 
-class Test(TestCaseBase):
+class Test(FlaskTestBase):
 
     models = [core.models, membership.models]
     

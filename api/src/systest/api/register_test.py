@@ -3,9 +3,8 @@ from time import time
 
 import stripe
 
-from aid.systest.api import ApiTest
-from aid.systest.base import ShopTestMixin, VALID_NON_3DS_CARD_NO, EXPIRED_3DS_CARD_NO
-from aid.systest.obj import ADD_MEMBERSHIP_DAYS
+from test_aid.obj import ADD_MEMBERSHIP_DAYS
+from test_aid.systest_base import ShopTestMixin, ApiTest, VALID_NON_3DS_CARD_NO, EXPIRED_3DS_CARD_NO
 
 
 class Test(ShopTestMixin, ApiTest):

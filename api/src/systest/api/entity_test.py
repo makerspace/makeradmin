@@ -1,9 +1,9 @@
 from datetime import datetime
 from random import randint
 
-from aid.systest.api import ApiTest
-from aid.systest.util import random_str
 from service.api_definition import REQUIRED, NOT_UNIQUE
+from test_aid.systest_base import ApiTest
+from test_aid.test_util import random_str
 
 
 class Test(ApiTest):

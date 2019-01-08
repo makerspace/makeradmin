@@ -1,22 +1,24 @@
-from datetime import datetime, timedelta
 from random import randint
 
 from faker import Faker
 
 
 # TODO Reuse obj.py.
-from aid.systest.util import random_str
 from core.models import AccessToken
 from membership.models import Member, Group, Permission
 from service.api_definition import SERVICE_USER_ID
 from service.db import db_session
+from test_aid.test_util import random_str
 
 
+# TODO Use obj.
 class DbFactory:
-    """ Create entities in the db. """
+    """ Create entities directly in the db, uses db_session to access the db so it can be used for both remote db
+    access and in memory db. """
     
-    def __init__(self, test):
+    def __init__(self, test, obj_factory=None):
         self.test = test
+        self.obj = obj_factory
         
         self.fake = Faker('sv_SE')
         

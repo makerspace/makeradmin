@@ -1,6 +1,5 @@
-from aid.systest.base import VALID_NON_3DS_CARD_NO, EXPIRES_CVC_ZIP, ShopTestMixin
-from aid.systest.selenium import SeleniumTest
-from aid.systest.util import SELENIUM_BASE_TIMEOUT
+from test_aid.systest_base import ShopTestMixin, SeleniumTest, VALID_NON_3DS_CARD_NO, EXPIRES_CVC_ZIP
+from test_aid.systest_config import SELENIUM_BASE_TIMEOUT
 
 
 class Test(ShopTestMixin, SeleniumTest):
@@ -26,7 +25,7 @@ class Test(ShopTestMixin, SeleniumTest):
         # Cart
     
         self.webdriver.switch_to.frame(self.wait_for_element(tag="iframe", timeout=SELENIUM_BASE_TIMEOUT))
-
+        
         card = self.wait_for_element(name="cardnumber")
         card.send_keys(VALID_NON_3DS_CARD_NO)
         card.send_keys(EXPIRES_CVC_ZIP)
