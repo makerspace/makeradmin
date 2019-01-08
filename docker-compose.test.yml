@@ -2,10 +2,6 @@ version: "3"
 
 services:
 
-  api:
-    environment:
-      TEST: "true"
-
   backend:
     environment:
       HOST_FRONTEND: 'http://admin'
@@ -43,11 +39,12 @@ services:
   test:
     image: makeradmin/test:1.0
     build:
-      context: ./test
+      context: ./api
+      dockerfile: TestDockerfile
     networks:
       - makeradmin
     command:
-      - "/work/run.sh"
+      - "/work/test_run.sh"
     volumes:
       - .test:/work/.test
     depends_on:

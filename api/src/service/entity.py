@@ -125,9 +125,6 @@ class Entity:
              search=Arg(str, required=False), page_size=Arg(natural0, required=False),
              page: natural1=Arg(int, required=False)):
         
-        if page is not None and page < 1:
-            raise UnprocessableEntity("Pagination page should be greater than 0.", fields='page', what=BAD_VALUE)
-        
         query = db_session.query(self.model).filter(self.model.deleted_at.is_(None))
 
         if search:
@@ -143,7 +140,7 @@ class Entity:
 
         count = query.count()
 
-        page_size = page_size or 25
+        page_size = 25 if page_size is None else page_size
         page = page or 1
         
         if page_size:
@@ -153,7 +150,7 @@ class Entity:
             total=count,
             page=page,
             per_page=page_size,
-            last_page=ceil(count / page_size),
+            last_page=ceil(count / page_size) if page_size else 1,
             data=[self.to_obj(entity) for entity in query]
         )
     

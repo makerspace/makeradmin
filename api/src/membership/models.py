@@ -7,7 +7,7 @@ from sqlalchemy.orm import relationship, validates
 
 from service.api_definition import REQUIRED, BAD_VALUE
 from service.db import db_session
-from service.error import UnprocessableEntity, Forbidden
+from service.error import UnprocessableEntity, Forbidden, Unauthorized
 from service.logging import logger
 
 Base = declarative_base()
@@ -271,7 +271,7 @@ def authenticate(username=None, password=None):
     member = db_session.query(Member).filter(Member.email == username).first()
     
     if not member or not verify_password(password, member.password):
-        raise Forbidden("The username and/or password you specified was incorrect.",
-                        fields='username,password', what=BAD_VALUE)
+        raise Unauthorized("The username and/or password you specified was incorrect.",
+                           fields='username,password', what=BAD_VALUE)
     
     return member.member_id

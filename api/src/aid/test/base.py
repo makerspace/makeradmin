@@ -4,7 +4,7 @@ from unittest import TestCase
 from flask import Flask
 from sqlalchemy import create_engine
 
-from test_aid.db import DbFactory
+from aid.test.db import DbFactory
 from service.db import db_session_factory
 from service.internal_service import InternalService
 

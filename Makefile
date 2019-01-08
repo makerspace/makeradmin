@@ -19,7 +19,6 @@ test: .env
 
 dev-test:
 	(cd api/src && python3 -m pytest --workers auto -ra)
-	(cd test/src && python3 -m pytest --workers auto -ra)
 
 init-npm:
 	cd admin && npm install 

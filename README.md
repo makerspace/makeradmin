@@ -113,9 +113,9 @@ Then go to:
 
 ## Tests
 
-### Function test that requires a running installation
+### System tests/integration tests that requires a running installation
 
-Function tests are written in python and the sources for the tests are in the test directory. There are 
+Systests are written in python and the sources for the systests are in the api/src/systest directory (because it shares a lot of code with the api unittests). There are 
 tests using the api as well as selenium tests. Those tests are also run in travis.
 
 You can run the tests in test containers using a one off db with:
@@ -130,6 +130,10 @@ make dev-test
 
 And you can also run single tests against your local running environment using you favorite test
 runner (like pytest).
+
+### Python unittests
+
+The api directory also contains unittests that can be run standalone, they will also run when running ```make test```.
 
 ### Javascript unit tests
 
