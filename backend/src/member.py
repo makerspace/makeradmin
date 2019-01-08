@@ -75,11 +75,7 @@ def permissions() -> Dict[str, Any]:
     }
 
 
-<<<<<<< HEAD
-@instance.route("current/membership", methods=["GET"], permission='user')
-=======
 @instance.route("current/membership", methods=["GET"], permission=None)
->>>>>>> master
 def membership_info() -> str:
     ''' If the user has lab access and how long '''
     user_id = assert_get(request.headers, "X-User-Id")
