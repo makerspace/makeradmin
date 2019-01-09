@@ -1,6 +1,6 @@
 from typing import Union
 
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, inspect
 from sqlalchemy.orm import scoped_session, Session, sessionmaker
 
 from service.logging import logger
@@ -40,3 +40,15 @@ def create_mysql_engine(host=None, port=None, db=None, user=None, pwd=None, time
     db_session_factory.init_with_engine(engine)
     
     return engine
+
+
+fields_by_index = {}
+
+
+def populate_fields_by_index(engine):
+    """ Populate the dict fields_by_index (used for error messages) by inspecting the database. """
+    entine_inspect = inspect(engine)
+    for table in entine_inspect.get_table_names():
+        for index in entine_inspect.get_indexes(table):
+            fields_by_index[index['name']] = ",".join(index['column_names'])
+    

@@ -9,19 +9,10 @@ from pymysql.constants.ER import DUP_ENTRY, BAD_NULL_ERROR
 from sqlalchemy.exc import IntegrityError
 
 from service.api_definition import Arg, PUBLIC, GET, POST, PUT, DELETE, SERVICE, USER, REQUIRED, NOT_UNIQUE
-from service.db import db_session
+from service.db import db_session, fields_by_index
 from service.error import Forbidden, UnprocessableEntity
 from service.logging import logger
 from service.migrate import migrate_service
-
-
-# TODO If possible solve this in a nicer way, maybe by db/model introspection or something.
-FIELDS_BY_INDEX = {
-    'access_tokens_access_token_unique': 'access_token',
-    'membership_permissions_permission_unique': 'permission',
-    'membership_members_email_index': 'email',
-    'membership_members_member_number_index': 'member_number',
-}
 
 
 class InternalService(Blueprint):
@@ -113,7 +104,7 @@ class InternalService(Blueprint):
                                 value = m.group(1)
                                 index = m.group(2)
                                 try:
-                                    fields = FIELDS_BY_INDEX[index]
+                                    fields = fields_by_index[index]
                                     raise UnprocessableEntity(f"Duplicate '{fields}', '{value}' already exists.",
                                                               what=NOT_UNIQUE, fields=fields)
                                 except KeyError:
