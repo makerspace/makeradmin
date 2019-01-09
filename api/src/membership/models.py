@@ -1,14 +1,12 @@
 import bcrypt
-from datetime import datetime
 
 from sqlalchemy import Column, Integer, String, DateTime, Text, Date, Enum, Table, ForeignKey, func, text
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import relationship, validates
+from sqlalchemy.orm import relationship
 
-from service.api_definition import REQUIRED, BAD_VALUE
+from service.api_definition import BAD_VALUE
 from service.db import db_session
-from service.error import UnprocessableEntity, Forbidden, Unauthorized
-from service.logging import logger
+from service.error import Unauthorized
 
 Base = declarative_base()
 
@@ -100,9 +98,9 @@ class Group(Base):
     __tablename__ = 'membership_groups'
     
     group_id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
-    parent = Column(Integer, index=True, nullable=False, default=0)  # TODO What is this?
-    left = Column(Integer, index=True, nullable=False, default=0)  # TODO What is this?
-    right = Column(Integer, index=True, nullable=False, default=0)  # TODO What is this?
+    parent = Column(Integer, index=True, nullable=False, default=0)  # TODO Remove this column.
+    left = Column(Integer, index=True, nullable=False, default=0)  # TODO Remove this column.
+    right = Column(Integer, index=True, nullable=False, default=0)  # TODO Remove this column.
     name = Column(String(255), nullable=False)
     title = Column(String(255), nullable=False)
     description = Column(Text)
@@ -118,7 +116,7 @@ class Group(Base):
         return f'Group(group_id={self.group_id}, name={self.name})'
     
     def json(self):
-        # TODO Automate this.
+        # TODO BM Automate this.
         return dict(
             group_id=self.group_id,
             name=self.name,
@@ -165,9 +163,9 @@ class Permission(Base):
     __tablename__ = 'membership_permissions'
 
     permission_id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
-    role_id = Column(Integer, nullable=False, server_default=text('0'))  # TODO Foreigh key? Ditch roles?
+    role_id = Column(Integer, nullable=False, server_default=text('0'))  # TODO Remove this column.
     permission = Column(String(255), nullable=False, unique=True)
-    group_id = Column(Integer,  nullable=False, server_default=text('0'))  # TODO Foreign key. What is this? Ditch this?
+    group_id = Column(Integer,  nullable=False, server_default=text('0'))  # TODO Remove this column.
     created_at = Column(DateTime, server_default=func.now())
     updated_at = Column(DateTime)
     deleted_at = Column(DateTime)
@@ -238,7 +236,7 @@ class Span(Base):
     member = relationship(Member, backref="spans")
 
 
-# TODO Move this somewhere. It is used by core and it should be clear that core is using membership, somewhere where
+# TODO BM Move this somewhere. It is used by core and it should be clear that core is using membership, somewhere where
 # membership endpoints are implemented.
 def get_member_permissions(member_id=None):
     """ Get all permissions for a memeber, returns set of permission strings. """
@@ -253,7 +251,7 @@ def get_member_permissions(member_id=None):
     )
 
 
-# TODO Move this somewhere.
+# TODO BM Move this somewhere.
 def verify_password(password, password_hash):
     return bcrypt.checkpw(password.encode(), password_hash.encode())
 
@@ -262,7 +260,7 @@ def hash_password(password):
     bcrypt.hashpw(password=password.encode(), salt=bcrypt.gensalt())
 
 
-# TODO Move this somewhere, used in core but accesses membership models.
+# TODO BM Move this somewhere, used in core but accesses membership models.
 def authenticate(username=None, password=None):
     """ Authenticate a member trough username and password, returns member_id if authenticated. """
     

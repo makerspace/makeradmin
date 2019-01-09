@@ -23,9 +23,9 @@ class Test(ApiTest):
         self.assertNotEqual(number1, number2)
         
     def test_include_membership_in_member_get(self):
-        # TODO We need to be able to create spans with api or db to do this test.
+        # TODO BM We need to be able to create spans with api or db to do this test.
         pass
 
     def test_include_membership_in_member_list(self):
-        # TODO We need to be able to create spans with api or db to do this test.
+        # TODO BM We need to be able to create spans with api or db to do this test.
         pass

@@ -55,8 +55,8 @@ to_obj_converters = {
 GLOBAl_READ_ONLY = ('created_at', 'updated_at', 'deleted_at')
 
 
-# TODO Expand functionality is used for Key->member and Span->member, nothing else. Subclassing is always possible
-# for special stuff.
+# TODO BM Expand functionality is used for Key->member and Span->member, nothing else, add support for it.
+# Or subclassing if it turns out it is rarly used.
 
 class Entity:
     """ Used to create a crud-able entity, subclass to provide additional functionality. """

@@ -4,7 +4,7 @@ from service.api_definition import MEMBER_VIEW, MEMBER_CREATE, MEMBER_EDIT, MEMB
     GROUP_EDIT, GROUP_DELETE
 from service.entity import Entity, not_empty, ASC, DESC, MemberEntity
 
-# TODO Move implementations around.
+# TODO BM Move implementations around.
 
 service.entity_routes(
     path="/member",
@@ -42,6 +42,8 @@ service.entity_routes(
     permission_delete=GROUP_DELETE,
 )
 
+
+# TODO BM Complete all membership api.
 
 # $app->  post("membership/authenticate", "Member@authenticate");   // Authenticate a member
 #

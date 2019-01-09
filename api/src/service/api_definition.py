@@ -11,7 +11,11 @@ GET = 'get'
 DELETE = 'delete'
 PUT = 'put'
 
-# Special permissions  # TODO Those permissions should be removed from the database, along with 47 legacy ones
+# TODO Since permissions are tied to the code it is probably better that they are in the code and not in the db. The
+# db also contains a lot of unusable permissions. membership_group_permissions could contain permission enum/string
+# directly.
+
+# Special permissions
 PUBLIC = 'public'    # Anyone on the internet can access this endpoint.
 SERVICE = 'service'  # A service user (id < 0) needs to be authenticated, but no other permissions are needed.
 USER = 'user'        # A regular user (id > 0) needs to be authenticated, but no other permissions are needed.

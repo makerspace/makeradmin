@@ -88,7 +88,7 @@ CREATE TABLE IF NOT EXISTS `membership_members_groups` (
   KEY `membership_members_groups_group_id_index` (`group_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
--- TODO Remove this, force use of goups?
+-- TODO Remove this table, use of groups only.
 CREATE TABLE IF NOT EXISTS `membership_members_roles` (
   `member_id` int(11) NOT NULL,
   `role_id` int(11) NOT NULL,
@@ -96,7 +96,7 @@ CREATE TABLE IF NOT EXISTS `membership_members_roles` (
   KEY `membership_members_roles_role_id_index` (`role_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
--- TODO Remove this, force use of goups?
+-- TODO Remove this table, use groups only.
 CREATE TABLE IF NOT EXISTS `membership_roles` (
   `role_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `group_id` int(11) NOT NULL,
@@ -148,11 +148,9 @@ ALTER TABLE `membership_permissions` MODIFY COLUMN `updated_at` DATETIME DEFAULT
 ALTER TABLE `membership_keys` MODIFY COLUMN `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP;
 ALTER TABLE `membership_spans` MODIFY COLUMN `deleted_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP;
 
--- TODO BM Make all unique fileds uniquie.
-
 -- make membership_members email unique
 ALTER TABLE `membership_members` DROP INDEX `membership_members_email_index`;
--- TODO johank, approve this:
+-- TODO BM johank, approve this is correct:
 UPDATE `membership_members` SET email = 'athawolf@gmail.com-dedup' WHERE member_id = 1857 and email = 'athawolf@gmail.com';
 UPDATE `membership_members` SET email = 'resdin@gmail.com-dedup-0' WHERE member_id = 1926 and email = 'resdin@gmail.com';
 UPDATE `membership_members` SET email = 'resdin@gmail.com-dedup-1' WHERE member_id = 1927 and email = 'resdin@gmail.com';
@@ -160,3 +158,5 @@ ALTER TABLE `membership_members` ADD UNIQUE INDEX `membership_members_email_inde
 
 -- make membership_members member_number unique, and auto increment
 ALTER TABLE `membership_members` ADD UNIQUE INDEX `membership_members_member_number_index` (`member_number`);
+
+-- TODO BM Make all unique fileds uniquie.
