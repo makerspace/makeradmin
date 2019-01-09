@@ -66,7 +66,7 @@ class Test(ApiTest):
     def test_deleted_entity_does_not_show_up_in_list_but_can_still_be_fetched(self):
         entity_id = self.api.create_group()['group_id']
         
-        self.assertIn(entity_id, [e['group_id'] for e in self.get("/membership/group").data])
+        self.assertIn(entity_id, [e['group_id'] for e in self.get("/membership/group?page_size=0").data])
         
         self.delete(f"/membership/group/{entity_id}").expect(code=200, status="deleted")
         
@@ -100,9 +100,7 @@ class Test(ApiTest):
         entity_2 = self.obj.create_member(email=email)
         
         self.post("/membership/member", entity_1).expect(code=201)
-        self.post("/membership/member", entity_2).expect(code=422,
-                                                         what=NOT_UNIQUE,
-                                                         message=f"'{email}' already exists.")
+        self.post("/membership/member", entity_2).expect(code=422, what=NOT_UNIQUE, fields='email')
         
     def test_not_null_constraint_fails_with_message(self):
         member = self.obj.create_member()

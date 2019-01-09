@@ -24,7 +24,7 @@ class Test(ApiTest):
         self.assertNotIn(group1_id, ids_before)
         self.assertNotIn(group2_id, ids_before)
 
-        after = self.get("/membership/group").get('data')
+        after = self.get("/membership/group?page_size=0").get('data')
 
         ids_after = {g['group_id'] for g in after}
         self.assertIn(group1_id, ids_after)
@@ -51,14 +51,5 @@ class Test(ApiTest):
         
         self.get(f"/membership/member/{member_id}/groups").expect(code=200, data=[])
         self.get(f"/membership/group/{group_id}/members").expect(code=200, data=[])
-
-    def test_deleted_group_does_not_show_up_in_list(self):
-        group_id = self.api.create_group()['group_id']
-        
-        self.assertIn(group_id, [g['group_id'] for g in self.get("/membership/group").data])
-        
-        self.delete(f"/membership/group/{group_id}").expect(code=200, status="deleted")
-        
-        self.assertNotIn(group_id, [g['group_id'] for g in self.get("/membership/group").data])
 
     # TODO BM Test permissions.

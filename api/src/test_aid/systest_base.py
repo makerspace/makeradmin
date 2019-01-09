@@ -2,14 +2,15 @@ import os
 import sys
 import time
 from copy import copy
-from datetime import datetime, timedelta
 from functools import wraps
 
-from unittest import TestCase, skipIf
+from unittest import skipIf
 
 import stripe
 from selenium.common.exceptions import NoSuchElementException
-from selenium.webdriver import chrome, remote, DesiredCapabilities
+from selenium.webdriver.remote import webdriver as remote
+from selenium.webdriver.chrome import webdriver as chrome
+from selenium.webdriver import DesiredCapabilities
 from selenium.webdriver.support.wait import WebDriverWait
 
 from test_aid.api import ApiFactory

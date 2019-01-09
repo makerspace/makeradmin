@@ -114,18 +114,6 @@ class Group(Base):
 
     def __repr__(self):
         return f'Group(group_id={self.group_id}, name={self.name})'
-    
-    def json(self):
-        # TODO BM Automate this.
-        return dict(
-            group_id=self.group_id,
-            name=self.name,
-            title=self.title,
-            description=self.description,
-            created_at=self.created_at.isoformat() if self.created_at else None,
-            updated_at=self.updated_at.isoformat() if self.updated_at else None,
-            deleted_at=self.deleted_at.isoformat() if self.deleted_at else None,
-        )
 
 
 group_permission = Table(

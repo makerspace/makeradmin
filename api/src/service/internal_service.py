@@ -11,7 +11,17 @@ from sqlalchemy.exc import IntegrityError
 from service.api_definition import Arg, PUBLIC, GET, POST, PUT, DELETE, SERVICE, USER, REQUIRED, NOT_UNIQUE
 from service.db import db_session
 from service.error import Forbidden, UnprocessableEntity
+from service.logging import logger
 from service.migrate import migrate_service
+
+
+# TODO If possible solve this in a nicer way, maybe by db/model introspection or something.
+FIELDS_BY_INDEX = {
+    'access_tokens_access_token_unique': 'access_token',
+    'membership_permissions_permission_unique': 'permission',
+    'membership_members_email_index': 'email',
+    'membership_members_member_number_index': 'member_number',
+}
 
 
 class InternalService(Blueprint):
@@ -94,21 +104,33 @@ class InternalService(Blueprint):
                         
                 except IntegrityError as e:
                     if isinstance(e.orig, pymysql.err.IntegrityError):
-                        # Not so nice parsing of db errors, but there is tests for it.
+                        # This parsing of db errors is very sketchy, but there are tests for it so at least we know
+                        # if it stops working.
                         errno, error = e.orig.args
-                        m = re.match(r".*?'([^']*)'.*", error)
-                        if m:
-                            thing = m.group(1)
-                        else:
-                            thing = None
-                            
                         if errno == DUP_ENTRY:
-                            raise UnprocessableEntity(f"'{thing}' already exists." if thing else "Duplicate entry.",
-                                                      what=NOT_UNIQUE)
+                            m = re.match(r".*?'([^']*)'.*?'([^']*)'.*", error)
+                            if m:
+                                value = m.group(1)
+                                index = m.group(2)
+                                try:
+                                    fields = FIELDS_BY_INDEX[index]
+                                    raise UnprocessableEntity(f"Duplicate '{fields}', '{value}' already exists.",
+                                                              what=NOT_UNIQUE, fields=fields)
+                                except KeyError:
+                                    logger.warning(f"index {index} is missing in index to fields mapping")
+                                    raise UnprocessableEntity(f"Duplicate '{value}' not allowed.", what=NOT_UNIQUE)
+                            else:
+                                raise UnprocessableEntity(f"Duplicate entry.", what=NOT_UNIQUE)
                         
                         if errno == BAD_NULL_ERROR:
-                            raise UnprocessableEntity(f"'{thing}' is required." if thing else "Required field missing.",
-                                                      fields=thing, what=REQUIRED)
+                            m = re.match(r".*?'([^']*)'.*", error)
+                            if m:
+                                field = m.group(1)
+                            else:
+                                field = None
+                            
+                            raise UnprocessableEntity(f"'{field}' is required." if field else "Required field missing.",
+                                                      fields=field, what=REQUIRED)
                         
                     raise UnprocessableEntity("Could save entity using the sent data.",
                                               log=f"unrecoginized integrity error: {str(e)}")

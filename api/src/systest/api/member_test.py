@@ -1,3 +1,5 @@
+from random import randint
+
 from test_aid.systest_base import ApiTest
 
 
@@ -6,8 +8,18 @@ class Test(ApiTest):
     
     def test_create_member_with_existing_email_fails(self):
         member = self.obj.create_member()
-        self.post("/membership/member", json=member).expect(code=201)
-        self.post("/membership/member", json=member).expect(code=422, status="error", what="not_unique")
+        member_number = self.post("/membership/member", json=member).expect(code=201).get('data__member_number')
+        member['member_number'] = member_number + 1000
+        self.post("/membership/member", json=member).expect(code=422, status="error", what="not_unique",
+                                                            fields='email')
+
+    def test_create_member_with_existing_member_number_fails(self):
+        member = self.obj.create_member()
+        member_number = self.post("/membership/member", json=member).expect(code=201).get('data__member_number')
+        member['email'] = member['email'] + '-not-duplicate'
+        member['member_number'] = member_number
+        self.post("/membership/member", json=member).expect(code=422, status="error", what="not_unique",
+                                                            fields='member_number')
 
     def test_create_member_gives_new_member_numbers_and_ids(self):
         member1 = self.obj.create_member()
@@ -27,5 +39,6 @@ class Test(ApiTest):
         pass
 
     def test_include_membership_in_member_list(self):
-        # TODO BM We need to be able to create spans with api or db to do this test.
+        # TODO BM We need to be able to create spans with api or db to do this test. Or is this a special endpoint,
+        # only used in one place.
         pass

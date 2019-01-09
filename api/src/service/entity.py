@@ -6,8 +6,7 @@ from sqlalchemy import inspect, Integer, String, DateTime, Text, desc, asc, or_
 
 from service.api_definition import BAD_VALUE, REQUIRED, Arg, symbol, Enum, natural0, natural1
 from service.db import db_session
-from service.error import NotFound, UnprocessableEntity
-
+from service.error import NotFound, UnprocessableEntity, InternalServerError
 
 ASC = 'asc'
 DESC = 'desc'
@@ -193,14 +192,28 @@ class Entity:
             raise NotFound("Could not find any entity with specified parameters.")
 
 
+# TODO BM Move this somewhere.
 class MemberEntity(Entity):
     """ Member member_number should be auto increment but mysql only supports one auto increment per table,
-    can solve it with a trigger or like this (which is worse because there is a possible race condition). """
-
+    can solve it with a trigger or like this using an explicit mysql lock. """
+    
     def create(self):
-        data = request.json
-        if data.get('member_number') is None:
-            sql = "SELECT COALESCE(MAX(member_number), 999) FROM membership_members"
-            max_member_number, = db_session.execute(sql).fetchone()
-            data['member_number'] = max_member_number + 1
-        return self.create_internal(data)
+        status, = db_session.execute("SELECT GET_LOCK('member_number', 20)").fetchone()
+        if not status:
+            raise InternalServerError("Failed to create member, try again later.",
+                                      log="failed to aquire member_number lock")
+        
+        try:
+            data = request.json
+            if data.get('member_number') is None:
+                sql = "SELECT COALESCE(MAX(member_number), 999) FROM membership_members"
+                max_member_number, = db_session.execute(sql).fetchone()
+                data['member_number'] = max_member_number + 1
+            return self.create_internal(data)
+        except Exception:
+            # Rollback session if anything went wrong or we can't release the lock.
+            db_session.rollback()
+            raise
+        finally:
+            db_session.execute("DO RELEASE_LOCK('member_number')")
+        
