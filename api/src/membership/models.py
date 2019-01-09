@@ -58,9 +58,7 @@ class Member(Base):
     created_at = Column(DateTime, server_default=func.now())
     updated_at = Column(DateTime)
     deleted_at = Column(DateTime)
-    member_number = Column(Integer)
-    # TODO BM Add unique constraint to member_number
-    # TODO BM Add auto increment to member_number
+    member_number = Column(Integer, unique=True)
 
     def __repr__(self):
         return f'Member(member_id={self.member_id}, member_number={self.member_number}, email={self.email})'

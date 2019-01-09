@@ -149,9 +149,14 @@ ALTER TABLE `membership_keys` MODIFY COLUMN `updated_at` DATETIME DEFAULT CURREN
 ALTER TABLE `membership_spans` MODIFY COLUMN `deleted_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP;
 
 -- TODO BM Make all unique fileds uniquie.
+
+-- make membership_members email unique
 ALTER TABLE `membership_members` DROP INDEX `membership_members_email_index`;
 -- TODO johank, approve this:
 UPDATE `membership_members` SET email = 'athawolf@gmail.com-dedup' WHERE member_id = 1857 and email = 'athawolf@gmail.com';
 UPDATE `membership_members` SET email = 'resdin@gmail.com-dedup-0' WHERE member_id = 1926 and email = 'resdin@gmail.com';
 UPDATE `membership_members` SET email = 'resdin@gmail.com-dedup-1' WHERE member_id = 1927 and email = 'resdin@gmail.com';
 ALTER TABLE `membership_members` ADD UNIQUE INDEX `membership_members_email_index` (`email`);
+
+-- make membership_members member_number unique, and auto increment
+ALTER TABLE `membership_members` ADD UNIQUE INDEX `membership_members_member_number_index` (`member_number`);

@@ -40,7 +40,7 @@ class Test(ApiTest):
         
         self.assertTrue(data['updated_at'] >= data['created_at'])
 
-    def test_can_not_updated_using_empty_or_read_only_data(self):
+    def test_can_not_update_entity_using_empty_or_read_only_data(self):
         entity = self.api.create_group()
         entity_id = entity['group_id']
 
@@ -48,7 +48,7 @@ class Test(ApiTest):
         self.put(f"/membership/group/{entity_id}", dict(group_id=1, deleted_at='remove_me')).expect(code=422)
 
     def test_list(self):
-        before = self.get("/membership/group").get('data')
+        before = self.get("/membership/group?page_size=0").get('data')
         
         entity1_id = self.api.create_group()['group_id']
         entity2_id = self.api.create_group()['group_id']
@@ -57,13 +57,13 @@ class Test(ApiTest):
         self.assertNotIn(entity1_id, ids_before)
         self.assertNotIn(entity2_id, ids_before)
 
-        after = self.get("/membership/group").get('data')
+        after = self.get("/membership/group?page_size=0").get('data')
 
         ids_after = {e['group_id'] for e in after}
         self.assertIn(entity1_id, ids_after)
         self.assertIn(entity2_id, ids_after)
 
-    def test_deleted_entity_does_not_show_up_in_list(self):
+    def test_deleted_entity_does_not_show_up_in_list_but_can_still_be_fetched(self):
         entity_id = self.api.create_group()['group_id']
         
         self.assertIn(entity_id, [e['group_id'] for e in self.get("/membership/group").data])
@@ -106,9 +106,9 @@ class Test(ApiTest):
         
     def test_not_null_constraint_fails_with_message(self):
         member = self.obj.create_member()
-        member.pop('member_number', None)
+        member.pop('email', None)
         
-        self.post("/membership/member", member).expect(code=422, what=REQUIRED, fields='member_number')
+        self.post("/membership/member", member).expect(code=422, what=REQUIRED, fields='email')
     
     def test_search_for_text(self):
         entity = self.api.create_group()

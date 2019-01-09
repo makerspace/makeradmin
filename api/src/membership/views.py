@@ -2,17 +2,18 @@ from membership import service
 from membership.models import Member, Group
 from service.api_definition import MEMBER_VIEW, MEMBER_CREATE, MEMBER_EDIT, MEMBER_DELETE, GROUP_VIEW, GROUP_CREATE,\
     GROUP_EDIT, GROUP_DELETE
-from service.entity import Entity, not_empty, EntityWithPassword, ASC, DESC
+from service.entity import Entity, not_empty, ASC, DESC, MemberEntity
 
 # TODO Move implementations around.
 
 service.entity_routes(
     path="/member",
-    entity=EntityWithPassword(
+    entity=MemberEntity(
         Member,
         validation=dict(email=not_empty, firstname=not_empty),
         default_sort_column='member_number',
         default_sort_order=DESC,
+        hidden_columns=('password',),
         search_columns=('firstname', 'lastname', 'email', 'address_street', 'address_extra', 'address_zipcode',
                         'address_city', 'phone', 'civicregno', 'member_number'),
     ),
@@ -31,6 +32,7 @@ service.entity_routes(
         default_sort_column='title',
         default_sort_order=ASC,
         search_columns=('name', 'title', 'description'),
+        read_only_columns=('parent', 'left', 'right'),
         hidden_columns=('parent', 'left', 'right'),
     ),
     permission_list=GROUP_VIEW,

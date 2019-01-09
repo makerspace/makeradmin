@@ -55,6 +55,9 @@ to_obj_converters = {
 GLOBAl_READ_ONLY = ('created_at', 'updated_at', 'deleted_at')
 
 
+# TODO Expand functionality is used for Key->member and Span->member, nothing else. Subclassing is always possible
+# for special stuff.
+
 class Entity:
     """ Used to create a crud-able entity, subclass to provide additional functionality. """
     
@@ -62,7 +65,7 @@ class Entity:
                  default_sort_column=None, default_sort_order=None, search_columns=tuple()):
         """
         :param model sqlalchemy orm model class
-        :param hidden_columns columns that should be filtered in all operations
+        :param hidden_columns columns that should be filtered on read
         :param read_only_columns columns that should be filtered on create and update (in addition to GLOBAl_READ_ONLY)
         :param validation map from column name to validation function run on create and update
         :param default_sort_column column name
@@ -90,8 +93,7 @@ class Entity:
             for k, c in self.columns.items()
             if (not c.primary_key
                 and k not in GLOBAl_READ_ONLY
-                and k not in read_only_columns
-                and k not in hidden_columns)
+                and k not in read_only_columns)
         }
         
         self.cols_to_obj = {
@@ -154,8 +156,8 @@ class Entity:
             data=[self.to_obj(entity) for entity in query]
         )
     
-    def create(self):
-        input_data = self.to_model(request.json)
+    def create_internal(self, data):
+        input_data = self.to_model(data)
         self.validate_all(input_data)
         if not input_data:
             raise UnprocessableEntity("Can not create using empty data.")
@@ -163,6 +165,9 @@ class Entity:
         db_session.add(entity)
         db_session.commit()
         return self.to_obj(entity)
+    
+    def create(self):
+        return self.create_internal(request.json)
     
     def read(self, entity_id):
         entity = db_session.query(self.model).get(entity_id)
@@ -188,11 +193,14 @@ class Entity:
             raise NotFound("Could not find any entity with specified parameters.")
 
 
-class EntityWithPassword(Entity):
-    # TODO Class or additional parameter. Also hidden_columns is that something that is needed in many places?
+class MemberEntity(Entity):
+    """ Member member_number should be auto increment but mysql only supports one auto increment per table,
+    can solve it with a trigger or like this (which is worse because there is a possible race condition). """
 
-    def to_obj(self, entity):
-        obj = super().to_obj(entity)
-        obj.pop('password', None)
-        return obj
-    
+    def create(self):
+        data = request.json
+        if data.get('member_number') is None:
+            sql = "SELECT COALESCE(MAX(member_number), 999) FROM membership_members"
+            max_member_number, = db_session.execute(sql).fetchone()
+            data['member_number'] = max_member_number + 1
+        return self.create_internal(data)
