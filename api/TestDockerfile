@@ -21,6 +21,6 @@ COPY requirements.txt .
 
 RUN pip install -r requirements.txt
 
-COPY systest_run.sh .
+COPY test_run.sh .
 
 COPY src ./src

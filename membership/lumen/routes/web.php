@@ -11,6 +11,8 @@
 |
 */
 
+// TODO BM Remove php after double checking that it have been implemented.
+
 $app->  post("membership/authenticate", "Member@authenticate");   // Authenticate a member
 
 // Members
