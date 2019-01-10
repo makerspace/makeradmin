@@ -150,7 +150,7 @@ ALTER TABLE `membership_spans` MODIFY COLUMN `deleted_at` DATETIME DEFAULT CURRE
 
 -- make membership_members email unique
 ALTER TABLE `membership_members` DROP INDEX `membership_members_email_index`;
--- TODO BM remove this before merge.
+-- TODO BM remove this before merge or consider keeping it for dev server, double check member_ids.
 UPDATE `membership_members` SET email = 'dedup-0' WHERE member_id = 1857;
 UPDATE `membership_members` SET email = 'dedup-1' WHERE member_id = 1926;
 UPDATE `membership_members` SET email = 'dedup-2' WHERE member_id = 1927;
