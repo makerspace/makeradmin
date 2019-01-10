@@ -62,7 +62,7 @@ with db.cursor() as cur:
             print(green + "Running migration " + name + " batch " + str(i) + "..." + reset)
             print(batches[i])
             cur.execute(batches[i])
-            cur.execute(f"UPDATE `{migrations_table}` SET batch=%s WHERE migration=%s", (i+1,name))
+            cur.execute(f"UPDATE `{migrations_table}` SET batch=%s WHERE migration=%s", (i + 1, name))
 
     if not anyMigrations and not check:
         print(green + "Nothing to migrate." + reset)
