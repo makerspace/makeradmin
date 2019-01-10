@@ -79,7 +79,7 @@ class Test(ApiTest):
             .post("/oauth/token", data=dict(grant_type='password', username=username, password=DEFAULT_PASSWORD))\
             .expect(code=200).get('access_token')
         
-        tokens = self.api.get(f'/oauth/token', token=token).expect(code=200).data
+        tokens = self.api.get('/oauth/token', token=token).expect(code=200).data
         
         self.assertEqual([token], [t['access_token'] for t in tokens])
 

@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS `membership_members` (
   `password` varchar(60) COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `firstname` varchar(255) COLLATE utf8mb4_0900_ai_ci NOT NULL,
   `lastname` varchar(255) COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
-  `civicregno` varchar(12) COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `civicregno` varchar(25) COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `company` varchar(255) COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `orgno` varchar(12) COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `address_street` varchar(255) COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,

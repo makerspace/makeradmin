@@ -33,9 +33,6 @@ class Test(FlaskTestBase):
             self.assertIsNone(g.user_id)
             self.assertEqual(tuple(), g.permissions)
 
-            self.assertIsNone(g.user_id)
-            self.assertEqual(tuple(), g.permissions)
-
     def test_empty_auth_or_bad_header_raises_unauthorized(self):
         with self.app.test_request_context(headers=dict(Authorization='')):
             with self.assertRaises(Unauthorized):
@@ -201,12 +198,3 @@ class Test(FlaskTestBase):
             g.permissions = tuple()
             with self.assertRaises(Forbidden):
                 view()
-
-
-
-
-
-
-
-
-

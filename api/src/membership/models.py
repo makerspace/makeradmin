@@ -21,7 +21,7 @@ class Member(Base):
     # | password        | varchar(60)      | YES  |     | NULL              |                   |
     # | firstname       | varchar(255)     | NO   |     | NULL              |                   |
     # | lastname        | varchar(255)     | YES  |     | NULL              |                   |
-    # | civicregno      | varchar(12)      | YES  |     | NULL              |                   |
+    # | civicregno      | varchar(25)      | YES  |     | NULL              |                   |
     # | company         | varchar(255)     | YES  |     | NULL              |                   |
     # | orgno           | varchar(12)      | YES  |     | NULL              |                   |
     # | address_street  | varchar(255)     | YES  |     | NULL              |                   |
@@ -44,7 +44,7 @@ class Member(Base):
     password = Column(String(60))
     firstname = Column(String(255), nullable=False)
     lastname = Column(String(255))
-    civicregno = Column(String(12))
+    civicregno = Column(String(25))
     company = Column(String(255))
     orgno = Column(String(12))
     address_street = Column(String(255))
