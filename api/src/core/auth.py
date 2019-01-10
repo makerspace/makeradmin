@@ -8,7 +8,7 @@ import membership
 from core.models import Login, AccessToken
 from service.api_definition import SERVICE, USER, REQUIRED, BAD_VALUE, EXPIRED
 from service.db import db_session
-from service.error import TooManyRequests, ApiError, NotFound, Unauthorized
+from service.error import TooManyRequests, ApiError, NotFound, Unauthorized, BadRequest, InternalServerError
 
 
 def generate_token():
@@ -118,8 +118,11 @@ def authenticate_request():
         }
         if access_token.user_id < 0:
             permissions.add(SERVICE)
-        else:
+        elif access_token.user_id > 0:
             permissions.add(USER)
+        else:
+            raise BadRequest("Bad token.",
+                             log=f"access_token {access_token.access_token} has user_id 0, this should never happend")
             
         access_token.permissions = ','.join(permissions)
     

@@ -29,7 +29,7 @@ def refresh_service_access_token(session_factory):
     
     with closing(session_factory()) as session:
         ten_years = timedelta(days=365 * 10)
-        session.execute("DELETE FROM access_tokens WHERE access_token = :token", dict(token=service_token))
+        session.execute("DELETE FROM access_tokens WHERE user_id = :user_id", dict(user_id=SERVICE_USER_ID))
         session.execute("INSERT INTO access_tokens (user_id, access_token, expires, lifetime, browser, ip)"
                         "   VALUES (:user_id, :token, :expires, :lifetime, '', '')",
                         dict(user_id=SERVICE_USER_ID, token=service_token,

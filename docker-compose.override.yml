@@ -1,8 +1,5 @@
 version: "3"
 services:
-  # api-gateway:
-  #   ports:
-  #     - "8010:80"
   api:
     ports:
       - "8010:80"
