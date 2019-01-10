@@ -1,6 +1,6 @@
 version: "3"
 services:
-  api-gateway:
+  api:
     ports:
       - "8010:80"
   public:

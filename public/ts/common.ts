@@ -11,6 +11,10 @@ declare global {
 	}
 }
 
+
+export const UNAUTHORIZED = "unauthorized";
+
+
 export function formatDateTime(str: any) {
     const options = {
         year: 'numeric', month: 'numeric', day: 'numeric',
@@ -39,13 +43,17 @@ export function ajax(type: string, url: string, data: object): Promise<any> {
 		var xhr = new XMLHttpRequest();
 		xhr.open(type, url);
 		xhr.setRequestHeader('Content-Type', 'application/json; charset=utf-8');
-		xhr.setRequestHeader('Authorization', "Bearer " + localStorage.getItem("token"));
+		let token = localStorage.getItem("token");
+		if (token) {
+            xhr.setRequestHeader('Authorization', "Bearer " + token);
+        }
 		xhr.onload = () => {
 			if (xhr.status >= 200 && xhr.status <= 300) {
 				resolve(JSON.parse(xhr.responseText));
 			}
-			else if (xhr.status === 401) {
-			    reject({status: "unauthorized", message: JSON.parse(xhr.responseText).message})
+			else if (xhr.status === 401 || xhr.status === 403) {
+			    removeToken();
+			    reject({status: UNAUTHORIZED, message: JSON.parse(xhr.responseText).message})
             }
 			else reject(JSON.parse(xhr.responseText));
 		};
@@ -74,7 +82,7 @@ export function refreshLoggedIn(callback: (loggedIn: boolean, permissions: strin
 			callback(true, json.data.permissions);
 		})
 		.catch(json => {
-			if (json.message == "Unauthorized") {
+			if (json.status === UNAUTHORIZED) {
 				callback(false, null);
 			} else {
 				UIkit.modal.alert("<h2>Error</h2>" + json.status + "\n" + json.message);
@@ -112,8 +120,13 @@ export function addSidebarListeners() {
 	}
 }
 
+export function removeToken() {
+    delete localStorage.token;
+}
+
+
 export function logout() {
-    localStorage.setItem("token", null);
+    removeToken();
     window.location.href = "/";
 }
 

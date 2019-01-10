@@ -1,6 +1,6 @@
 from decimal import Decimal
 from datetime import datetime
-from service import Entity, Column, DB
+from backend_service import Entity, Column, DB
 from typing import List, Dict, Any, NamedTuple
 from dataclasses import dataclass
 

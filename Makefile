@@ -15,10 +15,10 @@ test: .env
 	$(TEST_COMPOSE) down || true
 	docker volume rm test_dbdata || true
 	$(TEST_COMPOSE) build
-	python3 db_init.py --project-name test
 	$(TEST_COMPOSE) up --abort-on-container-exit --exit-code-from test
 
 dev-test:
+	(cd api/src && python3 -m pytest --workers auto -ra)
 	(cd test/src && python3 -m pytest --workers auto -ra)
 
 init-npm:
@@ -29,9 +29,6 @@ init-pip:
 	python3 -m pip install --upgrade -r requirements.txt
 
 init: init-pip init-npm
-
-init-db: .env
-	python3 db_init.py
 
 insert-devel-data: .env
 	docker-compose run backend bash -c "cd /work/src/scrape && python3 tictail2db.py"
@@ -55,4 +52,4 @@ admin-dev-server:
 	docker volume rm -f makeradmin_node_modules
 	docker-compose -f admin/dev-server-compose.yaml up --build
 
-.PHONY: build firstrun admin-dev-server init init-db init-npm init-pip install run stop dev-test test dev
+.PHONY: build firstrun admin-dev-server init init-npm init-pip install run stop dev-test test dev

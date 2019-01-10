@@ -12,7 +12,7 @@ class MessageShow extends React.Component {
         super(props);
         const {id} = props.params;
         this.message = Message.get(id);
-        this.recipients = new Collection({type: Message, url: "/messages/" + id + "/recipients"});
+        this.recipients = new Collection({type: Message, url: "/messages/message/" + id + "/recipients"});
         this.state = {message: {}};
     }
     

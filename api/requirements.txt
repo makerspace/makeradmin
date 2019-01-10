@@ -1,0 +1,10 @@
+flask
+flask_cors
+sqlalchemy
+gunicorn
+rocky>=1,<2
+PyMySQL
+requests
+python-dotenv
+pytest
+pytest-parallel

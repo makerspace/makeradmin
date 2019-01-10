@@ -92,7 +92,7 @@ class Send extends Command
 						]
 					);
 
-					// TODO: Uppdatera status i messages
+					// todo: Uppdatera status i messages
 				}
 				catch(\Exception $e)
 				{
@@ -104,7 +104,7 @@ class Send extends Command
 						]
 					);
 
-					// TODO: Error handling
+					// todo: Error handling
 					echo "Error\n";
 				}
 			}

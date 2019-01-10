@@ -50,7 +50,7 @@ class Entity
 				if($id == "type")
 				{
 					$this->type = $filter;
-					// TODO: Should not be a hardcoded list
+					// todo: Should not be a hardcoded list
 					if(in_array($this->type, ["accounting_transaction", "accounting_period", "accounting_instruction", "accounting_account", "member", "mail", "product", "rfid", "subscription", "invoice"]))
 					{
 //						$this->join = $this->type;
@@ -600,7 +600,7 @@ class Entity
 				}
 				else if($relation["action"] = "remove")
 				{
-					// TODO: Remove relation
+					// todo: Remove relation
 /*
 					DB::table("relation")->remove([
 						"entity1" => $this->entity_id,
@@ -640,7 +640,7 @@ class Entity
 			return false;
 		}
 
-		// TODO: Delete relations and data in joins
+		// todo: Delete relations and data in joins
 
 		if($permanent === true)
 		{
@@ -750,22 +750,22 @@ class Entity
 				// Validate a date according to ISO8601 standard
 				else if($rule == "date")
 				{
-					// TODO
+					// todo
 				}
 				// E-mail
 				else if($rule == "email")
 				{
-					// TODO
+					// todo
 				}
 				// Personnummer
 				else if($rule == "civicregno")
 				{
-					// TODO
+					// todo
 				}
 				// Phone number
 				else if($rule == "phone")
 				{
-					// TODO
+					// todo
 				}
 				else
 				{

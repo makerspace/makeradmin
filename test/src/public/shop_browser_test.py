@@ -1,6 +1,6 @@
-from library.base import VALID_NON_3DS_CARD_NO, EXPIRES_CVC_ZIP, ShopTestMixin
-from library.selenium import SeleniumTest
-from library.util import SELENIUM_BASE_TIMEOUT
+from aid.test.base import VALID_NON_3DS_CARD_NO, EXPIRES_CVC_ZIP, ShopTestMixin
+from aid.test.selenium import SeleniumTest
+from aid.test.util import SELENIUM_BASE_TIMEOUT
 
 
 class Test(ShopTestMixin, SeleniumTest):

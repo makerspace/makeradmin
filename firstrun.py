@@ -25,9 +25,6 @@ def assert_call(args, **kwargs):
         exit(exitcode)
 
 
-print(YELLOW + "Initializing the database" + RESET)
-assert_call(["python3", "db_init.py"])
-
 print(YELLOW + "Starting makeradmin" + RESET)
 assert_call(["docker-compose", *project_name_args, "up", "-d"])
 
@@ -36,7 +33,7 @@ cmd = 'while ! mysql -uroot --password="${MYSQL_ROOT_PASSWORD}" -e "" &> /dev/nu
 assert_call(["docker-compose", *project_name_args, "exec", "db2", "bash", "-c", cmd])
 
 print(YELLOW + "Waiting for makeradmin to come online", end="")
-assert_call(["docker-compose", *project_name_args, "exec", "membership", "bash", "-c", "/usr/local/myscripts/wait-for api-gateway:80"])
+assert_call(["docker-compose", *project_name_args, "exec", "membership", "bash", "-c", "/usr/local/myscripts/wait-for api:80"])
 print(".", end="")
 assert_call(["docker-compose", *project_name_args, "exec", "membership", "bash", "-c", "/usr/local/myscripts/wait-for backend:80"])
 print(".", end="")

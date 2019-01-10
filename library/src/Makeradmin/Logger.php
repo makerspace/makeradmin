@@ -47,7 +47,7 @@ class Logger
 			}
 			else
 			{
-				// TODO: Is this one affected by the encoding headers in HTTP and/or settings in server?
+				// todo: Is this one affected by the encoding headers in HTTP and/or settings in server?
 				static::$data["request"]["data"] = utf8_encode($request->getContent());
 			}
 		}

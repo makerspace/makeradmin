@@ -5,11 +5,11 @@
 
 # Note: the file is named maker_statistics instead of just statistics because python has a built in module called statistics
 
-import service
-from service import route_helper
+import backend_service
+from backend_service import route_helper
 from typing import List, Tuple
 from datetime import datetime
-instance = service.create(name="statistics", url="statistics", port=80, version="1.0")
+instance = backend_service.create(name="statistics", url="statistics", port=80, version="1.0")
 
 # Grab the database so that we can use it inside requests
 db = instance.db

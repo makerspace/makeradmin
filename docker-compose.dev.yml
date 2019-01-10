@@ -4,12 +4,10 @@ services:
   db2:
     ports:
       - "3306:3306"
-      
-  api-gateway:
+
+  api:
     volumes:
-      - ./apigateway/lumen/routes:/var/www/html/routes
-      - ./apigateway/lumen/app:/var/www/html/app
-      - ./library/src/Makeradmin:/var/www/html/library
+      - ./api/src:/work/src
     ports:
       - "8010:80"
     environment:

@@ -12,7 +12,6 @@ services:
     environment:
       # Note: the config only seems to be updated when the container is initially created.
       # If the db config needs to be changed then the db image and volume needs to be destroyed first.
-      # TODO Why makerdata here?
       MYSQL_DATABASE: "${MYSQL_DB}"
       MYSQL_ROOT_HOST: "db2"
       MYSQL_USER: "${MYSQL_USER}"
@@ -39,30 +38,32 @@ services:
     networks:
       - makeradmin
 
-  api-gateway:
-    image: makeradmin/apigateway:1.0
+  api:
+    image: makeradmin/api:1.0
     build:
-      context: ./apigateway
-      dockerfile: ${PWD}/library/DockerfileService
-    volumes:
-      - ./logs/apigateway:/var/www/html/storage/logs
+      context: ./api
     depends_on:
       - db2
-      - servicebase
-      - library
     networks:
       - makeradmin
     environment:
+      API_BEARER:
       APP_DEBUG:
-      MYSQL_HOST: "db2:${MYSQL_PORT}"
-      MYSQL_DB: "makeradmin"
+      MYSQL_HOST: db2
+      MYSQL_DB:
+      MYSQL_PORT:
       MYSQL_USER:
       MYSQL_PASS:
-      BEARER: "${API_BEARER}"
+      MEMBERSHIP_URL:
+      SHOP_URL:
+      MEMBER_URL:
+      MESSAGES_URL:
+      EMAIL_DISPATCHER_URL:
+      MULTIACCESS_SYNC_URL:
       VIRTUAL_HOST: "${HOST_BACKEND}"
       LETSENCRYPT_HOST: "${HOST_BACKEND}"
       LETSENCRYPT_EMAIL: "${ADMIN_EMAIL}"
-
+      
   backend:
     image: makeradmin/backend:1.0
     build: backend
@@ -72,7 +73,7 @@ services:
       MYSQL_DB: "makeradmin"
       MYSQL_USER:
       MYSQL_PASS:
-      APIGATEWAY: "api-gateway"
+      APIGATEWAY: "api"
       BEARER: "${API_BEARER}"
       HOST_FRONTEND:
       HOST_BACKEND:
@@ -82,7 +83,8 @@ services:
       STRIPE_PUBLIC_KEY:
       STRIPE_SIGNING_SECRET:
     depends_on:
-      - api-gateway
+      - api
+      - servicebase
     networks:
       - makeradmin
       
@@ -92,7 +94,7 @@ services:
       - "./.webshop_product_images:/work/static/product_images"
     build: public
     environment:
-      APIGATEWAY: "api-gateway"
+      APIGATEWAY: "api"
       HOST_BACKEND:
       STRIPE_PUBLIC_KEY:
       APP_DEBUG:
@@ -114,10 +116,11 @@ services:
       MYSQL_DB: "makeradmin"
       MYSQL_USER:
       MYSQL_PASS:
-      APIGATEWAY: "api-gateway"
+      APIGATEWAY: "api"
       BEARER: "${API_BEARER}"
     depends_on:
-      - api-gateway
+      - api
+      - library
     networks:
       - makeradmin
 
@@ -133,10 +136,11 @@ services:
       MYSQL_DB: "makeradmin"
       MYSQL_USER:
       MYSQL_PASS:
-      APIGATEWAY: "api-gateway"
+      APIGATEWAY: "api"
       BEARER: "${API_BEARER}"
     depends_on:
-      - api-gateway
+      - api
+      - library
     networks:
       - makeradmin
 
@@ -150,15 +154,16 @@ services:
       MYSQL_DB: "makeradmin"
       MYSQL_USER:
       MYSQL_PASS:
-      APIGATEWAY: "api-gateway"
+      APIGATEWAY: "api"
       BEARER: "${API_BEARER}"
       MAILGUN_DOMAIN:
       MAILGUN_KEY:
       MAILGUN_FROM:
       MAILGUN_TO_OVERRIDE:
     depends_on:
-      - api-gateway
+      - api
       - messages
+      - library
     networks:
       - makeradmin
 
@@ -170,10 +175,11 @@ services:
     volumes:
       - ./data/multiaccess-uploads:/var/www/html/storage/uploads
     environment:
-      APIGATEWAY: api-gateway
+      APIGATEWAY: api
       BEARER: "${API_BEARER}"
     depends_on:
-      - api-gateway
+      - api
+      - library
     networks:
       - makeradmin
 

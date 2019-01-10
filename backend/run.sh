@@ -15,10 +15,10 @@ function wait_for {
 }
 
 wait_for "${MYSQL_HOST%%:*}" "${MYSQL_HOST##*:}"
-wait_for api-gateway 80
+wait_for ${APIGATEWAY} 80
+wait_for membership 80
 
-echo "migrating"
-python3 src/migrate.py --assert-up-to-date
+python3 /work/src/migrate.py
 
 GUNICORN_FLAGS=""
 
@@ -34,4 +34,4 @@ fi
 # as nginx handles all the persistent connections.
 # Note: don't use more than one worker for the backend, otherwise we could in rare cases get race conditions as most of the actions the backend does are not atomic.
 echo "starting gunicorn"
-exec gunicorn $GUNICORN_FLAGS --access-logfile - --worker-class sync --chdir src --workers=1 -b :80 backend:app
+exec gunicorn $GUNICORN_FLAGS --access-logfile - --worker-class sync --chdir src --workers=4 -b :80 backend:app

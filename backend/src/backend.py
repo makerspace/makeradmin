@@ -4,7 +4,7 @@ from flask_uploads import UploadSet, IMAGES, configure_uploads
 import member
 import maker_statistics
 import webshop
-from service import format_datetime
+from backend_service import format_datetime
 
 
 app = Flask(__name__)

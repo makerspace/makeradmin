@@ -1,6 +1,6 @@
 import * as common from "./common"
 import * as login from "./login"
-import {logout} from "./common";
+import {logout, UNAUTHORIZED} from "./common";
 declare var UIkit: any;
 
 common.documentLoaded().then(() => {
@@ -165,7 +165,7 @@ common.documentLoaded().then(() => {
             </form>`;
     }).catch(e => {
         // Probably Unauthorized, redirect to login page.
-        if (e.message == "Unauthorized") {
+        if (e.status === UNAUTHORIZED) {
             // Render login
             login.render_login(root, null, null);
         } else {

@@ -11,7 +11,7 @@ class CurlMultiPartData
 	}
 
 	public function post_fields(): array {
-		// TODO: Handle more than files key and verify file handling
+		// todo: Handle more than files key and verify file handling
 		$post_fields = [];
 		foreach($this->data as $key => $value) {
 			if('files' == $key){

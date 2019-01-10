@@ -106,7 +106,7 @@ class Member extends Controller
 	{
 		$json = $request->json()->all();
 
-		// TODO: This should be removed
+		// todo: This should be removed
 		if(!empty($json["member_number"]))
 		{
 			$member_number = $json["member_number"];
@@ -231,7 +231,7 @@ class Member extends Controller
 			$result['password'] = null;
 
 			// Get groups and permission for user
-			// TODO: Groups are arranged into a hierarchy which should be expanded
+			// todo: Groups are arranged into a hierarchy which should be expanded
 			$result["groups"] = [];
 			$groups = DB::table("membership_members_groups")
 				->join("membership_groups", "membership_groups.group_id", "membership_members_groups.group_id")
@@ -298,7 +298,7 @@ class Member extends Controller
 		$username = $request->get("username");
 		$password = $request->get("password");
 
-		// TODO: Validate input
+		// todo: Validate input
 
 		// Check if the user is in the database
 		$result = DB::table("membership_members")
@@ -396,7 +396,7 @@ class Member extends Controller
 	public function getPermissions(Request $request, $member_id)
 	{
 		// Get permissions for user
-		// TODO: Groups are arranged into a hierarchy which should be expanded
+		// todo: Groups are arranged into a hierarchy which should be expanded
 		$permissions = DB::table("membership_members_groups")
 			->join("membership_group_permissions", "membership_group_permissions.group_id", "membership_members_groups.group_id")
 			->join("membership_permissions", "membership_permissions.permission_id", "membership_group_permissions.permission_id")
@@ -441,7 +441,7 @@ class Member extends Controller
 					$old_span->enddate == $span_data['enddate'] &&
 					$old_span->span_type == $span_data['span_type']
 				) {
-					// TODO: Report already exists?
+					// todo: Report already exists?
 				} else {
 					return Response()->json([
 						"status" => "error",
@@ -540,7 +540,7 @@ class Member extends Controller
 					$old_duration->d == $days && 
 					$old_span->span_type == $span_data['span_type']
 				) {
-					// TODO: Report already exists?
+					// todo: Report already exists?
 				} else {
 					return Response()->json([
 						"status"  => "error",

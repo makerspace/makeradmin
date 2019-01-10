@@ -2,8 +2,8 @@ from logging import getLogger
 
 from flask import request, render_template
 
-import service
-from service import eprint, assert_get, route_helper, format_datetime, abort
+import backend_service
+from backend_service import eprint, assert_get, route_helper, format_datetime, abort
 import stripe
 import os
 from decimal import Decimal, Rounded, localcontext
@@ -25,7 +25,7 @@ from dataclasses import dataclass
 logger = getLogger('makeradmin')
 
 
-instance = service.create(name="webshop", url="webshop", port=80, version="1.0")
+instance = backend_service.create(name="webshop", url="webshop", port=80, version="1.0")
 
 # Grab the database so that we can use it inside requests
 db = instance.db
@@ -47,16 +47,16 @@ currency = "sek"
 # E.g to update product with id 42 you would issue a PUT request to
 # /path/to/service/product/42
 product_entity.db = db
-product_entity.add_routes(instance, "product", read_permission=None, write_permission="webshop_edit")
+product_entity.add_routes(instance, "product", read_permission="webshop", write_permission="webshop_edit")
 
 category_entity.db = db
-category_entity.add_routes(instance, "category", read_permission=None, write_permission="webshop_edit")
+category_entity.add_routes(instance, "category", read_permission="webshop", write_permission="webshop_edit")
 
 action_entity.db = db
-action_entity.add_routes(instance, "action", read_permission=None, write_permission="webshop_edit")
+action_entity.add_routes(instance, "action", read_permission="webshop", write_permission="webshop_edit")
 
 product_action_entity.db = db
-product_action_entity.add_routes(instance, "product_action", read_permission=None, write_permission="webshop_edit")
+product_action_entity.add_routes(instance, "product_action", read_permission="webshop", write_permission="webshop_edit")
 
 transaction_entity.db = db
 transaction_entity.add_routes(instance, "transaction", read_permission="webshop")
@@ -108,7 +108,7 @@ def images_for_product(id: int):
     return product_image_entity.list("product_id=%s AND deleted_at IS NULL", id)
 
 
-@instance.route("member/current/pending_actions", methods=["GET"], permission=None)
+@instance.route("member/current/pending_actions", methods=["GET"], permission='user')
 @route_helper
 def pending_actions_for_member():
     user_id = assert_get(request.headers, "X-User-Id")
@@ -170,7 +170,6 @@ def _pending_actions(member_id: int=None) -> List[Dict[str, Any]]:
         ]
 
 
-# TODO: More restrictive permissions?
 @instance.route("transaction/<int:id>/content", methods=["GET"], permission="webshop")
 @route_helper
 def transaction_contents(id: int) -> List[Dict]:
@@ -235,6 +234,10 @@ def transaction_events(id: int):
 @route_helper
 def list_orders():
     transactions = transaction_entity.list()
+
+    if not transactions:
+        return []
+    
     member_ids = ",".join(set([str(t["member_id"]) for t in transactions]))
 
     r = instance.gateway.get(f"membership/member?entity_id={member_ids}")
@@ -253,7 +256,7 @@ def list_orders():
     return transactions
 
 
-@instance.route("member/current/transactions", methods=["GET"], permission=None)
+@instance.route("member/current/transactions", methods=["GET"], permission='user')
 @route_helper
 def member_history() -> Dict[str, Any]:
     '''
@@ -261,7 +264,6 @@ def member_history() -> Dict[str, Any]:
     '''
     user_id = assert_get(request.headers, "X-User-Id")
 
-    # TODO: All these database lookups could probably be optimized
     transactions = transaction_entity.list("member_id=%s", user_id)
     transactions.reverse()
     for tr in transactions:
@@ -287,7 +289,7 @@ def send_new_member_email(member_id: int) -> None:
     email_body = render_template("new_member_email.html", member=member, public_url=instance.gateway.get_public_url)
     eprint("====== Sending new member email")
 
-    r = instance.gateway.post("messages", {
+    r = instance.gateway.post("messages/message", {
         "recipients": [
             {
                 "type": "member",
@@ -463,11 +465,11 @@ def stripe_handle_charge_callback(subtype: str, event) -> None:
         _fail_stripe_source(charge.source.id)
         logger.info(f"Charge '{charge.id}' failed with message '{charge.failure_message}'")
     elif subtype.startswith('dispute'):
-        # TODO: log disputes for display in admin frontend.
+        # todo: log disputes for display in admin frontend.
         pass
     elif subtype.startswith('refund'):
-        # TODO: log refund for display in admin frontend.
-        # TODO: option in frontend to roll back actions.
+        # todo: log refund for display in admin frontend.
+        # todo: option in frontend to roll back actions.
         pass
 
 
@@ -677,7 +679,7 @@ def send_receipt_email(member_id: int, transaction_id: int) -> None:
 
     member = r.json()["data"]
 
-    r = instance.gateway.post("messages", {
+    r = instance.gateway.post("messages/message", {
         "recipients": [
             {
                 "type": "member",
@@ -698,7 +700,7 @@ def send_receipt_email(member_id: int, transaction_id: int) -> None:
 duplicatePurchaseRands: Set[int] = set()
 
 
-@instance.route("pay", methods=["POST"], permission=None)
+@instance.route("pay", methods=["POST"], permission='user')
 @route_helper
 def pay_route() -> Dict[str, int]:
     data = request.get_json()
@@ -834,7 +836,7 @@ def send_key_updated_email(member_id: int, extended_days: int, end_date: datetim
     assert r.ok
     member = r.json()["data"]
 
-    r = instance.gateway.post("messages", {
+    r = instance.gateway.post("messages/message", {
         "recipients": [
             {
                 "type": "member",
@@ -857,7 +859,7 @@ def send_membership_updated_email(member_id: int, extended_days: int, end_date: 
     assert r.ok
     member = r.json()["data"]
 
-    r = instance.gateway.post("messages", {
+    r = instance.gateway.post("messages/message", {
         "recipients": [
             {
                 "type": "member",
@@ -1065,7 +1067,7 @@ def product_edit_data(product_id: int):
     }
 
 
-@instance.route("receipt/<int:transaction_id>", methods=["GET"], permission=None)
+@instance.route("receipt/<int:transaction_id>", methods=["GET"], permission='user')
 @route_helper
 def receipt(transaction_id: int):
     member_id = int(assert_get(request.headers, "X-User-Id"))

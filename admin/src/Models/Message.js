@@ -15,7 +15,7 @@ export default class Message extends Base {
 
 Message.model = {
     id: "message_id",
-    root: "/messages",
+    root: "/messages/message",
     attributes: {
         body: "",
         created_at: null,

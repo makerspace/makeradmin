@@ -34,7 +34,7 @@ class CreateMembershipMembersTable extends Migration
 			$table->dateTimeTz("updated_at")->nullable();
 			$table->dateTimeTz("deleted_at")->nullable();
 
-			//TODO
+			//todo
 			$table->integer("member_number");;
 
 			$table->index("email");

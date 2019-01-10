@@ -1,4 +1,4 @@
-from service import BackendException
+from backend_service import BackendException
 from decimal import Decimal
 from typing import Dict, Any
 

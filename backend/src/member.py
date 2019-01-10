@@ -1,5 +1,5 @@
 from flask import request, jsonify, render_template
-from service import assert_get, route_helper, create, abort
+from backend_service import assert_get, route_helper, create, abort
 import urllib.parse
 from typing import Dict, Any
 from logging import getLogger
@@ -39,8 +39,7 @@ def send_access_token():
     token = response["access_token"]
     url = instance.gateway.get_public_url(f"/member/login/{token}?redirect=" + urllib.parse.quote_plus(redirect))
     logger.info(f"sending login link {url!r} to user_id {user_id}")
-
-    r = instance.gateway.post("messages", {
+    r = instance.gateway.post("messages/message", {
         "recipients": [
             {
                 "type": "member",
@@ -57,13 +56,13 @@ def send_access_token():
     return jsonify({"status": "sent"})
 
 
-@instance.route("current", methods=["GET"], permission=None)
+@instance.route("current", methods=["GET"], permission='user')
 def current_member() -> str:
     user_id = assert_get(request.headers, "X-User-Id")
     return instance.gateway.get("membership/member/%s" % user_id).text
 
 
-@instance.route("current/permissions", methods=["GET"], permission=None)
+@instance.route("current/permissions", methods=["GET"], permission='user')
 @route_helper
 def permissions() -> Dict[str, Any]:
     user_id = assert_get(request.headers, "X-User-Id")
@@ -75,7 +74,7 @@ def permissions() -> Dict[str, Any]:
     }
 
 
-@instance.route("current/membership", methods=["GET"], permission=None)
+@instance.route("current/membership", methods=["GET"], permission='user')
 def membership_info() -> str:
     ''' If the user has lab access and how long '''
     user_id = assert_get(request.headers, "X-User-Id")
