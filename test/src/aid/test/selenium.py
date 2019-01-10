@@ -96,5 +96,5 @@ class SeleniumTest(ApiTest):
 
     def browse_shop(self):
         self.webdriver.get(f"{self.public_url}/shop")
-        self.wait_for_page(title="Makerspace Webshop")
+        self.wait_for_page(title="Stockholm Makerspace Webshop")
         
