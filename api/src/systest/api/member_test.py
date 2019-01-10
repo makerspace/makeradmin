@@ -1,5 +1,3 @@
-from random import randint
-
 from test_aid.systest_base import ApiTest
 
 

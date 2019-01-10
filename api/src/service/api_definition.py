@@ -29,6 +29,10 @@ GROUP_VIEW = 'group_view'
 GROUP_CREATE = 'group_create'
 GROUP_EDIT = 'member_edit'
 GROUP_DELETE = 'group_delete'
+GROUP_MEMBER_VIEW = 'group_member_view'
+GROUP_MEMBER_ADD = 'group_member_add'
+GROUP_MEMBER_REMOVE = 'group_member_remove'
+
 PERMISSION_VIEW = 'permission_view'
 WEBSHOP = 'webshop'
 

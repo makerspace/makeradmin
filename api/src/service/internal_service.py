@@ -1,5 +1,5 @@
 import re
-from functools import wraps
+from functools import wraps, partial
 from inspect import getmodule, stack, getfile
 from os.path import dirname, join, isdir, exists
 
@@ -191,5 +191,44 @@ class InternalService(Blueprint):
                 method=DELETE,
                 status='deleted',
             )(entity.delete)
-            
-            
+
+    def related_entity_routes(self, path=None, entity=None, relation=None,
+                              permission_list=None, permission_add=None, permission_remove=None):
+        """
+        Add routes to manipulate entity (model) related to another entity. Path must contain <int:related_entity_id>
+        for where the related entity id should be entered. Routes will be added if there is a permission for it,
+        list: GET <path>, add: POST <path>/add, remove: POST <path>/remove.
+        
+        :param path path to use for entity, have to contain <int:related_entity_id>
+        :param entity object which supports the view methods needed, this object will be returned by list
+        :param relation object used together with entity to implement the operations
+        :param permission_list permission needed to list
+        :param permission_add permission needed to add to relation
+        :param permission_remove permission needed to remove from relation
+        """
+        
+        if permission_list:
+            self.route(
+                path,
+                endpoint=f"{entity.name}_{relation.name}_list",
+                permission=permission_list,
+                method=GET,
+                flat_return=True,
+            )(partial(entity.list, relation=relation))
+        
+        if permission_add:
+            self.route(
+                f"{path}/add",
+                endpoint=f"{entity.name}_{relation.name}_add",
+                permission=permission_add,
+                method=POST,
+                code=200,
+            )(partial(entity.related_add, relation=relation))
+
+        if permission_remove:
+            self.route(
+                f"{path}/remove",
+                endpoint=f"{entity.name}_{relation.name}_remove",
+                permission=permission_remove,
+                method=POST,
+            )(partial(entity.related_remove, relation=relation))

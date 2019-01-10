@@ -7,6 +7,7 @@ from sqlalchemy import inspect, Integer, String, DateTime, Text, desc, asc, or_
 from service.api_definition import BAD_VALUE, REQUIRED, Arg, symbol, Enum, natural0, natural1
 from service.db import db_session
 from service.error import NotFound, UnprocessableEntity, InternalServerError
+from service.logging import logger
 
 ASC = 'asc'
 DESC = 'desc'
@@ -124,10 +125,13 @@ class Entity:
     
     def list(self, sort_by=Arg(symbol, required=False), sort_order=Arg(Enum(DESC, ASC), required=False),
              search=Arg(str, required=False), page_size=Arg(natural0, required=False),
-             page=Arg(natural1, required=False)):
-        
+             page=Arg(natural1, required=False), relation=None, related_entity_id=None):
+
         query = db_session.query(self.model).filter(self.model.deleted_at.is_(None))
 
+        if relation and related_entity_id:
+            query = relation.filter(query, related_entity_id)
+        
         if search:
             expression = or_(*[self.columns[column_name].like(f"%{search}%") for column_name in self.search_columns])
             query = query.filter(expression)
@@ -190,6 +194,28 @@ class Entity:
         
         if not count:
             raise NotFound("Could not find any entity with specified parameters.")
+        
+    def related_add(self, relation=None, related_entity_id=None):
+        request.json
+        logger.info(f"related_add {relation.name} {related_entity_id}")
+
+    def related_remove(self, relation=None, related_entity_id=None):
+        logger.info(f"related_remove {relation.name} {related_entity_id}")
+    
+
+class OrmPropertyRelation:
+    
+    def __init__(self, name, model, property_name):
+        """
+        :param name of the relation, this will be used in request and name for registring endpoints
+        """
+        self.name = name
+        self.model = model
+        self.property_name = property_name
+    
+    def filter(self, query, related_entity_id):
+        from membership.models import Member, Group
+        return query.join(Group, Member.groups).filter(Member.member_id == related_entity_id)
 
 
 # TODO BM Move this somewhere.
