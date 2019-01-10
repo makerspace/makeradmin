@@ -24,6 +24,7 @@ CREATE TABLE IF NOT EXISTS `login` (
 
 -- drop tables that are no longer needed
 DROP TABLE IF EXISTS services;
+DROP TABLE IF EXISTS relations;
 DROP TABLE IF EXISTS migrations_apigateway;
 
 -- enable warnings
