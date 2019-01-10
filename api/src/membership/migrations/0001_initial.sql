@@ -150,10 +150,10 @@ ALTER TABLE `membership_spans` MODIFY COLUMN `deleted_at` DATETIME DEFAULT CURRE
 
 -- make membership_members email unique
 ALTER TABLE `membership_members` DROP INDEX `membership_members_email_index`;
--- TODO BM johank, approve this is correct:
-UPDATE `membership_members` SET email = 'athawolf@gmail.com-dedup' WHERE member_id = 1857 and email = 'athawolf@gmail.com';
-UPDATE `membership_members` SET email = 'resdin@gmail.com-dedup-0' WHERE member_id = 1926 and email = 'resdin@gmail.com';
-UPDATE `membership_members` SET email = 'resdin@gmail.com-dedup-1' WHERE member_id = 1927 and email = 'resdin@gmail.com';
+-- TODO BM remove this before merge.
+UPDATE `membership_members` SET email = 'dedup-0' WHERE member_id = 1857;
+UPDATE `membership_members` SET email = 'dedup-1' WHERE member_id = 1926;
+UPDATE `membership_members` SET email = 'dedup-2' WHERE member_id = 1927;
 ALTER TABLE `membership_members` ADD UNIQUE INDEX `membership_members_email_index` (`email`);
 
 -- make membership_members member_number unique, and auto increment
