@@ -1,8 +1,8 @@
 from membership import service
-from membership.models import Member, Group
+from membership.models import Member, Group, member_group
 from service.api_definition import MEMBER_VIEW, MEMBER_CREATE, MEMBER_EDIT, MEMBER_DELETE, GROUP_VIEW, GROUP_CREATE, \
     GROUP_EDIT, GROUP_DELETE, GROUP_MEMBER_VIEW, GROUP_MEMBER_ADD, GROUP_MEMBER_REMOVE
-from service.entity import Entity, not_empty, ASC, DESC, MemberEntity, OrmPropertyRelation
+from service.entity import Entity, not_empty, ASC, DESC, MemberEntity, OrmManyRelation
 
 # TODO BM Move implementations around.
 
@@ -47,10 +47,11 @@ service.entity_routes(
     permission_delete=GROUP_DELETE,
 )
 
+# TODO BM Add tests.
 service.related_entity_routes(
     path="/member/<int:related_entity_id>/groups",
     entity=group_entity,
-    relation=OrmPropertyRelation("member", Group, 'members'),
+    relation=OrmManyRelation('groups', Group.members, member_group, 'group_id', 'member_id'),
     permission_list=GROUP_MEMBER_VIEW,
     permission_add=GROUP_MEMBER_ADD,
     permission_remove=GROUP_MEMBER_REMOVE,
@@ -75,9 +76,9 @@ service.related_entity_routes(
 # DONE  $app->   put("membership/member/{id}", ['middleware' => 'permission:member_edit',   'uses' => "Member@update"]); // Model: Update
 # DONE  $app->delete("membership/member/{id}", ['middleware' => 'permission:member_delete', 'uses' => "Member@delete"]); // Model: Delete
 # Relation
-# $app->   get("membership/member/{id}/groups",        ['middleware' => 'permission:group_member_view',   'uses' => "Member@getGroups"]);    // Get collection with members
-# $app->  post("membership/member/{id}/groups/add",    ['middleware' => 'permission:group_member_add',    'uses' => "Member@addGroup"]);    // Get collection with members
-# $app->  post("membership/member/{id}/groups/remove", ['middleware' => 'permission:group_member_remove', 'uses' => "Member@removeGroup"]);    // Get collection with members
+# DONE $app->   get("membership/member/{id}/groups",        ['middleware' => 'permission:group_member_view',   'uses' => "Member@getGroups"]);    // Get collection with members
+# DONE $app->  post("membership/member/{id}/groups/add",    ['middleware' => 'permission:group_member_add',    'uses' => "Member@addGroup"]);    // Get collection with members
+# DONE $app->  post("membership/member/{id}/groups/remove", ['middleware' => 'permission:group_member_remove', 'uses' => "Member@removeGroup"]);    // Get collection with members
 # Relation
 # $app->   get("membership/member/{id}/keys", ['middleware' => 'permission:member_view',   'uses' => "Member@getKeys"]);
 

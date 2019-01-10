@@ -49,7 +49,8 @@ def error_handler_404(error):
     return jsonify(dict(message='Not found.', status='error')), 404
 
 
-# TODO Add generic nice 400 handler (for things like bad content type and reading json).
+# TODO Add generic nice 400 handler (for things like bad content type and reading json). Also 405 bad method not
+# allowed.
 
 
 class ApiError(Exception):

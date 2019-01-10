@@ -235,7 +235,7 @@ def get_member_permissions(member_id=None):
         .distinct()
         .join(Group, Permission.groups)
         .join(Member, Group.members)
-        .filter(Member.member_id == member_id)
+        .filter_by(member_id=member_id)
     )
 
 
@@ -252,7 +252,7 @@ def hash_password(password):
 def authenticate(username=None, password=None):
     """ Authenticate a member trough username and password, returns member_id if authenticated. """
     
-    member = db_session.query(Member).filter(Member.email == username).first()
+    member = db_session.query(Member).filter_by(email=username).first()
     
     if not member or not verify_password(password, member.password):
         raise Unauthorized("The username and/or password you specified was incorrect.",

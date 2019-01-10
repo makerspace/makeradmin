@@ -2,7 +2,7 @@ from datetime import datetime
 from math import ceil
 
 from flask import request
-from sqlalchemy import inspect, Integer, String, DateTime, Text, desc, asc, or_
+from sqlalchemy import inspect, Integer, String, DateTime, Text, desc, asc, or_, text, bindparam
 
 from service.api_definition import BAD_VALUE, REQUIRED, Arg, symbol, Enum, natural0, natural1
 from service.db import db_session
@@ -159,7 +159,7 @@ class Entity:
             data=[self.to_obj(entity) for entity in query]
         )
     
-    def create_internal(self, data):
+    def _create_internal(self, data):
         input_data = self.to_model(data)
         self.validate_all(input_data)
         if not input_data:
@@ -170,7 +170,7 @@ class Entity:
         return self.to_obj(entity)
     
     def create(self):
-        return self.create_internal(request.json)
+        return self._create_internal(request.json)
     
     def read(self, entity_id):
         entity = db_session.query(self.model).get(entity_id)
@@ -194,28 +194,63 @@ class Entity:
         
         if not count:
             raise NotFound("Could not find any entity with specified parameters.")
+
+    def _get_entity_id_list(self, name):
+        ids = request.json.get(name)
+        try:
+            if ids is None or any(int(id) < 0 for id in ids):
+                raise UnprocessableEntity(f"Unexpected post body, should be list of ids named {name}.",
+                                          what=BAD_VALUE)
+        except ValueError:
+            raise UnprocessableEntity(f"Expected list of integers.", what=BAD_VALUE)
+        
+        return ids
         
     def related_add(self, relation=None, related_entity_id=None):
-        request.json
-        logger.info(f"related_add {relation.name} {related_entity_id}")
+        relation.add(self._get_entity_id_list(relation.name), related_entity_id)
 
     def related_remove(self, relation=None, related_entity_id=None):
-        logger.info(f"related_remove {relation.name} {related_entity_id}")
+        relation.remove(self._get_entity_id_list(relation.name), related_entity_id)
     
 
-class OrmPropertyRelation:
+class OrmManyRelation:
     
-    def __init__(self, name, model, property_name):
+    # TODO The use of sqlalchemy in this class could probably be improved/simplified.
+    def __init__(self, name=None, relation_property=None, relation_table=None,
+                 entity_id_column=None, related_entity_id_column=None):
         """
-        :param name of the relation, this will be used in request and name for registring endpoints
+        Relation that is implemented through a many to many table in the orm.
+        
+        :param name the name of the entity id list in the post request, also used for the flask entity name
+        :param relation_property the orm property of the relation to use
+        :param relation_table the relation table
+        :param entity_id_column the column name of the entity column name
+        :param related_entity_id_column the column name of the related entity column name
         """
         self.name = name
-        self.model = model
-        self.property_name = property_name
+        self.relation_property = relation_property
+        self.relation_table = relation_table
+        self.entity_id_column = entity_id_column
+        self.related_entity_id_column = related_entity_id_column
+        
+        self.insert = text(f"REPLACE INTO {self.relation_table.name} "
+                           f" ({self.entity_id_column}, {self.related_entity_id_column}) "
+                           f" VALUES (:entity_id, :related_entity_id)")
+    
+        self.delete = text(f"DELETE FROM {self.relation_table.name} "
+                           f" WHERE {self.entity_id_column} = :entity_id"
+                           f" AND {self.related_entity_id_column} = :related_entity_id")
+    
+    def add(self, entity_ids, related_entity_id):
+        for entity_id in entity_ids:
+            db_session.execute(self.insert, {'entity_id': entity_id, 'related_entity_id': related_entity_id})
+
+    def remove(self, entity_ids, related_entity_id):
+        for entity_id in entity_ids:
+            db_session.execute(self.delete, {'entity_id': entity_id, 'related_entity_id': related_entity_id})
     
     def filter(self, query, related_entity_id):
-        from membership.models import Member, Group
-        return query.join(Group, Member.groups).filter(Member.member_id == related_entity_id)
+        return query.join(self.relation_property).filter_by(**{self.related_entity_id_column: related_entity_id})
 
 
 # TODO BM Move this somewhere.
@@ -235,7 +270,7 @@ class MemberEntity(Entity):
                 sql = "SELECT COALESCE(MAX(member_number), 999) FROM membership_members"
                 max_member_number, = db_session.execute(sql).fetchone()
                 data['member_number'] = max_member_number + 1
-            return self.create_internal(data)
+            return self._create_internal(data)
         except Exception:
             # Rollback session if anything went wrong or we can't release the lock.
             db_session.rollback()
