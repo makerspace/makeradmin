@@ -11,6 +11,21 @@ from service.error import Unauthorized
 Base = declarative_base()
 
 
+member_group = Table(
+    # mysql> describe membership_members_groups;
+    # +-----------+---------+------+-----+---------+-------+
+    # | Field     | Type    | Null | Key | Default | Extra |
+    # +-----------+---------+------+-----+---------+-------+
+    # | member_id | int(11) | NO   | PRI | NULL    |       |
+    # | group_id  | int(11) | NO   | PRI | NULL    |       |
+    # +-----------+---------+------+-----+---------+-------+
+    'membership_members_groups',
+    Base.metadata,
+    Column('member_id', ForeignKey('membership_members.member_id'), primary_key=True),
+    Column('group_id', ForeignKey('membership_groups.group_id'), primary_key=True)
+)
+
+
 class Member(Base):
     # mysql> describe membership_members;
     # +-----------------+------------------+------+-----+-------------------+-------------------+
@@ -58,22 +73,28 @@ class Member(Base):
     deleted_at = Column(DateTime)
     member_number = Column(Integer, unique=True)
 
+    groups = relationship('Group',
+                          secondary=member_group,
+                          back_populates='members')
+
     def __repr__(self):
         return f'Member(member_id={self.member_id}, member_number={self.member_number}, email={self.email})'
 
 
-member_group = Table(
-    # mysql> describe membership_members_groups;
-    # +-----------+---------+------+-----+---------+-------+
-    # | Field     | Type    | Null | Key | Default | Extra |
-    # +-----------+---------+------+-----+---------+-------+
-    # | member_id | int(11) | NO   | PRI | NULL    |       |
-    # | group_id  | int(11) | NO   | PRI | NULL    |       |
-    # +-----------+---------+------+-----+---------+-------+
-    'membership_members_groups',
+group_permission = Table(
+    # mysql> describe membership_group_permissions;
+    # +---------------+------------------+------+-----+---------+----------------+
+    # | Field         | Type             | Null | Key | Default | Extra          |
+    # +---------------+------------------+------+-----+---------+----------------+
+    # | id            | int(10) unsigned | NO   | PRI | NULL    | auto_increment |
+    # | group_id      | int(10) unsigned | NO   | MUL | NULL    |                |
+    # | permission_id | int(10) unsigned | NO   | MUL | NULL    |                |
+    # +---------------+------------------+------+-----+---------+----------------+
+    'membership_group_permissions',
     Base.metadata,
-    Column('member_id', ForeignKey('membership_members.member_id'), primary_key=True),
-    Column('group_id', ForeignKey('membership_groups.group_id'), primary_key=True)
+    Column('id', Integer, autoincrement=True, nullable=False, primary_key=True),
+    Column('group_id', ForeignKey('membership_groups.group_id'), nullable=False),
+    Column('permission_id', ForeignKey('membership_permissions.permission_id'), nullable=False)
 )
 
 
@@ -110,27 +131,14 @@ class Group(Base):
     
     members = relationship('Member',
                            secondary=member_group,
-                           backref='groups')
+                           back_populates='groups')
+
+    permissions = relationship('Permission',
+                               secondary=group_permission,
+                               back_populates='groups')
 
     def __repr__(self):
         return f'Group(group_id={self.group_id}, name={self.name})'
-
-
-group_permission = Table(
-    # mysql> describe membership_group_permissions;
-    # +---------------+------------------+------+-----+---------+----------------+
-    # | Field         | Type             | Null | Key | Default | Extra          |
-    # +---------------+------------------+------+-----+---------+----------------+
-    # | id            | int(10) unsigned | NO   | PRI | NULL    | auto_increment |
-    # | group_id      | int(10) unsigned | NO   | MUL | NULL    |                |
-    # | permission_id | int(10) unsigned | NO   | MUL | NULL    |                |
-    # +---------------+------------------+------+-----+---------+----------------+
-    'membership_group_permissions',
-    Base.metadata,
-    Column('id', Integer, autoincrement=True, nullable=False, primary_key=True),
-    Column('group_id', ForeignKey('membership_groups.group_id'), nullable=False),
-    Column('permission_id', ForeignKey('membership_permissions.permission_id'), nullable=False)
-)
 
 
 class Permission(Base):
@@ -160,7 +168,7 @@ class Permission(Base):
 
     groups = relationship('Group',
                           secondary=group_permission,
-                          backref='permissions')
+                          back_populates='permissions')
 
 
 class Key(Base):

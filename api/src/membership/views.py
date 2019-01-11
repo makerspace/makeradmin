@@ -16,16 +16,6 @@ member_entity = MemberEntity(
                     'address_city', 'phone', 'civicregno', 'member_number'),
 )
 
-service.entity_routes(
-    path="/member",
-    entity=member_entity,
-    permission_list=MEMBER_VIEW,
-    permission_create=MEMBER_CREATE,
-    permission_read=MEMBER_VIEW,
-    permission_update=MEMBER_EDIT,
-    permission_delete=MEMBER_DELETE,
-)
-
 # TODO BM Group contains num_members that is calculated from relation, but only for list or related list.
 group_entity = Entity(
     Group,
@@ -38,6 +28,25 @@ group_entity = Entity(
 )
 
 service.entity_routes(
+    path="/member",
+    entity=member_entity,
+    permission_list=MEMBER_VIEW,
+    permission_create=MEMBER_CREATE,
+    permission_read=MEMBER_VIEW,
+    permission_update=MEMBER_EDIT,
+    permission_delete=MEMBER_DELETE,
+)
+
+service.related_entity_routes(
+    path="/member/<int:related_entity_id>/groups",
+    entity=group_entity,
+    relation=OrmManyRelation('groups', Group.members, member_group, 'group_id', 'member_id'),
+    permission_list=GROUP_MEMBER_VIEW,
+    permission_add=GROUP_MEMBER_ADD,
+    permission_remove=GROUP_MEMBER_REMOVE,
+)
+
+service.entity_routes(
     path="/group",
     entity=group_entity,
     permission_list=GROUP_VIEW,
@@ -47,11 +56,10 @@ service.entity_routes(
     permission_delete=GROUP_DELETE,
 )
 
-# TODO BM Add tests.
 service.related_entity_routes(
-    path="/member/<int:related_entity_id>/groups",
-    entity=group_entity,
-    relation=OrmManyRelation('groups', Group.members, member_group, 'group_id', 'member_id'),
+    path="/group/<int:related_entity_id>/members",
+    entity=member_entity,
+    relation=OrmManyRelation('members', Member.groups, member_group, 'member_id', 'group_id'),
     permission_list=GROUP_MEMBER_VIEW,
     permission_add=GROUP_MEMBER_ADD,
     permission_remove=GROUP_MEMBER_REMOVE,
@@ -103,9 +111,9 @@ service.related_entity_routes(
 # DONE $app->   put("membership/group/{id}",  ['middleware' => 'permission:group_edit',   'uses' => "Group@update"]);  // Model: Update
 # DONE $app->delete("membership/group/{id}",  ['middleware' => 'permission:group_delete', 'uses' => "Group@delete"]);  // Model: Delete
 # Relation
-# $app->   get("membership/group/{id}/members",        ['middleware' => 'permission:group_member_view',   'uses' => "Group@getMembers"]);    // Get collection with members
-# $app->  post("membership/group/{id}/members/add",    ['middleware' => 'permission:group_member_add',    'uses' => "Group@addMembers"]);
-# $app->  post("membership/group/{id}/members/remove", ['middleware' => 'permission:group_member_remove', 'uses' => "Group@removeMembers"]);
+# DONE $app->   get("membership/group/{id}/members",        ['middleware' => 'permission:group_member_view',   'uses' => "Group@getMembers"]);    // Get collection with members
+# DONE $app->  post("membership/group/{id}/members/add",    ['middleware' => 'permission:group_member_add',    'uses' => "Group@addMembers"]);
+# DONE $app->  post("membership/group/{id}/members/remove", ['middleware' => 'permission:group_member_remove', 'uses' => "Group@removeMembers"]);
 # Relation
 # $app->   get("membership/group/{id}/permissions",        ['middleware' => 'permission:permission_view',   'uses' => "Group@listPermissions"]);  // Model: Create
 # $app->  post("membership/group/{id}/permissions/add",    ['middleware' => 'permission:permission_manage', 'uses' => "Group@addPermissions"]);  // Model: Create
