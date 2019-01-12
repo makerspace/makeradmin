@@ -173,3 +173,6 @@ class Test(ApiTest):
 
         self.get(f"/membership/member?search={firstname}&sort_by=lastname&sort_order=desc&page_size=3&page=3")\
             .expect(code=200, data=[], page=3, per_page=3, last_page=2, total=4)
+
+    # TODO Is delete non existent 404 or 200?
+    

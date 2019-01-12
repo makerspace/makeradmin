@@ -254,7 +254,7 @@ class OrmManyRelation:
         return query.join(self.relation_property).filter_by(**{self.related_entity_id_column: related_entity_id})
 
 
-# TODO BM Move this somewhere.
+# TODO BM Move this somewhere, belongs to membership.
 class MemberEntity(Entity):
     """ Member member_number should be auto increment but mysql only supports one auto increment per table,
     can solve it with a trigger or like this using an explicit mysql lock. """

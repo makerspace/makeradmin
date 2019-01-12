@@ -16,7 +16,6 @@ member_entity = MemberEntity(
                     'address_city', 'phone', 'civicregno', 'member_number'),
 )
 
-# TODO BM Group contains num_members that is calculated from relation, but only for list or related list.
 group_entity = Entity(
     Group,
     validation=dict(name=not_empty, title=not_empty),

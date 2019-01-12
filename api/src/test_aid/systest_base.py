@@ -13,7 +13,10 @@ from selenium.webdriver.chrome import webdriver as chrome
 from selenium.webdriver import DesiredCapabilities
 from selenium.webdriver.support.wait import WebDriverWait
 
+from service.config import get_mysql_config
+from service.db import create_mysql_engine
 from test_aid.api import ApiFactory
+from test_aid.db import DbFactory
 from test_aid.obj import DEFAULT_PASSWORD_HASH
 from test_aid.systest_config import STRIPE_PUBLIC_KEY, HOST_FRONTEND, HOST_PUBLIC, HOST_BACKEND, \
     SELENIUM_BASE_TIMEOUT, SLEEP, WEBDRIVER_TYPE, API_BEARER, SELENIUM_SCREENSHOT_DIR, KEEP_BROWSER
@@ -33,6 +36,8 @@ class SystestBase(TestBase):
     @classmethod
     def setUpClass(self):
         super().setUpClass()
+        create_mysql_engine(**get_mysql_config())
+        self.db = DbFactory(self, self.obj)
         self.admin_url = HOST_FRONTEND
         self.public_url = HOST_PUBLIC
         self.api_url = HOST_BACKEND

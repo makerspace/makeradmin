@@ -66,5 +66,3 @@ class Test(ApiTest):
 
         data = self.api.get(f"/membership/group?search={group['name']}").expect(200).data
         self.assertEqual(2, data[0]['num_members'])
-
-    # TODO BM Test permissions.

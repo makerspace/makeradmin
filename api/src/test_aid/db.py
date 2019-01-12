@@ -40,7 +40,7 @@ class DbFactory:
         
     def create_member(self, **kwargs):
         obj = self.obj.create_member(**kwargs)
-        self.member = Member(**obj)
+        self.member = Member(**obj, member_number=self.get_member_number())
         db_session.add(self.member)
         db_session.commit()
         return self.member
@@ -61,3 +61,11 @@ class DbFactory:
         db_session.add(self.permission)
         db_session.commit()
         return self.permission
+
+    def get_member_number(self):
+        # Ugly but will work most of the time.
+        sql = "SELECT COALESCE(MAX(member_number), 0) FROM membership_members"
+        member_number = db_session.execute(sql).fetchone()[0] + randint(1000, 2000)
+        return member_number
+        
+        
