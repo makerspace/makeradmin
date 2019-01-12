@@ -2,7 +2,7 @@ from datetime import datetime
 from math import ceil
 
 from flask import request
-from sqlalchemy import inspect, Integer, String, DateTime, Text, desc, asc, or_, text, bindparam
+from sqlalchemy import inspect, Integer, String, DateTime, Text, desc, asc, or_, text
 
 from service.api_definition import BAD_VALUE, REQUIRED, Arg, symbol, Enum, natural0, natural1
 from service.db import db_session
@@ -131,7 +131,7 @@ class Entity:
 
         if relation and related_entity_id:
             query = relation.filter(query, related_entity_id)
-        
+
         if search:
             expression = or_(*[self.columns[column_name].like(f"%{search}%") for column_name in self.search_columns])
             query = query.filter(expression)
@@ -150,7 +150,7 @@ class Entity:
         
         if page_size:
             query = query.limit(page_size).offset((page - 1) * page_size)
-            
+
         return dict(
             total=count,
             page=page,
@@ -160,6 +160,7 @@ class Entity:
         )
     
     def _create_internal(self, data):
+        """ Internal create to make it easier for subclasses to manipulated data before create. """
         input_data = self.to_model(data)
         self.validate_all(input_data)
         if not input_data:
@@ -277,4 +278,5 @@ class MemberEntity(Entity):
             raise
         finally:
             db_session.execute("DO RELEASE_LOCK('member_number')")
+        
         

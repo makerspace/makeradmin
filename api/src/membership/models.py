@@ -1,8 +1,8 @@
 import bcrypt
 
-from sqlalchemy import Column, Integer, String, DateTime, Text, Date, Enum, Table, ForeignKey, func, text
+from sqlalchemy import Column, Integer, String, DateTime, Text, Date, Enum, Table, ForeignKey, func, text, select
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, column_property
 
 from service.api_definition import BAD_VALUE
 from service.db import db_session
@@ -136,9 +136,17 @@ class Group(Base):
     permissions = relationship('Permission',
                                secondary=group_permission,
                                back_populates='groups')
-
+    
     def __repr__(self):
         return f'Group(group_id={self.group_id}, name={self.name})'
+  
+    
+# Calculated property will be a sub executed as a sub select for each groups, since there are not that many groups
+# this is fine.
+Group.num_members = column_property(
+    select([func.count(member_group.columns.member_id)])
+    .where(Group.group_id == member_group.columns.group_id)
+)
 
 
 class Permission(Base):
