@@ -1,7 +1,7 @@
 from membership import service
-from membership.models import Member, Group, member_group
+from membership.models import Member, Group, member_group, Span
 from service.api_definition import MEMBER_VIEW, MEMBER_CREATE, MEMBER_EDIT, MEMBER_DELETE, GROUP_VIEW, GROUP_CREATE, \
-    GROUP_EDIT, GROUP_DELETE, GROUP_MEMBER_VIEW, GROUP_MEMBER_ADD, GROUP_MEMBER_REMOVE
+    GROUP_EDIT, GROUP_DELETE, GROUP_MEMBER_VIEW, GROUP_MEMBER_ADD, GROUP_MEMBER_REMOVE, SPAN_VIEW, SPAN_MANAGE
 from service.entity import Entity, not_empty, ASC, DESC, MemberEntity, OrmManyRelation
 
 # TODO BM Move implementations around.
@@ -24,6 +24,15 @@ group_entity = Entity(
     search_columns=('name', 'title', 'description'),
     read_only_columns=('parent', 'left', 'right'),
     hidden_columns=('parent', 'left', 'right'),
+)
+
+# TODO BM got expandable field member (a concept used in two places)
+span_entity = Entity(
+    Span,
+    default_sort_column='created_at',
+    default_sort_order=DESC,
+    search_columns=('member_id',),
+    list_deleted=True,  # TODO BM Add test for this.
 )
 
 service.entity_routes(
@@ -64,6 +73,16 @@ service.related_entity_routes(
     permission_remove=GROUP_MEMBER_REMOVE,
 )
 
+service.entity_routes(
+    path="/span",
+    entity=span_entity,
+    permission_list=SPAN_VIEW,
+    permission_create=SPAN_MANAGE,
+    permission_read=SPAN_VIEW,
+    permission_update=SPAN_MANAGE,
+    permission_delete=SPAN_MANAGE,
+)
+
 
 # TODO BM Complete all membership api.
 
@@ -97,11 +116,11 @@ service.related_entity_routes(
 # $app->delete("membership/key/{id}", ['middleware' => 'permission:keys_edit', 'uses' => "Key@delete"]); // Model: Delete
 
 # Entity
-# $app->   get("membership/span",      ['middleware' => 'permission:span_view',  'uses' => "Span@list"]);       // Get collection
-# $app->  post("membership/span",      ['middleware' => 'permission:span_manage',  'uses' => "Span@create"]);   // Model: Create
-# $app->   get("membership/span/{id}", ['middleware' => 'permission:span_view',  'uses' => "Span@read"]);       // Model: Read
-# $app->   put("membership/span/{id}", ['middleware' => 'permission:span_manage',  'uses' => "Span@update"]);   // Model: Update
-# $app->delete("membership/span/{id}", ['middleware' => 'permission:span_manage',  'uses' => "Span@delete"]);   // Model: Delete
+# DONE $app->   get("membership/span",      ['middleware' => 'permission:span_view',  'uses' => "Span@list"]);       // Get collection
+# DONE $app->  post("membership/span",      ['middleware' => 'permission:span_manage',  'uses' => "Span@create"]);   // Model: Create
+# DONE $app->   get("membership/span/{id}", ['middleware' => 'permission:span_view',  'uses' => "Span@read"]);       // Model: Read
+# DONE $app->   put("membership/span/{id}", ['middleware' => 'permission:span_manage',  'uses' => "Span@update"]);   // Model: Update
+# DONE $app->delete("membership/span/{id}", ['middleware' => 'permission:span_manage',  'uses' => "Span@delete"]);   // Model: Delete
 
 # DONE Entity
 # DONE $app->   get("membership/group",       ['middleware' => 'permission:group_view',   'uses' => "Group@list"]);    // Get collection

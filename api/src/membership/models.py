@@ -208,6 +208,11 @@ class Key(Base):
     member = relationship(Member, backref="keys")
 
 
+LABACCESS = 'labaccess'
+MEMBERSHIP = 'membership'
+SPECIAL_LABACESS = 'special_labaccess'
+
+
 class Span(Base):
     # mysql> describe membership_spans;
     # +-----------------+------------------------+------+-----+-------------------+-------------------+
@@ -231,11 +236,11 @@ class Span(Base):
     member_id = Column(Integer, ForeignKey('membership_members.member_id'), nullable=False)
     startdate = Column(Date, nullable=False)  # Start date, inclusive
     enddate = Column(Date, nullable=False)    # End date, inclusive
-    type = Column(Enum('labaccess', 'membership', 'special_labaccess'), nullable=False)
+    type = Column(Enum(LABACCESS, MEMBERSHIP, SPECIAL_LABACESS), nullable=False)
     creation_reason = Column(String(255))
     created_at = Column(DateTime, server_default=func.now())
-    updated_at = Column(DateTime)
     deleted_at = Column(DateTime)
+    deletion_reason = Column(String(255))  # TODO Unused, remove it?
     
     member = relationship(Member, backref="spans")
 

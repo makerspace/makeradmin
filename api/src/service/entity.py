@@ -1,13 +1,12 @@
-from datetime import datetime
+from datetime import datetime, date
 from math import ceil
 
 from flask import request
-from sqlalchemy import inspect, Integer, String, DateTime, Text, desc, asc, or_, text
+from sqlalchemy import inspect, Integer, String, DateTime, Text, desc, asc, or_, text, Date, Enum as DbEnum
 
 from service.api_definition import BAD_VALUE, REQUIRED, Arg, symbol, Enum, natural0, natural1
 from service.db import db_session
 from service.error import NotFound, UnprocessableEntity, InternalServerError
-from service.logging import logger
 
 ASC = 'asc'
 DESC = 'desc'
@@ -37,6 +36,8 @@ to_model_converters = {
     String: to_model_wrap(str),
     Text: to_model_wrap(str),
     DateTime: to_model_wrap(datetime.fromisoformat),
+    Date: to_model_wrap(date.fromisoformat),
+    DbEnum: to_model_wrap(str),
 }
 
 
@@ -49,6 +50,8 @@ to_obj_converters = {
     String: identity,
     Text: identity,
     DateTime: lambda d: None if d is None else d.isoformat(),
+    Date: lambda d: None if d is None else d.isoformat(),
+    DbEnum: identity,
 }
 
 
@@ -58,11 +61,14 @@ GLOBAl_READ_ONLY = ('created_at', 'updated_at', 'deleted_at')
 # TODO BM Expand functionality is used for Key->member and Span->member, nothing else, add support for it.
 # Or subclassing if it turns out it is rarly used.
 
+# TODO BM Try to get guis running with both old and new version using same db for verification.
+
 class Entity:
     """ Used to create a crud-able entity, subclass to provide additional functionality. """
     
     def __init__(self, model, hidden_columns=tuple(), read_only_columns=tuple(), validation=None,
-                 default_sort_column=None, default_sort_order=None, search_columns=tuple()):
+                 default_sort_column=None, default_sort_order=None, search_columns=tuple(),
+                 list_deleted=False):
         """
         :param model sqlalchemy orm model class
         :param hidden_columns columns that should be filtered on read
@@ -71,6 +77,8 @@ class Entity:
         :param default_sort_column column name
         :param default_sort_order asc/desc
         :param search_columns columns that should be used for text search (search param to list)
+        :param list_deleted whether deleted entities should be included in list or not
+        # TODO BM Old implementation can search for "roos anders" check this.
         """
         
         self.model = model
@@ -79,6 +87,7 @@ class Entity:
         self.default_sort_column = default_sort_column
         self.default_sort_order = default_sort_order
         self.search_columns = search_columns
+        self.list_deleted = list_deleted
         
         model_inspect = inspect(self.model)
         
@@ -127,7 +136,10 @@ class Entity:
              search=Arg(str, required=False), page_size=Arg(natural0, required=False),
              page=Arg(natural1, required=False), relation=None, related_entity_id=None):
 
-        query = db_session.query(self.model).filter(self.model.deleted_at.is_(None))
+        query = db_session.query(self.model)\
+        
+        if not self.list_deleted:
+            query = query.filter(self.model.deleted_at.is_(None))
 
         if relation and related_entity_id:
             query = relation.filter(query, related_entity_id)
