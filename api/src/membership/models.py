@@ -1,5 +1,4 @@
 import bcrypt
-
 from sqlalchemy import Column, Integer, String, DateTime, Text, Date, Enum, Table, ForeignKey, func, text, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.declarative import declarative_base
@@ -249,15 +248,14 @@ class Span(Base):
 # TODO BM Move this somewhere. It is used by core and it should be clear that core is using membership, somewhere where
 # membership endpoints are implemented.
 def get_member_permissions(member_id=None):
-    """ Get all permissions for a memeber, returns set of permission strings. """
-    return set(
-        p for p, in
+    """ Return query to get all (permission_id, permission) for a memeber. """
+    return (
         db_session
-        .query(Permission.permission)
-        .distinct()
-        .join(Group, Permission.groups)
-        .join(Member, Group.members)
-        .filter_by(member_id=member_id)
+            .query(Permission.permission_id, Permission.permission)
+            .distinct()
+            .join(Group, Permission.groups)
+            .join(Member, Group.members)
+            .filter_by(member_id=member_id)
     )
 
 

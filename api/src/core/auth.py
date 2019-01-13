@@ -113,7 +113,7 @@ def authenticate_request():
         raise Unauthorized("Unauthorized, expired access token.", fields="bearer", what=EXPIRED)
     
     if access_token.permissions is None:
-        permissions = get_member_permissions(access_token.user_id)
+        permissions = {p for _, p in get_member_permissions(access_token.user_id)}
 
         if access_token.user_id < 0:
             permissions.add(SERVICE)
