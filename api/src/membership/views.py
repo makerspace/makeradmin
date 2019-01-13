@@ -4,7 +4,7 @@ from membership.models import Member, Group, member_group, Span, Permission, reg
     Key, MEMBERSHIP, LABACCESS, SPECIAL_LABACESS
 from service.api_definition import MEMBER_VIEW, MEMBER_CREATE, MEMBER_EDIT, MEMBER_DELETE, GROUP_VIEW, GROUP_CREATE, \
     GROUP_EDIT, GROUP_DELETE, GROUP_MEMBER_VIEW, GROUP_MEMBER_ADD, GROUP_MEMBER_REMOVE, SPAN_VIEW, SPAN_MANAGE, \
-    PERMISSION_MANAGE, SERVICE, POST, Arg, symbol_list, PERMISSION_VIEW, KEY_VIEW, KEY_EDIT, GET, Enum, natural0, \
+    PERMISSION_MANAGE, SERVICE, POST, Arg, symbol_list, PERMISSION_VIEW, KEYS_VIEW, KEYS_EDIT, GET, Enum, \
     iso_date, non_empty_str, natural1
 from service.db import db_session
 from service.entity import Entity, not_empty, ASC, DESC, MemberEntity, OrmManyRelation, OrmSingeRelation
@@ -161,11 +161,11 @@ service.entity_routes(
 service.entity_routes(
     path="/key",
     entity=key_entity,
-    permission_list=KEY_VIEW,
-    permission_read=KEY_VIEW,
-    permission_create=KEY_EDIT,
-    permission_update=KEY_EDIT,
-    permission_delete=KEY_EDIT,
+    permission_list=KEYS_VIEW,
+    permission_read=KEYS_VIEW,
+    permission_create=KEYS_EDIT,
+    permission_update=KEYS_EDIT,
+    permission_delete=KEYS_EDIT,
 )
 
 # TODO BM Complete all membership api.

@@ -37,8 +37,8 @@ PERMISSION_VIEW = 'permission_view'
 PERMISSION_MANAGE = 'permission_manage'
 SPAN_VIEW = "span_view"
 SPAN_MANAGE = "span_manage"
-KEY_VIEW = "key_view"
-KEY_EDIT = "key_edit"
+KEYS_VIEW = "keys_view"
+KEYS_EDIT = "keys_edit"
 WEBSHOP = 'webshop'
 
 ALL_PERMISSIONS = [
@@ -46,7 +46,7 @@ ALL_PERMISSIONS = [
     GROUP_VIEW, GROUP_CREATE, GROUP_EDIT, GROUP_DELETE, GROUP_MEMBER_ADD, GROUP_MEMBER_REMOVE, GROUP_MEMBER_VIEW,
     PERMISSION_VIEW, PERMISSION_MANAGE,
     SPAN_VIEW, SPAN_MANAGE,
-    KEY_VIEW, KEY_EDIT,
+    KEYS_VIEW, KEYS_EDIT,
 ]
 
 # Service credentials
