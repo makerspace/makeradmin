@@ -164,6 +164,9 @@ ALTER TABLE `membership_spans` ADD UNIQUE INDEX `membership_members_creation_rea
 
 -- make membership_keys tagid unique
 ALTER TABLE `membership_keys` DROP INDEX `membership_keys_tagid_index`;
+DELETE FROM `membership_keys` WHERE tagid = '329285081' AND `deleted_at` IS NOT NULL;
+DELETE FROM `membership_keys` WHERE tagid = '633412134' AND `deleted_at` IS NOT NULL;
+DELETE FROM `membership_keys` WHERE tagid = '329339240' AND `deleted_at` IS NOT NULL;
 ALTER TABLE `membership_keys` ADD UNIQUE INDEX `membership_keys_tagid_index` (`tagid`);
 
 -- TODO BM Make all unique fileds uniquie.

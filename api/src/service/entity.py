@@ -225,6 +225,25 @@ class Entity:
     def related_remove(self, relation=None, related_entity_id=None):
         relation.remove(self._get_entity_id_list(relation.name), related_entity_id)
     
+    
+class OrmSingeRelation:
+    def __init__(self, name=None, related_entity_id_column=None):
+        """
+        Relation that is implemented through a foreithn key in the orm.
+        """
+        
+        self.name = name
+        self.related_entity_id_column = related_entity_id_column
+        
+    def add(self, *args):
+        raise NotFound("Not supported.", log="Add not supported by this class.")
+
+    def remove(self, *args):
+        raise NotFound("Not supported.", log="Add not supported by this class.")
+
+    def filter(self, query, related_entity_id):
+        return query.filter_by(**{self.related_entity_id_column: related_entity_id})
+        
 
 class OrmManyRelation:
     

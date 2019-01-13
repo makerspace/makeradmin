@@ -55,6 +55,7 @@ class ApiFactory:
         self.category = None
         self.product = None
         self.action = None
+        self.key = None
     
     def request(self, method, path, **kwargs):
         token = kwargs.pop('token', self.api_token)
@@ -88,6 +89,11 @@ class ApiFactory:
             .expect(code=200)\
             .get("access_token")
         return self.token
+
+    def create_key(self, **kwargs):
+        obj = self.obj.create_key(**kwargs)
+        self.key = self.post("/membership/key", json=obj).expect(code=201, status='created').data
+        return self.key
 
     def create_group(self, **kwargs):
         obj = self.obj.create_group(**kwargs)

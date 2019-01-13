@@ -3,7 +3,7 @@ from membership.models import Member, Group, member_group, Span, Permission, reg
 from service.api_definition import MEMBER_VIEW, MEMBER_CREATE, MEMBER_EDIT, MEMBER_DELETE, GROUP_VIEW, GROUP_CREATE, \
     GROUP_EDIT, GROUP_DELETE, GROUP_MEMBER_VIEW, GROUP_MEMBER_ADD, GROUP_MEMBER_REMOVE, SPAN_VIEW, SPAN_MANAGE, \
     PERMISSION_MANAGE, SERVICE, POST, Arg, symbol_list, PERMISSION_VIEW, KEY_VIEW, KEY_EDIT
-from service.entity import Entity, not_empty, ASC, DESC, MemberEntity, OrmManyRelation
+from service.entity import Entity, not_empty, ASC, DESC, MemberEntity, OrmManyRelation, OrmSingeRelation
 
 # TODO BM Move implementations around.
 
@@ -72,6 +72,13 @@ service.related_entity_routes(
     permission_remove=GROUP_MEMBER_REMOVE,
 )
 
+service.related_entity_routes(
+    path="/member/<int:related_entity_id>/keys",
+    entity=key_entity,
+    relation=OrmSingeRelation('keys', 'member_id'),
+    permission_list=MEMBER_VIEW,
+)
+
 service.entity_routes(
     path="/group",
     entity=group_entity,
@@ -138,7 +145,6 @@ service.entity_routes(
     permission_delete=KEY_EDIT,
 )
 
-
 # TODO BM Complete all membership api.
 
 # Special? Check if they are used?
@@ -161,7 +167,7 @@ service.entity_routes(
 # DONE $app->  post("membership/member/{id}/groups/add",    ['middleware' => 'permission:group_member_add',    'uses' => "Member@addGroup"]);    // Get collection with members
 # DONE $app->  post("membership/member/{id}/groups/remove", ['middleware' => 'permission:group_member_remove', 'uses' => "Member@removeGroup"]);    // Get collection with members
 # Relation
-# $app->   get("membership/member/{id}/keys", ['middleware' => 'permission:member_view',   'uses' => "Member@getKeys"]);
+# DONE $app->   get("membership/member/{id}/keys", ['middleware' => 'permission:member_view',   'uses' => "Member@getKeys"]);
 
 # Entity
 # DONE $app->   get("membership/key",      ['middleware' => 'permission:keys_view', 'uses' => "Key@list"]);   // Get collection

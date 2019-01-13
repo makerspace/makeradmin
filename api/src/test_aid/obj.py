@@ -22,6 +22,7 @@ class ObjFactory:
         self.category = None
         self.product = None
         self.action = None
+        self.key = None
     
     def create_member(self, **kwargs):
         firstname = self.fake.first_name()
@@ -52,6 +53,15 @@ class ObjFactory:
         obj.update(kwargs)
         self.group = obj
         return self.group
+
+    def create_key(self, **kwargs):
+        obj = dict(
+            tagid=str(randint(1e12, 9e12)),
+            description=self.fake.bs(),
+        )
+        obj.update(kwargs)
+        self.key = obj
+        return self.key
 
     def create_category(self, **kwargs):
         obj = dict(
