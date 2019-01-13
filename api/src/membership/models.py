@@ -56,7 +56,7 @@ class Member(Base):
     __tablename__ = 'membership_members'
     
     member_id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
-    email = Column(String(255), unique=True, index=True, nullable=False)
+    email = Column(String(255), unique=True, nullable=False)
     password = Column(String(60))
     firstname = Column(String(255), nullable=False)
     lastname = Column(String(255))
@@ -201,7 +201,7 @@ class Key(Base):
     rfid_id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
     member_id = Column(Integer, ForeignKey('membership_members.member_id'), nullable=False)
     description = Column(Text)
-    tagid = Column(String(255), nullable=False, index=True)
+    tagid = Column(String(255), nullable=False, unique=True)
     created_at = Column(DateTime, server_default=func.now())
     updated_at = Column(DateTime)
     deleted_at = Column(DateTime)
@@ -238,7 +238,7 @@ class Span(Base):
     startdate = Column(Date, nullable=False)  # Start date, inclusive
     enddate = Column(Date, nullable=False)    # End date, inclusive
     type = Column(Enum(LABACCESS, MEMBERSHIP, SPECIAL_LABACESS), nullable=False)
-    creation_reason = Column(String(255))
+    creation_reason = Column(String(255), unique=True)
     created_at = Column(DateTime, server_default=func.now())
     deleted_at = Column(DateTime)
     deletion_reason = Column(String(255))  # TODO Unused, remove it?

@@ -1,8 +1,8 @@
 from membership import service
-from membership.models import Member, Group, member_group, Span, Permission, register_permissions, group_permission
+from membership.models import Member, Group, member_group, Span, Permission, register_permissions, group_permission, Key
 from service.api_definition import MEMBER_VIEW, MEMBER_CREATE, MEMBER_EDIT, MEMBER_DELETE, GROUP_VIEW, GROUP_CREATE, \
     GROUP_EDIT, GROUP_DELETE, GROUP_MEMBER_VIEW, GROUP_MEMBER_ADD, GROUP_MEMBER_REMOVE, SPAN_VIEW, SPAN_MANAGE, \
-    PERMISSION_MANAGE, SERVICE, POST, Arg, symbol_list, PERMISSION_VIEW
+    PERMISSION_MANAGE, SERVICE, POST, Arg, symbol_list, PERMISSION_VIEW, KEY_VIEW, KEY_EDIT
 from service.entity import Entity, not_empty, ASC, DESC, MemberEntity, OrmManyRelation
 
 # TODO BM Move implementations around.
@@ -27,6 +27,14 @@ group_entity = Entity(
     hidden_columns=('parent', 'left', 'right'),
 )
 
+# TODO BM Add tests.
+permission_entity = Entity(
+    Permission,
+    default_sort_column='permission_id',
+    default_sort_order=DESC,
+    search_columns=('permission', 'permission_id'),
+)
+
 # TODO BM got expandable field member (a concept used in two places)
 span_entity = Entity(
     Span,
@@ -36,12 +44,12 @@ span_entity = Entity(
     list_deleted=True,  # TODO BM Add test for this (and general tests).
 )
 
-# TODO BM Add tests.
-permission_entity = Entity(
-    Permission,
-    default_sort_column='permission_id',
+# TODO BM got expandable field member (a concept used in two places)
+key_entity = Entity(
+    Key,
+    default_sort_column='created_at',
     default_sort_order=DESC,
-    search_columns=('permission', 'permission_id'),
+    search_columns=('description', 'tagid'),
 )
 
 
@@ -120,6 +128,17 @@ service.entity_routes(
 )
 
 
+service.entity_routes(
+    path="/key",
+    entity=key_entity,
+    permission_list=KEY_VIEW,
+    permission_read=KEY_VIEW,
+    permission_create=KEY_EDIT,
+    permission_update=KEY_EDIT,
+    permission_delete=KEY_EDIT,
+)
+
+
 # TODO BM Complete all membership api.
 
 # Special? Check if they are used?
@@ -145,11 +164,11 @@ service.entity_routes(
 # $app->   get("membership/member/{id}/keys", ['middleware' => 'permission:member_view',   'uses' => "Member@getKeys"]);
 
 # Entity
-# $app->   get("membership/key",      ['middleware' => 'permission:keys_view', 'uses' => "Key@list"]);   // Get collection
-# $app->  post("membership/key",      ['middleware' => 'permission:keys_edit', 'uses' => "Key@create"]); // Model: Create
-# $app->   get("membership/key/{id}", ['middleware' => 'permission:keys_view', 'uses' => "Key@read"]);   // Model: Read
-# $app->   put("membership/key/{id}", ['middleware' => 'permission:keys_edit', 'uses' => "Key@update"]); // Model: Update
-# $app->delete("membership/key/{id}", ['middleware' => 'permission:keys_edit', 'uses' => "Key@delete"]); // Model: Delete
+# DONE $app->   get("membership/key",      ['middleware' => 'permission:keys_view', 'uses' => "Key@list"]);   // Get collection
+# DONE $app->  post("membership/key",      ['middleware' => 'permission:keys_edit', 'uses' => "Key@create"]); // Model: Create
+# DONE $app->   get("membership/key/{id}", ['middleware' => 'permission:keys_view', 'uses' => "Key@read"]);   // Model: Read
+# DONE $app->   put("membership/key/{id}", ['middleware' => 'permission:keys_edit', 'uses' => "Key@update"]); // Model: Update
+# DONE $app->delete("membership/key/{id}", ['middleware' => 'permission:keys_edit', 'uses' => "Key@delete"]); // Model: Delete
 
 # Entity
 # DONE $app->   get("membership/span",      ['middleware' => 'permission:span_view',  'uses' => "Span@list"]);       // Get collection

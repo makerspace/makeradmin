@@ -162,4 +162,8 @@ ALTER TABLE `membership_members` ADD UNIQUE INDEX `membership_members_member_num
 -- make membership_spans creation_reason unique
 ALTER TABLE `membership_spans` ADD UNIQUE INDEX `membership_members_creation_reason_index` (`creation_reason`);
 
+-- make membership_keys tagid unique
+ALTER TABLE `membership_keys` DROP INDEX `membership_keys_tagid_index`;
+ALTER TABLE `membership_keys` ADD UNIQUE INDEX `membership_keys_tagid_index` (`tagid`);
+
 -- TODO BM Make all unique fileds uniquie.
