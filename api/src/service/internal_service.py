@@ -29,7 +29,6 @@ class InternalService(Blueprint):
         super().__init__(name, name)
         self.migrations = migrations
         self.service_module = getmodule(stack()[1][0])
-        self.used_permissions = set()
 
     def migrate(self, session_factory):
         if self.migrations:
@@ -65,9 +64,6 @@ class InternalService(Blueprint):
         assert permission is not None, "permission is required, use PUBLIC for no permission needed"
         assert bool(method) != bool(methods), "exactly one of method and methods parameter should be set"
 
-        if permission not in (PUBLIC, SERVICE, USER):
-            self.used_permissions.add(permission)
-        
         methods = methods or (method,)
         
         def decorator(f):

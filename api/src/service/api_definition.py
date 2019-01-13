@@ -32,12 +32,18 @@ GROUP_DELETE = 'group_delete'
 GROUP_MEMBER_VIEW = 'group_member_view'
 GROUP_MEMBER_ADD = 'group_member_add'
 GROUP_MEMBER_REMOVE = 'group_member_remove'
+PERMISSION_VIEW = 'permission_view'
 PERMISSION_MANAGE = 'permission_manage'
 SPAN_VIEW = "span_view"
 SPAN_MANAGE = "span_manage"
-
-PERMISSION_VIEW = 'permission_view'
 WEBSHOP = 'webshop'
+
+ALL_PERMISSIONS = [
+    MEMBER_VIEW, MEMBER_CREATE, MEMBER_EDIT, MEMBER_DELETE,
+    GROUP_VIEW, GROUP_CREATE, GROUP_EDIT, GROUP_DELETE, GROUP_MEMBER_ADD, GROUP_MEMBER_REMOVE, GROUP_MEMBER_VIEW,
+    PERMISSION_VIEW, PERMISSION_MANAGE,
+    SPAN_VIEW, SPAN_MANAGE,
+]
 
 # Service credentials
 SERVICE_USER_ID = -1
