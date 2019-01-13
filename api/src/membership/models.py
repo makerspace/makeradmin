@@ -1,6 +1,7 @@
 import bcrypt
 
 from sqlalchemy import Column, Integer, String, DateTime, Text, Date, Enum, Table, ForeignKey, func, text, select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, column_property
 
@@ -259,6 +260,16 @@ def get_member_permissions(member_id=None):
         .filter_by(member_id=member_id)
     )
 
+
+# TODO BM Move this somewhere.
+def register_permissions(permissions):
+    for permission in permissions:
+        try:
+            db_session.add(Permission(permission=permission))
+            db_session.commit()
+        except IntegrityError:
+            db_session.rollback()
+    
 
 # TODO BM Move this somewhere.
 def verify_password(password, password_hash):

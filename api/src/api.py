@@ -3,6 +3,7 @@ from flask import Flask, jsonify
 from sqlalchemy.exc import OperationalError
 
 from core.auth import authenticate_request
+from membership.models import register_permissions
 from service.config import get_mysql_config
 from service.db import create_mysql_engine, shutdown_session, populate_fields_by_index
 from service.error import ApiError, error_handler_api, error_handler_db, error_handler_500, error_handler_404
@@ -31,6 +32,10 @@ app.before_request(authenticate_request)
 engine = create_mysql_engine(**get_mysql_config())
 
 populate_fields_by_index(engine)
+
+
+for _, service in services:
+    register_permissions(getattr(service, 'used_permissions', []))
 
 
 @app.route("/")

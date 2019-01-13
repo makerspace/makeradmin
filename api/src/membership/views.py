@@ -1,8 +1,8 @@
 from membership import service
-from membership.models import Member, Group, member_group, Span, Permission
+from membership.models import Member, Group, member_group, Span, Permission, register_permissions
 from service.api_definition import MEMBER_VIEW, MEMBER_CREATE, MEMBER_EDIT, MEMBER_DELETE, GROUP_VIEW, GROUP_CREATE, \
     GROUP_EDIT, GROUP_DELETE, GROUP_MEMBER_VIEW, GROUP_MEMBER_ADD, GROUP_MEMBER_REMOVE, SPAN_VIEW, SPAN_MANAGE, \
-    PERMISSION_MANAGE
+    PERMISSION_MANAGE, SERVICE, POST, Arg, symbol_list
 from service.entity import Entity, not_empty, ASC, DESC, MemberEntity, OrmManyRelation
 
 # TODO BM Move implementations around.
@@ -92,6 +92,13 @@ service.entity_routes(
     permission_update=GROUP_EDIT,
     permission_delete=GROUP_DELETE,
 )
+
+
+@service.route("/membership/permission/register", method=POST, permission=SERVICE)
+def permissions_register(permissions=Arg(symbol_list)):
+    """ Register permissions that a service is dependent of. """
+    register_permissions(permissions)
+
 
 service.entity_routes(
     path="/span",

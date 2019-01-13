@@ -142,3 +142,14 @@ def natural1(value):
     return value
     
     
+def symbol_list(value):
+    """ A list of symbols. """
+    if not isinstance(value, list):
+        raise ValueError(f"Value {value} should be a list.")
+    return [symbol(item) for item in value]
+    
+    
+    
+
+
+    
