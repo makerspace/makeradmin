@@ -4,7 +4,7 @@ from unittest import TestCase
 from flask import Flask
 from sqlalchemy import create_engine
 
-from service.db import db_session_factory
+from service.db import db_session_factory, db_session
 from service.internal_service import InternalService
 from test_aid.db import DbFactory
 from test_aid.obj import ObjFactory
@@ -46,6 +46,9 @@ class FlaskTestBase(TestBase):
         super().setUpClass()
 
         self.app = Flask(__name__)
+
+        # Make sure sessions is removed so it is not using another engine in this thread.
+        db_session.remove()
 
         engine = create_engine('sqlite:///:memory:')
         for model in self.models:

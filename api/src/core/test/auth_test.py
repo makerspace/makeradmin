@@ -20,16 +20,16 @@ class Test(FlaskTestBase):
         with self.app.test_request_context():
             self.assertFalse(hasattr(g, 'user_id'))
             self.assertFalse(hasattr(g, 'permissions'))
-            
+
             authenticate_request()
-            
+
             self.assertIsNone(g.user_id)
             self.assertEqual(tuple(), g.permissions)
 
     def test_no_auth_header_sets_correct_user_and_permissions(self):
         with self.app.test_request_context():
             authenticate_request()
-            
+
             self.assertIsNone(g.user_id)
             self.assertEqual(tuple(), g.permissions)
 
@@ -50,7 +50,7 @@ class Test(FlaskTestBase):
 
     def test_non_existing_access_token_raises_unauthorized(self):
         self.db.create_access_token(user_id=1)
-        
+
         with self.app.test_request_context(headers=dict(Authorization='Bearer non-existent-token')):
             with self.assertRaises(Unauthorized):
                 authenticate_request()
@@ -80,7 +80,7 @@ class Test(FlaskTestBase):
         group = self.db.create_group()
         group.members.append(member)
         group.permissions.append(permission)
-        
+
         access_token = self.db.create_access_token(user_id=member.member_id, expires=self.datetime(days=1))
 
         with self.app.test_request_context(headers=dict(Authorization=f'Bearer {access_token.access_token}'),
@@ -89,9 +89,9 @@ class Test(FlaskTestBase):
 
             self.assertEqual(member.member_id, g.user_id)
             self.assertCountEqual([USER, permission.permission], g.permissions)
-    
+
         db_session.refresh(access_token)
-        
+
         self.assertCountEqual([USER, permission.permission], access_token.permissions.split(','))
 
     def test_valid_service_auth_updates_access_token_and_sets_user_id_and_permission(self):
@@ -103,11 +103,11 @@ class Test(FlaskTestBase):
 
             self.assertEqual(SERVICE_USER_ID, g.user_id)
             self.assertCountEqual([SERVICE], g.permissions)
-    
+
         db_session.refresh(access_token)
-    
+
         self.assertEqual(SERVICE, access_token.permissions)
-    
+
     def test_permission_is_required_for_view(self):
         with self.assertRaises(AssertionError):
             @self.service.route('/', method=GET, permission=None)
@@ -118,7 +118,7 @@ class Test(FlaskTestBase):
         @self.service.route('/', method=GET, permission=PUBLIC)
         def view():
             pass
-        
+
         with self.app.test_request_context():
             g.user_id = None
             g.permissions = tuple()
@@ -143,7 +143,7 @@ class Test(FlaskTestBase):
             g.user_id = SERVICE_USER_ID
             g.permissions = (SERVICE,)
             view()
-        
+
         with self.app.test_request_context():
             g.user_id = None
             g.permissions = tuple()
@@ -171,7 +171,7 @@ class Test(FlaskTestBase):
             g.permissions = (SERVICE,)
             with self.assertRaises(Forbidden):
                 view()
-        
+
         with self.app.test_request_context():
             g.user_id = None
             g.permissions = tuple()
@@ -192,7 +192,7 @@ class Test(FlaskTestBase):
             g.user_id = SERVICE_USER_ID
             g.permissions = (SERVICE,)
             view()
-        
+
         with self.app.test_request_context():
             g.user_id = None
             g.permissions = tuple()

@@ -1,7 +1,8 @@
 from membership import service
-from membership.models import Member, Group, member_group, Span
+from membership.models import Member, Group, member_group, Span, Permission
 from service.api_definition import MEMBER_VIEW, MEMBER_CREATE, MEMBER_EDIT, MEMBER_DELETE, GROUP_VIEW, GROUP_CREATE, \
-    GROUP_EDIT, GROUP_DELETE, GROUP_MEMBER_VIEW, GROUP_MEMBER_ADD, GROUP_MEMBER_REMOVE, SPAN_VIEW, SPAN_MANAGE
+    GROUP_EDIT, GROUP_DELETE, GROUP_MEMBER_VIEW, GROUP_MEMBER_ADD, GROUP_MEMBER_REMOVE, SPAN_VIEW, SPAN_MANAGE, \
+    PERMISSION_MANAGE
 from service.entity import Entity, not_empty, ASC, DESC, MemberEntity, OrmManyRelation
 
 # TODO BM Move implementations around.
@@ -32,8 +33,17 @@ span_entity = Entity(
     default_sort_column='created_at',
     default_sort_order=DESC,
     search_columns=('member_id',),
-    list_deleted=True,  # TODO BM Add test for this.
+    list_deleted=True,  # TODO BM Add test for this (and general tests).
 )
+
+# TODO BM Add tests.
+permission_entity = Entity(
+    Permission,
+    default_sort_column='permission_id',
+    default_sort_order=DESC,
+    search_columns=('permission', 'permission_id'),
+)
+
 
 service.entity_routes(
     path="/member",
@@ -74,13 +84,23 @@ service.related_entity_routes(
 )
 
 service.entity_routes(
+    path="/permission",
+    entity=permission_entity,
+    permission_list=GROUP_VIEW,
+    permission_create=GROUP_CREATE,
+    permission_read=GROUP_VIEW,
+    permission_update=GROUP_EDIT,
+    permission_delete=GROUP_DELETE,
+)
+
+service.entity_routes(
     path="/span",
     entity=span_entity,
-    permission_list=SPAN_VIEW,
-    permission_create=SPAN_MANAGE,
-    permission_read=SPAN_VIEW,
-    permission_update=SPAN_MANAGE,
-    permission_delete=SPAN_MANAGE,
+    permission_list=PERMISSION_MANAGE,
+    permission_create=PERMISSION_MANAGE,
+    permission_read=PERMISSION_MANAGE,
+    permission_update=PERMISSION_MANAGE,
+    permission_delete=PERMISSION_MANAGE,
 )
 
 
@@ -138,11 +158,11 @@ service.entity_routes(
 # $app->  post("membership/group/{id}/permissions/remove", ['middleware' => 'permission:permission_manage', 'uses' => "Group@removePermissions"]);  // Model: Create
 
 # Entity
-# $app->   get("membership/permission",      ['middleware' => 'permission:permission_manage',  'uses' => "Permission@list"]);     // Get collection
-# $app->  post("membership/permission",      ['middleware' => 'permission:permission_manage',  'uses' => "Permission@create"]);   // Model: Create
-# $app->   get("membership/permission/{id}", ['middleware' => 'permission:permission_manage',  'uses' => "Permission@read"]);     // Model: Read
-# $app->   put("membership/permission/{id}", ['middleware' => 'permission:permission_manage',  'uses' => "Permission@update"]);   // Model: Update
-# $app->delete("membership/permission/{id}", ['middleware' => 'permission:permission_manage',  'uses' => "Permission@delete"]);   // Model: Delete
+# DONE $app->   get("membership/permission",      ['middleware' => 'permission:permission_manage',  'uses' => "Permission@list"]);     // Get collection
+# DONE $app->  post("membership/permission",      ['middleware' => 'permission:permission_manage',  'uses' => "Permission@create"]);   // Model: Create
+# DONE $app->   get("membership/permission/{id}", ['middleware' => 'permission:permission_manage',  'uses' => "Permission@read"]);     // Model: Read
+# DONE $app->   put("membership/permission/{id}", ['middleware' => 'permission:permission_manage',  'uses' => "Permission@update"]);   // Model: Update
+# DONE $app->delete("membership/permission/{id}", ['middleware' => 'permission:permission_manage',  'uses' => "Permission@delete"]);   // Model: Delete
 
 # IGNORE // Roles
 # IGNORE $app->   get("membership/role",        "Role@list");     // Get collection

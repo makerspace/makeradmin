@@ -15,7 +15,12 @@ class SessionFactoryWrapper:
         self.session_factory = None
         
     def init_with_engine(self, engine):
-        self.session_factory = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+        if self.session_factory is None:
+            logger.info(f"initializing session factory with eninge {engine}")
+            self.session_factory = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+        else:
+            logger.info(f"reinitializing session factory with eninge {engine}")
+            self.session_factory.configure(bind=engine)
         
     def __call__(self, *args, **kwargs):
         return self.session_factory(*args, **kwargs)

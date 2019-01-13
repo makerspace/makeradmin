@@ -14,7 +14,7 @@ from selenium.webdriver import DesiredCapabilities
 from selenium.webdriver.support.wait import WebDriverWait
 
 from service.config import get_mysql_config
-from service.db import create_mysql_engine
+from service.db import create_mysql_engine, db_session
 from test_aid.api import ApiFactory
 from test_aid.db import DbFactory
 from test_aid.obj import DEFAULT_PASSWORD_HASH
@@ -36,7 +36,12 @@ class SystestBase(TestBase):
     @classmethod
     def setUpClass(self):
         super().setUpClass()
+        
+        # Make sure sessions is removed so it is not using another engine in this thread.
+        db_session.remove()
+        
         create_mysql_engine(**get_mysql_config())
+        
         self.db = DbFactory(self, self.obj)
         self.admin_url = HOST_FRONTEND
         self.public_url = HOST_PUBLIC

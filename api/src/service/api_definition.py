@@ -32,6 +32,7 @@ GROUP_DELETE = 'group_delete'
 GROUP_MEMBER_VIEW = 'group_member_view'
 GROUP_MEMBER_ADD = 'group_member_add'
 GROUP_MEMBER_REMOVE = 'group_member_remove'
+PERMISSION_MANAGE = 'permission_manage'
 SPAN_VIEW = "span_view"
 SPAN_MANAGE = "span_manage"
 

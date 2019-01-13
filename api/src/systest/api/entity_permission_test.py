@@ -1,5 +1,3 @@
-from random import randint
-
 from core.auth import create_access_token
 from membership.models import Permission
 from service.api_definition import MEMBER_VIEW, MEMBER_CREATE, MEMBER_EDIT, MEMBER_DELETE
@@ -16,7 +14,8 @@ class Test(ApiTest):
         member = self.db.create_member()
         group = self.db.create_group()
         group.members.append(member)
-        group.permissions.append(db_session.query(Permission).filter_by(permission=permission).first())
+        p = db_session.query(Permission).filter_by(permission=permission).first()
+        group.permissions.append(p)
         res = create_access_token("", "", member.member_id)
         db_session.commit()
         return res['access_token']
