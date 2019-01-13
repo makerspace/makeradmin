@@ -1,4 +1,5 @@
 import re
+from datetime import date
 from inspect import signature
 
 from flask import request
@@ -157,8 +158,14 @@ def symbol_list(value):
         raise ValueError(f"Value {value} should be a list.")
     return [symbol(item) for item in value]
     
-    
-    
+
+def iso_date(value):
+    """ An iso formatted date. """
+    return date.fromisoformat(value)
 
 
-    
+def non_empty_str(value):
+    value = str(value)
+    if not value:
+        raise ValueError("Can not be empty.")
+    return value

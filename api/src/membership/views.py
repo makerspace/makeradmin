@@ -1,8 +1,12 @@
 from membership import service
-from membership.models import Member, Group, member_group, Span, Permission, register_permissions, group_permission, Key
+from membership.membership import get_membership_smmary, add_membership_days
+from membership.models import Member, Group, member_group, Span, Permission, register_permissions, group_permission, \
+    Key, MEMBERSHIP, LABACCESS, SPECIAL_LABACESS
 from service.api_definition import MEMBER_VIEW, MEMBER_CREATE, MEMBER_EDIT, MEMBER_DELETE, GROUP_VIEW, GROUP_CREATE, \
     GROUP_EDIT, GROUP_DELETE, GROUP_MEMBER_VIEW, GROUP_MEMBER_ADD, GROUP_MEMBER_REMOVE, SPAN_VIEW, SPAN_MANAGE, \
-    PERMISSION_MANAGE, SERVICE, POST, Arg, symbol_list, PERMISSION_VIEW, KEY_VIEW, KEY_EDIT
+    PERMISSION_MANAGE, SERVICE, POST, Arg, symbol_list, PERMISSION_VIEW, KEY_VIEW, KEY_EDIT, GET, Enum, natural0, \
+    iso_date, non_empty_str, natural1
+from service.db import db_session
 from service.entity import Entity, not_empty, ASC, DESC, MemberEntity, OrmManyRelation, OrmSingeRelation
 
 # TODO BM Move implementations around.
@@ -79,6 +83,25 @@ service.related_entity_routes(
     permission_list=MEMBER_VIEW,
 )
 
+
+@service.route("/member/<int:entity_id>/activate", method=POST, permission=SERVICE, status='activated')
+def member_activate(entity_id=None):
+    """ Activate (undelete) a member. """
+    db_session.query(Member).filter_by(member_id=entity_id).update({'deleted_at': None})
+
+
+@service.route("/member/<int:entity_id>/addMembershipDays", method=POST, permission=MEMBER_EDIT)
+def member_add_membership_days(
+        entity_id=None, type=Arg(Enum(MEMBERSHIP, LABACCESS, SPECIAL_LABACESS)), days=Arg(natural1),
+        creation_reason=Arg(non_empty_str), default_start_date=Arg(iso_date, required=False)):
+    return add_membership_days(entity_id, type, days, creation_reason, default_start_date)
+
+
+@service.route("/member/<int:entity_id>/membership", method=GET, permission=MEMBER_VIEW)
+def member_get_membership(entity_id=None):
+    return get_membership_smmary(entity_id)
+
+
 service.entity_routes(
     path="/group",
     entity=group_entity,
@@ -148,10 +171,10 @@ service.entity_routes(
 # TODO BM Complete all membership api.
 
 # Special? Check if they are used?
-# $app->  post("membership/member/{id}/activate", ['middleware' => 'permission:service', 'uses' => "Member@activate"]); // Model: Activate
-# $app->  post("membership/member/{id}/addMembershipSpan",    ['middleware' => 'permission:member_edit', 'uses' => "Member@addMembershipSpan"]);
-# $app->  post("membership/member/{id}/addMembershipDays",    ['middleware' => 'permission:member_edit', 'uses' => "Member@addMembershipDays"]);
-# $app->  get("membership/member/{id}/membership",    ['middleware' => 'permission:member_view', 'uses' => "Member@getMembership"]); // Get if a member has an active membership
+# DONE $app->  post("membership/member/{id}/activate", ['middleware' => 'permission:service', 'uses' => "Member@activate"]); // Model: Activate
+# NOT USED $app->  post("membership/member/{id}/addMembershipSpan",    ['middleware' => 'permission:member_edit', 'uses' => "Member@addMembershipSpan"]);
+# DONE $app->  post("membership/member/{id}/addMembershipDays",    ['middleware' => 'permission:member_edit', 'uses' => "Member@addMembershipDays"]);
+# DONE $app->  get("membership/member/{id}/membership",    ['middleware' => 'permission:member_view', 'uses' => "Member@getMembership"]); // Get if a member has an active membership
 # DONE $app->  post("membership/permission/register", "Permission@batchRegister");
 # Special since it is a relation in two steps.
 # $app->   get("membership/member/{id}/permissions",   ['middleware' => 'permission:permission_view',     'uses' => "Member@getPermissions"]);    // Get a member's permissions

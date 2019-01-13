@@ -31,6 +31,11 @@ class Test(ApiTest):
         
         self.assertNotEqual(id1, id2)
         self.assertNotEqual(number1, number2)
+
+    def test_activate(self):
+        member = self.db.create_member(deleted_at=self.datetime())
+        self.post(f"/membership/member/{member.member_id}/activate").expect(code=200)
+        self.get(f"/membership/member/{member.member_id}").expect(code=200, data__deleted_at=None)
         
     def test_include_membership_in_member_get(self):
         # TODO BM We need to be able to create spans with api or db to do this test.

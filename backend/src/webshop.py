@@ -347,7 +347,7 @@ def register() -> Dict[str, int]:
     r = instance.gateway.post("membership/member", member)
     if not r.ok:
         data = r.json()
-        if r.status_code == 422 and data['type'] == 'unique' and data['column'] == 'email':
+        if r.status_code == 422 and data['what'] == 'not_unique' and data['fields'] == 'email':
             raise errors.RegisterEmailAlreadyExists()
         abort(r.status_code, data["message"])
 
@@ -952,11 +952,12 @@ def ship_add_labaccess_action(action: PendingAction) -> None:
 def ship_add_membership_action(action: PendingAction) -> None:
     days_to_add = action.action_value
     assert(days_to_add >= 0)
+    created_at = datetime.fromisoformat(action.created_at)
     r = instance.gateway.post(f"membership/member/{action.member_id}/addMembershipDays",
                               {
                                   "type": "membership",
                                   "days": days_to_add,
-                                  "default_start_date": action.created_at,
+                                  "default_start_date": created_at.date().isoformat(),
                                   "creation_reason": f"transaction_action_id: {action.pending_action_id}, transaction_id: {action.transaction['transaction_id']}",
                               }
                               )
