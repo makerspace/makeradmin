@@ -45,7 +45,8 @@ export default class Collection {
         this.fetch();
     }
     
-    // Update filter, filter keys are model attributes, values are substrings.
+    // Update filter, filter keys are model attributes, values are strings.
+    // TODO This is used exclusivley for search, maybe rename it.
     updateFilter(filter) {
         this.filter = filter;
         this.fetch();
@@ -53,7 +54,7 @@ export default class Collection {
     
     // Change current page index (1-indexed).
     updatePage(index) {
-        this.page.index = Math.min(index, this.page.count);
+        this.page.index = Math.min(index, this.page.count) || 1;
         this.fetch();
     }
     
@@ -101,7 +102,7 @@ export default class Collection {
         return get({url: this.url, params}).then(data => {
             if (!data) return;
             this.page.count = data.last_page;
-            this.page.index = Math.min(this.page.count, this.page.index || 1);
+            this.page.index = Math.min(this.page.count, this.page.index) || 1;
             this.items = data.data.map(m => new this.type(m));
             _.values(this.subscribers).forEach(s => s({items: this.items, page: this.page}));
         });

@@ -14,7 +14,7 @@ class MemberBoxSpans extends React.Component {
 
     constructor(props) {
         super(props);
-        this.collection = new Collection({type: Span, filter: {member_id: props.params.member_id}, pageSize: 0});
+        this.collection = new Collection({type: Span, url: `/membership/member/${props.params.member_id}/spans`, pageSize: 0});
         this.state = {items: []};
     }
 

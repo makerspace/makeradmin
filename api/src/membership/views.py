@@ -84,6 +84,14 @@ service.related_entity_routes(
 )
 
 
+service.related_entity_routes(
+    path="/member/<int:related_entity_id>/spans",
+    entity=span_entity,
+    relation=OrmSingeRelation('spans', 'member_id'),
+    permission_list=SPAN_VIEW,
+)
+
+
 @service.route("/member/<int:entity_id>/activate", method=POST, permission=SERVICE, status='activated')
 def member_activate(entity_id=None):
     """ Activate (undelete) a member. """
@@ -127,7 +135,7 @@ service.related_entity_routes(
 )
 
 service.related_entity_routes(
-    path="/group/<int:related_entity_id>/permisssions",
+    path="/group/<int:related_entity_id>/permissions",
     entity=permission_entity,
     relation=OrmManyRelation('permisssions', Group.permissions, group_permission, 'group_id', 'permission_id'),
     permission_list=PERMISSION_VIEW,

@@ -68,7 +68,7 @@ class Entity:
     
     def __init__(self, model, hidden_columns=tuple(), read_only_columns=tuple(), validation=None,
                  default_sort_column=None, default_sort_order=None, search_columns=tuple(),
-                 list_deleted=False):
+                 list_deleted=False, filters=None):
         """
         :param model sqlalchemy orm model class
         :param hidden_columns columns that should be filtered on read
@@ -78,7 +78,7 @@ class Entity:
         :param default_sort_order asc/desc
         :param search_columns columns that should be used for text search (search param to list)
         :param list_deleted whether deleted entities should be included in list or not
-        # TODO BM Old implementation can search for "roos anders" check this.
+        # TODO BM Old implementation can search for "roos anders" check this. No does not work. Fix.
         """
         
         self.model = model
@@ -136,7 +136,7 @@ class Entity:
              search=Arg(str, required=False), page_size=Arg(natural0, required=False),
              page=Arg(natural1, required=False), relation=None, related_entity_id=None):
 
-        query = db_session.query(self.model)\
+        query = db_session.query(self.model)
         
         if not self.list_deleted:
             query = query.filter(self.model.deleted_at.is_(None))
