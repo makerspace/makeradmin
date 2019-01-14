@@ -76,7 +76,6 @@ class Entity:
         :param default_sort_order asc/desc
         :param search_columns columns that should be used for text search (search param to list)
         :param list_deleted whether deleted entities should be included in list or not
-        # TODO BM Old implementation can search for "roos anders" check this. No does not work. Fix.
         """
         
         self.model = model

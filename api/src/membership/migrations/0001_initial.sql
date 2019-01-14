@@ -88,27 +88,6 @@ CREATE TABLE IF NOT EXISTS `membership_members_groups` (
   KEY `membership_members_groups_group_id_index` (`group_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
--- TODO Remove this table, use of groups only.
-CREATE TABLE IF NOT EXISTS `membership_members_roles` (
-  `member_id` int(11) NOT NULL,
-  `role_id` int(11) NOT NULL,
-  KEY `membership_members_roles_member_id_index` (`member_id`),
-  KEY `membership_members_roles_role_id_index` (`role_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
--- TODO Remove this table, use groups only.
-CREATE TABLE IF NOT EXISTS `membership_roles` (
-  `role_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `group_id` int(11) NOT NULL,
-  `title` varchar(255) COLLATE utf8mb4_0900_ai_ci NOT NULL,
-  `description` text COLLATE utf8mb4_0900_ai_ci NOT NULL,
-  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` datetime DEFAULT NULL,
-  `deleted_at` datetime DEFAULT NULL,
-  PRIMARY KEY (`role_id`),
-  KEY `membership_roles_group_id_index` (`group_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
 CREATE TABLE IF NOT EXISTS `membership_spans` (
   `span_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `member_id` int(10) unsigned NOT NULL,
@@ -126,6 +105,8 @@ CREATE TABLE IF NOT EXISTS `membership_spans` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 DROP TABLE IF EXISTS `migrations_membership`;
+DROP TABLE IF EXISTS `membership_members_roles`;
+DROP TABLE IF EXISTS `membership_roles`;
 
 -- enable warnings
 SET sql_notes = 1;

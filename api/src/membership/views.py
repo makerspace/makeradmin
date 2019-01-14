@@ -82,7 +82,7 @@ service.related_entity_routes(
     path="/member/<int:related_entity_id>/keys",
     entity=key_entity,
     relation=OrmSingeRelation('keys', 'member_id'),
-    permission_list=MEMBER_VIEW,
+    permission_list=MEMBER_VIEW,  # TODO BM Why not KEYS_VIEW?
 )
 
 
@@ -100,6 +100,7 @@ def member_activate(entity_id=None):
     db_session.query(Member).filter_by(member_id=entity_id).update({'deleted_at': None})
 
 
+# TODO BM Why not SPAN_MANAGE?
 @service.route("/member/<int:entity_id>/addMembershipDays", method=POST, permission=MEMBER_EDIT)
 def member_add_membership_days(
         entity_id=None, type=Arg(Enum(MEMBERSHIP, LABACCESS, SPECIAL_LABACESS)), days=Arg(natural1),
@@ -107,6 +108,7 @@ def member_add_membership_days(
     return add_membership_days(entity_id, type, days, creation_reason, default_start_date)
 
 
+# TODO BM Why not SPAN_VIEW?
 @service.route("/member/<int:entity_id>/membership", method=GET, permission=MEMBER_VIEW)
 def member_get_membership(entity_id=None):
     return get_membership_summary(entity_id)
