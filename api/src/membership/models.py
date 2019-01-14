@@ -185,7 +185,7 @@ class Key(Base):
     # +-------------+------------------+------+-----+-------------------+-------------------+
     # | Field       | Type             | Null | Key | Default           | Extra             |
     # +-------------+------------------+------+-----+-------------------+-------------------+
-    # | rfid_id     | int(10) unsigned | NO   | PRI | NULL              | auto_increment    |
+    # | key_id      | int(10) unsigned | NO   | PRI | NULL              | auto_increment    |
     # | member_id   | int(10) unsigned | NO   | MUL | NULL              |                   |
     # | description | text             | YES  |     | NULL              |                   |
     # | tagid       | varchar(255)     | NO   | MUL | NULL              |                   |
@@ -197,7 +197,7 @@ class Key(Base):
     
     __tablename__ = 'membership_keys'
 
-    rfid_id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
+    key_id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
     member_id = Column(Integer, ForeignKey('membership_members.member_id'), nullable=False)
     description = Column(Text)
     tagid = Column(String(255), nullable=False, unique=True)

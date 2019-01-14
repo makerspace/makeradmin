@@ -147,6 +147,7 @@ ALTER TABLE `membership_groups` MODIFY COLUMN `updated_at` DATETIME DEFAULT CURR
 ALTER TABLE `membership_permissions` MODIFY COLUMN `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP;
 ALTER TABLE `membership_keys` MODIFY COLUMN `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP;
 ALTER TABLE `membership_spans` MODIFY COLUMN `deleted_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP;
+-- TODO BM Invesitigate why created_at gets current when being imported? Above looks very strange, especially deleted_at, double check.
 
 -- make membership_members email unique
 ALTER TABLE `membership_members` DROP INDEX `membership_members_email_index`;
@@ -169,4 +170,5 @@ DELETE FROM `membership_keys` WHERE tagid = '633412134' AND `deleted_at` IS NOT 
 DELETE FROM `membership_keys` WHERE tagid = '329339240' AND `deleted_at` IS NOT NULL;
 ALTER TABLE `membership_keys` ADD UNIQUE INDEX `membership_keys_tagid_index` (`tagid`);
 
--- TODO BM Make all unique fileds uniquie.
+-- fix broken alias column
+ALTER TABLE `membership_keys` CHANGE COLUMN `rfid_id` `key_id` int(10) unsigned NOT NULL AUTO_INCREMENT;
