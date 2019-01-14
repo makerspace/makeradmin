@@ -117,9 +117,7 @@ ALTER TABLE `membership_groups` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4
 ALTER TABLE `membership_keys` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
 ALTER TABLE `membership_members` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
 ALTER TABLE `membership_members_groups` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
-ALTER TABLE `membership_members_roles` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
 ALTER TABLE `membership_permissions` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
-ALTER TABLE `membership_roles` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
 ALTER TABLE `membership_spans` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
 
 -- set updated at in database instead

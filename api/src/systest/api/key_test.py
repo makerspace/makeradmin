@@ -10,7 +10,7 @@ class Test(ApiTest):
         
         data = self.get(f"/membership/member/{member.member_id}/keys").expect(code=200).print().data
         
-        self.assertCountEqual([key1['rfid_id'], key2['rfid_id']], [k['rfid_id'] for k in data])
+        self.assertCountEqual([key1['key_id'], key2['key_id']], [k['key_id'] for k in data])
         
     def test_create_key_with_existing_tagid_fails(self):
         member = self.db.create_member()
