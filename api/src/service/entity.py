@@ -68,7 +68,7 @@ class Entity:
     
     def __init__(self, model, hidden_columns=tuple(), read_only_columns=tuple(), validation=None,
                  default_sort_column=None, default_sort_order=None, search_columns=tuple(),
-                 list_deleted=False, filters=None):
+                 list_deleted=False):
         """
         :param model sqlalchemy orm model class
         :param hidden_columns columns that should be filtered on read
@@ -112,14 +112,16 @@ class Entity:
         }
     
     def validate_present(self, obj):
+        """ Validate object for all items in object. """
         for k, v in obj.items():
             func = self.validation.get(k)
             if func:
                 func(k, v)
 
     def validate_all(self, obj):
+        """ Validate object for all validation items. """
         for k, func in self.validation.items():
-            # TODO Use model default here?
+            # TODO Use model default here? If models has default none can be provided here and it will be fine.
             v = obj.get(k)
             func(k, v)
     
@@ -297,7 +299,7 @@ class MemberEntity(Entity):
                                       log="failed to aquire member_number lock")
         
         try:
-            data = request.json
+            data = request.json or {}
             if data.get('member_number') is None:
                 sql = "SELECT COALESCE(MAX(member_number), 999) FROM membership_members"
                 max_member_number, = db_session.execute(sql).fetchone()
