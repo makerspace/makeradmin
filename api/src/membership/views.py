@@ -1,13 +1,16 @@
 from membership import service
-from membership.membership import get_membership_smmary, add_membership_days
-from membership.models import Member, Group, member_group, Span, Permission, register_permissions, group_permission, \
-    Key, MEMBERSHIP, LABACCESS, SPECIAL_LABACESS, get_member_permissions
+from membership.member_entity import MemberEntity
+from membership.membership import get_membership_summary, add_membership_days
+from membership.models import Member, Group, member_group, Span, Permission, group_permission, \
+    Key, MEMBERSHIP, LABACCESS, SPECIAL_LABACESS
+from membership.member_auth import get_member_permissions
+from membership.permissions import register_permissions
 from service.api_definition import MEMBER_VIEW, MEMBER_CREATE, MEMBER_EDIT, MEMBER_DELETE, GROUP_VIEW, GROUP_CREATE, \
     GROUP_EDIT, GROUP_DELETE, GROUP_MEMBER_VIEW, GROUP_MEMBER_ADD, GROUP_MEMBER_REMOVE, SPAN_VIEW, SPAN_MANAGE, \
     PERMISSION_MANAGE, SERVICE, POST, Arg, symbol_list, PERMISSION_VIEW, KEYS_VIEW, KEYS_EDIT, GET, Enum, \
     iso_date, non_empty_str, natural1
 from service.db import db_session
-from service.entity import Entity, not_empty, ASC, DESC, MemberEntity, OrmManyRelation, OrmSingeRelation
+from service.entity import Entity, not_empty, ASC, DESC, OrmManyRelation, OrmSingeRelation
 
 # TODO BM Bug, can't create member zipcode not handled correctly in gui.
 member_entity = MemberEntity(
@@ -106,7 +109,7 @@ def member_add_membership_days(
 
 @service.route("/member/<int:entity_id>/membership", method=GET, permission=MEMBER_VIEW)
 def member_get_membership(entity_id=None):
-    return get_membership_smmary(entity_id)
+    return get_membership_summary(entity_id)
 
 
 @service.route("/member/<int:entity_id>/permissions", method=GET, permission=PERMISSION_VIEW)

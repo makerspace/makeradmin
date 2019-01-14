@@ -8,7 +8,7 @@ from service.db import db_session
 from service.error import UnprocessableEntity
 
 
-def get_membership_smmary(entity_id):
+def get_membership_summary(entity_id):
     today = date.today()
     
     has_labaccess = bool(
@@ -59,7 +59,7 @@ def add_membership_days(entity_id=None, type_=None, days=None, creation_reason=N
     if old_span:
         if days == (old_span.enddate - old_span.startdate).days and type_ == old_span.type:
             # TODO Why is this something that we need to ignore?
-            return get_membership_smmary(entity_id)
+            return get_membership_summary(entity_id)
         raise UnprocessableEntity(f"Duplicate entry.", fields='creation_reason', what=NOT_UNIQUE)
 
     if not default_start_date:
@@ -80,4 +80,4 @@ def add_membership_days(entity_id=None, type_=None, days=None, creation_reason=N
     db_session.add(span)
     db_session.commit()
     
-    return get_membership_smmary(entity_id)
+    return get_membership_summary(entity_id)

@@ -1,12 +1,6 @@
-import bcrypt
 from sqlalchemy import Column, Integer, String, DateTime, Text, Date, Enum, Table, ForeignKey, func, text, select
-from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, column_property
-
-from service.api_definition import BAD_VALUE
-from service.db import db_session
-from service.error import Unauthorized
 
 Base = declarative_base()
 
@@ -243,49 +237,3 @@ class Span(Base):
     deletion_reason = Column(String(255))  # TODO Unused, remove it?
     
     member = relationship(Member, backref="spans")
-
-
-# TODO BM Move this somewhere. It is used by core and it should be clear that core is using membership, somewhere where
-# membership endpoints are implemented.
-def get_member_permissions(member_id=None):
-    """ Return query to get all (permission_id, permission) for a memeber. """
-    return (
-        db_session
-            .query(Permission.permission_id, Permission.permission)
-            .distinct()
-            .join(Group, Permission.groups)
-            .join(Member, Group.members)
-            .filter_by(member_id=member_id)
-    )
-
-
-# TODO BM Move this somewhere.
-def register_permissions(permissions):
-    for permission in permissions:
-        try:
-            db_session.add(Permission(permission=permission))
-            db_session.commit()
-        except IntegrityError:
-            db_session.rollback()
-    
-
-# TODO BM Move this somewhere.
-def verify_password(password, password_hash):
-    return bcrypt.checkpw(password.encode(), password_hash.encode())
-
-
-def hash_password(password):
-    bcrypt.hashpw(password=password.encode(), salt=bcrypt.gensalt())
-
-
-# TODO BM Move this somewhere, used in core but accesses membership models.
-def authenticate(username=None, password=None):
-    """ Authenticate a member trough username and password, returns member_id if authenticated. """
-    
-    member = db_session.query(Member).filter_by(email=username).first()
-    
-    if not member or not verify_password(password, member.password):
-        raise Unauthorized("The username and/or password you specified was incorrect.",
-                           fields='username,password', what=BAD_VALUE)
-    
-    return member.member_id

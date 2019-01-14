@@ -6,7 +6,7 @@ from sqlalchemy import inspect, Integer, String, DateTime, Text, desc, asc, or_,
 
 from service.api_definition import BAD_VALUE, REQUIRED, Arg, symbol, Enum, natural0, natural1
 from service.db import db_session
-from service.error import NotFound, UnprocessableEntity, InternalServerError
+from service.error import NotFound, UnprocessableEntity
 
 ASC = 'asc'
 DESC = 'desc'
@@ -133,7 +133,7 @@ class Entity:
         return {k: conv(getattr(entity, k, None)) for k, conv in self.cols_to_obj.items()}
     
     def list(self, sort_by=Arg(symbol, required=False), sort_order=Arg(Enum(DESC, ASC), required=False),
-             search=Arg(str, required=False), page_size=Arg(natural0, required=False),
+             search: str=Arg(str, required=False), page_size=Arg(natural0, required=False),
              page=Arg(natural1, required=False), relation=None, related_entity_id=None):
 
         query = db_session.query(self.model)
@@ -145,8 +145,9 @@ class Entity:
             query = relation.filter(query, related_entity_id)
 
         if search:
-            expression = or_(*[self.columns[column_name].like(f"%{search}%") for column_name in self.search_columns])
-            query = query.filter(expression)
+            for term in search.split():
+                expression = or_(*[self.columns[column_name].like(f"%{term}%") for column_name in self.search_columns])
+                query = query.filter(expression)
 
         sort_column = sort_by or self.default_sort_column
         sort_order = sort_order or self.default_sort_order
@@ -283,31 +284,3 @@ class OrmManyRelation:
     
     def filter(self, query, related_entity_id):
         return query.join(self.relation_property).filter_by(**{self.related_entity_id_column: related_entity_id})
-
-
-# TODO BM Move this somewhere, belongs to membership.
-class MemberEntity(Entity):
-    """ Member member_number should be auto increment but mysql only supports one auto increment per table,
-    can solve it with a trigger or like this using an explicit mysql lock. """
-    
-    def create(self):
-        status, = db_session.execute("SELECT GET_LOCK('member_number', 20)").fetchone()
-        if not status:
-            raise InternalServerError("Failed to create member, try again later.",
-                                      log="failed to aquire member_number lock")
-        
-        try:
-            data = request.json or {}
-            if data.get('member_number') is None:
-                sql = "SELECT COALESCE(MAX(member_number), 999) FROM membership_members"
-                max_member_number, = db_session.execute(sql).fetchone()
-                data['member_number'] = max_member_number + 1
-            return self._create_internal(data)
-        except Exception:
-            # Rollback session if anything went wrong or we can't release the lock.
-            db_session.rollback()
-            raise
-        finally:
-            db_session.execute("DO RELEASE_LOCK('member_number')")
-        
-        

@@ -3,7 +3,7 @@ from flask import Flask, jsonify
 from sqlalchemy.exc import OperationalError
 
 from core.auth import authenticate_request
-from membership.models import register_permissions
+from membership.permissions import register_permissions
 from service.api_definition import ALL_PERMISSIONS
 from service.config import get_mysql_config
 from service.db import create_mysql_engine, shutdown_session, populate_fields_by_index

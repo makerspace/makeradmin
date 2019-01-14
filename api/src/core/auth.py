@@ -4,9 +4,8 @@ from string import ascii_letters, digits
 
 from flask import g, request
 
-import membership
 from core.models import Login, AccessToken
-from membership.models import get_member_permissions
+from membership.member_auth import get_member_permissions, authenticate
 from service.api_definition import SERVICE, USER, REQUIRED, BAD_VALUE, EXPIRED, SERVICE_USER_ID
 from service.db import db_session
 from service.error import TooManyRequests, ApiError, NotFound, Unauthorized, BadRequest, InternalServerError
@@ -42,7 +41,7 @@ def login(ip, browser, username, password):
                               " Please try again later.")
 
     try:
-        member_id = membership.models.authenticate(username=username, password=password)
+        member_id = authenticate(username=username, password=password)
     except ApiError:
         Login.register_login_failed(ip)
         raise
