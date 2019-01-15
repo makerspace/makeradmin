@@ -71,7 +71,8 @@ class Entity:
         :param model sqlalchemy orm model class
         :param hidden_columns columns that should be filtered on read
         :param read_only_columns columns that should be filtered on create and update (in addition to GLOBAl_READ_ONLY)
-        :param validation map from column name to validation function run on create and update
+        :param validation map from column name to validation function run on create and update, None values will 
+                          not be validated, use not null in db
         :param default_sort_column column name
         :param default_sort_order asc/desc
         :param search_columns columns that should be used for text search (search param to list)
@@ -118,9 +119,9 @@ class Entity:
     def validate_all(self, obj):
         """ Validate object for all validation items. """
         for k, func in self.validation.items():
-            # TODO Use model default here? If models has default none can be provided here and it will be fine.
             v = obj.get(k)
-            func(k, v)
+            if v is not None:
+                func(k, v)
     
     def to_model(self, obj):
         """ Convert and filter json compatible obejct to model compatible dict, also filter fields that is not
