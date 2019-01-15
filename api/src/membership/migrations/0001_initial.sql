@@ -149,3 +149,7 @@ ALTER TABLE `membership_keys` CHANGE COLUMN `rfid_id` `key_id` int(10) unsigned 
 ALTER TABLE `membership_groups` DROP COLUMN `parent`;
 ALTER TABLE `membership_groups` DROP COLUMN `left`;
 ALTER TABLE `membership_groups` DROP COLUMN `right`;
+
+-- drop unused columns
+ALTER TABLE `membership_permissions` DROP COLUMN `role_id`;
+ALTER TABLE `membership_permissions` DROP COLUMN `group_id`;

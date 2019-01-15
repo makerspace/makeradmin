@@ -89,9 +89,7 @@ class Permission(Base):
     __tablename__ = 'membership_permissions'
 
     permission_id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
-    role_id = Column(Integer, nullable=False, server_default=text('0'))  # TODO BM Remove this column.
     permission = Column(String(255), nullable=False, unique=True)
-    group_id = Column(Integer,  nullable=False, server_default=text('0'))  # TODO BM Remove this column.
     created_at = Column(DateTime, server_default=func.now())
     updated_at = Column(DateTime)
     deleted_at = Column(DateTime)
