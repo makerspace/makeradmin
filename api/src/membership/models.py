@@ -136,6 +136,6 @@ class Span(Base):
     creation_reason = Column(String(255), unique=True)
     created_at = Column(DateTime, server_default=func.now())
     deleted_at = Column(DateTime)
-    deletion_reason = Column(String(255))  # TODO BM Unused, remove it?
+    deletion_reason = Column(String(255))
     
     member = relationship(Member, backref="spans")

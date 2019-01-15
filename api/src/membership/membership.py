@@ -58,7 +58,9 @@ def add_membership_days(entity_id=None, type_=None, days=None, creation_reason=N
     old_span = db_session.query(Span).filter_by(creation_reason=creation_reason).first()
     if old_span:
         if days == (old_span.enddate - old_span.startdate).days and type_ == old_span.type:
-            # TODO Why is this something that we need to ignore?
+            # Duplicate add days can happend because the code that handles the transactions is not yet done in a db
+            # transaction, there are also an external script for handling puchases in ticktail that can create
+            # dupllicates.
             return get_membership_summary(entity_id)
         raise UnprocessableEntity(f"Duplicate entry.", fields='creation_reason', what=NOT_UNIQUE)
 
