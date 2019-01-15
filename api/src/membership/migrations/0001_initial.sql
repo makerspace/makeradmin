@@ -125,8 +125,6 @@ ALTER TABLE `membership_members` MODIFY COLUMN `updated_at` DATETIME DEFAULT CUR
 ALTER TABLE `membership_groups` MODIFY COLUMN `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP;
 ALTER TABLE `membership_permissions` MODIFY COLUMN `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP;
 ALTER TABLE `membership_keys` MODIFY COLUMN `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP;
-ALTER TABLE `membership_spans` MODIFY COLUMN `deleted_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP;
--- TODO BM Invesitigate why created_at gets current when being imported? Above looks very strange, especially deleted_at, double check.
 
 -- make membership_members email unique
 ALTER TABLE `membership_members` DROP INDEX `membership_members_email_index`;
