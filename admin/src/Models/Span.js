@@ -26,7 +26,7 @@ Span.model = {
         member_id: null,
         startdate: null,
         enddate: null,
-        span_type: "",
+        type: "",
         created_at: null,
         creation_reason: "",
         deleted_at: null,
@@ -68,7 +68,7 @@ export const mergePeriods = toMergePeriods => {
 
 // Filter not deleted spans for one category, return sorted.
 export const filterCategory = (spans, category) =>
-    spans.filter(i => !i.deleted_at &&  i.span_type === category).sort((a, b) => a.startdate > b.startdate);
+    spans.filter(i => !i.deleted_at &&  i.type === category).sort((a, b) => a.startdate > b.startdate);
 
 
 // Return assembled periods for non deleted spans in a category.
@@ -91,7 +91,7 @@ export const calculateSpanDiff = ({items, categoryPeriods, member_id, deleteSpan
         addSpans.push(new Span({
             startdate: formatUtcDate(start),
             enddate: formatUtcDate(end),
-            span_type: category,
+            type: category,
             member_id,
         }));
     };

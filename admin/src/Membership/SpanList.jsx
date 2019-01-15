@@ -13,7 +13,7 @@ const Row = deleteItem => props => {
     return (
         <tr>
             <td><Link to={"/membership/spans/" + item.id}>{item.id}</Link></td>
-            <td><Link to={"/membership/spans/" + item.id}>{item.span_type}</Link></td>
+            <td><Link to={"/membership/spans/" + item.id}>{item.type}</Link></td>
             <td><DateTimeShow date={item.created_at}/></td>
             <td>{item.creation_reason}</td>
             <td><DateTimeShow date={item.deleted_at}/></td>
@@ -39,7 +39,7 @@ class KeyList extends React.Component {
         
         const columns = [
             {title: "#", sort: "span_id"},
-            {title: "Typ", sort: "span_type"},
+            {title: "Typ", sort: "type"},
             {title: "Skapad", sort: "created_at"},
             {title: ""},
             {title: "Raderad", sort: "deleted_at"},

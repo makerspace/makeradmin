@@ -35,7 +35,7 @@ def create_span(member_id, startdate, enddate, span_type, creation_reason=None):
         member_id=member_id,
         startdate=startdate,
         enddate=enddate,
-        span_type=span_type,
+        type=span_type,
         creation_reason=creation_reason,
     )
     

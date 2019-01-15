@@ -130,10 +130,6 @@ ALTER TABLE `membership_spans` MODIFY COLUMN `deleted_at` DATETIME DEFAULT CURRE
 
 -- make membership_members email unique
 ALTER TABLE `membership_members` DROP INDEX `membership_members_email_index`;
--- TODO BM remove this before merge or consider keeping it for dev server, double check member_ids.
-UPDATE `membership_members` SET email = 'dedup-0' WHERE member_id = 1857;
-UPDATE `membership_members` SET email = 'dedup-1' WHERE member_id = 1926;
-UPDATE `membership_members` SET email = 'dedup-2' WHERE member_id = 1927;
 ALTER TABLE `membership_members` ADD UNIQUE INDEX `membership_members_email_index` (`email`);
 
 -- make membership_members member_number unique
@@ -144,10 +140,12 @@ ALTER TABLE `membership_spans` ADD UNIQUE INDEX `membership_members_creation_rea
 
 -- make membership_keys tagid unique
 ALTER TABLE `membership_keys` DROP INDEX `membership_keys_tagid_index`;
-DELETE FROM `membership_keys` WHERE tagid = '329285081' AND `deleted_at` IS NOT NULL;
-DELETE FROM `membership_keys` WHERE tagid = '633412134' AND `deleted_at` IS NOT NULL;
-DELETE FROM `membership_keys` WHERE tagid = '329339240' AND `deleted_at` IS NOT NULL;
 ALTER TABLE `membership_keys` ADD UNIQUE INDEX `membership_keys_tagid_index` (`tagid`);
 
 -- fix broken alias column
 ALTER TABLE `membership_keys` CHANGE COLUMN `rfid_id` `key_id` int(10) unsigned NOT NULL AUTO_INCREMENT;
+
+-- drop unused columns
+ALTER TABLE `membership_groups` DROP COLUMN `parent`;
+ALTER TABLE `membership_groups` DROP COLUMN `left`;
+ALTER TABLE `membership_groups` DROP COLUMN `right`;

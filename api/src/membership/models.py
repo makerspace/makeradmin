@@ -58,9 +58,6 @@ class Group(Base):
     __tablename__ = 'membership_groups'
     
     group_id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
-    parent = Column(Integer, index=True, nullable=False, default=0)  # TODO BM Remove this column.
-    left = Column(Integer, index=True, nullable=False, default=0)  # TODO BM Remove this column.
-    right = Column(Integer, index=True, nullable=False, default=0)  # TODO BM Remove this column.
     name = Column(String(255), nullable=False)
     title = Column(String(255), nullable=False)
     description = Column(Text)
