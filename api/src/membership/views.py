@@ -10,7 +10,7 @@ from service.api_definition import MEMBER_VIEW, MEMBER_CREATE, MEMBER_EDIT, MEMB
     PERMISSION_MANAGE, SERVICE, POST, Arg, symbol_list, PERMISSION_VIEW, KEYS_VIEW, KEYS_EDIT, GET, Enum, \
     iso_date, non_empty_str, natural1
 from service.db import db_session
-from service.entity import Entity, not_empty, ASC, DESC, OrmManyRelation, OrmSingeRelation
+from service.entity import Entity, not_empty, ASC, DESC, OrmManyRelation, OrmSingeRelation, ExpandField
 
 member_entity = MemberEntity(
     Member,
@@ -55,6 +55,7 @@ key_entity = Entity(
     default_sort_column='created_at',
     default_sort_order=DESC,
     search_columns=('description', 'tagid'),
+    expand_fields={'member': ExpandField(Key.member, [Member.member_number, Member.firstname, Member.lastname])},
 )
 
 

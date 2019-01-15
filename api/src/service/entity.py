@@ -1,3 +1,4 @@
+from collections import namedtuple
 from datetime import datetime, date
 from math import ceil
 
@@ -7,6 +8,7 @@ from sqlalchemy import inspect, Integer, String, DateTime, Text, desc, asc, or_,
 from service.api_definition import BAD_VALUE, REQUIRED, Arg, symbol, Enum, natural0, natural1
 from service.db import db_session
 from service.error import NotFound, UnprocessableEntity
+from service.logging import logger
 
 ASC = 'asc'
 DESC = 'desc'
@@ -58,15 +60,17 @@ to_obj_converters = {
 GLOBAl_READ_ONLY = ('created_at', 'updated_at', 'deleted_at')
 
 
+ExpandField = namedtuple('ExpandField', 'relation,columns')
+
+
 # TODO BM Expand functionality is used for Key->member and Span->member, nothing else, add support for it.
 # Or subclassing if it turns out it is rarly used.
-
 class Entity:
     """ Used to create a crud-able entity, subclass to provide additional functionality. """
     
     def __init__(self, model, hidden_columns=tuple(), read_only_columns=tuple(), validation=None,
                  default_sort_column=None, default_sort_order=None, search_columns=tuple(),
-                 list_deleted=False):
+                 list_deleted=False, expand_fields=None):
         """
         :param model sqlalchemy orm model class
         :param hidden_columns columns that should be filtered on read
@@ -77,6 +81,7 @@ class Entity:
         :param default_sort_order asc/desc
         :param search_columns columns that should be used for text search (search param to list)
         :param list_deleted whether deleted entities should be included in list or not
+        :param expand_fields map of name to ExpandField for data from other models that can be added when listing entity
         """
         
         self.model = model
@@ -86,6 +91,7 @@ class Entity:
         self.default_sort_order = default_sort_order
         self.search_columns = search_columns
         self.list_deleted = list_deleted
+        self.expand_fields = expand_fields or {}
         
         model_inspect = inspect(self.model)
         
@@ -130,11 +136,13 @@ class Entity:
     
     def to_obj(self, entity):
         """ Convert model to json compatible object. """
+        logger.info(entity)
         return {k: conv(getattr(entity, k, None)) for k, conv in self.cols_to_obj.items()}
     
     def list(self, sort_by=Arg(symbol, required=False), sort_order=Arg(Enum(DESC, ASC), required=False),
              search: str=Arg(str, required=False), page_size=Arg(natural0, required=False),
-             page=Arg(natural1, required=False), relation=None, related_entity_id=None):
+             page=Arg(natural1, required=False), expand=Arg(symbol, required=False), relation=None, 
+             related_entity_id=None):
 
         query = db_session.query(self.model)
         
@@ -148,6 +156,13 @@ class Entity:
             for term in search.split():
                 expression = or_(*[self.columns[column_name].like(f"%{term}%") for column_name in self.search_columns])
                 query = query.filter(expression)
+
+        if expand:
+            expand_field = self.expand_fields.get(expand)
+            if not expand_field:
+                raise UnprocessableEntity(f"Expand of {expand} not allowed.", fields='expand', what=BAD_VALUE)
+            query = query.outerjoin(expand_field.relation).add_columns(*expand_field.columns)
+            logger.info(query)
 
         sort_column = sort_by or self.default_sort_column
         sort_order = sort_order or self.default_sort_order
@@ -273,7 +288,7 @@ class OrmManyRelation:
         self.delete = text(f"DELETE FROM {self.relation_table.name} "
                            f" WHERE {self.entity_id_column} = :entity_id"
                            f" AND {self.related_entity_id_column} = :related_entity_id")
-    
+     
     def add(self, entity_ids, related_entity_id):
         for entity_id in entity_ids:
             db_session.execute(self.insert, {'entity_id': entity_id, 'related_entity_id': related_entity_id})
