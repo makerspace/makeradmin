@@ -22,7 +22,7 @@ class SearchBox extends React.Component {
                             <div className="uk-form-icon">
                                 <i className="uk-icon-search"/>
                                 <input ref="search" tabIndex="1" type="text" className="uk-form-width-large" placeholder="Skriv in ett sökord"
-                                       onChange={() => this.props.onChange({search: this.refs.search.value})} />
+                                       onChange={() => this.props.onChange(this.refs.search.value)} />
                             </div>
                         </form>
                     </div>
@@ -64,7 +64,7 @@ class KeyList extends React.Component {
         return (
             <div>
                 <h2>Nycklar</h2>
-                <SearchBox onChange={filters => this.collection.updateFilter(filters)} />
+                <SearchBox onChange={terms => this.collection.updateSearch(terms)} />
                 <CollectionTable rowComponent={Row} collection={this.collection} columns={columns} />
             </div>
         );

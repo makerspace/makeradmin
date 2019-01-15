@@ -21,7 +21,7 @@ class SearchBox extends React.Component {
                             <div className="uk-form-icon">
                                 <i className="uk-icon-search"/>
                                 <input ref="search" tabIndex="1" type="text" className="uk-form-width-large" placeholder="Skriv in ett sökord"
-                                       onChange={() => this.props.onChange({search: this.refs.search.value})} />
+                                       onChange={() => this.props.onChange(this.refs.search.value)} />
                             </div>
                         </form>
                     </div>
@@ -71,7 +71,7 @@ class MemberList extends React.Component {
                 <p className="uk-float-left">På denna sida ser du en lista på samtliga medlemmar.</p>
                 <Link to="/membership/members/add" className="uk-button uk-button-primary uk-float-right"><i className="uk-icon-plus-circle"/> Skapa ny medlem</Link>
 
-                <SearchBox onChange={filters => this.collection.updateFilter(filters)} />
+                <SearchBox onChange={terms => this.collection.updateSearch(terms)} />
                 <CollectionTable rowComponent={Row} collection={this.collection} columns={columns} />
             </div>
         );
