@@ -12,7 +12,6 @@ from service.api_definition import MEMBER_VIEW, MEMBER_CREATE, MEMBER_EDIT, MEMB
 from service.db import db_session
 from service.entity import Entity, not_empty, ASC, DESC, OrmManyRelation, OrmSingeRelation
 
-# TODO BM Bug, can't create member zipcode not handled correctly in gui.
 member_entity = MemberEntity(
     Member,
     validation=dict(email=not_empty, firstname=not_empty),
