@@ -7,7 +7,7 @@ export default class TextInput extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            value: '',
+            value: null,
             selected: false,
             isDirty: false,
         };
@@ -15,7 +15,7 @@ export default class TextInput extends React.Component {
 
     componentDidMount() {
         const {model, name} = this.props;
-        this.unsubscribe = model.subscribe(() => this.setState({value: model[name] === null ? '' : model[name], isDirty: model.isDirty(name)}));
+        this.unsubscribe = model.subscribe(() => this.setState({value: model[name] === '' ? null : model[name], isDirty: model.isDirty(name)}));
     }
     
     componentWillUnmount() {
@@ -38,7 +38,7 @@ export default class TextInput extends React.Component {
                              disabled={disabled}
                              type={type || "text"}
                              tabIndex={tabIndex}
-                             onChange={(event) => model[name] = event.target.value}
+                             onChange={(event) => model[name] = event.target.value === '' ? null : event.target.value}
                              onFocus={() => this.setState({selected: true})}
                              onBlur={() => this.setState({selected: false})}/>;
         
