@@ -13,7 +13,9 @@ RUN apk update \
        linux-headers \
     && rm -rf /var/cache/apk/*
 
-RUN mkdir -p /work/
+RUN mkdir -p /work/ && mkdir -p /work/logs
+
+VOLUME /work/logs
 
 COPY requirements.txt /work
 
