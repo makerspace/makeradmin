@@ -8,7 +8,6 @@ from sqlalchemy import inspect, Integer, String, DateTime, Text, desc, asc, or_,
 from service.api_definition import BAD_VALUE, REQUIRED, Arg, symbol, Enum, natural0, natural1
 from service.db import db_session
 from service.error import NotFound, UnprocessableEntity
-from service.logging import logger
 
 ASC = 'asc'
 DESC = 'desc'
@@ -63,8 +62,6 @@ GLOBAl_READ_ONLY = ('created_at', 'updated_at', 'deleted_at')
 ExpandField = namedtuple('ExpandField', 'relation,columns')
 
 
-# TODO BM Expand functionality is used for Key->member and Span->member, nothing else, add support for it.
-# Or subclassing if it turns out it is rarly used.
 class Entity:
     """ Used to create a crud-able entity, subclass to provide additional functionality. """
     
@@ -277,7 +274,6 @@ class OrmSingeRelation:
 
 class OrmManyRelation:
     
-    # TODO The use of sqlalchemy in this class could probably be improved/simplified.
     def __init__(self, name=None, relation_property=None, relation_table=None,
                  entity_id_column=None, related_entity_id_column=None):
         """

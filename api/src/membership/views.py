@@ -40,7 +40,6 @@ permission_entity = Entity(
     search_columns=('permission', 'permission_id'),
 )
 
-# TODO BM got expandable field member (a concept used in two places)
 span_entity = Entity(
     Span,
     default_sort_column='created_at',
@@ -50,7 +49,6 @@ span_entity = Entity(
     expand_fields={'member': ExpandField(Span.member, [Member.member_number, Member.firstname, Member.lastname])},
 )
 
-# TODO BM got expandable field member (a concept used in two places)
 key_entity = Entity(
     Key,
     default_sort_column='created_at',
