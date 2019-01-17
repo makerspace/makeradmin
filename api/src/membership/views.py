@@ -47,6 +47,7 @@ span_entity = Entity(
     default_sort_order=DESC,
     search_columns=('member_id',),
     list_deleted=True,  # TODO BM Add test for this (and general tests).
+    expand_fields={'member': ExpandField(Span.member, [Member.member_number, Member.firstname, Member.lastname])},
 )
 
 # TODO BM got expandable field member (a concept used in two places)

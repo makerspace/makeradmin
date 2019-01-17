@@ -8,7 +8,6 @@ from sqlalchemy import inspect, Integer, String, DateTime, Text, desc, asc, or_,
 from service.api_definition import BAD_VALUE, REQUIRED, Arg, symbol, Enum, natural0, natural1
 from service.db import db_session
 from service.error import NotFound, UnprocessableEntity
-from service.logging import logger
 
 ASC = 'asc'
 DESC = 'desc'
@@ -136,7 +135,6 @@ class Entity:
     
     def to_obj(self, entity):
         """ Convert model to json compatible object. """
-        logger.info(entity)
         return {k: conv(getattr(entity, k, None)) for k, conv in self.cols_to_obj.items()}
     
     def list(self, sort_by=Arg(symbol, required=False), sort_order=Arg(Enum(DESC, ASC), required=False),
@@ -145,7 +143,7 @@ class Entity:
              related_entity_id=None):
 
         query = db_session.query(self.model)
-        
+
         if not self.list_deleted:
             query = query.filter(self.model.deleted_at.is_(None))
 
@@ -162,7 +160,18 @@ class Entity:
             if not expand_field:
                 raise UnprocessableEntity(f"Expand of {expand} not allowed.", fields='expand', what=BAD_VALUE)
             query = query.outerjoin(expand_field.relation).add_columns(*expand_field.columns)
-            logger.info(query)
+            
+            column_obj_converter = [to_obj_converters[type(c.type)] for c in expand_field.columns]
+
+            # Use to_obj that can unpack result row.
+            def to_obj(row):
+                obj = self.to_obj(row[0])
+                for value, column, converter in zip(row[1:], expand_field.columns, column_obj_converter):
+                    obj[column.name] = converter(value)
+                return obj
+        else:
+            # Use regular to_obj.
+            to_obj = self.to_obj
 
         sort_column = sort_by or self.default_sort_column
         sort_order = sort_order or self.default_sort_order
@@ -184,7 +193,7 @@ class Entity:
             page=page,
             per_page=page_size,
             last_page=ceil(count / page_size) if page_size else 1,
-            data=[self.to_obj(entity) for entity in query]
+            data=[to_obj(entity) for entity in query]
         )
     
     def _create_internal(self, data):
