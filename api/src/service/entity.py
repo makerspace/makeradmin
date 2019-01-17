@@ -8,6 +8,7 @@ from sqlalchemy import inspect, Integer, String, DateTime, Text, desc, asc, or_,
 from service.api_definition import BAD_VALUE, REQUIRED, Arg, symbol, Enum, natural0, natural1
 from service.db import db_session
 from service.error import NotFound, UnprocessableEntity
+from service.logging import logger
 
 ASC = 'asc'
 DESC = 'desc'
@@ -177,8 +178,12 @@ class Entity:
         sort_order = sort_order or self.default_sort_order
         
         if sort_column:
+            try:
+                column = self.columns[sort_column]
+            except KeyError:
+                raise UnprocessableEntity(f"Can't sort on column {sort_column}.", fields='sort_column', what=BAD_VALUE)
             order = desc if sort_order == DESC else asc
-            query = query.order_by(order(sort_column))
+            query = query.order_by(order(column))
 
         count = query.count()
 
