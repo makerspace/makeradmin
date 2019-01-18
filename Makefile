@@ -11,9 +11,10 @@ run: .env
 dev: .env
 	$(DEV_COMPOSE) up --build
 
-test: .env
-	$(TEST_COMPOSE) down || true
-	docker volume rm test_dbdata || true
+test-clean: .env
+	$(TEST_COMPOSE) down -v --remove-orphans || true
+
+test: .env test-clean
 	$(TEST_COMPOSE) build
 	$(TEST_COMPOSE) up --abort-on-container-exit --exit-code-from test
 
@@ -52,4 +53,4 @@ admin-dev-server:
 	docker volume rm -f makeradmin_node_modules
 	docker-compose -f admin/dev-server-compose.yaml up --build
 
-.PHONY: build firstrun admin-dev-server init init-npm init-pip install run stop dev-test test dev
+.PHONY: build firstrun admin-dev-server init init-npm init-pip install run stop dev-test test-clean test dev
