@@ -6,6 +6,7 @@ from requests import RequestException
 from service.api_definition import POST, SERVICE_USER_ID, SERVICE_PERMISSIONS, GET, PUT, DELETE
 from service.error import InternalServerError, ApiError, EXCEPTION, GENERIC_500_ERROR_MESSAGE
 from service.logging import logger
+from service.traffic_logger import log_traffic
 
 
 class ExternalService(Blueprint):
@@ -57,6 +58,7 @@ class ExternalService(Blueprint):
                 timeout=self.timeout,
                 **kwargs,
             )
+            log_traffic(response)
         except RequestException as e:
             raise InternalServerError(GENERIC_500_ERROR_MESSAGE, service=self.name,
                                       log=f"{method} to {url} failed: {str(e)}", level=EXCEPTION)

@@ -42,6 +42,8 @@ services:
     image: makeradmin/api:1.0
     build:
       context: ./api
+    volumes:
+      - ./logs/api:/work/logs
     depends_on:
       - db2
     networks:
