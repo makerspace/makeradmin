@@ -4,7 +4,7 @@ services:
 
   api:
     volumes:
-      - logsfolder:/work/logs
+      - logs:/work/logs
     environment:
       TEST: "true"
 
@@ -71,4 +71,4 @@ services:
       SELENIUM_SCREENSHOT_DIR: "/work/.test/selenium-screenshots"
       
 volumes:
-  logsfolder:
+  logs:
