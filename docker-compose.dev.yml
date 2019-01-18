@@ -8,6 +8,7 @@ services:
   api:
     volumes:
       - ./api/src:/work/src
+      - logs:/work/logs
     ports:
       - "8010:80"
     environment:
@@ -59,3 +60,6 @@ services:
       - "8009:80"
     environment:
       APP_DEBUG: "true"
+
+volumes:
+  logs:
