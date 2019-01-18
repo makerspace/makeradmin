@@ -17,17 +17,18 @@ class TrafficLogger:
     def log_service_traffic(self, traffic: Response):
         req: PreparedRequest = traffic.request
         req_body = byte_decode(req.body) if type(req.body) == bytes else req.body
-        req_data = dict({
+
+        req_data = {
             "method": req.method,
             "url": req.url,
             "headers": dict(req.headers),
             "body": req_body
-        })
-        resp_data = dict({
+        }
+        resp_data = {
             "status": traffic.status_code,
             "headers": dict(traffic.headers),
             "data": traffic.json()
-        })
+        }
         self.service_traffic.append({
             "timeElapsed": traffic.elapsed.total_seconds(),
             "request": req_data,

@@ -3,6 +3,8 @@ version: "3"
 services:
 
   api:
+    volumes:
+      - logsfolder:/work/logs
     environment:
       TEST: "true"
 
@@ -68,3 +70,5 @@ services:
       SELENIUM_BASE_TIMEOUT:
       SELENIUM_SCREENSHOT_DIR: "/work/.test/selenium-screenshots"
       
+volumes:
+  logsfolder:
