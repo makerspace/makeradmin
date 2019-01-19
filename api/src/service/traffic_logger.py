@@ -10,6 +10,8 @@ def byte_decode(data: bytes):
 
 
 class TrafficLogger:
+    LOG_LIMIT = 64 * 1024
+
     def __init__(self):
         self.create_time = datetime.utcnow().isoformat()+'Z'
         self.service_traffic = list()
@@ -27,7 +29,7 @@ class TrafficLogger:
         resp_data = {
             "status": traffic.status_code,
             "headers": dict(traffic.headers),
-            "data": traffic.json()
+            "data": traffic.text if len(traffic.content) < self.LOG_LIMIT else "<content too large for logging>"
         }
         self.service_traffic.append({
             "timeElapsed": traffic.elapsed.total_seconds(),
@@ -47,7 +49,7 @@ class TrafficLogger:
         if method != "GET":
             session_request_data["data"] = (
                 session_request.get_json() if session_request.is_json
-                else session_request.get_data(as_text=True) if session_request.content_length or 0 < 16 * 1024
+                else session_request.get_data(as_text=True) if session_request.content_length or 0 < self.LOG_LIMIT
                 else "<content too large for logging>"
             )
         session_response_data = {
