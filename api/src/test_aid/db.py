@@ -3,7 +3,7 @@ from faker import Faker
 
 
 from core.models import AccessToken
-from membership.models import Member, Group, Permission
+from membership.models import Member, Group, Permission, Span
 from service.api_definition import SERVICE_USER_ID
 from service.db import db_session
 from test_aid.test_util import random_str
@@ -22,6 +22,7 @@ class DbFactory:
         self.access_token = None
         self.member = None
         self.group = None
+        self.span = None
         self.permission = None
 
     def create_access_token(self, **kwargs):
@@ -51,6 +52,14 @@ class DbFactory:
         db_session.add(self.group)
         db_session.commit()
         return self.group
+
+    def create_span(self, **kwargs):
+        member = kwargs.get('member') or self.member
+        obj = self.obj.create_span(**kwargs)
+        self.span = Span(**obj, member=member)
+        db_session.add(self.span)
+        db_session.commit()
+        return self.span
 
     def create_permission(self, **kwargs):
         obj = dict(

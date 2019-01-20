@@ -1,7 +1,8 @@
-from random import randint
+from random import randint, choice
 
 from faker import Faker
 
+from membership.models import LABACCESS, MEMBERSHIP, SPECIAL_LABACESS
 from test_aid.test_util import random_str
 
 DEFAULT_PASSWORD = '1q2w3e'
@@ -14,7 +15,8 @@ ADD_LABACCESS_DAYS = 2
 class ObjFactory:
     """ Create dicts representing entities. """
     
-    def __init__(self):
+    def __init__(self, test):
+        self.test = test
         self.fake = Faker('sv_SE')
         
         self.member = None
@@ -23,6 +25,7 @@ class ObjFactory:
         self.product = None
         self.action = None
         self.key = None
+        self.span = None
     
     def create_member(self, **kwargs):
         firstname = self.fake.first_name()
@@ -63,6 +66,17 @@ class ObjFactory:
         self.key = obj
         return self.key
 
+    def create_span(self, **kwargs):
+        obj = dict(
+            startdate=self.test.date(days=-randint(40, 60)),
+            enddate=self.test.date(days=-randint(10, 30)),
+            type=choice((LABACCESS, MEMBERSHIP, SPECIAL_LABACESS)),
+            creation_reason=random_str(),
+        )
+        obj.update(kwargs)
+        self.span = obj
+        return self.span
+    
     def create_category(self, **kwargs):
         obj = dict(
             name=f"category-{random_str(12)}",

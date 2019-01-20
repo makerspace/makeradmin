@@ -32,7 +32,6 @@ group_entity = Entity(
     hidden_columns=('parent', 'left', 'right'),
 )
 
-# TODO BM Add tests.
 permission_entity = Entity(
     Permission,
     default_sort_column='permission_id',
@@ -45,7 +44,7 @@ span_entity = Entity(
     default_sort_column='created_at',
     default_sort_order=DESC,
     search_columns=('member_id',),
-    list_deleted=True,  # TODO BM Add test for this (and general tests).
+    list_deleted=True,
     expand_fields={'member': ExpandField(Span.member, [Member.member_number, Member.firstname, Member.lastname])},
 )
 

@@ -17,7 +17,7 @@ class TestBase(TestCase):
     @classmethod
     def setUpClass(self):
         super().setUpClass()
-        self.obj = ObjFactory()
+        self.obj = ObjFactory(self)
         
         self.now = datetime.now()
         self.today = self.now.date()
