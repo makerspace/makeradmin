@@ -8,7 +8,7 @@ class Test(ApiTest):
     def test_create_member_with_existing_email_fails(self):
         member = self.obj.create_member()
         member_number = self.post("/membership/member", json=member).expect(code=201).get('data__member_number')
-        member['member_number'] = member_number + 1000
+        member['member_number'] = self.db.get_member_number()
         self.post("/membership/member", json=member).expect(code=422, status="error", what="not_unique",
                                                             fields='email')
 

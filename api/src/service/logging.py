@@ -6,7 +6,4 @@ basicConfig(format='%(asctime)s %(levelname)s [%(process)d/%(threadName)s %(path
 
 logger = getLogger('makeradmin')
 
-# TODO BM Double check all sql queries everywhere.
-# getLogger('sqlalchemy.engine').setLevel(INFO)
-
-# TODO BM Check all sql, use sqlalchemy better, check all old inserts, selects etc.
+getLogger('sqlalchemy.engine').setLevel(INFO)
