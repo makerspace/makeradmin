@@ -952,12 +952,11 @@ def ship_add_labaccess_action(action: PendingAction) -> None:
 def ship_add_membership_action(action: PendingAction) -> None:
     days_to_add = action.action_value
     assert(days_to_add >= 0)
-    created_at = datetime.fromisoformat(action.created_at)
     r = instance.gateway.post(f"membership/member/{action.member_id}/addMembershipDays",
                               {
                                   "type": "membership",
                                   "days": days_to_add,
-                                  "default_start_date": created_at.date().isoformat(),
+                                  "default_start_date": action.created_at[:10],
                                   "creation_reason": f"transaction_action_id: {action.pending_action_id}, transaction_id: {action.transaction['transaction_id']}",
                               }
                               )
