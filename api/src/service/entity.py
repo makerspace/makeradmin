@@ -8,6 +8,7 @@ from sqlalchemy import inspect, Integer, String, DateTime, Text, desc, asc, or_,
 from service.api_definition import BAD_VALUE, REQUIRED, Arg, symbol, Enum, natural0, natural1
 from service.db import db_session
 from service.error import NotFound, UnprocessableEntity
+from service.logging import logger
 
 ASC = 'asc'
 DESC = 'desc'
@@ -218,14 +219,18 @@ class Entity:
             raise NotFound("Could not find any entity with specified parameters.")
         obj = self.to_obj(entity)
         return obj
-    
-    def update(self, entity_id):
-        input_data = self.to_model(request.json)
+
+    def _update_internal(self, entity_id, data):
+        """ Internal update to make it easier for subclasses to manipulated data before update. """
+        input_data = self.to_model(data)
         self.validate_present(input_data)
         if not input_data:
             raise UnprocessableEntity("Can not update using empty data.")
         db_session.query(self.model).filter(self.pk == entity_id).update(input_data)
         return self.read(entity_id)
+    
+    def update(self, entity_id):
+        return self._update_internal(entity_id, request.json)
     
     def delete(self, entity_id):
         count = db_session.query(self.model).filter(self.pk == entity_id).update(dict(deleted_at=datetime.utcnow()))

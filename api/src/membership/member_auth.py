@@ -19,12 +19,13 @@ def get_member_permissions(member_id=None):
 
 
 def verify_password(password, password_hash):
+    if not password or not password_hash:
+        return False
     return bcrypt.checkpw(password.encode(), password_hash.encode())
 
 
 def hash_password(password):
-    # TODO BM When is this supposed to be used? Think passwords should be hashed on save?
-    bcrypt.hashpw(password=password.encode(), salt=bcrypt.gensalt())
+    return bcrypt.hashpw(password=password.encode(), salt=bcrypt.gensalt()).decode()
 
 
 def authenticate(username=None, password=None):
