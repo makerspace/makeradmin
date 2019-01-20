@@ -58,3 +58,8 @@ class Test(ApiTest):
     def test_can_not_set_password_and_unhashed_password_at_the_same_time(self):
         member = self.obj.create_member(password=random_str(8), unhashed_password=random_str(8))
         self.api.post("/membership/member", json=member).expect(code=422)
+
+    def test_activate_member(self):
+        member = self.db.create_member(deleted_at=self.datetime())
+        self.post(f"/membership/member/{member.member_id}/activate").expect(code=200)
+        self.get(f"/membership/member/{member.member_id}").expect(code=200, deleted_at=None)

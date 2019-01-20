@@ -179,5 +179,20 @@ class Test(ApiTest):
         self.get(f"/membership/member?search={firstname}&sort_by=lastname&sort_order=desc&page_size=3&page=3")\
             .expect(code=200, data=[], page=3, per_page=3, last_page=2, total=4)
 
+    def test_expand_includes_data_in_list(self):
+        member = self.db.create_member()
+        span = self.db.create_span()
+
+        result = self\
+            .get(f"/membership/span?expand=member&search={member.member_id}&page_size=0")\
+            .expect(code=200)\
+            .data
+        
+        entity, = (e for e in result if e['span_id'] == span.span_id)
+        
+        self.assertEqual(member.member_number, entity['member_number'])
+        self.assertEqual(member.firstname, entity['firstname'])
+        self.assertEqual(member.lastname, entity['lastname'])
+
     # TODO Is delete non existent 404 or 200?
     
