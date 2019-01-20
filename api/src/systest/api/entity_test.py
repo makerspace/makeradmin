@@ -81,6 +81,15 @@ class Test(ApiTest):
         span = self.db.create_span(deleted_at=self.datetime())
         self.assertIn(span.span_id, [e['span_id'] for e in self.get("/membership/span?page_size=0").data])
 
+    def test_deleting_deleted_existing_entry_returns_200(self):
+        # This replicates the behavior in the previous implementation.
+        member = self.db.create_member(deleted_at=self.datetime())
+        self.delete(f"/membership/member/{member.member_id}").expect(200)
+
+    def test_deleting_non_existing_entry_returns_404(self):
+        # This replicates the behavior in the previous implementation.
+        self.delete(f"/membership/member/{randint(1e8, 9e9)}").expect(404)
+
     def test_primary_key__created_at_and_updated_at_is_filtered_on_update(self):
         entity = self.api.create_group()
         entity_id = entity['group_id']
@@ -193,6 +202,3 @@ class Test(ApiTest):
         self.assertEqual(member.member_number, entity['member_number'])
         self.assertEqual(member.firstname, entity['firstname'])
         self.assertEqual(member.lastname, entity['lastname'])
-
-    # TODO Is delete non existent 404 or 200?
-    
