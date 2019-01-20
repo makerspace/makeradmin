@@ -77,8 +77,8 @@ class Group(Base):
         return f'Group(group_id={self.group_id}, name={self.name})'
   
     
-# Calculated property will be a sub executed as a sub select for each groups, since there are not that many groups
-# this is fine.
+# Calculated property will be executed as a sub select for each groups, since it is not that many groups this will be
+# fine.
 Group.num_members = column_property(
     select([func.count(member_group.columns.member_id)])
     .where(Group.group_id == member_group.columns.group_id)

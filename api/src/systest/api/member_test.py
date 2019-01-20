@@ -58,12 +58,3 @@ class Test(ApiTest):
     def test_can_not_set_password_and_unhashed_password_at_the_same_time(self):
         member = self.obj.create_member(password=random_str(8), unhashed_password=random_str(8))
         self.api.post("/membership/member", json=member).expect(code=422)
-
-    def test_include_membership_in_member_get(self):
-        # TODO BM We need to be able to create spans with api or db to do this test.
-        pass
-
-    def test_include_membership_in_member_list(self):
-        # TODO BM We need to be able to create spans with api or db to do this test. Or is this a special endpoint,
-        # only used in one place.
-        pass
