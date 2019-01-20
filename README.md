@@ -60,11 +60,6 @@ This can be done from the web UI, but it can be convenient to do it from the com
 python3 create_user.py --first-name "Maker" --last-name "Makersson" --email "maker@example.com" --type admin
 ```
 
-To change password for existing user.
-```
-docker-compose run --rm --no-deps membership /usr/bin/php /var/www/html/artisan member:password <email> <password>
-```
-
 ### Adding permissions for all users to view data on MakerAdmin
 
 If the admins don't seem to have the permissions that they should have (possibly because you have upgraded makeradmin to a newer version)
