@@ -1,6 +1,6 @@
 import requests
 
-from flask import Blueprint, g, request
+from flask import Blueprint, g, request, Response
 from requests import RequestException
 
 from service.api_definition import POST, SERVICE_USER_ID, SERVICE_PERMISSIONS, GET, PUT, DELETE
@@ -26,7 +26,10 @@ class ExternalService(Blueprint):
             response = self.raw_request("forwarding", url, request.method,
                                         data=request.get_data(), params=request.args,
                                         content_type=request.headers.get('Content-Type', None))
-            return response.content, response.status_code
+            
+            headers = {k: response.headers.get(k) for k in ('Content-Type', 'Cache-Control') if k in response.headers}
+            
+            return Response(response.content, headers=headers, status=response.status_code)
         
     def migrate(self, *args, **kwargs):
         pass
@@ -47,8 +50,13 @@ class ExternalService(Blueprint):
         if content_type:
             headers['Content-Type'] = content_type
         
+        stripe_signatrue = request.headers.get('Stripe-Signature')
+        if stripe_signatrue:
+            headers['Stripe-Signature'] = stripe_signatrue
+        
         # TODO Remove or level debug.
-        # logger.info(f"{what} to {method} {url}, user_id={user_id}, permissions={permissions}, data={kwargs.get('data')}")
+        # logger.info(f"{what} to {method} {url}, user_id={user_id}, permissions={permissions},"
+        #             f" data={kwargs.get('data')}")
         
         try:
             response = requests.request(
