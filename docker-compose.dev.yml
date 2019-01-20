@@ -14,12 +14,6 @@ services:
     environment:
       APP_DEBUG: "true"
       
-  membership:
-    volumes:
-      - ./membership/lumen/routes:/var/www/html/routes
-      - ./membership/lumen/app:/var/www/html/app
-      - ./library/src/Makeradmin:/var/www/html/library
-
   messages:
     volumes:
       - ./messages/lumen/routes:/var/www/html/routes

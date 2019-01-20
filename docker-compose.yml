@@ -56,7 +56,6 @@ services:
       MYSQL_PORT:
       MYSQL_USER:
       MYSQL_PASS:
-      MEMBERSHIP_URL:
       SHOP_URL:
       MEMBER_URL:
       MESSAGES_URL:
@@ -105,26 +104,6 @@ services:
     networks:
       - makeradmin
       
-  membership:
-    image: makeradmin/membership:1.0
-    build:
-      context: ./membership
-      dockerfile: ${PWD}/library/DockerfileService
-    volumes:
-      - ./logs/membership:/var/www/html/storage/logs
-    environment:
-      MYSQL_HOST: "db2:${MYSQL_PORT}"
-      MYSQL_DB: "makeradmin"
-      MYSQL_USER:
-      MYSQL_PASS:
-      APIGATEWAY: "api"
-      BEARER: "${API_BEARER}"
-    depends_on:
-      - api
-      - library
-    networks:
-      - makeradmin
-
   messages:
     image: makeradmin/messages:1.0
     build:

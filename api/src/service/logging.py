@@ -6,4 +6,4 @@ basicConfig(format='%(asctime)s %(levelname)s [%(process)d/%(threadName)s %(path
 
 logger = getLogger('makeradmin')
 
-getLogger('sqlalchemy.engine').setLevel(INFO)
+# getLogger('sqlalchemy.engine').setLevel(INFO)
