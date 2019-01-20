@@ -48,7 +48,7 @@ class TrafficLogger:
         }
         if method != "GET":
             session_request_data["data"] = (
-                session_request.get_json() if session_request.is_json
+                session_request.get_json() if session_request.is_json and session_request.content_length
                 else session_request.get_data(as_text=True) if session_request.content_length or 0 < self.LOG_LIMIT
                 else "<content too large for logging>"
             )
