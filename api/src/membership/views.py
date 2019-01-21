@@ -16,7 +16,6 @@ member_entity = MemberEntity(
     Member,
     validation=dict(email=not_empty, firstname=not_empty),
     default_sort_column='member_number',
-    default_sort_order=DESC,
     hidden_columns=('password',),
     search_columns=('firstname', 'lastname', 'email', 'address_street', 'address_extra', 'address_zipcode',
                     'address_city', 'phone', 'civicregno', 'member_number'),
@@ -33,14 +32,11 @@ group_entity = Entity(
 permission_entity = Entity(
     Permission,
     default_sort_column='permission_id',
-    default_sort_order=DESC,
     search_columns=('permission', 'permission_id'),
 )
 
 span_entity = Entity(
     Span,
-    default_sort_column='created_at',
-    default_sort_order=DESC,
     search_columns=('member_id',),
     list_deleted=True,
     expand_fields={'member': ExpandField(Span.member, [Member.member_number, Member.firstname, Member.lastname])},
@@ -48,8 +44,6 @@ span_entity = Entity(
 
 key_entity = Entity(
     Key,
-    default_sort_column='created_at',
-    default_sort_order=DESC,
     search_columns=('description', 'tagid'),
     expand_fields={'member': ExpandField(Key.member, [Member.member_number, Member.firstname, Member.lastname])},
 )

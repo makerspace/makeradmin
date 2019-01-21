@@ -57,7 +57,7 @@ to_obj_converters = {
 }
 
 
-GLOBAl_READ_ONLY = ('created_at', 'updated_at', 'deleted_at')
+GLOBAL_READ_ONLY = ('created_at', 'updated_at', 'deleted_at')
 
 
 ExpandField = namedtuple('ExpandField', 'relation,columns')
@@ -67,12 +67,12 @@ class Entity:
     """ Used to create a crud-able entity, subclass to provide additional functionality. """
     
     def __init__(self, model, hidden_columns=tuple(), read_only_columns=tuple(), validation=None,
-                 default_sort_column=None, default_sort_order=None, search_columns=tuple(),
+                 default_sort_column='created_at', default_sort_order=DESC, search_columns=tuple(),
                  list_deleted=False, expand_fields=None):
         """
         :param model sqlalchemy orm model class
         :param hidden_columns columns that should be filtered on read
-        :param read_only_columns columns that should be filtered on create and update (in addition to GLOBAl_READ_ONLY)
+        :param read_only_columns columns that should be filtered on create and update (in addition to GLOBAL_READ_ONLY)
         :param validation map from column name to validation function run on create and update, None values will 
                           not be validated, use not null in db
         :param default_sort_column column name
@@ -98,12 +98,16 @@ class Entity:
         self.pk = model_inspect.primary_key[0]
         
         self.columns = model_inspect.columns
+
+        assert default_sort_column is None or default_sort_column in self.columns, "default_sort_column does not exist"
+        
+        assert default_sort_order in (None, ASC, DESC), "bad default sort order"
         
         self.cols_to_model = {
             k: to_model_converters[type(c.type)](k)
             for k, c in self.columns.items()
             if (not c.primary_key
-                and k not in GLOBAl_READ_ONLY
+                and k not in GLOBAL_READ_ONLY
                 and k not in read_only_columns)
         }
         

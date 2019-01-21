@@ -20,7 +20,7 @@ class Test(ApiTest):
         data = self.get(f"/membership/group/{entity_id}").expect(code=200, data=entity, data__group_id=entity_id).data
         
         self.assertIsNotNone(data['created_at'])
-        self.assertIsNone(data['updated_at'])
+        self.assertIsNotNone(data['updated_at'])
         self.assertIsNone(data['deleted_at'])
 
     def test_can_not_create_with_empty_data(self):
@@ -28,10 +28,8 @@ class Test(ApiTest):
         self.post("/membership/group", dict(group_id=1, created_at='remove_me')).expect(code=422)
 
     def test_update(self):
-        entity = self.api.create_group()
-        entity_id = entity['group_id']
-
-        self.assertIsNone(entity['updated_at'])
+        entity = self.db.create_group(updated_at=self.datetime(days=-1))
+        entity_id = entity.group_id
 
         data = self\
             .put(f"/membership/group/{entity_id}", dict(name='arne'))\
@@ -39,6 +37,7 @@ class Test(ApiTest):
             .data
         
         self.assertTrue(data['updated_at'] >= data['created_at'])
+        self.assertTrue(datetime.fromisoformat(data['updated_at']) > entity.updated_at)
 
     def test_can_not_update_entity_using_empty_or_read_only_data(self):
         entity = self.api.create_group()
