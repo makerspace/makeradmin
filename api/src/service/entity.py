@@ -265,7 +265,7 @@ class Entity:
 class OrmSingeRelation:
     def __init__(self, name=None, related_entity_id_column=None):
         """
-        Relation that is implemented through a foreithn key in the orm.
+        Relation that is implemented through a foreign key in the orm.
         """
         
         self.name = name
@@ -275,7 +275,7 @@ class OrmSingeRelation:
         raise NotFound("Not supported.", log="Add not supported by this class.")
 
     def remove(self, *args):
-        raise NotFound("Not supported.", log="Add not supported by this class.")
+        raise NotFound("Not supported.", log="Remove not supported by this class.")
 
     def filter(self, query, related_entity_id):
         return query.filter_by(**{self.related_entity_id_column: related_entity_id})
