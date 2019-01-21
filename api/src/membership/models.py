@@ -32,7 +32,7 @@ class Member(Base):
     address_country = Column(String(2))
     phone = Column(String(255))
     created_at = Column(DateTime, server_default=func.now())
-    updated_at = Column(DateTime)
+    updated_at = Column(DateTime, server_default=func.now())
     deleted_at = Column(DateTime)
     member_number = Column(Integer, unique=True)
 
@@ -62,7 +62,7 @@ class Group(Base):
     title = Column(String(255), nullable=False)
     description = Column(Text)
     created_at = Column(DateTime, server_default=func.now())
-    updated_at = Column(DateTime)
+    updated_at = Column(DateTime, server_default=func.now())
     deleted_at = Column(DateTime)
     
     members = relationship('Member',
@@ -91,7 +91,7 @@ class Permission(Base):
     permission_id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
     permission = Column(String(255), nullable=False, unique=True)
     created_at = Column(DateTime, server_default=func.now())
-    updated_at = Column(DateTime)
+    updated_at = Column(DateTime, server_default=func.now())
     deleted_at = Column(DateTime)
 
     groups = relationship('Group',
@@ -108,7 +108,7 @@ class Key(Base):
     description = Column(Text)
     tagid = Column(String(255), nullable=False, unique=True)
     created_at = Column(DateTime, server_default=func.now())
-    updated_at = Column(DateTime)
+    updated_at = Column(DateTime, server_default=func.now())
     deleted_at = Column(DateTime)
     
     member = relationship(Member, backref="keys")
