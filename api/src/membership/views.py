@@ -28,8 +28,6 @@ group_entity = Entity(
     default_sort_column='title',
     default_sort_order=ASC,
     search_columns=('name', 'title', 'description'),
-    read_only_columns=('parent', 'left', 'right'),
-    hidden_columns=('parent', 'left', 'right'),
 )
 
 permission_entity = Entity(
