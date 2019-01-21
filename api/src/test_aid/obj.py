@@ -50,7 +50,7 @@ class ObjFactory:
     def create_group(self, **kwargs):
         obj = dict(
             name=f"group-{random_str(12)}",
-            title=self.fake.catch_phrase(),
+            title=f"group-title-{random_str(12)}",
             description=self.fake.bs(),
         )
         obj.update(kwargs)
