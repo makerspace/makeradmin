@@ -39,6 +39,8 @@ SPAN_VIEW = "span_view"
 SPAN_MANAGE = "span_manage"
 KEYS_VIEW = "keys_view"
 KEYS_EDIT = "keys_edit"
+MESSAGE_SEND = "message_send"
+MESSAGE_VIEW = "message_view"
 WEBSHOP = 'webshop'
 
 ALL_PERMISSIONS = [
@@ -47,6 +49,7 @@ ALL_PERMISSIONS = [
     PERMISSION_VIEW, PERMISSION_MANAGE,
     SPAN_VIEW, SPAN_MANAGE,
     KEYS_VIEW, KEYS_EDIT,
+    MESSAGE_SEND, MESSAGE_VIEW,
 ]
 
 # Service credentials
