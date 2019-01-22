@@ -1,5 +1,3 @@
--- NOTE This file is not in use yet.
-
 -- create tables (if not already created by old php migrations)
 
 -- disable warnings or mysql will complain about table exists and deprecated collate
