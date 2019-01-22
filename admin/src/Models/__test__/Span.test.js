@@ -17,7 +17,7 @@ const createSpan = (span_id, startOffsetDays, endOffsetDays) => {
         span_id,
         startdate: formatUtcDate(day(startOffsetDays)),
         enddate: formatUtcDate(day(endOffsetDays)),
-        span_type: 'labaccess',
+        type: 'labaccess',
     });
 };
 

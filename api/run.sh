@@ -4,11 +4,6 @@ set -e
 GUNICORN_FLAGS=""
 WORKERS="8"
 
-if [ "$TEST" = "true" ]; then
-    echo "running tests for api"
-    python3 -m pytest . --workers auto -ra
-fi
-
 if [ "$APP_DEBUG" = "true" ]; then
     echo "running in devel mode"
     GUNICORN_FLAGS=" --reload"

@@ -45,7 +45,7 @@ class MemberForm extends React.Component {
 
                         <TextInput model={member} name="address_street" title="Address" />
                         <TextInput model={member} name="address_extra" title="Address extra" placeholder="Extra adressrad, t ex C/O adress" />
-                        <TextInput model={member} name="address_zipcode" title="Postnummer" />
+                        <TextInput model={member} type="number" name="address_zipcode" title="Postnummer" />
                         <TextInput model={member} name="address_city" title="Postort" />
 
                         <div className="uk-form-row">

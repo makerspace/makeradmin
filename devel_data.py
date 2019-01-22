@@ -1,51 +1,62 @@
 #!/usr/bin/env python3
-import servicebase_python.service
 import json
 from pprint import pprint
 
-gateway = servicebase_python.service.gateway_from_envfile(".env")
+import requests
+from dotenv import dotenv_values
 
 "labaccess"
 "special_labaccess"
 "membership"
 
 
+env = dotenv_values()
+
+
+headers = {
+    'Authorization': f'Bearer {env.get("API_BEARER")}',
+}
+
+
+url = env.get('HOST_BACKEND')
+
+
 def delete_all_spans(member_id):
-    response = gateway.get("membership/span")
+    response = requests.get(f"{url}/membership/span", headers=headers)
     print("list", response.status_code)
-    spans = json.loads(response.content.decode())['data']
+    spans = response.json()['data']
     for span in spans:
-        response = gateway.delete(f"membership/span/{span['span_id']}")
+        response = requests.delete(f"{url}/membership/span/{span['span_id']}", headers=headers)
         print("delete", response.status_code)
-        
+
 
 def create_span(member_id, startdate, enddate, span_type, creation_reason=None):
     payload = dict(
         member_id=member_id,
         startdate=startdate,
         enddate=enddate,
-        span_type=span_type,
+        type=span_type,
         creation_reason=creation_reason,
     )
-
-    response = gateway.post("membership/span", payload=payload)
+    
+    response = requests.post(f"{url}/membership/span", json=payload, headers=headers)
     print("create", response.status_code)
     pprint(json.loads(response.content.decode()))
 
 
-member_id = 76
-    
+member_id = 1
+
 delete_all_spans(member_id)
 
-create_span(member_id, "2016-05-20", "2016-06-21", "labaccess")
-create_span(member_id, "2016-06-21", "2016-07-21", "labaccess")
+create_span(member_id, "2016-05-20", "2016-06-21", "labaccess", "1")
+create_span(member_id, "2016-06-21", "2016-07-21", "labaccess", "1")
 
-create_span(member_id, "2018-05-10", "2018-07-10", "labaccess")
-create_span(member_id, "2018-07-11", "2018-11-11", "labaccess")
+create_span(member_id, "2018-05-10", "2018-07-10", "labaccess", "1")
+create_span(member_id, "2018-07-11", "2018-11-11", "labaccess", "1")
 
-create_span(member_id, "2018-05-20", "2019-05-20", "membership")
+create_span(member_id, "2018-05-20", "2019-05-20", "membership", "2")
 
-create_span(member_id, "2018-05-10", "2019-05-10", "special_labaccess")
+create_span(member_id, "2018-05-10", "2019-05-10", "special_labaccess", "2")
 
 """
 insert into membership_group_permissions (id, group_id,

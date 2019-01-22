@@ -18,10 +18,9 @@ def create_user(first_name: str, last_name: str, email: str, user_type: str, pas
             "email": email,
             "firstname": first_name,
             "lastname": last_name,
-            "unhashed_password": True  # Let php hash the password
         }
         if password is not None:
-            payload["password"] = password
+            payload["unhashed_password"] = password
 
         r = gateway.post("membership/member", payload=payload)
     except Exception as e:

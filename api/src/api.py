@@ -4,8 +4,10 @@ from flask.wrappers import Response as FlaskResponse
 from sqlalchemy.exc import OperationalError
 
 from core.auth import authenticate_request
+from membership.permissions import register_permissions
+from service.api_definition import ALL_PERMISSIONS
 from service.config import get_mysql_config
-from service.db import create_mysql_engine, shutdown_session
+from service.db import create_mysql_engine, shutdown_session, populate_fields_by_index
 from service.error import ApiError, error_handler_api, error_handler_db, error_handler_500, error_handler_404
 from service.traffic_logger import traffic_logger_init, traffic_logger_commit
 from services import services
@@ -43,10 +45,20 @@ app.after_request(after_request_functions)
 
 engine = create_mysql_engine(**get_mysql_config())
 
+populate_fields_by_index(engine)
+register_permissions(ALL_PERMISSIONS)
+
 
 @app.route("/")
 def index():
     return jsonify(dict(status="ok")), 200
+
+
+@app.route("/routes")
+def routes():
+    # TODO Fix machine readable.
+    # TODO Why do we serve static?
+    return "\n".join(sorted([f"{rule.rule}: {', '.join(sorted(rule.methods))}" for rule in app.url_map.iter_rules()]))
 
 
 # TODO Use Sentry?

@@ -11,7 +11,7 @@ import * as _ from "underscore";
 // idListName: used for add and remove if collection supports it by pushing id list to to <url>/remove or <url>/add,
 //             this could be simpler if server handled removes in a better way
 export default class Collection {
-    constructor({type, pageSize = 25, expand = null, filter = {}, sort = {}, url=null, idListName=null}) {
+    constructor({type, pageSize = 25, expand = null, sort = {}, url=null, idListName=null}) {
         this.type = type;
         this.pageSize = pageSize;
         this.url = url || type.model.root;
@@ -20,7 +20,7 @@ export default class Collection {
         this.items = null;
         this.page = {index: 1, count: 1};
         this.sort = sort;
-        this.filter = filter;
+        this.search = null;
         this.expand = expand;
 
         this.subscribers = {};
@@ -45,15 +45,15 @@ export default class Collection {
         this.fetch();
     }
     
-    // Update filter, filter keys are model attributes, values are substrings.
-    updateFilter(filter) {
-        this.filter = filter;
+    // Update filter, filter keys are model attributes, values are strings.
+    updateSearch(terms) {
+        this.search = terms;
         this.fetch();
     }
     
     // Change current page index (1-indexed).
     updatePage(index) {
-        this.page.index = Math.min(index, this.page.count);
+        this.page.index = Math.min(index, this.page.count) || 1;
         this.fetch();
     }
     
@@ -94,14 +94,14 @@ export default class Collection {
             params.expand = this.expand;
         }
         
-        _.each(this.filter, (v, k) => {
-            params[k] = v;
-        });
+        if (this.search) {
+            params.search = this.search.trim();
+        }
         
         return get({url: this.url, params}).then(data => {
             if (!data) return;
             this.page.count = data.last_page;
-            this.page.index = Math.min(this.page.count, this.page.index || 1);
+            this.page.index = Math.min(this.page.count, this.page.index) || 1;
             this.items = data.data.map(m => new this.type(m));
             _.values(this.subscribers).forEach(s => s({items: this.items, page: this.page}));
         });

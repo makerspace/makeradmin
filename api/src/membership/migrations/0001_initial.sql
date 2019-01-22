@@ -1,5 +1,3 @@
--- NOTE This file is not in use yet.
-
 -- create tables (if not already created by old php migrations)
 
 -- disable warnings or mysql will complain about table exists and deprecated collate
@@ -90,27 +88,6 @@ CREATE TABLE IF NOT EXISTS `membership_members_groups` (
   KEY `membership_members_groups_group_id_index` (`group_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
--- TODO Remove this, force use of goups?
-CREATE TABLE IF NOT EXISTS `membership_members_roles` (
-  `member_id` int(11) NOT NULL,
-  `role_id` int(11) NOT NULL,
-  KEY `membership_members_roles_member_id_index` (`member_id`),
-  KEY `membership_members_roles_role_id_index` (`role_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
--- TODO Remove this, force use of goups?
-CREATE TABLE IF NOT EXISTS `membership_roles` (
-  `role_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `group_id` int(11) NOT NULL,
-  `title` varchar(255) COLLATE utf8mb4_0900_ai_ci NOT NULL,
-  `description` text COLLATE utf8mb4_0900_ai_ci NOT NULL,
-  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` datetime DEFAULT NULL,
-  `deleted_at` datetime DEFAULT NULL,
-  PRIMARY KEY (`role_id`),
-  KEY `membership_roles_group_id_index` (`group_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
 CREATE TABLE IF NOT EXISTS `membership_spans` (
   `span_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `member_id` int(10) unsigned NOT NULL,
@@ -128,6 +105,8 @@ CREATE TABLE IF NOT EXISTS `membership_spans` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 DROP TABLE IF EXISTS `migrations_membership`;
+DROP TABLE IF EXISTS `membership_members_roles`;
+DROP TABLE IF EXISTS `membership_roles`;
 
 -- enable warnings
 SET sql_notes = 1;
@@ -138,8 +117,37 @@ ALTER TABLE `membership_groups` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4
 ALTER TABLE `membership_keys` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
 ALTER TABLE `membership_members` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
 ALTER TABLE `membership_members_groups` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
-ALTER TABLE `membership_members_roles` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
 ALTER TABLE `membership_permissions` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
-ALTER TABLE `membership_roles` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
 ALTER TABLE `membership_spans` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
 
+-- set updated at in database instead
+ALTER TABLE `membership_members` MODIFY COLUMN `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP;
+ALTER TABLE `membership_groups` MODIFY COLUMN `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP;
+ALTER TABLE `membership_permissions` MODIFY COLUMN `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP;
+ALTER TABLE `membership_keys` MODIFY COLUMN `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP;
+
+-- make membership_members email unique
+ALTER TABLE `membership_members` DROP INDEX `membership_members_email_index`;
+ALTER TABLE `membership_members` ADD UNIQUE INDEX `membership_members_email_index` (`email`);
+
+-- make membership_members member_number unique
+ALTER TABLE `membership_members` ADD UNIQUE INDEX `membership_members_member_number_index` (`member_number`);
+
+-- make membership_spans creation_reason unique
+ALTER TABLE `membership_spans` ADD UNIQUE INDEX `membership_members_creation_reason_index` (`creation_reason`);
+
+-- make membership_keys tagid unique
+ALTER TABLE `membership_keys` DROP INDEX `membership_keys_tagid_index`;
+ALTER TABLE `membership_keys` ADD UNIQUE INDEX `membership_keys_tagid_index` (`tagid`);
+
+-- fix broken alias column
+ALTER TABLE `membership_keys` CHANGE COLUMN `rfid_id` `key_id` int(10) unsigned NOT NULL AUTO_INCREMENT;
+
+-- drop unused columns
+ALTER TABLE `membership_groups` DROP COLUMN `parent`;
+ALTER TABLE `membership_groups` DROP COLUMN `left`;
+ALTER TABLE `membership_groups` DROP COLUMN `right`;
+
+-- drop unused columns
+ALTER TABLE `membership_permissions` DROP COLUMN `role_id`;
+ALTER TABLE `membership_permissions` DROP COLUMN `group_id`;

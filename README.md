@@ -60,11 +60,6 @@ This can be done from the web UI, but it can be convenient to do it from the com
 python3 create_user.py --first-name "Maker" --last-name "Makersson" --email "maker@example.com" --type admin
 ```
 
-To change password for existing user.
-```
-docker-compose run --rm --no-deps membership /usr/bin/php /var/www/html/artisan member:password <email> <password>
-```
-
 ### Adding permissions for all users to view data on MakerAdmin
 
 If the admins don't seem to have the permissions that they should have (possibly because you have upgraded makeradmin to a newer version)
@@ -113,9 +108,9 @@ Then go to:
 
 ## Tests
 
-### Function test that requires a running installation
+### System tests/integration tests that requires a running installation
 
-Function tests are written in python and the sources for the tests are in the test directory. There are 
+Systests are written in python and the sources for the systests are in the api/src/systest directory (because it shares a lot of code with the api unittests). There are 
 tests using the api as well as selenium tests. Those tests are also run in travis.
 
 You can run the tests in test containers using a one off db with:
@@ -130,6 +125,10 @@ make dev-test
 
 And you can also run single tests against your local running environment using you favorite test
 runner (like pytest).
+
+### Python unittests
+
+The api directory also contains unittests that can be run standalone, they will also run when running ```make test```.
 
 ### Javascript unit tests
 

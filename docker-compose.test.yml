@@ -45,11 +45,12 @@ services:
   test:
     image: makeradmin/test:1.0
     build:
-      context: ./test
+      context: ./api
+      dockerfile: TestDockerfile
     networks:
       - makeradmin
     command:
-      - "/work/run.sh"
+      - "/work/test_run.sh"
     volumes:
       - .test:/work/.test
     depends_on:
@@ -58,6 +59,11 @@ services:
       - api
       - selenium
     environment:
+      MYSQL_HOST: db2
+      MYSQL_DB:
+      MYSQL_PORT:
+      MYSQL_USER:
+      MYSQL_PASS:
       WEBDRIVER_TYPE: "REMOTE_CHROME"
       API_BEARER:
       HOST_FRONTEND: 'http://admin'

@@ -9,7 +9,7 @@ from service.logging import logger
 EXCEPTION = 333
 
 
-GENERIC_ERROR_MESSAGE = "Something went wrong while trying to contact a service in our internal network."
+GENERIC_500_ERROR_MESSAGE = "Something went wrong while trying to contact a service in our internal network."
 
 
 def log(level, message):
@@ -22,7 +22,7 @@ def log(level, message):
 def error_handler_db(error):
     logger.exception(f"error when communicating with db: {str(error)}")
     response = jsonify(
-        message=GENERIC_ERROR_MESSAGE,
+        message=GENERIC_500_ERROR_MESSAGE,
         status="error",
         fields=None,
         what=None,
@@ -47,6 +47,10 @@ def error_handler_500(error):
 
 def error_handler_404(error):
     return jsonify(dict(message='Not found.', status='error')), 404
+
+
+# TODO Add generic nice 400 handler (for things like bad content type and reading json). Also 405 bad method not
+# allowed.
 
 
 class ApiError(Exception):

@@ -1,9 +1,10 @@
+import re
+from datetime import date
 from inspect import signature
 
 from flask import request
 
 from service.error import ApiError, UnprocessableEntity
-from service.logging import logger
 
 # HTTP Methods
 POST = 'post'
@@ -11,10 +12,42 @@ GET = 'get'
 DELETE = 'delete'
 PUT = 'put'
 
-# Permissions
+# TODO Since permissions are tied to the code it is probably better that they are in the code and not in the db. The
+# db also contains a lot of unusable permissions. membership_group_permissions could contain permission enum/string
+# directly.
+
+# Special permissions
 PUBLIC = 'public'    # Anyone on the internet can access this endpoint.
 SERVICE = 'service'  # A service user (id < 0) needs to be authenticated, but no other permissions are needed.
 USER = 'user'        # A regular user (id > 0) needs to be authenticated, but no other permissions are needed.
+
+# Regular permissions
+MEMBER_VIEW = 'member_view'
+MEMBER_CREATE = 'member_create'
+MEMBER_EDIT = 'member_edit'
+MEMBER_DELETE = 'member_delete'
+GROUP_VIEW = 'group_view'
+GROUP_CREATE = 'group_create'
+GROUP_EDIT = 'member_edit'
+GROUP_DELETE = 'group_delete'
+GROUP_MEMBER_VIEW = 'group_member_view'
+GROUP_MEMBER_ADD = 'group_member_add'
+GROUP_MEMBER_REMOVE = 'group_member_remove'
+PERMISSION_VIEW = 'permission_view'
+PERMISSION_MANAGE = 'permission_manage'
+SPAN_VIEW = "span_view"
+SPAN_MANAGE = "span_manage"
+KEYS_VIEW = "keys_view"
+KEYS_EDIT = "keys_edit"
+WEBSHOP = 'webshop'
+
+ALL_PERMISSIONS = [
+    MEMBER_VIEW, MEMBER_CREATE, MEMBER_EDIT, MEMBER_DELETE,
+    GROUP_VIEW, GROUP_CREATE, GROUP_EDIT, GROUP_DELETE, GROUP_MEMBER_ADD, GROUP_MEMBER_REMOVE, GROUP_MEMBER_VIEW,
+    PERMISSION_VIEW, PERMISSION_MANAGE,
+    SPAN_VIEW, SPAN_MANAGE,
+    KEYS_VIEW, KEYS_EDIT,
+]
 
 # Service credentials
 SERVICE_USER_ID = -1
@@ -24,6 +57,7 @@ SERVICE_PERMISSIONS = (SERVICE,)
 BAD_VALUE = 'bad_value'
 REQUIRED = 'required'
 EXPIRED = 'expired'
+NOT_UNIQUE = 'not_unique'
 
 
 class Arg:
@@ -63,18 +97,21 @@ class Arg:
                 
             if value is None:
                 try:
-                    value = request.json.get(name)
+                    value = request.get_json(silent=True).get(name)
                 except AttributeError:
                     pass
             
-            if value is None and param.required:
-                raise ApiError(message=f'Parameter {name} is required.', fields=name, what=REQUIRED)
+            if value is None:
+                if param.required:
+                    raise ApiError(message=f'Parameter {name} is required.', fields=name, what=REQUIRED)
             
-            try:
-                value = param.converter(value)
-            except Exception as e:
-                raise UnprocessableEntity(fields=name, what=BAD_VALUE,
-                                          message=f'Failed to validate parameter {name}: {str(e)}')
+            else:
+                try:
+                    value = param.converter(value)
+                except Exception as e:
+                    raise UnprocessableEntity(fields=name, what=BAD_VALUE,
+                                              message=f'Failed to validate parameter {name}: {str(e)}')
+                
             kwargs[name] = value
 
 
@@ -87,3 +124,48 @@ class Enum:
         if value in self.values:
             return value
         raise ValueError(f"Value {value} not among allowed values.")
+
+
+symbol_regex = re.compile(r'[A-Za-z0-9_]+')
+
+
+def symbol(value):
+    """ A string which is only A-Za-z0-9 and _. """
+    if not symbol_regex.match(value):
+        raise ValueError(f"Value {value} is not a symbol.")
+    return value
+
+
+def natural0(value):
+    """ Natural including 0. """
+    value = int(value)
+    if value < 0:
+        raise ValueError(f"Value {value} should be 0 or higher.")
+    return value
+    
+
+def natural1(value):
+    """ Natural excluding 0. """
+    value = int(value)
+    if value < 1:
+        raise ValueError(f"Value {value} should be 1 or higher.")
+    return value
+    
+    
+def symbol_list(value):
+    """ A list of symbols. """
+    if not isinstance(value, list):
+        raise ValueError(f"Value {value} should be a list.")
+    return [symbol(item) for item in value]
+    
+
+def iso_date(value):
+    """ An iso formatted date. """
+    return date.fromisoformat(value)
+
+
+def non_empty_str(value):
+    value = str(value)
+    if not value:
+        raise ValueError("Can not be empty.")
+    return value

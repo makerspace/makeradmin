@@ -1,6 +1,6 @@
 from typing import Union
 
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, inspect
 from sqlalchemy.orm import scoped_session, Session, sessionmaker
 
 from service.logging import logger
@@ -15,7 +15,12 @@ class SessionFactoryWrapper:
         self.session_factory = None
         
     def init_with_engine(self, engine):
-        self.session_factory = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+        if self.session_factory is None:
+            logger.info(f"initializing session factory with engine {engine}")
+            self.session_factory = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+        else:
+            logger.info(f"reinitializing session factory with engine {engine}")
+            self.session_factory.configure(bind=engine)
         
     def __call__(self, *args, **kwargs):
         return self.session_factory(*args, **kwargs)
@@ -40,3 +45,15 @@ def create_mysql_engine(host=None, port=None, db=None, user=None, pwd=None, time
     db_session_factory.init_with_engine(engine)
     
     return engine
+
+
+fields_by_index = {}
+
+
+def populate_fields_by_index(engine):
+    """ Populate the dict fields_by_index (used for error messages) by inspecting the database. """
+    engine_inspect = inspect(engine)
+    for table in engine_inspect.get_table_names():
+        for index in engine_inspect.get_indexes(table):
+            fields_by_index[index['name']] = ",".join(index['column_names'])
+    
