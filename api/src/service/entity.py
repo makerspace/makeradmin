@@ -1,6 +1,7 @@
 from collections import namedtuple
 from datetime import datetime, date
 from math import ceil
+from typing import Mapping
 
 from flask import request
 from sqlalchemy import inspect, Integer, String, DateTime, Text, desc, asc, or_, text, Date, Enum as DbEnum
@@ -135,6 +136,12 @@ class Entity:
     def to_model(self, obj):
         """ Convert and filter json compatible obejct to model compatible dict, also filter fields that is not
         allowed to be edited. """
+        if obj is None:
+            raise UnprocessableEntity("expected data in request, was empty", what=BAD_VALUE)
+        
+        if not isinstance(obj, Mapping):
+            raise UnprocessableEntity("expected data object in request", what=BAD_VALUE)
+        
         return {k: self.cols_to_model[k](v) for k, v in obj.items() if k in self.cols_to_model}
     
     def to_obj(self, entity):
