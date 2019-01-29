@@ -28,6 +28,7 @@ default = Dict(name="default", src=dict(
     MYSQL_DB='makeradmin',
     SHOP_URL='http://backend',
     MEMBER_URL='http://backend',
+    STATISTICS_URL='http://backend',
     MESSAGES_URL='http://messages',
     EMAIL_DISPATCHER_URL='http://email-dispatcher',
     MULTIACCESS_SYNC_URL='http://multiaccesssync',
