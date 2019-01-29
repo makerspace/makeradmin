@@ -132,7 +132,7 @@ class Entity:
                 func(k, v)
     
     def to_model(self, obj):
-        """ Convert and filter json compatible obejct to model compatible dict, also filter fields that is not
+        """ Convert and filter json compatible object to model compatible dict, also filter fields that is not
         allowed to be edited. """
         return {k: self.cols_to_model[k](v) for k, v in obj.items() if k in self.cols_to_model}
     
