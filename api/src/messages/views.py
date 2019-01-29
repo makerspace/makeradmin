@@ -1,6 +1,6 @@
 from messages import service
 from messages.models import Message, Template
-from service.api_definition import MESSAGE_VIEW, MESSAGE_SEND
+from service.api_definition import MESSAGE_VIEW, MESSAGE_SEND, GET
 from service.entity import Entity, not_empty
 
 message_entity = Entity(
@@ -31,6 +31,16 @@ service.entity_routes(
     permission_update=MESSAGE_SEND,
     permission_delete=MESSAGE_SEND,
 )
+
+
+@service.route("/message/user/<int:member_id>", method=GET, permission=MESSAGE_VIEW)
+def member_user_list(member_id=None):
+    pass
+
+
+@service.route("/message/userx/<int:member_id>", method=GET, permission=MESSAGE_VIEW)
+def member_user_listx(member_id=None):
+    pass
 
 # Message recipients
 # TODO $app-> get("messages/message/user/{id}",       ['middleware' => 'permission:message_view', 'uses' => "Recipient@userlist"]); // Get collection (List sent messages for specific user)
