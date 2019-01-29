@@ -88,7 +88,6 @@ class Entity:
         self.default_sort_column = default_sort_column
         self.default_sort_order = default_sort_order
         self.search_columns = search_columns
-        self.list_deleted = list_deleted
         self.expand_fields = expand_fields or {}
         
         model_inspect = inspect(self.model)
@@ -99,6 +98,8 @@ class Entity:
         
         self.columns = model_inspect.columns
 
+        self.list_deleted = list_deleted or 'deleted_at' not in self.columns
+        
         assert default_sort_column is None or default_sort_column in self.columns, "default_sort_column does not exist"
         
         assert default_sort_order in (None, ASC, DESC), "bad default sort order"
