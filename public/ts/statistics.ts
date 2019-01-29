@@ -12,7 +12,6 @@ common.documentLoaded().then(() => {
 	const service_permission = "service";
 
 	const root = document.getElementById("single-page-content");
-	console.log("Hellooooo");
 
 	const future1 = common.ajax("GET", apiBasePath + "/statistics/membership/by_date", null);
 	const future2 = common.ajax("GET", apiBasePath + "/statistics/lasertime/by_month", null);
@@ -92,13 +91,16 @@ function addChart(root: HTMLElement, data: any) {
 				xAxes: [{
 					type: 'time',
 					time: {
-						format: timeFormat,
+						parser: timeFormat,
 						// round: 'day'
 						tooltipFormat: 'll HH:mm'
 					},
 					scaleLabel: {
 						display: true,
 						labelString: 'Datum'
+					},
+					ticks: {
+						max: new Date()  // Set max data to the current date
 					}
 				}],
 				yAxes: [{
@@ -185,7 +187,7 @@ function addLaserChart(root: HTMLElement, data: any) {
 				xAxes: [{
 					type: 'time',
 					time: {
-						format: 'YYYY-MM',
+						parser: 'YYYY-MM',
 						// round: 'month'
 						tooltipFormat: 'll',
 						unit: 'month',
