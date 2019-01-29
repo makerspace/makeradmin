@@ -1,5 +1,5 @@
 from messages import service
-from messages.models import Message
+from messages.models import Message, Template
 from service.api_definition import MESSAGE_VIEW, MESSAGE_SEND
 from service.entity import Entity, not_empty
 
@@ -7,6 +7,11 @@ message_entity = Entity(
     Message,
     validation=dict(title=not_empty),
     search_columns=('title', 'description'),
+)
+
+template_entity = Entity(
+    Template,
+    search_columns=('name', 'title', 'description'),
 )
 
 service.entity_routes(
@@ -17,12 +22,15 @@ service.entity_routes(
     permission_create=MESSAGE_SEND,  # TODO Create is doing something  really special, check this code.
 )
 
-# Templates
-# TODO $app->   get("messages/templates",      ['middleware' => 'permission:message_view', 'uses' => "Template@list"]);   // Get collection
-# TODO $app->  post("messages/templates",      ['middleware' => 'permission:message_send', 'uses' => "Template@create"]); // Model: Create
-# TODO $app->   get("messages/templates/{id}", ['middleware' => 'permission:message_view', 'uses' => "Template@read"]);   // Model: Read
-# TODO $app->   put("messages/templates/{id}", ['middleware' => 'permission:message_send', 'uses' => "Template@update"]); // Model: Update
-# TODO $app->delete("messages/templates/{id}", ['middleware' => 'permission:message_send', 'uses' => "Template@delete"]); // Model: Delete
+service.entity_routes(
+    path="/templates",
+    entity=template_entity,
+    permission_list=MESSAGE_VIEW,
+    permission_read=MESSAGE_VIEW,
+    permission_create=MESSAGE_SEND,
+    permission_update=MESSAGE_SEND,
+    permission_delete=MESSAGE_SEND,
+)
 
 # Message recipients
 # TODO $app-> get("messages/message/user/{id}",       ['middleware' => 'permission:message_view', 'uses' => "Recipient@userlist"]); // Get collection (List sent messages for specific user)

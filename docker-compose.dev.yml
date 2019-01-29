@@ -14,11 +14,11 @@ services:
     environment:
       APP_DEBUG: "true"
       
-  messages:
-    volumes:
-      - ./messages/lumen/routes:/var/www/html/routes
-      - ./messages/lumen/app:/var/www/html/app
-      - ./library/src/Makeradmin:/var/www/html/library
+# TODO  messages:
+# TODO    volumes:
+# TODO      - ./messages/lumen/routes:/var/www/html/routes
+# TODO      - ./messages/lumen/app:/var/www/html/app
+# TODO      - ./library/src/Makeradmin:/var/www/html/library
 
   email-dispatcher:
     volumes:

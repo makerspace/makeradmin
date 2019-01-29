@@ -146,7 +146,7 @@ service.entity_routes(
 )
 
 
-@service.route("/membership/permission/register", method=POST, permission=SERVICE)
+@service.route("/permission/register", method=POST, permission=SERVICE)
 def permissions_register(permissions=Arg(symbol_list)):
     """ Register permissions that a service is dependent of. """
     register_permissions(permissions)
