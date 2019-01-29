@@ -17,4 +17,3 @@ services = (
     Instance(path='/messages', service=messages.service),
     Instance(path='/multiaccesssync', service=ExternalService('multiaccesssync', config.get('MULTIACCESS_SYNC_URL'))),
 )
-

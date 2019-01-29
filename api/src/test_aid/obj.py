@@ -26,6 +26,7 @@ class ObjFactory:
         self.action = None
         self.key = None
         self.span = None
+        self.message = None
     
     def create_member(self, **kwargs):
         firstname = self.fake.first_name()
@@ -109,3 +110,14 @@ class ObjFactory:
         obj.update(**kwargs)
         self.action = obj
         return self.action
+
+    def create_message(self, **kwargs):
+        obj = dict(
+            title=random_str(),
+            description=self.fake.bs(),
+            message_type='email',
+            status='queued',
+        )
+        obj.update(**kwargs)
+        self.message = obj
+        return self.message

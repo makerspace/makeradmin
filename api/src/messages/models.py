@@ -28,10 +28,10 @@ class Recipient(Base):
     __tablename__ = 'messages_recipient'
     
     messages_recipient_id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
-    messages_message_id = Column(Integer, ForeignKey('messages_message.messages_message_id'), nullable=False)
+    messages_message_id = Column(Integer, ForeignKey(Message.messages_message_id), nullable=False)
     title = Column(String(255), nullable=False)
     description = Column(Text)
-    member_id = Column(Integer, ForeignKey('membership_members.member_id'))
+    member_id = Column(Integer, ForeignKey(Member.member_id))
     recipient = Column(String(255))
     date_sent = Column(Date)
     status = Column(String(255), nullable=False)
@@ -57,3 +57,6 @@ class Template(Base):
     created_at = Column(DateTime, server_default=func.now())
     updated_at = Column(DateTime, server_default=func.now())
     deleted_at = Column(DateTime)
+
+    def __repr__(self):
+        return f'Template(template_id={self.messages_template_id}, name={self.name} title={self.title})'

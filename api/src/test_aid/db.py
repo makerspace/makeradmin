@@ -4,6 +4,7 @@ from faker import Faker
 
 from core.models import AccessToken
 from membership.models import Member, Group, Permission, Span
+from messages.models import Message, Recipient
 from service.api_definition import SERVICE_USER_ID
 from service.db import db_session
 from test_aid.test_util import random_str
@@ -24,6 +25,8 @@ class DbFactory:
         self.group = None
         self.span = None
         self.permission = None
+        self.message = None
+        self.recipient = None
 
     def create_access_token(self, **kwargs):
         obj = dict(
@@ -60,6 +63,27 @@ class DbFactory:
         db_session.add(self.span)
         db_session.commit()
         return self.span
+
+    def create_message(self, **kwargs):
+        obj = self.obj.create_message(**kwargs)
+        self.message = Message(**obj)
+        db_session.add(self.message)
+        db_session.commit()
+        return self.message
+
+    def create_recipient(self, **kwargs):
+        obj = dict(
+            title=random_str(),
+            description=self.fake.bs(),
+            recipient=self.fake.email(),
+            date_sent=self.test.date(),
+            status='sent',
+        )
+        obj.update(**kwargs)
+        self.recipient = Recipient(**obj)
+        db_session.add(self.recipient)
+        db_session.commit()
+        return self.recipient
 
     def create_permission(self, **kwargs):
         obj = dict(
