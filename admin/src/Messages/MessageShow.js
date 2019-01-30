@@ -42,7 +42,7 @@ class MessageShow extends React.Component {
                     {
                         message.message_type !== "sms"
                         ?
-                        <h3 className="uk-panel-title">{message.subject}</h3>
+                        <h3 className="uk-panel-title">{message.title}</h3>
                         :
                         null
                     }

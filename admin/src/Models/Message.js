@@ -9,26 +9,26 @@ export default class Message extends Base {
     }
     
     canSave() {
-        return this.body && this.recipients && this.recipients.length && (this.message_type !== 'email' || this.subject);
+        return this.body && this.recipients && this.recipients.length && (this.message_type !== 'email' || this.title);
     }
 }
 
 Message.model = {
-    id: "message_id",
+    id: "messages_message_id",
     root: "/messages/message",
     attributes: {
-        body: "",
+        body: "",  // TODO Rename to description.
         created_at: null,
         updated_at: null,
         entity_id: 0,
-        message_id: 0,
+        messages_message_id: 0,
         message_type: "email",
         num_recipients: 0,
         recipient: "",
         recipient_id: 0,
         recipients: [],
         status: "",
-        subject: "",
+        title: "",
         date_sent: null,
     },
 };

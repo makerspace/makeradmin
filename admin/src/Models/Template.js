@@ -13,10 +13,10 @@ export default class Template extends Base {
 }
 
 Template.model = {
-    id: "template_id",
+    id: "messages_template_id",
     root: "/messages/templates",
     attributes: {
-        template_id: 0,
+        messages_template_id: 0,
         created_at: null,
         updated_at: null,
         name: "",

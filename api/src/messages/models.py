@@ -50,7 +50,7 @@ class Template(Base):
     
     __tablename__ = 'messages_template'
     
-    messages_template_id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
+    messages_template_id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)  # TODO Rename
     name = Column(String(255), nullable=False)
     title = Column(String(255), nullable=False)
     description = Column(Text)

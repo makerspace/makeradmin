@@ -109,7 +109,7 @@ class MessageForm extends React.Component {
                     ""
                 }
 
-                {message_type === "email" ? <TextInput model={message} name="subject" title="Ärende"/> : ""}
+                {message_type === "email" ? <TextInput model={message} name="title" title="Ärende"/> : ""}
                 <Textarea model={message} name="body" title="Meddelande"/>
 
                 <div className="uk-form-row">

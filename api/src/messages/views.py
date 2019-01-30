@@ -35,13 +35,11 @@ service.entity_routes(
 
 @service.route("/message/user/<int:member_id>", method=GET, permission=MESSAGE_VIEW)
 def member_user_list(member_id=None):
+    # TODO $app-> get("messages/message/user/{id}",       ['middleware' => 'permission:message_view', 'uses' => "Recipient@userlist"]); // Get collection (List sent messages for specific user)
     pass
 
 
-@service.route("/message/userx/<int:member_id>", method=GET, permission=MESSAGE_VIEW)
-def member_user_listx(member_id=None):
+@service.route("/message/<int:message_id>/recipients", method=GET, permission=MESSAGE_VIEW)
+def member_list_message_recipients(message_id=None):
+    # TODO $app-> get("messages/message/{id}/recipients", ['middleware' => 'permission:message_view', 'uses' => "Recipient@list"]);   // Get collection (List recipients in sent message)
     pass
-
-# Message recipients
-# TODO $app-> get("messages/message/user/{id}",       ['middleware' => 'permission:message_view', 'uses' => "Recipient@userlist"]); // Get collection (List sent messages for specific user)
-# TODO $app-> get("messages/message/{id}/recipients", ['middleware' => 'permission:message_view', 'uses' => "Recipient@list"]);   // Get collection (List recipients in sent message)
