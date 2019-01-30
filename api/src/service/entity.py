@@ -134,7 +134,7 @@ class Entity:
                 func(k, v)
     
     def to_model(self, obj):
-        """ Convert and filter json compatible obejct to model compatible dict, also filter fields that is not
+        """ Convert and filter json compatible object to model compatible dict, also filter fields that is not
         allowed to be edited. """
         if obj is None:
             raise UnprocessableEntity("expected data in request, was empty", what=BAD_VALUE)

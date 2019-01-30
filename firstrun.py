@@ -3,10 +3,12 @@ import os
 import argparse
 from subprocess import call, STDOUT, check_output
 import create_user
+import time
 
 YELLOW = "\u001b[33m"
 GREEN = "\u001b[32m"
 RESET = "\u001b[0m"
+RED = "\u001b[31m"
 
 parser = argparse.ArgumentParser(
     description='Initialize the database and run migrations')
@@ -32,20 +34,17 @@ print(YELLOW + "Waiting for database" + RESET)
 cmd = 'while ! mysql -uroot --password="${MYSQL_ROOT_PASSWORD}" -e "" &> /dev/null; do printf "." && sleep 1; done'
 assert_call(["docker-compose", *project_name_args, "exec", "db2", "bash", "-c", cmd])
 
-print(YELLOW + "Waiting for makeradmin to come online", end="")
-assert_call(["docker-compose", *project_name_args, "exec", "membership", "bash", "-c", "/usr/local/myscripts/wait-for api:80"])
-print(".", end="")
-assert_call(["docker-compose", *project_name_args, "exec", "membership", "bash", "-c", "/usr/local/myscripts/wait-for backend:80"])
-print(".", end="")
-assert_call(["docker-compose", *project_name_args, "exec", "membership", "bash", "-c", "/usr/local/myscripts/wait-for membership:80"])
-print(".", end="")
-assert_call(["docker-compose", *project_name_args, "exec", "membership", "bash", "-c", "/usr/local/myscripts/wait-for admin:80"])
+print(YELLOW + "Waiting for makeradmin to come online")
+# assert_call(["docker-compose", *project_name_args, "exec", "api", "bash", "-c", "/usr/local/myscripts/wait-for api:80"])
+print(YELLOW + "TODO: Ping api-gateway when all containers have been merged. Sleeping instead as a temporary workaround")
+time.sleep(10)
 print(RESET)
 
 print(YELLOW + "Adding all admin permissions" + RESET)
 
 # Note: 'ignore' necesary to be able to run the script multiple times
 cmd = 'mysql -uroot -p"${MYSQL_ROOT_PASSWORD}" -e "use makeradmin;' \
+    'insert ignore into membership_groups (group_id, name, title, description) VALUES(1, \'admins\', \'Admins\', \'\');' \
     'insert ignore into membership_group_permissions (group_id, permission_id) select 1, permission_id from membership_permissions where permission != \'service\';' \
     'update access_tokens set permissions = null where user_id > 0;"'
 sql_output = check_output(["docker-compose", *project_name_args, "exec", "db2", "bash", "-c", cmd], stderr=STDOUT)
@@ -55,6 +54,7 @@ sql_output = sql_output.replace(
 if sql_output != "":
     print(RED + sql_output + RESET)
     exit(1)
+
 
 while True:
     s = input(
