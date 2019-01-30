@@ -974,12 +974,13 @@ def get_product_data() -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
     with db.cursor() as cur:
         # Get all categories, as some products may exist in deleted categories
         # (it is up to an admin to move them to another category)
-        categories: List[Dict[str, Any]] = category_entity.list(where=None)
+        categories: List[Dict[str, Any]] = category_entity.list(where=None, order_column='display_order')
 
         data = []
         for cat in categories:
-            cur.execute("SELECT id,name,unit,price,smallest_multiple FROM webshop_products"
-                        " WHERE category_id=%s AND deleted_at IS NULL ORDER BY name", (cat["id"],))
+            cur.execute("SELECT id,name,unit,price,smallest_multiple,IFNULL(image,'default_image.png'),display_order "
+                        "FROM webshop_products "
+                        "WHERE category_id=%s AND deleted_at IS NULL ORDER BY display_order", (cat["id"],))
             products = cur.fetchall()
             if len(products) > 0:
                 data.append({
@@ -992,12 +993,14 @@ def get_product_data() -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
                             "unit": item[2],
                             "price": str(item[3]),
                             "smallest_multiple": item[4],
+                            "image": item[5],
+                            "display_order": item[6],
                         } for item in products
                     ]
                 })
 
         # Only show existing columns in the sidebar
-        categories = category_entity.list()
+        categories = category_entity.list(order_column='display_order')
         return data, categories
 
 

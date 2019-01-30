@@ -16,6 +16,7 @@ from datetime import datetime
 from dateutil import parser
 from decimal import Decimal
 from flask import abort as flask_abort
+import re
 
 SERVICE_USER_ID = -1
 
@@ -419,7 +420,7 @@ class Entity:
     def _format_column_filter(self, column, values):
         return (f"{column.db_column} in ({','.join(['%s'] * len(values))})", list(map(column.write or (lambda x: x), values)))
 
-    def list(self, where=DEFAULT_WHERE, where_values=[]):
+    def list(self, where=DEFAULT_WHERE, where_values=[], order_column=None, order_dir='ASC'):
         if where == DEFAULT_WHERE:
             name2col = {c.exposed_name: c for c in self._readable}
             name2col.update({c.alias: c for c in self._readable if c.alias is not None})
@@ -434,7 +435,11 @@ class Entity:
 
         with self.db.cursor() as cur:
             where = "WHERE " + where if where else ""
-            sql = f"SELECT {self._read_fields} FROM {self.table} {where}"
+            assert type(order_dir) == str and order_dir in {'ASC', 'DESC'}
+            assert not order_column or \
+                (type(order_column) == str and re.fullmatch("[A-Za-z_][A-Za-z0-9_]*", order_column))
+            order_clause = f"ORDER BY `{order_column}` {order_dir}" if order_column else ""
+            sql = f"SELECT {self._read_fields} FROM {self.table} {where} {order_clause}"
             cur.execute(sql, where_values)
             rows = cur.fetchall()
             res = [self._convert_to_dict(row) for row in rows]

@@ -2,13 +2,17 @@
 import Cart from "./cart"
 import * as common from "./common"
 import {UNAUTHORIZED} from "./common";
+import {renderSidebarCategories} from "./category"
 declare var UIkit: any;
 
 
 common.onGetAndDocumentLoaded("/webshop/product_data", (value: any) => {
 	common.addSidebarListeners();
 
-    const {data} = value;
+	const {categories, data} = value;
+
+	renderSidebarCategories(categories);
+
 	const id2item = new Map<number, any>();
 
 	// Used to prevent clicking the 'Pay' button twice
@@ -47,14 +51,18 @@ common.onGetAndDocumentLoaded("/webshop/product_data", (value: any) => {
 			let baseStr = item.smallest_multiple > 1 ? item.smallest_multiple + item.unit : item.unit;
 
 			const li = document.createElement("li");
-			li.innerHTML =
-				`<div class="product">
-					<a class="product-title" href="product/${item.id}">${item.name}</a>
-					<span class="product-price">${price} ${Cart.currency}/${baseStr}</span>
-					<input type="number" min=0 max=9999 step=${item.smallest_multiple} placeholder="0" class="product-amount"></input>
-					<span class="product-unit">${item.unit}</span>
-					<button type="button" class="product-delete uk-button uk-button-small uk-button-danger" uk-icon="trash" ></button>
-		          </div>`;
+			li.innerHTML = `
+				<div class="product">
+					<div class="product-line">
+						<a class="product-title" href="product/${item.id}">${item.name}</a>
+						<span class="product-price">${price} ${Cart.currency}/${baseStr}</span>
+					</div>
+					<div class="product-input product-line">
+						<input type="number" min=0 max=9999 step=${item.smallest_multiple} placeholder="0" class="product-amount"></input>
+						<span class="product-unit">${item.unit}</span>
+						<button type="button" class="product-delete uk-button uk-button-small uk-button-danger" uk-icon="trash" ></button>
+					</div>
+				</div>`;
 			id2item.set(item.id, item);
 
 			// Handle deleting products

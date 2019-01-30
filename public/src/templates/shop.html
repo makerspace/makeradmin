@@ -17,7 +17,18 @@
             {{ sidebar("shop") }}
             <div id="content">
                 <button id="edit" class="uk-icon-button" uk-icon="icon: pencil"><span>Edit</span></button>
-                <ul class="product-list">
+                <ul class="product-list layout-grid">
+                    <li class="product-search-bar">
+                        <form class="product-search uk-search uk-search-default">
+                            <span uk-search-icon></span>
+                            <input class="uk-search-input" type="search" placeholder="Hitta produkt...">
+                        </form>
+                        <div class="toggle-product-images uk-button-group">
+                            <button id="layout-grid" class="layout-button uk-icon-button" uk-icon="icon: grid"></button>
+                            <button id="layout-list" class="layout-button uk-icon-button" uk-icon="icon: list"></button>
+                            <button id="layout-table" class="layout-button uk-icon-button" uk-icon="icon: table"></button>
+                        </div>
+                    </li>
                 </ul>
                 <a class="uk-button uk-button-primary uk-button-small edit product-add" href="product/create" uk-icon="plus"></a>
             </div>

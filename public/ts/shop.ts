@@ -1,6 +1,7 @@
 import Cart from "./cart"
 import * as common from "./common"
 import {UNAUTHORIZED} from "./common";
+import {renderSidebarCategories} from "./category"
 declare var UIkit: any;
 
 common.onGetAndDocumentLoaded("/webshop/product_data", (value: any) => {
@@ -11,18 +12,7 @@ common.onGetAndDocumentLoaded("/webshop/product_data", (value: any) => {
   const webshop_edit_permission = "webshop_edit";
   const service_permission = "service";
 
-    const categoriesUl = document.getElementById("categories");
-    const fixedLi = categoriesUl.firstChild;
-    categories.forEach((category: any) => {
-        const li = document.createElement("li");
-        li.innerHTML = `
-            <a href="#category${category.id}" uk-scroll><span uk-icon="tag"></span> ${category.name}</a>
-            <div class="category-edit-box">
-                <button data-id="${category.id}" data-name="${category.name}" class="category-edit edit uk-button uk-button-primary uk-button-small" uk-icon="pencil"/>
-                <button data-id="${category.id}" class="category-delete edit uk-button uk-button-danger uk-button-small" uk-icon="trash"/>
-            </div>`;
-        categoriesUl.insertBefore(li, fixedLi);
-    });
+  renderSidebarCategories(categories, true);
 
   let editMode = false;
 
@@ -62,6 +52,23 @@ common.onGetAndDocumentLoaded("/webshop/product_data", (value: any) => {
     setEditMode(!editMode);
   });
 
+  const layoutModes: Set<string> = new Set<string>(["layout-grid", "layout-list", "layout-table"]);
+  function setLayoutMode(mode: string){
+    if (!layoutModes.has(mode)) {
+      mode = "layout-grid";
+    }
+    layoutModes.forEach(element => {
+      document.querySelector(".product-list").classList.toggle(element, element === mode);
+      document.querySelector("#"+element).classList.toggle("selected", element === mode);
+    });
+  }
+
+  document.querySelectorAll(".layout-button").forEach( function(elm) {
+    elm.addEventListener("click", ev => {
+      setLayoutMode(elm.id);
+    });
+  });
+
   function setLoggedIn (loggedIn: boolean) {
   }
 
@@ -76,23 +83,36 @@ common.onGetAndDocumentLoaded("/webshop/product_data", (value: any) => {
     `;
 
     productListElem.insertAdjacentHTML("beforeend", catLi);
+    const productListLi = document.createElement("li");
+    productListLi.className = "product-container-list"
     for (const item of cat.items) {
       let price = item.price;
       price *= item.smallest_multiple;
 
       let baseStr = item.smallest_multiple > 1 ? item.smallest_multiple + item.unit : item.unit;
 
-      const li = document.createElement("li");
-      li.innerHTML = 
-        `<div id="product-${item.id}" class="product">
-              <a class="product-title" href="product/${item.id}">${item.name}</a>
-              <span class="product-price">${price} ${Cart.currency}/${baseStr}</span>
-              <input type="number" min=0 max=9999 step=${item.smallest_multiple} placeholder="0" class="product-amount edit-invisible"></input>
-              <span class="product-unit edit-invisible">${item.unit}</span>
-              <a href="product/${item.id}/edit" class="edit-display product-edit uk-button uk-button-small uk-button-primary" uk-icon="pencil"></a>
-              <button type="button" class="edit-display product-delete uk-button uk-button-small uk-button-danger" uk-icon="trash" ></button>
-              <button type="button" class="edit-invisible uk-button uk-button-small uk-button-primary number-add" data-amount="1">+</button>
-          </div>`;
+      const li = document.createElement("div");
+      li.className = "product-container"
+      li.innerHTML = `
+        <div class="product-image-container">
+          <a href="product/${item.id}">
+            <img src="/static/product_images/${item.image}" alt="${item.name}">
+          </a>
+        </div>
+        <div class="product">
+          <div class="product-line">
+            <a class="product-title" href="product/${item.id}">${item.name}</a>
+            <span class="product-price">${price} ${Cart.currency}/${baseStr}</span>
+          </div>
+          <div class="product-input product-line">
+            <input type="number" min=0 max=9999 step=${item.smallest_multiple} placeholder="0" class="product-amount edit-invisible"></input>
+            <span class="product-unit edit-invisible">${item.unit}</span>
+            <a href="product/${item.id}/edit" class="edit-display product-edit uk-button uk-button-small uk-button-primary" uk-icon="pencil"></a>
+            <button type="button" class="edit-display product-delete uk-button uk-button-small uk-button-danger" uk-icon="trash" ></button>
+            <button type="button" class="edit-invisible number-add uk-button uk-button-small uk-button-primary" data-amount="1">+</button>
+          </div>
+        </div>`;
+
       id2element.set(item.id, li);
       id2item.set(item.id, item);
 
@@ -137,8 +157,9 @@ common.onGetAndDocumentLoaded("/webshop/product_data", (value: any) => {
         ev.preventDefault();
       });
 
-      productListElem.appendChild(li);
+      productListLi.appendChild(li);
     }
+    productListElem.appendChild(productListLi);
   }
 
   function refreshUIFromCart(cart: Cart) {

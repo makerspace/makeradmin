@@ -147,3 +147,28 @@ CREATE TABLE `webshop_product_images` (
   PRIMARY KEY (`id`),
   CONSTRAINT image_product_constraint FOREIGN KEY (`product_id`) REFERENCES `webshop_products` (`id`)
 );
+
+ALTER TABLE `webshop_product_images` ADD `display_order` int(10) unsigned NOT NULL;
+ALTER TABLE `webshop_product_images` ADD CONSTRAINT `webshop_product_images_product_id_display_order_unique` UNIQUE (`product_id`, `display_order`);
+
+ALTER TABLE `webshop_products` ADD `image` varchar(255) DEFAULT NULL;
+
+ALTER TABLE `webshop_actions` CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
+ALTER TABLE `webshop_pending_registrations` CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
+ALTER TABLE `webshop_product_actions` CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
+ALTER TABLE `webshop_product_categories` CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
+ALTER TABLE `webshop_product_images` CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
+ALTER TABLE `webshop_product_variants` CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
+ALTER TABLE `webshop_products` CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
+ALTER TABLE `webshop_stripe_pending` CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
+ALTER TABLE `webshop_transaction_actions` CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
+ALTER TABLE `webshop_transaction_contents` CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
+ALTER TABLE `webshop_transactions` CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
+
+ALTER TABLE `webshop_products` ADD `display_order` int(10) unsigned NOT NULL;
+UPDATE `webshop_products` SET `display_order` = `id`;
+ALTER TABLE `webshop_products` ADD CONSTRAINT `webshop_products_display_order_unique` UNIQUE (`display_order`);
+
+ALTER TABLE `webshop_product_categories` ADD `display_order` int(10) unsigned NOT NULL;
+UPDATE `webshop_product_categories` SET `display_order` = `id`;
+ALTER TABLE `webshop_product_categories` ADD CONSTRAINT `webshop_product_categories_display_order_unique` UNIQUE (`display_order`);
