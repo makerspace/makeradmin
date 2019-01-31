@@ -29,6 +29,13 @@ getLogger('stripe').setLevel(WARNING)
 logger = getLogger('makeradmin')
 
 
+identifier_pattern = re.compile("[A-Za-z_][A-Za-z_0-9]*")
+
+
+def valid_database_identifier(identifier: str):
+    return bool(type(identifier) == str and identifier_pattern.fullmatch(identifier))
+
+
 def abort(code, tag):
     flask_abort(make_response(jsonify(status=tag), code))
 
@@ -332,6 +339,8 @@ class Column:
     exposed_name: Optional[str] = None
     '''Name alias which can be used in filters'''
     alias: Optional[str] = None
+    '''Function to generate a default initial value using database cursor'''
+    default_init: Optional[Callable] = None
 
     def __post_init__(self):
         self.exposed_name = self.exposed_name or self.db_column
@@ -365,6 +374,7 @@ class Entity:
 
         self._readable = [c for c in self.columns if c.read is not None]
         self._writeable = [c for c in self.columns if c.write is not None]
+        self._def_inits = [c for c in self.columns if c.default_init is not None]
         self.db = None
         self.allow_delete = allow_delete
 
@@ -404,6 +414,7 @@ class Entity:
 
     def post(self, data):
         with self.db.cursor() as cur:
+            data.update({c.exposed_name: c.default_init(cur) for c in self._def_inits if c.exposed_name not in data})
             values = self._convert_to_row(data, self._writeable)
             cols = ','.join('%s' for col in self._writeable)
             write_fields = ",".join(c.db_column for c in self._writeable)
@@ -436,8 +447,7 @@ class Entity:
         with self.db.cursor() as cur:
             where = "WHERE " + where if where else ""
             assert type(order_dir) == str and order_dir in {'ASC', 'DESC'}
-            assert not order_column or \
-                (type(order_column) == str and re.fullmatch("[A-Za-z_][A-Za-z0-9_]*", order_column))
+            assert not order_column or valid_database_identifier(order_column)
             order_clause = f"ORDER BY `{order_column}` {order_dir}" if order_column else ""
             sql = f"SELECT {self._read_fields} FROM {self.table} {where} {order_clause}"
             cur.execute(sql, where_values)
