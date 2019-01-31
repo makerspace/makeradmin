@@ -99,7 +99,7 @@ common.onGetAndDocumentLoaded("/webshop/product_data", (value: any) => {
             <img src="/static/product_images/${item.image}" alt="${item.name}">
           </a>
         </div>
-        <div class="product">
+        <div id="product-${item.id}" class="product">
           <div class="product-line">
             <a class="product-title" href="product/${item.id}">${item.name}</a>
             <span class="product-price">${price} ${Cart.currency}/${baseStr}</span>

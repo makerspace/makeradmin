@@ -4,7 +4,7 @@ set -e
 function wait_for {
     local host="$1"
     local port="$2"
-    for i in $(seq 1 100); do
+    for i in $(seq 1 1000); do
         if nc -z "$host" "$port"; then
             return
         fi
