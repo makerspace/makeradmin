@@ -24,7 +24,7 @@ class MemberBoxMessages extends React.Component {
 
     constructor(props) {
         super(props);
-        this.collection = new Collection({type: Message, url: "/messages/message/user/" + props.params.member_id});
+        this.collection = new Collection({type: Message, url: "/messages/member/" + props.params.member_id + "/recipients"});
     }
 
     render() {

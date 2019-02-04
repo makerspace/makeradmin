@@ -271,6 +271,7 @@ class Entity:
     
     
 class OrmSingeRelation:
+    
     def __init__(self, name=None, related_entity_id_column=None):
         """
         Relation that is implemented through a foreign key in the orm.
