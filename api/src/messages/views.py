@@ -1,12 +1,14 @@
 from messages import service
+from messages.message_entity import MessageEntity
 from messages.models import Message, Template, Recipient
 from service.api_definition import MESSAGE_VIEW, MESSAGE_SEND
 from service.entity import Entity, not_empty, OrmSingeRelation
 
-message_entity = Entity(
+message_entity = MessageEntity(
     Message,
     validation=dict(title=not_empty),
     search_columns=('title', 'description'),
+    read_only_columns=('status',),
 )
 
 template_entity = Entity(

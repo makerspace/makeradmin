@@ -40,7 +40,7 @@ class MemberEntity(Entity):
                 sql = "SELECT COALESCE(MAX(member_number), 999) FROM membership_members"
                 max_member_number, = db_session.execute(sql).fetchone()
                 data['member_number'] = max_member_number + 1
-            return self._create_internal(data)
+            return self.to_obj(self._create_internal(data))
         except Exception:
             # Rollback session if anything went wrong or we can't release the lock.
             db_session.rollback()

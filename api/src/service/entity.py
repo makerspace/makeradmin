@@ -219,11 +219,11 @@ class Entity:
             raise UnprocessableEntity("Can not create using empty data.")
         entity = self.model(**input_data)
         db_session.add(entity)
-        db_session.commit()
-        return self.to_obj(entity)
+        db_session.flush()  # Flush to get id of created entity.
+        return entity
     
     def create(self):
-        return self._create_internal(request.json)
+        return self.to_obj(self._create_internal(request.json))
     
     def read(self, entity_id):
         entity = db_session.query(self.model).get(entity_id)
