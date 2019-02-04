@@ -3,7 +3,7 @@
 function wait_for {
     local command="$*"
     echo "wait_for '${command}'"
-    for i in $(seq 1 100); do
+    for i in $(seq 1 1000); do
         if ${command}; then
             echo "wait_for '${command}' complete"
             return

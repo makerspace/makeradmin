@@ -83,18 +83,97 @@ html, body {
 	}
 }
 
-.number-add {
-	text-align: center;
-	padding: 0px;
+.product-container-list {
+	list-style: none;
+	display: flex;
+	flex-wrap: wrap;
+	padding: 0;
+	margin: 0;
+}
+
+.layout-grid {
+	.product-container {
+		width: 230px;
+		margin: 10px;
+		flex-direction: column;
+	}
+
+	.product-image-container {
+		width: 100%;
+		height: 230px;
+	}
+
+	.product {
+		flex: 1 0 auto;
+		.product-input {
+			flex: 0 0 auto;
+		}
+	}
+}
+
+.layout-list {
+	.product-image-container {
+		width: 50px;
+		height: auto;
+		img {
+			top:0;
+		}
+	}
+	.product {
+		margin-left: 6px;
+	}
+}
+
+.layout-table {
+	.product-image-container {
+		width: 0;
+		height: 0;
+		visibility: hidden;
+	}
+	.product {
+		flex-direction: row;
+		.product-line{
+			width: auto;
+		}
+		.product-input {
+			flex: 0 0 auto;
+			margin-left: 6px;
+		}
+	}
+}
+
+.product-container {
+	width: 100%;
+	margin: 0;
+	display: flex;
+	flex-direction: row;
+	align-items: stretch;
+}
+
+.product-image-container {
+	display: inline-block;
+	position: relative;
+	width: 100%;
+	height: 240px;
+
+	img {
+		display: block;
+		margin: auto;
+		max-height: 100%;
+		position: absolute;
+		bottom: 0;
+		left: 0;
+		right: 0;
+	}
 }
 
 .product {
 	font-size: 11pt;
 	display: flex;
-	flex-direction: row;
+	flex-direction: column;
+	flex-wrap: wrap;
 	width: 100%;
-	height: 30px;
-	padding: 4px;
+	padding: 0;
 	margin-top: 2px;
 	margin-bottom: 2px;
 	overflow: hidden;
@@ -106,8 +185,7 @@ html, body {
 	.uk-button {
 		flex: 0 1 50px;
 		color: #fff;
-		margin-left: 4px;
-		margin-right: 4px;
+		margin: 0;
 		text-transform: none;
 		min-width: 0px;
 	}
@@ -118,31 +196,36 @@ html, body {
 		}
 	}
 
+	.product-line{
+		display: flex;
+		align-content: stretch;
+		flex: 1 0 auto;
+		width: 100%;
+		padding: 0;
+		margin: 0;
+	}
+
 	.product-title {
 		flex: 1 1 auto;
 		color: #333;
-		padding-top: 5px;
-		margin-right: 10px;
-		padding-left: 10px;
-		white-space: nowrap;
-		text-overflow: ellipsis;
 		overflow: hidden;
+		line-height: 1.5em;
+		max-height: 3em;
 	}
 
 	input {
-		flex: 0 1 auto;
+		flex: 1 1 auto;
 		text-transform: none;
 		border-radius: 2px 0px 0px 2px;
 	}
 
 	.product-price {
+		flex: 0 0 auto;
 		white-space: pre;
-		padding-top: 5px;
-		margin-right: 10px;
 		padding-left: 10px;
 	}
 	.product-amount {
-		max-width: 45px;
+		width: 45px;
 		border-left: 1px solid #EEE;
 		border-top: 1px solid #EEE;
 		border-bottom: 1px solid #EEE;
@@ -171,6 +254,56 @@ html, body {
 		margin-right: 5px;
 		border-radius: 0px 2px 2px 0px;
 	}
+	.product-edit {
+		margin-left: 4px;
+		margin-right: 4px;
+	}
+	.product-delete {
+		margin-left: 4px;
+		margin-right: 4px;
+	}
+	.number-add {
+		text-align: center;
+		padding: 0px;
+		min-width: 40px;
+	}
+}
+
+.product-search-bar {
+	display: flex;
+	flex-wrap: wrap;
+	width: 100%;
+
+	.product-search {
+		flex: 1 0 auto;
+		margin-right: 10px;
+	}
+
+	.toggle-product-images {
+		display: inline-flex;
+		height: 100%;
+		min-height: 35px;
+		margin-left: 10px;
+		padding:0;
+		flex: 0 0 auto;
+
+		.uk-icon-button{
+			border-radius: 0;
+		}
+		.uk-icon-button:first-child{
+			border-radius: 10px 0 0 10px;
+		}
+		.uk-icon-button:last-child{
+			border-radius: 0 10px 10px 0;
+		}
+		.layout-button {
+			width: 50px;
+			border: 1px solid #AAA;
+		}
+		.selected {
+			background: #CCC;
+		}
+	}
 }
 
 #edit.active {
@@ -185,7 +318,7 @@ html, body {
 	height: 50px;
 	top: 10px;
 	border: 1px solid #AAA;
-	border-radius: px;
+	border-radius: 10px;
 	opacity: 0;
 	transition: opacity 500ms;
 	transition: background 500ms;
@@ -479,6 +612,7 @@ form input.readonly-input {
 }
 
 .content-centering {
+	width: 100%;
 	max-width: 600px;
 }
 

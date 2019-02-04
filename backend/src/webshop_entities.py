@@ -1,6 +1,6 @@
 from decimal import Decimal
 from datetime import datetime
-from backend_service import Entity, Column, DB
+from backend_service import Entity, Column, DB, valid_database_identifier
 from typing import List, Dict, Any, NamedTuple
 from dataclasses import dataclass
 
@@ -9,6 +9,14 @@ from dataclasses import dataclass
 # Decimal(0.2) = Decimal('0.200000000000000011102230246251565404236316680908203125')
 # but
 # Decimal("0.2") = Decimal('0.2')
+
+
+def get_max_column_value(cursor, table_name, column_name) -> int:
+    assert valid_database_identifier(table_name)
+    assert valid_database_identifier(column_name)
+    cursor.execute(f"SELECT COALESCE(MAX({column_name}), 0) FROM {table_name}")
+    max_value = cursor.fetchone()
+    return max_value[0]
 
 
 product_entity = Entity(
@@ -22,13 +30,23 @@ product_entity = Entity(
         Column("price", dtype=Decimal),
         "smallest_multiple",
         Column("created_at", dtype=datetime, write=None),
-        Column("updated_at", dtype=datetime, write=None)
+        Column("updated_at", dtype=datetime, write=None),
+        Column(
+            "display_order",
+            default_init=lambda c: 1+get_max_column_value(c, "webshop_products", "display_order")
+        ),
     ],
 )
 
 category_entity = Entity(
     table="webshop_product_categories",
-    columns=["name"]
+    columns=[
+        "name",
+        Column(
+            "display_order",
+            default_init=lambda c: 1+get_max_column_value(c, "webshop_product_categories", "display_order")
+        ),
+    ]
 )
 
 transaction_content_entity = Entity(
@@ -61,7 +79,15 @@ product_action_entity = Entity(
 
 product_image_entity = Entity(
     table="webshop_product_images",
-    columns=["product_id", "path", "caption"],
+    columns=[
+        "product_id",
+        "path",
+        "caption",
+        Column(
+            "display_order",
+            default_init=lambda c: 1+get_max_column_value(c, "webshop_product_images", "display_order")
+        ),
+    ],
 )
 
 webshop_stripe_pending = Entity(

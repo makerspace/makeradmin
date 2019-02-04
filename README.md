@@ -69,17 +69,6 @@ then you might have to update the permissions. Simply running the firstrun scrip
 make firstrun
 ```
 
-### Adding items to the shop
-The file [`backend/src/scrape/tictail.json`](./backend/src/scrape/tictail.json) contains an example list of items that can be bought in the webshop. They must be imported to the docker container's database:
-```bash
-docker-compose exec backend bash -c "cd src/scrape && python tictail2db.py"
-```
-
-The docker container corresponding to the webshop must be rebuilt when it is changed (and then imported anew):
-```bash
-docker-compose up -d --build public
-```
-
 ### Viewing MakerAdmin etc.
 Go to:
 * [the makeradmin web site](http://localhost:8009)
