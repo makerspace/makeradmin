@@ -46,7 +46,7 @@ class MessageShow extends React.Component {
                         :
                         null
                     }
-                    {message.body}
+                    {message.description}
                 </div>
                 <CollectionTable
                     collection = {this.recipients}

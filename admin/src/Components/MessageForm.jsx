@@ -110,11 +110,11 @@ class MessageForm extends React.Component {
                 }
 
                 {message_type === "email" ? <TextInput model={message} name="title" title="Ärende"/> : ""}
-                <Textarea model={message} name="body" title="Meddelande"/>
+                <Textarea model={message} name="description" title="Meddelande"/>
 
                 <div className="uk-form-row">
                     <div className="uk-form-controls">
-                        <p className="uk-float-left"><span id="characterCounter">{message.body.length}</span> tecken</p>
+                        <p className="uk-float-left"><span id="characterCounter">{message.description.length}</span> tecken</p>
                     </div>
                     <div className="uk-form-controls">
                         <button className="uk-button uk-button-success uk-float-right" disabled={sendDisabled}><i className="uk-icon-save"/> Skicka</button>
