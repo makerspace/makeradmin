@@ -104,27 +104,6 @@ services:
     networks:
       - makeradmin
 
-#  TODO
-#  messages:
-#    image: makeradmin/messages:1.0
-#    build:
-#      context: ./messages
-#      dockerfile: ${PWD}/library/DockerfileService
-#    volumes:
-#      - ./logs/messages:/var/www/html/storage/logs
-#    environment:
-#      MYSQL_HOST: "db2:${MYSQL_PORT}"
-#      MYSQL_DB: "makeradmin"
-#      MYSQL_USER:
-#      MYSQL_PASS:
-#      APIGATEWAY: "api"
-#      BEARER: "${API_BEARER}"
-#    depends_on:
-#      - api
-#      - library
-#    networks:
-#      - makeradmin
-
   email-dispatcher:
     image: makeradmin/messages-dispatcher-email:1.0
     build:

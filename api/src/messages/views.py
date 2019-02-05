@@ -22,7 +22,7 @@ service.entity_routes(
     entity=message_entity,
     permission_list=MESSAGE_VIEW,
     permission_read=MESSAGE_VIEW,
-    permission_create=MESSAGE_SEND,  # TODO Create is doing something  really special, check this code.
+    permission_create=MESSAGE_SEND,
 )
 
 service.related_entity_routes(
