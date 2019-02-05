@@ -8,7 +8,6 @@ message_entity = MessageEntity(
     Message,
     validation=dict(title=not_empty),
     search_columns=('title', 'description'),
-    read_only_columns=('status',),
 )
 
 template_entity = Entity(
