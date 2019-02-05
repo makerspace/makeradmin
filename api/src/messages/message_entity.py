@@ -1,50 +1,19 @@
 from flask import request
 
-from membership.member_auth import hash_password
-from membership.models import Member, Group, member_group
+from membership.models import Member, member_group
 from messages.models import Recipient
-from service.api_definition import BAD_VALUE, Enum, natural1, REQUIRED
+from service.api_definition import BAD_VALUE, natural1
 from service.db import db_session
 from service.entity import Entity
-from service.error import InternalServerError, UnprocessableEntity
-from service.logging import logger
-
-example = {
-   "date_sent": None,
-   "recipients": [
-      {
-         "id": 4,
-         "value": "member4",
-         "type": "member",
-         "label": "Medlem: Anders Roos (#1003)"
-      },
-      {
-         "type": "member",
-         "label": "Medlem: Anders Roos2 (#1029)",
-         "value": "member30",
-         "id": 30
-      }
-   ],
-   "message_type": "email",
-   "num_recipients": 0,
-   "entity_id": 0,
-   "updated_at": None,
-   "subject": "Hej",
-   "created_at": None,
-   "recipient": "",
-   "message_id": 0,
-   "body": "dasdasdas",
-   "recipient_id": 0,
-   "status": ""
-}
+from service.error import UnprocessableEntity
 
 
 def execute_template(member, text):
     return (
-        text.replace("##member_number##", member.member_number)
-            .replace("##member_id##", member.member_id)
+        text.replace("##member_number##", str(member.member_number))
+            .replace("##member_id##", str(member.member_id))
             .replace("##firstname##", member.firstname)
-            .replace("##lastname##", member.lastname)
+            .replace("##lastname##", member.lastname or "")
             .replace("##email##", member.email)
     )
 
@@ -102,7 +71,7 @@ class MessageEntity(Entity):
                 description=execute_template(member, message.description),
                 member_id=member.member_id,
                 recipient=member.email,
-                status=member.status,
+                status=message.status,
             )
             db_session.add(recipient)
         

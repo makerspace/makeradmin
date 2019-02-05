@@ -47,7 +47,11 @@ class SystestBase(TestBase):
         self.public_url = HOST_PUBLIC
         self.api_url = HOST_BACKEND
         
-        
+    def tearDown(self):
+        super().tearDown()
+        db_session.close()
+
+    
 class ApiTest(SystestBase):
     """ Base class for tests that accesses the api. """
     
