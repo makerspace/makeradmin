@@ -233,27 +233,33 @@ def transaction_events(id: int):
 @instance.route("transactions_extended_info", methods=["GET"], permission="webshop")
 @route_helper
 def list_orders():
-    transactions = transaction_entity.list()
-
-    if not transactions:
-        return []
-    
-    member_ids = ",".join(set([str(t["member_id"]) for t in transactions]))
-
-    r = instance.gateway.get(f"membership/member?entity_id={member_ids}")
-    assert(r.ok)
-
-    member_data = {d["member_id"]: d for d in r.json()["data"]}
-    for t in transactions:
-        if t["member_id"] not in member_data:
-            t["member_name"] = "Unknown member"
-            t["member_number"] = None
-        else:
-            member = member_data[t["member_id"]]
-            t["member_name"] = f"{member['firstname']} {member['lastname']}"
-            t["member_number"] = member['member_number']
-
-    return transactions
+    with db.cursor() as cur:
+        cur.execute("""
+            SELECT
+                webshop_transactions.id AS id,
+                webshop_transactions.member_id AS member_id,
+                webshop_transactions.status AS status,
+                webshop_transactions.amount AS amount,
+                DATE_FORMAT(webshop_transactions.created_at, '%Y-%m-%dT%H:%i:%sZ') AS created_at,
+                membership_members.firstname AS firstname,
+                membership_members.lastname AS lastname,
+                membership_members.member_number AS member_number,
+                membership_members.deleted_at
+            FROM webshop_transactions
+            INNER JOIN membership_members ON membership_members.member_id = webshop_transactions.member_id
+            """)
+        return [
+            {
+                "id": v[0],
+                "member_id": v[1],
+                "status": v[2],
+                "amount": str(v[3]),
+                "created_at": v[4],
+                "member_name": f"{v[5]} {v[6]}" if not v[8] else "Unknown member",
+                "member_number": v[7] if not v[8] else None,
+            } for v in cur.fetchall()
+        ]
+    return []
 
 
 @instance.route("member/current/transactions", methods=["GET"], permission='user')
