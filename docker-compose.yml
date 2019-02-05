@@ -126,6 +126,7 @@ services:
     networks:
       - makeradmin
 
+  # TODO Remove.
   multiaccesssync:
     image: makeradmin/multiaccesssync:1.0
     build:
