@@ -81,6 +81,7 @@ class ObjFactory:
     def create_category(self, **kwargs):
         obj = dict(
             name=f"category-{random_str(12)}",
+            display_order=randint(1e8, 9e8),
         )
         obj.update(kwargs)
         self.category = obj
@@ -93,6 +94,7 @@ class ObjFactory:
             price=100.0,
             description=self.fake.bs(),
             unit="st",
+            display_order=randint(1e8, 9e8),
             smallest_multiple=1,
             filter=None,
             category_id=category_id,
