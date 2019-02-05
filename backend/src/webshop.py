@@ -240,6 +240,7 @@ def list_orders():
     
     member_ids = ",".join(set([str(t["member_id"]) for t in transactions]))
 
+    # TODO Fix this bug.
     r = instance.gateway.get(f"membership/member?entity_id={member_ids}")
     assert(r.ok)
 

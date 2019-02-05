@@ -38,8 +38,6 @@ Message.typeIcon = message => {
     switch (message.message_type) {
         case "email":
             return <i className="uk-icon-envelope" title="E-post"/>;
-        case "sms":
-            return <i className="uk-icon-commenting" title="SMS"/>;
         default:
             return message.message_type;
     }
@@ -50,8 +48,6 @@ Message.typeText = message => {
     switch (message.message_type) {
         case "email":
             return "E-post";
-        case "sms":
-            return "SMS";
         default:
             return message.message_type;
     }

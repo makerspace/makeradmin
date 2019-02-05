@@ -79,7 +79,6 @@ class MessageForm extends React.Component {
                     <div className="uk-form-controls">
                         <select id="message_type" ref="message_type" className="uk-form-width-medium" onChange={e => message.message_type =  e.target.value}>
                             <option value="email">E-post</option>
-                            <option value="sms">SMS</option>
                         </select>
                     </div>
                 </div>
