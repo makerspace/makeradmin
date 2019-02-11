@@ -26,6 +26,8 @@ services:
       - ./multiaccesssync/lumen/routes:/var/www/html/routes
       - ./multiaccesssync/lumen/app:/var/www/html/app
       - ./library/src/Makeradmin:/var/www/html/library
+    ports:
+      - "8013:80"
 
   backend:
     volumes:
