@@ -20,15 +20,6 @@ services:
       - ./emaildispatcher/lumen/app:/var/www/html/app
       - ./library/src/Makeradmin:/var/www/html/library
 
-  multiaccesssync:
-    volumes:
-      - ./data/multiaccess-uploads:/var/www/html/storage/uploads
-      - ./multiaccesssync/lumen/routes:/var/www/html/routes
-      - ./multiaccesssync/lumen/app:/var/www/html/app
-      - ./library/src/Makeradmin:/var/www/html/library
-    ports:
-      - "8013:80"
-
   backend:
     volumes:
       - ./backend/src:/work/src

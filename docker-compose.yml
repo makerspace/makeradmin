@@ -60,7 +60,6 @@ services:
       MEMBER_URL:
       MESSAGES_URL:
       EMAIL_DISPATCHER_URL:
-      MULTIACCESS_SYNC_URL:
       VIRTUAL_HOST: "${HOST_BACKEND}"
       LETSENCRYPT_HOST: "${HOST_BACKEND}"
       LETSENCRYPT_EMAIL: "${ADMIN_EMAIL}"
@@ -120,23 +119,6 @@ services:
       MAILGUN_KEY:
       MAILGUN_FROM:
       MAILGUN_TO_OVERRIDE:
-    depends_on:
-      - api
-      - library
-    networks:
-      - makeradmin
-
-  # TODO Remove.
-  multiaccesssync:
-    image: makeradmin/multiaccesssync:1.0
-    build:
-      context: ./multiaccesssync
-      dockerfile: ${PWD}/library/DockerfileService
-    volumes:
-      - ./data/multiaccess-uploads:/var/www/html/storage/uploads
-    environment:
-      APIGATEWAY: api
-      BEARER: "${API_BEARER}"
     depends_on:
       - api
       - library
