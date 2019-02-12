@@ -1,15 +1,4 @@
-from flask import request, jsonify, render_template
-from backend_service import assert_get, route_helper, create, abort
-import urllib.parse
-from typing import Dict, Any
-from logging import getLogger
-
-logger = getLogger('makeradmin')
-
-instance = create(name="member", url="member", port=80, version="1.0")
-
-# Grab the database so that we can use it inside requests
-db = instance.db
+from member import service
 
 
 @instance.route("send_access_token", methods=["POST"], permission=None)

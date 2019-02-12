@@ -27,7 +27,6 @@ default = Dict(name="default", src=dict(
     MYSQL_USER='makeradmin',
     MYSQL_DB='makeradmin',
     SHOP_URL='http://backend',
-    MEMBER_URL='http://backend',
     STATISTICS_URL='http://backend',
     EMAIL_DISPATCHER_URL='http://email-dispatcher',
     MAILGUN_KEY='',
