@@ -20,24 +20,6 @@ services:
     networks:
       - makeradmin
 
-  servicebase:
-    image: makeradmin/servicebase:1.0
-    build:
-      context: ./library
-      dockerfile: DockerfileServiceBase
-    networks:
-      - makeradmin
-
-  library:
-    image: makeradmin/library:1.0
-    build:
-      context: ./library
-      dockerfile: Dockerfile
-    depends_on:
-      - servicebase
-    networks:
-      - makeradmin
-
   api:
     image: makeradmin/api:1.0
     build:
@@ -69,7 +51,7 @@ services:
     build:
       context: ./api
     command: 
-      - "/work/emaildispatcher.sh"
+      - "/work/dispatch_emails.sh"
     environment:
       MYSQL_HOST: db2
       MYSQL_DB:

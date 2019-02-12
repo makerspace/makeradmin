@@ -16,9 +16,8 @@ services:
       
   email-dispatcher:
     volumes:
-      - ./emaildispatcher/lumen/routes:/var/www/html/routes
-      - ./emaildispatcher/lumen/app:/var/www/html/app
-      - ./library/src/Makeradmin:/var/www/html/library
+      - ./api/src:/work/src
+      - logs:/work/logs
 
   backend:
     volumes:

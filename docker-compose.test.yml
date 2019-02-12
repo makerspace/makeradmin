@@ -22,12 +22,6 @@ services:
     environment:
       HOST_BACKEND: 'http://api'
 
-  servicebase:
-    command: ["/bin/sleep", "3600"]
-
-  library:
-    command: ["/bin/sleep", "3600"]
-
   selenium:
     image: selenium/standalone-chrome-debug
     networks:
