@@ -64,6 +64,27 @@ services:
       LETSENCRYPT_HOST: "${HOST_BACKEND}"
       LETSENCRYPT_EMAIL: "${ADMIN_EMAIL}"
       
+  email-dispatcher:
+    image: makeradmin/api:1.0
+    build:
+      context: ./api
+    command: 
+      - "/work/emaildispatcher.sh"
+    environment:
+      MYSQL_HOST: db2
+      MYSQL_DB:
+      MYSQL_PORT:
+      MYSQL_USER:
+      MYSQL_PASS:
+      MAILGUN_DOMAIN:
+      MAILGUN_KEY:
+      MAILGUN_FROM:
+      MAILGUN_TO_OVERRIDE:
+    depends_on:
+      - api
+    networks:
+      - makeradmin
+
   backend:
     image: makeradmin/backend:1.0
     build: backend
@@ -100,28 +121,6 @@ services:
       VIRTUAL_HOST: "${HOST_PUBLIC}"
       LETSENCRYPT_HOST: "${HOST_PUBLIC}"
       LETSENCRYPT_EMAIL: "${ADMIN_EMAIL}"
-    networks:
-      - makeradmin
-
-  email-dispatcher:
-    image: makeradmin/messages-dispatcher-email:1.0
-    build:
-      context: ./emaildispatcher
-      dockerfile: ${PWD}/library/DockerfileService
-    environment:
-      MYSQL_HOST: "db2:${MYSQL_PORT}"
-      MYSQL_DB: "makeradmin"
-      MYSQL_USER:
-      MYSQL_PASS:
-      APIGATEWAY: "api"
-      BEARER: "${API_BEARER}"
-      MAILGUN_DOMAIN:
-      MAILGUN_KEY:
-      MAILGUN_FROM:
-      MAILGUN_TO_OVERRIDE:
-    depends_on:
-      - api
-      - library
     networks:
       - makeradmin
 

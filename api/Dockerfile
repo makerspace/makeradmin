@@ -21,7 +21,7 @@ COPY requirements.txt /work
 
 RUN pip install -r /work/requirements.txt
 
-COPY run.sh /work/
+COPY run.sh emaildispatcher.sh /work/
 
 COPY src /work/src
 
