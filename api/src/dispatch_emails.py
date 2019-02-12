@@ -5,6 +5,7 @@ from time import sleep
 
 import requests
 from rocky.process import log_exception, stoppable
+from sqlalchemy.exc import DatabaseError
 from sqlalchemy.orm import sessionmaker
 
 from messages.models import Recipient, Message
@@ -78,4 +79,7 @@ if __name__ == '__main__':
         while True:
             sleep(args.sleep)
             with closing(session_factory()) as db_session:
-                send_messages(db_session, key, domain, sender, to_override, args.limit)
+                try:
+                    send_messages(db_session, key, domain, sender, to_override, args.limit)
+                except DatabaseError as e:
+                    logger.warning(f"failed to access messages_recipient table, ignoring: {e}")
