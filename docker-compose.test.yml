@@ -2,6 +2,10 @@ version: "3"
 
 services:
 
+  db2:
+    volumes:
+      - logs:/var/www/html/storage/logs
+      
   api:
     volumes:
       - logs:/work/logs
