@@ -1,28 +1,25 @@
+from flask import request
+
 from member import service
+from service.api_definition import POST, PUBLIC, Arg
+from service.db import db_session
 
 
-@instance.route("send_access_token", methods=["POST"], permission=None)
-def send_access_token():
-    data = request.get_json()
-    if data is None:
-        abort(400, "missing json")
+@service.route("/send_access_token", method=POST, permission=PUBLIC)
+def send_access_token(redirect=Arg(str), user_tag: str=Arg(str)):
+    redirect = redirect or "/member"
 
-    redirect = "/member"
-    if "redirect" in data:
-        redirect = data["redirect"]
-
-    user_tag = assert_get(data, "user_tag")
-    with db.cursor() as cur:
-        if user_tag.isdigit():
-            cur.execute("SELECT member_id FROM membership_members WHERE member_number=%s", (user_tag,))
-        else:
-            cur.execute("SELECT member_id FROM membership_members WHERE email=%s", (user_tag,))
-        matching = cur.fetchall()
-        if len(matching) == 0:
-            abort(400, "not found")
-        if len(matching) > 1:
-            abort(400, "ambiguous")
-        user_id = matching[0][0]
+    if user_tag.isdigit():
+        db_session.execute("SELECT member_id FROM membership_members WHERE member_number = %s", (user_tag,))
+    else:
+        db_session.execute("SELECT member_id FROM membership_members WHERE email=%s", (user_tag,))
+        
+    matching = cur.fetchall()
+    if len(matching) == 0:
+        abort(400, "not found")
+    if len(matching) > 1:
+        abort(400, "ambiguous")
+    user_id = matching[0][0]
 
     response = instance.gateway.post("oauth/force_token", {"user_id": user_id}).json()
     token = response["access_token"]

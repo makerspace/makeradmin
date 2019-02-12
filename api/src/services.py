@@ -1,5 +1,6 @@
 from collections import namedtuple
 
+import member
 import membership
 import core
 import messages
