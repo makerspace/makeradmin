@@ -56,6 +56,7 @@ common.onGetAndDocumentLoaded("/webshop/product_data", (value: any) => {
 
   const layoutModes: Set<string> = new Set<string>(["layout-grid", "layout-list", "layout-table"]);
   function setLayoutMode(mode: string){
+    localStorage.setItem("webshop-layout-mode", mode);
     if (!layoutModes.has(mode)) {
       mode = "layout-grid";
     }
@@ -70,6 +71,9 @@ common.onGetAndDocumentLoaded("/webshop/product_data", (value: any) => {
       setLayoutMode(elm.id);
     });
   });
+
+  // Load saved layout mode
+  setLayoutMode(localStorage.getItem("webshop-layout-mode"));
 
   function setLoggedIn (loggedIn: boolean) {
   }
