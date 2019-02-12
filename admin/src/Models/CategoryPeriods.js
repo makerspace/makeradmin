@@ -33,7 +33,7 @@ export default class CategoryPeriods extends Base {
 
     // Should be called after edit and before save to eliminate any overlapping periods.
     merge() {
-        this.periods.sort((a, b) => a.start > b.start);
+        this.periods.sort((a, b) => a.start > b.start ? 1 : -1);
         this.replace(mergePeriods(this.periods));
     }
     
