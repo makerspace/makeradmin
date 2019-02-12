@@ -75,7 +75,7 @@ export const filterCategory = (spans, category) =>
 export const filterPeriods = (spans, category) => {
     spans.sort((a, b) => a.start > b.start ? 1 : -1);
     return mergePeriods(filterCategory(spans, category));
-}
+};
 
 
 // Given the category periods and spans, calculate additions and deletions needed and add them to respective lists.
