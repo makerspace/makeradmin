@@ -1,5 +1,3 @@
--- NOTE This file is not in use yet.
-
 -- create tables (if not already created by old php migrations)
 
 -- disable warnings or mysql will complain about table exists and deprecated collate
@@ -52,3 +50,8 @@ SET sql_notes = 1;
 ALTER TABLE `messages_message` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
 ALTER TABLE `messages_recipient` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
 ALTER TABLE `messages_template` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
+
+-- set updated at in database instead
+ALTER TABLE `messages_message` MODIFY COLUMN `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP;
+ALTER TABLE `messages_recipient` MODIFY COLUMN `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP;
+ALTER TABLE `messages_template` MODIFY COLUMN `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP;

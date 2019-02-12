@@ -123,7 +123,7 @@ class InternalService(Blueprint):
                             raise UnprocessableEntity(f"'{field}' is required." if field else "Required field missing.",
                                                       fields=field, what=REQUIRED)
                         
-                    raise UnprocessableEntity("Could not save entity using the sent data. See server log for more details.",
+                    raise UnprocessableEntity("Could not save entity using the sent data.",
                                               log=f"unrecoginized integrity error: {str(e)}")
                 
                 return result

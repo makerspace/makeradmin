@@ -12,10 +12,10 @@ class MessageAdd extends React.Component {
         super(props);
         this.message = new Message();
         if (props.location.query.template) {
-            this.template = new Template({template_id: props.location.query.template});
+            this.template = new Template({messages_template_id: props.location.query.template});
             this.template.refresh().then(() => {
-                this.message.body = this.template.description;
-                this.message.subject = this.template.title;
+                this.message.description = this.template.description;
+                this.message.title = this.template.title;
             });
         }
     }

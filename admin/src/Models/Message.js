@@ -9,26 +9,26 @@ export default class Message extends Base {
     }
     
     canSave() {
-        return this.body && this.recipients && this.recipients.length && (this.message_type !== 'email' || this.subject);
+        return this.description && this.recipients && this.recipients.length && (this.message_type !== 'email' || this.title);
     }
 }
 
 Message.model = {
-    id: "message_id",
+    id: "messages_message_id",
     root: "/messages/message",
     attributes: {
-        body: "",
+        description: "",  // Body, rename in the future.
         created_at: null,
         updated_at: null,
         entity_id: 0,
-        message_id: 0,
+        messages_message_id: 0,
         message_type: "email",
         num_recipients: 0,
         recipient: "",
         recipient_id: 0,
         recipients: [],
         status: "",
-        subject: "",
+        title: "",
         date_sent: null,
     },
 };
@@ -38,8 +38,6 @@ Message.typeIcon = message => {
     switch (message.message_type) {
         case "email":
             return <i className="uk-icon-envelope" title="E-post"/>;
-        case "sms":
-            return <i className="uk-icon-commenting" title="SMS"/>;
         default:
             return message.message_type;
     }
@@ -50,8 +48,6 @@ Message.typeText = message => {
     switch (message.message_type) {
         case "email":
             return "E-post";
-        case "sms":
-            return "SMS";
         default:
             return message.message_type;
     }

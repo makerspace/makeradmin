@@ -14,12 +14,6 @@ services:
     environment:
       APP_DEBUG: "true"
       
-  messages:
-    volumes:
-      - ./messages/lumen/routes:/var/www/html/routes
-      - ./messages/lumen/app:/var/www/html/app
-      - ./library/src/Makeradmin:/var/www/html/library
-
   email-dispatcher:
     volumes:
       - ./emaildispatcher/lumen/routes:/var/www/html/routes

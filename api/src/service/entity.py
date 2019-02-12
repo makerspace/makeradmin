@@ -1,6 +1,7 @@
 from collections import namedtuple
 from datetime import datetime, date
 from math import ceil
+from typing import Mapping
 
 from flask import request
 from sqlalchemy import inspect, Integer, String, DateTime, Text, desc, asc, or_, text, Date, Enum as DbEnum
@@ -88,7 +89,6 @@ class Entity:
         self.default_sort_column = default_sort_column
         self.default_sort_order = default_sort_order
         self.search_columns = search_columns
-        self.list_deleted = list_deleted
         self.expand_fields = expand_fields or {}
         
         model_inspect = inspect(self.model)
@@ -99,6 +99,8 @@ class Entity:
         
         self.columns = model_inspect.columns
 
+        self.list_deleted = list_deleted or 'deleted_at' not in self.columns
+        
         assert default_sort_column is None or default_sort_column in self.columns, "default_sort_column does not exist"
         
         assert default_sort_order in (None, ASC, DESC), "bad default sort order"
@@ -134,6 +136,12 @@ class Entity:
     def to_model(self, obj):
         """ Convert and filter json compatible object to model compatible dict, also filter fields that is not
         allowed to be edited. """
+        if obj is None:
+            raise UnprocessableEntity("expected data in request, was empty", what=BAD_VALUE)
+        
+        if not isinstance(obj, Mapping):
+            raise UnprocessableEntity("expected data object in request", what=BAD_VALUE)
+        
         return {k: self.cols_to_model[k](v) for k, v in obj.items() if k in self.cols_to_model}
     
     def to_obj(self, entity):
@@ -211,11 +219,11 @@ class Entity:
             raise UnprocessableEntity("Can not create using empty data.")
         entity = self.model(**input_data)
         db_session.add(entity)
-        db_session.commit()
-        return self.to_obj(entity)
+        db_session.flush()  # Flush to get id of created entity.
+        return entity
     
     def create(self):
-        return self._create_internal(request.json)
+        return self.to_obj(self._create_internal(request.json))
     
     def read(self, entity_id):
         entity = db_session.query(self.model).get(entity_id)
@@ -263,6 +271,7 @@ class Entity:
     
     
 class OrmSingeRelation:
+    
     def __init__(self, name=None, related_entity_id_column=None):
         """
         Relation that is implemented through a foreign key in the orm.

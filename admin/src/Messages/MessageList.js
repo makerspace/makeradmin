@@ -25,7 +25,7 @@ class MessageList extends React.Component {
                         {title: "Status", sort: "status"},
                         {title: "Typ", sort: "type"},
                         {title: "Mottagare"},
-                        {title: "Meddelande", sort: "subject"},
+                        {title: "Meddelande", sort: "title"},
                     ]}
                     rowComponent={({item}) => (
                         <tr>
@@ -33,7 +33,7 @@ class MessageList extends React.Component {
                             <td>{Message.statusText(item)}</td>
                             <td>{Message.typeIcon(item)}</td>
                             <td>{item.num_recipients} st</td>
-                            <td><Link to={"/messages/" + item.id}>{item.subject}</Link></td>
+                            <td><Link to={"/messages/" + item.id}>{item.title}</Link></td>
                         </tr>
                     )}
                 />

@@ -67,6 +67,7 @@ class Group(Base):
     
     members = relationship('Member',
                            secondary=member_group,
+                           lazy='dynamic',
                            back_populates='groups')
 
     permissions = relationship('Permission',
