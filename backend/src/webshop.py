@@ -303,9 +303,8 @@ def send_new_member_email(member_id: int) -> None:
             },
         ],
         "message_type": "email",
-        "subject": "Välkommen till Stockholm Makerspace",
-        "subject_en": "Welcome to the Stockholm Makerspace",
-        "body": email_body
+        "title": "Välkommen till Stockholm Makerspace",
+        "description": email_body
     })
 
     if not r.ok:
@@ -693,9 +692,8 @@ def send_receipt_email(member_id: int, transaction_id: int) -> None:
             },
         ],
         "message_type": "email",
-        "subject": "Kvitto - Stockholm Makerspace",
-        "subject_en": "Receipt - Stockholm Makerspace",
-        "body": render_template("receipt_email.html", cart=zip(products, items), transaction=transaction, currency="kr", member=member, public_url=instance.gateway.get_public_url)
+        "title": "Kvitto - Stockholm Makerspace",
+        "description": render_template("receipt_email.html", cart=zip(products, items), transaction=transaction, currency="kr", member=member, public_url=instance.gateway.get_public_url)
     })
 
     if not r.ok:
@@ -850,9 +848,8 @@ def send_key_updated_email(member_id: int, extended_days: int, end_date: datetim
             },
         ],
         "message_type": "email",
-        "subject": "Din labaccess har utökats",
-        "subject_en": "Your lab access has been extended",
-        "body": render_template("updated_key_time_email.html", public_url=instance.gateway.get_public_url, member=member, extended_days=extended_days, end_date=end_date.strftime("%Y-%m-%d"))
+        "title": "Din labaccess har utökats",
+        "description": render_template("updated_key_time_email.html", public_url=instance.gateway.get_public_url, member=member, extended_days=extended_days, end_date=end_date.strftime("%Y-%m-%d"))
     })
 
     if not r.ok:
@@ -873,9 +870,8 @@ def send_membership_updated_email(member_id: int, extended_days: int, end_date: 
             },
         ],
         "message_type": "email",
-        "subject": "Ditt medlemsskap har utökats",
-        "subject_en": "Your membership has been extended",
-        "body": render_template("updated_membership_time_email.html", public_url=instance.gateway.get_public_url, member=member, extended_days=extended_days, end_date=end_date.strftime("%Y-%m-%d"))
+        "title": "Ditt medlemsskap har utökats",
+        "description": render_template("updated_membership_time_email.html", public_url=instance.gateway.get_public_url, member=member, extended_days=extended_days, end_date=end_date.strftime("%Y-%m-%d"))
     })
 
     if not r.ok:
