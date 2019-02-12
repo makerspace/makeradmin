@@ -114,6 +114,9 @@ class Key(Base):
     
     member = relationship(Member, backref="keys")
 
+    def __repr__(self):
+        return f'Key(key_id={self.key_id}, tagid={self.tagid})'
+
 
 LABACCESS = 'labaccess'
 MEMBERSHIP = 'membership'
@@ -135,3 +138,6 @@ class Span(Base):
     deletion_reason = Column(String(255))
     
     member = relationship(Member, backref="spans")
+
+    def __repr__(self):
+        return f'Span(span_id={self.span_id}, type={self.type}, enddate={self.enddate})'

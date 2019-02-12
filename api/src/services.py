@@ -3,6 +3,7 @@ from collections import namedtuple
 import membership
 import core
 import messages
+import multiaccess
 from service.config import config
 from service.external_service import ExternalService
 
@@ -16,5 +17,5 @@ services = (
     Instance(path='/member', service=ExternalService('member', config.get('MEMBER_URL'))),
     Instance(path='/messages', service=messages.service),
     Instance(path='/statistics', service=ExternalService('statistics', config.get('STATISTICS_URL'))),
-    Instance(path='/multiaccesssync', service=ExternalService('multiaccesssync', config.get('MULTIACCESS_SYNC_URL'))),
+    Instance(path='/multiaccess', service=multiaccess.service)
 )
