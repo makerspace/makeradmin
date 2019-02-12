@@ -32,6 +32,7 @@ services:
       - /dev/shm:/dev/shm
 
   email-dispatcher:
+    command: ['/bin/sleep', '3600']
     environment:
       MAILGUN_DOMAIN: ""
       MAILGUN_KEY: ""
