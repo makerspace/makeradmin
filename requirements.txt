@@ -1,4 +1,5 @@
-# Requirements file for utils.
 requests
 pip
--r servicebase_python/requirements.txt
+docker-compose
+-r backend/requirements.txt
+-r api/requirements.txt

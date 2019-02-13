@@ -1,42 +1,51 @@
 #!/usr/bin/env python3
 import argparse
-import servicebase_python.service
+import sys
+import os
+from typing import Optional
 
-gateway = servicebase_python.service.gateway_from_envfile(".env")
+# Ugly
+sys.path.append(os.path.join(os.path.dirname(__file__), "backend/src"))
 
-parser = argparse.ArgumentParser(description='Create a new MakerAdmin user')
-parser.add_argument("--first-name", help="First name of the user", required=True)
-parser.add_argument("--last-name", help="Last name of the user", required=True)
-parser.add_argument("--email", help="Email of the user", required=True)
-parser.add_argument("--type", choices=["user", "admin"], required=True)
-parser.add_argument("--password", help="Password (only relevant for admins)", required=False)
+import backend_service
 
-args = parser.parse_args()
+def create_user(first_name: str, last_name: str, email: str, user_type: str, password: Optional[str]):
+    gateway = backend_service.gateway_from_envfile(".env")
 
-try:
-    payload = {
-        "email": args.email,
-        "firstname": args.first_name,
-        "lastname": args.last_name,
-        "unhashed_password": True  # Let php hash the password
-    }
-    if args.password is not None:
-        payload["password"] = args.password
 
-    r = gateway.post("membership/member", payload=payload)
-except Exception as e:
-    print("Could not connect to the membership service. Are you sure makeradmin is running?")
-    print(e)
-    exit(1)
+    try:
+        payload = {
+            "email": email,
+            "firstname": first_name,
+            "lastname": last_name,
+        }
+        if password is not None:
+            payload["unhashed_password"] = password
 
-assert r.ok, r.text
-user = r.json()["data"]
+        r = gateway.post("membership/member", payload=payload)
+    except Exception as e:
+        print("Could not connect to the membership service. Are you sure makeradmin is running?")
+        print(e)
+        exit(1)
 
-if args.type == "admin":
-    admin_group_id = [g["group_id"] for g in gateway.get("membership/group").json()["data"] if g["name"] == "admins"][0]
-    r = gateway.post("membership/member/" + str(user["member_id"]) + "/groups/add", payload={
-        "groups": [admin_group_id]
-    })
     assert r.ok, r.text
+    user = r.json()["data"]
 
-print("Done")
+    if user_type == "admin":
+        admin_group_id = [g["group_id"] for g in gateway.get("membership/group").json()["data"] if g["name"] == "admins"][0]
+        r = gateway.post("membership/member/" + str(user["member_id"]) + "/groups/add", payload={
+            "groups": [admin_group_id]
+        })
+        assert r.ok, r.text
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description='Create a new MakerAdmin user')
+    parser.add_argument("--first-name", help="First name of the user", required=True)
+    parser.add_argument("--last-name", help="Last name of the user", required=True)
+    parser.add_argument("--email", help="Email of the user", required=True)
+    parser.add_argument("--type", choices=["user", "admin"], required=True)
+    parser.add_argument("--password", help="Password (only relevant for admins)", required=False)
+
+    args = parser.parse_args()
+    create_user(args.first_name, args.last_name, args.email, args.type, args.password)
+    print("Done")

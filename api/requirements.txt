@@ -1,0 +1,17 @@
+# Runtime requirements
+flask
+flask_cors
+sqlalchemy
+gunicorn
+rocky>=1,<2
+PyMySQL
+requests
+python-dotenv
+bcrypt
+stripe
+
+# Test requirements
+pytest
+pytest-parallel
+selenium
+faker

@@ -1,0 +1,44 @@
+{% macro nav_item(item, active_item) %}
+    {% if active_item == item %}
+        <li class="active">{{ caller() }}</li>
+    {% else %}
+        <li>{{ caller() }}</li>
+    {% endif %}
+{% endmacro %}
+
+{% macro sidebar(active_item) %}
+    <div id="left-sidebar">
+        <div class="sidebar-fixed-content">
+            <img src='{{ STATIC }}/images/logo-transparent-500px-300x210.png' />
+            <ul class="uk-nav uk-nav-default">
+                {% call nav_item("member", active_item) %}
+                    <a href="/member"><span uk-icon="user"></span> Medlemsvy</a>
+                {% endcall %}
+                {% call nav_item("shop", active_item) %}
+                    <a href="/shop"><span uk-icon="cart"></span> Webshop<span id="shop"></span></a>
+                {% endcall %}
+                {% if active_item == "shop" or active_item == "cart" %}
+                    <ul id="categories" class="uk-nav-sub">
+                        <li class="edit">
+                            <button type="button" class="uk-button uk-button-primary uk-button-small category-add" uk-icon="plus"></button>
+                        </li>
+                        {% call nav_item("cart", active_item) %}
+                            <a href="/shop/cart"><span uk-icon="cart"></span> Min kundvagn<span id="cart-sum"></span></a>
+                        {% endcall %}
+                    </ul>
+                {% endif %}
+                {% call nav_item("history", active_item) %}
+                    <a href="/shop/member/history"><span uk-icon="history"></span> Min köphistorik</a>
+                {% endcall %}
+                <li>
+                    <a href="#" id="logout"><span uk-icon="sign-out"></span> Logga ut</a>
+                </li>
+                {% if active_item == "shop" %}
+                <li class="uk-button uk-button-primary sidebar-buy-btn cart-empty">
+                    <a href="/shop/cart"><span uk-icon="cart"></span> Betala<span id="cart-sum"></span></a>
+                </li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+{% endmacro %}

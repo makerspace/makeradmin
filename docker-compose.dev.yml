@@ -1,0 +1,46 @@
+version: "3"
+
+services:
+  db2:
+    ports:
+      - "3306:3306"
+    volumes:
+      - logs:/var/www/html/storage/logs
+
+  api:
+    volumes:
+      - ./api/src:/work/src
+      - logs:/work/logs
+    ports:
+      - "8010:80"
+    environment:
+      APP_DEBUG: "true"
+      
+  email-dispatcher:
+    volumes:
+      - ./api/src:/work/src
+      
+  backend:
+    volumes:
+      - ./backend/src:/work/src
+    environment:
+      APP_DEBUG: "true"
+      
+  public:
+    ports:
+      - "8011:80"
+    volumes:
+      - ./public/ts:/work/ts
+      - ./public/scss:/work/scss
+      - ./public/src:/work/src
+    environment:
+      APP_DEBUG: "true"
+      
+  admin:
+    ports:
+      - "8009:80"
+    environment:
+      APP_DEBUG: "true"
+
+volumes:
+  logs:

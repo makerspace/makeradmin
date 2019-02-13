@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Bli medlem - Stockholm Makerspace</title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="{{ STATIC }}/uikit/css/uikit.min.css" />
+        <link rel="stylesheet" href="{{ STATIC }}/style.css" />
+        <script src='{{ STATIC }}/uikit/js/uikit.min.js'></script>
+        <script src='{{ STATIC }}/uikit/js/uikit-icons.min.js'></script>
+        <script src="https://js.stripe.com/v3/"></script>
+        {% include 'meta.html' %}
+        <script src='{{ STATIC }}/js/register.js'></script>
+    </head>
+    <body>
+        <form class="product-edit-form uk-form-stacked uk-margin-xlarge-bottom">
+            <div class="header-logo">
+                <img src='{{ STATIC }}/images/logo-transparent-500px-300x210.png' />
+            </div>
+            <h1>Bli medlem</h1>
+            <div>
+                <label for="firstname" class="uk-form-label">Förnamn</label>
+                <input required id="firstname" class="uk-input" type="text" placeholder="" />
+            </div>
+            <div>
+                <label for="lastname" class="uk-form-label">Efternamn</label>
+                <input required id="lastname" class="uk-input" type="text" placeholder="" />
+            </div>
+            <div>
+                <label for="email" class="uk-form-label">E-post</label>
+                <input required id="email" class="uk-input" type="text" placeholder="" />
+            </div>
+            <div>
+                <label for="phone" class="uk-form-label">Telefonnummer</label>
+                <input id="phone" class="uk-input" type="text" placeholder="" />
+            </div>
+            <!-- <div>
+                <label for="address_street" class="uk-form-label">Address</label>
+                <input id="address_street" class="uk-input" type="text" placeholder="" />
+            </div>
+            <div>
+                <label for="address_extra" class="uk-form-label">Adress (extra)</label>
+                <input id="address_extra" class="uk-input" type="text" placeholder="Extra adressrad, t ex C/O adress" />
+            </div>
+            <div>
+                <label for="address_zipcode" class="uk-form-label">Postnummer</label>
+                <input id="address_zipcode" class="uk-input" type="text" placeholder="" />
+            </div>
+            <div class="uk-margin-bottom">
+                <label for="address_city" class="uk-form-label">Postort</label>
+                <input id="address_city" class="uk-input" type="text" placeholder="" />
+            </div> -->
+
+            <div id="products"></div>
+
+            <p>Startpaketet ger dig årsmedlemsskap i föreningen samt 60 dagars labaccess till ett paketpris. Labaccessen börjar räknas efter uthämtad nyckel på en nyckelutlämning (se kalendarium för nästa tillfälle).</p>
+            <p>Du kan istället välja att köpa endast årsmedlemsskap i föreningen. Labaccess kan köpas separat i <a href="/shop">webshoppen</a>. Detta är något dyrare än paketpriset.</p>
+
+            <div class="form-row">
+                <div id="card-element">
+                  <!-- A Stripe Element will be inserted here. -->
+                </div>
+
+                <!-- Used to display form errors. -->
+                <div id="card-errors" role="alert"></div>
+            </div>
+
+            <button type="button" id="pay-button" class="uk-button uk-button-default uk-button-primary">
+                <div class="progress-spinner" uk-spinner></div>
+                <span>Betala</span>
+            </button>
+
+            </form>
+        </form>
+    </body>
+</html>
