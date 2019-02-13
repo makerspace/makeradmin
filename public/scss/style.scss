@@ -67,6 +67,36 @@ html, body {
 	.uk-nav-default {
 		margin-top: 20px;
 	}
+
+	.sidebar-buy-btn {
+		margin-top: 40px;
+		width: 100%;
+		opacity: 1;
+		transition: opacity 200ms;
+
+		a {
+			color: #FFF;
+		}
+	}
+
+	.sidebar-buy-btn.cart-empty {
+		opacity: 0.5;
+	}
+
+	@include media("<=tablet") {
+		.sidebar-buy-btn {
+			display: block;
+			position: fixed;
+		    bottom: 0px;
+		    left: 0px;
+		    z-index: 2;
+		    border-radius: 0px;
+		}
+
+		.sidebar-buy-btn.cart-empty {
+			display: none;
+		}
+	}
 }
 
 .product.active {
@@ -981,7 +1011,7 @@ form input.readonly-input {
 	justify-content: center;
 }
 
-.empty-cart {
+.empty-cart-text {
 	text-align: center;
 	width: 100%;
 	padding: 20px;

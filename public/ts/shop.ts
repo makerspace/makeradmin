@@ -20,10 +20,12 @@ common.onGetAndDocumentLoaded("/webshop/product_data", (value: any) => {
   Cart.startLocalStorageSync(refreshUIFromCart);
 
   function updateCartSum(cart: Cart) {
-    if (cart.items.length > 0) {
-      document.querySelector("#cart-sum").textContent = " (" + Cart.formatCurrency(cart.sum(id2item)) + ")";
+    const cartEmpty = cart.items.length == 0;
+    document.querySelector(".sidebar-buy-btn").classList.toggle("cart-empty", cartEmpty);
+    if (cartEmpty) {
+      document.querySelectorAll("#cart-sum").forEach(e => e.textContent = "");
     } else {
-      document.querySelector("#cart-sum").textContent = "";
+      document.querySelectorAll("#cart-sum").forEach(e => e.textContent = " (" + Cart.formatCurrency(cart.sum(id2item)) + ")");
     }
   }
 
@@ -54,6 +56,7 @@ common.onGetAndDocumentLoaded("/webshop/product_data", (value: any) => {
 
   const layoutModes: Set<string> = new Set<string>(["layout-grid", "layout-list", "layout-table"]);
   function setLayoutMode(mode: string){
+    localStorage.setItem("webshop-layout-mode", mode);
     if (!layoutModes.has(mode)) {
       mode = "layout-grid";
     }
@@ -68,6 +71,9 @@ common.onGetAndDocumentLoaded("/webshop/product_data", (value: any) => {
       setLayoutMode(elm.id);
     });
   });
+
+  // Load saved layout mode
+  setLayoutMode(localStorage.getItem("webshop-layout-mode"));
 
   function setLoggedIn (loggedIn: boolean) {
   }

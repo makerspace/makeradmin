@@ -19,7 +19,7 @@ services:
   email-dispatcher:
     volumes:
       - ./api/src:/work/src
-
+      
   backend:
     volumes:
       - ./backend/src:/work/src

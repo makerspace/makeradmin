@@ -1,8 +1,9 @@
 from flask import request, jsonify, render_template
-from backend_service import assert_get, route_helper, create, abort
+from backend_service import assert_get, route_helper, create, abort, format_datetime
 import urllib.parse
 from typing import Dict, Any
 from logging import getLogger
+from datetime import datetime
 
 logger = getLogger('makeradmin')
 
@@ -47,8 +48,8 @@ def send_access_token():
             },
         ],
         "message_type": "email",
-        "subject": "Log in to MakerAdmin",
-        "body": render_template("email_login.html", url=url)
+        "title": f"Log in to MakerAdmin ({format_datetime(datetime.now())})",
+        "description": render_template("email_login.html", url=url)
     })
     if not r.ok:
         raise Exception(r.text)
