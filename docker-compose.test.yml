@@ -2,6 +2,10 @@ version: "3"
 
 services:
 
+  db2:
+    volumes:
+      - logs:/var/www/html/storage/logs
+      
   api:
     volumes:
       - logs:/work/logs
@@ -22,12 +26,6 @@ services:
     environment:
       HOST_BACKEND: 'http://api'
 
-  servicebase:
-    command: ["/bin/sleep", "3600"]
-
-  library:
-    command: ["/bin/sleep", "3600"]
-
   selenium:
     image: selenium/standalone-chrome-debug
     networks:
@@ -38,6 +36,7 @@ services:
       - /dev/shm:/dev/shm
 
   email-dispatcher:
+    command: ['/bin/sleep', '3600']
     environment:
       MAILGUN_DOMAIN: ""
       MAILGUN_KEY: ""

@@ -29,7 +29,10 @@ default = Dict(name="default", src=dict(
     SHOP_URL='http://backend',
     MEMBER_URL='http://backend',
     STATISTICS_URL='http://backend',
-    EMAIL_DISPATCHER_URL='http://email-dispatcher',
+    MAILGUN_KEY='',
+    MAILGUN_DOMAIN='',
+    MAILGUN_FROM='',
+    MAILGUN_TO_OVERRIDE='',
 ))
 env = Env()
 dot_env = DotEnvFile()
