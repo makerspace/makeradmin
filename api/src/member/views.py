@@ -33,8 +33,8 @@ def send_access_token(redirect=Arg(str), user_tag: str=Arg(str)):
             },
         ],
         "message_type": "email",
-        "subject": "Log in to MakerAdmin",
-        "body": render_template("email_login.html", url=url)
+        "title": f"Log in to MakerAdmin ({format_datetime(datetime.now())})",
+        "description": render_template("email_login.html", url=url)
     })
     if not r.ok:
         raise Exception(r.text)

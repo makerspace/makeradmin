@@ -36,7 +36,7 @@ common.onGetAndDocumentLoaded("/webshop/product_data", (value: any) => {
 		document.querySelector("#cart").innerHTML = "";
 
 		if (cart.items.length == 0) {
-			document.querySelector("#cart").innerHTML = "<p class='empty-cart'>Du har inga produkter i varukorgen.</p>";
+			document.querySelector("#cart").innerHTML = "<p class='empty-cart-text'>Du har inga produkter i varukorgen.</p>";
 			(<HTMLButtonElement>document.querySelector("#pay-button")).disabled = true;
 			return;
 		}

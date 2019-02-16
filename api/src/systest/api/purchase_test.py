@@ -28,7 +28,7 @@ class Test(ShopTestMixin, ApiTest):
         purchase = {
             "cart": cart,
             "expectedSum": f"{expected_sum:.2f}",
-            "duplicatePurchaseRand": randint(1e9, 9e9),
+            "duplicatePurchaseRand": randint(int(1e9), int(9e9)),
             "stripeSource": source.id,
             "stripeThreeDSecure": source["card"]["three_d_secure"]
         }
@@ -55,7 +55,7 @@ class Test(ShopTestMixin, ApiTest):
         purchase = {
             "cart": [{"id": self.p1_id, "count": 17}],
             "expectedSum": f"{self.p1_price * 17:.2f}",
-            "duplicatePurchaseRand": randint(1e9, 9e9),
+            "duplicatePurchaseRand": randint(int(1e9), int(9e9)),
             "stripeSource": "not_used",
             "stripeThreeDSecure": "not_used",
         }
@@ -66,7 +66,7 @@ class Test(ShopTestMixin, ApiTest):
         purchase = {
             "cart": [{"id": self.p0_id, "count": 1}],
             "expectedSum": f"{self.p0_price + 1:.2f}",
-            "duplicatePurchaseRand": randint(1e9, 9e9),
+            "duplicatePurchaseRand": randint(int(1e9), int(9e9)),
             "stripeSource": "not_used",
             "stripeThreeDSecure": "not_used",
         }
@@ -77,7 +77,7 @@ class Test(ShopTestMixin, ApiTest):
         purchase = {
             "cart": [{"id": self.p0_id, "count": -1}],
             "expectedSum": f"{self.p0_price:.2f}",
-            "duplicatePurchaseRand": randint(1e9, 9e9),
+            "duplicatePurchaseRand": randint(int(1e9), int(9e9)),
             "stripeSource": "not_used",
             "stripeThreeDSecure": "not_used",
         }
@@ -88,7 +88,7 @@ class Test(ShopTestMixin, ApiTest):
         purchase = {
             "cart": [],
             "expectedSum": f"{self.p0_price:.2f}",
-            "duplicatePurchaseRand": randint(1e9, 9e9),
+            "duplicatePurchaseRand": randint(int(1e9), int(9e9)),
             "stripeSource": "not_used",
             "stripeThreeDSecure": "not_used",
         }
@@ -97,7 +97,7 @@ class Test(ShopTestMixin, ApiTest):
         
     @skip("duplicate purchase rand does not work reliably and can not be tested, see issue #35")
     def test_repeated_purchase_rand_fails_purchase(self):
-        duplicate_purchase_rand = randint(1e9, 9e9)
+        duplicate_purchase_rand = randint(int(1e9), int(9e9))
 
         source = stripe.Source.create(type="card", token=stripe.Token.create(card=self.card(VALID_NON_3DS_CARD_NO)).id)
         purchase = {

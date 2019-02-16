@@ -33,6 +33,11 @@
                 <li>
                     <a href="#" id="logout"><span uk-icon="sign-out"></span> Logga ut</a>
                 </li>
+                {% if active_item == "shop" %}
+                <li class="uk-button uk-button-primary sidebar-buy-btn cart-empty">
+                    <a href="/shop/cart"><span uk-icon="cart"></span> Betala<span id="cart-sum"></span></a>
+                </li>
+                {% endif %}
             </ul>
         </div>
     </div>

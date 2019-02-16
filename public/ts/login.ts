@@ -46,7 +46,7 @@ function login_via_single_use_link(tag: string, redirect: string) {
 export function render_login(root: HTMLElement, heading: string, redirect: string) {
     heading = heading || "Logga in";
 	root.innerHTML = `
-            <div>
+            <div class="uk-width-medium">
                 <h1 style="text-align: center;">${heading}</h1>
                 <form class="uk-form">
                         <div class="uk-form-row" style="margin: 16px 0;">
