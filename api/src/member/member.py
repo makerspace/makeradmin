@@ -45,24 +45,6 @@ def send_access_token_email(redirect, user_tag, ip, browser):
     return {"status": "sent"}
 
 
-# @instance.route("current", methods=["GET"], permission='user')
-# def current_member() -> str:
-#     user_id = assert_get(request.headers, "X-User-Id")
-#     return instance.gateway.get("membership/member/%s" % user_id).text
-#
-#
-# @instance.route("current/permissions", methods=["GET"], permission='user')
-# @route_helper
-# def permissions() -> Dict[str, Any]:
-#     user_id = assert_get(request.headers, "X-User-Id")
-#     permissionsStr = request.headers["X-User-Permissions"].strip() if "X-User-Permissions" in request.headers else ""
-#     permissions = permissionsStr.split(",") if permissionsStr != "" else []
-#     return {
-#         "member_id": user_id,
-#         "permissions": permissions,
-#     }
-#
-#
 # @instance.route("current/membership", methods=["GET"], permission='user')
 # def membership_info() -> str:
 #     ''' If the user has lab access and how long '''
