@@ -35,7 +35,7 @@ def send_messages(db_session, key, domain, sender, to_override, limit):
                                      'from': sender,
                                      'to': to,
                                      'subject': recipient.title,
-                                     'text': recipient.description,
+                                     'html': recipient.description,
                                  })
         
         if response.ok:
