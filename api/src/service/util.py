@@ -15,3 +15,10 @@ def wait_for(func, timeout=2, interval=0.2):
             return True
         sleep(interval)
     return False
+
+
+def format_datetime(dt):
+    if dt is None:
+        return None
+
+    return dt.strftime("%Y-%m-%d %H:%M")

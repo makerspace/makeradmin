@@ -32,6 +32,7 @@ default = Dict(name="default", src=dict(
     MAILGUN_DOMAIN='',
     MAILGUN_FROM='',
     MAILGUN_TO_OVERRIDE='',
+    HOST_PUBLIC='',
 ))
 env = Env()
 dot_env = DotEnvFile()
@@ -48,3 +49,11 @@ def get_mysql_config():
     if not pwd: raise Exception("config MYSQL_PASS is required")
     
     return dict(host=host, port=port, db=db, user=user, pwd=pwd)
+
+
+def get_public_url(path):
+    """ Get public site url. """
+    host = config.get('HOST_PUBLIC')
+    if not host.startswith("http://") and not host.startswith("https://"):
+        host = "http://" + host
+    return f"{host}{path}"
