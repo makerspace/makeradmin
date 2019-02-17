@@ -38,7 +38,6 @@ services:
       MYSQL_PORT:
       MYSQL_USER:
       MYSQL_PASS:
-      SHOP_URL:
       HOST_PUBLIC:
       VIRTUAL_HOST: "${HOST_BACKEND}"
       LETSENCRYPT_HOST: "${HOST_BACKEND}"

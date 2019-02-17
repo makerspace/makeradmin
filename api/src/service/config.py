@@ -26,7 +26,6 @@ default = Dict(name="default", src=dict(
     MYSQL_PORT=3306,
     MYSQL_USER='makeradmin',
     MYSQL_DB='makeradmin',
-    SHOP_URL='http://backend',
     STATISTICS_URL='http://backend',
     MAILGUN_KEY='',
     MAILGUN_DOMAIN='',
