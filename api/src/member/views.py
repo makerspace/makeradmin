@@ -3,6 +3,7 @@ from flask import request, g
 from member import service
 from member.member import send_access_token_email
 from membership.member_auth import get_member_permissions
+from membership.membership import get_membership_summary
 from membership.views import member_entity
 from service.api_definition import POST, PUBLIC, Arg, GET, USER
 
@@ -22,18 +23,10 @@ def current_member():
 @service.route("/current/permissions", method=GET, permission=USER)
 def current_permissions():
     """ Get current member permissions. """
-    return {
-        "permissions": [p for _, p in get_member_permissions(g.user_id)],
-    }
+    return {"permissions": [p for _, p in get_member_permissions(g.user_id)]}
 
-    
-# def permissions() -> Dict[str, Any]:
-#     user_id = assert_get(request.headers, "X-User-Id")
-#     permissionsStr = request.headers["X-User-Permissions"].strip() if "X-User-Permissions" in request.headers else ""
-#     permissions = permissionsStr.split(",") if permissionsStr != "" else []
-#     return {
-#         "member_id": user_id,
-#         "permissions": permissions,
-#     }
-#
 
+@service.route("/current/membership", method=GET, permission=USER)
+def current_membership_info():
+    """ Get current user membership information. """
+    return get_membership_summary(g.user_id)

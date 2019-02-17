@@ -43,13 +43,3 @@ def send_access_token_email(redirect, user_tag, ip, browser):
     })
 
     return {"status": "sent"}
-
-
-# @instance.route("current/membership", methods=["GET"], permission='user')
-# def membership_info() -> str:
-#     ''' If the user has lab access and how long '''
-#     user_id = assert_get(request.headers, "X-User-Id")
-#     return instance.gateway.get(f"membership/member/{user_id}/membership").text
-#
-#
-# instance.serve_indefinitely()
