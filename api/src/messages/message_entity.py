@@ -20,17 +20,11 @@ def execute_template(member, text):
 
 class MessageEntity(Entity):
     
-    def create(self):
-        """
-        Create is used to send message to a list of recipients. Recipients should be a list of objects with id,
-        type where type is member or group. The rest of the data is used to create the message normally.
-        """
-        
-        data = request.json or {}
-        
+    def create_message(self, data):
+
         # Create message.
         
-        data['status'] = 'queued'
+        data = {**data, 'status': 'queued'}
         
         message = self._create_internal(data)
 
@@ -75,4 +69,12 @@ class MessageEntity(Entity):
             )
             db_session.add(recipient)
         
-        return self.to_obj(message)
+        return message
+    
+    def create(self):
+        """
+        Create is used to send message to a list of recipients. Recipients should be a list of objects with id,
+        type where type is member or group. The rest of the data is used to create the message normally.
+        """
+        
+        return self.to_obj(self.create_message(request.json or {}))

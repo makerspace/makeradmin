@@ -1,5 +1,6 @@
 from collections import namedtuple
 
+import member
 import membership
 import core
 import messages
@@ -14,7 +15,7 @@ services = (
     Instance(path='', service=core.service),
     Instance(path='/membership', service=membership.service),
     Instance(path='/webshop', service=ExternalService('webshop', config.get('SHOP_URL'))),
-    Instance(path='/member', service=ExternalService('member', config.get('MEMBER_URL'))),
+    Instance(path='/member', service=member.service),
     Instance(path='/messages', service=messages.service),
     Instance(path='/statistics', service=ExternalService('statistics', config.get('STATISTICS_URL'))),
     Instance(path='/multiaccess', service=multiaccess.service)
