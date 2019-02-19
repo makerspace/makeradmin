@@ -1,4 +1,5 @@
 import Cart from "./cart"
+import * as shopsearch from "./shopsearch"
 import * as common from "./common"
 import {UNAUTHORIZED} from "./common";
 import {renderSidebarCategories} from "./category"
@@ -163,6 +164,7 @@ common.onGetAndDocumentLoaded("/webshop/product_data", (value: any) => {
         ev.preventDefault();
       });
 
+      item.parentList = productListLi;
       productListLi.appendChild(li);
     }
     productListElem.appendChild(productListLi);
@@ -256,6 +258,22 @@ common.onGetAndDocumentLoaded("/webshop/product_data", (value: any) => {
           const id = Number((<HTMLElement>ev.currentTarget).getAttribute("data-id"));
           editCategory(id, (<HTMLElement>ev.currentTarget).getAttribute("data-name"));
       });
+  });
+
+  document.querySelector("#product-search-field").addEventListener("input", ev => {
+    const allItems = [];
+    for (const item of id2item.values()) allItems.push(item);
+    const matchingItems = shopsearch.search(allItems, (<HTMLInputElement>ev.currentTarget).value);
+
+    for (const item of allItems) {
+      const elem = id2element.get(item.id);
+      elem.remove();
+    }
+
+    for (const item of matchingItems) {
+      const elem = id2element.get(item.id);
+      item.parentList.appendChild(elem);
+    }
   });
 
   document.querySelector(".category-add").addEventListener("click", ev => {
