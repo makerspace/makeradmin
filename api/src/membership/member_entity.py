@@ -1,7 +1,6 @@
 from flask import request
 
 from membership.member_auth import hash_password
-from service.api_definition import BAD_VALUE
 from service.db import db_session
 from service.entity import Entity
 from service.error import InternalServerError, UnprocessableEntity

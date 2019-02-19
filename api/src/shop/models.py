@@ -121,7 +121,7 @@ class PendingRegistration(Base):
         return f'PendingRegistration(id={self.id})'
     
 
-class ProductImages(Base):
+class ProductImage(Base):
     __tablename__ = 'webshop_product_images'
 
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)

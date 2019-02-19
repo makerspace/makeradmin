@@ -42,6 +42,7 @@ KEYS_EDIT = "keys_edit"
 MESSAGE_SEND = "message_send"
 MESSAGE_VIEW = "message_view"
 WEBSHOP = 'webshop'
+WEBSHOP_EDIT = 'webshop_edit'
 
 ALL_PERMISSIONS = [
     MEMBER_VIEW, MEMBER_CREATE, MEMBER_EDIT, MEMBER_DELETE,
@@ -50,6 +51,7 @@ ALL_PERMISSIONS = [
     SPAN_VIEW, SPAN_MANAGE,
     KEYS_VIEW, KEYS_EDIT,
     MESSAGE_SEND, MESSAGE_VIEW,
+    WEBSHOP, WEBSHOP_EDIT,
 ]
 
 # Service credentials
