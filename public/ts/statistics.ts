@@ -1,6 +1,7 @@
 /// <reference path="../node_modules/moment/moment.d.ts" />
 import * as common from "./common"
 //import * as moment from 'moment';
+import 'moment/locale/sv';
 
 declare var UIkit: any;
 declare var moment: any;
@@ -60,6 +61,8 @@ function toPoints (items: Array<any>) {
 function addChart(root: HTMLElement, data: any) {
 	// lab = splitSeries(data.labmembership);
 	// member = splitSeries(data.membership);
+	const dataMembership = toPoints(data.membership);
+	const dataLabaccess = toPoints(data.labaccess);
 
 	const config = {
 		type: 'line',
@@ -69,20 +72,32 @@ function addChart(root: HTMLElement, data: any) {
 				backgroundColor: "#FF000077",
 				borderColor: colors[0],
 				fill: false,
-				data: toPoints(data.membership),
-				steppedLine: true,
+				data: dataMembership
 			},
 			{
 				label: 'Labmedlemmar',
 				backgroundColor: "#0000FF77",
 				borderColor: colors[1],
 				fill: false,
-				data: toPoints(data.labaccess),
-				steppedLine: true,
+				data: dataLabaccess
 			}
 			],
 		},
 		options: {
+			responsive: true,
+			elements: {
+				line: {
+					tension: 0,
+				},
+				point:{
+					radius: 1,
+					hoverRadius: 3,
+				}
+			},
+			tooltips: {
+				mode: 'x',
+				intersect: false,
+			},
 			title: {
 				display: true,
 				text: 'Medlemsskap'
@@ -93,7 +108,7 @@ function addChart(root: HTMLElement, data: any) {
 					time: {
 						parser: timeFormat,
 						// round: 'day'
-						tooltipFormat: 'll HH:mm'
+						tooltipFormat: 'll'
 					},
 					scaleLabel: {
 						display: true,
@@ -112,6 +127,14 @@ function addChart(root: HTMLElement, data: any) {
 						labelString: 'Antal'
 					}
 				}]
+			},
+			pan: {
+				enabled: true,
+				mode: 'x',
+			},
+			zoom: {
+				enabled: true,
+				mode: 'x',
 			},
 		}
 	};
