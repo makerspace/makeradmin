@@ -20,17 +20,17 @@ function login_via_single_use_link(tag: string, redirect: string) {
     common.ajax("POST", apiBasePath + "/member/send_access_token", data)
     .then(json => {
     	// Yay, success, refresh page
-    	if (json.status === "sent") {
+    	if (json.data.status === "sent") {
             showSuccess("Ett mail har skickats till dig med en inloggningslänk, använd den för att logga in.");
         } else {
-            showError("<h2>Inloggningen misslyckades</h2>Tog emot ett oväntat svar från servern:<br><br>" + json.status);
+            showError("<h2>Inloggningen misslyckades</h2>Tog emot ett oväntat svar från servern:<br><br>" + json.data.status);
         }
     })
     .catch(json => {
-            if (json.status === "ambiguous") {
+            if (json.data != undefined && json.data.status === "ambiguous") {
                 showError("<h2>Inloggningen misslyckades</h2>Det finns flera medlemmar som matchar '" + tag + "'. Välj något som är mer unikt, t.ex email eller medlemsnummer.");
             }
-            else if (json.status === "not found") {
+            else if (json.data != undefined && json.data.status === "not found") {
                 showError("<h2>Inloggningen misslyckades</h2>Hittar inte email eller medlemsnummer.");
             }
             else {
