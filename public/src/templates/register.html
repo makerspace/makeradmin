@@ -20,19 +20,23 @@
             <h1>Bli medlem</h1>
             <div>
                 <label for="firstname" class="uk-form-label">Förnamn</label>
-                <input required id="firstname" class="uk-input" type="text" placeholder="" />
+                <input required id="firstname" required class="uk-input" type="text" placeholder="" />
             </div>
             <div>
                 <label for="lastname" class="uk-form-label">Efternamn</label>
-                <input required id="lastname" class="uk-input" type="text" placeholder="" />
+                <input required id="lastname" required class="uk-input" type="text" placeholder="" />
             </div>
             <div>
                 <label for="email" class="uk-form-label">E-post</label>
-                <input required id="email" class="uk-input" type="text" placeholder="" />
+                <input required id="email" required class="uk-input" type="text" placeholder="" />
             </div>
             <div>
                 <label for="phone" class="uk-form-label">Telefonnummer</label>
                 <input id="phone" class="uk-input" type="text" placeholder="" />
+            </div>
+            <div>
+                <label for="address_zipcode" class="uk-form-label">Postnummer</label>
+                <input id="address_zipcode" required class="uk-input" type="text" placeholder="" />
             </div>
             <!-- <div>
                 <label for="address_street" class="uk-form-label">Address</label>
@@ -41,10 +45,6 @@
             <div>
                 <label for="address_extra" class="uk-form-label">Adress (extra)</label>
                 <input id="address_extra" class="uk-input" type="text" placeholder="Extra adressrad, t ex C/O adress" />
-            </div>
-            <div>
-                <label for="address_zipcode" class="uk-form-label">Postnummer</label>
-                <input id="address_zipcode" class="uk-input" type="text" placeholder="" />
             </div>
             <div class="uk-margin-bottom">
                 <label for="address_city" class="uk-form-label">Postort</label>

@@ -28,11 +28,11 @@ common.onGetAndDocumentLoaded("/webshop/product_data", (value: any) => {
 		let cart = Cart.fromStorage();
 		cart.setItem(productID, count);
 		cart.saveToStorage();
-		updateCartSum(cart);
+		common.updateCartSum(cart, id2item);
 	}
 
 	function createElements(cart: Cart) {
-		updateCartSum(cart);
+		common.updateCartSum(cart, id2item);
 		document.querySelector("#cart").innerHTML = "";
 
 		if (cart.items.length == 0) {
@@ -126,10 +126,6 @@ common.onGetAndDocumentLoaded("/webshop/product_data", (value: any) => {
 	}
 
 	const { stripe, card } = initializeStripe();
-
-	function updateCartSum(cart: Cart) {
-		document.querySelector("#cart-sum").textContent = " " + Cart.formatCurrency(cart.sum(id2item));
-	}
 
 	let waitingForPaymentResponse = false;
 

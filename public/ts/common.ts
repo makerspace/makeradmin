@@ -1,4 +1,4 @@
-
+import Cart from "./cart"
 
 declare var UIkit: any;
 
@@ -89,6 +89,21 @@ export function refreshLoggedIn(callback: (loggedIn: boolean, permissions: strin
 			}
 		}
 		);
+}
+
+export function updateCartSum(cart: Cart, id2item: any) {
+	const cartEmpty = cart.items.length == 0;
+	const sidebarBuyBtn = document.querySelector(".sidebar-buy-btn");
+
+	if (sidebarBuyBtn !== null) {
+		sidebarBuyBtn.classList.toggle("cart-empty", cartEmpty);
+	}
+
+	if (cartEmpty) {
+		document.querySelectorAll("#cart-sum").forEach(e => e.textContent = "");
+    } else {
+    	document.querySelectorAll("#cart-sum").forEach(e => e.textContent = " (" + Cart.formatCurrency(cart.sum(id2item)) + ")");
+    }
 }
 
 export function getValue(selector: string): string {

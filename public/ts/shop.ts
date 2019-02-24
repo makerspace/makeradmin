@@ -20,21 +20,15 @@ common.onGetAndDocumentLoaded("/webshop/product_data", (value: any) => {
   // Keep local storage in sync even though other tabs change it
   Cart.startLocalStorageSync(refreshUIFromCart);
 
-  function updateCartSum(cart: Cart) {
-    const cartEmpty = cart.items.length == 0;
-    document.querySelector(".sidebar-buy-btn").classList.toggle("cart-empty", cartEmpty);
-    if (cartEmpty) {
-      document.querySelectorAll("#cart-sum").forEach(e => e.textContent = "");
-    } else {
-      document.querySelectorAll("#cart-sum").forEach(e => e.textContent = " (" + Cart.formatCurrency(cart.sum(id2item)) + ")");
-    }
-  }
+  const id2element = new Map<number, HTMLElement>();
+  const id2cartItem = new Map();
+  const id2item = new Map();
 
   function setCartItem(productID: number, count: number) {
     let cart = Cart.fromStorage();
     cart.setItem(productID, count);
     cart.saveToStorage();
-    updateCartSum(cart);
+    common.updateCartSum(cart, id2item);
   }
 
   function setEditMode(value: boolean) {
@@ -78,10 +72,6 @@ common.onGetAndDocumentLoaded("/webshop/product_data", (value: any) => {
 
   function setLoggedIn (loggedIn: boolean) {
   }
-
-  const id2element = new Map<number, HTMLElement>();
-  const id2cartItem = new Map();
-  const id2item = new Map();
 
   const productListElem = document.querySelector(".product-list");
   for (const cat of data) {
@@ -184,7 +174,7 @@ common.onGetAndDocumentLoaded("/webshop/product_data", (value: any) => {
       }
     }
 
-    updateCartSum(cart);
+    common.updateCartSum(cart, id2item);
   }
 
   function tryDeleteCategory(id: number) {
