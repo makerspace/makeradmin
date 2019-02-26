@@ -7,8 +7,7 @@ from backend_service import eprint, assert_get, route_helper, format_datetime, a
 import stripe
 import os
 from decimal import Decimal, Rounded, localcontext
-from webshop_entities import category_entity, product_entity, action_entity, transaction_entity, transaction_content_entity, product_action_entity
-from webshop_entities import membership_products, webshop_stripe_pending, webshop_pending_registrations, webshop_transaction_actions, product_image_entity
+from webshop_entities import membership_products
 from webshop_entities import CartItem
 from typing import Set, List, Dict, Any, Tuple
 from datetime import datetime
@@ -16,9 +15,6 @@ from dateutil import parser
 import errors
 from filters import product_filters
 from werkzeug.exceptions import HTTPException, NotFound
-from werkzeug.datastructures import FileStorage
-import base64
-import io
 from dataclasses import dataclass
 
 
@@ -26,9 +22,6 @@ logger = getLogger('makeradmin')
 
 
 instance = backend_service.create(name="webshop", url="webshop", port=80, version="1.0")
-
-# Grab the database so that we can use it inside requests
-db = instance.db
 
 stripe.api_key = os.environ["STRIPE_PRIVATE_KEY"]
 stripe_signing_secret = os.environ["STRIPE_SIGNING_SECRET"]
@@ -1035,6 +1028,3 @@ def register_page_data():
     data, _ = get_product_data()
     products = membership_products(db)
     return {"data": data, "products": products}
-
-
-instance.serve_indefinitely()
