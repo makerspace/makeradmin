@@ -31,12 +31,6 @@ stripe_currency_base = 100
 currency = "sek"
 
 
-@instance.route("product/<int:id>/images", methods=["GET"], permission=None)
-@route_helper
-def images_for_product(id: int):
-    return product_image_entity.list("product_id=%s AND deleted_at IS NULL", id)
-
-
 @instance.route("member/current/pending_actions", methods=["GET"], permission='user')
 @route_helper
 def pending_actions_for_member():
