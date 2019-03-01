@@ -61,6 +61,10 @@ const nav = {
                         text: "Produkter",
                         target: "/sales/product",
                     },
+                    {
+                        text: "Kategorier",
+                        target: "/sales/category",
+                    },
                 ],
         },
         {
