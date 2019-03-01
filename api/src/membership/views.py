@@ -129,7 +129,7 @@ service.related_entity_routes(
 service.related_entity_routes(
     path="/group/<int:related_entity_id>/permissions",
     entity=permission_entity,
-    relation=OrmManyRelation('permisssions', Group.permissions, group_permission, 'group_id', 'permission_id'),
+    relation=OrmManyRelation('permissions', Permission.groups, group_permission, 'permission_id', 'group_id'),
     permission_list=PERMISSION_VIEW,
     permission_add=PERMISSION_MANAGE,
     permission_remove=PERMISSION_MANAGE,
