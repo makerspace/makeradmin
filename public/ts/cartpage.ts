@@ -182,7 +182,7 @@ common.onGetAndDocumentLoaded("/webshop/product_data", (value: any) => {
 	function login() {
 		common.ajax("POST", window.apiBasePath + "/member/send_access_token", {
 			user_tag: (<HTMLInputElement>document.querySelector("#email")).value,
-			redirect: "shop/cart"
+			redirect: "/shop/cart"
 		}).then(json => {
 			UIkit.modal.alert("En inloggningslänk har skickats via email");
 		}).catch(json => {
