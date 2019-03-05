@@ -11,6 +11,9 @@ from shop.shop import pending_actions
 product_image_entity = ProductImageEntity(ProductImage, default_sort_column='display_order')
 
 
+transaction_content_entity = Entity(TransactionContent, default_sort_column=None)
+
+
 service.entity_routes(
     path="/category",
     entity=OrderedEntity(ProductCategory),
@@ -62,6 +65,14 @@ service.entity_routes(
 
 
 service.entity_routes(
+    path="/transaction_content",
+    entity=transaction_content_entity,
+    permission_list=WEBSHOP,
+    permission_read=WEBSHOP,
+)
+
+
+service.entity_routes(
     path="/transaction",
     entity=Entity(Transaction),
     permission_list=WEBSHOP,
@@ -69,11 +80,11 @@ service.entity_routes(
 )
 
 
-service.entity_routes(
-    path="/transaction_content",
-    entity=Entity(TransactionContent, default_sort_column=None),
+service.related_entity_routes(
+    path="/transaction/<int:related_entity_id>/content",  # TODO BM -> /contents to be consistent
+    entity=transaction_content_entity,
+    relation=OrmSingeRelation('contents', 'transaction_id'),
     permission_list=WEBSHOP,
-    permission_read=WEBSHOP,
 )
 
 

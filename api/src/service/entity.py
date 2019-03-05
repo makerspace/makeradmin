@@ -1,5 +1,6 @@
 from collections import namedtuple
 from datetime import datetime, date
+from decimal import Decimal
 from math import ceil
 from typing import Mapping
 
@@ -36,7 +37,7 @@ def to_model_wrap(value_converter):
 
 to_model_converters = {
     Integer: to_model_wrap(int),
-    Numeric: to_model_wrap(float),  # TODO BM Probably wrong (decimal)
+    Numeric: to_model_wrap(Decimal),
     String: to_model_wrap(str),
     Text: to_model_wrap(str),
     DateTime: to_model_wrap(datetime.fromisoformat),
@@ -51,7 +52,7 @@ def identity(value):
 
 to_obj_converters = {
     Integer: identity,
-    Numeric: identity,  # TODO BM May be wrong (decimal)
+    Numeric: str,
     String: identity,
     Text: identity,
     DateTime: lambda d: None if d is None else d.isoformat(),

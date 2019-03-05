@@ -70,6 +70,7 @@ def pending_actions(member_id=None):
         } for action, action_type, content, transaction in query.all()
     ]
 
+# TODO BM Implemented by related entity but needs additional info of product_name.
 # @instance.route("transaction/<int:id>/content", methods=["GET"], permission="webshop")
 # @route_helper
 # def transaction_contents(id: int) -> List[Dict]:
@@ -94,8 +95,8 @@ def pending_actions(member_id=None):
 #                 "amount": str(v[4]),
 #             } for v in cur.fetchall()
 #         ]
-# 
-# 
+
+
 # @instance.route("transaction/<int:id>/actions", methods=["GET"], permission="webshop")
 # @route_helper
 # def transaction_actions(id: int) -> List[Dict[str,Any]]:
