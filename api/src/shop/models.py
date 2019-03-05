@@ -1,5 +1,6 @@
 from sqlalchemy import Column, Integer, String, DateTime, func, Text, Numeric, ForeignKey, Enum
 from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import relationship
 
 from membership.models import Member
 
@@ -29,7 +30,7 @@ class Product(Base):
     description = Column(Text)
     unit = Column(String(30))
     price = Column(Numeric(precision="15,3"), nullable=False)
-    smallest_multiple = Column(Integer, nullable=False, server_default=1)
+    smallest_multiple = Column(Integer, nullable=False, server_default='1')
     filter = Column(String(255))
     image = Column(String(255))
     display_order = Column(Integer, nullable=False, unique=True)
@@ -93,6 +94,8 @@ class TransactionContent(Base):
     count = Column(Integer, nullable=False)
     amount = Column(Numeric(precision="15,2"), nullable=False)
 
+    transaction = relationship(Transaction, backref='contents')
+
     def __repr__(self):
         return f'TransactionContent(id={self.id}, count={self.count}, amount={self.amount})'
 
@@ -106,6 +109,9 @@ class TransactionAction(Base):
     value = Column(Integer)
     status = Column(Enum(PENDING, COMPLETED), nullable=False)
     completed_at = Column(DateTime)
+
+    action = relationship(Action)
+    content = relationship(TransactionContent, backref='actions')
 
     def __repr__(self):
         return f'TransactionAction(id={self.id}, value={self.value}, status={self.status})'

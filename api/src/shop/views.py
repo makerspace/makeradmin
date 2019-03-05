@@ -1,12 +1,14 @@
-from service.api_definition import WEBSHOP, WEBSHOP_EDIT, PUBLIC, GET
+from flask import g
+
+from service.api_definition import WEBSHOP, WEBSHOP_EDIT, PUBLIC, GET, USER
 from service.entity import Entity, OrmSingeRelation
 from shop import service
 from shop.models import Product, ProductCategory, Action, ProductAction, Transaction, TransactionContent, ProductImage
 from shop.ordered_entity import OrderedEntity
 from shop.product_image_entity import ProductImageEntity
+from shop.shop import pending_actions
 
-
-product_image_entity = ProductImageEntity(ProductImage)
+product_image_entity = ProductImageEntity(ProductImage, default_sort_column='display_order')
 
 
 service.entity_routes(
@@ -41,7 +43,7 @@ service.related_entity_routes(
 
 service.entity_routes(
     path="/action",
-    entity=Entity(Action),
+    entity=Entity(Action, default_sort_column=None),
     permission_list=WEBSHOP,
     permission_read=WEBSHOP,
     permission_create=WEBSHOP_EDIT,
@@ -69,7 +71,7 @@ service.entity_routes(
 
 service.entity_routes(
     path="/transaction_content",
-    entity=Entity(TransactionContent),
+    entity=Entity(TransactionContent, default_sort_column=None),
     permission_list=WEBSHOP,
     permission_read=WEBSHOP,
 )
@@ -84,3 +86,10 @@ service.entity_routes(
     permission_update=WEBSHOP_EDIT,
     permission_delete=WEBSHOP_EDIT,
 )
+
+
+@service.route("/member/current/pending_actions", method=GET, permission=USER)
+def pending_actions_for_member():
+    return pending_actions(g.user_id)
+
+

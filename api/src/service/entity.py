@@ -4,7 +4,7 @@ from math import ceil
 from typing import Mapping
 
 from flask import request
-from sqlalchemy import inspect, Integer, String, DateTime, Text, desc, asc, or_, text, Date, Enum as DbEnum
+from sqlalchemy import inspect, Integer, String, DateTime, Text, desc, asc, or_, text, Date, Enum as DbEnum, Numeric
 
 from service.api_definition import BAD_VALUE, REQUIRED, Arg, symbol, Enum, natural0, natural1
 from service.db import db_session
@@ -36,6 +36,7 @@ def to_model_wrap(value_converter):
 
 to_model_converters = {
     Integer: to_model_wrap(int),
+    Numeric: to_model_wrap(float),  # TODO BM Probably wrong (decimal)
     String: to_model_wrap(str),
     Text: to_model_wrap(str),
     DateTime: to_model_wrap(datetime.fromisoformat),
@@ -50,6 +51,7 @@ def identity(value):
 
 to_obj_converters = {
     Integer: identity,
+    Numeric: identity,  # TODO BM May be wrong (decimal)
     String: identity,
     Text: identity,
     DateTime: lambda d: None if d is None else d.isoformat(),
