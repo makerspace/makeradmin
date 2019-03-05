@@ -9,7 +9,9 @@ CREATE TABLE IF NOT EXISTS `webshop_product_categories` (
   `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `deleted_at` datetime DEFAULT NULL,
-  PRIMARY KEY (`id`)
+  `display_order` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `webshop_product_categories_display_order_unique` (`display_order`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 CREATE TABLE IF NOT EXISTS `webshop_products` (
@@ -24,9 +26,12 @@ CREATE TABLE IF NOT EXISTS `webshop_products` (
   `deleted_at` datetime DEFAULT NULL,
   `smallest_multiple` int(10) NOT NULL DEFAULT '1',
   `filter` varchar(255) DEFAULT NULL,
+  `image` varchar(255) DEFAULT NULL,
+  `display_order` int(10) unsigned NOT NULL,
   PRIMARY KEY (`id`),
+  UNIQUE KEY `webshop_products_display_order_unique` (`display_order`),
   KEY `category_id_key` (`category_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=62 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- TODO Move this table to code instead.
 CREATE TABLE IF NOT EXISTS `webshop_actions` (
@@ -92,7 +97,9 @@ CREATE TABLE IF NOT EXISTS `webshop_product_images` (
   `path` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `caption` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `deleted_at` datetime DEFAULT NULL,
+  `display_order` int(10) unsigned NOT NULL,
   PRIMARY KEY (`id`),
+  UNIQUE KEY `webshop_product_images_product_id_display_order_unique` (`product_id`,`display_order`),
   KEY `image_product_constraint` (`product_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
@@ -143,14 +150,4 @@ ALTER TABLE `webshop_transaction_actions` ADD CONSTRAINT `action_constraint3` FO
 ALTER TABLE `webshop_transaction_actions` ADD CONSTRAINT `content_constraint2` FOREIGN KEY (`content_id`) REFERENCES `webshop_transaction_contents` (`id`);
 ALTER TABLE `webshop_transaction_contents` ADD CONSTRAINT `transaction_constraint` FOREIGN KEY (`transaction_id`) REFERENCES `webshop_transactions` (`id`);
 
--- Add display order to images and products.
-ALTER TABLE `webshop_product_images` ADD `display_order` int(10) unsigned NOT NULL;
-ALTER TABLE `webshop_product_images` ADD CONSTRAINT `webshop_product_images_product_id_display_order_unique` UNIQUE (`product_id`, `display_order`);
-ALTER TABLE `webshop_products` ADD `image` varchar(255) DEFAULT NULL;
-ALTER TABLE `webshop_products` ADD `display_order` int(10) unsigned NOT NULL;
-UPDATE `webshop_products` SET `display_order` = `id`;
-ALTER TABLE `webshop_products` ADD CONSTRAINT `webshop_products_display_order_unique` UNIQUE (`display_order`);
 -- TODO Test if uniquie constraint gives same error messages as unique index.
-ALTER TABLE `webshop_product_categories` ADD `display_order` int(10) unsigned NOT NULL;
-UPDATE `webshop_product_categories` SET `display_order` = `id`;
-ALTER TABLE `webshop_product_categories` ADD CONSTRAINT `webshop_product_categories_display_order_unique` UNIQUE (`display_order`);
