@@ -9,11 +9,6 @@ language: python
 python:
   - "3.6"
 
-env:
-  global:
-    COVERALLS_REPO_TOKEN:
-      secure: blablabla
-
 jobs:
   include:
     # Multiaccess-program tests
