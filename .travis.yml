@@ -6,21 +6,48 @@ env:
     - TEST_PARALELLISM: "1"
 
 language: python
-
-sudo: required
-services:
-  - docker
-
 python:
   - "3.6"
 
-before_install:
-  - docker --version
-  - docker-compose --version
-  - pip3 install docker-compose
+jobs:
+  include:
+    # Multiaccess-program tests
+    - install:
+        - make -C multiaccess-program/ init
+      script:
+        - make -C multiaccess-program/ test
+      after_script:
+        - make -C multiaccess-program/ coverage
+        #- coveralls
+      env:
+        PROJECT: "multiaccess-program"
+        PURPOSE: "test+coverage"
 
-install:
-  - make build
+    # Multiaccess-program make dist
+    - install:
+        - make -C multiaccess-program/ init
+      script:
+        - make -C multiaccess-program/ dist
+      sudo: required
+      services:
+        - docker
+      env:
+        PROJECT: "multiaccess-program"
+        PURPOSE: "build executable"
 
-script:
-  - make test
+    # Makeradmin database
+    - before_install:
+        - docker --version
+        - docker-compose --version
+        - pip3 install docker-compose
+      install:
+        - make build
+      script:
+        - make test
+      sudo: required
+      services:
+        - docker
+      env:
+        PROJECT: "makeradmin"
+        PURPOSE: "build docker containers"
+
