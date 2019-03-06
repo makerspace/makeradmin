@@ -11,11 +11,16 @@ import * as _ from "underscore";
 // idListName: used for add and remove if collection supports it by pushing id list to to <url>/remove or <url>/add,
 //             this could be simpler if server handled removes in a better way
 export default class Collection {
-    constructor({type, pageSize = 25, expand = null, sort = {}, url=null, idListName=null}) {
+    constructor({type, pageSize = 25, expand = null, sort = {}, url=null, idListName=null, filter=null}) {
         this.type = type;
         this.pageSize = pageSize;
         this.url = url || type.model.root;
         this.idListName = idListName;
+        
+        if (filter !== null) {
+            // TODO Remove this later.
+            throw new Error("Filter has been removed.");
+        }
         
         this.items = null;
         this.page = {index: 1, count: 1};

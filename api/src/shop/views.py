@@ -1,5 +1,6 @@
 from flask import g
 
+from membership.models import Member
 from service.api_definition import WEBSHOP, WEBSHOP_EDIT, PUBLIC, GET, USER
 from service.entity import Entity, OrmSingeRelation, ExpandField
 from shop import service
@@ -8,13 +9,23 @@ from shop.ordered_entity import OrderedEntity
 from shop.product_image_entity import ProductImageEntity
 from shop.shop import pending_actions
 
-product_image_entity = ProductImageEntity(ProductImage, default_sort_column='display_order')
+product_image_entity = ProductImageEntity(
+    ProductImage,
+    default_sort_column='display_order',
+)
 
 
 transaction_content_entity = Entity(
     TransactionContent,
     default_sort_column=None,
-    expand_fields={'product': ExpandField(TransactionContent.product, [Product.name])})
+    expand_fields={'product': ExpandField(TransactionContent.product, [Product.name])},
+)
+
+
+transaction_entity = Entity(
+    Transaction,
+    expand_fields={'member': ExpandField(Transaction.member, [Member.firstname, Member.lastname, Member.member_number])},
+)
 
 
 service.entity_routes(
@@ -77,16 +88,23 @@ service.entity_routes(
 
 service.entity_routes(
     path="/transaction",
-    entity=Entity(Transaction),
+    entity=transaction_entity,
     permission_list=WEBSHOP,
     permission_read=WEBSHOP,
 )
-
 
 service.related_entity_routes(
     path="/transaction/<int:related_entity_id>/content",  # TODO BM -> /contents to be consistent
     entity=transaction_content_entity,
     relation=OrmSingeRelation('contents', 'transaction_id'),
+    permission_list=WEBSHOP,
+)
+
+
+service.related_entity_routes(
+    path="/member/<int:related_entity_id>/transactions",
+    entity=transaction_entity,
+    relation=OrmSingeRelation('member', 'member_id'),
     permission_list=WEBSHOP,
 )
 
@@ -105,5 +123,3 @@ service.entity_routes(
 @service.route("/member/current/pending_actions", method=GET, permission=USER)
 def pending_actions_for_member():
     return pending_actions(g.user_id)
-
-

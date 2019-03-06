@@ -81,6 +81,8 @@ class Transaction(Base):
     status = Column(Enum(PENDING, COMPLETED, FAILED), nullable=False)
     created_at = Column(DateTime, server_default=func.now())
 
+    member = relationship(Member)
+
     def __repr__(self):
         return f'Transaction(id={self.id}, amount={self.amount}, status={self.status})'
 

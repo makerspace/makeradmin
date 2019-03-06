@@ -23,7 +23,7 @@ class MemberBoxOrders extends React.Component {
 
     constructor(props) {
         super(props);
-        this.collection = new Collection({type: Order, url: "/webshop/transactions_extended_info", filter: {member_id: props.params.member_id}});
+        this.collection = new Collection({type: Order, url: `/webshop/member/${props.params.member_id}/transactions`});
     }
     
     render() {

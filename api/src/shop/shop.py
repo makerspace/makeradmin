@@ -102,40 +102,8 @@ def pending_actions(member_id=None):
 # @route_helper
 # def transaction_events(id: int):
 #     return transaction_content_entity.list("transaction_id=%s", id)
-# 
-# 
-# @instance.route("transactions_extended_info", methods=["GET"], permission="webshop")
-# @route_helper
-# def list_orders():
-#     with db.cursor() as cur:
-#         cur.execute("""
-#             SELECT
-#                 webshop_transactions.id AS id,
-#                 webshop_transactions.member_id AS member_id,
-#                 webshop_transactions.status AS status,
-#                 webshop_transactions.amount AS amount,
-#                 DATE_FORMAT(webshop_transactions.created_at, '%Y-%m-%dT%H:%i:%sZ') AS created_at,
-#                 membership_members.firstname AS firstname,
-#                 membership_members.lastname AS lastname,
-#                 membership_members.member_number AS member_number,
-#                 membership_members.deleted_at
-#             FROM webshop_transactions
-#             INNER JOIN membership_members ON membership_members.member_id = webshop_transactions.member_id
-#             """)
-#         return [
-#             {
-#                 "id": v[0],
-#                 "member_id": v[1],
-#                 "status": v[2],
-#                 "amount": str(v[3]),
-#                 "created_at": v[4],
-#                 "member_name": f"{v[5]} {v[6]}" if not v[8] else "Unknown member",
-#                 "member_number": v[7] if not v[8] else None,
-#             } for v in cur.fetchall()
-#         ]
-#     return []
-# 
-# 
+
+
 # @instance.route("member/current/transactions", methods=["GET"], permission='user')
 # @route_helper
 # def member_history() -> Dict[str, Any]:
