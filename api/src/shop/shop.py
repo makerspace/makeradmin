@@ -70,33 +70,6 @@ def pending_actions(member_id=None):
         } for action, action_type, content, transaction in query.all()
     ]
 
-# TODO BM Implemented by related entity but needs additional info of product_name.
-# @instance.route("transaction/<int:id>/content", methods=["GET"], permission="webshop")
-# @route_helper
-# def transaction_contents(id: int) -> List[Dict]:
-#     '''
-#     Return all content related to a transaction
-#     '''
-# 
-#     with db.cursor() as cur:
-#         cur.execute("""
-#             SELECT webshop_transaction_contents.id AS content_id, webshop_products.name AS product_name,
-#                    webshop_products.id AS product_id, webshop_transaction_contents.count, webshop_transaction_contents.amount
-#             FROM webshop_transaction_contents
-#             INNER JOIN webshop_products ON webshop_products.id = webshop_transaction_contents.product_id
-#             WHERE  webshop_transaction_contents.transaction_id = %s
-#             """, id)
-#         return [
-#             {
-#                 "content_id": v[0],
-#                 "product_name": v[1],
-#                 "product_id": v[2],
-#                 "count": v[3],
-#                 "amount": str(v[4]),
-#             } for v in cur.fetchall()
-#         ]
-
-
 # @instance.route("transaction/<int:id>/actions", methods=["GET"], permission="webshop")
 # @route_helper
 # def transaction_actions(id: int) -> List[Dict[str,Any]]:

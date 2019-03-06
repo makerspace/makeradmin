@@ -95,6 +95,7 @@ class TransactionContent(Base):
     amount = Column(Numeric(precision="15,2"), nullable=False)
 
     transaction = relationship(Transaction, backref='contents')
+    product = relationship(Product)
 
     def __repr__(self):
         return f'TransactionContent(id={self.id}, count={self.count}, amount={self.amount})'

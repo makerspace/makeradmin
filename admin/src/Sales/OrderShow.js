@@ -8,6 +8,7 @@ import OrderAction from "../Models/OrderAction";
 import Currency from "../Components/Currency";
 
 
+// TODO Test this page.
 class OrderShow extends React.Component {
 
     constructor(props) {
@@ -15,7 +16,7 @@ class OrderShow extends React.Component {
         const {id} = props.params;
         this.order = Order.get(id);
         this.state = {};
-        this.orderRows = new Collection({type: OrderRow, url: `/webshop/transaction/${id}/content`, pageSize: 0});
+        this.orderRows = new Collection({type: OrderRow, url: `/webshop/transaction/${id}/content`, pageSize: 0, expand: 'product'});
         this.orderActions = new Collection({type: OrderAction, url: `/webshop/transaction/${id}/actions`, pageSize: 0});
     }
     
@@ -56,7 +57,7 @@ class OrderShow extends React.Component {
                         ]}
                         rowComponent={({item}) =>
                             <tr>
-                                <td><Link to={"/sales/product/" + item.product_id}>{item.product_name}</Link></td>
+                                <td><Link to={"/sales/product/" + item.product_id}>{item.name}</Link></td>
                                 <td className="uk-text-right"><Currency value={100 * item.amount / item.count}/> kr</td>
                                 <td>{item.count}</td>
                                 <td className="uk-text-right"><Currency value={100 * item.amount} /> kr</td>
@@ -77,7 +78,7 @@ class OrderShow extends React.Component {
                         ]}
                         rowComponent={({item}) => {
                             return (<tr>
-                                <td>{item.content_id}</td>
+                                <td>{item.id}</td>
                                 <td>{item.action}</td>
                                 <td className="uk-text-right">{item.value}</td>
                                 <td className="uk-text-right">{item.completed_at ? item.completed_at : 'pending'}</td>

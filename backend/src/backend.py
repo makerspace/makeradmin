@@ -2,11 +2,9 @@ from flask import Flask
 from flask_uploads import UploadSet, IMAGES, configure_uploads
 
 import maker_statistics
-import webshop
 
 
 app = Flask(__name__)
-app.register_blueprint(webshop.instance.blueprint)
 app.register_blueprint(maker_statistics.instance.blueprint)
 
 

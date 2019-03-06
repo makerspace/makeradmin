@@ -181,6 +181,7 @@ class Entity:
             def to_obj(row):
                 obj = self.to_obj(row[0])
                 for value, column, converter in zip(row[1:], expand_field.columns, column_obj_converter):
+                    # TODO Map to "relation + _ + column.name"?
                     obj[column.name] = converter(value)
                 return obj
         else:

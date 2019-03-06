@@ -1,7 +1,7 @@
 from flask import g
 
 from service.api_definition import WEBSHOP, WEBSHOP_EDIT, PUBLIC, GET, USER
-from service.entity import Entity, OrmSingeRelation
+from service.entity import Entity, OrmSingeRelation, ExpandField
 from shop import service
 from shop.models import Product, ProductCategory, Action, ProductAction, Transaction, TransactionContent, ProductImage
 from shop.ordered_entity import OrderedEntity
@@ -11,7 +11,10 @@ from shop.shop import pending_actions
 product_image_entity = ProductImageEntity(ProductImage, default_sort_column='display_order')
 
 
-transaction_content_entity = Entity(TransactionContent, default_sort_column=None)
+transaction_content_entity = Entity(
+    TransactionContent,
+    default_sort_column=None,
+    expand_fields={'product': ExpandField(TransactionContent.product, [Product.name])})
 
 
 service.entity_routes(
