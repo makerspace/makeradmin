@@ -30,6 +30,7 @@ export const utcToday = () => {const d = new Date(); d.setUTCHours(0, 0, 0, 0); 
 export const addToDate = (date, millis) => new Date(date.getTime() + millis);
 
 
+// Parse and format date string.
 export const dateToStr = date => {
     if (!_.isEmpty(date)) {
         const options = {
@@ -39,7 +40,6 @@ export const dateToStr = date => {
         
         const parsed_date = Date.parse(date);
         
-        // If the date was parsed successfully we should update the string
         if (!isNaN(parsed_date)) {
             return new Intl.DateTimeFormat("sv-SE", options).format(parsed_date);
         }
@@ -48,6 +48,7 @@ export const dateToStr = date => {
 };
 
 
+// Parse and format datetime string.
 export const dateTimeToStr = date => {
     if (!_.isEmpty(date)) {
         const options = {
@@ -58,7 +59,6 @@ export const dateTimeToStr = date => {
         
         const parsed_date = Date.parse(date);
         
-        // If the date was parsed successfully we should update the string
         if (!isNaN(parsed_date)) {
             return new Intl.DateTimeFormat("sv-SE", options).format(parsed_date);
         }

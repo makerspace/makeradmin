@@ -54,6 +54,6 @@ class Test(ShopTestMixin, SeleniumTest):
             data__status="completed",
         )
 
-        data = self.get(f"/webshop/transaction/{transaction_id}/content").expect(code=200, status="ok").data
+        data = self.get(f"/webshop/transaction/{transaction_id}/contents").expect(code=200, status="ok").data
         self.assertEqual(self.p0_id, data[0]['product_id'])
         self.assertEqual(1, len(data))

@@ -292,6 +292,27 @@ class OrmSingeRelation:
 
     def filter(self, query, related_entity_id):
         return query.filter_by(**{self.related_entity_id_column: related_entity_id})
+
+
+class OrmSingleSingleRelation:
+    
+    def __init__(self, name=None, between_model=None, related_entity_id_column=None):
+        """
+        Relation that is implemented through a foreign key and then another foreigh key in the orm.
+        """
+        
+        self.name = name
+        self.between_model = between_model
+        self.related_entity_id_column = related_entity_id_column
+        
+    def add(self, *args):
+        raise NotFound("Not supported.", log="Add not supported by this class.")
+
+    def remove(self, *args):
+        raise NotFound("Not supported.", log="Remove not supported by this class.")
+
+    def filter(self, query, related_entity_id):
+        return query.join(self.between_model).filter_by(**{self.related_entity_id_column: related_entity_id})
         
 
 class OrmManyRelation:

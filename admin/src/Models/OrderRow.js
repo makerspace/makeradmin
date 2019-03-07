@@ -12,9 +12,9 @@ OrderRow.model = {
     id: "id",
     attributes: {
         amount: null,
-        id: 0,
         count: null,
         product_id: null,
+        transaction_id: null,
         name: "",
     },
 };

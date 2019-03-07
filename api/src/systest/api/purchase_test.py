@@ -44,7 +44,7 @@ class Test(ShopTestMixin, ApiTest):
             data__status="completed",
         )
 
-        data = self.get(f"/webshop/transaction/{transaction_id}/content").expect(code=200, status="ok").data
+        data = self.get(f"/webshop/transaction/{transaction_id}/contents").expect(code=200, status="ok").data
         self.assertCountEqual(
             [{"amount": f"{self.p0_price * p0_count:.2f}", "product_id": self.p0_id},
              {"amount": f"{self.p1_price * p1_count:.2f}", "product_id": self.p1_id}],

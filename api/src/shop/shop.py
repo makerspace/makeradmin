@@ -70,34 +70,7 @@ def pending_actions(member_id=None):
         } for action, action_type, content, transaction in query.all()
     ]
 
-# @instance.route("transaction/<int:id>/actions", methods=["GET"], permission="webshop")
-# @route_helper
-# def transaction_actions(id: int) -> List[Dict[str,Any]]:
-#     '''
-#     Return all actions related to a transaction
-#     '''
-# 
-#     with db.cursor() as cur:
-#         cur.execute("""
-#             SELECT webshop_actions.id AS action_id, webshop_actions.name AS action, 
-#                     webshop_transaction_contents.id AS content_id, webshop_transaction_actions.value, webshop_transaction_actions.status, webshop_transaction_actions.completed_at
-#             FROM webshop_transaction_contents
-#             INNER JOIN webshop_transaction_actions ON webshop_transaction_actions.content_id = webshop_transaction_contents.id
-#             INNER JOIN webshop_actions ON webshop_actions.id = webshop_transaction_actions.action_id
-#             WHERE webshop_transaction_contents.transaction_id = %s
-#             """, id)
-#         return [
-#             {
-#                 "action_id": v[0],
-#                 "action": v[1],
-#                 "content_id": v[2],
-#                 "value": v[3],
-#                 "status": v[4],
-#                 "completed_at": format_datetime(v[5]),
-#             } for v in cur.fetchall()
-#         ]
-# 
-# 
+
 # @instance.route("transaction/<int:id>/events", methods=["GET"], permission="webshop")
 # @route_helper
 # def transaction_events(id: int):

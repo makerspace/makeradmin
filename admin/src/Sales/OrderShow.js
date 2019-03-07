@@ -6,6 +6,7 @@ import CollectionTable from "../Components/CollectionTable";
 import OrderRow from "../Models/OrderRow";
 import OrderAction from "../Models/OrderAction";
 import Currency from "../Components/Currency";
+import {dateTimeToStr} from "../utils";
 
 
 // TODO Test this page.
@@ -16,8 +17,8 @@ class OrderShow extends React.Component {
         const {id} = props.params;
         this.order = Order.get(id);
         this.state = {};
-        this.orderRows = new Collection({type: OrderRow, url: `/webshop/transaction/${id}/content`, pageSize: 0, expand: 'product'});
-        this.orderActions = new Collection({type: OrderAction, url: `/webshop/transaction/${id}/actions`, pageSize: 0});
+        this.orderRows = new Collection({type: OrderRow, url: `/webshop/transaction/${id}/contents`, pageSize: 0, expand: 'product'});
+        this.orderActions = new Collection({type: OrderAction, url: `/webshop/transaction/${id}/actions`, pageSize: 0, expand: 'action'});
     }
     
     componentDidMount() {
@@ -79,9 +80,9 @@ class OrderShow extends React.Component {
                         rowComponent={({item}) => {
                             return (<tr>
                                 <td>{item.id}</td>
-                                <td>{item.action}</td>
+                                <td>{item.name}</td>
                                 <td className="uk-text-right">{item.value}</td>
-                                <td className="uk-text-right">{item.completed_at ? item.completed_at : 'pending'}</td>
+                                <td className="uk-text-right">{item.completed_at ? dateTimeToStr(item.completed_at) : 'pending'}</td>
                             </tr>);
                         }}
                     />

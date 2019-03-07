@@ -2,9 +2,10 @@ from flask import g
 
 from membership.models import Member
 from service.api_definition import WEBSHOP, WEBSHOP_EDIT, PUBLIC, GET, USER
-from service.entity import Entity, OrmSingeRelation, ExpandField
+from service.entity import Entity, OrmSingeRelation, ExpandField, OrmManyRelation, OrmSingleSingleRelation
 from shop import service
-from shop.models import Product, ProductCategory, Action, ProductAction, Transaction, TransactionContent, ProductImage
+from shop.models import Product, ProductCategory, Action, ProductAction, Transaction, TransactionContent, ProductImage, \
+    TransactionAction
 from shop.ordered_entity import OrderedEntity
 from shop.product_image_entity import ProductImageEntity
 from shop.shop import pending_actions
@@ -25,6 +26,13 @@ transaction_content_entity = Entity(
 transaction_entity = Entity(
     Transaction,
     expand_fields={'member': ExpandField(Transaction.member, [Member.firstname, Member.lastname, Member.member_number])},
+)
+
+
+transaction_action_entity = Entity(
+    TransactionAction,
+    default_sort_column=None,
+    expand_fields={'action': ExpandField(TransactionAction.action, [Action.name])},
 )
 
 
@@ -94,9 +102,17 @@ service.entity_routes(
 )
 
 service.related_entity_routes(
-    path="/transaction/<int:related_entity_id>/content",  # TODO BM -> /contents to be consistent
+    path="/transaction/<int:related_entity_id>/contents",
     entity=transaction_content_entity,
     relation=OrmSingeRelation('contents', 'transaction_id'),
+    permission_list=WEBSHOP,
+)
+
+
+service.related_entity_routes(
+    path="/transaction/<int:related_entity_id>/actions",
+    entity=transaction_action_entity,
+    relation=OrmSingleSingleRelation('actions', TransactionContent, 'transaction_id'),
     permission_list=WEBSHOP,
 )
 
