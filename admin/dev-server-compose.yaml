@@ -10,5 +10,5 @@ services:
     ports:
       - "8080:8080"
     volumes:
-      - .:/admin
-      - node_modules:/admin/node_modules
+      - .:/work
+      - node_modules:/work/node_modules
