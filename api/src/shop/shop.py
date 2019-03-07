@@ -71,12 +71,6 @@ def pending_actions(member_id=None):
     ]
 
 
-# @instance.route("transaction/<int:id>/events", methods=["GET"], permission="webshop")
-# @route_helper
-# def transaction_events(id: int):
-#     return transaction_content_entity.list("transaction_id=%s", id)
-
-
 # @instance.route("member/current/transactions", methods=["GET"], permission='user')
 # @route_helper
 # def member_history() -> Dict[str, Any]:
