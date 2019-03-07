@@ -28,7 +28,7 @@ common.documentLoaded().then(() => {
 
         for (const transaction of transactionJson.data) {
             let cartItems = "";
-            for (const item of transaction.content) {
+            for (const item of transaction.contents) {
                 cartItems += `<div class="receipt-item">
                             <a class="product-title" href="/shop/product/${item.product.id}">${item.product.name}</a>
                             <span class="receipt-item-count">${item.count} ${item.product.unit}</span>

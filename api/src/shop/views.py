@@ -1,39 +1,13 @@
 from flask import g
 
-from membership.models import Member
 from service.api_definition import WEBSHOP, WEBSHOP_EDIT, PUBLIC, GET, USER
-from service.entity import Entity, OrmSingeRelation, ExpandField, OrmManyRelation, OrmSingleSingleRelation
+from service.entity import Entity, OrmSingeRelation, OrmSingleSingleRelation
 from shop import service
-from shop.models import Product, ProductCategory, Action, ProductAction, Transaction, TransactionContent, ProductImage, \
-    TransactionAction
+from shop.entities import product_image_entity, transaction_content_entity, transaction_entity, \
+    transaction_action_entity, product_entity
+from shop.models import ProductCategory, Action, ProductAction, TransactionContent
 from shop.ordered_entity import OrderedEntity
-from shop.product_image_entity import ProductImageEntity
-from shop.shop import pending_actions
-
-product_image_entity = ProductImageEntity(
-    ProductImage,
-    default_sort_column='display_order',
-)
-
-
-transaction_content_entity = Entity(
-    TransactionContent,
-    default_sort_column=None,
-    expand_fields={'product': ExpandField(TransactionContent.product, [Product.name])},
-)
-
-
-transaction_entity = Entity(
-    Transaction,
-    expand_fields={'member': ExpandField(Transaction.member, [Member.firstname, Member.lastname, Member.member_number])},
-)
-
-
-transaction_action_entity = Entity(
-    TransactionAction,
-    default_sort_column=None,
-    expand_fields={'action': ExpandField(TransactionAction.action, [Action.name])},
-)
+from shop.shop import pending_actions, member_history
 
 
 service.entity_routes(
@@ -49,7 +23,7 @@ service.entity_routes(
 
 service.entity_routes(
     path="/product",
-    entity=OrderedEntity(Product),
+    entity=product_entity,
     permission_list=WEBSHOP,
     permission_read=WEBSHOP,
     permission_create=WEBSHOP_EDIT,
@@ -139,3 +113,8 @@ service.entity_routes(
 @service.route("/member/current/pending_actions", method=GET, permission=USER)
 def pending_actions_for_member():
     return pending_actions(g.user_id)
+
+
+@service.route("member/current/transactions", method=GET, permission=USER)
+def transactions_for_member():
+    return member_history(g.user_id)

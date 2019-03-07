@@ -6,8 +6,12 @@ import stripe
 import os
 from decimal import Decimal, Rounded, localcontext
 
+from sqlalchemy import desc
+from sqlalchemy.orm import contains_eager, joinedload
+
 from service.db import db_session
-from shop.models import TransactionContent, TransactionAction, PENDING, Action, Transaction, COMPLETED
+from shop.entities import transaction_entity, transaction_content_entity, product_entity
+from shop.models import TransactionContent, TransactionAction, PENDING, Action, Transaction, COMPLETED, Product
 from typing import Set, List, Dict, Any, Tuple
 from datetime import datetime
 from dateutil import parser
@@ -71,26 +75,23 @@ def pending_actions(member_id=None):
     ]
 
 
-# @instance.route("member/current/transactions", methods=["GET"], permission='user')
-# @route_helper
-# def member_history() -> Dict[str, Any]:
-#     '''
-#     Helper for listing the full transaction history of a member, with product info included.
-#     '''
-#     user_id = assert_get(request.headers, "X-User-Id")
-# 
-#     transactions = transaction_entity.list("member_id=%s", user_id)
-#     transactions.reverse()
-#     for tr in transactions:
-#         items = transaction_content_entity.list("transaction_id=%s", tr["id"])
-#         for item in items:
-#             item["product"] = product_entity.get(item["product_id"])
-# 
-#         tr["content"] = items
-# 
-#     return transactions
-# 
-# 
+def member_history(member_id):
+    query = (
+        db_session
+        .query(Transaction)
+        .options(joinedload('contents'), joinedload('contents.product'))
+        .filter(Transaction.member_id == member_id)
+        .order_by(desc(Transaction.id))
+    )
+    
+    return [{
+        **transaction_entity.to_obj(transaction),
+        'contents': [{
+            **transaction_content_entity.to_obj(content),
+            'product': product_entity.to_obj(content.product),
+        } for content in transaction.contents]
+    } for transaction in query.all()]
+
 # def copy_dict(source: Dict[str, Any], fields: List[str]) -> Dict[str, Any]:
 #     return {key: source[key] for key in fields if key in source}
 # 
