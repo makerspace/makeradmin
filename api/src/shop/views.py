@@ -7,8 +7,7 @@ from shop.entities import product_image_entity, transaction_content_entity, tran
     transaction_action_entity, product_entity
 from shop.models import ProductCategory, Action, ProductAction, TransactionContent
 from shop.ordered_entity import OrderedEntity
-from shop.shop import pending_actions, member_history
-
+from shop.shop import pending_actions, member_history, receipt
 
 service.entity_routes(
     path="/category",
@@ -115,6 +114,11 @@ def pending_actions_for_member():
     return pending_actions(g.user_id)
 
 
-@service.route("member/current/transactions", method=GET, permission=USER)
+@service.route("/member/current/transactions", method=GET, permission=USER)
 def transactions_for_member():
     return member_history(g.user_id)
+
+
+@service.route("/member/current/receipt/<int:transaction_id>", method=GET, permission=USER)
+def receipt_for_member(transaction_id):
+    return receipt(g.user_id, transaction_id)

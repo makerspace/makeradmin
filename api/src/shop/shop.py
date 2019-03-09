@@ -8,14 +8,17 @@ from decimal import Decimal, Rounded, localcontext
 
 from sqlalchemy import desc
 from sqlalchemy.orm import contains_eager, joinedload
+from sqlalchemy.orm.exc import NoResultFound
 
+from membership.views import member_entity
 from service.db import db_session
+from service.error import NotFound
 from shop.entities import transaction_entity, transaction_content_entity, product_entity
 from shop.models import TransactionContent, TransactionAction, PENDING, Action, Transaction, COMPLETED, Product
 from typing import Set, List, Dict, Any, Tuple
 from datetime import datetime
 from dateutil import parser
-from werkzeug.exceptions import HTTPException, NotFound
+from werkzeug.exceptions import HTTPException
 from dataclasses import dataclass
 
 
@@ -91,6 +94,21 @@ def member_history(member_id):
             'product': product_entity.to_obj(content.product),
         } for content in transaction.contents]
     } for transaction in query.all()]
+
+
+def receipt(member_id, transaction_id):
+    try:
+        transaction = db_session.query(Transaction).filter_by(member_id=member_id, id=transaction_id).one()
+    except NoResultFound:
+        raise NotFound()
+    
+    return {
+        'member': member_entity.to_obj(transaction.member),
+        'transaction': transaction_entity.to_obj(transaction),
+        'cart': list((product_entity.to_obj(content.product), transaction_content_entity.to_obj(content))
+                     for content in transaction.contents)
+    }
+
 
 # def copy_dict(source: Dict[str, Any], fields: List[str]) -> Dict[str, Any]:
 #     return {key: source[key] for key in fields if key in source}
@@ -882,27 +900,7 @@ def member_history(member_id):
 #     }
 # 
 # 
-# @instance.route("receipt/<int:transaction_id>", methods=["GET"], permission='user')
-# @route_helper
-# def receipt(transaction_id: int):
-#     member_id = int(assert_get(request.headers, "X-User-Id"))
-#     transaction = transaction_entity.get(transaction_id)
-#     if transaction.get('member_id') != member_id:
-#         raise NotFound()
-# 
-#     items = transaction_content_entity.list("transaction_id=%s", transaction_id)
-#     products = [product_entity.get(item["product_id"]) for item in items]
-#     r = instance.gateway.get(f"membership/member/{member_id}")
-#     assert r.ok
-#     member = r.json()["data"]
-# 
-#     return {
-#         "cart": list(zip(products, items)),
-#         "transaction": transaction,
-#         "member": member,
-#     }
-# 
-# 
+#
 # @instance.route("register_page_data", methods=["GET"], permission=None)
 # @route_helper
 # def register_page_data():
