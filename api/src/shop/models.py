@@ -40,6 +40,7 @@ class Product(Base):
 
     category = relationship(ProductCategory, backref='products')
     images = relationship("ProductImage", lazy='dynamic', backref='product')
+    actions = relationship("ProductAction")
 
     def __repr__(self):
         return f'Product(id={self.id}, name={self.name}, category_id={self.category_id}' \
@@ -66,6 +67,8 @@ class ProductAction(Base):
     created_at = Column(DateTime, server_default=func.now())
     updated_at = Column(DateTime, server_default=func.now())
     deleted_at = Column(DateTime)
+    
+    action = relationship(Action)
 
     def __repr__(self):
         return f'ProductAction(id={self.id}, value={self.value})'

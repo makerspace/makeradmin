@@ -10,7 +10,7 @@ from service.error import NotFound
 from shop.entities import transaction_entity, transaction_content_entity, product_entity, category_entity, \
     product_image_entity
 from shop.models import TransactionContent, TransactionAction, PENDING, Action, Transaction, COMPLETED, Product, \
-    ProductCategory
+    ProductCategory, ProductAction
 
 logger = getLogger('makeradmin')
 
@@ -100,7 +100,7 @@ def receipt(member_id, transaction_id):
     }
 
 
-def list_product_data():
+def all_product_data():
     """ Return all public products and categories. """
     
     query = (
@@ -131,8 +131,19 @@ def get_product_data(product_id):
     return {
         "product": product_entity.to_obj(product),
         "images": [product_image_entity.to_obj(image) for image in images],
-        "productData": list_product_data(),
+        "productData": all_product_data(),
     }
+
+
+def membership_products():
+    # Find all products which gives a member membership
+    # Note: Assumes a product never contains multiple actions of the same type.
+    # If this doesn't hold we will get duplicates of that product in the list.
+    query = db_session.query(Product).join(ProductAction).join(Action).filter(Action.name == 'add_membership_days',
+                                                                              ProductAction.deleted_at.is_(None),
+                                                                              Product.deleted_at.is_(None))
+    
+    return [{"id": p.id, "name": p.name, "price": float(p.price)} for p in query]
 
 
 # def copy_dict(source: Dict[str, Any], fields: List[str]) -> Dict[str, Any]:
@@ -877,9 +888,3 @@ def get_product_data(product_id):
 # 
 # 
 #
-# @instance.route("register_page_data", methods=["GET"], permission=None)
-# @route_helper
-# def register_page_data():
-#     data, _ = get_product_data()
-#     products = membership_products(db)
-#     return {"data": data, "products": products}

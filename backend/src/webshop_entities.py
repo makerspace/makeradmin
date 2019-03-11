@@ -11,6 +11,8 @@ from dataclasses import dataclass
 # Decimal("0.2") = Decimal('0.2')
 
 
+# TODO Remove me
+
 def membership_products(db: DB) -> List[Dict[str, Any]]:
     # Find all products which gives a member membership
     # Note: Assumes a product never contains multiple actions of the same type.

@@ -8,7 +8,7 @@ declare var UIkit: any;
 common.onGetAndDocumentLoaded("/webshop/register_page_data", (value: any) => {
     common.addSidebarListeners();
 
-    const {data, products} = value;
+    const {productData, membershipProducts} = value;
 
   // Create a Stripe client.
   const stripe = Stripe(window.stripeKey);
@@ -18,7 +18,7 @@ common.onGetAndDocumentLoaded("/webshop/register_page_data", (value: any) => {
   const elements = stripe.elements({ locale: "sv" });
 
     // Add membership products
-    products.forEach((product: any) => {
+    membershipProducts.forEach((product: any) => {
         document.querySelector("#products").innerHTML += `<div><input class="uk-radio" type="radio" value="${product.id}" name="product" checked/> ${product.name}: ${product.price} kr</div>`;
     });
 
@@ -52,7 +52,7 @@ common.onGetAndDocumentLoaded("/webshop/register_page_data", (value: any) => {
 
   const id2item = new Map();
 
-  for (const cat of data) {
+  for (const cat of productData) {
     for (const item of cat.items) {
       id2item.set(item.id, item);
     }
