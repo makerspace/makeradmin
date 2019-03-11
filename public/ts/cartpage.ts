@@ -6,20 +6,18 @@ import {renderSidebarCategories} from "./category"
 declare var UIkit: any;
 
 
-common.onGetAndDocumentLoaded("/webshop/product_data", (value: any) => {
+common.onGetAndDocumentLoaded("/webshop/product_data", (productData: any) => {
 	common.addSidebarListeners();
 
-	const {categories, data} = value;
-
-	renderSidebarCategories(categories);
+	renderSidebarCategories(productData);
 
 	const id2item = new Map<number, any>();
 
 	// Used to prevent clicking the 'Pay' button twice
 	const duplicatePurchaseRand = (100000000 * Math.random()) | 0;
 
-	for (const cat of data) {
-		for (const item of cat.items) {
+	for (const category of productData) {
+		for (const item of category.items) {
 			id2item.set(item.id, item);
 		}
 	}

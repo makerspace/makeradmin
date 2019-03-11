@@ -5,15 +5,14 @@ import {UNAUTHORIZED} from "./common";
 import {renderSidebarCategories} from "./category"
 declare var UIkit: any;
 
-common.onGetAndDocumentLoaded("/webshop/product_data", (value: any) => {
+common.onGetAndDocumentLoaded("/webshop/product_data", (productData: any) => {
     common.addSidebarListeners();
 
-    const {categories, data} = value;
   const apiBasePath = window.apiBasePath;
   const webshop_edit_permission = "webshop_edit";
   const service_permission = "service";
 
-  renderSidebarCategories(categories, true);
+  renderSidebarCategories(productData, true);
 
   let editMode = false;
 
@@ -74,15 +73,15 @@ common.onGetAndDocumentLoaded("/webshop/product_data", (value: any) => {
   }
 
   const productListElem = document.querySelector(".product-list");
-  for (const cat of data) {
+  for (const category of productData) {
     const catLi = `
-      <li><h3 id="category${cat.id}">${cat.name}</h3></li>
+      <li><h3 id="category${category.id}">${category.name}</h3></li>
     `;
 
     productListElem.insertAdjacentHTML("beforeend", catLi);
     const productListLi = document.createElement("li");
     productListLi.className = "product-container-list"
-    for (const item of cat.items) {
+    for (const item of category.items) {
       let price = item.price;
       price *= item.smallest_multiple;
 

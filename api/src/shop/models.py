@@ -18,7 +18,7 @@ class ProductCategory(Base):
     deleted_at = Column(DateTime)
 
     def __repr__(self):
-        return f'ProductCategory(id={self.id}, name={self.name})'
+        return f'ProductCategory(id={self.id}, name={self.name}, display_order={self.display_order})'
 
 
 class Product(Base):
@@ -38,8 +38,12 @@ class Product(Base):
     updated_at = Column(DateTime, server_default=func.now())
     deleted_at = Column(DateTime)
 
+    category = relationship(ProductCategory, backref='products')
+    images = relationship("ProductImage", lazy='dynamic', backref='product')
+
     def __repr__(self):
-        return f'Product(id={self.id}, name={self.name})'
+        return f'Product(id={self.id}, name={self.name}, category_id={self.category_id}' \
+               f', display_order={self.display_order})'
 
 
 class Action(Base):

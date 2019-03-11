@@ -1,26 +1,16 @@
 from logging import getLogger
 
-from flask import request, render_template
-
-import stripe
-import os
-from decimal import Decimal, Rounded, localcontext
-
 from sqlalchemy import desc
-from sqlalchemy.orm import contains_eager, joinedload
+from sqlalchemy.orm import joinedload
 from sqlalchemy.orm.exc import NoResultFound
 
 from membership.views import member_entity
 from service.db import db_session
 from service.error import NotFound
-from shop.entities import transaction_entity, transaction_content_entity, product_entity
-from shop.models import TransactionContent, TransactionAction, PENDING, Action, Transaction, COMPLETED, Product
-from typing import Set, List, Dict, Any, Tuple
-from datetime import datetime
-from dateutil import parser
-from werkzeug.exceptions import HTTPException
-from dataclasses import dataclass
-
+from shop.entities import transaction_entity, transaction_content_entity, product_entity, category_entity, \
+    product_image_entity
+from shop.models import TransactionContent, TransactionAction, PENDING, Action, Transaction, COMPLETED, Product, \
+    ProductCategory
 
 logger = getLogger('makeradmin')
 
@@ -107,6 +97,41 @@ def receipt(member_id, transaction_id):
         'transaction': transaction_entity.to_obj(transaction),
         'cart': list((product_entity.to_obj(content.product), transaction_content_entity.to_obj(content))
                      for content in transaction.contents)
+    }
+
+
+def list_product_data():
+    """ Return all public products and categories. """
+    
+    query = (
+        db_session
+        .query(ProductCategory)
+        .options(joinedload(ProductCategory.products))
+        .filter(Product.deleted_at.is_(None))
+        .order_by(ProductCategory.display_order)
+    )
+    
+    return [{
+        **category_entity.to_obj(category),
+        'items': [{
+            **product_entity.to_obj(product),
+            'image': product.image or 'default_image.png',
+        } for product in sorted(category.products, key=lambda p: p.display_order)]
+    } for category in query]
+    
+
+def get_product_data(product_id):
+    try:
+        product = db_session.query(Product).filter_by(id=product_id, deleted_at=None).one()
+    except NoResultFound:
+        raise NotFound()
+    
+    images = product.images.filter_by(deleted_at=None)
+    
+    return {
+        "product": product_entity.to_obj(product),
+        "images": [product_image_entity.to_obj(image) for image in images],
+        "productData": list_product_data(),
     }
 
 
@@ -800,56 +825,7 @@ def receipt(member_id, transaction_id):
 #     send_membership_updated_email(action.member_id, days_to_add, new_end_date)
 # 
 # 
-# def get_product_data() -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
-#     with db.cursor() as cur:
-#         # Get all categories, as some products may exist in deleted categories
-#         # (it is up to an admin to move them to another category)
-#         categories: List[Dict[str, Any]] = category_entity.list(where=None, order_column='display_order')
-# 
-#         data = []
-#         for cat in categories:
-#             cur.execute("SELECT id,name,unit,price,smallest_multiple,IFNULL(image,'default_image.png'),display_order "
-#                         "FROM webshop_products "
-#                         "WHERE category_id=%s AND deleted_at IS NULL ORDER BY display_order", (cat["id"],))
-#             products = cur.fetchall()
-#             if len(products) > 0:
-#                 data.append({
-#                     "id": cat["id"],
-#                     "name": cat["name"],
-#                     "items": [
-#                         {
-#                             "id": item[0],
-#                             "name": item[1],
-#                             "unit": item[2],
-#                             "price": str(item[3]),
-#                             "smallest_multiple": item[4],
-#                             "image": item[5],
-#                             "display_order": item[6],
-#                         } for item in products
-#                     ]
-#                 })
-# 
-#         # Only show existing columns in the sidebar
-#         categories = category_entity.list(order_column='display_order')
-#         return data, categories
-# 
-# 
-# @instance.route("product_data", methods=["GET"], permission=None)
-# @route_helper
-# def product_data():
-#     data, categories = get_product_data()
-#     return {"data": data, "categories": categories}
-# 
-# 
-# @instance.route("product_data/<int:product_id>/", methods=["GET"], permission=None)
-# @route_helper
-# def product_view_data(product_id: int):
-#     product = product_entity.get(product_id)
-#     images = product_image_entity.list("product_id=%s AND deleted_at IS NULL", product_id)
-#     data, categories = get_product_data()
-#     return {"product": product, "images": images, "data": data}
-# 
-# 
+
 # @instance.route("product_edit_data/<int:product_id>/", methods=["GET"], permission="webshop_edit")
 # @route_helper
 # def product_edit_data(product_id: int):

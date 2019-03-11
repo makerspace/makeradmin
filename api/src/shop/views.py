@@ -4,14 +4,13 @@ from service.api_definition import WEBSHOP, WEBSHOP_EDIT, PUBLIC, GET, USER
 from service.entity import Entity, OrmSingeRelation, OrmSingleSingleRelation
 from shop import service
 from shop.entities import product_image_entity, transaction_content_entity, transaction_entity, \
-    transaction_action_entity, product_entity
-from shop.models import ProductCategory, Action, ProductAction, TransactionContent
-from shop.ordered_entity import OrderedEntity
-from shop.shop import pending_actions, member_history, receipt
+    transaction_action_entity, product_entity, category_entity
+from shop.models import Action, ProductAction, TransactionContent
+from shop.shop import pending_actions, member_history, receipt, get_product_data, list_product_data
 
 service.entity_routes(
     path="/category",
-    entity=OrderedEntity(ProductCategory),
+    entity=category_entity,
     permission_list=WEBSHOP,
     permission_read=WEBSHOP,
     permission_create=WEBSHOP_EDIT,
@@ -122,3 +121,14 @@ def transactions_for_member():
 @service.route("/member/current/receipt/<int:transaction_id>", method=GET, permission=USER)
 def receipt_for_member(transaction_id):
     return receipt(g.user_id, transaction_id)
+
+
+@service.route("/product_data", method=GET, permission=PUBLIC)
+def list_product_data_view():
+    return list_product_data()
+
+
+@service.route("/product_data/<int:product_id>", method=GET, permission=PUBLIC)
+def get_product_data_view(product_id):
+    return get_product_data(product_id)
+

@@ -5,7 +5,7 @@ declare var UIkit: any;
 common.onGetAndDocumentLoaded("/webshop/product_data/" + window.productId, (value: any) => {
     common.addSidebarListeners();
 
-    const {product, data, images} = value;
+    const {product, images, productData} = value;
 
     document.getElementById("name").innerText = product.name;
 
@@ -31,13 +31,11 @@ common.onGetAndDocumentLoaded("/webshop/product_data/" + window.productId, (valu
 
 	const id2item = new Map<number, any>();
 
-	for (const cat of data) {
+	for (const cat of productData) {
 		for (const item of cat.items) {
 			id2item.set(item.id, item);
 		}
 	}
-
-	const item = id2item.get(window.productId);
 
 	function updateCartSum(cart: Cart) {
 		if (cart.items.length > 0) {
@@ -56,7 +54,7 @@ common.onGetAndDocumentLoaded("/webshop/product_data/" + window.productId, (valu
 	updateCountFromCart(Cart.fromStorage());
 
 	function setCartItem (updateField: boolean) {
-		let newAmount = Cart.adjustItemCount(Number(productAmount.value), item);
+		let newAmount = Cart.adjustItemCount(Number(productAmount.value), product);
 		const cart = Cart.fromStorage();
 		cart.setItem(window.productId, newAmount);
 		cart.saveToStorage();
@@ -67,12 +65,12 @@ common.onGetAndDocumentLoaded("/webshop/product_data/" + window.productId, (valu
 	productAmount.addEventListener("change", ev => setCartItem(true));
 
 	document.querySelector(".number-add").addEventListener("click", ev => {
-		productAmount.value = "" + (Number(productAmount.value) + item.smallest_multiple);
+		productAmount.value = "" + (Number(productAmount.value) + product.smallest_multiple);
 		setCartItem(true);
 	});
 
 	document.querySelector(".number-subtract").addEventListener("click", ev => {
-		productAmount.value = "" + (Number(productAmount.value) - item.smallest_multiple);
+		productAmount.value = "" + (Number(productAmount.value) - product.smallest_multiple);
 		setCartItem(true);
 	});
 });
