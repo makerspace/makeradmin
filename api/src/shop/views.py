@@ -1,12 +1,13 @@
-from flask import g
+from flask import g, request
 
-from service.api_definition import WEBSHOP, WEBSHOP_EDIT, PUBLIC, GET, USER
+from service.api_definition import WEBSHOP, WEBSHOP_EDIT, PUBLIC, GET, USER, POST
 from service.entity import Entity, OrmSingeRelation, OrmSingleSingleRelation
 from shop import service
 from shop.entities import product_image_entity, transaction_content_entity, transaction_entity, \
     transaction_action_entity, product_entity, category_entity
 from shop.models import Action, ProductAction, TransactionContent
-from shop.shop import pending_actions, member_history, receipt, get_product_data, all_product_data, membership_products
+from shop.shop import pending_actions, member_history, receipt, get_product_data, all_product_data, membership_products, \
+    register_member
 
 service.entity_routes(
     path="/category",
@@ -136,5 +137,10 @@ def product_data(product_id):
 @service.route("/register_page_data", method=GET, permission=PUBLIC)
 def register_page_data():
     return {"membershipProducts": membership_products(), "productData": all_product_data()}
+
+
+@service.route("/register", method=POST, permission=PUBLIC)
+def register():
+    return register_member(request.get_json(), request.remote_addr, request.user_agent.string)
 
 

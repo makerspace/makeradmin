@@ -26,8 +26,10 @@ class MemberEntity(Entity):
     * Unhashed password should be hashed on save.
     """
     
-    def create(self):
-        data = request.json or {}
+    def create(self, data=None):
+        if data is None:
+            data = request.json or {}
+            
         handle_password(data)
         
         status, = db_session.execute("SELECT GET_LOCK('member_number', 20)").fetchone()

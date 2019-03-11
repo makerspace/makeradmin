@@ -140,10 +140,10 @@ common.onGetAndDocumentLoaded("/webshop/register_page_data", (value: any) => {
           }).catch(json => {
             spinner.classList.remove("progress-spinner-visible");
             waitingForPaymentResponse = false;
-            if (json.status == "RegisterEmailAlreadyExists") {
-              UIkit.modal.alert("<h2>Registreringen misslyckades</h2>En användare med denna email är redan registrerad");
+            if (json.what === "not_unique") {
+              UIkit.modal.alert("<h2>Register failed</h2>A member with this email is already registred");
             } else {
-              UIkit.modal.alert("<h2>Betalningen misslyckades</h2>" + common.get_error(json));
+              UIkit.modal.alert("<h2>The playment failed</h2>" + common.get_error(json));
             }
           }
         );

@@ -226,8 +226,10 @@ class Entity:
         db_session.flush()  # Flush to get id of created entity.
         return entity
     
-    def create(self):
-        return self.to_obj(self._create_internal(request.json))
+    def create(self, data=None):
+        if data is None:
+            data = request.json or {}
+        return self.to_obj(self._create_internal(data))
     
     def read(self, entity_id):
         entity = db_session.query(self.model).get(entity_id)

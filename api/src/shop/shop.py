@@ -1,12 +1,14 @@
 from logging import getLogger
 
+from jsonschema import validate, ValidationError
 from sqlalchemy import desc
 from sqlalchemy.orm import joinedload
 from sqlalchemy.orm.exc import NoResultFound
 
+from core import auth
 from membership.views import member_entity
 from service.db import db_session
-from service.error import NotFound
+from service.error import NotFound, UnprocessableEntity, BadRequest
 from shop.entities import transaction_entity, transaction_content_entity, product_entity, category_entity, \
     product_image_entity
 from shop.models import TransactionContent, TransactionAction, PENDING, Action, Transaction, COMPLETED, Product, \
@@ -14,8 +16,6 @@ from shop.models import TransactionContent, TransactionAction, PENDING, Action, 
 
 logger = getLogger('makeradmin')
 
-
-#instance = backend_service.create(name="webshop", url="webshop", port=80, version="1.0")
 
 # stripe.api_key = os.environ["STRIPE_PRIVATE_KEY"]
 # stripe_signing_secret = os.environ["STRIPE_SIGNING_SECRET"]
@@ -27,9 +27,10 @@ currency = "sek"
 
 def pending_actions(member_id=None):
     """
-    Finds every item in a transaction and checks the actions it has, then checks to see if all those actions have been completed (and are not deleted).
-    The actions that are valid for a transaction are precisely those that existed at the time the transaction was made. Therefore if an action is added to a product
-    in the future, that action will *not* be retroactively applied to all existing transactions.
+    Finds every item in a transaction and checks the actions it has, then checks to see if all those actions have
+    been completed (and are not deleted). The actions that are valid for a transaction are precisely those that
+    existed at the time the transaction was made. Therefore if an action is added to a product in the future,
+    that action will *not* be retroactively applied to all existing transactions.
     """
 
     query = (
@@ -146,6 +147,128 @@ def membership_products():
     return [{"id": p.id, "name": p.name, "price": float(p.price)} for p in query]
 
 
+purchase_schema=dict(
+    type="object",
+    required=['cart', 'duplicatePurchaseRand', 'expectedSum', 'stripeSource', 'stripeThreeDSecure'],
+    properties=dict(
+        cart=dict(
+            type="array",
+            items=dict(
+                type="object",
+                required=['count', 'id'],
+                properties=dict(
+                    count=dict(type="integer"),
+                    id=dict(type="integer"),
+                )
+            ),
+        ),
+        duplicatePurchaseRand=dict(type="integer"),
+        expectedSum=dict(type="number"),
+        stripeSource=dict(type="string"),
+        stripeThreeDSecure=dict(type="string"),
+    )
+)
+
+
+register_schema = dict(
+    type="object",
+    required=['purchase'],
+    properties=dict(
+        purchase=purchase_schema,
+        member=dict(
+            type="object",
+            properties=dict(
+                email=dict(type="string"),
+                firstname=dict(type="string"),
+                lastname=dict(type="string"),
+                civicregno=dict(type="string"),
+                phone=dict(type="string"),
+                address_street=dict(type="string"),
+                address_city=dict(type="string"),
+                address_zipcode=dict(type="string"),
+                address_extra=dict(type="string"),
+            )
+        )
+    )
+)
+
+
+duplicatePurchaseRands = set()
+
+
+def pay(member_id=None, purchase=None, activates_member=False):
+    """ Pay using the data in purchase, the purchase structure should be validated according to schema.  """
+    
+    # The frontend will add a per-page random value to the request.
+    # This will try to prevent duplicate payments due to sending the payment request twice
+    # TODO Move duplicatePurchaseRand to db, this won't work with multiple processes.
+    if purchase['duplicatePurchaseRand'] in duplicatePurchaseRands:
+        raise BadRequest(message="You have already made this payment.")
+
+    if member_id <= 0:
+        raise BadRequest("You must be a member to purchase materials and tools.")
+
+    card_source_id = purchase["stripeSource"]
+    card_three_d_secure = purchase["stripeThreeDSecure"]
+
+    total_amount, items = validate_payment(member_id, purchase["cart"], purchase["expectedSum"])
+
+    transaction_id = add_transaction_to_db(member_id, total_amount, items)
+
+    if activates_member:
+        # Mark this transaction as one that is for registering a member
+        webshop_pending_registrations.post({"transaction_id": transaction_id})
+
+    webshop_stripe_pending.post({"transaction_id": transaction_id, "stripe_token": card_source_id})
+
+    result: Dict[str, Any] = {}
+    if card_three_d_secure == 'not_supported':
+        result = handle_card_source(transaction_id, card_source_id, total_amount)
+    else:
+        result = handle_three_d_secure_source(transaction_id, card_source_id, total_amount)
+
+    duplicatePurchaseRands.add(duplicatePurchaseRand)
+    return result
+
+
+def register_member(data, remote_addr, user_agent):
+    if not data:
+        raise UnprocessableEntity(message="No data was sent in the request. This is a bug.")
+    
+    try:
+        validate(data, schema=register_schema)
+    except ValidationError as e:
+        raise UnprocessableEntity(message="Data sent in request not in correct format. This is a bug.")
+
+    products = membership_products()
+
+    purchase = data['purchase']
+
+    cart = purchase['cart']
+    if len(cart) != 1:
+        raise BadRequest(message="The purchase must contain exactly one item.")
+        
+    item = cart[0]
+    if item['count'] != 1:
+        raise BadRequest(message="The purchase must contain exactly one item.")
+    
+    product_id = item['id']
+    if product_id not in (p['id'] for p in products):
+        raise BadRequest(message=f"Not allowed to purchase the product with id {product_id} when registring.")
+
+    # This will raise if the creation fails.
+    member_id = member_entity.create(data.get('member', {}))['member_id']
+
+    # This will raise if the payment fails.
+    result = pay(member_id=member_id, data=purchase, activates_member=True)
+
+    # If the pay succeeded (not same as the payment is completed) and the member does not already exists,
+    # the user will be logged in.
+    result['token'] = auth.force_login(remote_addr, user_agent, member_id)['access_token']
+
+    return result
+
+
 # def copy_dict(source: Dict[str, Any], fields: List[str]) -> Dict[str, Any]:
 #     return {key: source[key] for key in fields if key in source}
 # 
@@ -177,76 +300,7 @@ def membership_products():
 #     eprint("====== Sent email body")
 # 
 # 
-# @instance.route("register", methods=["POST"], permission=None)
-# @route_helper
-# def register() -> Dict[str, int]:
-#     ''' Register a new member.
-#         See frontend.py:register_member
-#     '''
-# 
-#     data = request.get_json()
-#     if data is None:
-#         raise errors.MissingJson()
-# 
-#     products = membership_products(db)
-# 
-#     purchase = assert_get(data, "purchase")
-#     if len(purchase["cart"]) != 1:
-#         raise errors.CartMustContainNItems(1)
-#     item = purchase["cart"][0]
-#     if item["count"] != 1:
-#         raise errors.CartMustContainNItems(1)
-#     if "id" not in item:
-#         abort(400, "Missing parameter 'id' on item in cart")
-#     if item["id"] not in (p["id"] for p in products):
-#         raise errors.NotAllowedToPurchase(item)
-# 
-#     # Register the new member.
-#     # We need to copy the member info for security reasons.
-#     # Otherwise an attacker could inject evil inputs like for example the 'groups' field which is a list of groups the member should be added to.
-#     # It would be quite a security risk if the member could add itself to the admins group when registering.
-#     valid_member_fields = [
-#         "email", "firstname", "lastname", "civicregno", "company",
-#         "orgno", "address_street", "address_extra", "address_zipcode", "address_city", "address_country", "phone"
-#     ]
-#     member = copy_dict(assert_get(data, "member"), valid_member_fields)
-#     member["validate_only"] = True
-#     # Disabled create deleted (possibly temporarily) since it prevents user from log in and see receipt.
-#     # member["create_deleted"] = True
-#     r = instance.gateway.post("membership/member", member)
-#     if not r.ok:
-#         data = r.json()
-#         if r.status_code == 422 and data['what'] == 'not_unique' and data['fields'] == 'email':
-#             raise errors.RegisterEmailAlreadyExists()
-#         abort(r.status_code, data["message"])
-# 
-#     member = r.json()["data"]
-#     member_id = member["member_id"]
-# 
-#     # Construct the purchase object again, using user data is always risky
-#     purchase = {
-#         "cart": [
-#             {
-#                 "id": item["id"],
-#                 "count": 1
-#             }
-#         ],
-#         "expectedSum": purchase["expectedSum"],
-#         "stripeSource": purchase["stripeSource"],
-#         "stripeThreeDSecure": purchase["stripeThreeDSecure"],
-#         "duplicatePurchaseRand": purchase["duplicatePurchaseRand"],
-#     }
-# 
-#     # Note this will throw if the payment fails
-#     result = pay(member_id=member_id, data=purchase, activates_member=True)
-# 
-#     # If the pay succeeded (not same as the payment is completed) and the member does not already exists,
-#     # the user will be logged in.
-#     response = instance.gateway.post("oauth/force_token", {"user_id": member_id}).json()
-#     result['token'] = response["access_token"]
-# 
-#     return result
-# 
+#
 # 
 # def complete_transaction(transaction_id: int):
 #     tr = transaction_entity.get(transaction_id)
@@ -664,39 +718,6 @@ def membership_products():
 #         fail_transaction(transaction_id, 500, f"Unknown stripe source status '{status}'")
 # 
 #     return {"transaction_id": transaction_id}
-# 
-# 
-# def pay(member_id: int, data: Dict[str, Any], activates_member: bool = False) -> Dict[str, Any]:
-#     # The frontend will add a per-page random value to the request.
-#     # This will try to prevent duplicate payments due to sending the payment request twice
-#     duplicatePurchaseRand = assert_get(data, "duplicatePurchaseRand")
-#     if duplicatePurchaseRand in duplicatePurchaseRands:
-#         raise errors.DuplicateTransaction()
-# 
-#     if member_id <= 0:
-#         raise errors.NotMember()
-# 
-#     card_source_id = assert_get(data, "stripeSource")
-#     card_three_d_secure = assert_get(data, "stripeThreeDSecure")
-# 
-#     total_amount, items = validate_payment(member_id, data["cart"], data["expectedSum"])
-# 
-#     transaction_id = add_transaction_to_db(member_id, total_amount, items)
-# 
-#     if activates_member:
-#         # Mark this transaction as one that is for registering a member
-#         webshop_pending_registrations.post({"transaction_id": transaction_id})
-# 
-#     webshop_stripe_pending.post({"transaction_id": transaction_id, "stripe_token": card_source_id})
-# 
-#     result: Dict[str, Any] = {}
-#     if card_three_d_secure == 'not_supported':
-#         result = handle_card_source(transaction_id, card_source_id, total_amount)
-#     else:
-#         result = handle_three_d_secure_source(transaction_id, card_source_id, total_amount)
-# 
-#     duplicatePurchaseRands.add(duplicatePurchaseRand)
-#     return result
 # 
 # 
 # def send_key_updated_email(member_id: int, extended_days: int, end_date: datetime) -> None:
