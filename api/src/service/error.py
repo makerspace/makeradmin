@@ -58,6 +58,7 @@ class ApiError(Exception):
     communcating with external services. In that case the response is used to choose class and fill the data.  """
     
     code = 400
+    message = None
 
     def __init__(self, message=None, fields=None, what=None, status="error", service=None, code=None,
                  log=None, level=ERROR):
@@ -71,9 +72,11 @@ class ApiError(Exception):
         :param log log when responding, if True all content will be logged, if a string that string will be logged
         :param level use this level when logging, if EXCEPTION full exception is logged
         """
-        if code: self.code = code
+        if code:
+            self.code = code
+        if message:
+            self.message = message
         self.status = status
-        self.message = message
         self.fields = fields
         self.what = what
         self.service = service

@@ -13,17 +13,14 @@ from shop.entities import transaction_entity, transaction_content_entity, produc
     product_image_entity
 from shop.models import TransactionContent, TransactionAction, PENDING, Action, Transaction, COMPLETED, Product, \
     ProductCategory, ProductAction
+from shop.pay import pay
+from shop.schemas import register_schema
 
 logger = getLogger('makeradmin')
 
 
 # stripe.api_key = os.environ["STRIPE_PRIVATE_KEY"]
 # stripe_signing_secret = os.environ["STRIPE_SIGNING_SECRET"]
-
-# All stripe calculations are done with cents (ören in Sweden)
-stripe_currency_base = 100
-currency = "sek"
-
 
 def pending_actions(member_id=None):
     """
@@ -147,90 +144,6 @@ def membership_products():
     return [{"id": p.id, "name": p.name, "price": float(p.price)} for p in query]
 
 
-purchase_schema=dict(
-    type="object",
-    required=['cart', 'duplicatePurchaseRand', 'expectedSum', 'stripeSource', 'stripeThreeDSecure'],
-    properties=dict(
-        cart=dict(
-            type="array",
-            items=dict(
-                type="object",
-                required=['count', 'id'],
-                properties=dict(
-                    count=dict(type="integer"),
-                    id=dict(type="integer"),
-                )
-            ),
-        ),
-        duplicatePurchaseRand=dict(type="integer"),
-        expectedSum=dict(type="number"),
-        stripeSource=dict(type="string"),
-        stripeThreeDSecure=dict(type="string"),
-    )
-)
-
-
-register_schema = dict(
-    type="object",
-    required=['purchase'],
-    properties=dict(
-        purchase=purchase_schema,
-        member=dict(
-            type="object",
-            properties=dict(
-                email=dict(type="string"),
-                firstname=dict(type="string"),
-                lastname=dict(type="string"),
-                civicregno=dict(type="string"),
-                phone=dict(type="string"),
-                address_street=dict(type="string"),
-                address_city=dict(type="string"),
-                address_zipcode=dict(type="string"),
-                address_extra=dict(type="string"),
-            )
-        )
-    )
-)
-
-
-duplicatePurchaseRands = set()
-
-
-def pay(member_id=None, purchase=None, activates_member=False):
-    """ Pay using the data in purchase, the purchase structure should be validated according to schema.  """
-    
-    # The frontend will add a per-page random value to the request.
-    # This will try to prevent duplicate payments due to sending the payment request twice
-    # TODO Move duplicatePurchaseRand to db, this won't work with multiple processes.
-    if purchase['duplicatePurchaseRand'] in duplicatePurchaseRands:
-        raise BadRequest(message="You have already made this payment.")
-
-    if member_id <= 0:
-        raise BadRequest("You must be a member to purchase materials and tools.")
-
-    card_source_id = purchase["stripeSource"]
-    card_three_d_secure = purchase["stripeThreeDSecure"]
-
-    total_amount, items = validate_payment(member_id, purchase["cart"], purchase["expectedSum"])
-
-    transaction_id = add_transaction_to_db(member_id, total_amount, items)
-
-    if activates_member:
-        # Mark this transaction as one that is for registering a member
-        webshop_pending_registrations.post({"transaction_id": transaction_id})
-
-    webshop_stripe_pending.post({"transaction_id": transaction_id, "stripe_token": card_source_id})
-
-    result: Dict[str, Any] = {}
-    if card_three_d_secure == 'not_supported':
-        result = handle_card_source(transaction_id, card_source_id, total_amount)
-    else:
-        result = handle_three_d_secure_source(transaction_id, card_source_id, total_amount)
-
-    duplicatePurchaseRands.add(duplicatePurchaseRand)
-    return result
-
-
 def register_member(data, remote_addr, user_agent):
     if not data:
         raise UnprocessableEntity(message="No data was sent in the request. This is a bug.")
@@ -260,13 +173,17 @@ def register_member(data, remote_addr, user_agent):
     member_id = member_entity.create(data.get('member', {}))['member_id']
 
     # This will raise if the payment fails.
-    result = pay(member_id=member_id, data=purchase, activates_member=True)
+    transaction, redirect = pay(member_id=member_id, purchase=purchase, activates_member=True)
 
     # If the pay succeeded (not same as the payment is completed) and the member does not already exists,
     # the user will be logged in.
-    result['token'] = auth.force_login(remote_addr, user_agent, member_id)['access_token']
+    token = auth.force_login(remote_addr, user_agent, member_id)['access_token']
 
-    return result
+    return {
+        'transaction_id': transaction.id,
+        'token': token,
+        'redirect': redirect,
+    }
 
 
 # def copy_dict(source: Dict[str, Any], fields: List[str]) -> Dict[str, Any]:
@@ -301,20 +218,6 @@ def register_member(data, remote_addr, user_agent):
 # 
 # 
 #
-# 
-# def complete_transaction(transaction_id: int):
-#     tr = transaction_entity.get(transaction_id)
-#     if tr['status'] == 'pending':
-#         tr["status"] = "completed"
-#         transaction_entity.put(tr, transaction_id)
-#         try:
-#             # Unclear if this is a performance issue or not, hopefully there shouldn't be that many pending actions, so this will be quick
-#             ship_orders(labaccess=False)
-#         except Exception as e:
-#             logger.exception(f"failed to ship orders in transaction {transaction_id}")
-#     elif tr['status'] not in {'completed'}:
-#         logger.error(f"unable to set transaction {transaction_id} to completed")
-# 
 # 
 # def _fail_transaction(transaction_id: int) -> None:
 #     with db.cursor() as cur:
@@ -360,9 +263,9 @@ def register_member(data, remote_addr, user_agent):
 #             if source.type == 'three_d_secure':
 #                 # Payment should happen now
 #                 try:
-#                     create_stripe_payment(transaction_id, source.id)
+#                     create_stripe_charge(transaction_id, source.id)
 #                 except Exception as e:
-#                     logger.error(f"Error in create_stripe_payment: {str(e)}. Source '{source.id}' for transaction {transaction_id}")
+#                     logger.error(f"Error in create_stripe_charge: {str(e)}. Source '{source.id}' for transaction {transaction_id}")
 #             elif source.type == 'card':
 #                 # All 'card' type sources that should be charged are handled synchonously, not here.
 #                 return None
@@ -450,90 +353,6 @@ def register_member(data, remote_addr, user_agent):
 #             logger.info(f"skipping event, not matching source_id")
 # 
 # 
-# def process_cart(member_id: int, cart: List[Dict[str, Any]]) -> Tuple[Decimal, List[CartItem]]:
-#     items = []
-#     with db.cursor() as cur:
-#         with localcontext() as ctx:
-#             ctx.clear_flags()
-#             total_amount = Decimal(0)
-# 
-#             for item in cart:
-#                 cur.execute("SELECT name,price,smallest_multiple,filter FROM webshop_products WHERE id=%s AND deleted_at IS NULL", item["id"])
-#                 tup: Tuple[str, Decimal, int, str] = cur.fetchone()
-#                 if tup is None:
-#                     raise errors.NoSuchItem(str(item["id"]))
-#                 name, price, smallest_multiple, product_filter = tup
-# 
-#                 if price < 0:
-#                     abort(400, "Item seems to have a negatice price. Not allowing purchases that item just in case. Item: " + str(item["id"]))
-# 
-#                 count = int(item["count"])
-#                 if count <= 0:
-#                     raise errors.NonNegativeItemCount(str(item["id"]))
-#                 if (count % smallest_multiple) != 0:
-#                     raise errors.InvalidItemCountMultiple(str(item["id"]), smallest_multiple, count)
-# 
-#                 item_amount = price * count
-#                 cart_item = CartItem(name, item["id"], count, item_amount)
-#                 items.append(cart_item)
-#                 total_amount += item_amount
-# 
-#                 if product_filter:
-#                     product_filters[product_filter](gateway=instance.gateway, item=cart_item, member_id=member_id)
-# 
-#             if ctx.flags[Rounded]:
-#                 # This can possibly happen with huge values, I suppose they will be caught below anyway but it's good to catch in any case
-#                 raise errors.RoundingError()
-# 
-#     return total_amount, items
-# 
-# 
-# def validate_payment(member_id: int, cart: List[Dict[str, Any]], expected_amount: Decimal) -> Tuple[Decimal, List[CartItem]]:
-#     if len(cart) == 0:
-#         raise errors.EmptyCart()
-# 
-#     total_amount, items = process_cart(member_id, cart)
-# 
-#     # Ensure that the frontend hasn't calculated the amount to pay incorrectly
-#     if abs(total_amount - Decimal(expected_amount)) > Decimal("0.01"):
-#         raise errors.NonMatchingSums(expected_amount, total_amount)
-# 
-#     if total_amount > 10000:
-#         raise errors.TooLargeAmount(10000)
-# 
-#     # Assert that the amount can be converted to a valid stripe amount
-#     convert_to_stripe_amount(total_amount)
-# 
-#     return total_amount, items
-# 
-# 
-# def convert_to_stripe_amount(amount: Decimal) -> int:
-#     # Ensure that the amount to pay is in whole cents (ören)
-#     # This shouldn't be able to fail as all products in the database have prices in cents, but you never know.
-#     stripe_amount = amount * stripe_currency_base
-#     if (stripe_amount % 1) != 0:
-#         raise errors.NotPurelyCents(amount)
-# 
-#     # The amount is stored as a Decimal, convert it to an int
-#     return int(stripe_amount)
-# 
-# 
-# def create_stripe_payment(transaction_id: int, token: str) -> stripe.Charge:
-#     transaction = transaction_entity.get(transaction_id)
-# 
-#     if transaction["status"] != "pending":
-#         raise Exception("To complete a payment, it must be currently pending")
-# 
-#     stripe_amount = convert_to_stripe_amount(Decimal(transaction["amount"]))
-# 
-#     return stripe.Charge.create(
-#         amount=stripe_amount,
-#         currency=currency,
-#         description=f'Charge for transaction id {transaction_id}',
-#         source=token,
-#     )
-# 
-# 
 # def handle_payment_success(transaction_id: int) -> None:
 #     complete_transaction(transaction_id)
 #     transaction = transaction_entity.get(transaction_id)
@@ -548,38 +367,6 @@ def register_member(data, remote_addr, user_agent):
 #     eprint("====== Sending receipt email")
 #     send_receipt_email(transaction["member_id"], transaction_id)
 #     eprint("Payment complete. id: " + str(transaction_id))
-# 
-# 
-# def card_stripe_payment(transaction_id: int, token: str) -> None:
-#     try:
-#         charge = create_stripe_payment(transaction_id, token)
-#         if charge.status == 'succeeded':
-#             # Avoid delay of feedback to customer, could be skipped and handled when webhook is called.
-#             complete_transaction(transaction_id)
-#     except stripe.error.InvalidRequestError as e:
-#         if "Amount must convert to at least" in str(e):
-#             _fail_transaction(transaction_id)
-#             raise errors.TooSmallAmount()
-#         else:
-#             eprint("Stripe Charge Failed")
-#             eprint(e)
-#             _fail_transaction(transaction_id)
-#             raise errors.PaymentFailed()
-#     except stripe.error.CardError as e:
-#         body = e.json_body
-#         err = body.get('error', {})
-#         eprint("Stripe Charge Failed\n" + str(err))
-#         _fail_transaction(transaction_id)
-#         raise errors.PaymentFailed(err.get("message"))
-#     except stripe.error.StripeError as e:
-#         eprint("Stripe Charge Failed\n" + str(e))
-#         _fail_transaction(transaction_id)
-#         raise errors.PaymentFailed()
-#     except Exception as e:
-#         eprint("Stripe Charge Failed")
-#         eprint(e)
-#         _fail_transaction(transaction_id)
-#         raise errors.PaymentFailed()
 # 
 # 
 # def activate_member(member_id: int) -> None:
@@ -631,93 +418,6 @@ def register_member(data, remote_addr, user_agent):
 # 
 #     member_id = int(assert_get(request.headers, "X-User-Id"))
 #     return pay(member_id, data)
-# 
-# 
-# def add_transaction_to_db(member_id: int, total_amount: Decimal, items: List[CartItem]) -> int:
-#     transaction_id = transaction_entity.post({"member_id": member_id, "amount": total_amount, "status": "pending"})["id"]
-#     for item in items:
-#         item_content = transaction_content_entity.post({"transaction_id": transaction_id, "product_id": item.id, "count": item.count, "amount": item.amount})
-#         with db.cursor() as cur:
-#             cur.execute("""
-#                 INSERT INTO webshop_transaction_actions (content_id, action_id, value, status)
-#                 SELECT %s AS content_id, action_id, SUM(%s * value) AS value, 'pending' AS status
-#                 FROM webshop_product_actions
-#                 WHERE product_id=%s AND deleted_at IS NULL
-#                 GROUP BY action_id
-#                 """, (item_content["id"], item.count, item.id))
-# 
-#     return transaction_id
-# 
-# 
-# def create_three_d_secure_source(transaction_id: int, card_source_id: str, total_amount: Decimal) -> stripe.Source:
-#     stripe_amount = convert_to_stripe_amount(total_amount)
-#     eprint("Token: " + str(card_source_id))
-#     return stripe.Source.create(
-#         amount=stripe_amount,
-#         currency=currency,
-#         type='three_d_secure',
-#         three_d_secure={
-#             'card': card_source_id,
-#         },
-#         redirect={
-#             'return_url': instance.gateway.get_public_url(f"/shop/receipt/{transaction_id}")
-#         },
-#     )
-# 
-# 
-# def handle_card_source(transaction_id: int, card_source_id: str, total_amount: Decimal) -> Dict[str, int]:
-#     card_source = stripe.Source.retrieve(card_source_id)
-#     if card_source.type != 'card' or card_source.card.three_d_secure != 'not_supported':
-#         abort(500, f'Synchronous charges should only be made for cards not supporting 3D Secure')
-# 
-#     status = card_source.status
-#     if status == "chargeable":
-#         card_stripe_payment(transaction_id, card_source_id)
-#     elif status == "failed":
-#         fail_transaction(transaction_id, 400, "Payment failed")
-#     elif status == "consumed":
-#         # Not necessarily an error but shouldn't happen.
-#         abort(500, f"Stripe source already marked as 'consumed'")
-#     else:
-#         logger.error(f"Unknown stripe source status '{status}'")
-#         fail_transaction(transaction_id, 500, f"Unknown stripe source status '{status}'")
-# 
-#     return {"transaction_id": transaction_id}
-# 
-# 
-# def handle_three_d_secure_source(transaction_id: int, card_source_id: str, total_amount: Decimal) -> Dict[str, Any]:
-#     try:
-#         source = create_three_d_secure_source(transaction_id, card_source_id, total_amount)
-#     except stripe.error.InvalidRequestError as e:
-#         if "Amount must convert to at least" in str(e):
-#             _fail_transaction(transaction_id)
-#             raise errors.TooSmallAmount()
-#         else:
-#             eprint("Stripe Charge Failed")
-#             eprint(e)
-#             fail_transaction(transaction_id, 400, "payment failed")
-# 
-#     webshop_stripe_pending.post({"transaction_id": transaction_id, "stripe_token": source.id})
-#     eprint(source)
-# 
-#     status = source.status
-#     if status in {"pending", "chargeable"}:
-#         # Assert 3d secure is pending redirect
-#         if source.redirect.status not in {'pending', 'not_required'}:
-#             fail_transaction(transaction_id, 500, f"Unexpected value for source.redirect.status, '{source.redirect.status}'")
-#         # Assert 3d secure is pending redirect
-#         if not source.redirect.url:
-#             fail_transaction(transaction_id, 500, f"Invalid value for source.redirect.url, '{source.redirect.url}'")
-#         # Redirect the user to do the 3D secure confirmation step
-#         if source.redirect.status == 'pending':
-#             return {"transaction_id": transaction_id, "redirect": source.redirect.url}
-#     elif status == "failed":
-#         fail_transaction(transaction_id, 400, "Payment failed")
-#     else:
-#         eprint(f"Unknown stripe source status '{status}'")
-#         fail_transaction(transaction_id, 500, f"Unknown stripe source status '{status}'")
-# 
-#     return {"transaction_id": transaction_id}
 # 
 # 
 # def send_key_updated_email(member_id: int, extended_days: int, end_date: datetime) -> None:
@@ -783,31 +483,6 @@ def register_member(data, remote_addr, user_agent):
 # def complete_pending_action(action: PendingAction) -> None:
 #     now = datetime.now().astimezone()
 #     webshop_transaction_actions.put({"status": "completed", "completed_at": str(now)}, action.pending_action_id)
-# 
-# 
-# def ship_orders(labaccess: bool) -> None:
-#     '''
-#     Completes all orders for purchasing lab access and updates existing keys with new dates.
-#     If a user has no key yet, then the order will remain as not completed.
-#     If a user has multiple keys, all of them are updated with new dates.
-#     '''
-#     actions = pending_actions()
-# 
-#     for pending in actions:
-#         action = PendingAction(
-#             member_id=pending["member_id"],
-#             action_name=pending["action"]["name"],
-#             action_value=int(pending["pending_action"]["value"]),
-#             pending_action_id=pending['pending_action']['id'],
-#             transaction=pending["item"],
-#             created_at=pending["created_at"]
-#         )
-# 
-#         if labaccess and action.action_name == "add_labaccess_days":
-#             ship_add_labaccess_action(action)
-# 
-#         if action.action_name == "add_membership_days":
-#             ship_add_membership_action(action)
 # 
 # 
 # def ship_add_labaccess_action(action: PendingAction) -> None:

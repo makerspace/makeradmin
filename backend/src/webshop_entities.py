@@ -29,9 +29,3 @@ def membership_products(db: DB) -> List[Dict[str, Any]]:
         return products
 
 
-@dataclass
-class CartItem:
-    name: str
-    id: int
-    count: int
-    amount: Decimal

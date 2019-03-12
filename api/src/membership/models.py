@@ -138,6 +138,5 @@ class Span(Base):
     deletion_reason = Column(String(255))
     
     member = relationship(Member, backref="spans")
-
     def __repr__(self):
         return f'Span(span_id={self.span_id}, type={self.type}, enddate={self.enddate})'
