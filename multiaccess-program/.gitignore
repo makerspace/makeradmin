@@ -1,0 +1,12 @@
+**.html
+.envrc
+.direnv
+build
+dist
+.idea
+__pycache__
+db.sqlite
+dumps
+coverage
+.coverage
+source_revision.py
