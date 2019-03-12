@@ -17,7 +17,7 @@ common.documentLoaded().then(() => {
         const millisecondsPerDay = millisecondsPerHour * 24;
 
         const end = Date.parse(info.enddate) + millisecondsPerDay;
-        
+
         if (info.active) {
             const remainingDays = Math.floor((end - Date.now()) / millisecondsPerDay);
 
@@ -76,29 +76,29 @@ common.documentLoaded().then(() => {
         }
 
         const labaccessStrings = [
-            (enddate: string, days: number) => `Din labaccess är ogiltig sedan ${days} dagar (${enddate}).`,
-            () => `Din labaccess gick ut igår.`,
-            (hours: number) => `Din labaccess är giltig i mindre än ${hours} timmar till.`,
-            (enddate: string, days: number) => `Din labaccess är giltig t.o.m. ${enddate} (endast ${days} dagar till). Kom ihåg att förnya den innan nästa nyckelutlämning.`,
-            (enddate: string, days: number) => `Din labaccess är giltig t.o.m. ${enddate} (${days} dagar till).`,
-            () => `Din labaccess är inaktiv.`,
+            (enddate: string, days: number) => `Din labaccess är ogiltig sedan ${days} dagar (${enddate}). Your lab membership expired ${days} day(s) ago (${enddate}).`,
+            () => `Din labaccess gick ut igår. Your lab membership expired yesterday.`,
+            (hours: number) => `Din labaccess är giltig i mindre än ${hours} timmar till. Your lab membership is valid for ${hours} more hours.`,
+            (enddate: string, days: number) => `Din labaccess är giltig t.o.m. ${enddate} (endast ${days} dagar till). Kom ihåg att förnya den innan nästa nyckelutlämning. Your lab membership is valid through ${enddate} (only ${days} day(s) left). Remember to extend your lab membership before the next nyckelutlämning.`,
+            (enddate: string, days: number) => `Din labaccess är giltig t.o.m. ${enddate} (${days} dagar till). Your lab membership is valid through ${enddate} (only ${days} day(s) left).`,
+            () => `Din labaccess är inaktiv. Your lab membership is inactive.`,
         ];
 
         const membershipStrings = [
-            (enddate: string, days: number) => `Ditt föreningsmedlemsskap är ogiltigt sedan ${days} dagar (${enddate}).`,
-            () => `Ditt föreningsmedlemsskap gick ut igår.`,
-            (hours: number) => `Ditt föreningsmedlemsskap går ut idag.`,
-            (enddate: string, days: number) => `Ditt föreningsmedlemsskap är giltigt t.o.m. ${enddate} (endast ${days} dagar till).`,
-            (enddate: string, days: number) => `Ditt föreningsmedlemsskap är giltigt t.o.m. ${enddate} (${days} dagar till).`,
-            () => `Ditt föreningsmedlemsskap är inaktivt.`,
+            (enddate: string, days: number) => `Ditt föreningsmedlemsskap är ogiltigt sedan ${days} dagar (${enddate}). Your membership expired ${days} day(s) ago (${enddate})`,
+            () => `Ditt föreningsmedlemsskap gick ut igår. Your membership expired yesterday.`,
+            (hours: number) => `Ditt föreningsmedlemsskap går ut idag. Your membership expires today.`,
+            (enddate: string, days: number) => `Ditt föreningsmedlemsskap är giltigt t.o.m. ${enddate} (endast ${days} dagar till). Your membership is valid through ${enddate} (only ${days} day(s) left).`,
+            (enddate: string, days: number) => `Ditt föreningsmedlemsskap är giltigt t.o.m. ${enddate} (${days} dagar till). Your membership is valid through ${enddate} (only ${days} day(s) left).`,
+            () => `Ditt föreningsmedlemsskap är inaktivt. Your membership is inactive.`,
         ];
 
         let calendarURL = "https://www.makerspace.se/kalendarium";
         let pendingAccess = "";
         if (pendingLabaccessDays > 0) {
-            pendingAccess = `<p>Du har ${pendingLabaccessDays} dagar som kommer att läggas till på din labaccess vid nästa <a href=${calendarURL}>nyckelutlämning</a>.</p>`;
+            pendingAccess = `<p>Du har ${pendingLabaccessDays} dagar som kommer att läggas till på din labaccess vid nästa <a href=${calendarURL}>nyckelutlämning</a>. You have ${pendingLabaccessDays} days that will be added to your lab membership during the next <a href=${calendarURL}>nyckelutlämning</a>.</p>`;
         } else {
-            pendingAccess = `<p>Om du köper ny labaccess i webshoppen så kommer den aktiveras vid nästa <a href=${calendarURL}>nyckelutlämning</a>.</p>`;
+            pendingAccess = `<p>Om du köper ny labaccess i webshoppen så kommer den aktiveras vid nästa <a href=${calendarURL}>nyckelutlämning</a>. If you buy new lab membership time in the webshop it will activate during the next <a href=${calendarURL}>nyckelutlämning</a></p>`;
         }
 
         return `
