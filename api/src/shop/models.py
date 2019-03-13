@@ -93,6 +93,7 @@ class Transaction(Base):
     created_at = Column(DateTime, server_default=func.now())
 
     member = relationship(Member)
+    stripe_pending = relationship("StripePending")
 
     def __repr__(self):
         return f'Transaction(id={self.id}, amount={self.amount}, status={self.status})'

@@ -3,13 +3,14 @@ from logging import getLogger
 
 import stripe
 from sqlalchemy.orm.exc import NoResultFound
-from stripe.error import StripeError, CardError, InvalidRequestError
+from stripe.error import StripeError, CardError, InvalidRequestError, SignatureVerificationError
 
-from service.config import get_public_url
+from service.config import get_public_url, config
 from service.db import db_session
 from service.error import NotFound, InternalServerError, BadRequest
 from shop.filters import PRODUCT_FILTERS
 from shop.models import Product, Transaction, PENDING, TransactionContent, PendingRegistration, StripePending
+from shop.stripe_events import STRIPE_SOURCE_TYPE_3D_SECURE, create_stripe_charge, convert_to_stripe_amount
 from shop.transactions import complete_transaction, fail_transaction
 
 logger = getLogger('makeradmin')
@@ -19,11 +20,9 @@ class PaymentFailed(BadRequest):
     message = 'Payment failed.'
 
 
-# All stripe calculations are done with cents (ören in Sweden)
-STRIPE_CURRENTY_BASE = 100
-CARD_3D_SECURE_NOT_SUPPORTED = 'not_supported'
-
 CURRENCY = "sek"
+
+CARD_3D_SECURE_NOT_SUPPORTED = 'not_supported'
 
 CARD_CHARGABLE = "chargeable"
 CARD_FAILED = "failed"
@@ -74,16 +73,6 @@ def process_cart(member_id, cart):
     return total_amount, contents
 
 
-def convert_to_stripe_amount(amount: Decimal) -> int:
-    """ Convert decimal amount to stripe amount and return it. Fails if amount is not even cents (ören). """
-    stripe_amount = amount * STRIPE_CURRENTY_BASE
-    if stripe_amount % 1 != 0:
-        raise InternalServerError(message=f"The amount could not be converted to an even number of ören ({amount}).",
-                                  log=f"Stripe amount not even number of ören, maybe some product has uneven ören.")
-
-    return int(stripe_amount)
-
-
 def validate_payment(member_id, cart, expected_amount: Decimal):
     """ Validate that the expected amount matches what in the cart. Returns total_amount and cart items. """
     
@@ -129,22 +118,6 @@ def add_transaction_to_db(member_id, total_amount, contents):
         )
     
     return transaction
-
-
-def create_stripe_charge(transaction, card_source_id) -> stripe.Charge:
-
-    if transaction.status != PENDING:
-        raise InternalServerError(f"Unexpected status of transaction.",
-                                  log=f"Transaction {transaction.id} has unexpected status {transaction.status}.")
-
-    stripe_amount = convert_to_stripe_amount(transaction.amount)
-
-    return stripe.Charge.create(
-        amount=stripe_amount,
-        currency=CURRENCY,
-        description=f'Charge for transaction id {transaction.id}.',
-        source=card_source_id,
-    )
 
 
 # TODO Rename.
@@ -198,7 +171,7 @@ def handle_three_d_secure_source(transaction, card_source_id, total_amount):
         source = stripe.Source.create(
             amount=stripe_amount,
             currency=CURRENCY,
-            type='three_d_secure',
+            type=STRIPE_SOURCE_TYPE_3D_SECURE,
             three_d_secure={'card': card_source_id},
             redirect={'return_url': get_public_url(f"/shop/receipt/{transaction.id}")},
         )
@@ -279,6 +252,3 @@ def pay(member_id=None, purchase=None, activates_member=False):
     
     return transaction, redirect
     
-    
-
-

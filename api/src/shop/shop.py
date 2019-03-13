@@ -19,9 +19,6 @@ from shop.transactions import pending_actions_query
 logger = getLogger('makeradmin')
 
 
-# stripe_signing_secret = os.environ["STRIPE_SIGNING_SECRET"]
-
-
 def pending_actions(member_id=None):
     query = pending_actions_query(member_id)
     
@@ -256,60 +253,6 @@ def register_member(data, remote_addr, user_agent):
 #         # todo: log refund for display in admin frontend.
 #         # todo: option in frontend to roll back actions.
 #         pass
-# 
-# 
-# @instance.route("stripe_callback", methods=["POST"], permission=None)
-# @route_helper
-# def stripe_callback() -> None:
-#     payload = request.data
-#     eprint("Headers: " + str(request.headers))
-#     sig_header = request.headers['Stripe-Signature']
-# 
-#     try:
-#         event = stripe.Webhook.construct_event(payload, sig_header, stripe_signing_secret)
-#     except ValueError as e:
-#         # Invalid payload
-#         abort(400)
-#     except stripe.error.SignatureVerificationError as e:
-#         # Invalid signature
-#         abort(400)
-# 
-#     eprint(f"Received stripe callback of type {event.type}")
-#     (event_type, event_subtype) = tuple(event.type.split('.', 1))
-#     if event_type == 'source':
-#         stripe_handle_source_callback(event_subtype, event)
-#     elif event_type == 'charge':
-#         stripe_handle_charge_callback(event_subtype, event)
-# 
-# 
-# def _reprocess_stripe_event(event) -> None:
-#     try:
-#         logger.info(f"Processing stripe event of type {event.type}")
-#         (event_type, event_subtype) = tuple(event.type.split('.', 1))
-#         if event_type == 'source':
-#             stripe_handle_source_callback(event_subtype, event)
-#         elif event_type == 'charge':
-#             stripe_handle_charge_callback(event_subtype, event)
-#     except HTTPException as e:
-#         # Catch and ignore all event processing errors
-#         pass
-# 
-# 
-# @instance.route("process_stripe_events", methods=["PUT"])
-# @route_helper
-# def process_stripe_events() -> None:
-#     payload = request.get_json() or {}
-#     source_id = payload.get('source_id', None)
-#     start = payload.get('start', None)
-#     logger.info(f"getting stripe events with start {start} and source_id {source_id}")
-#     events = stripe.Event.list(created={'gt': start} if start else None)
-#     logger.info(f"got {len(events)} events")
-#     for event in events.auto_paging_iter():
-#         obj = event.get('data', {}).get('object', {})
-#         if source_id and source_id in (obj.get('source', {}).get('id'), obj.get('id')) or not source_id:
-#             _reprocess_stripe_event(event)
-#         else:
-#             logger.info(f"skipping event, not matching source_id")
 # 
 # 
 # def handle_payment_success(transaction_id: int) -> None:

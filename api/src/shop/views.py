@@ -6,6 +6,7 @@ from shop import service
 from shop.entities import product_image_entity, transaction_content_entity, transaction_entity, \
     transaction_action_entity, product_entity, category_entity
 from shop.models import Action, ProductAction, TransactionContent
+from shop.pay import stripe_callback
 from shop.shop import pending_actions, member_history, receipt, get_product_data, all_product_data, \
     membership_products, register_member
 from shop.transactions import ship_orders
@@ -148,6 +149,12 @@ def register_page_data():
 @service.route("/register", method=POST, permission=PUBLIC)
 def register():
     return register_member(request.get_json(), request.remote_addr, request.user_agent.string)
+
+
+@service.route("/stripe_callback", method=POST, permission=PUBLIC)
+def stripe_callback_route():
+    stripe_callback(request.data, request.headers)
+
 
 
 
