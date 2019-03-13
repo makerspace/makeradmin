@@ -379,12 +379,6 @@ def register_member(data, remote_addr, user_agent):
 #     return pay(member_id, data)
 # 
 # 
-# @instance.route("ship_orders", methods=["POST"], permission="webshop")
-# @route_helper
-# def ship_orders_route() -> None:
-#     ship_orders(True)
-# 
-# 
 # @instance.route("product_edit_data/<int:product_id>/", methods=["GET"], permission="webshop_edit")
 # @route_helper
 # def product_edit_data(product_id: int):

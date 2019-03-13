@@ -8,7 +8,7 @@ from shop.entities import product_image_entity, transaction_content_entity, tran
 from shop.models import Action, ProductAction, TransactionContent
 from shop.shop import pending_actions, member_history, receipt, get_product_data, all_product_data, \
     membership_products, register_member
-
+from shop.transactions import ship_orders
 
 service.entity_routes(
     path="/category",
@@ -110,6 +110,11 @@ service.entity_routes(
 )
 
 
+@service.route("/ship_orders", method=POST, permission=WEBSHOP)
+def ship_orders_route():
+    ship_orders(ship_add_labaccess=True)
+
+
 @service.route("/member/current/pending_actions", method=GET, permission=USER)
 def pending_actions_for_member():
     return pending_actions(g.user_id)
@@ -143,5 +148,7 @@ def register_page_data():
 @service.route("/register", method=POST, permission=PUBLIC)
 def register():
     return register_member(request.get_json(), request.remote_addr, request.user_agent.string)
+
+
 
 
