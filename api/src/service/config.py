@@ -32,6 +32,7 @@ default = Dict(name="default", src=dict(
     MAILGUN_FROM='',
     MAILGUN_TO_OVERRIDE='',
     HOST_PUBLIC='',
+    STRIPE_PRIVATE_KEY=None,
 ))
 env = Env()
 dot_env = DotEnvFile()

@@ -94,12 +94,12 @@ def member_activate(entity_id=None):
 def member_add_membership_days(
         entity_id=None, type=Arg(Enum(MEMBERSHIP, LABACCESS, SPECIAL_LABACESS)), days=Arg(natural1),
         creation_reason=Arg(non_empty_str), default_start_date=Arg(iso_date, required=False)):
-    return add_membership_days(entity_id, type, days, creation_reason, default_start_date)
+    return add_membership_days(entity_id, type, days, creation_reason, default_start_date).as_json()
 
 
 @service.route("/member/<int:entity_id>/membership", method=GET, permission=SPAN_VIEW)
 def member_get_membership(entity_id=None):
-    return get_membership_summary(entity_id)
+    return get_membership_summary(entity_id).as_json()
 
 
 @service.route("/member/<int:entity_id>/permissions", method=GET, permission=PERMISSION_VIEW)

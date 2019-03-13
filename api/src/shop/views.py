@@ -6,8 +6,9 @@ from shop import service
 from shop.entities import product_image_entity, transaction_content_entity, transaction_entity, \
     transaction_action_entity, product_entity, category_entity
 from shop.models import Action, ProductAction, TransactionContent
-from shop.shop import pending_actions, member_history, receipt, get_product_data, all_product_data, membership_products, \
-    register_member
+from shop.shop import pending_actions, member_history, receipt, get_product_data, all_product_data, \
+    membership_products, register_member
+
 
 service.entity_routes(
     path="/category",

@@ -42,7 +42,10 @@ services:
       VIRTUAL_HOST: "${HOST_BACKEND}"
       LETSENCRYPT_HOST: "${HOST_BACKEND}"
       LETSENCRYPT_EMAIL: "${ADMIN_EMAIL}"
-      
+      STRIPE_PRIVATE_KEY:
+      STRIPE_PUBLIC_KEY:
+      STRIPE_SIGNING_SECRET:
+
   email-dispatcher:
     image: makeradmin/api:1.0
     build:

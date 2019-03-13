@@ -132,7 +132,7 @@ common.onGetAndDocumentLoaded("/webshop/register_page_data", (value: any) => {
             if (token) {
                 login(token);
             }
-            if (json.data.redirect !== undefined) {
+            if (json.data.redirect) {
               window.location.href = json.data.redirect;
             } else {
               window.location.href = "receipt/" + json.data.transaction_id;

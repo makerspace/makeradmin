@@ -11,37 +11,19 @@ from service.db import db_session
 from service.error import NotFound, UnprocessableEntity, BadRequest
 from shop.entities import transaction_entity, transaction_content_entity, product_entity, category_entity, \
     product_image_entity
-from shop.models import TransactionContent, TransactionAction, PENDING, Action, Transaction, COMPLETED, Product, \
-    ProductCategory, ProductAction
+from shop.models import Action, Transaction, Product, ProductCategory, ProductAction
 from shop.pay import pay
 from shop.schemas import register_schema
+from shop.transactions import pending_actions_query
 
 logger = getLogger('makeradmin')
 
 
-# stripe.api_key = os.environ["STRIPE_PRIVATE_KEY"]
 # stripe_signing_secret = os.environ["STRIPE_SIGNING_SECRET"]
 
+
 def pending_actions(member_id=None):
-    """
-    Finds every item in a transaction and checks the actions it has, then checks to see if all those actions have
-    been completed (and are not deleted). The actions that are valid for a transaction are precisely those that
-    existed at the time the transaction was made. Therefore if an action is added to a product in the future,
-    that action will *not* be retroactively applied to all existing transactions.
-    """
-
-    query = (
-        db_session
-        .query(TransactionAction, Action, TransactionContent, Transaction)
-        .join(Action)
-        .join(TransactionContent)
-        .join(Transaction)
-        .filter(TransactionAction.status == PENDING)
-        .filter(Transaction.status == COMPLETED)
-    )
-
-    if member_id:
-        query = query.filter(Transaction.member_id == member_id)
+    query = pending_actions_query(member_id)
     
     return [
         {
@@ -62,7 +44,7 @@ def pending_actions(member_id=None):
             },
             "member_id": transaction.member_id,
             "created_at": transaction.created_at.isoformat(),
-        } for action, action_type, content, transaction in query.all()
+        } for action, action_type, content, transaction in query
     ]
 
 
@@ -175,49 +157,26 @@ def register_member(data, remote_addr, user_agent):
     # This will raise if the payment fails.
     transaction, redirect = pay(member_id=member_id, purchase=purchase, activates_member=True)
 
+    # TODO Delete member if payment fails. Make <email, deleted_at> uniquie instead of just email.
+
     # If the pay succeeded (not same as the payment is completed) and the member does not already exists,
     # the user will be logged in.
     token = auth.force_login(remote_addr, user_agent, member_id)['access_token']
 
-    return {
+    res =  {
         'transaction_id': transaction.id,
         'token': token,
         'redirect': redirect,
     }
+    
+    logger.info(res)
+    
+    return res
 
 
 # def copy_dict(source: Dict[str, Any], fields: List[str]) -> Dict[str, Any]:
 #     return {key: source[key] for key in fields if key in source}
 # 
-# 
-# def send_new_member_email(member_id: int) -> None:
-#     eprint("====== Getting member")
-#     r = instance.gateway.get(f"membership/member/{member_id}")
-#     assert r.ok
-#     member = r.json()["data"]
-#     eprint("====== Generating email body")
-#     email_body = render_template("new_member_email.html", member=member, public_url=instance.gateway.get_public_url)
-#     eprint("====== Sending new member email")
-# 
-#     r = instance.gateway.post("messages/message", {
-#         "recipients": [
-#             {
-#                 "type": "member",
-#                 "id": member_id
-#             },
-#         ],
-#         "message_type": "email",
-#         "title": "Välkommen till Stockholm Makerspace",
-#         "description": email_body
-#     })
-# 
-#     if not r.ok:
-#         eprint("Failed to send new member email")
-#         eprint(r.text)
-#     eprint("====== Sent email body")
-# 
-# 
-#
 # 
 # def _fail_transaction(transaction_id: int) -> None:
 #     with db.cursor() as cur:
@@ -420,119 +379,12 @@ def register_member(data, remote_addr, user_agent):
 #     return pay(member_id, data)
 # 
 # 
-# def send_key_updated_email(member_id: int, extended_days: int, end_date: datetime) -> None:
-#     r = instance.gateway.get(f"membership/member/{member_id}")
-#     assert r.ok
-#     member = r.json()["data"]
-# 
-#     r = instance.gateway.post("messages/message", {
-#         "recipients": [
-#             {
-#                 "type": "member",
-#                 "id": member_id
-#             },
-#         ],
-#         "message_type": "email",
-#         "title": "Din labaccess har utökats",
-#         "description": render_template("updated_key_time_email.html", public_url=instance.gateway.get_public_url, member=member, extended_days=extended_days, end_date=end_date.strftime("%Y-%m-%d"))
-#     })
-# 
-#     if not r.ok:
-#         eprint("Failed to send key updated email")
-#         eprint(r.text)
-# 
-# 
-# def send_membership_updated_email(member_id: int, extended_days: int, end_date: datetime) -> None:
-#     r = instance.gateway.get(f"membership/member/{member_id}")
-#     assert r.ok
-#     member = r.json()["data"]
-# 
-#     r = instance.gateway.post("messages/message", {
-#         "recipients": [
-#             {
-#                 "type": "member",
-#                 "id": member_id
-#             },
-#         ],
-#         "message_type": "email",
-#         "title": "Ditt medlemsskap har utökats",
-#         "description": render_template("updated_membership_time_email.html", public_url=instance.gateway.get_public_url, member=member, extended_days=extended_days, end_date=end_date.strftime("%Y-%m-%d"))
-#     })
-# 
-#     if not r.ok:
-#         eprint("Failed to send membership updated email")
-#         eprint(r.text)
-# 
-# 
 # @instance.route("ship_orders", methods=["POST"], permission="webshop")
 # @route_helper
 # def ship_orders_route() -> None:
 #     ship_orders(True)
 # 
 # 
-# @dataclass
-# class PendingAction:
-#     member_id: int
-#     action_name: str
-#     action_value: int
-#     pending_action_id: int
-#     transaction: Dict[str, Any]
-#     created_at: str
-# 
-# 
-# def complete_pending_action(action: PendingAction) -> None:
-#     now = datetime.now().astimezone()
-#     webshop_transaction_actions.put({"status": "completed", "completed_at": str(now)}, action.pending_action_id)
-# 
-# 
-# def ship_add_labaccess_action(action: PendingAction) -> None:
-#     r = instance.gateway.get(f"membership/member/{action.member_id}/keys")
-#     assert r.ok, r.text
-#     if len(r.json()["data"]) == 0:
-#         # Skip this member because it has no keys
-#         return
-# 
-#     days_to_add = action.action_value
-#     assert(days_to_add >= 0)
-#     r = instance.gateway.post(f"membership/member/{action.member_id}/addMembershipDays",
-#                               {
-#                                   "type": "labaccess",
-#                                   "days": days_to_add,
-#                                   "creation_reason": f"transaction_action_id: {action.pending_action_id}, transaction_id: {action.transaction['transaction_id']}",
-#                               }
-#                               )
-#     assert r.ok, r.text
-# 
-#     r = instance.gateway.get(f"membership/member/{action.member_id}/membership")
-#     assert r.ok, r.text
-#     new_end_date = parser.parse(r.json()["data"]["labaccess_end"])
-# 
-#     complete_pending_action(action)
-#     send_key_updated_email(action.member_id, days_to_add, new_end_date)
-# 
-# 
-# def ship_add_membership_action(action: PendingAction) -> None:
-#     days_to_add = action.action_value
-#     assert(days_to_add >= 0)
-#     r = instance.gateway.post(f"membership/member/{action.member_id}/addMembershipDays",
-#                               {
-#                                   "type": "membership",
-#                                   "days": days_to_add,
-#                                   "default_start_date": action.created_at[:10],
-#                                   "creation_reason": f"transaction_action_id: {action.pending_action_id}, transaction_id: {action.transaction['transaction_id']}",
-#                               }
-#                               )
-#     assert r.ok, r.text
-# 
-#     r = instance.gateway.get(f"membership/member/{action.member_id}/membership")
-#     assert r.ok, r.text
-#     new_end_date = parser.parse(r.json()["data"]["membership_end"])
-# 
-#     complete_pending_action(action)
-#     send_membership_updated_email(action.member_id, days_to_add, new_end_date)
-# 
-# 
-
 # @instance.route("product_edit_data/<int:product_id>/", methods=["GET"], permission="webshop_edit")
 # @route_helper
 # def product_edit_data(product_id: int):

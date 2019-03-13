@@ -8,10 +8,9 @@ from stripe.error import StripeError, CardError, InvalidRequestError
 from service.config import get_public_url
 from service.db import db_session
 from service.error import NotFound, InternalServerError, BadRequest
-from shop import service
 from shop.filters import PRODUCT_FILTERS
-from shop.models import Product, Transaction, PENDING, TransactionContent, PendingRegistration, StripePending, FAILED, \
-    COMPLETED
+from shop.models import Product, Transaction, PENDING, TransactionContent, PendingRegistration, StripePending
+from shop.transactions import complete_transaction, fail_transaction
 
 logger = getLogger('makeradmin')
 
@@ -24,7 +23,7 @@ class PaymentFailed(BadRequest):
 STRIPE_CURRENTY_BASE = 100
 CARD_3D_SECURE_NOT_SUPPORTED = 'not_supported'
 
-currency = "sek"
+CURRENCY = "sek"
 
 CARD_CHARGABLE = "chargeable"
 CARD_FAILED = "failed"
@@ -132,48 +131,6 @@ def add_transaction_to_db(member_id, total_amount, contents):
     return transaction
 
 
-def ship_orders(labaccess: bool):
-    """
-    Completes all orders for purchasing lab access and updates existing keys with new dates.
-    If a user has no key yet, then the order will remain as not completed.
-    If a user has multiple keys, all of them are updated with new dates.
-    """
-    actions = pending_actions()
-
-    for pending in actions:
-        action = PendingAction(
-            member_id=pending["member_id"],
-            action_name=pending["action"]["name"],
-            action_value=int(pending["pending_action"]["value"]),
-            pending_action_id=pending['pending_action']['id'],
-            transaction=pending["item"],
-            created_at=pending["created_at"]
-        )
-
-        if labaccess and action.action_name == "add_labaccess_days":
-            ship_add_labaccess_action(action)
-
-        if action.action_name == "add_membership_days":
-            ship_add_membership_action(action)
-
-
-def complete_transaction(transaction):
-    if transaction.status == PENDING:
-        transaction.status = COMPLETED
-        db_session.add(transaction)
-        db_session.flush()
-        try:
-            ship_orders(labaccess=False)
-        except Exception as e:
-            logger.exception(f"failed to ship orders in transaction {transaction.id}.")
-
-
-def fail_transaction(transaction):
-    transaction.status = FAILED
-    db_session.add(transaction)
-    db_session.flush()
-
-
 def create_stripe_charge(transaction, card_source_id) -> stripe.Charge:
 
     if transaction.status != PENDING:
@@ -184,7 +141,7 @@ def create_stripe_charge(transaction, card_source_id) -> stripe.Charge:
 
     return stripe.Charge.create(
         amount=stripe_amount,
-        currency=currency,
+        currency=CURRENCY,
         description=f'Charge for transaction id {transaction.id}.',
         source=card_source_id,
     )
@@ -194,7 +151,7 @@ def create_stripe_charge(transaction, card_source_id) -> stripe.Charge:
 def handle_card_source(transaction, card_source_id):
     card_source = stripe.Source.retrieve(card_source_id)
     if card_source.type != 'card' or card_source.card.three_d_secure != CARD_3D_SECURE_NOT_SUPPORTED:
-        InternalServerError(f'Synchronous charges should only be made for cards not supporting 3D Secure.')
+        raise InternalServerError(f'Synchronous charges should only be made for cards not supporting 3D Secure.')
 
     status = card_source.status
     
@@ -205,7 +162,7 @@ def handle_card_source(transaction, card_source_id):
                 # Avoid delay of feedback to customer, could be skipped and handled when webhook is called.
                 complete_transaction(transaction)
             return
-                
+            
         except InvalidRequestError as e:
             fail_transaction(transaction)
             if "Amount must convert to at least" in str(e):
@@ -240,7 +197,7 @@ def handle_three_d_secure_source(transaction, card_source_id, total_amount):
         stripe_amount = convert_to_stripe_amount(total_amount)
         source = stripe.Source.create(
             amount=stripe_amount,
-            currency=currency,
+            currency=CURRENCY,
             type='three_d_secure',
             three_d_secure={'card': card_source_id},
             redirect={'return_url': get_public_url(f"/shop/receipt/{transaction.id}")},
@@ -254,7 +211,7 @@ def handle_three_d_secure_source(transaction, card_source_id, total_amount):
 
     # TODO Is this stripe source different?
     db_session.add(StripePending(transaction_id=transaction.id, stripe_token=source.id))
-    logger.info(f"created pending stripe for transaction {transaction.id}, source {source}")
+    logger.info(f"created stripe pending for transaction {transaction.id}, source id {source.id}")
 
     status = source.status
     if status in {"pending", "chargeable"}:
@@ -314,6 +271,7 @@ def pay(member_id=None, purchase=None, activates_member=False):
     
     if card_3d_secure == CARD_3D_SECURE_NOT_SUPPORTED:
         handle_card_source(transaction, card_source_id)
+        redirect = None
     else:
         redirect = handle_three_d_secure_source(transaction, card_source_id, total_amount)
 

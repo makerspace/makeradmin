@@ -50,6 +50,9 @@ class Product(Base):
 class Action(Base):
     __tablename__ = 'webshop_actions'
     
+    ADD_LABACCESS_DAYS = "add_labaccess_days"
+    ADD_MEMBERSHIP_DAYS = "add_membership_days"
+
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
     name = Column(String(255), nullable=False)
 
@@ -74,6 +77,7 @@ class ProductAction(Base):
         return f'ProductAction(id={self.id}, value={self.value})'
 
 
+# TODO Move to inside.
 PENDING = 'pending'
 COMPLETED = 'completed'
 FAILED = 'failed'
@@ -110,6 +114,7 @@ class TransactionContent(Base):
         return f'TransactionContent(id={self.id}, count={self.count}, amount={self.amount})'
 
     
+# TODO Move to other.
 class TransactionAction(Base):
     __tablename__ = 'webshop_transaction_actions'
 

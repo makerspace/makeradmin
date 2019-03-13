@@ -1,4 +1,5 @@
 from contextlib import closing
+from datetime import datetime
 from socket import socket, AF_INET, SOCK_STREAM
 from time import perf_counter, sleep
 
@@ -22,3 +23,15 @@ def format_datetime(dt):
         return None
 
     return dt.strftime("%Y-%m-%d %H:%M")
+
+
+def str_to_date(s):
+    if s is None:
+        return None
+    return datetime.strptime(s, "%Y-%m-%d").date()
+
+
+def date_to_str(d):
+    if d is None:
+        return None
+    return d.isoformat()

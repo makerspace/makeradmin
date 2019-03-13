@@ -118,6 +118,7 @@ class Key(Base):
         return f'Key(key_id={self.key_id}, tagid={self.tagid})'
 
 
+# TODO Move to span.
 LABACCESS = 'labaccess'
 MEMBERSHIP = 'membership'
 SPECIAL_LABACESS = 'special_labaccess'
