@@ -3,9 +3,12 @@ from datetime import datetime
 from logging import getLogger
 from typing import Dict, Any
 
+from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
+
 from membership.membership import add_membership_days
 from membership.models import Member, Key, LABACCESS
 from service.db import db_session
+from service.error import InternalServerError
 from service.util import str_to_date
 from shop.email import send_key_updated_email, send_membership_updated_email
 from shop.models import TransactionAction, Action, TransactionContent, Transaction, PENDING, COMPLETED, FAILED
@@ -107,5 +110,15 @@ def fail_transaction(transaction):
     transaction.status = FAILED
     db_session.add(transaction)
     db_session.flush()
+
+
+def get_source_transaction(source_id):
+    try:
+        return db_session.query(Transaction).filter(Transaction.stripe_pending.stripe_token == source_id).one()
+    except NoResultFound as e:
+        return None
+    except MultipleResultsFound as e:
+        raise InternalServerError(log=f"stripe token {source_id} has multiple transactions, this is a bug") from e
+
 
 

@@ -3,7 +3,7 @@ from datetime import date, timedelta
 
 from sqlalchemy import func
 
-from membership.models import Span, LABACCESS, SPECIAL_LABACESS, MEMBERSHIP
+from membership.models import Span, LABACCESS, SPECIAL_LABACESS, MEMBERSHIP, Member
 from service.api_definition import NOT_UNIQUE
 from service.db import db_session
 from service.error import UnprocessableEntity

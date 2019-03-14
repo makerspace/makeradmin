@@ -1,29 +1,3 @@
-# TODO
-# def send_new_member_email(member_id: int) -> None:
-#     eprint("====== Getting member")
-#     r = instance.gateway.get(f"membership/member/{member_id}")
-#     assert r.ok
-#     member = r.json()["data"]
-#     eprint("====== Generating email body")
-#     email_body = render_template("new_member_email.html", member=member, public_url=instance.gateway.get_public_url)
-#     eprint("====== Sending new member email")
-#
-#     r = instance.gateway.post("messages/message", {
-#         "recipients": [
-#             {
-#                 "type": "member",
-#                 "id": member_id
-#             },
-#         ],
-#         "message_type": "email",
-#         "title": "Välkommen till Stockholm Makerspace",
-#         "description": email_body
-#     })
-#
-#     if not r.ok:
-#         eprint("Failed to send new member email")
-#         eprint(r.text)
-#     eprint("====== Sent email body")
 from flask import render_template
 
 from membership.models import Member
@@ -66,3 +40,34 @@ def send_key_updated_email(member_id, extended_days, end_date):
         )
     })
 
+
+def send_receipt_email(transaction):
+    contents = transaction.contents
+    products = [content.product for content in contents]
+
+    message_entity.create({
+        "recipients": [{"type": "member", "id": transaction.member_id}],
+        "message_type": "email",
+        "title": "Kvitto - Stockholm Makerspace",
+        "description": render_template(
+            "receipt_email.html",
+            cart=zip(products, contents),
+            transaction=transaction,
+            currency="kr",
+            member=transaction.member,
+            public_url=get_public_url,
+        )
+    })
+
+
+def send_new_member_email(member):
+    message_entity.create({
+        "recipients": [{"type": "member", "id": member.id}],
+        "message_type": "email",
+        "title": "Välkommen till Stockholm Makerspace",
+        "description": render_template(
+            "new_member_email.html",
+            member=member,
+            public_url=get_public_url,
+        )
+    })

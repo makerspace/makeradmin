@@ -255,59 +255,6 @@ def register_member(data, remote_addr, user_agent):
 #         pass
 # 
 # 
-# def handle_payment_success(transaction_id: int) -> None:
-#     complete_transaction(transaction_id)
-#     transaction = transaction_entity.get(transaction_id)
-#     if transaction['status'] != 'completed':
-#         eprint(f"handle_payment_success called but transaction marked as '{transaction['status']}', aborting!")
-#         return
-# 
-#     # Check if this transaction is a new member registration
-#     if webshop_pending_registrations.list("transaction_id=%s", [transaction_id]):
-#         activate_member(transaction["member_id"])
-# 
-#     eprint("====== Sending receipt email")
-#     send_receipt_email(transaction["member_id"], transaction_id)
-#     eprint("Payment complete. id: " + str(transaction_id))
-# 
-# 
-# def activate_member(member_id: int) -> None:
-#     eprint("====== Activating member")
-#     # Make the member not be deleted
-#     r = instance.gateway.post(f"membership/member/{member_id}/activate", {})
-#     assert r.ok
-#     eprint("====== Activated member")
-# 
-#     send_new_member_email(member_id)
-# 
-# 
-# def send_receipt_email(member_id: int, transaction_id: int) -> None:
-#     transaction = transaction_entity.get(transaction_id)
-#     items = transaction_content_entity.list("transaction_id=%s", transaction_id)
-#     products = [product_entity.get(item["product_id"]) for item in items]
-# 
-#     r = instance.gateway.get(f"membership/member/{member_id}")
-#     assert r.ok
-# 
-#     member = r.json()["data"]
-# 
-#     r = instance.gateway.post("messages/message", {
-#         "recipients": [
-#             {
-#                 "type": "member",
-#                 "id": member_id
-#             },
-#         ],
-#         "message_type": "email",
-#         "title": "Kvitto - Stockholm Makerspace",
-#         "description": render_template("receipt_email.html", cart=zip(products, items), transaction=transaction, currency="kr", member=member, public_url=instance.gateway.get_public_url)
-#     })
-# 
-#     if not r.ok:
-#         eprint("Failed to send receipt email")
-#         eprint(r.text)
-# 
-# 
 # duplicatePurchaseRands: Set[int] = set()
 # 
 # 

@@ -2,15 +2,15 @@ from decimal import Decimal
 from logging import getLogger
 
 import stripe
-from sqlalchemy.orm.exc import MultipleResultsFound, NoResultFound
 from stripe.error import SignatureVerificationError
 
 from service.config import config
 from service.db import db_session
 from service.error import BadRequest, InternalServerError
-from shop.models import Transaction, PENDING
+from shop.email import send_new_member_email, send_receipt_email
+from shop.models import PENDING, COMPLETED, PendingRegistration
 from shop.pay import CURRENCY
-from shop.transactions import fail_transaction
+from shop.transactions import fail_transaction, get_source_transaction, complete_transaction
 
 logger = getLogger('makeradmin')
 
@@ -30,6 +30,8 @@ STRIPE_SUBTYPE_CHARGABLE = 'chargeable'
 STRIPE_SUBTYPE_FAILED = 'failed'
 STRIPE_SUBTYPE_CANCELED = 'canceled'
 STRIPE_SUBTYPE_SUCCEEDED = 'succeeded'
+STRIPE_SUBTYPE_DISPUTE_PREFIX = 'dispute'
+STRIPE_SUBTYPE_REFUND_PREFIX = 'refund'
 
 STRIPE_SOURCE_TYPE_3D_SECURE = 'three_d_secure'
 
@@ -61,18 +63,42 @@ def create_stripe_charge(transaction, card_source_id) -> stripe.Charge:
     )
 
 
+# TODO This does not belong here, move it...
+def activate_member(member):
+    logger.info(f"activating member {member.id}")
+    member.deleted_at = None
+    db_session.add(member)
+    db_session.flush()
+    send_new_member_email(member)
+
+
+# TODO This belongs in pay, but needs to be called from callback...
+def handle_payment_success(transaction):
+    complete_transaction(transaction)
+    if transaction.status != COMPLETED:
+        # TODO Is this really needed?
+        logger.error(f"wanted to complete transaction but marked as {transaction.status}")
+        return
+    
+    # Check if this transaction is a new member registration.
+    if db_session.query(PendingRegistration).filter(PendingRegistration.transaction_id == transaction.id).count():
+        activate_member(transaction.member)
+        
+    logger.info(f"sending receipt email to member {transaction.member_id}, transaction {transaction.id} complete")
+    send_receipt_email(transaction)
+
+
 def stripe_handle_source_callback(subtype, event):
     if subtype not in [STRIPE_SUBTYPE_CHARGABLE, STRIPE_SUBTYPE_FAILED, STRIPE_SUBTYPE_CANCELED]:
         return
         
     source = event.data.object
-    try:
-        transaction = db_session.query(Transaction).filter(Transaction.stripe_pending.stripe_token == source.id).one()
-    except NoResultFound as e:
-        logger.info(f"no transaction exists for token ({source.id}), ignoring event (usually fine)")
+    
+    transaction = get_source_transaction(source.id)
+
+    if not transaction:
+        logger.info(f"no transaction exists for token ({source_id}), ignoring event (usually fine)")
         return
-    except MultipleResultsFound as e:
-        raise InternalServerError(log=f"stripe token {source.id} has multiple transactions, this is a bug") from e
     
     if subtype == STRIPE_SUBTYPE_CHARGABLE:
         # Asynchronous charge should only be initiated from a 3D Secure source.
@@ -94,21 +120,26 @@ def stripe_handle_source_callback(subtype, event):
         fail_transaction(transaction)
 
 
-def stripe_handle_charge_callback(subtype: str, event) -> None:
+def stripe_handle_charge_callback(subtype, event):
     charge = event.data.object
-    if subtype == STRIPE_SUBTYPE_SUCCEEDED='succeeded':
-        transaction_id = source_to_transaction_id(charge.source.id)
-        if transaction_id is None:
-            abort(400, f"Unknown charge '{charge.id}' succeeded, no transaction found for charge source '{charge.source.id}'!")
-        else:
-            handle_payment_success(transaction_id)
-    elif subtype == 'failed':
-        _fail_stripe_source(charge.source.id)
-        logger.info(f"Charge '{charge.id}' failed with message '{charge.failure_message}'")
-    elif subtype.startswith('dispute'):
+    
+    transaction = get_source_transaction(charge.source.id)
+    if not transaction:
+        logger.error(f"no transaction for source {charge.source.id},  charge id {charge.id}, subtype {subtype}")
+        return
+    
+    if subtype == STRIPE_SUBTYPE_SUCCEEDED:
+        handle_payment_success(transaction)
+        
+    elif subtype == STRIPE_SUBTYPE_FAILED:
+        fail_transaction(transaction)
+        logger.info(f"charge {charge.id} (transaction {transaction.id}) failed with message {charge.failure_message}")
+        
+    elif subtype.startswith(STRIPE_SUBTYPE_DISPUTE_PREFIX):
         # todo: log disputes for display in admin frontend.
         pass
-    elif subtype.startswith('refund'):
+    
+    elif subtype.startswith(STRIPE_SUBTYPE_REFUND_PREFIX):
         # todo: log refund for display in admin frontend.
         # todo: option in frontend to roll back actions.
         pass
