@@ -109,7 +109,7 @@ class ApiFactory:
 
     def create_category(self, **kwargs):
         obj = self.obj.create_category(**kwargs)
-        self.category = self.post("/webshop/category", json=obj).expect(code=200, status='created').data
+        self.category = self.post("/webshop/category", json=obj).expect(code=201, status='created').data
         return self.category
         
     def delete_category(self, id=None):
@@ -120,7 +120,7 @@ class ApiFactory:
             kwargs.setdefault('category_id', self.category['id'])
             
         obj = self.obj.create_product(**kwargs)
-        self.product = self.post("/webshop/product", json=obj).expect(code=200, status='created').data
+        self.product = self.post("/webshop/product", json=obj).expect(code=201, status='created').data
         return self.product
     
     def delete_product(self, id=None):
@@ -131,5 +131,5 @@ class ApiFactory:
             kwargs.setdefault('product_id', self.product['id'])
         
         obj = self.obj.create_product_action(**kwargs)
-        self.action = self.post(f"/webshop/product_action", json=obj).expect(code=200, status='created').data
+        self.action = self.post(f"/webshop/product_action", json=obj).expect(code=201, status='created').data
         return self.action

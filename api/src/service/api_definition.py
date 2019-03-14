@@ -63,6 +63,7 @@ BAD_VALUE = 'bad_value'
 REQUIRED = 'required'
 EXPIRED = 'expired'
 NOT_UNIQUE = 'not_unique'
+NON_MATCHING_SUMS = 'non_matching_sums'
 
 
 class Arg:

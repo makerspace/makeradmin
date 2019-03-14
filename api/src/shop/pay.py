@@ -5,6 +5,7 @@ import stripe
 from sqlalchemy.orm.exc import NoResultFound
 from stripe.error import StripeError, CardError, InvalidRequestError, SignatureVerificationError
 
+from service.api_definition import BAD_VALUE, NON_MATCHING_SUMS
 from service.config import get_public_url, config
 from service.db import db_session
 from service.error import NotFound, InternalServerError, BadRequest
@@ -82,7 +83,8 @@ def validate_payment(member_id, cart, expected_amount: Decimal):
     # Ensure that the frontend hasn't calculated the amount to pay incorrectly
     if abs(total_amount - Decimal(expected_amount)) > Decimal("0.01"):
         raise BadRequest(f"Expected total amount to pay to be {expected_amount} "
-                         f"but the cart items actually sum to {total_amount}.")
+                         f"but the cart items actually sum to {total_amount}.",
+                         what=NON_MATCHING_SUMS)
 
     if total_amount > 10000:
         raise BadRequest("Maximum amount is 10000.")

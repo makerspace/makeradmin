@@ -48,7 +48,7 @@ def complete_pending_action(action):
 
 
 def ship_add_labaccess_action(action, transaction):
-    days_to_add = action.action_value
+    days_to_add = action.value
 
     if not db_session.query(Key).filter(Key.member_id == transaction.member_id, Key.deleted_at.is_(None)).count():
         logger.info(f"skipping ship_add_labaccess_action because member {transaction.member_id} has no key")
