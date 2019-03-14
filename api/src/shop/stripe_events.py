@@ -163,32 +163,26 @@ def stripe_callback(data, headers):
         stripe_handle_charge_callback(event_subtype, event)
 
 
-# def _reprocess_stripe_event(event) -> None:
-#     try:
-#         logger.info(f"Processing stripe event of type {event.type}")
-#         (event_type, event_subtype) = tuple(event.type.split('.', 1))
-#         if event_type == 'source':
-#             stripe_handle_source_callback(event_subtype, event)
-#         elif event_type == 'charge':
-#             stripe_handle_charge_callback(event_subtype, event)
-#     except HTTPException as e:
-#         # Catch and ignore all event processing errors
-#         pass
-#
-#
-# @instance.route("process_stripe_events", methods=["PUT"])
-# @route_helper
-# def process_stripe_events() -> None:
-#     payload = request.get_json() or {}
-#     source_id = payload.get('source_id', None)
-#     start = payload.get('start', None)
-#     logger.info(f"getting stripe events with start {start} and source_id {source_id}")
-#     events = stripe.Event.list(created={'gt': start} if start else None)
-#     logger.info(f"got {len(events)} events")
-#     for event in events.auto_paging_iter():
-#         obj = event.get('data', {}).get('object', {})
-#         if source_id and source_id in (obj.get('source', {}).get('id'), obj.get('id')) or not source_id:
-#             _reprocess_stripe_event(event)
-#         else:
-#             logger.info(f"skipping event, not matching source_id")
+def process_stripe_event(event):
+    try:
+        logger.info(f"processing stripe event of type {event.type}")
+        (event_type, event_subtype) = tuple(event.type.split('.', 1))
+        if event_type == STRIPE_TYPE_SOURCE:
+            stripe_handle_source_callback(event_subtype, event)
+            
+        elif event_type == STRIPE_TYPE_CHARGE:
+            stripe_handle_charge_callback(event_subtype, event)
+    except Exception as e:
+        pass
 
+
+def process_stripe_events(start=None, source_id=None):
+    logger.info(f"getting stripe events with start {start} and source_id {source_id}")
+    events = stripe.Event.list(created={'gt': start} if start else None)
+    logger.info(f"got {len(events)} events")
+    for event in events.auto_paging_iter():
+        obj = event.get('data', {}).get('object', {})
+        if source_id and source_id in (obj.get('source', {}).get('id'), obj.get('id')) or not source_id:
+            process_stripe_event(event)
+        else:
+            logger.info(f"skipping event, not matching source_id")

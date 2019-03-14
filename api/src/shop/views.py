@@ -1,6 +1,6 @@
 from flask import g, request
 
-from service.api_definition import WEBSHOP, WEBSHOP_EDIT, PUBLIC, GET, USER, POST
+from service.api_definition import WEBSHOP, WEBSHOP_EDIT, PUBLIC, GET, USER, POST, SERVICE, Arg
 from service.entity import Entity, OrmSingeRelation, OrmSingleSingleRelation
 from shop import service
 from shop.entities import product_image_entity, transaction_content_entity, transaction_entity, \
@@ -8,7 +8,7 @@ from shop.entities import product_image_entity, transaction_content_entity, tran
 from shop.models import Action, ProductAction, TransactionContent
 from shop.shop import pending_actions, member_history, receipt, get_product_data, all_product_data, \
     membership_products, register, pay
-from shop.stripe_events import stripe_callback
+from shop.stripe_events import stripe_callback, process_stripe_events
 from shop.transactions import ship_orders
 
 service.entity_routes(
@@ -160,6 +160,11 @@ def register_route():
 def stripe_callback_route():
     stripe_callback(request.data, request.headers)
 
+
+@service.route("/process_stripe_events", method=POST, permission=SERVICE)
+def process_stripe_events_route(start=Arg(str, required=False), source_id=Arg(str, required=False)):
+    """ Used to make server fetch stripe events, mainly for testing. """
+    process_stripe_events(start, source_id)
 
 
 
