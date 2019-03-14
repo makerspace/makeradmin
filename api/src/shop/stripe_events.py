@@ -9,7 +9,6 @@ from service.db import db_session
 from service.error import BadRequest, InternalServerError
 from shop.email import send_new_member_email, send_receipt_email
 from shop.models import PENDING, COMPLETED, PendingRegistration
-from shop.pay import CURRENCY
 from shop.transactions import fail_transaction, get_source_transaction, complete_transaction
 
 logger = getLogger('makeradmin')
@@ -34,6 +33,8 @@ STRIPE_SUBTYPE_DISPUTE_PREFIX = 'dispute'
 STRIPE_SUBTYPE_REFUND_PREFIX = 'refund'
 
 STRIPE_SOURCE_TYPE_3D_SECURE = 'three_d_secure'
+
+CURRENCY = "sek"
 
 
 def convert_to_stripe_amount(amount: Decimal) -> int:

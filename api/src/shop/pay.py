@@ -10,7 +10,7 @@ from service.db import db_session
 from service.error import NotFound, InternalServerError, BadRequest
 from shop.filters import PRODUCT_FILTERS
 from shop.models import Product, Transaction, PENDING, TransactionContent, PendingRegistration, StripePending
-from shop.stripe_events import STRIPE_SOURCE_TYPE_3D_SECURE, create_stripe_charge, convert_to_stripe_amount
+from shop.stripe_events import STRIPE_SOURCE_TYPE_3D_SECURE, create_stripe_charge, convert_to_stripe_amount, CURRENCY
 from shop.transactions import complete_transaction, fail_transaction
 
 logger = getLogger('makeradmin')
@@ -19,8 +19,6 @@ logger = getLogger('makeradmin')
 class PaymentFailed(BadRequest):
     message = 'Payment failed.'
 
-
-CURRENCY = "sek"
 
 CARD_3D_SECURE_NOT_SUPPORTED = 'not_supported'
 
@@ -213,7 +211,7 @@ def handle_three_d_secure_source(transaction, card_source_id, total_amount):
 duplicate_purchase_rands = set()
 
 
-def pay(member_id=None, purchase=None, activates_member=False):
+def make_purchase(member_id=None, purchase=None, activates_member=False):
     """ Pay using the data in purchase, the purchase structure should be validated according to schema.  """
     
     # The frontend will add a per-page random value to the request.

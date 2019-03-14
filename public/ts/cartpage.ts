@@ -158,7 +158,7 @@ common.onGetAndDocumentLoaded("/webshop/product_data", (productData: any) => {
 					spinner.classList.remove("progress-spinner-visible");
 					waitingForPaymentResponse = false;
 					new Cart([]).saveToStorage();
-					if (json.data.redirect !== undefined) {
+					if (json.data.redirect) {
 						window.location.href = json.data.redirect;
 					} else {
 						window.location.href = "receipt/" + json.data.transaction_id;
