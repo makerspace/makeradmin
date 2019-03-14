@@ -65,9 +65,9 @@ def get_membership_summary(entity_id):
     
     return MembershipData(
         has_labaccess=has_labaccess,
-        labaccess_end=labaccess_end.isoformat() if labaccess_end else None,
+        labaccess_end=labaccess_end,
         has_membership=has_membership,
-        membership_end=membership_end.isoformat() if membership_end else None,
+        membership_end=membership_end,
     )
 
 
