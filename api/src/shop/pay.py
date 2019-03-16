@@ -5,7 +5,7 @@ import stripe
 from sqlalchemy.orm.exc import NoResultFound
 from stripe.error import StripeError, CardError, InvalidRequestError, SignatureVerificationError
 
-from service.api_definition import BAD_VALUE, NON_MATCHING_SUMS
+from service.api_definition import BAD_VALUE, NON_MATCHING_SUMS, EMPTY_CART, NEGATIVE_ITEM_COUNT, INVALID_ITEM_COUNT
 from service.config import get_public_url, config
 from service.db import db_session
 from service.error import NotFound, InternalServerError, BadRequest
@@ -49,11 +49,11 @@ def process_cart(member_id, cart):
             count = item['count']
             
             if count <= 0:
-                raise BadRequest(message=f"Bad product count for product {product_id}.")
+                raise BadRequest(message=f"Bad product count for product {product_id}.", what=NEGATIVE_ITEM_COUNT)
             
             if count % product.smallest_multiple != 0:
                 raise BadRequest(f"Bad count for product {product_id}, must be in multiples "
-                                 f"of {product.smallest_multiple}, was {count}.")
+                                 f"of {product.smallest_multiple}, was {count}.", what=INVALID_ITEM_COUNT)
 
             if product.filter:
                 PRODUCT_FILTERS[product.filter](cart_item=item, member_id=member_id)
@@ -76,7 +76,7 @@ def validate_payment(member_id, cart, expected_amount: Decimal):
     """ Validate that the expected amount matches what in the cart. Returns total_amount and cart items. """
     
     if not cart:
-        raise BadRequest(message="No items in cart.")
+        raise BadRequest(message="No items in cart.", what=EMPTY_CART)
 
     total_amount, contents = process_cart(member_id, cart)
 

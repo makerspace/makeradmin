@@ -125,12 +125,12 @@ def membership_products():
 
 def pay(data, member_id):
     if not data:
-        raise UnprocessableEntity(message="No data was sent in the request. This is a bug.")
+        raise UnprocessableEntity(message="No data was sent in the request.")
     
     try:
         validate(data, schema=purchase_schema)
     except ValidationError as e:
-        raise UnprocessableEntity(message="Data sent in request not in correct format. This is a bug.")
+        raise UnprocessableEntity(message=f"Data sent in request not in correct format: {str(e)}")
     
     # This will raise if the payment fails.
     transaction, redirect = make_purchase(member_id=member_id, purchase=data)
@@ -143,12 +143,12 @@ def pay(data, member_id):
 
 def register(data, remote_addr, user_agent):
     if not data:
-        raise UnprocessableEntity(message="No data was sent in the request. This is a bug.")
+        raise UnprocessableEntity(message="No data was sent in the request.")
     
     try:
         validate(data, schema=register_schema)
     except ValidationError as e:
-        raise UnprocessableEntity(message="Data sent in request not in correct format. This is a bug.")
+        raise UnprocessableEntity(message=f"Data sent in request not in correct format: {str(e)}")
 
     products = membership_products()
 

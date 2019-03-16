@@ -58,12 +58,22 @@ ALL_PERMISSIONS = [
 SERVICE_USER_ID = -1
 SERVICE_PERMISSIONS = (SERVICE,)
 
+#
 # What
+#
+
+# Generic
 BAD_VALUE = 'bad_value'
 REQUIRED = 'required'
 EXPIRED = 'expired'
 NOT_UNIQUE = 'not_unique'
+
+# Ship
 NON_MATCHING_SUMS = 'non_matching_sums'
+INVALID_ITEM_COUNT = 'invalid_item_count'
+EMPTY_CART = 'empty_cart'
+DUPLICATE_TRANSACTION = 'duplicate_transaction'
+NEGATIVE_ITEM_COUNT = 'negative_item_count'
 
 
 class Arg:
