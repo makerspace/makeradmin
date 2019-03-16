@@ -6,7 +6,7 @@
     </tr>
     <tr>
         <td align="center" colspan="3">
-            <p>Tack för ditt köp {{member.firstname}} (#{{member.member_number}})!</p>
+            <p>Tack för ditt köp! Thanks for your purchase!<br> {{member.firstname}} (#{{member.member_number}})</p>
         </td>
     </tr>
     {% for product, cartItem in cart %}
@@ -29,8 +29,21 @@
     </tr>
     <tr>
         <td align="center" colspan="3">
-            <p>Stockholm Makerspace - Drottning Kristinas väg 53, 114 28 Stockholm</p>
-            <p>Kvittonummer: {{ transaction.id }}. <a href='{{ public_url("/shop/receipt/" + (transaction.id|string)) }}'>Se detta kvitto på nätet</a></p>
+          <p>Kvittonummer: {{ transaction.id }}. <a href='{{ public_url("/shop/receipt/" + (transaction.id|string)) }}'>Se detta kvitto på nätet</a>.<br>
+          (Receipt number above, click to see your receipt online).</p>
+
+          <p>Stockholm Makerspace - Drottning Kristinas väg 53, 114 28 Stockholm</p>
+
+          <p>Stockholm Makerspace är en ideell förening.<br>
+              Stockholm Makerspace is a non-profit organization.<br>
+              Org. Nummer: 802467-7026</p>
+
+          <p><a href="https://www.makerspace.se/" target="_blank">makerspace.se<br><br>
+            <a href="https://www.facebook.com/groups/makerspace.se" target="_blank">Facebook</a><br>
+            <a href="https://www.makerspace.se/medlemskap" target="_blank">Info om medlemskap</a> / <a href="https://www.makerspace.se/membership" target="_blank">Info about membership</a><br>
+            <a href="https://www.makerspace.se/kalendarium" target="_blank">Kalendariet/Calendar<br>
+            <a href="https://wiki.makerspace.se/Makerspace_FAQ" target="_blank">Allmän Q&A </a>/ <a href="https://wiki.makerspace.se/Makerspace_FAQ,_English" target="_blank">General FAQ</a>
+          </p>
         </td>
     </tr>
 </table>
