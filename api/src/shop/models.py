@@ -47,17 +47,8 @@ class Product(Base):
                f', display_order={self.display_order})'
 
 
-class Action(Base):
-    __tablename__ = 'webshop_actions'
-    
-    ADD_LABACCESS_DAYS = "add_labaccess_days"
-    ADD_MEMBERSHIP_DAYS = "add_membership_days"
-
-    id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
-    name = Column(String(255), nullable=False)
-
-    def __repr__(self):
-        return f'Action(id={self.id}, name={self.name})'
+ADD_LABACCESS_DAYS = "add_labaccess_days"
+ADD_MEMBERSHIP_DAYS = "add_membership_days"
 
 
 class ProductAction(Base):
@@ -65,16 +56,14 @@ class ProductAction(Base):
 
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
     product_id = Column(Integer, ForeignKey(Product.id), nullable=False)
-    action_id = Column(Integer, ForeignKey(Action.id), nullable=False)
+    action = Column(Enum(ADD_MEMBERSHIP_DAYS, ADD_LABACCESS_DAYS), nullable=False)
     value = Column(Integer)
     created_at = Column(DateTime, server_default=func.now())
     updated_at = Column(DateTime, server_default=func.now())
     deleted_at = Column(DateTime)
     
-    action = relationship(Action)
-
     def __repr__(self):
-        return f'ProductAction(id={self.id}, value={self.value})'
+        return f'ProductAction(id={self.id}, value={self.value}, action={self.action})'
 
 
 # TODO Move to inside.
@@ -121,16 +110,15 @@ class TransactionAction(Base):
 
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
     content_id = Column(Integer, ForeignKey(TransactionContent.id), nullable=False)
-    action_id = Column(Integer, ForeignKey(Action.id), nullable=False)
+    action = Column(Enum(ADD_MEMBERSHIP_DAYS, ADD_LABACCESS_DAYS), nullable=False)
     value = Column(Integer)
     status = Column(Enum(PENDING, COMPLETED), nullable=False)
     completed_at = Column(DateTime)
 
-    action = relationship(Action)
     content = relationship(TransactionContent, backref='actions')
 
     def __repr__(self):
-        return f'TransactionAction(id={self.id}, value={self.value}, status={self.status})'
+        return f'TransactionAction(id={self.id}, value={self.value}, status={self.status}, action={self.action})'
 
 
 class PendingRegistration(Base):

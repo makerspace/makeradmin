@@ -8,7 +8,8 @@ from membership.models import Key, LABACCESS
 from service.db import db_session
 from service.error import InternalServerError
 from shop.email import send_key_updated_email, send_membership_updated_email
-from shop.models import TransactionAction, Action, TransactionContent, Transaction, PENDING, COMPLETED, FAILED
+from shop.models import TransactionAction, TransactionContent, Transaction, PENDING, COMPLETED, FAILED, \
+    ADD_LABACCESS_DAYS, ADD_MEMBERSHIP_DAYS
 
 logger = getLogger('makeradmin')
 
@@ -23,10 +24,9 @@ def pending_actions_query(member_id=None):
     
     query = (
         db_session
-        .query(TransactionAction, Action, TransactionContent, Transaction)
-        .join(Action)
-        .join(TransactionContent)
-        .join(Transaction)
+        .query(TransactionAction, TransactionContent, Transaction)
+        .join(TransactionAction.content)
+        .join(TransactionContent.transaction)
         .filter(TransactionAction.status == PENDING)
         .filter(Transaction.status == COMPLETED)
     )
@@ -56,6 +56,7 @@ def ship_add_labaccess_action(action, transaction):
         creation_reason=f"transaction_action_id: {action.id}, transaction_id: {transaction.id}"
     ).labaccess_end
     
+    # TODO BM Can this assert fail too?
     assert labaccess_end
     
     complete_pending_action(action)
@@ -71,6 +72,7 @@ def ship_add_membership_action(action, transaction):
         default_start_date=transaction.created_at.date(),
     ).membership_end
 
+    # TODO BM This assert fails when running tests, but then we catch all exceptions... Investigate.
     assert membership_end
 
     complete_pending_action(action)
@@ -83,12 +85,12 @@ def ship_orders(ship_add_labaccess=True):
     If a user has no key yet, then the order will remain as not completed.
     If a user has multiple keys, all of them are updated with new dates.
     """
-    for action, action_type, content, transaction in pending_actions_query():
+    for action, content, transaction in pending_actions_query():
 
-        if ship_add_labaccess and action_type.name == Action.ADD_LABACCESS_DAYS:
+        if ship_add_labaccess and action.action == ADD_LABACCESS_DAYS:
             ship_add_labaccess_action(action, transaction)
 
-        if action_type.name == Action.ADD_MEMBERSHIP_DAYS:
+        if action.action == ADD_MEMBERSHIP_DAYS:
             ship_add_membership_action(action, transaction)
 
 
@@ -99,7 +101,7 @@ def complete_transaction(transaction):
         db_session.flush()
         try:
             ship_orders(ship_add_labaccess=False)
-        except Exception as e:
+        except Exception as e:  # TODO BM Don't catch all here, it is very bad.
             logger.exception(f"failed to ship orders in transaction {transaction.id}, ignoring error")
 
 

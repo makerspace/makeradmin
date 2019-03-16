@@ -70,8 +70,8 @@ common.documentLoaded().then(() => {
 
         let pendingLabaccessDays = 0;
         for (let pending of pending_actions_json.data) {
-            if (pending.action.name === "add_labaccess_days") {
-                pendingLabaccessDays += pending.pending_action.value;
+            if (pending.action.action === "add_labaccess_days") {
+                pendingLabaccessDays += pending.action.value;
             }
         }
 

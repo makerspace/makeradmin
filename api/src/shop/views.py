@@ -5,7 +5,7 @@ from service.entity import Entity, OrmSingeRelation, OrmSingleSingleRelation
 from shop import service
 from shop.entities import product_image_entity, transaction_content_entity, transaction_entity, \
     transaction_action_entity, product_entity, category_entity
-from shop.models import Action, ProductAction, TransactionContent
+from shop.models import ProductAction, TransactionContent
 from shop.shop import pending_actions, member_history, receipt, get_product_data, all_product_data, \
     membership_products, register, pay
 from shop.stripe_events import stripe_callback, process_stripe_events
@@ -38,16 +38,6 @@ service.related_entity_routes(
     entity=product_image_entity,
     relation=OrmSingeRelation('images', 'product_id'),
     permission_list=PUBLIC,
-)
-
-
-service.entity_routes(
-    path="/action",
-    entity=Entity(Action, default_sort_column=None),
-    permission_list=WEBSHOP,
-    permission_read=WEBSHOP,
-    permission_create=WEBSHOP_EDIT,
-    permission_update=WEBSHOP_EDIT,
 )
 
 
@@ -118,7 +108,7 @@ def ship_orders_route():
 
 @service.route("/member/current/pending_actions", method=GET, permission=USER)
 def pending_actions_for_member():
-    return pending_actions(g.user_id)
+    return pending_actions(g.user_id)  # TODO BM Fix usages.
 
 
 @service.route("/member/current/transactions", method=GET, permission=USER)

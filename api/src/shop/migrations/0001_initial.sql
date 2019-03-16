@@ -139,15 +139,32 @@ ALTER TABLE `webshop_transaction_actions` CONVERT TO CHARACTER SET utf8mb4 COLLA
 ALTER TABLE `webshop_transaction_contents` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
 ALTER TABLE `webshop_transactions` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
 
--- Add constraints that are missing in database.
+-- add constraints that are missing in database.
+
 ALTER TABLE `webshop_products` ADD CONSTRAINT `category_constraint` FOREIGN KEY (`category_id`) REFERENCES `webshop_product_categories` (`id`);
-ALTER TABLE `webshop_product_actions` ADD CONSTRAINT `action_constraint` FOREIGN KEY (`action_id`) REFERENCES `webshop_actions` (`id`);
 ALTER TABLE `webshop_product_actions` ADD CONSTRAINT `product_constraint` FOREIGN KEY (`product_id`) REFERENCES `webshop_products` (`id`);
 ALTER TABLE `webshop_product_images` ADD CONSTRAINT `image_product_constraint` FOREIGN KEY (`product_id`) REFERENCES `webshop_products` (`id`);
 ALTER TABLE `webshop_stripe_pending` ADD CONSTRAINT `transaction_constraint2` FOREIGN KEY (`transaction_id`) REFERENCES `webshop_transactions` (`id`);
 ALTER TABLE `webshop_pending_registrations` ADD CONSTRAINT `transaction_constraint3` FOREIGN KEY (`transaction_id`) REFERENCES `webshop_transactions` (`id`);
-ALTER TABLE `webshop_transaction_actions` ADD CONSTRAINT `action_constraint3` FOREIGN KEY (`action_id`) REFERENCES `webshop_actions` (`id`);
 ALTER TABLE `webshop_transaction_actions` ADD CONSTRAINT `content_constraint2` FOREIGN KEY (`content_id`) REFERENCES `webshop_transaction_contents` (`id`);
 ALTER TABLE `webshop_transaction_contents` ADD CONSTRAINT `transaction_constraint` FOREIGN KEY (`transaction_id`) REFERENCES `webshop_transactions` (`id`);
 
+-- replace action table with enum
+
+ALTER TABLE `webshop_product_actions` ADD COLUMN `action` enum('add_membership_days','add_labaccess_days') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL;
+UPDATE `webshop_product_actions` SET `action` = 'add_membership_days' where action_id = 1;
+UPDATE `webshop_product_actions` SET `action` = 'add_labaccess_days' where action_id = 2;
+ALTER TABLE `webshop_product_actions` DROP KEY `action_constraint`;
+ALTER TABLE `webshop_product_actions` DROP COLUMN `action_id`;
+
+ALTER TABLE `webshop_transaction_actions` ADD COLUMN `action` enum('add_membership_days','add_labaccess_days') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL;
+UPDATE `webshop_transaction_actions` SET `action` = 'add_membership_days' where action_id = 1;
+UPDATE `webshop_transaction_actions` SET `action` = 'add_labaccess_days' where action_id = 2;
+ALTER TABLE `webshop_transaction_actions` DROP KEY `action_constraint3`;
+ALTER TABLE `webshop_transaction_actions` DROP COLUMN `action_id`;
+
+DROP TABLE `webshop_actions`
+
+
 -- TODO Test if uniquie constraint gives same error messages as unique index.
+

@@ -11,7 +11,7 @@ from service.db import db_session
 from service.error import NotFound, UnprocessableEntity, BadRequest
 from shop.entities import transaction_entity, transaction_content_entity, product_entity, category_entity, \
     product_image_entity
-from shop.models import Action, Transaction, Product, ProductCategory, ProductAction
+from shop.models import Transaction, Product, ProductCategory, ProductAction, ADD_MEMBERSHIP_DAYS
 from shop.pay import make_purchase
 from shop.schemas import register_schema, purchase_schema
 from shop.transactions import pending_actions_query
@@ -24,7 +24,7 @@ def pending_actions(member_id=None):
     
     return [
         {
-            "item": {
+            "content": {
                 "id": content.id,
                 "transaction_id": content.transaction_id,
                 "product_id": content.product_id,
@@ -32,16 +32,12 @@ def pending_actions(member_id=None):
                 "amount": str(content.amount),
             },
             "action": {
-                "id": action_type.id,
-                "name": action_type.name,
-            },
-            "pending_action": {
-                "id": action.id,
+                "action": action.action,
                 "value": action.value,
             },
             "member_id": transaction.member_id,
             "created_at": transaction.created_at.isoformat(),
-        } for action, action_type, content, transaction in query
+        } for action, content, transaction in query
     ]
 
 
@@ -116,9 +112,9 @@ def membership_products():
     # Find all products which gives a member membership
     # Note: Assumes a product never contains multiple actions of the same type.
     # If this doesn't hold we will get duplicates of that product in the list.
-    query = db_session.query(Product).join(ProductAction).join(Action).filter(Action.name == 'add_membership_days',
-                                                                              ProductAction.deleted_at.is_(None),
-                                                                              Product.deleted_at.is_(None))
+    query = db_session.query(Product).join(ProductAction).filter(ProductAction.action == ADD_MEMBERSHIP_DAYS,
+                                                                 ProductAction.deleted_at.is_(None),
+                                                                 Product.deleted_at.is_(None))
     
     return [{"id": p.id, "name": p.name, "price": float(p.price)} for p in query]
 

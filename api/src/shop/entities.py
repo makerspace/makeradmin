@@ -1,6 +1,6 @@
 from membership.models import Member
 from service.entity import Entity, ExpandField
-from shop.models import ProductImage, Transaction, TransactionContent, Product, TransactionAction, Action, \
+from shop.models import ProductImage, Transaction, TransactionContent, Product, TransactionAction, \
     ProductCategory
 from shop.ordered_entity import OrderedEntity
 from shop.product_image_entity import ProductImageEntity
@@ -33,7 +33,6 @@ transaction_content_entity = Entity(
 transaction_action_entity = Entity(
     TransactionAction,
     default_sort_column=None,
-    expand_fields={'action': ExpandField(TransactionAction.action, [Action.name])},
 )
 
 
