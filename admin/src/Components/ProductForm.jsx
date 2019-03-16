@@ -9,6 +9,7 @@ import ReactSelect from "react-select";
 import ProductAction from "../Models/ProductAction";
 
 
+//  TODO BM Fix this code after removing action as an entity.
 const filterAvailableActions = (actions, actionTypes) => {
       return actionTypes.filter(type => -1 === _.findIndex(actions, action => type.id === action.action_id));
 };
@@ -118,7 +119,7 @@ class ProductForm extends React.Component {
                                              getOptionLabel={o => o.name}
                                              onChange={o=> this.setState({selectedActionType: o})}
                                 />
-                                <button type="button" className="uk-button uk-button-success uk-float-right" onClick={() => product.addAction(new ProductAction({action_id: selectedActionType.id}))}><i className="uk-icon-plus"/> Lägg till åtgärd</button>
+                                <button type="button" className="uk-button uk-button-success uk-float-right" onClick={() => product.addAction(new ProductAction({action: selectedActionType.id}))}><i className="uk-icon-plus"/> Lägg till åtgärd</button>
                             </div>
                         }
                     </fieldset>

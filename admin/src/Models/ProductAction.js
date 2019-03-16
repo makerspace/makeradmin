@@ -8,7 +8,7 @@ ProductAction.model = {
     id: "id",
     root: "/webshop/product_action",
     attributes: {
-        action_id: 0,
+        action: '',
         product_id: 0,
         value: 0,
     },
