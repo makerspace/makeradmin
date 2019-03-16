@@ -139,7 +139,7 @@ def pay(data, member_id):
         'transaction_id': transaction.id,
         'redirect': redirect,
     }
-    
+  
 
 def register(data, remote_addr, user_agent):
     if not data:

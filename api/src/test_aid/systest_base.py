@@ -3,6 +3,7 @@ import sys
 import time
 from copy import copy
 from functools import wraps
+from logging import getLogger
 
 from unittest import skipIf
 
@@ -28,6 +29,9 @@ VALID_NON_3DS_CARD_NO = "378282246310005"
 EXPIRED_3DS_CARD_NO = "4000000000000069"
 
 EXPIRES_CVC_ZIP = "4242424242424"
+
+
+logger = getLogger('makeradmin')
 
 
 class SystestBase(TestBase):

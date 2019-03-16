@@ -244,20 +244,28 @@ class Entity:
         self.validate_present(input_data)
         if not input_data:
             raise UnprocessableEntity("Can not update using empty data.")
-        db_session.query(self.model).filter(self.pk == entity_id).update(input_data)
-        return self.read(entity_id)
+        entity = db_session.query(self.model).get(entity_id)
+        if not entity:
+            raise NotFound("Could not find any entity with specified parameters.")
+
+        for k, v in input_data.items():
+            setattr(entity, k, v)
+
+        db_session.commit()
+        
+        return self.to_obj(entity)
     
     def update(self, entity_id):
         return self._update_internal(entity_id, request.json)
     
     def delete(self, entity_id):
-        count = db_session.query(self.model).filter(self.pk == entity_id).update(dict(deleted_at=datetime.utcnow()))
-        
-        assert count <= 1, "More than one entity matching primary key, this is a bug."
-        
-        if not count:
+        entity = db_session.query(self.model).get(entity_id)
+        if not entity:
             raise NotFound("Could not find any entity with specified parameters.")
-
+        
+        entity.deleted_at = datetime.utcnow()
+        db_session.commit()
+ 
     def _get_entity_id_list(self, name):
         ids = request.json.get(name)
         try:

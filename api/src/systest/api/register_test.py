@@ -63,7 +63,7 @@ class Test(ShopTestMixin, ApiTest):
 
     def test_registring_with_existing_member_email_does_not_work_and_does_not_return_token(self):
         source = stripe.Source.create(type="card", token=stripe.Token.create(card=self.card(VALID_NON_3DS_CARD_NO)).id)
-
+ 
         member = self.obj.create_member()
         self.api.create_member(**member)
 

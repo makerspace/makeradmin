@@ -44,6 +44,7 @@ app.before_request(before_request_functions)
 app.after_request(after_request_functions)
 
 engine = create_mysql_engine(**get_mysql_config())
+# TODO BM Make sure commits and rollbacks are handled correctly, especially in shop.
 
 populate_fields_by_index(engine)
 register_permissions(ALL_PERMISSIONS)
