@@ -112,7 +112,7 @@ def membership_products():
     # Find all products which gives a member membership
     # Note: Assumes a product never contains multiple actions of the same type.
     # If this doesn't hold we will get duplicates of that product in the list.
-    query = db_session.query(Product).join(ProductAction).filter(ProductAction.action == ADD_MEMBERSHIP_DAYS,
+    query = db_session.query(Product).join(ProductAction).filter(ProductAction.action_type == ADD_MEMBERSHIP_DAYS,
                                                                  ProductAction.deleted_at.is_(None),
                                                                  Product.deleted_at.is_(None))
     

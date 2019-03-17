@@ -110,9 +110,9 @@ def add_transaction_to_db(member_id, total_amount, contents):
         
         db_session.execute(
             """
-            INSERT INTO webshop_transaction_actions (content_id, action, value, status)
-            SELECT :content_id AS content_id, action, SUM(:count * value) AS value, :pending AS status
-            FROM webshop_product_actions WHERE product_id=:product_id AND deleted_at IS NULL GROUP BY action
+            INSERT INTO webshop_transaction_actions (content_id, action_type, value, status)
+            SELECT :content_id AS content_id, action_type, SUM(:count * value) AS value, :pending AS status
+            FROM webshop_product_actions WHERE product_id=:product_id AND deleted_at IS NULL GROUP BY action_type
             """,
             {'content_id': content.id, 'count': content.count, 'pending': PENDING, 'product_id': content.product_id}
         )

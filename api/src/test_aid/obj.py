@@ -104,7 +104,7 @@ class ObjFactory:
     def create_product_action(self, **kwargs):
         obj = dict(
             product_id=0,
-            action=ADD_MEMBERSHIP_DAYS,
+            action_type=ADD_MEMBERSHIP_DAYS,
             value=365,
         )
         obj.update(**kwargs)

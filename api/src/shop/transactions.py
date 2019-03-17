@@ -52,7 +52,9 @@ def ship_add_labaccess_action(action, transaction):
         return
 
     labaccess_end = add_membership_days(
-        transaction.member_id, LABACCESS, days=days_to_add,
+        transaction.member_id,
+        LABACCESS,
+        days=days_to_add,
         creation_reason=f"transaction_action_id: {action.id}, transaction_id: {transaction.id}"
     ).labaccess_end
     
@@ -87,10 +89,10 @@ def ship_orders(ship_add_labaccess=True):
     """
     for action, content, transaction in pending_actions_query():
 
-        if ship_add_labaccess and action.action == ADD_LABACCESS_DAYS:
+        if ship_add_labaccess and action.action_type == ADD_LABACCESS_DAYS:
             ship_add_labaccess_action(action, transaction)
 
-        if action.action == ADD_MEMBERSHIP_DAYS:
+        if action.action_type == ADD_MEMBERSHIP_DAYS:
             ship_add_membership_action(action, transaction)
 
 

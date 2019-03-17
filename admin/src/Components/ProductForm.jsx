@@ -10,7 +10,7 @@ import ProductAction, {ACTION_TYPES} from "../Models/ProductAction";
 
 // Return list of available actions types based on selected ones
 const filterAvailableActions = actions => {
-      return ACTION_TYPES.filter(type => -1 === _.findIndex(actions, action => type === action.action));
+      return ACTION_TYPES.filter(type => -1 === _.findIndex(actions, action => type === action.action_type));
 };
 
 
@@ -64,7 +64,7 @@ class ProductForm extends React.Component {
         
         const renderAction = (action, i) => (
             <div key={i} className="form-row uk-grid">
-                <div className="uk-with-1-6">{action.action}</div>
+                <div className="uk-with-1-6">{action.action_type}</div>
                 <div className="uk-with-1-6"><strong>Värde</strong></div>
                 <div className="uk-with-3-6"><TextInput model={action} label={false} formrow={false} name={"value"}/></div>
                 <div className="uk-with-1-6">

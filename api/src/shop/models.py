@@ -56,15 +56,14 @@ class ProductAction(Base):
 
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
     product_id = Column(Integer, ForeignKey(Product.id), nullable=False)
-    # TODO Rename to action type?
-    action = Column(Enum(ADD_MEMBERSHIP_DAYS, ADD_LABACCESS_DAYS), nullable=False)
+    action_type = Column(Enum(ADD_MEMBERSHIP_DAYS, ADD_LABACCESS_DAYS), nullable=False)
     value = Column(Integer)
     created_at = Column(DateTime, server_default=func.now())
     updated_at = Column(DateTime, server_default=func.now())
     deleted_at = Column(DateTime)
     
     def __repr__(self):
-        return f'ProductAction(id={self.id}, value={self.value}, action={self.action})'
+        return f'ProductAction(id={self.id}, value={self.value}, action_type={self.action_type})'
 
 
 # TODO Move to inside.
@@ -89,6 +88,7 @@ class Transaction(Base):
         return f'Transaction(id={self.id}, amount={self.amount}, status={self.status})'
 
 
+# TODO Rename to transaction item?
 class TransactionContent(Base):
     __tablename__ = 'webshop_transaction_contents'
     
@@ -110,7 +110,7 @@ class TransactionAction(Base):
 
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
     content_id = Column(Integer, ForeignKey(TransactionContent.id), nullable=False)
-    action = Column(Enum(ADD_MEMBERSHIP_DAYS, ADD_LABACCESS_DAYS), nullable=False)
+    action_type = Column(Enum(ADD_MEMBERSHIP_DAYS, ADD_LABACCESS_DAYS), nullable=False)
     value = Column(Integer)
     status = Column(Enum(PENDING, COMPLETED), nullable=False)
     completed_at = Column(DateTime)
@@ -118,7 +118,8 @@ class TransactionAction(Base):
     content = relationship(TransactionContent, backref='actions')
 
     def __repr__(self):
-        return f'TransactionAction(id={self.id}, value={self.value}, status={self.status}, action={self.action})'
+        return f'TransactionAction(id={self.id}, value={self.value}, status={self.status},' \
+               f' action_type={self.action_type})'
 
 
 class PendingRegistration(Base):

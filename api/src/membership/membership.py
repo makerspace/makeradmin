@@ -71,12 +71,12 @@ def get_membership_summary(entity_id):
     )
 
 
-def add_membership_days(member_id=None, type_=None, days=None, creation_reason=None, default_start_date=None):
+def add_membership_days(member_id=None, span_type=None, days=None, creation_reason=None, default_start_date=None):
     assert days >= 0
 
     old_span = db_session.query(Span).filter_by(creation_reason=creation_reason).first()
     if old_span:
-        if days == (old_span.enddate - old_span.startdate).days and type_ == old_span.type:
+        if days == (old_span.enddate - old_span.startdate).days and span_type == old_span.type:
             # Duplicate add days can happend because the code that handles the transactions is not yet done in a db
             # transaction, there are also an external script for handling puchases in ticktail that can create
             # dupllicates.
@@ -88,7 +88,7 @@ def add_membership_days(member_id=None, type_=None, days=None, creation_reason=N
         
     last_end, = db_session.query(func.max(Span.enddate)).filter(
         Span.member_id == member_id,
-        Span.type == type_,
+        Span.type == span_type,
         Span.deleted_at.is_(None)
     ).first()
     
@@ -97,7 +97,7 @@ def add_membership_days(member_id=None, type_=None, days=None, creation_reason=N
 
     end = last_end + timedelta(days=days)
     
-    span = Span(member_id=member_id, startdate=last_end, enddate=end, type=type_, creation_reason=creation_reason)
+    span = Span(member_id=member_id, startdate=last_end, enddate=end, type=span_type, creation_reason=creation_reason)
     db_session.add(span)
     db_session.flush()
     

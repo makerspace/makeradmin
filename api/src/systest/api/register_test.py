@@ -14,7 +14,7 @@ class Test(ShopTestMixin, ApiTest):
         dict(
             smallest_multiple=1,
             price=300.0,
-            action=dict(action=ADD_MEMBERSHIP_DAYS, value=365),
+            action=dict(action_type=ADD_MEMBERSHIP_DAYS, value=365),
         )
     ]
 
