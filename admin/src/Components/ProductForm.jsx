@@ -2,16 +2,15 @@ import React from 'react';
 import TextInput from "./TextInput";
 import Textarea from "./Textarea";
 import DateTimeInput from "./DateTimeInput";
-import {get} from "../gateway";
 import * as _ from "underscore";
 import SelectInput from "./SelectInput";
 import ReactSelect from "react-select";
-import ProductAction from "../Models/ProductAction";
+import ProductAction, {ACTION_TYPES} from "../Models/ProductAction";
 
 
-//  TODO BM Fix this code after removing action as an entity.
-const filterAvailableActions = (actions, actionTypes) => {
-      return actionTypes.filter(type => -1 === _.findIndex(actions, action => type.id === action.action_id));
+// Return list of available actions types based on selected ones
+const filterAvailableActions = actions => {
+      return ACTION_TYPES.filter(type => -1 === _.findIndex(actions, action => type === action.action));
 };
 
 
@@ -19,27 +18,16 @@ const filterSelectedActionType = (selectedActionType, availableActionTypes) => {
     if (_.isEmpty(availableActionTypes)) {
         return null;
     }
-    if (selectedActionType && -1 !== _.findIndex(availableActionTypes, type => type.id === selectedActionType.id)) {
+    if (selectedActionType && -1 !== _.findIndex(availableActionTypes, type => type === selectedActionType)) {
         return selectedActionType;
     }
     return availableActionTypes[0];
 };
 
 
-const setActionTypes = actionTypes => prevState => {
-    const availableActionTypes = filterAvailableActions(prevState.actions, actionTypes);
-    const selectedActionType = filterSelectedActionType(prevState.selectedActionType, availableActionTypes);
-    return {
-        actionTypes,
-        availableActionTypes,
-        selectedActionType,
-    };
-};
-
-
 const productChanged = (prevState, props) => {
     const actions = props.product.actions;
-    const availableActionTypes = filterAvailableActions(actions, prevState.actionTypes);
+    const availableActionTypes = filterAvailableActions(actions);
     const selectedActionType = filterSelectedActionType(prevState.selectedActionType, availableActionTypes);
     return {
         actions,
@@ -55,12 +43,10 @@ class ProductForm extends React.Component {
         super(props);
         this.state = {
             actions: [],
-            actionTypes: [],
             availableActionTypes: [],
             selectedActionType: null,
             saveDisabled: true,
         };
-        get({url: "/webshop/action"}).then(data => this.setState(setActionTypes(data.data)));
     }
 
     componentDidMount() {
@@ -74,13 +60,11 @@ class ProductForm extends React.Component {
     
     render() {
         const {product, onDelete, onSave} = this.props;
-        const {actions, availableActionTypes, selectedActionType, saveDisabled, actionTypes} = this.state;
-        
-        const actionName = action => (_.find(actionTypes, a => action.action_id === a.id) || {}).name;
+        const {actions, availableActionTypes, selectedActionType, saveDisabled} = this.state;
         
         const renderAction = (action, i) => (
             <div key={i} className="form-row uk-grid">
-                <div className="uk-with-1-6">{actionName(action)}</div>
+                <div className="uk-with-1-6">{action.action}</div>
                 <div className="uk-with-1-6"><strong>Värde</strong></div>
                 <div className="uk-with-3-6"><TextInput model={action} label={false} formrow={false} name={"value"}/></div>
                 <div className="uk-with-1-6">
@@ -112,14 +96,12 @@ class ProductForm extends React.Component {
                             ""
                             :
                             <div>
-                                <ReactSelect className="uk-width-3-5 uk-float-left"
-                                             value={selectedActionType}
-                                             options={availableActionTypes}
-                                             getOptionValue={o => o.id}
-                                             getOptionLabel={o => o.name}
-                                             onChange={o=> this.setState({selectedActionType: o})}
+                                 <ReactSelect className="uk-width-3-5 uk-float-left"
+                                             value={{value: selectedActionType, label: selectedActionType}}
+                                             options={availableActionTypes.map(a => ({value: a, label: a}))}
+                                             onChange={o => this.setState({selectedActionType: o.value})}
                                 />
-                                <button type="button" className="uk-button uk-button-success uk-float-right" onClick={() => product.addAction(new ProductAction({action: selectedActionType.id}))}><i className="uk-icon-plus"/> Lägg till åtgärd</button>
+                                <button type="button" className="uk-button uk-button-success uk-float-right" onClick={() => product.addAction(new ProductAction({action: selectedActionType}))}><i className="uk-icon-plus"/> Lägg till åtgärd</button>
                             </div>
                         }
                     </fieldset>

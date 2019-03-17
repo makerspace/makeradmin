@@ -4,7 +4,7 @@ from service.api_definition import WEBSHOP, WEBSHOP_EDIT, PUBLIC, GET, USER, POS
 from service.entity import Entity, OrmSingeRelation, OrmSingleSingleRelation
 from shop import service
 from shop.entities import product_image_entity, transaction_content_entity, transaction_entity, \
-    transaction_action_entity, product_entity, category_entity
+    transaction_action_entity, product_entity, category_entity, product_action_entity
 from shop.models import ProductAction, TransactionContent
 from shop.shop import pending_actions, member_history, receipt, get_product_data, all_product_data, \
     membership_products, register, pay
@@ -43,11 +43,18 @@ service.related_entity_routes(
 
 service.entity_routes(
     path="/product_action",
-    entity=Entity(ProductAction),
+    entity=product_action_entity,
     permission_list=WEBSHOP,
     permission_read=WEBSHOP,
     permission_create=WEBSHOP_EDIT,
     permission_update=WEBSHOP_EDIT,
+)
+
+service.related_entity_routes(
+    path="/product/<int:related_entity_id>/actions",
+    entity=product_action_entity,
+    relation=OrmSingeRelation('actions', 'product_id'),
+    permission_list=WEBSHOP,
 )
 
 

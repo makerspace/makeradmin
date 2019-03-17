@@ -56,6 +56,7 @@ class ProductAction(Base):
 
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
     product_id = Column(Integer, ForeignKey(Product.id), nullable=False)
+    # TODO Rename to action type?
     action = Column(Enum(ADD_MEMBERSHIP_DAYS, ADD_LABACCESS_DAYS), nullable=False)
     value = Column(Integer)
     created_at = Column(DateTime, server_default=func.now())

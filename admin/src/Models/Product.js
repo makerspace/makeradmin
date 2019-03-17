@@ -71,12 +71,12 @@ export default class Product extends Base {
         if (!this.unsavedActions) {
             this.unsavedActions = this.savedActions.map(a => a.copy());
         }
-        this.unsavedActions = this.unsavedActions.filter(a => a.action_id !== action.action_id);
+        this.unsavedActions = this.unsavedActions.filter(a => a.action !== action.action);
         this.notify();
     }
     
     refreshRelated() {
-        return get({url: ProductAction.model.root, params: {product_id: this.id}})
+        return get({url: `/webshop/product/${this.id}/actions`})
             .then(({data}) => {
                 this.savedActions = data.map(d => new ProductAction(d));
                 this.unsavedActions = null;
