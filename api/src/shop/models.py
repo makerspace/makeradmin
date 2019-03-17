@@ -121,6 +121,7 @@ class TransactionAction(Base):
                f' action_type={self.action_type})'
 
 
+# TODO Convert into product action.
 class PendingRegistration(Base):
     __tablename__ = 'webshop_pending_registrations'
     
@@ -131,6 +132,7 @@ class PendingRegistration(Base):
         return f'PendingRegistration(id={self.id})'
     
 
+# TODO Make it work.
 class ProductImage(Base):
     __tablename__ = 'webshop_product_images'
 
