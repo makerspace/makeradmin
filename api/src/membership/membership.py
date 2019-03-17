@@ -3,7 +3,7 @@ from datetime import date, timedelta
 
 from sqlalchemy import func
 
-from membership.models import Span, LABACCESS, SPECIAL_LABACESS, MEMBERSHIP, Member
+from membership.models import Span, Member
 from service.api_definition import NOT_UNIQUE
 from service.db import db_session
 from service.error import UnprocessableEntity
@@ -33,7 +33,7 @@ def get_membership_summary(entity_id):
         db_session
             .query(Span)
             .filter(Span.member_id == entity_id,
-                    Span.type.in_([LABACCESS, SPECIAL_LABACESS]),
+                    Span.type.in_([Span.LABACCESS, Span.SPECIAL_LABACESS]),
                     Span.startdate <= today,
                     Span.enddate >= today,
                     Span.deleted_at.is_(None))
@@ -44,7 +44,7 @@ def get_membership_summary(entity_id):
         db_session
             .query(Span)
             .filter(Span.member_id == entity_id,
-                    Span.type.in_([MEMBERSHIP]),
+                    Span.type.in_([Span.MEMBERSHIP]),
                     Span.startdate <= today,
                     Span.enddate >= today,
                     Span.deleted_at.is_(None))
@@ -53,13 +53,13 @@ def get_membership_summary(entity_id):
 
     labaccess_end, = db_session.query(func.max(Span.enddate)).filter(
         Span.member_id == entity_id,
-        Span.type.in_([LABACCESS, SPECIAL_LABACESS]),
+        Span.type.in_([Span.LABACCESS, Span.SPECIAL_LABACESS]),
         Span.deleted_at.is_(None)
     ).first()
 
     membership_end, = db_session.query(func.max(Span.enddate)).filter(
         Span.member_id == entity_id,
-        Span.type.in_([MEMBERSHIP]),
+        Span.type.in_([Span.MEMBERSHIP]),
         Span.deleted_at.is_(None)
     ).first()
     

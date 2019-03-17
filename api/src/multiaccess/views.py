@@ -1,6 +1,6 @@
 from sqlalchemy.orm import contains_eager
 
-from membership.models import Member, Span, LABACCESS, SPECIAL_LABACESS, Key
+from membership.models import Member, Span, Key
 from multiaccess import service
 from service.api_definition import GET, SERVICE
 from service.db import db_session
@@ -23,7 +23,7 @@ def get_memberdata():
     query = query.options(contains_eager(Member.spans), contains_eager(Member.keys))
     query = query.filter(
         Member.deleted_at.is_(None),
-        Span.type.in_([LABACCESS, SPECIAL_LABACESS]),
+        Span.type.in_([Span.LABACCESS, Span.SPECIAL_LABACESS]),
         Span.deleted_at.is_(None),
         Key.deleted_at.is_(None),
     )

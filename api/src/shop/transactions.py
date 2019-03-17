@@ -4,7 +4,7 @@ from logging import getLogger
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 
 from membership.membership import add_membership_days
-from membership.models import Key, LABACCESS
+from membership.models import Key, Span
 from service.db import db_session
 from service.error import InternalServerError
 from shop.email import send_key_updated_email, send_membership_updated_email
@@ -52,7 +52,7 @@ def ship_add_labaccess_action(action, transaction):
 
     labaccess_end = add_membership_days(
         transaction.member_id,
-        LABACCESS,
+        Span.LABACCESS,
         days=days_to_add,
         creation_reason=f"transaction_action_id: {action.id}, transaction_id: {transaction.id}"
     ).labaccess_end
@@ -68,7 +68,9 @@ def ship_add_membership_action(action, transaction):
     days_to_add = action.value
 
     membership_end = add_membership_days(
-        transaction.member_id, LABACCESS, days=days_to_add,
+        transaction.member_id,
+        Span.LABACCESS,
+        days=days_to_add,
         creation_reason=f"transaction_action_id: {action.id}, transaction_id: {transaction.id}",
         default_start_date=transaction.created_at.date(),
     ).membership_end

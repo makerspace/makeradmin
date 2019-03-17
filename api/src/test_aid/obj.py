@@ -2,7 +2,7 @@ from random import randint, choice
 
 from faker import Faker
 
-from membership.models import LABACCESS, MEMBERSHIP, SPECIAL_LABACESS
+from membership.models import Span
 from shop.models import ProductAction
 from test_aid.test_util import random_str
 
@@ -69,7 +69,7 @@ class ObjFactory:
         obj = dict(
             startdate=self.test.date(days=-randint(40, 60)),
             enddate=self.test.date(days=-randint(10, 30)),
-            type=choice((LABACCESS, MEMBERSHIP, SPECIAL_LABACESS)),
+            type=choice((Span.LABACCESS, Span.MEMBERSHIP, Span.SPECIAL_LABACESS)),
             creation_reason=random_str(),
         )
         obj.update(kwargs)
