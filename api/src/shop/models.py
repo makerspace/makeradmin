@@ -105,7 +105,6 @@ class TransactionContent(Base):
         return f'TransactionContent(id={self.id}, count={self.count}, amount={self.amount})'
 
     
-# TODO Move to other.
 class TransactionAction(Base):
     __tablename__ = 'webshop_transaction_actions'
 
@@ -144,18 +143,6 @@ class ProductImage(Base):
 
     def __repr__(self):
         return f'ProductImage(id={self.id}, path={self.path})'
-
-
-class ProductVariant(Base):
-    __tablename__ = 'webshop_product_variants'
-
-    id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
-    product_id = Column(Integer, ForeignKey(Product.id), nullable=False)
-    name = Column(String(255), nullable=False)
-    price = Column(Numeric(precision="15,2"), nullable=False)
-
-    def __repr__(self):
-        return f'ProductVariant(id={self.id}, name={self.name})'
 
 
 class StripePending(Base):

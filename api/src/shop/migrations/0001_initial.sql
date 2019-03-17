@@ -103,14 +103,6 @@ CREATE TABLE IF NOT EXISTS `webshop_product_images` (
   KEY `image_product_constraint` (`product_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-CREATE TABLE IF NOT EXISTS `webshop_product_variants` (
-  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `product_id` int(10) unsigned NOT NULL,
-  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `price` decimal(15,2) NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
 CREATE TABLE IF NOT EXISTS `webshop_stripe_pending` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `transaction_id` int(10) unsigned NOT NULL,
@@ -122,12 +114,12 @@ CREATE TABLE IF NOT EXISTS `webshop_stripe_pending` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 DROP TABLE IF EXISTS `migrations_webshop`;
+DROP TABLE IF EXISTS `webshop_product_variants`;
 
 -- enable warnings
 SET sql_notes = 1;
 
 -- convert old existing tables to non deprecated char set and better collate
-ALTER TABLE `webshop_actions` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
 ALTER TABLE `webshop_pending_registrations` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
 ALTER TABLE `webshop_product_actions` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
 ALTER TABLE `webshop_product_categories` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
@@ -151,15 +143,15 @@ ALTER TABLE `webshop_transaction_contents` ADD CONSTRAINT `transaction_constrain
 
 -- replace action table with enum
 
-ALTER TABLE `webshop_product_actions` ADD COLUMN `action` enum('add_membership_days','add_labaccess_days') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL;
-UPDATE `webshop_product_actions` SET `action` = 'add_membership_days' where action_id = 1;
-UPDATE `webshop_product_actions` SET `action` = 'add_labaccess_days' where action_id = 2;
+ALTER TABLE `webshop_product_actions` ADD COLUMN `action_type` enum('add_membership_days','add_labaccess_days') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL;
+UPDATE `webshop_product_actions` SET `action_type` = 'add_membership_days' where action_id = 1;
+UPDATE `webshop_product_actions` SET `action_type` = 'add_labaccess_days' where action_id = 2;
 ALTER TABLE `webshop_product_actions` DROP KEY `action_constraint`;
 ALTER TABLE `webshop_product_actions` DROP COLUMN `action_id`;
 
-ALTER TABLE `webshop_transaction_actions` ADD COLUMN `action` enum('add_membership_days','add_labaccess_days') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL;
-UPDATE `webshop_transaction_actions` SET `action` = 'add_membership_days' where action_id = 1;
-UPDATE `webshop_transaction_actions` SET `action` = 'add_labaccess_days' where action_id = 2;
+ALTER TABLE `webshop_transaction_actions` ADD COLUMN `action_type` enum('add_membership_days','add_labaccess_days') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL;
+UPDATE `webshop_transaction_actions` SET `action_type` = 'add_membership_days' where action_id = 1;
+UPDATE `webshop_transaction_actions` SET `action_type` = 'add_labaccess_days' where action_id = 2;
 ALTER TABLE `webshop_transaction_actions` DROP KEY `action_constraint3`;
 ALTER TABLE `webshop_transaction_actions` DROP COLUMN `action_id`;
 
