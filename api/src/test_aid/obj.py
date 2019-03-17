@@ -3,7 +3,7 @@ from random import randint, choice
 from faker import Faker
 
 from membership.models import LABACCESS, MEMBERSHIP, SPECIAL_LABACESS
-from shop.models import ADD_MEMBERSHIP_DAYS
+from shop.models import ProductAction
 from test_aid.test_util import random_str
 
 DEFAULT_PASSWORD = '1q2w3e'
@@ -104,7 +104,7 @@ class ObjFactory:
     def create_product_action(self, **kwargs):
         obj = dict(
             product_id=0,
-            action_type=ADD_MEMBERSHIP_DAYS,
+            action_type=ProductAction.ADD_MEMBERSHIP_DAYS,
             value=365,
         )
         obj.update(**kwargs)

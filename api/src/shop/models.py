@@ -47,12 +47,11 @@ class Product(Base):
                f', display_order={self.display_order})'
 
 
-ADD_LABACCESS_DAYS = "add_labaccess_days"
-ADD_MEMBERSHIP_DAYS = "add_membership_days"
-
-
 class ProductAction(Base):
     __tablename__ = 'webshop_product_actions'
+
+    ADD_LABACCESS_DAYS = "add_labaccess_days"
+    ADD_MEMBERSHIP_DAYS = "add_membership_days"
 
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
     product_id = Column(Integer, ForeignKey(Product.id), nullable=False)
@@ -110,7 +109,7 @@ class TransactionAction(Base):
 
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
     content_id = Column(Integer, ForeignKey(TransactionContent.id), nullable=False)
-    action_type = Column(Enum(ADD_MEMBERSHIP_DAYS, ADD_LABACCESS_DAYS), nullable=False)
+    action_type = Column(Enum(ProductAction.ADD_MEMBERSHIP_DAYS, ProductAction.ADD_LABACCESS_DAYS), nullable=False)
     value = Column(Integer)
     status = Column(Enum(PENDING, COMPLETED), nullable=False)
     completed_at = Column(DateTime)

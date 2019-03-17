@@ -8,8 +8,7 @@ from membership.models import Key, LABACCESS
 from service.db import db_session
 from service.error import InternalServerError
 from shop.email import send_key_updated_email, send_membership_updated_email
-from shop.models import TransactionAction, TransactionContent, Transaction, PENDING, COMPLETED, FAILED, \
-    ADD_LABACCESS_DAYS, ADD_MEMBERSHIP_DAYS
+from shop.models import TransactionAction, TransactionContent, Transaction, PENDING, COMPLETED, FAILED, ProductAction
 
 logger = getLogger('makeradmin')
 
@@ -89,10 +88,10 @@ def ship_orders(ship_add_labaccess=True):
     """
     for action, content, transaction in pending_actions_query():
 
-        if ship_add_labaccess and action.action_type == ADD_LABACCESS_DAYS:
+        if ship_add_labaccess and action.action_type == ProductAction.ADD_LABACCESS_DAYS:
             ship_add_labaccess_action(action, transaction)
 
-        if action.action_type == ADD_MEMBERSHIP_DAYS:
+        if action.action_type == ProductAction.ADD_MEMBERSHIP_DAYS:
             ship_add_membership_action(action, transaction)
 
 

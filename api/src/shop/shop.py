@@ -11,7 +11,7 @@ from service.db import db_session
 from service.error import NotFound, UnprocessableEntity, BadRequest
 from shop.entities import transaction_entity, transaction_content_entity, product_entity, category_entity, \
     product_image_entity
-from shop.models import Transaction, Product, ProductCategory, ProductAction, ADD_MEMBERSHIP_DAYS
+from shop.models import Transaction, Product, ProductCategory, ProductAction
 from shop.pay import make_purchase
 from shop.schemas import register_schema, purchase_schema
 from shop.transactions import pending_actions_query
@@ -112,9 +112,13 @@ def membership_products():
     # Find all products which gives a member membership
     # Note: Assumes a product never contains multiple actions of the same type.
     # If this doesn't hold we will get duplicates of that product in the list.
-    query = db_session.query(Product).join(ProductAction).filter(ProductAction.action_type == ADD_MEMBERSHIP_DAYS,
-                                                                 ProductAction.deleted_at.is_(None),
-                                                                 Product.deleted_at.is_(None))
+    query = (db_session
+             .query(Product)
+             .join(ProductAction)
+             .filter(ProductAction.action_type == ProductAction.ADD_MEMBERSHIP_DAYS,
+                     ProductAction.deleted_at.is_(None),
+                     Product.deleted_at.is_(None))
+    )
     
     return [{"id": p.id, "name": p.name, "price": float(p.price)} for p in query]
 

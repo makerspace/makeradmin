@@ -4,7 +4,7 @@ from time import time
 import stripe
 
 from service.api_definition import NON_MATCHING_SUMS
-from shop.models import ADD_MEMBERSHIP_DAYS
+from shop.models import ProductAction
 from test_aid.systest_base import ShopTestMixin, ApiTest, VALID_NON_3DS_CARD_NO, EXPIRED_3DS_CARD_NO
 
 
@@ -14,7 +14,7 @@ class Test(ShopTestMixin, ApiTest):
         dict(
             smallest_multiple=1,
             price=300.0,
-            action=dict(action_type=ADD_MEMBERSHIP_DAYS, value=365),
+            action=dict(action_type=ProductAction.ADD_MEMBERSHIP_DAYS, value=365),
         )
     ]
 
