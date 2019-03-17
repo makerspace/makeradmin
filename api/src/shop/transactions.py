@@ -8,7 +8,7 @@ from membership.models import Key, LABACCESS
 from service.db import db_session
 from service.error import InternalServerError
 from shop.email import send_key_updated_email, send_membership_updated_email
-from shop.models import TransactionAction, TransactionContent, Transaction, PENDING, COMPLETED, FAILED, ProductAction
+from shop.models import TransactionAction, TransactionContent, Transaction, ProductAction
 
 logger = getLogger('makeradmin')
 
@@ -26,8 +26,8 @@ def pending_actions_query(member_id=None):
         .query(TransactionAction, TransactionContent, Transaction)
         .join(TransactionAction.content)
         .join(TransactionContent.transaction)
-        .filter(TransactionAction.status == PENDING)
-        .filter(Transaction.status == COMPLETED)
+        .filter(TransactionAction.status == TransactionAction.PENDING)
+        .filter(Transaction.status == Transaction.COMPLETED)
     )
 
     if member_id:
@@ -37,7 +37,7 @@ def pending_actions_query(member_id=None):
     
 
 def complete_pending_action(action):
-    action.status = COMPLETED
+    action.status = TransactionAction.COMPLETED
     action.completed_at = datetime.utcnow()
     db_session.add(action)
     db_session.flush()
@@ -96,8 +96,8 @@ def ship_orders(ship_add_labaccess=True):
 
 
 def complete_transaction(transaction):
-    if transaction.status == PENDING:
-        transaction.status = COMPLETED
+    if transaction.status == Transaction.PENDING:
+        transaction.status = Transaction.COMPLETED
         db_session.add(transaction)
         db_session.flush()
         try:
@@ -107,7 +107,7 @@ def complete_transaction(transaction):
 
 
 def fail_transaction(transaction):
-    transaction.status = FAILED
+    transaction.status = Transaction.FAILED
     db_session.add(transaction)
     db_session.flush()
 

@@ -65,14 +65,12 @@ class ProductAction(Base):
         return f'ProductAction(id={self.id}, value={self.value}, action_type={self.action_type})'
 
 
-# TODO Move to inside.
-PENDING = 'pending'
-COMPLETED = 'completed'
-FAILED = 'failed'
-
-
 class Transaction(Base):
     __tablename__ = 'webshop_transactions'
+
+    PENDING = 'pending'
+    COMPLETED = 'completed'
+    FAILED = 'failed'
 
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
     member_id = Column(Integer, ForeignKey(Member.member_id), nullable=False)
@@ -106,6 +104,9 @@ class TransactionContent(Base):
     
 class TransactionAction(Base):
     __tablename__ = 'webshop_transaction_actions'
+
+    PENDING = 'pending'
+    COMPLETED = 'completed'
 
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
     content_id = Column(Integer, ForeignKey(TransactionContent.id), nullable=False)

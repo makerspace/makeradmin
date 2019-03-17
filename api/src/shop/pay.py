@@ -3,14 +3,14 @@ from logging import getLogger
 
 import stripe
 from sqlalchemy.orm.exc import NoResultFound
-from stripe.error import StripeError, CardError, InvalidRequestError, SignatureVerificationError
+from stripe.error import StripeError, CardError, InvalidRequestError
 
-from service.api_definition import BAD_VALUE, NON_MATCHING_SUMS, EMPTY_CART, NEGATIVE_ITEM_COUNT, INVALID_ITEM_COUNT
-from service.config import get_public_url, config
+from service.api_definition import NON_MATCHING_SUMS, EMPTY_CART, NEGATIVE_ITEM_COUNT, INVALID_ITEM_COUNT
+from service.config import get_public_url
 from service.db import db_session
 from service.error import NotFound, InternalServerError, BadRequest
 from shop.filters import PRODUCT_FILTERS
-from shop.models import Product, Transaction, PENDING, TransactionContent, PendingRegistration, StripePending
+from shop.models import Product, Transaction, TransactionContent, PendingRegistration, StripePending, TransactionAction
 from shop.stripe_events import STRIPE_SOURCE_TYPE_3D_SECURE, create_stripe_charge, convert_to_stripe_amount, CURRENCY
 from shop.transactions import complete_transaction, fail_transaction
 
@@ -98,7 +98,7 @@ def validate_payment(member_id, cart, expected_amount: Decimal):
 def add_transaction_to_db(member_id, total_amount, contents):
     """ Save as new transaction with transaction content in db and return transaction_id. """
     
-    transaction = Transaction(member_id=member_id, amount=total_amount, status=PENDING)
+    transaction = Transaction(member_id=member_id, amount=total_amount, status=Transaction.PENDING)
     
     db_session.add(transaction)
     db_session.flush()
@@ -114,7 +114,8 @@ def add_transaction_to_db(member_id, total_amount, contents):
             SELECT :content_id AS content_id, action_type, SUM(:count * value) AS value, :pending AS status
             FROM webshop_product_actions WHERE product_id=:product_id AND deleted_at IS NULL GROUP BY action_type
             """,
-            {'content_id': content.id, 'count': content.count, 'pending': PENDING, 'product_id': content.product_id}
+            {'content_id': content.id, 'count': content.count, 'pending': TransactionAction.PENDING,
+             'product_id': content.product_id}
         )
     
     return transaction

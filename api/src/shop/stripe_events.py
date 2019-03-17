@@ -8,7 +8,7 @@ from service.config import config
 from service.db import db_session
 from service.error import BadRequest, InternalServerError
 from shop.email import send_new_member_email, send_receipt_email
-from shop.models import PENDING, COMPLETED, PendingRegistration
+from shop.models import PendingRegistration, Transaction
 from shop.transactions import fail_transaction, get_source_transaction, complete_transaction
 
 logger = getLogger('makeradmin')
@@ -50,7 +50,7 @@ def convert_to_stripe_amount(amount: Decimal) -> int:
 # TODO Compare calling code, very different exception handling.
 def create_stripe_charge(transaction, card_source_id) -> stripe.Charge:
 
-    if transaction.status != PENDING:
+    if transaction.status != Transaction.PENDING:
         raise InternalServerError(f"Unexpected status of transaction.",
                                   log=f"Transaction {transaction.id} has unexpected status {transaction.status}.")
 
@@ -76,7 +76,7 @@ def activate_member(member):
 # TODO This belongs in pay, but needs to be called from callback...
 def handle_payment_success(transaction):
     complete_transaction(transaction)
-    if transaction.status != COMPLETED:
+    if transaction.status != Transaction.COMPLETED:
         # TODO Is this really needed?
         logger.error(f"wanted to complete transaction but marked as {transaction.status}")
         return
