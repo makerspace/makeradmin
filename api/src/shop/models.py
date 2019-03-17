@@ -85,7 +85,6 @@ class Transaction(Base):
         return f'Transaction(id={self.id}, amount={self.amount}, status={self.status})'
 
 
-# TODO Rename to transaction item?
 class TransactionContent(Base):
     __tablename__ = 'webshop_transaction_contents'
     
