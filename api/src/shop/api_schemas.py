@@ -1,8 +1,17 @@
+from jsonschema import validate, ValidationError
+
+from service.config import debug_mode
+from service.error import UnprocessableEntity
+
+STRIPE_3D_SECURE_REQUIRED = 'required'
+STRIPE_3D_SECURE_RECOMMENDED = 'recommended'
+STRIPE_3D_SECURE_OPTIONAL = 'optional'
+STRIPE_3D_SECURE_NOT_SUPPORTED = 'not_supported'
 
 
 purchase_schema = dict(
     type="object",
-    required=['cart', 'duplicatePurchaseRand', 'expectedSum', 'stripeSource', 'stripeThreeDSecure'],
+    required=['cart', 'expected_sum', 'stripe_card_source_id', 'stripe_card_3d_secure'],
     additionalProperties=False,
     properties=dict(
         cart=dict(
@@ -17,10 +26,14 @@ purchase_schema = dict(
                 )
             ),
         ),
-        duplicatePurchaseRand=dict(type="integer"),
-        expectedSum=dict(type="number"),
-        stripeSource=dict(type="string"),
-        stripeThreeDSecure=dict(type="string"),
+        expected_sum=dict(type="number"),
+        stripe_card_source_id=dict(type="string"),
+        stripe_card_3d_secure=dict(enum=[
+            STRIPE_3D_SECURE_REQUIRED,
+            STRIPE_3D_SECURE_RECOMMENDED,
+            STRIPE_3D_SECURE_OPTIONAL,
+            STRIPE_3D_SECURE_NOT_SUPPORTED,
+        ]),
     )
 )
 
@@ -51,3 +64,11 @@ register_schema = dict(
         )
     )
 )
+
+
+def validate_data(schema, data):
+    try:
+        validate(data, schema=schema)
+    except ValidationError as e:
+        raise UnprocessableEntity(message=f"Data sent in request not in correct format.",
+                                  log=debug_mode() and str(e))

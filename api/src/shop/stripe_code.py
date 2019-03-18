@@ -14,7 +14,7 @@ from shop.transactions import fail_transaction, get_source_transaction, complete
 logger = getLogger('makeradmin')
 
 
-# TODO Maybe rename file and put all stripe in it?
+stripe.api_key = config.get("STRIPE_PRIVATE_KEY", log_value=False)
 
 
 # All stripe calculations are done with cents (ören in Sweden)

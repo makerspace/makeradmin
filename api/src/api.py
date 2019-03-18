@@ -14,11 +14,20 @@ from services import services
 
 app = Flask(__name__)
 
+# TODO BM Add origins but make it a configuration.
 flask_cors.CORS(
     app,
     max_age='1728000',
     allow_headers=['Origin', 'Content-Type', 'Accept', 'Authorization', 'X-Request-With',
                    'Access-Control-Allow-Origin'],
+    # origins=[
+    #     'https://medlem.makerspace.se',
+    #     'https://stockholm.makeradmin.se',
+    #     'https://medlem.dev.makerspace.se',
+    #     'http://localhost:8009',
+    #     'http://localhost:8011',
+    #     'http://localhost:8080',
+    # ]
 )
 
 for path, service in services:

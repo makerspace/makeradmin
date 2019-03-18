@@ -34,6 +34,7 @@ default = Dict(name="default", src=dict(
     HOST_PUBLIC='',
     STRIPE_PRIVATE_KEY=None,
     STRIPE_SIGNING_SECRET=None,
+    APP_DEBUG=None,
 ))
 env = Env()
 dot_env = DotEnvFile()
@@ -58,3 +59,7 @@ def get_public_url(path):
     if not host.startswith("http://") and not host.startswith("https://"):
         host = "http://" + host
     return f"{host}{path}"
+
+
+def debug_mode():
+    return config.get('APP_DEBUG') == 'true'

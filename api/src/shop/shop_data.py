@@ -1,19 +1,15 @@
 from logging import getLogger
 
-from jsonschema import validate, ValidationError
 from sqlalchemy import desc
 from sqlalchemy.orm import joinedload
 from sqlalchemy.orm.exc import NoResultFound
 
-from core import auth
 from membership.views import member_entity
 from service.db import db_session
-from service.error import NotFound, UnprocessableEntity, BadRequest
+from service.error import NotFound
 from shop.entities import transaction_entity, transaction_content_entity, product_entity, category_entity, \
     product_image_entity
-from shop.models import Transaction, Product, ProductCategory, ProductAction
-from shop.pay import make_purchase
-from shop.schemas import register_schema, purchase_schema
+from shop.models import Transaction, Product, ProductCategory
 from shop.transactions import pending_actions_query
 
 logger = getLogger('makeradmin')
@@ -105,81 +101,4 @@ def get_product_data(product_id):
         "product": product_entity.to_obj(product),
         "images": [product_image_entity.to_obj(image) for image in images],
         "productData": all_product_data(),
-    }
-
-
-def membership_products():
-    # Find all products which gives a member membership
-    # Note: Assumes a product never contains multiple actions of the same type.
-    # If this doesn't hold we will get duplicates of that product in the list.
-    query = (db_session
-             .query(Product)
-             .join(ProductAction)
-             .filter(ProductAction.action_type == ProductAction.ADD_MEMBERSHIP_DAYS,
-                     ProductAction.deleted_at.is_(None),
-                     Product.deleted_at.is_(None))
-    )
-    
-    return [{"id": p.id, "name": p.name, "price": float(p.price)} for p in query]
-
-
-def pay(data, member_id):
-    if not data:
-        raise UnprocessableEntity(message="No data was sent in the request.")
-    
-    try:
-        validate(data, schema=purchase_schema)
-    except ValidationError as e:
-        raise UnprocessableEntity(message=f"Data sent in request not in correct format: {str(e)}")
-    
-    # This will raise if the payment fails.
-    transaction, redirect = make_purchase(member_id=member_id, purchase=data)
-    
-    return {
-        'transaction_id': transaction.id,
-        'redirect': redirect,
-    }
-  
-
-def register(data, remote_addr, user_agent):
-    if not data:
-        raise UnprocessableEntity(message="No data was sent in the request.")
-    
-    try:
-        validate(data, schema=register_schema)
-    except ValidationError as e:
-        raise UnprocessableEntity(message=f"Data sent in request not in correct format: {str(e)}")
-
-    products = membership_products()
-
-    purchase = data['purchase']
-
-    cart = purchase['cart']
-    if len(cart) != 1:
-        raise BadRequest(message="The purchase must contain exactly one item.")
-        
-    item = cart[0]
-    if item['count'] != 1:
-        raise BadRequest(message="The purchase must contain exactly one item.")
-    
-    product_id = item['id']
-    if product_id not in (p['id'] for p in products):
-        raise BadRequest(message=f"Not allowed to purchase the product with id {product_id} when registring.")
-
-    # This will raise if the creation fails.
-    member_id = member_entity.create(data.get('member', {}))['member_id']
-
-    # This will raise if the payment fails.
-    transaction, redirect = make_purchase(member_id=member_id, purchase=purchase, activates_member=True)
-
-    # TODO Delete member if payment fails. Make <email, deleted_at> uniquie instead of just email.
-
-    # If the pay succeeded (not same as the payment is completed) and the member does not already exists,
-    # the user will be logged in.
-    token = auth.force_login(remote_addr, user_agent, member_id)['access_token']
-
-    return {
-        'transaction_id': transaction.id,
-        'token': token,
-        'redirect': redirect,
     }

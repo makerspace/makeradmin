@@ -47,9 +47,6 @@ common.onGetAndDocumentLoaded("/webshop/register_page_data", (value: any) => {
   // Add an instance of the card Element into the `card-element` <div>.
   card.mount('#card-element');
 
-  // Used to prevent clicking the 'Pay' button twice
-  const duplicatePurchaseRand = (100000000*Math.random())|0;
-
   const id2item = new Map();
 
   for (const cat of productData) {
@@ -92,8 +89,10 @@ common.onGetAndDocumentLoaded("/webshop/register_page_data", (value: any) => {
     if (waitingForPaymentResponse) {
       return;
     }
+    const payButton = <HTMLInputElement> document.getElementById("pay-button");
 
     waitingForPaymentResponse = true;
+    payButton.disabled = true;
 
     const spinner = document.querySelector(".progress-spinner");
     spinner.classList.add("progress-spinner-visible");
@@ -106,6 +105,7 @@ common.onGetAndDocumentLoaded("/webshop/register_page_data", (value: any) => {
         // Inform the user if there was an error.
         errorElement.textContent = result.error.message;
         waitingForPaymentResponse = false;
+        payButton.disabled = false;
       } else {
         common.ajax("POST", apiBasePath + "/webshop/register", {
             member: {
@@ -120,14 +120,14 @@ common.onGetAndDocumentLoaded("/webshop/register_page_data", (value: any) => {
             },
             purchase: {
               cart: cart.items,
-              expectedSum: cart.sum(id2item),
-              stripeSource: result.source.id,
-              stripeThreeDSecure: result.source.card.three_d_secure,
-              duplicatePurchaseRand: duplicatePurchaseRand,
+              expected_sum: cart.sum(id2item),
+              stripe_card_source_id: result.source.id,
+              stripe_card_3d_secure: result.source.card.three_d_secure,
             }
           }).then(json => {
             spinner.classList.remove("progress-spinner-visible");
             waitingForPaymentResponse = false;
+            payButton.disabled = false;
             const token :string = json.data.token;
             if (token) {
                 login(token);
@@ -140,6 +140,7 @@ common.onGetAndDocumentLoaded("/webshop/register_page_data", (value: any) => {
           }).catch(json => {
             spinner.classList.remove("progress-spinner-visible");
             waitingForPaymentResponse = false;
+            payButton.disabled = false;
             if (json.what === "not_unique") {
               UIkit.modal.alert("<h2>Register failed</h2>A member with this email is already registred");
             } else {

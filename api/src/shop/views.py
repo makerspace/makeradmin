@@ -6,9 +6,9 @@ from shop import service
 from shop.entities import product_image_entity, transaction_content_entity, transaction_entity, \
     transaction_action_entity, product_entity, category_entity, product_action_entity
 from shop.models import ProductAction, TransactionContent
-from shop.shop import pending_actions, member_history, receipt, get_product_data, all_product_data, \
+from shop.shop_data import pending_actions, member_history, receipt, get_product_data, all_product_data, \
     membership_products, register, pay
-from shop.stripe_events import stripe_callback, process_stripe_events
+from shop.stripe_code import stripe_callback, process_stripe_events
 from shop.transactions import ship_orders
 
 service.entity_routes(
@@ -115,7 +115,7 @@ def ship_orders_route():
 
 @service.route("/member/current/pending_actions", method=GET, permission=USER)
 def pending_actions_for_member():
-    return pending_actions(g.user_id)  # TODO BM Fix usages.
+    return pending_actions(g.user_id)  # TODO BM Fix usages, returned data was changed.
 
 
 @service.route("/member/current/transactions", method=GET, permission=USER)
