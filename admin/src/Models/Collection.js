@@ -87,7 +87,7 @@ export default class Collection {
         
         if (this.pageSize !== 0) {
             params.page = this.page.index;
-            params.per_page = this.pageSize;
+            params.page_size = this.pageSize;
         }
         
         if (!_.isEmpty(this.sort)) {

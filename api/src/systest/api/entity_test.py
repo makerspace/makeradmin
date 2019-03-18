@@ -155,28 +155,28 @@ class Test(ApiTest):
         
         result = self\
             .get(f"/membership/member?search={firstname}&sort_by=lastname&sort_order=asc&page_size=2")\
-            .expect(code=200, page=1, per_page=2, last_page=2, total=4)\
+            .expect(code=200, page=1, page_size=2, last_page=2, total=4)\
             .data
         
         self.assertEqual([entity3_id, entity4_id], [e['member_id'] for e in result])
 
         result = self\
             .get(f"/membership/member?search={firstname}&sort_by=lastname&sort_order=asc&page_size=2&page=2")\
-            .expect(code=200, page=2, per_page=2, last_page=2, total=4)\
+            .expect(code=200, page=2, page_size=2, last_page=2, total=4)\
             .data
         
         self.assertEqual([entity2_id, entity1_id], [e['member_id'] for e in result])
         
         result = self\
             .get(f"/membership/member?search={firstname}&sort_by=lastname&sort_order=desc&page_size=3&page=1")\
-            .expect(code=200, page=1, per_page=3, last_page=2, total=4)\
+            .expect(code=200, page=1, page_size=3, last_page=2, total=4)\
             .data
         
         self.assertEqual([entity1_id, entity2_id, entity4_id], [e['member_id'] for e in result])
 
         result = self\
             .get(f"/membership/member?search={firstname}&sort_by=lastname&sort_order=desc&page_size=3&page=2")\
-            .expect(code=200, page=2, per_page=3, last_page=2, total=4)\
+            .expect(code=200, page=2, page_size=3, last_page=2, total=4)\
             .data
         
         self.assertEqual([entity3_id], [e['member_id'] for e in result])
@@ -185,7 +185,7 @@ class Test(ApiTest):
             .expect(code=422)
 
         self.get(f"/membership/member?search={firstname}&sort_by=lastname&sort_order=desc&page_size=3&page=3")\
-            .expect(code=200, data=[], page=3, per_page=3, last_page=2, total=4)
+            .expect(code=200, data=[], page=3, page_size=3, last_page=2, total=4)
 
     def test_expand_includes_data_in_list(self):
         member = self.db.create_member()
