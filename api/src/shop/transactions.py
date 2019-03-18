@@ -6,11 +6,76 @@ from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 from membership.membership import add_membership_days
 from membership.models import Key, Span
 from service.db import db_session
-from service.error import InternalServerError
-from shop.email import send_key_updated_email, send_membership_updated_email
-from shop.models import TransactionAction, TransactionContent, Transaction, ProductAction
+from service.error import InternalServerError, BadRequest
+from shop.email import send_key_updated_email, send_membership_updated_email, send_new_member_email, send_receipt_email
+from shop.models import TransactionAction, TransactionContent, Transaction, ProductAction, PendingRegistration, \
+    StripePending
 
 logger = getLogger('makeradmin')
+
+
+class PaymentFailed(BadRequest):
+    message = 'Payment failed.'
+
+
+def commit_transaction_to_db(member_id=None, total_amount=None, contents=None, stripe_card_source_id=None,
+                             activates_member=False):
+    """ Save as new transaction with transaction content in db and return it transaction. """
+    
+    transaction = Transaction(member_id=member_id, amount=total_amount, status=Transaction.PENDING)
+    
+    db_session.add(transaction)
+    db_session.flush()
+
+    for content in contents:
+        content.transaction_id = transaction.id
+        db_session.add(content)
+        db_session.flush()
+        
+        db_session.execute(
+            """
+            INSERT INTO webshop_transaction_actions (content_id, action_type, value, status)
+            SELECT :content_id AS content_id, action_type, SUM(:count * value) AS value, :pending AS status
+            FROM webshop_product_actions WHERE product_id=:product_id AND deleted_at IS NULL GROUP BY action_type
+            """,
+            {'content_id': content.id, 'count': content.count, 'pending': TransactionAction.PENDING,
+             'product_id': content.product_id}
+        )
+    
+    if activates_member:
+        # TODO Convert this to a product action.
+        # Mark this transaction as one that is for registering a member.
+        db_session.add(PendingRegistration(transaction_id=transaction.id))
+
+    # TODO Rename stripe pending to TransactionReferences or something (with type).
+    db_session.add(StripePending(transaction_id=transaction.id, stripe_token=stripe_card_source_id))
+    db_session.commit()
+    
+    return transaction
+
+
+def complete_transaction(transaction):
+    assert transaction.status == Transaction.PENDING, "TODO BM let's see if this can be not true"
+    
+    if transaction.status == Transaction.PENDING:
+        transaction.status = Transaction.COMPLETED
+        db_session.add(transaction)
+        db_session.commit()
+        try:
+            # TODO Investigate this, should we ship before commit, and should we ship just this transaction?
+            # TODO Why do we ship all orders?
+            ship_orders(ship_add_labaccess=False)
+        except Exception as e:  # TODO BM Don't catch all here, it is very bad.
+            logger.exception(f"failed to ship orders in transaction {transaction.id}, ignoring error")
+
+
+def fail_transaction(transaction):
+    transaction.status = Transaction.FAILED
+    db_session.add(transaction)
+    db_session.commit()
+
+
+# TODO Check code below.
 
 
 def pending_actions_query(member_id=None):
@@ -82,6 +147,29 @@ def ship_add_membership_action(action, transaction):
     send_membership_updated_email(action.member_id, days_to_add, membership_end)
 
 
+def activate_member(member):
+    logger.info(f"activating member {member.id}")
+    member.deleted_at = None
+    db_session.add(member)
+    db_session.flush()
+    send_new_member_email(member)
+
+
+def handle_payment_success(transaction):
+    complete_transaction(transaction)
+    if transaction.status != Transaction.COMPLETED:
+        # TODO Is this really needed?
+        logger.error(f"wanted to complete transaction but marked as {transaction.status}")
+        return
+    
+    # Check if this transaction is a new member registration.
+    if db_session.query(PendingRegistration).filter(PendingRegistration.transaction_id == transaction.id).count():
+        activate_member(transaction.member)
+        
+    logger.info(f"sending receipt email to member {transaction.member_id}, transaction {transaction.id} complete")
+    send_receipt_email(transaction)
+
+
 def ship_orders(ship_add_labaccess=True):
     """
     Completes all orders for purchasing lab access and updates existing keys with new dates.
@@ -97,23 +185,6 @@ def ship_orders(ship_add_labaccess=True):
             ship_add_membership_action(action, transaction)
 
 
-def complete_transaction(transaction):
-    if transaction.status == Transaction.PENDING:
-        transaction.status = Transaction.COMPLETED
-        db_session.add(transaction)
-        db_session.flush()
-        try:
-            ship_orders(ship_add_labaccess=False)
-        except Exception as e:  # TODO BM Don't catch all here, it is very bad.
-            logger.exception(f"failed to ship orders in transaction {transaction.id}, ignoring error")
-
-
-def fail_transaction(transaction):
-    transaction.status = Transaction.FAILED
-    db_session.add(transaction)
-    db_session.flush()
-
-
 def get_source_transaction(source_id):
     try:
         return db_session.query(Transaction).filter(Transaction.stripe_pending.stripe_token == source_id).one()
@@ -121,6 +192,5 @@ def get_source_transaction(source_id):
         return None
     except MultipleResultsFound as e:
         raise InternalServerError(log=f"stripe token {source_id} has multiple transactions, this is a bug") from e
-
 
 

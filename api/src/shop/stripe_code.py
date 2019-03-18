@@ -2,14 +2,15 @@ from decimal import Decimal
 from logging import getLogger
 
 import stripe
-from stripe.error import SignatureVerificationError
+from stripe.error import SignatureVerificationError, InvalidRequestError, CardError, StripeError
 
-from service.config import config
+from shop.transactions import PaymentFailed
+from service.config import config, get_public_url
 from service.db import db_session
 from service.error import BadRequest, InternalServerError
-from shop.email import send_new_member_email, send_receipt_email
-from shop.models import PendingRegistration, Transaction
-from shop.transactions import fail_transaction, get_source_transaction, complete_transaction
+from shop.api_schemas import STRIPE_3D_SECURE_NOT_SUPPORTED
+from shop.models import Transaction, StripePending
+from shop.transactions import fail_transaction, get_source_transaction, complete_transaction, handle_payment_success
 
 logger = getLogger('makeradmin')
 
@@ -17,24 +18,47 @@ logger = getLogger('makeradmin')
 stripe.api_key = config.get("STRIPE_PRIVATE_KEY", log_value=False)
 
 
+CURRENCY = "sek"
+
 # All stripe calculations are done with cents (ören in Sweden)
 STRIPE_CURRENTY_BASE = 100
 
 STRIPE_SIGNING_SECRET = config.get("STRIPE_SIGNING_SECRET", log_value=False)
 
-STRIPE_TYPE_SOURCE = 'source'
-STRIPE_TYPE_CHARGE = 'charge'
 
-STRIPE_SUBTYPE_CHARGABLE = 'chargeable'
-STRIPE_SUBTYPE_FAILED = 'failed'
-STRIPE_SUBTYPE_CANCELED = 'canceled'
-STRIPE_SUBTYPE_SUCCEEDED = 'succeeded'
-STRIPE_SUBTYPE_DISPUTE_PREFIX = 'dispute'
-STRIPE_SUBTYPE_REFUND_PREFIX = 'refund'
+class Type:
+    SOURCE = 'source'
+    CARD = 'card'
+    CHARGE = 'charge'
 
-STRIPE_SOURCE_TYPE_3D_SECURE = 'three_d_secure'
 
-CURRENCY = "sek"
+class Subtype:
+    CHARGABLE = 'chargeable'
+    FAILED = 'failed'
+    CANCELED = 'canceled'
+    SUCCEEDED = 'succeeded'
+    DISPUTE_PREFIX = 'dispute'
+    REFUND_PREFIX = 'refund'
+
+
+class SourceType:
+    THREE_D_SECURE = 'three_d_secure'
+
+
+class SourceStatus:
+    CHARGEABLE = 'chargeable'
+    CONSUMED = 'consumed'
+    FAILED = 'failed'
+    PENDING = "pending"
+
+
+class SourceRedirectStatus:
+    PENDING = 'pending'
+    NOT_REQUIRED = 'not_required'
+
+
+class ChargeStatus:
+    SUCCEDED = 'succeded'
 
 
 def convert_to_stripe_amount(amount: Decimal) -> int:
@@ -51,42 +75,145 @@ def convert_to_stripe_amount(amount: Decimal) -> int:
 def create_stripe_charge(transaction, card_source_id) -> stripe.Charge:
 
     if transaction.status != Transaction.PENDING:
-        raise InternalServerError(f"Unexpected status of transaction.",
-                                  log=f"Transaction {transaction.id} has unexpected status {transaction.status}.")
+        raise InternalServerError(f"unexpected status of transaction",
+                                  log=f"transaction {transaction.id} has unexpected status {transaction.status}")
 
     stripe_amount = convert_to_stripe_amount(transaction.amount)
 
-    return stripe.Charge.create(
-        amount=stripe_amount,
-        currency=CURRENCY,
-        description=f'Charge for transaction id {transaction.id}.',
-        source=card_source_id,
-    )
-
-
-# TODO This does not belong here, move it...
-def activate_member(member):
-    logger.info(f"activating member {member.id}")
-    member.deleted_at = None
-    db_session.add(member)
-    db_session.flush()
-    send_new_member_email(member)
-
-
-# TODO This belongs in pay, but needs to be called from callback...
-def handle_payment_success(transaction):
-    complete_transaction(transaction)
-    if transaction.status != Transaction.COMPLETED:
-        # TODO Is this really needed?
-        logger.error(f"wanted to complete transaction but marked as {transaction.status}")
-        return
+    try:
+        return stripe.Charge.create(
+            amount=stripe_amount,
+            currency=CURRENCY,
+            description=f'charge for transaction id {transaction.id}',
+            source=card_source_id,
+        )
+    except InvalidRequestError as e:
+        if "Amount must convert to at least" in str(e):
+            raise PaymentFailed("paynebt too small total, least chargable amount is around 5 SEK")
     
-    # Check if this transaction is a new member registration.
-    if db_session.query(PendingRegistration).filter(PendingRegistration.transaction_id == transaction.id).count():
-        activate_member(transaction.member)
+        raise PaymentFailed(log=f"stripe charge failed: {str(e)}")
+            
+    except CardError as e:
+        error = e.json_body.get('error', {})
+        raise PaymentFailed(message=error.get("message"), log=f"stripe charge failed: {str(error)}")
         
-    logger.info(f"sending receipt email to member {transaction.member_id}, transaction {transaction.id} complete")
-    send_receipt_email(transaction)
+    except StripeError as e:
+        raise PaymentFailed(log=f"stripe charge failed: {str(e)}")
+    
+    except Exception as e:
+        logger.exception("unhandled exception when creating stripe charge, this should be handled")
+        raise
+    
+    
+def create_3d_secure_source(amount, card_source_id, shop_redirect_url):
+    try:
+        return stripe.Source.create(
+            amount=convert_to_stripe_amount(amount),
+            currency=CURRENCY,
+            type=SourceType.THREE_D_SECURE,
+            three_d_secure={'card': card_source_id},
+            redirect={'return_url': shop_redirect_url},
+        )
+    except InvalidRequestError as e:
+        if "Amount must convert to at least" in str(e):
+            raise PaymentFailed("paynebt too small total, least chargable amount is around 5 SEK")
+
+        raise PaymentFailed(log=True)
+
+
+def handle_card_source(transaction, card_source_id):
+    """ This is a directly chargable card that should be handled syncronously. """
+    
+    # TODO How can this fail?
+    card_source = stripe.Source.retrieve(card_source_id)
+    
+    assert card_source.type == Type.CARD
+    assert card_source.card.three_d_secure == STRIPE_3D_SECURE_NOT_SUPPORTED
+
+    try:
+        if card_source.status == SourceStatus.CHARGEABLE:
+            charge = create_stripe_charge(transaction, card_source_id)
+            
+            if charge.status == ChargeStatus.SUCCEDED:
+                # Avoid delay of feedback to customer, could be skipped and handled when webhook is called.
+                complete_transaction(transaction)
+                return
+            
+            # TODO Test this, when can this happend?
+            logger.warning(f"transaction {transaction.id} card source charge status {charge.status}"
+                           f", not {ChargeStatus.SUCCEDED}, is this an error state?")
+            
+        if card_source.status == SourceStatus.FAILED:
+            raise PaymentFailed()
+        
+        if card_source.status == SourceStatus.CONSUMED:
+            # Not necessarily an error but shouldn't happen.
+            # TODO Does this happend in real life? Maybe it is a bug?
+            raise InternalServerError(f"stripe source already marked as {SourceStatus.CONSUMED}", log=True)
+    
+        raise InternalServerError(f"unknown stripe source status {card_source.status}, this is a bug", log=True)
+    
+    except (InternalServerError, PaymentFailed):
+        # TODO Should we really fail transaction on internal server error?
+        fail_transaction(transaction)
+        raise
+
+
+def handle_three_d_secure_source(transaction, card_source_id):
+    """ This is a 3d secure card that should be handled asyncronously. """
+    
+    try:
+        source = create_3d_secure_source(transaction.amount, card_source_id,
+                                         get_public_url(f"/shop/receipt/{transaction.id}"))
+        
+        logger.info(f"created 3ds stripe source for transaction {transaction.id}, source id {source.id}")
+        
+        db_session.add(StripePending(transaction_id=transaction.id, stripe_token=source.id))
+    
+        if source.status in {SourceStatus.PENDING, SourceStatus.CHARGEABLE}:
+            # Assert 3d secure is pending redirect.
+            if source.redirect.status not in {SourceRedirectStatus.PENDING, SourceRedirectStatus.NOT_REQUIRED}:
+                raise InternalServerError(log=f"unexpected value for source.redirect.status, {source.redirect.status}")
+            
+            # Assert 3d secure is pending redirect.
+            if not source.redirect.url:
+                raise InternalServerError(log=f"invalid value for source.redirect.url, {source.redirect.url}")
+            
+            # Redirect the user to do the 3D secure confirmation step.
+            if source.redirect.status == SourceRedirectStatus.PENDING:
+                return source.redirect.url
+            
+        if source.status == SourceStatus.FAILED:
+            raise PaymentFailed()
+
+        raise InternalServerError(log=f"unknown stripe source status {source.status}")
+    
+    except (InternalServerError, PaymentFailed):
+        # TODO Should we really fail transaction on internal server error?
+        fail_transaction(transaction)
+        raise
+
+
+def handle_stripe_source(transaction, card_source_id, card_3d_secure):
+    """ Handle stripe source from payment request, see https://stripe.com/docs/sources/three-d-secure. Returns
+    redirect url or None if no redirect is needed. """
+    
+    if card_3d_secure == STRIPE_3D_SECURE_NOT_SUPPORTED:
+        handle_card_source(transaction, card_source_id)
+        return None
+        
+    return handle_three_d_secure_source(transaction, card_source_id)
+
+
+
+
+
+# TODO Try to simplify code below.
+
+
+
+
+
 
 
 def stripe_handle_source_callback(subtype, event):

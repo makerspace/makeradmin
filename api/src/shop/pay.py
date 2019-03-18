@@ -15,23 +15,11 @@ from shop.filters import PRODUCT_FILTERS
 from shop.models import Product, Transaction, TransactionContent, PendingRegistration, StripePending, TransactionAction, \
     ProductAction
 from shop.api_schemas import validate_data, purchase_schema, register_schema
-from shop.stripe_code import STRIPE_SOURCE_TYPE_3D_SECURE, create_stripe_charge, convert_to_stripe_amount, CURRENCY
-from shop.transactions import complete_transaction, fail_transaction
+from shop.stripe_code import STRIPE_SOURCE_TYPE_3D_SECURE, create_stripe_charge, convert_to_stripe_amount, CURRENCY, \
+    handle_stripe_source
+from shop.transactions import complete_transaction, fail_transaction, commit_transaction_to_db
 
 logger = getLogger('makeradmin')
-
-
-class PaymentFailed(BadRequest):
-    message = 'Payment failed.'
-
-
-CARD_3D_SECURE_NOT_SUPPORTED = 'not_supported'
-
-CARD_CHARGABLE = "chargeable"
-CARD_FAILED = "failed"
-CARD_CONSUMED = "consumed"
-
-CHARGE_SUCCEDED = 'succeeded'
 
 
 def process_cart(member_id, cart):
@@ -99,122 +87,6 @@ def validate_payment(member_id, cart, expected_amount: Decimal):
     return total_amount, unsaved_contents
 
 
-def add_transaction_to_db(member_id, total_amount, contents):
-    """ Save as new transaction with transaction content in db and return transaction_id. """
-    
-    transaction = Transaction(member_id=member_id, amount=total_amount, status=Transaction.PENDING)
-    
-    db_session.add(transaction)
-    db_session.flush()
-
-    for content in contents:
-        content.transaction_id = transaction.id
-        db_session.add(content)
-        db_session.flush()
-        
-        db_session.execute(
-            """
-            INSERT INTO webshop_transaction_actions (content_id, action_type, value, status)
-            SELECT :content_id AS content_id, action_type, SUM(:count * value) AS value, :pending AS status
-            FROM webshop_product_actions WHERE product_id=:product_id AND deleted_at IS NULL GROUP BY action_type
-            """,
-            {'content_id': content.id, 'count': content.count, 'pending': TransactionAction.PENDING,
-             'product_id': content.product_id}
-        )
-    
-    return transaction
-
-
-# TODO Rename.
-def handle_card_source(transaction, card_source_id):
-    card_source = stripe.Source.retrieve(card_source_id)
-    if card_source.type != 'card' or card_source.card.three_d_secure != CARD_3D_SECURE_NOT_SUPPORTED:
-        raise InternalServerError(f'Synchronous charges should only be made for cards not supporting 3D Secure.')
-
-    status = card_source.status
-    
-    if status == CARD_CHARGABLE:
-        try:
-            charge = create_stripe_charge(transaction, card_source_id)
-            if charge.status == CHARGE_SUCCEDED:
-                # Avoid delay of feedback to customer, could be skipped and handled when webhook is called.
-                complete_transaction(transaction)
-            return
-            
-        except InvalidRequestError as e:
-            fail_transaction(transaction)
-            if "Amount must convert to at least" in str(e):
-                raise PaymentFailed("Paynebt too small total. Least chargable amount is around 5 SEK.")
-
-            raise PaymentFailed(log=f"Stripe charge failed: {str(e)}")
-            
-        except CardError as e:
-            fail_transaction(transaction)
-            error = e.json_body.get('error', {})
-            raise PaymentFailed(message=error.get("message"), log=f"Stripe charge failed: {str(error)}")
-    
-        except (Exception, StripeError) as e:
-            fail_transaction(transaction)
-            raise PaymentFailed(log=f"Stripe charge failed: {str(e)}")
-        
-    if status == CARD_FAILED:
-        fail_transaction(transaction)
-        raise PaymentFailed()
-    
-    if status == CARD_CONSUMED:
-        # Not necessarily an error but shouldn't happen.
-        fail_transaction(transaction)
-        raise InternalServerError(f"Stripe source already marked as 'consumed'.")
-    
-    fail_transaction(transaction)
-    raise InternalServerError(f"Unknown stripe source status '{status}', this is a bug.", log=True)
-
-
-def handle_three_d_secure_source(transaction, card_source_id, total_amount):
-    try:
-        stripe_amount = convert_to_stripe_amount(total_amount)
-        source = stripe.Source.create(
-            amount=stripe_amount,
-            currency=CURRENCY,
-            type=STRIPE_SOURCE_TYPE_3D_SECURE,
-            three_d_secure={'card': card_source_id},
-            redirect={'return_url': get_public_url(f"/shop/receipt/{transaction.id}")},
-        )
-    except InvalidRequestError as e:
-        fail_transaction(transaction)
-        if "Amount must convert to at least" in str(e):
-            raise PaymentFailed("Paynebt too small total. Least chargable amount is around 5 SEK.")
-
-        raise PaymentFailed(log=True)
-
-    # TODO Is this stripe source different?
-    db_session.add(StripePending(transaction_id=transaction.id, stripe_token=source.id))
-    logger.info(f"created stripe pending for transaction {transaction.id}, source id {source.id}")
-
-    status = source.status
-    if status in {"pending", "chargeable"}:
-        # Assert 3d secure is pending redirect
-        if source.redirect.status not in {'pending', 'not_required'}:
-            fail_transaction(transaction)
-            raise InternalServerError(log=f"unexpected value for source.redirect.status, '{source.redirect.status}'")
-        # Assert 3d secure is pending redirect
-        if not source.redirect.url:
-            fail_transaction(transaction)
-            raise InternalServerError(log=f"invalid value for source.redirect.url, '{source.redirect.url}'")
-        # Redirect the user to do the 3D secure confirmation step
-        if source.redirect.status == 'pending':
-            return source.redirect.url
-        
-    elif status == "failed":
-        fail_transaction(transaction)
-        raise PaymentFailed()
-    else:
-        fail_transaction(transaction)
-        raise InternalServerError(log=f"unknown stripe source status '{status}'")
-
-    return None
-
-
 def get_membership_products():
     # Find all products which gives a member membership
     # Note: Assumes a product never contains multiple actions of the same type.
@@ -238,25 +110,15 @@ def make_purchase(member_id=None, purchase=None, activates_member=False):
     
     total_amount, contents = validate_payment(member_id, purchase["cart"], purchase["expected_sum"])
 
-    transaction = add_transaction_to_db(member_id, total_amount, contents)
+    transaction = commit_transaction_to_db(member_id=member_id, total_amount=total_amount, contents=contents,
+                                           stripe_card_source_id=card_source_id, activates_member=activates_member)
+
+    logger.info(f"created transaction {transaction.id},  stripe_card_source_id={card_source_id}"
+                f", card_3d_secure={card_3d_secure}, total_amount={total_amount}, member_id={member_id}")
     
-    if activates_member:
-        # Mark this transaction as one that is for registering a member.
-        db_session.add(PendingRegistration(transaction_id=transaction.id))
-
-    db_session.add(StripePending(transaction_id=transaction.id, stripe_token=card_source_id))
-    db_session.commit()
-
-    logger.info(f"pay card_source_id={card_source_id}, card_3d_secure={card_3d_secure}"
-                f", total_amount={total_amount}, transaction_id={transaction.id}")
+    redirect_url = handle_stripe_source(card_source_id, card_3d_secure)
     
-    if card_3d_secure == CARD_3D_SECURE_NOT_SUPPORTED:
-        handle_card_source(transaction, card_source_id)
-        redirect = None
-    else:
-        redirect = handle_three_d_secure_source(transaction, card_source_id, total_amount)
-
-    return transaction, redirect
+    return transaction, redirect_url
     
     
 def pay(data, member_id):
