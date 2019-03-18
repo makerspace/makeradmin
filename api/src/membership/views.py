@@ -31,7 +31,8 @@ group_entity = Entity(
 
 permission_entity = Entity(
     Permission,
-    default_sort_column='permission_id',
+    default_sort_column='permission',
+    default_sort_order=ASC,
     search_columns=('permission', 'permission_id'),
 )
 
