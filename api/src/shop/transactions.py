@@ -185,6 +185,7 @@ def ship_orders(ship_add_labaccess=True):
             ship_add_membership_action(action, transaction)
 
 
+# TODO Rename when it is not source.
 def get_source_transaction(source_id):
     try:
         return db_session.query(Transaction).filter(Transaction.stripe_pending.stripe_token == source_id).one()

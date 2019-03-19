@@ -1,13 +1,14 @@
 from flask import g, request
 
 from service.api_definition import WEBSHOP, WEBSHOP_EDIT, PUBLIC, GET, USER, POST, SERVICE, Arg
-from service.entity import Entity, OrmSingeRelation, OrmSingleSingleRelation
+from service.entity import OrmSingeRelation, OrmSingleSingleRelation
 from shop import service
 from shop.entities import product_image_entity, transaction_content_entity, transaction_entity, \
     transaction_action_entity, product_entity, category_entity, product_action_entity
-from shop.models import ProductAction, TransactionContent
+from shop.models import TransactionContent
+from shop.pay import pay, register
 from shop.shop_data import pending_actions, member_history, receipt, get_product_data, all_product_data, \
-    membership_products, register, pay
+    get_membership_products
 from shop.stripe_code import stripe_callback, process_stripe_events
 from shop.transactions import ship_orders
 
@@ -140,7 +141,7 @@ def product_data(product_id):
 
 @service.route("/register_page_data", method=GET, permission=PUBLIC)
 def register_page_data():
-    return {"membershipProducts": membership_products(), "productData": all_product_data()}
+    return {"membershipProducts": get_membership_products(), "productData": all_product_data()}
 
 
 @service.route("/pay", method=POST, permission=USER)

@@ -9,7 +9,7 @@ from service.db import db_session
 from service.error import NotFound
 from shop.entities import transaction_entity, transaction_content_entity, product_entity, category_entity, \
     product_image_entity
-from shop.models import Transaction, Product, ProductCategory
+from shop.models import Transaction, Product, ProductCategory, ProductAction
 from shop.transactions import pending_actions_query
 
 logger = getLogger('makeradmin')
@@ -102,3 +102,20 @@ def get_product_data(product_id):
         "images": [product_image_entity.to_obj(image) for image in images],
         "productData": all_product_data(),
     }
+
+
+def get_membership_products():
+    # Find all products which gives a member membership
+    # Note: Assumes a product never contains multiple actions of the same type.
+    # If this doesn't hold we will get duplicates of that product in the list.
+    query = (db_session
+             .query(Product)
+             .join(ProductAction)
+             .filter(ProductAction.action_type == ProductAction.ADD_MEMBERSHIP_DAYS,
+                     ProductAction.deleted_at.is_(None),
+                     Product.deleted_at.is_(None))
+    )
+    
+    return [{"id": p.id, "name": p.name, "price": float(p.price)} for p in query]
+
+

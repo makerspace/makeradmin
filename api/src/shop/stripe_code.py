@@ -43,6 +43,7 @@ class Subtype:
 
 class SourceType:
     THREE_D_SECURE = 'three_d_secure'
+    CARD = 'card'
 
 
 class SourceStatus:
@@ -77,9 +78,9 @@ def create_stripe_charge(transaction, card_source_id) -> stripe.Charge:
     if transaction.status != Transaction.PENDING:
         raise InternalServerError(f"unexpected status of transaction",
                                   log=f"transaction {transaction.id} has unexpected status {transaction.status}")
-
+    
     stripe_amount = convert_to_stripe_amount(transaction.amount)
-
+    
     try:
         return stripe.Charge.create(
             amount=stripe_amount,
@@ -90,7 +91,7 @@ def create_stripe_charge(transaction, card_source_id) -> stripe.Charge:
     except InvalidRequestError as e:
         if "Amount must convert to at least" in str(e):
             raise PaymentFailed("paynebt too small total, least chargable amount is around 5 SEK")
-    
+        
         raise PaymentFailed(log=f"stripe charge failed: {str(e)}")
             
     except CardError as e:
@@ -205,19 +206,8 @@ def handle_stripe_source(transaction, card_source_id, card_3d_secure):
     return handle_three_d_secure_source(transaction, card_source_id)
 
 
-
-
-
-# TODO Try to simplify code below.
-
-
-
-
-
-
-
-def stripe_handle_source_callback(subtype, event):
-    if subtype not in [STRIPE_SUBTYPE_CHARGABLE, STRIPE_SUBTYPE_FAILED, STRIPE_SUBTYPE_CANCELED]:
+def handle_stripe_source_callback(subtype, event):
+    if subtype not in (Subtype.CHARGABLE, Subtype.FAILED, Subtype.CANCELED):
         return
         
     source = event.data.object
@@ -225,21 +215,24 @@ def stripe_handle_source_callback(subtype, event):
     transaction = get_source_transaction(source.id)
 
     if not transaction:
-        logger.info(f"no transaction exists for token ({source_id}), ignoring event (usually fine)")
+        logger.info(f"no transaction exists for token ({source.id}), ignoring event (usually fine)")
         return
     
-    if subtype == STRIPE_SUBTYPE_CHARGABLE:
+    if subtype == Subtype.CHARGABLE:
         # Asynchronous charge should only be initiated from a 3D Secure source.
-        if source.type == STRIPE_SOURCE_TYPE_3D_SECURE:
-            # Payment should happen now.
+        if source.type == SourceType.THREE_D_SECURE:
+            # Charge should be created now.
             try:
-                create_stripe_charge(transaction, source.id)
-            except Exception as e:
+                charge = create_stripe_charge(transaction, source.id)
+                # TODO Why can't we complete the transaction here.
+            except PaymentFailed as e:
                 logger.exception(f"create_stripe_charge failed, source={source.id}, transaction_id={transaction.id}")
+                # TODO Why not raise here?
         
-        elif source.type == 'card':
+        elif source.type == SourceType.CARD:
             # All 'card' type sources that should be charged are handled synchronously, not here.
             pass
+        
         else:
             logger.warning(f'unexpected source type {source.type} in stripe webhook: {source}')
             
@@ -248,7 +241,30 @@ def stripe_handle_source_callback(subtype, event):
         fail_transaction(transaction)
 
 
-def stripe_handle_charge_callback(subtype, event):
+def stripe_callback(data, headers):
+    logger.info(f"stripe callback with headers: {headers}")
+
+    headers['TODO_VALUE_ERROR']
+
+    try:
+        event = stripe.Webhook.construct_event(data, headers['Stripe-Signature'], STRIPE_SIGNING_SECRET)
+    except (KeyError, SignatureVerificationError) as e:
+        raise BadRequest(log=f"failed to process stripe callback: {str(e)}")
+
+    logger.info(f"stripe callback of type: {event.type}")
+
+    event_type, event_subtype = event.type.split('.', 1)
+    if event_type == Type.SOURCE:
+        handle_stripe_source_callback(event_subtype, event)
+        
+    elif event_type == Type.CHARGE:
+        handle_stripe_charge_callback(event_subtype, event)
+
+
+# TODO Try to simplify code below.
+
+
+def handle_stripe_charge_callback(subtype, event):
     charge = event.data.object
     
     transaction = get_source_transaction(charge.source.id)
@@ -256,49 +272,32 @@ def stripe_handle_charge_callback(subtype, event):
         logger.error(f"no transaction for source {charge.source.id},  charge id {charge.id}, subtype {subtype}")
         return
     
-    if subtype == STRIPE_SUBTYPE_SUCCEEDED:
+    if subtype == Subtype.SUCCEEDED:
         handle_payment_success(transaction)
         
-    elif subtype == STRIPE_SUBTYPE_FAILED:
+    elif subtype == Subtype.FAILED:
         fail_transaction(transaction)
         logger.info(f"charge {charge.id} (transaction {transaction.id}) failed with message {charge.failure_message}")
         
-    elif subtype.startswith(STRIPE_SUBTYPE_DISPUTE_PREFIX):
+    elif subtype.startswith(Subtype.DISPUTE_PREFIX):
         # todo: log disputes for display in admin frontend.
         pass
     
-    elif subtype.startswith(STRIPE_SUBTYPE_REFUND_PREFIX):
+    elif subtype.startswith(Subtype.REFUND_PREFIX):
         # todo: log refund for display in admin frontend.
         # todo: option in frontend to roll back actions.
         pass
-
-
-def stripe_callback(data, headers):
-    logger.info(f"stripe callback with headers: {headers}")
-
-    try:
-        event = stripe.Webhook.construct_event(data, headers['Stripe-Signature'], STRIPE_SIGNING_SECRET)
-    except (ValueError, SignatureVerificationError) as e:
-        raise BadRequest(log=f"failed to process stripe callback: {str(e)}")
-
-    logger.info(f"stripe callback of type: {event.type}")
-
-    event_type, event_subtype = event.type.split('.', 1)
-    if event_type == STRIPE_TYPE_SOURCE:
-        stripe_handle_source_callback(event_subtype, event)
-    elif event_type == STRIPE_TYPE_CHARGE:
-        stripe_handle_charge_callback(event_subtype, event)
 
 
 def process_stripe_event(event):
     try:
         logger.info(f"processing stripe event of type {event.type}")
         (event_type, event_subtype) = tuple(event.type.split('.', 1))
-        if event_type == STRIPE_TYPE_SOURCE:
-            stripe_handle_source_callback(event_subtype, event)
+        if event_type == Type.SOURCE:
+            handle_stripe_source_callback(event_subtype, event)
             
-        elif event_type == STRIPE_TYPE_CHARGE:
-            stripe_handle_charge_callback(event_subtype, event)
+        elif event_type == Type.CHARGE:
+            handle_stripe_charge_callback(event_subtype, event)
     except Exception as e:
         pass
 
@@ -313,3 +312,8 @@ def process_stripe_events(start=None, source_id=None):
             process_stripe_event(event)
         else:
             logger.info(f"skipping event, not matching source_id")
+
+
+
+
+

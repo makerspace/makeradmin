@@ -8,16 +8,14 @@ from stripe.error import StripeError, CardError, InvalidRequestError
 from core import auth
 from membership import member_entity
 from service.api_definition import NON_MATCHING_SUMS, EMPTY_CART, NEGATIVE_ITEM_COUNT, INVALID_ITEM_COUNT
-from service.config import get_public_url
 from service.db import db_session
 from service.error import NotFound, InternalServerError, BadRequest
 from shop.filters import PRODUCT_FILTERS
-from shop.models import Product, Transaction, TransactionContent, PendingRegistration, StripePending, TransactionAction, \
-    ProductAction
+from shop.models import Product, TransactionContent, ProductAction
 from shop.api_schemas import validate_data, purchase_schema, register_schema
-from shop.stripe_code import STRIPE_SOURCE_TYPE_3D_SECURE, create_stripe_charge, convert_to_stripe_amount, CURRENCY, \
-    handle_stripe_source
-from shop.transactions import complete_transaction, fail_transaction, commit_transaction_to_db
+from shop.shop_data import get_membership_products
+from shop.stripe_code import convert_to_stripe_amount, handle_stripe_source
+from shop.transactions import commit_transaction_to_db
 
 logger = getLogger('makeradmin')
 
@@ -87,21 +85,6 @@ def validate_payment(member_id, cart, expected_amount: Decimal):
     return total_amount, unsaved_contents
 
 
-def get_membership_products():
-    # Find all products which gives a member membership
-    # Note: Assumes a product never contains multiple actions of the same type.
-    # If this doesn't hold we will get duplicates of that product in the list.
-    query = (db_session
-             .query(Product)
-             .join(ProductAction)
-             .filter(ProductAction.action_type == ProductAction.ADD_MEMBERSHIP_DAYS,
-                     ProductAction.deleted_at.is_(None),
-                     Product.deleted_at.is_(None))
-    )
-    
-    return [{"id": p.id, "name": p.name, "price": float(p.price)} for p in query]
-
-
 def make_purchase(member_id=None, purchase=None, activates_member=False):
     """ Pay using the data in purchase, the purchase structure should be validated according to schema.  """
     
@@ -116,7 +99,7 @@ def make_purchase(member_id=None, purchase=None, activates_member=False):
     logger.info(f"created transaction {transaction.id},  stripe_card_source_id={card_source_id}"
                 f", card_3d_secure={card_3d_secure}, total_amount={total_amount}, member_id={member_id}")
     
-    redirect_url = handle_stripe_source(card_source_id, card_3d_secure)
+    redirect_url = handle_stripe_source(transaction, card_source_id, card_3d_secure)
     
     return transaction, redirect_url
     
