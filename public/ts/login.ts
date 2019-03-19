@@ -59,7 +59,7 @@ export function render_login(root: HTMLElement, heading: string, redirect: strin
                             </button>
                         </div>
                 </form>
-								<p style="text-align: center;"><a href="https://medlem.makerspace.se/shop/register">Bli medlem / Become a member</a></p>
+								<p style="text-align: center;"><a href="/shop/register">Bli medlem / Become a member</a></p>
             </div>`;
 	const form = <HTMLElement>root.getElementsByTagName("form")[0];
 	const tagInput = <HTMLInputElement>root.getElementsByTagName("input")[0];
