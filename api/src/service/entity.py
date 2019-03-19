@@ -206,7 +206,7 @@ class Entity:
         return dict(
             total=count,
             page=page,
-            per_page=page_size,
+            page_size=page_size,
             last_page=ceil(count / page_size) if page_size else 1,
             data=[to_obj(entity) for entity in query]
         )
