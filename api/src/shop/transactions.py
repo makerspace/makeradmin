@@ -143,7 +143,7 @@ def ship_add_membership_action(action, transaction):
     assert membership_end
 
     complete_pending_action(action)
-    send_membership_updated_email(action.member_id, days_to_add, membership_end)
+    send_membership_updated_email(transaction.member_id, days_to_add, membership_end)
 
 
 def activate_member(member):

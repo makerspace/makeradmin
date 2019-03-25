@@ -63,7 +63,9 @@ class Test(ShopTestMixin, ApiTest):
         self.assertIsNone(after_activation['deleted_at'])
         
         span = db_session.query(Span).filter_by(member_id=member_id, type=Span.MEMBERSHIP).one()
-        self.assertEqual(self.date(356), span.enddate)
+        self.assertEqual(self.date(365), span.enddate)
+
+        # TODO This tests makes member get two duplicate emails. Interesting, race conditions? Wrong isolation level?
 
     def test_registring_with_existing_member_email_does_not_work_and_does_not_return_token(self):
         source = stripe.Source.create(type="card", token=stripe.Token.create(card=self.card(VALID_NON_3DS_CARD_NO)).id)
