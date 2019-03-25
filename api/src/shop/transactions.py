@@ -123,7 +123,6 @@ def ship_add_labaccess_action(action, transaction):
         creation_reason=f"transaction_action_id: {action.id}, transaction_id: {transaction.id}"
     ).labaccess_end
     
-    # TODO BM Can this assert fail too?
     assert labaccess_end
     
     complete_pending_action(action)
@@ -135,13 +134,12 @@ def ship_add_membership_action(action, transaction):
 
     membership_end = add_membership_days(
         transaction.member_id,
-        Span.LABACCESS,
+        Span.MEMBERSHIP,
         days=days_to_add,
         creation_reason=f"transaction_action_id: {action.id}, transaction_id: {transaction.id}",
         default_start_date=transaction.created_at.date(),
     ).membership_end
 
-    # TODO BM This assert fails when running tests, but then we catch all exceptions... Investigate.
     assert membership_end
 
     complete_pending_action(action)
@@ -177,6 +175,8 @@ def ship_orders(ship_add_labaccess=True):
     If a user has no key yet, then the order will remain as not completed.
     If a user has multiple keys, all of them are updated with new dates.
     """
+    
+    # TODO Rollback on exceptions? And commit on success? Creation of some entities will commit.
     for action, content, transaction in pending_actions_query():
 
         if ship_add_labaccess and action.action_type == ProductAction.ADD_LABACCESS_DAYS:

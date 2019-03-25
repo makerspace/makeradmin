@@ -224,6 +224,7 @@ class Entity:
         entity = self.model(**input_data)
         db_session.add(entity)
         db_session.flush()  # Flush to get id of created entity.
+        # TODO BM Probably a good idea to commit here like for update and delete.
         return entity
     
     def create(self, data=None):

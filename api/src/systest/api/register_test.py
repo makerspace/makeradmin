@@ -3,7 +3,9 @@ from time import time
 
 import stripe
 
+from membership.models import Span
 from service.api_definition import NON_MATCHING_SUMS
+from service.db import db_session
 from shop.models import ProductAction
 from test_aid.systest_base import ShopTestMixin, ApiTest, VALID_NON_3DS_CARD_NO, EXPIRED_3DS_CARD_NO
 
@@ -59,6 +61,9 @@ class Test(ShopTestMixin, ApiTest):
         
         after_activation = self.get(f"/membership/member/{member_id}").expect(code=200, data=member).data
         self.assertIsNone(after_activation['deleted_at'])
+        
+        span = db_session.query(Span).filter_by(member_id=member_id, type=Span.MEMBERSHIP).one()
+        self.assertEqual(self.date(356), span.enddate)
 
     def test_registring_with_existing_member_email_does_not_work_and_does_not_return_token(self):
         source = stripe.Source.create(type="card", token=stripe.Token.create(card=self.card(VALID_NON_3DS_CARD_NO)).id)

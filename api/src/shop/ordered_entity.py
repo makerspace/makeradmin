@@ -13,8 +13,9 @@ class OrderedEntity(Entity):
     can solve it with a trigger or like this using an explicit mysql lock.
     """
     
-    def create(self):
-        data = request.json or {}
+    def create(self, data=None):
+        if data is None:
+            data = request.json or {}
         
         status, = db_session.execute("SELECT GET_LOCK('display_order', 20)").fetchone()
         if not status:
