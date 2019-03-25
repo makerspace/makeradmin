@@ -33,10 +33,9 @@ class Test(ShopTestMixin, ApiTest):
                         "count": 1,
                     }
                 ],
-                "expectedSum": 300.00,
-                "duplicatePurchaseRand": randint(1e9, 9e9),
-                "stripeSource": source.id,
-                "stripeThreeDSecure": source["card"]["three_d_secure"]
+                "expected_sum": 300.00,
+                "stripe_card_source_id": source.id,
+                "stripe_card_3d_secure": source["card"]["three_d_secure"]
             },
             "member": member
         }
@@ -75,10 +74,9 @@ class Test(ShopTestMixin, ApiTest):
                         "count": 1,
                     }
                 ],
-                "expectedSum": 300.00,
-                "duplicatePurchaseRand": randint(1e9, 9e9),
-                "stripeSource": source.id,
-                "stripeThreeDSecure": source["card"]["three_d_secure"]
+                "expected_sum": 300.00,
+                "stripe_card_source_id": source.id,
+                "stripe_card_3d_secure": source["card"]["three_d_secure"]
             },
             "member": member
         }
@@ -100,10 +98,9 @@ class Test(ShopTestMixin, ApiTest):
                         "count": 1,
                     }
                 ],
-                "expectedSum": 121212121.00,
-                "duplicatePurchaseRand": randint(1e9, 9e9),
-                "stripeSource": source.id,
-                "stripeThreeDSecure": source["card"]["three_d_secure"]
+                "expected_sum": 121212121.00,
+                "stripe_card_source_id": source.id,
+                "stripe_card_3d_secure": source["card"]["three_d_secure"]
             },
             "member": member
         }

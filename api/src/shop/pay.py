@@ -1,17 +1,15 @@
 from decimal import Decimal, localcontext, Rounded
 from logging import getLogger
 
-import stripe
 from sqlalchemy.orm.exc import NoResultFound
-from stripe.error import StripeError, CardError, InvalidRequestError
 
 from core import auth
-from membership import member_entity
+from membership.views import member_entity
 from service.api_definition import NON_MATCHING_SUMS, EMPTY_CART, NEGATIVE_ITEM_COUNT, INVALID_ITEM_COUNT
 from service.db import db_session
 from service.error import NotFound, InternalServerError, BadRequest
 from shop.filters import PRODUCT_FILTERS
-from shop.models import Product, TransactionContent, ProductAction
+from shop.models import Product, TransactionContent
 from shop.api_schemas import validate_data, purchase_schema, register_schema
 from shop.shop_data import get_membership_products
 from shop.stripe_code import convert_to_stripe_amount, handle_stripe_source

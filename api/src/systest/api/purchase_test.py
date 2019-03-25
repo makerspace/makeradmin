@@ -27,10 +27,9 @@ class Test(ShopTestMixin, ApiTest):
         
         purchase = {
             "cart": cart,
-            "expectedSum": expected_sum,
-            "duplicatePurchaseRand": randint(int(1e9), int(9e9)),
-            "stripeSource": source.id,
-            "stripeThreeDSecure": source["card"]["three_d_secure"]
+            "expected_sum": expected_sum,
+            "stripe_card_source_id": source.id,
+            "stripe_card_3d_secure": source["card"]["three_d_secure"]
         }
 
         transaction_id = self.post(f"/webshop/pay", purchase, token=self.token)\
@@ -54,10 +53,9 @@ class Test(ShopTestMixin, ApiTest):
     def test_count_not_of_correct_multiple_fails_purchase(self):
         purchase = {
             "cart": [{"id": self.p1_id, "count": 17}],
-            "expectedSum": self.p1_price * 17,
-            "duplicatePurchaseRand": randint(int(1e9), int(9e9)),
-            "stripeSource": "not_used",
-            "stripeThreeDSecure": "not_used",
+            "expected_sum": self.p1_price * 17,
+            "stripe_card_source_id": "not_used",
+            "stripe_card_3d_secure": "not_supported",
         }
 
         self.post(f"/webshop/pay", purchase, token=self.token).expect(code=400, what="invalid_item_count")
@@ -65,10 +63,9 @@ class Test(ShopTestMixin, ApiTest):
     def test_invalid_expected_sum_fails_purchase(self):
         purchase = {
             "cart": [{"id": self.p0_id, "count": 1}],
-            "expectedSum": self.p0_price + 1,
-            "duplicatePurchaseRand": randint(int(1e9), int(9e9)),
-            "stripeSource": "not_used",
-            "stripeThreeDSecure": "not_used",
+            "expected_sum": self.p0_price + 1,
+            "stripe_card_source_id": "not_used",
+            "stripe_card_3d_secure": "not_supported",
         }
 
         self.post(f"/webshop/pay", purchase, token=self.token).expect(code=400, what="non_matching_sums")
@@ -76,10 +73,9 @@ class Test(ShopTestMixin, ApiTest):
     def test_negative_count_fails_purchaste(self):
         purchase = {
             "cart": [{"id": self.p0_id, "count": -1}],
-            "expectedSum": self.p0_price,
-            "duplicatePurchaseRand": randint(int(1e9), int(9e9)),
-            "stripeSource": "not_used",
-            "stripeThreeDSecure": "not_used",
+            "expected_sum": self.p0_price,
+            "stripe_card_source_id": "not_used",
+            "stripe_card_3d_secure": "not_supported",
         }
 
         self.post(f"/webshop/pay", purchase, token=self.token).expect(code=400, what="negative_item_count")
@@ -87,30 +83,9 @@ class Test(ShopTestMixin, ApiTest):
     def test_empty_cart_fails_purchase(self):
         purchase = {
             "cart": [],
-            "expectedSum": self.p0_price,
-            "duplicatePurchaseRand": randint(int(1e9), int(9e9)),
-            "stripeSource": "not_used",
-            "stripeThreeDSecure": "not_used",
+            "expected_sum": self.p0_price,
+            "stripe_card_source_id": "not_used",
+            "stripe_card_3d_secure": "not_supported",
         }
 
         self.post(f"/webshop/pay", purchase, token=self.token).expect(code=400, what="empty_cart")
-        
-    @skip("duplicate purchase rand does not work reliably and can not be tested, see issue #35")
-    def test_repeated_purchase_rand_fails_purchase(self):
-        duplicate_purchase_rand = randint(int(1e9), int(9e9))
-
-        source = stripe.Source.create(type="card", token=stripe.Token.create(card=self.card(VALID_NON_3DS_CARD_NO)).id)
-        purchase = {
-            "cart": [{"id": self.p0_id, "count": 1}],
-            "expectedSum": self.p0_price,
-            "duplicatePurchaseRand": duplicate_purchase_rand,
-            "stripeSource": source.id,
-            "stripeThreeDSecure": source["card"]["three_d_secure"]
-        }
-
-        self.post(f"/webshop/pay", purchase, token=self.token).expect(code=200, status="ok")
-        
-        source = stripe.Source.create(type="card", token=stripe.Token.create(card=self.card(VALID_NON_3DS_CARD_NO)).id)
-        purchase['stripeSource'] = source.id
-
-        self.post(f"/webshop/pay", purchase, token=self.token).expect(code=400, what="duplicate_transaction")
