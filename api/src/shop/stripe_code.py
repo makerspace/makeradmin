@@ -224,17 +224,21 @@ def handle_stripe_source_callback(subtype, event):
             # Charge should be created now.
             try:
                 charge = create_stripe_charge(transaction, source.id)
-                # TODO Why can't we complete the transaction here.
+                # TODO Why can't we complete the transaction here. Investigate result. Check tutorial.
             except PaymentFailed as e:
                 logger.exception(f"create_stripe_charge failed, source={source.id}, transaction_id={transaction.id}")
                 # TODO Why not raise here?
+                # TODO Why not fail transaction here?
         
         elif source.type == SourceType.CARD:
             # All 'card' type sources that should be charged are handled synchronously, not here.
             pass
+            logger.info(f"stripe callback source type '{source.type}', ignored")
+            # TODO The code may be better by handling all through callbacks, but we seem to get the callback pretty
+            # fast so it may introduce race conditions if pay is not completed.
         
         else:
-            logger.warning(f'unexpected source type {source.type} in stripe webhook: {source}')
+            logger.warning(f"unexpected source type '{source.type}' in stripe webhook: {source}")
             
     else:
         logger.info(f"transaction {transaction.id} failed")
@@ -290,6 +294,8 @@ def handle_stripe_charge_callback(subtype, event):
 def process_stripe_event(event):
     try:
         logger.info(f"processing stripe event of type {event.type}")
+        
+        # TODO Duplicate code, see stripe callback.
         (event_type, event_subtype) = tuple(event.type.split('.', 1))
         if event_type == Type.SOURCE:
             handle_stripe_source_callback(event_subtype, event)

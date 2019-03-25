@@ -62,6 +62,9 @@ def complete_transaction(transaction):
         transaction.status = Transaction.COMPLETED
         db_session.add(transaction)
         db_session.commit()
+        # TODO If we do it after we would not have to do it like this (commit). But what does Transaction.COMPLETED
+        # mean? It means payed i guess, and actions completed is another thing so we need this hack and ship all
+        # peoples orders wen someone else is buying someting?
         try:
             # TODO Investigate this, should we ship before commit, and should we ship just this transaction?
             # TODO Why do we ship all orders?
@@ -74,9 +77,6 @@ def fail_transaction(transaction):
     transaction.status = Transaction.FAILED
     db_session.add(transaction)
     db_session.commit()
-
-
-# TODO Check code below.
 
 
 def pending_actions_query(member_id=None):
@@ -163,10 +163,12 @@ def handle_payment_success(transaction):
     
     # Check if this transaction is a new member registration.
     if db_session.query(PendingRegistration).filter(PendingRegistration.transaction_id == transaction.id).count():
+        # TODO Why is this not a transaction_action like the other?
         activate_member(transaction.member)
         
     logger.info(f"sending receipt email to member {transaction.member_id}, transaction {transaction.id} complete")
     send_receipt_email(transaction)
+    # TODO Why do we not send receipt immediatly when we have completed a transaction?
 
 
 def ship_orders(ship_add_labaccess=True):
