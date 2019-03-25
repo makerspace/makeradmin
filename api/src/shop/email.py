@@ -62,7 +62,7 @@ def send_receipt_email(transaction):
 
 def send_new_member_email(member):
     message_entity.create({
-        "recipients": [{"type": "member", "id": member.id}],
+        "recipients": [{"type": "member", "id": member.member_id}],
         "message_type": "email",
         "title": "Välkommen till Stockholm Makerspace",
         "description": render_template(

@@ -149,7 +149,7 @@ def ship_add_membership_action(action, transaction):
 
 
 def activate_member(member):
-    logger.info(f"activating member {member.id}")
+    logger.info(f"activating member {member.member_id}")
     member.deleted_at = None
     db_session.add(member)
     db_session.flush()
