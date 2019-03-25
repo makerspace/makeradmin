@@ -14,3 +14,4 @@ node_modules
 .pydevproject
 .buildpath
 .settings
+local.mk

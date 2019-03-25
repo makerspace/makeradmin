@@ -55,7 +55,8 @@ def commit_transaction_to_db(member_id=None, total_amount=None, contents=None, s
 
 
 def complete_transaction(transaction):
-    assert transaction.status == Transaction.PENDING, "TODO BM let's see if this can be not true"
+    # TODO It isn't true when not 3d secure because we complete it the get callback as well.
+    # assert transaction.status == Transaction.PENDING, "TODO BM let's see if this can be not true"
     
     if transaction.status == Transaction.PENDING:
         transaction.status = Transaction.COMPLETED
@@ -188,7 +189,10 @@ def ship_orders(ship_add_labaccess=True):
 # TODO Rename when it is not source.
 def get_source_transaction(source_id):
     try:
-        return db_session.query(Transaction).filter(Transaction.stripe_pending.stripe_token == source_id).one()
+        return db_session\
+            .query(Transaction)\
+            .filter(Transaction.stripe_pending.any(StripePending.stripe_token == source_id))\
+            .one()
     except NoResultFound as e:
         return None
     except MultipleResultsFound as e:

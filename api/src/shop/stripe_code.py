@@ -59,7 +59,7 @@ class SourceRedirectStatus:
 
 
 class ChargeStatus:
-    SUCCEDED = 'succeded'
+    SUCCEEDED = 'succeeded'
 
 
 def convert_to_stripe_amount(amount: Decimal) -> int:
@@ -135,14 +135,14 @@ def handle_card_source(transaction, card_source_id):
         if card_source.status == SourceStatus.CHARGEABLE:
             charge = create_stripe_charge(transaction, card_source_id)
             
-            if charge.status == ChargeStatus.SUCCEDED:
+            if charge.status == ChargeStatus.SUCCEEDED:
                 # Avoid delay of feedback to customer, could be skipped and handled when webhook is called.
                 complete_transaction(transaction)
                 return
             
             # TODO Test this, when can this happend?
-            logger.warning(f"transaction {transaction.id} card source charge status {charge.status}"
-                           f", not {ChargeStatus.SUCCEDED}, is this an error state?")
+            logger.warning(f"transaction {transaction.id} card source charge status was '{charge.status}'"
+                           f", not '{ChargeStatus.SUCCEEDED}', is this an error state?")
             
         if card_source.status == SourceStatus.FAILED:
             raise PaymentFailed()
@@ -242,12 +242,10 @@ def handle_stripe_source_callback(subtype, event):
 
 
 def stripe_callback(data, headers):
-    logger.info(f"stripe callback with headers: {headers}")
-
-    headers['TODO_VALUE_ERROR']
-
     try:
-        event = stripe.Webhook.construct_event(data, headers['Stripe-Signature'], STRIPE_SIGNING_SECRET)
+        signature = headers['Stripe-Signature']
+        logger.info(f"stripe callback with signature: {signature}")
+        event = stripe.Webhook.construct_event(data, signature, STRIPE_SIGNING_SECRET)
     except (KeyError, SignatureVerificationError) as e:
         raise BadRequest(log=f"failed to process stripe callback: {str(e)}")
 

@@ -71,10 +71,13 @@ class MessageEntity(Entity):
         
         return message
     
-    def create(self):
+    def create(self, data=None):
         """
         Create is used to send message to a list of recipients. Recipients should be a list of objects with id,
         type where type is member or group. The rest of the data is used to create the message normally.
         """
         
-        return self.to_obj(self.create_message(request.json or {}))
+        if data is None:
+            data = request.json or {}
+        
+        return self.to_obj(self.create_message(data))
