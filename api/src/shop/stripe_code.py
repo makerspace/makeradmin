@@ -170,7 +170,7 @@ def handle_three_d_secure_source(transaction, card_source_id):
         logger.info(f"created 3ds stripe source for transaction {transaction.id}, source id {source.id}")
         
         db_session.add(StripePending(transaction_id=transaction.id, stripe_token=source.id))
-    
+        
         if source.status in {SourceStatus.PENDING, SourceStatus.CHARGEABLE}:
             # Assert 3d secure is pending redirect.
             if source.redirect.status not in {SourceRedirectStatus.PENDING, SourceRedirectStatus.NOT_REQUIRED}:
@@ -223,7 +223,9 @@ def handle_stripe_source_callback(subtype, event):
         if source.type == SourceType.THREE_D_SECURE:
             # Charge should be created now.
             try:
+                logger.info(f"TODO 3DS SECURE: {repr(source)}")
                 charge = create_stripe_charge(transaction, source.id)
+                logger.info(f"TODO IGNORING CHARGE: {repr(charge)}")
                 # TODO Why can't we complete the transaction here. Investigate result. Check tutorial.
             except PaymentFailed as e:
                 logger.exception(f"create_stripe_charge failed, source={source.id}, transaction_id={transaction.id}")
@@ -267,6 +269,7 @@ def stripe_callback(data, headers):
 
 
 def handle_stripe_charge_callback(subtype, event):
+    logger.info(f"TODO GOT CHARGE: {repr(event)}")
     charge = event.data.object
     
     transaction = get_source_transaction(charge.source.id)

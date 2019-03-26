@@ -19,8 +19,9 @@ from service.db import create_mysql_engine, db_session
 from test_aid.api import ApiFactory
 from test_aid.db import DbFactory
 from test_aid.obj import DEFAULT_PASSWORD_HASH
-from test_aid.systest_config import STRIPE_PUBLIC_KEY, HOST_FRONTEND, HOST_PUBLIC, HOST_BACKEND, \
-    SELENIUM_BASE_TIMEOUT, SLEEP, WEBDRIVER_TYPE, API_BEARER, SELENIUM_SCREENSHOT_DIR, KEEP_BROWSER
+from test_aid.systest_config import HOST_FRONTEND, HOST_PUBLIC, HOST_BACKEND, \
+    SELENIUM_BASE_TIMEOUT, SLEEP, WEBDRIVER_TYPE, API_BEARER, SELENIUM_SCREENSHOT_DIR, KEEP_BROWSER, \
+    STRIPE_PUBLIC_KEY
 from test_aid.test_base import TestBase
 
 stripe.api_key = STRIPE_PUBLIC_KEY

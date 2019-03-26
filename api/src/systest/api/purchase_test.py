@@ -4,6 +4,7 @@ from unittest import skip
 import stripe
 
 from test_aid.systest_base import ShopTestMixin, ApiTest, VALID_NON_3DS_CARD_NO
+from test_aid.systest_config import STRIPE_PRIVATE_KEY
 
 
 class Test(ShopTestMixin, ApiTest):
@@ -31,9 +32,13 @@ class Test(ShopTestMixin, ApiTest):
             "stripe_card_source_id": source.id,
             "stripe_card_3d_secure": source["card"]["three_d_secure"]
         }
-
+        
         transaction_id = self.post(f"/webshop/pay", purchase, token=self.token)\
             .expect(code=200, status="ok").get('data__transaction_id')
+        
+        # TODO Remove prints.
+        print(source.id)
+        print(stripe.Source.retrieve(source.id, api_key=STRIPE_PRIVATE_KEY))
         
         self.get(f"/webshop/transaction/{transaction_id}").expect(
             code=200,
