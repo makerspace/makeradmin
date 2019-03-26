@@ -165,10 +165,13 @@ def handle_payment_success(transaction):
     if db_session.query(PendingRegistration).filter(PendingRegistration.transaction_id == transaction.id).count():
         # TODO Why is this not a transaction_action like the other?
         activate_member(transaction.member)
+        # TODO We need to remove the pending registration or it will send registration emails for each event (don't
+        # think it happens in prod).
         
     logger.info(f"sending receipt email to member {transaction.member_id}, transaction {transaction.id} complete")
+    # TODO Why do we do this even if transaction already completed once before?
     send_receipt_email(transaction)
-    # TODO Why do we not send receipt immediatly when we have completed a transaction?
+    # TODO Why do we not send receipt immediately when we have completed a transaction?
 
 
 def ship_orders(ship_add_labaccess=True):
