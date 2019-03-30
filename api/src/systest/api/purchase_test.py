@@ -1,10 +1,15 @@
-from random import randint
-from unittest import skip
+from logging import getLogger
+from time import sleep
+
 
 import stripe
 
-from test_aid.systest_base import ShopTestMixin, ApiTest, VALID_NON_3DS_CARD_NO
+from shop.stripe_code import Type
+from test_aid.systest_base import ShopTestMixin, ApiTest, VALID_NON_3DS_CARD_NO, VALID_OPTIONAL_3DS_CARD_NO
 from test_aid.systest_config import STRIPE_PRIVATE_KEY
+
+
+logger = getLogger('makeradmin')
 
 
 class Test(ShopTestMixin, ApiTest):
@@ -13,6 +18,23 @@ class Test(ShopTestMixin, ApiTest):
         dict(price=12.3, unit="st", smallest_multiple=1),
         dict(price=1.2, unit="mm", smallest_multiple=100),
     ]
+
+    def send_stripe_source_callback(self, source_id):
+        """ Poll stripe for stripe source callbacks using event list, then send it to server as a faked webhook
+        callback. """
+        for i in range(10):
+            events = stripe.Event.list(api_key=STRIPE_PRIVATE_KEY,
+                                       created={'gte': self.test_start_timestamp})
+            for event in events:
+                logger.info(f"testing for event {event}")
+
+                obj = event.get('data', {}).get('object', {})
+                if source_id in (obj.get('source', {}).get('id'), obj.get('id')):
+                    self.post(f"/webshop/test_stripe_source_event", event)
+                    return
+                
+        sleep(1)
+        raise AssertionError(f"failed to get source event for {source_id}")
 
     def test_valid_purchase_from_existing_member(self):
         p0_count = 100
@@ -24,7 +46,7 @@ class Test(ShopTestMixin, ApiTest):
             {"id": self.p1_id, "count": p1_count},
         ]
         
-        source = stripe.Source.create(type="card", token=stripe.Token.create(card=self.card(VALID_NON_3DS_CARD_NO)).id)
+        source = stripe.Source.create(type="card", token=stripe.Token.create(card=self.card(VALID_OPTIONAL_3DS_CARD_NO)).id)
         
         purchase = {
             "cart": cart,
@@ -36,9 +58,11 @@ class Test(ShopTestMixin, ApiTest):
         transaction_id = self.post(f"/webshop/pay", purchase, token=self.token)\
             .expect(code=200, status="ok").get('data__transaction_id')
         
-        # TODO Remove prints.
-        print(source.id)
-        print(stripe.Source.retrieve(source.id, api_key=STRIPE_PRIVATE_KEY))
+        self.send_stripe_source_callback(source.id)
+        
+        # # TODO Remove prints.
+        # print(source.id)
+        # print(stripe.Source.retrieve(source.id, api_key=STRIPE_PRIVATE_KEY))
         
         self.get(f"/webshop/transaction/{transaction_id}").expect(
             code=200,

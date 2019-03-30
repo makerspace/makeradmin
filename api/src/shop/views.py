@@ -9,7 +9,7 @@ from shop.models import TransactionContent
 from shop.pay import pay, register
 from shop.shop_data import pending_actions, member_history, receipt, get_product_data, all_product_data, \
     get_membership_products
-from shop.stripe_code import stripe_callback, process_stripe_events
+from shop.stripe_code import stripe_callback, process_stripe_events, test_stripe_source_event
 from shop.transactions import ship_orders
 
 service.entity_routes(
@@ -157,6 +157,12 @@ def register_route():
 @service.route("/stripe_callback", method=POST, permission=PUBLIC)
 def stripe_callback_route():
     stripe_callback(request.data, request.headers)
+
+
+@service.route("/test_stripe_event", method=POST, permission=SERVICE)
+def test_stripe_source_event_route():
+    """ This endpoint is used for testing only. """
+    test_stripe_source_event(request.data)
 
 
 @service.route("/process_stripe_events", method=POST, permission=SERVICE)

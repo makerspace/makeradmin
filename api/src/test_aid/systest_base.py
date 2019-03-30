@@ -1,9 +1,9 @@
 import os
 import sys
-import time
 from copy import copy
 from functools import wraps
 from logging import getLogger
+from time import time
 
 from unittest import skipIf
 
@@ -27,6 +27,8 @@ from test_aid.test_base import TestBase
 stripe.api_key = STRIPE_PUBLIC_KEY
 
 VALID_NON_3DS_CARD_NO = "378282246310005"
+VALID_OPTIONAL_3DS_CARD_NO = "4242424242424242"
+VALID_REQUIRED_3DS_CARD_NO = "4000000000003063"
 EXPIRED_3DS_CARD_NO = "4000000000000069"
 
 EXPIRES_CVC_ZIP = "4242424242424"
@@ -244,6 +246,8 @@ class ShopTestMixin:
         self.member = self.api.create_member(password=DEFAULT_PASSWORD_HASH)
         self.member_id = self.member['member_id']
         self.token = self.api.login_member()
+
+        self.test_start_timestamp = str(int(time()))
 
 
         
