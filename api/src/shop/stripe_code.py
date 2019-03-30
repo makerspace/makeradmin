@@ -7,7 +7,7 @@ from stripe.error import SignatureVerificationError, InvalidRequestError, CardEr
 from shop.transactions import PaymentFailed
 from service.config import config, get_public_url
 from service.db import db_session
-from service.error import BadRequest, InternalServerError
+from service.error import BadRequest, InternalServerError, EXCEPTION
 from shop.api_schemas import STRIPE_3D_SECURE_NOT_SUPPORTED
 from shop.models import Transaction, StripePending
 from shop.transactions import fail_transaction, get_source_transaction, complete_transaction, handle_payment_success
@@ -171,23 +171,23 @@ def handle_three_d_secure_source(transaction, card_source_id):
         
         db_session.add(StripePending(transaction_id=transaction.id, stripe_token=source.id))
         
-        if source.status in {SourceStatus.PENDING, SourceStatus.CHARGEABLE}:
-            # Assert 3d secure is pending redirect.
-            if source.redirect.status not in {SourceRedirectStatus.PENDING, SourceRedirectStatus.NOT_REQUIRED}:
-                raise InternalServerError(log=f"unexpected value for source.redirect.status, {source.redirect.status}")
-            
-            # Assert 3d secure is pending redirect.
-            if not source.redirect.url:
-                raise InternalServerError(log=f"invalid value for source.redirect.url, {source.redirect.url}")
-            
+        if source.status in (SourceStatus.PENDING, SourceStatus.CHARGEABLE):
             # Redirect the user to do the 3D secure confirmation step.
             if source.redirect.status == SourceRedirectStatus.PENDING:
+                if not source.redirect.url:
+                    raise BadRequest(log=f"empty source.redirect.url")
+
                 return source.redirect.url
+
+            # Assert 3d secure is pending redirect.
+            if source.redirect.status == SourceRedirectStatus.NOT_REQUIRED:
+                return None
             
         if source.status == SourceStatus.FAILED:
             raise PaymentFailed()
 
-        raise InternalServerError(log=f"unknown stripe source status {source.status}")
+        raise BadRequest(log=f"unknown stripe source status '{source.status}'"
+                             f", source redirect status '{source.redirect.status}'")
     
     except (InternalServerError, PaymentFailed):
         # TODO Should we really fail transaction on internal server error?
@@ -264,6 +264,11 @@ def stripe_callback(data, headers):
     elif event_type == Type.CHARGE:
         handle_stripe_charge_callback(event_subtype, event)
 
+
+def test_stripe_source_event(event):
+    event_type, event_subtype = event.type.split('.', 1)
+    assert event_type == Type.SOURCE
+    handle_stripe_source_callback(event_subtype, event)
 
 # TODO Try to simplify code below.
 
