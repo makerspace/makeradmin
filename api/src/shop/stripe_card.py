@@ -19,15 +19,12 @@ logger = getLogger('makeradmin')
 def pay_with_card(transaction, card_source_id):
     """ This is a directly chargable card that should be handled syncronously. """
     
-    # TODO This code is not fixed yet.
-    
-    # TODO How can this fail?
-    card_source = stripe.Source.retrieve(card_source_id)
-    
-    assert card_source.type == Type.CARD
-    assert card_source.card.three_d_secure == STRIPE_3D_SECURE_NOT_SUPPORTED
-
     try:
+        card_source = stripe.Source.retrieve(card_source_id)
+    
+        assert card_source.type == Type.CARD
+        assert card_source.card.three_d_secure == STRIPE_3D_SECURE_NOT_SUPPORTED
+
         if card_source.status == SourceStatus.CHARGEABLE:
             charge = create_stripe_charge(transaction, card_source_id)
             
@@ -43,9 +40,9 @@ def pay_with_card(transaction, card_source_id):
     
     except Exception as e:
         # Fail on all errors as we can't recover transaction when using synchronous card payments as we ignore the
-        # callbacks.
+        # card source callbacks.
         fail_transaction(transaction)
-        logger.info(f"failing transaction {transaction.id}")
+        logger.info(f"failing transaction {transaction.id}, due to error when processing card")
         raise
 
     charge_transaction(transaction, charge)
@@ -96,7 +93,7 @@ def pay_with_3d_secure_card(transaction, card_source_id):
     except Exception:
         # Fail transaction on all known and unknown errors to be safe, we won't charge a failed transaction.
         fail_transaction(transaction)
-        logger.info(f"failing transaction {transaction.id}")
+        logger.info(f"failing transaction {transaction.id}, due to error when processing 3ds card")
         raise
 
 
@@ -110,5 +107,3 @@ def pay_with_stripe_card(transaction, card_source_id, card_3d_secure):
         return None
     
     return pay_with_3d_secure_card(transaction, card_source_id)
-
-

@@ -46,8 +46,4 @@ class SourceRedirectStatus:
 
 class ChargeStatus:
     SUCCEEDED = 'succeeded'
-    # TODO Check that this can happend.
-    FAILED = 'failed'
-    CANCELED = 'canceled'
-    
 

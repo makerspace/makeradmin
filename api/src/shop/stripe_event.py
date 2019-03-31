@@ -7,7 +7,7 @@ from service.error import BadRequest, InternalServerError
 from shop.models import Transaction
 from shop.stripe_charge import charge_transaction, create_stripe_charge
 from shop.stripe_constants import STRIPE_SIGNING_SECRET, Type, Subtype, SourceType
-from shop.transactions import get_source_transaction, fail_transaction, payment_success, PaymentFailed
+from shop.transactions import get_source_transaction, fail_transaction, PaymentFailed
 
 logger = getLogger('makeradmin')
 
@@ -109,4 +109,38 @@ def stripe_callback(data, headers):
         raise BadRequest(log=f"failed to process stripe callback: {str(e)}")
 
     stripe_event(event)
+
+
+def process_stripe_events(start=None, source_id=None, type=None):
+    
+    def event_filter(event):
+        if not source_id:
+            return True
+
+        obj = event.data.object
+
+        if source_id == obj.id:
+            return True
+
+        if source_id == obj.three_d_secure.card:
+            return True
+            
+        if source_id == obj.object.source.three_d_secure.card:
+            return True
+        
+        return False
+    
+    logger.info(f"getting stripe events with start={start}, source_id={source_id}, type={type}")
+    events = list(filter(event_filter,
+                         stripe.Event.list(created={'gte': start} if start else None,
+                                           type=type)))
+    event_count = len(events)
+    logger.info(f"got {event_count} events")
+    for event in events:
+        stripe_event(event)
+        
+    return event_count
+
+
+
 
