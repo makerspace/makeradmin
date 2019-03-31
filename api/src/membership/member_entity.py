@@ -26,7 +26,7 @@ class MemberEntity(Entity):
     * Unhashed password should be hashed on save.
     """
     
-    def create(self, data=None):
+    def create(self, data=None, commit=True):
         if data is None:
             data = request.json or {}
             
@@ -41,8 +41,7 @@ class MemberEntity(Entity):
                 sql = "SELECT COALESCE(MAX(member_number), 999) FROM membership_members"
                 max_member_number, = db_session.execute(sql).fetchone()
                 data['member_number'] = max_member_number + 1
-            obj = self.to_obj(self._create_internal(data))
-            db_session.commit()
+            obj = self.to_obj(self._create_internal(data, commit=commit))
             return obj
         except Exception:
             # Rollback session if anything went wrong or we can't release the lock.

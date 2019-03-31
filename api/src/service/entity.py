@@ -10,7 +10,6 @@ from sqlalchemy import inspect, Integer, String, DateTime, Text, desc, asc, or_,
 from service.api_definition import BAD_VALUE, REQUIRED, Arg, symbol, Enum, natural0, natural1
 from service.db import db_session
 from service.error import NotFound, UnprocessableEntity
-from service.logging import logger
 
 ASC = 'asc'
 DESC = 'desc'
@@ -215,7 +214,7 @@ class Entity:
             data=[to_obj(entity) for entity in query]
         )
     
-    def _create_internal(self, data):
+    def _create_internal(self, data, commit=True):
         """ Internal create to make it easier for subclasses to manipulated data before create. """
         input_data = self.to_model(data)
         self.validate_all(input_data)
@@ -223,14 +222,17 @@ class Entity:
             raise UnprocessableEntity("Can not create using empty data.")
         entity = self.model(**input_data)
         db_session.add(entity)
-        db_session.flush()  # Flush to get id of created entity.
-        # TODO BM Probably a good idea to commit here like for update and delete.
+        if commit:
+            db_session.commit()
+        else:
+            db_session.flush()  # Flush to get id of created entity.
+        
         return entity
     
-    def create(self, data=None):
+    def create(self, data=None, commit=True):
         if data is None:
             data = request.json or {}
-        return self.to_obj(self._create_internal(data))
+        return self.to_obj(self._create_internal(data, commit=commit))
     
     def read(self, entity_id):
         entity = db_session.query(self.model).get(entity_id)
@@ -239,7 +241,7 @@ class Entity:
         obj = self.to_obj(entity)
         return obj
 
-    def _update_internal(self, entity_id, data):
+    def _update_internal(self, entity_id, data, commit=True):
         """ Internal update to make it easier for subclasses to manipulated data before update. """
         input_data = self.to_model(data)
         self.validate_present(input_data)
@@ -252,20 +254,22 @@ class Entity:
         for k, v in input_data.items():
             setattr(entity, k, v)
 
-        db_session.commit()
+        if commit:
+            db_session.commit()
         
         return self.to_obj(entity)
     
-    def update(self, entity_id):
-        return self._update_internal(entity_id, request.json)
+    def update(self, entity_id, commit=True):
+        return self._update_internal(entity_id, request.json, commit=commit)
     
-    def delete(self, entity_id):
+    def delete(self, entity_id, commit=True):
         entity = db_session.query(self.model).get(entity_id)
         if not entity:
             raise NotFound("Could not find any entity with specified parameters.")
         
         entity.deleted_at = datetime.utcnow()
-        db_session.commit()
+        if commit:
+            db_session.commit()
  
     def _get_entity_id_list(self, name):
         ids = request.json.get(name)

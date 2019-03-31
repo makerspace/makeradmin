@@ -13,7 +13,7 @@ class OrderedEntity(Entity):
     can solve it with a trigger or like this using an explicit mysql lock.
     """
     
-    def create(self, data=None):
+    def create(self, data=None, commit=True):
         if data is None:
             data = request.json or {}
         
@@ -26,8 +26,7 @@ class OrderedEntity(Entity):
                 sql = f"SELECT COALESCE(MAX(display_order), 0) FROM {self.model.table_name}"
                 max_member_number, = db_session.execute(sql).fetchone()
                 data['display_order'] = max_member_number + 1
-            obj = self.to_obj(self._create_internal(data))
-            db_session.commit()
+            obj = self.to_obj(self._create_internal(data, commit=commit))
             return obj
         except Exception:
             # Rollback session if anything went wrong or we can't release the lock.
