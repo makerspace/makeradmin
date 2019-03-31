@@ -164,7 +164,3 @@ def process_stripe_events_route(start=Arg(str, required=False), source_id=Arg(st
                                 type=Arg(str, required=False)):
     """ Used to make server fetch stripe events, used for testing since webhook is hard to use. """
     return process_stripe_events(start, source_id, type)
-
-
-
-
