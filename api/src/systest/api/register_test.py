@@ -21,8 +21,6 @@ class Test(ShopTestMixin, ApiTest):
     ]
 
     def test_registring_new_member_works_and_returns_token(self):
-        start_timestamp = int(time())
-
         source = stripe.Source.create(type="card", token=stripe.Token.create(card=self.card(VALID_NON_3DS_CARD_NO)).id)
 
         member = self.obj.create_member()
@@ -57,15 +55,13 @@ class Test(ShopTestMixin, ApiTest):
         before_activation = self.get(f"/membership/member/{member_id}").expect(code=200, data=member).data
         self.assertIsNone(before_activation['deleted_at'])
         
-        self.post("/webshop/process_stripe_events", {"source_id": source.id, "start": start_timestamp}).expect(code=200)
+        self.trigger_stripe_source_event(source.id, expected_event_count=1)
         
         after_activation = self.get(f"/membership/member/{member_id}").expect(code=200, data=member).data
         self.assertIsNone(after_activation['deleted_at'])
         
         span = db_session.query(Span).filter_by(member_id=member_id, type=Span.MEMBERSHIP).one()
         self.assertEqual(self.date(365), span.enddate)
-
-        # TODO This tests makes member get two duplicate emails. Interesting, race conditions? Wrong isolation level?
 
     def test_registring_with_existing_member_email_does_not_work_and_does_not_return_token(self):
         source = stripe.Source.create(type="card", token=stripe.Token.create(card=self.card(VALID_NON_3DS_CARD_NO)).id)

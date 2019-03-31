@@ -122,11 +122,17 @@ def process_stripe_events(start=None, source_id=None, type=None):
         if source_id == obj.id:
             return True
 
-        if source_id == obj.three_d_secure.card:
-            return True
+        try:
+            if source_id == obj.three_d_secure.card:
+                return True
+        except AttributeError:
+            pass
             
-        if source_id == obj.object.source.three_d_secure.card:
-            return True
+        try:
+            if source_id == obj.object.source.three_d_secure.card:
+                return True
+        except AttributeError:
+            pass
         
         return False
     

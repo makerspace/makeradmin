@@ -1,4 +1,4 @@
-from test_aid.systest_base import ShopTestMixin, SeleniumTest, VALID_NON_3DS_CARD_NO, EXPIRES_CVC_ZIP
+from test_aid.systest_base import ShopTestMixin, SeleniumTest, VALID_NON_3DS_CARD_NO, EXPIRED_CVC_ZIP
 from test_aid.systest_config import SELENIUM_BASE_TIMEOUT
 
 
@@ -28,7 +28,7 @@ class Test(ShopTestMixin, SeleniumTest):
         
         card = self.wait_for_element(name="cardnumber")
         card.send_keys(VALID_NON_3DS_CARD_NO)
-        card.send_keys(EXPIRES_CVC_ZIP)
+        card.send_keys(EXPIRED_CVC_ZIP)
         
         self.webdriver.switch_to.default_content()
         
