@@ -2,7 +2,7 @@ from sqlalchemy.orm import contains_eager
 
 from membership.models import Member, Span, LABACCESS, SPECIAL_LABACESS, Key
 from multiaccess import service
-from service.api_definition import GET, SERVICE
+from service.api_definition import GET, KEYS_VIEW, SERVICE
 from service.db import db_session
 
 
@@ -29,3 +29,23 @@ def get_memberdata():
     )
 
     return [member_to_response_object(m) for m in query]
+
+def key_to_response_object(member):
+    return {
+        'member_id': member.member_id,
+        'member_number': member.member_number,
+        'firstname': member.firstname,
+        'lastname': member.lastname,
+        'keys': [{'key_id': key.key_id, 'rfid_tag': key.tagid} for key in member.keys],
+    }
+
+@service.route("/keylookup", method=GET, permission=KEYS_VIEW)
+def get_keys():
+    query = db_session.query(Member).join(Member.keys)
+    query = query.options(contains_eager(Member.keys))
+    query = query.filter(
+        Member.deleted_at.is_(None),
+        Key.deleted_at.is_(None),
+    )
+
+    return [key_to_response_object(m) for m in query]
