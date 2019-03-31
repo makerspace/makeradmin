@@ -35,6 +35,8 @@ default = Dict(name="default", src=dict(
     STRIPE_PRIVATE_KEY=None,
     STRIPE_SIGNING_SECRET=None,
     APP_DEBUG=None,
+    CORS_ALLOWED_ORIGINS='https://medlem.makerspace.se,https://stockholm.makeradmin.se,https://medlem.dev.makerspace.se'
+                         ',http://localhost:8009,http://localhost:8011,http://localhost:8080',
 ))
 env = Env()
 dot_env = DotEnvFile()

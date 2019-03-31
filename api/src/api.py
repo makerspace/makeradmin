@@ -6,7 +6,7 @@ from sqlalchemy.exc import OperationalError
 from core.auth import authenticate_request
 from membership.permissions import register_permissions
 from service.api_definition import ALL_PERMISSIONS
-from service.config import get_mysql_config
+from service.config import get_mysql_config, config
 from service.db import create_mysql_engine, shutdown_session, populate_fields_by_index
 from service.error import ApiError, error_handler_api, error_handler_db, error_handler_500, error_handler_404
 from service.traffic_logger import traffic_logger_init, traffic_logger_commit
@@ -14,20 +14,13 @@ from services import services
 
 app = Flask(__name__)
 
-# TODO BM Add origins but make it a configuration.
+
 flask_cors.CORS(
     app,
     max_age='1728000',
     allow_headers=['Origin', 'Content-Type', 'Accept', 'Authorization', 'X-Request-With',
                    'Access-Control-Allow-Origin'],
-    # origins=[
-    #     'https://medlem.makerspace.se',
-    #     'https://stockholm.makeradmin.se',
-    #     'https://medlem.dev.makerspace.se',
-    #     'http://localhost:8009',
-    #     'http://localhost:8011',
-    #     'http://localhost:8080',
-    # ]
+    origins=config.get('CORS_ALLOWED_ORIGINS').split(',')
 )
 
 for path, service in services:
@@ -53,7 +46,7 @@ app.before_request(before_request_functions)
 app.after_request(after_request_functions)
 
 engine = create_mysql_engine(**get_mysql_config())
-# TODO BM Make sure commits and rollbacks are handled correctly, especially in shop.
+
 
 populate_fields_by_index(engine)
 register_permissions(ALL_PERMISSIONS)

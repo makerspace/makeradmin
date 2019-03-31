@@ -20,6 +20,4 @@ python3 ./init_db.py
 # as nginx handles all the persistent connections.
 echo "starting gunicorn"
 
-# TODO Consider using multiple threads per process as long as services calls other services through api gateway.
-# Not sure the code is thread safe though. Another solution would be to remove this antipattern.
 exec gunicorn ${GUNICORN_FLAGS} --access-logfile - --worker-class sync --workers=${WORKERS} -b :80 api:app
