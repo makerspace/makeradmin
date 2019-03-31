@@ -154,7 +154,3 @@ ALTER TABLE `webshop_transaction_actions` DROP KEY `action_constraint3`;
 ALTER TABLE `webshop_transaction_actions` DROP COLUMN `action_id`;
 
 DROP TABLE `webshop_actions`
-
--- TODO Test if uniquie constraint gives same error messages as unique index.
-
--- TODO Do we want to keep webshop_pending_registrations for historical reasons or do we drop it?

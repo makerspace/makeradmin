@@ -9,7 +9,6 @@ import Currency from "../Components/Currency";
 import {dateTimeToStr} from "../utils";
 
 
-// TODO Test this page.
 class OrderShow extends React.Component {
 
     constructor(props) {
@@ -18,7 +17,7 @@ class OrderShow extends React.Component {
         this.order = Order.get(id);
         this.state = {};
         this.orderRows = new Collection({type: OrderRow, url: `/webshop/transaction/${id}/contents`, pageSize: 0, expand: 'product'});
-        this.orderActions = new Collection({type: OrderAction, url: `/webshop/transaction/${id}/actions`, pageSize: 0, expand: 'action'});
+        this.orderActions = new Collection({type: OrderAction, url: `/webshop/transaction/${id}/actions`, pageSize: 0});
     }
     
     componentDidMount() {

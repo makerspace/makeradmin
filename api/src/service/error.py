@@ -36,7 +36,6 @@ def error_handler_api(error):
         log(error.level, repr(error))
     elif error.log:
         log(error.level, error.log)
-    # TODO Remove this logging if it turns out to be used in too few places.
         
     return error.to_response()
 
