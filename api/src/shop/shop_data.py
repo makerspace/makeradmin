@@ -28,7 +28,7 @@ def pending_actions(member_id=None):
                 "amount": str(content.amount),
             },
             "action": {
-                "action": action.action,
+                "action": action.action_type,
                 "value": action.value,
             },
             "member_id": transaction.member_id,

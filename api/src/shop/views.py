@@ -111,7 +111,7 @@ service.entity_routes(
 
 @service.route("/member/current/pending_actions", method=GET, permission=USER)
 def pending_actions_for_member():
-    return pending_actions(g.user_id)  # TODO BM Fix usages, returned data was changed.
+    return pending_actions(g.user_id)
 
 
 @service.route("/member/current/transactions", method=GET, permission=USER)
