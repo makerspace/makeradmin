@@ -109,11 +109,6 @@ service.entity_routes(
 )
 
 
-@service.route("/ship_orders", method=POST, permission=WEBSHOP)
-def ship_orders_route():
-    ship_orders(ship_add_labaccess=True)
-
-
 @service.route("/member/current/pending_actions", method=GET, permission=USER)
 def pending_actions_for_member():
     return pending_actions(g.user_id)  # TODO BM Fix usages, returned data was changed.
@@ -144,23 +139,29 @@ def register_page_data():
     return {"membershipProducts": get_membership_products(), "productData": all_product_data()}
 
 
-@service.route("/pay", method=POST, permission=USER)
+@service.route("/ship_orders", method=POST, permission=WEBSHOP, commit_on_error=True)
+def ship_orders_route():
+    ship_orders(ship_add_labaccess=True)
+
+
+@service.route("/pay", method=POST, permission=USER, commit_on_error=True)
 def pay_route():
     return pay(request.json, g.user_id)
 
 
-@service.route("/register", method=POST, permission=PUBLIC)
+@service.route("/register", method=POST, permission=PUBLIC, commit_on_error=True)
 def register_route():
     return register(request.json, request.remote_addr, request.user_agent.string)
 
 
-@service.route("/stripe_callback", method=POST, permission=PUBLIC)
+@service.route("/stripe_callback", method=POST, permission=PUBLIC, commit_on_error=True)
 def stripe_callback_route():
     stripe_callback(request.data, request.headers)
 
 
-@service.route("/process_stripe_events", method=POST, permission=SERVICE)
+@service.route("/process_stripe_events", method=POST, permission=SERVICE, commit_on_error=True)
 def process_stripe_events_route(start=Arg(str, required=False), source_id=Arg(str, required=False),
                                 type=Arg(str, required=False)):
     """ Used to make server fetch stripe events, used for testing since webhook is hard to use. """
     return process_stripe_events(start, source_id, type)
+

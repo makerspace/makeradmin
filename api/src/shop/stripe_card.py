@@ -11,7 +11,7 @@ from shop.models import StripePending
 from shop.stripe_charge import raise_from_stripe_invalid_request_error, create_stripe_charge, charge_transaction
 from shop.stripe_constants import Type, CURRENCY, SourceType, SourceStatus, SourceRedirectStatus
 from shop.stripe_util import convert_to_stripe_amount
-from shop.transactions import PaymentFailed, fail_transaction
+from shop.transactions import PaymentFailed, commit_fail_transaction
 
 logger = getLogger('makeradmin')
 
@@ -41,7 +41,7 @@ def pay_with_card(transaction, card_source_id):
     except Exception as e:
         # Fail on all errors as we can't recover transaction when using synchronous card payments as we ignore the
         # card source callbacks.
-        fail_transaction(transaction)
+        commit_fail_transaction(transaction)
         logger.info(f"failing transaction {transaction.id}, due to error when processing card")
         raise
 
@@ -92,7 +92,7 @@ def pay_with_3d_secure_card(transaction, card_source_id):
     
     except Exception:
         # Fail transaction on all known and unknown errors to be safe, we won't charge a failed transaction.
-        fail_transaction(transaction)
+        commit_fail_transaction(transaction)
         logger.info(f"failing transaction {transaction.id}, due to error when processing 3ds card")
         raise
 

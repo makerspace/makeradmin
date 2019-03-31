@@ -7,7 +7,7 @@ from service.error import BadRequest, InternalServerError
 from shop.models import Transaction
 from shop.stripe_charge import charge_transaction, create_stripe_charge
 from shop.stripe_constants import STRIPE_SIGNING_SECRET, Type, Subtype, SourceType
-from shop.transactions import get_source_transaction, fail_transaction, PaymentFailed
+from shop.transactions import get_source_transaction, commit_fail_transaction, PaymentFailed
 
 logger = getLogger('makeradmin')
 
@@ -36,7 +36,7 @@ def stripe_charge_event(subtype, event):
         charge_transaction(transaction, charge)
         
     elif subtype == Subtype.FAILED:
-        fail_transaction(transaction)
+        commit_fail_transaction(transaction)
         logger.info(f"charge failed for transaction {transaction.id}, {charge.failure_message}")
         
     elif subtype.startswith(Subtype.DISPUTE_PREFIX):
@@ -63,7 +63,7 @@ def stripe_source_event(subtype, event):
                 charge = create_stripe_charge(transaction, source.id)
             except PaymentFailed as e:
                 logger.info(f"failing transaction {transaction.id}, permanent error when creating charge: {str(e)}")
-                fail_transaction(transaction)
+                commit_fail_transaction(transaction)
             else:
                 charge_transaction(transaction, charge)
         
@@ -77,7 +77,7 @@ def stripe_source_event(subtype, event):
         
     elif subtype in (Subtype.FAILED, Subtype.CANCELED):
         logger.info(f"failing transaction {transaction.id} due to source event subtype {subtype}")
-        fail_transaction(transaction)
+        commit_fail_transaction(transaction)
         
     else:
         raise IgnoreEvent(f"source event subtype {subtype} for transaction {transaction.id}")

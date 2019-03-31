@@ -5,7 +5,7 @@ from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 
 from membership.membership import add_membership_days
 from membership.models import Key, Span
-from service.db import db_session, atomic
+from service.db import db_session, nested_atomic
 from service.error import InternalServerError, BadRequest
 from shop.email import send_key_updated_email, send_membership_updated_email, send_new_member_email, send_receipt_email
 from shop.models import TransactionAction, TransactionContent, Transaction, ProductAction, PendingRegistration, \
@@ -18,7 +18,21 @@ class PaymentFailed(BadRequest):
     message = 'Payment failed.'
 
 
-@atomic
+# TODO Rename when it is not source.
+def get_source_transaction(source_id):
+    try:
+        return db_session\
+            .query(Transaction)\
+            .filter(Transaction.stripe_pending.any(StripePending.stripe_token == source_id))\
+            .with_for_update()\
+            .one()
+    except NoResultFound as e:
+        return None
+    except MultipleResultsFound as e:
+        raise InternalServerError(log=f"stripe token {source_id} has multiple transactions, this is a bug") from e
+
+
+@nested_atomic
 def commit_transaction_to_db(member_id=None, total_amount=None, contents=None, stripe_card_source_id=None,
                              activates_member=False):
     """ Save as new transaction with transaction content in db and return it transaction. """
@@ -54,33 +68,13 @@ def commit_transaction_to_db(member_id=None, total_amount=None, contents=None, s
     return transaction
 
 
-def complete_transaction(transaction):
-    # TODO It isn't true when not 3d secure because we complete it the get callback as well.
-    # assert transaction.status == Transaction.PENDING, "TODO BM let's see if this can be not true"
-    # TODO make this atomic and nice.
-    
-    if transaction.status == Transaction.PENDING:
-        transaction.status = Transaction.COMPLETED
-        logger.info(f"completing transaction {transaction.id}, payment confirmed")
-        db_session.add(transaction)
-        db_session.commit()
-        # TODO If we do it after we would not have to do it like this (commit). But what does Transaction.COMPLETED
-        # mean? It means payed i guess, and actions completed is another thing so we need this hack and ship all
-        # peoples orders wen someone else is buying someting?
-        try:
-            # TODO Investigate this, should we ship before commit, and should we ship just this transaction?
-            # TODO Why do we ship all orders?
-            ship_orders(ship_add_labaccess=False)
-        except Exception as e:  # TODO BM Don't catch all here, it is very bad.
-            logger.exception(f"failed to ship orders in transaction {transaction.id}, ignoring error")
-
-
-def fail_transaction(transaction):
+def commit_fail_transaction(transaction):
     transaction.status = Transaction.FAILED
     db_session.add(transaction)
+    db_session.commit()
 
 
-def pending_actions_query(member_id=None):
+def pending_actions_query(member_id=None, transaction=None):
     """
     Finds every item in a transaction and checks the actions it has, then checks to see if all those actions have
     been completed (and are not deleted). The actions that are valid for a transaction are precisely those that
@@ -96,6 +90,9 @@ def pending_actions_query(member_id=None):
         .filter(TransactionAction.status == TransactionAction.PENDING)
         .filter(Transaction.status == Transaction.COMPLETED)
     )
+    
+    if transaction:
+        query = query.filter(Transaction.id == transaction.id)
 
     if member_id:
         query = query.filter(Transaction.member_id == member_id)
@@ -153,37 +150,27 @@ def activate_member(member):
     db_session.add(member)
     db_session.flush()
     send_new_member_email(member)
-
-
-def payment_success(transaction):
-    complete_transaction(transaction)
-    if transaction.status != Transaction.COMPLETED:
-        # TODO Is this really needed?
-        logger.error(f"wanted to complete transaction but marked as {transaction.status}")
-        return
     
-    # Check if this transaction is a new member registration.
-    if db_session.query(PendingRegistration).filter(PendingRegistration.transaction_id == transaction.id).count():
-        # TODO Why is this not a transaction_action like the other?
-        activate_member(transaction.member)
-        # TODO We need to remove the pending registration or it will send registration emails for each event (don't
-        # think it happens in prod).
-        
-    logger.info(f"sending receipt email to member {transaction.member_id}, transaction {transaction.id} complete")
-    # TODO Why do we do this even if transaction already completed once before?
+    
+def complete_transaction(transaction):
+    assert transaction.status == Transaction.PENDING
+
+    transaction.status = Transaction.COMPLETED
+    db_session.add(transaction)
+    logger.info(f"completing transaction {transaction.id}, payment confirmed"
+                f", sending email receipt to member {transaction.member_id}")
     send_receipt_email(transaction)
-    # TODO Why do we not send receipt immediately when we have completed a transaction?
 
 
-def ship_orders(ship_add_labaccess=True):
+def ship_orders(ship_add_labaccess=True, transaction=None):
     """
     Completes all orders for purchasing lab access and updates existing keys with new dates.
     If a user has no key yet, then the order will remain as not completed.
     If a user has multiple keys, all of them are updated with new dates.
+    If transaction is set this is done only for that transaction.
     """
     
-    # TODO Rollback on exceptions? And commit on success? Creation of some entities will commit.
-    for action, content, transaction in pending_actions_query():
+    for action, content, transaction in pending_actions_query(transaction=transaction):
 
         if ship_add_labaccess and action.action_type == ProductAction.ADD_LABACCESS_DAYS:
             ship_add_labaccess_action(action, transaction)
@@ -192,16 +179,11 @@ def ship_orders(ship_add_labaccess=True):
             ship_add_membership_action(action, transaction)
 
 
-# TODO Rename when it is not source.
-def get_source_transaction(source_id):
-    try:
-        return db_session\
-            .query(Transaction)\
-            .filter(Transaction.stripe_pending.any(StripePending.stripe_token == source_id))\
-            .one()
-    except NoResultFound as e:
-        return None
-    except MultipleResultsFound as e:
-        raise InternalServerError(log=f"stripe token {source_id} has multiple transactions, this is a bug") from e
+@nested_atomic
+def payment_success(transaction):
+    complete_transaction(transaction)
+    ship_orders(ship_add_labaccess=False, transaction=transaction)
 
-
+    if db_session.query(PendingRegistration).filter(PendingRegistration.transaction_id == transaction.id).count():
+        # TODO Make this into a proper transaction_action like the other.
+        activate_member(transaction.member)

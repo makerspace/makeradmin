@@ -61,17 +61,14 @@ def populate_fields_by_index(engine):
             fields_by_index[index['name']] = ",".join(index['column_names'])
     
     
-def atomic(f):
-    """ Decorator for commiting on success and rolback on any exception, hopefully this makes it atomic. """
+def nested_atomic(f):
+    """ Decorator for commiting on success and rollback on any exception. NOTE: A subsequent rollback will rollback
+    this nested transaction as well, but comitting will not unrollback an rolbacked nexted transaction. """
     @wraps(f)
     def wrapper(*args, **kwargs):
         try:
-            # TODO Should we do begin sub transaction here. If we don't we rollback/commit stuff that happend before,
-            # maybe not what we want?
+            db_session.begin_nested()
             result = f(*args, **kwargs)
-            # TODO What happeds if db connection fails during f and we have autcommit? Will it commit or rollback? Do
-            # we have autocommit? Should we remove it?
-            # Let's do some testing with this db and settings, and then go through all commit and rollback.
             db_session.commit()
             return result
         except Exception:

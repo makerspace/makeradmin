@@ -128,6 +128,8 @@ class PendingRegistration(Base):
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
     transaction_id = Column(Integer, ForeignKey(Transaction.id), nullable=False)
 
+    transaction = relationship(Transaction, backref='pending_registrations')
+
     def __repr__(self):
         return f'PendingRegistration(id={self.id})'
     

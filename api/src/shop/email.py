@@ -21,7 +21,7 @@ def send_membership_updated_email(member_id, extended_days, end_date):
             extended_days=extended_days,
             end_date=date_to_str(end_date),
         )
-    })
+    }, commit=False)
 
 
 def send_key_updated_email(member_id, extended_days, end_date):
@@ -38,7 +38,7 @@ def send_key_updated_email(member_id, extended_days, end_date):
             extended_days=extended_days,
             end_date=date_to_str(end_date),
         )
-    })
+    }, commit=False)
 
 
 def send_receipt_email(transaction):
@@ -57,7 +57,7 @@ def send_receipt_email(transaction):
             member=transaction.member,
             public_url=get_public_url,
         )
-    })
+    }, commit=False)
 
 
 def send_new_member_email(member):
@@ -70,4 +70,4 @@ def send_new_member_email(member):
             member=member,
             public_url=get_public_url,
         )
-    })
+    }, commit=False)

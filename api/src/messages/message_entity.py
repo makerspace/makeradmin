@@ -20,7 +20,7 @@ def execute_template(member, text):
 
 class MessageEntity(Entity):
     
-    def create_message(self, data):
+    def create_message(self, data, commit=True):
 
         # Create message.
         
@@ -69,9 +69,12 @@ class MessageEntity(Entity):
             )
             db_session.add(recipient)
         
+        if commit:
+            db_session.commit()
+        
         return message
     
-    def create(self, data=None):
+    def create(self, data=None, commit=True):
         """
         Create is used to send message to a list of recipients. Recipients should be a list of objects with id,
         type where type is member or group. The rest of the data is used to create the message normally.
@@ -80,4 +83,4 @@ class MessageEntity(Entity):
         if data is None:
             data = request.json or {}
         
-        return self.to_obj(self.create_message(data))
+        return self.to_obj(self.create_message(data, commit=commit))
