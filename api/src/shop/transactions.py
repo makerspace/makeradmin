@@ -5,7 +5,7 @@ from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 
 from membership.membership import add_membership_days
 from membership.models import Key, Span
-from service.db import db_session
+from service.db import db_session, atomic
 from service.error import InternalServerError, BadRequest
 from shop.email import send_key_updated_email, send_membership_updated_email, send_new_member_email, send_receipt_email
 from shop.models import TransactionAction, TransactionContent, Transaction, ProductAction, PendingRegistration, \
@@ -18,6 +18,7 @@ class PaymentFailed(BadRequest):
     message = 'Payment failed.'
 
 
+@atomic
 def commit_transaction_to_db(member_id=None, total_amount=None, contents=None, stripe_card_source_id=None,
                              activates_member=False):
     """ Save as new transaction with transaction content in db and return it transaction. """
@@ -49,7 +50,6 @@ def commit_transaction_to_db(member_id=None, total_amount=None, contents=None, s
 
     # TODO Rename stripe pending to TransactionReferences or something (with type).
     db_session.add(StripePending(transaction_id=transaction.id, stripe_token=stripe_card_source_id))
-    db_session.commit()
     
     return transaction
 
@@ -57,6 +57,7 @@ def commit_transaction_to_db(member_id=None, total_amount=None, contents=None, s
 def complete_transaction(transaction):
     # TODO It isn't true when not 3d secure because we complete it the get callback as well.
     # assert transaction.status == Transaction.PENDING, "TODO BM let's see if this can be not true"
+    # TODO make this atomic and nice.
     
     if transaction.status == Transaction.PENDING:
         transaction.status = Transaction.COMPLETED
@@ -77,7 +78,6 @@ def complete_transaction(transaction):
 def fail_transaction(transaction):
     transaction.status = Transaction.FAILED
     db_session.add(transaction)
-    db_session.commit()
 
 
 def pending_actions_query(member_id=None):
@@ -155,7 +155,7 @@ def activate_member(member):
     send_new_member_email(member)
 
 
-def handle_payment_success(transaction):
+def payment_success(transaction):
     complete_transaction(transaction)
     if transaction.status != Transaction.COMPLETED:
         # TODO Is this really needed?

@@ -1,3 +1,4 @@
+from functools import wraps
 from typing import Union
 
 from sqlalchemy import create_engine, inspect
@@ -57,3 +58,22 @@ def populate_fields_by_index(engine):
         for index in engine_inspect.get_indexes(table):
             fields_by_index[index['name']] = ",".join(index['column_names'])
     
+    
+def atomic(f):
+    """ Decorator for commiting on success and rolback on any exception, hopefully this makes it atomic. """
+    @wraps(f)
+    def wrapper(*args, **kwargs):
+        try:
+            # TODO Should we do begin sub transaction here. If we don't we rollback/commit stuff that happend before,
+            # maybe not what we want?
+            result = f(*args, **kwargs)
+            # TODO What happeds if db connection fails during f and we have autcommit? Will it commit or rollback? Do
+            # we have autocommit? Should we remove it?
+            # Let's do some testing with this db and settings, and then go through all commit and rollback.
+            db_session.commit()
+            return result
+        except Exception:
+            db_session.rollback()
+            raise
+        
+    return wrapper

@@ -10,9 +10,10 @@ from service.db import db_session
 from service.error import NotFound, InternalServerError, BadRequest
 from shop.filters import PRODUCT_FILTERS
 from shop.models import Product, TransactionContent
-from shop.api_schemas import validate_data, purchase_schema, register_schema
+from shop.api_schemas import validate_data, purchase_schema, register_schema, STRIPE_3D_SECURE_NOT_SUPPORTED
 from shop.shop_data import get_membership_products
-from shop.stripe_code import convert_to_stripe_amount, handle_stripe_source
+from shop.stripe_card import pay_with_stripe_card
+from shop.stripe_util import convert_to_stripe_amount
 from shop.transactions import commit_transaction_to_db
 
 logger = getLogger('makeradmin')
@@ -97,7 +98,7 @@ def make_purchase(member_id=None, purchase=None, activates_member=False):
     logger.info(f"created transaction {transaction.id},  stripe_card_source_id={card_source_id}"
                 f", card_3d_secure={card_3d_secure}, total_amount={total_amount}, member_id={member_id}")
     
-    redirect_url = handle_stripe_source(transaction, card_source_id, card_3d_secure)
+    redirect_url = pay_with_stripe_card(transaction, card_source_id, card_3d_secure)
     
     return transaction, redirect_url
     
