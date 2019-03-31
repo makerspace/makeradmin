@@ -20,7 +20,7 @@ class Test(ShopTestMixin, SeleniumTest):
         
         div.find_element_by_css_selector('button.number-add').click()
         
-        self.wait_for_element(id='cart-sum').click()
+        self.browse_cart_page()
     
         # Cart
     

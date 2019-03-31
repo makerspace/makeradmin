@@ -188,6 +188,10 @@ class SeleniumTest(ApiTest):
     def browse_shop(self):
         self.webdriver.get(f"{self.public_url}/shop")
         self.wait_for_page(title="Stockholm Makerspace Webshop")
+
+    def browse_cart_page(self):
+        self.webdriver.get(f"{self.public_url}/shop/cart")
+        self.wait_for_page(title="Stockholm Makerspace Webshop")
         
         
 class ShopTestMixin:
