@@ -1,13 +1,9 @@
 from logging import getLogger
-from time import sleep
 
 
 import stripe
 
-from shop.stripe_code import Type
-from test_aid.systest_base import ShopTestMixin, ApiTest, VALID_NON_3DS_CARD_NO, VALID_OPTIONAL_3DS_CARD_NO
-from test_aid.systest_config import STRIPE_PRIVATE_KEY
-
+from test_aid.systest_base import ShopTestMixin, ApiTest, VALID_NON_3DS_CARD_NO, VALID_3DS_CARD_NO
 
 logger = getLogger('makeradmin')
 
@@ -19,24 +15,7 @@ class Test(ShopTestMixin, ApiTest):
         dict(price=1.2, unit="mm", smallest_multiple=100),
     ]
 
-    def send_stripe_source_callback(self, source_id):
-        """ Poll stripe for stripe source callbacks using event list, then send it to server as a faked webhook
-        callback. """
-        for i in range(10):
-            events = stripe.Event.list(api_key=STRIPE_PRIVATE_KEY,
-                                       created={'gte': self.test_start_timestamp})
-            for event in events:
-                logger.info(f"testing for event {event}")
-
-                obj = event.get('data', {}).get('object', {})
-                if source_id in (obj.get('source', {}).get('id'), obj.get('id')):
-                    self.post(f"/webshop/test_stripe_source_event", event)
-                    return
-                
-        sleep(1)
-        raise AssertionError(f"failed to get source event for {source_id}")
-
-    def test_valid_purchase_from_existing_member(self):
+    def test_purchase_from_existing_member_using_non_3ds_card_works(self):
         p0_count = 100
         p1_count = 500
         
@@ -46,7 +25,8 @@ class Test(ShopTestMixin, ApiTest):
             {"id": self.p1_id, "count": p1_count},
         ]
         
-        source = stripe.Source.create(type="card", token=stripe.Token.create(card=self.card(VALID_OPTIONAL_3DS_CARD_NO)).id)
+        source = stripe.Source.create(type="card",
+                                      token=stripe.Token.create(card=self.card(VALID_NON_3DS_CARD_NO)).id)
         
         purchase = {
             "cart": cart,
@@ -58,11 +38,45 @@ class Test(ShopTestMixin, ApiTest):
         transaction_id = self.post(f"/webshop/pay", purchase, token=self.token)\
             .expect(code=200, status="ok").get('data__transaction_id')
         
-        self.send_stripe_source_callback(source.id)
+        self.get(f"/webshop/transaction/{transaction_id}").expect(
+            code=200,
+            status="ok",
+            data__amount=f"{expected_sum:.2f}",
+            data__member_id=self.member_id,
+            data__status="completed",
+        )
+
+        data = self.get(f"/webshop/transaction/{transaction_id}/contents").expect(code=200, status="ok").data
+        self.assertCountEqual(
+            [{"amount": f"{self.p0_price * p0_count:.2f}", "product_id": self.p0_id},
+             {"amount": f"{self.p1_price * p1_count:.2f}", "product_id": self.p1_id}],
+            [dict(amount=item['amount'], product_id=item['product_id']) for item in data]
+        )
+
+    def test_purchase_from_existing_member_using_auto_validating_3ds_card_works(self):
+        p0_count = 100
+        p1_count = 500
         
-        # # TODO Remove prints.
-        # print(source.id)
-        # print(stripe.Source.retrieve(source.id, api_key=STRIPE_PRIVATE_KEY))
+        expected_sum = self.p0_price * p0_count + self.p1_price * p1_count
+        cart = [
+            {"id": self.p0_id, "count": p0_count},
+            {"id": self.p1_id, "count": p1_count},
+        ]
+        
+        source = stripe.Source.create(type="card",
+                                      token=stripe.Token.create(card=self.card(VALID_3DS_CARD_NO)).id)
+        
+        purchase = {
+            "cart": cart,
+            "expected_sum": expected_sum,
+            "stripe_card_source_id": source.id,
+            "stripe_card_3d_secure": source["card"]["three_d_secure"]
+        }
+        
+        transaction_id = self.post(f"/webshop/pay", purchase, token=self.token)\
+            .expect(code=200, status="ok").get('data__transaction_id')
+        
+        self.trigger_stripe_source_event(source.id, expected_event_count=2)
         
         self.get(f"/webshop/transaction/{transaction_id}").expect(
             code=200,

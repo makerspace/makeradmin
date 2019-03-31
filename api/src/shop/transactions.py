@@ -60,6 +60,7 @@ def complete_transaction(transaction):
     
     if transaction.status == Transaction.PENDING:
         transaction.status = Transaction.COMPLETED
+        logger.info(f"completing transaction {transaction.id}, payment confirmed")
         db_session.add(transaction)
         db_session.commit()
         # TODO If we do it after we would not have to do it like this (commit). But what does Transaction.COMPLETED

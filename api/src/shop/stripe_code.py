@@ -4,12 +4,12 @@ from logging import getLogger
 import stripe
 from stripe.error import SignatureVerificationError, InvalidRequestError, CardError, StripeError
 
-from shop.transactions import PaymentFailed
 from service.config import config, get_public_url
 from service.db import db_session
-from service.error import BadRequest, InternalServerError, EXCEPTION
+from service.error import BadRequest, InternalServerError
 from shop.api_schemas import STRIPE_3D_SECURE_NOT_SUPPORTED
 from shop.models import Transaction, StripePending
+from shop.transactions import PaymentFailed
 from shop.transactions import fail_transaction, get_source_transaction, complete_transaction, handle_payment_success
 
 logger = getLogger('makeradmin')
@@ -223,9 +223,19 @@ def handle_stripe_source_callback(subtype, event):
         if source.type == SourceType.THREE_D_SECURE:
             # Charge should be created now.
             try:
-                logger.info(f"TODO 3DS SECURE: {repr(source)}")
+                logger.info(f"TODO 3DS SECURE source callback") # : {repr(source)}")
                 charge = create_stripe_charge(transaction, source.id)
-                logger.info(f"TODO IGNORING CHARGE: {repr(charge)}")
+                logger.info(f"created strpe charge with status {charge.status}")
+                
+                if charge.status == ChargeStatus.SUCCEEDED:
+                    handle_payment_success(transaction)
+                    return
+                
+                # TODO Test this, when can this happend? Don't think it can happend, should be an internal server error.
+                logger.warning(f"transaction {transaction.id} card source charge status was '{charge.status}'"
+                               f", not '{ChargeStatus.SUCCEEDED}', is this an error state?")
+                
+                logger.info(f"TODO IGNORING CHARGE") # : {repr(charge)}")
                 # TODO Why can't we complete the transaction here. Investigate result. Check tutorial.
             except PaymentFailed as e:
                 logger.exception(f"create_stripe_charge failed, source={source.id}, transaction_id={transaction.id}")
@@ -248,6 +258,9 @@ def handle_stripe_source_callback(subtype, event):
 
 
 def stripe_callback(data, headers):
+    """ Handle stripe event callback. In case of non 200 response stripe will send the same event again (retrying a
+    few times), so the code is written to handle that. For example an error that can be assumed to be intermittent
+    like a communication error with stripe will not fail or succeed a transaction but just leave it as is. """
     try:
         signature = headers['Stripe-Signature']
         logger.info(f"stripe callback with signature: {signature}")
@@ -255,7 +268,7 @@ def stripe_callback(data, headers):
     except (KeyError, SignatureVerificationError) as e:
         raise BadRequest(log=f"failed to process stripe callback: {str(e)}")
 
-    logger.info(f"stripe callback of type: {event.type}")
+    logger.info(f"stripe callback of type: {event.type}: {event}")
 
     event_type, event_subtype = event.type.split('.', 1)
     if event_type == Type.SOURCE:
@@ -265,7 +278,8 @@ def stripe_callback(data, headers):
         handle_stripe_charge_callback(event_subtype, event)
 
 
-def test_stripe_source_event(event):
+def test_stripe_source_event(data):
+    event = stripe.Webhook.construct_event(data, "", STRIPE_SIGNING_SECRET, tolerance=1e9)
     event_type, event_subtype = event.type.split('.', 1)
     assert event_type == Type.SOURCE
     handle_stripe_source_callback(event_subtype, event)
@@ -274,7 +288,7 @@ def test_stripe_source_event(event):
 
 
 def handle_stripe_charge_callback(subtype, event):
-    logger.info(f"TODO GOT CHARGE: {repr(event)}")
+    logger.info(f"TODO GOT CHARGE callback") #: {repr(event)}")
     charge = event.data.object
     
     transaction = get_source_transaction(charge.source.id)
@@ -309,22 +323,42 @@ def process_stripe_event(event):
             handle_stripe_source_callback(event_subtype, event)
             
         elif event_type == Type.CHARGE:
+            # TODO Keep this in case syncronous transaction goes wrong?
             handle_stripe_charge_callback(event_subtype, event)
     except Exception as e:
         pass
 
 
-def process_stripe_events(start=None, source_id=None):
-    logger.info(f"getting stripe events with start {start} and source_id {source_id}")
-    events = stripe.Event.list(created={'gt': start} if start else None)
-    logger.info(f"got {len(events)} events")
-    for event in events.auto_paging_iter():
-        obj = event.get('data', {}).get('object', {})
-        if source_id and source_id in (obj.get('source', {}).get('id'), obj.get('id')) or not source_id:
-            process_stripe_event(event)
-        else:
-            logger.info(f"skipping event, not matching source_id")
+def process_stripe_events(start=None, source_id=None, type=None):
+    
+    def event_filter(event):
+        if not source_id:
+            return True
 
+        obj = event.data.object
+
+        if source_id == obj.id:
+            return True
+
+        if source_id == obj.three_d_secure.card:
+            return True
+            
+        if source_id == obj.object.source.three_d_secure.card:
+            return True
+        
+        return False
+    
+    logger.info(f"getting stripe events with start={start}, source_id={source_id}, type={type}")
+    events = list(filter(event_filter,
+                         stripe.Event.list(created={'gte': start} if start else None,
+                                           type=type)))
+    event_count = len(events)
+    logger.info(f"got {event_count} events")
+    for event in events:
+        logger.info(f"processing event: {event}")
+        process_stripe_event(event)
+        
+    return event_count
 
 
 

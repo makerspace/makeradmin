@@ -159,16 +159,11 @@ def stripe_callback_route():
     stripe_callback(request.data, request.headers)
 
 
-@service.route("/test_stripe_event", method=POST, permission=SERVICE)
-def test_stripe_source_event_route():
-    """ This endpoint is used for testing only. """
-    test_stripe_source_event(request.data)
-
-
 @service.route("/process_stripe_events", method=POST, permission=SERVICE)
-def process_stripe_events_route(start=Arg(str, required=False), source_id=Arg(str, required=False)):
-    """ Used to make server fetch stripe events, mainly for testing. """
-    process_stripe_events(start, source_id)
+def process_stripe_events_route(start=Arg(str, required=False), source_id=Arg(str, required=False),
+                                type=Arg(str, required=False)):
+    """ Used to make server fetch stripe events, used for testing since webhook is hard to use. """
+    return process_stripe_events(start, source_id, type)
 
 
 

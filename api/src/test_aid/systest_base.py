@@ -3,7 +3,7 @@ import sys
 from copy import copy
 from functools import wraps
 from logging import getLogger
-from time import time
+from time import time, sleep
 
 from unittest import skipIf
 
@@ -16,6 +16,7 @@ from selenium.webdriver.support.wait import WebDriverWait
 
 from service.config import get_mysql_config
 from service.db import create_mysql_engine, db_session
+from shop.stripe_code import Type
 from test_aid.api import ApiFactory
 from test_aid.db import DbFactory
 from test_aid.obj import DEFAULT_PASSWORD_HASH
@@ -27,8 +28,7 @@ from test_aid.test_base import TestBase
 stripe.api_key = STRIPE_PUBLIC_KEY
 
 VALID_NON_3DS_CARD_NO = "378282246310005"
-VALID_OPTIONAL_3DS_CARD_NO = "4242424242424242"
-VALID_REQUIRED_3DS_CARD_NO = "4000000000003063"
+VALID_3DS_CARD_NO = "4242424242424242"
 EXPIRED_3DS_CARD_NO = "4000000000000069"
 
 EXPIRES_CVC_ZIP = "4242424242424"
@@ -248,6 +248,26 @@ class ShopTestMixin:
         self.token = self.api.login_member()
 
         self.test_start_timestamp = str(int(time()))
+
+    def trigger_stripe_source_event(self, source_id, expected_event_count=1):
+        """ Make server fetch events and filter it on source and type, do this until one event was processed. """
+        
+        for i in range(10):
+            event_count = self.post(
+                f"/webshop/process_stripe_events",
+                dict(
+                    start=self.test_start_timestamp,
+                    type=f"{Type.SOURCE}*",
+                    source_id=source_id,
+                )
+            ).expect(200).data
+            
+            if event_count >= expected_event_count:
+                return
+                
+            sleep(1)
+            
+        raise AssertionError(f"failed to get source events for {source_id}")
 
 
         
