@@ -12,7 +12,7 @@ def member_to_response_object(member):
         'member_number': member.member_number,
         'firstname': member.firstname,
         'lastname': member.lastname,
-        'end_date': max((span.enddate for span in member.spans)).isoformat(),
+        'end_date': max((span.enddate for span in member.spans)).isoformat() if len(member.spans) > 0 else member.created_at,
         'keys': [{'key_id': key.key_id, 'rfid_tag': key.tagid} for key in member.keys],
     }
 
