@@ -30,19 +30,20 @@ def get_memberdata():
 
     return [member_to_response_object(m) for m in query]
 
-def key_to_response_object(member):
+def key_to_response_object(key):
     return {
-        'member_id': member.member_id,
-        'member_number': member.member_number,
-        'firstname': member.firstname,
-        'lastname': member.lastname,
-        'keys': [{'key_id': key.key_id, 'rfid_tag': key.tagid} for key in member.keys],
+        'member_id': key.member_id,
+        'key_id' : key.key_id,
+        'tagid': key.tagid,
+        'description': key.description,
+        'member': member_to_response_object(key.member)
     }
 
-@service.route("/keylookup", method=GET, permission=KEYS_VIEW)
-def get_keys():
-    query = db_session.query(Member).join(Member.keys)
-    query = query.options(contains_eager(Member.keys))
+@service.route("/keylookup/<int:tagid>", method=GET, permission=KEYS_VIEW)
+def get_keys(tagid):
+    query = db_session.query(Key)
+    query = query.filter(Key.tagid == tagid)
+    query = query.join(Key.member)
     query = query.filter(
         Member.deleted_at.is_(None),
         Key.deleted_at.is_(None),
