@@ -1,6 +1,5 @@
 from test_aid.obj import DEFAULT_PASSWORD_HASH
-from test_aid.systest_base import SeleniumTest, VALID_NON_3DS_CARD_NO, EXPIRED_CVC_ZIP
-from test_aid.systest_config import SELENIUM_BASE_TIMEOUT
+from test_aid.systest_base import SeleniumTest
 
 
 class Test(SeleniumTest):
