@@ -1,9 +1,15 @@
-from sqlalchemy.orm import contains_eager
+from datetime import date, timedelta
 
+from sqlalchemy import func
+from sqlalchemy.orm import contains_eager
+from sqlalchemy.orm.exc import NoResultFound
+
+from membership.membership import get_membership_summary
 from membership.models import Member, Span, LABACCESS, SPECIAL_LABACESS, Key
 from multiaccess import service
-from service.api_definition import GET, KEYS_VIEW, SERVICE
+from service.api_definition import GET, KEYS_VIEW, SERVICE, MEMBER_VIEW, Arg
 from service.db import db_session
+from service.error import NotFound
 
 
 def member_to_response_object(member):
@@ -30,14 +36,16 @@ def get_memberdata():
 
     return [member_to_response_object(m) for m in query]
 
+
 def key_to_response_object(key):
     return {
         'member_id': key.member_id,
-        'key_id' : key.key_id,
+        'key_id': key.key_id,
         'tagid': key.tagid,
         'description': key.description,
         'member': member_to_response_object(key.member)
     }
+
 
 @service.route("/keylookup/<int:tagid>", method=GET, permission=KEYS_VIEW)
 def get_keys(tagid):
@@ -50,3 +58,34 @@ def get_keys(tagid):
     )
 
     return [key_to_response_object(m) for m in query]
+
+
+@service.route("/box-terminator/member", method=GET, permission=MEMBER_VIEW)
+def box_terminator_member(member_number=Arg(int)):
+    try:
+        member = db_session.query(Member).filter(Member.member_number == member_number).one()
+    except NoResultFound:
+        raise NotFound()
+
+    query = db_session\
+        .query(func.max(Span.enddate))\
+        .filter(Span.member_id == member.member_id, Span.type.in_([LABACCESS, SPECIAL_LABACESS]))
+
+    today = date.today()
+    expire_date = (query.first()[0] or date(1997, 9, 26)) + timedelta(days=1)
+    terminate_date = expire_date + timedelta(days=45)
+    
+    if today < expire_date:
+        status = "active"
+    elif today < terminate_date:
+        status = "expired"
+    else:
+        status = "terminate"
+        
+    return {
+        "name": f"{member.firstname} {member.lastname or ''}",
+        "expire_date": expire_date.isoformat(),
+        "terminate_date": terminate_date.isoformat(),
+        "status": status,
+    }
+    
