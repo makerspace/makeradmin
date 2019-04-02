@@ -48,5 +48,10 @@ def get_keys(tagid):
         Member.deleted_at.is_(None),
         Key.deleted_at.is_(None),
     )
+    
+    keys = [key_to_response_object(m) for m in query]
 
-    return [key_to_response_object(m) for m in query]
+    if len(keys) == 0:
+        return None
+    else:
+        return keys[0]
