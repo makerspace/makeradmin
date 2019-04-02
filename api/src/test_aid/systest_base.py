@@ -185,6 +185,32 @@ class SeleniumTest(ApiTest):
         
         return retry(timeout=timeout, sleep=sleep, do_retry=lambda e: isinstance(e, NoSuchElementException))(get)()
 
+    def wait_for_elements(self, id=None, name=None, tag=None, css=None, xpath=None,
+                          timeout=SELENIUM_BASE_TIMEOUT, sleep=SLEEP):
+        if id:
+            def get():
+                return self.webdriver.find_elements_by_id(id)
+        elif name:
+            def get():
+                return self.webdriver.find_elements_by_name(name)
+        elif tag:
+            def get():
+                return self.webdriver.find_elements_by_tag_name(tag)
+        elif css:
+            def get():
+                return self.webdriver.find_elements_by_css_selector(css)
+        elif xpath:
+            def get():
+                return self.webdriver.find_elements_by_xpath(xpath)
+        else:
+            raise Exception("missing parameter")
+        
+        return retry(timeout=timeout, sleep=sleep, do_retry=lambda e: isinstance(e, NoSuchElementException))(get)()
+
+    def browse_member_page(self):
+        self.webdriver.get(f"{self.public_url}/member")
+        self.wait_for_page(title="Medlemssidor - Stockholm Makerspace Webshop")
+        
     def browse_shop(self):
         self.webdriver.get(f"{self.public_url}/shop")
         self.wait_for_page(title="Stockholm Makerspace Webshop")

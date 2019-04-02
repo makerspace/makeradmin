@@ -89,9 +89,14 @@ class ApiFactory:
 
     def login_member(self, member=None):
         member = member or self.member
+        try:
+            email = member.email
+        except AttributeError:
+            email = member['email']
+        
         self.token = self\
             .post("/oauth/token", {"grant_type": "password",
-                                   "username": member["email"],
+                                   "username": email,
                                    "password": DEFAULT_PASSWORD})\
             .expect(code=200)\
             .get("access_token")
