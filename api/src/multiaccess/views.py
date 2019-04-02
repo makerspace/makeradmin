@@ -83,7 +83,7 @@ def box_terminator_member(member_number=Arg(int)):
         status = "terminate"
         
     return {
-        "name": "Anders Roos",
+        "name": f"{member.firstname} {member.lastname or ''}",
         "expire_date": expire_date.isoformat(),
         "terminate_date": terminate_date.isoformat(),
         "status": status,
