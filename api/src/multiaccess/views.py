@@ -37,7 +37,7 @@ def get_memberdata():
     return [member_to_response_object(m) for m in query]
 
 
-def key_to_response_object(key):
+def memberbooth_response_object(key):
     return {
         'member_id': key.member_id,
         'key_id': key.key_id,
@@ -47,7 +47,7 @@ def key_to_response_object(key):
     }
 
 
-@service.route("/keylookup/<int:tagid>", method=GET, permission=KEYS_VIEW)
+@service.route("/memberbooth/tag/<int:tagid>", method=GET, permission=KEYS_VIEW)
 def get_keys(tagid):
     query = db_session.query(Key)
     query = query.filter(Key.tagid == tagid)
@@ -57,11 +57,11 @@ def get_keys(tagid):
         Key.deleted_at.is_(None),
     )
 
-    keylookup = query.first()
-    if keylookup is None:
+    taglookup = query.first()
+    if taglookup is None:
         return None
     else:
-        return key_to_response_object(keylookup)
+        return memberbooth_response_object(taglookup)
 
 
 @service.route("/box-terminator/member", method=GET, permission=MEMBER_VIEW)
