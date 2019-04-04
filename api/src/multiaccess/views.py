@@ -49,9 +49,8 @@ def get_keys(tagid):
         Key.deleted_at.is_(None),
     )
     
-    keys = [key_to_response_object(m) for m in query]
-
-    if len(keys) == 0:
+    keylookup = query.first()
+    if keylookup is None:
         return None
     else:
-        return keys[0]
+        return key_to_response_object(keylookup)
