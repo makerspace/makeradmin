@@ -21,6 +21,7 @@ if [ "$APP_DEBUG" = "true" ]; then
 	}
 	
 
+        # TODO proxy to dev 
         npm run dev &
 fi
 
