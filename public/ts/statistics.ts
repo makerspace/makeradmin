@@ -1,10 +1,7 @@
 /// <reference path="../node_modules/moment/moment.d.ts" />
 import * as common from "./common"
-//import * as moment from 'moment';
-import 'moment/locale/sv';
 
 declare var UIkit: any;
-declare var moment: any;
 declare var Chart: any;
 
 common.documentLoaded().then(() => {
