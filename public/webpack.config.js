@@ -18,14 +18,12 @@ const commonSettings = {
         statistics: "./ts/statistics.ts",
     },
 
-    // Compile into a js.app
     output:
     {
         filename: "[name].js",
-        path: path.resolve(__dirname, "dist"),
+        path: path.resolve(__dirname, "static/js"),
     },
     
-    // Preprocess *.jsx files
     module: {
         rules: [
             {
@@ -36,9 +34,8 @@ const commonSettings = {
         ]
     },
 
-    // Files to include.
     resolve: {
-        extensions: ['*', '.ts', '.tsx']
+        extensions: ['*', '.ts', '.tsx', '.js']
     },
 
     plugins: [
@@ -46,36 +43,29 @@ const commonSettings = {
 };
 
 
-// if (process.env.DEVELOPMENT) {
-//     console.info("webpack development mode");
-//
-//     module.exports = merge(commonSettings, {
-//         mode: "development",
-//         devtool: "inline-source-map",
-//         plugins: [
-//         ],
-//         devServer: {
-//             host: "0.0.0.0",
-//             contentBase: "./dist",
-//             historyApiFallback: true,           
-//         },
-//     });
-// }
-// else {
-//     console.info("webpack production mode");
-//
-//     const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
-//     const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
-//    
+if (process.env.DEVELOPMENT) {
+    console.info("webpack development mode");
+
+    module.exports = merge(commonSettings, {
+        mode: "development",
+        devtool: "inline-source-map",
+        plugins: [
+        ],
+        // devServer: {
+        //     host: "0.0.0.0",
+        // },
+    });
+}
+else {
+    console.info("webpack production mode");
 
     module.exports = merge(commonSettings, {
         mode: "production",
         devtool: "source-map",
         plugins: [
-            // new webpack.LoaderOptionsPlugin({
-            //     minimize: true,
-            // }),
-            // // new BundleAnalyzerPlugin(),
+            new webpack.LoaderOptionsPlugin({
+                minimize: true,
+            }),
         ],
     });
-//}
+}

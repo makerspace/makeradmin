@@ -15,4 +15,5 @@ node_modules
 .buildpath
 .settings
 public/dist
+public/static/js
 local.mk

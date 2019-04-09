@@ -4,6 +4,7 @@
     "description": "",
     "main": "webpack.config.js",
     "devDependencies": {
+        "sass-loader": "^7.1.0",
         "ts-loader": "^5.3.3",
         "typescript": "^3.4.2",
         "webpack": "^4.20.2",
@@ -16,7 +17,7 @@
         "chart.js": "^2.7.3"
     },
     "scripts": {
-        "build": "./node_modules/.bin/webpack --config webpack.config.js",
+        "build": "./node_modules/.bin/webpack",
         "dev": "./node_modules/.bin/webpack-dev-server",
         "eslint": "eslint src"
     }

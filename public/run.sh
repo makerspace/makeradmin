@@ -6,13 +6,6 @@ function refresh() {
 	sass scss/style.scss static/style.css || true
 }
 
-function refresh_ts() {
-	# the OR is to ensure that the whole script won't exit even if the program threw an error
-	(cd ts && ./build.sh) || true
-}
-
-refresh
-
 GUNICORN_FLAGS=""
 
 if [ "$APP_DEBUG" = "true" ]; then
@@ -26,16 +19,9 @@ if [ "$APP_DEBUG" = "true" ]; then
 			refresh
 		done
 	}
-	watch_sass&
-	function watch_ts() {
-		echo "starting typescript watch process"
-		while inotifywait -qq -r -e modify,create,delete ts; do
-			echo "Updating typescript"
-			sleep 0.1
-			refresh_ts
-		done
-	}
-	watch_ts&
+	
+
+        npm run dev &
 fi
 
 # Note: for some reason the workers seem to sometimes get blocked by persistent connections
