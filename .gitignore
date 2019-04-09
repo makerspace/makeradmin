@@ -14,5 +14,3 @@ node_modules
 .pydevproject
 .buildpath
 .settings
-public/dist
-local.mk
