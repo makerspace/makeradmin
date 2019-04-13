@@ -1,14 +1,15 @@
 
+COMPOSE=docker-compose
 TEST_COMPOSE=docker-compose -p test -f docker-compose.yml -f docker-compose.test.yml
 DEV_COMPOSE=docker-compose -f docker-compose.yml -f docker-compose.dev.yml
 
 -include local.mk
 
 build: .env
-	docker-compose build
+	$(COMPOSE) build
 
 run: .env
-	docker-compose up
+	$(COMPOSE) up
 
 dev: .env
 	$(DEV_COMPOSE) up --build
@@ -39,19 +40,13 @@ insert-devel-data: .env
 	python3 create_env.py
 
 stop:
-	docker-compose down
+	$(COMPOSE) down
 
 test-admin-js:
 	npm --prefix admin run eslint
 	npm --prefix admin run test
 
 firstrun: .env build
-	python3 firstrun.py
+	$(COMPOSE) run api python3 ./firstrun.py
 
-admin-dev-server:
-	mkdir -p admin/node_modules
-	docker-compose -f admin/dev-server-compose.yaml rm -sfv
-	docker volume rm -f makeradmin_node_modules
-	docker-compose -f admin/dev-server-compose.yaml up --build
-
-.PHONY: build firstrun admin-dev-server init init-npm init-pip install run stop dev-test test-clean test dev
+.PHONY: build firstrun init init-npm init-pip install run stop dev-test test-clean test dev
