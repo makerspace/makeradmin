@@ -1,4 +1,4 @@
-from _pydecimal import Decimal
+from decimal import Decimal
 
 from service.error import InternalServerError
 from shop.stripe_constants import STRIPE_CURRENTY_BASE

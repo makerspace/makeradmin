@@ -53,9 +53,11 @@ class ProductAction(Base):
     ADD_LABACCESS_DAYS = "add_labaccess_days"
     ADD_MEMBERSHIP_DAYS = "add_membership_days"
 
+    PRODUCT_ACTIONS = (ADD_LABACCESS_DAYS, ADD_MEMBERSHIP_DAYS)
+
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
     product_id = Column(Integer, ForeignKey(Product.id), nullable=False)
-    action_type = Column(Enum(ADD_MEMBERSHIP_DAYS, ADD_LABACCESS_DAYS), nullable=False)
+    action_type = Column(Enum(*PRODUCT_ACTIONS), nullable=False)
     value = Column(Integer)
     created_at = Column(DateTime, server_default=func.now())
     updated_at = Column(DateTime, server_default=func.now())
@@ -109,7 +111,7 @@ class TransactionAction(Base):
 
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
     content_id = Column(Integer, ForeignKey(TransactionContent.id), nullable=False)
-    action_type = Column(Enum(ProductAction.ADD_MEMBERSHIP_DAYS, ProductAction.ADD_LABACCESS_DAYS), nullable=False)
+    action_type = Column(Enum(*ProductAction.PRODUCT_ACTIONS), nullable=False)
     value = Column(Integer)
     status = Column(Enum(PENDING, COMPLETED), nullable=False)
     completed_at = Column(DateTime)

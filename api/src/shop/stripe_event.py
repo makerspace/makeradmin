@@ -112,6 +112,7 @@ def stripe_callback(data, headers):
 
 
 def process_stripe_events(start=None, source_id=None, type=None):
+    """ Used to make server fetch stripe events, used for testing since webhook is hard to use. """
     
     def event_filter(event):
         if not source_id:
