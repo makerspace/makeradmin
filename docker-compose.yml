@@ -92,7 +92,8 @@ services:
     image: makeradmin/public:1.0
     volumes:
       - "./.webshop_product_images:/work/static/product_images"
-    build: public
+    build:
+      context: ./public
     environment:
       APIGATEWAY: "api"
       HOST_BACKEND:

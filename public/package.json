@@ -18,7 +18,7 @@
     },
     "scripts": {
         "build": "./node_modules/.bin/webpack",
-        "dev": "./node_modules/.bin/webpack-dev-server",
+        "dev": "./node_modules/.bin/webpack-dev-server --mode development",
         "eslint": "eslint src"
     }
 }

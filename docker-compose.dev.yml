@@ -27,6 +27,9 @@ services:
       APP_DEBUG: "true"
       
   public:
+    build:
+      args:
+        DEV_BUILD: "true"
     ports:
       - "8011:80"
     volumes:
@@ -34,8 +37,8 @@ services:
       - ./public/scss:/work/scss
       - ./public/src:/work/src
     environment:
-      APP_DEBUG: "true"
-      
+      DEV_RUN: "true"
+
   admin:
     ports:
       - "8009:80"

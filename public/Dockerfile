@@ -24,20 +24,20 @@ COPY ./webpack.config.js /work/
 
 COPY ts /work/ts
 
-RUN npm run build
-
 COPY static /work/static
 
 COPY scss /work/scss
-
-RUN /dart-sass/scss scss/style.scss static/style.css || true
 
 COPY src /work/src
 
 COPY run.sh /work/run.sh
 
-EXPOSE 80
+RUN /dart-sass/sass scss/style.scss static/style.css
 
-WORKDIR "/work"
+ARG DEV_BUILD
+
+RUN test "$DEV_BUILD" = "true" || npm run build
+
+EXPOSE 80
 
 CMD ["./run.sh"]
