@@ -2,12 +2,12 @@
 set -e
 
 GUNICORN_FLAGS=""
-WORKERS="8"
+GUNICORN_WORKERS="8"
 
-if [ "$APP_DEBUG" = "true" ]; then
+if [ "$DEV_RUN" = "true" ]; then
     echo "running in devel mode"
     GUNICORN_FLAGS=" --reload"
-    WORKERS="4"
+    GUNICORN_WORKERS="2"
 fi
 
 echo "initializing and migrating db"
@@ -22,4 +22,4 @@ echo "starting gunicorn"
 
 # TODO Consider using multiple threads per process as long as services calls other services through api gateway.
 # Not sure the code is thread safe though. Another solution would be to remove this antipattern.
-exec gunicorn ${GUNICORN_FLAGS} --access-logfile - --worker-class sync --workers=${WORKERS} -b :80 api:app
+exec gunicorn ${GUNICORN_FLAGS} --access-logfile - --worker-class sync --workers=${GUNICORN_WORKERS} -b :80 api:app

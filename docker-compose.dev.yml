@@ -14,8 +14,8 @@ services:
     ports:
       - "8010:80"
     environment:
-      APP_DEBUG: "true"
-      
+      DEV_RUN: "true"
+
   email-dispatcher:
     volumes:
       - ./api/src:/work/src
@@ -40,10 +40,14 @@ services:
       DEV_RUN: "true"
 
   admin:
+    build:
+      dockerfile: DevServerDockerfile
     ports:
       - "8009:80"
-    environment:
-      APP_DEBUG: "true"
+    volumes:
+      - ./admin/src:/work/src
+      - ./admin/dist:/work/dist
+
 
 volumes:
   logs:

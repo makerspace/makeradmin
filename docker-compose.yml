@@ -32,7 +32,6 @@ services:
       - makeradmin
     environment:
       API_BEARER:
-      APP_DEBUG:
       MYSQL_HOST: db2
       MYSQL_DB:
       MYSQL_PORT:
@@ -98,7 +97,6 @@ services:
       APIGATEWAY: "api"
       HOST_BACKEND:
       STRIPE_PUBLIC_KEY:
-      APP_DEBUG:
       VIRTUAL_HOST: "${HOST_PUBLIC}"
       LETSENCRYPT_HOST: "${HOST_PUBLIC}"
       LETSENCRYPT_EMAIL: "${ADMIN_EMAIL}"
@@ -107,7 +105,8 @@ services:
 
   admin:
     image: makeradmin/admin:1.0
-    build: ./admin
+    build:
+      context: ./admin
     environment:
       HOST_BACKEND:
       VIRTUAL_HOST: "${HOST_FRONTEND}"

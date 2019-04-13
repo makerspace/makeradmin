@@ -29,7 +29,6 @@ config = {
     "STRIPE_PRIVATE_KEY": os.environ.get("STRIPE_PRIVATE_KEY", ""),
     "STRIPE_PUBLIC_KEY": os.environ.get("STRIPE_PUBLIC_KEY", ""),
     "STRIPE_SIGNING_SECRET": "",
-    "APP_DEBUG": "false",
 }
 
 if not args.force and os.path.isfile(".env"):
