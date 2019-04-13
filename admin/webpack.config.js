@@ -85,6 +85,7 @@ module.exports = (env, args) => {
                 port: "80",
                 contentBase: "./dist",
                 historyApiFallback: true,
+                public: 'http://localhost:8009',
             },
         });
     }

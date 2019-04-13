@@ -55,8 +55,6 @@ class MemberList extends React.Component {
     }
 
     render() {
-        console.info("KOKOKOX2");
-        
         const columns = [
             {title: "#", sort: "member_id"},
             {title: "Förnamn", sort: "firstname"},

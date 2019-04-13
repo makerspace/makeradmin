@@ -54,6 +54,7 @@ module.exports = (env, args) => {
             devServer: {
                 host: "0.0.0.0",
                 port: 80,
+                public: 'http://localhost:8011',
                 publicPath: '/static/js',
                 proxy: {
                     '/': 'http://localhost:81',
