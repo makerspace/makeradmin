@@ -13,12 +13,6 @@ services:
       TEST: "true"
       CORS_ALLOWED_ORIGINS: 'http://admin,http://api,http://public'
 
-  backend:
-    environment:
-      HOST_FRONTEND: 'http://admin'
-      HOST_BACKEND: 'http://api'
-      HOST_PUBLIC: 'http://public'
-
   public:
     environment:
       HOST_BACKEND: 'http://api'

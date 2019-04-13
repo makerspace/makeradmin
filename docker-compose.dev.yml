@@ -20,12 +20,6 @@ services:
     volumes:
       - ./api/src:/work/src
       
-  backend:
-    volumes:
-      - ./backend/src:/work/src
-    environment:
-      APP_DEBUG: "true"
-      
   public:
     build:
       args:
