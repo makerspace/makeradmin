@@ -66,29 +66,6 @@ services:
       - api
     networks:
       - makeradmin
-
-  backend:
-    image: makeradmin/backend:1.0
-    build: backend
-    environment:
-      TABLE_PREFIX: "webshop"
-      MYSQL_HOST: "db2:${MYSQL_PORT}"
-      MYSQL_DB: "makeradmin"
-      MYSQL_USER:
-      MYSQL_PASS:
-      APIGATEWAY: "api"
-      BEARER: "${API_BEARER}"
-      HOST_FRONTEND:
-      HOST_BACKEND:
-      HOST_PUBLIC:
-      APP_DEBUG:
-      STRIPE_PRIVATE_KEY:
-      STRIPE_PUBLIC_KEY:
-      STRIPE_SIGNING_SECRET:
-    depends_on:
-      - api
-    networks:
-      - makeradmin
       
   public:
     image: makeradmin/public:1.0
