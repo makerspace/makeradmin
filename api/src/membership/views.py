@@ -2,7 +2,7 @@ from membership import service
 from membership.member_entity import MemberEntity
 from membership.membership import get_membership_summary, add_membership_days
 from membership.models import Member, Group, member_group, Span, Permission, group_permission, \
-    Key, MEMBERSHIP, LABACCESS, SPECIAL_LABACESS
+    Key
 from membership.member_auth import get_member_permissions
 from membership.permissions import register_permissions
 from service.api_definition import MEMBER_VIEW, MEMBER_CREATE, MEMBER_EDIT, MEMBER_DELETE, GROUP_VIEW, GROUP_CREATE, \
@@ -88,19 +88,21 @@ service.related_entity_routes(
 @service.route("/member/<int:entity_id>/activate", method=POST, permission=SERVICE, status='activated')
 def member_activate(entity_id=None):
     """ Activate (undelete) a member. """
-    db_session.query(Member).filter_by(member_id=entity_id).update({'deleted_at': None})
+    member = db_session.query(Member).get(entity_id)
+    member.deleted_at = None
+    db_session.commit()
 
 
 @service.route("/member/<int:entity_id>/addMembershipDays", method=POST, permission=SPAN_MANAGE)
 def member_add_membership_days(
-        entity_id=None, type=Arg(Enum(MEMBERSHIP, LABACCESS, SPECIAL_LABACESS)), days=Arg(natural1),
+        entity_id=None, type=Arg(Enum(Span.MEMBERSHIP, Span.LABACCESS, Span.SPECIAL_LABACESS)), days=Arg(natural1),
         creation_reason=Arg(non_empty_str), default_start_date=Arg(iso_date, required=False)):
-    return add_membership_days(entity_id, type, days, creation_reason, default_start_date)
+    return add_membership_days(entity_id, type, days, creation_reason, default_start_date).as_json()
 
 
 @service.route("/member/<int:entity_id>/membership", method=GET, permission=SPAN_VIEW)
 def member_get_membership(entity_id=None):
-    return get_membership_summary(entity_id)
+    return get_membership_summary(entity_id).as_json()
 
 
 @service.route("/member/<int:entity_id>/permissions", method=GET, permission=PERMISSION_VIEW)

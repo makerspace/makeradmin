@@ -32,9 +32,7 @@ export function formatDateTime(str: any) {
 }
 
 export function get_error(json: any) {
-	if (typeof json.message_sv === 'string') return json.message_sv;
 	if (typeof json.message === 'string') return json.message;
-	if (typeof json.message_en === 'string') return json.message_en;
 	return json.status;
 }
 

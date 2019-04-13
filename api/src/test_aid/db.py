@@ -7,6 +7,7 @@ from membership.models import Member, Group, Permission, Span, Key
 from messages.models import Message, Recipient
 from service.api_definition import SERVICE_USER_ID
 from service.db import db_session
+from shop.models import StripePending
 from test_aid.test_util import random_str
 
 
@@ -117,5 +118,3 @@ class DbFactory:
         sql = "SELECT COALESCE(MAX(member_number), 0) FROM membership_members"
         member_number = db_session.execute(sql).fetchone()[0] + randint(1000, 2000)
         return member_number
-        
-        

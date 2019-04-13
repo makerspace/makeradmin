@@ -13,7 +13,7 @@ const Row = props => {
             <td><Link to={"/sales/order/" + item.id}>{item.id}</Link></td>
             <td><DateTimeShow date={item.created_at}/></td>
             <td>{item.status}</td>
-            <td><Link to={"/membership/members/" + item.member_id}>#{item.member_number}: {item.member_name}</Link></td>
+            <td><Link to={"/membership/members/" + item.member_id}>#{item.member_number}: {item.firstname} {item.lastname}</Link></td>
             <td className='uk-text-right'>{item.amount} kr</td>
         </tr>
     );
@@ -21,10 +21,10 @@ const Row = props => {
 
 
 class OrderList extends React.Component {
-
+    
     constructor(props) {
         super(props);
-        this.collection = new Collection({type: Order, url: "/webshop/transactions_extended_info"});
+        this.collection = new Collection({type: Order, url: "/webshop/transaction", expand: 'member'});
     }
     
     render() {

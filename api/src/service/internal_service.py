@@ -40,8 +40,8 @@ class InternalService(Blueprint):
             
             migrate_service(session_factory, self.name, migrations_dir)
 
-    def route(self, path, permission=None, method=None, methods=None, status='ok', code=200, commit=True,
-              flat_return=False, **route_kwargs):
+    def route(self, path, permission=None, method=None, methods=None, status='ok', code=200,
+              commit=True, commit_on_error=False, flat_return=False, **route_kwargs):
         """
         Enhanced Blueprint.route for internal services. The function should return a jsonable structure that will
         be put in the data key in the response.
@@ -57,6 +57,7 @@ class InternalService(Blueprint):
         :param status status value of response
         :param code response code
         :param commit commit db_session just before returning if no exception was raised
+        :param commit_on_error commit db_session even if there was an exception
         :param route_kwargs all extra kwargs are forwarded to Blueprint.route
         :param flat_return some endpoints returns data flattened, most don't TODO fix this
         """
@@ -90,7 +91,7 @@ class InternalService(Blueprint):
                     else:
                         result = jsonify({'status': status, 'data': data}), code
                     
-                    if commit:
+                    if commit and not commit_on_error:
                         db_session.commit()
                         
                 except IntegrityError as e:
@@ -125,6 +126,10 @@ class InternalService(Blueprint):
                         
                     raise UnprocessableEntity("Could not save entity using the sent data.",
                                               log=f"unrecoginized integrity error: {str(e)}")
+                
+                finally:
+                    if commit_on_error:
+                        db_session.commit()
                 
                 return result
             

@@ -5,20 +5,15 @@ import {UNAUTHORIZED} from "./common";
 import {renderSidebarCategories} from "./category"
 declare var UIkit: any;
 
-common.onGetAndDocumentLoaded("/webshop/product_data", (value: any) => {
+common.onGetAndDocumentLoaded("/webshop/product_data", (productData: any) => {
 	common.addSidebarListeners();
 
-	const {categories, data} = value;
-
-	renderSidebarCategories(categories);
+	renderSidebarCategories(productData);
 
 	const id2item = new Map<number, any>();
 
-	// Used to prevent clicking the 'Pay' button twice
-	const duplicatePurchaseRand = (100000000 * Math.random()) | 0;
-
-	for (const cat of data) {
-		for (const item of cat.items) {
+	for (const category of productData) {
+		for (const item of category.items) {
 			id2item.set(item.id, item);
 		}
 	}
@@ -133,7 +128,9 @@ common.onGetAndDocumentLoaded("/webshop/product_data", (value: any) => {
 		if (waitingForPaymentResponse) {
 			return;
 		}
+        const payButton = <HTMLInputElement> document.getElementById("pay-button");
 
+		payButton.disabled = true;
 		waitingForPaymentResponse = true;
 
 		const spinner = document.querySelector(".progress-spinner");
@@ -147,19 +144,20 @@ common.onGetAndDocumentLoaded("/webshop/product_data", (value: any) => {
 				// Inform the user if there was an error.
 				errorElement.textContent = result.error.message;
 				waitingForPaymentResponse = false;
+                payButton.disabled = false;
 			} else {
 				let cart = Cart.fromStorage();
 				common.ajax("POST", window.apiBasePath + "/webshop/pay", {
 					cart: cart.items,
-					expectedSum: cart.sum(id2item),
-					stripeSource: result.source.id,
-					stripeThreeDSecure: result.source.card.three_d_secure,
-					duplicatePurchaseRand: duplicatePurchaseRand,
+					expected_sum: cart.sum(id2item),
+					stripe_card_source_id: result.source.id,
+                    stripe_card_3d_secure: result.source.card.three_d_secure,
 				}).then(json => {
 					spinner.classList.remove("progress-spinner-visible");
 					waitingForPaymentResponse = false;
+                    payButton.disabled = false;
 					new Cart([]).saveToStorage();
-					if (json.data.redirect !== undefined) {
+					if (json.data.redirect) {
 						window.location.href = json.data.redirect;
 					} else {
 						window.location.href = "receipt/" + json.data.transaction_id;
@@ -168,6 +166,7 @@ common.onGetAndDocumentLoaded("/webshop/product_data", (value: any) => {
 				}).catch(json => {
 					spinner.classList.remove("progress-spinner-visible");
 					waitingForPaymentResponse = false;
+                    payButton.disabled = false;
 					if (json.status === UNAUTHORIZED) {
 						UIkit.modal.alert("<h2>Betalningen misslyckades</h2>Du är inte inloggad");
 					} else {

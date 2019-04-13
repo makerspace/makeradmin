@@ -29,4 +29,4 @@ def current_permissions():
 @service.route("/current/membership", method=GET, permission=USER)
 def current_membership_info():
     """ Get current user membership information. """
-    return get_membership_summary(g.user_id)
+    return get_membership_summary(g.user_id).as_json()

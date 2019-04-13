@@ -1,3 +1,4 @@
+from functools import wraps
 from typing import Union
 
 from sqlalchemy import create_engine, inspect
@@ -40,7 +41,9 @@ def create_mysql_engine(host=None, port=None, db=None, user=None, pwd=None, time
     if not wait_for(lambda: can_connect(host, port), timeout=timeout, interval=0.5):
         raise Exception(f"could not connect to db at {host}:{port} in {timeout} seconds")
     
-    engine = create_engine(f"mysql+pymysql://{user}:{pwd}@{host}:{port}/{db}", pool_recycle=1800)
+    engine = create_engine(f"mysql+pymysql://{user}:{pwd}@{host}:{port}/{db}",
+                           pool_recycle=1800,
+                           isolation_level="REPEATABLE_READ")
     
     db_session_factory.init_with_engine(engine)
     
@@ -57,3 +60,19 @@ def populate_fields_by_index(engine):
         for index in engine_inspect.get_indexes(table):
             fields_by_index[index['name']] = ",".join(index['column_names'])
     
+    
+def nested_atomic(f):
+    """ Decorator for committing on success and rollback on any exception. NOTE: A subsequent rollback will rollback
+    this nested transaction as well, but comitting will not unrollback a rollbacked nested transaction. """
+    @wraps(f)
+    def wrapper(*args, **kwargs):
+        try:
+            db_session.begin_nested()
+            result = f(*args, **kwargs)
+            db_session.commit()
+            return result
+        except Exception:
+            db_session.rollback()
+            raise
+        
+    return wrapper

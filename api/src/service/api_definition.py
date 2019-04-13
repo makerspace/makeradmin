@@ -42,6 +42,7 @@ KEYS_EDIT = "keys_edit"
 MESSAGE_SEND = "message_send"
 MESSAGE_VIEW = "message_view"
 WEBSHOP = 'webshop'
+WEBSHOP_EDIT = 'webshop_edit'
 
 ALL_PERMISSIONS = [
     MEMBER_VIEW, MEMBER_CREATE, MEMBER_EDIT, MEMBER_DELETE,
@@ -50,17 +51,29 @@ ALL_PERMISSIONS = [
     SPAN_VIEW, SPAN_MANAGE,
     KEYS_VIEW, KEYS_EDIT,
     MESSAGE_SEND, MESSAGE_VIEW,
+    WEBSHOP, WEBSHOP_EDIT,
 ]
 
 # Service credentials
 SERVICE_USER_ID = -1
 SERVICE_PERMISSIONS = (SERVICE,)
 
+#
 # What
+#
+
+# Generic
 BAD_VALUE = 'bad_value'
 REQUIRED = 'required'
 EXPIRED = 'expired'
 NOT_UNIQUE = 'not_unique'
+
+# Ship
+NON_MATCHING_SUMS = 'non_matching_sums'
+INVALID_ITEM_COUNT = 'invalid_item_count'
+EMPTY_CART = 'empty_cart'
+DUPLICATE_TRANSACTION = 'duplicate_transaction'
+NEGATIVE_ITEM_COUNT = 'negative_item_count'
 
 
 class Arg:

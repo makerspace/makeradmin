@@ -2,6 +2,8 @@
 TEST_COMPOSE=docker-compose -p test -f docker-compose.yml -f docker-compose.test.yml
 DEV_COMPOSE=docker-compose -f docker-compose.yml -f docker-compose.dev.yml
 
+-include local.mk
+
 build: .env
 	docker-compose build
 

@@ -4,8 +4,7 @@ from sqlalchemy import func
 from sqlalchemy.orm import contains_eager
 from sqlalchemy.orm.exc import NoResultFound
 
-from membership.membership import get_membership_summary
-from membership.models import Member, Span, LABACCESS, SPECIAL_LABACESS, Key
+from membership.models import Member, Span, Key
 from multiaccess import service
 from service.api_definition import GET, KEYS_VIEW, SERVICE, MEMBER_VIEW, Arg
 from service.db import db_session
@@ -29,7 +28,7 @@ def get_memberdata():
     query = query.options(contains_eager(Member.spans), contains_eager(Member.keys))
     query = query.filter(
         Member.deleted_at.is_(None),
-        Span.type.in_([LABACCESS, SPECIAL_LABACESS]),
+        Span.type.in_([Span.LABACCESS, Span.SPECIAL_LABACESS]),
         Span.deleted_at.is_(None),
         Key.deleted_at.is_(None),
     )
@@ -73,7 +72,7 @@ def box_terminator_member(member_number=Arg(int)):
 
     query = db_session\
         .query(func.max(Span.enddate))\
-        .filter(Span.member_id == member.member_id, Span.type.in_([LABACCESS, SPECIAL_LABACESS]))
+        .filter(Span.member_id == member.member_id, Span.type.in_([Span.LABACCESS, Span.SPECIAL_LABACESS]))
 
     today = date.today()
     expire_date = (query.first()[0] or date(1997, 9, 26)) + timedelta(days=1)

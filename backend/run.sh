@@ -17,8 +17,6 @@ function wait_for {
 wait_for "${MYSQL_HOST%%:*}" "${MYSQL_HOST##*:}"
 wait_for ${APIGATEWAY} 80
 
-python3 /work/src/migrate.py
-
 GUNICORN_FLAGS=""
 
 if [ "$APP_DEBUG" = "true" ]; then
@@ -31,6 +29,6 @@ fi
 # The gthread worker class should help with this, but it doesn't always seem to work for some reason.
 # However running the servers behind nginx (and using the sync class) resolves all problems
 # as nginx handles all the persistent connections.
-# Note: don't use more than one worker for the backend, otherwise we could in rare cases get race conditions as most of the actions the backend does are not atomic.
+# Note: don't use more than one worker for the backend, otherwise we could in rare cases get race conditions as most of the actions the backend does are not nested_atomic.
 echo "starting gunicorn"
-exec gunicorn $GUNICORN_FLAGS --access-logfile - --worker-class sync --chdir src --workers=4 -b :80 backend:app
+exec gunicorn $GUNICORN_FLAGS --access-logfile - --worker-class sync --chdir src --workers=1 -b :80 backend:app

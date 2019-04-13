@@ -9,6 +9,7 @@ requests
 python-dotenv
 bcrypt
 stripe
+jsonschema
 
 # Test requirements
 pytest

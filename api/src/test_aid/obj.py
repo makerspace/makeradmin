@@ -2,14 +2,12 @@ from random import randint, choice
 
 from faker import Faker
 
-from membership.models import LABACCESS, MEMBERSHIP, SPECIAL_LABACESS
+from membership.models import Span
+from shop.models import ProductAction
 from test_aid.test_util import random_str
 
 DEFAULT_PASSWORD = '1q2w3e'
 DEFAULT_PASSWORD_HASH = "$2y$10$NcNoheVsKVo2Agz3FLeI8.fhAgbmRV/NoJMqPC67ZXiqgqfE5DE.S"
-
-ADD_MEMBERSHIP_DAYS = 1
-ADD_LABACCESS_DAYS = 2
 
 
 class ObjFactory:
@@ -71,7 +69,7 @@ class ObjFactory:
         obj = dict(
             startdate=self.test.date(days=-randint(40, 60)),
             enddate=self.test.date(days=-randint(10, 30)),
-            type=choice((LABACCESS, MEMBERSHIP, SPECIAL_LABACESS)),
+            type=choice((Span.LABACCESS, Span.MEMBERSHIP, Span.SPECIAL_LABACESS)),
             creation_reason=random_str(),
         )
         obj.update(kwargs)
@@ -106,7 +104,7 @@ class ObjFactory:
     def create_product_action(self, **kwargs):
         obj = dict(
             product_id=0,
-            action_id=ADD_MEMBERSHIP_DAYS,
+            action_type=ProductAction.ADD_MEMBERSHIP_DAYS,
             value=365,
         )
         obj.update(**kwargs)
