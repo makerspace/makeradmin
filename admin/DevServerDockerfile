@@ -1,8 +1,12 @@
 FROM node:8-alpine
 
-RUN mkdir /work
+RUN apk add --no-cache tzdata
+ENV TZ Europe/Stockholm
 
-COPY ./package.json ./package-lock.json /work/
+RUN mkdir -p /work/src && mkdir -p /work/dist/js
+
+# Copy package file first, to avoid having to install dependencies every time a source file is updated
+COPY ./webpack.config.js ./package.json ./package-lock.json /work/
 
 WORKDIR /work
 
@@ -14,8 +18,6 @@ COPY  ./src/ /work/src
 
 COPY  ./dist/ /work/dist
 
-EXPOSE 8080
+EXPOSE 80
 
-ENV DEVELOPMENT=1
-
-CMD ["npm", "start"]
+CMD ["npm", "run", "dev"]

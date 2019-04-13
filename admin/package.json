@@ -42,7 +42,8 @@
     "webpack-merge": "^4.1.4"
   },
   "scripts": {
-    "start": "./node_modules/.bin/webpack-dev-server",
+    "dev": "./node_modules/.bin/webpack-dev-server --mode development",
+    "build": "./node_modules/.bin/webpack",
     "test": "jest",
     "eslint": "eslint src"
   },

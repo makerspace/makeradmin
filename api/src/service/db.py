@@ -62,8 +62,8 @@ def populate_fields_by_index(engine):
     
     
 def nested_atomic(f):
-    """ Decorator for commiting on success and rollback on any exception. NOTE: A subsequent rollback will rollback
-    this nested transaction as well, but comitting will not unrollback an rolbacked nexted transaction. """
+    """ Decorator for committing on success and rollback on any exception. NOTE: A subsequent rollback will rollback
+    this nested transaction as well, but comitting will not unrollback a rollbacked nested transaction. """
     @wraps(f)
     def wrapper(*args, **kwargs):
         try:

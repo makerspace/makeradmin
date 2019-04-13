@@ -266,8 +266,10 @@ class Entity:
         entity = db_session.query(self.model).get(entity_id)
         if not entity:
             raise NotFound("Could not find any entity with specified parameters.")
-        
-        entity.deleted_at = datetime.utcnow()
+
+        if not entity.deleted_at:
+            entity.deleted_at = datetime.utcnow()
+            
         if commit:
             db_session.commit()
  
