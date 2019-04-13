@@ -5,7 +5,6 @@ import {UNAUTHORIZED} from "./common";
 import {renderSidebarCategories} from "./category"
 declare var UIkit: any;
 
-
 common.onGetAndDocumentLoaded("/webshop/product_data", (productData: any) => {
 	common.addSidebarListeners();
 
