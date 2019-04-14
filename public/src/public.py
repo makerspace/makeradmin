@@ -94,6 +94,11 @@ app.register_blueprint(shop)
 app.register_blueprint(member)
 
 
+@app.route("/static/product_images/<path:path>")
+def product_image(path):
+    return app.send_from_directory("../static/product_images", path)
+
+
 @app.route("/")
 def root():
     return redirect(url_for("member.show_member"))
