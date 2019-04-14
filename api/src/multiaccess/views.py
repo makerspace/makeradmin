@@ -1,12 +1,13 @@
 from datetime import date, timedelta
 
+from flask import g
 from sqlalchemy import func
 from sqlalchemy.orm import contains_eager
 from sqlalchemy.orm.exc import NoResultFound
 
 from membership.models import Member, Span, Key
 from multiaccess import service
-from multiaccess.box_terminator import box_terminator_validate
+from multiaccess.box_terminator import box_terminator_validate, box_terminator_session_list, box_terminator_nag
 from service.api_definition import GET, KEYS_VIEW, SERVICE, MEMBER_VIEW, Arg, MEMBER_EDIT, POST
 from service.db import db_session
 from service.error import NotFound
@@ -67,16 +68,16 @@ def get_keys(tagid):
 @service.route("/box-terminator/session-list", method=GET, permission=MEMBER_EDIT)
 def box_terminator_session_list_route():
     """ Returns a list of all boxes scanned in this session. """
-    pass
+    return box_terminator_session_list(g.session_token)
 
 
 @service.route("/box-terminator/nag", method=POST, permission=MEMBER_EDIT)
 def box_terminator_nag_route(member_number=Arg(int), box_label_id=Arg(int)):
     """ Send a nag email for this box. """
-    pass
+    return box_terminator_nag(member_number, box_label_id)
 
 
 @service.route("/box-terminator/validate-box", method=POST, permission=MEMBER_EDIT)
 def box_terminator_validate_route(member_number=Arg(int), box_label_id=Arg(int)):
     """ Used when scanning boxes. """
-    return box_terminator_validate(member_number, box_label_id)
+    return box_terminator_validate(member_number, box_label_id, g.session_token)

@@ -8,7 +8,15 @@ from service.db import db_session
 from service.error import NotFound
 
 
-def box_terminator_validate(member_number=None, box_label_id=None):
+def box_terminator_session_list(session_token=None):
+    pass
+
+
+def box_terminator_nag(member_number=None, box_label_id=None):
+    pass
+
+
+def box_terminator_validate(member_number=None, box_label_id=None, session_token=None):
     try:
         member = db_session.query(Member).filter(Member.member_number == member_number).one()
     except NoResultFound:
