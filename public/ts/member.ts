@@ -102,9 +102,8 @@ common.documentLoaded().then(() => {
             (enddate: string, days: number) => ``,
             () => ``,
             (hours: number) => ``,
-            (hours: number) => `Ditt <strong>föreningsmedlemsskap</strong> går ut idag. <br>Your <strong>membership</strong> expires today.`,
             (enddate: string, days: number) => `Du har fått <strong>specialtillträde</strong> till föreningslokalerna t.o.m. ${enddate} (${days} dag(ar) till). <br>You have been given <strong>special access</strong> to the premises through ${enddate} (${days} day(s) left).`,
-            (enddate: string, days: number) => ``,
+            (enddate: string, days: number) => `Du har fått <strong>specialtillträde</strong> till föreningslokalerna t.o.m. ${enddate} (${days} dag(ar) till). <br>You have been given <strong>special access</strong> to the premises through ${enddate} (${days} day(s) left).`,
             () => ``,
         ];
 
