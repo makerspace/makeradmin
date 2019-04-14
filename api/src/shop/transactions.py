@@ -114,17 +114,17 @@ def ship_add_labaccess_action(action, transaction):
         logger.info(f"skipping ship_add_labaccess_action because member {transaction.member_id} has no key")
         return
 
-    labaccess_end = add_membership_days(
+    labaccess_membership_end = add_membership_days(
         transaction.member_id,
         Span.LABACCESS,
         days=days_to_add,
         creation_reason=f"transaction_action_id: {action.id}, transaction_id: {transaction.id}"
-    ).labaccess_end
+    ).labaccess_membership_end
     
-    assert labaccess_end
+    assert labaccess_membership_end
     
     complete_pending_action(action)
-    send_key_updated_email(transaction.member_id, days_to_add, labaccess_end)
+    send_key_updated_email(transaction.member_id, days_to_add, labaccess_membership_end)
 
 
 def ship_add_membership_action(action, transaction):
