@@ -1,8 +1,10 @@
 {
   "name": "makeradmin-admin",
   "version": "1.0.0",
-  "description": "",
+  "description": "See repository",
   "main": "webpack.config.js",
+  "repository": "https://github.com/makerspace/makeradmin",
+  "license": "GPL-3.0",
   "dependencies": {
     "classnames": "^2.2.5",
     "history": "^4.7.2",
@@ -48,7 +50,6 @@
     "eslint": "eslint src"
   },
   "author": "",
-  "license": "GPL-3.0",
   "babel": {
     "presets": [
       "@babel/preset-env",
