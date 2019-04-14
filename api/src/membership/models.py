@@ -40,6 +40,8 @@ class Member(Base):
                           secondary=member_group,
                           back_populates='members')
 
+    boxes = relationship('Box')
+
     def __repr__(self):
         return f'Member(member_id={self.member_id}, member_number={self.member_number}, email={self.email})'
 
@@ -146,8 +148,8 @@ class Box(Base):
     
     member_id = Column(Integer, ForeignKey('membership_members.member_id'), nullable=False)
     
-    # The id of the printed tag on the box.
-    box_tag_id = Column(Integer, unique=True, nullable=False)
+    # The id of the printed label on the box.
+    box_label_id = Column(Integer, unique=True, nullable=False)
 
     # Scanning session to be able to make list of all scanned boxes during the session.
     session_token = Column(String(32), index=True, nullable=False)
@@ -158,9 +160,11 @@ class Box(Base):
     # Last time a nag mail was sent out for this box, note that for a member with several boxes this may not be the
     # last nag date for that member.
     last_nag_at = Column(DateTime, nullable=False)
+
+    member = relationship('Member')
     
     def __repr__(self):
         return (
-            f'Box(id={self.id}, box_tag_id={self.box_tag_id}, member_id={self.member_id}'
+            f'Box(id={self.id}, box_label_id={self.box_label_id}, member_id={self.member_id}'
             f', last_check_at={self.last_check_at}, last_nag_at={self.last_nag_at})'
         )
