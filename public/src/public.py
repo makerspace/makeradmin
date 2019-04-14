@@ -2,7 +2,7 @@ import os
 import sys
 from logging import basicConfig, INFO, getLogger
 
-from flask import Flask, Blueprint, redirect, url_for
+from flask import Flask, Blueprint, redirect, url_for, send_from_directory
 from flask import render_template
 
 
@@ -96,7 +96,7 @@ app.register_blueprint(member)
 
 @app.route("/static/product_images/<path:path>")
 def product_image(path):
-    return app.send_from_directory("../static/product_images", path)
+    return send_from_directory("../static/product_images", path)
 
 
 @app.route("/")
