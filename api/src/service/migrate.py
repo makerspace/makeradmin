@@ -64,18 +64,22 @@ def migrate_service(session_factory, service_name, migrations_dir):
                     f", {len(applied)} migrations already applied")
         
         for i, migration in enumerate(migrations, start=1):
-            if i != migration.id:
-                raise Exception(f"migrations should be numbered in sequence {migration.name} was not")
-    
-            if migration.id in applied:
-                continue
-    
-            logger.info(f"{service_name}, applying {migration.name}")
-    
-            for sql in read_sql(join(migrations_dir, migration.name + '.sql')):
-                session.execute(sql)
-                
-            session.execute("INSERT INTO migrations VALUES (:id, :service, :name, :applied_at)",
-                            {'id': migration.id, 'service': service_name, 'name': migration.name,
-                             'applied_at': datetime.utcnow()})
-            session.commit()
+            try:
+                if i != migration.id:
+                    raise Exception(f"migrations should be numbered in sequence {migration.name} was not")
+        
+                if migration.id in applied:
+                    continue
+        
+                logger.info(f"{service_name}, applying {migration.name}")
+        
+                for sql in read_sql(join(migrations_dir, migration.name + '.sql')):
+                    session.execute(sql)
+                    
+                session.execute("INSERT INTO migrations VALUES (:id, :service, :name, :applied_at)",
+                                {'id': migration.id, 'service': service_name, 'name': migration.name,
+                                 'applied_at': datetime.utcnow()})
+                session.commit()
+            except Exception:
+                session.rollback()
+                raise

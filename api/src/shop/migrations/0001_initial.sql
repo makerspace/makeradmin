@@ -60,8 +60,8 @@ CREATE TABLE IF NOT EXISTS `webshop_transactions` (
   `status` enum('pending','completed','failed') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
 CREATE TABLE IF NOT EXISTS `webshop_transaction_contents` (
+
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `transaction_id` int(10) unsigned NOT NULL,
   `product_id` int(10) unsigned NOT NULL,
@@ -153,4 +153,4 @@ UPDATE `webshop_transaction_actions` SET `action_type` = 'add_labaccess_days' wh
 ALTER TABLE `webshop_transaction_actions` DROP KEY `action_constraint3`;
 ALTER TABLE `webshop_transaction_actions` DROP COLUMN `action_id`;
 
-DROP TABLE `webshop_actions`
+DROP TABLE `webshop_actions`;
