@@ -5,22 +5,19 @@ GUNICORN_FLAGS=""
 GUNICORN_PORT=80
 GUNICORN_WORKERS=4
 
-# Calculates a hash based on the hash of every file here
-STATIC_PREFIX_HASH=`find . -type f -exec md5sum {} \; | sort -k 2 | md5sum | cut -c 1-6`
-export STATIC_PREFIX_HASH
-echo "Prefix hash $STATIC_PREFIX_HASH"
-
 function watch_sass() {
     echo "starting sass watch process"
     while inotifywait -qq -r -e modify,create,delete scss; do
         echo "updating stylesheets"
         sleep 0.1
-        /dart-sass/sass scss/style.scss static/style.css || true
+        sass scss/style.scss static/style.css || true
     done
 }
 
 if [ "$DEV_RUN" = "true" ]; then
         echo "running app in devel mode"
+        STATIC_PREFIX_HASH=""
+        export STATIC_PREFIX_HASH
 
         # Set gunicorn to reload on changes in source files.
         GUNICORN_FLAGS=" --reload"
@@ -34,6 +31,11 @@ if [ "$DEV_RUN" = "true" ]; then
 
         # Run webpack dev server.
         npm run dev &
+else
+    # Calculates a hash based on the hash of every file here
+    STATIC_PREFIX_HASH="_$(find . -type f -exec md5sum {} \; | sort -k 2 | md5sum | cut -c 1-6)"
+    export STATIC_PREFIX_HASH
+    echo "Prefix hash $STATIC_PREFIX_HASH"
 fi
 
 # Note: for some reason the workers seem to sometimes get blocked by persistent connections

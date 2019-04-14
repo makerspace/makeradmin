@@ -88,7 +88,7 @@ def login(token):
 
 
 static_hash = os.environ["STATIC_PREFIX_HASH"]
-app = Flask(__name__, static_url_path=f"/static_{static_hash}", static_folder="../static")
+app = Flask(__name__, static_url_path=f"/static{static_hash}", static_folder="../static")
 sys.stderr.write("STATIC URL PATH" + app.static_url_path + "\n")
 app.register_blueprint(shop)
 app.register_blueprint(member)
