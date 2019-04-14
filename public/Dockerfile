@@ -1,13 +1,23 @@
-FROM ubuntu:latest
+FROM python:3.7-alpine
 
-RUN apt-get update && apt-get install -y curl python3 python3-pip netcat
+RUN apk update \
+	&& apk add \
+	less \
+	bash \
+	build-base \
+	curl \
+	python3-dev \
+	netcat-openbsd \
+	&& rm -rf /var/cache/apk/*
 
-RUN apt-get update && apt-get install -y inotify-tools wget npm curl
+RUN apk update && apk add \
+	inotify-tools \
+	wget \
+	npm \
+	curl \
+	&& rm -rf /var/cache/apk/*
 
 RUN npm i -g npm
-
-RUN wget https://github.com/sass/dart-sass/releases/download/1.3.0/dart-sass-1.3.0-linux-x64.tar.gz --quiet -O sass.tar.gz && tar -xf sass.tar.gz && rm sass.tar.gz
-ENV PATH="/dart-sass:${PATH}"
 
 RUN pip3 install flask gunicorn
 
@@ -19,6 +29,7 @@ COPY ./package.json ./package-lock.json /work/
 WORKDIR /work
 
 RUN npm install
+RUN npm install -g sass
 
 COPY ./webpack.config.js /work/
 
@@ -32,7 +43,7 @@ COPY src /work/src
 
 COPY run.sh /work/run.sh
 
-RUN /dart-sass/sass scss/style.scss static/style.css
+RUN sass scss/style.scss static/style.css
 
 ARG DEV_BUILD
 

@@ -92,7 +92,7 @@ class ApiError(Exception):
             fields=self.fields,
             what=self.what,
             status=self.status,
-            serivce=self.service,
+            service=self.service,
             # Legacy response fields, remove when not used any more.
             column=self.fields,
             type=self.what,

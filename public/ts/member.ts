@@ -60,13 +60,17 @@ common.documentLoaded().then(() => {
     }
 
     function render_key_view(membership: any, pending_actions_json: any) {
-        const info_labaccess = {
-            active:  membership.has_labaccess,
-            enddate: membership.labaccess_end,
-        };
         const info_membership = {
             active:  membership.has_membership,
             enddate: membership.membership_end,
+        };
+        const info_labaccess_membership = {
+            active:  membership.has_labaccess_membership,
+            enddate: membership.labaccess_membership_end,
+        };
+        const info_special_membership = {
+            active:  membership.has_special_membership,
+            enddate: membership.special_membership_end,
         };
 
         let pendingLabaccessDays = 0;
@@ -76,7 +80,7 @@ common.documentLoaded().then(() => {
             }
         }
 
-        const labaccessStrings = [
+        const labaccessMembershipStrings = [
             (enddate: string, days: number) => `Din <strong>labaccess</strong> är ogiltig sedan ${days} dagar (${enddate}). <br>Your <strong>lab membership</strong> expired ${days} day(s) ago (${enddate}).`,
             () => `Din <strong>labaccess</strong> gick ut igår. <br>Your <strong>lab membership</strong> expired yesterday.`,
             (hours: number) => `Din <strong>labaccess</strong> är giltig i mindre än ${hours} timmar till. <br>Your <strong>lab membership</strong> is valid for ${hours} more hours.`,
@@ -94,6 +98,15 @@ common.documentLoaded().then(() => {
             () => `Ditt <strong>föreningsmedlemsskap</strong> är inaktivt. <br>Your <strong>membership</strong> is inactive.`,
         ];
 
+        const specialAccessStrings = [
+            (enddate: string, days: number) => ``,
+            () => ``,
+            (hours: number) => ``,
+            (enddate: string, days: number) => `Du har fått <strong>specialtillträde</strong> till föreningslokalerna t.o.m. ${enddate} (${days} dag(ar) till). <br>You have been given <strong>special access</strong> to the premises through ${enddate} (${days} day(s) left).`,
+            (enddate: string, days: number) => `Du har fått <strong>specialtillträde</strong> till föreningslokalerna t.o.m. ${enddate} (${days} dag(ar) till). <br>You have been given <strong>special access</strong> to the premises through ${enddate} (${days} day(s) left).`,
+            () => ``,
+        ];
+
         let calendarURL = "https://www.makerspace.se/kalendarium";
         let pendingAccess = "";
         if (pendingLabaccessDays > 0) {
@@ -106,7 +119,8 @@ common.documentLoaded().then(() => {
             <fieldset class="data-uk-margin">
                 <legend><i uk-icon="lock"></i> Medlemsskap</legend>
                 ${renderInfo(info_membership, membershipStrings)}
-                ${renderInfo(info_labaccess, labaccessStrings)}
+                ${renderInfo(info_labaccess_membership, labaccessMembershipStrings)}
+                ${info_special_membership.active?renderInfo(info_special_membership, specialAccessStrings):``}
                 ${pendingAccess}
             </fieldset>`;
     }
