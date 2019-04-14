@@ -1,7 +1,7 @@
 CREATE TABLE `membership_box` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `member_id` int(10) unsigned NOT NULL,
-  `box_label_id` int(20) unsigned NOT NULL,
+  `box_label_id` bigint(20) unsigned NOT NULL,
   `session_token` varchar(32) COLLATE utf8mb4_0900_ai_ci NOT NULL,
   `last_nag_at` datetime DEFAULT NULL,
   `last_check_at` datetime DEFAULT NULL,

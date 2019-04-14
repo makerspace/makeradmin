@@ -1,4 +1,5 @@
-from sqlalchemy import Column, Integer, String, DateTime, Text, Date, Enum, Table, ForeignKey, func, text, select
+from sqlalchemy import Column, Integer, String, DateTime, Text, Date, Enum, Table, ForeignKey, func, text, select, \
+    BigInteger
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, column_property
 
@@ -152,7 +153,7 @@ class Box(Base):
     member_id = Column(Integer, ForeignKey('membership_members.member_id'), nullable=False)
     
     # The id of the printed label on the box.
-    box_label_id = Column(Integer, unique=True, nullable=False)
+    box_label_id = Column(BigInteger, unique=True, nullable=False)
 
     # Scanning session to be able to make list of all scanned boxes during the session.
     session_token = Column(String(32), index=True, nullable=False)

@@ -3,7 +3,7 @@ from faker import Faker
 
 
 from core.models import AccessToken
-from membership.models import Member, Group, Permission, Span, Key
+from membership.models import Member, Group, Permission, Span, Key, Box
 from messages.models import Message, Recipient
 from service.api_definition import SERVICE_USER_ID
 from service.db import db_session
@@ -29,6 +29,7 @@ class DbFactory:
         self.permission = None
         self.message = None
         self.recipient = None
+        self.box = None
 
     def create_access_token(self, **kwargs):
         obj = dict(
@@ -50,6 +51,18 @@ class DbFactory:
         db_session.add(self.member)
         db_session.commit()
         return self.member
+
+    def create_box(self, **kwargs):
+        obj = dict(
+            member_id=self.member.member_id,
+            box_label_id=randint(1e9, 9e9),
+            session_token=random_str(),
+        )
+        obj.update(kwargs)
+        self.box = Box(**obj)
+        db_session.add(self.box)
+        db_session.commit()
+        return self.box
 
     def create_group(self, **kwargs):
         obj = self.obj.create_group(**kwargs)

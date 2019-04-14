@@ -7,20 +7,21 @@ from membership.models import Member, Box, Span
 from messages.views import message_entity
 from service.db import db_session
 from service.error import NotFound
+from service.logging import logger
 from service.util import date_to_str, dt_to_str
 
 
 def get_labacess_end_date(box):
     try:
-        return max(s.enddate for s in box.member.spans if s.type in (Span.LABACCESS, Span.SPECIAL_LABACESS))
+        return max(s.enddate for s in box.member.spans
+                   if s.type in (Span.LABACCESS, Span.SPECIAL_LABACESS) and not s.deleted_at)
     except ValueError:
         return None
 
 
 def get_box_query():
-    query = db_session.query(Box).join(Member).join(Span)
+    query = db_session.query(Box).join(Member).outerjoin(Span)
     query = query.options(contains_eager(Box.member), contains_eager(Box.member).contains_eager(Member.spans))
-    query = query.filter(Span.deleted_at.is_(None))
     return query
 
 
@@ -60,14 +61,12 @@ def box_terminator_nag(member_number=None, box_label_id=None):
     except NoResultFound:
         raise NotFound()
     
-    member = box.member
-
     message_entity.create({
-        "recipients": [{"type": "member", "id": member.member_id}],
+        "recipients": [{"type": "member", "id": box.member.member_id}],
         "message_type": "email",
         "title": "Hämta din låda!",
         "description": (
-            f"Hej,\n\nDin labacess gick ut {date_to_str(get_labacess_end_date(member))}"
+            f"Hej,\n\nDin labacess gick ut {date_to_str(get_labacess_end_date(box))}"
             f", hämta lådan eller så går innehållet till makespace.\n\nHälsningar\nStockholm Makerpsace"
         )
     }, commit=False)
@@ -86,10 +85,12 @@ def box_terminator_validate(member_number=None, box_label_id=None, session_token
         except NoResultFound:
             raise NotFound()
         
-        box = Box(member_id=member.member_id, box_label_id=box_label_id, session_token=session_token)
+        box = Box(member_id=member.member_id, box_label_id=box_label_id)
         
     box.last_check_at = datetime.utcnow()
+    box.session_token = session_token
     db_session.add(box)
     db_session.flush()
     
     return get_box_info(box)
+ 
