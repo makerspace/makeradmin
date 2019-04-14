@@ -87,7 +87,9 @@ def login(token):
     return render_template("login.html", token=token)
 
 
-app = Flask(__name__, static_url_path="/static", static_folder="../static")
+static_hash = os.environ["STATIC_PREFIX_HASH"]
+app = Flask(__name__, static_url_path=f"/static_{static_hash}", static_folder="../static")
+sys.stderr.write("STATIC URL PATH" + app.static_url_path + "\n")
 app.register_blueprint(shop)
 app.register_blueprint(member)
 
@@ -105,7 +107,7 @@ if not api_base_url.startswith("http"):
 @app.context_processor
 def context():
     return dict(
-        STATIC="/static",
+        STATIC=app.static_url_path,
         meta=dict(
             api_base_url=api_base_url,
             stripe_public_key=os.environ["STRIPE_PUBLIC_KEY"],

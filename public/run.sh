@@ -5,6 +5,11 @@ GUNICORN_FLAGS=""
 GUNICORN_PORT=80
 GUNICORN_WORKERS=4
 
+# Calculates a hash based on the hash of every file here
+STATIC_PREFIX_HASH=`find . -type f -exec md5sum {} \; | sort -k 2 | md5sum | cut -c 1-6`
+export STATIC_PREFIX_HASH
+echo "Prefix hash $STATIC_PREFIX_HASH"
+
 function watch_sass() {
     echo "starting sass watch process"
     while inotifywait -qq -r -e modify,create,delete scss; do
