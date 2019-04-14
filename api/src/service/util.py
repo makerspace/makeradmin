@@ -35,3 +35,9 @@ def date_to_str(d):
     if d is None:
         return None
     return d.isoformat()
+
+
+def dt_to_str(d):
+    if d is None:
+        return None
+    return d.isoformat()
