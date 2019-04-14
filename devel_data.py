@@ -4,6 +4,7 @@ from pprint import pprint
 
 import requests
 from dotenv import dotenv_values
+import random
 
 "labaccess"
 "special_labaccess"
@@ -48,15 +49,15 @@ member_id = 1
 
 delete_all_spans(member_id)
 
-create_span(member_id, "2016-05-20", "2016-06-21", "labaccess", "1")
-create_span(member_id, "2016-06-21", "2016-07-21", "labaccess", "1")
+create_span(member_id, "2016-05-20", "2016-06-21", "labaccess", str(random.randrange(0, 100000)))
+create_span(member_id, "2016-06-21", "2016-07-21", "labaccess", str(random.randrange(0, 100000)))
 
-create_span(member_id, "2018-05-10", "2018-07-10", "labaccess", "1")
-create_span(member_id, "2018-07-11", "2018-11-11", "labaccess", "1")
+create_span(member_id, "2018-05-10", "2018-07-10", "labaccess", str(random.randrange(0, 100000)))
+create_span(member_id, "2018-07-11", "2018-11-11", "labaccess", str(random.randrange(0, 100000)))
 
-create_span(member_id, "2018-05-20", "2019-05-20", "membership", "2")
+create_span(member_id, "2018-05-20", "2019-05-20", "membership", str(random.randrange(0, 100000)))
 
-create_span(member_id, "2018-05-10", "2019-05-10", "special_labaccess", "2")
+create_span(member_id, "2018-05-10", "2019-05-10", "special_labaccess", str(random.randrange(0, 100000)))
 
 """
 insert into membership_group_permissions (id, group_id,
