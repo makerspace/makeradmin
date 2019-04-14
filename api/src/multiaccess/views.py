@@ -6,7 +6,7 @@ from sqlalchemy.orm.exc import NoResultFound
 
 from membership.models import Member, Span, Key
 from multiaccess import service
-from service.api_definition import GET, KEYS_VIEW, SERVICE, MEMBER_VIEW, Arg
+from service.api_definition import GET, KEYS_VIEW, SERVICE, MEMBER_VIEW, Arg, MEMBER_EDIT
 from service.db import db_session
 from service.error import NotFound
 
@@ -63,8 +63,18 @@ def get_keys(tagid):
         return memberbooth_response_object(taglookup)
 
 
-@service.route("/box-terminator/member", method=GET, permission=MEMBER_VIEW)
-def box_terminator_member(member_number=Arg(int)):
+@service.route("/box-terminator/session-list", method=GET, permission=MEMBER_EDIT)
+def box_terminator_nag(member_number=Arg(int)):
+    pass
+
+
+@service.route("/box-terminator/nag", method=GET, permission=MEMBER_EDIT)
+def box_terminator_nag(member_number=Arg(int)):
+    pass
+
+
+@service.route("/box-terminator/validate-box", method=GET, permission=MEMBER_EDIT)
+def box_terminator_validate(member_number=Arg(int)):
     try:
         member = db_session.query(Member).filter(Member.member_number == member_number).one()
     except NoResultFound:
