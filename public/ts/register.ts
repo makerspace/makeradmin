@@ -81,6 +81,32 @@ common.onGetAndDocumentLoaded("/webshop/register_page_data", (value: any) => {
     });
   });
 
+  const payment_button: HTMLButtonElement = document.querySelector("#pay-button");
+  const validate_fields: Array<string> = ['firstname', 'lastname', 'email', 'address_zipcode'];
+
+  function checkInputField(field: string): boolean {
+    const el: HTMLInputElement = document.querySelector("#" + field);
+    return el.checkValidity();
+  }
+
+  function isInputInvalid(): boolean {
+    return validate_fields.reduce((acc, field) => acc || !checkInputField(field), false);
+  }
+
+  function updatePaymentButton() {
+    payment_button.disabled = isInputInvalid();
+  }
+
+  validate_fields.forEach(field => {
+    const el: HTMLElement = document.querySelector("#" + field);
+    el.addEventListener("change", ev => {
+      updatePaymentButton();
+    });
+    el.addEventListener("input", ev => {
+      updatePaymentButton();
+    });
+  });
+
   let waitingForPaymentResponse = false;
   document.querySelector("#pay-button").addEventListener("click", ev => {
     ev.preventDefault();
