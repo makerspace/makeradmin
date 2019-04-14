@@ -78,32 +78,4 @@ def box_terminator_nag_route(member_number=Arg(int), box_label_id=Arg(int)):
 @service.route("/box-terminator/validate-box", method=POST, permission=MEMBER_EDIT)
 def box_terminator_validate_route(member_number=Arg(int), box_label_id=Arg(int)):
     """ Used when scanning boxes. """
-    try:
-        member = db_session.query(Member).filter(Member.member_number == member_number).one()
-    except NoResultFound:
-        raise NotFound()
-
-    query = db_session\
-        .query(func.max(Span.enddate))\
-        .filter(Span.member_id == member.member_id, Span.type.in_([Span.LABACCESS, Span.SPECIAL_LABACESS]))
-
-    today = date.today()
-    expire_date = (query.first()[0] or date(1997, 9, 26)) + timedelta(days=1)
-    terminate_date = expire_date + timedelta(days=45)
-    
-    if today < expire_date:
-        status = "active"
-    elif today < terminate_date:
-        status = "expired"
-    else:
-        status = "terminate"
-        
-    return {
-        "box_label_id": box_label_id,
-        "member_number": member.member_number,
-        "name": f"{member.firstname} {member.lastname or ''}",
-        "expire_date": expire_date.isoformat(),
-        "terminate_date": terminate_date.isoformat(),
-        "status": status,
-        # TODO Add last nag date.
-    }
+    return box_terminator_validate(member_number, box_label_id)
