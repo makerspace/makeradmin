@@ -96,7 +96,7 @@ def box_terminator_validate(member_number=Arg(int), box_label_id=Arg(int)):
         status = "terminate"
         
     return {
-    	"member_number": member.member_number,
+        "member_number": member.member_number,
         "name": f"{member.firstname} {member.lastname or ''}",
         "expire_date": expire_date.isoformat(),
         "terminate_date": terminate_date.isoformat(),
