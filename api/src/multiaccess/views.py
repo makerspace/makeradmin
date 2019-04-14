@@ -6,7 +6,7 @@ from sqlalchemy.orm.exc import NoResultFound
 
 from membership.models import Member, Span, Key
 from multiaccess import service
-from service.api_definition import GET, KEYS_VIEW, SERVICE, MEMBER_VIEW, Arg, MEMBER_EDIT
+from service.api_definition import GET, KEYS_VIEW, SERVICE, MEMBER_VIEW, Arg, MEMBER_EDIT, POST
 from service.db import db_session
 from service.error import NotFound
 
@@ -64,17 +64,17 @@ def get_keys(tagid):
 
 
 @service.route("/box-terminator/session-list", method=GET, permission=MEMBER_EDIT)
-def box_terminator_session_list(member_number=Arg(int)):
+def box_terminator_session_list():
     pass
 
 
-@service.route("/box-terminator/nag", method=GET, permission=MEMBER_EDIT)
+@service.route("/box-terminator/nag", method=POST, permission=MEMBER_EDIT)
 def box_terminator_nag(member_number=Arg(int)):
     pass
 
 
-@service.route("/box-terminator/validate-box", method=GET, permission=MEMBER_EDIT)
-def box_terminator_validate(member_number=Arg(int)):
+@service.route("/box-terminator/validate-box", method=POST, permission=MEMBER_EDIT)
+def box_terminator_validate(member_number=Arg(int), box_label_id=Arg(int)):
     try:
         member = db_session.query(Member).filter(Member.member_number == member_number).one()
     except NoResultFound:
@@ -100,5 +100,5 @@ def box_terminator_validate(member_number=Arg(int)):
         "expire_date": expire_date.isoformat(),
         "terminate_date": terminate_date.isoformat(),
         "status": status,
+        # TODO Add last nag date.
     }
-
