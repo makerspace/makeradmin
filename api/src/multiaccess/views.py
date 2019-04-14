@@ -64,17 +64,20 @@ def get_keys(tagid):
 
 
 @service.route("/box-terminator/session-list", method=GET, permission=MEMBER_EDIT)
-def box_terminator_session_list():
+def box_terminator_session_list_route():
+    """ Returns a list of all boxes scanned in this session. """
     pass
 
 
 @service.route("/box-terminator/nag", method=POST, permission=MEMBER_EDIT)
-def box_terminator_nag(member_number=Arg(int)):
+def box_terminator_nag_route(member_number=Arg(int), box_label_id=Arg(int)):
+    """ Send a nag email for this box. """
     pass
 
 
 @service.route("/box-terminator/validate-box", method=POST, permission=MEMBER_EDIT)
-def box_terminator_validate(member_number=Arg(int), box_label_id=Arg(int)):
+def box_terminator_validate_route(member_number=Arg(int), box_label_id=Arg(int)):
+    """ Used when scanning boxes. """
     try:
         member = db_session.query(Member).filter(Member.member_number == member_number).one()
     except NoResultFound:
