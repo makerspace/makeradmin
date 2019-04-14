@@ -58,11 +58,23 @@ function toPoints (items: Array<any>) {
 	return values;
 }
 
+function filterDuplicates(items: Array<any>) {
+	const newValues = [];
+	for (let i = 0; i < items.length; i++) {
+		if (i == 0 || items[i].x != items[i-1].x) {
+			newValues.push(items[i]);
+		}
+	}
+	return newValues;
+}
+
 function addChart(root: HTMLElement, data: any) {
 	// lab = splitSeries(data.labmembership);
 	// member = splitSeries(data.membership);
-	const dataMembership = toPoints(data.membership);
-	const dataLabaccess = toPoints(data.labaccess);
+	const dataMembership = filterDuplicates(toPoints(data.membership));
+	console.log(dataMembership);
+	const dataLabaccess = filterDuplicates(toPoints(data.labaccess));
+	const maxtime = new Date();
 
 	const config = {
 		type: 'line',
@@ -95,7 +107,7 @@ function addChart(root: HTMLElement, data: any) {
 				}
 			},
 			tooltips: {
-				mode: 'x',
+				mode: 'nearest',
 				intersect: false,
 			},
 			title: {
@@ -108,14 +120,12 @@ function addChart(root: HTMLElement, data: any) {
 					time: {
 						parser: timeFormat,
 						// round: 'day'
-						tooltipFormat: 'll'
+						tooltipFormat: 'll',
+						max: maxtime,
 					},
 					scaleLabel: {
 						display: true,
 						labelString: 'Datum'
-					},
-					ticks: {
-						max: new Date()  // Set max data to the current date
 					}
 				}],
 				yAxes: [{
@@ -187,6 +197,7 @@ function addRandomCharts(root: HTMLElement) {
 function addLaserChart(root: HTMLElement, data: any) {
 	// lab = splitSeries(data.labmembership);
 	// member = splitSeries(data.membership);
+	const maxtime = new Date();
 
 	const config = {
 		type: 'bar',
@@ -214,6 +225,7 @@ function addLaserChart(root: HTMLElement, data: any) {
 						// round: 'month'
 						tooltipFormat: 'll',
 						unit: 'month',
+						max: maxtime,
 					},
 					scaleLabel: {
 						display: true,
