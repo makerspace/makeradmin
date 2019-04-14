@@ -6,6 +6,7 @@ from sqlalchemy.orm.exc import NoResultFound
 
 from membership.models import Member, Span, Key
 from multiaccess import service
+from multiaccess.box_terminator import box_terminator_validate
 from service.api_definition import GET, KEYS_VIEW, SERVICE, MEMBER_VIEW, Arg, MEMBER_EDIT, POST
 from service.db import db_session
 from service.error import NotFound
