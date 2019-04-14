@@ -16,6 +16,11 @@ class MembershipData:
     labaccess_end: date
     has_membership: bool
     membership_end: date
+    # Differentiate the kind of membership the member has (either regular paid or special)
+    has_labaccess_membership: bool
+    labaccess_membership_end: date
+    has_special_membership: bool
+    special_membership_end: date
     
     def as_json(self):
         return dict(
@@ -23,6 +28,10 @@ class MembershipData:
             labaccess_end=date_to_str(self.labaccess_end),
             has_membership=self.has_membership,
             membership_end=date_to_str(self.membership_end),
+            has_labaccess_membership=self.has_labaccess_membership,
+            labaccess_membership_end=date_to_str(self.labaccess_membership_end),
+            has_special_membership=self.has_special_membership,
+            special_membership_end=date_to_str(self.special_membership_end)
         )
 
 
@@ -34,6 +43,28 @@ def get_membership_summary(entity_id):
             .query(Span)
             .filter(Span.member_id == entity_id,
                     Span.type.in_([Span.LABACCESS, Span.SPECIAL_LABACESS]),
+                    Span.startdate <= today,
+                    Span.enddate >= today,
+                    Span.deleted_at.is_(None))
+            .count()
+    )
+    
+    has_labaccess_membership = bool(
+        db_session
+            .query(Span)
+            .filter(Span.member_id == entity_id,
+                    Span.type.in_([Span.LABACCESS]),
+                    Span.startdate <= today,
+                    Span.enddate >= today,
+                    Span.deleted_at.is_(None))
+            .count()
+    )
+    
+    has_special_membership = bool(
+        db_session
+            .query(Span)
+            .filter(Span.member_id == entity_id,
+                    Span.type.in_([Span.SPECIAL_LABACESS]),
                     Span.startdate <= today,
                     Span.enddate >= today,
                     Span.deleted_at.is_(None))
@@ -62,12 +93,28 @@ def get_membership_summary(entity_id):
         Span.type.in_([Span.MEMBERSHIP]),
         Span.deleted_at.is_(None)
     ).first()
+
+    labaccess_membership_end, = db_session.query(func.max(Span.enddate)).filter(
+        Span.member_id == entity_id,
+        Span.type.in_([Span.LABACCESS]),
+        Span.deleted_at.is_(None)
+    ).first()
+
+    special_membership_end, = db_session.query(func.max(Span.enddate)).filter(
+        Span.member_id == entity_id,
+        Span.type.in_([Span.SPECIAL_LABACESS]),
+        Span.deleted_at.is_(None)
+    ).first()
     
     return MembershipData(
         has_labaccess=has_labaccess,
         labaccess_end=labaccess_end,
         has_membership=has_membership,
         membership_end=membership_end,
+        has_labaccess_membership=has_labaccess_membership,
+        labaccess_membership_end=labaccess_membership_end,
+        has_special_membership=has_special_membership,
+        special_membership_end=special_membership_end
     )
 
 
