@@ -24,15 +24,6 @@ test: .env test-clean
 dev-test:
 	(cd api/src && python3 -m pytest --workers auto -ra)
 
-init-npm:
-	cd admin && npm install 
-	cd public && npm install 
-
-init-pip:
-	python3 -m pip install --upgrade -r requirements.txt
-
-init: init-pip init-npm
-
 insert-devel-data: .env
 	docker-compose run backend bash -c "cd /work/src/scrape && python3 tictail2db.py"
 
