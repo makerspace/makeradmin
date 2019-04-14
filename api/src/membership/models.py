@@ -42,6 +42,8 @@ class Member(Base):
 
     boxes = relationship('Box')
 
+    spans = relationship('Span')
+
     def __repr__(self):
         return f'Member(member_id={self.member_id}, member_number={self.member_number}, email={self.email})'
 
@@ -136,7 +138,8 @@ class Span(Base):
     deleted_at = Column(DateTime)
     deletion_reason = Column(String(255))
     
-    member = relationship(Member, backref="spans")
+    member = relationship(Member)
+    
     def __repr__(self):
         return f'Span(span_id={self.span_id}, type={self.type}, enddate={self.enddate})'
 

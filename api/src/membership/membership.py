@@ -26,15 +26,6 @@ class MembershipData:
         )
 
 
-def get_labacess_end_date(member):
-    return (
-        db_session
-        .query(func.max(Span.enddate))
-        .filter(Span.member_id == member.member_id, Span.type.in_([Span.LABACCESS, Span.SPECIAL_LABACESS]))
-        .scalar()
-    )
-
-
 def get_membership_summary(entity_id):
     today = date.today()
     
