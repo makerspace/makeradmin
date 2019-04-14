@@ -64,7 +64,7 @@ def get_keys(tagid):
 
 
 @service.route("/box-terminator/session-list", method=GET, permission=MEMBER_EDIT)
-def box_terminator_nag(member_number=Arg(int)):
+def box_terminator_session_list(member_number=Arg(int)):
     pass
 
 
