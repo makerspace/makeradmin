@@ -21,6 +21,15 @@ test: .env test-clean
 	$(TEST_COMPOSE) build
 	$(TEST_COMPOSE) up --abort-on-container-exit --exit-code-from test
 
+clean-nuke:
+	echo "Removing all databases"
+	docker-compose down
+	docker volume rm -f makeradmin_dbdata
+	docker volume rm -f makeradmin_logs
+	docker volume rm -f makeradmin_node_modules
+	docker volume rm -f test_dbdata
+	docker volume rm -f test_logs
+
 dev-test:
 	(cd api/src && python3 -m pytest --workers auto -ra)
 
