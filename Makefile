@@ -42,9 +42,6 @@ init-pip:
 
 init: init-pip init-npm
 
-insert-devel-data: .env
-	docker-compose run backend bash -c "cd /work/src/scrape && python3 tictail2db.py"
-
 .env:
 	python3 create_env.py
 
