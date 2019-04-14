@@ -27,14 +27,10 @@ function login_via_single_use_link(tag: string, redirect: string) {
         }
     })
     .catch(json => {
-            if (json.data != undefined && json.data.status === "ambiguous") {
-                showError("<h2>Inloggningen misslyckades</h2>Det finns flera medlemmar som matchar '" + tag + "'. Välj något som är mer unikt, t.ex email eller medlemsnummer.");
-            }
-            else if (json.data != undefined && json.data.status === "not found") {
+            if (json.status === "not found") {
                 showError("<h2>Inloggningen misslyckades</h2>Hittar inte email eller medlemsnummer.");
-            }
-            else {
-                showError("<h2>Inloggningen misslyckades</h2>Tog emot ett oväntat svar från servern:<br><br>" + json.status);
+            } else {
+                showError("<h2>Inloggningen misslyckades</h2>Tog emot ett oväntat svar från servern:<br><br>" + json.message);
             }
         })
         .catch(() => {

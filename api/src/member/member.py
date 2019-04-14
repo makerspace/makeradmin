@@ -22,7 +22,7 @@ def send_access_token_email(redirect, user_tag, ip, browser):
             member_id, = db_session.query(Member.member_id).filter_by(email=user_tag).one()
             
     except NoResultFound:
-        raise NotFound(f"Could not find user by '{user_tag}'.", fields='user_tag')
+        raise NotFound(f"Could not find any user with the name or email '{user_tag}'.", fields='user_tag', status="not found")
 
     access_token = create_access_token(ip, browser, member_id)['access_token']
 
