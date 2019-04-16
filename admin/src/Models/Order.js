@@ -18,6 +18,7 @@ Order.model = {
         status: "",
         // extend="member"
         member_number: 0,
-        member_name: "",
+        firstname: "",
+        lastname: "",
     },
 };

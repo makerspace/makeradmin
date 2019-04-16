@@ -37,20 +37,24 @@ def refresh_service_access_token(session_factory):
         session.commit()
 
 
+def init_db():
+    engine = create_mysql_engine(**get_mysql_config())
+    session_factory = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+    
+    ensure_migrations_table(engine, session_factory)
+    
+    for path, service in services:
+        service.migrate(session_factory)
+        
+    clear_permission_cache(session_factory)
+    
+    refresh_service_access_token(session_factory)
+
+
 if __name__ == '__main__':
 
     with log_exception(status=1):
         parser = ArgumentParser(description="Migrate all components.", formatter_class=ArgumentDefaultsHelpFormatter)
         args = parser.parse_args()
         
-        engine = create_mysql_engine(**get_mysql_config())
-        session_factory = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-        
-        ensure_migrations_table(engine, session_factory)
-        
-        for path, service in services:
-            service.migrate(session_factory)
-        
-        clear_permission_cache(session_factory)
-        
-        refresh_service_access_token(session_factory)
+        init_db()

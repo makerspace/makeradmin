@@ -101,7 +101,6 @@ class Permission(Base):
 
 
 class Key(Base):
-
     __tablename__ = 'membership_keys'
 
     key_id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
@@ -118,14 +117,12 @@ class Key(Base):
         return f'Key(key_id={self.key_id}, tagid={self.tagid})'
 
 
-LABACCESS = 'labaccess'
-MEMBERSHIP = 'membership'
-SPECIAL_LABACESS = 'special_labaccess'
-
-
 class Span(Base):
-
     __tablename__ = 'membership_spans'
+
+    LABACCESS = 'labaccess'
+    MEMBERSHIP = 'membership'
+    SPECIAL_LABACESS = 'special_labaccess'
 
     span_id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
     member_id = Column(Integer, ForeignKey('membership_members.member_id'), nullable=False)
@@ -138,6 +135,5 @@ class Span(Base):
     deletion_reason = Column(String(255))
     
     member = relationship(Member, backref="spans")
-
     def __repr__(self):
         return f'Span(span_id={self.span_id}, type={self.type}, enddate={self.enddate})'

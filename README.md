@@ -18,11 +18,6 @@ Python 3.6 or higher is required.
 sudo apt-get install npm
 ```
 
-### Dependencies for Python and npm
-```bash
-make init
-```
-
 ## Initialize everything
 ```bash
 make firstrun
@@ -125,4 +120,13 @@ Javascript unit tests are run when the images is build but they can also be run 
 by ```make test-admin-js``` or ```npm --prefix admin run test```.
 
 
+### If everything goes wrong
 
+If you for some reason want to remove the existing database and start from scratch you can run the command
+```
+make clean-nuke
+```
+
+*Warning: this will completely wipe out all your makeradmin data!*
+
+After this you can run `make firstrun` again to set things up again.

@@ -11,12 +11,7 @@ services:
       - logs:/work/logs
     environment:
       TEST: "true"
-
-  backend:
-    environment:
-      HOST_FRONTEND: 'http://admin'
-      HOST_BACKEND: 'http://api'
-      HOST_PUBLIC: 'http://public'
+      CORS_ALLOWED_ORIGINS: 'http://admin,http://api,http://public'
 
   public:
     environment:

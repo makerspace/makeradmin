@@ -2,7 +2,7 @@ import os
 import sys
 from logging import basicConfig, INFO, getLogger
 
-from flask import Flask, Blueprint, redirect, url_for
+from flask import Flask, Blueprint, redirect, url_for, send_from_directory
 from flask import render_template
 
 
@@ -87,9 +87,16 @@ def login(token):
     return render_template("login.html", token=token)
 
 
-app = Flask(__name__, static_url_path="/static", static_folder="../static")
+static_hash = os.environ["STATIC_PREFIX_HASH"]
+app = Flask(__name__, static_url_path=f"/static{static_hash}", static_folder="../static")
+sys.stderr.write("STATIC URL PATH" + app.static_url_path + "\n")
 app.register_blueprint(shop)
 app.register_blueprint(member)
+
+
+@app.route("/static/product_images/<path:path>")
+def product_image(path):
+    return send_from_directory("../static/product_images", path)
 
 
 @app.route("/")
@@ -105,7 +112,7 @@ if not api_base_url.startswith("http"):
 @app.context_processor
 def context():
     return dict(
-        STATIC="/static",
+        STATIC=app.static_url_path,
         meta=dict(
             api_base_url=api_base_url,
             stripe_public_key=os.environ["STRIPE_PUBLIC_KEY"],

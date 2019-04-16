@@ -19,7 +19,7 @@ RUN npm run eslint
 
 RUN npm run test
 
-RUN /work/node_modules/.bin/webpack --config /work/webpack.config.js
+RUN npm run build
 
 FROM nginx:alpine
 

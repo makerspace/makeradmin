@@ -28,6 +28,8 @@ def send_messages(db_session, key, domain, sender, to_override, limit):
             msg += f" (overriding to {to_override})"
             to = to_override
 
+        msg += f": {recipient.title}"
+
         logger.info(msg)
 
         response = requests.post(f"https://api.mailgun.net/v3/{domain}/messages", auth=('api', key),

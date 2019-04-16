@@ -4,6 +4,9 @@ from pprint import pprint
 
 import requests
 from dotenv import dotenv_values
+import random
+from create_user import create_user
+from datetime import datetime, timedelta
 
 "labaccess"
 "special_labaccess"
@@ -18,15 +21,22 @@ headers = {
 }
 
 
-url = env.get('HOST_BACKEND')
+api_url = env.get('HOST_BACKEND')
+
+def post(url, payload):
+    print(payload)
+    return requests.post(f"{api_url}/{url}", headers=headers, json=payload)
+
+def get(url):
+    return requests.get(f"{api_url}/{url}", headers=headers)
 
 
 def delete_all_spans(member_id):
-    response = requests.get(f"{url}/membership/span", headers=headers)
-    print("list", response.status_code)
+    response = requests.get(f"{api_url}/membership/member/{member_id}/spans", headers=headers)
+    assert response.ok, response.text
     spans = response.json()['data']
     for span in spans:
-        response = requests.delete(f"{url}/membership/span/{span['span_id']}", headers=headers)
+        response = requests.delete(f"{api_url}/membership/span/{span['span_id']}", headers=headers)
         print("delete", response.status_code)
 
 
@@ -39,24 +49,39 @@ def create_span(member_id, startdate, enddate, span_type, creation_reason=None):
         creation_reason=creation_reason,
     )
     
-    response = requests.post(f"{url}/membership/span", json=payload, headers=headers)
-    print("create", response.status_code)
+    response = post("membership/span", payload=payload)
+    assert response.ok, response.text
     pprint(json.loads(response.content.decode()))
 
 
 member_id = 1
 
-delete_all_spans(member_id)
+# delete_all_spans(member_id)
 
-create_span(member_id, "2016-05-20", "2016-06-21", "labaccess", "1")
-create_span(member_id, "2016-06-21", "2016-07-21", "labaccess", "1")
+# create_span(member_id, "2016-05-20", "2016-06-21", "labaccess", str(random.randrange(0, 100000)))
+# create_span(member_id, "2016-06-21", "2016-07-21", "labaccess", str(random.randrange(0, 100000)))
 
-create_span(member_id, "2018-05-10", "2018-07-10", "labaccess", "1")
-create_span(member_id, "2018-07-11", "2018-11-11", "labaccess", "1")
+# create_span(member_id, "2018-05-10", "2018-07-10", "labaccess", str(random.randrange(0, 100000)))
+# create_span(member_id, "2018-07-11", "2018-11-11", "labaccess", str(random.randrange(0, 100000)))
 
-create_span(member_id, "2018-05-20", "2019-05-20", "membership", "2")
+# create_span(member_id, "2018-05-20", "2019-05-20", "membership", str(random.randrange(0, 100000)))
 
-create_span(member_id, "2018-05-10", "2019-05-10", "special_labaccess", "2")
+# create_span(member_id, "2018-05-10", "2019-05-10", "special_labaccess", str(random.randrange(0, 100000)))
+
+# create_user("test user", "blah", f"test_user_{member_id}", "user", None)
+
+for member_id in range(2, 200):
+    try:
+        member = get(f"membership/member/{member_id}").json()["data"]
+    except:
+        member = create_user("test user", "blah", f"test_user_{random.randrange(0, 100000)}", "user", None)
+
+    delete_all_spans(member["member_id"])
+    startTime = datetime.now() + timedelta(days=random.randrange(-300, 0))
+    endTime = datetime.now() + timedelta(days=random.randrange(-300, 100))
+    startTime = startTime.strftime("%Y-%m-%d")
+    endTime = endTime.strftime("%Y-%m-%d")
+    create_span(member["member_id"], startTime, endTime, "membership", str(random.randrange(0, 100000)))
 
 """
 insert into membership_group_permissions (id, group_id,

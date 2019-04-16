@@ -3,7 +3,10 @@ from time import time
 
 import stripe
 
-from test_aid.obj import ADD_MEMBERSHIP_DAYS
+from membership.models import Span
+from service.api_definition import NON_MATCHING_SUMS
+from service.db import db_session
+from shop.models import ProductAction
 from test_aid.systest_base import ShopTestMixin, ApiTest, VALID_NON_3DS_CARD_NO, EXPIRED_3DS_CARD_NO
 
 
@@ -13,13 +16,11 @@ class Test(ShopTestMixin, ApiTest):
         dict(
             smallest_multiple=1,
             price=300.0,
-            action=dict(action_id=ADD_MEMBERSHIP_DAYS, value=365),
+            action=dict(action_type=ProductAction.ADD_MEMBERSHIP_DAYS, value=365),
         )
     ]
 
     def test_registring_new_member_works_and_returns_token(self):
-        start_timestamp = int(time())
-
         source = stripe.Source.create(type="card", token=stripe.Token.create(card=self.card(VALID_NON_3DS_CARD_NO)).id)
 
         member = self.obj.create_member()
@@ -32,10 +33,9 @@ class Test(ShopTestMixin, ApiTest):
                         "count": 1,
                     }
                 ],
-                "expectedSum": "300.00",
-                "duplicatePurchaseRand": randint(1e9, 9e9),
-                "stripeSource": source.id,
-                "stripeThreeDSecure": source["card"]["three_d_secure"]
+                "expected_sum": 300.00,
+                "stripe_card_source_id": source.id,
+                "stripe_card_3d_secure": source["card"]["three_d_secure"]
             },
             "member": member
         }
@@ -55,15 +55,19 @@ class Test(ShopTestMixin, ApiTest):
         before_activation = self.get(f"/membership/member/{member_id}").expect(code=200, data=member).data
         self.assertIsNone(before_activation['deleted_at'])
         
-        self.put("/webshop/process_stripe_events", {"source_id": source.id, "start": start_timestamp}).expect(code=200)
+        self.trigger_stripe_source_event(source.id, expected_event_count=1)
         
         after_activation = self.get(f"/membership/member/{member_id}").expect(code=200, data=member).data
         self.assertIsNone(after_activation['deleted_at'])
+        
+        span = db_session.query(Span).filter_by(member_id=member_id, type=Span.MEMBERSHIP).one()
+        self.assertEqual(self.date(365), span.enddate)
 
     def test_registring_with_existing_member_email_does_not_work_and_does_not_return_token(self):
         source = stripe.Source.create(type="card", token=stripe.Token.create(card=self.card(VALID_NON_3DS_CARD_NO)).id)
-
-        member = self.api.create_member()
+ 
+        member = self.obj.create_member()
+        self.api.create_member(**member)
 
         register = {
             "purchase": {
@@ -73,17 +77,16 @@ class Test(ShopTestMixin, ApiTest):
                         "count": 1,
                     }
                 ],
-                "expectedSum": "300.00",
-                "duplicatePurchaseRand": randint(1e9, 9e9),
-                "stripeSource": source.id,
-                "stripeThreeDSecure": source["card"]["three_d_secure"]
+                "expected_sum": 300.00,
+                "stripe_card_source_id": source.id,
+                "stripe_card_3d_secure": source["card"]["three_d_secure"]
             },
             "member": member
         }
 
         self\
             .post(f"/webshop/register", register, headers={})\
-            .expect(data__token=None, code=400, status="RegisterEmailAlreadyExists")\
+            .expect(data__token=None, code=422, what="not_unique", fields="email")
 
     def test_registring_with_failed_payment_does_not_work_and_does_not_return_token(self):
         source = stripe.Source.create(type="card", token=stripe.Token.create(card=self.card(EXPIRED_3DS_CARD_NO)).id)
@@ -98,14 +101,13 @@ class Test(ShopTestMixin, ApiTest):
                         "count": 1,
                     }
                 ],
-                "expectedSum": "121212121.00",
-                "duplicatePurchaseRand": randint(1e9, 9e9),
-                "stripeSource": source.id,
-                "stripeThreeDSecure": source["card"]["three_d_secure"]
+                "expected_sum": 121212121.00,
+                "stripe_card_source_id": source.id,
+                "stripe_card_3d_secure": source["card"]["three_d_secure"]
             },
             "member": member
         }
 
         self\
-            .post(f"/webshop/register", register, headers={})\
-            .expect(data__token=None, code=400, status="NonMatchingSums")\
+            .post(f"/webshop/register", register, headers={}).print()\
+            .expect(data__token=None, code=400, what=NON_MATCHING_SUMS)

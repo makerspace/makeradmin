@@ -26,13 +26,16 @@ default = Dict(name="default", src=dict(
     MYSQL_PORT=3306,
     MYSQL_USER='makeradmin',
     MYSQL_DB='makeradmin',
-    SHOP_URL='http://backend',
-    STATISTICS_URL='http://backend',
     MAILGUN_KEY='',
     MAILGUN_DOMAIN='',
     MAILGUN_FROM='',
     MAILGUN_TO_OVERRIDE='',
     HOST_PUBLIC='',
+    STRIPE_PRIVATE_KEY=None,
+    STRIPE_SIGNING_SECRET=None,
+    APP_DEBUG=None,
+    CORS_ALLOWED_ORIGINS='https://medlem.makerspace.se,https://stockholm.makeradmin.se,https://medlem.dev.makerspace.se'
+                         ',http://localhost:8009,http://localhost:8011,http://localhost:8080',
 ))
 env = Env()
 dot_env = DotEnvFile()
@@ -57,3 +60,7 @@ def get_public_url(path):
     if not host.startswith("http://") and not host.startswith("https://"):
         host = "http://" + host
     return f"{host}{path}"
+
+
+def debug_mode():
+    return config.get('APP_DEBUG') == 'true'

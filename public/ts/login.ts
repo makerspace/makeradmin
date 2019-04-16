@@ -16,7 +16,7 @@ function login_via_single_use_link(tag: string, redirect: string) {
     if (redirect) {
         data['redirect'] = redirect;
     }
-	
+
     common.ajax("POST", apiBasePath + "/member/send_access_token", data)
     .then(json => {
     	// Yay, success, refresh page
@@ -27,14 +27,10 @@ function login_via_single_use_link(tag: string, redirect: string) {
         }
     })
     .catch(json => {
-            if (json.data != undefined && json.data.status === "ambiguous") {
-                showError("<h2>Inloggningen misslyckades</h2>Det finns flera medlemmar som matchar '" + tag + "'. Välj något som är mer unikt, t.ex email eller medlemsnummer.");
-            }
-            else if (json.data != undefined && json.data.status === "not found") {
+            if (json.status === "not found") {
                 showError("<h2>Inloggningen misslyckades</h2>Hittar inte email eller medlemsnummer.");
-            }
-            else {
-                showError("<h2>Inloggningen misslyckades</h2>Tog emot ett oväntat svar från servern:<br><br>" + json.status);
+            } else {
+                showError("<h2>Inloggningen misslyckades</h2>Tog emot ett oväntat svar från servern:<br><br>" + json.message);
             }
         })
         .catch(() => {
@@ -52,13 +48,14 @@ export function render_login(root: HTMLElement, heading: string, redirect: strin
                         <div class="uk-form-row" style="margin: 16px 0;">
                             <input autoFocus ref="tag" class="uk-form-large uk-width-1-1" type="text" placeholder="Email/Medlemsnummer"/>
                         </div>
-                        
+
                         <div class="uk-form-row" style="margin: 16px 0;">
                             <button class="uk-width-1-1 uk-button uk-button-primary uk-button-large"><span class="uk-icon-check"/>
                             	Gå vidare
                             </button>
                         </div>
                 </form>
+								<p style="text-align: center;"><a href="/shop/register">Bli medlem / Become a member</a></p>
             </div>`;
 	const form = <HTMLElement>root.getElementsByTagName("form")[0];
 	const tagInput = <HTMLInputElement>root.getElementsByTagName("input")[0];

@@ -67,7 +67,7 @@ common.documentLoaded().then(() => {
     function update() {
         content.innerHTML = '';
         common
-            .ajax("GET", window.apiBasePath + "/webshop/receipt/" + window.transactionId, {})
+            .ajax("GET", window.apiBasePath + "/webshop/member/current/receipt/" + window.transactionId, {})
             .then(json => {
                 const {cart, transaction, member} = json.data;
                 if (transaction.status === "failed") {

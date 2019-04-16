@@ -1,15 +1,15 @@
 from collections import namedtuple
 from datetime import datetime, date
+from decimal import Decimal
 from math import ceil
 from typing import Mapping
 
 from flask import request
-from sqlalchemy import inspect, Integer, String, DateTime, Text, desc, asc, or_, text, Date, Enum as DbEnum
+from sqlalchemy import inspect, Integer, String, DateTime, Text, desc, asc, or_, text, Date, Enum as DbEnum, Numeric
 
 from service.api_definition import BAD_VALUE, REQUIRED, Arg, symbol, Enum, natural0, natural1
 from service.db import db_session
 from service.error import NotFound, UnprocessableEntity
-from service.logging import logger
 
 ASC = 'asc'
 DESC = 'desc'
@@ -36,6 +36,7 @@ def to_model_wrap(value_converter):
 
 to_model_converters = {
     Integer: to_model_wrap(int),
+    Numeric: to_model_wrap(Decimal),
     String: to_model_wrap(str),
     Text: to_model_wrap(str),
     DateTime: to_model_wrap(datetime.fromisoformat),
@@ -50,6 +51,7 @@ def identity(value):
 
 to_obj_converters = {
     Integer: identity,
+    Numeric: str,
     String: identity,
     Text: identity,
     DateTime: lambda d: None if d is None else d.isoformat(),
@@ -178,6 +180,7 @@ class Entity:
             def to_obj(row):
                 obj = self.to_obj(row[0])
                 for value, column, converter in zip(row[1:], expand_field.columns, column_obj_converter):
+                    # TODO Map to "relation + _ + column.name"? Or maybe change to have sub object instead?
                     obj[column.name] = converter(value)
                 return obj
         else:
@@ -206,12 +209,12 @@ class Entity:
         return dict(
             total=count,
             page=page,
-            per_page=page_size,
+            page_size=page_size,
             last_page=ceil(count / page_size) if page_size else 1,
             data=[to_obj(entity) for entity in query]
         )
     
-    def _create_internal(self, data):
+    def _create_internal(self, data, commit=True):
         """ Internal create to make it easier for subclasses to manipulated data before create. """
         input_data = self.to_model(data)
         self.validate_all(input_data)
@@ -219,11 +222,17 @@ class Entity:
             raise UnprocessableEntity("Can not create using empty data.")
         entity = self.model(**input_data)
         db_session.add(entity)
-        db_session.flush()  # Flush to get id of created entity.
+        if commit:
+            db_session.commit()
+        else:
+            db_session.flush()  # Flush to get id of created entity.
+        
         return entity
     
-    def create(self):
-        return self.to_obj(self._create_internal(request.json))
+    def create(self, data=None, commit=True):
+        if data is None:
+            data = request.json or {}
+        return self.to_obj(self._create_internal(data, commit=commit))
     
     def read(self, entity_id):
         entity = db_session.query(self.model).get(entity_id)
@@ -232,26 +241,38 @@ class Entity:
         obj = self.to_obj(entity)
         return obj
 
-    def _update_internal(self, entity_id, data):
+    def _update_internal(self, entity_id, data, commit=True):
         """ Internal update to make it easier for subclasses to manipulated data before update. """
         input_data = self.to_model(data)
         self.validate_present(input_data)
         if not input_data:
             raise UnprocessableEntity("Can not update using empty data.")
-        db_session.query(self.model).filter(self.pk == entity_id).update(input_data)
-        return self.read(entity_id)
-    
-    def update(self, entity_id):
-        return self._update_internal(entity_id, request.json)
-    
-    def delete(self, entity_id):
-        count = db_session.query(self.model).filter(self.pk == entity_id).update(dict(deleted_at=datetime.utcnow()))
-        
-        assert count <= 1, "More than one entity matching primary key, this is a bug."
-        
-        if not count:
+        entity = db_session.query(self.model).get(entity_id)
+        if not entity:
             raise NotFound("Could not find any entity with specified parameters.")
 
+        for k, v in input_data.items():
+            setattr(entity, k, v)
+
+        if commit:
+            db_session.commit()
+        
+        return self.to_obj(entity)
+    
+    def update(self, entity_id, commit=True):
+        return self._update_internal(entity_id, request.json, commit=commit)
+    
+    def delete(self, entity_id, commit=True):
+        entity = db_session.query(self.model).get(entity_id)
+        if not entity:
+            raise NotFound("Could not find any entity with specified parameters.")
+
+        if not entity.deleted_at:
+            entity.deleted_at = datetime.utcnow()
+            
+        if commit:
+            db_session.commit()
+ 
     def _get_entity_id_list(self, name):
         ids = request.json.get(name)
         try:
@@ -288,6 +309,27 @@ class OrmSingeRelation:
 
     def filter(self, query, related_entity_id):
         return query.filter_by(**{self.related_entity_id_column: related_entity_id})
+
+
+class OrmSingleSingleRelation:
+    
+    def __init__(self, name=None, between_model=None, related_entity_id_column=None):
+        """
+        Relation that is implemented through a foreign key and then another foreigh key in the orm.
+        """
+        
+        self.name = name
+        self.between_model = between_model
+        self.related_entity_id_column = related_entity_id_column
+        
+    def add(self, *args):
+        raise NotFound("Not supported.", log="Add not supported by this class.")
+
+    def remove(self, *args):
+        raise NotFound("Not supported.", log="Remove not supported by this class.")
+
+    def filter(self, query, related_entity_id):
+        return query.join(self.between_model).filter_by(**{self.related_entity_id_column: related_entity_id})
         
 
 class OrmManyRelation:

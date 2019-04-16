@@ -9,12 +9,12 @@ export default class OrderRow extends Base {
 }
 
 OrderRow.model = {
-    id: "content_id",
+    id: "id",
     attributes: {
         amount: null,
-        content_id: 0,
         count: null,
         product_id: null,
-        product_name: "",
+        transaction_id: null,
+        name: "",
     },
 };
