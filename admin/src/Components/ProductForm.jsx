@@ -101,7 +101,7 @@ class ProductForm extends React.Component {
                                              options={availableActionTypes.map(a => ({value: a, label: a}))}
                                              onChange={o => this.setState({selectedActionType: o.value})}
                                 />
-                                <button type="button" className="uk-button uk-button-success uk-float-right" onClick={() => product.addAction(new ProductAction({action: selectedActionType}))}><i className="uk-icon-plus"/> Lägg till åtgärd</button>
+                                <button type="button" className="uk-button uk-button-success uk-float-right" onClick={() => product.addAction(new ProductAction({action_type: selectedActionType}))}><i className="uk-icon-plus"/> Lägg till åtgärd</button>
                             </div>
                         }
                     </fieldset>

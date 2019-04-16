@@ -11,7 +11,7 @@ export default class OrderAction extends Base {
 OrderAction.model = {
     id: "id",
     attributes: {
-        action_id: 0,
+        action_type: '',
         completed_at: null,
         content_id: 0,
         status: "",
