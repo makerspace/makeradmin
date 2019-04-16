@@ -1,5 +1,4 @@
 import React from 'react';
-import {Link} from "react-router";
 import Collection from "../Models/Collection";
 import CollectionTable from "../Components/CollectionTable";
 import Category from "../Models/ProductCategory";
@@ -73,8 +72,8 @@ class CategoryList extends React.Component {
                         ]}
                         rowComponent={({item, deleteItem}) =>
                             <tr>
-                                <td><Link to={"/sales/category/" + item.id}>{item.name}</Link></td>
-                                <td><Link to={"/sales/category/" + item.id}>{item.product_count}</Link></td>
+                                <td>{item.name}</td>
+                                <td>{item.product_count}</td>
                                 <td><a onClick={() => deleteItem(item)} className="removebutton"><i className="uk-icon-trash"/></a></td>
                             </tr>
                         }
