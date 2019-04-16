@@ -12,109 +12,100 @@ from service.util import date_to_str
 
 @dataclass(frozen=True)
 class MembershipData:
-    has_labaccess: bool
-    labaccess_end: date
-    has_membership: bool
     membership_end: date
-    # Differentiate the kind of membership the member has (either regular paid or special)
-    has_labaccess_membership: bool
-    labaccess_membership_end: date
-    has_special_membership: bool
-    special_membership_end: date
+    membership_active: bool
+    labaccess_end: date
+    labaccess_active: bool
+    special_labaccess_end: date
+    special_labaccess_active: bool
+    
+    # Should this member have access to the lab.
+    effective_labaccess_end: date
+    effective_labaccess_active: bool
     
     def as_json(self):
         return dict(
-            has_labaccess=self.has_labaccess,
-            labaccess_end=date_to_str(self.labaccess_end),
-            has_membership=self.has_membership,
             membership_end=date_to_str(self.membership_end),
-            has_labaccess_membership=self.has_labaccess_membership,
-            labaccess_membership_end=date_to_str(self.labaccess_membership_end),
-            has_special_membership=self.has_special_membership,
-            special_membership_end=date_to_str(self.special_membership_end)
+            membership_active=self.membership_active,
+            labaccess_end=date_to_str(self.labaccess_end),
+            labaccess_active=self.labaccess_active,
+            special_labaccess_end=date_to_str(self.special_labaccess_end),
+            special_labaccess_active=self.special_labaccess_active,
+            effective_labaccess_end=date_to_str(self.effective_labaccess_end),
+            effective_labaccess_active=self.effective_labaccess_active,
         )
+
+
+def max_or_none(*args):
+    items = [i for i in args if i is not None]
+    if items:
+        return max(items)
+    return None
 
 
 def get_membership_summary(entity_id):
     today = date.today()
     
-    has_labaccess = bool(
+    labaccess_active = bool(
         db_session
             .query(Span)
             .filter(Span.member_id == entity_id,
-                    Span.type.in_([Span.LABACCESS, Span.SPECIAL_LABACESS]),
+                    Span.type == Span.LABACCESS,
+                    Span.startdate <= today,
+                    Span.enddate >= today,
+                    Span.deleted_at.is_(None))
+            .count()
+    )
+
+    labaccess_end = db_session.query(func.max(Span.enddate)).filter(
+        Span.member_id == entity_id,
+        Span.type == Span.LABACCESS,
+        Span.deleted_at.is_(None)
+    ).scalar()
+    
+    membership_active = bool(
+        db_session
+            .query(Span)
+            .filter(Span.member_id == entity_id,
+                    Span.type == Span.MEMBERSHIP,
+                    Span.startdate <= today,
+                    Span.enddate >= today,
+                    Span.deleted_at.is_(None))
+            .count()
+    )
+
+    membership_end = db_session.query(func.max(Span.enddate)).filter(
+        Span.member_id == entity_id,
+        Span.type == Span.MEMBERSHIP,
+        Span.deleted_at.is_(None)
+    ).scalar()
+    
+    special_labaccess_active = bool(
+        db_session
+            .query(Span)
+            .filter(Span.member_id == entity_id,
+                    Span.type == Span.SPECIAL_LABACESS,
                     Span.startdate <= today,
                     Span.enddate >= today,
                     Span.deleted_at.is_(None))
             .count()
     )
     
-    has_labaccess_membership = bool(
-        db_session
-            .query(Span)
-            .filter(Span.member_id == entity_id,
-                    Span.type.in_([Span.LABACCESS]),
-                    Span.startdate <= today,
-                    Span.enddate >= today,
-                    Span.deleted_at.is_(None))
-            .count()
-    )
-    
-    has_special_membership = bool(
-        db_session
-            .query(Span)
-            .filter(Span.member_id == entity_id,
-                    Span.type.in_([Span.SPECIAL_LABACESS]),
-                    Span.startdate <= today,
-                    Span.enddate >= today,
-                    Span.deleted_at.is_(None))
-            .count()
-    )
-    
-    has_membership = bool(
-        db_session
-            .query(Span)
-            .filter(Span.member_id == entity_id,
-                    Span.type.in_([Span.MEMBERSHIP]),
-                    Span.startdate <= today,
-                    Span.enddate >= today,
-                    Span.deleted_at.is_(None))
-            .count()
-    )
-
-    labaccess_end, = db_session.query(func.max(Span.enddate)).filter(
+    special_labaccess_end = db_session.query(func.max(Span.enddate)).filter(
         Span.member_id == entity_id,
-        Span.type.in_([Span.LABACCESS, Span.SPECIAL_LABACESS]),
+        Span.type == Span.SPECIAL_LABACESS,
         Span.deleted_at.is_(None)
-    ).first()
-
-    membership_end, = db_session.query(func.max(Span.enddate)).filter(
-        Span.member_id == entity_id,
-        Span.type.in_([Span.MEMBERSHIP]),
-        Span.deleted_at.is_(None)
-    ).first()
-
-    labaccess_membership_end, = db_session.query(func.max(Span.enddate)).filter(
-        Span.member_id == entity_id,
-        Span.type.in_([Span.LABACCESS]),
-        Span.deleted_at.is_(None)
-    ).first()
-
-    special_membership_end, = db_session.query(func.max(Span.enddate)).filter(
-        Span.member_id == entity_id,
-        Span.type.in_([Span.SPECIAL_LABACESS]),
-        Span.deleted_at.is_(None)
-    ).first()
+    ).scalar()
     
     return MembershipData(
-        has_labaccess=has_labaccess,
         labaccess_end=labaccess_end,
-        has_membership=has_membership,
+        labaccess_active=labaccess_active,
+        special_labaccess_end=special_labaccess_end,
+        special_labaccess_active=special_labaccess_active,
         membership_end=membership_end,
-        has_labaccess_membership=has_labaccess_membership,
-        labaccess_membership_end=labaccess_membership_end,
-        has_special_membership=has_special_membership,
-        special_membership_end=special_membership_end
+        membership_active=membership_active,
+        effective_labaccess_end=max_or_none(labaccess_end, special_labaccess_end),
+        effective_labaccess_active=labaccess_active or special_labaccess_active
     )
 
 

@@ -60,19 +60,6 @@ common.documentLoaded().then(() => {
     }
 
     function render_key_view(membership: any, pending_actions_json: any) {
-        const info_membership = {
-            active:  membership.has_membership,
-            enddate: membership.membership_end,
-        };
-        const info_labaccess_membership = {
-            active:  membership.has_labaccess_membership,
-            enddate: membership.labaccess_membership_end,
-        };
-        const info_special_membership = {
-            active:  membership.has_special_membership,
-            enddate: membership.special_membership_end,
-        };
-
         let pendingLabaccessDays = 0;
         for (let pending of pending_actions_json.data) {
             if (pending.action.action === "add_labaccess_days") {
@@ -80,7 +67,7 @@ common.documentLoaded().then(() => {
             }
         }
 
-        const labaccessMembershipStrings = [
+        const labaccessStrings = [
             (enddate: string, days: number) => `Din <strong>labaccess</strong> är ogiltig sedan ${days} dagar (${enddate}). <br>Your <strong>lab membership</strong> expired ${days} day(s) ago (${enddate}).`,
             () => `Din <strong>labaccess</strong> gick ut igår. <br>Your <strong>lab membership</strong> expired yesterday.`,
             (hours: number) => `Din <strong>labaccess</strong> är giltig i mindre än ${hours} timmar till. <br>Your <strong>lab membership</strong> is valid for ${hours} more hours.`,
@@ -98,7 +85,7 @@ common.documentLoaded().then(() => {
             () => `Ditt <strong>föreningsmedlemsskap</strong> är inaktivt. <br>Your <strong>membership</strong> is inactive.`,
         ];
 
-        const specialAccessStrings = [
+        const specialLabaccessStrings = [
             (enddate: string, days: number) => ``,
             () => ``,
             (hours: number) => ``,
@@ -118,9 +105,9 @@ common.documentLoaded().then(() => {
         return `
             <fieldset class="data-uk-margin">
                 <legend><i uk-icon="lock"></i> Medlemsskap</legend>
-                ${renderInfo(info_membership, membershipStrings)}
-                ${renderInfo(info_labaccess_membership, labaccessMembershipStrings)}
-                ${info_special_membership.active?renderInfo(info_special_membership, specialAccessStrings):``}
+                ${renderInfo({active: membership.membership_active, enddate: membership.membership_end}, membershipStrings)}
+                ${renderInfo({active: membership.labaccess_active, enddate: membership.labaccess_end}, labaccessStrings)}
+                ${membership.special_labaccess_active ? renderInfo({active: membership.special_labaccess_active, enddate: membership.special_labaccess_end}, specialLabaccessStrings) : ``}
                 ${pendingAccess}
             </fieldset>`;
     }
