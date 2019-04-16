@@ -1,0 +1,89 @@
+import React from 'react';
+import {Link} from "react-router";
+import Collection from "../Models/Collection";
+import CollectionTable from "../Components/CollectionTable";
+import Category from "../Models/ProductCategory";
+import TextInput from "../Components/TextInput";
+
+
+class CategoryList extends React.Component {
+
+    constructor(props) {
+        super(props);
+        this.collection = new Collection({type: Category});
+        this.state = {saveEnabled: false};
+        this.category = new Category();
+    }
+
+    componentDidMount() {
+        const category = this.category;
+        this.unsubscribe = category.subscribe(() => this.setState({saveEnabled: category.canSave()}));
+    }
+
+    componentWillUnmount() {
+        this.unsubscribe();
+    }
+
+    createCategory() {
+        this.category
+            .save()
+            .then(() => {
+                      this.category.reset();
+                      this.collection.fetch();
+                  });
+    }
+
+    render() {
+        const {saveEnabled} = this.state;
+
+        return (
+            <div>
+                <div className="uk-margin-top">
+                    <h2>Kategorier</h2>
+                    <p>På denna sida ser du en lista på samtliga produktkategorier som finns.</p>
+                </div>
+
+                <div className="uk-margin-top uk-form">
+                    <div className="meep">
+                        <form className="uk-form" onSubmit={(e) => {e.preventDefault(); this.createCategory(); return false;}}>
+                            <div className="uk-grid">
+                                <div className="uk-width-1-1">
+                                    <TextInput model={this.category} tabIndex="1" name="name" title="Namn" placeholder="Namn för ny kategori" />
+
+                                    <div className="uk-form-row uk-margin-top">
+                                        <div className="uk-form-controls">
+                                            <button className="uk-button uk-button-success uk-float-right" disabled={!saveEnabled}><i className="uk-icon-save"/> Skapa kategori</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div className="uk-margin-top">
+                    <CollectionTable
+                        className="uk-margin-top"
+                        collection={this.collection}
+                        emptyMessage="Inga produktkategorier"
+                        columns={[
+                            {title: "Namn"},
+                            {title: "Antal produkter"},
+                            {title: ""},
+                        ]}
+                        rowComponent={({item, deleteItem}) =>
+                            <tr>
+                                <td><Link to={"/sales/category/" + item.id}>{item.name}</Link></td>
+                                <td><Link to={"/sales/category/" + item.id}>{item.product_count}</Link></td>
+                                <td><a onClick={() => deleteItem(item)} className="removebutton"><i className="uk-icon-trash"/></a></td>
+                            </tr>
+                        }
+                    />
+                </div>
+            </div>
+        );
+    }
+}
+
+
+export default CategoryList;
