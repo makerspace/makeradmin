@@ -32,7 +32,7 @@ def get_or_create(model, defaults=None, **kwargs):
     entity = db_session.query(model).filter_by(**kwargs).first()
     if entity:
         return entity
-    
+
     entity = model(**{**kwargs, **defaults})
     db_session.add(entity)
     db_session.flush()
@@ -46,27 +46,27 @@ def create_db():
 
 def admin_group():
     banner(BLUE, "Adding Admin Permissions")
-    
+
     logger.info(f"Adding permissions: {ALL_PERMISSIONS}")
     register_permissions(ALL_PERMISSIONS)
-    
+
     logger.info("Creating admin group.")
     admins = get_or_create(Group, name='admins', defaults=dict(title='Admins'))
     for permission in db_session.query(Permission):
         admins.permissions.append(permission)
-        
+
     db_session.commit()
     return admins
 
 
 def create_admin(admins):
     banner(BLUE, "Admin User")
-    
+
     s = input("Do you want to create a new admin user"
               " (you can later use the create_user.py script to create users)? [Y/n]: ")
     if s not in {"", "y", "yes"}:
         return
-    
+
     member = member_entity.create(dict(
         firstname=input("First name: "),
         lastname=input("Last name: "),
@@ -74,7 +74,7 @@ def create_admin(admins):
         unhashed_password=input("Password: "),
     ))
     member_id = member['member_id']
-    
+
     logger.info(f"Addmin new menber {member_id} to admin group.")
     admins.members.append(db_session.query(Member).get(member_id))
     db_session.commit()
@@ -91,6 +91,7 @@ def create_shop_products():
     get_or_create(ProductCategory, name='Förbrukning', defaults=dict(display_order=display_order + 2))
     get_or_create(ProductCategory, name='Verktyg', defaults=dict(display_order=display_order + 3))
     get_or_create(ProductCategory, name='Övrigt', defaults=dict(display_order=display_order + 4))
+    db_session.commit()
 
 
 def firstrun():
@@ -107,6 +108,5 @@ def firstrun():
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Initialize the database with some development data.')
     args = parser.parse_args()
-    
+
     firstrun()
-    
