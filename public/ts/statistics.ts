@@ -72,7 +72,6 @@ function addChart(root: HTMLElement, data: any) {
 	// lab = splitSeries(data.labmembership);
 	// member = splitSeries(data.membership);
 	const dataMembership = filterDuplicates(toPoints(data.membership));
-	console.log(dataMembership);
 	const dataLabaccess = filterDuplicates(toPoints(data.labaccess));
 	const maxtime = new Date();
 
