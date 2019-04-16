@@ -71,7 +71,7 @@ export default class Product extends Base {
         if (!this.unsavedActions) {
             this.unsavedActions = this.savedActions.map(a => a.copy());
         }
-        this.unsavedActions = this.unsavedActions.filter(a => a.action !== action.action);
+        this.unsavedActions = this.unsavedActions.filter(a => a.action_type !== action.action_type);
         this.notify();
     }
     
