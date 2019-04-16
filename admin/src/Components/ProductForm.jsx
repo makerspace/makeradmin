@@ -63,7 +63,7 @@ class ProductForm extends React.Component {
         const {actions, availableActionTypes, selectedActionType, saveDisabled} = this.state;
         
         const renderAction = (action, i) => (
-            <div key={i} className="form-row uk-grid">
+            <div key={action.action_type} className="form-row uk-grid">
                 <div className="uk-with-1-6">{action.action_type}</div>
                 <div className="uk-with-1-6"><strong>Värde</strong></div>
                 <div className="uk-with-3-6"><TextInput model={action} label={false} formrow={false} name={"value"}/></div>
