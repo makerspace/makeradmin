@@ -1,5 +1,7 @@
 import argparse
 
+from sqlalchemy import func
+
 from init_db import init_db
 from membership.models import Group, Permission, Member
 from membership.permissions import register_permissions
@@ -8,6 +10,7 @@ from service.api_definition import ALL_PERMISSIONS
 from service.config import config
 from service.db import db_session
 from service.logging import logger
+from shop.models import ProductCategory
 
 YELLOW = "\u001b[33m"
 GREEN = "\u001b[32m"
@@ -82,7 +85,12 @@ def create_members():
 
 
 def create_shop_products():
-    banner(RED, "TODO: Creating Fake Shop Products")
+    banner(BLUE, "Creating Fake Shop Products")
+    display_order = db_session.query(func.max(ProductCategory.display_order)).scalar() or 0
+    get_or_create(ProductCategory, name='Medlemskap', defaults=dict(display_order=display_order + 1))
+    get_or_create(ProductCategory, name='Förbrukning', defaults=dict(display_order=display_order + 2))
+    get_or_create(ProductCategory, name='Verktyg', defaults=dict(display_order=display_order + 3))
+    get_or_create(ProductCategory, name='Övrigt', defaults=dict(display_order=display_order + 4))
 
 
 def firstrun():
