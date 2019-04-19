@@ -46,30 +46,34 @@ def memberbooth_response_object(key):
     }
 
 
-@service.route("/memberbooth/tag/<int:tagid>", method=GET, permission=KEYS_VIEW)
-def get_keys(tagid):
-    query = db_session.query(Key)
-    query = query.filter(Key.tagid == tagid)
-    query = query.join(Key.member)
-    query = query.filter(
-        Member.deleted_at.is_(None),
-        Key.deleted_at.is_(None),
-    )
+@service.route("/memberbooth/tag", method=GET, permission=KEYS_VIEW)
+def get_keys(tagid=Arg(int)):
+    key = db_session.query(Key) \
+        .filter(Key.tagid == tagid) \
+        .join(Key.member) \
+        .filter(
+            Member.deleted_at.is_(None),
+            Key.deleted_at.is_(None),
+        ) \
+        .first()
 
-    taglookup = query.first()
-    if taglookup is None:
+    if key is None:
         return None
     else:
-        return memberbooth_response_object(taglookup)
+        return memberbooth_response_object(key)
 
 
 @service.route("/memberbooth/member", method=GET, permission=MEMBER_VIEW)
 def memberbooth_member(member_number=Arg(int)):
-    member = db_session.query(Member).filter(Member.member_number == member_number).first()
-    if member is None:
+    key = db_session.query(Key) \
+        .filter(Member.member_number == member_number) \
+        .join(Key.member) \
+        .first()
+
+    if key is None:
         return None
     else:
-        return member_to_response_object(member)
+        return memberbooth_response_object(key)
 
 
 @service.route("/box-terminator/member", method=GET, permission=MEMBER_VIEW)
