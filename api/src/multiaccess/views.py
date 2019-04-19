@@ -63,6 +63,15 @@ def get_keys(tagid):
         return memberbooth_response_object(taglookup)
 
 
+@service.route("/memberbooth/member", method=GET, permission=MEMBER_VIEW)
+def memberbooth_member(member_number=Arg(int)):
+    member = db_session.query(Member).filter(Member.member_number == member_number).first()
+    if member is None:
+        return None
+    else:
+        return member_to_response_object(member)
+
+
 @service.route("/box-terminator/member", method=GET, permission=MEMBER_VIEW)
 def box_terminator_member(member_number=Arg(int)):
     try:
