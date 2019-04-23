@@ -1,16 +1,12 @@
-from datetime import date, timedelta
-
 from flask import g
-from sqlalchemy import func
 from sqlalchemy.orm import contains_eager
-from sqlalchemy.orm.exc import NoResultFound
 
 from membership.models import Member, Span, Key
 from multiaccess import service
-from multiaccess.box_terminator import box_terminator_validate, box_terminator_session_list, box_terminator_nag
-from service.api_definition import GET, KEYS_VIEW, SERVICE, MEMBER_VIEW, Arg, MEMBER_EDIT, POST
+from multiaccess.box_terminator import box_terminator_validate, box_terminator_nag, \
+    box_terminator_boxes
+from service.api_definition import GET, KEYS_VIEW, SERVICE, Arg, MEMBER_EDIT, POST
 from service.db import db_session
-from service.error import NotFound
 
 
 def member_to_response_object(member):
@@ -65,10 +61,10 @@ def get_keys(tagid):
         return memberbooth_response_object(taglookup)
 
 
-@service.route("/box-terminator/session-list", method=GET, permission=MEMBER_EDIT)
-def box_terminator_session_list_route():
-    """ Returns a list of all boxes scanned in this session. """
-    return box_terminator_session_list(g.session_token)
+@service.route("/box-terminator/boxes", method=GET, permission=MEMBER_EDIT)
+def box_terminator_boxes_routes():
+    """ Returns a list of all boxes scanned, ever. """
+    return box_terminator_boxes()
 
 
 @service.route("/box-terminator/nag", method=POST, permission=MEMBER_EDIT)

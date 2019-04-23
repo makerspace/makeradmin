@@ -117,7 +117,7 @@ class Test(ApiTest):
         
         self.assertIn('lådan', message.description)
 
-    def test_box_terminator_list_validated_boxes_in_session(self):
+    def test_box_terminator_list_all_boxes(self):
         token = self.db.create_access_token()
         
         member1 = self.db.create_member()
@@ -136,8 +136,11 @@ class Test(ApiTest):
         self.api.post('/multiaccess/box-terminator/validate-box', token=token.access_token,
                       json=dict(member_number=member2.member_number, box_label_id=box21.box_label_id)).expect(200)
         
-        data = self.api.get('/multiaccess/box-terminator/session-list', token=token.access_token).expect(200).data
+        data = self.api.get('/multiaccess/box-terminator/boxes', token=token.access_token).expect(200).data
     
-        self.assertCountEqual([box11.box_label_id, box12.box_label_id, box21.box_label_id],
-                              [b['box_label_id'] for b in data])
+        box_ids = [b['box_label_id'] for b in data]
+    
+        self.assertIn(box11.box_label_id, box_ids)
+        self.assertIn(box12.box_label_id, box_ids)
+        self.assertIn(box21.box_label_id, box_ids)
     

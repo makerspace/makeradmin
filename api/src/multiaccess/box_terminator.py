@@ -1,5 +1,8 @@
 from datetime import date, timedelta, datetime
+from itertools import groupby
+from operator import attrgetter
 
+from sqlalchemy import desc
 from sqlalchemy.orm import contains_eager
 from sqlalchemy.orm.exc import NoResultFound
 
@@ -45,13 +48,13 @@ def get_box_info(box):
         "terminate_date": date_to_str(terminate_date),
         "status": status,
         "last_nag_at": dt_to_str(box.last_nag_at),
+        "last_check_at": dt_to_str(box.last_check_at),
     }
 
 
-def box_terminator_session_list(session_token=None):
+def box_terminator_boxes():
     query = get_box_query()
-    query = query.filter(Box.session_token == session_token)
-    return [get_box_info(b) for b in query]
+    return [get_box_info(b) for b in query.order_by(desc(Box.last_check_at))]
     
     
 def box_terminator_nag(member_number=None, box_label_id=None):
