@@ -1,3 +1,4 @@
+
 // Load jQuery and UIkit
 global.jQuery = require('jquery')
 global.$ = global.jQuery;
@@ -135,7 +136,7 @@ class App extends React.Component {
     render() {
         if (this.state.isLoggedIn) {
             return (
-                <div>
+                <div style={{marginBottom: "2em"}}>
                     <Nav nav={nav} />
                     <div className="uk-container uk-container-center uk-margin-top">
                         <div className="uk-grid">

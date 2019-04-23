@@ -1,5 +1,6 @@
 import React from "react";
 import classNames from 'classnames/bind';
+import * as _ from "underscore";
 
 
 export default class TextInput extends React.Component {
@@ -34,7 +35,7 @@ export default class TextInput extends React.Component {
                                    });
         
         const input = <input id={name} name={name} placeholder={placeholder} className="uk-input uk-width-1-1"
-                             value={value}
+                             value={_.isNull(value) ? '' : value}
                              disabled={disabled}
                              type={type || "text"}
                              tabIndex={tabIndex}

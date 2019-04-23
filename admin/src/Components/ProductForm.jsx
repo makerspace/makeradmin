@@ -62,7 +62,7 @@ class ProductForm extends React.Component {
         const {product, onDelete, onSave} = this.props;
         const {actions, availableActionTypes, selectedActionType, saveDisabled} = this.state;
         
-        const renderAction = (action, i) => (
+        const renderAction = action => (
             <div key={action.action_type} className="form-row uk-grid">
                 <div className="uk-with-1-6">{action.action_type}</div>
                 <div className="uk-with-1-6"><strong>Värde</strong></div>
