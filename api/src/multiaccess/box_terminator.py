@@ -29,9 +29,12 @@ def get_box_query():
     return query
 
 
+def get_expire_date_from_labaccess_end_date(end_date):
+    return expire_date + timedelta(days=45)
+
 def get_box_info(box):
     expire_date = (get_labacess_end_date(box) or date(1997, 9, 26)) + timedelta(days=1)
-    terminate_date = expire_date + timedelta(days=45)
+    terminate_date = get_expire_date_from_labaccess_end_date(expire_date)
     
     today = date.today()
     if today < expire_date:
@@ -67,14 +70,17 @@ def box_terminator_nag(member_number=None, box_label_id=None):
     except NoResultFound:
         raise NotFound()
     
+    end_date = get_labacess_end_date(box)
+    expire_date = get_expire_date_from_labaccess_end_date(end_date)
     message_entity.create({
         "recipients": [{"type": "member", "id": box.member.member_id}],
         "message_type": "email",
-        "title": "Hämta din låda!",
+        "title": "Förnya ditt medlemskap!",
         "description": render_template(
-            "nag_email.html",
+            "nag_email_expired.html" if date.today() >= expire_date else "nag_email.html",
             member=box.member,
-            end_date=date_to_str(get_labacess_end_date(box))
+            terminate_date=date_to_str(get_expire_date_from_labaccess_end_date(end_date)),
+            labaccess_end_date=date_to_str(end_date)
         )
     }, commit=False)
 
