@@ -64,6 +64,7 @@ export default class Product extends Base {
             this.unsavedActions = this.savedActions.map(a => a.copy());
         }
         this.unsavedActions.push(action);
+        action.subscribe(() => this.notify());
         this.notify();
     }
     
@@ -71,7 +72,7 @@ export default class Product extends Base {
         if (!this.unsavedActions) {
             this.unsavedActions = this.savedActions.map(a => a.copy());
         }
-        this.unsavedActions = this.unsavedActions.filter(a => a.action !== action.action);
+        this.unsavedActions = this.unsavedActions.filter(a => a.action_type !== action.action_type);
         this.notify();
     }
     
@@ -79,6 +80,7 @@ export default class Product extends Base {
         return get({url: `/webshop/product/${this.id}/actions`})
             .then(({data}) => {
                 this.savedActions = data.map(d => new ProductAction(d));
+                this.savedActions.forEach(action => action.subscribe(() => this.notify()));
                 this.unsavedActions = null;
                 this.notify();
             });

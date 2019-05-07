@@ -20,7 +20,7 @@
             <h1>Bli medlem / Become a member</h1>
             <div>
                 <label for="firstname" class="uk-form-label">Förnamn / First name</label>
-                <input required id="firstname" required class="uk-input" type="text" placeholder="" />
+                <input required id="firstname" required class="uk-input" type="text" placeholder="" required />
             </div>
             <div>
                 <label for="lastname" class="uk-form-label">Efternamn / Last name</label>
@@ -28,7 +28,7 @@
             </div>
             <div>
                 <label for="email" class="uk-form-label">E-post / Email</label>
-                <input required id="email" required class="uk-input" type="text" placeholder="" />
+                <input required id="email" required class="uk-input" type="email" placeholder="" required />
             </div>
             <div>
                 <label for="phone" class="uk-form-label">Telefonnummer / Phone number</label>
@@ -36,7 +36,7 @@
             </div>
             <div>
                 <label for="address_zipcode" class="uk-form-label">Postnummer / Zipcode</label>
-                <input id="address_zipcode" required class="uk-input" type="text" placeholder="" />
+                <input id="address_zipcode" required class="uk-input" type="text" placeholder="" minlength="5"/>
             </div>
             <!-- <div>
                 <label for="address_street" class="uk-form-label">Address</label>
@@ -58,6 +58,7 @@
             <p>The starter pack gives you one year's membership in the association and 60 days of lab membership at a discounted price. The lab access time starts after your key is retrieved during a "nyckelutlämning" (key distribution) (see the calendar for the next time).</p>
 
             <p><strong>You must be at least 16 years old to purchase lab membership!</strong></p>
+            <p><strong>We do not allow commercial use of the premises!</strong></p>
 
             <p>You can also choose to buy just the annual membership in the association. Lab access can be purchased separately in the <a href="/shop">webshop</a>. This is slightly more expensive than the package price.</p>
 
@@ -65,6 +66,7 @@
 
             <p>Startpaketet ger dig årsmedlemsskap i föreningen samt 60 dagars labaccess till ett paketpris. Labaccessen börjar räknas efter uthämtad nyckel på en nyckelutlämning (se kalendarium för nästa tillfälle).</p>
             <p><strong>Du måste vara minst 16 för att köpa labbmedlemskap!</strong></p>
+            <p><strong>Vi tillåter inte kommersiellt bruk av lokalerna!</strong></p>
             <p>Du kan istället välja att köpa endast årsmedlemsskap i föreningen. Labaccess kan köpas separat i <a href="/shop">webshoppen</a>. Detta är något dyrare än paketpriset.</p>
 
             <div class="form-row">
@@ -76,7 +78,7 @@
                 <div id="card-errors" role="alert"></div>
             </div>
 
-            <button type="button" id="pay-button" class="uk-button uk-button-default uk-button-primary">
+            <button type="button" id="pay-button" class="uk-button uk-button-default uk-button-primary" disabled>
                 <div class="progress-spinner" uk-spinner></div>
                 <span>Betala / Pay</span>
             </button>

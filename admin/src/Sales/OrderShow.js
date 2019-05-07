@@ -79,7 +79,7 @@ class OrderShow extends React.Component {
                         rowComponent={({item}) => {
                             return (<tr>
                                 <td>{item.id}</td>
-                                <td>{item.name}</td>
+                                <td>{item.action_type}</td>
                                 <td className="uk-text-right">{item.value}</td>
                                 <td className="uk-text-right">{item.completed_at ? dateTimeToStr(item.completed_at) : 'pending'}</td>
                             </tr>);

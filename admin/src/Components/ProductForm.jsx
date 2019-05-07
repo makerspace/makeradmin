@@ -62,8 +62,8 @@ class ProductForm extends React.Component {
         const {product, onDelete, onSave} = this.props;
         const {actions, availableActionTypes, selectedActionType, saveDisabled} = this.state;
         
-        const renderAction = (action, i) => (
-            <div key={i} className="form-row uk-grid">
+        const renderAction = action => (
+            <div key={action.action_type} className="form-row uk-grid">
                 <div className="uk-with-1-6">{action.action_type}</div>
                 <div className="uk-with-1-6"><strong>Värde</strong></div>
                 <div className="uk-with-3-6"><TextInput model={action} label={false} formrow={false} name={"value"}/></div>
@@ -101,7 +101,7 @@ class ProductForm extends React.Component {
                                              options={availableActionTypes.map(a => ({value: a, label: a}))}
                                              onChange={o => this.setState({selectedActionType: o.value})}
                                 />
-                                <button type="button" className="uk-button uk-button-success uk-float-right" onClick={() => product.addAction(new ProductAction({action: selectedActionType}))}><i className="uk-icon-plus"/> Lägg till åtgärd</button>
+                                <button type="button" className="uk-button uk-button-success uk-float-right" onClick={() => product.addAction(new ProductAction({action_type: selectedActionType}))}><i className="uk-icon-plus"/> Lägg till åtgärd</button>
                             </div>
                         }
                     </fieldset>

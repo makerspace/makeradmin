@@ -49,6 +49,7 @@ service.entity_routes(
     permission_read=WEBSHOP,
     permission_create=WEBSHOP_EDIT,
     permission_update=WEBSHOP_EDIT,
+    permission_delete=WEBSHOP_EDIT,
 )
 
 service.related_entity_routes(

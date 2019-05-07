@@ -1,7 +1,7 @@
 from logging import getLogger
 
 from sqlalchemy import desc
-from sqlalchemy.orm import joinedload
+from sqlalchemy.orm import joinedload, contains_eager
 from sqlalchemy.orm.exc import NoResultFound
 
 from membership.views import member_entity
@@ -75,11 +75,12 @@ def all_product_data():
     query = (
         db_session
         .query(ProductCategory)
-        .options(joinedload(ProductCategory.products))
+        .join(ProductCategory.products)
+        .options(contains_eager(ProductCategory.products))
         .filter(Product.deleted_at.is_(None))
         .order_by(ProductCategory.display_order)
     )
-    
+
     return [{
         **category_entity.to_obj(category),
         'items': [{

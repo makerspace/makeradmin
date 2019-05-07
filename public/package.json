@@ -1,8 +1,10 @@
 {
     "name": "makeradmin-public",
     "version": "1.0.0",
-    "description": "",
+    "description": "See repository",
     "main": "webpack.config.js",
+    "repository": "https://github.com/makerspace/makeradmin",
+    "license": "GPL-3.0",
     "devDependencies": {
         "sass-loader": "^7.1.0",
         "ts-loader": "^5.3.3",

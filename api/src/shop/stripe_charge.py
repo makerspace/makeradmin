@@ -14,7 +14,7 @@ logger = getLogger('makeradmin')
 
 
 def raise_from_stripe_invalid_request_error(e):
-        if "Amount must convert to at least" in str(e):
+        if "Amount must convert to at least" in str(e) or "Amount must be at least" in str(e):
             raise PaymentFailed("Total amount too small total, least chargable amount is around 5 SEK.")
         
         raise PaymentFailed(log=f"stripe charge failed: {str(e)}", level=EXCEPTION)

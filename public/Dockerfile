@@ -8,16 +8,13 @@ RUN apk update \
 	curl \
 	python3-dev \
 	netcat-openbsd \
-	&& rm -rf /var/cache/apk/*
-
-RUN apk update && apk add \
 	inotify-tools \
 	wget \
 	npm \
 	curl \
 	&& rm -rf /var/cache/apk/*
 
-RUN npm i -g npm
+RUN npm i -g npm sass
 
 RUN pip3 install flask gunicorn
 
@@ -29,7 +26,6 @@ COPY ./package.json ./package-lock.json /work/
 WORKDIR /work
 
 RUN npm install
-RUN npm install -g sass
 
 COPY ./webpack.config.js /work/
 

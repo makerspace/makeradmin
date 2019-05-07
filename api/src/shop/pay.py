@@ -75,8 +75,11 @@ def validate_payment(member_id, cart, expected_amount: Decimal):
                          f"but the cart items actually sum to {total_amount}.",
                          what=NON_MATCHING_SUMS)
 
+    if total_amount < 5:
+        raise BadRequest("Total amount too small, must be at least 5 SEK.")
+
     if total_amount > 10000:
-        raise BadRequest("Maximum amount is 10000.")
+        raise BadRequest("Maximum amount is 10 000 SEK.")
 
     # Assert that the amount can be converted to a valid stripe amount.
     convert_to_stripe_amount(total_amount)

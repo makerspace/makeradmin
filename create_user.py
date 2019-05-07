@@ -49,7 +49,7 @@ def create_user(first_name: str, last_name: str, email: str, user_type: str, pas
     user = r.json()["data"]
 
     if user_type == "admin":
-        admin_group_id = [g["group_id"] for g in gateway.get("membership/group").json()["data"] if g["name"] == "admins"][0]
+        admin_group_id = [g["group_id"] for g in get("membership/group").json()["data"] if g["name"] == "admins"][0]
         r = post("membership/member/" + str(user["member_id"]) + "/groups/add", payload={
             "groups": [admin_group_id]
         })

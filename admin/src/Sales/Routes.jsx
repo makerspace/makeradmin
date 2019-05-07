@@ -26,6 +26,10 @@ module.exports = {
                     path: "product/:id",
                     component: require("./ProductEdit").default,
                 },
+                {
+                    path: "category",
+                    component: require("./CategoryList").default,
+                },
             ]
         }
     ]

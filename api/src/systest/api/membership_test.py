@@ -9,10 +9,10 @@ class Test(ApiTest):
         self.get(f"/membership/member/{member_id}/membership").expect(
             code=200,
             status="ok",
-            data__has_labaccess=False,
-            data__has_membership=False,
+            data__labaccess_active=False,
             data__labaccess_end=None,
             data__membership_end=None,
+            data__membership_active=False,
         )
 
     def test_add_membership_days_by_adding_days(self):
@@ -29,9 +29,9 @@ class Test(ApiTest):
         self.get(f"/membership/member/{member_id}/membership")\
             .expect(code=200,
                     status="ok",
-                    data__has_labaccess=False,
-                    data__has_membership=True,
+                    data__labaccess_active=False,
                     data__labaccess_end=None,
+                    data__membership_active=True,
                     data__membership_end=self.date(1).isoformat(),
                     )
 
@@ -50,7 +50,7 @@ class Test(ApiTest):
         self.get(f"/membership/member/{member_id}/membership")\
             .expect(code=200,
                     status="ok",
-                    data__has_membership=True,
+                    data__membership_active=True,
                     data__membership_end=self.date(1).isoformat())
         
         self.post(f"/membership/member/{member_id}/addMembershipDays",
@@ -63,9 +63,9 @@ class Test(ApiTest):
         self.get(f"/membership/member/{member_id}/membership")\
             .expect(code=200,
                     status="ok",
-                    data__has_labaccess=False,
-                    data__has_membership=True,
+                    data__labaccess_active=False,
                     data__labaccess_end=None,
+                    data__membership_active=True,
                     data__membership_end=self.date(2).isoformat(),
                     )
 
@@ -84,9 +84,9 @@ class Test(ApiTest):
         self.get(f"/membership/member/{member_id}/membership")\
             .expect(code=200,
                     status="ok",
-                    data__has_labaccess=False,
-                    data__has_membership=True,
+                    data__labaccess_active=False,
                     data__labaccess_end=None,
+                    data__membership_active=True,
                     data__membership_end=self.date(days=1).isoformat(),
                     )
 
@@ -105,9 +105,9 @@ class Test(ApiTest):
         self.get(f"/membership/member/{member_id}/membership")\
             .expect(code=200,
                     status="ok",
-                    data__has_labaccess=False,
-                    data__has_membership=False,
+                    data__labaccess_active=False,
                     data__labaccess_end=None,
+                    data__membership_active=False,
                     data__membership_end=self.date(days=-20).isoformat(),
                     )
 
@@ -126,9 +126,9 @@ class Test(ApiTest):
         self.get(f"/membership/member/{member_id}/membership")\
             .expect(code=200,
                     status="ok",
-                    data__has_labaccess=False,
-                    data__has_membership=False,
+                    data__labaccess_active=False,
                     data__labaccess_end=None,
+                    data__membership_active=False,
                     data__membership_end=self.date(days=40).isoformat(),
                     )
 
@@ -161,9 +161,9 @@ class Test(ApiTest):
         self.get(f"/membership/member/{member_id}/membership")\
             .expect(code=200,
                     status="ok",
-                    data__has_labaccess=False,
-                    data__has_membership=False,
+                    data__labaccess_active=False,
                     data__labaccess_end=None,
+                    data__membership_active=False,
                     data__membership_end=self.date(days=40).isoformat(),
                     )
 
@@ -181,9 +181,9 @@ class Test(ApiTest):
         self.get(f"/membership/member/{member_id}/membership")\
             .expect(code=200,
                     status="ok",
-                    data__has_labaccess=True,
-                    data__has_membership=False,
+                    data__labaccess_active=True,
                     data__labaccess_end=self.date(1).isoformat(),
+                    data__membership_active=False,
                     data__membership_end=None,
                     )
 
@@ -202,7 +202,7 @@ class Test(ApiTest):
         self.get(f"/membership/member/{member_id}/membership")\
             .expect(code=200,
                     status="ok",
-                    data__has_labaccess=True,
+                    data__labaccess_active=True,
                     data__labaccess_end=self.date(days=40).isoformat(),
                     )
         
@@ -217,7 +217,7 @@ class Test(ApiTest):
         self.get(f"/membership/member/{member_id}/membership")\
             .expect(code=200,
                     status="ok",
-                    data__has_labaccess=True,
+                    data__labaccess_active=True,
                     data__labaccess_end=self.date(41).isoformat(),
                     )
 
@@ -236,7 +236,7 @@ class Test(ApiTest):
         self.get(f"/membership/member/{member_id}/membership")\
             .expect(code=200,
                     status="ok",
-                    data__has_labaccess=True,
+                    data__labaccess_active=True,
                     data__labaccess_end=self.date(days=10).isoformat(),
                     )
 
@@ -252,7 +252,7 @@ class Test(ApiTest):
         self.get(f"/membership/member/{member_id}/membership")\
             .expect(code=200,
                     status="ok",
-                    data__has_labaccess=True,
+                    data__labaccess_active=True,
                     data__labaccess_end=self.date(days=40).isoformat(),
                     )
 
@@ -271,7 +271,7 @@ class Test(ApiTest):
         self.get(f"/membership/member/{member_id}/membership")\
             .expect(code=200,
                     status="ok",
-                    data__has_labaccess=False,
+                    data__labaccess_active=False,
                     data__labaccess_end=self.date(days=-10).isoformat(),
                     )
 
@@ -287,6 +287,6 @@ class Test(ApiTest):
         self.get(f"/membership/member/{member_id}/membership")\
             .expect(code=200,
                     status="ok",
-                    data__has_labaccess=False,
+                    data__labaccess_active=False,
                     data__labaccess_end=self.date(days=40).isoformat(),
                     )

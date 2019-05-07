@@ -1,4 +1,5 @@
 from flask import request
+from sqlalchemy import func
 
 from service.db import db_session
 from service.entity import Entity
@@ -23,9 +24,7 @@ class OrderedEntity(Entity):
                                       log="failed to aquire display_order lock")
         try:
             if data.get('display_order') is None:
-                sql = f"SELECT COALESCE(MAX(display_order), 0) FROM {self.model.table_name}"
-                max_member_number, = db_session.execute(sql).fetchone()
-                data['display_order'] = max_member_number + 1
+                data['display_order'] = (db_session.query(func.max(self.model.display_order)).scalar() or 0) + 1
             obj = self.to_obj(self._create_internal(data, commit=commit))
             return obj
         except Exception:
