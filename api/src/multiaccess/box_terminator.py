@@ -12,6 +12,7 @@ from service.db import db_session
 from service.error import NotFound
 from service.logging import logger
 from service.util import date_to_str, dt_to_str
+from flask import render_template
 
 
 def get_labacess_end_date(box):
@@ -70,9 +71,10 @@ def box_terminator_nag(member_number=None, box_label_id=None):
         "recipients": [{"type": "member", "id": box.member.member_id}],
         "message_type": "email",
         "title": "Hämta din låda!",
-        "description": (
-            f"Hej,\n\nDin labacess gick ut {date_to_str(get_labacess_end_date(box))}"
-            f", hämta lådan eller så går innehållet till makespace.\n\nHälsningar\nStockholm Makerpsace"
+        "description": render_template(
+            "nag_email.html",
+            member=box.member,
+            end_date=date_to_str(get_labacess_end_date(box))
         )
     }, commit=False)
 
