@@ -58,6 +58,8 @@ def box_terminator_boxes():
     
     
 def box_terminator_nag(member_number=None, box_label_id=None):
+    raise NotImplemented("Disabled until message is fixed.")
+    
     try:
         box = db_session.query(Box).filter(Box.box_label_id == box_label_id,
                                            Member.member_number == member_number).one()
