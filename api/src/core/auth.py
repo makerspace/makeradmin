@@ -129,6 +129,7 @@ def authenticate_request():
     access_token.expires = datetime.utcnow() + timedelta(seconds=access_token.lifetime)
     
     g.user_id = access_token.user_id
+    g.session_token = access_token.access_token
     g.permissions = access_token.permissions.split(',')
     
     # Commit token validation to make it stick even if request fails later.

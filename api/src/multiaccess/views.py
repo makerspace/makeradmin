@@ -1,12 +1,15 @@
 from datetime import date, timedelta
 
+from flask import g
 from sqlalchemy import func
 from sqlalchemy.orm import contains_eager
 from sqlalchemy.orm.exc import NoResultFound
 
 from membership.models import Member, Span, Key
 from multiaccess import service
-from service.api_definition import GET, KEYS_VIEW, SERVICE, MEMBER_VIEW, Arg
+from multiaccess.box_terminator import box_terminator_validate, box_terminator_nag, \
+    box_terminator_boxes
+from service.api_definition import GET, KEYS_VIEW, SERVICE, Arg, MEMBER_EDIT, POST, MEMBER_VIEW
 from service.db import db_session
 from service.error import NotFound
 
@@ -72,32 +75,19 @@ def memberbooth_member(member_number=Arg(int)):
         return member_to_response_object(member)
 
 
-@service.route("/box-terminator/member", method=GET, permission=MEMBER_VIEW)
-def box_terminator_member(member_number=Arg(int)):
-    try:
-        member = db_session.query(Member).filter(Member.member_number == member_number).one()
-    except NoResultFound:
-        raise NotFound()
+@service.route("/box-terminator/boxes", method=GET, permission=MEMBER_EDIT)
+def box_terminator_boxes_routes():
+    """ Returns a list of all boxes scanned, ever. """
+    return box_terminator_boxes()
 
-    query = db_session\
-        .query(func.max(Span.enddate))\
-        .filter(Span.member_id == member.member_id, Span.type.in_([Span.LABACCESS, Span.SPECIAL_LABACESS]))
 
-    today = date.today()
-    expire_date = (query.first()[0] or date(1997, 9, 26)) + timedelta(days=1)
-    terminate_date = expire_date + timedelta(days=45)
-    
-    if today < expire_date:
-        status = "active"
-    elif today < terminate_date:
-        status = "expired"
-    else:
-        status = "terminate"
-        
-    return {
-        "name": f"{member.firstname} {member.lastname or ''}",
-        "expire_date": expire_date.isoformat(),
-        "terminate_date": terminate_date.isoformat(),
-        "status": status,
-    }
+@service.route("/box-terminator/nag", method=POST, permission=MEMBER_EDIT)
+def box_terminator_nag_route(member_number=Arg(int), box_label_id=Arg(int)):
+    """ Send a nag email for this box. """
+    return box_terminator_nag(member_number, box_label_id)
 
+
+@service.route("/box-terminator/validate-box", method=POST, permission=MEMBER_EDIT)
+def box_terminator_validate_route(member_number=Arg(int), box_label_id=Arg(int)):
+    """ Used when scanning boxes. """
+    return box_terminator_validate(member_number, box_label_id, g.session_token)
