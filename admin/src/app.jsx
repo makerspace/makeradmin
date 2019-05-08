@@ -1,13 +1,13 @@
 
 // Load jQuery and UIkit
-global.jQuery = require('jquery')
+global.jQuery = require('jquery');
 global.$ = global.jQuery;
-require('uikit')
-require('uikit/dist/js/core/dropdown')
-require('uikit/dist/js/components/pagination')
-require('uikit/dist/js/components/autocomplete')
-require('uikit/dist/js/components/notify')
-require('uikit/dist/js/components/upload')
+require('uikit');
+require('uikit/dist/js/core/dropdown');
+require('uikit/dist/js/components/pagination');
+require('uikit/dist/js/components/autocomplete');
+require('uikit/dist/js/components/notify');
+require('uikit/dist/js/components/upload');
 
 import React from 'react';
 import ReactDOM from 'react-dom';

@@ -72,7 +72,9 @@
       "global": true,
       "require": true,
       "module": true,
-      "console": true
+      "console": true,
+      "__BUILD_DATE__": "readonly",
+      "__COMMIT_HASH__": "readonly"
     },
     "parser": "babel-eslint",
     "plugins": [

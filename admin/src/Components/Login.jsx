@@ -7,8 +7,8 @@ export default class Login extends React.Component
 {
     login(e) {
         e.preventDefault();
-        let username = this.refs.username.value;
-        let password = this.refs.password.value;
+        const username = this.username.value;
+        const password = this.password.value;
 
         if (!username || !password)
         {
@@ -31,14 +31,14 @@ export default class Login extends React.Component
                         <div className="uk-form-row">
                             <div className="uk-form-icon">
                                 <i className="uk-icon-user"/>
-                                <input ref="username" className="uk-form-large uk-form-width-large" type="text" placeholder="Användarnamn" />
+                                <input ref={c => { this.username = c; }} className="uk-form-large uk-form-width-large" type="text" placeholder="Användarnamn" />
                             </div>
                         </div>
 
                         <div className="uk-form-row">
                             <div className="uk-form-icon">
                                 <i className="uk-icon-lock"/>
-                                <input ref="password" className="uk-form-large uk-form-width-large" type="password" placeholder="Lösenord" />
+                                <input ref={c => { this.password = c; }} className="uk-form-large uk-form-width-large" type="password" placeholder="Lösenord" />
                             </div>
                         </div>
 

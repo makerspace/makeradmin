@@ -1,6 +1,6 @@
-import React from 'react'
+import React from 'react';
 //import classNames from 'classnames/bind'
-import auth from '../auth'
+// import auth from '../auth';
 
 module.exports = class FileInput extends React.Component
 {
@@ -16,6 +16,7 @@ module.exports = class FileInput extends React.Component
 
 	componentDidMount()
 	{
+		/*
 		var _this = this;
 		var settings = {
 			action: config.apiBasePath + this.props.action,
@@ -68,9 +69,10 @@ module.exports = class FileInput extends React.Component
 
 			}
 		};
-
+		
 		var select = UIkit.uploadSelect($("#upload-select"), settings),
 		drop = UIkit.uploadDrop($("#upload-drop"), settings);
+		*/
 /*
 		var _this = this;
 
@@ -160,4 +162,4 @@ module.exports = class FileInput extends React.Component
 		);
 */
 	}
-}
+};
