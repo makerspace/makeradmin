@@ -50,7 +50,7 @@ class MemberEntity(Entity):
         finally:
             db_session.execute("DO RELEASE_LOCK('member_number')")
 
-    def update(self, entity_id):
+    def update(self, entity_id, commit=True):
         data = request.json or {}
         handle_password(data)
-        return self._update_internal(entity_id, data)
+        return self._update_internal(entity_id, data, commit=commit)

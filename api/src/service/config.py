@@ -63,4 +63,4 @@ def get_public_url(path):
 
 
 def debug_mode():
-    return config.get('APP_DEBUG') == 'true'
+    return config.get('DEV_RUN') == 'true'

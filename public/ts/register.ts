@@ -141,7 +141,7 @@ common.onGetAndDocumentLoaded("/webshop/register_page_data", (value: any) => {
               phone: common.getValue("#phone"),
               address_street: "", // common.getValue("#address_street"),
               address_extra: "", // common.getValue("#address_extra"),
-              address_zipcode: common.getValue("#address_zipcode"),
+              address_zipcode: parseInt(common.getValue("#address_zipcode").replace(/ /g, '')) || null,
               address_city: "", // common.getValue("#address_city"),
             },
             purchase: {
@@ -170,7 +170,7 @@ common.onGetAndDocumentLoaded("/webshop/register_page_data", (value: any) => {
             if (json.what === "not_unique") {
               UIkit.modal.alert("<h2>Register failed</h2>A member with this email is already registred");
             } else {
-              UIkit.modal.alert("<h2>The playment failed</h2>" + common.get_error(json));
+              UIkit.modal.alert("<h2>The payment failed</h2>" + common.get_error(json));
             }
           }
         );

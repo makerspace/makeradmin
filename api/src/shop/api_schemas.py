@@ -57,7 +57,7 @@ register_schema = dict(
                 phone=dict(type="string"),
                 address_street=dict(type="string"),
                 address_city=dict(type="string"),
-                address_zipcode=dict(type=["string", "integer"]),
+                address_zipcode=dict(type=["null", "integer"]),
                 address_extra=dict(type="string"),
                 address_country=dict(type="string"),
             )

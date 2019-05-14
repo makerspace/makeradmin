@@ -1061,3 +1061,7 @@ form input.readonly-input {
 .member-key-status {
 	flex-grow: 1;
 }
+
+input:invalid {
+    border-color: red;
+}
