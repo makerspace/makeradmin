@@ -26,6 +26,7 @@ services:
       context: ./api
     volumes:
       - ./logs/api:/work/logs
+    restart: always
     depends_on:
       - db2
     networks:
@@ -51,6 +52,7 @@ services:
     image: makeradmin/api:1.0
     build:
       context: ./api
+    restart: always
     command: 
       - "/work/dispatch_emails.sh"
     environment:
@@ -74,6 +76,7 @@ services:
       - "./.webshop_product_images:/work/static/product_images"
     build:
       context: ./public
+    restart: always
     environment:
       APIGATEWAY: "api"
       HOST_BACKEND:
@@ -88,6 +91,7 @@ services:
     image: makeradmin/admin:1.0
     build:
       context: ./admin
+    restart: always
     environment:
       HOST_BACKEND:
       VIRTUAL_HOST: "${HOST_FRONTEND}"
