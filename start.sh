@@ -1,4 +1,4 @@
 #!/bin/bash
 
 ./create_connect.sh && \
-docker-compose -f docker-compose.yml up -d
+docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
