@@ -77,7 +77,7 @@ class MessageForm extends React.Component {
                         Typ
                     </label>
                     <div className="uk-form-controls">
-                        <select id="message_type" ref="message_type" className="uk-form-width-medium" onChange={e => message.message_type =  e.target.value}>
+                        <select id="message_type" className="uk-form-width-medium" onChange={e => message.message_type = e.target.value}>
                             <option value="email">E-post</option>
                         </select>
                     </div>
@@ -91,7 +91,7 @@ class MessageForm extends React.Component {
                             Mottagare
                         </label>
                         <div className="uk-form-controls">
-                            <Async ref="recps"
+                            <Async 
                                    name="recipients"
                                    isMulti
                                    cache={false}

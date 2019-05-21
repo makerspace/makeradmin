@@ -1,6 +1,5 @@
 import React from 'react';
 import { Link } from 'react-router';
-import Date from '../Components/DateShow';
 import Collection from "../Models/Collection";
 import Key from "../Models/Key";
 import CollectionTable from "../Components/CollectionTable";
@@ -21,8 +20,8 @@ class SearchBox extends React.Component {
                         <form className="uk-form">
                             <div className="uk-form-icon">
                                 <i className="uk-icon-search"/>
-                                <input ref="search" tabIndex="1" type="text" className="uk-form-width-large" placeholder="Skriv in ett sökord"
-                                       onChange={() => this.props.onChange(this.refs.search.value)} />
+                                <input ref={c => { this.search = c;}} tabIndex="1" type="text" className="uk-form-width-large" placeholder="Skriv in ett sökord"
+                                       onChange={() => this.props.onChange(this.search.value)} />
                             </div>
                         </form>
                     </div>
