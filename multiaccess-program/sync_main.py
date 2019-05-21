@@ -111,7 +111,7 @@ def main():
                              f" '{WHAT_BLOCK}' will block members that should not have access."
                         )
     parser.add_argument("-u", "--maker-admin-base-url",
-                        default='https://api.makeradmin.se',
+                        default='https://api.makerspace.se',
                         help="Base url of maker admin (for login and fetching of member info).")
     parser.add_argument("-m", "--members-filename", default=None,
                         help="Provide members in a file instead of fetching from maker admin (same format as response"
