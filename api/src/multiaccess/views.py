@@ -1,9 +1,5 @@
-from datetime import date, timedelta
-
 from flask import g
-from sqlalchemy import func
 from sqlalchemy.orm import contains_eager
-from sqlalchemy.orm.exc import NoResultFound
 
 from membership.models import Member, Span, Key
 from multiaccess import service
@@ -11,7 +7,6 @@ from multiaccess.box_terminator import box_terminator_validate, box_terminator_n
     box_terminator_boxes
 from service.api_definition import GET, KEYS_VIEW, SERVICE, Arg, MEMBER_EDIT, POST, MEMBER_VIEW
 from service.db import db_session
-from service.error import NotFound
 
 
 def member_to_response_object(member):
@@ -25,7 +20,7 @@ def member_to_response_object(member):
     }
 
 
-@service.route("/memberdata", method=GET, permission=SERVICE)
+@service.route("/memberdata", method=GET, permission=MEMBER_EDIT)
 def get_memberdata():
     query = db_session.query(Member).join(Member.spans).join(Member.keys)
     query = query.options(contains_eager(Member.spans), contains_eager(Member.keys))
