@@ -7,6 +7,7 @@ from membership.models import Member
 Base = declarative_base()
 
 
+# Message template.
 class Message(Base):
     
     __tablename__ = 'messages_message'
@@ -23,6 +24,7 @@ class Message(Base):
         return f'Message(message_id={self.messages_message_id}, title={self.title}, status={self.status})'
 
 
+# Message to one recipient.
 class Recipient(Base):
     
     __tablename__ = 'messages_recipient'
@@ -46,6 +48,7 @@ Message.num_recipients = column_property(select([func.count(Recipient.member_id)
                                          .where(Message.messages_message_id == Recipient.messages_message_id))
 
 
+# Not used.
 class Template(Base):
     
     __tablename__ = 'messages_template'
@@ -60,3 +63,5 @@ class Template(Base):
 
     def __repr__(self):
         return f'Template(template_id={self.messages_template_id}, name={self.name} title={self.title})'
+
+
