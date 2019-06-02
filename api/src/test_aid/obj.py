@@ -5,6 +5,7 @@ from faker import Faker
 from membership.models import Span
 from shop.models import ProductAction
 from test_aid.test_util import random_str
+import re
 
 DEFAULT_PASSWORD = '1q2w3e'
 DEFAULT_PASSWORD_HASH = "$2y$10$NcNoheVsKVo2Agz3FLeI8.fhAgbmRV/NoJMqPC67ZXiqgqfE5DE.S"
@@ -40,7 +41,8 @@ class ObjFactory:
             address_country=self.fake.country_code(representation="alpha-2"),
             phone=f'070-{randint(1e7, 9e7):07d}',
             civicregno=f"19901011{randint(1000, 9999):04d}",
-            email=f'{firstname}.{lastname}+{random_str(6)}@bmail.com'.lower(),
+            email=re.sub('[^a-zA-Z0-9.!#$%&\'*+\\/=?^_`{|}~\\-@\\.]', '_',
+                         f'{firstname}.{lastname}+{random_str(6)}@bmail.com'.lower().replace(' ', '_')),
         )
         obj.update(kwargs)
         self.member = obj
