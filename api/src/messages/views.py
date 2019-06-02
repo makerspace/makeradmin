@@ -4,6 +4,8 @@ from messages.models import Message, Template, Recipient
 from service.api_definition import MESSAGE_VIEW, MESSAGE_SEND
 from service.entity import Entity, not_empty, OrmSingeRelation
 
+# TODO Check all usages.
+
 message_entity = MessageEntity(
     Message,
     validation=dict(title=not_empty),

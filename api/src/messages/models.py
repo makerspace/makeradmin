@@ -1,67 +1,49 @@
-from sqlalchemy import Column, Integer, String, Text, DateTime, func, Date, ForeignKey, select
+from sqlalchemy import Column, Integer, String, Text, DateTime, func, Date, ForeignKey, Enum
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import relationship, column_property
 
 from membership.models import Member
 
 Base = declarative_base()
 
 
-# Message template.
-class Message(Base):
+class MessagePurpose:
+    LABACCESS_REMINDER = 'labaccess_reminder'
+
+
+class MessageTemplate(Base):
     
-    __tablename__ = 'messages_message'
+    __tablename__ = 'message_template'
     
-    messages_message_id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
-    title = Column(String(255), nullable=False)
-    description = Column(Text)
-    message_type = Column(String(255), nullable=False)
-    status = Column(String(255), nullable=False)
+    id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
+    subject = Column(Text, nullable=False)
+    body = Column(Text)
+    purpose = Column(Enum(MessagePurpose.LABACCESS_REMINDER), nullable=True)
     created_at = Column(DateTime, server_default=func.now())
     updated_at = Column(DateTime, server_default=func.now())
-
+    
     def __repr__(self):
-        return f'Message(message_id={self.messages_message_id}, title={self.title}, status={self.status})'
-
-
-# Message to one recipient.
-class Recipient(Base):
+        return f'MessageTemplate(id={self.id}, subject={self.subject}, purpose={self.purpose})'
     
-    __tablename__ = 'messages_recipient'
     
-    messages_recipient_id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
-    messages_message_id = Column(Integer, ForeignKey(Message.messages_message_id), nullable=False)
-    title = Column(String(255), nullable=False)
-    description = Column(Text)
+class Message(Base):
+    
+    QUEUED = 'queued'
+    SENT = 'sent'
+    FAILED = 'failed'
+    
+    __tablename__ = 'message'
+    
+    id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
+    message_template_id = Column(Integer, ForeignKey(MessageTemplate.id), nullable=False)
+    subject = Column(Text, nullable=False)
+    body = Column(Text)
     member_id = Column(Integer, ForeignKey(Member.member_id))
     recipient = Column(String(255))
     date_sent = Column(Date)
-    status = Column(String(255), nullable=False)
+    status = Column(Enum(QUEUED, SENT, FAILED), nullable=False)
+    purpose = Column(Enum(MessagePurpose.LABACCESS_REMINDER), nullable=True)
     created_at = Column(DateTime, server_default=func.now())
     updated_at = Column(DateTime, server_default=func.now())
     
     def __repr__(self):
-        return f'Recipient(recipient_id={self.messages_recipient_id}, title={self.title}, member_id={self.member_id})'
-
-
-Message.num_recipients = column_property(select([func.count(Recipient.member_id)])
-                                         .where(Message.messages_message_id == Recipient.messages_message_id))
-
-
-# Not used.
-class Template(Base):
-    
-    __tablename__ = 'messages_template'
-    
-    messages_template_id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)  # TODO Rename
-    name = Column(String(255), nullable=False)
-    title = Column(String(255), nullable=False)
-    description = Column(Text)
-    created_at = Column(DateTime, server_default=func.now())
-    updated_at = Column(DateTime, server_default=func.now())
-    deleted_at = Column(DateTime)
-
-    def __repr__(self):
-        return f'Template(template_id={self.messages_template_id}, name={self.name} title={self.title})'
-
-
+        return f'Message(recipient_id={self.id}, subject={self.subject}, member_id={self.member_id})'
