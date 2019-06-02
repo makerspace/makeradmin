@@ -63,6 +63,31 @@ class Test(ShopTestMixin, ApiTest):
         span = db_session.query(Span).filter_by(member_id=member_id, type=Span.MEMBERSHIP).one()
         self.assertEqual(self.date(365), span.enddate)
 
+    def test_registring_new_member_fails_with_invalid_email(self):
+        source = stripe.Source.create(type="card", token=stripe.Token.create(card=self.card(VALID_NON_3DS_CARD_NO)).id)
+
+        member = self.obj.create_member()
+        member["email"] = member["email"].replace('@', '_')
+
+        register = {
+            "purchase": {
+                "cart": [
+                    {
+                        "id": self.p0_id,
+                        "count": 1,
+                    }
+                ],
+                "expected_sum": 300.00,
+                "stripe_card_source_id": source.id,
+                "stripe_card_3d_secure": source["card"]["three_d_secure"]
+            },
+            "member": member
+        }
+
+        self \
+            .post(f"/webshop/register", register, headers={}) \
+            .expect(data__token=None, code=422, message="Data sent in request not in correct format.")
+
     def test_registring_with_existing_member_email_does_not_work_and_does_not_return_token(self):
         source = stripe.Source.create(type="card", token=stripe.Token.create(card=self.card(VALID_NON_3DS_CARD_NO)).id)
  
