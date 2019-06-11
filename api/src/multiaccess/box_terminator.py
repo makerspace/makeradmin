@@ -9,7 +9,7 @@ from sqlalchemy.orm.exc import NoResultFound
 from membership.models import Member, Box, Span
 from messages.views import message_entity
 from service.db import db_session
-from service.error import NotFound
+from service.error import NotFound, BadRequest
 from service.logging import logger
 from service.util import date_to_str, dt_to_str
 from flask import render_template
@@ -32,10 +32,11 @@ def get_box_query():
 def get_expire_date_from_labaccess_end_date(end_date):
     return expire_date + timedelta(days=45)
 
+
 def get_box_info(box):
     expire_date = (get_labacess_end_date(box) or date(1997, 9, 26)) + timedelta(days=1)
     terminate_date = get_expire_date_from_labaccess_end_date(expire_date)
-    
+
     today = date.today()
     if today < expire_date:
         status = "active"
@@ -43,7 +44,7 @@ def get_box_info(box):
         status = "expired"
     else:
         status = "terminate"
-        
+
     return {
         "box_label_id": box.box_label_id,
         "member_number": box.member.member_number,
@@ -59,33 +60,61 @@ def get_box_info(box):
 def box_terminator_boxes():
     query = get_box_query()
     return [get_box_info(b) for b in query.order_by(desc(Box.last_check_at))]
-    
-    
-def box_terminator_nag(member_number=None, box_label_id=None):
-    raise NotImplemented("Disabled until message is fixed.")
-    
+
+
+nag_templates = {
+    "nag-warning": "nag_warning_email.html",
+    "nag-last-warning": "nag_last_warning_email.html",
+    "nag-terminated": "nag_terminated_email.html",
+}
+
+
+nag_titles = {
+    "nag-warning": "Stockholm Makerspace - Din labblåda rensas snart ut /"
+                   " Your lab storage box will soon be removed",
+    "nag-last-warning": "Stockholm Makerspace - Din labblåda rensas snart ut /"
+                        " Your lab storage box will soon be removed",
+    "nag-terminated": "Stockholm Makerspace - Din låda har blivit utgallrad /"
+                      " Your lab storage box has been forfeited",
+}
+
+
+def box_terminator_nag(member_number=None, box_label_id=None, nag_type=None):
     try:
         box = db_session.query(Box).filter(Box.box_label_id == box_label_id,
                                            Member.member_number == member_number).one()
     except NoResultFound:
-        raise NotFound()
-    
+        raise NotFound("Bloop, lådan finns i Lettland")
+
+    try:
+        nag_template = nag_templates[nag_type]
+        nag_title = nag_titles[nag_type]
+
+    except KeyError:
+        raise BadRequest(f"Bad nag type {nag_type}")
+
     end_date = get_labacess_end_date(box)
-    expire_date = get_expire_date_from_labaccess_end_date(end_date)
+
+    days_after_expiration = date.today() - end_date
+
+    warning_days = 45 - days_after_expiration
+
     message_entity.create({
         "recipients": [{"type": "member", "id": box.member.member_id}],
         "message_type": "email",
-        "title": "Förnya ditt medlemskap!",
+        "title": nag_title,
         "description": render_template(
-            "nag_email_expired.html" if date.today() >= expire_date else "nag_email.html",
+            nag_template,
             member=box.member,
             terminate_date=date_to_str(get_expire_date_from_labaccess_end_date(end_date)),
-            labaccess_end_date=date_to_str(end_date)
+            labaccess_end_date=date_to_str(end_date),
+            expired_days=days_after_expiration,
+            days_after_expiration=warning_days,
         )
     }, commit=False)
 
     box.last_nag_at = datetime.utcnow()
-    
+
 
 def box_terminator_validate(member_number=None, box_label_id=None, session_token=None):
     query = get_box_query()
@@ -97,13 +126,12 @@ def box_terminator_validate(member_number=None, box_label_id=None, session_token
             member = db_session.query(Member).filter(Member.member_number == member_number).one()
         except NoResultFound:
             raise NotFound()
-        
+
         box = Box(member_id=member.member_id, box_label_id=box_label_id)
-        
+
     box.last_check_at = datetime.utcnow()
     box.session_token = session_token
     db_session.add(box)
     db_session.flush()
-    
+
     return get_box_info(box)
- 

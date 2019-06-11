@@ -1,21 +1,27 @@
 <table width="600px" border="0" cellspacing="0" cellpadding="0" style="margin-left: auto; margin-right: auto;">
     <tr>
         <td align="center">
-            <img style="margin-bottom: 15px;" width=200px src="https://www.makerspace.se/wp-content/uploads/2015/06/logo-transparent-500px-300x210.png" />
+            <img style="margin-bottom: 15px;" width=200px
+                 src="https://www.makerspace.se/wp-content/uploads/2015/06/logo-transparent-500px-300x210.png"/>
         </td>
     </tr>
     <tr>
         <td>
-          <h2>Your membership dues for Stockholm Makerspace have been paid!</h2>
-          <p>Hej {{member.firstname}},</p>
-          <p>Your membership time has been extended by {{extended_days}} days and is now valid up to an including {{end_date}}.</p>
-          <p>Remember that you can always see you current membership and lab membership status on your <a href="{{ public_url('/member') }}">Stockholm Makerspace member homepage</a>.</p>
-          <p>New lab access and other material can be purchased in the <a href="{{ public_url('/shop') }}">webshop</a>.</p>
-
-          <h2>Ditt föreningsmedlemsskap i Stockholm Makerspace har utökats!</h2>
+            <h2>Your membership dues for Stockholm Makerspace have been paid!</h2>
             <p>Hej {{member.firstname}},</p>
-            <p>Ditt föreningsmedlemsskap har utökats med {{extended_days}} dagar och är nu giltigt till och med {{end_date}}.</p>
-            <p>Kom ihåg att du alltid kan se din nuvarande medlemsskap och labaccess-status på din <a href="{{ public_url('/member') }}">Stockholm Makerspace medlemssida</a>.</p>
+            <p>Your membership time has been extended by {{extended_days}} days and is now valid up to an including
+                {{end_date}}.</p>
+            <p>Remember that you can always see you current membership and lab membership status on your <a
+                    href="{{ public_url('/member') }}">Stockholm Makerspace member homepage</a>.</p>
+            <p>New lab access and other material can be purchased in the <a href="{{ public_url('/shop') }}">webshop</a>.
+            </p>
+
+            <h2>Ditt föreningsmedlemsskap i Stockholm Makerspace har utökats!</h2>
+            <p>Hej {{member.firstname}},</p>
+            <p>Ditt föreningsmedlemsskap har utökats med {{extended_days}} dagar och är nu giltigt till och med
+                {{end_date}}.</p>
+            <p>Kom ihåg att du alltid kan se din nuvarande medlemsskap och labaccess-status på din <a
+                    href="{{ public_url('/member') }}">Stockholm Makerspace medlemssida</a>.</p>
             <p>Ny labaccess och annat material kan köpas i <a href="{{ public_url('/shop') }}">webshoppen</a>.</p>
         </td>
     </tr>
