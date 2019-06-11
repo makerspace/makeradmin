@@ -29,8 +29,9 @@ def get_box_query():
     return query
 
 
-def get_expire_date_from_labaccess_end_date(end_date):
+def get_expire_date_from_labaccess_end_date(expire_date):
     return expire_date + timedelta(days=45)
+
 
 def get_box_info(box):
     expire_date = (get_labacess_end_date(box) or date(1997, 9, 26)) + timedelta(days=1)
