@@ -20,23 +20,23 @@
             <h1>Bli medlem / Become a member</h1>
             <div>
                 <label for="firstname" class="uk-form-label">Förnamn / First name</label>
-                <input required id="firstname" required class="uk-input" type="text" placeholder="" required />
+                <input required id="firstname" required class="uk-input" type="text" placeholder="" required maxlength="255"/>
             </div>
             <div>
                 <label for="lastname" class="uk-form-label">Efternamn / Last name</label>
-                <input required id="lastname" required class="uk-input" type="text" placeholder="" />
+                <input required id="lastname" required class="uk-input" type="text" placeholder=""  maxlength="255"/>
             </div>
             <div>
                 <label for="email" class="uk-form-label">E-post / Email</label>
-                <input required id="email" required class="uk-input" type="email" placeholder="" required />
+                <input required id="email" required class="uk-input" type="email" placeholder="" required  maxlength="255"/>
             </div>
             <div>
                 <label for="phone" class="uk-form-label">Telefonnummer / Phone number</label>
-                <input id="phone" class="uk-input" type="text" placeholder="" />
+                <input id="phone" class="uk-input" type="text" placeholder="" maxlength="255"/>
             </div>
             <div>
                 <label for="address_zipcode" class="uk-form-label">Postnummer / Zipcode</label>
-                <input id="address_zipcode" required class="uk-input" type="text" placeholder="" minlength="5"/>
+                <input id="address_zipcode" class="uk-input" required type="text" pattern="[0-9 ]{0,6}"/>
             </div>
             <!-- <div>
                 <label for="address_street" class="uk-form-label">Address</label>

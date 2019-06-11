@@ -49,7 +49,11 @@ register_schema = dict(
             required=['email', 'firstname'],
             additionalProperties=False,
             properties=dict(
-                email=dict(type="string"),
+                email=dict(
+                    type="string",
+                    pattern="^[a-zA-Z0-9.!#$%&'*+\\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}"
+                            "[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$"
+                ),
                 firstname=dict(type="string"),
                 lastname=dict(type="string"),
                 password=dict(type="null"),
@@ -57,7 +61,7 @@ register_schema = dict(
                 phone=dict(type="string"),
                 address_street=dict(type="string"),
                 address_city=dict(type="string"),
-                address_zipcode=dict(type=["string", "integer"]),
+                address_zipcode=dict(type=["null", "integer"]),
                 address_extra=dict(type="string"),
                 address_country=dict(type="string"),
             )

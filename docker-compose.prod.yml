@@ -1,0 +1,7 @@
+version: "3"
+
+services:
+  db2:
+    volumes:
+      - ./data/mysql:/var/lib/mysql:rw
+      - ./data/dbexport:/dbexport:rw

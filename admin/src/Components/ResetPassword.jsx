@@ -13,7 +13,7 @@ class LoginResetPassword extends React.Component {
     submit(e) {
         e.preventDefault();
 
-        let username = this.refs.username.value;
+        const username = this.username.value;
 
         // Error handling
         if(!username)
@@ -45,7 +45,7 @@ class LoginResetPassword extends React.Component {
                             <div className="uk-form-row">
                                 <div className="uk-form-icon">
                                     <i className="uk-icon-user"/>
-                                    <input ref="username" className="uk-form-large uk-form-width-large" type="text" placeholder="Användarnamn" />
+                                    <input ref={c => { this.username = c; }} className="uk-form-large uk-form-width-large" type="text" placeholder="Användarnamn" />
                                 </div>
                             </div>
 
