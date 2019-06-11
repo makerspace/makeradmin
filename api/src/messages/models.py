@@ -6,25 +6,15 @@ from membership.models import Member
 Base = declarative_base()
 
 
-class MessagePurpose:
+class MessageTemplate(Enum):
     LABACCESS_REMINDER = 'labaccess_reminder'
+    LOGIN_LINK = 'login_link'
+    NEW_MEMBER = 'new_member'
+    RECEIPT = 'receipt'
+    ADD_LABACCESS_TIME = 'add_labaccess_time'
+    ADD_MEMBERSHIP_TIME = 'add_membership_time'
 
 
-class MessageTemplate(Base):
-    
-    __tablename__ = 'message_template'
-    
-    id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
-    subject = Column(Text, nullable=False)
-    body = Column(Text)
-    purpose = Column(Enum(MessagePurpose.LABACCESS_REMINDER), nullable=True)
-    created_at = Column(DateTime, server_default=func.now())
-    updated_at = Column(DateTime, server_default=func.now())
-    
-    def __repr__(self):
-        return f'MessageTemplate(id={self.id}, subject={self.subject}, purpose={self.purpose})'
-    
-    
 class Message(Base):
     
     QUEUED = 'queued'
@@ -34,14 +24,13 @@ class Message(Base):
     __tablename__ = 'message'
     
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
-    message_template_id = Column(Integer, ForeignKey(MessageTemplate.id), nullable=False)
     subject = Column(Text, nullable=False)
     body = Column(Text)
     member_id = Column(Integer, ForeignKey(Member.member_id))
     recipient = Column(String(255))
     date_sent = Column(Date)
     status = Column(Enum(QUEUED, SENT, FAILED), nullable=False)
-    purpose = Column(Enum(MessagePurpose.LABACCESS_REMINDER), nullable=True)
+    template = Column(Enum([e.value for e in MessageTemplate]), nullable=True)
     created_at = Column(DateTime, server_default=func.now())
     updated_at = Column(DateTime, server_default=func.now())
     
