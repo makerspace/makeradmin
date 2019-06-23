@@ -12,7 +12,7 @@ from service.error import ApiError, error_handler_api, error_handler_db, error_h
 from service.traffic_logger import traffic_logger_init, traffic_logger_commit
 from services import services
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder=None)
 
 
 flask_cors.CORS(
@@ -59,8 +59,6 @@ def index():
 
 @app.route("/routes")
 def routes():
-    # TODO Fix machine readable.
-    # TODO Why do we serve static?
     return "\n".join(sorted([f"{rule.rule}: {', '.join(sorted(rule.methods))}" for rule in app.url_map.iter_rules()]))
 
 
