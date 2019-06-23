@@ -1,6 +1,4 @@
 from datetime import date, timedelta, datetime
-from itertools import groupby
-from operator import attrgetter
 
 from sqlalchemy import desc
 from sqlalchemy.orm import contains_eager
@@ -10,7 +8,6 @@ from membership.models import Member, Box, Span
 from messages.views import message_entity
 from service.db import db_session
 from service.error import NotFound
-from service.logging import logger
 from service.util import date_to_str, dt_to_str
 
 
@@ -56,7 +53,8 @@ def box_terminator_boxes():
     query = get_box_query()
     return [get_box_info(b) for b in query.order_by(desc(Box.last_check_at))]
     
-    
+
+# TODO Fix this.
 def box_terminator_nag(member_number=None, box_label_id=None):
     raise NotImplemented("Disabled until message is fixed.")
     

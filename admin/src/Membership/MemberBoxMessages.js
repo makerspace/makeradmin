@@ -13,8 +13,8 @@ const Row = props => {
         <tr>
             <td><DateTimeShow date={item.created_at}/></td>
             <td>{Message.statusText(item)}</td>
-            <td>{Message.typeIcon(item)} {item.recipient}</td>
-            <td><Link to={"/messages/" + item.id}>{item.title}</Link></td>
+            <td>{item.recipient}</td>
+            <td><Link to={"/messages/" + item.id}>{item.subject}</Link></td>
         </tr>
     );
 };
@@ -24,7 +24,7 @@ class MemberBoxMessages extends React.Component {
 
     constructor(props) {
         super(props);
-        this.collection = new Collection({type: Message, url: "/messages/member/" + props.params.member_id + "/recipients"});
+        this.collection = new Collection({type: Message, url: "/messages/member/" + props.params.member_id + "/messages"});
     }
 
     render() {
@@ -32,7 +32,7 @@ class MemberBoxMessages extends React.Component {
             {title: "Skapad", sort: "created_at"},
             {title: "Status", sort: "status"},
             {title: "Mottagare", sort: "recipient"},
-            {title: "Meddelande", sort: "title"},
+            {title: "Meddelande", sort: "subject"},
         ];
 
         return (
