@@ -1,3 +1,5 @@
+import enum
+
 from sqlalchemy import Column, Integer, String, Text, DateTime, func, Date, ForeignKey, Enum
 from sqlalchemy.ext.declarative import declarative_base
 
@@ -6,7 +8,7 @@ from membership.models import Member
 Base = declarative_base()
 
 
-class MessageTemplate(Enum):
+class MessageTemplate(enum.Enum):
     LABACCESS_REMINDER = 'labaccess_reminder'
     LOGIN_LINK = 'login_link'
     NEW_MEMBER = 'new_member'
@@ -30,7 +32,7 @@ class Message(Base):
     recipient = Column(String(255))
     date_sent = Column(Date)
     status = Column(Enum(QUEUED, SENT, FAILED), nullable=False)
-    template = Column(Enum([e.value for e in MessageTemplate]), nullable=True)
+    template = Column(String(120), nullable=True)
     created_at = Column(DateTime, server_default=func.now())
     updated_at = Column(DateTime, server_default=func.now())
     
