@@ -8,27 +8,26 @@ from rocky.process import log_exception, stoppable
 from sqlalchemy.exc import DatabaseError
 from sqlalchemy.orm import sessionmaker
 
-from messages.models import Recipient, Message
+from messages.models import Message
 from service.config import get_mysql_config, config
 from service.db import create_mysql_engine
 from service.logging import logger
 
 
 def send_messages(db_session, key, domain, sender, to_override, limit):
-    query = db_session.query(Recipient).join(Message)
-    query = query.filter(Message.message_type == 'email', Recipient.status == 'queued')
+    query = db_session.query(Message)
+    query = query.filter(Message.status == Message.QUEUED)
     query = query.limit(limit)
     
-    for recipient in query:
-        to = recipient.recipient
-        recipient_id = recipient.messages_recipient_id
-        msg = f"sending {recipient_id} to {to}"
+    for message in query:
+        to = message.recipient
+        msg = f"sending {message.id} to {to}"
         
         if to_override:
             msg += f" (overriding to {to_override})"
             to = to_override
 
-        msg += f": {recipient.title}"
+        msg += f": {message.subject}"
 
         logger.info(msg)
 
@@ -36,25 +35,25 @@ def send_messages(db_session, key, domain, sender, to_override, limit):
                                  data={
                                      'from': sender,
                                      'to': to,
-                                     'subject': recipient.title,
-                                     'html': recipient.description,
+                                     'subject': message.subject,
+                                     'html': message.body,
                                  })
         
         if response.ok:
-            recipient.status = 'sent'
-            recipient.date_sent = date.today()
+            message.status = 'sent'
+            message.date_sent = date.today()
             
-            db_session.add(recipient)
+            db_session.add(message)
             db_session.commit()
             
         else:
-            recipient.status = 'failed'
-            recipient.date_sent = date.today()
+            message.status = 'failed'
+            message.date_sent = date.today()
             
-            db_session.add(recipient)
+            db_session.add(message)
             db_session.commit()
             
-            logger.error(f"failed to send {recipient_id} to {to}: {response.content}")
+            logger.error(f"failed to send {message.id} to {to}: {response.content}")
 
 
 if __name__ == '__main__':
