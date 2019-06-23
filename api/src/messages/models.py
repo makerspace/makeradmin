@@ -15,6 +15,9 @@ class MessageTemplate(enum.Enum):
     RECEIPT = 'receipt'
     ADD_LABACCESS_TIME = 'add_labaccess_time'
     ADD_MEMBERSHIP_TIME = 'add_membership_time'
+    BOX_WARNING = 'box_warning'
+    BOX_FINAL_WARNING = 'box_final_warning'
+    BOX_TERMINATED = 'box_terminated'
 
 
 class Message(Base):
