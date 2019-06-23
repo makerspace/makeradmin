@@ -8,14 +8,14 @@ from service.db import db_session
 def send_message(template: MessageTemplate, member, **kwargs):
     
     subject = render_template(
-        f"{template.value}_subject.jinja2",
+        f"{template.value}.subject.jinja2",
         public_url=get_public_url,
         member=member,
         **kwargs,
     )
     
     body = render_template(
-        f"{template.value}_body.jinja2",
+        f"{template.value}.body.jinja2",
         public_url=get_public_url,
         member=member,
         **kwargs,
