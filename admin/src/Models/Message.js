@@ -22,6 +22,7 @@ Message.model = {
         status: "",
         template: "",
         recipient: "",
+        recipients: [],
         created_at: null,
         updated_at: null,
         recipient_id: 0,
