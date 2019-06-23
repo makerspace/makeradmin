@@ -31,7 +31,7 @@ class MessageShow extends React.Component {
                         <tbody>
                         <tr><th align="left">Created</th><td><DateTimeShow date={message.created_at}/></td></tr>
                         <tr><th align="left">Status</th><td>{Message.statusText(message)}</td></tr>
-                        <tr><th align="left">Date Sent</th><td>{Message.date_sent}</td></tr>
+                        <tr><th align="left">Sent</th><td><DateTimeShow date={message.sent_at}/></td></tr>
                         <tr><th align="left">Recipient</th><td>{message.recipient}</td></tr>
                         <tr><th align="left">Template Used</th><td>{message.template}</td></tr>
                         </tbody>

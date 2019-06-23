@@ -1,4 +1,3 @@
-import React from 'react';
 import Base from './Base';
 
 
@@ -25,8 +24,8 @@ Message.model = {
         recipients: [],
         created_at: null,
         updated_at: null,
+        sent_at: null,
         recipient_id: 0,
-        date_sent: null,
     },
 };
 

@@ -7,16 +7,6 @@ from service.entity import Entity
 from service.error import UnprocessableEntity
 
 
-def execute_template(member, text):
-    return (
-        text.replace("##member_number##", str(member.member_number))
-            .replace("##member_id##", str(member.member_id))
-            .replace("##firstname##", member.firstname)
-            .replace("##lastname##", member.lastname or "")
-            .replace("##email##", member.email)
-    )
-
-
 class MessageEntity(Entity):
 
     def create_message(self, data, commit=True):

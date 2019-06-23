@@ -15,18 +15,6 @@ module.exports = {
                     component: require("./MessageAdd").default
                 },
                 {
-                    path: "templates",
-                    component: require("./TemplateList").default,
-                },
-                {
-                    path: "templates/new",
-                    component: require("./TemplateAdd").default,
-                },
-                {
-                    path: "templates/:id",
-                    component: require("./TemplateEdit").default,
-                },
-                {
                     path: ":id",
                     component: require("./MessageShow").default
                 },

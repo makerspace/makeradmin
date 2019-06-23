@@ -14,6 +14,7 @@ RENAME TABLE `messages_recipient` TO `message`;
 ALTER TABLE `message` RENAME COLUMN `messages_recipient_id` TO `id`;
 ALTER TABLE `message` RENAME COLUMN `title` TO `subject`;
 ALTER TABLE `message` RENAME COLUMN `description` TO `body`;
+ALTER TABLE `message` RENAME COLUMN `date_sent` TO `sent_at`;
 
 --- add template as "enum" to message, no real enum becuse too hard to maintain
 ALTER TABLE `message` ADD COLUMN `template` varchar(112) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;

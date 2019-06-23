@@ -1,6 +1,6 @@
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 from contextlib import closing
-from datetime import date
+from datetime import datetime
 from time import sleep
 
 import requests
@@ -41,14 +41,13 @@ def send_messages(db_session, key, domain, sender, to_override, limit):
         
         if response.ok:
             message.status = 'sent'
-            message.date_sent = date.today()
+            message.sent_at = datetime.utcnow()
             
             db_session.add(message)
             db_session.commit()
             
         else:
             message.status = 'failed'
-            message.date_sent = date.today()
             
             db_session.add(message)
             db_session.commit()

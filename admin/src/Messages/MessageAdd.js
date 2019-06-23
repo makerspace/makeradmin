@@ -1,7 +1,6 @@
 import React from 'react';
 import MessageForm from '../Components/MessageForm';
 import Message from "../Models/Message";
-import Template from "../Models/Template";
 import { notifySuccess } from "../message";
 import {withRouter} from "react-router";
 

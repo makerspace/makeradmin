@@ -54,7 +54,7 @@ to_obj_converters = {
     Numeric: str,
     String: identity,
     Text: identity,
-    DateTime: lambda d: None if d is None else d.isoformat(),
+    DateTime: lambda d: None if d is None else d.isoformat() + "Z",
     Date: lambda d: None if d is None else d.isoformat(),
     DbEnum: identity,
 }
