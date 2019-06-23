@@ -1,6 +1,6 @@
 from random import randint
 
-from messages.models import Recipient, Message
+from messages.models import Message
 from service.db import db_session
 from test_aid.systest_base import ApiTest
 

@@ -18,7 +18,8 @@ def execute_template(member, text):
 
 
 class MessageEntity(Entity):
-    
+
+    # TODO Check usages.
     def create_message(self, data, commit=True):
 
         # Create message.

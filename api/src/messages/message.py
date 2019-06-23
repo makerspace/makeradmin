@@ -27,6 +27,6 @@ def send_message(template: MessageTemplate, member, **kwargs):
         member_id=member.member_id,
         recipient=member.email,
         status=Message.QUEUED,
-        template=template,
+        template=template.value,
     ))
 
