@@ -9,8 +9,9 @@
             <p>Hej {{ member.firstname }},</p>
             <p>(See below for English).</p>
             <p>
-                Om du vill fortsätta ha tillgång till Stockholms största kollektiva verkstad efter den EXPIRATION_DATE TODO
-                så är det dags att förnya ditt labbmedlemskap i vår webshop. TODO LÄNK
+                Om du vill fortsätta ha tillgång till Stockholms största kollektiva verkstad efter {{ expiration_date }}
+                så är det dags att förnya ditt labbmedlemskap i vår
+                <a href="{{ shop_url }}">webshop</a>.
             </p>
             <p>
                 Om du inte tänkt att förnya ditt labbmedlemskap så kom ihåg att hämta din labblåda och din eventuella
@@ -20,14 +21,15 @@
             </p>
             <p>
                 Om du inte tänkt förnya ditt labbmedlemskap så är vi nyfikna på att veta varför, skriv en rad eller två
-                till info@makerspace.se. TODO
+                till <a href="mailto:info@makerspace.se">info@makerspace.se</a>.
             </p>
             <p>Med vänliga hälsningar,</p>
             <p>Stockholm Makerspace</p>
 
             <p>
-                If you want to continue to have access to Stockholm's largest collective workshop after EXPIRATION_DATE,
-                TODO it is time to renew your lab membership in our webshop TODO.
+                If you want to continue to have access to Stockholm's largest collective workshop after
+                {{ expiration_date }}, it is time to renew your lab membership in our
+                <a href="{{ shop_url }}">webshop</a>.
             </p>
             <p>
                 If you do not intend to renew your lab membership, then remember to retrieve your lab storage box and
@@ -37,7 +39,7 @@
             </p>
             <p>
                 If you are not going to renew your lab membership, we are curious to know why. Please write a line
-                or two to info@makerspace.se. TODO
+                or two to <a href="mailto:info@makerspace.se">info@makerspace.se</a>.
             </p>
             <p>Sincerely,</p>
             <p>Stockholm Makerspace</p>
