@@ -1,29 +1,30 @@
-from flask import render_template
-
 from messages.models import MessageTemplate, Message
 from service.config import get_public_url
-from service.db import db_session as service_db_session
 
 
-def send_message(template: MessageTemplate, member, db_session=None, **kwargs):
+def send_message(template: MessageTemplate, member, db_session=None, render_template=None, **kwargs):
+    
+    if render_template is None:
+        from flask import render_template
     
     subject = render_template(
-        f"{template.value}.subject.jinja2",
+        f"{template.value}.subject.html",
         public_url=get_public_url,
         member=member,
         **kwargs,
     )
     
     body = render_template(
-        f"{template.value}.body.jinja2",
+        f"{template.value}.body.html",
         public_url=get_public_url,
         member=member,
         **kwargs,
     )
+
+    if not db_session:
+        from service.db import db_session
     
-    session = db_session or service_db_session
-    
-    session.add(Message(
+    db_session.add(Message(
         subject=subject,
         body=body,
         member_id=member.member_id,
@@ -31,4 +32,4 @@ def send_message(template: MessageTemplate, member, db_session=None, **kwargs):
         status=Message.QUEUED,
         template=template.value,
     ))
-
+    

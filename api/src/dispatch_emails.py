@@ -1,13 +1,13 @@
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 from contextlib import closing
-from datetime import datetime, date, timedelta
+from datetime import datetime, timedelta
 from time import sleep
 
 import requests
 from rocky.process import log_exception, stoppable
 from sqlalchemy import func
 from sqlalchemy.exc import DatabaseError
-from sqlalchemy.orm import sessionmaker, contains_eager
+from sqlalchemy.orm import sessionmaker
 
 from membership.models import Member, Span
 from messages.message import send_message
@@ -58,7 +58,7 @@ def send_messages(db_session, key, domain, sender, to_override, limit):
             logger.error(f"failed to send {message.id} to {to}: {response.content}")
 
 
-def labaccess_reminder(db_session):
+def labaccess_reminder(db_session, render_template):
     now = datetime.utcnow()
     
     end_date_reminder_target = now.date() + timedelta(days=20)
@@ -87,18 +87,19 @@ def labaccess_reminder(db_session):
         # Don't send a reminder if we sent a reminder the last 28 days.
         reminder_sent = db_session.query(Message).filter(
             Message.member == member,
-            Message.template == MessageTemplate.LABACCESS_REMINDER,
+            Message.template == MessageTemplate.LABACCESS_REMINDER.value,
             now - timedelta(days=28) < Message.created_at,
         ).count()
         if reminder_sent:
             continue
 
-        logger.info(f'sending labaccess reminder to member with id {member.id}')
-        
+        logger.info(f'sending labaccess reminder to member with id {member.member_id}')
+
         send_message(
             template=MessageTemplate.LABACCESS_REMINDER,
             member=member,
             db_session=db_session,
+            render_template=render_template,
             expiration_date=end_date,
         )
 
@@ -116,7 +117,7 @@ if __name__ == '__main__':
         
         engine = create_mysql_engine(**get_mysql_config())
         session_factory = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-        
+
         logger.info(f'checking for emails to send every {args.sleep} seconds, limit is {args.limit}')
         
         key = config.get('MAILGUN_KEY', log_value=False)
@@ -128,6 +129,8 @@ if __name__ == '__main__':
             sleep(args.sleep)
             with closing(session_factory()) as db_session:
                 try:
+                    # TODO Send in render template, with autoescape for html enabled. Should we rename template 
+                    #  files? Yes! 
                     labaccess_reminder(db_session)
                     send_messages(db_session, key, domain, sender, to_override, args.limit)
                 except DatabaseError as e:
