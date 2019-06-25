@@ -2,6 +2,7 @@ import enum
 
 from sqlalchemy import Column, Integer, String, Text, DateTime, func, Date, ForeignKey, Enum
 from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import relationship
 
 from membership.models import Member
 
@@ -38,6 +39,8 @@ class Message(Base):
     created_at = Column(DateTime, server_default=func.now())
     updated_at = Column(DateTime, server_default=func.now())
     sent_at = Column(DateTime)
+
+    member = relationship(Member)
     
     def __repr__(self):
         return f'Message(recipient_id={self.id}, subject={self.subject}, member_id={self.member_id})'

@@ -2,10 +2,10 @@ from flask import render_template
 
 from messages.models import MessageTemplate, Message
 from service.config import get_public_url
-from service.db import db_session
+from service.db import db_session as service_db_session
 
 
-def send_message(template: MessageTemplate, member, **kwargs):
+def send_message(template: MessageTemplate, member, db_session=None, **kwargs):
     
     subject = render_template(
         f"{template.value}.subject.jinja2",
@@ -21,7 +21,9 @@ def send_message(template: MessageTemplate, member, **kwargs):
         **kwargs,
     )
     
-    db_session.add(Message(
+    session = db_session or service_db_session
+    
+    session.add(Message(
         subject=subject,
         body=body,
         member_id=member.member_id,
