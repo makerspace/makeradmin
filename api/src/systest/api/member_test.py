@@ -54,8 +54,3 @@ class Test(ApiTest):
                                    "username": member.email,
                                    "password": pwd})\
             .expect(code=200)
-
-    def test_can_not_set_password_and_unhashed_password_at_the_same_time(self):
-        member = self.obj.create_member(password=random_str(8), unhashed_password=random_str(8))
-        self.api.post("/membership/member", json=member).expect(code=422)
-        

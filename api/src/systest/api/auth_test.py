@@ -1,13 +1,13 @@
 import re
 
-from test_aid.obj import DEFAULT_PASSWORD_HASH, DEFAULT_PASSWORD
+from test_aid.obj import DEFAULT_PASSWORD
 from test_aid.systest_base import ApiTest
 
 
 class Test(ApiTest):
 
     def test_get_token_with_username_and_password(self):
-        self.api.create_member(password=DEFAULT_PASSWORD_HASH)
+        self.api.create_member(unhashed_password=DEFAULT_PASSWORD)
         username = self.api.member['email']
         
         patten = re.compile(r'[A-Za-z0-9]{32}')
@@ -40,7 +40,7 @@ class Test(ApiTest):
         self.assertTrue(patten.match(token))
         
     def test_get_token_with_bad_parameters(self):
-        self.api.create_member(password=DEFAULT_PASSWORD_HASH)
+        self.api.create_member(unhashed_password=DEFAULT_PASSWORD)
         username = self.api.member['email']
 
         self.api.post("/oauth/token", data=dict(grant_type='not-correct'))\
@@ -55,7 +55,7 @@ class Test(ApiTest):
             .expect(code=401)
 
     def test_delete_token_aka_logout(self):
-        self.api.create_member(password=DEFAULT_PASSWORD_HASH)
+        self.api.create_member(unhashed_password=DEFAULT_PASSWORD)
         username = self.api.member['email']
 
         token = self.api\
@@ -72,7 +72,7 @@ class Test(ApiTest):
         self.api.delete(f'/oauth/token/{token}', token=token).expect(code=401)
 
     def test_list_access_tokens(self):
-        self.api.create_member(password=DEFAULT_PASSWORD_HASH)
+        self.api.create_member(unhashed_password=DEFAULT_PASSWORD)
         username = self.api.member['email']
 
         token = self.api\

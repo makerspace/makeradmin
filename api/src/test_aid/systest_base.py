@@ -19,7 +19,7 @@ from service.db import create_mysql_engine, db_session
 from shop.stripe_constants import Type
 from test_aid.api import ApiFactory
 from test_aid.db import DbFactory
-from test_aid.obj import DEFAULT_PASSWORD_HASH
+from test_aid.obj import DEFAULT_PASSWORD
 from test_aid.systest_config import HOST_FRONTEND, HOST_PUBLIC, HOST_BACKEND, \
     SELENIUM_BASE_TIMEOUT, SLEEP, WEBDRIVER_TYPE, API_BEARER, SELENIUM_SCREENSHOT_DIR, KEEP_BROWSER, \
     STRIPE_PUBLIC_KEY
@@ -273,7 +273,7 @@ class ShopTestMixin:
     @skipIf(not stripe.api_key, "webshop tests require stripe api key in .env file")
     def setUp(self):
         super().setUp()
-        self.member = self.api.create_member(password=DEFAULT_PASSWORD_HASH)
+        self.member = self.api.create_member(unhashed_password=DEFAULT_PASSWORD)
         self.member_id = self.member['member_id']
         self.token = self.api.login_member()
 

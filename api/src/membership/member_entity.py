@@ -6,13 +6,51 @@ from service.entity import Entity
 from service.error import InternalServerError, UnprocessableEntity
 
 
+ALPHA_LOWER_SET = set("abcdefghijklmnopqrstuvwxyzåäö")
+ALPHA_UPPER_SET = set("ABCDEFGHIJKLMNOPQRSTUVWXYZÅÄÖ")
+DIGIT_SET = set("0123456789")
+ALPHA_DIGIT_SET = ALPHA_LOWER_SET | ALPHA_UPPER_SET | DIGIT_SET
+
+forbidden_sub_sequences = [
+    ("abcdefghijklmnopqrstuvwxyzåäö", 4),
+    ("abcdefghijklmnopqrstuvwxyzåäö"[::-1], 4),
+    ("qwertyuiopå", 4),
+    ("qwertyuiopå"[::-1], 4),
+    ("asdfghjklöä", 4),
+    ("asdfghjklöä"[::-1], 4),
+    ("zxcvbnm,.", 4),
+    ("zxcvbnm,."[::-1], 4),
+    ("01234567890", 3),
+    ("01234567890"[::-1], 3),
+]
+
+
+def contains_sub_sequence(value, sequence, length):
+    for i in range(0, len(sequence) - length + 1):
+        if value.find(sequence[i:i + length]) != -1:
+            return True
+    return False
+
+
 def handle_password(data):
+    password = data.pop('password', None)
     unhashed_password = data.pop('unhashed_password', None)
     if unhashed_password is not None:
-        if data.get('password') is not None:
-            raise UnprocessableEntity("'password' or 'unhashed_password' allowed, not both",
-                                      fields='password,unhashed_password')
-        
+        contained_chars_set = set(unhashed_password)
+
+        if len(unhashed_password) < 8 or len(contained_chars_set) < 6:
+            raise ValueError("password must be at least 8 characters long with at least 6 unique characters")
+
+        # Test for forbidden sequences
+        forbidden_sequences = {
+            "password", "q1w2e3r4t5", "maker", "space"
+        }
+        if (
+                any([contains_sub_sequence(unhashed_password, s, l) for s, l in forbidden_sub_sequences]) or
+                any([unhashed_password.find(s) != -1 for s in forbidden_sequences])
+        ):
+            raise ValueError("password contains a forbidden sequence of characters")
+
         data['password'] = hash_password(unhashed_password)
         
     
