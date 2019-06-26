@@ -3,6 +3,7 @@ from random import randint, choice
 from faker import Faker
 
 from membership.models import Span
+from messages.models import Message
 from shop.models import ProductAction
 from test_aid.test_util import random_str
 import re
@@ -112,3 +113,14 @@ class ObjFactory:
         obj.update(**kwargs)
         self.action = obj
         return self.action
+
+    def create_message(self, **kwargs):
+        obj = dict(
+            subject=random_str(),
+            body=self.fake.bs(),
+            recipient=self.fake.email(),
+            status=Message.QUEUED,
+        )
+        obj.update(**kwargs)
+        self.message = obj
+        return self.message
