@@ -88,7 +88,7 @@ class Test(FlaskTestBase):
         
         labaccess_reminder(db_session, render_template)
         
-        self.assertEqual(1, db_session.query(Message).filter(Message.member == member).count())
+        self.assertEqual(2, db_session.query(Message).filter(Message.member == member).count())
 
     def test_reminder_message_is_created_if_member_got_other_message(self):
         member = self.db.create_member()
