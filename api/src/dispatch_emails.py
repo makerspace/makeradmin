@@ -1,9 +1,11 @@
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 from contextlib import closing
 from datetime import datetime, timedelta
+from os.path import abspath, dirname
 from time import sleep
 
 import requests
+from jinja2 import Environment, select_autoescape, FileSystemLoader
 from rocky.process import log_exception, stoppable
 from sqlalchemy import func
 from sqlalchemy.exc import DatabaseError
@@ -15,6 +17,15 @@ from messages.models import Message, MessageTemplate
 from service.config import get_mysql_config, config
 from service.db import create_mysql_engine
 from service.logging import logger
+
+path = abspath(dirname(__file__))
+print(path)
+template_loader = FileSystemLoader(path + '/templates')
+template_env = Environment(loader=template_loader, autoescape=select_autoescape())
+
+
+def render_template(name, **kwargs):
+    return template_env.get_template(name).render(**kwargs)
 
 
 def send_messages(db_session, key, domain, sender, to_override, limit):
@@ -74,7 +85,7 @@ def labaccess_reminder(db_session, render_template):
     
     for member in query:
         # We have a candidate, now check if we should send a reminder.
-         
+        
         # First double check the end date so we don't send reminder if there is another span further in the future.
         end_date = db_session.query(func.max(Span.enddate)).filter(
             Span.member == member,
@@ -103,6 +114,8 @@ def labaccess_reminder(db_session, render_template):
             expiration_date=end_date,
         )
 
+    db_session.commit()
+    
 
 if __name__ == '__main__':
 
@@ -129,9 +142,7 @@ if __name__ == '__main__':
             sleep(args.sleep)
             with closing(session_factory()) as db_session:
                 try:
-                    # TODO Send in render template, with autoescape for html enabled. Should we rename template 
-                    #  files? Yes! 
-                    labaccess_reminder(db_session)
+                    labaccess_reminder(db_session, render_template)
                     send_messages(db_session, key, domain, sender, to_override, args.limit)
                 except DatabaseError as e:
                     logger.warning(f"failed to do db query. ignoring: {e}")

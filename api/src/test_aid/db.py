@@ -4,10 +4,9 @@ from faker import Faker
 
 from core.models import AccessToken
 from membership.models import Member, Group, Permission, Span, Key, Box
-from messages.models import Message, Recipient
+from messages.models import Message
 from service.api_definition import SERVICE_USER_ID
 from service.db import db_session
-from shop.models import StripePending
 from test_aid.test_util import random_str
 
 
@@ -28,7 +27,6 @@ class DbFactory:
         self.key = None
         self.permission = None
         self.message = None
-        self.recipient = None
         self.box = None
 
     def create_access_token(self, **kwargs):
@@ -95,26 +93,21 @@ class DbFactory:
         db_session.commit()
         return self.key
 
-    def create_message(self, **kwargs):
-        obj = self.obj.create_message(**kwargs)
+    def create_message(self, member=None, **kwargs):
+        member = member or self.member
+        
+        obj = dict(
+            member=member,
+            subject=random_str(),
+            body=self.fake.bs(),
+            recipient=member.email if member else self.fake.email(),
+            status=Message.QUEUED,
+        )
+        obj.update(**kwargs)
         self.message = Message(**obj)
         db_session.add(self.message)
         db_session.commit()
-        return self.message
-
-    def create_recipient(self, **kwargs):
-        obj = dict(
-            title=random_str(),
-            description=self.fake.bs(),
-            recipient=self.fake.email(),
-            date_sent=self.test.date(),
-            status='sent',
-        )
-        obj.update(**kwargs)
-        self.recipient = Recipient(**obj)
-        db_session.add(self.recipient)
-        db_session.commit()
-        return self.recipient
+        return self.member
 
     def create_permission(self, **kwargs):
         obj = dict(
