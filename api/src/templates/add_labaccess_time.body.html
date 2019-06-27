@@ -1,22 +1,17 @@
-<table width="600px" border="0" cellspacing="0" cellpadding="0" style="margin-left: auto; margin-right: auto;">
-    <tr>
-        <td align="center">
-            <img style="margin-bottom: 15px;" width=200px src="https://www.makerspace.se/wp-content/uploads/2015/06/logo-transparent-500px-300x210.png" />
-        </td>
-    </tr>
-    <tr>
-        <td>
-            <h2>Your lab access time has been extended!</h2>
-            <p>Hej {{member.firstname}},</p>
-            <p>Your lab access time has been extended by  {{extended_days}} days and is now active up to and including {{end_date}}.</p>
-            <p>Remember that you can always see you current lab membership status on your <a href="{{ public_url('/member') }}">Stockholm Makerspace member homepage</a>.</p>
-            <p>New lab access and other material can be purchased in the <a href="{{ public_url('/shop') }}">webshop</a>.</p>
+{% extends "email_body_base.html" %}
 
-            <h2>Din labaccess har utökats!</h2>
-            <p>Hej {{member.firstname}},</p>
-            </p>Din labaccess har utökats med {{extended_days}} dagar och är nu giltig till och med {{end_date}}.</p>
-            <p>Kom ihåg att du alltid kan se din nuvarande labaccess-status på din <a href="{{ public_url('/member') }}">Stockholm Makerspace medlemssida</a>.</p>
-            <p>Ny labaccess och annat material kan köpas i <a href="{{ public_url('/shop') }}">webshoppen</a>.</p>
-        </td>
-    </tr>
-</table>
+{% block swedish %}
+    <h2>Din labaccess har utökats!</h2>
+    <p>Hej {{member.firstname}},</p>
+    <p>Din labaccess har utökats med {{extended_days}} dagar och är nu giltig till och med {{end_date}}.</p>
+    <p>Kom ihåg att du alltid kan se din nuvarande labaccess-status på din <a href="{{ public_url('/member') }}">Stockholm Makerspace medlemssida</a>.</p>
+    <p>Ny labaccess och annat material kan köpas i <a href="{{ public_url('/shop') }}">webshoppen</a>.</p>
+{% endblock %}
+
+{% block english %}
+    <h2>Your lab access time has been extended!</h2>
+    <p>Hi {{member.firstname}},</p>
+    <p>Your lab access time has been extended by  {{extended_days}} days and is now active up to and including {{end_date}}.</p>
+    <p>Remember that you can always see you current lab membership status on your <a href="{{ public_url('/member') }}">Stockholm Makerspace member homepage</a>.</p>
+    <p>New lab access and other material can be purchased in the <a href="{{ public_url('/shop') }}">webshop</a>.</p>
+{% endblock %}
