@@ -8,7 +8,7 @@ from service.entity import not_empty, OrmSingeRelation
 message_entity = MessageEntity(
     Message,
     validation=dict(title=not_empty),
-    search_columns=('subject', 'body'),
+    search_columns=('subject', 'body', 'recipient'),
 )
 
 

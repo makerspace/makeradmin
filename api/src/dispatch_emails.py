@@ -18,9 +18,7 @@ from service.config import get_mysql_config, config
 from service.db import create_mysql_engine
 from service.logging import logger
 
-path = abspath(dirname(__file__))
-print(path)
-template_loader = FileSystemLoader(path + '/templates')
+template_loader = FileSystemLoader(abspath(dirname(__file__)) + '/templates')
 template_env = Environment(loader=template_loader, autoescape=select_autoescape())
 
 
