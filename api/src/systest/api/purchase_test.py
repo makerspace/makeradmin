@@ -37,6 +37,8 @@ class Test(ShopTestMixin, ApiTest):
         
         transaction_id = self.post(f"/webshop/pay", purchase, token=self.token)\
             .expect(code=200, status="ok").get('data__transaction_id')
+
+        self.trigger_stripe_source_event(source.id, expected_event_count=1)
         
         self.get(f"/webshop/transaction/{transaction_id}").expect(
             code=200,
