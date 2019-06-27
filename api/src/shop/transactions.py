@@ -157,6 +157,7 @@ def complete_transaction(transaction):
 
     transaction.status = Transaction.COMPLETED
     db_session.add(transaction)
+    db_session.flush()
     logger.info(f"completing transaction {transaction.id}, payment confirmed"
                 f", sending email receipt to member {transaction.member_id}")
     send_receipt_email(transaction)
