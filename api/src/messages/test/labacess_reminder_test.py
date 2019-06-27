@@ -70,7 +70,7 @@ class Test(FlaskTestBase):
         self.db.create_message(
             template=MessageTemplate.LABACCESS_REMINDER.value,
             member=member,
-            created_at=self.datetime(days=-28),
+            created_at=self.datetime(days=-27),
         )
         
         labaccess_reminder(db_session, render_template)
@@ -83,7 +83,7 @@ class Test(FlaskTestBase):
         self.db.create_message(
             template=MessageTemplate.LABACCESS_REMINDER.value,
             member=member,
-            created_at=self.datetime(days=-29),
+            created_at=self.datetime(days=-30),
         )
         
         labaccess_reminder(db_session, render_template)

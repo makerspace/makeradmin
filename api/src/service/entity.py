@@ -5,6 +5,7 @@ from math import ceil
 from typing import Mapping
 
 from flask import request
+from pytz import UTC
 from sqlalchemy import inspect, Integer, String, DateTime, Text, desc, asc, or_, text, Date, Enum as DbEnum, Numeric
 
 from service.api_definition import BAD_VALUE, REQUIRED, Arg, symbol, Enum, natural0, natural1
@@ -54,7 +55,7 @@ to_obj_converters = {
     Numeric: str,
     String: identity,
     Text: identity,
-    DateTime: lambda d: None if d is None else d.isoformat() + "Z",
+    DateTime: lambda d: None if d is None else d.replace(tzinfo=UTC).isoformat(),
     Date: lambda d: None if d is None else d.isoformat(),
     DbEnum: identity,
 }

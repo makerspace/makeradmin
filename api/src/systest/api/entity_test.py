@@ -1,6 +1,8 @@
 from datetime import datetime
 from random import randint
 
+from pytz import UTC
+
 from service.api_definition import REQUIRED, NOT_UNIQUE
 from test_aid.systest_base import ApiTest
 from test_aid.test_util import random_str
@@ -37,7 +39,7 @@ class Test(ApiTest):
             .data
         
         self.assertTrue(data['updated_at'] >= data['created_at'])
-        self.assertTrue(datetime.fromisoformat(data['updated_at']) > entity.updated_at)
+        self.assertTrue(datetime.fromisoformat(data['updated_at']) > entity.updated_at.replace(tzinfo=UTC))
 
     def test_can_not_update_entity_using_empty_or_read_only_data(self):
         entity = self.api.create_group()
@@ -89,7 +91,7 @@ class Test(ApiTest):
         # This replicates the behavior in the previous implementation.
         self.delete(f"/membership/member/{randint(1e8, 9e9)}").expect(404)
 
-    def test_primary_key__created_at_and_updated_at_is_filtered_on_update(self):
+    def test_primary_key__created_at_and_updated_at_is_filtered_and_not_used_on_update(self):
         entity = self.api.create_group()
         entity_id = entity['group_id']
 
