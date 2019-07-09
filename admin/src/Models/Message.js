@@ -33,13 +33,13 @@ Message.model = {
 Message.statusText = message => {
     switch (message.status) {
         case "queued":
-            return "Köad";
+            return "Queued";
         case "failed":
-            return "Misslycad";
+            return "Failed";
         case "sent":
-            return "Skickad";
+            return "Sent";
         default:
-            return "Okänt";
+            return "Unknown";
     }
 };
 
