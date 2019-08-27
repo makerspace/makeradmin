@@ -16,12 +16,9 @@ jobs:
         - make -C multiaccess-program/ init
       script:
         - make -C multiaccess-program/ test
-      after_script:
-        - make -C multiaccess-program/ coverage
-        #- coveralls
       env:
         PROJECT: "multiaccess-program"
-        PURPOSE: "test+coverage"
+        PURPOSE: "test"
 
     # Multiaccess-program make dist
     - install:
