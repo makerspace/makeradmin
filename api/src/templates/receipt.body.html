@@ -1,49 +1,60 @@
-<table width="400px" border="0" cellspacing="0" cellpadding="0" style="margin-left: auto; margin-right: auto;">
-    <tr>
-        <td align="center" colspan="3">
-            <img style="margin-bottom: 15px;" width=200px src="https://www.makerspace.se/wp-content/uploads/2015/06/logo-transparent-500px-300x210.png" />
-        </td>
-    </tr>
-    <tr>
-        <td align="center" colspan="3">
-            <p>Tack för ditt köp! Thanks for your purchase!<br> {{member.firstname}} (#{{member.member_number}})</p>
-        </td>
-    </tr>
+{% extends "email_body_base.html" %}
+
+{% block swedish %}
+  <h2>Tack för ditt köp {{member.firstname}} (#{{member.member_number}})</h2>
+
+  <h3><a href='{{ public_url("/shop/receipt/" + (transaction.id|string)) }}'>Kvittonummer: {{ transaction.id }}</a></h3>
+  
+  <table width="400px" border="0" cellspacing="0" cellpadding="0">
     {% for product, cartItem in cart %}
-        <tr>
-            <td align="left">
-                {{ product.name }}
-            </td>
-            <td align="right">
-                {{ cartItem.count }} {{ product.unit }}
-            </td>
-            <td align="right">
-                {{ cartItem.amount }} {{ currency }}
-            </td>
-        </tr>
+      <tr>
+        <td align="left">{{ product.name }}</td>
+        <td align="right">{{ cartItem.count }} {{ product.unit }}</td>
+        <td align="right">{{ cartItem.amount }} {{ currency }}</td>
+      </tr>
     {% endfor %}
+    
     <tr>
-        <td align="right" style="font-size: 16pt;" colspan="3">
-            <span>{{ transaction.amount }} {{ currency }}</span>
-        </td>
+      <td align="left" style="font-weight: bold;">Totalt</td>
+      <td align="right" style="font-weight: bold;" colspan="2">{{ transaction.amount }} {{ currency }}</td>
     </tr>
+  
+  </table>
+  
+  <p style="color: #777">
+    Stockholm Makerspace - Drottning Kristinas väg 53, 114 28 Stockholm<br>
+    Org. Nummer: 802467-7026<br>
+    Stockholm Makerspace är en ideell förening.<br>
+    <a href="https://makerspace.se/" target="_blank">makerspace.se</a><br>
+  </p>
+{% endblock %}
+
+{% block english %}
+  <h2>Thanks for your purchase {{member.firstname}} (#{{member.member_number}})</h2>
+
+  <h3><a href='{{ public_url("/shop/receipt/" + (transaction.id|string)) }}'>Receipt number: {{ transaction.id }}</a></h3>
+
+  <table width="400px" border="0" cellspacing="0" cellpadding="0">
+    {% for product, cartItem in cart %}
+      <tr>
+        <td align="left">{{ product.name }}</td>
+        <td align="right">{{ cartItem.count }} {{ product.unit }}</td>
+        <td align="right">{{ cartItem.amount }} {{ currency }}</td>
+      </tr>
+    {% endfor %}
+    
     <tr>
-        <td align="center" colspan="3">
-          <p>Kvittonummer: {{ transaction.id }}. <a href='{{ public_url("/shop/receipt/" + (transaction.id|string)) }}'>Se detta kvitto på nätet</a>.<br>
-          (Receipt number above, click to see your receipt online).</p>
-
-          <p>Stockholm Makerspace - Drottning Kristinas väg 53, 114 28 Stockholm</p>
-
-          <p>Stockholm Makerspace är en ideell förening.<br>
-              Stockholm Makerspace is a non-profit organization.<br>
-              Org. Nummer: 802467-7026</p>
-
-          <p><a href="https://www.makerspace.se/" target="_blank">makerspace.se<br><br>
-            <a href="https://www.facebook.com/groups/makerspace.se" target="_blank">Facebook</a><br>
-            <a href="https://www.makerspace.se/medlemskap" target="_blank">Info om medlemskap</a> / <a href="https://www.makerspace.se/membership" target="_blank">Info about membership</a><br>
-            <a href="https://www.makerspace.se/kalendarium" target="_blank">Kalendariet/Calendar<br>
-            <a href="https://wiki.makerspace.se/Makerspace_FAQ" target="_blank">Allmän Q&A </a>/ <a href="https://wiki.makerspace.se/Makerspace_FAQ,_English" target="_blank">General FAQ</a>
-          </p>
-        </td>
+      <td align="left" style="font-weight: bold;">Total</td>
+      <td align="right" style="font-weight: bold;" colspan="2">{{ transaction.amount }} {{ currency }}</td>
     </tr>
-</table>
+  
+  </table>
+  
+  <p style="color: #777">
+    Stockholm Makerspace - Drottning Kristinas väg 53, 114 28 Stockholm<br>
+    Org. Nummer: 802467-7026<br>
+    Stockholm Makerspace is a non-profit organization.<br>
+    <a href="https://makerspace.se/" target="_blank">makerspace.se</a><br>
+  </p>
+  
+{% endblock %}
