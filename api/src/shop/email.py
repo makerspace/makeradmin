@@ -31,7 +31,7 @@ def send_receipt_email(transaction):
 
     send_message(
         MessageTemplate.RECEIPT, transaction.member,
-        cart=zip(products, contents),
+        cart=list(zip(products, contents)),
         transaction=transaction,
         currency="kr",
     )
