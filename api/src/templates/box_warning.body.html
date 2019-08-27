@@ -1,0 +1,18 @@
+{% extends "email_body_base.html" %}
+
+{% block swedish %}
+<p>Hej,</p>
+<p>
+    Din labacess gick ut {{ expiration_date }}, hämta lådan eller så går innehållet till makespace.
+</p>
+<p>
+    Hälsningar<br/>
+    Stockholm Makerpsace
+</p>
+{% endblock %}
+
+{% block separator %}
+{% endblock %}
+
+{% block english %}
+{% endblock %}

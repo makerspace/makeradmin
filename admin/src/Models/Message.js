@@ -1,4 +1,3 @@
-import React from 'react';
 import Base from './Base';
 
 
@@ -9,61 +8,38 @@ export default class Message extends Base {
     }
     
     canSave() {
-        return this.description && this.recipients && this.recipients.length && (this.message_type !== 'email' || this.title);
+        return this.body && this.recipients && this.recipients.length && this.subject;
     }
 }
 
 Message.model = {
-    id: "messages_message_id",
+    id: "id",
     root: "/messages/message",
     attributes: {
-        description: "",  // Body, rename in the future.
+        subject: "",
+        body: "",
+        status: "",
+        template: "",
+        recipient: "",
+        recipients: [],
         created_at: null,
         updated_at: null,
-        entity_id: 0,
-        messages_message_id: 0,
-        message_type: "email",
-        num_recipients: 0,
-        recipient: "",
+        sent_at: null,
         recipient_id: 0,
-        recipients: [],
-        status: "",
-        title: "",
-        date_sent: null,
     },
-};
-
-
-Message.typeIcon = message => {
-    switch (message.message_type) {
-        case "email":
-            return <i className="uk-icon-envelope" title="E-post"/>;
-        default:
-            return message.message_type;
-    }
-};
-
-
-Message.typeText = message => {
-    switch (message.message_type) {
-        case "email":
-            return "E-post";
-        default:
-            return message.message_type;
-    }
 };
 
 
 Message.statusText = message => {
     switch (message.status) {
         case "queued":
-            return "Köad";
+            return "Queued";
         case "failed":
-            return "Misslycad";
+            return "Failed";
         case "sent":
-            return "Skickad";
+            return "Sent";
         default:
-            return "Okänt";
+            return "Unknown";
     }
 };
 

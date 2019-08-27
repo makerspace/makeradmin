@@ -1,6 +1,4 @@
 from datetime import date, timedelta, datetime
-from itertools import groupby
-from operator import attrgetter
 
 from sqlalchemy import desc
 from sqlalchemy.orm import contains_eager
@@ -10,7 +8,6 @@ from membership.models import Member, Box, Span
 from messages.views import message_entity
 from service.db import db_session
 from service.error import NotFound
-from service.logging import logger
 from service.util import date_to_str, dt_to_str
 
 
@@ -56,7 +53,7 @@ def box_terminator_boxes():
     query = get_box_query()
     return [get_box_info(b) for b in query.order_by(desc(Box.last_check_at))]
     
-    
+
 def box_terminator_nag(member_number=None, box_label_id=None):
     raise NotImplemented("Disabled until message is fixed.")
     
@@ -65,17 +62,12 @@ def box_terminator_nag(member_number=None, box_label_id=None):
                                            Member.member_number == member_number).one()
     except NoResultFound:
         raise NotFound()
-    
-    message_entity.create({
-        "recipients": [{"type": "member", "id": box.member.member_id}],
-        "message_type": "email",
-        "title": "Hämta din låda!",
-        "description": (
-            f"Hej,\n\nDin labacess gick ut {date_to_str(get_labacess_end_date(box))}"
-            f", hämta lådan eller så går innehållet till makespace.\n\nHälsningar\nStockholm Makerpsace"
-        )
-    }, commit=False)
 
+    send_message(
+        MessageTemplate.BOX_WARNING, box.member,
+        expiration_date=date_to_str(get_labacess_end_date(box)),
+    )
+    
     box.last_nag_at = datetime.utcnow()
     
 

@@ -83,11 +83,6 @@ const nav = {
                     target: "/messages/new",
                     icon: "envelope",
                 },
-                {
-                    text: "Mallar",
-                    target: "/messages/templates",
-                    icon: "file-text-o",
-                },
             ],
         },
         {
