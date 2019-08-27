@@ -22,6 +22,10 @@ template_loader = FileSystemLoader(abspath(dirname(__file__)) + '/templates')
 template_env = Environment(loader=template_loader, autoescape=select_autoescape())
 
 
+LABACCESS_REMINDER_DAYS_BEFORE = 20
+LABACCESS_REMINDER_GRACE_PERIOD = 28
+
+
 def render_template(name, **kwargs):
     return template_env.get_template(name).render(**kwargs)
 
@@ -52,14 +56,14 @@ def send_messages(db_session, key, domain, sender, to_override, limit):
                                  })
         
         if response.ok:
-            message.status = 'sent'
+            message.status = Message.SENT
             message.sent_at = datetime.utcnow()
             
             db_session.add(message)
             db_session.commit()
             
         else:
-            message.status = 'failed'
+            message.status = Message.FAILED
             
             db_session.add(message)
             db_session.commit()
@@ -70,7 +74,7 @@ def send_messages(db_session, key, domain, sender, to_override, limit):
 def labaccess_reminder(db_session, render_template):
     now = datetime.utcnow()
     
-    end_date_reminder_target = now.date() + timedelta(days=20)
+    end_date_reminder_target = now.date() + timedelta(days=LABACCESS_REMINDER_DAYS_BEFORE)
     
     query = db_session.query(Member)
     query = query.join(Span)
@@ -97,7 +101,7 @@ def labaccess_reminder(db_session, render_template):
         reminder_sent = db_session.query(Message).filter(
             Message.member == member,
             Message.template == MessageTemplate.LABACCESS_REMINDER.value,
-            now - timedelta(days=28) < Message.created_at,
+            now - timedelta(days=LABACCESS_REMINDER_GRACE_PERIOD) < Message.created_at,
         ).count()
         if reminder_sent:
             continue

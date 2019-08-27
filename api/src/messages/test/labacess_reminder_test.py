@@ -1,6 +1,7 @@
 
 import messages
-from dispatch_emails import labaccess_reminder, render_template
+from dispatch_emails import labaccess_reminder, render_template, LABACCESS_REMINDER_DAYS_BEFORE, \
+    LABACCESS_REMINDER_GRACE_PERIOD
 from membership import membership
 from membership.models import Span, Member
 from messages.models import Message, MessageTemplate
@@ -19,7 +20,7 @@ class Test(FlaskTestBase):
     
     def test_reminder_message_is_created_20_days_before_expiry(self):
         member = self.db.create_member()
-        self.db.create_span(type=Span.LABACCESS, enddate=self.date(20))
+        self.db.create_span(type=Span.LABACCESS, enddate=self.date(LABACCESS_REMINDER_DAYS_BEFORE))
         
         labaccess_reminder(db_session, render_template)
         
@@ -30,7 +31,7 @@ class Test(FlaskTestBase):
 
     def test_reminder_message_is_created_20_days_before_expiry_even_if_other_span_after(self):
         member = self.db.create_member()
-        self.db.create_span(type=Span.LABACCESS, enddate=self.date(20))
+        self.db.create_span(type=Span.LABACCESS, enddate=self.date(LABACCESS_REMINDER_DAYS_BEFORE))
         self.db.create_span(type=Span.MEMBERSHIP, enddate=self.date(200))
         
         labaccess_reminder(db_session, render_template)
@@ -39,26 +40,29 @@ class Test(FlaskTestBase):
 
     def test_reminder_message_is_not_created_unless_labaccess_and_20_days_before_expiry(self):
         m1 = self.db.create_member()
-        s1 = self.db.create_span(type=Span.LABACCESS, enddate=self.date(19))
+        s1 = self.db.create_span(type=Span.LABACCESS, enddate=self.date(LABACCESS_REMINDER_DAYS_BEFORE - 1))
 
         m2 = self.db.create_member()
-        s2 = self.db.create_span(type=Span.LABACCESS, enddate=self.date(21))
+        s2 = self.db.create_span(type=Span.LABACCESS, enddate=self.date(LABACCESS_REMINDER_DAYS_BEFORE + 1))
 
         m3 = self.db.create_member()
-        s3 = self.db.create_span(type=Span.SPECIAL_LABACESS, enddate=self.date(20))
+        s3 = self.db.create_span(type=Span.SPECIAL_LABACESS, enddate=self.date(LABACCESS_REMINDER_DAYS_BEFORE))
 
         m4 = self.db.create_member()
-        s4 = self.db.create_span(type=Span.MEMBERSHIP, enddate=self.date(20))
+        s4 = self.db.create_span(type=Span.MEMBERSHIP, enddate=self.date(LABACCESS_REMINDER_DAYS_BEFORE))
 
         m5 = self.db.create_member()
-        s5a = self.db.create_span(type=Span.LABACCESS, enddate=self.date(20))
-        s5b = self.db.create_span(type=Span.LABACCESS, startdate=self.date(21), enddate=self.date(22))
+        s5a = self.db.create_span(type=Span.LABACCESS, enddate=self.date(LABACCESS_REMINDER_DAYS_BEFORE))
+        s5b = self.db.create_span(type=Span.LABACCESS,
+                                  startdate=self.date(LABACCESS_REMINDER_DAYS_BEFORE + 1),
+                                  enddate=self.date(LABACCESS_REMINDER_DAYS_BEFORE +2))
 
         m6 = self.db.create_member()
-        s6 = self.db.create_span(type=Span.LABACCESS, enddate=self.date(20), deleted_at=self.datetime())
+        s6 = self.db.create_span(type=Span.LABACCESS, enddate=self.date(LABACCESS_REMINDER_DAYS_BEFORE),
+                                 deleted_at=self.datetime())
 
         m7 = self.db.create_member(deleted_at=self.datetime())
-        s7 = self.db.create_span(type=Span.LABACCESS, enddate=self.date(20))
+        s7 = self.db.create_span(type=Span.LABACCESS, enddate=self.date(LABACCESS_REMINDER_DAYS_BEFORE))
         
         labaccess_reminder(db_session, render_template)
         
@@ -66,11 +70,11 @@ class Test(FlaskTestBase):
         
     def test_reminder_message_is_not_created_if_recent_reminder_already_exists(self):
         member = self.db.create_member()
-        self.db.create_span(type=Span.LABACCESS, enddate=self.date(20))
+        self.db.create_span(type=Span.LABACCESS, enddate=self.date(LABACCESS_REMINDER_DAYS_BEFORE))
         self.db.create_message(
             template=MessageTemplate.LABACCESS_REMINDER.value,
             member=member,
-            created_at=self.datetime(days=-27),
+            created_at=self.datetime(days=-LABACCESS_REMINDER_GRACE_PERIOD + 1),
         )
         
         labaccess_reminder(db_session, render_template)
@@ -79,11 +83,11 @@ class Test(FlaskTestBase):
 
     def test_reminder_message_is_created_if_recent_reminder_is_old(self):
         member = self.db.create_member()
-        self.db.create_span(type=Span.LABACCESS, enddate=self.date(20))
+        self.db.create_span(type=Span.LABACCESS, enddate=self.date(LABACCESS_REMINDER_DAYS_BEFORE))
         self.db.create_message(
             template=MessageTemplate.LABACCESS_REMINDER.value,
             member=member,
-            created_at=self.datetime(days=-30),
+            created_at=self.datetime(days=-LABACCESS_REMINDER_GRACE_PERIOD - 2),
         )
         
         labaccess_reminder(db_session, render_template)
@@ -92,7 +96,7 @@ class Test(FlaskTestBase):
 
     def test_reminder_message_is_created_if_member_got_other_message(self):
         member = self.db.create_member()
-        self.db.create_span(type=Span.LABACCESS, enddate=self.date(20))
+        self.db.create_span(type=Span.LABACCESS, enddate=self.date(LABACCESS_REMINDER_DAYS_BEFORE))
         self.db.create_message(
             template=MessageTemplate.BOX_TERMINATED.value,
             member=member,
@@ -112,7 +116,7 @@ class Test(FlaskTestBase):
         )
         
         member = self.db.create_member()
-        self.db.create_span(type=Span.LABACCESS, enddate=self.date(20))
+        self.db.create_span(type=Span.LABACCESS, enddate=self.date(LABACCESS_REMINDER_DAYS_BEFORE))
         
         labaccess_reminder(db_session, render_template)
         
