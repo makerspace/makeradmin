@@ -8,22 +8,27 @@ env:
 language: python
 python:
   - "3.6"
-
+ 
 jobs:
   include:
     # Multiaccess-program tests
     - before_install:
-        - sudo apt-get install -y unixodbc-dev
-    - install:
+        - sudo apt update
+        - sudo apt install unixodbc-dev
+      install:
         - make -C multiaccess-program/ init
       script:
         - make -C multiaccess-program/ test
+      sudo: required
       env:
         PROJECT: "multiaccess-program"
         PURPOSE: "test"
 
     # Multiaccess-program make dist
-    - install:
+    - before_install:
+        - sudo apt update
+        - sudo apt install unixodbc-dev
+      install:
         - make -C multiaccess-program/ init
       script:
         - make -C multiaccess-program/ dist
