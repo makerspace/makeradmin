@@ -12,6 +12,8 @@ python:
 jobs:
   include:
     # Multiaccess-program tests
+    - before_install:
+        - sudo apt-get install -y unixodbc-dev
     - install:
         - make -C multiaccess-program/ init
       script:
