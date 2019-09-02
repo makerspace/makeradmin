@@ -1,0 +1,60 @@
+{% extends "email_body_base.html" %}
+
+{% block swedish %}
+  <h2>Tack för ditt köp {{member.firstname}} (#{{member.member_number}})</h2>
+
+  <h3><a href='{{ public_url("/shop/receipt/" + (transaction.id|string)) }}'>Kvittonummer: {{ transaction.id }}</a></h3>
+  
+  <table width="400px" border="0" cellspacing="0" cellpadding="0">
+    {% for product, cartItem in cart %}
+      <tr>
+        <td align="left">{{ product.name }}</td>
+        <td align="right">{{ cartItem.count }} {{ product.unit }}</td>
+        <td align="right">{{ cartItem.amount }} {{ currency }}</td>
+      </tr>
+    {% endfor %}
+    
+    <tr>
+      <td align="left" style="font-weight: bold;">Totalt</td>
+      <td align="right" style="font-weight: bold;" colspan="2">{{ transaction.amount }} {{ currency }}</td>
+    </tr>
+  
+  </table>
+  
+  <p style="color: #777">
+    Stockholm Makerspace - Drottning Kristinas väg 53, 114 28 Stockholm<br>
+    Org. Nummer: 802467-7026<br>
+    Stockholm Makerspace är en ideell förening.<br>
+    <a href="https://makerspace.se/" target="_blank">makerspace.se</a><br>
+  </p>
+{% endblock %}
+
+{% block english %}
+  <h2>Thanks for your purchase {{member.firstname}} (#{{member.member_number}})</h2>
+
+  <h3><a href='{{ public_url("/shop/receipt/" + (transaction.id|string)) }}'>Receipt number: {{ transaction.id }}</a></h3>
+
+  <table width="400px" border="0" cellspacing="0" cellpadding="0">
+    {% for product, cartItem in cart %}
+      <tr>
+        <td align="left">{{ product.name }}</td>
+        <td align="right">{{ cartItem.count }} {{ product.unit }}</td>
+        <td align="right">{{ cartItem.amount }} {{ currency }}</td>
+      </tr>
+    {% endfor %}
+    
+    <tr>
+      <td align="left" style="font-weight: bold;">Total</td>
+      <td align="right" style="font-weight: bold;" colspan="2">{{ transaction.amount }} {{ currency }}</td>
+    </tr>
+  
+  </table>
+  
+  <p style="color: #777">
+    Stockholm Makerspace - Drottning Kristinas väg 53, 114 28 Stockholm<br>
+    Org. Nummer: 802467-7026<br>
+    Stockholm Makerspace is a non-profit organization.<br>
+    <a href="https://makerspace.se/" target="_blank">makerspace.se</a><br>
+  </p>
+  
+{% endblock %}

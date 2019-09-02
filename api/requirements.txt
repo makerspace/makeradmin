@@ -10,6 +10,8 @@ python-dotenv
 bcrypt
 stripe
 jsonschema
+jinja2
+pytz
 
 # Test requirements
 pytest

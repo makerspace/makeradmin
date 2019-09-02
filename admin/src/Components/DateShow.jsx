@@ -7,7 +7,7 @@ const DateShow = ({date}) => {
         return <span>{dateToStr(date)}</span>;
     }
     
-    return <span><em>Ej angivet</em></span>;
+    return <span><em>Not set</em></span>;
 };
 
 export default DateShow;

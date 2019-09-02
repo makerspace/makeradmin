@@ -23,8 +23,13 @@ class Tui(object):
             print("    ", line)
         print()
         try:
-            if input("'go' to continue, ctrl-c to abort: ").strip() != 'go':
-                raise KeyboardInterrupt()
+            valid_input = False
+            while not valid_input:
+                user_command = input("'go' to perform all, 'exit' to abort: ").strip().lower()
+                if user_command == 'go':
+                    valid_input = True
+                elif user_command == 'exit':
+                    raise KeyboardInterrupt()
         except KeyboardInterrupt:
             raise SystemExit()
 

@@ -65,6 +65,8 @@ services:
       MAILGUN_KEY:
       MAILGUN_FROM:
       MAILGUN_TO_OVERRIDE:
+      HOST_PUBLIC:
+      HOST_FRONTEND:
     depends_on:
       - api
     networks:

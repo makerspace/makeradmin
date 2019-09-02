@@ -7,16 +7,17 @@
     "license": "GPL-3.0",
     "devDependencies": {
         "sass-loader": "^7.1.0",
-        "ts-loader": "^5.3.3",
-        "typescript": "^3.4.2",
-        "webpack": "^4.20.2",
-        "webpack-cli": "^3.1.1",
-        "webpack-dev-server": "^3.1.14",
+        "ts-loader": "^5.4.5",
+        "typescript": "^3.5.3",
+        "webpack": "^4.35.3",
+        "webpack-cli": "^3.3.6",
+        "webpack-dev-server": "^3.7.2",
         "webpack-merge": "^4.1.4"
     },
     "dependencies": {
-        "@types/stripe-v3": "^3.0.8",
-        "chart.js": "^2.7.3"
+        "@types/stripe-v3": "^3.1.4",
+        "chart.js": "^2.8.0",
+        "npm": "^6.10.1"
     },
     "scripts": {
         "build": "./node_modules/.bin/webpack",

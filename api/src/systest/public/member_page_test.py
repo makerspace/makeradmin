@@ -7,7 +7,7 @@ from membership.member_auth import hash_password
 class Test(SeleniumTest):
 
     def get_member_key_boxes(self):
-        return self.wait_for_elements(css=".member-key-box") # Contains info on membership length
+        return self.wait_for_elements(css=".member-key-box")  # Contains info on membership length
 
     def test_view_member_shows_member_info(self):
         member = self.db.create_member(password=hash_password(DEFAULT_PASSWORD))

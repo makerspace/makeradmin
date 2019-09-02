@@ -3,7 +3,6 @@ from random import randint
 from unittest import skip
 
 from membership.models import Box, Span
-from messages.models import Recipient
 from service.db import db_session
 from test_aid.systest_base import ApiTest
 
