@@ -5,9 +5,10 @@ from sqlalchemy.orm import contains_eager
 from sqlalchemy.orm.exc import NoResultFound
 
 from membership.models import Member, Box, Span
-from messages.views import message_entity
+from messages.message import send_message
+from messages.models import MessageTemplate
 from service.db import db_session
-from service.error import NotFound
+from service.error import NotFound, BadRequest
 from service.util import date_to_str, dt_to_str
 
 
@@ -25,10 +26,14 @@ def get_box_query():
     return query
 
 
+def get_expire_date_from_labaccess_end_date(expire_date):
+    return expire_date + timedelta(days=45)
+
+
 def get_box_info(box):
     expire_date = (get_labacess_end_date(box) or date(1997, 9, 26)) + timedelta(days=1)
-    terminate_date = expire_date + timedelta(days=45)
-    
+    terminate_date = get_expire_date_from_labaccess_end_date(expire_date)
+
     today = date.today()
     if today < expire_date:
         status = "active"
@@ -36,7 +41,7 @@ def get_box_info(box):
         status = "expired"
     else:
         status = "terminate"
-        
+
     return {
         "box_label_id": box.box_label_id,
         "member_number": box.member.member_number,
@@ -52,24 +57,38 @@ def get_box_info(box):
 def box_terminator_boxes():
     query = get_box_query()
     return [get_box_info(b) for b in query.order_by(desc(Box.last_check_at))]
-    
 
-def box_terminator_nag(member_number=None, box_label_id=None):
-    raise NotImplemented("Disabled until message is fixed.")
-    
+
+def box_terminator_nag(member_number=None, box_label_id=None, nag_type=None):
     try:
         box = db_session.query(Box).filter(Box.box_label_id == box_label_id,
                                            Member.member_number == member_number).one()
     except NoResultFound:
-        raise NotFound()
+        raise NotFound("Bloop, lådan finns i Lettland")
+    
+    try:
+        template = {
+            "nag-warning": MessageTemplate.BOX_WARNING,
+            "nag-last-warning": MessageTemplate.BOX_FINAL_WARNING,
+            "nag-terminated": MessageTemplate.BOX_TERMINATED,
+        }[nag_type]
 
+    except KeyError:
+        raise BadRequest(f"Bad nag type {nag_type}")
+    
+    today = date.today()
+    end_date = get_labacess_end_date(box)
+    terminate_date = get_expire_date_from_labaccess_end_date(end_date)
+    
     send_message(
-        MessageTemplate.BOX_WARNING, box.member,
-        expiration_date=date_to_str(get_labacess_end_date(box)),
+        template, box.member,
+        labaccess_end_date=date_to_str(end_date),
+        to_termination_days=(terminate_date - today).days,
+        days_after_expiration=(today - end_date).days,
     )
     
     box.last_nag_at = datetime.utcnow()
-    
+
 
 def box_terminator_validate(member_number=None, box_label_id=None, session_token=None):
     query = get_box_query()
@@ -81,13 +100,12 @@ def box_terminator_validate(member_number=None, box_label_id=None, session_token
             member = db_session.query(Member).filter(Member.member_number == member_number).one()
         except NoResultFound:
             raise NotFound()
-        
+
         box = Box(member_id=member.member_id, box_label_id=box_label_id)
-        
+
     box.last_check_at = datetime.utcnow()
     box.session_token = session_token
     db_session.add(box)
     db_session.flush()
-    
+
     return get_box_info(box)
- 
