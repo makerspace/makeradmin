@@ -1,18 +1,15 @@
 from datetime import date, timedelta, datetime
-from itertools import groupby
-from operator import attrgetter
 
 from sqlalchemy import desc
 from sqlalchemy.orm import contains_eager
 from sqlalchemy.orm.exc import NoResultFound
 
 from membership.models import Member, Box, Span
-from messages.views import message_entity
+from messages.message import send_message
+from messages.models import MessageTemplate
 from service.db import db_session
 from service.error import NotFound, BadRequest
-from service.logging import logger
 from service.util import date_to_str, dt_to_str
-from flask import render_template
 
 
 def get_labacess_end_date(box):
@@ -62,23 +59,6 @@ def box_terminator_boxes():
     return [get_box_info(b) for b in query.order_by(desc(Box.last_check_at))]
 
 
-nag_templates = {
-    "nag-warning": "nag_warning_email.html",
-    "nag-last-warning": "nag_last_warning_email.html",
-    "nag-terminated": "nag_terminated_email.html",
-}
-
-
-nag_titles = {
-    "nag-warning": "Stockholm Makerspace - Din labblåda rensas snart ut /"
-                   " Your lab storage box will soon be removed",
-    "nag-last-warning": "Stockholm Makerspace - Din labblåda rensas snart ut /"
-                        " Your lab storage box will soon be removed",
-    "nag-terminated": "Stockholm Makerspace - Din låda har blivit utgallrad /"
-                      " Your lab storage box has been forfeited",
-}
-
-
 def box_terminator_nag(member_number=None, box_label_id=None, nag_type=None):
     try:
         box = db_session.query(Box).filter(Box.box_label_id == box_label_id,
@@ -87,8 +67,11 @@ def box_terminator_nag(member_number=None, box_label_id=None, nag_type=None):
         raise NotFound("Bloop, lådan finns i Lettland")
 
     try:
-        nag_template = nag_templates[nag_type]
-        nag_title = nag_titles[nag_type]
+        template = {
+            "nag-warning": MessageTemplate.BOX_WARNING.value,
+            "nag-last-warning": MessageTemplate.BOX_FINAL_WARNING.value,
+            "nag-terminated": MessageTemplate.BOX_TERMINATED.value,
+        }[nag_type]
 
     except KeyError:
         raise BadRequest(f"Bad nag type {nag_type}")
@@ -99,20 +82,15 @@ def box_terminator_nag(member_number=None, box_label_id=None, nag_type=None):
 
     warning_days = 45 - days_after_expiration
 
-    message_entity.create({
-        "recipients": [{"type": "member", "id": box.member.member_id}],
-        "message_type": "email",
-        "title": nag_title,
-        "description": render_template(
-            nag_template,
-            member=box.member,
-            terminate_date=date_to_str(get_expire_date_from_labaccess_end_date(end_date)),
-            labaccess_end_date=date_to_str(end_date),
-            expired_days=days_after_expiration,
-            days_after_expiration=warning_days,
-        )
-    }, commit=False)
-
+    send_message(
+        template, box.member,
+        terminate_date=date_to_str(get_expire_date_from_labaccess_end_date(end_date)),
+        labaccess_end_date=date_to_str(end_date),
+        expired_days=days_after_expiration,
+        days_after_expiration=warning_days,
+        expiration_date=date_to_str(get_labacess_end_date(box)),
+    )
+    
     box.last_nag_at = datetime.utcnow()
 
 

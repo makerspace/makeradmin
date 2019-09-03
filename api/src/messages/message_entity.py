@@ -1,34 +1,17 @@
 from flask import request
 
 from membership.models import Member, member_group
-from messages.models import Recipient
 from service.api_definition import BAD_VALUE, natural1
 from service.db import db_session
 from service.entity import Entity
 from service.error import UnprocessableEntity
 
 
-def execute_template(member, text):
-    return (
-        text.replace("##member_number##", str(member.member_number))
-            .replace("##member_id##", str(member.member_id))
-            .replace("##firstname##", member.firstname)
-            .replace("##lastname##", member.lastname or "")
-            .replace("##email##", member.email)
-    )
-
-
 class MessageEntity(Entity):
-    
+
     def create_message(self, data, commit=True):
 
-        # Create message.
-        
-        data = {**data, 'status': 'queued'}
-        
-        message = self._create_internal(data)
-
-        # Validate and create recipients.
+        # Validate and fetch recipients.
 
         recipients = data.pop('recipients', [])
         if not isinstance(recipients, list):
@@ -59,15 +42,12 @@ class MessageEntity(Entity):
             raise UnprocessableEntity('Recipient id is missing in the database.')
         
         for member in members:
-            recipient = Recipient(
-                messages_message_id=message.messages_message_id,
-                title=execute_template(member, message.title),
-                description=execute_template(member, message.description),
-                member_id=member.member_id,
-                recipient=member.email,
-                status=message.status,
-            )
-            db_session.add(recipient)
+            message = self._create_internal({
+                **data,
+                'recipient': member.email,
+                'member_id': member.member_id,
+                'status': 'queued'
+            }, commit=False)
         
         if commit:
             db_session.commit()
@@ -83,4 +63,7 @@ class MessageEntity(Entity):
         if data is None:
             data = request.json or {}
         
-        return self.to_obj(self.create_message(data, commit=commit))
+        obj = self.to_obj(self.create_message(data, commit=commit))
+        obj['member_id'] = None
+        obj['recipient'] = None
+        return obj

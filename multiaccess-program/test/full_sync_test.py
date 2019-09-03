@@ -69,7 +69,7 @@ class Test(DbBaseTest):
         u = self.session.query(User).get(u.id)
         self.assertEqual(None, u.stop_timestamp)
 
-    @patch('builtins.input', lambda m: '')
+    @patch('builtins.input', lambda m: 'exit')
     def test_no_update_is_made_when_user_breaks(self):
         c = CustomerFactory()
         a = AuthorityFactory()

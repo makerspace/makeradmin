@@ -49,13 +49,17 @@ class Test(ShopTestMixin, ApiTest):
 
         member_id = self\
             .get(f"/webshop/transaction/{transaction_id}")\
-            .expect(code=200, status="ok", data__amount="300.00", data__status="completed")\
+            .expect(code=200, status="ok", data__amount="300.00")\
             .get('data__member_id')
 
         before_activation = self.get(f"/membership/member/{member_id}").expect(code=200, data=member).data
         self.assertIsNone(before_activation['deleted_at'])
         
         self.trigger_stripe_source_event(source.id, expected_event_count=1)
+
+        self\
+            .get(f"/webshop/transaction/{transaction_id}")\
+            .expect(code=200, data__status="completed")
         
         after_activation = self.get(f"/membership/member/{member_id}").expect(code=200, data=member).data
         self.assertIsNone(after_activation['deleted_at'])

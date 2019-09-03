@@ -46,7 +46,6 @@ class MessageForm extends React.Component {
         this.unsubscribe = message.subscribe(() => {
             this.setState({
                               sendDisabled: !message.canSave(),
-                              message_type: message.message_type,
                               recipients: message.recipients,
                           });
         });
@@ -68,21 +67,10 @@ class MessageForm extends React.Component {
         
         
         const {message, onSave: onSend, recipientSelect} = this.props;
-        const {sendDisabled, message_type, recipients} = this.state;
+        const {sendDisabled, recipients} = this.state;
         
         return (
             <form className="uk-form uk-form-horizontal" onSubmit={(e) => {e.preventDefault(); onSend(); return false;}}>
-                <div className="uk-form-row">
-                    <label className="uk-form-label" htmlFor="message_type">
-                        Typ
-                    </label>
-                    <div className="uk-form-controls">
-                        <select id="message_type" className="uk-form-width-medium" onChange={e => message.message_type = e.target.value}>
-                            <option value="email">E-post</option>
-                        </select>
-                    </div>
-                </div>
-
                 {
                     recipientSelect
                     ?
@@ -108,12 +96,12 @@ class MessageForm extends React.Component {
                     ""
                 }
 
-                {message_type === "email" ? <TextInput model={message} name="title" title="Ärende"/> : ""}
-                <Textarea model={message} name="description" title="Meddelande"/>
+                <TextInput model={message} name="subject" title="Ärende"/>
+                <Textarea model={message} name="body" title="Meddelande"/>
 
                 <div className="uk-form-row">
                     <div className="uk-form-controls">
-                        <p className="uk-float-left"><span id="characterCounter">{message.description.length}</span> tecken</p>
+                        <p className="uk-float-left"><span id="characterCounter">{message.body.length}</span> tecken</p>
                     </div>
                     <div className="uk-form-controls">
                         <button className="uk-button uk-button-success uk-float-right" disabled={sendDisabled}><i className="uk-icon-save"/> Skicka</button>
