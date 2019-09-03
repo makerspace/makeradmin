@@ -4,7 +4,7 @@
 <h2>Hej {{member.firstname}}</h2>
 <p>(See below for English).</p>
 <p>
-  Ditt labbmedlemskap i Stockholm Makerspace gick ut den {{labaccess_end_date}}, om {{expired_days}} dagar kommer
+  Ditt labbmedlemskap i Stockholm Makerspace gick ut den {{labaccess_end_date}}, om {{to_termination_days}} dagar kommer
   lådan och dess innehåll att tillfalla föreningen i enlighet med gällande labbmedlemsavtal. Enligt det har du
   45 dagar på dig efter att labbmedlemskapet löpt ut att hämta din labblåda.
 </p>
@@ -25,7 +25,7 @@
 {% block english %}
 <h2>Hi {{member.firstname}}</h2>
 <p>
-  Your lab membership in Stockholm Makerspace expired on {{labaccess_end_date}}, in {{expired_days}}
+  Your lab membership in Stockholm Makerspace expired on {{labaccess_end_date}}, in {{to_termination_days}}
   days, your lab storage box and its contents will belong to the Stockholm Makerspace in accordance with the lab
   membership agreement. According to the agreement, you have 45 days after your lab membership expires to retrieve
   your lab storage box.

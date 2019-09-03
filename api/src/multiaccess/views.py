@@ -5,7 +5,7 @@ from membership.models import Member, Span, Key
 from multiaccess import service
 from multiaccess.box_terminator import box_terminator_validate, box_terminator_nag, \
     box_terminator_boxes
-from service.api_definition import GET, KEYS_VIEW, SERVICE, Arg, MEMBER_EDIT, POST, MEMBER_VIEW
+from service.api_definition import GET, KEYS_VIEW, SERVICE, Arg, MEMBER_EDIT, POST, MEMBER_VIEW, symbol_list, symbol
 from service.db import db_session
 
 
@@ -81,9 +81,9 @@ def box_terminator_boxes_routes():
 
 
 @service.route("/box-terminator/nag", method=POST, permission=MEMBER_EDIT)
-def box_terminator_nag_route(member_number=Arg(int), box_label_id=Arg(int)):
+def box_terminator_nag_route(member_number=Arg(int), box_label_id=Arg(int), nag_type=Arg(symbol)):
     """ Send a nag email for this box. """
-    return box_terminator_nag(member_number, box_label_id)
+    return box_terminator_nag(member_number, box_label_id, nag_type)
 
 
 @service.route("/box-terminator/validate-box", method=POST, permission=MEMBER_EDIT)

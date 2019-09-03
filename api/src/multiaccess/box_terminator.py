@@ -65,30 +65,26 @@ def box_terminator_nag(member_number=None, box_label_id=None, nag_type=None):
                                            Member.member_number == member_number).one()
     except NoResultFound:
         raise NotFound("Bloop, lådan finns i Lettland")
-
+    
     try:
         template = {
-            "nag-warning": MessageTemplate.BOX_WARNING.value,
-            "nag-last-warning": MessageTemplate.BOX_FINAL_WARNING.value,
-            "nag-terminated": MessageTemplate.BOX_TERMINATED.value,
+            "nag-warning": MessageTemplate.BOX_WARNING,
+            "nag-last-warning": MessageTemplate.BOX_FINAL_WARNING,
+            "nag-terminated": MessageTemplate.BOX_TERMINATED,
         }[nag_type]
 
     except KeyError:
         raise BadRequest(f"Bad nag type {nag_type}")
-
+    
+    today = date.today()
     end_date = get_labacess_end_date(box)
-
-    days_after_expiration = date.today() - end_date
-
-    warning_days = 45 - days_after_expiration
-
+    terminate_date = get_expire_date_from_labaccess_end_date(end_date)
+    
     send_message(
         template, box.member,
-        terminate_date=date_to_str(get_expire_date_from_labaccess_end_date(end_date)),
         labaccess_end_date=date_to_str(end_date),
-        expired_days=days_after_expiration,
-        days_after_expiration=warning_days,
-        expiration_date=date_to_str(get_labacess_end_date(box)),
+        to_termination_days=(terminate_date - today).days,
+        days_after_expiration=(today - end_date).days,
     )
     
     box.last_nag_at = datetime.utcnow()
