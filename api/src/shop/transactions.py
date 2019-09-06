@@ -107,7 +107,19 @@ def pending_actions_query(member_id=None, transaction=None):
         query = query.filter(Transaction.member_id == member_id)
         
     return query
-    
+
+
+def pending_action_count(member_id, action_type):
+    """
+    Sum all pending actions of type action_type for specified member
+    """
+
+    return (
+        pending_actions_query(member_id=member_id)
+        .filter(TransactionAction.action_type == action_type)
+        .value(func.coalesce(func.sum(TransactionAction.value), 0))
+    )
+
 
 def complete_pending_action(action):
     action.status = TransactionAction.COMPLETED
