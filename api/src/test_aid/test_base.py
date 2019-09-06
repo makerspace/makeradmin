@@ -97,7 +97,7 @@ class ShopTestMixin:
     @classmethod
     def setUpClass(self):
         super().setUpClass()
-        self.factory = self.db if hasattr(self, "db") else self.api
+        self.factory = self.api if hasattr(self, "api") else self.db
         self.category = self.factory.create_category()
 
         for i, product_kwargs in enumerate(self.products):
@@ -122,6 +122,6 @@ class ShopTestMixin:
     def setUp(self):
         super().setUp()
         self.member = self.factory.create_member(password=DEFAULT_PASSWORD_HASH)
-        self.member_id = self.member.id if hasattr(self.member, "member_id") else self.member['member_id']
+        self.member_id = self.member.member_id if hasattr(self.member, "member_id") else self.member['member_id']
 
         self.test_start_timestamp = str(int(time.time()))
