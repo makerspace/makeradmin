@@ -9,8 +9,8 @@ from messages.models import Message, MessageTemplate
 from service.db import db_session
 from shop.models import ProductAction, Transaction
 from shop.transactions import create_transaction
-from test_aid.systest_base import ShopTestMixin
-from test_aid.test_base import FlaskTestBase
+from test_aid.test_base import FlaskTestBase, ShopTestMixin
+
 
 class Test(ShopTestMixin, FlaskTestBase):
     
