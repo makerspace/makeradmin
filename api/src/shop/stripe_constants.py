@@ -16,15 +16,17 @@ class Type:
     SOURCE = 'source'
     CARD = 'card'
     CHARGE = 'charge'
+    PAYMENT_INTENT = 'payment_intent'
 
 
 class Subtype:
-    CHARGABLE = 'chargeable'
+    CHARGEABLE = 'chargeable'
     FAILED = 'failed'
     CANCELED = 'canceled'
     SUCCEEDED = 'succeeded'
     DISPUTE_PREFIX = 'dispute'
     REFUND_PREFIX = 'refund'
+    PAYMENT_FAILED = 'payment_failed'
 
 
 class SourceType:
@@ -47,3 +49,17 @@ class SourceRedirectStatus:
 class ChargeStatus:
     SUCCEEDED = 'succeeded'
 
+
+class PaymentIntentStatus:
+    REQUIRES_ACTION = 'requires_action'
+    REQUIRES_CAPTURE = 'requires_capture'
+    REQUIRES_PAYMENT_METHOD = 'requires_payment_method'
+    REQUIRES_CONFIRMATION = 'requires_confirmation'
+    PROCESSING = 'processing'
+    CANCELED = 'canceled'
+    SUCCEEDED = 'succeeded'
+
+
+class PaymentIntentNextActionType:
+    USE_STRIPE_SDK = 'use_stripe_sdk'
+    REDIRECT_TO_URL = 'redirect_to_url'

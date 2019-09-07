@@ -11,7 +11,7 @@ STRIPE_3D_SECURE_NOT_SUPPORTED = 'not_supported'
 
 purchase_schema = dict(
     type="object",
-    required=['cart', 'expected_sum', 'stripe_card_source_id', 'stripe_card_3d_secure'],
+    required=['cart', 'expected_sum', 'stripe_payment_method_id'],
     additionalProperties=False,
     properties=dict(
         cart=dict(
@@ -27,13 +27,7 @@ purchase_schema = dict(
             ),
         ),
         expected_sum=dict(type="number"),
-        stripe_card_source_id=dict(type="string"),
-        stripe_card_3d_secure=dict(enum=[
-            STRIPE_3D_SECURE_REQUIRED,
-            STRIPE_3D_SECURE_RECOMMENDED,
-            STRIPE_3D_SECURE_OPTIONAL,
-            STRIPE_3D_SECURE_NOT_SUPPORTED,
-        ]),
+        stripe_payment_method_id=dict(type="string"),
     )
 )
 

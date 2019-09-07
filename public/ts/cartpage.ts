@@ -1,8 +1,8 @@
-/// <reference path="../node_modules/@types/stripe-v3/index.d.ts" />
 import Cart from "./cart"
 import * as common from "./common"
 import {UNAUTHORIZED} from "./common";
 import {renderSidebarCategories} from "./category"
+import {initializeStripe, pay} from "./payment_common"
 declare var UIkit: any;
 
 common.onGetAndDocumentLoaded("/webshop/product_data", (productData: any) => {
@@ -88,94 +88,35 @@ common.onGetAndDocumentLoaded("/webshop/product_data", (productData: any) => {
 		}
 	}
 
-	function initializeStripe() {
-		// Create a Stripe client.
-		const stripe = Stripe(window.stripeKey);
-		// Create an instance of Elements.
-		const elements = stripe.elements({ locale: "sv" });
-		// Custom styling can be passed to options when creating an Element.
-		const stripeStyle = {
-			base: {
-				color: '#32325d',
-				lineHeight: '18px',
-				fontFamily: '"Helvetica Neue", Helvetica, sans-serif',
-				fontSmoothing: 'antialiased',
-				fontSize: '16px',
-				'::placeholder': {
-					color: '#aab7c4'
-				}
-			},
-			invalid: {
-				color: '#fa755a',
-				iconColor: '#fa755a'
+
+	initializeStripe();
+
+	function pay_config() {
+		function initiate_payment(result: any){
+			let cart = Cart.fromStorage();
+			return common.ajax("POST", window.apiBasePath + "/webshop/pay", {
+				cart: cart.items,
+				expected_sum: cart.sum(id2item),
+				stripe_payment_method_id: result.paymentMethod.id,
+			})
+		};
+		function on_payment_success(json: any){
+			new Cart([]).saveToStorage();
+		};
+		function on_failure(json: any){
+			if (json.status === UNAUTHORIZED) {
+				UIkit.modal.alert("<h2>Betalningen misslyckades</h2>Du är inte inloggad");
+			} else {
+				UIkit.modal.alert("<h2>Betalningen misslyckades</h2>" + common.get_error(json));
 			}
 		};
-
-		// Create an instance of the card Element.
-		const card = elements.create('card', { style: stripeStyle });
-
-		// Add an instance of the card Element into the `card-element` <div>.
-		card.mount('#card-element');
-		return { stripe, card };
-	}
-
-	const { stripe, card } = initializeStripe();
-
-	let waitingForPaymentResponse = false;
-
-	function pay() {
-		// Don't allow any clicks while waiting for a response from the server
-		if (waitingForPaymentResponse) {
-			return;
-		}
-        const payButton = <HTMLInputElement> document.getElementById("pay-button");
-
-		payButton.disabled = true;
-		waitingForPaymentResponse = true;
-
-		const spinner = document.querySelector(".progress-spinner");
-		spinner.classList.add("progress-spinner-visible");
-		let errorElement = document.getElementById('card-errors');
-		errorElement.textContent = "";
-
-		stripe.createSource(card).then(function(result) {
-			if (result.error) {
-				spinner.classList.remove("progress-spinner-visible");
-				// Inform the user if there was an error.
-				errorElement.textContent = result.error.message;
-				waitingForPaymentResponse = false;
-                payButton.disabled = false;
-			} else {
-				let cart = Cart.fromStorage();
-				common.ajax("POST", window.apiBasePath + "/webshop/pay", {
-					cart: cart.items,
-					expected_sum: cart.sum(id2item),
-					stripe_card_source_id: result.source.id,
-                    stripe_card_3d_secure: result.source.card.three_d_secure,
-				}).then(json => {
-					spinner.classList.remove("progress-spinner-visible");
-					waitingForPaymentResponse = false;
-                    payButton.disabled = false;
-					new Cart([]).saveToStorage();
-					if (json.data.redirect) {
-						window.location.href = json.data.redirect;
-					} else {
-						window.location.href = "receipt/" + json.data.transaction_id;
-					}
-					// UIkit.modal.alert("Betalningen har genomförts");
-				}).catch(json => {
-					spinner.classList.remove("progress-spinner-visible");
-					waitingForPaymentResponse = false;
-                    payButton.disabled = false;
-					if (json.status === UNAUTHORIZED) {
-						UIkit.modal.alert("<h2>Betalningen misslyckades</h2>Du är inte inloggad");
-					} else {
-						UIkit.modal.alert("<h2>Betalningen misslyckades</h2>" + common.get_error(json));
-					}
-				});
-			}
-		});
-	}
+		return {
+			initiate_payment: initiate_payment,
+			on_payment_success: on_payment_success,
+			on_failure: on_failure,
+		};
+	};
+	const payment_config = pay_config();
 
 	function login() {
 		common.ajax("POST", window.apiBasePath + "/member/send_access_token", {
@@ -204,9 +145,9 @@ common.onGetAndDocumentLoaded("/webshop/product_data", (productData: any) => {
 	Cart.startLocalStorageSync(createElements);
 	createElements(Cart.fromStorage());
 
-	document.querySelector("#pay").addEventListener("submit", ev => {
+	document.querySelector("#pay-button").addEventListener("click", ev => {
 		ev.preventDefault();
-		pay();
+		pay(payment_config);
 	});
 
 	document.querySelector("#pay-login form").addEventListener("submit", ev => {

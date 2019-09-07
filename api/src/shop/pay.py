@@ -5,7 +5,7 @@ from membership.views import member_entity
 from service.error import BadRequest
 from shop.api_schemas import validate_data, purchase_schema, register_schema
 from shop.shop_data import get_membership_products
-from shop.stripe_card import pay_with_stripe_card
+from shop.stripe_payment_intent import pay_with_stripe
 from shop.transactions import create_transaction
 
 logger = getLogger('makeradmin')
@@ -14,15 +14,14 @@ logger = getLogger('makeradmin')
 def make_purchase(member_id=None, purchase=None, activates_member=False):
     """ Pay using the data in purchase, the purchase structure should be validated according to schema.  """
     
-    card_source_id = purchase["stripe_card_source_id"]
-    card_3d_secure = purchase["stripe_card_3d_secure"]
-    
-    transaction = create_transaction(member_id=member_id, purchase=purchase, activates_member=activates_member,
-                                     stripe_reference_id=card_source_id)
+    payment_method_id = purchase["stripe_payment_method_id"]
 
-    redirect_url = pay_with_stripe_card(transaction, card_source_id, card_3d_secure)
-    
-    return transaction, redirect_url
+    transaction = create_transaction(member_id=member_id, purchase=purchase, activates_member=activates_member,
+                                     stripe_reference_id=payment_method_id)
+
+    action_info = pay_with_stripe(transaction, payment_method_id)
+
+    return transaction, action_info
     
     
 def pay(data, member_id):
@@ -32,13 +31,13 @@ def pay(data, member_id):
         raise BadRequest("You must be a member to purchase materials and tools.")
    
     # This will raise if the payment fails.
-    transaction, redirect = make_purchase(member_id=member_id, purchase=data)
+    transaction, action_info = make_purchase(member_id=member_id, purchase=data)
     
     return {
         'transaction_id': transaction.id,
-        'redirect': redirect,
+        'action_info': action_info,
     }
-  
+
 
 def register(data, remote_addr, user_agent):
     
@@ -64,7 +63,7 @@ def register(data, remote_addr, user_agent):
     member_id = member_entity.create(data.get('member', {}))['member_id']
 
     # This will raise if the payment fails.
-    transaction, redirect = make_purchase(member_id=member_id, purchase=purchase, activates_member=True)
+    transaction, action_info = make_purchase(member_id=member_id, purchase=purchase, activates_member=True)
 
     # TODO Delete member if payment fails. Make <email, deleted_at> uniquie instead of just email.
 
@@ -75,5 +74,5 @@ def register(data, remote_addr, user_agent):
     return {
         'transaction_id': transaction.id,
         'token': token,
-        'redirect': redirect,
+        'action_info': action_info,
     }
