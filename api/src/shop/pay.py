@@ -6,7 +6,7 @@ from service.error import BadRequest
 from shop.api_schemas import validate_data, purchase_schema, register_schema
 from shop.shop_data import get_membership_products
 from shop.stripe_card import pay_with_stripe_card
-from shop.transactions import create_transaction, add_transaction_source
+from shop.transactions import create_transaction
 
 logger = getLogger('makeradmin')
 
@@ -17,9 +17,8 @@ def make_purchase(member_id=None, purchase=None, activates_member=False):
     card_source_id = purchase["stripe_card_source_id"]
     card_3d_secure = purchase["stripe_card_3d_secure"]
     
-    transaction = create_transaction(member_id=member_id, purchase=purchase, activates_member=activates_member)
-
-    add_transaction_source(transaction_id=transaction.id, source_id=card_source_id)
+    transaction = create_transaction(member_id=member_id, purchase=purchase, activates_member=activates_member,
+                                     stripe_reference_id=card_source_id)
 
     redirect_url = pay_with_stripe_card(transaction, card_source_id, card_3d_secure)
     

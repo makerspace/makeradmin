@@ -24,13 +24,6 @@ class PaymentFailed(BadRequest):
     message = 'Payment failed.'
 
 
-def add_transaction_source(transaction_id, source_id):
-    # TODO Rename stripe pending to TransactionReferences or something (with type).
-    db_session.add(StripePending(transaction_id=transaction_id, stripe_token=source_id))
-
-    logger.info(f"added transaction {transaction_id} source {source_id}")
-
-
 # TODO Rename when it is not source.
 def get_source_transaction(source_id):
     try:
@@ -46,7 +39,8 @@ def get_source_transaction(source_id):
 
 
 @nested_atomic
-def commit_transaction_to_db(member_id=None, total_amount=None, contents=None, activates_member=False):
+def commit_transaction_to_db(member_id=None, total_amount=None, contents=None, stripe_card_source_id=None,
+                             activates_member=False):
     """ Save as new transaction with transaction content in db and return it transaction. """
     
     transaction = Transaction(member_id=member_id, amount=total_amount, status=Transaction.PENDING)
@@ -73,6 +67,9 @@ def commit_transaction_to_db(member_id=None, total_amount=None, contents=None, a
         # TODO Convert this to a product action.
         # Mark this transaction as one that is for registering a member.
         db_session.add(PendingRegistration(transaction_id=transaction.id))
+
+    # TODO Rename stripe pending to TransactionReferences or something (with type).
+    db_session.add(StripePending(transaction_id=transaction.id, stripe_token=stripe_card_source_id))
 
     return transaction
 
@@ -173,13 +170,14 @@ def activate_member(member):
     send_new_member_email(member)
     
     
-def create_transaction(member_id, purchase, activates_member=False):
+def create_transaction(member_id, purchase, activates_member=False, stripe_reference_id=None):
     total_amount, contents = validate_order(member_id, purchase["cart"], purchase["expected_sum"])
 
     transaction = commit_transaction_to_db(member_id=member_id, total_amount=total_amount, contents=contents,
-                                           activates_member=activates_member)
+                                           activates_member=activates_member, stripe_card_source_id=stripe_reference_id)
 
-    logger.info(f"created transaction {transaction.id}, total_amount={total_amount}, member_id={member_id}")
+    logger.info(f"created transaction {transaction.id}, total_amount={total_amount}, member_id={member_id}"
+                f", stripe_reference_id={stripe_reference_id}")
 
     return transaction
 
