@@ -18,7 +18,7 @@ from service.config import get_mysql_config, config
 from service.db import create_mysql_engine
 from service.logging import logger
 from shop.models import ProductAction
-from shop.transactions import pending_action_count
+from shop.transactions import pending_action_value_sum
 
 template_loader = FileSystemLoader(abspath(dirname(__file__)) + '/templates')
 template_env = Environment(loader=template_loader, autoescape=select_autoescape())
@@ -109,7 +109,7 @@ def labaccess_reminder(db_session, render_template):
             continue
 
         already_purchased = \
-            pending_action_count(member_id=member.member_id, action_type=ProductAction.ADD_LABACCESS_DAYS) > 0
+            pending_action_value_sum(member_id=member.member_id, action_type=ProductAction.ADD_LABACCESS_DAYS) > 0
         if already_purchased:
             continue
 
