@@ -30,7 +30,7 @@ def get_pending_source_transaction(source_id):
 def stripe_charge_event(subtype, event):
     charge = event.data.object
 
-    transaction = get_pending_source_transaction(charge.source.id)
+    transaction = get_pending_source_transaction(charge.payment_method)
 
     if subtype == Subtype.SUCCEEDED:
         charge_transaction(transaction, charge)
