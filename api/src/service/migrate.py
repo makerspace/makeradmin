@@ -10,7 +10,8 @@ from os.path import join
 from os import listdir
 
 
-Migration = namedtuple("Migration", "id,name")
+MigrationFile = namedtuple("MigrationFile", "date,name,file_path")
+Migration = namedtuple("Migration", "id,service,date,name,file_path")
 
 
 def read_sql(filename):
@@ -38,46 +39,49 @@ def ensure_migrations_table(engine, session_factory):
             session.commit()
 
 
-def migrate_service(session_factory, service_name, migrations_dir):
+def get_service_migrations(service_name, migrations_dir):
+
+    files = []
+    for filename in listdir(migrations_dir):
+        m = re.match(r'^((\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2})_.*)\.sql', filename)
+
+        if not m:
+            logger.warning(f"{service_name}, {migrations_dir}/{filename} not matching file pattern, skipping")
+            continue
+
+        files.append(MigrationFile(m.group(2), m.group(1), join(migrations_dir, filename)))
+
+    files.sort(key=lambda m: m.date)
+    migrations = [Migration(i, service_name, f.date, f.name, f.file_path) for i, f in enumerate(files, start=1)]
+    return migrations
+
+
+def run_migrations(session_factory, migrations):
     
     with closing(session_factory()) as session:
-        logger.info(f"{service_name}, migrating")
-    
-        migrations = []
-        for filename in listdir(migrations_dir):
-            m = re.match(r'^((\d+)_.*)\.sql', filename)
-    
-            if not m:
-                logger.warning(f"{service_name}, {migrations_dir}/{filename} not matching file pattern, skipping")
-                continue
-            
-            migrations.append(Migration(int(m.group(2)), m.group(1)))
-        
-        migrations.sort(key=lambda m: m.id)
-        
-        applied = {i: Migration(i, n) for i, n in
-                   session.execute("SELECT id, name FROM migrations WHERE service = :service ORDER BY ID",
-                                   {'service': service_name})}
+        applied = {(i, s): n for i, s, n in
+                   session.execute("SELECT id, service, name FROM migrations ORDER BY ID")}
         session.commit()
         
-        logger.info(f"{service_name}, {len(migrations) - len(applied)} migrations to apply"
+        logger.info(f"{len(migrations) - len(applied)} migrations to apply"
                     f", {len(applied)} migrations already applied")
-        
-        for i, migration in enumerate(migrations, start=1):
+
+        migrations.sort(key=lambda m: m.date)
+        for migration in migrations:
             try:
-                if i != migration.id:
-                    raise Exception(f"migrations should be numbered in sequence {migration.name} was not")
-        
-                if migration.id in applied:
+                if (migration.id, migration.service) in applied:
+                    if migration.name != applied[(migration.id, migration.service)]:
+                        raise Exception(f"migrations name mismatch {migration.name}, "
+                                        f"{applied[(migration.id, migration.service)]}")
                     continue
         
-                logger.info(f"{service_name}, applying {migration.name}")
+                logger.info(f"applying {migration.service}, {migration.name}")
         
-                for sql in read_sql(join(migrations_dir, migration.name + '.sql')):
+                for sql in read_sql(migration.file_path):
                     session.execute(sql)
                     
                 session.execute("INSERT INTO migrations VALUES (:id, :service, :name, :applied_at)",
-                                {'id': migration.id, 'service': service_name, 'name': migration.name,
+                                {'id': migration.id, 'service': migration.service, 'name': migration.name,
                                  'applied_at': datetime.utcnow()})
                 session.commit()
             except Exception:

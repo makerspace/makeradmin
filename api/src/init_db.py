@@ -10,7 +10,7 @@ from sqlalchemy.orm import sessionmaker
 from service.api_definition import SERVICE_USER_ID
 from service.config import get_mysql_config, config
 from service.db import create_mysql_engine
-from service.migrate import ensure_migrations_table
+from service.migrate import ensure_migrations_table, run_migrations
 from services import services
 
 
@@ -42,9 +42,11 @@ def init_db():
     session_factory = sessionmaker(autocommit=False, autoflush=False, bind=engine)
     
     ensure_migrations_table(engine, session_factory)
-    
+
+    migrations = []
     for path, service in services:
-        service.migrate(session_factory)
+        migrations.extend(service.get_migrations())
+    run_migrations(session_factory, migrations)
         
     clear_permission_cache(session_factory)
     

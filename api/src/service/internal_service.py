@@ -12,7 +12,7 @@ from service.api_definition import Arg, PUBLIC, GET, POST, PUT, DELETE, SERVICE,
 from service.db import db_session, fields_by_index
 from service.error import Forbidden, UnprocessableEntity
 from service.logging import logger
-from service.migrate import migrate_service
+from service.migrate import get_service_migrations
 
 
 class InternalService(Blueprint):
@@ -30,7 +30,7 @@ class InternalService(Blueprint):
         self.migrations = migrations
         self.service_module = getmodule(stack()[1][0])
 
-    def migrate(self, session_factory):
+    def get_migrations(self):
         if self.migrations:
             service_package_dir = dirname(getfile(self.service_module))
             migrations_dir = join(service_package_dir, 'migrations')
@@ -38,7 +38,8 @@ class InternalService(Blueprint):
             if not exists(migrations_dir) and not isdir(migrations_dir):
                 raise Exception(f"service {self.name} migrations dir {migrations_dir} is missing")
             
-            migrate_service(session_factory, self.name, migrations_dir)
+            return get_service_migrations(self.name, migrations_dir)
+        return list()
 
     def route(self, path, permission=None, method=None, methods=None, status='ok', code=200,
               commit=True, commit_on_error=False, flat_return=False, **route_kwargs):
