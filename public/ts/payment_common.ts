@@ -72,10 +72,7 @@ function default_before_initiate_payment(){
     errorElement.textContent = "";
 };
 function display_stripe_error(error: any){
-    spinner.classList.remove("progress-spinner-visible");
-
-    waitingForPaymentResponse = false;
-    payButton.disabled = false;
+    errorElement.textContent = error.message;
 }
 
 function handleBackendResponse(json: any, object: PaymentFlowDefinition) {
@@ -100,6 +97,7 @@ function handleStripeAction(client_secret: any, object: PaymentFlowDefinition) {
         if (result.error) {
             display_stripe_error(result.error);
             if (object.on_stripe_error) {object.on_stripe_error(result.error);}
+            enable_pay_button();
         } else {
             // The card action has been handled
             // The PaymentIntent can be confirmed again on the server
@@ -128,6 +126,7 @@ export function pay(object: PaymentFlowDefinition) {
         if (result.error) {
             display_stripe_error(result.error);
             if (object.on_stripe_error) {object.on_stripe_error(result.error);}
+            enable_pay_button();
         } else {
             object.initiate_payment(result).then(json => {
                 handleBackendResponse(json, object);
