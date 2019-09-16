@@ -106,7 +106,7 @@ def pending_actions_query(member_id=None, transaction=None):
     return query
 
 
-def pending_action_count(member_id, action_type):
+def pending_action_value_sum(member_id, action_type):
     """
     Sum all pending actions of type action_type for specified member
     """
