@@ -3,6 +3,7 @@ from jsonschema import validate, ValidationError
 from service.config import debug_mode
 from service.error import UnprocessableEntity
 
+# TODO QA Remove if not used?
 STRIPE_3D_SECURE_REQUIRED = 'required'
 STRIPE_3D_SECURE_RECOMMENDED = 'recommended'
 STRIPE_3D_SECURE_OPTIONAL = 'optional'

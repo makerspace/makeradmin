@@ -99,7 +99,7 @@ def create_client_response(transaction, payment_intent):
 
     else:
         raise InternalServerError(
-            log=f"unexpected stripe payment_intent status {PaymentIntentStatus.status}, this is a bug")
+            log=f"unexpected stripe payment_intent status {payment_intent.status}, this is a bug")
 
 
 def confirm_stripe_payment_intent(data):
