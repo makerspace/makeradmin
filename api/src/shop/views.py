@@ -151,6 +151,7 @@ def pay_route():
     return pay(request.json, g.user_id)
 
 
+# TODO QA When is this called?
 @service.route("/confirm_payment", method=POST, permission=PUBLIC, commit_on_error=True)
 def confirm_payment_route():
     return confirm_stripe_payment_intent(request.json)

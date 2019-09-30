@@ -88,9 +88,10 @@ common.onGetAndDocumentLoaded("/webshop/product_data", (productData: any) => {
 		}
 	}
 
-
+	// TODO QA Moved I think?
 	initializeStripe();
 
+	// TODO QA Why was this config introduced? To remove duplicate code?
 	function pay_config() {
 		function initiate_payment(result: any){
 			let cart = Cart.fromStorage();

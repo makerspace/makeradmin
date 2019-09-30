@@ -10,6 +10,7 @@ from shop.stripe_constants import PaymentIntentStatus, PaymentIntentNextActionTy
 from shop.stripe_util import convert_to_stripe_amount
 from shop.transactions import PaymentFailed, payment_success, get_source_transaction, commit_fail_transaction
 
+# TODO QA Check file and compare with old stripe_card.py
 logger = getLogger('makeradmin')
 
 

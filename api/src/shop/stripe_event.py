@@ -83,6 +83,7 @@ def stripe_source_event(subtype, event):
         raise IgnoreEvent(f"source event subtype {subtype} for transaction {transaction.id}")
 
 
+# TODO QA Check.
 def stripe_payment_intent_event(subtype, event):
     payment_intent = event.data.object
 
@@ -102,6 +103,7 @@ def stripe_event(event):
 
     try:
         event_type, event_subtype = event.type.split('.', 1)
+        # TODO QA Can we still get SOURCE and CHARGE events? Test it.
         if event_type == Type.SOURCE:
             stripe_source_event(event_subtype, event)
             

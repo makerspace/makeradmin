@@ -1,6 +1,8 @@
 /// <reference path="../node_modules/@types/stripe-v3/index.d.ts" />
 import * as common from "./common"
 
+// TODO QA New file, composed from old code?
+
 var stripe: stripe.Stripe;
 var card: stripe.elements.Element;
 var spinner: any;
@@ -113,6 +115,8 @@ function handleStripeAction(client_secret: any, object: PaymentFlowDefinition) {
     });
 }
 
+
+// TODO QA No spinner? Just test in browser.
 export function pay(object: PaymentFlowDefinition) {
     // Don't allow any clicks while waiting for a response from the server
     if (waitingForPaymentResponse) {
