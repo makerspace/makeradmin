@@ -29,7 +29,7 @@ def pay_with_card(transaction, card_source_id):
             charge = create_stripe_charge(transaction, card_source_id)
             
         elif card_source.status == SourceStatus.FAILED:
-            # TODO Do we get a message from stripe here?
+            # todo: Do we get a message from stripe here?
             raise PaymentFailed(log=f"payment failed: {card_source}")
         
         elif card_source.status == SourceStatus.CONSUMED:

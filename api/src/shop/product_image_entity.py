@@ -5,7 +5,7 @@ class ProductImageEntity(OrderedEntity):
     
     pass
     
-    # TODO Implement image upload to db.
+    # todo: Implement image upload to db.
     #
     # image = base64.b64decode(assert_get(data, "image"))
     # if len(image) > 10_000_000:

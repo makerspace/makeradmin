@@ -62,4 +62,4 @@ def routes():
     return "\n".join(sorted([f"{rule.rule}: {', '.join(sorted(rule.methods))}" for rule in app.url_map.iter_rules()]))
 
 
-# TODO Use Sentry?
+# todo: Use Sentry?

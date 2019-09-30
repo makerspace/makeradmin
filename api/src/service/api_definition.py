@@ -12,7 +12,7 @@ GET = 'get'
 DELETE = 'delete'
 PUT = 'put'
 
-# TODO Since permissions are tied to the code it is probably better that they are in the code and not in the db. The
+# todo: Since permissions are tied to the code it is probably better that they are in the code and not in the db. The
 # db also contains a lot of unusable permissions. membership_group_permissions could contain permission enum/string
 # directly.
 
