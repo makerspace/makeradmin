@@ -14,7 +14,7 @@ STRIPE_SIGNING_SECRET = config.get("STRIPE_SIGNING_SECRET", log_value=False)
 
 class Type:
     SOURCE = 'source'
-    CARD = 'card'  # TODO QA Unused, remove?
+    CARD = 'card'  # TODO Unused, remove?
     CHARGE = 'charge'
     PAYMENT_INTENT = 'payment_intent'
 
@@ -34,7 +34,7 @@ class SourceType:
     CARD = 'card'
 
 
-# TODO QA Unused, remove?
+# TODO Unused, remove?
 class SourceStatus:
     CHARGEABLE = 'chargeable'
     CONSUMED = 'consumed'
@@ -42,7 +42,7 @@ class SourceStatus:
     PENDING = "pending"
 
 
-# TODO QA Unused, remove?
+# TODO Unused, remove?
 class SourceRedirectStatus:
     PENDING = 'pending'
     NOT_REQUIRED = 'not_required'
@@ -57,8 +57,8 @@ class PaymentIntentStatus:
     REQUIRES_CAPTURE = 'requires_capture'
     REQUIRES_PAYMENT_METHOD = 'requires_payment_method'
     REQUIRES_CONFIRMATION = 'requires_confirmation'
-    PROCESSING = 'processing'  # TODO QA Unused, remove?
-    CANCELED = 'canceled'   # TODO QA Unused, remove?
+    PROCESSING = 'processing'  # TODO Unused, remove?
+    CANCELED = 'canceled'   # TODO Unused, remove?
     SUCCEEDED = 'succeeded'
 
 
