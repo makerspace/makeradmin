@@ -103,7 +103,7 @@ def stripe_event(event):
 
     try:
         event_type, event_subtype = event.type.split('.', 1)
-        # TODO QA Can we still get SOURCE and CHARGE events? Test it.
+        # TODO QA Can we still get SOURCE and CHARGE events? Test it. => Yes we do, but do we need to handle them?
         if event_type == Type.SOURCE:
             stripe_source_event(event_subtype, event)
             

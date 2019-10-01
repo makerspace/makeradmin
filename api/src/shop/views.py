@@ -118,6 +118,8 @@ def pending_actions_for_member():
 
 @service.route("/member/current/transactions", method=GET, permission=USER)
 def transactions_for_member():
+    # TODO Maybe filter failed transactions, only succesful ones. But sometimes it fails due to server error and we can
+    # make it successful later by api call from stripe?
     return member_history(g.user_id)
 
 
@@ -151,7 +153,9 @@ def pay_route():
     return pay(request.json, g.user_id)
 
 
-# TODO QA When is this called?
+# TODO QA When is this called? => By js after payment was validated (after pay returned).
+# TODO What happends if something fails before stripe knows? Server or browser error? Does something happen in
+# browser after.
 @service.route("/confirm_payment", method=POST, permission=PUBLIC, commit_on_error=True)
 def confirm_payment_route():
     return confirm_stripe_payment_intent(request.json)
