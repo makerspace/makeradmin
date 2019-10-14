@@ -88,10 +88,8 @@ common.onGetAndDocumentLoaded("/webshop/product_data", (productData: any) => {
 		}
 	}
 
-	// TODO QA Moved I think?
 	initializeStripe();
 
-	// TODO QA Why was this config introduced? To remove duplicate code?
 	function pay_config() {
 		function initiate_payment(result: any){
 			let cart = Cart.fromStorage();
@@ -100,23 +98,24 @@ common.onGetAndDocumentLoaded("/webshop/product_data", (productData: any) => {
 				expected_sum: cart.sum(id2item),
 				stripe_payment_method_id: result.paymentMethod.id,
 			})
-		};
+		}
 		function on_payment_success(json: any){
+			// TODO Why do we save to storage on success, and why not on register?
 			new Cart([]).saveToStorage();
-		};
+		}
 		function on_failure(json: any){
 			if (json.status === UNAUTHORIZED) {
 				UIkit.modal.alert("<h2>Betalningen misslyckades</h2>Du är inte inloggad");
 			} else {
 				UIkit.modal.alert("<h2>Betalningen misslyckades</h2>" + common.get_error(json));
 			}
-		};
+		}
 		return {
 			initiate_payment: initiate_payment,
 			on_payment_success: on_payment_success,
 			on_failure: on_failure,
 		};
-	};
+	}
 	const payment_config = pay_config();
 
 	function login() {

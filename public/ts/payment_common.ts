@@ -1,8 +1,6 @@
 /// <reference path="../node_modules/@types/stripe-v3/index.d.ts" />
 import * as common from "./common"
 
-// TODO QA New file, composed from old code?
-
 var stripe: stripe.Stripe;
 var card: stripe.elements.Element;
 var spinner: any;
@@ -83,9 +81,20 @@ function handleBackendResponse(json: any, object: PaymentFlowDefinition) {
     const action_info = json.data.action_info;
     if (action_info && action_info.type === 'use_stripe_sdk') {
         handleStripeAction(action_info.client_secret, object);
+        // TODO Why do we not handle status here, doc says it can return succeeded or error?
+
+        // TODO Why is on_payment_success not called here, because we will end up here again after
+        // the server responds? Would prefer if the code was written using a different handler for each different
+        // server call. Using a common if statement like this for different things makes it impossible to follow the
+        // control flow by just reading the code.
+
+        // TODO How does redirect ot receipt work in this case? We come to this if statement again but from a
+        // different server response I think, but you can't understand that by reading the code.
     } else if (action_info && action_info.type === 'redirect_to_url') {
         if (object.on_payment_success) {object.on_payment_success(json);}
         window.location.href = action_info.redirect;
+        // TODO How does redirect to receipt work in this case?  We come to this if statement again but from a
+        // different server response I think, but you can't understand that by reading the code.
     } else {
         if (object.on_payment_success) {object.on_payment_success(json);}
         window.location.href = "receipt/" + json.data.transaction_id;
@@ -116,7 +125,6 @@ function handleStripeAction(client_secret: any, object: PaymentFlowDefinition) {
 }
 
 
-// TODO QA No spinner? Just test in browser.
 export function pay(object: PaymentFlowDefinition) {
     // Don't allow any clicks while waiting for a response from the server
     if (waitingForPaymentResponse) {

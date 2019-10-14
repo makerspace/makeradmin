@@ -11,7 +11,6 @@ from shop.stripe_constants import PaymentIntentStatus, PaymentIntentNextActionTy
 from shop.stripe_util import convert_to_stripe_amount
 from shop.transactions import PaymentFailed, payment_success, get_source_transaction, commit_fail_transaction
 
-# TODO QA Looks more or less completly rewritten, check.
 logger = getLogger('makeradmin')
 
 
@@ -22,6 +21,8 @@ def raise_from_stripe_invalid_request_error(e):
     raise PaymentFailed(log=f"stripe charge failed: {str(e)}", level=EXCEPTION)
 
 
+# TODO Inconsistent usage of leading _ in function names, maybe just remove it everywhere to make the code easier to
+# read?
 def _capture_stripe_payment_intent(transaction, payment_intent):
     """ This is payment_intent is authorized and can be captured synchronously. """
 
@@ -51,9 +52,12 @@ def _create_action_required_response(transaction, payment_intent):
         if payment_intent.next_action.type == PaymentIntentNextActionType.USE_STRIPE_SDK:
             return dict(type=PaymentIntentNextActionType.USE_STRIPE_SDK,
                         client_secret=payment_intent.client_secret)
+        
         elif payment_intent.next_action.type == PaymentIntentNextActionType.REDIRECT_TO_URL:
+            # TODO Can this happen when we do not provide an url to PaymentIntent.create?
             return dict(type=PaymentIntentNextActionType.REDIRECT_TO_URL,
                         redirect=payment_intent.next_action.redirect_to_url.url)
+        
         else:
             raise PaymentFailed(log=f"unknown intent next_action type, {payment_intent.next_action.type}")
 
@@ -74,12 +78,27 @@ def _complete_payment_intent_transaction(transaction, payment_intent):
         payment_success(transaction)
 
 
+# TODO Very similar problem to the to code in payment_common.ts. Unnecessary hard to follow control flow, outside
+# knowledge is required. Try to split code into more limited functions to make it clearer what states are valid when.
+#
+# As far as I understand it only possible control flows are:
+# client post pay -> SUCCEEDED -> client success
+# client post pay -> REQUIRES_ACTION -> client post confirm -> REQUIRES_CONFIRMATION -> SUCCEEDED -> client success
+#
+# Also theoretically possible? Does not happen when I test. How are they possible? Maybe just error them?
+# client post pay -> REQUIRES_PAYMENT_METHOD -> client fail
+# client post pay -> REQUIRES_CAPTURE -> client success
+#
+# I think the code should reflect this and not anything else.
 def create_client_response(transaction, payment_intent):
+    logger.info(f"TODO create_client_response {payment_intent.status}")
+    
     if payment_intent.status == PaymentIntentStatus.REQUIRES_CAPTURE:
         _capture_stripe_payment_intent(transaction, payment_intent)
         return None
 
     elif payment_intent.status == PaymentIntentStatus.REQUIRES_ACTION:
+        """ Requires further action on client side. """
         if not payment_intent.next_action:
             raise InternalServerError(f"intent next_action is required but missing ({payment_intent.next_action})")
         return _create_action_required_response(transaction, payment_intent)
@@ -97,6 +116,7 @@ def create_client_response(transaction, payment_intent):
     elif payment_intent.status == PaymentIntentStatus.REQUIRES_PAYMENT_METHOD:
         commit_fail_transaction(transaction)
         logger.info(f"failed: payment for transaction {transaction.id}, payment_intent id {payment_intent.id}")
+        # TODO Should we really return None here? Maybe raise something instead so the user gets an error message?
         return None
 
     else:
@@ -113,6 +133,7 @@ def confirm_stripe_payment_intent(data):
 
     transaction = get_source_transaction(payment_intent_id)
     if not transaction:
+        # TODO This is a bad request not InternalServerError?
         raise InternalServerError(f"unknown payment_intent ({payment_intent_id})")
 
     payment_intent = stripe.PaymentIntent.retrieve(payment_intent_id)
@@ -135,6 +156,9 @@ def pay_with_stripe(transaction, payment_method_id):
             description=f'charge for transaction id {transaction.id}',
             confirmation_method='manual',
             confirm=True,
+            # TODO Add return_url here? Or will that force redirect front client? What decides if it is going to be
+            # use_stripe_sdk or redirect_to_url? Maybe remove redirect_to_url code from the client and server? If we
+            # do not provide the url it can't happen, right?
         )
 
         logger.info(
