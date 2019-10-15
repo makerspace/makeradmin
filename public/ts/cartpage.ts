@@ -100,7 +100,6 @@ common.onGetAndDocumentLoaded("/webshop/product_data", (productData: any) => {
 			})
 		}
 		function on_payment_success(json: any){
-			// TODO Why do we save to storage on success, and why not on register?
 			new Cart([]).saveToStorage();
 		}
 		function on_failure(json: any){

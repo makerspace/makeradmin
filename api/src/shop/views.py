@@ -118,8 +118,6 @@ def pending_actions_for_member():
 
 @service.route("/member/current/transactions", method=GET, permission=USER)
 def transactions_for_member():
-    # TODO Maybe filter failed transactions, only successful ones. But sometimes it fails due to server error and we can
-    # make it successful later by api call from stripe?
     return member_history(g.user_id)
 
 

@@ -75,26 +75,17 @@ function display_stripe_error(error: any){
     errorElement.textContent = error.message;
 }
 
+// TODO Maybe doc this strange client -> server recursion?
 function handleBackendResponse(json: any, object: PaymentFlowDefinition) {
     if (object.handle_backend_response) {object.handle_backend_response(json);}
 
     const action_info = json.data.action_info;
     if (action_info && action_info.type === 'use_stripe_sdk') {
         handleStripeAction(action_info.client_secret, object);
-        // TODO Why do we not handle status here, doc says it can return succeeded or error?
-
-        // TODO Why is on_payment_success not called here, because we will end up here again after
-        // the server responds? Would prefer if the code was written using a different handler for each different
-        // server call. Using a common if statement like this for different things makes it impossible to follow the
-        // control flow by just reading the code.
-
-        // TODO How does redirect ot receipt work in this case? We come to this if statement again but from a
-        // different server response I think, but you can't understand that by reading the code.
     } else if (action_info && action_info.type === 'redirect_to_url') {
+        // TODO Remove redirect_to_url branch.
         if (object.on_payment_success) {object.on_payment_success(json);}
         window.location.href = action_info.redirect;
-        // TODO How does redirect to receipt work in this case?  We come to this if statement again but from a
-        // different server response I think, but you can't understand that by reading the code.
     } else {
         if (object.on_payment_success) {object.on_payment_success(json);}
         window.location.href = "receipt/" + json.data.transaction_id;

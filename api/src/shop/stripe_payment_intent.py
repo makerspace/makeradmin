@@ -55,6 +55,7 @@ def _create_action_required_response(transaction, payment_intent):
         
         elif payment_intent.next_action.type == PaymentIntentNextActionType.REDIRECT_TO_URL:
             # TODO Can this happen when we do not provide an url to PaymentIntent.create?
+            # => InternalServerError
             return dict(type=PaymentIntentNextActionType.REDIRECT_TO_URL,
                         redirect=payment_intent.next_action.redirect_to_url.url)
         
@@ -78,22 +79,10 @@ def _complete_payment_intent_transaction(transaction, payment_intent):
         payment_success(transaction)
 
 
-# TODO Very similar problem to the to code in payment_common.ts. Unnecessary hard to follow control flow, outside
-# knowledge is required. Try to split code into more limited functions to make it clearer what states are valid when.
-#
-# As far as I understand it only possible control flows are:
-# client post pay -> SUCCEEDED -> client success
-# client post pay -> REQUIRES_ACTION -> client post confirm -> REQUIRES_CONFIRMATION -> SUCCEEDED -> client success
-#
-# Also theoretically possible? Does not happen when I test. How are they possible? Maybe just error them?
-# client post pay -> REQUIRES_PAYMENT_METHOD -> client fail
-# client post pay -> REQUIRES_CAPTURE -> client success
-#
-# I think the code should reflect this and not anything else.
 def create_client_response(transaction, payment_intent):
-    logger.info(f"TODO create_client_response {payment_intent.status}")
     
     if payment_intent.status == PaymentIntentStatus.REQUIRES_CAPTURE:
+        # TODO Remove
         _capture_stripe_payment_intent(transaction, payment_intent)
         return None
 
@@ -134,6 +123,7 @@ def confirm_stripe_payment_intent(data):
     transaction = get_source_transaction(payment_intent_id)
     if not transaction:
         # TODO This is a bad request not InternalServerError?
+        # => You decide.
         raise InternalServerError(f"unknown payment_intent ({payment_intent_id})")
 
     payment_intent = stripe.PaymentIntent.retrieve(payment_intent_id)
@@ -156,9 +146,6 @@ def pay_with_stripe(transaction, payment_method_id):
             description=f'charge for transaction id {transaction.id}',
             confirmation_method='manual',
             confirm=True,
-            # TODO Add return_url here? Or will that force redirect front client? What decides if it is going to be
-            # use_stripe_sdk or redirect_to_url? Maybe remove redirect_to_url code from the client and server? If we
-            # do not provide the url it can't happen, right?
         )
 
         logger.info(

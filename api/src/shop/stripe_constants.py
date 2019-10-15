@@ -56,8 +56,8 @@ class PaymentIntentStatus:
     REQUIRES_PAYMENT_METHOD = 'requires_payment_method'
     REQUIRES_CONFIRMATION = 'requires_confirmation'
     REQUIRES_ACTION = 'requires_action'
-    PROCESSING = 'processing'  # TODO Unused, remove?
-    CANCELED = 'canceled'   # TODO Unused, remove?
+    PROCESSING = 'processing'
+    CANCELED = 'canceled'
     SUCCEEDED = 'succeeded'
     REQUIRES_CAPTURE = 'requires_capture'
 

@@ -91,6 +91,7 @@ def stripe_payment_intent_event(subtype, event):
     if subtype == Subtype.SUCCEEDED:
         # TODO Should we really do this? This transaction is pending? Is the synchronous control flow always
         # successful?
+        # => Verify that we always get a charge event, if we do, remove this if branch.
         pass
     
     elif subtype == Subtype.PAYMENT_FAILED:
@@ -108,6 +109,7 @@ def stripe_event(event):
         event_type, event_subtype = event.type.split('.', 1)
         # TODO Can we still get SOURCE and CHARGE events? Test it. => Yes we do, but do we need to handle them?
         # Remove handling of old event types?
+        # => Remove handling of SOURCE events.
         if event_type == Type.SOURCE:
             stripe_source_event(event_subtype, event)
             
