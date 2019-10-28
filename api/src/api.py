@@ -60,6 +60,3 @@ def index():
 @app.route("/routes")
 def routes():
     return "\n".join(sorted([f"{rule.rule}: {', '.join(sorted(rule.methods))}" for rule in app.url_map.iter_rules()]))
-
-
-# todo: Use Sentry?

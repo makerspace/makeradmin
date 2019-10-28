@@ -63,7 +63,7 @@ class ApiError(Exception):
                  log=None, level=ERROR):
         """
         :param message human readable message of what went wrong, should be safe to show to end users
-        :param status :todo: is this really needed? we have http status code
+        :param status is this really needed? we have http status code
         :param service this external service created this response
         :param fields comma separated list of db fields/request parameters that was wrong, use when code is not enough
         :param what symbolic string of what went wrong, only use when code and field is not specific enough

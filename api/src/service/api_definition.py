@@ -12,10 +12,6 @@ GET = 'get'
 DELETE = 'delete'
 PUT = 'put'
 
-# todo: Since permissions are tied to the code it is probably better that they are in the code and not in the db. The
-# db also contains a lot of unusable permissions. membership_group_permissions could contain permission enum/string
-# directly.
-
 # Special permissions
 PUBLIC = 'public'    # Anyone on the internet can access this endpoint.
 SERVICE = 'service'  # A service user (id < 0) needs to be authenticated, but no other permissions are needed.

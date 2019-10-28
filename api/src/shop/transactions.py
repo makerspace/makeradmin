@@ -24,7 +24,6 @@ class PaymentFailed(BadRequest):
     message = 'Payment failed.'
 
 
-# todo: Rename when it is not source.
 def get_source_transaction(source_id):
     try:
         return db_session\
@@ -64,11 +63,9 @@ def commit_transaction_to_db(member_id=None, total_amount=None, contents=None, s
         )
     
     if activates_member:
-        # todo: Convert this to a product action.
         # Mark this transaction as one that is for registering a member.
         db_session.add(PendingRegistration(transaction_id=transaction.id))
 
-    # todo: Rename stripe pending to TransactionReferences or something (with type).
     db_session.add(StripePending(transaction_id=transaction.id, stripe_token=stripe_card_source_id))
 
     return transaction
@@ -216,7 +213,6 @@ def payment_success(transaction):
     ship_orders(ship_add_labaccess=False, transaction=transaction)
 
     if db_session.query(PendingRegistration).filter(PendingRegistration.transaction_id == transaction.id).count():
-        # todo: Make this into a proper transaction_action like the other.
         activate_member(transaction.member)
 
 
