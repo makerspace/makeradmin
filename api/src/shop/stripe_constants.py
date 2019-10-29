@@ -14,7 +14,7 @@ STRIPE_SIGNING_SECRET = config.get("STRIPE_SIGNING_SECRET", log_value=False)
 
 class Type:
     SOURCE = 'source'
-    CARD = 'card'  # TODO Unused, remove?
+    CARD = 'card'
     CHARGE = 'charge'
     PAYMENT_INTENT = 'payment_intent'
 
@@ -32,20 +32,6 @@ class Subtype:
 class SourceType:
     THREE_D_SECURE = 'three_d_secure'
     CARD = 'card'
-
-
-# TODO Unused, remove?
-class SourceStatus:
-    CHARGEABLE = 'chargeable'
-    CONSUMED = 'consumed'
-    FAILED = 'failed'
-    PENDING = "pending"
-
-
-# TODO Unused, remove?
-class SourceRedirectStatus:
-    PENDING = 'pending'
-    NOT_REQUIRED = 'not_required'
 
 
 class ChargeStatus:
