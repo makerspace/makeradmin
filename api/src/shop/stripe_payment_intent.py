@@ -52,11 +52,10 @@ def create_action_required_response(transaction, payment_intent):
                         client_secret=payment_intent.client_secret)
         
         elif payment_intent.next_action.type == PaymentIntentNextActionType.REDIRECT_TO_URL:
-            return dict(type=PaymentIntentNextActionType.REDIRECT_TO_URL,
-                        redirect=payment_intent.next_action.redirect_to_url.url)
-        
+            raise InternalServerError(log=f"unexpected next_action type, {payment_intent.next_action.type}")
+
         else:
-            raise PaymentFailed(log=f"unknown intent next_action type, {payment_intent.next_action.type}")
+            raise PaymentFailed(log=f"unknown next_action type, {payment_intent.next_action.type}")
 
     except Exception:
         # Fail transaction on all known and unknown errors to be safe, we won't charge a failed transaction.

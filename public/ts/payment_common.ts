@@ -78,23 +78,21 @@ function display_stripe_error(error: any){
     UIkit.modal.alert("<h2>Your payment failed</h2>" + errorElement.innerHTML);
 }
 
-// TODO Maybe doc this strange client -> server recursion?
+// This function might be called recursively doing multiple authentication steps.
 function handleBackendResponse(json: any, object: PaymentFlowDefinition) {
     if (object.handle_backend_response) {object.handle_backend_response(json);}
 
     const action_info = json.data.action_info;
     if (action_info && action_info.type === 'use_stripe_sdk') {
+        // This might be a recursive call doing multiple authentication steps.
         handleStripeAction(action_info.client_secret, object);
-    } else if (action_info && action_info.type === 'redirect_to_url') {
-        // TODO Remove redirect_to_url branch.
-        if (object.on_payment_success) {object.on_payment_success(json);}
-        window.location.href = action_info.redirect;
     } else {
         if (object.on_payment_success) {object.on_payment_success(json);}
         window.location.href = "receipt/" + json.data.transaction_id;
     }
 }
 
+// This function might be called recursively doing multiple authentication steps.
 function handleStripeAction(client_secret: any, object: PaymentFlowDefinition) {
     stripe.handleCardAction(
           client_secret
@@ -109,6 +107,7 @@ function handleStripeAction(client_secret: any, object: PaymentFlowDefinition) {
             common.ajax("POST", window.apiBasePath + "/webshop/confirm_payment", {
                 payment_intent_id: result.paymentIntent.id,
             }).then(json => {
+                // This might be a recursive call doing multiple authentication steps.
                 handleBackendResponse(json, object);
             }).catch(json => {
                 if (object.on_failure) {object.on_failure(json);}
