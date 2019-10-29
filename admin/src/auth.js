@@ -1,4 +1,5 @@
 import {showError, showSuccess} from "./message";
+import {post} from "./gateway";
 
 
 class Auth {
@@ -27,13 +28,7 @@ class Auth {
 
     // Ask server to send a request on time login email to the user.
     requestPassword(username) {
-        fetch(config.apiBasePath + "/oauth/resetpassword",
-            {
-                body: JSON.stringify({username}),
-                method: "POST",
-                headers: {'Content-Type': 'application/json; charset=UTF-8'},
-            })
-            .then(() => null, () => null);
+        return post({url: "/oauth/resetpassword", params: {username}, errorMessage: "Error when sending", expectedDataStatus: 'ok'});
     }
     
     login(username, password) {

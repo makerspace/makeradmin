@@ -16,16 +16,16 @@ class LoginResetPassword extends React.Component {
         const username = this.username.value;
 
         // Error handling
-        if(!username)
+        if (!username)
         {
             showError("Du måste fylla i din E-postadress");
             return;
         }
 
-        auth.requestPassword(username);
-
-        showSuccess("Ett E-postmeddelande med information om hur du nollställer ditt lösenord har skickats till " + username);
-        this.props.router.push("/");
+        auth.requestPassword(username).then(() => {
+            showSuccess("Epost med resetlänk för lösen har skickats till " + username);
+            this.props.router.push("/");
+        });
     }
 
     render() {
@@ -50,7 +50,7 @@ class LoginResetPassword extends React.Component {
                             </div>
 
                             <div className="uk-form-row">
-                                <button type="submit" className="uk-width-1-1 uk-button uk-button-success uk-button-large"><span className="uk-icon-check" /> Skicka E-post</button>
+                                <button type="submit" className="uk-width-1-1 uk-button uk-button-success uk-button-large"><span className="uk-icon-check" /> Skicka epost</button>
                             </div>
                         </form>
                     </div>

@@ -15,7 +15,15 @@ const handleError = message => error => {
 
 export function request({url, params, data, options, errorMessage, expectedDataStatus}) {
     
-    options = Object.assign({headers: {'Authorization': 'Bearer ' + auth.getAccessToken(), 'Content-Type': 'application/json; charset=UTF-8'}},
+    const accessToken = auth.getAccessToken();
+    
+    let headers = {'Content-Type': 'application/json; charset=UTF-8'};
+    
+    if (accessToken) {
+        headers['Authorization'] = 'Bearer ' + accessToken;
+    }
+    
+    options = Object.assign({headers},
                             data ? {body: JSON.stringify(data)} : {},
                             options);
     
