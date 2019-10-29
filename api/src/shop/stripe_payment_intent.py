@@ -98,8 +98,7 @@ def create_client_response(transaction, payment_intent):
     elif payment_intent.status == PaymentIntentStatus.REQUIRES_PAYMENT_METHOD:
         commit_fail_transaction(transaction)
         logger.info(f"failed: payment for transaction {transaction.id}, payment_intent id {payment_intent.id}")
-        # TODO Should we really return None here? Maybe raise something instead so the user gets an error message?
-        return None
+        raise BadRequest(log=f"payment_intent requires payment method, either no method provided or the payment failed")
 
     else:
         raise InternalServerError(

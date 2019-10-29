@@ -1,6 +1,8 @@
 /// <reference path="../node_modules/@types/stripe-v3/index.d.ts" />
 import * as common from "./common"
 
+declare var UIkit: any;
+
 var stripe: stripe.Stripe;
 var card: stripe.elements.Element;
 var spinner: any;
@@ -73,6 +75,7 @@ function default_before_initiate_payment(){
 };
 function display_stripe_error(error: any){
     errorElement.textContent = error.message;
+    UIkit.modal.alert("<h2>Your payment failed</h2>" + errorElement.innerHTML);
 }
 
 // TODO Maybe doc this strange client -> server recursion?
