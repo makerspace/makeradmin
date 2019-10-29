@@ -79,12 +79,7 @@ def complete_payment_intent_transaction(transaction, payment_intent):
 
 def create_client_response(transaction, payment_intent):
     
-    if payment_intent.status == PaymentIntentStatus.REQUIRES_CAPTURE:
-        # TODO Remove
-        capture_stripe_payment_intent(transaction, payment_intent)
-        return None
-
-    elif payment_intent.status == PaymentIntentStatus.REQUIRES_ACTION:
+    if payment_intent.status == PaymentIntentStatus.REQUIRES_ACTION:
         """ Requires further action on client side. """
         if not payment_intent.next_action:
             raise InternalServerError(f"intent next_action is required but missing ({payment_intent.next_action})")
