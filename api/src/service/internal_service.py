@@ -59,7 +59,7 @@ class InternalService(Blueprint):
         :param commit commit db_session just before returning if no exception was raised
         :param commit_on_error commit db_session even if there was an exception
         :param route_kwargs all extra kwargs are forwarded to Blueprint.route
-        :param flat_return some endpoints returns data flattened, most don't :todo: fix this
+        :param flat_return some endpoints returns data flattened
         """
         
         assert permission is not None, "permission is required, use PUBLIC for no permission needed"

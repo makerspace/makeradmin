@@ -65,8 +65,6 @@ def register(data, remote_addr, user_agent):
     # This will raise if the payment fails.
     transaction, action_info = make_purchase(member_id=member_id, purchase=purchase, activates_member=True)
 
-    # todo: Delete member if payment fails. Make <email, deleted_at> uniquie instead of just email.
-
     # If the pay succeeded (not same as the payment is completed) and the member does not already exists,
     # the user will be logged in.
     token = auth.force_login(remote_addr, user_agent, member_id)['access_token']

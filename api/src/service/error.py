@@ -40,16 +40,20 @@ def error_handler_api(error):
     return error.to_response()
 
 
-def error_handler_500(error):
-    return jsonify(dict(message='Internal server error.', status='error')), 500
+def error_handler_400(error):
+    return jsonify(dict(message='Bad request.', status='error')), 400
 
 
 def error_handler_404(error):
     return jsonify(dict(message='Not found.', status='error')), 404
 
 
-# todo: Add generic nice 400 handler (for things like bad content type and reading json). Also 405 bad method not
-# allowed.
+def error_handler_405(error):
+    return jsonify(dict(message='Method not allowed.', status='error')), 405
+
+
+def error_handler_500(error):
+    return jsonify(dict(message='Internal server error.', status='error')), 500
 
 
 class ApiError(Exception):
@@ -63,7 +67,7 @@ class ApiError(Exception):
                  log=None, level=ERROR):
         """
         :param message human readable message of what went wrong, should be safe to show to end users
-        :param status :todo: is this really needed? we have http status code
+        :param status is this really needed? we have http status code
         :param service this external service created this response
         :param fields comma separated list of db fields/request parameters that was wrong, use when code is not enough
         :param what symbolic string of what went wrong, only use when code and field is not specific enough
