@@ -3,9 +3,13 @@ from datetime import datetime, timedelta
 from string import ascii_letters, digits
 
 from flask import g, request
+from sqlalchemy.orm.exc import NoResultFound
 
-from core.models import Login, AccessToken
+from core.models import Login, AccessToken, PasswordResetToken
 from membership.member_auth import get_member_permissions, authenticate
+from membership.models import Member
+from messages.message import send_message
+from messages.models import MessageTemplate
 from service.api_definition import SERVICE, USER, REQUIRED, BAD_VALUE, EXPIRED, SERVICE_USER_ID
 from service.db import db_session
 from service.error import TooManyRequests, ApiError, NotFound, Unauthorized, BadRequest, InternalServerError
@@ -13,6 +17,18 @@ from service.error import TooManyRequests, ApiError, NotFound, Unauthorized, Bad
 
 def generate_token():
     return ''.join(secrets.choice(ascii_letters + digits) for _ in range(32))
+
+
+def get_member_by_user_tag(user_tag):
+    try:
+        if user_tag.isdigit():
+            return db_session.query(Member).filter_by(member_number=int(user_tag), deleted_at=None).one()
+            
+        return db_session.query(Member).filter_by(email=user_tag, deleted_at=None).one()
+        
+    except NoResultFound:
+        raise NotFound(f"Could not find any user with the name or email '{user_tag}'.", fields='user_tag',
+                       status="not found")
 
 
 def create_access_token(ip, browser, user_id):
@@ -49,6 +65,20 @@ def login(ip, browser, username, password):
     Login.register_login_success(ip, member_id)
 
     return create_access_token(ip, browser, member_id)
+
+
+def reset_password(username):
+    member = get_member_by_user_tag(username)
+    
+    token = generate_token()
+    
+    db_session.add(PasswordResetToken(member_id=member.member_id, token=token))
+    db_session.commit()
+    
+    send_message(
+        MessageTemplate.PASSWORD_RESET, member,
+        token=token
+    )
 
 
 def force_login(ip, browser, user_id):

@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime, Text, text
+from sqlalchemy import Column, Integer, String, DateTime, Text, text, func
 from sqlalchemy.ext.declarative import declarative_base
 from service.db import db_session
 
@@ -19,6 +19,18 @@ class AccessToken(Base):
 
     def __repr__(self):
         return f'AccessToken(user_id={self.access_token}, access_token={self.access_token})'
+
+
+class PasswordResetToken(Base):
+    __tablename__ = 'password_reset_token'
+    
+    id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
+    member_id = Column(Integer, index=True, nullable=False)
+    token = Column(String(32), unique=True, nullable=False)
+    created_at = Column(DateTime, nullable=False, server_default=func.now())
+
+    def __repr__(self):
+        return f'PasswordResetToken(member_id={self.member_id}, created_at={self.created_at})'
 
 
 class Login:

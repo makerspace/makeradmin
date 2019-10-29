@@ -1,7 +1,7 @@
 from flask import request, g
 
 from core import service, auth
-from service.api_definition import POST, PUBLIC, Arg, DELETE, GET, SERVICE, Enum, USER, BAD_VALUE
+from service.api_definition import POST, PUBLIC, Arg, DELETE, GET, SERVICE, Enum, USER, BAD_VALUE, non_empty_str
 from service.error import NotFound, UnprocessableEntity
 
 
@@ -20,9 +20,9 @@ def logout(token=None):
 
 
 @service.route("/oauth/resetpassword", method=POST, permission=PUBLIC)
-def reset_password():
+def reset_password(username: str=Arg(non_empty_str)):
     """ Send a reset password link to the users email. """
-    raise NotFound("Reset password functionality is not implemented yet.")
+    auth.reset_password(username)
 
 
 @service.route("/oauth/token", method=GET, permission=USER)
