@@ -52,8 +52,6 @@ def create_action_required_response(transaction, payment_intent):
                         client_secret=payment_intent.client_secret)
         
         elif payment_intent.next_action.type == PaymentIntentNextActionType.REDIRECT_TO_URL:
-            # TODO Can this happen when we do not provide an url to PaymentIntent.create?
-            # => InternalServerError
             return dict(type=PaymentIntentNextActionType.REDIRECT_TO_URL,
                         redirect=payment_intent.next_action.redirect_to_url.url)
         
@@ -114,9 +112,7 @@ def confirm_stripe_payment_intent(data):
 
     transaction = get_source_transaction(payment_intent_id)
     if not transaction:
-        # TODO This is a bad request not InternalServerError?
-        # => You decide.
-        raise InternalServerError(f"unknown payment_intent ({payment_intent_id})")
+        raise BadRequest(f"unknown payment_intent ({payment_intent_id})")
 
     payment_intent = stripe.PaymentIntent.retrieve(payment_intent_id)
     assert payment_intent.status == PaymentIntentStatus.REQUIRES_CONFIRMATION
