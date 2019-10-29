@@ -21,9 +21,7 @@ def raise_from_stripe_invalid_request_error(e):
     raise PaymentFailed(log=f"stripe charge failed: {str(e)}", level=EXCEPTION)
 
 
-# TODO Inconsistent usage of leading _ in function names, maybe just remove it everywhere to make the code easier to
-# read?
-def _capture_stripe_payment_intent(transaction, payment_intent):
+def capture_stripe_payment_intent(transaction, payment_intent):
     """ This is payment_intent is authorized and can be captured synchronously. """
 
     if transaction.status != Transaction.PENDING:
@@ -35,7 +33,7 @@ def _capture_stripe_payment_intent(transaction, payment_intent):
             payment_intent.id
         )
 
-        _complete_payment_intent_transaction(transaction, captured_intent)
+        complete_payment_intent_transaction(transaction, captured_intent)
     except InvalidRequestError as e:
         raise PaymentFailed(log=f"stripe capture payment_intent failed: {str(e)}", level=EXCEPTION)
 
@@ -43,7 +41,7 @@ def _capture_stripe_payment_intent(transaction, payment_intent):
         raise InternalServerError(log=f"stripe capture payment_intent failed (possibly temporarily): {str(e)}")
 
 
-def _create_action_required_response(transaction, payment_intent):
+def create_action_required_response(transaction, payment_intent):
     """ The payment_intent requires customer action to be confirmed. Create response to client"""
 
     try:
@@ -69,7 +67,7 @@ def _create_action_required_response(transaction, payment_intent):
         raise
 
 
-def _complete_payment_intent_transaction(transaction, payment_intent):
+def complete_payment_intent_transaction(transaction, payment_intent):
     if payment_intent.status != PaymentIntentStatus.SUCCEEDED:
         raise InternalServerError(
             log=f"unexpected payment_intent status '{payment_intent.status}' for transaction {transaction.id} "
@@ -83,14 +81,14 @@ def create_client_response(transaction, payment_intent):
     
     if payment_intent.status == PaymentIntentStatus.REQUIRES_CAPTURE:
         # TODO Remove
-        _capture_stripe_payment_intent(transaction, payment_intent)
+        capture_stripe_payment_intent(transaction, payment_intent)
         return None
 
     elif payment_intent.status == PaymentIntentStatus.REQUIRES_ACTION:
         """ Requires further action on client side. """
         if not payment_intent.next_action:
             raise InternalServerError(f"intent next_action is required but missing ({payment_intent.next_action})")
-        return _create_action_required_response(transaction, payment_intent)
+        return create_action_required_response(transaction, payment_intent)
 
     elif payment_intent.status == PaymentIntentStatus.REQUIRES_CONFIRMATION:
         confirmed_intent = stripe.PaymentIntent.confirm(payment_intent.id)
