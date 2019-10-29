@@ -3,12 +3,6 @@ from jsonschema import validate, ValidationError
 from service.config import debug_mode
 from service.error import UnprocessableEntity
 
-# TODO Remove if not used?
-STRIPE_3D_SECURE_REQUIRED = 'required'
-STRIPE_3D_SECURE_RECOMMENDED = 'recommended'
-STRIPE_3D_SECURE_OPTIONAL = 'optional'
-STRIPE_3D_SECURE_NOT_SUPPORTED = 'not_supported'
-
 
 purchase_schema = dict(
     type="object",
