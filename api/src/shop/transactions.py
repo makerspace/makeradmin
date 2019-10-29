@@ -1,15 +1,21 @@
+from decimal import localcontext, Decimal, Rounded
 from datetime import datetime
 from logging import getLogger
 
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
+from sqlalchemy.sql import func
+
 
 from membership.membership import add_membership_days
 from membership.models import Key, Span
+from service.api_definition import NEGATIVE_ITEM_COUNT, INVALID_ITEM_COUNT, EMPTY_CART, NON_MATCHING_SUMS
 from service.db import db_session, nested_atomic
-from service.error import InternalServerError, BadRequest
+from service.error import InternalServerError, BadRequest, NotFound
 from shop.email import send_key_updated_email, send_membership_updated_email, send_new_member_email, send_receipt_email
+from shop.filters import PRODUCT_FILTERS
 from shop.models import TransactionAction, TransactionContent, Transaction, ProductAction, PendingRegistration, \
-    StripePending
+    StripePending, Product
+from shop.stripe_util import convert_to_stripe_amount
 
 logger = getLogger('makeradmin')
 
@@ -18,7 +24,6 @@ class PaymentFailed(BadRequest):
     message = 'Payment failed.'
 
 
-# TODO Rename when it is not source.
 def get_source_transaction(source_id):
     try:
         return db_session\
@@ -58,13 +63,11 @@ def commit_transaction_to_db(member_id=None, total_amount=None, contents=None, s
         )
     
     if activates_member:
-        # TODO Convert this to a product action.
         # Mark this transaction as one that is for registering a member.
         db_session.add(PendingRegistration(transaction_id=transaction.id))
 
-    # TODO Rename stripe pending to TransactionReferences or something (with type).
     db_session.add(StripePending(transaction_id=transaction.id, stripe_token=stripe_card_source_id))
-    
+
     return transaction
 
 
@@ -98,7 +101,19 @@ def pending_actions_query(member_id=None, transaction=None):
         query = query.filter(Transaction.member_id == member_id)
         
     return query
-    
+
+
+def pending_action_value_sum(member_id, action_type):
+    """
+    Sum all pending actions of type action_type for specified member
+    """
+
+    return (
+        pending_actions_query(member_id=member_id)
+        .filter(TransactionAction.action_type == action_type)
+        .value(func.coalesce(func.sum(TransactionAction.value), 0))
+    )
+
 
 def complete_pending_action(action):
     action.status = TransactionAction.COMPLETED
@@ -152,6 +167,18 @@ def activate_member(member):
     send_new_member_email(member)
     
     
+def create_transaction(member_id, purchase, activates_member=False, stripe_reference_id=None):
+    total_amount, contents = validate_order(member_id, purchase["cart"], purchase["expected_sum"])
+
+    transaction = commit_transaction_to_db(member_id=member_id, total_amount=total_amount, contents=contents,
+                                           activates_member=activates_member, stripe_card_source_id=stripe_reference_id)
+
+    logger.info(f"created transaction {transaction.id}, total_amount={total_amount}, member_id={member_id}"
+                f", stripe_reference_id={stripe_reference_id}")
+
+    return transaction
+
+
 def complete_transaction(transaction):
     assert transaction.status == Transaction.PENDING
 
@@ -186,5 +213,72 @@ def payment_success(transaction):
     ship_orders(ship_add_labaccess=False, transaction=transaction)
 
     if db_session.query(PendingRegistration).filter(PendingRegistration.transaction_id == transaction.id).count():
-        # TODO Make this into a proper transaction_action like the other.
         activate_member(transaction.member)
+
+
+def process_cart(member_id, cart):
+    contents = []
+    with localcontext() as ctx:
+        ctx.clear_flags()
+        total_amount = Decimal(0)
+
+        for item in cart:
+            try:
+                product_id = item['id']
+                product = db_session.query(Product).filter(Product.id == product_id, Product.deleted_at.is_(None)).one()
+            except NoResultFound:
+                raise NotFound(message=f"Could not find product with id {product_id}.")
+
+            if product.price < 0:
+                raise InternalServerError(log=f"Product {product_id} has a negative price.")
+
+            count = item['count']
+
+            if count <= 0:
+                raise BadRequest(message=f"Bad product count for product {product_id}.", what=NEGATIVE_ITEM_COUNT)
+
+            if count % product.smallest_multiple != 0:
+                raise BadRequest(f"Bad count for product {product_id}, must be in multiples "
+                                 f"of {product.smallest_multiple}, was {count}.", what=INVALID_ITEM_COUNT)
+
+            if product.filter:
+                PRODUCT_FILTERS[product.filter](cart_item=item, member_id=member_id)
+
+            amount = product.price * count
+            total_amount += amount
+
+            content = TransactionContent(product_id=product_id, count=count, amount=amount)
+            contents.append(content)
+
+        if ctx.flags[Rounded]:
+            # This can possibly happen with huge values, I suppose they will be caught below anyway but it's good to
+            # catch in any case.
+            raise InternalServerError(log="Rounding error when calculating cart sum.")
+
+    return total_amount, contents
+
+
+def validate_order(member_id, cart, expected_amount: Decimal):
+    """ Validate that the expected amount matches what in the cart. Returns total_amount and cart items. """
+
+    if not cart:
+        raise BadRequest(message="No items in cart.", what=EMPTY_CART)
+
+    total_amount, unsaved_contents = process_cart(member_id, cart)
+
+    # Ensure that the frontend hasn't calculated the amount to pay incorrectly
+    if abs(total_amount - Decimal(expected_amount)) > Decimal("0.01"):
+        raise BadRequest(f"Expected total amount to pay to be {expected_amount} "
+                         f"but the cart items actually sum to {total_amount}.",
+                         what=NON_MATCHING_SUMS)
+
+    if total_amount < 5:
+        raise BadRequest("Total amount too small, must be at least 5 SEK.")
+
+    if total_amount > 10000:
+        raise BadRequest("Maximum amount is 10 000 SEK.")
+
+    # Assert that the amount can be converted to a valid stripe amount.
+    convert_to_stripe_amount(total_amount)
+
+    return total_amount, unsaved_contents

@@ -3,12 +3,12 @@ from logging import getLogger
 
 import stripe
 
-from test_aid.systest_base import ShopTestMixin, ApiTest, VALID_NON_3DS_CARD_NO, VALID_3DS_CARD_NO
+from test_aid.systest_base import ApiShopTestMixin, ApiTest, VALID_NON_3DS_CARD_NO, VALID_3DS_CARD_NO
 
 logger = getLogger('makeradmin')
 
 
-class Test(ShopTestMixin, ApiTest):
+class Test(ApiShopTestMixin, ApiTest):
 
     products = [
         dict(price=12.3, unit="st", smallest_multiple=1),

@@ -17,6 +17,8 @@ from messages.models import Message, MessageTemplate
 from service.config import get_mysql_config, config
 from service.db import create_mysql_engine
 from service.logging import logger
+from shop.models import ProductAction
+from shop.transactions import pending_action_value_sum
 
 template_loader = FileSystemLoader(abspath(dirname(__file__)) + '/templates')
 template_env = Environment(loader=template_loader, autoescape=select_autoescape())
@@ -104,6 +106,11 @@ def labaccess_reminder(db_session, render_template):
             now - timedelta(days=LABACCESS_REMINDER_GRACE_PERIOD) < Message.created_at,
         ).count()
         if reminder_sent:
+            continue
+
+        already_purchased = \
+            pending_action_value_sum(member_id=member.member_id, action_type=ProductAction.ADD_LABACCESS_DAYS) > 0
+        if already_purchased:
             continue
 
         logger.info(f'sending labaccess reminder to member with id {member.member_id}')

@@ -7,6 +7,7 @@ from membership.models import Member, Group, Permission, Span, Key, Box
 from messages.models import Message
 from service.api_definition import SERVICE_USER_ID
 from service.db import db_session
+from shop.models import ProductCategory, Product, ProductAction
 from test_aid.test_util import random_str
 
 
@@ -28,6 +29,10 @@ class DbFactory:
         self.permission = None
         self.message = None
         self.box = None
+        self.category = None
+        self.product = None
+        self.action = None
+
 
     def create_access_token(self, **kwargs):
         obj = dict(
@@ -124,3 +129,42 @@ class DbFactory:
         sql = "SELECT COALESCE(MAX(member_number), 0) FROM membership_members"
         member_number = db_session.execute(sql).fetchone()[0] + randint(1000, 2000)
         return member_number
+
+    def create_category(self, **kwargs):
+        obj = self.obj.create_category(**kwargs)
+        self.category = ProductCategory(**obj)
+        db_session.add(self.category)
+        db_session.commit()
+        return self.category
+
+    def delete_category(self, id=None):
+        category_id = id or self.category.id
+        db_session.query(ProductCategory).filter(ProductCategory.id == category_id).delete()
+        db_session.flush()
+
+    def create_product(self, **kwargs):
+        if self.category:
+            kwargs.setdefault('category_id', self.category.id)
+
+        obj = self.obj.create_product(**kwargs)
+
+        self.product = Product(**obj)
+        db_session.add(self.product)
+        db_session.flush()
+        return self.product
+
+    def delete_product(self, id=None):
+        product_id = id or self.product.id
+        db_session.query(ProductAction).filter(ProductAction.product_id == product_id).delete()
+        db_session.query(Product).filter(Product.id == product_id).delete()
+        db_session.flush()
+
+    def create_product_action(self, **kwargs):
+        if self.product:
+            kwargs.setdefault('product_id', self.product.id)
+
+        obj = self.obj.create_product_action(**kwargs)
+        self.action = ProductAction(**obj)
+        db_session.add(self.action)
+        db_session.flush()
+        return self.action

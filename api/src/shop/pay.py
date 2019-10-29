@@ -1,90 +1,14 @@
-from decimal import Decimal, localcontext, Rounded
 from logging import getLogger
-
-from sqlalchemy.orm.exc import NoResultFound
 
 from core import auth
 from membership.views import member_entity
-from service.api_definition import NON_MATCHING_SUMS, EMPTY_CART, NEGATIVE_ITEM_COUNT, INVALID_ITEM_COUNT
-from service.db import db_session
-from service.error import NotFound, InternalServerError, BadRequest
-from shop.filters import PRODUCT_FILTERS
-from shop.models import Product, TransactionContent
-from shop.api_schemas import validate_data, purchase_schema, register_schema, STRIPE_3D_SECURE_NOT_SUPPORTED
+from service.error import BadRequest
+from shop.api_schemas import validate_data, purchase_schema, register_schema
 from shop.shop_data import get_membership_products
 from shop.stripe_card import pay_with_stripe_card
-from shop.stripe_util import convert_to_stripe_amount
-from shop.transactions import commit_transaction_to_db
+from shop.transactions import create_transaction
 
 logger = getLogger('makeradmin')
-
-
-def process_cart(member_id, cart):
-    contents = []
-    with localcontext() as ctx:
-        ctx.clear_flags()
-        total_amount = Decimal(0)
-
-        for item in cart:
-            try:
-                product_id = item['id']
-                product = db_session.query(Product).filter(Product.id == product_id, Product.deleted_at.is_(None)).one()
-            except NoResultFound:
-                raise NotFound(message=f"Could not find product with id {product_id}.")
-            
-            if product.price < 0:
-                raise InternalServerError(log=f"Product {product_id} has a negative price.")
-            
-            count = item['count']
-            
-            if count <= 0:
-                raise BadRequest(message=f"Bad product count for product {product_id}.", what=NEGATIVE_ITEM_COUNT)
-            
-            if count % product.smallest_multiple != 0:
-                raise BadRequest(f"Bad count for product {product_id}, must be in multiples "
-                                 f"of {product.smallest_multiple}, was {count}.", what=INVALID_ITEM_COUNT)
-
-            if product.filter:
-                PRODUCT_FILTERS[product.filter](cart_item=item, member_id=member_id)
-
-            amount = product.price * count
-            total_amount += amount
-
-            content = TransactionContent(product_id=product_id, count=count, amount=amount)
-            contents.append(content)
-
-        if ctx.flags[Rounded]:
-            # This can possibly happen with huge values, I suppose they will be caught below anyway but it's good to
-            # catch in any case.
-            raise InternalServerError(log="Rounding error when calculating cart sum.")
-
-    return total_amount, contents
-
-
-def validate_payment(member_id, cart, expected_amount: Decimal):
-    """ Validate that the expected amount matches what in the cart. Returns total_amount and cart items. """
-    
-    if not cart:
-        raise BadRequest(message="No items in cart.", what=EMPTY_CART)
-
-    total_amount, unsaved_contents = process_cart(member_id, cart)
-
-    # Ensure that the frontend hasn't calculated the amount to pay incorrectly
-    if abs(total_amount - Decimal(expected_amount)) > Decimal("0.01"):
-        raise BadRequest(f"Expected total amount to pay to be {expected_amount} "
-                         f"but the cart items actually sum to {total_amount}.",
-                         what=NON_MATCHING_SUMS)
-
-    if total_amount < 5:
-        raise BadRequest("Total amount too small, must be at least 5 SEK.")
-
-    if total_amount > 10000:
-        raise BadRequest("Maximum amount is 10 000 SEK.")
-
-    # Assert that the amount can be converted to a valid stripe amount.
-    convert_to_stripe_amount(total_amount)
-
-    return total_amount, unsaved_contents
 
 
 def make_purchase(member_id=None, purchase=None, activates_member=False):
@@ -93,14 +17,9 @@ def make_purchase(member_id=None, purchase=None, activates_member=False):
     card_source_id = purchase["stripe_card_source_id"]
     card_3d_secure = purchase["stripe_card_3d_secure"]
     
-    total_amount, contents = validate_payment(member_id, purchase["cart"], purchase["expected_sum"])
+    transaction = create_transaction(member_id=member_id, purchase=purchase, activates_member=activates_member,
+                                     stripe_reference_id=card_source_id)
 
-    transaction = commit_transaction_to_db(member_id=member_id, total_amount=total_amount, contents=contents,
-                                           stripe_card_source_id=card_source_id, activates_member=activates_member)
-
-    logger.info(f"created transaction {transaction.id},  stripe_card_source_id={card_source_id}"
-                f", card_3d_secure={card_3d_secure}, total_amount={total_amount}, member_id={member_id}")
-    
     redirect_url = pay_with_stripe_card(transaction, card_source_id, card_3d_secure)
     
     return transaction, redirect_url
@@ -146,8 +65,6 @@ def register(data, remote_addr, user_agent):
 
     # This will raise if the payment fails.
     transaction, redirect = make_purchase(member_id=member_id, purchase=purchase, activates_member=True)
-
-    # TODO Delete member if payment fails. Make <email, deleted_at> uniquie instead of just email.
 
     # If the pay succeeded (not same as the payment is completed) and the member does not already exists,
     # the user will be logged in.

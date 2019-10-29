@@ -40,12 +40,9 @@ def stripe_charge_event(subtype, event):
         logger.info(f"charge failed for transaction {transaction.id}, {charge.failure_message}")
         
     elif subtype.startswith(Subtype.DISPUTE_PREFIX):
-        # todo: log disputes for display in admin frontend.
         pass
     
     elif subtype.startswith(Subtype.REFUND_PREFIX):
-        # todo: log refund for display in admin frontend.
-        # todo: option in frontend to roll back actions.
         pass
 
 

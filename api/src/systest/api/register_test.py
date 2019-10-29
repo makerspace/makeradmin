@@ -7,10 +7,10 @@ from membership.models import Span
 from service.api_definition import NON_MATCHING_SUMS
 from service.db import db_session
 from shop.models import ProductAction
-from test_aid.systest_base import ShopTestMixin, ApiTest, VALID_NON_3DS_CARD_NO, EXPIRED_3DS_CARD_NO
+from test_aid.systest_base import ApiShopTestMixin, ApiTest, VALID_NON_3DS_CARD_NO, EXPIRED_3DS_CARD_NO
 
 
-class Test(ShopTestMixin, ApiTest):
+class Test(ApiShopTestMixin, ApiTest):
 
     products = [
         dict(

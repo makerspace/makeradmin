@@ -1,17 +1,28 @@
 
 import messages
+import shop
 from dispatch_emails import labaccess_reminder, render_template, LABACCESS_REMINDER_DAYS_BEFORE, \
     LABACCESS_REMINDER_GRACE_PERIOD
 from membership import membership
 from membership.models import Span, Member
 from messages.models import Message, MessageTemplate
 from service.db import db_session
-from test_aid.test_base import FlaskTestBase
+from shop.models import ProductAction, Transaction
+from shop.transactions import create_transaction
+from test_aid.test_base import FlaskTestBase, ShopTestMixin
 
 
-class Test(FlaskTestBase):
+class Test(ShopTestMixin, FlaskTestBase):
     
-    models = [membership.models, messages.models]
+    models = [membership.models, messages.models, shop.models]
+    products = [
+        dict(
+            price=100.0,
+            unit="st",
+            smallest_multiple=1,
+            action=dict(action_type=ProductAction.ADD_LABACCESS_DAYS, value=30)
+        )
+    ]
 
     def setUp(self):
         db_session.query(Member).delete()
@@ -122,4 +133,23 @@ class Test(FlaskTestBase):
         
         self.assertEqual(1, db_session.query(Message).filter(Message.member == member).count())
 
-    
+    def test_reminder_message_is_not_created_if_member_has_pending_labaccess_days(self):
+        member = self.db.create_member()
+        self.db.create_span(type=Span.LABACCESS, enddate=self.date(LABACCESS_REMINDER_DAYS_BEFORE))
+        p0_count = 1
+
+        expected_sum = self.p0_price * p0_count
+        cart = [
+            {"id": self.p0_id, "count": p0_count},
+        ]
+
+        transaction = create_transaction(member_id=member.member_id,
+                                         purchase=dict(cart=cart, expected_sum=expected_sum),
+                                         stripe_reference_id="not_used")
+        transaction.status = Transaction.COMPLETED
+        db_session.add(transaction)
+        db_session.flush()
+
+        labaccess_reminder(db_session, render_template)
+
+        self.assertEqual(0, db_session.query(Message).count())
