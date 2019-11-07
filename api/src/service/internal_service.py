@@ -12,7 +12,7 @@ from service.api_definition import Arg, PUBLIC, GET, POST, PUT, DELETE, SERVICE,
 from service.db import db_session, fields_by_index
 from service.error import Forbidden, UnprocessableEntity
 from service.logging import logger
-from service.migrate import migrate_service
+from migrate import migrate_service
 
 
 class InternalService(Blueprint):
