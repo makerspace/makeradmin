@@ -27,8 +27,8 @@ class Auth {
     }
 
     // Ask server to send a request on time login email to the user.
-    requestPassword(username) {
-        return post({url: "/oauth/resetpassword", params: {username}, errorMessage: "Error when sending", expectedDataStatus: 'ok'});
+    requestPasswordReset(username) {
+        return post({url: "/oauth/request_password_reset", params: {username}, errorMessage: "Error when sending", expectedDataStatus: 'ok'});
     }
     
     login(username, password) {

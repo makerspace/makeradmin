@@ -62,5 +62,13 @@ def get_public_url(path):
     return f"{host}{path}"
 
 
+def get_admin_url(path):
+    """ Get public site url. """
+    host = config.get('HOST_FRONTEND')
+    if not host.startswith("http://") and not host.startswith("https://"):
+        host = "http://" + host
+    return f"{host}{path}"
+
+
 def debug_mode():
     return config.get('DEV_RUN') == 'true'

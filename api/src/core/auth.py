@@ -1,6 +1,7 @@
 import secrets
 from datetime import datetime, timedelta
 from string import ascii_letters, digits
+from urllib.parse import quote_plus
 
 from flask import g, request
 from sqlalchemy.orm.exc import NoResultFound
@@ -10,6 +11,7 @@ from membership.member_auth import get_member_permissions, authenticate
 from membership.models import Member
 from messages.message import send_message
 from messages.models import MessageTemplate
+from service import config
 from service.api_definition import SERVICE, USER, REQUIRED, BAD_VALUE, EXPIRED, SERVICE_USER_ID
 from service.db import db_session
 from service.error import TooManyRequests, ApiError, NotFound, Unauthorized, BadRequest, InternalServerError
@@ -67,7 +69,7 @@ def login(ip, browser, username, password):
     return create_access_token(ip, browser, member_id)
 
 
-def reset_password(username):
+def request_password_reset(username):
     member = get_member_by_user_tag(username)
     
     token = generate_token()
@@ -77,9 +79,13 @@ def reset_password(username):
     
     send_message(
         MessageTemplate.PASSWORD_RESET, member,
-        token=token
+        url=config.get_admin_url(f"/reset-password?reset_token={quote_plus(token)}"),
     )
 
+
+def password_reset(reset_token, unhashed_password):
+    return None
+    
 
 def force_login(ip, browser, user_id):
     Login.register_login_success(ip, user_id)

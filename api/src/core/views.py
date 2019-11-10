@@ -19,10 +19,16 @@ def logout(token=None):
     auth.remove_token(token, g.user_id)
 
 
-@service.route("/oauth/resetpassword", method=POST, permission=PUBLIC)
-def reset_password(username: str=Arg(non_empty_str)):
+@service.route("/oauth/request_password_reset", method=POST, permission=PUBLIC)
+def request_password_reset(username: str=Arg(non_empty_str)):
     """ Send a reset password link to the users email. """
-    auth.reset_password(username)
+    auth.request_password_reset(username)
+
+
+@service.route("/oauth/request_password_reset", method=POST, permission=PUBLIC)
+def password_reset(reset_token: str=Arg(non_empty_str), unhashed_password: str=Arg(non_empty_str)):
+    """ Reset the password for a user. """
+    auth.password_reset(reset_token, unhashed_password)
 
 
 @service.route("/oauth/token", method=GET, permission=USER)

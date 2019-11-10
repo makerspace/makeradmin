@@ -3,8 +3,7 @@ import auth from '../auth';
 import { withRouter } from 'react-router';
 import {showError, showSuccess} from "../message";
 
-
-class LoginResetPassword extends React.Component {
+class RequestPasswordReset extends React.Component {
     
     cancel() {
         this.props.router.push("/");
@@ -22,8 +21,8 @@ class LoginResetPassword extends React.Component {
             return;
         }
 
-        auth.requestPassword(username).then(() => {
-            showSuccess("Epost med resetlänk för lösen har skickats till " + username);
+        auth.requestPasswordReset(username).then(() => {
+            showSuccess("Link to password reset will be sent to your email shortly.");
             this.props.router.push("/");
         });
     }
@@ -61,4 +60,4 @@ class LoginResetPassword extends React.Component {
 }
 
 
-export default withRouter(LoginResetPassword);
+export default withRouter(RequestPasswordReset);
