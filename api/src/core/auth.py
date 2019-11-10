@@ -4,7 +4,7 @@ from string import ascii_letters, digits
 from urllib.parse import quote_plus
 
 from flask import g, request
-from sqlalchemy.orm.exc import NoResultFound
+from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 
 from core.models import Login, AccessToken, PasswordResetToken
 from membership.member_auth import get_member_permissions, authenticate
@@ -79,11 +79,28 @@ def request_password_reset(username):
     
     send_message(
         MessageTemplate.PASSWORD_RESET, member,
-        url=config.get_admin_url(f"/reset-password?reset_token={quote_plus(token)}"),
+        url=config.get_admin_url(f"/password-reset?reset_token={quote_plus(token)}"),
     )
 
 
 def password_reset(reset_token, unhashed_password):
+    try:
+        password_reset_token = db_session.query(PasswordResetToken).filter_by(token=reset_token).one()
+        
+    except NoResultFound:
+        raise BadRequest("Could not find password reset token, try to request a new reset link.")
+    
+    except MultipleResultsFound:
+        raise InternalServerError(log=f"Multiple tokens {reset_token} found, this is a bug.")
+    
+    if datetime.utcnow() - password_reset_token.created_at > timedelta(minutes=10):
+        raise BadRequest("Reset link expired, try to request a new.")
+    
+    try:
+        pass
+    except ValueError as e:
+        raise BadRequest(str(e))
+    
     return None
     
 

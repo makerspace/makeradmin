@@ -30,7 +30,12 @@ class Auth {
     requestPasswordReset(username) {
         return post({url: "/oauth/request_password_reset", params: {username}, errorMessage: "Error when sending", expectedDataStatus: 'ok'});
     }
-    
+
+    // Reset the password.
+    passwordReset(reset_token, unhashed_password) {
+        return post({url: "/oauth/password_reset", params: {unhashed_password, reset_token}, errorMessage: "Error when sending", expectedDataStatus: 'ok'});
+    }
+
     login(username, password) {
         fetch(config.apiBasePath + "/oauth/token",
             {

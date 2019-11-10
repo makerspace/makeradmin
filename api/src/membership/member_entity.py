@@ -49,7 +49,7 @@ def handle_password(data):
                 any([contains_sub_sequence(unhashed_password, s, l) for s, l in forbidden_sub_sequences]) or
                 any([unhashed_password.find(s) != -1 for s in forbidden_sequences])
         ):
-            raise ValueError("password contains a forbidden sequence of characters")
+            raise ValueError("password contains a forbidden sequence of characters, try something less common")
 
         data['password'] = hash_password(unhashed_password)
         

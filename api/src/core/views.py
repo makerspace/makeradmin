@@ -25,8 +25,8 @@ def request_password_reset(username: str=Arg(non_empty_str)):
     auth.request_password_reset(username)
 
 
-@service.route("/oauth/request_password_reset", method=POST, permission=PUBLIC)
-def password_reset(reset_token: str=Arg(non_empty_str), unhashed_password: str=Arg(non_empty_str)):
+@service.route("/oauth/password_reset", method=POST, permission=PUBLIC)
+def password_reset(reset_token: str=Arg(non_empty_str), unhashed_password: str=Arg(str)):
     """ Reset the password for a user. """
     auth.password_reset(reset_token, unhashed_password)
 

@@ -2,12 +2,26 @@ import React from 'react';
 import auth from '../auth';
 import { withRouter } from 'react-router';
 import {showError, showSuccess} from "../message";
+import { Link } from 'react-router';
 
 class PasswordReset extends React.Component {
     
     submit(e) {
         e.preventDefault();
-        console.log("sub");
+        const password = this.input.value;
+        const token = this.props.location.query.reset_token;
+        
+        console.log(password, this.props.location.query.reset_token);
+        
+        auth.passwordReset(token, password)
+            .then(() => {
+                showSuccess("New password was successfully set!");
+                this.props.router.push("/");
+            })
+            .catch(e => {
+                console.error(e);
+            })
+        ;
     }
     
     render() {
@@ -22,12 +36,15 @@ class PasswordReset extends React.Component {
                             <div className="uk-form-row">
                                 <div className="uk-form-icon">
                                     <i className="uk-icon-user"/>
-                                    <input ref={c => { this.password = c; }} className="uk-form-large uk-form-width-large" type="password" placeholder="New Password" />
+                                    <input ref={i => { this.input = i; }} className="uk-form-large uk-form-width-large" type="password" placeholder="New Password" />
                                 </div>
                             </div>
 
                             <div className="uk-form-row">
                                 <button type="submit" className="uk-width-1-1 uk-button uk-button-success uk-button-large"><span className="uk-icon-check" /> Submit</button>
+                            </div>
+                            <div className="uk-form-row uk-text-small">
+                                <Link className="uk-link uk-link-muted" to="/request-password-reset">Request another passsword reset.</Link>
                             </div>
                         </form>
                     </div>
