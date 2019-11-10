@@ -2,7 +2,7 @@ from random import randint
 from faker import Faker
 
 
-from core.models import AccessToken
+from core.models import AccessToken, PasswordResetToken
 from membership.models import Member, Group, Permission, Span, Key, Box
 from messages.models import Message
 from service.api_definition import SERVICE_USER_ID
@@ -168,3 +168,16 @@ class DbFactory:
         db_session.add(self.action)
         db_session.flush()
         return self.action
+
+    def create_password_reset_token(self, member=None, **kwargs):
+        member = member or self.member
+        
+        obj = dict(
+            member_id=member.member_id,
+            token=random_str(),
+        )
+        obj.update(**kwargs)
+        self.password_reset_token = PasswordResetToken(**obj)
+        db_session.add(self.password_reset_token)
+        db_session.commit()
+        return self.password_reset_token
