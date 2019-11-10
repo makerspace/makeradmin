@@ -3,23 +3,30 @@ import auth from '../auth';
 import { withRouter } from 'react-router';
 import {showError, showSuccess} from "../message";
 import { Link } from 'react-router';
+import * as _ from "underscore";
 
 class PasswordReset extends React.Component {
+    
+    constructor(props) {
+        super(props);
+        this.input = {};
+    }
     
     submit(e) {
         e.preventDefault();
         const password = this.input.value;
         const token = this.props.location.query.reset_token;
         
-        console.log(password, this.props.location.query.reset_token);
-        
         auth.passwordReset(token, password)
-            .then(() => {
-                showSuccess("New password was successfully set!");
-                this.props.router.push("/");
-            })
-            .catch(e => {
-                console.error(e);
+            .then(response => {
+                const error_message = response.data.error_message;
+                if (_.isEmpty(error_message)) {
+                    showSuccess("New password was successfully set!");
+                    this.props.router.push("/");
+                }
+                else {
+                    showError(error_message);
+                }
             })
         ;
     }

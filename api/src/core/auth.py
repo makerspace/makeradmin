@@ -93,13 +93,13 @@ def password_reset(reset_token, unhashed_password):
     except MultipleResultsFound:
         raise InternalServerError(log=f"Multiple tokens {reset_token} found, this is a bug.")
     
-    if datetime.utcnow() - password_reset_token.created_at > timedelta(minutes=10):
+    if datetime.utcnow() - password_reset_token.created_at > timedelta(minutes=1000):  # TODO
         return dict(error_message="Reset link expired, try to request a new.")
     
     try:
         hashed_password = check_and_hash_password(unhashed_password)
     except ValueError as e:
-        raise dict(error_message=str(e))
+        return dict(error_message=str(e))
     
     try:
         member = db_session.query(Member).get(password_reset_token.member_id)
@@ -109,7 +109,7 @@ def password_reset(reset_token, unhashed_password):
     member.password = hashed_password
     db_session.add(member)
     
-    return None
+    return {}
     
 
 def force_login(ip, browser, user_id):

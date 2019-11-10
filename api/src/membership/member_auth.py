@@ -22,10 +22,18 @@ FORBIDDEN_SUB_SEQUENCES = [
     ("zxcvbnm,."[::-1], 4),
     ("01234567890", 3),
     ("01234567890"[::-1], 3),
+    ("password", None),
+    ("q1w2e3", None),
+    ("maker", None),
+    ("space", None),
+    ("dinmamma", None),
 ]
 
 
 def contains_sub_sequence(value, sequence, length):
+    if length is None:
+        length = len(sequence)
+    value = value.lower()
     for i in range(0, len(sequence) - length + 1):
         if value.find(sequence[i:i + length]) != -1:
             return True
@@ -49,17 +57,15 @@ def check_and_hash_password(unhashed_password):
     contained_chars_set = set(unhashed_password)
 
     if len(unhashed_password) < 8 or len(contained_chars_set) < 6:
-        raise ValueError("password must be at least 8 characters long with at least 6 unique characters")
+        raise ValueError("Password must be at least 8 characters long with at least 6 unique characters.")
 
     # Test for forbidden sequences
     forbidden_sequences = {
-        "password", "q1w2e3r4t5", "maker", "space"
+        "password", "q1w2e3r4", "maker", "space"
     }
-    if (
-            any([contains_sub_sequence(unhashed_password, s, l) for s, l in FORBIDDEN_SUB_SEQUENCES]) or
-            any([unhashed_password.find(s) != -1 for s in forbidden_sequences])
-    ):
-        raise ValueError("password contains a forbidden sequence of characters, try something less common")
+    if any(contains_sub_sequence(unhashed_password, sequence, length)
+           for sequence, length in FORBIDDEN_SUB_SEQUENCES):
+        raise ValueError("Password contains a forbidden sequence of characters, try something less common.")
 
     return hash_password(unhashed_password)
 
