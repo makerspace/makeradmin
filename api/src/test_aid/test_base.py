@@ -6,10 +6,11 @@ from copy import copy
 from flask import Flask
 from sqlalchemy import create_engine, Numeric
 
+from membership.member_auth import hash_password
 from service.db import db_session_factory, db_session
 from service.internal_service import InternalService
 from test_aid.db import DbFactory
-from test_aid.obj import ObjFactory, DEFAULT_PASSWORD_HASH
+from test_aid.obj import ObjFactory, DEFAULT_PASSWORD
 from test_aid.test_util import classinstancemethod
 
 
@@ -121,7 +122,7 @@ class ShopTestMixin:
 
     def setUp(self):
         super().setUp()
-        self.member = self.factory.create_member(password=DEFAULT_PASSWORD_HASH)
+        self.member = self.factory.create_member(password=hash_password(DEFAULT_PASSWORD))
         self.member_id = self.member.member_id if hasattr(self.member, "member_id") else self.member['member_id']
 
         self.test_start_timestamp = str(int(time.time()))
