@@ -60,9 +60,6 @@ def check_and_hash_password(unhashed_password):
         raise ValueError("Password must be at least 8 characters long with at least 6 unique characters.")
 
     # Test for forbidden sequences
-    forbidden_sequences = {
-        "password", "q1w2e3r4", "maker", "space"
-    }
     if any(contains_sub_sequence(unhashed_password, sequence, length)
            for sequence, length in FORBIDDEN_SUB_SEQUENCES):
         raise ValueError("Password contains a forbidden sequence of characters, try something less common.")

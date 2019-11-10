@@ -12,7 +12,7 @@ from membership.models import Member
 from messages.message import send_message
 from messages.models import MessageTemplate
 from service import config
-from service.api_definition import SERVICE, USER, REQUIRED, BAD_VALUE, EXPIRED, SERVICE_USER_ID
+from service.api_definition import SERVICE, USER, REQUIRED, BAD_VALUE, EXPIRED
 from service.db import db_session
 from service.error import TooManyRequests, ApiError, NotFound, Unauthorized, BadRequest, InternalServerError
 
@@ -93,7 +93,7 @@ def password_reset(reset_token, unhashed_password):
     except MultipleResultsFound:
         raise InternalServerError(log=f"Multiple tokens {reset_token} found, this is a bug.")
     
-    if datetime.utcnow() - password_reset_token.created_at > timedelta(minutes=1000):  # TODO
+    if datetime.utcnow() - password_reset_token.created_at > timedelta(minutes=10):
         return dict(error_message="Reset link expired, try to request a new.")
     
     try:
