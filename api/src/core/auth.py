@@ -7,7 +7,7 @@ from flask import g, request
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 
 from core.models import Login, AccessToken, PasswordResetToken
-from membership.member_auth import get_member_permissions, authenticate
+from membership.member_auth import get_member_permissions, authenticate, check_and_hash_password
 from membership.models import Member
 from messages.message import send_message
 from messages.models import MessageTemplate
@@ -88,18 +88,26 @@ def password_reset(reset_token, unhashed_password):
         password_reset_token = db_session.query(PasswordResetToken).filter_by(token=reset_token).one()
         
     except NoResultFound:
-        raise BadRequest("Could not find password reset token, try to request a new reset link.")
+        return dict(error_message="Could not find password reset token, try to request a new reset link.")
     
     except MultipleResultsFound:
         raise InternalServerError(log=f"Multiple tokens {reset_token} found, this is a bug.")
     
     if datetime.utcnow() - password_reset_token.created_at > timedelta(minutes=10):
-        raise BadRequest("Reset link expired, try to request a new.")
+        return dict(error_message="Reset link expired, try to request a new.")
     
     try:
-        pass
+        hashed_password = check_and_hash_password(unhashed_password)
     except ValueError as e:
-        raise BadRequest(str(e))
+        raise dict(error_message=str(e))
+    
+    try:
+        member = db_session.query(Member).get(password_reset_token.member_id)
+    except NoResultFound:
+        raise InternalServerError(log=f"No member with id {password_reset_token.member_id} found, this is a bug.")
+    
+    member.password = hashed_password
+    db_session.add(member)
     
     return None
     
