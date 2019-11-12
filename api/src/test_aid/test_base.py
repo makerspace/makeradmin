@@ -22,7 +22,7 @@ class TestBase(TestCase):
         super().setUpClass()
         self.obj = ObjFactory(self)
         
-        self.now = datetime.now()
+        self.now = datetime.utcnow()
         self.today = self.now.date()
         
     @classinstancemethod

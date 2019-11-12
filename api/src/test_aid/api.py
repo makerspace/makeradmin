@@ -1,5 +1,6 @@
 import requests
 
+from service.db import db_session
 from test_aid.obj import DEFAULT_PASSWORD
 from test_aid.test_util import get_path, merge_paths
 
@@ -68,7 +69,9 @@ class ApiFactory:
         token = kwargs.pop('token', self.api_token)
         headers = kwargs.pop('headers', {"Authorization": "Bearer " + token})
         url = self.base_url + path
-        return ApiResponse(requests.request(method, url=url, headers=headers, **kwargs))
+        response = ApiResponse(requests.request(method, url=url, headers=headers, **kwargs))
+        db_session.close()  # We use REPETABLE_READ, closing session here for convenience.
+        return response
 
     def post(self, path, json=None, **kwargs):
         return self.request("post", path, json=json, **kwargs)

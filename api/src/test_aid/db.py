@@ -33,7 +33,6 @@ class DbFactory:
         self.product = None
         self.action = None
 
-
     def create_access_token(self, **kwargs):
         obj = dict(
             user_id=SERVICE_USER_ID,

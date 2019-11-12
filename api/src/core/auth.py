@@ -1,5 +1,6 @@
 import secrets
 from datetime import datetime, timedelta
+from logging import getLogger
 from string import ascii_letters, digits
 from urllib.parse import quote_plus
 
@@ -15,6 +16,9 @@ from service import config
 from service.api_definition import SERVICE, USER, REQUIRED, BAD_VALUE, EXPIRED
 from service.db import db_session
 from service.error import TooManyRequests, ApiError, NotFound, Unauthorized, BadRequest, InternalServerError
+
+
+logger = getLogger('makeradmin')
 
 
 def generate_token():
@@ -75,7 +79,7 @@ def request_password_reset(username):
     token = generate_token()
     
     db_session.add(PasswordResetToken(member_id=member.member_id, token=token))
-    db_session.commit()
+    db_session.flush()
     
     send_message(
         MessageTemplate.PASSWORD_RESET, member,
