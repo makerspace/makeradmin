@@ -70,7 +70,6 @@ class ApiFactory:
         headers = kwargs.pop('headers', {"Authorization": "Bearer " + token})
         url = self.base_url + path
         response = ApiResponse(requests.request(method, url=url, headers=headers, **kwargs))
-        db_session.close()  # We use REPETABLE_READ, closing session here for convenience.
         return response
 
     def post(self, path, json=None, **kwargs):

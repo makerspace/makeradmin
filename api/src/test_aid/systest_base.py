@@ -45,7 +45,7 @@ class SystestBase(TestBase):
         # Make sure sessions is removed so it is not using another engine in this thread.
         db_session.remove()
         
-        create_mysql_engine(**get_mysql_config())
+        create_mysql_engine(**get_mysql_config(), isolation_level="READ_COMMITTED")
         
         self.db = DbFactory(self, self.obj)
         self.admin_url = HOST_FRONTEND

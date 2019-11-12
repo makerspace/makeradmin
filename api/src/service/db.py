@@ -36,14 +36,15 @@ def shutdown_session(exception=None):
     db_session.remove()
 
 
-def create_mysql_engine(host=None, port=None, db=None, user=None, pwd=None, timeout=240):
+def create_mysql_engine(host=None, port=None, db=None, user=None, pwd=None, timeout=240,
+                        isolation_level="REPEATABLE_READ"):
     logger.info(f"waiting for db to respond at {host}:{port}")
     if not wait_for(lambda: can_connect(host, port), timeout=timeout, interval=0.5):
         raise Exception(f"could not connect to db at {host}:{port} in {timeout} seconds")
     
     engine = create_engine(f"mysql+pymysql://{user}:{pwd}@{host}:{port}/{db}",
                            pool_recycle=1800,
-                           isolation_level="REPEATABLE_READ")
+                           isolation_level=isolation_level)
     
     db_session_factory.init_with_engine(engine)
     

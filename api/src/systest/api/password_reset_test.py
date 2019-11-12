@@ -1,12 +1,8 @@
-import re
-from time import sleep
-
 from core.models import PasswordResetToken
 from membership.member_auth import verify_password
 from membership.models import Member
 from messages.models import Message
 from service.db import db_session
-from test_aid.obj import DEFAULT_PASSWORD
 from test_aid.systest_base import ApiTest
 from test_aid.test_util import random_str
 
