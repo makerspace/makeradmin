@@ -3,6 +3,7 @@ from random import randint
 from unittest import skip
 
 from membership.models import Box, Span
+from messages.models import Message
 from service.db import db_session
 from test_aid.systest_base import ApiTest
 
@@ -104,19 +105,19 @@ class Test(ApiTest):
             data__status='terminate'
         )
     
-    @skip("skip until nag mail is fine")
     def test_box_terminator_send_nag_email(self):
         member = self.db.create_member()
         box = self.db.create_box()
         
         self.api.post('/multiaccess/box-terminator/nag',
-                      dict(member_number=member.member_number, box_label_id=box.box_label_id)).expect(200)
+                      dict(member_number=member.member_number, box_label_id=box.box_label_id, nag_type="nag-warning"))\
+             .expect(200)
         
         db_session.close()
         
-        message = db_session.query(Recipient).filter_by(member_id=member.member_id).one()
+        message = db_session.query(Message).filter_by(member_id=member.member_id).one()
         
-        self.assertIn('lådan', message.description)
+        self.assertIn('lådan', message.body)
 
     def test_box_terminator_list_all_boxes(self):
         token = self.db.create_access_token()
