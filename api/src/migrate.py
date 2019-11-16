@@ -2,11 +2,12 @@ import re
 from collections import namedtuple
 from contextlib import closing
 from datetime import datetime
+from inspect import getmodule, stack, getfile
 
 from sqlalchemy import inspect
 
 from service.logging import logger
-from os.path import join
+from os.path import join, dirname, exists, isdir
 from os import listdir
 
 
@@ -21,47 +22,52 @@ def read_sql(filename):
 
 def ensure_migrations_table(engine, session_factory):
     """ Create migrations table if not exists. """
-    
-    table_names = inspect(engine).get_table_names()
+
+    engine_inspect = inspect(engine)
+    table_names = engine_inspect.get_table_names()
     if 'migrations' not in table_names:
         with closing(session_factory()) as session:
-            session = session_factory()
             logger.info("creating migrations table")
             session.execute("ALTER DATABASE makeradmin CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci")
             session.execute("CREATE TABLE migrations ("
                             "    id INTEGER NOT NULL,"
-                            "    service VARCHAR(255) COLLATE utf8mb4_0900_ai_ci NOT NULL,"
                             "    name VARCHAR(255) COLLATE utf8mb4_0900_ai_ci NOT NULL,"
                             "    applied_at DATETIME NOT NULL,"
                             "    PRIMARY KEY (service, id)"
                             ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci")
             session.commit()
+    elif 'service' in engine_inspect.get_columns('migrations'):
+        logger.error("migrations table has 'service' column, please run 'scripts/update_migration_table.sh'")
+        raise Exception("migrations table has 'service' column, please run 'scripts/update_migration_tableg.sh'")
 
 
-def migrate_service(session_factory, service_name, migrations_dir):
-    
+def run_migrations(session_factory):
+    current_module = getmodule(stack()[1][0])
+    source_dir = dirname(getfile(current_module))
+    migrations_dir = join(source_dir, 'migrations')
+
+    if not exists(migrations_dir) and not isdir(migrations_dir):
+        raise Exception(f"migrations dir {migrations_dir} is missing")
+
     with closing(session_factory()) as session:
-        logger.info(f"{service_name}, migrating")
+        logger.info(f"running migrations")
     
         migrations = []
         for filename in listdir(migrations_dir):
             m = re.match(r'^((\d+)_.*)\.sql', filename)
     
             if not m:
-                logger.warning(f"{service_name}, {migrations_dir}/{filename} not matching file pattern, skipping")
+                logger.warning(f"migrations, {migrations_dir}/{filename} not matching file pattern, skipping")
                 continue
             
             migrations.append(Migration(int(m.group(2)), m.group(1)))
         
         migrations.sort(key=lambda m: m.id)
         
-        applied = {i: Migration(i, n) for i, n in
-                   session.execute("SELECT id, name FROM migrations WHERE service = :service ORDER BY ID",
-                                   {'service': service_name})}
+        applied = {i: Migration(i, n) for i, n in session.execute("SELECT id, name FROM migrations ORDER BY ID")}
         session.commit()
         
-        logger.info(f"{service_name}, {len(migrations) - len(applied)} migrations to apply"
-                    f", {len(applied)} migrations already applied")
+        logger.info(f"{len(migrations) - len(applied)} migrations to apply, {len(applied)} migrations already applied")
         
         for i, migration in enumerate(migrations, start=1):
             try:
@@ -71,14 +77,13 @@ def migrate_service(session_factory, service_name, migrations_dir):
                 if migration.id in applied:
                     continue
         
-                logger.info(f"{service_name}, applying {migration.name}")
+                logger.info(f"migrations, applying {migration.name}")
         
                 for sql in read_sql(join(migrations_dir, migration.name + '.sql')):
                     session.execute(sql)
                     
-                session.execute("INSERT INTO migrations VALUES (:id, :service, :name, :applied_at)",
-                                {'id': migration.id, 'service': service_name, 'name': migration.name,
-                                 'applied_at': datetime.utcnow()})
+                session.execute("INSERT INTO migrations VALUES (:id, :name, :applied_at)",
+                                {'id': migration.id, 'name': migration.name, 'applied_at': datetime.utcnow()})
                 session.commit()
             except Exception:
                 session.rollback()

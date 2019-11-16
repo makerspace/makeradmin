@@ -10,8 +10,7 @@ from sqlalchemy.orm import sessionmaker
 from service.api_definition import SERVICE_USER_ID
 from service.config import get_mysql_config, config
 from service.db import create_mysql_engine
-from migrate import ensure_migrations_table
-from services import services
+from migrate import ensure_migrations_table, run_migrations
 
 
 def clear_permission_cache(session_factory):
@@ -43,8 +42,7 @@ def init_db():
     
     ensure_migrations_table(engine, session_factory)
     
-    for path, service in services:
-        service.migrate(session_factory)
+    run_migrations(session_factory)
         
     clear_permission_cache(session_factory)
     
