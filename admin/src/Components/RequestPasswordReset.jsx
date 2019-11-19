@@ -17,7 +17,7 @@ class RequestPasswordReset extends React.Component {
         // Error handling
         if (!user_identification)
         {
-            showError("Du måste fylla i din E-postadress");
+            showError("You need to fill your email or member number.");
             return;
         }
 

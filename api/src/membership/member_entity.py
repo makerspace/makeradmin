@@ -9,7 +9,8 @@ from service.error import InternalServerError
 def handle_password(data):
     data.pop('password', None)
     unhashed_password = data.pop('unhashed_password', None)
-    data['password'] = check_and_hash_password(unhashed_password)
+    if unhashed_password is not None:
+        data['password'] = check_and_hash_password(unhashed_password)
 
     
 class MemberEntity(Entity):

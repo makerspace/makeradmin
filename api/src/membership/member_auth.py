@@ -6,11 +6,6 @@ from service.db import db_session
 from service.error import Unauthorized
 
 
-ALPHA_LOWER_SET = set("abcdefghijklmnopqrstuvwxyzåäö")
-ALPHA_UPPER_SET = set("ABCDEFGHIJKLMNOPQRSTUVWXYZÅÄÖ")
-DIGIT_SET = set("0123456789")
-ALPHA_DIGIT_SET = ALPHA_LOWER_SET | ALPHA_UPPER_SET | DIGIT_SET
-
 FORBIDDEN_SUB_SEQUENCES = [
     ("abcdefghijklmnopqrstuvwxyzåäö", 4),
     ("abcdefghijklmnopqrstuvwxyzåäö"[::-1], 4),

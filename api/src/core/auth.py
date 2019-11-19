@@ -81,6 +81,8 @@ def request_password_reset(user_identification):
     db_session.add(PasswordResetToken(member_id=member.member_id, token=token))
     db_session.flush()
     
+    # TODO Remove token on use.
+    
     send_message(
         MessageTemplate.PASSWORD_RESET, member,
         url=config.get_admin_url(f"/password-reset?reset_token={quote_plus(token)}"),
