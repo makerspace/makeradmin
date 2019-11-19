@@ -26,9 +26,9 @@ class Auth {
         return typeof(this.getAccessToken()) !== "undefined";
     }
 
-    // Ask server to send a request on time login email to the user.
-    requestPasswordReset(username) {
-        return post({url: "/oauth/request_password_reset", params: {username}, errorMessage: "Error when sending", expectedDataStatus: 'ok'});
+    // Ask server to send a password reset email to the user.
+    requestPasswordReset(user_identification) {
+        return post({url: "/oauth/request_password_reset", params: {user_identification}, errorMessage: "Error when sending", expectedDataStatus: 'ok'});
     }
 
     // Reset the password.
@@ -88,7 +88,7 @@ class Auth {
     login_via_single_use_link(tag) {
         fetch(config.apiBasePath + "/member/send_access_token",
             {
-                body:    JSON.stringify({user_tag: tag}),
+                body:    JSON.stringify({user_identification: tag}),
                 method:  "POST",
                 headers: {'Content-Type': 'application/json; charset=UTF-8'},
             })

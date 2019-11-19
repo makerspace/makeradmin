@@ -25,16 +25,16 @@ def generate_token():
     return ''.join(secrets.choice(ascii_letters + digits) for _ in range(32))
 
 
-def get_member_by_user_tag(user_tag):
+def get_member_by_user_identification(user_identification):
     try:
-        if user_tag.isdigit():
-            return db_session.query(Member).filter_by(member_number=int(user_tag), deleted_at=None).one()
+        if user_identification.isdigit():
+            return db_session.query(Member).filter_by(member_number=int(user_identification), deleted_at=None).one()
             
-        return db_session.query(Member).filter_by(email=user_tag, deleted_at=None).one()
+        return db_session.query(Member).filter_by(email=user_identification, deleted_at=None).one()
         
     except NoResultFound:
-        raise NotFound(f"Could not find any user with the name or email '{user_tag}'.", fields='user_tag',
-                       status="not found")
+        raise NotFound(f"Could not find any user with the name or email '{user_identification}'.",
+                       fields='user_identification', status="not found")
 
 
 def create_access_token(ip, browser, user_id):
@@ -73,8 +73,8 @@ def login(ip, browser, username, password):
     return create_access_token(ip, browser, member_id)
 
 
-def request_password_reset(username):
-    member = get_member_by_user_tag(username)
+def request_password_reset(user_identification):
+    member = get_member_by_user_identification(user_identification)
     
     token = generate_token()
     

@@ -12,7 +12,7 @@ function showError(message: string) {
 function login_via_single_use_link(tag: string, redirect: string) {
 	const apiBasePath = window.apiBasePath;
 
-    const data: any = {user_tag: tag};
+    const data: any = {user_identification: tag};
     if (redirect) {
         data['redirect'] = redirect;
     }

@@ -12,7 +12,8 @@ class Test(ApiTest):
     def test_request_password_reset_with_correct_email_creates_message_with_token(self):
         member = self.db.create_member()
 
-        self.api.post("/oauth/request_password_reset", data=dict(username=member.email), headers={}).expect(code=200)
+        self.api.post("/oauth/request_password_reset", data=dict(user_identification=member.email), headers={})\
+            .expect(code=200)
 
         reset_token = db_session.query(PasswordResetToken).filter_by(member_id=member.member_id).one()
         message = db_session.query(Message).filter_by(member_id=member.member_id).one()

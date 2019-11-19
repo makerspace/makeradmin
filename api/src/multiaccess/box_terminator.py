@@ -26,6 +26,7 @@ def get_box_query():
     return query
 
 
+# TODO Return 1970 instead of none.
 def get_expire_date_from_labaccess_end_date(expire_date):
     if expire_date:
         return expire_date + timedelta(days=45)

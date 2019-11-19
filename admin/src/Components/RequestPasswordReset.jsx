@@ -12,16 +12,16 @@ class RequestPasswordReset extends React.Component {
     submit(e) {
         e.preventDefault();
 
-        const username = this.username.value;
+        const user_identification = this.user_identification.value;
 
         // Error handling
-        if (!username)
+        if (!user_identification)
         {
             showError("Du måste fylla i din E-postadress");
             return;
         }
 
-        auth.requestPasswordReset(username).then(() => {
+        auth.requestPasswordReset(user_identification).then(() => {
             showSuccess("Link to password reset will be sent to your email shortly.");
             this.props.router.push("/");
         });
@@ -44,7 +44,7 @@ class RequestPasswordReset extends React.Component {
                             <div className="uk-form-row">
                                 <div className="uk-form-icon">
                                     <i className="uk-icon-user"/>
-                                    <input ref={c => { this.username = c; }} className="uk-form-large uk-form-width-large" type="text" placeholder="Användarnamn" />
+                                    <input ref={c => { this.user_identification = c; }} className="uk-form-large uk-form-width-large" type="text" placeholder="Användarnamn" />
                                 </div>
                             </div>
 

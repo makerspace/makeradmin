@@ -20,9 +20,9 @@ def logout(token=None):
 
 
 @service.route("/oauth/request_password_reset", method=POST, permission=PUBLIC)
-def request_password_reset(username: str=Arg(non_empty_str)):
+def request_password_reset(user_identification: str=Arg(non_empty_str)):
     """ Send a reset password link to the users email. """
-    return auth.request_password_reset(username)
+    return auth.request_password_reset(user_identification)
 
 
 @service.route("/oauth/password_reset", method=POST, permission=PUBLIC)
