@@ -3,6 +3,7 @@ from membership.member_auth import verify_password
 from membership.models import Member
 from messages.models import Message
 from service.db import db_session
+from test_aid.obj import DEFAULT_PASSWORD
 from test_aid.systest_base import ApiTest
 from test_aid.test_util import random_str
 
@@ -20,7 +21,8 @@ class Test(ApiTest):
         self.assertIn(reset_token.token, message.body)
 
     def test_reset_password_returns_error_if_token_does_not_exist(self):
-        e = self.api.post("/oauth/password_reset", data=dict(reset_token=random_str(), unhashed_password=random_str()))\
+        e = self.api.post("/oauth/password_reset",
+                          data=dict(reset_token=random_str(), unhashed_password=DEFAULT_PASSWORD))\
             .expect(code=200).get('data__error_message')
         
         self.assertIn("could not find", e.lower())
@@ -30,7 +32,7 @@ class Test(ApiTest):
         reset_token = self.db.create_password_reset_token(created_at=self.datetime(minutes=-11))
         
         e = self.api.post("/oauth/password_reset",
-                          data=dict(reset_token=reset_token.token, unhashed_password=random_str()))\
+                          data=dict(reset_token=reset_token.token, unhashed_password=DEFAULT_PASSWORD))\
             .expect(code=200).get('data__error_message')
         
         self.assertIn("expired", e.lower())
@@ -40,7 +42,7 @@ class Test(ApiTest):
         reset_token = self.db.create_password_reset_token()
         
         e = self.api.post("/oauth/password_reset",
-                          data=dict(reset_token=reset_token.token, unhashed_password=random_str(3)))\
+                          data=dict(reset_token=reset_token.token, unhashed_password=DEFAULT_PASSWORD[:3]))\
             .expect(code=200).get('data__error_message')
         
         self.assertIn("at least", e.lower())

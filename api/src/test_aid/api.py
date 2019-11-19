@@ -1,6 +1,5 @@
 import requests
 
-from service.db import db_session
 from test_aid.obj import DEFAULT_PASSWORD
 from test_aid.test_util import get_path, merge_paths
 
