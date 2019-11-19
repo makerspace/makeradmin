@@ -12,12 +12,15 @@ from service.error import NotFound, BadRequest
 from service.util import date_to_str, dt_to_str
 
 
+JUDGMENT_DAY = date(1997, 9, 26)  # Used as default for missing lab access date.
+
+
 def get_labacess_end_date(box):
     try:
         return max(s.enddate for s in box.member.spans
                    if s.type in (Span.LABACCESS, Span.SPECIAL_LABACESS) and not s.deleted_at)
     except ValueError:
-        return None
+        return JUDGMENT_DAY
 
 
 def get_box_query():
@@ -26,15 +29,15 @@ def get_box_query():
     return query
 
 
-# TODO Return 1970 instead of none.
 def get_expire_date_from_labaccess_end_date(expire_date):
     if expire_date:
         return expire_date + timedelta(days=45)
-    return None
+    
+    return JUDGMENT_DAY
 
 
 def get_box_info(box):
-    expire_date = (get_labacess_end_date(box) or date(1997, 9, 26)) + timedelta(days=1)
+    expire_date = get_labacess_end_date(box) + timedelta(days=1)
     terminate_date = get_expire_date_from_labaccess_end_date(expire_date)
 
     today = date.today()
@@ -80,25 +83,14 @@ def box_terminator_nag(member_number=None, box_label_id=None, nag_type=None):
         raise BadRequest(f"Bad nag type {nag_type}")
     
     today = date.today()
-    
     end_date = get_labacess_end_date(box)
-    
     terminate_date = get_expire_date_from_labaccess_end_date(end_date)
-    if terminate_date:
-        to_termination_days = (terminate_date - today).days,
-    else:
-        to_termination_days = None
-    
-    if end_date:
-        days_after_expiration = (today - end_date).days,
-    else:
-        days_after_expiration = None
     
     send_message(
         template, box.member,
         labaccess_end_date=date_to_str(end_date),
-        to_termination_days=to_termination_days,
-        days_after_expiration=days_after_expiration,
+        to_termination_days=(terminate_date - today).days,
+        days_after_expiration=(today - end_date).days,
     )
     
     box.last_nag_at = datetime.utcnow()
