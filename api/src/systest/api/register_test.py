@@ -21,7 +21,7 @@ class Test(ApiShopTestMixin, ApiTest):
     ]
 
     def test_registring_new_member_works_and_returns_token(self):
-        source = stripe.Source.create(type="card", token=stripe.Token.create(card=self.card(VALID_NON_3DS_CARD_NO)).id)
+        payment_method = stripe.PaymentMethod.create(type="card", card=self.card(VALID_NON_3DS_CARD_NO))
 
         member = self.obj.create_member()
 
@@ -34,8 +34,7 @@ class Test(ApiShopTestMixin, ApiTest):
                     }
                 ],
                 "expected_sum": 300.00,
-                "stripe_card_source_id": source.id,
-                "stripe_card_3d_secure": source["card"]["three_d_secure"]
+                "stripe_payment_method_id": payment_method.id,
             },
             "member": member
         }
@@ -55,8 +54,6 @@ class Test(ApiShopTestMixin, ApiTest):
         before_activation = self.get(f"/membership/member/{member_id}").expect(code=200, data=member).data
         self.assertIsNone(before_activation['deleted_at'])
         
-        self.trigger_stripe_source_event(source.id, expected_event_count=1)
-
         self\
             .get(f"/webshop/transaction/{transaction_id}")\
             .expect(code=200, data__status="completed")
@@ -68,7 +65,7 @@ class Test(ApiShopTestMixin, ApiTest):
         self.assertEqual(self.date(365), span.enddate)
 
     def test_registring_new_member_fails_with_invalid_email(self):
-        source = stripe.Source.create(type="card", token=stripe.Token.create(card=self.card(VALID_NON_3DS_CARD_NO)).id)
+        payment_method = stripe.PaymentMethod.create(type="card", card=self.card(VALID_NON_3DS_CARD_NO))
 
         member = self.obj.create_member()
         member["email"] = member["email"].replace('@', '_')
@@ -82,8 +79,7 @@ class Test(ApiShopTestMixin, ApiTest):
                     }
                 ],
                 "expected_sum": 300.00,
-                "stripe_card_source_id": source.id,
-                "stripe_card_3d_secure": source["card"]["three_d_secure"]
+                "stripe_payment_method_id": payment_method.id,
             },
             "member": member
         }
@@ -93,7 +89,7 @@ class Test(ApiShopTestMixin, ApiTest):
             .expect(data__token=None, code=422, message="Data sent in request not in correct format.")
 
     def test_registring_with_existing_member_email_does_not_work_and_does_not_return_token(self):
-        source = stripe.Source.create(type="card", token=stripe.Token.create(card=self.card(VALID_NON_3DS_CARD_NO)).id)
+        payment_method = stripe.PaymentMethod.create(type="card", card=self.card(VALID_NON_3DS_CARD_NO))
  
         member = self.obj.create_member()
         self.api.create_member(**member)
@@ -107,8 +103,7 @@ class Test(ApiShopTestMixin, ApiTest):
                     }
                 ],
                 "expected_sum": 300.00,
-                "stripe_card_source_id": source.id,
-                "stripe_card_3d_secure": source["card"]["three_d_secure"]
+                "stripe_payment_method_id": payment_method.id,
             },
             "member": member
         }
@@ -118,7 +113,7 @@ class Test(ApiShopTestMixin, ApiTest):
             .expect(data__token=None, code=422, what="not_unique", fields="email")
 
     def test_registring_with_failed_payment_does_not_work_and_does_not_return_token(self):
-        source = stripe.Source.create(type="card", token=stripe.Token.create(card=self.card(EXPIRED_3DS_CARD_NO)).id)
+        payment_method = stripe.PaymentMethod.create(type="card", card=self.card(EXPIRED_3DS_CARD_NO))
 
         member = self.obj.create_member()
 
@@ -131,8 +126,7 @@ class Test(ApiShopTestMixin, ApiTest):
                     }
                 ],
                 "expected_sum": 121212121.00,
-                "stripe_card_source_id": source.id,
-                "stripe_card_3d_secure": source["card"]["three_d_secure"]
+                "stripe_payment_method_id": payment_method.id,
             },
             "member": member
         }
