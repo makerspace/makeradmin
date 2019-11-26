@@ -14,6 +14,7 @@ class MessageTemplate(enum.Enum):
     LOGIN_LINK = 'login_link'
     NEW_MEMBER = 'new_member'
     RECEIPT = 'receipt'
+    PASSWORD_RESET = 'password_reset'
     ADD_LABACCESS_TIME = 'add_labaccess_time'
     ADD_MEMBERSHIP_TIME = 'add_membership_time'
     BOX_WARNING = 'box_warning'

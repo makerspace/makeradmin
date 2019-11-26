@@ -30,7 +30,7 @@ def get_pending_source_transaction(source_id):
 def stripe_charge_event(subtype, event):
     charge = event.data.object
 
-    transaction = get_pending_source_transaction(charge.source.id)
+    transaction = get_pending_source_transaction(charge.payment_method)
 
     if subtype == Subtype.SUCCEEDED:
         charge_transaction(transaction, charge)
@@ -51,7 +51,7 @@ def stripe_source_event(subtype, event):
     
     transaction = get_pending_source_transaction(source.id)
 
-    if subtype == Subtype.CHARGABLE:
+    if subtype == Subtype.CHARGEABLE:
 
         if source.type == SourceType.THREE_D_SECURE:
             # Charge card and resolve transaction, don't fail transaction on errors as it may be resolved when we get
@@ -80,6 +80,19 @@ def stripe_source_event(subtype, event):
         raise IgnoreEvent(f"source event subtype {subtype} for transaction {transaction.id}")
 
 
+def stripe_payment_intent_event(subtype, event):
+    payment_intent = event.data.object
+
+    transaction = get_pending_source_transaction(payment_intent.id)
+
+    if subtype == Subtype.PAYMENT_FAILED:
+        commit_fail_transaction(transaction)
+        logger.info(f"failing transaction {transaction.id}, due to error when processing payment")
+        
+    else:
+        raise IgnoreEvent(f"payment_intent event subtype {subtype} for transaction {transaction.id}")
+
+
 def stripe_event(event):
     logger.info(f"got stripe event of type {event.type}")
 
@@ -90,6 +103,9 @@ def stripe_event(event):
             
         elif event_type == Type.CHARGE:
             stripe_charge_event(event_subtype, event)
+
+        elif event_type == Type.PAYMENT_INTENT:
+            stripe_payment_intent_event(event_subtype, event)
     
     except IgnoreEvent as e:
         logger.info(f"ignoring event, {str(e)}")

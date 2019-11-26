@@ -1,18 +1,40 @@
 import secrets
 from datetime import datetime, timedelta
+from logging import getLogger
 from string import ascii_letters, digits
+from urllib.parse import quote_plus
 
 from flask import g, request
+from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 
-from core.models import Login, AccessToken
-from membership.member_auth import get_member_permissions, authenticate
-from service.api_definition import SERVICE, USER, REQUIRED, BAD_VALUE, EXPIRED, SERVICE_USER_ID
+from core.models import Login, AccessToken, PasswordResetToken
+from membership.member_auth import get_member_permissions, authenticate, check_and_hash_password
+from membership.models import Member
+from messages.message import send_message
+from messages.models import MessageTemplate
+from service import config
+from service.api_definition import SERVICE, USER, REQUIRED, BAD_VALUE, EXPIRED
 from service.db import db_session
 from service.error import TooManyRequests, ApiError, NotFound, Unauthorized, BadRequest, InternalServerError
 
 
+logger = getLogger('makeradmin')
+
+
 def generate_token():
     return ''.join(secrets.choice(ascii_letters + digits) for _ in range(32))
+
+
+def get_member_by_user_identification(user_identification):
+    try:
+        if user_identification.isdigit():
+            return db_session.query(Member).filter_by(member_number=int(user_identification), deleted_at=None).one()
+            
+        return db_session.query(Member).filter_by(email=user_identification, deleted_at=None).one()
+        
+    except NoResultFound:
+        raise NotFound(f"Could not find any user with the name or email '{user_identification}'.",
+                       fields='user_identification', status="not found")
 
 
 def create_access_token(ip, browser, user_id):
@@ -50,6 +72,51 @@ def login(ip, browser, username, password):
 
     return create_access_token(ip, browser, member_id)
 
+
+def request_password_reset(user_identification):
+    member = get_member_by_user_identification(user_identification)
+    
+    token = generate_token()
+    
+    db_session.add(PasswordResetToken(member_id=member.member_id, token=token))
+    db_session.flush()
+    
+    # TODO Remove token on use.
+    
+    send_message(
+        MessageTemplate.PASSWORD_RESET, member,
+        url=config.get_admin_url(f"/password-reset?reset_token={quote_plus(token)}"),
+    )
+
+
+def password_reset(reset_token, unhashed_password):
+    try:
+        password_reset_token = db_session.query(PasswordResetToken).filter_by(token=reset_token).one()
+        
+    except NoResultFound:
+        return dict(error_message="Could not find password reset token, try to request a new reset link.")
+    
+    except MultipleResultsFound:
+        raise InternalServerError(log=f"Multiple tokens {reset_token} found, this is a bug.")
+    
+    if datetime.utcnow() - password_reset_token.created_at > timedelta(minutes=10):
+        return dict(error_message="Reset link expired, try to request a new.")
+    
+    try:
+        hashed_password = check_and_hash_password(unhashed_password)
+    except ValueError as e:
+        return dict(error_message=str(e))
+    
+    try:
+        member = db_session.query(Member).get(password_reset_token.member_id)
+    except NoResultFound:
+        raise InternalServerError(log=f"No member with id {password_reset_token.member_id} found, this is a bug.")
+    
+    member.password = hashed_password
+    db_session.add(member)
+    
+    return {}
+    
 
 def force_login(ip, browser, user_id):
     Login.register_login_success(ip, user_id)

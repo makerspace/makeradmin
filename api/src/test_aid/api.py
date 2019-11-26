@@ -68,7 +68,8 @@ class ApiFactory:
         token = kwargs.pop('token', self.api_token)
         headers = kwargs.pop('headers', {"Authorization": "Bearer " + token})
         url = self.base_url + path
-        return ApiResponse(requests.request(method, url=url, headers=headers, **kwargs))
+        response = ApiResponse(requests.request(method, url=url, headers=headers, **kwargs))
+        return response
 
     def post(self, path, json=None, **kwargs):
         return self.request("post", path, json=json, **kwargs)

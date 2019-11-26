@@ -1,20 +1,17 @@
 from flask import request
 
-from membership.member_auth import hash_password
+from membership.member_auth import check_and_hash_password
 from service.db import db_session
 from service.entity import Entity
-from service.error import InternalServerError, UnprocessableEntity
+from service.error import InternalServerError
 
 
 def handle_password(data):
+    data.pop('password', None)
     unhashed_password = data.pop('unhashed_password', None)
     if unhashed_password is not None:
-        if data.get('password') is not None:
-            raise UnprocessableEntity("'password' or 'unhashed_password' allowed, not both",
-                                      fields='password,unhashed_password')
-        
-        data['password'] = hash_password(unhashed_password)
-        
+        data['password'] = check_and_hash_password(unhashed_password)
+
     
 class MemberEntity(Entity):
     """

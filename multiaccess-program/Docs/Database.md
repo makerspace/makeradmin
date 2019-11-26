@@ -46,7 +46,7 @@ Lägg till användare
 -------------------
 Denna behöver kontrolleras noga innan vi ger oss in på detta. Se `Skapa testdatabas`. 
 
-**TODO**: Kolla upp om tabellen `UserNo` har någon påverkan.
+**TO DO**: Kolla upp om tabellen `UserNo` har någon påverkan.
 
 ***AuthorityId*** är 23 för vanliga medlemmar på Stockholm Makerspace
 

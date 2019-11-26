@@ -17,6 +17,7 @@ from service.db import create_mysql_engine, db_session
 from shop.stripe_constants import Type
 from test_aid.api import ApiFactory
 from test_aid.db import DbFactory
+from test_aid.obj import DEFAULT_PASSWORD
 from test_aid.systest_config import HOST_FRONTEND, HOST_PUBLIC, HOST_BACKEND, \
     SELENIUM_BASE_TIMEOUT, SLEEP, WEBDRIVER_TYPE, API_BEARER, SELENIUM_SCREENSHOT_DIR, KEEP_BROWSER, \
     STRIPE_PUBLIC_KEY
@@ -44,7 +45,7 @@ class SystestBase(TestBase):
         # Make sure sessions is removed so it is not using another engine in this thread.
         db_session.remove()
         
-        create_mysql_engine(**get_mysql_config())
+        create_mysql_engine(**get_mysql_config(), isolation_level="READ_COMMITTED")
         
         self.db = DbFactory(self, self.obj)
         self.admin_url = HOST_FRONTEND
@@ -218,9 +219,13 @@ class SeleniumTest(ApiTest):
         
         
 class ApiShopTestMixin(ShopTestMixin):
+    
     @skipIf(not stripe.api_key, "webshop tests require stripe api key in .env file")
     def setUp(self):
         super().setUp()
+        self.member = self.api.create_member(unhashed_password=DEFAULT_PASSWORD)
+        self.member_id = self.member['member_id']
+        self.test_start_timestamp = str(int(time.time()))
         self.token = self.factory.login_member()
 
     def trigger_stripe_source_event(self, source_id, expected_event_count=1):

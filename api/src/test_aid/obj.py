@@ -8,8 +8,7 @@ from shop.models import ProductAction
 from test_aid.test_util import random_str
 import re
 
-DEFAULT_PASSWORD = '1q2w3e'
-DEFAULT_PASSWORD_HASH = "$2y$10$NcNoheVsKVo2Agz3FLeI8.fhAgbmRV/NoJMqPC67ZXiqgqfE5DE.S"
+DEFAULT_PASSWORD = 'D9ub8$13'
 
 
 class ObjFactory:

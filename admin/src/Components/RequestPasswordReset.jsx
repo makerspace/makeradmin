@@ -3,8 +3,7 @@ import auth from '../auth';
 import { withRouter } from 'react-router';
 import {showError, showSuccess} from "../message";
 
-
-class LoginResetPassword extends React.Component {
+class RequestPasswordReset extends React.Component {
     
     cancel() {
         this.props.router.push("/");
@@ -13,19 +12,19 @@ class LoginResetPassword extends React.Component {
     submit(e) {
         e.preventDefault();
 
-        const username = this.username.value;
+        const user_identification = this.user_identification.value;
 
         // Error handling
-        if(!username)
+        if (!user_identification)
         {
-            showError("Du måste fylla i din E-postadress");
+            showError("You need to fill your email or member number.");
             return;
         }
 
-        auth.requestPassword(username);
-
-        showSuccess("Ett E-postmeddelande med information om hur du nollställer ditt lösenord har skickats till " + username);
-        this.props.router.push("/");
+        auth.requestPasswordReset(user_identification).then(() => {
+            showSuccess("Link to password reset will be sent to your email shortly.");
+            this.props.router.push("/");
+        });
     }
 
     render() {
@@ -45,12 +44,12 @@ class LoginResetPassword extends React.Component {
                             <div className="uk-form-row">
                                 <div className="uk-form-icon">
                                     <i className="uk-icon-user"/>
-                                    <input ref={c => { this.username = c; }} className="uk-form-large uk-form-width-large" type="text" placeholder="Användarnamn" />
+                                    <input ref={c => { this.user_identification = c; }} className="uk-form-large uk-form-width-large" type="text" placeholder="Användarnamn" />
                                 </div>
                             </div>
 
                             <div className="uk-form-row">
-                                <button type="submit" className="uk-width-1-1 uk-button uk-button-success uk-button-large"><span className="uk-icon-check" /> Skicka E-post</button>
+                                <button type="submit" className="uk-width-1-1 uk-button uk-button-success uk-button-large"><span className="uk-icon-check" /> Skicka epost</button>
                             </div>
                         </form>
                     </div>
@@ -61,4 +60,4 @@ class LoginResetPassword extends React.Component {
 }
 
 
-export default withRouter(LoginResetPassword);
+export default withRouter(RequestPasswordReset);

@@ -1,6 +1,7 @@
-from test_aid.obj import DEFAULT_PASSWORD_HASH
+from test_aid.obj import DEFAULT_PASSWORD
 from test_aid.systest_base import SeleniumTest
 from membership.models import Span
+from membership.member_auth import hash_password
 
 
 class Test(SeleniumTest):
@@ -9,7 +10,7 @@ class Test(SeleniumTest):
         return self.wait_for_elements(css=".member-key-box")  # Contains info on membership length
 
     def test_view_member_shows_member_info(self):
-        member = self.db.create_member(password=DEFAULT_PASSWORD_HASH)
+        member = self.db.create_member(password=hash_password(DEFAULT_PASSWORD))
         self.db.create_span(
             startdate=self.date(),
             enddate=self.date(30),
@@ -27,7 +28,7 @@ class Test(SeleniumTest):
         self.assertIn("30 dagar till", " ".join([e.text for e in member_key_boxes]))
     
     def test_view_member_shows_special_access_when_added(self):
-        member = self.db.create_member(password=DEFAULT_PASSWORD_HASH)
+        member = self.db.create_member(password=hash_password(DEFAULT_PASSWORD))
         self.db.create_span(
             startdate=self.date(),
             enddate=self.date(30),

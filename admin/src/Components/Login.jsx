@@ -47,7 +47,7 @@ export default class Login extends React.Component
                         </div>
 
                         <div className="uk-form-row uk-text-small">
-                            <Link className="uk-float-right uk-link uk-link-muted" to="/resetpassword">Glömt ditt lösenord?</Link>
+                            <Link className="uk-float-right uk-link uk-link-muted" to="/request-password-reset">Glömt ditt lösenord?</Link>
                         </div>
                     </form>
                 </div>

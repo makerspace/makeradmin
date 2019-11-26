@@ -12,12 +12,15 @@ from service.error import NotFound, BadRequest
 from service.util import date_to_str, dt_to_str
 
 
+JUDGMENT_DAY = date(1997, 9, 26)  # Used as default for missing lab access date.
+
+
 def get_labacess_end_date(box):
     try:
         return max(s.enddate for s in box.member.spans
                    if s.type in (Span.LABACCESS, Span.SPECIAL_LABACESS) and not s.deleted_at)
     except ValueError:
-        return None
+        return JUDGMENT_DAY
 
 
 def get_box_query():
@@ -27,11 +30,14 @@ def get_box_query():
 
 
 def get_expire_date_from_labaccess_end_date(expire_date):
-    return expire_date + timedelta(days=45)
+    if expire_date:
+        return expire_date + timedelta(days=45)
+    
+    return JUDGMENT_DAY
 
 
 def get_box_info(box):
-    expire_date = (get_labacess_end_date(box) or date(1997, 9, 26)) + timedelta(days=1)
+    expire_date = get_labacess_end_date(box) + timedelta(days=1)
     terminate_date = get_expire_date_from_labaccess_end_date(expire_date)
 
     today = date.today()

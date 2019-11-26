@@ -7,6 +7,7 @@ from shop.entities import product_image_entity, transaction_content_entity, tran
     transaction_action_entity, product_entity, category_entity, product_action_entity
 from shop.models import TransactionContent
 from shop.pay import pay, register
+from shop.stripe_payment_intent import confirm_stripe_payment_intent
 from shop.shop_data import pending_actions, member_history, receipt, get_product_data, all_product_data, \
     get_membership_products
 from shop.stripe_event import stripe_callback, process_stripe_events
@@ -148,6 +149,11 @@ def ship_orders_route():
 @service.route("/pay", method=POST, permission=USER, commit_on_error=True)
 def pay_route():
     return pay(request.json, g.user_id)
+
+
+@service.route("/confirm_payment", method=POST, permission=PUBLIC, commit_on_error=True)
+def confirm_payment_route():
+    return confirm_stripe_payment_intent(request.json)
 
 
 @service.route("/register", method=POST, permission=PUBLIC, commit_on_error=True)

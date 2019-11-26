@@ -1,7 +1,7 @@
 from flask import request, g
 
 from core import service, auth
-from service.api_definition import POST, PUBLIC, Arg, DELETE, GET, SERVICE, Enum, USER, BAD_VALUE
+from service.api_definition import POST, PUBLIC, Arg, DELETE, GET, SERVICE, Enum, USER, BAD_VALUE, non_empty_str
 from service.error import NotFound, UnprocessableEntity
 
 
@@ -16,13 +16,19 @@ def login(grant_type=Arg(Enum('password')), username=Arg(str), password=Arg(str)
 @service.route("/oauth/token/<string:token>", method=DELETE, permission=USER)
 def logout(token=None):
     """ Remove token from database, returns None. """
-    auth.remove_token(token, g.user_id)
+    return auth.remove_token(token, g.user_id)
 
 
-@service.route("/oauth/resetpassword", method=POST, permission=PUBLIC)
-def reset_password():
+@service.route("/oauth/request_password_reset", method=POST, permission=PUBLIC)
+def request_password_reset(user_identification: str=Arg(non_empty_str)):
     """ Send a reset password link to the users email. """
-    raise NotFound("Reset password functionality is not implemented yet.")
+    return auth.request_password_reset(user_identification)
+
+
+@service.route("/oauth/password_reset", method=POST, permission=PUBLIC)
+def password_reset(reset_token: str=Arg(non_empty_str), unhashed_password: str=Arg(str)):
+    """ Reset the password for a user. """
+    return auth.password_reset(reset_token, unhashed_password)
 
 
 @service.route("/oauth/token", method=GET, permission=USER)

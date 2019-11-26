@@ -25,21 +25,17 @@ class Test(ApiShopTestMixin, ApiTest):
             {"id": self.p1_id, "count": p1_count},
         ]
         
-        source = stripe.Source.create(type="card",
-                                      token=stripe.Token.create(card=self.card(VALID_NON_3DS_CARD_NO)).id)
+        payment_method = stripe.PaymentMethod.create(type="card", card=self.card(VALID_NON_3DS_CARD_NO))
         
         purchase = {
             "cart": cart,
             "expected_sum": expected_sum,
-            "stripe_card_source_id": source.id,
-            "stripe_card_3d_secure": source["card"]["three_d_secure"]
+            "stripe_payment_method_id": payment_method.id,
         }
         
         transaction_id = self.post(f"/webshop/pay", purchase, token=self.token)\
             .expect(code=200, status="ok").get('data__transaction_id')
 
-        self.trigger_stripe_source_event(source.id, expected_event_count=1)
-        
         self.get(f"/webshop/transaction/{transaction_id}").expect(
             code=200,
             status="ok",
@@ -65,20 +61,16 @@ class Test(ApiShopTestMixin, ApiTest):
             {"id": self.p1_id, "count": p1_count},
         ]
         
-        source = stripe.Source.create(type="card",
-                                      token=stripe.Token.create(card=self.card(VALID_3DS_CARD_NO)).id)
+        payment_method = stripe.PaymentMethod.create(type="card", card=self.card(VALID_3DS_CARD_NO))
         
         purchase = {
             "cart": cart,
             "expected_sum": expected_sum,
-            "stripe_card_source_id": source.id,
-            "stripe_card_3d_secure": source["card"]["three_d_secure"]
+            "stripe_payment_method_id": payment_method.id,
         }
         
         transaction_id = self.post(f"/webshop/pay", purchase, token=self.token)\
             .expect(code=200, status="ok").get('data__transaction_id')
-        
-        self.trigger_stripe_source_event(source.id, expected_event_count=2)
         
         self.get(f"/webshop/transaction/{transaction_id}").expect(
             code=200,
@@ -99,8 +91,7 @@ class Test(ApiShopTestMixin, ApiTest):
         purchase = {
             "cart": [{"id": self.p1_id, "count": 17}],
             "expected_sum": self.p1_price * 17,
-            "stripe_card_source_id": "not_used",
-            "stripe_card_3d_secure": "not_supported",
+            "stripe_payment_method_id": "not_used",
         }
 
         self.post(f"/webshop/pay", purchase, token=self.token).expect(code=400, what="invalid_item_count")
@@ -109,8 +100,7 @@ class Test(ApiShopTestMixin, ApiTest):
         purchase = {
             "cart": [{"id": self.p0_id, "count": 1}],
             "expected_sum": self.p0_price + 1,
-            "stripe_card_source_id": "not_used",
-            "stripe_card_3d_secure": "not_supported",
+            "stripe_payment_method_id": "not_used",
         }
 
         self.post(f"/webshop/pay", purchase, token=self.token).expect(code=400, what="non_matching_sums")
@@ -119,8 +109,7 @@ class Test(ApiShopTestMixin, ApiTest):
         purchase = {
             "cart": [{"id": self.p0_id, "count": -1}],
             "expected_sum": self.p0_price,
-            "stripe_card_source_id": "not_used",
-            "stripe_card_3d_secure": "not_supported",
+            "stripe_payment_method_id": "not_used",
         }
 
         self.post(f"/webshop/pay", purchase, token=self.token).expect(code=400, what="negative_item_count")
@@ -129,8 +118,7 @@ class Test(ApiShopTestMixin, ApiTest):
         purchase = {
             "cart": [],
             "expected_sum": self.p0_price,
-            "stripe_card_source_id": "not_used",
-            "stripe_card_3d_secure": "not_supported",
+            "stripe_payment_method_id": "not_used",
         }
 
         self.post(f"/webshop/pay", purchase, token=self.token).expect(code=400, what="empty_cart")
