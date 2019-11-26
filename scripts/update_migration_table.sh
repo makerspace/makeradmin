@@ -10,5 +10,5 @@ UPDATE migrations SET id=2, name='0002_initial_membership' WHERE id=1 AND servic
 UPDATE migrations SET id=4, name='0004_initial_messages' WHERE id=1 AND service='messages' AND name='0001_initial';\
 UPDATE migrations SET id=7, name='0007_rename_everything' WHERE id=2 AND service='messages' AND name='0002_rename_everything';\
 UPDATE migrations SET id=3, name='0003_initial_shop' WHERE id=1 AND service='shop' AND name='0001_initial';\
+UPDATE migrations SET id=8, name='0008_password_reset_token' WHERE id=2 AND service='core' AND name='0002_password_reset_token';\
 ALTER TABLE migrations DROP COLUMN service;\""
-
