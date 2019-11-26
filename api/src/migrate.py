@@ -36,9 +36,28 @@ def ensure_migrations_table(engine, session_factory):
                             "    PRIMARY KEY (id)"
                             ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci")
             session.commit()
-    elif 'service' in engine_inspect.get_columns('migrations'):
-        logger.error("migrations table has 'service' column, please run 'scripts/update_migration_table.sh'")
-        raise Exception("migrations table has 'service' column, please run 'scripts/update_migration_tableg.sh'")
+    elif 'service' in {c['name'] for c in engine_inspect.get_columns('migrations')}:
+        with closing(session_factory()) as session:
+            logger.info("updating existing migrations table")
+            session.execute("UPDATE migrations SET id=1, name='0001_initial_core'"
+                            "     WHERE id=1 AND service='core' AND name='0001_initial'")
+            session.execute("UPDATE migrations SET id=5, name='0005_remove_excessive_permissions'"
+                            "    WHERE id=2 AND service='membership' AND name='0002_remove_excessive_permissions'")
+            session.execute("UPDATE migrations SET id=6, name='0006_add_box'"
+                            "    WHERE id=3 AND service='membership' AND name='0003_add_box'")
+            session.execute("UPDATE migrations SET id=2, name='0002_initial_membership'"
+                            "    WHERE id=1 AND service='membership' AND name='0001_initial'")
+            session.execute("UPDATE migrations SET id=4, name='0004_initial_messages'"
+                            "    WHERE id=1 AND service='messages' AND name='0001_initial'")
+            session.execute("UPDATE migrations SET id=7, name='0007_rename_everything'"
+                            "    WHERE id=2 AND service='messages' AND name='0002_rename_everything'")
+            session.execute("UPDATE migrations SET id=3, name='0003_initial_shop'"
+                            "    WHERE id=1 AND service='shop' AND name='0001_initial'")
+            session.execute("UPDATE migrations SET id=8, name='0008_password_reset_token'"
+                            "    WHERE id=2 AND service='core' AND name='0002_password_reset_token'")
+            session.execute("ALTER TABLE migrations DROP PRIMARY KEY, ADD PRIMARY KEY(id)")
+            session.execute("ALTER TABLE migrations DROP COLUMN service")
+            session.commit()
 
 
 def run_migrations(session_factory):
