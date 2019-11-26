@@ -33,7 +33,7 @@ def ensure_migrations_table(engine, session_factory):
                             "    id INTEGER NOT NULL,"
                             "    name VARCHAR(255) COLLATE utf8mb4_0900_ai_ci NOT NULL,"
                             "    applied_at DATETIME NOT NULL,"
-                            "    PRIMARY KEY (service, id)"
+                            "    PRIMARY KEY (id)"
                             ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci")
             session.commit()
     elif 'service' in engine_inspect.get_columns('migrations'):
