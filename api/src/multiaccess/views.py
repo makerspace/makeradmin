@@ -5,7 +5,7 @@ from membership.models import Member, Span, Key
 from multiaccess import service
 from multiaccess.box_terminator import box_terminator_validate, box_terminator_nag, \
     box_terminator_boxes
-from service.api_definition import GET, KEYS_VIEW, SERVICE, Arg, MEMBER_EDIT, POST, MEMBER_VIEW, symbol_list, symbol
+from service.api_definition import GET, KEYS_VIEW, Arg, MEMBER_EDIT, POST, MEMBER_VIEW, symbol
 from service.db import db_session
 
 
@@ -20,7 +20,7 @@ def member_to_response_object(member):
     }
 
 
-@service.route("/memberdata", method=GET, permission=MEMBER_EDIT)
+@service.route("/memberdata", method=GET, permission=MEMBER_VIEW)
 def get_memberdata():
     query = db_session.query(Member).join(Member.spans).join(Member.keys)
     query = query.options(contains_eager(Member.spans), contains_eager(Member.keys))

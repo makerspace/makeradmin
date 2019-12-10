@@ -1,8 +1,7 @@
 from flask import request, g
 
 from core import service, auth
-from service.api_definition import POST, PUBLIC, Arg, DELETE, GET, SERVICE, Enum, USER, BAD_VALUE, non_empty_str
-from service.error import NotFound, UnprocessableEntity
+from service.api_definition import POST, PUBLIC, Arg, DELETE, GET, Enum, USER, non_empty_str
 
 
 @service.route("/oauth/token", method=POST, permission=PUBLIC, flat_return=True)

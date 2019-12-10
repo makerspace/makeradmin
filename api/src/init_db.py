@@ -6,9 +6,12 @@ from datetime import timedelta, datetime
 
 from rocky.process import log_exception
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 
-from service.api_definition import SERVICE_USER_ID
-from service.config import get_mysql_config, config
+from core.auth import generate_token
+from core.service_users import SERVICE_USERS
+from core.models import AccessToken
+from service.config import get_mysql_config
 from service.db import create_mysql_engine
 from migrate import ensure_migrations_table, run_migrations
 
@@ -23,18 +26,26 @@ def clear_permission_cache(session_factory):
 def refresh_service_access_tokens(session_factory):
     """ Clear permisssion cache as a part of every db_init/restart. """
     
-    service_token = config.get('API_BEARER', log_value=False)
-    assert service_token, "API_BEARER not configured"
-    
     with closing(session_factory()) as session:
         ten_years = timedelta(days=365 * 10)
-        session.execute("DELETE FROM access_tokens WHERE user_id = :user_id", dict(user_id=SERVICE_USER_ID))
-        session.execute("INSERT INTO access_tokens (user_id, access_token, expires, lifetime, browser, ip)"
-                        "   VALUES (:user_id, :token, :expires, :lifetime, '', '')",
-                        dict(user_id=SERVICE_USER_ID, token=service_token,
-                             expires=datetime.utcnow() + ten_years, lifetime=ten_years.total_seconds()))
-        session.commit()
+        for service_user in SERVICE_USERS:
+            try:
+                access_token = session.query(AccessToken).filter_by(user_id=service_user.id).one()
+                
+            except NoResultFound:
+                access_token = AccessToken(
+                    user_id=service_user.id,
+                    access_token=service_user.token or generate_token(),
+                )
+            
+            except MultipleResultsFound as e:
+                raise Exception(f"Found multiple of servive token id {service_user.user_id}, this is a bug.") from e
 
+            access_token.lifetime = ten_years.total_seconds()
+            access_token.expires = datetime.utcnow() + ten_years
+            session.add(access_token)
+            session.commit()
+            
 
 def init_db():
     engine = create_mysql_engine(**get_mysql_config())
