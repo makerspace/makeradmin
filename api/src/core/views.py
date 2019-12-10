@@ -1,7 +1,8 @@
 from flask import request, g
 
 from core import service, auth
-from service.api_definition import POST, PUBLIC, Arg, DELETE, GET, SERVICE, Enum, USER, BAD_VALUE, non_empty_str
+from service.api_definition import POST, PUBLIC, Arg, DELETE, GET, SERVICE, Enum, USER, BAD_VALUE, non_empty_str, \
+    PERMISSION_MANAGE
 from service.error import NotFound, UnprocessableEntity
 
 
@@ -35,3 +36,15 @@ def password_reset(reset_token: str=Arg(non_empty_str), unhashed_password: str=A
 def list_tokens():
     """ List all tokens for the authorized user. """
     return auth.list_for_user(g.user_id)
+
+
+@service.route("/oauth/service_token", method=GET, permission=PERMISSION_MANAGE)
+def list_service_tokens():
+    """ List all service tokens. """
+    return auth.list_service_tokens()
+
+
+@service.route("/oauth/service_token/<string:token>", method=DELETE, permission=PERMISSION_MANAGE)
+def remove_service_token(token=None):
+    """ Remove service token from database, returns None. """
+    return auth.remove_service_token(token)

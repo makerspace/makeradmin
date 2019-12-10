@@ -13,12 +13,16 @@ from membership.models import Member
 from messages.message import send_message
 from messages.models import MessageTemplate
 from service import config
-from service.api_definition import SERVICE, USER, REQUIRED, BAD_VALUE, EXPIRED
+from service.api_definition import SERVICE, USER, REQUIRED, BAD_VALUE, EXPIRED, SERVICE_USER_ID
 from service.db import db_session
 from service.error import TooManyRequests, ApiError, NotFound, Unauthorized, BadRequest, InternalServerError
 
 
 logger = getLogger('makeradmin')
+
+service_names = {
+    -2: "Memberbooth"
+}
 
 
 def generate_token():
@@ -201,3 +205,23 @@ def authenticate_request():
     
     # Commit token validation to make it stick even if request fails later.
     db_session.commit()
+
+
+def remove_service_token(token):
+    count = db_session \
+        .query(AccessToken) \
+        .filter(AccessToken.user_id < SERVICE_USER_ID, AccessToken.access_token == token) \
+        .delete()
+
+    if not count:
+        raise NotFound("The access_token you specified could not be found in the database.")
+
+    return None
+
+
+def list_service_tokens():
+    return [dict(
+        service_name=service_names.get(access_token.user_id, "unknown service"),
+        access_token=access_token.access_token,
+        permissions=str(access_token.permissions),
+    ) for access_token in db_session.query(AccessToken).filter(AccessToken.user_id < SERVICE_USER_ID)]
