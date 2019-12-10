@@ -20,7 +20,7 @@ def clear_permission_cache(session_factory):
         session.commit()
 
 
-def refresh_service_access_token(session_factory):
+def refresh_service_access_tokens(session_factory):
     """ Clear permisssion cache as a part of every db_init/restart. """
     
     service_token = config.get('API_BEARER', log_value=False)
@@ -46,7 +46,7 @@ def init_db():
         
     clear_permission_cache(session_factory)
     
-    refresh_service_access_token(session_factory)
+    refresh_service_access_tokens(session_factory)
 
 
 if __name__ == '__main__':

@@ -14,7 +14,8 @@ PUT = 'put'
 
 # Special permissions
 PUBLIC = 'public'    # Anyone on the internet can access this endpoint.
-SERVICE = 'service'  # A service user (id < 0) needs to be authenticated, but no other permissions are needed.
+# TODO Service permission should never be needed, check it.
+SERVICE = 'service'  # A service user (id < 0) needs to bea authenticated, but no other permissions are needed.
 USER = 'user'        # A regular user (id > 0) needs to be authenticated, but no other permissions are needed.
 
 # Regular permissions

@@ -35,12 +35,3 @@ def password_reset(reset_token: str=Arg(non_empty_str), unhashed_password: str=A
 def list_tokens():
     """ List all tokens for the authorized user. """
     return auth.list_for_user(g.user_id)
-
-
-@service.route("/oauth/force_token", method=POST, permission=SERVICE, flat_return=True)
-def force_token(user_id: int=Arg(int)):
-    """ Create force login for any user, returns token. """
-    if user_id <= 0:
-        raise UnprocessableEntity(fields='user_id', what=BAD_VALUE)
-
-    return auth.force_login(request.remote_addr, request.user_agent.string, user_id)

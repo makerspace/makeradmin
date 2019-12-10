@@ -85,14 +85,6 @@ service.related_entity_routes(
 )
 
 
-@service.route("/member/<int:entity_id>/activate", method=POST, permission=SERVICE, status='activated')
-def member_activate(entity_id=None):
-    """ Activate (undelete) a member. """
-    member = db_session.query(Member).get(entity_id)
-    member.deleted_at = None
-    db_session.commit()
-
-
 @service.route("/member/<int:entity_id>/addMembershipDays", method=POST, permission=SPAN_MANAGE)
 def member_add_membership_days(
         entity_id=None, type=Arg(Enum(Span.MEMBERSHIP, Span.LABACCESS, Span.SPECIAL_LABACESS)), days=Arg(natural1),
@@ -147,12 +139,6 @@ service.entity_routes(
     permission_update=PERMISSION_MANAGE,
     permission_delete=PERMISSION_MANAGE,
 )
-
-
-@service.route("/permission/register", method=POST, permission=SERVICE)
-def permissions_register(permissions=Arg(symbol_list)):
-    """ Register permissions that a service is dependent of. """
-    register_permissions(permissions)
 
 
 service.entity_routes(

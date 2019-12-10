@@ -181,8 +181,10 @@ def authenticate_request():
 
         if access_token.user_id < 0:
             permissions.add(SERVICE)
+            
         elif access_token.user_id > 0:
             permissions.add(USER)
+            
         else:
             raise BadRequest("Bad token.",
                              log=f"access_token {access_token.access_token} has user_id 0, this should never happend")
