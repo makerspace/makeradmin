@@ -107,7 +107,7 @@ class Test(FlaskTestBase):
 
         db_session.refresh(access_token)
 
-        self.assertEqual(ALL_PERMISSIONS, access_token.permissions)
+        self.assertCountEqual(ALL_PERMISSIONS, access_token.permissions.split(','))
 
     def test_permission_is_required_for_view(self):
         with self.assertRaises(AssertionError):
