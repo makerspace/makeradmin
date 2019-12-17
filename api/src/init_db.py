@@ -29,21 +29,26 @@ def refresh_service_access_tokens(session_factory):
     with closing(session_factory()) as session:
         ten_years = timedelta(days=365 * 10)
         for service_user in SERVICE_USERS:
-            try:
-                access_token = session.query(AccessToken).filter_by(user_id=service_user.id).one()
+            if service_user.present:
+                try:
+                    access_token = session.query(AccessToken).filter_by(user_id=service_user.id).one()
+                    
+                except NoResultFound:
+                    access_token = AccessToken(
+                        user_id=service_user.id,
+                        access_token=service_user.token or generate_token()
+                    )
                 
-            except NoResultFound:
-                access_token = AccessToken(
-                    user_id=service_user.id,
-                )
-            
-            except MultipleResultsFound as e:
-                raise Exception(f"Found multiple of service token id {service_user.user_id}, this is a bug.") from e
+                except MultipleResultsFound as e:
+                    raise Exception(f"Found multiple of service token id {service_user.user_id}, this is a bug.") from e
+    
+                access_token.lifetime = ten_years.total_seconds()
+                access_token.expires = datetime.utcnow() + ten_years
+                
+                session.add(access_token)
+            else:
+                session.query(AccessToken).filter_by(user_id=service_user.id).delete()
 
-            access_token.token = service_user.token or access_token.token or generate_token()
-            access_token.lifetime = ten_years.total_seconds()
-            access_token.expires = datetime.utcnow() + ten_years
-            session.add(access_token)
             session.commit()
             
 
