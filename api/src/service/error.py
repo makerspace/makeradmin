@@ -3,6 +3,7 @@ from logging import ERROR
 from flask import jsonify
 
 from service.logging import logger
+from typing import Optional
 
 
 # Internal log level to error log with exception.
@@ -61,7 +62,7 @@ class ApiError(Exception):
     communcating with external services. In that case the response is used to choose class and fill the data.  """
     
     code = 400
-    message = None
+    message: Optional[str] = None
 
     def __init__(self, message=None, fields=None, what=None, status="error", service=None, code=None,
                  log=None, level=ERROR):

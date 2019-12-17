@@ -2,7 +2,7 @@ from collections import namedtuple
 from datetime import datetime, date
 from decimal import Decimal
 from math import ceil
-from typing import Mapping
+from typing import Mapping, Dict, Callable, Type
 
 from flask import request
 from pytz import UTC
@@ -35,7 +35,7 @@ def to_model_wrap(value_converter):
     return error_handling_wrapper
 
 
-to_model_converters = {
+to_model_converters: Dict[Type, Callable] = {
     Integer: to_model_wrap(int),
     Numeric: to_model_wrap(Decimal),
     String: to_model_wrap(str),
@@ -50,7 +50,7 @@ def identity(value):
     return value
 
 
-to_obj_converters = {
+to_obj_converters: Dict[Type, Callable] = {
     Integer: identity,
     Numeric: str,
     String: identity,

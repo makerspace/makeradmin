@@ -18,7 +18,7 @@ class TrafficLogger:
 
     def log_service_traffic(self, traffic: Response):
         req: PreparedRequest = traffic.request
-        req_body = byte_decode(req.body) if type(req.body) == bytes else req.body
+        req_body = byte_decode(req.body) if isinstance(req.body, bytes) else req.body
 
         req_data = {
             "method": req.method,
