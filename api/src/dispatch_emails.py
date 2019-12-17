@@ -70,7 +70,7 @@ def send_messages(db_session, key, domain, sender, to_override, limit):
             db_session.add(message)
             db_session.commit()
             
-            logger.error(f"failed to send {message.id} to {to}: {response.content}")
+            logger.error(f"failed to send {message.id} to {to}: {response.content.decode('utf-8')}")
 
 
 def labaccess_reminder(db_session, render_template):
