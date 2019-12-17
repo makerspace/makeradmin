@@ -2,6 +2,7 @@ from flask import request, g
 
 from core import service, auth
 from service.api_definition import POST, PUBLIC, Arg, DELETE, GET, Enum, USER, non_empty_str, PERMISSION_MANAGE
+from service.error import BadRequest
 
 
 @service.route("/oauth/token", method=POST, permission=PUBLIC, flat_return=True)
@@ -42,7 +43,15 @@ def list_service_tokens():
     return auth.list_service_tokens()
 
 
-@service.route("/oauth/service_token/<string:token>", method=DELETE, permission=PERMISSION_MANAGE)
-def remove_service_token(token=None):
-    """ Remove service token from database, returns None. """
-    return auth.remove_service_token(token)
+@service.route("/oauth/service_token/<user_id>", method=DELETE, permission=PERMISSION_MANAGE, status='deleted')
+def roll_service_token(user_id=None):
+    """ Roll service token in the database, returns None. """
+    try:
+        user_id = int(user_id)
+    except (ValueError, TypeError):
+        raise BadRequest(f"Can not convert arg to int.")
+    
+    if user_id >= 0:
+        raise BadRequest(f"Can only roll tokens for service users.")
+        
+    return auth.roll_service_token(user_id)

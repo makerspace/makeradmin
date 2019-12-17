@@ -4,7 +4,7 @@ from logging import getLogger
 from string import ascii_letters, digits
 from urllib.parse import quote_plus
 
-from flask import g, request
+from flask import g, request, jsonify
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 
 from core.models import Login, AccessToken, PasswordResetToken
@@ -203,20 +203,21 @@ def authenticate_request():
     db_session.commit()
 
 
-def remove_service_token(token):
-    count = db_session \
-        .query(AccessToken) \
-        .filter(AccessToken.user_id < 0, AccessToken.access_token == token) \
-        .delete()
+def roll_service_token(user_id):
+    try:
+        access_token = db_session.query(AccessToken).filter_by(user_id=user_id).one()
+        access_token.access_token = generate_token()
+        db_session.add(access_token)
+    except NoResultFound:
+        raise NotFound()
 
-    if not count:
-        raise NotFound("The access_token you specified could not be found in the database.")
-
-    return None
+    except MultipleResultsFound as e:
+        raise Exception(f"Found multiple of service token id {user_id}, this is a bug.") from e
 
 
 def list_service_tokens():
     return [dict(
+        user_id=access_token.user_id,
         service_name=SERVICE_NAMES.get(access_token.user_id, "unknown service"),
         access_token=access_token.access_token,
         permissions=",".join(SERVICE_PERMISSIONS.get(access_token.user_id, [])),

@@ -1,4 +1,3 @@
-import werkzeug
 import flask_cors
 from flask import Flask, jsonify
 from flask.wrappers import Response as FlaskResponse
@@ -25,6 +24,7 @@ flask_cors.CORS(
     origins=config.get('CORS_ALLOWED_ORIGINS').split(',')
 )
 
+
 for path, service in services:
     app.register_blueprint(service, url_prefix=path)
 
@@ -48,6 +48,7 @@ app.register_error_handler(500, error_handler_500)
 app.teardown_appcontext(shutdown_session)
 app.before_request(before_request_functions)
 app.after_request(after_request_functions)
+
 
 engine = create_mysql_engine(**get_mysql_config())
 
