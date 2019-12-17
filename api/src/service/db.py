@@ -24,6 +24,8 @@ class SessionFactoryWrapper:
             self.session_factory.configure(bind=engine)
         
     def __call__(self, *args, **kwargs):
+        if self.session_factory is None:
+            raise Exception("Need to initialize with engine first")
         return self.session_factory(*args, **kwargs)
         
 

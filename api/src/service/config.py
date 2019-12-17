@@ -13,7 +13,7 @@ class DotEnvFile(Dict):
         filename = find_dotenv()
         if not filename:
             logger.info("could not find .env file, skipping")
-            env = {}
+            env: Dict[str, str] = {}
         else:
             logger.info(f"loading .env file from {filename}")
             env = dotenv_values()
