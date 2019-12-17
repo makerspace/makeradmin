@@ -27,7 +27,7 @@ class MessageEntity(Entity):
             try:
                 id_ = natural1(recipient.get('id'))
             except (ValueError, TypeError):
-                raise UnprocessableEntity(what=BAD_VALUE, message=f'Recipient id should be positived int.')
+                raise UnprocessableEntity(what=BAD_VALUE, message=f'Recipient id should be positive int.')
             
             if type_ == 'member':
                 member_ids.add(id_)
