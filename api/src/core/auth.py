@@ -8,21 +8,18 @@ from flask import g, request
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 
 from core.models import Login, AccessToken, PasswordResetToken
+from core.service_users import SERVICE_NAMES
 from membership.member_auth import get_member_permissions, authenticate, check_and_hash_password
 from membership.models import Member
 from messages.message import send_message
 from messages.models import MessageTemplate
 from service import config
-from service.api_definition import SERVICE, USER, REQUIRED, BAD_VALUE, EXPIRED, SERVICE_USER_ID
+from service.api_definition import USER, REQUIRED, BAD_VALUE, EXPIRED
 from service.db import db_session
 from service.error import TooManyRequests, ApiError, NotFound, Unauthorized, BadRequest, InternalServerError
 
 
 logger = getLogger('makeradmin')
-
-service_names = {
-    -2: "Memberbooth"
-}
 
 
 def generate_token():
@@ -183,10 +180,8 @@ def authenticate_request():
     if access_token.permissions is None:
         permissions = {p for _, p in get_member_permissions(access_token.user_id)}
 
-        if access_token.user_id < 0:
-            permissions.add(SERVICE)
-            
-        elif access_token.user_id > 0:
+        if access_token.user_id > 0:
+            # Add special permission user for user_id > 0, user_id < 0 are service users.
             permissions.add(USER)
             
         else:
@@ -210,7 +205,7 @@ def authenticate_request():
 def remove_service_token(token):
     count = db_session \
         .query(AccessToken) \
-        .filter(AccessToken.user_id < SERVICE_USER_ID, AccessToken.access_token == token) \
+        .filter(AccessToken.user_id < 0, AccessToken.access_token == token) \
         .delete()
 
     if not count:
@@ -221,7 +216,7 @@ def remove_service_token(token):
 
 def list_service_tokens():
     return [dict(
-        service_name=service_names.get(access_token.user_id, "unknown service"),
+        service_name=SERVICE_NAMES.get(access_token.user_id, "unknown service"),
         access_token=access_token.access_token,
         permissions=str(access_token.permissions),
-    ) for access_token in db_session.query(AccessToken).filter(AccessToken.user_id < SERVICE_USER_ID)]
+    ) for access_token in db_session.query(AccessToken).filter(AccessToken.user_id < 0)]

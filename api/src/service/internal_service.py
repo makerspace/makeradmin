@@ -6,7 +6,7 @@ from flask import Blueprint, g, jsonify
 from pymysql.constants.ER import DUP_ENTRY, BAD_NULL_ERROR
 from sqlalchemy.exc import IntegrityError
 
-from service.api_definition import Arg, PUBLIC, GET, POST, PUT, DELETE, SERVICE, USER, REQUIRED, NOT_UNIQUE
+from service.api_definition import Arg, PUBLIC, GET, POST, PUT, DELETE, REQUIRED, NOT_UNIQUE
 from service.db import db_session, fields_by_index
 from service.error import Forbidden, UnprocessableEntity
 from service.logging import logger
@@ -59,7 +59,6 @@ class InternalService(Blueprint):
                     has_permission = (
                             permission == PUBLIC
                             or permission in g.permissions
-                            or (SERVICE in g.permissions and permission != USER)
                     )
                     
                     if not has_permission:

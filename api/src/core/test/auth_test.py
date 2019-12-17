@@ -6,7 +6,8 @@ import membership
 from core import models
 from core.auth import authenticate_request
 from core.models import AccessToken
-from service.api_definition import USER, SERVICE, GET, PUBLIC, SERVICE_USER_ID
+from core.service_users import TEST_SERVICE_USER_ID
+from service.api_definition import USER, GET, PUBLIC, ALL_PERMISSIONS
 from service.db import db_session
 from service.error import Unauthorized, Forbidden
 from test_aid.test_base import FlaskTestBase
@@ -95,18 +96,18 @@ class Test(FlaskTestBase):
         self.assertCountEqual([USER, permission.permission], access_token.permissions.split(','))
 
     def test_valid_service_auth_updates_access_token_and_sets_user_id_and_permission(self):
-        access_token = self.db.create_access_token(user_id=SERVICE_USER_ID, expires=self.datetime(days=1))
+        access_token = self.db.create_access_token(user_id=TEST_SERVICE_USER_ID, expires=self.datetime(days=1))
 
         with self.app.test_request_context(headers=dict(Authorization=f'Bearer {access_token.access_token}'),
                                            environ_base={'REMOTE_ADDR': '127.0.0.1'}):
             authenticate_request()
 
-            self.assertEqual(SERVICE_USER_ID, g.user_id)
-            self.assertCountEqual([SERVICE], g.permissions)
+            self.assertEqual(TEST_SERVICE_USER_ID, g.user_id)
+            self.assertCountEqual(ALL_PERMISSIONS, g.permissions)
 
         db_session.refresh(access_token)
 
-        self.assertEqual(SERVICE, access_token.permissions)
+        self.assertEqual(ALL_PERMISSIONS, access_token.permissions)
 
     def test_permission_is_required_for_view(self):
         with self.assertRaises(AssertionError):
@@ -125,36 +126,14 @@ class Test(FlaskTestBase):
             view()
 
         with self.app.test_request_context():
-            g.user_id = SERVICE_USER_ID
-            g.permissions = (SERVICE,)
+            g.user_id = TEST_SERVICE_USER_ID
+            g.permissions = ALL_PERMISSIONS
             view()
 
         with self.app.test_request_context():
             g.user_id = 1
             g.permissions = (USER, 'webshop')
             view()
-
-    def test_service_permission_check_works(self):
-        @self.service.route('/', method=GET, permission=SERVICE)
-        def view():
-            pass
-
-        with self.app.test_request_context():
-            g.user_id = SERVICE_USER_ID
-            g.permissions = (SERVICE,)
-            view()
-
-        with self.app.test_request_context():
-            g.user_id = None
-            g.permissions = tuple()
-            with self.assertRaises(Forbidden):
-                view()
-
-        with self.app.test_request_context():
-            g.user_id = 1
-            g.permissions = (USER, 'webshop')
-            with self.assertRaises(Forbidden):
-                view()
 
     def test_logged_in_user_permission_check_works(self):
         @self.service.route('/', method=GET, permission=USER)
@@ -167,8 +146,8 @@ class Test(FlaskTestBase):
             view()
 
         with self.app.test_request_context():
-            g.user_id = SERVICE_USER_ID
-            g.permissions = (SERVICE,)
+            g.user_id = TEST_SERVICE_USER_ID
+            g.permissions = ALL_PERMISSIONS
             with self.assertRaises(Forbidden):
                 view()
 
@@ -189,8 +168,8 @@ class Test(FlaskTestBase):
             view()
 
         with self.app.test_request_context():
-            g.user_id = SERVICE_USER_ID
-            g.permissions = (SERVICE,)
+            g.user_id = TEST_SERVICE_USER_ID
+            g.permissions = ALL_PERMISSIONS
             view()
 
         with self.app.test_request_context():

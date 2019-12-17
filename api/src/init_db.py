@@ -35,12 +35,12 @@ def refresh_service_access_tokens(session_factory):
             except NoResultFound:
                 access_token = AccessToken(
                     user_id=service_user.id,
-                    access_token=service_user.token or generate_token(),
                 )
             
             except MultipleResultsFound as e:
-                raise Exception(f"Found multiple of servive token id {service_user.user_id}, this is a bug.") from e
+                raise Exception(f"Found multiple of service token id {service_user.user_id}, this is a bug.") from e
 
+            access_token.token = service_user.token or access_token.token or generate_token()
             access_token.lifetime = ten_years.total_seconds()
             access_token.expires = datetime.utcnow() + ten_years
             session.add(access_token)
