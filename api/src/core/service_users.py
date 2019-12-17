@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Sequence
 
-from service import config
+from service.config import config
 from service.api_definition import ALL_PERMISSIONS, KEYS_VIEW, MEMBER_VIEW, WEBSHOP
 
 
@@ -40,3 +40,6 @@ SERVICE_USERS = (
 
 
 SERVICE_NAMES = {service_user.id: service_user.name for service_user in SERVICE_USERS}
+
+
+SERVICE_PERMISSIONS = {service_user.id: service_user.permissions for service_user in SERVICE_USERS}

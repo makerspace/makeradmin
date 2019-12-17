@@ -3,9 +3,9 @@ from faker import Faker
 
 
 from core.models import AccessToken, PasswordResetToken
+from core.service_users import TEST_SERVICE_USER_ID
 from membership.models import Member, Group, Permission, Span, Key, Box
 from messages.models import Message
-from service.api_definition import SERVICE_USER_ID
 from service.db import db_session
 from shop.models import ProductCategory, Product, ProductAction
 from test_aid.test_util import random_str
@@ -36,7 +36,7 @@ class DbFactory:
         
     def create_access_token(self, **kwargs):
         obj = dict(
-            user_id=SERVICE_USER_ID,
+            user_id=TEST_SERVICE_USER_ID,
             access_token=random_str(),
             browser=f'a-browser-{random_str()}',
             ip=f'{randint(0, 255)}.{randint(0, 255)}.{randint(0, 255)}.{randint(0, 255)}',

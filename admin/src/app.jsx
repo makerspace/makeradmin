@@ -101,7 +101,7 @@ const nav = {
                         target: "/settings/about",
                     },
                     {
-                        text: "Access tokens",
+                        text: "My access tokens",
                         target: "/settings/tokens",
                     },
                     {

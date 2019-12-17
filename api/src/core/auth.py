@@ -8,7 +8,7 @@ from flask import g, request
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 
 from core.models import Login, AccessToken, PasswordResetToken
-from core.service_users import SERVICE_NAMES
+from core.service_users import SERVICE_NAMES, SERVICE_PERMISSIONS
 from membership.member_auth import get_member_permissions, authenticate, check_and_hash_password
 from membership.models import Member
 from messages.message import send_message
@@ -178,10 +178,11 @@ def authenticate_request():
         raise Unauthorized("Unauthorized, expired access token.", fields="bearer", what=EXPIRED)
     
     if access_token.permissions is None:
-        permissions = {p for _, p in get_member_permissions(access_token.user_id)}
-
-        if access_token.user_id > 0:
-            # Add special permission user for user_id > 0, user_id < 0 are service users.
+        if access_token.user_id < 0:
+            permissions = SERVICE_PERMISSIONS.get(access_token.user_id, [])
+            
+        elif access_token.user_id > 0:
+            permissions = {p for _, p in get_member_permissions(access_token.user_id)}
             permissions.add(USER)
             
         else:
@@ -218,5 +219,5 @@ def list_service_tokens():
     return [dict(
         service_name=SERVICE_NAMES.get(access_token.user_id, "unknown service"),
         access_token=access_token.access_token,
-        permissions=str(access_token.permissions),
+        permissions=",".join(SERVICE_PERMISSIONS.get(access_token.user_id, [])),
     ) for access_token in db_session.query(AccessToken).filter(AccessToken.user_id < 0)]

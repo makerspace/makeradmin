@@ -36,7 +36,9 @@ def refresh_service_access_tokens(session_factory):
                 except NoResultFound:
                     access_token = AccessToken(
                         user_id=service_user.id,
-                        access_token=service_user.token or generate_token()
+                        access_token=service_user.token or generate_token(),
+                        browser='',
+                        ip='',
                     )
                 
                 except MultipleResultsFound as e:
