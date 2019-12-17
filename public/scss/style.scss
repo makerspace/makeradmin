@@ -1067,3 +1067,24 @@ form input.readonly-input {
 input:invalid {
     border-color: red;
 }
+
+.statistics-member-stats {
+	margin-bottom: 30px;
+}
+
+.statistics-member-stats-box {
+	padding: 8px;
+	background: #4699be;
+	border-radius: 5px;
+	color: white;
+}
+
+.statistics-member-stats-type {
+	width: 200px;
+	font-weight: bold;
+	display: inline-block;
+}
+
+.statistics-member-stats-value {
+	display: inline-block;
+}

@@ -68,6 +68,31 @@ function filterDuplicates(items: Array<any>) {
 	return newValues;
 }
 
+function maxOfSeries(items: Array<any>) {
+	let mx = null;
+	for (let i = 0; i < items.length; i++) {
+		if (mx == null || items[i].y > mx.y) {
+			mx = items[i];
+		}
+	}
+	return mx;
+}
+
+function date2str(date: String|Date) {
+	if (date instanceof Date) return date.toISOString().split('T')[0];
+	else return date;
+}
+
+function pointAtDate(items: Array<any>, date: Date) {
+	let best = null;
+	for (let i = 0; i < items.length; i++) {
+		if (best == null || items[i].x <= date) {
+			best = items[i];
+		}
+	}
+	return best;
+}
+
 function addChart(root: HTMLElement, data: any) {
 	// lab = splitSeries(data.labmembership);
 	// member = splitSeries(data.membership);
@@ -148,12 +173,31 @@ function addChart(root: HTMLElement, data: any) {
 		}
 	};
 
-	const canvas = <HTMLCanvasElement>document.createElement("canvas");
-	root.appendChild(canvas);
-	canvas.width = 500;
-	canvas.height = 300;
+
+	const memberstats = <HTMLDivElement>document.createElement("div");
+	const highestMembership = maxOfSeries(dataMembership) || { x: "never", y: 0};
+	const highestLabaccess = maxOfSeries(dataLabaccess) || { x: "never", y: 0};
+
+	const today = new Date();
+	const currentMembership = pointAtDate(dataMembership, today) || { x: today, y: 0};
+	const currentLabaccess = pointAtDate(dataLabaccess, today) || { x: today, y: 0};
+
+	memberstats.innerHTML = `
+	<canvas width=500 height=300></canvas>
+	<div class="statistics-member-stats-box">
+	<div class="statistics-member-stats-row"><span class="statistics-member-stats-type">Membership</span><span  class="statistics-member-stats-value">${currentMembership.y}</span></div>
+	<div class="statistics-member-stats-row"><span class="statistics-member-stats-type">Membership record</span><span  class="statistics-member-stats-value">${highestMembership.y} members on ${date2str(highestMembership.x)}</span></div>
+	<div class="statistics-member-stats-row"><span class="statistics-member-stats-type">Labaccess</span><span  class="statistics-member-stats-value">${currentLabaccess.y}</span></div>
+	<div class="statistics-member-stats-row"><span class="statistics-member-stats-type">Labaccess record</span><span  class="statistics-member-stats-value">${highestLabaccess.y} members on ${date2str(highestLabaccess.x)}</span></div>
+	</div>
+	`;
+	memberstats.className = "statistics-member-stats";
+
+	const canvas = memberstats.querySelector("canvas"); // <HTMLCanvasElement>document.createElement("canvas");
 	const ctx = canvas.getContext('2d');
 	const chart = new Chart(ctx, config);
+
+	root.appendChild(memberstats);
 }
 
 function addRandomCharts(root: HTMLElement) {
