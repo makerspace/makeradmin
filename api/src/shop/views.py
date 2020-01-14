@@ -1,6 +1,6 @@
 from flask import g, request
 
-from service.api_definition import WEBSHOP, WEBSHOP_EDIT, PUBLIC, GET, USER, POST, SERVICE, Arg
+from service.api_definition import WEBSHOP, WEBSHOP_EDIT, PUBLIC, GET, USER, POST, Arg, WEBSHOP_ADMIN
 from service.entity import OrmSingeRelation, OrmSingleSingleRelation
 from shop import service
 from shop.entities import product_image_entity, transaction_content_entity, transaction_entity, \
@@ -166,7 +166,7 @@ def stripe_callback_route():
     stripe_callback(request.data, request.headers)
 
 
-@service.route("/process_stripe_events", method=POST, permission=SERVICE, commit_on_error=True)
+@service.route("/process_stripe_events", method=POST, permission=WEBSHOP_ADMIN, commit_on_error=True)
 def process_stripe_events_route(start=Arg(str, required=False), source_id=Arg(str, required=False),
                                 type=Arg(str, required=False)):
     """ Used to make server fetch stripe events, used for testing since webhook is hard to use. """

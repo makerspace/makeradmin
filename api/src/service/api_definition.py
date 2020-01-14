@@ -14,7 +14,6 @@ PUT = 'put'
 
 # Special permissions
 PUBLIC = 'public'    # Anyone on the internet can access this endpoint.
-SERVICE = 'service'  # A service user (id < 0) needs to be authenticated, but no other permissions are needed.
 USER = 'user'        # A regular user (id > 0) needs to be authenticated, but no other permissions are needed.
 
 # Regular permissions
@@ -39,6 +38,8 @@ MESSAGE_SEND = "message_send"
 MESSAGE_VIEW = "message_view"
 WEBSHOP = 'webshop'
 WEBSHOP_EDIT = 'webshop_edit'
+WEBSHOP_ADMIN = 'webshop_admin'
+MEMBERBOOTH = 'memberbooth'
 
 ALL_PERMISSIONS = [
     MEMBER_VIEW, MEMBER_CREATE, MEMBER_EDIT, MEMBER_DELETE,
@@ -47,12 +48,9 @@ ALL_PERMISSIONS = [
     SPAN_VIEW, SPAN_MANAGE,
     KEYS_VIEW, KEYS_EDIT,
     MESSAGE_SEND, MESSAGE_VIEW,
-    WEBSHOP, WEBSHOP_EDIT,
+    WEBSHOP, WEBSHOP_EDIT, WEBSHOP_ADMIN,
+    MEMBERBOOTH,
 ]
-
-# Service credentials
-SERVICE_USER_ID = -1
-SERVICE_PERMISSIONS = (SERVICE,)
 
 #
 # What

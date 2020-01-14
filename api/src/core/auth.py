@@ -4,16 +4,17 @@ from logging import getLogger
 from string import ascii_letters, digits
 from urllib.parse import quote_plus
 
-from flask import g, request
+from flask import g, request, jsonify
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 
 from core.models import Login, AccessToken, PasswordResetToken
+from core.service_users import SERVICE_NAMES, SERVICE_PERMISSIONS
 from membership.member_auth import get_member_permissions, authenticate, check_and_hash_password
 from membership.models import Member
 from messages.message import send_message
 from messages.models import MessageTemplate
 from service import config
-from service.api_definition import SERVICE, USER, REQUIRED, BAD_VALUE, EXPIRED
+from service.api_definition import USER, REQUIRED, BAD_VALUE, EXPIRED
 from service.db import db_session
 from service.error import TooManyRequests, ApiError, NotFound, Unauthorized, BadRequest, InternalServerError
 
@@ -177,12 +178,13 @@ def authenticate_request():
         raise Unauthorized("Unauthorized, expired access token.", fields="bearer", what=EXPIRED)
     
     if access_token.permissions is None:
-        permissions = {p for _, p in get_member_permissions(access_token.user_id)}
-
         if access_token.user_id < 0:
-            permissions.add(SERVICE)
+            permissions = SERVICE_PERMISSIONS.get(access_token.user_id, [])
+            
         elif access_token.user_id > 0:
+            permissions = {p for _, p in get_member_permissions(access_token.user_id)}
             permissions.add(USER)
+            
         else:
             raise BadRequest("Bad token.",
                              log=f"access_token {access_token.access_token} has user_id 0, this should never happend")
@@ -199,3 +201,24 @@ def authenticate_request():
     
     # Commit token validation to make it stick even if request fails later.
     db_session.commit()
+
+
+def roll_service_token(user_id):
+    try:
+        access_token = db_session.query(AccessToken).filter_by(user_id=user_id).one()
+        access_token.access_token = generate_token()
+        db_session.add(access_token)
+    except NoResultFound:
+        raise NotFound()
+
+    except MultipleResultsFound as e:
+        raise Exception(f"Found multiple of service token id {user_id}, this is a bug.") from e
+
+
+def list_service_tokens():
+    return [dict(
+        user_id=access_token.user_id,
+        service_name=SERVICE_NAMES.get(access_token.user_id, "unknown service"),
+        access_token=access_token.access_token,
+        permissions=",".join(SERVICE_PERMISSIONS.get(access_token.user_id, [])),
+    ) for access_token in db_session.query(AccessToken).filter(AccessToken.user_id < 0)]

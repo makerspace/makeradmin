@@ -132,5 +132,5 @@ class Test(ApiShopTestMixin, ApiTest):
         }
 
         self\
-            .post(f"/webshop/register", register, headers={}).print()\
+            .post(f"/webshop/register", register, headers={})\
             .expect(data__token=None, code=400, what=NON_MATCHING_SUMS)

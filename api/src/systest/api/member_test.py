@@ -33,11 +33,6 @@ class Test(ApiTest):
         self.assertNotEqual(id1, id2)
         self.assertNotEqual(number1, number2)
 
-    def test_activate(self):
-        member = self.db.create_member(deleted_at=self.datetime(), firstname='X')
-        self.post(f"/membership/member/{member.member_id}/activate").expect(code=200)
-        self.get(f"/membership/member/{member.member_id}").expect(code=200, data__deleted_at=None, data__firstname='X')
-
     def test_create_password_using_unhashed_password(self):
         pwd = random_str(8)
         member = self.api.create_member(password=None, unhashed_password=pwd)

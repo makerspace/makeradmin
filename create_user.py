@@ -14,20 +14,22 @@ sys.path.append(os.path.join(os.path.dirname(__file__), "backend/src"))
 # import backend_service
 
 headers = {
-    'Authorization': f'Bearer {env.get("API_BEARER")}',
+    'Authorization': f'Bearer {env.get("TEST_SERVICE_TOKEN")}',
 }
 api_url = env.get('HOST_BACKEND')
+
 
 def post(url, payload):
     print(payload)
     return requests.post(f"{api_url}/{url}", headers=headers, json=payload)
 
+
 def get(url):
     return requests.get(f"{api_url}/{url}", headers=headers)
+
     
 def create_user(first_name: str, last_name: str, email: str, user_type: str, password: Optional[str]):
     # gateway = backend_service.gateway_from_envfile(".env")
-
 
     try:
         payload = {

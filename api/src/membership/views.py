@@ -4,13 +4,11 @@ from membership.membership import get_membership_summary, add_membership_days
 from membership.models import Member, Group, member_group, Span, Permission, group_permission, \
     Key
 from membership.member_auth import get_member_permissions
-from membership.permissions import register_permissions
 from service.api_definition import MEMBER_VIEW, MEMBER_CREATE, MEMBER_EDIT, MEMBER_DELETE, GROUP_VIEW, GROUP_CREATE, \
     GROUP_EDIT, GROUP_DELETE, GROUP_MEMBER_VIEW, GROUP_MEMBER_ADD, GROUP_MEMBER_REMOVE, SPAN_VIEW, SPAN_MANAGE, \
-    PERMISSION_MANAGE, SERVICE, POST, Arg, symbol_list, PERMISSION_VIEW, KEYS_VIEW, KEYS_EDIT, GET, Enum, \
+    PERMISSION_MANAGE, POST, Arg, PERMISSION_VIEW, KEYS_VIEW, KEYS_EDIT, GET, Enum, \
     iso_date, non_empty_str, natural1
-from service.db import db_session
-from service.entity import Entity, not_empty, ASC, DESC, OrmManyRelation, OrmSingeRelation, ExpandField
+from service.entity import Entity, not_empty, ASC, OrmManyRelation, OrmSingeRelation, ExpandField
 
 member_entity = MemberEntity(
     Member,
@@ -85,14 +83,6 @@ service.related_entity_routes(
 )
 
 
-@service.route("/member/<int:entity_id>/activate", method=POST, permission=SERVICE, status='activated')
-def member_activate(entity_id=None):
-    """ Activate (undelete) a member. """
-    member = db_session.query(Member).get(entity_id)
-    member.deleted_at = None
-    db_session.commit()
-
-
 @service.route("/member/<int:entity_id>/addMembershipDays", method=POST, permission=SPAN_MANAGE)
 def member_add_membership_days(
         entity_id=None, type=Arg(Enum(Span.MEMBERSHIP, Span.LABACCESS, Span.SPECIAL_LABACESS)), days=Arg(natural1),
@@ -147,12 +137,6 @@ service.entity_routes(
     permission_update=PERMISSION_MANAGE,
     permission_delete=PERMISSION_MANAGE,
 )
-
-
-@service.route("/permission/register", method=POST, permission=SERVICE)
-def permissions_register(permissions=Arg(symbol_list)):
-    """ Register permissions that a service is dependent of. """
-    register_permissions(permissions)
 
 
 service.entity_routes(

@@ -17,15 +17,17 @@ env = dotenv_values()
 
 
 headers = {
-    'Authorization': f'Bearer {env.get("API_BEARER")}',
+    'Authorization': f'Bearer {env.get("TEST_SERVICE_TOKEN")}',
 }
 
 
 api_url = env.get('HOST_BACKEND')
 
+
 def post(url, payload):
     print(payload)
     return requests.post(f"{api_url}/{url}", headers=headers, json=payload)
+
 
 def get(url):
     return requests.get(f"{api_url}/{url}", headers=headers)

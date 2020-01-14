@@ -5,7 +5,7 @@ from membership.models import Member, Span, Key
 from multiaccess import service
 from multiaccess.box_terminator import box_terminator_validate, box_terminator_nag, \
     box_terminator_boxes
-from service.api_definition import GET, KEYS_VIEW, SERVICE, Arg, MEMBER_EDIT, POST, MEMBER_VIEW, symbol_list, symbol
+from service.api_definition import GET, Arg, MEMBER_EDIT, POST, MEMBER_VIEW, symbol, MEMBERBOOTH
 from service.db import db_session
 
 
@@ -20,7 +20,7 @@ def member_to_response_object(member):
     }
 
 
-@service.route("/memberdata", method=GET, permission=MEMBER_EDIT)
+@service.route("/memberdata", method=GET, permission=MEMBER_VIEW)
 def get_memberdata():
     query = db_session.query(Member).join(Member.spans).join(Member.keys)
     query = query.options(contains_eager(Member.spans), contains_eager(Member.keys))
@@ -44,7 +44,7 @@ def memberbooth_response_object(key):
     }
 
 
-@service.route("/memberbooth/tag", method=GET, permission=KEYS_VIEW)
+@service.route("/memberbooth/tag", method=GET, permission=MEMBERBOOTH)
 def get_keys(tagid=Arg(int)):
     key = db_session.query(Key) \
         .filter(Key.tagid == tagid) \
@@ -61,7 +61,7 @@ def get_keys(tagid=Arg(int)):
         return memberbooth_response_object(key)
 
 
-@service.route("/memberbooth/member", method=GET, permission=MEMBER_VIEW)
+@service.route("/memberbooth/member", method=GET, permission=MEMBERBOOTH)
 def memberbooth_member(member_number=Arg(int)):
     key = db_session.query(Key) \
         .filter(Member.member_number == member_number) \

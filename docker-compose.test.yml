@@ -12,6 +12,7 @@ services:
     environment:
       TEST: "true"
       CORS_ALLOWED_ORIGINS: 'http://admin,http://api,http://public'
+      TEST_SERVICE_TOKEN:
 
   public:
     environment:
@@ -59,7 +60,7 @@ services:
       MYSQL_USER:
       MYSQL_PASS:
       WEBDRIVER_TYPE: "REMOTE_CHROME"
-      API_BEARER:
+      TEST_SERVICE_TOKEN:
       HOST_FRONTEND: 'http://admin'
       HOST_BACKEND: 'http://api'
       HOST_PUBLIC: 'http://public'

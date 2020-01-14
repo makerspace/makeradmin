@@ -11,6 +11,10 @@ module.exports = {
                     component: require("./AccessTokenList").default,
                 },
                 {
+                    path: "service_tokens",
+                    component: require("./ServiceTokenList").default,
+                },
+                {
                     path: "about",
                     component: require("./About").default,
                 },
