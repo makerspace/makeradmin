@@ -35,4 +35,4 @@ SELENIUM_SCREENSHOT_DIR = config.get('SELENIUM_SCREENSHOT_DIR',
                                      default=os.path.abspath(os.path.join(os.path.dirname(__file__),
                                                                           "../../../.test/selenium-screenshots")))
 
-API_BEARER = config.get("API_BEARER")
+TEST_SERVICE_TOKEN = config.get("TEST_SERVICE_TOKEN")

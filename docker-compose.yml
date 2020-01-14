@@ -32,7 +32,7 @@ services:
     networks:
       - makeradmin
     environment:
-      API_BEARER:
+      TEST_SERVICE_TOKEN:
       MYSQL_HOST: db2
       MYSQL_DB:
       MYSQL_PORT:

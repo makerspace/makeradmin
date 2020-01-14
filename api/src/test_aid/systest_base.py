@@ -19,7 +19,7 @@ from test_aid.api import ApiFactory
 from test_aid.db import DbFactory
 from test_aid.obj import DEFAULT_PASSWORD
 from test_aid.systest_config import HOST_FRONTEND, HOST_PUBLIC, HOST_BACKEND, \
-    SELENIUM_BASE_TIMEOUT, SLEEP, WEBDRIVER_TYPE, API_BEARER, SELENIUM_SCREENSHOT_DIR, KEEP_BROWSER, \
+    SELENIUM_BASE_TIMEOUT, SLEEP, WEBDRIVER_TYPE, TEST_SERVICE_TOKEN, SELENIUM_SCREENSHOT_DIR, KEEP_BROWSER, \
     STRIPE_PUBLIC_KEY
 from test_aid.test_base import TestBase, ShopTestMixin
 
@@ -65,7 +65,7 @@ class ApiTest(SystestBase):
     @classmethod
     def setUpClass(self):
         super().setUpClass()
-        self.api = ApiFactory(obj_factory=self.obj, base_url=self.api_url, api_token=API_BEARER)
+        self.api = ApiFactory(obj_factory=self.obj, base_url=self.api_url, api_token=TEST_SERVICE_TOKEN)
 
     def request(self, *args, **kwargs):
         return self.api.request(*args, **kwargs)

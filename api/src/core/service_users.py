@@ -15,7 +15,7 @@ class ServiceUser:
 
 
 TEST_SERVICE_USER_ID = -1
-TEST_SERVICE_TOKEN = config.get('API_BEARER', log_value=False)
+TEST_SERVICE_TOKEN = config.get('TEST_SERVICE_TOKEN')
 
 
 SERVICE_USERS = (

@@ -14,7 +14,7 @@ config = {
     "MYSQL_PASS": secrets.token_hex(16),
     "MYSQL_ROOT_PASSWORD": secrets.token_hex(16),
     # Note: This must fit into the access_tokens table in the database
-    "API_BEARER": secrets.token_hex(16),
+    "TEST_SERVICE_TOKEN": secrets.token_hex(16),
     "TICTAIL_USER": "",
     "TICTAIL_PASS": "",
     "TICTAIL_STORE": "",
