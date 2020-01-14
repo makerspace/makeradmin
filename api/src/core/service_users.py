@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from typing import Sequence
 
 from service.config import config
-from service.api_definition import ALL_PERMISSIONS, KEYS_VIEW, MEMBER_VIEW, WEBSHOP
+from service.api_definition import ALL_PERMISSIONS, MEMBER_VIEW, WEBSHOP, MEMBERBOOTH
 
 
 @dataclass
@@ -29,7 +29,7 @@ SERVICE_USERS = (
     ServiceUser(
         id=-2,
         name="memberbooth",
-        permissions=[KEYS_VIEW, MEMBER_VIEW],
+        permissions=[MEMBERBOOTH],
     ),
     ServiceUser(
         id=-3,
