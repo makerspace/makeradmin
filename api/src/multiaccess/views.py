@@ -7,6 +7,7 @@ from multiaccess.box_terminator import box_terminator_validate, box_terminator_n
     box_terminator_boxes
 from service.api_definition import GET, Arg, MEMBER_EDIT, POST, MEMBER_VIEW, symbol, MEMBERBOOTH
 from service.db import db_session
+from service.logging import logger
 
 
 def member_to_response_object(member):
@@ -22,6 +23,7 @@ def member_to_response_object(member):
 
 @service.route("/memberdata", method=GET, permission=MEMBER_VIEW)
 def get_memberdata():
+    """ Used by multiaccess sync program to get members. """
     query = db_session.query(Member).join(Member.spans).join(Member.keys)
     query = query.options(contains_eager(Member.spans), contains_eager(Member.keys))
     query = query.filter(
@@ -34,13 +36,13 @@ def get_memberdata():
     return [member_to_response_object(m) for m in query]
 
 
-def memberbooth_response_object(key):
+def memberbooth_response_object(member, key):
     return {
-        'member_id': key.member_id,
-        'key_id': key.key_id,
-        'tagid': key.tagid,
-        'description': key.description,
-        'member': member_to_response_object(key.member)
+        'member_id': member.member_id,
+        'key_id': key.key_id if key else None,
+        'tagid': key.tagid if key else None,
+        'description': key.description if key else None,
+        'member': member_to_response_object(member)
     }
 
 
@@ -58,20 +60,18 @@ def get_keys(tagid=Arg(int)):
     if key is None:
         return None
     else:
-        return memberbooth_response_object(key)
+        return memberbooth_response_object(key.member, key)
 
 
 @service.route("/memberbooth/member", method=GET, permission=MEMBERBOOTH)
 def memberbooth_member(member_number=Arg(int)):
-    key = db_session.query(Key) \
-        .filter(Member.member_number == member_number) \
-        .join(Key.member) \
-        .first()
+    member = db_session.query(Member).filter(Member.member_number == member_number, Member.deleted_at.is_(None)).one()
+    key = db_session.query(Key).filter(Key.member_id == member.member_id, Key.deleted_at.is_(None)).first()
 
-    if key is None:
-        return None
-    else:
-        return memberbooth_response_object(key)
+    if member:
+        return memberbooth_response_object(member, key)
+
+    return None
 
 
 @service.route("/box-terminator/boxes", method=GET, permission=MEMBER_EDIT)
