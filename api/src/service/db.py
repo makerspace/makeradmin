@@ -61,7 +61,10 @@ def populate_fields_by_index(engine):
     engine_inspect = inspect(engine)
     for table in engine_inspect.get_table_names():
         for index in engine_inspect.get_indexes(table):
-            fields_by_index[index['name']] = ",".join(index['column_names'])
+            index_name = index['name']
+            column_names = index['column_names']
+            fields_by_index[index_name] = ",".join(column_names)
+            fields_by_index[table + '.' + index_name] = ",".join(column_names)
     
     
 def nested_atomic(f):
