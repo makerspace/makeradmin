@@ -46,7 +46,8 @@ def memberbooth_response_object(member, membership_data):
 
 @service.route("/memberbooth/tag", method=GET, permission=MEMBERBOOTH)
 def memberbooth_tag(tagid=Arg(int)):
-    key = db_session.query(Key).join(Key.member) \
+    key = db_session.query(Key)\
+        .join(Key.member) \
         .filter(Key.tagid == tagid) \
         .filter(
             Member.deleted_at.is_(None),
@@ -65,7 +66,7 @@ def memberbooth_tag(tagid=Arg(int)):
 def memberbooth_member(member_number=Arg(int)):
     member = db_session.query(Member).filter(Member.member_number == member_number, Member.deleted_at.is_(None)).first()
 
-    if member is None:
+    if not member:
         return None
 
     membership_data = get_membership_summary(member.member_id)
