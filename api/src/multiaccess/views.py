@@ -2,6 +2,7 @@ from flask import g
 from sqlalchemy.orm import contains_eager
 
 from membership.models import Member, Span, Key
+from membership.membership import get_membership_summary
 from multiaccess import service
 from multiaccess.box_terminator import box_terminator_validate, box_terminator_nag, \
     box_terminator_boxes
@@ -36,21 +37,18 @@ def get_memberdata():
     return [member_to_response_object(m) for m in query]
 
 
-def memberbooth_response_object(member, key):
-    return {
-        'member_id': member.member_id,
-        'key_id': key.key_id if key else None,
-        'tagid': key.tagid if key else None,
-        'description': key.description if key else None,
-        'member': member_to_response_object(member)
-    }
+def memberbooth_response_object(member, membership_data):
+    response = member_to_response_object(member)
+    del response["end_date"]
+    response["membership_data"] = membership_data.as_json()
+    return response
 
 
 @service.route("/memberbooth/tag", method=GET, permission=MEMBERBOOTH)
-def get_keys(tagid=Arg(int)):
-    key = db_session.query(Key) \
-        .filter(Key.tagid == tagid) \
+def memberbooth_tag(tagid=Arg(int)):
+    key = db_session.query(Key)\
         .join(Key.member) \
+        .filter(Key.tagid == tagid) \
         .filter(
             Member.deleted_at.is_(None),
             Key.deleted_at.is_(None),
@@ -59,19 +57,20 @@ def get_keys(tagid=Arg(int)):
 
     if key is None:
         return None
-    else:
-        return memberbooth_response_object(key.member, key)
+
+    membership_data = get_membership_summary(key.member_id)
+    return memberbooth_response_object(key.member, membership_data)
 
 
 @service.route("/memberbooth/member", method=GET, permission=MEMBERBOOTH)
 def memberbooth_member(member_number=Arg(int)):
-    member = db_session.query(Member).filter(Member.member_number == member_number, Member.deleted_at.is_(None)).one()
-    key = db_session.query(Key).filter(Key.member_id == member.member_id, Key.deleted_at.is_(None)).first()
+    member = db_session.query(Member).filter(Member.member_number == member_number, Member.deleted_at.is_(None)).first()
 
-    if member:
-        return memberbooth_response_object(member, key)
+    if not member:
+        return None
 
-    return None
+    membership_data = get_membership_summary(member.member_id)
+    return memberbooth_response_object(member, membership_data)
 
 
 @service.route("/box-terminator/boxes", method=GET, permission=MEMBER_EDIT)
