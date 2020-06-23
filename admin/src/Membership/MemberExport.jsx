@@ -1,5 +1,5 @@
 import React from 'react';
-import { get } from "../gateway"
+import { get } from "../gateway";
 
 
 class MemberExport extends React.Component {
@@ -22,17 +22,17 @@ class MemberExport extends React.Component {
 
             // Find all members which are either active lab members or makerspace members.
             // Lab membership does technically imply makerspace membership... but people are not always paying their membership fees properly.
-            const active_members = members.filter(m => m.membership.effective_labaccess_active || m.membership.membership_active)
+            const active_members = members.filter(m => m.membership.effective_labaccess_active || m.membership.membership_active);
 
             // Format as a CSV file
             let rows = [];
             rows.push(["First Name, Last Name, Email, Labaccess End Date"]);
             for (const member of active_members) {
-                rows.push([member.firstname, member.lastname, member.email, member.membership.labaccess_end ? member.membership.labaccess_end : ""])
+                rows.push([member.firstname, member.lastname, member.email, member.membership.labaccess_end ? member.membership.labaccess_end : ""]);
             }
 
             this.setState({state: "loaded", csv_content: rows.map(r => r.join(", ")).join("\n")});
-        })
+        });
     }
 
     
@@ -50,7 +50,7 @@ class MemberExport extends React.Component {
                 )}
                 { !this.state.csv_content && (
                     <a className="uk-button uk-button-primary" role="button" onClick={() => this.exportMembers()}>
-                        Exportera alla aktiva medlemmar som CSV{this.state.state == "loading" ? "..." : ""}
+                        Exportera alla aktiva medlemmar som CSV{this.state.state === "loading" ? "..." : ""}
                     </a>
                 )}
             </div>
