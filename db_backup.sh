@@ -1,3 +1,4 @@
+#!/bin/bash
 CURRENT_TIME=`date +%FT%T+%N`
 DB_CONTAINER=`docker-compose ps -q db2`
 FILEPATH=/tmp/db_${CURRENT_TIME}.sql
