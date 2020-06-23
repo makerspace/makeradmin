@@ -1,6 +1,6 @@
 from membership import service
 from membership.member_entity import MemberEntity
-from membership.membership import get_membership_summary, add_membership_days
+from membership.membership import get_membership_summary, add_membership_days, get_members_and_membership
 from membership.models import Member, Group, member_group, Span, Permission, group_permission, \
     Key
 from membership.member_auth import get_member_permissions
@@ -98,6 +98,23 @@ def member_get_membership(entity_id=None):
 @service.route("/member/<int:entity_id>/permissions", method=GET, permission=PERMISSION_VIEW)
 def member_get_permissions(entity_id=None):
     return [{'permission_id': i, 'permission': p} for i, p in get_member_permissions(entity_id)]
+
+
+@service.route("/member/all_with_membership", method=GET, permission=MEMBER_VIEW)
+def all_with_membership(entity_id=None):
+    '''
+    Used for the CSV export feature in MakerAdmin.
+    While technically the frontend could reuqest a list of all members and then query individually if they are members or not,
+    that would be several thousand API requests which seems kinda unnecessary.
+    It also avoids the need to deal with pagination in the frontend for this operation.
+    '''
+    members, memberships = get_members_and_membership()
+    dict_members = []
+    for member, membership in zip(members, memberships):
+        obj = member_entity.to_obj(member)
+        obj["membership"] = membership.as_json()
+        dict_members.append(obj)
+    return dict_members
 
 
 service.entity_routes(

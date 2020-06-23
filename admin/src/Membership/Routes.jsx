@@ -122,6 +122,12 @@ module.exports = {
                         },
                     ],
                 },
+                {
+                    path: "export",
+                    indexRoute: {
+                        component: require("./MemberExport").default,
+                    },
+                },
             ]
         },
     ]

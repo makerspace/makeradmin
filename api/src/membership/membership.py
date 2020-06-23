@@ -109,6 +109,17 @@ def get_membership_summary(entity_id):
     )
 
 
+def get_members_and_membership():
+    members = (
+        db_session
+        .query(Member)
+        .filter(Member.deleted_at.is_(None))
+    )
+
+    memberships = [get_membership_summary(member.member_id) for member in members]
+    return members, memberships
+
+
 def add_membership_days(member_id=None, span_type=None, days=None, creation_reason=None, default_start_date=None):
     assert days >= 0
 

@@ -46,6 +46,11 @@ const nav = {
                         target: "/membership/spans",
                         icon: "clock-o",
                     },
+                    {
+                        text: "Exportera medlemmar",
+                        target: "/membership/export",
+                        icon: "download",
+                    },
                 ],
         },
         {
