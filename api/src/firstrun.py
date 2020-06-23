@@ -11,6 +11,7 @@ from service.config import config
 from service.db import db_session
 from service.logging import logger
 from shop.models import ProductCategory
+from getpass import getpass
 
 YELLOW = "\u001b[33m"
 GREEN = "\u001b[32m"
@@ -67,17 +68,25 @@ def create_admin(admins):
     if s not in {"", "y", "yes"}:
         return
 
-    member = member_entity.create(dict(
-        firstname=input("First name: "),
-        lastname=input("Last name: "),
-        email=input("Email: "),
-        unhashed_password=input("Password: "),
-    ))
-    member_id = member['member_id']
+    while True:
+        try:
+            member = member_entity.create(dict(
+                firstname=input("First name: "),
+                lastname=input("Last name: "),
+                email=input("Email: "),
+                unhashed_password=getpass("Password: "),
+            ))
+            member_id = member['member_id']
 
-    logger.info(f"Addmin new menber {member_id} to admin group.")
-    admins.members.append(db_session.query(Member).get(member_id))
-    db_session.commit()
+            logger.info(f"Addmin new menber {member_id} to admin group.")
+            admins.members.append(db_session.query(Member).get(member_id))
+            db_session.commit()
+            break
+        except Exception as e:
+            # This may fail when for example the password was too weak
+            print(e)
+            print("Something went wrong while creating the new user. Please try again.")
+
 
 
 def create_members():
