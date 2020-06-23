@@ -109,6 +109,8 @@ def get_membership_summary(entity_id):
     )
 
 
+
+
 def get_members_and_membership():
     members = (
         db_session
@@ -116,7 +118,79 @@ def get_members_and_membership():
         .filter(Member.deleted_at.is_(None))
     )
 
-    memberships = [get_membership_summary(member.member_id) for member in members]
+    today = date.today()
+    
+    # Converts a list of rows of IDs to a set of them
+    def setify(rows):
+        return set(r[0] for r in rows)
+    
+    # Converts a list of rows of IDs and values to a map from id to value
+    def mapify(rows):
+        return {r[0]: r[1] for r in rows}
+
+    labaccess_active = setify(
+        db_session
+            .query(Span.member_id)
+            .filter(Span.type == Span.LABACCESS,
+                    Span.startdate <= today,
+                    Span.enddate >= today,
+                    Span.deleted_at.is_(None))
+            .group_by(Span.member_id)
+            .all()
+    )
+
+    labaccess_end = mapify(db_session.query(Span.member_id, func.max(Span.enddate)).filter(
+        Span.type == Span.LABACCESS,
+        Span.deleted_at.is_(None)
+    ).group_by(Span.member_id).all())
+    
+    membership_active = setify(
+        db_session
+            .query(Span.member_id)
+            .filter(Span.type == Span.MEMBERSHIP,
+                    Span.startdate <= today,
+                    Span.enddate >= today,
+                    Span.deleted_at.is_(None))
+            .all()
+    )
+
+    membership_end = mapify(db_session.query(Span.member_id, func.max(Span.enddate)).filter(
+        Span.type == Span.MEMBERSHIP,
+        Span.deleted_at.is_(None)
+    ).group_by(Span.member_id).all())
+    
+    special_labaccess_active = setify(
+        db_session
+            .query(Span.member_id)
+            .filter(Span.type == Span.SPECIAL_LABACESS,
+                    Span.startdate <= today,
+                    Span.enddate >= today,
+                    Span.deleted_at.is_(None))
+            .group_by(Span.member_id)
+            .all()
+    )
+
+    special_labaccess_end = mapify(db_session.query(Span.member_id, func.max(Span.enddate)).filter(
+        Span.type == Span.SPECIAL_LABACESS,
+        Span.deleted_at.is_(None)
+    ).group_by(Span.member_id).all())
+
+    memberships = []
+    for member in members:
+        id = member.member_id
+        # Create the MembershipData structure
+        # Note that the dict.get method returns None if the key doesn't exist in the map
+        memberships.append(MembershipData(
+            labaccess_end=labaccess_end.get(id),
+            labaccess_active=id in labaccess_active,
+            special_labaccess_end=special_labaccess_end.get(id),
+            special_labaccess_active=id in special_labaccess_active,
+            membership_end=membership_end.get(id),
+            membership_active=id in membership_active,
+            effective_labaccess_end=max_or_none(labaccess_end.get(id), special_labaccess_end.get(id)),
+            effective_labaccess_active=(id in labaccess_active) or (id in special_labaccess_active)
+        ))
+
     return members, memberships
 
 
