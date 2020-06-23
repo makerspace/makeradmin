@@ -8,6 +8,7 @@ from service.api_definition import NOT_UNIQUE
 from service.db import db_session
 from service.error import UnprocessableEntity
 from service.util import date_to_str
+from typing import List
 
 
 @dataclass(frozen=True)
@@ -44,79 +45,17 @@ def max_or_none(*args):
 
 
 def get_membership_summary(entity_id):
-    today = date.today()
-    
-    labaccess_active = bool(
-        db_session
-            .query(Span)
-            .filter(Span.member_id == entity_id,
-                    Span.type == Span.LABACCESS,
-                    Span.startdate <= today,
-                    Span.enddate >= today,
-                    Span.deleted_at.is_(None))
-            .count()
-    )
-
-    labaccess_end = db_session.query(func.max(Span.enddate)).filter(
-        Span.member_id == entity_id,
-        Span.type == Span.LABACCESS,
-        Span.deleted_at.is_(None)
-    ).scalar()
-    
-    membership_active = bool(
-        db_session
-            .query(Span)
-            .filter(Span.member_id == entity_id,
-                    Span.type == Span.MEMBERSHIP,
-                    Span.startdate <= today,
-                    Span.enddate >= today,
-                    Span.deleted_at.is_(None))
-            .count()
-    )
-
-    membership_end = db_session.query(func.max(Span.enddate)).filter(
-        Span.member_id == entity_id,
-        Span.type == Span.MEMBERSHIP,
-        Span.deleted_at.is_(None)
-    ).scalar()
-    
-    special_labaccess_active = bool(
-        db_session
-            .query(Span)
-            .filter(Span.member_id == entity_id,
-                    Span.type == Span.SPECIAL_LABACESS,
-                    Span.startdate <= today,
-                    Span.enddate >= today,
-                    Span.deleted_at.is_(None))
-            .count()
-    )
-    
-    special_labaccess_end = db_session.query(func.max(Span.enddate)).filter(
-        Span.member_id == entity_id,
-        Span.type == Span.SPECIAL_LABACESS,
-        Span.deleted_at.is_(None)
-    ).scalar()
-    
-    return MembershipData(
-        labaccess_end=labaccess_end,
-        labaccess_active=labaccess_active,
-        special_labaccess_end=special_labaccess_end,
-        special_labaccess_active=special_labaccess_active,
-        membership_end=membership_end,
-        membership_active=membership_active,
-        effective_labaccess_end=max_or_none(labaccess_end, special_labaccess_end),
-        effective_labaccess_active=labaccess_active or special_labaccess_active
-    )
+    return get_membership_summaries([entity_id])[0]
 
 
+def get_membership_summaries(member_ids: List[int]):
+    ''' Returns a list of MembershipData for each member in member_ids.
+    '''
 
-
-def get_members_and_membership():
-    members = (
-        db_session
-        .query(Member)
-        .filter(Member.deleted_at.is_(None))
-    )
+    # Speed up the database query for the common special case that member_ids is a list with exactly 1 element.
+    # In other cases we will extract information about every member.
+    # Since the method is only used with either 1 member or all members in the database this is reasonable.
+    span_filter = Span.member_id == member_ids[0] if len(member_ids) == 1 else True
 
     today = date.today()
     
@@ -131,7 +70,8 @@ def get_members_and_membership():
     labaccess_active = setify(
         db_session
             .query(Span.member_id)
-            .filter(Span.type == Span.LABACCESS,
+            .filter(span_filter,
+                    Span.type == Span.LABACCESS,
                     Span.startdate <= today,
                     Span.enddate >= today,
                     Span.deleted_at.is_(None))
@@ -140,6 +80,7 @@ def get_members_and_membership():
     )
 
     labaccess_end = mapify(db_session.query(Span.member_id, func.max(Span.enddate)).filter(
+        span_filter,
         Span.type == Span.LABACCESS,
         Span.deleted_at.is_(None)
     ).group_by(Span.member_id).all())
@@ -147,7 +88,8 @@ def get_members_and_membership():
     membership_active = setify(
         db_session
             .query(Span.member_id)
-            .filter(Span.type == Span.MEMBERSHIP,
+            .filter(span_filter,
+                    Span.type == Span.MEMBERSHIP,
                     Span.startdate <= today,
                     Span.enddate >= today,
                     Span.deleted_at.is_(None))
@@ -155,6 +97,7 @@ def get_members_and_membership():
     )
 
     membership_end = mapify(db_session.query(Span.member_id, func.max(Span.enddate)).filter(
+        span_filter,
         Span.type == Span.MEMBERSHIP,
         Span.deleted_at.is_(None)
     ).group_by(Span.member_id).all())
@@ -162,7 +105,8 @@ def get_members_and_membership():
     special_labaccess_active = setify(
         db_session
             .query(Span.member_id)
-            .filter(Span.type == Span.SPECIAL_LABACESS,
+            .filter(span_filter,
+                    Span.type == Span.SPECIAL_LABACESS,
                     Span.startdate <= today,
                     Span.enddate >= today,
                     Span.deleted_at.is_(None))
@@ -171,13 +115,13 @@ def get_members_and_membership():
     )
 
     special_labaccess_end = mapify(db_session.query(Span.member_id, func.max(Span.enddate)).filter(
+        span_filter,
         Span.type == Span.SPECIAL_LABACESS,
         Span.deleted_at.is_(None)
     ).group_by(Span.member_id).all())
 
     memberships = []
-    for member in members:
-        id = member.member_id
+    for id in member_ids:
         # Create the MembershipData structure
         # Note that the dict.get method returns None if the key doesn't exist in the map
         memberships.append(MembershipData(
@@ -190,6 +134,15 @@ def get_members_and_membership():
             effective_labaccess_end=max_or_none(labaccess_end.get(id), special_labaccess_end.get(id)),
             effective_labaccess_active=(id in labaccess_active) or (id in special_labaccess_active)
         ))
+    return memberships
+
+def get_members_and_membership():
+    members = (
+        db_session
+        .query(Member)
+        .filter(Member.deleted_at.is_(None))
+    )
+    memberships = get_membership_summaries([m.member_id for m in members])
 
     return members, memberships
 
