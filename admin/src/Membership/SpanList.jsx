@@ -26,7 +26,7 @@ const Row = deleteItem => props => {
 };
 
 
-class KeyList extends React.Component {
+class SpanList extends React.Component {
 
     constructor(props) {
         super(props);
@@ -57,4 +57,4 @@ class KeyList extends React.Component {
     }
 }
 
-export default KeyList;
+export default SpanList;
