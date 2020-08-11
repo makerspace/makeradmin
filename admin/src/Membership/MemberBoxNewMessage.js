@@ -8,7 +8,7 @@ class MemberBoxMessages extends React.Component {
 
     constructor(props) {
         super(props);
-        this.message = new Message({recipients: [{type: "member", id: props.params.member_id}]});
+        this.message = new Message({recipients: [{type: "member", id: props.match.params.member_id}]});
     }
     
     onSend() {

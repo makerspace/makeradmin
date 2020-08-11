@@ -9,7 +9,7 @@ class ProductEdit extends React.Component {
     
     constructor(props) {
         super(props);
-        const {id} = props.params;
+        const {id} = props.match.params;
         this.product = Product.getWithRelated(id);
     }
     

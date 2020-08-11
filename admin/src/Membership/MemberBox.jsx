@@ -1,5 +1,6 @@
 import React from 'react';
-import {Link, withRouter} from 'react-router';
+import { Link } from "react-router-dom";
+import { withRouter} from 'react-router';
 import PropTypes from 'prop-types';
 import Member from "../Models/Member";
 
@@ -8,7 +9,7 @@ class MemberBox extends React.Component {
     
     constructor(props) {
         super(props);
-        const {member_id} = props.params;
+        const {member_id} = props.match.params;
         this.member = Member.get(member_id);
         this.state = {member_id, firstname: "", lastname: ""};
     }
@@ -27,7 +28,7 @@ class MemberBox extends React.Component {
     }
     
     render() {
-        const {member_id} = this.props.params;
+        const {member_id} = this.props.match.params;
         const {member_number, firstname, lastname} = this.state;
         
         return (

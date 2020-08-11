@@ -1,6 +1,6 @@
 import React from 'react';
 import Collection from "../Models/Collection";
-import {Link} from "react-router";
+import { Link } from "react-router-dom";
 import Group from "../Models/Group";
 import CollectionTable from "../Components/CollectionTable";
 import {get} from "../gateway";
@@ -32,7 +32,7 @@ class MemberBoxGroups extends React.Component {
 
     constructor(props) {
         super(props);
-        this.collection = new Collection({type: Group, url: `/membership/member/${props.params.member_id}/groups`, idListName: 'groups', pageSize: 0});
+        this.collection = new Collection({type: Group, url: `/membership/member/${props.match.params.member_id}/groups`, idListName: 'groups', pageSize: 0});
         this.state = {
             items: [],
             options: [],
@@ -62,7 +62,7 @@ class MemberBoxGroups extends React.Component {
     }
     
     render() {
-        const {member_id} = this.props.params;
+        const {member_id} = this.props.match.params;
         const {selectedOption, showOptions} = this.state;
         
         return (

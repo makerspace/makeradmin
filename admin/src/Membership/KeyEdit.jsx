@@ -11,7 +11,7 @@ class KeyEdit extends React.Component {
     
     constructor(props) {
         super(props);
-        const {key_id} = props.params;
+        const {key_id} = props.match.params;
         this.key = Key.get(key_id);
         this.state = {saveDisabled: true};
     }

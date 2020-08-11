@@ -1,5 +1,5 @@
 import React from 'react';
-import {Link} from "react-router";
+import { Link } from "react-router-dom";
 import Order from "../Models/Order";
 import Collection from "../Models/Collection";
 import CollectionTable from "../Components/CollectionTable";
@@ -23,7 +23,7 @@ class MemberBoxOrders extends React.Component {
 
     constructor(props) {
         super(props);
-        this.collection = new Collection({type: Order, url: `/webshop/member/${props.params.member_id}/transactions`});
+        this.collection = new Collection({type: Order, url: `/webshop/member/${props.match.params.member_id}/transactions`});
     }
     
     render() {

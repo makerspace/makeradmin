@@ -3,7 +3,7 @@ import Collection from "../Models/Collection";
 import CollectionTable from "../Components/CollectionTable";
 import Message from "../Models/Message";
 import DateTimeShow from "../Components/DateTimeShow";
-import {Link} from "react-router";
+import { Link } from "react-router-dom";
 
 
 class MessageList extends React.Component {

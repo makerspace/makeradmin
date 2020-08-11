@@ -1,5 +1,5 @@
 import React from 'react';
-import { browserHistory } from 'react-router';
+import { browserHistory } from '../browser_history'
 import auth from '../auth';
 
 export default class Logout extends React.Component {

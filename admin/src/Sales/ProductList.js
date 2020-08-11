@@ -1,5 +1,5 @@
 import React from 'react';
-import {Link} from "react-router";
+import { Link } from "react-router-dom";
 import Collection from "../Models/Collection";
 import CollectionTable from "../Components/CollectionTable";
 import Product from "../Models/Product";

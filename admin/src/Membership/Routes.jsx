@@ -1,134 +1,91 @@
-module.exports = {
-    childRoutes: [
-        {
-            path: "/membership",
-            indexRoute: {
-                onEnter: (nextState, replace) => replace("/membership/members"),
-            },
-            childRoutes: [
-                {
-                    path: "members",
-                    indexRoute: {
-                        component: require("./MemberList").default,
-                    },
-                    childRoutes: [
-                        {
-                            path: "add",
-                            component: require("./MemberAdd").default,
-                        },
-                        {
-                            path: ":member_id",
-                            component:  require("./MemberBox").default,
-                            indexRoute: {
-                                onEnter: (nextState, replace) => {
-                                    return replace("/membership/members/" + nextState.params.member_id + "/member-data/");
-                                },
-                            },
-                            childRoutes: [
-                                {
-                                    path: "member-data",
-                                    component: require("./MemberBoxMemberData").default,
-                                },
-                                {
-                                    path: "groups",
-                                    component: require("./MemberBoxGroups").default,
-                                },
-                                {
-                                    path: "keys",
-                                    component: require("./MemberBoxKeys").default,
-                                },
-                                {
-                                    path: "permissions",
-                                    component: require("./MemberBoxPermissions").default,
-                                },
-                                {
-                                    path: "orders",
-                                    component: require("./MemberBoxOrders").default,
-                                },
-                                {
-                                    path: "messages",
-                                    indexRoute: {
-                                        component: require("./MemberBoxMessages").default,
-                                    },
-                                    childRoutes: [
-                                        {
-                                            path: "new",
-                                            component: require("./MemberBoxNewMessage").default,
-                                        },
-                                    ],
-                                },
-                                {
-                                    path: "spans",
-                                    component: require("./MemberBoxSpans").default,
-                                },
-                            ]
-                        },
-                    ],
-                },
-                {
-                    path: "groups",
-                    indexRoute: {
-                        component: require("./GroupList").default,
-                    },
-                    childRoutes: [
-                        {
-                            path: "add",
-                            component: require("./GroupAdd").default,
-                        },
-                        {
-                            path: ":group_id",
-                            component: require("./GroupBox").default,
-                            indexRoute: {
-                                component: require("./GroupBoxEditInfo").default,
-                            },
-                            childRoutes: [
-                                {
-                                    path: "info",
-                                    component: require("./GroupBoxEditInfo").default,
-                                },
-                                {
-                                    path: "members",
-                                    component: require("./GroupBoxMembers").default,
-                                },
-                                {
-                                    path: "permissions",
-                                    component: require("./GroupBoxPermissions").default,
-                                },
-                            ],
-                        },
-                    ],
-                },
-                {
-                    path: "keys",
-                    indexRoute: {
-                        component: require("./KeyList").default
-                    },
-                    childRoutes: [
-                        {
-                            path: ":key_id",
-                            component: require("./KeyEdit").default
-                        },
-                    ]
-                },
-                {
-                    path: "spans",
-                    indexRoute: {
-                        component: require("./SpanList").default,
-                    },
-                    childRoutes: [
-                        {
-                            path: ":span_id",
-                            component: require("./SpanShow").default,
-                        },
-                    ],
-                },
-                {
-                    path: "export",
-                    indexRoute: {
-                        component: require("./MemberExport").default,
-                    },
-                },
-            ]
-        },
-    ]
-};
+import React from 'react';
+import MemberList from "./MemberList"
+import GroupAdd from "./GroupAdd"
+import GroupBox from "./GroupBox"
+import GroupBoxEditInfo from "./GroupBoxEditInfo"
+import GroupBoxMembers from "./GroupBoxMembers"
+import GroupBoxPermissions from "./GroupBoxPermissions"
+import GroupList from "./GroupList"
+import KeyEdit from "./KeyEdit"
+import KeyList from "./KeyList"
+import MemberAdd from "./MemberAdd"
+import MemberBox from "./MemberBox"
+import MemberBoxGroups from "./MemberBoxGroups"
+import MemberBoxKeys from "./MemberBoxKeys"
+import MemberBoxMemberData from "./MemberBoxMemberData"
+import MemberBoxMessages from "./MemberBoxMessages"
+import MemberBoxNewMessage from "./MemberBoxNewMessage"
+import MemberBoxOrders from "./MemberBoxOrders"
+import MemberBoxPermissions from "./MemberBoxPermissions"
+import MemberBoxSpans from "./MemberBoxSpans"
+import MemberExport from "./MemberExport"
+import SpanList from "./SpanList"
+import SpanShow from "./SpanShow"
+
+import { Route, Switch } from 'react-router-dom';
+
+const Group = ({ match: { path } }) => (
+    <GroupBox>
+        <Switch>
+            <Route path={`${path}/members`} component={GroupBoxMembers} />
+            <Route path={`${path}/permissions`} component={GroupBoxPermissions} />
+            <Route path={`${path}/(info)?`} component={GroupBoxEditInfo} />
+        </Switch>
+    </GroupBox>
+)
+
+const Groups = ({ match: { path } }) => (
+    <Switch>
+        <Route exact path={path} component={GroupList} />
+        <Route path={`${path}/add`} component={GroupAdd} />
+        <Route path={`${path}/:group_id`} component={Group} />
+    </Switch>
+)
+                
+const Member = ({ match: { path } }) => (
+    <MemberBox>
+        <Switch>
+            <Route path={`${path}/groups`} component={MemberBoxGroups} />
+            <Route path={`${path}/keys`} component={MemberBoxKeys} />
+            <Route path={`${path}/permissions`} component={MemberBoxPermissions} />
+            <Route path={`${path}/orders`} component={MemberBoxOrders} />
+            <Route path={`${path}/messages/new`} component={MemberBoxNewMessage} />
+            <Route path={`${path}/messages`} component={MemberBoxMessages} />
+            <Route path={`${path}/spans`} component={MemberBoxSpans} />
+            <Route path={`${path}/(member-data)?`} component={MemberBoxMemberData} />
+        </Switch>
+    </MemberBox>
+)
+
+const Members = ({ match: { path } }) => (
+    <Switch>
+        <Route exact path={path} component={MemberList} />
+        <Route path={`${path}/add`} component={MemberAdd} />
+        <Route path={`${path}/:member_id`} component={Member} />
+    </Switch>
+)
+
+const Keys = ({ match: { path } }) => (
+    <Switch>
+        <Route exact path={path} component={KeyList} />
+        <Route path={`${path}/:key_id`} component={KeyEdit} />
+    </Switch>
+)
+
+const Spans = ({ match: { path } }) => (
+    <Switch>
+        <Route exact path={path} component={SpanList} />
+        <Route path={`${path}/:span_id`} component={SpanShow} />
+    </Switch>
+)
+
+export default ({ match }) => (
+    <Switch>
+        <Route exact path={match.path} component={MemberList} />
+        <Route path={`${match.path}/members`} component={Members} />
+        <Route path={`${match.path}/groups`} component={Groups} />
+        <Route path={`${match.path}/keys`} component={Keys} />
+        <Route path={`${match.path}/spans`} component={Spans} />
+        <Route path={`${match.path}/export`} component={MemberExport} />
+    </Switch>
+)

@@ -11,7 +11,7 @@ class MemberBoxPermissions extends React.Component {
 
     constructor(props) {
         super(props);
-        this.collection = new Collection({type: Permission, url: `/membership/member/${props.params.member_id}/permissions`, pageSize: 0});
+        this.collection = new Collection({type: Permission, url: `/membership/member/${props.match.params.member_id}/permissions`, pageSize: 0});
     }
     
     render() {

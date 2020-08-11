@@ -1,10 +1,10 @@
-module.exports = {
-    childRoutes: [
-        {
-            path: "/statistics",
-            indexRoute: {
-                component: require("./StatisticsOverview").default
-            },
-        }
-    ]
-};
+import React from 'react';
+import { Route, Switch } from 'react-router-dom';
+import StatisticsOverview from "./StatisticsOverview"
+
+export default ({ match }) => (
+    <Switch>
+        <Route path={`${match.path}/`} exact component={StatisticsOverview} />
+        <Route path={`${match.path}/statistics`} component={StatisticsOverview} />
+    </Switch>
+)

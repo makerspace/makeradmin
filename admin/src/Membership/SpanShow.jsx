@@ -7,7 +7,7 @@ class SpanShow extends React.Component {
     
     constructor(props) {
         super(props);
-        const {span_id} = props.params;
+        const {span_id} = props.match.params;
         this.span = Span.get(span_id);
         this.state = {data: {}};
     }

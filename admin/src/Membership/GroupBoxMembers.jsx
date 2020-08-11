@@ -1,5 +1,5 @@
 import React from 'react';
-import {Link} from "react-router";
+import { Link } from "react-router-dom";
 import {Async} from "react-select";
 import Collection from "../Models/Collection";
 import Member from "../Models/Member";
@@ -28,7 +28,7 @@ class GroupBoxMembers extends React.Component {
 
     constructor(props) {
         super(props);
-        this.collection = new Collection({type: Member, url: `/membership/group/${props.params.group_id}/members`, idListName: 'members'});
+        this.collection = new Collection({type: Member, url: `/membership/group/${props.match.params.group_id}/members`, idListName: 'members'});
         this.state = {selectedOption: null};
     }
     

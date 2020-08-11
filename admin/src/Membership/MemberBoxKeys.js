@@ -1,6 +1,6 @@
 import React from 'react';
 import Collection from "../Models/Collection";
-import {Link} from "react-router";
+import { Link } from "react-router-dom";
 import CollectionTable from "../Components/CollectionTable";
 import Key from "../Models/Key";
 import {confirmModal} from "../message";
@@ -30,7 +30,7 @@ class MemberBoxKeys extends React.Component {
 
     constructor(props) {
         super(props);
-        const {member_id} = props.params;
+        const {member_id} = props.match.params;
         this.collection = new Collection({type: Key, url: `/membership/member/${member_id}/keys`, idListName: 'keys', pageSize: 0});
         this.key = new Key({member_id});
         this.state = {saveEnabled: false};
@@ -49,7 +49,7 @@ class MemberBoxKeys extends React.Component {
         this.key
             .save()
             .then(() => {
-                      this.key.reset({member_id: this.props.params.member_id});
+                      this.key.reset({member_id: this.props.match.params.member_id});
                       this.collection.fetch();
                   });
     }
@@ -62,7 +62,7 @@ class MemberBoxKeys extends React.Component {
             {title: ""},
         ];
 
-        const {member_id} = this.props.params;
+        const {member_id} = this.props.match.params;
         const {saveEnabled} = this.state;
 
         return (

@@ -22,7 +22,7 @@ class GroupBoxPermissions extends React.Component {
 
     constructor(props) {
         super(props);
-        this.collection = new Collection({type: Permission, url: `/membership/group/${props.params.group_id}/permissions`, idListName: 'permissions', pageSize: 0});
+        this.collection = new Collection({type: Permission, url: `/membership/group/${props.match.params.group_id}/permissions`, idListName: 'permissions', pageSize: 0});
         this.state = {
             showOptions: [],
             selectedOption: null,

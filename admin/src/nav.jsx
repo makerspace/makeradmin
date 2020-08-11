@@ -1,6 +1,7 @@
 import React from 'react';
 import * as _ from "underscore";
-import {IndexLink, Link, withRouter} from 'react-router';
+import { withRouter, matchPath} from 'react-router';
+import {Link, NavLink} from 'react-router-dom';
 
 
 const NavItem = withRouter(props => {
@@ -8,10 +9,10 @@ const NavItem = withRouter(props => {
     const {target, text, icon} = item;
     
     return (
-        <li className={router.isActive(target) ? "uk-active" : null}>
-            <IndexLink activeClassName="uk-active" to={target}>
+        <li>
+            <NavLink activeClassName="uk-active" to={target}>
                 <i className={"uk-icon-" + icon}/>&nbsp;{text}
-            </IndexLink>
+            </NavLink>
         </li>
     );
 });
@@ -29,8 +30,8 @@ export const Nav = ({nav: {brand, items}}) => (
 );
 
 
-export const SideNav = withRouter(({router, nav}) => {
-    let activeItem = _.find(nav.items, i => router.isActive(i.target));
+export const SideNav = withRouter(({nav, location}) => {
+    let activeItem = _.find(nav.items, i => matchPath(location.pathname, i.target) != null);
     
     if (!activeItem || _.isUndefined(activeItem.children)) {
         return null;

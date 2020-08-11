@@ -2,7 +2,7 @@ import React from 'react';
 import auth from '../auth';
 import { withRouter } from 'react-router';
 import {showError, showSuccess} from "../message";
-import { Link } from 'react-router';
+import { Link } from 'react-router-dom';
 import * as _ from "underscore";
 
 class PasswordReset extends React.Component {

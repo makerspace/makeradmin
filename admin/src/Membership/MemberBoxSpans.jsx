@@ -1,5 +1,5 @@
 import React from 'react';
-import {Link} from "react-router";
+import { Link } from "react-router-dom";
 import Collection from "../Models/Collection";
 import Span from "../Models/Span";
 import {confirmModal} from "../message";
@@ -14,7 +14,7 @@ class MemberBoxSpans extends React.Component {
 
     constructor(props) {
         super(props);
-        this.collection = new Collection({type: Span, url: `/membership/member/${props.params.member_id}/spans`, pageSize: 0});
+        this.collection = new Collection({type: Span, url: `/membership/member/${props.match.params.member_id}/spans`, pageSize: 0});
         this.state = {items: []};
     }
 
@@ -34,7 +34,7 @@ class MemberBoxSpans extends React.Component {
         return (
             <div className="uk-margin-top">
                 <h2>Medlemsperioder</h2>
-                <MembershipPeriodsInput spans={this.collection} member_id={this.props.params.member_id}/>
+                <MembershipPeriodsInput spans={this.collection} member_id={this.props.match.params.member_id}/>
                 <h2>Spans</h2>
                 <CollectionTable
                     collection={this.collection}

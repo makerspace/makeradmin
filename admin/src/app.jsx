@@ -11,11 +11,24 @@ require('uikit/dist/js/components/upload');
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import {Router,	browserHistory} from 'react-router';
+import {Router} from 'react-router';
+import { Route, Switch } from 'react-router-dom';
+import { browserHistory } from './browser_history'
 import {Nav, SideNav} from './nav';
 import auth from './auth';
 import Login from './Components/Login';
 
+import RequestPasswordReset from "./Components/RequestPasswordReset"
+import PasswordReset from "./Components/PasswordReset"
+import Logout from "./Components/Logout"
+import Page404 from "./Components/404"
+import Dashboard from './Components/Dashboard';
+
+import Sales from "./Sales/Routes";
+import Membership from "./Membership/Routes";
+import Messages from "./Messages/Routes";
+import Statistics from "./Statistics/Routes";
+import Settings from "./Settings/Routes";
 
 const nav = {
     brand: "MakerAdmin 1.0",
@@ -140,20 +153,32 @@ class App extends React.Component {
     render() {
         if (this.state.isLoggedIn) {
             return (
-                <div style={{marginBottom: "2em"}}>
-                    <Nav nav={nav} />
-                    <div className="uk-container uk-container-center uk-margin-top">
-                        <div className="uk-grid">
-                            <div className="uk-width-medium-1-4">
-                                <SideNav nav={nav} />
-                            </div>
-
-                            <div className="uk-width-medium-3-4">
-                                {this.props.children}
+                <Router history={browserHistory}>
+                    <div style={{marginBottom: "2em"}}>
+                        <Nav nav={nav} />
+                        <div className="uk-container uk-container-center uk-margin-top">
+                            <div className="uk-grid">
+                                <div className="uk-width-medium-1-4">
+                                    <SideNav nav={nav} />
+                                </div>
+                                <div className="uk-width-medium-3-4">
+                                    <Switch>
+                                        <Route exact path="/" component={Dashboard} />
+                                        <Route path="/request-password-reset" component={RequestPasswordReset} />
+                                        <Route path="/password-reset" component={PasswordReset} />
+                                        <Route path="/logout" component={Logout} />
+                                        <Route path="/membership" component={Membership} />
+                                        <Route path="/sales" component={Sales} />
+                                        <Route path="/messages" component={Messages} />
+                                        <Route path="/statistics" component={Statistics} />
+                                        <Route path="/settings" component={Settings} />
+                                        <Route component={Page404} />
+                                    </Switch>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
+                </Router>
             );
         }
 
@@ -162,40 +187,4 @@ class App extends React.Component {
 }
 App.title = "MakerAdmin";
 
-const rootRoute = {
-    childRoutes: [
-        {
-            path: "/request-password-reset",
-            component: require("./Components/RequestPasswordReset").default,
-        },
-        {
-            path: "/password-reset",
-            component: require("./Components/PasswordReset").default,
-        },
-        {
-            path: "/",
-            component: App,
-            indexRoute: {
-                component: require("./Components/Dashboard").default,
-            },
-            childRoutes: [
-                {
-                    path: "logout",
-                    component: require("./Components/Logout").default,
-                },
-                require("./Membership/Routes"),
-                require("./Sales/Routes"),
-                require("./Messages/Routes"),
-                require("./Statistics/Routes"),
-                require("./Settings/Routes"),
-                {
-                    path: "*",
-                    component: require("./Components/404").default,
-                },
-            ]
-        }
-    ]
-};
-
-
-ReactDOM.render(<Router history={browserHistory} routes={rootRoute} />, document.getElementById("main"));
+ReactDOM.render(<App />, document.getElementById("main"));

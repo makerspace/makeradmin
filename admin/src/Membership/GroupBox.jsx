@@ -1,5 +1,6 @@
 import React from 'react';
-import {Link, withRouter} from 'react-router';
+import { Link } from "react-router-dom";
+import { withRouter} from 'react-router';
 import PropTypes from 'prop-types';
 import Group from "../Models/Group";
 
@@ -8,7 +9,7 @@ class GroupBox extends React.Component {
     
     constructor(props) {
         super(props);
-        const {group_id} = props.params;
+        const {group_id} = props.match.params;
         this.group = Group.get(group_id);
         this.state = {group_id, title: ""};
     }
@@ -27,7 +28,7 @@ class GroupBox extends React.Component {
     }
     
     render() {
-        const {group_id} = this.props.params;
+        const {group_id} = this.props.match.params;
         const {title} = this.state;
         
         return (

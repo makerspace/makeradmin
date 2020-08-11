@@ -2,7 +2,7 @@ import React from 'react';
 
 import MemberForm from '../Components/MemberForm';
 import Member from "../Models/Member";
-import {browserHistory} from 'react-router';
+import { browserHistory } from '../browser_history'
 
 
 class MemberAdd extends React.Component {

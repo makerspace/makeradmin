@@ -1,5 +1,5 @@
 import React from 'react';
-import {Link} from "react-router";
+import { Link } from "react-router-dom";
 import Order from "../Models/Order";
 import Collection from "../Models/Collection";
 import CollectionTable from "../Components/CollectionTable";
@@ -13,7 +13,7 @@ class OrderShow extends React.Component {
 
     constructor(props) {
         super(props);
-        const {id} = props.params;
+        const {id} = props.match.params;
         this.order = Order.get(id);
         this.state = {};
         this.orderRows = new Collection({type: OrderRow, url: `/webshop/transaction/${id}/contents`, pageSize: 0, expand: 'product'});
@@ -33,7 +33,7 @@ class OrderShow extends React.Component {
     
     render() {
         const {member_id} = this.state;
-        const {id} = this.props.params;
+        const {id} = this.props.match.params;
         
         return (
             <div>

@@ -8,7 +8,7 @@ class MessageShow extends React.Component {
     
     constructor(props) {
         super(props);
-        const {id} = props.params;
+        const {id} = props.match.params;
         this.message = Message.get(id);
         this.state = {message: {}};
     }
