@@ -1,4 +1,4 @@
-FROM node:8-alpine
+FROM node:14-alpine3.10
 
 RUN apk add --no-cache tzdata
 ENV TZ Europe/Stockholm
