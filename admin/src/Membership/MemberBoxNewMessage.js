@@ -3,6 +3,7 @@ import MessageForm from '../Components/MessageForm';
 import Message from "../Models/Message";
 import { notifySuccess } from "../message";
 import {withRouter} from "react-router";
+import { browserHistory } from '../browser_history';
 
 class MemberBoxMessages extends React.Component {
 
@@ -12,9 +13,9 @@ class MemberBoxMessages extends React.Component {
     }
     
     onSend() {
-        const {router, params} = this.props;
+        const params = this.props.match.params;
         this.message.save().then(() => {
-            router.push("/membership/members/" + params.member_id + "/messages");
+            browserHistory.push("/membership/members/" + params.member_id + "/messages");
             notifySuccess("Ditt meddelande har skickats");
         });
     }
