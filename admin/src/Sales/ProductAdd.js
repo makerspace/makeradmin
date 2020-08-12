@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { browserHistory } from '../browser_history'
+import { browserHistory } from '../browser_history';
 import Product from "../Models/Product";
 import ProductForm from "../Components/ProductForm";
 
