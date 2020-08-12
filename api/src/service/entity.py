@@ -6,7 +6,7 @@ from typing import Mapping, Dict, Callable, Type
 
 from flask import request
 from pytz import UTC
-from sqlalchemy import inspect, Integer, String, DateTime, Text, desc, asc, or_, text, Date, Enum as DbEnum, Numeric
+from sqlalchemy import inspect, Integer, String, DateTime, Text, desc, asc, or_, text, Date, Enum as DbEnum, Numeric, Boolean
 
 from service.api_definition import BAD_VALUE, REQUIRED, Arg, symbol, Enum, natural0, natural1
 from service.db import db_session
@@ -43,6 +43,7 @@ to_model_converters: Dict[Type, Callable] = {
     DateTime: to_model_wrap(datetime.fromisoformat),
     Date: to_model_wrap(date.fromisoformat),
     DbEnum: to_model_wrap(str),
+    Boolean: to_model_wrap(bool),
 }
 
 
@@ -58,6 +59,7 @@ to_obj_converters: Dict[Type, Callable] = {
     DateTime: lambda d: None if d is None else d.replace(tzinfo=UTC).isoformat(),
     Date: lambda d: None if d is None else d.isoformat(),
     DbEnum: identity,
+    Boolean: identity,
 }
 
 
