@@ -39,11 +39,17 @@ class QuizManager extends React.Component<{}, State> {
 
     async start() {
         this.setState({ state: "started" });
-        const data = await common.ajax("GET", `${window.apiBasePath}/quiz/next_question`);
-        if (data.data == null) {
-            this.setState({ state: "done" });
-        } else {
-            this.setState({ question: data.data, answer: null });
+        try {
+            const data = await common.ajax("GET", `${window.apiBasePath}/quiz/next_question`);
+            if (data.data == null) {
+                this.setState({ state: "done" });
+            } else {
+                this.setState({ question: data.data, answer: null });
+            }
+        } catch (data) {
+            if (data.status == "unauthorized") {
+                window.location.href = "/member";
+            }
         }
     }
 
