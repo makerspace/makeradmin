@@ -10,7 +10,7 @@ import { Route, Switch } from 'react-router-dom';
 export default ({ match }) => (
     <Switch>
         <Route path={`${match.path}/`} exact component={OrderList} />
-        <Route path={`${match.path}/order`} component={OrderList} />
+        <Route path={`${match.path}/order`} exact component={OrderList} />
         <Route path={`${match.path}/order/:id`} component={OrderShow} />
         <Route path={`${match.path}/product`} component={ProductList} />
         <Route path={`${match.path}/product/add`} component={ProductAdd} />
