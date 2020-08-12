@@ -17,6 +17,7 @@ module.exports = (env, args) => {
             history: "./ts/history.ts",
             member: "./ts/member.ts",
             statistics: "./ts/statistics.ts",
+            quiz: "./ts/quiz.tsx",
         },
         
         output:
@@ -28,7 +29,7 @@ module.exports = (env, args) => {
         module: {
             rules: [
                 {
-                    test: /\.(ts)$/,
+                    test: /\.(ts|tsx)$/,
                     exclude: /node_modules/,
                     use: ['ts-loader'],
                 },

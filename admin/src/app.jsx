@@ -29,6 +29,7 @@ import Membership from "./Membership/Routes";
 import Messages from "./Messages/Routes";
 import Statistics from "./Statistics/Routes";
 import Settings from "./Settings/Routes";
+import Quiz from "./Quiz/Routes";
 
 const nav = {
     brand: "MakerAdmin 1.0",
@@ -104,6 +105,18 @@ const nav = {
             ],
         },
         {
+            text: "Quiz",
+            target: "/quiz",
+            icon: "commenting",
+            children:
+                [
+                    {
+                        text: "Frågor",
+                        target: "/quiz/question",
+                    },
+                ],
+        },
+        {
             text: "Statistik",
             target: "/statistics",
             icon: "area-chart",
@@ -151,9 +164,9 @@ class App extends React.Component {
     }
 
     render() {
-        if (this.state.isLoggedIn) {
-            return (
-                <Router history={browserHistory}>
+        return (
+            <Router history={browserHistory}>
+                { this.state.isLoggedIn && (
                     <div style={{marginBottom: "2em"}}>
                         <Nav nav={nav} />
                         <div className="uk-container uk-container-center uk-margin-top">
@@ -172,17 +185,17 @@ class App extends React.Component {
                                         <Route path="/messages" component={Messages} />
                                         <Route path="/statistics" component={Statistics} />
                                         <Route path="/settings" component={Settings} />
+                                        <Route path="/quiz" component={Quiz} />
                                         <Route component={Page404} />
                                     </Switch>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </Router>
-            );
-        }
-
-        return <Login/>;
+                )}
+                { !this.state.isLoggedIn && <Login /> }
+            </Router>
+        );
     }
 }
 App.title = "MakerAdmin";

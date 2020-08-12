@@ -31,6 +31,7 @@
     "@types/react-dom": "^16.8.6",
     "@types/react-router": "^5.1.8",
     "@types/react-router-dom": "^5.1.5",
+    "@types/underscore": "^1.10.2",
     "babel-core": "^7.0.0-0",
     "babel-eslint": "^8.2.6",
     "babel-jest": "^25.5.1",

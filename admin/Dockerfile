@@ -6,7 +6,7 @@ ENV TZ Europe/Stockholm
 RUN mkdir -p /work/src && mkdir -p /work/dist/js
 
 # Copy package file first, to avoid having to install dependencies every time a source file is updated
-COPY ./webpack.config.js ./package.json ./package-lock.json /work/
+COPY ./webpack.config.js ./tsconfig.json ./package.json ./package-lock.json /work/
 
 WORKDIR /work
 
@@ -20,6 +20,7 @@ RUN npm run eslint
 RUN npm run test
 
 RUN npm run build
+RUN echo tsc --version
 
 FROM nginx:alpine
 

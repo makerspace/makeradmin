@@ -7,6 +7,7 @@ import messages
 import multiaccess
 import shop
 import statistics
+import quiz
 
 Instance = namedtuple("Instance", "path,service")
 
@@ -18,5 +19,6 @@ services = (
     Instance(path='/member', service=member.service),
     Instance(path='/messages', service=messages.service),
     Instance(path='/statistics', service=statistics.service),
-    Instance(path='/multiaccess', service=multiaccess.service)
+    Instance(path='/multiaccess', service=multiaccess.service),
+    Instance(path='/quiz', service=quiz.service),
 )

@@ -1,0 +1,20 @@
+{% from "sidebar.html" import sidebar with context %}
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Quiz - Stockholm Makerspace</title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="{{ STATIC }}/uikit/css/uikit.min.css" />
+        <link rel="stylesheet" href="{{ STATIC }}/style.css" />
+        <script src='{{ STATIC }}/uikit/js/uikit.min.js'></script>
+        <script src='{{ STATIC }}/uikit/js/uikit-icons.min.js'></script>
+        <script src="https://js.stripe.com/v3/"></script>
+        {% include 'meta.html' %}
+        <script src='{{ STATIC }}/js/quiz.js'></script>
+    </head>
+    <body>
+        <div id="root">
+        </div>
+    </body>
+</html>

@@ -8,9 +8,7 @@
         "esModuleInterop": true,
         "sourceMap": true,
         "moduleResolution": "node",
-        "jsx": "react"
+        "jsx": "react",
+        "allowJs": true,
     },
-    "include": [
-        "*.ts", "quiz.tsx"
-    ]
 }

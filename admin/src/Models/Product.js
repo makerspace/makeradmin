@@ -28,7 +28,7 @@ export default class Product extends Base {
     }
     
     deleteConfirmMessage() {
-        return `Are you sure you want to product ${this.name}?`;
+        return `Are you sure you want to delete product ${this.name}?`;
     }
     
     del() {

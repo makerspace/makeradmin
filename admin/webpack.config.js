@@ -34,6 +34,11 @@ module.exports = (env, args) => {
         module: {
             rules: [
                 {
+                    test: /\.tsx?$/,
+                    use: 'ts-loader',
+                    exclude: /node_modules/,
+                },
+                {
                     test: /\.(js|jsx)$/,
                     exclude: /node_modules/,
                     use: ['babel-loader'],
@@ -60,7 +65,7 @@ module.exports = (env, args) => {
     
         // Files to include.
         resolve: {
-            extensions: ['*', '.js', '.jsx']
+            extensions: ['*', '.js', '.jsx', '.ts', '.tsx']
         },
     
         // Include build information (build date, git hash)

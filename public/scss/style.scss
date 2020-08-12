@@ -6,6 +6,7 @@ $primary-color: #333;
 // Breakpoint between mobile and desktop layout
 $break-small: 480px;
 $break-medium: 600px;
+$makerspace-orange: #FF8B37;
 
 html, body {
 	height: 100%;
@@ -1087,4 +1088,176 @@ input:invalid {
 
 .statistics-member-stats-value {
 	display: inline-block;
+}
+
+$palette1: #5C2849;
+$palette2: #A73E5C;
+$palette3: #EC4863;
+$palette4: #FF733F;
+$palette5: #A8C545;
+$palette-green: $palette5;
+$palette-red: $palette4;
+
+.quiz-background {
+	width: 100%;
+	min-height: 100%;
+	background-color: $palette1;
+}
+
+#content.quizpage {
+	margin-top: 40px;
+	background-color: white;
+	box-shadow: 0px 0px 3px 0px rgba(0,0,0,0.2);
+	border-radius: 10px;
+	padding: 50px;
+	justify-content: start;
+	flex-direction: column;
+
+	&.quiz-complete {
+		background-color: $palette5;
+		color: white;
+		justify-content: center;
+		text-align: center;
+
+		h2 {
+			font-family: 'Bitter';
+			color: white;
+		}
+	}
+
+
+	h1 {
+		font-family: 'Bitter', serif;
+		margin-top: 0px;
+		padding-top: 0px;
+		font-size: 30pt;
+		text-align: center;
+	}
+
+	.question-text {
+		font-style: italic;
+	}
+
+	p {
+		margin-bottom: 5px;
+	}
+
+	.quiz-button-start {
+		align-self: center;
+		width: 200px;
+	}
+
+	ul {
+		margin-top: 8px;
+		margin-bottom: 8px;
+		padding: 0px;
+	}
+
+	li {
+		padding: 8px;
+		list-style: none;
+		border-radius: 5px;
+		border: 1px solid $palette2;
+		padding-left: 10px;
+		// transition: 200ms background-color;
+		transition: 200ms box-shadow;
+		color: black;
+		box-shadow: 0px 0px 3px 0px rgba(0,0,0,0.2);
+		margin: 12px;
+		cursor: pointer;
+
+		&:hover {
+			// background-color: #37d;
+			// color: white;
+			box-shadow: 0px 3px 8px 0px rgba(0,0,0,0.2);
+		}
+	}
+
+	.question-answer-info {
+		// padding: 8px;
+		// border-radius: 5px;
+		// color: white;
+		margin: 12px;
+		// box-shadow: 0px 0px 3px 0px rgba(0,0,0,0.2);
+	}
+
+	.question-answer-info-incorrect {
+		// border: 1px solid darken($palette-red, 0.1);
+		// background: $palette-red;
+		color: $palette-red;
+	}
+
+	.question-answer-info-correct {
+		// border: 1px solid darken($palette-green, 0.1);
+		// background: $palette-green;
+		color: $palette-green;
+		
+	}
+
+	.question-answer-description {
+		margin: 5px;
+		margin-bottom: 15px;
+		font-style: italic;
+	}
+
+	.question-option-correct {
+		color: white;
+		border: 1px solid darken($palette-green, 0.1);
+		background: $palette-green;
+	}
+
+	.question-option-incorrect:not(.question-option-selected) {
+		opacity: 0.5;
+	}
+
+	.question-option-selected.question-option-correct {
+		color: white;
+		border: 1px solid darken($palette-green, 0.1);
+		background: $palette-green;
+	}
+
+	.question-option-selected.question-option-incorrect {
+		color: white;
+		border: 1px solid darken($palette-red, 0.1);
+		background: $palette-red;
+	}
+
+	.uk-button-primary {
+		margin-top: 20px;
+		background-color: $palette2;
+		box-shadow: 0px 0px 3px 0px rgba(0,0,0,0.2);
+		transition: 200ms box-shadow;
+
+		&:hover {
+			box-shadow: 0px 3px 8px 0px rgba(0,0,0,0.2);
+		}
+	}
+
+	@media screen and (max-width: 900px) {
+		margin: 0px;
+		border-radius: 0px;
+		background-color: $palette1;
+		color: white;
+
+		h1 {
+			font-size: 20pt;
+			color: white;
+		}
+
+		.question-answer-info {
+			text-shadow: 0px 0px 3px rgba(0,0,0,0.3);
+		}
+
+		li {
+			background-color: $palette2;
+			color: white;
+			border: 1px solid rgba(0,0,0,0);
+
+			// Stronger shadows
+			box-shadow: 0px 0px 3px 0px rgba(0,0,0,0.3);
+			&:hover {
+				box-shadow: 0px 3px 8px 0px rgba(0,0,0,0.3);
+			}
+		}
+	}
 }

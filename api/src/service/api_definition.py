@@ -39,6 +39,7 @@ MESSAGE_VIEW = "message_view"
 WEBSHOP = 'webshop'
 WEBSHOP_EDIT = 'webshop_edit'
 WEBSHOP_ADMIN = 'webshop_admin'
+QUIZ_EDIT = 'quiz_edit'
 MEMBERBOOTH = 'memberbooth'
 
 ALL_PERMISSIONS = [
@@ -50,6 +51,7 @@ ALL_PERMISSIONS = [
     MESSAGE_SEND, MESSAGE_VIEW,
     WEBSHOP, WEBSHOP_EDIT, WEBSHOP_ADMIN,
     MEMBERBOOTH,
+    QUIZ_EDIT,
 ]
 
 #

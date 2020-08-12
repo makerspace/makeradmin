@@ -87,6 +87,10 @@ def login(token):
     return render_template("login.html", token=token)
 
 
+@member.route("/quiz/")
+def quiz_main():
+    return render_template("quiz/quiz.html")
+
 static_hash = os.environ["STATIC_PREFIX_HASH"]
 app = Flask(__name__, static_url_path=f"/static{static_hash}", static_folder="../static")
 sys.stderr.write("STATIC URL PATH" + app.static_url_path + "\n")

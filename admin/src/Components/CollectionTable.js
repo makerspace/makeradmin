@@ -78,7 +78,7 @@ export default class CollectionTable extends React.Component {
         
         let rows = null;
         if (items !== null) {
-            rows = items.map((item, i) => React.createElement(rowComponent, {item, deleteItem: () => this.deleteItem(collection, item), key: i}));
+            rows = items.map((item, i) => <React.Fragment key={i}>{ rowComponent({item, deleteItem: () => this.deleteItem(collection, item)}) }</React.Fragment>);
             if (!rows.length && emptyMessage) {
                 rows = <tr><td colSpan={columns.length} className='uk-text-center'><em>{emptyMessage}</em></td></tr>;
             }

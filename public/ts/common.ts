@@ -36,7 +36,7 @@ export function get_error(json: any) {
 	return json.status;
 }
 
-export function ajax(type: string, url: string, data: object): Promise<any> {
+export function ajax(type: string, url: string, data: object|null = null): Promise<any> {
 	return new Promise((resolve, reject) => {
 		var xhr = new XMLHttpRequest();
 		xhr.open(type, url);
