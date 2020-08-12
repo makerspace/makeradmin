@@ -11,17 +11,17 @@ require('uikit/dist/js/components/upload');
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import {Router} from 'react-router';
+import { Router } from 'react-router';
 import { Route, Switch } from 'react-router-dom';
-import { browserHistory } from './browser_history'
-import {Nav, SideNav} from './nav';
+import { browserHistory } from './browser_history';
+import { Nav, SideNav } from './nav';
 import auth from './auth';
 import Login from './Components/Login';
 
-import RequestPasswordReset from "./Components/RequestPasswordReset"
-import PasswordReset from "./Components/PasswordReset"
-import Logout from "./Components/Logout"
-import Page404 from "./Components/404"
+import RequestPasswordReset from "./Components/RequestPasswordReset";
+import PasswordReset from "./Components/PasswordReset";
+import Logout from "./Components/Logout";
+import Page404 from "./Components/404";
 import Dashboard from './Components/Dashboard';
 
 import Sales from "./Sales/Routes";
@@ -151,23 +151,23 @@ const nav = {
 
 
 class App extends React.Component {
-    
+
     constructor(props) {
         super(props);
         this.state = {
             isLoggedIn: auth.isLoggedIn()
         };
     }
-    
+
     componentDidMount() {
-        auth.onChange = isLoggedIn => this.setState({isLoggedIn});
+        auth.onChange = isLoggedIn => this.setState({ isLoggedIn });
     }
 
     render() {
         return (
             <Router history={browserHistory}>
-                { this.state.isLoggedIn && (
-                    <div style={{marginBottom: "2em"}}>
+                {this.state.isLoggedIn && (
+                    <div style={{ marginBottom: "2em" }}>
                         <Nav nav={nav} />
                         <div className="uk-container uk-container-center uk-margin-top">
                             <div className="uk-grid">
@@ -193,7 +193,7 @@ class App extends React.Component {
                         </div>
                     </div>
                 )}
-                { !this.state.isLoggedIn && <Login /> }
+                {!this.state.isLoggedIn && <Login />}
             </Router>
         );
     }

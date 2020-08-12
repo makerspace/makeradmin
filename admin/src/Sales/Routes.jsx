@@ -7,7 +7,7 @@ import ProductEdit from "./ProductEdit";
 import CategoryList from "./CategoryList";
 import { Route, Switch } from 'react-router-dom';
 
-export default ({match}) => (
+export default ({ match }) => (
     <Switch>
         <Route path={`${match.path}/`} exact component={OrderList} />
         <Route path={`${match.path}/order`} component={OrderList} />
@@ -17,4 +17,4 @@ export default ({match}) => (
         <Route path={`${match.path}/product/:id`} component={ProductEdit} />
         <Route path={`${match.path}/category`} component={CategoryList} />
     </Switch>
-)
+);

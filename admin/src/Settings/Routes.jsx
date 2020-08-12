@@ -11,4 +11,4 @@ export default ({ match }) => (
         <Route path={`${match.path}/tokens`} component={AccessTokenList} />
         <Route path={`${match.path}/service_tokens`} component={ServiceTokenList} />
     </Switch>
-)
+);

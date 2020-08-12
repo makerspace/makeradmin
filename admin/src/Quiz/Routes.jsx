@@ -12,5 +12,5 @@ export default ({ match }) => {
             <Route path={`${match.path}/question/add`} component={QuestionAdd} />
             <Route path={`${match.path}/question/:id`} component={QuestionShow} />
         </Switch>
-    )
-}
+    );
+};

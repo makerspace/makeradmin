@@ -1,7 +1,7 @@
 import React from 'react';
 
 import GroupForm from '../Components/GroupForm';
-import { browserHistory } from '../browser_history'
+import { browserHistory } from '../browser_history';
 import Group from "../Models/Group";
 
 

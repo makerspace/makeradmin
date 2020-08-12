@@ -1,38 +1,39 @@
 import React from 'react';
-import MemberList from "./MemberList"
-import GroupAdd from "./GroupAdd"
-import GroupBox from "./GroupBox"
-import GroupBoxEditInfo from "./GroupBoxEditInfo"
-import GroupBoxMembers from "./GroupBoxMembers"
-import GroupBoxPermissions from "./GroupBoxPermissions"
-import GroupList from "./GroupList"
-import KeyEdit from "./KeyEdit"
-import KeyList from "./KeyList"
-import MemberAdd from "./MemberAdd"
-import MemberBox from "./MemberBox"
-import MemberBoxGroups from "./MemberBoxGroups"
-import MemberBoxKeys from "./MemberBoxKeys"
-import MemberBoxMemberData from "./MemberBoxMemberData"
-import MemberBoxMessages from "./MemberBoxMessages"
-import MemberBoxNewMessage from "./MemberBoxNewMessage"
-import MemberBoxOrders from "./MemberBoxOrders"
-import MemberBoxPermissions from "./MemberBoxPermissions"
-import MemberBoxSpans from "./MemberBoxSpans"
-import MemberExport from "./MemberExport"
-import SpanList from "./SpanList"
-import SpanShow from "./SpanShow"
+import MemberList from "./MemberList";
+import GroupAdd from "./GroupAdd";
+import GroupBox from "./GroupBox";
+import GroupBoxEditInfo from "./GroupBoxEditInfo";
+import GroupBoxMembers from "./GroupBoxMembers";
+import GroupBoxPermissions from "./GroupBoxPermissions";
+import GroupList from "./GroupList";
+import KeyEdit from "./KeyEdit";
+import KeyList from "./KeyList";
+import MemberAdd from "./MemberAdd";
+import MemberBox from "./MemberBox";
+import MemberBoxGroups from "./MemberBoxGroups";
+import MemberBoxKeys from "./MemberBoxKeys";
+import MemberBoxMemberData from "./MemberBoxMemberData";
+import MemberBoxMessages from "./MemberBoxMessages";
+import MemberBoxNewMessage from "./MemberBoxNewMessage";
+import MemberBoxOrders from "./MemberBoxOrders";
+import MemberBoxPermissions from "./MemberBoxPermissions";
+import MemberBoxSpans from "./MemberBoxSpans";
+import MemberExport from "./MemberExport";
+import SpanList from "./SpanList";
+import SpanShow from "./SpanShow";
 
 import { Route, Switch } from 'react-router-dom';
 
 const Group = ({ match: { path } }) => (
     <GroupBox>
         <Switch>
+            <Route exact path={`${path}/`} component={GroupBoxEditInfo} />
+            <Route path={`${path}/info`} component={GroupBoxEditInfo} />
             <Route path={`${path}/members`} component={GroupBoxMembers} />
             <Route path={`${path}/permissions`} component={GroupBoxPermissions} />
-            <Route path={`${path}/(info)?`} component={GroupBoxEditInfo} />
         </Switch>
     </GroupBox>
-)
+);
 
 const Groups = ({ match: { path } }) => (
     <Switch>
@@ -40,11 +41,13 @@ const Groups = ({ match: { path } }) => (
         <Route path={`${path}/add`} component={GroupAdd} />
         <Route path={`${path}/:group_id`} component={Group} />
     </Switch>
-)
-                
+);
+
 const Member = ({ match: { path } }) => (
     <MemberBox>
         <Switch>
+            <Route exact path={`${path}/`} component={MemberBoxMemberData} />
+            <Route path={`${path}/member-data`} component={MemberBoxMemberData} />
             <Route path={`${path}/groups`} component={MemberBoxGroups} />
             <Route path={`${path}/keys`} component={MemberBoxKeys} />
             <Route path={`${path}/permissions`} component={MemberBoxPermissions} />
@@ -52,10 +55,9 @@ const Member = ({ match: { path } }) => (
             <Route path={`${path}/messages/new`} component={MemberBoxNewMessage} />
             <Route path={`${path}/messages`} component={MemberBoxMessages} />
             <Route path={`${path}/spans`} component={MemberBoxSpans} />
-            <Route path={`${path}/(member-data)?`} component={MemberBoxMemberData} />
         </Switch>
     </MemberBox>
-)
+);
 
 const Members = ({ match: { path } }) => (
     <Switch>
@@ -63,21 +65,21 @@ const Members = ({ match: { path } }) => (
         <Route path={`${path}/add`} component={MemberAdd} />
         <Route path={`${path}/:member_id`} component={Member} />
     </Switch>
-)
+);
 
 const Keys = ({ match: { path } }) => (
     <Switch>
         <Route exact path={path} component={KeyList} />
         <Route path={`${path}/:key_id`} component={KeyEdit} />
     </Switch>
-)
+);
 
 const Spans = ({ match: { path } }) => (
     <Switch>
         <Route exact path={path} component={SpanList} />
         <Route path={`${path}/:span_id`} component={SpanShow} />
     </Switch>
-)
+);
 
 export default ({ match }) => (
     <Switch>
@@ -88,4 +90,4 @@ export default ({ match }) => (
         <Route path={`${match.path}/spans`} component={Spans} />
         <Route path={`${match.path}/export`} component={MemberExport} />
     </Switch>
-)
+);
