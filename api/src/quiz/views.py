@@ -66,6 +66,7 @@ def next_question(include_correct=False):
     # Find all questions that the user has correctly answered
     correct_questions = db_session.query(QuizQuestion.id) \
         .join(QuizQuestion.answers) \
+        .filter(QuizAnswer.member_id == g.user_id) \
         .filter((QuizAnswer.correct) & (QuizAnswer.deleted_at == None))
     
     # Find questions which the user has not yet answered correctly
