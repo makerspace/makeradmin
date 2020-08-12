@@ -70,7 +70,7 @@ class QuizManager extends React.Component<{}, State> {
                     will repeat until you have answered all of them correctly and are thus familiar with the basics of how things work at Stockholm Makerspace.
                     Completing this quiz is however a mandatory part of being a member. You will receive nagging emails every few days or so until you complete the quiz.
                     </p>
-                    <p>The quiz will save your progress automatically so you close this window and return here at any time to continue with the quiz.</p>
+                    <p>The quiz will save your progress automatically so you can close this window and return here at any time to continue with the quiz.</p>
                     <p>Alright, are you ready to get started?</p>
                     <a className="uk-button uk-button-primary quiz-button-start" onClick={()=>this.start()}>Start!</a>
                 </div>
