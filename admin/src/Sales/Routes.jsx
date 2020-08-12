@@ -12,9 +12,9 @@ export default ({ match }) => (
         <Route path={`${match.path}/`} exact component={OrderList} />
         <Route path={`${match.path}/order`} exact component={OrderList} />
         <Route path={`${match.path}/order/:id`} component={OrderShow} />
-        <Route path={`${match.path}/product`} component={ProductList} />
+        <Route path={`${match.path}/product`} exact component={ProductList} />
         <Route path={`${match.path}/product/add`} component={ProductAdd} />
         <Route path={`${match.path}/product/:id`} component={ProductEdit} />
-        <Route path={`${match.path}/category`} component={CategoryList} />
+        <Route path={`${match.path}/category`} exact component={CategoryList} />
     </Switch>
 );
