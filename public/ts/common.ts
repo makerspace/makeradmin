@@ -73,7 +73,7 @@ export function documentLoaded() {
     });
 }
 
-export function refreshLoggedIn(callback: (loggedIn: boolean, permissions: string[]) => void) {
+export function refreshLoggedIn(callback: (loggedIn: boolean, permissions: string[]|null) => void) {
 	const apiBasePath = window.apiBasePath;
 	ajax("GET", apiBasePath + "/member/current/permissions", null)
 		.then(json => {

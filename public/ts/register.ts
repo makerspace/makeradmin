@@ -14,7 +14,7 @@ common.onGetAndDocumentLoaded("/webshop/register_page_data", (value: any) => {
 
     // Add membership products
     membershipProducts.forEach((product: any) => {
-        document.querySelector("#products").innerHTML += `<div><input class="uk-radio" type="radio" value="${product.id}" name="product" checked/> ${product.name}: ${product.price} kr</div>`;
+        document.querySelector("#products")!.innerHTML += `<div><input class="uk-radio" type="radio" value="${product.id}" name="product" checked/> ${product.name}: ${product.price} kr</div>`;
     });
 
     // Add an instance of the card Element into the `card-element` <div>.
@@ -42,7 +42,7 @@ common.onGetAndDocumentLoaded("/webshop/register_page_data", (value: any) => {
         }]);
 
         const totalSum = cart.sum(id2item);
-        document.querySelector("#pay-button").querySelector("span").innerHTML = "Betala " + Cart.formatCurrency(totalSum);
+        document.querySelector("#pay-button")!.querySelector("span")!.innerHTML = "Betala " + Cart.formatCurrency(totalSum);
     }
 
     [].forEach.call(document.querySelectorAll(".uk-radio"), (el: HTMLElement) => {
@@ -54,16 +54,16 @@ common.onGetAndDocumentLoaded("/webshop/register_page_data", (value: any) => {
         });
     });
 
-    const payment_button: HTMLButtonElement = document.querySelector("#pay-button");
+    const payment_button = document.querySelector<HTMLButtonElement>("#pay-button")!;
     const validate_fields: Array<string> = ['firstname', 'lastname', 'email', 'address_zipcode'];
 
     function checkInputField(field: string): boolean {
-        const el: HTMLInputElement = document.querySelector("#" + field);
+        const el = document.querySelector<HTMLInputElement>("#" + field)!;
         return el.checkValidity();
     }
 
     function isInputInvalid(): boolean {
-        return validate_fields.reduce((acc, field) => acc || !checkInputField(field), false);
+        return validate_fields.reduce<boolean>((acc, field) => acc || !checkInputField(field), false);
     }
 
     function updatePaymentButton() {
@@ -71,7 +71,7 @@ common.onGetAndDocumentLoaded("/webshop/register_page_data", (value: any) => {
     }
 
     validate_fields.forEach(field => {
-        const el: HTMLElement = document.querySelector("#" + field);
+        const el = document.querySelector<HTMLElement>("#" + field)!;
         el.addEventListener("change", ev => {
             updatePaymentButton();
         });
@@ -122,7 +122,7 @@ common.onGetAndDocumentLoaded("/webshop/register_page_data", (value: any) => {
 	};
     const payment_config = pay_config();
 
-    document.querySelector("#pay-button").addEventListener("click", ev => {
+    document.querySelector("#pay-button")!.addEventListener("click", ev => {
         ev.preventDefault();
         pay(payment_config);
     });

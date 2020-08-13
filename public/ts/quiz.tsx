@@ -28,7 +28,7 @@ interface State {
 }
 
 class QuizManager extends React.Component<{}, State> {
-    page: HTMLDivElement = document.querySelector(".quizpage");
+    page: HTMLDivElement = document.querySelector<HTMLDivElement>(".quizpage")!;
 
     constructor(props: any) {
         super(props);
@@ -146,7 +146,7 @@ class QuizManager extends React.Component<{}, State> {
                                 <div className="question-answer-description">
                                     {
                                         // Split description into paragraphs. Ensure that trailing whitespace on any line doesn't matter.
-                                        this.state.question.answer_description.split("\n").map(x => x.trim()).join("\n").split("\n\n").map(x => <p>{x}</p>)
+                                        this.state.question.answer_description!.split("\n").map(x => x.trim()).join("\n").split("\n\n").map(x => <p>{x}</p>)
                                     }
                                 </div>
                                 <a className="uk-button uk-button-primary question-submit" onClick={() => this.start()}>Next Question</a>
@@ -160,12 +160,12 @@ class QuizManager extends React.Component<{}, State> {
     }
 
     async select(option_id: number) {
-        if (this.state.answerInProgress || this.state.answer !== null) return;
+        if (this.state.answerInProgress || this.state.answer !== null || this.state.question === null) return;
 
         this.setState({ answerInProgress: true });
         const data = await common.ajax("POST", `${window.apiBasePath}/quiz/question/${this.state.question.id}/answer`, { option_id });
         const fullQuestion = data.data as Question;
-        const correct = fullQuestion.options.find(x => x.id == option_id).correct;
+        const correct = fullQuestion.options.find(x => x.id == option_id)!.correct!;
         this.setState({ question: fullQuestion, answer: { selected: option_id, correct }, answerInProgress: false });
     }
 

@@ -7,19 +7,19 @@ common.onGetAndDocumentLoaded("/webshop/product_data/" + window.productId, (valu
 
     const {product, images, productData} = value;
 
-    document.getElementById("name").innerText = product.name;
+    document.getElementById("name")!.innerText = product.name;
 
     const productPrice = product.price * product.smallest_multiple;
     const productUnit = product.smallest_multiple === 1 ? product.unit : `${product.smallest_multiple}${product.unit}`;
-    document.getElementById("price").innerText = `${productPrice} kr/${productUnit}`;
+    document.getElementById("price")!.innerText = `${productPrice} kr/${productUnit}`;
 
-    document.getElementById("smallest-multiple").setAttribute("step", product.smallest_multiple);
+    document.getElementById("smallest-multiple")!.setAttribute("step", product.smallest_multiple);
 
-    document.getElementById("unit").innerText = product.unit;
+    document.getElementById("unit")!.innerText = product.unit;
 
-    document.getElementById("description").innerHTML = product.description;
+    document.getElementById("description")!.innerHTML = product.description;
 
-    const imagesDiv = document.getElementById("images");
+    const imagesDiv = document.getElementById("images")!;
     images.forEach((image: any) => {
         imagesDiv.innerHTML +=
             `<a class="product-image uk-inline" href='/static/product_images/${image.path}' data-caption="${image.caption}">
@@ -39,9 +39,9 @@ common.onGetAndDocumentLoaded("/webshop/product_data/" + window.productId, (valu
 
 	function updateCartSum(cart: Cart) {
 		if (cart.items.length > 0) {
-			document.querySelector("#cart-sum").textContent = " (" + Cart.formatCurrency(cart.sum(id2item)) + ")";
+			document.querySelector("#cart-sum")!.textContent = " (" + Cart.formatCurrency(cart.sum(id2item)) + ")";
 		} else {
-			document.querySelector("#cart-sum").textContent = "";
+			document.querySelector("#cart-sum")!.textContent = "";
 		}
 	}
 
@@ -64,12 +64,12 @@ common.onGetAndDocumentLoaded("/webshop/product_data/" + window.productId, (valu
 	productAmount.addEventListener("input", ev => setCartItem(false));
 	productAmount.addEventListener("change", ev => setCartItem(true));
 
-	document.querySelector(".number-add").addEventListener("click", ev => {
+	document.querySelector(".number-add")!.addEventListener("click", ev => {
 		productAmount.value = "" + (Number(productAmount.value) + product.smallest_multiple);
 		setCartItem(true);
 	});
 
-	document.querySelector(".number-subtract").addEventListener("click", ev => {
+	document.querySelector(".number-subtract")!.addEventListener("click", ev => {
 		productAmount.value = "" + (Number(productAmount.value) - product.smallest_multiple);
 		setCartItem(true);
 	});

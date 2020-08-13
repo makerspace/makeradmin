@@ -9,7 +9,7 @@ function showError(message: string) {
     UIkit.notification(message, {timeout: 0, status: "danger"});
 }
 
-function login_via_single_use_link(tag: string, redirect: string) {
+function login_via_single_use_link(tag: string, redirect: string|null) {
 	const apiBasePath = window.apiBasePath;
 
     const data: any = {user_identification: tag};
@@ -39,7 +39,7 @@ function login_via_single_use_link(tag: string, redirect: string) {
     );
 }
 
-export function render_login(root: HTMLElement, heading: string, redirect: string) {
+export function render_login(root: HTMLElement, heading: string|null, redirect: string|null) {
     heading = heading || "Logga in";
 	root.innerHTML = `
             <div class="uk-width-medium">

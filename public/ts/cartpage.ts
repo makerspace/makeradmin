@@ -27,10 +27,10 @@ common.onGetAndDocumentLoaded("/webshop/product_data", (productData: any) => {
 
 	function createElements(cart: Cart) {
 		common.updateCartSum(cart, id2item);
-		document.querySelector("#cart").innerHTML = "";
+		document.querySelector("#cart")!.innerHTML = "";
 
 		if (cart.items.length == 0) {
-			document.querySelector("#cart").innerHTML = "<p class='empty-cart-text'>Du har inga produkter i varukorgen.</p>";
+			document.querySelector("#cart")!.innerHTML = "<p class='empty-cart-text'>Du har inga produkter i varukorgen.</p>";
 			(<HTMLButtonElement>document.querySelector("#pay-button")).disabled = true;
 			return;
 		}
@@ -60,7 +60,7 @@ common.onGetAndDocumentLoaded("/webshop/product_data", (productData: any) => {
 			id2item.set(item.id, item);
 
 			// Handle deleting products
-			li.querySelector(".product-delete").addEventListener("click", ev => {
+			li.querySelector(".product-delete")!.addEventListener("click", ev => {
 				ev.preventDefault();
 				setCartItem(item.id, 0);
 				li.remove();
@@ -84,7 +84,7 @@ common.onGetAndDocumentLoaded("/webshop/product_data", (productData: any) => {
 			};
 
 			productAmount.value = "" + cartItem.count;
-			document.querySelector("#cart").appendChild(li);
+			document.querySelector("#cart")!.appendChild(li);
 		}
 	}
 
@@ -133,8 +133,8 @@ common.onGetAndDocumentLoaded("/webshop/product_data", (productData: any) => {
 	}
 
 	function setLoggedIn(loggedIn: boolean) {
-		document.querySelector("#pay-login").classList.toggle("active", !loggedIn);
-		document.querySelector("#pay").classList.toggle("active", loggedIn);
+		document.querySelector("#pay-login")!.classList.toggle("active", !loggedIn);
+		document.querySelector("#pay")!.classList.toggle("active", loggedIn);
 	}
 
 	common.refreshLoggedIn((loggedIn, permissions) => {
@@ -144,12 +144,12 @@ common.onGetAndDocumentLoaded("/webshop/product_data", (productData: any) => {
 	Cart.startLocalStorageSync(createElements);
 	createElements(Cart.fromStorage());
 
-	document.querySelector("#pay-button").addEventListener("click", ev => {
+	document.querySelector("#pay-button")!.addEventListener("click", ev => {
 		ev.preventDefault();
 		pay(payment_config);
 	});
 
-	document.querySelector("#pay-login form").addEventListener("submit", ev => {
+	document.querySelector("#pay-login form")!.addEventListener("submit", ev => {
 		ev.preventDefault();
 		login();
 	});

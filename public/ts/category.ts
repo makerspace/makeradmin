@@ -1,5 +1,5 @@
 export function renderSidebarCategories(productData: any, is_shop_page: boolean = false) {
-  const categoriesUl = document.getElementById("categories");
+  const categoriesUl = document.getElementById("categories")!;
   const fixedLi = categoriesUl.firstChild;
   productData.forEach((category: any) => {
     const li = document.createElement("li");

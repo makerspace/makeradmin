@@ -36,27 +36,28 @@ common.onGetAndDocumentLoaded("/webshop/product_data", (productData: any) => {
     for (let i = 0; i < els.length; i++) {
       els[i].classList.toggle("active", editMode);
     }
-    document.querySelector("#edit").classList.toggle("edit-mode", editMode);
-    document.querySelector("#edit").setAttribute("uk-icon", editMode ? "close" : "pencil");
+    document.querySelector("#edit")!.classList.toggle("edit-mode", editMode);
+    document.querySelector("#edit")!.setAttribute("uk-icon", editMode ? "close" : "pencil");
   }
 
   function showEditButton() {
-    document.querySelector("#edit").classList.toggle("active", true);
+    document.querySelector("#edit")!.classList.toggle("active", true);
   }
 
-  document.querySelector("#edit").addEventListener("click", ev => {
+  document.querySelector("#edit")!.addEventListener("click", ev => {
     setEditMode(!editMode);
   });
 
   const layoutModes: Set<string> = new Set<string>(["layout-grid", "layout-list", "layout-table"]);
-  function setLayoutMode(mode: string){
-    localStorage.setItem("webshop-layout-mode", mode);
-    if (!layoutModes.has(mode)) {
+  function setLayoutMode(mode: string|null){
+    if (mode == null || !layoutModes.has(mode)) {
       mode = "layout-grid";
     }
+    localStorage.setItem("webshop-layout-mode", mode);
+
     layoutModes.forEach(element => {
-      document.querySelector(".product-list").classList.toggle(element, element === mode);
-      document.querySelector("#"+element).classList.toggle("selected", element === mode);
+      document.querySelector(".product-list")!.classList.toggle(element, element === mode);
+      document.querySelector("#"+element)!.classList.toggle("selected", element === mode);
     });
   }
 
@@ -72,7 +73,7 @@ common.onGetAndDocumentLoaded("/webshop/product_data", (productData: any) => {
   function setLoggedIn (loggedIn: boolean) {
   }
 
-  const productListElem = document.querySelector(".product-list");
+  const productListElem = document.querySelector(".product-list")!;
   for (const category of productData) {
     const catLi = `
       <li><h3 id="category${category.id}">${category.name}</h3></li>
@@ -113,7 +114,7 @@ common.onGetAndDocumentLoaded("/webshop/product_data", (productData: any) => {
       id2item.set(item.id, item);
 
       // Handle deleting products
-      li.querySelector(".product-delete").addEventListener("click", ev => {
+      li.querySelector(".product-delete")!.addEventListener("click", ev => {
         ev.preventDefault();
         UIkit.modal.confirm(`Are you sure you want to delete ${item.name}?`).then(
           () => {
@@ -126,7 +127,7 @@ common.onGetAndDocumentLoaded("/webshop/product_data", (productData: any) => {
         });
       });
 
-      const productAmount = <HTMLInputElement>li.querySelector(".product-amount");
+      const productAmount = li.querySelector<HTMLInputElement>(".product-amount")!;
       // Select everything in the textfield when clicking on it
       productAmount.onclick = () => {
         productAmount.select();
@@ -147,9 +148,10 @@ common.onGetAndDocumentLoaded("/webshop/product_data", (productData: any) => {
         }
       };
 
-      li.querySelector(".number-add").addEventListener("click", ev => {
+      li.querySelector(".number-add")!.addEventListener("click", ev => {
         productAmount.value = "" + (Number(productAmount.value)+Number((<HTMLElement>ev.currentTarget).getAttribute("data-amount")));
-        productAmount.onchange(null);
+        // Ugly
+        productAmount.onchange!(null as unknown as Event);
         ev.preventDefault();
       });
 
@@ -243,18 +245,18 @@ common.onGetAndDocumentLoaded("/webshop/product_data", (productData: any) => {
   document.querySelectorAll(".category-edit").forEach(el => {
       el.addEventListener("click", ev => {
           ev.preventDefault();
-          const id = Number((<HTMLElement>ev.currentTarget).getAttribute("data-id"));
-          editCategory(id, (<HTMLElement>ev.currentTarget).getAttribute("data-name"));
+          const id = Number((ev.currentTarget as HTMLElement).getAttribute("data-id"));
+          editCategory(id, (ev.currentTarget as HTMLElement).getAttribute("data-name")!);
       });
   });
 
-  document.querySelector("#product-search-field").addEventListener("input", ev => {
+  document.querySelector("#product-search-field")!.addEventListener("input", ev => {
     const allItems = [];
     for (const item of id2item.values()) allItems.push(item);
     const matchingItems = shopsearch.search(allItems, (<HTMLInputElement>ev.currentTarget).value);
 
     for (const item of allItems) {
-      const elem = id2element.get(item.id);
+      const elem = id2element.get(item.id)!;
       elem.remove();
     }
 
@@ -264,7 +266,7 @@ common.onGetAndDocumentLoaded("/webshop/product_data", (productData: any) => {
     }
   });
 
-  document.querySelector(".category-add").addEventListener("click", ev => {
+  document.querySelector(".category-add")!.addEventListener("click", ev => {
     ev.preventDefault();
     addCategory();
   });

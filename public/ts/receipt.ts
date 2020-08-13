@@ -6,7 +6,7 @@ declare var UIkit: any;
 common.documentLoaded().then(() => {
     common.addSidebarListeners();
 
-    const content = document.getElementById("receipt-content");
+    const content = document.getElementById("receipt-content")!;
 
     function pending() {
         content.innerHTML = `<h1>Din betalning har inte bekräftats ännu. Var god vänta.</h1>`;

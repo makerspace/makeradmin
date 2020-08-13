@@ -1,4 +1,4 @@
-export class Item {
+export interface Item {
 	id: number;
 	count: number;
 }
@@ -21,7 +21,7 @@ export default class Cart {
 	static startLocalStorageSync(onSync: (cart: Cart) => void) {
 		window.addEventListener('storage', function(e) {
 			if (e.oldValue !== e.newValue) {
-				localStorage.setItem(e.key, e.newValue);
+				localStorage.setItem(e.key!, e.newValue!);
 				onSync(Cart.fromStorage());
 			}
 		});
@@ -85,7 +85,7 @@ export default class Cart {
 	static fromStorage() : Cart {
 		let cart = [];
 		try {
-			cart = JSON.parse(localStorage.getItem("cart"));
+			cart = JSON.parse(localStorage.getItem("cart")!);
 		} catch (e) {}
 
 		if (!Array.isArray(cart)) {

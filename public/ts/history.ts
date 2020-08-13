@@ -51,11 +51,11 @@ common.documentLoaded().then(() => {
                     <span class="receipt-amount-value">${Cart.formatCurrency(Number(transaction.amount))}</span>
                 </div>
             </div>`;
-            rootElement.appendChild(elem.firstChild);
+            rootElement.appendChild(elem.firstChild!);
         }
 
         const member = memberJson.data;
-        document.querySelector("#member-header").textContent = `#${member.member_number} ${member.firstname} ${member.lastname}`;
+        document.querySelector("#member-header")!.textContent = `#${member.member_number} ${member.firstname} ${member.lastname}`;
     })
     .catch(json => {
         // Probably Unauthorized, redirect to login page.

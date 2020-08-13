@@ -10,37 +10,37 @@ common.onGetAndDocumentLoaded("/webshop/product_edit_data/" + window.productId, 
     const {categories, product, actions, images, filters, action_categories} = value;
     const apiBasePath = window.apiBasePath;
 
-    let categorySelect = document.getElementById("category");
+    let categorySelect = document.getElementById("category")!;
     categories.forEach((category: any) => {
         const selected = product.category_id === category.id ? "selected" : "";
         categorySelect.innerHTML += `<option value="${category.id}" ${selected}>${category.name}</option>`;
     });
 
-    let filterSelect = document.getElementById("filter");
+    let filterSelect = document.getElementById("filter")!;
     filters.forEach((filter: any) => {
         const selected = product.filter === filter ? "selected" : "";
         filterSelect.innerHTML += `<option value="${filter}" ${selected}>${filter}</option>`;
     });
 
-    let actionSelect = document.getElementById("add-action-category");
+    let actionSelect = document.getElementById("add-action-category")!;
     action_categories.forEach((action: any) => {
         actionSelect.innerHTML += `<option value="${action.id}">${action.name}</option>`;
     });
 
-    document.getElementById("name").setAttribute("value", product.name);
-    document.getElementById("unit").setAttribute("value", product.unit);
-    document.getElementById("price").setAttribute("value", product.price);
-    document.getElementById("description").innerText = product.description;
-    document.getElementById("smallest_multiple").setAttribute("value", product.smallest_multiple);
+    document.getElementById("name")!.setAttribute("value", product.name);
+    document.getElementById("unit")!.setAttribute("value", product.unit);
+    document.getElementById("price")!.setAttribute("value", product.price);
+    document.getElementById("description")!.innerText = product.description;
+    document.getElementById("smallest_multiple")!.setAttribute("value", product.smallest_multiple);
 
     const updateUnit = () => {
         const unit = (<HTMLInputElement>document.querySelector("#unit")).value;
-        document.querySelector("#price-unit").innerHTML = Cart.currency + "/" + unit;
-        document.querySelector("#multiple-unit").innerHTML = unit;
+        document.querySelector("#price-unit")!.innerHTML = Cart.currency + "/" + unit;
+        document.querySelector("#multiple-unit")!.innerHTML = unit;
     };
 
 
-    document.querySelector("#unit").addEventListener("input", ev => updateUnit());
+    document.querySelector("#unit")!.addEventListener("input", ev => updateUnit());
     updateUnit();
 
     let deletedActionIDs : (number|string)[] = [];
@@ -64,15 +64,15 @@ common.onGetAndDocumentLoaded("/webshop/product_edit_data/" + window.productId, 
             </div>`;
         const element = <HTMLElement>wrapper.firstChild;
 
-        element.querySelector("button").addEventListener("click", ev => {
+        element.querySelector("button")!.addEventListener("click", ev => {
             ev.preventDefault();
             // Note that the ID may change from its original value.
             // In particular new actions start out with an id of 'new' which is later changed when the action is saved.
-            deletedActionIDs.push(element.getAttribute("data-id"));
+            deletedActionIDs.push(element.getAttribute("data-id")!);
             element.remove();
         });
 
-        document.querySelector("#action-list").appendChild(element);
+        document.querySelector("#action-list")!.appendChild(element);
     }
 
     for (const action of actions) {
@@ -81,14 +81,14 @@ common.onGetAndDocumentLoaded("/webshop/product_edit_data/" + window.productId, 
 
     let isSaving = false;
 
-    document.querySelector("#product-cancel").addEventListener("click", ev => {
+    document.querySelector("#product-cancel")!.addEventListener("click", ev => {
         ev.preventDefault();
         // Redirect the user back to the webshop
         window.location.href = "/shop#edit";
     });
 
     // Handle image uploads
-    const imageList = document.getElementById('image-list');
+    const imageList = document.getElementById('image-list')!;
     function addImage(src: any, name: string, id: (number|string)) {
         const wrapper = document.createElement('div');
         wrapper.innerHTML =
@@ -99,11 +99,11 @@ common.onGetAndDocumentLoaded("/webshop/product_edit_data/" + window.productId, 
         const element = <HTMLElement>wrapper.firstChild;
         element.getElementsByTagName("img")[0].src = src;
 
-        element.querySelector("button").addEventListener("click", ev => {
+        element.querySelector("button")!.addEventListener("click", ev => {
             ev.preventDefault();
             // Note that the ID may change from its original value.
             // In particular new actions start out with an id of 'new' which is later changed when the action is saved.
-            deletedImageIDs.push(element.getAttribute("data-id"));
+            deletedImageIDs.push(element.getAttribute("data-id")!);
             element.remove();
         });
         imageList.appendChild(element);
@@ -135,13 +135,13 @@ common.onGetAndDocumentLoaded("/webshop/product_edit_data/" + window.productId, 
 
     // Wow: So much code!
     // Should probably simplify this...
-    document.querySelector(".product-edit-form").addEventListener("submit", ev => {
+    document.querySelector(".product-edit-form")!.addEventListener("submit", ev => {
         ev.preventDefault();
         if (isSaving) return;
 
         const type = window.productId === 0 ? "POST" : "PUT";
         const url = apiBasePath + "/webshop/product" + (window.productId === 0 ? "" : "/" + window.productId);
-        const spinner = document.querySelector(".progress-spinner");
+        const spinner = document.querySelector(".progress-spinner")!;
         spinner.classList.add("progress-spinner-visible");
 
         common.ajax(type, url, {
@@ -163,8 +163,8 @@ common.onGetAndDocumentLoaded("/webshop/product_edit_data/" + window.productId, 
             const futures : Promise<any>[] = [];
             [].forEach.call(document.querySelectorAll(".product-action"), (element: HTMLElement) => {
                 const id2 = element.getAttribute("data-id");
-                const value = element.querySelector("input").value;
-                const actionID = element.querySelector("select").value;
+                const value = element.querySelector("input")!.value;
+                const actionID = element.querySelector("select")!.value;
 
                 const type2 = id2 == "new" ? "POST" : "PUT";
                 const url2 = apiBasePath + "/webshop/product_action" + (id2 == "new" ? "" : "/" + id2);
@@ -275,7 +275,7 @@ common.onGetAndDocumentLoaded("/webshop/product_edit_data/" + window.productId, 
         });
     });
 
-    document.getElementById("add-action").addEventListener("click", ev => {
+    document.getElementById("add-action")!.addEventListener("click", ev => {
         ev.preventDefault();
         new UIkit.modal('#add-action-modal').hide();
 

@@ -6,7 +6,7 @@ declare var UIkit: any;
 var stripe: stripe.Stripe;
 var card: stripe.elements.Element;
 var spinner: any;
-var payButton: HTMLButtonElement;
+var payButton: HTMLInputElement;
 var errorElement: any;
 
 export function initializeStripe() {

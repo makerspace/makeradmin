@@ -12,7 +12,7 @@ common.documentLoaded().then(() => {
 	const webshop_edit_permission = "webshop_edit";
 	const service_permission = "service";
 
-	const root = document.getElementById("single-page-content");
+	const root = document.getElementById("single-page-content")!;
 
 	const future1 = common.ajax("GET", apiBasePath + "/statistics/membership/by_date", null);
 	const future2 = common.ajax("GET", apiBasePath + "/statistics/lasertime/by_month", null);
@@ -193,7 +193,7 @@ function addChart(root: HTMLElement, data: any) {
 	`;
 	memberstats.className = "statistics-member-stats";
 
-	const canvas = memberstats.querySelector("canvas"); // <HTMLCanvasElement>document.createElement("canvas");
+	const canvas = memberstats.querySelector("canvas")!; // <HTMLCanvasElement>document.createElement("canvas");
 	const ctx = canvas.getContext('2d');
 	const chart = new Chart(ctx, config);
 
