@@ -17,11 +17,11 @@ interface Question {
 }
 
 interface State {
-    question: Question|null;
-    state: "intro"|"started"|"done",
+    question: Question | null;
+    state: "intro" | "started" | "done",
     answerInProgress: boolean,
-    loginState: "pending"|"logged in"|"logged out";
-    answer: null|{
+    loginState: "pending" | "logged in" | "logged out";
+    answer: null | {
         correct: boolean,
         selected: number,
     },
@@ -48,10 +48,10 @@ class QuizManager extends React.Component<{}, State> {
     async checkLogin() {
         try {
             await common.ajax("GET", `${window.apiBasePath}/member/current`, null);
-            this.setState({loginState: "logged in"});
+            this.setState({ loginState: "logged in" });
         } catch (error) {
             if (error.status == "unauthorized") {
-                this.setState({loginState: "logged out"});
+                this.setState({ loginState: "logged out" });
             }
         }
     }
@@ -75,17 +75,17 @@ class QuizManager extends React.Component<{}, State> {
     render() {
         if (this.state.state == "done") {
             return <div id="content" className="quizpage quiz-complete">
-                    <h2>Congratulations!<br/>You have correctly answered all questions in the quiz!</h2>
-                    <p>We hope that you learned something from it and we wish you good luck with all your exciting projects at Stockholm Makerspace!</p>
-                    {/* Vi hoppas att det var lärorikt och önskar dig lycka till med alla spännande projekt på Stockholm Makerspace */}
-                    <div className="quiz-more-questions">
-                        <span>Do you have more questions? Join us on Slack or Facebook and ask away!</span>
-                        <ul>
-                            <li><a href="https://wiki.makerspace.se/Slack"><img src="/static/images/slack_logo_transparent.png"></img></a></li>
-                            <li><a href="https://www.facebook.com/groups/makerspace.se"><img src="/static/images/facebook_logo_transparent.png"></img></a></li>
-                        </ul>
-                    </div>
-                </div>;
+                <h2>Congratulations!<br />You have correctly answered all questions in the quiz!</h2>
+                <p>We hope that you learned something from it and we wish you good luck with all your exciting projects at Stockholm Makerspace!</p>
+                {/* Vi hoppas att det var lärorikt och önskar dig lycka till med alla spännande projekt på Stockholm Makerspace */}
+                <div className="quiz-more-questions">
+                    <span>Do you have more questions? Join us on Slack or Facebook and ask away!</span>
+                    <ul>
+                        <li><a href="https://wiki.makerspace.se/Slack"><img src="/static/images/slack_logo_transparent.png"></img></a></li>
+                        <li><a href="https://www.facebook.com/groups/makerspace.se"><img src="/static/images/facebook_logo_transparent.png"></img></a></li>
+                    </ul>
+                </div>
+            </div>;
         } else if (this.state.state == "intro" || this.state.question == null) {
             return (
                 <div id="content" className="quizpage">
@@ -98,17 +98,17 @@ class QuizManager extends React.Component<{}, State> {
                     Completing this quiz is however a mandatory part of being a member. You will receive nagging emails every few days or so until you complete the quiz.
                     </p>
                     <p>The quiz will save your progress automatically so you can close this window and return here at any time to continue with the quiz.</p>
-                    { this.state.loginState == "logged out"
+                    {this.state.loginState == "logged out"
                         ?
-                            <>
-                                <p>You need to be logged in to take the quiz. Please log in and then return to this quiz.</p>
-                                <a className="uk-button uk-button-primary quiz-button-start" href="/member">Log in</a>
-                            </>
+                        <>
+                            <p>You need to be logged in to take the quiz. Please log in and then return to this quiz.</p>
+                            <a className="uk-button uk-button-primary quiz-button-start" href="/member">Log in</a>
+                        </>
                         :
-                            <>
-                                <p>Alright, are you ready to get started?</p>
-                                <a className="uk-button uk-button-primary quiz-button-start" onClick={()=>this.start()}>Start!</a>
-                            </>
+                        <>
+                            <p>Alright, are you ready to get started?</p>
+                            <a className="uk-button uk-button-primary quiz-button-start" onClick={() => this.start()}>Start!</a>
+                        </>
                     }
                 </div>
             );
@@ -134,11 +134,11 @@ class QuizManager extends React.Component<{}, State> {
                             )
                         }
                     </ul>
-                    { this.state.answer === null
+                    {this.state.answer === null
                         ? null
                         : (
                             <>
-                                { this.state.answer.correct
+                                {this.state.answer.correct
                                     ? <div className="question-answer-info question-answer-info-correct">Great! You answered correctly!</div>
                                     // : <div className="question-answer-info question-answer-info-incorrect">Du svarade tyvärr fel. Men oroa dig inte, den här frågan kommer komma igen senare så att du kan svara rätt nu när du vet vad rätt svar är.</div>
                                     : <div className="question-answer-info question-answer-info-incorrect">Unfortunately you answered incorrectly. But don't worry, this question will repeat later so you will have an opportunity to answer it correctly now that you know what the correct answer is.</div>
@@ -153,7 +153,7 @@ class QuizManager extends React.Component<{}, State> {
                             </>
                         )
                     }
-                    
+
                 </div>
             );
         }
