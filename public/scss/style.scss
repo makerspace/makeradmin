@@ -899,10 +899,10 @@ form input.readonly-input {
 			// Turn off input spinner
 			-moz-appearance: textfield;
 
-			&::-webkit-inner-spin-button, &::-webkit-outer-spin-button { 
+			&::-webkit-inner-spin-button, &::-webkit-outer-spin-button {
 				// Turn off input spinner
-				-webkit-appearance: none; 
-				margin: 0; 
+				-webkit-appearance: none;
+				margin: 0;
 			}
 
 			&::placeholder {
@@ -1153,7 +1153,7 @@ $palette-red: $palette4;
 		padding: 0px;
 	}
 
-	li {
+	.question-options li {
 		padding: 8px;
 		list-style: none;
 		border-radius: 5px;
@@ -1166,10 +1166,36 @@ $palette-red: $palette4;
 		margin: 12px;
 		cursor: pointer;
 
+		// Prevents text selection.
+		// This helps in particular on mobile devices where clicking a button might otherwise select its text
+		user-select: none;
+
 		&:hover {
 			// background-color: #37d;
 			// color: white;
 			box-shadow: 0px 3px 8px 0px rgba(0,0,0,0.2);
+		}
+
+		&.question-option-correct {
+			color: white;
+			border: 1px solid darken($palette-green, 0.1);
+			background: $palette-green;
+		}
+
+		&.question-option-incorrect:not(.question-option-selected) {
+			opacity: 0.5;
+		}
+
+		&.question-option-selected.question-option-correct {
+			color: white;
+			border: 1px solid darken($palette-green, 0.1);
+			background: $palette-green;
+		}
+
+		&.question-option-selected.question-option-incorrect {
+			color: white;
+			border: 1px solid darken($palette-red, 0.1);
+			background: $palette-red;
 		}
 	}
 
@@ -1191,35 +1217,13 @@ $palette-red: $palette4;
 		// border: 1px solid darken($palette-green, 0.1);
 		// background: $palette-green;
 		color: $palette-green;
-		
+
 	}
 
 	.question-answer-description {
 		margin: 5px;
 		margin-bottom: 15px;
 		font-style: italic;
-	}
-
-	.question-option-correct {
-		color: white;
-		border: 1px solid darken($palette-green, 0.1);
-		background: $palette-green;
-	}
-
-	.question-option-incorrect:not(.question-option-selected) {
-		opacity: 0.5;
-	}
-
-	.question-option-selected.question-option-correct {
-		color: white;
-		border: 1px solid darken($palette-green, 0.1);
-		background: $palette-green;
-	}
-
-	.question-option-selected.question-option-incorrect {
-		color: white;
-		border: 1px solid darken($palette-red, 0.1);
-		background: $palette-red;
 	}
 
 	.uk-button-primary {
@@ -1244,11 +1248,16 @@ $palette-red: $palette4;
 			color: white;
 		}
 
+		h2 {
+			font-size: 20pt;
+			color: white;
+		}
+
 		.question-answer-info {
 			text-shadow: 0px 0px 3px rgba(0,0,0,0.3);
 		}
 
-		li {
+		.question-options li {
 			background-color: $palette2;
 			color: white;
 			border: 1px solid rgba(0,0,0,0);
@@ -1257,6 +1266,41 @@ $palette-red: $palette4;
 			box-shadow: 0px 0px 3px 0px rgba(0,0,0,0.3);
 			&:hover {
 				box-shadow: 0px 3px 8px 0px rgba(0,0,0,0.3);
+			}
+		}
+	}
+
+	.quiz-more-questions {
+		margin-top: 60px;
+
+		ul {
+			list-style: none;
+			margin-top: 30px;
+			display: flex;
+			flex-direction: row;
+			justify-content: center;
+		}
+
+		li {
+			border: none;
+			box-shadow: none;
+			margin: 20px;
+		}
+		img {
+			width: 64px;
+			filter: drop-shadow(0px 0px 6px rgba(0, 0, 0, 0.3));
+			transition: 200ms filter;
+
+			&:hover {
+				filter: drop-shadow(0px 3px 10px rgba(0, 0, 0, 0.4));
+			}
+		}
+
+		@media screen and (max-width: 900px) {
+			margin-top: 30px;
+
+			ul {
+				margin-top: 20px;
 			}
 		}
 	}

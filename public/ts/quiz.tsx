@@ -19,6 +19,8 @@ interface Question {
 interface State {
     question: Question|null;
     state: "intro"|"started"|"done",
+    answerInProgress: boolean,
+    loginState: "pending"|"logged in"|"logged out";
     answer: null|{
         correct: boolean,
         selected: number,
@@ -31,9 +33,26 @@ class QuizManager extends React.Component<{}, State> {
     constructor(props: any) {
         super(props);
         this.state = {
+            answerInProgress: false,
             question: null,
             answer: null,
+            loginState: "pending",
             state: "intro",
+        }
+    }
+
+    componentDidMount() {
+        this.checkLogin();
+    }
+
+    async checkLogin() {
+        try {
+            await common.ajax("GET", `${window.apiBasePath}/member/current`, null);
+            this.setState({loginState: "logged in"});
+        } catch (error) {
+            if (error.status == "unauthorized") {
+                this.setState({loginState: "logged out"});
+            }
         }
     }
 
@@ -56,8 +75,16 @@ class QuizManager extends React.Component<{}, State> {
     render() {
         if (this.state.state == "done") {
             return <div id="content" className="quizpage quiz-complete">
-                    <h2>Grattis! Du har svarat rätt på alla frågor i quizzet!</h2>
-                    <p>Vi hoppas att det var lärorikt och önskar dig lycka till med alla spännande projekt på Stockholm Makerspace!</p>
+                    <h2>Congratulations!<br/>You have correctly answered all questions in the quiz!</h2>
+                    <p>We hope that you learned something from it and we wish you good luck with all your exciting projects at Stockholm Makerspace!</p>
+                    {/* Vi hoppas att det var lärorikt och önskar dig lycka till med alla spännande projekt på Stockholm Makerspace */}
+                    <div className="quiz-more-questions">
+                        <span>Do you have more questions? Join us on Slack or Facebook and ask away!</span>
+                        <ul>
+                            <li><a href="https://wiki.makerspace.se/Slack"><img src="/static/images/slack_logo_transparent.png"></img></a></li>
+                            <li><a href="https://www.facebook.com/groups/makerspace.se"><img src="/static/images/facebook_logo_transparent.png"></img></a></li>
+                        </ul>
+                    </div>
                 </div>;
         } else if (this.state.state == "intro" || this.state.question == null) {
             return (
@@ -71,8 +98,18 @@ class QuizManager extends React.Component<{}, State> {
                     Completing this quiz is however a mandatory part of being a member. You will receive nagging emails every few days or so until you complete the quiz.
                     </p>
                     <p>The quiz will save your progress automatically so you can close this window and return here at any time to continue with the quiz.</p>
-                    <p>Alright, are you ready to get started?</p>
-                    <a className="uk-button uk-button-primary quiz-button-start" onClick={()=>this.start()}>Start!</a>
+                    { this.state.loginState == "logged out"
+                        ?
+                            <>
+                                <p>You need to be logged in to take the quiz. Please log in and then return to this quiz.</p>
+                                <a className="uk-button uk-button-primary quiz-button-start" href="/member">Log in</a>
+                            </>
+                        :
+                            <>
+                                <p>Alright, are you ready to get started?</p>
+                                <a className="uk-button uk-button-primary quiz-button-start" onClick={()=>this.start()}>Start!</a>
+                            </>
+                    }
                 </div>
             );
         } else {
@@ -102,8 +139,9 @@ class QuizManager extends React.Component<{}, State> {
                         : (
                             <>
                                 { this.state.answer.correct
-                                    ? <div className="question-answer-info question-answer-info-correct">Snyggt! Du svarade rätt!</div>
-                                    : <div className="question-answer-info question-answer-info-incorrect">Du svarade tyvärr fel. Men oroa dig inte, den här frågan kommer komma igen senare så att du kan svara rätt nu när du vet vad rätt svar är.</div>
+                                    ? <div className="question-answer-info question-answer-info-correct">Great! You answered correctly!</div>
+                                    // : <div className="question-answer-info question-answer-info-incorrect">Du svarade tyvärr fel. Men oroa dig inte, den här frågan kommer komma igen senare så att du kan svara rätt nu när du vet vad rätt svar är.</div>
+                                    : <div className="question-answer-info question-answer-info-incorrect">Unfortunately you answered incorrectly. But don't worry, this question will repeat later so you will have an opportunity to answer it correctly now that you know what the correct answer is.</div>
                                 }
                                 <div className="question-answer-description">
                                     {
@@ -122,10 +160,13 @@ class QuizManager extends React.Component<{}, State> {
     }
 
     async select(option_id: number) {
+        if (this.state.answerInProgress || this.state.answer !== null) return;
+
+        this.setState({ answerInProgress: true });
         const data = await common.ajax("POST", `${window.apiBasePath}/quiz/question/${this.state.question.id}/answer`, { option_id });
         const fullQuestion = data.data as Question;
         const correct = fullQuestion.options.find(x => x.id == option_id).correct;
-        this.setState({ question: fullQuestion, answer: { selected: option_id, correct } });
+        this.setState({ question: fullQuestion, answer: { selected: option_id, correct }, answerInProgress: false });
     }
 
     async submit() {
