@@ -1,14 +1,14 @@
 import Cart from "./cart"
 import * as common from "./common"
-import {login} from "./common";
-import {initializeStripe, pay} from "./payment_common"
+import { login } from "./common";
+import { initializeStripe, pay } from "./payment_common"
 declare var UIkit: any;
 
 
 common.onGetAndDocumentLoaded("/webshop/register_page_data", (value: any) => {
     common.addSidebarListeners();
 
-    const {productData, membershipProducts} = value;
+    const { productData, membershipProducts } = value;
 
     const apiBasePath = window.apiBasePath;
 
@@ -28,7 +28,7 @@ common.onGetAndDocumentLoaded("/webshop/register_page_data", (value: any) => {
         }
     }
 
-    let cart : Cart = new Cart([]);
+    let cart: Cart = new Cart([]);
 
     function refresh() {
         let checked = document.querySelectorAll(".uk-radio:checked");
@@ -81,8 +81,8 @@ common.onGetAndDocumentLoaded("/webshop/register_page_data", (value: any) => {
     });
 
 
-	function pay_config() {
-		function initiate_payment(result: any){
+    function pay_config() {
+        function initiate_payment(result: any) {
             return common.ajax("POST", apiBasePath + "/webshop/register", {
                 member: {
                     firstname: common.getValue("#firstname"),
@@ -101,25 +101,25 @@ common.onGetAndDocumentLoaded("/webshop/register_page_data", (value: any) => {
                 }
             });
         };
-		function handle_backend_response(json: any){
-            const token :string = json.data.token;
+        function handle_backend_response(json: any) {
+            const token: string = json.data.token;
             if (token) {
                 login(token);
             }
-		};
-		function on_failure(json: any){
+        };
+        function on_failure(json: any) {
             if (json.what === "not_unique") {
                 UIkit.modal.alert("<h2>Register failed</h2>A member with this email is already registred");
             } else {
                 UIkit.modal.alert("<h2>The payment failed</h2>" + common.get_error(json));
             }
-		};
-		return {
-			initiate_payment: initiate_payment,
+        };
+        return {
+            initiate_payment: initiate_payment,
             handle_backend_response: handle_backend_response,
-			on_failure: on_failure,
-		};
-	};
+            on_failure: on_failure,
+        };
+    };
     const payment_config = pay_config();
 
     document.querySelector("#pay-button")!.addEventListener("click", ev => {

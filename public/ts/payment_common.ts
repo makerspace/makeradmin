@@ -36,18 +36,18 @@ export function initializeStripe() {
     card = elements.create('card', { style: stripeStyle });
     card.mount("#card-element");
 
-    payButton = <HTMLInputElement> document.getElementById("pay-button");
+    payButton = <HTMLInputElement>document.getElementById("pay-button");
     spinner = document.querySelector(".progress-spinner");
     errorElement = document.getElementById('card-errors');
 }
 
-interface InitializePaymentFunction{
+interface InitializePaymentFunction {
     (result: any): Promise<any>;
 }
-interface ResponseFunction{
+interface ResponseFunction {
     (json: any): void;
 }
-export interface PaymentFlowDefinition{
+export interface PaymentFlowDefinition {
     initiate_payment: InitializePaymentFunction;
     before_initiate_payment?: Function;
     on_stripe_error?: ResponseFunction;
@@ -58,36 +58,36 @@ export interface PaymentFlowDefinition{
 
 let waitingForPaymentResponse = false;
 
-function enable_pay_button(){
+function enable_pay_button() {
     spinner.classList.remove("progress-spinner-visible");
     waitingForPaymentResponse = false;
     payButton.disabled = false;
 };
-function disable_pay_button(){
+function disable_pay_button() {
     payButton.disabled = true;
     waitingForPaymentResponse = true;
     spinner.classList.add("progress-spinner-visible");
 };
 
-function default_before_initiate_payment(){
+function default_before_initiate_payment() {
     disable_pay_button();
     errorElement.textContent = "";
 };
-function display_stripe_error(error: any){
+function display_stripe_error(error: any) {
     errorElement.textContent = error.message;
     UIkit.modal.alert("<h2>Your payment failed</h2>" + errorElement.innerHTML);
 }
 
 // This function might be called recursively doing multiple authentication steps.
 function handleBackendResponse(json: any, object: PaymentFlowDefinition) {
-    if (object.handle_backend_response) {object.handle_backend_response(json);}
+    if (object.handle_backend_response) { object.handle_backend_response(json); }
 
     const action_info = json.data.action_info;
     if (action_info && action_info.type === 'use_stripe_sdk') {
         // This might be a recursive call doing multiple authentication steps.
         handleStripeAction(action_info.client_secret, object);
     } else {
-        if (object.on_payment_success) {object.on_payment_success(json);}
+        if (object.on_payment_success) { object.on_payment_success(json); }
         window.location.href = "receipt/" + json.data.transaction_id;
     }
 }
@@ -95,11 +95,11 @@ function handleBackendResponse(json: any, object: PaymentFlowDefinition) {
 // This function might be called recursively doing multiple authentication steps.
 function handleStripeAction(client_secret: any, object: PaymentFlowDefinition) {
     stripe.handleCardAction(
-          client_secret
-    ).then(function(result: any) {
+        client_secret
+    ).then(function (result: any) {
         if (result.error) {
             display_stripe_error(result.error);
-            if (object.on_stripe_error) {object.on_stripe_error(result.error);}
+            if (object.on_stripe_error) { object.on_stripe_error(result.error); }
             enable_pay_button();
         } else {
             // The card action has been handled
@@ -110,7 +110,7 @@ function handleStripeAction(client_secret: any, object: PaymentFlowDefinition) {
                 // This might be a recursive call doing multiple authentication steps.
                 handleBackendResponse(json, object);
             }).catch(json => {
-                if (object.on_failure) {object.on_failure(json);}
+                if (object.on_failure) { object.on_failure(json); }
                 enable_pay_button();
             })
         }
@@ -124,19 +124,19 @@ export function pay(object: PaymentFlowDefinition) {
         return;
     }
 
-    if (object.before_initiate_payment) {object.before_initiate_payment();}
+    if (object.before_initiate_payment) { object.before_initiate_payment(); }
     default_before_initiate_payment();
 
-    stripe.createPaymentMethod('card', card).then(function(result: any) {
+    stripe.createPaymentMethod('card', card).then(function (result: any) {
         if (result.error) {
             display_stripe_error(result.error);
-            if (object.on_stripe_error) {object.on_stripe_error(result.error);}
+            if (object.on_stripe_error) { object.on_stripe_error(result.error); }
             enable_pay_button();
         } else {
             object.initiate_payment(result).then(json => {
                 handleBackendResponse(json, object);
             }).catch(json => {
-                if (object.on_failure) {object.on_failure(json);}
+                if (object.on_failure) { object.on_failure(json); }
                 enable_pay_button();
             });
         }

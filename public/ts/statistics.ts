@@ -24,9 +24,9 @@ common.documentLoaded().then(() => {
 		addLaserChart(root, laserjson.data);
 		addRandomCharts(root);
 	})
-	.catch(json => {
-		UIkit.modal.alert("<h2>Couldn't load statistics</h2>" + json.message + " " + json.error);
-	});
+		.catch(json => {
+			UIkit.modal.alert("<h2>Couldn't load statistics</h2>" + json.message + " " + json.error);
+		});
 });
 
 const colors = [
@@ -40,7 +40,7 @@ const colors = [
 
 var timeFormat = 'YYYY-MM-DD HH:mm';
 
-function splitSeries (items: Array<any>) {
+function splitSeries(items: Array<any>) {
 	const dates = [];
 	const values = [];
 	for (let i = 0; i < items.length; i++) {
@@ -50,7 +50,7 @@ function splitSeries (items: Array<any>) {
 	return { dates: dates, values: values };
 }
 
-function toPoints (items: Array<any>) {
+function toPoints(items: Array<any>) {
 	const values = [];
 	for (let i = 0; i < items.length; i++) {
 		values.push({ x: new Date(items[i][0]), y: items[i][1] });
@@ -61,7 +61,7 @@ function toPoints (items: Array<any>) {
 function filterDuplicates(items: Array<any>) {
 	const newValues = [];
 	for (let i = 0; i < items.length; i++) {
-		if (i == 0 || items[i].x != items[i-1].x) {
+		if (i == 0 || items[i].x != items[i - 1].x) {
 			newValues.push(items[i]);
 		}
 	}
@@ -78,7 +78,7 @@ function maxOfSeries(items: Array<any>) {
 	return mx;
 }
 
-function date2str(date: String|Date) {
+function date2str(date: String | Date) {
 	if (date instanceof Date) return date.toISOString().split('T')[0];
 	else return date;
 }
@@ -125,7 +125,7 @@ function addChart(root: HTMLElement, data: any) {
 				line: {
 					tension: 0,
 				},
-				point:{
+				point: {
 					radius: 1,
 					hoverRadius: 3,
 				}
@@ -175,12 +175,12 @@ function addChart(root: HTMLElement, data: any) {
 
 
 	const memberstats = <HTMLDivElement>document.createElement("div");
-	const highestMembership = maxOfSeries(dataMembership) || { x: "never", y: 0};
-	const highestLabaccess = maxOfSeries(dataLabaccess) || { x: "never", y: 0};
+	const highestMembership = maxOfSeries(dataMembership) || { x: "never", y: 0 };
+	const highestLabaccess = maxOfSeries(dataLabaccess) || { x: "never", y: 0 };
 
 	const today = new Date();
-	const currentMembership = pointAtDate(dataMembership, today) || { x: today, y: 0};
-	const currentLabaccess = pointAtDate(dataLabaccess, today) || { x: today, y: 0};
+	const currentMembership = pointAtDate(dataMembership, today) || { x: today, y: 0 };
+	const currentLabaccess = pointAtDate(dataLabaccess, today) || { x: today, y: 0 };
 
 	memberstats.innerHTML = `
 	<canvas width=500 height=300></canvas>
@@ -295,4 +295,3 @@ function addLaserChart(root: HTMLElement, data: any) {
 	const ctx = canvas.getContext('2d');
 	const chart = new Chart(ctx, config);
 }
- 

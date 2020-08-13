@@ -3,29 +3,29 @@ import * as common from "./common"
 declare var UIkit: any;
 
 common.onGetAndDocumentLoaded("/webshop/product_data/" + window.productId, (value: any) => {
-    common.addSidebarListeners();
+	common.addSidebarListeners();
 
-    const {product, images, productData} = value;
+	const { product, images, productData } = value;
 
-    document.getElementById("name")!.innerText = product.name;
+	document.getElementById("name")!.innerText = product.name;
 
-    const productPrice = product.price * product.smallest_multiple;
-    const productUnit = product.smallest_multiple === 1 ? product.unit : `${product.smallest_multiple}${product.unit}`;
-    document.getElementById("price")!.innerText = `${productPrice} kr/${productUnit}`;
+	const productPrice = product.price * product.smallest_multiple;
+	const productUnit = product.smallest_multiple === 1 ? product.unit : `${product.smallest_multiple}${product.unit}`;
+	document.getElementById("price")!.innerText = `${productPrice} kr/${productUnit}`;
 
-    document.getElementById("smallest-multiple")!.setAttribute("step", product.smallest_multiple);
+	document.getElementById("smallest-multiple")!.setAttribute("step", product.smallest_multiple);
 
-    document.getElementById("unit")!.innerText = product.unit;
+	document.getElementById("unit")!.innerText = product.unit;
 
-    document.getElementById("description")!.innerHTML = product.description;
+	document.getElementById("description")!.innerHTML = product.description;
 
-    const imagesDiv = document.getElementById("images")!;
-    images.forEach((image: any) => {
-        imagesDiv.innerHTML +=
-            `<a class="product-image uk-inline" href='/static/product_images/${image.path}' data-caption="${image.caption}">
+	const imagesDiv = document.getElementById("images")!;
+	images.forEach((image: any) => {
+		imagesDiv.innerHTML +=
+			`<a class="product-image uk-inline" href='/static/product_images/${image.path}' data-caption="${image.caption}">
                  <img src='/static/product_images/${image.path}' alt="">
              </a>`;
-    });
+	});
 
 	const productAmount = <HTMLInputElement>document.querySelector(".product-amount");
 
@@ -53,7 +53,7 @@ common.onGetAndDocumentLoaded("/webshop/product_data/" + window.productId, (valu
 	Cart.startLocalStorageSync(updateCountFromCart);
 	updateCountFromCart(Cart.fromStorage());
 
-	function setCartItem (updateField: boolean) {
+	function setCartItem(updateField: boolean) {
 		let newAmount = Cart.adjustItemCount(Number(productAmount.value), product);
 		const cart = Cart.fromStorage();
 		cart.setItem(window.productId, newAmount);

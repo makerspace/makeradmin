@@ -1,12 +1,12 @@
 import Cart from "./cart"
 import * as shopsearch from "./shopsearch"
 import * as common from "./common"
-import {UNAUTHORIZED} from "./common";
-import {renderSidebarCategories} from "./category"
+import { UNAUTHORIZED } from "./common";
+import { renderSidebarCategories } from "./category"
 declare var UIkit: any;
 
 common.onGetAndDocumentLoaded("/webshop/product_data", (productData: any) => {
-    common.addSidebarListeners();
+  common.addSidebarListeners();
 
   const apiBasePath = window.apiBasePath;
   const webshop_edit_permission = "webshop_edit";
@@ -49,7 +49,7 @@ common.onGetAndDocumentLoaded("/webshop/product_data", (productData: any) => {
   });
 
   const layoutModes: Set<string> = new Set<string>(["layout-grid", "layout-list", "layout-table"]);
-  function setLayoutMode(mode: string|null){
+  function setLayoutMode(mode: string | null) {
     if (mode == null || !layoutModes.has(mode)) {
       mode = "layout-grid";
     }
@@ -57,11 +57,11 @@ common.onGetAndDocumentLoaded("/webshop/product_data", (productData: any) => {
 
     layoutModes.forEach(element => {
       document.querySelector(".product-list")!.classList.toggle(element, element === mode);
-      document.querySelector("#"+element)!.classList.toggle("selected", element === mode);
+      document.querySelector("#" + element)!.classList.toggle("selected", element === mode);
     });
   }
 
-  document.querySelectorAll(".layout-button").forEach( function(elm) {
+  document.querySelectorAll(".layout-button").forEach(function (elm) {
     elm.addEventListener("click", ev => {
       setLayoutMode(elm.id);
     });
@@ -70,7 +70,7 @@ common.onGetAndDocumentLoaded("/webshop/product_data", (productData: any) => {
   // Load saved layout mode
   setLayoutMode(localStorage.getItem("webshop-layout-mode"));
 
-  function setLoggedIn (loggedIn: boolean) {
+  function setLoggedIn(loggedIn: boolean) {
   }
 
   const productListElem = document.querySelector(".product-list")!;
@@ -124,7 +124,7 @@ common.onGetAndDocumentLoaded("/webshop/product_data", (productData: any) => {
             }).catch(json => {
               UIkit.modal.alert("<h2>Error</h2>" + json.status);
             });
-        });
+          });
       });
 
       const productAmount = li.querySelector<HTMLInputElement>(".product-amount")!;
@@ -149,7 +149,7 @@ common.onGetAndDocumentLoaded("/webshop/product_data", (productData: any) => {
       };
 
       li.querySelector(".number-add")!.addEventListener("click", ev => {
-        productAmount.value = "" + (Number(productAmount.value)+Number((<HTMLElement>ev.currentTarget).getAttribute("data-amount")));
+        productAmount.value = "" + (Number(productAmount.value) + Number((<HTMLElement>ev.currentTarget).getAttribute("data-amount")));
         // Ugly
         productAmount.onchange!(null as unknown as Event);
         ev.preventDefault();
@@ -187,7 +187,7 @@ common.onGetAndDocumentLoaded("/webshop/product_data", (productData: any) => {
         }).catch(json => {
           UIkit.modal.alert("<h2>Error</h2>" + common.get_error(json));
         });
-    });
+      });
   }
 
   function editCategory(id: number, placeholder_name: string) {
@@ -235,19 +235,19 @@ common.onGetAndDocumentLoaded("/webshop/product_data", (productData: any) => {
   refreshUIFromCart(Cart.fromStorage());
 
   document.querySelectorAll(".category-delete").forEach(el => {
-      el.addEventListener("click", ev => {
-          ev.preventDefault();
-          const id = Number((<HTMLElement>ev.currentTarget).getAttribute("data-id"));
-          tryDeleteCategory(id);
-      });
+    el.addEventListener("click", ev => {
+      ev.preventDefault();
+      const id = Number((<HTMLElement>ev.currentTarget).getAttribute("data-id"));
+      tryDeleteCategory(id);
+    });
   });
 
   document.querySelectorAll(".category-edit").forEach(el => {
-      el.addEventListener("click", ev => {
-          ev.preventDefault();
-          const id = Number((ev.currentTarget as HTMLElement).getAttribute("data-id"));
-          editCategory(id, (ev.currentTarget as HTMLElement).getAttribute("data-name")!);
-      });
+    el.addEventListener("click", ev => {
+      ev.preventDefault();
+      const id = Number((ev.currentTarget as HTMLElement).getAttribute("data-id"));
+      editCategory(id, (ev.currentTarget as HTMLElement).getAttribute("data-name")!);
+    });
   });
 
   document.querySelector("#product-search-field")!.addEventListener("input", ev => {

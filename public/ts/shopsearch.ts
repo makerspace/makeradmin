@@ -29,7 +29,7 @@ export function search(items: any[], query: string) {
 		}
 	}
 
-	scores.sort((a,b) => b.score - a.score);
+	scores.sort((a, b) => b.score - a.score);
 
 	items = [];
 	for (const item of scores) {

@@ -1,6 +1,6 @@
 import * as common from "./common"
-import {formatDateTime, UNAUTHORIZED} from "./common";
-import {render_login} from "./login";
+import { formatDateTime, UNAUTHORIZED } from "./common";
+import { render_login } from "./login";
 declare var UIkit: any;
 
 common.documentLoaded().then(() => {
@@ -16,7 +16,7 @@ common.documentLoaded().then(() => {
     function failed() {
         content.innerHTML = `<h1>Din betalning misslyckades</h1>`;
     }
-    
+
     function showLogin() {
         render_login(content, "Logga in för att se kvittot", '/shop/receipt/' + window.transactionId);
     }
@@ -35,7 +35,7 @@ common.documentLoaded().then(() => {
         }).join("");
 
         const createdAt = formatDateTime(transaction.created_at);
-        
+
         content.innerHTML = `
             <h1>Tack för ditt köp!</h1>
             <div class="history-item history-item-${transaction.status}">
@@ -69,7 +69,7 @@ common.documentLoaded().then(() => {
         common
             .ajax("GET", window.apiBasePath + "/webshop/member/current/receipt/" + window.transactionId, {})
             .then(json => {
-                const {cart, transaction, member} = json.data;
+                const { cart, transaction, member } = json.data;
                 if (transaction.status === "failed") {
                     failed();
                 }

@@ -2,31 +2,31 @@ import * as common from "./common"
 declare var UIkit: any;
 
 function showSuccess(message: string) {
-	UIkit.notification(message, {timeout: 0, status: "success"});
+    UIkit.notification(message, { timeout: 0, status: "success" });
 }
 
 function showError(message: string) {
-    UIkit.notification(message, {timeout: 0, status: "danger"});
+    UIkit.notification(message, { timeout: 0, status: "danger" });
 }
 
-function login_via_single_use_link(tag: string, redirect: string|null) {
-	const apiBasePath = window.apiBasePath;
+function login_via_single_use_link(tag: string, redirect: string | null) {
+    const apiBasePath = window.apiBasePath;
 
-    const data: any = {user_identification: tag};
+    const data: any = { user_identification: tag };
     if (redirect) {
         data['redirect'] = redirect;
     }
 
     common.ajax("POST", apiBasePath + "/member/send_access_token", data)
-    .then(json => {
-    	// Yay, success, refresh page
-    	if (json.data.status === "sent") {
-            showSuccess("Ett mail har skickats till dig med en inloggningslänk, använd den för att logga in.");
-        } else {
-            showError("<h2>Inloggningen misslyckades</h2>Tog emot ett oväntat svar från servern:<br><br>" + json.data.status);
-        }
-    })
-    .catch(json => {
+        .then(json => {
+            // Yay, success, refresh page
+            if (json.data.status === "sent") {
+                showSuccess("Ett mail har skickats till dig med en inloggningslänk, använd den för att logga in.");
+            } else {
+                showError("<h2>Inloggningen misslyckades</h2>Tog emot ett oväntat svar från servern:<br><br>" + json.data.status);
+            }
+        })
+        .catch(json => {
             if (json.status === "not found") {
                 showError("<h2>Inloggningen misslyckades</h2>Hittar inte email eller medlemsnummer.");
             } else {
@@ -36,12 +36,12 @@ function login_via_single_use_link(tag: string, redirect: string|null) {
         .catch(() => {
             showError("<h2>Inloggningen misslyckades</h2>Kunde inte kommunicera med servern.");
         }
-    );
+        );
 }
 
-export function render_login(root: HTMLElement, heading: string|null, redirect: string|null) {
+export function render_login(root: HTMLElement, heading: string | null, redirect: string | null) {
     heading = heading || "Logga in";
-	root.innerHTML = `
+    root.innerHTML = `
             <div class="uk-width-medium">
                 <h1 style="text-align: center;">${heading}</h1>
                 <form class="uk-form">
@@ -57,10 +57,10 @@ export function render_login(root: HTMLElement, heading: string|null, redirect: 
                 </form>
 								<p style="text-align: center;"><a href="/shop/register">Bli medlem / Become a member</a></p>
             </div>`;
-	const form = <HTMLElement>root.getElementsByTagName("form")[0];
-	const tagInput = <HTMLInputElement>root.getElementsByTagName("input")[0];
-	form.onsubmit = e => {
-		e.preventDefault();
+    const form = <HTMLElement>root.getElementsByTagName("form")[0];
+    const tagInput = <HTMLInputElement>root.getElementsByTagName("input")[0];
+    form.onsubmit = e => {
+        e.preventDefault();
         const tag = tagInput.value;
 
         // Error handling
@@ -70,5 +70,5 @@ export function render_login(root: HTMLElement, heading: string|null, redirect: 
         }
 
         login_via_single_use_link(tag, redirect);
-	}
+    }
 }

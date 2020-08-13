@@ -1,7 +1,7 @@
 import * as common from "./common"
 import * as login from "./login"
 import Cart from "./cart"
-import {UNAUTHORIZED} from "./common";
+import { UNAUTHORIZED } from "./common";
 declare var UIkit: any;
 
 common.documentLoaded().then(() => {
@@ -10,7 +10,7 @@ common.documentLoaded().then(() => {
     const apiBasePath = window.apiBasePath;
 
     function format_receipt_status(transaction_status: string) {
-        switch(transaction_status){
+        switch (transaction_status) {
             case "pending": return "Ej bekräftad";
             case "completed": return "";
             case "failed": return "Misslyckad";
@@ -41,7 +41,7 @@ common.documentLoaded().then(() => {
             elem.innerHTML = `<div class="history-item history-item-${transaction.status}">
                 <a class="receipt-header" href="/shop/receipt/${transaction.id}">
                     <span>Kvitto ${transaction.id}</span>
-                    <span class="receipt-date">${ new Date(transaction.created_at).toLocaleDateString("sv-SE") }</span>
+                    <span class="receipt-date">${ new Date(transaction.created_at).toLocaleDateString("sv-SE")}</span>
                 </a>
                 <div class="receipt-items">
                     ${cartItems}
@@ -57,13 +57,13 @@ common.documentLoaded().then(() => {
         const member = memberJson.data;
         document.querySelector("#member-header")!.textContent = `#${member.member_number} ${member.firstname} ${member.lastname}`;
     })
-    .catch(json => {
-        // Probably Unauthorized, redirect to login page.
-        if (json.status === UNAUTHORIZED) {
-            // Render login
-            login.render_login(rootElement, null, null);
-        } else {
-            UIkit.modal.alert("<h2>Misslyckades med att hämta köphistorik</h2>" + common.get_error(json));
-        }
-    });
+        .catch(json => {
+            // Probably Unauthorized, redirect to login page.
+            if (json.status === UNAUTHORIZED) {
+                // Render login
+                login.render_login(rootElement, null, null);
+            } else {
+                UIkit.modal.alert("<h2>Misslyckades med att hämta köphistorik</h2>" + common.get_error(json));
+            }
+        });
 });

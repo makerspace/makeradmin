@@ -1,8 +1,8 @@
 import Cart from "./cart"
 import * as common from "./common"
-import {UNAUTHORIZED} from "./common";
-import {renderSidebarCategories} from "./category"
-import {initializeStripe, pay} from "./payment_common"
+import { UNAUTHORIZED } from "./common";
+import { renderSidebarCategories } from "./category"
+import { initializeStripe, pay } from "./payment_common"
 declare var UIkit: any;
 
 common.onGetAndDocumentLoaded("/webshop/product_data", (productData: any) => {
@@ -91,7 +91,7 @@ common.onGetAndDocumentLoaded("/webshop/product_data", (productData: any) => {
 	initializeStripe();
 
 	function pay_config() {
-		function initiate_payment(result: any){
+		function initiate_payment(result: any) {
 			let cart = Cart.fromStorage();
 			return common.ajax("POST", window.apiBasePath + "/webshop/pay", {
 				cart: cart.items,
@@ -99,10 +99,10 @@ common.onGetAndDocumentLoaded("/webshop/product_data", (productData: any) => {
 				stripe_payment_method_id: result.paymentMethod.id,
 			})
 		}
-		function on_payment_success(json: any){
+		function on_payment_success(json: any) {
 			new Cart([]).saveToStorage();
 		}
-		function on_failure(json: any){
+		function on_failure(json: any) {
 			if (json.status === UNAUTHORIZED) {
 				UIkit.modal.alert("<h2>Betalningen misslyckades</h2>Du är inte inloggad");
 			} else {

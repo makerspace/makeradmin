@@ -4,7 +4,7 @@ export interface Item {
 }
 
 export default class Cart {
-	items : Item[];
+	items: Item[];
 
 	constructor(items: Item[]) {
 		this.items = items;
@@ -13,13 +13,13 @@ export default class Cart {
 	static readonly currency = "kr";
 	static readonly currencyDecimals = 2;
 
-	static formatCurrency(value: number) : string {
+	static formatCurrency(value: number): string {
 		return value.toFixed(Cart.currencyDecimals) + " kr";
 	}
 
 	// Keep local storage in sync even though other tabs change it
 	static startLocalStorageSync(onSync: (cart: Cart) => void) {
-		window.addEventListener('storage', function(e) {
+		window.addEventListener('storage', function (e) {
 			if (e.oldValue !== e.newValue) {
 				localStorage.setItem(e.key!, e.newValue!);
 				onSync(Cart.fromStorage());
@@ -57,7 +57,7 @@ export default class Cart {
 		}
 	}
 
-	getItemCount(productID: number) : number {
+	getItemCount(productID: number): number {
 		for (let i = 0; i < this.items.length; i++) {
 			if (this.items[i].id == productID) return this.items[i].count;
 		}
@@ -72,21 +72,21 @@ export default class Cart {
 		return totalSum;
 	}
 
-	static adjustItemCount (count: number, item: any) : number {
+	static adjustItemCount(count: number, item: any): number {
 		if (count < 0) count = 0;
 		// Note: the |0 will ensure the number is a 32-bit integer
-		return (Math.ceil(count / item.smallest_multiple)*item.smallest_multiple)|0;
+		return (Math.ceil(count / item.smallest_multiple) * item.smallest_multiple) | 0;
 	}
 
 	saveToStorage() {
 		localStorage.setItem("cart", JSON.stringify(this.items));
 	}
 
-	static fromStorage() : Cart {
+	static fromStorage(): Cart {
 		let cart = [];
 		try {
 			cart = JSON.parse(localStorage.getItem("cart")!);
-		} catch (e) {}
+		} catch (e) { }
 
 		if (!Array.isArray(cart)) {
 			cart = [];

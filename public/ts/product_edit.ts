@@ -1,13 +1,13 @@
 import * as common from "./common"
 import Cart from "./cart"
-import {UNAUTHORIZED} from "./common";
+import { UNAUTHORIZED } from "./common";
 declare var UIkit: any;
 
 
 common.onGetAndDocumentLoaded("/webshop/product_edit_data/" + window.productId, (value: any) => {
     common.addSidebarListeners();
 
-    const {categories, product, actions, images, filters, action_categories} = value;
+    const { categories, product, actions, images, filters, action_categories } = value;
     const apiBasePath = window.apiBasePath;
 
     let categorySelect = document.getElementById("category")!;
@@ -43,23 +43,23 @@ common.onGetAndDocumentLoaded("/webshop/product_edit_data/" + window.productId, 
     document.querySelector("#unit")!.addEventListener("input", ev => updateUnit());
     updateUnit();
 
-    let deletedActionIDs : (number|string)[] = [];
-    let deletedImageIDs : (number|string)[] = [];
+    let deletedActionIDs: (number | string)[] = [];
+    let deletedImageIDs: (number | string)[] = [];
 
     function addAction(action: any) {
         let options = "";
         for (const cat of action_categories) {
-            options += `<option value="${ cat.id }" ${ action.action_id == cat.id ? "selected" : "" }>${cat.name}</option>`;
+            options += `<option value="${cat.id}" ${action.action_id == cat.id ? "selected" : ""}>${cat.name}</option>`;
         }
 
 
         const wrapper = document.createElement('div');
         wrapper.innerHTML =
-            `<div data-id="${ action.id }" class="product-action uk-flex uk-margin">
+            `<div data-id="${action.id}" class="product-action uk-flex uk-margin">
                 <select required class="uk-select uk-margin-right">
                     ${options}
                 </select>
-                <input required class="uk-input uk-margin-right" type="number" value="${ action.value }" />
+                <input required class="uk-input uk-margin-right" type="number" value="${ action.value}" />
                 <button type="button" class="uk-button uk-button-danger uk-button-small" uk-icon="trash"></button>
             </div>`;
         const element = <HTMLElement>wrapper.firstChild;
@@ -89,10 +89,10 @@ common.onGetAndDocumentLoaded("/webshop/product_edit_data/" + window.productId, 
 
     // Handle image uploads
     const imageList = document.getElementById('image-list')!;
-    function addImage(src: any, name: string, id: (number|string)) {
+    function addImage(src: any, name: string, id: (number | string)) {
         const wrapper = document.createElement('div');
         wrapper.innerHTML =
-            `<div data-id="${ id }" data-name="${ name }" class="product-image uk-flex uk-margin">
+            `<div data-id="${id}" data-name="${name}" class="product-image uk-flex uk-margin">
                 <img/>
                 <button type="button" class="uk-button uk-button-danger uk-button-small" uk-icon="trash"></button>
             </div>`;
@@ -160,7 +160,7 @@ common.onGetAndDocumentLoaded("/webshop/product_edit_data/" + window.productId, 
                 history.replaceState(history.state, "Edit Product", window.productId + "/edit");
             }
 
-            const futures : Promise<any>[] = [];
+            const futures: Promise<any>[] = [];
             [].forEach.call(document.querySelectorAll(".product-action"), (element: HTMLElement) => {
                 const id2 = element.getAttribute("data-id");
                 const value = element.querySelector("input")!.value;
@@ -182,7 +182,7 @@ common.onGetAndDocumentLoaded("/webshop/product_edit_data/" + window.productId, 
                         element.setAttribute("data-id", json.data.id);
                     }
                     // UIkit.modal.alert("Saved action");
-                }).catch (json => {
+                }).catch(json => {
                     if (json.status === UNAUTHORIZED) {
                         UIkit.modal.alert("<h2>Failed to save action</h2>You are not logged in");
                     } else {
@@ -228,7 +228,7 @@ common.onGetAndDocumentLoaded("/webshop/product_edit_data/" + window.productId, 
                     future.then(json => {
                         // Update the form with the image id
                         element.setAttribute("data-id", json.data.id);
-                    }).catch (json => {
+                    }).catch(json => {
                         if (json.status === UNAUTHORIZED) {
                             UIkit.modal.alert("<h2>Failed to save image</h2>You are not logged in");
                         } else {

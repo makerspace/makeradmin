@@ -1,6 +1,6 @@
 import * as common from "./common"
 import * as login from "./login"
-import {logout, UNAUTHORIZED} from "./common";
+import { logout, UNAUTHORIZED } from "./common";
 declare var UIkit: any;
 
 
@@ -105,9 +105,9 @@ common.documentLoaded().then(() => {
         return `
             <fieldset class="data-uk-margin">
                 <legend><i uk-icon="lock"></i> Medlemsskap</legend>
-                ${renderInfo({active: membership.membership_active, enddate: membership.membership_end}, membershipStrings)}
-                ${renderInfo({active: membership.labaccess_active, enddate: membership.labaccess_end}, labaccessStrings)}
-                ${membership.special_labaccess_active ? renderInfo({active: membership.special_labaccess_active, enddate: membership.special_labaccess_end}, specialLabaccessStrings) : ``}
+                ${renderInfo({ active: membership.membership_active, enddate: membership.membership_end }, membershipStrings)}
+                ${renderInfo({ active: membership.labaccess_active, enddate: membership.labaccess_end }, labaccessStrings)}
+                ${membership.special_labaccess_active ? renderInfo({ active: membership.special_labaccess_active, enddate: membership.special_labaccess_end }, specialLabaccessStrings) : ``}
                 ${pendingAccess}
             </fieldset>`;
     }
