@@ -81,8 +81,8 @@ class QuizManager extends React.Component<{}, State> {
                 <div className="quiz-more-questions">
                     <span>Do you have more questions? Join us on Slack or Facebook and ask away!</span>
                     <ul>
-                        <li><a href="https://wiki.makerspace.se/Slack"><img src="/static/images/slack_logo_transparent.png"></img></a></li>
-                        <li><a href="https://www.facebook.com/groups/makerspace.se"><img src="/static/images/facebook_logo_transparent.png"></img></a></li>
+                        <li><a href="https://wiki.makerspace.se/Slack"><img src={`${window.staticBasePath}/images/slack_logo_transparent.png`}></img></a></li>
+                        <li><a href="https://www.facebook.com/groups/makerspace.se"><img src={`${window.staticBasePath}/images/facebook_logo_transparent.png`}></img></a></li>
                     </ul>
                 </div>
             </div>;
