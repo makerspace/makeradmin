@@ -1,8 +1,37 @@
 import * as common from "./common"
 import React from 'react'
 import ReactDOM from 'react-dom';
+import { login_via_single_use_link } from './login'
 
 declare var UIkit: any;
+
+const Login = ({ redirect }: { redirect: string }) => {
+    let [tag, setTag] = React.useState("");
+
+    return (
+        <div className="uk-width-medium">
+            <form className="uk-form" onSubmit={e => {
+                e.preventDefault();
+                if (tag) {
+                    login_via_single_use_link(tag, redirect);
+                } else {
+                    UIkit.modal.alert("You need to enter your email");
+                }
+            }}>
+                <div className="uk-form-row" style={{ margin: "16px 0" }}>
+                    <input autoFocus className="uk-form-large uk-width-1-1" type="text" placeholder="Email/Member number" value={tag} onChange={(v) => setTag(v.target.value)} />
+                </div>
+
+                <div className="uk-form-row" style={{ margin: "16px 0" }}>
+                    <button className="uk-width-1-1 uk-button uk-button-primary uk-button-large"><span className="uk-icon-check" />
+                        Continue
+                    </button>
+                </div>
+            </form>
+            <p style={{ textAlign: "center" }}><a href="/shop/register">Become a member</a></p>
+        </div>
+    );
+}
 
 interface Question {
     id: number,
@@ -95,14 +124,16 @@ class QuizManager extends React.Component<{}, State> {
                         and also many things that you might not have thought about but that are important for you to know in order to make Stockholm Makerspace work well.</p>
                     <p>Note that this is not intended as test of your knowledge, it is a way for new members to learn how things work without having to read through a long and boring document. Don't worry if you pick an incorrect answer, the questions you answered incorrectly
                     will repeat until you have answered all of them correctly and are thus familiar with the basics of how things work at Stockholm Makerspace.
-                    Completing this quiz is however a mandatory part of being a member. You will receive nagging emails every few days or so until you complete the quiz.
+                    Completing this quiz is a mandatory part of becoming a member. You will receive nagging emails every few days or so until you complete the quiz.
                     </p>
                     <p>The quiz will save your progress automatically so you can close this window and return here at any time to continue with the quiz.</p>
                     {this.state.loginState == "logged out"
                         ?
                         <>
                             <p>You need to be logged in to take the quiz. Please log in and then return to this quiz.</p>
-                            <a className="uk-button uk-button-primary quiz-button-start" href="/member">Log in</a>
+                            <div className="quiz-login">
+                                <Login redirect={window.location.href} />
+                            </div>
                         </>
                         :
                         <>

@@ -1,0 +1,17 @@
+{% extends "email_body_base.html" %}
+
+{% block separator %}
+{% endblock %}
+
+{% block english %}
+<h2>Improve your makerspace knowledge!</h2>
+<p>Hello {{member.firstname}}. It looks like you haven't completed the Makerspace Quiz yet.</p>
+<p>Completing this quiz is a mandatory part of being a member. It goes through many common questions that members have and things we want members to know about.
+ Since you have been a member for a while it might all be super easy, but there may be some nuggets of information there which you didn't know about.</p>
+<p>Note that this is not intended as test of your knowledge, it is a way for members to learn how things work without having to read through a long and boring document.
+</p>
+<p>The quiz only take a few minutes, just click on the link below to get started.</p>
+
+<a href="{{ url }}" style="display: block; width: 200px; text-decoration: none; color: #FFF; font-size: 16pt; border-radius: 10px; background: rgb(0, 168, 230); padding: 10px; text-align: center;">Start learning</a>
+
+{% endblock %}

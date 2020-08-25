@@ -1186,6 +1186,14 @@ $palette-red: $palette4;
         width: 200px;
     }
 
+    .quiz-login {
+        align-self: center;
+
+        a {
+            color: $palette2;
+        }
+    }
+
     ul {
         margin-top: 8px;
         margin-bottom: 8px;

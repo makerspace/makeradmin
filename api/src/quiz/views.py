@@ -6,7 +6,9 @@ from quiz import service
 from service.db import db_session
 from quiz.models import QuizQuestion, QuizQuestionOption, QuizAnswer
 from service.entity import OrmSingeRelation
-from sqlalchemy import func, exists
+from sqlalchemy import func, exists, distinct
+from membership.models import Member
+from dataclasses import dataclass
 
 service.entity_routes(
     path="/question",
@@ -39,7 +41,7 @@ service.related_entity_routes(
 def answer_question(question_id):
     data = request.json
     option_id = int(data["option_id"])
-    
+
     option = db_session \
         .query(QuizQuestionOption) \
         .join(QuizQuestionOption.question) \
@@ -57,7 +59,7 @@ def answer_question(question_id):
     for option in question.options:
         option = quiz_question_option_entity.to_obj(option)
         json["options"].append(option)
-    
+
     return json
 
 
@@ -68,13 +70,13 @@ def next_question(include_correct=False):
         .join(QuizQuestion.answers) \
         .filter(QuizAnswer.member_id == g.user_id) \
         .filter((QuizAnswer.correct) & (QuizAnswer.deleted_at == None))
-    
+
     # Find questions which the user has not yet answered correctly
     q = db_session.query(QuizQuestion) \
         .filter(QuizQuestion.id.notin_(correct_questions)) \
         .filter(QuizQuestion.deleted_at == None) \
         .order_by(func.random())
-    
+
     # Pick the first one
     question = q.first()
 
@@ -88,9 +90,45 @@ def next_question(include_correct=False):
         del option["correct"]
         del option["answer_description"]
         json["options"].append(option)
-    
+
     del json["answer_description"]
-    
+
     return json
 
+
+@service.route("/unfinished", method=GET, permission=PUBLIC)
+def quiz_member_answer_stats_route():
+    return quiz_member_answer_stats()
+
+@dataclass(frozen=True)
+class QuizMemberStat:
+    member_id: int
+    remaining_questions: int
+    correctly_answered_questions: int
+
+def quiz_member_answer_stats():
+    ''' Returns all members which haven't completed the quiz'''
+
+    # Calculates how many questions each member has answered correctly
+    # Includes an entry for all members, even if it is zero
+    correctly_answered_questions = db_session.query(Member.member_id, func.count(distinct(QuizAnswer.option_id)).label("count")) \
+        .join(QuizAnswer, Member.member_id==QuizAnswer.member_id, isouter=True) \
+        .join(QuizAnswer.question, isouter=True) \
+        .filter((QuizAnswer.id == None) | ((QuizAnswer.correct) & (QuizAnswer.deleted_at == None) & (QuizQuestion.deleted_at == None))) \
+        .group_by(Member.member_id) \
+        .subquery()
+
+    question_count = db_session.query(QuizQuestion).filter(QuizQuestion.deleted_at == None).count()
+
+    members = db_session.query(Member.member_id, correctly_answered_questions.c.count) \
+        .join(correctly_answered_questions, (correctly_answered_questions.c.member_id==Member.member_id)) \
+        .filter(Member.deleted_at == None)
+
+    return [
+        QuizMemberStat(
+            member_id=member[0],
+            remaining_questions=question_count - member[1],
+            correctly_answered_questions=member[1],
+         ) for member in members.all()
+    ]
 

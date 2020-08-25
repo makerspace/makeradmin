@@ -20,6 +20,9 @@ class MessageTemplate(enum.Enum):
     BOX_WARNING = 'box_warning'
     BOX_FINAL_WARNING = 'box_final_warning'
     BOX_TERMINATED = 'box_terminated'
+    QUIZ_FIRST_NEWMEMBER = 'quiz_first_newmember'
+    QUIZ_FIRST_OLDMEMBER = 'quiz_first_oldmember'
+    QUIZ_REMINDER = 'quiz_reminder'
 
 
 class Message(Base):

@@ -17,6 +17,7 @@ from service import config
 from service.api_definition import USER, REQUIRED, BAD_VALUE, EXPIRED
 from service.db import db_session
 from service.error import TooManyRequests, ApiError, NotFound, Unauthorized, BadRequest, InternalServerError
+from typing import Optional
 
 
 logger = getLogger('makeradmin')
@@ -38,7 +39,7 @@ def get_member_by_user_identification(user_identification):
                        fields='user_identification', status="not found")
 
 
-def create_access_token(ip, browser, user_id):
+def create_access_token(ip, browser, user_id, valid_duration: Optional[timedelta]=None):
     assert user_id > 0
     
     access_token = AccessToken(
@@ -46,7 +47,7 @@ def create_access_token(ip, browser, user_id):
         access_token=generate_token(),
         browser=browser,
         ip=ip,
-        expires=datetime.utcnow() + timedelta(minutes=15),
+        expires=datetime.utcnow() + (timedelta(minutes=15) if valid_duration is None else valid_duration),
         lifetime=int(timedelta(days=14).total_seconds()),
     )
     

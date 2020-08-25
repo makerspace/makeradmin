@@ -9,7 +9,7 @@ function showError(message: string) {
     UIkit.notification(message, { timeout: 0, status: "danger" });
 }
 
-function login_via_single_use_link(tag: string, redirect: string | null) {
+export function login_via_single_use_link(tag: string, redirect: string | null) {
     const apiBasePath = window.apiBasePath;
 
     const data: any = { user_identification: tag };
