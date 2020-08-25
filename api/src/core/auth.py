@@ -46,7 +46,7 @@ def create_access_token(ip, browser, user_id):
         access_token=generate_token(),
         browser=browser,
         ip=ip,
-        expires=datetime.utcnow() + timedelta(minutes=5),
+        expires=datetime.utcnow() + timedelta(minutes=15),
         lifetime=int(timedelta(days=14).total_seconds()),
     )
     
