@@ -3,6 +3,7 @@ from contextlib import closing
 from datetime import datetime, timedelta
 from os.path import abspath, dirname
 from time import sleep
+import time
 from urllib.parse import quote_plus
 
 import requests
@@ -224,12 +225,17 @@ if __name__ == '__main__':
         domain = config.get('MAILGUN_DOMAIN')
         sender = config.get('MAILGUN_FROM')
         to_override = config.get('MAILGUN_TO_OVERRIDE')
+        last_quiz_check = time.time()
 
         while True:
             sleep(args.sleep)
             try:
                 labaccess_reminder(render_template)
-                quiz_reminders()
+                if time.time() - last_quiz_check > 30:
+                    # This check is kinda slow (takes maybe 100 ms)
+                    # so don't do it as often. It's not time critical anyway.
+                    last_quiz_check = time.time()
+                    quiz_reminders()
                 db_session.commit()
                 send_messages(key, domain, sender, to_override, args.limit)
                 db_session.commit()
