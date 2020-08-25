@@ -139,7 +139,6 @@ def quiz_reminders():
     quiz_members = quiz_member_answer_stats()
     now = datetime.utcnow()
 
-    logger.info("Checking quiz reminders")
     members, memberships = get_members_and_membership()
     id_to_member = {
         member.member_id: (member, membership) for member, membership in zip(members, memberships)
@@ -202,8 +201,6 @@ def quiz_reminders():
                 correctly_answered_questions=quiz_member.correctly_answered_questions,
                 url=url,
             )
-
-    logger.info("Done")
 
 if __name__ == '__main__':
 
