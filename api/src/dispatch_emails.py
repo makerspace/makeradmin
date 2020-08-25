@@ -156,7 +156,7 @@ def quiz_reminders():
                 continue
 
             # Only send messages to members whose labaccess is active
-            if not membership.labaccess_active:
+            if not membership.effective_labaccess_active:
                 continue
 
             if member.email not in ["ronjaharletun@hotmail.com", "aron.granberg@gmail.com", "tbbw82@gmail.com", "leila_el@hotmail.com", "lina.ottosson93@gmail.com", "erasmus.cedernaes@gmail.com", "makerspace.se@cj.se", "oskarstrid01@gmail.com", "farouk.hashim@Gmail.com", "lundquist.andreas@gmail.com", "info@erikcederberg.se"]:
