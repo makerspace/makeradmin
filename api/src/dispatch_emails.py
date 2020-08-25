@@ -160,7 +160,7 @@ def quiz_reminders():
             if not membership.labaccess_active:
                 continue
 
-            if member.email not in ["aron.granberg@gmai.com"]:
+            if member.email not in ["aron.granberg@gmail.com"]:
                 continue
 
             sent_newmember = already_sent_message(MessageTemplate.QUIZ_FIRST_NEWMEMBER, member, QUIZ_DAYS_FROM_FIRST_EMAIL_TO_REMINDER)
