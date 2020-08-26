@@ -140,18 +140,21 @@ def quiz_reminders():
     quiz_members = quiz_member_answer_stats()
     now = datetime.utcnow()
 
+    logger.info("Quiz start")
     members, memberships = get_members_and_membership()
     id_to_member = {
         member.member_id: (member, membership) for member, membership in zip(members, memberships)
     }
-    logger.info("Quiz start")
+    logger.info("Membership end")
 
+    logger.info("Pending")
     # Get all pending shop actions and check which members have pending purchases of lab access
     actions = pending_actions()
     members_with_pending_labaccess = set()
     for action in actions:
         if action["action"]["action"] == "add_labaccess_days" and action["action"]["value"] > 0:
             members_with_pending_labaccess.add(action["member_id"])
+    logger.info("Pending end")
 
     for quiz_member in quiz_members:
         if quiz_member.remaining_questions > 0:
