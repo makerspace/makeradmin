@@ -158,6 +158,9 @@ def quiz_reminders():
                 continue
 
             actions = pending_actions(member.member_id)
+            if len(actions) > 0:
+                print([action["action"]["action"] for action in actions])
+
             pending_labaccess = any(action["action"]["action"] == "add_labaccess_days" and action["action"]["value"] > 0 for action in actions)
 
             # Only send messages to members whose labaccess is active or pending
