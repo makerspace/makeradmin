@@ -156,6 +156,21 @@ def quiz_reminders():
             members_with_pending_labaccess.add(action["member_id"])
     logger.info("Pending end")
 
+    recently_sent_messages = db_session.query(Message.member, func.count(Message.member)).filter(
+        Message.member == member,
+          ((Message.template == MessageTemplate.QUIZ_FIRST_NEWMEMBER.value) & (now - timedelta(days=QUIZ_DAYS_FROM_FIRST_EMAIL_TO_REMINDER) < Message.created_at))
+        | ((Message.template == MessageTemplate.QUIZ_FIRST_OLDMEMBER.value) & (now - timedelta(days=QUIZ_DAYS_FROM_FIRST_EMAIL_TO_REMINDER) < Message.created_at))
+        | ((Message.template == MessageTemplate.QUIZ_REMINDER.value) & (now - timedelta(days=QUIZ_DAYS_BETWEEN_REMINDERS) < Message.created_at))
+    ).group_by(Message.member)
+    recently_sent_messages_by_member = set(member for (member, count) in zip(recently_sent_messages) if count > 0)
+
+    sent_first_message = db_session.query(Message.member, func.count(Message.member)).filter(
+        Message.member == member,
+          (Message.template == MessageTemplate.QUIZ_FIRST_NEWMEMBER.value)
+        | (Message.template == MessageTemplate.QUIZ_FIRST_OLDMEMBER.value)
+    ).group_by(Message.member)
+    sent_first_message_by_member = set(member for (member, count) in zip(sent_first_message) if count > 0)
+
     for quiz_member in quiz_members:
         if quiz_member.remaining_questions > 0:
             member, membership = id_to_member.get(quiz_member.member_id)
@@ -177,17 +192,11 @@ def quiz_reminders():
             # if member.email not in ["ronjaharletun@hotmail.com", "aron.granberg@gmail.com", "tbbw82@gmail.com", "leila_el@hotmail.com", "lina.ottosson93@gmail.com", "erasmus.cedernaes@gmail.com", "makerspace.se@cj.se", "oskarstrid01@gmail.com", "farouk.hashim@Gmail.com", "lundquist.andreas@gmail.com", "info@erikcederberg.se"]:
             #     continue
 
-            sent_newmember = already_sent_message(MessageTemplate.QUIZ_FIRST_NEWMEMBER, member, QUIZ_DAYS_FROM_FIRST_EMAIL_TO_REMINDER)
-            sent_oldmember = already_sent_message(MessageTemplate.QUIZ_FIRST_OLDMEMBER, member, QUIZ_DAYS_FROM_FIRST_EMAIL_TO_REMINDER)
-            sent_reminder = already_sent_message(MessageTemplate.QUIZ_REMINDER, member, QUIZ_DAYS_BETWEEN_REMINDERS)
-
-            if sent_newmember or sent_oldmember or sent_reminder:
+            # Check if a message has already been sent within given time periods
+            if member.member_id in recently_sent_messages_by_member:
                 continue
 
-            firstmessage_sent = db_session.query(Message).filter(
-                Message.member == member,
-                (Message.template == MessageTemplate.QUIZ_FIRST_OLDMEMBER.value) | (Message.template == MessageTemplate.QUIZ_FIRST_NEWMEMBER.value)
-            ).count() > 0
+            firstmessage_sent = member.member_id in sent_first_message_by_member
 
             template = MessageTemplate.QUIZ_REMINDER
             if not firstmessage_sent:
