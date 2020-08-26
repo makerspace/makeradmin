@@ -144,7 +144,7 @@ def quiz_reminders():
     id_to_member = {
         member.member_id: (member, membership) for member, membership in zip(members, memberships)
     }
-    print("Quiz start")
+    logger.info("Quiz start")
 
     for quiz_member in quiz_members:
         if quiz_member.remaining_questions > 0:
@@ -209,7 +209,7 @@ def quiz_reminders():
             #     correctly_answered_questions=quiz_member.correctly_answered_questions,
             #     url=url,
             # )
-    print("Quiz end")
+    logger.info("Quiz end")
 
 if __name__ == '__main__':
 
