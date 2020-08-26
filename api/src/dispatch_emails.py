@@ -140,7 +140,6 @@ def quiz_reminders():
     quiz_members = quiz_member_answer_stats()
     now = datetime.utcnow()
 
-    logger.info("Quiz start")
     members, memberships = get_members_and_membership()
     id_to_member = {
         member.member_id: (member, membership) for member, membership in zip(members, memberships)
@@ -208,17 +207,15 @@ def quiz_reminders():
             access_token = create_access_token("localhost", "automatic quiz reminder", member.member_id, valid_duration=timedelta(days=2))['access_token']
             url = get_public_url(f"/member/login/{access_token}?redirect=" + quote_plus(redirect))
 
-            logger.info("Sending to " + member.email)
-            # send_message(
-            #     template=template,
-            #     member=member,
-            #     db_session=db_session,
-            #     render_template=render_template,
-            #     remaining_questions=quiz_member.remaining_questions,
-            #     correctly_answered_questions=quiz_member.correctly_answered_questions,
-            #     url=url,
-            # )
-    logger.info("Quiz end")
+            send_message(
+                template=template,
+                member=member,
+                db_session=db_session,
+                render_template=render_template,
+                remaining_questions=quiz_member.remaining_questions,
+                correctly_answered_questions=quiz_member.correctly_answered_questions,
+                url=url,
+            )
 
 if __name__ == '__main__':
 
@@ -246,7 +243,7 @@ if __name__ == '__main__':
             sleep(args.sleep)
             try:
                 labaccess_reminder(render_template)
-                if time.time() - last_quiz_check > 5:
+                if time.time() - last_quiz_check > 20:
                     # This check is kinda slow (takes maybe 100 ms)
                     # so don't do it as often. It's not time critical anyway.
                     last_quiz_check = time.time()
