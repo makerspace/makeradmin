@@ -207,16 +207,15 @@ def quiz_reminders():
             access_token = create_access_token("localhost", "automatic quiz reminder", member.member_id, valid_duration=timedelta(days=2))['access_token']
             url = get_public_url(f"/member/login/{access_token}?redirect=" + quote_plus(redirect))
 
-            logger.info("Sending " + member.email)
-            # send_message(
-            #     template=template,
-            #     member=member,
-            #     db_session=db_session,
-            #     render_template=render_template,
-            #     remaining_questions=quiz_member.remaining_questions,
-            #     correctly_answered_questions=quiz_member.correctly_answered_questions,
-            #     url=url,
-            # )
+            send_message(
+                template=template,
+                member=member,
+                db_session=db_session,
+                render_template=render_template,
+                remaining_questions=quiz_member.remaining_questions,
+                correctly_answered_questions=quiz_member.correctly_answered_questions,
+                url=url,
+            )
 
 if __name__ == '__main__':
 
