@@ -146,6 +146,13 @@ def quiz_reminders():
     }
     logger.info("Quiz start")
 
+    # Get all pending shop actions and check which members have pending purchases of lab access
+    actions = pending_actions()
+    members_with_pending_labaccess = set()
+    for action in actions:
+        if action["action"]["action"] == "add_labaccess_days" and action["action"]["value"] > 0:
+            members_with_pending_labaccess.add(action["member_id"])
+
     for quiz_member in quiz_members:
         if quiz_member.remaining_questions > 0:
             member, membership = id_to_member.get(quiz_member.member_id)
@@ -158,8 +165,7 @@ def quiz_reminders():
                 continue
 
             # Check if the member has any pending purchase of lab access (important to ensure new members get the quiz before the key handout if possible)
-            actions = pending_actions(member.member_id)
-            pending_labaccess = any(action["action"]["action"] == "add_labaccess_days" and action["action"]["value"] > 0 for action in actions)
+            pending_labaccess = member.member_id in members_with_pending_labaccess
 
             # Only send messages to members whose labaccess is active or pending
             if not (membership.effective_labaccess_active or pending_labaccess):
@@ -200,6 +206,7 @@ def quiz_reminders():
             access_token = create_access_token("localhost", "automatic quiz reminder", member.member_id, valid_duration=timedelta(days=2))['access_token']
             url = get_public_url(f"/member/login/{access_token}?redirect=" + quote_plus(redirect))
 
+            print("Sending to " + member.email)
             # send_message(
             #     template=template,
             #     member=member,
