@@ -184,9 +184,6 @@ def quiz_reminders():
             if not (membership.effective_labaccess_active or pending_labaccess):
                 continue
 
-            # if member.email not in ["ronjaharletun@hotmail.com", "aron.granberg@gmail.com", "tbbw82@gmail.com", "leila_el@hotmail.com", "lina.ottosson93@gmail.com", "erasmus.cedernaes@gmail.com", "makerspace.se@cj.se", "oskarstrid01@gmail.com", "farouk.hashim@Gmail.com", "lundquist.andreas@gmail.com", "info@erikcederberg.se"]:
-            #     continue
-
             # Check if a message has already been sent within given time periods
             if member.member_id in recently_sent_messages_by_member:
                 continue
@@ -213,7 +210,7 @@ def quiz_reminders():
             access_token = create_access_token("localhost", "automatic quiz reminder", member.member_id, valid_duration=timedelta(days=2))['access_token']
             url = get_public_url(f"/member/login/{access_token}?redirect=" + quote_plus(redirect))
 
-            print("Sending to " + member.email)
+            logger.info("Sending to " + member.email)
             # send_message(
             #     template=template,
             #     member=member,
