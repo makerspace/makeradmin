@@ -22,6 +22,7 @@ from service.db import create_mysql_engine, db_session
 from service.logging import logger
 from shop.models import ProductAction
 from shop.transactions import pending_action_value_sum
+from shop.shop_data import pending_actions
 from quiz.views import quiz_member_answer_stats
 from core.auth import create_access_token
 
@@ -155,12 +156,15 @@ def quiz_reminders():
             if member.email is None or len(member.email) == 0:
                 continue
 
-            # Only send messages to members whose labaccess is active
-            if not membership.effective_labaccess_active:
+            actions = pending_actions(member.member_id)
+            pending_labaccess = any(action["action"]["action"] == "add_labaccess_days" and action["action"]["value"] > 0 for action in actions)
+
+            # Only send messages to members whose labaccess is active or pending
+            if not (membership.effective_labaccess_active or pending_labaccess):
                 continue
 
-            if member.email not in ["ronjaharletun@hotmail.com", "aron.granberg@gmail.com", "tbbw82@gmail.com", "leila_el@hotmail.com", "lina.ottosson93@gmail.com", "erasmus.cedernaes@gmail.com", "makerspace.se@cj.se", "oskarstrid01@gmail.com", "farouk.hashim@Gmail.com", "lundquist.andreas@gmail.com", "info@erikcederberg.se"]:
-                continue
+            # if member.email not in ["ronjaharletun@hotmail.com", "aron.granberg@gmail.com", "tbbw82@gmail.com", "leila_el@hotmail.com", "lina.ottosson93@gmail.com", "erasmus.cedernaes@gmail.com", "makerspace.se@cj.se", "oskarstrid01@gmail.com", "farouk.hashim@Gmail.com", "lundquist.andreas@gmail.com", "info@erikcederberg.se"]:
+            #     continue
 
             sent_newmember = already_sent_message(MessageTemplate.QUIZ_FIRST_NEWMEMBER, member, QUIZ_DAYS_FROM_FIRST_EMAIL_TO_REMINDER)
             sent_oldmember = already_sent_message(MessageTemplate.QUIZ_FIRST_OLDMEMBER, member, QUIZ_DAYS_FROM_FIRST_EMAIL_TO_REMINDER)
@@ -180,9 +184,11 @@ def quiz_reminders():
                 # The oldmember template was used when the quiz was first introduced to give
                 # existing members a customized message.
                 # It also applies to those who haven't been members for a long time and become members again.
-                is_oldmember = member.created_at < now - timedelta(days=30)
+                is_oldmember = member.created_at < now - timedelta(days=5)
                 if is_oldmember:
                     template = MessageTemplate.QUIZ_FIRST_OLDMEMBER
+                    # Ignore old members. We don't send the quiz to them right now
+                    continue
                 else:
                     template = MessageTemplate.QUIZ_FIRST_NEWMEMBER
 
@@ -191,16 +197,17 @@ def quiz_reminders():
             # It's not like this is a security risk, having access to someones email will automatically allow one to login anyway.
             access_token = create_access_token("localhost", "automatic quiz reminder", member.member_id, valid_duration=timedelta(days=2))['access_token']
             url = get_public_url(f"/member/login/{access_token}?redirect=" + quote_plus(redirect))
+            print("Sending to " + member.email)
 
-            send_message(
-                template=template,
-                member=member,
-                db_session=db_session,
-                render_template=render_template,
-                remaining_questions=quiz_member.remaining_questions,
-                correctly_answered_questions=quiz_member.correctly_answered_questions,
-                url=url,
-            )
+            # send_message(
+            #     template=template,
+            #     member=member,
+            #     db_session=db_session,
+            #     render_template=render_template,
+            #     remaining_questions=quiz_member.remaining_questions,
+            #     correctly_answered_questions=quiz_member.correctly_answered_questions,
+            #     url=url,
+            # )
 
 if __name__ == '__main__':
 
