@@ -122,7 +122,7 @@ class QuizManager extends React.Component<{}, State> {
                     <p>Hello and welcome as a member of Stockholm Makerspace! We are sure you are excited to get started on a project at the makerspace!</p>
                     <p>To help you get started we have put together this quiz as a learning tool. It will go through many common questions you might have
                         and also many things that you might not have thought about but that are important for you to know in order to make Stockholm Makerspace work well.</p>
-                    <p>Note that this is not intended as test of your knowledge, it is a way for new members to learn how things work without having to read through a long and boring document. Don't worry if you pick an incorrect answer, the questions you answered incorrectly
+                    <p>Note that this is not intended as a test of your knowledge, it is a way for new members to learn how things work without having to read through a long and boring document. Don't worry if you pick an incorrect answer, the questions you answered incorrectly
                     will repeat until you have answered all of them correctly and are thus familiar with the basics of how things work at Stockholm Makerspace.
                     Completing this quiz is a mandatory part of becoming a member. You will receive nagging emails every few days or so until you complete the quiz.
                     </p>
