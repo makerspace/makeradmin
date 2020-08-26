@@ -160,13 +160,13 @@ def quiz_reminders():
           ((Message.template == MessageTemplate.QUIZ_FIRST_NEWMEMBER.value) & (now - timedelta(days=QUIZ_DAYS_FROM_FIRST_EMAIL_TO_REMINDER) < Message.created_at))
         | ((Message.template == MessageTemplate.QUIZ_FIRST_OLDMEMBER.value) & (now - timedelta(days=QUIZ_DAYS_FROM_FIRST_EMAIL_TO_REMINDER) < Message.created_at))
         | ((Message.template == MessageTemplate.QUIZ_REMINDER.value) & (now - timedelta(days=QUIZ_DAYS_BETWEEN_REMINDERS) < Message.created_at))
-    ).group_by(Message.member)
+    ).group_by(Message.member).all()
     recently_sent_messages_by_member = set(member for (member, count) in zip(recently_sent_messages) if count > 0)
 
     sent_first_message = db_session.query(Message.member, func.count(Message.member)).filter(
           (Message.template == MessageTemplate.QUIZ_FIRST_NEWMEMBER.value)
         | (Message.template == MessageTemplate.QUIZ_FIRST_OLDMEMBER.value)
-    ).group_by(Message.member)
+    ).group_by(Message.member).all()
     sent_first_message_by_member = set(member for (member, count) in zip(sent_first_message) if count > 0)
 
     for quiz_member in quiz_members:
