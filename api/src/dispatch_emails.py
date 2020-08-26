@@ -188,7 +188,7 @@ def quiz_reminders():
                 # existing members a customized message.
                 # It also applies to those who haven't been members for a long time and become members again.
                 is_oldmember = member.created_at < now - timedelta(days=5)
-                print("Member age " + (now - member.created_at).days)
+                print("Member age " + str((now - member.created_at).days))
                 if is_oldmember:
                     template = MessageTemplate.QUIZ_FIRST_OLDMEMBER
                     # Ignore old members. We don't send the quiz to them right now
