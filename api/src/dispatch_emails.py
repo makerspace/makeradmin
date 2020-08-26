@@ -137,6 +137,7 @@ def labaccess_reminder(render_template):
         )
 
 def quiz_reminders():
+    print("Checking for quiz")
     quiz_members = quiz_member_answer_stats()
     now = datetime.utcnow()
 
@@ -162,6 +163,8 @@ def quiz_reminders():
             # Only send messages to members whose labaccess is active or pending
             if not (membership.effective_labaccess_active or pending_labaccess):
                 continue
+
+            print("Testing " + member.email)
 
             # if member.email not in ["ronjaharletun@hotmail.com", "aron.granberg@gmail.com", "tbbw82@gmail.com", "leila_el@hotmail.com", "lina.ottosson93@gmail.com", "erasmus.cedernaes@gmail.com", "makerspace.se@cj.se", "oskarstrid01@gmail.com", "farouk.hashim@Gmail.com", "lundquist.andreas@gmail.com", "info@erikcederberg.se"]:
             #     continue
@@ -208,6 +211,7 @@ def quiz_reminders():
             #     correctly_answered_questions=quiz_member.correctly_answered_questions,
             #     url=url,
             # )
+    print("Done")
 
 if __name__ == '__main__':
 
@@ -235,7 +239,7 @@ if __name__ == '__main__':
             sleep(args.sleep)
             try:
                 labaccess_reminder(render_template)
-                if time.time() - last_quiz_check > 30:
+                if time.time() - last_quiz_check > 5:
                     # This check is kinda slow (takes maybe 100 ms)
                     # so don't do it as often. It's not time critical anyway.
                     last_quiz_check = time.time()
