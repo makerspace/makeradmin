@@ -145,29 +145,26 @@ def quiz_reminders():
     id_to_member = {
         member.member_id: (member, membership) for member, membership in zip(members, memberships)
     }
-    logger.info("Membership end")
 
-    logger.info("Pending")
     # Get all pending shop actions and check which members have pending purchases of lab access
     actions = pending_actions()
     members_with_pending_labaccess = set()
     for action in actions:
         if action["action"]["action"] == "add_labaccess_days" and action["action"]["value"] > 0:
             members_with_pending_labaccess.add(action["member_id"])
-    logger.info("Pending end")
 
-    recently_sent_messages = db_session.query(Message.member, func.count(Message.member)).filter(
+    recently_sent_messages = db_session.query(Message.member_id, func.count(Message.member)).filter(
           ((Message.template == MessageTemplate.QUIZ_FIRST_NEWMEMBER.value) & (now - timedelta(days=QUIZ_DAYS_FROM_FIRST_EMAIL_TO_REMINDER) < Message.created_at))
         | ((Message.template == MessageTemplate.QUIZ_FIRST_OLDMEMBER.value) & (now - timedelta(days=QUIZ_DAYS_FROM_FIRST_EMAIL_TO_REMINDER) < Message.created_at))
         | ((Message.template == MessageTemplate.QUIZ_REMINDER.value) & (now - timedelta(days=QUIZ_DAYS_BETWEEN_REMINDERS) < Message.created_at))
-    ).group_by(Message.member).all()
-    recently_sent_messages_by_member = set(member for (member, count) in zip(recently_sent_messages) if count > 0)
+    ).group_by(Message.member_id).all()
+    recently_sent_messages_by_member = set(member for (member, count) in recently_sent_messages if count > 0)
 
-    sent_first_message = db_session.query(Message.member, func.count(Message.member)).filter(
+    sent_first_message = db_session.query(Message.member_id, func.count(Message.member)).filter(
           (Message.template == MessageTemplate.QUIZ_FIRST_NEWMEMBER.value)
         | (Message.template == MessageTemplate.QUIZ_FIRST_OLDMEMBER.value)
-    ).group_by(Message.member).all()
-    sent_first_message_by_member = set(member for (member, count) in zip(sent_first_message) if count > 0)
+    ).group_by(Message.member_id).all()
+    sent_first_message_by_member = set(member for (member, count) in sent_first_message if count > 0)
 
     for quiz_member in quiz_members:
         if quiz_member.remaining_questions > 0:
