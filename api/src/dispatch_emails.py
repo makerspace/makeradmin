@@ -144,6 +144,7 @@ def quiz_reminders():
     id_to_member = {
         member.member_id: (member, membership) for member, membership in zip(members, memberships)
     }
+    print("Quiz start")
 
     for quiz_member in quiz_members:
         if quiz_member.remaining_questions > 0:
@@ -198,7 +199,6 @@ def quiz_reminders():
             # It's not like this is a security risk, having access to someones email will automatically allow one to login anyway.
             access_token = create_access_token("localhost", "automatic quiz reminder", member.member_id, valid_duration=timedelta(days=2))['access_token']
             url = get_public_url(f"/member/login/{access_token}?redirect=" + quote_plus(redirect))
-            logger.info("Sending to " + member.email)
 
             # send_message(
             #     template=template,
@@ -209,6 +209,7 @@ def quiz_reminders():
             #     correctly_answered_questions=quiz_member.correctly_answered_questions,
             #     url=url,
             # )
+    print("Quiz end")
 
 if __name__ == '__main__':
 
