@@ -137,7 +137,6 @@ def labaccess_reminder(render_template):
         )
 
 def quiz_reminders():
-    print("Checking for quiz")
     quiz_members = quiz_member_answer_stats()
     now = datetime.utcnow()
 
@@ -157,17 +156,13 @@ def quiz_reminders():
             if member.email is None or len(member.email) == 0:
                 continue
 
+            # Check if the member has any pending purchase of lab access (important to ensure new members get the quiz before the key handout if possible)
             actions = pending_actions(member.member_id)
-            if len(actions) > 0:
-                print([action["action"]["action"] for action in actions])
-
             pending_labaccess = any(action["action"]["action"] == "add_labaccess_days" and action["action"]["value"] > 0 for action in actions)
 
             # Only send messages to members whose labaccess is active or pending
             if not (membership.effective_labaccess_active or pending_labaccess):
                 continue
-
-            print("Testing " + member.email)
 
             # if member.email not in ["ronjaharletun@hotmail.com", "aron.granberg@gmail.com", "tbbw82@gmail.com", "leila_el@hotmail.com", "lina.ottosson93@gmail.com", "erasmus.cedernaes@gmail.com", "makerspace.se@cj.se", "oskarstrid01@gmail.com", "farouk.hashim@Gmail.com", "lundquist.andreas@gmail.com", "info@erikcederberg.se"]:
             #     continue
@@ -190,8 +185,7 @@ def quiz_reminders():
                 # The oldmember template was used when the quiz was first introduced to give
                 # existing members a customized message.
                 # It also applies to those who haven't been members for a long time and become members again.
-                is_oldmember = member.created_at < now - timedelta(days=5)
-                print("Member age " + str((now - member.created_at).days))
+                is_oldmember = member.created_at < now - timedelta(days=14)
                 if is_oldmember:
                     template = MessageTemplate.QUIZ_FIRST_OLDMEMBER
                     # Ignore old members. We don't send the quiz to them right now
@@ -204,7 +198,7 @@ def quiz_reminders():
             # It's not like this is a security risk, having access to someones email will automatically allow one to login anyway.
             access_token = create_access_token("localhost", "automatic quiz reminder", member.member_id, valid_duration=timedelta(days=2))['access_token']
             url = get_public_url(f"/member/login/{access_token}?redirect=" + quote_plus(redirect))
-            print("Sending to " + member.email)
+            logger.info("Sending to " + member.email)
 
             # send_message(
             #     template=template,
@@ -215,7 +209,6 @@ def quiz_reminders():
             #     correctly_answered_questions=quiz_member.correctly_answered_questions,
             #     url=url,
             # )
-    print("Done")
 
 if __name__ == '__main__':
 
