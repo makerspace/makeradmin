@@ -7,16 +7,16 @@ import { Link } from 'react-router-dom';
 import * as _ from "underscore";
 
 class PasswordReset extends React.Component {
-    
-    constructor(props) {
+    input = React.createRef<HTMLInputElement>();
+
+    constructor(props: any) {
         super(props);
-        this.input = {};
     }
     
-    submit(e) {
+    submit(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault();
-        const password = this.input.value;
-        const token = this.props.location.query.reset_token;
+        const password = this.input.current.value;
+        const token = new RegExp("^\\?reset_token=([^&]*)$").exec(browserHistory.location.search)[1];
         
         auth.passwordReset(token, password)
             .then(response => {
@@ -44,7 +44,7 @@ class PasswordReset extends React.Component {
                             <div className="uk-form-row">
                                 <div className="uk-form-icon">
                                     <i className="uk-icon-user"/>
-                                    <input ref={i => { this.input = i; }} className="uk-form-large uk-form-width-large" type="password" placeholder="New Password" />
+                                    <input ref={this.input} className="uk-form-large uk-form-width-large" type="password" placeholder="New Password" />
                                 </div>
                             </div>
 
