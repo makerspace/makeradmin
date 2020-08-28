@@ -166,34 +166,38 @@ class App extends React.Component {
     render() {
         return (
             <Router history={browserHistory}>
-                {this.state.isLoggedIn && (
-                    <div style={{ marginBottom: "2em" }}>
-                        <Nav nav={nav} />
-                        <div className="uk-container uk-container-center uk-margin-top">
-                            <div className="uk-grid">
-                                <div className="uk-width-medium-1-4">
-                                    <SideNav nav={nav} />
-                                </div>
-                                <div className="uk-width-medium-3-4">
-                                    <Switch>
-                                        <Route exact path="/" component={Dashboard} />
-                                        <Route path="/request-password-reset" component={RequestPasswordReset} />
-                                        <Route path="/password-reset" component={PasswordReset} />
-                                        <Route path="/logout" component={Logout} />
-                                        <Route path="/membership" component={Membership} />
-                                        <Route path="/sales" component={Sales} />
-                                        <Route path="/messages" component={Messages} />
-                                        <Route path="/statistics" component={Statistics} />
-                                        <Route path="/settings" component={Settings} />
-                                        <Route path="/quiz" component={Quiz} />
-                                        <Route component={Page404} />
-                                    </Switch>
+                <Switch>
+                    <Route path="/logout" component={Logout} />
+                    <Route path="/request-password-reset" component={RequestPasswordReset} />
+                    <Route path="/password-reset" component={PasswordReset} />
+                    <Route path="*">
+                        {this.state.isLoggedIn && (
+                            <div style={{ marginBottom: "2em" }}>
+                                <Nav nav={nav} />
+                                <div className="uk-container uk-container-center uk-margin-top">
+                                    <div className="uk-grid">
+                                        <div className="uk-width-medium-1-4">
+                                            <SideNav nav={nav} />
+                                        </div>
+                                        <div className="uk-width-medium-3-4">
+                                            <Switch>
+                                                <Route exact path="/" component={Dashboard} />
+                                                <Route path="/membership" component={Membership} />
+                                                <Route path="/sales" component={Sales} />
+                                                <Route path="/messages" component={Messages} />
+                                                <Route path="/statistics" component={Statistics} />
+                                                <Route path="/settings" component={Settings} />
+                                                <Route path="/quiz" component={Quiz} />
+                                                <Route component={Page404} />
+                                            </Switch>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-                )}
-                {!this.state.isLoggedIn && <Login />}
+                        )}
+                        {!this.state.isLoggedIn && <Login />}
+                    </Route>
+                </Switch>
             </Router>
         );
     }
