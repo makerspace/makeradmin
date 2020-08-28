@@ -1,12 +1,13 @@
 import React from 'react';
 import auth from '../auth';
 import { withRouter } from 'react-router';
+import { browserHistory } from '../browser_history';
 import {showError, showSuccess} from "../message";
 
 class RequestPasswordReset extends React.Component {
     
     cancel() {
-        this.props.router.push("/");
+        browserHistory.push("/");
     }
 
     submit(e) {
@@ -23,7 +24,7 @@ class RequestPasswordReset extends React.Component {
 
         auth.requestPasswordReset(user_identification).then(() => {
             showSuccess("Link to password reset will be sent to your email shortly.");
-            this.props.router.push("/");
+            browserHistory.push("/");
         });
     }
 

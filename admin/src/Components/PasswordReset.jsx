@@ -2,6 +2,7 @@ import React from 'react';
 import auth from '../auth';
 import { withRouter } from 'react-router';
 import {showError, showSuccess} from "../message";
+import { browserHistory } from '../browser_history';
 import { Link } from 'react-router-dom';
 import * as _ from "underscore";
 
@@ -22,7 +23,7 @@ class PasswordReset extends React.Component {
                 const error_message = response.data.error_message;
                 if (_.isEmpty(error_message)) {
                     showSuccess("New password was successfully set!");
-                    this.props.router.push("/");
+                    browserHistory.push("/");
                 }
                 else {
                     showError(error_message);

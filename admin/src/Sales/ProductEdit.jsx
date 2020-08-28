@@ -3,6 +3,7 @@ import {withRouter} from "react-router";
 import Product from "../Models/Product";
 import ProductForm from "../Components/ProductForm";
 import {confirmModal} from "../message";
+import { browserHistory } from '../browser_history';
 
 
 class ProductEdit extends React.Component {
@@ -25,7 +26,7 @@ class ProductEdit extends React.Component {
                         return confirmModal(this.product.deleteConfirmMessage())
                             .then(() => this.product.del())
                             .then(() => {
-                                this.props.router.push("/sales/product/");
+                                browserHistory.push("/sales/product/");
                             })
                             .catch(() => null);
                     }}
