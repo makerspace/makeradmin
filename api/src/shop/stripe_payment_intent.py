@@ -2,7 +2,7 @@ from logging import getLogger
 from time import sleep
 
 import stripe
-from stripe.error import InvalidRequestError, StripeError
+from stripe.error import InvalidRequestError, StripeError, CardError
 
 from service.db import db_session
 from service.error import InternalServerError, EXCEPTION, BadRequest
@@ -116,7 +116,14 @@ def confirm_stripe_payment_intent(data):
     payment_intent = stripe.PaymentIntent.retrieve(payment_intent_id)
     assert payment_intent.status == PaymentIntentStatus.REQUIRES_CONFIRMATION
 
-    action_info = create_client_response(transaction, payment_intent)
+    try:
+        action_info = create_client_response(transaction, payment_intent)
+    except CardError as e:
+        # Reason can be for example: 'Your card's security code is incorrect'.
+        commit_fail_transaction(transaction)
+        err = PaymentFailed(log=f"Payment failed: {str(e)}", level=EXCEPTION)
+        err.message = e.user_message
+        raise err
 
     return dict(transaction_id=transaction.id,
                 action_info=action_info)
