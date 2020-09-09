@@ -488,6 +488,10 @@ function addQuizChart(root: HTMLElement, data: QuizStatistics) {
 			<span class="statistics-member-stats-type">Median time to answer quiz [min]</span>
 			<span class="statistics-member-stats-value">${(data.median_seconds_to_answer_quiz/60).toFixed(1)}</span>
 		</div>
+		<div class="statistics-member-stats-row">
+			<span class="statistics-member-stats-type">Total quiz respondents</span>
+			<span class="statistics-member-stats-value">${data.answered_quiz_member_count}</span>
+		</div>
 	</div>
 	<canvas width=500 height=300></canvas>
 	`;
