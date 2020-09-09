@@ -1110,6 +1110,7 @@ input:invalid {
 
 .statistics-member-stats {
     margin-bottom: 30px;
+    margin-top: 30px;
 }
 
 .statistics-member-stats-box {
@@ -1120,13 +1121,17 @@ input:invalid {
 }
 
 .statistics-member-stats-type {
-    width: 200px;
+    width: 220px;
+    margin-right: 20px;
     font-weight: bold;
-    display: inline-block;
 }
 
 .statistics-member-stats-value {
-    display: inline-block;
+}
+
+.statistics-member-stats-row {
+    display: flex;
+    flex-direction: row;
 }
 
 $palette1: #5C2849;

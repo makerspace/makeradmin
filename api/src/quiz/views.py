@@ -132,3 +132,56 @@ def quiz_member_answer_stats():
          ) for member in members.all()
     ]
 
+@service.route("/statistics", method=GET, permission=PUBLIC)
+def quiz_statistics():
+    # How many members have answered the quiz that should have
+
+    # Correct percentage per question
+    # Average correct percentage per member
+
+    # Converts a list of rows of IDs and values to a map from id to value
+    def mapify(rows):
+        return {r[0]: r[1] for r in rows}
+
+    questions = db_session.query(QuizQuestion).filter(QuizQuestion.deleted_at == None, QuizQuestionOption.deleted_at == None).join(QuizQuestion.options).all()
+
+    # Note: counts each member at most once per question. So multiple mistakes on the same question are not counted
+    incorrect_answers_by_question = mapify(db_session.query(QuizAnswer.question_id, func.count(distinct(QuizAnswer.member_id))).filter(QuizAnswer.correct == False).group_by(QuizAnswer.question_id).all())
+    answers_by_question = mapify(db_session.query(QuizAnswer.question_id, func.count(distinct(QuizAnswer.member_id))).filter(QuizAnswer.deleted_at == None).group_by(QuizAnswer.question_id).all())
+
+    first_answer_by_member = db_session.query(QuizAnswer.member_id, QuizAnswer.question_id, func.min(QuizAnswer.id).label("id")).filter(QuizAnswer.deleted_at == None).group_by(QuizAnswer.member_id, QuizAnswer.question_id).subquery()
+
+    answers_by_option = mapify(
+        db_session.query(QuizAnswer.option_id, func.count(distinct(QuizAnswer.member_id))) \
+        .join(first_answer_by_member, (QuizAnswer.question_id == first_answer_by_member.c.question_id) & (QuizAnswer.member_id == first_answer_by_member.c.member_id)) \
+        .filter(QuizAnswer.id == first_answer_by_member.c.id) \
+        .group_by(QuizAnswer.option_id) \
+        .all()
+    )
+
+    seconds_to_answer_quiz = list(db_session.execute("select TIME_TO_SEC(TIMEDIFF(max(created_at), min(created_at))) as t from quiz_answers group by member_id order by t asc;"))
+    median_seconds_to_answer_quiz = seconds_to_answer_quiz[len(seconds_to_answer_quiz)//2][0] if len(seconds_to_answer_quiz) > 0 else 0
+
+
+    return {
+        "median_seconds_to_answer_quiz": median_seconds_to_answer_quiz,
+        # Maximum number members that have answered any question.
+        # This ensures we also account for questions added later (which may not have as many answers)
+        # We iterate through the questions list to ensure we dont count deleted questions
+        "answered_quiz_member_count": max([answers_by_question.get(question.id, 0) for question in questions]),
+        "questions": [
+            {
+                "question": quiz_question_entity.to_obj(question),
+                "options": [
+                    {
+                        "answer_count": answers_by_option.get(option.id, 0),
+                        "option": quiz_question_option_entity.to_obj(option)
+                    } for option in question.options
+                ],
+                # Number of unique members that have answered this question
+                "member_answer_count": answers_by_question.get(question.id, 0),
+                "incorrect_answer_fraction": sum(answers_by_option.get(option.id, 0) for option in question.options if not option.correct) / answers_by_question.get(question.id, 1),
+            }
+            for question in questions
+        ]
+    }
