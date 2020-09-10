@@ -3,8 +3,8 @@ from typing import List, Tuple
 
 from service.db import db_session
 from service.logging import logger
-from shop.models import Product, Transaction, TransactionContent
-from shop.entities import product_entity
+from shop.models import Product, Transaction, TransactionContent, ProductCategory
+from shop.entities import product_entity, category_entity
 from sqlalchemy import func
 
 def spans_by_date(span_type) -> List[Tuple[str, int]]:
@@ -70,21 +70,31 @@ def shop_statistics():
         return {r[0]: r[1] for r in rows}
 
     date_lower_limit = datetime.now() - timedelta(days=365)
-    sales = mapify(db_session.query(TransactionContent.product_id, func.sum(TransactionContent.amount)).join(TransactionContent.transaction).filter(Transaction.created_at > date_lower_limit).group_by(TransactionContent.product_id).all())
+    sales_by_product = mapify(db_session.query(TransactionContent.product_id, func.sum(TransactionContent.amount)).join(TransactionContent.transaction).filter(Transaction.created_at > date_lower_limit).group_by(TransactionContent.product_id).all())
+    sales_by_category = mapify(db_session.query(Product.category_id, func.sum(TransactionContent.amount)).join(TransactionContent.product).join(TransactionContent.transaction).filter(Transaction.created_at > date_lower_limit).group_by(Product.category_id).all())
 
-    ids = sales.keys()
-
-    products = db_session.query(Product).filter((Product.deleted_at == None) | (Product.id.in_(ids))).all()
-
+    product_ids = sales_by_product.keys()
+    products = db_session.query(Product).filter((Product.deleted_at == None) | (Product.id.in_(product_ids))).all()
     products_json = list(map(product_entity.to_obj, list(products)))
+
+    category_ids = sales_by_category.keys()
+    categories = db_session.query(ProductCategory).filter((ProductCategory.deleted_at == None) | (ProductCategory.id.in_(category_ids))).all()
+    categories_json = list(map(category_entity.to_obj, list(categories)))
 
     return {
         "revenue_by_product_last_12_months": [
             {
                 "product_id": r.id,
-                "amount": float(sales.get(r.id, 0))
+                "amount": float(sales_by_product.get(r.id, 0))
             } for r in products
         ],
+        "revenue_by_category_last_12_months": [
+            {
+                "category_id": r.id,
+                "amount": float(sales_by_category.get(r.id, 0))
+            } for r in categories
+        ],
         "products": products_json,
+        "categories": categories_json,
     }
 

@@ -523,63 +523,67 @@ interface Product {
     deleted_at: string|null,
 }
 
+interface Category {
+	id: number,
+	name: string,
+}
+
 interface ProductStatistics {
 	revenue_by_product_last_12_months: {
 		product_id: number,
 		amount: number,
 	}[],
+	revenue_by_category_last_12_months: {
+		category_id: number,
+		amount: number,
+	}[],
 	products: Product[],
+	categories: Category[],
 }
 
 function addProductPurchasedChart(root: HTMLElement, data: ProductStatistics) {
 	const membershipProductIDs = [1, 2, 3];
-	const onlyMembership = {
-		products: data.products.filter(p => membershipProductIDs.includes(p.id)),
-		revenue_by_product_last_12_months: data.revenue_by_product_last_12_months.filter(p => membershipProductIDs.includes(p.product_id)),
-	}
+	const onlyMembershipProducts = data.products.filter(p => membershipProductIDs.includes(p.id));
+	const excludingMembershipProducts = data.products.filter(p => !membershipProductIDs.includes(p.id));
 
-	const excludingMembership = {
-		products: data.products.filter(p => !membershipProductIDs.includes(p.id)),
-		revenue_by_product_last_12_months: data.revenue_by_product_last_12_months.filter(p => !membershipProductIDs.includes(p.product_id)),
-	}
+	const membershipSales = onlyMembershipProducts.map(p => ({ name: p.name, amount: data.revenue_by_product_last_12_months.find(x => x.product_id == p.id)?.amount ?? 0 }));
+	const otherSales = excludingMembershipProducts.map(p => ({ name: p.name, amount: data.revenue_by_product_last_12_months.find(x => x.product_id == p.id)?.amount ?? 0 }));
 
-	onlyMembership.products.push({
-		id: -1,
-		category_id: -1,
+	membershipSales.push({
 		name: "Other products",
-		description: "",
-		unit: "st",
-		price: 0,
-		smallest_multiple: 0,
-		filter: "",
-		image: "",
-		display_order: 0,
-		created_at: "",
-		updated_at: "",
-		deleted_at: null,
-	});
-	onlyMembership.revenue_by_product_last_12_months.push({
-		product_id: -1,
-		amount: excludingMembership.revenue_by_product_last_12_months.map(x => x.amount).reduce((a,b)=>a+b),
+		amount: otherSales.map(x => x.amount).reduce((a,b)=>a+b),
 	});
 
-	addProductPurchasedChartWithLabel(root, onlyMembership, "Försäljning i webshoppen av medlemskap (senaste 12 månaderna)");
-	addProductPurchasedChartWithLabel(root, excludingMembership, "Försäljning i webshoppen av övriga produkter (senaste 12 månaderna)");
+	addRevenueChart(
+		root,
+		membershipSales,
+		"Försäljning i webshoppen av medlemskap (senaste 12 månaderna)"
+	);
+	addRevenueChart(
+		root,
+		otherSales,
+		"Försäljning i webshoppen av övriga produkter (senaste 12 månaderna)"
+	);
+	addRevenueChart(
+		root,
+		data.categories.map(c => ({ name: c.name, amount: data.revenue_by_category_last_12_months.find(x => x.category_id == c.id)?.amount ?? 0 })),
+		"Försäljning i webshoppen per kategori (senaste 12 månaderna)"
+	);
 }
 
-function addProductPurchasedChartWithLabel(root: HTMLElement, data: ProductStatistics, label: string) {
+function addRevenueChart(root: HTMLElement, data: { name: string, amount: number }[], label: string) {
 	// Sort by sales
-	data.revenue_by_product_last_12_months.sort((a,b) => b.amount - a.amount);
+	data.sort((a,b) => b.amount - a.amount);
 
 	const config = {
 		type: 'horizontalBar',
 		data: {
-			labels: data.revenue_by_product_last_12_months.map(x => data.products.find(p => p.id == x.product_id)!.name),
+			labels: data.map(x => x.name),
 			datasets: [{
 				label: 'Revenue',
 				backgroundColor: "#FF000077",
 				borderColor: colors[0],
-				data: data.revenue_by_product_last_12_months.map(x => x.amount),
+				data: data.map(x => x.amount),
 			},
 			],
 		},
@@ -606,7 +610,7 @@ function addProductPurchasedChartWithLabel(root: HTMLElement, data: ProductStati
 	const canvas = <HTMLCanvasElement>document.createElement("canvas");
 	root.appendChild(canvas);
 	canvas.width = 500;
-	canvas.height = 70 + 30*data.revenue_by_product_last_12_months.length;
+	canvas.height = 70 + 30*data.length;
 	const ctx = canvas.getContext('2d');
 	const chart = new Chart(ctx, config);
 }
