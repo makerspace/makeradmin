@@ -69,7 +69,7 @@ def shop_statistics():
     def mapify(rows):
         return {r[0]: r[1] for r in rows}
 
-    date_lower_limit = datetime.now() - timedelta(days=30*6)
+    date_lower_limit = datetime.now() - timedelta(days=365)
     sales = mapify(db_session.query(TransactionContent.product_id, func.sum(TransactionContent.amount)).join(TransactionContent.transaction).filter(Transaction.created_at > date_lower_limit).group_by(TransactionContent.product_id).all())
 
     ids = sales.keys()
@@ -79,7 +79,7 @@ def shop_statistics():
     products_json = list(map(product_entity.to_obj, list(products)))
 
     return {
-        "revenue_by_product_last_6_months": [
+        "revenue_by_product_last_12_months": [
             {
                 "product_id": r.id,
                 "amount": float(sales.get(r.id, 0))

@@ -524,7 +524,7 @@ interface Product {
 }
 
 interface ProductStatistics {
-	revenue_by_product_last_6_months: {
+	revenue_by_product_last_12_months: {
 		product_id: number,
 		amount: number,
 	}[],
@@ -535,12 +535,12 @@ function addProductPurchasedChart(root: HTMLElement, data: ProductStatistics) {
 	const membershipProductIDs = [1, 2, 3];
 	const onlyMembership = {
 		products: data.products.filter(p => membershipProductIDs.includes(p.id)),
-		revenue_by_product_last_6_months: data.revenue_by_product_last_6_months.filter(p => membershipProductIDs.includes(p.product_id)),
+		revenue_by_product_last_12_months: data.revenue_by_product_last_12_months.filter(p => membershipProductIDs.includes(p.product_id)),
 	}
 
 	const excludingMembership = {
 		products: data.products.filter(p => !membershipProductIDs.includes(p.id)),
-		revenue_by_product_last_6_months: data.revenue_by_product_last_6_months.filter(p => !membershipProductIDs.includes(p.product_id)),
+		revenue_by_product_last_12_months: data.revenue_by_product_last_12_months.filter(p => !membershipProductIDs.includes(p.product_id)),
 	}
 
 	onlyMembership.products.push({
@@ -558,28 +558,28 @@ function addProductPurchasedChart(root: HTMLElement, data: ProductStatistics) {
 		updated_at: "",
 		deleted_at: null,
 	});
-	onlyMembership.revenue_by_product_last_6_months.push({
+	onlyMembership.revenue_by_product_last_12_months.push({
 		product_id: -1,
-		amount: excludingMembership.revenue_by_product_last_6_months.map(x => x.amount).reduce((a,b)=>a+b),
+		amount: excludingMembership.revenue_by_product_last_12_months.map(x => x.amount).reduce((a,b)=>a+b),
 	});
 
-	addProductPurchasedChartWithLabel(root, onlyMembership, "Försäljning i webshoppen av medlemskap (senaste 6 månaderna)");
-	addProductPurchasedChartWithLabel(root, excludingMembership, "Försäljning i webshoppen av övriga produkter (senaste 6 månaderna)");
+	addProductPurchasedChartWithLabel(root, onlyMembership, "Försäljning i webshoppen av medlemskap (senaste 12 månaderna)");
+	addProductPurchasedChartWithLabel(root, excludingMembership, "Försäljning i webshoppen av övriga produkter (senaste 12 månaderna)");
 }
 
 function addProductPurchasedChartWithLabel(root: HTMLElement, data: ProductStatistics, label: string) {
 	// Sort by sales
-	data.revenue_by_product_last_6_months.sort((a,b) => b.amount - a.amount);
+	data.revenue_by_product_last_12_months.sort((a,b) => b.amount - a.amount);
 
 	const config = {
 		type: 'horizontalBar',
 		data: {
-			labels: data.revenue_by_product_last_6_months.map(x => data.products.find(p => p.id == x.product_id)!.name),
+			labels: data.revenue_by_product_last_12_months.map(x => data.products.find(p => p.id == x.product_id)!.name),
 			datasets: [{
 				label: 'Revenue',
 				backgroundColor: "#FF000077",
 				borderColor: colors[0],
-				data: data.revenue_by_product_last_6_months.map(x => x.amount),
+				data: data.revenue_by_product_last_12_months.map(x => x.amount),
 			},
 			],
 		},
@@ -602,7 +602,7 @@ function addProductPurchasedChartWithLabel(root: HTMLElement, data: ProductStati
 	const canvas = <HTMLCanvasElement>document.createElement("canvas");
 	root.appendChild(canvas);
 	canvas.width = 500;
-	canvas.height = 70 + 30*data.revenue_by_product_last_6_months.length;
+	canvas.height = 70 + 30*data.revenue_by_product_last_12_months.length;
 	const ctx = canvas.getContext('2d');
 	const chart = new Chart(ctx, config);
 }
