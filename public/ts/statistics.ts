@@ -532,7 +532,22 @@ interface ProductStatistics {
 }
 
 function addProductPurchasedChart(root: HTMLElement, data: ProductStatistics) {
+	const membershipProductIDs = [1, 2, 3];
+	const onlyMembership = {
+		products: data.products.filter(p => membershipProductIDs.includes(p.id)),
+		revenue_by_product_last_6_months: data.revenue_by_product_last_6_months.filter(p => membershipProductIDs.includes(p.product_id)),
+	}
 
+	const excludingMembership = {
+		products: data.products.filter(p => !membershipProductIDs.includes(p.id)),
+		revenue_by_product_last_6_months: data.revenue_by_product_last_6_months.filter(p => !membershipProductIDs.includes(p.product_id)),
+	}
+
+	addProductPurchasedChartWithLabel(root, onlyMembership, "Försäljning i webshoppen av medlemskap (senaste 6 månaderna)");
+	addProductPurchasedChartWithLabel(root, excludingMembership, "Försäljning i webshoppen av övriga produkter (senaste 6 månaderna)");
+}
+
+function addProductPurchasedChartWithLabel(root: HTMLElement, data: ProductStatistics, label: string) {
 	// Sort by sales
 	data.revenue_by_product_last_6_months.sort((a,b) => b.amount - a.amount);
 
@@ -551,7 +566,7 @@ function addProductPurchasedChart(root: HTMLElement, data: ProductStatistics) {
 		options: {
 			title: {
 				display: true,
-				text: 'Försäljning i webshoppen per product (senaste 6 månaderna)',
+				text: label,
 			},
 			scales: {
 				xAxes: [{
