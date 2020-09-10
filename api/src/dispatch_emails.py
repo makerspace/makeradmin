@@ -169,13 +169,13 @@ def membership_reminder():
             # Member has already purchased extra membership
             continue
             
-        send_message(
-            template=MessageTemplate.MEMBERSHIP_REMINDER,
-            member=member,
-            db_session=db_session,
-            render_template=render_template,
-            expiration_date=membership.membership_end,
-        )
+        # send_message(
+        #     template=MessageTemplate.MEMBERSHIP_REMINDER,
+        #     member=member,
+        #     db_session=db_session,
+        #     render_template=render_template,
+        #     expiration_date=membership.membership_end,
+        # )
 
         logger.info(f'sending labaccess reminder to member with id {member.member_id}. Expires ' + str(membership.membership_end))
 
