@@ -596,6 +596,10 @@ function addProductPurchasedChartWithLabel(root: HTMLElement, data: ProductStati
 					stacked: true,
 				}]
 			},
+			tooltips: {
+				mode: 'nearest',
+				intersect: false,
+			},
 		}
 	};
 
