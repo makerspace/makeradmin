@@ -543,6 +543,26 @@ function addProductPurchasedChart(root: HTMLElement, data: ProductStatistics) {
 		revenue_by_product_last_6_months: data.revenue_by_product_last_6_months.filter(p => !membershipProductIDs.includes(p.product_id)),
 	}
 
+	onlyMembership.products.push({
+		id: -1,
+		category_id: -1,
+		name: "Other products",
+		description: "",
+		unit: "st",
+		price: 0,
+		smallest_multiple: 0,
+		filter: "",
+		image: "",
+		display_order: 0,
+		created_at: "",
+		updated_at: "",
+		deleted_at: null,
+	});
+	onlyMembership.revenue_by_product_last_6_months.push({
+		product_id: -1,
+		amount: excludingMembership.revenue_by_product_last_6_months.map(x => x.amount).reduce((a,b)=>a+b),
+	});
+
 	addProductPurchasedChartWithLabel(root, onlyMembership, "Försäljning i webshoppen av medlemskap (senaste 6 månaderna)");
 	addProductPurchasedChartWithLabel(root, excludingMembership, "Försäljning i webshoppen av övriga produkter (senaste 6 månaderna)");
 }
