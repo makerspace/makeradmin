@@ -33,6 +33,9 @@ template_env = Environment(loader=template_loader, autoescape=select_autoescape(
 LABACCESS_REMINDER_DAYS_BEFORE = 20
 LABACCESS_REMINDER_GRACE_PERIOD = 28
 
+MEMBERSHIP_REMINDER_DAYS_BEFORE = 20
+MEMBERSHIP_REMINDER_GRACE_PERIOD = 28
+
 QUIZ_DAYS_FROM_FIRST_EMAIL_TO_REMINDER = 4
 QUIZ_DAYS_BETWEEN_REMINDERS = 21
 
@@ -135,6 +138,47 @@ def labaccess_reminder(render_template):
             render_template=render_template,
             expiration_date=end_date,
         )
+
+def membership_reminder():
+    now = datetime.utcnow().date()
+
+    members, memberships = get_members_and_membership()
+    members = list(members)
+    end_date_reminder_target = now + timedelta(days=MEMBERSHIP_REMINDER_DAYS_BEFORE)
+
+    for member, membership in zip(members, memberships):
+        if membership.membership_end is None:
+            # Not a member
+            continue
+
+        if membership.membership_end < now:
+            # Membership already expired
+            continue
+
+        if membership.membership_end > end_date_reminder_target:
+            # Membership is valid for a long time
+            continue
+        
+        # Don't send a reminder if we sent a reminder the last 28 days.
+        if already_sent_message(MessageTemplate.MEMBERSHIP_REMINDER, member, MEMBERSHIP_REMINDER_GRACE_PERIOD):
+            continue
+
+        already_purchased = \
+            pending_action_value_sum(member_id=member.member_id, action_type=ProductAction.ADD_MEMBERSHIP_DAYS) > 0
+        if already_purchased:
+            # Member has already purchased extra membership
+            continue
+            
+        send_message(
+            template=MessageTemplate.MEMBERSHIP_REMINDER,
+            member=member,
+            db_session=db_session,
+            render_template=render_template,
+            expiration_date=membership.membership_end,
+        )
+
+        logger.info(f'sending labaccess reminder to member with id {member.member_id}. Expires ' + str(membership.membership_end))
+
 
 def quiz_reminders():
     quiz_members = quiz_member_answer_stats()
@@ -243,6 +287,7 @@ if __name__ == '__main__':
             sleep(args.sleep)
             try:
                 labaccess_reminder(render_template)
+                membership_reminder()
                 if time.time() - last_quiz_check > 20:
                     # This check is kinda slow (takes maybe 100 ms)
                     # so don't do it as often. It's not time critical anyway.

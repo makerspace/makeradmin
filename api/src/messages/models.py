@@ -23,6 +23,7 @@ class MessageTemplate(enum.Enum):
     QUIZ_FIRST_NEWMEMBER = 'quiz_first_newmember'
     QUIZ_FIRST_OLDMEMBER = 'quiz_first_oldmember'
     QUIZ_REMINDER = 'quiz_reminder'
+    MEMBERSHIP_REMINDER = 'membership_reminder'
 
 
 class Message(Base):
