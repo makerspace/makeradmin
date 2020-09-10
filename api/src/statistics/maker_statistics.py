@@ -1,10 +1,11 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import List, Tuple
 
 from service.db import db_session
 from service.logging import logger
-from shop.models import Product
-
+from shop.models import Product, Transaction, TransactionContent
+from shop.entities import product_entity
+from sqlalchemy import func
 
 def spans_by_date(span_type) -> List[Tuple[str, int]]:
     # Warning: doesn't accurately add datapoints when the number of members drops to zero
@@ -62,3 +63,28 @@ def lasertime():
     results = [(date, int(count)) for (date, count) in query]
     logger.info(results)
     return results
+
+def shop_statistics():
+    # Converts a list of rows of IDs and values to a map from id to value
+    def mapify(rows):
+        return {r[0]: r[1] for r in rows}
+
+    date_lower_limit = datetime.now() - timedelta(days=30*6)
+    sales = mapify(db_session.query(TransactionContent.product_id, func.sum(TransactionContent.amount)).join(TransactionContent.transaction).filter(Transaction.created_at > date_lower_limit).group_by(TransactionContent.product_id).all())
+
+    ids = sales.keys()
+
+    products = db_session.query(Product).filter((Product.deleted_at == None) | (Product.id.in_(ids))).all()
+
+    products_json = list(map(product_entity.to_obj, list(products)))
+
+    return {
+        "revenue_by_product_last_6_months": [
+            {
+                "product_id": r.id,
+                "amount": float(sales.get(r.id, 0))
+            } for r in products
+        ],
+        "products": products_json,
+    }
+

@@ -22,13 +22,15 @@ common.documentLoaded().then(() => {
 	const future1 = common.ajax("GET", apiBasePath + "/statistics/membership/by_date", null);
 	const future2 = common.ajax("GET", apiBasePath + "/statistics/lasertime/by_month", null);
 	const future3 = common.ajax("GET", apiBasePath + "/quiz/statistics", null) as Promise<ServerResponse<QuizStatistics>>;
+	const future4 = common.ajax("GET", apiBasePath + "/statistics/shop/statistics", null) as Promise<ServerResponse<ProductStatistics>>;
 
-	Promise.all([future1, future2, future3]).then(data => {
+	Promise.all([future1, future2, future3, future4]).then(data => {
 		const membershipjson = data[0];
 		const laserjson = data[1];
 		addChart(root, membershipjson.data);
 		addLaserChart(root, laserjson.data);
 		addQuizChart(root, data[2].data)
+		addProductPurchasedChart(root, data[3].data);
 		// addRandomCharts(root);
 	})
 		.catch(json => {
@@ -501,6 +503,71 @@ function addQuizChart(root: HTMLElement, data: QuizStatistics) {
 	root.appendChild(quizstats);
 	canvas.width = 500;
 	canvas.height = 800;
+	const ctx = canvas.getContext('2d');
+	const chart = new Chart(ctx, config);
+}
+
+interface Product {
+	id: number
+    category_id: number,
+    name: string,
+    description: string,
+    unit: string,
+    price: number,
+    smallest_multiple: number,
+    filter: string,
+    image: string,
+    display_order: number,
+    created_at: string,
+    updated_at: string,
+    deleted_at: string|null,
+}
+
+interface ProductStatistics {
+	revenue_by_product_last_6_months: {
+		product_id: number,
+		amount: number,
+	}[],
+	products: Product[],
+}
+
+function addProductPurchasedChart(root: HTMLElement, data: ProductStatistics) {
+
+	// Sort by sales
+	data.revenue_by_product_last_6_months.sort((a,b) => b.amount - a.amount);
+
+	const config = {
+		type: 'horizontalBar',
+		data: {
+			labels: data.revenue_by_product_last_6_months.map(x => data.products.find(p => p.id == x.product_id)!.name),
+			datasets: [{
+				label: 'Revenue',
+				backgroundColor: "#FF000077",
+				borderColor: colors[0],
+				data: data.revenue_by_product_last_6_months.map(x => x.amount),
+			},
+			],
+		},
+		options: {
+			title: {
+				display: true,
+				text: 'Försäljning i webshoppen per product (senaste 6 månaderna)',
+			},
+			scales: {
+				xAxes: [{
+					stacked: true,
+				}],
+				yAxes: [{
+					stacked: true,
+				}]
+			},
+		}
+	};
+
+	const canvas = <HTMLCanvasElement>document.createElement("canvas");
+	root.appendChild(canvas);
+	canvas.width = 500;
+	canvas.height = 70 + 30*data.revenue_by_product_last_6_months.length;
 	const ctx = canvas.getContext('2d');
 	const chart = new Chart(ctx, config);
 }

@@ -1,6 +1,6 @@
 from service.api_definition import GET, PUBLIC
 from statistics import service
-from statistics.maker_statistics import membership_by_date_statistics, lasertime
+from statistics.maker_statistics import membership_by_date_statistics, lasertime, shop_statistics
 
 
 @service.route("/membership/by_date", method=GET, permission=PUBLIC)
@@ -12,4 +12,8 @@ def membership_by_date_statistics_route():
 def lasertime_route():
     return lasertime()
 
+
+@service.route("/shop/statistics", method=GET, permission=PUBLIC)
+def shop_route():
+    return shop_statistics()
 
