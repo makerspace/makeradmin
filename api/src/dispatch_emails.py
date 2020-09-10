@@ -151,8 +151,10 @@ def membership_reminder():
             # Not a member
             continue
 
-        if membership.membership_end < now:
+        if membership.membership_end < now and not membership.effective_labaccess_active:
             # Membership already expired
+            # If the member has labaccess active then the member has likely forgot to renew the yearly membership.
+            # Having a yearly membership is a requirement for being allowed to purchase lab membership.
             continue
 
         if membership.membership_end > end_date_reminder_target:
@@ -168,14 +170,14 @@ def membership_reminder():
         if already_purchased:
             # Member has already purchased extra membership
             continue
-            
-        send_message(
-            template=MessageTemplate.MEMBERSHIP_REMINDER,
-            member=member,
-            db_session=db_session,
-            render_template=render_template,
-            expiration_date=membership.membership_end,
-        )
+        
+        # send_message(
+        #     template=MessageTemplate.MEMBERSHIP_REMINDER,
+        #     member=member,
+        #     db_session=db_session,
+        #     render_template=render_template,
+        #     expiration_date=membership.membership_end,
+        # )
 
         logger.info(f'sending yearly membership reminder to member with id {member.member_id}. Expires ' + str(membership.membership_end))
 
