@@ -11,7 +11,7 @@ const NavItem = withRouter(props => {
     return (
         <li>
             <NavLink activeClassName="uk-active" to={target}>
-                <i className={"uk-icon-" + icon} />&nbsp;{text}
+                <i className={"uk-icon-" + icon} />&nbsp;<span class="uk-hidden-small">{text}</span>
             </NavLink>
         </li>
     );
@@ -22,7 +22,7 @@ export const Nav = ({ nav: { brand, items } }) => (
     <nav className="uk-navbar">
         <div className="uk-container uk-container-center">
             <Link to="/" className="uk-navbar-brand">{brand}</Link>
-            <ul className="uk-navbar-nav uk-hidden-small uk-navbar-attached">
+            <ul className="uk-navbar-nav uk-navbar-attached">
                 {items.map((item, i) => <NavItem item={item} key={i} />)}
             </ul>
         </div>
