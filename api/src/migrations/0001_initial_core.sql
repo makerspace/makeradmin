@@ -6,7 +6,7 @@ SET sql_notes = 0;
 CREATE TABLE IF NOT EXISTS `access_tokens` (
   `user_id` int(11) NOT NULL,
   `access_token` varchar(32) COLLATE utf8mb4_0900_ai_ci NOT NULL,
-  `browser` varchar(255) COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `browser` varchar(512) COLLATE utf8mb4_0900_ai_ci NOT NULL,
   `ip` varchar(255) COLLATE utf8mb4_0900_ai_ci NOT NULL,
   `expires` datetime NOT NULL,
   `permissions` text COLLATE utf8mb4_0900_ai_ci,
