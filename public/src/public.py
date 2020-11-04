@@ -14,7 +14,7 @@ logger = getLogger('makeradmin')
 
 
 class Section(Blueprint):
-    
+
     def __init__(self, name):
         super().__init__(name, name)
         self.context_processor(lambda: dict(url=self.url))
@@ -47,6 +47,11 @@ def register_member():
 @shop.route("/member/history")
 def purchase_history():
     return render_template("history.html")
+
+
+@shop.route("/member/licenses")
+def licenses():
+    return render_template("licenses.html")
 
 
 @shop.route("/product/<product_id>")
@@ -90,6 +95,7 @@ def login(token):
 @member.route("/quiz/")
 def quiz_main():
     return render_template("quiz/quiz.html")
+
 
 static_hash = os.environ["STATIC_PREFIX_HASH"]
 app = Flask(__name__, static_url_path=f"/static{static_hash}", static_folder="../static")
