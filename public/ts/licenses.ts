@@ -23,18 +23,23 @@ common.documentLoaded().then(() => {
                     <h3>Lightburn</h3>
                     <p>Mjukvara som används för att kontrollera laserskäraren på Stockholm Makerspace. Datorerna vid laserskäraren har
                     redan det här programmet installerat så du kan fritt använda det där. Men vill du ha Lightburn på din egen dator
-                    så kan du köpa det till ett makerspace-rabatterat pris med koden nedan.</p>
-                    <pre><code>Rabattkod: St0ckh0lmM@ker-Sp@ce</code></pre>
+                    så kan du köpa det till ett makerspace-rabatterat pris (75% rabatt) med koden nedan.</p>
+                    <ul>
+                        <li>Köp DSP-licensen av Lightburn <a href="https://lightburnsoftware.com/collections/frontpage/products/lightburn-dsp">här</a>.</li>
+                        <li>Använd rabattkoden
+                        <pre><code>St0ckh0lmM@ker-Sp@ce</code></pre>
+                        </li>
+                    </ul>
                 </div>
 
                 <div>
                     <h3>VCarve Pro Makerspace Edition</h3>
                     <p>VCarve Pro finns installerat på CAD-datorerna vid laserskäraren. Det är bara CAD-datorerna som kan generera gkods-filer men du kan skapa projekt på din egen dator, förbereda allt och öppna i CAD-datorn för att spara ut toolpaths osv.
                     <ol>
-                    <li>Ladda ner en trial av VCarve Pro och installera.</li>
-                    <li>Du hittar denna trial-version <a href="https://www.vectric.com/free-trial/vcarve-pro">här</a>.</li>
-                    <li>Starta programmet och under fliken Help hittar du "About VCarve Pro Trial".</li>
-                    <li>Där sätter du in vårat Makerspace ID som är <pre><code>B7D8D-0BB4E-E7877-8853E-F49AB-A1D0B-DEE9D</code></pre></li>
+                        <li>Ladda ner en trial av VCarve Pro och installera.</li>
+                        <li>Du hittar denna trial-version <a href="https://www.vectric.com/free-trial/vcarve-pro">här</a>.</li>
+                        <li>Starta programmet och under fliken Help hittar du "About VCarve Pro Trial".</li>
+                        <li>Där sätter du in vårat Makerspace ID som är <pre><code>B7D8D-0BB4E-E7877-8853E-F49AB-A1D0B-DEE9D</code></pre></li>
                     </ol>
             </div>`;
         
