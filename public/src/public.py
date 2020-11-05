@@ -34,8 +34,8 @@ class Section(Blueprint):
         return super().route(self.url(path), **kwargs)
 
 
-def render_template(path):
-    return flask.render_template(path, banner=banner, sidebar_additional_classes=sidebar_additional_classes)
+def render_template(path, **kwargs):
+    return flask.render_template(path, banner=banner, sidebar_additional_classes=sidebar_additional_classes, **kwargs)
 
 shop = Section("shop")
 
