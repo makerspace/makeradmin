@@ -3,7 +3,7 @@ import sys
 from logging import basicConfig, INFO, getLogger
 
 from flask import Flask, Blueprint, redirect, url_for, send_from_directory
-from flask import render_template
+import flask
 
 
 basicConfig(format='%(asctime)s %(levelname)s [%(process)d/%(threadName)s %(pathname)s:%(lineno)d]: %(message)s',
@@ -12,6 +12,14 @@ basicConfig(format='%(asctime)s %(levelname)s [%(process)d/%(threadName)s %(path
 
 logger = getLogger('makeradmin')
 
+# This is the current global banner.
+# Set to an empty string ("") to disable.
+banner = "Please be aware of that during the current corona restrictions there are no key handouts happening. Thus it is not possible for new members to get keys. Key updates for members that already have a key happen sporadically."
+
+sidebar_additional_classes = ""
+if banner:
+    # Set the sidebar to not to use fixed positioning if there is a banner because otherwise the sidebar may end up below the banner, esp. on mobile devices
+    sidebar_additional_classes = 'sidebar-banner-adjust'
 
 class Section(Blueprint):
 
@@ -25,6 +33,9 @@ class Section(Blueprint):
     def route(self, path, **kwargs):
         return super().route(self.url(path), **kwargs)
 
+
+def render_template(path):
+    return flask.render_template(path, banner=banner, sidebar_additional_classes=sidebar_additional_classes)
 
 shop = Section("shop")
 

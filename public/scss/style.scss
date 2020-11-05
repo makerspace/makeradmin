@@ -1359,3 +1359,15 @@ $palette-red: $palette4;
         }
     }
 }
+
+.banner {
+	background: #cd1515;
+	padding: 20px;
+	color: white;
+	text-align: center;
+	/* box-shadow: 0px 0px 10px rgba(0,0,0,0.4); */
+}
+
+.sidebar-banner-adjust {
+    position: initial !important;
+}

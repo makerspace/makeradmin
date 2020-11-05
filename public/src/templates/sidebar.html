@@ -8,7 +8,7 @@
 
 {% macro sidebar(active_item) %}
     <div id="left-sidebar">
-        <div class="sidebar-fixed-content">
+        <div class="sidebar-fixed-content {{ sidebar_additional_classes }}">
             <img src='{{ STATIC }}/images/logo-transparent-500px-300x210.png' />
             <ul class="uk-nav uk-nav-default">
                 {% call nav_item("member", active_item) %}
