@@ -14,7 +14,7 @@ logger = getLogger('makeradmin')
 
 # This is the current global banner.
 # Set to an empty string ("") to disable.
-banner = "Please be aware of that during the current corona restrictions there are no key handouts happening. Thus it is not possible for new members to get keys. Key updates for members that already have a key happen sporadically."
+banner = "Please be aware of that during the current corona restrictions there are no key handouts happening. Thus it is not possible for new members to get keys. Key updates for members that already have a key happen sporadically. Read more <a href='https://wiki.makerspace.se/V%C3%A4lkommen_till_Stockholm_Makerspace'>here</a>."
 
 sidebar_additional_classes = ""
 if banner:
