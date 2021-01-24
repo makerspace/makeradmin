@@ -8,6 +8,7 @@ import DateTimeShow from "../Components/DateTimeShow";
 import DateShow from "../Components/DateShow";
 import 'react-day-picker/lib/style.css';
 import MembershipPeriodsInput from "./MembershipPeriodsInput";
+import {get} from '../gateway';
 
 
 class MemberBoxSpans extends React.Component {
@@ -15,7 +16,16 @@ class MemberBoxSpans extends React.Component {
     constructor(props) {
         super(props);
         this.collection = new Collection({type: Span, url: `/membership/member/${props.match.params.member_id}/spans`, pageSize: 0});
-        this.state = {items: []};
+        this.state = {items: [], pending_actions: {}};
+        this.pending_actions = get({url: `/membership/member/${props.match.params.member_id}/pending_actions`}).then((r) => {
+            const total_add = r.data.reduce((acc, value) => {
+                if (value.action.action === "add_labaccess_days")
+                    return acc + value.action.value;
+                else
+                    return acc;
+            }, 0);
+            console.log("Got pending lab access days: \n" + total_add);
+        });
     }
 
     componentDidMount() {
