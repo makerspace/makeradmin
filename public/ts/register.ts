@@ -109,7 +109,7 @@ common.onGetAndDocumentLoaded("/webshop/register_page_data", (value: any) => {
         };
         function on_failure(json: any) {
             if (json.what === "not_unique") {
-                UIkit.modal.alert("<h2>Register failed</h2>A member with this email is already registred");
+                UIkit.modal.alert("<h2>Email has already been registered</h2>Log in <a href=\"/member\">on the member pages</a> and then continue to the shop, where you can buy either the membership or the starter pack.</p>");
             } else {
                 UIkit.modal.alert("<h2>The payment failed</h2>" + common.get_error(json));
             }
