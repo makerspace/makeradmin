@@ -21,8 +21,7 @@ class MemberBoxSpans extends React.Component {
             const sum_pending_labaccess_days = r.data.reduce((acc, value) => {
             if (value.action.action === "add_labaccess_days")
                 return acc + value.action.value;
-            else
-                return acc;
+            return acc;
             }, 0);
             this.setState({pending_labaccess_days: sum_pending_labaccess_days});
         });
