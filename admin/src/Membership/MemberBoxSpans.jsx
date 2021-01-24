@@ -16,15 +16,15 @@ class MemberBoxSpans extends React.Component {
     constructor(props) {
         super(props);
         this.collection = new Collection({type: Span, url: `/membership/member/${props.match.params.member_id}/spans`, pageSize: 0});
-        this.state = {items: [], pending_actions: {}};
+        this.state = {items: [], pending_labaccess_days: "?"};
         this.pending_actions = get({url: `/membership/member/${props.match.params.member_id}/pending_actions`}).then((r) => {
-            const total_add = r.data.reduce((acc, value) => {
-                if (value.action.action === "add_labaccess_days")
-                    return acc + value.action.value;
-                else
-                    return acc;
+            const sum_pending_labaccess_days = r.data.reduce((acc, value) => {
+            if (value.action.action === "add_labaccess_days")
+                return acc + value.action.value;
+            else
+                return acc;
             }, 0);
-            console.log("Got pending lab access days: \n" + total_add);
+            this.setState({pending_labaccess_days: sum_pending_labaccess_days});
         });
     }
 
@@ -44,6 +44,7 @@ class MemberBoxSpans extends React.Component {
         return (
             <div className="uk-margin-top">
                 <h2>Medlemsperioder</h2>
+                <h3>Pending labaccess days: {this.state.pending_labaccess_days}</h3>
                 <MembershipPeriodsInput spans={this.collection} member_id={this.props.match.params.member_id}/>
                 <h2>Spans</h2>
                 <CollectionTable
