@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from "react-router-dom";
 import Collection from "../Models/Collection";
 import Span from "../Models/Span";
+import {ADD_LABACCESS_DAYS } from "../Models/ProductAction";
 import {confirmModal} from "../message";
 import CollectionTable from "../Components/CollectionTable";
 import DateTimeShow from "../Components/DateTimeShow";
@@ -19,7 +20,7 @@ class MemberBoxSpans extends React.Component {
         this.state = {items: [], pending_labaccess_days: "?"};
         this.pending_actions = get({url: `/membership/member/${props.match.params.member_id}/pending_actions`}).then((r) => {
             const sum_pending_labaccess_days = r.data.reduce((acc, value) => {
-            if (value.action.action === "add_labaccess_days")
+            if (value.action.action === ADD_LABACCESS_DAYS)
                 return acc + value.action.value;
             return acc;
             }, 0);
@@ -43,9 +44,11 @@ class MemberBoxSpans extends React.Component {
         return (
             <div className="uk-margin-top">
                 <h2>Medlemsperioder</h2>
-                <h3>Pending labaccess days: {this.state.pending_labaccess_days}</h3>
+                <p><b>{this.state.pending_labaccess_days}</b> dagar labaccess kommer läggas till vid en nyckelsynkronisering.</p>
+                <hr/>
                 <MembershipPeriodsInput spans={this.collection} member_id={this.props.match.params.member_id}/>
                 <h2>Spans</h2>
+                <hr/>
                 <CollectionTable
                     collection={this.collection}
                     columns={[
