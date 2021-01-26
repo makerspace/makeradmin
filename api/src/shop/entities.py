@@ -23,6 +23,7 @@ product_image_entity = ProductImageEntity(
 transaction_entity = Entity(
     Transaction,
     expand_fields={'member': ExpandField(Transaction.member, [Member.firstname, Member.lastname, Member.member_number])},
+    search_columns=('id', 'created_at', 'status', 'member_id', 'amount'),
 )
 
 
