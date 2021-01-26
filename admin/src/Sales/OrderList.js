@@ -7,10 +7,6 @@ import DateTimeShow from "../Components/DateTimeShow";
 
 class SearchBox extends React.Component {
 
-    constructor(props) {
-        super(props);
-    }
-
     render() {
         return (
             <div className="filterbox">
@@ -19,8 +15,7 @@ class SearchBox extends React.Component {
                         <form className="uk-form">
                             <div className="uk-form-icon">
                                 <i className="uk-icon-search"/>
-                                <input ref={c => this.search = c} tabIndex="1" type="text" className="uk-form-width-large" placeholder="Skriv in ett sökord"
-                                       onChange={() => this.props.onChange(this.search.value)} />
+                                <input value={this.props.value} ref={c => this.search = c} tabIndex="1" type="text" className="uk-form-width-large" placeholder="Skriv in ett sökord" onChange={(e) => this.props.handleChange(e.target.value)} />
                             </div>
                         </form>
                     </div>
@@ -46,12 +41,27 @@ const Row = props => {
 
 
 class OrderList extends React.Component {
-    
+
+    componentDidMount() {
+        const params = new URLSearchParams(this.props.location.search);
+        const search_term = params.get('search');
+        this.setState({'search': search_term});
+        this.collection.updateSearch(search_term);
+    }
+
     constructor(props) {
         super(props);
         this.collection = new Collection({type: Order, url: "/webshop/transaction", expand: 'member'});
+        this.state = {'search': ''};
+        this.onSearch = this.onSearch.bind(this);
     }
-    
+
+    onSearch(term) {
+        this.setState({'search': term});
+        this.collection.updateSearch(term);
+        this.props.history.replace("/sales?search=" + term);
+    }
+
     render() {
         const columns = [
             {title: "Order"},
@@ -64,7 +74,7 @@ class OrderList extends React.Component {
         return (
             <div className="uk-margin-top">
                 <h2>Inkommna ordrar</h2>
-                <SearchBox onChange={terms => this.collection.updateSearch(terms)} />
+                <SearchBox handleChange={this.onSearch} value={this.state.search}/>
                 <CollectionTable emptyMessage="Ingar ordrar" rowComponent={Row} collection={this.collection} columns={columns} />
             </div>
         );
