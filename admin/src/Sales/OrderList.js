@@ -42,18 +42,14 @@ const Row = props => {
 
 class OrderList extends React.Component {
 
-    componentDidMount() {
-        const params = new URLSearchParams(this.props.location.search);
-        const search_term = params.get('search');
-        this.setState({'search': search_term || ''});
-        this.collection.updateSearch(search_term);
-    }
-
     constructor(props) {
         super(props);
-        this.collection = new Collection({type: Order, url: "/webshop/transaction", expand: 'member'});
-        this.state = {'search': ''};
         this.onSearch = this.onSearch.bind(this);
+
+        const params = new URLSearchParams(this.props.location.search);
+        const search_term = params.get('search') || '';
+        this.collection = new Collection({type: Order, url: "/webshop/transaction", expand: 'member', search: search_term});
+        this.state = {'search': search_term};
     }
 
     onSearch(term) {
