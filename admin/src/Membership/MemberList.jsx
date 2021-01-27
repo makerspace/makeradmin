@@ -4,33 +4,9 @@ import Date from '../Components/DateShow';
 import Collection from "../Models/Collection";
 import Member from "../Models/Member";
 import CollectionTable from "../Components/CollectionTable";
+import SearchBox from "../Components/SearchBox";
 
-
-class SearchBox extends React.Component {
-    
-    constructor(props) {
-        super(props);
-    }
-    
-    render() {
-        return (
-            <div className="filterbox">
-                <div className="uk-grid">
-                    <div className="uk-width-2-3">
-                        <form className="uk-form">
-                            <div className="uk-form-icon">
-                                <i className="uk-icon-search"/>
-                                <input ref={c => this.search = c} tabIndex="1" type="text" className="uk-form-width-large" placeholder="Skriv in ett sökord"
-                                       onChange={() => this.props.onChange(this.search.value)} />
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        );
-    }
-}
-
+const URL = "/membership/members";
 
 const Row = props => {
     const {item, deleteItem} = props;
@@ -51,7 +27,18 @@ class MemberList extends React.Component {
 
     constructor(props) {
         super(props);
-        this.collection = new Collection({type: Member});
+        this.onSearch = this.onSearch.bind(this);
+
+        const params = new URLSearchParams(this.props.location.search);
+        const search_term = params.get('search') || '';
+        this.collection = new Collection({type: Member, search: search_term});
+        this.state = {'search': search_term};
+    }
+
+    onSearch(term) {
+        this.setState({'search': term});
+        this.collection.updateSearch(term);
+        this.props.history.replace(URL + "?search=" + term);
     }
 
     render() {
@@ -71,7 +58,7 @@ class MemberList extends React.Component {
                 <p className="uk-float-left">På denna sida ser du en lista på samtliga medlemmar.</p>
                 <Link to="/membership/members/add" className="uk-button uk-button-primary uk-float-right"><i className="uk-icon-plus-circle"/> Skapa ny medlem</Link>
 
-                <SearchBox onChange={terms => this.collection.updateSearch(terms)} />
+                <SearchBox handleChange={this.onSearch} />
                 <CollectionTable rowComponent={Row} collection={this.collection} columns={columns} />
             </div>
         );

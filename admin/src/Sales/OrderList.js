@@ -4,27 +4,9 @@ import Order from "../Models/Order";
 import Collection from "../Models/Collection";
 import CollectionTable from "../Components/CollectionTable";
 import DateTimeShow from "../Components/DateTimeShow";
+import SearchBox from "../Components/SearchBox";
 
-class SearchBox extends React.Component {
-
-    render() {
-        return (
-            <div className="filterbox">
-                <div className="uk-grid">
-                    <div className="uk-width-2-3">
-                        <form className="uk-form" onSubmit={(e) => e.preventDefault()}>
-                            <div className="uk-form-icon">
-                                <i className="uk-icon-search"/>
-                                <input value={this.props.value} ref={c => this.search = c} tabIndex="1" type="text" className="uk-form-width-large" placeholder="Skriv in ett sökord" onChange={(e) => this.props.handleChange(e.target.value)} />
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        );
-    }
-}
-
+const URL = "/sales";
 
 const Row = props => {
     const {item} = props;
@@ -55,7 +37,7 @@ class OrderList extends React.Component {
     onSearch(term) {
         this.setState({'search': term});
         this.collection.updateSearch(term);
-        this.props.history.replace("/sales?search=" + term);
+        this.props.history.replace(URL + "?search=" + term);
     }
 
     render() {

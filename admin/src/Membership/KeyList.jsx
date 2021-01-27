@@ -4,33 +4,9 @@ import Collection from "../Models/Collection";
 import Key from "../Models/Key";
 import CollectionTable from "../Components/CollectionTable";
 import DateTimeShow from "../Components/DateTimeShow";
+import SearchBox from "../Components/SearchBox";
 
-
-class SearchBox extends React.Component {
-    
-    constructor(props) {
-        super(props);
-    }
-    
-    render() {
-        return (
-            <div className="filterbox">
-                <div className="uk-grid">
-                    <div className="uk-width-2-3">
-                        <form className="uk-form">
-                            <div className="uk-form-icon">
-                                <i className="uk-icon-search"/>
-                                <input ref={c => { this.search = c;}} tabIndex="1" type="text" className="uk-form-width-large" placeholder="Skriv in ett sökord"
-                                       onChange={() => this.props.onChange(this.search.value)} />
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        );
-    }
-}
-
+const URL = "/membership/keys";
 
 const Row = props => {
     const {item} = props;
@@ -49,7 +25,18 @@ class KeyList extends React.Component {
 
     constructor(props) {
         super(props);
-        this.collection = new Collection({type: Key, expand: "member"});
+        this.onSearch = this.onSearch.bind(this);
+
+        const params = new URLSearchParams(this.props.location.search);
+        const search_term = params.get('search') || '';
+        this.collection = new Collection({type: Key, expand: "member", search: search_term});
+        this.state = {'search': search_term};
+    }
+
+    onSearch(term) {
+        this.setState({'search': term});
+        this.collection.updateSearch(term);
+        this.props.history.replace(URL + "?search=" + term);
     }
 
     render() {
@@ -63,7 +50,7 @@ class KeyList extends React.Component {
         return (
             <div>
                 <h2>Nycklar</h2>
-                <SearchBox onChange={terms => this.collection.updateSearch(terms)} />
+                <SearchBox handleChange={this.onSearch} />
                 <CollectionTable rowComponent={Row} collection={this.collection} columns={columns} />
             </div>
         );
