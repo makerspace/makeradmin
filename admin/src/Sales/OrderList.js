@@ -6,8 +6,6 @@ import CollectionTable from "../Components/CollectionTable";
 import DateTimeShow from "../Components/DateTimeShow";
 import SearchBox from "../Components/SearchBox";
 
-const URL = "/sales";
-
 const Row = props => {
     const {item} = props;
     return (
@@ -28,8 +26,8 @@ class OrderList extends React.Component {
         super(props);
         this.onSearch = this.onSearch.bind(this);
 
-        const params = new URLSearchParams(this.props.location.search);
-        const search_term = params.get('search') || '';
+        this.params = new URLSearchParams(this.props.location.search);
+        const search_term = this.params.get('search') || '';
         this.collection = new Collection({type: Order, url: "/webshop/transaction", expand: 'member', search: search_term});
         this.state = {'search': search_term};
     }
@@ -37,7 +35,12 @@ class OrderList extends React.Component {
     onSearch(term) {
         this.setState({'search': term});
         this.collection.updateSearch(term);
-        this.props.history.replace(URL + "?search=" + term);
+        if (term === "") {
+            this.params.delete("search");
+        } else {
+            this.params.set("search", term);
+        }
+        this.props.history.replace(this.props.location.pathname + "?" + this.params.toString());
     }
 
     render() {

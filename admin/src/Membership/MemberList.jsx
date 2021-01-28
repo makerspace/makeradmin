@@ -6,8 +6,6 @@ import Member from "../Models/Member";
 import CollectionTable from "../Components/CollectionTable";
 import SearchBox from "../Components/SearchBox";
 
-const URL = "/membership/members";
-
 const Row = props => {
     const {item, deleteItem} = props;
     return (
@@ -29,8 +27,8 @@ class MemberList extends React.Component {
         super(props);
         this.onSearch = this.onSearch.bind(this);
 
-        const params = new URLSearchParams(this.props.location.search);
-        const search_term = params.get('search') || '';
+        this.params = new URLSearchParams(this.props.location.search);
+        const search_term = this.params.get('search') || '';
         this.collection = new Collection({type: Member, search: search_term});
         this.state = {'search': search_term};
     }
@@ -38,8 +36,14 @@ class MemberList extends React.Component {
     onSearch(term) {
         this.setState({'search': term});
         this.collection.updateSearch(term);
-        this.props.history.replace(URL + "?search=" + term);
+        if (term === "") {
+            this.params.delete("search");
+        } else {
+            this.params.set("search", term);
+        }
+        this.props.history.replace(this.props.location.pathname + "?" + this.params.toString());
     }
+
 
     render() {
         const columns = [
