@@ -48,35 +48,26 @@ export default class CollectionTable extends React.Component {
     renderPagination() {
         const {collection} = this.props;
         const {page} = this.state;
+        const show_count = 2;
         
         if (!page.count || page.count <= 1) {
             return "";
         }
         return (
             <ul className="uk-pagination">
-                { page.index == 1 ? <>
-                    <li key="first"><span><i className="uk-icon-angle-double-left"></i></span></li>
-                    <li key="previous"><span><i className="uk-icon-angle-left"></i></span></li>
-                </> : <>
-                    <li key="first"><a className="uk-icon-angle-double-left" onClick={() => {this.setState({loading: true}); collection.updatePage(1);}}></a></li>
-                    <li key="previous"><a className="uk-icon-angle-left" onClick={() => {this.setState({loading: true}); collection.updatePage(page.index - 1);}}></a></li>
-                </>}
                 {_.range(1, page.count + 1).map(i => {
-                    if (i === page.index) {
+                    const distance = Math.abs(i - page.index);
+                    if (distance == 0) {
                         return <li key={i} className="uk-active"><span>{i}</span></li>;
+                    } else if (distance <= show_count || i == 1 || i == page.count) {
+                        return <li key={i}><a onClick={() => {
+                            this.setState({loading: true});
+                            collection.updatePage(i);
+                        }}>{i}</a></li>;
+                    } else if (distance == show_count + 1) {
+                        return <li key={i}><span>...</span></li>;
                     }
-                    return <li key={i}><a onClick={() => {
-                        this.setState({loading: true});
-                        collection.updatePage(i);
-                    }}>{i}</a></li>;
                 })}
-                { page.index == page.count ? <>
-                    <li key="next"><span><i className="uk-icon-angle-right"></i></span></li>
-                    <li key="last"><span><i className="uk-icon-angle-double-right"></i></span></li>
-                </> : <>
-                    <li key="next"><a className="uk-icon-angle-right" onClick={() => {this.setState({loading: true}); collection.updatePage(page.index + 1);}}></a></li>
-                    <li key="last"><a className="uk-icon-angle-double-right" onClick={() => {this.setState({loading: true}); collection.updatePage(page.count);}}></a></li>
-                </>}
             </ul>
         );
     }
