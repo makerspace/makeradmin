@@ -29,7 +29,7 @@ class OrderList extends React.Component {
         this.params = new URLSearchParams(this.props.location.search);
         const search_term = this.params.get('search') || '';
         this.collection = new Collection({type: Order, url: "/webshop/transaction", expand: 'member', search: search_term});
-        this.state = {'search': search_term};
+        this.state = {'search': search_term, 'page_index': this.params.get('page') || 1};
     }
 
     onSearch(term) {
@@ -41,6 +41,13 @@ class OrderList extends React.Component {
             this.params.set("search", term);
         }
         this.props.history.replace(this.props.location.pathname + "?" + this.params.toString());
+    }
+
+    onPageNav(index) {
+        this.setState({'page_index': index});
+        this.collection.updatePage(i);
+        this.params.set("page", i);
+        this.history.replace(location.pathname + "?" + this.params.toString());
     }
 
     render() {
@@ -56,7 +63,7 @@ class OrderList extends React.Component {
             <div className="uk-margin-top">
                 <h2>Inkommna ordrar</h2>
                 <SearchBox handleChange={this.onSearch} value={this.state.search}/>
-                <CollectionTable emptyMessage="Ingar ordrar" rowComponent={Row} collection={this.collection} columns={columns} />
+                <CollectionTable emptyMessage="Ingar ordrar" rowComponent={Row} collection={this.collection} columns={columns} onPageNav={this.onPageNav} />
             </div>
         );
     }

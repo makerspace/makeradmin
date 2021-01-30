@@ -26,11 +26,13 @@ class MemberList extends React.Component {
     constructor(props) {
         super(props);
         this.onSearch = this.onSearch.bind(this);
+        this.onPageNav = this.onPageNav.bind(this);
 
         this.params = new URLSearchParams(this.props.location.search);
         const search_term = this.params.get('search') || '';
-        this.collection = new Collection({type: Member, search: search_term});
-        this.state = {'search': search_term};
+        const page = this.params.get('page') || 1;
+        this.collection = new Collection({type: Member, search: search_term, page: page});
+        this.state = {'search': search_term, 'page_index': page};
     }
 
     onSearch(term) {
@@ -41,6 +43,13 @@ class MemberList extends React.Component {
         } else {
             this.params.set("search", term);
         }
+        this.props.history.replace(this.props.location.pathname + "?" + this.params.toString());
+    }
+
+    onPageNav(index) {
+        this.setState({'page_index': index});
+        this.collection.updatePage(index);
+        this.params.set("page", index);
         this.props.history.replace(this.props.location.pathname + "?" + this.params.toString());
     }
 
@@ -63,7 +72,7 @@ class MemberList extends React.Component {
                 <Link to="/membership/members/add" className="uk-button uk-button-primary uk-float-right"><i className="uk-icon-plus-circle"/> Skapa ny medlem</Link>
 
                 <SearchBox handleChange={this.onSearch} />
-                <CollectionTable rowComponent={Row} collection={this.collection} columns={columns} />
+                <CollectionTable rowComponent={Row} collection={this.collection} columns={columns} onPageNav={this.onPageNav} />
             </div>
         );
     }
