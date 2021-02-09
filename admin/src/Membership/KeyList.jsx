@@ -24,9 +24,9 @@ class KeyList extends CollectionNavigation {
 
     constructor(props) {
         super(props);
-        const {search_term, page} = this.state;
+        const {search, page} = this.state;
 
-        this.collection = new Collection({type: Key, expand: "member", search: search_term, page: page});
+        this.collection = new Collection({type: Key, expand: "member", search: search, page: page});
     }
 
     render() {
@@ -40,7 +40,7 @@ class KeyList extends CollectionNavigation {
         return (
             <div>
                 <h2>Nycklar</h2>
-                <SearchBox handleChange={this.onSearch} />
+                <SearchBox handleChange={this.onSearch} value={this.state.search}/>
                 <CollectionTable rowComponent={Row} collection={this.collection} columns={columns} onPageNav={this.onPageNav} />
             </div>
         );

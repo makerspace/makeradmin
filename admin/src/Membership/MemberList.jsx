@@ -26,10 +26,10 @@ class MemberList extends CollectionNavigation {
 
     constructor(props) {
         super(props);
-        const {search_term, page} = this.state;
+        const {search, page} = this.state;
         console.log(this.state);
 
-        this.collection = new Collection({type: Member, search: search_term, page: page});
+        this.collection = new Collection({type: Member, search: search, page: page});
     }
 
 
@@ -50,7 +50,7 @@ class MemberList extends CollectionNavigation {
                 <p className="uk-float-left">På denna sida ser du en lista på samtliga medlemmar.</p>
                 <Link to="/membership/members/add" className="uk-button uk-button-primary uk-float-right"><i className="uk-icon-plus-circle"/> Skapa ny medlem</Link>
 
-                <SearchBox handleChange={this.onSearch} />
+                <SearchBox handleChange={this.onSearch} value={this.state.search}/>
                 <CollectionTable rowComponent={Row} collection={this.collection} columns={columns} onPageNav={this.onPageNav} />
             </div>
         );

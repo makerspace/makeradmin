@@ -24,9 +24,9 @@ class GroupList extends CollectionNavigation {
 
     constructor(props) {
         super(props);
-        const {search_term, page} = this.state;
+        const {search, page} = this.state;
 
-        this.collection = new Collection({type: Group, search: search_term, page: page});
+        this.collection = new Collection({type: Group, search: search, page: page});
     }
 
     render() {
@@ -44,7 +44,7 @@ class GroupList extends CollectionNavigation {
                 <p className="uk-float-left">På denna sida ser du en lista på samtliga grupper..</p>
                 <Link to="/membership/groups/add" className="uk-button uk-button-primary uk-float-right"><i className="uk-icon-plus-circle"/> Skapa ny grupp</Link>
 
-                <SearchBox handleChange={this.onSearch} />
+                <SearchBox handleChange={this.onSearch} value={this.state.search}/>
                 <CollectionTable rowComponent={Row} collection={this.collection} columns={columns} onPageNav={this.onPageNav} />
             </div>
         );

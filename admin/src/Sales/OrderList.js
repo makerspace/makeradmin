@@ -25,7 +25,7 @@ class OrderList extends CollectionNavigation {
 
     constructor(props) {
         super(props);
-        const {search_term, page} = this.state;
+        const {search, page} = this.state;
 
         this.collection = new Collection({type: Order, url: "/webshop/transaction", expand: 'member', search: search_term, page: page});
     }

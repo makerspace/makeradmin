@@ -10,7 +10,7 @@ export default class CollectionNavigation extends React.Component {
         this.params = new URLSearchParams(this.props.location.search);
         const search_term = this.params.get('search') || '';
         const page = this.params.get('page') || 1;
-        this.state = {'search': search_term, 'page_index': page};
+        this.state = {'search': search_term, 'page': page};
     }
 
     onSearch(term) {
@@ -25,7 +25,7 @@ export default class CollectionNavigation extends React.Component {
     }
 
     onPageNav(index) {
-        this.setState({'page_index': index});
+        this.setState({'page': index});
         this.collection.updatePage(index);
         this.params.set("page", index);
         this.props.history.replace(this.props.location.pathname + "?" + this.params.toString());
