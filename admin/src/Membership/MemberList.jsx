@@ -27,9 +27,8 @@ class MemberList extends CollectionNavigation {
     constructor(props) {
         super(props);
         const {search, page} = this.state;
-        console.log(this.state);
-
-        this.collection = new Collection({type: Member, search: search, page: page});
+        
+        this.collection = new Collection({type: Member, search, page});
     }
 
 

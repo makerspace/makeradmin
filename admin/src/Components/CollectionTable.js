@@ -63,7 +63,8 @@ export default class CollectionTable extends React.Component {
                     } else if (distance <= show_count || i == 1 || i == page.count) {
                         return <li key={i}><a onClick={() => {
                             this.setState({loading: true});
-                            onPageNav(i);
+                            if (onPageNav)
+                                onPageNav(i);
                         }}>{i}</a></li>;
                     } else if (distance == show_count + 1) {
                         return <li key={i}><span>...</span></li>;

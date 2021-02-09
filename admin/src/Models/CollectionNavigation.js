@@ -8,9 +8,9 @@ export default class CollectionNavigation extends React.Component {
         this.onPageNav = this.onPageNav.bind(this);
 
         this.params = new URLSearchParams(this.props.location.search);
-        const search_term = this.params.get('search') || '';
+        const search = this.params.get('search') || '';
         const page = this.params.get('page') || 1;
-        this.state = {'search': search_term, 'page': page};
+        this.state = {'search': search, 'page': page};
     }
 
     onSearch(term) {
