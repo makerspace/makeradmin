@@ -3,31 +3,7 @@ import { Link } from 'react-router-dom';
 import Collection from "../Models/Collection";
 import CollectionTable from "../Components/CollectionTable";
 import Group from "../Models/Group";
-
-
-class SearchBox extends React.Component {
-    
-    constructor(props) {
-        super(props);
-    }
-    
-    render() {
-        return (
-            <div className="filterbox">
-                <div className="uk-grid">
-                    <form className="uk-form">
-                        <div className="uk-form-icon">
-                            <i className="uk-icon-search"/>
-                            <input ref={c => { this.search = c; }} tabIndex="1" type="text" className="uk-form-width-large" placeholder="Skriv in ett sökord"
-                                onChange={() => this.props.onChange(this.search.value)} />
-                        </div>
-                    </form>
-                </div>
-            </div>
-        );
-    }
-}
-
+import SearchBox from "../Components/SearchBox";
 
 const Row = props => {
     const {item, deleteItem} = props;
@@ -47,8 +23,25 @@ class GroupList extends React.Component {
 
     constructor(props) {
         super(props);
-        this.collection = new Collection({type: Group});
+        this.onSearch = this.onSearch.bind(this);
+
+        this.params = new URLSearchParams(this.props.location.search);
+        const search_term = this.params.get('search') || '';
+        this.collection = new Collection({type: Group, search: search_term});
+        this.state = {'search': search_term};
     }
+
+    onSearch(term) {
+        this.setState({'search': term});
+        this.collection.updateSearch(term);
+        if (term === "") {
+            this.params.delete("search");
+        } else {
+            this.params.set("search", term);
+        }
+        this.props.history.replace(this.props.location.pathname + "?" + this.params.toString());
+    }
+
 
     render() {
         const columns = [
@@ -65,7 +58,7 @@ class GroupList extends React.Component {
                 <p className="uk-float-left">På denna sida ser du en lista på samtliga grupper..</p>
                 <Link to="/membership/groups/add" className="uk-button uk-button-primary uk-float-right"><i className="uk-icon-plus-circle"/> Skapa ny grupp</Link>
 
-                <SearchBox onChange={terms => this.collection.updateSearch(terms)} />
+                <SearchBox handleChange={this.onSearch} />
                 <CollectionTable rowComponent={Row} collection={this.collection} columns={columns} />
             </div>
         );
