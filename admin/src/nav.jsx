@@ -11,7 +11,7 @@ const NavItem = withRouter(props => {
     return (
         <li>
             <NavLink activeClassName="uk-active" to={target}>
-                <i className={"uk-icon-" + icon} />&nbsp;<span className="uk-hidden-small">{text}</span>
+                <i className={"uk-icon-" + icon} />&nbsp;<span>{text}</span>
             </NavLink>
         </li>
     );
@@ -38,7 +38,7 @@ export const SideNav = withRouter(({ nav, location }) => {
     }
 
     return (
-        <div className="uk-panel uk-panel-box" data-uk-sticky="{top:35}">
+        <div className="uk-panel uk-panel-box" style={{ marginBottom: "1em" }} data-uk-sticky="{top:35}">
             <ul className="uk-nav uk-nav-side" data-uk-scrollspy-nav="{closest:'li', smoothscroll:true}">
                 <li className="uk-nav-header">{activeItem.text}</li>
                 <li className="uk-nav-divider" />
