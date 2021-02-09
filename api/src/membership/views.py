@@ -90,6 +90,12 @@ def member_add_membership_days(
     return add_membership_days(entity_id, type, days, creation_reason, default_start_date).as_json()
 
 
+@service.route("/member/<int:member_id>/pending_actions", method=GET, permission=SPAN_VIEW)
+def member_get_pending(member_id):
+    from shop.shop_data import pending_actions
+    return pending_actions(member_id)
+
+
 @service.route("/member/<int:entity_id>/membership", method=GET, permission=SPAN_VIEW)
 def member_get_membership(entity_id=None):
     return get_membership_summary(entity_id).as_json()

@@ -2,12 +2,14 @@ import React from 'react';
 import { Link } from "react-router-dom";
 import Collection from "../Models/Collection";
 import Span from "../Models/Span";
+import {ADD_LABACCESS_DAYS } from "../Models/ProductAction";
 import {confirmModal} from "../message";
 import CollectionTable from "../Components/CollectionTable";
 import DateTimeShow from "../Components/DateTimeShow";
 import DateShow from "../Components/DateShow";
 import 'react-day-picker/lib/style.css';
 import MembershipPeriodsInput from "./MembershipPeriodsInput";
+import {get} from '../gateway';
 
 
 class MemberBoxSpans extends React.Component {
@@ -15,7 +17,15 @@ class MemberBoxSpans extends React.Component {
     constructor(props) {
         super(props);
         this.collection = new Collection({type: Span, url: `/membership/member/${props.match.params.member_id}/spans`, pageSize: 0});
-        this.state = {items: []};
+        this.state = {items: [], pending_labaccess_days: "?"};
+        this.pending_actions = get({url: `/membership/member/${props.match.params.member_id}/pending_actions`}).then((r) => {
+            const sum_pending_labaccess_days = r.data.reduce((acc, value) => {
+            if (value.action.action === ADD_LABACCESS_DAYS)
+                return acc + value.action.value;
+            return acc;
+            }, 0);
+            this.setState({pending_labaccess_days: sum_pending_labaccess_days});
+        });
     }
 
     componentDidMount() {
@@ -34,8 +44,11 @@ class MemberBoxSpans extends React.Component {
         return (
             <div className="uk-margin-top">
                 <h2>Medlemsperioder</h2>
+                <p><b>{this.state.pending_labaccess_days}</b> dagar labaccess kommer läggas till vid en nyckelsynkronisering.</p>
+                <hr/>
                 <MembershipPeriodsInput spans={this.collection} member_id={this.props.match.params.member_id}/>
                 <h2>Spans</h2>
+                <hr/>
                 <CollectionTable
                     collection={this.collection}
                     columns={[
