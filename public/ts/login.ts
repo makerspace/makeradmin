@@ -69,6 +69,6 @@ export function render_login(root: HTMLElement, heading: string | null, redirect
             return;
         }
 
-        login_via_single_use_link(tag, redirect);
+        login_via_single_use_link(tag.trim(), redirect);
     }
 }
