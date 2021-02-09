@@ -662,14 +662,6 @@ form input.readonly-input {
     }
 
     flex: 1 1 auto;
-
-    .product-amount,
-    .product-price,
-    .product-unit {
-        @include media("<=tablet") {
-            display: none;
-        }
-    }
 }
 
 .content-centering {
