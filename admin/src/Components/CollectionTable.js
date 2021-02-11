@@ -46,7 +46,6 @@ export default class CollectionTable extends React.Component {
     }
 
     renderPagination() {
-        const {collection} = this.props;
         const {page} = this.state;
         const show_count = 2;
         const onPageNav = this.props.onPageNav;
@@ -58,17 +57,18 @@ export default class CollectionTable extends React.Component {
             <ul className="uk-pagination">
                 {_.range(1, page.count + 1).map(i => {
                     const distance = Math.abs(i - page.index);
-                    if (distance == 0) {
+                    if (distance === 0) {
                         return <li key={i} className="uk-active"><span>{i}</span></li>;
-                    } else if (distance <= show_count || i == 1 || i == page.count) {
+                    } else if (distance <= show_count || i === 1 || i === page.count) {
                         return <li key={i}><a onClick={() => {
                             this.setState({loading: true});
                             if (onPageNav)
                                 onPageNav(i);
                         }}>{i}</a></li>;
-                    } else if (distance == show_count + 1) {
+                    } else if (distance === show_count + 1) {
                         return <li key={i}><span>...</span></li>;
                     }
+                    return "";
                 })}
             </ul>
         );
