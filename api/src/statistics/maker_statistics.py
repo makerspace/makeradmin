@@ -70,8 +70,8 @@ def shop_statistics():
         return {r[0]: r[1] for r in rows}
 
     date_lower_limit = datetime.now() - timedelta(days=365)
-    sales_by_product = mapify(db_session.query(TransactionContent.product_id, func.sum(TransactionContent.amount)).join(TransactionContent.transaction).filter(Transaction.created_at > date_lower_limit).group_by(TransactionContent.product_id).all())
-    sales_by_category = mapify(db_session.query(Product.category_id, func.sum(TransactionContent.amount)).join(TransactionContent.product).join(TransactionContent.transaction).filter(Transaction.created_at > date_lower_limit).group_by(Product.category_id).all())
+    sales_by_product = mapify(db_session.query(TransactionContent.product_id, func.sum(TransactionContent.amount)).join(TransactionContent.transaction).filter(Transaction.created_at > date_lower_limit).filter(Transaction.status == Transaction.COMPLETED).group_by(TransactionContent.product_id).all())
+    sales_by_category = mapify(db_session.query(Product.category_id, func.sum(TransactionContent.amount)).join(TransactionContent.product).join(TransactionContent.transaction).filter(Transaction.created_at > date_lower_limit).filter(Transaction.status == Transaction.COMPLETED).group_by(Product.category_id).all())
 
     product_ids = sales_by_product.keys()
     products = db_session.query(Product).filter((Product.deleted_at == None) | (Product.id.in_(product_ids))).all()
