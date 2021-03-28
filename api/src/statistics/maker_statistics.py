@@ -1,13 +1,16 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 from typing import List, Tuple
+import math
 
 from service.db import db_session
 from service.logging import logger
 from shop.models import Product, Transaction, TransactionContent, ProductCategory
 from shop.entities import product_entity, category_entity
+from membership.models import Member, Span
 from sqlalchemy import func
 
 def spans_by_date(span_type) -> List[Tuple[str, int]]:
+    ''' Number of active spans of a given type indexed by a date string '''
     # Warning: doesn't accurately add datapoints when the number of members drops to zero
     # But since we know that Stockholm Makerspace will exist forever, this is an edge case that will never happen.
     query = """
@@ -42,6 +45,55 @@ def spans_by_date(span_type) -> List[Tuple[str, int]]:
 
     return dates_str
 
+def membership_number_months(membership_type: str, startdate: date, enddate: date):
+    # 1. För alla medlemmar, räkna ihop total medlemstid => group sum by month
+    # 2. För alla medlemmar, räkna ihop konskutiv medlemstid => group sum by month
+
+    # 1. Medlem hela tiden
+    # 2. Medlem lite då och då, säg 5 månader totalt under året, men inte sammanhängande
+    # 3. Medlem i 5 månader och sen slutade
+    # 4. Medlem 2 månader och sen slutade
+
+    total_months = math.ceil((enddate - startdate).days / 30)
+
+    # of members older than N months, how many have been members for at least N months the last 12 months
+    # for months in range(1, 12):
+
+    # member_created_at_start
+    # spans = SELECT membership_members.member_id, membership_spans.startdate, membership_spans.enddate FROM membership_members WHERE membership_members.created_at <= member_created_at_start
+    # LEFT JOIN membership_spans ON membership_members.member_id=membership_spans.member_id
+    # WHERE membership_spans.startdate < enddate AND membership_spans.enddate > startdate
+
+    spans = db_session.query(Member.member_id, Span.startdate, Span.enddate).join(Member.spans).filter(Member.created_at <= startdate, Span.startdate < enddate, Span.enddate > startdate, Span.type == membership_type).all()
+    valid_members = db_session.query(Member.member_id).filter(Member.created_at <= startdate).all()
+    amount_by_member = {}
+
+    for (member_id,) in valid_members:
+        amount_by_member[member_id] = timedelta(days=0)
+
+    for (member_id, span_startdate, span_enddate) in spans:
+        span_startdate: datetime = max(span_startdate, startdate)
+        span_enddate: datetime = min(span_enddate, enddate)
+        length = (span_enddate - span_startdate)
+        amount_by_member[member_id] += length
+    
+    # Number of members active for exactly N months during this period
+    members_active_for_months = [0] * (total_months + 1)
+    for (_, member_time) in amount_by_member.items():
+        days = member_time.days
+        months = round(days / 30)
+        assert months < len(members_active_for_months)
+        members_active_for_months[months] += 1
+    
+    return members_active_for_months
+
+def membership_number_months_default():
+    now = datetime.now()
+    starttime = now - timedelta(days=30*12)
+    return {
+        "membership": membership_number_months("membership", starttime.date(), now.date()),
+        "labaccess": membership_number_months("labaccess", starttime.date(), now.date()),
+    }
 
 def membership_by_date_statistics():
     return {

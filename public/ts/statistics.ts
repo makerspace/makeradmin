@@ -23,14 +23,16 @@ common.documentLoaded().then(() => {
 	const future2 = common.ajax("GET", apiBasePath + "/statistics/lasertime/by_month", null);
 	const future3 = common.ajax("GET", apiBasePath + "/quiz/statistics", null) as Promise<ServerResponse<QuizStatistics>>;
 	const future4 = common.ajax("GET", apiBasePath + "/statistics/shop/statistics", null) as Promise<ServerResponse<ProductStatistics>>;
+	const future5 = common.ajax("GET", apiBasePath + "/statistics/membership/distribution_by_month", null) as Promise<ServerResponse<MemberDistribution>>;
 
-	Promise.all([future1, future2, future3, future4]).then(data => {
+	Promise.all([future1, future2, future3, future4, future5]).then(data => {
 		const membershipjson = data[0];
 		const laserjson = data[1];
 		addChart(root, membershipjson.data);
 		addLaserChart(root, laserjson.data);
 		addQuizChart(root, data[2].data)
 		addProductPurchasedChart(root, data[3].data);
+		addMemberDistribution(root, data[4].data);
 		// addRandomCharts(root);
 	})
 		.catch(json => {
@@ -328,6 +330,85 @@ function addLaserChart(root: HTMLElement, data: any) {
 	const chart = new Chart(ctx, config);
 }
 
+
+function addMemberDistribution(root: HTMLElement, data: MemberDistribution) {
+	// lab = splitSeries(data.labmembership);
+	// member = splitSeries(data.membership);
+	let labaccess = data.labaccess;
+
+	// Remove the "wasn't a member during this time" count which will be the data for "0 Months"
+	labaccess.splice(0, 1);
+	const maxtime = new Date();
+
+	const toPoints = (items: Array<any>)=>{
+		const values = [];
+		for (let i = 0; i < items.length; i++) {
+			values.push({ x: "" + (i + 1), y: items[i] });
+		}
+		return values;
+	}
+
+	console.log(toPoints(labaccess));
+
+	const labels = [];
+	for(let i = 0; i < labaccess.length; i++) {
+		labels.push("" + (i+1));
+	}
+
+
+	const config = {
+		type: 'bar',
+		data: {
+			labels: labels,
+			datasets: [
+				{
+					label: 'Members',
+					backgroundColor: "#FF000077",
+					borderColor: colors[0],
+					fill: false,
+					data: toPoints(labaccess),
+					steppedLine: true,
+				},
+			],
+		},
+		options: {
+			title: {
+				display: true,
+				text: 'Active labaccess time over one year.',
+			},
+			scales: {
+				xAxes: [{
+					scaleLabel: {
+						display: true,
+						labelString: 'Months'
+					}
+				}],
+				yAxes: [{
+					ticks: {
+						min: 0
+					},
+					scaleLabel: {
+						display: true,
+						labelString: 'Member Count'
+					}
+				}]
+			},
+		}
+	};
+
+	const canvas = <HTMLCanvasElement>document.createElement("canvas");
+	root.appendChild(canvas);
+	canvas.width = 500;
+	canvas.height = 300;
+	const ctx = canvas.getContext('2d');
+	const chart = new Chart(ctx, config);
+
+	const desc = <HTMLParagraphElement>document.createElement("p");
+	desc.textContent = "Of all members who became members at least one year ago, how many months have they had active lab membership during the last 12 months.";
+	root.appendChild(desc);
+}
+
+
 interface Question {
 	question: string,
 }
@@ -379,7 +460,7 @@ function addQuizChart(root: HTMLElement, data: QuizStatistics) {
 		backgroundColor: string,
 		borderColor: string,
 		data: any[],
-		options: (null|OptionStatistics)[],
+		options: (null | OptionStatistics)[],
 	}
 
 	const incorrectDatasets: Dataset[] = [];
@@ -472,7 +553,7 @@ function addQuizChart(root: HTMLElement, data: QuizStatistics) {
 					label: (tooltipItem: any, data: any) => {
 						const option = datasets[tooltipItem.datasetIndex].options[tooltipItem.index];
 						if (option != null) {
-							return Math.round(datasets[tooltipItem.datasetIndex].data[tooltipItem.index]*100) + "%: " + option.option.description;
+							return Math.round(datasets[tooltipItem.datasetIndex].data[tooltipItem.index] * 100) + "%: " + option.option.description;
 						} else {
 							return "";
 						}
@@ -488,7 +569,7 @@ function addQuizChart(root: HTMLElement, data: QuizStatistics) {
 	<div class="statistics-member-stats-box">
 		<div class="statistics-member-stats-row">
 			<span class="statistics-member-stats-type">Median time to answer quiz [min]</span>
-			<span class="statistics-member-stats-value">${(data.median_seconds_to_answer_quiz/60).toFixed(1)}</span>
+			<span class="statistics-member-stats-value">${(data.median_seconds_to_answer_quiz / 60).toFixed(1)}</span>
 		</div>
 		<div class="statistics-member-stats-row">
 			<span class="statistics-member-stats-type">Total quiz respondents</span>
@@ -509,23 +590,28 @@ function addQuizChart(root: HTMLElement, data: QuizStatistics) {
 
 interface Product {
 	id: number
-    category_id: number,
-    name: string,
-    description: string,
-    unit: string,
-    price: number,
-    smallest_multiple: number,
-    filter: string,
-    image: string,
-    display_order: number,
-    created_at: string,
-    updated_at: string,
-    deleted_at: string|null,
+	category_id: number,
+	name: string,
+	description: string,
+	unit: string,
+	price: number,
+	smallest_multiple: number,
+	filter: string,
+	image: string,
+	display_order: number,
+	created_at: string,
+	updated_at: string,
+	deleted_at: string | null,
 }
 
 interface Category {
 	id: number,
 	name: string,
+}
+
+interface MemberDistribution {
+	membership: number[],
+	labaccess: number[],
 }
 
 interface ProductStatistics {
@@ -551,7 +637,7 @@ function addProductPurchasedChart(root: HTMLElement, data: ProductStatistics) {
 
 	membershipSales.push({
 		name: "Other products",
-		amount: otherSales.map(x => x.amount).reduce((a,b)=>a+b),
+		amount: otherSales.map(x => x.amount).reduce((a, b) => a + b),
 	});
 
 	addRevenueChart(
@@ -573,7 +659,7 @@ function addProductPurchasedChart(root: HTMLElement, data: ProductStatistics) {
 
 function addRevenueChart(root: HTMLElement, data: { name: string, amount: number }[], label: string) {
 	// Sort by sales
-	data.sort((a,b) => b.amount - a.amount);
+	data.sort((a, b) => b.amount - a.amount);
 
 	const config = {
 		type: 'horizontalBar',
@@ -610,7 +696,7 @@ function addRevenueChart(root: HTMLElement, data: { name: string, amount: number
 	const canvas = <HTMLCanvasElement>document.createElement("canvas");
 	root.appendChild(canvas);
 	canvas.width = 500;
-	canvas.height = 70 + 30*data.length;
+	canvas.height = 70 + 30 * data.length;
 	const ctx = canvas.getContext('2d');
 	const chart = new Chart(ctx, config);
 }
