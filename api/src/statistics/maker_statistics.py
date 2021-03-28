@@ -82,10 +82,10 @@ def membership_number_months(membership_type: str, startdate: date, enddate: dat
     for (_, member_time) in amount_by_member.items():
         days = member_time.days
         months = round(days / 30)
-        if months >= len(members_active_for_months):
+        if months > total_months:
             print(f"Unexpected high month count: {months}")
-            months = len(members_active_for_months)
-        assert months < len(members_active_for_months)
+            months = total_months
+        assert months <= total_months
         members_active_for_months[months] += 1
     
     return members_active_for_months
