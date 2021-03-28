@@ -24,15 +24,17 @@ common.documentLoaded().then(() => {
 	const future3 = common.ajax("GET", apiBasePath + "/quiz/statistics", null) as Promise<ServerResponse<QuizStatistics>>;
 	const future4 = common.ajax("GET", apiBasePath + "/statistics/shop/statistics", null) as Promise<ServerResponse<ProductStatistics>>;
 	const future5 = common.ajax("GET", apiBasePath + "/statistics/membership/distribution_by_month", null) as Promise<ServerResponse<MemberDistribution>>;
+	const future6 = common.ajax("GET", apiBasePath + "/statistics/membership/distribution_by_month2", null) as Promise<ServerResponse<MemberDistribution>>;
 
-	Promise.all([future1, future2, future3, future4, future5]).then(data => {
+	Promise.all([future1, future2, future3, future4, future5, future6]).then(data => {
 		const membershipjson = data[0];
 		const laserjson = data[1];
 		addChart(root, membershipjson.data);
 		addLaserChart(root, laserjson.data);
 		addQuizChart(root, data[2].data)
 		addProductPurchasedChart(root, data[3].data);
-		addMemberDistribution(root, data[4].data);
+		addMemberDistribution(root, data[4].data, "Of all members who became members at least one year ago, how many months have they had active lab membership during the last 12 months.");
+		addMemberDistribution(root, data[5].data, "Among all members, how many months have they had active lab membership during the last 12 months.");
 		// addRandomCharts(root);
 	})
 		.catch(json => {
@@ -331,7 +333,7 @@ function addLaserChart(root: HTMLElement, data: any) {
 }
 
 
-function addMemberDistribution(root: HTMLElement, data: MemberDistribution) {
+function addMemberDistribution(root: HTMLElement, data: MemberDistribution, description: string) {
 	// lab = splitSeries(data.labmembership);
 	// member = splitSeries(data.membership);
 	let labaccess = data.labaccess;
@@ -404,7 +406,7 @@ function addMemberDistribution(root: HTMLElement, data: MemberDistribution) {
 	const chart = new Chart(ctx, config);
 
 	const desc = <HTMLParagraphElement>document.createElement("p");
-	desc.textContent = "Of all members who became members at least one year ago, how many months have they had active lab membership during the last 12 months.";
+	desc.textContent = description;
 	root.appendChild(desc);
 }
 
