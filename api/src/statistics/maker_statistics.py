@@ -80,7 +80,7 @@ def membership_number_months2(membership_type: str, startdate: date, enddate: da
     total_months = math.ceil((enddate - startdate).days / 30)
 
     spans = db_session.query(Member.member_id, Span.startdate, Span.enddate).join(Member.spans).filter(Span.startdate < enddate, Span.enddate > startdate, Span.type == membership_type).all()
-    valid_members = db_session.query(Member.member_id).filter(Member.created_at <= startdate).all()
+    valid_members = db_session.query(Member.member_id).all()
     amount_by_member = {}
 
     for (member_id,) in valid_members:
