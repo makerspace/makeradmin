@@ -17,9 +17,9 @@ export const UNAUTHORIZED = "unauthorized";
 
 
 export function formatDateTime(str: any) {
-	const options = {
-		year: 'numeric', month: 'numeric', day: 'numeric',
-		hour: 'numeric', minute: 'numeric', second: 'numeric',
+	const options: Intl.DateTimeFormatOptions = {
+		year: "numeric", month: "numeric", day: "numeric",
+		hour: "numeric", minute: "numeric", second: "numeric",
 		hour12: false
 	};
 
@@ -69,7 +69,7 @@ export function ajax(type: string, url: string, data: object | null = null): Pro
 }
 
 export function documentLoaded() {
-	return new Promise((resolve, reject) => {
+	return new Promise<void>((resolve, reject) => {
 		document.addEventListener('DOMContentLoaded', () => resolve());
 	});
 }
