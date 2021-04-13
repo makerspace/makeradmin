@@ -1,0 +1,29 @@
+{% from "sidebar.html" import sidebar with context %}
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Stockholm Makerspace Webshop</title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="{{ STATIC }}/uikit/css/uikit.min.css" />
+        <link rel="stylesheet" href="{{ STATIC }}/style.css" />
+        <script src='{{ STATIC }}/uikit/js/uikit.min.js'></script>
+        <script src='{{ STATIC }}/uikit/js/uikit-icons.min.js'></script>
+        {% include 'meta.html' %}
+        <script>
+            window.transactionId = {{ transaction_id }};
+        </script>
+        <script src='{{ STATIC }}/js/receipt.js'></script>
+    </head>
+    <body>
+        {% include 'banner.html' %}
+        <div id="root">
+            {{ sidebar("") }}
+            <div id="content" class="receipt">
+                <div class="content-centering">
+                    <div id="receipt-content"></div>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>

@@ -1,0 +1,20 @@
+# Runtime requirements
+flask
+flask_cors
+sqlalchemy
+gunicorn
+rocky>=1,<2
+PyMySQL
+requests
+python-dotenv
+bcrypt
+stripe
+jsonschema
+jinja2
+pytz
+
+# Test requirements
+pytest
+pytest-parallel
+selenium
+faker

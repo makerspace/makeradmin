@@ -1,11 +1,10 @@
-version: "2"
+version: "3"
 services:
   db2:
-    image: mysql:5.7
+    image: mysql:8
     # The lumen library seems to use an older mysql client which is not able to connect if mysql uses the newer caching_sha2_password authentication plugin.
     # Therefore we need to override the mysql starting command to set a config option to use the older password authentication plugin.
     command: mysqld --default-authentication-plugin=mysql_native_password
-    restart: always
     volumes:
       - dbdata:/var/lib/mysql
       - ./logs/mysql:/var/www/html/storage/logs
@@ -20,216 +19,80 @@ services:
     networks:
       - makeradmin
 
-  servicebase:
-    image: makeradmin/servicebase:1.0
+  api:
+    image: makeradmin/api:1.0
     build:
-      context: ./library
-      dockerfile: DockerfileServiceBase
-    networks:
-      - makeradmin
-
-  library:
-    image: makeradmin/library:1.0
-    build:
-      context: ./library
-      dockerfile: Dockerfile
-    depends_on:
-      - servicebase
-    networks:
-      - makeradmin
-
-  servicebase_python:
-    image: makeradmin/servicebase_python:1.0
-    build:
-      context: ./servicebase_python
-    networks:
-      - makeradmin
-
-  api-gateway:
-    image: makeradmin/apigateway:1.0
-    build:
-      context: ./apigateway
-      dockerfile: ${PWD}/library/DockerfileService
+      context: ./api
     volumes:
-      - ./logs/apigateway:/var/www/html/storage/logs
+      - ./logs/api:/work/logs
     depends_on:
       - db2
-      - servicebase
-      - library
     networks:
       - makeradmin
     environment:
-      APP_DEBUG:
-      MYSQL_HOST: "db2:${MYSQL_PORT}"
-      MYSQL_DB: "makeradmin-apigateway"
-      MYSQL_USER: "${MYSQL_USER}"
-      MYSQL_PASS: "${MYSQL_PASS}"
-      BEARER: "${API_BEARER}"
-
-  current-member:
-    image: makeradmin/current-member:1.0
-    build: member_view
-    environment:
-      MYSQL_HOST: "db2:${MYSQL_PORT}"
-      MYSQL_DB: "makeradmin-membership"
-      MYSQL_USER: "${MYSQL_USER}"
-      MYSQL_PASS: "${MYSQL_PASS}"
-      APIGATEWAY: "api-gateway"
-      BEARER: "${API_BEARER}"
+      MYSQL_HOST: db2
+      MYSQL_DB:
+      MYSQL_PORT:
+      MYSQL_USER:
+      MYSQL_PASS:
+      HOST_PUBLIC:
       HOST_FRONTEND:
-      HOST_BACKEND:
-      APP_DEBUG:
-    depends_on:
-      - api-gateway
-      - servicebase_python
-    networks:
-      - makeradmin
-
-  webshop:
-    image: makeradmin/webshop:1.0
-    volumes:
-      - "./webshop/src/ts:/var/www/service/ts"
-      - "./webshop/src/scss:/var/www/service/scss"
-      - "./webshop/src/templates:/var/www/service/templates"
-      - "./webshop_product_images:/var/www/service/static/product_images"
-    build: webshop
-    environment:
-      MYSQL_HOST: "db2:${MYSQL_PORT}"
-      MYSQL_DB: "makeradmin-webshop"
-      MYSQL_USER: "${MYSQL_USER}"
-      MYSQL_PASS: "${MYSQL_PASS}"
-      APIGATEWAY: "api-gateway"
-      BEARER: "${API_BEARER}"
-      HOST_FRONTEND:
-      HOST_BACKEND:
-      APP_DEBUG:
+      VIRTUAL_HOST: "${HOST_BACKEND}"
+      LETSENCRYPT_HOST: "${HOST_BACKEND}"
+      LETSENCRYPT_EMAIL: "${ADMIN_EMAIL}"
       STRIPE_PRIVATE_KEY:
       STRIPE_PUBLIC_KEY:
       STRIPE_SIGNING_SECRET:
-    depends_on:
-      - api-gateway
-      - servicebase_python
-    networks:
-      - makeradmin
-
-  rfid:
-    image: makeradmin/rfid:1.0
-    build: rfid
-    environment:
-      MYSQL_HOST: "db2:${MYSQL_PORT}"
-      MYSQL_DB: "makeradmin-rfid"
-      MYSQL_USER: "${MYSQL_USER}"
-      MYSQL_PASS: "${MYSQL_PASS}"
-      APIGATEWAY: "api-gateway"
-      BEARER: "${API_BEARER}"
-      HOST_FRONTEND:
-      HOST_BACKEND:
-      APP_DEBUG:
-    depends_on:
-      - api-gateway
-      - servicebase_python
-    networks:
-      - makeradmin
-
-  economy:
-    image: makeradmin/economy:1.0
-    build:
-      context: ./economy
-      dockerfile: ${PWD}/library/DockerfileService
-    volumes:
-      - ./logs/economy:/var/www/html/storage/logs
-      - ./data/economy-vouchers:/var/www/html/vouchers
-    environment:
-      MYSQL_HOST: "db2:${MYSQL_PORT}"
-      MYSQL_DB: "makeradmin-economy"
-      MYSQL_USER: "${MYSQL_USER}"
-      MYSQL_PASS: "${MYSQL_PASS}"
-      APIGATEWAY: "api-gateway"
-      BEARER: "${API_BEARER}"
-    depends_on:
-      - api-gateway
-    networks:
-      - makeradmin
-
-  membership:
-    image: makeradmin/membership:1.0
-    build:
-      context: ./membership
-      dockerfile: ${PWD}/library/DockerfileService
-    volumes:
-      - ./logs/membership:/var/www/html/storage/logs
-    environment:
-      MYSQL_HOST: "db2:${MYSQL_PORT}"
-      MYSQL_DB: "makeradmin-membership"
-      MYSQL_USER: "${MYSQL_USER}"
-      MYSQL_PASS: "${MYSQL_PASS}"
-      APIGATEWAY: "api-gateway"
-      BEARER: "${API_BEARER}"
-    depends_on:
-      - api-gateway
-    networks:
-      - makeradmin
-
-  messages:
-    image: makeradmin/messages:1.0
-    build:
-      context: ./messages
-      dockerfile: ${PWD}/library/DockerfileService
-    volumes:
-      - ./logs/messages:/var/www/html/storage/logs
-    environment:
-      MYSQL_HOST: "db2:${MYSQL_PORT}"
-      MYSQL_DB: "makeradmin-messages"
-      MYSQL_USER: "${MYSQL_USER}"
-      MYSQL_PASS: "${MYSQL_PASS}"
-      APIGATEWAY: "api-gateway"
-      BEARER: "${API_BEARER}"
-    depends_on:
-      - api-gateway
-    networks:
-      - makeradmin
+      CORS_ALLOWED_ORIGINS:
 
   email-dispatcher:
-    image: makeradmin/messages-dispatcher-email:1.0
+    image: makeradmin/api:1.0
     build:
-      context: ./emaildispatcher
-      dockerfile: ${PWD}/library/DockerfileService
+      context: ./api
+    command: 
+      - "/work/dispatch_emails.sh"
     environment:
-      MYSQL_HOST: "db2:${MYSQL_PORT}"
-      MYSQL_DB: "makeradmin-messages"
-      MYSQL_USER: "${MYSQL_USER}"
-      MYSQL_PASS: "${MYSQL_PASS}"
-      APIGATEWAY: "api-gateway"
-      BEARER: "${API_BEARER}"
-      MAILGUN_DOMAIN: "${MAILGUN_DOMAIN}"
-      MAILGUN_KEY: "${MAILGUN_KEY}"
-      MAILGUN_FROM: "${MAILGUN_FROM}"
+      MYSQL_HOST: db2
+      MYSQL_DB:
+      MYSQL_PORT:
+      MYSQL_USER:
+      MYSQL_PASS:
+      MAILGUN_DOMAIN:
+      MAILGUN_KEY:
+      MAILGUN_FROM:
+      MAILGUN_TO_OVERRIDE:
+      HOST_PUBLIC:
+      HOST_FRONTEND:
     depends_on:
-      - api-gateway
-      - messages
+      - api
     networks:
       - makeradmin
-
-  multiaccesssync:
-    image: makeradmin/multiaccesssync:1.0
-    build:
-      context: ./multiaccesssync
-      dockerfile: ${PWD}/library/DockerfileService
+      
+  public:
+    image: makeradmin/public:1.0
     volumes:
-      - ./data/multiaccess-uploads:/var/www/html/storage/uploads
+      - "./.webshop_product_images:/work/static/product_images"
+    build:
+      context: ./public
     environment:
-      APIGATEWAY: api-gateway
-      BEARER: "${API_BEARER}"
-    depends_on:
-      - api-gateway
+      APIGATEWAY: "api"
+      HOST_BACKEND:
+      STRIPE_PUBLIC_KEY:
+      VIRTUAL_HOST: "${HOST_PUBLIC}"
+      LETSENCRYPT_HOST: "${HOST_PUBLIC}"
+      LETSENCRYPT_EMAIL: "${ADMIN_EMAIL}"
     networks:
       - makeradmin
 
-  frontend:
-    image: makeradmin/frontend:1.0
-    build: ./frontend
+  admin:
+    image: makeradmin/admin:1.0
+    build:
+      context: ./admin
     environment:
       HOST_BACKEND:
+      VIRTUAL_HOST: "${HOST_FRONTEND}"
+      LETSENCRYPT_HOST: "${HOST_FRONTEND}"
+      LETSENCRYPT_EMAIL: "${ADMIN_EMAIL}"
     networks:
       - makeradmin
 

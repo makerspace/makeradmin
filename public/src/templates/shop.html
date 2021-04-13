@@ -1,0 +1,38 @@
+{% from "sidebar.html" import sidebar with context %}
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Stockholm Makerspace Webshop</title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="{{ STATIC }}/uikit/css/uikit.min.css" />
+        <link rel="stylesheet" href="{{ STATIC }}/style.css" />
+        <script src='{{ STATIC }}/uikit/js/uikit.min.js'></script>
+        <script src='{{ STATIC }}/uikit/js/uikit-icons.min.js'></script>
+        {% include 'meta.html' %}
+        <script src='{{ STATIC }}/js/shop.js'></script>
+    </head>
+    <body>
+        {% include 'banner.html' %}
+        <div id="root">
+            {{ sidebar("shop") }}
+            <div id="content">
+                <button id="edit" class="uk-icon-button" uk-icon="icon: pencil"><span>Edit</span></button>
+                <ul class="product-list layout-grid">
+                    <li class="product-search-bar">
+                        <form class="product-search uk-search uk-search-default">
+                            <span uk-search-icon></span>
+                            <input class="uk-search-input" id="product-search-field" type="search" placeholder="Hitta produkt...">
+                        </form>
+                        <div class="toggle-product-images uk-button-group">
+                            <button id="layout-grid" class="layout-button uk-icon-button" uk-icon="icon: grid"></button>
+                            <button id="layout-list" class="layout-button uk-icon-button" uk-icon="icon: list"></button>
+                            <button id="layout-table" class="layout-button uk-icon-button" uk-icon="icon: table"></button>
+                        </div>
+                    </li>
+                </ul>
+                <a class="uk-button uk-button-primary uk-button-small edit product-add" href="product/create" uk-icon="plus"></a>
+            </div>
+        </div>
+    </body>
+</html>

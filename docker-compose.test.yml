@@ -1,11 +1,75 @@
-version: "2"
+version: "3"
+
 services:
-  api-gateway:
+
+  db2:
+    volumes:
+      - logs:/var/www/html/storage/logs
+      
+  api:
+    volumes:
+      - logs:/work/logs
+    environment:
+      TEST: "true"
+      CORS_ALLOWED_ORIGINS: 'http://admin,http://api,http://public'
+      TEST_SERVICE_TOKEN:
+
+  public:
+    environment:
+      HOST_BACKEND: 'http://api'
+      
+  admin:
+    environment:
+      HOST_BACKEND: 'http://api'
+
+  selenium:
+    image: selenium/standalone-chrome-debug
+    networks:
+      - makeradmin
     ports:
-      - "9010:80"
-  webshop:
-    ports:
-      - "9011:80"
-  frontend:
-    ports:
-      - "9009:80"
+      - '4444'
+    volumes:
+      - /dev/shm:/dev/shm
+
+  email-dispatcher:
+    command: ['/bin/sleep', '3600']
+    environment:
+      MAILGUN_DOMAIN: ""
+      MAILGUN_KEY: ""
+      
+  test:
+    image: makeradmin/test:1.0
+    build:
+      context: ./api
+      dockerfile: TestDockerfile
+    networks:
+      - makeradmin
+    command:
+      - "/work/test_run.sh"
+    volumes:
+      - .test:/work/.test
+    depends_on:
+      - admin
+      - public
+      - api
+      - selenium
+    environment:
+      MYSQL_HOST: db2
+      MYSQL_DB:
+      MYSQL_PORT:
+      MYSQL_USER:
+      MYSQL_PASS:
+      WEBDRIVER_TYPE: "REMOTE_CHROME"
+      TEST_SERVICE_TOKEN:
+      HOST_FRONTEND: 'http://admin'
+      HOST_BACKEND: 'http://api'
+      HOST_PUBLIC: 'http://public'
+      APIGATEWAY: "api"
+      STRIPE_PRIVATE_KEY:
+      STRIPE_PUBLIC_KEY:
+      TEST_PARALELLISM:
+      SELENIUM_BASE_TIMEOUT:
+      SELENIUM_SCREENSHOT_DIR: "/work/.test/selenium-screenshots"
+      
+volumes:
+  logs:

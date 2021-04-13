@@ -1,0 +1,35 @@
+{% extends "email_body_base.html" %}
+
+{% block swedish %}
+    <p>Hej {{ member.firstname }},</p>
+    <p>(See below for English).</p>
+    <p>
+        Om du vill fortsätta vara medlem i Stockholms största kollektiva verkstad efter {{ expiration_date }}
+        så är det dags att förnya ditt årsmedlemskap i vår
+        <a href="{{ public_url('/shop') }}">webshop</a>.
+    </p>
+    <p>
+        Årsmedlemskapet låter dig vara med på kurser och årsmötet och krävs även för att du ska kunna förnya ditt labbmedlemskap.
+    </p>
+    <p>
+        Om du inte tänkt förnya ditt medlemskap så är vi nyfikna på att veta varför, skriv en rad eller två
+        till <a href="mailto:info@makerspace.se">info@makerspace.se</a>.
+    </p>
+    <p>Med vänliga hälsningar,<br/>Stockholm Makerspace</p>
+{% endblock %}
+
+{% block english %}
+    <p>
+        If you want to continue to be a member in Stockholm's largest collective workshop after
+        {{ expiration_date }}, it is time to renew your membership in our
+        <a href="{{ public_url('/shop') }}">webshop</a>.
+    </p>
+    <p>
+        The yearly membership lets you attend courses and the annual meeting and it is a prerequisite for being able to purchase lab membership.
+    </p>
+    <p>
+        If you are not going to renew your membership, we are curious to know why. Please write a line
+        or two to <a href="mailto:info@makerspace.se">info@makerspace.se</a>.
+    </p>
+    <p>Sincerely,<br/>Stockholm Makerspace</p>
+{% endblock %}

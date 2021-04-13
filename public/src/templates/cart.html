@@ -1,0 +1,41 @@
+{% from "sidebar.html" import sidebar with context %}
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Kundvagn - Stockholm Makerspace Webshop</title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="{{ STATIC }}/uikit/css/uikit.min.css" />
+        <link rel="stylesheet" href="{{ STATIC }}/style.css" />
+        <script src='{{ STATIC }}/uikit/js/uikit.min.js'></script>
+        <script src='{{ STATIC }}/uikit/js/uikit-icons.min.js'></script>
+        <script src="https://js.stripe.com/v3/"></script>
+        {% include 'meta.html' %}
+        <script src='{{ STATIC }}/js/cartpage.js'></script>
+    </head>
+    <body>
+        {% include 'banner.html' %}
+        <div id="root">
+            {{ sidebar("cart") }}
+            <div id="content" class="cartpage">
+                <div class="content-centering">
+                    <h3 class="cart-header">Varukorg</h3>
+                    <ul id="cart" class="layout-table">
+                    </ul>
+                    <div id="pay-module">
+                        <div id="pay-login">
+                            <h3>Du måste logga in för att kunna betala</h3>
+                            <form class="uk-form-stacked">
+                                <input required id="email" class="uk-input" type="text" placeholder="Email" />
+                                <button id="login-button" type="submit" class="uk-button uk-button-default uk-button-primary">
+                                    Logga in
+                                </button>
+                            </form>
+                        </div>
+                        {% include 'payment_form.html' %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>

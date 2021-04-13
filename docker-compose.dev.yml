@@ -1,0 +1,48 @@
+version: "3"
+
+services:
+  db2:
+    ports:
+      - "3306:3306"
+    volumes:
+      - logs:/var/www/html/storage/logs
+
+  api:
+    volumes:
+      - ./api/src:/work/src
+      - logs:/work/logs
+    ports:
+      - "8010:80"
+    environment:
+      DEV_RUN: "true"
+      TEST_SERVICE_TOKEN:
+
+  email-dispatcher:
+    volumes:
+      - ./api/src:/work/src
+      
+  public:
+    build:
+      args:
+        DEV_BUILD: "true"
+    ports:
+      - "8011:80"
+    volumes:
+      - ./public/ts:/work/ts
+      - ./public/scss:/work/scss
+      - ./public/src:/work/src
+    environment:
+      DEV_RUN: "true"
+
+  admin:
+    build:
+      dockerfile: DevServerDockerfile
+    ports:
+      - "8009:80"
+    volumes:
+      - ./admin/src:/work/src
+      - ./admin/dist:/work/dist
+
+
+volumes:
+  logs:
