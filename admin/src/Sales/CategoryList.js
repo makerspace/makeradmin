@@ -67,13 +67,11 @@ class CategoryList extends React.Component {
                         emptyMessage="Inga produktkategorier"
                         columns={[
                             {title: "Namn"},
-                            {title: "Antal produkter"},
                             {title: ""},
                         ]}
                         rowComponent={({item, deleteItem}) =>
                             <tr>
                                 <td>{item.name}</td>
-                                <td>{item.product_count}</td>
                                 <td><a onClick={() => deleteItem(item)} className="removebutton"><i className="uk-icon-trash"/></a></td>
                             </tr>
                         }
