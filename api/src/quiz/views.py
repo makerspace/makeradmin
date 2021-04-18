@@ -37,6 +37,7 @@ service.related_entity_routes(
     permission_list=QUIZ_EDIT,
 )
 
+
 @service.route("/question/<int:question_id>/answer", method=POST, permission=USER)
 def answer_question(question_id):
     data = request.json

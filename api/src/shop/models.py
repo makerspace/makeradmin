@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, DateTime, func, Text, Numeric, ForeignKey, Enum
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, configure_mappers
 
 from membership.models import Member
 
@@ -102,7 +102,7 @@ class TransactionContent(Base):
     def __repr__(self):
         return f'TransactionContent(id={self.id}, count={self.count}, amount={self.amount})'
 
-    
+
 class TransactionAction(Base):
     __tablename__ = 'webshop_transaction_actions'
 
@@ -133,7 +133,7 @@ class PendingRegistration(Base):
 
     def __repr__(self):
         return f'PendingRegistration(id={self.id})'
-    
+
 
 class ProductImage(Base):
     __tablename__ = 'webshop_product_images'
@@ -159,3 +159,7 @@ class StripePending(Base):
 
     def __repr__(self):
         return f'StripePending(id={self.id}, stripe_token={self.stripe_token})'
+
+
+# https://stackoverflow.com/questions/67149505/how-do-i-make-sqlalchemy-backref-work-without-creating-an-orm-object
+configure_mappers()

@@ -72,3 +72,4 @@ def get_admin_url(path):
 
 def debug_mode():
     return config.get('DEV_RUN') == 'true'
+

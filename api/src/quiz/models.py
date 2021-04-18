@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, DateTime, func, Text, Numeric, ForeignKey, Enum, Boolean
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, configure_mappers
 from membership.models import Member
 
 Base = declarative_base()
@@ -18,6 +18,7 @@ class QuizQuestion(Base):
 
     def __repr__(self):
         return f'QuizQuestion(id={self.id}, question={self.question})'
+
 
 class QuizQuestionOption(Base):
     __tablename__ = 'quiz_question_options'
@@ -37,6 +38,7 @@ class QuizQuestionOption(Base):
     def __repr__(self):
         return f'QuizQuestionOption(id={self.id}, description={self.description})'
 
+
 class QuizAnswer(Base):
     __tablename__ = 'quiz_answers'
     
@@ -54,3 +56,7 @@ class QuizAnswer(Base):
 
     def __repr__(self):
         return f'QuizAnswer(id={self.id})'
+
+
+# https://stackoverflow.com/questions/67149505/how-do-i-make-sqlalchemy-backref-work-without-creating-an-orm-object
+configure_mappers()

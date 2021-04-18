@@ -94,6 +94,7 @@ def already_sent_message(template: MessageTemplate, member: Member, days: int):
     ).count()
     return reminder_sent > 0
 
+
 def labaccess_reminder(render_template):
     now = datetime.utcnow()
 

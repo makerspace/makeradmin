@@ -2,7 +2,7 @@ import enum
 
 from sqlalchemy import Column, Integer, String, Text, DateTime, func, Date, ForeignKey, Enum
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, configure_mappers
 
 from membership.models import Member
 
@@ -49,3 +49,7 @@ class Message(Base):
     
     def __repr__(self):
         return f'Message(recipient_id={self.id}, subject={self.subject}, member_id={self.member_id})'
+
+
+# https://stackoverflow.com/questions/67149505/how-do-i-make-sqlalchemy-backref-work-without-creating-an-orm-object
+configure_mappers()

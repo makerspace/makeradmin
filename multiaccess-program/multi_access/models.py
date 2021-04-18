@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, DateTime, Boolean, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, configure_mappers
 
 Base = declarative_base()
 
@@ -86,4 +86,5 @@ class Customer(Base):
     name = Column("Name", String(length=50), nullable=False, index=True)
 
 
-    
+# https://stackoverflow.com/questions/67149505/how-do-i-make-sqlalchemy-backref-work-without-creating-an-orm-object
+configure_mappers()

@@ -1,7 +1,7 @@
 # Runtime requirements
 flask
 flask_cors
-sqlalchemy
+sqlalchemy>=1.4.9
 gunicorn
 rocky>=1,<2
 PyMySQL
@@ -12,6 +12,7 @@ stripe
 jsonschema
 jinja2
 pytz
+ipython
 
 # Test requirements
 pytest
