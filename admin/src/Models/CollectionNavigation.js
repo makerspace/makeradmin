@@ -13,22 +13,48 @@ export default class CollectionNavigation extends React.Component {
         this.state = {'search': search, 'page': page};
     }
 
+    componentDidMount() {
+        this.unsubscribe = this.collection.subscribe(({page}) => this.gotNewData(page));
+    }
+    
+    componentWillUnmount() {
+        this.unsubscribe();
+    }
+
+    gotNewData(page) {
+        // If the returned result has fewer number of pages, keep the page within bounds
+        let index = this.state.page;
+        if (index && page.count < index) {
+            this.onPageNav(page.count);
+        }
+    }
+
+    setHistory() {
+        if (this.state.search === "") {
+            this.params.delete("search");
+        } else {
+            this.params.set("search", this.state.search);
+        }
+
+        if (this.state.page === 1) {
+            this.params.delete("page");
+        } else {
+            this.params.set("page", this.state.page);
+        }
+
+        this.props.history.replace(this.props.location.pathname + "?" + this.params.toString());
+    }
+
     onSearch(term) {
         this.setState({'search': term});
         this.collection.updateSearch(term);
-        if (term === "") {
-            this.params.delete("search");
-        } else {
-            this.params.set("search", term);
-        }
-        this.props.history.replace(this.props.location.pathname + "?" + this.params.toString());
+        this.setHistory();
     }
 
     onPageNav(index) {
         this.setState({'page': index});
         this.collection.updatePage(index);
-        this.params.set("page", index);
-        this.props.history.replace(this.props.location.pathname + "?" + this.params.toString());
+        this.setHistory();
     }
 
 }
