@@ -37,7 +37,7 @@ class KeyHandoutForm extends React.Component {
 				Kontrollera att labbmedlemsavtalet är signerat och säkerställ att rätt medlemsnummer står väl synligt på labbmedlemsavtalet. 	
 			</div>
 			    <fieldset>
-			        <input className="uk-checkbox" type="checkbox" title="Gnupung"/>
+			        <input className="uk-checkbox" type="checkbox"/>
 			   	<label> Signerat labbmedlemsavtal mottaget.</label> 
 				</fieldset>
 
