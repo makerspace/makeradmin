@@ -50,11 +50,11 @@ export default class CollectionTable extends React.Component {
         const show_count = 2;
         const onPageNav = this.props.onPageNav;
         
-        if (!page.count || page.count <= 1) {
-            return "";
+        if (!page.count) {
+            page.count = 1;
         }
         return (
-            <ul className="uk-pagination">
+            <ul className="uk-pagination" style={{clear:"both"}}>
                 {_.range(1, page.count + 1).map(i => {
                     const distance = Math.abs(i - page.index);
                     if (distance === 0) {
