@@ -1,6 +1,5 @@
 import React from "react";
 import classNames from 'classnames/bind';
-import * as _ from "underscore";
 
 
 export default class CheckboxInput extends React.Component {
