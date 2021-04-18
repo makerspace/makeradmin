@@ -12,7 +12,7 @@ endif
 	python3 -m pip install -r requirements.txt --upgrade
 
 pep8:
-	python3 -m pycodestyle --ignore=W503,W504,W391,W293,E741,E701,E241,E402 --max-line-length=120 --exclude=.direnv,dist,build,.idea .
+	python3 -m pycodestyle --ignore=W503,W504,W391,W293,E741,E701,E241,E402,W292 --max-line-length=120 --exclude=.direnv,dist,build,.idea .
 
 test: build pep8
 	python3 -m nose test
