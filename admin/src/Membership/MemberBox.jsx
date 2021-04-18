@@ -36,6 +36,7 @@ class MemberBox extends React.Component {
                 <h2>Medlem #{member_number}: {firstname} {lastname}</h2>
 
                 <ul className="uk-tab">
+                    <li><Link to={"/membership/members/" + member_id + "/key-handout"}>Nyckelutlämning</Link></li>
                     <li><Link to={"/membership/members/" + member_id + "/member-data"}>Uppgifter</Link></li>
                     <li><Link to={"/membership/members/" + member_id + "/groups"}>Grupper</Link></li>
                     <li><Link to={"/membership/members/" + member_id + "/keys"}>Nycklar</Link></li>
