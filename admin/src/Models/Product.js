@@ -107,5 +107,6 @@ Product.model = {
         unit: "",
         smallest_multiple: 1,
         filter: null,
+        show: true,
     },
 };

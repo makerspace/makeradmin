@@ -6,6 +6,7 @@ import * as _ from "underscore";
 import SelectInput from "./SelectInput";
 import ReactSelect from "react-select";
 import ProductAction, {ACTION_TYPES} from "../Models/ProductAction";
+import CheckboxInput from "./CheckboxInput";
 
 
 // Return list of available actions types based on selected ones
@@ -109,17 +110,20 @@ class ProductForm extends React.Component {
                         <legend><i className="uk-icon-filter"/> Filter</legend>
                         <SelectInput model={product} name="filter" title="Filter" getLabel={o => o.name} getValue={o => o.id} options={[{id: "", name: "No filter"}, {id: "start_package", name: "Startpaket"}]}/>
                     </fieldset>
-                    {
-                        product.id
-                        ?
-                        <fieldset className="uk-margin-top">
-                            <legend><i className="uk-icon-tag"/> Metadata</legend>
-                            <DateTimeInput model={product} name="created_at" title="Skapad"/>
-                            <DateTimeInput model={product} name="updated_at" title="Uppdaterad"/>
-                        </fieldset>
-                        :
-                        ""
-                    }
+                    <fieldset className="uk-margin-top">
+                        <legend><i className="uk-icon-tag"/> Metadata</legend>
+                        <CheckboxInput model={product} name="show" title="Synlig"/>
+                        {
+                            product.id
+                            ?
+                            <>
+                                <DateTimeInput model={product} name="created_at" title="Skapad"/>
+                                <DateTimeInput model={product} name="updated_at" title="Uppdaterad"/>
+                            </>
+                            :
+                            ""
+                        }
+                    </fieldset>
                     <fieldset className="uk-margin-top">
                         {product.id ? <a className="uk-button uk-button-danger uk-float-left" onClick={onDelete}><i className="uk-icon-trash"/> Ta bort produkt</a> : ""}
                         <button disabled={saveDisabled} className="uk-button uk-button-success uk-float-right"><i className="uk-icon-save"/> {product.id ? 'Spara' : 'Skapa'}</button>

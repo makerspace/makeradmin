@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime, func, Text, Numeric, ForeignKey, Enum
+from sqlalchemy import Column, Integer, String, DateTime, func, Text, Numeric, ForeignKey, Enum, Boolean
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, configure_mappers
 
@@ -37,6 +37,7 @@ class Product(Base):
     created_at = Column(DateTime, server_default=func.now())
     updated_at = Column(DateTime, server_default=func.now())
     deleted_at = Column(DateTime)
+    show = Column(Boolean, nullable=False, server_default="1")
 
     category = relationship(ProductCategory, backref='products')
     images = relationship("ProductImage", lazy='dynamic', backref='product')
