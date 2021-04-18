@@ -6,6 +6,7 @@ import CollectionTable from "../Components/CollectionTable";
 import DateTimeShow from "../Components/DateTimeShow";
 import Span from "../Models/Span";
 import {confirmModal} from "../message";
+import CollectionNavigation from "../Models/CollectionNavigation";
 
 
 const Row = deleteItem => props => {
@@ -26,11 +27,13 @@ const Row = deleteItem => props => {
 };
 
 
-class SpanList extends React.Component {
+class SpanList extends CollectionNavigation {
 
     constructor(props) {
         super(props);
-        this.collection = new Collection({type: Span, expand: "member"});
+        const {page} = this.state;
+
+        this.collection = new Collection({type: Span, expand: "member", page});
     }
 
     
@@ -51,7 +54,7 @@ class SpanList extends React.Component {
         return (
             <div>
                 <h2>Medlemsperioder</h2>
-                <CollectionTable rowComponent={Row(deleteItem)} collection={this.collection} columns={columns} />
+                <CollectionTable rowComponent={Row(deleteItem)} collection={this.collection} columns={columns} onPageNav={this.onPageNav} />
             </div>
         );
     }
