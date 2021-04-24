@@ -7,35 +7,23 @@ import Currency from "../Components/Currency";
 import * as _ from "underscore";
 import {get} from "../gateway";
 import SearchBox from "../Components/SearchBox";
+import CollectionNavigation from "../Models/CollectionNavigation";
 
 
-class ProductList extends React.Component {
+class ProductList extends CollectionNavigation {
 
     constructor(props) {
         super(props);
-        this.onSearch = this.onSearch.bind(this);
-        this.params = new URLSearchParams(this.props.location.search);
-        const search_term = this.params.get('search') || '';
-        this.collection = new Collection({type: Product, search: search_term});
-        this.state = {};
-        this.state = {categories: null, 'search': search_term};
+        const {search, page} = this.state;
+        this.state.categories = null;
+        
+        this.collection = new Collection({type: Product, search, page});
         get({url: "/webshop/category"})
             .then(data => {
                       const categories = _.reduce(data.data, (obj, item) => {obj[item.id] = item.name; return obj;}, {});
                       this.setState({categories});
                   },
                   () => null);
-    }
-    
-    onSearch(term) {
-        this.setState({'search': term});
-        this.collection.updateSearch(term);
-        if (term === "") {
-            this.params.delete("search");
-        } else {
-            this.params.set("search", term);
-        }
-        this.props.history.replace(this.props.location.pathname + "?" + this.params.toString());
     }
     
     render() {
@@ -75,6 +63,7 @@ class ProductList extends React.Component {
                             <td><a onClick={() => deleteItem(item)} className="removebutton"><i className="uk-icon-trash"/></a></td>
                         </tr>
                     }
+                    onPageNav={this.onPageNav}
                 />
             </div>
         );
