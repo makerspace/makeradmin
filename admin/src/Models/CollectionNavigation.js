@@ -46,15 +46,13 @@ export default class CollectionNavigation extends React.Component {
     }
 
     onSearch(term) {
-        this.setState({'search': term});
+        this.setState({'search': term}, this.setHistory);
         this.collection.updateSearch(term);
-        this.setHistory();
     }
 
     onPageNav(index) {
-        this.setState({'page': index});
+        this.setState({'page': index}, this.setHistory);
         this.collection.updatePage(index);
-        this.setHistory();
     }
 
 }
