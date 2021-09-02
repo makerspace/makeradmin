@@ -13,6 +13,6 @@
         "strict": true
     },
     "include": [
-        "*.ts", "quiz.tsx"
+        "*.ts", "*.tsx"
     ]
 }

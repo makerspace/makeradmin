@@ -12,6 +12,10 @@ declare global {
 	}
 }
 
+export interface ServerResponse<T> {
+	status: string,
+	data: T,
+}
 
 export const UNAUTHORIZED = "unauthorized";
 
@@ -35,6 +39,25 @@ export function formatDateTime(str: any) {
 export function get_error(json: any) {
 	if (typeof json.message === 'string') return json.message;
 	return json.status;
+}
+
+export function uploadFile<T>(url: string, file: File): Promise<T> {
+	let token = localStorage.getItem("token") || "";
+	let headers = {
+		'Authorization': "Bearer " + token,
+		"Content-Type": file.type,
+	}
+
+	const formData = new FormData();
+
+	formData.append('file', file);
+	formData.append('filename', file.name);
+	
+	return fetch(url, {
+		headers,
+		method: "POST",
+		body: formData,
+	}).then(response => response.json())
 }
 
 export function ajax(type: string, url: string, data: object | null = null): Promise<any> {
