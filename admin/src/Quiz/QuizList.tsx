@@ -10,7 +10,7 @@ class QuestionList extends React.Component {
     render() {
         return (
             <div className="uk-margin-top">
-                <h2>Quizes</h2>
+                <h2>Quizzes</h2>
                 <p className="uk-float-left">På denna sida ser du en lista med samtliga quiz.</p>
                 <Link className="uk-button uk-button-primary uk-margin-bottom uk-float-right" to="/quiz/add"><i className="uk-icon-plus-circle"/> Skapa nytt quiz</Link>
                 <CollectionTable

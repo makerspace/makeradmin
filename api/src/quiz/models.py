@@ -6,7 +6,7 @@ from membership.models import Member
 Base = declarative_base()
 
 class Quiz(Base):
-    __tablename__ = 'quiz_quizes'
+    __tablename__ = 'quiz_quizzes'
     
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
     name = Column(Text, nullable=False)
