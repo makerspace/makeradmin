@@ -109,6 +109,10 @@ def quiz_main(quiz_id: int):
     return render_template("quiz/quiz.html")
 
 
+@member.route("/quiz/")
+def quiz_backwards_compatibility():
+    return redirect(member.url("/quiz/1"))
+
 static_hash = os.environ["STATIC_PREFIX_HASH"]
 app = Flask(__name__, static_url_path=f"/static{static_hash}", static_folder="../static")
 sys.stderr.write("STATIC URL PATH" + app.static_url_path + "\n")
