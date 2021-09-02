@@ -1,0 +1,191 @@
+{% from "sidebar.html" import sidebar with context %}
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Medlemssidor - Stockholm Makerspace Webshop</title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="{{ STATIC }}/uikit/css/uikit.min.css" />
+        <link rel="stylesheet" href="{{ STATIC }}/style.css" />
+        {% include 'meta.html' %}
+        <script src="{{ STATIC }}/uikit/js/uikit.min.js"></script>
+        <script src="{{ STATIC }}/uikit/js/uikit-icons.min.js"></script>
+        <script src="{{ STATIC }}/js/payments.js"></script>
+    </head>
+    <body>
+        {% include 'banner.html' %}
+        <div id="root">
+            {{ sidebar("payments") }}
+            <div id="content">
+                <div class="content-centering">
+                    <h2>Payments</h2>
+                    <div id="economy-payment" class="economy-payment">
+                        <input type="text" class="economy-item-name" placeholder="Name">
+                        <h3>How will the item be used?</h3>
+                        <div class="economy-item-usage">
+                            <label for="usage_sales">
+                                <input id="usage_sales" type="checkbox">
+                                <div>For sale at the makerspace</div>
+                            </label>
+
+                            <label for="usage_consumable">
+                                <input id="usage_consumable" type="checkbox">
+                                <div>Consumables</div>
+                            </label>
+
+                            <label for="usage_new">
+                                <input id="usage_new" type="checkbox">
+                                <div>New item & tools</div>
+                            </label>
+
+                            <label for="usage_upgrade">
+                                <input id="usage_upgrade" type="checkbox">
+                                <div>Upgrades</div>
+                            </label>
+
+                            <label for="usage_maintenance">
+                                <input id="usage_maintenance" type="checkbox">
+                                <div>Maintenance</div>
+                            </label>
+
+                            <label for="usage_other">
+                                <input id="usage_other" type="checkbox">
+                                <div>Other</div>
+                            </label>
+                        </div>
+
+                        <h3>What area is the item for?</h3>
+                        <div class="economy-payment-rooms">
+                            <label class="economy-location">
+                                <input name="room_woodworkshop" type="checkbox">
+                                <div>Wood workshop</div>
+                            </label>
+
+                            <label class="economy-location">
+                                <input name="room_metalworkshop" type="checkbox">
+                                <div>Metal workshop</div>
+                            </label>
+
+                            <label class="economy-location">
+                                <input name="room_woodworkshop" type="checkbox">
+                                <div>Welding room</div>
+                            </label>
+
+                            <label class="economy-location">
+                                <input name="room_woodworkshop" type="checkbox">
+                                <div>Laser cutter</div>
+                            </label>
+
+                            <label class="economy-location">
+                                <input name="room_woodworkshop" type="checkbox">
+                                <div>Wood CNC</div>
+                            </label>
+
+                            <label class="economy-location">
+                                <input name="room_woodworkshop" type="checkbox">
+                                <div>3D Printing</div>
+                            </label>
+
+                            <label class="economy-location">
+                                <input name="room_woodworkshop" type="checkbox">
+                                <div>Electronics corner</div>
+                            </label>
+
+                            <label class="economy-location">
+                                <input name="room_woodworkshop" type="checkbox">
+                                <div>Sewing room</div>
+                            </label>
+
+                            <label class="economy-location">
+                                <input name="room_sewingroom" type="checkbox">
+                                <div>Vinyl corner</div>
+                            </label>
+
+                            <label class="economy-location">
+                                <input name="room_wetroom" type="checkbox">
+                                <div>Painting room</div>
+                            </label>
+
+                            <label class="economy-location">
+                                <input name="room_wetroom" type="checkbox">
+                                <div>Workshop room</div>
+                            </label>
+                            
+                            <label class="economy-location">
+                                <input name="room_sewingroom" type="checkbox">
+                                <div>Other location</div>
+                            </label>
+
+                            <label class="economy-location">
+                                <input name="room_sewingroom" type="checkbox">
+                                <div>The whole space</div>
+                            </label>
+
+                            <label class="economy-nonlocation">
+                                <input name="it" type="checkbox">
+                                <div>IT</div>
+                            </label>
+
+                            <label class="economy-nonlocation">
+                                <input name="it" type="checkbox">
+                                <div>Software</div>
+                            </label>
+
+                            <label class="economy-nonlocation">
+                                <input name="it" type="checkbox">
+                                <div>The board</div>
+                            </label>
+
+                            <label class="economy-nonlocation">
+                                <input name="it" type="checkbox">
+                                <div>Food</div>
+                            </label>
+                        </div>
+
+                        <div class="economy-item-slider">
+                            <div class="economy-item-slider-labels">
+                                <span>Metal workshop 90%</span>
+                                <span>Wood workshop 10%</span>
+                            </div>
+                            <input type="range" min="1" max="99" value="50" class="slider">
+                        </div>
+                        
+                        <div class="economy-item-wide-input-wrapper">
+                            <input autocomplete="off" inputmode="numeric" pattern="[\d\.,]+" type="text" class="economy-item-wide-input" placeholder="Total sum (SEK)">
+                            <div>
+                                SEK
+                            </div>
+                        </div>
+
+                        <div class="receipt-drag-drop">
+                            <label for="receipt_file_input">Click to select receipts and invoices</label>
+                            <input id="receipt_file_input" type="file" multiple accept="image/*,.pdf,.txt,.csv,.tsv">
+                            
+                            <!-- <input type="file" multiple accept="image/*" capture="environment"> -->
+                        </div>
+
+                        <div class="economy-item-payment-state">
+                            <input id="paid_self" type="radio" name="payment_state" value="paid_by_member" checked>
+                            <label for="paid_self">Paid by me</label>
+                            <input id="makerspace_to_pay_invoice" type="radio" name="payment_state" value="makerspace_to_pay_invoice" checked>
+                            <label for="makerspace_to_pay_invoice">Makerspace should pay attached invoice</label>
+                            <input id="paid_by_makerspace" type="radio" name="payment_state" value="paid_by_makerspace" checked>
+                            <label for="paid_by_makerspace">Paid using a makerspace account</label>
+                        </div>
+
+                        <input autocomplete="off" inputmode="numeric" pattern="[\d\-]+" type="text" class="economy-item-wide-input economy-item-wide-input-wrapper" placeholder="Bank account number">
+
+                        <select>
+                            <option value="2644">Aron Granberg</option>
+                            <option>Erik Cederberg</option>
+                            <option>Chris</option>
+                        </select>
+
+                        <input type="submit" value="Submit">
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>

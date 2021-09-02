@@ -65,6 +65,11 @@ def licenses():
     return render_template("licenses.html")
 
 
+@shop.route("/member/payments")
+def payments():
+    return render_template("payments.html")
+
+
 @shop.route("/product/<product_id>")
 def product_view(product_id: int):
     return render_template("product.html", product_id=product_id)
@@ -73,7 +78,6 @@ def product_view(product_id: int):
 @shop.route("/product/<int:product_id>/edit")
 def product_edit(product_id: int):
     return render_template("product_edit.html", product_id=product_id)
-
 
 @shop.route("/product/create")
 def product_create() -> str:
@@ -92,21 +96,17 @@ def statistics() -> str:
 
 member = Section("member")
 
-
 @member.route("/")
 def show_member():
     return render_template("member.html")
-
 
 @member.route("/login/<string:token>")
 def login(token):
     return render_template("login.html", token=token)
 
-
 @member.route("/quiz/")
 def quiz_main():
     return render_template("quiz/quiz.html")
-
 
 static_hash = os.environ["STATIC_PREFIX_HASH"]
 app = Flask(__name__, static_url_path=f"/static{static_hash}", static_folder="../static")

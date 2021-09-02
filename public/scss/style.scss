@@ -1368,3 +1368,348 @@ $palette-red: $palette4;
 .sidebar-banner-adjust {
     position: initial !important;
 }
+
+
+$economy-blue1: #469ABE;
+$economy-blue1-alt: saturate(darken($economy-blue1, 5%), 12%);
+$economy-blue2: #2785AD;
+$economy-blue2-alt: saturate(darken($economy-blue2, 5%), 12%);
+$economy-blue3: #07719F;
+$economy-inner-padding: 20px;
+
+$economy-red1: #BE4646;
+$economy-red1-alt: saturate(darken($economy-red1, 5%), 12%);
+$economy-red2: #AD2727;
+$economy-red3: #9F1107;
+
+.economy-payment {
+    box-shadow: rgba(0, 0, 0, 0.1) 0px 0px 10px 0px;
+    border-radius: 5px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+
+    // input {
+    //     display: block;
+    // }
+
+    h3 {
+        margin-left: $economy-inner-padding;
+        margin-right: $economy-inner-padding;
+        margin-top: 10px;
+        margin-bottom: 5px;
+    }
+
+    .economy-item-name {
+        box-sizing: border-box;
+        background: $economy-blue1;
+        border: none;
+        padding: 15px 15px 15px 30px;
+        color: white;
+        font-size: 20px;
+        margin-bottom: 10px;
+
+        &::placeholder {
+            // Firefox applies a low opacity by default. So reset that.
+            opacity: 1;
+            // Make the placeholder a bit transparent
+            color: rgba(255, 255, 255, 0.6);
+        }
+    }
+
+    button[type="submit"] {
+        box-sizing: border-box;
+        background: $economy-blue1;
+        border: none;
+        padding: 15px 15px 15px 30px;
+        color: white;
+        font-size: 20px;
+        margin-top: 10px;
+        transition: background-color 100ms;
+        cursor: pointer;
+
+        &:hover {
+            background: $economy-blue3;
+        }
+
+        position: relative;
+
+        .uk-spinner {
+            left: 20px;
+            top: 12px;
+            position: absolute;
+            opacity: 0;
+            transition: opacity 20ms;
+        }
+
+        &.uploading .uk-spinner {
+            opacity: 1;
+        }
+    }
+
+    .economy-payment-rooms, .economy-item-usage {
+        margin-left: $economy-inner-padding;
+        margin-right: $economy-inner-padding;
+
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+
+        input {
+            display: none;
+        }
+
+        div {
+            padding: 5px;
+            margin: 5px;
+            white-space: nowrap;
+            user-select: none;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 100ms;
+            transition: color 100ms;
+            background: transparentize(saturate(darken($economy-blue2, 10), 30), 0.5);
+            color: white;
+        }
+
+        input:hover + div {
+            color: white;
+            background: transparentize($economy-blue2, 0.5);
+        }
+
+        input:checked + div {
+            color: white;
+            background: $economy-blue2;
+        }
+
+        label.economy-nonlocation {
+            div {
+                background: transparentize(saturate(darken($economy-red2, 10), 30), 0.5);
+            }
+
+            input:hover + div {
+                background: transparentize($economy-red2, 0.5);
+            }
+
+            input:checked + div {
+                background: $economy-red2;
+            }
+        }
+    }
+
+    .economy-item-payment-state {
+        margin-left: $economy-inner-padding;
+        margin-right: $economy-inner-padding;
+
+        display: flex;
+        flex-direction: column;
+        border-radius: 5px;
+        overflow: hidden;
+        color: white;
+
+        input {
+            display: none;;
+        }
+
+        label {
+            padding: 8px;
+            background: $economy-blue2;
+            transition: background-color 50ms;
+        }
+
+        input:hover + label {
+            background: $economy-blue2-alt;
+        }
+
+        input:checked + label {
+            background: $economy-blue3;
+        }
+    }
+
+    .receipt-drag-drop {
+        input {
+            display: none;
+        }
+        
+        label {
+            margin-left: $economy-inner-padding;
+            margin-right: $economy-inner-padding;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: center;
+            // width: 100%;
+            text-align: center;
+            padding: 10px;
+            border-radius: 10px;
+            background: $economy-blue1;
+            font-size: 20px;
+            color: white;
+            height: 100px;
+            margin-top: 10px;
+            margin-bottom: 10px;
+            // border: 4px solid $economy-blue1-alt;
+        }
+    }
+
+    .economy-item-wide-input-wrapper {
+        margin-left: $economy-inner-padding;
+        margin-right: $economy-inner-padding;
+        margin-top: 10px;
+        margin-bottom: 10px;
+        border-radius: 5px;
+
+        background: $economy-blue1;
+        color: white;
+        font-size: 16px;
+        overflow: hidden;
+
+        display: flex;
+        flex-direction: row;
+
+        div {
+            flex: 80px;
+            flex-grow: 0;
+            padding-top: 12px;
+            text-align: center;
+            background: $economy-blue2;
+        }
+    }
+    
+    input.economy-item-wide-input {
+        background: $economy-blue1;
+        padding: 15px 15px 15px 30px;
+        border: none;
+        flex-grow: 1;
+        color: white;
+
+        &::placeholder {
+            // Firefox applies a low opacity by default. So reset that.
+            opacity: 1;
+            // Make the placeholder a bit transparent
+            color: rgba(255, 255, 255, 0.6);
+        }
+    }
+
+    .economy-item-slider {
+        margin-top: 20px;
+        margin-bottom: 20px;
+        display: flex;
+        flex-direction: column;
+
+        .economy-item-slider-labels {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            align-items: center;
+        }
+    }
+
+    .economy-item-percentages {
+        margin-left: $economy-inner-padding;
+        margin-right: $economy-inner-padding;
+    }
+
+    .economy-percentage {
+        color: black;
+    }
+
+    .economy-percentage-low {
+        color: $economy-blue2;
+    }
+
+    .economy-percentage-high {
+        color: $economy-red2;
+    }
+
+    .file {
+        margin-left: $economy-inner-padding;
+        margin-right: $economy-inner-padding;
+        margin-bottom: 10px;
+        margin-top: 10px;
+
+        padding-left: 10px;
+
+        background: $economy-blue1;
+
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        height: 100px;
+        color: white;
+        border-radius: 5px;
+        overflow: hidden;
+        
+        .filename {
+            flex-grow: 1;
+            color: white;
+            text-decoration: none;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .fileimage {
+            height: 90%;
+            margin-right: 5px;
+            margin-left: 5px;
+        }
+
+        img {
+            height: 100%;
+            border-radius: 5px;
+        }
+
+        .delete-btn {
+            padding: 10px;
+            height: 100%;
+            box-sizing: border-box;
+            width: 50px;
+
+
+            background: $economy-blue2;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 100ms;
+            cursor: pointer;
+
+            &:hover {
+                background: $economy-blue2-alt;
+            }
+        }
+    }
+
+    .economy-info {
+        margin-left: $economy-inner-padding;
+        margin-right: $economy-inner-padding;
+        background-color: $economy-blue2;
+        border-radius: 3px;
+        color: white;
+        padding: 10px;
+
+        &.error {
+            background-color: $economy-red1;
+        }
+    }
+
+    .economy-item-dropdown {
+        margin-left: $economy-inner-padding;
+        margin-right: $economy-inner-padding;
+        background-color: $economy-blue1;
+        border-radius: 3px;
+        border: none;
+        color: white;
+        padding: 10px;
+        transition: background-color 100ms;
+
+        &:hover {
+            background-color: $economy-blue2;
+        }
+
+        &:active {
+            background-color: $economy-blue3;
+        }
+    }
+}
