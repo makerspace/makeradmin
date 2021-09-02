@@ -2,15 +2,11 @@
 import * as common from "./common"
 //import * as moment from 'moment';
 import 'moment/locale/sv';
+import { ServerResponse } from "./common";
 
 declare var UIkit: any;
 declare var moment: any;
 declare var Chart: any;
-
-interface ServerResponse<T> {
-	status: string,
-	data: T,
-}
 
 common.documentLoaded().then(() => {
 	const apiBasePath = window.apiBasePath;
