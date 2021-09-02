@@ -184,7 +184,9 @@ def membership_reminder():
 
 
 def quiz_reminders():
-    quiz_members = quiz_member_answer_stats()
+    # Assume quiz 1 is the get started quiz
+    quiz_id = 1
+    quiz_members = quiz_member_answer_stats(quiz_id)
     now = datetime.utcnow()
 
     members, memberships = get_members_and_membership()
@@ -248,7 +250,7 @@ def quiz_reminders():
                 else:
                     template = MessageTemplate.QUIZ_FIRST_NEWMEMBER
 
-            redirect = get_public_url(f"/member/quiz")
+            redirect = get_public_url(f"/member/quiz/1")
             # Allow a very long login token for the quiz
             # It's not like this is a security risk, having access to someones email will automatically allow one to login anyway.
             access_token = create_access_token("localhost", "automatic quiz reminder", member.member_id, valid_duration=timedelta(days=2))['access_token']
