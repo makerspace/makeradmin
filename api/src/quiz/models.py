@@ -5,11 +5,24 @@ from membership.models import Member
 
 Base = declarative_base()
 
+class Quiz(Base):
+    __tablename__ = 'quiz_quizes'
+    
+    id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
+    name = Column(Text, nullable=False)
+    description = Column(Text, nullable=False)
+    created_at = Column(DateTime, server_default=func.now())
+    updated_at = Column(DateTime, server_default=func.now())
+    deleted_at = Column(DateTime)
+
+    def __repr__(self):
+        return f'Quiz(id={self.id}, name={self.name})'
 
 class QuizQuestion(Base):
     __tablename__ = 'quiz_questions'
     
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
+    quiz_id = Column(Integer, ForeignKey(Quiz.id), nullable=False)
     question = Column(Text, nullable=False)
     answer_description = Column(Text, nullable=False)
     created_at = Column(DateTime, server_default=func.now())
@@ -17,7 +30,7 @@ class QuizQuestion(Base):
     deleted_at = Column(DateTime)
 
     def __repr__(self):
-        return f'QuizQuestion(id={self.id}, question={self.question})'
+        return f'QuizQuestion(id={self.id}, question={self.question}, quiz={self.quiz_id})'
 
 
 class QuizQuestionOption(Base):

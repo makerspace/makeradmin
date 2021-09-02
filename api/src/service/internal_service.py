@@ -193,7 +193,7 @@ class InternalService(Blueprint):
         :param permission_add permission needed to add to relation
         :param permission_remove permission needed to remove from relation
         """
-        
+
         if permission_list:
             self.route(
                 path,

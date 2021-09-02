@@ -9,7 +9,7 @@ interface State {
 }
 
 interface Props {
-    match: { params: { id: string }}
+    match: { params: { quiz_id: string }}
 }
 
 class QuestionAdd extends React.Component<Props, State> {
@@ -21,12 +21,15 @@ class QuestionAdd extends React.Component<Props, State> {
     }
 
     async save() {
+        console.log(this.props);
+        this.question.quiz_id = parseInt(this.props.match.params.quiz_id);
+        console.log(this.question);
         await this.question.save();
         browserHistory.replace('/quiz/question/' + this.question.id);
     }
     
     delete() {
-        browserHistory.push("/quiz/question/");
+        browserHistory.push(`/quiz/${this.props.match.params.quiz_id}`);
     }
 
     render() {

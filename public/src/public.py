@@ -103,8 +103,9 @@ def login(token):
     return render_template("login.html", token=token)
 
 
-@member.route("/quiz/")
-def quiz_main():
+@member.route("/quiz/<int:quiz_id>")
+def quiz_main(quiz_id: int):
+    # Note: quiz_id is parsed client side
     return render_template("quiz/quiz.html")
 
 

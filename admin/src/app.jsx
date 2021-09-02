@@ -111,8 +111,8 @@ const nav = {
             children:
                 [
                     {
-                        text: "Frågor",
-                        target: "/quiz/question",
+                        text: "Quiz",
+                        target: "/quiz",
                     },
                 ],
         },

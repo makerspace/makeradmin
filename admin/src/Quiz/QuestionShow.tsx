@@ -37,9 +37,12 @@ class QuestionShow extends React.Component<Props, State> {
     
     async delete() {
         try {
+            console.log(this.state.question);
             await confirmModal(this.question.deleteConfirmMessage());
             await this.question.del();
-            browserHistory.push("/quiz/question/");
+            console.log(this.question);
+            console.log(this.state.question);
+            browserHistory.push(`/quiz/${this.question.quiz_id}`);
         } catch {}
     }
 
