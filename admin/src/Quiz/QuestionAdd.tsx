@@ -21,9 +21,7 @@ class QuestionAdd extends React.Component<Props, State> {
     }
 
     async save() {
-        console.log(this.props);
         this.question.quiz_id = parseInt(this.props.match.params.quiz_id);
-        console.log(this.question);
         await this.question.save();
         browserHistory.replace('/quiz/question/' + this.question.id);
     }
