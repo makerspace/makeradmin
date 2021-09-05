@@ -152,7 +152,7 @@ def quiz_member_answer_stats(quiz_id: int):
          ) for member in members.all()
     ]
 
-@service.route("/statistics/<int:quiz_id>", method=GET, permission=PUBLIC)
+@service.route("/quiz/<int:quiz_id>/statistics", method=GET, permission=PUBLIC)
 def quiz_statistics(quiz_id: int):
     # How many members have answered the quiz that should have
 
@@ -163,7 +163,7 @@ def quiz_statistics(quiz_id: int):
     def mapify(rows):
         return {r[0]: r[1] for r in rows}
 
-    questions = db_session.query(QuizQuestion).filter(QuizQuestion.deleted_at == None, QuizQuestionOption.deleted_at == None).join(QuizQuestion.options).all()
+    questions = db_session.query(QuizQuestion).filter(QuizQuestion.deleted_at == None, QuizQuestionOption.deleted_at == None, QuizQuestion.quiz_id == quiz_id).join(QuizQuestion.options).all()
 
     # Note: counts each member at most once per question. So multiple mistakes on the same question are not counted
     incorrect_answers_by_question = mapify(db_session.query(QuizAnswer.question_id, func.count(distinct(QuizAnswer.member_id))).join(QuizAnswer.question).filter(QuizQuestion.quiz_id == quiz_id).filter(QuizAnswer.correct == False).group_by(QuizAnswer.question_id).all())
