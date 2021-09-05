@@ -8,10 +8,11 @@
         "esModuleInterop": true,
         "sourceMap": true,
         "moduleResolution": "node",
-        "jsx": "react",
+        "jsx": "react-jsx",
+        "jsxImportSource": "preact",
         "strict": true
     },
     "include": [
-        "*.ts", "quiz.tsx"
+        "*.ts", "*.tsx"
     ]
 }

@@ -1,12 +1,12 @@
 import * as common from "./common"
-import React from 'react'
-import ReactDOM from 'react-dom';
+import { Component, render } from 'preact';
+import { useState } from 'preact/hooks';
 import { login_via_single_use_link } from './login'
 
 declare var UIkit: any;
 
 const Login = ({ redirect }: { redirect: string }) => {
-    let [tag, setTag] = React.useState("");
+    let [tag, setTag] = useState("");
 
     return (
         <div className="uk-width-medium">
@@ -19,7 +19,7 @@ const Login = ({ redirect }: { redirect: string }) => {
                 }
             }}>
                 <div className="uk-form-row" style={{ margin: "16px 0" }}>
-                    <input autoFocus className="uk-form-large uk-width-1-1" type="text" placeholder="Email/Member number" value={tag} onChange={(v) => setTag(v.target.value)} />
+                    <input autoFocus className="uk-form-large uk-width-1-1" type="text" placeholder="Email/Member number" value={tag} onChange={(v) => setTag(v.currentTarget.value)} />
                 </div>
 
                 <div className="uk-form-row" style={{ margin: "16px 0" }}>
@@ -56,7 +56,7 @@ interface State {
     },
 }
 
-class QuizManager extends React.Component<{}, State> {
+class QuizManager extends Component<{}, State> {
     page: HTMLDivElement = document.querySelector<HTMLDivElement>(".quizpage")!;
 
     constructor(props: any) {
@@ -206,10 +206,11 @@ class QuizManager extends React.Component<{}, State> {
 }
 
 common.documentLoaded().then(() => {
-    ReactDOM.render(
-        <React.StrictMode>
-            <QuizManager />
-        </React.StrictMode>,
-        document.getElementById('root')
-    );
+    const root = document.getElementById('root');
+    if (root != null) {
+        render(
+            <QuizManager />,
+            root
+        );
+    }
 });
