@@ -46,10 +46,11 @@ interface Question {
     }[]
 }
 
-interface Quiz {
+export interface Quiz {
     id: number,
     name: string,
     description: string,
+    deleted_at: string | null,
 }
 
 interface State {
@@ -107,7 +108,7 @@ class QuizManager extends Component<QuizManagerProps, State> {
     async start() {
         this.setState({ state: "started" });
         try {
-            const data = await common.ajax("GET", `${window.apiBasePath}/quiz/quiz/${this.state.quiz!.id}/next_question`);
+            const data: ServerResponse<Question> = await common.ajax("GET", `${window.apiBasePath}/quiz/quiz/${this.state.quiz!.id}/next_question`);
             if (data.data == null) {
                 this.setState({ state: "done" });
             } else {
@@ -125,6 +126,13 @@ class QuizManager extends Component<QuizManagerProps, State> {
             return (
                 <div id="content" className="quizpage">
                     <h1>...</h1>
+                </div>
+            );
+        } else if (this.state.quiz.deleted_at !== null) {
+            return (
+                <div id="content" className="quizpage">
+                    <h1>{this.state.quiz.name}</h1>
+                    <p>This quiz has been deleted :(</p>
                 </div>
             );
         }

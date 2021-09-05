@@ -47,7 +47,22 @@ class QuestionShow extends React.Component<Props, State> {
         } catch {}
     }
 
+    async restore() {
+        this.state.quiz.deleted_at = null;
+        await this.state.quiz.save();
+        await this.state.quiz.refresh();
+    }
+
     render() {
+        if (this.state.quiz.deleted_at !== null) {
+            return (
+                <>
+                    <h1>{this.state.quiz.name}</h1>
+                    <p>Det här quizzet har blivit raderat :(</p>
+                </>
+            )
+        }
+
         return (
             <>
                 <QuizEditForm

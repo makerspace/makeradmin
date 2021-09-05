@@ -15,6 +15,7 @@ export default class Quiz extends Base {
         attributes: {
             name: "",
             description: "",
+            deleted_at: null as string,
         },
     };
 
