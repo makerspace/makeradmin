@@ -3,6 +3,7 @@ import * as common from "./common"
 //import * as moment from 'moment';
 import 'moment/locale/sv';
 import { ServerResponse } from "./common";
+import { Quiz } from "./quiz";
 
 declare var UIkit: any;
 declare var moment: any;
@@ -17,7 +18,7 @@ common.documentLoaded().then(() => {
 
 	const future1 = common.ajax("GET", apiBasePath + "/statistics/membership/by_date", null);
 	const future2 = common.ajax("GET", apiBasePath + "/statistics/lasertime/by_month", null);
-	const future3 = common.ajax("GET", apiBasePath + "/quiz/statistics", null) as Promise<ServerResponse<QuizStatistics>>;
+	const future3 = common.ajax("GET", apiBasePath + "/quiz/quiz", null) as Promise<ServerResponse<Quiz[]>>;
 	const future4 = common.ajax("GET", apiBasePath + "/statistics/shop/statistics", null) as Promise<ServerResponse<ProductStatistics>>;
 	const future5 = common.ajax("GET", apiBasePath + "/statistics/membership/distribution_by_month", null) as Promise<ServerResponse<MemberDistribution>>;
 	const future6 = common.ajax("GET", apiBasePath + "/statistics/membership/distribution_by_month2", null) as Promise<ServerResponse<MemberDistribution>>;
@@ -27,7 +28,12 @@ common.documentLoaded().then(() => {
 		const laserjson = data[1];
 		addChart(root, membershipjson.data);
 		addLaserChart(root, laserjson.data);
-		addQuizChart(root, data[2].data)
+		for (let quiz of data[2].data) {
+			const quiz_future = common.ajax("GET", apiBasePath + `/quiz/quiz/${quiz.id}/statistics`) as Promise<ServerResponse<QuizStatistics>>;
+			quiz_future.then(data => {
+				addQuizChart(root, data.data, quiz);
+			});
+		}
 		addProductPurchasedChart(root, data[3].data);
 		addMemberDistribution(root, data[4].data, "Of all members who became members at least one year ago, how many months have they had active lab membership during the last 12 months.");
 		addMemberDistribution(root, data[5].data, "Among all members, how many months have they had active lab membership during the last 12 months.");
@@ -432,7 +438,7 @@ interface QuizStatistics {
 	}[],
 }
 
-function addQuizChart(root: HTMLElement, data: QuizStatistics) {
+function addQuizChart(root: HTMLElement, data: QuizStatistics, quiz: Quiz) {
 
 	// Sort questions so that the more incorrectly answered questions are at the top
 	data.questions.sort((a, b) => b.incorrect_answer_fraction - a.incorrect_answer_fraction);
@@ -564,6 +570,7 @@ function addQuizChart(root: HTMLElement, data: QuizStatistics) {
 	const quizstats = <HTMLDivElement>document.createElement("div");
 
 	quizstats.innerHTML = `
+	<h3>Statistics for Quiz: ${quiz.name}</h3>
 	<div class="statistics-member-stats-box">
 		<div class="statistics-member-stats-row">
 			<span class="statistics-member-stats-type">Median time to answer quiz [min]</span>

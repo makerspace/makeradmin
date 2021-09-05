@@ -103,10 +103,15 @@ def login(token):
     return render_template("login.html", token=token)
 
 
-@member.route("/quiz/")
-def quiz_main():
+@member.route("/quiz/<int:quiz_id>")
+def quiz_main(quiz_id: int):
+    # Note: quiz_id is parsed client side
     return render_template("quiz/quiz.html")
 
+
+@member.route("/quiz/")
+def quiz_backwards_compatibility():
+    return redirect(member.url("/quiz/1"))
 
 static_hash = os.environ["STATIC_PREFIX_HASH"]
 app = Flask(__name__, static_url_path=f"/static{static_hash}", static_folder="../static")
