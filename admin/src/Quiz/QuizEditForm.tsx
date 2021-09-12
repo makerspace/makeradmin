@@ -25,6 +25,7 @@ export default (props: Props) => {
                         <>
                             <TextInput model={quiz} name="name" title="Namn" />
                             <Textarea model={quiz} name="description" title="Beskrivning" rows="14"/>
+                            <i>Du kan använda [html]...[/html] taggar för att lägga till ren html</i>
                         </>)
                     }
                 </fieldset>
