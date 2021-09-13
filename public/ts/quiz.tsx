@@ -3,7 +3,6 @@ import { Component, render } from 'preact';
 import { useState } from 'preact/hooks';
 import { login_via_single_use_link } from './login'
 import { ServerResponse } from "./common";
-import sanitizeHtml  from "sanitize-html";
 import markdown from "markdown-it";
 
 declare var UIkit: any;
