@@ -3,8 +3,15 @@ import { Component, render } from 'preact';
 import { useState } from 'preact/hooks';
 import { login_via_single_use_link } from './login'
 import { ServerResponse } from "./common";
+import sanitizeHtml  from "sanitize-html";
+import markdown from "markdown-it";
 
 declare var UIkit: any;
+
+const markdown_engine = markdown({
+    linkify: true,
+    html: true,
+});
 
 const Login = ({ redirect }: { redirect: string }) => {
     let [tag, setTag] = useState("");
@@ -154,9 +161,7 @@ class QuizManager extends Component<QuizManagerProps, State> {
             return (
                 <div id="content" className="quizpage">
                     <h1>{this.state.quiz.name}</h1>
-                    {
-                        this.state.quiz.description.split("\n\n").map(paragraph => (<p>{paragraph}</p>))
-                    }
+                    <span dangerouslySetInnerHTML={{__html: markdown_engine.render(this.state.quiz.description) }}></span>
                     <p>The quiz will save your progress automatically so you can close this window and return here at any time to continue with the quiz.</p>
                     {this.state.loginState == "logged out"
                         ?
@@ -182,7 +187,7 @@ class QuizManager extends Component<QuizManagerProps, State> {
             return (
                 <div id="content" className="quizpage">
                     <h1>{this.state.quiz.name}</h1>
-                    <div className="question-text">{this.state.question.question}</div>
+                    <div className="question-text" dangerouslySetInnerHTML={{__html: markdown_engine.render(this.state.question.question) }}></div>
                     <ul className="question-options">
                         {
                             this.state.question.options.map(option => (
@@ -209,11 +214,7 @@ class QuizManager extends Component<QuizManagerProps, State> {
                                     // : <div className="question-answer-info question-answer-info-incorrect">Du svarade tyvärr fel. Men oroa dig inte, den här frågan kommer komma igen senare så att du kan svara rätt nu när du vet vad rätt svar är.</div>
                                     : <div className="question-answer-info question-answer-info-incorrect">Unfortunately you answered incorrectly. But don't worry, this question will repeat later so you will have an opportunity to answer it correctly now that you know what the correct answer is.</div>
                                 }
-                                <div className="question-answer-description">
-                                    {
-                                        // Split description into paragraphs. Ensure that trailing whitespace on any line doesn't matter.
-                                        this.state.question.answer_description!.split("\n").map(x => x.trim()).join("\n").split("\n\n").map(x => <p>{x}</p>)
-                                    }
+                                <div className="question-answer-description" dangerouslySetInnerHTML={{__html: markdown_engine.render(this.state.question.answer_description!) }}>
                                 </div>
                                 <a className="uk-button uk-button-primary question-submit" onClick={() => this.start()}>Next Question</a>
                             </>
