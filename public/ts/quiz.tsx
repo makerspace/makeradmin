@@ -4,64 +4,14 @@ import { useState } from 'preact/hooks';
 import { login_via_single_use_link } from './login'
 import { ServerResponse } from "./common";
 import sanitizeHtml  from "sanitize-html";
+import markdown from "markdown-it";
 
 declare var UIkit: any;
 
-const next_token = (text: string, tokens: string[]): [number, string, string] => {
-    let first = -1;
-    let firstToken = null;
-    for (let i = 0; i < tokens.length; i++) {
-        const index = text.indexOf(tokens[i]);
-        if (first == -1 || (index != -1 && index < first)) {
-            first = index;
-            firstToken = tokens[i];
-        }
-    }
-    if (first == -1) {
-        return [-1, text, ""];
-    } else if (first > 0) {
-        return [-1, text.substring(0, first), text.substring(first)];
-    }
-
-    return [first, firstToken!, text.substring(first + firstToken!.length)];
-}
-
-/// Expands [html]..[/html] tags and escapes all text outside those tags.
-/// Returns a raw html string.
-const expand_template = (text: string) => {
-    // Remove trailing whitespace on all lines
-    text = text.split("\n").map(x => x.trim()).join("\n");
-
-    let tokens = [];
-    while(text != "") {
-        let [id, token, remaining] = next_token(text, ["[html]", "[/html]", "\n\n"]);
-        text = remaining;
-        tokens.push(token);
-    }
-    let insideHTML = false;
-    let output = "<p>";
-    for (let i = 0; i < tokens.length; i++) {
-        if (tokens[i] == "[html]") {
-            insideHTML = true;
-        } else if (tokens[i] == "[/html]") {
-            if (!insideHTML) return "Found unexpected closing [/html] template tag";
-            insideHTML = false;
-        } else if (tokens[i] == "\n\n") {
-            output += "</p><p>";
-        } else {
-            if (insideHTML) {
-                output += tokens[i];
-            } else {
-                output += sanitizeHtml(tokens[i]);
-            }
-        }
-    }
-    if (insideHTML) {
-        return "Missing closing [/html] template tag";
-    }
-    output += "</p>";
-    return output;
-}
+const markdown_engine = markdown({
+    linkify: true,
+    html: true,
+});
 
 const Login = ({ redirect }: { redirect: string }) => {
     let [tag, setTag] = useState("");
@@ -211,7 +161,7 @@ class QuizManager extends Component<QuizManagerProps, State> {
             return (
                 <div id="content" className="quizpage">
                     <h1>{this.state.quiz.name}</h1>
-                    <span dangerouslySetInnerHTML={{__html: expand_template(this.state.quiz.description) }}></span>
+                    <span dangerouslySetInnerHTML={{__html: markdown_engine.render(this.state.quiz.description) }}></span>
                     <p>The quiz will save your progress automatically so you can close this window and return here at any time to continue with the quiz.</p>
                     {this.state.loginState == "logged out"
                         ?
@@ -237,7 +187,7 @@ class QuizManager extends Component<QuizManagerProps, State> {
             return (
                 <div id="content" className="quizpage">
                     <h1>{this.state.quiz.name}</h1>
-                    <div className="question-text" dangerouslySetInnerHTML={{__html: expand_template(this.state.question.question) }}></div>
+                    <div className="question-text" dangerouslySetInnerHTML={{__html: markdown_engine.render(this.state.question.question) }}></div>
                     <ul className="question-options">
                         {
                             this.state.question.options.map(option => (
@@ -264,7 +214,7 @@ class QuizManager extends Component<QuizManagerProps, State> {
                                     // : <div className="question-answer-info question-answer-info-incorrect">Du svarade tyvärr fel. Men oroa dig inte, den här frågan kommer komma igen senare så att du kan svara rätt nu när du vet vad rätt svar är.</div>
                                     : <div className="question-answer-info question-answer-info-incorrect">Unfortunately you answered incorrectly. But don't worry, this question will repeat later so you will have an opportunity to answer it correctly now that you know what the correct answer is.</div>
                                 }
-                                <div className="question-answer-description" dangerouslySetInnerHTML={{__html: expand_template(this.state.question.answer_description!) }}>
+                                <div className="question-answer-description" dangerouslySetInnerHTML={{__html: markdown_engine.render(this.state.question.answer_description!) }}>
                                 </div>
                                 <a className="uk-button uk-button-primary question-submit" onClick={() => this.start()}>Next Question</a>
                             </>
