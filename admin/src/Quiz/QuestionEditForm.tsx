@@ -25,7 +25,7 @@ export default (props: Props) => {
                         <>
                             <Textarea model={question} name="question" title="Fråga" rows="4"/>
                             <Textarea model={question} name="answer_description" title="Lösningsbeskrivning" rows="14"/>
-                            <i>Du kan använda [html]...[/html] taggar för att lägga till ren html</i>
+                            <i>Du kan använda markdown eller html för att lägga extra funktionalitet och bilder</i>
                         </>)
                     }
                 </fieldset>
