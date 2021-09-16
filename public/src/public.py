@@ -59,6 +59,9 @@ def register_member():
 def purchase_history():
     return render_template("history.html")
 
+@shop.route("/member/courses")
+def courses():
+    return render_template("courses.html")
 
 @shop.route("/member/licenses")
 def licenses():
