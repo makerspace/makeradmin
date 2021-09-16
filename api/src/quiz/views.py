@@ -132,7 +132,7 @@ def member_quiz_statistics(member_id: int):
         .group_by(QuizQuestion.quiz_id)
     )
 
-    answered_questions_per_quiz = answered_questions_per_quiz_query.all()
+    answered_questions_per_quiz = mapify(answered_questions_per_quiz_query.all())
 
     total_questions_in_quiz = mapify((
         db_session.query(QuizQuestion.quiz_id, func.count(func.distinct(QuizQuestion.id)))
@@ -142,10 +142,10 @@ def member_quiz_statistics(member_id: int):
 
     return [
         {
-            "quiz": quiz_entity.to_obj(next(q for q in quizzes if q.id == quiz_id)),
-            "total_questions_in_quiz": total_questions_in_quiz[quiz_id],
-            "correctly_answered_questions": correctly_answered,
-        } for quiz_id, correctly_answered in answered_questions_per_quiz
+            "quiz": quiz_entity.to_obj(quiz),
+            "total_questions_in_quiz": total_questions_in_quiz[quiz.id],
+            "correctly_answered_questions": answered_questions_per_quiz[quiz.id] if quiz.id in answered_questions_per_quiz else 0,
+        } for quiz in quizzes
     ]
 
 @service.route("/unfinished/<int:quiz_id>", method=GET, permission=PUBLIC)
