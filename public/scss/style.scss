@@ -40,7 +40,15 @@ body {
 
     @include media(">tablet") {
         width: 250px;
-        box-shadow: rgba(0, 0, 0, 0.1) 0px 0px 10px 0px;
+
+        // Designed using: https://shadows.brumm.af/
+        box-shadow:
+            0px 0.1px 0.3px rgba(0, 0, 0, 0.034),
+            0px 0.3px 0.7px rgba(0, 0, 0, 0.048),
+            0px 0.5px 1.3px rgba(0, 0, 0, 0.06),
+            0px 0.9px 2.2px rgba(0, 0, 0, 0.072),
+            0px 1.7px 4.2px rgba(0, 0, 0, 0.086),
+            0px 4px 10px rgba(0, 0, 0, 0.12);
 
         .sidebar-fixed-content {
             width: 250px - 5px;
@@ -786,7 +794,14 @@ form input.readonly-input {
     border-radius: 4px;
     margin-bottom: 20px;
 
-    box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.4);
+    // Designed using: https://shadows.brumm.af/
+    box-shadow:
+        0px 0.1px 0.3px rgba(0, 0, 0, 0.02),
+        0px 0.3px 0.7px rgba(0, 0, 0, 0.028),
+        0px 0.5px 1.3px rgba(0, 0, 0, 0.035),
+        0px 0.9px 2.2px rgba(0, 0, 0, 0.042),
+        0px 1.7px 4.2px rgba(0, 0, 0, 0.05),
+        0px 4px 10px rgba(0, 0, 0, 0.07);
 
     .receipt-header {
         display: block;
