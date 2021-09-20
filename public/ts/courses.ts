@@ -17,12 +17,11 @@ common.documentLoaded().then(() => {
     const apiBasePath = window.apiBasePath;
 
     const future1 = common.ajax("GET", apiBasePath + "/member/current/quizzes", null);
-    const future2 = common.ajax("GET", apiBasePath + "/member/current", null);
 
     const rootElement = <HTMLElement>document.querySelector("#courses-contents");
     rootElement.innerHTML = "";
 
-    Promise.all([future1, future2]).then(([quizzesJson, memberJson]: [ServerResponse<QuizInfo[]>, any]) => {
+    future1.then((quizzesJson: ServerResponse<QuizInfo[]>) => {
         let content = "";
 
         for (const quizInfo of quizzesJson.data) {
