@@ -69,6 +69,10 @@ body {
                 max-width: 250px;
             }
         }
+
+        li a {
+            justify-content: center;
+        }
     }
 
     // Required for the delete button to be placed on the same row as the category
@@ -89,6 +93,20 @@ body {
         a {
             color: #FFF;
         }
+    }
+
+    li.active > a {
+        color: #444;
+    }
+
+    li a {
+        .uk-icon {
+            margin-right: 10px;
+        }
+
+        display: flex;
+        flex-direction: row;
+        align-items: center;
     }
 
     .sidebar-buy-btn.cart-empty {
