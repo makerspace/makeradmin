@@ -4,7 +4,7 @@ from service.api_definition import QUIZ_EDIT, USER, GET, PUBLIC, POST
 from quiz.entities import quiz_question_entity, quiz_question_option_entity, quiz_entity
 from quiz import service
 from service.db import db_session
-from quiz.models import QuizQuestion, QuizQuestionOption, QuizAnswer
+from quiz.models import Quiz, QuizQuestion, QuizQuestionOption, QuizAnswer
 from service.entity import OrmSingeRelation
 from sqlalchemy import func, exists, distinct
 from membership.models import Member
@@ -115,6 +115,39 @@ def next_question(quiz_id: int, include_correct=False):
     return json
 
 
+# Converts a list of rows of IDs and values to a map from id to value
+def mapify(rows):
+    return {r[0]: r[1] for r in rows}
+
+
+def member_quiz_statistics(member_id: int):
+    '''Returns information about all quizzes and if the given member has completed them'''
+
+    quizzes = db_session.query(Quiz).filter(Quiz.deleted_at == None).all()
+    answered_questions_per_quiz_query = (
+        db_session.query(QuizQuestion.quiz_id, func.count(func.distinct(QuizAnswer.option_id)))
+        .join(QuizAnswer, QuizQuestion.id == QuizAnswer.question_id)
+        .filter(QuizAnswer.member_id == member_id)
+        .filter(((QuizAnswer.id == None) | QuizAnswer.correct) & (QuizAnswer.deleted_at == None) & (QuizQuestion.deleted_at == None))
+        .group_by(QuizQuestion.quiz_id)
+    )
+
+    answered_questions_per_quiz = mapify(answered_questions_per_quiz_query.all())
+
+    total_questions_in_quiz = mapify((
+        db_session.query(QuizQuestion.quiz_id, func.count(func.distinct(QuizQuestion.id)))
+        .filter(QuizQuestion.deleted_at == None)
+        .group_by(QuizQuestion.quiz_id)
+    ).all())
+
+    return [
+        {
+            "quiz": quiz_entity.to_obj(quiz),
+            "total_questions_in_quiz": total_questions_in_quiz[quiz.id],
+            "correctly_answered_questions": answered_questions_per_quiz[quiz.id] if quiz.id in answered_questions_per_quiz else 0,
+        } for quiz in quizzes
+    ]
+
 @service.route("/unfinished/<int:quiz_id>", method=GET, permission=PUBLIC)
 def quiz_member_answer_stats_route(quiz_id: int):
     return quiz_member_answer_stats(quiz_id)
@@ -158,10 +191,6 @@ def quiz_statistics(quiz_id: int):
 
     # Correct percentage per question
     # Average correct percentage per member
-
-    # Converts a list of rows of IDs and values to a map from id to value
-    def mapify(rows):
-        return {r[0]: r[1] for r in rows}
 
     questions = db_session.query(QuizQuestion).filter(QuizQuestion.deleted_at == None, QuizQuestionOption.deleted_at == None, QuizQuestion.quiz_id == quiz_id).join(QuizQuestion.options).all()
 

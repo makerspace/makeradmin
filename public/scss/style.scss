@@ -40,7 +40,15 @@ body {
 
     @include media(">tablet") {
         width: 250px;
-        box-shadow: rgba(0, 0, 0, 0.1) 0px 0px 10px 0px;
+
+        // Designed using: https://shadows.brumm.af/
+        box-shadow:
+            0px 0.1px 0.3px rgba(0, 0, 0, 0.034),
+            0px 0.3px 0.7px rgba(0, 0, 0, 0.048),
+            0px 0.5px 1.3px rgba(0, 0, 0, 0.06),
+            0px 0.9px 2.2px rgba(0, 0, 0, 0.072),
+            0px 1.7px 4.2px rgba(0, 0, 0, 0.086),
+            0px 4px 10px rgba(0, 0, 0, 0.12);
 
         .sidebar-fixed-content {
             width: 250px - 5px;
@@ -804,7 +812,14 @@ form input.readonly-input {
     border-radius: 4px;
     margin-bottom: 20px;
 
-    box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.4);
+    // Designed using: https://shadows.brumm.af/
+    box-shadow:
+        0px 0.1px 0.3px rgba(0, 0, 0, 0.02),
+        0px 0.3px 0.7px rgba(0, 0, 0, 0.028),
+        0px 0.5px 1.3px rgba(0, 0, 0, 0.035),
+        0px 0.9px 2.2px rgba(0, 0, 0, 0.042),
+        0px 1.7px 4.2px rgba(0, 0, 0, 0.05),
+        0px 4px 10px rgba(0, 0, 0, 0.07);
 
     .receipt-header {
         display: block;
@@ -1136,8 +1151,7 @@ input:invalid {
     font-weight: bold;
 }
 
-.statistics-member-stats-value {
-}
+.statistics-member-stats-value {}
 
 .statistics-member-stats-row {
     display: flex;
@@ -1164,8 +1178,33 @@ $palette-red: $palette4;
     box-shadow: 0px 0px 3px 0px rgba(0, 0, 0, 0.2);
     border-radius: 10px;
     padding: 50px;
+
+    @media screen and (max-width: 900px) {
+        padding: 20px;
+    }
+
     justify-content: start;
     flex-direction: column;
+
+    .quiz-embed {
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        margin-top: 15px;
+        margin-bottom: 15px;
+
+        iframe {
+            max-width: 100%;
+        }
+    }
+
+    a {
+        color: #d45277;
+    }
+
+    .uk-button {
+        color: white
+    }
 
     &.quiz-complete {
         background-color: $palette5;
@@ -1371,12 +1410,12 @@ $palette-red: $palette4;
 }
 
 .banner {
-	background: #cd1515;
-	padding: 20px;
-	color: white;
-	text-align: center;
+    background: #cd1515;
+    padding: 20px;
+    color: white;
+    text-align: center;
     /* box-shadow: 0px 0px 10px rgba(0,0,0,0.4); */
-    
+
     a {
         color: white;
         text-decoration: underline;
@@ -1385,4 +1424,105 @@ $palette-red: $palette4;
 
 .sidebar-banner-adjust {
     position: initial !important;
+}
+
+#courses-contents {
+    display: flex;
+    flex-direction: column;
+
+    .course-item {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        min-height: 50px;
+
+        color: #333;
+        border-radius: 4px;
+        margin-bottom: 30px;
+        overflow: hidden;
+        text-decoration: none;
+        background: white;
+        transition: 100ms background-color;
+
+        // Designed using: https://shadows.brumm.af/
+        box-shadow:
+            0px 0.1px 0.3px rgba(0, 0, 0, 0.034),
+            0px 0.3px 0.7px rgba(0, 0, 0, 0.048),
+            0px 0.5px 1.3px rgba(0, 0, 0, 0.06),
+            0px 0.9px 2.2px rgba(0, 0, 0, 0.072),
+            0px 1.7px 4.2px rgba(0, 0, 0, 0.086),
+            0px 4px 10px rgba(0, 0, 0, 0.12);
+
+        padding-left: 20px;
+        padding-right: 0px;
+
+        >span {
+            padding-top: 8px;
+            padding-bottom: 8px;
+        }
+
+        .course-not-completed,
+        .course-completed {
+            flex-grow: 0;
+            flex-shrink: 0;
+            height: 100%;
+            width: 140px;
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            align-items: center;
+            padding-left: 20px;
+            padding-right: 20px;
+        }
+
+        .course-completed {
+            background: #68be46;
+            color: white;
+            transition: 100ms background-color;
+        }
+
+        &:hover .course-completed {
+            background: saturate(darken(#68be46, 5%), 12%);
+        }
+
+        .course-not-completed {
+            background: #469ABE;
+            color: white;
+            transition: 100ms background-color;
+        }
+
+        &:hover {
+            background: darken(#FFF, 2%);
+        }
+
+        &:hover .course-not-completed {
+            background: saturate(darken(#469ABE, 5%), 12%);
+        }
+
+        .course-not-completed>div,
+        .course-completed>div {
+            position: relative;
+            top: -10px;
+            left: -10px;
+            width: 70px;
+            height: 70px;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: center;
+
+            color: white;
+            border-radius: 50%;
+
+            // Designed using: https://shadows.brumm.af/
+            box-shadow:
+                0px 0.1px 0.3px rgba(0, 0, 0, 0.02),
+                0px 0.3px 0.7px rgba(0, 0, 0, 0.028),
+                0px 0.5px 1.3px rgba(0, 0, 0, 0.035),
+                0px 0.9px 2.2px rgba(0, 0, 0, 0.042),
+                0px 1.7px 4.2px rgba(0, 0, 0, 0.05),
+                0px 4px 10px rgba(0, 0, 0, 0.07);
+        }
+    }
 }

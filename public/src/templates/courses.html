@@ -1,0 +1,32 @@
+{% from "sidebar.html" import sidebar with context %}
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Kurser - Stockholm Makerspace</title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="{{ STATIC }}/uikit/css/uikit.min.css" />
+        <link rel="stylesheet" href="{{ STATIC }}/style.css" />
+        <script src='{{ STATIC }}/uikit/js/uikit.min.js'></script>
+        <script src='{{ STATIC }}/uikit/js/uikit-icons.min.js'></script>
+        {% include("meta.html") %}
+        <script src='{{ STATIC }}/js/courses.js'></script>
+    </head>
+    <body>
+        {% include 'banner.html' %}
+        <div id="root">
+            {{ sidebar("courses") }}
+            <div id="content">
+                <div class="content-centering">
+                    <h2>Kurser</h1>
+                    <p>Här hittar du alla digitala kurser som Stockholm Makerspace har.
+                    De flesta kurser sker på plats och annonseras i facebook-gruppen och på slack. Men vissa har en digital variant som du kan ta när du vill.
+                    </p>
+                    <div id="courses-contents">
+                        <div uk-spinner></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>
