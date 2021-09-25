@@ -37,7 +37,7 @@ class MemberExport extends React.Component {
                 ]);
             }
 
-            this.setState({state: "loaded", csv_content: rows.map(r => r.join(", ")).join("\n")});
+            this.setState({state: "loaded", csv_content: rows.map(r => r.join(",")).join("\n")});
         });
     }
 
