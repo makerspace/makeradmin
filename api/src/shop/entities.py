@@ -19,10 +19,7 @@ product_entity = OrderedEntity(
 product_action_entity = Entity(ProductAction)
 
 
-product_image_entity = ProductImageEntity(
-    ProductImage,
-    default_sort_column='display_order',
-)
+product_image_entity = ProductImageEntity(ProductImage)
 
 
 transaction_entity = Entity(

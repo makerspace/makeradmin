@@ -6,7 +6,8 @@ from typing import Mapping, Dict, Callable, Type
 
 from flask import request
 from pytz import UTC
-from sqlalchemy import inspect, Integer, String, DateTime, Text, desc, asc, or_, text, Date, Enum as DbEnum, Numeric, Boolean
+from sqlalchemy import inspect, Integer, String, DateTime, Text, desc, asc, or_, text, Date, Enum as DbEnum, Numeric, \
+    Boolean, LargeBinary
 
 from service.api_definition import BAD_VALUE, REQUIRED, Arg, symbol, Enum, natural0, natural1
 from service.db import db_session
@@ -35,6 +36,10 @@ def to_model_wrap(value_converter):
     return error_handling_wrapper
 
 
+def identity(value):
+    return value
+
+
 to_model_converters: Dict[Type, Callable] = {
     Integer: to_model_wrap(int),
     Numeric: to_model_wrap(Decimal),
@@ -44,11 +49,8 @@ to_model_converters: Dict[Type, Callable] = {
     Date: to_model_wrap(date.fromisoformat),
     DbEnum: to_model_wrap(str),
     Boolean: to_model_wrap(bool),
+    LargeBinary: to_model_wrap(identity)  # TODO
 }
-
-
-def identity(value):
-    return value
 
 
 to_obj_converters: Dict[Type, Callable] = {
@@ -60,6 +62,7 @@ to_obj_converters: Dict[Type, Callable] = {
     Date: lambda d: None if d is None else d.isoformat(),
     DbEnum: identity,
     Boolean: identity,
+    LargeBinary: identity,  # TODO Fix
 }
 
 
