@@ -42,17 +42,7 @@ common.documentLoaded().then(() => {
                         <li>Där sätter du in vårat Makerspace ID som är <pre><code>B7D8D-0BB4E-E7877-8853E-F49AB-A1D0B-DEE9D</code></pre></li>
                     </ol>
             </div>`;
-        
-            // <h2>Licenses and discounts</h2>
-            // <p>This is a list of licenses and discounts that Stockholm Makerspace members can use freely.</p>
-            // <p>Note that no license or discount may be shared with non-members.</p>
-            // <div>
-            //     <h3>Lightburn</h3>
-            //     <p>Software used for controlling the laser cutter at Stockholm Makerspace. The desktop computers next to the laser cutter
-            //     already have this program installed and you can use it there. However if you want to use Lightburn on your own
-            //     personal computer you can purchase a license with a makerspace discount.</p>
-            //     <pre><code>Discount code: St0ckh0lmM@ker-Sp@ce</code></pre>
-            // </div>
+            
     }).catch(e => {
         // Probably Unauthorized, redirect to login page.
         if (e.status === UNAUTHORIZED) {

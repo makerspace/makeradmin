@@ -1,16 +1,13 @@
-import Cart from "./cart"
-import * as shopsearch from "./shopsearch"
-import * as common from "./common"
-import { UNAUTHORIZED } from "./common";
-import { renderSidebarCategories } from "./category"
+import Cart from "./cart";
+import * as shopsearch from "./shopsearch";
+import * as common from "./common";
+import { renderSidebarCategories } from "./category";
 declare var UIkit: any;
 
 common.onGetAndDocumentLoaded("/webshop/product_data", (productData: any) => {
   common.addSidebarListeners();
 
   const apiBasePath = window.apiBasePath;
-  const webshop_edit_permission = "webshop_edit";
-  const service_permission = "service";
 
   renderSidebarCategories(productData, true);
 
@@ -20,7 +17,6 @@ common.onGetAndDocumentLoaded("/webshop/product_data", (productData: any) => {
   Cart.startLocalStorageSync(refreshUIFromCart);
 
   const id2element = new Map<number, HTMLElement>();
-  const id2cartItem = new Map();
   const id2item = new Map();
 
   function setCartItem(productID: number, count: number) {
@@ -119,7 +115,7 @@ common.onGetAndDocumentLoaded("/webshop/product_data", (productData: any) => {
         UIkit.modal.confirm(`Are you sure you want to delete ${item.name}?`).then(
           () => {
             common.ajax("DELETE", apiBasePath + "/webshop/product/" + item.id, {
-            }).then(json => {
+            }).then(() => {
               li.remove();
             }).catch(json => {
               UIkit.modal.alert("<h2>Error</h2>" + json.status);
@@ -178,77 +174,11 @@ common.onGetAndDocumentLoaded("/webshop/product_data", (productData: any) => {
     common.updateCartSum(cart, id2item);
   }
 
-  function tryDeleteCategory(id: number) {
-    UIkit.modal.confirm(`Are you sure you want to delete this category?`).then(
-      () => {
-        common.ajax("DELETE", apiBasePath + "/webshop/category/" + id, {
-        }).then(json => {
-          location.reload(true);
-        }).catch(json => {
-          UIkit.modal.alert("<h2>Error</h2>" + common.get_error(json));
-        });
-      });
-  }
-
-  function editCategory(id: number, placeholder_name: string) {
-    UIkit.modal.prompt('Category Name', placeholder_name).then((name: string) => {
-      if (name == null) return;
-
-      common.ajax("PUT", apiBasePath + "/webshop/category/" + id, {
-        name: name
-      }).then(json => {
-        // Reload the page to show the new category
-        location.reload(true);
-      }).catch(json => {
-        if (json.status === UNAUTHORIZED) {
-          UIkit.modal.alert("<h2>Något gick fel</h2>Du har inte behörighet att ändra kategorier");
-        } else {
-          UIkit.modal.alert("<h2>Något gick fel</h2>" + common.get_error(json));
-        }
-      });
-    });
-  }
-
-  function addCategory() {
-    UIkit.modal.prompt('Category Name', '').then((name: string) => {
-      if (name == null) return;
-
-      common.ajax("POST", apiBasePath + "/webshop/category", {
-        name: name
-      }).then(json => {
-        // Reload the page to show the new category
-        location.reload(true);
-      }).catch(json => {
-        if (json.status === UNAUTHORIZED) {
-          UIkit.modal.alert("<h2>Något gick fel</h2>Du har inte behörighet att lägga till en ny kategori");
-        } else {
-          UIkit.modal.alert("<h2>Något gick fel</h2>" + common.get_error(json));
-        }
-      });
-    });
-  }
-
   setLoggedIn(localStorage.getItem("token") !== undefined && localStorage.getItem("token") !== null);
   common.refreshLoggedIn((loggedIn, permissions) => {
     setLoggedIn(loggedIn);
   });
   refreshUIFromCart(Cart.fromStorage());
-
-  document.querySelectorAll(".category-delete").forEach(el => {
-    el.addEventListener("click", ev => {
-      ev.preventDefault();
-      const id = Number((<HTMLElement>ev.currentTarget).getAttribute("data-id"));
-      tryDeleteCategory(id);
-    });
-  });
-
-  document.querySelectorAll(".category-edit").forEach(el => {
-    el.addEventListener("click", ev => {
-      ev.preventDefault();
-      const id = Number((ev.currentTarget as HTMLElement).getAttribute("data-id"));
-      editCategory(id, (ev.currentTarget as HTMLElement).getAttribute("data-name")!);
-    });
-  });
 
   document.querySelector("#product-search-field")!.addEventListener("input", ev => {
     const allItems = [];
@@ -264,11 +194,6 @@ common.onGetAndDocumentLoaded("/webshop/product_data", (productData: any) => {
       const elem = id2element.get(item.id);
       item.parentList.appendChild(elem);
     }
-  });
-
-  document.querySelector(".category-add")!.addEventListener("click", ev => {
-    ev.preventDefault();
-    addCategory();
   });
 
   if (window.location.hash == "#edit") {
