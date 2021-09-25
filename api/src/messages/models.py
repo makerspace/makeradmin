@@ -12,7 +12,8 @@ Base = declarative_base()
 class MessageTemplate(enum.Enum):
     LABACCESS_REMINDER = 'labaccess_reminder'
     LOGIN_LINK = 'login_link'
-    NEW_MEMBER = 'new_member'
+    NEW_MEMBER_CREATED = 'new_member_created'
+    NEW_MEMBER_REGISTRED = 'new_member_registred'
     RECEIPT = 'receipt'
     PASSWORD_RESET = 'password_reset'
     ADD_LABACCESS_TIME = 'add_labaccess_time'

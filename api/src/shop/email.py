@@ -37,7 +37,11 @@ def send_receipt_email(transaction):
     )
 
 
-def send_new_member_email(member):
-    send_message(
-        MessageTemplate.NEW_MEMBER, member,
-    )
+def send_new_member_created_email(member, login_url):
+    send_message(MessageTemplate.NEW_MEMBER_CREATED, member, login_url=login_url)
+
+
+def send_new_member_registred_email(member):
+    send_message(MessageTemplate.NEW_MEMBER_REGISTRED, member)
+
+

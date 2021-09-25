@@ -1,0 +1,41 @@
+{% extends "email_body_base.html" %}
+
+{% block swedish %}
+<h1>Hej {{member.firstname}},</h1>
+<p style="font-size: small;"><em>(For information in ENGLISH, see below the dashed line).</em></p>
+  <p>
+      Du har nu en användare i Stockholm Makerspace medlemssystem, ditt medlemsskap startar när betalningen av medlemsavgiften går igenom.
+  </p>
+  <p>
+      Om betalningen vid registreringen misslyckades så kan du logga in och köpa medlemskap i webshoppen här:
+      <a href="{{login_url}}" style="display: block; width: 200px; text-decoration: none; color: #FFF; font-size: 16pt; border-radius: 10px; background: rgb(0, 168, 230); padding: 10px; text-align: center;">Login</a>
+  </p>
+
+  <p>
+    Bästa hälsningar,<br/>
+    Styrelsen i Stockholm Makerspace<br/>
+    <a href="mailto:info@makerspace.se">info@makerspace.se</a>.
+    <a href="https://www.makerspace.se/">www.makerspace.se</a>
+  </p>
+{% endblock %}
+
+{% block english %}
+
+  <p>ENGLISH</p>
+
+  <p>
+      Your user in Stockholm Makerspace's membership system was created, your membership will start when the membership payment is complete.
+  </p>
+  <p>
+      If the payment at registration failed you can log in and try to pay the membership fee again in the web shop here:
+      <a href="{{login_url}}" style="display: block; width: 200px; text-decoration: none; color: #FFF; font-size: 16pt; border-radius: 10px; background: rgb(0, 168, 230); padding: 10px; text-align: center;">Login</a>
+  </p>
+
+  <p>
+    Best regards,<br/>
+    The Board of Stockholm Makerspace<br/>
+    <a href="mailto:info@makerspace.se">info@makerspace.se</a>.
+    <a href="https://www.makerspace.se/">www.makerspace.se</a>
+  </p>
+{% endblock %}
+

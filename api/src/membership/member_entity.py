@@ -23,7 +23,8 @@ class MemberEntity(Entity):
     * Unhashed password should be hashed on save.
     """
     
-    def create(self, data=None, commit=True):
+    def create_as_obj(self, data=None, commit=True):
+        """ Create member and return as sql achemy obect. """
         if data is None:
             data = request.json or {}
             
@@ -38,14 +39,17 @@ class MemberEntity(Entity):
                 sql = "SELECT COALESCE(MAX(member_number), 999) FROM membership_members"
                 max_member_number, = db_session.execute(sql).fetchone()
                 data['member_number'] = max_member_number + 1
-            obj = self.to_obj(self._create_internal(data, commit=commit))
-            return obj
+            return self._create_internal(data, commit=commit)
         except Exception:
             # Rollback session if anything went wrong or we can't release the lock.
             db_session.rollback()
             raise
         finally:
             db_session.execute("DO RELEASE_LOCK('member_number')")
+    
+    def create(self, data=None, commit=True):
+        """ Create member and return as sql json compatible dict. """
+        return self.to_obj(self.create_as_obj(data, commit=commit))
 
     def update(self, entity_id, commit=True):
         data = request.json or {}

@@ -11,7 +11,7 @@ from membership.models import Key, Span
 from service.api_definition import NEGATIVE_ITEM_COUNT, INVALID_ITEM_COUNT, EMPTY_CART, NON_MATCHING_SUMS
 from service.db import db_session, nested_atomic
 from service.error import InternalServerError, BadRequest, NotFound
-from shop.email import send_key_updated_email, send_membership_updated_email, send_new_member_email, send_receipt_email
+from shop.email import send_key_updated_email, send_membership_updated_email, send_new_member_registred_email, send_receipt_email
 from shop.filters import PRODUCT_FILTERS
 from shop.models import TransactionAction, TransactionContent, Transaction, ProductAction, PendingRegistration, \
     StripePending, Product
@@ -39,7 +39,7 @@ def get_source_transaction(source_id):
 
 @nested_atomic
 def commit_transaction_to_db(member_id=None, total_amount=None, contents=None, stripe_card_source_id=None,
-                             activates_member=False):
+                             registration=False):
     """ Save as new transaction with transaction content in db and return it transaction. """
     
     transaction = Transaction(member_id=member_id, amount=total_amount, status=Transaction.PENDING)
@@ -62,7 +62,7 @@ def commit_transaction_to_db(member_id=None, total_amount=None, contents=None, s
              'product_id': content.product_id}
         )
     
-    if activates_member:
+    if registration:
         # Mark this transaction as one that is for registering a member.
         db_session.add(PendingRegistration(transaction_id=transaction.id))
 
@@ -160,19 +160,11 @@ def ship_add_membership_action(action, transaction):
     send_membership_updated_email(transaction.member_id, days_to_add, membership_end)
 
 
-def activate_member(member):
-    logger.info(f"activating member {member.member_id}")
-    member.deleted_at = None
-    db_session.add(member)
-    db_session.flush()
-    send_new_member_email(member)
-    
-    
-def create_transaction(member_id, purchase, activates_member=False, stripe_reference_id=None):
+def create_transaction(member_id, purchase, registration=False, stripe_reference_id=None):
     total_amount, contents = validate_order(member_id, purchase["cart"], purchase["expected_sum"])
 
     transaction = commit_transaction_to_db(member_id=member_id, total_amount=total_amount, contents=contents,
-                                           activates_member=activates_member, stripe_card_source_id=stripe_reference_id)
+                                           registration=registration, stripe_card_source_id=stripe_reference_id)
 
     logger.info(f"created transaction {transaction.id}, total_amount={total_amount}, member_id={member_id}"
                 f", stripe_reference_id={stripe_reference_id}")
@@ -214,7 +206,7 @@ def payment_success(transaction):
     ship_orders(ship_add_labaccess=False, transaction=transaction)
 
     if db_session.query(PendingRegistration).filter(PendingRegistration.transaction_id == transaction.id).count():
-        activate_member(transaction.member)
+        send_new_member_registred_email(transaction.member)
 
 
 def process_cart(member_id, cart):
