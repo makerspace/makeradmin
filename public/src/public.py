@@ -72,17 +72,6 @@ def licenses():
 def product_view(product_id: int):
     return render_template("product.html", product_id=product_id)
 
-
-@shop.route("/product/<int:product_id>/edit")
-def product_edit(product_id: int):
-    return render_template("product_edit.html", product_id=product_id)
-
-
-@shop.route("/product/create")
-def product_create() -> str:
-    return render_template("product_edit.html", product_id=0)
-
-
 @shop.route("/receipt/<int:transaction_id>")
 def receipt(transaction_id: int):
     return render_template("receipt.html", transaction_id=transaction_id)
