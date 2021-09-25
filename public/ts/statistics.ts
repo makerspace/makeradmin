@@ -6,6 +6,7 @@ import { ServerResponse } from "./common";
 import { Quiz } from "./quiz";
 
 declare var UIkit: any;
+declare var Chart: any;
 
 common.documentLoaded().then(() => {
 	const apiBasePath = window.apiBasePath;
@@ -97,6 +98,94 @@ function pointAtDate(items: Array<any>, date: Date) {
 function addChart(root: HTMLElement, data: any) {
 	const dataMembership = filterDuplicates(toPoints(data.membership));
 	const dataLabaccess = filterDuplicates(toPoints(data.labaccess));
+	const maxtime = new Date();
+
+	const config = {
+		type: 'line',
+		data: {
+			datasets: [{
+				label: 'Föreningsmedlemmar',
+				backgroundColor: "#FF000077",
+				borderColor: colors[0],
+				fill: false,
+				data: dataMembership
+			},
+			{
+				label: 'Labmedlemmar',
+				backgroundColor: "#0000FF77",
+				borderColor: colors[1],
+				fill: false,
+				data: dataLabaccess
+			}
+			],
+		},
+		options: {
+			responsive: true,
+			elements: {
+				line: {
+					tension: 0,
+				},
+				point: {
+					radius: 1,
+					hoverRadius: 3,
+				}
+			},
+			tooltips: {
+				mode: 'nearest',
+				intersect: false,
+			},
+			title: {
+				display: true,
+				text: 'Medlemsskap'
+			},
+			scales: {
+				xAxes: [{
+					type: 'time',
+					time: {
+						parser: timeFormat,
+						// round: 'day'
+						tooltipFormat: 'll',
+						max: maxtime,
+					},
+					scaleLabel: {
+						display: true,
+						labelString: 'Datum'
+					}
+				}],
+				yAxes: [{
+					ticks: {
+						min: 0
+					},
+					scaleLabel: {
+						display: true,
+						labelString: 'Antal'
+					}
+				}]
+			},
+			pan: {
+				enabled: true,
+				mode: 'x',
+			},
+			zoom: {
+				enabled: true,
+				mode: 'x',
+			},
+			annotation: {
+				events: ["click"],
+				annotations: [
+					{
+						drawTime: "afterDatasetsDraw",
+						type: "line",
+						mode: "vertical",
+						scaleID: "x-axis-0",
+						borderColor: "red",
+						borderWidth: 1,
+						value: maxtime
+					}
+				]
+			}
+		}
+	};
 
 
 	const memberstats = <HTMLDivElement>document.createElement("div");
@@ -119,6 +208,8 @@ function addChart(root: HTMLElement, data: any) {
 	memberstats.className = "statistics-member-stats";
 
 	const canvas = memberstats.querySelector("canvas")!; // <HTMLCanvasElement>document.createElement("canvas");
+	const ctx = canvas.getContext('2d');
+	new Chart(ctx, config);
 
 	root.appendChild(memberstats);
 }
@@ -126,10 +217,58 @@ function addChart(root: HTMLElement, data: any) {
 function addLaserChart(root: HTMLElement, data: any) {
 	const maxtime = new Date();
 
+	const config = {
+		type: 'bar',
+		data: {
+			datasets: [{
+				label: 'Laserminuter',
+				backgroundColor: "#FF000077",
+				borderColor: colors[0],
+				fill: false,
+				data: toPoints(data),
+				steppedLine: true,
+			},
+			],
+		},
+		options: {
+			title: {
+				display: true,
+				text: 'Användning av laserskäraren',
+			},
+			scales: {
+				xAxes: [{
+					type: 'time',
+					time: {
+						parser: 'YYYY-MM',
+						// round: 'month'
+						tooltipFormat: 'll',
+						unit: 'month',
+						max: maxtime,
+					},
+					scaleLabel: {
+						display: true,
+						labelString: 'Datum'
+					}
+				}],
+				yAxes: [{
+					ticks: {
+						min: 0
+					},
+					scaleLabel: {
+						display: true,
+						labelString: 'Antal'
+					}
+				}]
+			},
+		}
+	};
+
 	const canvas = <HTMLCanvasElement>document.createElement("canvas");
 	root.appendChild(canvas);
 	canvas.width = 500;
 	canvas.height = 300;
+	const ctx = canvas.getContext('2d');
+	new Chart(ctx, config);
 }
 
 
@@ -154,10 +293,53 @@ function addMemberDistribution(root: HTMLElement, data: MemberDistribution, desc
 		labels.push("" + (i+1));
 	}
 
+
+	const config = {
+		type: 'bar',
+		data: {
+			labels: labels,
+			datasets: [
+				{
+					label: 'Members',
+					backgroundColor: "#FF000077",
+					borderColor: colors[0],
+					fill: false,
+					data: toPoints(labaccess),
+					steppedLine: true,
+				},
+			],
+		},
+		options: {
+			title: {
+				display: true,
+				text: 'Active labaccess time over one year.',
+			},
+			scales: {
+				xAxes: [{
+					scaleLabel: {
+						display: true,
+						labelString: 'Months'
+					}
+				}],
+				yAxes: [{
+					ticks: {
+						min: 0
+					},
+					scaleLabel: {
+						display: true,
+						labelString: 'Member Count'
+					}
+				}]
+			},
+		}
+	};
+
 	const canvas = <HTMLCanvasElement>document.createElement("canvas");
 	root.appendChild(canvas);
 	canvas.width = 500;
 	canvas.height = 300;
+	const ctx = canvas.getContext('2d');
+	new Chart(ctx, config);
 
 	const desc = <HTMLParagraphElement>document.createElement("p");
 	desc.textContent = description;
@@ -279,6 +461,46 @@ function addQuizChart(root: HTMLElement, data: QuizStatistics, quiz: Quiz) {
 		}
 	}
 
+	const config = {
+		type: 'horizontalBar',
+		data: {
+			labels: data.questions.map(q => q.question.question.substring(0, Math.min(q.question.question.length, 30))),
+			datasets: datasets,
+		},
+		options: {
+			title: {
+				display: true,
+				text: 'Procent rätt på quizfrågor',
+			},
+			responsive: true,
+			scales: {
+				xAxes: [{
+					stacked: true,
+				}],
+				yAxes: [{
+					stacked: true,
+				}]
+			},
+			tooltips: {
+				format: "nearest",
+				position: "nearest",
+				callbacks: {
+					title: (tooltipItems: any[], itemData: any) => {
+						return data.questions[tooltipItems[0].index].question.question;
+					},
+					label: (tooltipItem: any, data: any) => {
+						const option = datasets[tooltipItem.datasetIndex].options[tooltipItem.index];
+						if (option != null) {
+							return Math.round(datasets[tooltipItem.datasetIndex].data[tooltipItem.index] * 100) + "%: " + option.option.description;
+						} else {
+							return "";
+						}
+					}
+				}
+			},
+		}
+	};
+
 	const quizstats = <HTMLDivElement>document.createElement("div");
 
 	quizstats.innerHTML = `
@@ -301,6 +523,8 @@ function addQuizChart(root: HTMLElement, data: QuizStatistics, quiz: Quiz) {
 	root.appendChild(quizstats);
 	canvas.width = 500;
 	canvas.height = 800;
+	const ctx = canvas.getContext('2d');
+	new Chart(ctx, config);
 }
 
 interface Product {
@@ -376,8 +600,42 @@ function addRevenueChart(root: HTMLElement, data: { name: string, amount: number
 	// Sort by sales
 	data.sort((a, b) => b.amount - a.amount);
 
+	const config = {
+		type: 'horizontalBar',
+		data: {
+			labels: data.map(x => x.name),
+			datasets: [{
+				label: 'Revenue',
+				backgroundColor: "#FF000077",
+				borderColor: colors[0],
+				data: data.map(x => x.amount),
+			},
+			],
+		},
+		options: {
+			title: {
+				display: true,
+				text: label,
+			},
+			scales: {
+				xAxes: [{
+					stacked: true,
+				}],
+				yAxes: [{
+					stacked: true,
+				}]
+			},
+			tooltips: {
+				mode: 'nearest',
+				intersect: false,
+			},
+		}
+	};
+
 	const canvas = <HTMLCanvasElement>document.createElement("canvas");
 	root.appendChild(canvas);
 	canvas.width = 500;
 	canvas.height = 70 + 30 * data.length;
+	const ctx = canvas.getContext('2d');
+	new Chart(ctx, config);
 }
