@@ -140,6 +140,7 @@ def labaccess_reminder(render_template):
             expiration_date=end_date,
         )
 
+
 def membership_reminder():
     now = datetime.utcnow().date()
 

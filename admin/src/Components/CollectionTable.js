@@ -91,7 +91,7 @@ export default class CollectionTable extends React.Component {
         }
         
         const headers = columns.map((c, i) => this.renderHeading(c, i));
-        const pagination = this.state.page !== undefined && this.state.page.count > 1 ? this.renderPagination() : null;
+        const pagination = typeof this.state.page !== "undefined" && this.state.page.count > 1 ? this.renderPagination() : null;
 
         return (
             <div className={className}>
