@@ -10,4 +10,3 @@ ALTER TABLE `webshop_product_images` ADD COLUMN `updated_at` datetime DEFAULT NU
 ALTER TABLE `webshop_products` DROP COLUMN `image`;
 ALTER TABLE `webshop_products` ADD COLUMN `image_id` int unsigned;
 ALTER TABLE `webshop_products` ADD CONSTRAINT `image_constraint` FOREIGN KEY (`image_id`) REFERENCES `webshop_product_images` (`id`);
-ALTER TABLE `webshop_products` ADD COLUMN `image_id` int unsigned;
