@@ -88,7 +88,7 @@ common.onGetAndDocumentLoaded("/webshop/product_data", (productData: any) => {
       li.className = "product-container"
       let image_url;
       if (item.image_id == null) {
-        image_url = "/static/product_images/default_image.png";
+        image_url = "/static/images/default-product-image.png";
       }
       else {
         image_url = `${apiBasePath}/webshop/image/${item.image_id}`;
