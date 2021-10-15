@@ -1466,7 +1466,7 @@ $palette-red: $palette4;
         .course-completed {
             flex-grow: 0;
             flex-shrink: 0;
-            height: 100%;
+            align-self: stretch;
             width: 140px;
             display: flex;
             flex-direction: row;
