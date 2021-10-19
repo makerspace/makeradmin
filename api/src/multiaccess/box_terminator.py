@@ -98,7 +98,7 @@ def box_terminator_nag(member_number=None, box_label_id=None, nag_type=None):
     box.last_nag_at = datetime.utcnow()
 
 
-def box_terminator_validate(member_number=None, box_label_id=None, session_token=None):
+def box_terminator_validate(member_number=None, box_label_id=None):
     query = get_box_query()
     query = query.filter(Box.box_label_id == box_label_id)
     try:
@@ -112,7 +112,6 @@ def box_terminator_validate(member_number=None, box_label_id=None, session_token
         box = Box(member_id=member.member_id, box_label_id=box_label_id)
 
     box.last_check_at = datetime.utcnow()
-    box.session_token = session_token
     db_session.add(box)
     db_session.flush()
 

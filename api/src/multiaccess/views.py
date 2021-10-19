@@ -88,4 +88,4 @@ def box_terminator_nag_route(member_number=Arg(int), box_label_id=Arg(int), nag_
 @service.route("/box-terminator/validate-box", method=POST, permission=MEMBER_EDIT)
 def box_terminator_validate_route(member_number=Arg(int), box_label_id=Arg(int)):
     """ Used when scanning boxes. """
-    return box_terminator_validate(member_number, box_label_id, g.session_token)
+    return box_terminator_validate(member_number, box_label_id)

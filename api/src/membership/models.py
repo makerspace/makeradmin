@@ -151,9 +151,6 @@ class Box(Base):
     
     # The id of the printed label on the box.
     box_label_id = Column(BigInteger, unique=True, nullable=False)
-
-    # Scanning session to be able to make list of all scanned boxes during the session.
-    session_token = Column(String(32), index=True, nullable=False)
     
     # Box last checked at timestamp.
     last_check_at = Column(DateTime, nullable=True)
