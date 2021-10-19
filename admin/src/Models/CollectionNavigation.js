@@ -10,7 +10,7 @@ export default class CollectionNavigation extends React.Component {
         this.params = new URLSearchParams(this.props.location.search);
         const search = this.params.get('search') || '';
         const page = this.params.get('page') || 1;
-        this.state = {'search': search, 'page': page};
+        this.state = {search, page};
     }
 
     componentDidMount() {
@@ -24,8 +24,8 @@ export default class CollectionNavigation extends React.Component {
     gotNewData(page) {
         // If the returned result has fewer number of pages, keep the page within bounds
         let index = this.state.page;
-        if (index && page.count < index) {
-            this.onPageNav(page.count);
+        if (index && page.last_page < index) {
+            this.onPageNav(page.last_page);
         }
     }
 
@@ -51,6 +51,7 @@ export default class CollectionNavigation extends React.Component {
     }
 
     onPageNav(index) {
+        console.info("onPageNav", index);
         this.setState({'page': index}, this.setHistory);
         this.collection.updatePage(index);
     }

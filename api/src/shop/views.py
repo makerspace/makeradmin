@@ -103,8 +103,8 @@ service.related_entity_routes(
 service.entity_routes(
     path="/product_image",
     entity=product_image_entity,
-    permission_list=PUBLIC,
-    permission_read=PUBLIC,
+    permission_list=WEBSHOP,
+    permission_read=WEBSHOP,
     permission_create=WEBSHOP_EDIT,
     permission_update=WEBSHOP_EDIT,
     permission_delete=WEBSHOP_EDIT,

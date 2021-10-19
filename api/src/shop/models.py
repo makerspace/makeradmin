@@ -25,7 +25,8 @@ class ProductImage(Base):
     __tablename__ = 'webshop_product_images'
 
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
-    name = Column(Text)
+    name = Column(String(255), nullable=False)
+    type = Column(String(64), nullable=False)
     data = Column(LargeBinary)
     created_at = Column(DateTime, server_default=func.now())
     updated_at = Column(DateTime, server_default=func.now())

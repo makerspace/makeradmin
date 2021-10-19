@@ -1,6 +1,7 @@
 from collections import namedtuple
 from datetime import datetime, date
 from decimal import Decimal
+from logging import getLogger
 from math import ceil
 from typing import Mapping, Dict, Callable, Type
 
@@ -12,9 +13,13 @@ from sqlalchemy import inspect, Integer, String, DateTime, Text, desc, asc, or_,
 from service.api_definition import BAD_VALUE, REQUIRED, Arg, symbol, Enum, natural0, natural1
 from service.db import db_session
 from service.error import NotFound, UnprocessableEntity
+from base64 import b64decode, b64encode
 
 ASC = 'asc'
 DESC = 'desc'
+
+
+logger = getLogger('makeradmin')
 
 
 def not_empty(key, value):
@@ -40,6 +45,18 @@ def identity(value):
     return value
 
 
+def base64decode(value):
+    if value is None:
+        return None
+    return b64decode(value)
+
+
+def base64encode(value):
+    if value is None:
+        return None
+    return b64encode(value).decode()
+
+
 to_model_converters: Dict[Type, Callable] = {
     Integer: to_model_wrap(int),
     Numeric: to_model_wrap(Decimal),
@@ -49,7 +66,7 @@ to_model_converters: Dict[Type, Callable] = {
     Date: to_model_wrap(date.fromisoformat),
     DbEnum: to_model_wrap(str),
     Boolean: to_model_wrap(bool),
-    LargeBinary: to_model_wrap(identity)  # TODO
+    LargeBinary: to_model_wrap(base64decode),
 }
 
 
@@ -62,7 +79,7 @@ to_obj_converters: Dict[Type, Callable] = {
     Date: lambda d: None if d is None else d.isoformat(),
     DbEnum: identity,
     Boolean: identity,
-    LargeBinary: identity,  # TODO Fix
+    LargeBinary: base64encode,
 }
 
 

@@ -5,7 +5,7 @@ import Product from "../Models/Product";
 import ProductForm from "../Components/ProductForm";
 
 
-class GroupAdd extends React.Component {
+class ProductAdd extends React.Component {
 
     constructor(props) {
         super(props);
@@ -15,7 +15,7 @@ class GroupAdd extends React.Component {
     render() {
         return (
             <div>
-                <h2>Skapa grupp</h2>
+                <h2>Skapa produkt</h2>
                 <ProductForm
                     product={this.product}
                     onSave={() => this.product.save().then(() => browserHistory.replace('/sales/product/' + this.product.id))}
@@ -25,4 +25,4 @@ class GroupAdd extends React.Component {
     }
 }
 
-export default GroupAdd;
+export default ProductAdd;

@@ -1,7 +1,7 @@
-from shop.ordered_entity import OrderedEntity
+from service.entity import Entity
 
 
-class ProductImageEntity(OrderedEntity):
+class ProductImageEntity(Entity):
     
     pass
     
