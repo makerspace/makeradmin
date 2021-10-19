@@ -11,19 +11,19 @@ Base = declarative_base()
 
 class MessageTemplate(enum.Enum):
     LABACCESS_REMINDER = 'labaccess_reminder'
+    MEMBERSHIP_REMINDER = 'membership_reminder'
     LOGIN_LINK = 'login_link'
     NEW_MEMBER = 'new_member'
     RECEIPT = 'receipt'
     PASSWORD_RESET = 'password_reset'
     ADD_LABACCESS_TIME = 'add_labaccess_time'
     ADD_MEMBERSHIP_TIME = 'add_membership_time'
-    BOX_WARNING = 'box_warning'
-    BOX_FINAL_WARNING = 'box_final_warning'
-    BOX_TERMINATED = 'box_terminated'
-    QUIZ_FIRST_NEWMEMBER = 'quiz_first_newmember'
-    QUIZ_FIRST_OLDMEMBER = 'quiz_first_oldmember'
-    QUIZ_REMINDER = 'quiz_reminder'
-    MEMBERSHIP_REMINDER = 'membership_reminder'
+    BOX_WARNING = 'storage/box_warning'
+    BOX_FINAL_WARNING = 'storage/box_final_warning'
+    BOX_TERMINATED = 'storage/box_terminated'
+    QUIZ_FIRST_NEWMEMBER = 'quiz/first_newmember'
+    QUIZ_FIRST_OLDMEMBER = 'quiz/first_oldmember'
+    QUIZ_REMINDER = 'quiz/reminder'
 
 
 class Message(Base):
