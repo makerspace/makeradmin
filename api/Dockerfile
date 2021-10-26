@@ -6,6 +6,8 @@ RUN apk update \
        netcat-openbsd \
        less \
        curl \
+       zlib-dev \
+       jpeg-dev \
        build-base \
        python3-dev \
        libffi-dev \
