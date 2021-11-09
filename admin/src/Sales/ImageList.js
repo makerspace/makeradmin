@@ -2,6 +2,7 @@ import React from "react";
 import CollectionNavigation from "../Models/CollectionNavigation";
 import ProductImage from "../Models/ProductImage";
 import Collection from "../Models/Collection";
+import CollectionTable from "../Components/CollectionTable";
 
 class ImageList extends CollectionNavigation {
 
@@ -28,13 +29,12 @@ class ImageList extends CollectionNavigation {
             }
             image.type = file.type;
             image.data = data;
-            image.save();
+            image.save().then(() => this.collection.fetch());
         };
         console.info(file);
     }
     
     render() {
-        
         return (
             <div className="uk-margin-top">
                 <h2>Bilder</h2>
@@ -42,7 +42,31 @@ class ImageList extends CollectionNavigation {
                 <form onSubmit={e => {e.preventDefault(); this.onSubmit();}}>
                     <input type="file" id="avatar" name="avatar" accept="image/png, image/jpeg, image/gif" onChange={e => this.upload(e)}/>
                 </form>
-                
+                <div className="uk-margin-top">
+                    <CollectionTable
+                        className="uk-margin-top"
+                        collection={this.collection}
+                        emptyMessage="Inga produktkategorier"
+                        onPageNav={this.onPageNav}
+                        columns={[
+                            {title: "Namn"},
+                            {title: "Typ"},
+                            {title: "Bild"},
+                            {title: ""},
+                        ]}
+                        rowComponent={({item, deleteItem}) => {
+                            const src = `data:${item.type};base64, ` + item.data;
+                            return (
+                                <tr>
+                                    <td>{item.name}</td>
+                                    <td>{item.type}</td>
+                                    <td><div style={{height: "40px", width: "40px"}}><img src={src} style={{verticalAlign: "middle", height: "100%"}} alt={item.name} /></div></td>
+                                    <td><a onClick={() => deleteItem(item)} className="removebutton"><i className="uk-icon-trash"/></a></td>
+                                </tr>
+                            );
+                        }}
+                    />
+                </div>
              </div>
         );
     }

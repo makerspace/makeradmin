@@ -21,7 +21,7 @@ class ProductImageEntity(Entity):
             print("size", image.width, image.height)
             model["data"] = bytes.getvalue()
             print("len2", len(model["data"]))
-            model["type"] = 'image/png'
+            model["type"] = "image/png"
 
             if len(model["data"]) > 1_000_000:
                 raise BadRequest("image too large")

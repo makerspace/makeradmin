@@ -1,6 +1,10 @@
 import Base from './Base';
 
 export default class ProductImage extends Base {
+
+    deleteConfirmMessage() {
+        return `Are you sure you want to delete image ${this.name}?`;
+    }
     
     canSave() {
         return this.isDirty() && this.name.length > 0 && this.data.length > 0;
