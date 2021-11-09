@@ -3,6 +3,7 @@ import CollectionNavigation from "../Models/CollectionNavigation";
 import ProductImage from "../Models/ProductImage";
 import Collection from "../Models/Collection";
 import CollectionTable from "../Components/CollectionTable";
+import SearchBox from "../Components/SearchBox";
 
 class ImageList extends CollectionNavigation {
 
@@ -31,7 +32,6 @@ class ImageList extends CollectionNavigation {
             image.data = data;
             image.save().then(() => this.collection.fetch());
         };
-        console.info(file);
     }
     
     render() {
@@ -42,11 +42,12 @@ class ImageList extends CollectionNavigation {
                 <form onSubmit={e => {e.preventDefault(); this.onSubmit();}}>
                     <input type="file" id="avatar" name="avatar" accept="image/png, image/jpeg, image/gif" onChange={e => this.upload(e)}/>
                 </form>
+                <SearchBox handleChange={this.onSearch} />
                 <div className="uk-margin-top">
                     <CollectionTable
                         className="uk-margin-top"
                         collection={this.collection}
-                        emptyMessage="Inga produktkategorier"
+                        emptyMessage="Inga bilder"
                         onPageNav={this.onPageNav}
                         columns={[
                             {title: "Namn"},

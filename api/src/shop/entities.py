@@ -19,7 +19,10 @@ product_entity = OrderedEntity(
 product_action_entity = Entity(ProductAction)
 
 
-product_image_entity = ProductImageEntity(ProductImage)
+product_image_entity = ProductImageEntity(
+    ProductImage,
+    search_columns=("name",),
+)
 
 
 transaction_entity = Entity(
