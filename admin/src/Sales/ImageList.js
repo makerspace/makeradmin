@@ -74,5 +74,3 @@ class ImageList extends CollectionNavigation {
 }
 
 export default ImageList;
-
-// <Link className="uk-button uk-button-primary uk-margin-bottom uk-float-right" to="/sales/product/add"><i className="uk-icon-plus-circle"/> Ladda upp bild</Link>

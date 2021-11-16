@@ -108,5 +108,6 @@ Product.model = {
         smallest_multiple: 1,
         filter: null,
         show: true,
+        image_id: null,
     },
 };

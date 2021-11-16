@@ -141,8 +141,8 @@ def product_data(product_id):
     return get_product_data(product_id)
 
 
-@service.raw_route("/public_product_image/<int:image_id>")
-def public_product_image(image_id):
+@service.raw_route("/image/<int:image_id>")
+def public_image(image_id):
     try:
         image = db_session.query(ProductImage).filter(ProductImage.id == image_id, ProductImage.deleted_at.is_(None)).one()
     except NoResultFound:
