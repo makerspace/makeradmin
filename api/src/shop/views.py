@@ -1,7 +1,8 @@
-from flask import g, request, send_file, make_response, abort
+from flask import g, request, send_file, make_response, abort, redirect
 from sqlalchemy.exc import NoResultFound
 
 from service.api_definition import WEBSHOP, WEBSHOP_EDIT, PUBLIC, GET, USER, POST, Arg, WEBSHOP_ADMIN
+from service.config import get_public_url
 from service.db import db_session
 from service.entity import OrmSingeRelation, OrmSingleSingleRelation
 from service.error import NotFound
@@ -146,7 +147,8 @@ def public_image(image_id):
     try:
         image = db_session.query(ProductImage).filter(ProductImage.id == image_id, ProductImage.deleted_at.is_(None)).one()
     except NoResultFound:
-        abort(404)
+        return redirect(get_public_url("/static/images/default-product-image.png"), code=302)
+
     response = make_response(image.data)
     response.headers.set("Content-Type", image.type)
     response.headers.set("Max-Age", "36000")

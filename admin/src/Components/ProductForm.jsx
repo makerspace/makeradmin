@@ -75,7 +75,11 @@ class ProductForm extends React.Component {
         );
         
         const imageSrc = o => `data:${o.type};base64, ` + o.data;
-  
+
+        /*
+        TODO Can't remove image
+        TODO Image too small
+        */
         return (
             <div className="uk-margin-top">
                 <form className="uk-form uk-form-stacked" onSubmit={(e) => {e.preventDefault(); onSave(); return false;}}>
@@ -87,10 +91,6 @@ class ProductForm extends React.Component {
                         <TextInput model={product} name="unit" title="Enhet" />
                         <TextInput model={product} name="price" title="Pris (SEK)" type="number"/>
                         <TextInput model={product} name="smallest_multiple" title="Multipel " type="number"/>
-                        <!--
-                        TODO Can't remove image
-                        TODO Image too small
-                        -->
                         <SelectInput
                             model={product} name="image_id" title="Bild"
                             getLabel={o => <div style={{height: "40px", width: "40px"}}><img src={imageSrc(o)} style={{verticalAlign: "middle", height: "100%"}} alt={o.name}/></div>}
@@ -142,7 +142,6 @@ class ProductForm extends React.Component {
                 </form>
             </div>
         );
-        // Image upload not yet supported.
     }
 }
 
