@@ -10,6 +10,7 @@ from messages.models import MessageTemplate
 from service.db import db_session
 from service.error import NotFound, BadRequest
 from service.util import date_to_str, dt_to_str
+from shop.transactions import pending_action_value_sum, ProductAction
 
 
 JUDGMENT_DAY = date(1997, 9, 26)  # Used as default for missing lab access date.
@@ -39,11 +40,12 @@ def get_expire_date_from_labaccess_end_date(expire_date):
 def get_box_info(box):
     expire_date = get_labacess_end_date(box) + timedelta(days=1)
     terminate_date = get_expire_date_from_labaccess_end_date(expire_date)
+    pending_labaccess_days = pending_action_value_sum(box.member_id, ProductAction.ADD_LABACCESS_DAYS)
 
     today = date.today()
     if today < expire_date:
         status = "active"
-    elif today < terminate_date:
+    elif today < terminate_date or pending_labaccess_days > 0:
         status = "expired"
     else:
         status = "terminate"
