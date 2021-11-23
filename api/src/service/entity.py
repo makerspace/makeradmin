@@ -212,7 +212,7 @@ class Entity:
             total=count,
             page=page,
             page_size=page_size,
-            last_page=ceil(count / page_size) if page_size else 1,
+            last_page=max(1, ceil(count / page_size)) if page_size else 1,
             data=[to_obj(entity) for entity in query]
         )
     
