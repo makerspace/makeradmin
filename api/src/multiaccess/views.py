@@ -36,13 +36,20 @@ def get_memberdata():
 
     return [member_to_response_object(m) for m in query]
 
-
-def memberbooth_response_object(member, membership_data):
+def member_response_object(member, membership_data):
     response = member_to_response_object(member)
     del response["end_date"]
     response["membership_data"] = membership_data.as_json()
     return response
 
+def get_member(member_number)
+    member = db_session.query(Member).filter(Member.member_number == member_number, Member.deleted_at.is_(None)).first()
+
+    if not member:
+        return None
+
+    membership_data = get_membership_summary(member.member_id)
+    return member_response_object(member, membership_data)
 
 @service.route("/memberbooth/tag", method=GET, permission=MEMBERBOOTH)
 def memberbooth_tag(tagid=Arg(int)):
@@ -59,33 +66,24 @@ def memberbooth_tag(tagid=Arg(int)):
         return None
 
     membership_data = get_membership_summary(key.member_id)
-    return memberbooth_response_object(key.member, membership_data)
-
+    return member_response_object(key.member, membership_data)
 
 @service.route("/memberbooth/member", method=GET, permission=MEMBERBOOTH)
 def memberbooth_member(member_number=Arg(int)):
-    member = db_session.query(Member).filter(Member.member_number == member_number, Member.deleted_at.is_(None)).first()
+    return get_member(member_number)
 
-    if not member:
-        return None
-
-    membership_data = get_membership_summary(member.member_id)
-    return memberbooth_response_object(member, membership_data)
-
-
-@service.route("/box-terminator/boxes", method=GET, permission=MEMBER_EDIT)
-def box_terminator_boxes_routes():
-    """ Returns a list of all boxes scanned, ever. """
-    return box_terminator_boxes()
-
+@service.route("/box-terminator/stored_items", method=GET, permission=MEMBER_EDIT)
+def box_terminator_stored_items():
+    """ Returns a list of all items scanned, ever. """
+    return box_terminator_stored_items()
 
 @service.route("/box-terminator/nag", method=POST, permission=MEMBER_EDIT)
-def box_terminator_nag_route(member_number=Arg(int), box_label_id=Arg(int), nag_type=Arg(symbol)):
-    """ Send a nag email for this box. """
-    return box_terminator_nag(member_number, box_label_id, nag_type)
+def box_terminator_nag(member_number=Arg(int), label_id=Arg(int), storage_type=Arg(symbol), nag_type=Arg(symbol), description=Arg(str)):
+    """ Send a nag email for this storage type. """
+    return box_terminator_nag(member_number, label_id, storage_type, nag_type, description)
 
+@service.route("/box-terminator/validate", method=POST, permission=MEMBER_EDIT)
+def box_terminator_validate(member_number=Arg(int), label_id=Arg(int), storage_type=Arg(symbol), fixed_end_date=Arg(date)):
+    """ Used when scanning qr codes. """
+    return box_terminator_validate(member_number, label_id, storage_type, fixed_end_date)
 
-@service.route("/box-terminator/validate-box", method=POST, permission=MEMBER_EDIT)
-def box_terminator_validate_route(member_number=Arg(int), box_label_id=Arg(int)):
-    """ Used when scanning boxes. """
-    return box_terminator_validate(member_number, box_label_id)

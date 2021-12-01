@@ -142,26 +142,51 @@ class Span(Base):
         return f'Span(span_id={self.span_id}, type={self.type}, enddate={self.enddate})'
 
 
-class Box(Base):
-    __tablename__ = 'membership_box'
-    
+class MemberStorage(Base):
+    __tablename__ = 'membership_storage'
+
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
-    
+
     member_id = Column(Integer, ForeignKey('membership_members.member_id'), nullable=False)
-    
-    # The id of the printed label on the box.
-    box_label_id = Column(BigInteger, unique=True, nullable=False)
-    
+
+    # The id of the printed label on the storage item.
+    label_id = Column(BigInteger, unique=True, nullable=False)
+
+    # The type of storage
+    storage_type = Column(String(100), nullable=False)
+
+    # Fixed end date
+    fixed_end_date = Column(DateTime, nullable=False)
+
     # Box last checked at timestamp.
     last_check_at = Column(DateTime, nullable=True)
-    
-    # Last time a nag mail was sent out for this box, note that for a member with several boxes this may not be the
-    # last nag date for that member.
-    last_nag_at = Column(DateTime, nullable=False)
 
-    member = relationship(Member, backref="boxes")
-    
-    def __repr__(self):
+    member = relationship(Member, backref="storage_items")
+
+    def __repr__(self): #TODO update
+        return (
+            f'Box(id={self.id}, box_label_id={self.box_label_id}, member_id={self.member_id}'
+            f', last_check_at={self.last_check_at}, last_nag_at={self.last_nag_at})'
+        )
+
+
+class StorageNags(Base):
+    __tablename__ = 'storage_nags'
+
+    id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
+
+    member_id = Column(Integer, ForeignKey('membership_members.member_id'), nullable=False)
+
+    # The id of the printed label on the storage item.
+    label_id = Column(BigInteger, ForeignKey('membership_storage.label_id'), nullable=False)
+
+    # Box last checked at timestamp.
+    nag_at = Column(DateTime, nullable=False)
+
+    member = relationship(Member, backref="nags")
+    storage = relationship(MemberStorage, backref="nags") #TODO fix backref
+
+    def __repr__(self): #TODO update
         return (
             f'Box(id={self.id}, box_label_id={self.box_label_id}, member_id={self.member_id}'
             f', last_check_at={self.last_check_at}, last_nag_at={self.last_nag_at})'
