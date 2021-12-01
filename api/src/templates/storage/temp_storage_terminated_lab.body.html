@@ -1,0 +1,38 @@
+{% extends "email_body_base.html" %}
+
+{% block swedish %}
+<h2>Hej {{member.firstname}}</h2>
+<p>(See below for English).</p>
+<p>
+  Ditt labbmedlemskap i Stockholm Makerspace gick ut den {{labaccess_end_date}}, det har gått
+  {{days_after_expiration}} dagar sedan att ditt labbmedlemskap gått ut vilket innebär att den här temporära förvaringen och
+  dess innehåll nu tillfallit föreningen i enlighet med gällande labbmedlemsavtal.
+  Den här specifika temporära förvaringen har beskrivningen:
+</p>
+<p>
+  {{description}}
+</p>
+<p>
+  Om du anser att detta inte stämmer, hör av dig till <a href="mailto: info@makerspace.se">info@makerspace.se</a><br/>
+  Med vänliga hälsningar,<br/>
+  Stockholm Makerspace<br/>
+</p>
+{% endblock %}
+
+{% block english %}
+<h2>Hi {{member.firstname}}</h2>
+<p>
+  Your lab membership in Stockholm Makerspace expired on {{labaccess_end_date}}, you have not had an active
+  lab membership for {{days_after_expiration}} days which means that this temporary storage and all of its
+  contents now belong to the Stockholm Makerspace according to the lab membership agreement.
+  This specific temporary storage has the description:
+</p>
+<p>
+  {{description}}
+</p>
+<p>
+  If you feel that this is not the case, please contact <a href="mailto: info@makerspace.se">info@makerspace.se</a> as soon as possible.<br/>
+  Sincerely,<br/>
+  Stockholm Makerpace<br/>
+</p>
+{% endblock %}

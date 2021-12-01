@@ -1,0 +1,59 @@
+{% extends "email_body_base.html" %}
+
+{% block swedish %}
+<h2>Hej {{member.firstname}}</h2>
+<p>(See below for English).</p>
+<p>
+  Datumet på din temporära förvaring hos Stockholm Makerspace gick ut den {{fixed_end_date}} och
+  ditt labbmedlemskap gick ut den {{labaccess_end_date}}.
+  Om {{to_termination_days}} dagar kommer din temporära förvaring och dess innehåll att
+  tillfalla föreningen i enlighet med gällande labbmedlemsavtal. Enligt det har du
+  {{expiration_time}} dagar på dig att hämta din temporära förvaring.
+  Den här specifika temporära förvaringen har beskrivningen:
+</p>
+<p>
+  {{description}}
+</p>
+<p>
+  Du har nu följande två alternativ:
+  <ul>
+    <li>Om du fortfarande arbetar med projektet förnya ettiketten i medlemsbåset,
+    och förnya ditt labbmedlemskap i <a href="https://medlem.makerspace.se/shop">webshoppen</a>.</li>
+    <li>Hämta din temporära förvaring och eventuell labblåda.</li>
+  </ul>
+</p>
+<p>
+  Om du anser att detta inte stämmer, hör av dig till <a href="mailto: info@makerspace.se">info@makerspace.se</a><br/>
+  Med vänliga hälsningar,<br/>
+  Stockholm Makerspace
+</p>
+{% endblock %}
+
+{% block english %}
+<h2>Hi {{member.firstname}}</h2>
+<p>
+  Your temporary storage at Stockholm Makerspace expired on {{fixed_end_date}} and
+  your lab membership expired on {{labaccess_end_date}}.
+  In {{to_termination_days}} days, your temporary storage and its contents will belong to the Stockholm Makerspace in accordance with the lab
+  membership agreement. According to the agreement, you have {{expiration_time}} days to retrieve
+  your temporary storage.
+  This specific temporary storage has the description:
+</p>
+<p>
+  {{description}}
+</p>
+<p>
+  You now have the following two options:
+  <ul>
+    <li>If you are still working wit the project renew the temporary storage label at the memberbooth, 
+    and renew your lab membership in our <a href="https://medlem.makerspace.se/shop">webshoppen</a>.</li>
+    <li>Retrieve your temporary storage and any lab storage box.</li>
+  </ul>
+</p>
+<p>
+  If you feel that this is not the case, please contact <a href = "mailto: info@makerspace.se">info@makerspace.se</a> as soon as possible.<br/>
+  Sincerely,<br/>
+  Stockholm Makerspace<br/>
+</p>
+
+{% endblock %}
