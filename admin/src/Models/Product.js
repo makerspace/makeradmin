@@ -36,6 +36,9 @@ export default class Product extends Base {
     }
     
     save() {
+        if (this.image_id === 0) {
+            this.image_id = null;
+        }
         return super.save()
                     .then(() => {
                         const promises = [];

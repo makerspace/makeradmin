@@ -10,7 +10,7 @@ class ProductImageEntity(Entity):
     
     def to_model(self, obj):
         model = super().to_model(obj)
-
+        
         if "data" in model and "type" in model:
             print("len1", len(model["data"]), model["name"])
             image = Image.open(BytesIO(model["data"]))
