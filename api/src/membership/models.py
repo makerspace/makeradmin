@@ -158,15 +158,15 @@ class MemberStorage(Base):
     # Fixed end date
     fixed_end_date = Column(DateTime, nullable=False)
 
-    # Box last checked at timestamp.
+    # Item last checked at timestamp.
     last_check_at = Column(DateTime, nullable=True)
 
     member = relationship(Member, backref="storage_items")
 
-    def __repr__(self): #TODO update
+    def __repr__(self):
         return (
-            f'Box(id={self.id}, box_label_id={self.box_label_id}, member_id={self.member_id}'
-            f', last_check_at={self.last_check_at}, last_nag_at={self.last_nag_at})'
+            f'Storage(id={self.id}, label_id={self.label_id}, member_id={self.member_id}'
+            f', last_check_at={self.last_check_at})'
         )
 
 
@@ -180,16 +180,19 @@ class StorageNags(Base):
     # The id of the printed label on the storage item.
     label_id = Column(BigInteger, ForeignKey('membership_storage.label_id'), nullable=False)
 
-    # Box last checked at timestamp.
+    # Storage naged at timestamp.
     nag_at = Column(DateTime, nullable=False)
 
-    member = relationship(Member, backref="nags")
-    storage = relationship(MemberStorage, backref="nags") #TODO fix backref
+    # What type of nag was sent
+    nag_type = Column(String(100), nullable=False)
 
-    def __repr__(self): #TODO update
+    member = relationship(Member, backref="nags")
+    storage = relationship(MemberStorage, backref="nags")
+
+    def __repr__(self):
         return (
-            f'Box(id={self.id}, box_label_id={self.box_label_id}, member_id={self.member_id}'
-            f', last_check_at={self.last_check_at}, last_nag_at={self.last_nag_at})'
+            f'Nag(id={self.id}, label_id={self.label_id}, member_id={self.member_id}'
+            f', nag_at={self.nag_at}, nag_type={self.nag_type})'
         )
 
 
