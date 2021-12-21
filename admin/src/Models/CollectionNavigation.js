@@ -51,7 +51,6 @@ export default class CollectionNavigation extends React.Component {
     }
 
     onPageNav(index) {
-        console.info("onPageNav", index);
         this.setState({'page': index}, this.setHistory);
         this.collection.updatePage(index);
     }

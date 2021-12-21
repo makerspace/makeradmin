@@ -19,15 +19,6 @@ common.onGetAndDocumentLoaded("/webshop/product_data/" + window.productId, (valu
 
 	document.getElementById("description")!.innerHTML = product.description;
 
-	// const imagesDiv = document.getElementById("images")!;
-	// const image_id = product.image_id
-	// if (image_id != null) {}
-	// 	imagesDiv.innerHTML +=
-	// 		`<a class="product-image uk-inline" href='/static/product_images/${image.path}' data-caption="${image.caption}">
-    //              <img src='/static/product_images/${image.path}' alt="">
-    //          </a>`;
-	// });
-
 	const productAmount = <HTMLInputElement>document.querySelector(".product-amount");
 
 	const id2item = new Map<number, any>();
