@@ -33,7 +33,7 @@ export default class SelectInput extends React.Component {
     
     render() {
         const {value, options, isDirty} = this.state;
-        const {model, name, title, style, icon, getValue, getLabel} = this.props;
+        const {model, name, title, icon, getValue, getLabel} = this.props;
 
         const classes = classNames(name,
                                    {
