@@ -83,6 +83,10 @@ def check_status(item):
 def get_storage_info(item):
     status, reason = check_status(item)
 
+    nags = []
+    for d in item.storage_nags:
+        nags.append(dt_to_str(d))
+
     return {
         "label_id": item.label_id,
         "member_number": item.member.member_number,
@@ -91,13 +95,15 @@ def get_storage_info(item):
         "terminate_date": date_to_str(terminate_date),
         "fixed_end_date": date_to_str(fixed_end_date),
         "status": status,
-        "last_nag_at": dt_to_str(item.last_nag_at),
+        "nags": nags,
         "last_check_at": dt_to_str(item.last_check_at),
     }
 
 def box_terminator_stored_items():
     query = get_storage_query()
-    return [get_storage_info(s) for s in query.order_by(desc(MemberStorage.last_check_at))]
+    limit = datetime.utcnow() - timedelta(days=7)
+    filtered_query = filter(lambda item: item.last_check_at > limit, query)
+    return [get_storage_info(s) for s in filtered_query.order_by(desc(MemberStorage.last_check_at))]
 
 def box_terminator_nag(member_number=None, label_id=None, storage_type=None, nag_type=None, description=None):
     try:
@@ -134,7 +140,7 @@ def box_terminator_nag(member_number=None, label_id=None, storage_type=None, nag
             raise BadRequest(f"Bad nag type {nag_type}")
     else:
         raise BadRequest(f"Bad storage type {storage_type}")
-    
+
     today = date.today()
 
     lab_end_date = get_labacess_end_date(item)
@@ -154,7 +160,9 @@ def box_terminator_nag(member_number=None, label_id=None, storage_type=None, nag
         description = description,
     )
 
-    item.last_nag_at = datetime.utcnow()
+    nag = StorageNags(member_id=member.member_id, label_id=label_id, nag_at=datetime.utcnow(), nag_type=nag_type)
+    db_session.add(nag)
+    db_session.flush()
 
 def box_terminator_validate(member_number=None, label_id=None, storage_type=None, fixed_end_date=RESISTANCE_VICTORY_DAY):
     if storage_type == None:
@@ -169,7 +177,7 @@ def box_terminator_validate(member_number=None, label_id=None, storage_type=None
             #Find the member since there was nothing in the db with the label_id
             member = db_session.query(Member).filter(Member.member_number == member_number).one()
         except NoResultFound:
-            raise NotFound()
+            raise NotFound(f"Member not found {member_number}")
         item = MemberStorage(member_id=member.member_id, label_id=label_id, storage_type=storage_type)
 
     item.last_check_at = datetime.utcnow()

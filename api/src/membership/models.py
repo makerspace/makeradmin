@@ -41,6 +41,8 @@ class Member(Base):
                           secondary=member_group,
                           back_populates='members')
 
+    storage_nags = relationship('StorageNags', backref="member" order_by='StorageNags.nag_at.desc()')
+
     def __repr__(self):
         return f'Member(member_id={self.member_id}, member_number={self.member_number}, email={self.email})'
 
@@ -162,6 +164,7 @@ class MemberStorage(Base):
     last_check_at = Column(DateTime, nullable=True)
 
     member = relationship(Member, backref="storage_items")
+    storage_nags = relationship('StorageNags', backref="member" order_by='StorageNags.nag_at.desc()')
 
     def __repr__(self):
         return (
@@ -185,9 +188,6 @@ class StorageNags(Base):
 
     # What type of nag was sent
     nag_type = Column(String(100), nullable=False)
-
-    member = relationship(Member, backref="nags")
-    storage = relationship(MemberStorage, backref="nags")
 
     def __repr__(self):
         return (
