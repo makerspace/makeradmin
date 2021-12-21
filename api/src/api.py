@@ -35,6 +35,7 @@ def before_request_functions():
 
 
 def after_request_functions(response: FlaskResponse):
+    response.direct_passthrough = False
     traffic_logger_commit(response)
     return response
 

@@ -147,7 +147,7 @@ def public_image(image_id):
     try:
         image = db_session.query(ProductImage).filter(ProductImage.id == image_id, ProductImage.deleted_at.is_(None)).one()
     except NoResultFound:
-        return redirect(get_public_url("/static/images/default-product-image.png"), code=302)
+        return send_file("/work/default-product-image.png", mimetype='image/png')
 
     response = make_response(image.data)
     response.headers.set("Content-Type", image.type)
