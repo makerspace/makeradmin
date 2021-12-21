@@ -82,6 +82,10 @@ const nav = {
                         target: "/sales/product",
                     },
                     {
+                        text: "Bilder",
+                        target: "/sales/image",
+                    },
+                    {
                         text: "Kategorier",
                         target: "/sales/category",
                     },

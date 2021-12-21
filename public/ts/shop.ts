@@ -86,10 +86,11 @@ common.onGetAndDocumentLoaded("/webshop/product_data", (productData: any) => {
 
       const li = document.createElement("div");
       li.className = "product-container"
+      const image_url = `${apiBasePath}/webshop/image/${item.image_id || 0}`;
       li.innerHTML = `
         <div class="product-image-container">
           <a href="product/${item.id}">
-            <img src="/static/product_images/${item.image}" alt="${item.name}">
+            <img src="${image_url}" alt="${item.name}">
           </a>
         </div>
         <div id="product-${item.id}" class="product">

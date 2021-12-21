@@ -14,7 +14,11 @@ export default class SelectInput extends React.Component {
             value: null,
         };
         if (props.dataSource) {
-            get({url: props.dataSource}).then(data => this.setState({options: data.data}), () => null);
+            let options = [];
+            if (props.nullOption) {
+                options = [props.nullOption];
+            }
+            get({url: props.dataSource}).then(data => this.setState({options: options.concat(data.data)}), () => null);
         }
     }
 
@@ -29,7 +33,7 @@ export default class SelectInput extends React.Component {
     
     render() {
         const {value, options, isDirty} = this.state;
-        const {model, name, title, icon, getValue, getLabel} = this.props;
+        const {model, name, title, style, icon, getValue, getLabel} = this.props;
 
         const classes = classNames(name,
                                    {

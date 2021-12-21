@@ -67,7 +67,7 @@ class InternalService(Blueprint):
                     Arg.fill_args(params, kwargs)
                     
                     data = f(*args, **kwargs)
-                    
+        
                     if flat_return:
                         result = jsonify({**data, 'status': status}), code
                     else:
@@ -117,7 +117,10 @@ class InternalService(Blueprint):
             
             return super(InternalService, self).route(path, methods=methods, **route_kwargs)(view_wrapper)
         return decorator
-    
+
+    def raw_route(self, rule, **options):
+        return super().route(rule, **options)
+
     def entity_routes(self, path=None, entity=None, permission_list=None, permission_create=None, permission_read=None,
                       permission_update=None, permission_delete=None):
         """
