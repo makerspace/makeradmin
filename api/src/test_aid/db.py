@@ -23,6 +23,8 @@ class DbFactory:
         
         self.access_token = None
         self.member = None
+        self.storage = None
+        self.nag = None
         self.group = None
         self.span = None
         self.key = None
@@ -55,29 +57,15 @@ class DbFactory:
         db_session.commit()
         return self.member
 
-    #TODO move to objfactory
     def create_member_storage(self, storage_type, **kwargs):
-        obj = dict(
-            member_id=self.member.member_id,
-            label_id=randint(1e9, 9e9),
-            fixed_end_date='2029-01-01',
-            storage_type=storage_type,
-        )
-        obj.update(kwargs)
+        obj = self.obj.create_member_storage(storage_type, **kwargs)
         self.storage = MemberStorage(**obj)
         db_session.add(self.storage)
         db_session.commit()
         return self.storage
 
-    #TODO move to objfactory
     def create_storage_nag(self, nag_type, **kwargs):
-        obj = dict(
-            member_id=self.member.member_id,
-            label_id=randint(1e9, 9e9),
-            nag_at=self.test.date(),
-            nag_type=nag_type,
-        )
-        obj.update(kwargs)
+        obj = self.obj.create_storage_nag(nag_type, **kwargs)
         self.nag = StorageNags(**obj)
         db_session.add(self.nag)
         db_session.commit()

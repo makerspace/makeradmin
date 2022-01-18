@@ -50,9 +50,27 @@ class ObjFactory:
         self.member = obj
         return self.member
 
-#TODO create storage
+    def create_member_storage(self, storage_type, **kwargs):
+        obj = dict(
+            member_id=self.member.member_id,
+            label_id=randint(1e9, 9e9),
+            fixed_end_date='2029-01-01',
+            storage_type=storage_type,
+        )
+        obj.update(kwargs)
+        self.member_storage = obj
+        return self.member_storage
 
-#TODO create nag
+    def create_storage_nag(self, nag_type, **kwargs):
+        obj = dict(
+            member_id=self.member.member_id,
+            label_id=randint(1e9, 9e9),
+            nag_at=self.test.date(),
+            nag_type=nag_type,
+        )
+        obj.update(kwargs)
+        self.nag = obj
+        return self.nag
 
     def create_group(self, **kwargs):
         obj = dict(
