@@ -4,7 +4,7 @@ from faker import Faker
 
 from core.models import AccessToken, PasswordResetToken
 from core.service_users import TEST_SERVICE_USER_ID
-from membership.models import Member, Group, Permission, Span, Key, Box
+from membership.models import Member, Group, Permission, Span, Key, MemberStorage, StorageNags
 from messages.models import Message
 from service.db import db_session
 from shop.models import ProductCategory, Product, ProductAction
@@ -33,7 +33,7 @@ class DbFactory:
         self.product = None
         self.action = None
         self.password_reset_token = None
-        
+
     def create_access_token(self, **kwargs):
         obj = dict(
             user_id=TEST_SERVICE_USER_ID,
@@ -55,17 +55,33 @@ class DbFactory:
         db_session.commit()
         return self.member
 
-    def create_box(self, **kwargs):
+    #TODO move to objfactory
+    def create_member_storage(self, storage_type, **kwargs):
         obj = dict(
             member_id=self.member.member_id,
-            box_label_id=randint(1e9, 9e9),
-            session_token=random_str(),
+            label_id=randint(1e9, 9e9),
+            fixed_end_date='2029-01-01',
+            storage_type=storage_type,
         )
         obj.update(kwargs)
-        self.box = Box(**obj)
-        db_session.add(self.box)
+        self.storage = MemberStorage(**obj)
+        db_session.add(self.storage)
         db_session.commit()
-        return self.box
+        return self.storage
+
+    #TODO move to objfactory
+    def create_storage_nag(self, nag_type, **kwargs):
+        obj = dict(
+            member_id=self.member.member_id,
+            label_id=randint(1e9, 9e9),
+            nag_at=self.test.date(),
+            nag_type=nag_type,
+        )
+        obj.update(kwargs)
+        self.nag = StorageNags(**obj)
+        db_session.add(self.nag)
+        db_session.commit()
+        return self.nag
 
     def create_group(self, **kwargs):
         obj = self.obj.create_group(**kwargs)

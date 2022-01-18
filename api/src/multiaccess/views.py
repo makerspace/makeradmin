@@ -73,8 +73,8 @@ def memberbooth_member(member_number=Arg(int)):
     return get_member(member_number)
 
 @service.route("/box-terminator/stored_items", method=GET, permission=MEMBER_EDIT)
-def box_terminator_stored_items():
-    """ Returns a list of all items scanned, ever. """
+def box_terminator_stored_items(storage_type=Arg(symbol)):
+    """ Returns a list of all items scanned of the storage type during the last seven days"""
     return box_terminator_stored_items()
 
 @service.route("/box-terminator/nag", method=POST, permission=MEMBER_EDIT)

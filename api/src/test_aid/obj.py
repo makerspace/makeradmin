@@ -19,6 +19,8 @@ class ObjFactory:
         self.fake = Faker('sv_SE')
         
         self.member = None
+        self.member_storage = None
+        self.nag = None
         self.group = None
         self.category = None
         self.product = None
@@ -47,7 +49,11 @@ class ObjFactory:
         obj.update(kwargs)
         self.member = obj
         return self.member
-        
+
+#TODO create storage
+
+#TODO create nag
+
     def create_group(self, **kwargs):
         obj = dict(
             name=f"group-{random_str(12)}",

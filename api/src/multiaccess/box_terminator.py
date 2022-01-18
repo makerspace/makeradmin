@@ -99,10 +99,10 @@ def get_storage_info(item):
         "last_check_at": dt_to_str(item.last_check_at),
     }
 
-def box_terminator_stored_items():
+def box_terminator_stored_items(storage_type=None):
     query = get_storage_query()
     limit = datetime.utcnow() - timedelta(days=7)
-    filtered_query = filter(lambda item: item.last_check_at > limit, query)
+    filtered_query = filter(lambda item: item.last_check_at > limit and item.storage_type == storage_type, query)
     return [get_storage_info(s) for s in filtered_query.order_by(desc(MemberStorage.last_check_at))]
 
 def box_terminator_nag(member_number=None, label_id=None, storage_type=None, nag_type=None, description=None):
