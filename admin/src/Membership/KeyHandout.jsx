@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import Member from "../Models/Member";
+import Key from "../Models/Key"
 import KeyHandoutForm from "../Components/KeyHandoutForm";
 import {confirmModal} from "../message";
 import {withRouter} from "react-router";
@@ -33,6 +34,5 @@ class KeyHandout extends React.Component {
 KeyHandout.contextTypes = {
     member: PropTypes.instanceOf(Member)
 };
-
 
 export default withRouter(KeyHandout);

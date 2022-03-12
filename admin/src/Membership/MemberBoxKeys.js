@@ -8,6 +8,7 @@ import TextInput from "../Components/TextInput";
 import DateTimeShow from "../Components/DateTimeShow";
 
 
+
 const Row = collection => props => {
     const {item} = props;
     
@@ -94,4 +95,5 @@ class MemberBoxKeys extends React.Component {
 }
 
 
+export {Row};
 export default MemberBoxKeys;
