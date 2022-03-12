@@ -86,21 +86,9 @@ class KeyHandoutForm extends React.Component {
             </>;
         }
 
-        return (
-        <div className="meep">
+        // Section 2 and onward shall only be visible after lab contract has been signed
+        const section2andon = <>
             <form className="uk-form" onSubmit={(e) => {e.preventDefault(); onSave(); return false;}}>
-                <div className="uk-section">
-                    <div className="uk-container">
-                        <h2>1. Ta emot signerat labbmedlemsavtal</h2>
-                        Kontrollera att labbmedlemsavtalet är signerat och säkerställ att rätt medlemsnummer står väl synligt på labbmedlemsavtalet.
-                    </div>
-                    <fieldset>
-                        <input className="uk-checkbox" type="checkbox" checked={has_signed} onChange={(e) => this.signedChanged(e.target.checked)}/>
-                        <label> Signerat labbmedlemsavtal mottaget.</label> 
-                    </fieldset>
-
-                </div>
-
                 <div className="uk-section">
                     <div className="uk-container">
                         <h2>2. Kontrollera legitimation</h2>
@@ -124,6 +112,25 @@ class KeyHandoutForm extends React.Component {
                     {key_paragraph}
                 </div>
             </form>
+        </>;
+
+        return (
+        <div className="meep">
+            <div class="uk-form">
+                <div className="uk-section">
+                    <div className="uk-container">
+                        <h2>1. Ta emot signerat labbmedlemsavtal</h2>
+                        Kontrollera att labbmedlemsavtalet är signerat och säkerställ att rätt medlemsnummer står väl synligt på labbmedlemsavtalet.
+                    </div>
+                    <br/>
+                    <fieldset>
+                        <input className="uk-checkbox" type="checkbox" checked={has_signed} onChange={(e) => this.signedChanged(e.target.checked)}/>
+                        <label> Signerat labbmedlemsavtal mottaget.</label> 
+                    </fieldset>
+                </div>
+            </div>
+
+            {has_signed ? section2andon : ""}
         </div>
         );
     }
