@@ -66,6 +66,7 @@ export default class Cart {
 
 	sum(id2product: Map<number, any>) {
 		let totalSum = 0;
+		this.items = this.items.filter(i => id2product.get(i.id))
 		for (let item of this.items) {
 			totalSum += item.count * id2product.get(item.id).price;
 		}
