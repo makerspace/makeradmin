@@ -12,7 +12,7 @@ services:
     environment:
       TEST: "true"
       CORS_ALLOWED_ORIGINS: 'http://admin,http://api,http://public'
-      TEST_SERVICE_TOKEN:
+      TEST_SERVICE_TOKEN: "${TEST_SERVICE_TOKEN}"
 
   public:
     environment:

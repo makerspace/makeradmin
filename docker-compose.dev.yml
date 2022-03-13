@@ -15,7 +15,7 @@ services:
       - "8010:80"
     environment:
       DEV_RUN: "true"
-      TEST_SERVICE_TOKEN:
+      TEST_SERVICE_TOKEN: "${TEST_SERVICE_TOKEN}"
 
   email-dispatcher:
     volumes:

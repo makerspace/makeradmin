@@ -64,8 +64,8 @@ def create_admin(admins):
     banner(BLUE, "Admin User")
 
     s = input("Do you want to create a new admin user"
-              " (you can later use the create_user.py script to create users)? [Y/n]: ")
-    if s not in {"", "y", "yes"}:
+              " (you can later use the create_user.py script to create users)? [y/n]: ")
+    if s not in {"", "y", "Y", "yes"}:
         return
 
     while True:

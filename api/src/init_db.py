@@ -38,6 +38,7 @@ def refresh_service_access_tokens(session_factory):
                         user_id=service_user.id,
                         access_token=service_user.token or generate_token(),
                         browser='',
+                        permissions=",".join(service_user.permissions),
                         ip='',
                     )
                 
