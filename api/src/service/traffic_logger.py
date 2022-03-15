@@ -49,9 +49,9 @@ class TrafficLogger:
 
         # Images take quite much space when logging their requests
         if method == "GET" and session_request.path.startswith("/webshop/image/"):
-            session_request_data["data"] = "<skipping image content>"
+            session_response.data = "<skipping image content>"
 
-        elif method != "GET":
+        if method != "GET":
             if (session_request.content_length or 0) < self.LOG_LIMIT:
                 data = session_request.get_data(as_text=True)
                 
