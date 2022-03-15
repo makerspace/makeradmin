@@ -23,10 +23,6 @@ class KeyHandoutForm extends React.Component {
     }
 
     onSave() {
-        console.log("onSave");
-        console.log(this.key);
-        console.log(this.key.isDirty());
-        console.log(this.key.canSave());
         if (this.key && this.key.isDirty() && this.key.canSave()) {
             this.key
                 .save()
@@ -37,9 +33,6 @@ class KeyHandoutForm extends React.Component {
         }
 
         const {member} = this.props;
-        console.log(member);
-        console.log(member.isDirty());
-        console.log(member.canSave());
         if (member.isDirty() && member.canSave()) {
             member.save();
         }
@@ -73,7 +66,7 @@ class KeyHandoutForm extends React.Component {
         if (keys.length === 0) {
             key_paragraph = <>
                     <div className="uk-container">
-                        Skapa en ny nyckel genom att läsa in den i fältet nedan.
+                        Skapa en ny nyckel genom att läsa in den i fältet nedan och sedan spara.
                         <TextInput model={this.key} tabIndex="1" name="tagid" title="RFID" placeholder="Använd en RFID-läsare för att läsa av det unika numret på nyckeln" />
                     </div>
                 </>;
@@ -102,7 +95,7 @@ class KeyHandoutForm extends React.Component {
                 </div>
 
                 <fieldset>
-                    <TextInput model={member} tabIndex="1" name="civicregno" title="Personnummer" pattern="([0-9]{2})?[0-9]{6}-?[0-9]{4}" placeholder="YYYYMMDD-XXXX" />
+                    <TextInput model={member} tabIndex="1" name="civicregno" title="Personnummer" placeholder="YYYYMMDD-XXXX" />
                 </fieldset>
             </div>
 
@@ -123,11 +116,15 @@ class KeyHandoutForm extends React.Component {
                 </div>
                 {key_paragraph}
             </div>
+
+            <div className="uk-container">
+                <button className="uk-button uk-button-success uk-float-right" tabIndex="1" disabled={!can_save_member && !can_save_key}><i className="uk-icon-save"/> Spara</button>
+            </div>
         </>;
 
         return (
         <div className="meep">
-            <div className="uk-form" onSubmit={(e) => {e.preventDefault(); this.onSave(); return false;}}>
+            <form className="uk-form" onSubmit={(e) => {e.preventDefault(); this.onSave(); return false;}}>
                 <div className="uk-section">
                     <div className="uk-container">
                         <h2>1. Ta emot signerat labbmedlemsavtal</h2>
@@ -141,11 +138,7 @@ class KeyHandoutForm extends React.Component {
                 </div>
 
                 {has_signed ? section2andon : ""}
-
-                <div className="uk-container">
-                    <button className="uk-button uk-button-success uk-float-right" tabIndex="1" disabled={!can_save_member && !can_save_key}><i className="uk-icon-save"/> Spara</button>
-                </div>
-            </div>
+            </form>
         </div>
         );
     }

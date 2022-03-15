@@ -25,7 +25,7 @@ export default class TextInput extends React.Component {
     
     render() {
         const {value, selected, isDirty} = this.state;
-        const {model, name, title, icon, disabled, placeholder, formrow, tabIndex, type, label, pattern} = this.props;
+        const {model, name, title, icon, disabled, placeholder, formrow, tabIndex, type, label} = this.props;
         
         const classes = classNames(name,
                                    {
@@ -38,7 +38,6 @@ export default class TextInput extends React.Component {
                              value={_.isNull(value) ? '' : value}
                              disabled={disabled}
                              type={type || "text"}
-                             pattern={pattern || ""}
                              tabIndex={tabIndex}
                              onChange={(event) => model[name] = event.target.value === '' ? null : event.target.value}
                              onFocus={() => this.setState({selected: true})}
