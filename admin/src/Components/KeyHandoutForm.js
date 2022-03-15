@@ -39,7 +39,7 @@ class KeyHandoutForm extends React.Component {
 
     componentDidMount() {
         const {member} = this.props;
-        this.unsubscribe_member = member.subscribe(() => this.setState({can_save_member: member.canSave(), has_signed: member.civicregno.length > 0}));
+        this.unsubscribe_member = member.subscribe(() => this.setState({can_save_member: member.canSave(), has_signed: (member.civicregno && member.civicregno.length > 0) ? true : false}));
         this.unsubscribe_keys = this.keyCollection.subscribe((keys) => this.setState({keys: keys.items}));
         const key = this.key;
         this.unsubscribe_key = key.subscribe(() => this.setState({can_save_key: key.canSave()}));
@@ -54,7 +54,6 @@ class KeyHandoutForm extends React.Component {
     render() {
         const {member, onSave, onDelete} = this.props;
         const {can_save_member, can_save_key, keys, has_signed} = this.state;
-        console.log(has_signed);
 
         // Show different content based on if the user has a key or not
         let key_paragraph;
@@ -116,7 +115,7 @@ class KeyHandoutForm extends React.Component {
 
         return (
         <div className="meep">
-            <div class="uk-form">
+            <div className="uk-form">
                 <div className="uk-section">
                     <div className="uk-container">
                         <h2>1. Ta emot signerat labbmedlemsavtal</h2>
