@@ -46,23 +46,29 @@ export default class CollectionTable extends React.Component {
     }
 
     renderPagination() {
-        const {collection} = this.props;
         const {page} = this.state;
+        const show_count = 2;
+        const onPageNav = this.props.onPageNav;
         
-        if (!page.count || page.count <= 1) {
-            return "";
+        if (!page.count) {
+            page.count = 1;
         }
-        
         return (
-            <ul className="uk-pagination">
+            <ul className="uk-pagination" style={{clear:"both"}}>
                 {_.range(1, page.count + 1).map(i => {
-                    if (i === page.index) {
+                    const distance = Math.abs(i - page.index);
+                    if (distance === 0) {
                         return <li key={i} className="uk-active"><span>{i}</span></li>;
+                    } else if (distance <= show_count || i === 1 || i === page.count) {
+                        return <li key={i}><a onClick={() => {
+                            this.setState({loading: true});
+                            if (onPageNav)
+                                onPageNav(i);
+                        }}>{i}</a></li>;
+                    } else if (distance === show_count + 1) {
+                        return <li key={i}><span>...</span></li>;
                     }
-                    return <li key={i}><a href="#" onClick={() => {
-                        this.setState({loading: true});
-                        collection.updatePage(i);
-                    }}>{i}</a></li>;
+                    return "";
                 })}
             </ul>
         );
@@ -85,7 +91,7 @@ export default class CollectionTable extends React.Component {
         }
         
         const headers = columns.map((c, i) => this.renderHeading(c, i));
-        const pagination = this.renderPagination();
+        const pagination = typeof this.state.page !== "undefined" && this.state.page.count > 1 ? this.renderPagination() : null;
 
         return (
             <div className={className}>

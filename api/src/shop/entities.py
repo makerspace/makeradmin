@@ -1,5 +1,5 @@
 from membership.models import Member
-from service.entity import Entity, ExpandField
+from service.entity import Entity, ExpandField, ASC
 from shop.models import ProductImage, Transaction, TransactionContent, Product, TransactionAction, \
     ProductCategory, ProductAction
 from shop.ordered_entity import OrderedEntity
@@ -8,7 +8,12 @@ from shop.product_image_entity import ProductImageEntity
 category_entity = OrderedEntity(ProductCategory)
 
 
-product_entity = OrderedEntity(Product)
+product_entity = OrderedEntity(
+    Product,
+    default_sort_column='name',
+    default_sort_order=ASC,
+    search_columns=('name', 'description'),
+)
 
 
 product_action_entity = Entity(ProductAction)
@@ -16,7 +21,7 @@ product_action_entity = Entity(ProductAction)
 
 product_image_entity = ProductImageEntity(
     ProductImage,
-    default_sort_column='display_order',
+    search_columns=("name",),
 )
 
 

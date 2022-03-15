@@ -136,6 +136,7 @@ def get_membership_summaries(member_ids: List[int]):
         ))
     return memberships
 
+
 def get_members_and_membership():
     members = (
         db_session

@@ -1,17 +1,23 @@
-from flask import g, request
+from flask import g, request, send_file, make_response, abort, redirect
+from sqlalchemy.exc import NoResultFound
 
 from service.api_definition import WEBSHOP, WEBSHOP_EDIT, PUBLIC, GET, USER, POST, Arg, WEBSHOP_ADMIN
+from service.config import get_public_url
+from service.db import db_session
 from service.entity import OrmSingeRelation, OrmSingleSingleRelation
+from service.error import NotFound
 from shop import service
 from shop.entities import product_image_entity, transaction_content_entity, transaction_entity, \
     transaction_action_entity, product_entity, category_entity, product_action_entity
-from shop.models import TransactionContent
+from shop.models import TransactionContent, ProductImage
 from shop.pay import pay, register
 from shop.stripe_payment_intent import confirm_stripe_payment_intent
 from shop.shop_data import pending_actions, member_history, receipt, get_product_data, all_product_data, \
     get_membership_products
 from shop.stripe_event import stripe_callback, process_stripe_events
 from shop.transactions import ship_orders
+from service.logging import logger
+
 
 service.entity_routes(
     path="/category",
@@ -103,8 +109,8 @@ service.related_entity_routes(
 service.entity_routes(
     path="/product_image",
     entity=product_image_entity,
-    permission_list=PUBLIC,
-    permission_read=PUBLIC,
+    permission_list=WEBSHOP,
+    permission_read=WEBSHOP,
     permission_create=WEBSHOP_EDIT,
     permission_update=WEBSHOP_EDIT,
     permission_delete=WEBSHOP_EDIT,
@@ -134,6 +140,19 @@ def shop_data():
 @service.route("/product_data/<int:product_id>", method=GET, permission=PUBLIC)
 def product_data(product_id):
     return get_product_data(product_id)
+
+
+@service.raw_route("/image/<int:image_id>")
+def public_image(image_id):
+    try:
+        image = db_session.query(ProductImage).filter(ProductImage.id == image_id, ProductImage.deleted_at.is_(None)).one()
+    except NoResultFound:
+        return send_file("/work/default-product-image.png", mimetype='image/png')
+
+    response = make_response(image.data)
+    response.headers.set("Content-Type", image.type)
+    response.headers.set("Max-Age", "36000")
+    return response
 
 
 @service.route("/register_page_data", method=GET, permission=PUBLIC)

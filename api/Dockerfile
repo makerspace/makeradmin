@@ -1,4 +1,4 @@
-FROM python:3.8-alpine
+FROM python:3.9-alpine
 
 RUN apk update \
     && apk add \
@@ -6,6 +6,8 @@ RUN apk update \
        netcat-openbsd \
        less \
        curl \
+       zlib-dev \
+       jpeg-dev \
        build-base \
        python3-dev \
        libffi-dev \
@@ -17,8 +19,11 @@ RUN mkdir -p /work/ && mkdir -p /work/logs
 
 VOLUME /work/logs
 
+COPY default-product-image.png /work
+
 COPY requirements.txt /work
 
+RUN pip install -U pip
 RUN pip install -r /work/requirements.txt
 
 COPY run.sh dispatch_emails.sh /work/

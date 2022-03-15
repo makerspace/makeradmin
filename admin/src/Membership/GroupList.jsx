@@ -4,6 +4,7 @@ import Collection from "../Models/Collection";
 import CollectionTable from "../Components/CollectionTable";
 import Group from "../Models/Group";
 import SearchBox from "../Components/SearchBox";
+import CollectionNavigation from "../Models/CollectionNavigation";
 
 const Row = props => {
     const {item, deleteItem} = props;
@@ -19,29 +20,14 @@ const Row = props => {
 };
 
 
-class GroupList extends React.Component {
+class GroupList extends CollectionNavigation {
 
     constructor(props) {
         super(props);
-        this.onSearch = this.onSearch.bind(this);
+        const {search, page} = this.state;
 
-        this.params = new URLSearchParams(this.props.location.search);
-        const search_term = this.params.get('search') || '';
-        this.collection = new Collection({type: Group, search: search_term});
-        this.state = {'search': search_term};
+        this.collection = new Collection({type: Group, search: search, page: page});
     }
-
-    onSearch(term) {
-        this.setState({'search': term});
-        this.collection.updateSearch(term);
-        if (term === "") {
-            this.params.delete("search");
-        } else {
-            this.params.set("search", term);
-        }
-        this.props.history.replace(this.props.location.pathname + "?" + this.params.toString());
-    }
-
 
     render() {
         const columns = [
@@ -58,8 +44,8 @@ class GroupList extends React.Component {
                 <p className="uk-float-left">På denna sida ser du en lista på samtliga grupper..</p>
                 <Link to="/membership/groups/add" className="uk-button uk-button-primary uk-float-right"><i className="uk-icon-plus-circle"/> Skapa ny grupp</Link>
 
-                <SearchBox handleChange={this.onSearch} />
-                <CollectionTable rowComponent={Row} collection={this.collection} columns={columns} />
+                <SearchBox handleChange={this.onSearch} value={this.state.search}/>
+                <CollectionTable rowComponent={Row} collection={this.collection} columns={columns} onPageNav={this.onPageNav} />
             </div>
         );
     }

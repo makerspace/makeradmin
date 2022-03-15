@@ -1,6 +1,6 @@
-from sqlalchemy import Column, Integer, String, DateTime, func, Text, Numeric, ForeignKey, Enum
+from sqlalchemy import Column, Integer, String, DateTime, func, Text, Numeric, ForeignKey, Enum, Boolean, LargeBinary
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, configure_mappers
 
 from membership.models import Member
 
@@ -21,6 +21,21 @@ class ProductCategory(Base):
         return f'ProductCategory(id={self.id}, name={self.name}, display_order={self.display_order})'
 
 
+class ProductImage(Base):
+    __tablename__ = 'webshop_product_images'
+
+    id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
+    name = Column(String(255), nullable=False)
+    type = Column(String(64), nullable=False)
+    data = Column(LargeBinary)
+    created_at = Column(DateTime, server_default=func.now())
+    updated_at = Column(DateTime, server_default=func.now())
+    deleted_at = Column(DateTime)
+    
+    def __repr__(self):
+        return f'ProductImage(id={self.id}, path={self.path})'
+
+
 class Product(Base):
     __tablename__ = 'webshop_products'
     
@@ -32,15 +47,16 @@ class Product(Base):
     price = Column(Numeric(precision="15,3"), nullable=False)
     smallest_multiple = Column(Integer, nullable=False, server_default='1')
     filter = Column(String(255))
-    image = Column(String(255))
     display_order = Column(Integer, nullable=False, unique=True)
     created_at = Column(DateTime, server_default=func.now())
     updated_at = Column(DateTime, server_default=func.now())
     deleted_at = Column(DateTime)
+    show = Column(Boolean, nullable=False, server_default="1")
 
     category = relationship(ProductCategory, backref='products')
-    images = relationship("ProductImage", lazy='dynamic', backref='product')
     actions = relationship("ProductAction")
+
+    image_id = Column(Integer, ForeignKey(ProductImage.id), nullable=True)
 
     def __repr__(self):
         return f'Product(id={self.id}, name={self.name}, category_id={self.category_id}' \
@@ -102,7 +118,7 @@ class TransactionContent(Base):
     def __repr__(self):
         return f'TransactionContent(id={self.id}, count={self.count}, amount={self.amount})'
 
-    
+
 class TransactionAction(Base):
     __tablename__ = 'webshop_transaction_actions'
 
@@ -133,20 +149,6 @@ class PendingRegistration(Base):
 
     def __repr__(self):
         return f'PendingRegistration(id={self.id})'
-    
-
-class ProductImage(Base):
-    __tablename__ = 'webshop_product_images'
-
-    id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
-    product_id = Column(Integer, ForeignKey(Product.id), nullable=False)
-    path = Column(String(255), nullable=False)
-    caption = Column(Text)
-    display_order = Column(Integer, unique=True)
-    deleted_at = Column(DateTime)
-
-    def __repr__(self):
-        return f'ProductImage(id={self.id}, path={self.path})'
 
 
 class StripePending(Base):
@@ -159,3 +161,7 @@ class StripePending(Base):
 
     def __repr__(self):
         return f'StripePending(id={self.id}, stripe_token={self.stripe_token})'
+
+
+# https://stackoverflow.com/questions/67149505/how-do-i-make-sqlalchemy-backref-work-without-creating-an-orm-object
+configure_mappers()

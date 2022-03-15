@@ -3,7 +3,7 @@ from logging import getLogger
 
 import stripe
 
-from test_aid.systest_base import ApiShopTestMixin, ApiTest, VALID_NON_3DS_CARD_NO, VALID_3DS_CARD_NO
+from test_aid.systest_base import ApiShopTestMixin, ApiTest, VALID_NON_3DS_CARD_NO, VALID_3DS_CARD_NO, retry
 
 logger = getLogger('makeradmin')
 
@@ -71,14 +71,16 @@ class Test(ApiShopTestMixin, ApiTest):
         
         transaction_id = self.post(f"/webshop/pay", purchase, token=self.token)\
             .expect(code=200, status="ok").get('data__transaction_id')
-        
-        self.get(f"/webshop/transaction/{transaction_id}").expect(
-            code=200,
-            status="ok",
-            data__amount=f"{expected_sum:.2f}",
-            data__member_id=self.member_id,
-            data__status="completed",
-        )
+
+        def assert_transation():
+            self.get(f"/webshop/transaction/{transaction_id}").expect(
+                code=200,
+                status="ok",
+                data__amount=f"{expected_sum:.2f}",
+                data__member_id=self.member_id,
+                data__status="completed",
+            )
+        retry(retry_exception=lambda e: isinstance(e, AssertionError))(assert_transation)()
 
         data = self.get(f"/webshop/transaction/{transaction_id}/contents").expect(code=200, status="ok").data
         self.assertCountEqual(

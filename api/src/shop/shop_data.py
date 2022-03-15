@@ -78,15 +78,13 @@ def all_product_data():
         .join(ProductCategory.products)
         .options(contains_eager(ProductCategory.products))
         .filter(Product.deleted_at.is_(None))
+        .filter(Product.show)
         .order_by(ProductCategory.display_order)
     )
 
     return [{
         **category_entity.to_obj(category),
-        'items': [{
-            **product_entity.to_obj(product),
-            'image': product.image or 'default_image.png',
-        } for product in sorted(category.products, key=lambda p: p.display_order)]
+        'items': [product_entity.to_obj(product) for product in sorted(category.products, key=lambda p: p.display_order)]
     } for category in query]
     
 
@@ -96,11 +94,8 @@ def get_product_data(product_id):
     except NoResultFound:
         raise NotFound()
     
-    images = product.images.filter_by(deleted_at=None)
-    
     return {
         "product": product_entity.to_obj(product),
-        "images": [product_image_entity.to_obj(image) for image in images],
         "productData": all_product_data(),
     }
 

@@ -111,7 +111,8 @@ def pending_action_value_sum(member_id, action_type):
     return (
         pending_actions_query(member_id=member_id)
         .filter(TransactionAction.action_type == action_type)
-        .value(func.coalesce(func.sum(TransactionAction.value), 0))
+        .with_entities(func.coalesce(func.sum(TransactionAction.value), 0))
+        .scalar()
     )
 
 

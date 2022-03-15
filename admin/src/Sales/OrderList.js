@@ -5,6 +5,7 @@ import Collection from "../Models/Collection";
 import CollectionTable from "../Components/CollectionTable";
 import DateTimeShow from "../Components/DateTimeShow";
 import SearchBox from "../Components/SearchBox";
+import CollectionNavigation from "../Models/CollectionNavigation";
 
 const Row = props => {
     const {item} = props;
@@ -20,27 +21,13 @@ const Row = props => {
 };
 
 
-class OrderList extends React.Component {
+class OrderList extends CollectionNavigation {
 
     constructor(props) {
         super(props);
-        this.onSearch = this.onSearch.bind(this);
+        const {search, page} = this.state;
 
-        this.params = new URLSearchParams(this.props.location.search);
-        const search_term = this.params.get('search') || '';
-        this.collection = new Collection({type: Order, url: "/webshop/transaction", expand: 'member', search: search_term});
-        this.state = {'search': search_term};
-    }
-
-    onSearch(term) {
-        this.setState({'search': term});
-        this.collection.updateSearch(term);
-        if (term === "") {
-            this.params.delete("search");
-        } else {
-            this.params.set("search", term);
-        }
-        this.props.history.replace(this.props.location.pathname + "?" + this.params.toString());
+        this.collection = new Collection({type: Order, url: "/webshop/transaction", expand: 'member', search, page});
     }
 
     render() {
@@ -56,7 +43,7 @@ class OrderList extends React.Component {
             <div className="uk-margin-top">
                 <h2>Inkommna ordrar</h2>
                 <SearchBox handleChange={this.onSearch} value={this.state.search}/>
-                <CollectionTable emptyMessage="Ingar ordrar" rowComponent={Row} collection={this.collection} columns={columns} />
+                <CollectionTable emptyMessage="Ingar ordrar" rowComponent={Row} collection={this.collection} columns={columns} onPageNav={this.onPageNav} />
             </div>
         );
     }

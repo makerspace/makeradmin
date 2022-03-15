@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, String, DateTime, Text, Date, Enum, Table, ForeignKey, func, text, select, \
     BigInteger
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import relationship, column_property
+from sqlalchemy.orm import relationship, column_property, configure_mappers
 
 Base = declarative_base()
 
@@ -41,10 +41,6 @@ class Member(Base):
                           secondary=member_group,
                           back_populates='members')
 
-    boxes = relationship('Box')
-
-    spans = relationship('Span')
-
     def __repr__(self):
         return f'Member(member_id={self.member_id}, member_number={self.member_number}, email={self.email})'
 
@@ -81,13 +77,14 @@ class Group(Base):
     
     def __repr__(self):
         return f'Group(group_id={self.group_id}, name={self.name})'
-  
-    
+
+
 # Calculated property will be executed as a sub select for each groups, since it is not that many groups this will be
 # fine.
 Group.num_members = column_property(
     select([func.count(member_group.columns.member_id)])
     .where(Group.group_id == member_group.columns.group_id)
+    .scalar_subquery()
 )
 
 
@@ -139,7 +136,7 @@ class Span(Base):
     deleted_at = Column(DateTime)
     deletion_reason = Column(String(255))
     
-    member = relationship(Member)
+    member = relationship(Member, backref="spans")
     
     def __repr__(self):
         return f'Span(span_id={self.span_id}, type={self.type}, enddate={self.enddate})'
@@ -165,10 +162,14 @@ class Box(Base):
     # last nag date for that member.
     last_nag_at = Column(DateTime, nullable=False)
 
-    member = relationship('Member')
+    member = relationship(Member, backref="boxes")
     
     def __repr__(self):
         return (
             f'Box(id={self.id}, box_label_id={self.box_label_id}, member_id={self.member_id}'
             f', last_check_at={self.last_check_at}, last_nag_at={self.last_nag_at})'
         )
+
+
+# https://stackoverflow.com/questions/67149505/how-do-i-make-sqlalchemy-backref-work-without-creating-an-orm-object
+configure_mappers()

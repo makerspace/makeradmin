@@ -10,4 +10,5 @@ rollup /tmp/ts_output/history.js --file ../static/js/history.js --format iife -m
 rollup /tmp/ts_output/cartpage.js --file ../static/js/cartpage.js --format iife -m
 rollup /tmp/ts_output/member.js --file ../static/js/member.js --format iife -m
 rollup /tmp/ts_output/statistics.js --file ../static/js/statistics.js --format iife -m
+rollup /tmp/ts_output/courses.js --file ../static/js/courses.js --format iife -m
 rm -rf /tmp/ts_output

@@ -1,6 +1,7 @@
 from sqlalchemy import Column, Integer, String, DateTime, Text, text, func
 from sqlalchemy.ext.declarative import declarative_base
 from service.db import db_session
+from sqlalchemy.orm import configure_mappers
 
 
 Base = declarative_base()
@@ -59,3 +60,7 @@ class Login:
                                     "   WHERE ip = :ip AND NOT success AND date >= DATE_SUB(NOW(), INTERVAL 1 HOUR)",
                                     {'ip': ip}).fetchone()
         return count
+
+
+# https://stackoverflow.com/questions/67149505/how-do-i-make-sqlalchemy-backref-work-without-creating-an-orm-object
+configure_mappers()

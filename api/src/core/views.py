@@ -9,6 +9,7 @@ from service.error import BadRequest
 def login(grant_type=Arg(Enum('password')), username=Arg(str), password=Arg(str)):
     """ Login user with username and password, returns token. """
     assert grant_type
+    username = username.strip()
 
     return auth.login(request.remote_addr, request.user_agent.string, username, password)
 
@@ -22,6 +23,7 @@ def logout(token=None):
 @service.route("/oauth/request_password_reset", method=POST, permission=PUBLIC)
 def request_password_reset(user_identification: str=Arg(non_empty_str)):
     """ Send a reset password link to the users email. """
+    user_identification = user_identification.strip()
     return auth.request_password_reset(user_identification)
 
 

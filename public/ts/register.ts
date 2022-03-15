@@ -46,10 +46,10 @@ common.onGetAndDocumentLoaded("/webshop/register_page_data", (value: any) => {
     }
 
     [].forEach.call(document.querySelectorAll(".uk-radio"), (el: HTMLElement) => {
-        el.addEventListener("change", ev => {
+        el.addEventListener("change", () => {
             refresh();
         });
-        el.addEventListener("input", ev => {
+        el.addEventListener("input", () => {
             refresh();
         });
     });
@@ -72,10 +72,10 @@ common.onGetAndDocumentLoaded("/webshop/register_page_data", (value: any) => {
 
     validate_fields.forEach(field => {
         const el = document.querySelector<HTMLElement>("#" + field)!;
-        el.addEventListener("change", ev => {
+        el.addEventListener("change", () => {
             updatePaymentButton();
         });
-        el.addEventListener("input", ev => {
+        el.addEventListener("input", () => {
             updatePaymentButton();
         });
     });

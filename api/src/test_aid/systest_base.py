@@ -83,17 +83,20 @@ class ApiTest(SystestBase):
         return self.api.get(*args, **kwargs)
 
 
-def retry(timeout=SELENIUM_BASE_TIMEOUT, sleep=SLEEP, do_retry=None):
+def retry(timeout=SELENIUM_BASE_TIMEOUT, sleep=SLEEP, retry_exception=None, retry_result=None):
     def decorator(wrapped):
         @wraps(wrapped)
         def wrap(*args, **kwargs):
             start = time.perf_counter()
             while True:
                 try:
-                    return wrapped(*args, **kwargs)
+                    result = wrapped(*args, **kwargs)
+                    elapsed = time.perf_counter() - start
+                    if not retry_result or elapsed > timeout or not retry_result(result):
+                        return result
                 except Exception as e:
                     elapsed = time.perf_counter() - start
-                    if elapsed > timeout or not do_retry(e):
+                    if elapsed > timeout or not retry_exception(e):
                         raise
                     print(f"{wrapped.__qualname__} failed with the following error after {elapsed:02f}s:"
                           f" {e.__class__.__name__} {str(e)}",
@@ -140,12 +143,12 @@ class SeleniumTest(ApiTest):
                     w.write(repr(self.webdriver.get_log('browser')))
             except Exception as e:
                 print(f"failed to save screenshot: {str(e)}", file=sys.stderr)
-        
+      
         super().tearDown()
     
     @classmethod
     def tearDownClass(self):
-        if not KEEP_BROWSER:
+        if not KEEP_BROWSER and getattr(self, "webdriver"):
             self.webdriver.close()
         super().tearDownClass()
 
@@ -181,9 +184,9 @@ class SeleniumTest(ApiTest):
         else:
             raise Exception("missing parameter")
         
-        return retry(timeout=timeout, sleep=sleep, do_retry=lambda e: isinstance(e, NoSuchElementException))(get)()
+        return retry(timeout=timeout, sleep=sleep, retry_exception=lambda e: isinstance(e, NoSuchElementException))(get)()
 
-    def wait_for_elements(self, id=None, name=None, tag=None, css=None, xpath=None,
+    def wait_for_elements(self, id=None, name=None, tag=None, css=None, xpath=None, expected_count=None,
                           timeout=SELENIUM_BASE_TIMEOUT, sleep=SLEEP):
         if id:
             def get():
@@ -203,7 +206,11 @@ class SeleniumTest(ApiTest):
         else:
             raise Exception("missing parameter")
         
-        return retry(timeout=timeout, sleep=sleep, do_retry=lambda e: isinstance(e, NoSuchElementException))(get)()
+        return retry(
+            timeout=timeout, sleep=sleep,
+            retry_exception=lambda e: isinstance(e, NoSuchElementException),
+            retry_result=lambda r: len(r) != expected_count
+        )(get)()
 
     def browse_member_page(self):
         self.webdriver.get(f"{self.public_url}/member")

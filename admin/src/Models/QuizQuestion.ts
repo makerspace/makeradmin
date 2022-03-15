@@ -3,6 +3,7 @@ import Base from './Base';
 
 export default class QuizQuestion extends Base {
     id: number|null;
+    quiz_id: number;
     question: string;
     answer_description: string;
     created_at: string;
@@ -15,6 +16,7 @@ export default class QuizQuestion extends Base {
         attributes: {
             question: "",
             answer_description: "",
+            quiz_id: -1,
         },
     };
 

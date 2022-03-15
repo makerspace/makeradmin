@@ -5,6 +5,7 @@ import Collection from "../Models/Collection";
 import Member from "../Models/Member";
 import CollectionTable from "../Components/CollectionTable";
 import SearchBox from "../Components/SearchBox";
+import CollectionNavigation from "../Models/CollectionNavigation";
 
 const Row = props => {
     const {item, deleteItem} = props;
@@ -21,27 +22,13 @@ const Row = props => {
 };
 
 
-class MemberList extends React.Component {
+class MemberList extends CollectionNavigation {
 
     constructor(props) {
         super(props);
-        this.onSearch = this.onSearch.bind(this);
-
-        this.params = new URLSearchParams(this.props.location.search);
-        const search_term = this.params.get('search') || '';
-        this.collection = new Collection({type: Member, search: search_term});
-        this.state = {'search': search_term};
-    }
-
-    onSearch(term) {
-        this.setState({'search': term});
-        this.collection.updateSearch(term);
-        if (term === "") {
-            this.params.delete("search");
-        } else {
-            this.params.set("search", term);
-        }
-        this.props.history.replace(this.props.location.pathname + "?" + this.params.toString());
+        const {search, page} = this.state;
+        
+        this.collection = new Collection({type: Member, search, page});
     }
 
 
@@ -62,8 +49,8 @@ class MemberList extends React.Component {
                 <p className="uk-float-left">På denna sida ser du en lista på samtliga medlemmar.</p>
                 <Link to="/membership/members/add" className="uk-button uk-button-primary uk-float-right"><i className="uk-icon-plus-circle"/> Skapa ny medlem</Link>
 
-                <SearchBox handleChange={this.onSearch} />
-                <CollectionTable rowComponent={Row} collection={this.collection} columns={columns} />
+                <SearchBox handleChange={this.onSearch} value={this.state.search}/>
+                <CollectionTable rowComponent={Row} collection={this.collection} columns={columns} onPageNav={this.onPageNav} />
             </div>
         );
     }

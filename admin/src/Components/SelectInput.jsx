@@ -14,7 +14,11 @@ export default class SelectInput extends React.Component {
             value: null,
         };
         if (props.dataSource) {
-            get({url: props.dataSource}).then(data => this.setState({options: data.data}), () => null);
+            let options = [];
+            if (props.nullOption) {
+                options = [props.nullOption];
+            }
+            get({url: props.dataSource}).then(data => this.setState({options: options.concat(data.data)}), () => null);
         }
     }
 

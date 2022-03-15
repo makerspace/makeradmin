@@ -14,7 +14,7 @@ logger = getLogger('makeradmin')
 
 # This is the current global banner.
 # Set to an empty string ("") to disable.
-banner = "Please be aware that during the current corona restrictions key handouts and updates may happen less often. All courses are also cancelled. Read more <a href='https://wiki.makerspace.se/V%C3%A4lkommen_till_Stockholm_Makerspace'>here</a>."
+banner = ""
 
 sidebar_additional_classes = ""
 if banner:
@@ -59,6 +59,9 @@ def register_member():
 def purchase_history():
     return render_template("history.html")
 
+@shop.route("/member/courses")
+def courses():
+    return render_template("courses.html")
 
 @shop.route("/member/licenses")
 def licenses():
@@ -68,17 +71,6 @@ def licenses():
 @shop.route("/product/<product_id>")
 def product_view(product_id: int):
     return render_template("product.html", product_id=product_id)
-
-
-@shop.route("/product/<int:product_id>/edit")
-def product_edit(product_id: int):
-    return render_template("product_edit.html", product_id=product_id)
-
-
-@shop.route("/product/create")
-def product_create() -> str:
-    return render_template("product_edit.html", product_id=0)
-
 
 @shop.route("/receipt/<int:transaction_id>")
 def receipt(transaction_id: int):
@@ -103,10 +95,15 @@ def login(token):
     return render_template("login.html", token=token)
 
 
-@member.route("/quiz/")
-def quiz_main():
+@member.route("/quiz/<int:quiz_id>")
+def quiz_main(quiz_id: int):
+    # Note: quiz_id is parsed client side
     return render_template("quiz/quiz.html")
 
+
+@member.route("/quiz/")
+def quiz_backwards_compatibility():
+    return redirect(member.url("/quiz/1"))
 
 static_hash = os.environ["STATIC_PREFIX_HASH"]
 app = Flask(__name__, static_url_path=f"/static{static_hash}", static_folder="../static")

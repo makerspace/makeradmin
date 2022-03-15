@@ -1,12 +1,19 @@
 import * as common from "./common"
-import React from 'react'
-import ReactDOM from 'react-dom';
+import { Component, render } from 'preact';
+import { useState } from 'preact/hooks';
 import { login_via_single_use_link } from './login'
+import { ServerResponse } from "./common";
+import markdown from "markdown-it";
 
 declare var UIkit: any;
 
+const markdown_engine = markdown({
+    linkify: true,
+    html: true,
+});
+
 const Login = ({ redirect }: { redirect: string }) => {
-    let [tag, setTag] = React.useState("");
+    let [tag, setTag] = useState("");
 
     return (
         <div className="uk-width-medium">
@@ -19,7 +26,7 @@ const Login = ({ redirect }: { redirect: string }) => {
                 }
             }}>
                 <div className="uk-form-row" style={{ margin: "16px 0" }}>
-                    <input autoFocus className="uk-form-large uk-width-1-1" type="text" placeholder="Email/Member number" value={tag} onChange={(v) => setTag(v.target.value)} />
+                    <input autoFocus className="uk-form-large uk-width-1-1" type="text" placeholder="Email/Member number" value={tag} onChange={(v) => setTag(v.currentTarget.value)} />
                 </div>
 
                 <div className="uk-form-row" style={{ margin: "16px 0" }}>
@@ -45,6 +52,13 @@ interface Question {
     }[]
 }
 
+export interface Quiz {
+    id: number,
+    name: string,
+    description: string,
+    deleted_at: string | null,
+}
+
 interface State {
     question: Question | null;
     state: "intro" | "started" | "done",
@@ -54,9 +68,14 @@ interface State {
         correct: boolean,
         selected: number,
     },
+    quiz: Quiz | null,
 }
 
-class QuizManager extends React.Component<{}, State> {
+interface QuizManagerProps {
+    quiz_id: number;
+}
+
+class QuizManager extends Component<QuizManagerProps, State> {
     page: HTMLDivElement = document.querySelector<HTMLDivElement>(".quizpage")!;
 
     constructor(props: any) {
@@ -67,11 +86,18 @@ class QuizManager extends React.Component<{}, State> {
             answer: null,
             loginState: "pending",
             state: "intro",
+            quiz: null,
         }
     }
 
     componentDidMount() {
         this.checkLogin();
+        this.loadQuiz();
+    }
+
+    async loadQuiz() {
+        const quiz: ServerResponse<Quiz> = await common.ajax("GET", `${window.apiBasePath}/quiz/quiz/${this.props.quiz_id}`);
+        this.setState({ quiz: quiz.data });
     }
 
     async checkLogin() {
@@ -88,7 +114,7 @@ class QuizManager extends React.Component<{}, State> {
     async start() {
         this.setState({ state: "started" });
         try {
-            const data = await common.ajax("GET", `${window.apiBasePath}/quiz/next_question`);
+            const data: ServerResponse<Question> = await common.ajax("GET", `${window.apiBasePath}/quiz/quiz/${this.state.quiz!.id}/next_question`);
             if (data.data == null) {
                 this.setState({ state: "done" });
             } else {
@@ -102,6 +128,21 @@ class QuizManager extends React.Component<{}, State> {
     }
 
     render() {
+        if (this.state.quiz == null) {
+            return (
+                <div id="content" className="quizpage">
+                    <h1>...</h1>
+                </div>
+            );
+        } else if (this.state.quiz.deleted_at !== null) {
+            return (
+                <div id="content" className="quizpage">
+                    <h1>{this.state.quiz.name}</h1>
+                    <p>This quiz has been deleted :(</p>
+                </div>
+            );
+        }
+
         if (this.state.state == "done") {
             return <div id="content" className="quizpage quiz-complete">
                 <h2>Congratulations!<br />You have correctly answered all questions in the quiz!</h2>
@@ -118,14 +159,8 @@ class QuizManager extends React.Component<{}, State> {
         } else if (this.state.state == "intro" || this.state.question == null) {
             return (
                 <div id="content" className="quizpage">
-                    <h1>Stockholm Makerspace Get Started Quiz!</h1>
-                    <p>Hello and welcome as a member of Stockholm Makerspace! We are sure you are excited to get started on a project at the makerspace!</p>
-                    <p>To help you get started we have put together this quiz as a learning tool. It will go through many common questions you might have
-                        and also many things that you might not have thought about but that are important for you to know in order to make Stockholm Makerspace work well.</p>
-                    <p>Note that this is not intended as a test of your knowledge, it is a way for new members to learn how things work without having to read through a long and boring document. Don't worry if you pick an incorrect answer, the questions you answered incorrectly
-                    will repeat until you have answered all of them correctly and are thus familiar with the basics of how things work at Stockholm Makerspace.
-                    Completing this quiz is a mandatory part of becoming a member. You will receive nagging emails every few days or so until you complete the quiz.
-                    </p>
+                    <h1>{this.state.quiz.name}</h1>
+                    <span dangerouslySetInnerHTML={{__html: markdown_engine.render(this.state.quiz.description) }}></span>
                     <p>The quiz will save your progress automatically so you can close this window and return here at any time to continue with the quiz.</p>
                     {this.state.loginState == "logged out"
                         ?
@@ -135,19 +170,23 @@ class QuizManager extends React.Component<{}, State> {
                                 <Login redirect={window.location.href} />
                             </div>
                         </>
-                        :
-                        <>
-                            <p>Alright, are you ready to get started?</p>
-                            <a className="uk-button uk-button-primary quiz-button-start" onClick={() => this.start()}>Start!</a>
-                        </>
+                        : (
+                            this.state.loginState == "pending"
+                            ? <p>Checking if you are logged in...</p>
+                            :
+                            <>
+                                <p>Alright, are you ready to get started?</p>
+                                <a className="uk-button uk-button-primary quiz-button-start" onClick={() => this.start()}>Start!</a>
+                            </>
+                        )
                     }
                 </div>
             );
         } else {
             return (
                 <div id="content" className="quizpage">
-                    <h1>Stockholm Makerspace Get Started Quiz!</h1>
-                    <div className="question-text">{this.state.question.question}</div>
+                    <h1>{this.state.quiz.name}</h1>
+                    <div className="question-text" dangerouslySetInnerHTML={{__html: markdown_engine.render(this.state.question.question) }}></div>
                     <ul className="question-options">
                         {
                             this.state.question.options.map(option => (
@@ -174,11 +213,7 @@ class QuizManager extends React.Component<{}, State> {
                                     // : <div className="question-answer-info question-answer-info-incorrect">Du svarade tyvärr fel. Men oroa dig inte, den här frågan kommer komma igen senare så att du kan svara rätt nu när du vet vad rätt svar är.</div>
                                     : <div className="question-answer-info question-answer-info-incorrect">Unfortunately you answered incorrectly. But don't worry, this question will repeat later so you will have an opportunity to answer it correctly now that you know what the correct answer is.</div>
                                 }
-                                <div className="question-answer-description">
-                                    {
-                                        // Split description into paragraphs. Ensure that trailing whitespace on any line doesn't matter.
-                                        this.state.question.answer_description!.split("\n").map(x => x.trim()).join("\n").split("\n\n").map(x => <p>{x}</p>)
-                                    }
+                                <div className="question-answer-description" dangerouslySetInnerHTML={{__html: markdown_engine.render(this.state.question.answer_description!) }}>
                                 </div>
                                 <a className="uk-button uk-button-primary question-submit" onClick={() => this.start()}>Next Question</a>
                             </>
@@ -206,10 +241,17 @@ class QuizManager extends React.Component<{}, State> {
 }
 
 common.documentLoaded().then(() => {
-    ReactDOM.render(
-        <React.StrictMode>
-            <QuizManager />
-        </React.StrictMode>,
-        document.getElementById('root')
-    );
+    const root = document.getElementById('root');
+    if (root != null) {
+        const splits = document.location.href.split("/");
+        let quiz_id = parseInt(splits[splits.length-1]);
+        if (isNaN(quiz_id)) {
+            // Backwards compatibility in case someone has an old link
+            quiz_id = 1;
+        }
+        render(
+            <QuizManager quiz_id={quiz_id}/>,
+            root
+        );
+    }
 });

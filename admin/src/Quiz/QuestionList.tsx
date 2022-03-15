@@ -4,16 +4,23 @@ import Collection from "../Models/Collection";
 import CollectionTable from "../Components/CollectionTable";
 import QuizQuestion from '../Models/QuizQuestion';
 
+interface QuestionListProps {
+    quiz_id: number
+}
 
-class QuestionList extends React.Component {
-    collection = new Collection({type: QuizQuestion});
+class QuestionList extends React.Component<QuestionListProps> {
+    collection: Collection
+
+    constructor(props: QuestionListProps) {
+        super(props);
+        this.collection = new Collection({type: QuizQuestion, url: `/quiz/quiz/${props.quiz_id}/questions`});
+    }
     
     render() {
         return (
             <div className="uk-margin-top">
                 <h2>Quizfrågor</h2>
-                <p className="uk-float-left">På denna sida ser du en lista på samtliga frågor som finns i quizzet.</p>
-                <Link className="uk-button uk-button-primary uk-margin-bottom uk-float-right" to="/quiz/question/add"><i className="uk-icon-plus-circle"/> Skapa ny fråga</Link>
+                <Link className="uk-button uk-button-primary uk-margin-bottom uk-float-right" to={`/quiz/${this.props.quiz_id}/question/add`}><i className="uk-icon-plus-circle"/> Skapa ny fråga</Link>
                 <CollectionTable
                     className="uk-margin-top"
                     collection={this.collection}
