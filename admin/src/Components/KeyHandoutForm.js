@@ -2,7 +2,27 @@ import React from 'react';
 import TextInput from "./TextInput";
 import {withRouter} from "react-router";
 import Key from "../Models/Key"
+import Span from "../Models/Span"
+import {filterCategory} from '../Models/Span';
 import Collection from "../Models/Collection";
+import {ADD_LABACCESS_DAYS} from "../Models/ProductAction";
+import {utcToday, parseUtcDate} from "../utils";
+
+
+function last_span_enddate(spans, category) {
+    const last_span = filterCategory(spans, category).splice(-1)[0];
+    if (last_span) {
+        return last_span.enddate;
+    }
+    return null;
+}
+
+function create_dateview(date, placeholder="") {
+    const style = {
+        "color": parseUtcDate(date) < utcToday() ? "red" : "black"
+    };
+    return <input value={date || ""} placeholder={placeholder} type="text" size={date ? 10 : placeholder.length} readOnly={true} style={style}></input>;
+}
 
 
 class KeyHandoutForm extends React.Component {
@@ -16,10 +36,24 @@ class KeyHandoutForm extends React.Component {
             can_save_key: false,
             keys: [],
             has_signed: false,
+            pending_labaccess_days: "?",
+            labaccess_enddate: "",
+            membership_enddate: "",
+            special_enddate: "",
         };
+        this.unsubscribe = [];
         this.keyCollection = new Collection({type: Key, url: `/membership/member/${member.id}/keys`, idListName: 'keys', pageSize: 0});
+        this.spanCollection = new Collection({type: Span, url: `/membership/member/${member.id}/spans`, pageSize: 0});
         this.signedChanged = this.signedChanged.bind(this);
         this.onSave = this.onSave.bind(this);
+        get({url: `/membership/member/${member.id}/pending_actions`}).then((r) => {
+            const sum_pending_labaccess_days = r.data.reduce((acc, value) => {
+            if (value.action.action === ADD_LABACCESS_DAYS)
+                return acc + value.action.value;
+            return acc;
+            }, 0);
+            this.setState({pending_labaccess_days: sum_pending_labaccess_days});
+        });
     }
 
     onSave() {
@@ -45,21 +79,30 @@ class KeyHandoutForm extends React.Component {
     componentDidMount() {
         const {member} = this.props;
         member.initialization(() => this.setState({has_signed: (member.civicregno && member.civicregno.length > 0) ? true : false}));
-        this.unsubscribe_member = member.subscribe(() => this.setState({can_save_member: member.canSave()}));
-        this.unsubscribe_keys = this.keyCollection.subscribe((keys) => this.setState({keys: keys.items}));
+        this.unsubscribe.push(member.subscribe(() => this.setState({can_save_member: member.canSave()})));
+        this.unsubscribe.push(this.keyCollection.subscribe((keys) => this.setState({keys: keys.items})));
         const key = this.key;
-        this.unsubscribe_key = key.subscribe(() => this.setState({can_save_key: key.canSave()}));
+        this.unsubscribe.push(key.subscribe(() => this.setState({can_save_key: key.canSave()})));
+        this.unsubscribe.push(this.spanCollection.subscribe(({items}) => {
+            this.setState({
+                "labaccess_enddate": last_span_enddate(items, "labaccess"),
+                "membership_enddate": last_span_enddate(items, "membership"),
+                "special_enddate": last_span_enddate(items, "special_labaccess"),
+            });
+        }));
     }
     
     componentWillUnmount() {
-        this.unsubscribe_member();
-        this.unsubscribe_keys();
-        this.unsubscribe_key();
+        this.unsubscribe.forEach(u => u());
     }
 
     render() {
-        const {member, onDelete} = this.props;
-        const {can_save_member, can_save_key, keys, has_signed} = this.state;
+        const {member} = this.props;
+        const {can_save_member, can_save_key, keys, has_signed, labaccess_enddate, membership_enddate, special_enddate, pending_labaccess_days} = this.state;
+
+        console.log("labaccess: " + labaccess_enddate);
+        console.log("membership: " + membership_enddate);
+        console.log("special: " + special_enddate);
 
         // Show different content based on if the user has a key or not
         let key_paragraph;
@@ -106,13 +149,29 @@ class KeyHandoutForm extends React.Component {
                 </div>
                 <fieldset>
                     <TextInput model={member} name="email" tabIndex="1" type="email" title="Epost" />
-                    <TextInput model={member} name="phone" tabIndex="1" type="phone" title="Telefonnummer" />
+                    <TextInput model={member} name="phone" tabIndex="1" type="tel" title="Telefonnummer" />
+                    <TextInput model={member} name="address_zipcode" tabIndex="1" type="number" title="Postnummer" />
+                    
                 </fieldset>
             </div>
 
             <div className="uk-section">
                 <div className="uk-container">
-                    <h2>4. Kontrollera nyckel </h2>
+                    <h2>4. Kontrollera medlemskap </h2>
+                    Kontrollera om medlemmen har köpt medlemskap och labbmedlemskap.
+                </div>
+
+                <fieldset>
+                    <p>Labaccess tar slut: {create_dateview(labaccess_enddate, "Ingen tidigare labaccess finns registrerad")} {pending_labaccess_days ? <span> (<b>{pending_labaccess_days}</b> dagar labaccess kommer läggas till vid en nyckelsynkronisering)</span> : ""}</p>
+                    <p>Medlemskap tar slut: {create_dateview(membership_enddate, "Inget tidigare medlemskap finns registrerat")}</p>
+                    {special_enddate ? <p>Speciell labaccess tar slut: {create_dateview(special_enddate)}</p> : null}
+                </fieldset>
+
+            </div>
+
+            <div className="uk-section">
+                <div className="uk-container">
+                    <h2>5. Kontrollera nyckel </h2>
                 </div>
                 {key_paragraph}
             </div>
