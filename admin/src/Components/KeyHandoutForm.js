@@ -17,11 +17,32 @@ function last_span_enddate(spans, category) {
     return null;
 }
 
-function create_dateview(date, placeholder="") {
-    const style = {
-        "color": parseUtcDate(date) < utcToday() ? "red" : "black"
-    };
-    return <input value={date || ""} placeholder={placeholder} type="text" size={date ? 10 : placeholder.length} readOnly={true} style={style}></input>;
+function DateView(props) {
+    const is_valid = props.date && parseUtcDate(props.date) < utcToday();
+    let status, text;
+
+    if (!props.date) {
+        status = <div className="uk-panel-badge uk-badge uk-badge-warning">Saknas</div>;
+        text = <p style={{"color": "gray", "fontStyle": "italic"}}>{props.placeholder}</p>;
+    } else if (!is_valid) {
+        status = <div className="uk-panel-badge uk-badge uk-badge-danger">Utgånget</div>;
+        text = <p>Giltigt till: <span style={{"color": "red", "fontStyle": "italic"}}>{props.date}</span></p>;
+    } else {
+        status = <div className="uk-panel-badge uk-badge uk-badge-success">OK</div>;
+        text = <p>Giltigt till: {props.date}</p>;
+    }
+
+    // Override if there are pending days to be synchronized
+    if (props.pending || is_valid) {
+        status = <div className="uk-panel-badge uk-badge uk-badge-success">OK</div>;
+    }
+
+    return <div className="uk-panel uk-panel-box">
+        <h4>{props.title}</h4>
+        {status}
+        {text}
+        { props.pending ? <p><span>(<b>{props.pending}</b> dagar kommer läggas till vid en nyckelsynkronisering)</span></p> : null }
+    </div>
 }
 
 
@@ -149,9 +170,10 @@ class KeyHandoutForm extends React.Component {
                 </div>
                 <fieldset>
                     <TextInput model={member} name="email" tabIndex="1" type="email" title="Epost" />
-                    <TextInput model={member} name="phone" tabIndex="1" type="tel" title="Telefonnummer" />
-                    <TextInput model={member} name="address_zipcode" tabIndex="1" type="number" title="Postnummer" />
-                    
+                    <div className="uk-grid">
+                        <div className="uk-width-1-2"><TextInput model={member} name="phone" tabIndex="1" type="tel" title="Telefonnummer" /></div>
+                        <div className="uk-width-1-2"><TextInput model={member} name="address_zipcode" tabIndex="1" type="number" title="Postnummer" /></div>
+                    </div>
                 </fieldset>
             </div>
 
@@ -162,9 +184,11 @@ class KeyHandoutForm extends React.Component {
                 </div>
 
                 <fieldset>
-                    <p>Labaccess tar slut: {create_dateview(labaccess_enddate, "Ingen tidigare labaccess finns registrerad")} {pending_labaccess_days ? <span> (<b>{pending_labaccess_days}</b> dagar labaccess kommer läggas till vid en nyckelsynkronisering)</span> : ""}</p>
-                    <p>Medlemskap tar slut: {create_dateview(membership_enddate, "Inget tidigare medlemskap finns registrerat")}</p>
-                    {special_enddate ? <p>Speciell labaccess tar slut: {create_dateview(special_enddate)}</p> : null}
+                        <DateView title="Föreningsmedlemskap" date={membership_enddate} placeholder="Inget tidigare medlemskap finns registrerat"/>
+                        <DateView title="Labaccess" date={labaccess_enddate} placeholder="Ingen tidigare labaccess finns registrerad" pending={pending_labaccess_days}/>
+                        { special_enddate ? 
+                            <DateView title="Specialaccess" date={special_enddate}/> : null
+                        }
                 </fieldset>
 
             </div>
@@ -191,8 +215,8 @@ class KeyHandoutForm extends React.Component {
                     </div>
                     <br/>
                     <fieldset>
-                        <input className="uk-checkbox" type="checkbox" tabIndex="1" checked={has_signed} onChange={(e) => this.signedChanged(e.target.checked)}/>
-                        <label> Signerat labbmedlemsavtal mottaget.</label> 
+                        <input id="signed" className="uk-checkbox" type="checkbox" tabIndex="1" checked={has_signed} onChange={(e) => this.signedChanged(e.target.checked)}/>
+                        <label htmlFor="signed"> Signerat labbmedlemsavtal mottaget.</label> 
                     </fieldset>
                 </div>
 
