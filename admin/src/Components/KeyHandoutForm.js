@@ -121,10 +121,6 @@ class KeyHandoutForm extends React.Component {
         const {member} = this.props;
         const {can_save_member, can_save_key, keys, has_signed, labaccess_enddate, membership_enddate, special_enddate, pending_labaccess_days} = this.state;
 
-        console.log("labaccess: " + labaccess_enddate);
-        console.log("membership: " + membership_enddate);
-        console.log("special: " + special_enddate);
-
         // Show different content based on if the user has a key or not
         let key_paragraph;
         if (keys.length === 0) {
