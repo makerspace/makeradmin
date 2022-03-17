@@ -124,79 +124,52 @@ class KeyHandoutForm extends React.Component {
         // Show different content based on if the user has a key or not
         let key_paragraph;
         if (keys.length === 0) {
-            key_paragraph = <>
-                    <div className="uk-container">
-                        Skapa en ny nyckel genom att läsa in den i fältet nedan och sedan spara.
-                        <TextInput model={this.key} tabIndex="1" name="tagid" title="RFID" placeholder="Använd en RFID-läsare för att läsa av det unika numret på nyckeln" />
-                    </div>
-                </>;
+            key_paragraph = <div className="uk-section">
+                    Skapa en ny nyckel genom att läsa in den i fältet nedan och sedan spara.
+                    <TextInput model={this.key} tabIndex="1" name="tagid" title="RFID" placeholder="Använd en RFID-läsare för att läsa av det unika numret på nyckeln" />
+                </div>;
         } else if (keys.length === 1) {
-            key_paragraph = <>
-                    <div className="uk-container">
-                        Användaren har en nyckel registrerad (med id=<span style={{fontFamily: "monospace"}}>{keys[0].tagid}</span>). Kontrollera om hen vet om det och har kvar nyckeln. Gå annars till <a href={"/membership/members/" + member.id + "/keys"}>Nycklar</a> och ta bort den gamla nyckeln, och lägg till en ny.
-                    </div>
-                </>;
+            key_paragraph = <p>
+                    Användaren har en nyckel registrerad (med id=<span style={{fontFamily: "monospace"}}>{keys[0].tagid}</span>). Kontrollera om hen vet om det och har kvar nyckeln. Gå annars till <a href={"/membership/members/" + member.id + "/keys"}>Nycklar</a> och ta bort den gamla nyckeln, och lägg till en ny.
+                </p>;
         } else {
-            key_paragraph = <>
-                <div className="uk-container">
-                    <div className="uk-container">
-                        Användaren har flera nycklar registrerade! Gå till <a href={"/membership/members/" + member.id + "/keys"}>Nycklar</a> och ta bort alla nycklar utom en.
-                    </div>
-                </div>
-            </>;
+            key_paragraph = <p>
+                    Användaren har flera nycklar registrerade! Gå till <a href={"/membership/members/" + member.id + "/keys"}>Nycklar</a> och ta bort alla nycklar utom en.
+                </p>;
         }
 
         // Section 2 and onward shall only be visible after lab contract has been signed
         const section2andon = <>
+            <h2>2. Kontrollera legitimation</h2>
+            <p>Kontrollera personens legitimation och för in personnummret i fältet nedan. Nyckel kan endast lämnas ut till personen som skall bli medlem.</p>
             <div className="uk-section">
-                <div className="uk-container">
-                    <h2>2. Kontrollera legitimation</h2>
-                    Kontrollera personens legitimation och för in personnummret i fältet nedan. Nyckel kan endast lämnas ut till personen som skall bli medlem.
-                </div>
-
-                <fieldset>
-                    <TextInput model={member} tabIndex="1" name="civicregno" title="Personnummer" placeholder="YYYYMMDD-XXXX" />
-                </fieldset>
+                <TextInput model={member} tabIndex="1" name="civicregno" title="Personnummer" placeholder="YYYYMMDD-XXXX" />
             </div>
 
             <div className="uk-section">
-                <div className="uk-container">
-                    <h2>3. Övrig information</h2>
-                    Kontrollera <b>epost</b> så personen kommer åt kontot, och <b>telefon</b> så vi kan nå hen när det är mer brådskande.
+                <h2>3. Övrig information</h2>
+                <p>Kontrollera <b>epost</b> så personen kommer åt kontot, och <b>telefon</b> så vi kan nå hen när det är mer brådskande.</p>
+                <div className="uk-grid">
+                    <div className="uk-width-1-1"><TextInput model={member} name="email" tabIndex="1" type="email" title="Epost" /></div>
+                    <div className="uk-width-1-2"><TextInput model={member} name="phone" tabIndex="1" type="tel" title="Telefonnummer" /></div>
+                    <div className="uk-width-1-2"><TextInput model={member} name="address_zipcode" tabIndex="1" type="number" title="Postnummer" /></div>
                 </div>
-                <fieldset>
-                    <TextInput model={member} name="email" tabIndex="1" type="email" title="Epost" />
-                    <div className="uk-grid">
-                        <div className="uk-width-1-2"><TextInput model={member} name="phone" tabIndex="1" type="tel" title="Telefonnummer" /></div>
-                        <div className="uk-width-1-2"><TextInput model={member} name="address_zipcode" tabIndex="1" type="number" title="Postnummer" /></div>
-                    </div>
-                </fieldset>
             </div>
+
+            <h2>4. Kontrollera medlemskap </h2>
+            <p>Kontrollera om medlemmen har köpt medlemskap och labbmedlemskap.</p>
+            <div className="uk-section">
+                <DateView title="Föreningsmedlemskap" date={membership_enddate} placeholder="Inget tidigare medlemskap finns registrerat"/>
+                <DateView title="Labaccess" date={labaccess_enddate} placeholder="Ingen tidigare labaccess finns registrerad" pending={pending_labaccess_days}/>
+                { special_enddate ? 
+                    <DateView title="Specialaccess" date={special_enddate}/> : null
+                }
+            </div>
+
+            <h2>5. Kontrollera nyckel </h2>
+            {key_paragraph}
 
             <div className="uk-section">
-                <div className="uk-container">
-                    <h2>4. Kontrollera medlemskap </h2>
-                    Kontrollera om medlemmen har köpt medlemskap och labbmedlemskap.
-                </div>
-
-                <fieldset>
-                        <DateView title="Föreningsmedlemskap" date={membership_enddate} placeholder="Inget tidigare medlemskap finns registrerat"/>
-                        <DateView title="Labaccess" date={labaccess_enddate} placeholder="Ingen tidigare labaccess finns registrerad" pending={pending_labaccess_days}/>
-                        { special_enddate ? 
-                            <DateView title="Specialaccess" date={special_enddate}/> : null
-                        }
-                </fieldset>
-
-            </div>
-
-            <div className="uk-section">
-                <div className="uk-container">
-                    <h2>5. Kontrollera nyckel </h2>
-                </div>
-                {key_paragraph}
-            </div>
-
-            <div className="uk-container">
                 <button className="uk-button uk-button-success uk-float-right" tabIndex="1" disabled={!can_save_member && !can_save_key}><i className="uk-icon-save"/> Spara</button>
             </div>
         </>;
@@ -204,16 +177,11 @@ class KeyHandoutForm extends React.Component {
         return (
         <div className="meep">
             <form className="uk-form" onSubmit={(e) => {e.preventDefault(); this.onSave(); return false;}}>
+                <h2>1. Ta emot signerat labbmedlemsavtal</h2>
+                <p>Kontrollera att labbmedlemsavtalet är signerat och säkerställ att rätt medlemsnummer står väl synligt på labbmedlemsavtalet.</p>
                 <div className="uk-section">
-                    <div className="uk-container">
-                        <h2>1. Ta emot signerat labbmedlemsavtal</h2>
-                        Kontrollera att labbmedlemsavtalet är signerat och säkerställ att rätt medlemsnummer står väl synligt på labbmedlemsavtalet.
-                    </div>
-                    <br/>
-                    <fieldset>
-                        <input id="signed" className="uk-checkbox" type="checkbox" tabIndex="1" checked={has_signed} onChange={(e) => this.signedChanged(e.target.checked)}/>
-                        <label htmlFor="signed"> Signerat labbmedlemsavtal mottaget.</label> 
-                    </fieldset>
+                    <input id="signed" className="uk-checkbox" type="checkbox" tabIndex="1" checked={has_signed} onChange={(e) => this.signedChanged(e.target.checked)}/>
+                    <label htmlFor="signed"> Signerat labbmedlemsavtal mottaget.</label> 
                 </div>
 
                 {has_signed ? section2andon : ""}
