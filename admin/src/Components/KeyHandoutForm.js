@@ -126,7 +126,7 @@ class KeyHandoutForm extends React.Component {
         if (keys.length === 0) {
             key_paragraph = <div>
                     Skapa en ny nyckel genom att läsa in den i fältet nedan och sedan spara.
-                    <TextInput model={this.key} tabIndex="1" name="tagid" title="RFID" placeholder="Använd en RFID-läsare för att läsa av det unika numret på nyckeln" />
+                    <TextInput model={this.key} icon="tags" tabIndex="1" name="tagid" title="RFID" placeholder="Använd en RFID-läsare för att läsa av det unika numret på nyckeln" />
                 </div>;
         } else if (keys.length === 1) {
             key_paragraph = <p>
@@ -144,7 +144,7 @@ class KeyHandoutForm extends React.Component {
                 <h2>2. Kontrollera legitimation</h2>
                 <p>Kontrollera personens legitimation och för in personnummret i fältet nedan. Nyckel kan endast lämnas ut till personen som skall bli medlem.</p>
                 <div>
-                    <TextInput model={member} tabIndex="1" name="civicregno" title="Personnummer" placeholder="YYYYMMDD-XXXX" />
+                    <TextInput model={member} icon="birthday-cake" tabIndex="1" name="civicregno" title="Personnummer" placeholder="YYYYMMDD-XXXX" />
                 </div>
             </div>
 
@@ -152,9 +152,9 @@ class KeyHandoutForm extends React.Component {
                 <h2>3. Övrig information</h2>
                 <p>Kontrollera <b>epost</b> så personen kommer åt kontot, och <b>telefon</b> så vi kan nå hen när det är mer brådskande.</p>
                 <div className="uk-grid">
-                    <div className="uk-width-1-1"><TextInput model={member} name="email" tabIndex="1" type="email" title="Epost" /></div>
-                    <div className="uk-width-1-2"><TextInput model={member} name="phone" tabIndex="1" type="tel" title="Telefonnummer" /></div>
-                    <div className="uk-width-1-2"><TextInput model={member} name="address_zipcode" tabIndex="1" type="number" title="Postnummer" /></div>
+                    <div className="uk-width-1-1"><TextInput model={member} icon="at" name="email" tabIndex="1" type="email" title="Epost" /></div>
+                    <div className="uk-width-1-2"><TextInput model={member} icon="phone" name="phone" tabIndex="1" type="tel" title="Telefonnummer" /></div>
+                    <div className="uk-width-1-2"><TextInput model={member} icon="home" name="address_zipcode" tabIndex="1" type="number" title="Postnummer" /></div>
                 </div>
             </div>
 

@@ -347,6 +347,10 @@ tr.toggle pre {
 	margin: 0;
 }
 
+.meep .uk-form-controls > .uk-form-icon {
+	width: 100%;
+}
+
 /* MultiAccess stuff*/
 .multiaccess h4
 {
