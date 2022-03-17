@@ -5,12 +5,12 @@ import { Link, NavLink } from 'react-router-dom';
 
 
 export const NavItem = withRouter(props => {
-    const { location, icon, text, target } = props;
+    const { location, icon, to } = props;
 
     return (
-        <li className={location.pathname.indexOf(target) >= 0 ? "uk-active" : ""}>
-            <NavLink to={target}>
-                {icon ? <><i className={"uk-icon-" + icon} />&nbsp;</> : null }<span>{text}</span>
+        <li className={location.pathname.indexOf(to) >= 0 ? "uk-active" : ""}>
+            <NavLink to={to}>
+                {icon ? <><i className={"uk-icon-" + icon} />&nbsp;</> : null }<span>{props.children}</span>
             </NavLink>
         </li>
     );
@@ -22,7 +22,7 @@ export const Nav = ({ nav: { brand, items } }) => (
         <div className="uk-container uk-container-center">
             <Link to="/" className="uk-navbar-brand">{brand}</Link>
             <ul className="uk-navbar-nav uk-navbar-attached">
-                {items.map((item, i) => <NavItem target={item.target} text={item.text} icon={item.icon} key={i} />)}
+                {items.map((item, i) => <NavItem to={item.target} icon={item.icon} key={i}>{item.text}</NavItem>)}
             </ul>
         </div>
     </nav>
@@ -50,7 +50,7 @@ export const SideNav = withRouter(({ nav, location }) => {
                         return (<li key={i} className="uk-nav-header">{item.text}</li>);
                     }
 
-                    return (<NavItem key={i} target={item.target} text={item.text} icon={item.icon} activeItem={activeItem} />);
+                    return (<NavItem key={i} to={item.target} icon={item.icon} activeItem={activeItem}>{item.text}</NavItem>);
                 })}
             </ul>
         </div>
