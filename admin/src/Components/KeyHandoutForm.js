@@ -187,8 +187,10 @@ class KeyHandoutForm extends React.Component {
                     <h2>1. Ta emot signerat labbmedlemsavtal</h2>
                     <p>Kontrollera att labbmedlemsavtalet är signerat och säkerställ att rätt medlemsnummer står väl synligt på labbmedlemsavtalet.</p>
                     <div>
-                        <input id="signed" className="uk-checkbox" type="checkbox" tabIndex="1" checked={has_signed} onChange={(e) => this.signedChanged(e.target.checked)}/>
-                        <label htmlFor="signed"> Signerat labbmedlemsavtal mottaget.</label> 
+                        <label htmlFor="signed"> 
+                            <input id="signed" style={{"verticalAlign": "middle"}} className="uk-checkbox" type="checkbox" tabIndex="1" checked={has_signed} onChange={(e) => this.signedChanged(e.target.checked)}/> &nbsp;
+                            Signerat labbmedlemsavtal mottaget.
+                        </label> 
                     </div>
                 </div>
 
