@@ -82,8 +82,7 @@ html, body, #main {
 	width: 100%;
 }
 
-.meep .uk-form input[type=text],
-.meep .uk-form input[type=date],
+.meep .uk-form input,
 .meep .uk-form textarea {
 	border: none;
 	border-radius: 0;
@@ -109,11 +108,6 @@ html, body, #main {
 	border: 0;
 }
 */
-
-.uk-form-row.civicregno,
-.uk-form-row.address_street {
-	margin-top: 5px !important;
-}
 
 .meep .uk-form-row label {
 	font-size: 11px;
@@ -236,11 +230,6 @@ html, body, #main {
 	width: 342px;
 }
 
-.uk-form-row.address_zipcode,
-.uk-form-row.address_city {
-	margin-top: 5px !important;
-}
-
 .uk-form-row.address_city + div {
 	clear: both;
 }
@@ -350,6 +339,14 @@ tr.toggle pre {
 	margin: 5px 0 !important;
 }
 
+.meep .uk-section {
+	margin-bottom: 3em;
+}
+
+.meep p {
+	margin: 0;
+}
+
 /* MultiAccess stuff*/
 .multiaccess h4
 {
@@ -357,7 +354,7 @@ tr.toggle pre {
 	font-weight: bold;
 }
 
-.multiaccess h3, h4, ul, p {
+.multiaccess h3, .multiaccess h4, .multiaccess ul, .multiaccess p {
 	margin: 0;
 }
 

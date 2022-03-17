@@ -38,7 +38,7 @@ function DateView(props) {
     }
 
     return <div className="uk-panel uk-panel-box">
-        <h4>{props.title}</h4>
+        <p style={{"fontSize": "1.2em"}}><b>{props.title}</b></p>
         {status}
         {text}
         { props.pending ? <p><span>(<b>{props.pending}</b> dagar kommer läggas till vid en nyckelsynkronisering)</span></p> : null }
@@ -124,7 +124,7 @@ class KeyHandoutForm extends React.Component {
         // Show different content based on if the user has a key or not
         let key_paragraph;
         if (keys.length === 0) {
-            key_paragraph = <div className="uk-section">
+            key_paragraph = <div>
                     Skapa en ny nyckel genom att läsa in den i fältet nedan och sedan spara.
                     <TextInput model={this.key} tabIndex="1" name="tagid" title="RFID" placeholder="Använd en RFID-läsare för att läsa av det unika numret på nyckeln" />
                 </div>;
@@ -140,10 +140,12 @@ class KeyHandoutForm extends React.Component {
 
         // Section 2 and onward shall only be visible after lab contract has been signed
         const section2andon = <>
-            <h2>2. Kontrollera legitimation</h2>
-            <p>Kontrollera personens legitimation och för in personnummret i fältet nedan. Nyckel kan endast lämnas ut till personen som skall bli medlem.</p>
             <div className="uk-section">
-                <TextInput model={member} tabIndex="1" name="civicregno" title="Personnummer" placeholder="YYYYMMDD-XXXX" />
+                <h2>2. Kontrollera legitimation</h2>
+                <p>Kontrollera personens legitimation och för in personnummret i fältet nedan. Nyckel kan endast lämnas ut till personen som skall bli medlem.</p>
+                <div>
+                    <TextInput model={member} tabIndex="1" name="civicregno" title="Personnummer" placeholder="YYYYMMDD-XXXX" />
+                </div>
             </div>
 
             <div className="uk-section">
@@ -156,20 +158,24 @@ class KeyHandoutForm extends React.Component {
                 </div>
             </div>
 
-            <h2>4. Kontrollera medlemskap </h2>
-            <p>Kontrollera om medlemmen har köpt medlemskap och labbmedlemskap.</p>
             <div className="uk-section">
-                <DateView title="Föreningsmedlemskap" date={membership_enddate} placeholder="Inget tidigare medlemskap finns registrerat"/>
-                <DateView title="Labaccess" date={labaccess_enddate} placeholder="Ingen tidigare labaccess finns registrerad" pending={pending_labaccess_days}/>
-                { special_enddate ? 
-                    <DateView title="Specialaccess" date={special_enddate}/> : null
-                }
+                <h2>4. Kontrollera medlemskap </h2>
+                <p>Kontrollera om medlemmen har köpt medlemskap och labbmedlemskap.</p>
+                <div>
+                    <DateView title="Föreningsmedlemskap" date={membership_enddate} placeholder="Inget tidigare medlemskap finns registrerat"/>
+                    <DateView title="Labaccess" date={labaccess_enddate} placeholder="Ingen tidigare labaccess finns registrerad" pending={pending_labaccess_days}/>
+                    { special_enddate ? 
+                        <DateView title="Specialaccess" date={special_enddate}/> : null
+                    }
+                </div>
             </div>
 
-            <h2>5. Kontrollera nyckel </h2>
-            {key_paragraph}
-
             <div className="uk-section">
+                <h2>5. Kontrollera nyckel </h2>
+                {key_paragraph}
+            </div>
+
+            <div>
                 <button className="uk-button uk-button-success uk-float-right" tabIndex="1" disabled={!can_save_member && !can_save_key}><i className="uk-icon-save"/> Spara</button>
             </div>
         </>;
@@ -177,11 +183,13 @@ class KeyHandoutForm extends React.Component {
         return (
         <div className="meep">
             <form className="uk-form" onSubmit={(e) => {e.preventDefault(); this.onSave(); return false;}}>
-                <h2>1. Ta emot signerat labbmedlemsavtal</h2>
-                <p>Kontrollera att labbmedlemsavtalet är signerat och säkerställ att rätt medlemsnummer står väl synligt på labbmedlemsavtalet.</p>
                 <div className="uk-section">
-                    <input id="signed" className="uk-checkbox" type="checkbox" tabIndex="1" checked={has_signed} onChange={(e) => this.signedChanged(e.target.checked)}/>
-                    <label htmlFor="signed"> Signerat labbmedlemsavtal mottaget.</label> 
+                    <h2>1. Ta emot signerat labbmedlemsavtal</h2>
+                    <p>Kontrollera att labbmedlemsavtalet är signerat och säkerställ att rätt medlemsnummer står väl synligt på labbmedlemsavtalet.</p>
+                    <div>
+                        <input id="signed" className="uk-checkbox" type="checkbox" tabIndex="1" checked={has_signed} onChange={(e) => this.signedChanged(e.target.checked)}/>
+                        <label htmlFor="signed"> Signerat labbmedlemsavtal mottaget.</label> 
+                    </div>
                 </div>
 
                 {has_signed ? section2andon : ""}
