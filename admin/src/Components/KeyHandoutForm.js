@@ -1,12 +1,13 @@
 import React from 'react';
 import TextInput from "./TextInput";
 import {withRouter} from "react-router";
-import Key from "../Models/Key"
-import Span from "../Models/Span"
+import Key from "../Models/Key";
+import Span from "../Models/Span";
 import {filterCategory} from '../Models/Span';
 import Collection from "../Models/Collection";
 import {ADD_LABACCESS_DAYS} from "../Models/ProductAction";
 import {utcToday, parseUtcDate} from "../utils";
+import {get} from '../gateway';
 
 
 function last_span_enddate(spans, category) {
@@ -42,7 +43,7 @@ function DateView(props) {
         {status}
         {text}
         { props.pending ? <p><span>(<b>{props.pending}</b> dagar kommer läggas till vid en nyckelsynkronisering)</span></p> : null }
-    </div>
+    </div>;
 }
 
 

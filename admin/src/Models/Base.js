@@ -58,7 +58,7 @@ export default class Base {
     // Subscribe to initialization when data has been fetched (run only once, then unsubscribed)
     initialization(callback) {
         const id = this.initializerId++;
-        this.initializers[id] = () => {callback(); delete this.initializers[id]};
+        this.initializers[id] = () => {callback(); delete this.initializers[id];};
         callback();
     }
     

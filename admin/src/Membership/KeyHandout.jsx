@@ -7,8 +7,6 @@ import {withRouter} from "react-router";
 
 class KeyHandout extends React.Component {
     render() {
-        const {router} = this.props;
-        
         return (
             <div className='uk-margin-top'>
                 <KeyHandoutForm
