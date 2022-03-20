@@ -7,6 +7,9 @@ export default class Base {
     constructor(data=null) {
         this.subscribers = {};
         this.subscriberId = 0;
+
+        this.initializers = {};
+        this.initializerId = 0;
         
         this.reset(data);
 
@@ -51,10 +54,18 @@ export default class Base {
         callback();
         return () => delete this.subscribers[id];
     }
+
+    // Subscribe to initialization when data has been fetched (run only once, then unsubscribed)
+    initialization(callback) {
+        const id = this.initializerId++;
+        this.initializers[id] = () => {callback(); delete this.initializers[id]};
+        callback();
+    }
     
     // Notify subscribers that something changed.
     notify() {
         _.values(this.subscribers).forEach(s => s());
+        _.values(this.initializers).forEach(s => s());
     }
 
     // Reset to empty/data state.

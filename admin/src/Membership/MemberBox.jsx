@@ -36,6 +36,7 @@ class MemberBox extends React.Component {
                 <h2>Medlem #{member_number}: {firstname} {lastname}</h2>
 
                 <ul className="uk-tab">
+                    <NavItem to={"/membership/members/" + member_id + "/key-handout"}>Nyckelutlämning</NavItem>
                     <NavItem to={"/membership/members/" + member_id + "/member-data"}>Uppgifter</NavItem>
                     <NavItem to={"/membership/members/" + member_id + "/groups"}>Grupper</NavItem>
                     <NavItem to={"/membership/members/" + member_id + "/keys"}>Nycklar</NavItem>
