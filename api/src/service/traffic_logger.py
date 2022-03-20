@@ -46,26 +46,29 @@ class TrafficLogger:
             "headers": dict(session_request.headers),
             "query": session_request.args,
         }
-
-        # Images take quite much space when logging their requests
-        if method == "GET" and session_request.path.startswith("/webshop/image/"):
-            session_response.data = "<skipping image content>"
-
-        if method != "GET":
-            if (session_request.content_length or 0) < self.LOG_LIMIT:
-                data = session_request.get_data(as_text=True)
-                
-            else:
-                data = "<content too large for logging>"
-                
-            session_request_data["data"] = data
-
         session_response_data = {
             "date": datetime.utcnow().isoformat()+'Z',
             "status": session_response.status_code,
             "headers": dict(session_response.headers),
-            "data": byte_decode(session_response.data),
         }
+
+        if method == "GET":
+            if len(session_response.data) > self.LOG_LIMIT:
+                data = "<content too large for logging>"
+            # Webship images are unnecessary and large
+            elif session_request.path.startswith("/webshop/image/"):
+                data = "<skipping image content>"
+            else:
+                data = byte_decode(session_response.data)
+            session_response_data["data"] = data
+
+        if method != "GET":
+            if (session_request.content_length or 0) > self.LOG_LIMIT:
+                data = "<content too large for logging>"
+            else:
+                data = session_request.get_data(as_text=True)
+            session_request_data["data"] = data
+
         traffic_data = {
             "ip": session_request.remote_addr,
             "host": session_request.host,
