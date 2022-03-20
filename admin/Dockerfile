@@ -1,4 +1,4 @@
-FROM node:15-alpine
+FROM node:16-alpine
 
 RUN apk add --no-cache tzdata
 ENV TZ Europe/Stockholm
@@ -6,12 +6,13 @@ ENV TZ Europe/Stockholm
 RUN mkdir -p /work/src && mkdir -p /work/dist/js
 
 # Copy package file first, to avoid having to install dependencies every time a source file is updated
-COPY ./webpack.config.js ./tsconfig.json ./package.json ./package-lock.json /work/
+COPY ./tsconfig.json ./package.json ./package-lock.json /work/
 
 WORKDIR /work
 
 RUN npm install
 
+COPY ./webpack.config.js /work/
 COPY ./src/ /work/src
 COPY ./jestSetup.js /work/
 

@@ -21,13 +21,12 @@ module.exports = (env, args) => {
     const commonSettings = {
         context: src,
         entry: "./app.jsx",
-    
+
         // Compile into a js.app
-        output:
-        {
-        filename: "app.js",
+        output: {
+            filename: "app.js",
             publicPath: "js",
-        path: path.resolve(__dirname, "dist/js"),
+            path: path.resolve(__dirname, "dist/js"),
         },
         
         // Preprocess *.jsx files
@@ -88,9 +87,11 @@ module.exports = (env, args) => {
             devServer: {
                 host: "0.0.0.0",
                 port: "80",
-                contentBase: "./dist",
+                static: {
+                    directory: "./dist",
+                    publicPath: "/",
+                },
                 historyApiFallback: true,
-                public: 'http://localhost:8009',
             },
         });
     }
