@@ -19,7 +19,7 @@ function last_span_enddate(spans, category) {
 }
 
 function DateView(props) {
-    const is_valid = props.date && parseUtcDate(props.date) < utcToday();
+    const is_valid = props.date && parseUtcDate(props.date) >= utcToday();
     let status, text;
 
     if (!props.date) {
