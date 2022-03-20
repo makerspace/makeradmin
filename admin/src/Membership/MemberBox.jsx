@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from "react-router-dom";
+import { NavItem } from "../nav";
 import { withRouter} from 'react-router';
 import PropTypes from 'prop-types';
 import Member from "../Models/Member";
@@ -36,14 +36,14 @@ class MemberBox extends React.Component {
                 <h2>Medlem #{member_number}: {firstname} {lastname}</h2>
 
                 <ul className="uk-tab">
-                    <li><Link to={"/membership/members/" + member_id + "/key-handout"}>Nyckelutlämning</Link></li>
-                    <li><Link to={"/membership/members/" + member_id + "/member-data"}>Uppgifter</Link></li>
-                    <li><Link to={"/membership/members/" + member_id + "/groups"}>Grupper</Link></li>
-                    <li><Link to={"/membership/members/" + member_id + "/keys"}>Nycklar</Link></li>
-                    <li><Link to={"/membership/members/" + member_id + "/permissions"}>Behörigheter</Link></li>
-                    <li><Link to={"/membership/members/" + member_id + "/orders"}>Ordrar</Link></li>
-                    <li><Link to={"/membership/members/" + member_id + "/messages"}>Utskick</Link></li>
-                    <li><Link to={"/membership/members/" + member_id + "/spans"}>Perioder</Link></li>
+                    <NavItem to={"/membership/members/" + member_id + "/key-handout"}>Nyckelutlämning</NavItem>
+                    <NavItem to={"/membership/members/" + member_id + "/member-data"}>Uppgifter</NavItem>
+                    <NavItem to={"/membership/members/" + member_id + "/groups"}>Grupper</NavItem>
+                    <NavItem to={"/membership/members/" + member_id + "/keys"}>Nycklar</NavItem>
+                    <NavItem to={"/membership/members/" + member_id + "/permissions"}>Behörigheter</NavItem>
+                    <NavItem to={"/membership/members/" + member_id + "/orders"}>Ordrar</NavItem>
+                    <NavItem to={"/membership/members/" + member_id + "/messages"}>Utskick</NavItem>
+                    <NavItem to={"/membership/members/" + member_id + "/spans"}>Perioder</NavItem>
                 </ul>
                 {this.props.children}
             </div>
