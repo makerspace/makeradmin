@@ -1,0 +1,26 @@
+name: Run tests
+
+on:
+  push:
+    branches:
+      - '**'
+  pull_request:
+    branches:
+      - '**'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Install prerequisites
+      run: |
+        apt install -y docker python3-pip
+        pip3 install docker-compose
+    - name: List versions
+      run: |
+        docker --version
+        docker-compose --version
+    - uses: actions/checkout@v2
+    - name: Build docker and run tests
+      run: |
+        make test
