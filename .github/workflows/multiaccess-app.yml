@@ -10,12 +10,12 @@ on:
 
 jobs:
   build:
-    runs-on: python:3.8
+    runs-on: ubuntu-latest
     steps:
     - name: Install prerequisites
       run: |
         sudo apt update
-        sudo apt install -y unixodbc-dev
+        sudo apt install -y python3 python3-pip unixodbc-dev
     - uses: actions/checkout@v2
     - name: Initialize
       run: |
