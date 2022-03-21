@@ -19,7 +19,11 @@ jobs:
     - uses: actions/checkout@v2
     - name: Initialize
       run: |
-        make -C multiaccess-program/ init
+        cd multiaccess-program
+        make init
     - name: Build distributable
       run: |
-        make -C multiaccess-program/ dist
+        make dist
+    - name: Run tests
+      run: |
+        make test

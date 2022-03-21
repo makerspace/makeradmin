@@ -9,7 +9,7 @@ on:
       - '**'
 
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
     steps:
     - name: Install prerequisites
@@ -21,6 +21,7 @@ jobs:
         docker --version
         docker-compose --version
     - uses: actions/checkout@v2
-    - name: Build docker and run tests
-      run: |
-        make test
+    - name: Build docker
+      run: make build
+    - name: Run tests
+      run: make test
