@@ -10,7 +10,7 @@ on:
 
 jobs:
   build:
-    runs-on: python3:latest
+    runs-on: python:3.8
     steps:
     - name: Install prerequisites
       run: |
