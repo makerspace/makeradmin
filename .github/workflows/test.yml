@@ -14,7 +14,7 @@ jobs:
     steps:
     - name: Install prerequisites
       run: |
-        apt install -y docker python3-pip
+        sudo apt install -y docker python3-pip
         pip3 install docker-compose
     - name: List versions
       run: |
