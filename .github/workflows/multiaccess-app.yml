@@ -18,12 +18,8 @@ jobs:
         sudo apt install -y python3 python3-pip unixodbc-dev
     - uses: actions/checkout@v2
     - name: Initialize
-      run: |
-        cd multiaccess-program
-        make init
+      run: make -C multiaccess-program init
     - name: Build distributable
-      run: |
-        make dist
+      run: make -C multiaccess-program dist
     - name: Run tests
-      run: |
-        make test
+      run: make -C multiaccess-program test
