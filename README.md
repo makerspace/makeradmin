@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/makerspace/makeradmin.svg?branch=master)](https://travis-ci.org/makerspace/makeradmin)
+[![Run tests](https://github.com/makerspace/makeradmin/actions/workflows/test.yml/badge.svg)](https://github.com/makerspace/makeradmin/actions/workflows/test.yml)
 # Makeradmin
 
 ## Install 

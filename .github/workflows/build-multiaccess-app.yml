@@ -1,0 +1,25 @@
+name: Build multiaccess app
+
+on:
+  push:
+    branches:
+      - '**'
+  pull_request:
+    branches:
+      - '**'
+
+jobs:
+  build:
+    runs-on: python3:latest
+    steps:
+    - name: Install prerequisites
+      run: |
+        sudo apt update
+        sudo apt install -y unixodbc-dev
+    - uses: actions/checkout@v2
+    - name: Initialize
+      run: |
+        make -C multiaccess-program/ init
+    - name: Build distributable
+      run: |
+        make -C multiaccess-program/ dist
