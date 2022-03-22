@@ -6,10 +6,10 @@ from logging import getLogger
 from unittest import skipIf
 
 import stripe
+from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.remote import webdriver as remote
 from selenium.webdriver.chrome import webdriver as chrome
-from selenium.webdriver import DesiredCapabilities
 from selenium.webdriver.support.wait import WebDriverWait
 
 from service.config import get_mysql_config
@@ -112,7 +112,7 @@ def create_webdriver():
     
     if WEBDRIVER_TYPE == 'REMOTE_CHROME':
         return remote.WebDriver(command_executor='http://selenium:4444/wd/hub',
-                                desired_capabilities=DesiredCapabilities.CHROME)
+                                options=webdriver.ChromeOptions())
     
     raise Exception(f"bad webdriver type {WEBDRIVER_TYPE}")
 
