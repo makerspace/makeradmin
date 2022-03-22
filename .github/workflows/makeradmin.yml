@@ -1,4 +1,4 @@
-name: Run tests
+name: Build and run tests for makeradmin
 
 on:
   push:

@@ -23,3 +23,9 @@ jobs:
       run: make -C multiaccess-program dist
     - name: Run tests
       run: make -C multiaccess-program test
+    - name: Upload the built .exe (multiaccess program)
+      uses: actions/upload-artifact@v3
+      with:
+        name: multiaccess-program
+        path: |
+          multiaccess-program/dist/*.exe
