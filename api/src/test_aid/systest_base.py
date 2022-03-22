@@ -11,6 +11,7 @@ from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.remote import webdriver as remote
 from selenium.webdriver.chrome import webdriver as chrome
 from selenium.webdriver.support.wait import WebDriverWait
+from selenium.webdriver.common.by import By
 
 from service.config import get_mysql_config
 from service.db import create_mysql_engine, db_session
@@ -168,19 +169,19 @@ class SeleniumTest(ApiTest):
                          timeout=SELENIUM_BASE_TIMEOUT, sleep=SLEEP):
         if id:
             def get():
-                return self.webdriver.find_element_by_id(id)
+                return self.webdriver.find_element(By.ID, id)
         elif name:
             def get():
-                return self.webdriver.find_element_by_name(name)
+                return self.webdriver.find_element(By.NAME, name)
         elif tag:
             def get():
-                return self.webdriver.find_element_by_tag_name(tag)
+                return self.webdriver.find_element(By.TAG_NAME, tag)
         elif css:
             def get():
-                return self.webdriver.find_element_by_css_selector(css)
+                return self.webdriver.find_element(by=By.CSS_SELECTOR, value=css)
         elif xpath:
             def get():
-                return self.webdriver.find_element_by_xpath(xpath)
+                return self.webdriver.find_element(By.XPATH, xpath)
         else:
             raise Exception("missing parameter")
         
@@ -190,19 +191,19 @@ class SeleniumTest(ApiTest):
                           timeout=SELENIUM_BASE_TIMEOUT, sleep=SLEEP):
         if id:
             def get():
-                return self.webdriver.find_elements_by_id(id)
+                return self.webdriver.find_elements(By.ID, id)
         elif name:
             def get():
-                return self.webdriver.find_elements_by_name(name)
+                return self.webdriver.find_elements(By.NAME, name)
         elif tag:
             def get():
-                return self.webdriver.find_elements_by_tag_name(tag)
+                return self.webdriver.find_elements(By.TAG_NAME, tag)
         elif css:
             def get():
-                return self.webdriver.find_elements_by_css_selector(css)
+                return self.webdriver.find_elements(By.CSS_SELECTOR, css)
         elif xpath:
             def get():
-                return self.webdriver.find_elements_by_xpath(xpath)
+                return self.webdriver.find_elements(By.XPATH, xpath)
         else:
             raise Exception("missing parameter")
         
