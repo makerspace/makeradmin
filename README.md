@@ -1,4 +1,5 @@
-[![Run tests](https://github.com/makerspace/makeradmin/actions/workflows/test.yml/badge.svg)](https://github.com/makerspace/makeradmin/actions/workflows/test.yml)
+[![Build and run tests for makeradmin](https://github.com/makerspace/makeradmin/actions/workflows/makeradmin.yml/badge.svg)](https://github.com/makerspace/makeradmin/actions/workflows/makeradmin.yml)
+[![Build multiaccess app](https://github.com/makerspace/makeradmin/actions/workflows/multiaccess-app.yml/badge.svg)](https://github.com/makerspace/makeradmin/actions/workflows/multiaccess-app.yml)
 # Makeradmin
 
 ## Install 
