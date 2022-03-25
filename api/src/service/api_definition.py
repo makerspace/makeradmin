@@ -138,8 +138,15 @@ class Enum:
         raise ValueError(f"Value {value} not among allowed values.")
 
 
-symbol_regex = re.compile(r'[A-Za-z0-9_]+')
+safe_text_regex = re.compile(r'[A-Za-z0-9_\w]+')
 
+def safe_text(value):
+    """ A string which is only A-Za-z0-9_ and whitespace. """
+    if not safe_text_regex.match(value):
+        raise ValueError(f"Value {value} is not a safe text.")
+    return value
+
+symbol_regex = re.compile(r'[A-Za-z0-9_]+')
 
 def symbol(value):
     """ A string which is only A-Za-z0-9 and _. """
