@@ -13,6 +13,7 @@ import MemberBox from "./MemberBox";
 import MemberBoxGroups from "./MemberBoxGroups";
 import MemberBoxKeys from "./MemberBoxKeys";
 import MemberBoxMemberData from "./MemberBoxMemberData";
+import KeyHandout from "./KeyHandout";
 import MemberBoxMessages from "./MemberBoxMessages";
 import MemberBoxNewMessage from "./MemberBoxNewMessage";
 import MemberBoxOrders from "./MemberBoxOrders";
@@ -46,7 +47,8 @@ const Groups = ({ match: { path } }) => (
 const Member = ({ match: { path } }) => (
     <MemberBox>
         <Switch>
-            <Route exact path={`${path}/`} component={MemberBoxMemberData} />
+            <Route exact path={`${path}/`} component={KeyHandout} />
+            <Route path={`${path}/key-handout`} component={KeyHandout} />
             <Route path={`${path}/member-data`} component={MemberBoxMemberData} />
             <Route path={`${path}/groups`} component={MemberBoxGroups} />
             <Route path={`${path}/keys`} component={MemberBoxKeys} />

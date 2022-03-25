@@ -10,15 +10,17 @@ RUN apk update \
         python3-dev \
         libffi-dev \
         libressl-dev \
-       linux-headers \
+        linux-headers \
+        jpeg-dev \
+        zlib-dev \
     && rm -rf /var/cache/apk/*
 
 RUN mkdir -p /work/
 
 WORKDIR /work
 
+RUN pip install -U pip
 COPY requirements.txt .
-
 RUN pip install -r requirements.txt
 
 COPY test_run.sh .

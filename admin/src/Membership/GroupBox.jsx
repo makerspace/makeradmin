@@ -1,6 +1,6 @@
 import React from 'react';
-import { Link } from "react-router-dom";
 import { withRouter} from 'react-router';
+import { NavItem } from "../nav";
 import PropTypes from 'prop-types';
 import Group from "../Models/Group";
 
@@ -36,9 +36,9 @@ class GroupBox extends React.Component {
                 <h2>Grupp {title}</h2>
 
                 <ul className="uk-tab">
-                    <li><Link to={"/membership/groups/" + group_id + "/info"}>Information</Link></li>
-                    <li><Link to={"/membership/groups/" + group_id + "/members"}>Medlemmar</Link></li>
-                    <li><Link to={"/membership/groups/" + group_id + "/permissions"}>Behörigheter</Link></li>
+                    <NavItem icon={null} to={"/membership/groups/" + group_id + "/info"}>Information</NavItem>
+                    <NavItem icon={null} to={"/membership/groups/" + group_id + "/members"}>Medlemmar</NavItem>
+                    <NavItem icon={null} to={"/membership/groups/" + group_id + "/permissions"}>Behörigheter</NavItem>
                 </ul>
                 {this.props.children}
             </div>

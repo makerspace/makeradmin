@@ -23,6 +23,7 @@ COPY default-product-image.png /work
 
 COPY requirements.txt /work
 
+RUN pip install -U pip
 RUN pip install -r /work/requirements.txt
 
 COPY run.sh dispatch_emails.sh /work/
