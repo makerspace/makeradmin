@@ -2,7 +2,7 @@ from random import randint, choice
 
 from faker import Faker
 
-from membership.models import Span
+from membership.models import Span, MemberStorage
 from messages.models import Message
 from shop.models import ProductAction
 from test_aid.test_util import random_str
@@ -50,21 +50,26 @@ class ObjFactory:
         self.member = obj
         return self.member
 
-    def create_member_storage(self, storage_type, **kwargs):
+    def create_member_storage(self, member, fixed_end_date, storage_type, **kwargs):
+        if storage_type == MemberStorage.BOX:
+            fixed_end_date = None
+
         obj = dict(
-            member_id=self.member.member_id,
-            label_id=randint(1e9, 9e9),
-            fixed_end_date='2029-01-01',
+            #member = member,
+            member_id=member.member_id,
+            item_label_id=randint(1e2, 1e9),
+            fixed_end_date=fixed_end_date,
             storage_type=storage_type,
         )
         obj.update(kwargs)
         self.member_storage = obj
         return self.member_storage
 
-    def create_storage_nag(self, nag_type, **kwargs):
+    def create_storage_nag(self, member, nag_type, **kwargs):
         obj = dict(
-            member_id=self.member.member_id,
-            label_id=randint(1e9, 9e9),
+            #member = member,
+            member_id=member.member_id,
+            item_label_id=randint(1e2, 1e9),
             nag_at=self.test.date(),
             nag_type=nag_type,
         )

@@ -1,3 +1,4 @@
+from datetime import date
 from random import randint
 from faker import Faker
 
@@ -58,14 +59,29 @@ class DbFactory:
         return self.member
 
     def create_member_storage(self, storage_type, **kwargs):
-        obj = self.obj.create_member_storage(storage_type, **kwargs)
+        if 'fixed_end_date' in kwargs:
+            fixed_end_date = kwargs.pop('fixed_end_date')
+        else:
+            fixed_end_date = date(2029,1,1)
+
+        if 'member' in kwargs:
+            member = kwargs.pop('member')
+        else:
+            member = self.member
+
+        obj = self.obj.create_member_storage(member, fixed_end_date, storage_type, **kwargs)
         self.storage = MemberStorage(**obj)
         db_session.add(self.storage)
         db_session.commit()
         return self.storage
 
     def create_storage_nag(self, nag_type, **kwargs):
-        obj = self.obj.create_storage_nag(nag_type, **kwargs)
+        if 'member' in kwargs:
+            member = kwargs.pop('member')
+        else:
+            member = self.member
+
+        obj = self.obj.create_storage_nag(member, nag_type, **kwargs)
         self.nag = StorageNags(**obj)
         db_session.add(self.nag)
         db_session.commit()
