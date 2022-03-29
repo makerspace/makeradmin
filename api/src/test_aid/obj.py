@@ -55,7 +55,7 @@ class ObjFactory:
             fixed_end_date = None
 
         obj = dict(
-            #member = member,
+            member = member,
             member_id=member.member_id,
             item_label_id=randint(1e2, 1e9),
             fixed_end_date=fixed_end_date,
@@ -67,7 +67,7 @@ class ObjFactory:
 
     def create_storage_nag(self, member, nag_type, **kwargs):
         obj = dict(
-            #member = member,
+            member = member,
             member_id=member.member_id,
             item_label_id=randint(1e2, 1e9),
             nag_at=self.test.date(),

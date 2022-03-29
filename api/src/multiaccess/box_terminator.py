@@ -4,7 +4,7 @@ from sqlalchemy import desc
 from sqlalchemy.orm import contains_eager
 from sqlalchemy.orm.exc import NoResultFound
 
-from membership.models import Member, MemberStorage, Span
+from membership.models import Member, MemberStorage, Span, StorageNags
 from messages.message import send_message
 from messages.models import MessageTemplate
 from service.db import db_session
@@ -14,15 +14,15 @@ from shop.transactions import pending_action_value_sum, ProductAction
 
 
 JUDGMENT_DAY = date(1997, 9, 26)  # Used as default for missing lab access date
-RESISTANCE_VICTORY_DAY = date(2029, 1, 1) # Used as default for missing fixed end date for storage
 EXPIRATION_TIME = 45 #Number of days from expiration date to the termination date when the item is removed
+TEMP_STORAGE_TIME = 90 #Number of days of temporary storage allowed
 
-class Reason(enum.Enum):
+class Reason:
     LABACCESS_EXPIRED = 'labaccess_expired'
     DATE_EXPIRED = 'date_expired'
     BOTH_EXPIRED = 'both_expired'
 
-class Status(enum.Enum):
+class Status:
     ACTIVE = 'active'
     EXPIRED = 'expired'
     TERMINATE = 'terminate'
@@ -34,6 +34,13 @@ def get_labacess_end_date(item):
     except ValueError:
         return JUDGMENT_DAY
 
+def get_fixed_end_date(storage_type):
+    today = date.today()
+    if storage_type == MemberStorage.TEMP:
+        return today + timedelta(days=TEMP_STORAGE_TIME)
+    else:
+        return None
+
 def get_storage_query():
     query = db_session.query(MemberStorage).join(Member).outerjoin(Span)
     query = query.options(contains_eager(MemberStorage.member), contains_eager(MemberStorage.member).contains_eager(Member.spans))
@@ -43,58 +50,89 @@ def get_expire_date_from_end_date(expire_date):
     if expire_date:
         return expire_date + timedelta(days=EXPIRATION_TIME)
 
-def check_status(item):
+def get_dates(item):
     today = date.today()
 
-    expire_lab_date = get_labacess_end_date(item) + timedelta(days=1)
-    terminate_lab_date = get_expire_date_from_end_date(expire_date)
-    expire_fixed_date = item.fixed_end_date + timedelta(days=1)
-    terminate_fixed_date = get_expire_date_from_end_date(item.fixed_end_date)
+    expire_lab_date = get_labacess_end_date(item)
+    terminate_lab_date = get_expire_date_from_end_date(expire_lab_date)
+
+    if item.fixed_end_date:
+        fixed_end_date = item.fixed_end_date
+        terminate_fixed_date = get_expire_date_from_end_date(fixed_end_date)
+
+        to_termination_days = min( (terminate_fixed_date - today).days, (terminate_lab_date - today).days ) #TODO error here
+        days_after_expiration = max( (today - fixed_end_date).days, (today - expire_lab_date).days )
+    else:
+        fixed_end_date = None
+        terminate_fixed_date = None
+
+        to_termination_days = (terminate_lab_date - today).days
+        days_after_expiration = (today - expire_lab_date).days
+
     pending_labaccess_days = pending_action_value_sum(item.member_id, ProductAction.ADD_LABACCESS_DAYS)
 
-    if today <= expire_lab_date or pending_labaccess_days > 0:
+    return {
+        "expire_lab_date": expire_lab_date,
+        "terminate_lab_date": terminate_lab_date,
+        "expire_fixed_date": fixed_end_date,
+        "terminate_fixed_date": terminate_fixed_date,
+        "to_termination_days": to_termination_days,
+        "days_after_expiration": days_after_expiration,
+        "pending_labaccess_days": pending_labaccess_days,
+    }
+
+def check_status(dates):
+    today = date.today()
+
+    if today <= dates["expire_lab_date"] or dates["pending_labaccess_days"] > 0:
         lab_status = Status.ACTIVE
-    elif expire_lab_date < today <= terminate_lab_date:
+    elif dates["expire_lab_date"] < today <= dates["terminate_lab_date"]:
         lab_status = Status.EXPIRED
     else:
         lab_status = Status.TERMINATE
 
-    if today <= expire_fixed_date:
-        fixed_date_status = Status.ACTIVE
-    elif expire_fixed_date < today <= terminate_fixed_date:
-        fixed_date_status = Status.EXPIRED
+    if dates["expire_fixed_date"] != None: #Not all items have a fixed end date
+        if today <= dates["expire_fixed_date"]:
+            fixed_date_status = Status.ACTIVE
+        elif dates["expire_fixed_date"] < today <= dates["terminate_fixed_date"]:
+            fixed_date_status = Status.EXPIRED
+        else:
+            fixed_date_status = Status.TERMINATE
     else:
-        fixed_date_status = Status.TERMINATE
+        fixed_date_status = Status.ACTIVE
 
     status, reason = {
-        Status.ACTIVE, Status.ACTIVE: Status.ACTIVE, None,
-        Status.EXPIRED, Status.ACTIVE: Status.EXPIRED, Reason.LABACCESS_EXPIRED,
-        Status.ACTIVE, Status.EXPIRED: Status.EXPIRED, Reason.DATE_EXPIRED,
-        Status.EXPIRED, Status.EXPIRED: Status.EXPIRED, Reason.BOTH_EXPIRED,
-        Status.TERMINATE, Status.ACTIVE: Status.TERMINATE, Reason.LABACCESS_EXPIRED,
-        Status.ACTIVE, Status.TERMINATE: Status.TERMINATE, Reason.DATE_EXPIRED,
-        Status.TERMINATE, Status.EXPIRED: Status.TERMINATE, Reason.BOTH_EXPIRED,
-        Status.EXPIRED, Status.TERMINATE: Status.TERMINATE, Reason.BOTH_EXPIRED,
-        Status.TERMINATE, Status.TERMINATE: Status.TERMINATE, Reason.BOTH_EXPIRED,
-    }[lab_status, fixed_date_status]
+        (Status.ACTIVE, Status.ACTIVE): (Status.ACTIVE, None),
+        (Status.EXPIRED, Status.ACTIVE): (Status.EXPIRED, Reason.LABACCESS_EXPIRED),
+        (Status.ACTIVE, Status.EXPIRED): (Status.EXPIRED, Reason.DATE_EXPIRED),
+        (Status.EXPIRED, Status.EXPIRED): (Status.EXPIRED, Reason.BOTH_EXPIRED),
+        (Status.TERMINATE, Status.ACTIVE): (Status.TERMINATE, Reason.LABACCESS_EXPIRED),
+        (Status.ACTIVE, Status.TERMINATE): (Status.TERMINATE, Reason.DATE_EXPIRED),
+        (Status.TERMINATE, Status.EXPIRED): (Status.TERMINATE, Reason.BOTH_EXPIRED),
+        (Status.EXPIRED, Status.TERMINATE): (Status.TERMINATE, Reason.BOTH_EXPIRED),
+        (Status.TERMINATE, Status.TERMINATE): (Status.TERMINATE, Reason.BOTH_EXPIRED),
+    }[(lab_status, fixed_date_status)]
 
     return status, reason
 
 def get_storage_info(item):
-    status, reason = check_status(item)
+    dates = get_dates(item)
+    status, reason = check_status(dates)
 
+    today = date.today()
     nags = []
-    for d in item.storage_nags:
-        nags.append(dt_to_str(d))
+    for nag in item.storage_nags:
+        if (today - nag.nag_at).days < dates["days_after_expiration"]:
+            nags.append(dt_to_str(nag))
 
     return {
-        "label_id": item.label_id,
+        "item_label_id": item.item_label_id,
         "member_number": item.member.member_number,
-        "name": f"{box.member.firstname} {box.member.lastname or ''}",
-        "expire_date": date_to_str(expire_date),
-        "terminate_date": date_to_str(terminate_date),
-        "fixed_end_date": date_to_str(fixed_end_date),
+        "storage_type": item.storage_type,
+        "name": f"{item.member.firstname} {item.member.lastname or ''}",
+        "days_after_expiration": dates["days_after_expiration"],
         "status": status,
+        "reason": reason,
         "nags": nags,
         "last_check_at": dt_to_str(item.last_check_at),
     }
@@ -105,16 +143,17 @@ def box_terminator_stored_items(storage_type=None):
     filtered_query = filter(lambda item: item.last_check_at > limit and item.storage_type == storage_type, query)
     return [get_storage_info(s) for s in filtered_query.order_by(desc(MemberStorage.last_check_at))]
 
-def box_terminator_nag(member_number=None, label_id=None, storage_type=None, nag_type=None, description=None):
+def box_terminator_nag(member_number=None, item_label_id=None, nag_type=None, description=None):
     try:
-        item = db_session.query(MemberStorage).filter(MemberStorage.label_id == label_id,
+        item = db_session.query(MemberStorage).filter(MemberStorage.item_label_id == item_label_id,
                                            Member.member_number == member_number).one()
     except NoResultFound:
         raise NotFound("Bloop, prylen finns i Lettland")
 
-    status, reason = check_status(item)
+    dates = get_dates(item)
+    status, reason = check_status(dates)
 
-    if storage_type == "box":
+    if item.storage_type == MemberStorage.BOX:
         try:
             template = {
                 "nag-warning": MessageTemplate.BOX_WARNING,
@@ -123,66 +162,71 @@ def box_terminator_nag(member_number=None, label_id=None, storage_type=None, nag
             }[nag_type]
         except KeyError:
             raise BadRequest(f"Bad nag type {nag_type}")
-    elif storage_type == "temp":
+    elif item.storage_type == MemberStorage.TEMP:
         try:
-        template = {
-            ("nag-warning", Reason.LABACCESS_EXPIRED): MessageTemplate.TEMP_STORAGE_WARNING_LAB,
-            ("nag-last-warning", Reason.LABACCESS_EXPIRED): MessageTemplate.TEMP_STORAGE_WARNING_LAB,
-            ("nag-terminated", Reason.LABACCESS_EXPIRED): MessageTemplate.TEMP_STORAGE_TERMINATED_LAB,
-            ("nag-warning", Reason.DATE_EXPIRED): MessageTemplate.TEMP_STORAGE_WARNING_DATE,
-            ("nag-last-warning", Reason.DATE_EXPIRED): MessageTemplate.TEMP_STORAGE_WARNING_DATE,
-            ("nag-terminated", Reason.DATE_EXPIRED): MessageTemplate.TEMP_STORAGE_TERMINATED_DATE,
-            ("nag-warning", Reason.BOTH_EXPIRED): MessageTemplate.TEMP_STORAGE_WARNING_BOTH,
-            ("nag-last-warning", Reason.BOTH_EXPIRED): MessageTemplate.TEMP_STORAGE_WARNING_BOTH,
-            ("nag-terminated", Reason.BOTH_EXPIRED): MessageTemplate.TEMP_STORAGE_TERMINATED_BOTH,
-        }[(nag_type, reason)]
+            template = {
+                ("nag-warning", Reason.LABACCESS_EXPIRED): MessageTemplate.TEMP_STORAGE_WARNING_LAB,
+                ("nag-last-warning", Reason.LABACCESS_EXPIRED): MessageTemplate.TEMP_STORAGE_WARNING_LAB,
+                ("nag-terminated", Reason.LABACCESS_EXPIRED): MessageTemplate.TEMP_STORAGE_TERMINATED_LAB,
+                ("nag-warning", Reason.DATE_EXPIRED): MessageTemplate.TEMP_STORAGE_WARNING_DATE,
+                ("nag-last-warning", Reason.DATE_EXPIRED): MessageTemplate.TEMP_STORAGE_WARNING_DATE,
+                ("nag-terminated", Reason.DATE_EXPIRED): MessageTemplate.TEMP_STORAGE_TERMINATED_DATE,
+                ("nag-warning", Reason.BOTH_EXPIRED): MessageTemplate.TEMP_STORAGE_WARNING_BOTH,
+                ("nag-last-warning", Reason.BOTH_EXPIRED): MessageTemplate.TEMP_STORAGE_WARNING_BOTH,
+                ("nag-terminated", Reason.BOTH_EXPIRED): MessageTemplate.TEMP_STORAGE_TERMINATED_BOTH,
+            }[(nag_type, reason)]
         except KeyError:
             raise BadRequest(f"Bad nag type {nag_type}")
     else:
         raise BadRequest(f"Bad storage type {storage_type}")
 
-    today = date.today()
+    if item.storage_type == MemberStorage.TEMP:
+        send_message(
+            template, item.member,
+            expiration_time = EXPIRATION_TIME,
+            labaccess_end_date = date_to_str(dates["expire_lab_date"]),
+            fixed_end_date = date_to_str(dates["fixed_end_date"]),
+            to_termination_days = dates["to_termination_days"],
+            days_after_expiration = dates["days_after_expiration"],
+            description = description,
+        )
+    else:
+        send_message(
+            template, item.member,
+            expiration_time = EXPIRATION_TIME,
+            labaccess_end_date = date_to_str(dates["expire_lab_date"]),
+            to_termination_days = dates["to_termination_days"],
+            days_after_expiration = dates["days_after_expiration"],
+        )
 
-    lab_end_date = get_labacess_end_date(item)
-    fixed_end_date = item.fixed_end_date
-    terminate_lab_date = get_expire_date_from_end_date(lab_end_date)
-    terminate_fixed_date = get_expire_date_from_end_date(fixed_end_date)
-    to_termination_days = min(terminate_fixed_date - today, terminate_lab_date - today).days
-    days_after_expiration = max(today - fixed_end_date, today - lab_end_date).days
-
-    send_message(
-        template, item.member,
-        expiration_time = EXPIRATION_TIME,
-        labaccess_end_date = date_to_str(lab_end_date),
-        fixed_end_date = date_to_str(fixed_end_date),
-        to_termination_days = to_termination_days,
-        days_after_expiration = days_after_expiration,
-        description = description,
-    )
-
-    nag = StorageNags(member_id=member.member_id, label_id=label_id, nag_at=datetime.utcnow(), nag_type=nag_type)
+    nag = StorageNags(member_id=item.member_id, item_label_id=item_label_id, nag_at=datetime.utcnow(), nag_type=nag_type)
     db_session.add(nag)
     db_session.flush()
 
-def box_terminator_validate(member_number=None, label_id=None, storage_type=None, fixed_end_date=RESISTANCE_VICTORY_DAY):
+def box_terminator_validate(member_number=None, item_label_id=None, storage_type=None):
+    #TODO check input storage type and description, make sure they are ok inputs, also for the nag function
     if storage_type == None:
         raise BadRequest("No storage type")
 
     query = get_storage_query()
-    query = query.filter(MemberStorage.label_id == label_id)
+    query = query.filter(MemberStorage.item_label_id == item_label_id)
     try:
-        storage = query.one()
+        item = query.one()
+        found_item = True
     except NoResultFound:
+        found_item = False
         try:
-            #Find the member since there was nothing in the db with the label_id
+            #Find the member since there was nothing in the db with the item_label_id
             member = db_session.query(Member).filter(Member.member_number == member_number).one()
         except NoResultFound:
             raise NotFound(f"Member not found {member_number}")
-        item = MemberStorage(member_id=member.member_id, label_id=label_id, storage_type=storage_type)
+        item = MemberStorage(member_id=member.member_id, item_label_id=item_label_id, storage_type=storage_type,
+         fixed_end_date = get_fixed_end_date(storage_type))
 
     item.last_check_at = datetime.utcnow()
-    item.fixed_end_date = fixed_end_date
-    db_session.add(item)
-    db_session.flush()
+
+    if not found_item:
+        db_session.add(item)
+    db_session.commit()
 
     return get_storage_info(item)

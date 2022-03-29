@@ -41,7 +41,7 @@ class Member(Base):
                           secondary=member_group,
                           back_populates='members')
 
-    storage_nags = relationship('StorageNags', backref="member" order_by='StorageNags.nag_at.desc()')
+    storage_nags = relationship('StorageNags', backref="member", order_by='StorageNags.nag_at.desc()')
 
     def __repr__(self):
         return f'Member(member_id={self.member_id}, member_number={self.member_number}, email={self.email})'
@@ -147,28 +147,31 @@ class Span(Base):
 class MemberStorage(Base):
     __tablename__ = 'membership_storage'
 
+    BOX = 'box'
+    TEMP = 'temp'
+
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
 
     member_id = Column(Integer, ForeignKey('membership_members.member_id'), nullable=False)
 
     # The id of the printed label on the storage item.
-    label_id = Column(BigInteger, unique=True, nullable=False)
+    item_label_id = Column(BigInteger, unique=True, nullable=False)
 
     # The type of storage
-    storage_type = Column(String(100), nullable=False)
+    storage_type = Column(String(50), nullable=False)
 
     # Fixed end date
-    fixed_end_date = Column(DateTime, nullable=False)
+    fixed_end_date = Column(Date, nullable=False)
 
     # Item last checked at timestamp.
     last_check_at = Column(DateTime, nullable=True)
 
     member = relationship(Member, backref="storage_items")
-    storage_nags = relationship('StorageNags', backref="member" order_by='StorageNags.nag_at.desc()')
+    storage_nags = relationship('StorageNags', backref="member_storage", order_by='StorageNags.nag_at.desc()')
 
     def __repr__(self):
         return (
-            f'Storage(id={self.id}, label_id={self.label_id}, member_id={self.member_id}'
+            f'Storage(id={self.id}, item_label_id={self.item_label_id}, member_id={self.member_id}'
             f', last_check_at={self.last_check_at})'
         )
 
@@ -181,17 +184,17 @@ class StorageNags(Base):
     member_id = Column(Integer, ForeignKey('membership_members.member_id'), nullable=False)
 
     # The id of the printed label on the storage item.
-    label_id = Column(BigInteger, ForeignKey('membership_storage.label_id'), nullable=False)
+    item_label_id = Column(BigInteger, ForeignKey('membership_storage.item_label_id'), nullable=False)
 
     # Storage naged at timestamp.
     nag_at = Column(DateTime, nullable=False)
 
     # What type of nag was sent
-    nag_type = Column(String(100), nullable=False)
+    nag_type = Column(String(50), nullable=False)
 
     def __repr__(self):
         return (
-            f'Nag(id={self.id}, label_id={self.label_id}, member_id={self.member_id}'
+            f'Nag(id={self.id}, item_label_id={self.item_label_id}, member_id={self.member_id}'
             f', nag_at={self.nag_at}, nag_type={self.nag_type})'
         )
 
