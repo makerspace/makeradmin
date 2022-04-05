@@ -1,4 +1,4 @@
-
+import core
 import messages
 import shop
 from dispatch_emails import labaccess_reminder, render_template, LABACCESS_REMINDER_DAYS_BEFORE, \
@@ -14,7 +14,7 @@ from test_aid.test_base import FlaskTestBase, ShopTestMixin
 
 class Test(ShopTestMixin, FlaskTestBase):
     
-    models = [membership.models, messages.models, shop.models]
+    models = [membership.models, messages.models, shop.models, core.models]
     products = [
         dict(
             price=100.0,
