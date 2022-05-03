@@ -68,8 +68,7 @@ export const mergePeriods = toMergePeriods => {
 
 // Filter not deleted spans for one category, return sorted.
 export const filterCategory = (spans, category) =>
-    spans.filter(i => !i.deleted_at &&  i.type === category).sort();
-
+    spans.filter(i => !i.deleted_at &&  i.type === category).sort((a, b) => a.start - b.start);
 
 // Return assembled periods for non deleted spans in a category.
 export const filterPeriods = (spans, category) => {
