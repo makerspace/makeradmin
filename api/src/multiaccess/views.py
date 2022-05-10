@@ -4,11 +4,9 @@ from sqlalchemy.orm import contains_eager
 from membership.models import Member, Span, Key
 from membership.membership import get_membership_summary
 from multiaccess import service
-from multiaccess.box_terminator import box_terminator_validate, box_terminator_nag, \
-    box_terminator_stored_items
+from multiaccess import box_terminator
 from service.api_definition import GET, Arg, MEMBER_EDIT, POST, MEMBER_VIEW, symbol, safe_text, iso_date, MEMBERBOOTH
 from service.db import db_session
-from service.logging import logger
 
 
 def member_to_response_object(member):
@@ -36,11 +34,13 @@ def get_memberdata():
 
     return [member_to_response_object(m) for m in query]
 
+
 def member_response_object(member, membership_data):
     response = member_to_response_object(member)
     del response["end_date"]
     response["membership_data"] = membership_data.as_json()
     return response
+
 
 def get_member(member_number):
     member = db_session.query(Member).filter(Member.member_number == member_number, Member.deleted_at.is_(None)).first()
@@ -50,6 +50,7 @@ def get_member(member_number):
 
     membership_data = get_membership_summary(member.member_id)
     return member_response_object(member, membership_data)
+
 
 @service.route("/memberbooth/tag", method=GET, permission=MEMBERBOOTH)
 def memberbooth_tag(tagid=Arg(int)):
@@ -68,22 +69,26 @@ def memberbooth_tag(tagid=Arg(int)):
     membership_data = get_membership_summary(key.member_id)
     return member_response_object(key.member, membership_data)
 
+
 @service.route("/memberbooth/member", method=GET, permission=MEMBERBOOTH)
 def memberbooth_member(member_number=Arg(int)):
     return get_member(member_number)
 
+
 @service.route("/box-terminator/stored_items", method=GET, permission=MEMBER_EDIT)
 def box_terminator_stored_items(storage_type=Arg(symbol)):
     """ Returns a list of all items scanned of the storage type during the last seven days"""
-    return box_terminator_stored_items()
+    return box_terminator.box_terminator_stored_items()
+
 
 @service.route("/box-terminator/nag", method=POST, permission=MEMBER_EDIT)
 def box_terminator_nag(member_number=Arg(int), item_label_id=Arg(int), nag_type=Arg(symbol), description=Arg(safe_text)):
     """ Send a nag email for this storage type. """
-    return box_terminator_nag(member_number, item_label_id, nag_type, description)
+    return box_terminator.box_terminator_nag(member_number, item_label_id, nag_type, description)
+
 
 @service.route("/box-terminator/validate", method=POST, permission=MEMBER_EDIT)
 def box_terminator_validate(member_number=Arg(int), item_label_id=Arg(int), storage_type=Arg(symbol)):
     """ Used when scanning qr codes. """
-    return box_terminator_validate(member_number, item_label_id, storage_type)
+    return box_terminator.box_terminator_validate(member_number, item_label_id, storage_type)
 

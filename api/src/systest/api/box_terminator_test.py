@@ -143,7 +143,7 @@ class Test(ApiTest):
     def test_box_terminator_validate_creates_box_if_not_exists(self):
         member = self.db.create_member()
         item_label_id = randint(1e9, 9e9)
-        storage_type=MemberStorage.BOX
+        storage_type = MemberStorage.BOX
         
         self.api.post('/multiaccess/box-terminator/validate',
                       dict(member_number=member.member_number, storage_type=storage_type, item_label_id=item_label_id)).expect(

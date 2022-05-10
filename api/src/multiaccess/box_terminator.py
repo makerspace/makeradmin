@@ -183,29 +183,30 @@ def box_terminator_nag(member_number=None, item_label_id=None, nag_type=None, de
     if item.storage_type == MemberStorage.TEMP:
         send_message(
             template, item.member,
-            expiration_time = EXPIRATION_TIME,
-            labaccess_end_date = date_to_str(dates["expire_lab_date"]),
-            fixed_end_date = date_to_str(dates["fixed_end_date"]),
-            to_termination_days = dates["to_termination_days"],
-            days_after_expiration = dates["days_after_expiration"],
-            description = description,
+            expiration_time=EXPIRATION_TIME,
+            labaccess_end_date=date_to_str(dates["expire_lab_date"]),
+            fixed_end_date=date_to_str(dates["fixed_end_date"]),
+            to_termination_days=dates["to_termination_days"],
+            days_after_expiration=dates["days_after_expiration"],
+            description=description,
         )
     else:
         send_message(
             template, item.member,
-            expiration_time = EXPIRATION_TIME,
-            labaccess_end_date = date_to_str(dates["expire_lab_date"]),
-            to_termination_days = dates["to_termination_days"],
-            days_after_expiration = dates["days_after_expiration"],
+            expiration_time=EXPIRATION_TIME,
+            labaccess_end_date=date_to_str(dates["expire_lab_date"]),
+            to_termination_days=dates["to_termination_days"],
+            days_after_expiration=dates["days_after_expiration"],
         )
 
     nag = StorageNags(member_id=item.member_id, item_label_id=item_label_id, nag_at=datetime.utcnow(), nag_type=nag_type)
     db_session.add(nag)
     db_session.flush()
 
+
 def box_terminator_validate(member_number=None, item_label_id=None, storage_type=None):
-    #TODO check input storage type and description, make sure they are ok inputs, also for the nag function
-    if storage_type == None:
+    # TODO check input storage type and description, make sure they are ok inputs, also for the nag function
+    if storage_type is None:
         raise BadRequest("No storage type")
 
     query = get_storage_query()
@@ -216,12 +217,16 @@ def box_terminator_validate(member_number=None, item_label_id=None, storage_type
     except NoResultFound:
         found_item = False
         try:
-            #Find the member since there was nothing in the db with the item_label_id
+            # Find the member since there was nothing in the db with the item_label_id
             member = db_session.query(Member).filter(Member.member_number == member_number).one()
         except NoResultFound:
             raise NotFound(f"Member not found {member_number}")
-        item = MemberStorage(member_id=member.member_id, item_label_id=item_label_id, storage_type=storage_type,
-         fixed_end_date = get_fixed_end_date(storage_type))
+        item = MemberStorage(
+            member_id=member.member_id,
+            item_label_id=item_label_id,
+            storage_type=storage_type,
+            fixed_end_date=get_fixed_end_date(storage_type),
+        )
 
     item.last_check_at = datetime.utcnow()
 
