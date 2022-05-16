@@ -11,7 +11,7 @@ ALTER TABLE `membership_storage` DROP COLUMN `session_token`;
 ALTER TABLE `membership_storage` DROP COLUMN `last_nag_at`;
 
 --- add column for fixed end date of the allowed storage period which is used for some storage types
-ALTER TABLE `membership_storage` ADD COLUMN`fixed_end_date` datetime DEFAULT NULL;
+ALTER TABLE `membership_storage` ADD COLUMN `fixed_end_date` date DEFAULT NULL;
 
 --- add template as "enum" to message, no real enum becuse too hard to maintain
 ALTER TABLE `membership_storage` ADD COLUMN `storage_type` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;

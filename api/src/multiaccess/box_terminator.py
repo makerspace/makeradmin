@@ -9,13 +9,12 @@ from messages.message import send_message
 from messages.models import MessageTemplate
 from service.db import db_session
 from service.error import NotFound, BadRequest
-from service.util import date_to_str, dt_to_str
+from service.util import date_to_str, dt_to_str, str_to_date
 from shop.transactions import pending_action_value_sum, ProductAction
 
 
 JUDGMENT_DAY = date(1997, 9, 26)  # Used as default for missing lab access date
 EXPIRATION_TIME = 45 #Number of days from expiration date to the termination date when the item is removed
-TEMP_STORAGE_TIME = 90 #Number of days of temporary storage allowed
 
 class Reason:
     LABACCESS_EXPIRED = 'labaccess_expired'
@@ -33,13 +32,6 @@ def get_labacess_end_date(item):
                    if s.type in (Span.LABACCESS, Span.SPECIAL_LABACESS) and not s.deleted_at)
     except ValueError:
         return JUDGMENT_DAY
-
-def get_fixed_end_date(storage_type):
-    today = date.today()
-    if storage_type == MemberStorage.TEMP:
-        return today + timedelta(days=TEMP_STORAGE_TIME)
-    else:
-        return None
 
 def get_storage_query():
     query = db_session.query(MemberStorage).join(Member).outerjoin(Span)
@@ -60,7 +52,7 @@ def get_dates(item):
         fixed_end_date = item.fixed_end_date
         terminate_fixed_date = get_expire_date_from_end_date(fixed_end_date)
 
-        to_termination_days = min( (terminate_fixed_date - today).days, (terminate_lab_date - today).days ) #TODO error here
+        to_termination_days = min( (terminate_fixed_date - today).days, (terminate_lab_date - today).days )
         days_after_expiration = max( (today - fixed_end_date).days, (today - expire_lab_date).days )
     else:
         fixed_end_date = None
@@ -144,6 +136,7 @@ def box_terminator_stored_items(storage_type=None):
     return [get_storage_info(s) for s in filtered_query.order_by(desc(MemberStorage.last_check_at))]
 
 def box_terminator_nag(member_number=None, item_label_id=None, nag_type=None, description=None):
+    #TODO check input description, make sure they are ok inputs
     try:
         item = db_session.query(MemberStorage).filter(MemberStorage.item_label_id == item_label_id,
                                            Member.member_number == member_number).one()
@@ -178,7 +171,7 @@ def box_terminator_nag(member_number=None, item_label_id=None, nag_type=None, de
         except KeyError:
             raise BadRequest(f"Bad nag type {nag_type}")
     else:
-        raise BadRequest(f"Bad storage type {storage_type}")
+        raise BadRequest(f"Bad storage type {item.storage_type}")
 
     if item.storage_type == MemberStorage.TEMP:
         send_message(
@@ -203,11 +196,13 @@ def box_terminator_nag(member_number=None, item_label_id=None, nag_type=None, de
     db_session.add(nag)
     db_session.flush()
 
-
-def box_terminator_validate(member_number=None, item_label_id=None, storage_type=None):
-    # TODO check input storage type and description, make sure they are ok inputs, also for the nag function
+def box_terminator_validate(member_number=None, item_label_id=None, storage_type=None, fixed_end_date_iso_str=None):
     if storage_type is None:
         raise BadRequest("No storage type")
+    if storage_type != MemberStorage.BOX and storage_type != MemberStorage.TEMP:
+        raise BadRequest("Unrecognized storage type")
+    if (fixed_end_date_iso_str is None) and storage_type == MemberStorage.TEMP:
+        raise BadRequest("Temporary storage requires fixed expiration date.")
 
     query = get_storage_query()
     query = query.filter(MemberStorage.item_label_id == item_label_id)
@@ -225,7 +220,7 @@ def box_terminator_validate(member_number=None, item_label_id=None, storage_type
             member_id=member.member_id,
             item_label_id=item_label_id,
             storage_type=storage_type,
-            fixed_end_date=get_fixed_end_date(storage_type),
+            fixed_end_date = str_to_date(fixed_end_date_iso_str),
         )
 
     item.last_check_at = datetime.utcnow()

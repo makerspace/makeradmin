@@ -161,7 +161,7 @@ class MemberStorage(Base):
     storage_type = Column(String(50), nullable=False)
 
     # Fixed end date
-    fixed_end_date = Column(Date, nullable=False)
+    fixed_end_date = Column(Date, nullable=True)
 
     # Item last checked at timestamp.
     last_check_at = Column(DateTime, nullable=True)
@@ -172,7 +172,7 @@ class MemberStorage(Base):
     def __repr__(self):
         return (
             f'Storage(id={self.id}, item_label_id={self.item_label_id}, member_id={self.member_id}'
-            f', last_check_at={self.last_check_at})'
+            f', last_check_at={self.last_check_at}, fixed_expire_date={self.fixed_end_date})'
         )
 
 

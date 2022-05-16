@@ -82,13 +82,12 @@ def box_terminator_stored_items(storage_type=Arg(symbol)):
 
 
 @service.route("/box-terminator/nag", method=POST, permission=MEMBER_EDIT)
-def box_terminator_nag(member_number=Arg(int), item_label_id=Arg(int), nag_type=Arg(symbol), description=Arg(safe_text)):
+def box_terminator_nag(member_number=Arg(int), item_label_id=Arg(int), nag_type=Arg(symbol), description=Arg(safe_text, False)):
     """ Send a nag email for this storage type. """
     return box_terminator.box_terminator_nag(member_number, item_label_id, nag_type, description)
 
 
 @service.route("/box-terminator/validate", method=POST, permission=MEMBER_EDIT)
-def box_terminator_validate(member_number=Arg(int), item_label_id=Arg(int), storage_type=Arg(symbol)):
+def box_terminator_validate(member_number=Arg(int), item_label_id=Arg(int), storage_type=Arg(symbol), fixed_end_date=Arg(iso_date, False)):
     """ Used when scanning qr codes. """
     return box_terminator.box_terminator_validate(member_number, item_label_id, storage_type)
-

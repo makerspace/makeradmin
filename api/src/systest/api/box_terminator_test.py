@@ -7,7 +7,7 @@ from membership.models import MemberStorage, Span, StorageNags
 from messages.models import Message
 from service.db import db_session
 from test_aid.systest_base import ApiTest
-from multiaccess.box_terminator import box_terminator_validate, get_dates, check_status, get_storage_info, Reason, Status, EXPIRATION_TIME, TEMP_STORAGE_TIME
+from multiaccess.box_terminator import box_terminator_validate, get_dates, check_status, get_storage_info, Reason, Status, EXPIRATION_TIME
 
 
 class Test(ApiTest):
@@ -38,6 +38,22 @@ class Test(ApiTest):
         item = self.db.create_member_storage(MemberStorage.TEMP, fixed_end_date=self.date(90))
         dates = get_dates(item)
 
+        self.assertEqual(dates["expire_lab_date"], self.date(50))
+        self.assertEqual(dates["terminate_lab_date"], self.date(50+EXPIRATION_TIME))
+
+        self.assertEqual(dates["expire_fixed_date"], self.date(90))
+        self.assertEqual(dates["terminate_fixed_date"], self.date(90+EXPIRATION_TIME))
+
+        self.assertEqual(dates["to_termination_days"], 50+EXPIRATION_TIME)
+        self.assertEqual(dates["days_after_expiration"], -50)
+        self.assertEqual(dates["pending_labaccess_days"], 0)
+
+    def test_box_terminator_get_dates_temp__lab_exp(self):
+        member = self.db.create_member()
+        span = self.db.create_span(enddate=self.date(-50), type=Span.LABACCESS)
+        item = self.db.create_member_storage(MemberStorage.TEMP, fixed_end_date=self.date(90))
+        dates = get_dates(item)
+
         self.assertEqual(dates["expire_lab_date"], self.date(-50))
         self.assertEqual(dates["terminate_lab_date"], self.date(-50+EXPIRATION_TIME))
 
@@ -60,7 +76,7 @@ class Test(ApiTest):
         self.assertEqual(dates["expire_fixed_date"], self.date(-30))
         self.assertEqual(dates["terminate_fixed_date"], self.date(-30+EXPIRATION_TIME))
 
-        self.assertEqual(dates["to_termination_days"], -30)
+        self.assertEqual(dates["to_termination_days"], -30+EXPIRATION_TIME)
         self.assertEqual(dates["days_after_expiration"], 30)
         self.assertEqual(dates["pending_labaccess_days"], 0)
 
@@ -106,7 +122,7 @@ class Test(ApiTest):
     #TODO check_status with fixed end date
     #TODO check_status with pending lab days
 
-    def test_box_terminator_get_storage_info(self):
+    def test_box_terminator_get_storage_info_box(self):
         member = self.db.create_member()
         item = self.db.create_member_storage(MemberStorage.BOX)
 
@@ -120,12 +136,61 @@ class Test(ApiTest):
 
         #TODO check nags of various kinds
 
-    def test_box_terminator_validate_simple_without_post(self):
+    def test_box_terminator_get_storage_info_temp_lab_exp(self):
+        member = self.db.create_member()
+        item = self.db.create_member_storage(MemberStorage.TEMP, fixed_end_date=self.date(50))
+
+        item_info = get_storage_info(item)
+
+        self.assertEqual(item_info["member_number"], member.member_number)
+        self.assertEqual(item_info["item_label_id"], item.item_label_id)
+        self.assertEqual(item_info["storage_type"], item.storage_type)
+        self.assertEqual(item_info["status"], Status.TERMINATE)
+        self.assertEqual(item_info["reason"], Reason.LABACCESS_EXPIRED)
+
+        #TODO check nags of various kinds
+
+    def test_box_terminator_get_storage_info_temp_fixed_exp(self):
+        member = self.db.create_member()
+        item = self.db.create_member_storage(MemberStorage.TEMP, fixed_end_date=self.date(-50))
+
+        item_info = get_storage_info(item)
+
+        self.assertEqual(item_info["member_number"], member.member_number)
+        self.assertEqual(item_info["item_label_id"], item.item_label_id)
+        self.assertEqual(item_info["storage_type"], item.storage_type)
+        self.assertEqual(item_info["status"], Status.TERMINATE)
+        self.assertEqual(item_info["reason"], Reason.BOTH_EXPIRED)
+
+        #TODO check nags of various kinds
+
+    def test_box_terminator_validate_simple_without_post_box(self):
         member = self.db.create_member()
         item_label_id = randint(1e9, 9e9)
         storage_type=MemberStorage.BOX
 
-        item_info = box_terminator_validate(member.member_number, item_label_id, storage_type)
+        item_info = box_terminator_validate(member.member_number, item_label_id, storage_type, None)
+
+        db_session.close()
+        item = db_session.query(MemberStorage).filter_by(item_label_id=item_label_id).one()
+        self.assertIsNotNone(item.last_check_at)
+        self.assertEqual(item.member_id, member.member_id)
+        self.assertEqual(item.item_label_id, item_label_id)
+        self.assertEqual(item.storage_type, storage_type)
+
+        self.assertEqual(item_info["member_number"], member.member_number)
+        self.assertEqual(item_info["item_label_id"], item_label_id)
+        self.assertEqual(item_info["storage_type"], storage_type)
+        self.assertEqual(item_info["status"], Status.TERMINATE)
+        self.assertEqual(item_info["reason"], Reason.LABACCESS_EXPIRED)
+
+    def test_box_terminator_validate_simple_without_post_temp(self):
+        member = self.db.create_member()
+        item_label_id = randint(1e9, 9e9)
+        storage_type=MemberStorage.TEMP
+        fixed_end_date=self.date(50)
+
+        item_info = box_terminator_validate(member.member_number, item_label_id, storage_type, fixed_end_date.isoformat())
 
         db_session.close()
         item = db_session.query(MemberStorage).filter_by(item_label_id=item_label_id).one()
@@ -161,6 +226,30 @@ class Test(ApiTest):
         
         self.assertIsNone(item.last_nag_at)
         self.assertIsNotNone(item.last_check_at)
+
+    def test_box_terminator_validate_creates_temp_if_not_exists(self):
+        member = self.db.create_member()
+        item_label_id = randint(1e9, 9e9)
+        storage_type=MemberStorage.TEMP
+        fixed_end_date=self.date(50)
+        
+        self.api.post('/multiaccess/box-terminator/validate',
+                      dict(member_number=member.member_number, storage_type=storage_type, item_label_id=item_label_id, fixed_end_date=fixed_end_date.isoformat())).expect(
+            200,
+            data__member_number=member.member_number,
+            data__expire_date='1997-09-27', #TODO
+            data__terminate_date='1997-11-11', #TODO
+            data__storage_type=storage_type,
+            data__status='terminate' #TODO
+        )
+        
+        db_session.close()
+        
+        item = db_session.query(MemberStorage).filter_by(item_label_id=item_label_id).one()
+        
+        self.assertIsNone(item.last_nag_at)
+        self.assertIsNotNone(item.last_check_at)
+
 """
     def test_box_terminator_validate_uses_existing_box_if_it_exists(self):
         member = self.db.create_member()
