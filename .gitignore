@@ -4,6 +4,7 @@ __pycache__/
 .idea
 .envrc
 .mypy_cache
+.vscode
 # For VIM temp files
 *.swp
 .webshop_product_images/
