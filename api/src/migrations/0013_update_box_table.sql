@@ -17,7 +17,7 @@ ALTER TABLE `membership_storage` ADD COLUMN `fixed_end_date` date DEFAULT NULL;
 ALTER TABLE `membership_storage` ADD COLUMN `storage_type` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
 
 --- create a new table to store the nag history
-CREATE TABLE `storage_nags` (
+CREATE TABLE IF NOT EXISTS `storage_nags` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `member_id` int(10) unsigned NOT NULL,
   `item_label_id` bigint(20) unsigned NOT NULL,

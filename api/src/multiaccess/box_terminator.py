@@ -15,6 +15,10 @@ from shop.transactions import pending_action_value_sum, ProductAction
 
 JUDGMENT_DAY = date(1997, 9, 26)  # Used as default for missing lab access date
 EXPIRATION_TIME = 45 #Number of days from expiration date to the termination date when the item is removed
+FUTURE_LIMIT = 90 # Maximum number of days possible for fixed_end_date
+
+# TODO
+# Add nags for spray cans in box, chemicals in box, battery in box, random stuff/chaos around item
 
 class Reason:
     LABACCESS_EXPIRED = 'labaccess_expired'
@@ -196,13 +200,16 @@ def box_terminator_nag(member_number=None, item_label_id=None, nag_type=None, de
     db_session.add(nag)
     db_session.flush()
 
-def box_terminator_validate(member_number=None, item_label_id=None, storage_type=None, fixed_end_date_iso_str=None):
+def box_terminator_validate(member_number=None, item_label_id=None, storage_type=None, fixed_end_date=None):
+    today = date.today()
     if storage_type is None:
         raise BadRequest("No storage type")
     if storage_type != MemberStorage.BOX and storage_type != MemberStorage.TEMP:
         raise BadRequest("Unrecognized storage type")
-    if (fixed_end_date_iso_str is None) and storage_type == MemberStorage.TEMP:
+    if fixed_end_date is None and storage_type == MemberStorage.TEMP:
         raise BadRequest("Temporary storage requires fixed expiration date.")
+    if (fixed_end_date - today.days)> FUTURE_LIMIT:
+        raise BadRequest("Fixed end date is further in the future than allowed maximum.")
 
     query = get_storage_query()
     query = query.filter(MemberStorage.item_label_id == item_label_id)
@@ -220,7 +227,7 @@ def box_terminator_validate(member_number=None, item_label_id=None, storage_type
             member_id=member.member_id,
             item_label_id=item_label_id,
             storage_type=storage_type,
-            fixed_end_date = str_to_date(fixed_end_date_iso_str),
+            fixed_end_date = fixed_end_date,
         )
 
     item.last_check_at = datetime.utcnow()

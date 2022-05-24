@@ -90,4 +90,5 @@ def box_terminator_nag(member_number=Arg(int), item_label_id=Arg(int), nag_type=
 @service.route("/box-terminator/validate", method=POST, permission=MEMBER_EDIT)
 def box_terminator_validate(member_number=Arg(int), item_label_id=Arg(int), storage_type=Arg(symbol), fixed_end_date=Arg(iso_date, False)):
     """ Used when scanning qr codes. """
-    return box_terminator.box_terminator_validate(member_number, item_label_id, storage_type)
+    # Arg(isodate) converts from isoformat string to datetime
+    return box_terminator.box_terminator_validate(member_number, item_label_id, storage_type, fixed_end_date)
