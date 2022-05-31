@@ -133,14 +133,15 @@ def get_storage_info(item):
         "last_check_at": dt_to_str(item.last_check_at),
     }
 
-def box_terminator_stored_items(storage_type=None):
+def box_terminator_stored_items(storage_type=None, num_days=None):
+    if num_days is None:
+        num_days = 7
     query = get_storage_query()
-    limit = datetime.utcnow() - timedelta(days=7)
+    limit = datetime.utcnow() - timedelta(days=num_days)
     filtered_query = filter(lambda item: item.last_check_at > limit and item.storage_type == storage_type, query)
     return [get_storage_info(s) for s in filtered_query.order_by(desc(MemberStorage.last_check_at))]
 
 def box_terminator_nag(member_number=None, item_label_id=None, nag_type=None, description=None):
-    #TODO check input description, make sure they are ok inputs
     try:
         item = db_session.query(MemberStorage).filter(MemberStorage.item_label_id == item_label_id,
                                            Member.member_number == member_number).one()
@@ -208,14 +209,19 @@ def box_terminator_validate(member_number=None, item_label_id=None, storage_type
         raise BadRequest("Unrecognized storage type")
     if fixed_end_date is None and storage_type == MemberStorage.TEMP:
         raise BadRequest("Temporary storage requires fixed expiration date.")
-    if (fixed_end_date - today.days)> FUTURE_LIMIT:
-        raise BadRequest("Fixed end date is further in the future than allowed maximum.")
+    #if (fixed_end_date - today).days> FUTURE_LIMIT:
+    #    raise BadRequest("Fixed end date is further in the future than allowed maximum.")
 
     query = get_storage_query()
     query = query.filter(MemberStorage.item_label_id == item_label_id)
     try:
         item = query.one()
         found_item = True
+        if storage_type != item.storage_type:
+            raise BadRequest("Storage type argument does not match storage type in db.")
+        if storage_type != MemberStorage.BOX:
+            if fixed_end_date != item.fixed_end_date:
+                raise BadRequest("Fixed end date does not match fixed end date in db.")
     except NoResultFound:
         found_item = False
         try:

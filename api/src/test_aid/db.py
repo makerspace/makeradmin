@@ -59,10 +59,13 @@ class DbFactory:
         return self.member
 
     def create_member_storage(self, storage_type, **kwargs):
-        if 'fixed_end_date' in kwargs:
-            fixed_end_date = kwargs.pop('fixed_end_date')
+        if storage_type == MemberStorage.TEMP:
+            if 'fixed_end_date' in kwargs:
+                fixed_end_date = kwargs.pop('fixed_end_date')
+            else:
+                fixed_end_date = date.today+30
         else:
-            fixed_end_date = date(2029,1,1)
+            fixed_end_date = None
 
         if 'member' in kwargs:
             member = kwargs.pop('member')

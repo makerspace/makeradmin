@@ -5,7 +5,7 @@ from membership.models import Member, Span, Key
 from membership.membership import get_membership_summary
 from multiaccess import service
 from multiaccess import box_terminator
-from service.api_definition import GET, Arg, MEMBER_EDIT, POST, MEMBER_VIEW, symbol, safe_text, iso_date, MEMBERBOOTH
+from service.api_definition import GET, Arg, MEMBER_EDIT, POST, MEMBER_VIEW, symbol, safe_text, iso_date, natural1, MEMBERBOOTH
 from service.db import db_session
 
 
@@ -76,9 +76,9 @@ def memberbooth_member(member_number=Arg(int)):
 
 
 @service.route("/box-terminator/stored_items", method=GET, permission=MEMBER_EDIT)
-def box_terminator_stored_items(storage_type=Arg(symbol)):
-    """ Returns a list of all items scanned of the storage type during the last seven days"""
-    return box_terminator.box_terminator_stored_items()
+def box_terminator_stored_items(storage_type=Arg(symbol), num_days=Arg(natural1 ,False)):
+    """ Returns a list of all items scanned of the storage type during the last num_days, seven if None, days"""
+    return box_terminator.box_terminator_stored_items(storage_type, num_days)
 
 
 @service.route("/box-terminator/nag", method=POST, permission=MEMBER_EDIT)
