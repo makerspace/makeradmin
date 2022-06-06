@@ -3,7 +3,7 @@ CREATE TABLE IF NOT EXISTS `change_phone_number_requests` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `member_id` int(10) unsigned NOT NULL,
   `phone` varchar(255) COLLATE utf8mb4_0900_ai_ci NOT NULL,
-  `validation_code` int(10) unsigned NOT NULL,
+  `validation_code` int(6) unsigned NOT NULL,
   `completed` boolean DEFAULT false NOT NULL,
   `timestamp` datetime NOT NULL,
   PRIMARY KEY (`id`),
