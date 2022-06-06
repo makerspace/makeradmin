@@ -92,7 +92,7 @@ export function ajax(type: string, url: string, data: object | null = null): Pro
 }
 
 export function documentLoaded() {
-	return new Promise<void>((resolve, reject) => {
+	return new Promise<void>((resolve) => {
 		document.addEventListener('DOMContentLoaded', () => resolve());
 	});
 }

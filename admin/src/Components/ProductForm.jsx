@@ -74,6 +74,8 @@ class ProductForm extends React.Component {
             </div>
         );
         
+        const imageSrc = o => `data:${o.type};base64, ` + o.data;
+
         return (
             <div className="uk-margin-top">
                 <form className="uk-form uk-form-stacked" onSubmit={(e) => {e.preventDefault(); onSave(); return false;}}>
@@ -85,6 +87,12 @@ class ProductForm extends React.Component {
                         <TextInput model={product} name="unit" title="Enhet" />
                         <TextInput model={product} name="price" title="Pris (SEK)" type="number"/>
                         <TextInput model={product} name="smallest_multiple" title="Multipel " type="number"/>
+                        <SelectInput
+                            nullOption={{id: 0}}
+                            model={product} name="image_id" title="Bild"
+                            getLabel={o => <div style={{height: "40px", width: "40px"}}>{ o.id ? <img src={imageSrc(o)} style={{verticalAlign: "middle", height: "100%"}} alt={o.name}/> : ""}</div>}
+                            getValue={o => o.id} dataSource={"/webshop/product_image"}
+                        />
                     </fieldset>
                     <fieldset className="uk-margin-top">
                         <legend><i className="uk-icon-magic"/> Åtgärder</legend>
@@ -131,7 +139,6 @@ class ProductForm extends React.Component {
                 </form>
             </div>
         );
-        // Image upload not yet supported.
     }
 }
 

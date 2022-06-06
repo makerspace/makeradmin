@@ -7,7 +7,7 @@ export default class CheckboxInput extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            value: null,
+            value: false,
             selected: false,
             isDirty: false,
         };
@@ -15,7 +15,7 @@ export default class CheckboxInput extends React.Component {
 
     componentDidMount() {
         const {model, name} = this.props;
-        this.unsubscribe = model.subscribe(() => this.setState({value: model[name] === '' ? null : model[name], isDirty: model.isDirty(name)}));
+        this.unsubscribe = model.subscribe(() => this.setState({value: model[name] === '' ? false : model[name], isDirty: model.isDirty(name)}));
     }
     
     componentWillUnmount() {

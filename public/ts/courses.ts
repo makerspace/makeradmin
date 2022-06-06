@@ -1,6 +1,5 @@
 import * as common from "./common"
-import * as login from "./login"
-import Cart from "./cart"
+import * as login from "./login";
 import { ServerResponse, UNAUTHORIZED } from "./common";
 import { Quiz } from "./quiz";
 declare var UIkit: any;

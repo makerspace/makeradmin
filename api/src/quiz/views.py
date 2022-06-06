@@ -106,9 +106,10 @@ def next_question(quiz_id: int, include_correct=False):
     json["options"] = []
     for option in question.options:
         option = quiz_question_option_entity.to_obj(option)
-        del option["correct"]
-        del option["answer_description"]
-        json["options"].append(option)
+        if option["deleted_at"] is None:
+            del option["correct"]
+            del option["answer_description"]
+            json["options"].append(option)
 
     del json["answer_description"]
 

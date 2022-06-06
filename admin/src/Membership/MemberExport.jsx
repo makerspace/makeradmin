@@ -26,9 +26,10 @@ class MemberExport extends React.Component {
 
             // Format as a CSV file
             let rows = [];
-            rows.push(["First Name, Last Name, Email, Labaccess End Date, Membership End Date"]);
+            rows.push(["Member Number,First Name,Last Name,Email,Labaccess End Date,Membership End Date"]);
             for (const member of active_members) {
                 rows.push([
+                    member.member_number,
                     member.firstname,
                     member.lastname,
                     member.email,

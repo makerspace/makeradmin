@@ -39,6 +39,7 @@ MEMBERSHIP_REMINDER_GRACE_PERIOD = 28
 QUIZ_DAYS_FROM_FIRST_EMAIL_TO_REMINDER = 4
 QUIZ_DAYS_BETWEEN_REMINDERS = 21
 
+
 def render_template(name, **kwargs):
     return template_env.get_template(name).render(**kwargs)
 
@@ -172,10 +173,13 @@ def membership_reminder():
         if already_purchased:
             # Member has already purchased extra membership
             continue
-        
+
+        url = get_login_link(member, "membership reminder", "/shop")
+
         send_message(
             template=MessageTemplate.MEMBERSHIP_REMINDER,
             member=member,
+            url=url,
             db_session=db_session,
             render_template=render_template,
             expiration_date=membership.membership_end,
@@ -251,11 +255,7 @@ def quiz_reminders():
                 else:
                     template = MessageTemplate.QUIZ_FIRST_NEWMEMBER
 
-            redirect = get_public_url(f"/member/quiz/1")
-            # Allow a very long login token for the quiz
-            # It's not like this is a security risk, having access to someones email will automatically allow one to login anyway.
-            access_token = create_access_token("localhost", "automatic quiz reminder", member.member_id, valid_duration=timedelta(days=2))['access_token']
-            url = get_public_url(f"/member/login/{access_token}?redirect=" + quote_plus(redirect))
+            url = get_login_link(member, "automatic quiz reminder", "/member/quiz/1")
 
             send_message(
                 template=template,
@@ -266,6 +266,13 @@ def quiz_reminders():
                 correctly_answered_questions=quiz_member.correctly_answered_questions,
                 url=url,
             )
+
+
+def get_login_link(member, browser, path):
+    redirect = get_public_url(path)
+    access_token = create_access_token("localhost", browser, member.member_id, valid_duration=timedelta(days=4))['access_token']
+    return get_public_url(f"/member/login/{access_token}?redirect=" + quote_plus(redirect))
+    
 
 if __name__ == '__main__':
 

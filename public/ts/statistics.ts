@@ -6,13 +6,10 @@ import { ServerResponse } from "./common";
 import { Quiz } from "./quiz";
 
 declare var UIkit: any;
-declare var moment: any;
 declare var Chart: any;
 
 common.documentLoaded().then(() => {
 	const apiBasePath = window.apiBasePath;
-	const webshop_edit_permission = "webshop_edit";
-	const service_permission = "service";
 
 	const root = document.getElementById("single-page-content")!;
 
@@ -37,7 +34,7 @@ common.documentLoaded().then(() => {
 		addProductPurchasedChart(root, data[3].data);
 		addMemberDistribution(root, data[4].data, "Of all members who became members at least one year ago, how many months have they had active lab membership during the last 12 months.");
 		addMemberDistribution(root, data[5].data, "Among all members, how many months have they had active lab membership during the last 12 months.");
-		// addRandomCharts(root);
+
 	})
 		.catch(json => {
 			UIkit.modal.alert("<h2>Couldn't load statistics</h2>" + json.message + " " + json.error);
@@ -53,26 +50,7 @@ const colors = [
 	"#ffff33",
 ]
 
-// const colors = [
-// 	"#07719F",
-// 	"#2785AD",
-// 	"#9F7107",
-// 	"#BE9A46",
-// 	"#AD2727",
-// 	"#BE4646",
-// ]
-
 var timeFormat = 'YYYY-MM-DD HH:mm';
-
-function splitSeries(items: Array<any>) {
-	const dates = [];
-	const values = [];
-	for (let i = 0; i < items.length; i++) {
-		dates.push(new Date(items[i][0]));
-		values.push(items[i][1]);
-	}
-	return { dates: dates, values: values };
-}
 
 function toPoints(items: Array<any>) {
 	const values = [];
@@ -118,8 +96,6 @@ function pointAtDate(items: Array<any>, date: Date) {
 }
 
 function addChart(root: HTMLElement, data: any) {
-	// lab = splitSeries(data.labmembership);
-	// member = splitSeries(data.membership);
 	const dataMembership = filterDuplicates(toPoints(data.membership));
 	const dataLabaccess = filterDuplicates(toPoints(data.labaccess));
 	const maxtime = new Date();
@@ -233,51 +209,12 @@ function addChart(root: HTMLElement, data: any) {
 
 	const canvas = memberstats.querySelector("canvas")!; // <HTMLCanvasElement>document.createElement("canvas");
 	const ctx = canvas.getContext('2d');
-	const chart = new Chart(ctx, config);
+	new Chart(ctx, config);
 
 	root.appendChild(memberstats);
 }
 
-function addRandomCharts(root: HTMLElement) {
-	{
-		const canvas = <HTMLCanvasElement>document.createElement("canvas");
-		root.appendChild(canvas);
-		canvas.width = 500;
-		canvas.height = 300;
-		const ctx = canvas.getContext('2d');
-
-		// And for a doughnut chart
-		const myDoughnutChart = new Chart(ctx, {
-			type: 'doughnut',
-			data: {
-				datasets: [{
-					"data": [0.1, 0.9],
-					"backgroundColor": [
-						colors[1],
-						colors[0],
-					]
-				}],
-				labels: [
-					"Tid som du är på makerspace",
-					"Annan tid som borde spenderas på makerspace",
-				]
-			},
-			options: {
-				title: {
-					display: true,
-					text: 'Motiverande fake-data'
-				},
-				legend: {
-					position: 'top',
-				}
-			}
-		});
-	}
-}
-
 function addLaserChart(root: HTMLElement, data: any) {
-	// lab = splitSeries(data.labmembership);
-	// member = splitSeries(data.membership);
 	const maxtime = new Date();
 
 	const config = {
@@ -331,18 +268,15 @@ function addLaserChart(root: HTMLElement, data: any) {
 	canvas.width = 500;
 	canvas.height = 300;
 	const ctx = canvas.getContext('2d');
-	const chart = new Chart(ctx, config);
+	new Chart(ctx, config);
 }
 
 
 function addMemberDistribution(root: HTMLElement, data: MemberDistribution, description: string) {
-	// lab = splitSeries(data.labmembership);
-	// member = splitSeries(data.membership);
 	let labaccess = data.labaccess;
 
 	// Remove the "wasn't a member during this time" count which will be the data for "0 Months"
 	labaccess.splice(0, 1);
-	const maxtime = new Date();
 
 	const toPoints = (items: Array<any>)=>{
 		const values = [];
@@ -405,7 +339,7 @@ function addMemberDistribution(root: HTMLElement, data: MemberDistribution, desc
 	canvas.width = 500;
 	canvas.height = 300;
 	const ctx = canvas.getContext('2d');
-	const chart = new Chart(ctx, config);
+	new Chart(ctx, config);
 
 	const desc = <HTMLParagraphElement>document.createElement("p");
 	desc.textContent = description;
@@ -590,7 +524,7 @@ function addQuizChart(root: HTMLElement, data: QuizStatistics, quiz: Quiz) {
 	canvas.width = 500;
 	canvas.height = 800;
 	const ctx = canvas.getContext('2d');
-	const chart = new Chart(ctx, config);
+	new Chart(ctx, config);
 }
 
 interface Product {
@@ -703,5 +637,5 @@ function addRevenueChart(root: HTMLElement, data: { name: string, amount: number
 	canvas.width = 500;
 	canvas.height = 70 + 30 * data.length;
 	const ctx = canvas.getContext('2d');
-	const chart = new Chart(ctx, config);
+	new Chart(ctx, config);
 }
