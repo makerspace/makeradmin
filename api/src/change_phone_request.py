@@ -12,6 +12,7 @@ logger = logging.getLogger('makeradmin') #TODO is it needed?
 
 #TODO logging
 
+
 def change_phone_request(member_id, phone):
     logging.info('asdf')
     now = datetime.utcnow()
@@ -26,7 +27,7 @@ def change_phone_request(member_id, phone):
     #TODO change format of number?
     #TODO accessy and sms thing has same format?
 
-    validation_code = randint(1e5, 1e6-1)
+    validation_code = f"{randint(1e6):06d}"
 
     #TODO send validation code with sms
 
@@ -38,6 +39,7 @@ def change_phone_request(member_id, phone):
     #TODO return errors
 
     return {}
+
 
 def change_phone_validate(member_id, phone, validation_code):
     logging.info('asdf')
