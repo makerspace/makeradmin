@@ -84,7 +84,13 @@ export function ajax(type: string, url: string, data: object | null = null): Pro
 			else reject(JSON.parse(xhr.responseText));
 		};
 		xhr.onerror = () => {
-			reject(JSON.parse(xhr.responseText));
+			let response;
+			try {
+				response = JSON.parse(xhr.responseText);
+			} catch (err) {
+				response = "bad json: " + xhr.responseText;
+			}
+			reject(response);
 		};
 
 		if (data == null) {

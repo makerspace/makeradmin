@@ -10,7 +10,6 @@ from membership.membership import get_membership_summary
 from membership.views import member_entity
 from service.api_definition import POST, PUBLIC, Arg, GET, USER, natural1, non_empty_str
 from change_phone_request import change_phone_request, change_phone_validate
-from service.error import BadRequest
 
 
 @service.route("/send_access_token", method=POST, permission=PUBLIC)
@@ -50,6 +49,6 @@ def request_change_phone_number(phone=Arg(non_empty_str)):
 
 
 @service.route("/current/change_phone_validate", method=POST, permission=USER)
-def validate_change_phone_number(phone=Arg(non_empty_str), validation_code=Arg(natural1)):
-    return change_phone_validate(g.user_id, phone, validation_code)
+def validate_change_phone_number(validation_code=Arg(natural1)):
+    return change_phone_validate(g.user_id, validation_code)
 
