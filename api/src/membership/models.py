@@ -1,3 +1,4 @@
+from xmlrpc.client import Boolean
 from sqlalchemy import Column, Integer, String, DateTime, Text, Date, Enum, Table, ForeignKey, func, text, select, \
     BigInteger
 from sqlalchemy.ext.declarative import declarative_base
@@ -170,6 +171,28 @@ class Box(Base):
             f', last_check_at={self.last_check_at}, last_nag_at={self.last_nag_at})'
         )
 
+
+class PhoneNumberChangeRequest(Base):
+    __tablename__ = 'change_phone_number_requests'
+    
+    id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
+    
+    member_id = Column(Integer, ForeignKey('membership_members.member_id'), nullable=False)
+    
+    # If the request has been completed or not.
+    box_label_id = Column(Boolean, nullable=False)
+    
+    # When the request was made.
+    time_stamp = Column(DateTime, nullable=False)
+
+    member = relationship(Member, backref="change_phone_number_requests")
+    
+    def __repr__(self):
+        return (
+            f'Box(id={self.id}, box_label_id={self.box_label_id}, member_id={self.member_id}'
+            f', last_check_at={self.last_check_at}, last_nag_at={self.last_nag_at})'
+        )
+    
 
 # https://stackoverflow.com/questions/67149505/how-do-i-make-sqlalchemy-backref-work-without-creating-an-orm-object
 configure_mappers()
