@@ -20,6 +20,7 @@ module.exports = (env, args) => {
             quiz: "./ts/quiz.tsx",
             licenses: "./ts/licenses.ts",
             courses: "./ts/courses.ts",
+            change_phone: "./ts/change_phone.tsx",
         },
         
         output:

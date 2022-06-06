@@ -142,7 +142,7 @@ common.documentLoaded().then(() => {
                         <label  for='phone'           class="uk-form-label">Telefonnummer</label>
                         <span style="width: 100%; display: flex;">
                             <input name='phone'           class="uk-input readonly-input" value="${member.phone || ''}" disabled />
-                            <a href="${apiBasePath}/member/change_phone" class="uk-button uk-button-primary" >Byt</a>
+                            <a href="/member/change_phone" class="uk-button uk-button-primary" >Byt</a>
                         </span>
                     </div>
                 </fieldset>
