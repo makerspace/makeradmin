@@ -179,7 +179,7 @@ class PhoneNumberChangeRequest(Base):
     phone = Column(String(255), nullable=False)
 
     # Number used to compare if the reques is valid or not.
-    validate_code = Column(Integer, nullable=False)
+    validation_code = Column(Integer, nullable=False)
 
     # If the request has been completed or not.
     completed = Column(Boolean, nullable=False)
