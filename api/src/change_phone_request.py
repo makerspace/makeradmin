@@ -37,6 +37,8 @@ def change_phone_request(member_id, phone):
 
     #TODO return errors
 
+    return {}
+
 def change_phone_validate(member_id, phone, validation_code):
     logging.info('asdf')
     now = datetime.utcnow()
@@ -53,3 +55,5 @@ def change_phone_validate(member_id, phone, validation_code):
     except NoResultFound:
         logging.warning('asdf')
         raise NotFound("Missing request or old request")
+
+    return {}

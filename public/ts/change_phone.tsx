@@ -32,9 +32,22 @@ class ChangePhone extends Component<Props, State> {
             await common.ajax("POST", `${window.apiBasePath}/member/current/change_phone_request`, {phone: number.trim()});
             this.setState({requestSent: true})
         } catch (error) {
-            UIkit.modal.alert("<h2>" + error.status + "</h2><p>" + error.message + "</p>");
+            common.show_error("Byta telefonnummer misslyckades", error)
         }
-        this.setState({requestSent: true,})
+        this.setState({requestSubmitInProgress: false})
+        // UIkit.modal.alert("You need to enter your email" + number.trim());
+        //common.ajax("POST", `${window.apiBasePath}/member/current/change_phone_validate`, {code: number.trim()});
+    }
+    
+    async submitValidationCode(code: string) {
+        try {
+            this.setState({validateSubmitInProgress: true})
+            await common.ajax("POST", `${window.apiBasePath}/member/current/change_phone_request`, {phone: code.trim()});
+            this.setState({requestSent: true})
+        } catch (error) {
+            common.show_error("Validera kod misslyckades", error)
+        }
+        this.setState({validateSubmitInProgress: false})
         // UIkit.modal.alert("You need to enter your email" + number.trim());
         //common.ajax("POST", `${window.apiBasePath}/member/current/change_phone_validate`, {code: number.trim()});
     }
@@ -60,7 +73,15 @@ class ChangePhone extends Component<Props, State> {
                         <button className="uk-width-1-1 uk-button uk-button-primary uk-button-large" disabled={requestSubmitInProgress}><span className="uk-icon-check"/>Skicka valideringskod</button>
                     </div>
                 </form>
-                <form className="uk-form uk-form-stacked uk-margin-bottom">
+                <form className="uk-form uk-form-stacked uk-margin-bottom"
+                      onSubmit={e => {
+                          e.preventDefault();
+                          const input = document.getElementById('code') as HTMLInputElement;
+                          if (input != null) {
+                              this.submitValidationCode(input.value);
+                          }
+                      }}
+                >
                     <h1 style="text-align: center;">Validera telefonnummer</h1>
                     <div className="uk-form-row" style="margin: 16px 0;">
                         <input id="code" tabIndex={2} autoFocus className="uk-form-large uk-width-1-1" type="number" placeholder="Valideringkod"/>
