@@ -122,7 +122,7 @@ common.documentLoaded().then(() => {
         const member = member_json.data;
         const membership = membership_json.data;
         root.innerHTML = `
-            <form class="uk-form uk-form-stacked uk-margin-bottom">
+            <form class="uk-form uk-form-stacked uk-margin-bottom" xmlns="http://www.w3.org/1999/html">
                 <h2>Medlem ${member.member_number}: ${member.firstname} ${member.lastname}</h2>
                 <fieldset>
                     <legend><i uk-icon="user"></i> Personuppgifter</legend>
@@ -140,7 +140,10 @@ common.documentLoaded().then(() => {
                     </div>
                     <div>
                         <label  for='phone'           class="uk-form-label">Telefonnummer</label>
-                        <input name='phone'           class="uk-input readonly-input" value="${member.phone || ''}" disabled />
+                        <span style="width: 100%; display: flex;">
+                            <input name='phone'           class="uk-input readonly-input" value="${member.phone || ''}" disabled />
+                            <a href="${apiBasePath}/member/change_phone" class="uk-button uk-button-primary" >Byt</a>
+                        </span>
                     </div>
                 </fieldset>
                 <fieldset data-uk-margin>
