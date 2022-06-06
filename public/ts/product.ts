@@ -65,4 +65,8 @@ common.onGetAndDocumentLoaded("/webshop/product_data/" + window.productId, (valu
 		productAmount.value = "" + (Number(productAmount.value) - product.smallest_multiple);
 		setCartItem(true);
 	});
+
+  	const apiBasePath = window.apiBasePath;
+    const image_url = `${apiBasePath}/webshop/image/${product.image_id || 0}`;
+	document.querySelector("#images")!.innerHTML = `<img src="${image_url}" alt="${product.name}">`;
 });
