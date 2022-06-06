@@ -324,16 +324,6 @@ body {
         border-radius: 0px 2px 2px 0px;
     }
 
-    .product-edit {
-        margin-left: 4px;
-        margin-right: 4px;
-    }
-
-    .product-delete {
-        margin-left: 4px;
-        margin-right: 4px;
-    }
-
     .number-add {
         text-align: center;
         padding: 0px;
@@ -380,76 +370,6 @@ body {
             background: #CCC;
         }
     }
-}
-
-#edit.active {
-    opacity: 1;
-    visibility: visible;
-}
-
-#edit {
-    position: fixed;
-    right: 10px;
-    width: 100px;
-    height: 50px;
-    top: 10px;
-    border: 1px solid #AAA;
-    border-radius: 10px;
-    opacity: 0;
-    transition: opacity 500ms;
-    transition: background 500ms;
-    visibility: hidden;
-
-    span {
-        margin-right: 8px;
-    }
-}
-
-#edit.edit-mode {
-    background: #f0506e;
-    color: #FFF;
-    border: 1px solid #962d41;
-}
-
-.edit.active {
-    opacity: 1;
-    visibility: visible;
-    display: inline-block;
-}
-
-.edit {
-    opacity: 0;
-    // display: inline-block;
-    // visibility: hidden;
-    display: none;
-    transition: opacity 500ms;
-}
-
-.edit-invisible.active {
-    width: 0px;
-    flex-basis: 0px;
-    min-width: 0px;
-    margin-left: 0px;
-    margin-right: 0px;
-    border: none;
-    opacity: 0;
-    visibility: hidden;
-}
-
-.edit-display {
-    opacity: 1;
-    visibility: visible;
-}
-
-.edit-display:not(.active) {
-    opacity: 0;
-    width: 0px;
-    flex-basis: 0px;
-    padding-left: 0px;
-    padding-right: 0px;
-    margin-left: 0px;
-    margin-right: 0px;
-    visibility: hidden;
 }
 
 .product:hover .edit-display.active {
