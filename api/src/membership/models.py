@@ -1,6 +1,5 @@
-from xmlrpc.client import Boolean
 from sqlalchemy import Column, Integer, String, DateTime, Text, Date, Enum, Table, ForeignKey, func, text, select, \
-    BigInteger
+    BigInteger, Boolean
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, column_property, configure_mappers
 
@@ -176,9 +175,12 @@ class PhoneNumberChangeRequest(Base):
     __tablename__ = 'change_phone_number_requests'
     
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
-    
     member_id = Column(Integer, ForeignKey('membership_members.member_id'), nullable=False)
-    
+    phone = Column(String(255), nullable=False)
+
+    # Number used to compare if the reques is valid or not.
+    validate_code = Column(Integer, nullable=False)
+
     # If the request has been completed or not.
     completed = Column(Boolean, nullable=False)
     
