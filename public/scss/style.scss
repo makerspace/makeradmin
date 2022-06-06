@@ -815,6 +815,13 @@ form input.readonly-input {
     }
 
     color: white;
+    #images {
+        background: white;
+
+        img {
+            width: 100%;
+        }
+    }
 
     a {
         color: white;
