@@ -33,6 +33,7 @@ def current_membership_info():
     """ Get current user membership information. """
     return get_membership_summary(g.user_id).as_json()
 
+
 @service.route("/current/quizzes", method=GET, permission=USER)
 def current_member_quiz_info():
     """ Get info about which quizzes the current user has completed. """

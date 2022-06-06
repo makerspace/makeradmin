@@ -1,0 +1,23 @@
+{% from "sidebar.html" import sidebar with context %}
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Medlemssidor - Stockholm Makerspace</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="{{ STATIC }}/uikit/css/uikit.min.css" />
+    <link rel="stylesheet" href="{{ STATIC }}/style.css" />
+    {% include 'meta.html' %}
+    <script src="{{ STATIC }}/uikit/js/uikit.min.js"></script>
+    <script src="{{ STATIC }}/uikit/js/uikit-icons.min.js"></script>
+    <script src="{{ STATIC }}/js/change_phone.js"></script>
+  </head>
+  <body>
+    {% include 'banner.html' %}
+    <div id="root">
+      {{ sidebar("member") }}
+      <div id="content">
+      </div>
+    </div>
+  </body>
+</html>
