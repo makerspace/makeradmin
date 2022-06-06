@@ -180,17 +180,17 @@ class PhoneNumberChangeRequest(Base):
     member_id = Column(Integer, ForeignKey('membership_members.member_id'), nullable=False)
     
     # If the request has been completed or not.
-    box_label_id = Column(Boolean, nullable=False)
+    completed = Column(Boolean, nullable=False)
     
     # When the request was made.
-    time_stamp = Column(DateTime, nullable=False)
+    timestamp = Column(DateTime, nullable=False)
 
     member = relationship(Member, backref="change_phone_number_requests")
     
     def __repr__(self):
         return (
-            f'Box(id={self.id}, box_label_id={self.box_label_id}, member_id={self.member_id}'
-            f', last_check_at={self.last_check_at}, last_nag_at={self.last_nag_at})'
+            f'ChangePhoneNumberRequest(id={self.id}, member_id={self.member_id}'
+            f', completed={self.completed}, timestamp={self.timestamp})'
         )
     
 
