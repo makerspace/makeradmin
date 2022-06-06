@@ -13,10 +13,8 @@ logger = logging.getLogger('makeradmin') #TODO is it needed?
 
 #TODO logging
 
-
 def change_phone_request(member_id, phone):
-    return {"kaka": "baja"}
-    logging.info('asdf')
+    logging.info('Member id: {member_id} channge phone number request. Phone {phone}')
     now = datetime.utcnow()
 
     #TODO spam checks
@@ -40,31 +38,23 @@ def change_phone_request(member_id, phone):
     db_session.add(change_request)
     db_session.flush()
 
-    #TODO return errors
-
-    return {"kaka": "baja"}
-
-
 def change_phone_validate(member_id, validation_code):
-    return {"kaka": "baja"}
-    logging.info('asdf')
+    logging.info(f'Member id: {member_id} validating phone number. Code {validation_code}')
     now = datetime.utcnow()
 
     try:
         change_request = db_session.query(PhoneNumberChangeRequest).filter(PhoneNumberChangeRequest.member_id == member_id).one()
         if PhoneNumberChangeRequest.timestamp <= now-timedelta(minutes=5):
-            logging.info('asdf')
+            logging.info(f'Member id: {member_id} validating phone number. Too old request')
             raise BadRequest("Ändringsförfrågan är för gammal")
         else:
             if change_request.validation_code == validation_code:
                 setattr(change_request.member, phone)
                 db_session.flush()
-                logging.info('asdf')
+                logging.info('Member id: {member_id} validating phone number. Success')
             else:
-                logging.info('asdf')
+                logging.info('Member id: {member_id} validating phone number. Incorrect validation code')
                 raise BadRequest("Felaktig valideringskod")
     except NoResultFound:
-        logging.info('asdf')
+        logging.info('Member id: {member_id} validating phone number. No request for this member')
         raise NotFound("Finns ingen ändringsförfrågan")
-
-    return {"kaka": "baja"}
