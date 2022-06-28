@@ -88,7 +88,7 @@ common.onGetAndDocumentLoaded("/webshop/register_page_data", (value: any) => {
                     firstname: common.getValue("#firstname"),
                     lastname: common.getValue("#lastname"),
                     email: common.getValue("#email"),
-                    phone: common.getValue("#phone"),
+                    // phone: common.getValue("#phone"), disabled until we can validate phone on register
                     address_street: "", // common.getValue("#address_street"),
                     address_extra: "", // common.getValue("#address_extra"),
                     address_zipcode: parseInt(common.getValue("#address_zipcode").replace(/ /g, '')) || null,
