@@ -49,6 +49,6 @@ def request_change_phone_number(phone=Arg(non_empty_str)):
 
 
 @service.route("/current/change_phone_validate", method=POST, permission=USER)
-def validate_change_phone_number(validation_code=Arg(natural1)):
+def validate_change_phone_number(validation_code=Arg(int)):
     return change_phone_validate(g.user_id, validation_code)
 

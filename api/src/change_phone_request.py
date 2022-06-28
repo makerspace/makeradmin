@@ -33,8 +33,6 @@ def change_phone_request(member_id, phone):
     except ValueError as e:
         raise BadRequest("Dåligt formatterat telefonnummer.")
 
-    #TODO accessy and sms thing has same format?
-
     validation_code = randint(0, 999_999)
 
     #TODO send validation code with sms
@@ -63,7 +61,7 @@ def change_phone_validate(member_id, validation_code):
             logging.info(f'member {member_id} validating phone number, code already completed, code {validation_code}')
             raise BadRequest("Koden är redan använd")
 
-        if change_request.timestamp <= now-timedelta(minutes=5):
+        if change_request.validation_code == validation_code and change_request.timestamp <= now-timedelta(minutes=5):
             logging.info(f'member {member_id} validating phone number, too old request, code {validation_code}')
             raise BadRequest("Koden är gammal")
         
