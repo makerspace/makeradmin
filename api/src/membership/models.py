@@ -1,7 +1,8 @@
+import phonenumbers as phonenumbers
 from sqlalchemy import Column, Integer, String, DateTime, Text, Date, Enum, Table, ForeignKey, func, text, select, \
     BigInteger, Boolean
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import relationship, column_property, configure_mappers
+from sqlalchemy.orm import relationship, column_property, configure_mappers, validates
 
 Base = declarative_base()
 
@@ -37,10 +38,13 @@ class Member(Base):
     deleted_at = Column(DateTime)
     member_number = Column(Integer, unique=True)
 
+    @validates('phone')
+    def validate_phone(self, key, value):
+        return normalise_phone_number(value)
+
     groups = relationship('Group',
                           secondary=member_group,
                           back_populates='members')
-
     def __repr__(self):
         return f'Member(member_id={self.member_id}, member_number={self.member_number}, email={self.email})'
 
@@ -188,13 +192,28 @@ class PhoneNumberChangeRequest(Base):
     timestamp = Column(DateTime, nullable=False)
 
     member = relationship(Member, backref="change_phone_number_requests")
+
+    @validates('phone')
+    def validate_phone(self, key, value):
+        return normalise_phone_number(value)
     
     def __repr__(self):
         return (
             f'ChangePhoneNumberRequest(id={self.id}, member_id={self.member_id}'
             f', completed={self.completed}, timestamp={self.timestamp})'
         )
+
+
+def normalise_phone_number(phone):
+    try:
+        p = phonenumbers.parse(phone, "SE")
+    except phonenumbers.NumberParseException:
+        raise ValueError(f"invalid phone number {phone[:40]}")
+        
+    return f"+{p.country_code}{p.national_number}"
     
 
 # https://stackoverflow.com/questions/67149505/how-do-i-make-sqlalchemy-backref-work-without-creating-an-orm-object
 configure_mappers()
+
+

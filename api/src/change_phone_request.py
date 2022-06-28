@@ -6,7 +6,7 @@ import logging
 from sqlalchemy import desc
 from sqlalchemy.orm.exc import NoResultFound
 
-from membership.models import PhoneNumberChangeRequest
+from membership.models import PhoneNumberChangeRequest, normalise_phone_number
 from service.db import db_session
 from service.error import NotFound, BadRequest
 
@@ -27,12 +27,15 @@ def change_phone_request(member_id, phone):
     if num_requests > 3:
         logging.info(f'member {member_id} channge phone number request, too many requests lately')
         raise BadRequest("För många ändringar av numret, testa igen om några veckor.")
+    
+    try:
+        phone = normalise_phone_number(phone)
+    except ValueError as e:
+        raise BadRequest("Dåligt formatterat telefonnummer.")
 
-    #TODO validate phone number
-    #TODO change format of number?
     #TODO accessy and sms thing has same format?
 
-    validation_code = f"{randint(0, 999_999):06d}"
+    validation_code = randint(0, 999_999)
 
     #TODO send validation code with sms
 
