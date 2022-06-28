@@ -61,7 +61,7 @@ def change_phone_validate(member_id, validation_code):
             logging.info(f'member {member_id} validating phone number, code already completed, code {validation_code}')
             raise BadRequest("Koden är redan använd")
 
-        if change_request.validation_code == validation_code and change_request.timestamp <= now-timedelta(minutes=5):
+        if change_request.validation_code == validation_code and change_request.timestamp <= now-timedelta(minutes=8):
             logging.info(f'member {member_id} validating phone number, too old request, code {validation_code}')
             raise BadRequest("Koden är gammal")
         
