@@ -25,14 +25,18 @@ class ChangePhone extends Component<Props, State> {
             validateSubmitInProgress: false,
         }
     }
-    
+
     async submitPhoneNumber(number: string) {
         try {
             this.setState({requestSubmitInProgress: true})
             await common.ajax("POST", `${window.apiBasePath}/member/current/change_phone_request`, {phone: number.trim()});
             this.setState({requestSent: true})
         } catch (error) {
-            common.show_error("Byta telefonnummer misslyckades", error)
+            if (error.status === UNAUTHORIZED) {
+                login.redirect_to_member_page();
+            } else {
+                common.show_error("Byta telefonnummer misslyckades", error)
+            }
         }
         this.setState({requestSubmitInProgress: false})
     }
@@ -47,7 +51,11 @@ class ChangePhone extends Component<Props, State> {
             await common.ajax("POST", `${window.apiBasePath}/member/current/change_phone_validate`, {validation_code: number});
             window.location.href = "/member";
         } catch (error) {
-            common.show_error("Validera kod misslyckades", error)
+            if (error.status === UNAUTHORIZED) {
+                login.redirect_to_member_page();
+            } else {
+                common.show_error("Validera kod misslyckades", error)
+            }
         }
         this.setState({validateSubmitInProgress: false})
     }
