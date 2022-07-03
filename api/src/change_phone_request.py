@@ -6,9 +6,10 @@ import logging
 from sqlalchemy import desc
 from sqlalchemy.orm.exc import NoResultFound
 
-from membership.models import PhoneNumberChangeRequest, normalise_phone_number
+from membership.models import PhoneNumberChangeRequest
 from service.db import db_session
 from service.error import NotFound, BadRequest
+from dispatch_sms import send_validation_code
 
 logger = logging.getLogger('makeradmin')
 
@@ -27,15 +28,13 @@ def change_phone_request(member_id, phone):
     if num_requests > 3:
         logging.info(f'member {member_id} channge phone number request, too many requests lately')
         raise BadRequest("För många ändringar av numret, testa igen om några veckor.")
-    
-    try:
-        phone = normalise_phone_number(phone)
-    except ValueError as e:
-        raise BadRequest("Dåligt formatterat telefonnummer.")
 
     validation_code = randint(0, 999_999)
 
-    #TODO send validation code with sms
+    try:
+        send_validation_code(phone, validation_code)
+    except Exception as e:
+        raise BadRequest("Misslyckades med att skicka sms med verifikations kod.")
 
     change_request = PhoneNumberChangeRequest(member_id=member_id, phone=phone, validation_code=validation_code,
                                               completed=False, timestamp=datetime.utcnow())
@@ -85,5 +84,3 @@ validation_tries = defaultdict(lambda: 0)
 def inc_tries(member_id):
     validation_tries[member_id] += 1
     return validation_tries[member_id]
-
-
