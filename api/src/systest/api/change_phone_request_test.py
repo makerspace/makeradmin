@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from time import sleep
 from random import randint
 from unittest import skip
 from unittest.mock import patch
@@ -153,13 +154,13 @@ class Test(ApiTest):
         member = self.db.create_member()
 
         for i in range(0, 3):
+            sleep(0.1) #Needed to make sure the timestamps are not too close which causes problems with reading the correct validation code from db
             r = random.randrange(1e8, 9e8, 8)
             new_phone = f'+46{r}'
             change_phone_request(member.member_id, new_phone)
 
-            db_items_filter = db_session.query(PhoneNumberChangeRequest).filter(PhoneNumberChangeRequest.member_id == member.member_id, 
-                                        PhoneNumberChangeRequest.phone == new_phone)
-            db_item = db_items_filter.order_by(asc(PhoneNumberChangeRequest.timestamp))[0]
+            db_items_filter = db_session.query(PhoneNumberChangeRequest).filter(PhoneNumberChangeRequest.member_id == member.member_id)
+            db_item = db_items_filter.order_by(desc(PhoneNumberChangeRequest.timestamp))[0]
 
             self.assertEqual(db_item.member_id, member.member_id)
             self.assertEqual(db_item.phone, new_phone)
@@ -172,7 +173,8 @@ class Test(ApiTest):
 
             change_phone_validate(member.member_id, validation_code)
 
-            db_item = db_session.query(PhoneNumberChangeRequest).filter(PhoneNumberChangeRequest.member_id == member.member_id).one()
+            db_item = db_session.query(PhoneNumberChangeRequest).filter(PhoneNumberChangeRequest.member_id == member.member_id, 
+                                                                        PhoneNumberChangeRequest.validation_code == validation_code).one()
             self.assertEqual(db_item.member_id, member.member_id)
             self.assertEqual(db_item.phone, new_phone)
             self.assertTrue(db_item.completed)
@@ -191,6 +193,7 @@ class Test(ApiTest):
             member[i] = self.db.create_member()
 
         for i in range(0, 30):
+            sleep(0.1) #Needed to make sure the timestamps are not too close which causes problems with reading the correct validation code from db
             r = random.randrange(1e8, 9e8, 8)
             new_phone = f'+46{r}'
             rand_member = member[i % num_members]
@@ -198,7 +201,7 @@ class Test(ApiTest):
 
             db_items_filter = db_session.query(PhoneNumberChangeRequest).filter(PhoneNumberChangeRequest.member_id == rand_member.member_id, 
                                         PhoneNumberChangeRequest.phone == new_phone)
-            db_item = db_items_filter.order_by(asc(PhoneNumberChangeRequest.timestamp))[0]
+            db_item = db_items_filter.order_by(desc(PhoneNumberChangeRequest.timestamp))[0]
 
             self.assertEqual(db_item.member_id, rand_member.member_id)
             self.assertEqual(db_item.phone, new_phone)
@@ -211,7 +214,8 @@ class Test(ApiTest):
 
             change_phone_validate(rand_member.member_id, validation_code)
 
-            db_item = db_session.query(PhoneNumberChangeRequest).filter(PhoneNumberChangeRequest.member_id == rand_member.member_id).one()
+            db_item = db_session.query(PhoneNumberChangeRequest).filter(PhoneNumberChangeRequest.member_id == rand_member.member_id,
+                                                                        PhoneNumberChangeRequest.validation_code == validation_code).one()
             self.assertEqual(db_item.member_id, rand_member.member_id)
             self.assertEqual(db_item.phone, new_phone)
             self.assertTrue(db_item.completed)
