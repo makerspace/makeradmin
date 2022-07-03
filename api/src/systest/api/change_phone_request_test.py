@@ -161,7 +161,7 @@ class Test(ApiTest):
 
             db_items_filter = db_session.query(PhoneNumberChangeRequest).filter(PhoneNumberChangeRequest.member_id == member.member_id,
                                                PhoneNumberChangeRequest.phone == new_phone)
-            db_item = db_items_filter.order_by(desc(PhoneNumberChangeRequest.timestamp)).one()
+            db_item = db_items_filter.order_by(desc(PhoneNumberChangeRequest.timestamp)).first()
 
             self.assertEqual(db_item.member_id, member.member_id)
             self.assertEqual(db_item.phone, new_phone)
@@ -202,7 +202,7 @@ class Test(ApiTest):
 
             db_items_filter = db_session.query(PhoneNumberChangeRequest).filter(PhoneNumberChangeRequest.member_id == rand_member.member_id, 
                                                PhoneNumberChangeRequest.phone == new_phone)
-            db_item = db_items_filter.order_by(desc(PhoneNumberChangeRequest.timestamp)).one()
+            db_item = db_items_filter.order_by(desc(PhoneNumberChangeRequest.timestamp)).first()
 
             self.assertEqual(db_item.member_id, rand_member.member_id)
             self.assertEqual(db_item.phone, new_phone)
