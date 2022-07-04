@@ -24,6 +24,7 @@ class Test(ApiShopTestMixin, ApiTest):
         payment_method = stripe.PaymentMethod.create(type="card", card=self.card(VALID_NON_3DS_CARD_NO))
 
         member = self.obj.create_member()
+        del member["phone"]
 
         register = {
             "purchase": {

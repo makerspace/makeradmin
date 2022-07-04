@@ -4,7 +4,7 @@ from faker import Faker
 
 from core.models import AccessToken, PasswordResetToken
 from core.service_users import TEST_SERVICE_USER_ID
-from membership.models import Member, Group, Permission, Span, Key, Box
+from membership.models import Member, Group, Permission, Span, Key, Box, PhoneNumberChangeRequest
 from messages.models import Message
 from service.db import db_session
 from shop.models import ProductCategory, Product, ProductAction
@@ -33,6 +33,7 @@ class DbFactory:
         self.product = None
         self.action = None
         self.password_reset_token = None
+        self.phone_request = None
         
     def create_access_token(self, **kwargs):
         obj = dict(
@@ -54,6 +55,13 @@ class DbFactory:
         db_session.add(self.member)
         db_session.commit()
         return self.member
+
+    def create_phone_request(self, **kwargs):
+        obj = self.obj.create_phone_request(**kwargs)
+        self.phone_request = PhoneNumberChangeRequest(**obj, member=self.member)
+        db_session.add(self.phone_request)
+        db_session.commit()
+        return self.phone_request
 
     def create_box(self, **kwargs):
         obj = dict(
@@ -126,8 +134,11 @@ class DbFactory:
 
     def get_member_number(self):
         # Ugly but will work most of the time.
-        sql = "SELECT COALESCE(MAX(member_number), 0) FROM membership_members"
-        member_number = db_session.execute(sql).fetchone()[0] + randint(1000, 2000)
+        while True:
+            member_number = randint(5000, 2000000)
+            sql = "SELECT 1 FROM membership_members WHERE member_number = :number"
+            if db_session.execute(sql, params=dict(number=member_number)).first() is None:
+                break
         return member_number
 
     def create_category(self, **kwargs):

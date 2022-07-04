@@ -1,3 +1,4 @@
+from datetime import datetime
 from random import randint, choice
 
 from faker import Faker
@@ -26,6 +27,7 @@ class ObjFactory:
         self.key = None
         self.span = None
         self.message = None
+        self.phone_request = None
     
     def create_member(self, **kwargs):
         firstname = self.fake.first_name()
@@ -47,6 +49,17 @@ class ObjFactory:
         obj.update(kwargs)
         self.member = obj
         return self.member
+
+    def create_phone_request(self, **kwargs):
+        obj = dict(
+            phone=self.fake.phone_number(),
+            validation_code=randint(1,999999),
+            completed=False,
+            timestamp=datetime.now(),
+        )
+        obj.update(kwargs)
+        self.phone_request = obj
+        return self.phone_request
         
     def create_group(self, **kwargs):
         obj = dict(
