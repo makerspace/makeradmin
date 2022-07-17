@@ -11,4 +11,5 @@ rollup /tmp/ts_output/cartpage.js --file ../static/js/cartpage.js --format iife 
 rollup /tmp/ts_output/member.js --file ../static/js/member.js --format iife -m
 rollup /tmp/ts_output/statistics.js --file ../static/js/statistics.js --format iife -m
 rollup /tmp/ts_output/courses.js --file ../static/js/courses.js --format iife -m
+rollup /tmp/ts_output/change_phone.js --file ../static/js/change_phone.js --format iife -m
 rm -rf /tmp/ts_output

@@ -1,3 +1,5 @@
+import time
+
 from quiz.views import member_quiz_statistics
 from flask import request, g
 
@@ -6,7 +8,8 @@ from member.member import send_access_token_email
 from membership.member_auth import get_member_permissions
 from membership.membership import get_membership_summary
 from membership.views import member_entity
-from service.api_definition import POST, PUBLIC, Arg, GET, USER
+from service.api_definition import POST, PUBLIC, Arg, GET, USER, natural1, non_empty_str
+from change_phone_request import change_phone_request, change_phone_validate
 
 
 @service.route("/send_access_token", method=POST, permission=PUBLIC)
@@ -33,7 +36,19 @@ def current_membership_info():
     """ Get current user membership information. """
     return get_membership_summary(g.user_id).as_json()
 
+
 @service.route("/current/quizzes", method=GET, permission=USER)
 def current_member_quiz_info():
     """ Get info about which quizzes the current user has completed. """
     return member_quiz_statistics(g.user_id)
+
+
+@service.route("/current/change_phone_request", method=POST, permission=USER)
+def request_change_phone_number(phone=Arg(non_empty_str)):
+    return change_phone_request(g.user_id, phone)
+
+
+@service.route("/current/change_phone_validate", method=POST, permission=USER)
+def validate_change_phone_number(validation_code=Arg(int)):
+    return change_phone_validate(g.user_id, validation_code)
+

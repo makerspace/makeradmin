@@ -72,3 +72,7 @@ export function render_login(root: HTMLElement, heading: string | null, redirect
         login_via_single_use_link(tag.trim(), redirect);
     }
 }
+
+export function redirect_to_member_page() {
+    window.location.href = "/member";
+}

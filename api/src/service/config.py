@@ -30,6 +30,8 @@ default = Dict(name="default", src=dict(
     MAILGUN_DOMAIN='',
     MAILGUN_FROM='',
     MAILGUN_TO_OVERRIDE='',
+    ELKS46_API_USER="",
+    ELKS46_API_KEY="",
     HOST_PUBLIC='',
     STRIPE_PRIVATE_KEY=None,
     STRIPE_SIGNING_SECRET=None,
@@ -60,6 +62,14 @@ def get_public_url(path):
     if not host.startswith("http://") and not host.startswith("https://"):
         host = "http://" + host
     return f"{host}{path}"
+
+
+def get_46elks_auth():
+    usr = config.get('ELKS46_API_USER')
+    pwd = config.get('ELKS46_API_KEY', log_value=False)
+    if not usr and not pwd:
+        return None
+    return (usr, pwd)
 
 
 def get_admin_url(path):

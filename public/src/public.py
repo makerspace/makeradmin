@@ -59,9 +59,11 @@ def register_member():
 def purchase_history():
     return render_template("history.html")
 
+
 @shop.route("/member/courses")
 def courses():
     return render_template("courses.html")
+
 
 @shop.route("/member/licenses")
 def licenses():
@@ -71,6 +73,7 @@ def licenses():
 @shop.route("/product/<product_id>")
 def product_view(product_id: int):
     return render_template("product.html", product_id=product_id)
+
 
 @shop.route("/receipt/<int:transaction_id>")
 def receipt(transaction_id: int):
@@ -104,6 +107,12 @@ def quiz_main(quiz_id: int):
 @member.route("/quiz/")
 def quiz_backwards_compatibility():
     return redirect(member.url("/quiz/1"))
+
+
+@member.route("/change_phone")
+def change_phone():
+    return render_template("change_phone.html")
+
 
 static_hash = os.environ["STATIC_PREFIX_HASH"]
 app = Flask(__name__, static_url_path=f"/static{static_hash}", static_folder="../static")

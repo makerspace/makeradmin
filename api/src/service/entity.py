@@ -274,7 +274,10 @@ class Entity:
             raise NotFound("Could not find any entity with specified parameters.")
 
         for k, v in input_data.items():
-            setattr(entity, k, v)
+            try:
+                setattr(entity, k, v)
+            except ValueError as e:
+                raise UnprocessableEntity(f"Could not save value.", fields=k, what=BAD_VALUE) from e
 
         if commit:
             db_session.commit()

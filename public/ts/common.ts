@@ -41,6 +41,10 @@ export function get_error(json: any) {
 	return json.status;
 }
 
+export function show_error(heading: string, error: any) {
+	UIkit.modal.alert("<h2>" + heading + "</h2>" + get_error(error));
+}
+
 export function uploadFile<T>(url: string, file: File): Promise<T> {
 	let token = localStorage.getItem("token") || "";
 	let headers = {
@@ -80,7 +84,13 @@ export function ajax(type: string, url: string, data: object | null = null): Pro
 			else reject(JSON.parse(xhr.responseText));
 		};
 		xhr.onerror = () => {
-			reject(JSON.parse(xhr.responseText));
+			let response;
+			try {
+				response = JSON.parse(xhr.responseText);
+			} catch (err) {
+				response = "bad json: " + xhr.responseText;
+			}
+			reject(response);
 		};
 
 		if (data == null) {
