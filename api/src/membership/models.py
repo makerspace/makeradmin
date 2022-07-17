@@ -205,6 +205,9 @@ class PhoneNumberChangeRequest(Base):
 
 
 def normalise_phone_number(phone):
+    if not phone:
+        return None
+    
     try:
         p = phonenumbers.parse(phone, "SE")
     except phonenumbers.NumberParseException:
