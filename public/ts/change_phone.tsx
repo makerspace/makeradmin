@@ -81,7 +81,7 @@ class ChangePhone extends Component<Props, State> {
                     <button className="uk-width-1-1 uk-button uk-button-primary uk-button-large" disabled={requestSubmitInProgress}><span className="uk-icon-check"/>Skicka valideringskod</button>
                 </div>
             </form>
-            <p style={{visibility: requestSent ? "visible" : "hidden" }}>SMS med valideringskod skickad, skriv in koden (eller tryck "skicka" igen för en ny kod).</p>
+            <p style={{visibility: requestSent ? "visible" : "hidden", color: "green", fontWeight: "bold"}}>SMS med valideringskod skickad, skriv in koden (eller tryck "skicka" igen för en ny kod).</p>
             <form className="uk-form uk-form-stacked uk-margin-bottom"
                   onSubmit={e => {
                       e.preventDefault();
