@@ -179,5 +179,5 @@ def iso_date(value):
 def non_empty_str(value):
     value = str(value)
     if not value:
-        raise ValueError("Can not be empty.")
+        raise ValueError("Kan inte vara tomt.")
     return value

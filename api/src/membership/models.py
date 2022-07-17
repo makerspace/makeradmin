@@ -1,3 +1,5 @@
+from logging import getLogger
+
 import phonenumbers as phonenumbers
 from sqlalchemy import Column, Integer, String, DateTime, Text, Date, Enum, Table, ForeignKey, func, text, select, \
     BigInteger, Boolean
@@ -5,6 +7,9 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, column_property, configure_mappers, validates
 
 Base = declarative_base()
+
+
+logger = getLogger("makeradmin")
 
 
 member_group = Table(
@@ -212,6 +217,9 @@ def normalise_phone_number(phone):
         p = phonenumbers.parse(phone, "SE")
     except phonenumbers.NumberParseException:
         raise ValueError(f"invalid phone number {phone[:40]}")
+    
+    if p.national_number in (112, 911, 1177, 11313, 116000, 11414, 90000):
+        raise ValueError(f"not allowed phone number {phone[:40]}")
         
     return f"+{p.country_code}{p.national_number}"
     
