@@ -41,7 +41,7 @@ class ObjFactory:
             address_zipcode=randint(10000, 99999),
             address_city=self.fake.city(),
             address_country=self.fake.country_code(representation="alpha-2"),
-            phone=f'070-{randint(1e7, 9e7):07d}',
+            phone=f'070-{randint(int(1e7), int(9e7)):07d}',
             civicregno=f"19901011{randint(1000, 9999):04d}",
             email=re.sub('[^a-zA-Z0-9.!#$%&\'*+\\/=?^_`{|}~\\-@\\.]', '_',
                          f'{firstname}.{lastname}+{random_str(6)}@bmail.com'.lower().replace(' ', '_')),
@@ -73,7 +73,7 @@ class ObjFactory:
 
     def create_key(self, **kwargs):
         obj = dict(
-            tagid=str(randint(1e12, 9e12)),
+            tagid=str(randint(int(1e12), int(9e12))),
             description=self.fake.bs(),
         )
         obj.update(kwargs)
@@ -94,7 +94,7 @@ class ObjFactory:
     def create_category(self, **kwargs):
         obj = dict(
             name=f"category-{random_str(12)}",
-            display_order=randint(1e8, 9e8),
+            display_order=randint(int(1e8), int(9e8)),
         )
         obj.update(kwargs)
         self.category = obj
@@ -107,7 +107,7 @@ class ObjFactory:
             price=100.0,
             description=self.fake.bs(),
             unit="st",
-            display_order=randint(1e8, 9e8),
+            display_order=randint(int(1e8), int(9e8)),
             smallest_multiple=1,
             filter=None,
             category_id=category_id,

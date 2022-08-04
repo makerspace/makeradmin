@@ -89,7 +89,7 @@ class Test(ApiTest):
 
     def test_deleting_non_existing_entry_returns_404(self):
         # This replicates the behavior in the previous implementation.
-        self.delete(f"/membership/member/{randint(1e8, 9e9)}").expect(404)
+        self.delete(f"/membership/member/{randint(int(1e8), int(9e9))}").expect(404)
 
     def test_primary_key__created_at_and_updated_at_is_filtered_and_not_used_on_update(self):
         entity = self.api.create_group()
@@ -141,7 +141,7 @@ class Test(ApiTest):
         
         self.assertEqual(entity_id, result['member_id'])
 
-        self.get(f"/membership/group?search={randint(1e8, 9e8)}").expect(code=200, page=1, total=0, data=[])
+        self.get(f"/membership/group?search={randint(int(1e8), int(9e8))}").expect(code=200, page=1, total=0, data=[])
         
     def test_pagination_and_sort(self):
         firstname = random_str(12)
