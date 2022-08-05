@@ -52,7 +52,7 @@ class Test(ApiTest):
     def test_request_high_num_one_member(self, mock_send_validation_code):
         member = self.db.create_member()
 
-        for i in range(0, 3):
+        for i in range(0, 10):
             r = random.randrange(int(1e8), int(9e8), 8)
             new_phone = f'+46{r}'
             change_phone_request(member.member_id, new_phone)

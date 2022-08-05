@@ -9,6 +9,8 @@ interface State {
     requestSubmitInProgress: boolean,
     requestSent: boolean,
     validateSubmitInProgress: boolean,
+    phoneSent: string,
+    requestCount: number,
 }
 
 interface Props {
@@ -23,14 +25,16 @@ class ChangePhone extends Component<Props, State> {
             requestSubmitInProgress: false,
             requestSent: false,
             validateSubmitInProgress: false,
+            phoneSent: "",
+            requestCount: 0
         }
     }
 
     async submitPhoneNumber(number: string) {
         try {
             this.setState({requestSubmitInProgress: true})
-            await common.ajax("POST", `${window.apiBasePath}/member/current/change_phone_request`, {phone: number.trim()});
-            this.setState({requestSent: true})
+            const {data} = await common.ajax("POST", `${window.apiBasePath}/member/current/change_phone_request`, {phone: number.trim()});
+            this.setState({requestSent: true, phoneSent: data.phone, requestCount: data.request_count});
         } catch (error) {
             if (error.status === UNAUTHORIZED) {
                 login.redirect_to_member_page();
@@ -61,7 +65,7 @@ class ChangePhone extends Component<Props, State> {
     }
     
     render() {
-        const {requestSubmitInProgress, validateSubmitInProgress, requestSent} = this.state;
+        const {requestSubmitInProgress, validateSubmitInProgress, requestSent, phoneSent, requestCount} = this.state;
         
         return <>
             <form className="uk-form uk-form-stacked uk-margin-bottom"
@@ -81,7 +85,7 @@ class ChangePhone extends Component<Props, State> {
                     <button className="uk-width-1-1 uk-button uk-button-primary uk-button-large" disabled={requestSubmitInProgress}><span className="uk-icon-check"/>Skicka valideringskod</button>
                 </div>
             </form>
-            <p style={{visibility: requestSent ? "visible" : "hidden" }}>SMS med valideringskod skickad, skriv in koden (eller tryck "skicka" igen för en ny kod).</p>
+            <p style={{visibility: requestSent ? "visible" : "hidden", color: "green", fontWeight: "bold"}}>SMS{requestCount>1?` #${requestCount}`:""} med valideringskod skickad till {phoneSent}, skriv in koden (eller tryck "skicka" igen för en ny kod).</p>
             <form className="uk-form uk-form-stacked uk-margin-bottom"
                   onSubmit={e => {
                       e.preventDefault();

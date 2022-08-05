@@ -11,8 +11,6 @@ common.onGetAndDocumentLoaded("/webshop/product_data", (productData: any) => {
 
   renderSidebarCategories(productData, true);
 
-  let editMode = false;
-
   // Keep local storage in sync even though other tabs change it
   Cart.startLocalStorageSync(refreshUIFromCart);
 
@@ -25,24 +23,6 @@ common.onGetAndDocumentLoaded("/webshop/product_data", (productData: any) => {
     cart.saveToStorage();
     common.updateCartSum(cart, id2item);
   }
-
-  function setEditMode(value: boolean) {
-    editMode = value;
-    let els = document.querySelectorAll(".edit, .edit-display, .edit-invisible");
-    for (let i = 0; i < els.length; i++) {
-      els[i].classList.toggle("active", editMode);
-    }
-    document.querySelector("#edit")!.classList.toggle("edit-mode", editMode);
-    document.querySelector("#edit")!.setAttribute("uk-icon", editMode ? "close" : "pencil");
-  }
-
-  function showEditButton() {
-    document.querySelector("#edit")!.classList.toggle("active", true);
-  }
-
-  document.querySelector("#edit")!.addEventListener("click", ev => {
-    setEditMode(!editMode);
-  });
 
   const layoutModes: Set<string> = new Set<string>(["layout-grid", "layout-list", "layout-table"]);
   function setLayoutMode(mode: string | null) {
@@ -99,30 +79,14 @@ common.onGetAndDocumentLoaded("/webshop/product_data", (productData: any) => {
             <span class="product-price">${price} ${Cart.currency}/${baseStr}</span>
           </div>
           <div class="product-input product-line">
-            <input type="number" min=0 max=9999 step=${item.smallest_multiple} placeholder="0" class="product-amount edit-invisible"></input>
-            <span class="product-unit edit-invisible">${item.unit}</span>
-            <a href="product/${item.id}/edit" class="edit-display product-edit uk-button uk-button-small uk-button-primary" uk-icon="pencil"></a>
-            <button type="button" class="edit-display product-delete uk-button uk-button-small uk-button-danger" uk-icon="trash" ></button>
-            <button type="button" class="edit-invisible number-add uk-button uk-button-small uk-button-primary" data-amount="1">+</button>
+            <input type="number" min=0 max=9999 step=${item.smallest_multiple} placeholder="0" class="product-amount"/>
+            <span class="product-unit">${item.unit}</span>
+            <button type="button" class="number-add uk-button uk-button-small uk-button-primary" data-amount="1">+</button>
           </div>
         </div>`;
 
       id2element.set(item.id, li);
       id2item.set(item.id, item);
-
-      // Handle deleting products
-      li.querySelector(".product-delete")!.addEventListener("click", ev => {
-        ev.preventDefault();
-        UIkit.modal.confirm(`Are you sure you want to delete ${item.name}?`).then(
-          () => {
-            common.ajax("DELETE", apiBasePath + "/webshop/product/" + item.id, {
-            }).then(() => {
-              li.remove();
-            }).catch(json => {
-              UIkit.modal.alert("<h2>Error</h2>" + json.status);
-            });
-          });
-      });
 
       const productAmount = li.querySelector<HTMLInputElement>(".product-amount")!;
       // Select everything in the textfield when clicking on it
@@ -196,9 +160,4 @@ common.onGetAndDocumentLoaded("/webshop/product_data", (productData: any) => {
       item.parentList.appendChild(elem);
     }
   });
-
-  if (window.location.hash == "#edit") {
-    showEditButton();
-    setEditMode(true);
-  }
 });

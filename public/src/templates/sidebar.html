@@ -19,9 +19,6 @@
                 {% endcall %}
                 {% if active_item == "shop" or active_item == "cart" %}
                     <ul id="categories" class="uk-nav-sub">
-                        <li class="edit">
-                            <button type="button" class="uk-button uk-button-primary uk-button-small category-add" uk-icon="plus"></button>
-                        </li>
                         {% call nav_item("cart", active_item) %}
                             <a href="/shop/cart"><span uk-icon="cart"></span> Min kundvagn<span id="cart-sum"></span></a>
                         {% endcall %}
