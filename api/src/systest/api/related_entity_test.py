@@ -34,7 +34,7 @@ class Test(ApiTest):
         related_entity = self.api.create_group()
         related_entity_id = related_entity['group_id']
 
-        self.post(f"/membership/group/{related_entity_id}/members/add", {'members': [randint(1e8, 9e8)]})\
+        self.post(f"/membership/group/{related_entity_id}/members/add", {'members': [randint(int(1e8), int(9e8))]})\
             .expect(code=200)
 
         self.get(f"/membership/group/{related_entity_id}/members").expect(code=200, data=[])
@@ -43,5 +43,5 @@ class Test(ApiTest):
         related_entity = self.api.create_group()
         related_entity_id = related_entity['group_id']
 
-        self.post(f"/membership/group/{related_entity_id}/members/remove", {'members': [randint(1e8, 9e8)]})\
+        self.post(f"/membership/group/{related_entity_id}/members/remove", {'members': [randint(int(1e8), int(9e8))]})\
             .expect(code=200)

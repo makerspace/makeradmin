@@ -69,7 +69,7 @@ def monkeypatch_settable_for_list(list_obj):
 def print_diff(old, new):
     
     # Sanity checking tables and colums should be same.
-    assert(set(old.keys()) == set(new.keys()))
+    assert (set(old.keys()) == set(new.keys()))
     
     tables = sorted(old.keys())
     table_summary = {k: {"added": set(), "removed": set()} for k in tables}
@@ -77,17 +77,17 @@ def print_diff(old, new):
     for table in tables:
         old_table = old[table]
         new_table = new[table]
-        assert(old_table['columns'] == new_table['columns'])
+        assert (old_table['columns'] == new_table['columns'])
         
         # Check for duplicates or algorithm won't work.
         
         old_rows = monkeypatch_settable_for_list(old_table['rows'])
         old_set = set(old_rows)
-        assert(len(old_rows) == len(set(old_rows)))
+        assert (len(old_rows) == len(set(old_rows)))
         
         new_rows = monkeypatch_settable_for_list(new_table['rows'])
         new_set = set(new_rows)
-        assert(len(new_rows) == len(set(new_rows)))
+        assert (len(new_rows) == len(set(new_rows)))
     
         # Check for added and removed rows.
         

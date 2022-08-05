@@ -66,7 +66,7 @@ class DbFactory:
     def create_box(self, **kwargs):
         obj = dict(
             member_id=self.member.member_id,
-            box_label_id=randint(1e9, 9e9),
+            box_label_id=randint(int(1e9), int(9e9)),
             session_token=random_str(),
         )
         obj.update(kwargs)

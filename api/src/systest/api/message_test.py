@@ -75,7 +75,7 @@ class Test(ApiTest):
 
     def test_send_message_to_non_member_does_not_work(self):
         message = self.obj.create_message()
-        message['recipients'] = [{'id': randint(1e9, 9e9), 'type': 'member'}]
+        message['recipients'] = [{'id': randint(int(1e9), int(9e9)), 'type': 'member'}]
         
         self.api.post("/messages/message", message).expect(422)
 

@@ -6,7 +6,7 @@
     "repository": "https://github.com/makerspace/makeradmin",
     "license": "GPL-3.0",
     "devDependencies": {
-        "sass-loader": "^11.0.1",
+        "sass-loader": "^10.0.0",
         "ts-loader": "^8.1.0",
         "typescript": "^4.2.3",
         "webpack": "^4.46.0",

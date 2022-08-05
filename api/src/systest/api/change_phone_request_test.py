@@ -53,12 +53,12 @@ class Test(ApiTest):
         member = self.db.create_member()
 
         for i in range(0, 10):
-            r = random.randrange(1e8, 9e8, 8)
+            r = random.randrange(int(1e8), int(9e8), 8)
             new_phone = f'+46{r}'
             change_phone_request(member.member_id, new_phone)
             mock_send_validation_code.assert_called()
 
-        r = random.randrange(1e8, 9e8, 8)
+        r = random.randrange(int(1e8), int(9e8), 8)
         new_phone = f'+46{r}'
         change_phone_request(member.member_id, new_phone)
         self.assertRaises(BadRequest, change_phone_request, member.member_id, new_phone)
@@ -135,7 +135,7 @@ class Test(ApiTest):
         self.db.create_phone_request(timestamp=now - timedelta(hours=1))
         self.db.create_phone_request(timestamp=now - timedelta(hours=2))
 
-        new_phone = f'+46{randint(1e8, 9e8)}'
+        new_phone = f'+46{randint(int(1e8), int(9e8))}'
         change_phone_request(member.member_id, new_phone)
         
         db_items_filter = db_session.query(PhoneNumberChangeRequest).filter(PhoneNumberChangeRequest.member_id == member.member_id,
@@ -173,7 +173,7 @@ class Test(ApiTest):
             self.db.create_phone_request(timestamp=now - timedelta(minutes=1))
    
         for i in range(0, 30):
-            r = random.randrange(1e8, 9e8, 8)
+            r = random.randrange(int(1e8), int(9e8), 8)
             new_phone = f'+46{r}'
             rand_member = member[i % num_members]
             change_phone_request(rand_member.member_id, new_phone)
