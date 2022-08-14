@@ -12,6 +12,9 @@ from multi_access.multi_access import get_multi_access_members, update_diffs, \
     UpdateMember, AddMember, BlockMember
 from multi_access.tui import Tui
 
+from accessy.models import AccessyMember
+from admin.api.src.membership.models import Member as MakerAdminMember
+
 try:
     from source_revision import source_revision
 except ImportError:
@@ -27,6 +30,38 @@ WHAT_BLOCK = 'block'
 WHAT_ALL = {WHAT_ORDERS, WHAT_UPDATE, WHAT_ADD, WHAT_BLOCK}
 
 
+def split_into_groups(accessy_members:list[AccessyMember], makeradmin_members:list[MakerAdminMember]):
+    members_ok = []
+    members_not_in_accessy = []
+    members_not_in_makeradmin = []
+    accessy_members.sort(key=lambda x: x.accessy_phone)
+    makeradmin_members.sort(key=lambda x: x.phone)
+
+    #Check if members are in accessy but not makeradmin
+    for acessy_member in accessy_members:
+        found = False
+        for makeradmin_member in makeradmin_members:
+            if acessy_member.accessy_phone == makeradmin_member.phone:
+                members_ok.append({acessy_member, makeradmin_member})
+                found = True
+                break
+        if not found:
+            members_not_in_makeradmin.append(acessy_member)
+
+    #Check if members in makeradmin are not in accessy but should be
+    for makeradmin_member in makeradmin_members:
+        if should_have_access(makeradmin_member): #TODO
+            found = False
+            for acessy_member in accessy_members:
+                if acessy_member.accessy_phone == makeradmin_member.phone:
+                    found = True
+                    break
+            if not found:
+                members_not_in_accessy.append(makeradmin_member)
+    
+    return members_ok, members_not_in_accessy, members_not_in_makeradmin
+
+
 def sync(session=None, client=None, ui=None, customer_id=None, authority_id=None, what=None, ignore_running=False):
     what = what or WHAT_ALL
 
@@ -38,23 +73,31 @@ def sync(session=None, client=None, ui=None, customer_id=None, authority_id=None
     # Run actions on MakerAdmin (ship orders and update key timestamps)
 
     if WHAT_ORDERS in what:
+        #TODO update pending lab stuff?
         client.ship_orders(ui)
 
     # Fetch from MakerAdmin
     
     ma_members = client.fetch_members(ui)
-    
-    # Fetch relevant data from db and diff it
-    
-    db_members = get_multi_access_members(session, ui, customer_id)
 
     #TODO update access permision groups
 
     #TODO list members
-    #TODO filter members
+
+    #Split the members into groups
+    members_ok, members_not_in_accessy, members_not_in_makeradmin = split_into_groups(accessy_members, ma_members)
+
+    #Send invites to the members not in accessy
+    for makeradmin_member in members_not_in_accessy:
+        send_invite(makeradmin_member) #TODO
+    
+    #Remove accessy members not in makeradmin from accessy
+    for acessy_member in members_not_in_makeradmin:
+        remove_member(acessy_member) #TODO
 
     #TODO update members
-    
+    #TODO för varje user/member updatera accesser
+
     return
     
 
