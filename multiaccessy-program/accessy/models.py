@@ -1,10 +1,9 @@
 from dataclasses import dataclass
 from logging import getLogger
 import os
-from tabnanny import check
+import threading
 import uuid
 import warnings
-
 
 import requests
 
@@ -71,7 +70,7 @@ class AccessySession:
         items = data["items"]
         if page_number + 1 > total_pages:  # TODO: How to get more pages?
             logger.error(f"Did not get all of the users...")
-
+        
         return items
 
     def get_membership(self, user_id: str) -> str:
@@ -93,7 +92,11 @@ class AccessyMember:
     def get_all(cls, session: AccessySession) -> list["AccessyMember"]:
         user_list = session.get_users()
 
-        users = []
+        def get_membership(user: "AccessyMember", user_id: str):
+            user.membership_id = session.get_membership(user_id)
+
+        accessy_users = []
+        threads = []
         for user in user_list:
             # API key does not have phone number
             phone_number = user.get("msisdn", None)
@@ -101,18 +104,30 @@ class AccessyMember:
                 continue
 
             user_id = user["id"]
-            membership_id = session.get_membership(user_id)
-            users.append(cls(membership_id, user_id, phone_number))
-        return users
+
+            # Create user without membership, then update in-place in parallel
+            accessy_user = cls(None, user_id, phone_number)
+            accessy_users.append(accessy_user)
+            _thread = threading.Thread(target=get_membership, args=(accessy_user, user_id), daemon=True)
+            _thread.start()
+            threads.append(_thread)
+
+        for thread in threads:
+            thread.join()
+
+        return accessy_users
 
 
 def main():
     session = None
+    # Convenience if a session token is already issued
     if ACCESSY_SESSION_TOKEN is not None:
         try:
             session = AccessySession(ACCESSY_SESSION_TOKEN)
         except:
             pass
+    
+    # Get a new session token
     if session is None:
         session = AccessySession.create_session(CLIENT_ID, CLIENT_SECRET)
     print("session:", session)
