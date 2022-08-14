@@ -27,24 +27,8 @@ WHAT_BLOCK = 'block'
 WHAT_ALL = {WHAT_ORDERS, WHAT_UPDATE, WHAT_ADD, WHAT_BLOCK}
 
 
-def is_multi_access_running():
-    for process in psutil.process_iter():
-        if 'multiaccess' in process.name().lower():
-            return True
-
-    return False
-
-
 def sync(session=None, client=None, ui=None, customer_id=None, authority_id=None, what=None, ignore_running=False):
     what = what or WHAT_ALL
-    
-    # Exit if MultiAccess is running
-    
-    if not ignore_running:
-        ui.info__progress("checking for running MultiAccess")
-        if is_multi_access_running():
-            ui.info__progress("looks like MultiAccess is running, please exit MultiAccess and run again")
-            return
 
     # Log in to the MakerAdmin server unless we are already logged in
     if not client.is_logged_in():
@@ -64,30 +48,9 @@ def sync(session=None, client=None, ui=None, customer_id=None, authority_id=None
     
     db_members = get_multi_access_members(session, ui, customer_id)
     
-    # Diff maker data.
-    
-    ui.info__progress('diffing multi access users against maker admin members')
-    diffs = []
-    if WHAT_UPDATE in what:
-        diffs += UpdateMember.find_diffs(db_members, ma_members)
-    if WHAT_ADD in what:
-        diffs += AddMember.find_diffs(db_members, ma_members)
-    if WHAT_BLOCK in what:
-        diffs += BlockMember.find_diffs(db_members, ma_members)
-    
-    if not diffs:
-        ui.info__progress('nothing to update')
-        return
-    
-    # Present diff of what will be changed
+    #TODO update access permision groups
 
-    ui.prompt__update_db(heading=f'the following {len(diffs)} changes will be made',
-                         lines=[d.describe_update() for d in diffs])
-    
-    # Preform changes
-    
-    update_diffs(session, ui, diffs, customer_id=customer_id, authority_id=authority_id)
-    ui.info__progress('finished updating db')
+    #TODO update members
     
     return
     
@@ -100,9 +63,6 @@ def main():
     parser = argparse.ArgumentParser("Fetches member list from makeradmin.se or local file, then prompt user with"
                                      f" changes to make. Built from source revision {source_revision}.",
                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument("-d", "--db",
-                        default='mssql://(local)\\SQLEXPRESS/MultiAccess?trusted_connection=yes&driver=SQL+Server',
-                        help="SQL Alchemy db engine spec.")
     parser.add_argument("-w", "--what", default=",".join(WHAT_ALL),
                         help=f"What to update, comma separated list."
                              f" '{WHAT_ORDERS}' tell maker admin to perform order actions before updating members."
@@ -118,12 +78,6 @@ def main():
                              " from maker admin).")
     parser.add_argument("-t", "--token", default="",
                         help="Provide token on command line instead of prompting for login.")
-    parser.add_argument("--customer-id", default=16, type=int,
-                        help="MultiAcces custoemr primary key to use to get and add users.")
-    parser.add_argument("--authority-id", default=23, type=int,
-                        help="MultiAcces authority primary key to add ny default to new users.")
-    parser.add_argument("--ignore-running", action='store_true',
-                        help="Ignore the check for if MultiAcces is running, do not use this.")
     
     args = parser.parse_args()
 
