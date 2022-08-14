@@ -101,6 +101,14 @@ class Permission(Base):
                           secondary=group_permission,
                           back_populates='permissions')
 
+class Tags(Base):
+    __tablename__ = 'membership_tags'
+
+    id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
+    group_id =  Column(Integer, ForeignKey('membership_groups.group_id'), nullable=False)
+    tag = Column(String(255), nullable=False, unique=True)
+
+    member = relationship(Member, backref="nags")
 
 class Key(Base):
     __tablename__ = 'membership_keys'
