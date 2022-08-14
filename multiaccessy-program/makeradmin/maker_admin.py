@@ -38,7 +38,7 @@ MakerAdminMember = namedtuple('MakerAdminMember', [
     'member_number',  # int
     'firstname',      # string
     'lastname',       # string
-    'rfid_tag',       # string
+    'phone',          # string
     'end_timestamp',  # datetime
 ])
 
