@@ -47,8 +47,11 @@ def sync(session=None, client=None, ui=None, customer_id=None, authority_id=None
     # Fetch relevant data from db and diff it
     
     db_members = get_multi_access_members(session, ui, customer_id)
-    
+
     #TODO update access permision groups
+
+    #TODO list members
+    #TODO filter members
 
     #TODO update members
     
