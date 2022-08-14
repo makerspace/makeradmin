@@ -41,6 +41,35 @@ class AccessySession:
     
     def __post_init__(self):
         self.organization_id = self._get_organization()
+    
+    def _get_json_paginated(self, url: str, msg: str = None):
+        """ Convenience method for getting all data for a JSON endpoint that is paginated """
+        page_size = 10000
+        page_number = 0
+        items = []
+
+        total_items = None
+        received_items = 0
+        while total_items is None or received_items < total_items:
+            response = requests.get(ACCESSY_URL + url + f"?page_number={page_number}&page_size={page_size}",
+                headers={"Authorization": f"Bearer {self.SESSION_TOKEN}"})
+            check_response_error(response, f"{msg} (on page {page_number})")
+            data = response.json()
+
+            current_items = data["items"]
+
+            items.extend(current_items)
+            received_items += len(current_items)
+            page_number += 1
+            if total_items and total_items != data["totalItems"]:
+                logger.warning(f"Length of response was changed during fetch. Need to restart it.")
+                return self._get_json_paginated(url, msg)
+            total_items = data["totalItems"]
+
+            if len(current_items) == 0:
+                raise ValueError(f"Could not get all items. Not enough items were returned from Accessy endpoint during pagination loop. Got {len(received_items)} out of {total_items} expected items")
+
+        return items
 
     def _get_organization(self) -> str:
         response = requests.get(ACCESSY_URL + "/asset/user/organization-membership",
@@ -58,20 +87,8 @@ class AccessySession:
         return data[0]["organizationId"]
 
     def get_users(self) -> list[dict]:
-        response = requests.get(ACCESSY_URL + f"/asset/admin/organization/{self.organization_id}/user",
-            headers={"Authorization": f"Bearer {self.SESSION_TOKEN}"})
-
-        check_response_error(response, "Get users")
-        data = response.json()
+        return self._get_json_paginated(f"/asset/admin/organization/{self.organization_id}/user")
         # {"items":[{"id":<uuid>,"msisdn":"+46...","firstName":str,"lastName":str}, ...],"totalItems":6,"pageSize":25,"pageNumber":0,"totalPages":1}
-
-        page_number = data["pageNumber"]
-        total_pages = data["totalPages"]
-        items = data["items"]
-        if page_number + 1 > total_pages:  # TODO: How to get more pages?
-            logger.error(f"Did not get all of the users...")
-        
-        return items
 
     def get_membership(self, user_id: str) -> str:
         response = requests.get(ACCESSY_URL + f"/asset/admin/user/{user_id}/organization/{self.organization_id}/membership",
