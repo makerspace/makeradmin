@@ -1,48 +1,77 @@
-# Program to Update MultiAccess With Data from MakerAdmin
+# Påläsning av API-dokumentation
+* export av nyligen labbmedlemmar + telefonnummer
+* knapp i makeradmin för att skicka ut Accessy-länk manuellt. Används vid nyckelutlämningar.
+* dela upp i veckovis access? Synka upp midnatt De som betalat före dess får access. Annars får man vänta till nästa vecka.
+  * Se till att alltid synka upp några veckor i förväg så att folk fortsätter ha access och kommer in även om nätverket är nere.
 
-A Windows program that will fetch data from MakerAdmin (or a file)
-with member information, then updates rfid_tag and end date, adds new
-members and blocks members that should no logner have access.
+## Frågor
+### kan vi använda access-grupper per person?
+NEJ
 
-Users of the program is supposed to make all updates in the MakerAdmin
-system (including entering of new rfid_tags) then run
-`multi_access_sync.exe` with MultiAccess turned off, then start
-MultiAccess and use it to send the updates to the building.
+### kan man fjärrstyra access till dörrar?
+Fråga Accessy.
 
-## MultiAccess
+### rate limiting?
+Fråga Accessy.
 
-Multiaccess is a program developed by Aptus and is used to admin their
-access system. The program is pretty old and may no longer be
-maintained. The version used in the Makerspace buiding is 7.16.6.
+### vad händer om någon byter telefonnummer?
+Måste plocka bort från Organisation. Skicka ny Accessy-invite till nytt nummer vid byte i Makeradmin.
 
-## MakerAdmin
+### hur fungerar pagination?
+Fråga Accessy.
 
-MakerAdmin is the system for administrating members of Stockholm
-Makerspace, there is an API endpoint used by this program to fetch
-member information.
 
-## Database Structure
+## Inbjudan
+* Invite via API
+* SMS skickas till personen
+* Personen får installera Accessy-appen och registrera användare i appen
 
-See [Docs/Database.md](Docs/Database.md)
+## Pending / shipping
+* 30 dagar måste bli 28 dagar i pending labaccess
+* Nyköp blir 28 dagar
+* Vi behöver avrunda nuvarande labaccesser till slutet på veckan
+* Pending skeppas i slutet på varje vecka
+* Behövs inget startdatum. Istället avrundas vid skeppning.
+* Synkning bryr sig inte om pending, bara aktuella spans.
+* Behöver kunna skeppa för specifik användare vid nyckelutlämning
 
-## Development Environment
 
-Written in Python (requires Python >= 3.6).
+# API-anrop
+## 1. Få session token
 
-### Install Dependencies
-You may need to install `unixodbc-dev` on ubuntu.
+```bash
+$ CLIENT_SECRET="..."
+$ CLIENT_ID="..."
 
-`sudo make init`
+$ curl -s --location --request POST 'https://api.accessy.se/auth/oauth/token' --header 'Content-Type: application/json' --data-raw '{
+    "audience": "https://api.accessy.se",
+    "grant_type": "client_credentials",
+    "client_id": "'$CLIENT_ID'",
+    "client_secret": "'$CLIENT_SECRET'"
+}'
 
-This installs the Python dependencies described in `requirements.txt`
 
-### Run Tests
-`make test`
+{"access_token":"...","token_type":"Bearer","expires_in":"604800000"}
+=> SESSION_TOKEN="$access_token"
+```
 
-### Create Windows Executables
-`make dist`
 
-## Installation
+## 2. Få organization ID
 
-Just copy the binary (`multi_access_sync.exe`) to the computer
-connected to the house and run it in a `cmd`.
+```bash
+$ curl -s --location --request GET 'https://api.accessy.se/asset/user/organization-membership' --header 'Authorization: Bearer '$SESSION_TOKEN
+
+[{"id":"...","userId":"...","organizationId":"...","roles":["ASSET_ADMINISTRATOR","DEVICE_ADMINISTRATOR","REALESTATE_ADMINISTRATOR","USER","ORGANIZATION_ADMINISTRATOR","DELEGATOR"]}]
+
+=> ORG_ID="$organizationId"
+```
+
+## 3. Få lista på user ID för organisation
+
+```bash
+$ curl --location --request GET 'https://api.accessy.se/asset/admin/organization/'$ORG_ID'/user' --header 'Authorization: Bearer '$SESSION_TOKEN
+
+{"items":[{"id":"...","msisdn":"+46...","firstName":"...","lastName":"..."},{"id":"...","msisdn":"+46...","firstName":"...","lastName":"..."},{"id":"...","msisdn":"+46...","firstName":"...","lastName":"..."},{"id":"...","msisdn":"+46...","firstName":"...","lastName":"..."},{"id":"...","firstName":"...","lastName":"..."},{"id":"...","msisdn":"+46...","firstName":"...","lastName":"..."}],"totalItems":6,"pageSize":25,"pageNumber":0,"totalPages":1}
+```
+
+## 4. Få membership ID för user
