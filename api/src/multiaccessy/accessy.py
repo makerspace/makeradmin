@@ -2,7 +2,6 @@ from dataclasses import dataclass
 from logging import getLogger
 import os
 import threading
-import warnings
 
 import requests
 
@@ -45,7 +44,22 @@ class AccessySession:
         return cls(response.json()["access_token"])
     
     def __post_init__(self):
-        self.organization_id = self._get_organization()
+        self.organization_id = self.__get_organization()
+
+    ################################################
+    # Internal methods
+    ################################################
+
+    def __get_organization(self) -> str:
+        """ Get the organization for the session token """
+        data = self._get_json("/asset/user/organization-membership")
+        # [{"id":<uuid>,"userId":<uuid>,"organizationId":<uuid>,"roles":[<roles>]}]
+        if len(data) > 1:
+            logger.warning("API key has several memberships. This is probably an error...")
+        elif len(data) == 0:
+            raise ValueError("The API key does not have a corresponding organization membership")
+
+        return data[0]["organizationId"]
 
     def _get_json(self, url: str, msg: str = None) -> dict:
         """ Convenience method for getting data from a JSON endpoint that is not paginated """
@@ -83,23 +97,34 @@ class AccessySession:
                 raise ValueError(f"Could not get all items. Not enough items were returned from Accessy endpoint during pagination loop. Got {received_item_count} out of {total_item_count} expected items")
 
         return items
-
-    def _get_organization(self) -> str:
-        """ Get the organization for the session token """
-        data = self._get_json("/asset/user/organization-membership")
-        # [{"id":<uuid>,"userId":<uuid>,"organizationId":<uuid>,"roles":[<roles>]}]
-        if len(data) > 1:
-            warnings.warn("API key has several memberships. This is probably an error...", RuntimeWarning)
-        elif len(data) == 0:
-            raise ValueError("The API key does not have a corresponding organization membership")
-
-        return data[0]["organizationId"]
+    
+    ################################################
+    # Methods that return raw JSON data from API:s
+    ################################################
 
     def _get_user_details(self, user_id: UUID) -> dict:
         """ Get details for user ID. Fields: id, msisdn, firstName, lastName, ... """
         return self._get_json(f"/org/admin/user/{user_id}", msg="Getting user details")
+
+    def _get_users_org(self) -> list[dict]:
+        """ Get all user ID:s """
+        return self._get_json_paginated(f"/asset/admin/organization/{self.organization_id}/user")
+        # {"items":[{"id":<uuid>,"msisdn":"+46...","firstName":str,"lastName":str}, ...],"totalItems":6,"pageSize":25,"pageNumber":0,"totalPages":1}
     
-    def user_ids_to_accessy_members(self, user_ids: list[UUID]) -> list["AccessyMember"]:
+    def _get_users_in_access_group(self, access_group_id: UUID) -> list[dict]:
+        """ Get all user ID:s in a specific access group """
+        return self._get_json_paginated(f"/asset/admin/access-permission-group/{access_group_id}/membership")
+        # {"items":[{"id":<uuid>,"userId":<uuid>,"organizationId":<uuid>,"roles":[<roles>]}, ...],"totalItems":3,"pageSize":25,"pageNumber":0,"totalPages":1}
+
+    def _get_users_lab(self) -> list[dict]:
+        """ Get all user ID:s with lab access """
+        return self._get_users_in_access_group(ACCESSY_LAB_ACCESS_GROUP)
+
+    def _get_users_special(self) -> list[dict]:
+        """ Get all user ID:s with special access """
+        return self._get_users_in_access_group(ACCESSY_SPECIAL_ACCESS_GROUP)
+    
+    def _user_ids_to_accessy_members(self, user_ids: list[UUID]) -> list["AccessyMember"]:
         """ Convert a list of User ID:s to AccessyMembers """
 
         def fill_user_details(user: "AccessyMember", user_id: str):
@@ -133,33 +158,20 @@ class AccessySession:
             t.join()
 
         return accessy_members
-
-    def get_users_org(self) -> list[dict]:
-        """ Get all user ID:s """
-        return self._get_json_paginated(f"/asset/admin/organization/{self.organization_id}/user")
-        # {"items":[{"id":<uuid>,"msisdn":"+46...","firstName":str,"lastName":str}, ...],"totalItems":6,"pageSize":25,"pageNumber":0,"totalPages":1}
     
-    def get_users_in_access_group(self, access_group_id: UUID) -> list[dict]:
-        """ Get all user ID:s in a specific access group """
-        return self._get_json_paginated(f"/asset/admin/access-permission-group/{access_group_id}/membership")
-
-    def get_users_lab(self) -> list[dict]:
-        """ Get all user ID:s with lab access """
-        return self.get_users_in_access_group(ACCESSY_LAB_ACCESS_GROUP)
-
-    def get_users_special(self) -> list[dict]:
-        """ Get all user ID:s with special access """
-        return self.get_users_in_access_group(ACCESSY_SPECIAL_ACCESS_GROUP)
+    #################
+    # Public methods
+    #################
 
     def get_all_members(self) -> tuple[list["AccessyMember"], list["AccessyMember"], list["AccessyMember"]]:
         """ Get a list of all Accessy members in the ORG and GROUPS (lab and special) """
-        org = set(item["id"] for item in self.get_users_org())
-        lab = set(item["userId"] for item in self.get_users_lab())
-        special = set(item["userId"] for item in self.get_users_special())
+        org = set(item["id"] for item in self._get_users_org())
+        lab = set(item["userId"] for item in self._get_users_lab())
+        special = set(item["userId"] for item in self._get_users_special())
 
-        org = self.user_ids_to_accessy_members(org)
-        lab = self.user_ids_to_accessy_members(lab)
-        special = self.user_ids_to_accessy_members(special)
+        org = self._user_ids_to_accessy_members(org)
+        lab = self._user_ids_to_accessy_members(lab)
+        special = self._user_ids_to_accessy_members(special)
 
         return org, lab, special
 
@@ -184,8 +196,10 @@ def main():
     if session is None:
         session = AccessySession.create_session(ACCESSY_CLIENT_ID, ACCESSY_CLIENT_SECRET)
     print("session:", session)
-    users = session.get_all_members()
-    print("users:", users)
+    org, lab, special = session.get_all_members()
+    print("Members in organization: ", org)
+    print("Members in lab group: ", lab)
+    print("Members in special group: ", special)
 
 
 if __name__ == "__main__":
