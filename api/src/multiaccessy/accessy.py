@@ -11,6 +11,7 @@ logger = getLogger("accessy")
 
 
 UUID = str  # The UUID used by Accessy is a 16 byte hexadecimal number formatted as 01234567-abcd-abcd-abcd-0123456789ab (i.e. grouped by 4, 2, 2, 2, 6 with dashes in between)
+MSISDN = str  # Standardized number of the form +46123123456
 
 ACCESSY_URL = config.get("ACCESSY_URL")
 ACCESSY_CLIENT_SECRET = config.get("ACCESSY_CLIENT_SECRET", log_value=False)
@@ -175,6 +176,16 @@ class AccessySession:
 
         return org, lab, special
 
+    def is_in_org(self, phone_number: MSISDN, users_org: list[dict] = None) -> bool:
+        """ Check if a user with a specific phone number is in the ORG """
+        if users_org is None:
+            users_org = self._get_users_org()
+
+        for item in users_org:
+            if item.get("msisdn", None) == phone_number:
+                return True
+        return False
+
 
 @dataclass
 class AccessyMember:
@@ -200,6 +211,13 @@ def main():
     print("Members in organization: ", org)
     print("Members in lab group: ", lab)
     print("Members in special group: ", special)
+
+    # Check person is in ORG
+    import random
+    random_se_number = f"+46{random.randint(0, 1e9):09d}"
+    print(f"Random person ({random_se_number}) in org?: {session.is_in_org(random_se_number)}")
+    special_person = special[0]
+    print(f"Special person ({special_person.phone_number}) in org?: {session.is_in_org(special_person.phone_number)}")
 
 
 if __name__ == "__main__":
