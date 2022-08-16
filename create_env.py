@@ -29,6 +29,10 @@ config = {
     "STRIPE_PRIVATE_KEY": os.environ.get("STRIPE_PRIVATE_KEY", ""),
     "STRIPE_PUBLIC_KEY": os.environ.get("STRIPE_PUBLIC_KEY", ""),
     "STRIPE_SIGNING_SECRET": "",
+    "ACCESSY_CLIENT_ID": "",
+    "ACCESSY_CLIENT_SECRET": "",
+    "ACCESSY_LAB_ACCESS_GROUP": "",
+    "ACCESSY_SPECIAL_ACCESS_GROUP": "",
 }
 
 if not args.force and os.path.isfile(".env"):
