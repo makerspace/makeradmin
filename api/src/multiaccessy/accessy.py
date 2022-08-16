@@ -1,8 +1,7 @@
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from logging import getLogger
 import os
 import threading
-import uuid
 import warnings
 
 import requests
@@ -12,21 +11,25 @@ from service.config import config
 logger = getLogger("accessy")
 
 
+UUID = str  # The UUID used by Accessy is a 16 byte hexadecimal number formatted as 01234567-abcd-abcd-abcd-0123456789ab (i.e. grouped by 4, 2, 2, 2, 6 with dashes in between)
+
 ACCESSY_URL = config.get("ACCESSY_URL")
 ACCESSY_CLIENT_SECRET = config.get("ACCESSY_CLIENT_SECRET", log_value=False)
 ACCESSY_CLIENT_ID = config.get("ACCESSY_CLIENT_ID")
+ACCESSY_LAB_ACCESS_GROUP = config.get("ACCESSY_LAB_ACCESS_GROUP")
+ACCESSY_SPECIAL_ACCESS_GROUP = config.get("ACCESSY_SPECIAL_ACCESS_GROUP")
 
 
 def check_response_error(response: requests.Response, msg: str = None):
     if not response.ok:
         msg_str = f"\n\tMessage: {msg}" if msg is not None else ""
-        logger.error(f"Got an error in the response. {response.status_code=}{msg_str}")
+        logger.error(f"Got an error in the response for {response.request.path_url}. {response.status_code=}{msg_str}")
         raise RuntimeError(msg)
 
 
 @dataclass
 class AccessySession:
-    session_token: uuid
+    session_token: UUID
 
     @classmethod
     def create_session(cls, client_id: str, client_secret: str) -> "AccessySession":
@@ -43,6 +46,14 @@ class AccessySession:
     
     def __post_init__(self):
         self.organization_id = self._get_organization()
+
+    def _get_json(self, url: str, msg: str = None) -> dict:
+        """ Convenience method for getting data from a JSON endpoint that is not paginated """
+        response = requests.get(ACCESSY_URL + url,
+                                headers={"Authorization": f"Bearer {self.session_token}"})
+        check_response_error(response, f"{msg}")
+        data = response.json()
+        return data
     
     def _get_json_paginated(self, url: str, msg: str = None):
         """ Convenience method for getting all data for a JSON endpoint that is paginated """
@@ -50,38 +61,33 @@ class AccessySession:
         page_number = 0
         items = []
 
-        total_items = None
-        received_items = 0
-        while total_items is None or received_items < total_items:
+        total_item_count = None
+        received_item_count = 0
+        while total_item_count is None or received_item_count < total_item_count:
             response = requests.get(ACCESSY_URL + url + f"?page_number={page_number}&page_size={page_size}",
                                     headers={"Authorization": f"Bearer {self.session_token}"})
-            check_response_error(response, f"{msg} (on page {page_number})")
+            check_response_error(response, f"{msg} (when fetching items {received_item_count} / {total_item_count})")
             data = response.json()
 
             current_items = data["items"]
 
             items.extend(current_items)
-            received_items += len(current_items)
+            received_item_count += len(current_items)
             page_number += 1
-            if total_items and total_items != data["totalItems"]:
+            if total_item_count and total_item_count != data["totalItems"]:
                 logger.warning(f"Length of response was changed during fetch. Need to restart it.")
                 return self._get_json_paginated(url, msg)
-            total_items = data["totalItems"]
+            total_item_count = data["totalItems"]
 
-            if len(current_items) == 0:
-                raise ValueError(f"Could not get all items. Not enough items were returned from Accessy endpoint during pagination loop. Got {len(received_items)} out of {total_items} expected items")
+            if len(current_items) == 0 and total_item_count != 0:
+                raise ValueError(f"Could not get all items. Not enough items were returned from Accessy endpoint during pagination loop. Got {received_item_count} out of {total_item_count} expected items")
 
         return items
 
     def _get_organization(self) -> str:
         """ Get the organization for the session token """
-        response = requests.get(ACCESSY_URL + "/asset/user/organization-membership",
-                                headers={"Authorization": f"Bearer {self.session_token}"})
+        data = self._get_json("/asset/user/organization-membership")
         # [{"id":<uuid>,"userId":<uuid>,"organizationId":<uuid>,"roles":[<roles>]}]
-
-        check_response_error(response, "Get organization")
-
-        data = response.json()
         if len(data) > 1:
             warnings.warn("API key has several memberships. This is probably an error...", RuntimeWarning)
         elif len(data) == 0:
@@ -89,66 +95,80 @@ class AccessySession:
 
         return data[0]["organizationId"]
 
+    def _get_user_details(self, user_id: UUID) -> dict:
+        """ Get details for user ID. Fields: id, msisdn, firstName, lastName, ... """
+        return self._get_json(f"/org/admin/user/{user_id}", msg="Getting user details")
+    
+    def user_ids_to_accessy_members(self, user_ids: list[UUID]) -> list["AccessyMember"]:
+        """ Convert a list of User ID:s to AccessyMembers """
+
+        def fill_user_details(user: "AccessyMember", user_id: str):
+            data = self._get_json(f"/org/admin/user/{user_id}")
+
+            # API keys do not have phone numbers
+            if data["application"]:
+                return
+
+            try:
+                user.phone_number = data["msisdn"]
+            except KeyError:
+                logger.error(f"User {user.user_id} does not have a phone number. {data=}")
+
+        def fill_membership_id(user: "AccessyMember", user_id: str):
+            data = self._get_json(f"/asset/admin/user/{user_id}/organization/{self.organization_id}/membership")
+            user.membership_id = data["id"]
+        
+        threads = []
+        accessy_members = []
+        for uid in user_ids:
+            accessy_member = AccessyMember(uid, None)
+            threads.append(threading.Thread(target=fill_user_details, args=(accessy_member, uid)))
+            threads.append(threading.Thread(target=fill_membership_id, args=(accessy_member, uid)))
+            accessy_members.append(accessy_member)
+        
+        for t in threads:
+            t.start()
+
+        for t in threads:
+            t.join()
+
+        return accessy_members
+
     def get_users_org(self) -> list[dict]:
         """ Get all user ID:s """
         return self._get_json_paginated(f"/asset/admin/organization/{self.organization_id}/user")
         # {"items":[{"id":<uuid>,"msisdn":"+46...","firstName":str,"lastName":str}, ...],"totalItems":6,"pageSize":25,"pageNumber":0,"totalPages":1}
     
+    def get_users_in_access_group(self, access_group_id: UUID) -> list[dict]:
+        """ Get all user ID:s in a specific access group """
+        return self._get_json_paginated(f"/asset/admin/access-permission-group/{access_group_id}/membership")
+
     def get_users_lab(self) -> list[dict]:
         """ Get all user ID:s with lab access """
-        pass
-    
+        return self.get_users_in_access_group(ACCESSY_LAB_ACCESS_GROUP)
+
     def get_users_special(self) -> list[dict]:
         """ Get all user ID:s with special access """
-        pass
-
-    def get_membership(self, user_id: str) -> str:
-        """ Get the membership ID for a user ID """
-        response = requests.get(ACCESSY_URL + f"/asset/admin/user/{user_id}/organization/{self.organization_id}/membership",
-                                headers={"Authorization": f"Bearer {self.session_token}"})
-
-        check_response_error(response, "Get membership")
-        data = response.json()
-        return data["id"]
+        return self.get_users_in_access_group(ACCESSY_SPECIAL_ACCESS_GROUP)
 
     def get_all_members(self) -> tuple[list["AccessyMember"], list["AccessyMember"], list["AccessyMember"]]:
-        """ Get a list of all Accessy members in ORG, GROUP (lab and special) """
-        org = self.get_users_org()
-        lab = self.get_users_lab()
-        special = self.get_users_special()
+        """ Get a list of all Accessy members in the ORG and GROUPS (lab and special) """
+        org = set(item["id"] for item in self.get_users_org())
+        lab = set(item["userId"] for item in self.get_users_lab())
+        special = set(item["userId"] for item in self.get_users_special())
 
-        def get_membership(user: "AccessyMember", user_id: str):
-            user.membership_id = self.get_membership(user_id)
-
-        accessy_users = []
-        # Fill in the membership ID for all
-        threads = []
-        for user in org:
-            # API key does not have phone number
-            phone_number = user.get("msisdn", None)
-            if phone_number is None:
-                continue
-
-            user_id = user["id"]
-
-            # Create user without membership, then update in-place in parallel
-            accessy_user = AccessyMember(user_id, phone_number)
-            accessy_users.append(accessy_user)
-            _thread = threading.Thread(target=get_membership, args=(accessy_user, user_id), daemon=True)
-            _thread.start()
-            threads.append(_thread)
-
-        for thread in threads:
-            thread.join()
+        org = self.user_ids_to_accessy_members(org)
+        lab = self.user_ids_to_accessy_members(lab)
+        special = self.user_ids_to_accessy_members(special)
 
         return org, lab, special
 
 
 @dataclass
 class AccessyMember:
-    user_id: uuid
+    user_id: UUID
     phone_number: str
-    membership_id: uuid = None
+    membership_id: UUID = None
 
 
 def main():
