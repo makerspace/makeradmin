@@ -17,3 +17,4 @@ node_modules
 public/dist
 public/static/js
 local.mk
+.vscode/

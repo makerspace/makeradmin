@@ -18,13 +18,13 @@ def member_to_response_object(member):
         'firstname': member.firstname,
         'lastname': member.lastname,
         'end_date': max((span.enddate for span in member.spans)).isoformat() if len(member.spans) > 0 else None,
-        'keys': [{'key_id': key.key_id, 'rfid_tag': key.tagid} for key in member.keys],
+        'phone': member.phone,
     }
 
 
 @service.route("/memberdata", method=GET, permission=MEMBER_VIEW)
 def get_memberdata():
-    """ Used by multiaccess sync program to get members. """
+    """ Used by access sync program to get members. """
     query = db_session.query(Member).join(Member.spans).join(Member.keys)
     query = query.options(contains_eager(Member.spans), contains_eager(Member.keys))
     query = query.filter(

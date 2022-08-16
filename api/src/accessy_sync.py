@@ -7,10 +7,12 @@ from logging import basicConfig, INFO, getLogger
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from multi_access.maker_admin import MakerAdminClient
 from multi_access.multi_access import get_multi_access_members, update_diffs, \
     UpdateMember, AddMember, BlockMember
 from multi_access.tui import Tui
+
+from accessy.models import AccessyMember, AccessyPermissiongroup
+from makeradmin.maker_admin import MakerAdminMember, MakerAdminClient
 
 try:
     from source_revision import source_revision
@@ -27,6 +29,30 @@ WHAT_BLOCK = 'block'
 WHAT_ALL = {WHAT_ORDERS, WHAT_UPDATE, WHAT_ADD, WHAT_BLOCK}
 
 
+def split_into_groups(accessy_members:list[AccessyMember], makeradmin_members:list[MakerAdminMember]):
+    members_ok = []
+    members_not_in_makeradmin = []
+    accessy_members.sort(key=lambda x: x.accessy_phone)
+    makeradmin_members.sort(key=lambda x: x.phone)
+
+    #Check if members are in accessy but not makeradmin
+    for acessy_member in accessy_members:
+        found = False
+        for makeradmin_member in makeradmin_members:
+            if acessy_member.accessy_phone == makeradmin_member.phone:
+                members_ok.append({acessy_member, makeradmin_member})
+                found = True
+                break
+        if not found:
+            members_not_in_makeradmin.append(acessy_member)
+    
+    return members_ok, members_not_in_makeradmin
+
+def update_regular_access(permission_groups: list[AccessyPermissiongroup], acessy_member:AccessyMember, makeradmin_member:MakerAdminMember):
+    for permission_group in permission_groups:
+        if permission_group.week_start_date < makeradmin_member.end_timestamp:
+            add_to_permission_group(permission_group, acessy_member) #TODO
+
 def sync(session=None, client=None, ui=None, customer_id=None, authority_id=None, what=None, ignore_running=False):
     what = what or WHAT_ALL
 
@@ -38,25 +64,30 @@ def sync(session=None, client=None, ui=None, customer_id=None, authority_id=None
     # Run actions on MakerAdmin (ship orders and update key timestamps)
 
     if WHAT_ORDERS in what:
-        client.ship_orders(ui)
+        #TODO update pending lab stuff
+        client.ship_orders(ui) #TODO should only run once a week etc
 
     # Fetch from MakerAdmin
     
     ma_members = client.fetch_members(ui)
-    
-    # Fetch relevant data from db and diff it
-    
-    db_members = get_multi_access_members(session, ui, customer_id)
 
     #TODO update access permision groups
 
     #TODO list members
-    #TODO filter members
 
-    #TODO update members
+    #Split the members into groups
+    members_ok, members_not_in_makeradmin = split_into_groups(accessy_members, ma_members)
     
+    #Remove accessy members not in makeradmin from accessy
+    for acessy_member in members_not_in_makeradmin:
+        remove_member(acessy_member) #TODO
+
+    #Update member access permission groups
+    for acessy_member, makeradmin_member in members_ok:
+        update_regular_access(acessy_member,makeradmin_member)
+        #TODO special groups
+
     return
-    
 
 def main():
 
