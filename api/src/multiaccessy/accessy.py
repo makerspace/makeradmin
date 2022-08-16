@@ -134,6 +134,13 @@ class AccessyMember:
 
         return accessy_users
 
+@dataclass
+class AccessyPermissiongroup():
+
+    def __init__(self, permission_group_id) -> None:
+        self.permission_group_id = permission_group_id
+        self.week_end_date
+        self.week_start_date
 
 def main():
     session = None

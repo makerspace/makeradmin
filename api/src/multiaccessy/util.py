@@ -2,6 +2,7 @@ from datetime import time, datetime
 
 from pytz import timezone
 
+#TODO remove things we dont need here
 
 class classinstancemethod(object):
     """ Decorator for methods that can be used both in a class or instance contex. The first argument will be either
