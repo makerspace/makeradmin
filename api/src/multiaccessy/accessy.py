@@ -24,6 +24,14 @@ def check_response_error(response: requests.Response, msg: str = None):
         raise RuntimeError(msg)
 
 
+# Use this instead of AccessySession during development if you don't want to call the actual api.
+class DummyAccessySession:
+    
+    @staticmethod
+    def get():
+        return DummyAccessySession()
+
+
 @dataclass
 class AccessySession:
     session_token: uuid

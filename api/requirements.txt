@@ -15,6 +15,7 @@ pytz
 ipython
 Pillow
 Phonenumbers
+schedule
 
 # Test requirements
 pytest

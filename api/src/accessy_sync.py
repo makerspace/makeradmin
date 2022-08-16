@@ -1,11 +1,27 @@
+import time
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
-from time import sleep
 
+import schedule
 from rocky.process import log_exception, stoppable
 from sqlalchemy.orm import sessionmaker
-from api.src.service.config import get_mysql_config
-from api.src.service.db import create_mysql_engine, db_session
+
+from multiaccessy.accessy import DummyAccessySession
+from service.config import get_mysql_config
+from service.db import create_mysql_engine, db_session
 from service.logging import logger
+from shop.transactions import ship_orders
+
+
+def ship():
+    logger.info("shipping orders")
+    try:
+        ship_orders()
+    except Exception as e:
+        logger.exception(f"failed to ship orders: {e}")
+
+
+def sync():
+    logger.info("syncing accessy")
 
 
 if __name__ == '__main__':
@@ -18,15 +34,9 @@ if __name__ == '__main__':
         engine = create_mysql_engine(**get_mysql_config())
         session_factory = sessionmaker(autocommit=False, autoflush=False, bind=engine)
         
-        logger.info(f'checking for emails to send every {args.sleep} seconds, limit is {args.limit}')
+        # TODO Enable when we have accessy in place: schedule.every().tuesday.at("19:30").do(ship)
+        schedule.every().day.at("04:00").do(sync)
         
         while True:
-            sleep(100)
-            try:
-                # TODO sync accessy every day
-                # TODO ship order periodically, ask board for when
-                pass
-            except Exception as e:
-                logger.warning(f"failed to do db query. ignoring: {e}")
-            finally:
-                db_session.remove()
+            time.sleep(1)
+            schedule.run_pending()
