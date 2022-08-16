@@ -38,6 +38,11 @@ default = Dict(name="default", src=dict(
     APP_DEBUG=None,
     CORS_ALLOWED_ORIGINS='https://medlem.makerspace.se,https://stockholm.makeradmin.se,https://medlem.dev.makerspace.se'
                          ',http://localhost:8009,http://localhost:8011,http://localhost:8080',
+    ACCESSY_URL="https://api.accessy.se",
+    ACCESSY_CLIENT_ID=None,
+    ACCESSY_CLIENT_SECRET=None,
+    ACCESSY_LAB_ACESS_GROUP=None,
+    ACCESSY_SPECIAL_ACESS_GROUP=None,
 ))
 env = Env()
 dot_env = DotEnvFile()
