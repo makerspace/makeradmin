@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from logging import getLogger
 import os
 import threading
@@ -74,6 +74,7 @@ class AccessySession:
         return items
 
     def _get_organization(self) -> str:
+        """ Get the organization for the session token """
         response = requests.get(ACCESSY_URL + "/asset/user/organization-membership",
                                 headers={"Authorization": f"Bearer {self.session_token}"})
         # [{"id":<uuid>,"userId":<uuid>,"organizationId":<uuid>,"roles":[<roles>]}]
@@ -88,11 +89,21 @@ class AccessySession:
 
         return data[0]["organizationId"]
 
-    def get_users(self) -> list[dict]:
+    def get_users_org(self) -> list[dict]:
+        """ Get all user ID:s """
         return self._get_json_paginated(f"/asset/admin/organization/{self.organization_id}/user")
         # {"items":[{"id":<uuid>,"msisdn":"+46...","firstName":str,"lastName":str}, ...],"totalItems":6,"pageSize":25,"pageNumber":0,"totalPages":1}
+    
+    def get_users_lab(self) -> list[dict]:
+        """ Get all user ID:s with lab access """
+        pass
+    
+    def get_users_special(self) -> list[dict]:
+        """ Get all user ID:s with special access """
+        pass
 
     def get_membership(self, user_id: str) -> str:
+        """ Get the membership ID for a user ID """
         response = requests.get(ACCESSY_URL + f"/asset/admin/user/{user_id}/organization/{self.organization_id}/membership",
                                 headers={"Authorization": f"Bearer {self.session_token}"})
 
@@ -100,23 +111,19 @@ class AccessySession:
         data = response.json()
         return data["id"]
 
-
-@dataclass
-class AccessyMember:
-    membership_id: uuid
-    user_id: uuid
-    phone_number: str
-
-    @classmethod
-    def get_all(cls, session: AccessySession) -> list["AccessyMember"]:
-        user_list = session.get_users()
+    def get_all_members(self) -> tuple[list["AccessyMember"], list["AccessyMember"], list["AccessyMember"]]:
+        """ Get a list of all Accessy members in ORG, GROUP (lab and special) """
+        org = self.get_users_org()
+        lab = self.get_users_lab()
+        special = self.get_users_special()
 
         def get_membership(user: "AccessyMember", user_id: str):
-            user.membership_id = session.get_membership(user_id)
+            user.membership_id = self.get_membership(user_id)
 
         accessy_users = []
+        # Fill in the membership ID for all
         threads = []
-        for user in user_list:
+        for user in org:
             # API key does not have phone number
             phone_number = user.get("msisdn", None)
             if phone_number is None:
@@ -125,7 +132,7 @@ class AccessyMember:
             user_id = user["id"]
 
             # Create user without membership, then update in-place in parallel
-            accessy_user = cls(None, user_id, phone_number)
+            accessy_user = AccessyMember(user_id, phone_number)
             accessy_users.append(accessy_user)
             _thread = threading.Thread(target=get_membership, args=(accessy_user, user_id), daemon=True)
             _thread.start()
@@ -134,15 +141,15 @@ class AccessyMember:
         for thread in threads:
             thread.join()
 
-        return accessy_users
+        return org, lab, special
 
 
 @dataclass
-class AccessyPermissiongroup():
+class AccessyMember:
+    user_id: uuid
+    phone_number: str
+    membership_id: uuid = None
 
-    def __init__(self, permission_group_id) -> None:
-        self.permission_group_id = permission_group_id
-        
 
 def main():
     session = None
@@ -157,7 +164,7 @@ def main():
     if session is None:
         session = AccessySession.create_session(ACCESSY_CLIENT_ID, ACCESSY_CLIENT_SECRET)
     print("session:", session)
-    users = AccessyMember.get_all(session)
+    users = session.get_all_members()
     print("users:", users)
 
 
