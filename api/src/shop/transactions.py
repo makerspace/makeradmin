@@ -9,6 +9,7 @@ from sqlalchemy.sql import func
 from membership.membership import add_membership_days
 from membership.models import Key, Span
 from multiaccessy.accessy import DummyAccessySession
+from multiaccessy.invite import send_accessy_invite
 from service.api_definition import NEGATIVE_ITEM_COUNT, INVALID_ITEM_COUNT, EMPTY_CART, NON_MATCHING_SUMS
 from service.db import db_session, nested_atomic
 from service.error import InternalServerError, BadRequest, NotFound
@@ -140,12 +141,13 @@ def ship_add_labaccess_action(action, transaction):
     
     assert labaccess_end
 
-    accessy_session = DummyAccessySession.get()
-    if transaction.member.phone and not accessy_session.is_in_org(transaction.member.phone):
-        send_invite()
-
     complete_pending_action(action)
     send_key_updated_email(transaction.member_id, days_to_add, labaccess_end)
+
+    accessy_session = DummyAccessySession.get()
+    if transaction.member.phone and not accessy_session.is_in_org(transaction.member.phone):
+        result_message = send_accessy_invite(member_id=transaction.member_id)
+        logger.info(f"send accessy invite result: {result_message}")
 
 
 def ship_add_membership_action(action, transaction):

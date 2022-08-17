@@ -31,6 +31,14 @@ class DummyAccessySession:
     def get():
         return DummyAccessySession()
 
+    def is_in_org(self, phone) -> bool:
+        """ Return true if user with phone number is in makerspace org. """
+        return True
+
+    def invite_to_org_and_labacess_permissions(self, phone) -> None:
+        """ Sent an invitation for the phone into the org and make it auto add to labacess permissions on accept. """
+        pass
+
 
 @dataclass
 class AccessySession:
