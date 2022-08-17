@@ -209,7 +209,7 @@ class AccessySession:
         if accessy_member is None:
             return
 
-        response = requests.delete(ACCESSY_URL + f"/org/admin/organization/{self.organization_id}/user/{accessy_member.membership_id}",
+        response = requests.delete(ACCESSY_URL + f"/org/admin/organization/{self.organization_id}/user/{accessy_member.user_id}",
                                    headers={"Authorization": f"Bearer {self.session_token}"})
         check_response_error(response)
 
