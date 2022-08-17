@@ -48,18 +48,24 @@ class AccessySession:
     #################
     # Public methods
     #################
+    @dataclass
+    class AllAccessyMemberGroups:
+        """ A collection of the members that are included in each Accessy org/group """
+        org_members: list["AccessyMember"]
+        lab: list["AccessyMember"]
+        special: list["AccessyMember"]
 
-    def get_all_members(self) -> tuple[list["AccessyMember"], list["AccessyMember"], list["AccessyMember"]]:
+    def get_all_members(self) -> AllAccessyMemberGroups:
         """ Get a list of all Accessy members in the ORG and GROUPS (lab and special) """
         org = set(item["id"] for item in self._get_users_org())
         lab = set(item["userId"] for item in self._get_users_lab())
         special = set(item["userId"] for item in self._get_users_special())
 
-        org = self._user_ids_to_accessy_members(org)
-        lab = self._user_ids_to_accessy_members(lab)
-        special = self._user_ids_to_accessy_members(special)
-
-        return org, lab, special
+        return AccessySession.AllAccessyMemberGroups(
+            org = self._user_ids_to_accessy_members(org),
+            lab = self._user_ids_to_accessy_members(lab),
+            special = self._user_ids_to_accessy_members(special)
+        )
 
     def is_in_org(self, phone_number: MSISDN, users_org: list[dict] = None) -> bool:
         """ Check if a user with a specific phone number is in the ORG """
@@ -134,7 +140,7 @@ class AccessySession:
         """ Convenience method for getting data from a JSON endpoint that is not paginated """
         response = requests.get(ACCESSY_URL + url,
                                 headers={"Authorization": f"Bearer {self.session_token}"})
-        check_response_error(response, f"{msg}")
+        check_response_error(response, msg)
         data = response.json()
         return data
     
@@ -193,10 +199,10 @@ class AccessySession:
         """ Convert a list of User ID:s to AccessyMembers """
 
         APPLICATION_PHONE_NUMBER = object()  # Sentinel phone number for applications
-        def fill_user_details(user: "AccessyMember", user_id: str):
-            data = self._get_json(f"/org/admin/user/{user_id}")
+        def fill_user_details(user: "AccessyMember"):
+            data = self._get_json(f"/org/admin/user/{user.user_id}")
 
-            # API keys do not have phone numbers
+            # API keys do not have phone numbers, set it to sentinel object so we can filter out API keys further down
             if data["application"]:
                 user.phone_number = APPLICATION_PHONE_NUMBER
                 return
@@ -208,16 +214,16 @@ class AccessySession:
             user.first_name = data.get("firstName", "")
             user.last_name = data.get("lastName", "")
 
-        def fill_membership_id(user: "AccessyMember", user_id: str):
-            data = self._get_json(f"/asset/admin/user/{user_id}/organization/{self.organization_id}/membership")
+        def fill_membership_id(user: "AccessyMember"):
+            data = self._get_json(f"/asset/admin/user/{user.user_id}/organization/{self.organization_id}/membership")
             user.membership_id = data["id"]
         
         threads = []
         accessy_members = []
         for uid in user_ids:
-            accessy_member = AccessyMember(uid, None)
-            threads.append(threading.Thread(target=fill_user_details, args=(accessy_member, uid)))
-            threads.append(threading.Thread(target=fill_membership_id, args=(accessy_member, uid)))
+            accessy_member = AccessyMember(uid)
+            threads.append(threading.Thread(target=fill_user_details, args=(accessy_member, )))
+            threads.append(threading.Thread(target=fill_membership_id, args=(accessy_member, )))
             accessy_members.append(accessy_member)
         
         for t in threads:
@@ -247,7 +253,8 @@ class AccessySession:
 @dataclass
 class AccessyMember:
     user_id: UUID = field(repr=False)
-    phone_number: str
+    # Get information below later
+    phone_number: str = None
     membership_id: UUID = field(repr=False, default=None)
     first_name: str = "<first name>"
     last_name: str = "<last name>"
