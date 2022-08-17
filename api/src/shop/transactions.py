@@ -145,7 +145,7 @@ def ship_add_labaccess_action(action, transaction):
     send_key_updated_email(transaction.member_id, days_to_add, labaccess_end)
 
     result_message = maybe_send_accessy_labaccess_invite(member_id=transaction.member_id)
-    logger.info(f"maybe send accessy invite result for member_id {transaction.member_id}: {result_message}")
+    logger.info(f"maybe_send_accessy_labaccess_invite result for member_id {transaction.member_id}: {result_message}")
 
 
 def ship_add_membership_action(action, transaction):

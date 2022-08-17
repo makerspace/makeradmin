@@ -31,8 +31,8 @@ config = {
     "STRIPE_SIGNING_SECRET": "",
     "ACCESSY_CLIENT_ID": "",
     "ACCESSY_CLIENT_SECRET": "",
-    "ACCESSY_LAB_ACCESS_GROUP": "",
-    "ACCESSY_SPECIAL_ACCESS_GROUP": "",
+    "ACCESSY_LABACCESS_GROUP": "",
+    "ACCESSY_SPECIAL_LABACCESS_GROUP": "",
 }
 
 if not args.force and os.path.isfile(".env"):

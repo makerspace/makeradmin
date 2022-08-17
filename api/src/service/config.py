@@ -29,7 +29,7 @@ default = Dict(name="default", src=dict(
     MAILGUN_KEY='',
     MAILGUN_DOMAIN='',
     MAILGUN_FROM='',
-    MAILGUN_TO_OVERRIDE='',
+    MAILGUN_TO_OVERRIDE='',  # Send to this email address instead of the actual to, useful when developing.
     ELKS46_API_USER="",
     ELKS46_API_KEY="",
     HOST_PUBLIC='',
@@ -41,8 +41,9 @@ default = Dict(name="default", src=dict(
     ACCESSY_URL="https://api.accessy.se",
     ACCESSY_CLIENT_ID=None,
     ACCESSY_CLIENT_SECRET=None,
-    ACCESSY_LAB_ACESS_GROUP=None,
-    ACCESSY_SPECIAL_ACESS_GROUP=None,
+    ACCESSY_LABACCESS_GROUP=None,
+    ACCESSY_SPECIAL_LABACCESS=None,
+    ACCESSY_NO_MODIFY_OVERRIDE=True,  # Do not perform modify operations to Acessy, only log, useful when developing.
 ))
 env = Env()
 dot_env = DotEnvFile()

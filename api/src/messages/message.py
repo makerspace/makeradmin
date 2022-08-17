@@ -1,12 +1,20 @@
+from os.path import abspath, dirname
+
+from jinja2 import FileSystemLoader, Environment, select_autoescape
+
 from messages.models import MessageTemplate, Message
 from service.config import get_public_url
 
 
-def send_message(template: MessageTemplate, member, db_session=None, render_template=None, **kwargs):
-    
-    if render_template is None:
-        from flask import render_template
-    
+template_loader = FileSystemLoader(abspath(dirname(dirname(__file__))) + '/templates')
+template_env = Environment(loader=template_loader, autoescape=select_autoescape())
+
+
+def render_template(name, **kwargs):
+    return template_env.get_template(name).render(**kwargs)
+
+
+def send_message(template: MessageTemplate, member, db_session=None, **kwargs):
     subject = render_template(
         f"{template.value}.subject.html",
         public_url=get_public_url,

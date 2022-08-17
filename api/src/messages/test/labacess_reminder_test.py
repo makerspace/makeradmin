@@ -1,8 +1,7 @@
 import core
 import messages
 import shop
-from dispatch_emails import labaccess_reminder, render_template, LABACCESS_REMINDER_DAYS_BEFORE, \
-    LABACCESS_REMINDER_GRACE_PERIOD
+from dispatch_emails import labaccess_reminder, LABACCESS_REMINDER_DAYS_BEFORE, LABACCESS_REMINDER_GRACE_PERIOD
 from membership import membership
 from membership.models import Span, Member
 from messages.models import Message, MessageTemplate
@@ -30,7 +29,7 @@ class Test(ShopTestMixin, FlaskTestBase):
         db_session.query(Message).delete()
     
     def send_labaccess(self):
-        labaccess_reminder(render_template)
+        labaccess_reminder()
         db_session.commit()
 
     def test_reminder_message_is_created_20_days_before_expiry(self):
