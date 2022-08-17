@@ -45,6 +45,76 @@ class AccessySession:
     def __post_init__(self):
         self.organization_id = self.__get_organization()
 
+    #################
+    # Public methods
+    #################
+
+    def get_all_members(self) -> tuple[list["AccessyMember"], list["AccessyMember"], list["AccessyMember"]]:
+        """ Get a list of all Accessy members in the ORG and GROUPS (lab and special) """
+        org = set(item["id"] for item in self._get_users_org())
+        lab = set(item["userId"] for item in self._get_users_lab())
+        special = set(item["userId"] for item in self._get_users_special())
+
+        org = self._user_ids_to_accessy_members(org)
+        lab = self._user_ids_to_accessy_members(lab)
+        special = self._user_ids_to_accessy_members(special)
+
+        return org, lab, special
+
+    def is_in_org(self, phone_number: MSISDN, users_org: list[dict] = None) -> bool:
+        """ Check if a user with a specific phone number is in the ORG """
+        user = self._get_org_user_from_phone(phone_number, users_org)
+        if user is not None:
+            return True
+        return False
+
+    def is_in_group(self, phone_number: MSISDN, access_group_id: UUID) -> bool:
+        """ Check if a user is in a specific access group """
+        accessy_member = self._get_org_user_from_phone(phone_number)
+        if accessy_member is None:
+            return False
+
+        items = self._get_json_paginated(f"/asset/admin/access-permission-group/{access_group_id}/membership")
+        for item in items:
+            if item["userId"] == accessy_member.user_id:
+                return True
+        return False
+
+    def remove_from_org(self, phone_number: MSISDN):
+        accessy_member = self._get_org_user_from_phone(phone_number)
+        if accessy_member is None:
+            return
+
+        response = requests.delete(ACCESSY_URL + f"/org/admin/organization/{self.organization_id}/user/{accessy_member.user_id}",
+                                   headers={"Authorization": f"Bearer {self.session_token}"})
+        check_response_error(response)
+
+    def remove_from_group(self, phone_number: MSISDN, access_group_id: UUID):
+        accessy_member = self._get_org_user_from_phone(phone_number)
+        if accessy_member is None:
+            return
+
+        response = requests.delete(ACCESSY_URL + f"/asset/admin/access-permission-group/{access_group_id}/membership/{accessy_member.membership_id}",
+                                headers={"Content-Type": "application/json", "Authorization": f"Bearer {self.session_token}"})
+        check_response_error(response)
+
+    def add_to_group(self, phone_number: MSISDN, access_group_id: UUID):
+        """ Add a specific user with phone number to access group """
+        accessy_member = self._get_org_user_from_phone(phone_number)
+        if accessy_member is None:
+            self.invite_phone_to_org_and_groups([phone_number], [access_group_id])
+
+        response = requests.put(ACCESSY_URL + f"/asset/admin/access-permission-group/{access_group_id}/membership", json=dict(membership=accessy_member.membership_id),
+                                headers={"Content-Type": "application/json", "Authorization": f"Bearer {self.session_token}"})
+        check_response_error(response)
+
+    def invite_phone_to_org_and_groups(self, phone_numbers: list[MSISDN], access_group_ids: list[UUID] = [], message_to_user: str = ""):
+        """ Invite a list of phone numbers to a list of groups """
+        response = requests.post(ACCESSY_URL + f"/org/admin/organization/{self.organization_id}/invitation",
+                                json=dict(accessPermissionGroupIds=access_group_ids, message=message_to_user, msisdns=phone_numbers),
+                                headers={"Content-Type": "application/json", "Authorization": f"Bearer {self.session_token}"})
+        check_response_error(response, f"Invite {phone_numbers=} to org and groups {access_group_ids}. {message_to_user=}")
+
     ################################################
     # Internal methods
     ################################################
@@ -172,76 +242,6 @@ class AccessySession:
                 return self._user_ids_to_accessy_members([user_id])[0]
         else:
             return None
-    
-    #################
-    # Public methods
-    #################
-
-    def get_all_members(self) -> tuple[list["AccessyMember"], list["AccessyMember"], list["AccessyMember"]]:
-        """ Get a list of all Accessy members in the ORG and GROUPS (lab and special) """
-        org = set(item["id"] for item in self._get_users_org())
-        lab = set(item["userId"] for item in self._get_users_lab())
-        special = set(item["userId"] for item in self._get_users_special())
-
-        org = self._user_ids_to_accessy_members(org)
-        lab = self._user_ids_to_accessy_members(lab)
-        special = self._user_ids_to_accessy_members(special)
-
-        return org, lab, special
-
-    def is_in_org(self, phone_number: MSISDN, users_org: list[dict] = None) -> bool:
-        """ Check if a user with a specific phone number is in the ORG """
-        user = self._get_org_user_from_phone(phone_number, users_org)
-        if user is not None:
-            return True
-        return False
-
-    def is_in_group(self, phone_number: MSISDN, access_group_id: UUID) -> bool:
-        """ Check if a user is in a specific access group """
-        accessy_member = self._get_org_user_from_phone(phone_number)
-        if accessy_member is None:
-            return False
-
-        items = self._get_json_paginated(f"/asset/admin/access-permission-group/{access_group_id}/membership")
-        for item in items:
-            if item["userId"] == accessy_member.user_id:
-                return True
-        return False
-
-    def remove_from_org(self, phone_number: MSISDN):
-        accessy_member = self._get_org_user_from_phone(phone_number)
-        if accessy_member is None:
-            return
-
-        response = requests.delete(ACCESSY_URL + f"/org/admin/organization/{self.organization_id}/user/{accessy_member.user_id}",
-                                   headers={"Authorization": f"Bearer {self.session_token}"})
-        check_response_error(response)
-
-    def remove_from_group(self, phone_number: MSISDN, access_group_id: UUID):
-        accessy_member = self._get_org_user_from_phone(phone_number)
-        if accessy_member is None:
-            return
-
-        response = requests.delete(ACCESSY_URL + f"/asset/admin/access-permission-group/{access_group_id}/membership/{accessy_member.membership_id}",
-                                headers={"Content-Type": "application/json", "Authorization": f"Bearer {self.session_token}"})
-        check_response_error(response)
-
-    def add_to_group(self, phone_number: MSISDN, access_group_id: UUID):
-        """ Add a specific user with phone number to access group """
-        accessy_member = self._get_org_user_from_phone(phone_number)
-        if accessy_member is None:
-            self.invite_phone_to_org_and_groups([phone_number], [access_group_id])
-
-        response = requests.put(ACCESSY_URL + f"/asset/admin/access-permission-group/{access_group_id}/membership", json=dict(membership=accessy_member.membership_id),
-                                headers={"Content-Type": "application/json", "Authorization": f"Bearer {self.session_token}"})
-        check_response_error(response)
-
-    def invite_phone_to_org_and_groups(self, phone_numbers: list[MSISDN], access_group_ids: list[UUID] = [], message_to_user: str = ""):
-        """ Invite a list of phone numbers to a list of groups """
-        response = requests.post(ACCESSY_URL + f"/org/admin/organization/{self.organization_id}/invitation",
-                                json=dict(accessPermissionGroupIds=access_group_ids, message=message_to_user, msisdns=phone_numbers),
-                                headers={"Content-Type": "application/json", "Authorization": f"Bearer {self.session_token}"})
-        check_response_error(response, f"Invite {phone_numbers=} to org and groups {access_group_ids}. {message_to_user=}")
 
 
 @dataclass
