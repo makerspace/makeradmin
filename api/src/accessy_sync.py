@@ -5,7 +5,6 @@ import schedule
 from rocky.process import log_exception, stoppable
 from sqlalchemy.orm import sessionmaker
 
-from multiaccessy.accessy import DummyAccessySession
 from service.config import get_mysql_config
 from service.db import create_mysql_engine, db_session
 from service.logging import logger
@@ -21,7 +20,7 @@ def ship():
 
 
 def sync():
-    logger.info("syncing accessy X")
+    logger.info("syncing accessy")
     try:
         pass  # TODO
     except Exception as e:

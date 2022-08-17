@@ -1,5 +1,5 @@
 from datetime import datetime
-from random import randint, choice
+from random import randint, choice, seed
 
 from faker import Faker
 
@@ -28,7 +28,8 @@ class ObjFactory:
         self.span = None
         self.message = None
         self.phone_request = None
-    
+        # TODO seed()
+
     def create_member(self, **kwargs):
         firstname = self.fake.first_name()
         lastname = self.fake.last_name()

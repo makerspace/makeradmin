@@ -1,3 +1,5 @@
+import random
+from datetime import datetime
 from random import randint
 from faker import Faker
 
@@ -136,6 +138,7 @@ class DbFactory:
         # Ugly but will work most of the time.
         while True:
             member_number = randint(5000, 2000000)
+            # sql = "SELECT 1 FROM membership_members WHERE member_number = :number OR member_number = :number + 1 OR member_number = :number + 2"
             sql = "SELECT 1 FROM membership_members WHERE member_number = :number"
             if db_session.execute(sql, params=dict(number=member_number)).first() is None:
                 break
