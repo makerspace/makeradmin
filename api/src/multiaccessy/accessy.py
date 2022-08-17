@@ -34,9 +34,6 @@ class AccessySession:
 
     @classmethod
     def create_session(cls, client_id: str, client_secret: str) -> "AccessySession":
-        if not isinstance(client_id, str) or not isinstance(client_secret, str):
-            raise TypeError("client_id and client_secret must be strings")
-
         response = requests.post(ACCESSY_URL + "/auth/oauth/token", 
             json={"audience": ACCESSY_URL, "grant_type": "client_credentials", "client_id": client_id, "client_secret": client_secret},
             headers={"Content-Type": "application/json"}
