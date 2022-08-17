@@ -55,7 +55,7 @@ class AccessySession:
         lab: list["AccessyMember"]
         special: list["AccessyMember"]
 
-    def get_all_members(self) -> AllAccessyMemberGroups:
+    def get_all_groups_members(self) -> AllAccessyMemberGroups:
         """ Get a list of all Accessy members in the ORG and GROUPS (lab and special) """
         org = set(item["id"] for item in self._get_users_org())
         lab = set(item["userId"] for item in self._get_users_lab())
@@ -273,16 +273,16 @@ def main():
     if session is None:
         session = AccessySession.create_session(ACCESSY_CLIENT_ID, ACCESSY_CLIENT_SECRET)
     print("session:", session)
-    org, lab, special = session.get_all_members()
-    print("Members in organization: ", org)
-    print("Members in lab group: ", lab)
-    print("Members in special group: ", special)
+    all_groups = session.get_all_groups_members()
+    print("Members in organization: ", all_groups.org_members)
+    print("Members in lab group: ", all_groups.lab)
+    print("Members in special group: ", all_groups.special)
 
     # Check person is in ORG
     import random
     random_se_number = f"+46{random.randint(0, 1e9):09d}"
     print(f"Random person ({random_se_number}) in org?: {session.is_in_org(random_se_number)}")
-    special_person = random.choice(special)
+    special_person = random.choice(all_groups.special)
     print(f"Special person ({special_person.phone_number}) in org?: {session.is_in_org(special_person.phone_number)}")
 
 
