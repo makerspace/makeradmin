@@ -1,2 +1,2 @@
----
-ALTER TABLE `memberspacemessage` ADD COLUMN `membership_agreement_at` varchar(112) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
+--- Timestamp for when the labaccess agreement was signed by the member.
+ALTER TABLE `membership_members` ADD COLUMN `labaccess_agreement_at`  datetime;

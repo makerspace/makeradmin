@@ -42,6 +42,7 @@ class Member(Base):
     updated_at = Column(DateTime, server_default=func.now())
     deleted_at = Column(DateTime)
     member_number = Column(Integer, unique=True)
+    labaccess_agreement_at = Column(DateTime)
 
     @validates('phone')
     def validate_phone(self, key, value):
