@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from logging import getLogger
 import os
 import threading
@@ -125,17 +125,21 @@ class AccessySession:
     def _user_ids_to_accessy_members(self, user_ids: list[UUID]) -> list["AccessyMember"]:
         """ Convert a list of User ID:s to AccessyMembers """
 
+        APPLICATION_PHONE_NUMBER = object()  # Sentinel phone number for applications
         def fill_user_details(user: "AccessyMember", user_id: str):
             data = self._get_json(f"/org/admin/user/{user_id}")
 
             # API keys do not have phone numbers
             if data["application"]:
+                user.phone_number = APPLICATION_PHONE_NUMBER
                 return
 
             try:
                 user.phone_number = data["msisdn"]
             except KeyError:
                 logger.error(f"User {user.user_id} does not have a phone number. {data=}")
+            user.first_name = data.get("firstName", "")
+            user.last_name = data.get("lastName", "")
 
         def fill_membership_id(user: "AccessyMember", user_id: str):
             data = self._get_json(f"/asset/admin/user/{user_id}/organization/{self.organization_id}/membership")
@@ -154,6 +158,9 @@ class AccessySession:
 
         for t in threads:
             t.join()
+        
+        # Filter out API keys
+        accessy_members = [m for m in accessy_members if m.phone_number is not APPLICATION_PHONE_NUMBER]
 
         return accessy_members
     
@@ -242,9 +249,11 @@ class AccessySession:
 
 @dataclass
 class AccessyMember:
-    user_id: UUID
+    user_id: UUID = field(repr=False)
     phone_number: str
-    membership_id: UUID = None
+    membership_id: UUID = field(repr=False, default=None)
+    first_name: str = "<first name>"
+    last_name: str = "<last name>"
 
 
 def main():
