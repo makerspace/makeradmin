@@ -62,9 +62,9 @@ class AccessySession:
         special = set(item["userId"] for item in self._get_users_special())
 
         return AccessySession.AllAccessyMemberGroups(
-            org = self._user_ids_to_accessy_members(org),
-            lab = self._user_ids_to_accessy_members(lab),
-            special = self._user_ids_to_accessy_members(special)
+            org_members=self._user_ids_to_accessy_members(org),
+            lab=self._user_ids_to_accessy_members(lab),
+            special=self._user_ids_to_accessy_members(special)
         )
 
     def is_in_org(self, phone_number: MSISDN, users_org: list[dict] = None) -> bool:
