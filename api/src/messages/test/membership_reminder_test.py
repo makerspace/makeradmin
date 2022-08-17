@@ -1,7 +1,7 @@
 import core
 import messages
 import shop
-from dispatch_emails import membership_reminder, render_template, MEMBERSHIP_REMINDER_DAYS_BEFORE, \
+from dispatch_emails import membership_reminder, MEMBERSHIP_REMINDER_DAYS_BEFORE, \
     MEMBERSHIP_REMINDER_GRACE_PERIOD
 from membership import membership
 from membership.models import Span, Member

@@ -7,7 +7,7 @@ import warnings
 
 import requests
 
-from create_env import config
+from service.config import config
 
 logger = getLogger("accessy")
 
@@ -22,6 +22,22 @@ def check_response_error(response: requests.Response, msg: str = None):
         msg_str = f"\n\tMessage: {msg}" if msg is not None else ""
         logger.error(f"Got an error in the response. {response.status_code=}{msg_str}")
         raise RuntimeError(msg)
+
+
+# Use this instead of AccessySession during development if you don't want to call the actual api.
+class DummyAccessySession:
+    
+    @staticmethod
+    def get():
+        return DummyAccessySession()
+
+    def is_in_org(self, phone) -> bool:
+        """ Return true if user with phone number is in makerspace org. """
+        return True
+
+    def invite_to_org_and_labacess_permissions(self, phone) -> None:
+        """ Sent an invitation for the phone into the org and make it auto add to labacess permissions on accept. """
+        pass
 
 
 @dataclass

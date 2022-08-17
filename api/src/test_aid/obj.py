@@ -1,5 +1,5 @@
 from datetime import datetime
-from random import randint, choice
+from random import randint, choice, seed
 
 from faker import Faker
 
@@ -28,7 +28,8 @@ class ObjFactory:
         self.span = None
         self.message = None
         self.phone_request = None
-    
+        seed()
+
     def create_member(self, **kwargs):
         firstname = self.fake.first_name()
         lastname = self.fake.last_name()
@@ -41,7 +42,7 @@ class ObjFactory:
             address_zipcode=randint(10000, 99999),
             address_city=self.fake.city(),
             address_country=self.fake.country_code(representation="alpha-2"),
-            phone=f'070-{randint(int(1e7), int(9e7)):07d}',
+            phone=f'070-1{randint(int(1e6), int(9e6)):06d}',
             civicregno=f"19901011{randint(1000, 9999):04d}",
             email=re.sub('[^a-zA-Z0-9.!#$%&\'*+\\/=?^_`{|}~\\-@\\.]', '_',
                          f'{firstname}.{lastname}+{random_str(6)}@bmail.com'.lower().replace(' ', '_')),
