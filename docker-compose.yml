@@ -48,8 +48,9 @@ services:
       CORS_ALLOWED_ORIGINS:
       ACCESSY_CLIENT_ID:
       ACCESSY_CLIENT_SECRET:
-      ACCESSY_LAB_ACCESS_GROUP:
-      ACCESSY_SPECIAL_ACCESS_GROUP:
+      ACCESSY_LABACCESS_GROUP:
+      ACCESSY_SPECIAL_LABACCESS_GROUP:
+      ACCESSY_DO_MODIFY:
 
   email-dispatcher:
     image: makeradmin/api:1.0
@@ -79,7 +80,7 @@ services:
     build:
       context: ./api
     command: 
-      - "/work/accessy_sync.sh"
+      - "/work/accessy_syncer.sh"
     environment:
       MYSQL_HOST: db2
       MYSQL_DB:
@@ -96,6 +97,7 @@ services:
       ACCESSY_CLIENT_SECRET:
       ACCESSY_LAB_ACCESS_GROUP:
       ACCESSY_SPECIAL_ACCESS_GROUP:
+      ACCESSY_DO_MODIFY:
     depends_on:
       - api
     networks:

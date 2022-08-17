@@ -1,5 +1,3 @@
-import random
-from datetime import datetime
 from random import randint
 from faker import Faker
 

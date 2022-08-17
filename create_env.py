@@ -33,6 +33,7 @@ config = {
     "ACCESSY_CLIENT_SECRET": "",
     "ACCESSY_LABACCESS_GROUP": "",
     "ACCESSY_SPECIAL_LABACCESS_GROUP": "",
+    "ACCESSY_DO_MODIFY":"false",
 }
 
 if not args.force and os.path.isfile(".env"):

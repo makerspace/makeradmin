@@ -40,12 +40,9 @@ if __name__ == '__main__':
         engine = create_mysql_engine(**get_mysql_config())
         session_factory = sessionmaker(autocommit=False, autoflush=False, bind=engine)
         
-        logger.info("shipping")
-        ship()
-        
         # # TODO Enable when we have accessy in place: schedule.every().tuesday.at("19:30").do(ship)
-        # schedule.every().day.at("04:00").do(sync)
-        #
-        # while True:
-        #     time.sleep(1)
-        #     schedule.run_pending()
+        schedule.every().day.at("04:00").do(sync)
+
+        while True:
+            time.sleep(1)
+            schedule.run_pending()

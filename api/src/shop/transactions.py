@@ -8,7 +8,6 @@ from sqlalchemy.sql import func
 
 from membership.membership import add_membership_days
 from membership.models import Key, Span
-from multiaccessy.accessy import DummyAccessySession
 from multiaccessy.invite import maybe_send_accessy_labaccess_invite
 from service.api_definition import NEGATIVE_ITEM_COUNT, INVALID_ITEM_COUNT, EMPTY_CART, NON_MATCHING_SUMS
 from service.db import db_session, nested_atomic

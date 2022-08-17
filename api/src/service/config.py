@@ -43,7 +43,7 @@ default = Dict(name="default", src=dict(
     ACCESSY_CLIENT_SECRET=None,
     ACCESSY_LABACCESS_GROUP=None,
     ACCESSY_SPECIAL_LABACCESS=None,
-    ACCESSY_NO_MODIFY_OVERRIDE=True,  # Do not perform modify operations to Acessy, only log, useful when developing.
+    ACCESSY_DO_MODIFY=False,  # Do perform modify operations to Accessy, default is to log only, useful when developing.
 ))
 env = Env()
 dot_env = DotEnvFile()
