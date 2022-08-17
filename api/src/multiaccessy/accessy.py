@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from logging import getLogger
 import os
 import threading
+from typing import Union
 
 import requests
 
@@ -79,11 +80,7 @@ class AccessySession:
         total_item_count = None
         received_item_count = 0
         while total_item_count is None or received_item_count < total_item_count:
-            response = requests.get(ACCESSY_URL + url + f"?page_number={page_number}&page_size={page_size}",
-                                    headers={"Authorization": f"Bearer {self.session_token}"})
-            check_response_error(response, f"{msg} (when fetching items {received_item_count} / {total_item_count})")
-            data = response.json()
-
+            data = self._get_json(url + f"?page_number={page_number}&page_size={page_size}")
             current_items = data["items"]
 
             items.extend(current_items)
@@ -160,6 +157,18 @@ class AccessySession:
 
         return accessy_members
     
+    def _get_org_user_from_phone(self, phone_number: MSISDN, users_in_org: list[dict] = None) -> Union[None, "AccessyMember"]:
+        """ Get a AccessyMember from a phone number (if in org) """
+        if users_in_org is None:
+            users_in_org = self._get_users_org()
+
+        for item in users_in_org:
+            if item.get("msisdn", None) == phone_number:
+                user_id = item["id"]
+                return self._user_ids_to_accessy_members([user_id])[0]
+        else:
+            return None
+    
     #################
     # Public methods
     #################
@@ -178,13 +187,57 @@ class AccessySession:
 
     def is_in_org(self, phone_number: MSISDN, users_org: list[dict] = None) -> bool:
         """ Check if a user with a specific phone number is in the ORG """
-        if users_org is None:
-            users_org = self._get_users_org()
+        user = self._get_org_user_from_phone(phone_number, users_org)
+        if user is not None:
+            return True
+        return False
 
-        for item in users_org:
-            if item.get("msisdn", None) == phone_number:
+    def is_in_group(self, phone_number: MSISDN, access_group_id: UUID) -> bool:
+        """ Check if a user is in a specific access group """
+        accessy_member = self._get_org_user_from_phone(phone_number)
+        if accessy_member is None:
+            return False
+
+        items = self._get_json_paginated(f"/asset/admin/access-permission-group/{access_group_id}/membership")
+        for item in items:
+            if item["userId"] == accessy_member.user_id:
                 return True
         return False
+
+    def remove_from_org(self, phone_number: MSISDN):
+        accessy_member = self._get_org_user_from_phone(phone_number)
+        if accessy_member is None:
+            return
+
+        response = requests.delete(ACCESSY_URL + f"/org/admin/organization/{self.organization_id}/user/{accessy_member.membership_id}",
+                                   headers={"Authorization": f"Bearer {self.session_token}"})
+        check_response_error(response)
+
+    def remove_from_group(self, phone_number: MSISDN, access_group_id: UUID):
+        accessy_member = self._get_org_user_from_phone(phone_number)
+        if accessy_member is None:
+            return
+
+        response = requests.delete(ACCESSY_URL + f"/asset/admin/access-permission-group/{access_group_id}/membership/{accessy_member.membership_id}",
+                                headers={"Content-Type": "application/json", "Authorization": f"Bearer {self.session_token}"})
+        check_response_error(response)
+
+    def add_to_group(self, phone_number: MSISDN, access_group_id: UUID):
+        """ Add a specific user with phone number to access group """
+        accessy_member = self._get_org_user_from_phone(phone_number)
+        if accessy_member is None:
+            self.invite_phone_to_org_and_groups([phone_number], [access_group_id])
+
+        response = requests.put(ACCESSY_URL + f"/asset/admin/access-permission-group/{access_group_id}/membership", json=dict(membership=accessy_member.membership_id),
+                                headers={"Content-Type": "application/json", "Authorization": f"Bearer {self.session_token}"})
+        check_response_error(response)
+
+    def invite_phone_to_org_and_groups(self, phone_numbers: list[MSISDN], access_group_ids: list[UUID] = [], message_to_user: str = ""):
+        """ Invite a list of phone numbers to a list of groups """
+        response = requests.post(ACCESSY_URL + f"/org/admin/organization/{self.organization_id}/invitation",
+                                json=dict(accessPermissionGroupIds=access_group_ids, message=message_to_user, msisdns=phone_numbers),
+                                headers={"Content-Type": "application/json", "Authorization": f"Bearer {self.session_token}"})
+        check_response_error(response, f"Invite {phone_numbers=} to org and groups {access_group_ids}. {message_to_user=}")
 
 
 @dataclass
@@ -202,7 +255,7 @@ def main():
         session = AccessySession(session_token)
     except:
         pass
-    
+
     # Get a new session token
     if session is None:
         session = AccessySession.create_session(ACCESSY_CLIENT_ID, ACCESSY_CLIENT_SECRET)
@@ -216,7 +269,7 @@ def main():
     import random
     random_se_number = f"+46{random.randint(0, 1e9):09d}"
     print(f"Random person ({random_se_number}) in org?: {session.is_in_org(random_se_number)}")
-    special_person = special[0]
+    special_person = random.choice(special)
     print(f"Special person ({special_person.phone_number}) in org?: {session.is_in_org(special_person.phone_number)}")
 
 
