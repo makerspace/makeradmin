@@ -46,6 +46,10 @@ services:
       STRIPE_PUBLIC_KEY:
       STRIPE_SIGNING_SECRET:
       CORS_ALLOWED_ORIGINS:
+      ACCESSY_CLIENT_ID:
+      ACCESSY_CLIENT_SECRET:
+      ACCESSY_LAB_ACCESS_GROUP:
+      ACCESSY_SPECIAL_ACCESS_GROUP:
 
   email-dispatcher:
     image: makeradmin/api:1.0
@@ -69,6 +73,34 @@ services:
       - api
     networks:
       - makeradmin
+
+  accessy-syncer:
+    image: makeradmin/api:1.0
+    build:
+      context: ./api
+    command: 
+      - "/work/accessy_sync.sh"
+    environment:
+      MYSQL_HOST: db2
+      MYSQL_DB:
+      MYSQL_PORT:
+      MYSQL_USER:
+      MYSQL_PASS:
+      MAILGUN_DOMAIN:
+      MAILGUN_KEY:
+      MAILGUN_FROM:
+      MAILGUN_TO_OVERRIDE:
+      HOST_PUBLIC:
+      HOST_FRONTEND:
+      ACCESSY_CLIENT_ID:
+      ACCESSY_CLIENT_SECRET:
+      ACCESSY_LAB_ACCESS_GROUP:
+      ACCESSY_SPECIAL_ACCESS_GROUP:
+    depends_on:
+      - api
+    networks:
+      - makeradmin
+
       
   public:
     image: makeradmin/public:1.0

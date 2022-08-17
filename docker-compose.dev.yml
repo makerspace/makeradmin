@@ -20,6 +20,10 @@ services:
   email-dispatcher:
     volumes:
       - ./api/src:/work/src
+
+  accessy-syncer:
+    volumes:
+      - ./api/src:/work/src
       
   public:
     build:

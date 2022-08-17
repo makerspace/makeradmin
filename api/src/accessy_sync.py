@@ -21,7 +21,11 @@ def ship():
 
 
 def sync():
-    logger.info("syncing accessy")
+    logger.info("syncing accessy X")
+    try:
+        pass  # TODO
+    except Exception as e:
+        logger.exception(f"failed to sync with accessy: {e}")
 
 
 if __name__ == '__main__':
@@ -36,7 +40,8 @@ if __name__ == '__main__':
         
         # TODO Enable when we have accessy in place: schedule.every().tuesday.at("19:30").do(ship)
         schedule.every().day.at("04:00").do(sync)
-        
+        schedule.every().minute.do(sync)
+
         while True:
             time.sleep(1)
             schedule.run_pending()

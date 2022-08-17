@@ -7,7 +7,7 @@ import warnings
 
 import requests
 
-from create_env import config
+from service.config import config
 
 logger = getLogger("accessy")
 
