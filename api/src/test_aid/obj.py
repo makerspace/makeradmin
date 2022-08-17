@@ -28,7 +28,7 @@ class ObjFactory:
         self.span = None
         self.message = None
         self.phone_request = None
-        # TODO seed()
+        seed()
 
     def create_member(self, **kwargs):
         firstname = self.fake.first_name()
