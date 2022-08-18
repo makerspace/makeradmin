@@ -1,7 +1,7 @@
 from flask import g, request, send_file, make_response, abort, redirect
 from sqlalchemy.exc import NoResultFound
 
-from service.api_definition import WEBSHOP, WEBSHOP_EDIT, PUBLIC, GET, USER, POST, Arg, WEBSHOP_ADMIN
+from service.api_definition import WEBSHOP, WEBSHOP_EDIT, PUBLIC, GET, USER, POST, Arg, WEBSHOP_ADMIN, MEMBER_EDIT
 from service.config import get_public_url
 from service.db import db_session
 from service.entity import OrmSingeRelation, OrmSingleSingleRelation
@@ -130,6 +130,21 @@ def transactions_for_member():
 @service.route("/member/current/receipt/<int:transaction_id>", method=GET, permission=USER)
 def receipt_for_member(transaction_id):
     return receipt(g.user_id, transaction_id)
+
+
+@service.route("/member/current/accessy_invite", method=POST, permission=USER)
+def accessy_invite():
+    pass  # TODO
+    # return receipt(g.user_id, transaction_id)
+
+
+@service.route("/member/<int:member_id>/ship_labaccess_orders", method=POST, permission=MEMBER_EDIT)
+def ship_labaccess_orders(member_id=None):
+    # get member
+    # ship pending labacess
+    # send invite
+    # return add_membership_days(entity_id, type, days, creation_reason, default_start_date).as_json()
+    pass  # TODO
 
 
 @service.route("/product_data", method=GET, permission=PUBLIC)

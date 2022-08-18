@@ -6,7 +6,7 @@ import Span from "../Models/Span";
 import {filterCategory} from '../Models/Span';
 import Collection from "../Models/Collection";
 import {ADD_LABACCESS_DAYS} from "../Models/ProductAction";
-import {utcToday, parseUtcDate} from "../utils";
+import {utcToday, parseUtcDate, dateTimeToStr} from "../utils";
 import {get} from '../gateway';
 
 
@@ -57,7 +57,6 @@ class KeyHandoutForm extends React.Component {
             can_save_member: false,
             can_save_key: false,
             keys: [],
-            has_signed: false,
             pending_labaccess_days: "?",
             labaccess_enddate: "",
             membership_enddate: "",
@@ -66,7 +65,6 @@ class KeyHandoutForm extends React.Component {
         this.unsubscribe = [];
         this.keyCollection = new Collection({type: Key, url: `/membership/member/${member.id}/keys`, idListName: 'keys', pageSize: 0});
         this.spanCollection = new Collection({type: Span, url: `/membership/member/${member.id}/spans`, pageSize: 0});
-        this.signedChanged = this.signedChanged.bind(this);
         this.onSave = this.onSave.bind(this);
         get({url: `/membership/member/${member.id}/pending_actions`}).then((r) => {
             const sum_pending_labaccess_days = r.data.reduce((acc, value) => {
@@ -94,13 +92,8 @@ class KeyHandoutForm extends React.Component {
         }
     }
 
-    signedChanged(signed) {
-        this.setState({has_signed: signed});
-    }
-
     componentDidMount() {
         const {member} = this.props;
-        member.initialization(() => this.setState({has_signed: (member.civicregno && member.civicregno.length > 0) ? true : false}));
         this.unsubscribe.push(member.subscribe(() => this.setState({can_save_member: member.canSave()})));
         this.unsubscribe.push(this.keyCollection.subscribe((keys) => this.setState({keys: keys.items})));
         const key = this.key;
@@ -120,7 +113,7 @@ class KeyHandoutForm extends React.Component {
 
     render() {
         const {member} = this.props;
-        const {can_save_member, can_save_key, keys, has_signed, labaccess_enddate, membership_enddate, special_enddate, pending_labaccess_days} = this.state;
+        const {can_save_member, can_save_key, keys, labaccess_enddate, membership_enddate, special_enddate, pending_labaccess_days} = this.state;
 
         // Show different content based on if the user has a key or not
         let key_paragraph;
@@ -151,7 +144,7 @@ class KeyHandoutForm extends React.Component {
 
             <div className="uk-section">
                 <h2>3. Övrig information</h2>
-                <p>Kontrollera <b>epost</b> så personen kommer åt kontot, och <b>telefon</b> så vi kan nå hen när det är mer brådskande.</p>
+                <p>Kontrollera <b>epost</b> så personen kommer åt kontot, och <b>telefon</b> så att de kan använda accessy.</p>
                 <div className="uk-grid">
                     <div className="uk-width-1-1"><TextInput model={member} icon="at" name="email" tabIndex="1" type="email" title="Epost" /></div>
                     <div className="uk-width-1-2"><TextInput model={member} icon="phone" name="phone" tabIndex="1" type="tel" title="Telefonnummer" /></div>
@@ -165,7 +158,7 @@ class KeyHandoutForm extends React.Component {
                 <div>
                     <DateView title="Föreningsmedlemskap" date={membership_enddate} placeholder="Inget tidigare medlemskap finns registrerat"/>
                     <DateView title="Labaccess" date={labaccess_enddate} placeholder="Ingen tidigare labaccess finns registrerad" pending={pending_labaccess_days}/>
-                    { special_enddate ? 
+                    { special_enddate ?
                         <DateView title="Specialaccess" date={special_enddate}/> : null
                     }
                 </div>
@@ -177,9 +170,12 @@ class KeyHandoutForm extends React.Component {
             </div>
 
             <div>
-                <button className="uk-button uk-button-success uk-float-right" tabIndex="1" disabled={!can_save_member && !can_save_key}><i className="uk-icon-save"/> Spara</button>
+                <button className="uk-button uk-button-success uk-float-right" tabIndex="2" disabled={!can_save_member && !can_save_key}><i className="uk-icon-save"/> Spara</button>
+                <button className="uk-button uk-button-success uk-float-right" style={{marginRight: "10px"}} tabIndex="1"><i className="uk-icon-save"/> Spara, lägg till labaccess och skicka Accessy-invite</button>
             </div>
         </>;
+        
+        const has_signed = member.labaccess_agreement_at !== null;
 
         return (
         <div className="meep">
@@ -189,12 +185,18 @@ class KeyHandoutForm extends React.Component {
                     <p>Kontrollera att labbmedlemsavtalet är signerat och säkerställ att rätt medlemsnummer står väl synligt på labbmedlemsavtalet.</p>
                     <div>
                         <label htmlFor="signed"> 
-                            <input id="signed" style={{"verticalAlign": "middle"}} className="uk-checkbox" type="checkbox" tabIndex="1" checked={has_signed} onChange={(e) => this.signedChanged(e.target.checked)}/> &nbsp;
-                            Signerat labbmedlemsavtal mottaget.
+                            <input id="signed" style={{"verticalAlign": "middle"}} className="uk-checkbox" type="checkbox" tabIndex="1" checked={has_signed} onChange={(e) => {
+                                if (e.target.checked) {
+                                    member.labaccess_agreement_at = new Date().toISOString();
+                                } else {
+                                    member.labaccess_agreement_at = null;
+                                }
+                            }}/>  &nbsp;
+                            Signerat labbmedlemsavtal mottaget{ has_signed ? " " + dateTimeToStr(member.labaccess_agreement_at) : "" }.
                         </label> 
                     </div>
                 </div>
-
+                
                 {has_signed ? section2andon : ""}
             </form>
         </div>
