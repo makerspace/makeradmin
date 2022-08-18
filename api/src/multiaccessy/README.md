@@ -9,16 +9,16 @@
 NEJ
 
 ### kan man fjärrstyra access till dörrar?
-Fråga Accessy.
+Fråga Accessy. Delvis, om vi inte har iBeacon.
 
 ### rate limiting?
-Fråga Accessy.
+300 requests/s
 
 ### vad händer om någon byter telefonnummer?
 Måste plocka bort från Organisation. Skicka ny Accessy-invite till nytt nummer vid byte i Makeradmin.
 
 ### hur fungerar pagination?
-Fråga Accessy.
+Fixat
 
 
 ## Inbjudan
