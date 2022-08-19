@@ -50,35 +50,6 @@ function DateView(props) {
     </div>;
 }
 
-function accessyInviteSaveButton({has_signed, labaccess_enddate, pending_labaccess_days, member, save}) {
-    
-    let tooltip;
-    let color;
-
-    if (!pending_labaccess_days && !isAccessValid(labaccess_enddate)) {
-        tooltip = "Ingen labaccess, accessy invite kommer inte att skickas (bara sparning görs)!";
-        color = "uk-button-danger";
-    } else if (!has_signed) {
-        tooltip = "Inte signerat, accessy invite kommer inte att skickas (bara sparning görs)!";
-        color = "uk-button-danger";
-    } else if (!member.phone) {
-        tooltip = "Inget telefonnummer, accessy invite kommer inte att skickas (bara sparning och ev labaccessorder konverteras till labaccess)!";
-        color = "uk-button-danger";
-    } else {
-        tooltip = "All info finns, accessy invite kommer att skickas!";
-        color = "uk-button-success";
-    }
-    
-    const on_click = (e) => {
-        e.preventDefault();
-        save().then(() => post({url: `/webshop/member/${member.id}/ship_labaccess_orders`}));
-        return false;
-    };
-    
-    return <button className={"uk-button uk-float-right " + color} title={tooltip} style={{marginRight: "10px"}} tabIndex="1" onClick={on_click}><i className="uk-icon-save"/> Spara, lägg till labaccess och skicka Accessy-invite</button>;
-}
-
-
 class KeyHandoutForm extends React.Component {
 
     constructor(props) {
@@ -98,14 +69,7 @@ class KeyHandoutForm extends React.Component {
         this.keyCollection = new Collection({type: Key, url: `/membership/member/${member.id}/keys`, idListName: 'keys', pageSize: 0});
         this.spanCollection = new Collection({type: Span, url: `/membership/member/${member.id}/spans`, pageSize: 0});
         this.save = this.save.bind(this);
-        get({url: `/membership/member/${member.id}/pending_actions`}).then((r) => {
-            const sum_pending_labaccess_days = r.data.reduce((acc, value) => {
-            if (value.action.action === ADD_LABACCESS_DAYS)
-                return acc + value.action.value;
-            return acc;
-            }, 0);
-            this.setState({pending_labaccess_days: sum_pending_labaccess_days});
-        });
+        this.fetchPendingLabaccess();
     }
 
     save() {
@@ -124,6 +88,18 @@ class KeyHandoutForm extends React.Component {
         }
         
         return Promise.resolve();
+    }
+    
+    fetchPendingLabaccess() {
+        const {member} = this.props;
+        return get({url: `/membership/member/${member.id}/pending_actions`}).then((r) => {
+            const sum_pending_labaccess_days = r.data.reduce((acc, value) => {
+            if (value.action.action === ADD_LABACCESS_DAYS)
+                return acc + value.action.value;
+            return acc;
+            }, 0);
+            this.setState({pending_labaccess_days: sum_pending_labaccess_days});
+        });
     }
 
     componentDidMount() {
@@ -145,6 +121,36 @@ class KeyHandoutForm extends React.Component {
         this.unsubscribe.forEach(u => u());
     }
 
+    renderAccessyInviteSaveButton({has_signed, labaccess_enddate, pending_labaccess_days, member}) {
+        let tooltip;
+        let color;
+    
+        if (!pending_labaccess_days && !isAccessValid(labaccess_enddate)) {
+            tooltip = "Ingen labaccess, accessy invite kommer inte att skickas (bara sparning görs)!";
+            color = "uk-button-danger";
+        } else if (!has_signed) {
+            tooltip = "Inte signerat, accessy invite kommer inte att skickas (bara sparning görs)!";
+            color = "uk-button-danger";
+        } else if (!member.phone) {
+            tooltip = "Inget telefonnummer, accessy invite kommer inte att skickas (bara sparning och ev labaccessorder konverteras till labaccess)!";
+            color = "uk-button-danger";
+        } else {
+            tooltip = "All info finns, accessy invite kommer att skickas!";
+            color = "uk-button-success";
+        }
+        
+        const on_click = (e) => {
+            e.preventDefault();
+            this.save()
+                .then(() => post({url: `/webshop/member/${member.id}/ship_labaccess_orders`, expectedDataStatus: "ok"}))
+                .then(() => this.fetchPendingLabaccess())
+                .then(() => this.spanCollection.fetch());
+            return false;
+        };
+        
+        return <button className={"uk-button uk-float-right " + color} title={tooltip} style={{marginRight: "10px"}} tabIndex="1" onClick={on_click}><i className="uk-icon-save"/> Spara, lägg till labaccess och skicka Accessy-invite</button>;
+    }
+    
     render() {
         const {member} = this.props;
         const {can_save_member, can_save_key, keys, labaccess_enddate, membership_enddate, special_enddate, pending_labaccess_days} = this.state;
@@ -206,7 +212,7 @@ class KeyHandoutForm extends React.Component {
 
             <div>
                 <button className="uk-button uk-button-success uk-float-right" tabIndex="2" title="Spara ändringar" disabled={!can_save_member && !can_save_key}><i className="uk-icon-save"/> Spara</button>
-                {accessyInviteSaveButton({has_signed, labaccess_enddate, pending_labaccess_days, member, save: this.save})}
+                {this.renderAccessyInviteSaveButton({has_signed, labaccess_enddate, pending_labaccess_days, member})}
             </div>
         </>;
         
