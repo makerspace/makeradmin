@@ -1,11 +1,12 @@
 from flask import g, request, send_file, make_response, abort, redirect
 from sqlalchemy.exc import NoResultFound
 
+from multiaccessy.invite import AccessyInvitePrectionditionFailed, ensure_accessy_labaccess
 from service.api_definition import WEBSHOP, WEBSHOP_EDIT, PUBLIC, GET, USER, POST, Arg, WEBSHOP_ADMIN, MEMBER_EDIT
 from service.config import get_public_url
 from service.db import db_session
 from service.entity import OrmSingeRelation, OrmSingleSingleRelation
-from service.error import NotFound
+from service.error import NotFound, PreconditionFailed
 from shop import service
 from shop.entities import product_image_entity, transaction_content_entity, transaction_entity, \
     transaction_action_entity, product_entity, category_entity, product_action_entity
@@ -15,7 +16,7 @@ from shop.stripe_payment_intent import confirm_stripe_payment_intent
 from shop.shop_data import pending_actions, member_history, receipt, get_product_data, all_product_data, \
     get_membership_products
 from shop.stripe_event import stripe_callback, process_stripe_events
-from shop.transactions import ship_orders
+from shop.transactions import ship_orders, ship_labaccess_orders
 from service.logging import logger
 
 
@@ -134,17 +135,18 @@ def receipt_for_member(transaction_id):
 
 @service.route("/member/current/accessy_invite", method=POST, permission=USER)
 def accessy_invite():
-    pass  # TODO
-    # return receipt(g.user_id, transaction_id)
-
+    try:
+        ensure_accessy_labaccess(member_id=g.user_id)
+    except AccessyInvitePrectionditionFailed as e:
+        raise PreconditionFailed(message=str(e))
+    
 
 @service.route("/member/<int:member_id>/ship_labaccess_orders", method=POST, permission=MEMBER_EDIT)
-def ship_labaccess_orders(member_id=None):
-    # get member
-    # ship pending labacess
-    # send invite
-    # return add_membership_days(entity_id, type, days, creation_reason, default_start_date).as_json()
-    pass  # TODO
+def ship_labaccess_orders_endpoint(member_id=None):
+    try:
+        ship_labaccess_orders(member_id)
+    except AccessyInvitePrectionditionFailed as e:
+        pass
 
 
 @service.route("/product_data", method=GET, permission=PUBLIC)

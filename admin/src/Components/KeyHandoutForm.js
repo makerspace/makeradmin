@@ -7,7 +7,7 @@ import {filterCategory} from '../Models/Span';
 import Collection from "../Models/Collection";
 import {ADD_LABACCESS_DAYS} from "../Models/ProductAction";
 import {utcToday, parseUtcDate, dateTimeToStr} from "../utils";
-import {get} from '../gateway';
+import {get, post} from "../gateway";
 
 
 function last_span_enddate(spans, category) {
@@ -18,8 +18,12 @@ function last_span_enddate(spans, category) {
     return null;
 }
 
+function isAccessValid(date) {
+    return date && parseUtcDate(date) >= utcToday();
+}
+
 function DateView(props) {
-    const is_valid = props.date && parseUtcDate(props.date) >= utcToday();
+    const is_valid = isAccessValid(props.date);
     let status, text;
 
     if (!props.date) {
@@ -46,6 +50,34 @@ function DateView(props) {
     </div>;
 }
 
+function accessyInviteSaveButton({has_signed, labaccess_enddate, pending_labaccess_days, member, save}) {
+    
+    let tooltip;
+    let color;
+
+    if (!pending_labaccess_days && !isAccessValid(labaccess_enddate)) {
+        tooltip = "Ingen labaccess, accessy invite kommer inte att skickas (bara sparning görs)!";
+        color = "uk-button-danger";
+    } else if (!has_signed) {
+        tooltip = "Inte signerat, accessy invite kommer inte att skickas (bara sparning görs)!";
+        color = "uk-button-danger";
+    } else if (!member.phone) {
+        tooltip = "Inget telefonnummer, accessy invite kommer inte att skickas (bara sparning och ev labaccessorder konverteras till labaccess)!";
+        color = "uk-button-danger";
+    } else {
+        tooltip = "All info finns, accessy invite kommer att skickas!";
+        color = "uk-button-success";
+    }
+    
+    const on_click = (e) => {
+        e.preventDefault();
+        save().then(() => post({url: `/webshop/member/${member.id}/ship_labaccess_orders`}));
+        return false;
+    };
+    
+    return <button className={"uk-button uk-float-right " + color} title={tooltip} style={{marginRight: "10px"}} tabIndex="1" onClick={on_click}><i className="uk-icon-save"/> Spara, lägg till labaccess och skicka Accessy-invite</button>;
+}
+
 
 class KeyHandoutForm extends React.Component {
 
@@ -65,7 +97,7 @@ class KeyHandoutForm extends React.Component {
         this.unsubscribe = [];
         this.keyCollection = new Collection({type: Key, url: `/membership/member/${member.id}/keys`, idListName: 'keys', pageSize: 0});
         this.spanCollection = new Collection({type: Span, url: `/membership/member/${member.id}/spans`, pageSize: 0});
-        this.onSave = this.onSave.bind(this);
+        this.save = this.save.bind(this);
         get({url: `/membership/member/${member.id}/pending_actions`}).then((r) => {
             const sum_pending_labaccess_days = r.data.reduce((acc, value) => {
             if (value.action.action === ADD_LABACCESS_DAYS)
@@ -76,9 +108,9 @@ class KeyHandoutForm extends React.Component {
         });
     }
 
-    onSave() {
+    save() {
         if (this.key && this.key.isDirty() && this.key.canSave()) {
-            this.key
+            return this.key
                 .save()
                 .then(() => {
                             this.key.reset({member_id: this.props.member.id});
@@ -88,8 +120,10 @@ class KeyHandoutForm extends React.Component {
 
         const {member} = this.props;
         if (member.isDirty() && member.canSave()) {
-            member.save();
+            return member.save();
         }
+        
+        return Promise.resolve();
     }
 
     componentDidMount() {
@@ -114,6 +148,7 @@ class KeyHandoutForm extends React.Component {
     render() {
         const {member} = this.props;
         const {can_save_member, can_save_key, keys, labaccess_enddate, membership_enddate, special_enddate, pending_labaccess_days} = this.state;
+        const has_signed = member.labaccess_agreement_at !== null;
 
         // Show different content based on if the user has a key or not
         let key_paragraph;
@@ -170,16 +205,14 @@ class KeyHandoutForm extends React.Component {
             </div>
 
             <div>
-                <button className="uk-button uk-button-success uk-float-right" tabIndex="2" disabled={!can_save_member && !can_save_key}><i className="uk-icon-save"/> Spara</button>
-                <button className="uk-button uk-button-success uk-float-right" style={{marginRight: "10px"}} tabIndex="1"><i className="uk-icon-save"/> Spara, lägg till labaccess och skicka Accessy-invite</button>
+                <button className="uk-button uk-button-success uk-float-right" tabIndex="2" title="Spara ändringar" disabled={!can_save_member && !can_save_key}><i className="uk-icon-save"/> Spara</button>
+                {accessyInviteSaveButton({has_signed, labaccess_enddate, pending_labaccess_days, member, save: this.save})}
             </div>
         </>;
         
-        const has_signed = member.labaccess_agreement_at !== null;
-
         return (
         <div className="meep">
-            <form className="uk-form" onSubmit={(e) => {e.preventDefault(); this.onSave(); return false;}}>
+            <form className="uk-form" onSubmit={(e) => {e.preventDefault(); this.save(); return false;}}>
                 <div className="uk-section">
                     <h2>1. Ta emot signerat labbmedlemsavtal</h2>
                     <p>Kontrollera att labbmedlemsavtalet är signerat och säkerställ att rätt medlemsnummer står väl synligt på labbmedlemsavtalet.</p>
