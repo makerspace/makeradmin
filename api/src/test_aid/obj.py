@@ -53,7 +53,7 @@ class ObjFactory:
 
     def create_phone_request(self, **kwargs):
         obj = dict(
-            phone=self.random_phone_number(),
+            phone=random_phone_number(),
             validation_code=randint(1, 999999),
             completed=False,
             timestamp=datetime.now(),
