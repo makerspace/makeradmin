@@ -42,7 +42,7 @@ class ObjFactory:
             address_zipcode=randint(10000, 99999),
             address_city=self.fake.city(),
             address_country=self.fake.country_code(representation="alpha-2"),
-            phone=f'070-1{randint(int(1e6), int(9e6)):06d}',
+            phone=random_phone_number(),
             civicregno=f"19901011{randint(1000, 9999):04d}",
             email=re.sub('[^a-zA-Z0-9.!#$%&\'*+\\/=?^_`{|}~\\-@\\.]', '_',
                          f'{firstname}.{lastname}+{random_str(6)}@bmail.com'.lower().replace(' ', '_')),
@@ -53,8 +53,8 @@ class ObjFactory:
 
     def create_phone_request(self, **kwargs):
         obj = dict(
-            phone=self.fake.phone_number(),
-            validation_code=randint(1,999999),
+            phone=random_phone_number(),
+            validation_code=randint(1, 999999),
             completed=False,
             timestamp=datetime.now(),
         )
@@ -137,3 +137,7 @@ class ObjFactory:
         obj.update(**kwargs)
         self.message = obj
         return self.message
+
+
+def random_phone_number():
+    return f'070-1{randint(int(1e6), int(9e6)):06d}'

@@ -57,12 +57,18 @@ def base64encode(value):
     return b64encode(value).decode()
 
 
+def fromisoformat(value):
+    if value[-1].lower() == "z":
+        value = value[:-1]
+    return datetime.fromisoformat(value)
+
+
 to_model_converters: Dict[Type, Callable] = {
     Integer: to_model_wrap(int),
     Numeric: to_model_wrap(Decimal),
     String: to_model_wrap(str),
     Text: to_model_wrap(str),
-    DateTime: to_model_wrap(datetime.fromisoformat),
+    DateTime: to_model_wrap(fromisoformat),
     Date: to_model_wrap(date.fromisoformat),
     DbEnum: to_model_wrap(str),
     Boolean: to_model_wrap(bool),

@@ -17,8 +17,8 @@ MSISDN = str  # Standardized number of the form +46123123456
 ACCESSY_URL = config.get("ACCESSY_URL")
 ACCESSY_CLIENT_SECRET = config.get("ACCESSY_CLIENT_SECRET", log_value=False)
 ACCESSY_CLIENT_ID = config.get("ACCESSY_CLIENT_ID")
-ACCESSY_LAB_ACCESS_GROUP = config.get("ACCESSY_LAB_ACCESS_GROUP")
-ACCESSY_SPECIAL_ACCESS_GROUP = config.get("ACCESSY_SPECIAL_ACCESS_GROUP")
+ACCESSY_LABACCESS_GROUP = config.get("ACCESSY_LABACCESS_GROUP")
+ACCESSY_SPECIAL_LABACCESS_GROUP = config.get("ACCESSY_SPECIAL_LABACCESS_GROUP")
 
 
 def check_response_error(response: requests.Response, msg: str = None):
@@ -39,8 +39,11 @@ class DummyAccessySession:
         """ Return true if user with phone number is in makerspace org. """
         return True
 
-    def invite_to_org_and_labacess_permissions(self, phone) -> None:
+    def invite_phone_to_org_and_groups(self, phone_numbers: list[MSISDN], access_group_ids: list[UUID] = [], message_to_user: str = ""):
         """ Sent an invitation for the phone into the org and make it auto add to labacess permissions on accept. """
+        pass
+    
+    def add_to_group(self, phone_number: MSISDN, access_group_id: UUID):
         pass
 
 
@@ -205,11 +208,11 @@ class AccessySession:
 
     def _get_users_lab(self) -> list[dict]:
         """ Get all user ID:s with lab access """
-        return self._get_users_in_access_group(ACCESSY_LAB_ACCESS_GROUP)
+        return self._get_users_in_access_group(ACCESSY_LABACCESS_GROUP)
 
     def _get_users_special(self) -> list[dict]:
         """ Get all user ID:s with special access """
-        return self._get_users_in_access_group(ACCESSY_SPECIAL_ACCESS_GROUP)
+        return self._get_users_in_access_group(ACCESSY_SPECIAL_LABACCESS_GROUP)
     
     def _user_ids_to_accessy_members(self, user_ids: list[UUID]) -> list["AccessyMember"]:
         """ Convert a list of User ID:s to AccessyMembers """
@@ -279,27 +282,42 @@ class AccessyMember:
 def main():
     session = None
     # Convenience if a session token is already issued
-    session_token = os.environ.get("ACCESSY_SESSION_TOKEN")
-    try:
-        session = AccessySession(session_token)
-    except:
-        pass
+    # session_token = os.environ.get("ACCESSY_SESSION_TOKEN")
+    # try:
+    #     session = AccessySession(session_token)
+    # except:
+    #     pass
 
     # Get a new session token
     if session is None:
         session = AccessySession.create_session(ACCESSY_CLIENT_ID, ACCESSY_CLIENT_SECRET)
     print("session:", session)
-    all_groups = session.get_all_groups_members()
-    print("Members in organization: ", all_groups.org_members)
-    print("Members in lab group: ", all_groups.lab)
-    print("Members in special group: ", all_groups.special)
+    
+    # all_groups = session.get_all_groups_members()
+    # print("Members in organization: ", all_groups.org_members)
+    # print("Members in lab group: ", all_groups.lab)
+    # print("Members in special group: ", all_groups.special)
 
-    # Check person is in ORG
-    import random
-    random_se_number = f"+46{random.randint(0, 1e9):09d}"
-    print(f"Random person ({random_se_number}) in org?: {session.is_in_org(random_se_number)}")
-    special_person = random.choice(all_groups.special)
-    print(f"Special person ({special_person.phone_number}) in org?: {session.is_in_org(special_person.phone_number)}")
+    nr = "+46704424644"
+    
+    # session.remove_from_org(nr)
+    # session.invite_phone_to_org_and_groups([nr], message_to_user="only org")
+    # session.invite_phone_to_org_and_groups([nr], [ACCESSY_LABACCESS_GROUP], "special message")
+    session.add_to_group(nr, ACCESSY_LABACCESS_GROUP)
+
+    members = session.get_all_groups_members()
+    for x in members.org_members:
+        print("org", x)
+        
+    for x in members.lab:
+        print("lab", x)
+
+    # # Check person is in ORG
+    # import random
+    # random_se_number = f"+46{random.randint(0, 1e9):09d}"
+    # print(f"Random person ({random_se_number}) in org?: {session.is_in_org(random_se_number)}")
+    # special_person = random.choice(all_groups.special)
+    # print(f"Special person ({special_person.phone_number}) in org?: {session.is_in_org(special_person.phone_number)}")
 
 
 if __name__ == "__main__":

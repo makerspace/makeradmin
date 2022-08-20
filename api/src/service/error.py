@@ -140,6 +140,10 @@ class NotFound(ApiError):
     code = 404
 
 
+class PreconditionFailed(ApiError):
+    code = 412
+
+
 class TooManyRequests(ApiError):
     code = 429
 

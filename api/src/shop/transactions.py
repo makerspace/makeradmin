@@ -8,7 +8,7 @@ from sqlalchemy.sql import func
 
 from membership.membership import add_membership_days
 from membership.models import Key, Span
-from multiaccessy.invite import maybe_send_accessy_labaccess_invite
+from multiaccessy.invite import ensure_accessy_labaccess, AccessyError
 from service.api_definition import NEGATIVE_ITEM_COUNT, INVALID_ITEM_COUNT, EMPTY_CART, NON_MATCHING_SUMS
 from service.db import db_session, nested_atomic
 from service.error import InternalServerError, BadRequest, NotFound
@@ -142,9 +142,7 @@ def ship_add_labaccess_action(action, transaction):
 
     complete_pending_action(action)
     send_key_updated_email(transaction.member_id, days_to_add, labaccess_end)
-
-    result_message = maybe_send_accessy_labaccess_invite(member_id=transaction.member_id)
-    logger.info(f"maybe_send_accessy_labaccess_invite result for member_id {transaction.member_id}: {result_message}")
+    ensure_accessy_labaccess(member_id=transaction.member_id)
 
 
 def ship_add_membership_action(action, transaction):
@@ -206,10 +204,19 @@ def ship_orders(ship_add_labaccess=True, transaction=None):
     for action, content, transaction in pending_actions_query(transaction=transaction):
 
         if ship_add_labaccess and action.action_type == ProductAction.ADD_LABACCESS_DAYS:
-            ship_add_labaccess_action(action, transaction)
+            try:
+                ship_add_labaccess_action(action, transaction)
+            except AccessyError as e:
+                logger.warning(f"failed to ensure accessy labacess, skipping, member (id {transaction.member_id}, number {transaction.member.member_number}) can self service add later: {e}")
 
         if action.action_type == ProductAction.ADD_MEMBERSHIP_DAYS:
             ship_add_membership_action(action, transaction)
+
+
+def ship_labaccess_orders(member_id=None):
+    for action, content, transaction in pending_actions_query(member_id=member_id):
+        if action.action_type == ProductAction.ADD_LABACCESS_DAYS:
+            ship_add_labaccess_action(action, transaction)
 
 
 @nested_atomic
