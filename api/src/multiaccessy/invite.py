@@ -2,7 +2,7 @@ from sqlalchemy.exc import NoResultFound
 
 from membership.membership import get_membership_summary
 from membership.models import Member
-from multiaccessy.accessy import DummyAccessySession, ACCESSY_LABACCESS_GROUP
+from multiaccessy.accessy import DummyAccessySession, ACCESSY_LABACCESS_GROUP, ACCESSY_SPECIAL_LABACCESS_GROUP
 from service.db import db_session
 
 
@@ -10,7 +10,7 @@ class AccessyError(Exception):
     pass
 
 
-class AccessyInvitePrectionditionFailed(AccessyError):
+class AccessyInvitePreconditionFailed(AccessyError):
     pass
 
 
@@ -20,20 +20,27 @@ def ensure_accessy_labaccess(member_id):
     try:
         member = db_session.query(Member).get(member_id)
     except NoResultFound as e:
-        raise AccessyInvitePrectionditionFailed("hittade inte medlem") from e
+        raise AccessyInvitePreconditionFailed("hittade inte medlem") from e
 
     if not member.phone:
-        raise AccessyInvitePrectionditionFailed("inget telefonnummer")
+        raise AccessyInvitePreconditionFailed("inget telefonnummer")
 
     summary = get_membership_summary(member_id)
-    if not summary.labaccess_active:
-        raise AccessyInvitePrectionditionFailed("ingen aktiv labacess")
+    if not summary.labaccess_active and not summary.special_labaccess_active:
+        raise AccessyInvitePreconditionFailed("ingen aktiv labacess")
+
+    groups = []
+    if summary.labaccess_active:
+        groups.append(ACCESSY_LABACCESS_GROUP)
+    if summary.special_labaccess_active:
+        groups.append(ACCESSY_SPECIAL_LABACCESS_GROUP)
 
     try:
         accessy_session = DummyAccessySession.get()
         if accessy_session.is_in_org(member.phone):
-            accessy_session.add_to_group(member.phone, ACCESSY_LABACCESS_GROUP)
+            for group in groups:
+                accessy_session.add_to_group(member.phone, group)
         else:
-            accessy_session.invite_phone_to_org_and_groups([member.phone], [ACCESSY_LABACCESS_GROUP])
+            accessy_session.invite_phone_to_org_and_groups([member.phone], groups)
     except Exception as e:
         raise AccessyError("failed to interact with accessy") from e

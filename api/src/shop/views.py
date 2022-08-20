@@ -1,7 +1,7 @@
 from flask import g, request, send_file, make_response, abort, redirect
 from sqlalchemy.exc import NoResultFound
 
-from multiaccessy.invite import AccessyInvitePrectionditionFailed, ensure_accessy_labaccess
+from multiaccessy.invite import AccessyInvitePreconditionFailed, ensure_accessy_labaccess
 from service.api_definition import WEBSHOP, WEBSHOP_EDIT, PUBLIC, GET, USER, POST, Arg, WEBSHOP_ADMIN, MEMBER_EDIT
 from service.config import get_public_url
 from service.db import db_session
@@ -137,7 +137,7 @@ def receipt_for_member(transaction_id):
 def accessy_invite():
     try:
         ensure_accessy_labaccess(member_id=g.user_id)
-    except AccessyInvitePrectionditionFailed as e:
+    except AccessyInvitePreconditionFailed as e:
         raise PreconditionFailed(message=str(e))
     
 
@@ -145,7 +145,7 @@ def accessy_invite():
 def ship_labaccess_orders_endpoint(member_id=None):
     try:
         ship_labaccess_orders(member_id)
-    except AccessyInvitePrectionditionFailed as e:
+    except AccessyInvitePreconditionFailed as e:
         pass
 
 

@@ -207,7 +207,7 @@ def ship_orders(ship_add_labaccess=True, transaction=None):
             try:
                 ship_add_labaccess_action(action, transaction)
             except AccessyError as e:
-                logger.warning(f"failed to ensure accessy labacess, skipping, member can self service add later: {e}")
+                logger.warning(f"failed to ensure accessy labacess, skipping, member (id {transaction.member_id}, number {transaction.member.member_number}) can self service add later: {e}")
 
         if action.action_type == ProductAction.ADD_MEMBERSHIP_DAYS:
             ship_add_membership_action(action, transaction)
