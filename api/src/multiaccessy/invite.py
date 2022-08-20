@@ -22,7 +22,7 @@ def ensure_accessy_labaccess(member_id):
     except NoResultFound as e:
         raise AccessyInvitePreconditionFailed("hittade inte medlem") from e
 
-    if not member.phone:
+    if True or not member.phone:
         raise AccessyInvitePreconditionFailed("inget telefonnummer")
 
     summary = get_membership_summary(member_id)
