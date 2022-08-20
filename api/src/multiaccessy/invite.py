@@ -27,7 +27,7 @@ def ensure_accessy_labaccess(member_id):
 
     summary = get_membership_summary(member_id)
     if not summary.labaccess_active and not summary.special_labaccess_active:
-        raise AccessyInvitePreconditionFailed("ingen aktiv labacess")
+        raise AccessyInvitePreconditionFailed("ingen aktiv labaccess")
 
     groups = []
     if summary.labaccess_active:
