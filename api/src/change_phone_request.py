@@ -7,6 +7,7 @@ from sqlalchemy import desc
 from sqlalchemy.orm.exc import NoResultFound
 
 from membership.models import PhoneNumberChangeRequest, normalise_phone_number
+from multiaccessy.invite import ensure_accessy_labaccess, AccessyError
 from service.db import db_session
 from service.error import NotFound, BadRequest
 from dispatch_sms import send_validation_code
@@ -88,6 +89,12 @@ def change_phone_validate(member_id, validation_code):
             change_request.completed = True
             db_session.flush()
             logging.info(f'member id {member_id} validating phone number, success, changed phone number to {change_request.phone}')
+            
+            try:
+                ensure_accessy_labaccess(member_id)
+            except AccessyError as e:
+                logger.warning(f"failed to ensure accessy labacess after changing phone number, skipping, member (id {member_id}), member can self service add later: {e}")
+            
             return {}
     
     except NoResultFound:
