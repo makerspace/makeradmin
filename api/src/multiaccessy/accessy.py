@@ -26,26 +26,7 @@ ACCESSY_CLIENT_SECRET = config.get("ACCESSY_CLIENT_SECRET", log_value=False)
 ACCESSY_CLIENT_ID = config.get("ACCESSY_CLIENT_ID")
 ACCESSY_LABACCESS_GROUP = config.get("ACCESSY_LABACCESS_GROUP")
 ACCESSY_SPECIAL_LABACCESS_GROUP = config.get("ACCESSY_SPECIAL_LABACCESS_GROUP")
-ACCESSY_DO_MODIFY = config.get("ACCESSY_DO_MODIFY", default="false").lower() in ("true", "t")
-
-
-# Use this instead of AccessySession during development if you don't want to call the actual api.
-class DummyAccessySession:
-    
-    @staticmethod
-    def get():
-        return DummyAccessySession()
-
-    def is_in_org(self, phone) -> bool:
-        """ Return true if user with phone number is in makerspace org. """
-        return True
-
-    def invite_phone_to_org_and_groups(self, phone_numbers: list[MSISDN], access_group_ids: list[UUID] = [], message_to_user: str = ""):
-        """ Sent an invitation for the phone into the org and make it auto add to labacess permissions on accept. """
-        pass
-    
-    def add_to_group(self, phone_number: MSISDN, access_group_id: UUID):
-        pass
+ACCESSY_DO_MODIFY = config.get("ACCESSY_DO_MODIFY", default="false").lower() == "true"
 
 
 def request(method, path, token=None, json=None, max_tries=1, err_msg=None):
@@ -68,7 +49,12 @@ def request(method, path, token=None, json=None, max_tries=1, err_msg=None):
             logger.error(f"got an error in the response for {response.request.path_url}, {response.status_code=}: {err_msg or ''}")
             raise AccessyError(err_msg)
 
-        return response.json()
+        try:
+            return response.json()
+        except ValueError as e:
+            if not response.content:
+                return {}
+            raise e
 
     raise AccessyError("too many requests")
 
@@ -222,7 +208,7 @@ class AccessySession:
     def __put(self, path: str, err_msg: str = None, json: dict = None):
         self.__ensure_token()
         if ACCESSY_DO_MODIFY:
-            return request("post", path, token=self.session_token, err_msg=err_msg, json=json)
+            return request("put", path, token=self.session_token, err_msg=err_msg, json=json)
         logger.info(f"ACCESSY_DO_MODIFY is false, skipping put to {path=}")
 
     def _get_json_paginated(self, url: str, msg: str = None):
@@ -345,11 +331,6 @@ class AccessyMember:
 
 
 def main():
-    # all_groups = accessy_session.get_all_groups_members()
-    # print("Members in organization: ", all_groups.org_members)
-    # print("Members in lab group: ", all_groups.lab)
-    # print("Members in special group: ", all_groups.special)
-
     nr = "+46704424644"
     # print(accessy_session.is_in_org(nr))
     # print(accessy_session.is_in_group(nr, ACCESSY_LABACCESS_GROUP))
@@ -360,6 +341,11 @@ def main():
     # accessy_session.invite_phone_to_org_and_groups([nr], message_to_user="only org")
     # accessy_session.invite_phone_to_org_and_groups([nr], [ACCESSY_LABACCESS_GROUP], "special message")
     # accessy_session.add_to_group(nr, ACCESSY_LABACCESS_GROUP)
+
+    all_groups = accessy_session.get_all_groups_members()
+    print("Members in organization: ", all_groups.org_members)
+    print("Members in lab group: ", all_groups.lab)
+    print("Members in special group: ", all_groups.special)
 
 
 if __name__ == "__main__":
