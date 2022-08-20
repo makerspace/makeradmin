@@ -2,12 +2,9 @@ from sqlalchemy.exc import NoResultFound
 
 from membership.membership import get_membership_summary
 from membership.models import Member
-from multiaccessy.accessy import DummyAccessySession, ACCESSY_LABACCESS_GROUP, ACCESSY_SPECIAL_LABACCESS_GROUP
+from multiaccessy.accessy import DummyAccessySession, ACCESSY_LABACCESS_GROUP, ACCESSY_SPECIAL_LABACCESS_GROUP, \
+    AccessyError
 from service.db import db_session
-
-
-class AccessyError(Exception):
-    pass
 
 
 class AccessyInvitePreconditionFailed(AccessyError):

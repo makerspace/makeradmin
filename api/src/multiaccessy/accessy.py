@@ -1,7 +1,10 @@
-from dataclasses import dataclass, field
-from logging import getLogger
-import os
 import threading
+
+from dataclasses import dataclass, field
+from datetime import datetime, timedelta
+from logging import getLogger
+from random import random
+from time import sleep
 from typing import Union
 
 import requests
@@ -9,6 +12,10 @@ import requests
 from service.config import config
 
 logger = getLogger("accessy")
+
+
+class AccessyError(RuntimeError):
+    pass
 
 
 UUID = str  # The UUID used by Accessy is a 16 byte hexadecimal number formatted as 01234567-abcd-abcd-abcd-0123456789ab (i.e. grouped by 4, 2, 2, 2, 6 with dashes in between)
@@ -19,13 +26,7 @@ ACCESSY_CLIENT_SECRET = config.get("ACCESSY_CLIENT_SECRET", log_value=False)
 ACCESSY_CLIENT_ID = config.get("ACCESSY_CLIENT_ID")
 ACCESSY_LABACCESS_GROUP = config.get("ACCESSY_LABACCESS_GROUP")
 ACCESSY_SPECIAL_LABACCESS_GROUP = config.get("ACCESSY_SPECIAL_LABACCESS_GROUP")
-
-
-def check_response_error(response: requests.Response, msg: str = None):
-    if not response.ok:
-        msg_str = f"\n\tMessage: {msg}" if msg is not None else ""
-        logger.error(f"Got an error in the response for {response.request.path_url}. {response.status_code=}{msg_str}")
-        raise RuntimeError(msg)
+ACCESSY_DO_MODIFY = config.get("ACCESSY_DO_MODIFY", default="false").lower() in ("true", "t")
 
 
 # Use this instead of AccessySession during development if you don't want to call the actual api.
@@ -47,26 +48,42 @@ class DummyAccessySession:
         pass
 
 
-@dataclass
-class AccessySession:
-    session_token: UUID
+def request(method, path, token=None, json=None, max_tries=1, err_msg=None):
+    headers = {}
+    if token:
+        headers["Authorization"] = f"Bearer {token}"
+    if json:
+        headers["Content-Type"] = "application/json"
+        
+    backoff = 1.0
+    for i in range(max_tries):
+        response = requests.request(method, ACCESSY_URL + path, json=json, headers=headers)
+        if response.status_code == 429:
+            logger.warning(f"requesting accessy returned 429, too many reqeusts, try {i+1}/{max_tries}, retrying in {backoff}s, {path=}")
+            sleep(backoff)
+            backoff = backoff * (1.2 + 0.1 * random())
+            continue
 
-    @classmethod
-    def create_session(cls, client_id: str, client_secret: str) -> "AccessySession":
-        response = requests.post(ACCESSY_URL + "/auth/oauth/token", 
-            json={"audience": ACCESSY_URL, "grant_type": "client_credentials", "client_id": client_id, "client_secret": client_secret},
-            headers={"Content-Type": "application/json"}
-        )
         if not response.ok:
-            return None
-        return cls(response.json()["access_token"])
-    
-    def __post_init__(self):
-        self.organization_id = self.__get_organization()
+            logger.error(f"got an error in the response for {response.request.path_url}, {response.status_code=}: {err_msg or ''}")
+            raise AccessyError(err_msg)
+
+        return response.json()
+
+    raise AccessyError("too many requests")
+
+
+class AccessySession:
+    def __init__(self):
+        self.session_token = None
+        self.session_token_token_expires_at = None
+        self._organization_id = None
+        self._mutex = threading.Lock()
 
     #################
     # Public methods
     #################
+
     @dataclass
     class AllAccessyMemberGroups:
         """ A collection of the members that are included in each Accessy org/group """
@@ -110,18 +127,14 @@ class AccessySession:
         if accessy_member is None:
             return
 
-        response = requests.delete(ACCESSY_URL + f"/org/admin/organization/{self.organization_id}/user/{accessy_member.user_id}",
-                                   headers={"Authorization": f"Bearer {self.session_token}"})
-        check_response_error(response)
+        self.__delete(f"/org/admin/organization/{self.organization_id()}/user/{accessy_member.user_id}")
 
     def remove_from_group(self, phone_number: MSISDN, access_group_id: UUID):
         accessy_member = self._get_org_user_from_phone(phone_number)
         if accessy_member is None:
             return
 
-        response = requests.delete(ACCESSY_URL + f"/asset/admin/access-permission-group/{access_group_id}/membership/{accessy_member.membership_id}",
-                                headers={"Content-Type": "application/json", "Authorization": f"Bearer {self.session_token}"})
-        check_response_error(response)
+        self.__delete(f"/asset/admin/access-permission-group/{access_group_id}/membership/{accessy_member.membership_id}")
 
     def add_to_group(self, phone_number: MSISDN, access_group_id: UUID):
         """ Add a specific user with phone number to access group """
@@ -129,40 +142,89 @@ class AccessySession:
         if accessy_member is None:
             self.invite_phone_to_org_and_groups([phone_number], [access_group_id])
 
-        response = requests.put(ACCESSY_URL + f"/asset/admin/access-permission-group/{access_group_id}/membership", json=dict(membership=accessy_member.membership_id),
-                                headers={"Content-Type": "application/json", "Authorization": f"Bearer {self.session_token}"})
-        check_response_error(response)
+        self.__put(
+            f"/asset/admin/access-permission-group/{access_group_id}/membership",
+            json=dict(membership=accessy_member.membership_id),
+        )
 
     def invite_phone_to_org_and_groups(self, phone_numbers: list[MSISDN], access_group_ids: list[UUID] = [], message_to_user: str = ""):
         """ Invite a list of phone numbers to a list of groups """
-        response = requests.post(ACCESSY_URL + f"/org/admin/organization/{self.organization_id}/invitation",
-                                json=dict(accessPermissionGroupIds=access_group_ids, message=message_to_user, msisdns=phone_numbers),
-                                headers={"Content-Type": "application/json", "Authorization": f"Bearer {self.session_token}"})
-        check_response_error(response, f"Invite {phone_numbers=} to org and groups {access_group_ids}. {message_to_user=}")
+        self.__post(
+            f"/org/admin/organization/{self.organization_id()}/invitation",
+            json=dict(accessPermissionGroupIds=access_group_ids, message=message_to_user, msisdns=phone_numbers),
+            err_msg=f"invite {phone_numbers=} to org and groups {access_group_ids}. {message_to_user=}",
+        )
+        
+    def organization_id(self):
+        if self._organization_id:
+            return self._organization_id
+        self.__ensure_token()
+        return self._organization_id
 
     ################################################
     # Internal methods
     ################################################
 
-    def __get_organization(self) -> str:
-        """ Get the organization for the session token """
-        data = self._get_json("/asset/user/organization-membership")
-        # [{"id":<uuid>,"userId":<uuid>,"organizationId":<uuid>,"roles":[<roles>]}]
-        if len(data) > 1:
-            logger.warning("API key has several memberships. This is probably an error...")
-        elif len(data) == 0:
-            raise ValueError("The API key does not have a corresponding organization membership")
+    def __ensure_token(self):
+        if not ACCESSY_CLIENT_ID or not ACCESSY_CLIENT_SECRET:
+            return
 
-        return data[0]["organizationId"]
+        with self._mutex:  # Only allow one concurrent token refresh as rate limiting on this endpoint is aggressive.
+            if not self.session_token or datetime.now() > self.session_token_token_expires_at:
+                now = datetime.now()
+                data = request(
+                    "post",
+                    "/auth/oauth/token",
+                    json={
+                        "audience": ACCESSY_URL,
+                        "grant_type": "client_credentials",
+                        "client_id": ACCESSY_CLIENT_ID,
+                        "client_secret": ACCESSY_CLIENT_SECRET,
+                    },
+                )
+                
+                self.session_token = data["access_token"]
+                self.session_token_token_expires_at = now + timedelta(milliseconds=int(data["expires_in"]))
+                logger.info(f"accessy session token refreshed, expires_at={self.session_token_token_expires_at.isoformat()} token={self.session_token}")
+                
+            if not self._organization_id:
+                data = request(
+                    "get",
+                    "/asset/user/organization-membership",
+                    token=self.session_token,
+                )
+                
+                match len(data):
+                    case 0:
+                        raise AccessyError("The API key does not have a corresponding organization membership")
+                    case l if l > 1:
+                        logger.warning("API key has several memberships. This is probably an error...")
+        
+                self._organization_id = data[0]["organizationId"]
+                logger.info(f"fetched accessy organization_id {self._organization_id}")
 
-    def _get_json(self, url: str, msg: str = None) -> dict:
-        """ Convenience method for getting data from a JSON endpoint that is not paginated """
-        response = requests.get(ACCESSY_URL + url,
-                                headers={"Authorization": f"Bearer {self.session_token}"})
-        check_response_error(response, msg)
-        data = response.json()
-        return data
+    def _get(self, path: str, err_msg: str = None) -> dict:
+        self.__ensure_token()
+        return request("get", path, token=self.session_token, err_msg=err_msg)
+
+    def __delete(self, path: str, err_msg: str = None):
+        self.__ensure_token()
+        if ACCESSY_DO_MODIFY:
+            return request("delete", path, token=self.session_token, err_msg=err_msg)
+        logger.info(f"ACCESSY_DO_MODIFY is false, skipping delete to {path=}")
     
+    def __post(self, path: str, err_msg: str = None, json: dict = None):
+        self.__ensure_token()
+        if ACCESSY_DO_MODIFY:
+            return request("post", path, token=self.session_token, err_msg=err_msg, json=json)
+        logger.info(f"ACCESSY_DO_MODIFY is false, skipping post to {path=}")
+
+    def __put(self, path: str, err_msg: str = None, json: dict = None):
+        self.__ensure_token()
+        if ACCESSY_DO_MODIFY:
+            return request("post", path, token=self.session_token, err_msg=err_msg, json=json)
+        logger.info(f"ACCESSY_DO_MODIFY is false, skipping put to {path=}")
+
     def _get_json_paginated(self, url: str, msg: str = None):
         """ Convenience method for getting all data for a JSON endpoint that is paginated """
         page_size = 10000
@@ -172,7 +234,7 @@ class AccessySession:
         total_item_count = None
         received_item_count = 0
         while total_item_count is None or received_item_count < total_item_count:
-            data = self._get_json(url + f"?page_number={page_number}&page_size={page_size}")
+            data = self._get(url + f"?page_number={page_number}&page_size={page_size}")
             current_items = data["items"]
 
             items.extend(current_items)
@@ -184,21 +246,21 @@ class AccessySession:
             total_item_count = data["totalItems"]
 
             if len(current_items) == 0 and total_item_count != 0:
-                raise ValueError(f"Could not get all items. Not enough items were returned from Accessy endpoint during pagination loop. Got {received_item_count} out of {total_item_count} expected items")
+                raise AccessyError(f"Could not get all items. Not enough items were returned from Accessy endpoint during pagination loop. Got {received_item_count} out of {total_item_count} expected items")
 
         return items
-    
+
     ################################################
     # Methods that return raw JSON data from API:s
     ################################################
 
     def _get_user_details(self, user_id: UUID) -> dict:
         """ Get details for user ID. Fields: id, msisdn, firstName, lastName, ... """
-        return self._get_json(f"/org/admin/user/{user_id}", msg="Getting user details")
+        return self._get(f"/org/admin/user/{user_id}", msg="Getting user details")
 
     def _get_users_org(self) -> list[dict]:
         """ Get all user ID:s """
-        return self._get_json_paginated(f"/asset/admin/organization/{self.organization_id}/user")
+        return self._get_json_paginated(f"/asset/admin/organization/{self.organization_id()}/user")
         # {"items":[{"id":<uuid>,"msisdn":"+46...","firstName":str,"lastName":str}, ...],"totalItems":6,"pageSize":25,"pageNumber":0,"totalPages":1}
     
     def _get_users_in_access_group(self, access_group_id: UUID) -> list[dict]:
@@ -219,7 +281,7 @@ class AccessySession:
 
         APPLICATION_PHONE_NUMBER = object()  # Sentinel phone number for applications
         def fill_user_details(user: "AccessyMember"):
-            data = self._get_json(f"/org/admin/user/{user.user_id}")
+            data = self._get(f"/org/admin/user/{user.user_id}")
 
             # API keys do not have phone numbers, set it to sentinel object so we can filter out API keys further down
             if data["application"]:
@@ -234,7 +296,7 @@ class AccessySession:
             user.last_name = data.get("lastName", "")
 
         def fill_membership_id(user: "AccessyMember"):
-            data = self._get_json(f"/asset/admin/user/{user.user_id}/organization/{self.organization_id}/membership")
+            data = self._get(f"/asset/admin/user/{user.user_id}/organization/{self.organization_id()}/membership")
             user.membership_id = data["id"]
         
         threads = []
@@ -269,6 +331,9 @@ class AccessySession:
             return None
 
 
+accessy_session = AccessySession()
+
+
 @dataclass
 class AccessyMember:
     user_id: UUID = field(repr=False)
@@ -280,44 +345,21 @@ class AccessyMember:
 
 
 def main():
-    session = None
-    # Convenience if a session token is already issued
-    # session_token = os.environ.get("ACCESSY_SESSION_TOKEN")
-    # try:
-    #     session = AccessySession(session_token)
-    # except:
-    #     pass
-
-    # Get a new session token
-    if session is None:
-        session = AccessySession.create_session(ACCESSY_CLIENT_ID, ACCESSY_CLIENT_SECRET)
-    print("session:", session)
-    
-    # all_groups = session.get_all_groups_members()
+    # all_groups = accessy_session.get_all_groups_members()
     # print("Members in organization: ", all_groups.org_members)
     # print("Members in lab group: ", all_groups.lab)
     # print("Members in special group: ", all_groups.special)
 
     nr = "+46704424644"
-    
-    # session.remove_from_org(nr)
-    # session.invite_phone_to_org_and_groups([nr], message_to_user="only org")
-    # session.invite_phone_to_org_and_groups([nr], [ACCESSY_LABACCESS_GROUP], "special message")
-    session.add_to_group(nr, ACCESSY_LABACCESS_GROUP)
+    # print(accessy_session.is_in_org(nr))
+    # print(accessy_session.is_in_group(nr, ACCESSY_LABACCESS_GROUP))
+    # print(accessy_session.is_in_group(nr, ACCESSY_SPECIAL_LABACCESS_GROUP))
 
-    members = session.get_all_groups_members()
-    for x in members.org_members:
-        print("org", x)
-        
-    for x in members.lab:
-        print("lab", x)
-
-    # # Check person is in ORG
-    # import random
-    # random_se_number = f"+46{random.randint(0, 1e9):09d}"
-    # print(f"Random person ({random_se_number}) in org?: {session.is_in_org(random_se_number)}")
-    # special_person = random.choice(all_groups.special)
-    # print(f"Special person ({special_person.phone_number}) in org?: {session.is_in_org(special_person.phone_number)}")
+    # accessy_session.remove_from_org(nr)
+    # accessy_session.remove_from_group(nr, ACCESSY_LABACCESS_GROUP)
+    # accessy_session.invite_phone_to_org_and_groups([nr], message_to_user="only org")
+    # accessy_session.invite_phone_to_org_and_groups([nr], [ACCESSY_LABACCESS_GROUP], "special message")
+    # accessy_session.add_to_group(nr, ACCESSY_LABACCESS_GROUP)
 
 
 if __name__ == "__main__":
