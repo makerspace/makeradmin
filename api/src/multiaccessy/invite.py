@@ -22,12 +22,12 @@ def ensure_accessy_labaccess(member_id):
     except NoResultFound as e:
         raise AccessyInvitePreconditionFailed("hittade inte medlem") from e
 
-    if True or not member.phone:
+    if not member.phone:
         raise AccessyInvitePreconditionFailed("inget telefonnummer")
 
     summary = get_membership_summary(member_id)
     if not summary.labaccess_active and not summary.special_labaccess_active:
-        raise AccessyInvitePreconditionFailed("ingen aktiv labacess")
+        raise AccessyInvitePreconditionFailed("ingen aktiv labaccess")
 
     groups = []
     if summary.labaccess_active:

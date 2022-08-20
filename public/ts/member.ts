@@ -102,20 +102,19 @@ common.documentLoaded().then(() => {
             pendingAccess = `<p>Om du köper ny labaccess i webshoppen så kommer den aktiveras vid nästa <a href=${calendarURL}>nyckelutlämning</a>. <br>If you buy new lab membership time in the webshop, it will activate during the next <a href=${calendarURL}>nyckelutlämning</a></p>`;
         }
 
-        const disabled = (!phone || !membership.labaccess_active) ? "disabled" : ""
+        const disabled = (!phone || (!membership.labaccess_active && !membership.special_labaccess_active)) ? "disabled" : ""
         let explanation = "";
         if (!phone) {
-            explanation += " Telefonnummer saknas, fyll i med knappen ovan."
-        }
-        if (!membership.labaccess_active) {
+            explanation = "Telefonnummer saknas, fyll i med knappen ovan."
+        } else if (!membership.labaccess_active && !membership.special_labaccess_active) {
             if (pendingLabaccessDays === 0) {
-                explanation += " Ingen labaccess aktiv, köp mer i shoppen och vänta på nyckelutlämning." // TODO :( :( seriously? vänta?
+                explanation = "Ingen labaccess aktiv, köp mer och vänta på synk (notifieras via mejl)." // TODO :( :( seriously? vänta i en vecka?
             } else {
-                explanation += " Ingen labaccess aktiv, vänta på nyckelutlämning." // TODO :( :( seriously? vänta?
+                explanation = "Ingen labaccess aktiv, den blir aktiv vid nästa synk (notifieras via mejl)." // TODO :( :( seriously? vänta i en vecka?
             }
         }
 
-        const accessyInvite = `<p><button id="accessy-ivite-button" "${disabled} class="uk-button uk-button-danger" onclick="">Skicka Accessy-inbjudan</button></button>${explanation}</p>`
+        const accessyInvite = `<p><button id="accessy-invite-button" ${disabled} class="uk-button uk-button-danger" onclick="">Skicka Accessy-inbjudan</button></button> ${explanation}</p>`
 
         return `
             <fieldset class="data-uk-margin">
@@ -184,8 +183,14 @@ common.documentLoaded().then(() => {
 
                 ${render_key_view(member.phone, membership, pending_actions_json)}
             </form>`;
-        document.getElementById("accessy-ivite-button")!.onclick = () => {
-            common.ajax("POST", `${window.apiBasePath}/member/current/accessy_invite`).then(() => location.reload());
+        document.getElementById("accessy-invite-button")!.onclick = (e) => {
+            e.preventDefault();
+            common.ajax("POST", `${window.apiBasePath}/webshop/member/current/accessy_invite`)
+                .then(() => UIkit.modal.alert(`<h2>Inbjudan skickad</h2>`))
+                .catch((e) => {
+                    UIkit.modal.alert(`<h2>Inbjudan misslyckades</h2><b class="uk-text-danger"">${e.message}</b>`);
+                });
+            return false;
         };
     }).catch(e => {
         // Probably Unauthorized, redirect to login page.
