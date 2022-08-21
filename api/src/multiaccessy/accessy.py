@@ -29,7 +29,7 @@ ACCESSY_SPECIAL_LABACCESS_GROUP = config.get("ACCESSY_SPECIAL_LABACCESS_GROUP")
 ACCESSY_DO_MODIFY = config.get("ACCESSY_DO_MODIFY", default="false").lower() == "true"
 
 
-def request(method, path, token=None, json=None, max_tries=1, err_msg=None):
+def request(method, path, token=None, json=None, max_tries=8, err_msg=None):
     headers = {}
     if token:
         headers["Authorization"] = f"Bearer {token}"
