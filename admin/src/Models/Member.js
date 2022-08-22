@@ -30,5 +30,6 @@ Member.model = {
         address_zipcode: null,
         address_city: "",
         address_country: "se",
+        labaccess_agreement_at: null,
     },
 };

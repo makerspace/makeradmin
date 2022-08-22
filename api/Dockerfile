@@ -26,7 +26,7 @@ COPY requirements.txt /work
 RUN pip install -U pip
 RUN pip install -r /work/requirements.txt
 
-COPY run.sh dispatch_emails.sh /work/
+COPY run.sh dispatch_emails.sh accessy_syncer.sh /work/
 
 COPY src /work/src
 

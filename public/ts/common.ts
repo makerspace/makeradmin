@@ -66,7 +66,7 @@ export function uploadFile<T>(url: string, file: File): Promise<T> {
 
 export function ajax(type: string, url: string, data: object | null = null): Promise<any> {
 	return new Promise((resolve, reject) => {
-		var xhr = new XMLHttpRequest();
+		const xhr = new XMLHttpRequest();
 		xhr.open(type, url);
 		xhr.setRequestHeader('Content-Type', 'application/json; charset=utf-8');
 		let token = localStorage.getItem("token");

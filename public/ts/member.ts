@@ -59,7 +59,7 @@ common.documentLoaded().then(() => {
                 </div>`;
     }
 
-    function render_key_view(membership: any, pending_actions_json: any) {
+    function render_key_view(phone: any, membership: any, pending_actions_json: any) {
         let pendingLabaccessDays = 0;
         for (let pending of pending_actions_json.data) {
             if (pending.action.action === "add_labaccess_days") {
@@ -93,7 +93,7 @@ common.documentLoaded().then(() => {
             (enddate: string, days: number) => `Du har fått <strong>specialtillträde</strong> till föreningslokalerna t.o.m. ${enddate} (${days} dagar till). <br>You have been given <strong>special access</strong> to the premises through ${enddate} (${days} day(s) left).`,
             () => ``,
         ];
-
+        
         let calendarURL = "https://www.makerspace.se/kalendarium";
         let pendingAccess = "";
         if (pendingLabaccessDays > 0) {
@@ -102,6 +102,20 @@ common.documentLoaded().then(() => {
             pendingAccess = `<p>Om du köper ny labaccess i webshoppen så kommer den aktiveras vid nästa <a href=${calendarURL}>nyckelutlämning</a>. <br>If you buy new lab membership time in the webshop, it will activate during the next <a href=${calendarURL}>nyckelutlämning</a></p>`;
         }
 
+        const disabled = (!phone || (!membership.labaccess_active && !membership.special_labaccess_active)) ? "disabled" : ""
+        let explanation = "";
+        if (!phone) {
+            explanation = "Telefonnummer saknas, fyll i med knappen ovan."
+        } else if (!membership.labaccess_active && !membership.special_labaccess_active) {
+            if (pendingLabaccessDays === 0) {
+                explanation = "Ingen labaccess aktiv, köp mer och vänta på synk (notifieras via mejl)." // TODO :( :( seriously? vänta i en vecka?
+            } else {
+                explanation = "Ingen labaccess aktiv, den blir aktiv vid nästa synk (notifieras via mejl)." // TODO :( :( seriously? vänta i en vecka?
+            }
+        }
+
+        const accessyInvite = `<p><button id="accessy-invite-button" ${disabled} class="uk-button uk-button-danger" onclick="">Skicka Accessy-inbjudan</button></button> ${explanation}</p>`
+
         return `
             <fieldset class="data-uk-margin">
                 <legend><i uk-icon="lock"></i> Medlemsskap</legend>
@@ -109,6 +123,7 @@ common.documentLoaded().then(() => {
                 ${renderInfo({ active: membership.labaccess_active, enddate: membership.labaccess_end }, labaccessStrings)}
                 ${membership.special_labaccess_active ? renderInfo({ active: membership.special_labaccess_active, enddate: membership.special_labaccess_end }, specialLabaccessStrings) : ``}
                 ${pendingAccess}
+                ${accessyInvite}
             </fieldset>`;
     }
 
@@ -166,8 +181,17 @@ common.documentLoaded().then(() => {
                     </div>
                 </fieldset>
 
-                ${render_key_view(membership, pending_actions_json)}
+                ${render_key_view(member.phone, membership, pending_actions_json)}
             </form>`;
+        document.getElementById("accessy-invite-button")!.onclick = (e) => {
+            e.preventDefault();
+            common.ajax("POST", `${window.apiBasePath}/webshop/member/current/accessy_invite`)
+                .then(() => UIkit.modal.alert(`<h2>Inbjudan skickad</h2>`))
+                .catch((e) => {
+                    UIkit.modal.alert(`<h2>Inbjudan misslyckades</h2><b class="uk-text-danger"">${e.message}</b>`);
+                });
+            return false;
+        };
     }).catch(e => {
         // Probably Unauthorized, redirect to login page.
         if (e.status === UNAUTHORIZED) {

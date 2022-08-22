@@ -44,8 +44,8 @@ def max_or_none(*args):
     return None
 
 
-def get_membership_summary(entity_id):
-    return get_membership_summaries([entity_id])[0]
+def get_membership_summary(member_id):
+    return get_membership_summaries([member_id])[0]
 
 
 def get_membership_summaries(member_ids: List[int]):
