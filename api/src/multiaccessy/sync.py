@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 from logging import basicConfig, INFO, getLogger
 
-from accessy import AccessyMember, AccessyPermissiongroup
+from accessy import AccessyMember, accessy_session
 from membership.models import Member as MakerAdminMember
 from membership.membership import get_members_and_membership
 
 logger = getLogger("makeradmin")
 
 ORG_MEMBER_COUNT_LIMIT = 600
+
 
 def split_into_groups(accessy_members:list[AccessyMember], makeradmin_members:list[MakerAdminMember]):
     members_ok = []
@@ -29,6 +30,9 @@ def split_into_groups(accessy_members:list[AccessyMember], makeradmin_members:li
     return members_ok, members_not_in_makeradmin
 
 def sync():
+    
+    accessy_session
+    
     #TODO populate these lists
     accessy_org_members
     accessy_persmission_group_members
@@ -59,9 +63,3 @@ def sync():
         remove_old()
 
     return
-
-def main():
-    print("test")
-
-if __name__ == '__main__':
-    main()
