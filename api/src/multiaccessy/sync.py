@@ -1,65 +1,110 @@
 #!/usr/bin/env python3
-from logging import basicConfig, INFO, getLogger
+from dataclasses import dataclass, field
+from datetime import date
+from logging import getLogger
 
-from accessy import AccessyMember, accessy_session
-from membership.models import Member as MakerAdminMember
-from membership.membership import get_members_and_membership
+from sqlalchemy.orm import contains_eager
+
+from membership.models import Member, Span
+from multiaccessy.accessy import PHONE, AccessyMember, ACCESSY_LABACCESS_GROUP, ACCESSY_SPECIAL_LABACCESS_GROUP, \
+    accessy_session
+from service.db import db_session
 
 logger = getLogger("makeradmin")
 
-ORG_MEMBER_COUNT_LIMIT = 600
+
+GROUPS = {
+    Span.SPECIAL_LABACESS: ACCESSY_SPECIAL_LABACCESS_GROUP,
+    Span.LABACCESS: ACCESSY_LABACCESS_GROUP,
+}
 
 
-def split_into_groups(accessy_members:list[AccessyMember], makeradmin_members:list[MakerAdminMember]):
-    members_ok = []
-    members_not_in_makeradmin = []
-    accessy_members.sort(key=lambda x: x.accessy_phone)
-    makeradmin_members.sort(key=lambda x: x.phone)
-
-    #Check if members are in accessy but not makeradmin
-    for acessy_member in accessy_members:
-        found = False
-        for makeradmin_member in makeradmin_members:
-            if acessy_member.accessy_phone == makeradmin_member.phone:
-                members_ok.append({acessy_member, makeradmin_member})
-                found = True
-                break
-        if not found:
-            members_not_in_makeradmin.append(acessy_member)
+def get_wanted_access(today) -> dict[PHONE, AccessyMember]:
+    query = db_session.query(Member).join(Member.spans)
+    query = query.options(contains_eager(Member.spans))
+    query = query.filter(
+        Member.deleted_at.is_(None),
+        Member.phone.is_not(None),
+        Member.labaccess_agreement_at.is_not(None),
+        Span.type.in_([Span.LABACCESS, Span.SPECIAL_LABACESS]),
+        Span.startdate <= today,
+        Span.enddate >= today,
+        Span.deleted_at.is_(None),
+    )
     
-    return members_ok, members_not_in_makeradmin
+    return {
+        m.phone: AccessyMember(
+            user_id=None,
+            phone=m.phone,
+            name=f"{m.firstname} {m.lastname}",
+            groups={GROUPS[span.type] for span in m.spans},
+        )
+        for m in query
+    }
 
-def sync():
+
+@dataclass
+class GroupOp:
+    member: AccessyMember
+    group: str
+
+
+@dataclass
+class Diff:
+    invites: [AccessyMember] = field(default_factory=list)
+    group_adds: [GroupOp] = field(default_factory=list)
+    group_removes: [GroupOp] = field(default_factory=list)
+    org_removes: [AccessyMember] = field(default_factory=list)
+
+
+def calculate_diff(actual_members, wanted_members):
+    diff = Diff()
     
-    accessy_session
+    # Missing in Accessy, invite needed:
+    for wanted in (wanted for phone, wanted in wanted_members.items() if phone not in actual_members):
+        diff.invites.append(wanted)
+        
+    # Should have any access, remove from org needed:
+    for actual in (actual for phone, actual in actual_members.items() if phone not in wanted_members):
+        diff.org_removes.append(actual)
+
+    # Already exists in accessy and should have access, but could be wrong groups:
+    for phone, wanted in wanted_members.items():
+        actual = actual_members.get(phone)
+        
+        if not actual:
+            continue
     
-    #TODO populate these lists
-    accessy_org_members
-    accessy_persmission_group_members
-    ma_members, ma_memberships = get_members_and_membership()
-
-    #Filter the members
-    members_in_both, members_not_in_makeradmin = split_into_groups(accessy_org_members, ma_members)
+        for group in wanted.groups - actual.groups:
+            diff.group_adds.append(GroupOp(wanted, group))
+            
+        for group in actual.groups - wanted.groups:
+            diff.group_removes.append(GroupOp(actual, group))
     
-    #Delete accessy members not in makeradmin from accessy
-    for acessy_member in members_not_in_makeradmin:
-        removeFromGroup(acessy_member)
-        delete_member(acessy_member)
+    return diff
 
-    #Remove members from the permission group if are not members of org
-    for accessy_member in accessy_persmission_group_members:
-        if notInOrg(accessy_member) or not hasLabbAccess(makeradmin_member):
-            removeFromGroup(accessy_member)
 
-    #Add and remove people that are in the org from the group based on labbaccess
-    for accessy_member, makeradmin_member in members_in_both:
-        if notInGroup(accessy_member) and hasLabbAccess(makeradmin_member):
-            addToGroup(accessy_member)
-        elif inGroup(accessy_member) and not hasLabbAccess(makeradmin_member):
-            removeFromGroup(accessy_member)
-
-    #Check org membership count, remove if above limit (600), don't remove people with access to the space. LIFO based on last labbaccess and membership
-    if len(accessy_org_members) > ORG_MEMBER_COUNT_LIMIT:
-        remove_old()
-
-    return
+def sync(today=None):
+    if not today:
+        today = date.today()
+    
+    actual_members = accessy_session.get_all_members()
+    wanted_members = get_wanted_access(today)
+    
+    diff = calculate_diff(actual_members, wanted_members)
+    
+    for member in diff.invites:
+        logger.info(f"accessy sync inviting: {member}")
+        accessy_session.invite_phone_to_org_and_groups([member.phone], member.groups)
+    
+    for op in diff.group_adds:
+        logger.info(f"accessy sync adding to group: {op}")
+        accessy_session.add_to_group(op.member.phone, op.group)
+        
+    for op in diff.group_removes:
+        logger.info(f"accessy sync removing from group: {op}")
+        accessy_session.remove_from_group(op.member.phone, op.group)
+        
+    for member in diff.org_removes:
+        logger.info(f"accessy sync removing from org: {member}")
+        accessy_session.remove_from_org(member.phone)

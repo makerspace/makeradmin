@@ -38,7 +38,7 @@ def main():
     with log_exception(status=1), stoppable():
         parser = ArgumentParser(description="Sync accessy and ship labaccess orders.",
                                 formatter_class=ArgumentDefaultsHelpFormatter)
-        parser.add_argument("command", type=str, nargs=1, default=COMMAND_SCHEDULED,
+        parser.add_argument("command", type=str, default=COMMAND_SCHEDULED,
                             help=f"The command to run"
                                  f", {COMMAND_SCHEDULED}: run forever according to schedule"
                                  f", {COMMAND_SHIP}: ship once (no sync after) then exit"
@@ -47,6 +47,8 @@ def main():
         
         engine = create_mysql_engine(**get_mysql_config())
         session_factory = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+    
+        logger.info(f"running syncer command {args.command}")
         
         match args.command:
             case x if x == COMMAND_SHIP:
@@ -64,7 +66,10 @@ def main():
                 while True:
                     time.sleep(1)
                     schedule.run_pending()
-
+            
+            case _:
+                logger.warning(f"unknown command {args.command}")
+            
 
 if __name__ == '__main__':
     main()
