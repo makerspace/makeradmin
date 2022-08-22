@@ -191,23 +191,26 @@ class AccessySession:
 
     def _get(self, path: str, err_msg: str = None) -> dict:
         self.__ensure_token()
-        return request("get", path, token=self.session_token, err_msg=err_msg)
+        if self.session_token:
+            return request("get", path, token=self.session_token, err_msg=err_msg)
+        logger.info(f"NO ACCESSY SESSION TOKEN (ID or CLIENT not configured), skipping get from {path=}")
+        return {}
 
     def __delete(self, path: str, err_msg: str = None):
         self.__ensure_token()
-        if ACCESSY_DO_MODIFY:
+        if ACCESSY_DO_MODIFY and self.session_token:
             return request("delete", path, token=self.session_token, err_msg=err_msg)
         logger.info(f"ACCESSY_DO_MODIFY is false, skipping delete to {path=}")
     
     def __post(self, path: str, err_msg: str = None, json: dict = None):
         self.__ensure_token()
-        if ACCESSY_DO_MODIFY:
+        if ACCESSY_DO_MODIFY and self.session_token:
             return request("post", path, token=self.session_token, err_msg=err_msg, json=json)
         logger.info(f"ACCESSY_DO_MODIFY is false, skipping post to {path=}")
 
     def __put(self, path: str, err_msg: str = None, json: dict = None):
         self.__ensure_token()
-        if ACCESSY_DO_MODIFY:
+        if ACCESSY_DO_MODIFY and self.session_token:
             return request("put", path, token=self.session_token, err_msg=err_msg, json=json)
         logger.info(f"ACCESSY_DO_MODIFY is false, skipping put to {path=}")
 
