@@ -2,12 +2,9 @@ from sqlalchemy.exc import NoResultFound
 
 from membership.membership import get_membership_summary
 from membership.models import Member
-from multiaccessy.accessy import DummyAccessySession, ACCESSY_LABACCESS_GROUP, ACCESSY_SPECIAL_LABACCESS_GROUP
+from multiaccessy.accessy import ACCESSY_LABACCESS_GROUP, ACCESSY_SPECIAL_LABACCESS_GROUP, \
+    AccessyError, accessy_session
 from service.db import db_session
-
-
-class AccessyError(Exception):
-    pass
 
 
 class AccessyInvitePreconditionFailed(AccessyError):
@@ -36,7 +33,6 @@ def ensure_accessy_labaccess(member_id):
         groups.append(ACCESSY_SPECIAL_LABACCESS_GROUP)
 
     try:
-        accessy_session = DummyAccessySession.get()
         if accessy_session.is_in_org(member.phone):
             for group in groups:
                 accessy_session.add_to_group(member.phone, group)
