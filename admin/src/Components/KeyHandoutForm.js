@@ -121,11 +121,11 @@ class KeyHandoutForm extends React.Component {
         this.unsubscribe.forEach(u => u());
     }
 
-    renderAccessyInviteSaveButton({has_signed, labaccess_enddate, pending_labaccess_days, member}) {
+    renderAccessyInviteSaveButton({has_signed, labaccess_enddate, special_enddate, pending_labaccess_days, member}) {
         let tooltip;
         let color;
     
-        if (!pending_labaccess_days && !isAccessValid(labaccess_enddate)) {
+        if (!pending_labaccess_days && !isAccessValid(labaccess_enddate) && !isAccessValid(special_enddate)) {
             tooltip = "Ingen labaccess, accessy invite kommer inte att skickas (bara sparning görs)!";
             color = "uk-button-danger";
         } else if (!has_signed) {
@@ -212,7 +212,7 @@ class KeyHandoutForm extends React.Component {
 
             <div>
                 <button className="uk-button uk-button-success uk-float-right" tabIndex="2" title="Spara ändringar" disabled={!can_save_member && !can_save_key}><i className="uk-icon-save"/> Spara</button>
-                {this.renderAccessyInviteSaveButton({has_signed, labaccess_enddate, pending_labaccess_days, member})}
+                {this.renderAccessyInviteSaveButton({has_signed, labaccess_enddate, special_enddate, pending_labaccess_days, member})}
             </div>
         </>;
         
