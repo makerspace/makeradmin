@@ -34,7 +34,6 @@ def get_wanted_access(today) -> dict[PHONE, AccessyMember]:
     
     return {
         m.phone: AccessyMember(
-            user_id=None,
             phone=m.phone,
             name=f"{m.firstname} {m.lastname}",
             groups={GROUPS[span.type] for span in m.spans},

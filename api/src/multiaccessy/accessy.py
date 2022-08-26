@@ -63,7 +63,7 @@ def request(method, path, token=None, json=None, max_tries=8, err_msg=None):
 
 @dataclass
 class AccessyMember:
-    user_id: Union[UUID, None]
+    user_id: Union[UUID, None] = None
     # Get information below later
     phone: Union[str, None] = None
     membership_id: Union[UUID, None] = field(default=None)
@@ -311,7 +311,7 @@ class AccessySession:
         threads = []
         accessy_members = []
         for uid in user_ids:
-            accessy_member = AccessyMember(uid)
+            accessy_member = AccessyMember(user_id=uid)
             threads.append(threading.Thread(target=fill_user_details, args=(accessy_member, )))
             threads.append(threading.Thread(target=fill_membership_id, args=(accessy_member, )))
             accessy_members.append(accessy_member)
