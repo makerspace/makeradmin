@@ -43,7 +43,7 @@ def create_mysql_engine(host=None, port=None, db=None, user=None, pwd=None, time
     logger.info(f"waiting for db to respond at {host}:{port}")
     if not wait_for(lambda: can_connect(host, port), timeout=timeout, interval=0.5):
         raise Exception(f"could not connect to db at {host}:{port} in {timeout} seconds")
-    
+
     engine = create_engine(f"mysql+pymysql://{user}:{pwd}@{host}:{port}/{db}",
                            pool_recycle=1800,
                            isolation_level=isolation_level)

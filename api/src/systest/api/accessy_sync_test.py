@@ -1,84 +1,83 @@
 import re
+from datetime import date
 
-from test_aid.obj import DEFAULT_PASSWORD
+from membership.models import Span
+from multiaccessy.sync import get_wanted_access
+from test_aid.obj import random_phone_number
 from test_aid.systest_base import ApiTest
 
 
 class Test(ApiTest):
 
-    def test_get_token_with_username_and_password(self):
-        self.api.create_member(unhashed_password=DEFAULT_PASSWORD)
-        username = self.api.member['email']
-        
-        patten = re.compile(r'[A-Za-z0-9]{32}')
-        
-        # Using post parameters.
-        token = self.api\
-            .post("/oauth/token",
-                  data=dict(grant_type='password', username=username, password=DEFAULT_PASSWORD),
-                  headers={})\
-            .expect(code=200).get('access_token')
-        
-        self.assertTrue(patten.match(token))
+    def test_get_wanted_access(self):
+        included_because_labaccess_span = self.db.create_member(
+            phone=random_phone_number(),
+            labaccess_agreement_at=date.today(),
+        )
+        self.db.create_span(startdate=self.date(-1), enddate=self.date(0), type=Span.LABACCESS)
 
-        # Using url parameters.
-        token = self.api\
-            .post("/oauth/token",
-                  params=dict(grant_type='password', username=username, password=DEFAULT_PASSWORD),
-                  headers={})\
-            .expect(code=200).get('access_token')
+        included_because_special_span = self.db.create_member(
+            phone=random_phone_number(),
+            labaccess_agreement_at=date.today(),
+        )
+        self.db.create_span(startdate=self.date(0), enddate=self.date(1), type=Span.SPECIAL_LABACESS)
+
+        included_because_both_kinds_of_spans = self.db.create_member(
+            phone=random_phone_number(),
+            labaccess_agreement_at=date.today(),
+        )
+        self.db.create_span(startdate=self.date(0), enddate=self.date(0), type=Span.LABACCESS)
+        self.db.create_span(startdate=self.date(0), enddate=self.date(0), type=Span.SPECIAL_LABACESS)
+
+        not_included_because_spans_outside_today = self.db.create_member(
+            phone=random_phone_number(),
+            labaccess_agreement_at=date.today(),
+        )
+        self.db.create_span(startdate=self.date(-1), enddate=self.date(-1), type=Span.LABACCESS)
+        self.db.create_span(startdate=self.date(1), enddate=self.date(1), type=Span.LABACCESS)
+
+        not_included_because_labaccess_agreement_not_signed = self.db.create_member(
+            phone=random_phone_number(),
+            labaccess_agreement_at=None,
+        )
+        self.db.create_span(startdate=self.date(0), enddate=self.date(0), type=Span.LABACCESS)
+
+        not_included_because_no_phone_number = self.db.create_member(
+            phone=None,
+            labaccess_agreement_at=date.today(),
+        )
+        self.db.create_span(startdate=self.date(0), enddate=self.date(0), type=Span.LABACCESS)
+
+        not_included_because_deleted = self.db.create_member(
+            phone=random_phone_number(),
+            labaccess_agreement_at=date.today(),
+            deleted_at=self.datetime(),
+        )
+        self.db.create_span(startdate=self.date(0), enddate=self.date(0), type=Span.LABACCESS)
+
+        wanted = get_wanted_access(self.date())
         
-        self.assertTrue(patten.match(token))
-
-        # Using json content.
-        token = self.api\
-            .post("/oauth/token",
-                  json=dict(grant_type='password', username=username, password=DEFAULT_PASSWORD),
-                  headers={})\
-            .expect(code=200).get('access_token')
+        wanted_ids = {m.member_id for m in wanted.values()}
         
-        self.assertTrue(patten.match(token))
-        
-    def test_get_token_with_bad_parameters(self):
-        self.api.create_member(unhashed_password=DEFAULT_PASSWORD)
-        username = self.api.member['email']
+        self.assertIn(included_because_special_span.member_id, wanted_ids)
+        self.assertIn(included_because_special_span.phone, wanted)
 
-        self.api.post("/oauth/token", data=dict(grant_type='not-correct'))\
-            .expect(code=422, fields='grant_type', what='bad_value')
+        self.assertIn(included_because_labaccess_span.member_id, wanted_ids)
+        self.assertIn(included_because_labaccess_span.phone, wanted)
 
-        self.api.post("/oauth/token",
-                      data=dict(grant_type='password', username=username + 'wrong', password=DEFAULT_PASSWORD))\
-            .expect(code=401)
+        self.assertIn(included_because_both_kinds_of_spans.member_id, wanted_ids)
+        self.assertIn(included_because_both_kinds_of_spans.phone, wanted)
 
-        self.api.post("/oauth/token",
-                      data=dict(grant_type='password', username=username, password=DEFAULT_PASSWORD + 'wrong'))\
-            .expect(code=401)
+        self.assertNotIn(not_included_because_spans_outside_today.member_id, wanted_ids)
+        self.assertNotIn(not_included_because_spans_outside_today.phone, wanted)
 
-    def test_delete_token_aka_logout(self):
-        self.api.create_member(unhashed_password=DEFAULT_PASSWORD)
-        username = self.api.member['email']
+        self.assertNotIn(not_included_because_labaccess_agreement_not_signed.member_id, wanted_ids)
+        self.assertNotIn(not_included_because_labaccess_agreement_not_signed.phone, wanted)
 
-        token = self.api\
-            .post("/oauth/token", data=dict(grant_type='password', username=username, password=DEFAULT_PASSWORD))\
-            .expect(code=200).get('access_token')
-        
-        # Can't delete another persons token.
-        self.api.delete(f'/oauth/token/{token}X', token=token).expect(code=404)
+        self.assertNotIn(not_included_because_no_phone_number.member_id, wanted_ids)
+        self.assertNotIn(not_included_because_no_phone_number.phone, wanted)
 
-        # Delete own token works.
-        self.api.delete(f'/oauth/token/{token}', token=token).expect(code=200)
-        
-        # Missing token in subsequent delete.
-        self.api.delete(f'/oauth/token/{token}', token=token).expect(code=401)
+        self.assertNotIn(not_included_because_deleted.member_id, wanted_ids)
+        self.assertNotIn(not_included_because_deleted.phone, wanted)
 
-    def test_list_access_tokens(self):
-        self.api.create_member(unhashed_password=DEFAULT_PASSWORD)
-        username = self.api.member['email']
 
-        token = self.api\
-            .post("/oauth/token", data=dict(grant_type='password', username=username, password=DEFAULT_PASSWORD))\
-            .expect(code=200).get('access_token')
-        
-        tokens = self.api.get('/oauth/token', token=token).expect(code=200).data
-        
-        self.assertEqual([token], [t['access_token'] for t in tokens])
