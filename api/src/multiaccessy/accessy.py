@@ -1,4 +1,5 @@
 import threading
+from collections.abc import Iterable
 
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
@@ -18,6 +19,7 @@ class AccessyError(RuntimeError):
     pass
 
 
+PHONE = str
 UUID = str  # The UUID used by Accessy is a 16 byte hexadecimal number formatted as 01234567-abcd-abcd-abcd-0123456789ab (i.e. grouped by 4, 2, 2, 2, 6 with dashes in between)
 MSISDN = str  # Standardized number of the form +46123123456
 
@@ -59,6 +61,26 @@ def request(method, path, token=None, json=None, max_tries=8, err_msg=None):
     raise AccessyError("too many requests")
 
 
+@dataclass
+class AccessyMember:
+    user_id: Union[UUID, None] = None
+    # Get information below later
+    phone: Union[str, None] = None
+    membership_id: Union[UUID, None] = field(default=None)
+    name: str = "<name>"
+    member_id: Union[int, None] = None  # Makeradmin member_id
+    member_number: Union[int, None] = None  # Makeradmin member_number
+    groups: {str} = field(default_factory=set)
+
+    def __repr__(self):
+        groups = []
+        if ACCESSY_LABACCESS_GROUP in self.groups:
+            groups.append("labaccess")
+        if ACCESSY_SPECIAL_LABACCESS_GROUP in self.groups:
+            groups.append("special")
+        return f"AccessyMember(phone={self.phone}, name={self.name}, {groups=}, member_id={self.member_id}, member_number={self.member_number}, user_id={self.user_id})"
+
+
 class AccessySession:
     def __init__(self):
         self.session_token = None
@@ -70,24 +92,23 @@ class AccessySession:
     # Public methods
     #################
 
-    @dataclass
-    class AllAccessyMemberGroups:
-        """ A collection of the members that are included in each Accessy org/group """
-        org_members: list["AccessyMember"]
-        lab: list["AccessyMember"]
-        special: list["AccessyMember"]
+    def get_all_members(self) -> dict[PHONE, AccessyMember]:
+        """ Get a list of all Accessy members in the ORG with GROUPS (lab and special) """
 
-    def get_all_groups_members(self) -> AllAccessyMemberGroups:
-        """ Get a list of all Accessy members in the ORG and GROUPS (lab and special) """
-        org = set(item["id"] for item in self._get_users_org())
-        lab = set(item["userId"] for item in self._get_users_lab())
-        special = set(item["userId"] for item in self._get_users_special())
+        org_member_ids = set(item["id"] for item in self._get_users_org())
 
-        return AccessySession.AllAccessyMemberGroups(
-            org_members=self._user_ids_to_accessy_members(org),
-            lab=self._user_ids_to_accessy_members(lab),
-            special=self._user_ids_to_accessy_members(special)
-        )
+        members = {m.phone: m for m in self._user_ids_to_accessy_members(org_member_ids)}
+        
+        lab_ids = set(item["userId"] for item in self._get_users_lab())
+        special_ids = set(item["userId"] for item in self._get_users_special())
+        
+        for m in members.values():
+            if m.user_id in lab_ids:
+                m.groups.add(ACCESSY_LABACCESS_GROUP)
+            if m.user_id in special_ids:
+                m.groups.add(ACCESSY_SPECIAL_LABACCESS_GROUP)
+        
+        return members
 
     def is_in_org(self, phone_number: MSISDN, users_org: list[dict] = None) -> bool:
         """ Check if a user with a specific phone number is in the ORG """
@@ -245,7 +266,7 @@ class AccessySession:
 
     def _get_user_details(self, user_id: UUID) -> dict:
         """ Get details for user ID. Fields: id, msisdn, firstName, lastName, ... """
-        return self._get(f"/org/admin/user/{user_id}", msg="Getting user details")
+        return self._get(f"/org/admin/user/{user_id}", err_msg="Getting user details")
 
     def _get_users_org(self) -> list[dict]:
         """ Get all user ID:s """
@@ -265,33 +286,32 @@ class AccessySession:
         """ Get all user ID:s with special access """
         return self._get_users_in_access_group(ACCESSY_SPECIAL_LABACCESS_GROUP)
     
-    def _user_ids_to_accessy_members(self, user_ids: list[UUID]) -> list["AccessyMember"]:
+    def _user_ids_to_accessy_members(self, user_ids: Iterable[UUID]) -> list[AccessyMember]:
         """ Convert a list of User ID:s to AccessyMembers """
 
         APPLICATION_PHONE_NUMBER = object()  # Sentinel phone number for applications
-        def fill_user_details(user: "AccessyMember"):
+        def fill_user_details(user: AccessyMember):
             data = self._get(f"/org/admin/user/{user.user_id}")
 
             # API keys do not have phone numbers, set it to sentinel object so we can filter out API keys further down
             if data["application"]:
-                user.phone_number = APPLICATION_PHONE_NUMBER
+                user.phone = APPLICATION_PHONE_NUMBER
                 return
 
             try:
-                user.phone_number = data["msisdn"]
+                user.phone = data["msisdn"]
             except KeyError:
                 logger.error(f"User {user.user_id} does not have a phone number. {data=}")
-            user.first_name = data.get("firstName", "")
-            user.last_name = data.get("lastName", "")
+            user.name = f"{data.get('firstName', '')} {data.get('lastName', '')}"
 
-        def fill_membership_id(user: "AccessyMember"):
+        def fill_membership_id(user: AccessyMember):
             data = self._get(f"/asset/admin/user/{user.user_id}/organization/{self.organization_id()}/membership")
             user.membership_id = data["id"]
         
         threads = []
         accessy_members = []
         for uid in user_ids:
-            accessy_member = AccessyMember(uid)
+            accessy_member = AccessyMember(user_id=uid)
             threads.append(threading.Thread(target=fill_user_details, args=(accessy_member, )))
             threads.append(threading.Thread(target=fill_membership_id, args=(accessy_member, )))
             accessy_members.append(accessy_member)
@@ -303,11 +323,11 @@ class AccessySession:
             t.join()
         
         # Filter out API keys
-        accessy_members = [m for m in accessy_members if m.phone_number is not APPLICATION_PHONE_NUMBER]
+        accessy_members = [m for m in accessy_members if m.phone is not APPLICATION_PHONE_NUMBER]
 
         return accessy_members
     
-    def _get_org_user_from_phone(self, phone_number: MSISDN, users_in_org: list[dict] = None) -> Union[None, "AccessyMember"]:
+    def _get_org_user_from_phone(self, phone_number: MSISDN, users_in_org: list[dict] = None) -> Union[None, AccessyMember]:
         """ Get a AccessyMember from a phone number (if in org) """
         if users_in_org is None:
             users_in_org = self._get_users_org()
@@ -321,16 +341,6 @@ class AccessySession:
 
 
 accessy_session = AccessySession()
-
-
-@dataclass
-class AccessyMember:
-    user_id: UUID = field(repr=False)
-    # Get information below later
-    phone_number: str = None
-    membership_id: UUID = field(repr=False, default=None)
-    first_name: str = "<first name>"
-    last_name: str = "<last name>"
 
 
 def main():
