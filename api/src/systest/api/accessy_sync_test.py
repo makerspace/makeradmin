@@ -11,6 +11,9 @@ from test_aid.systest_base import ApiTest
 class Test(ApiTest):
 
     def test_diff(self):
+        self.assertIsNotNone(ACCESSY_SPECIAL_LABACCESS_GROUP)
+        self.assertIsNotNone(ACCESSY_LABACCESS_GROUP)
+
         m1_phone = random_phone_number()
         m1_both = AccessyMember(phone=m1_phone, groups={ACCESSY_SPECIAL_LABACCESS_GROUP, ACCESSY_LABACCESS_GROUP})
         m1_lab = AccessyMember(phone=m1_phone, groups={ACCESSY_LABACCESS_GROUP})
@@ -21,6 +24,7 @@ class Test(ApiTest):
         self.assertEqual(Diff(invites=[m1_both]), diff)
 
         diff = calculate_diff(wanted_members={m1_phone: m1_lab}, actual_members={m1_phone: m1_both})
+        self.assertEqual([GroupOp(m1_both, ACCESSY_SPECIAL_LABACCESS_GROUP)], diff.group_removes)
         self.assertEqual(Diff(group_removes=[GroupOp(m1_both, ACCESSY_SPECIAL_LABACCESS_GROUP)]), diff)
 
         diff = calculate_diff(wanted_members={m1_phone: m1_lab}, actual_members={m1_phone: m1_none})

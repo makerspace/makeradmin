@@ -60,6 +60,11 @@ class Diff:
 
 def calculate_diff(actual_members, wanted_members):
     diff = Diff()
+
+    if ACCESSY_LABACCESS_GROUP is None or ACCESSY_SPECIAL_LABACCESS_GROUP is None:
+        # We cannot perform diffing if
+        logger.warning("ACCESSY_LABACCESS_GROUP and/or ACCESSY_SPECIAL_LABACCESS_GROUP not configured, there will be no accessy diff")
+        return diff
     
     # Missing in Accessy, invite needed:
     for wanted in (wanted for phone, wanted in wanted_members.items() if phone not in actual_members):
@@ -78,7 +83,7 @@ def calculate_diff(actual_members, wanted_members):
     
         for group in wanted.groups - actual.groups:
             diff.group_adds.append(GroupOp(wanted, group))
-            
+    
         for group in actual.groups - wanted.groups:
             diff.group_removes.append(GroupOp(actual, group))
     
