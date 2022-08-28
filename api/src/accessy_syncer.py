@@ -7,7 +7,7 @@ from sqlalchemy.orm import sessionmaker
 
 from multiaccessy.sync import sync
 from service.config import get_mysql_config
-from service.db import create_mysql_engine
+from service.db import create_mysql_engine, db_session
 from service.logging import logger
 from shop.transactions import ship_orders
 
@@ -22,16 +22,24 @@ def scheduled_ship():
     try:
         ship_orders()
         sync()
+        db_session.commit()
+        logger.info("finished shipping orders")
     except Exception as e:
         logger.exception(f"failed to ship orders: {e}")
+    finally:
+        db_session.remove()
 
 
 def scheduled_sync():
     logger.info("syncing accessy")
     try:
         sync()
+        db_session.commit()
+        logger.info("finished syncing accessy")
     except Exception as e:
         logger.exception(f"failed to sync with accessy: {e}")
+    finally:
+        db_session.remove()
 
 
 def main():
@@ -62,7 +70,7 @@ def main():
             case x if x == COMMAND_SCHEDULED:
                 # # TODO Enable when we have accessy in place: schedule.every().tuesday.at("19:30").do(scheduled_ship)
                 schedule.every().day.at("04:00").do(scheduled_sync)
-                
+
                 while True:
                     time.sleep(1)
                     schedule.run_pending()
