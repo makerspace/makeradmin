@@ -48,8 +48,9 @@ def request(method, path, token=None, json=None, max_tries=8, err_msg=None):
             continue
 
         if not response.ok:
-            logger.error(f"got an error in the response for {response.request.path_url}, {response.status_code=}: {err_msg or ''}")
-            raise AccessyError(err_msg)
+            msg = f"got an error in the response for {response.request.path_url}, {response.status_code=}: {err_msg or ''}"
+            logger.error(msg)
+            raise AccessyError(msg)
 
         try:
             return response.json()
