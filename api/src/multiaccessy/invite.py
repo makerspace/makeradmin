@@ -1,3 +1,5 @@
+from logging import getLogger
+
 from sqlalchemy.exc import NoResultFound
 
 from membership.membership import get_membership_summary
@@ -5,6 +7,9 @@ from membership.models import Member
 from multiaccessy.accessy import ACCESSY_LABACCESS_GROUP, ACCESSY_SPECIAL_LABACCESS_GROUP, \
     AccessyError, accessy_session
 from service.db import db_session
+
+
+logger = getLogger("makeradmin")
 
 
 class AccessyInvitePreconditionFailed(AccessyError):
@@ -35,8 +40,10 @@ def ensure_accessy_labaccess(member_id):
     try:
         if accessy_session.is_in_org(member.phone):
             for group in groups:
+                logger.info(f"accessy, addding to group: {member=} {group=}")
                 accessy_session.add_to_group(member.phone, group)
         else:
+            logger.info(f"accessy, sending invite: {member=} {groups=}")
             accessy_session.invite_phone_to_org_and_groups([member.phone], groups)
     except Exception as e:
         raise AccessyError("failed to interact with accessy") from e
