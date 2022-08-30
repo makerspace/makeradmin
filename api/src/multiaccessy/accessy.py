@@ -2,7 +2,7 @@ import threading
 from collections.abc import Iterable
 
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 from logging import getLogger
 from random import random
 from time import sleep
@@ -11,6 +11,7 @@ from typing import Union
 import requests
 
 from service.config import config
+from service.entity import fromisoformat
 
 logger = getLogger("accessy")
 
@@ -162,6 +163,19 @@ class AccessySession:
             json=dict(accessPermissionGroupIds=list(access_group_ids), message=message_to_user, msisdns=list(phone_numbers)),
             err_msg=f"invite {phone_numbers=} to org and groups {access_group_ids}. {message_to_user=}",
         )
+    
+    def get_pending_invitations(self, after_date: date = None) -> Iterable[MSISDN]:
+        """ Get all pending invitations after a specific date (including). """
+        data = self._get(f"/org/admin/organization/{self.organization_id()}/invitation")
+        pending_invitations = set()
+        for inv in data:
+            recipient = inv["recipientMsisdn"]
+            invitation_date = fromisoformat(inv["createdAt"]).date()
+            is_pending = inv["status"] == "PENDING"
+
+            if is_pending and (after_date is None or invitation_date >= after_date):
+                pending_invitations.add(recipient)
+        return pending_invitations
         
     def organization_id(self):
         if self._organization_id:
@@ -345,21 +359,8 @@ accessy_session = AccessySession()
 
 
 def main():
-    nr = "+46704424644"
-    # print(accessy_session.is_in_org(nr))
-    # print(accessy_session.is_in_group(nr, ACCESSY_LABACCESS_GROUP))
-    # print(accessy_session.is_in_group(nr, ACCESSY_SPECIAL_LABACCESS_GROUP))
-
-    # accessy_session.remove_from_org(nr)
-    # accessy_session.remove_from_group(nr, ACCESSY_LABACCESS_GROUP)
-    # accessy_session.invite_phone_to_org_and_groups([nr], message_to_user="only org")
-    # accessy_session.invite_phone_to_org_and_groups([nr], [ACCESSY_LABACCESS_GROUP], "special message")
-    # accessy_session.add_to_group(nr, ACCESSY_LABACCESS_GROUP)
-
-    all_groups = accessy_session.get_all_groups_members()
-    print("Members in organization: ", all_groups.org_members)
-    print("Members in lab group: ", all_groups.lab)
-    print("Members in special group: ", all_groups.special)
+    pending_invitations = accessy_session.get_pending_invitations(date(2022, 8, 30))
+    print("Pending invitations", len(pending_invitations), pending_invitations)
 
 
 if __name__ == "__main__":
