@@ -95,7 +95,7 @@ def sync(today=None):
         today = date.today()
     
     actual_members = accessy_session.get_all_members()
-    pending_invites = accessy_session.get_pending_invitations(after=today - timedelta(days=7))
+    pending_invites = accessy_session.get_pending_invitations(after_date=today - timedelta(days=7))
     wanted_members = get_wanted_access(today)
     
     diff = calculate_diff(actual_members, wanted_members)
