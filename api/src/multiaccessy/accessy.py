@@ -155,11 +155,11 @@ class AccessySession:
             json=dict(membership=accessy_member.membership_id),
         )
 
-    def invite_phone_to_org_and_groups(self, phone_numbers: list[MSISDN], access_group_ids: list[UUID] = [], message_to_user: str = ""):
+    def invite_phone_to_org_and_groups(self, phone_numbers: Iterable[MSISDN], access_group_ids: Iterable[UUID] = [], message_to_user: str = ""):
         """ Invite a list of phone numbers to a list of groups """
         self.__post(
             f"/org/admin/organization/{self.organization_id()}/invitation",
-            json=dict(accessPermissionGroupIds=access_group_ids, message=message_to_user, msisdns=phone_numbers),
+            json=dict(accessPermissionGroupIds=list(access_group_ids), message=message_to_user, msisdns=list(phone_numbers)),
             err_msg=f"invite {phone_numbers=} to org and groups {access_group_ids}. {message_to_user=}",
         )
         
