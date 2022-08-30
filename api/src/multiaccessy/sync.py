@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 from dataclasses import dataclass, field
-from datetime import date
+from datetime import date, timedelta
 from logging import getLogger
 
 from sqlalchemy.orm import contains_eager
@@ -95,11 +95,15 @@ def sync(today=None):
         today = date.today()
     
     actual_members = accessy_session.get_all_members()
+    pending_invites = accessy_session.get_pending_invitations(after=today - timedelta(days=7))
     wanted_members = get_wanted_access(today)
     
     diff = calculate_diff(actual_members, wanted_members)
     
     for member in diff.invites:
+        if member.phone in pending_invites:
+            logger.info(f"accessy sync skipping, invite already pending: {member}")
+            continue
         logger.info(f"accessy sync inviting: {member}")
         accessy_session.invite_phone_to_org_and_groups([member.phone], member.groups)
     
