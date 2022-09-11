@@ -98,7 +98,14 @@ def sync(today=None):
     pending_invites = accessy_session.get_pending_invitations(after_date=today - timedelta(days=7))
     wanted_members = get_wanted_access(today)
     
-    diff = calculate_diff(actual_members, wanted_members)
+    actual_members_by_phone = {}
+    for m in actual_members:
+        if m.phone:
+            actual_members_by_phone[m.phone] = m.phone
+        else:
+            logger.warning(f"accessy sync got member %s from accessy without phone number, skipping in calculation, will probably cause extra invite or delayed org remove", m)
+            
+    diff = calculate_diff(actual_members_by_phone, wanted_members)
     
     for member in diff.invites:
         if member.phone in pending_invites:
