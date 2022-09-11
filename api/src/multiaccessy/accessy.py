@@ -6,7 +6,7 @@ from datetime import date, datetime, timedelta
 from logging import getLogger
 from random import random
 from time import sleep
-from typing import Union, List
+from typing import Union
 
 import requests
 
@@ -94,7 +94,7 @@ class AccessySession:
     # Public methods
     #################
 
-    def get_all_members(self) -> List[AccessyMember]:
+    def get_all_members(self) -> list[AccessyMember]:
         """ Get a list of all Accessy members in the ORG with GROUPS (lab and special) """
 
         org_member_ids = set(item["id"] for item in self._get_users_org())
