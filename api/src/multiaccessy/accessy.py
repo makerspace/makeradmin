@@ -6,7 +6,7 @@ from datetime import date, datetime, timedelta
 from logging import getLogger
 from random import random
 from time import sleep
-from typing import Union
+from typing import Union, List
 
 import requests
 
@@ -94,17 +94,17 @@ class AccessySession:
     # Public methods
     #################
 
-    def get_all_members(self) -> dict[PHONE, AccessyMember]:
+    def get_all_members(self) -> List[AccessyMember]:
         """ Get a list of all Accessy members in the ORG with GROUPS (lab and special) """
 
         org_member_ids = set(item["id"] for item in self._get_users_org())
 
-        members = {m.phone: m for m in self._user_ids_to_accessy_members(org_member_ids)}
+        members = self._user_ids_to_accessy_members(org_member_ids)
         
         lab_ids = set(item["userId"] for item in self._get_users_lab())
         special_ids = set(item["userId"] for item in self._get_users_special())
         
-        for m in members.values():
+        for m in members:
             if m.user_id in lab_ids:
                 m.groups.add(ACCESSY_LABACCESS_GROUP)
             if m.user_id in special_ids:
@@ -316,7 +316,7 @@ class AccessySession:
             try:
                 user.phone = data["msisdn"]
             except KeyError:
-                logger.error(f"User {user.user_id} does not have a phone number. {data=}")
+                logger.warning(f"User {user.user_id} does not have a phone number in accessy. {data=}")
             user.name = f"{data.get('firstName', '')} {data.get('lastName', '')}"
 
         def fill_membership_id(user: AccessyMember):
