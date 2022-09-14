@@ -27,6 +27,9 @@ def ensure_accessy_labaccess(member_id):
     if not member.phone:
         raise AccessyInvitePreconditionFailed("inget telefonnummer")
 
+    if not member.labaccess_agreement_at:
+        raise AccessyInvitePreconditionFailed("inget labbavtal")
+
     summary = get_membership_summary(member_id)
     if not summary.labaccess_active and not summary.special_labaccess_active:
         raise AccessyInvitePreconditionFailed("ingen aktiv labaccess")
