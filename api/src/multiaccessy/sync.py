@@ -80,7 +80,7 @@ def calculate_diff(actual_members, wanted_members):
         
         if not actual:
             continue
-    
+
         for group in wanted.groups - actual.groups:
             diff.group_adds.append(GroupOp(wanted, group))
     
@@ -101,12 +101,12 @@ def sync(today=None):
     actual_members_by_phone = {}
     for m in actual_members:
         if m.phone:
-            actual_members_by_phone[m.phone] = m.phone
+            actual_members_by_phone[m.phone] = m
         else:
             logger.warning(f"accessy sync got member %s from accessy without phone number, skipping in calculation, will probably cause extra invite or delayed org remove", m)
-            
+
     diff = calculate_diff(actual_members_by_phone, wanted_members)
-    
+
     for member in diff.invites:
         if member.phone in pending_invites:
             logger.info(f"accessy sync skipping, invite already pending: {member}")
