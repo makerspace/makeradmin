@@ -73,21 +73,24 @@ class KeyHandoutForm extends React.Component {
     }
 
     save() {
+        let promise = Promise.resolve();
         if (this.key && this.key.isDirty() && this.key.canSave()) {
-            return this.key
+            promise.then(() => {
+                this.key
                 .save()
                 .then(() => {
                             this.key.reset({member_id: this.props.member.id});
                             this.keyCollection.fetch();
                         });
+            });
         }
 
         const {member} = this.props;
         if (member.isDirty() && member.canSave()) {
-            return member.save();
+            promise.then(() => member.save());
         }
         
-        return Promise.resolve();
+        return promise;
     }
     
     fetchPendingLabaccess() {
