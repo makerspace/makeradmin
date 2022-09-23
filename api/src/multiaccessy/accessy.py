@@ -301,6 +301,10 @@ class AccessySession:
         """ Get all user ID:s with special access """
         return self._get_users_in_access_group(ACCESSY_SPECIAL_LABACCESS_GROUP)
     
+    def _get_groups(self, msisdn: MSISDN) -> list[UUID]:
+        # FIXME
+        pass
+    
     def _user_ids_to_accessy_members(self, user_ids: Iterable[UUID]) -> list[AccessyMember]:
         """ Convert a list of User ID:s to AccessyMembers """
 
