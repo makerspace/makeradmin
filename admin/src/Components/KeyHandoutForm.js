@@ -124,6 +124,7 @@ class KeyHandoutForm extends React.Component {
         const {member} = this.props;
         this.unsubscribe.push(member.subscribe(() => this.setState({can_save_member: member.canSave()})));
         this.unsubscribe.push(this.keyCollection.subscribe((keys) => this.setState({keys: keys.items})));
+        this.unsubscribe.push(member.subscribe(() => this.fetchAccessyStatus()));
         const key = this.key;
         this.unsubscribe.push(key.subscribe(() => this.setState({can_save_key: key.canSave()})));
         this.unsubscribe.push(this.spanCollection.subscribe(({items}) => {
@@ -162,7 +163,8 @@ class KeyHandoutForm extends React.Component {
             this.save()
                 .then(() => post({url: `/webshop/member/${member.id}/ship_labaccess_orders`, expectedDataStatus: "ok"}))
                 .then(() => this.fetchPendingLabaccess())
-                .then(() => this.spanCollection.fetch());
+                .then(() => this.spanCollection.fetch())
+                .then(() => this.fetchAccessyStatus());
             return false;
         };
         
@@ -197,11 +199,11 @@ class KeyHandoutForm extends React.Component {
         } else {
             let invite_part;
             if (accessy_pending_invites == 0) {
-                invite_part = <><span className="uk-badge uk-badge-warning">Invite saknas</span> Det finns {accessy_pending_invites} aktiva inbjudningar utsända för tillfället.</>;
+                invite_part = <span className="uk-badge uk-badge-warning">Invite saknas</span>;
             } else {
-                invite_part = <><span className="uk-badge uk-badge-success">Invite skickad</span> Det finns {accessy_pending_invites} aktiva inbjudningar utsända för tillfället.</>;
+                invite_part = <span className="uk-badge uk-badge-success">Invite skickad</span>;
             }
-            accessy_paragraph = <><span className="uk-badge uk-badge-danger">Ej access</span> Personen är inte med i organisationen ännu. <br/> {invite_part} </>;
+            accessy_paragraph = <><span className="uk-badge uk-badge-danger">Ej access</span> Personen är inte med i organisationen ännu. <br/> {invite_part} Det finns {accessy_pending_invites} aktiva inbjudningar utsända för tillfället. </>;
         }
 
         access_paragraph = <><h3>Accessy</h3> <p> {accessy_paragraph} </p> <h3>RFID-tagg</h3> {key_paragraph} </>
