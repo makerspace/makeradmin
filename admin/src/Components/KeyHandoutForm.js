@@ -64,9 +64,9 @@ class KeyHandoutForm extends React.Component {
             labaccess_enddate: "",
             membership_enddate: "",
             special_enddate: "",
-            accessy_in_org: undefined,
-            accessy_in_groups: undefined,
-            accessy_pending_invites: undefined,
+            accessy_in_org: null,
+            accessy_in_groups: null,
+            accessy_pending_invites: null,
         };
         this.unsubscribe = [];
         this.keyCollection = new Collection({type: Key, url: `/membership/member/${member.id}/keys`, idListName: 'keys', pageSize: 0});
@@ -198,7 +198,7 @@ class KeyHandoutForm extends React.Component {
             accessy_paragraph = <><span className="uk-badge uk-badge-success">OK</span> Personen är med i organisationen. <br/> Med i följande ({accessy_in_groups.length}) grupper: {accessy_in_groups.sort().join(", ")} </>;
         } else {
             let invite_part;
-            if (accessy_pending_invites == 0) {
+            if (accessy_pending_invites === 0) {
                 invite_part = <span className="uk-badge uk-badge-warning">Invite saknas</span>;
             } else {
                 invite_part = <span className="uk-badge uk-badge-success">Invite skickad</span>;
@@ -206,7 +206,7 @@ class KeyHandoutForm extends React.Component {
             accessy_paragraph = <><span className="uk-badge uk-badge-danger">Ej access</span> Personen är inte med i organisationen ännu. <br/> {invite_part} Det finns {accessy_pending_invites} aktiva inbjudningar utsända för tillfället. </>;
         }
 
-        access_paragraph = <><h3>Accessy</h3> <p> {accessy_paragraph} </p> <h3>RFID-tagg</h3> {key_paragraph} </>
+        access_paragraph = <><h3>Accessy</h3> <p> {accessy_paragraph} </p> <h3>RFID-tagg</h3> {key_paragraph} </>;
 
         // Section 2 and onward shall only be visible after lab contract has been signed
         const section2andon = <>
