@@ -195,7 +195,7 @@ class KeyHandoutForm extends React.Component {
         }
 
         if (accessy_in_org) {
-            accessy_paragraph = <><span className="uk-badge uk-badge-success">OK</span> Personen är med i organisationen. <br/> Med i följande ({accessy_in_groups.length}) grupper: {accessy_in_groups.sort().join(", ")} </>;
+            accessy_paragraph = <><span className="uk-badge uk-badge-success">OK</span> Personen är med i organisationen.</>; // <br/> Med i följande ({accessy_in_groups.length}) grupper: {accessy_in_groups.sort().join(", ")} </>;
         } else {
             let invite_part;
             if (accessy_pending_invites === 0) {
