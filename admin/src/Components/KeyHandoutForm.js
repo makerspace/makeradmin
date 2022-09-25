@@ -64,9 +64,9 @@ class KeyHandoutForm extends React.Component {
             labaccess_enddate: "",
             membership_enddate: "",
             special_enddate: "",
-            accessy_in_org: null,
-            accessy_in_groups: null,
-            accessy_pending_invites: null,
+            accessy_in_org: false,
+            accessy_in_groups: [],
+            accessy_pending_invites: 0,
         };
         this.unsubscribe = [];
         this.keyCollection = new Collection({type: Key, url: `/membership/member/${member.id}/keys`, idListName: 'keys', pageSize: 0});
@@ -178,24 +178,25 @@ class KeyHandoutForm extends React.Component {
         const has_signed = member.labaccess_agreement_at !== null;
 
         // Show different content based on if the user has a key or not
-        let access_paragraph, accessy_paragraph, key_paragraph;
+        let rfid_key_paragraph;
         if (keys.length === 0) {
-            key_paragraph = <div>
+            rfid_key_paragraph = <div>
                     Skapa en ny nyckel genom att läsa in den i fältet nedan och sedan spara.
                     <TextInput model={this.key} icon="tags" tabIndex="1" name="tagid" title="RFID" placeholder="Använd en RFID-läsare för att läsa av det unika numret på nyckeln" />
                 </div>;
         } else if (keys.length === 1) {
-            key_paragraph = <p>
+            rfid_key_paragraph = <p>
                     Användaren har en nyckel registrerad (med id=<span style={{fontFamily: "monospace"}}>{keys[0].tagid}</span>). Kontrollera om hen vet om det och har kvar nyckeln. Gå annars till <a href={"/membership/members/" + member.id + "/keys"}>Nycklar</a> och ta bort den gamla nyckeln, och lägg till en ny.
                 </p>;
         } else {
-            key_paragraph = <p>
+            rfid_key_paragraph = <p>
                     Användaren har flera nycklar registrerade! Gå till <a href={"/membership/members/" + member.id + "/keys"}>Nycklar</a> och ta bort alla nycklar utom en.
                 </p>;
         }
 
+        let accessy_paragraph;
         if (accessy_in_org) {
-            accessy_paragraph = <><span className="uk-badge uk-badge-success">OK</span> Personen är med i organisationen. <br/> Med i följande ({accessy_in_groups.length}) grupper: {accessy_in_groups.sort().join(", ")} </>;
+            accessy_paragraph = <p><span className="uk-badge uk-badge-success">OK</span> Personen är med i organisationen. <br/> Med i följande ({accessy_in_groups.length}) grupper: {accessy_in_groups.sort().join(", ")} </p>;
         } else {
             let invite_part;
             if (accessy_pending_invites === 0) {
@@ -203,10 +204,8 @@ class KeyHandoutForm extends React.Component {
             } else {
                 invite_part = <span className="uk-badge uk-badge-success">Invite skickad</span>;
             }
-            accessy_paragraph = <><span className="uk-badge uk-badge-danger">Ej access</span> Personen är inte med i organisationen ännu. <br/> {invite_part} Det finns {accessy_pending_invites} aktiva inbjudningar utsända för tillfället. </>;
+            accessy_paragraph = <p><span className="uk-badge uk-badge-danger">Ej access</span> Personen är inte med i organisationen ännu. <br/> {invite_part} Det finns {accessy_pending_invites} aktiva inbjudningar utsända för tillfället. </p>;
         }
-
-        access_paragraph = <><h3>Accessy</h3> <p> {accessy_paragraph} </p> <h3>RFID-tagg</h3> {key_paragraph} </>;
 
         // Section 2 and onward shall only be visible after lab contract has been signed
         const section2andon = <>
@@ -242,7 +241,10 @@ class KeyHandoutForm extends React.Component {
 
             <div className="uk-section">
                 <h2>5. Kontrollera nyckel </h2>
-                {access_paragraph}
+                <h3>Accessy</h3>
+                <p> {accessy_paragraph} </p>
+                <h3>RFID-tagg</h3>
+                {rfid_key_paragraph}
             </div>
 
             <div>
