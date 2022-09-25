@@ -65,7 +65,7 @@ class KeyHandoutForm extends React.Component {
             membership_enddate: "",
             special_enddate: "",
             accessy_in_org: false,
-            accessy_in_groups: [],
+            accessy_groups: [],
             accessy_pending_invites: 0,
         };
         this.unsubscribe = [];
@@ -103,7 +103,7 @@ class KeyHandoutForm extends React.Component {
             this.setState({
                 accessy_pending_invites: r.data.pending_invite_count,
                 accessy_in_org: r.data.in_org,
-                accessy_in_groups: r.data.access_permission_group_names,
+                accessy_groups: r.data.access_permission_group_names,
             });
         });
     }
@@ -174,7 +174,7 @@ class KeyHandoutForm extends React.Component {
     render() {
         const {member} = this.props;
         const {can_save_member, can_save_key, keys, labaccess_enddate, membership_enddate, special_enddate, pending_labaccess_days} = this.state;
-        const {accessy_in_groups, accessy_in_org, accessy_pending_invites} = this.state;
+        const {accessy_groups, accessy_in_org, accessy_pending_invites} = this.state;
         const has_signed = member.labaccess_agreement_at !== null;
 
         // Show different content based on if the user has a key or not
@@ -196,7 +196,7 @@ class KeyHandoutForm extends React.Component {
 
         let accessy_paragraph;
         if (accessy_in_org) {
-            accessy_paragraph = <p><span className="uk-badge uk-badge-success">OK</span> Personen är med i organisationen. <br/> Med i följande ({accessy_in_groups.length}) grupper: {accessy_in_groups.sort().join(", ")} </p>;
+            accessy_paragraph = <p><span className="uk-badge uk-badge-success">OK</span> Personen är med i organisationen. <br/> Med i följande ({accessy_groups.length}) grupper: {accessy_groups.sort().join(", ")} </p>;
         } else {
             let invite_part;
             if (accessy_pending_invites === 0) {
