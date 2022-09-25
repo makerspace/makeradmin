@@ -1,6 +1,6 @@
 from membership import service
 from membership.member_entity import MemberEntity
-from membership.membership import get_membership_summary, add_membership_days, get_members_and_membership
+from membership.membership import get_membership_summary, add_membership_days, get_members_and_membership, get_access_summary
 from membership.models import Member, Group, member_group, Span, Permission, group_permission, \
     Key
 from membership.member_auth import get_member_permissions
@@ -99,6 +99,11 @@ def member_get_pending(member_id):
 @service.route("/member/<int:entity_id>/membership", method=GET, permission=SPAN_VIEW)
 def member_get_membership(entity_id=None):
     return get_membership_summary(entity_id).as_json()
+
+
+@service.route("/member/<int:entity_id>/access", method=GET, permission=KEYS_VIEW)
+def member_get_access(entity_id=None):
+    return get_access_summary(entity_id)
 
 
 @service.route("/member/<int:entity_id>/permissions", method=GET, permission=PERMISSION_VIEW)

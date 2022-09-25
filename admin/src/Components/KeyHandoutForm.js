@@ -64,12 +64,16 @@ class KeyHandoutForm extends React.Component {
             labaccess_enddate: "",
             membership_enddate: "",
             special_enddate: "",
+            accessy_in_org: false,
+            accessy_groups: [],
+            accessy_pending_invites: 0,
         };
         this.unsubscribe = [];
         this.keyCollection = new Collection({type: Key, url: `/membership/member/${member.id}/keys`, idListName: 'keys', pageSize: 0});
         this.spanCollection = new Collection({type: Span, url: `/membership/member/${member.id}/spans`, pageSize: 0});
         this.save = this.save.bind(this);
         this.fetchPendingLabaccess();
+        this.fetchAccessyStatus();
     }
 
     save() {
@@ -92,6 +96,17 @@ class KeyHandoutForm extends React.Component {
         
         return promise;
     }
+
+    fetchAccessyStatus() {
+        const {member} = this.props;
+        return get({url: `/membership/member/${member.id}/access`}).then((r) => {
+            this.setState({
+                accessy_pending_invites: r.data.pending_invite_count,
+                accessy_in_org: r.data.in_org,
+                accessy_groups: r.data.access_permission_group_names,
+            });
+        });
+    }
     
     fetchPendingLabaccess() {
         const {member} = this.props;
@@ -109,6 +124,7 @@ class KeyHandoutForm extends React.Component {
         const {member} = this.props;
         this.unsubscribe.push(member.subscribe(() => this.setState({can_save_member: member.canSave()})));
         this.unsubscribe.push(this.keyCollection.subscribe((keys) => this.setState({keys: keys.items})));
+        this.unsubscribe.push(member.subscribe(() => this.fetchAccessyStatus()));
         const key = this.key;
         this.unsubscribe.push(key.subscribe(() => this.setState({can_save_key: key.canSave()})));
         this.unsubscribe.push(this.spanCollection.subscribe(({items}) => {
@@ -147,7 +163,8 @@ class KeyHandoutForm extends React.Component {
             this.save()
                 .then(() => post({url: `/webshop/member/${member.id}/ship_labaccess_orders`, expectedDataStatus: "ok"}))
                 .then(() => this.fetchPendingLabaccess())
-                .then(() => this.spanCollection.fetch());
+                .then(() => this.spanCollection.fetch())
+                .then(() => this.fetchAccessyStatus());
             return false;
         };
         
@@ -157,23 +174,37 @@ class KeyHandoutForm extends React.Component {
     render() {
         const {member} = this.props;
         const {can_save_member, can_save_key, keys, labaccess_enddate, membership_enddate, special_enddate, pending_labaccess_days} = this.state;
+        const {accessy_groups, accessy_in_org, accessy_pending_invites} = this.state;
         const has_signed = member.labaccess_agreement_at !== null;
 
         // Show different content based on if the user has a key or not
-        let key_paragraph;
+        let rfid_key_paragraph;
         if (keys.length === 0) {
-            key_paragraph = <div>
+            rfid_key_paragraph = <div>
                     Skapa en ny nyckel genom att läsa in den i fältet nedan och sedan spara.
                     <TextInput model={this.key} icon="tags" tabIndex="1" name="tagid" title="RFID" placeholder="Använd en RFID-läsare för att läsa av det unika numret på nyckeln" />
                 </div>;
         } else if (keys.length === 1) {
-            key_paragraph = <p>
+            rfid_key_paragraph = <p>
                     Användaren har en nyckel registrerad (med id=<span style={{fontFamily: "monospace"}}>{keys[0].tagid}</span>). Kontrollera om hen vet om det och har kvar nyckeln. Gå annars till <a href={"/membership/members/" + member.id + "/keys"}>Nycklar</a> och ta bort den gamla nyckeln, och lägg till en ny.
                 </p>;
         } else {
-            key_paragraph = <p>
+            rfid_key_paragraph = <p>
                     Användaren har flera nycklar registrerade! Gå till <a href={"/membership/members/" + member.id + "/keys"}>Nycklar</a> och ta bort alla nycklar utom en.
                 </p>;
+        }
+
+        let accessy_paragraph;
+        if (accessy_in_org) {
+            accessy_paragraph = <p><span className="uk-badge uk-badge-success">OK</span> Personen är med i organisationen. <br/> Med i följande ({accessy_groups.length}) grupper: {accessy_groups.sort().join(", ")} </p>;
+        } else {
+            let invite_part;
+            if (accessy_pending_invites === 0) {
+                invite_part = <span className="uk-badge uk-badge-warning">Invite saknas</span>;
+            } else {
+                invite_part = <span className="uk-badge uk-badge-success">Invite skickad</span>;
+            }
+            accessy_paragraph = <p><span className="uk-badge uk-badge-danger">Ej access</span> Personen är inte med i organisationen ännu. <br/> {invite_part} Det finns {accessy_pending_invites} aktiva inbjudningar utsända för tillfället. </p>;
         }
 
         // Section 2 and onward shall only be visible after lab contract has been signed
@@ -210,7 +241,10 @@ class KeyHandoutForm extends React.Component {
 
             <div className="uk-section">
                 <h2>5. Kontrollera nyckel </h2>
-                {key_paragraph}
+                <h3>Accessy</h3>
+                <p> {accessy_paragraph} </p>
+                <h3>RFID-tagg</h3>
+                {rfid_key_paragraph}
             </div>
 
             <div>
