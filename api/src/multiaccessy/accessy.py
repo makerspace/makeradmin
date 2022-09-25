@@ -125,9 +125,9 @@ class AccessySession:
         if accessy_member is None:
             return False
 
-        items = self._get_json_paginated(f"/asset/admin/access-permission-group/{access_group_id}/membership")
-        for item in items:
-            if item["userId"] == accessy_member.user_id:
+        membership_ids = self._get_membership_ids_in_group(access_group_id)
+        for id_ in membership_ids:
+            if id_ == accessy_member.membership_id:
                 return True
         return False
 
@@ -182,6 +182,22 @@ class AccessySession:
             return self._organization_id
         self.__ensure_token()
         return self._organization_id
+    
+    def get_user_groups(self, phone_number: MSISDN) -> list[str]:
+        """ Get all of the groups of a member """
+        accessy_member = self._get_org_user_from_phone(phone_number)
+        if accessy_member is None:
+            return []
+
+        org_groups = (d['id'] for d in self._get_organization_groups())
+
+        group_descriptions = []
+        for group_id in org_groups:
+            membership_ids = self._get_membership_ids_in_group(group_id)
+            if accessy_member.membership_id in membership_ids:
+                group_descriptions.append(self._get_group_description(group_id))
+
+        return group_descriptions
 
     ################################################
     # Internal methods
@@ -301,10 +317,19 @@ class AccessySession:
         """ Get all user ID:s with special access """
         return self._get_users_in_access_group(ACCESSY_SPECIAL_LABACCESS_GROUP)
     
-    def _get_groups(self, msisdn: MSISDN) -> list[UUID]:
-        # FIXME
-        pass
+    def _get_organization_groups(self) -> list[dict]:
+        """ Get information about all groups """
+        return self._get_json_paginated(f"/asset/admin/organization/{self.organization_id()}/access-permission-group")
+        # {"items": [{"id":<uuid>, "name":<string>, "description":<string>, constraints: <object>, childConstraints: <bool>}],"totalItems":2,"pageSize":25,"pageNumber":0,"totalPages":1}
     
+    def _get_membership_ids_in_group(self, group_id: UUID) -> list[UUID]:
+        """ Get each membership for a specific group """
+        return [d["id"] for d in self._get_json_paginated(f"/asset/admin/access-permission-group/{group_id}/membership")]
+    
+    def _get_group_description(self, group_id: UUID) -> str:
+        """ Get a description for a group ID """
+        return self._get(f"/asset/admin/access-permission-group/{group_id}")["name"]
+
     def _user_ids_to_accessy_members(self, user_ids: Iterable[UUID]) -> list[AccessyMember]:
         """ Convert a list of User ID:s to AccessyMembers """
 

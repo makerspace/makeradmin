@@ -190,11 +190,11 @@ def get_access_summary(member_id: int):
     )
 
     msisdn = member.phone
-    pending_invite_count = len([no for no in accessy_session.get_pending_invitations() if no == msisdn])
-    groups = accessy_session._get_groups(msisdn)
+    pending_invite_count = sum(1 for no in accessy_session.get_pending_invitations() if no == msisdn)
+    groups = accessy_session.get_user_groups(msisdn)
 
     return dict(
         in_org=accessy_session.is_in_org(msisdn),
         pending_invite_count=pending_invite_count,
-        access_permission_group_names=[str(Span.LABACCESS), str(Span.SPECIAL_LABACESS)]
+        access_permission_group_names=groups
     )
