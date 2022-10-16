@@ -8,7 +8,8 @@ from sqlalchemy.sql import func
 
 from membership.membership import add_membership_days
 from membership.models import Key, Span
-from multiaccessy.invite import ensure_accessy_labaccess, AccessyError
+from multiaccessy.invite import ensure_accessy_labaccess, AccessyError, check_labaccess_requirements, \
+    LabaccessRequirements
 from service.api_definition import NEGATIVE_ITEM_COUNT, INVALID_ITEM_COUNT, EMPTY_CART, NON_MATCHING_SUMS
 from service.db import db_session, nested_atomic
 from service.error import InternalServerError, BadRequest, NotFound
@@ -124,11 +125,16 @@ def complete_pending_action(action):
     db_session.flush()
 
 
-def ship_add_labaccess_action(action, transaction):
+def ship_add_labaccess_action(action, transaction, skip_ensure_accessy=False):
     days_to_add = action.value
 
     if not db_session.query(Key).filter(Key.member_id == transaction.member_id, Key.deleted_at.is_(None)).count():
         logger.info(f"skipping ship_add_labaccess_action because member {transaction.member_id} has no key")
+        return
+    
+    state = check_labaccess_requirements(transaction.member_id)
+    if state != LabaccessRequirements.OK:
+        logger.info(f"skipping ship_add_labaccess_action because member {transaction.member_id} failed check_labaccess_requirements with {state}")
         return
 
     labaccess_end = add_membership_days(
@@ -142,7 +148,8 @@ def ship_add_labaccess_action(action, transaction):
 
     complete_pending_action(action)
     send_key_updated_email(transaction.member_id, days_to_add, labaccess_end)
-    ensure_accessy_labaccess(member_id=transaction.member_id)
+    if not skip_ensure_accessy:
+        ensure_accessy_labaccess(member_id=transaction.member_id)
 
 
 def ship_add_membership_action(action, transaction):
@@ -213,10 +220,10 @@ def ship_orders(ship_add_labaccess=True, transaction=None):
             ship_add_membership_action(action, transaction)
 
 
-def ship_labaccess_orders(member_id=None):
+def ship_labaccess_orders(member_id=None, skip_ensure_accessy=False):
     for action, content, transaction in pending_actions_query(member_id=member_id):
         if action.action_type == ProductAction.ADD_LABACCESS_DAYS:
-            ship_add_labaccess_action(action, transaction)
+            ship_add_labaccess_action(action, transaction, skip_ensure_accessy=skip_ensure_accessy)
 
 
 @nested_atomic

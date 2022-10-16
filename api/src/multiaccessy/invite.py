@@ -1,3 +1,4 @@
+from enum import Enum
 from logging import getLogger
 
 from sqlalchemy.exc import NoResultFound
@@ -16,19 +17,39 @@ class AccessyInvitePreconditionFailed(AccessyError):
     pass
 
 
+class LabaccessRequirements(Enum):
+    OK = "OK"
+    MEMBER_MISSING = "MEMBER_MISSING"
+    NO_PHONE_NUMBER = "NO_PHONE_NUMBER"
+    NO_LABACESS_AGREEMENT = "NO_LABACESS_AGREEMENT"
+
+
+def check_labaccess_requirements(member_id) -> LabaccessRequirements:
+    try:
+        member = db_session.query(Member).get(member_id)
+    except NoResultFound:
+        return LabaccessRequirements.MEMBER_MISSING
+
+    if not member.phone:
+        return LabaccessRequirements.NO_PHONE_NUMBER
+
+    if not member.labaccess_agreement_at:
+        return LabaccessRequirements.NO_LABACESS_AGREEMENT
+
+    return LabaccessRequirements.OK
+
+
 def ensure_accessy_labaccess(member_id):
     """ If all preconditions are met, send an accessy invite (including auto add to labaccess gropup). Returns human
     readable message of what happened. """
-    try:
-        member = db_session.query(Member).get(member_id)
-    except NoResultFound as e:
-        raise AccessyInvitePreconditionFailed("hittade inte medlem") from e
-
-    if not member.phone:
-        raise AccessyInvitePreconditionFailed("inget telefonnummer")
-
-    if not member.labaccess_agreement_at:
-        raise AccessyInvitePreconditionFailed("inget labbavtal")
+    state = check_labaccess_requirements(member_id)
+    match state:
+        case LabaccessRequirements.MEMBER_MISSING:
+            raise AccessyInvitePreconditionFailed("hittade inte medlem")
+        case LabaccessRequirements.NO_PHONE_NUMBER:
+            raise AccessyInvitePreconditionFailed("inget telefonnummer")
+        case LabaccessRequirements.NO_LABACESS_AGREEMENT:
+            raise AccessyInvitePreconditionFailed("inget labbavtal")
 
     summary = get_membership_summary(member_id)
     if not summary.labaccess_active and not summary.special_labaccess_active:
@@ -39,6 +60,8 @@ def ensure_accessy_labaccess(member_id):
         groups.append(ACCESSY_LABACCESS_GROUP)
     if summary.special_labaccess_active:
         groups.append(ACCESSY_SPECIAL_LABACCESS_GROUP)
+
+    member = db_session.query(Member).get(member_id)
 
     try:
         if accessy_session.is_in_org(member.phone):

@@ -2,12 +2,12 @@ import React from 'react';
 import TextInput from "./TextInput";
 import {withRouter} from "react-router";
 import Key from "../Models/Key";
-import Span from "../Models/Span";
-import {filterCategory} from '../Models/Span';
+import Span, {filterCategory} from "../Models/Span";
 import Collection from "../Models/Collection";
 import {ADD_LABACCESS_DAYS} from "../Models/ProductAction";
-import {utcToday, parseUtcDate, dateTimeToStr} from "../utils";
+import {dateTimeToStr, parseUtcDate, utcToday} from "../utils";
 import {get, post} from "../gateway";
+import {notifySuccess} from "../message";
 
 
 function last_span_enddate(spans, category) {
@@ -151,7 +151,7 @@ class KeyHandoutForm extends React.Component {
             tooltip = "Inte signerat, accessy invite kommer inte att skickas (bara sparning görs)!";
             color = "uk-button-danger";
         } else if (!member.phone) {
-            tooltip = "Inget telefonnummer, accessy invite kommer inte att skickas (bara sparning och ev labaccessorder konverteras till labaccess)!";
+            tooltip = "Inget telefonnummer, accessy invite kommer inte att skickas (bara sparning görs)!";
             color = "uk-button-danger";
         } else {
             tooltip = "All info finns, accessy invite kommer att skickas!";
@@ -164,7 +164,8 @@ class KeyHandoutForm extends React.Component {
                 .then(() => post({url: `/webshop/member/${member.id}/ship_labaccess_orders`, expectedDataStatus: "ok"}))
                 .then(() => this.fetchPendingLabaccess())
                 .then(() => this.spanCollection.fetch())
-                .then(() => this.fetchAccessyStatus());
+                .then(() => this.fetchAccessyStatus())
+                .then(() => notifySuccess("Accessy invite skickad"));
             return false;
         };
         
@@ -247,7 +248,7 @@ class KeyHandoutForm extends React.Component {
                 {rfid_key_paragraph}
             </div>
 
-            <div>
+            <div style={{"paddingBottom": "4em"}}>
                 <button className="uk-button uk-button-success uk-float-right" tabIndex="2" title="Spara ändringar" disabled={!can_save_member && !can_save_key}><i className="uk-icon-save"/> Spara</button>
                 {this.renderAccessyInviteSaveButton({has_signed, labaccess_enddate, special_enddate, pending_labaccess_days, member})}
             </div>

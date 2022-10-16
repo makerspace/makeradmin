@@ -144,9 +144,10 @@ def accessy_invite():
 @service.route("/member/<int:member_id>/ship_labaccess_orders", method=POST, permission=MEMBER_EDIT)
 def ship_labaccess_orders_endpoint(member_id=None):
     try:
-        ship_labaccess_orders(member_id)
+        ship_labaccess_orders(member_id, skip_ensure_accessy=True)
+        ensure_accessy_labaccess(member_id)  # Always do this, not only when the order is shipped.
     except AccessyInvitePreconditionFailed as e:
-        pass
+        raise PreconditionFailed(message=str(e))
 
 
 @service.route("/product_data", method=GET, permission=PUBLIC)
