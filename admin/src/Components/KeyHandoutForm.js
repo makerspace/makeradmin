@@ -165,7 +165,7 @@ class KeyHandoutForm extends React.Component {
                 .then(() => this.fetchPendingLabaccess())
                 .then(() => this.spanCollection.fetch())
                 .then(() => this.fetchAccessyStatus())
-                .then(() => notifySuccess("Accessy invite skickad"));
+                .then(() => notifySuccess("Accessy invite skickad (eller redan medlem i Accessy org, se info på sidan)"));
             return false;
         };
         

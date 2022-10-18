@@ -66,7 +66,7 @@ def ensure_accessy_labaccess(member_id):
     try:
         if accessy_session.is_in_org(member.phone):
             for group in groups:
-                logger.info(f"accessy, addding to group: {member=} {group=}")
+                logger.info(f"accessy, already in org, addding to group, will be noop if already in group: {member=} {group=}")
                 accessy_session.add_to_group(member.phone, group)
         else:
             logger.info(f"accessy, sending invite: {member=} {groups=}")
