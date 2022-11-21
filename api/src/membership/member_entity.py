@@ -4,6 +4,10 @@ from membership.member_auth import check_and_hash_password
 from service.db import db_session
 from service.entity import Entity
 from service.error import InternalServerError
+from logging import getLogger
+
+
+logger = getLogger('makeradmin')
 
 
 def handle_password(data):
@@ -39,6 +43,7 @@ class MemberEntity(Entity):
                 max_member_number, = db_session.execute(sql).fetchone()
                 data['member_number'] = max_member_number + 1
             obj = self.to_obj(self._create_internal(data, commit=commit))
+            logger.info(f"created member with number {data['member_number']}")
             return obj
         except Exception:
             # Rollback session if anything went wrong or we can't release the lock.

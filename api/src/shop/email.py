@@ -15,7 +15,7 @@ def send_membership_updated_email(member_id, extended_days, end_date):
     )
 
 
-def send_key_updated_email(member_id, extended_days, end_date):
+def send_labaccess_extended_email(member_id, extended_days, end_date):
     member = db_session.query(Member).get(member_id)
 
     send_message(

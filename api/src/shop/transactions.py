@@ -13,7 +13,7 @@ from multiaccessy.invite import ensure_accessy_labaccess, AccessyError, check_la
 from service.api_definition import NEGATIVE_ITEM_COUNT, INVALID_ITEM_COUNT, EMPTY_CART, NON_MATCHING_SUMS
 from service.db import db_session, nested_atomic
 from service.error import InternalServerError, BadRequest, NotFound
-from shop.email import send_key_updated_email, send_membership_updated_email, send_new_member_email, send_receipt_email
+from shop.email import send_labaccess_extended_email, send_membership_updated_email, send_new_member_email, send_receipt_email
 from shop.filters import PRODUCT_FILTERS
 from shop.models import TransactionAction, TransactionContent, Transaction, ProductAction, PendingRegistration, \
     StripePending, Product
@@ -128,10 +128,6 @@ def complete_pending_action(action):
 def ship_add_labaccess_action(action, transaction, skip_ensure_accessy=False):
     days_to_add = action.value
 
-    if not db_session.query(Key).filter(Key.member_id == transaction.member_id, Key.deleted_at.is_(None)).count():
-        logger.info(f"skipping ship_add_labaccess_action because member {transaction.member_id} has no key")
-        return
-    
     state = check_labaccess_requirements(transaction.member_id)
     if state != LabaccessRequirements.OK:
         logger.info(f"skipping ship_add_labaccess_action because member {transaction.member_id} failed check_labaccess_requirements with {state}")
@@ -147,7 +143,7 @@ def ship_add_labaccess_action(action, transaction, skip_ensure_accessy=False):
     assert labaccess_end
 
     complete_pending_action(action)
-    send_key_updated_email(transaction.member_id, days_to_add, labaccess_end)
+    send_labaccess_extended_email(transaction.member_id, days_to_add, labaccess_end)
     if not skip_ensure_accessy:
         ensure_accessy_labaccess(member_id=transaction.member_id)
 
@@ -203,8 +199,7 @@ def complete_transaction(transaction):
 def ship_orders(ship_add_labaccess=True, transaction=None):
     """
     Completes all orders for purchasing lab access and updates existing keys with new dates.
-    If a user has no key yet, then the order will remain as not completed.
-    If a user has multiple keys, all of them are updated with new dates.
+    If a user does not meet requirements for order (for example labaccess needs phone, signed agreement etc), then the order will remain as not completed.
     If transaction is set this is done only for that transaction.
     """
     

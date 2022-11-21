@@ -1,3 +1,4 @@
+from logging import getLogger
 from random import randint
 from faker import Faker
 
@@ -9,6 +10,9 @@ from messages.models import Message
 from service.db import db_session
 from shop.models import ProductCategory, Product, ProductAction
 from test_aid.test_util import random_str
+
+
+logger = getLogger('makeradmin')
 
 
 class DbFactory:
@@ -139,6 +143,7 @@ class DbFactory:
             sql = "SELECT 1 FROM membership_members WHERE member_number = :number"
             if db_session.execute(sql, params=dict(number=member_number)).first() is None:
                 break
+        logger.info(f"generated random member number {member_number}")
         return member_number
 
     def create_category(self, **kwargs):
