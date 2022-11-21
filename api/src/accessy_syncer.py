@@ -17,13 +17,14 @@ COMMAND_SHIP = "ship"
 COMMAND_SYNC = "sync"
 
 
-def scheduled_ship():
-    logger.info("shipping orders")
+def scheduled_ship_and_sync():
     try:
+        logger.info("shipping orders")
         ship_orders()
+        logger.info("syncing accessy")
         sync()
         db_session.commit()
-        logger.info("finished shipping orders")
+        logger.info("committing changes to db")
     except Exception as e:
         logger.exception(f"failed to ship orders: {e}")
     finally:
@@ -68,8 +69,7 @@ def main():
                 return
         
             case x if x == COMMAND_SCHEDULED:
-                # # TODO Enable when we have accessy in place: schedule.every().tuesday.at("19:30").do(scheduled_ship)
-                schedule.every().day.at("04:00").do(scheduled_sync)
+                schedule.every().day.at("04:00").do(scheduled_ship_and_sync)
 
                 while True:
                     time.sleep(1)
