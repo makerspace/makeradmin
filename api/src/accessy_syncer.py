@@ -69,7 +69,8 @@ def main():
                 return
         
             case x if x == COMMAND_SCHEDULED:
-                schedule.every().day.at("04:00").do(scheduled_ship_and_sync)
+                schedule.every().friday.at("04:00").do(scheduled_ship_and_sync)
+                schedule.every().day.at("04:00").do(scheduled_sync)
 
                 while True:
                     time.sleep(1)
