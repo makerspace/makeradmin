@@ -1,3 +1,4 @@
+from datetime import datetime
 import time
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 
@@ -43,6 +44,14 @@ def scheduled_sync():
         db_session.remove()
 
 
+friday = 4
+def daily_job():
+    if datetime.today().weekday() is friday:
+        scheduled_ship_and_sync()
+    else:
+        scheduled_sync()
+
+
 def main():
     with log_exception(status=1), stoppable():
         parser = ArgumentParser(description="Sync accessy and ship labaccess orders.",
@@ -69,7 +78,7 @@ def main():
                 return
         
             case x if x == COMMAND_SCHEDULED:
-                schedule.every().day.at("04:00").do(scheduled_ship_and_sync)
+                schedule.every().day.at("04:00").do(daily_job)
 
                 while True:
                     time.sleep(1)
