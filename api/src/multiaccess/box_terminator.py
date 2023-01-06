@@ -43,9 +43,9 @@ def get_box_info(box):
     pending_labaccess_days = pending_action_value_sum(box.member_id, ProductAction.ADD_LABACCESS_DAYS)
 
     today = date.today()
-    if today < expire_date:
+    if today < expire_date or pending_labaccess_days > 0:
         status = "active"
-    elif today < terminate_date or pending_labaccess_days > 0:
+    elif today < terminate_date:
         status = "expired"
     else:
         status = "terminate"
