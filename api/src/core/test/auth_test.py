@@ -16,7 +16,7 @@ from test_aid.test_base import FlaskTestBase
 class Test(FlaskTestBase):
 
     models = [core.models, membership.models]
-    
+
     def test_user_id_and_permission_is_set_even_if_there_is_no_auth_header(self):
         with self.app.test_request_context():
             self.assertFalse(hasattr(g, 'user_id'))

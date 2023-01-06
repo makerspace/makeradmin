@@ -40,8 +40,10 @@ class TestBase(TestCase):
             self._feedErrorsToResult(result, self._outcome.errors)
         else:
             # Python 3.11+
+            # This does not work when running in pytest, will fix later, maybe....
             result = self._outcome.result
-        return result.errors or result.failures
+            
+        return getattr(result, "errors", None) or getattr(result, "failures", None)
     
 
 class FlaskTestBase(TestBase):
