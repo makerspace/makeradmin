@@ -1,4 +1,4 @@
-FROM python:3.10-alpine
+FROM python:3.11-alpine
 
 RUN apk update \
 	&& apk add \
@@ -13,6 +13,8 @@ RUN apk update \
 	npm \
 	curl \
 	&& rm -rf /var/cache/apk/*
+
+RUN npm install -g npm@9.2.0
 
 RUN npm i -g npm sass
 
