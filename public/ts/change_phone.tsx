@@ -35,7 +35,7 @@ class ChangePhone extends Component<Props, State> {
             this.setState({requestSubmitInProgress: true})
             const {data} = await common.ajax("POST", `${window.apiBasePath}/member/current/change_phone_request`, {phone: number.trim()});
             this.setState({requestSent: true, phoneSent: data.phone, requestCount: data.request_count});
-        } catch (error) {
+        } catch (error: any) {
             if (error.status === UNAUTHORIZED) {
                 login.redirect_to_member_page();
             } else {
@@ -54,7 +54,7 @@ class ChangePhone extends Component<Props, State> {
             }
             await common.ajax("POST", `${window.apiBasePath}/member/current/change_phone_validate`, {validation_code: number});
             window.location.href = "/member";
-        } catch (error) {
+        } catch (error: any) {
             if (error.status === UNAUTHORIZED) {
                 login.redirect_to_member_page();
             } else {

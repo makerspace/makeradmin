@@ -1,9 +1,7 @@
 {
-    "exclude": [
-        "node_modules/**/*.d.ts",
-    ],
     "include": [
-        "src/**/*.ts", "src/**/*.tsx"
+        "src/**/*.ts",
+        "src/**/*.tsx",
     ],
     "compilerOptions": {
         "target": "es6",
@@ -16,5 +14,6 @@
         "moduleResolution": "node",
         "jsx": "react",
         "allowJs": true,
+        "skipLibCheck": true,
     },
 }
