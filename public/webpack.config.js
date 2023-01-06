@@ -1,5 +1,5 @@
 const path = require('path');
-const merge = require('webpack-merge');
+const {merge} = require('webpack-merge');
 const webpack = require('webpack');
 
 module.exports = (env, args) => {
@@ -57,8 +57,7 @@ module.exports = (env, args) => {
             devServer: {
                 host: "0.0.0.0",
                 port: 80,
-                public: 'http://localhost:8011',
-                publicPath: '/static/js',
+                static: '/static/js',
                 proxy: {
                     '/': 'http://localhost:81',
                     '/member': 'http://localhost:81',

@@ -1,5 +1,5 @@
 const path = require('path');
-const merge = require('webpack-merge');
+const {merge} = require('webpack-merge');
 const webpack = require('webpack');
 
 module.exports = (env, args) => {
@@ -34,14 +34,12 @@ module.exports = (env, args) => {
         module: {
             rules: [
                 {
-                    test: /\.tsx?$/,
+                    test: /\.(ts|tsx)$/,
                     use: 'ts-loader',
-                    exclude: /node_modules/,
                 },
                 {
                     test: /\.(js|jsx)$/,
-                    exclude: /node_modules/,
-                    use: ['babel-loader'],
+                    use: 'babel-loader',
                 },
                 {
                     test: /\.css$/,
@@ -88,17 +86,16 @@ module.exports = (env, args) => {
             devServer: {
                 host: "0.0.0.0",
                 port: "80",
-                contentBase: "./dist",
+                static: "./dist",
                 historyApiFallback: true,
-                public: 'http://localhost:8009',
+                //client: {
+                //    webSocketURL: 'http://localhost:8009',
+                //}
             },
         });
     }
     
     console.info("webpack production mode");
-
-    const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
-    const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 
     return merge(commonSettings, {
         mode: "production",
@@ -107,7 +104,6 @@ module.exports = (env, args) => {
             new webpack.LoaderOptionsPlugin({
                 minimize: true,
             }),
-            // new BundleAnalyzerPlugin(),
         ],
     });
 };

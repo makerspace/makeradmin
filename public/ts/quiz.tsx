@@ -104,7 +104,7 @@ class QuizManager extends Component<QuizManagerProps, State> {
         try {
             await common.ajax("GET", `${window.apiBasePath}/member/current`, null);
             this.setState({ loginState: "logged in" });
-        } catch (error) {
+        } catch (error: any) {
             if (error.status == "unauthorized") {
                 this.setState({ loginState: "logged out" });
             }
@@ -120,7 +120,7 @@ class QuizManager extends Component<QuizManagerProps, State> {
             } else {
                 this.setState({ question: data.data, answer: null });
             }
-        } catch (data) {
+        } catch (data: any) {
             if (data.status == "unauthorized") {
                 window.location.href = "/member";
             }
