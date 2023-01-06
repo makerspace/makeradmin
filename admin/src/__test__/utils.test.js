@@ -1,3 +1,7 @@
+/**
+ * @jest-environment jsdom
+ */
+
 /* eslint-env jest */
 
 import {dateTimeToStr, dateToStr} from "../utils";

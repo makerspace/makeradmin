@@ -36,12 +36,10 @@ module.exports = (env, args) => {
                 {
                     test: /\.(ts|tsx)$/,
                     use: 'ts-loader',
-                    exclude: /node_modules/,
                 },
                 {
                     test: /\.(js|jsx)$/,
-                    exclude: /node_modules/,
-                    use: ['babel-loader'],
+                    use: 'babel-loader',
                 },
                 {
                     test: /\.css$/,
@@ -87,9 +85,12 @@ module.exports = (env, args) => {
             ],
             devServer: {
                 host: "0.0.0.0",
-                port: "8009",
-                contentBase: "./dist",
+                port: "80",
+                static: "./dist",
                 historyApiFallback: true,
+                //client: {
+                //    webSocketURL: 'http://localhost:8009',
+                //}
             },
         });
     }

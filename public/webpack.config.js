@@ -56,12 +56,12 @@ module.exports = (env, args) => {
             ],
             devServer: {
                 host: "0.0.0.0",
-                port: 8011,
+                port: 80,
                 static: '/static/js',
                 proxy: {
-                    '/': 'http://localhost:8011',
-                    '/member': 'http://localhost:8011',
-                    '/shop': 'http://localhost:8011',
+                    '/': 'http://localhost:81',
+                    '/member': 'http://localhost:81',
+                    '/shop': 'http://localhost:81',
                 }
             },
         });
