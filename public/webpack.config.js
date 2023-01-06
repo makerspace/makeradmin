@@ -25,6 +25,7 @@ module.exports = (env, args) => {
         output:
             {
                 filename: "[name].js",
+                publicPath: "/static/js/",
                 path: path.resolve(__dirname, "static/js"),
             },
         
