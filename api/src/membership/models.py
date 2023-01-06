@@ -43,6 +43,7 @@ class Member(Base):
     deleted_at = Column(DateTime)
     member_number = Column(Integer, unique=True)
     labaccess_agreement_at = Column(DateTime)
+    pin_code = Column(String(30))
 
     @validates('phone')
     def validate_phone(self, key, value):
