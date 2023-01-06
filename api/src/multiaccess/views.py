@@ -1,30 +1,10 @@
 from flask import g
-from sqlalchemy.orm import contains_eager
 
-from membership.models import Member, Span, Key
 from multiaccess import service
 from multiaccess.box_terminator import box_terminator_validate, box_terminator_nag, \
     box_terminator_boxes
-from service.api_definition import GET, Arg, MEMBER_EDIT, POST, MEMBER_VIEW, symbol, MEMBERBOOTH
-from service.db import db_session
-from service.logging import logger
-from .util import member_to_response_object
-from .memberbooth import pin_login_to_memberinfo, tag_to_memberinfo, member_number_to_memberinfo
-
-
-@service.route("/memberdata", method=GET, permission=MEMBER_VIEW)
-def get_memberdata():
-    """ Used by multiaccess program to get members. """
-    query = db_session.query(Member).join(Member.spans).join(Member.keys)
-    query = query.options(contains_eager(Member.spans), contains_eager(Member.keys))
-    query = query.filter(
-        Member.deleted_at.is_(None),
-        Span.type.in_([Span.LABACCESS, Span.SPECIAL_LABACESS]),
-        Span.deleted_at.is_(None),
-        Key.deleted_at.is_(None),
-    )
-
-    return [member_to_response_object(m) for m in query]
+from multiaccess.memberbooth import pin_login_to_memberinfo, tag_to_memberinfo, member_number_to_memberinfo
+from service.api_definition import GET, Arg, MEMBER_EDIT, POST, symbol, MEMBERBOOTH
 
 
 @service.route("/memberbooth/tag", method=GET, permission=MEMBERBOOTH)

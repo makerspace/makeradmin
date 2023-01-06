@@ -18,7 +18,7 @@ class Test(ApiShopTestMixin, ApiTest):
     def test_purchase_from_existing_member_using_non_3ds_card_works(self):
         p0_count = 100
         p1_count = 500
-        
+
         expected_sum = self.p0_price * p0_count + self.p1_price * p1_count
         cart = [
             {"id": self.p0_id, "count": p0_count},

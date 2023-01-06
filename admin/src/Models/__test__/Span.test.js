@@ -1,3 +1,7 @@
+/**
+ * @jest-environment jsdom
+ */
+
 /* eslint-env jest */
 import {addToDate, formatUtcDate, utcToday} from "../../utils";
 import {calculateSpanDiff, DAY_MILLIS} from "../Span";
