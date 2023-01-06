@@ -34,8 +34,13 @@ class TestBase(TestCase):
         return self.now + timedelta(**kwargs)
     
     def this_test_failed(self):
-        result = self.defaultTestResult()
-        self._feedErrorsToResult(result, self._outcome.errors)
+        if hasattr(self._outcome, 'errors'):
+            # Python 3.4 - 3.10  (These two methods have no side effects)
+            result = self.defaultTestResult()
+            self._feedErrorsToResult(result, self._outcome.errors)
+        else:
+            # Python 3.11+
+            result = self._outcome.result
         return result.errors or result.failures
     
 
