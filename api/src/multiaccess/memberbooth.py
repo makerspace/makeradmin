@@ -33,7 +33,10 @@ def pin_login_to_memberinfo(member_id: int, pin_code: str):
     member = db_session.query(Member)\
         .filter(Member.member_id == member_id) \
         .filter(Member.pin_code == pin_code) \
-        .filter(Member.deleted_at.is_(None)) \
+        .filter(
+            Member.pin_code.is_not(None),
+            Member.deleted_at.is_(None),
+        ) \
         .first()
 
     if member is None:
