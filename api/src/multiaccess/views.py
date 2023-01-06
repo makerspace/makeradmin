@@ -38,7 +38,7 @@ def memberbooth_pin_login(member_id=Arg(int), pin_code=Arg(str)):
 
 @service.route("/memberbooth/member", method=GET, permission=MEMBERBOOTH)
 def memberbooth_member(member_number=Arg(int)):
-    return member_number_to_memberinfo
+    return member_number_to_memberinfo(member_number)
 
 
 @service.route("/box-terminator/boxes", method=GET, permission=MEMBER_EDIT)
