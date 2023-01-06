@@ -25,9 +25,9 @@ module.exports = (env, args) => {
         // Compile into a js.app
         output:
         {
-        filename: "app.js",
-            publicPath: "js",
-        path: path.resolve(__dirname, "dist/js"),
+            filename: "app.js",
+            publicPath: "/js/",
+            path: path.resolve(__dirname, "dist/js"),
         },
         
         // Preprocess *.jsx files
@@ -88,9 +88,9 @@ module.exports = (env, args) => {
                 port: "80",
                 static: "./dist",
                 historyApiFallback: true,
-                //client: {
-                //    webSocketURL: 'http://localhost:8009',
-                //}
+                client: {
+                    webSocketURL: 'http://localhost:8009',
+                }
             },
         });
     }
