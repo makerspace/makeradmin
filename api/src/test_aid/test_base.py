@@ -34,9 +34,16 @@ class TestBase(TestCase):
         return self.now + timedelta(**kwargs)
     
     def this_test_failed(self):
-        result = self.defaultTestResult()
-        self._feedErrorsToResult(result, self._outcome.errors)
-        return result.errors or result.failures
+        if hasattr(self._outcome, 'errors'):
+            # Python 3.4 - 3.10  (These two methods have no side effects)
+            result = self.defaultTestResult()
+            self._feedErrorsToResult(result, self._outcome.errors)
+        else:
+            # Python 3.11+
+            # This does not work when running in pytest, will fix later, maybe....
+            result = self._outcome.result
+            
+        return getattr(result, "errors", None) or getattr(result, "failures", None)
     
 
 class FlaskTestBase(TestBase):
