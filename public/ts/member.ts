@@ -160,6 +160,14 @@ common.documentLoaded().then(() => {
                             <a href="/member/change_phone" class="uk-button uk-button-danger" >Byt</a>
                         </span>
                     </div>
+                    <div>
+                        <label  for='pin_code'        class="uk-form-label">Pin code</label>
+                        <span style="width: 100%; display: flex;">
+                            <input name='pin_code' type="password" class="uk-input readonly-input" style="white-space: nowrap;" value="${member.pin_code || ''}" disabled />
+                            <a class="uk-icon-button" href="#" uk-icon="more"></a>
+                            <a href="/member/change_pin_code" class="uk-button uk-button-danger" >Byt</a>
+                        </span>
+                    </div>
                 </fieldset>
                 <fieldset data-uk-margin>
                     <legend><i uk-icon="home"></i> Adress</legend>
