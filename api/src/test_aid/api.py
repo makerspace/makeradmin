@@ -33,6 +33,13 @@ class ApiResponse:
         )
         return self
     
+    def is_not_ok(self):
+        assert self.response.status_code not in (200, 201), (
+            f"bad status, was ok, status: '{self.response.status_code}'"
+            f", url: {self.response.url}, content: {self.response.text}"
+        )
+        return self
+    
     @property
     def data(self):
         return self.get('data')
