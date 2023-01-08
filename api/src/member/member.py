@@ -2,9 +2,11 @@ from datetime import datetime
 from urllib.parse import quote_plus
 
 from core.auth import create_access_token, get_member_by_user_identification
+from membership.models import Member
 from messages.message import send_message
 from messages.models import MessageTemplate
 from service import config
+from service.db import db_session
 from service.logging import logger
 from service.util import format_datetime
 
@@ -25,3 +27,10 @@ def send_access_token_email(redirect, user_identification, ip, browser):
     )
 
     return {"status": "sent"}
+
+
+def set_pin_code(member_id: int, pin_code: str):
+    member: Member = db_session.query(Member).get(member_id)
+    member.pin_code = pin_code
+    db_session.flush()
+    return {"status": "PIN code changed"}
