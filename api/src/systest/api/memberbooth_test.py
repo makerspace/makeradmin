@@ -36,3 +36,20 @@ class Test(ApiTest):
             data__member_id=member.member_id,
         )
         self.assertNotEqual([], response.data["keys"], "There exists keys")
+    
+    def test_cannot_get_member_without_pin_set(self):
+        member = self.db.create_member()  # Defaults without PIN
+
+        self.api.get("/multiaccess/memberbooth/pin-login", params=dict(member_number=member.member_number, pin_code=member.pin_code)) \
+            .is_not_ok()
+        self.api.get("/multiaccess/memberbooth/pin-login", params=dict(member_number=member.member_number, pin_code="")) \
+            .is_not_ok()
+    
+    def test_get_member_with_pin(self):
+        member = self.db.create_member(pin_code=1234)
+
+        response = self.api.get("/multiaccess/memberbooth/pin-login", params=dict(member_number=member.member_number, pin_code=member.pin_code))
+        response.expect(200)
+
+        response = self.api.get("/multiaccess/memberbooth/pin-login", params=dict(member_number=member.member_number, pin_code="wrong pin"))
+        response.expect(404)
