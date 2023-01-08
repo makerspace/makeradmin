@@ -4,7 +4,7 @@ from quiz.views import member_quiz_statistics
 from flask import request, g
 
 from member import service
-from member.member import send_access_token_email
+from member.member import send_access_token_email, set_pin_code
 from membership.member_auth import get_member_permissions
 from membership.membership import get_membership_summary
 from membership.views import member_entity
@@ -41,6 +41,11 @@ def current_membership_info():
 def current_member_quiz_info():
     """ Get info about which quizzes the current user has completed. """
     return member_quiz_statistics(g.user_id)
+
+
+@service.route("/current/set_pin_code", method=POST, permission=USER)
+def set_pin_code_endpoint(pin_code=Arg(str)):
+    return set_pin_code(g.user_id, pin_code)
 
 
 @service.route("/current/change_phone_request", method=POST, permission=USER)
