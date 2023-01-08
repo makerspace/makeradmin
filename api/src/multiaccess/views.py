@@ -32,8 +32,8 @@ def memberbooth_tag(tagid=Arg(int)):
 
 
 @service.route("/memberbooth/pin-login", method=GET, permission=MEMBERBOOTH)
-def memberbooth_pin_login(member_id=Arg(int), pin_code=Arg(str)):
-    return pin_login_to_memberinfo(member_id, pin_code)
+def memberbooth_pin_login(member_number=Arg(int), pin_code=Arg(str)):
+    return pin_login_to_memberinfo(member_number, pin_code)
 
 
 @service.route("/memberbooth/member", method=GET, permission=MEMBERBOOTH)
