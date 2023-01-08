@@ -165,7 +165,7 @@ common.documentLoaded().then(() => {
                         <span style="width: 100%; display: flex;">
                             <input name='pin_code' type="password" class="uk-input readonly-input" style="white-space: nowrap; font-family: monospace;" value="${member.pin_code || ''}" disabled id="pin_code_input"/>
                             <button class="uk-icon-button" href="#" uk-icon="more" id="toggle_show_pin_code"></button>
-                            <button href="/member/change_pin_code" class="uk-button uk-button-danger" disabled="true" >Byt</button>
+                            <button class="uk-button uk-button-danger" disabled="true" id="change_pin_code">Byt</button>
                         </span>
                     </div>
                 </fieldset>
@@ -205,6 +205,16 @@ common.documentLoaded().then(() => {
             pin_code_hidden = ! pin_code_hidden;
             const attr_value = pin_code_hidden ? "password" : "text";
             document.getElementById("pin_code_input")?.setAttribute("type", attr_value);
+        };
+        document.getElementById("change_pin_code")!.onclick = (e) => {
+            UIkit.modal.prompt("Välj en pinkod", member.pin_code).then((pin_code: string) => {
+                common.ajax("POST", `${apiBasePath}/member/change_pin_code`, {pin_code: pin_code})
+                    .then(() => UIkit.modal.alert(`<h2>Pinkod är nu bytt</h2>`))
+                    .catch((e) => {
+                        UIkit.modal.alert(`<h2>Kunde inte byta pinkod</h2><b class="uk-text-danger"">${e.message}</b>`);
+                        location.reload();
+                    });
+            }, () => {});
         };
     }).catch(e => {
         // Probably Unauthorized, redirect to login page.
