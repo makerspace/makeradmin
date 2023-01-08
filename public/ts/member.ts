@@ -163,9 +163,9 @@ common.documentLoaded().then(() => {
                     <div>
                         <label  for='pin_code'        class="uk-form-label">Pin code</label>
                         <span style="width: 100%; display: flex;">
-                            <input name='pin_code' type="password" class="uk-input readonly-input" style="white-space: nowrap;" value="${member.pin_code || ''}" disabled />
-                            <a class="uk-icon-button" href="#" uk-icon="more"></a>
-                            <a href="/member/change_pin_code" class="uk-button uk-button-danger" >Byt</a>
+                            <input name='pin_code' type="password" class="uk-input readonly-input" style="white-space: nowrap; font-family: monospace;" value="${member.pin_code || ''}" disabled id="pin_code_input"/>
+                            <button class="uk-icon-button" href="#" uk-icon="more" id="toggle_show_pin_code"></button>
+                            <button href="/member/change_pin_code" class="uk-button uk-button-danger" disabled="true" >Byt</button>
                         </span>
                     </div>
                 </fieldset>
@@ -199,6 +199,12 @@ common.documentLoaded().then(() => {
                     UIkit.modal.alert(`<h2>Inbjudan misslyckades</h2><b class="uk-text-danger"">${e.message}</b>`);
                 });
             return false;
+        };
+        let pin_code_hidden = true;
+        document.getElementById("toggle_show_pin_code")!.onclick = (e) => {
+            pin_code_hidden = ! pin_code_hidden;
+            const attr_value = pin_code_hidden ? "password" : "text";
+            document.getElementById("pin_code_input")?.setAttribute("type", attr_value);
         };
     }).catch(e => {
         // Probably Unauthorized, redirect to login page.
