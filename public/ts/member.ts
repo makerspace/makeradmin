@@ -160,6 +160,14 @@ common.documentLoaded().then(() => {
                             <a href="/member/change_phone" class="uk-button uk-button-danger" >Byt</a>
                         </span>
                     </div>
+                    <div>
+                        <label  for='pin_code'        class="uk-form-label">Pin code</label>
+                        <span style="width: 100%; display: flex;">
+                            <input name='pin_code' type="password" class="uk-input readonly-input" style="white-space: nowrap; font-family: monospace;" value="${member.pin_code || ''}" disabled id="pin_code_input"/>
+                            <button class="uk-icon-button" href="#" uk-icon="more" id="toggle_show_pin_code"></button>
+                            <button class="uk-button uk-button-danger" id="change_pin_code">Byt</button>
+                        </span>
+                    </div>
                 </fieldset>
                 <fieldset data-uk-margin>
                     <legend><i uk-icon="home"></i> Adress</legend>
@@ -191,6 +199,26 @@ common.documentLoaded().then(() => {
                     UIkit.modal.alert(`<h2>Inbjudan misslyckades</h2><b class="uk-text-danger"">${e.message}</b>`);
                 });
             return false;
+        };
+
+        let pin_code_hidden = true;
+        document.getElementById("toggle_show_pin_code")!.onclick = (e) => {
+            pin_code_hidden = ! pin_code_hidden;
+            const attr_value = pin_code_hidden ? "password" : "text";
+            document.getElementById("pin_code_input")?.setAttribute("type", attr_value);
+        };
+
+        document.getElementById("change_pin_code")!.onclick = (e) => {
+            UIkit.modal.prompt("Välj en pinkod", member.pin_code).then((pin_code: string) => {
+                if (pin_code === null)
+                    return;
+
+                common.ajax("POST", `${apiBasePath}/member/current/set_pin_code`, {pin_code: pin_code})
+                    .then(() => UIkit.modal.alert(`<h2>Pinkod är nu bytt</h2>`).then(() => location.reload()))
+                    .catch((e) => {
+                        UIkit.modal.alert(`<h2>Kunde inte byta pinkod</h2><b class="uk-text-danger"">${e.message}</b>`);
+                    });
+            }, () => {});
         };
     }).catch(e => {
         // Probably Unauthorized, redirect to login page.

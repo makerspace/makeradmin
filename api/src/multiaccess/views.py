@@ -1,59 +1,25 @@
 from flask import g
 
-from membership.membership import get_membership_summary
-from membership.models import Member, Key
 from multiaccess import service
 from multiaccess.box_terminator import box_terminator_validate, box_terminator_nag, \
     box_terminator_boxes
+from multiaccess.memberbooth import pin_login_to_memberinfo, tag_to_memberinfo, member_number_to_memberinfo
 from service.api_definition import GET, Arg, MEMBER_EDIT, POST, symbol, MEMBERBOOTH
-from service.db import db_session
-
-
-def member_to_response_object(member):
-    return {
-        'member_id': member.member_id,
-        'member_number': member.member_number,
-        'firstname': member.firstname,
-        'lastname': member.lastname,
-        'end_date': max((span.enddate for span in member.spans)).isoformat() if len(member.spans) > 0 else None,
-        'keys': [{'key_id': key.key_id, 'rfid_tag': key.tagid} for key in member.keys],
-    }
-
-
-def memberbooth_response_object(member, membership_data):
-    response = member_to_response_object(member)
-    del response["end_date"]
-    response["membership_data"] = membership_data.as_json()
-    return response
 
 
 @service.route("/memberbooth/tag", method=GET, permission=MEMBERBOOTH)
 def memberbooth_tag(tagid=Arg(int)):
-    key = db_session.query(Key)\
-        .join(Key.member) \
-        .filter(Key.tagid == tagid) \
-        .filter(
-            Member.deleted_at.is_(None),
-            Key.deleted_at.is_(None),
-        ) \
-        .first()
+    return tag_to_memberinfo(tagid)
 
-    if key is None:
-        return None
 
-    membership_data = get_membership_summary(key.member_id)
-    return memberbooth_response_object(key.member, membership_data)
+@service.route("/memberbooth/pin-login", method=GET, permission=MEMBERBOOTH)
+def memberbooth_pin_login(member_number=Arg(int), pin_code=Arg(str)):
+    return pin_login_to_memberinfo(member_number, pin_code)
 
 
 @service.route("/memberbooth/member", method=GET, permission=MEMBERBOOTH)
 def memberbooth_member(member_number=Arg(int)):
-    member = db_session.query(Member).filter(Member.member_number == member_number, Member.deleted_at.is_(None)).first()
-
-    if not member:
-        return None
-
-    membership_data = get_membership_summary(member.member_id)
-    return memberbooth_response_object(member, membership_data)
+    return member_number_to_memberinfo(member_number)
 
 
 @service.route("/box-terminator/boxes", method=GET, permission=MEMBER_EDIT)

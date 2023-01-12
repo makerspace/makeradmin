@@ -2,6 +2,7 @@
 COMPOSE=docker-compose
 TEST_COMPOSE=docker-compose -p test -f docker-compose.yml -f docker-compose.test.yml
 DEV_COMPOSE=docker-compose -f docker-compose.yml -f docker-compose.dev.yml
+PYTEST_PARAMS?=$(PYTEST_PARAMS)
 
 -include local.mk
 
@@ -31,7 +32,7 @@ clean-nuke:
 	docker volume rm -f test_logs
 
 dev-test:
-	(cd api/src && python3 -m pytest --workers auto -ra)
+	(cd api/src && python3 -m pytest --workers auto -ra $(PYTEST_PARAMS))
 
 init-npm:
 	cd admin && npm install 
