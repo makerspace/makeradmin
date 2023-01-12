@@ -184,23 +184,6 @@ class KeyHandoutForm extends React.Component {
         const {accessy_groups, accessy_in_org, accessy_pending_invites} = this.state;
         const has_signed = member.labaccess_agreement_at !== null;
 
-        // Show different content based on if the user has a key or not
-        let rfid_key_paragraph;
-        if (keys.length === 0) {
-            rfid_key_paragraph = <div>
-                    Skapa en ny nyckel genom att läsa in den i fältet nedan och sedan spara.
-                    <TextInput model={this.key} icon="tags" tabIndex="1" name="tagid" title="RFID" placeholder="Använd en RFID-läsare för att läsa av det unika numret på nyckeln" />
-                </div>;
-        } else if (keys.length === 1) {
-            rfid_key_paragraph = <p>
-                    Användaren har en nyckel registrerad (med id=<span style={{fontFamily: "monospace"}}>{keys[0].tagid}</span>). Kontrollera om hen vet om det och har kvar nyckeln. Gå annars till <a href={"/membership/members/" + member.id + "/keys"}>Nycklar</a> och ta bort den gamla nyckeln, och lägg till en ny.
-                </p>;
-        } else {
-            rfid_key_paragraph = <p>
-                    Användaren har flera nycklar registrerade! Gå till <a href={"/membership/members/" + member.id + "/keys"}>Nycklar</a> och ta bort alla nycklar utom en.
-                </p>;
-        }
-
         let accessy_paragraph;
         if (accessy_in_org) {
             accessy_paragraph = <p><span className="uk-badge uk-badge-success">OK</span> Personen är med i organisationen. <br/> Med i följande ({accessy_groups.length}) grupper: {accessy_groups.sort().join(", ")} </p>;
@@ -247,11 +230,8 @@ class KeyHandoutForm extends React.Component {
             </div>
 
             <div className="uk-section">
-                <h2>5. Kontrollera nyckel </h2>
-                <h3>Accessy</h3>
+                <h2>5. Kontrollera tillgång till Accessy </h2>
                 <p> {accessy_paragraph} </p>
-                <h3>RFID-tagg</h3>
-                {rfid_key_paragraph}
             </div>
 
             <div style={{"paddingBottom": "4em"}}>
