@@ -13,6 +13,7 @@ from shop.entities import product_image_entity, transaction_content_entity, tran
 from shop.models import TransactionContent, ProductImage
 from shop.pay import pay, register
 from shop.stripe_payment_intent import confirm_stripe_payment_intent
+from shop.stripe_checkout import create_stripe_checkout_session
 from shop.shop_data import pending_actions, member_history, receipt, get_product_data, all_product_data, \
     get_membership_products
 from shop.stripe_event import stripe_callback, process_stripe_events
@@ -183,9 +184,9 @@ def ship_orders_route():
     ship_orders(ship_add_labaccess=True)
 
 
-@service.route("/pay", method=POST, permission=USER, commit_on_error=True)
+@service.route("/checkout", method=POST, permission=USER, commit_on_error=True)
 def pay_route():
-    return pay(request.json, g.user_id)
+    return create_stripe_checkout_session(request.json, g.user_id)
 
 
 @service.route("/confirm_payment", method=POST, permission=PUBLIC, commit_on_error=True)
