@@ -1,7 +1,6 @@
 import React from 'react';
 import TextInput from "./TextInput";
 import {withRouter} from "react-router";
-import Key from "../Models/Key";
 import Span, {filterCategory} from "../Models/Span";
 import Collection from "../Models/Collection";
 import {ADD_LABACCESS_DAYS} from "../Models/ProductAction";
@@ -55,11 +54,8 @@ class KeyHandoutForm extends React.Component {
     constructor(props) {
         super(props);
         const {member} = this.props;
-        this.key = new Key({member_id: member.id});
         this.state = {
             can_save_member: false,
-            can_save_key: false,
-            keys: [],
             pending_labaccess_days: "?",
             labaccess_enddate: "",
             membership_enddate: "",
@@ -69,7 +65,6 @@ class KeyHandoutForm extends React.Component {
             accessy_pending_invites: 0,
         };
         this.unsubscribe = [];
-        this.keyCollection = new Collection({type: Key, url: `/membership/member/${member.id}/keys`, idListName: 'keys', pageSize: 0});
         this.spanCollection = new Collection({type: Span, url: `/membership/member/${member.id}/spans`, pageSize: 0});
         this.save = this.save.bind(this);
         this.fetchPendingLabaccess();
@@ -78,17 +73,6 @@ class KeyHandoutForm extends React.Component {
 
     save() {
         let promise = Promise.resolve();
-        if (this.key && this.key.isDirty() && this.key.canSave()) {
-            promise.then(() => {
-                this.key
-                .save()
-                .then(() => {
-                            this.key.reset({member_id: this.props.member.id});
-                            this.keyCollection.fetch();
-                        });
-            });
-        }
-
         const {member} = this.props;
         if (member.isDirty() && member.canSave()) {
             promise.then(() => member.save());
@@ -123,10 +107,7 @@ class KeyHandoutForm extends React.Component {
     componentDidMount() {
         const {member} = this.props;
         this.unsubscribe.push(member.subscribe(() => this.setState({can_save_member: member.canSave()})));
-        this.unsubscribe.push(this.keyCollection.subscribe((keys) => this.setState({keys: keys.items})));
         this.unsubscribe.push(member.subscribe(() => this.fetchAccessyStatus()));
-        const key = this.key;
-        this.unsubscribe.push(key.subscribe(() => this.setState({can_save_key: key.canSave()})));
         this.unsubscribe.push(this.spanCollection.subscribe(({items}) => {
             this.setState({
                 "labaccess_enddate": last_span_enddate(items, "labaccess"),
@@ -180,7 +161,7 @@ class KeyHandoutForm extends React.Component {
     
     render() {
         const {member} = this.props;
-        const {can_save_member, can_save_key, keys, labaccess_enddate, membership_enddate, special_enddate, pending_labaccess_days} = this.state;
+        const {can_save_member, labaccess_enddate, membership_enddate, special_enddate, pending_labaccess_days} = this.state;
         const {accessy_groups, accessy_in_org, accessy_pending_invites} = this.state;
         const has_signed = member.labaccess_agreement_at !== null;
 
@@ -235,7 +216,7 @@ class KeyHandoutForm extends React.Component {
             </div>
 
             <div style={{"paddingBottom": "4em"}}>
-                <button className="uk-button uk-button-success uk-float-right" tabIndex="2" title="Spara ändringar" disabled={!can_save_member && !can_save_key}><i className="uk-icon-save"/> Spara</button>
+                <button className="uk-button uk-button-success uk-float-right" tabIndex="2" title="Spara ändringar" disabled={!can_save_member}><i className="uk-icon-save"/> Spara</button>
                 {this.renderAccessyInviteSaveButton({has_signed, labaccess_enddate, special_enddate, pending_labaccess_days, member})}
             </div>
         </>;
