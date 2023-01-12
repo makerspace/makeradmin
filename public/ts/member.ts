@@ -164,7 +164,7 @@ common.documentLoaded().then(() => {
                         <label  for='pin_code'        class="uk-form-label">Pin code</label>
                         <span style="width: 100%; display: flex;">
                             <input name='pin_code' type="password" class="uk-input readonly-input" style="white-space: nowrap; font-family: monospace;" value="${member.pin_code || ''}" disabled id="pin_code_input"/>
-                            <button class="uk-icon-button" href="#" uk-icon="more" id="toggle_show_pin_code"></button>
+                            <button class="uk-icon-button" uk-icon="more" id="toggle_show_pin_code"></button>
                             <button class="uk-button uk-button-danger" id="change_pin_code">Byt</button>
                         </span>
                     </div>
@@ -203,6 +203,7 @@ common.documentLoaded().then(() => {
 
         let pin_code_hidden = true;
         document.getElementById("toggle_show_pin_code")!.onclick = (e) => {
+            e.preventDefault();
             pin_code_hidden = ! pin_code_hidden;
             const attr_value = pin_code_hidden ? "password" : "text";
             document.getElementById("pin_code_input")?.setAttribute("type", attr_value);
