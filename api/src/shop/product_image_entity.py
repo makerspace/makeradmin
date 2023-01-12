@@ -1,6 +1,6 @@
 from io import BytesIO
 
-from PIL import Image
+from PIL import Image, UnidentifiedImageError
 
 from service.entity import Entity, logger
 from service.error import BadRequest
@@ -12,7 +12,10 @@ class ProductImageEntity(Entity):
         model = super().to_model(obj)
 
         if "data" in model and "type" in model:
-            image = Image.open(BytesIO(model["data"]))
+            try:
+                image = Image.open(BytesIO(model["data"]))
+            except UnidentifiedImageError:
+                raise BadRequest("unsupported or invalid file format")
             image.thumbnail((500, 1_000_000), Image.ANTIALIAS)
             bytes = BytesIO()
             image.save(bytes, format="png", compress_level=8)
