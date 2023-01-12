@@ -157,9 +157,14 @@ common.onGetAndDocumentLoaded("/webshop/product_data", (productData: any) => {
 	document.querySelector("#checkout-button")!.addEventListener("click", ev => {
 		ev.preventDefault();
 		let cart = Cart.fromStorage();
-			return common.ajax("POST", window.apiBasePath + "/webshop/checkout", {
+			const checkout_url = common.ajax("POST", window.apiBasePath + "/webshop/checkout", {
 				cart: cart.items,
 				expected_sum: cart.sum(id2item),
+			}).then(
+				json=>window.location=json.data
+			).catch(json => {
+				UIkit.modal.alert("<h2>Error</h2>" + common.get_error(json));
 			})
+			
 	});
 });
