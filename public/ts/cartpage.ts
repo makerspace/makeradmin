@@ -153,4 +153,13 @@ common.onGetAndDocumentLoaded("/webshop/product_data", (productData: any) => {
 		ev.preventDefault();
 		login();
 	});
+
+	document.querySelector("#checkout-button")!.addEventListener("click", ev => {
+		ev.preventDefault();
+		let cart = Cart.fromStorage();
+			return common.ajax("POST", window.apiBasePath + "/webshop/checkout", {
+				cart: cart.items,
+				expected_sum: cart.sum(id2item),
+			})
+	});
 });
