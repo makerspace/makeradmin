@@ -11,8 +11,12 @@ from shop.entities import product_image_entity, transaction_content_entity, tran
     transaction_action_entity, product_entity, category_entity, product_action_entity
 from shop.models import TransactionContent, ProductImage
 from shop.pay import pay, register
+<<<<<<< HEAD
 
 # Next two needed?
+from shop.stripe_payment_intent import confirm_stripe_payment_intent
+from shop.stripe_checkout import create_stripe_checkout_session
+
 from shop.stripe_payment_intent import confirm_stripe_payment_intent
 from shop.stripe_checkout import create_stripe_checkout_session
 
@@ -179,17 +183,14 @@ def public_image(image_id):
 def register_page_data():
     return {"membershipProducts": get_membership_products(), "productData": all_product_data()}
 
-
-<<<<<<< HEAD
+# @service.route("/pay", method=POST, permission=USER, commit_on_error=True)
 @service.route("/ship_orders", method=POST, permission=WEBSHOP, commit_on_error=True)
 def ship_orders_route():
     ship_orders(ship_add_labaccess=True)
 
 
 @service.route("/checkout", method=POST, permission=USER, commit_on_error=True)
-=======
-@service.route("/pay", method=POST, permission=USER, commit_on_error=True)
->>>>>>> a6435a80 (Removed multiaccess.)
+# @service.route("/pay", method=POST, permission=USER, commit_on_error=True)
 def pay_route():
     return create_stripe_checkout_session(request.json, g.user_id)
 

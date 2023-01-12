@@ -2,6 +2,7 @@ from logging import getLogger
 
 import stripe
 
+from flask import Flask
 from stripe.error import InvalidRequestError, CardError, StripeError
 from service.error import InternalServerError, EXCEPTION
 #from shop.models import Transaction
@@ -16,7 +17,8 @@ logger = getLogger('makeradmin')
 
 
 def create_stripe_checkout_session(data, member_id):
-    checkout_session = stripe.checkout.Session.create(
+    try:
+        checkout_session = stripe.checkout.Session.create(
             line_items=[{
       'price_data': {
         'currency': 'usd',
@@ -31,5 +33,7 @@ def create_stripe_checkout_session(data, member_id):
             success_url="https://makerspace.se",
             cancel_url="https://google.com",
         )
+    except Exception as e:
+        return str(e)
 
-    return checkout_session.url
+    return Flask.redirect(checkout_session.url, code=303)
