@@ -4,6 +4,11 @@ import { logout, UNAUTHORIZED } from "./common";
 declare var UIkit: any;
 
 
+function get_random_pin_code(numbers: number): string {
+    return Math.random().toString(10).substr(2, numbers);
+}
+
+
 common.documentLoaded().then(() => {
     common.addSidebarListeners();
 
@@ -136,6 +141,7 @@ common.documentLoaded().then(() => {
     Promise.all([future1, future2, future3]).then(([member_json, membership_json, pending_actions_json]) => {
         const member = member_json.data;
         const membership = membership_json.data;
+        const pin_warning = member.pin_code == null ? `<label class="uk-form-label" style="color: red;">Du har inte satt någon PIN-kod ännu. Använd BYT-knappen för att sätta den.</label>` : "";
         root.innerHTML = `
             <form class="uk-form uk-form-stacked uk-margin-bottom" xmlns="http://www.w3.org/1999/html">
                 <h2>Medlem ${member.member_number}: ${member.firstname} ${member.lastname}</h2>
@@ -167,6 +173,7 @@ common.documentLoaded().then(() => {
                             <button class="uk-icon-button" uk-icon="more" id="toggle_show_pin_code"></button>
                             <button class="uk-button uk-button-danger" id="change_pin_code">Byt</button>
                         </span>
+                        ${pin_warning}
                     </div>
                 </fieldset>
                 <fieldset data-uk-margin>
@@ -211,7 +218,7 @@ common.documentLoaded().then(() => {
 
         document.getElementById("change_pin_code")!.onclick = (e) => {
             e.preventDefault();
-            UIkit.modal.prompt("Välj en pinkod", member.pin_code).then((pin_code: string) => {
+            UIkit.modal.prompt("Välj en pinkod", member.pin_code === null ? get_random_pin_code(4) : member.pin_code).then((pin_code: string) => {
                 if (pin_code === null)
                     return;
 
