@@ -210,6 +210,7 @@ common.documentLoaded().then(() => {
         };
 
         document.getElementById("change_pin_code")!.onclick = (e) => {
+            e.preventDefault();
             UIkit.modal.prompt("Välj en pinkod", member.pin_code).then((pin_code: string) => {
                 if (pin_code === null)
                     return;
