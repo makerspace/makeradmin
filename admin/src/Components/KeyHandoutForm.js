@@ -212,7 +212,7 @@ class KeyHandoutForm extends React.Component {
 
             <div className="uk-section">
                 <h2>5. Kontrollera tillgång till Accessy </h2>
-                <p> {accessy_paragraph} </p>
+                {accessy_paragraph}
             </div>
 
             <div style={{"paddingBottom": "4em"}}>
