@@ -1,4 +1,5 @@
 import React from 'react';
+import {Prompt} from 'react-router';
 import TextInput from "./TextInput";
 import {withRouter} from "react-router";
 import Span, {filterCategory} from "../Models/Span";
@@ -221,29 +222,30 @@ class KeyHandoutForm extends React.Component {
             </div>
         </>;
         
-        return (
-        <div className="meep">
-            <form className="uk-form" onSubmit={(e) => {e.preventDefault(); this.save(); return false;}}>
-                <div className="uk-section">
-                    <h2>1. Ta emot signerat labbmedlemsavtal</h2>
-                    <p>Kontrollera att labbmedlemsavtalet är signerat och säkerställ att rätt medlemsnummer står väl synligt på labbmedlemsavtalet.</p>
-                    <div>
-                        <label htmlFor="signed"> 
-                            <input id="signed" style={{"verticalAlign": "middle"}} className="uk-checkbox" type="checkbox" tabIndex="1" checked={has_signed} onChange={(e) => {
-                                if (e.target.checked) {
-                                    member.labaccess_agreement_at = new Date().toISOString();
-                                } else {
-                                    member.labaccess_agreement_at = null;
-                                }
-                            }}/>  &nbsp;
-                            Signerat labbmedlemsavtal mottaget{ has_signed ? " " + dateTimeToStr(member.labaccess_agreement_at) : "" }.
-                        </label> 
+        return (<>
+            <Prompt when={can_save_member || can_save_key} message="Du har inte sparat - vill du verkligen lämna sidan?"></Prompt>
+            <div className="meep">
+                <form className="uk-form" onSubmit={(e) => {e.preventDefault(); this.save(); return false;}}>
+                    <div className="uk-section">
+                        <h2>1. Ta emot signerat labbmedlemsavtal</h2>
+                        <p>Kontrollera att labbmedlemsavtalet är signerat och säkerställ att rätt medlemsnummer står väl synligt på labbmedlemsavtalet.</p>
+                        <div>
+                            <label htmlFor="signed">
+                                <input id="signed" style={{"verticalAlign": "middle"}} className="uk-checkbox" type="checkbox" tabIndex="1" checked={has_signed} onChange={(e) => {
+                                    if (e.target.checked) {
+                                        member.labaccess_agreement_at = new Date().toISOString();
+                                    } else {
+                                        member.labaccess_agreement_at = null;
+                                    }
+                                }}/>  &nbsp;
+                                Signerat labbmedlemsavtal mottaget{ has_signed ? " " + dateTimeToStr(member.labaccess_agreement_at) : "" }.
+                            </label>
+                        </div>
                     </div>
-                </div>
-                
-                {has_signed ? section2andon : ""}
-            </form>
-        </div>
+                    {has_signed ? section2andon : ""}
+                </form>
+            </div>
+        </>
         );
     }
 }
