@@ -1,25 +1,26 @@
-from flask import g, request, send_file, make_response, abort, redirect
+from flask import g, request, send_file, make_response
 from sqlalchemy.exc import NoResultFound
 
 from multiaccessy.invite import AccessyInvitePreconditionFailed, ensure_accessy_labaccess
 from service.api_definition import WEBSHOP, WEBSHOP_EDIT, PUBLIC, GET, USER, POST, Arg, WEBSHOP_ADMIN, MEMBER_EDIT
-from service.config import get_public_url
 from service.db import db_session
 from service.entity import OrmSingeRelation, OrmSingleSingleRelation
-from service.error import NotFound, PreconditionFailed
+from service.error import PreconditionFailed
 from shop import service
 from shop.entities import product_image_entity, transaction_content_entity, transaction_entity, \
     transaction_action_entity, product_entity, category_entity, product_action_entity
 from shop.models import TransactionContent, ProductImage
 from shop.pay import pay, register
+
+# Next two needed?
 from shop.stripe_payment_intent import confirm_stripe_payment_intent
 from shop.stripe_checkout import create_stripe_checkout_session
+
 from shop.shop_data import pending_actions, member_history, receipt, get_product_data, all_product_data, \
     get_membership_products
 from shop.stripe_event import stripe_callback, process_stripe_events
-from shop.transactions import ship_orders, ship_labaccess_orders
-from service.logging import logger
-
+from shop.stripe_payment_intent import confirm_stripe_payment_intent
+from shop.transactions import ship_labaccess_orders
 
 service.entity_routes(
     path="/category",
@@ -179,12 +180,16 @@ def register_page_data():
     return {"membershipProducts": get_membership_products(), "productData": all_product_data()}
 
 
+<<<<<<< HEAD
 @service.route("/ship_orders", method=POST, permission=WEBSHOP, commit_on_error=True)
 def ship_orders_route():
     ship_orders(ship_add_labaccess=True)
 
 
 @service.route("/checkout", method=POST, permission=USER, commit_on_error=True)
+=======
+@service.route("/pay", method=POST, permission=USER, commit_on_error=True)
+>>>>>>> a6435a80 (Removed multiaccess.)
 def pay_route():
     return create_stripe_checkout_session(request.json, g.user_id)
 
