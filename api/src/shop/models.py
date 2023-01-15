@@ -52,6 +52,7 @@ class Product(Base):
     updated_at = Column(DateTime, server_default=func.now())
     deleted_at = Column(DateTime)
     show = Column(Boolean, nullable=False, server_default="1")
+    stripe_product_id = Column(String(255), nullable=True)
 
     category = relationship(ProductCategory, backref='products')
     actions = relationship("ProductAction")
@@ -60,7 +61,7 @@ class Product(Base):
 
     def __repr__(self):
         return f'Product(id={self.id}, name={self.name}, category_id={self.category_id}' \
-               f', display_order={self.display_order})'
+               f', display_order={self.display_order} stripe_product_id={self.stripe_product_id})'
 
 
 class ProductAction(Base):

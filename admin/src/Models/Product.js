@@ -112,5 +112,6 @@ Product.model = {
         filter: null,
         show: true,
         image_id: null,
+        stripe_product_id: null,
     },
 };
