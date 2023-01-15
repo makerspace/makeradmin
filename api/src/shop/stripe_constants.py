@@ -11,13 +11,18 @@ CURRENCY = "sek"
 
 STRIPE_SIGNING_SECRET = config.get("STRIPE_SIGNING_SECRET", log_value=False)
 
+class MakerspaceMetadataKeys:
+    USER_ID = "makerspace_user_id"
+    MEMBER_NUMBER = "makerspace_member_number"
 
 class Type:
     SOURCE = 'source'
     CARD = 'card'
     CHARGE = 'charge'
     PAYMENT_INTENT = 'payment_intent'
-
+    CUSTOMER = 'customer'
+    INVOICE = 'invoice'
+    CHECKOUT = 'checkout'
 
 class Subtype:
     CHARGEABLE = 'chargeable'
@@ -27,6 +32,24 @@ class Subtype:
     DISPUTE_PREFIX = 'dispute'
     REFUND_PREFIX = 'refund'
     PAYMENT_FAILED = 'payment_failed'
+    PAYMENT_SUCCEEDED = 'payment_succeeded'
+    PAID = "paid"
+    UNCOLLECTABLE = 'marked_uncollectible'
+    UPDATED = 'updated'
+    SUBSCRIPTION_CREATED = 'subscription.created'
+    SUBSCRIPTION_UPDATED = 'subscription.updated'
+    SUBSCRIPTION_DELETED = 'subscription.deleted'
+    SESSION_COMPLETED = 'session_completed'
+
+class SubscriptionStatus:
+    ACTIVE = 'active'
+    INCOMPLETE = 'incomplete'
+    INCOMPLETE_EXPIRED = 'incomplete_expired'
+    PAST_DUE = 'past_due'
+    UNPAID = 'unpaid'
+    CANCELED = 'canceled'
+    TRAILING = 'trailing'
+
 
 
 class SourceType:
