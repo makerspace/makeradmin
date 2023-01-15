@@ -64,7 +64,17 @@ common.documentLoaded().then(() => {
                 </div>`;
     }
 
-    function render_key_view(phone: any, membership: any, pending_actions_json: any) {
+    function renderSubscriptionButton(info: any) {
+        // { type: 'membership', active_subscription: member.stripe_membership_subscription_id }
+        console.log(info)
+        if (info['active_subscription'] !== null)
+            return `<a id="unsubscribe-${info["type"]}-button" onclick="" class="uk-button uk-button-danger subscribe-button" >Avprenumera</a>
+                <button id='update-payment-method'>LKfdkl</button>
+            `
+        return `<a id="subscribe-${info["type"]}-button" onclick="" class="uk-button uk-button-danger subscribe-button" >Prenumera</a>`
+    }
+
+    function render_key_view(member: any, membership: any, pending_actions_json: any) {
         let pendingLabaccessDays = 0;
         for (let pending of pending_actions_json.data) {
             if (pending.action.action === "add_labaccess_days") {
@@ -107,9 +117,9 @@ common.documentLoaded().then(() => {
             pendingAccess = `<p>Om du köper ny labaccess i webshoppen så kommer den aktiveras vid nästa <a href=${calendarURL}>nyckelutlämning</a>. <br>If you buy new lab membership time in the webshop, it will activate during the next <a href=${calendarURL}>nyckelutlämning</a></p>`;
         }
 
-        const disabled = (!phone || (!membership.labaccess_active && !membership.special_labaccess_active)) ? "disabled" : ""
+        const disabled = (!member.phone || (!membership.labaccess_active && !membership.special_labaccess_active)) ? "disabled" : ""
         let explanation = "";
-        if (!phone) {
+        if (!member.phone) {
             explanation = "Telefonnummer saknas, fyll i med knappen ovan."
         } else if (!membership.labaccess_active && !membership.special_labaccess_active) {
             if (pendingLabaccessDays === 0) {
@@ -124,9 +134,13 @@ common.documentLoaded().then(() => {
         return `
             <fieldset class="data-uk-margin">
                 <legend><i uk-icon="lock"></i> Medlemsskap</legend>
-                ${renderInfo({ active: membership.membership_active, enddate: membership.membership_end }, membershipStrings)}
-                ${renderInfo({ active: membership.labaccess_active, enddate: membership.labaccess_end }, labaccessStrings)}
-                ${membership.special_labaccess_active ? renderInfo({ active: membership.special_labaccess_active, enddate: membership.special_labaccess_end }, specialLabaccessStrings) : ``}
+                ${renderInfo({ active: membership.membership_active, enddate: membership.membership_end, apiBasePath: apiBasePath }, membershipStrings)}
+                ${renderSubscriptionButton({ type: 'membership', active_subscription: member.stripe_membership_subscription_id, apiBasePath: apiBasePath })}
+
+                ${renderInfo({ active: membership.labaccess_active, enddate: membership.labaccess_end, apiBasePath: apiBasePath }, labaccessStrings)}
+                ${renderSubscriptionButton({ type: 'labaccess', active_subscription: member.stripe_labaccess_subscription_id, apiBasePath: apiBasePath })}
+
+                ${membership.special_labaccess_active ? renderInfo({ active: membership.special_labaccess_active, enddate: membership.special_labaccess_end, apiBasePath: apiBasePath }, specialLabaccessStrings) : ``}
                 ${pendingAccess}
                 ${accessyInvite}
             </fieldset>`;
@@ -196,7 +210,7 @@ common.documentLoaded().then(() => {
                     </div>
                 </fieldset>
 
-                ${render_key_view(member.phone, membership, pending_actions_json)}
+                ${render_key_view(member, membership, pending_actions_json)}
             </form>`;
         document.getElementById("accessy-invite-button")!.onclick = (e) => {
             e.preventDefault();
@@ -208,6 +222,92 @@ common.documentLoaded().then(() => {
             return false;
         };
 
+
+        let urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('subscription_type') !== null) {
+            console.log("Resuming subscription")
+            let start_subscription_url = window.apiBasePath + `/webshop/member/current/start_subscription`;
+            
+            common.ajax("POST", start_subscription_url, {
+                subscription_type: urlParams.get("subscription_type"),
+                checkout_session_id: urlParams.get("checkout_session_id"),
+                success_url: window.location.href.split('?')[0],
+            }).then((res) => {
+                console.log(res)
+                window.location.search = "";
+            }).catch((e) => {
+                UIkit.modal.alert(`Error: ${e.message}`)
+            });
+        }
+
+        var subscribeButtons = document.getElementsByClassName('subscribe-button')
+        for (let i = 0; i < subscribeButtons.length; i++) {
+            let node = subscribeButtons[i] as HTMLButtonElement;
+            node!.onclick = (e) => {
+                let target: Element = e.target as Element;
+                e.preventDefault();
+                let tmp = target.id.split('-');
+                if (tmp[0] == 'subscribe') {
+                    let next_step_url = window.location.href.split('?')[0] + `?subscription_type=${tmp[1]}&checkout_session_id={CHECKOUT_SESSION_ID}`
+                    let url = `${window.apiBasePath}/webshop/setup_payment_method`
+                    console.log(next_step_url)
+                    console.log(`Redirecting to ${url}`)
+                    common.ajax("POST", url, {
+                        success_url: next_step_url,
+                        cancel_url: window.location.href,
+                    }).then((res) => {
+                        window.location.href = res.data;
+                    });
+                } else {
+                    let cancel_subscription_url = window.apiBasePath + `/webshop/member/current/cancel_subscription`;
+
+                    common.ajax("POST", cancel_subscription_url, {
+                        subscription_type: tmp[1],
+                        success_url: window.location.href.split('?')[0],
+                    }).then((res) => {
+                        console.log(res)
+                        if (window.location.search != "") {
+                            window.location.search = "";
+                        } else {
+                            window.location.reload()
+                        }
+                    }).catch((e) => {
+                        UIkit.modal.alert(`Error: ${e.message}`)
+                    });
+                }
+
+                /*
+
+                common.ajax("POST", `${window.apiBasePath}/webshop/member/current/${tmp[0] == 'subscribe' ? 'start' : 'cancel'}_subscription`, { subscription_type: tmp[1] })
+                    .then((res) => {
+                        console.log(res);
+                        if (res.status && res.status === 'ok') {
+                            if (res.data.invoice_url) {
+                                window.open(res.data.invoice_url);
+                            } else if (res.data.reload) {
+                                window.location.reload()
+                            }
+                        }
+                    })
+                    .catch((e) => {
+                        UIkit.modal.alert(`Error: ${e.message}`)
+                    })
+                    */
+            }
+        }
+
+/*
+        document.getElementById("update-payment-method")!.onclick = (e) => {
+            e.preventDefault()
+            let url = apiBasePath + "/webshop/setup_payment_method"
+            console.log(url)
+            common.ajax("POST", url, {success_url: window.location.href, cancel_url: window.location.href }).then((res) => {
+                if (res.status === "ok") {
+                    window.location.href = res.data;
+                }
+            })
+        }
+*/
         let pin_code_hidden = true;
         document.getElementById("toggle_show_pin_code")!.onclick = (e) => {
             e.preventDefault();
@@ -235,6 +335,7 @@ common.documentLoaded().then(() => {
             // Render login
             login.render_login(root, null, null);
         } else {
+            console.log(e)
             UIkit.modal.alert("<h2>Failed to load member info</h2>");
         }
     });

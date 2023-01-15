@@ -8,6 +8,12 @@ from shop.models import Transaction
 from shop.stripe_charge import charge_transaction, create_stripe_charge
 from shop.stripe_constants import STRIPE_SIGNING_SECRET, Type, Subtype, SourceType
 from shop.transactions import get_source_transaction, commit_fail_transaction, PaymentFailed
+from membership.membership import add_membership_days
+from service.db import db_session
+from membership.models import Member
+from membership.models import Span
+from shop.stripe_checkout import SubscriptionTypes
+from datetime import datetime
 
 logger = getLogger('makeradmin')
 
@@ -92,9 +98,131 @@ def stripe_payment_intent_event(subtype, event):
     else:
         raise IgnoreEvent(f"payment_intent event subtype {subtype} for transaction {transaction.id}")
 
+def stripe_invoice_event(subtype : Subtype, event:any):
+    #FIXME: In the case of uncollectable subtype, we should probably e-mail the invoice to the member
+
+    if (subtype == Subtype.PAID):
+        print(f"Processing paid invoice {event['id']}")
+        # Member has paid something and we can now add things accordingly...
+        invoice = event["data"]['object']
+
+        for line in invoice["lines"]['data']:
+            subscription_id = line['subscription']
+            
+            # Ignore non-subscription lines in invoices
+            if (subscription_id == None):
+                continue
+
+            subscription = stripe.Subscription.retrieve(subscription_id)
+
+            # We ignore any items that doesn't contain the right metadata
+            if ("makerspace_user_id" not in subscription["metadata"] or "subscription_type" not in subscription["metadata"]):
+                print(f'Subscription {subscription_id} does not have metadata indicating an actionable subscription.')
+                continue
+            member_id = int(subscription["metadata"]["makerspace_user_id"])
+            subscription_type = subscription["metadata"]["subscription_type"]
+
+            span_type = None
+            if (subscription_type == SubscriptionTypes.LAB):
+                span_type = Span.LABACCESS
+            elif (subscription_type == SubscriptionTypes.MEMBERSHIP):
+                span_type = Span.MEMBERSHIP
+
+            if (span_type is None):
+                print(f"Invalid subscription type {subscription_type} paid in invoice {invoice['id']}.")
+                continue
+
+            member:Member = db_session.query(Member).get(member_id)
+            
+            if (subscription_type == SubscriptionTypes.LAB):
+                member.stripe_labaccess_subscription_id = subscription_id
+            elif (subscription_type == SubscriptionTypes.MEMBERSHIP):
+                member.stripe_membership_subscription_id = subscription_id
+
+            end_ts = int(line["period"]["end"])
+            start_ts =int(line["period"]["start"])
+
+            # Divide the timespan down to days
+            days = (end_ts-start_ts)/86400
+            try:
+                new_memberships = add_membership_days(member_id=member_id, span_type=span_type, days=days,creation_reason=f"Subscription invoice {invoice['id']} paid")
+                print(f"New memberships for member {member.member_number}\n{new_memberships}")
+            except Exception as e:
+                print(f"ERROR: {e}")
+        
+        db_session.flush()
+        return
+
+def stripe_customer_event(event_subtype:str, event:any):
+
+    try:
+        subscription = event["data"]["object"]
+        meta = subscription["metadata"]
+        
+        if ("makerspace_user_id" not in meta):
+            print(f"Ignoring customer event {event['id']} without correct metadata")
+            return 
+
+        member_id = int(meta["makerspace_user_id"])
+        member:Member = db_session.query(Member).get(member_id)
+        if (event_subtype == Subtype.SUBSCRIPTION_CREATED):
+            # We end up here if a schedule starts the subscription
+            if (meta['subscription_type'] == SubscriptionTypes.MEMBERSHIP):
+                if (member.stripe_membership_subscription_id != None):
+                    print(
+                        f"WARNING! New subscripton {subscription['id']} will overwrite {member.stripe_membership_subscription_id}")
+
+                member.stripe_membership_subscription_id = subscription['id']
+            elif (meta['subscription_type'] == SubscriptionTypes.LAB):
+                if (member.stripe_labaccess_subscription_id != None):
+                    print(
+                        f"WARNING! New subscripton {subscription['id']} will overwrite {member.stripe_labaccess_subscription_id}")
+                member.stripe_labaccess_subscription_id = subscription['id']
+            pass
+
+        elif (event_subtype == Subtype.SUBSCRIPTION_DELETED):
+            if (meta["subscription_type"] == SubscriptionTypes.LAB):
+                if (member.stripe_labaccess_subscription_id == subscription['id']):
+                    member.stripe_labaccess_subscription_id = None
+                else:
+                    print(f"Ignoring delete notification for subscription {subscription['id']} on {member} since it isn't current. (Current is {member.stripe_labaccess_subscription_id})")
+            elif(meta["subscription_type"] == SubscriptionTypes.MEMBERSHIP):
+                if (member.stripe_membership_subscription_id == subscription['id']):
+                    member.stripe_membership_subscription_id = None
+                else:
+                    print(f"Ignoring delete notification for subscription {subscription['id']} on {member} since it isn't current. (Current is {member.stripe_membership_subscription_id})")
+            db_session.flush()
+
+    except Exception as e:
+        print(e)
+
+
+def stripe_checkout_event(event_subtype:str, event:any):
+    if (event_subtype == Subtype.SESSION_COMPLETED):
+        # This event is triggered when we go thru the setup intent flow.
+        # This typically happens as part of the subscription flow in MakerAdmin but
+        # could happen at other times. For now, we capture this event and set
+        # the default invoice payment method to the payment method in the setup
+        # intent. We might want to consider updating the default source instead.
+        checkout_session = event['data']['object']
+
+        # Only setup intents are of our concern. If a checkout from the webshop
+        # triggers the event, we should see other modes than setup.
+        if (checkout_session['mode'] == 'setup'):
+            setup_intent = stripe.SetupIntent.retrieve(checkout_session['setup_intent'])
+            if (setup_intent == None):
+                return
+            payment_method = setup_intent['payment_method']
+            customer = setup_intent['customer']
+            print(f"Updating default invoice payment method to {payment_method} for customer {customer}")
+            stripe.Customer.update(customer, invoice_settings = {
+                    'default_payment_method' : payment_method,
+                    },
+                    )
+
 
 def stripe_event(event):
-    logger.info(f"got stripe event of type {event.type}")
+    logger.info(f"got stripe event of type {event.type} {event['id']}")
 
     try:
         event_type, event_subtype = event.type.split('.', 1)
@@ -106,6 +234,16 @@ def stripe_event(event):
 
         elif event_type == Type.PAYMENT_INTENT:
             stripe_payment_intent_event(event_subtype, event)
+        
+        elif event_type == Type.INVOICE:
+            stripe_invoice_event(event_subtype, event)
+        
+        elif event_type == Type.CUSTOMER:
+            stripe_customer_event(event_subtype, event)
+        
+        elif event_type == Type.CHECKOUT:
+            stripe_checkout_event(event_subtype, event)
+        
     
     except IgnoreEvent as e:
         logger.info(f"ignoring event, {str(e)}")
@@ -160,7 +298,3 @@ def process_stripe_events(start=None, source_id=None, type=None):
         stripe_event(event)
         
     return event_count
-
-
-
-
