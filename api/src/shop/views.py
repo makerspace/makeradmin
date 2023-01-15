@@ -1,4 +1,4 @@
-from flask import g, request, send_file, make_response
+from flask import g, request, send_file, make_response, redirect, jsonify
 from sqlalchemy.exc import NoResultFound
 
 from multiaccessy.invite import AccessyInvitePreconditionFailed, ensure_accessy_labaccess
@@ -11,11 +11,11 @@ from shop.entities import product_image_entity, transaction_content_entity, tran
     transaction_action_entity, product_entity, category_entity, product_action_entity
 from shop.models import TransactionContent, ProductImage
 from shop.pay import pay, register
-<<<<<<< HEAD
 
 # Next two needed?
 from shop.stripe_payment_intent import confirm_stripe_payment_intent
 from shop.stripe_checkout import create_stripe_checkout_session
+from shop.stripe_checkout import start_subscription, cancel_subscription
 
 from shop.stripe_payment_intent import confirm_stripe_payment_intent
 from shop.stripe_checkout import create_stripe_checkout_session
@@ -25,6 +25,8 @@ from shop.shop_data import pending_actions, member_history, receipt, get_product
 from shop.stripe_event import stripe_callback, process_stripe_events
 from shop.stripe_payment_intent import confirm_stripe_payment_intent
 from shop.transactions import ship_labaccess_orders
+
+from shop.stripe_checkout import SubscriptionTypes
 
 service.entity_routes(
     path="/category",
@@ -147,6 +149,16 @@ def accessy_invite():
         raise PreconditionFailed(message=str(e))
     
 
+@service.route("/member/current/start_subscription", method=POST, permission=USER)
+def start_subscription_route(subscription_type=Arg(str, required=True), checkout_session_id=Arg(str, required=False), success_url=Arg(str, required=True)):
+    return start_subscription(member_id=g.user_id, subscription_type=subscription_type, checkout_session_id=checkout_session_id, success_url=success_url)
+
+
+@service.route("/member/current/cancel_subscription", method=POST, permission=USER)
+def cancel_subscription_route(subscription_type=Arg(str, required=True), success_url=Arg(str, required=False)):
+    return cancel_subscription(member_id=g.user_id, subscription_type=subscription_type)
+
+
 @service.route("/member/<int:member_id>/ship_labaccess_orders", method=POST, permission=MEMBER_EDIT)
 def ship_labaccess_orders_endpoint(member_id=None):
     try:
@@ -183,7 +195,6 @@ def public_image(image_id):
 def register_page_data():
     return {"membershipProducts": get_membership_products(), "productData": all_product_data()}
 
-# @service.route("/pay", method=POST, permission=USER, commit_on_error=True)
 @service.route("/ship_orders", method=POST, permission=WEBSHOP, commit_on_error=True)
 def ship_orders_route():
     ship_orders(ship_add_labaccess=True)
@@ -192,8 +203,13 @@ def ship_orders_route():
 @service.route("/checkout", method=POST, permission=USER, commit_on_error=True)
 # @service.route("/pay", method=POST, permission=USER, commit_on_error=True)
 def pay_route():
-    return create_stripe_checkout_session(request.json, g.user_id)
+    return create_stripe_checkout_session(g.user_id, data=request.json)
 
+
+# Used to just initiate a capture of a payment method via a setup intent
+@service.route("/setup_payment_method", method=POST, permission=USER, commit_on_error=True)
+def stripe_payment_method_route():
+    return create_stripe_checkout_session(g.user_id, data=request.json, mode='setup')
 
 @service.route("/confirm_payment", method=POST, permission=PUBLIC, commit_on_error=True)
 def confirm_payment_route():
