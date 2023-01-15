@@ -44,6 +44,9 @@ class Member(Base):
     member_number = Column(Integer, unique=True)
     labaccess_agreement_at = Column(DateTime)
     pin_code = Column(String(30))
+    stripe_customer_id = Column(String(64))
+    stripe_membership_subscription_id = Column(String(64))
+    stripe_labaccess_subscription_id = Column(String(64))
 
     @validates('phone')
     def validate_phone(self, key, value):
