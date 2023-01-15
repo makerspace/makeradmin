@@ -162,7 +162,7 @@ class KeyHandoutForm extends React.Component {
     
     render() {
         const {member} = this.props;
-        const {can_save_member, labaccess_enddate, membership_enddate, special_enddate, pending_labaccess_days} = this.state;
+        const {can_save_member, can_save_key, labaccess_enddate, membership_enddate, special_enddate, pending_labaccess_days} = this.state;
         const {accessy_groups, accessy_in_org, accessy_pending_invites} = this.state;
         const has_signed = member.labaccess_agreement_at !== null;
 

@@ -276,6 +276,9 @@ class AccessySession:
         received_item_count = 0
         while total_item_count is None or received_item_count < total_item_count:
             data = self._get(url + f"?page_number={page_number}&page_size={page_size}")
+            if ("items" not in data):
+                break
+            
             current_items = data["items"]
 
             items.extend(current_items)
