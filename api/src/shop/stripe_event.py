@@ -211,15 +211,17 @@ def stripe_checkout_event(event_subtype:str, event:any):
         if (checkout_session['mode'] == 'setup'):
             setup_intent = stripe.SetupIntent.retrieve(checkout_session['setup_intent'])
             if (setup_intent == None):
+                print("No setup intent found!")
                 return
             payment_method = setup_intent['payment_method']
             customer = setup_intent['customer']
             print(f"Updating default invoice payment method to {payment_method} for customer {customer}")
-            stripe.Customer.update(customer, invoice_settings = {
+            stripe.Customer.modify(customer, invoice_settings = {
                     'default_payment_method' : payment_method,
                     },
                     )
-
+    else:
+        print(f"Unknown subtype {event_subtype}")
 
 def stripe_event(event):
     logger.info(f"got stripe event of type {event.type} {event['id']}")
