@@ -39,7 +39,7 @@ class Subtype:
     SUBSCRIPTION_CREATED = 'subscription.created'
     SUBSCRIPTION_UPDATED = 'subscription.updated'
     SUBSCRIPTION_DELETED = 'subscription.deleted'
-    SESSION_COMPLETED = 'session_completed'
+    SESSION_COMPLETED = 'session.completed'
 
 class SubscriptionStatus:
     ACTIVE = 'active'
