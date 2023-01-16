@@ -69,9 +69,9 @@ common.documentLoaded().then(() => {
         console.log(info)
         if (info['active_subscription'] !== null)
             return `<a id="unsubscribe-${info["type"]}-button" onclick="" class="uk-button uk-button-danger subscribe-button" >Avprenumera</a>
-                <button id='update-payment-method'>LKfdkl</button>
+                <a name='update-payment-method' class="uk-button uk-button-danger update-payment-button">Uppdatera betalningsmetod</a>
             `
-        return `<a id="subscribe-${info["type"]}-button" onclick="" class="uk-button uk-button-danger subscribe-button" >Prenumera</a>`
+        return `<a id="subscribe-${info["type"]}-button" onclick="" class="uk-button uk-button-danger subscribe-button">Prenumera</a>`
     }
 
     function render_key_view(member: any, membership: any, pending_actions_json: any) {
@@ -240,7 +240,7 @@ common.documentLoaded().then(() => {
             });
         }
 
-        var subscribeButtons = document.getElementsByClassName('subscribe-button')
+        let subscribeButtons = document.getElementsByClassName('subscribe-button')
         for (let i = 0; i < subscribeButtons.length; i++) {
             let node = subscribeButtons[i] as HTMLButtonElement;
             node!.onclick = (e) => {
@@ -275,39 +275,23 @@ common.documentLoaded().then(() => {
                         UIkit.modal.alert(`Error: ${e.message}`)
                     });
                 }
-
-                /*
-
-                common.ajax("POST", `${window.apiBasePath}/webshop/member/current/${tmp[0] == 'subscribe' ? 'start' : 'cancel'}_subscription`, { subscription_type: tmp[1] })
-                    .then((res) => {
-                        console.log(res);
-                        if (res.status && res.status === 'ok') {
-                            if (res.data.invoice_url) {
-                                window.open(res.data.invoice_url);
-                            } else if (res.data.reload) {
-                                window.location.reload()
-                            }
-                        }
-                    })
-                    .catch((e) => {
-                        UIkit.modal.alert(`Error: ${e.message}`)
-                    })
-                    */
             }
         }
 
-/*
-        document.getElementById("update-payment-method")!.onclick = (e) => {
-            e.preventDefault()
-            let url = apiBasePath + "/webshop/setup_payment_method"
-            console.log(url)
-            common.ajax("POST", url, {success_url: window.location.href, cancel_url: window.location.href }).then((res) => {
-                if (res.status === "ok") {
-                    window.location.href = res.data;
-                }
-            })
+        let updatePaymentButtons = document.getElementsByName('update-payment-method');
+        for (let i = 0; i < updatePaymentButtons.length; i++) {
+            let btn = updatePaymentButtons[i] as HTMLButtonElement;
+            btn.onclick = (e) => {
+                e.preventDefault()
+                let next_step_url = window.location.href.split('?')[0];
+                let url = apiBasePath + "/webshop/setup_payment_method"
+                common.ajax("POST", url, {success_url: next_step_url, cancel_url: window.location.href }).then((res) => {
+                    if (res.status === "ok") {
+                        window.location.href = res.data;
+                    }
+                })
+            }
         }
-*/
         let pin_code_hidden = true;
         document.getElementById("toggle_show_pin_code")!.onclick = (e) => {
             e.preventDefault();
