@@ -49,7 +49,7 @@ def get_stripe_subscriptions(stripe_customer_id:str, active_only=True):
 def get_stripe_customer(member_info:Member):
   try:
     customer_search_result = stripe.Customer.search(
-      query=f"email~'{member_info.email}'"
+      query=f"metadata['{MSMetaKeys.MEMBER_NUMBER}']:'{member_info.member_number}'"
       )
 
     # If we find exactly one customer matching the e-mail, we return it
