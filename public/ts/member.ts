@@ -226,7 +226,7 @@ common.documentLoaded().then(() => {
         let urlParams = new URLSearchParams(window.location.search);
         if (urlParams.get('subscription_type') !== null) {
             console.log("Resuming subscription")
-            let start_subscription_url = window.apiBasePath + `/webshop/member/current/start_subscription`;
+            let start_subscription_url = window.apiBasePath + `/webshop/member/current/subscription`;
             
             common.ajax("POST", start_subscription_url, {
                 subscription_type: urlParams.get("subscription_type"),
@@ -259,9 +259,9 @@ common.documentLoaded().then(() => {
                         window.location.href = res.data;
                     });
                 } else {
-                    let cancel_subscription_url = window.apiBasePath + `/webshop/member/current/cancel_subscription`;
+                    let cancel_subscription_url = window.apiBasePath + `/webshop/member/current/subscription`;
 
-                    common.ajax("POST", cancel_subscription_url, {
+                    common.ajax("DELETE", cancel_subscription_url, {
                         subscription_type: tmp[1],
                         success_url: window.location.href.split('?')[0],
                     }).then((res) => {

@@ -2,7 +2,7 @@ from flask import g, request, send_file, make_response, redirect, jsonify
 from sqlalchemy.exc import NoResultFound
 
 from multiaccessy.invite import AccessyInvitePreconditionFailed, ensure_accessy_labaccess
-from service.api_definition import WEBSHOP, WEBSHOP_EDIT, PUBLIC, GET, USER, POST, Arg, WEBSHOP_ADMIN, MEMBER_EDIT
+from service.api_definition import WEBSHOP, WEBSHOP_EDIT, PUBLIC, GET, USER, POST, DELETE, Arg, WEBSHOP_ADMIN, MEMBER_EDIT
 from service.db import db_session
 from service.entity import OrmSingeRelation, OrmSingleSingleRelation
 from service.error import PreconditionFailed
@@ -149,12 +149,12 @@ def accessy_invite():
         raise PreconditionFailed(message=str(e))
     
 
-@service.route("/member/current/start_subscription", method=POST, permission=USER)
+@service.route("/member/current/subscription", method=POST, permission=USER)
 def start_subscription_route(subscription_type=Arg(str, required=True), checkout_session_id=Arg(str, required=False), success_url=Arg(str, required=True)):
     return start_subscription(member_id=g.user_id, subscription_type=subscription_type, checkout_session_id=checkout_session_id, success_url=success_url)
 
 
-@service.route("/member/current/cancel_subscription", method=POST, permission=USER)
+@service.route("/member/current/subscription", method=DELETE, permission=USER)
 def cancel_subscription_route(subscription_type=Arg(str, required=True), success_url=Arg(str, required=False)):
     return cancel_subscription(member_id=g.user_id, subscription_type=subscription_type)
 
