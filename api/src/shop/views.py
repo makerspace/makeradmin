@@ -16,6 +16,7 @@ from shop.pay import pay, register
 from shop.stripe_payment_intent import confirm_stripe_payment_intent
 from shop.stripe_checkout import create_stripe_checkout_session
 from shop.stripe_checkout import start_subscription, cancel_subscription
+from shop.stripe_checkout import open_stripe_customer_portal
 
 from shop.stripe_payment_intent import confirm_stripe_payment_intent
 from shop.stripe_checkout import create_stripe_checkout_session
@@ -157,6 +158,11 @@ def start_subscription_route(subscription_type=Arg(str, required=True), checkout
 @service.route("/member/current/subscription", method=DELETE, permission=USER)
 def cancel_subscription_route(subscription_type=Arg(str, required=True), success_url=Arg(str, required=False)):
     return cancel_subscription(member_id=g.user_id, subscription_type=subscription_type)
+
+
+@service.route("/member/current/stripe_customer_portal", method=GET, permission=PUBLIC)
+def open_stripe_customer_portal_route():
+    return open_stripe_customer_portal(g.user_id)
 
 
 @service.route("/member/<int:member_id>/ship_labaccess_orders", method=POST, permission=MEMBER_EDIT)

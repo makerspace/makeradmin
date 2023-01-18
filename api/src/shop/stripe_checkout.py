@@ -240,3 +240,13 @@ def create_stripe_checkout_session(member_id:int, data:any = None, mode='payment
   # TODO: Handle normal shop payments?
 
     return checkout_session.url
+
+def open_stripe_customer_portal(member_id:int):
+  """Create a customer portal session and return the URL to which the user should be redirected."""
+  member: Member = db_session.query(Member).get(member_id)
+  stripe_customer = get_stripe_customer(member)
+
+  billing_portal_session = stripe.billing_portal.Session.create(customer=stripe_customer['id'])
+  print(billing_portal_session)
+
+  return billing_portal_session.url

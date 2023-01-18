@@ -68,9 +68,7 @@ common.documentLoaded().then(() => {
         // { type: 'membership', active_subscription: member.stripe_membership_subscription_id }
         console.log(info)
         if (info['active_subscription'] !== null)
-            return `<a id="unsubscribe-${info["type"]}-button" onclick="" class="uk-button uk-button-danger subscribe-button" >Avprenumera</a>
-                <a name='update-payment-method' class="uk-button uk-button-danger update-payment-button">Uppdatera betalningsmetod</a>
-            `
+            return `<a id="unsubscribe-${info["type"]}-button" onclick="" class="uk-button uk-button-danger subscribe-button" >Avprenumera</a>`
         return `<a id="subscribe-${info["type"]}-button" onclick="" class="uk-button uk-button-danger subscribe-button">Prenumera</a>`
     }
 
@@ -131,6 +129,8 @@ common.documentLoaded().then(() => {
 
         const accessyInvite = `<p><button id="accessy-invite-button" ${disabled} class="uk-button uk-button-danger" onclick="">Skicka Accessy-inbjudan</button></button> ${explanation}</p>`
 
+        const stripeCustomerPortal = `<p><button id="stripe-customer-portal" class="uk-button uk-button-danger stripe-customer-portal" onclick="">Hantera betalningsmetoder</button></p>`
+        
         return `
             <fieldset class="data-uk-margin">
                 <legend><i uk-icon="lock"></i> Medlemsskap</legend>
@@ -141,6 +141,7 @@ common.documentLoaded().then(() => {
                 ${renderSubscriptionButton({ type: 'labaccess', active_subscription: member.stripe_labaccess_subscription_id, apiBasePath: apiBasePath })}
 
                 ${membership.special_labaccess_active ? renderInfo({ active: membership.special_labaccess_active, enddate: membership.special_labaccess_end, apiBasePath: apiBasePath }, specialLabaccessStrings) : ``}
+                ${stripeCustomerPortal}
                 ${pendingAccess}
                 ${accessyInvite}
             </fieldset>`;
@@ -278,21 +279,17 @@ common.documentLoaded().then(() => {
             }
         }
 
-        let updatePaymentButtons = document.getElementsByName('update-payment-method');
-        for (let i = 0; i < updatePaymentButtons.length; i++) {
-            let btn = updatePaymentButtons[i] as HTMLButtonElement;
-            btn.onclick = (e) => {
-                e.preventDefault()
-                let next_step_url = window.location.href.split('?')[0];
-                let url = apiBasePath + "/webshop/setup_payment_method"
-                common.ajax("POST", url, {success_url: next_step_url, cancel_url: window.location.href }).then((res) => {
-                    if (res.status === "ok") {
-                        window.location.href = res.data;
-                    }
-                })
-            }
+        let stripeCustomerPortalButton = document.getElementById('stripe-customer-portal') as HTMLButtonElement;
+        stripeCustomerPortalButton.onclick = (evt) => {
+            evt.preventDefault();
+            common.ajax("GET", `${window.apiBasePath}/webshop/member/current/stripe_customer_portal`, {}).then((res) => {
+                if (res.status === 'ok') {
+                    window.location.href = res.data;
+                }
+            });
         }
-        let pin_code_hidden = true;
+
+       let pin_code_hidden = true;
         document.getElementById("toggle_show_pin_code")!.onclick = (e) => {
             e.preventDefault();
             pin_code_hidden = ! pin_code_hidden;
