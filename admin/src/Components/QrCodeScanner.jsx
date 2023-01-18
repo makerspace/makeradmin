@@ -1,4 +1,4 @@
-import React from 'react'
+import React from 'react';
 import { Html5Qrcode } from 'html5-qrcode';
 
 class QrCodeScanner extends React.Component {
@@ -7,14 +7,14 @@ class QrCodeScanner extends React.Component {
     }
 
     componentDidMount() {
-        if (!(this.props.qrCodeSuccessCallback )) {
-            throw "qrCodeSuccessCallback is required";
+        if (!(this.props.qrCodeSuccessCallback)) {
+            throw new Error("qrCodeSuccessCallback is required");
         }
 
 
         const config = {
             qrbox: { width: 300, height: 300 } 
-        }
+        };
 
         this.html5QrCode = new Html5Qrcode(/* element id */ "QrReader");
         this.html5QrCode.start({ facingMode: { exact: "environment"}}, config, this.props.qrCodeSuccessCallback);
@@ -23,8 +23,11 @@ class QrCodeScanner extends React.Component {
     }
 
     componentWillUnmount() {
-        this.html5QrCode.clear()
-        // .catch(err => { console.log(`Error during qrcode unmount ${err}`) });
+        try {
+            this.html5QrCode.stop()
+        } catch(err) {
+            console.error(`Error during qrcode unmount ${err}`);
+        }
     }
 
 }

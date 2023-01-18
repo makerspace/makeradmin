@@ -1,11 +1,6 @@
 import React from 'react';
-import { Link } from "react-router-dom";
-import Button from '../Components/Button';
-import QrCodeScanner from '../Components/QrCodeScanner'
-
-const handleClick = () => {
-    console.log("test");
-  }
+// import Button from '../Components/Button';
+import QrCodeScanner from '../Components/QrCodeScanner';
 
 class BoxTerminator extends React.Component {
 
@@ -24,7 +19,7 @@ class BoxTerminator extends React.Component {
         );
     }
     scanCallback(message) {
-        console.dir(message)
+        console.dir(message);
     }
 }
 
