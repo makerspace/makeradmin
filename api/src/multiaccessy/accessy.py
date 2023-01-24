@@ -8,6 +8,7 @@ from random import random
 from time import sleep
 from typing import Union
 
+import dateutil.parser
 import requests
 
 from service.config import config
@@ -65,15 +66,15 @@ def request(method, path, token=None, json=None, max_tries=8, err_msg=None):
 
 @dataclass
 class AccessyDoor:
-    id: UUID
+    id: UUID = field(repr=False)
     name: str
 
 
 @dataclass
 class Access:
     dt: datetime
-    door: AccessyDoor
     name: str
+    door: AccessyDoor = field(repr=False)
 
 
 @dataclass
@@ -219,13 +220,13 @@ class AccessySession:
             door.id = self._get_asset_id(door.id)
         return doors
 
-    def get_all_accesses(self, door: AccessyDoor):
+    def get_all_accesses(self, door: AccessyDoor) -> list[Access]:
         response = self._get_accesses(door.id)
         accesses = []
         for item in response["items"]:
-            dt = item["date"]
+            dt = dateutil.parser.parse(item["date"])
             name = item["user"]
-            accesses.append(Access(dt, door, name))
+            accesses.append(Access(dt, name, door))
         return accesses
 
     ################################################
