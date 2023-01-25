@@ -9,8 +9,9 @@ def dt2unix(dt: datetime) -> int:
     return int(dt.timestamp())
 
 
+unix_time_0 = datetime(1970, 1, 1, 1)
 def unix2dt(unixtime: int) -> datetime:
-    return datetime(1970, 1, 1, 1) + timedelta(seconds=unixtime)
+    return unix_time_0 + timedelta(seconds=unixtime)
 
 
 def ensure_init_db(con: sqlite3.Connection):

@@ -4,14 +4,14 @@ from unittest import TestCase
 
 from multiaccessy.accessy import AccessyDoor, Access
 from multiaccessy.unlock_statistics import (ensure_init_db, ensure_door_exists,
-    insert_accesses, select_accesses, unix2dt)
+    insert_accesses, select_accesses, unix_time_0)
 
 
 class AccessyStatisticsTest(TestCase):
     def setUp(self):
         self.con = sqlite3.connect(":memory:")
         self.test_door = AccessyDoor("uuid-door", "Test door")
-        self.access = Access(unix2dt(0), "FirstName LastName", self.test_door)
+        self.access = Access(unix_time_0, "FirstName LastName", self.test_door)
         ensure_init_db(self.con)
 
     def tearDown(self) -> None:
