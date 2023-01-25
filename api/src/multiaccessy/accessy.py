@@ -64,6 +64,19 @@ def request(method, path, token=None, json=None, max_tries=8, err_msg=None):
 
 
 @dataclass
+class AccessyDoor:
+    id: UUID
+    name: str
+
+
+@dataclass
+class Access:
+    dt: datetime
+    door: AccessyDoor
+    name: str
+
+
+@dataclass
 class AccessyMember:
     user_id: Union[UUID, None] = None
     # Get information below later
@@ -198,6 +211,22 @@ class AccessySession:
                 group_descriptions.append(self._get_group_description(group_id))
 
         return group_descriptions
+    
+    def get_all_doors(self) -> list[AccessyDoor]:
+        items = self._get_doors()
+        doors = [AccessyDoor(item["id"], item["name"]) for item in items]
+        for door in doors:
+            door.id = self._get_asset_id(door.id)
+        return doors
+
+    def get_all_accesses(self, door: AccessyDoor):
+        response = self._get_accesses(door.id)
+        accesses = []
+        for item in response["items"]:
+            dt = item["date"]
+            name = item["user"]
+            accesses.append(Access(dt, door, name))
+        return accesses
 
     ################################################
     # Internal methods
@@ -382,6 +411,15 @@ class AccessySession:
                 return self._user_ids_to_accessy_members([user_id])[0]
         else:
             return None
+    
+    def _get_asset_id(self, door_id: UUID) -> UUID:
+        return self._get(f"/asset/admin/organization/{self.organization_id()}/asset/{door_id}/asset-publication")["id"]
+
+    def _get_doors(self):
+        return self._get_json_paginated(f"/asset/admin/organization/{self.organization_id()}/asset")
+    
+    def _get_accesses(self, door_id: UUID):
+        return self._get(f"/asset/admin/asset-publication/{door_id}/invoke-activity?cursor=&page_size=1000&")
 
 
 accessy_session = AccessySession()
