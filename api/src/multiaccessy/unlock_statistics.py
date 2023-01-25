@@ -61,8 +61,8 @@ def ensure_door_exists(con: sqlite3.Connection, door: AccessyDoor) -> str:
         return f"Adding new door {door.name!r}"
     elif (result_door_name := result[1]) != door.name:
         cur.execute("""
-        UPDATE SET name = :name
-        FROM doors
+        UPDATE doors
+        SET name = :name
         WHERE accessy_id = :id
         ;""", dict(id=door.id, name=door.name))
         con.commit()
