@@ -1,7 +1,5 @@
-import collections
 from datetime import datetime, timedelta
 import sqlite3
-import sys
 
 from multiaccessy.accessy import accessy_session, Access, AccessyDoor
 from service.config import config
@@ -26,17 +24,9 @@ def ensure_init_db(con: sqlite3.Connection):
     CREATE TABLE IF NOT EXISTS
     doors (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        assetPublicationId TEXT UNIQUE ON CONFLICT ABORT,
+        accessy_id TEXT UNIQUE ON CONFLICT ABORT, -- assetPublicationId in Accessy
         name TEXT
     );""")
-
-    # cur.execute("""
-    # CREATE TABLE IF NOT EXISTS
-    # members (
-    #     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    #     uuid TEXT UNIQUE ON CONFLICT ABORT,
-    #     name TEXT
-    # );""")
 
     cur.execute("""
     CREATE TABLE IF NOT EXISTS
@@ -44,7 +34,6 @@ def ensure_init_db(con: sqlite3.Connection):
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         door INTEGER REFERENCES doors ( id ),
         person TEXT,
-        -- person INTEGER REFERENCES members ( id ),
         unixtime INTEGER,
         CONSTRAINT timecombo UNIQUE (
             door, person, unixtime
@@ -58,17 +47,18 @@ def ensure_door_exists(con: sqlite3.Connection, door: AccessyDoor):
     cur = con.cursor()
 
     cur.execute("""
-    SELECT assetPublicationId, name
+    SELECT accessy_id, name
     FROM doors
-    WHERE assetPublicationId = :id
+    WHERE accessy_id = :id
     ;""", dict(id=door.id))
     result = cur.fetchone()
     door_exists = result is not None
 
     if not door_exists:
+        print(f"Adding new door {door.name!r}")
         cur.execute("""
         INSERT OR IGNORE INTO doors
-        ( assetPublicationId, name )
+        ( accessy_id, name )
         VALUES ( :id, :name )
         ;""", dict(id=door.id, name=door.name))
         con.commit()
@@ -77,7 +67,7 @@ def ensure_door_exists(con: sqlite3.Connection, door: AccessyDoor):
         cur.execute("""
         UPDATE SET name = :name
         FROM doors
-        WHERE assetPublicationId = :id
+        WHERE accessy_id = :id
         ;""", dict(id=door.id, name=door.name))
         con.commit()
 
@@ -90,10 +80,9 @@ def insert_accesses(con: sqlite3.Connection, accesses: list[Access]) -> int:
         door, person, unixtime
     ) SELECT doors.id, :person, :unixtime
     FROM doors
-    WHERE doors.assetPublicationId = :door_id
-    ;""", (dict(door_id=access.door.id, person=access.name, unixtime=dt2unix(access.dt)) for access in accesses))
+    WHERE doors.accessy_id = :accessy_door_id
+    ;""", (dict(accessy_door_id=access.door.id, person=access.name, unixtime=dt2unix(access.dt)) for access in accesses))
     con.commit()
-    print(f"Updated {cur.rowcount} rows")
     return cur.rowcount
 
 
@@ -111,34 +100,7 @@ for door in doors:
 
 accesses: list[Access] = []
 for door in doors:
+    print(f"Getting unlocks for door {door.name!r}")
     accesses = accessy_session.get_all_accesses(door)
-    insert_accesses(con, accesses)
-
-sys.exit(0)
-
-
-accesses_per_door = collections.Counter(a.door.name for a in accesses)
-print(f"Accesses per door: {accesses_per_door}")
-
-accesses_per_date = collections.Counter(a.dt.date() for a in accesses)
-print(f"Accesses per date: {accesses_per_date}")
-
-weekday_lookup = ("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
-accesses_per_day = collections.Counter(weekday_lookup[a.dt.date().weekday()] for a in accesses)
-print(f"Accesses per day: {accesses_per_day}")
-
-people_accesses_per_date = collections.defaultdict(lambda: collections.Counter())
-for access in accesses:
-    people_accesses_per_date[access.dt.date()].update({access.name: 1})
-print(f"People accesses per date {people_accesses_per_date}")
-
-unique_people_per_date = {d: len(people_accesses_per_date[d].keys()) for d in people_accesses_per_date.keys()}
-print(f"Unique people per date {unique_people_per_date}")
-
-people_accesses_per_day = collections.defaultdict(lambda: collections.Counter())
-for access in accesses:
-    people_accesses_per_day[weekday_lookup[access.dt.weekday()]].update({access.name: 1})
-print(f"People accesses per day {people_accesses_per_day}")
-
-unique_people_per_day = {d: len(people_accesses_per_day[d].keys()) for d in people_accesses_per_day.keys()}
-print(f"Unique people per day {unique_people_per_day}")
+    row_updates = insert_accesses(con, accesses)
+    print(f"    {row_updates} new unlocks")
