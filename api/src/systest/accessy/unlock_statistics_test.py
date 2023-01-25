@@ -3,14 +3,15 @@ import sqlite3
 from unittest import TestCase
 
 from multiaccessy.accessy import AccessyDoor, Access
-from multiaccessy.unlock_statistics import ensure_init_db, ensure_door_exists, insert_accesses
+from multiaccessy.unlock_statistics import (ensure_init_db, ensure_door_exists,
+    insert_accesses, select_accesses, unix2dt)
 
 
 class AccessyStatisticsTest(TestCase):
     def setUp(self):
         self.con = sqlite3.connect(":memory:")
         self.test_door = AccessyDoor("uuid-door", "Test door")
-        self.access = Access(datetime(1970, 1, 1), "FirstName LastName", self.test_door)
+        self.access = Access(unix2dt(0), "FirstName LastName", self.test_door)
         ensure_init_db(self.con)
 
     def tearDown(self) -> None:
@@ -48,3 +49,10 @@ class AccessyStatisticsTest(TestCase):
         _ = insert_accesses(self.con, [self.access])
         inserts = insert_accesses(self.con, [self.access])
         self.assertEqual(inserts, 0)
+    
+    def test_get_back_accesses(self):
+        ensure_door_exists(self.con, self.test_door)
+        insert_accesses(self.con, [self.access])
+        accesses = select_accesses(self.con)
+        self.assertEqual(accesses, [self.access])
+

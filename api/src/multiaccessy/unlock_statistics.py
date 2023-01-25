@@ -1,3 +1,4 @@
+import collections
 from datetime import datetime, timedelta
 import sqlite3
 
@@ -9,7 +10,7 @@ def dt2unix(dt: datetime) -> int:
 
 
 def unix2dt(unixtime: int) -> datetime:
-    return datetime(1970, 1, 1) + timedelta(seconds=unixtime)
+    return datetime(1970, 1, 1, 1) + timedelta(seconds=unixtime)
 
 
 def ensure_init_db(con: sqlite3.Connection):
@@ -84,3 +85,17 @@ def insert_accesses(con: sqlite3.Connection, accesses: list[Access]) -> int:
     ;""", (dict(accessy_door_id=access.door.id, person=access.name, unixtime=dt2unix(access.dt)) for access in accesses))
     con.commit()
     return cur.rowcount
+
+
+def select_accesses(con: sqlite3.Connection) -> list[Access]:
+    cur = con.cursor()
+
+    SqlResult = collections.namedtuple("SqlResult", "door_id, door_name, person, unixtime")
+    cur.execute("""
+    SELECT doors.accessy_id, doors.name, unlocks.person, unlocks.unixtime
+    FROM unlocks
+    JOIN doors ON doors.id = unlocks.door
+    ;""")
+    results = [SqlResult(*d) for d in cur.fetchall()]
+
+    return list(Access(unix2dt(r.unixtime), r.person, AccessyDoor(r.door_id, r.door_name)) for r in results)
