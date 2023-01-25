@@ -9,6 +9,7 @@ from service.config import config
 
 
 def fetch_accessy(con: sqlite3.Connection):
+    print("Initializing database")
     ensure_init_db(con)
 
     ACCESSY_SESSION_TOKEN = config.get("ACCESSY_SESSION_TOKEN")
@@ -16,9 +17,12 @@ def fetch_accessy(con: sqlite3.Connection):
     accessy_session.session_token = ACCESSY_SESSION_TOKEN
     accessy_session.session_token_token_expires_at = datetime.now() + timedelta(days=1)
 
+    print("Getting all doors")
     doors = accessy_session.get_all_doors()
     for door in doors:
-        ensure_door_exists(con, door)
+        change_reason = ensure_door_exists(con, door)
+        if change_reason:
+            print(change_reason)
 
     accesses: list[Access] = []
     for door in doors:

@@ -38,7 +38,9 @@ def ensure_init_db(con: sqlite3.Connection):
     con.commit()
 
 
-def ensure_door_exists(con: sqlite3.Connection, door: AccessyDoor):
+def ensure_door_exists(con: sqlite3.Connection, door: AccessyDoor) -> str:
+    """ Returns the change reason (if any) """
+
     cur = con.cursor()
 
     cur.execute("""
@@ -50,24 +52,27 @@ def ensure_door_exists(con: sqlite3.Connection, door: AccessyDoor):
     door_exists = result is not None
 
     if not door_exists:
-        print(f"Adding new door {door.name!r}")
         cur.execute("""
         INSERT OR IGNORE INTO doors
         ( accessy_id, name )
         VALUES ( :id, :name )
         ;""", dict(id=door.id, name=door.name))
         con.commit()
+        return f"Adding new door {door.name!r}"
     elif (result_door_name := result[1]) != door.name:
-        print(f"The door name has changed! Old name: {result_door_name}. New name: {door.name}")
         cur.execute("""
         UPDATE SET name = :name
         FROM doors
         WHERE accessy_id = :id
         ;""", dict(id=door.id, name=door.name))
         con.commit()
+        return f"The door name has changed! Old name: {result_door_name}. New name: {door.name}"
+    
+    return ""
 
 
 def insert_accesses(con: sqlite3.Connection, accesses: list[Access]) -> int:
+    """ Returns the number of new rows inserted into DB (only unique ones). """
     cur = con.cursor()
     cur.executemany("""
     INSERT OR IGNORE
