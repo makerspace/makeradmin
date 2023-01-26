@@ -2,6 +2,8 @@ import collections
 from datetime import datetime, timedelta
 import sqlite3
 
+import pytz
+
 from multiaccessy.accessy import Access, AccessyDoor
 
 
@@ -9,7 +11,7 @@ def dt2unix(dt: datetime) -> int:
     return int(dt.timestamp())
 
 
-unix_time_0 = datetime(1970, 1, 1, 1)
+unix_time_0 = datetime(1970, 1, 1, tzinfo=pytz.UTC)
 def unix2dt(unixtime: int) -> datetime:
     return unix_time_0 + timedelta(seconds=unixtime)
 

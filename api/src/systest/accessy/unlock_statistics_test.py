@@ -2,9 +2,20 @@ from datetime import datetime
 import sqlite3
 from unittest import TestCase
 
+import pytz
+
 from multiaccessy.accessy import AccessyDoor, Access
 from multiaccessy.unlock_statistics import (ensure_init_db, ensure_door_exists,
-    insert_accesses, select_accesses, unix_time_0)
+    insert_accesses, select_accesses, unix_time_0, unix2dt, dt2unix)
+
+
+class HelperTest(TestCase):
+    def test_convert_unix_t0(self):
+        self.assertEqual(unix2dt(0), unix_time_0)
+
+    def test_convert_unix_convert_back_and_forth(self):
+        unix0 = unix2dt(0)
+        self.assertEqual(dt2unix(unix0), 0)
 
 
 class AccessyStatisticsTest(TestCase):
