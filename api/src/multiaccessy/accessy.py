@@ -69,12 +69,18 @@ class AccessyDoor:
     id: UUID = field(repr=False)
     name: str
 
+    def __hash__(self) -> int:
+        return hash(self.id)
+
 
 @dataclass
 class Access:
     dt: datetime
     name: str
     door: AccessyDoor = field(repr=False)
+
+    def __hash__(self) -> int:
+        return hash((self.dt, self.name, self.door))
 
 
 @dataclass

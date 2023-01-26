@@ -61,9 +61,18 @@ class AccessyStatisticsTest(TestCase):
         inserts = insert_accesses(self.con, [self.access])
         self.assertEqual(inserts, 0)
     
-    def test_get_back_accesses(self):
+    def test_get_back_access(self):
         ensure_door_exists(self.con, self.test_door)
         insert_accesses(self.con, [self.access])
         accesses = select_accesses(self.con)
-        self.assertEqual(accesses, [self.access])
+        self.assertEqual(set(accesses), {self.access})
+    
+    def test_get_back_accesses(self):
+        ensure_door_exists(self.con, self.test_door)
+        now = datetime.now(tz=pytz.UTC)
+        access2 = Access(now, "Person2", self.test_door)
+        insert_accesses(self.con, [self.access, access2])
+        accesses = select_accesses(self.con)
+        access2.dt = now.replace(microsecond=0)
+        self.assertEqual(set(accesses), {self.access, access2})
 
