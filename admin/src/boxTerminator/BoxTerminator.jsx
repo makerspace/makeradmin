@@ -1,6 +1,7 @@
 import React from 'react';
 // import Button from '../Components/Button';
 import QrCodeScanner from '../Components/QrCodeScanner';
+import { showError } from '../message';
 
 class BoxTerminator extends React.Component {
 
@@ -18,8 +19,27 @@ class BoxTerminator extends React.Component {
             </div>
         );
     }
-    scanCallback(message) {
-        console.dir(message);
+
+    async scanCallback(scannedString) {
+        // console.dir(message);
+        try {
+            const scannedObject = JSON.stringify(scannedString);
+            if ( !scannedObject.hasOwnPropery('member_number') ) {
+                throw('Not a member memberbooth tag!')
+            }
+
+            switch (scannedObject.type) {
+                case value:
+                    
+                    break;
+            
+                default:
+                    break;
+            }
+
+        } catch(err) {
+            showError(err);
+        }
     }
 }
 
