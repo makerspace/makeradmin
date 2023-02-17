@@ -4,7 +4,7 @@ from collections.abc import Iterable
 from dataclasses import dataclass, field
 from datetime import date, datetime, timedelta
 from logging import getLogger
-from random import random
+from random import random, randint
 from time import sleep
 from typing import Union
 
@@ -48,6 +48,9 @@ def request(method, path, token=None, json=None, max_tries=8, err_msg=None):
             sleep(backoff)
             backoff = backoff * (1.2 + 0.1 * random())
             continue
+
+        if response.status_code == 401:
+            raise AccessyError("401: unauthorized")
 
         if not response.ok:
             msg = f"got an error in the response for {response.request.path_url}, {response.status_code=}: {err_msg or ''}"
@@ -239,43 +242,58 @@ class AccessySession:
     # Internal methods
     ################################################
 
+    def refresh_token(self):
+        now = datetime.now()
+        data = request(
+            "post",
+            "/auth/oauth/token",
+            json={
+                "audience": ACCESSY_URL,
+                "grant_type": "client_credentials",
+                "client_id": ACCESSY_CLIENT_ID,
+                "client_secret": ACCESSY_CLIENT_SECRET,
+            },
+        )
+
+        self.session_token = data["access_token"]
+        self.session_token_token_expires_at = now + timedelta(milliseconds=int(data["expires_in"]))
+        logger.info(f"accessy session token refreshed, expires_at={self.session_token_token_expires_at.isoformat()} token={self.session_token}")
+
+    def fetch_organization_id(self) -> UUID:
+        data = request(
+            "get",
+            "/asset/user/organization-membership",
+            token=self.session_token,
+        )
+
+        match len(data):
+            case 0:
+                raise AccessyError("The API key does not have a corresponding organization membership")
+            case l if l > 1:
+                logger.warning("API key has several memberships. This is probably an error...")
+
+        return data[0]["organizationId"]
+
     def __ensure_token(self):
         if not ACCESSY_CLIENT_ID or not ACCESSY_CLIENT_SECRET:
             return
 
         with self._mutex:  # Only allow one concurrent token refresh as rate limiting on this endpoint is aggressive.
-            if not self.session_token or datetime.now() > self.session_token_token_expires_at:
-                now = datetime.now()
-                data = request(
-                    "post",
-                    "/auth/oauth/token",
-                    json={
-                        "audience": ACCESSY_URL,
-                        "grant_type": "client_credentials",
-                        "client_id": ACCESSY_CLIENT_ID,
-                        "client_secret": ACCESSY_CLIENT_SECRET,
-                    },
-                )
-                
-                self.session_token = data["access_token"]
-                self.session_token_token_expires_at = now + timedelta(milliseconds=int(data["expires_in"]))
-                logger.info(f"accessy session token refreshed, expires_at={self.session_token_token_expires_at.isoformat()} token={self.session_token}")
-                
-            if not self._organization_id:
-                data = request(
-                    "get",
-                    "/asset/user/organization-membership",
-                    token=self.session_token,
-                )
-                
-                match len(data):
-                    case 0:
-                        raise AccessyError("The API key does not have a corresponding organization membership")
-                    case l if l > 1:
-                        logger.warning("API key has several memberships. This is probably an error...")
-        
-                self._organization_id = data[0]["organizationId"]
-                logger.info(f"fetched accessy organization_id {self._organization_id}")
+            if not self.session_token or datetime.now() > self.session_token_token_expires_at - timedelta(hours=randint(1, 23), minutes=randint(0, 59)):
+                self.refresh_token()
+
+            try:
+                organization_id = self.fetch_organization_id()
+            except AccessyError as e:
+                if "401" not in str(e):
+                    raise e
+
+                self.refresh_token()
+                organization_id = self.fetch_organization_id()
+            finally:
+                if not self._organization_id:
+                    self._organization_id = organization_id
+                    logger.info(f"fetched accessy organization_id {self._organization_id}")
 
     def _get(self, path: str, err_msg: str = None) -> dict:
         self.__ensure_token()
