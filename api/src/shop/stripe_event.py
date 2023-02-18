@@ -178,7 +178,6 @@ def stripe_customer_event(event_subtype:str, event:any):
                     print(
                         f"WARNING! New subscripton {subscription['id']} will overwrite {member.stripe_labaccess_subscription_id}")
                 member.stripe_labaccess_subscription_id = subscription['id']
-            pass
 
         elif (event_subtype == Subtype.SUBSCRIPTION_DELETED):
             if (meta["subscription_type"] == SubscriptionTypes.LAB):
