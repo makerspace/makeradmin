@@ -32,18 +32,7 @@ logger = getLogger('makeradmin')
 def get_stripe_subscriptions(stripe_customer_id:str, active_only=True):
     '''Returns the list of subscription objects for the given user.'''
   resp = stripe.Subscription.list(customer=stripe_customer_id)
-  ret = []
-  for sub in resp["data"]:
-    if (active_only):
-      if (sub['status'] in [
-        SubscriptionStatus.ACTIVE,
-        SubscriptionStatus.TRAILING,
-        ]):
-        ret.append(sub)
-    else:
-      ret.append(sub)
-
-  return ret
+  return [sub for sub in resp["data"] if not active_only or sub['status'] in  [SubscriptionStatus.ACTIVE, SubscriptionStatus.TRAILING]]
 
 
 def get_stripe_customer(member_info:Member):
