@@ -136,21 +136,22 @@ def start_subscription(member_id, subscription_type: SubscriptionTypes, checkout
             "subscription_type": subscription_type,
         }
 
-        subscription_schedule = stripe.SubscriptionSchedule.create(start_date=subscription_start,
-                                                                   customer=stripe_customer['id'],
-                                                                   phases=[
-                                                                       {
-                                                                           'items': [
-                                                                               {
-                                                                                   'price': price_id,
-                                                                                   'metadata': metadata,
-                                                                               },
-                                                                           ],
-                                                                           'collection_method': 'charge_automatically',
-                                                                           'metadata': metadata,
-                                                                           'proration_behavior': 'none',
-                                                                       }
-                                                                   ])
+        subscription_schedule = stripe.SubscriptionSchedule.create(
+            start_date=subscription_start,
+            customer=stripe_customer['id'],
+            phases=[
+                {
+                    'items': [
+                        {
+                            'price': price_id,
+                            'metadata': metadata,
+                        },
+                    ],
+                    'collection_method': 'charge_automatically',
+                    'metadata': metadata,
+                    'proration_behavior': 'none',
+                }
+            ])
 
         # Update the stripe customer id in the member just to be sure
         member.stripe_customer_id = stripe_customer['id']
