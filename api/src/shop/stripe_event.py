@@ -143,7 +143,7 @@ def stripe_invoice_event(subtype : Subtype, event:any):
             start_ts =int(line["period"]["start"])
 
             # Divide the timespan down to days
-            days = (end_ts-start_ts)/86400
+            days = round((end_ts-start_ts)/86400)
             try:
                 new_memberships = add_membership_days(member_id=member_id, span_type=span_type, days=days,creation_reason=f"Subscription invoice {invoice['id']} paid")
                 print(f"New memberships for member {member.member_number}\n{new_memberships}")
@@ -190,7 +190,7 @@ def stripe_customer_event(event_subtype:str, event:any):
                     member.stripe_membership_subscription_id = None
                 else:
                     print(f"Ignoring delete notification for subscription {subscription['id']} on {member} since it isn't current. (Current is {member.stripe_membership_subscription_id})")
-            db_session.flush()
+        db_session.flush()
 
     except Exception as e:
         print(e)

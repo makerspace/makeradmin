@@ -13,11 +13,6 @@ from membership.membership import get_membership_summary
 from shop.stripe_constants import MakerspaceMetadataKeys as MSMetaKeys
 from shop.stripe_constants import SubscriptionStatus
 
-#from shop.models import Transaction
-#from shop.stripe_constants import CURRENCY, ChargeStatus
-#from shop.stripe_util import convert_to_stripe_amount
-#from shop.transactions import PaymentFailed, payment_success
-
 # print(f"Stripe api_key={stripe.api_key}")
 
 # stripe.api_key = 'sk_test_4QHS9UR02FMGKPqdjElznDRI'
