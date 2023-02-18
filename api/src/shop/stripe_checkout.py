@@ -89,7 +89,7 @@ def lookup_subscription_price_for(member_info:Member, subscription_type:Subscrip
       return 'price_1MPw64KMK5LCTpGFfj1fCWdf'
     return None
 
-def calc_start_ts(current_end_date:datetime.date) -> int:
+def calc_start_ts(current_end_date: datetime.date) -> int | Literal["now"]:
   dt = datetime.datetime.combine(current_end_date, datetime.datetime.min.time())
   tmp = int(dt.timestamp())
   utc_now = int(datetime.datetime.utcnow().timestamp())
