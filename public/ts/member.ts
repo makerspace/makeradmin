@@ -68,7 +68,7 @@ common.documentLoaded().then(() => {
         // { type: 'membership', active_subscription: member.stripe_membership_subscription_id }
         console.log(info)
         if (info['active_subscription'] !== null)
-            return `<a id="unsubscribe-${info["type"]}-button" onclick="" class="uk-button uk-button-danger subscribe-button" >Avprenumera</a>`
+            return `<a id="unsubscribe-${info["type"]}-button" onclick="" class="uk-button uk-button-danger subscribe-button" >Avsluta prenumeration</a>`
         return `<a id="subscribe-${info["type"]}-button" onclick="" class="uk-button uk-button-danger subscribe-button">Prenumera</a>`
     }
 
