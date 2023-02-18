@@ -29,8 +29,8 @@ class SubscriptionTypes:
 logger = getLogger('makeradmin')
 
 
-# Returns the list of subscription objects for the given user.
 def get_stripe_subscriptions(stripe_customer_id:str, active_only=True):
+    '''Returns the list of subscription objects for the given user.'''
   resp = stripe.Subscription.list(customer=stripe_customer_id)
   ret = []
   for sub in resp["data"]:
