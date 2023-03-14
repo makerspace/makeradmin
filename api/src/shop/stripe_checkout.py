@@ -77,13 +77,13 @@ def get_stripe_customer(member_info:Member) -> Optional[stripe.Customer]:
 # Helper that can look up relevant price for the given member/subscription combo
 # This would be a good place to implement discounts as the member_info could give
 # the user a different price compared to the standard price for the products.
-def lookup_subscription_price_for(member_info:Member, subscription_type:SubscriptionTypes) -> Optional[str]:
-    # FIXME: Really bad to have hardcoded prices...
-    if (subscription_type == SubscriptionTypes.MEMBERSHIP):
-      return 'price_1MPw5kKMK5LCTpGFzgJAUIID'
-    if (subscription_type == SubscriptionTypes.LAB):
-      return 'price_1MPw64KMK5LCTpGFfj1fCWdf'
-    return None
+def lookup_subscription_price_for(member_info:Member, subscription_type:SubscriptionTypes) -> str:
+    products = stripe.Product.search(query=f"metadata['{MSMetaKeys.PRICING_TYPE}']:'{subscription_type}'")
+    assert len(products.data) == 1, f"Expected to find a single stripe product for the subscription type {subscription_type}, but found {len(products.data)}"
+    product = products.data[0]
+    default_price = product["default_price"]
+    assert type(default_price) == str
+    return default_price
 
 def calc_start_ts(current_end_date: datetime.date) -> int | Literal["now"]:
   dt = datetime.datetime.combine(current_end_date, datetime.datetime.min.time())
@@ -97,7 +97,7 @@ def calc_start_ts(current_end_date: datetime.date) -> int | Literal["now"]:
   return 'now'
   
 
-def start_subscription(member_id: int, subscription_type: SubscriptionTypes, checkout_session_id: Optional[str] = None, success_url: Optional[str] = None) -> Optional[str]:
+def start_subscription(member_id: int, subscription_type: SubscriptionTypes, checkout_session_id: Optional[str] = None) -> None:
     try:
         print(
             f"Attempting to start new subscription {subscription_type} using checkout session id {checkout_session_id}")
@@ -162,8 +162,6 @@ def start_subscription(member_id: int, subscription_type: SubscriptionTypes, che
         elif (subscription_type == SubscriptionTypes.LAB):
           member.stripe_labaccess_subscription_id = subscription_schedule['id']
         db_session.flush()
-
-        return success_url
 
     except Exception as e:
       raise BadRequest("Internal error: " + str(e))
