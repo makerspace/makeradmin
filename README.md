@@ -5,7 +5,7 @@
 
 ### Docker
 ```bash
-sudo apt-get install docker.io docker-compose
+sudo apt-get install docker.io docker-compose-plugin
 sudo adduser your_username docker
 ```
 You need to sign out and sign back in again for changes to take effect. 
