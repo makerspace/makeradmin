@@ -135,3 +135,12 @@ make clean-nuke
 *Warning: this will completely wipe out all your makeradmin data!*
 
 After this you can run `make firstrun` again to set things up again.
+
+## Development with Stripe 
+
+Create your own stripe account and add your keys to the `.env` file.
+Install the Stripe CLI and forward events using
+
+```bash
+stripe listen --forward-to http://localhost:8010/stripe_callback
+```

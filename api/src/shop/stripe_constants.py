@@ -14,6 +14,7 @@ STRIPE_SIGNING_SECRET = config.get("STRIPE_SIGNING_SECRET", log_value=False)
 class MakerspaceMetadataKeys:
     USER_ID = "makerspace_user_id"
     MEMBER_NUMBER = "makerspace_member_number"
+    PRICING_TYPE = "pricing_type"
 
 class Type:
     SOURCE = 'source'

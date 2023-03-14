@@ -152,7 +152,8 @@ def accessy_invite():
 
 @service.route("/member/current/subscription", method=POST, permission=USER)
 def start_subscription_route(subscription_type=Arg(str, required=True), checkout_session_id=Arg(str, required=False), success_url=Arg(str, required=True)):
-    return start_subscription(member_id=g.user_id, subscription_type=subscription_type, checkout_session_id=checkout_session_id, success_url=success_url)
+    start_subscription(member_id=g.user_id, subscription_type=subscription_type, checkout_session_id=checkout_session_id)
+    return success_url
 
 
 @service.route("/member/current/subscription", method=DELETE, permission=USER)
