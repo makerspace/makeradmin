@@ -209,7 +209,7 @@ def pay_route():
 # Used to just initiate a capture of a payment method via a setup intent
 @service.route("/setup_payment_method", method=POST, permission=USER, commit_on_error=True)
 def stripe_payment_method_route():
-    return create_stripe_checkout_session(g.user_id, data=request.json, mode='setup')
+    return create_stripe_checkout_session(g.user_id, data=request.json)
 
 @service.route("/confirm_payment", method=POST, permission=PUBLIC, commit_on_error=True)
 def confirm_payment_route():

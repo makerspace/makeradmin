@@ -64,8 +64,8 @@ class ApiError(Exception):
     code = 400
     message: Optional[str] = None
 
-    def __init__(self, message=None, fields=None, what=None, status="error", service=None, code=None,
-                 log=None, level=ERROR):
+    def __init__(self, message: Optional[str]=None, fields: Optional[str]=None, what: Optional[str]=None, status: str="error", service: Optional[str]=None, code: Optional[int]=None,
+                 log: Optional[bool]=None, level: int=ERROR):
         """
         :param message human readable message of what went wrong, should be safe to show to end users
         :param status is this really needed? we have http status code
@@ -87,7 +87,7 @@ class ApiError(Exception):
         self.log = log
         self.level = level
         
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"{self.__class__.__name__}(code={self.code}, status={self.status}, fields={self.fields}" \
                f", what={self.what}, message='{self.message}, service='{self.service}')"
     
