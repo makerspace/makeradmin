@@ -1,12 +1,13 @@
+from dataclasses import dataclass
 from logging import getLogger
+from typing import Any, List, Literal, Optional, Union
 
 import stripe
 
 import datetime
 
-from flask import Flask, redirect, jsonify
 from stripe.error import InvalidRequestError, CardError, StripeError
-from service.error import InternalServerError, EXCEPTION
+from service.error import BadRequest, InternalServerError, EXCEPTION
 from service.db import db_session
 from membership.models import Member
 from membership.membership import get_membership_summary
@@ -24,13 +25,13 @@ class SubscriptionTypes:
 logger = getLogger('makeradmin')
 
 
-def get_stripe_subscriptions(stripe_customer_id:str, active_only=True):
+def get_stripe_subscriptions(stripe_customer_id:str, active_only: bool=True) -> List[stripe.Subscription]:
   '''Returns the list of subscription objects for the given user.'''
   resp = stripe.Subscription.list(customer=stripe_customer_id)
   return [sub for sub in resp["data"] if not active_only or sub['status'] in  [SubscriptionStatus.ACTIVE, SubscriptionStatus.TRAILING]]
 
 
-def get_stripe_customer(member_info:Member):
+def get_stripe_customer(member_info:Member) -> Optional[stripe.Customer]:
   try:
     customer_search_result = stripe.Customer.search(
       query=f"metadata['{MSMetaKeys.MEMBER_NUMBER}']:'{member_info.member_number}'"
@@ -69,14 +70,14 @@ def get_stripe_customer(member_info:Member):
         return customer
 
   except Exception as e:
-    print(f"Encountered a problem: {e}")
+    print(f"Unable to get or create stripe user: {e}")
   
   return None
 
 # Helper that can look up relevant price for the given member/subscription combo
 # This would be a good place to implement discounts as the member_info could give
 # the user a different price compared to the standard price for the products.
-def lookup_subscription_price_for(member_info:Member, subscription_type:SubscriptionTypes):
+def lookup_subscription_price_for(member_info:Member, subscription_type:SubscriptionTypes) -> Optional[str]:
     # FIXME: Really bad to have hardcoded prices...
     if (subscription_type == SubscriptionTypes.MEMBERSHIP):
       return 'price_1MPw5kKMK5LCTpGFzgJAUIID'
@@ -96,25 +97,29 @@ def calc_start_ts(current_end_date: datetime.date) -> int | Literal["now"]:
   return 'now'
   
 
-def start_subscription(member_id, subscription_type: SubscriptionTypes, checkout_session_id: str = None, success_url: str = None):
+def start_subscription(member_id: int, subscription_type: SubscriptionTypes, checkout_session_id: Optional[str] = None, success_url: Optional[str] = None) -> Optional[str]:
     try:
         print(
             f"Attempting to start new subscription {subscription_type} using checkout session id {checkout_session_id}")
-        subscription_start = "now"
+        subscription_start: Union[int, Literal['now']] = "now"
 
         memberships = get_membership_summary(member_id)
 
-        if (memberships.membership_active and subscription_type == SubscriptionTypes.MEMBERSHIP):
+        if memberships.membership_active and subscription_type == SubscriptionTypes.MEMBERSHIP:
+          assert memberships.membership_end is not None
           subscription_start = calc_start_ts(memberships.membership_end)
-        elif (memberships.labaccess_active and subscription_type == SubscriptionTypes.LAB):
+        elif memberships.labaccess_active and subscription_type == SubscriptionTypes.LAB:
+          assert memberships.labaccess_end is not None
           subscription_start = calc_start_ts(memberships.labaccess_end)
 
         member: Member = db_session.query(Member).get(member_id)
         stripe_customer = get_stripe_customer(member)
+        if stripe_customer is None:
+          raise BadRequest(f"Unable to find corresponding stripe member {member}")
 
         price_id = lookup_subscription_price_for(member, subscription_type)
         if (price_id == None):
-          return {'error': f"Unable to find suitable subscription type {subscription_type} for {member}"}
+          raise BadRequest(f"Unable to find suitable subscription type {subscription_type} for {member}")
 
         active_subscriptions = get_stripe_subscriptions(stripe_customer['id'])
         print(f"Checking if user has active subscription for price {price_id}")
@@ -123,7 +128,7 @@ def start_subscription(member_id, subscription_type: SubscriptionTypes, checkout
             print(f" - Found price id {item['price']['id']}")
             if (item['price']['id'] == price_id):
               # There is already an active subscription. Let's bail out
-              return {'error': "Member already has active subscription"}
+              raise BadRequest(f"Member already has active subscription")
 
         metadata = {
             MSMetaKeys.USER_ID: member_id,
@@ -161,25 +166,30 @@ def start_subscription(member_id, subscription_type: SubscriptionTypes, checkout
         return success_url
 
     except Exception as e:
-      return {'error': str(e)}
+      raise BadRequest("Internal error: " + str(e))
+
+@dataclass
+class ReloadPage:
+  def __init__(self) -> None:
+    self.reload = True
 
 # FIXME: Do we want business logic to prevent users from unsubscribing within X months?
 
-
-def cancel_subscription(member_id: int, subscription_type: SubscriptionTypes):
+def cancel_subscription(member_id: int, subscription_type: SubscriptionTypes) -> Union[ReloadPage, None]:
     try:
         member: Member = db_session.query(Member).get(member_id)
         stripe_customer = get_stripe_customer(member)
+        assert stripe_customer is not None
 
         subscription_id = None
 
-        if (subscription_type == SubscriptionTypes.MEMBERSHIP):
+        if subscription_type == SubscriptionTypes.MEMBERSHIP:
           subscription_id = member.stripe_membership_subscription_id
-        elif (subscription_type == SubscriptionTypes.LAB):
+        elif subscription_type == SubscriptionTypes.LAB:
           subscription_id = member.stripe_labaccess_subscription_id
 
-        if (subscription_id == None):
-          return
+        if subscription_id is None:
+          return None
 
         # The subscription might be a scheduled one so we need to check the id prefix
         # to determine which API to use.
@@ -194,39 +204,41 @@ def cancel_subscription(member_id: int, subscription_type: SubscriptionTypes):
         elif (subscription_id.startswith('sub_')):
           stripe.Subscription.delete(sid=subscription_id)
 
+        assert ("id" in stripe_customer)
         member.stripe_customer_id = stripe_customer['id']
         db_session.flush()
 
-        return {"reload": True}
+        return ReloadPage()
     except Exception as e:
       return str(e)  # FIXME: We could use some structured error reporting
 
-def create_stripe_checkout_session(member_id:int, data:any = None, mode='payment'):
+def create_stripe_checkout_session(member_id:int, data:Any = None) -> str:
   print('Creating stripe checkout session')
   checkout_session = None
 
   member: Member = db_session.query(Member).get(member_id)
   stripe_customer = get_stripe_customer(member)
+  if stripe_customer is None:
+    raise BadRequest("Unable to find corresponding stripe member")
+
   metadata = {
       MSMetaKeys.USER_ID: member_id,
       MSMetaKeys.MEMBER_NUMBER: member.member_number,
   }
 
-  if (mode == 'setup'):
-    checkout_session = stripe.checkout.Session.create(
-      payment_method_types=['card'],
-      mode=mode,
-      metadata=metadata,
-      customer=stripe_customer['id'],
-      success_url=data["success_url"],
-      cancel_url=data["cancel_url"],
-    )
+  checkout_session = stripe.checkout.Session.create(
+    payment_method_types=['card'],
+    mode='setup',
+    metadata=metadata,
+    customer=stripe_customer['id'],
+    success_url=data["success_url"],
+    cancel_url=data["cancel_url"],
+  )
 
   # TODO: Handle normal shop payments?
+  return checkout_session.url
 
-    return checkout_session.url
-
-def open_stripe_customer_portal(member_id:int):
+def open_stripe_customer_portal(member_id:int) -> str:
   """Create a customer portal session and return the URL to which the user should be redirected."""
   member: Member = db_session.query(Member).get(member_id)
   stripe_customer = get_stripe_customer(member)
