@@ -7,7 +7,7 @@ from string import ascii_letters, digits
 seed(os.urandom(8))
 
 
-def random_str(length=12):
+def random_str(length: int=12) -> str:
     return ''.join(choice(ascii_letters + digits) for _ in range(length))
 
 

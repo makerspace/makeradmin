@@ -17,7 +17,7 @@ class Test(FlaskTestBase):
 
     models = [core.models, membership.models]
 
-    def test_user_id_and_permission_is_set_even_if_there_is_no_auth_header(self):
+    def test_user_id_and_permission_is_set_even_if_there_is_no_auth_header(self) -> None:
         with self.app.test_request_context():
             self.assertFalse(hasattr(g, 'user_id'))
             self.assertFalse(hasattr(g, 'permissions'))
@@ -27,14 +27,14 @@ class Test(FlaskTestBase):
             self.assertIsNone(g.user_id)
             self.assertEqual(tuple(), g.permissions)
 
-    def test_no_auth_header_sets_correct_user_and_permissions(self):
+    def test_no_auth_header_sets_correct_user_and_permissions(self) -> None:
         with self.app.test_request_context():
             authenticate_request()
 
             self.assertIsNone(g.user_id)
             self.assertEqual(tuple(), g.permissions)
 
-    def test_empty_auth_or_bad_header_raises_unauthorized(self):
+    def test_empty_auth_or_bad_header_raises_unauthorized(self) -> None:
         with self.app.test_request_context(headers=dict(Authorization='')):
             with self.assertRaises(Unauthorized):
                 authenticate_request()
@@ -49,7 +49,7 @@ class Test(FlaskTestBase):
             self.assertIsNone(g.user_id)
             self.assertEqual(tuple(), g.permissions)
 
-    def test_non_existing_access_token_raises_unauthorized(self):
+    def test_non_existing_access_token_raises_unauthorized(self) -> None:
         self.db.create_access_token(user_id=1)
 
         with self.app.test_request_context(headers=dict(Authorization='Bearer non-existent-token')):
@@ -59,7 +59,7 @@ class Test(FlaskTestBase):
             self.assertIsNone(g.user_id)
             self.assertEqual(tuple(), g.permissions)
 
-    def test_expired_token_raises_unautorized_and_removes_all_expired_tokens(self):
+    def test_expired_token_raises_unautorized_and_removes_all_expired_tokens(self) -> None:
         self.db.create_access_token(user_id=1, access_token='expired-1', expires=self.datetime(days=-1))
         self.db.create_access_token(user_id=2, access_token='expired-2', expires=self.datetime(days=-1))
         self.db.create_access_token(user_id=3, access_token='not-expired-1', expires=self.datetime(days=1))
@@ -75,7 +75,7 @@ class Test(FlaskTestBase):
         
         self.assertEqual('not-expired-1', access_token.access_token)
     
-    def test_valid_user_auth_updates_access_token_and_sets_user_id_and_permission(self):
+    def test_valid_user_auth_updates_access_token_and_sets_user_id_and_permission(self) -> None:
         permission = self.db.create_permission()
         member = self.db.create_member()
         group = self.db.create_group()
@@ -95,7 +95,7 @@ class Test(FlaskTestBase):
 
         self.assertCountEqual([USER, permission.permission], access_token.permissions.split(','))
 
-    def test_valid_service_auth_updates_access_token_and_sets_user_id_and_permission(self):
+    def test_valid_service_auth_updates_access_token_and_sets_user_id_and_permission(self) -> None:
         access_token = self.db.create_access_token(user_id=TEST_SERVICE_USER_ID, expires=self.datetime(days=1))
 
         with self.app.test_request_context(headers=dict(Authorization=f'Bearer {access_token.access_token}'),
@@ -109,16 +109,16 @@ class Test(FlaskTestBase):
 
         self.assertCountEqual(ALL_PERMISSIONS, access_token.permissions.split(','))
 
-    def test_permission_is_required_for_view(self):
+    def test_permission_is_required_for_view(self) -> None:
         with self.assertRaises(AssertionError):
             @self.service.route('/', method=GET, permission=None)
-            def view():
-                pass
+            def view() -> str:
+                return ""
 
-    def test_public_view_does_not_require_permissions(self):
+    def test_public_view_does_not_require_permissions(self) -> None:
         @self.service.route('/', method=GET, permission=PUBLIC)
-        def view():
-            pass
+        def view() -> str:
+            return ""
 
         with self.app.test_request_context():
             g.user_id = None
@@ -135,10 +135,10 @@ class Test(FlaskTestBase):
             g.permissions = (USER, 'webshop')
             view()
 
-    def test_logged_in_user_permission_check_works(self):
+    def test_logged_in_user_permission_check_works(self) -> None:
         @self.service.route('/', method=GET, permission=USER)
-        def view():
-            pass
+        def view() -> str:
+            return ""
 
         with self.app.test_request_context():
             g.user_id = 1
@@ -157,10 +157,10 @@ class Test(FlaskTestBase):
             with self.assertRaises(Forbidden):
                 view()
 
-    def test_regular_permission_check_works(self):
+    def test_regular_permission_check_works(self) -> None:
         @self.service.route('/', method=GET, permission='webshop')
-        def view():
-            pass
+        def view() -> str:
+            return ""
 
         with self.app.test_request_context():
             g.user_id = 1

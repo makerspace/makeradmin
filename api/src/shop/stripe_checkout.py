@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from enum import Enum
 from logging import getLogger
 from typing import Any, List, Literal, Optional, Union
 
@@ -18,7 +19,7 @@ from shop.stripe_constants import SubscriptionStatus
 
 # stripe.api_key = 'sk_test_4QHS9UR02FMGKPqdjElznDRI'
 
-class SubscriptionTypes:
+class SubscriptionTypes(Enum):
   MEMBERSHIP = "membership"
   LAB        = "labaccess"
 

@@ -12,13 +12,16 @@ from service.internal_service import InternalService
 from test_aid.db import DbFactory
 from test_aid.obj import ObjFactory, DEFAULT_PASSWORD
 from test_aid.test_util import classinstancemethod
-
+from datetime import date
 
 class TestBase(TestCase):
     """ Base test with obj factory and date helpers. """
+    now: datetime
+    today: date
+    obj: ObjFactory
     
     @classmethod
-    def setUpClass(self):
+    def setUpClass(self) -> None:
         super().setUpClass()
         self.obj = ObjFactory(self)
         
@@ -26,11 +29,11 @@ class TestBase(TestCase):
         self.today = self.now.date()
         
     @classinstancemethod
-    def date(self, days=0):
+    def date(self, days:int=0) -> date:
         return self.today + timedelta(days=days)
 
     @classinstancemethod
-    def datetime(self, **kwargs):
+    def datetime(self, **kwargs) -> datetime:
         return self.now + timedelta(**kwargs)
     
     def this_test_failed(self):
@@ -50,9 +53,12 @@ class FlaskTestBase(TestBase):
     """ Includes setup of flask and in memory db. """
     
     models = []
+    app: Flask
+    db: DbFactory
+    service: InternalService
     
     @classmethod
-    def setUpClass(self):
+    def setUpClass(self) -> None:
         super().setUpClass()
 
         self.app = Flask(__name__)
