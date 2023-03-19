@@ -133,7 +133,7 @@ def labaccess_reminder() -> None:
         )
 
 
-def membership_reminder():
+def membership_reminder() -> None:
     now = datetime.utcnow().date()
 
     members, memberships = get_members_and_membership()
@@ -178,7 +178,7 @@ def membership_reminder():
         logger.info(f'sending yearly membership reminder to member with id {member.member_id}. Expires ' + str(membership.membership_end))
 
 
-def quiz_reminders():
+def quiz_reminders() -> None:
     # Assume quiz 1 is the get started quiz
     quiz_id = 1
     quiz_members = quiz_member_answer_stats(quiz_id)

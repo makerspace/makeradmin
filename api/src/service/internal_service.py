@@ -1,5 +1,6 @@
 import re
 from functools import wraps, partial
+from typing import Any, Callable, List, Optional, Tuple
 
 import pymysql
 from flask import Blueprint, g, jsonify
@@ -10,21 +11,21 @@ from service.api_definition import Arg, PUBLIC, GET, POST, PUT, DELETE, REQUIRED
 from service.db import db_session, fields_by_index
 from service.error import Forbidden, UnprocessableEntity
 from service.logging import logger
-
+from flask import typing as ft
 
 class InternalService(Blueprint):
     """ Flask blueprint for internal service that handles requests within the same process, authentication and
     permissions is handled by this class. """
     
-    def __init__(self, name):
+    def __init__(self, name: str) -> None:
         """
         The name of the service, this should be __name__.
         """
         
         super().__init__(name, name)
 
-    def route(self, path, permission=None, method=None, methods=None, status='ok', code=200,
-              commit=True, commit_on_error=False, flat_return=False, **route_kwargs):
+    def route(self, path: str, permission: Optional[str]=None, method: Optional[str]=None, methods: Optional[Tuple[str]]=None, status: str='ok', code: int=200,
+              commit: bool=True, commit_on_error: bool=False, flat_return: bool=False, **route_kwargs) -> Callable[[ft.RouteCallable], ft.RouteCallable]:
         """
         Enhanced Blueprint.route for internal services. The function should return a jsonable structure that will
         be put in the data key in the response.

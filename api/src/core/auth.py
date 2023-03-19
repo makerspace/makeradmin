@@ -146,7 +146,7 @@ def list_for_user(user_id):
     ) for access_token in db_session.query(AccessToken).filter(AccessToken.user_id == user_id)]
 
 
-def authenticate_request():
+def authenticate_request() -> None:
     """ Update global object with user_id and user permissions using token from request header. """
 
     # Make sure user_id and permissions is always set.
@@ -183,8 +183,9 @@ def authenticate_request():
             permissions = SERVICE_PERMISSIONS.get(access_token.user_id, [])
             
         elif access_token.user_id > 0:
-            permissions = {p for _, p in get_member_permissions(access_token.user_id)}
-            permissions.add(USER)
+            permissions_set = {p for _, p in get_member_permissions(access_token.user_id)}
+            permissions_set.add(USER)
+            permissions = list(permissions_set)
             
         else:
             raise BadRequest("Bad token.",
