@@ -1,3 +1,4 @@
+from typing import List, Optional, Tuple
 import bcrypt
 
 from membership.models import Permission, Group, Member
@@ -25,7 +26,7 @@ FORBIDDEN_SUB_SEQUENCES = [
 ]
 
 
-def contains_sub_sequence(value, sequence, length):
+def contains_sub_sequence(value: str, sequence: str, length: Optional[int]) -> bool:
     if length is None:
         length = len(sequence)
     value = value.lower()
@@ -35,17 +36,17 @@ def contains_sub_sequence(value, sequence, length):
     return False
 
 
-def verify_password(password, password_hash):
+def verify_password(password: Optional[str], password_hash: Optional[str]) -> bool:
     if not password or not password_hash:
         return False
     return bcrypt.checkpw(password.encode(), password_hash.encode())
 
 
-def hash_password(password):
+def hash_password(password: str) -> str:
     return bcrypt.hashpw(password=password.encode(), salt=bcrypt.gensalt()).decode()
 
 
-def check_and_hash_password(unhashed_password):
+def check_and_hash_password(unhashed_password: Optional[str]) -> Optional[str]:
     if unhashed_password is None:
         return None
         
@@ -62,7 +63,7 @@ def check_and_hash_password(unhashed_password):
     return hash_password(unhashed_password)
 
 
-def get_member_permissions(member_id=None):
+def get_member_permissions(member_id: Optional[int]=None) -> List[Tuple[int, str]]:
     """ Return query to get all (permission_id, permission) for a memeber, used from core. """
     return (
         db_session
@@ -74,12 +75,12 @@ def get_member_permissions(member_id=None):
     )
 
 
-def authenticate(username=None, password=None):
+def authenticate(username: Optional[str]=None, password: Optional[str]=None) -> int:
     """ Authenticate a member trough username and password, returns member_id if authenticated, used from core. """
     
-    member = db_session.query(Member).filter_by(email=username).first()
+    member: Optional[Member] = db_session.query(Member).filter_by(email=username).first()
     
-    if not member or not verify_password(password, member.password):
+    if member is None or not verify_password(password, member.password):
         raise Unauthorized("The username and/or password you specified was incorrect.",
                            fields='username,password', what=BAD_VALUE)
     
