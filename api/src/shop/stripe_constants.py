@@ -1,8 +1,8 @@
+from enum import Enum
 import stripe
+from test_aid.systest_config import STRIPE_PRIVATE_KEY, STRIPE_PUBLIC_KEY
 
 from service.config import config
-
-stripe.api_key = config.get("STRIPE_PRIVATE_KEY", log_value=False)
 
 # All stripe calculations are done with cents (ören in Sweden)
 STRIPE_CURRENTY_BASE = 100
@@ -11,12 +11,18 @@ CURRENCY = "sek"
 
 STRIPE_SIGNING_SECRET = config.get("STRIPE_SIGNING_SECRET", log_value=False)
 
-class MakerspaceMetadataKeys:
+def set_stripe_key(private: bool):
+    stripe.api_key = STRIPE_PRIVATE_KEY if private else STRIPE_PUBLIC_KEY
+
+set_stripe_key(True)
+
+class MakerspaceMetadataKeys(Enum):
     USER_ID = "makerspace_user_id"
     MEMBER_NUMBER = "makerspace_member_number"
     PRICING_TYPE = "pricing_type"
+    SUBSCRIPTION_TYPE = "subscription_type"
 
-class Type:
+class Type(Enum):
     SOURCE = 'source'
     CARD = 'card'
     CHARGE = 'charge'
@@ -24,8 +30,9 @@ class Type:
     CUSTOMER = 'customer'
     INVOICE = 'invoice'
     CHECKOUT = 'checkout'
+    TEST_HELPERS = 'test_helpers'
 
-class Subtype:
+class Subtype(Enum):
     CHARGEABLE = 'chargeable'
     FAILED = 'failed'
     CANCELED = 'canceled'
@@ -41,8 +48,11 @@ class Subtype:
     SUBSCRIPTION_UPDATED = 'subscription.updated'
     SUBSCRIPTION_DELETED = 'subscription.deleted'
     SESSION_COMPLETED = 'session.completed'
+    TEST_CLOCK_ADVANCING = 'test_clock.advancing'
+    CREATED = 'created'
 
-class SubscriptionStatus:
+
+class SubscriptionStatus(Enum):
     ACTIVE = 'active'
     INCOMPLETE = 'incomplete'
     INCOMPLETE_EXPIRED = 'incomplete_expired'
@@ -53,16 +63,18 @@ class SubscriptionStatus:
 
 
 
-class SourceType:
+class SourceType(Enum):
     THREE_D_SECURE = 'three_d_secure'
     CARD = 'card'
 
 
-class ChargeStatus:
+class ChargeStatus(Enum):
     SUCCEEDED = 'succeeded'
+    PENDING = 'pending'
+    FAILED = 'failed'
 
 
-class PaymentIntentStatus:
+class PaymentIntentStatus(Enum):
     REQUIRES_PAYMENT_METHOD = 'requires_payment_method'
     REQUIRES_CONFIRMATION = 'requires_confirmation'
     REQUIRES_ACTION = 'requires_action'
@@ -72,6 +84,6 @@ class PaymentIntentStatus:
     REQUIRES_CAPTURE = 'requires_capture'
 
 
-class PaymentIntentNextActionType:
+class PaymentIntentNextActionType(Enum):
     USE_STRIPE_SDK = 'use_stripe_sdk'
     REDIRECT_TO_URL = 'redirect_to_url'

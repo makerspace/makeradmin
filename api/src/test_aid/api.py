@@ -71,23 +71,23 @@ class ApiFactory:
         self.action = None
         self.key = None
     
-    def request(self, method, path, **kwargs):
+    def request(self, method: str, path: str, **kwargs) -> ApiResponse:
         token = kwargs.pop('token', self.api_token)
         headers = kwargs.pop('headers', {"Authorization": "Bearer " + token})
         url = self.base_url + path
         response = ApiResponse(requests.request(method, url=url, headers=headers, **kwargs))
         return response
 
-    def post(self, path, json=None, **kwargs):
+    def post(self, path: str, json=None, **kwargs) -> ApiResponse:
         return self.request("post", path, json=json, **kwargs)
 
-    def put(self, path, json=None, **kwargs):
+    def put(self, path: str, json=None, **kwargs) -> ApiResponse:
         return self.request("put", path, json=json, **kwargs)
 
-    def delete(self, path, json=None, **kwargs):
+    def delete(self, path: str, json=None, **kwargs) -> ApiResponse:
         return self.request("delete", path, json=json, **kwargs)
         
-    def get(self, path, params=None, **kwargs):
+    def get(self, path: str, params=None, **kwargs) -> ApiResponse:
         return self.request("get", path, params=params, **kwargs)
 
     def create_member(self, **kwargs):

@@ -10,7 +10,7 @@ from test_aid.systest_base import ApiTest
 
 class Test(ApiTest):
 
-    def test_diff(self):
+    def test_diff(self) -> None:
         self.assertIsNotNone(ACCESSY_SPECIAL_LABACCESS_GROUP)
         self.assertIsNotNone(ACCESSY_LABACCESS_GROUP)
 
@@ -36,7 +36,7 @@ class Test(ApiTest):
         diff = calculate_diff(wanted_members={m1_phone: m1_lab}, actual_members={m1_phone: m1_special})
         self.assertEqual(Diff(group_adds=[GroupOp(m1_lab, ACCESSY_LABACCESS_GROUP)], group_removes=[GroupOp(m1_special, ACCESSY_SPECIAL_LABACCESS_GROUP)]), diff)
 
-    def test_get_wanted_access(self):
+    def test_get_wanted_access(self) -> None:
         included_because_labaccess_span = self.db.create_member(
             phone=random_phone_number(),
             labaccess_agreement_at=date.today(),

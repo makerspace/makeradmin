@@ -1,6 +1,7 @@
 from decimal import localcontext, Decimal, Rounded
 from datetime import datetime
 from logging import getLogger
+from typing import Optional
 
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 from sqlalchemy.sql import func
@@ -26,7 +27,7 @@ class PaymentFailed(BadRequest):
     message = 'Payment failed.'
 
 
-def get_source_transaction(source_id):
+def get_source_transaction(source_id: str) -> Optional[Transaction]:
     try:
         return db_session\
             .query(Transaction)\
@@ -185,7 +186,7 @@ def create_transaction(member_id, purchase, activates_member=False, stripe_refer
     return transaction
 
 
-def complete_transaction(transaction):
+def complete_transaction(transaction: Transaction) -> None:
     assert transaction.status == Transaction.PENDING
 
     transaction.status = Transaction.COMPLETED
@@ -222,7 +223,7 @@ def ship_labaccess_orders(member_id=None, skip_ensure_accessy=False):
 
 
 @nested_atomic
-def payment_success(transaction):
+def payment_success(transaction: Transaction) -> None:
     complete_transaction(transaction)
     ship_orders(ship_add_labaccess=False, transaction=transaction)
 

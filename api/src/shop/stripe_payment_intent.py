@@ -46,16 +46,17 @@ def create_action_required_response(transaction, payment_intent):
 
     try:
         db_session.add(StripePending(transaction_id=transaction.id, stripe_token=payment_intent.id))
+        next_action_type = PaymentIntentNextActionType(payment_intent.next_action.type)
 
-        if payment_intent.next_action.type == PaymentIntentNextActionType.USE_STRIPE_SDK:
+        if next_action_type == PaymentIntentNextActionType.USE_STRIPE_SDK:
             return dict(type=PaymentIntentNextActionType.USE_STRIPE_SDK,
                         client_secret=payment_intent.client_secret)
         
-        elif payment_intent.next_action.type == PaymentIntentNextActionType.REDIRECT_TO_URL:
-            raise InternalServerError(log=f"unexpected next_action type, {payment_intent.next_action.type}")
+        elif next_action_type == PaymentIntentNextActionType.REDIRECT_TO_URL:
+            raise InternalServerError(log=f"unexpected next_action type, {next_action_type}")
 
         else:
-            raise PaymentFailed(log=f"unknown next_action type, {payment_intent.next_action.type}")
+            raise PaymentFailed(log=f"unknown next_action type, {next_action_type}")
 
     except Exception:
         # Fail transaction on all known and unknown errors to be safe, we won't charge a failed transaction.
@@ -65,7 +66,7 @@ def create_action_required_response(transaction, payment_intent):
 
 
 def complete_payment_intent_transaction(transaction, payment_intent):
-    if payment_intent.status != PaymentIntentStatus.SUCCEEDED:
+    if PaymentIntentStatus(payment_intent.status) != PaymentIntentStatus.SUCCEEDED:
         raise InternalServerError(
             log=f"unexpected payment_intent status '{payment_intent.status}' for transaction {transaction.id} "
             f"this should be handled")
@@ -75,24 +76,24 @@ def complete_payment_intent_transaction(transaction, payment_intent):
 
 
 def create_client_response(transaction, payment_intent):
-    
-    if payment_intent.status == PaymentIntentStatus.REQUIRES_ACTION:
+    status = PaymentIntentStatus(payment_intent.status)
+    if status == PaymentIntentStatus.REQUIRES_ACTION:
         """ Requires further action on client side. """
         if not payment_intent.next_action:
             raise InternalServerError(f"intent next_action is required but missing ({payment_intent.next_action})")
         return create_action_required_response(transaction, payment_intent)
 
-    elif payment_intent.status == PaymentIntentStatus.REQUIRES_CONFIRMATION:
+    elif status == PaymentIntentStatus.REQUIRES_CONFIRMATION:
         confirmed_intent = stripe.PaymentIntent.confirm(payment_intent.id)
-        assert confirmed_intent.status != PaymentIntentStatus.REQUIRES_CONFIRMATION
+        assert PaymentIntentStatus(confirmed_intent.status) != PaymentIntentStatus.REQUIRES_CONFIRMATION
         return create_client_response(transaction, confirmed_intent)
 
-    elif payment_intent.status == PaymentIntentStatus.SUCCEEDED:
+    elif status == PaymentIntentStatus.SUCCEEDED:
         payment_success(transaction)
         logger.info(f"succeeded: payment for transaction {transaction.id}, payment_intent id {payment_intent.id}")
         return None
 
-    elif payment_intent.status == PaymentIntentStatus.REQUIRES_PAYMENT_METHOD:
+    elif status == PaymentIntentStatus.REQUIRES_PAYMENT_METHOD:
         commit_fail_transaction(transaction)
         logger.info(f"failed: payment for transaction {transaction.id}, payment_intent id {payment_intent.id}")
         raise BadRequest(log=f"payment_intent requires payment method, either no method provided or the payment failed")
@@ -114,7 +115,7 @@ def confirm_stripe_payment_intent(data):
         raise BadRequest(f"unknown payment_intent ({payment_intent_id})")
 
     payment_intent = stripe.PaymentIntent.retrieve(payment_intent_id)
-    assert payment_intent.status == PaymentIntentStatus.REQUIRES_CONFIRMATION
+    assert PaymentIntentStatus(payment_intent.status) == PaymentIntentStatus.REQUIRES_CONFIRMATION
 
     try:
         action_info = create_client_response(transaction, payment_intent)

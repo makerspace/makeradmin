@@ -1,9 +1,9 @@
 from datetime import datetime
 from random import randint, choice, seed
-
+from typing import Dict
 from faker import Faker
 
-from membership.models import Span
+from membership.models import Member, Span
 from messages.models import Message
 from shop.models import ProductAction
 from test_aid.test_util import random_str
@@ -30,7 +30,7 @@ class ObjFactory:
         self.phone_request = None
         seed()
 
-    def create_member(self, **kwargs):
+    def create_member(self, **kwargs) -> Member:
         firstname = self.fake.first_name()
         lastname = self.fake.last_name()
         obj = dict(
@@ -72,7 +72,7 @@ class ObjFactory:
         self.group = obj
         return self.group
 
-    def create_key(self, **kwargs):
+    def create_key(self, **kwargs) -> Dict[str,str]:
         obj = dict(
             tagid=str(randint(int(1e12), int(9e12))),
             description=self.fake.bs(),
@@ -139,5 +139,5 @@ class ObjFactory:
         return self.message
 
 
-def random_phone_number():
+def random_phone_number() -> str:
     return f'070-1{randint(int(1e6), int(9e6)):06d}'
