@@ -2,7 +2,7 @@ from datetime import date, timedelta, datetime, timezone
 import time
 import random
 import copy
-from typing import Any, Dict, Literal, Set
+from typing import Any, Dict, Literal, Optional, Set, cast
 from unittest.mock import Mock, patch
 from test_aid.systest_base import VALID_3DS_CARD_NO
 from shop.stripe_checkout import SubscriptionType, get_stripe_customer
@@ -73,17 +73,32 @@ class Test(FlaskTestBase):
     def advance_clock(self, clock: FakeClock, time: datetime) -> None:
         t0 = clock.date
         clock.advance(to=time)
-        self.poll_stripe_events(t0, "test_helpers.test_clock.ready")
+        self.poll_stripe_events(t0, "test_helpers.test_clock.ready", clock.stripe_clock.stripe_id)
 
-    def poll_stripe_events(self, min_time: datetime, until_seen_type: str) -> None:
+    def poll_stripe_events(self, min_time: datetime, until_seen_type: str, test_clock: str) -> None:
+        def test_clock_for_event(event: Any) -> Optional[str]:
+            if event["type"].startswith("test_helpers.test_clock."):
+                return cast(str, event['data']['object']['id'])
+            else:
+                return cast(Optional[str], event['data']['object'].get('test_clock', None))
+
         batched_events = []
         done = False
         print("Waiting for stripe events...")
         while not done:
-            time.sleep(0.1)
+            time.sleep(0.4)
             events = stripe.Event.list(created={"gte": int(min_time.timestamp())})
             for ev in events:
                 if ev.id in self.seen_event_ids:
+                    continue
+                
+                # This will filter out all events not associated with the test clock we are interested in.
+                # This is useful when we have multiple test clocks running in parallel, which may happen
+                # if we have multiple tests running in parallel.
+                # Note that this will also filter out all events that are not associated with a test clock.
+                # For example charge events will not be associated with a test clock.
+                # However, for the subscriptions tests, we don't care about those events.
+                if test_clock_for_event(ev) != test_clock:
                     continue
 
                 self.seen_event_ids.add(ev.stripe_id)
