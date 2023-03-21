@@ -1,8 +1,9 @@
 from decimal import Decimal
+from typing import Optional
 
 from service.error import InternalServerError
 from shop.stripe_constants import STRIPE_CURRENTY_BASE
-
+import stripe
 
 def convert_to_stripe_amount(amount: Decimal) -> int:
     """ Convert decimal amount to stripe amount and return it. Fails if amount is not even cents (ören). """
@@ -14,3 +15,11 @@ def convert_to_stripe_amount(amount: Decimal) -> int:
     return int(stripe_amount)
 
 
+global_stripe_clock: Optional[stripe.test_helpers.TestClock] = None
+
+def set_global_clock(clock: Optional[stripe.test_helpers.TestClock]) -> None:
+  global global_stripe_clock
+  global_stripe_clock = clock
+
+def global_clock_id() -> Optional[str]:
+  return global_stripe_clock.stripe_id if global_stripe_clock is not None else None

@@ -27,7 +27,7 @@ from shop.stripe_event import stripe_callback, process_stripe_events
 from shop.stripe_payment_intent import confirm_stripe_payment_intent
 from shop.transactions import ship_labaccess_orders
 
-from shop.stripe_checkout import SubscriptionTypes
+from shop.stripe_checkout import SubscriptionType
 
 service.entity_routes(
     path="/category",
@@ -152,7 +152,7 @@ def accessy_invite():
 
 @service.route("/member/current/subscription", method=POST, permission=USER)
 def start_subscription_route(subscription_type=Arg(str, required=True), checkout_session_id=Arg(str, required=False), success_url=Arg(str, required=True)):
-    start_subscription(member_id=g.user_id, subscription_type=subscription_type, checkout_session_id=checkout_session_id)
+    start_subscription(member_id=g.user_id, subscription_type=subscription_type)
     return success_url
 
 

@@ -2,6 +2,7 @@
 from dataclasses import dataclass, field
 from datetime import date, timedelta
 from logging import getLogger
+from typing import Dict, List
 
 from sqlalchemy.orm import contains_eager
 
@@ -52,13 +53,13 @@ class GroupOp:
 
 @dataclass
 class Diff:
-    invites: [AccessyMember] = field(default_factory=list)
-    group_adds: [GroupOp] = field(default_factory=list)
-    group_removes: [GroupOp] = field(default_factory=list)
-    org_removes: [AccessyMember] = field(default_factory=list)
+    invites: List[AccessyMember] = field(default_factory=list)
+    group_adds: List[GroupOp] = field(default_factory=list)
+    group_removes: List[GroupOp] = field(default_factory=list)
+    org_removes: List[AccessyMember] = field(default_factory=list)
 
 
-def calculate_diff(actual_members, wanted_members):
+def calculate_diff(actual_members: Dict[str, AccessyMember], wanted_members: Dict[str, AccessyMember]) -> Diff:
     diff = Diff()
 
     if ACCESSY_LABACCESS_GROUP is None or ACCESSY_SPECIAL_LABACCESS_GROUP is None:
@@ -76,16 +77,16 @@ def calculate_diff(actual_members, wanted_members):
 
     # Already exists in accessy and should have access, but could be wrong groups:
     for phone, wanted in wanted_members.items():
-        actual = actual_members.get(phone)
+        actual_m = actual_members.get(phone)
         
-        if not actual:
+        if not actual_m:
             continue
 
-        for group in wanted.groups - actual.groups:
+        for group in wanted.groups - actual_m.groups:
             diff.group_adds.append(GroupOp(wanted, group))
     
-        for group in actual.groups - wanted.groups:
-            diff.group_removes.append(GroupOp(actual, group))
+        for group in actual_m.groups - wanted.groups:
+            diff.group_removes.append(GroupOp(actual_m, group))
     
     return diff
 

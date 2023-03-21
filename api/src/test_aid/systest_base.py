@@ -3,6 +3,7 @@ import sys
 import time
 from functools import wraps
 from logging import getLogger
+from typing import Optional
 from unittest import skipIf
 
 import stripe
@@ -15,8 +16,8 @@ from selenium.webdriver.common.by import By
 
 from service.config import get_mysql_config
 from service.db import create_mysql_engine, db_session
-from shop.stripe_constants import Type
-from test_aid.api import ApiFactory
+from shop.stripe_constants import Type, set_stripe_key
+from test_aid.api import ApiFactory, ApiResponse
 from test_aid.db import DbFactory
 from test_aid.obj import DEFAULT_PASSWORD
 from test_aid.systest_config import HOST_FRONTEND, HOST_PUBLIC, HOST_BACKEND, \
@@ -24,24 +25,28 @@ from test_aid.systest_config import HOST_FRONTEND, HOST_PUBLIC, HOST_BACKEND, \
     STRIPE_PUBLIC_KEY
 from test_aid.test_base import TestBase, ShopTestMixin
 
-stripe.api_key = STRIPE_PUBLIC_KEY
-
 VALID_NON_3DS_CARD_NO = "378282246310005"
 VALID_3DS_CARD_NO = "4242424242424242"
 EXPIRED_3DS_CARD_NO = "4000000000000069"
 
 EXPIRED_CVC_ZIP = "4242424242424"
 
-
 logger = getLogger('makeradmin')
 
 
 class SystestBase(TestBase):
     """ Base class for systest with config available. """
-    
+    db: DbFactory
+    admin_url: str
+    public_url: str
+    api_url: str
+
     @classmethod
-    def setUpClass(self):
+    def setUpClass(self) -> None:
         super().setUpClass()
+
+        # Use the public key for these tests. TODO: Why not the private one?
+        set_stripe_key(False)
         
         # Make sure sessions is removed so it is not using another engine in this thread.
         db_session.remove()
@@ -53,7 +58,7 @@ class SystestBase(TestBase):
         self.public_url = HOST_PUBLIC
         self.api_url = HOST_BACKEND
         
-    def tearDown(self):
+    def tearDown(self) -> None:
         super().tearDown()
         db_session.close()
 
@@ -61,26 +66,31 @@ class SystestBase(TestBase):
 class ApiTest(SystestBase):
     """ Base class for tests that accesses the api. """
     
-    api = None
+    api: Optional[ApiFactory] = None
     
     @classmethod
-    def setUpClass(self):
+    def setUpClass(self) -> None:
         super().setUpClass()
         self.api = ApiFactory(obj_factory=self.obj, base_url=self.api_url, api_token=TEST_SERVICE_TOKEN)
 
-    def request(self, *args, **kwargs):
+    def request(self, *args, **kwargs) -> ApiResponse:
+        assert self.api is not None
         return self.api.request(*args, **kwargs)
 
-    def post(self, *args, **kwargs):
+    def post(self, *args, **kwargs) -> ApiResponse:
+        assert self.api is not None
         return self.api.post(*args, **kwargs)
 
-    def put(self, *args, **kwargs):
+    def put(self, *args, **kwargs) -> ApiResponse:
+        assert self.api is not None
         return self.api.put(*args, **kwargs)
 
-    def delete(self, *args, **kwargs):
+    def delete(self, *args, **kwargs) -> ApiResponse:
+        assert self.api is not None
         return self.api.delete(*args, **kwargs)
 
-    def get(self, *args, **kwargs):
+    def get(self, *args, **kwargs) -> ApiResponse:
+        assert self.api is not None
         return self.api.get(*args, **kwargs)
 
 

@@ -46,11 +46,11 @@ def max_or_none(*args: T) -> Optional[T]:
     return None
 
 
-def get_membership_summary(member_id: int) -> MembershipData:
-    return get_membership_summaries([member_id])[0]
+def get_membership_summary(member_id: int, at_date: Optional[date] = None) -> MembershipData:
+    return get_membership_summaries([member_id], at_date)[0]
 
 
-def get_membership_summaries(member_ids: List[int]) -> List[MembershipData]:
+def get_membership_summaries(member_ids: List[int], at_date: Optional[date] = None) -> List[MembershipData]:
     ''' Returns a list of MembershipData for each member in member_ids.
     '''
 
@@ -59,7 +59,8 @@ def get_membership_summaries(member_ids: List[int]) -> List[MembershipData]:
     # Since the method is only used with either 1 member or all members in the database this is reasonable.
     span_filter = Span.member_id == member_ids[0] if len(member_ids) == 1 else True
 
-    today = date.today()
+    if at_date is None:
+        at_date = date.today()
     
     # Converts a list of rows of IDs to a set of them
     def setify(rows: List[Any]) -> Set[Any]:
@@ -74,8 +75,8 @@ def get_membership_summaries(member_ids: List[int]) -> List[MembershipData]:
             .query(Span.member_id)
             .filter(span_filter,
                     Span.type == Span.LABACCESS,
-                    Span.startdate <= today,
-                    Span.enddate >= today,
+                    Span.startdate <= at_date,
+                    Span.enddate >= at_date,
                     Span.deleted_at.is_(None))
             .group_by(Span.member_id)
             .all()
@@ -92,8 +93,8 @@ def get_membership_summaries(member_ids: List[int]) -> List[MembershipData]:
             .query(Span.member_id)
             .filter(span_filter,
                     Span.type == Span.MEMBERSHIP,
-                    Span.startdate <= today,
-                    Span.enddate >= today,
+                    Span.startdate <= at_date,
+                    Span.enddate >= at_date,
                     Span.deleted_at.is_(None))
             .all()
     )
@@ -109,8 +110,8 @@ def get_membership_summaries(member_ids: List[int]) -> List[MembershipData]:
             .query(Span.member_id)
             .filter(span_filter,
                     Span.type == Span.SPECIAL_LABACESS,
-                    Span.startdate <= today,
-                    Span.enddate >= today,
+                    Span.startdate <= at_date,
+                    Span.enddate >= at_date,
                     Span.deleted_at.is_(None))
             .group_by(Span.member_id)
             .all()

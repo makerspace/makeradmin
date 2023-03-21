@@ -2,6 +2,7 @@ from logging import getLogger
 from random import randint
 from typing import Optional
 from faker import Faker
+from test_aid.obj import ObjFactory
 
 
 from core.models import AccessToken, PasswordResetToken
@@ -20,25 +21,25 @@ class DbFactory:
     """ Create entities directly in the db, uses db_session to access the db so it can be used for both remote db
     access and in memory db. """
     
-    def __init__(self, test, obj_factory=None):
+    def __init__(self, test, obj_factory: Optional[ObjFactory]=None) -> None:
         self.test = test
         self.obj = obj_factory
         
         self.fake = Faker('sv_SE')
         
-        self.access_token = None
-        self.member = None
-        self.group = None
-        self.span = None
-        self.key = None
-        self.permission = None
-        self.message = None
-        self.box = None
-        self.category = None
-        self.product = None
-        self.action = None
-        self.password_reset_token = None
-        self.phone_request = None
+        self.access_token: Optional[AccessToken] = None
+        self.member: Optional[Member] = None
+        self.group: Optional[Group] = None
+        self.span: Optional[Span] = None
+        self.key: Optional[Key] = None
+        self.permission: Optional[Permission] = None
+        self.message: Optional[Message] = None
+        self.box: Optional[Box] = None
+        self.category: Optional[ProductCategory] = None
+        self.product: Optional[Product] = None
+        self.action: Optional[ProductAction] = None
+        self.password_reset_token: Optional[PasswordResetToken] = None
+        self.phone_request: Optional[PhoneNumberChangeRequest] = None
         
     def create_access_token(self, **kwargs) -> AccessToken:
         obj = dict(
@@ -55,6 +56,7 @@ class DbFactory:
         return self.access_token
         
     def create_member(self, **kwargs) -> Member:
+        assert self.obj is not None
         obj = self.obj.create_member(**kwargs)
         self.member = Member(**obj, member_number=self.get_member_number())
         db_session.add(self.member)
@@ -62,6 +64,7 @@ class DbFactory:
         return self.member
 
     def create_phone_request(self, **kwargs) -> PhoneNumberChangeRequest:
+        assert self.obj is not None
         obj = self.obj.create_phone_request(**kwargs)
         self.phone_request = PhoneNumberChangeRequest(**obj, member=self.member)
         db_session.add(self.phone_request)
@@ -82,6 +85,7 @@ class DbFactory:
         return self.box
 
     def create_group(self, **kwargs) -> Group:
+        assert self.obj is not None
         obj = self.obj.create_group(**kwargs)
         self.group = Group(**obj)
         db_session.add(self.group)
@@ -89,6 +93,7 @@ class DbFactory:
         return self.group
 
     def create_span(self, **kwargs) -> Span:
+        assert self.obj is not None
         if 'member' in kwargs:
             member = kwargs.pop('member')
         else:
@@ -102,6 +107,7 @@ class DbFactory:
         return self.span
 
     def create_key(self, **kwargs) -> Key:
+        assert self.obj is not None
         if 'member' in kwargs:
             member = kwargs.pop('member')
         else:
@@ -152,6 +158,7 @@ class DbFactory:
         return member_number
 
     def create_category(self, **kwargs) -> ProductCategory:
+        assert self.obj is not None
         obj = self.obj.create_category(**kwargs)
         self.category = ProductCategory(**obj)
         db_session.add(self.category)
@@ -166,6 +173,7 @@ class DbFactory:
         db_session.flush()
 
     def create_product(self, **kwargs) -> Product:
+        assert self.obj is not None
         if self.category:
             kwargs.setdefault('category_id', self.category.id)
 
@@ -187,6 +195,7 @@ class DbFactory:
         db_session.flush()
 
     def create_product_action(self, **kwargs) -> ProductAction:
+        assert self.obj is not None
         if self.product:
             kwargs.setdefault('product_id', self.product.id)
 
@@ -200,12 +209,11 @@ class DbFactory:
         member = member or self.member
         assert member is not None
         
-        obj = dict(
-            member_id=member.member_id,
-            token=random_str(),
-        )
-        obj.update(**kwargs)
-        self.password_reset_token = PasswordResetToken(**obj)
+        if "member_id" not in kwargs:
+            kwargs["member_id"] = member.member_id
+        if "token" not in kwargs:
+            kwargs["token"]= random_str(),
+        self.password_reset_token = PasswordResetToken(**kwargs)
         db_session.add(self.password_reset_token)
         db_session.commit()
         return self.password_reset_token
