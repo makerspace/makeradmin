@@ -19,8 +19,11 @@ set_stripe_key(True)
 class MakerspaceMetadataKeys(Enum):
     USER_ID = "makerspace_user_id"
     MEMBER_NUMBER = "makerspace_member_number"
-    PRICING_TYPE = "pricing_type"
+    PRICE_TYPE = "price_type"
     SUBSCRIPTION_TYPE = "subscription_type"
+
+class PriceType(Enum):
+    BINDING_PERIOD = "binding_period"
 
 class Type(Enum):
     SOURCE = 'source'
@@ -30,6 +33,7 @@ class Type(Enum):
     CUSTOMER = 'customer'
     INVOICE = 'invoice'
     CHECKOUT = 'checkout'
+    SUBSCRIPTION_SCHEDULE = 'subscription_schedule'
     TEST_HELPERS = 'test_helpers'
 
 class Subtype(Enum):
@@ -50,6 +54,7 @@ class Subtype(Enum):
     SESSION_COMPLETED = 'session.completed'
     TEST_CLOCK_ADVANCING = 'test_clock.advancing'
     CREATED = 'created'
+    RELEASED = 'released'
 
 
 class SubscriptionStatus(Enum):

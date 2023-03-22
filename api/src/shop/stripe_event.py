@@ -131,11 +131,9 @@ def stripe_invoice_event(subtype: Subtype, event: Any) -> None:
         print(f"Processing paid invoice {event['id']}")
         # Member has paid something and we can now add things accordingly...
         invoice = event["data"]["object"]
-        print(invoice)
+        # print(invoice)
 
         for line in invoice["lines"]["data"]:
-            subscription_id = line["subscription"]
-
             metadata: Dict[str,str] = line["metadata"]
 
             try:
@@ -161,13 +159,6 @@ def stripe_invoice_event(subtype: Subtype, event: Any) -> None:
                 print(f"Invoice contains subscription for non-existing member (id={member_id}). Ignoring.")
                 continue
 
-            if subscription_type == SubscriptionType.LAB:
-                member.stripe_labaccess_subscription_id = subscription_id
-            elif subscription_type == SubscriptionType.MEMBERSHIP:
-                member.stripe_membership_subscription_id = subscription_id
-            else:
-                assert False
-
             end_ts = int(line["period"]["end"])
             start_ts = int(line["period"]["start"])
 
@@ -188,13 +179,17 @@ def stripe_invoice_event(subtype: Subtype, event: Any) -> None:
 
         db_session.flush()
         return
+    elif subtype == Subtype.PAYMENT_FAILED:
+        # The user will be notified by Stripe if this happens.
+        # This can be configured at https://dashboard.stripe.com/settings/billing/automatic
+        # It should also be configured to automatically cancel the subscription after some failed attempts.
+        pass
 
 
-def stripe_customer_event(event_subtype: Subtype, event: any):
 
+def stripe_customer_event(event_subtype: Subtype, event: Any) -> None:
     try:
-        subscription = event["data"]["object"]
-        meta = subscription["metadata"]
+        meta = event["data"]["object"]["metadata"]
 
         if MakerspaceMetadataKeys.USER_ID.value not in meta:
             print(f"Ignoring customer event {event['id']} without correct metadata")
@@ -202,56 +197,90 @@ def stripe_customer_event(event_subtype: Subtype, event: any):
 
         member_id = int(meta[MakerspaceMetadataKeys.USER_ID.value])
         member: Member = db_session.query(Member).get(member_id)
+        
+        if event_subtype in (Subtype.SUBSCRIPTION_CREATED, Subtype.SUBSCRIPTION_UPDATED, Subtype.SUBSCRIPTION_DELETED):
+            subscription = event["data"]["object"]
+            subscription_type = SubscriptionType(meta[MakerspaceMetadataKeys.SUBSCRIPTION_TYPE.value])
+            subscription_id = subscription["id"]
 
-        if event_subtype == Subtype.CREATED:
-            print(f"Created stripe customer for makerspace member {member.member_number}")
-        elif event_subtype == Subtype.SUBSCRIPTION_CREATED:
-            print(f"Created stripe subscription for makerspace member {member.member_number}")
-        elif event_subtype == Subtype.SUBSCRIPTION_DELETED:
-            print(f"Deleted stripe subscription for makerspace member {member.member_number}")
-        elif event_subtype == Subtype.SUBSCRIPTION_UPDATED:
-            print(f"Updated stripe subscription for makerspace member {member.member_number}")
-        elif event_subtype == Subtype.UPDATED:
-            print(f"Updated stripe customer for makerspace member {member.member_number}")
+            if event_subtype == Subtype.SUBSCRIPTION_CREATED:
+                print(f"Created stripe {subscription_type.name} subscription {subscription_id} for makerspace member {member.member_number}")
+            elif event_subtype == Subtype.SUBSCRIPTION_DELETED:
+                print(f"Deleted stripe {subscription_type.name} subscription {subscription_id} for makerspace member {member.member_number}")
+            elif event_subtype == Subtype.SUBSCRIPTION_UPDATED:
+                print(f"Updated stripe {subscription_type.name} subscription {subscription_id} for makerspace member {member.member_number}")
 
-        if event_subtype == Subtype.SUBSCRIPTION_CREATED:
-            # We end up here if a schedule starts the subscription
-            if meta[MakerspaceMetadataKeys.SUBSCRIPTION_TYPE.value] == SubscriptionType.MEMBERSHIP:
-                if member.stripe_membership_subscription_id != None:
+            current_subscription_id = member.stripe_labaccess_subscription_id if subscription_type == SubscriptionType.LAB else member.stripe_membership_subscription_id
+
+            if event_subtype == Subtype.SUBSCRIPTION_CREATED:
+                if current_subscription_id is not None:
                     print(
-                        f"WARNING! New subscripton {subscription['id']} will overwrite {member.stripe_membership_subscription_id}"
+                        f"WARNING! New {subscription_type.name} subscription {subscription_id} will overwrite {current_subscription_id}"
                     )
 
-                member.stripe_membership_subscription_id = subscription["id"]
-            elif meta[MakerspaceMetadataKeys.SUBSCRIPTION_TYPE.value] == SubscriptionType.LAB:
-                if member.stripe_labaccess_subscription_id != None:
-                    print(
-                        f"WARNING! New subscripton {subscription['id']} will overwrite {member.stripe_labaccess_subscription_id}"
-                    )
-                member.stripe_labaccess_subscription_id = subscription["id"]
-
-        elif event_subtype == Subtype.SUBSCRIPTION_DELETED:
-            if meta[MakerspaceMetadataKeys.SUBSCRIPTION_TYPE.value] == SubscriptionType.LAB:
-                if member.stripe_labaccess_subscription_id == subscription["id"]:
-                    member.stripe_labaccess_subscription_id = None
+                # We end up here if a schedule starts the subscription
+                if subscription_type == SubscriptionType.MEMBERSHIP:
+                    member.stripe_membership_subscription_id = subscription_id
+                elif subscription_type == SubscriptionType.LAB:
+                    member.stripe_labaccess_subscription_id = subscription_id
+                else:
+                    assert False
+            elif event_subtype == Subtype.SUBSCRIPTION_DELETED:
+                is_current = current_subscription_id == subscription_id
+                if is_current:
+                    if subscription_type == SubscriptionType.LAB:
+                        member.stripe_labaccess_subscription_id = None
+                    elif subscription_type == SubscriptionType.MEMBERSHIP:
+                        member.stripe_membership_subscription_id = None
+                    else:
+                        assert False
                 else:
                     print(
-                        f"Ignoring delete notification for subscription {subscription['id']} on {member} since it isn't current. (Current is {member.stripe_labaccess_subscription_id})"
+                        f"Ignoring delete notification for {subscription_type.name} subscription {subscription_id} on {member.member_number} since it isn't current. (Current is {current_subscription_id})"
                     )
-            elif meta[MakerspaceMetadataKeys.SUBSCRIPTION_TYPE.value] == SubscriptionType.MEMBERSHIP:
-                if member.stripe_membership_subscription_id == subscription["id"]:
-                    member.stripe_membership_subscription_id = None
-                else:
-                    print(
-                        f"Ignoring delete notification for subscription {subscription['id']} on {member} since it isn't current. (Current is {member.stripe_membership_subscription_id})"
-                    )
-        db_session.flush()
+
+            db_session.commit()
+        else:
+            if event_subtype == Subtype.CREATED:
+                print(f"Created stripe customer for makerspace member {member.member_number}")
+            elif event_subtype == Subtype.UPDATED:
+                print(f"Updated stripe customer for makerspace member {member.member_number}")
 
     except Exception as e:
         print(e)
 
+def stripe_subscription_schedule_event(event_subtype: Subtype, event: Any) -> None:
+    subscription = event["data"]["object"]
+    meta = subscription["metadata"]
 
-def stripe_checkout_event(event_subtype: Subtype, event: any):
+    if MakerspaceMetadataKeys.USER_ID.value not in meta:
+        print(f"Ignoring subscription schedule event {event['id']} without correct metadata")
+        return
+
+    member_id = int(meta[MakerspaceMetadataKeys.USER_ID.value])
+    member: Member = db_session.query(Member).get(member_id)
+    subscription_type = SubscriptionType(meta[MakerspaceMetadataKeys.SUBSCRIPTION_TYPE.value])
+    current_subscription_id = member.stripe_labaccess_subscription_id if subscription_type == SubscriptionType.LAB else member.stripe_membership_subscription_id
+    subscription_id = subscription["id"]
+
+    if event_subtype == Subtype.RELEASED:
+        # This can happen if we cancel a scheduled subscription before it starts,
+        # and it also happens when an active subscription is cancelled.
+        is_current = current_subscription_id == subscription_id
+        if is_current:
+            print(f"Removed scheduled stripe subscription for makerspace member {member.member_number}")
+            if subscription_type == SubscriptionType.LAB:
+                member.stripe_labaccess_subscription_id = None
+            elif subscription_type == SubscriptionType.MEMBERSHIP:
+                member.stripe_membership_subscription_id = None
+            else:
+                assert False
+        else:
+            print(
+                f"Ignoring delete notification for scheduled {subscription_type} subscription {subscription_id} on {member.member_number} since it isn't current. (Current is {current_subscription_id})"
+            )
+
+def stripe_checkout_event(event_subtype: Subtype, event: Any) -> None:
     if event_subtype == Subtype.SESSION_COMPLETED:
         # This event is triggered when we go thru the setup intent flow.
         # This typically happens as part of the subscription flow in MakerAdmin but
@@ -284,7 +313,12 @@ def stripe_checkout_event(event_subtype: Subtype, event: any):
 
 def stripe_event(event: Any) -> None:
     print()
-    print(f"Stripe Event: {event.type:<34} {datetime.fromtimestamp(event['created'], timezone.utc)}")
+    event_created_time = datetime.fromtimestamp(event['created'], timezone.utc)
+    # This is the time when the event happens semantically. E.g. an invoice is created at exactly 00:00 on the first of the month.
+    # This may be different from the time when the event is created in Stripe. In particular, when using a test clock
+    # the event_created_time is still in real-time, but the event_semantic_time follows the test clock.
+    event_semantic_time = datetime.fromtimestamp(event['data']['object']['created'], timezone.utc)
+    print(f"Stripe Event: {event.type:<34} {event_semantic_time}")
     logger.info(f"got stripe event of type {event.type} {event['id']}")
 
     try:
@@ -314,6 +348,8 @@ def stripe_event(event: Any) -> None:
 
         elif event_type == Type.CHECKOUT:
             stripe_checkout_event(event_subtype, event)
+        elif event_type == Type.SUBSCRIPTION_SCHEDULE:
+            stripe_subscription_schedule_event(event_subtype, event)
         else:
             logger.info(f"ignoring unknown event type: {str(event.type)}")
 

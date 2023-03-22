@@ -13,13 +13,3 @@ def convert_to_stripe_amount(amount: Decimal) -> int:
                                   log=f"Stripe amount not even number of ören, maybe some product has uneven ören.")
 
     return int(stripe_amount)
-
-
-global_stripe_clock: Optional[stripe.test_helpers.TestClock] = None
-
-def set_global_clock(clock: Optional[stripe.test_helpers.TestClock]) -> None:
-  global global_stripe_clock
-  global_stripe_clock = clock
-
-def global_clock_id() -> Optional[str]:
-  return global_stripe_clock.stripe_id if global_stripe_clock is not None else None

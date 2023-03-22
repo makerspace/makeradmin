@@ -16,6 +16,8 @@ ipython
 Pillow
 Phonenumbers
 schedule
+python-dateutil
+types-python-dateutil
 
 # Test requirements
 pytest<7.2.0 # https://github.com/pytest-dev/pytest/issues/10420 remove version limitation when fixed
