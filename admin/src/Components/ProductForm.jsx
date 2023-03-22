@@ -116,7 +116,12 @@ class ProductForm extends React.Component {
                     </fieldset>
                     <fieldset className="uk-margin-top">
                         <legend><i className="uk-icon-filter"/> Filter</legend>
-                        <SelectInput model={product} name="filter" title="Filter" getLabel={o => o.name} getValue={o => o.id} options={[{id: "", name: "No filter"}, {id: "start_package", name: "Startpaket"}]}/>
+                        <SelectInput model={product} name="filter" title="Filter" getLabel={o => o.name} getValue={o => o.id} options={[
+                            {id: "", name: "No filter"},
+                            {id: "start_package", name: "Startpaket"},
+                            {id: "labaccess_non_subscription_purchase", name: "Labaccess Non Subscription Purchase"},
+                            {id: "membership_non_subscription_purchase", name: "Membership Non Subscription Purchase"},
+                        ]}/>
                     </fieldset>
                     <fieldset className="uk-margin-top">
                         <legend><i className="uk-icon-tag"/> Metadata</legend>
