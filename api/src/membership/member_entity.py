@@ -1,4 +1,6 @@
+from typing import Optional
 from flask import request
+from membership.models import Member
 
 from membership.member_auth import check_and_hash_password
 from service.db import db_session
@@ -16,23 +18,23 @@ def handle_password(data):
     if unhashed_password is not None:
         data['password'] = check_and_hash_password(unhashed_password)
 
-    
+
 class MemberEntity(Entity):
     """
     Special handling of Member, requires subclassing entity:
-    
+
     * Member member_number should be auto increment but mysql only supports one auto increment per table,
     can solve it with a trigger or like this using an explicit mysql lock.
-    
+
     * Unhashed password should be hashed on save.
     """
-    
+
     def create(self, data=None, commit=True):
         if data is None:
             data = request.json or {}
-            
+
         handle_password(data)
-        
+
         status, = db_session.execute("SELECT GET_LOCK('member_number', 20)").fetchone()
         if not status:
             raise InternalServerError("Failed to create member, try again later.",
@@ -56,3 +58,10 @@ class MemberEntity(Entity):
         data = request.json or {}
         handle_password(data)
         return self._update_internal(entity_id, data, commit=commit)
+
+    def delete(self, entity_id, commit=False) -> None:
+        # Do an import here to avoid circular imports
+        from shop import stripe_checkout
+        # Ensure that if a member is deleted, all of their stripe data is deleted as well (including subscriptions)
+        stripe_checkout.delete_stripe_customer(entity_id)
+        return super().delete(entity_id, commit)
