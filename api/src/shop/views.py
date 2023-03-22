@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from flask import g, request, send_file, make_response, redirect, jsonify
 from sqlalchemy.exc import NoResultFound
 
@@ -5,7 +6,7 @@ from multiaccessy.invite import AccessyInvitePreconditionFailed, ensure_accessy_
 from service.api_definition import WEBSHOP, WEBSHOP_EDIT, PUBLIC, GET, USER, POST, DELETE, Arg, WEBSHOP_ADMIN, MEMBER_EDIT
 from service.db import db_session
 from service.entity import OrmSingeRelation, OrmSingleSingleRelation
-from service.error import PreconditionFailed
+from service.error import InternalServerError, PreconditionFailed
 from shop import service
 from shop.entities import product_image_entity, transaction_content_entity, transaction_entity, \
     transaction_action_entity, product_entity, category_entity, product_action_entity
@@ -26,8 +27,10 @@ from shop.shop_data import pending_actions, member_history, receipt, get_product
 from shop.stripe_event import stripe_callback, process_stripe_events
 from shop.stripe_payment_intent import confirm_stripe_payment_intent
 from shop.transactions import ship_labaccess_orders
+from logging import getLogger
 
 from shop.stripe_checkout import SubscriptionType
+logger = getLogger("makeradmin")
 
 service.entity_routes(
     path="/category",
@@ -156,9 +159,20 @@ def start_subscription_route(subscription_type=Arg(str, required=True), checkout
     return success_url
 
 
+@dataclass
+class ReloadPage:
+    def __init__(self) -> None:
+        self.reload = True
+
 @service.route("/member/current/subscription", method=DELETE, permission=USER)
 def cancel_subscription_route(subscription_type=Arg(str, required=True), success_url=Arg(str, required=False)):
-    return cancel_subscription(member_id=g.user_id, subscription_type=subscription_type)
+    try:
+        cancel_subscription(member_id=g.user_id, subscription_type=subscription_type)
+        return ReloadPage()
+    except Exception as e:
+        # Don't expose error details to the user
+        logger.error(e)
+        raise InternalServerError("Failed to cancel subscription")
 
 
 @service.route("/member/current/stripe_customer_portal", method=GET, permission=PUBLIC)
