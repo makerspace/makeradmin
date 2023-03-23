@@ -1,13 +1,16 @@
 from dataclasses import dataclass
+from decimal import Decimal
 from enum import Enum
 from logging import getLogger
-from typing import Any, List, Literal, Optional, Union, cast
+from typing import Any, Dict, List, Literal, Optional, Tuple, Union, cast
 from time import sleep
+from sqlalchemy import func
 
 import stripe
 
 from datetime import datetime, timezone, date, time, timedelta
 from stripe.error import InvalidRequestError, CardError, StripeError
+from shop.models import Product, ProductAction, ProductCategory
 from service.error import BadRequest, InternalServerError, EXCEPTION
 from service.db import db_session
 from membership.models import Member
@@ -27,6 +30,90 @@ class SubscriptionType(Enum):
 
 
 logger = getLogger("makeradmin")
+
+
+def setup_subscription_makeradmin_products(
+    subscription_type: SubscriptionType,
+) -> Product:
+    name = f"{subscription_type.value.title()} Subscription"
+
+    category = (
+        db_session.query(ProductCategory)
+        .filter(ProductCategory.name == "Subscriptions")
+        .one_or_none()
+    )
+    if category is None:
+        category = ProductCategory(
+            name="Subscriptions",
+            display_order=(
+                db_session.query(func.max(ProductCategory.display_order)).scalar() or 0
+            )
+            + 1,
+        )
+        db_session.add(category)
+        db_session.flush()
+
+    product: Optional[Product] = (
+        db_session.query(Product).filter(Product.name == name).one_or_none()
+    )
+    new = False
+    if product is None:
+        new = True
+        product = Product()
+
+    product.name = name
+    product.description = f"Stripe subscription for {subscription_type.value}"
+    stripe_price = lookup_subscription_price_for(
+        None, subscription_type
+    ).recurring_price
+    price = stripe.Price.retrieve(stripe_price)
+    product.category_id = category.id
+    product.unit = price["recurring"]["interval"]
+    assert int(price["recurring"]["interval_count"]) == 1
+    assert price["type"] == "recurring"
+    assert price["currency"] == "sek"
+    product.price = Decimal(price["unit_amount"]) / 100
+    product.smallest_multiple = 1
+    product.filter = ""
+    product.show = False  # The subscription products are not shown in the shop
+    if new:
+        product.display_order = (
+            db_session.query(func.max(Product.display_order)).scalar() or 0
+        ) + 1
+        db_session.add(product)
+
+    db_session.commit()
+    return product
+
+
+SUBSCRIPTION_PRODUCTS: Optional[Dict[SubscriptionType, int]] = None
+
+
+def get_subscription_products() -> Dict[SubscriptionType, int]:
+    # Setup the products for the subscriptions lazily
+    global SUBSCRIPTION_PRODUCTS
+    if SUBSCRIPTION_PRODUCTS is None:
+        SUBSCRIPTION_PRODUCTS = {
+            SubscriptionType.MEMBERSHIP: setup_subscription_makeradmin_products(
+                SubscriptionType.MEMBERSHIP
+            ).id,
+            SubscriptionType.LAB: setup_subscription_makeradmin_products(
+                SubscriptionType.LAB
+            ).id,
+        }
+
+    return SUBSCRIPTION_PRODUCTS
+
+
+def get_subscription_product(subscription_type: SubscriptionType) -> Product:
+    p = db_session.query(Product).get(get_subscription_products()[subscription_type])
+    if p is None:
+        # The product doesn't exist anymore.
+        # Possibly a new test has been started and the database has been reset.
+        global SUBSCRIPTION_PRODUCTS
+        SUBSCRIPTION_PRODUCTS = None
+        return get_subscription_product(subscription_type)
+    return p
 
 
 def get_stripe_subscriptions(
@@ -123,9 +210,10 @@ class ProductPricing:
     recurring_price: str
     binding_period_price: Optional[str]
 
+
 # TODO: Would be a nice to cache this for an hour or so to avoid excessive lookups
 def lookup_subscription_price_for(
-    member_info: Member, subscription_type: SubscriptionType
+    member_info: Optional[Member], subscription_type: SubscriptionType
 ) -> ProductPricing:
     products = stripe.Product.search(
         query=f"metadata['{MSMetaKeys.SUBSCRIPTION_TYPE.value}']:'{subscription_type.value}'"
@@ -140,6 +228,7 @@ def lookup_subscription_price_for(
     prices = stripe.Price.list(product=product.stripe_id)
     if BINDING_PERIOD[subscription_type] > 0:
         binding_period = BINDING_PERIOD[subscription_type]
+        # Filter by metadata
         starting_prices = [
             p
             for p in prices
@@ -147,6 +236,7 @@ def lookup_subscription_price_for(
             if p["metadata"][MSMetaKeys.PRICE_TYPE.value]
             == PriceType.BINDING_PERIOD.value
         ]
+        # Filter by period
         starting_prices = [
             p
             for p in starting_prices
@@ -173,6 +263,38 @@ def calc_start_ts(current_end_date: date, now: datetime) -> datetime:
     return max(now, end_dt - timedelta(days=1))
 
 
+def calc_subscription_start_time(
+    member_id: int,
+    subscription_type: SubscriptionType,
+    earliest_start_at: Optional[datetime],
+) -> Tuple[bool, datetime]:
+    if earliest_start_at is None:
+        earliest_start_at = datetime.now(timezone.utc)
+    assert (
+        earliest_start_at.tzinfo is not None
+    ), "earliest_start_at must be timezone aware"
+
+    memberships = get_membership_summary(member_id, earliest_start_at)
+    was_already_member = False
+    if (
+        memberships.membership_active
+        and subscription_type == SubscriptionType.MEMBERSHIP
+    ):
+        assert memberships.membership_end is not None
+        subscription_start = calc_start_ts(
+            memberships.membership_end, earliest_start_at
+        )
+        was_already_member = True
+    elif memberships.labaccess_active and subscription_type == SubscriptionType.LAB:
+        assert memberships.labaccess_end is not None
+        subscription_start = calc_start_ts(memberships.labaccess_end, earliest_start_at)
+        was_already_member = True
+    else:
+        subscription_start = earliest_start_at
+
+    return was_already_member, subscription_start
+
+
 def start_subscription(
     member_id: int,
     subscription_type: SubscriptionType,
@@ -182,31 +304,9 @@ def start_subscription(
     try:
         print(f"Attempting to start new subscription {subscription_type}")
 
-        if earliest_start_at is None:
-            earliest_start_at = datetime.now(timezone.utc)
-        assert (
-            earliest_start_at.tzinfo is not None
-        ), "earliest_start_at must be timezone aware"
-        memberships = get_membership_summary(member_id, earliest_start_at)
-        was_already_member = False
-
-        if (
-            memberships.membership_active
-            and subscription_type == SubscriptionType.MEMBERSHIP
-        ):
-            assert memberships.membership_end is not None
-            subscription_start = calc_start_ts(
-                memberships.membership_end, earliest_start_at
-            )
-            was_already_member = True
-        elif memberships.labaccess_active and subscription_type == SubscriptionType.LAB:
-            assert memberships.labaccess_end is not None
-            subscription_start = calc_start_ts(
-                memberships.labaccess_end, earliest_start_at
-            )
-            was_already_member = True
-        else:
-            subscription_start = earliest_start_at
+        (was_already_member, subscription_start) = calc_subscription_start_time(
+            member_id, subscription_type, earliest_start_at
+        )
 
         member: Member = db_session.query(Member).get(member_id)
         stripe_customer = get_stripe_customer(member, test_clock)
@@ -240,15 +340,6 @@ def start_subscription(
                     print(e)
                     raise e
                 member = db_session.query(Member).get(member_id)
-
-        # active_subscriptions = get_stripe_subscriptions(stripe_customer["id"])
-        # print(f"Checking if user has active subscription")
-        # for active_subscription in active_subscriptions:
-        #     for item in active_subscription["items"]["data"]:
-        #         print(f" - Found price id {item['price']['id']}")
-        #         if item["price"]["id"] == price_id:
-        #             # There is already an active subscription. Let's bail out
-        #             raise BadRequest(f"Member already has active subscription")
 
         metadata = {
             MSMetaKeys.USER_ID.value: member_id,
@@ -305,22 +396,175 @@ def start_subscription(
             phases=phases,
         )
 
-        # We set the subscription schedule id in the membership_subscription_column as this
-        # is also used to indicate pending subscriptions
+        schedule_id: str = subscription_schedule["id"]
+
+        # The subscription schedule will have a null subscription until it is started.
+        # So we use the subscription schedule id temporarily.
+
         if subscription_type == SubscriptionType.MEMBERSHIP:
-            member.stripe_membership_subscription_id = subscription_schedule.stripe_id
+            member.stripe_membership_subscription_id = schedule_id
         elif subscription_type == SubscriptionType.LAB:
-            member.stripe_labaccess_subscription_id = subscription_schedule.stripe_id
+            member.stripe_labaccess_subscription_id = schedule_id
         else:
             assert False
 
         db_session.commit()
-        return cast(str, subscription_schedule.stripe_id)
+        return schedule_id
     except Exception as e:
         raise BadRequest("Internal error: " + str(e))
 
 
-# FIXME: Do we want business logic to prevent users from unsubscribing within X months?
+def resume_paused_subscription(
+    member_id: int,
+    subscription_type: SubscriptionType,
+    earliest_start_at: Optional[datetime],
+    test_clock: Optional[stripe.test_helpers.TestClock],
+) -> bool:
+    member: Optional[Member] = db_session.query(Member).get(member_id)
+    if member is None:
+        raise BadRequest(f"Unable to find member with id {member_id}")
+
+    if subscription_type == SubscriptionType.MEMBERSHIP:
+        subscription_id = member.stripe_membership_subscription_id
+    elif subscription_type == SubscriptionType.LAB:
+        subscription_id = member.stripe_labaccess_subscription_id
+    else:
+        assert False
+
+    if subscription_id is None:
+        return False
+
+    if subscription_id.startswith("sub_sched_"):
+        # The subscription is scheduled for the future.
+        # We can just wait for it to start as normal
+        return False
+
+    subscription = stripe.Subscription.retrieve(subscription_id)
+    # If the subscription is not paused, we just do nothing.
+    if subscription["pause_collection"] is None:
+        return False
+
+    # Resuming stripe subscriptions is possible,
+    # but it was very tricky to do it while handling binding periods correctly.
+    # So we just cancel the subscription and start a new one.
+    # Much less code, much lower risk of bugs. Everyone is happy :)
+    cancel_subscription(member_id, subscription_type, test_clock)
+    start_subscription(member_id, subscription_type, test_clock, earliest_start_at)
+    return True
+
+    # (was_already_member, subscription_start) = calc_subscription_start_time(
+    #     member_id, subscription_type, earliest_start_at
+    # )
+
+    # try:
+    #     # The subscription might be a scheduled one so we need to check the id prefix
+    #     # to determine which API to use.
+    #     if subscription_id.startswith("sub_sched_"):
+    #         # A subscription schedule cannot be paused.
+    #         # Fortunately, we should never have to do this.
+    #         # Subscriptions are paused when a new member signs up,
+    #         # but hasn't yet signed the membership agreement.
+    #         # But subscription schedules are only used for members
+    #         # that already had membership when they signed up for the subscription.
+    #         return False
+    #     elif subscription_id.startswith("sub_"):
+    #         subscription = stripe.Subscription.retrieve(subscription_id)
+    #         # If the subscription is not paused, we just do nothing.
+    #         if subscription["pause_collection"] is None:
+    #             return False
+
+    #         logger.info(f"Resuming subscription. It will start at {subscription_start}")
+    #         if was_already_member:
+    #             # If the member already had labaccess/membership at this time,
+    #             # then we leave the billing anchor unchanged.
+    #             # The member will then be billed at the normal time.
+    #             # This is fine because when a subscription is started, it is scheduled
+    #             # such that the billing cycle anchor lines up with when the member needs
+    #             # to renew their subscription.
+    #             stripe.Subscription.modify(
+    #                 sid=subscription_id,
+    #                 pause_collection={
+    #                     "behavior": "void",
+    #                     "resumes_at": int(subscription_start.timestamp()),
+    #                 },
+    #                 proration_behavior="none",
+    #                 # billing_cycle_anchor="unchanged",
+    #             )
+    #         else:
+    #             # This will resume the paused subscription and bill the member immediately.
+    #             # The billing cycle anchor will be set to the current time, and since the member
+    #             # does not have labaccess/membership at this time, we should not add any prorations.
+    #             stripe.Subscription.modify(
+    #                 sid=subscription_id,
+    #                 pause_collection='', # None gets stripped out by the API, so we must use an empty string
+    #                 billing_cycle_anchor="now",
+    #                 proration_behavior="none",
+    #             )
+    #         return True
+    #     else:
+    #         assert False
+    # except stripe.error.InvalidRequestError as e:
+    #     if e.code == "resource_missing":
+    #         # The subscription was already deleted
+    #         # We might have missed the webhook to delete the reference from the member.
+    #         # Or the webhook might be on its way.
+    #         return False
+    #     else:
+    #         raise
+
+
+def pause_subscription(
+    member_id: int,
+    subscription_type: SubscriptionType,
+    test_clock: Optional[stripe.test_helpers.TestClock],
+) -> bool:
+    member: Optional[Member] = db_session.query(Member).get(member_id)
+    if member is None:
+        raise BadRequest(f"Unable to find member with id {member_id}")
+    stripe_customer = get_stripe_customer(member, test_clock)
+    assert stripe_customer is not None
+    assert member.stripe_customer_id == stripe_customer.stripe_id
+
+    if subscription_type == SubscriptionType.MEMBERSHIP:
+        subscription_id = member.stripe_membership_subscription_id
+    elif subscription_type == SubscriptionType.LAB:
+        subscription_id = member.stripe_labaccess_subscription_id
+    else:
+        assert False
+
+    if subscription_id is None:
+        return False
+
+    try:
+        # The subscription might be a scheduled one so we need to check the id prefix
+        # to determine which API to use.
+        if subscription_id.startswith("sub_sched_"):
+            # A subscription schedule cannot be paused.
+            # Fortunately, we should never have to do this.
+            # Subscriptions are paused when a new member signs up,
+            # but hasn't yet signed the membership agreement.
+            # But subscription schedules are only used for members
+            # that already had membership when they signed up for the subscription.
+            return False
+        elif subscription_id.startswith("sub_"):
+            stripe.Subscription.modify(
+                sid=subscription_id,
+                pause_collection={
+                    "behavior": "void",
+                    "resumes_at": None,
+                },
+            )
+            return True
+        else:
+            assert False
+    except stripe.error.InvalidRequestError as e:
+        if e.code == "resource_missing":
+            # The subscription was already deleted
+            # We might have missed the webhook to delete the reference from the member.
+            # Or the webhook might be on its way.
+            return False
+        else:
+            raise
 
 
 def cancel_subscription(
@@ -344,11 +588,11 @@ def cancel_subscription(
 
     if subscription_id is None:
         return False
-    
+
     try:
         # The subscription might be a scheduled one so we need to check the id prefix
         # to determine which API to use.
-        
+
         # We delete the subscription here. This will make stripe send us an event
         # and that will make us remove the reference from the member.
         # We rely on webhooks as much as possible since this allows admins to
@@ -358,8 +602,10 @@ def cancel_subscription(
             stripe.SubscriptionSchedule.release(subscription_id)
         elif subscription_id.startswith("sub_"):
             stripe.Subscription.delete(sid=subscription_id)
+        else:
+            assert False
     except stripe.error.InvalidRequestError as e:
-        if e.code == 'resource_missing':
+        if e.code == "resource_missing":
             # The subscription was already deleted.
             # We might have missed the webhook to delete the reference from the member.
             # Or the webhook might be on its way.
@@ -374,7 +620,7 @@ def cancel_subscription(
         else:
             raise
 
-    return True  
+    return True
 
 
 def create_stripe_checkout_session(

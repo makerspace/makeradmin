@@ -24,7 +24,7 @@ from shop.stripe_checkout import create_stripe_checkout_session
 
 from shop.shop_data import pending_actions, member_history, receipt, get_product_data, all_product_data, \
     get_membership_products
-from shop.stripe_event import stripe_callback, process_stripe_events
+from shop.stripe_event import stripe_callback
 from shop.stripe_payment_intent import confirm_stripe_payment_intent
 from shop.transactions import ship_labaccess_orders
 from logging import getLogger
@@ -239,11 +239,4 @@ def register_route():
 @service.route("/stripe_callback", method=POST, permission=PUBLIC, commit_on_error=True)
 def stripe_callback_route():
     stripe_callback(request.data, request.headers)
-
-
-@service.route("/process_stripe_events", method=POST, permission=WEBSHOP_ADMIN, commit_on_error=True)
-def process_stripe_events_route(start=Arg(str, required=False), source_id=Arg(str, required=False),
-                                type=Arg(str, required=False)):
-    """ Used to make server fetch stripe events, used for testing since webhook is hard to use. """
-    return process_stripe_events(start, source_id, type)
 

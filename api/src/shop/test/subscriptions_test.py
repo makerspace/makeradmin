@@ -1,4 +1,5 @@
 from datetime import date, timedelta, datetime, timezone
+import logging
 import time
 import random
 import copy
@@ -8,6 +9,7 @@ from typing import Any, Dict, List, Literal, Optional, Set, Tuple, cast
 from unittest.mock import Mock, patch
 
 import pytest
+from shop.stripe_util import event_semantic_time
 from test_aid.systest_base import DECLINE_AFTER_ATTACHING_CARD, VALID_3DS_CARD_NO
 from shop.stripe_checkout import BINDING_PERIOD, SubscriptionType, get_stripe_customer
 from shop import stripe_checkout
@@ -33,12 +35,13 @@ from messages.models import Message, MessageTemplate
 import membership.views
 from service.db import db_session
 from shop.models import ProductAction, Transaction
-from shop.transactions import create_transaction
+from shop.transactions import create_transaction, ship_orders
 from test_aid.test_base import FlaskTestBase, ShopTestMixin
 import stripe
 from shop import stripe_event
 from shop import stripe_constants
 
+logger = logging.getLogger("makeradmin")
 
 class FakeClock:
     def __init__(self, date: datetime) -> None:
@@ -69,6 +72,12 @@ class Test(FlaskTestBase):
         self.clocks_to_destroy: List[FakeClock] = []
         stripe_constants.set_stripe_key(True)
 
+        disable_loggers = ['stripe']
+
+        for logger_name in disable_loggers:
+            logger = logging.getLogger(logger_name)
+            logger.disabled = True
+
     def tearDown(self) -> None:
         # Delete all test clocks
         # This will also delete all customers and subscriptions created during the test
@@ -93,9 +102,11 @@ class Test(FlaskTestBase):
     def card(number: str) -> Dict[str, Any]:
         return {"number": number, "exp_month": 12, "exp_year": 2030, "cvc": "123"}
 
-    def create_member_that_can_pay(self, test_clock: FakeClock) -> Member:
+    def create_member_that_can_pay(self, test_clock: FakeClock, signed_labaccess: bool=True) -> Member:
         member = self.db.create_member(password=hash_password(DEFAULT_PASSWORD))
         self.set_payment_method(member, VALID_3DS_CARD_NO, test_clock)
+        if signed_labaccess:
+            member.labaccess_agreement_at = test_clock.date
         return member
 
     def set_payment_method(
@@ -117,15 +128,16 @@ class Test(FlaskTestBase):
     def get_member(self, member_id: int) -> Member:
         return cast(Member, db_session.query(Member).get(member_id))
 
-    def setup_single_member(self) -> Tuple[datetime, FakeClock, int]:
+    def setup_single_member(self, signed_labaccess: bool=True) -> Tuple[datetime, FakeClock, int]:
         now = datetime.now(timezone.utc)
         clock = FakeClock(now)
         self.clocks_to_destroy.append(clock)
-        member_id = self.create_member_that_can_pay(clock).member_id
+        member_id = self.create_member_that_can_pay(clock, signed_labaccess).member_id
         return (now, clock, member_id)
 
     def advance_clock(self, clock: FakeClock, time: datetime) -> None:
         clock.advance(to=time)
+        logger.info(f"Advancing clock to {time}...")
         # Wait until all stripe events have been received
         # We will query for all events that have been created since this test started.
         # We would like to filter for all events after the test clock's time before we advanced it, but sadly
@@ -149,7 +161,6 @@ class Test(FlaskTestBase):
 
         batched_events: List[stripe.Event] = []
         done = 0
-        print("Waiting for stripe events...")
 
         # Even if we receive for example a test_helpers.test_clock.ready event, we still check
         # a few more times to make sure that we have received all events that were generated.
@@ -186,14 +197,13 @@ class Test(FlaskTestBase):
                     continue
 
                 self.seen_event_ids.add(ev.stripe_id)
-                # print(ev)
 
                 # Do not forward test clock events. They are just debugging noise.
                 if not ev.type.startswith("test_helpers.test_clock."):
                     batched_events.append(ev)
 
                 if ev.type == until_seen_type:
-                    print(
+                    logger.info(
                         "Clock is ready. Waiting a bit to make sure we have received all events..."
                     )
                     done = 1
@@ -225,7 +235,7 @@ class Test(FlaskTestBase):
             events_with_random_time.sort(key=lambda x: x[0])
 
         for _, ev in events_with_random_time:
-            stripe_event.stripe_event(ev)
+            stripe_event.stripe_event(ev, current_time=event_semantic_time(ev))
 
     def test_subscriptions_create1(self) -> None:
         """
@@ -271,11 +281,11 @@ class Test(FlaskTestBase):
         )
         self.advance_clock(clock, now + relativedelta(days=1))
 
-        # The member should have a subscription set, but it is a scheduled subscription, not the real one
+        # Note that the scheduled subscription is not the same as the real subscription.
         assert (
             self.get_member(member_id).stripe_membership_subscription_id
             == subscription_schedule_id
-        )
+        ), "The member should have a scheduled subscription"
 
         self.advance_clock(clock, now + relativedelta(days=11))
 
@@ -303,11 +313,12 @@ class Test(FlaskTestBase):
             earliest_start_at=now,
             test_clock=clock.stripe_clock,
         )
-        # The member should have a subscription set, but it is a scheduled subscription, not the real one
+        
+        # Note that the scheduled subscription is not the same as the real subscription.
         assert (
             self.get_member(member_id).stripe_membership_subscription_id
             == subscription_schedule_id
-        )
+        ), "The member should have a scheduled subscription"
 
         self.advance_clock(clock, now + relativedelta(days=11))
 
@@ -366,7 +377,7 @@ class Test(FlaskTestBase):
         )
         assert get_membership_summary(member_id, clock.date).membership_active
 
-        subscription_schedule_id = stripe_checkout.start_subscription(
+        stripe_checkout.start_subscription(
             member_id,
             SubscriptionType.MEMBERSHIP,
             earliest_start_at=now,
@@ -403,7 +414,7 @@ class Test(FlaskTestBase):
         """
         (now, clock, member_id) = self.setup_single_member()
 
-        subscription_schedule_id = stripe_checkout.start_subscription(
+        stripe_checkout.start_subscription(
             member_id,
             SubscriptionType.MEMBERSHIP,
             earliest_start_at=now,
@@ -430,7 +441,7 @@ class Test(FlaskTestBase):
 
         (now, clock, member_id) = self.setup_single_member()
 
-        subscription_schedule_id = stripe_checkout.start_subscription(
+        stripe_checkout.start_subscription(
             member_id,
             SubscriptionType.LAB,
             earliest_start_at=now,
@@ -474,7 +485,7 @@ class Test(FlaskTestBase):
 
         (now, clock, member_id) = self.setup_single_member()
 
-        subscription_schedule_id = stripe_checkout.start_subscription(
+        stripe_checkout.start_subscription(
             member_id,
             SubscriptionType.LAB,
             earliest_start_at=now,
@@ -524,7 +535,7 @@ class Test(FlaskTestBase):
 
         (now, clock, member_id) = self.setup_single_member()
 
-        subscription_schedule_id = stripe_checkout.start_subscription(
+        stripe_checkout.start_subscription(
             member_id,
             SubscriptionType.MEMBERSHIP,
             earliest_start_at=now,
@@ -563,7 +574,7 @@ class Test(FlaskTestBase):
 
         (now, clock, member_id) = self.setup_single_member()
 
-        subscription_schedule_id = stripe_checkout.start_subscription(
+        stripe_checkout.start_subscription(
             member_id,
             SubscriptionType.MEMBERSHIP,
             earliest_start_at=now,
@@ -603,3 +614,91 @@ class Test(FlaskTestBase):
         assert (
             self.get_member(member_id).stripe_membership_subscription_id is not None
         ), "The subscription should not have been deleted"
+    
+    def test_subscriptions_signed_agreement1(self) -> None:
+        """
+        Checks that labaccess is not granted if the member has not signed the agreement.
+        The subscription is immediatelly paused, and only resumed when the member signs the agreement.
+        In this variant the member signs the agreement after just a few days.
+        """
+        (now, clock, member_id) = self.setup_single_member(signed_labaccess=False)
+
+        assert not get_membership_summary(member_id).membership_active
+
+        subscription_schedule_id = stripe_checkout.start_subscription(
+            member_id,
+            SubscriptionType.LAB,
+            earliest_start_at=now,
+            test_clock=clock.stripe_clock,
+        )
+        
+        self.advance_clock(clock, now + relativedelta(days=5))
+
+        summary = get_membership_summary(member_id, clock.date)
+        assert not summary.labaccess_active
+        
+        # Member signs agreement
+        self.get_member(member_id).labaccess_agreement_at = clock.date
+        db_session.commit()
+        # Ship any orders related to the member. We exclude all other members
+        # because that might mess up other tests running in parallel.
+        ship_orders(True, current_time=clock.date, member_id=member_id)
+
+        self.advance_clock(clock, now + relativedelta(days=5))
+
+        summary = get_membership_summary(member_id, clock.date)
+        assert summary.labaccess_active
+        assert summary.labaccess_end == (now + relativedelta(months=2, days=5)).date()
+
+        # Stripe limits how much we can advance the clock in one go
+        self.advance_clock(clock, now + relativedelta(months=2, days=3))
+        self.advance_clock(clock, now + relativedelta(months=2, days=5))
+
+        summary = get_membership_summary(member_id, clock.date)
+        assert summary.labaccess_active
+        assert summary.labaccess_end == (now + relativedelta(months=3, days=5)).date()
+    
+    def test_subscriptions_signed_agreement2(self) -> None:
+        """
+        Checks that labaccess is not granted if the member has not signed the agreement.
+        The subscription is immediatelly paused, and only resumed when the member signs the agreement.
+        In this variant the member signs the agreement after binding period would have been over.
+        """
+        (now, clock, member_id) = self.setup_single_member(signed_labaccess=False)
+
+        assert not get_membership_summary(member_id).membership_active
+
+        stripe_checkout.start_subscription(
+            member_id,
+            SubscriptionType.LAB,
+            earliest_start_at=now,
+            test_clock=clock.stripe_clock,
+        )
+        
+        self.advance_clock(clock, now + relativedelta(months=1, days=5))
+
+        # Since the member has not signed the agreement yet, they should not have labaccess
+        summary = get_membership_summary(member_id, clock.date)
+        assert not summary.labaccess_active
+
+        self.advance_clock(clock, now + relativedelta(months=2, days=5))
+        self.advance_clock(clock, now + relativedelta(months=3, days=5))
+
+        # Member signs agreement after more than 3 months
+        # Their 2 months of initial labaccess will start ticking now
+        self.get_member(member_id).labaccess_agreement_at = clock.date
+        db_session.commit()
+        ship_orders(True, current_time=clock.date, member_id=member_id)
+
+        self.advance_clock(clock, now + relativedelta(months=3, days=10))
+
+        summary = get_membership_summary(member_id, clock.date)
+        assert summary.labaccess_active
+        assert summary.labaccess_end == (now + relativedelta(months=5, days=5)).date()
+
+        self.advance_clock(clock, now + relativedelta(months=5, days=6))
+
+        # The member should now have finished their binding period and been billed for another month
+        summary = get_membership_summary(member_id, clock.date)
+        assert summary.labaccess_active
+        assert summary.labaccess_end == (now + relativedelta(months=6, days=5)).date()

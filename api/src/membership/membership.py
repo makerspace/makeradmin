@@ -151,7 +151,7 @@ def get_members_and_membership() -> Tuple[List[Member], List[MembershipData]]:
     return members, memberships
 
 
-def add_membership_days(member_id: int, span_type: str, days: int, creation_reason: Optional[str]=None, default_start_date: Optional[date]=None) -> MembershipData:
+def add_membership_days(member_id: int, span_type: str, days: int, creation_reason: Optional[str]=None, earliest_start_date: Optional[date]=None) -> MembershipData:
     assert days >= 0
 
     old_span = db_session.query(Span).filter_by(creation_reason=creation_reason).first()
@@ -163,8 +163,8 @@ def add_membership_days(member_id: int, span_type: str, days: int, creation_reas
             return get_membership_summary(member_id)
         raise UnprocessableEntity(f"Duplicate entry.", fields='creation_reason', what=NOT_UNIQUE)
 
-    if not default_start_date:
-        default_start_date = date.today()
+    if not earliest_start_date:
+        earliest_start_date = date.today()
         
     last_end, = db_session.query(func.max(Span.enddate)).filter(
         Span.member_id == member_id,
@@ -172,8 +172,8 @@ def add_membership_days(member_id: int, span_type: str, days: int, creation_reas
         Span.deleted_at.is_(None)
     ).first()
     
-    if not last_end or last_end < default_start_date:
-        last_end = default_start_date
+    if not last_end or last_end < earliest_start_date:
+        last_end = earliest_start_date
 
     end = last_end + timedelta(days=days)
     
