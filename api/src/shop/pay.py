@@ -14,7 +14,7 @@ logger = getLogger('makeradmin')
 def make_purchase(member_id=None, purchase=None, activates_member=False):
     """ Pay using the data in purchase, the purchase structure should be validated according to schema.  """
     
-    payment_method_id = purchase["stripe_payment_method_id"]
+    payment_method_id: str = purchase["stripe_payment_method_id"]
 
     transaction = create_transaction(member_id=member_id, purchase=purchase, activates_member=activates_member,
                                      stripe_reference_id=payment_method_id)

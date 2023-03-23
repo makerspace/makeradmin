@@ -1,5 +1,5 @@
 from functools import wraps
-from typing import Union
+from typing import Any, Callable, TypeVar, Union, cast
 
 from sqlalchemy import create_engine, inspect
 from sqlalchemy.orm import scoped_session, Session, sessionmaker
@@ -66,8 +66,9 @@ def populate_fields_by_index(engine):
             fields_by_index[index_name] = ",".join(column_names)
             fields_by_index[table + '.' + index_name] = ",".join(column_names)
     
-    
-def nested_atomic(f):
+
+F = TypeVar('F', bound=Callable[..., Any])
+def nested_atomic(f: F) -> F:
     """ Decorator for committing on success and rollback on any exception. NOTE: A subsequent rollback will rollback
     this nested transaction as well, but comitting will not unrollback a rollbacked nested transaction. """
     @wraps(f)
@@ -81,4 +82,4 @@ def nested_atomic(f):
             db_session.rollback()
             raise
         
-    return wrapper
+    return cast(F, wrapper)
