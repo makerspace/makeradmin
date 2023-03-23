@@ -1,8 +1,6 @@
 from enum import Enum
 from logging import getLogger
 
-from sqlalchemy.exc import NoResultFound
-
 from membership.membership import get_membership_summary
 from membership.models import Member
 from multiaccessy.accessy import ACCESSY_LABACCESS_GROUP, ACCESSY_SPECIAL_LABACCESS_GROUP, \
@@ -24,10 +22,9 @@ class LabaccessRequirements(Enum):
     NO_LABACESS_AGREEMENT = "NO_LABACESS_AGREEMENT"
 
 
-def check_labaccess_requirements(member_id) -> LabaccessRequirements:
-    try:
-        member = db_session.query(Member).get(member_id)
-    except NoResultFound:
+def check_labaccess_requirements(member_id: int) -> LabaccessRequirements:
+    member = db_session.query(Member).get(member_id)
+    if member is None:
         return LabaccessRequirements.MEMBER_MISSING
 
     if not member.phone:
@@ -39,9 +36,8 @@ def check_labaccess_requirements(member_id) -> LabaccessRequirements:
     return LabaccessRequirements.OK
 
 
-def ensure_accessy_labaccess(member_id):
-    """ If all preconditions are met, send an accessy invite (including auto add to labaccess gropup). Returns human
-    readable message of what happened. """
+def ensure_accessy_labaccess(member_id: int) -> None:
+    """ If all preconditions are met, send an accessy invite (including auto add to labaccess group)."""
     state = check_labaccess_requirements(member_id)
     match state:
         case LabaccessRequirements.MEMBER_MISSING:
@@ -62,6 +58,7 @@ def ensure_accessy_labaccess(member_id):
         groups.append(ACCESSY_SPECIAL_LABACCESS_GROUP)
 
     member = db_session.query(Member).get(member_id)
+    assert member is not None
 
     try:
         if accessy_session.is_in_org(member.phone):

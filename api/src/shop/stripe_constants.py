@@ -21,6 +21,7 @@ class MakerspaceMetadataKeys(Enum):
     MEMBER_NUMBER = "makerspace_member_number"
     PRICE_TYPE = "price_type"
     SUBSCRIPTION_TYPE = "subscription_type"
+    TRANSACTION_IDS = "makerspace_transaction_ids"
 
 class PriceType(Enum):
     BINDING_PERIOD = "binding_period"
