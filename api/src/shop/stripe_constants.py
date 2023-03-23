@@ -11,7 +11,7 @@ CURRENCY = "sek"
 
 STRIPE_SIGNING_SECRET = config.get("STRIPE_SIGNING_SECRET", log_value=False)
 
-def set_stripe_key(private: bool):
+def set_stripe_key(private: bool) -> None:
     stripe.api_key = STRIPE_PRIVATE_KEY if private else STRIPE_PUBLIC_KEY
 
 set_stripe_key(True)

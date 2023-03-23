@@ -1,7 +1,7 @@
 from decimal import localcontext, Decimal, Rounded
 from datetime import datetime, timezone
 from logging import getLogger
-from typing import Any, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 from sqlalchemy.sql import func
@@ -9,9 +9,10 @@ from shop.stripe_checkout import SubscriptionType, resume_paused_subscription
 
 
 from membership.membership import add_membership_days
-from membership.models import Key, Member, Span
-from multiaccessy.invite import ensure_accessy_labaccess, AccessyError, check_labaccess_requirements, \
+from membership.models import Member, Span
+from multiaccessy.invite import ensure_accessy_labaccess, check_labaccess_requirements, \
     LabaccessRequirements
+from multiaccessy.accessy import AccessyError
 from service.api_definition import NEGATIVE_ITEM_COUNT, INVALID_ITEM_COUNT, EMPTY_CART, NON_MATCHING_SUMS
 from service.db import db_session, nested_atomic
 from service.error import InternalServerError, BadRequest, NotFound
@@ -42,8 +43,8 @@ def get_source_transaction(source_id: str) -> Optional[Transaction]:
 
 
 @nested_atomic
-def commit_transaction_to_db(member_id=None, total_amount=None, contents=None, stripe_card_source_id=None,
-                             activates_member=False) -> Transaction:
+def commit_transaction_to_db(member_id: int, total_amount: Decimal, contents: List[TransactionContent], stripe_card_source_id: str,
+                             activates_member: bool=False) -> Transaction:
     """ Save as new transaction with transaction content in db and return it transaction. """
     
     transaction = Transaction(member_id=member_id, amount=total_amount, status=Transaction.PENDING)
@@ -107,12 +108,12 @@ def pending_actions_query(member_id: Optional[int]=None, transaction: Optional[T
     return query
 
 
-def pending_action_value_sum(member_id: int, action_type) -> int:
+def pending_action_value_sum(member_id: int, action_type: str) -> int:
     """
     Sum all pending actions of type action_type for specified member
     """
 
-    return (
+    return int(
         pending_actions_query(member_id=member_id)
         .filter(TransactionAction.action_type == action_type)
         .with_entities(func.coalesce(func.sum(TransactionAction.value), 0))
@@ -132,21 +133,24 @@ def activate_paused_labaccess_subscription(member_id: int, earliest_start_at: da
     if member is not None and member.stripe_labaccess_subscription_id is not None:
         resume_paused_subscription(member.member_id, SubscriptionType.LAB, earliest_start_at, test_clock=None)
 
-def ship_add_labaccess_action(action: ProductAction, transaction: Transaction, current_time: datetime, skip_ensure_accessy: bool=False) -> None:
+def ship_add_labaccess_action(action: TransactionAction, transaction: Transaction, current_time: datetime, skip_ensure_accessy: bool=False) -> None:
     days_to_add = action.value
+    assert days_to_add is not None
 
     state = check_labaccess_requirements(transaction.member_id)
     if state != LabaccessRequirements.OK:
         logger.info(f"skipping ship_add_labaccess_action because member {transaction.member_id} failed check_labaccess_requirements with {state.name}")
         return
 
+    assert transaction.created_at is not None
+    earliest_start_date = max(current_time, transaction.created_at.astimezone(timezone.utc))
     labaccess_end = add_membership_days(
         transaction.member_id,
         Span.LABACCESS,
         days=days_to_add,
         creation_reason=f"transaction_action_id: {action.id}, transaction_id: {transaction.id}",
         # Note: passing created_at here is important during tests which use a simulated time
-        earliest_start_date=max(current_time, transaction.created_at.astimezone(timezone.utc)).date(),
+        earliest_start_date=earliest_start_date.date(),
     ).labaccess_end
     logger.info(f"Adding labaccess ({days_to_add} days) for member {transaction.member_id} until {labaccess_end}")
     
@@ -155,15 +159,17 @@ def ship_add_labaccess_action(action: ProductAction, transaction: Transaction, c
     # After a member has been granted labaccess, we want to make sure that their subscription is active.
     # It may already be active, but if it's paused, we want to resume it.
     # Note: passing created_at here is important during tests which use a simulated time
-    activate_paused_labaccess_subscription(transaction.member_id, max(current_time, transaction.created_at.astimezone(timezone.utc)))
+    activate_paused_labaccess_subscription(transaction.member_id, earliest_start_date)
     complete_pending_action(action)
     send_labaccess_extended_email(transaction.member_id, days_to_add, labaccess_end)
     if not skip_ensure_accessy:
         ensure_accessy_labaccess(member_id=transaction.member_id)
 
 
-def ship_add_membership_action(action: ProductAction, transaction: Transaction, current_time: datetime) -> None:
+def ship_add_membership_action(action: TransactionAction, transaction: Transaction, current_time: datetime) -> None:
     days_to_add = action.value
+    assert days_to_add is not None
+    assert transaction.created_at is not None
 
     membership_end = add_membership_days(
         transaction.member_id,
@@ -188,7 +194,7 @@ def activate_member(member: Member) -> None:
     send_new_member_email(member)
     
     
-def create_transaction(member_id: int, purchase, activates_member: bool=False, stripe_reference_id: Optional[str]=None) -> Transaction:
+def create_transaction(member_id: int, purchase, activates_member: bool, stripe_reference_id: str) -> Transaction:
     total_amount, contents = validate_order(member_id, purchase["cart"], purchase["expected_sum"])
 
     transaction = commit_transaction_to_db(member_id=member_id, total_amount=total_amount, contents=contents,
@@ -232,10 +238,12 @@ def ship_orders(ship_add_labaccess: bool=True, transaction_filter: Optional[Tran
             ship_add_membership_action(action, transaction, current_time=current_time)
 
 
-def ship_labaccess_orders(member_id: Optional[int]=None, skip_ensure_accessy: bool=False) -> None:
+def ship_labaccess_orders(member_id: Optional[int]=None, skip_ensure_accessy: bool=False, current_time: Optional[datetime] = None) -> None:
+    if current_time is None:
+        current_time = datetime.now(timezone.utc)
     for action, content, transaction in pending_actions_query(member_id=member_id):
         if action.action_type == ProductAction.ADD_LABACCESS_DAYS:
-            ship_add_labaccess_action(action, transaction, skip_ensure_accessy=skip_ensure_accessy)
+            ship_add_labaccess_action(action, transaction, skip_ensure_accessy=skip_ensure_accessy, current_time=current_time)
 
 
 @nested_atomic
@@ -247,7 +255,7 @@ def payment_success(transaction: Transaction) -> None:
         activate_member(transaction.member)
 
 
-def process_cart(member_id, cart):
+def process_cart(member_id: int, cart: Any) -> Tuple[Decimal, List[TransactionContent]]:
     contents = []
     with localcontext() as ctx:
         ctx.clear_flags()
@@ -273,7 +281,7 @@ def process_cart(member_id, cart):
                                  f"of {product.smallest_multiple}, was {count}.", what=INVALID_ITEM_COUNT)
 
             if product.filter:
-                PRODUCT_FILTERS[product.filter](cart_item=item, member_id=member_id)
+                PRODUCT_FILTERS[product.filter](item, member_id)
 
             amount = product.price * count
             total_amount += amount
@@ -289,7 +297,7 @@ def process_cart(member_id, cart):
     return total_amount, contents
 
 
-def validate_order(member_id, cart, expected_amount: Decimal):
+def validate_order(member_id: int, cart, expected_amount: Decimal) -> Tuple[Decimal, List[TransactionContent]]:
     """ Validate that the expected amount matches what in the cart. Returns total_amount and cart items. """
 
     if not cart:

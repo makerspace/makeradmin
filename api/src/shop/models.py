@@ -17,7 +17,7 @@ class ProductCategory(Base):
     updated_at = Column(DateTime, server_default=func.now())
     deleted_at = Column(DateTime)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f'ProductCategory(id={self.id}, name={self.name}, display_order={self.display_order})'
 
 
@@ -32,7 +32,7 @@ class ProductImage(Base):
     updated_at = Column(DateTime, server_default=func.now())
     deleted_at = Column(DateTime)
     
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f'ProductImage(id={self.id}, path={self.path})'
 
 
@@ -58,7 +58,7 @@ class Product(Base):
 
     image_id = Column(Integer, ForeignKey(ProductImage.id), nullable=True)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f'Product(id={self.id}, name={self.name}, category_id={self.category_id}' \
                f', display_order={self.display_order})'
 
@@ -79,7 +79,7 @@ class ProductAction(Base):
     updated_at = Column(DateTime, server_default=func.now())
     deleted_at = Column(DateTime)
     
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f'ProductAction(id={self.id}, value={self.value}, action_type={self.action_type})'
 
 
@@ -99,7 +99,7 @@ class Transaction(Base):
     member = relationship(Member)
     stripe_pending = relationship("StripePending")
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f'Transaction(id={self.id}, amount={self.amount}, status={self.status})'
 
 
@@ -115,7 +115,7 @@ class TransactionContent(Base):
     transaction = relationship(Transaction, backref='contents')
     product = relationship(Product)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f'TransactionContent(id={self.id}, count={self.count}, amount={self.amount})'
 
 
@@ -134,7 +134,7 @@ class TransactionAction(Base):
 
     content = relationship(TransactionContent, backref='actions')
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f'TransactionAction(id={self.id}, value={self.value}, status={self.status},' \
                f' action_type={self.action_type})'
 
@@ -147,7 +147,7 @@ class PendingRegistration(Base):
 
     transaction = relationship(Transaction, backref='pending_registrations')
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f'PendingRegistration(id={self.id})'
 
 
@@ -159,7 +159,7 @@ class StripePending(Base):
     stripe_token = Column(String(255), nullable=False, index=True)
     created_at = Column(DateTime, server_default=func.now())
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f'StripePending(id={self.id}, stripe_token={self.stripe_token})'
 
 

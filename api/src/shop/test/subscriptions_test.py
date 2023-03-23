@@ -20,23 +20,17 @@ from test_aid.obj import ObjFactory, DEFAULT_PASSWORD
 import core
 import messages
 import shop
-from dispatch_emails import (
-    membership_reminder,
-    MEMBERSHIP_REMINDER_DAYS_BEFORE,
-    MEMBERSHIP_REMINDER_GRACE_PERIOD,
-)
 import membership
 import membership.models
 import shop.models
 import messages.models
 import core.models
 from membership.models import Span, Member
-from messages.models import Message, MessageTemplate
+from messages.models import Message
 import membership.views
 from service.db import db_session
-from shop.models import ProductAction, Transaction
-from shop.transactions import create_transaction, ship_orders
-from test_aid.test_base import FlaskTestBase, ShopTestMixin
+from shop.transactions import ship_orders
+from test_aid.test_base import FlaskTestBase
 import stripe
 from shop import stripe_event
 from shop import stripe_constants
