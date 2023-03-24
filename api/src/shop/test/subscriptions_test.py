@@ -11,8 +11,8 @@ from unittest.mock import Mock, patch
 import pytest
 from shop.stripe_util import event_semantic_time
 from test_aid.systest_base import DECLINE_AFTER_ATTACHING_CARD, VALID_3DS_CARD_NO
-from shop.stripe_checkout import BINDING_PERIOD, SubscriptionType, get_stripe_customer
-from shop import stripe_checkout
+from api.src.shop.stripe_subscriptions import BINDING_PERIOD, SubscriptionType, get_stripe_customer
+from api.src.shop import stripe_subscriptions
 from membership.membership import get_membership_summary
 from test_aid.test_util import random_str
 from membership.member_auth import hash_password
@@ -239,7 +239,7 @@ class Test(FlaskTestBase):
 
         assert not get_membership_summary(member_id).membership_active
 
-        subscription_schedule_id = stripe_checkout.start_subscription(
+        subscription_schedule_id = stripe_subscriptions.start_subscription(
             member_id,
             SubscriptionType.MEMBERSHIP,
             earliest_start_at=now,
@@ -267,7 +267,7 @@ class Test(FlaskTestBase):
             (now + relativedelta(days=10)).date(),
         )
 
-        subscription_schedule_id = stripe_checkout.start_subscription(
+        subscription_schedule_id = stripe_subscriptions.start_subscription(
             member_id,
             SubscriptionType.MEMBERSHIP,
             earliest_start_at=now,
@@ -301,7 +301,7 @@ class Test(FlaskTestBase):
 
         assert not get_membership_summary(member_id).membership_active
 
-        subscription_schedule_id = stripe_checkout.start_subscription(
+        subscription_schedule_id = stripe_subscriptions.start_subscription(
             member_id,
             SubscriptionType.MEMBERSHIP,
             earliest_start_at=now,
@@ -334,7 +334,7 @@ class Test(FlaskTestBase):
         assert summary.membership_active
         assert summary.membership_end == (now + relativedelta(years=2)).date()
 
-        was_cancelled = stripe_checkout.cancel_subscription(
+        was_cancelled = stripe_subscriptions.cancel_subscription(
             member_id, SubscriptionType.MEMBERSHIP, test_clock=clock.stripe_clock
         )
         assert was_cancelled
@@ -371,7 +371,7 @@ class Test(FlaskTestBase):
         )
         assert get_membership_summary(member_id, clock.date).membership_active
 
-        stripe_checkout.start_subscription(
+        stripe_subscriptions.start_subscription(
             member_id,
             SubscriptionType.MEMBERSHIP,
             earliest_start_at=now,
@@ -380,7 +380,7 @@ class Test(FlaskTestBase):
 
         self.advance_clock(clock, now + relativedelta(days=4))
 
-        was_cancelled = stripe_checkout.cancel_subscription(
+        was_cancelled = stripe_subscriptions.cancel_subscription(
             member_id, SubscriptionType.MEMBERSHIP, test_clock=clock.stripe_clock
         )
         assert was_cancelled
@@ -408,7 +408,7 @@ class Test(FlaskTestBase):
         """
         (now, clock, member_id) = self.setup_single_member()
 
-        stripe_checkout.start_subscription(
+        stripe_subscriptions.start_subscription(
             member_id,
             SubscriptionType.MEMBERSHIP,
             earliest_start_at=now,
@@ -435,7 +435,7 @@ class Test(FlaskTestBase):
 
         (now, clock, member_id) = self.setup_single_member()
 
-        stripe_checkout.start_subscription(
+        stripe_subscriptions.start_subscription(
             member_id,
             SubscriptionType.LAB,
             earliest_start_at=now,
@@ -479,7 +479,7 @@ class Test(FlaskTestBase):
 
         (now, clock, member_id) = self.setup_single_member()
 
-        stripe_checkout.start_subscription(
+        stripe_subscriptions.start_subscription(
             member_id,
             SubscriptionType.LAB,
             earliest_start_at=now,
@@ -488,11 +488,11 @@ class Test(FlaskTestBase):
         self.advance_clock(clock, now + relativedelta(days=1))
 
         # Cancel subscription after one day
-        stripe_checkout.cancel_subscription(
+        stripe_subscriptions.cancel_subscription(
             member_id, SubscriptionType.LAB, test_clock=clock.stripe_clock
         )
         # And immediately regret that decision and resubscribe (which is only proper)
-        stripe_checkout.start_subscription(
+        stripe_subscriptions.start_subscription(
             member_id, SubscriptionType.LAB, test_clock=clock.stripe_clock
         )
 
@@ -529,7 +529,7 @@ class Test(FlaskTestBase):
 
         (now, clock, member_id) = self.setup_single_member()
 
-        stripe_checkout.start_subscription(
+        stripe_subscriptions.start_subscription(
             member_id,
             SubscriptionType.MEMBERSHIP,
             earliest_start_at=now,
@@ -568,7 +568,7 @@ class Test(FlaskTestBase):
 
         (now, clock, member_id) = self.setup_single_member()
 
-        stripe_checkout.start_subscription(
+        stripe_subscriptions.start_subscription(
             member_id,
             SubscriptionType.MEMBERSHIP,
             earliest_start_at=now,
@@ -619,7 +619,7 @@ class Test(FlaskTestBase):
 
         assert not get_membership_summary(member_id).membership_active
 
-        subscription_schedule_id = stripe_checkout.start_subscription(
+        subscription_schedule_id = stripe_subscriptions.start_subscription(
             member_id,
             SubscriptionType.LAB,
             earliest_start_at=now,
@@ -662,7 +662,7 @@ class Test(FlaskTestBase):
 
         assert not get_membership_summary(member_id).membership_active
 
-        stripe_checkout.start_subscription(
+        stripe_subscriptions.start_subscription(
             member_id,
             SubscriptionType.LAB,
             earliest_start_at=now,

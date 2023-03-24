@@ -5,7 +5,7 @@ from typing import Any, Dict, List, Optional
 import stripe
 from stripe.error import SignatureVerificationError
 from datetime import timezone
-from shop import stripe_checkout
+from api.src.shop import stripe_subscriptions
 import shop.transactions
 from shop.stripe_util import event_semantic_time
 
@@ -33,7 +33,7 @@ from membership.membership import add_membership_days
 from service.db import db_session
 from membership.models import Member
 from membership.models import Span
-from shop.stripe_checkout import get_subscription_product, SubscriptionType
+from api.src.shop.stripe_subscriptions import get_subscription_product, SubscriptionType
 from datetime import datetime
 
 logger = getLogger("makeradmin")
@@ -230,7 +230,7 @@ def stripe_invoice_event(
                 subscription_type == SubscriptionType.LAB
                 and member.labaccess_agreement_at is None
             ):
-                stripe_checkout.pause_subscription(
+                stripe_subscriptions.pause_subscription(
                     member_id, SubscriptionType.LAB, test_clock=None
                 )
 
