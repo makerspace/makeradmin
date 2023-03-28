@@ -5,7 +5,7 @@ from typing import Any, Dict, List, Optional, Tuple
 
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 from sqlalchemy.sql import func
-from api.src.shop.stripe_subscriptions import SubscriptionType, resume_paused_subscription
+from shop.stripe_subscriptions import SubscriptionType, resume_paused_subscription
 
 
 from membership.membership import add_membership_days

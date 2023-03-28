@@ -61,7 +61,7 @@ class MemberEntity(Entity):
 
     def delete(self, entity_id, commit=False) -> None:
         # Do an import here to avoid circular imports
-        from api.src.shop import stripe_subscriptions
+        from shop import stripe_subscriptions
         # Ensure that if a member is deleted, all of their stripe data is deleted as well (including subscriptions)
         stripe_subscriptions.delete_stripe_customer(entity_id)
         return super().delete(entity_id, commit)

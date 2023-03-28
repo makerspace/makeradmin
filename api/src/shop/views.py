@@ -15,12 +15,12 @@ from shop.pay import pay, register
 
 # Next two needed?
 from shop.stripe_payment_intent import confirm_stripe_payment_intent
-from shop.stripe_checkout import create_stripe_checkout_session
-from shop.stripe_checkout import start_subscription, cancel_subscription
-from shop.stripe_checkout import open_stripe_customer_portal
+from shop.stripe_subscriptions import create_stripe_checkout_session
+from shop.stripe_subscriptions import start_subscription, cancel_subscription
+from shop.stripe_subscriptions import open_stripe_customer_portal
 
 from shop.stripe_payment_intent import confirm_stripe_payment_intent
-from shop.stripe_checkout import create_stripe_checkout_session
+from shop.stripe_subscriptions import create_stripe_checkout_session
 
 from shop.shop_data import pending_actions, member_history, receipt, get_product_data, all_product_data, \
     get_membership_products
@@ -29,7 +29,7 @@ from shop.stripe_payment_intent import confirm_stripe_payment_intent
 from shop.transactions import ship_labaccess_orders
 from logging import getLogger
 
-from shop.stripe_checkout import SubscriptionType
+from shop.stripe_subscriptions import SubscriptionType
 logger = getLogger("makeradmin")
 
 service.entity_routes(
@@ -222,9 +222,10 @@ def pay_route():
     return pay(request.json, g.user_id)
 
 # Used to just initiate a capture of a payment method via a setup intent
-@service.route("/setup_payment_method", method=POST, permission=USER, commit_on_error=True)
+@service.route("/setup_payment_method", method=GET, permission=USER, commit_on_error=True)
 def stripe_payment_method_route():
-    return create_stripe_checkout_session(g.user_id, data=request.json)
+    url = create_stripe_checkout_session(g.user_id, data=request.json)
+    return redirect(url)
 
 @service.route("/confirm_payment", method=POST, permission=PUBLIC, commit_on_error=True)
 def confirm_payment_route():
