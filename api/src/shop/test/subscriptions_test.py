@@ -11,8 +11,8 @@ from unittest.mock import Mock, patch
 import pytest
 from shop.stripe_util import event_semantic_time
 from test_aid.systest_base import DECLINE_AFTER_ATTACHING_CARD, VALID_3DS_CARD_NO
-from api.src.shop.stripe_subscriptions import BINDING_PERIOD, SubscriptionType, get_stripe_customer
-from api.src.shop import stripe_subscriptions
+from shop.stripe_subscriptions import BINDING_PERIOD, SubscriptionType, get_stripe_customer
+from shop import stripe_subscriptions
 from membership.membership import get_membership_summary
 from test_aid.test_util import random_str
 from membership.member_auth import hash_password

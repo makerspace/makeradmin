@@ -12,6 +12,7 @@ module.exports = (env, args) => {
             cart: "./ts/cart.ts",
             category: "./ts/category.ts",
             register: "./ts/register.ts",
+            register2: "./ts/register2.tsx",
             product: "./ts/product.ts",
             history: "./ts/history.ts",
             member: "./ts/member.ts",

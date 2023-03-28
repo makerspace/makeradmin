@@ -1,6 +1,7 @@
 import os
 import sys
 from logging import basicConfig, INFO, getLogger
+from typing import Any
 
 from flask import Flask, Blueprint, redirect, url_for, send_from_directory
 import flask
@@ -34,7 +35,7 @@ class Section(Blueprint):
         return super().route(self.url(path), **kwargs)
 
 
-def render_template(path, **kwargs):
+def render_template(path: str, **kwargs: Any) -> str:
     return flask.render_template(path, banner=banner, sidebar_additional_classes=sidebar_additional_classes, **kwargs)
 
 shop = Section("shop")
@@ -54,6 +55,9 @@ def cart() -> str:
 def register_member():
     return render_template("register.html")
 
+@shop.route("/register2")
+def register_member2() -> str:
+    return render_template("register2.html")
 
 @shop.route("/member/history")
 def purchase_history():

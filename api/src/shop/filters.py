@@ -1,7 +1,7 @@
 from datetime import timedelta, date
 from typing import Any, Callable, Dict
 from membership.models import Member
-from api.src.shop.stripe_subscriptions import SubscriptionType
+from shop.stripe_subscriptions import SubscriptionType
 from service.db import db_session
 from membership.membership import get_membership_summary
 from service.error import BadRequest
