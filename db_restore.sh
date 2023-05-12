@@ -12,7 +12,6 @@ if [ ! -f "$file_path" ]; then
 fi
 
 # Prompt for confirmation before restoring
-#read -p "This will delete your current database!! Are you sure you want to continue? (y/n) " -n 1 -r
 while true; do
     read -p "This will delete your current database!! Are you sure you want to continue? " yn
     case $yn in
