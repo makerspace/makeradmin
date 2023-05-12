@@ -5,7 +5,6 @@ import 'moment/locale/sv';
 import { ServerResponse } from "./common";
 import { Quiz } from "./quiz";
 import * as d3 from 'd3';
-import { GElement } from 'd3';
 import { sankey, SankeyGraph, SankeyLayout, sankeyLeft, sankeyLinkHorizontal } from 'd3-sankey';
 
 declare var UIkit: any;
