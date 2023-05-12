@@ -1,6 +1,7 @@
+from datetime import date
 from service.api_definition import GET, PUBLIC
 from statistics import service
-from statistics.maker_statistics import membership_by_date_statistics, lasertime, shop_statistics, membership_number_months_default, membership_number_months2_default
+from statistics.maker_statistics import membership_by_date_statistics, lasertime, retention_graph, shop_statistics, membership_number_months_default, membership_number_months2_default
 
 
 @service.route("/membership/distribution_by_month2", method=GET, permission=PUBLIC)
@@ -25,3 +26,6 @@ def lasertime_route():
 def shop_route():
     return shop_statistics()
 
+@service.route("/retention_graph", method=GET, permission=PUBLIC)
+def retention_graph_route():
+    return retention_graph(date(2016, 1, 1), date(2023, 12, 31))

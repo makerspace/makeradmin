@@ -4,6 +4,9 @@ import * as common from "./common"
 import 'moment/locale/sv';
 import { ServerResponse } from "./common";
 import { Quiz } from "./quiz";
+import * as d3 from 'd3';
+import { GElement } from 'd3';
+import { sankey, SankeyGraph, SankeyLayout, sankeyLeft, sankeyLinkHorizontal } from 'd3-sankey';
 
 declare var UIkit: any;
 declare var Chart: any;
@@ -19,10 +22,12 @@ common.documentLoaded().then(() => {
 	const future4 = common.ajax("GET", apiBasePath + "/statistics/shop/statistics", null) as Promise<ServerResponse<ProductStatistics>>;
 	const future5 = common.ajax("GET", apiBasePath + "/statistics/membership/distribution_by_month", null) as Promise<ServerResponse<MemberDistribution>>;
 	const future6 = common.ajax("GET", apiBasePath + "/statistics/membership/distribution_by_month2", null) as Promise<ServerResponse<MemberDistribution>>;
+	const future7 = common.ajax("GET", apiBasePath + "/statistics/retention_graph", null) as Promise<ServerResponse<RetentionGraph>>;
 
-	Promise.all([future1, future2, future3, future4, future5, future6]).then(data => {
+	Promise.all([future1, future2, future3, future4, future5, future6, future7]).then(data => {
 		const membershipjson = data[0];
 		const laserjson = data[1];
+		addRetentionChart(root, data[6].data);
 		addChart(root, membershipjson.data);
 		addLaserChart(root, laserjson.data);
 		for (let quiz of data[2].data) {
@@ -638,4 +643,124 @@ function addRevenueChart(root: HTMLElement, data: { name: string, amount: number
 	canvas.height = 70 + 30 * data.length;
 	const ctx = canvas.getContext('2d');
 	new Chart(ctx, config);
+}
+
+type Node = { id: number, name: string, color?: string };
+type Link = { source: number, target: number, value: number, pause: boolean };
+type RetentionGraph = {
+	nodes: Node[],
+	links: Link[],
+}
+async function addRetentionChart(root: HTMLElement, graph: RetentionGraph) {
+	// set the dimensions and margins of the graph
+	var margin = {top: 10, right: 10, bottom: 10, left: 10},
+	width = 1600 - margin.left - margin.right,
+	height = 1000 - margin.top - margin.bottom;
+
+	// append the svg object to the body of the page
+	var svg = d3.select(root).append("svg")
+	.attr("width", width + margin.left + margin.right)
+	.attr("height", height + margin.top + margin.bottom)
+	.append("g")
+	.attr("transform",
+		"translate(" + margin.left + "," + margin.top + ")");
+
+	// Color scale used
+	var color = d3.scaleOrdinal(d3.schemeCategory10);
+
+	// Set the sankey diagram properties
+	var sankeyF = sankey<Node, Link>()
+	.nodeWidth(36)
+	.nodePadding(50)
+	.size([width, height])
+	.nodeAlign(sankeyLeft);
+
+	console.log(sankeyF);
+
+	// Constructs a new Sankey generator with the default settings.
+	sankeyF
+	.nodeId(d => d.id)
+	.nodes(graph.nodes)
+	.links(graph.links);
+
+	for (const node of graph.nodes) {
+		node.color = color(node.name.replace(/ .*/, ""));
+	}
+
+	const generated = sankeyF(graph);
+
+	console.log(generated.nodes);
+	console.log(generated.links);
+	
+
+	// add in the links
+	// var link = svg.append("g")
+	// .selectAll(".link")
+	// .data(graph.links)
+	// .enter()
+	// .append("path")
+	// .attr("class", "link")
+	// .attr("d", sankeyF.link() )
+	// .style("stroke-width", d => Math.max(1, d.dy))
+	// .sort((a, b) => b.dy - a.dy);
+	svg.append("g")
+		.attr("fill", "none")
+		.attr("stroke", "#000")
+		.attr("stroke-opacity", 0.2)
+	.selectAll("path")
+	.data(generated.links)
+	.join("path")
+		.attr("d", sankeyLinkHorizontal())
+		.attr("stroke-width", d => Math.max(1, d.width!))
+		.attr("stroke", d => d.pause ? "red" : "black");
+
+	// add in the nodes
+	const node = svg.append("g")
+	.selectAll(".node")
+	.data(generated.nodes)
+	.enter().append("g")
+	.attr("class", "node")
+	.attr("transform", d => `translate(${d.x0!},${d.y0!})`);
+	// .call(d3.drag()
+	// 	.subject(d => d)
+	// 	.on("start", function() { this.parentNode.appendChild(this); })
+	// 	.on("drag", dragmove));
+
+	// add the rectangles for the nodes
+
+	node
+	.append("rect")
+	.attr("height", d => d.y1! - d.y0!)
+	.attr("width", sankeyF.nodeWidth())
+	.style("fill", d => d.color!)
+	.style("stroke", d => d3.rgb(d.color!).darker(2).formatRgb())
+	// Add hover text
+	.append("title")
+	.text(d => d.name + "\n" + "There is " + d.name + " stuff in this node");
+
+	// add in the title for the nodes
+	node
+	.append("text")
+		.attr("x", d => -0.5 * (d.x1! - d.x0!))
+		.attr("y", d => d.height! / 2)
+		.attr("dy", ".35em")
+		.attr("text-anchor", "middle")
+		.attr("transform", null)
+		.text(d => d.name)
+	.filter(d => d.x0! < width / 2)
+		.attr("x", 6 + sankeyF.nodeWidth())
+		.attr("text-anchor", "middle");
+
+	// the function for moving the nodes
+	// function dragmove(d) {
+	// d3.select(this)
+	// .attr("transform",
+	// 		"translate("
+	// 		+ d.x + ","
+	// 		+ (d.y = Math.max(
+	// 			0, Math.min(height - d.dy, d3.event.y))
+	// 			) + ")");
+	// sankeyF.relayout();
+	// link.attr("d", sankeyF.link() );
+	// }
 }
