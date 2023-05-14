@@ -1,3 +1,4 @@
+from typing import Any, Dict, Optional
 import requests
 
 from test_aid.obj import DEFAULT_PASSWORD
@@ -78,19 +79,19 @@ class ApiFactory:
         response = ApiResponse(requests.request(method, url=url, headers=headers, **kwargs))
         return response
 
-    def post(self, path, json=None, **kwargs):
+    def post(self, path: str, json: Optional[Dict[str,Any]]=None, **kwargs: Any) -> ApiResponse:
         return self.request("post", path, json=json, **kwargs)
 
-    def put(self, path, json=None, **kwargs):
+    def put(self, path: str, json: Optional[Dict[str,Any]]=None, **kwargs: Any) -> ApiResponse:
         return self.request("put", path, json=json, **kwargs)
 
-    def delete(self, path, json=None, **kwargs):
+    def delete(self, path: str, json: Optional[Dict[str,Any]]=None, **kwargs: Any) -> ApiResponse:
         return self.request("delete", path, json=json, **kwargs)
         
-    def get(self, path, params=None, **kwargs):
+    def get(self, path: str, params=None, **kwargs: Any) -> ApiResponse:
         return self.request("get", path, params=params, **kwargs)
 
-    def create_member(self, **kwargs):
+    def create_member(self, **kwargs: Any):
         obj = self.obj.create_member(**kwargs)
         self.member = self.post("/membership/member", json=obj).expect(code=201, status='created').data
         return self.member
