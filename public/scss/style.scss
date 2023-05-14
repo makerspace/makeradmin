@@ -1459,3 +1459,146 @@ $palette-red: $palette4;
     flex-direction: column;
     align-items: center;
 }
+
+#root.register-page {
+    padding-top: 32px;
+    background: #ECECEC;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    h1 {
+        font-weight: bold;
+        font-size: 1.8em;
+        text-align: center;
+    }
+    p {
+        margin: 10px 32px;
+        text-align: center;
+        color: #222;
+    }
+
+    h2 {
+        font-weight: bold;
+        font-size: 1.8em;
+        text-align: center;
+        margin: 32px 0px;
+    }
+
+    .access-plan {
+        margin: 16px 16px;
+
+        background: white;
+        border-bottom: 2px solid #B6B6B6;
+        border-radius: 5px;
+        display: flex;
+        align-self: stretch;
+        flex-direction: column;
+        align-items: stretch;
+        padding: 0px 0px;
+        text-align: center;
+        transition: outline-color 100ms;
+        outline: 4px solid transparent;
+
+        &.selected {
+            outline: 4px solid rgb(73, 73, 73);
+        }
+
+        &:not(.selected):hover {
+            outline: 4px solid rgb(73, 73, 73, 0.1);
+        }
+
+        .access-plan-title {
+            font-weight: bold;
+            font-size: 1.1em;
+            margin-top: 10px;
+            margin-bottom: 10px;
+        }
+
+        .access-plan-description {
+            padding: 16px 16px;
+            white-space: pre-wrap;
+        }
+
+        .access-plan-price {
+            background-color: #E46D22;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: white;
+            padding: 20px;
+
+            .abovePrice {
+                font-size: 0.8em;
+                font-weight: bold;
+                line-height: 100%;
+                opacity: 0.5;
+            }
+            
+            .price {
+                font-weight: bold;
+                font-size: 3em;
+                line-height: 100%;
+            }
+
+            .period {
+                font-size: 1.2em;
+                line-height: 100%;
+                font-weight: bold;
+            }
+        }
+    }
+
+    .panel {
+        margin: 16px 16px;
+
+        background: white;
+        border-bottom: 2px solid #B6B6B6;
+        border-radius: 5px;
+        display: flex;
+        align-self: stretch;
+        flex-direction: column;
+        align-items: stretch;
+        padding: 10px;
+
+        .small-price, .requirement {
+            text-align: center;
+        }
+
+        .small-price {
+            color: #E46D22;
+        }
+
+        ul {
+            margin-top: 16px;
+            width: 100%;
+        }
+
+        h3 {
+            font-weight: bold;
+            text-align: center;
+            margin: 0px;
+            margin-top: 4px;
+        }
+
+        .price {
+            border-radius: 5px;
+            background-color: #E46D22;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: white;
+            padding-top: 16px;
+            padding-bottom: 20px;
+
+            font-weight: bold;
+            font-size: 2em;
+            line-height: 100%;
+
+            .period {
+                font-size: 0.5em;
+                line-height: 100%;
+            }
+        }
+    }
+}
