@@ -1,9 +1,11 @@
 from decimal import Decimal
 from logging import getLogger
+import random
+import time
 from typing import Any, Dict, List, Optional
 
 import stripe
-from stripe.error import SignatureVerificationError
+from stripe.error import SignatureVerificationError, RateLimitError
 from datetime import timezone
 from shop import stripe_subscriptions
 import shop.transactions
@@ -234,8 +236,6 @@ def stripe_invoice_event(
                     member_id, SubscriptionType.LAB, test_clock=None
                 )
 
-        db_session.commit()
-
         if len(transaction_ids) > 0:
             # Attach a makerspace transaction id to the stripe invoice item.
             # This is nice to have in the future if we need to match them somehow.
@@ -331,8 +331,6 @@ def stripe_customer_event(event_subtype: Subtype, event: stripe.Event) -> None:
                     logger.warning(
                         f"Ignoring delete notification for {subscription_type.name} subscription {subscription_id} on {member.member_number} since it isn't current. (Current is {current_subscription_id})"
                     )
-
-            db_session.commit()
         else:
             if event_subtype == Subtype.CREATED:
                 logger.info(
@@ -429,6 +427,21 @@ def stripe_checkout_event(event_subtype: Subtype, event: stripe.Event) -> None:
 
 
 def stripe_event(event: stripe.Event, current_time: datetime) -> None:
+    # Begin a transaction to be able to roll it back if we hit a rate limit
+    while True:
+        try:
+            with db_session.begin_nested():
+                _stripe_event_inner(event, current_time)
+                break
+        except RateLimitError:
+            logger.warning("Exceeded Stripe API rate limit. Waiting a bit...")
+            # This is most likely because we are running tests in parallel.
+            # Add some jitter to avoid the stripe tests from running so much in parallel.
+            time.sleep(1 + random.random())
+            logger.warning("Retrying...")
+
+
+def _stripe_event_inner(event: stripe.Event, current_time: datetime) -> None:
     event_time = event_semantic_time(event)
     logger.info("")
     logger.info(f"Stripe Event: {event.type:<34} {event_time}")

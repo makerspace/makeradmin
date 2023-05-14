@@ -32,6 +32,7 @@ from service.db import db_session
 from shop.transactions import ship_orders
 from test_aid.test_base import FlaskTestBase
 import stripe
+import stripe.error
 from shop import stripe_event
 from shop import stripe_constants
 
@@ -176,32 +177,44 @@ class Test(FlaskTestBase):
                 )
 
             time.sleep(SLEEP_BETWEEN_POLLS)
-            events = stripe.Event.list(created={"gte": int(min_time.timestamp())})
-            for ev in events.auto_paging_iter():
-                if ev.id in self.seen_event_ids:
-                    continue
+            # Begin a transaction to be able to roll it back if we hit a rate limit
+            try:
+                with db_session.begin_nested():
+                    events = stripe.Event.list(created={"gte": int(min_time.timestamp())})
+                    for ev in events.auto_paging_iter():
+                        if ev.id in self.seen_event_ids:
+                            continue
 
-                # This will filter out all events not associated with the test clock we are interested in.
-                # This is useful when we have multiple test clocks running in parallel, which may happen
-                # if we have multiple tests running in parallel.
-                # Note that this will also filter out all events that are not associated with a test clock.
-                # For example charge events will not be associated with a test clock.
-                # However, for the subscriptions tests, we don't care about those events.
-                if test_clock_for_event(ev) != test_clock:
-                    continue
+                        # This will filter out all events not associated with the test clock we are interested in.
+                        # This is useful when we have multiple test clocks running in parallel, which may happen
+                        # if we have multiple tests running in parallel.
+                        # Note that this will also filter out all events that are not associated with a test clock.
+                        # For example charge events will not be associated with a test clock.
+                        # However, for the subscriptions tests, we don't care about those events.
+                        if test_clock_for_event(ev) != test_clock:
+                            continue
 
-                self.seen_event_ids.add(ev.stripe_id)
+                        self.seen_event_ids.add(ev.stripe_id)
 
-                # Do not forward test clock events. They are just debugging noise.
-                if not ev.type.startswith("test_helpers.test_clock."):
-                    batched_events.append(ev)
+                        # Do not forward test clock events. They are just debugging noise.
+                        if not ev.type.startswith("test_helpers.test_clock."):
+                            batched_events.append(ev)
 
-                if ev.type == until_seen_type:
-                    logger.info(
-                        "Clock is ready. Waiting a bit to make sure we have received all events..."
-                    )
-                    done = 1
-                    break
+                        if ev.type == until_seen_type:
+                            logger.info(
+                                "Clock is ready. Waiting a bit to make sure we have received all events..."
+                            )
+                            done = 1
+                            break
+            except stripe.error.RateLimitError:
+                logger.warning("Exceeded Stripe API rate limit. Waiting a bit...")
+                # This is most likely because we are running tests in parallel.
+                # Add some jitter to avoid the stripe tests from running so much in parallel.
+                time.sleep(1 + random.random()*5)
+                continue
+            except Exception as e:
+                logger.error("Error while polling for stripe events: %s", e)
+                raise
 
         ORDER = "time"
 
@@ -656,7 +669,7 @@ class Test(FlaskTestBase):
         """
         Checks that labaccess is not granted if the member has not signed the agreement.
         The subscription is immediatelly paused, and only resumed when the member signs the agreement.
-        In this variant the member signs the agreement after binding period would have been over.
+        In this variant the member signs the agreement after the binding period would have been over.
         """
         (now, clock, member_id) = self.setup_single_member(signed_labaccess=False)
 
