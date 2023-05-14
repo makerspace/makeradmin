@@ -1453,3 +1453,9 @@ $palette-red: $palette4;
         }
     }
 }
+
+.statistics-page {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
