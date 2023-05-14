@@ -4,7 +4,8 @@ import time
 from functools import wraps
 from logging import getLogger
 from typing import Optional
-from unittest import skipIf
+from unittest import SkipTest, skipIf
+from sqlalchemy import create_engine
 
 import stripe
 from selenium import webdriver
@@ -15,7 +16,7 @@ from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.common.by import By
 
 from service.config import get_mysql_config
-from service.db import create_mysql_engine, db_session
+from service.db import create_mysql_engine, db_session_factory, db_session
 from shop.stripe_constants import Type, set_stripe_key
 from test_aid.api import ApiFactory, ApiResponse
 from test_aid.db import DbFactory
@@ -51,6 +52,11 @@ class SystestBase(TestBase):
         # Make sure sessions is removed so it is not using another engine in this thread.
         db_session.remove()
         
+        if "TEST_IS_INSIDE_DOCKER" not in os.environ:
+            # This test requires a connection to the mysql database instead of just an in-memory db.
+            # Therefore we only run this test when we are inside docker.
+            raise SkipTest("Not running inside docker")
+
         create_mysql_engine(**get_mysql_config(), isolation_level="READ_COMMITTED")
         
         self.db = DbFactory(self, self.obj)
