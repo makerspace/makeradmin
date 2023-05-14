@@ -65,7 +65,7 @@ def create_admin(admins):
 
     while True:
         s = input("Do you want to create a new admin user"
-                " (you can later use the create_user.py script to create users)? [Y/n]: ")
+                " (you can later use the create_user.py script to create users)? [Y/n]: ").lower()
         if s in ["n", "no"]:
             return
         if s in {"", "y", "yes"}:
