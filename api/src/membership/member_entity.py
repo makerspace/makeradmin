@@ -63,5 +63,6 @@ class MemberEntity(Entity):
         # Do an import here to avoid circular imports
         from shop import stripe_subscriptions
         # Ensure that if a member is deleted, all of their stripe data is deleted as well (including subscriptions)
+        # Note: This will throw NotFound if the member doesn't exist, which is fine.
         stripe_subscriptions.delete_stripe_customer(entity_id)
         return super().delete(entity_id, commit)

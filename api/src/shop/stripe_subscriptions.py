@@ -31,7 +31,7 @@ import stripe
 from datetime import datetime, timezone, date, time, timedelta
 from stripe.error import InvalidRequestError, CardError, StripeError
 from shop.models import Product, ProductAction, ProductCategory
-from service.error import BadRequest, InternalServerError, EXCEPTION
+from service.error import BadRequest, InternalServerError, EXCEPTION, NotFound
 from service.db import db_session
 from membership.models import Member
 from membership.membership import get_membership_summary
@@ -104,7 +104,7 @@ def setup_subscription_makeradmin_products(
         ) + 1
         db_session.add(product)
 
-    db_session.commit()
+    db_session.flush()
     return product
 
 
@@ -155,13 +155,13 @@ def get_stripe_subscriptions(
 def delete_stripe_customer(member_id: int) -> None:
     member = db_session.query(Member).get(member_id)
     if member is None:
-        raise BadRequest(f"Unable to find member with id {member_id}")
+        raise NotFound(f"Unable to find member with id {member_id}")
     if member.stripe_customer_id is not None:
         # Note: This will also delete all subscriptions
         stripe.Customer.delete(member.stripe_customer_id)
 
     member.stripe_customer_id = None
-    db_session.commit()
+    db_session.flush()
 
 
 def get_stripe_customer(
@@ -208,7 +208,7 @@ def get_stripe_customer(
         # so the new customer may not be visible to stripe.Customer.search for a few seconds.
         # Therefore we always try to find the customer by its ID, that we store in the database
         member_info.stripe_customer_id = customer.stripe_id
-        db_session.commit()
+        db_session.flush()
         return customer
     except Exception as e:
         print(f"Unable to get or create stripe user: {e}")
@@ -421,7 +421,7 @@ def start_subscription(
         else:
             assert False
 
-        db_session.commit()
+        db_session.flush()
         return schedule_id
     except Exception as e:
         raise BadRequest("Internal error: " + str(e))
@@ -569,7 +569,7 @@ def cancel_subscription(
                 member.stripe_labaccess_subscription_id = None
             else:
                 assert False
-            db_session.commit()
+            db_session.flush()
         else:
             raise
 

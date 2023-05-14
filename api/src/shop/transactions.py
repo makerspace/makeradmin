@@ -79,7 +79,7 @@ def commit_transaction_to_db(member_id: int, total_amount: Decimal, contents: Li
 def commit_fail_transaction(transaction: Transaction) -> None:
     transaction.status = Transaction.FAILED
     db_session.add(transaction)
-    db_session.commit()
+    db_session.flush()
 
 
 def pending_actions_query(member_id: Optional[int]=None, transaction: Optional[Transaction]=None) -> Any:
