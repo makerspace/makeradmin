@@ -54,12 +54,12 @@ class MemberEntity(Entity):
         finally:
             db_session.execute("DO RELEASE_LOCK('member_number')")
 
-    def update(self, entity_id, commit=True):
+    def update(self, entity_id: int, commit=True):
         data = request.json or {}
         handle_password(data)
         return self._update_internal(entity_id, data, commit=commit)
 
-    def delete(self, entity_id, commit=False) -> None:
+    def delete(self, entity_id: int, commit=False) -> None:
         # Do an import here to avoid circular imports
         from shop import stripe_subscriptions
         # Ensure that if a member is deleted, all of their stripe data is deleted as well (including subscriptions)

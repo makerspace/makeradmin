@@ -88,7 +88,7 @@ def already_sent_message(template: MessageTemplate, member: Member, days: int):
     return reminder_sent > 0
 
 
-def labaccess_reminder():
+def labaccess_reminder() -> None:
     now = datetime.utcnow()
 
     end_date_reminder_target = now.date() + timedelta(days=LABACCESS_REMINDER_DAYS_BEFORE)

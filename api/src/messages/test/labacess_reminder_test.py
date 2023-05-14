@@ -23,16 +23,16 @@ class Test(ShopTestMixin, FlaskTestBase):
         )
     ]
 
-    def setUp(self):
+    def setUp(self) -> None:
         db_session.query(Member).delete()
         db_session.query(Span).delete()
         db_session.query(Message).delete()
     
-    def send_labaccess(self):
+    def send_labaccess(self) -> None:
         labaccess_reminder()
         db_session.commit()
 
-    def test_reminder_message_is_created_20_days_before_expiry(self):
+    def test_reminder_message_is_created_20_days_before_expiry(self) -> None:
         member = self.db.create_member()
         self.db.create_span(type=Span.LABACCESS, enddate=self.date(LABACCESS_REMINDER_DAYS_BEFORE))
         
@@ -43,7 +43,7 @@ class Test(ShopTestMixin, FlaskTestBase):
         self.assertEqual(member.member_id, message.member_id)
         self.assertEqual(MessageTemplate.LABACCESS_REMINDER.value, message.template)
 
-    def test_reminder_message_is_created_20_days_before_expiry_even_if_other_span_after(self):
+    def test_reminder_message_is_created_20_days_before_expiry_even_if_other_span_after(self) -> None:
         member = self.db.create_member()
         self.db.create_span(type=Span.LABACCESS, enddate=self.date(LABACCESS_REMINDER_DAYS_BEFORE))
         self.db.create_span(type=Span.MEMBERSHIP, enddate=self.date(200))
@@ -52,7 +52,7 @@ class Test(ShopTestMixin, FlaskTestBase):
         
         self.assertEqual(1, db_session.query(Message).filter(Message.member == member).count())
 
-    def test_reminder_message_is_not_created_unless_labaccess_and_20_days_before_expiry(self):
+    def test_reminder_message_is_not_created_unless_labaccess_and_20_days_before_expiry(self) -> None:
         m1 = self.db.create_member()
         s1 = self.db.create_span(type=Span.LABACCESS, enddate=self.date(LABACCESS_REMINDER_DAYS_BEFORE - 1))
 
@@ -82,7 +82,7 @@ class Test(ShopTestMixin, FlaskTestBase):
         
         self.assertEqual(0, db_session.query(Message).count())
         
-    def test_reminder_message_is_not_created_if_recent_reminder_already_exists(self):
+    def test_reminder_message_is_not_created_if_recent_reminder_already_exists(self) -> None:
         member = self.db.create_member()
         self.db.create_span(type=Span.LABACCESS, enddate=self.date(LABACCESS_REMINDER_DAYS_BEFORE))
         self.db.create_message(
@@ -95,7 +95,7 @@ class Test(ShopTestMixin, FlaskTestBase):
         
         self.assertEqual(1, db_session.query(Message).filter(Message.member == member).count())
 
-    def test_reminder_message_is_created_if_recent_reminder_is_old(self):
+    def test_reminder_message_is_created_if_recent_reminder_is_old(self) -> None:
         member = self.db.create_member()
         self.db.create_span(type=Span.LABACCESS, enddate=self.date(LABACCESS_REMINDER_DAYS_BEFORE))
         self.db.create_message(
@@ -108,7 +108,7 @@ class Test(ShopTestMixin, FlaskTestBase):
         
         self.assertEqual(2, db_session.query(Message).filter((Message.member == member) & (Message.template == MessageTemplate.LABACCESS_REMINDER.value)).count())
 
-    def test_reminder_message_is_created_if_member_got_other_message(self):
+    def test_reminder_message_is_created_if_member_got_other_message(self) -> None:
         member = self.db.create_member()
         self.db.create_span(type=Span.LABACCESS, enddate=self.date(LABACCESS_REMINDER_DAYS_BEFORE))
         self.db.create_message(
@@ -121,7 +121,7 @@ class Test(ShopTestMixin, FlaskTestBase):
         
         self.assertEqual(1, db_session.query(Message).filter((Message.member == member) & (Message.template == MessageTemplate.LABACCESS_REMINDER.value)).count())
 
-    def test_reminder_message_is_created_if_member_another_member_got_recent_reminder(self):
+    def test_reminder_message_is_created_if_member_another_member_got_recent_reminder(self) -> None:
         other_member = self.db.create_member()
         self.db.create_message(
             template=MessageTemplate.LABACCESS_REMINDER.value,
@@ -136,7 +136,7 @@ class Test(ShopTestMixin, FlaskTestBase):
         
         self.assertEqual(1, db_session.query(Message).filter(Message.member == member).count())
 
-    def test_reminder_message_is_not_created_if_member_has_pending_labaccess_days(self):
+    def test_reminder_message_is_not_created_if_member_has_pending_labaccess_days(self) -> None:
         member = self.db.create_member()
         self.db.create_span(type=Span.LABACCESS, enddate=self.date(LABACCESS_REMINDER_DAYS_BEFORE))
         p0_count = 1
