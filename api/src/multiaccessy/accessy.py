@@ -54,7 +54,7 @@ def request(method, path, token=None, json=None, max_tries=8, err_msg=None):
 
         if not response.ok:
             msg = f"got an error in the response for {response.request.path_url}, {response.status_code=}: {err_msg or ''}"
-            logger.error(msg)
+            logger.error(f"{msg}: {response.text}")
             raise AccessyError(msg)
 
         try:
