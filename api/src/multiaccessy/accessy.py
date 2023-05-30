@@ -444,7 +444,7 @@ class AccessySession:
         return self._get_json_paginated(f"/asset/admin/organization/{self.organization_id()}/asset")
     
     def _get_accesses(self, door_id: UUID):
-        return self._get(f"/asset/admin/asset-publication/{door_id}/invoke-activity?cursor=&page_size=1000&")
+        return self._get(f"/asset/admin/asset-publication/{door_id}/invoke-activity?cursor=&page_size=250&")
 
 
 accessy_session = AccessySession()
