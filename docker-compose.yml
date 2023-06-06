@@ -18,6 +18,12 @@ services:
       MYSQL_ROOT_PASSWORD: "${MYSQL_ROOT_PASSWORD}"
     networks:
       - makeradmin
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
 
   api:
     image: makeradmin/api:1.0
@@ -51,12 +57,18 @@ services:
       ACCESSY_LABACCESS_GROUP:
       ACCESSY_SPECIAL_LABACCESS_GROUP:
       ACCESSY_DO_MODIFY:
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
 
   email-dispatcher:
     image: makeradmin/api:1.0
     build:
       context: ./api
-    command: 
+    command:
       - "/work/dispatch_emails.sh"
     environment:
       MYSQL_HOST: db2
@@ -74,12 +86,18 @@ services:
       - api
     networks:
       - makeradmin
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
 
   accessy-syncer:
     image: makeradmin/api:1.0
     build:
       context: ./api
-    command: 
+    command:
       - "/work/accessy_syncer.sh"
     environment:
       MYSQL_HOST: db2
@@ -102,8 +120,14 @@ services:
       - api
     networks:
       - makeradmin
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
 
-      
+
   public:
     image: makeradmin/public:1.0
     volumes:
@@ -119,6 +143,12 @@ services:
       LETSENCRYPT_EMAIL: "${ADMIN_EMAIL}"
     networks:
       - makeradmin
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
 
   admin:
     image: makeradmin/admin:1.0
@@ -131,6 +161,12 @@ services:
       LETSENCRYPT_EMAIL: "${ADMIN_EMAIL}"
     networks:
       - makeradmin
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
 
 networks:
   makeradmin:
