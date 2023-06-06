@@ -121,15 +121,7 @@ function render_signed_contract_warning(member: member_t): string {
     if (member.labaccess_agreement_at)
         return "";
 
-    return `Du måste delta på en <strong>medlemintroduktion</strong> för att kunna bli labbmedlem. Du hittar dem i <a href="${calendarURL}">kalendern</a>.`;
-}
-
-
-function render_no_labaccess_warning(membership: membership_t): string {
-    if (membership.labaccess_active)
-        return "";
-
-    return `Du måste köpa <strong>labbaccess</strong> i <a href="${webshop_url}">webshoppen</a> för att bli labbmedlem.`;
+    return `Du måste delta på en <strong>medlemintroduktion</strong>. Du hittar dem i <a href="${calendarURL}">kalendern</a>.`;
 }
 
 
@@ -137,7 +129,7 @@ function render_no_membership_warning(membership: membership_t): string {
     if (membership.membership_active)
         return "";
 
-    return `Du måste köpa <strong>föreningsmedlemskap</strong> i <a href="${webshop_url}">webshoppen</a> för att bli labbmedlem.`;
+    return `Du måste köpa <strong>föreningsmedlemskap</strong> i <a href="${webshop_url}">webshoppen</a>.`;
 }
 
 
@@ -145,7 +137,7 @@ function render_missing_phone_number(member: member_t): string {
     if (member.phone)
         return "";
 
-    return "Du måste lägga in ditt <strong>telefonnummer</strong> nedan för att bli labbmedlem.";
+    return "Du måste lägga in ditt <strong>telefonnummer</strong> i personuppgifterna nedan.";
 }
 
 
@@ -156,14 +148,13 @@ function render_pending_labaccess_instructions(can_sync_labaccess: boolean, pend
         return `<strong>${pending_labaccess_days} dagar</strong> kommer läggas till vid nästa nyckelsynkronisering. Då kommer din access att förlängas.`;
     }
 
-    return `För att bli labbmedlem så behöver du köpa labbmedlemskap i <a href="${webshop_url}">webshoppen</a>.`;
+    return `Du behöver köpa labbmedlemskap i <a href="${webshop_url}">webshoppen</a> för att förlänga ditt labbmedlemskap.`;
 }
 
 
 function render_help(member: member_t, membership: membership_t, pending_labaccess_days: number) {
     const todo_bullets = [
         render_signed_contract_warning(member),
-        render_no_labaccess_warning(membership),
         render_no_membership_warning(membership),
         render_missing_phone_number(member)
     ].map((todo_string: string) => {
@@ -177,11 +168,15 @@ function render_help(member: member_t, membership: membership_t, pending_labacce
         !todo_bullets, pending_labaccess_days
     );
 
+    const disabled = (!member.phone || (!membership.labaccess_active && !membership.special_labaccess_active)) ? "disabled" : ""
+    const accessyInvite = `<p><button id="${id_accessy_invite_button}" ${disabled} class="uk-button uk-button-danger" onclick="">Skicka Accessy-inbjudan</button></button></p>`
+
     return `
         <fieldset>
             <legend><i uk-icon="info"></i> Instruktioner för att bli labbmedlem</legend>
             ${todo_bullets}
             ${pending_labaccess_instruction}
+            ${accessyInvite}
         </fieldset>
     `;
 }
@@ -226,27 +221,12 @@ function render_membership_view(member: member_t, membership: membership_t, pend
         () => ``,
     ];
 
-    const disabled = (!member.phone || (!membership.labaccess_active && !membership.special_labaccess_active)) ? "disabled" : ""
-    let explanation = "";
-    if (!member.phone) {
-        explanation = "Telefonnummer saknas, fyll i med knappen ovan."
-    } else if (!membership.labaccess_active && !membership.special_labaccess_active) {
-        if (pendingLabaccessDays === 0) {
-            explanation = "Ingen labaccess aktiv, köp mer och vänta på synk (notifieras via mejl)." // TODO :( :( seriously? vänta i en vecka?
-        } else {
-            explanation = "Ingen labaccess aktiv, den blir aktiv vid nästa synk (notifieras via mejl)." // TODO :( :( seriously? vänta i en vecka?
-        }
-    }
-
-    const accessyInvite = `<p><button id="${id_accessy_invite_button}" ${disabled} class="uk-button uk-button-danger" onclick="">Skicka Accessy-inbjudan</button></button> ${explanation}</p>`
-
     return `
         <fieldset class="data-uk-margin">
             <legend><i uk-icon="lock"></i> Medlemsskap</legend>
             ${render_info({ active: membership.membership_active, enddate: membership.membership_end }, membershipStrings)}
             ${render_info({ active: membership.labaccess_active, enddate: membership.labaccess_end }, labaccessStrings)}
             ${membership.special_labaccess_active ? render_info({ active: membership.special_labaccess_active, enddate: membership.special_labaccess_end }, specialLabaccessStrings) : ``}
-            ${accessyInvite}
         </fieldset>`;
 }
 
