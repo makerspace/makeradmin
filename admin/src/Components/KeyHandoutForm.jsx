@@ -8,6 +8,7 @@ import {ADD_LABACCESS_DAYS} from "../Models/ProductAction";
 import {dateTimeToStr, parseUtcDate, utcToday} from "../utils";
 import {get, post} from "../gateway";
 import {notifySuccess} from "../message";
+import {renderToString} from 'react-dom/server';
 
 
 function last_span_enddate(spans, category) {
@@ -234,8 +235,8 @@ class KeyHandoutForm extends React.Component {
                                 <input id="signed" style={{"verticalAlign": "middle"}} className="uk-checkbox" type="checkbox" tabIndex="1" checked={has_signed} onChange={(e) => {
                                     if (e.target.checked) {
                                         member.labaccess_agreement_at = new Date().toISOString();
-                                    } else {
-                                        UIkit.modal.confirm("<p>Är du säker på att "+member.firstname+" "+member.lastname+" inte har skrivit på ett labbavtal?</p><p>Labbavtalet mottogs <strong>"+ dateTimeToStr(member.labaccess_agreement_at) + "</strong>. </p>", function(){
+                                    } else {                                        
+                                        UIkit.modal.confirm(renderToString(<div><p>Är du säker på att {member.firstname} {member.lastname} inte har skrivit på ett labbavtal?</p><p>Labbavtalet mottogs <strong>{dateTimeToStr(member.labaccess_agreement_at)}</strong>. </p></div>), function(){
                                             member.labaccess_agreement_at = null;
                                         }, false);
                                     }
