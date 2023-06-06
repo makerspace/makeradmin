@@ -153,7 +153,7 @@ function render_pending_labaccess_instructions(can_sync_labaccess: boolean, pend
     if (!can_sync_labaccess && pending_labaccess_days) {
         return `Du behöver åtgärda ovanstående fel innan din labbaccess kan synkas. När de är åtgärdade kommer den digitala nyckeln att förlängas med <strong>${pending_labaccess_days} dagar</strong> vid nästa nyckelsynkronisering.`;
     } else if (can_sync_labaccess && pending_labaccess_days) {
-        return `<strong>${pending_labaccess_days} dagar</strong> kommer läggas till vid nästa nyckelsynk. Då kommer din access att förlängas.`;
+        return `<strong>${pending_labaccess_days} dagar</strong> kommer läggas till vid nästa nyckelsynkronisering. Då kommer din access att förlängas.`;
     }
 
     return `För att bli labbmedlem så behöver du köpa labbmedlemskap i <a href="${webshop_url}">webshoppen</a>.`;
@@ -203,7 +203,7 @@ function render_membership_view(member: member_t, membership: membership_t, pend
         (enddate: string, days: number) => `Din <strong>labaccess</strong> är ogiltig sedan ${days} dagar (${enddate}). <br>Your <strong>lab membership</strong> expired ${days} day(s) ago (${enddate}).`,
         () => `Din <strong>labaccess</strong> gick ut igår. <br>Your <strong>lab membership</strong> expired yesterday.`,
         (hours: number) => `Din <strong>labaccess</strong> är giltig i mindre än ${hours} timmar till. <br>Your <strong>lab membership</strong> is valid for ${hours} more hours.`,
-        (enddate: string, days: number) => `Din <strong>labaccess</strong> är giltig t.o.m. ${enddate} (endast ${days} dagar till). Kom ihåg att förnya den innan nästa nyckelutlämning. <br>Your <strong>lab membership</strong> is valid through ${enddate} (only ${days} day(s) left). Remember to extend your lab membership before the next nyckelutlämning.`,
+        (enddate: string, days: number) => `Din <strong>labaccess</strong> är giltig t.o.m. ${enddate} (endast ${days} dagar till). Kom ihåg att förnya den innan nästa fredag morgon. <br>Your <strong>lab membership</strong> is valid through ${enddate} (only ${days} day(s) left). Remember to extend your lab membership before next Friday morning.`,
         (enddate: string, days: number) => `Din <strong>labaccess</strong> är giltig t.o.m. ${enddate} (${days} dagar till). <br>Your <strong>lab membership</strong> is valid through ${enddate} (only ${days} day(s) left).`,
         () => `Din <strong>labaccess</strong> är inaktiv. <br>Your <strong>lab membership</strong> is inactive.`,
     ];
