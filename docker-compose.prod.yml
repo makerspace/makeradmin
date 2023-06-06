@@ -5,3 +5,72 @@ services:
     volumes:
       - ./data/mysql:/var/lib/mysql:rw
       - ./data/dbexport:/dbexport:rw
+
+  api:
+    environment:
+      GRAYLOG_HOST: graylog
+      GRAYLOG_PORT: 12202
+
+  graylog-mongodb:
+    image: "mongo:5.0"
+    volumes:
+      - "graylog_mongodb_data:/data/db"
+    restart: "on-failure"
+    networks:
+      - makeradmin
+
+  opensearch:
+    image: "opensearchproject/opensearch:2.4.0"
+    environment:
+      - "OPENSEARCH_JAVA_OPTS=-Xms1g -Xmx1g"
+      - "bootstrap.memory_lock=true"
+      - "discovery.type=single-node"
+      - "action.auto_create_index=false"
+      - "plugins.security.ssl.http.enabled=false"
+      - "plugins.security.disabled=true"
+    ulimits:
+      memlock:
+        hard: -1
+        soft: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    volumes:
+      - "graylog_os_data:/usr/share/opensearch/data"
+    restart: "on-failure"
+    networks:
+      - makeradmin
+
+  graylog:
+    image: "${GRAYLOG_IMAGE:-graylog/graylog:5.0}"
+    depends_on:
+      opensearch:
+        condition: "service_started"
+      graylog-mongodb:
+        condition: "service_started"
+    entrypoint: "/usr/bin/tini -- wait-for-it opensearch:9200 --  /docker-entrypoint.sh"
+    environment:
+      GRAYLOG_NODE_ID_FILE: "/usr/share/graylog/data/config/node-id"
+      GRAYLOG_PASSWORD_SECRET: "${GRAYLOG_PASSWORD_SECRET:?Please configure GRAYLOG_PASSWORD_SECRET in the .env file}"
+      GRAYLOG_ROOT_PASSWORD_SHA2: "${GRAYLOG_ROOT_PASSWORD_SHA2:?Please configure GRAYLOG_ROOT_PASSWORD_SHA2 in the .env file}"
+      GRAYLOG_HTTP_BIND_ADDRESS: "0.0.0.0:9000"
+      GRAYLOG_HTTP_EXTERNAL_URI: "http://localhost:9000/"
+      GRAYLOG_ELASTICSEARCH_HOSTS: "http://opensearch:9200"
+      GRAYLOG_MONGODB_URI: "mongodb://graylog-mongodb:27017/graylog"
+    ports:
+      - "9000:9000/tcp" # Server API
+      - "12201:12201/udp" # GELF UDP
+      - "12202:12202/udp" # GELF UDP
+
+    volumes:
+      - "graylog_data:/usr/share/graylog/data/data"
+      - "graylog_journal:/usr/share/graylog/data/journal"
+    restart: "on-failure"
+    networks:
+      - makeradmin
+
+volumes:
+  graylog_mongodb_data:
+  graylog_os_data:
+  graylog_data:
+  graylog_journal:

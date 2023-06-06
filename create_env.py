@@ -34,6 +34,8 @@ config = {
     "ACCESSY_LABACCESS_GROUP": "",
     "ACCESSY_SPECIAL_LABACCESS_GROUP": "",
     "ACCESSY_DO_MODIFY":"false",
+    "GRAYLOG_PASSWORD_SECRET": "",
+    "GRAYLOG_ROOT_PASSWORD_SHA2": "",
 }
 
 if not args.force and os.path.isfile(".env"):
