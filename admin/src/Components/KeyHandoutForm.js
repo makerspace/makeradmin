@@ -235,7 +235,9 @@ class KeyHandoutForm extends React.Component {
                                     if (e.target.checked) {
                                         member.labaccess_agreement_at = new Date().toISOString();
                                     } else {
-                                        member.labaccess_agreement_at = null;
+                                        UIkit.modal.confirm("<p>Är du säker på att "+member.firstname+" "+member.lastname+" inte har skrivit på ett labbavtal?</p><p>Labbavtalet mottogs <strong>"+ dateTimeToStr(member.labaccess_agreement_at) + "</strong>. </p>", function(){
+                                            member.labaccess_agreement_at = null;
+                                        }, false);
                                     }
                                 }}/>  &nbsp;
                                 Signerat labbmedlemsavtal mottaget{ has_signed ? " " + dateTimeToStr(member.labaccess_agreement_at) : "" }.
