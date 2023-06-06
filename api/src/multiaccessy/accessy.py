@@ -4,10 +4,11 @@ from collections.abc import Iterable
 from dataclasses import dataclass, field
 from datetime import date, datetime, timedelta
 from logging import getLogger
-from random import random
+from random import random, randint
 from time import sleep
 from typing import Union
 
+import dateutil.parser
 import requests
 
 from service.config import config
@@ -48,9 +49,12 @@ def request(method, path, token=None, json=None, max_tries=8, err_msg=None):
             backoff = backoff * (1.2 + 0.1 * random())
             continue
 
+        if response.status_code == 401:
+            raise AccessyError("401: unauthorized")
+
         if not response.ok:
             msg = f"got an error in the response for {response.request.path_url}, {response.status_code=}: {err_msg or ''}"
-            logger.error(msg)
+            logger.error(f"{msg}: {response.text}")
             raise AccessyError(msg)
 
         try:
@@ -61,6 +65,25 @@ def request(method, path, token=None, json=None, max_tries=8, err_msg=None):
             raise e
 
     raise AccessyError("too many requests")
+
+
+@dataclass
+class AccessyDoor:
+    id: UUID = field(repr=False)
+    name: str
+
+    def __hash__(self) -> int:
+        return hash(self.id)
+
+
+@dataclass
+class Access:
+    dt: datetime
+    name: str
+    door: AccessyDoor = field(repr=False)
+
+    def __hash__(self) -> int:
+        return hash((self.dt, self.name, self.door))
 
 
 @dataclass
@@ -198,48 +221,79 @@ class AccessySession:
                 group_descriptions.append(self._get_group_description(group_id))
 
         return group_descriptions
+    
+    def get_all_doors(self) -> list[AccessyDoor]:
+        items = self._get_doors()
+        doors = [AccessyDoor(item["id"], item["name"]) for item in items]
+        for door in doors:
+            door.id = self._get_asset_id(door.id)
+        return doors
+
+    def get_all_accesses(self, door: AccessyDoor) -> list[Access]:
+        response = self._get_accesses(door.id)
+        accesses = []
+        for item in response["items"]:
+            dt = dateutil.parser.parse(item["date"])
+            name = item["user"]
+            accesses.append(Access(dt, name, door))
+        return accesses
 
     ################################################
     # Internal methods
     ################################################
+
+    def refresh_token(self):
+        now = datetime.now()
+        data = request(
+            "post",
+            "/auth/oauth/token",
+            json={
+                "audience": ACCESSY_URL,
+                "grant_type": "client_credentials",
+                "client_id": ACCESSY_CLIENT_ID,
+                "client_secret": ACCESSY_CLIENT_SECRET,
+            },
+        )
+
+        self.session_token = data["access_token"]
+        self.session_token_token_expires_at = now + timedelta(milliseconds=int(data["expires_in"]))
+        logger.info(f"accessy session token refreshed, expires_at={self.session_token_token_expires_at.isoformat()} token={self.session_token}")
+
+    def fetch_organization_id(self) -> UUID:
+        data = request(
+            "get",
+            "/asset/user/organization-membership",
+            token=self.session_token,
+        )
+
+        match len(data):
+            case 0:
+                raise AccessyError("The API key does not have a corresponding organization membership")
+            case l if l > 1:
+                logger.warning("API key has several memberships. This is probably an error...")
+
+        return data[0]["organizationId"]
 
     def __ensure_token(self):
         if not ACCESSY_CLIENT_ID or not ACCESSY_CLIENT_SECRET:
             return
 
         with self._mutex:  # Only allow one concurrent token refresh as rate limiting on this endpoint is aggressive.
-            if not self.session_token or datetime.now() > self.session_token_token_expires_at:
-                now = datetime.now()
-                data = request(
-                    "post",
-                    "/auth/oauth/token",
-                    json={
-                        "audience": ACCESSY_URL,
-                        "grant_type": "client_credentials",
-                        "client_id": ACCESSY_CLIENT_ID,
-                        "client_secret": ACCESSY_CLIENT_SECRET,
-                    },
-                )
-                
-                self.session_token = data["access_token"]
-                self.session_token_token_expires_at = now + timedelta(milliseconds=int(data["expires_in"]))
-                logger.info(f"accessy session token refreshed, expires_at={self.session_token_token_expires_at.isoformat()} token={self.session_token}")
-                
-            if not self._organization_id:
-                data = request(
-                    "get",
-                    "/asset/user/organization-membership",
-                    token=self.session_token,
-                )
-                
-                match len(data):
-                    case 0:
-                        raise AccessyError("The API key does not have a corresponding organization membership")
-                    case l if l > 1:
-                        logger.warning("API key has several memberships. This is probably an error...")
-        
-                self._organization_id = data[0]["organizationId"]
-                logger.info(f"fetched accessy organization_id {self._organization_id}")
+            if not self.session_token or datetime.now() > self.session_token_token_expires_at - timedelta(hours=randint(1, 23), minutes=randint(0, 59)):
+                self.refresh_token()
+
+            try:
+                organization_id = self.fetch_organization_id()
+            except AccessyError as e:
+                if "401" not in str(e):
+                    raise e
+
+                self.refresh_token()
+                organization_id = self.fetch_organization_id()
+            finally:
+                if not self._organization_id:
+                    self._organization_id = organization_id
+                    logger.info(f"fetched accessy organization_id {self._organization_id}")
 
     def _get(self, path: str, err_msg: str = None) -> dict:
         self.__ensure_token()
@@ -382,6 +436,15 @@ class AccessySession:
                 return self._user_ids_to_accessy_members([user_id])[0]
         else:
             return None
+    
+    def _get_asset_id(self, door_id: UUID) -> UUID:
+        return self._get(f"/asset/admin/organization/{self.organization_id()}/asset/{door_id}/asset-publication")["id"]
+
+    def _get_doors(self):
+        return self._get_json_paginated(f"/asset/admin/organization/{self.organization_id()}/asset")
+    
+    def _get_accesses(self, door_id: UUID):
+        return self._get(f"/asset/admin/asset-publication/{door_id}/invoke-activity?cursor=&page_size=250&")
 
 
 accessy_session = AccessySession()
