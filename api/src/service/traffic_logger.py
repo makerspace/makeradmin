@@ -1,22 +1,24 @@
 import json
+from typing import List
 from requests import Response, PreparedRequest
 from flask import g, request, Request as FlaskRequest
 from flask.wrappers import Response as FlaskResponse
 from datetime import datetime
 
 
-def byte_decode(data: bytes):
+def byte_decode(data: bytes) -> str:
     return data.decode('utf-8', 'backslashreplace')
 
 
 class TrafficLogger:
     LOG_LIMIT = 64 * 1024
+    service_traffic: List[object]
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.create_time = datetime.utcnow().isoformat()+'Z'
         self.service_traffic = list()
 
-    def log_service_traffic(self, traffic: Response):
+    def log_service_traffic(self, traffic: Response) -> None:
         req: PreparedRequest = traffic.request
         req_body = byte_decode(req.body) if isinstance(req.body, bytes) else req.body
 
@@ -37,7 +39,7 @@ class TrafficLogger:
             "response": resp_data
         })
 
-    def commit(self, session_request: FlaskRequest, session_response: FlaskResponse):
+    def commit(self, session_request: FlaskRequest, session_response: FlaskResponse) -> None:
         method = session_request.method
         session_request_data = {
             "date": self.create_time,
@@ -80,21 +82,21 @@ class TrafficLogger:
             json.dump(traffic_data, file, ensure_ascii=False)
 
 
-def traffic_logger_init():
+def traffic_logger_init() -> None:
     """ Add TrafficLogger instance to global object. """
 
     # Create traffic logger object.
     g.traffic_logger = TrafficLogger()
 
 
-def log_traffic(traffic: Response):
+def log_traffic(traffic: Response) -> None:
     """ Log traffic to global object. """
 
     traffic_logger: TrafficLogger = g.traffic_logger
     traffic_logger.log_service_traffic(traffic)
 
 
-def traffic_logger_commit(response: FlaskResponse):
+def traffic_logger_commit(response: FlaskResponse) -> None:
     """ Write TrafficLogger data. """
 
     traffic_logger: TrafficLogger = g.traffic_logger
