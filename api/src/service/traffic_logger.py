@@ -9,6 +9,7 @@ from datetime import datetime
 def byte_decode(data: bytes) -> str:
     return data.decode('utf-8', 'backslashreplace')
 
+LOGGING_ENABLED = False
 
 class TrafficLogger:
     LOG_LIMIT = 64 * 1024
@@ -85,19 +86,22 @@ class TrafficLogger:
 def traffic_logger_init() -> None:
     """ Add TrafficLogger instance to global object. """
 
-    # Create traffic logger object.
-    g.traffic_logger = TrafficLogger()
+    if LOGGING_ENABLED:
+        # Create traffic logger object.
+        g.traffic_logger = TrafficLogger()
 
 
 def log_traffic(traffic: Response) -> None:
     """ Log traffic to global object. """
 
-    traffic_logger: TrafficLogger = g.traffic_logger
-    traffic_logger.log_service_traffic(traffic)
+    if LOGGING_ENABLED:
+        traffic_logger: TrafficLogger = g.traffic_logger
+        traffic_logger.log_service_traffic(traffic)
 
 
 def traffic_logger_commit(response: FlaskResponse) -> None:
     """ Write TrafficLogger data. """
 
-    traffic_logger: TrafficLogger = g.traffic_logger
-    traffic_logger.commit(request, response)
+    if LOGGING_ENABLED:
+        traffic_logger: TrafficLogger = g.traffic_logger
+        traffic_logger.commit(request, response)
