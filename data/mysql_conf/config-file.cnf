@@ -1,0 +1,10 @@
+[mysqld]
+user=root
+
+# Slow query settings:
+slow_query_log='ON'
+slow_query_log_file=/var/www/html/storage/logs/slow.log
+long_query_time=1.0
+
+innodb_buffer_pool_size = 1024M
+max_execution_time=16384
