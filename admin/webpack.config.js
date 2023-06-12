@@ -47,7 +47,6 @@ module.exports = (env, args) => {
                         {
                             loader: "style-loader",
                             options: {
-                                sourceMap: true
                             }
                         },
                         {

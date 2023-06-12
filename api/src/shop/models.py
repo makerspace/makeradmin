@@ -1,8 +1,10 @@
 from sqlalchemy import Column, Integer, String, DateTime, func, Text, Numeric, ForeignKey, Enum, Boolean, LargeBinary
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import relationship, configure_mappers
+from sqlalchemy.orm import relationship, configure_mappers, validates
 
 from membership.models import Member
+from service.api_definition import BAD_VALUE
+from service.error import UnprocessableEntity
 
 Base = declarative_base()
 
@@ -57,6 +59,12 @@ class Product(Base):
     actions = relationship("ProductAction")
 
     image_id = Column(Integer, ForeignKey(ProductImage.id), nullable=True)
+
+    @validates('price')
+    def validate_name(self, key, value):
+        if value < 0:
+            raise UnprocessableEntity(f"Price can't be below zero.", fields=key, what=BAD_VALUE)
+        return value
 
     def __repr__(self) -> str:
         return f'Product(id={self.id}, name={self.name}, category_id={self.category_id}' \

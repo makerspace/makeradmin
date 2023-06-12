@@ -1,6 +1,6 @@
 # Påläsning av API-dokumentation
 * export av nyligen labbmedlemmar + telefonnummer
-* knapp i makeradmin för att skicka ut Accessy-länk manuellt. Används vid nyckelutlämningar.
+* knapp i makeradmin för att skicka ut Accessy-länk manuellt. Används vid medlemsintroduktioner.
 * dela upp i veckovis access? Synka upp midnatt De som betalat före dess får access. Annars får man vänta till nästa vecka.
   * Se till att alltid synka upp några veckor i förväg så att folk fortsätter ha access och kommer in även om nätverket är nere.
 
@@ -33,7 +33,7 @@ Fixat
 * Pending skeppas i slutet på varje vecka
 * Behövs inget startdatum. Istället avrundas vid skeppning.
 * Synkning bryr sig inte om pending, bara aktuella spans.
-* Behöver kunna skeppa för specifik användare vid nyckelutlämning
+* Behöver kunna skeppa för specifik användare vid medlemsintroduktion
 
 
 # API-anrop
