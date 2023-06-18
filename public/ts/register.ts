@@ -1,7 +1,7 @@
 import Cart from "./cart"
 import * as common from "./common"
 import { login } from "./common";
-import { initializeStripe, pay } from "./payment_common"
+import { mountStripe, pay } from "./payment_common"
 declare var UIkit: any;
 
 
@@ -18,7 +18,7 @@ common.onGetAndDocumentLoaded("/webshop/register_page_data", (value: any) => {
     });
 
     // Add an instance of the card Element into the `card-element` <div>.
-    initializeStripe();
+    mountStripe();
 
     const id2item = new Map();
 

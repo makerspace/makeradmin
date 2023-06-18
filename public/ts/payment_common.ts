@@ -1,9 +1,10 @@
 /// <reference path="../node_modules/@types/stripe-v3/index.d.ts" />
 import * as common from "./common"
+import { ServerResponse } from "./common";
 
 declare var UIkit: any;
 
-var stripe: stripe.Stripe;
+export var stripe: stripe.Stripe;
 var card: stripe.elements.Element;
 var spinner: any;
 var payButton: HTMLInputElement;
@@ -12,6 +13,11 @@ var errorElement: any;
 export function initializeStripe() {
     // Create a Stripe client.
     stripe = Stripe(window.stripeKey);
+}
+
+initializeStripe();
+
+export function mountStripe() {
     // Create an instance of Elements.
     const elements = stripe.elements({ locale: "sv" });
     // Custom styling can be passed to options when creating an Element.
@@ -50,10 +56,10 @@ interface ResponseFunction {
 export interface PaymentFlowDefinition {
     initiate_payment: InitializePaymentFunction;
     before_initiate_payment?: Function;
-    on_stripe_error?: ResponseFunction;
-    handle_backend_response?: ResponseFunction;
-    on_payment_success?: ResponseFunction;
-    on_failure?: ResponseFunction;
+    on_stripe_error?: (error: stripe.Error) => void;
+    handle_backend_response?: (json: ServerResponse<BackendPaymentResponse>) => void;
+    on_payment_success?: (json: ServerResponse<BackendPaymentResponse>) => void;
+    on_failure?: (error: any) => void;
 }
 
 let waitingForPaymentResponse = false;
@@ -73,52 +79,76 @@ function default_before_initiate_payment() {
     disable_pay_button();
     errorElement.textContent = "";
 };
-function display_stripe_error(error: any) {
+export function display_stripe_error(error: any) {
     errorElement.textContent = error.message;
     UIkit.modal.alert("<h2>Your payment failed</h2>" + errorElement.innerHTML);
 }
 
+export enum PaymentIntentNextActionType {
+    USE_STRIPE_SDK = 'use_stripe_sdk',
+}
+
+export type PaymentAction = {
+    type: PaymentIntentNextActionType
+    client_secret: string
+}
+
+export type BackendPaymentResponse = {
+    transaction_id: string,
+    action_info: PaymentAction,
+}
+
+export type CartItem = {
+    id: number
+    count: number
+}
+
+export type Purchase = {
+    cart: CartItem[]
+    expected_sum: string
+    stripe_payment_method_id: string
+}
+
 // This function might be called recursively doing multiple authentication steps.
-function handleBackendResponse(json: any, object: PaymentFlowDefinition) {
+async function handleBackendResponse(json: ServerResponse<BackendPaymentResponse>, object: PaymentFlowDefinition) {
     if (object.handle_backend_response) { object.handle_backend_response(json); }
 
     const action_info = json.data.action_info;
-    if (action_info && action_info.type === 'use_stripe_sdk') {
+    if (action_info && action_info.type === PaymentIntentNextActionType.USE_STRIPE_SDK) {
         // This might be a recursive call doing multiple authentication steps.
-        handleStripeAction(action_info.client_secret, object);
+        await handleStripeAction(action_info.client_secret, object);
     } else {
         if (object.on_payment_success) { object.on_payment_success(json); }
-        window.location.href = "receipt/" + json.data.transaction_id;
     }
 }
 
 // This function might be called recursively doing multiple authentication steps.
-function handleStripeAction(client_secret: any, object: PaymentFlowDefinition) {
-    stripe.handleCardAction(
+async function handleStripeAction(client_secret: string, object: PaymentFlowDefinition) {
+    const result = await stripe.handleCardAction(
         client_secret
-    ).then(function (result: any) {
-        if (result.error) {
-            display_stripe_error(result.error);
-            if (object.on_stripe_error) { object.on_stripe_error(result.error); }
+    );
+    if (result.error) {
+        display_stripe_error(result.error);
+        if (object.on_stripe_error) { object.on_stripe_error(result.error); }
+        enable_pay_button();
+    } else {
+        // The card action has been handled
+        // The PaymentIntent can be confirmed again on the server
+        try {
+            const json = await common.ajax("POST", window.apiBasePath + "/webshop/confirm_payment", {
+                payment_intent_id: result.paymentIntent!.id,
+            });
+            // This might be a recursive call doing multiple authentication steps.
+            await handleBackendResponse(json as ServerResponse<BackendPaymentResponse>, object);
+        } catch (json) {
+            if (object.on_failure) { object.on_failure(json as ServerResponse<any>); }
             enable_pay_button();
-        } else {
-            // The card action has been handled
-            // The PaymentIntent can be confirmed again on the server
-            common.ajax("POST", window.apiBasePath + "/webshop/confirm_payment", {
-                payment_intent_id: result.paymentIntent.id,
-            }).then(json => {
-                // This might be a recursive call doing multiple authentication steps.
-                handleBackendResponse(json, object);
-            }).catch(json => {
-                if (object.on_failure) { object.on_failure(json); }
-                enable_pay_button();
-            })
         }
-    });
+    }
 }
 
 
-export function pay(object: PaymentFlowDefinition) {
+export async function pay(object: PaymentFlowDefinition) {
     // Don't allow any clicks while waiting for a response from the server
     if (waitingForPaymentResponse) {
         return;
@@ -127,18 +157,18 @@ export function pay(object: PaymentFlowDefinition) {
     if (object.before_initiate_payment) { object.before_initiate_payment(); }
     default_before_initiate_payment();
 
-    stripe.createPaymentMethod('card', card).then(function (result: any) {
-        if (result.error) {
-            display_stripe_error(result.error);
-            if (object.on_stripe_error) { object.on_stripe_error(result.error); }
+    const result = await stripe.createPaymentMethod('card', card);
+    if (result.error) {
+        display_stripe_error(result.error);
+        if (object.on_stripe_error) { object.on_stripe_error(result.error); }
+        enable_pay_button();
+    } else {
+        try {
+            const json = await object.initiate_payment(result);
+            await handleBackendResponse(json, object);
+        } catch (json) {
+            if (object.on_failure) { object.on_failure(json); }
             enable_pay_button();
-        } else {
-            object.initiate_payment(result).then(json => {
-                handleBackendResponse(json, object);
-            }).catch(json => {
-                if (object.on_failure) { object.on_failure(json); }
-                enable_pay_button();
-            });
         }
-    });
+    }
 }
