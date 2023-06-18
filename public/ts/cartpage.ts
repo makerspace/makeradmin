@@ -1,8 +1,8 @@
 import Cart from "./cart"
 import * as common from "./common"
-import { UNAUTHORIZED } from "./common";
+import { ServerResponse, UNAUTHORIZED } from "./common";
 import { renderSidebarCategories } from "./category"
-import { initializeStripe, pay } from "./payment_common"
+import { BackendPaymentResponse, PaymentFlowDefinition, mountStripe, pay } from "./payment_common"
 declare var UIkit: any;
 
 common.onGetAndDocumentLoaded("/webshop/product_data", (productData: any) => {
@@ -88,31 +88,29 @@ common.onGetAndDocumentLoaded("/webshop/product_data", (productData: any) => {
 		}
 	}
 
-	initializeStripe();
+	mountStripe();
 
-	function pay_config() {
-		function initiate_payment(result: any) {
-			let cart = Cart.fromStorage();
-			return common.ajax("POST", window.apiBasePath + "/webshop/pay", {
-				cart: cart.items,
-				expected_sum: cart.sum(id2item),
-				stripe_payment_method_id: result.paymentMethod.id,
-			})
-		}
-		function on_payment_success(json: any) {
-			new Cart([]).saveToStorage();
-		}
-		function on_failure(json: any) {
-			if (json.status === UNAUTHORIZED) {
-				UIkit.modal.alert("<h2>Betalningen misslyckades</h2>Du är inte inloggad");
-			} else {
-				UIkit.modal.alert("<h2>Betalningen misslyckades</h2>" + common.get_error(json));
-			}
-		}
+	function pay_config(): PaymentFlowDefinition {
 		return {
-			initiate_payment: initiate_payment,
-			on_payment_success: on_payment_success,
-			on_failure: on_failure,
+			initiate_payment: (result) => {
+				let cart = Cart.fromStorage();
+				return common.ajax("POST", window.apiBasePath + "/webshop/pay", {
+					cart: cart.items,
+					expected_sum: cart.sum(id2item),
+					stripe_payment_method_id: result.paymentMethod.id,
+				})
+			},
+			on_payment_success: (json: ServerResponse<BackendPaymentResponse>) => {
+				window.location.href = "receipt/" + json.data.transaction_id;
+				new Cart([]).saveToStorage();
+			},
+			on_failure: (json: ServerResponse<any>) => {
+				if (json.status === UNAUTHORIZED) {
+					UIkit.modal.alert("<h2>Betalningen misslyckades</h2>Du är inte inloggad");
+				} else {
+					UIkit.modal.alert("<h2>Betalningen misslyckades</h2>" + common.get_error(json));
+				}
+			},
 		};
 	}
 	const payment_config = pay_config();
