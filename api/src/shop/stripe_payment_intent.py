@@ -150,10 +150,16 @@ def pay_with_stripe(transaction: Transaction, payment_method_id: str) -> Optiona
     """ Handle stripe payment, Returns dict containing data for further processing customer action or None. """
 
     try:
+        member = db_session.query(Member).get(transaction.member_id)
+        assert member is not None
+        stripe_customer = get_stripe_customer(member, test_clock=None)
+        assert stripe_customer is not None
+
         payment_intent = stripe.PaymentIntent.create(
             payment_method=payment_method_id,
             amount=convert_to_stripe_amount(transaction.amount),
             currency=CURRENCY,
+            customer=stripe_customer.stripe_id,
             description=f'charge for transaction id {transaction.id}',
             confirmation_method='manual',
             confirm=True,
