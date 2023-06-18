@@ -1,5 +1,6 @@
 from dataclasses import dataclass
-from flask import g, request, send_file, make_response, redirect, jsonify
+from typing import Any
+from flask import Response, g, request, send_file, make_response, redirect, jsonify
 from sqlalchemy.exc import NoResultFound
 
 from multiaccessy.invite import AccessyInvitePreconditionFailed, ensure_accessy_labaccess
@@ -11,21 +12,17 @@ from shop import service
 from shop.entities import product_image_entity, transaction_content_entity, transaction_entity, \
     transaction_action_entity, product_entity, category_entity, product_action_entity
 from shop.models import TransactionContent, ProductImage
-from shop.pay import pay, register
+from shop.pay import RegisterResponse, pay, register, register2
 
-# Next two needed?
-from shop.stripe_payment_intent import confirm_stripe_payment_intent
-from shop.stripe_subscriptions import create_stripe_checkout_session
 from shop.stripe_subscriptions import start_subscription, cancel_subscription
 from shop.stripe_subscriptions import open_stripe_customer_portal
 
-from shop.stripe_payment_intent import confirm_stripe_payment_intent
+from shop.stripe_payment_intent import PartialPayment, confirm_stripe_payment_intent
 from shop.stripe_subscriptions import create_stripe_checkout_session
 
 from shop.shop_data import pending_actions, member_history, receipt, get_product_data, all_product_data, \
-    get_membership_products
+    get_membership_products, special_product_data
 from shop.stripe_event import stripe_callback
-from shop.stripe_payment_intent import confirm_stripe_payment_intent
 from shop.transactions import ship_labaccess_orders
 from logging import getLogger
 
@@ -200,7 +197,7 @@ def product_data(product_id):
 
 
 @service.raw_route("/image/<int:image_id>")
-def public_image(image_id):
+def public_image(image_id: int) -> Response:
     try:
         image = db_session.query(ProductImage).filter(ProductImage.id == image_id, ProductImage.deleted_at.is_(None)).one()
     except NoResultFound:
@@ -214,11 +211,11 @@ def public_image(image_id):
 
 @service.route("/register_page_data", method=GET, permission=PUBLIC)
 def register_page_data():
-    return {"membershipProducts": get_membership_products(), "productData": all_product_data()}
+    return {"membershipProducts": get_membership_products(), "productData": [product_entity.to_obj(p) for p in special_product_data()]}
 
 
 @service.route("/pay", method=POST, permission=USER, commit_on_error=True)
-def pay_route():
+def pay_route() -> PartialPayment:
     return pay(request.json, g.user_id)
 
 # Used to just initiate a capture of a payment method via a setup intent
@@ -228,14 +225,19 @@ def stripe_payment_method_route():
     return redirect(url)
 
 @service.route("/confirm_payment", method=POST, permission=PUBLIC, commit_on_error=True)
-def confirm_payment_route():
+def confirm_payment_route() -> PartialPayment:
     return confirm_stripe_payment_intent(request.json)
 
 
 @service.route("/register", method=POST, permission=PUBLIC, commit_on_error=True)
 def register_route():
+    assert request.remote_addr is not None
     return register(request.json, request.remote_addr, request.user_agent.string)
 
+@service.route("/register2", method=POST, permission=PUBLIC, commit_on_error=True)
+def register2_route() -> Any:
+    assert request.remote_addr is not None
+    return register2(request.json, request.remote_addr, request.user_agent.string).to_dict()
 
 @service.route("/stripe_callback", method=POST, permission=PUBLIC, commit_on_error=True)
 def stripe_callback_route():
