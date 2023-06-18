@@ -1,6 +1,9 @@
+from dataclasses import dataclass
 from decimal import localcontext, Decimal, Rounded
 from datetime import datetime
 from logging import getLogger
+from typing import List, Tuple
+from dataclasses_json import DataClassJsonMixin
 
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 from sqlalchemy.sql import func
@@ -8,44 +11,90 @@ from sqlalchemy.sql import func
 
 from membership.membership import add_membership_days
 from membership.models import Key, Span
-from multiaccessy.invite import ensure_accessy_labaccess, AccessyError, check_labaccess_requirements, \
-    LabaccessRequirements
-from service.api_definition import NEGATIVE_ITEM_COUNT, INVALID_ITEM_COUNT, EMPTY_CART, NON_MATCHING_SUMS
+from multiaccessy.invite import (
+    ensure_accessy_labaccess,
+    AccessyError,
+    check_labaccess_requirements,
+    LabaccessRequirements,
+)
+from service.api_definition import (
+    NEGATIVE_ITEM_COUNT,
+    INVALID_ITEM_COUNT,
+    EMPTY_CART,
+    NON_MATCHING_SUMS,
+)
 from service.db import db_session, nested_atomic
 from service.error import InternalServerError, BadRequest, NotFound
-from shop.email import send_labaccess_extended_email, send_membership_updated_email, send_new_member_email, send_receipt_email
+from shop.email import (
+    send_labaccess_extended_email,
+    send_membership_updated_email,
+    send_new_member_email,
+    send_receipt_email,
+)
 from shop.filters import PRODUCT_FILTERS
-from shop.models import TransactionAction, TransactionContent, Transaction, ProductAction, PendingRegistration, \
-    StripePending, Product
+from shop.models import (
+    TransactionAction,
+    TransactionContent,
+    Transaction,
+    ProductAction,
+    PendingRegistration,
+    StripePending,
+    Product,
+)
 from shop.stripe_util import convert_to_stripe_amount
 
-logger = getLogger('makeradmin')
+logger = getLogger("makeradmin")
 
 
 class PaymentFailed(BadRequest):
-    message = 'Payment failed.'
+    message = "Payment failed."
+
+
+@dataclass
+class CartItem(DataClassJsonMixin):
+    id: int
+    count: int
+
+
+@dataclass
+class Purchase(DataClassJsonMixin):
+    cart: List[CartItem]
+    expected_sum: str
+    stripe_payment_method_id: str
 
 
 def get_source_transaction(source_id):
     try:
-        return db_session\
-            .query(Transaction)\
-            .filter(Transaction.stripe_pending.any(StripePending.stripe_token == source_id))\
-            .with_for_update()\
+        return (
+            db_session.query(Transaction)
+            .filter(
+                Transaction.stripe_pending.any(StripePending.stripe_token == source_id)
+            )
+            .with_for_update()
             .one()
+        )
     except NoResultFound as e:
         return None
     except MultipleResultsFound as e:
-        raise InternalServerError(log=f"stripe token {source_id} has multiple transactions, this is a bug") from e
+        raise InternalServerError(
+            log=f"stripe token {source_id} has multiple transactions, this is a bug"
+        ) from e
 
 
 @nested_atomic
-def commit_transaction_to_db(member_id=None, total_amount=None, contents=None, stripe_card_source_id=None,
-                             activates_member=False):
-    """ Save as new transaction with transaction content in db and return it transaction. """
-    
-    transaction = Transaction(member_id=member_id, amount=total_amount, status=Transaction.PENDING)
-    
+def commit_transaction_to_db(
+    member_id=None,
+    total_amount=None,
+    contents=None,
+    stripe_card_source_id=None,
+    activates_member=False,
+) -> Transaction:
+    """Save as new transaction with transaction content in db and return it transaction."""
+
+    transaction = Transaction(
+        member_id=member_id, amount=total_amount, status=Transaction.PENDING
+    )
+
     db_session.add(transaction)
     db_session.flush()
 
@@ -53,22 +102,28 @@ def commit_transaction_to_db(member_id=None, total_amount=None, contents=None, s
         content.transaction_id = transaction.id
         db_session.add(content)
         db_session.flush()
-        
+
         db_session.execute(
             """
             INSERT INTO webshop_transaction_actions (content_id, action_type, value, status)
             SELECT :content_id AS content_id, action_type, SUM(:count * value) AS value, :pending AS status
             FROM webshop_product_actions WHERE product_id=:product_id AND deleted_at IS NULL GROUP BY action_type
             """,
-            {'content_id': content.id, 'count': content.count, 'pending': TransactionAction.PENDING,
-             'product_id': content.product_id}
+            {
+                "content_id": content.id,
+                "count": content.count,
+                "pending": TransactionAction.PENDING,
+                "product_id": content.product_id,
+            },
         )
-    
+
     if activates_member:
         # Mark this transaction as one that is for registering a member.
         db_session.add(PendingRegistration(transaction_id=transaction.id))
 
-    db_session.add(StripePending(transaction_id=transaction.id, stripe_token=stripe_card_source_id))
+    db_session.add(
+        StripePending(transaction_id=transaction.id, stripe_token=stripe_card_source_id)
+    )
 
     return transaction
 
@@ -86,22 +141,21 @@ def pending_actions_query(member_id=None, transaction=None):
     existed at the time the transaction was made. Therefore if an action is added to a product in the future,
     that action will *not* be retroactively applied to all existing transactions.
     """
-    
+
     query = (
-        db_session
-        .query(TransactionAction, TransactionContent, Transaction)
+        db_session.query(TransactionAction, TransactionContent, Transaction)
         .join(TransactionAction.content)
         .join(TransactionContent.transaction)
         .filter(TransactionAction.status == TransactionAction.PENDING)
         .filter(Transaction.status == Transaction.COMPLETED)
     )
-    
+
     if transaction:
         query = query.filter(Transaction.id == transaction.id)
 
     if member_id:
         query = query.filter(Transaction.member_id == member_id)
-        
+
     return query
 
 
@@ -130,16 +184,18 @@ def ship_add_labaccess_action(action, transaction, skip_ensure_accessy=False):
 
     state = check_labaccess_requirements(transaction.member_id)
     if state != LabaccessRequirements.OK:
-        logger.info(f"skipping ship_add_labaccess_action because member {transaction.member_id} failed check_labaccess_requirements with {state}")
+        logger.info(
+            f"skipping ship_add_labaccess_action because member {transaction.member_id} failed check_labaccess_requirements with {state}"
+        )
         return
 
     labaccess_end = add_membership_days(
         transaction.member_id,
         Span.LABACCESS,
         days=days_to_add,
-        creation_reason=f"transaction_action_id: {action.id}, transaction_id: {transaction.id}"
+        creation_reason=f"transaction_action_id: {action.id}, transaction_id: {transaction.id}",
     ).labaccess_end
-    
+
     assert labaccess_end
 
     complete_pending_action(action)
@@ -171,16 +227,27 @@ def activate_member(member):
     db_session.add(member)
     db_session.flush()
     send_new_member_email(member)
-    
-    
-def create_transaction(member_id, purchase, activates_member=False, stripe_reference_id=None):
-    total_amount, contents = validate_order(member_id, purchase["cart"], purchase["expected_sum"])
 
-    transaction = commit_transaction_to_db(member_id=member_id, total_amount=total_amount, contents=contents,
-                                           activates_member=activates_member, stripe_card_source_id=stripe_reference_id)
 
-    logger.info(f"created transaction {transaction.id}, total_amount={total_amount}, member_id={member_id}"
-                f", stripe_reference_id={stripe_reference_id}")
+def create_transaction(
+    member_id: int, purchase: Purchase, activates_member: bool, stripe_reference_id: str
+) -> Transaction:
+    total_amount, contents = validate_order(
+        member_id, purchase.cart, purchase.expected_sum
+    )
+
+    transaction = commit_transaction_to_db(
+        member_id=member_id,
+        total_amount=total_amount,
+        contents=contents,
+        activates_member=activates_member,
+        stripe_card_source_id=stripe_reference_id,
+    )
+
+    logger.info(
+        f"created transaction {transaction.id}, total_amount={total_amount}, member_id={member_id}"
+        f", stripe_reference_id={stripe_reference_id}"
+    )
 
     return transaction
 
@@ -191,8 +258,10 @@ def complete_transaction(transaction):
     transaction.status = Transaction.COMPLETED
     db_session.add(transaction)
     db_session.flush()
-    logger.info(f"completing transaction {transaction.id}, payment confirmed"
-                f", sending email receipt to member {transaction.member_id}")
+    logger.info(
+        f"completing transaction {transaction.id}, payment confirmed"
+        f", sending email receipt to member {transaction.member_id}"
+    )
     send_receipt_email(transaction)
 
 
@@ -202,14 +271,18 @@ def ship_orders(ship_add_labaccess=True, transaction=None):
     If a user does not meet requirements for order (for example labaccess needs phone, signed agreement etc), then the order will remain as not completed.
     If transaction is set this is done only for that transaction.
     """
-    
-    for action, content, transaction in pending_actions_query(transaction=transaction):
 
-        if ship_add_labaccess and action.action_type == ProductAction.ADD_LABACCESS_DAYS:
+    for action, content, transaction in pending_actions_query(transaction=transaction):
+        if (
+            ship_add_labaccess
+            and action.action_type == ProductAction.ADD_LABACCESS_DAYS
+        ):
             try:
                 ship_add_labaccess_action(action, transaction)
             except AccessyError as e:
-                logger.warning(f"failed to ensure accessy labacess, skipping, member (id {transaction.member_id}, number {transaction.member.member_number}) can self service add later: {e}")
+                logger.warning(
+                    f"failed to ensure accessy labacess, skipping, member (id {transaction.member_id}, number {transaction.member.member_number}) can self service add later: {e}"
+                )
 
         if action.action_type == ProductAction.ADD_MEMBERSHIP_DAYS:
             ship_add_membership_action(action, transaction)
@@ -218,7 +291,9 @@ def ship_orders(ship_add_labaccess=True, transaction=None):
 def ship_labaccess_orders(member_id=None, skip_ensure_accessy=False):
     for action, content, transaction in pending_actions_query(member_id=member_id):
         if action.action_type == ProductAction.ADD_LABACCESS_DAYS:
-            ship_add_labaccess_action(action, transaction, skip_ensure_accessy=skip_ensure_accessy)
+            ship_add_labaccess_action(
+                action, transaction, skip_ensure_accessy=skip_ensure_accessy
+            )
 
 
 @nested_atomic
@@ -226,11 +301,17 @@ def payment_success(transaction):
     complete_transaction(transaction)
     ship_orders(ship_add_labaccess=False, transaction=transaction)
 
-    if db_session.query(PendingRegistration).filter(PendingRegistration.transaction_id == transaction.id).count():
+    if (
+        db_session.query(PendingRegistration)
+        .filter(PendingRegistration.transaction_id == transaction.id)
+        .count()
+    ):
         activate_member(transaction.member)
 
 
-def process_cart(member_id, cart):
+def process_cart(
+    member_id: int, cart: List[CartItem]
+) -> Tuple[Decimal, List[TransactionContent]]:
     contents = []
     with localcontext() as ctx:
         ctx.clear_flags()
@@ -238,30 +319,44 @@ def process_cart(member_id, cart):
 
         for item in cart:
             try:
-                product_id = item['id']
-                product = db_session.query(Product).filter(Product.id == product_id, Product.deleted_at.is_(None)).one()
+                product_id = item.id
+                product = (
+                    db_session.query(Product)
+                    .filter(Product.id == product_id, Product.deleted_at.is_(None))
+                    .one()
+                )
             except NoResultFound:
                 raise NotFound(message=f"Could not find product with id {product_id}.")
 
             if product.price < 0:
-                raise InternalServerError(log=f"Product {product_id} has a negative price.")
+                raise InternalServerError(
+                    log=f"Product {product_id} has a negative price."
+                )
 
-            count = item['count']
+            count = item.count
 
             if count <= 0:
-                raise BadRequest(message=f"Bad product count for product {product_id}.", what=NEGATIVE_ITEM_COUNT)
+                raise BadRequest(
+                    message=f"Bad product count for product {product_id}.",
+                    what=NEGATIVE_ITEM_COUNT,
+                )
 
             if count % product.smallest_multiple != 0:
-                raise BadRequest(f"Bad count for product {product_id}, must be in multiples "
-                                 f"of {product.smallest_multiple}, was {count}.", what=INVALID_ITEM_COUNT)
+                raise BadRequest(
+                    f"Bad count for product {product_id}, must be in multiples "
+                    f"of {product.smallest_multiple}, was {count}.",
+                    what=INVALID_ITEM_COUNT,
+                )
 
             if product.filter:
-                PRODUCT_FILTERS[product.filter](cart_item=item, member_id=member_id)
+                PRODUCT_FILTERS[product.filter](item, member_id)
 
             amount = product.price * count
             total_amount += amount
 
-            content = TransactionContent(product_id=product_id, count=count, amount=amount)
+            content = TransactionContent(
+                product_id=product_id, count=count, amount=amount
+            )
             contents.append(content)
 
         if ctx.flags[Rounded]:
@@ -272,8 +367,10 @@ def process_cart(member_id, cart):
     return total_amount, contents
 
 
-def validate_order(member_id, cart, expected_amount: Decimal):
-    """ Validate that the expected amount matches what in the cart. Returns total_amount and cart items. """
+def validate_order(
+    member_id: int, cart: List[CartItem], expected_amount: str
+) -> Tuple[Decimal, List[TransactionContent]]:
+    """Validate that the expected amount matches what in the cart. Returns total_amount and cart items."""
 
     if not cart:
         raise BadRequest(message="No items in cart.", what=EMPTY_CART)
@@ -282,9 +379,11 @@ def validate_order(member_id, cart, expected_amount: Decimal):
 
     # Ensure that the frontend hasn't calculated the amount to pay incorrectly
     if abs(total_amount - Decimal(expected_amount)) > Decimal("0.01"):
-        raise BadRequest(f"Expected total amount to pay to be {expected_amount} "
-                         f"but the cart items actually sum to {total_amount}.",
-                         what=NON_MATCHING_SUMS)
+        raise BadRequest(
+            f"Expected total amount to pay to be {expected_amount} "
+            f"but the cart items actually sum to {total_amount}.",
+            what=NON_MATCHING_SUMS,
+        )
 
     if total_amount < 5:
         raise BadRequest("Total amount too small, must be at least 5 SEK.")
