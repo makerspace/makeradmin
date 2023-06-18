@@ -1,8 +1,12 @@
+from dataclasses import dataclass
 from logging import getLogger
+from typing import List
 
 from sqlalchemy import desc
 from sqlalchemy.orm import joinedload, contains_eager
 from sqlalchemy.orm.exc import NoResultFound
+from shop.stripe_constants import MakerspaceMetadataKeys
+from shop.stripe_subscriptions import get_subscription_products
 
 from membership.views import member_entity
 from service.db import db_session
@@ -67,6 +71,20 @@ def receipt(member_id, transaction_id):
         'cart': list((product_entity.to_obj(content.product), transaction_content_entity.to_obj(content))
                      for content in transaction.contents)
     }
+
+
+def special_product_data() -> List[Product]:
+    # Make sure subscription products have been created
+    get_subscription_products()
+
+    query = (
+        db_session
+        .query(Product)
+        .filter(Product.deleted_at.is_(None))
+        .filter(Product.product_metadata[MakerspaceMetadataKeys.SPECIAL_PRODUCT_ID.value] != "")
+    )
+
+    return query.all()
 
 
 def all_product_data():
