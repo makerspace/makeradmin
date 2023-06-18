@@ -41,7 +41,11 @@ module.exports = (env, args) => {
         },
         
         resolve: {
-            extensions: ['*', '.ts', '.tsx', '.js']
+            extensions: ['*', '.ts', '.tsx', '.js'],
+            alias: {
+                "react": "preact/compat",
+                "react-dom": "preact/compat"
+            }
         },
         
         plugins: [
@@ -58,6 +62,7 @@ module.exports = (env, args) => {
             ],
             devServer: {
                 host: "0.0.0.0",
+                allowedHosts: "all",
                 port: 80,
                 static: '/static/js',
                 proxy: {
