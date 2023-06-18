@@ -23,7 +23,7 @@ from typing import Optional
 logger = getLogger('makeradmin')
 
 
-def generate_token():
+def generate_token() -> str:
     return ''.join(secrets.choice(ascii_letters + digits) for _ in range(32))
 
 
@@ -39,7 +39,7 @@ def get_member_by_user_identification(user_identification):
                        fields='user_identification', status="not found")
 
 
-def create_access_token(ip, browser, user_id, valid_duration: Optional[timedelta]=None):
+def create_access_token(ip: str, browser: Optional[str], user_id: int, valid_duration: Optional[timedelta]=None):
     assert user_id > 0
     
     access_token = AccessToken(
@@ -118,7 +118,7 @@ def password_reset(reset_token, unhashed_password):
     return {}
     
 
-def force_login(ip, browser, user_id):
+def force_login(ip: str, browser: str, user_id: int):
     Login.register_login_success(ip, user_id)
     return create_access_token(ip, browser, user_id)
 
