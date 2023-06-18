@@ -1,4 +1,6 @@
 from flask import g, request, send_file, make_response
+from typing import Any
+from flask import Response, g, request, send_file, make_response, redirect, jsonify
 from sqlalchemy.exc import NoResultFound
 
 from multiaccessy.invite import AccessyInvitePreconditionFailed, ensure_accessy_labaccess
@@ -11,10 +13,10 @@ from shop.entities import product_image_entity, transaction_content_entity, tran
     transaction_action_entity, product_entity, category_entity, product_action_entity
 from shop.models import TransactionContent, ProductImage
 from shop.pay import pay, register
+from shop.stripe_payment_intent import PartialPayment, confirm_stripe_payment_intent
 from shop.shop_data import pending_actions, member_history, receipt, get_product_data, all_product_data, \
-    get_membership_products
+    get_membership_products, special_product_data
 from shop.stripe_event import stripe_callback, process_stripe_events
-from shop.stripe_payment_intent import confirm_stripe_payment_intent
 from shop.transactions import ship_labaccess_orders
 
 service.entity_routes(
@@ -158,7 +160,7 @@ def product_data(product_id):
 
 
 @service.raw_route("/image/<int:image_id>")
-def public_image(image_id):
+def public_image(image_id: int) -> Response:
     try:
         image = db_session.query(ProductImage).filter(ProductImage.id == image_id, ProductImage.deleted_at.is_(None)).one()
     except NoResultFound:
@@ -176,17 +178,18 @@ def register_page_data():
 
 
 @service.route("/pay", method=POST, permission=USER, commit_on_error=True)
-def pay_route():
+def pay_route() -> PartialPayment:
     return pay(request.json, g.user_id)
 
 
 @service.route("/confirm_payment", method=POST, permission=PUBLIC, commit_on_error=True)
-def confirm_payment_route():
+def confirm_payment_route() -> PartialPayment:
     return confirm_stripe_payment_intent(request.json)
 
 
 @service.route("/register", method=POST, permission=PUBLIC, commit_on_error=True)
 def register_route():
+    assert request.remote_addr is not None
     return register(request.json, request.remote_addr, request.user_agent.string)
 
 
