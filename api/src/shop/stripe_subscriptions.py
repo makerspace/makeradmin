@@ -131,7 +131,8 @@ def get_subscription_products() -> Dict[SubscriptionType, int]:
 
 
 def get_subscription_product(subscription_type: SubscriptionType) -> Product:
-    p = db_session.query(Product).get(get_subscription_products()[subscription_type])
+    p_id = get_subscription_products()[subscription_type]
+    p = db_session.query(Product).get(p_id)
     if p is None:
         # The product doesn't exist anymore.
         # When we are running tests, this can happen if the database is reset between tests.

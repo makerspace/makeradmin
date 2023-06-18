@@ -112,6 +112,7 @@ class ObjFactory:
             smallest_multiple=1,
             filter=None,
             category_id=category_id,
+            product_metadata=dict()
         )
         obj.update(kwargs)
         self.product = obj
