@@ -4,6 +4,7 @@ import { useState } from 'preact/hooks';
 import { login_via_single_use_link } from './login'
 import { ServerResponse } from "./common";
 import markdown from "markdown-it";
+import { FACEBOOK_GROUP, SLACK_HELP } from "./urls";
 
 declare var UIkit: any;
 
@@ -151,8 +152,8 @@ class QuizManager extends Component<QuizManagerProps, State> {
                 <div className="quiz-more-questions">
                     <span>Do you have more questions? Join us on Slack or Facebook and ask away!</span>
                     <ul>
-                        <li><a href="https://wiki.makerspace.se/Slack"><img src={`${window.staticBasePath}/images/slack_logo_transparent.png`}></img></a></li>
-                        <li><a href="https://www.facebook.com/groups/makerspace.se"><img src={`${window.staticBasePath}/images/facebook_logo_transparent.png`}></img></a></li>
+                        <li><a href={SLACK_HELP}><img src={`${window.staticBasePath}/images/slack_logo_transparent.png`}></img></a></li>
+                        <li><a href={FACEBOOK_GROUP}><img src={`${window.staticBasePath}/images/facebook_logo_transparent.png`}></img></a></li>
                     </ul>
                 </div>
             </div>;
