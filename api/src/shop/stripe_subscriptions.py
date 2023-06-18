@@ -22,16 +22,15 @@ from dataclasses import dataclass
 from decimal import Decimal
 from enum import Enum
 from logging import getLogger
-from typing import Any, Dict, List, Literal, Optional, Tuple, Union, cast
-from time import sleep
+from typing import Any, Dict, List, Optional, Tuple
 from sqlalchemy import func
 
 import stripe
 
 from datetime import datetime, timezone, date, time, timedelta
-from stripe.error import InvalidRequestError, CardError, StripeError
-from shop.models import Product, ProductAction, ProductCategory
-from service.error import BadRequest, InternalServerError, EXCEPTION, NotFound
+from stripe.error import InvalidRequestError
+from shop.models import Product, ProductCategory
+from service.error import BadRequest, NotFound
 from service.db import db_session
 from membership.models import Member
 from membership.membership import get_membership_summary
@@ -90,6 +89,10 @@ def setup_subscription_makeradmin_products(
     ).recurring_price
     price = stripe.Price.retrieve(stripe_price)
     product.category_id = category.id
+    product.product_metadata = {
+        MSMetaKeys.SUBSCRIPTION_TYPE.value: f"{subscription_type.value}",
+        MSMetaKeys.SPECIAL_PRODUCT_ID.value: f"{subscription_type.value}_subscription",
+    }
     product.unit = price["recurring"]["interval"]
     assert int(price["recurring"]["interval_count"]) == 1
     assert price["type"] == "recurring"
@@ -192,6 +195,8 @@ def get_stripe_customer(
                     stripe.Customer.modify(
                         customer["id"],
                         metadata={
+                            # Delete the pending member key if present
+                            MSMetaKeys.PENDING_MEMBER: "",
                             MSMetaKeys.USER_ID.value: member_info.member_id,
                             MSMetaKeys.MEMBER_NUMBER.value: member_info.member_number,
                         },
