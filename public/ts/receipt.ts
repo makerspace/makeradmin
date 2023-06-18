@@ -22,15 +22,11 @@ common.documentLoaded().then(() => {
     }
 
     function completed(cart: any, transaction: any, member: any) {
-        let cartHtml = cart.map((value: any) => {
-            const [product, item] = value;
-
+        let cartHtml = transaction.contents.map((item: any) => {
             return `
-                <div class="receipt-item">
-                    <a class="product-title" href="/shop/product/${product.id}">${product.name}</a>
-                    <span class="receipt-item-count">${item.count} ${product.unit}</span>
-                    <span class="receipt-item-amount">${item.amount} kr</span>
-                </div>
+                <a class="product-title" href="/shop/product/${item.product.id}">${item.product.name}</a>
+                <span class="receipt-item-count">${item.count} ${item.product.unit}</span>
+                <span class="receipt-item-amount">${item.amount} kr</span>
             `;
         }).join("");
 
@@ -51,10 +47,8 @@ common.documentLoaded().then(() => {
                     <span class="receipt-amount-value">${transaction.amount} kr</span>
                 </div>
                 <div class="receipt-items">
-                    <div class="receipt-item">
-                        <span class="product-title">Medlem</span>
-                        <span class="receipt-item-amount" style="min-width: 200px;">${member.firstname} ${member.lastname} #${member.member_number}</span>
-                    </div>
+                    <span class="product-title">Medlem</span>
+                    <span class="receipt-item-amount" style="min-width: 200px;">${member.firstname} ${member.lastname} #${member.member_number}</span>
                 </div>
             </div>
             <div class="receipt-message">
@@ -69,11 +63,10 @@ common.documentLoaded().then(() => {
         common
             .ajax("GET", window.apiBasePath + "/webshop/member/current/receipt/" + window.transactionId, {})
             .then(json => {
-                const { cart, transaction, member } = json.data;
+                let { cart, transaction, member } = json.data;
                 if (transaction.status === "failed") {
                     failed();
-                }
-                else if (transaction.status === "completed") {
+                } else if (transaction.status === "completed") {
                     completed(cart, transaction, member);
                 }
                 else {

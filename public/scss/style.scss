@@ -563,37 +563,6 @@ form input.readonly-input {
     color: #333 !important;
 }
 
-.receipt-item {
-    display: flex;
-    flex-direction: row;
-    border-bottom: 1px solid #EEE;
-
-    .product-title {
-        color: white;
-        flex: 5;
-    }
-
-    a.product-title {
-        text-decoration: none;
-
-        &:hover {
-            text-decoration: underline;
-        }
-    }
-
-    .receipt-item-count {
-        flex: 1;
-        min-width: 100px;
-        text-align: right;
-    }
-
-    .receipt-item-amount {
-        flex: 1;
-        min-width: 100px;
-        text-align: right;
-    }
-}
-
 #content {
     max-width: 800px;
     padding: 10px;
@@ -776,10 +745,36 @@ form input.readonly-input {
         padding-right: 20px;
         padding-top: 10px;
         padding-bottom: 10px;
-    }
 
-    .receipt-item {
-        border-bottom: none;
+        display: grid;
+        grid-template-columns: 5fr 1fr 1fr;
+        column-gap: 20px;
+
+        .product-title {
+            color: white;
+            grid-column: 1;
+        }
+
+        a.product-title {
+            text-decoration: none;
+
+            &:hover {
+                text-decoration: underline;
+            }
+        }
+
+        .receipt-item-count {
+            grid-column: 2;
+            white-space:nowrap;
+            text-align: right;
+        }
+
+        .receipt-item-amount {
+            grid-column: 3;
+            flex-shrink: 0;
+            white-space:nowrap;
+            text-align: right;
+        }
     }
 
     .receipt-amount {

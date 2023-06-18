@@ -29,11 +29,11 @@ common.documentLoaded().then(() => {
         for (const transaction of transactionJson.data) {
             let cartItems = "";
             for (const item of transaction.contents) {
-                cartItems += `<div class="receipt-item">
+                cartItems += `
                             <a class="product-title" href="/shop/product/${item.product.id}">${item.product.name}</a>
                             <span class="receipt-item-count">${item.count} ${item.product.unit}</span>
                             <span class="receipt-item-amount">${Cart.formatCurrency(Number(item.amount))}</span>
-                        </div>`;
+                        `;
             }
 
             const elem = document.createElement("div");
