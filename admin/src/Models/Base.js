@@ -98,26 +98,34 @@ export default class Base {
         }
         
         return get({url: this.constructor.model.root + '/' + this.id}).then(d => {
-            this.saved = d.data;
+            this.saved = this.deserialize(d.data);
             this.unsaved = {};
             this.notify();
         });
     }
+
+    deserialize(x) {
+        return x;
+    }
+
+    serialize(x) {
+        return x;
+    }
     
     // Save or create, returns promise.
     save() {
-        const data = Object.assign({}, this.saved, this.unsaved);
+        const data = this.serialize(Object.assign({}, this.saved, this.unsaved));
 
         if (this.id) {
             return put({url: this.constructor.model.root + '/' + this.id, data}).then(d => {
-                this.saved = d.data;
+                this.saved = this.deserialize(d.data);
                 this.unsaved = {};
                 this.notify();
             });
         }
     
         return post({url: this.constructor.model.root, data}).then(d => {
-            this.saved = d.data;
+            this.saved = this.deserialize(d.data);
             this.unsaved = {};
             this.notify();
         });
