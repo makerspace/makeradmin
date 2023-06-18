@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime, func, Text, Numeric, ForeignKey, Enum, Boolean, LargeBinary
+from sqlalchemy import JSON, Column, Integer, String, DateTime, func, Text, Numeric, ForeignKey, Enum, Boolean, LargeBinary
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, configure_mappers, validates
 
@@ -42,6 +42,7 @@ class Product(Base):
     __tablename__ = 'webshop_products'
     
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
+    product_metadata = Column(JSON, nullable=False)
     category_id = Column(Integer, ForeignKey(ProductCategory.id), nullable=False)
     name = Column(String(255), nullable=False)
     description = Column(Text)

@@ -82,6 +82,7 @@ class ProductForm extends React.Component {
                     <fieldset className="uk-margin-top">
                         <legend><i className="uk-icon-shopping-cart" /> Produkt</legend>
                         <TextInput model={product} name="name" title="Produktnamn" />
+                        <TextInput model={product} name="product_metadata" title="Metadata" />
                         <SelectInput model={product} name="category_id" title="Kategori" getLabel={o => o.name} getValue={o => o.id} dataSource={"/webshop/category"} />
                         <Textarea model={product} name="description" title="Beskrivning" rows="4"/>
                         <TextInput model={product} name="unit" title="Enhet" />
