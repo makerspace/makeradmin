@@ -100,7 +100,13 @@ def get_product_data(product_id):
     }
 
 
-def get_membership_products():
+@dataclass
+class SimpleProductData:
+    id: int
+    name: str
+    price: float
+
+def get_membership_products() -> List[SimpleProductData]:
     # Find all products which gives a member membership
     # Note: Assumes a product never contains multiple actions of the same type.
     # If this doesn't hold we will get duplicates of that product in the list.
@@ -112,6 +118,6 @@ def get_membership_products():
                      Product.deleted_at.is_(None))
     )
     
-    return [{"id": p.id, "name": p.name, "price": float(p.price)} for p in query]
+    return [SimpleProductData(p.id, p.name, float(p.price)) for p in query]
 
 

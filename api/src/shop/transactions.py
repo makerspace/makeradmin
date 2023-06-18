@@ -1,7 +1,9 @@
+from dataclasses import dataclass
 from decimal import localcontext, Decimal, Rounded
 from datetime import datetime, timezone
 from logging import getLogger
 from typing import Any, Dict, List, Optional, Tuple
+from dataclasses_json import DataClassJsonMixin
 
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 from sqlalchemy.sql import func
@@ -27,6 +29,17 @@ logger = getLogger('makeradmin')
 
 class PaymentFailed(BadRequest):
     message = 'Payment failed.'
+
+@dataclass
+class CartItem(DataClassJsonMixin):
+    id: int
+    count: int
+
+@dataclass
+class Purchase(DataClassJsonMixin):
+    cart: List[CartItem]
+    expected_sum: str
+    stripe_payment_method_id: str
 
 
 def get_source_transaction(source_id: str) -> Optional[Transaction]:
@@ -194,8 +207,8 @@ def activate_member(member: Member) -> None:
     send_new_member_email(member)
     
     
-def create_transaction(member_id: int, purchase, activates_member: bool, stripe_reference_id: str) -> Transaction:
-    total_amount, contents = validate_order(member_id, purchase["cart"], purchase["expected_sum"])
+def create_transaction(member_id: int, purchase: Purchase, activates_member: bool, stripe_reference_id: str) -> Transaction:
+    total_amount, contents = validate_order(member_id, purchase.cart, purchase.expected_sum)
 
     transaction = commit_transaction_to_db(member_id=member_id, total_amount=total_amount, contents=contents,
                                            activates_member=activates_member, stripe_card_source_id=stripe_reference_id)
@@ -255,7 +268,7 @@ def payment_success(transaction: Transaction) -> None:
         activate_member(transaction.member)
 
 
-def process_cart(member_id: int, cart: Any) -> Tuple[Decimal, List[TransactionContent]]:
+def process_cart(member_id: int, cart: List[CartItem]) -> Tuple[Decimal, List[TransactionContent]]:
     contents = []
     with localcontext() as ctx:
         ctx.clear_flags()
@@ -263,7 +276,7 @@ def process_cart(member_id: int, cart: Any) -> Tuple[Decimal, List[TransactionCo
 
         for item in cart:
             try:
-                product_id = item['id']
+                product_id = item.id
                 product = db_session.query(Product).filter(Product.id == product_id, Product.deleted_at.is_(None)).one()
             except NoResultFound:
                 raise NotFound(message=f"Could not find product with id {product_id}.")
@@ -271,7 +284,7 @@ def process_cart(member_id: int, cart: Any) -> Tuple[Decimal, List[TransactionCo
             if product.price < 0:
                 raise InternalServerError(log=f"Product {product_id} has a negative price.")
 
-            count = item['count']
+            count = item.count
 
             if count <= 0:
                 raise BadRequest(message=f"Bad product count for product {product_id}.", what=NEGATIVE_ITEM_COUNT)
@@ -297,7 +310,7 @@ def process_cart(member_id: int, cart: Any) -> Tuple[Decimal, List[TransactionCo
     return total_amount, contents
 
 
-def validate_order(member_id: int, cart, expected_amount: Decimal) -> Tuple[Decimal, List[TransactionContent]]:
+def validate_order(member_id: int, cart: List[CartItem], expected_amount: str) -> Tuple[Decimal, List[TransactionContent]]:
     """ Validate that the expected amount matches what in the cart. Returns total_amount and cart items. """
 
     if not cart:
