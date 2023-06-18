@@ -1,7 +1,7 @@
 
-COMPOSE=docker-compose
-TEST_COMPOSE=docker-compose -p test -f docker-compose.yml -f docker-compose.test.yml
-DEV_COMPOSE=docker-compose -f docker-compose.yml -f docker-compose.dev.yml
+COMPOSE=docker compose
+TEST_COMPOSE=docker compose -p test -f docker-compose.yml -f docker-compose.test.yml
+DEV_COMPOSE=docker compose -f docker-compose.yml -f docker-compose.dev.yml
 PYTEST_PARAMS?=
 
 -include local.mk
@@ -24,7 +24,7 @@ test: .env test-clean
 
 clean-nuke:
 	echo "Removing all databases"
-	docker-compose down
+	$(COMPOSE) down
 	docker volume rm -f makeradmin_dbdata
 	docker volume rm -f makeradmin_logs
 	docker volume rm -f makeradmin_node_modules
@@ -53,7 +53,7 @@ test-admin-js:
 	npm --prefix admin run eslint
 	npm --prefix admin run test
 
-firstrun: .env build
+firstrun: .env init build
 	$(COMPOSE) run api python3 ./firstrun.py
 
 .PHONY: build firstrun init init-npm init-pip install run stop dev-test test-clean test dev
