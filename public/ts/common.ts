@@ -64,7 +64,7 @@ export function uploadFile<T>(url: string, file: File): Promise<T> {
 	}).then(response => response.json())
 }
 
-export function ajax(type: string, url: string, data: object | null = null): Promise<any> {
+export function ajax(type: string, url: string, data: object | null = null): Promise<ServerResponse<any>> {
 	return new Promise((resolve, reject) => {
 		const xhr = new XMLHttpRequest();
 		xhr.open(type, url);
