@@ -2,13 +2,12 @@ import * as common from "./common";
 import * as login from "./login";
 import { UNAUTHORIZED, get_error } from "./common";
 import { JSX } from "preact/jsx-runtime";
+import { LoadCurrentMemberInfo, date_t, member_t } from "./member_common";
 import { render } from "preact";
 import { useState } from "preact/hooks";
 import { showPhoneNumberDialog } from "./change_phone";
 declare var UIkit: any;
 
-
-type date_t = string;
 
 
 type fn_past_enddate = (enddate: date_t, remaining_days: number) => JSX.Element;
@@ -21,21 +20,6 @@ type fn_inactive = () => JSX.Element;
 type template_strings_t = [fn_past_enddate, fn_expired_yesterday,
     fn_less_than_one_day_left, fn_less_than_two_weeks_left,
     fn_lots_of_time_left, fn_inactive];
-
-
-type member_t = {
-    address_street: string,
-    address_extra: string,
-    address_zipcode: string,
-    address_city: string,
-    email: string,
-    member_number: number,
-    firstname: string,
-    lastname: string,
-    phone: string,
-    pin_code: string,
-    labaccess_agreement_at: date_t
-};
 
 
 type membership_t = {
@@ -339,12 +323,11 @@ common.documentLoaded().then(() => {
     const apiBasePath = window.apiBasePath;
     const root = document.querySelector("#content") as HTMLElement;
 
-    const future1 = common.ajax("GET", apiBasePath + "/member/current", null);
+    const future1 = LoadCurrentMemberInfo();
     const future2 = common.ajax("GET", apiBasePath + "/member/current/membership", null);
     const future3 = common.ajax("GET", apiBasePath + "/webshop/member/current/pending_actions", null);
 
-    Promise.all([future1, future2, future3]).then(([member_json, membership_json, pending_actions_json]) => {
-        const member: member_t = member_json.data;
+    Promise.all([future1, future2, future3]).then(([member, membership_json, pending_actions_json]) => {
         const membership: membership_t = membership_json.data;
         const pending_labaccess_days = get_pending_labaccess_days(pending_actions_json);
         if (root != null) {
