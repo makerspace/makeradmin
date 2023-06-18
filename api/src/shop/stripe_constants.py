@@ -22,6 +22,10 @@ class MakerspaceMetadataKeys(Enum):
     PRICE_TYPE = "price_type"
     SUBSCRIPTION_TYPE = "subscription_type"
     TRANSACTION_IDS = "makerspace_transaction_ids"
+    PENDING_MEMBER = "makerspace_pending_member"
+
+    # Used in the webshop for special products
+    SPECIAL_PRODUCT_ID = "special_product_id"
 
 class PriceType(Enum):
     BINDING_PERIOD = "binding_period"
@@ -90,6 +94,6 @@ class PaymentIntentStatus(Enum):
     REQUIRES_CAPTURE = 'requires_capture'
 
 
-class PaymentIntentNextActionType(Enum):
+class PaymentIntentNextActionType(str, Enum):
     USE_STRIPE_SDK = 'use_stripe_sdk'
     REDIRECT_TO_URL = 'redirect_to_url'
