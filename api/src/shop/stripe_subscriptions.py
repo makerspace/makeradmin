@@ -164,6 +164,17 @@ def delete_stripe_customer(member_id: int) -> None:
     db_session.flush()
 
 
+def attach_and_set_default_payment_method(member: Member, payment_method: stripe.PaymentMethod, test_clock: Optional[stripe.test_helpers.TestClock] = None) -> None:
+    stripe_member = get_stripe_customer(member, test_clock=test_clock.stripe_clock)
+    assert stripe_member is not None
+    stripe.PaymentMethod.attach(payment_method, customer=stripe_member.stripe_id)
+    stripe.Customer.modify(
+        stripe_member.stripe_id,
+        invoice_settings={
+            "default_payment_method": payment_method.stripe_id,
+        },
+    )
+
 def get_stripe_customer(
     member_info: Member, test_clock: Optional[stripe.test_helpers.TestClock]
 ) -> Optional[stripe.Customer]:

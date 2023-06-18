@@ -11,7 +11,7 @@ from unittest.mock import Mock, patch
 import pytest
 from shop.stripe_util import event_semantic_time
 from test_aid.systest_base import DECLINE_AFTER_ATTACHING_CARD, VALID_3DS_CARD_NO
-from shop.stripe_subscriptions import BINDING_PERIOD, SubscriptionType, get_stripe_customer
+from shop.stripe_subscriptions import BINDING_PERIOD, SubscriptionType, attach_and_set_default_payment_method, get_stripe_customer
 from shop import stripe_subscriptions
 from membership.membership import get_membership_summary
 from test_aid.test_util import random_str
@@ -110,15 +110,7 @@ class Test(FlaskTestBase):
         payment_method = stripe.PaymentMethod.create(
             type="card", card=self.card(card_number)
         )
-        stripe_member = get_stripe_customer(member, test_clock=test_clock.stripe_clock)
-        assert stripe_member is not None
-        stripe.PaymentMethod.attach(payment_method, customer=stripe_member.stripe_id)
-        stripe.Customer.modify(
-            stripe_member.stripe_id,
-            invoice_settings={
-                "default_payment_method": payment_method.stripe_id,
-            },
-        )
+        attach_and_set_default_payment_method(member, payment_method, test_clock)
 
     def get_member(self, member_id: int) -> Member:
         return cast(Member, db_session.query(Member).get(member_id))
