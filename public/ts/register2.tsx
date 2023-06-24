@@ -21,7 +21,6 @@ type Plan = {
     period: string,
     description: string,
     products: Product[],
-    subscriptions: SubscriptionType[]
     highlight: string | null,
 }
 
@@ -29,20 +28,41 @@ const Eng = {
     continue: "Continue",
     back: "Back",
     apply_for_discounts: "I cannot afford the membership fee",
+    unit: {
+        år: {
+            one: "year",
+            many: "years",
+        },
+        mån: {
+            one: "month",
+            many: "months",
+        },
+        st: {
+            one: "piece",
+            many: "pieces",
+        }
+    },
     summaries: {
         labaccess_subscription: {
-            summary: "Makerspace Access - 1 month",
+            summary: (count: number) => "Makerspace Access",
             renewal: (price: number) => `Your makerspace access will renew monthly at ${price} kr/month.`,
         },
         membership_subscription: {
-            summary: "Base Membership - 1 year",
+            summary: "Base Membership",
             renewal: (price: number) => `Your base membership will renew yearly at ${price} kr/year.`,
         },
-        labaccess: {
-            summary: "Makerspace Access - 1 month",
+        single_labaccess_month: {
+            summary: "Makerspace Access",
+            renewal: (price: number) => { throw new Error("This should never be called") },
         },
-        starter_pack: {
-            summary: "Starter Pack - 2 months",
+        single_membership_year: {
+            summary: "Makerspace Access",
+            renewal: (price: number) => { throw new Error("This should never be called") },
+        },
+        access_starter_pack: {
+            summary: "Starter Pack",
+            period: "2 months",
+            renewal: (price: number) => { throw new Error("This should never be called") },
         },
         renewal: {
             one: "You can cancel this subscription at any time.",
@@ -182,8 +202,9 @@ const Eng = {
         title: "Low Income Discounts",
         text: "If you cannot afford the full price of membership, you can apply for a discount.",
         confirmation: <>
+            <p>Discount approved!</p>
             <p>A new option will show up in the plan selection page which gives you a 30% discount.</p>
-            <p>We understand that not everyone can afford the full price of membership. But there are other ways you can help, even if you cannot pay.
+            <p>We understand that not everyone can afford the full price of membership. But there are other ways you can help, if you want to.
             The Makerspace is run by its members volonteering their time and effort. Join a work day, help out with maintaining a machine, or why not hold a course about something you are excited about?</p>
             </>,
         submit: "Continue",
@@ -386,58 +407,130 @@ const StripeCardInput = ({ element }: { element: stripe.elements.Element }) => {
     )
 }
 
-const ToPayPreview = ({ selectedPlan, relevantProducts }: { selectedPlan: Plan, relevantProducts: RelevantProducts }) => {
-    const t = useTranslation();
-    const paidRightNow: [string, number][] = [];
-    const renewInfo = [];
-    if (selectedPlan.subscriptions.includes("membership")) {
-        paidRightNow.push([t("summaries.membership_subscription.summary"), parseFloat(relevantProducts.membershipSubscriptionProduct.price)]);
-        renewInfo.push(t("summaries.membership_subscription.renewal")(parseFloat(relevantProducts.membershipSubscriptionProduct.price)));
+type ToPayInfo = {
+    paidRightNow: [string, number][];
+    renewInfo: [[TranslationKey & `${string}_subscription.renewal`, number]];
+}
+
+const WellKnownProducts = ["access_starter_pack", "single_membership_year", "single_labaccess_month", "membership_subscription", "labaccess_subscription"] as const;
+type WellKnownProductId = typeof WellKnownProducts[number];
+
+function AssertIsWellKnownProductId (id: string | undefined): asserts id is WellKnownProductId {
+    if (!WellKnownProducts.includes(id as any)) {
+        throw new Error(`Unknown product id ${id}`);
     }
-    if (selectedPlan.subscriptions.includes("labaccess")) {
-        if (!selectedPlan.products.includes(relevantProducts.starterPackProduct)) {
-            // If the starter pack is included, the lab access subscription will start when the starter pack is over
-            paidRightNow.push([t("summaries.labaccess_subscription.summary"), parseFloat(relevantProducts.labaccessSubscriptionProduct.price)]);
-        }
-        renewInfo.push(t("summaries.labaccess_subscription.renewal")(parseFloat(relevantProducts.labaccessSubscriptionProduct.price)));
+}
+
+const calculateAmountToPay = ({ selectedPlan, relevantProducts, currentMemberships }: { selectedPlan: Plan, relevantProducts: RelevantProducts, currentMemberships: SubscriptionType[] }) => {
+    const payNow: [Product, number][] = [];
+    const payRecurring: [Product, number][] = [];
+
+    // Calculate which memberships the user will have after the non-subscription products have been purchased.
+    // This is important to handle e.g. purchasing the starter pack and a membership at the same time.
+    // This is because the starter pack includes makerspace acccess membership for 2 months, so the subscription will then only start
+    // after the starter pack is over, and thus the subscription will not be included in the paidRightNow output.
+    currentMemberships = [...currentMemberships];
+    if (selectedPlan.products.includes(relevantProducts.labaccessProduct) || selectedPlan.products.includes(relevantProducts.starterPackProduct)) {
+        currentMemberships.push("labaccess");
     }
+    if (selectedPlan.products.includes(relevantProducts.baseMembershipProduct)) {
+        currentMemberships.push("membership");
+    }
+
     for (const product of selectedPlan.products) {
-        if (product === relevantProducts.starterPackProduct) {
-            paidRightNow.push([t("summaries.starter_pack.summary"), parseFloat(product.price)]);
-        } else if (product === relevantProducts.labaccessProduct) {
-            paidRightNow.push([t("summaries.labaccess.summary"), parseFloat(product.price)]);
-        } else {
-            throw new Error("Unexpected product");
+        const subscriptionType = product.product_metadata.subscription_type;
+        if (subscriptionType === undefined || !currentMemberships.includes(subscriptionType)) {
+            // TODO: There's no support right now for displaying a different price during the binding period, if one exists
+            payNow.push([product, parseFloat(product.price) * product.smallest_multiple]);
+        }
+        if (subscriptionType !== undefined) {
+            payRecurring.push([product, parseFloat(product.price)]);
         }
     }
-    if (renewInfo.length == 1) {
-        renewInfo.push(t("summaries.renewal.one"));
-    } else if (renewInfo.length > 1) {
-        renewInfo.push(t("summaries.renewal.many"));
+    return { payNow, payRecurring };
+    // if (selectedPlan.products.includes(relevantProducts.membershipSubscriptionProduct)) {
+    //     paidRightNow.push([t("summaries.membership_subscription.summary"), parseFloat(relevantProducts.membershipSubscriptionProduct.price)]);
+    //     renewInfo.push([t("summaries.membership_subscription.renewal"), parseFloat(relevantProducts.membershipSubscriptionProduct.price)]);
+    // }
+    // if (selectedPlan.products.includes(relevantProducts.labaccessSubscriptionProduct)) {
+    //     if (!selectedPlan.products.includes(relevantProducts.starterPackProduct)) {
+    //         // If the starter pack is included, the lab access subscription will start when the starter pack is over
+    //         paidRightNow.push([t("summaries.labaccess_subscription.summary"), parseFloat(relevantProducts.labaccessSubscriptionProduct.price)]);
+    //     }
+    //     renewInfo.push([t("summaries.labaccess_subscription.renewal"), parseFloat(relevantProducts.labaccessSubscriptionProduct.price)]);
+    // }
+    // for (const product of selectedPlan.products) {
+    //     if (product === relevantProducts.starterPackProduct) {
+    //         paidRightNow.push([t("summaries.starter_pack.summary"), parseFloat(product.price)]);
+    //     } else if (product === relevantProducts.labaccessProduct) {
+    //         paidRightNow.push([t("summaries.labaccess.summary"), parseFloat(product.price)]);
+    //     } else {
+    //         throw new Error("Unexpected product");
+    //     }
+    // }
+}
+
+const ToPayPreview = ({ selectedPlan, relevantProducts, relevantProductsNormal }: { selectedPlan: Plan, relevantProducts: RelevantProducts, relevantProductsNormal: RelevantProducts }) => {
+    const t = useTranslation();
+    const { payNow, payRecurring } = calculateAmountToPay({ selectedPlan, relevantProducts, currentMemberships: [] });
+    const { payNow: payNowNormal, payRecurring: payRecurringNormal } = calculateAmountToPay({ selectedPlan, relevantProducts: relevantProductsNormal, currentMemberships: [] });
+
+    let renewInfoText = payRecurring.map(([product, price]) => {
+        const product_id = product.product_metadata.special_product_id;
+        AssertIsWellKnownProductId(product_id);
+        return t(`summaries.${product_id}.renewal`)(price)
+    }).join(" ");
+    if (payRecurring.length == 1) {
+        renewInfoText += " " + t("summaries.renewal.one");
+    } else if (payRecurring.length > 1) {
+        renewInfoText += " " + t("summaries.renewal.many");
     }
+
+    if (payNow.length !== payNowNormal.length) {
+        throw new Error("Unexpected difference in payNow length");
+    }
+
+    let anyDiscountedColumn = false;
+    const paidRightNowItems = payNow.map(([product, price], i) => {
+        const normalPrice = payNowNormal[i][1];
+        const product_id = product.product_metadata.special_product_id;
+        AssertIsWellKnownProductId(product_id);
+        if (product.unit !== "mån" && product.unit !== "år" && product.unit !== "st") throw new Error(`Unexpected unit ${product.unit}`);
+        let period = product.smallest_multiple + " " + t(`unit.${product.unit}.${product.smallest_multiple > 1 ? "many" : "one"}`);
+        if (product_id === "access_starter_pack") {
+            // Special case for the starter pack period. Otherwise it would show "1 st"
+            period = t("summaries.access_starter_pack.period");
+        }
+        if (price !== normalPrice) {
+            anyDiscountedColumn = true;
+        }
+        return [t(`summaries.${product_id}.summary`) + " - " + period, price, price !== normalPrice ? normalPrice : undefined];
+    });
 
     return (
         <>
             <span className="small-print">{t("summaries.payment_right_now")}</span>
             <div class="history-item to-pay-preview">
-                <div class="receipt-items">
-                    {paidRightNow.map(([name, price]) => (
+                <div class={"receipt-items " + (anyDiscountedColumn ? "with-original-price-column" : "")}>
+                    {paidRightNowItems.map(([summary, price, normalPrice]) => (
                         <>
-                            <span className="product-title">{name}</span>
+                            <span className="product-title">{summary}</span>
+                            {normalPrice !== undefined && <span className="receipt-item-original-amount">{normalPrice} {t("priceUnit")}</span>}
                             <span className="receipt-item-amount">{price} {t("priceUnit")}</span>
                         </>
                     ))}
                 </div>
                 <div class="receipt-amount">
                     <span>{t("summaries.cart_total")}</span>
-                    <span className="receipt-amount-value">{paidRightNow.reduce((s, [_, c]) => s + c, 0)} {t("priceUnit")}</span>
+                    <span className="receipt-amount-value">{payNow.reduce((s, [_, c]) => s + c, 0)} {t("priceUnit")}</span>
                 </div>
             </div>
-            {renewInfo.length > 0 ? (<span className="small-print">{renewInfo.join(" ")}</span>) : null}
+            {payRecurring.length > 0 ? (<span className="small-print">{renewInfoText}</span>) : null}
         </>
     )
 }
-const Confirmation = ({ memberInfo, selectedPlan, relevantProducts, card, onRegistered, onBack }: { memberInfo: MemberInfo, selectedPlan: Plan, relevantProducts: RelevantProducts, card: stripe.elements.Element, onRegistered: (r: RegistrationSuccess) => void, onBack: ()=>void }) => {
+
+const Confirmation = ({ memberInfo, selectedPlan, relevantProducts, relevantProductsNormal, card, onRegistered, onBack }: { memberInfo: MemberInfo, selectedPlan: Plan, relevantProducts: RelevantProducts, relevantProductsNormal: RelevantProducts, card: stripe.elements.Element, onRegistered: (r: RegistrationSuccess) => void, onBack: ()=>void }) => {
     const t = useTranslation();
     const [inProgress, setInProgress] = useState(false);
 
@@ -446,7 +539,7 @@ const Confirmation = ({ memberInfo, selectedPlan, relevantProducts, card, onRegi
         <div class="uk-flex-1" />
         <p>{t("payment.text")}</p>
         <div class="uk-flex-1" />
-        <ToPayPreview selectedPlan={selectedPlan} relevantProducts={relevantProducts} />
+        <ToPayPreview selectedPlan={selectedPlan} relevantProducts={relevantProducts} relevantProductsNormal={relevantProductsNormal} />
         <div class="uk-flex-1" />
         <span class="payment-processor">{t("payment.payment_processor")}</span>
         <StripeCardInput element={card} />
@@ -459,7 +552,7 @@ const Confirmation = ({ memberInfo, selectedPlan, relevantProducts, card, onRegi
                 const paymentMethod = await createPaymentMethod(card, memberInfo);
                 if (paymentMethod !== null) {
                     try {
-                        onRegistered(await registerMember(paymentMethod, memberInfo, selectedPlan));
+                        onRegistered(await registerMember(paymentMethod, memberInfo, selectedPlan, relevantProducts));
                     } catch (e) {
                         if (e instanceof PaymentFailedError) {
                             UIkit.modal.alert("<h2>Payment failed</h2>" + e.message);
@@ -516,31 +609,45 @@ type RegisterResponse = {
 
 type SubscriptionType = "membership" | "labaccess"
 
+type SubscriptionStart = {
+    subscription: SubscriptionType
+    expected_to_pay_now: string // Encoded decimal
+    expected_to_pay_recurring: string // Encoded decimal
+}
+
 type RegisterRequest = {
     purchase: Purchase
     setup_intent_id: string | null
     member: MemberInfo
-    subscriptions: SubscriptionType[]
+    subscriptions: SubscriptionStart[]
 }
 
 type RegistrationSuccess = {
     loginToken: string
 }
 
-async function registerMember(paymentMethod: stripe.paymentMethod.PaymentMethod, memberInfo: MemberInfo, selectedPlan: Plan): Promise<RegistrationSuccess> {
+async function registerMember(paymentMethod: stripe.paymentMethod.PaymentMethod, memberInfo: MemberInfo, selectedPlan: Plan, relevantProducts: RelevantProducts): Promise<RegistrationSuccess> {
+    const { payNow, payRecurring } = calculateAmountToPay({ selectedPlan, relevantProducts, currentMemberships: [] })
+    const nonSubscriptionProducts = selectedPlan.products.filter(p => p.product_metadata.subscription_type === undefined);
     const data: RegisterRequest = {
         member: memberInfo,
         purchase: {
-            cart: selectedPlan.products.map(p => ({
+            cart: nonSubscriptionProducts.map(p => ({
                 id: p.id,
                 count: 1,
             })),
-            // TODO: Should come from the same value that is displayed to the user
-            expected_sum: "" + selectedPlan.products.reduce((sum, p) => sum + parseFloat(p.price), 0),
+            expected_sum: "" + payNow.filter(p => p[0].product_metadata.subscription_type === undefined).reduce((sum, [_, price]) => sum + price, 0),
             stripe_payment_method_id: paymentMethod.id,
         },
-        // All new members become subscribed to the yearly plan
-        subscriptions: selectedPlan.subscriptions,
+        subscriptions: selectedPlan.products.filter(p => p.product_metadata.subscription_type !== undefined).map(p => {
+            const payNowForSubscription = payNow.find(([p2, _]) => p == p2);
+            const payRecurringForSubscription = payRecurring.find(([p2, _]) => p == p2);
+            return {
+                subscription: p.product_metadata.subscription_type!,
+                expected_to_pay_now: "" + (payNowForSubscription ? payNowForSubscription[1] : 0),
+                expected_to_pay_recurring: "" + (payRecurringForSubscription ? payRecurringForSubscription[1] : 0),
+            }
+        }),
         setup_intent_id: null,
     };
 
@@ -569,7 +676,7 @@ async function registerMember(paymentMethod: stripe.paymentMethod.PaymentMethod,
                         throw new PaymentFailedError(stripeResult.error.message!);
                     } else {
                         // The card action has been handled
-                        // Now we try the server endpoint again
+                        // Now we try the server endpoint again in the next iteration of the loop
                     }
                 } else {
                     throw new Error("Unexpected action type");
@@ -684,13 +791,13 @@ const Discounts = ({ discounts, setDiscounts, onSubmit }: { discounts: Discounts
             <p>{t("discounts.text")}</p>
 
             {reasons.map(reason =>
-                <>
-                    <input type="checkbox" checked={discounts.discountReason === reason} onChange={(e) => setDiscounts({ ...discounts, discountReason: e.currentTarget.checked ? reason : null })} />
-                    {t(`discounts.reasons.${reason}`)}
-                </>
+                <div class="rule-checkbox">
+                    <input id={`reason.${reason}`} type="checkbox" checked={discounts.discountReason === reason} onChange={(e) => setDiscounts({ ...discounts, discountReason: e.currentTarget.checked ? reason : null })} />
+                    <label for={`reason.${reason}`}>{t(`discounts.reasons.${reason}`)}</label>
+                </div>
             )}
-            <input type="text" placeholder={t("discounts.messagePlaceholder")} value={discounts.discountReasonMessage} onChange={(e) => setDiscounts({ ...discounts, discountReasonMessage: e.currentTarget.value })} />
-            <button className="flow-button" onClick={() => setStep(1)} disabled={discounts.discountReason !== null && discounts.discountReasonMessage.length > 30}>{t("discounts.submit")}</button>
+            <textarea placeholder={t("discounts.messagePlaceholder")} value={discounts.discountReasonMessage} onChange={(e) => setDiscounts({ ...discounts, discountReasonMessage: e.currentTarget.value })} />
+            <button className="flow-button" onClick={() => setStep(1)} disabled={discounts.discountReason === null || discounts.discountReasonMessage.length < 30}>{t("discounts.submit")}</button>
             <button className="flow-button" onClick={() => {
                 setDiscounts({ discountReason: null, discountReasonMessage: "" });
                 onSubmit();
@@ -781,6 +888,9 @@ const extractRelevantProducts = (products: Product[]): RelevantProducts => {
     };
 
 }
+
+type PriceLevel = "normal" | "low_income_discount";
+
 const RegisterPage = ({ onChangeLanguage }: { onChangeLanguage: (lang: keyof typeof Translations) => void }) => {
     // Language chooser
     // Inspiration page?
@@ -823,19 +933,27 @@ const RegisterPage = ({ onChangeLanguage }: { onChangeLanguage: (lang: keyof typ
     const t = useTranslation();
     const card = createStripeCardInput();
     const [registerPageData, setRegisterPageData] = useState<RegisterPageData | null>(null);
+    const [registerPageDataNormal, setRegisterPageDataNormal] = useState<RegisterPageData | null>(null);
     const [discounts, setDiscounts] = useState<DiscountsInfo>({
         discountReason: null,
         discountReasonMessage: "",
     });
+    const priceLevel: PriceLevel = discounts.discountReason !== null ? "low_income_discount" : "normal";
 
     useEffect(() => {
-        common.ajax('GET', `${window.apiBasePath}/webshop/register_page_data`).then(x => setRegisterPageData(x.data));
-    }, []);
+        common.ajax('GET', `${window.apiBasePath}/webshop/register_page_data/${priceLevel}`).then(x => {
+            if (priceLevel === "normal") {
+                setRegisterPageDataNormal(x.data);
+            }
+            setRegisterPageData(x.data);
+        });
+    }, [priceLevel]);
 
-    if (registerPageData === null) {
+    if (registerPageData === null || registerPageDataNormal === null) {
         return <div>Loading...</div>
     }
     const relevantProducts = extractRelevantProducts(registerPageData.productData);
+    const relevantProductsOriginal = extractRelevantProducts(registerPageDataNormal.productData);
     const accessCostSingle = parseFloat(relevantProducts.labaccessProduct.price);
     const accessSubscriptionCost = parseFloat(relevantProducts.labaccessSubscriptionProduct.price);
 
@@ -844,33 +962,30 @@ const RegisterPage = ({ onChangeLanguage }: { onChangeLanguage: (lang: keyof typ
             id: "singleMonth",
             title: t("plans.singleMonth.title"),
             abovePrice: t("plans.singleMonth.abovePrice"),
-            price: parseFloat(relevantProducts.labaccessProduct.price),
+            price: parseFloat(relevantProductsOriginal.labaccessProduct.price),
             period: t("plans.singleMonth.period"),
             description: t("plans.singleMonth.description"),
-            products: [relevantProducts.labaccessProduct],
-            subscriptions: ["membership"],
+            products: [relevantProductsOriginal.labaccessProduct, relevantProductsOriginal.membershipSubscriptionProduct],
             highlight: null,
         },
         {
             id: "starterPack",
             title: t("plans.starterPack.title"),
             abovePrice: t("plans.starterPack.abovePrice"),
-            price: parseFloat(relevantProducts.starterPackProduct.price),
+            price: parseFloat(relevantProductsOriginal.starterPackProduct.price),
             period: t("plans.starterPack.period"),
             description: t("plans.starterPack.description"),
-            products: [relevantProducts.starterPackProduct],
-            subscriptions: ["membership"],
+            products: [relevantProductsOriginal.starterPackProduct, relevantProductsOriginal.membershipSubscriptionProduct],
             highlight: "Recommended",
         },
         // {
         //     id: "makerspaceAccessSub",
         //     title: t("plans.makerspaceAccessSub.title"),
         //     abovePrice: t("plans.makerspaceAccessSub.abovePrice"),
-        //     price: parseFloat(relevantProducts.labaccessSubscriptionProduct.price),
+        //     price: parseFloat(relevantProductsOriginal.labaccessSubscriptionProduct.price),
         //     period: t("plans.makerspaceAccessSub.period"),
         //     description: t("plans.makerspaceAccessSub.description"),
-        //     products: [],
-        //     subscriptions: ["membership", "labaccess"],
+        //     products: [relevantProductsOriginal.membershipSubscriptionProduct, relevantProductsOriginal.labaccessSubscriptionProduct],
         //     highlight: null,
         // },
         {
@@ -880,8 +995,7 @@ const RegisterPage = ({ onChangeLanguage }: { onChangeLanguage: (lang: keyof typ
             price: 0,
             period: t("plans.decideLater.period"),
             description: t("plans.decideLater.description")(accessCostSingle, accessSubscriptionCost),
-            products: [],
-            subscriptions: ["membership"],
+            products: [relevantProductsOriginal.membershipSubscriptionProduct],
             highlight: null,
         },
         // {
@@ -891,8 +1005,7 @@ const RegisterPage = ({ onChangeLanguage }: { onChangeLanguage: (lang: keyof typ
         //     price: 0,
         //     period: t("plans.discounted.period"),
         //     description: t("plans.discounted.description"),
-        //     products: [],
-        //     subscriptions: ["membership"],
+        //     products: [relevantProductsOriginal.membershipSubscriptionProduct],
         //     highlight: null,
         // }
     ]
@@ -916,12 +1029,12 @@ const RegisterPage = ({ onChangeLanguage }: { onChangeLanguage: (lang: keyof typ
 
                 <Panel>
                     <h3>{t("baseMembership.title")}</h3>
-                    <span className="small-price">{parseFloat(relevantProducts.baseMembershipProduct.price)} {t("priceUnit")} {t("baseMembership.period")}</span>
+                    <span className="small-price">{parseFloat(relevantProductsOriginal.baseMembershipProduct.price)} {t("priceUnit")} {t("baseMembership.period")}</span>
                     <ul>
                         {t("baseMembership.reasons").map((reason, i) => <li key={i}>{reason}</li>)}
                     </ul>
                     {/* <div className="price">
-                        {parseFloat(relevantProducts.baseMembershipProduct.price)} {t("priceUnit")}
+                        {parseFloat(relevantProductsOriginal.baseMembershipProduct.price)} {t("priceUnit")}
                         <span className="period">{t("baseMembership.period")}</span>
                     </div> */}
                     <span className="panel-divider" />
@@ -940,7 +1053,7 @@ const RegisterPage = ({ onChangeLanguage }: { onChangeLanguage: (lang: keyof typ
                 <span>{t("chooseYourPlan.help")}</span>
                 {plans.map(plan => <PlanButton selected={selectedPlan === plan.id} onClick={() => setSelectedPlan(plan.id)} plan={plan} />)}
                 <button className="flow-button" onClick={() => setState(State.Discounts)}>{t("apply_for_discounts")}</button>
-                {activePlan !== undefined ? <ToPayPreview selectedPlan={activePlan} relevantProducts={relevantProducts}  /> : null}
+                {activePlan !== undefined ? <ToPayPreview selectedPlan={activePlan} relevantProducts={relevantProducts} relevantProductsNormal={relevantProductsOriginal} /> : null}
                 <button className="flow-button" disabled={selectedPlan == null} onClick={() => setState(State.MemberInfo)}>{t("continue")}</button>
             </>);
         case State.MemberInfo:
@@ -971,6 +1084,7 @@ const RegisterPage = ({ onChangeLanguage }: { onChangeLanguage: (lang: keyof typ
                     selectedPlan={activePlan}
                     memberInfo={memberInfo}
                     relevantProducts={relevantProducts}
+                    relevantProductsNormal={relevantProductsOriginal}
                     onRegistered={async (r) => {
                         common.login(r.loginToken);
                         setLoggedInMember(await LoadCurrentMemberInfo());

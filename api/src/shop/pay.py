@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from decimal import Decimal
 from enum import Enum
 from logging import getLogger
 from typing import Any, List, Literal, Optional, Tuple, Union
@@ -11,6 +12,7 @@ from shop.stripe_setup_intent import check_next_action
 from membership.models import Member
 from shop.models import Transaction
 from shop.stripe_subscriptions import (
+    PriceLevel,
     SubscriptionType,
     attach_and_set_default_payment_method,
     get_stripe_customer,
@@ -124,13 +126,19 @@ class MemberInfo(DataClassJsonMixin):
         if not self.zipCode.strip():
             raise BadRequest(message="Zip code is required.")
 
+@dataclass
+class SubscriptionStart(DataClassJsonMixin):
+    subscription: SubscriptionType
+    expected_to_pay_now: Decimal
+    expected_to_pay_recurring: Decimal
 
 @dataclass
 class RegisterRequest(DataClassJsonMixin):
     purchase: Purchase
     setup_intent_id: Optional[str]
     member: MemberInfo
-    subscriptions: List[SubscriptionType]
+    subscriptions: List[SubscriptionStart]
+    price_level: PriceLevel # TODO: Supply discount reasons
 
 
 class RegisterResponseType(str, Enum):
@@ -163,6 +171,34 @@ class RegistrationFailed(Exception):
     response: RegisterResponse
 
 
+def validate_cart(purchase: Purchase, price_level: PriceLevel) -> None:
+    products = special_product_data(price_level)
+
+    cart = purchase.cart
+    if len(cart) > 1:
+        raise BadRequest(
+            message="The purchase must contain at most one item."
+        )
+
+    if len(cart) > 0:
+        item = cart[0]
+        if item.count != 1:
+            raise BadRequest(
+                message="The purchase must contain exactly one item."
+            )
+
+        product_id = item.id
+        # Make sure it is a special product, but not a subscription product
+        if product_id not in (
+            p.id
+            for p in products
+            if MakerspaceMetadataKeys.SUBSCRIPTION_TYPE
+            not in p.product_metadata
+        ):
+            raise BadRequest(
+                message=f"Not allowed to purchase the product with id {product_id} when registring."
+            )
+
 def register2(data_dict: Any, remote_addr: str, user_agent: str) -> RegisterResponse:
     try:
         data = RegisterRequest.from_dict(data_dict)
@@ -170,7 +206,9 @@ def register2(data_dict: Any, remote_addr: str, user_agent: str) -> RegisterResp
         raise BadRequest(message=f"Invalid data: {e}")
 
     data.member.validate()
-    if len(set(data.subscriptions)) != len(data.subscriptions):
+    validate_cart(data.purchase, data.price_level)
+
+    if len(set([s.subscription for s in data.subscriptions])) != len(data.subscriptions):
         raise BadRequest(message="Duplicate subscriptions.")
 
     try:
@@ -179,6 +217,8 @@ def register2(data_dict: Any, remote_addr: str, user_agent: str) -> RegisterResp
         )
     except:
         raise BadRequest(message="The payment method is not valid.")
+    
+    
 
     if data.setup_intent_id is None:
         # stripe_customer = get_stripe_customer(member, test_clock=None)
@@ -287,40 +327,11 @@ def register2(data_dict: Any, remote_addr: str, user_agent: str) -> RegisterResp
                     # This means we should be able to charge the card with WHATEVER WE WANT!
                     # HAHA! Let's drain the card!
                     # No, just kidding. We will just charge the card with the amount for the purchase.
-
-                    products = special_product_data()
-
-                    purchase = data.purchase
-
-                    cart = purchase.cart
-                    if len(cart) > 1:
-                        raise BadRequest(
-                            message="The purchase must contain at most one item."
-                        )
-
-                    if len(cart) > 0:
-                        item = cart[0]
-                        if item.count != 1:
-                            raise BadRequest(
-                                message="The purchase must contain exactly one item."
-                            )
-
-                        product_id = item.id
-                        # Make sure it is a special product, but not a subscription product
-                        if product_id not in (
-                            p.id
-                            for p in products
-                            if MakerspaceMetadataKeys.SUBSCRIPTION_TYPE
-                            not in p.product_metadata
-                        ):
-                            raise BadRequest(
-                                message=f"Not allowed to purchase the product with id {product_id} when registring."
-                            )
-
+                    if len(data.purchase.cart) > 0:
                         # This will raise if the payment fails.
                         transaction, action_info = make_purchase(
                             member_id=member_id,
-                            purchase=purchase,
+                            purchase=data.purchase,
                             activates_member=False,
                         )
                         if action_info is not None:
@@ -342,7 +353,7 @@ def register2(data_dict: Any, remote_addr: str, user_agent: str) -> RegisterResp
                         # Note: This will *not* raise in case the user has not enough funds.
                         # In that case we should send an email to the user.
                         start_subscription(
-                            member.member_id, subscription, test_clock=None
+                            member.member_id, subscription.subscription, test_clock=None, expected_to_pay_now=subscription.expected_to_pay_now, expected_to_pay_recurring=subscription.expected_to_pay_recurring
                         )
 
                     # If the pay succeeded (not same as the payment is completed) and the member does not already exists,

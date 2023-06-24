@@ -779,6 +779,11 @@ form input.readonly-input {
             white-space: nowrap;
             text-align: right;
         }
+
+        .strikethrough-price {
+            text-decoration: line-through;
+            color: rgba(255, 255, 255, 0.5);
+        }
     }
 
     .receipt-amount {
@@ -1815,6 +1820,18 @@ $palette-red: $palette4;
             .receipt-item-amount {
                 grid-column: 2;
             }
+
+            &.with-original-price-column {
+                grid-template-columns: 5fr 1fr 1fr;
+
+                .receipt-item-original-amount {
+                    grid-column: 2;
+                }
+
+                .receipt-item-amount {
+                    grid-column: 3;
+                }
+            }
         }
 
         .receipt-amount {
@@ -1837,6 +1854,14 @@ $palette-red: $palette4;
         display: block;
         margin-left: 21px;
         margin-right: 16px;
+    }
+
+    textarea {
+        margin: 0px 16px;
+        border-radius: 5px;
+        min-height: 100px;
+        border: none;
+        padding: 10px;
     }
 }
 

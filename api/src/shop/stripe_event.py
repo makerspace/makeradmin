@@ -20,10 +20,11 @@ from shop.models import (
 )
 from shop.stripe_charge import charge_transaction, create_stripe_charge
 from shop.stripe_constants import (
+    STRIPE_CURRENTY_BASE,
     STRIPE_SIGNING_SECRET,
     MakerspaceMetadataKeys,
-    Type,
-    Subtype,
+    EventType,
+    EventSubtype,
     SourceType,
 )
 from shop.transactions import (
@@ -35,7 +36,7 @@ from membership.membership import add_membership_days
 from service.db import db_session
 from membership.models import Member
 from membership.models import Span
-from shop.stripe_subscriptions import get_subscription_product, SubscriptionType
+from shop.stripe_subscriptions import PriceLevel, get_subscription_product, SubscriptionType
 from datetime import datetime
 
 logger = getLogger("makeradmin")
@@ -59,27 +60,27 @@ def get_pending_source_transaction(source_id: str) -> Transaction:
     return transaction
 
 
-def stripe_charge_event(subtype: Subtype, event: stripe.Event) -> None:
+def stripe_charge_event(subtype: EventSubtype, event: stripe.Event) -> None:
     charge = event.data.object
 
     transaction = get_pending_source_transaction(charge.payment_method)
 
-    if subtype == Subtype.SUCCEEDED:
+    if subtype == EventSubtype.SUCCEEDED:
         charge_transaction(transaction, charge)
 
-    elif subtype == Subtype.FAILED:
+    elif subtype == EventSubtype.FAILED:
         commit_fail_transaction(transaction)
         logger.info(
             f"charge failed for transaction {transaction.id}, {charge.failure_message}"
         )
 
 
-def stripe_source_event(subtype: Subtype, event: stripe.Event) -> None:
+def stripe_source_event(subtype: EventSubtype, event: stripe.Event) -> None:
     source = event.data.object
 
     transaction = get_pending_source_transaction(source.id)
 
-    if subtype == Subtype.CHARGEABLE:
+    if subtype == EventSubtype.CHARGEABLE:
 
         if SourceType(source.type) == SourceType.THREE_D_SECURE:
             # Charge card and resolve transaction, don't fail transaction on errors as it may be resolved when we get
@@ -106,7 +107,7 @@ def stripe_source_event(subtype: Subtype, event: stripe.Event) -> None:
                 f" when handling source event: {source}"
             )
 
-    elif subtype in (Subtype.FAILED, Subtype.CANCELED):
+    elif subtype in (EventSubtype.FAILED, EventSubtype.CANCELED):
         logger.info(
             f"failing transaction {transaction.id} due to source event subtype {subtype}"
         )
@@ -118,12 +119,12 @@ def stripe_source_event(subtype: Subtype, event: stripe.Event) -> None:
         )
 
 
-def stripe_payment_intent_event(subtype: Subtype, event: stripe.Event) -> None:
+def stripe_payment_intent_event(subtype: EventSubtype, event: stripe.Event) -> None:
     payment_intent = event.data.object
 
     transaction = get_pending_source_transaction(payment_intent.id)
 
-    if subtype == Subtype.PAYMENT_FAILED:
+    if subtype == EventSubtype.PAYMENT_FAILED:
         commit_fail_transaction(transaction)
         logger.info(
             f"failing transaction {transaction.id}, due to error when processing payment"
@@ -136,11 +137,11 @@ def stripe_payment_intent_event(subtype: Subtype, event: stripe.Event) -> None:
 
 
 def stripe_invoice_event(
-    subtype: Subtype, event: stripe.Event, current_time: datetime
+    subtype: EventSubtype, event: stripe.Event, current_time: datetime
 ) -> None:
     # FIXME: In the case of uncollectable subtype, we should probably e-mail the invoice to the member
 
-    if subtype == Subtype.PAID:
+    if subtype == EventSubtype.PAID:
         logger.info(f"Processing paid invoice {event['id']}")
         # Member has paid something and we can now add things accordingly...
         invoice = event["data"]["object"]
@@ -155,6 +156,7 @@ def stripe_invoice_event(
                 subscription_type = SubscriptionType(
                     metadata[MakerspaceMetadataKeys.SUBSCRIPTION_TYPE.value]
                 )
+                price_level = PriceLevel(metadata[MakerspaceMetadataKeys.PRICE_LEVEL.value])
             except KeyError as e:
                 # We ignore any items that doesn't contain the right metadata
                 logger.error(
@@ -179,8 +181,9 @@ def stripe_invoice_event(
             # Divide the timespan down to days
             days = round((end_ts - start_ts) / 86400)
 
-            product = get_subscription_product(subscription_type)
-            amount = Decimal(line["amount"]) / 100
+            product = get_subscription_product(subscription_type, price_level)
+            # Note: We use stripe as the source of truth for how much was actually paid.
+            amount = Decimal(line["amount"]) / STRIPE_CURRENTY_BASE
             transaction = Transaction(
                 member_id=member_id,
                 amount=amount,
@@ -250,14 +253,14 @@ def stripe_invoice_event(
             )
 
         return
-    elif subtype == Subtype.PAYMENT_FAILED:
+    elif subtype == EventSubtype.PAYMENT_FAILED:
         # The user will be notified by Stripe if this happens.
         # This can be configured at https://dashboard.stripe.com/settings/billing/automatic
         # It should also be configured to automatically cancel the subscription after some failed attempts.
         pass
 
 
-def stripe_customer_event(event_subtype: Subtype, event: stripe.Event) -> None:
+def stripe_customer_event(event_subtype: EventSubtype, event: stripe.Event) -> None:
     try:
         meta = event["data"]["object"]["metadata"]
 
@@ -276,9 +279,9 @@ def stripe_customer_event(event_subtype: Subtype, event: stripe.Event) -> None:
             return
 
         if event_subtype in (
-            Subtype.SUBSCRIPTION_CREATED,
-            Subtype.SUBSCRIPTION_UPDATED,
-            Subtype.SUBSCRIPTION_DELETED,
+            EventSubtype.SUBSCRIPTION_CREATED,
+            EventSubtype.SUBSCRIPTION_UPDATED,
+            EventSubtype.SUBSCRIPTION_DELETED,
         ):
             subscription = event["data"]["object"]
             subscription_type = SubscriptionType(
@@ -286,15 +289,15 @@ def stripe_customer_event(event_subtype: Subtype, event: stripe.Event) -> None:
             )
             subscription_id = subscription["id"]
 
-            if event_subtype == Subtype.SUBSCRIPTION_CREATED:
+            if event_subtype == EventSubtype.SUBSCRIPTION_CREATED:
                 logger.info(
                     f"Created stripe {subscription_type.name} subscription {subscription_id} for makerspace member {member.member_number}"
                 )
-            elif event_subtype == Subtype.SUBSCRIPTION_DELETED:
+            elif event_subtype == EventSubtype.SUBSCRIPTION_DELETED:
                 logger.info(
                     f"Deleted stripe {subscription_type.name} subscription {subscription_id} for makerspace member {member.member_number}"
                 )
-            elif event_subtype == Subtype.SUBSCRIPTION_UPDATED:
+            elif event_subtype == EventSubtype.SUBSCRIPTION_UPDATED:
                 logger.info(
                     f"Updated stripe {subscription_type.name} subscription {subscription_id} for makerspace member {member.member_number}"
                 )
@@ -305,7 +308,7 @@ def stripe_customer_event(event_subtype: Subtype, event: stripe.Event) -> None:
                 else member.stripe_membership_subscription_id
             )
 
-            if event_subtype == Subtype.SUBSCRIPTION_CREATED:
+            if event_subtype == EventSubtype.SUBSCRIPTION_CREATED:
                 if current_subscription_id is not None:
                     logger.warning(
                         f"WARNING! New {subscription_type.name} subscription {subscription_id} will overwrite {current_subscription_id}"
@@ -318,7 +321,7 @@ def stripe_customer_event(event_subtype: Subtype, event: stripe.Event) -> None:
                     member.stripe_labaccess_subscription_id = subscription_id
                 else:
                     assert False
-            elif event_subtype == Subtype.SUBSCRIPTION_DELETED:
+            elif event_subtype == EventSubtype.SUBSCRIPTION_DELETED:
                 is_current = current_subscription_id == subscription_id
                 if is_current:
                     if subscription_type == SubscriptionType.LAB:
@@ -332,11 +335,11 @@ def stripe_customer_event(event_subtype: Subtype, event: stripe.Event) -> None:
                         f"Ignoring delete notification for {subscription_type.name} subscription {subscription_id} on {member.member_number} since it isn't current. (Current is {current_subscription_id})"
                     )
         else:
-            if event_subtype == Subtype.CREATED:
+            if event_subtype == EventSubtype.CREATED:
                 logger.info(
                     f"Created stripe customer for makerspace member {member.member_number}"
                 )
-            elif event_subtype == Subtype.UPDATED:
+            elif event_subtype == EventSubtype.UPDATED:
                 logger.info(
                     f"Updated stripe customer for makerspace member {member.member_number}"
                 )
@@ -346,7 +349,7 @@ def stripe_customer_event(event_subtype: Subtype, event: stripe.Event) -> None:
 
 
 def stripe_subscription_schedule_event(
-    event_subtype: Subtype, event: stripe.Event
+    event_subtype: EventSubtype, event: stripe.Event
 ) -> None:
     subscription = event["data"]["object"]
     meta = subscription["metadata"]
@@ -375,7 +378,7 @@ def stripe_subscription_schedule_event(
     )
     subscription_id = subscription["id"]
 
-    if event_subtype == Subtype.RELEASED:
+    if event_subtype == EventSubtype.RELEASED:
         # This can happen if we cancel a scheduled subscription before it starts,
         # and it also happens when an active subscription is cancelled.
         is_current = current_subscription_id == subscription_id
@@ -395,8 +398,8 @@ def stripe_subscription_schedule_event(
             )
 
 
-def stripe_checkout_event(event_subtype: Subtype, event: stripe.Event) -> None:
-    if event_subtype == Subtype.SESSION_COMPLETED:
+def stripe_checkout_event(event_subtype: EventSubtype, event: stripe.Event) -> None:
+    if event_subtype == EventSubtype.SESSION_COMPLETED:
         # This event is triggered when we go thru the setup intent flow.
         # This typically happens as part of the subscription flow in MakerAdmin but
         # could happen at other times. For now, we capture this event and set
@@ -449,29 +452,29 @@ def _stripe_event_inner(event: stripe.Event, current_time: datetime) -> None:
     try:
         event_type_s, event_subtype_s = event.type.split(".", 1)
         try:
-            event_type = Type(event_type_s)
-            event_subtype = Subtype(event_subtype_s)
+            event_type = EventType(event_type_s)
+            event_subtype = EventSubtype(event_subtype_s)
         except:
             raise IgnoreEvent(f"unknown event type {event.type}")
 
-        if event_type == Type.SOURCE:
+        if event_type == EventType.SOURCE:
             stripe_source_event(event_subtype, event)
 
-        elif event_type == Type.CHARGE:
+        elif event_type == EventType.CHARGE:
             stripe_charge_event(event_subtype, event)
 
-        elif event_type == Type.PAYMENT_INTENT:
+        elif event_type == EventType.PAYMENT_INTENT:
             stripe_payment_intent_event(event_subtype, event)
 
-        elif event_type == Type.INVOICE:
+        elif event_type == EventType.INVOICE:
             stripe_invoice_event(event_subtype, event, current_time)
 
-        elif event_type == Type.CUSTOMER:
+        elif event_type == EventType.CUSTOMER:
             stripe_customer_event(event_subtype, event)
 
-        elif event_type == Type.CHECKOUT:
+        elif event_type == EventType.CHECKOUT:
             stripe_checkout_event(event_subtype, event)
-        elif event_type == Type.SUBSCRIPTION_SCHEDULE:
+        elif event_type == EventType.SUBSCRIPTION_SCHEDULE:
             stripe_subscription_schedule_event(event_subtype, event)
         else:
             logger.info(f"ignoring unknown event type: {str(event.type)}")

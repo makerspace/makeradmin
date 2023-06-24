@@ -17,7 +17,7 @@ from selenium.webdriver.common.by import By
 
 from service.config import get_mysql_config
 from service.db import create_mysql_engine, db_session_factory, db_session
-from shop.stripe_constants import Type, set_stripe_key
+from shop.stripe_constants import EventType, set_stripe_key
 from test_aid.api import ApiFactory, ApiResponse
 from test_aid.db import DbFactory
 from test_aid.obj import DEFAULT_PASSWORD
@@ -260,7 +260,7 @@ class ApiShopTestMixin(ShopTestMixin):
                 f"/webshop/process_stripe_events",
                 dict(
                     start=self.test_start_timestamp,
-                    type=f"{Type.SOURCE}*",
+                    type=f"{EventType.SOURCE}*",
                     source_id=source_id,
                 )
             ).expect(200).data

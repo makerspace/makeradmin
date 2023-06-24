@@ -17,20 +17,37 @@ def set_stripe_key(private: bool) -> None:
 set_stripe_key(True)
 
 class MakerspaceMetadataKeys(Enum):
+    '''Keys used in the metadata for stripe objects, and in some cases, metadata for makerspace products in the webshop'''
     USER_ID = "makerspace_user_id"
+
+    # The makerspace member number. This is only intended to be used for human-readable ids, and should not be used for any logic.
+    # When writing code, use USER_ID instead.
     MEMBER_NUMBER = "makerspace_member_number"
+
+    # Type of price. See PriceType
     PRICE_TYPE = "price_type"
     SUBSCRIPTION_TYPE = "subscription_type"
     TRANSACTION_IDS = "makerspace_transaction_ids"
     PENDING_MEMBER = "makerspace_pending_member"
+    PRICE_LEVEL = "makerspace_price_level"
+    PRODUCT_ID = "makerspace_product_id"
 
     # Used in the webshop for special products
     SPECIAL_PRODUCT_ID = "special_product_id"
 
+    # A product may specify this to indicate which discounts are applicable.
+    # If this is not specified, no discounts will apply.
+    # The 'normal' price level is always allowed regardless of this setting.
+    # For example, if ['low_income_discount'] is specified, then the product will be able
+    # to be purchased with the low income discount, which reduces the price by a certain percentage.
+    # Allowed values are the values of PriceLevel, except 'normal'.
+    ALLOWED_PRICE_LEVELS = "allowed_price_levels"
+
 class PriceType(Enum):
     BINDING_PERIOD = "binding_period"
+    RECURRING = "recurring"
 
-class Type(Enum):
+class EventType(Enum):
     SOURCE = 'source'
     CARD = 'card'
     CHARGE = 'charge'
@@ -41,7 +58,7 @@ class Type(Enum):
     SUBSCRIPTION_SCHEDULE = 'subscription_schedule'
     TEST_HELPERS = 'test_helpers'
 
-class Subtype(Enum):
+class EventSubtype(Enum):
     CHARGEABLE = 'chargeable'
     FAILED = 'failed'
     CANCELED = 'canceled'

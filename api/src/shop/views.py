@@ -14,7 +14,7 @@ from shop.entities import product_image_entity, transaction_content_entity, tran
 from shop.models import TransactionContent, ProductImage
 from shop.pay import RegisterResponse, pay, register, register2
 
-from shop.stripe_subscriptions import start_subscription, cancel_subscription
+from shop.stripe_subscriptions import PriceLevel, start_subscription, cancel_subscription
 from shop.stripe_subscriptions import open_stripe_customer_portal
 
 from shop.stripe_payment_intent import PartialPayment, confirm_stripe_payment_intent
@@ -209,9 +209,9 @@ def public_image(image_id: int) -> Response:
     return response
 
 
-@service.route("/register_page_data", method=GET, permission=PUBLIC)
-def register_page_data():
-    return {"membershipProducts": get_membership_products(), "productData": [product_entity.to_obj(p) for p in special_product_data()]}
+@service.route("/register_page_data/<price_level>", method=GET, permission=PUBLIC)
+def register_page_data(price_level: str):
+    return {"membershipProducts": get_membership_products(), "productData": [product_entity.to_obj(p) for p in special_product_data(PriceLevel(price_level))]}
 
 
 @service.route("/pay", method=POST, permission=USER, commit_on_error=True)

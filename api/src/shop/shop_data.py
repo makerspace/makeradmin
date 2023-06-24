@@ -1,12 +1,13 @@
 from dataclasses import dataclass
 from logging import getLogger
 from typing import List
+import collections
 
 from sqlalchemy import desc
 from sqlalchemy.orm import joinedload, contains_eager
 from sqlalchemy.orm.exc import NoResultFound
 from shop.stripe_constants import MakerspaceMetadataKeys
-from shop.stripe_subscriptions import get_subscription_products
+from shop.stripe_subscriptions import PriceLevel, get_subscription_products
 
 from membership.views import member_entity
 from service.db import db_session
@@ -73,7 +74,7 @@ def receipt(member_id, transaction_id):
     }
 
 
-def special_product_data() -> List[Product]:
+def special_product_data(price_level: PriceLevel) -> List[Product]:
     # Make sure subscription products have been created
     get_subscription_products()
 
@@ -84,7 +85,19 @@ def special_product_data() -> List[Product]:
         .filter(Product.product_metadata[MakerspaceMetadataKeys.SPECIAL_PRODUCT_ID.value] != "")
     )
 
-    return query.all()
+    products: List[Product] = query.all()
+    # Filter out products which are not for the given price level.
+    # If a price level is not given, the product is assumed to apply for all price levels.
+    products = [p for p in products if (MakerspaceMetadataKeys.PRICE_LEVEL.value not in p.product_metadata) or PriceLevel(p.product_metadata[MakerspaceMetadataKeys.PRICE_LEVEL.value]) == price_level]
+
+    duplicates = [item for item, count in collections.Counter([p.product_metadata[MakerspaceMetadataKeys.SPECIAL_PRODUCT_ID.value] for p in products]).items() if count > 1]
+    if len(duplicates) > 0:
+        for p in products:
+            if MakerspaceMetadataKeys.PRICE_LEVEL.value in p.product_metadata:
+                print(p.name + ": " + str(PriceLevel(p.product_metadata[MakerspaceMetadataKeys.PRICE_LEVEL.value])))
+        raise Exception("Multiple products have the same special product id and price level. Please ensure their price levels are different. Duplicates: " + str(duplicates))
+
+    return products
 
 
 def all_product_data():

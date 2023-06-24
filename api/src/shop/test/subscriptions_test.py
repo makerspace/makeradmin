@@ -110,7 +110,7 @@ class Test(FlaskTestBase):
         payment_method = stripe.PaymentMethod.create(
             type="card", card=self.card(card_number)
         )
-        attach_and_set_default_payment_method(member, payment_method, test_clock)
+        attach_and_set_default_payment_method(member, payment_method, test_clock.stripe_clock)
 
     def get_member(self, member_id: int) -> Member:
         return cast(Member, db_session.query(Member).get(member_id))
