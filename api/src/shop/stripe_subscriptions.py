@@ -22,13 +22,15 @@ from dataclasses import dataclass
 from decimal import Decimal
 from enum import Enum
 from logging import getLogger
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, Generic, List, Optional, Tuple, TypeVar
 from sqlalchemy import func
 
 import stripe
 
 from datetime import datetime, timezone, date, time, timedelta
 from stripe.error import InvalidRequestError
+from membership.enums import PriceLevel
+from shop.stripe_discounts import get_discount_for_product, get_discount_fraction_off, get_price_level_for_member
 from shop.models import Product, ProductCategory
 from service.error import BadRequest, NotFound
 from service.db import db_session
@@ -42,10 +44,6 @@ class SubscriptionType(Enum):
     MEMBERSHIP = "membership"
     LAB = "labaccess"
 
-class PriceLevel(Enum):
-    Normal = "normal"
-    LowIncomeDiscount = "low_income_discount"
-
 logger = getLogger("makeradmin")
 
 # Binding period in months.
@@ -56,48 +54,11 @@ BINDING_PERIOD = {
     SubscriptionType.LAB: 2,
 }
 
-@dataclass
-class Discount:
-    coupon: Optional[stripe.Coupon]
-    fraction_off: float
-
-DISCOUNT_FRACTIONS: Optional[Dict[PriceLevel, Discount]] = None
-
-def get_discount_fraction_off(price_level: PriceLevel) -> Discount:
-    global DISCOUNT_FRACTIONS
-    if DISCOUNT_FRACTIONS is None:
-        DISCOUNT_FRACTIONS = {
-            price_level: _query_discount_fraction_off(price_level) for price_level in PriceLevel
-        }
-    
-    return DISCOUNT_FRACTIONS[price_level]
-
-def _query_discount_fraction_off(price_level: PriceLevel) -> Discount:
-    if price_level == PriceLevel.Normal:
-        return Discount(None, 0)
-
-    coupons = stripe.Coupon.list()
-    coupons = [coupon for coupon in coupons if coupon["metadata"].get(MSMetaKeys.PRICE_LEVEL, None) == price_level.name]
-    if len(coupons) == 0:
-        raise Exception(f"Could not find stripe coupon for {MSMetaKeys.PRICE_LEVEL.value}={price_level.name}")
-    if len(coupons) > 1:
-        raise Exception(f"Found multiple stripe coupons for {MSMetaKeys.PRICE_LEVEL.value}={price_level.name}")
-    
-    coupon = coupons[0]
-    if coupon["amount_off"] > 0:
-        raise Exception(f"Stripe coupon {coupon.stripe_id} has a fixed amount off. Only a percentage off is supported by MakerAdmin")
-
-    percentage_off = coupon["percentage_off"]
-    assert isinstance(percentage_off, float) and percentage_off >= 0 and percentage_off <= 100
-    return Discount(coupon, percentage_off / 100)
 
 def setup_subscription_makeradmin_product(
     subscription_type: SubscriptionType,
-    price_level: PriceLevel,
 ) -> Product:
     name = f"{subscription_type.value.title()} Subscription"
-    if price_level is not PriceLevel.Normal:
-        name += f" ({price_level.name})"
 
     category = (
         db_session.query(ProductCategory)
@@ -126,16 +87,15 @@ def setup_subscription_makeradmin_product(
     product.name = name
     product.description = f"Stripe subscription for {subscription_type.value}"
     subscription_prices = lookup_subscription_price_for(
-        subscription_type, price_level
+        subscription_type
     )
     recurring_price = subscription_prices.recurring_price
     product.category_id = category.id
     product.product_metadata = {
         MSMetaKeys.SUBSCRIPTION_TYPE.value: f"{subscription_type.value}",
         MSMetaKeys.SPECIAL_PRODUCT_ID.value: f"{subscription_type.value}_subscription",
-        MSMetaKeys.PRICE_LEVEL.value: price_level.value,
         # Allow subscriptions to be discounted
-        # MSMetaKeys.ALLOWED_PRICE_LEVELS.value: [PriceLevel.LowIncomeDiscount.value],
+        MSMetaKeys.ALLOWED_PRICE_LEVELS.value: [PriceLevel.LowIncomeDiscount.value],
     }
     interval = recurring_price["recurring"]["interval"]
     if interval == "month":
@@ -143,7 +103,7 @@ def setup_subscription_makeradmin_product(
     elif interval == "year":
         product.unit = "år"
     else:
-        raise RuntimeError(f"Unknown interval {interval}")
+        raise RuntimeError(f"Unexpected interval {interval} in stripe product")
     assert int(recurring_price["recurring"]["interval_count"]) == 1
     assert recurring_price["type"] == "recurring"
     assert recurring_price["currency"] == "sek"
@@ -171,32 +131,30 @@ def setup_subscription_makeradmin_product(
     return product
 
 
-SUBSCRIPTION_PRODUCTS: Optional[Dict[Tuple[SubscriptionType, PriceLevel], int]] = None
+SUBSCRIPTION_PRODUCTS: Optional[Dict[SubscriptionType, int]] = None
 
 
-def get_subscription_products() -> Dict[Tuple[SubscriptionType, PriceLevel], int]:
+def get_subscription_products() -> Dict[SubscriptionType, int]:
     # Setup the products for the subscriptions lazily
     global SUBSCRIPTION_PRODUCTS
     if SUBSCRIPTION_PRODUCTS is None:
         SUBSCRIPTION_PRODUCTS = {
-            (SubscriptionType.MEMBERSHIP, PriceLevel.Normal): setup_subscription_makeradmin_product(SubscriptionType.MEMBERSHIP, PriceLevel.Normal).id,
-            (SubscriptionType.MEMBERSHIP, PriceLevel.LowIncomeDiscount): setup_subscription_makeradmin_product(SubscriptionType.MEMBERSHIP, PriceLevel.LowIncomeDiscount).id,
-            (SubscriptionType.LAB, PriceLevel.Normal): setup_subscription_makeradmin_product(SubscriptionType.LAB, PriceLevel.Normal).id,
-            (SubscriptionType.LAB, PriceLevel.LowIncomeDiscount): setup_subscription_makeradmin_product(SubscriptionType.LAB, PriceLevel.LowIncomeDiscount).id,
+            SubscriptionType.MEMBERSHIP: setup_subscription_makeradmin_product(SubscriptionType.MEMBERSHIP).id,
+            SubscriptionType.LAB: setup_subscription_makeradmin_product(SubscriptionType.LAB).id,
         }
 
     return SUBSCRIPTION_PRODUCTS
 
 
-def get_subscription_product(subscription_type: SubscriptionType, price_level: PriceLevel) -> Product:
-    p_id = get_subscription_products()[(subscription_type, price_level)]
+def get_subscription_product(subscription_type: SubscriptionType) -> Product:
+    p_id = get_subscription_products()[subscription_type]
     p = db_session.query(Product).get(p_id)
     if p is None:
         # The product doesn't exist anymore.
         # When we are running tests, this can happen if the database is reset between tests.
         global SUBSCRIPTION_PRODUCTS
         SUBSCRIPTION_PRODUCTS = None
-        return get_subscription_product(subscription_type, price_level)
+        return get_subscription_product(subscription_type)
     return p
 
 
@@ -298,10 +256,37 @@ class ProductPricing:
     recurring_price: stripe.Price
     binding_period_price: Optional[stripe.Price]
 
-# TODO: Would be a nice to cache this for an hour or so to avoid excessive lookups
+K = TypeVar("K")
+V = TypeVar("V")
+
+class Cache(Generic[K, V]):
+    data: Dict[K,Tuple[datetime, V]] = dict()
+    ttl: timedelta
+
+    def __init__(self, ttl: timedelta):
+        self.ttl = ttl
+    
+    def get(self, key: K) -> Optional[V]:
+        if key not in self.data:
+            return None
+        if self.data[key][0] < datetime.now():
+            del self.data[key]
+            return None
+        return self.data[key][1]
+    
+    def set(self, key: K, value: V) -> None:
+        self.data[key] = (datetime.now() + self.ttl, value)
+
+# Cache the subscription prices for an hour to avoid hitting the stripe API too often
+SUBSCRIPTION_PRICE_CACHE = Cache[SubscriptionType, ProductPricing](timedelta(hours=1))
+
 def lookup_subscription_price_for(
-    subscription_type: SubscriptionType, price_level: PriceLevel
+    subscription_type: SubscriptionType
 ) -> ProductPricing:
+    res = SUBSCRIPTION_PRICE_CACHE.get(subscription_type)
+    if res is not None:
+        return res
+
     products = stripe.Product.search(
         query=f"metadata['{MSMetaKeys.SUBSCRIPTION_TYPE.value}']:'{subscription_type.value}'"
     )
@@ -320,18 +305,9 @@ def lookup_subscription_price_for(
         if p["metadata"][MSMetaKeys.PRICE_TYPE.value]
         == PriceType.RECURRING.value
     ]
-
-    # Filter by price_level
-    # If no price level is specified, the price is assumed to apply for all price levels
-    recurring_prices = [
-            p
-            for p in recurring_prices
-            if MSMetaKeys.PRICE_LEVEL.value not in p["metadata"]
-            or p["metadata"][MSMetaKeys.PRICE_LEVEL.value] == price_level.value
-        ]
     assert (
         len(recurring_prices) == 1
-    ), f"Expected to find a single stripe price for {subscription_type.name} with metadata->{MSMetaKeys.PRICE_TYPE.value}={PriceType.RECURRING.value}, and {MSMetaKeys.PRICE_LEVEL.value}={price_level.value}, but found {len(recurring_prices)} prices: {[p.stripe_id for p in recurring_prices]}"
+    ), f"Expected to find a single stripe price for {subscription_type.name} with metadata->{MSMetaKeys.PRICE_TYPE.value}={PriceType.RECURRING.value}, but found {len(recurring_prices)} prices: {[p.stripe_id for p in recurring_prices]}"
     recurring_price = recurring_prices[0]
     
 
@@ -352,24 +328,19 @@ def lookup_subscription_price_for(
             if p["recurring"]["interval"] == "month"
             and p["recurring"]["interval_count"] == binding_period
         ]
-        # Filter by price_level
-        starting_prices = [
-            p
-            for p in starting_prices
-            if MSMetaKeys.PRICE_LEVEL.value not in p["metadata"]
-            or p["metadata"][MSMetaKeys.PRICE_LEVEL.value] == price_level.value
-        ]
 
         assert (
             len(starting_prices) == 1
-        ), f"Expected to find a single stripe price for {subscription_type.name} with metadata->{MSMetaKeys.PRICE_TYPE.value}={PriceType.BINDING_PERIOD.value}, a period of exactly {binding_period} months, and {MSMetaKeys.PRICE_LEVEL.value}={price_level.value}, but found {len(starting_prices)} prices: {[p.stripe_id for p in recurring_prices]}"
+        ), f"Expected to find a single stripe price for {subscription_type.name} with metadata->{MSMetaKeys.PRICE_TYPE.value}={PriceType.BINDING_PERIOD.value}, a period of exactly {binding_period} months, but found {len(starting_prices)} prices: {[p.stripe_id for p in recurring_prices]}"
         binding_period_price = starting_prices[0]
     else:
         binding_period_price = None
 
-    return ProductPricing(
+    res = ProductPricing(
         recurring_price=recurring_price, binding_period_price=binding_period_price
     )
+    SUBSCRIPTION_PRICE_CACHE.set(subscription_type, res)
+    return res
 
 
 def calc_start_ts(current_end_date: date, now: datetime) -> datetime:
@@ -411,8 +382,7 @@ def calc_subscription_start_time(
 
     return was_already_member, subscription_start
 
-def get_price_level_for_member(member: Member) -> PriceLevel:
-    return PriceLevel.Normal
+
 
 def start_subscription(
     member_id: int,
@@ -436,8 +406,9 @@ def start_subscription(
             raise BadRequest(f"Unable to find corresponding stripe member {member}")
         assert member.stripe_customer_id == stripe_customer.stripe_id
 
-        price_level = get_price_level_for_member(member)
-        price = lookup_subscription_price_for(subscription_type, price_level)
+        price = lookup_subscription_price_for(subscription_type)
+
+        discount = get_discount_for_product(get_subscription_product(subscription_type), get_price_level_for_member(member))
 
         # Check that the price is as expected
         # This is done to ensure that the frontend logic is in sync with the backend logic and the user
@@ -449,14 +420,14 @@ def start_subscription(
             else:
                 # Fetch a fresh price object from stripe to make sure we have the latest price
                 to_pay_now_price = stripe.Price.retrieve((price.binding_period_price or price.recurring_price).stripe_id)
-                to_pay_now = Decimal(to_pay_now_price["unit_amount"]) / STRIPE_CURRENTY_BASE
+                to_pay_now = ((Decimal(to_pay_now_price["unit_amount"]) / STRIPE_CURRENTY_BASE) * (1 - discount.fraction_off)).quantize(Decimal("0.01"))
             if to_pay_now != expected_to_pay_now:
                 raise BadRequest(f"Expected to pay {expected_to_pay_now} for starting {subscription_type} subscription now, but price is {to_pay_now}")
 
         if expected_to_pay_recurring is not None:
             # Fetch a fresh price object from stripe to make sure we have the latest price
             to_pay_recurring_price = stripe.Price.retrieve(price.recurring_price.stripe_id)
-            to_pay_recurring = Decimal(to_pay_recurring_price["unit_amount"]) / STRIPE_CURRENTY_BASE
+            to_pay_recurring = ((Decimal(to_pay_recurring_price["unit_amount"]) / STRIPE_CURRENTY_BASE) * (1 - discount.fraction_off)).quantize(Decimal("0.01"))
             if to_pay_recurring != expected_to_pay_recurring:
                 raise BadRequest(f"Expected to pay {expected_to_pay_recurring} when {subscription_type} subscription renews, but the recurring price is {to_pay_recurring}")
 
@@ -488,7 +459,6 @@ def start_subscription(
             MSMetaKeys.USER_ID.value: member_id,
             MSMetaKeys.MEMBER_NUMBER.value: member.member_number,
             MSMetaKeys.SUBSCRIPTION_TYPE.value: subscription_type.value,
-            MSMetaKeys.PRICE_LEVEL.value: price_level.value if price_level is not None else None,
         }
 
         phases = []
@@ -516,6 +486,7 @@ def start_subscription(
                     "metadata": metadata,
                     "proration_behavior": "none",
                     "iterations": 1,
+                    "coupon": discount.coupon.stripe_id if discount.coupon is not None else None,
                 }
             )
 
@@ -530,6 +501,7 @@ def start_subscription(
                 "collection_method": "charge_automatically",
                 "metadata": metadata,
                 "proration_behavior": "none",
+                "coupon": discount.coupon.stripe_id if discount.coupon is not None else None,
             }
         )
 

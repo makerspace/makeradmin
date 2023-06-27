@@ -7,6 +7,8 @@ from sqlalchemy import Column, Integer, String, DateTime, Text, Date, Enum, Tabl
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, column_property, configure_mappers, validates
 
+from membership.enums import PriceLevel
+
 Base = declarative_base()
 
 
@@ -48,6 +50,8 @@ class Member(Base):
     stripe_customer_id = Column(String(64))
     stripe_membership_subscription_id = Column(String(64))
     stripe_labaccess_subscription_id = Column(String(64))
+    price_level = Column(Enum(*[x.value for x in PriceLevel]), nullable=False)
+    price_level_motivation = Column(String)
 
     @validates('phone')
     def validate_phone(self, key: Any, value: Optional[str]) -> Optional[str]:

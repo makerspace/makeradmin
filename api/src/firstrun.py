@@ -1,6 +1,7 @@
 import argparse
 
 from sqlalchemy import func
+from api.src.membership.enums import PriceLevel
 
 from init_db import init_db
 from membership.models import Group, Permission, Member
@@ -78,6 +79,7 @@ def create_admin(admins):
                 lastname=input("Last name: "),
                 email=input("Email: "),
                 unhashed_password=getpass("Password: "),
+                price_level=PriceLevel.Normal.value
             ))
             member_id = member['member_id']
 

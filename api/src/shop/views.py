@@ -2,6 +2,8 @@ from dataclasses import dataclass
 from typing import Any
 from flask import Response, g, request, send_file, make_response, redirect, jsonify
 from sqlalchemy.exc import NoResultFound
+from membership.enums import PriceLevel
+from shop.stripe_discounts import get_discount_fraction_off
 
 from multiaccessy.invite import AccessyInvitePreconditionFailed, ensure_accessy_labaccess
 from service.api_definition import WEBSHOP, WEBSHOP_EDIT, PUBLIC, GET, USER, POST, DELETE, Arg, WEBSHOP_ADMIN, MEMBER_EDIT
@@ -14,7 +16,7 @@ from shop.entities import product_image_entity, transaction_content_entity, tran
 from shop.models import TransactionContent, ProductImage
 from shop.pay import RegisterResponse, pay, register, register2
 
-from shop.stripe_subscriptions import PriceLevel, start_subscription, cancel_subscription
+from shop.stripe_subscriptions import start_subscription, cancel_subscription
 from shop.stripe_subscriptions import open_stripe_customer_portal
 
 from shop.stripe_payment_intent import PartialPayment, confirm_stripe_payment_intent
@@ -209,9 +211,15 @@ def public_image(image_id: int) -> Response:
     return response
 
 
-@service.route("/register_page_data/<price_level>", method=GET, permission=PUBLIC)
-def register_page_data(price_level: str):
-    return {"membershipProducts": get_membership_products(), "productData": [product_entity.to_obj(p) for p in special_product_data(PriceLevel(price_level))]}
+@service.route("/register_page_data", method=GET, permission=PUBLIC)
+def register_page_data():
+    return {
+        "membershipProducts": get_membership_products(),
+        "productData": [product_entity.to_obj(p) for p in special_product_data()],
+        "discounts": {
+            price_level.value: get_discount_fraction_off(price_level).fraction_off for price_level in PriceLevel
+        }
+    }
 
 
 @service.route("/pay", method=POST, permission=USER, commit_on_error=True)

@@ -7,6 +7,7 @@ from typing import Any, Dict, List, Optional
 import stripe
 from stripe.error import SignatureVerificationError, RateLimitError
 from datetime import timezone
+from membership.enums import PriceLevel
 from shop import stripe_subscriptions
 import shop.transactions
 from shop.stripe_util import event_semantic_time
@@ -36,7 +37,7 @@ from membership.membership import add_membership_days
 from service.db import db_session
 from membership.models import Member
 from membership.models import Span
-from shop.stripe_subscriptions import PriceLevel, get_subscription_product, SubscriptionType
+from shop.stripe_subscriptions import get_subscription_product, SubscriptionType
 from datetime import datetime
 
 logger = getLogger("makeradmin")

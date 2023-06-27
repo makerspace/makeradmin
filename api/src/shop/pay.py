@@ -7,12 +7,12 @@ from dataclasses_json import DataClassJsonMixin, dataclass_json
 
 import stripe
 from stripe.error import CardError
+from membership.enums import PriceLevel
 from shop.stripe_constants import MakerspaceMetadataKeys
 from shop.stripe_setup_intent import check_next_action
 from membership.models import Member
 from shop.models import Transaction
 from shop.stripe_subscriptions import (
-    PriceLevel,
     SubscriptionType,
     attach_and_set_default_payment_method,
     get_stripe_customer,
@@ -43,7 +43,6 @@ def make_purchase(
         activates_member=activates_member,
         stripe_reference_id=payment_method_id,
     )
-
     action_info = pay_with_stripe(transaction, payment_method_id)
 
     return transaction, action_info
@@ -133,13 +132,17 @@ class SubscriptionStart(DataClassJsonMixin):
     expected_to_pay_recurring: Decimal
 
 @dataclass
+class DiscountRequest(DataClassJsonMixin):
+    price_level: PriceLevel
+    message: str
+
+@dataclass
 class RegisterRequest(DataClassJsonMixin):
     purchase: Purchase
     setup_intent_id: Optional[str]
     member: MemberInfo
     subscriptions: List[SubscriptionStart]
-    price_level: PriceLevel # TODO: Supply discount reasons
-
+    discount: Optional[DiscountRequest]
 
 class RegisterResponseType(str, Enum):
     Success = "success"
@@ -171,8 +174,8 @@ class RegistrationFailed(Exception):
     response: RegisterResponse
 
 
-def validate_cart(purchase: Purchase, price_level: PriceLevel) -> None:
-    products = special_product_data(price_level)
+def validate_cart(purchase: Purchase) -> None:
+    products = special_product_data()
 
     cart = purchase.cart
     if len(cart) > 1:
@@ -206,7 +209,7 @@ def register2(data_dict: Any, remote_addr: str, user_agent: str) -> RegisterResp
         raise BadRequest(message=f"Invalid data: {e}")
 
     data.member.validate()
-    validate_cart(data.purchase, data.price_level)
+    validate_cart(data.purchase)
 
     if len(set([s.subscription for s in data.subscriptions])) != len(data.subscriptions):
         raise BadRequest(message="Duplicate subscriptions.")
@@ -260,6 +263,8 @@ def register2(data_dict: Any, remote_addr: str, user_agent: str) -> RegisterResp
                     "email": data.member.email,
                     "phone": data.member.phone,
                     "address_zipcode": data.member.zipCode,
+                    "price_level": (data.discount.price_level if data.discount is not None else PriceLevel.Normal).value, 
+                    "price_level_motivation": data.discount.message if data.discount is not None else None,
                 },
                 commit=False,
             )["member_id"]
@@ -335,6 +340,7 @@ def register2(data_dict: Any, remote_addr: str, user_agent: str) -> RegisterResp
                             activates_member=False,
                         )
                         if action_info is not None:
+                            logger.error("Purchase could not be completed. Card requires additional verification: %s", action_info.type)
                             # We have already done a setup intent, so the card should not require additional verification.
                             # If it does, we just fail.
                             # There are probably cards for which this can happen. But how could we possibly handle

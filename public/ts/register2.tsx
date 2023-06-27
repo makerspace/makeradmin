@@ -5,7 +5,7 @@ import { ServerResponse } from "./common";
 import { Translation, TranslationKeyValues } from "./translate";
 import { PaymentAction, PaymentIntentNextActionType, Purchase, display_stripe_error, stripe } from "./payment_common";
 import { PopupModal, PopupWidget, useCalendlyEventListener } from "react-calendly";
-import { FACEBOOK_GROUP, GET_STARTED_QUIZ, INSTAGRAM, RELATIVE_MEMBER_PORTAL, SLACK_HELP, WIKI } from "./urls";
+import { CALENDAR, FACEBOOK_GROUP, GET_STARTED_QUIZ, INSTAGRAM, RELATIVE_MEMBER_PORTAL, SLACK_HELP, WIKI } from "./urls";
 import { LoadCurrentMemberInfo, member_t } from "./member_common";
 
 declare var UIkit: any;
@@ -22,6 +22,11 @@ type Plan = {
     description: string,
     products: Product[],
     highlight: string | null,
+}
+
+type Discount = {
+    priceLevel: PriceLevel,
+    fractionOff: number,
 }
 
 const Eng = {
@@ -114,7 +119,8 @@ const Eng = {
             "Take part in courses",
             "Attent social events",
             "Vote at yearly meetings",
-            "Support your local makerspace"
+            "Support your local makerspace",
+            "No access to Stockholm Makerspace outside of events",
         ],
         price: "200",
         period: "per year",
@@ -176,7 +182,10 @@ const Eng = {
     },
     payment: {
         title: "Payment",
-        text: "Almost done, we just need to take care of the payment.",
+        text: <>
+                <p>Almost done, we just need to take care of the payment.</p>
+                <p>Before you gain access to the makerspace you need to attend a member introduction. These are held <a target="_blank" href={CALENDAR}>regularly every 1-2 weeks</a>.</p>
+            </>,
         pay: "Pay with Stripe",
         payment_processor: "Payment handled by Stripe",
     },
@@ -194,16 +203,16 @@ const Eng = {
             ((onClick: (e: MouseEvent) => void) => (<>Join our <a target="_blank" href={SLACK_HELP} onClick={onClick}>Slack</a> to chat with other members.</>)),
             ((onClick: (e: MouseEvent) => void) => (<>Take our <a target="_blank" href={GET_STARTED_QUIZ} onClick={onClick}>Get Started Quiz</a> to learn about the space.</>)),
             ((onClick: (e: MouseEvent) => void) => (<>Check out our <a target="_blank" href={WIKI} onClick={onClick}>wiki</a>.</>)),
-            ((onClick: (e: MouseEvent) => void) => (<>Be inspired on <a target="_blank" href={INSTAGRAM} onClick={onClick}>our Instagram</a>.</>)),
+            ((onClick: (e: MouseEvent) => void) => (<>Get inspired on out <a target="_blank" href={INSTAGRAM} onClick={onClick}>Instagram</a>.</>)),
         ],
         continue_to_member_portal: "Continue to your member page",
     },
     discounts: {
         title: "Low Income Discounts",
         text: "If you cannot afford the full price of membership, you can apply for a discount.",
-        confirmation: <>
+        confirmation: (fraction: number) => <>
             <p>Discount approved!</p>
-            <p>A new option will show up in the plan selection page which gives you a 30% discount.</p>
+            <p>You'll get a {fraction*100}% discount on membership.</p>
             <p>We understand that not everyone can afford the full price of membership. But there are other ways you can help, if you want to.
             The Makerspace is run by its members volonteering their time and effort. Join a work day, help out with maintaining a machine, or why not hold a course about something you are excited about?</p>
             </>,
@@ -312,7 +321,7 @@ const MemberInfoForm = ({ info, onChange, onSubmit, onBack }: { info: MemberInfo
             <LabeledInput label={t("memberInfo.email")} id="email" type="email" required value={info.email} onChange={email => onChange(info => ({ ...info, email }))} onInvalid={onInvalid} />
             <LabeledInput label={t("memberInfo.phone")} id="phone" type="tel" pattern="[\-\+\s0-9]*" required value={info.phone} onChange={phone => onChange(info => ({ ...info, phone }))} onInvalid={onInvalid} />
             <LabeledInput label={t("memberInfo.zipCode")} id="zipCode" type="text" pattern="[0-9\s]*" required value={info.zipCode} onChange={zipCode => onChange(info => ({ ...info, zipCode }))} onInvalid={onInvalid} />
-            <input type="submit" className="flow-button" value={t("memberInfo.submit")} />
+            <input type="submit" className="flow-button primary" value={t("memberInfo.submit")} />
             <BackButton onClick={onBack} />
         </form>
     )
@@ -346,7 +355,7 @@ const TermsAndConditions = ({ onAccept, onBack, acceptedTerms, onChangeAcceptedT
         <RuleCheckbox rule={t("terms.understanding1")} onChange={() => onChangeAcceptedTerms({ ...acceptedTerms, accepted1: !acceptedTerms.accepted1})} value={acceptedTerms.accepted1} />
         <RuleCheckbox rule={t("terms.understanding2")} onChange={() => onChangeAcceptedTerms({ ...acceptedTerms, accepted2: !acceptedTerms.accepted2})} value={acceptedTerms.accepted2} />
         <RuleCheckbox rule={t("terms.welcoming")} onChange={() => onChangeAcceptedTerms({ ...acceptedTerms, accepted3: !acceptedTerms.accepted3})} value={acceptedTerms.accepted3} />
-        <button className="flow-button" disabled={!acceptedTerms.accepted1 || !acceptedTerms.accepted2 || !acceptedTerms.accepted3} onClick={onAccept}>{t("terms.accept")}</button>
+        <button className="flow-button primary" disabled={!acceptedTerms.accepted1 || !acceptedTerms.accepted2 || !acceptedTerms.accepted3} onClick={onAccept}>{t("terms.accept")}</button>
         <BackButton onClick={onBack} />
     </div>);
 }
@@ -421,9 +430,15 @@ function AssertIsWellKnownProductId (id: string | undefined): asserts id is Well
     }
 }
 
-const calculateAmountToPay = ({ selectedPlan, relevantProducts, currentMemberships }: { selectedPlan: Plan, relevantProducts: RelevantProducts, currentMemberships: SubscriptionType[] }) => {
-    const payNow: [Product, number][] = [];
-    const payRecurring: [Product, number][] = [];
+type ToPay = {
+    product: Product,
+    amount: number,
+    originalAmount: number,
+}
+
+const calculateAmountToPay = ({ selectedPlan, relevantProducts, currentMemberships, discount }: { selectedPlan: Plan, relevantProducts: RelevantProducts, discount: Discount, currentMemberships: SubscriptionType[] }) => {
+    const payNow: ToPay[] = [];
+    const payRecurring: ToPay[] = [];
 
     // Calculate which memberships the user will have after the non-subscription products have been purchased.
     // This is important to handle e.g. purchasing the starter pack and a membership at the same time.
@@ -439,12 +454,25 @@ const calculateAmountToPay = ({ selectedPlan, relevantProducts, currentMembershi
 
     for (const product of selectedPlan.products) {
         const subscriptionType = product.product_metadata.subscription_type;
+        let price = parseFloat(product.price);
+        const originalPrice = price;
+        if (product.product_metadata.allowed_price_levels?.includes(discount.priceLevel) ?? false) {
+            price *= 1 - discount.fractionOff;
+        }
         if (subscriptionType === undefined || !currentMemberships.includes(subscriptionType)) {
             // TODO: There's no support right now for displaying a different price during the binding period, if one exists
-            payNow.push([product, parseFloat(product.price) * product.smallest_multiple]);
+            payNow.push({
+                product,
+                amount: price * product.smallest_multiple,
+                originalAmount: originalPrice * product.smallest_multiple,
+            });
         }
         if (subscriptionType !== undefined) {
-            payRecurring.push([product, parseFloat(product.price)]);
+            payRecurring.push({
+                product,
+                amount: price,
+                originalAmount: originalPrice,
+            });
         }
     }
     return { payNow, payRecurring };
@@ -470,15 +498,23 @@ const calculateAmountToPay = ({ selectedPlan, relevantProducts, currentMembershi
     // }
 }
 
-const ToPayPreview = ({ selectedPlan, relevantProducts, relevantProductsNormal }: { selectedPlan: Plan, relevantProducts: RelevantProducts, relevantProductsNormal: RelevantProducts }) => {
-    const t = useTranslation();
-    const { payNow, payRecurring } = calculateAmountToPay({ selectedPlan, relevantProducts, currentMemberships: [] });
-    const { payNow: payNowNormal, payRecurring: payRecurringNormal } = calculateAmountToPay({ selectedPlan, relevantProducts: relevantProductsNormal, currentMemberships: [] });
+const currencyToString = (value: number) => {
+    if (value - Math.abs(value) < 0.01) {
+        return value.toFixed(0);
+    } else {
+        return value.toFixed(2);
+    }
+}
 
-    let renewInfoText = payRecurring.map(([product, price]) => {
+
+const ToPayPreview = ({ selectedPlan, relevantProducts, discount }: { selectedPlan: Plan, relevantProducts: RelevantProducts, discount: Discount }) => {
+    const t = useTranslation();
+    const { payNow, payRecurring } = calculateAmountToPay({ selectedPlan, relevantProducts, discount, currentMemberships: [] });
+
+    let renewInfoText = payRecurring.map(({ product, amount }) => {
         const product_id = product.product_metadata.special_product_id;
         AssertIsWellKnownProductId(product_id);
-        return t(`summaries.${product_id}.renewal`)(price)
+        return t(`summaries.${product_id}.renewal`)(amount)
     }).join(" ");
     if (payRecurring.length == 1) {
         renewInfoText += " " + t("summaries.renewal.one");
@@ -486,13 +522,8 @@ const ToPayPreview = ({ selectedPlan, relevantProducts, relevantProductsNormal }
         renewInfoText += " " + t("summaries.renewal.many");
     }
 
-    if (payNow.length !== payNowNormal.length) {
-        throw new Error("Unexpected difference in payNow length");
-    }
-
     let anyDiscountedColumn = false;
-    const paidRightNowItems = payNow.map(([product, price], i) => {
-        const normalPrice = payNowNormal[i][1];
+    const paidRightNowItems: [string, number, number | undefined][] = payNow.map(({ product, amount, originalAmount }, i) => {
         const product_id = product.product_metadata.special_product_id;
         AssertIsWellKnownProductId(product_id);
         if (product.unit !== "mån" && product.unit !== "år" && product.unit !== "st") throw new Error(`Unexpected unit ${product.unit}`);
@@ -501,10 +532,10 @@ const ToPayPreview = ({ selectedPlan, relevantProducts, relevantProductsNormal }
             // Special case for the starter pack period. Otherwise it would show "1 st"
             period = t("summaries.access_starter_pack.period");
         }
-        if (price !== normalPrice) {
+        if (amount !== originalAmount) {
             anyDiscountedColumn = true;
         }
-        return [t(`summaries.${product_id}.summary`) + " - " + period, price, price !== normalPrice ? normalPrice : undefined];
+        return [t(`summaries.${product_id}.summary`) + " - " + period, amount, amount !== originalAmount ? originalAmount : undefined];
     });
 
     return (
@@ -515,14 +546,14 @@ const ToPayPreview = ({ selectedPlan, relevantProducts, relevantProductsNormal }
                     {paidRightNowItems.map(([summary, price, normalPrice]) => (
                         <>
                             <span className="product-title">{summary}</span>
-                            {normalPrice !== undefined && <span className="receipt-item-original-amount">{normalPrice} {t("priceUnit")}</span>}
-                            <span className="receipt-item-amount">{price} {t("priceUnit")}</span>
+                            {normalPrice !== undefined && <span className="receipt-item-original-amount strikethrough-price">{currencyToString(normalPrice)} {t("priceUnit")}</span>}
+                            <span className="receipt-item-amount">{currencyToString(price)} {t("priceUnit")}</span>
                         </>
                     ))}
                 </div>
                 <div class="receipt-amount">
                     <span>{t("summaries.cart_total")}</span>
-                    <span className="receipt-amount-value">{payNow.reduce((s, [_, c]) => s + c, 0)} {t("priceUnit")}</span>
+                    <span className="receipt-amount-value">{currencyToString(payNow.reduce((s, { amount }) => s + amount, 0))} {t("priceUnit")}</span>
                 </div>
             </div>
             {payRecurring.length > 0 ? (<span className="small-print">{renewInfoText}</span>) : null}
@@ -530,20 +561,20 @@ const ToPayPreview = ({ selectedPlan, relevantProducts, relevantProductsNormal }
     )
 }
 
-const Confirmation = ({ memberInfo, selectedPlan, relevantProducts, relevantProductsNormal, card, onRegistered, onBack }: { memberInfo: MemberInfo, selectedPlan: Plan, relevantProducts: RelevantProducts, relevantProductsNormal: RelevantProducts, card: stripe.elements.Element, onRegistered: (r: RegistrationSuccess) => void, onBack: ()=>void }) => {
+const Confirmation = ({ memberInfo, selectedPlan, relevantProducts, discount, discountInfo, card, onRegistered, onBack }: { memberInfo: MemberInfo, selectedPlan: Plan, relevantProducts: RelevantProducts, discount: Discount, discountInfo: DiscountsInfo, card: stripe.elements.Element, onRegistered: (r: RegistrationSuccess) => void, onBack: ()=>void }) => {
     const t = useTranslation();
     const [inProgress, setInProgress] = useState(false);
 
     return (<>
         {/* <h2>{t("payment.title")}</h2> */}
         <div class="uk-flex-1" />
-        <p>{t("payment.text")}</p>
+        {t("payment.text")}
         <div class="uk-flex-1" />
-        <ToPayPreview selectedPlan={selectedPlan} relevantProducts={relevantProducts} relevantProductsNormal={relevantProductsNormal} />
+        <ToPayPreview selectedPlan={selectedPlan} relevantProducts={relevantProducts} discount={discount} />
         <div class="uk-flex-1" />
         <span class="payment-processor">{t("payment.payment_processor")}</span>
         <StripeCardInput element={card} />
-        <button className="flow-button" disabled={inProgress} onClick={async () => {
+        <button className="flow-button primary" disabled={inProgress} onClick={async () => {
             setInProgress(true);
             try {
                 if (selectedPlan == null) {
@@ -552,7 +583,7 @@ const Confirmation = ({ memberInfo, selectedPlan, relevantProducts, relevantProd
                 const paymentMethod = await createPaymentMethod(card, memberInfo);
                 if (paymentMethod !== null) {
                     try {
-                        onRegistered(await registerMember(paymentMethod, memberInfo, selectedPlan, relevantProducts));
+                        onRegistered(await registerMember(paymentMethod, memberInfo, selectedPlan, discount, discountInfo, relevantProducts));
                     } catch (e) {
                         if (e instanceof PaymentFailedError) {
                             UIkit.modal.alert("<h2>Payment failed</h2>" + e.message);
@@ -615,19 +646,25 @@ type SubscriptionStart = {
     expected_to_pay_recurring: string // Encoded decimal
 }
 
+type DiscountRequest = {
+    price_level: PriceLevel,
+    message: string,
+}
+
 type RegisterRequest = {
     purchase: Purchase
     setup_intent_id: string | null
     member: MemberInfo
     subscriptions: SubscriptionStart[]
+    discount: DiscountRequest | null
 }
 
 type RegistrationSuccess = {
     loginToken: string
 }
 
-async function registerMember(paymentMethod: stripe.paymentMethod.PaymentMethod, memberInfo: MemberInfo, selectedPlan: Plan, relevantProducts: RelevantProducts): Promise<RegistrationSuccess> {
-    const { payNow, payRecurring } = calculateAmountToPay({ selectedPlan, relevantProducts, currentMemberships: [] })
+async function registerMember(paymentMethod: stripe.paymentMethod.PaymentMethod, memberInfo: MemberInfo, selectedPlan: Plan, discount: Discount, discountInfo: DiscountsInfo, relevantProducts: RelevantProducts): Promise<RegistrationSuccess> {
+    const { payNow, payRecurring } = calculateAmountToPay({ selectedPlan, relevantProducts, discount, currentMemberships: [] })
     const nonSubscriptionProducts = selectedPlan.products.filter(p => p.product_metadata.subscription_type === undefined);
     const data: RegisterRequest = {
         member: memberInfo,
@@ -636,19 +673,23 @@ async function registerMember(paymentMethod: stripe.paymentMethod.PaymentMethod,
                 id: p.id,
                 count: 1,
             })),
-            expected_sum: "" + payNow.filter(p => p[0].product_metadata.subscription_type === undefined).reduce((sum, [_, price]) => sum + price, 0),
+            expected_sum: "" + payNow.filter(p => p.product.product_metadata.subscription_type === undefined).reduce((sum, { amount }) => sum + amount, 0),
             stripe_payment_method_id: paymentMethod.id,
         },
         subscriptions: selectedPlan.products.filter(p => p.product_metadata.subscription_type !== undefined).map(p => {
-            const payNowForSubscription = payNow.find(([p2, _]) => p == p2);
-            const payRecurringForSubscription = payRecurring.find(([p2, _]) => p == p2);
+            const payNowForSubscription = payNow.find(({ product }) => p == product);
+            const payRecurringForSubscription = payRecurring.find(({ product }) => p == product);
             return {
                 subscription: p.product_metadata.subscription_type!,
-                expected_to_pay_now: "" + (payNowForSubscription ? payNowForSubscription[1] : 0),
-                expected_to_pay_recurring: "" + (payRecurringForSubscription ? payRecurringForSubscription[1] : 0),
+                expected_to_pay_now: "" + (payNowForSubscription ? payNowForSubscription.amount : 0),
+                expected_to_pay_recurring: "" + (payRecurringForSubscription ? payRecurringForSubscription.amount : 0),
             }
         }),
         setup_intent_id: null,
+        discount: discount.priceLevel !== null && discountInfo.discountReason !== null ? {
+            price_level: discount.priceLevel,
+            message: `${discountInfo.discountReason}: ${discountInfo.discountReasonMessage}`,
+        } : null,
     };
 
     while (true) {
@@ -712,6 +753,7 @@ type Product = {
     product_metadata: {
         subscription_type?: SubscriptionType,
         special_product_id?: string,
+        allowed_price_levels?: PriceLevel[],
     },
     name: string,
     price: string,
@@ -720,6 +762,8 @@ type Product = {
     unit: string,
 }
 
+type PriceLevel = "normal" | "low_income_discount";
+
 type RegisterPageData = {
     membershipProducts: {
         id: number,
@@ -727,9 +771,7 @@ type RegisterPageData = {
         price: number,
     }[],
     productData: Product[],
-    subscriptions: {
-
-    }
+    discounts: Record<PriceLevel, number>,
 }
 
 const CheckIcon = ({ done }: { done: boolean }) => {
@@ -757,13 +799,13 @@ const Success = ({ member }: { member: member_t }) => {
                 <CheckIcon done={booked} />
                 <div class="uk-flex uk-flex-column">
                     <span>{t("success.book_step")}</span>
-                    <button className="flow-button flow-button-small" onClick={() => setBookModalOpen(true)}>{t("success.book_button")}</button>
+                    <button className="flow-button primary flow-button-small" onClick={() => setBookModalOpen(true)}>{t("success.book_button")}</button>
                 </div>
             </li>
             {t("success.steps").map((step, i) => <li key={i}><CheckIcon done={clickedSteps.has(i)} /><span>{step((e) => setClickedSteps(new Set(clickedSteps).add(i)))}</span></li>)}
         </ul>
         <div class="uk-flex-1" />
-        <a href={RELATIVE_MEMBER_PORTAL} className="flow-button" >{t("success.continue_to_member_portal")}</a>
+        <a href={RELATIVE_MEMBER_PORTAL} className="flow-button primary" >{t("success.continue_to_member_portal")}</a>
         <PopupModal
             url="https://calendly.com/medlemsintroduktion/medlemsintroduktion"
             rootElement={document.getElementById("root")!}
@@ -779,7 +821,7 @@ const Success = ({ member }: { member: member_t }) => {
     </>);
 }
 
-const Discounts = ({ discounts, setDiscounts, onSubmit }: { discounts: DiscountsInfo, setDiscounts: (m: DiscountsInfo)=>void, onSubmit: ()=>void }) => {
+const Discounts = ({ discounts, setDiscounts, onSubmit, discountAmounts }: { discounts: DiscountsInfo, discountAmounts: Record<PriceLevel, number>, setDiscounts: (m: DiscountsInfo)=>void, onSubmit: ()=>void }) => {
     const t = useTranslation();
 
     const reasons: DiscountReason[] = ["student","unemployed","senior","other"];
@@ -797,8 +839,8 @@ const Discounts = ({ discounts, setDiscounts, onSubmit }: { discounts: Discounts
                 </div>
             )}
             <textarea placeholder={t("discounts.messagePlaceholder")} value={discounts.discountReasonMessage} onChange={(e) => setDiscounts({ ...discounts, discountReasonMessage: e.currentTarget.value })} />
-            <button className="flow-button" onClick={() => setStep(1)} disabled={discounts.discountReason === null || discounts.discountReasonMessage.length < 30}>{t("discounts.submit")}</button>
-            <button className="flow-button" onClick={() => {
+            <button className="flow-button primary" onClick={() => setStep(1)} disabled={discounts.discountReason === null || discounts.discountReasonMessage.length < 30}>{t("discounts.submit")}</button>
+            <button className="flow-button primary" onClick={() => {
                 setDiscounts({ discountReason: null, discountReasonMessage: "" });
                 onSubmit();
             }}>{t("discounts.cancel")}</button>
@@ -806,9 +848,9 @@ const Discounts = ({ discounts, setDiscounts, onSubmit }: { discounts: Discounts
     } else {
         return <>
             <h2>{t("discounts.title")}</h2>
-            {t("discounts.confirmation")}
-            <button className="flow-button" onClick={onSubmit}>{t("discounts.submit")}</button>
-            <button className="flow-button" onClick={() => {
+            {t("discounts.confirmation")(discountAmounts["low_income_discount"])}
+            <button className="flow-button primary" onClick={onSubmit}>{t("discounts.submit")}</button>
+            <button className="flow-button primary" onClick={() => {
                 setDiscounts({ discountReason: null, discountReasonMessage: "" });
                 onSubmit();
             }}>{t("discounts.cancel")}</button>
@@ -889,8 +931,6 @@ const extractRelevantProducts = (products: Product[]): RelevantProducts => {
 
 }
 
-type PriceLevel = "normal" | "low_income_discount";
-
 const RegisterPage = ({ onChangeLanguage }: { onChangeLanguage: (lang: keyof typeof Translations) => void }) => {
     // Language chooser
     // Inspiration page?
@@ -931,29 +971,31 @@ const RegisterPage = ({ onChangeLanguage }: { onChangeLanguage: (lang: keyof typ
         labaccess_agreement_at: "2020-01-01",
     });
     const t = useTranslation();
-    const card = createStripeCardInput();
+    const card = useMemo(() => createStripeCardInput(), []);
     const [registerPageData, setRegisterPageData] = useState<RegisterPageData | null>(null);
-    const [registerPageDataNormal, setRegisterPageDataNormal] = useState<RegisterPageData | null>(null);
     const [discounts, setDiscounts] = useState<DiscountsInfo>({
         discountReason: null,
         discountReasonMessage: "",
     });
-    const priceLevel: PriceLevel = discounts.discountReason !== null ? "low_income_discount" : "normal";
+
 
     useEffect(() => {
-        common.ajax('GET', `${window.apiBasePath}/webshop/register_page_data/${priceLevel}`).then(x => {
-            if (priceLevel === "normal") {
-                setRegisterPageDataNormal(x.data);
-            }
+        common.ajax('GET', `${window.apiBasePath}/webshop/register_page_data`).then(x => {
             setRegisterPageData(x.data);
         });
-    }, [priceLevel]);
+    }, []);
 
-    if (registerPageData === null || registerPageDataNormal === null) {
+    if (registerPageData === null) {
         return <div>Loading...</div>
     }
+
+    const priceLevel: PriceLevel = discounts.discountReason !== null ? "low_income_discount" : "normal";
+    const discount: Discount = {
+        priceLevel,
+        fractionOff: registerPageData.discounts[priceLevel],
+    }
+
     const relevantProducts = extractRelevantProducts(registerPageData.productData);
-    const relevantProductsOriginal = extractRelevantProducts(registerPageDataNormal.productData);
     const accessCostSingle = parseFloat(relevantProducts.labaccessProduct.price);
     const accessSubscriptionCost = parseFloat(relevantProducts.labaccessSubscriptionProduct.price);
 
@@ -962,30 +1004,30 @@ const RegisterPage = ({ onChangeLanguage }: { onChangeLanguage: (lang: keyof typ
             id: "singleMonth",
             title: t("plans.singleMonth.title"),
             abovePrice: t("plans.singleMonth.abovePrice"),
-            price: parseFloat(relevantProductsOriginal.labaccessProduct.price),
+            price: parseFloat(relevantProducts.labaccessProduct.price),
             period: t("plans.singleMonth.period"),
             description: t("plans.singleMonth.description"),
-            products: [relevantProductsOriginal.labaccessProduct, relevantProductsOriginal.membershipSubscriptionProduct],
+            products: [relevantProducts.labaccessProduct, relevantProducts.membershipSubscriptionProduct],
             highlight: null,
         },
         {
             id: "starterPack",
             title: t("plans.starterPack.title"),
             abovePrice: t("plans.starterPack.abovePrice"),
-            price: parseFloat(relevantProductsOriginal.starterPackProduct.price),
+            price: parseFloat(relevantProducts.starterPackProduct.price),
             period: t("plans.starterPack.period"),
             description: t("plans.starterPack.description"),
-            products: [relevantProductsOriginal.starterPackProduct, relevantProductsOriginal.membershipSubscriptionProduct],
+            products: [relevantProducts.starterPackProduct, relevantProducts.membershipSubscriptionProduct],
             highlight: "Recommended",
         },
         // {
         //     id: "makerspaceAccessSub",
         //     title: t("plans.makerspaceAccessSub.title"),
         //     abovePrice: t("plans.makerspaceAccessSub.abovePrice"),
-        //     price: parseFloat(relevantProductsOriginal.labaccessSubscriptionProduct.price),
+        //     price: parseFloat(relevantProducts.labaccessSubscriptionProduct.price),
         //     period: t("plans.makerspaceAccessSub.period"),
         //     description: t("plans.makerspaceAccessSub.description"),
-        //     products: [relevantProductsOriginal.membershipSubscriptionProduct, relevantProductsOriginal.labaccessSubscriptionProduct],
+        //     products: [relevantProducts.membershipSubscriptionProduct, relevantProducts.labaccessSubscriptionProduct],
         //     highlight: null,
         // },
         {
@@ -995,7 +1037,7 @@ const RegisterPage = ({ onChangeLanguage }: { onChangeLanguage: (lang: keyof typ
             price: 0,
             period: t("plans.decideLater.period"),
             description: t("plans.decideLater.description")(accessCostSingle, accessSubscriptionCost),
-            products: [relevantProductsOriginal.membershipSubscriptionProduct],
+            products: [relevantProducts.membershipSubscriptionProduct],
             highlight: null,
         },
         // {
@@ -1005,7 +1047,7 @@ const RegisterPage = ({ onChangeLanguage }: { onChangeLanguage: (lang: keyof typ
         //     price: 0,
         //     period: t("plans.discounted.period"),
         //     description: t("plans.discounted.description"),
-        //     products: [relevantProductsOriginal.membershipSubscriptionProduct],
+        //     products: [relevantProducts.membershipSubscriptionProduct],
         //     highlight: null,
         // }
     ]
@@ -1029,12 +1071,12 @@ const RegisterPage = ({ onChangeLanguage }: { onChangeLanguage: (lang: keyof typ
 
                 <Panel>
                     <h3>{t("baseMembership.title")}</h3>
-                    <span className="small-price">{parseFloat(relevantProductsOriginal.baseMembershipProduct.price)} {t("priceUnit")} {t("baseMembership.period")}</span>
+                    <span className="small-price">{parseFloat(relevantProducts.baseMembershipProduct.price)} {t("priceUnit")} {t("baseMembership.period")}</span>
                     <ul>
                         {t("baseMembership.reasons").map((reason, i) => <li key={i}>{reason}</li>)}
                     </ul>
                     {/* <div className="price">
-                        {parseFloat(relevantProductsOriginal.baseMembershipProduct.price)} {t("priceUnit")}
+                        {parseFloat(relevantProducts.baseMembershipProduct.price)} {t("priceUnit")}
                         <span className="period">{t("baseMembership.period")}</span>
                     </div> */}
                     <span className="panel-divider" />
@@ -1052,9 +1094,9 @@ const RegisterPage = ({ onChangeLanguage }: { onChangeLanguage: (lang: keyof typ
                 <h2>{t("chooseYourPlan.title")}</h2>
                 <span>{t("chooseYourPlan.help")}</span>
                 {plans.map(plan => <PlanButton selected={selectedPlan === plan.id} onClick={() => setSelectedPlan(plan.id)} plan={plan} />)}
-                <button className="flow-button" onClick={() => setState(State.Discounts)}>{t("apply_for_discounts")}</button>
-                {activePlan !== undefined ? <ToPayPreview selectedPlan={activePlan} relevantProducts={relevantProducts} relevantProductsNormal={relevantProductsOriginal} /> : null}
-                <button className="flow-button" disabled={selectedPlan == null} onClick={() => setState(State.MemberInfo)}>{t("continue")}</button>
+                {registerPageData.discounts["low_income_discount"] > 0 && <button className="flow-button" onClick={() => setState(State.Discounts)}>{t("apply_for_discounts")}</button>}
+                {activePlan !== undefined ? <ToPayPreview selectedPlan={activePlan} relevantProducts={relevantProducts} discount={discount} /> : null}
+                <button className="flow-button primary" disabled={selectedPlan == null} onClick={() => setState(State.MemberInfo)}>{t("continue")}</button>
             </>);
         case State.MemberInfo:
             return (<>
@@ -1084,7 +1126,8 @@ const RegisterPage = ({ onChangeLanguage }: { onChangeLanguage: (lang: keyof typ
                     selectedPlan={activePlan}
                     memberInfo={memberInfo}
                     relevantProducts={relevantProducts}
-                    relevantProductsNormal={relevantProductsOriginal}
+                    discount={discount}
+                    discountInfo={discounts}
                     onRegistered={async (r) => {
                         common.login(r.loginToken);
                         setLoggedInMember(await LoadCurrentMemberInfo());
@@ -1103,10 +1146,7 @@ const RegisterPage = ({ onChangeLanguage }: { onChangeLanguage: (lang: keyof typ
         case State.Discounts:
             return <>
                 <MakerspaceLogo />
-                <Discounts discounts={discounts} setDiscounts={setDiscounts} onSubmit={() => {
-                    if (discounts.discountReason !== null) {
-                        setSelectedPlan("discounted");
-                    }
+                <Discounts discounts={discounts} setDiscounts={setDiscounts} discountAmounts={registerPageData.discounts} onSubmit={() => {
                     setState(State.ChoosePlan);
                 }} />
             </>

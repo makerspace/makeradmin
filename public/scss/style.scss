@@ -1682,13 +1682,29 @@ $palette-red: $palette4;
             top: 7px;
         }
 
-        background: #e46d22;
-        color: white;
-        padding: 10px 20px;
         border: none;
+        background: #fff;
+        color: rgb(104, 104, 104);
+        border-bottom: 2px solid #b6b6b6;
+        &:hover:not(:disabled), &:active:not(:disabled) {
+            background-color: #e5e5e5;
+            color: rgb(90, 90, 90);
+        }
+
+        &.primary {
+            background: #e46d22;
+            border-bottom: 2px solid #B14908;
+            color: white;
+
+            &:hover:not(:disabled), &:active:not(:disabled) {
+                background-color: #d9651d;
+                color: white;
+            }
+        }
+
+        padding: 10px 20px;
         border-radius: 5px;
         font-size: 20px;
-        border-bottom: 2px solid #B14908;
         margin-left: 16px;
         margin-right: 16px;
         margin-top: 16px;
@@ -1699,11 +1715,6 @@ $palette-red: $palette4;
         font-family: inherit; // Disable the browser's own font-family for buttons
         line-height: normal; // Reset line-height to normal, as it otherwise differs between 'a' and 'button' tags
         text-align: center;
-
-        &:hover,
-        &:active {
-            background-color: #d9651d;
-        }
 
         &:disabled {
             background-color: #a7a7a7;
@@ -1826,6 +1837,8 @@ $palette-red: $palette4;
 
                 .receipt-item-original-amount {
                     grid-column: 2;
+                    text-align: right;
+                    white-space: nowrap;
                 }
 
                 .receipt-item-amount {

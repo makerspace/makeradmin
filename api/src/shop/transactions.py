@@ -7,6 +7,7 @@ from dataclasses_json import DataClassJsonMixin
 
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 from sqlalchemy.sql import func
+from shop.stripe_discounts import get_discount_for_product, get_price_level_for_member
 from shop.stripe_subscriptions import SubscriptionType, resume_paused_subscription
 
 
@@ -209,7 +210,6 @@ def activate_member(member: Member) -> None:
     
 def create_transaction(member_id: int, purchase: Purchase, activates_member: bool, stripe_reference_id: str) -> Transaction:
     total_amount, contents = validate_order(member_id, purchase.cart, purchase.expected_sum)
-
     transaction = commit_transaction_to_db(member_id=member_id, total_amount=total_amount, contents=contents,
                                            activates_member=activates_member, stripe_card_source_id=stripe_reference_id)
 
@@ -270,6 +270,9 @@ def payment_success(transaction: Transaction) -> None:
 
 def process_cart(member_id: int, cart: List[CartItem]) -> Tuple[Decimal, List[TransactionContent]]:
     contents = []
+
+    price_level = get_price_level_for_member(db_session.query(Member).get(member_id))
+
     with localcontext() as ctx:
         ctx.clear_flags()
         total_amount = Decimal(0)
@@ -295,8 +298,10 @@ def process_cart(member_id: int, cart: List[CartItem]) -> Tuple[Decimal, List[Tr
 
             if product.filter:
                 PRODUCT_FILTERS[product.filter](item, member_id)
+            
+            discount = get_discount_for_product(product, price_level)
 
-            amount = product.price * count
+            amount = Decimal(product.price) * Decimal(count) * (1 - discount.fraction_off)
             total_amount += amount
 
             content = TransactionContent(product_id=product_id, count=count, amount=amount)
@@ -305,7 +310,7 @@ def process_cart(member_id: int, cart: List[CartItem]) -> Tuple[Decimal, List[Tr
         if ctx.flags[Rounded]:
             # This can possibly happen with huge values, I suppose they will be caught below anyway but it's good to
             # catch in any case.
-            raise InternalServerError(log="Rounding error when calculating cart sum.")
+            raise InternalServerError("Internal server error", log="Rounding error when calculating cart sum.")
 
     return total_amount, contents
 

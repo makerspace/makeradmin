@@ -1,6 +1,8 @@
+from typing import Any
 from sqlalchemy import JSON, Column, Integer, String, DateTime, func, Text, Numeric, ForeignKey, Enum, Boolean, LargeBinary
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, configure_mappers, validates
+from shop.stripe_constants import MakerspaceMetadataKeys
 
 from membership.models import Member
 from service.api_definition import BAD_VALUE
@@ -60,6 +62,11 @@ class Product(Base):
     actions = relationship("ProductAction")
 
     image_id = Column(Integer, ForeignKey(ProductImage.id), nullable=True)
+
+    def get_metadata(self, key: MakerspaceMetadataKeys, default: Any) -> Any:
+        meta = self.product_metadata
+        assert isinstance(meta, dict)
+        return meta.get(key.value, default)
 
     @validates('price')
     def validate_name(self, key, value):
