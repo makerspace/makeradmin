@@ -1523,6 +1523,7 @@ $palette-red: $palette4;
         flex-direction: column;
         align-items: stretch;
         padding: 0px 0px;
+        padding-bottom: 20px;
         text-align: center;
         transition: outline-color 100ms;
         outline: 4px solid transparent;
@@ -1575,7 +1576,7 @@ $palette-red: $palette4;
             color: white;
             padding: 20px;
 
-            .abovePrice {
+            .abovePrice, .belowPrice {
                 font-size: 0.8em;
                 font-weight: bold;
                 line-height: 100%;
@@ -1593,6 +1594,10 @@ $palette-red: $palette4;
                 line-height: 100%;
                 font-weight: bold;
             }
+        }
+
+        .checkmark-list {
+            margin: 0px;
         }
     }
 
@@ -1897,6 +1902,8 @@ $palette-red: $palette4;
 .checkmark-list {
     list-style: none;
     padding-left: 20px;
+    text-align: left;
+    line-height: 1.8;
 
     span {
         margin-right: 10px;

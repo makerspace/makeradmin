@@ -18,8 +18,9 @@ type Plan = {
     title: string,
     abovePrice: string,
     price: number,
-    period: string,
-    description: string,
+    belowPrice: string,
+    description1: string
+    description2: string,
     products: Product[],
     highlight: string | null,
 }
@@ -82,35 +83,73 @@ const Eng = {
         p2: "Everyone has the base membership, and if you want to work on your own projects, you must also get Makerspace Access.",
     },
     chooseYourPlan: {
-        title: "Choose your Makerspace\xa0Access",
+        title: "Choose your membership",
         help: ""
     },
     priceUnit: "kr",
     plans: {
+        ofWhichBaseMembership: (price: number) => `of which ${price} kr is base membership`,
         makerspaceAccessSub: {
             title: "Makerspace Access Subscription",
-            abovePrice: "base membership +",
+            abovePrice: "",
             period: "per month",
-            description: "A monthly subscription gets you access all the time, for a lower price.\n2 months minimum.",
+            description1: "A monthly subscription gets you access all the time, for a lower price.\n2 months minimum.",
+            description2: "",
+            included: [
+                "Take part in courses and social events",
+                "Vote at yearly meetings",
+                "Access to Stockholm Makerspace 24/7",
+                "Work on your own projects",
+                "Store a personal box at the space"
+            ],
+            notIncluded: [],
         },
         starterPack: {
             title: "Starter Pack",
-            abovePrice: "base membership +",
+            abovePrice: "",
             period: "",
-            description: "Two months of makerspace access for a lower price.\nNew members only.",
+            description1: "Two months of makerspace access for a lower price.\nNew members only.",
+            description2: "",
+            included: [
+                "Take part in courses and social events",
+                "Vote at yearly meetings",
+                "Access to Stockholm Makerspace 24/7",
+                "Work on your own projects",
+                "Store a personal box at the space"
+            ],
+            notIncluded: [],
         },
         singleMonth: {
             title: "1 month of Makerspace Access",
-            abovePrice: "base membership +",
+            abovePrice: "",
             period: "",
-            description: "One month of makerspace access.",
+            description1: "One month of makerspace access.",
+            description2: "",
+            included: [
+                "Take part in courses and social events",
+                "Vote at yearly meetings",
+                "Access to Stockholm Makerspace 24/7",
+                "Work on your own projects",
+                "Store a personal box at the space"
+            ],
+            notIncluded: [],
+            
         },
         decideLater: {
-            title: "Base Membership Only",
-            abovePrice: "base membership +",
+            title: "1 year of Base Membership only",
+            abovePrice: "",
             price: "0",
             period: "",
-            description: (a: number, b: number) => `Later, you can pay for individual months of makerspace access (${a} kr/mo) in our webshop, or get a subscription (${b} kr/mo).`,
+            description1: "One year of base membership.",
+            description2: (a: number, b: number) => `Later, you can pay for individual months of makerspace access (${a} kr/mo) in our webshop, or get a subscription (${b} kr/mo).`,
+            included: [
+                "Take part in courses and social events",
+                "Vote at yearly meetings",
+                "Support your local makerspace",
+            ],
+            notIncluded: [
+                "Access to the space outside of events",
+            ],
         },
     },
     baseMembership: {
@@ -275,11 +314,16 @@ const PlanButton = ({ plan, selected, onClick }: { plan: Plan, selected: boolean
         <div className={"access-plan " + (selected ? 'selected' : '')} onClick={onClick}>
             <div className="access-plan-title">{plan.title}{plan.highlight !== null ? <span class="plan-highlight"><span>{plan.highlight}</span></span> : null}</div>
             <div className="access-plan-price">
-                <span class="abovePrice">{plan.abovePrice}</span>
+                {plan.abovePrice && <span class="abovePrice">{plan.abovePrice}</span>}
                 <span class="price">{plan.price} {t("priceUnit")}</span>
-                <span class="period">{plan.period}</span>
+                {plan.belowPrice && <span class="belowPrice">{plan.belowPrice}</span>}
             </div>
-            <div className="access-plan-description">{plan.description}</div>
+            {plan.description1 && <div className="access-plan-description">{plan.description1}</div>}
+            <ul className="checkmark-list">
+                {t(`plans.${plan.id}.included`).map((reason, i) => <li key={i}><span className="positive" uk-icon="icon: check"></span> {reason}</li>)}
+                {t(`plans.${plan.id}.notIncluded`).map((reason, i) => <li key={i}><span className="negative" uk-icon="icon: close"></span> {reason}</li>)}
+            </ul>
+            {plan.description2 && <div className="access-plan-description">{plan.description2}</div>}
         </div>
     );
 }
@@ -903,7 +947,7 @@ const heuristicallyPickLanguage = (): "en" | "sv" => {
     return "en";
 }
 
-type PlanId = "starterPack" | "makerspaceAccessSub" | "decideLater" | "singleMonth" | "discounted";
+type PlanId = "starterPack" | "makerspaceAccessSub" | "decideLater" | "singleMonth";
 
 type RelevantProducts = {
     starterPackProduct: Product,
@@ -1004,24 +1048,26 @@ const RegisterPage = ({ onChangeLanguage }: { onChangeLanguage: (lang: keyof typ
 
     const plans: Plan[] = [
         {
-            id: "singleMonth",
-            title: t("plans.singleMonth.title"),
-            abovePrice: t("plans.singleMonth.abovePrice"),
-            price: parseFloat(relevantProducts.labaccessProduct.price),
-            period: t("plans.singleMonth.period"),
-            description: t("plans.singleMonth.description"),
-            products: [relevantProducts.labaccessProduct, relevantProducts.membershipSubscriptionProduct],
-            highlight: null,
-        },
-        {
             id: "starterPack",
             title: t("plans.starterPack.title"),
             abovePrice: t("plans.starterPack.abovePrice"),
             price: parseFloat(relevantProducts.starterPackProduct.price),
-            period: t("plans.starterPack.period"),
-            description: t("plans.starterPack.description"),
+            belowPrice: t("plans.ofWhichBaseMembership")(parseFloat(relevantProducts.baseMembershipProduct.price)),
+            description1: t("plans.starterPack.description1"),
+            description2: t("plans.starterPack.description2"),
             products: [relevantProducts.starterPackProduct, relevantProducts.membershipSubscriptionProduct],
             highlight: "Recommended",
+        },
+        {
+            id: "singleMonth",
+            title: t("plans.singleMonth.title"),
+            abovePrice: t("plans.singleMonth.abovePrice"),
+            price: parseFloat(relevantProducts.labaccessProduct.price),
+            belowPrice: t("plans.ofWhichBaseMembership")(parseFloat(relevantProducts.baseMembershipProduct.price)),
+            description1: t("plans.singleMonth.description1"),
+            description2: t("plans.singleMonth.description2"),
+            products: [relevantProducts.labaccessProduct, relevantProducts.membershipSubscriptionProduct],
+            highlight: null,
         },
         // {
         //     id: "makerspaceAccessSub",
@@ -1038,8 +1084,9 @@ const RegisterPage = ({ onChangeLanguage }: { onChangeLanguage: (lang: keyof typ
             title: t("plans.decideLater.title"),
             abovePrice: t("plans.decideLater.abovePrice"),
             price: 0,
-            period: t("plans.decideLater.period"),
-            description: t("plans.decideLater.description")(accessCostSingle, accessSubscriptionCost),
+            belowPrice: "",
+            description1: t("plans.decideLater.description1"),
+            description2: t("plans.decideLater.description2")(accessCostSingle, accessSubscriptionCost),
             products: [relevantProducts.membershipSubscriptionProduct],
             highlight: null,
         },
@@ -1053,7 +1100,12 @@ const RegisterPage = ({ onChangeLanguage }: { onChangeLanguage: (lang: keyof typ
         //     products: [relevantProducts.membershipSubscriptionProduct],
         //     highlight: null,
         // }
-    ]
+    ];
+
+    for (const plan of plans) {
+        const toPay = calculateAmountToPay({ selectedPlan: plan, relevantProducts: relevantProducts, discount: discount, currentMemberships: [] });
+        plan.price = toPay.payNow.reduce((a, b) => a + b.amount, 0);
+    }
 
     const lowestMakerspaceAccessPrice = Math.min(accessCostSingle, accessSubscriptionCost);
     const highestMakerspaceAccessPrice = Math.max(accessCostSingle, accessSubscriptionCost);
@@ -1072,30 +1124,6 @@ const RegisterPage = ({ onChangeLanguage }: { onChangeLanguage: (lang: keyof typ
                 <p>{t("memberships.p1")}</p>
                 <p>{t("memberships.p2")}</p>
 
-                <Panel>
-                    <h3>{t("baseMembership.title")}</h3>
-                    <span className="small-price">{parseFloat(relevantProducts.baseMembershipProduct.price)} {t("priceUnit")} {t("baseMembership.period")}</span>
-                    <ul className="checkmark-list">
-                        {t("baseMembership.included").map((reason, i) => <li key={i}><span className="positive" uk-icon="icon: check"></span> {reason}</li>)}
-                        {t("baseMembership.notIncluded").map((reason, i) => <li key={i}><span className="negative" uk-icon="icon: close"></span> {reason}</li>)}
-                    </ul>
-                    {/* <div className="price">
-                        {parseFloat(relevantProducts.baseMembershipProduct.price)} {t("priceUnit")}
-                        <span className="period">{t("baseMembership.period")}</span>
-                    </div> */}
-                    <span className="panel-divider" />
-                    <h3>{t("makerspaceAccess.title")}</h3>
-                    <span className="small-price">
-                        {lowestMakerspaceAccessPrice != highestMakerspaceAccessPrice ? `${lowestMakerspaceAccessPrice}-${highestMakerspaceAccessPrice}${t("makerspaceAccess.price")}`
-                            : `${lowestMakerspaceAccessPrice}${t("makerspaceAccess.price")}`
-                        }
-                    </span>
-                    <span className="requirement">{t("makerspaceAccess.requirement")}</span>
-                    <ul className="checkmark-list">
-                        {t("makerspaceAccess.included").map((reason, i) => <li key={i}><span className="positive" uk-icon="icon: check"></span> {reason}</li>)}
-                        {t("makerspaceAccess.notIncluded").map((reason, i) => <li key={i}><span className="negative" uk-icon="icon: close"></span> {reason}</li>)}
-                    </ul>
-                </Panel>
                 <h2>{t("chooseYourPlan.title")}</h2>
                 <span>{t("chooseYourPlan.help")}</span>
                 {plans.map(plan => <PlanButton selected={selectedPlan === plan.id} onClick={() => setSelectedPlan(plan.id)} plan={plan} />)}
