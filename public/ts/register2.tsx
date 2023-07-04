@@ -115,12 +115,14 @@ const Eng = {
     },
     baseMembership: {
         title: "Base Membership",
-        reasons: [
+        included: [
             "Take part in courses",
-            "Attent social events",
+            "Attend social events",
             "Vote at yearly meetings",
             "Support your local makerspace",
-            "No access to Stockholm Makerspace outside of events",
+        ],
+        notIncluded: [
+            "Access to the makerspace outside of events",
         ],
         price: "200",
         period: "per year",
@@ -129,11 +131,12 @@ const Eng = {
         title: "Makerspace Access",
         price: " kr per month",
         requirement: "Requires the base membership",
-        reasons: [
+        included: [
             "Access to Stockholm Makerspace 24/7",
             "Work on your own projects",
             "Store a personal box at the space"
         ],
+        notIncluded: [],
     },
     memberInfo: {
         title: "A little bit about you",
@@ -526,7 +529,7 @@ const ToPayPreview = ({ selectedPlan, relevantProducts, discount }: { selectedPl
     const paidRightNowItems: [string, number, number | undefined][] = payNow.map(({ product, amount, originalAmount }, i) => {
         const product_id = product.product_metadata.special_product_id;
         AssertIsWellKnownProductId(product_id);
-        if (product.unit !== "mån" && product.unit !== "år" && product.unit !== "st") throw new Error(`Unexpected unit ${product.unit}`);
+    if (product.unit !== "mån" && product.unit !== "år" && product.unit !== "st") throw new Error(`Unexpected unit '${product.unit}' for ${product.name}. Expected one of år/mån/st`);
         let period = product.smallest_multiple + " " + t(`unit.${product.unit}.${product.smallest_multiple > 1 ? "many" : "one"}`);
         if (product_id === "access_starter_pack") {
             // Special case for the starter pack period. Otherwise it would show "1 st"
@@ -1072,8 +1075,9 @@ const RegisterPage = ({ onChangeLanguage }: { onChangeLanguage: (lang: keyof typ
                 <Panel>
                     <h3>{t("baseMembership.title")}</h3>
                     <span className="small-price">{parseFloat(relevantProducts.baseMembershipProduct.price)} {t("priceUnit")} {t("baseMembership.period")}</span>
-                    <ul>
-                        {t("baseMembership.reasons").map((reason, i) => <li key={i}>{reason}</li>)}
+                    <ul className="checkmark-list">
+                        {t("baseMembership.included").map((reason, i) => <li key={i}><span className="positive" uk-icon="icon: check"></span> {reason}</li>)}
+                        {t("baseMembership.notIncluded").map((reason, i) => <li key={i}><span className="negative" uk-icon="icon: close"></span> {reason}</li>)}
                     </ul>
                     {/* <div className="price">
                         {parseFloat(relevantProducts.baseMembershipProduct.price)} {t("priceUnit")}
@@ -1087,8 +1091,9 @@ const RegisterPage = ({ onChangeLanguage }: { onChangeLanguage: (lang: keyof typ
                         }
                     </span>
                     <span className="requirement">{t("makerspaceAccess.requirement")}</span>
-                    <ul>
-                        {t("makerspaceAccess.reasons").map((reason, i) => <li key={i}>{reason}</li>)}
+                    <ul className="checkmark-list">
+                        {t("makerspaceAccess.included").map((reason, i) => <li key={i}><span className="positive" uk-icon="icon: check"></span> {reason}</li>)}
+                        {t("makerspaceAccess.notIncluded").map((reason, i) => <li key={i}><span className="negative" uk-icon="icon: close"></span> {reason}</li>)}
                     </ul>
                 </Panel>
                 <h2>{t("chooseYourPlan.title")}</h2>

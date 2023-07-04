@@ -1893,3 +1893,19 @@ $palette-red: $palette4;
         opacity: 100%;
     }
 }
+
+.checkmark-list {
+    list-style: none;
+    padding-left: 20px;
+
+    span {
+        margin-right: 10px;
+    }
+
+    span.positive {
+        color: rgb(135, 201, 43);
+    }
+    span.negative {
+        color: rgb(201, 43, 43);
+    }
+}
