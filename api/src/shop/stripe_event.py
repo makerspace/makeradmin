@@ -157,7 +157,6 @@ def stripe_invoice_event(
                 subscription_type = SubscriptionType(
                     metadata[MakerspaceMetadataKeys.SUBSCRIPTION_TYPE.value]
                 )
-                price_level = PriceLevel(metadata[MakerspaceMetadataKeys.PRICE_LEVEL.value])
             except KeyError as e:
                 # We ignore any items that doesn't contain the right metadata
                 logger.error(
@@ -182,7 +181,7 @@ def stripe_invoice_event(
             # Divide the timespan down to days
             days = round((end_ts - start_ts) / 86400)
 
-            product = get_subscription_product(subscription_type, price_level)
+            product = get_subscription_product(subscription_type)
             # Note: We use stripe as the source of truth for how much was actually paid.
             amount = Decimal(line["amount"]) / STRIPE_CURRENTY_BASE
             transaction = Transaction(
