@@ -148,7 +148,6 @@ class DbFactory:
             sql = "SELECT 1 FROM membership_members WHERE member_number = :number"
             if db_session.execute(sql, params=dict(number=member_number)).first() is None:
                 break
-        logger.info(f"generated random member number {member_number}")
         return member_number
 
     def create_category(self, **kwargs) -> ProductCategory:
