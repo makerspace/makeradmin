@@ -34,6 +34,7 @@ config = {
     "ACCESSY_LABACCESS_GROUP": "",
     "ACCESSY_SPECIAL_LABACCESS_GROUP": "",
     "ACCESSY_DO_MODIFY":"false",
+    "CORS_ALLOWED_ORIGINS": "http://localhost:8009,http://localhost:8011,http://localhost:8080",
 }
 
 if not args.force and os.path.isfile(".env"):
