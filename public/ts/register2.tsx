@@ -1126,7 +1126,9 @@ const RegisterPage = ({ onChangeLanguage }: { onChangeLanguage: (lang: keyof typ
 
                 <h2>{t("chooseYourPlan.title")}</h2>
                 <span>{t("chooseYourPlan.help")}</span>
-                {plans.map(plan => <PlanButton selected={selectedPlan === plan.id} onClick={() => setSelectedPlan(plan.id)} plan={plan} />)}
+                <div class="plan-buttons">
+                    {plans.map(plan => <PlanButton selected={selectedPlan === plan.id} onClick={() => setSelectedPlan(plan.id)} plan={plan} />)}
+                </div>
                 {registerPageData.discounts["low_income_discount"] > 0 && <button className="flow-button" onClick={() => setState(State.Discounts)}>{t("apply_for_discounts")}</button>}
                 {activePlan !== undefined ? <ToPayPreview selectedPlan={activePlan} relevantProducts={relevantProducts} discount={discount} /> : null}
                 <button className="flow-button primary" disabled={selectedPlan == null} onClick={() => setState(State.MemberInfo)}>{t("continue")}</button>

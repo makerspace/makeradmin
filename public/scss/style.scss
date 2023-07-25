@@ -1483,6 +1483,11 @@ $palette-red: $palette4;
         flex-direction: column;
         align-items: stretch;
         align-self: stretch;
+
+        @media screen and (width > $break-medium) {
+            align-items: center;
+            align-self: center;
+        }
     }
 
     .StripeElement {
@@ -1512,6 +1517,15 @@ $palette-red: $palette4;
         margin: 32px 0px;
     }
 
+    .plan-buttons {
+        display: flex;
+        flex-direction: column;
+
+        @media screen and (width > $break-medium) {
+            flex-direction: row;
+        }
+    }
+
     .access-plan {
         margin: 16px 16px;
 
@@ -1527,6 +1541,10 @@ $palette-red: $palette4;
         text-align: center;
         transition: outline-color 100ms;
         outline: 4px solid transparent;
+
+        @media screen and (width > $break-medium) {
+            width: 400px;
+        }
 
         &.selected {
             outline: 4px solid rgb(73, 73, 73);
@@ -1826,6 +1844,10 @@ $palette-red: $palette4;
         border-radius: 4px;
         margin-bottom: 6px;
         margin-top: 6px;
+
+        @media screen and (width > $break-medium) {
+            align-self: stretch;
+        }
 
         .receipt-items {
             background-color: #c87744;
