@@ -4,7 +4,8 @@ services:
     image: mysql:8.0.33
     # The lumen library seems to use an older mysql client which is not able to connect if mysql uses the newer caching_sha2_password authentication plugin.
     # Therefore we need to override the mysql starting command to set a config option to use the older password authentication plugin.
-    command: bash -c "chmod -R 0777 /var/www/html/storage/logs && exec mysqld --default-authentication-plugin=mysql_native_password"
+    # We need to call the entrypoint script manually because that one will also initialize the database, if one doesn't already exist.
+    command: bash -c "chmod -R 0777 /var/www/html/storage/logs && exec bash ./entrypoint.sh mysqld --default-authentication-plugin=mysql_native_password"
     volumes:
       - dbdata:/var/lib/mysql
       - ./data/mysql_conf:/etc/mysql/conf.d
