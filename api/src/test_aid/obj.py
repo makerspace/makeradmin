@@ -2,6 +2,7 @@ from datetime import datetime
 from random import randint, choice, seed
 from typing import Dict
 from faker import Faker
+from membership.enums import PriceLevel
 
 from membership.models import Member, Span
 from messages.models import Message
@@ -46,6 +47,8 @@ class ObjFactory:
             civicregno=f"19901011{randint(1000, 9999):04d}",
             email=re.sub('[^a-zA-Z0-9.!#$%&\'*+\\/=?^_`{|}~\\-@\\.]', '_',
                          f'{firstname}.{lastname}+{random_str(6)}@bmail.com'.lower().replace(' ', '_')),
+            price_level=PriceLevel.Normal.value,
+            price_level_motivation=None,
         )
         obj.update(kwargs)
         self.member = obj
