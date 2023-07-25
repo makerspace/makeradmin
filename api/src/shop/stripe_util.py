@@ -1,6 +1,8 @@
 from datetime import datetime, timezone
 from decimal import Decimal
-from typing import Optional
+import random
+import time
+from typing import Callable, Optional, TypeVar
 
 from service.error import InternalServerError
 from shop.stripe_constants import STRIPE_CURRENTY_BASE
@@ -25,3 +27,20 @@ def event_semantic_time(event: stripe.Event) -> datetime:
     '''
     obj = event['data']['object']
     return datetime.fromtimestamp(obj['created'] if 'created' in obj else event['created'], timezone.utc)
+
+T = TypeVar('T')
+MAX_TRIES = 10
+
+def retry(f: Callable[[], T]) -> T:
+    """Retries a stripe operation if it fails with a rate limit error."""
+    its = 0
+    while True:
+        try:
+            return f()
+        except stripe.error.RateLimitError:
+            its += 1
+            if its > MAX_TRIES:
+                raise
+            # Retry.
+            # Especially when starting a lot of parallel tests, we can get rate limit errors.
+            time.sleep(1.0 * (1.0 + random.random()))

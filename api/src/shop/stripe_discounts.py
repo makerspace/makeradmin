@@ -1,8 +1,10 @@
 from dataclasses import dataclass
 from decimal import Decimal
 from enum import Enum
-from typing import TYPE_CHECKING, Dict, Optional
+import time
+from typing import TYPE_CHECKING, Dict, List, Optional
 import stripe
+from shop.stripe_util import retry
 from membership.enums import PriceLevel
 
 from shop.stripe_constants import MakerspaceMetadataKeys
@@ -42,7 +44,7 @@ def _query_discount_fraction_off(price_level: PriceLevel) -> Discount:
     if price_level == PriceLevel.Normal:
         return Discount(None, Decimal(0))
 
-    coupons = stripe.Coupon.list()
+    coupons: List[stripe.Coupon] = retry(lambda: stripe.Coupon.list())
     coupons = [coupon for coupon in coupons if coupon["metadata"].get(MakerspaceMetadataKeys.PRICE_LEVEL.value, None) == price_level.value]
     if len(coupons) == 0:
         raise Exception(f"Could not find stripe coupon for {MakerspaceMetadataKeys.PRICE_LEVEL.value}={price_level.value}")
@@ -54,6 +56,5 @@ def _query_discount_fraction_off(price_level: PriceLevel) -> Discount:
         raise Exception(f"Stripe coupon {coupon.stripe_id} has a fixed amount off. Only a percentage off is supported by MakerAdmin")
 
     percent_off = coupon["percent_off"]
-    print(percent_off)
     assert isinstance(percent_off, float) and percent_off >= 0 and percent_off <= 100
     return Discount(coupon, Decimal(percent_off) / 100)

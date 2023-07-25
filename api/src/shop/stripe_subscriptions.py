@@ -22,15 +22,16 @@ from dataclasses import dataclass
 from decimal import Decimal
 from enum import Enum
 from logging import getLogger
-from typing import Any, Dict, Generic, List, Optional, Tuple, TypeVar
+from typing import Any, Dict, Generic, List, Optional, Tuple, TypeVar, cast
 from sqlalchemy import func
 
 import stripe
 
 from datetime import datetime, timezone, date, time, timedelta
 from stripe.error import InvalidRequestError
+from shop.stripe_util import retry
 from membership.enums import PriceLevel
-from shop.stripe_discounts import get_discount_for_product, get_discount_fraction_off, get_price_level_for_member
+from shop.stripe_discounts import get_discount_for_product, get_price_level_for_member
 from shop.models import Product, ProductCategory
 from service.error import BadRequest, NotFound
 from service.db import db_session
@@ -162,7 +163,7 @@ def get_stripe_subscriptions(
     stripe_customer_id: str, active_only: bool = True
 ) -> List[stripe.Subscription]:
     """Returns the list of subscription objects for the given user."""
-    resp = stripe.Subscription.list(customer=stripe_customer_id)
+    resp = retry(lambda: stripe.Subscription.list(customer=stripe_customer_id))
     return [
         sub
         for sub in resp["data"]
@@ -201,7 +202,7 @@ def get_stripe_customer(
     try:
         if member_info.stripe_customer_id is not None:
             try:
-                customer = stripe.Customer.retrieve(member_info.stripe_customer_id)
+                customer = retry(lambda: stripe.Customer.retrieve(member_info.stripe_customer_id))
                 assert customer is not None
 
                 # Update the metadata if needed
@@ -226,7 +227,7 @@ def get_stripe_customer(
                     )
 
         # If no customer is found, we create one
-        customer = stripe.Customer.create(
+        customer = retry(lambda: stripe.Customer.create(
             description="Created by Makeradmin",
             email=member_info.email,
             test_clock=test_clock,
@@ -235,7 +236,7 @@ def get_stripe_customer(
                 MSMetaKeys.USER_ID.value: member_info.member_id,
                 MSMetaKeys.MEMBER_NUMBER.value: member_info.member_number,
             },
-        )
+        ))
 
         # Note: Stripe doesn't update its search index of customers immediately,
         # so the new customer may not be visible to stripe.Customer.search for a few seconds.
@@ -287,9 +288,9 @@ def lookup_subscription_price_for(
     if res is not None:
         return res
 
-    products = stripe.Product.search(
+    products = retry(lambda: stripe.Product.search(
         query=f"metadata['{MSMetaKeys.SUBSCRIPTION_TYPE.value}']:'{subscription_type.value}'"
-    )
+    ))
     assert (
         len(products.data) == 1
     ), f"Expected to find a single stripe product with metadata->{MSMetaKeys.SUBSCRIPTION_TYPE.value}={subscription_type.value}, but found {len(products.data)}"
@@ -297,7 +298,7 @@ def lookup_subscription_price_for(
     # default_price = product["default_price"]
     # assert type(default_price) == str
 
-    prices = stripe.Price.list(product=product.stripe_id)
+    prices = retry(lambda: stripe.Price.list(product=product.stripe_id))
     recurring_prices = [
         p
         for p in prices
@@ -709,7 +710,7 @@ def create_stripe_checkout_session(
     )
 
     # TODO: Handle normal shop payments?
-    return checkout_session.url
+    return cast(str, checkout_session.url)
 
 
 def open_stripe_customer_portal(
@@ -726,4 +727,4 @@ def open_stripe_customer_portal(
     )
     print(billing_portal_session)
 
-    return billing_portal_session.url
+    return cast(str, billing_portal_session.url)
