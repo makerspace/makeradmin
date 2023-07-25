@@ -46,10 +46,14 @@ class MemberEntity(Entity):
                 with db_session.begin_nested():
                     max_member_number, = db_session.execute("SELECT COALESCE(MAX(member_number), 999) FROM membership_members").fetchone()
                     data['member_number'] = max_member_number + 1
-                    obj = self.to_obj(self._create_internal(data, commit=commit))
+                    # We must not commit here, because that will end our transaction
+                    obj = self.to_obj(self._create_internal(data, commit=False))
                     logger.info(f"created member with number {data['member_number']}")
                     if db_session.query(self.model).filter(Member.member_number == data['member_number']).count() != 1:
                         raise RaceCondition()
+
+                    if commit:
+                        db_session.commit()
                     return obj
             except RaceCondition as e:
                 print("Race condition when creating member, retrying...")
