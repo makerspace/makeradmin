@@ -1,4 +1,5 @@
 from logging import getLogger
+from typing import Any, Optional
 
 import phonenumbers as phonenumbers
 from sqlalchemy import Column, Integer, String, DateTime, Text, Date, Enum, Table, ForeignKey, func, text, select, \
@@ -46,13 +47,13 @@ class Member(Base):
     pin_code = Column(String(30))
 
     @validates('phone')
-    def validate_phone(self, key, value):
+    def validate_phone(self, key: Any, value: Optional[str]) -> Optional[str]:
         return normalise_phone_number(value)
 
     groups = relationship('Group',
                           secondary=member_group,
                           back_populates='members')
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f'Member(member_id={self.member_id}, member_number={self.member_number}, email={self.email})'
 
 
@@ -86,7 +87,7 @@ class Group(Base):
                                secondary=group_permission,
                                back_populates='groups')
     
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f'Group(group_id={self.group_id}, name={self.name})'
 
 
@@ -126,7 +127,7 @@ class Key(Base):
     
     member = relationship(Member, backref="keys")
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f'Key(key_id={self.key_id}, tagid={self.tagid})'
 
 
@@ -149,7 +150,7 @@ class Span(Base):
     
     member = relationship(Member, backref="spans")
     
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f'Span(span_id={self.span_id}, type={self.type}, enddate={self.enddate})'
 
 
@@ -175,7 +176,7 @@ class Box(Base):
 
     member = relationship(Member, backref="boxes")
     
-    def __repr__(self):
+    def __repr__(self) -> str:
         return (
             f'Box(id={self.id}, box_label_id={self.box_label_id}, member_id={self.member_id}'
             f', last_check_at={self.last_check_at}, last_nag_at={self.last_nag_at})'
@@ -201,17 +202,17 @@ class PhoneNumberChangeRequest(Base):
     member = relationship(Member, backref="change_phone_number_requests")
 
     @validates('phone')
-    def validate_phone(self, key, value):
+    def validate_phone(self, key: Any, value: Optional[str]) -> Optional[str]:
         return normalise_phone_number(value)
     
-    def __repr__(self):
+    def __repr__(self) -> str:
         return (
             f'ChangePhoneNumberRequest(id={self.id}, member_id={self.member_id}'
             f', completed={self.completed}, timestamp={self.timestamp})'
         )
 
 
-def normalise_phone_number(phone):
+def normalise_phone_number(phone: Optional[str]) -> Optional[str]:
     if not phone:
         return None
     

@@ -1,3 +1,4 @@
+
 from flask import request
 
 from membership.member_auth import check_and_hash_password
@@ -52,7 +53,7 @@ class MemberEntity(Entity):
         finally:
             db_session.execute("DO RELEASE_LOCK('member_number')")
 
-    def update(self, entity_id, commit=True):
+    def update(self, entity_id: int, commit=True):
         data = request.json or {}
         handle_password(data)
         return self._update_internal(entity_id, data, commit=commit)

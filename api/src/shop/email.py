@@ -1,3 +1,4 @@
+from datetime import date
 from membership.models import Member
 from messages.message import send_message
 from messages.models import MessageTemplate
@@ -5,7 +6,7 @@ from service.db import db_session
 from service.util import date_to_str
 
 
-def send_membership_updated_email(member_id, extended_days, end_date):
+def send_membership_updated_email(member_id: int, extended_days: int, end_date: date) -> None:
     member = db_session.query(Member).get(member_id)
 
     send_message(
@@ -15,7 +16,7 @@ def send_membership_updated_email(member_id, extended_days, end_date):
     )
 
 
-def send_labaccess_extended_email(member_id, extended_days, end_date):
+def send_labaccess_extended_email(member_id: int, extended_days: int, end_date: date) -> None:
     member = db_session.query(Member).get(member_id)
 
     send_message(

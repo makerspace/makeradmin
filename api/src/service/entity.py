@@ -3,7 +3,7 @@ from datetime import datetime, date
 from decimal import Decimal
 from logging import getLogger
 from math import ceil
-from typing import Mapping, Dict, Callable, Type
+from typing import Any, Mapping, Dict, Callable, Type
 
 from flask import request
 from pytz import UTC
@@ -290,10 +290,10 @@ class Entity:
         
         return self.to_obj(entity)
     
-    def update(self, entity_id, commit=True):
+    def update(self, entity_id: int, commit: bool=True) -> Any:
         return self._update_internal(entity_id, request.json, commit=commit)
     
-    def delete(self, entity_id, commit=True):
+    def delete(self, entity_id: int, commit: bool=True) -> None:
         entity = db_session.query(self.model).get(entity_id)
         if not entity:
             raise NotFound("Could not find any entity with specified parameters.")

@@ -23,7 +23,7 @@ from typing import Optional
 logger = getLogger('makeradmin')
 
 
-def generate_token():
+def generate_token() -> str:
     return ''.join(secrets.choice(ascii_letters + digits) for _ in range(32))
 
 
@@ -39,7 +39,7 @@ def get_member_by_user_identification(user_identification):
                        fields='user_identification', status="not found")
 
 
-def create_access_token(ip, browser, user_id, valid_duration: Optional[timedelta]=None):
+def create_access_token(ip: str, browser: Optional[str], user_id: int, valid_duration: Optional[timedelta]=None):
     assert user_id > 0
     
     access_token = AccessToken(
@@ -118,7 +118,7 @@ def password_reset(reset_token, unhashed_password):
     return {}
     
 
-def force_login(ip, browser, user_id):
+def force_login(ip: str, browser: str, user_id: int):
     Login.register_login_success(ip, user_id)
     return create_access_token(ip, browser, user_id)
 
@@ -146,7 +146,7 @@ def list_for_user(user_id):
     ) for access_token in db_session.query(AccessToken).filter(AccessToken.user_id == user_id)]
 
 
-def authenticate_request():
+def authenticate_request() -> None:
     """ Update global object with user_id and user permissions using token from request header. """
 
     # Make sure user_id and permissions is always set.
@@ -183,8 +183,9 @@ def authenticate_request():
             permissions = SERVICE_PERMISSIONS.get(access_token.user_id, [])
             
         elif access_token.user_id > 0:
-            permissions = {p for _, p in get_member_permissions(access_token.user_id)}
-            permissions.add(USER)
+            permissions_set = {p for _, p in get_member_permissions(access_token.user_id)}
+            permissions_set.add(USER)
+            permissions = list(permissions_set)
             
         else:
             raise BadRequest("Bad token.",
