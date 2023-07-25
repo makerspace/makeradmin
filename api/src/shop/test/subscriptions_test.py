@@ -693,11 +693,11 @@ class Test(FlaskTestBase):
 
         summary = get_membership_summary(member_id, clock.date)
         assert summary.labaccess_active
-        assert summary.labaccess_end == (now + relativedelta(months=5, days=5)).date()
+        assert summary.labaccess_end == (now + relativedelta(months=3, days=5) + relativedelta(days=31*2)).date()
 
         self.advance_clock(clock, now + relativedelta(months=5, days=6))
 
         # The member should now have finished their binding period and been billed for another month
         summary = get_membership_summary(member_id, clock.date)
         assert summary.labaccess_active
-        assert summary.labaccess_end == (now + relativedelta(months=6, days=5)).date()
+        assert summary.labaccess_end == (now + relativedelta(months=3, days=5) + relativedelta(days=31*3)).date()
