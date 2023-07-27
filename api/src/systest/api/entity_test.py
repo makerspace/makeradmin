@@ -134,7 +134,7 @@ class Test(ApiTest):
         self.get(f"/membership/group?search={random_str()}").expect(code=200, page=1, total=0, data=[])
     
     def test_search_for_number_column_works(self):
-        entity = self.api.create_member(member_number=self.db.get_member_number())
+        entity = self.api.create_member()
         entity_id = entity['member_id']
         
         result = self.get(f"/membership/member?search={entity['member_number']}").expect(code=200).data[0]
