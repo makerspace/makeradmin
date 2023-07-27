@@ -259,7 +259,7 @@ function render_personal_data(member: member_t) {
                 <label  for='pin_code'        class="uk-form-label">Pin code</label>
                 <span style="width: 100%; display: flex;">
                     <input name='pin_code' type="password" class="uk-input readonly-input" style="white-space: nowrap; font-family: monospace;" value="${member.pin_code || ''}" disabled id="${id_pin_code_input}"/>
-                    <button class="uk-icon-button uk-margin-small-left uk-margin-small-right" uk-icon="more" id="${id_toggle_show_pin_code}"></button>
+                    <button class="uk-icon-button uk-margin-small-left uk-margin-small-right" uk-icon="eye" id="${id_toggle_show_pin_code}"></button>
                     <button class="uk-button uk-button-danger" id="${id_change_pin_code}">Byt</button>
                 </span>
                 ${pin_warning}
