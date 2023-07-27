@@ -14,7 +14,7 @@ module.exports = (env, args) => {
             register: "./ts/register.ts",
             product: "./ts/product.ts",
             history: "./ts/history.ts",
-            member: "./ts/member.ts",
+            member: "./ts/member.tsx",
             statistics: "./ts/statistics.ts",
             quiz: "./ts/quiz.tsx",
             licenses: "./ts/licenses.ts",
