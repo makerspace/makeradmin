@@ -209,9 +209,11 @@ def get_stripe_customer(
                 if (
                     MSMetaKeys.USER_ID.value not in customer.metadata
                     or MSMetaKeys.MEMBER_NUMBER.value not in customer.metadata
+                    or customer.email != member_info.email
                 ):
                     stripe.Customer.modify(
                         customer["id"],
+                        email=member_info.email,
                         metadata={
                             # Delete the pending member key if present
                             MSMetaKeys.PENDING_MEMBER: "",
@@ -228,7 +230,7 @@ def get_stripe_customer(
 
         # If no customer is found, we create one
         customer = retry(lambda: stripe.Customer.create(
-            description="Created by Makeradmin",
+            description=f"Created by Makeradmin (#${member_info.member_number})",
             email=member_info.email,
             test_clock=test_clock,
             name=f"{member_info.firstname} {member_info.lastname}",
