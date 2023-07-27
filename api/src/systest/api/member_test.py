@@ -7,18 +7,15 @@ class Test(ApiTest):
     
     def test_create_member_with_existing_email_fails(self):
         member = self.obj.create_member()
-        member_number = self.post("/membership/member", json=member).expect(code=201).get('data__member_number')
-        member['member_number'] = self.db.get_member_number()
+        self.post("/membership/member", json=member).expect(code=201).get('data__member_number')
         self.post("/membership/member", json=member).expect(code=422, status="error", what="not_unique",
                                                             fields='email')
 
-    def test_create_member_with_existing_member_number_fails(self):
+    def test_create_almost_duplicate_member_ok(self):
         member = self.obj.create_member()
-        member_number = self.post("/membership/member", json=member).expect(code=201).get('data__member_number')
+        self.post("/membership/member", json=member).expect(code=201).get('data__member_number')
         member['email'] = member['email'] + '-not-duplicate'
-        member['member_number'] = member_number
-        self.post("/membership/member", json=member).expect(code=422, status="error", what="not_unique",
-                                                            fields='member_number')
+        self.post("/membership/member", json=member).expect(code=201)
 
     def test_create_member_gives_new_member_numbers_and_ids(self):
         member1 = self.obj.create_member()

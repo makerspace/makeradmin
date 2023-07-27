@@ -35,7 +35,7 @@ class Test(ApiTest):
 
     def test_only_member_create_is_allowed_to_create(self):
         url = f'/membership/member'
-        data = self.obj.create_member(member_number=self.db.get_member_number())
+        data = self.obj.create_member()
         self.api.post(url, data, token=self.tokens[MEMBER_VIEW]).expect(403)
         self.api.post(url, data, token=self.tokens[MEMBER_EDIT]).expect(403)
         self.api.post(url, data, token=self.tokens[MEMBER_CREATE]).expect(201)
