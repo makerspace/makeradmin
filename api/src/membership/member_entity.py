@@ -1,10 +1,12 @@
-
 from flask import request
+import pymysql
+from sqlalchemy.exc import IntegrityError
+from pymysql.constants.ER import DUP_ENTRY
+from membership.models import Member
 
 from membership.member_auth import check_and_hash_password
 from service.db import db_session
 from service.entity import Entity
-from service.error import InternalServerError
 from logging import getLogger
 
 
@@ -17,7 +19,6 @@ def handle_password(data):
     if unhashed_password is not None:
         data['password'] = check_and_hash_password(unhashed_password)
 
-    
 class MemberEntity(Entity):
     """
     Special handling of Member, requires subclassing entity:
@@ -33,25 +34,36 @@ class MemberEntity(Entity):
             data = request.json or {}
             
         handle_password(data)
-        
-        status, = db_session.execute("SELECT GET_LOCK('member_number', 20)").fetchone()
-        if not status:
-            raise InternalServerError("Failed to create member, try again later.",
-                                      log="failed to aquire member_number lock")
-        try:
-            if data.get('member_number') is None:
-                sql = "SELECT COALESCE(MAX(member_number), 999) FROM membership_members"
-                max_member_number, = db_session.execute(sql).fetchone()
-                data['member_number'] = max_member_number + 1
-            obj = self.to_obj(self._create_internal(data, commit=commit))
-            logger.info(f"created member with number {data['member_number']}")
-            return obj
-        except Exception:
-            # Rollback session if anything went wrong or we can't release the lock.
-            db_session.rollback()
-            raise
-        finally:
-            db_session.execute("DO RELEASE_LOCK('member_number')")
+
+        assert 'member_number' not in data
+        # Locking was used here previously, but that did not work well with transactions
+        # so now we use transactions to solve EVERYTHING.
+        # In practice we will never get a race here, except possibly in tests that run in parallel.
+        while True:
+            try:
+                with db_session.begin_nested():
+                    data = data.copy()
+                    max_member_number, = db_session.execute("SELECT COALESCE(MAX(member_number), 999) FROM membership_members").fetchone()
+                    data['member_number'] = max_member_number + 1
+                    # We must not commit here, because that will end our transaction, and the to_obj call will fail
+                    member: Member = self._create_internal(data, commit=False)
+                    logger.info(f"created member with number {member.member_number}")
+
+                    obj = self.to_obj(member)
+                    if commit:
+                        db_session.commit()
+                    return obj
+            except IntegrityError as e:
+                # Check if we have got a duplicate member number
+                if isinstance(e.orig, pymysql.err.IntegrityError):
+                    errno, error = e.orig.args
+                    if errno == DUP_ENTRY and "membership_members_member_number_index" in error:
+                        print("Race condition when creating member, retrying...")
+                        continue
+                    else:
+                        raise e
+                else:
+                    raise e
 
     def update(self, entity_id: int, commit=True):
         data = request.json or {}
