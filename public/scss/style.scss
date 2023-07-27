@@ -10,6 +10,7 @@ $primary-color: #333;
 // Breakpoint between mobile and desktop layout
 $break-small: 480px;
 $break-medium: 600px;
+$break-large: 1000px;
 $makerspace-orange: #FF8B37;
 
 html,
@@ -1485,8 +1486,12 @@ $palette-red: $palette4;
         align-self: stretch;
 
         @media screen and (width > $break-medium) {
-            align-items: center;
+            // align-items: center;
             align-self: center;
+        }
+
+        @media screen and (width > $break-large) {
+            min-width: 800px;
         }
     }
 
@@ -1522,7 +1527,21 @@ $palette-red: $palette4;
         flex-direction: column;
 
         @media screen and (width > $break-medium) {
+            align-self: center;
             flex-direction: row;
+
+            // Make the buttons ordered from the center outwards
+            .semantic-order-0 {
+                order: 1;
+            }
+
+            .semantic-order-1 {
+                order: 0;
+            }
+
+            .semantic-order-2 {
+                order: 2;
+            }
         }
     }
 
@@ -1595,10 +1614,10 @@ $palette-red: $palette4;
             padding: 20px;
 
             .abovePrice, .belowPrice {
-                font-size: 0.8em;
+                font-size: 0.9em;
                 font-weight: bold;
                 line-height: 100%;
-                opacity: 0.5;
+                opacity: 0.6;
             }
 
             .price {
@@ -1890,7 +1909,7 @@ $palette-red: $palette4;
     }
 
     .small-print {
-        font-size: 0.8em;
+        font-size: 0.9em;
         display: block;
         margin-left: 21px;
         margin-right: 16px;

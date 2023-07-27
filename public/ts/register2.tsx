@@ -308,10 +308,10 @@ const LabeledInput = ({ label, id, required, type, value, pattern, onChange, onI
     )
 }
 
-const PlanButton = ({ plan, selected, onClick }: { plan: Plan, selected: boolean, onClick: () => void }) => {
+const PlanButton = ({ plan, selected, onClick, order }: { plan: Plan, selected: boolean, onClick: () => void, order: number }) => {
     const t = useTranslation();
     return (
-        <div className={"access-plan " + (selected ? 'selected' : '')} onClick={onClick}>
+        <div className={"access-plan " + (selected ? 'selected' : '') + ` semantic-order-${order}`} onClick={onClick}>
             <div className="access-plan-title">{plan.title}{plan.highlight !== null ? <span class="plan-highlight"><span>{plan.highlight}</span></span> : null}</div>
             <div className="access-plan-price">
                 {plan.abovePrice && <span class="abovePrice">{plan.abovePrice}</span>}
@@ -1127,7 +1127,7 @@ const RegisterPage = ({ onChangeLanguage }: { onChangeLanguage: (lang: keyof typ
                 <h2>{t("chooseYourPlan.title")}</h2>
                 <span>{t("chooseYourPlan.help")}</span>
                 <div class="plan-buttons">
-                    {plans.map(plan => <PlanButton selected={selectedPlan === plan.id} onClick={() => setSelectedPlan(plan.id)} plan={plan} />)}
+                    {plans.map((plan, i) => <PlanButton selected={selectedPlan === plan.id} onClick={() => setSelectedPlan(plan.id)} plan={plan} order={i} />)}
                 </div>
                 {registerPageData.discounts["low_income_discount"] > 0 && <button className="flow-button" onClick={() => setState(State.Discounts)}>{t("apply_for_discounts")}</button>}
                 {activePlan !== undefined ? <ToPayPreview selectedPlan={activePlan} relevantProducts={relevantProducts} discount={discount} /> : null}
