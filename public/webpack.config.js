@@ -15,12 +15,11 @@ module.exports = (env, args) => {
             register2: "./ts/register2.tsx",
             product: "./ts/product.ts",
             history: "./ts/history.ts",
-            member: "./ts/member.ts",
+            member: "./ts/member.tsx",
             statistics: "./ts/statistics.ts",
             quiz: "./ts/quiz.tsx",
             licenses: "./ts/licenses.ts",
             courses: "./ts/courses.ts",
-            change_phone: "./ts/change_phone.tsx",
         },
         
         output:
