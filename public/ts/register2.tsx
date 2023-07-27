@@ -88,7 +88,7 @@ const Eng = {
     },
     priceUnit: "kr",
     plans: {
-        ofWhichBaseMembership: (price: number) => `of which ${price} kr is base membership`,
+        ofWhichBaseMembership: (price: number) => `of which ${price} kr is yearly base membership`,
         makerspaceAccessSub: {
             title: "Makerspace Access Subscription",
             abovePrice: "",
@@ -1043,8 +1043,9 @@ const RegisterPage = ({ onChangeLanguage }: { onChangeLanguage: (lang: keyof typ
     }
 
     const relevantProducts = extractRelevantProducts(registerPageData.productData);
-    const accessCostSingle = parseFloat(relevantProducts.labaccessProduct.price);
-    const accessSubscriptionCost = parseFloat(relevantProducts.labaccessSubscriptionProduct.price);
+    const accessCostSingle = parseFloat(relevantProducts.labaccessProduct.price) * (1 - discount.fractionOff);
+    const accessSubscriptionCost = parseFloat(relevantProducts.labaccessSubscriptionProduct.price) * (1 - discount.fractionOff);
+    const baseMembershipCost = parseFloat(relevantProducts.baseMembershipProduct.price) * (1 - discount.fractionOff);
 
     const plans: Plan[] = [
         {
@@ -1052,7 +1053,7 @@ const RegisterPage = ({ onChangeLanguage }: { onChangeLanguage: (lang: keyof typ
             title: t("plans.starterPack.title"),
             abovePrice: t("plans.starterPack.abovePrice"),
             price: parseFloat(relevantProducts.starterPackProduct.price),
-            belowPrice: t("plans.ofWhichBaseMembership")(parseFloat(relevantProducts.baseMembershipProduct.price)),
+            belowPrice: t("plans.ofWhichBaseMembership")(baseMembershipCost),
             description1: t("plans.starterPack.description1"),
             description2: t("plans.starterPack.description2"),
             products: [relevantProducts.starterPackProduct, relevantProducts.membershipSubscriptionProduct],
@@ -1063,7 +1064,7 @@ const RegisterPage = ({ onChangeLanguage }: { onChangeLanguage: (lang: keyof typ
             title: t("plans.singleMonth.title"),
             abovePrice: t("plans.singleMonth.abovePrice"),
             price: parseFloat(relevantProducts.labaccessProduct.price),
-            belowPrice: t("plans.ofWhichBaseMembership")(parseFloat(relevantProducts.baseMembershipProduct.price)),
+            belowPrice: t("plans.ofWhichBaseMembership")(baseMembershipCost),
             description1: t("plans.singleMonth.description1"),
             description2: t("plans.singleMonth.description2"),
             products: [relevantProducts.labaccessProduct, relevantProducts.membershipSubscriptionProduct],
