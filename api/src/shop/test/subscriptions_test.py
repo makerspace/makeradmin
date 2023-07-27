@@ -647,15 +647,15 @@ class Test(FlaskTestBase):
 
         summary = get_membership_summary(member_id, clock.date)
         assert summary.labaccess_active
-        assert summary.labaccess_end == (now + relativedelta(months=2, days=5)).date()
+        assert summary.labaccess_end == (now + relativedelta(days=5 + 31*2)).date()
 
         # Stripe limits how much we can advance the clock in one go
-        self.advance_clock(clock, now + relativedelta(months=2, days=3))
-        self.advance_clock(clock, now + relativedelta(months=2, days=5))
+        self.advance_clock(clock, now + relativedelta(days=3 + 31*2))
+        self.advance_clock(clock, now + relativedelta(days=5 + 31*2))
 
         summary = get_membership_summary(member_id, clock.date)
         assert summary.labaccess_active
-        assert summary.labaccess_end == (now + relativedelta(months=3, days=5)).date()
+        assert summary.labaccess_end == (now + relativedelta(days=5 + 31*3)).date()
     
     def test_subscriptions_signed_agreement2(self) -> None:
         """
