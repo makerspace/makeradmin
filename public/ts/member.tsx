@@ -4,6 +4,7 @@ import { UNAUTHORIZED, get_error } from "./common";
 import { JSX } from "preact/jsx-runtime";
 import { render } from "preact";
 import { useState } from "preact/hooks";
+import { showPhoneNumberDialog } from "./change_phone";
 declare var UIkit: any;
 
 
@@ -215,7 +216,7 @@ function MembershipView({ member, membership, pendingLabaccessDays }: { member: 
 }
 
 
-function PersonalData({ member, onChangePinCode }: { member: member_t, onChangePinCode: ()=>void }) {
+function PersonalData({ member, onChangePinCode, onChangePhoneNumber }: { member: member_t, onChangePinCode: ()=>void, onChangePhoneNumber: ()=>void }) {
     const pin_warning = member.pin_code == null ? <label class="uk-form-label" style="color: red;">Du har inte satt någon PIN-kod ännu. Använd BYT-knappen för att sätta den.</label> : null;
     const [showPinCode, setShowPinCode] = useState(false);
     return (
@@ -237,7 +238,10 @@ function PersonalData({ member, onChangePinCode }: { member: member_t, onChangeP
                 <label  for='phone'           class="uk-form-label">Telefonnummer</label>
                 <span style="width: 100%; display: flex;">
                     <input name='phone'           class="uk-input readonly-input" value={member.phone || ''} disabled />
-                    <a href="/member/change_phone" class="uk-button uk-button-danger" >Byt</a>
+                    <button class="uk-button uk-button-danger" onClick={e => {
+                        e.preventDefault();
+                        onChangePhoneNumber();
+                    }} >Byt</button>
                 </span>
             </div>
             <div>
@@ -306,11 +310,24 @@ function MemberPage({ member, membership, pending_labaccess_days }: { member: me
         
                 try {
                     await common.ajax("POST", `${apiBasePath}/member/current/set_pin_code`, {pin_code: pin_code})
-                    UIkit.modal.alert(`<h2>Pinkod är nu bytt</h2>`).then(() => location.reload());
+                    await UIkit.modal.alert(`<h2>Pinkoden är nu bytt</h2>`);
+                    location.reload();
                 } catch (e) {
                     UIkit.modal.alert(`<h2>Kunde inte byta pinkod</h2><b class="uk-text-danger"">${get_error(e)}</b>`);
                 }
-            }} />
+            }}
+            onChangePhoneNumber={async () => {
+                switch (await showPhoneNumberDialog(member.phone)) {
+                    case "ok":
+                        await UIkit.modal.alert(`<h2>Telefonnummret är nu bytt</h2>`)
+                        location.reload();
+                        break;
+                    case "cancel":
+                        break;
+                    case UNAUTHORIZED:
+                        login.redirect_to_member_page();
+                        break;
+                }}} />
             <Address member={member} />
         </form>
     )
