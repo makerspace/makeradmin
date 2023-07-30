@@ -142,5 +142,7 @@ Create your own stripe account and add your keys to the `.env` file.
 Install the Stripe CLI and forward events using
 
 ```bash
-stripe listen --forward-to http://localhost:8010/stripe_callback
+stripe listen --forward-to http://localhost:8010/webshop/stripe_callback
 ```
+
+After the forwarding has started, you'll need to copy the signing secret it gives you, and put it in your own `.env` file in the key `STRIPE_SIGNING_SECRET`.
