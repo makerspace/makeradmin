@@ -22,6 +22,22 @@ body {
     border-radius: 2px;
 }
 
+.uk-button-group {
+    .uk-button {
+        border-radius: 0px;
+
+        &:first-child {
+            border-top-left-radius: 2px;
+            border-bottom-left-radius: 2px;
+        }
+
+        &:last-child {
+            border-top-right-radius: 2px;
+            border-bottom-right-radius: 2px;
+        }
+    }
+}
+
 #root {
     // position: absolute;
     width: 100%;
@@ -438,12 +454,16 @@ body {
     margin-right: 10%;
     text-transform: none;
 
-    // Required for progress spinner
-    position: relative;
-
     &:disabled {
         background: #CCC;
     }
+}
+
+.spinner-button {
+    padding-left: 50px;
+    padding-right: 50px;
+    // Required for progress spinner
+    position: relative;
 }
 
 #pay-login {
