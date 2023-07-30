@@ -433,12 +433,16 @@ body {
     margin-right: 10%;
     text-transform: none;
 
-    // Required for progress spinner
-    position: relative;
-
     &:disabled {
         background: #CCC;
     }
+}
+
+.spinner-button {
+    padding-left: 50px;
+    padding-right: 50px;
+    // Required for progress spinner
+    position: relative;
 }
 
 #pay-login {
