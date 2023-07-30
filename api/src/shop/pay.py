@@ -15,6 +15,7 @@ from shop.models import Transaction
 from shop.stripe_subscriptions import (
     SubscriptionType,
     attach_and_set_default_payment_method,
+    cancel_subscription,
     get_stripe_customer,
     start_subscription,
 )
@@ -65,7 +66,6 @@ def pay(data: Any, member_id: int) -> PartialPayment:
 
 
 def register(data: Any, remote_addr: str, user_agent: str):
-
     validate_data(register_schema, data or {})
 
     products = get_membership_products()
@@ -125,16 +125,31 @@ class MemberInfo(DataClassJsonMixin):
         if not self.zipCode.strip():
             raise BadRequest(message="Zip code is required.")
 
+
 @dataclass
 class SubscriptionStart(DataClassJsonMixin):
     subscription: SubscriptionType
     expected_to_pay_now: Decimal
     expected_to_pay_recurring: Decimal
 
+
 @dataclass
 class DiscountRequest(DataClassJsonMixin):
     price_level: PriceLevel
     message: str
+
+
+@dataclass
+class CancelSubscriptionsRequest(DataClassJsonMixin):
+    subscriptions: List[SubscriptionType]
+
+
+@dataclass
+class StartSubscriptionsRequest(DataClassJsonMixin):
+    subscriptions: List[SubscriptionStart]
+    setup_intent_id: Optional[str]
+    stripe_payment_method_id: str
+
 
 @dataclass
 class RegisterRequest(DataClassJsonMixin):
@@ -144,7 +159,8 @@ class RegisterRequest(DataClassJsonMixin):
     subscriptions: List[SubscriptionStart]
     discount: Optional[DiscountRequest]
 
-class RegisterResponseType(str, Enum):
+
+class SetupIntentResult(str, Enum):
     Success = "success"
     RequiresAction = "requires_action"
     Wait = "wait"
@@ -152,9 +168,17 @@ class RegisterResponseType(str, Enum):
 
 
 @dataclass
+class StartSubscriptionsResponse(DataClassJsonMixin):
+    setup_intent_id: str
+    type: SetupIntentResult
+    action_info: Optional[PaymentAction]
+    error: Optional[str] = None
+
+
+@dataclass
 class RegisterResponse(DataClassJsonMixin):
     setup_intent_id: str
-    type: RegisterResponseType
+    type: SetupIntentResult
     token: Optional[str]
     action_info: Optional[PaymentAction]
     error: Optional[str] = None
@@ -170,8 +194,10 @@ class SetupIntentStatus(Enum):
 
 
 @dataclass
-class RegistrationFailed(Exception):
-    response: RegisterResponse
+class SetupIntentFailed(Exception):
+    type: SetupIntentResult
+    action_info: Optional[PaymentAction]
+    error: Optional[str] = None
 
 
 def validate_cart(purchase: Purchase) -> None:
@@ -179,28 +205,160 @@ def validate_cart(purchase: Purchase) -> None:
 
     cart = purchase.cart
     if len(cart) > 1:
-        raise BadRequest(
-            message="The purchase must contain at most one item."
-        )
+        raise BadRequest(message="The purchase must contain at most one item.")
 
     if len(cart) > 0:
         item = cart[0]
         if item.count != 1:
-            raise BadRequest(
-                message="The purchase must contain exactly one item."
-            )
+            raise BadRequest(message="The purchase must contain exactly one item.")
 
         product_id = item.id
         # Make sure it is a special product, but not a subscription product
         if product_id not in (
             p.id
             for p in products
-            if MakerspaceMetadataKeys.SUBSCRIPTION_TYPE
-            not in p.product_metadata
+            if MakerspaceMetadataKeys.SUBSCRIPTION_TYPE not in p.product_metadata
         ):
             raise BadRequest(
                 message=f"Not allowed to purchase the product with id {product_id} when registring."
             )
+
+
+def handle_setup_intent(setup_intent: stripe.SetupIntent) -> None:
+    while True:
+        status = SetupIntentStatus(setup_intent["status"])
+        if status == SetupIntentStatus.RequiresPaymentMethod:
+            # This can happen if the card was declined.
+            # In that case the user will just have to try again.
+            raise SetupIntentFailed(
+                type=SetupIntentResult.Failed,
+                error=setup_intent["last_setup_error"]["message"],
+                action_info=None,
+            )
+        elif status == SetupIntentStatus.RequiresConfirmation:
+            try:
+                setup_intent = stripe.SetupIntent.confirm(setup_intent.stripe_id)
+            except CardError as e:
+                # This can happen if the card was declined in *some* cases.
+                # In particular, it happens if you try to use a real card in a testing environment.
+                raise SetupIntentFailed(
+                    type=SetupIntentResult.Failed,
+                    error=e.error.message,
+                    action_info=None,
+                )
+            continue
+        elif status == SetupIntentStatus.RequiresAction:
+            payment_action = check_next_action(setup_intent)
+            raise SetupIntentFailed(
+                type=SetupIntentResult.RequiresAction,
+                action_info=payment_action,
+                error=None,
+            )
+        elif status == SetupIntentStatus.Processing:
+            raise SetupIntentFailed(
+                type=SetupIntentResult.Wait, action_info=None, error=None
+            )
+        elif status == SetupIntentStatus.Succeeded:
+            # Yay!
+
+            # Mark this payment method as the customer's default payment method for the future.
+            # The customer must have a default payment method so that invoices for a subscription can be charged.
+            stripe.Customer.modify(
+                setup_intent["customer"],
+                invoice_settings={
+                    "default_payment_method": setup_intent["payment_method"]
+                },
+            )
+
+            # TODO: Should we delete all previous payment methods to keep things clean?
+            return
+        elif status == SetupIntentStatus.Canceled:
+            raise BadRequest(message="The payment was canceled.")
+        else:
+            assert False, f"Unknown status {status}"
+
+
+def cancel_subscriptions(data_dict: Any, user_id: int) -> None:
+    try:
+        data = CancelSubscriptionsRequest.from_dict(data_dict)
+    except Exception as e:
+        raise BadRequest(message=f"Invalid data: {e}")
+
+    member = db_session.query(Member).get(user_id)
+    assert member is not None
+
+    if (
+        SubscriptionType.MEMBERSHIP in data.subscriptions
+        and SubscriptionType.LAB not in data.subscriptions
+    ):
+        # This should be handled automatically by the frontend with a nice popup, but we will enforce it here
+        data.subscriptions.append(SubscriptionType.LAB)
+
+    for sub in data.subscriptions:
+        cancel_subscription(member.member_id, sub, test_clock=None)
+
+
+def start_subscriptions(data_dict: Any, user_id: int) -> StartSubscriptionsResponse:
+    try:
+        data = StartSubscriptionsRequest.from_dict(data_dict)
+    except Exception as e:
+        raise BadRequest(message=f"Invalid data: {e}")
+
+    member = db_session.query(Member).get(user_id)
+    assert member is not None
+
+    stripe_customer = get_stripe_customer(member, test_clock=None)
+    assert stripe_customer is not None
+
+    try:
+        payment_method = stripe.PaymentMethod.retrieve(data.stripe_payment_method_id)
+    except:
+        raise BadRequest(message="The payment method is not valid.")
+
+    if data.setup_intent_id is None:
+        # TODO: If a customer already has a payment method attached, we should use that instead of creating a new one.
+        # In that case, we shouldn't show the card input to the user.
+        setup_intent = stripe.SetupIntent.create(
+            payment_method_types=["card"],
+            metadata={},
+            payment_method=payment_method.stripe_id,
+            customer=stripe_customer.stripe_id,
+        )
+    else:
+        setup_intent = stripe.SetupIntent.retrieve(data.setup_intent_id)
+        if stripe_customer.stripe_id != setup_intent["customer"]:
+            raise BadRequest(
+                message="The payment intent is not for the currently logged in member."
+            )
+
+    try:
+        handle_setup_intent(setup_intent)
+    except SetupIntentFailed as e:
+        return StartSubscriptionsResponse(
+            type=e.type,
+            setup_intent_id=setup_intent.stripe_id,
+            action_info=e.action_info,
+            error=e.error,
+        )
+
+    for subscription in data.subscriptions:
+        # Note: This will *not* raise in case the user has not enough funds.
+        # In that case we should send an email to the user.
+        start_subscription(
+            member.member_id,
+            subscription.subscription,
+            test_clock=None,
+            expected_to_pay_now=subscription.expected_to_pay_now,
+            expected_to_pay_recurring=subscription.expected_to_pay_recurring,
+        )
+
+    return StartSubscriptionsResponse(
+        type=SetupIntentResult.Success,
+        setup_intent_id=setup_intent.stripe_id,
+        action_info=None,
+        error=None,
+    )
+
 
 def register2(data_dict: Any, remote_addr: str, user_agent: str) -> RegisterResponse:
     try:
@@ -211,7 +369,9 @@ def register2(data_dict: Any, remote_addr: str, user_agent: str) -> RegisterResp
     data.member.validate()
     validate_cart(data.purchase)
 
-    if len(set([s.subscription for s in data.subscriptions])) != len(data.subscriptions):
+    if len(set([s.subscription for s in data.subscriptions])) != len(
+        data.subscriptions
+    ):
         raise BadRequest(message="Duplicate subscriptions.")
 
     try:
@@ -220,13 +380,8 @@ def register2(data_dict: Any, remote_addr: str, user_agent: str) -> RegisterResp
         )
     except:
         raise BadRequest(message="The payment method is not valid.")
-    
-    
 
     if data.setup_intent_id is None:
-        # stripe_customer = get_stripe_customer(member, test_clock=None)
-        # assert stripe_customer is not None
-
         # Create a new stripe customer.
         # If the verification fails, we just forget about the customer
         stripe_customer = stripe.Customer.create(
@@ -263,8 +418,14 @@ def register2(data_dict: Any, remote_addr: str, user_agent: str) -> RegisterResp
                     "email": data.member.email,
                     "phone": data.member.phone,
                     "address_zipcode": data.member.zipCode,
-                    "price_level": (data.discount.price_level if data.discount is not None else PriceLevel.Normal).value, 
-                    "price_level_motivation": data.discount.message if data.discount is not None else None,
+                    "price_level": (
+                        data.discount.price_level
+                        if data.discount is not None
+                        else PriceLevel.Normal
+                    ).value,
+                    "price_level_motivation": data.discount.message
+                    if data.discount is not None
+                    else None,
                 },
                 commit=False,
             )["member_id"]
@@ -272,116 +433,75 @@ def register2(data_dict: Any, remote_addr: str, user_agent: str) -> RegisterResp
             assert member is not None
             member.stripe_customer_id = stripe_customer.stripe_id
 
-            while True:
-                status = SetupIntentStatus(setup_intent["status"])
-                if status == SetupIntentStatus.RequiresPaymentMethod:
-                    # This can happen if the card was declined.
-                    # In that case the user will just have to try again.
+            try:
+                handle_setup_intent(setup_intent)
+            except SetupIntentFailed as e:
+                if e.type == SetupIntentResult.Failed:
                     # We delete the customer just to keep things tidy. It's not strictly necessary.
                     stripe.Customer.delete(stripe_customer.stripe_id)
-                    raise RegistrationFailed(
-                        RegisterResponse(
-                            type=RegisterResponseType.Failed,
-                            setup_intent_id=setup_intent.stripe_id,
-                            token=None,
-                            error=setup_intent["last_setup_error"]["message"],
-                            action_info=None,
-                        )
+                raise
+            except BadRequest:
+                # We delete the customer just to keep things tidy. It's not strictly necessary.
+                stripe.Customer.delete(stripe_customer.stripe_id)
+                raise
+
+            # Yay. The setup intent is verified.
+            # This means we should be able to charge the card with WHATEVER WE WANT!
+            # HAHA! Let's drain the card!
+            # No, just kidding. We will just charge the card with the amount for the purchase.
+            if len(data.purchase.cart) > 0:
+                # This will raise if the payment fails.
+                transaction, action_info = make_purchase(
+                    member_id=member_id,
+                    purchase=data.purchase,
+                    activates_member=False,
+                )
+                if action_info is not None:
+                    logger.error(
+                        "Purchase could not be completed. Card requires additional verification: %s",
+                        action_info.type,
                     )
-                elif status == SetupIntentStatus.RequiresConfirmation:
-                    try:
-                        setup_intent = stripe.SetupIntent.confirm(
-                            setup_intent.stripe_id
-                        )
-                    except CardError as e:
-                        # This can happen if the card was declined in *some* cases.
-                        # In particular, it happens if you try to use a real card in a testing environment.
-                        raise RegistrationFailed(
-                            RegisterResponse(
-                                type=RegisterResponseType.Failed,
-                                setup_intent_id=setup_intent.stripe_id,
-                                token=None,
-                                error=e.error.message,
-                                action_info=None,
-                            )
-                        )
-                    # assert False, "Should not be required, as we provided the payment info at creation"
-                    continue
-                elif status == SetupIntentStatus.RequiresAction:
-                    payment_action = check_next_action(setup_intent)
-                    raise RegistrationFailed(
-                        RegisterResponse(
-                            type=RegisterResponseType.RequiresAction,
-                            setup_intent_id=setup_intent.stripe_id,
-                            token=None,
-                            action_info=payment_action,
-                        )
-                    )
-                elif status == SetupIntentStatus.Processing:
-                    raise RegistrationFailed(
-                        RegisterResponse(
-                            type=RegisterResponseType.Wait,
-                            setup_intent_id=setup_intent.stripe_id,
-                            token=None,
-                            action_info=None,
-                        )
-                    )
-
-                elif status == SetupIntentStatus.Succeeded:
-                    # Yay. The setup intent is verified.
-                    # This means we should be able to charge the card with WHATEVER WE WANT!
-                    # HAHA! Let's drain the card!
-                    # No, just kidding. We will just charge the card with the amount for the purchase.
-                    if len(data.purchase.cart) > 0:
-                        # This will raise if the payment fails.
-                        transaction, action_info = make_purchase(
-                            member_id=member_id,
-                            purchase=data.purchase,
-                            activates_member=False,
-                        )
-                        if action_info is not None:
-                            logger.error("Purchase could not be completed. Card requires additional verification: %s", action_info.type)
-                            # We have already done a setup intent, so the card should not require additional verification.
-                            # If it does, we just fail.
-                            # There are probably cards for which this can happen. But how could we possibly handle
-                            # subscriptions in that case?
-                            raise RegistrationFailed(
-                                RegisterResponse(
-                                    type=RegisterResponseType.Failed,
-                                    setup_intent_id=setup_intent.stripe_id,
-                                    error="Your card does not allow this payment without additional verification.",
-                                    token=None,
-                                    action_info=None,
-                                )
-                            )
-
-                    for subscription in data.subscriptions:
-                        # Note: This will *not* raise in case the user has not enough funds.
-                        # In that case we should send an email to the user.
-                        start_subscription(
-                            member.member_id, subscription.subscription, test_clock=None, expected_to_pay_now=subscription.expected_to_pay_now, expected_to_pay_recurring=subscription.expected_to_pay_recurring
-                        )
-
-                    # If the pay succeeded (not same as the payment is completed) and the member does not already exists,
-                    # the user will be logged in.
-                    token = auth.force_login(remote_addr, user_agent, member_id)[
-                        "access_token"
-                    ]
-
-                    # This will get the stripe customer, and in the process update its metadata fields.
-                    get_stripe_customer(member, test_clock=None)
-                    activate_member(member)
-
-                    return RegisterResponse(
-                        type=RegisterResponseType.Success,
-                        setup_intent_id=setup_intent.stripe_id,
-                        token=token,
+                    # We have already done a setup intent, so the card should not require additional verification.
+                    # If it does, we just fail.
+                    # There are probably cards for which this can happen. But how could we possibly handle
+                    # subscriptions in that case?
+                    stripe.Customer.delete(stripe_customer.stripe_id)
+                    raise SetupIntentFailed(
+                        type=SetupIntentResult.Failed,
+                        error="Your card does not allow this payment without additional verification.",
                         action_info=None,
                     )
-                elif status == SetupIntentStatus.Canceled:
-                    stripe.Customer.delete(stripe_customer.stripe_id)
-                    raise BadRequest(message="The payment was canceled.")
-                else:
-                    assert False, f"Unknown status {status}"
-    except RegistrationFailed as e:
-        return e.response
+
+            for subscription in data.subscriptions:
+                # Note: This will *not* raise in case the user has not enough funds.
+                # In that case we should send an email to the user.
+                start_subscription(
+                    member.member_id,
+                    subscription.subscription,
+                    test_clock=None,
+                    expected_to_pay_now=subscription.expected_to_pay_now,
+                    expected_to_pay_recurring=subscription.expected_to_pay_recurring,
+                )
+
+            # If the pay succeeded (not same as the payment is completed) and the member does not already exists,
+            # the user will be logged in.
+            token = auth.force_login(remote_addr, user_agent, member_id)["access_token"]
+
+            # This will get the stripe customer, and in the process update its metadata fields.
+            get_stripe_customer(member, test_clock=None)
+            activate_member(member)
+
+            return RegisterResponse(
+                type=SetupIntentResult.Success,
+                setup_intent_id=setup_intent.stripe_id,
+                token=token,
+                action_info=None,
+            )
+    except SetupIntentFailed as e:
+        return RegisterResponse(
+            type=e.type,
+            setup_intent_id=setup_intent.stripe_id,
+            token=None,
+            action_info=e.action_info,
+            error=e.error,
+        )

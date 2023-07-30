@@ -14,9 +14,9 @@ from shop import service
 from shop.entities import product_image_entity, transaction_content_entity, transaction_entity, \
     transaction_action_entity, product_entity, category_entity, product_action_entity
 from shop.models import TransactionContent, ProductImage
-from shop.pay import RegisterResponse, pay, register, register2
+from shop.pay import RegisterResponse, cancel_subscriptions, pay, register, register2, start_subscriptions
 
-from shop.stripe_subscriptions import start_subscription, cancel_subscription
+from shop.stripe_subscriptions import list_subscriptions, start_subscription, cancel_subscription
 from shop.stripe_subscriptions import open_stripe_customer_portal
 
 from shop.stripe_payment_intent import PartialPayment, confirm_stripe_payment_intent
@@ -150,13 +150,18 @@ def accessy_invite():
         ensure_accessy_labaccess(member_id=g.user_id)
     except AccessyInvitePreconditionFailed as e:
         raise PreconditionFailed(message=str(e))
-    
 
-@service.route("/member/current/subscription", method=POST, permission=USER)
-def start_subscription_route(subscription_type=Arg(str, required=True), checkout_session_id=Arg(str, required=False), success_url=Arg(str, required=True)):
-    start_subscription(member_id=g.user_id, subscription_type=subscription_type)
-    return success_url
+@service.route("/member/current/subscriptions", method=POST, permission=USER)
+def start_subscriptions_route() -> Any:
+    return start_subscriptions(request.json, g.user_id).to_dict()
 
+@service.route("/member/current/subscriptions", method=DELETE, permission=USER)
+def cancel_subscriptions_route() -> Any:
+    return cancel_subscriptions(request.json, g.user_id)
+
+@service.route("/member/current/subscriptions", method=GET, permission=USER)
+def list_subscriptions_route() -> Any:
+    return list_subscriptions(g.user_id)
 
 @dataclass
 class ReloadPage:
@@ -175,8 +180,8 @@ def cancel_subscription_route(subscription_type=Arg(str, required=True), success
 
 
 @service.route("/member/current/stripe_customer_portal", method=GET, permission=PUBLIC)
-def open_stripe_customer_portal_route():
-    return open_stripe_customer_portal(g.user_id)
+def open_stripe_customer_portal_route() -> str:
+    return open_stripe_customer_portal(g.user_id, test_clock=None)
 
 
 @service.route("/member/<int:member_id>/ship_labaccess_orders", method=POST, permission=MEMBER_EDIT)
@@ -250,4 +255,3 @@ def register2_route() -> Any:
 @service.route("/stripe_callback", method=POST, permission=PUBLIC, commit_on_error=True)
 def stripe_callback_route():
     stripe_callback(request.data, request.headers)
-

@@ -114,3 +114,10 @@ class PaymentIntentStatus(Enum):
 class PaymentIntentNextActionType(str, Enum):
     USE_STRIPE_SDK = 'use_stripe_sdk'
     REDIRECT_TO_URL = 'redirect_to_url'
+
+class SubscriptionScheduleStatus(Enum):
+    NOT_STARTED = "not_started"
+    ACTIVE = "active"
+    COMPLETED = "completed"
+    RELEASED = "released"
+    CANCELED = "canceled"
