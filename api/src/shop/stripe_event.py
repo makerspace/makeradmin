@@ -82,7 +82,6 @@ def stripe_source_event(subtype: EventSubtype, event: stripe.Event) -> None:
     transaction = get_pending_source_transaction(source.id)
 
     if subtype == EventSubtype.CHARGEABLE:
-
         if SourceType(source.type) == SourceType.THREE_D_SECURE:
             # Charge card and resolve transaction, don't fail transaction on errors as it may be resolved when we get
             # callback again.
@@ -258,6 +257,16 @@ def stripe_invoice_event(
         # This can be configured at https://dashboard.stripe.com/settings/billing/automatic
         # It should also be configured to automatically cancel the subscription after some failed attempts.
         pass
+    elif subtype == EventSubtype.CREATED:
+        # Immediately charge the customer when the invoice is created.
+        # Otherwise stripe will keep it in the draft state for an hour or so.
+        # That would be especially bad when starting a subscription, since the user
+        # wants to see their membership activate immediately.
+        invoice = event["data"]["object"]
+        if invoice["status"] == "draft":
+            logger.info(f"Draft invoice created ({event['id']}), charging customer...")
+            stripe.Invoice.finalize_invoice(invoice["id"], auto_advance=True)
+            stripe.Invoice.pay(invoice["id"])
 
 
 def stripe_customer_event(event_subtype: EventSubtype, event: stripe.Event) -> None:
