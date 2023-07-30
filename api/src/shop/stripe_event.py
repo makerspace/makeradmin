@@ -495,8 +495,13 @@ def _stripe_event_inner(event: stripe.Event, current_time: datetime) -> None:
 def stripe_callback(data: Any, headers: Dict[str, Any]) -> None:
     """Handle stripe event callback. In case of non 200 response stripe will send the same event again (retrying a
     few times), so the code is written to handle that. For example an error that can be assumed to be intermittent
-    like a communication error with stripe will not fail or succeed a transaction but just leave it as is."""
+    like a communication error with stripe will not fail or succeed a transaction but just leave it as is.
+    """
     try:
+        assert (
+            STRIPE_SIGNING_SECRET
+        ), "STRIPE_SIGNING_SECRET not set. Cannot verify stripe callback."
+
         signature = headers["Stripe-Signature"]
         event = stripe.Webhook.construct_event(data, signature, STRIPE_SIGNING_SECRET)
     except (KeyError, SignatureVerificationError) as e:
