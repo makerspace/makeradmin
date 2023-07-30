@@ -3,7 +3,7 @@ import { UNAUTHORIZED } from "./common";
 
 declare var UIkit: any;
 
-export async function showPhoneNumberDialog(current_number: string): Promise<"ok" | "cancel" | typeof UNAUTHORIZED> {
+export async function show_phone_number_dialog(current_number: string): Promise<"ok" | "cancel" | "no-change" | typeof UNAUTHORIZED> {
     let new_number: string | null = await UIkit.modal.prompt("Nytt telefonnummer", current_number);
     if (new_number === null) {
         return "cancel";
@@ -40,6 +40,10 @@ export async function showPhoneNumberDialog(current_number: string): Promise<"ok
                 }
             }
         }
+    }
+
+    if (current_number.trim() === new_number.trim()) {
+        return "no-change";
     }
 
     return "ok";

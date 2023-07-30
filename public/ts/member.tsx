@@ -2,10 +2,12 @@ import * as common from "./common";
 import * as login from "./login";
 import { UNAUTHORIZED, get_error } from "./common";
 import { JSX } from "preact/jsx-runtime";
-import { LoadCurrentMemberInfo, date_t, member_t } from "./member_common";
+import { LoadCurrentMemberGroups, LoadCurrentMemberInfo, LoadCurrentMembershipInfo, date_t, member_t, membership_t } from "./member_common";
 import { render } from "preact";
-import { useState } from "preact/hooks";
-import { showPhoneNumberDialog } from "./change_phone";
+import { useEffect, useState } from "preact/hooks";
+import { show_phone_number_dialog } from "./change_phone";
+import { SubscriptionInfo, SubscriptionInfos, SubscriptionType, activateSubscription, cancelSubscription, getCurrentSubscriptions } from "./subscriptions";
+import { TranslationKey, useTranslation } from "./translations";
 declare var UIkit: any;
 
 
@@ -21,15 +23,6 @@ type template_strings_t = [fn_past_enddate, fn_expired_yesterday,
     fn_less_than_one_day_left, fn_less_than_two_weeks_left,
     fn_lots_of_time_left, fn_inactive];
 
-
-type membership_t = {
-    membership_active: boolean,
-    membership_end: date_t,
-    labaccess_active: boolean,
-    labaccess_end: date_t,
-    special_labaccess_active: boolean,
-    special_labaccess_end: date_t
-};
 
 
 type membership_info_t = {
@@ -98,6 +91,59 @@ function Info({ info, template_strings }: { info: membership_info_t, template_st
     );
 }
 
+function Info2({ translation_key, info }: { translation_key: "labaccess" | "membership" | "special_labaccess", info: membership_info_t }) {
+    const t = useTranslation();
+    let text: JSX.Element | string;
+    let icon: string;
+    let color: string;
+
+    const millisecondsPerHour = 1000 * 3600;
+    const millisecondsPerDay = millisecondsPerHour * 24;
+
+    const end = Date.parse(info.enddate) + millisecondsPerDay;
+
+    if (info.active) {
+        const remainingDays = Math.floor((end - Date.now()) / millisecondsPerDay);
+
+        if (remainingDays < -1) {
+            text = t(`membership_status.${translation_key}.inactive_recent`)(-remainingDays);
+            icon = "close";
+            color = "member-key-color-inactive";
+        } else if (remainingDays < 0) {
+            text = t(`membership_status.${translation_key}.inactive_yesterday`);
+            icon = "close";
+            color = "member-key-color-inactive";
+        } else if (remainingDays < 1) {
+            const remainingHours = Math.ceil((end - Date.now()) / millisecondsPerHour);
+            text = t(`membership_status.${translation_key}.active_hours_remaining`)(remainingHours);
+            icon = "check";
+            color = "member-key-color-warning";
+        } else if (remainingDays < 14) {
+            text = t(`membership_status.${translation_key}.active_few_days_remaining`)(info.enddate, remainingDays);
+            icon = "check";
+            color = "member-key-color-warning";
+        } else {
+            text = t(`membership_status.${translation_key}.active_days_remaining`)(info.enddate, remainingDays);
+            icon = "check";
+            color = "member-key-color-active";
+        }
+    } else {
+        text = t(`membership_status.${translation_key}.inactive`);
+        icon = "close";
+        color = "member-key-color-inactive";
+    }
+
+    return (
+        <div class="member-key-box">
+            <div class={`uk-icon-small member-key-icon ${color}`} uk-icon={icon}>
+            </div>
+            <div class="member-key-status">
+                {text}
+            </div>
+        </div>
+    );
+}
+
 function WarningItem({ children }: { children: preact.ComponentChildren }) {
     return <p><i class="member-text-warning" uk-icon="warning"></i> &nbsp; {children}</p>;
 }
@@ -130,10 +176,15 @@ function PendingLabaccessInstructions({ can_sync_labaccess, pending_labaccess_da
 
 function Help({ member, membership, pending_labaccess_days, onSendAccessyInvite }: { member: member_t, membership: membership_t, pending_labaccess_days: number, onSendAccessyInvite: ()=>void }) {
     const todo_bullets = [
-        <SignedContractWarning member={member} />,
-        <NoMembershipWarning membership={membership} />,
-        <MissingPhoneNumber member={member} />,
-    ];
+        SignedContractWarning({member}),
+        NoMembershipWarning({membership}),
+        MissingPhoneNumber({member}),
+        // TODO: Accessy invite. Check if user is in accessy group.
+    ].filter(x => x !== null);
+
+    if (todo_bullets.length === 0) {
+        return null;
+    }
 
     const pending_labaccess_instruction = <PendingLabaccessInstructions can_sync_labaccess={!todo_bullets} pending_labaccess_days={pending_labaccess_days} />;
 
@@ -162,6 +213,49 @@ function get_pending_labaccess_days(pending_actions_json: any): number {
     return pendingLabaccessDays;
 }
 
+async function change_pin_code(member: member_t) {
+    const pin_code = await UIkit.modal.prompt("Välj en pinkod", member.pin_code === null ? get_random_pin_code(4) : member.pin_code);
+    if (pin_code === null)
+        return;
+
+    try {
+        await common.ajax("POST", `${window.apiBasePath}/member/current/set_pin_code`, {pin_code: pin_code})
+        await UIkit.modal.alert(`<h2>Pinkoden är nu bytt</h2>`);
+        location.reload();
+    } catch (e) {
+        UIkit.modal.alert(`<h2>Kunde inte byta pinkod</h2><b class="uk-text-danger"">${get_error(e)}</b>`);
+    }
+}
+
+async function change_phone_number(member: member_t, membership: membership_t) {
+    switch (await show_phone_number_dialog(member.phone)) {
+        case "ok":
+            await UIkit.modal.alert(`<h2>Telefonnummret är nu bytt</h2>`);
+
+            if (membership.labaccess_active || membership.special_labaccess_active) {
+                // Send accessy invite to the new phone number
+                await common.ajax("POST", `${window.apiBasePath}/webshop/member/current/accessy_invite`);
+            }
+
+            location.reload();
+            break;
+        case "cancel":
+        case "no-change":
+            break;
+        case UNAUTHORIZED:
+            login.redirect_to_member_page();
+            break;
+    }
+}
+
+async function send_accessy_invite () {
+    try {
+        await common.ajax("POST", `${window.apiBasePath}/webshop/member/current/accessy_invite`);
+        UIkit.modal.alert(`<h2>Inbjudan skickad</h2>`);
+    } catch (e) {
+        UIkit.modal.alert(`<h2>Inbjudan misslyckades</h2><b class="uk-text-danger"">${get_error(e)}</b>`);
+    }
+}
 
 function MembershipView({ member, membership, pendingLabaccessDays }: { member: member_t, membership: membership_t, pendingLabaccessDays: number }) {
     const labaccessStrings: template_strings_t = [
@@ -272,46 +366,110 @@ function Address({ member }: { member: member_t }) {
     );
 }
 
-function MemberPage({ member, membership, pending_labaccess_days }: { member: member_t, membership: membership_t, pending_labaccess_days: number }) {
-    const apiBasePath = window.apiBasePath;
+function SubscriptionPayment ({ sub, membership, subscriptions, member, type }: { sub: SubscriptionInfo | null, membership: membership_t, subscriptions: SubscriptionInfo[], member: member_t, type: SubscriptionType }) {
+    return sub ?
+        <div class="uk-button-group">
+            <button class="uk-button" disabled>Auto renew: Active</button>
+            <button class="uk-button uk-button-danger" onClick={e => {
+                e.preventDefault();
+                cancelSubscription(type, membership, subscriptions);
+            }}>Cancel</button>
+        </div>
+        : 
+        <>
+            <button class="uk-button uk-button-primary" onClick={e => {
+                e.preventDefault();
+                activateSubscription(type, member, membership, subscriptions);
+            }}>Activate auto renewal</button>
+            <p>Enable auto-renewal to get a 10% discount on your membership.</p>
+            <button class="uk-button uk-button-primary">Add one month to cart: 375 kr</button>
+        </>;
+}
+
+function BaseMembership ({ member, membership, subscriptions }: { member: member_t, membership: membership_t, subscriptions: SubscriptionInfo[] }) {
+    const t = useTranslation();
+    const sub = subscriptions.find(sub => sub.type === "membership") || null;
+    return <fieldset>
+        <legend><i uk-icon="home"></i> Base Membership</legend>
+        <Info2 info={{ active: membership.membership_active, enddate: membership.membership_end }} translation_key="membership" />
+        <p>{t("member_page.subscriptions.descriptions.membership")}</p>
+        <hr />
+        <SubscriptionPayment type="membership" sub={sub} membership={membership} subscriptions={subscriptions} member={member} />
+        { sub && sub.upcoming_invoice && <p>{t("member_page.subscriptions.next_charge")(sub.upcoming_invoice.amount_due, sub.upcoming_invoice.payment_date)}</p>}
+    </fieldset>
+}
+
+function MakerspaceAccess ({ member, membership, subscriptions }: { member: member_t, membership: membership_t, subscriptions: SubscriptionInfo[] }) {
+    const t = useTranslation();
+    const sub = subscriptions.find(sub => sub.type === "labaccess") || null;
+    return <fieldset>
+        <legend><i uk-icon="home"></i> Makerspace Access</legend>
+        <Info2 info={{ active: membership.labaccess_active, enddate: membership.labaccess_end }} translation_key="labaccess" />
+        {
+            membership.special_labaccess_active && <Info2 info={{ active: membership.special_labaccess_active, enddate: membership.special_labaccess_end }} translation_key="special_labaccess" />
+        }
+        <p>{t("member_page.subscriptions.descriptions.labaccess")}</p>
+        <hr />
+        <SubscriptionPayment type="labaccess" sub={sub} membership={membership} subscriptions={subscriptions} member={member} />
+        { sub && sub.upcoming_invoice && <p>{t("member_page.subscriptions.next_charge")(sub.upcoming_invoice.amount_due, sub.upcoming_invoice.payment_date)}</p>}
+    </fieldset>
+}
+
+function Billing () {
+    const t = useTranslation();
+    return <fieldset>
+        <legend><i uk-icon="credit-card"></i> {t("member_page.billing.title")}</legend>
+        <button className="uk-button" onClick={async e => {
+            e.preventDefault();
+            const url = (await common.ajax("GET", `${window.apiBasePath}/webshop/member/current/stripe_customer_portal`)).data;
+            location.href = url;
+        }}>{t("member_page.billing.manage")}</button>
+    </fieldset>;
+}
+
+function useFetchRepeatedly<T>(fetcher: ()=>Promise<T>, callback: (t: T)=>void) {
+    useEffect(() => {
+        let i = 0;
+        let id: NodeJS.Timeout;
+        const f = async () => {
+            callback(await fetcher());
+            i++;
+            id = setTimeout(f, Math.min(60*60*1000, Math.pow(1.5, i)*1000));
+        };
+        id = setTimeout(f, 1000);
+        return () => clearInterval(id);
+    }, []);
+}
+
+function MemberPage({ member, membership: initial_membership, pending_labaccess_days, subscriptions, show_beta }: { member: member_t, membership: membership_t, pending_labaccess_days: number, subscriptions: SubscriptionInfo[], show_beta: boolean }) {
+    const [membership, setMembership] = useState(initial_membership);
+
+    // Automatically refresh membership info.
+    // This is particularly useful when the user has just bought a subscription,
+    // but the invoice has not yet been paid.
+    // In most cases it will get paid in a few seconds, and we want to show this to the user when it happens.
+    useFetchRepeatedly(LoadCurrentMembershipInfo, setMembership);
+    const t = useTranslation();
 
     return (
         <form class="uk-form uk-form-stacked uk-margin-bottom">
-            <h2>Medlem {member.member_number}: {member.firstname} {member.lastname}</h2>
-            <MembershipView member={member} membership={membership} pendingLabaccessDays={pending_labaccess_days} />
-            <Help member={member} membership={membership} pending_labaccess_days={pending_labaccess_days} onSendAccessyInvite={async () => {
-                try {
-                    await common.ajax("POST", `${window.apiBasePath}/webshop/member/current/accessy_invite`);
-                    UIkit.modal.alert(`<h2>Inbjudan skickad</h2>`);
-                } catch (e) {
-                    UIkit.modal.alert(`<h2>Inbjudan misslyckades</h2><b class="uk-text-danger"">${get_error(e)}</b>`);
-                }
-            }} />
-            <PersonalData member={member} onChangePinCode={async () => {
-                const pin_code = await UIkit.modal.prompt("Välj en pinkod", member.pin_code === null ? get_random_pin_code(4) : member.pin_code);
-                if (pin_code === null)
-                    return;
-        
-                try {
-                    await common.ajax("POST", `${apiBasePath}/member/current/set_pin_code`, {pin_code: pin_code})
-                    await UIkit.modal.alert(`<h2>Pinkoden är nu bytt</h2>`);
-                    location.reload();
-                } catch (e) {
-                    UIkit.modal.alert(`<h2>Kunde inte byta pinkod</h2><b class="uk-text-danger"">${get_error(e)}</b>`);
-                }
-            }}
-            onChangePhoneNumber={async () => {
-                switch (await showPhoneNumberDialog(member.phone)) {
-                    case "ok":
-                        await UIkit.modal.alert(`<h2>Telefonnummret är nu bytt</h2>`)
-                        location.reload();
-                        break;
-                    case "cancel":
-                        break;
-                    case UNAUTHORIZED:
-                        login.redirect_to_member_page();
-                        break;
-                }}} />
+            <h2>{t("member_page.member")} {member.member_number}: {member.firstname} {member.lastname}</h2>
+            { show_beta ? <>
+                    <Help member={member} membership={membership} pending_labaccess_days={pending_labaccess_days} onSendAccessyInvite={send_accessy_invite} />
+                    <BaseMembership member={member} membership={membership} subscriptions={subscriptions} />
+                    <MakerspaceAccess member={member} membership={membership} subscriptions={subscriptions} />
+                    <Billing />
+                </>
+                : <>
+                    <MembershipView member={member} membership={membership} pendingLabaccessDays={pending_labaccess_days} />
+                    <Help member={member} membership={membership} pending_labaccess_days={pending_labaccess_days} onSendAccessyInvite={send_accessy_invite} />
+                </>
+            }
+            <PersonalData
+                member={member}
+                onChangePinCode={() => void change_pin_code(member)}
+                onChangePhoneNumber={() => void change_phone_number(member, membership)}
+            />
             <Address member={member} />
         </form>
     )
@@ -324,15 +482,17 @@ common.documentLoaded().then(() => {
     const root = document.querySelector("#content") as HTMLElement;
 
     const future1 = LoadCurrentMemberInfo();
-    const future2 = common.ajax("GET", apiBasePath + "/member/current/membership", null);
+    const membership = LoadCurrentMembershipInfo();
     const future3 = common.ajax("GET", apiBasePath + "/webshop/member/current/pending_actions", null);
+    const subscriptions = getCurrentSubscriptions().then(s => s.filter(sub => sub.active));
+    const groups = LoadCurrentMemberGroups();
 
-    Promise.all([future1, future2, future3]).then(([member, membership_json, pending_actions_json]) => {
-        const membership: membership_t = membership_json.data;
+    Promise.all([future1, membership, future3, subscriptions, groups]).then(([member, membership, pending_actions_json, subscriptions, groups]) => {
         const pending_labaccess_days = get_pending_labaccess_days(pending_actions_json);
+        const in_beta_group = groups.some(g => g.name === "betatesters");
         if (root != null) {
             render(
-                <MemberPage member={member} membership={membership} pending_labaccess_days={pending_labaccess_days} />,
+                <MemberPage member={member} membership={membership} pending_labaccess_days={pending_labaccess_days} subscriptions={subscriptions} show_beta={in_beta_group} />,
                 root
             );
         }

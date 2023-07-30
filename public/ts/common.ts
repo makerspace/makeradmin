@@ -19,6 +19,20 @@ export interface ServerResponse<T> {
 
 export const UNAUTHORIZED = "unauthorized";
 
+export function formatDate(str: any) {
+	const options: Intl.DateTimeFormatOptions = {
+		year: "numeric", month: "numeric", day: "numeric",
+		hour12: false
+	};
+
+	const parsed_date = Date.parse(str);
+
+	// If the date was parsed successfully we should update the string
+	if (!isNaN(parsed_date)) {
+		return new Intl.DateTimeFormat("sv-SE", options).format(parsed_date);
+	}
+	return "";
+}
 
 export function formatDateTime(str: any) {
 	const options: Intl.DateTimeFormatOptions = {
@@ -56,7 +70,7 @@ export function uploadFile<T>(url: string, file: File): Promise<T> {
 
 	formData.append('file', file);
 	formData.append('filename', file.name);
-	
+
 	return fetch(url, {
 		headers,
 		method: "POST",

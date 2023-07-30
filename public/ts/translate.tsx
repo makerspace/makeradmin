@@ -1,4 +1,10 @@
-// See https://stackoverflow.com/questions/58277973/how-to-type-check-i18n-dictionaries-with-typescript
+/// This file contains a bunch of hard to understand typescript types.
+/// They are used to type check the translation dictionary.
+/// The dictionary is a nested object with string keys and string/function values.
+///
+/// This file should rarely require any modifications.
+///
+/// See https://stackoverflow.com/questions/58277973/how-to-type-check-i18n-dictionaries-with-typescript
 
 import { VNode, isValidElement } from "preact";
 
@@ -20,7 +26,7 @@ T extends VNode ? "" :
 : "");
 
 
-// get all possible key paths
+/// Get all possible key paths
 type DeepKeysAll<T> = T extends VNode ? "" : (T extends object ? {
     [K in keyof T]-?: `${K & string}` | Concat<K & string, DeepKeysAll<T[K]>>
 }[keyof T] : "");
@@ -32,7 +38,7 @@ type Concat<K extends string, P extends string> =
 export type TranslationKeyValues<T> = T extends object ?
     { [K in keyof T]-?: Concat<K & string, DeepKeysAll<T[K]>> }[keyof T] : "";
 
-// returns property value from object O given property path T, otherwise never
+/// Returns property value from object O given property path T, otherwise never
 type GetDictValue<T extends string, O> =
     T extends `${infer A}.${infer B}` ? 
     A extends keyof O ? GetDictValue<B, O[A]> : never
@@ -46,7 +52,7 @@ export class Translation<T extends Record<string, any>> {
         this.translations = translations;
     }
 
-
+    /// Get translation value for key
     t<S extends string>(key: DeepKeys<T, S>): GetDictValue<S, T> {
         const parts = key.split(".");
         let item = this.translations as Record<string, any>;
