@@ -1,9 +1,10 @@
 from datetime import datetime
+from typing import Any, List
 from urllib.parse import quote_plus
 from sqlalchemy.exc import DataError
 
 from core.auth import create_access_token, get_member_by_user_identification
-from membership.models import Member
+from membership.models import Member, Group
 from messages.message import send_message
 from messages.models import MessageTemplate
 from service import config
@@ -11,6 +12,7 @@ from service.db import db_session
 from service.error import BadRequest
 from service.logging import logger
 from service.util import format_datetime
+from membership.views import group_entity
 
 
 def send_access_token_email(redirect, user_identification, ip, browser):
@@ -42,3 +44,7 @@ def set_pin_code(member_id: int, pin_code: str):
         raise BadRequest(f"PIN code is of wrong format. Make sure it is maximum 30 characters long.")
 
     return {"status": "PIN code changed"}
+
+def get_member_groups(member_id: int) -> List[Any]:
+    groups = db_session.query(Group).join(Member.groups).filter(Member.member_id==member_id).filter(Group.deleted_at==None).all()
+    return [group_entity.to_obj(g) for g in groups]

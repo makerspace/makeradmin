@@ -4,7 +4,7 @@ from quiz.views import member_quiz_statistics
 from flask import request, g
 
 from member import service
-from member.member import send_access_token_email, set_pin_code
+from member.member import send_access_token_email, set_pin_code, get_member_groups
 from membership.member_auth import get_member_permissions
 from membership.membership import get_membership_summary
 from membership.views import member_entity
@@ -36,6 +36,10 @@ def current_membership_info():
     """ Get current user membership information. """
     return get_membership_summary(g.user_id).as_json()
 
+
+@service.route("/current/groups", method=GET, permission=USER)
+def current_membership_groups():
+    return get_member_groups(g.user_id)
 
 @service.route("/current/quizzes", method=GET, permission=USER)
 def current_member_quiz_info():
