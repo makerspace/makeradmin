@@ -42,7 +42,7 @@ export function mountStripe() {
     card = elements.create('card', { style: stripeStyle });
     card.mount("#card-element");
 
-    payButton = <HTMLInputElement>document.getElementById("pay-button");
+    payButton = document.getElementById("pay-button") as HTMLInputElement;
     spinner = document.querySelector(".progress-spinner");
     errorElement = document.getElementById('card-errors');
 }
@@ -171,4 +171,21 @@ export async function pay(object: PaymentFlowDefinition) {
             enable_pay_button();
         }
     }
+}
+
+export type Product = {
+    category_id: number,
+    created_at: string,
+    deleted_at: string | null,
+    updated_at: string,
+    description: string,
+    display_order: number,
+    filter: string,
+    id: number,
+    image_id: number | null,
+    name: string,
+    price: string,
+    show: boolean,
+    smallest_multiple: number,
+    unit: string,
 }
