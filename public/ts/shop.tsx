@@ -110,7 +110,7 @@ common.onGetAndDocumentLoaded("/webshop/product_data", (productData: any) => {
       };
 
       li.querySelector(".number-add")!.addEventListener("click", ev => {
-        productAmount.value = "" + (Number(productAmount.value) + Number((<HTMLElement>ev.currentTarget).getAttribute("data-amount")));
+        productAmount.value = "" + (Number(productAmount.value) + Number((ev.currentTarget as HTMLElement).getAttribute("data-amount")));
         // Ugly
         productAmount.onchange!(null as unknown as Event);
         ev.preventDefault();
@@ -125,14 +125,14 @@ common.onGetAndDocumentLoaded("/webshop/product_data", (productData: any) => {
   function refreshUIFromCart(cart: Cart) {
     // Reset all values
     for (const element of id2element.values()) {
-      (<HTMLInputElement>element.querySelector(".product-amount")).value = "";
+      (element.querySelector(".product-amount") as HTMLInputElement).value = "";
     }
 
     // Copy from cart
     for (const item of cart.items) {
       const element = id2element.get(item.id);
       if (element !== null && element !== undefined) {
-        (<HTMLInputElement>element.querySelector(".product-amount")).value = "" + item.count;
+        (element.querySelector(".product-amount") as HTMLInputElement).value = "" + item.count;
       }
     }
 
@@ -148,7 +148,7 @@ common.onGetAndDocumentLoaded("/webshop/product_data", (productData: any) => {
   document.querySelector("#product-search-field")!.addEventListener("input", ev => {
     const allItems = [];
     for (const item of id2item.values()) allItems.push(item);
-    const matchingItems = shopsearch.search(allItems, (<HTMLInputElement>ev.currentTarget).value);
+    const matchingItems = shopsearch.search(allItems, (ev.currentTarget as HTMLInputElement).value);
 
     for (const item of allItems) {
       const elem = id2element.get(item.id)!;

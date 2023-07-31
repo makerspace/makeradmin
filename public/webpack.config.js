@@ -7,18 +7,18 @@ module.exports = (env, args) => {
         context: path.resolve(__dirname),
         entry: {
             receipt: "./ts/receipt.ts",
-            shop: "./ts/shop.ts",
+            shop: "./ts/shop.tsx",
             cartpage: "./ts/cartpage.ts",
             cart: "./ts/cart.ts",
             category: "./ts/category.ts",
             register: "./ts/register.ts",
             product: "./ts/product.ts",
-            history: "./ts/history.ts",
+            history: "./ts/history.tsx",
             member: "./ts/member.tsx",
             statistics: "./ts/statistics.ts",
             quiz: "./ts/quiz.tsx",
-            licenses: "./ts/licenses.ts",
-            courses: "./ts/courses.ts",
+            licenses: "./ts/licenses.tsx",
+            courses: "./ts/courses.tsx",
         },
         
         output:
