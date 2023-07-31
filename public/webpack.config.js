@@ -8,7 +8,7 @@ module.exports = (env, args) => {
         entry: {
             receipt: "./ts/receipt.ts",
             shop: "./ts/shop.tsx",
-            cartpage: "./ts/cartpage.ts",
+            cartpage: "./ts/cartpage.tsx",
             cart: "./ts/cart.ts",
             category: "./ts/category.ts",
             register: "./ts/register.ts",
