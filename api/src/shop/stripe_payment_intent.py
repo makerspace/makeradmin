@@ -30,19 +30,13 @@ logger = getLogger("makeradmin")
 
 
 def raise_from_stripe_invalid_request_error(e: InvalidRequestError) -> Never:
-    if "Amount must convert to at least" in str(e) or "Amount must be at least" in str(
-        e
-    ):
-        raise PaymentFailed(
-            "Total amount too small total, least chargable amount is around 5 SEK."
-        )
+    if "Amount must convert to at least" in str(e) or "Amount must be at least" in str(e):
+        raise PaymentFailed("Total amount too small total, least chargable amount is around 5 SEK.")
 
     raise PaymentFailed(log=f"stripe charge failed: {str(e)}", level=EXCEPTION)
 
 
-def capture_stripe_payment_intent(
-    transaction: Transaction, payment_intent: PaymentIntent
-) -> None:
+def capture_stripe_payment_intent(transaction: Transaction, payment_intent: PaymentIntent) -> None:
     """This is payment_intent is authorized and can be captured synchronously."""
 
     if transaction.status != Transaction.PENDING:
@@ -56,14 +50,10 @@ def capture_stripe_payment_intent(
 
         complete_payment_intent_transaction(transaction, captured_intent)
     except InvalidRequestError as e:
-        raise PaymentFailed(
-            log=f"stripe capture payment_intent failed: {str(e)}", level=EXCEPTION
-        )
+        raise PaymentFailed(log=f"stripe capture payment_intent failed: {str(e)}", level=EXCEPTION)
 
     except StripeError as e:
-        raise InternalServerError(
-            log=f"stripe capture payment_intent failed (possibly temporarily): {str(e)}"
-        )
+        raise InternalServerError(log=f"stripe capture payment_intent failed (possibly temporarily): {str(e)}")
 
 
 @dataclass
@@ -121,15 +111,11 @@ def complete_payment_intent_transaction(transaction: Transaction, payment_intent
         payment_success(transaction)
 
 
-def create_client_response(
-    transaction: Transaction, payment_intent: PaymentIntent
-) -> Optional[PaymentAction]:
+def create_client_response(transaction: Transaction, payment_intent: PaymentIntent) -> Optional[PaymentAction]:
     if payment_intent.status == PaymentIntentStatus.REQUIRES_ACTION:
         """Requires further action on client side."""
         if not payment_intent.next_action:
-            raise InternalServerError(
-                f"intent next_action is required but missing ({payment_intent.next_action})"
-            )
+            raise InternalServerError(f"intent next_action is required but missing ({payment_intent.next_action})")
         return create_action_required_response(transaction, payment_intent)
 
     elif payment_intent.status == PaymentIntentStatus.REQUIRES_CONFIRMATION:
@@ -139,24 +125,16 @@ def create_client_response(
 
     elif payment_intent.status == PaymentIntentStatus.SUCCEEDED:
         payment_success(transaction)
-        logger.info(
-            f"succeeded: payment for transaction {transaction.id}, payment_intent id {payment_intent.id}"
-        )
+        logger.info(f"succeeded: payment for transaction {transaction.id}, payment_intent id {payment_intent.id}")
         return None
 
     elif payment_intent.status == PaymentIntentStatus.REQUIRES_PAYMENT_METHOD:
         commit_fail_transaction(transaction)
-        logger.info(
-            f"failed: payment for transaction {transaction.id}, payment_intent id {payment_intent.id}"
-        )
-        raise BadRequest(
-            log=f"payment_intent requires payment method, either no method provided or the payment failed"
-        )
+        logger.info(f"failed: payment for transaction {transaction.id}, payment_intent id {payment_intent.id}")
+        raise BadRequest(log=f"payment_intent requires payment method, either no method provided or the payment failed")
 
     else:
-        raise InternalServerError(
-            log=f"unexpected stripe payment_intent status {payment_intent.status}, this is a bug"
-        )
+        raise InternalServerError(log=f"unexpected stripe payment_intent status {payment_intent.status}, this is a bug")
 
 
 def confirm_stripe_payment_intent(transaction_id: int) -> PartialPayment:
@@ -180,12 +158,14 @@ def confirm_stripe_payment_intent(transaction_id: int) -> PartialPayment:
         err.message = e.user_message
         raise err
 
-    return PartialPayment(transaction_id=transaction.id, action_info=action_info)
+    return PartialPayment(
+        type=PaymentIntentResult.Success if action_info is None else PaymentIntentResult.RequiresAction,
+        transaction_id=transaction.id,
+        action_info=action_info,
+    )
 
 
-def pay_with_stripe(
-    transaction: Transaction, payment_method_id: str
-) -> Optional[PaymentAction]:
+def pay_with_stripe(transaction: Transaction, payment_method_id: str) -> Optional[PaymentAction]:
     """Handle stripe payment, Returns dict containing data for further processing customer action or None."""
 
     try:

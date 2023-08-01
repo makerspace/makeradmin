@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from decimal import localcontext, Decimal, Rounded
 from datetime import datetime
 from logging import getLogger
-from typing import List, Tuple
+from typing import List, Optional, Tuple
 from dataclasses_json import DataClassJsonMixin
 
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
@@ -259,10 +259,7 @@ def ship_orders(ship_add_labaccess=True, transaction=None):
     """
 
     for action, content, transaction in pending_actions_query(transaction=transaction):
-        if (
-            ship_add_labaccess
-            and action.action_type == ProductAction.ADD_LABACCESS_DAYS
-        ):
+        if ship_add_labaccess and action.action_type == ProductAction.ADD_LABACCESS_DAYS:
             try:
                 ship_add_labaccess_action(action, transaction)
             except AccessyError as e:
@@ -277,9 +274,7 @@ def ship_orders(ship_add_labaccess=True, transaction=None):
 def ship_labaccess_orders(member_id=None, skip_ensure_accessy=False):
     for action, content, transaction in pending_actions_query(member_id=member_id):
         if action.action_type == ProductAction.ADD_LABACCESS_DAYS:
-            ship_add_labaccess_action(
-                action, transaction, skip_ensure_accessy=skip_ensure_accessy
-            )
+            ship_add_labaccess_action(action, transaction, skip_ensure_accessy=skip_ensure_accessy)
 
 
 @nested_atomic
@@ -287,17 +282,11 @@ def payment_success(transaction):
     complete_transaction(transaction)
     ship_orders(ship_add_labaccess=False, transaction=transaction)
 
-    if (
-        db_session.query(PendingRegistration)
-        .filter(PendingRegistration.transaction_id == transaction.id)
-        .count()
-    ):
+    if db_session.query(PendingRegistration).filter(PendingRegistration.transaction_id == transaction.id).count():
         activate_member(transaction.member)
 
 
-def process_cart(
-    member_id: int, cart: List[CartItem]
-) -> Tuple[Decimal, List[TransactionContent]]:
+def process_cart(member_id: int, cart: List[CartItem]) -> Tuple[Decimal, List[TransactionContent]]:
     contents = []
     with localcontext() as ctx:
         ctx.clear_flags()
@@ -306,18 +295,12 @@ def process_cart(
         for item in cart:
             try:
                 product_id = item.id
-                product = (
-                    db_session.query(Product)
-                    .filter(Product.id == product_id, Product.deleted_at.is_(None))
-                    .one()
-                )
+                product = db_session.query(Product).filter(Product.id == product_id, Product.deleted_at.is_(None)).one()
             except NoResultFound:
                 raise NotFound(message=f"Could not find product with id {product_id}.")
 
             if product.price < 0:
-                raise InternalServerError(
-                    log=f"Product {product_id} has a negative price."
-                )
+                raise InternalServerError(log=f"Product {product_id} has a negative price.")
 
             count = item.count
 
@@ -340,9 +323,7 @@ def process_cart(
             amount = product.price * count
             total_amount += amount
 
-            content = TransactionContent(
-                product_id=product_id, count=count, amount=amount
-            )
+            content = TransactionContent(product_id=product_id, count=count, amount=amount)
             contents.append(content)
 
         if ctx.flags[Rounded]:

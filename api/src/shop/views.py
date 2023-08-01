@@ -9,13 +9,26 @@ from service.db import db_session
 from service.entity import OrmSingeRelation, OrmSingleSingleRelation
 from service.error import PreconditionFailed
 from shop import service
-from shop.entities import product_image_entity, transaction_content_entity, transaction_entity, \
-    transaction_action_entity, product_entity, category_entity, product_action_entity
+from shop.entities import (
+    product_image_entity,
+    transaction_content_entity,
+    transaction_entity,
+    transaction_action_entity,
+    product_entity,
+    category_entity,
+    product_action_entity,
+)
 from shop.models import TransactionContent, ProductImage
 from shop.pay import pay, register
 from shop.stripe_payment_intent import PartialPayment, confirm_stripe_payment_intent
-from shop.shop_data import pending_actions, member_history, receipt, get_product_data, all_product_data, \
-    get_membership_products, special_product_data
+from shop.shop_data import (
+    pending_actions,
+    member_history,
+    receipt,
+    get_product_data,
+    all_product_data,
+    get_membership_products,
+)
 from shop.stripe_event import stripe_callback, process_stripe_events
 from shop.transactions import ship_labaccess_orders
 
@@ -44,7 +57,7 @@ service.entity_routes(
 service.related_entity_routes(
     path="/product/<int:related_entity_id>/images",
     entity=product_image_entity,
-    relation=OrmSingeRelation('images', 'product_id'),
+    relation=OrmSingeRelation("images", "product_id"),
     permission_list=PUBLIC,
 )
 
@@ -62,7 +75,7 @@ service.entity_routes(
 service.related_entity_routes(
     path="/product/<int:related_entity_id>/actions",
     entity=product_action_entity,
-    relation=OrmSingeRelation('actions', 'product_id'),
+    relation=OrmSingeRelation("actions", "product_id"),
     permission_list=WEBSHOP,
 )
 
@@ -85,7 +98,7 @@ service.entity_routes(
 service.related_entity_routes(
     path="/transaction/<int:related_entity_id>/contents",
     entity=transaction_content_entity,
-    relation=OrmSingeRelation('contents', 'transaction_id'),
+    relation=OrmSingeRelation("contents", "transaction_id"),
     permission_list=WEBSHOP,
 )
 
@@ -93,7 +106,7 @@ service.related_entity_routes(
 service.related_entity_routes(
     path="/transaction/<int:related_entity_id>/actions",
     entity=transaction_action_entity,
-    relation=OrmSingleSingleRelation('actions', TransactionContent, 'transaction_id'),
+    relation=OrmSingleSingleRelation("actions", TransactionContent, "transaction_id"),
     permission_list=WEBSHOP,
 )
 
@@ -101,7 +114,7 @@ service.related_entity_routes(
 service.related_entity_routes(
     path="/member/<int:related_entity_id>/transactions",
     entity=transaction_entity,
-    relation=OrmSingeRelation('member', 'member_id'),
+    relation=OrmSingeRelation("member", "member_id"),
     permission_list=WEBSHOP,
 )
 
@@ -138,7 +151,7 @@ def accessy_invite():
         ensure_accessy_labaccess(member_id=g.user_id)
     except AccessyInvitePreconditionFailed as e:
         raise PreconditionFailed(message=str(e))
-    
+
 
 @service.route("/member/<int:member_id>/ship_labaccess_orders", method=POST, permission=MEMBER_EDIT)
 def ship_labaccess_orders_endpoint(member_id=None):
@@ -162,9 +175,11 @@ def product_data(product_id):
 @service.raw_route("/image/<int:image_id>")
 def public_image(image_id: int) -> Response:
     try:
-        image = db_session.query(ProductImage).filter(ProductImage.id == image_id, ProductImage.deleted_at.is_(None)).one()
+        image = (
+            db_session.query(ProductImage).filter(ProductImage.id == image_id, ProductImage.deleted_at.is_(None)).one()
+        )
     except NoResultFound:
-        return send_file("/work/default-product-image.png", mimetype='image/png')
+        return send_file("/work/default-product-image.png", mimetype="image/png")
 
     response = make_response(image.data)
     response.headers.set("Content-Type", image.type)
@@ -194,8 +209,8 @@ def stripe_callback_route():
 
 
 @service.route("/process_stripe_events", method=POST, permission=WEBSHOP_ADMIN, commit_on_error=True)
-def process_stripe_events_route(start=Arg(str, required=False), source_id=Arg(str, required=False),
-                                type=Arg(str, required=False)):
-    """ Used to make server fetch stripe events, used for testing since webhook is hard to use. """
+def process_stripe_events_route(
+    start=Arg(str, required=False), source_id=Arg(str, required=False), type=Arg(str, required=False)
+):
+    """Used to make server fetch stripe events, used for testing since webhook is hard to use."""
     return process_stripe_events(start, source_id, type)
-
