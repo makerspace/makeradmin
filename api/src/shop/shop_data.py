@@ -120,7 +120,6 @@ def all_product_data():
         .join(ProductCategory.products)
         .options(contains_eager(ProductCategory.products))
         .filter(Product.deleted_at.is_(None))
-        .filter(Product.show)
         .order_by(ProductCategory.display_order)
     )
 

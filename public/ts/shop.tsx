@@ -65,15 +65,15 @@ const ProductItem = ({ item, cart, onChangeCart }: { item: Product, cart: Cart, 
 }
 
 const ProductCategory = ({ category, cart, onChangeCart, visibleItems }: { category: ProductCategory, cart: Cart, onChangeCart: (cart: Cart) => void, visibleItems: Set<number> }) => {
-  const anyVisible = category.items.some(item => visibleItems.has(item.id));
-  if (!anyVisible) {
+  const items = category.items.filter(item => visibleItems.has(item.id) && item.show);
+  if (items.length === 0) {
     return null;
   }
 
   return <>
     <ProductCategoryHeader category={category} />
     <li className="product-container-list">
-      {category.items.filter(item => visibleItems.has(item.id)).map(item => <ProductItem item={item} cart={cart} onChangeCart={onChangeCart} />)}
+      {items.map(item => <ProductItem item={item} cart={cart} onChangeCart={onChangeCart} />)}
     </li>
   </>
 }
@@ -120,10 +120,7 @@ const ShopPage = ({ productData }: { productData: ProductData }) => {
             <button className={`layout-button uk-icon-button ${layoutMode === "layout-table" ? "selected" : ""}`} uk-icon="icon: table" onClick={() => setLayoutMode("layout-table")}></button>
           </div>
         </li>
-        {productData.products.map(cat => <ProductCategory category={cat} cart={cart} onChangeCart={cart => {
-          cart.saveToStorage();
-          setCart(Cart.fromStorage());
-        }} visibleItems={visibleItems} />)}
+        {productData.products.map(cat => <ProductCategory category={cat} cart={cart} onChangeCart={setCart} visibleItems={visibleItems} />)}
       </ul>
     </div>
   </>

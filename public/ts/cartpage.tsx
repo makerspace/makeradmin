@@ -13,8 +13,8 @@ declare var UIkit: any;
 
 const CartItem = ({ cartItem, productData, cart, onChangeCart }: { cartItem: Item, productData: ProductData, cart: Cart, onChangeCart: (cart: Cart) => void }) => {
 	const item = productData.id2item.get(cartItem.id);
-	if (item === undefined) {
-		// Item no longer exists
+	if (item === undefined || !item.show) {
+		// Item no longer exists or should not be visible in the shop anymore.
 		cart.setItem(cartItem.id, 0);
 		onChangeCart(cart);
 		return null;
@@ -137,10 +137,7 @@ const CartPage = ({ productData }: { productData: ProductData }) => {
 				<h3 class="cart-header">Varukorg</h3>
 				<ul id="cart" class="layout-table">
 					{cart.items.length > 0 ?
-						cart.items.map(cartItem => <CartItem cartItem={cartItem} productData={productData} cart={cart} onChangeCart={cart => {
-							cart.saveToStorage();
-							setCart(Cart.fromStorage());
-						}} />)
+						cart.items.map(cartItem => <CartItem cartItem={cartItem} productData={productData} cart={cart} onChangeCart={setCart} />)
 						: <p class='empty-cart-text'>Du har inga produkter i varukorgen.</p>}
 				</ul>
 				<div id="pay-module">

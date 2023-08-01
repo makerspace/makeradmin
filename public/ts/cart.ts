@@ -110,5 +110,10 @@ export const useCart = () => {
 	// Keep local storage in sync even though other tabs change it
 	const [cart, setCart] = useState(Cart.fromStorage());
 	useEffect(() => Cart.startLocalStorageSync(setCart));
-	return { cart, setCart };
+	return {
+		cart, setCart: (cart: Cart) => {
+			cart.saveToStorage();
+			setCart(Cart.fromStorage());
+		}
+	};
 }
