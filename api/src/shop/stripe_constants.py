@@ -12,13 +12,17 @@ CURRENCY = "sek"
 
 STRIPE_SIGNING_SECRET = config.get("STRIPE_SIGNING_SECRET", log_value=False)
 
+
 def set_stripe_key(private: bool) -> None:
     stripe.api_key = STRIPE_PRIVATE_KEY if private else STRIPE_PUBLIC_KEY
 
+
 set_stripe_key(True)
 
+
 class MakerspaceMetadataKeys(Enum):
-    '''Keys used in the metadata for stripe objects, and in some cases, metadata for makerspace products in the webshop'''
+    """Keys used in the metadata for stripe objects, and in some cases, metadata for makerspace products in the webshop"""
+
     USER_ID = "makerspace_user_id"
 
     # The makerspace member number. This is only intended to be used for human-readable ids, and should not be used for any logic.
@@ -44,20 +48,23 @@ class MakerspaceMetadataKeys(Enum):
     # Allowed values are the values of PriceLevel, except 'normal'.
     ALLOWED_PRICE_LEVELS = "allowed_price_levels"
 
+
 class PriceType(str, Enum):
     BINDING_PERIOD = "binding_period"
     RECURRING = "recurring"
 
+
 class EventType(str, Enum):
-    SOURCE = 'source'
-    CARD = 'card'
-    CHARGE = 'charge'
-    PAYMENT_INTENT = 'payment_intent'
-    CUSTOMER = 'customer'
-    INVOICE = 'invoice'
-    CHECKOUT = 'checkout'
-    SUBSCRIPTION_SCHEDULE = 'subscription_schedule'
-    TEST_HELPERS = 'test_helpers'
+    SOURCE = "source"
+    CARD = "card"
+    CHARGE = "charge"
+    PAYMENT_INTENT = "payment_intent"
+    CUSTOMER = "customer"
+    INVOICE = "invoice"
+    CHECKOUT = "checkout"
+    SUBSCRIPTION_SCHEDULE = "subscription_schedule"
+    TEST_HELPERS = "test_helpers"
+
 
 class EventSubtype(str, Enum):
     CHARGEABLE = "chargeable"
@@ -67,39 +74,38 @@ class EventSubtype(str, Enum):
     DISPUTE_PREFIX = "dispute"
     REFUND_PREFIX = "refund"
     PAYMENT_FAILED = "payment_failed"
-    PAYMENT_SUCCEEDED = 'payment_succeeded'
+    PAYMENT_SUCCEEDED = "payment_succeeded"
     PAID = "paid"
-    UNCOLLECTABLE = 'marked_uncollectible'
-    UPDATED = 'updated'
-    SUBSCRIPTION_CREATED = 'subscription.created'
-    SUBSCRIPTION_UPDATED = 'subscription.updated'
-    SUBSCRIPTION_DELETED = 'subscription.deleted'
-    SESSION_COMPLETED = 'session.completed'
-    TEST_CLOCK_ADVANCING = 'test_clock.advancing'
-    CREATED = 'created'
-    RELEASED = 'released'
+    UNCOLLECTABLE = "marked_uncollectible"
+    UPDATED = "updated"
+    SUBSCRIPTION_CREATED = "subscription.created"
+    SUBSCRIPTION_UPDATED = "subscription.updated"
+    SUBSCRIPTION_DELETED = "subscription.deleted"
+    SESSION_COMPLETED = "session.completed"
+    TEST_CLOCK_ADVANCING = "test_clock.advancing"
+    CREATED = "created"
+    RELEASED = "released"
 
 
 class SubscriptionStatus(str, Enum):
-    ACTIVE = 'active'
-    INCOMPLETE = 'incomplete'
-    INCOMPLETE_EXPIRED = 'incomplete_expired'
-    PAST_DUE = 'past_due'
-    UNPAID = 'unpaid'
-    CANCELED = 'canceled'
-    TRAILING = 'trailing'
-
+    ACTIVE = "active"
+    INCOMPLETE = "incomplete"
+    INCOMPLETE_EXPIRED = "incomplete_expired"
+    PAST_DUE = "past_due"
+    UNPAID = "unpaid"
+    CANCELED = "canceled"
+    TRAILING = "trailing"
 
 
 class SourceType(str, Enum):
-    THREE_D_SECURE = 'three_d_secure'
-    CARD = 'card'
+    THREE_D_SECURE = "three_d_secure"
+    CARD = "card"
 
 
 class ChargeStatus(str, Enum):
     SUCCEEDED = "succeeded"
-    PENDING = 'pending'
-    FAILED = 'failed'
+    PENDING = "pending"
+    FAILED = "failed"
 
 
 class PaymentIntentStatus(str, Enum):
@@ -115,6 +121,7 @@ class PaymentIntentStatus(str, Enum):
 class PaymentIntentNextActionType(str, Enum):
     USE_STRIPE_SDK = "use_stripe_sdk"
     REDIRECT_TO_URL = "redirect_to_url"
+
 
 class SubscriptionScheduleStatus(str, Enum):
     NOT_STARTED = "not_started"
