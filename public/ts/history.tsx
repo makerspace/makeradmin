@@ -29,7 +29,7 @@ const Receipt = ({ transaction }: { transaction: Transaction }) => {
     return <div className={`history-item history-item-${transaction.status}`}>
         <a className="receipt-header" href={`/shop/receipt/${transaction.id}`}>
             <span>Kvitto {transaction.id}</span>
-            <span className="receipt-date">{ new Date(transaction.created_at).toLocaleDateString("sv-SE")}</span>
+            <span className="receipt-date">{new Date(transaction.created_at).toLocaleDateString("sv-SE")}</span>
         </a>
         <div className="receipt-items">
             {transaction.contents.map(item => <ReceiptItem item={item} />)}

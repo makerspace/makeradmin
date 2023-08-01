@@ -10,7 +10,7 @@ export async function showPhoneNumberDialog(current_number: string): Promise<"ok
     }
 
     try {
-        const {data} = await common.ajax("POST", `${window.apiBasePath}/member/current/change_phone_request`, {phone: new_number.trim()});
+        const { data } = await common.ajax("POST", `${window.apiBasePath}/member/current/change_phone_request`, { phone: new_number.trim() });
     } catch (error: any) {
         if (error.status === UNAUTHORIZED) {
             return UNAUTHORIZED;
@@ -20,7 +20,7 @@ export async function showPhoneNumberDialog(current_number: string): Promise<"ok
         }
     }
 
-    while(true) {
+    while (true) {
         let validation_code: string | null = await UIkit.modal.prompt("Valideringskod: ", "");
         if (validation_code === null) {
             return "cancel";
@@ -30,7 +30,7 @@ export async function showPhoneNumberDialog(current_number: string): Promise<"ok
             await UIkit.modal.alert("<h2>Ogiltig kod. Försök igen.</h2>");
         } else {
             try {
-                await common.ajax("POST", `${window.apiBasePath}/member/current/change_phone_validate`, {validation_code});
+                await common.ajax("POST", `${window.apiBasePath}/member/current/change_phone_validate`, { validation_code });
                 break;
             } catch (error: any) {
                 if (error.status === UNAUTHORIZED) {

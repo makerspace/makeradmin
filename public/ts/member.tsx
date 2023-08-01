@@ -117,7 +117,7 @@ function MissingPhoneNumber({ member }: { member: member_t }) {
 }
 
 
-function PendingLabaccessInstructions({ can_sync_labaccess, pending_labaccess_days}: { can_sync_labaccess: boolean, pending_labaccess_days: number }) {
+function PendingLabaccessInstructions({ can_sync_labaccess, pending_labaccess_days }: { can_sync_labaccess: boolean, pending_labaccess_days: number }) {
     if (!can_sync_labaccess && pending_labaccess_days) {
         return <>Du behöver åtgärda ovanstående fel innan din labbaccess kan synkas. När de är åtgärdade kommer den digitala nyckeln att förlängas med <strong>{pending_labaccess_days} dagar</strong> vid nästa nyckelsynkronisering.</>;
     } else if (can_sync_labaccess && pending_labaccess_days) {
@@ -128,7 +128,7 @@ function PendingLabaccessInstructions({ can_sync_labaccess, pending_labaccess_da
 }
 
 
-function Help({ member, membership, pending_labaccess_days, onSendAccessyInvite }: { member: member_t, membership: membership_t, pending_labaccess_days: number, onSendAccessyInvite: ()=>void }) {
+function Help({ member, membership, pending_labaccess_days, onSendAccessyInvite }: { member: member_t, membership: membership_t, pending_labaccess_days: number, onSendAccessyInvite: () => void }) {
     const todo_bullets = [
         <SignedContractWarning member={member} />,
         <NoMembershipWarning membership={membership} />,
@@ -144,11 +144,11 @@ function Help({ member, membership, pending_labaccess_days, onSendAccessyInvite 
     }}>Skicka Accessy-inbjudan</button></p>;
 
     return <fieldset>
-            <legend><i uk-icon="info"></i> Instruktioner för att bli labbmedlem</legend>
-            {todo_bullets}
-            {pending_labaccess_instruction}
-            {accessyInvite}
-        </fieldset>;
+        <legend><i uk-icon="info"></i> Instruktioner för att bli labbmedlem</legend>
+        {todo_bullets}
+        {pending_labaccess_instruction}
+        {accessyInvite}
+    </fieldset>;
 }
 
 
@@ -165,63 +165,63 @@ function get_pending_labaccess_days(pending_actions_json: any): number {
 
 function MembershipView({ member, membership, pendingLabaccessDays }: { member: member_t, membership: membership_t, pendingLabaccessDays: number }) {
     const labaccessStrings: template_strings_t = [
-        (enddate: string, days: number) => <>Din <strong>labaccess</strong> är ogiltig sedan {days} dagar ({enddate}). <br/>Your <strong>lab membership</strong> expired {days} day(s) ago ({enddate}).</>,
-        () => <>Din <strong>labaccess</strong> gick ut igår. <br/>Your <strong>lab membership</strong> expired yesterday.</>,
-        (hours: number) => <>Din <strong>labaccess</strong> är giltig i mindre än {hours} timmar till. <br/>Your <strong>lab membership</strong> is valid for {hours} more hours.</>,
-        (enddate: string, days: number) => <>Din <strong>labaccess</strong> är giltig t.o.m. {enddate} (endast {days} dagar till). Kom ihåg att förnya den innan nästa fredag morgon. <br/>Your <strong>lab membership</strong> is valid through {enddate} (only {days} day(s) left). Remember to extend your lab membership before next Friday morning.</>,
-        (enddate: string, days: number) => <>Din <strong>labaccess</strong> är giltig t.o.m. {enddate} ({days} dagar till). <br/>Your <strong>lab membership</strong> is valid through {enddate} (only {days} day(s) left).</>,
-        () => <>Din <strong>labaccess</strong> är inaktiv. <br/>Your <strong>lab membership</strong> is inactive.</>,
+        (enddate: string, days: number) => <>Din <strong>labaccess</strong> är ogiltig sedan {days} dagar ({enddate}). <br />Your <strong>lab membership</strong> expired {days} day(s) ago ({enddate}).</>,
+        () => <>Din <strong>labaccess</strong> gick ut igår. <br />Your <strong>lab membership</strong> expired yesterday.</>,
+        (hours: number) => <>Din <strong>labaccess</strong> är giltig i mindre än {hours} timmar till. <br />Your <strong>lab membership</strong> is valid for {hours} more hours.</>,
+        (enddate: string, days: number) => <>Din <strong>labaccess</strong> är giltig t.o.m. {enddate} (endast {days} dagar till). Kom ihåg att förnya den innan nästa fredag morgon. <br />Your <strong>lab membership</strong> is valid through {enddate} (only {days} day(s) left). Remember to extend your lab membership before next Friday morning.</>,
+        (enddate: string, days: number) => <>Din <strong>labaccess</strong> är giltig t.o.m. {enddate} ({days} dagar till). <br />Your <strong>lab membership</strong> is valid through {enddate} (only {days} day(s) left).</>,
+        () => <>Din <strong>labaccess</strong> är inaktiv. <br />Your <strong>lab membership</strong> is inactive.</>,
     ];
 
     const membershipStrings: template_strings_t = [
-        (enddate: string, days: number) => <>Ditt <strong>föreningsmedlemsskap</strong> är ogiltigt sedan {days} dagar ({enddate}). <br/>Your <strong>membership</strong> expired {days} day(s) ago ({enddate})</>,
-        () => <>Ditt <strong>föreningsmedlemsskap</strong> gick ut igår. <br/>Your <strong>membership</strong> expired yesterday.</>,
-        (hours: number) => <>Ditt <strong>föreningsmedlemsskap</strong> går ut idag. <br/>Your <strong>membership</strong> expires today.</>,
-        (enddate: string, days: number) => <>Ditt <strong>föreningsmedlemsskap</strong> är giltigt t.o.m. {enddate} (endast {days} dagar till). <br/>Your <strong>membership</strong> is valid through {enddate} (only {days} day(s) left).</>,
-        (enddate: string, days: number) => <>Ditt <strong>föreningsmedlemsskap</strong> är giltigt t.o.m. {enddate} ({days} dagar till). <br/>Your <strong>membership</strong> is valid through {enddate} (only {days} day(s) left).</>,
-        () => <>Ditt <strong>föreningsmedlemsskap</strong> är inaktivt. <br/>Your <strong>membership</strong> is inactive.</>,
+        (enddate: string, days: number) => <>Ditt <strong>föreningsmedlemsskap</strong> är ogiltigt sedan {days} dagar ({enddate}). <br />Your <strong>membership</strong> expired {days} day(s) ago ({enddate})</>,
+        () => <>Ditt <strong>föreningsmedlemsskap</strong> gick ut igår. <br />Your <strong>membership</strong> expired yesterday.</>,
+        (hours: number) => <>Ditt <strong>föreningsmedlemsskap</strong> går ut idag. <br />Your <strong>membership</strong> expires today.</>,
+        (enddate: string, days: number) => <>Ditt <strong>föreningsmedlemsskap</strong> är giltigt t.o.m. {enddate} (endast {days} dagar till). <br />Your <strong>membership</strong> is valid through {enddate} (only {days} day(s) left).</>,
+        (enddate: string, days: number) => <>Ditt <strong>föreningsmedlemsskap</strong> är giltigt t.o.m. {enddate} ({days} dagar till). <br />Your <strong>membership</strong> is valid through {enddate} (only {days} day(s) left).</>,
+        () => <>Ditt <strong>föreningsmedlemsskap</strong> är inaktivt. <br />Your <strong>membership</strong> is inactive.</>,
     ];
 
     const specialLabaccessStrings: template_strings_t = [
         (enddate: string, days: number) => <></>,
         () => <></>,
         (hours: number) => <></>,
-        (enddate: string, days: number) => <>Du har fått <strong>specialtillträde</strong> till föreningslokalerna t.o.m. {enddate} ({days} dagar till). <br/>You have been given <strong>special access</strong> to the premises through {enddate} ({days} day(s) left).</>,
-        (enddate: string, days: number) => <>Du har fått <strong>specialtillträde</strong> till föreningslokalerna t.o.m. {enddate} ({days} dagar till). <br/>You have been given <strong>special access</strong> to the premises through {enddate} ({days} day(s) left).</>,
+        (enddate: string, days: number) => <>Du har fått <strong>specialtillträde</strong> till föreningslokalerna t.o.m. {enddate} ({days} dagar till). <br />You have been given <strong>special access</strong> to the premises through {enddate} ({days} day(s) left).</>,
+        (enddate: string, days: number) => <>Du har fått <strong>specialtillträde</strong> till föreningslokalerna t.o.m. {enddate} ({days} dagar till). <br />You have been given <strong>special access</strong> to the premises through {enddate} ({days} day(s) left).</>,
         () => <></>,
     ];
 
     return <fieldset class="data-uk-margin">
-            <legend><i uk-icon="lock"></i> Medlemsskap</legend>
-            <Info info={{ active: membership.membership_active, enddate: membership.membership_end }} template_strings={membershipStrings} />
-            <Info info={{ active: membership.labaccess_active, enddate: membership.labaccess_end }} template_strings={labaccessStrings} />
-            {membership.special_labaccess_active ? <Info info={{ active: membership.special_labaccess_active, enddate: membership.special_labaccess_end }} template_strings={specialLabaccessStrings} /> : null}
-        </fieldset>;
+        <legend><i uk-icon="lock"></i> Medlemsskap</legend>
+        <Info info={{ active: membership.membership_active, enddate: membership.membership_end }} template_strings={membershipStrings} />
+        <Info info={{ active: membership.labaccess_active, enddate: membership.labaccess_end }} template_strings={labaccessStrings} />
+        {membership.special_labaccess_active ? <Info info={{ active: membership.special_labaccess_active, enddate: membership.special_labaccess_end }} template_strings={specialLabaccessStrings} /> : null}
+    </fieldset>;
 }
 
 
-function PersonalData({ member, onChangePinCode, onChangePhoneNumber }: { member: member_t, onChangePinCode: ()=>void, onChangePhoneNumber: ()=>void }) {
+function PersonalData({ member, onChangePinCode, onChangePhoneNumber }: { member: member_t, onChangePinCode: () => void, onChangePhoneNumber: () => void }) {
     const pin_warning = member.pin_code == null ? <label class="uk-form-label" style="color: red;">Du har inte satt någon PIN-kod ännu. Använd BYT-knappen för att sätta den.</label> : null;
     const [showPinCode, setShowPinCode] = useState(false);
     return (
         <fieldset>
             <legend><i uk-icon="user"></i> Personuppgifter</legend>
             <div>
-                <label  for='firstname'       class="uk-form-label">Förnamn</label>
-                <input name='firstname'       class="uk-input readonly-input" value={member.firstname || ''} disabled />
+                <label for='firstname' class="uk-form-label">Förnamn</label>
+                <input name='firstname' class="uk-input readonly-input" value={member.firstname || ''} disabled />
             </div>
             <div>
-                <label  for='lastname'        class="uk-form-label">Efternamn</label>
-                <input name='lastname'        class="uk-input readonly-input" value={member.lastname || ''} disabled />
+                <label for='lastname' class="uk-form-label">Efternamn</label>
+                <input name='lastname' class="uk-input readonly-input" value={member.lastname || ''} disabled />
             </div>
             <div>
-                <label  for='email'           class="uk-form-label">E-post</label>
-                <input name='email'           class="uk-input readonly-input" value={member.email || ''} disabled />
+                <label for='email' class="uk-form-label">E-post</label>
+                <input name='email' class="uk-input readonly-input" value={member.email || ''} disabled />
             </div>
             <div>
-                <label  for='phone'           class="uk-form-label">Telefonnummer</label>
+                <label for='phone' class="uk-form-label">Telefonnummer</label>
                 <span style="width: 100%; display: flex;">
-                    <input name='phone'           class="uk-input readonly-input" value={member.phone || ''} disabled />
+                    <input name='phone' class="uk-input readonly-input" value={member.phone || ''} disabled />
                     <button class="uk-button uk-button-danger" onClick={e => {
                         e.preventDefault();
                         onChangePhoneNumber();
@@ -229,9 +229,9 @@ function PersonalData({ member, onChangePinCode, onChangePhoneNumber }: { member
                 </span>
             </div>
             <div>
-                <label  for='pin_code'        class="uk-form-label">Pin code</label>
+                <label for='pin_code' class="uk-form-label">Pin code</label>
                 <span style="width: 100%; display: flex;">
-                    <input name='pin_code' type={showPinCode ? "text" : "password"} class="uk-input readonly-input" style="white-space: nowrap; font-family: monospace;" value={member.pin_code || ''} disabled/>
+                    <input name='pin_code' type={showPinCode ? "text" : "password"} class="uk-input readonly-input" style="white-space: nowrap; font-family: monospace;" value={member.pin_code || ''} disabled />
                     <button class="uk-icon-button uk-margin-small-left uk-margin-small-right" uk-icon={showPinCode ? "eye" : "eye-slash"} onClick={e => {
                         setShowPinCode(!showPinCode);
                         e.preventDefault();
@@ -253,20 +253,20 @@ function Address({ member }: { member: member_t }) {
         <fieldset data-uk-margin>
             <legend><i uk-icon="home"></i> Adress</legend>
             <div>
-                <label  for='address_street'  class="uk-form-label">Address</label>
-                <input name='address_street'  class="uk-input readonly-input" value={member.address_street || ''} disabled />
+                <label for='address_street' class="uk-form-label">Address</label>
+                <input name='address_street' class="uk-input readonly-input" value={member.address_street || ''} disabled />
             </div>
             <div>
-                <label  for='address_extra'   class="uk-form-label">Extra adressrad, t ex C/O</label>
-                <input name='address_extra'   class="uk-input readonly-input" value={member.address_extra || ''} disabled />
+                <label for='address_extra' class="uk-form-label">Extra adressrad, t ex C/O</label>
+                <input name='address_extra' class="uk-input readonly-input" value={member.address_extra || ''} disabled />
             </div>
             <div>
-                <label  for='address_zipcode' class="uk-form-label">Postnummer</label>
+                <label for='address_zipcode' class="uk-form-label">Postnummer</label>
                 <input name='address_zipcode' class="uk-input readonly-input" value={member.address_zipcode || ''} disabled />
             </div>
             <div>
-                <label  for='address_city'    class="uk-form-label">Postort</label>
-                <input name='address_city'    class="uk-input readonly-input" value={member.address_city || ''} disabled />
+                <label for='address_city' class="uk-form-label">Postort</label>
+                <input name='address_city' class="uk-input readonly-input" value={member.address_city || ''} disabled />
             </div>
         </fieldset>
     );
@@ -291,27 +291,28 @@ function MemberPage({ member, membership, pending_labaccess_days }: { member: me
                 const pin_code = await UIkit.modal.prompt("Välj en pinkod", member.pin_code === null ? get_random_pin_code(4) : member.pin_code);
                 if (pin_code === null)
                     return;
-        
+
                 try {
-                    await common.ajax("POST", `${apiBasePath}/member/current/set_pin_code`, {pin_code: pin_code})
+                    await common.ajax("POST", `${apiBasePath}/member/current/set_pin_code`, { pin_code: pin_code })
                     await UIkit.modal.alert(`<h2>Pinkoden är nu bytt</h2>`);
                     location.reload();
                 } catch (e) {
                     UIkit.modal.alert(`<h2>Kunde inte byta pinkod</h2><b class="uk-text-danger"">${get_error(e)}</b>`);
                 }
             }}
-            onChangePhoneNumber={async () => {
-                switch (await showPhoneNumberDialog(member.phone)) {
-                    case "ok":
-                        await UIkit.modal.alert(`<h2>Telefonnummret är nu bytt</h2>`)
-                        location.reload();
-                        break;
-                    case "cancel":
-                        break;
-                    case UNAUTHORIZED:
-                        login.redirect_to_member_page();
-                        break;
-                }}} />
+                onChangePhoneNumber={async () => {
+                    switch (await showPhoneNumberDialog(member.phone)) {
+                        case "ok":
+                            await UIkit.modal.alert(`<h2>Telefonnummret är nu bytt</h2>`)
+                            location.reload();
+                            break;
+                        case "cancel":
+                            break;
+                        case UNAUTHORIZED:
+                            login.redirect_to_member_page();
+                            break;
+                    }
+                }} />
             <Address member={member} />
         </form>
     )

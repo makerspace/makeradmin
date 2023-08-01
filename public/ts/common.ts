@@ -56,7 +56,7 @@ export function uploadFile<T>(url: string, file: File): Promise<T> {
 
 	formData.append('file', file);
 	formData.append('filename', file.name);
-	
+
 	return fetch(url, {
 		headers,
 		method: "POST",
