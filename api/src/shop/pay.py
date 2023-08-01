@@ -6,8 +6,6 @@ from dataclasses_json import DataClassJsonMixin, dataclass_json
 
 import stripe
 from stripe.error import CardError
-from shop.stripe_constants import MakerspaceMetadataKeys
-from shop.stripe_setup_intent import check_next_action
 from membership.models import Member
 from shop.models import Transaction
 from service.db import db_session
@@ -58,7 +56,6 @@ def pay(data: Any, member_id: int) -> PartialPayment:
 
 
 def register(data: Any, remote_addr: str, user_agent: str):
-
     validate_data(register_schema, data or {})
 
     products = get_membership_products()
