@@ -231,6 +231,14 @@ def stripe_invoice_event(subtype: EventSubtype, event: stripe.Event, current_tim
         # That would be especially bad when starting a subscription, since the user
         # wants to see their membership activate immediately.
         invoice = event["data"]["object"]
+        if invoice["test_clock"] is not None:
+            # In test mode, we don't care about charging customers quickly.
+            # It's best that we don't do this, since if a developer has makeradmin running
+            # and listening for events, we might try to finalize the invoice twice
+            # (once in the test container, and once in the dev container).
+            # That just causes noisy errors in the logs.
+            return
+
         if invoice["status"] == "draft":
             logger.info(f"Draft invoice created ({event['id']}), charging customer...")
             stripe.Invoice.finalize_invoice(invoice["id"], auto_advance=True)
