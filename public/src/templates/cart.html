@@ -1,4 +1,3 @@
-{% from "sidebar.html" import sidebar with context %}
 <!DOCTYPE html>
 <html>
     <head>
@@ -16,26 +15,6 @@
     <body>
         {% include 'banner.html' %}
         <div id="root">
-            {{ sidebar("cart") }}
-            <div id="content" class="cartpage">
-                <div class="content-centering">
-                    <h3 class="cart-header">Varukorg</h3>
-                    <ul id="cart" class="layout-table">
-                    </ul>
-                    <div id="pay-module">
-                        <div id="pay-login">
-                            <h3>Du måste logga in för att kunna betala</h3>
-                            <form class="uk-form-stacked">
-                                <input required id="email" class="uk-input" type="text" placeholder="Email" />
-                                <button id="login-button" type="submit" class="uk-button uk-button-default uk-button-primary">
-                                    Logga in
-                                </button>
-                            </form>
-                        </div>
-                        {% include 'payment_form.html' %}
-                    </div>
-                </div>
-            </div>
         </div>
     </body>
 </html>
