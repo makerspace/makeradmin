@@ -6,6 +6,9 @@ import { LoadCurrentMemberInfo, date_t, member_t } from "./member_common";
 import { render } from "preact";
 import { useState } from "preact/hooks";
 import { showPhoneNumberDialog } from "./change_phone";
+import { Sidebar } from "./sidebar";
+import { LoadProductData, ProductData } from "./payment_common";
+import { useCart } from "./cart";
 declare var UIkit: any;
 
 
@@ -272,49 +275,55 @@ function Address({ member }: { member: member_t }) {
     );
 }
 
-function MemberPage({ member, membership, pending_labaccess_days }: { member: member_t, membership: membership_t, pending_labaccess_days: number }) {
+function MemberPage({ member, membership, pending_labaccess_days, productData }: { member: member_t, membership: membership_t, pending_labaccess_days: number, productData: ProductData }) {
     const apiBasePath = window.apiBasePath;
+    const { cart } = useCart();
 
     return (
-        <form class="uk-form uk-form-stacked uk-margin-bottom">
-            <h2>Medlem {member.member_number}: {member.firstname} {member.lastname}</h2>
-            <MembershipView member={member} membership={membership} pendingLabaccessDays={pending_labaccess_days} />
-            <Help member={member} membership={membership} pending_labaccess_days={pending_labaccess_days} onSendAccessyInvite={async () => {
-                try {
-                    await common.ajax("POST", `${window.apiBasePath}/webshop/member/current/accessy_invite`);
-                    UIkit.modal.alert(`<h2>Inbjudan skickad</h2>`);
-                } catch (e) {
-                    UIkit.modal.alert(`<h2>Inbjudan misslyckades</h2><b class="uk-text-danger"">${get_error(e)}</b>`);
-                }
-            }} />
-            <PersonalData member={member} onChangePinCode={async () => {
-                const pin_code = await UIkit.modal.prompt("Välj en pinkod", member.pin_code === null ? get_random_pin_code(4) : member.pin_code);
-                if (pin_code === null)
-                    return;
+        <>
+            <Sidebar cart={cart.items.length > 0 ? { cart, productData } : null} />
+            <div id="content">
+                <form class="uk-form uk-form-stacked uk-margin-bottom">
+                    <h2>Medlem {member.member_number}: {member.firstname} {member.lastname}</h2>
+                    <MembershipView member={member} membership={membership} pendingLabaccessDays={pending_labaccess_days} />
+                    <Help member={member} membership={membership} pending_labaccess_days={pending_labaccess_days} onSendAccessyInvite={async () => {
+                        try {
+                            await common.ajax("POST", `${window.apiBasePath}/webshop/member/current/accessy_invite`);
+                            UIkit.modal.alert(`<h2>Inbjudan skickad</h2>`);
+                        } catch (e) {
+                            UIkit.modal.alert(`<h2>Inbjudan misslyckades</h2><b class="uk-text-danger"">${get_error(e)}</b>`);
+                        }
+                    }} />
+                    <PersonalData member={member} onChangePinCode={async () => {
+                        const pin_code = await UIkit.modal.prompt("Välj en pinkod", member.pin_code === null ? get_random_pin_code(4) : member.pin_code);
+                        if (pin_code === null)
+                            return;
 
-                try {
-                    await common.ajax("POST", `${apiBasePath}/member/current/set_pin_code`, { pin_code: pin_code })
-                    await UIkit.modal.alert(`<h2>Pinkoden är nu bytt</h2>`);
-                    location.reload();
-                } catch (e) {
-                    UIkit.modal.alert(`<h2>Kunde inte byta pinkod</h2><b class="uk-text-danger"">${get_error(e)}</b>`);
-                }
-            }}
-                onChangePhoneNumber={async () => {
-                    switch (await showPhoneNumberDialog(member.phone)) {
-                        case "ok":
-                            await UIkit.modal.alert(`<h2>Telefonnummret är nu bytt</h2>`)
+                        try {
+                            await common.ajax("POST", `${apiBasePath}/member/current/set_pin_code`, { pin_code: pin_code })
+                            await UIkit.modal.alert(`<h2>Pinkoden är nu bytt</h2>`);
                             location.reload();
-                            break;
-                        case "cancel":
-                            break;
-                        case UNAUTHORIZED:
-                            login.redirect_to_member_page();
-                            break;
-                    }
-                }} />
-            <Address member={member} />
-        </form>
+                        } catch (e) {
+                            UIkit.modal.alert(`<h2>Kunde inte byta pinkod</h2><b class="uk-text-danger"">${get_error(e)}</b>`);
+                        }
+                    }}
+                        onChangePhoneNumber={async () => {
+                            switch (await showPhoneNumberDialog(member.phone)) {
+                                case "ok":
+                                    await UIkit.modal.alert(`<h2>Telefonnummret är nu bytt</h2>`)
+                                    location.reload();
+                                    break;
+                                case "cancel":
+                                    break;
+                                case UNAUTHORIZED:
+                                    login.redirect_to_member_page();
+                                    break;
+                            }
+                        }} />
+                    <Address member={member} />
+                </form>
+            </div>
+        </>
     )
 }
 
@@ -322,18 +331,19 @@ common.documentLoaded().then(() => {
     common.addSidebarListeners();
 
     const apiBasePath = window.apiBasePath;
-    const root = document.querySelector("#content") as HTMLElement;
+    const root = document.querySelector("#root") as HTMLElement;
 
     const future1 = LoadCurrentMemberInfo();
     const future2 = common.ajax("GET", apiBasePath + "/member/current/membership", null);
     const future3 = common.ajax("GET", apiBasePath + "/webshop/member/current/pending_actions", null);
+    const productData = LoadProductData();
 
-    Promise.all([future1, future2, future3]).then(([member, membership_json, pending_actions_json]) => {
+    Promise.all([future1, future2, future3, productData]).then(([member, membership_json, pending_actions_json, productData]) => {
         const membership: membership_t = membership_json.data;
         const pending_labaccess_days = get_pending_labaccess_days(pending_actions_json);
         if (root != null) {
             render(
-                <MemberPage member={member} membership={membership} pending_labaccess_days={pending_labaccess_days} />,
+                <MemberPage member={member} membership={membership} pending_labaccess_days={pending_labaccess_days} productData={productData} />,
                 root
             );
         }
