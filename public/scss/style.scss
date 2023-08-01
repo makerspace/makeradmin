@@ -1,5 +1,9 @@
 @import 'include-media';
-$breakpoints: (phone: 320px, tablet: 800px, desktop: 1024px);
+$breakpoints: (
+    phone: 320px,
+    tablet: 800px,
+    desktop: 1024px
+);
 
 $primary-color: #333;
 
@@ -111,7 +115,7 @@ body {
         }
     }
 
-    li.active > a {
+    li.active>a {
         color: #444;
     }
 
@@ -827,6 +831,7 @@ form input.readonly-input {
     }
 
     color: white;
+
     #images {
         background: white;
 
