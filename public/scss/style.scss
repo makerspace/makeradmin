@@ -469,14 +469,6 @@ body {
     display: block;
 }
 
-#pay {
-    display: none;
-}
-
-#pay.active {
-    display: block;
-}
-
 #product-save {
     // Required for progress spinner
     position: relative;
@@ -1377,7 +1369,7 @@ $palette-red: $palette4;
     position: initial !important;
 }
 
-#courses-contents {
+.courses-page {
     display: flex;
     flex-direction: column;
 
