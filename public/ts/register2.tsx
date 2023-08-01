@@ -128,7 +128,7 @@ type Terms = {
     accepted3: boolean;
 }
 
-const TermsAndConditions = ({ onAccept, onBack, acceptedTerms, onChangeAcceptedTerms }: { onAccept: () => void, onBack: () => void, acceptedTerms: Terms, onChangeAcceptedTerms: (terms: Terms)=>void }) => {
+const TermsAndConditions = ({ onAccept, onBack, acceptedTerms, onChangeAcceptedTerms }: { onAccept: () => void, onBack: () => void, acceptedTerms: Terms, onChangeAcceptedTerms: (terms: Terms) => void }) => {
     const t = useTranslation();
     return (<div class="terms-and-conditions">
         <h2>{t("terms.title")}</h2>
@@ -137,9 +137,9 @@ const TermsAndConditions = ({ onAccept, onBack, acceptedTerms, onChangeAcceptedT
             {t("terms.rules").map(rule => <li>{rule}</li>)}
         </ol>
 
-        <RuleCheckbox rule={t("terms.understanding1")} onChange={() => onChangeAcceptedTerms({ ...acceptedTerms, accepted1: !acceptedTerms.accepted1})} value={acceptedTerms.accepted1} />
-        <RuleCheckbox rule={t("terms.understanding2")} onChange={() => onChangeAcceptedTerms({ ...acceptedTerms, accepted2: !acceptedTerms.accepted2})} value={acceptedTerms.accepted2} />
-        <RuleCheckbox rule={t("terms.welcoming")} onChange={() => onChangeAcceptedTerms({ ...acceptedTerms, accepted3: !acceptedTerms.accepted3})} value={acceptedTerms.accepted3} />
+        <RuleCheckbox rule={t("terms.understanding1")} onChange={() => onChangeAcceptedTerms({ ...acceptedTerms, accepted1: !acceptedTerms.accepted1 })} value={acceptedTerms.accepted1} />
+        <RuleCheckbox rule={t("terms.understanding2")} onChange={() => onChangeAcceptedTerms({ ...acceptedTerms, accepted2: !acceptedTerms.accepted2 })} value={acceptedTerms.accepted2} />
+        <RuleCheckbox rule={t("terms.welcoming")} onChange={() => onChangeAcceptedTerms({ ...acceptedTerms, accepted3: !acceptedTerms.accepted3 })} value={acceptedTerms.accepted3} />
         <button className="flow-button primary" disabled={!acceptedTerms.accepted1 || !acceptedTerms.accepted2 || !acceptedTerms.accepted3} onClick={onAccept}>{t("terms.accept")}</button>
         <BackButton onClick={onBack} />
     </div>);
@@ -156,7 +156,7 @@ enum State {
     Discounts,
 }
 
-const Confirmation = ({ memberInfo, selectedPlan, relevantProducts, discount, discountInfo, card, onRegistered, onBack }: { memberInfo: MemberInfo, selectedPlan: Plan, relevantProducts: RelevantProducts, discount: Discount, discountInfo: DiscountsInfo, card: stripe.elements.Element, onRegistered: (r: RegistrationSuccess) => void, onBack: ()=>void }) => {
+const Confirmation = ({ memberInfo, selectedPlan, relevantProducts, discount, discountInfo, card, onRegistered, onBack }: { memberInfo: MemberInfo, selectedPlan: Plan, relevantProducts: RelevantProducts, discount: Discount, discountInfo: DiscountsInfo, card: stripe.elements.Element, onRegistered: (r: RegistrationSuccess) => void, onBack: () => void }) => {
     const t = useTranslation();
     const [inProgress, setInProgress] = useState(false);
 
@@ -259,7 +259,7 @@ async function registerMember(paymentMethod: stripe.paymentMethod.PaymentMethod,
     };
 
     return {
-        loginToken: (await handleStripeSetupIntent<RegisterRequest, SetupIntentResponse & { token: string }> (window.apiBasePath + "/webshop/register2", data)).token!
+        loginToken: (await handleStripeSetupIntent<RegisterRequest, SetupIntentResponse & { token: string }>(window.apiBasePath + "/webshop/register2", data)).token!
     };
 }
 
@@ -312,10 +312,10 @@ const Success = ({ member }: { member: member_t }) => {
     </>);
 }
 
-const Discounts = ({ discounts, setDiscounts, onSubmit, discountAmounts }: { discounts: DiscountsInfo, discountAmounts: Record<PriceLevel, number>, setDiscounts: (m: DiscountsInfo)=>void, onSubmit: ()=>void }) => {
+const Discounts = ({ discounts, setDiscounts, onSubmit, discountAmounts }: { discounts: DiscountsInfo, discountAmounts: Record<PriceLevel, number>, setDiscounts: (m: DiscountsInfo) => void, onSubmit: () => void }) => {
     const t = useTranslation();
 
-    const reasons: DiscountReason[] = ["student","unemployed","senior","other"];
+    const reasons: DiscountReason[] = ["student", "unemployed", "senior", "other"];
     const [step, setStep] = useState(0);
 
     if (step == 0) {
@@ -377,7 +377,7 @@ const MakerspaceLogo = () => {
 
 type PlanId = "starterPack" | "makerspaceAccessSub" | "decideLater" | "singleMonth";
 
-const RegisterPage = ({}: {}) => {
+const RegisterPage = ({ }: {}) => {
     // Language chooser
     // Inspiration page?
     // Plan chooser
