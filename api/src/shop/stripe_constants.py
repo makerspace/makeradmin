@@ -1,3 +1,4 @@
+from enum import Enum
 import stripe
 
 from service.config import config
@@ -12,14 +13,14 @@ CURRENCY = "sek"
 STRIPE_SIGNING_SECRET = config.get("STRIPE_SIGNING_SECRET", log_value=False)
 
 
-class Type:
+class Type(str, Enum):
     SOURCE = 'source'
     CARD = 'card'
     CHARGE = 'charge'
     PAYMENT_INTENT = 'payment_intent'
 
 
-class Subtype:
+class Subtype(str, Enum):
     CHARGEABLE = 'chargeable'
     FAILED = 'failed'
     CANCELED = 'canceled'
@@ -29,16 +30,16 @@ class Subtype:
     PAYMENT_FAILED = 'payment_failed'
 
 
-class SourceType:
+class SourceType(str, Enum):
     THREE_D_SECURE = 'three_d_secure'
     CARD = 'card'
 
 
-class ChargeStatus:
+class ChargeStatus(str, Enum):
     SUCCEEDED = 'succeeded'
 
 
-class PaymentIntentStatus:
+class PaymentIntentStatus(str, Enum):
     REQUIRES_PAYMENT_METHOD = 'requires_payment_method'
     REQUIRES_CONFIRMATION = 'requires_confirmation'
     REQUIRES_ACTION = 'requires_action'
@@ -48,6 +49,6 @@ class PaymentIntentStatus:
     REQUIRES_CAPTURE = 'requires_capture'
 
 
-class PaymentIntentNextActionType:
+class PaymentIntentNextActionType(str, Enum):
     USE_STRIPE_SDK = 'use_stripe_sdk'
     REDIRECT_TO_URL = 'redirect_to_url'
