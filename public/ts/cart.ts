@@ -1,3 +1,5 @@
+import { useEffect, useState } from "preact/hooks";
+
 export interface Item {
 	id: number;
 	count: number;
@@ -19,19 +21,27 @@ export default class Cart {
 
 	// Keep local storage in sync even though other tabs change it
 	static startLocalStorageSync(onSync: (cart: Cart) => void) {
-		window.addEventListener('storage', function (e) {
+		const onStorage = (e: StorageEvent) => {
 			if (e.oldValue !== e.newValue) {
 				localStorage.setItem(e.key!, e.newValue!);
 				onSync(Cart.fromStorage());
 			}
-		});
+		};
 
 		// When using the back button to navigate back
 		// many browsers do not actually reload the page, but simply restore it from memory
 		// In this case we need to do some refreshing to ensure that for example the shopping cart is up to date
-		window.addEventListener("pageshow", persisted => {
+		const onPageShow = (persisted: PageTransitionEvent) => {
 			onSync(Cart.fromStorage());
-		});
+		};
+
+		window.addEventListener('storage', onStorage);
+		window.addEventListener("pageshow", onPageShow);
+
+		return () => {
+			window.removeEventListener('storage', onStorage);
+			window.removeEventListener("pageshow", onPageShow);
+		}
 	}
 
 	setItem(productID: number, count: number) {
@@ -94,4 +104,11 @@ export default class Cart {
 		}
 		return new Cart(cart);
 	}
+}
+
+export const useCart = () => {
+	// Keep local storage in sync even though other tabs change it
+	const [cart, setCart] = useState(Cart.fromStorage());
+	useEffect(() => Cart.startLocalStorageSync(setCart));
+	return { cart, setCart };
 }
