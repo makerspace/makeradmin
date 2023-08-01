@@ -7,7 +7,7 @@
     </head>
     <body>
         <script>
-            localStorage.token = "{{ token }}";
+            localStorage.setItem("token", "{{ token }}");
             let url = new URL(window.location);
             let redirect = url.searchParams.get("redirect");
             window.location.replace(redirect || "/");

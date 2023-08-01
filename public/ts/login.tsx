@@ -14,6 +14,7 @@ function showError(message: string) {
 
 export function login_via_single_use_link(tag: string, redirect: string | null) {
     const apiBasePath = window.apiBasePath;
+    common.removeToken();
 
     const data: any = { user_identification: tag };
     if (redirect) {
