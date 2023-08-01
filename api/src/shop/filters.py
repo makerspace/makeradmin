@@ -33,12 +33,12 @@ def filter_no_subscription_active(
         if sub == SubscriptionType.LAB:
             if member.stripe_labaccess_subscription_id is not None:
                 raise BadRequest(
-                    "You already have a labaccess subscription. Please change to the pay-as-you-go plan before purchasing individual labaccess months"
+                    "You already have a makerspace access subscription. You must cancel your subscription if you want to buy invidual makerspace access months."
                 )
         elif sub == SubscriptionType.MEMBERSHIP:
             if member.stripe_membership_subscription_id is not None:
                 raise BadRequest(
-                    "You already have an association subscription. You cannot buy invidual association membership years."
+                    "You already have a base membership subscription. You must cancel your subscription if you want to buy invidual base membership years."
                 )
         else:
             assert False
