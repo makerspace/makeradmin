@@ -18,11 +18,11 @@ function format_receipt_status(transaction_status: string) {
 }
 
 const ReceiptItem = ({ item }: { item: TransactionItem }) => {
-    return <div className="receipt-item">
+    return <>
         <a className="product-title" href={`/shop/product/${item.product.id}`}>{item.product.name}</a>
         <span className="receipt-item-count">{item.count} {item.product.unit}</span>
         <span className="receipt-item-amount">{Cart.formatCurrency(Number(item.amount))}</span>
-    </div>
+    </>
 }
 
 const Receipt = ({ transaction }: { transaction: Transaction }) => {
