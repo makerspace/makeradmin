@@ -1479,4 +1479,5 @@ $palette-red: $palette4;
 .makerspace-logo {
     // Setting an aspect ratio is important to avoid layout shifts as the page loads
     aspect-ratio: 300/210;
+    width: 100%;
 }
