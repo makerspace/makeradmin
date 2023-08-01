@@ -282,7 +282,7 @@ function addMemberDistribution(root: HTMLElement, data: MemberDistribution, desc
 	// Remove the "wasn't a member during this time" count which will be the data for "0 Months"
 	labaccess.splice(0, 1);
 
-	const toPoints = (items: Array<any>)=>{
+	const toPoints = (items: Array<any>) => {
 		const values = [];
 		for (let i = 0; i < items.length; i++) {
 			values.push({ x: "" + (i + 1), y: items[i] });
@@ -293,8 +293,8 @@ function addMemberDistribution(root: HTMLElement, data: MemberDistribution, desc
 	console.log(toPoints(labaccess));
 
 	const labels = [];
-	for(let i = 0; i < labaccess.length; i++) {
-		labels.push("" + (i+1));
+	for (let i = 0; i < labaccess.length; i++) {
+		labels.push("" + (i + 1));
 	}
 
 
@@ -652,35 +652,35 @@ type RetentionGraph = {
 }
 async function addRetentionChart(root: HTMLElement, graph: RetentionGraph) {
 	// set the dimensions and margins of the graph
-	var margin = {top: 10, right: 10, bottom: 10, left: 10},
-	width = 1600 - margin.left - margin.right,
-	height = 1000 - margin.top - margin.bottom;
+	var margin = { top: 10, right: 10, bottom: 10, left: 10 },
+		width = 1600 - margin.left - margin.right,
+		height = 1000 - margin.top - margin.bottom;
 
 	// append the svg object to the body of the page
 	var svg = d3.select(root).append("svg")
-	.attr("width", width + margin.left + margin.right)
-	.attr("height", height + margin.top + margin.bottom)
-	.append("g")
-	.attr("transform",
-		"translate(" + margin.left + "," + margin.top + ")");
+		.attr("width", width + margin.left + margin.right)
+		.attr("height", height + margin.top + margin.bottom)
+		.append("g")
+		.attr("transform",
+			"translate(" + margin.left + "," + margin.top + ")");
 
 	// Color scale used
 	var color = d3.scaleOrdinal(d3.schemeCategory10);
 
 	// Set the sankey diagram properties
 	var sankeyF = sankey<Node, Link>()
-	.nodeWidth(36)
-	.nodePadding(50)
-	.size([width, height])
-	.nodeAlign(sankeyLeft);
+		.nodeWidth(36)
+		.nodePadding(50)
+		.size([width, height])
+		.nodeAlign(sankeyLeft);
 
 	console.log(sankeyF);
 
 	// Constructs a new Sankey generator with the default settings.
 	sankeyF
-	.nodeId(d => d.id)
-	.nodes(graph.nodes)
-	.links(graph.links);
+		.nodeId(d => d.id)
+		.nodes(graph.nodes)
+		.links(graph.links);
 
 	for (const node of graph.nodes) {
 		node.color = color(node.name.replace(/ .*/, ""));
@@ -690,7 +690,7 @@ async function addRetentionChart(root: HTMLElement, graph: RetentionGraph) {
 
 	console.log(generated.nodes);
 	console.log(generated.links);
-	
+
 
 	// add in the links
 	// var link = svg.append("g")
@@ -706,20 +706,20 @@ async function addRetentionChart(root: HTMLElement, graph: RetentionGraph) {
 		.attr("fill", "none")
 		.attr("stroke", "#000")
 		.attr("stroke-opacity", 0.2)
-	.selectAll("path")
-	.data(generated.links)
-	.join("path")
+		.selectAll("path")
+		.data(generated.links)
+		.join("path")
 		.attr("d", sankeyLinkHorizontal())
 		.attr("stroke-width", d => Math.max(1, d.width!))
 		.attr("stroke", d => d.pause ? "red" : "black");
 
 	// add in the nodes
 	const node = svg.append("g")
-	.selectAll(".node")
-	.data(generated.nodes)
-	.enter().append("g")
-	.attr("class", "node")
-	.attr("transform", d => `translate(${d.x0!},${d.y0!})`);
+		.selectAll(".node")
+		.data(generated.nodes)
+		.enter().append("g")
+		.attr("class", "node")
+		.attr("transform", d => `translate(${d.x0!},${d.y0!})`);
 	// .call(d3.drag()
 	// 	.subject(d => d)
 	// 	.on("start", function() { this.parentNode.appendChild(this); })
@@ -728,25 +728,25 @@ async function addRetentionChart(root: HTMLElement, graph: RetentionGraph) {
 	// add the rectangles for the nodes
 
 	node
-	.append("rect")
-	.attr("height", d => d.y1! - d.y0!)
-	.attr("width", sankeyF.nodeWidth())
-	.style("fill", d => d.color!)
-	.style("stroke", d => d3.rgb(d.color!).darker(2).formatRgb())
-	// Add hover text
-	.append("title")
-	.text(d => d.name + "\n" + "There is " + d.name + " stuff in this node");
+		.append("rect")
+		.attr("height", d => d.y1! - d.y0!)
+		.attr("width", sankeyF.nodeWidth())
+		.style("fill", d => d.color!)
+		.style("stroke", d => d3.rgb(d.color!).darker(2).formatRgb())
+		// Add hover text
+		.append("title")
+		.text(d => d.name + "\n" + "There is " + d.name + " stuff in this node");
 
 	// add in the title for the nodes
 	node
-	.append("text")
+		.append("text")
 		.attr("x", d => -0.5 * (d.x1! - d.x0!))
 		.attr("y", d => d.height! / 2)
 		.attr("dy", ".35em")
 		.attr("text-anchor", "middle")
 		.attr("transform", null)
 		.text(d => d.name)
-	.filter(d => d.x0! < width / 2)
+		.filter(d => d.x0! < width / 2)
 		.attr("x", 6 + sankeyF.nodeWidth())
 		.attr("text-anchor", "middle");
 

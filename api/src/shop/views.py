@@ -6,29 +6,55 @@ from membership.enums import PriceLevel
 from shop.stripe_discounts import get_discount_fraction_off
 
 from multiaccessy.invite import AccessyInvitePreconditionFailed, ensure_accessy_labaccess
-from service.api_definition import WEBSHOP, WEBSHOP_EDIT, PUBLIC, GET, USER, POST, DELETE, Arg, WEBSHOP_ADMIN, MEMBER_EDIT
+from service.api_definition import (
+    WEBSHOP,
+    WEBSHOP_EDIT,
+    PUBLIC,
+    GET,
+    USER,
+    POST,
+    DELETE,
+    Arg,
+    WEBSHOP_ADMIN,
+    MEMBER_EDIT,
+)
 from service.db import db_session
 from service.entity import OrmSingeRelation, OrmSingleSingleRelation
 from service.error import InternalServerError, PreconditionFailed
 from shop import service
-from shop.entities import product_image_entity, transaction_content_entity, transaction_entity, \
-    transaction_action_entity, product_entity, category_entity, product_action_entity
+from shop.entities import (
+    product_image_entity,
+    transaction_content_entity,
+    transaction_entity,
+    transaction_action_entity,
+    product_entity,
+    category_entity,
+    product_action_entity,
+)
 from shop.models import TransactionContent, ProductImage
 from shop.pay import RegisterResponse, cancel_subscriptions, pay, register, register2, start_subscriptions
-
-from shop.stripe_subscriptions import list_subscriptions, start_subscription, cancel_subscription
-from shop.stripe_subscriptions import open_stripe_customer_portal
-
 from shop.stripe_payment_intent import PartialPayment, confirm_stripe_payment_intent
-from shop.stripe_subscriptions import create_stripe_checkout_session
-
-from shop.shop_data import pending_actions, member_history, receipt, get_product_data, all_product_data, \
-    get_membership_products, special_product_data
+from shop.shop_data import (
+    pending_actions,
+    member_history,
+    receipt,
+    get_product_data,
+    all_product_data,
+    get_membership_products,
+    special_product_data,
+)
 from shop.stripe_event import stripe_callback
 from shop.transactions import ship_labaccess_orders
 from logging import getLogger
 
-from shop.stripe_subscriptions import SubscriptionType
+from shop.stripe_subscriptions import (
+    SubscriptionType,
+    cancel_subscription,
+    create_stripe_checkout_session,
+    list_subscriptions,
+    open_stripe_customer_portal,
+)
+
 logger = getLogger("makeradmin")
 
 service.entity_routes(
@@ -56,7 +82,7 @@ service.entity_routes(
 service.related_entity_routes(
     path="/product/<int:related_entity_id>/images",
     entity=product_image_entity,
-    relation=OrmSingeRelation('images', 'product_id'),
+    relation=OrmSingeRelation("images", "product_id"),
     permission_list=PUBLIC,
 )
 
@@ -74,7 +100,7 @@ service.entity_routes(
 service.related_entity_routes(
     path="/product/<int:related_entity_id>/actions",
     entity=product_action_entity,
-    relation=OrmSingeRelation('actions', 'product_id'),
+    relation=OrmSingeRelation("actions", "product_id"),
     permission_list=WEBSHOP,
 )
 
@@ -97,7 +123,7 @@ service.entity_routes(
 service.related_entity_routes(
     path="/transaction/<int:related_entity_id>/contents",
     entity=transaction_content_entity,
-    relation=OrmSingeRelation('contents', 'transaction_id'),
+    relation=OrmSingeRelation("contents", "transaction_id"),
     permission_list=WEBSHOP,
 )
 
@@ -105,7 +131,7 @@ service.related_entity_routes(
 service.related_entity_routes(
     path="/transaction/<int:related_entity_id>/actions",
     entity=transaction_action_entity,
-    relation=OrmSingleSingleRelation('actions', TransactionContent, 'transaction_id'),
+    relation=OrmSingleSingleRelation("actions", TransactionContent, "transaction_id"),
     permission_list=WEBSHOP,
 )
 
@@ -113,7 +139,7 @@ service.related_entity_routes(
 service.related_entity_routes(
     path="/member/<int:related_entity_id>/transactions",
     entity=transaction_entity,
-    relation=OrmSingeRelation('member', 'member_id'),
+    relation=OrmSingeRelation("member", "member_id"),
     permission_list=WEBSHOP,
 )
 
@@ -151,22 +177,27 @@ def accessy_invite():
     except AccessyInvitePreconditionFailed as e:
         raise PreconditionFailed(message=str(e))
 
+
 @service.route("/member/current/subscriptions", method=POST, permission=USER)
 def start_subscriptions_route() -> Any:
     return start_subscriptions(request.json, g.user_id).to_dict()
+
 
 @service.route("/member/current/subscriptions", method=DELETE, permission=USER)
 def cancel_subscriptions_route() -> Any:
     return cancel_subscriptions(request.json, g.user_id)
 
+
 @service.route("/member/current/subscriptions", method=GET, permission=USER)
 def list_subscriptions_route() -> Any:
     return list_subscriptions(g.user_id)
+
 
 @dataclass
 class ReloadPage:
     def __init__(self) -> None:
         self.reload = True
+
 
 @service.route("/member/current/subscription", method=DELETE, permission=USER)
 def cancel_subscription_route(subscription_type=Arg(str, required=True), success_url=Arg(str, required=False)):
@@ -206,9 +237,11 @@ def product_data(product_id):
 @service.raw_route("/image/<int:image_id>")
 def public_image(image_id: int) -> Response:
     try:
-        image = db_session.query(ProductImage).filter(ProductImage.id == image_id, ProductImage.deleted_at.is_(None)).one()
+        image = (
+            db_session.query(ProductImage).filter(ProductImage.id == image_id, ProductImage.deleted_at.is_(None)).one()
+        )
     except NoResultFound:
-        return send_file("/work/default-product-image.png", mimetype='image/png')
+        return send_file("/work/default-product-image.png", mimetype="image/png")
 
     response = make_response(image.data)
     response.headers.set("Content-Type", image.type)
@@ -223,7 +256,7 @@ def register_page_data():
         "productData": [product_entity.to_obj(p) for p in special_product_data()],
         "discounts": {
             price_level.value: get_discount_fraction_off(price_level).fraction_off for price_level in PriceLevel
-        }
+        },
     }
 
 
@@ -231,15 +264,12 @@ def register_page_data():
 def pay_route() -> PartialPayment:
     return pay(request.json, g.user_id)
 
+
 # Used to just initiate a capture of a payment method via a setup intent
 @service.route("/setup_payment_method", method=GET, permission=USER, commit_on_error=True)
 def stripe_payment_method_route():
     url = create_stripe_checkout_session(g.user_id, data=request.json)
     return redirect(url)
-
-@service.route("/confirm_payment", method=POST, permission=PUBLIC, commit_on_error=True)
-def confirm_payment_route() -> PartialPayment:
-    return confirm_stripe_payment_intent(request.json)
 
 
 @service.route("/register", method=POST, permission=PUBLIC, commit_on_error=True)
@@ -247,10 +277,12 @@ def register_route():
     assert request.remote_addr is not None
     return register(request.json, request.remote_addr, request.user_agent.string)
 
+
 @service.route("/register2", method=POST, permission=PUBLIC, commit_on_error=True)
 def register2_route() -> Any:
     assert request.remote_addr is not None
     return register2(request.json, request.remote_addr, request.user_agent.string).to_dict()
+
 
 @service.route("/stripe_callback", method=POST, permission=PUBLIC, commit_on_error=True)
 def stripe_callback_route():

@@ -161,7 +161,7 @@ class QuizManager extends Component<QuizManagerProps, State> {
             return (
                 <div id="content" className="quizpage">
                     <h1>{this.state.quiz.name}</h1>
-                    <span dangerouslySetInnerHTML={{__html: markdown_engine.render(this.state.quiz.description) }}></span>
+                    <span dangerouslySetInnerHTML={{ __html: markdown_engine.render(this.state.quiz.description) }}></span>
                     <p>The quiz will save your progress automatically so you can close this window and return here at any time to continue with the quiz.</p>
                     {this.state.loginState == "logged out"
                         ?
@@ -173,12 +173,12 @@ class QuizManager extends Component<QuizManagerProps, State> {
                         </>
                         : (
                             this.state.loginState == "pending"
-                            ? <p>Checking if you are logged in...</p>
-                            :
-                            <>
-                                <p>Alright, are you ready to get started?</p>
-                                <a className="uk-button uk-button-primary quiz-button-start" onClick={() => this.start()}>Start!</a>
-                            </>
+                                ? <p>Checking if you are logged in...</p>
+                                :
+                                <>
+                                    <p>Alright, are you ready to get started?</p>
+                                    <a className="uk-button uk-button-primary quiz-button-start" onClick={() => this.start()}>Start!</a>
+                                </>
                         )
                     }
                 </div>
@@ -187,7 +187,7 @@ class QuizManager extends Component<QuizManagerProps, State> {
             return (
                 <div id="content" className="quizpage">
                     <h1>{this.state.quiz.name}</h1>
-                    <div className="question-text" dangerouslySetInnerHTML={{__html: markdown_engine.render(this.state.question.question) }}></div>
+                    <div className="question-text" dangerouslySetInnerHTML={{ __html: markdown_engine.render(this.state.question.question) }}></div>
                     <ul className="question-options">
                         {
                             this.state.question.options.map(option => (
@@ -214,7 +214,7 @@ class QuizManager extends Component<QuizManagerProps, State> {
                                     // : <div className="question-answer-info question-answer-info-incorrect">Du svarade tyvärr fel. Men oroa dig inte, den här frågan kommer komma igen senare så att du kan svara rätt nu när du vet vad rätt svar är.</div>
                                     : <div className="question-answer-info question-answer-info-incorrect">Unfortunately you answered incorrectly. But don't worry, this question will repeat later so you will have an opportunity to answer it correctly now that you know what the correct answer is.</div>
                                 }
-                                <div className="question-answer-description" dangerouslySetInnerHTML={{__html: markdown_engine.render(this.state.question.answer_description!) }}>
+                                <div className="question-answer-description" dangerouslySetInnerHTML={{ __html: markdown_engine.render(this.state.question.answer_description!) }}>
                                 </div>
                                 <a className="uk-button uk-button-primary question-submit" onClick={() => this.start()}>Next Question</a>
                             </>
@@ -245,13 +245,13 @@ common.documentLoaded().then(() => {
     const root = document.getElementById('root');
     if (root != null) {
         const splits = document.location.href.split("/");
-        let quiz_id = parseInt(splits[splits.length-1]);
+        let quiz_id = parseInt(splits[splits.length - 1]);
         if (isNaN(quiz_id)) {
             // Backwards compatibility in case someone has an old link
             quiz_id = 1;
         }
         render(
-            <QuizManager quiz_id={quiz_id}/>,
+            <QuizManager quiz_id={quiz_id} />,
             root
         );
     }

@@ -1,4 +1,3 @@
-{% from "sidebar.html" import sidebar with context %}
 <!DOCTYPE html>
 <html>
     <head>
@@ -15,22 +14,6 @@
     <body>
         {% include 'banner.html' %}
         <div id="root">
-            {{ sidebar("shop") }}
-            <div id="content">
-                <ul class="product-list layout-grid">
-                    <li class="product-search-bar">
-                        <form class="product-search uk-search uk-search-default">
-                            <span uk-search-icon></span>
-                            <input class="uk-search-input" id="product-search-field" type="search" placeholder="Hitta produkt...">
-                        </form>
-                        <div class="toggle-product-images uk-button-group">
-                            <button id="layout-grid" class="layout-button uk-icon-button" uk-icon="icon: grid"></button>
-                            <button id="layout-list" class="layout-button uk-icon-button" uk-icon="icon: list"></button>
-                            <button id="layout-table" class="layout-button uk-icon-button" uk-icon="icon: table"></button>
-                        </div>
-                    </li>
-                </ul>
-            </div>
         </div>
     </body>
 </html>

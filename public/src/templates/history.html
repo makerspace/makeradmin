@@ -1,4 +1,3 @@
-{% from "sidebar.html" import sidebar with context %}
 <!DOCTYPE html>
 <html>
     <head>
@@ -15,16 +14,7 @@
     <body>
         {% include 'banner.html' %}
         <div id="root">
-            {{ sidebar("history") }}
-            <div id="content" class="purchase-history">
-                <div class="content-centering">
-                    <h2>Köphistorik</h1>
-                    <h3 id="member-header"></h3>
-                    <div id="history-contents">
-                        <div uk-spinner></div>
-                    </div>
-                </div>
-            </div>
+            <div uk-spinner></div>
         </div>
     </body>
 </html>

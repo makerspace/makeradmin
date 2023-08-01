@@ -26,6 +26,13 @@ from service.error import BadRequest
 from shop.api_schemas import validate_data, purchase_schema, register_schema
 from shop.shop_data import get_membership_products, special_product_data
 from shop.stripe_payment_intent import PartialPayment, PaymentAction, pay_with_stripe
+from shop.stripe_payment_intent import (
+    PartialPayment,
+    PaymentAction,
+    PaymentIntentResult,
+    confirm_stripe_payment_intent,
+    pay_with_stripe,
+)
 from shop.transactions import Purchase, activate_member, create_transaction
 
 logger = getLogger("makeradmin")
@@ -56,13 +63,18 @@ def pay(data: Any, member_id: int) -> PartialPayment:
     if member_id <= 0:
         raise BadRequest("You must be a member to purchase materials and tools.")
 
-    # This will raise if the payment fails.
-    transaction, action_info = make_purchase(member_id=member_id, purchase=purchase)
+    if purchase.transaction_id is not None:
+        # This is a retry of an in-progress payment.
+        return confirm_stripe_payment_intent(purchase.transaction_id)
+    else:
+        # This will raise if the payment fails.
+        transaction, action_info = make_purchase(member_id=member_id, purchase=purchase)
 
-    return PartialPayment(
-        transaction_id=transaction.id,
-        action_info=action_info,
-    )
+        return PartialPayment(
+            type=PaymentIntentResult.Success if action_info is None else PaymentIntentResult.RequiresAction,
+            transaction_id=transaction.id,
+            action_info=action_info,
+        )
 
 
 def register(data: Any, remote_addr: str, user_agent: str):

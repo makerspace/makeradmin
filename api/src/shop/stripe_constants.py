@@ -4,6 +4,7 @@ from test_aid.systest_config import STRIPE_PRIVATE_KEY, STRIPE_PUBLIC_KEY
 
 from service.config import config
 
+stripe.api_version = "2022-11-15"
 # All stripe calculations are done with cents (ören in Sweden)
 STRIPE_CURRENTY_BASE = 100
 
@@ -43,29 +44,25 @@ class MakerspaceMetadataKeys(Enum):
     # Allowed values are the values of PriceLevel, except 'normal'.
     ALLOWED_PRICE_LEVELS = "allowed_price_levels"
 
-class PriceType(Enum):
+class PriceType(str, Enum):
     BINDING_PERIOD = "binding_period"
     RECURRING = "recurring"
 
-class EventType(Enum):
-    SOURCE = 'source'
-    CARD = 'card'
-    CHARGE = 'charge'
-    PAYMENT_INTENT = 'payment_intent'
+class EventType(str, Enum):
     CUSTOMER = 'customer'
     INVOICE = 'invoice'
     CHECKOUT = 'checkout'
     SUBSCRIPTION_SCHEDULE = 'subscription_schedule'
     TEST_HELPERS = 'test_helpers'
 
-class EventSubtype(Enum):
-    CHARGEABLE = 'chargeable'
-    FAILED = 'failed'
-    CANCELED = 'canceled'
-    SUCCEEDED = 'succeeded'
-    DISPUTE_PREFIX = 'dispute'
-    REFUND_PREFIX = 'refund'
-    PAYMENT_FAILED = 'payment_failed'
+class EventSubtype(str, Enum):
+    CHARGEABLE = "chargeable"
+    FAILED = "failed"
+    CANCELED = "canceled"
+    SUCCEEDED = "succeeded"
+    DISPUTE_PREFIX = "dispute"
+    REFUND_PREFIX = "refund"
+    PAYMENT_FAILED = "payment_failed"
     PAYMENT_SUCCEEDED = 'payment_succeeded'
     PAID = "paid"
     UNCOLLECTABLE = 'marked_uncollectible'
@@ -79,7 +76,7 @@ class EventSubtype(Enum):
     RELEASED = 'released'
 
 
-class SubscriptionStatus(Enum):
+class SubscriptionStatus(str, Enum):
     ACTIVE = 'active'
     INCOMPLETE = 'incomplete'
     INCOMPLETE_EXPIRED = 'incomplete_expired'
@@ -90,32 +87,32 @@ class SubscriptionStatus(Enum):
 
 
 
-class SourceType(Enum):
+class SourceType(str, Enum):
     THREE_D_SECURE = 'three_d_secure'
     CARD = 'card'
 
 
-class ChargeStatus(Enum):
-    SUCCEEDED = 'succeeded'
+class ChargeStatus(str, Enum):
+    SUCCEEDED = "succeeded"
     PENDING = 'pending'
     FAILED = 'failed'
 
 
-class PaymentIntentStatus(Enum):
-    REQUIRES_PAYMENT_METHOD = 'requires_payment_method'
-    REQUIRES_CONFIRMATION = 'requires_confirmation'
-    REQUIRES_ACTION = 'requires_action'
-    PROCESSING = 'processing'
-    CANCELED = 'canceled'
-    SUCCEEDED = 'succeeded'
-    REQUIRES_CAPTURE = 'requires_capture'
+class PaymentIntentStatus(str, Enum):
+    REQUIRES_PAYMENT_METHOD = "requires_payment_method"
+    REQUIRES_CONFIRMATION = "requires_confirmation"
+    REQUIRES_ACTION = "requires_action"
+    PROCESSING = "processing"
+    CANCELED = "canceled"
+    SUCCEEDED = "succeeded"
+    REQUIRES_CAPTURE = "requires_capture"
 
 
 class PaymentIntentNextActionType(str, Enum):
-    USE_STRIPE_SDK = 'use_stripe_sdk'
-    REDIRECT_TO_URL = 'redirect_to_url'
+    USE_STRIPE_SDK = "use_stripe_sdk"
+    REDIRECT_TO_URL = "redirect_to_url"
 
-class SubscriptionScheduleStatus(Enum):
+class SubscriptionScheduleStatus(str, Enum):
     NOT_STARTED = "not_started"
     ACTIVE = "active"
     COMPLETED = "completed"

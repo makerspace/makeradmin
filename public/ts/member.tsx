@@ -8,6 +8,9 @@ import { useEffect, useState } from "preact/hooks";
 import { show_phone_number_dialog } from "./change_phone";
 import { SubscriptionInfo, SubscriptionInfos, SubscriptionType, activateSubscription, cancelSubscription, getCurrentSubscriptions } from "./subscriptions";
 import { TranslationKey, useTranslation } from "./translations";
+import { Sidebar } from "./sidebar";
+import { LoadProductData, ProductData } from "./payment_common";
+import { useCart } from "./cart";
 declare var UIkit: any;
 
 
@@ -163,7 +166,7 @@ function MissingPhoneNumber({ member }: { member: member_t }) {
 }
 
 
-function PendingLabaccessInstructions({ can_sync_labaccess, pending_labaccess_days}: { can_sync_labaccess: boolean, pending_labaccess_days: number }) {
+function PendingLabaccessInstructions({ can_sync_labaccess, pending_labaccess_days }: { can_sync_labaccess: boolean, pending_labaccess_days: number }) {
     if (!can_sync_labaccess && pending_labaccess_days) {
         return <>Du behöver åtgärda ovanstående fel innan din labbaccess kan synkas. När de är åtgärdade kommer den digitala nyckeln att förlängas med <strong>{pending_labaccess_days} dagar</strong> vid nästa nyckelsynkronisering.</>;
     } else if (can_sync_labaccess && pending_labaccess_days) {
@@ -174,11 +177,11 @@ function PendingLabaccessInstructions({ can_sync_labaccess, pending_labaccess_da
 }
 
 
-function Help({ member, membership, pending_labaccess_days, onSendAccessyInvite }: { member: member_t, membership: membership_t, pending_labaccess_days: number, onSendAccessyInvite: ()=>void }) {
+function Help({ member, membership, pending_labaccess_days, onSendAccessyInvite }: { member: member_t, membership: membership_t, pending_labaccess_days: number, onSendAccessyInvite: () => void }) {
     const todo_bullets = [
-        SignedContractWarning({member}),
-        NoMembershipWarning({membership}),
-        MissingPhoneNumber({member}),
+        SignedContractWarning({ member }),
+        NoMembershipWarning({ membership }),
+        MissingPhoneNumber({ member }),
         // TODO: Accessy invite. Check if user is in accessy group.
     ].filter(x => x !== null);
 
@@ -195,11 +198,11 @@ function Help({ member, membership, pending_labaccess_days, onSendAccessyInvite 
     }}>Skicka Accessy-inbjudan</button></p>;
 
     return <fieldset>
-            <legend><i uk-icon="info"></i> Instruktioner för att bli labbmedlem</legend>
-            {todo_bullets}
-            {pending_labaccess_instruction}
-            {accessyInvite}
-        </fieldset>;
+        <legend><i uk-icon="info"></i> Instruktioner för att bli labbmedlem</legend>
+        {todo_bullets}
+        {pending_labaccess_instruction}
+        {accessyInvite}
+    </fieldset>;
 }
 
 
@@ -219,7 +222,7 @@ async function change_pin_code(member: member_t) {
         return;
 
     try {
-        await common.ajax("POST", `${window.apiBasePath}/member/current/set_pin_code`, {pin_code: pin_code})
+        await common.ajax("POST", `${window.apiBasePath}/member/current/set_pin_code`, { pin_code: pin_code })
         await UIkit.modal.alert(`<h2>Pinkoden är nu bytt</h2>`);
         location.reload();
     } catch (e) {
@@ -248,7 +251,7 @@ async function change_phone_number(member: member_t, membership: membership_t) {
     }
 }
 
-async function send_accessy_invite () {
+async function send_accessy_invite() {
     try {
         await common.ajax("POST", `${window.apiBasePath}/webshop/member/current/accessy_invite`);
         UIkit.modal.alert(`<h2>Inbjudan skickad</h2>`);
@@ -259,63 +262,63 @@ async function send_accessy_invite () {
 
 function MembershipView({ member, membership, pendingLabaccessDays }: { member: member_t, membership: membership_t, pendingLabaccessDays: number }) {
     const labaccessStrings: template_strings_t = [
-        (enddate: string, days: number) => <>Din <strong>labaccess</strong> är ogiltig sedan {days} dagar ({enddate}). <br/>Your <strong>lab membership</strong> expired {days} day(s) ago ({enddate}).</>,
-        () => <>Din <strong>labaccess</strong> gick ut igår. <br/>Your <strong>lab membership</strong> expired yesterday.</>,
-        (hours: number) => <>Din <strong>labaccess</strong> är giltig i mindre än {hours} timmar till. <br/>Your <strong>lab membership</strong> is valid for {hours} more hours.</>,
-        (enddate: string, days: number) => <>Din <strong>labaccess</strong> är giltig t.o.m. {enddate} (endast {days} dagar till). Kom ihåg att förnya den innan nästa fredag morgon. <br/>Your <strong>lab membership</strong> is valid through {enddate} (only {days} day(s) left). Remember to extend your lab membership before next Friday morning.</>,
-        (enddate: string, days: number) => <>Din <strong>labaccess</strong> är giltig t.o.m. {enddate} ({days} dagar till). <br/>Your <strong>lab membership</strong> is valid through {enddate} (only {days} day(s) left).</>,
-        () => <>Din <strong>labaccess</strong> är inaktiv. <br/>Your <strong>lab membership</strong> is inactive.</>,
+        (enddate: string, days: number) => <>Din <strong>labaccess</strong> är ogiltig sedan {days} dagar ({enddate}). <br />Your <strong>lab membership</strong> expired {days} day(s) ago ({enddate}).</>,
+        () => <>Din <strong>labaccess</strong> gick ut igår. <br />Your <strong>lab membership</strong> expired yesterday.</>,
+        (hours: number) => <>Din <strong>labaccess</strong> är giltig i mindre än {hours} timmar till. <br />Your <strong>lab membership</strong> is valid for {hours} more hours.</>,
+        (enddate: string, days: number) => <>Din <strong>labaccess</strong> är giltig t.o.m. {enddate} (endast {days} dagar till). Kom ihåg att förnya den innan nästa fredag morgon. <br />Your <strong>lab membership</strong> is valid through {enddate} (only {days} day(s) left). Remember to extend your lab membership before next Friday morning.</>,
+        (enddate: string, days: number) => <>Din <strong>labaccess</strong> är giltig t.o.m. {enddate} ({days} dagar till). <br />Your <strong>lab membership</strong> is valid through {enddate} (only {days} day(s) left).</>,
+        () => <>Din <strong>labaccess</strong> är inaktiv. <br />Your <strong>lab membership</strong> is inactive.</>,
     ];
 
     const membershipStrings: template_strings_t = [
-        (enddate: string, days: number) => <>Ditt <strong>föreningsmedlemsskap</strong> är ogiltigt sedan {days} dagar ({enddate}). <br/>Your <strong>membership</strong> expired {days} day(s) ago ({enddate})</>,
-        () => <>Ditt <strong>föreningsmedlemsskap</strong> gick ut igår. <br/>Your <strong>membership</strong> expired yesterday.</>,
-        (hours: number) => <>Ditt <strong>föreningsmedlemsskap</strong> går ut idag. <br/>Your <strong>membership</strong> expires today.</>,
-        (enddate: string, days: number) => <>Ditt <strong>föreningsmedlemsskap</strong> är giltigt t.o.m. {enddate} (endast {days} dagar till). <br/>Your <strong>membership</strong> is valid through {enddate} (only {days} day(s) left).</>,
-        (enddate: string, days: number) => <>Ditt <strong>föreningsmedlemsskap</strong> är giltigt t.o.m. {enddate} ({days} dagar till). <br/>Your <strong>membership</strong> is valid through {enddate} (only {days} day(s) left).</>,
-        () => <>Ditt <strong>föreningsmedlemsskap</strong> är inaktivt. <br/>Your <strong>membership</strong> is inactive.</>,
+        (enddate: string, days: number) => <>Ditt <strong>föreningsmedlemsskap</strong> är ogiltigt sedan {days} dagar ({enddate}). <br />Your <strong>membership</strong> expired {days} day(s) ago ({enddate})</>,
+        () => <>Ditt <strong>föreningsmedlemsskap</strong> gick ut igår. <br />Your <strong>membership</strong> expired yesterday.</>,
+        (hours: number) => <>Ditt <strong>föreningsmedlemsskap</strong> går ut idag. <br />Your <strong>membership</strong> expires today.</>,
+        (enddate: string, days: number) => <>Ditt <strong>föreningsmedlemsskap</strong> är giltigt t.o.m. {enddate} (endast {days} dagar till). <br />Your <strong>membership</strong> is valid through {enddate} (only {days} day(s) left).</>,
+        (enddate: string, days: number) => <>Ditt <strong>föreningsmedlemsskap</strong> är giltigt t.o.m. {enddate} ({days} dagar till). <br />Your <strong>membership</strong> is valid through {enddate} (only {days} day(s) left).</>,
+        () => <>Ditt <strong>föreningsmedlemsskap</strong> är inaktivt. <br />Your <strong>membership</strong> is inactive.</>,
     ];
 
     const specialLabaccessStrings: template_strings_t = [
         (enddate: string, days: number) => <></>,
         () => <></>,
         (hours: number) => <></>,
-        (enddate: string, days: number) => <>Du har fått <strong>specialtillträde</strong> till föreningslokalerna t.o.m. {enddate} ({days} dagar till). <br/>You have been given <strong>special access</strong> to the premises through {enddate} ({days} day(s) left).</>,
-        (enddate: string, days: number) => <>Du har fått <strong>specialtillträde</strong> till föreningslokalerna t.o.m. {enddate} ({days} dagar till). <br/>You have been given <strong>special access</strong> to the premises through {enddate} ({days} day(s) left).</>,
+        (enddate: string, days: number) => <>Du har fått <strong>specialtillträde</strong> till föreningslokalerna t.o.m. {enddate} ({days} dagar till). <br />You have been given <strong>special access</strong> to the premises through {enddate} ({days} day(s) left).</>,
+        (enddate: string, days: number) => <>Du har fått <strong>specialtillträde</strong> till föreningslokalerna t.o.m. {enddate} ({days} dagar till). <br />You have been given <strong>special access</strong> to the premises through {enddate} ({days} day(s) left).</>,
         () => <></>,
     ];
 
     return <fieldset class="data-uk-margin">
-            <legend><i uk-icon="lock"></i> Medlemsskap</legend>
-            <Info info={{ active: membership.membership_active, enddate: membership.membership_end }} template_strings={membershipStrings} />
-            <Info info={{ active: membership.labaccess_active, enddate: membership.labaccess_end }} template_strings={labaccessStrings} />
-            {membership.special_labaccess_active ? <Info info={{ active: membership.special_labaccess_active, enddate: membership.special_labaccess_end }} template_strings={specialLabaccessStrings} /> : null}
-        </fieldset>;
+        <legend><i uk-icon="lock"></i> Medlemsskap</legend>
+        <Info info={{ active: membership.membership_active, enddate: membership.membership_end }} template_strings={membershipStrings} />
+        <Info info={{ active: membership.labaccess_active, enddate: membership.labaccess_end }} template_strings={labaccessStrings} />
+        {membership.special_labaccess_active ? <Info info={{ active: membership.special_labaccess_active, enddate: membership.special_labaccess_end }} template_strings={specialLabaccessStrings} /> : null}
+    </fieldset>;
 }
 
 
-function PersonalData({ member, onChangePinCode, onChangePhoneNumber }: { member: member_t, onChangePinCode: ()=>void, onChangePhoneNumber: ()=>void }) {
+function PersonalData({ member, onChangePinCode, onChangePhoneNumber }: { member: member_t, onChangePinCode: () => void, onChangePhoneNumber: () => void }) {
     const pin_warning = member.pin_code == null ? <label class="uk-form-label" style="color: red;">Du har inte satt någon PIN-kod ännu. Använd BYT-knappen för att sätta den.</label> : null;
     const [showPinCode, setShowPinCode] = useState(false);
     return (
         <fieldset>
             <legend><i uk-icon="user"></i> Personuppgifter</legend>
             <div>
-                <label  for='firstname'       class="uk-form-label">Förnamn</label>
-                <input name='firstname'       class="uk-input readonly-input" value={member.firstname || ''} disabled />
+                <label for='firstname' class="uk-form-label">Förnamn</label>
+                <input name='firstname' class="uk-input readonly-input" value={member.firstname || ''} disabled />
             </div>
             <div>
-                <label  for='lastname'        class="uk-form-label">Efternamn</label>
-                <input name='lastname'        class="uk-input readonly-input" value={member.lastname || ''} disabled />
+                <label for='lastname' class="uk-form-label">Efternamn</label>
+                <input name='lastname' class="uk-input readonly-input" value={member.lastname || ''} disabled />
             </div>
             <div>
-                <label  for='email'           class="uk-form-label">E-post</label>
-                <input name='email'           class="uk-input readonly-input" value={member.email || ''} disabled />
+                <label for='email' class="uk-form-label">E-post</label>
+                <input name='email' class="uk-input readonly-input" value={member.email || ''} disabled />
             </div>
             <div>
-                <label  for='phone'           class="uk-form-label">Telefonnummer</label>
+                <label for='phone' class="uk-form-label">Telefonnummer</label>
                 <span style="width: 100%; display: flex;">
-                    <input name='phone'           class="uk-input readonly-input" value={member.phone || ''} disabled />
+                    <input name='phone' class="uk-input readonly-input" value={member.phone || ''} disabled />
                     <button class="uk-button uk-button-danger" onClick={e => {
                         e.preventDefault();
                         onChangePhoneNumber();
@@ -323,9 +326,9 @@ function PersonalData({ member, onChangePinCode, onChangePhoneNumber }: { member
                 </span>
             </div>
             <div>
-                <label  for='pin_code'        class="uk-form-label">Pin code</label>
+                <label for='pin_code' class="uk-form-label">Pin code</label>
                 <span style="width: 100%; display: flex;">
-                    <input name='pin_code' type={showPinCode ? "text" : "password"} class="uk-input readonly-input" style="white-space: nowrap; font-family: monospace;" value={member.pin_code || ''} disabled/>
+                    <input name='pin_code' type={showPinCode ? "text" : "password"} class="uk-input readonly-input" style="white-space: nowrap; font-family: monospace;" value={member.pin_code || ''} disabled />
                     <button class="uk-icon-button uk-margin-small-left uk-margin-small-right" uk-icon={showPinCode ? "eye" : "eye-slash"} onClick={e => {
                         setShowPinCode(!showPinCode);
                         e.preventDefault();
@@ -347,26 +350,26 @@ function Address({ member }: { member: member_t }) {
         <fieldset data-uk-margin>
             <legend><i uk-icon="home"></i> Adress</legend>
             <div>
-                <label  for='address_street'  class="uk-form-label">Address</label>
-                <input name='address_street'  class="uk-input readonly-input" value={member.address_street || ''} disabled />
+                <label for='address_street' class="uk-form-label">Address</label>
+                <input name='address_street' class="uk-input readonly-input" value={member.address_street || ''} disabled />
             </div>
             <div>
-                <label  for='address_extra'   class="uk-form-label">Extra adressrad, t ex C/O</label>
-                <input name='address_extra'   class="uk-input readonly-input" value={member.address_extra || ''} disabled />
+                <label for='address_extra' class="uk-form-label">Extra adressrad, t ex C/O</label>
+                <input name='address_extra' class="uk-input readonly-input" value={member.address_extra || ''} disabled />
             </div>
             <div>
-                <label  for='address_zipcode' class="uk-form-label">Postnummer</label>
+                <label for='address_zipcode' class="uk-form-label">Postnummer</label>
                 <input name='address_zipcode' class="uk-input readonly-input" value={member.address_zipcode || ''} disabled />
             </div>
             <div>
-                <label  for='address_city'    class="uk-form-label">Postort</label>
-                <input name='address_city'    class="uk-input readonly-input" value={member.address_city || ''} disabled />
+                <label for='address_city' class="uk-form-label">Postort</label>
+                <input name='address_city' class="uk-input readonly-input" value={member.address_city || ''} disabled />
             </div>
         </fieldset>
     );
 }
 
-function SubscriptionPayment ({ sub, membership, subscriptions, member, type }: { sub: SubscriptionInfo | null, membership: membership_t, subscriptions: SubscriptionInfo[], member: member_t, type: SubscriptionType }) {
+function SubscriptionPayment({ sub, membership, subscriptions, member, type }: { sub: SubscriptionInfo | null, membership: membership_t, subscriptions: SubscriptionInfo[], member: member_t, type: SubscriptionType }) {
     return sub ?
         <div class="uk-button-group">
             <button class="uk-button" disabled>Auto renew: Active</button>
@@ -375,7 +378,7 @@ function SubscriptionPayment ({ sub, membership, subscriptions, member, type }: 
                 cancelSubscription(type, membership, subscriptions);
             }}>Cancel</button>
         </div>
-        : 
+        :
         <>
             <button class="uk-button uk-button-primary" onClick={e => {
                 e.preventDefault();
@@ -386,7 +389,7 @@ function SubscriptionPayment ({ sub, membership, subscriptions, member, type }: 
         </>;
 }
 
-function BaseMembership ({ member, membership, subscriptions }: { member: member_t, membership: membership_t, subscriptions: SubscriptionInfo[] }) {
+function BaseMembership({ member, membership, subscriptions }: { member: member_t, membership: membership_t, subscriptions: SubscriptionInfo[] }) {
     const t = useTranslation();
     const sub = subscriptions.find(sub => sub.type === "membership") || null;
     return <fieldset>
@@ -395,11 +398,11 @@ function BaseMembership ({ member, membership, subscriptions }: { member: member
         <p>{t("member_page.subscriptions.descriptions.membership")}</p>
         <hr />
         <SubscriptionPayment type="membership" sub={sub} membership={membership} subscriptions={subscriptions} member={member} />
-        { sub && sub.upcoming_invoice && <p>{t("member_page.subscriptions.next_charge")(sub.upcoming_invoice.amount_due, sub.upcoming_invoice.payment_date)}</p>}
+        {sub && sub.upcoming_invoice && <p>{t("member_page.subscriptions.next_charge")(sub.upcoming_invoice.amount_due, sub.upcoming_invoice.payment_date)}</p>}
     </fieldset>
 }
 
-function MakerspaceAccess ({ member, membership, subscriptions }: { member: member_t, membership: membership_t, subscriptions: SubscriptionInfo[] }) {
+function MakerspaceAccess({ member, membership, subscriptions }: { member: member_t, membership: membership_t, subscriptions: SubscriptionInfo[] }) {
     const t = useTranslation();
     const sub = subscriptions.find(sub => sub.type === "labaccess") || null;
     return <fieldset>
@@ -411,11 +414,11 @@ function MakerspaceAccess ({ member, membership, subscriptions }: { member: memb
         <p>{t("member_page.subscriptions.descriptions.labaccess")}</p>
         <hr />
         <SubscriptionPayment type="labaccess" sub={sub} membership={membership} subscriptions={subscriptions} member={member} />
-        { sub && sub.upcoming_invoice && <p>{t("member_page.subscriptions.next_charge")(sub.upcoming_invoice.amount_due, sub.upcoming_invoice.payment_date)}</p>}
+        {sub && sub.upcoming_invoice && <p>{t("member_page.subscriptions.next_charge")(sub.upcoming_invoice.amount_due, sub.upcoming_invoice.payment_date)}</p>}
     </fieldset>
 }
 
-function Billing () {
+function Billing() {
     const t = useTranslation();
     return <fieldset>
         <legend><i uk-icon="credit-card"></i> {t("member_page.billing.title")}</legend>
@@ -427,21 +430,22 @@ function Billing () {
     </fieldset>;
 }
 
-function useFetchRepeatedly<T>(fetcher: ()=>Promise<T>, callback: (t: T)=>void) {
+function useFetchRepeatedly<T>(fetcher: () => Promise<T>, callback: (t: T) => void) {
     useEffect(() => {
         let i = 0;
         let id: NodeJS.Timeout;
         const f = async () => {
             callback(await fetcher());
             i++;
-            id = setTimeout(f, Math.min(60*60*1000, Math.pow(1.5, i)*1000));
+            id = setTimeout(f, Math.min(60 * 60 * 1000, Math.pow(1.5, i) * 1000));
         };
         id = setTimeout(f, 1000);
         return () => clearInterval(id);
     }, []);
 }
 
-function MemberPage({ member, membership: initial_membership, pending_labaccess_days, subscriptions, show_beta }: { member: member_t, membership: membership_t, pending_labaccess_days: number, subscriptions: SubscriptionInfo[], show_beta: boolean }) {
+function MemberPage({ member, membership: initial_membership, pending_labaccess_days, productData, subscriptions, show_beta }: { member: member_t, membership: membership_t, pending_labaccess_days: number, subscriptions: SubscriptionInfo[], show_beta: boolean, productData: ProductData }) {
+    const apiBasePath = window.apiBasePath;
     const [membership, setMembership] = useState(initial_membership);
 
     // Automatically refresh membership info.
@@ -450,28 +454,34 @@ function MemberPage({ member, membership: initial_membership, pending_labaccess_
     // In most cases it will get paid in a few seconds, and we want to show this to the user when it happens.
     useFetchRepeatedly(LoadCurrentMembershipInfo, setMembership);
     const t = useTranslation();
+    const { cart } = useCart();
 
     return (
-        <form class="uk-form uk-form-stacked uk-margin-bottom">
-            <h2>{t("member_page.member")} {member.member_number}: {member.firstname} {member.lastname}</h2>
-            { show_beta ? <>
-                    <Help member={member} membership={membership} pending_labaccess_days={pending_labaccess_days} onSendAccessyInvite={send_accessy_invite} />
-                    <BaseMembership member={member} membership={membership} subscriptions={subscriptions} />
-                    <MakerspaceAccess member={member} membership={membership} subscriptions={subscriptions} />
-                    <Billing />
-                </>
-                : <>
-                    <MembershipView member={member} membership={membership} pendingLabaccessDays={pending_labaccess_days} />
-                    <Help member={member} membership={membership} pending_labaccess_days={pending_labaccess_days} onSendAccessyInvite={send_accessy_invite} />
-                </>
-            }
-            <PersonalData
-                member={member}
-                onChangePinCode={() => void change_pin_code(member)}
-                onChangePhoneNumber={() => void change_phone_number(member, membership)}
-            />
-            <Address member={member} />
-        </form>
+        <>
+            <Sidebar cart={cart.items.length > 0 ? { cart, productData } : null} />
+            <div id="content">
+                <form class="uk-form uk-form-stacked uk-margin-bottom">
+                    <h2>{t("member_page.member")} {member.member_number}: {member.firstname} {member.lastname}</h2>
+                    {show_beta ? <>
+                        <Help member={member} membership={membership} pending_labaccess_days={pending_labaccess_days} onSendAccessyInvite={send_accessy_invite} />
+                        <BaseMembership member={member} membership={membership} subscriptions={subscriptions} />
+                        <MakerspaceAccess member={member} membership={membership} subscriptions={subscriptions} />
+                        <Billing />
+                    </>
+                        : <>
+                            <MembershipView member={member} membership={membership} pendingLabaccessDays={pending_labaccess_days} />
+                            <Help member={member} membership={membership} pending_labaccess_days={pending_labaccess_days} onSendAccessyInvite={send_accessy_invite} />
+                        </>
+                    }
+                    <PersonalData
+                        member={member}
+                        onChangePinCode={() => void change_pin_code(member)}
+                        onChangePhoneNumber={() => void change_phone_number(member, membership)}
+                    />
+                    <Address member={member} />
+                </form>
+            </div>
+        </>
     )
 }
 
@@ -479,20 +489,21 @@ common.documentLoaded().then(() => {
     common.addSidebarListeners();
 
     const apiBasePath = window.apiBasePath;
-    const root = document.querySelector("#content") as HTMLElement;
+    const root = document.querySelector("#root") as HTMLElement;
 
     const future1 = LoadCurrentMemberInfo();
     const membership = LoadCurrentMembershipInfo();
     const future3 = common.ajax("GET", apiBasePath + "/webshop/member/current/pending_actions", null);
     const subscriptions = getCurrentSubscriptions().then(s => s.filter(sub => sub.active));
     const groups = LoadCurrentMemberGroups();
+    const productData = LoadProductData();
 
-    Promise.all([future1, membership, future3, subscriptions, groups]).then(([member, membership, pending_actions_json, subscriptions, groups]) => {
+    Promise.all([future1, membership, future3, subscriptions, groups, productData]).then(([member, membership, pending_actions_json, subscriptions, groups, productData]) => {
         const pending_labaccess_days = get_pending_labaccess_days(pending_actions_json);
         const in_beta_group = groups.some(g => g.name === "betatesters");
         if (root != null) {
             render(
-                <MemberPage member={member} membership={membership} pending_labaccess_days={pending_labaccess_days} subscriptions={subscriptions} show_beta={in_beta_group} />,
+                <MemberPage member={member} membership={membership} pending_labaccess_days={pending_labaccess_days} subscriptions={subscriptions} show_beta={in_beta_group} productData={productData} />,
                 root
             );
         }

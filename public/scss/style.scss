@@ -474,14 +474,6 @@ body {
     display: block;
 }
 
-#pay {
-    display: none;
-}
-
-#pay.active {
-    display: block;
-}
-
 #product-save {
     // Required for progress spinner
     position: relative;
@@ -1383,7 +1375,7 @@ $palette-red: $palette4;
     position: initial !important;
 }
 
-#courses-contents {
+.courses-page {
     display: flex;
     flex-direction: column;
 
@@ -1488,6 +1480,11 @@ $palette-red: $palette4;
     display: flex;
     flex-direction: column;
     align-items: center;
+}
+
+.makerspace-logo {
+    // Setting an aspect ratio is important to avoid layout shifts as the page loads
+    aspect-ratio: 300/210;
 }
 
 #root.register-page {
