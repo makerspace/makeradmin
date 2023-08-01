@@ -137,10 +137,7 @@ const CartPage = ({ productData }: { productData: ProductData }) => {
 				<h3 class="cart-header">Varukorg</h3>
 				<ul id="cart" class="layout-table">
 					{cart.items.length > 0 ?
-						cart.items.map(cartItem => <CartItem cartItem={cartItem} productData={productData} cart={cart} onChangeCart={cart => {
-							cart.saveToStorage();
-							setCart(Cart.fromStorage());
-						}} />)
+						cart.items.map(cartItem => <CartItem cartItem={cartItem} productData={productData} cart={cart} onChangeCart={setCart} />)
 						: <p class='empty-cart-text'>Du har inga produkter i varukorgen.</p>}
 				</ul>
 				<div id="pay-module">
