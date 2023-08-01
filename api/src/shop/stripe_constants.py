@@ -14,41 +14,41 @@ STRIPE_SIGNING_SECRET = config.get("STRIPE_SIGNING_SECRET", log_value=False)
 
 
 class Type(str, Enum):
-    SOURCE = 'source'
-    CARD = 'card'
-    CHARGE = 'charge'
-    PAYMENT_INTENT = 'payment_intent'
+    SOURCE = "source"
+    CARD = "card"
+    CHARGE = "charge"
+    PAYMENT_INTENT = "payment_intent"
 
 
 class Subtype(str, Enum):
-    CHARGEABLE = 'chargeable'
-    FAILED = 'failed'
-    CANCELED = 'canceled'
-    SUCCEEDED = 'succeeded'
-    DISPUTE_PREFIX = 'dispute'
-    REFUND_PREFIX = 'refund'
-    PAYMENT_FAILED = 'payment_failed'
+    CHARGEABLE = "chargeable"
+    FAILED = "failed"
+    CANCELED = "canceled"
+    SUCCEEDED = "succeeded"
+    DISPUTE_PREFIX = "dispute"
+    REFUND_PREFIX = "refund"
+    PAYMENT_FAILED = "payment_failed"
 
 
 class SourceType(str, Enum):
-    THREE_D_SECURE = 'three_d_secure'
-    CARD = 'card'
+    THREE_D_SECURE = "three_d_secure"
+    CARD = "card"
 
 
 class ChargeStatus(str, Enum):
-    SUCCEEDED = 'succeeded'
+    SUCCEEDED = "succeeded"
 
 
 class PaymentIntentStatus(str, Enum):
-    REQUIRES_PAYMENT_METHOD = 'requires_payment_method'
-    REQUIRES_CONFIRMATION = 'requires_confirmation'
-    REQUIRES_ACTION = 'requires_action'
-    PROCESSING = 'processing'
-    CANCELED = 'canceled'
-    SUCCEEDED = 'succeeded'
-    REQUIRES_CAPTURE = 'requires_capture'
+    REQUIRES_PAYMENT_METHOD = "requires_payment_method"
+    REQUIRES_CONFIRMATION = "requires_confirmation"
+    REQUIRES_ACTION = "requires_action"
+    PROCESSING = "processing"
+    CANCELED = "canceled"
+    SUCCEEDED = "succeeded"
+    REQUIRES_CAPTURE = "requires_capture"
 
 
 class PaymentIntentNextActionType(str, Enum):
-    USE_STRIPE_SDK = 'use_stripe_sdk'
-    REDIRECT_TO_URL = 'redirect_to_url'
+    USE_STRIPE_SDK = "use_stripe_sdk"
+    REDIRECT_TO_URL = "redirect_to_url"
