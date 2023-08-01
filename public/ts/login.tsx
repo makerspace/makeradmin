@@ -1,4 +1,7 @@
+import { useState } from "preact/hooks";
 import * as common from "./common"
+import { Sidebar } from "./sidebar";
+import { render } from "preact";
 declare var UIkit: any;
 
 function showSuccess(message: string) {
@@ -40,37 +43,43 @@ export function login_via_single_use_link(tag: string, redirect: string | null) 
 }
 
 export function render_login(root: HTMLElement, heading: string | null, redirect: string | null) {
+    render(<Login heading={heading} redirect={redirect} />, root);
+}
+
+function Login({ heading, redirect }: { heading: string | null, redirect: string | null }) {
     heading = heading || "Logga in";
-    root.innerHTML = `
-            <div class="uk-width-medium">
-                <h1 style="text-align: center;">${heading}</h1>
-                <form class="uk-form">
+    const [tag, setTag] = useState("");
+    return <>
+        <Sidebar cart={null} />
+        <div id="content">
+            <div class="content-centering">
+                <div class="uk-width-medium">
+                    <h1 style="text-align: center;">{heading}</h1>
+                    <form class="uk-form" onSubmit={e => {
+                        e.preventDefault();
+                        // Error handling
+                        if (!tag) {
+                            UIkit.modal.alert("Du måste fylla i din E-postadress");
+                            return;
+                        }
+
+                        login_via_single_use_link(tag.trim(), redirect);
+                    }}>
                         <div class="uk-form-row" style="margin: 16px 0;">
-                            <input autoFocus ref="tag" class="uk-form-large uk-width-1-1" type="text" placeholder="Email/Medlemsnummer"/>
+                            <input autoFocus class="uk-form-large uk-width-1-1" type="text" placeholder="Email/Medlemsnummer" value={tag} onChange={e => setTag(e.currentTarget.value)} />
                         </div>
 
                         <div class="uk-form-row" style="margin: 16px 0;">
-                            <button class="uk-width-1-1 uk-button uk-button-primary uk-button-large"><span class="uk-icon-check"/>
-                            	Gå vidare
+                            <button type="submit" class="uk-width-1-1 uk-button uk-button-primary uk-button-large"><span class="uk-icon-check" />
+                                Gå vidare
                             </button>
                         </div>
-                </form>
-								<p style="text-align: center;"><a href="/shop/register">Bli medlem / Become a member</a></p>
-            </div>`;
-    const form = <HTMLElement>root.getElementsByTagName("form")[0];
-    const tagInput = <HTMLInputElement>root.getElementsByTagName("input")[0];
-    form.onsubmit = e => {
-        e.preventDefault();
-        const tag = tagInput.value;
-
-        // Error handling
-        if (!tag) {
-            UIkit.modal.alert("Du måste fylla i din E-postadress");
-            return;
-        }
-
-        login_via_single_use_link(tag.trim(), redirect);
-    }
+                    </form>
+                    <p style="text-align: center;"><a href="/shop/register">Bli medlem / Become a member</a></p>
+                </div>
+            </div>
+        </div>
+    </>
 }
 
 export function redirect_to_member_page() {
