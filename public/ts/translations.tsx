@@ -294,6 +294,7 @@ const Eng = {
                 You get 24/7 access to the space and you can also store one box with your own things at the space.
                 Makerspace Access requires the Base Membership.`,
             },
+            add_to_cart: (count: number, unit: string, price: number) => `Add ${count} ${unit} to cart: ${price} kr`,
             binding_period: (duration: string) => `subscription has a binding period of ${duration}.`,
             next_charge: (amount: string, date: string) => `Your membership will renew at ${formatDate(date)} for ${amount} kr.`,
         },

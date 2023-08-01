@@ -4,13 +4,13 @@ import { UNAUTHORIZED, get_error } from "./common";
 import { JSX } from "preact/jsx-runtime";
 import { LoadCurrentMemberGroups, LoadCurrentMemberInfo, LoadCurrentMembershipInfo, date_t, member_t, membership_t } from "./member_common";
 import { render } from "preact";
-import { useEffect, useState } from "preact/hooks";
+import { useEffect, useMemo, useState } from "preact/hooks";
 import { show_phone_number_dialog } from "./change_phone";
 import { SubscriptionInfo, SubscriptionInfos, SubscriptionType, activateSubscription, cancelSubscription, getCurrentSubscriptions } from "./subscriptions";
 import { TranslationKey, useTranslation } from "./translations";
 import { Sidebar } from "./sidebar";
-import { LoadProductData, ProductData } from "./payment_common";
-import { useCart } from "./cart";
+import { LoadProductData, LoadSpecialProductData, Product, ProductData, RelevantProducts, extractRelevantProducts } from "./payment_common";
+import Cart, { useCart } from "./cart";
 declare var UIkit: any;
 
 
@@ -385,11 +385,26 @@ function SubscriptionPayment({ sub, membership, subscriptions, member, type }: {
                 activateSubscription(type, member, membership, subscriptions);
             }}>Activate auto renewal</button>
             <p>Enable auto-renewal to get a 10% discount on your membership.</p>
-            <button class="uk-button uk-button-primary">Add one month to cart: 375 kr</button>
         </>;
 }
 
-function BaseMembership({ member, membership, subscriptions }: { member: member_t, membership: membership_t, subscriptions: SubscriptionInfo[] }) {
+function SubscriptionProduct({ product, cart, onChangeCart }: { product: Product, cart: Cart, onChangeCart: (cart: Cart) => void }) {
+    const t = useTranslation();
+    if (product.unit !== "mån" && product.unit !== "år" && product.unit !== "st") throw new Error(`Unexpected unit '${product.unit}' for ${product.name}. Expected one of år/mån/st`);
+
+    return <button
+        class="uk-button uk-button-primary"
+        onClick={e => {
+            e.preventDefault();
+            cart.setItem(product.id, cart.getItemCount(product.id) + 1);
+            onChangeCart(cart);
+        }}
+    >
+        {t("member_page.subscriptions.add_to_cart")(product.smallest_multiple, t(`unit.${product.unit}.${product.smallest_multiple > 1 ? 'many' : 'one'}`), Number(product.price) * product.smallest_multiple)}
+    </button>
+}
+
+function BaseMembership({ member, membership, subscriptions, relevantProducts, cart, onChangeCart }: { member: member_t, membership: membership_t, subscriptions: SubscriptionInfo[], relevantProducts: RelevantProducts, cart: Cart, onChangeCart: (cart: Cart) => void }) {
     const t = useTranslation();
     const sub = subscriptions.find(sub => sub.type === "membership") || null;
     return <fieldset>
@@ -399,10 +414,11 @@ function BaseMembership({ member, membership, subscriptions }: { member: member_
         <hr />
         <SubscriptionPayment type="membership" sub={sub} membership={membership} subscriptions={subscriptions} member={member} />
         {sub && sub.upcoming_invoice && <p>{t("member_page.subscriptions.next_charge")(sub.upcoming_invoice.amount_due, sub.upcoming_invoice.payment_date)}</p>}
+        {!sub && <SubscriptionProduct product={relevantProducts.baseMembershipProduct} cart={cart} onChangeCart={onChangeCart} />}
     </fieldset>
 }
 
-function MakerspaceAccess({ member, membership, subscriptions }: { member: member_t, membership: membership_t, subscriptions: SubscriptionInfo[] }) {
+function MakerspaceAccess({ member, membership, subscriptions, relevantProducts, cart, onChangeCart }: { member: member_t, membership: membership_t, subscriptions: SubscriptionInfo[], relevantProducts: RelevantProducts, cart: Cart, onChangeCart: (cart: Cart) => void }) {
     const t = useTranslation();
     const sub = subscriptions.find(sub => sub.type === "labaccess") || null;
     return <fieldset>
@@ -415,6 +431,7 @@ function MakerspaceAccess({ member, membership, subscriptions }: { member: membe
         <hr />
         <SubscriptionPayment type="labaccess" sub={sub} membership={membership} subscriptions={subscriptions} member={member} />
         {sub && sub.upcoming_invoice && <p>{t("member_page.subscriptions.next_charge")(sub.upcoming_invoice.amount_due, sub.upcoming_invoice.payment_date)}</p>}
+        {!sub && <SubscriptionProduct product={relevantProducts.labaccessProduct} cart={cart} onChangeCart={onChangeCart} />}
     </fieldset>
 }
 
@@ -447,6 +464,7 @@ function useFetchRepeatedly<T>(fetcher: () => Promise<T>, callback: (t: T) => vo
 function MemberPage({ member, membership: initial_membership, pending_labaccess_days, productData, subscriptions, show_beta }: { member: member_t, membership: membership_t, pending_labaccess_days: number, subscriptions: SubscriptionInfo[], show_beta: boolean, productData: ProductData }) {
     const apiBasePath = window.apiBasePath;
     const [membership, setMembership] = useState(initial_membership);
+    const relevantProducts = useMemo(() => extractRelevantProducts([...productData.id2item.values()]), [productData.id2item]);
 
     // Automatically refresh membership info.
     // This is particularly useful when the user has just bought a subscription,
@@ -454,7 +472,7 @@ function MemberPage({ member, membership: initial_membership, pending_labaccess_
     // In most cases it will get paid in a few seconds, and we want to show this to the user when it happens.
     useFetchRepeatedly(LoadCurrentMembershipInfo, setMembership);
     const t = useTranslation();
-    const { cart } = useCart();
+    const { cart, setCart } = useCart();
 
     return (
         <>
@@ -464,8 +482,8 @@ function MemberPage({ member, membership: initial_membership, pending_labaccess_
                     <h2>{t("member_page.member")} {member.member_number}: {member.firstname} {member.lastname}</h2>
                     {show_beta ? <>
                         <Help member={member} membership={membership} pending_labaccess_days={pending_labaccess_days} onSendAccessyInvite={send_accessy_invite} />
-                        <BaseMembership member={member} membership={membership} subscriptions={subscriptions} />
-                        <MakerspaceAccess member={member} membership={membership} subscriptions={subscriptions} />
+                        <BaseMembership member={member} membership={membership} subscriptions={subscriptions} relevantProducts={relevantProducts} cart={cart} onChangeCart={setCart} />
+                        <MakerspaceAccess member={member} membership={membership} subscriptions={subscriptions} relevantProducts={relevantProducts} cart={cart} onChangeCart={setCart} />
                         <Billing />
                     </>
                         : <>
@@ -497,6 +515,7 @@ common.documentLoaded().then(() => {
     const subscriptions = getCurrentSubscriptions().then(s => s.filter(sub => sub.active));
     const groups = LoadCurrentMemberGroups();
     const productData = LoadProductData();
+
 
     Promise.all([future1, membership, future3, subscriptions, groups, productData]).then(([member, membership, pending_actions_json, subscriptions, groups, productData]) => {
         const pending_labaccess_days = get_pending_labaccess_days(pending_actions_json);
