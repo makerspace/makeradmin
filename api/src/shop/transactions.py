@@ -61,24 +61,21 @@ class Purchase(DataClassJsonMixin):
     cart: List[CartItem]
     expected_sum: str
     stripe_payment_method_id: str
+    transaction_id: Optional[int] = None
 
 
-def get_source_transaction(source_id):
+def get_source_transaction(source_id: str) -> Optional[Transaction]:
     try:
         return (
             db_session.query(Transaction)
-            .filter(
-                Transaction.stripe_pending.any(StripePending.stripe_token == source_id)
-            )
+            .filter(Transaction.stripe_pending.any(StripePending.stripe_token == source_id))
             .with_for_update()
             .one()
         )
     except NoResultFound as e:
         return None
     except MultipleResultsFound as e:
-        raise InternalServerError(
-            log=f"stripe token {source_id} has multiple transactions, this is a bug"
-        ) from e
+        raise InternalServerError(log=f"stripe token {source_id} has multiple transactions, this is a bug") from e
 
 
 @nested_atomic
@@ -86,14 +83,11 @@ def commit_transaction_to_db(
     member_id=None,
     total_amount=None,
     contents=None,
-    stripe_card_source_id=None,
     activates_member=False,
 ) -> Transaction:
     """Save as new transaction with transaction content in db and return it transaction."""
 
-    transaction = Transaction(
-        member_id=member_id, amount=total_amount, status=Transaction.PENDING
-    )
+    transaction = Transaction(member_id=member_id, amount=total_amount, status=Transaction.PENDING)
 
     db_session.add(transaction)
     db_session.flush()
@@ -120,10 +114,6 @@ def commit_transaction_to_db(
     if activates_member:
         # Mark this transaction as one that is for registering a member.
         db_session.add(PendingRegistration(transaction_id=transaction.id))
-
-    db_session.add(
-        StripePending(transaction_id=transaction.id, stripe_token=stripe_card_source_id)
-    )
 
     return transaction
 
@@ -230,23 +220,19 @@ def activate_member(member):
 
 
 def create_transaction(
-    member_id: int, purchase: Purchase, activates_member: bool, stripe_reference_id: str
+    member_id: int, purchase: Purchase, activates_member: bool
 ) -> Transaction:
-    total_amount, contents = validate_order(
-        member_id, purchase.cart, purchase.expected_sum
-    )
+    total_amount, contents = validate_order(member_id, purchase.cart, purchase.expected_sum)
 
     transaction = commit_transaction_to_db(
         member_id=member_id,
         total_amount=total_amount,
         contents=contents,
         activates_member=activates_member,
-        stripe_card_source_id=stripe_reference_id,
     )
 
     logger.info(
         f"created transaction {transaction.id}, total_amount={total_amount}, member_id={member_id}"
-        f", stripe_reference_id={stripe_reference_id}"
     )
 
     return transaction

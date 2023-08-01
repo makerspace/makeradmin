@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from enum import Enum
 from logging import getLogger
 from time import sleep
 from typing import Any, Optional
@@ -71,58 +72,45 @@ class PaymentAction(DataClassJsonMixin):
     client_secret: str
 
 
+class PaymentIntentResult(str, Enum):
+    Success = "success"
+    RequiresAction = "requires_action"
+    Wait = "wait"
+
+
 @dataclass
 class PartialPayment(DataClassJsonMixin):
+    type: PaymentIntentResult
     transaction_id: int
     # Payment needs additional actions to complete if this is non-null.
     # If it is None then the payment is complete.
     action_info: Optional[PaymentAction]
 
 
-def create_action_required_response(
-    transaction: Transaction, payment_intent: PaymentIntent
-) -> PaymentAction:
+def create_action_required_response(transaction: Transaction, payment_intent: PaymentIntent) -> PaymentAction:
     """The payment_intent requires customer action to be confirmed. Create response to client"""
 
     try:
-        db_session.add(
-            StripePending(transaction_id=transaction.id, stripe_token=payment_intent.id)
-        )
-
-        if (
-            payment_intent.next_action.type
-            == PaymentIntentNextActionType.USE_STRIPE_SDK
-        ):
+        if payment_intent.next_action.type == PaymentIntentNextActionType.USE_STRIPE_SDK:
             return PaymentAction(
                 type=PaymentIntentNextActionType.USE_STRIPE_SDK,
                 client_secret=payment_intent.client_secret,
             )
 
-        elif (
-            payment_intent.next_action.type
-            == PaymentIntentNextActionType.REDIRECT_TO_URL
-        ):
-            raise InternalServerError(
-                log=f"unexpected next_action type, {payment_intent.next_action.type}"
-            )
+        elif payment_intent.next_action.type == PaymentIntentNextActionType.REDIRECT_TO_URL:
+            raise InternalServerError(log=f"unexpected next_action type, {payment_intent.next_action.type}")
 
         else:
-            raise PaymentFailed(
-                log=f"unknown next_action type, {payment_intent.next_action.type}"
-            )
+            raise PaymentFailed(log=f"unknown next_action type, {payment_intent.next_action.type}")
 
     except Exception:
         # Fail transaction on all known and unknown errors to be safe, we won't charge a failed transaction.
         commit_fail_transaction(transaction)
-        logger.info(
-            f"failing transaction {transaction.id}, due to error when processing 3ds card"
-        )
+        logger.info(f"failing transaction {transaction.id}, due to error when processing 3ds card")
         raise
 
 
-def complete_payment_intent_transaction(
-    transaction: Transaction, payment_intent: PaymentIntent
-) -> None:
+def complete_payment_intent_transaction(transaction: Transaction, payment_intent: PaymentIntent) -> None:
     if payment_intent.status != PaymentIntentStatus.SUCCEEDED:
         raise InternalServerError(
             log=f"unexpected payment_intent status '{payment_intent.status}' for transaction {transaction.id} "
@@ -171,18 +159,16 @@ def create_client_response(
         )
 
 
-def confirm_stripe_payment_intent(data: Any) -> PartialPayment:
+def confirm_stripe_payment_intent(transaction_id: int) -> PartialPayment:
     """Called by client after payment_intent next_action has been handled"""
-
-    payment_intent_id = data.get("payment_intent_id", None)
-    if not payment_intent_id:
-        raise BadRequest("Missing required parameter 'payment_intent_id'")
-
-    transaction = get_source_transaction(payment_intent_id)
+    pending = db_session.query(StripePending).filter_by(transaction_id=transaction_id).one()
+    transaction = db_session.query(Transaction).get(transaction_id)
     if not transaction:
-        raise BadRequest(f"unknown payment_intent ({payment_intent_id})")
+        raise BadRequest(f"unknown transaction ({transaction_id})")
+    if transaction.status != Transaction.PENDING:
+        raise BadRequest(f"transaction ({transaction_id}) is not pending")
 
-    payment_intent = stripe.PaymentIntent.retrieve(payment_intent_id)
+    payment_intent = stripe.PaymentIntent.retrieve(pending.stripe_token)
     assert payment_intent.status == PaymentIntentStatus.REQUIRES_CONFIRMATION
 
     try:
@@ -211,6 +197,8 @@ def pay_with_stripe(
             confirmation_method="manual",
             confirm=True,
         )
+
+        db_session.add(StripePending(transaction_id=transaction.id, stripe_token=payment_intent.stripe_id))
 
         logger.info(
             f"created stripe payment_intent for transaction {transaction.id}, payment_intent id {payment_intent.id}"

@@ -52,7 +52,7 @@ type PaymentRequest = {
 	cart: Item[],
 	expected_sum: number,
 	stripe_payment_method_id: string,
-	transaction_id: string | null
+	transaction_id: number | null
 }
 
 const PaymentButton = ({ cart, productData }: { cart: Cart, productData: ProductData }) => {

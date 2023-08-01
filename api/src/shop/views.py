@@ -182,11 +182,6 @@ def pay_route() -> PartialPayment:
     return pay(request.json, g.user_id)
 
 
-@service.route("/confirm_payment", method=POST, permission=PUBLIC, commit_on_error=True)
-def confirm_payment_route() -> PartialPayment:
-    return confirm_stripe_payment_intent(request.json)
-
-
 @service.route("/register", method=POST, permission=PUBLIC, commit_on_error=True)
 def register_route():
     assert request.remote_addr is not None

@@ -13,8 +13,14 @@ from core import auth
 from membership.views import member_entity
 from service.error import BadRequest
 from shop.api_schemas import validate_data, purchase_schema, register_schema
-from shop.shop_data import get_membership_products, special_product_data
-from shop.stripe_payment_intent import PartialPayment, PaymentAction, pay_with_stripe
+from shop.shop_data import get_membership_products
+from shop.stripe_payment_intent import (
+    PartialPayment,
+    PaymentAction,
+    PaymentIntentResult,
+    confirm_stripe_payment_intent,
+    pay_with_stripe,
+)
 from shop.transactions import Purchase, activate_member, create_transaction
 
 logger = getLogger("makeradmin")
@@ -27,12 +33,7 @@ def make_purchase(
 
     payment_method_id: str = purchase.stripe_payment_method_id
 
-    transaction = create_transaction(
-        member_id=member_id,
-        purchase=purchase,
-        activates_member=activates_member,
-        stripe_reference_id=payment_method_id,
-    )
+    transaction = create_transaction(member_id=member_id, purchase=purchase, activates_member=activates_member)
 
     action_info = pay_with_stripe(transaction, payment_method_id)
 
@@ -46,13 +47,18 @@ def pay(data: Any, member_id: int) -> PartialPayment:
     if member_id <= 0:
         raise BadRequest("You must be a member to purchase materials and tools.")
 
-    # This will raise if the payment fails.
-    transaction, action_info = make_purchase(member_id=member_id, purchase=purchase)
+    if purchase.transaction_id is not None:
+        # This is a retry of an in-progress payment.
+        return confirm_stripe_payment_intent(purchase.transaction_id)
+    else:
+        # This will raise if the payment fails.
+        transaction, action_info = make_purchase(member_id=member_id, purchase=purchase)
 
-    return PartialPayment(
-        transaction_id=transaction.id,
-        action_info=action_info,
-    )
+        return PartialPayment(
+            type=PaymentIntentResult.Success if action_info is None else PaymentIntentResult.RequiresAction,
+            transaction_id=transaction.id,
+            action_info=action_info,
+        )
 
 
 def register(data: Any, remote_addr: str, user_agent: str):
@@ -72,17 +78,13 @@ def register(data: Any, remote_addr: str, user_agent: str):
 
     product_id = item["id"]
     if product_id not in (p.id for p in products):
-        raise BadRequest(
-            message=f"Not allowed to purchase the product with id {product_id} when registring."
-        )
+        raise BadRequest(message=f"Not allowed to purchase the product with id {product_id} when registring.")
 
     # This will raise if the creation fails, if it succeeds it will commit the member.
     member_id = member_entity.create(data.get("member", {}))["member_id"]
 
     # This will raise if the payment fails.
-    transaction, action_info = make_purchase(
-        member_id=member_id, purchase=purchase, activates_member=True
-    )
+    transaction, action_info = make_purchase(member_id=member_id, purchase=purchase, activates_member=True)
 
     # If the pay succeeded (not same as the payment is completed) and the member does not already exists,
     # the user will be logged in.

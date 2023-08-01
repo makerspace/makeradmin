@@ -137,9 +137,9 @@ class Test(ShopTestMixin, FlaskTestBase):
             {"id": self.p0_id, "count": p0_count},
         ]
 
-        transaction = create_transaction(member_id=member.member_id,
-                                         purchase=dict(cart=cart, expected_sum=expected_sum),
-                                         stripe_reference_id="not_used")
+        transaction = create_transaction(
+            member_id=member.member_id, purchase=dict(cart=cart, expected_sum=expected_sum)
+        )
         transaction.status = Transaction.COMPLETED
         db_session.add(transaction)
         db_session.flush()

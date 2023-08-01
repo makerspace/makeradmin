@@ -95,7 +95,7 @@ export type PaymentAction = {
 
 export type BackendPaymentResponse = {
     type: PaymentIntentResult
-    transaction_id: string,
+    transaction_id: number,
     action_info: PaymentAction,
 }
 
@@ -281,10 +281,9 @@ export enum PaymentIntentResult {
     Success = "success",
     RequiresAction = "requires_action",
     Wait = "wait",
-    Failed = "failed",
 }
 
-export async function negotiatePayment<T extends { transaction_id: string | null }, R extends BackendPaymentResponse>(endpoint: string, data: T): Promise<R> {
+export async function negotiatePayment<T extends { transaction_id: number | null }, R extends BackendPaymentResponse>(endpoint: string, data: T): Promise<R> {
     while (true) {
         let res: ServerResponse<R>;
         try {
@@ -303,7 +302,7 @@ export async function negotiatePayment<T extends { transaction_id: string | null
                 return res.data;
             case PaymentIntentResult.RequiresAction:
                 if (res.data.action_info!.type === PaymentIntentNextActionType.USE_STRIPE_SDK) {
-                    const stripeResult = await stripe.confirmCardSetup(res.data.action_info!.client_secret);
+                    const stripeResult = await stripe.handleCardAction(res.data.action_info!.client_secret);
                     if (stripeResult.error) {
                         throw new PaymentFailedError(stripeResult.error.message!);
                     } else {
@@ -318,9 +317,6 @@ export async function negotiatePayment<T extends { transaction_id: string | null
                 // Stripe needs some time to confirm the payment. Wait a bit and try again.
                 await new Promise(resolve => setTimeout(resolve, 500));
                 break;
-            case PaymentIntentResult.Failed:
-                // TODO: Error? Shouldn't this be a different status code?
-                throw new PaymentFailedError(res.data.error!)
         }
     }
 }
