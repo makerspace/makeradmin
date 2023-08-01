@@ -13,8 +13,8 @@ declare var UIkit: any;
 
 const CartItem = ({ cartItem, productData, cart, onChangeCart }: { cartItem: Item, productData: ProductData, cart: Cart, onChangeCart: (cart: Cart) => void }) => {
 	const item = productData.id2item.get(cartItem.id);
-	if (item === undefined) {
-		// Item no longer exists
+	if (item === undefined || !item.show) {
+		// Item no longer exists or should not be visible in the shop anymore.
 		cart.setItem(cartItem.id, 0);
 		onChangeCart(cart);
 		return null;
