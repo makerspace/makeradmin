@@ -9,7 +9,7 @@ import { show_phone_number_dialog } from "./change_phone";
 import { SubscriptionInfo, SubscriptionInfos, SubscriptionType, activateSubscription, cancelSubscription, getCurrentSubscriptions } from "./subscriptions";
 import { TranslationKey, useTranslation } from "./translations";
 import { Sidebar } from "./sidebar";
-import { LoadProductData, LoadSpecialProductData, Product, ProductData, RelevantProducts, extractRelevantProducts, initializeStripe } from "./payment_common";
+import { LoadProductData, Product, ProductData, RelevantProducts, extractRelevantProducts, initializeStripe } from "./payment_common";
 import Cart, { useCart } from "./cart";
 declare var UIkit: any;
 

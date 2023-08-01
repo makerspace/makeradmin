@@ -6,7 +6,7 @@ module.exports = (env, args) => {
     const commonSettings = {
         context: path.resolve(__dirname),
         entry: {
-            receipt: "./ts/receipt.ts",
+            receipt: "./ts/receipt.tsx",
             shop: "./ts/shop.tsx",
             cartpage: "./ts/cartpage.tsx",
             cart: "./ts/cart.ts",

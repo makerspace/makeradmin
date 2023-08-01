@@ -6,40 +6,9 @@ import { LoadProductData, Product, ProductData, Transaction, TransactionItem } f
 import { LoadCurrentMemberInfo, member_t } from "./member_common";
 import { Sidebar } from "./sidebar";
 import { render } from "preact";
+import { Receipt } from "./receipt_common";
 declare var UIkit: any;
 
-function format_receipt_status(transaction_status: string) {
-    switch (transaction_status) {
-        case "pending": return "Ej bekräftad";
-        case "completed": return "";
-        case "failed": return "Misslyckad";
-    };
-    return "Okänd status";
-}
-
-const ReceiptItem = ({ item }: { item: TransactionItem }) => {
-    return <>
-        <a className="product-title" href={`/shop/product/${item.product.id}`}>{item.product.name}</a>
-        <span className="receipt-item-count">{item.count} {item.product.unit}</span>
-        <span className="receipt-item-amount">{Cart.formatCurrency(Number(item.amount))}</span>
-    </>
-}
-
-const Receipt = ({ transaction }: { transaction: Transaction }) => {
-    return <div className={`history-item history-item-${transaction.status}`}>
-        <a className="receipt-header" href={`/shop/receipt/${transaction.id}`}>
-            <span>Kvitto {transaction.id}</span>
-            <span className="receipt-date">{new Date(transaction.created_at).toLocaleDateString("sv-SE")}</span>
-        </a>
-        <div className="receipt-items">
-            {transaction.contents.map(item => <ReceiptItem item={item} />)}
-        </div>
-        <div className="receipt-amount">
-            <span className="receipt-payment-status">{format_receipt_status(transaction.status)}</span>
-            <span className="receipt-amount-value">{Cart.formatCurrency(Number(transaction.amount))}</span>
-        </div>
-    </div>
-}
 
 const HistoryPage = ({ transactions, member, productData }: { transactions: Transaction[], member: member_t, productData: ProductData }) => {
     const cart = Cart.fromStorage();
@@ -50,7 +19,7 @@ const HistoryPage = ({ transactions, member, productData }: { transactions: Tran
                 <h2>Köphistorik</h2>
                 <h3>#{member.member_number} {member.firstname} {member.lastname}</h3>
                 <div>
-                    {transactions.map(transaction => <Receipt transaction={transaction} />)}
+                    {transactions.map(transaction => <Receipt transaction={transaction} detailed={false} />)}
                 </div>
             </div>
         </div>

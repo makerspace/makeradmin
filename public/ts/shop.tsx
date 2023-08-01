@@ -126,10 +126,9 @@ const ShopPage = ({ productData }: { productData: ProductData }) => {
   </>
 }
 
-
+const productData = LoadProductData();
+const member = LoadCurrentMemberInfo();
 common.documentLoaded().then(() => {
-  const productData = LoadProductData();
-  const member = LoadCurrentMemberInfo();
   const root = document.querySelector("#root") as HTMLElement;
 
   // renderSidebarCategories(productData, true);
