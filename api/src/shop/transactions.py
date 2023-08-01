@@ -51,16 +51,19 @@ logger = getLogger("makeradmin")
 class PaymentFailed(BadRequest):
     message = "Payment failed."
 
+
 @dataclass
 class CartItem(DataClassJsonMixin):
     id: int
     count: int
+
 
 @dataclass
 class Purchase(DataClassJsonMixin):
     cart: List[CartItem]
     expected_sum: str
     stripe_payment_method_id: str
+
 
 @dataclass
 class CartItem(DataClassJsonMixin):
@@ -91,10 +94,11 @@ def get_source_transaction(source_id: str) -> Optional[Transaction]:
 
 
 @nested_atomic
-def commit_transaction_to_db(member_id: int, total_amount: Decimal, contents: List[TransactionContent], stripe_card_source_id: str,
-                             activates_member: bool=False) -> Transaction:
-    """ Save as new transaction with transaction content in db and return it transaction. """
-    
+def commit_transaction_to_db(
+    member_id: int, total_amount: Decimal, contents: List[TransactionContent], activates_member: bool = False
+) -> Transaction:
+    """Save as new transaction with transaction content in db and return it transaction."""
+
     transaction = Transaction(member_id=member_id, amount=total_amount, status=Transaction.PENDING)
 
     db_session.add(transaction)
@@ -132,7 +136,7 @@ def commit_fail_transaction(transaction: Transaction) -> None:
     db_session.flush()
 
 
-def pending_actions_query(member_id: Optional[int]=None, transaction: Optional[Transaction]=None) -> Any:
+def pending_actions_query(member_id: Optional[int] = None, transaction: Optional[Transaction] = None) -> Any:
     """
     Finds every item in a transaction and checks the actions it has, then checks to see if all those actions have
     been completed (and are not deleted). The actions that are valid for a transaction are precisely those that
@@ -182,7 +186,10 @@ def activate_paused_labaccess_subscription(member_id: int, earliest_start_at: da
     if member is not None and member.stripe_labaccess_subscription_id is not None:
         resume_paused_subscription(member.member_id, SubscriptionType.LAB, earliest_start_at, test_clock=None)
 
-def ship_add_labaccess_action(action: TransactionAction, transaction: Transaction, current_time: datetime, skip_ensure_accessy: bool=False) -> None:
+
+def ship_add_labaccess_action(
+    action: TransactionAction, transaction: Transaction, current_time: datetime, skip_ensure_accessy: bool = False
+) -> None:
     days_to_add = action.value
     assert days_to_add is not None
 
@@ -245,9 +252,7 @@ def activate_member(member: Member) -> None:
     send_new_member_email(member)
 
 
-def create_transaction(
-    member_id: int, purchase: Purchase, activates_member: bool
-) -> Transaction:
+def create_transaction(member_id: int, purchase: Purchase, activates_member: bool) -> Transaction:
     total_amount, contents = validate_order(member_id, purchase.cart, purchase.expected_sum)
     transaction = commit_transaction_to_db(
         member_id=member_id,
@@ -256,9 +261,7 @@ def create_transaction(
         activates_member=activates_member,
     )
 
-    logger.info(
-        f"created transaction {transaction.id}, total_amount={total_amount}, member_id={member_id}"
-    )
+    logger.info(f"created transaction {transaction.id}, total_amount={total_amount}, member_id={member_id}")
 
     return transaction
 
@@ -276,7 +279,12 @@ def complete_transaction(transaction: Transaction) -> None:
     send_receipt_email(transaction)
 
 
-def ship_orders(ship_add_labaccess: bool=True, transaction_filter: Optional[Transaction]=None, member_id: Optional[int] = None, current_time: Optional[datetime] = None) -> None:
+def ship_orders(
+    ship_add_labaccess: bool = True,
+    transaction_filter: Optional[Transaction] = None,
+    member_id: Optional[int] = None,
+    current_time: Optional[datetime] = None,
+) -> None:
     """
     Completes all orders for purchasing lab access and updates existing keys with new dates.
     If a user does not meet requirements for order (for example labaccess needs phone, signed agreement etc), then the order will remain as not completed.
@@ -298,12 +306,16 @@ def ship_orders(ship_add_labaccess: bool=True, transaction_filter: Optional[Tran
             ship_add_membership_action(action, transaction, current_time=current_time)
 
 
-def ship_labaccess_orders(member_id: Optional[int]=None, skip_ensure_accessy: bool=False, current_time: Optional[datetime] = None) -> None:
+def ship_labaccess_orders(
+    member_id: Optional[int] = None, skip_ensure_accessy: bool = False, current_time: Optional[datetime] = None
+) -> None:
     if current_time is None:
         current_time = datetime.now(timezone.utc)
     for action, content, transaction in pending_actions_query(member_id=member_id):
         if action.action_type == ProductAction.ADD_LABACCESS_DAYS:
-            ship_add_labaccess_action(action, transaction, skip_ensure_accessy=skip_ensure_accessy, current_time=current_time)
+            ship_add_labaccess_action(
+                action, transaction, skip_ensure_accessy=skip_ensure_accessy, current_time=current_time
+            )
 
 
 @nested_atomic
@@ -351,7 +363,7 @@ def process_cart(member_id: int, cart: List[CartItem]) -> Tuple[Decimal, List[Tr
 
             if product.filter:
                 PRODUCT_FILTERS[product.filter](item, member_id)
-            
+
             discount = get_discount_for_product(product, price_level)
 
             amount = Decimal(product.price) * Decimal(count) * (1 - discount.fraction_off)

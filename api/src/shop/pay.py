@@ -49,7 +49,6 @@ def make_purchase(
         member_id=member_id,
         purchase=purchase,
         activates_member=activates_member,
-        stripe_reference_id=payment_method_id,
     )
     action_info = pay_with_stripe(transaction, payment_method_id)
 
