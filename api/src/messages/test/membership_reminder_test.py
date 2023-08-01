@@ -11,7 +11,7 @@ from membership.models import Span, Member
 from messages.models import Message, MessageTemplate
 from service.db import db_session
 from shop.models import ProductAction, Transaction
-from shop.transactions import create_transaction
+from shop.transactions import CartItem, Purchase, create_transaction
 from test_aid.test_base import FlaskTestBase, ShopTestMixin
 
 
@@ -134,11 +134,13 @@ class Test(ShopTestMixin, FlaskTestBase):
 
         expected_sum = self.p0_price * p0_count
         cart = [
-            {"id": self.p0_id, "count": p0_count},
+            CartItem(self.p0_id, p0_count),
         ]
 
         transaction = create_transaction(
-            member_id=member.member_id, purchase=dict(cart=cart, expected_sum=expected_sum)
+            member_id=member.member_id,
+            purchase=Purchase(cart=cart, expected_sum=str(expected_sum), stripe_payment_method_id="not_used"),
+            activates_member=False,
         )
         transaction.status = Transaction.COMPLETED
         db_session.add(transaction)
