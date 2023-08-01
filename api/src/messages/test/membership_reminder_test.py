@@ -1,8 +1,7 @@
 import core
 import messages
 import shop
-from dispatch_emails import membership_reminder, MEMBERSHIP_REMINDER_DAYS_BEFORE, \
-    MEMBERSHIP_REMINDER_GRACE_PERIOD
+from dispatch_emails import membership_reminder, MEMBERSHIP_REMINDER_DAYS_BEFORE, MEMBERSHIP_REMINDER_GRACE_PERIOD
 import membership
 import membership.models
 import shop.models
@@ -17,14 +16,13 @@ from test_aid.test_base import FlaskTestBase, ShopTestMixin
 
 
 class Test(ShopTestMixin, FlaskTestBase):
-    
     models = [membership.models, messages.models, shop.models, core.models]
     products = [
         dict(
             price=100.0,
             unit="st",
             smallest_multiple=1,
-            action=dict(action_type=ProductAction.ADD_MEMBERSHIP_DAYS, value=30)
+            action=dict(action_type=ProductAction.ADD_MEMBERSHIP_DAYS, value=30),
         )
     ]
 
@@ -32,7 +30,7 @@ class Test(ShopTestMixin, FlaskTestBase):
         db_session.query(Member).delete()
         db_session.query(Span).delete()
         db_session.query(Message).delete()
-    
+
     def send_membership(self) -> None:
         membership_reminder()
         db_session.commit()
@@ -40,31 +38,31 @@ class Test(ShopTestMixin, FlaskTestBase):
     def test_reminder_message_is_created_20_days_before_expiry(self) -> None:
         member = self.db.create_member()
         self.db.create_span(type=Span.MEMBERSHIP, enddate=self.date(MEMBERSHIP_REMINDER_DAYS_BEFORE))
-        
+
         self.send_membership()
-        
-        message, = db_session.query(Message).all()
-        
+
+        (message,) = db_session.query(Message).all()
+
         self.assertEqual(member.member_id, message.member_id)
         self.assertEqual(MessageTemplate.MEMBERSHIP_REMINDER.value, message.template)
-    
+
     def test_reminder_message_is_not_created_if_membership_active(self) -> None:
         member = self.db.create_member()
         self.db.create_span(type=Span.MEMBERSHIP, enddate=self.date(MEMBERSHIP_REMINDER_DAYS_BEFORE + 20))
-        
+
         self.send_membership()
-        
+
         self.assertEqual(0, db_session.query(Message).filter(Message.member == member).count())
 
     def test_reminder_message_is_created_20_days_before_expiry_even_if_other_span_after(self) -> None:
         member = self.db.create_member()
         self.db.create_span(type=Span.MEMBERSHIP, enddate=self.date(MEMBERSHIP_REMINDER_DAYS_BEFORE))
         self.db.create_span(type=Span.LABACCESS, enddate=self.date(200))
-        
+
         self.send_membership()
-        
+
         self.assertEqual(1, db_session.query(Message).filter(Message.member == member).count())
-        
+
     def test_reminder_message_is_not_created_if_recent_reminder_already_exists(self) -> None:
         member = self.db.create_member()
         self.db.create_span(type=Span.MEMBERSHIP, enddate=self.date(MEMBERSHIP_REMINDER_DAYS_BEFORE))
@@ -73,9 +71,9 @@ class Test(ShopTestMixin, FlaskTestBase):
             member=member,
             created_at=self.datetime(days=-MEMBERSHIP_REMINDER_GRACE_PERIOD + 1),
         )
-        
+
         self.send_membership()
-        
+
         self.assertEqual(1, db_session.query(Message).filter(Message.member == member).count())
 
     def test_reminder_message_is_created_if_recent_reminder_is_old(self) -> None:
@@ -86,10 +84,15 @@ class Test(ShopTestMixin, FlaskTestBase):
             member=member,
             created_at=self.datetime(days=-MEMBERSHIP_REMINDER_GRACE_PERIOD - 2),
         )
-        
+
         self.send_membership()
-        
-        self.assertEqual(2, db_session.query(Message).filter((Message.member == member) & (Message.template == MessageTemplate.MEMBERSHIP_REMINDER.value)).count())
+
+        self.assertEqual(
+            2,
+            db_session.query(Message)
+            .filter((Message.member == member) & (Message.template == MessageTemplate.MEMBERSHIP_REMINDER.value))
+            .count(),
+        )
 
     def test_reminder_message_is_created_if_member_got_other_message(self) -> None:
         member = self.db.create_member()
@@ -99,10 +102,15 @@ class Test(ShopTestMixin, FlaskTestBase):
             member=member,
             created_at=self.datetime(days=-1),
         )
-        
+
         self.send_membership()
-        
-        self.assertEqual(1, db_session.query(Message).filter((Message.member == member) & (Message.template == MessageTemplate.MEMBERSHIP_REMINDER.value)).count())
+
+        self.assertEqual(
+            1,
+            db_session.query(Message)
+            .filter((Message.member == member) & (Message.template == MessageTemplate.MEMBERSHIP_REMINDER.value))
+            .count(),
+        )
 
     def test_reminder_message_is_created_if_member_another_member_got_recent_reminder(self) -> None:
         other_member = self.db.create_member()
@@ -111,12 +119,12 @@ class Test(ShopTestMixin, FlaskTestBase):
             member=other_member,
             created_at=self.datetime(days=-1),
         )
-        
+
         member = self.db.create_member()
         self.db.create_span(type=Span.MEMBERSHIP, enddate=self.date(MEMBERSHIP_REMINDER_DAYS_BEFORE))
-        
+
         self.send_membership()
-        
+
         self.assertEqual(1, db_session.query(Message).filter(Message.member == member).count())
 
     def test_reminder_message_is_not_created_if_member_has_pending_membership_days(self) -> None:
