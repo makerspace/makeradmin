@@ -49,6 +49,10 @@ class PriceType(str, Enum):
     RECURRING = "recurring"
 
 class EventType(str, Enum):
+    SOURCE = 'source'
+    CARD = 'card'
+    CHARGE = 'charge'
+    PAYMENT_INTENT = 'payment_intent'
     CUSTOMER = 'customer'
     INVOICE = 'invoice'
     CHECKOUT = 'checkout'
