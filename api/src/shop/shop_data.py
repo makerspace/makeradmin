@@ -70,17 +70,27 @@ def member_history(member_id):
 
 def receipt(member_id, transaction_id):
     try:
-        transaction = db_session.query(Transaction).filter_by(member_id=member_id, id=transaction_id).one()
+        transaction = (
+            db_session.query(Transaction)
+            .filter_by(member_id=member_id, id=transaction_id)
+            .options(joinedload("contents"), joinedload("contents.product"))
+            .one()
+        )
     except NoResultFound:
         raise NotFound()
 
     return {
         "member": member_entity.to_obj(transaction.member),
-        "transaction": transaction_entity.to_obj(transaction),
-        "cart": list(
-            (product_entity.to_obj(content.product), transaction_content_entity.to_obj(content))
-            for content in transaction.contents
-        ),
+        "transaction": {
+            **transaction_entity.to_obj(transaction),
+            "contents": [
+                {
+                    **transaction_content_entity.to_obj(content),
+                    "product": product_entity.to_obj(content.product),
+                }
+                for content in transaction.contents
+            ],
+        },
     }
 
 
