@@ -1,6 +1,8 @@
 /// <reference path="../node_modules/@types/stripe-v3/index.d.ts" />
+import { useEffect, useRef } from "preact/hooks";
 import * as common from "./common"
 import { ServerResponse } from "./common";
+import Cart from "./cart";
 
 declare var UIkit: any;
 
@@ -14,8 +16,6 @@ export function initializeStripe() {
     // Create a Stripe client.
     stripe = Stripe(window.stripeKey);
 }
-
-initializeStripe();
 
 export function mountStripe() {
     // Create an instance of Elements.
@@ -94,6 +94,7 @@ export type PaymentAction = {
 }
 
 export type BackendPaymentResponse = {
+    type: PaymentIntentResult
     transaction_id: string,
     action_info: PaymentAction,
 }
@@ -188,4 +189,138 @@ export type Product = {
     show: boolean,
     smallest_multiple: number,
     unit: string,
+}
+
+export type ProductCategory = {
+    id: number
+    name: string
+    items: Product[]
+}
+
+export type TransactionItem = {
+    product: Product
+    count: number
+    unit: string
+    amount: string
+}
+
+export type Transaction = {
+    id: number
+    created_at: string
+    status: "pending" | "completed" | "failed"
+    amount: string
+    contents: TransactionItem[]
+}
+
+export type ProductData = {
+    products: ProductCategory[]
+    id2item: Map<number, Product>
+}
+
+export async function LoadProductData(): Promise<ProductData> {
+    const products = (await common.ajax("GET", window.apiBasePath + "/webshop/product_data", null)).data as ProductCategory[];
+
+    const id2item = new Map<number, Product>();
+
+    for (const category of products) {
+        for (const item of category.items) {
+            id2item.set(item.id, item);
+        }
+    }
+    return { products, id2item };
+}
+
+export const StripeCardInput = ({ element }: { element: stripe.elements.Element }) => {
+    const mountPoint = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        element.mount(mountPoint.current!);
+    }, []);
+
+    return (
+        <div ref={mountPoint}></div>
+    )
+}
+
+export const createStripeCardInput = () => {
+    // Create an instance of Elements.
+    const elements = stripe.elements({ locale: "sv" });
+    // Custom styling can be passed to options when creating an Element.
+    const stripeStyle = {
+        base: {
+            color: '#32325d',
+            lineHeight: '18px',
+            fontFamily: '"Helvetica Neue", Helvetica, sans-serif',
+            fontSmoothing: 'antialiased',
+            fontSize: '16px',
+            '::placeholder': {
+                color: '#aab7c4'
+            }
+        },
+        invalid: {
+            color: '#fa755a',
+            iconColor: '#fa755a'
+        }
+    };
+
+    // Create an instance of the card Element.
+    return elements.create('card', { style: stripeStyle, hidePostalCode: true });
+}
+
+
+
+export class PaymentFailedError {
+    message: string;
+
+    constructor(message: string) {
+        this.message = message;
+    }
+}
+
+export enum PaymentIntentResult {
+    Success = "success",
+    RequiresAction = "requires_action",
+    Wait = "wait",
+    Failed = "failed",
+}
+
+export async function negotiatePayment<T extends { transaction_id: string | null }, R extends BackendPaymentResponse>(endpoint: string, data: T): Promise<R> {
+    while (true) {
+        let res: ServerResponse<R>;
+        try {
+            res = await common.ajax("POST", endpoint, data);
+        } catch (e: any) {
+            if (e["message"] !== undefined) {
+                throw new PaymentFailedError(e["message"]);
+            } else {
+                throw e;
+            }
+        }
+        data.transaction_id = res.data.transaction_id;
+
+        switch (res.data.type) {
+            case PaymentIntentResult.Success:
+                return res.data;
+            case PaymentIntentResult.RequiresAction:
+                if (res.data.action_info!.type === PaymentIntentNextActionType.USE_STRIPE_SDK) {
+                    const stripeResult = await stripe.confirmCardSetup(res.data.action_info!.client_secret);
+                    if (stripeResult.error) {
+                        throw new PaymentFailedError(stripeResult.error.message!);
+                    } else {
+                        // The card action has been handled
+                        // Now we try the server endpoint again in the next iteration of the loop
+                    }
+                } else {
+                    throw new Error("Unexpected action type");
+                }
+                break;
+            case PaymentIntentResult.Wait:
+                // Stripe needs some time to confirm the payment. Wait a bit and try again.
+                await new Promise(resolve => setTimeout(resolve, 500));
+                break;
+            case PaymentIntentResult.Failed:
+                // TODO: Error? Shouldn't this be a different status code?
+                throw new PaymentFailedError(res.data.error!)
+        }
+    }
 }
