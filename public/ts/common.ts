@@ -168,7 +168,7 @@ export function addSidebarListeners() {
 }
 
 export function removeToken() {
-	delete localStorage.token;
+	localStorage.removeItem("token");
 }
 
 
