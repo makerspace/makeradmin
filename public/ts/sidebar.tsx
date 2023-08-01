@@ -9,7 +9,7 @@ const NavItem = ({ url, icon, children }: { url: string, icon: string, children:
         path = path.substring(0, path.length - 1);
     }
 
-    return <li className={url === location.pathname ? "active" : ""}>
+    return <li className={url === path ? "active" : ""}>
         <a href={url}><span uk-icon={icon}></span> {children}</a>
     </li>
 }
