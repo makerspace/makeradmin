@@ -1,4 +1,6 @@
-export function search(items: any[], query: string) {
+import { Product } from "./payment_common";
+
+export function search(items: Product[], query: string) {
 	query = query.toLowerCase().trim();
 	if (query === "") {
 		return items;
@@ -8,6 +10,7 @@ export function search(items: any[], query: string) {
 	const scores = [];
 	for (const item of items) {
 		const nameKeys = item.name.toLowerCase().trim().split(" ");
+		const descKeys = item.description.toLowerCase().trim().split(" ");
 
 		let score = 0;
 		for (const queryKey of keys) {
@@ -18,6 +21,12 @@ export function search(items: any[], query: string) {
 				}
 				if (itemKey === queryKey) {
 					matches = Math.max(matches, 2);
+				}
+			}
+
+			for (const itemKey of descKeys) {
+				if (itemKey.includes(queryKey)) {
+					matches += 0.1;
 				}
 			}
 
