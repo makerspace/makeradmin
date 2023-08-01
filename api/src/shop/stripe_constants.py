@@ -4,6 +4,7 @@ import stripe
 from service.config import config
 
 stripe.api_key = config.get("STRIPE_PRIVATE_KEY", log_value=False)
+stripe.api_version = "2022-11-15"
 
 # All stripe calculations are done with cents (ören in Sweden)
 STRIPE_CURRENTY_BASE = 100
