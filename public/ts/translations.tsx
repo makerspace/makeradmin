@@ -224,7 +224,7 @@ const Eng = {
             ((onClick: (e: MouseEvent) => void) => (<>Join our <a target="_blank" href={SLACK_HELP} onClick={onClick}>Slack</a> to chat with other members.</>)),
             ((onClick: (e: MouseEvent) => void) => (<>Take our <a target="_blank" href={GET_STARTED_QUIZ} onClick={onClick}>Get Started Quiz</a> to learn about the space.</>)),
             ((onClick: (e: MouseEvent) => void) => (<>Check out our <a target="_blank" href={WIKI} onClick={onClick}>wiki</a>.</>)),
-            ((onClick: (e: MouseEvent) => void) => (<>Get inspired on out <a target="_blank" href={INSTAGRAM} onClick={onClick}>Instagram</a>.</>)),
+            ((onClick: (e: MouseEvent) => void) => (<>Get inspired on our <a target="_blank" href={INSTAGRAM} onClick={onClick}>Instagram</a>.</>)),
         ],
         continue_to_member_portal: "Continue to your member page",
     },
