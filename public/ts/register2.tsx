@@ -259,7 +259,7 @@ async function registerMember(paymentMethod: stripe.paymentMethod.PaymentMethod,
     };
 
     return {
-        loginToken: (await handleStripeSetupIntent<RegisterRequest, SetupIntentResponse & { token: string }>(window.apiBasePath + "/webshop/register2", data)).token!
+        loginToken: (await handleStripeSetupIntent<RegisterRequest, SetupIntentResponse & { token: string }>(window.apiBasePath + "/webshop/register", data)).token!
     };
 }
 

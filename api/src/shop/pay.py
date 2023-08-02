@@ -15,7 +15,6 @@ from membership.models import Member
 from shop.models import Transaction
 from shop.stripe_subscriptions import (
     SubscriptionType,
-    attach_and_set_default_payment_method,
     cancel_subscription,
     get_stripe_customer,
     start_subscription,
@@ -24,8 +23,7 @@ from service.db import db_session
 from core import auth
 from membership.views import member_entity
 from service.error import BadRequest, UnprocessableEntity
-from shop.api_schemas import validate_data, purchase_schema, register_schema
-from shop.shop_data import get_membership_products, special_product_data
+from shop.shop_data import special_product_data
 from shop.stripe_payment_intent import PartialPayment, PaymentAction, pay_with_stripe
 from shop.stripe_payment_intent import (
     PartialPayment,
@@ -103,65 +101,6 @@ class MemberInfo(DataClassJsonMixin):
             self.email.strip(),
         ):
             raise UnprocessableEntity(message="Email is not valid.")
-
-
-@dataclass
-class RegisterRequestOld(DataClassJsonMixin):
-    purchase: Purchase
-    setup_intent_id: Optional[str]
-    member: MemberInfo
-
-
-def register(data_dict: Any, remote_addr: str, user_agent: str):
-    try:
-        data = RegisterRequest.from_dict(data_dict)
-    except Exception as e:
-        raise BadRequest(message=f"Invalid data: {e}")
-
-    data.member.validate()
-    validate_cart(data.purchase)
-
-    products = get_membership_products()
-
-    purchase = data.purchase
-
-    cart = purchase.cart
-    if len(cart) != 1:
-        raise BadRequest(message="The purchase must contain exactly one item.")
-
-    item = cart[0]
-    if item.count != 1:
-        raise BadRequest(message="The purchase must contain exactly one item.")
-
-    product_id = item.id
-    if product_id not in (p.id for p in products):
-        raise BadRequest(message=f"Not allowed to purchase the product with id {product_id} when registring.")
-
-    # This will raise if the creation fails, if it succeeds it will commit the member.
-    member_id = member_entity.create(
-        {
-            "firstname": data.member.firstName,
-            "lastname": data.member.lastName,
-            "email": data.member.email,
-            "phone": data.member.phone,
-            "address_zipcode": data.member.zipCode,
-            "price_level": PriceLevel.Normal.value,
-            "price_level_motivation": None,
-        }
-    )["member_id"]
-
-    # This will raise if the payment fails.
-    transaction, action_info = make_purchase(member_id=member_id, purchase=purchase, activates_member=True)
-
-    # If the pay succeeded (not same as the payment is completed) and the member does not already exists,
-    # the user will be logged in.
-    token = auth.force_login(remote_addr, user_agent, member_id)["access_token"]
-
-    return {
-        "transaction_id": transaction.id,
-        "token": token,
-        "action_info": action_info,
-    }
 
 
 @dataclass
@@ -386,7 +325,7 @@ def start_subscriptions(data_dict: Any, user_id: int) -> StartSubscriptionsRespo
     )
 
 
-def register2(data_dict: Any, remote_addr: str, user_agent: str) -> RegisterResponse:
+def register(data_dict: Any, remote_addr: str, user_agent: str) -> RegisterResponse:
     try:
         data = RegisterRequest.from_dict(data_dict)
     except Exception as e:

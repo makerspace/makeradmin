@@ -32,7 +32,7 @@ from shop.entities import (
     product_action_entity,
 )
 from shop.models import TransactionContent, ProductImage
-from shop.pay import RegisterResponse, cancel_subscriptions, pay, register, register2, start_subscriptions
+from shop.pay import RegisterResponse, cancel_subscriptions, pay, register, register, start_subscriptions
 from shop.stripe_payment_intent import PartialPayment, confirm_stripe_payment_intent
 from shop.shop_data import (
     pending_actions,
@@ -273,15 +273,9 @@ def stripe_payment_method_route():
 
 
 @service.route("/register", method=POST, permission=PUBLIC, commit_on_error=True)
-def register_route():
+def register_route() -> Any:
     assert request.remote_addr is not None
-    return register(request.json, request.remote_addr, request.user_agent.string)
-
-
-@service.route("/register2", method=POST, permission=PUBLIC, commit_on_error=True)
-def register2_route() -> Any:
-    assert request.remote_addr is not None
-    return register2(request.json, request.remote_addr, request.user_agent.string).to_dict()
+    return register(request.json, request.remote_addr, request.user_agent.string).to_dict()
 
 
 @service.route("/stripe_callback", method=POST, permission=PUBLIC, commit_on_error=True)
