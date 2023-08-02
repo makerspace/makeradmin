@@ -157,6 +157,4 @@ class Test(ApiShopTestMixin, ApiTest):
             discount=None,
         )
 
-        self.post(f"/webshop/register", register.to_dict(), headers={}).expect(
-            data__token=None, code=400, what=NON_MATCHING_SUMS
-        )
+        self.post(f"/webshop/register", register.to_dict(), headers={}).expect(code=200, data={"type": "failed"})
