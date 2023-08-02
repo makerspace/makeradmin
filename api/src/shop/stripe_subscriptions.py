@@ -68,25 +68,30 @@ def setup_subscription_makeradmin_product(
 ) -> Product:
     name = f"{subscription_type.value.title()} Subscription"
 
-    category = (
-        db_session.query(ProductCategory)
-        .filter(ProductCategory.name == "Subscriptions")
-        .one_or_none()
-    )
-    if category is None:
-        category = ProductCategory(
-            name="Subscriptions",
-            display_order=(
-                db_session.query(func.max(ProductCategory.display_order)).scalar() or 0
-            )
-            + 1,
-        )
-        db_session.add(category)
-        db_session.flush()
+    offset = 0
+    while True:
+        with db_session.begin_nested():
+            try:
+                offset += 1
+                category = db_session.query(ProductCategory).filter(ProductCategory.name == "Subscriptions").one_or_none()
+                if category is None:
+                    category = ProductCategory(
+                        name="Subscriptions",
+                        display_order=(db_session.query(func.max(ProductCategory.display_order)).scalar() or 0) + offset,
+                    )
+                    db_session.add(category)
+                    db_session.flush()
 
-    product: Optional[Product] = (
-        db_session.query(Product).filter(Product.name == name).one_or_none()
-    )
+                break
+            except Exception as e:
+                # I think, if this setup happens inside a transaction, we may not be able to see another category with the same display order,
+                # but we will still be prevented from creating a new one with that display order.
+                # So we incrementally increase the display order until we find a free one.
+                # This race condition will basically only happen when executing tests in parallel.
+                # TODO: Can this be done in a better way?
+                print("Race condition when creating category. Trying again: ", e)
+
+    product: Optional[Product] = db_session.query(Product).filter(Product.name == name).one_or_none()
     new = False
     if product is None:
         new = True
