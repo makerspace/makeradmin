@@ -48,6 +48,7 @@ export function mountStripe() {
     payButton = document.getElementById("pay-button") as HTMLInputElement;
     spinner = document.querySelector(".progress-spinner");
     errorElement = document.getElementById('card-errors');
+    return card;
 }
 
 interface InitializePaymentFunction {
@@ -67,12 +68,12 @@ export interface PaymentFlowDefinition {
 
 let waitingForPaymentResponse = false;
 
-function enable_pay_button() {
+export function enable_pay_button() {
     spinner.classList.remove("progress-spinner-visible");
     waitingForPaymentResponse = false;
     payButton.disabled = false;
 };
-function disable_pay_button() {
+export function disable_pay_button() {
     payButton.disabled = true;
     waitingForPaymentResponse = true;
     spinner.classList.add("progress-spinner-visible");

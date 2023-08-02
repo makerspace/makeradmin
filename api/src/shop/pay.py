@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from decimal import Decimal
 from enum import Enum
+import re
 from logging import getLogger
 from typing import Any, List, Literal, Optional, Tuple, Union
 from dataclasses_json import DataClassJsonMixin, dataclass_json
@@ -22,7 +23,7 @@ from shop.stripe_subscriptions import (
 from service.db import db_session
 from core import auth
 from membership.views import member_entity
-from service.error import BadRequest
+from service.error import BadRequest, UnprocessableEntity
 from shop.api_schemas import validate_data, purchase_schema, register_schema
 from shop.shop_data import get_membership_products, special_product_data
 from shop.stripe_payment_intent import PartialPayment, PaymentAction, pay_with_stripe
@@ -76,46 +77,6 @@ def pay(data: Any, member_id: int) -> PartialPayment:
         )
 
 
-def register(data: Any, remote_addr: str, user_agent: str):
-    validate_data(register_schema, data or {})
-
-    products = get_membership_products()
-
-    purchase = data["purchase"]
-
-    cart = purchase["cart"]
-    if len(cart) != 1:
-        raise BadRequest(message="The purchase must contain exactly one item.")
-
-    item = cart[0]
-    if item["count"] != 1:
-        raise BadRequest(message="The purchase must contain exactly one item.")
-
-    product_id = item["id"]
-    if product_id not in (p.id for p in products):
-        raise BadRequest(
-            message=f"Not allowed to purchase the product with id {product_id} when registring."
-        )
-
-    # This will raise if the creation fails, if it succeeds it will commit the member.
-    member_id = member_entity.create(data.get("member", {}))["member_id"]
-
-    # This will raise if the payment fails.
-    transaction, action_info = make_purchase(
-        member_id=member_id, purchase=purchase, activates_member=True
-    )
-
-    # If the pay succeeded (not same as the payment is completed) and the member does not already exists,
-    # the user will be logged in.
-    token = auth.force_login(remote_addr, user_agent, member_id)["access_token"]
-
-    return {
-        "transaction_id": transaction.id,
-        "token": token,
-        "action_info": action_info,
-    }
-
-
 @dataclass
 class MemberInfo(DataClassJsonMixin):
     firstName: str
@@ -129,12 +90,78 @@ class MemberInfo(DataClassJsonMixin):
             raise BadRequest(message="Firstname is required.")
         if not self.lastName.strip():
             raise BadRequest(message="Lastname is required.")
-        if not self.email.strip() or "@" not in self.email:
+        if not self.email.strip():
             raise BadRequest(message="Email is required.")
         if not self.phone.strip():
             raise BadRequest(message="Phone is required.")
         if not self.zipCode.strip():
             raise BadRequest(message="Zip code is required.")
+
+        if not re.match(
+            "^[a-zA-Z0-9.!#$%&'*+\\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}"
+            "[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$",
+            self.email.strip(),
+        ):
+            raise UnprocessableEntity(message="Email is not valid.")
+
+
+@dataclass
+class RegisterRequestOld(DataClassJsonMixin):
+    purchase: Purchase
+    setup_intent_id: Optional[str]
+    member: MemberInfo
+
+
+def register(data_dict: Any, remote_addr: str, user_agent: str):
+    try:
+        data = RegisterRequest.from_dict(data_dict)
+    except Exception as e:
+        raise BadRequest(message=f"Invalid data: {e}")
+
+    data.member.validate()
+    validate_cart(data.purchase)
+
+    products = get_membership_products()
+
+    purchase = data.purchase
+
+    cart = purchase.cart
+    if len(cart) != 1:
+        raise BadRequest(message="The purchase must contain exactly one item.")
+
+    item = cart[0]
+    if item.count != 1:
+        raise BadRequest(message="The purchase must contain exactly one item.")
+
+    product_id = item.id
+    if product_id not in (p.id for p in products):
+        raise BadRequest(message=f"Not allowed to purchase the product with id {product_id} when registring.")
+
+    # This will raise if the creation fails, if it succeeds it will commit the member.
+    member_id = member_entity.create(
+        {
+            "firstname": data.member.firstName,
+            "lastname": data.member.lastName,
+            "email": data.member.email,
+            "phone": data.member.phone,
+            "address_zipcode": data.member.zipCode,
+            "price_level": PriceLevel.Normal.value,
+            "price_level_motivation": None,
+        }
+    )["member_id"]
+
+    # This will raise if the payment fails.
+    transaction, action_info = make_purchase(member_id=member_id, purchase=purchase, activates_member=True)
+
+    # If the pay succeeded (not same as the payment is completed) and the member does not already exists,
+    # the user will be logged in.
+    token = auth.force_login(remote_addr, user_agent, member_id)["access_token"]
+
+    return {
+        "transaction_id": transaction.id,
+        "token": token,
+        "action_info": action_info,
+    }
 
 
 @dataclass
@@ -192,6 +219,7 @@ class RegisterResponse(DataClassJsonMixin):
     type: SetupIntentResult
     token: Optional[str]
     action_info: Optional[PaymentAction]
+    member_id: Optional[int]
     error: Optional[str] = None
 
 
@@ -226,13 +254,9 @@ def validate_cart(purchase: Purchase) -> None:
         product_id = item.id
         # Make sure it is a special product, but not a subscription product
         if product_id not in (
-            p.id
-            for p in products
-            if MakerspaceMetadataKeys.SUBSCRIPTION_TYPE not in p.product_metadata
+            p.id for p in products if MakerspaceMetadataKeys.SUBSCRIPTION_TYPE not in p.product_metadata
         ):
-            raise BadRequest(
-                message=f"Not allowed to purchase the product with id {product_id} when registring."
-            )
+            raise BadRequest(message=f"Not allowed to purchase the product with id {product_id} when registring.")
 
 
 def handle_setup_intent(setup_intent: stripe.SetupIntent) -> None:
@@ -266,9 +290,7 @@ def handle_setup_intent(setup_intent: stripe.SetupIntent) -> None:
                 error=None,
             )
         elif status == SetupIntentStatus.Processing:
-            raise SetupIntentFailed(
-                type=SetupIntentResult.Wait, action_info=None, error=None
-            )
+            raise SetupIntentFailed(type=SetupIntentResult.Wait, action_info=None, error=None)
         elif status == SetupIntentStatus.Succeeded:
             # Yay!
 
@@ -276,9 +298,7 @@ def handle_setup_intent(setup_intent: stripe.SetupIntent) -> None:
             # The customer must have a default payment method so that invoices for a subscription can be charged.
             stripe.Customer.modify(
                 setup_intent["customer"],
-                invoice_settings={
-                    "default_payment_method": setup_intent["payment_method"]
-                },
+                invoice_settings={"default_payment_method": setup_intent["payment_method"]},
             )
 
             # TODO: Should we delete all previous payment methods to keep things clean?
@@ -298,10 +318,7 @@ def cancel_subscriptions(data_dict: Any, user_id: int) -> None:
     member = db_session.query(Member).get(user_id)
     assert member is not None
 
-    if (
-        SubscriptionType.MEMBERSHIP in data.subscriptions
-        and SubscriptionType.LAB not in data.subscriptions
-    ):
+    if SubscriptionType.MEMBERSHIP in data.subscriptions and SubscriptionType.LAB not in data.subscriptions:
         # This should be handled automatically by the frontend with a nice popup, but we will enforce it here
         data.subscriptions.append(SubscriptionType.LAB)
 
@@ -338,9 +355,7 @@ def start_subscriptions(data_dict: Any, user_id: int) -> StartSubscriptionsRespo
     else:
         setup_intent = stripe.SetupIntent.retrieve(data.setup_intent_id)
         if stripe_customer.stripe_id != setup_intent["customer"]:
-            raise BadRequest(
-                message="The payment intent is not for the currently logged in member."
-            )
+            raise BadRequest(message="The payment intent is not for the currently logged in member.")
 
     try:
         handle_setup_intent(setup_intent)
@@ -380,15 +395,11 @@ def register2(data_dict: Any, remote_addr: str, user_agent: str) -> RegisterResp
     data.member.validate()
     validate_cart(data.purchase)
 
-    if len(set([s.subscription for s in data.subscriptions])) != len(
-        data.subscriptions
-    ):
+    if len(set([s.subscription for s in data.subscriptions])) != len(data.subscriptions):
         raise BadRequest(message="Duplicate subscriptions.")
 
     try:
-        payment_method = stripe.PaymentMethod.retrieve(
-            data.purchase.stripe_payment_method_id
-        )
+        payment_method = stripe.PaymentMethod.retrieve(data.purchase.stripe_payment_method_id)
     except:
         raise BadRequest(message="The payment method is not valid.")
 
@@ -430,13 +441,9 @@ def register2(data_dict: Any, remote_addr: str, user_agent: str) -> RegisterResp
                     "phone": data.member.phone,
                     "address_zipcode": data.member.zipCode,
                     "price_level": (
-                        data.discount.price_level
-                        if data.discount is not None
-                        else PriceLevel.Normal
+                        data.discount.price_level if data.discount is not None else PriceLevel.Normal
                     ).value,
-                    "price_level_motivation": data.discount.message
-                    if data.discount is not None
-                    else None,
+                    "price_level_motivation": data.discount.message if data.discount is not None else None,
                 },
                 commit=False,
             )["member_id"]
@@ -507,6 +514,7 @@ def register2(data_dict: Any, remote_addr: str, user_agent: str) -> RegisterResp
                 setup_intent_id=setup_intent.stripe_id,
                 token=token,
                 action_info=None,
+                member_id=member_id,
             )
     except SetupIntentFailed as e:
         return RegisterResponse(
@@ -515,4 +523,5 @@ def register2(data_dict: Any, remote_addr: str, user_agent: str) -> RegisterResp
             token=None,
             action_info=e.action_info,
             error=e.error,
+            member_id=None,
         )
