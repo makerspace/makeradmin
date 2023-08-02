@@ -1,6 +1,6 @@
 from datetime import datetime
 from random import randint, choice, seed
-from typing import Dict
+from typing import Any, Dict
 from faker import Faker
 from membership.enums import PriceLevel
 
@@ -31,7 +31,7 @@ class ObjFactory:
         self.phone_request = None
         seed()
 
-    def create_member(self, **kwargs) -> Member:
+    def create_member(self, **kwargs) -> Dict[str, Any]:
         firstname = self.fake.first_name()
         lastname = self.fake.last_name()
         obj = dict(
