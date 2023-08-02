@@ -3,7 +3,7 @@ import { Component, ComponentChildren, createContext, render } from 'preact';
 import { StateUpdater, useContext, useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { ServerResponse } from "./common";
 import { Translation, TranslationKeyValues } from "./translate";
-import { AssertIsWellKnownProductId, Discount, FindWellKnownProduct, PaymentAction, PaymentFailedError, PaymentIntentNextActionType, PriceLevel, Product, Purchase, RegisterPageData, RelevantProducts, SetupIntentResponse, StripeCardInput, ToPayPreview, calculateAmountToPay, createPaymentMethod, createStripeCardInput, display_stripe_error, extractRelevantProducts, handleStripeSetupIntent, stripe } from "./payment_common";
+import { AssertIsWellKnownProductId, Discount, FindWellKnownProduct, PaymentAction, PaymentFailedError, PaymentIntentNextActionType, PriceLevel, Product, Purchase, RegisterPageData, RelevantProducts, SetupIntentResponse, StripeCardInput, ToPayPreview, calculateAmountToPay, createPaymentMethod, createStripeCardInput, display_stripe_error, extractRelevantProducts, handleStripeSetupIntent, initializeStripe, stripe } from "./payment_common";
 import { PopupModal, PopupWidget, useCalendlyEventListener } from "react-calendly";
 import { CALENDAR, FACEBOOK_GROUP, GET_STARTED_QUIZ, INSTAGRAM, RELATIVE_MEMBER_PORTAL, SLACK_HELP, WIKI } from "./urls";
 import { LoadCurrentMemberInfo, member_t } from "./member_common";
@@ -589,6 +589,7 @@ const RegisterPage = ({ }: {}) => {
 
 common.documentLoaded().then(() => {
     const root = document.getElementById('root');
+    initializeStripe();
     if (root != null) {
         render(
             <TranslationWrapper>
