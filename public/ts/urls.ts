@@ -5,3 +5,4 @@ export const GET_STARTED_QUIZ = "https://medlem.makerspace.se/member/quiz/1"
 export const INSTAGRAM = "https://www.instagram.com/stockholmmakerspace/"
 export const RELATIVE_MEMBER_PORTAL = "/member";
 export const CALENDAR = "https://www.makerspace.se/kalendarium"
+export const MEMBERBOOTH_URL = "https://wiki.makerspace.se/Memberbooth"
