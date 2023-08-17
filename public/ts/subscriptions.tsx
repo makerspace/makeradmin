@@ -48,6 +48,10 @@ const PayDialog = ({ stripe, products, productData, discount, currentMemberships
                 {products.filter(p => p.smallest_multiple > 1).map(p => {
                     const sub_type = p.product_metadata.subscription_type;
                     if (sub_type === undefined) return null;
+
+                    // If the member already has membership, information about the binding period is redundant, or even misleading
+                    if (currentMemberships.includes(sub_type)) return null;
+
                     if (p.unit !== "mån" && p.unit !== "år" && p.unit !== "st") throw new Error(`Unexpected unit '${p.unit}' for ${p.name}. Expected one of år/mån/st`);
 
                     return <p class="small-print">{t(`summaries.${sub_type}_subscription.summary`)} {t('member_page.subscriptions.binding_period')(p.smallest_multiple + " " + t(`unit.${p.unit}.many`))}</p>;
