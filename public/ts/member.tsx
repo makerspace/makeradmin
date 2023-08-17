@@ -11,7 +11,7 @@ import { TranslationKey, useTranslation } from "./translations";
 import { Sidebar } from "./sidebar";
 import { FindWellKnownProduct, LoadProductData, Product, ProductData, RelevantProducts, extractRelevantProducts, initializeStripe } from "./payment_common";
 import Cart, { useCart } from "./cart";
-import { MEMBERBOOTH_URL } from "./urls";
+import { URL_MEMBERBOOTH } from "./urls";
 declare var UIkit: any;
 
 
@@ -299,7 +299,7 @@ function MembershipView({ member, membership, pendingLabaccessDays }: { member: 
 
 
 function PersonalData({ member, onChangePinCode, onChangePhoneNumber }: { member: member_t, onChangePinCode: () => void, onChangePhoneNumber: () => void }) {
-    const pin_warning = member.pin_code == null ? <label class="uk-form-label" style="color: red;">Du har inte satt någon PIN-kod ännu. Använd BYT-knappen för att sätta den. PIN-koden används för <a href={MEMBERBOOTH_URL}>memberbooth</a>.</label> : null;
+    const pin_warning = member.pin_code == null ? <label class="uk-form-label" style="color: red;">Du har inte satt någon PIN-kod ännu. Använd BYT-knappen för att sätta den. PIN-koden används för <a href={URL_MEMBERBOOTH}>memberbooth</a>.</label> : null;
     const [showPinCode, setShowPinCode] = useState(false);
     return (
         <fieldset>

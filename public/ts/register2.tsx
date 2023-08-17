@@ -4,7 +4,7 @@ import { StateUpdater, useEffect, useMemo, useState } from 'preact/hooks';
 import { ServerResponse } from "./common";
 import { BackendPaymentResponse, Discount, PaymentFailedError, PriceLevel, Product, ProductData, ProductDataFromProducts, RegisterPageData, RelevantProducts, SetupIntentResponse, SetupPaymentMethodRequest, StripeCardInput, ToPayPreview, calculateAmountToPay, createPaymentMethod, createStripeCardInput, extractRelevantProducts, handleStripeSetupIntent, initializeStripe, negotiatePayment, pay } from "./payment_common";
 import { PopupModal, PopupWidget, useCalendlyEventListener } from "react-calendly";
-import { RELATIVE_MEMBER_PORTAL } from "./urls";
+import { URL_RELATIVE_MEMBER_PORTAL } from "./urls";
 import { LoadCurrentMemberInfo, member_t } from "./member_common";
 import { StartSubscriptionsRequest, SubscriptionStart } from "./subscriptions";
 import { PaymentRequest } from "./payment_common";
@@ -295,7 +295,7 @@ const Success = ({ member }: { member: member_t }) => {
             {t("registration_page.success.steps").map((step, i) => <li key={i}><CheckIcon done={clickedSteps.has(i)} /><span>{step((e) => setClickedSteps(new Set(clickedSteps).add(i)))}</span></li>)}
         </ul>
         <div class="uk-flex-1" />
-        <a href={RELATIVE_MEMBER_PORTAL} className="flow-button primary" >{t("registration_page.success.continue_to_member_portal")}</a>
+        <a href={URL_RELATIVE_MEMBER_PORTAL} className="flow-button primary" >{t("registration_page.success.continue_to_member_portal")}</a>
         <PopupModal
             url="https://calendly.com/medlemsintroduktion/medlemsintroduktion"
             rootElement={document.getElementById("root")!}

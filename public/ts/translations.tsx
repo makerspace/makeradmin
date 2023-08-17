@@ -1,7 +1,7 @@
 import { Translation, TranslationKeyValues } from "./translate";
 import { createContext } from 'preact';
 import { useContext, useState } from 'preact/hooks';
-import { CALENDAR, FACEBOOK_GROUP, GET_STARTED_QUIZ, INSTAGRAM, SLACK_HELP, WIKI } from "./urls";
+import { URL_CALENDAR, URL_FACEBOOK_GROUP, URL_GET_STARTED_QUIZ, URL_INSTAGRAM, URL_SLACK_HELP, URL_WIKI } from "./urls";
 import { formatDate, formatDateTime } from "./common";
 
 export type Dictionary = Translation<typeof Eng>;
@@ -174,7 +174,7 @@ const Eng = {
             title: "Calendar",
             text: (<>Book a Member Introduction, during which you'll get a tour of the space (if you haven't already) and gain permission to use the makerspace.
                 Your makerspace access will not be activated until you have visited a Member Introduction.
-                In some situations, there may be no available time slots. Please let us know on <a href={FACEBOOK_GROUP}>Facebook</a> or <a href={SLACK_HELP}>Slack</a> if you cannot book a slot.
+                In some situations, there may be no available time slots. Please let us know on <a href={URL_FACEBOOK_GROUP}>Facebook</a> or <a href={URL_SLACK_HELP}>Slack</a> if you cannot book a slot.
             </>),
             book_button: "Book a member introduction"
         },
@@ -182,7 +182,7 @@ const Eng = {
             title: "Payment",
             text: <>
                 <p>Almost done, we just need to take care of the payment.</p>
-                <p>Before you gain access to the makerspace you need to attend a member introduction. These are held <a target="_blank" href={CALENDAR}>regularly every 1-2 weeks</a>.</p>
+                <p>Before you gain access to the makerspace you need to attend a member introduction. These are held <a target="_blank" href={URL_CALENDAR}>regularly every 1-2 weeks</a>.</p>
             </>,
             pay: "Pay with Stripe",
             payment_processor: "Payment handled by Stripe",
@@ -198,10 +198,10 @@ const Eng = {
             steps: [
                 // ((onClick: (e: MouseEvent)=>void) => (<>Book a Member Introduction, during which you'll get a tour of the space (if you haven't already) and gain permission to use the makerspace. Your makerspace access will not be activated until you have visited a Member Introduction.
                 // You can find them in the calendar: https://calendly.com/medlemsintroduktion/medlemsintroduktion ("Medlemsintroduktion" in Swedish)</>)),
-                ((onClick: (e: MouseEvent) => void) => (<>Join our <a target="_blank" href={SLACK_HELP} onClick={onClick}>Slack</a> to chat with other members.</>)),
-                ((onClick: (e: MouseEvent) => void) => (<>Take our <a target="_blank" href={GET_STARTED_QUIZ} onClick={onClick}>Get Started Quiz</a> to learn about the space.</>)),
-                ((onClick: (e: MouseEvent) => void) => (<>Check out our <a target="_blank" href={WIKI} onClick={onClick}>wiki</a>.</>)),
-                ((onClick: (e: MouseEvent) => void) => (<>Get inspired on our <a target="_blank" href={INSTAGRAM} onClick={onClick}>Instagram</a>.</>)),
+                ((onClick: (e: MouseEvent) => void) => (<>Join our <a target="_blank" href={URL_SLACK_HELP} onClick={onClick}>Slack</a> to chat with other members.</>)),
+                ((onClick: (e: MouseEvent) => void) => (<>Take our <a target="_blank" href={URL_GET_STARTED_QUIZ} onClick={onClick}>Get Started Quiz</a> to learn about the space.</>)),
+                ((onClick: (e: MouseEvent) => void) => (<>Check out our <a target="_blank" href={URL_WIKI} onClick={onClick}>wiki</a>.</>)),
+                ((onClick: (e: MouseEvent) => void) => (<>Get inspired on our <a target="_blank" href={URL_INSTAGRAM} onClick={onClick}>Instagram</a>.</>)),
             ],
             continue_to_member_portal: "Continue to your member page",
         },
