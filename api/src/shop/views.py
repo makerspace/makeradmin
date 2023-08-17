@@ -197,23 +197,6 @@ def list_subscriptions_route() -> Any:
     return list_subscriptions(g.user_id)
 
 
-@dataclass
-class ReloadPage:
-    def __init__(self) -> None:
-        self.reload = True
-
-
-@service.route("/member/current/subscription", method=DELETE, permission=USER)
-def cancel_subscription_route(subscription_type=Arg(str, required=True), success_url=Arg(str, required=False)):
-    try:
-        cancel_subscription(member_id=g.user_id, subscription_type=subscription_type)
-        return ReloadPage()
-    except Exception as e:
-        # Don't expose error details to the user
-        logger.error(e)
-        raise InternalServerError("Failed to cancel subscription")
-
-
 @service.route("/member/current/stripe_customer_portal", method=GET, permission=PUBLIC)
 def open_stripe_customer_portal_route() -> str:
     return open_stripe_customer_portal(g.user_id, test_clock=None)

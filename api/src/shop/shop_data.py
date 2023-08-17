@@ -97,36 +97,6 @@ def receipt(member_id, transaction_id):
     }
 
 
-def special_product_data() -> List[Product]:
-    # Make sure subscription products have been created
-    get_subscription_products()
-
-    query = (
-        db_session.query(Product)
-        .filter(Product.deleted_at.is_(None))
-        .filter(Product.product_metadata[MakerspaceMetadataKeys.SPECIAL_PRODUCT_ID.value] != "")
-    )
-
-    products: List[Product] = query.all()
-
-    duplicates = [
-        item
-        for item, count in collections.Counter(
-            [
-                p.product_metadata[MakerspaceMetadataKeys.SPECIAL_PRODUCT_ID.value]
-                for p in products
-                if p.product_metadata[MakerspaceMetadataKeys.SPECIAL_PRODUCT_ID.value]
-                != "special_test_product_please_ignore"
-            ]
-        ).items()
-        if count > 1
-    ]
-    if len(duplicates) > 0:
-        raise Exception("Multiple products have the same special product id. Duplicates: " + str(duplicates))
-
-    return products
-
-
 def all_product_data():
     """Return all public products and categories."""
 

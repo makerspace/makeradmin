@@ -1,12 +1,10 @@
-from datetime import date, timedelta, datetime, timezone, time as dt_time
+from datetime import date, datetime, timezone, time as dt_time
 import logging
 import time
 import random
-import copy
 import math
 from dateutil.relativedelta import relativedelta
-from typing import Any, Dict, List, Literal, Optional, Set, Tuple, cast
-from unittest.mock import Mock, patch
+from typing import Any, Dict, List, Optional, Set, Tuple, cast
 
 import pytest
 from shop.stripe_util import event_semantic_time
@@ -15,13 +13,12 @@ from shop.stripe_subscriptions import (
     BINDING_PERIOD,
     SubscriptionType,
     attach_and_set_default_payment_method,
-    get_stripe_customer,
 )
 from shop import stripe_subscriptions
 from membership.membership import get_membership_summary
 from test_aid.test_util import random_str
 from membership.member_auth import hash_password
-from test_aid.obj import ObjFactory, DEFAULT_PASSWORD
+from test_aid.obj import DEFAULT_PASSWORD
 import core
 import messages
 import shop

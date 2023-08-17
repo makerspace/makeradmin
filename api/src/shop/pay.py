@@ -22,7 +22,6 @@ from service.db import db_session
 from core import auth
 from membership.views import member_entity
 from service.error import BadRequest, UnprocessableEntity
-from shop.shop_data import special_product_data
 from shop.stripe_payment_intent import PartialPayment, PaymentAction, pay_with_stripe
 from shop.stripe_payment_intent import (
     PartialPayment,
@@ -62,8 +61,6 @@ def pay(data: Any, member_id: int) -> PartialPayment:
     if member_id <= 0:
         raise BadRequest("You must be a member to purchase materials and tools.")
 
-    member = db_session.query(Member).get(member_id)
-    assert member is not None
     if purchase.transaction_id is not None:
         # This is a retry of an in-progress payment.
         return confirm_stripe_payment_intent(purchase.transaction_id)
@@ -141,26 +138,6 @@ class RegisterRequest(DataClassJsonMixin):
 class RegisterResponse(DataClassJsonMixin):
     token: str
     member_id: int
-
-
-def validate_cart(purchase: Purchase) -> None:
-    products = special_product_data()
-
-    cart = purchase.cart
-    if len(cart) > 1:
-        raise BadRequest(message="The purchase must contain at most one item.")
-
-    if len(cart) > 0:
-        item = cart[0]
-        if item.count != 1:
-            raise BadRequest(message="The purchase must contain exactly one item.")
-
-        product_id = item.id
-        # Make sure it is a special product, but not a subscription product
-        if product_id not in (
-            p.id for p in products if MakerspaceMetadataKeys.SUBSCRIPTION_TYPE not in p.product_metadata
-        ):
-            raise BadRequest(message=f"Not allowed to purchase the product with id {product_id} when registring.")
 
 
 @dataclass
@@ -323,10 +300,6 @@ def register(data_dict: Any, remote_addr: str, user_agent: str) -> RegisterRespo
     cleanup_pending_members(data.member.email)
 
     # This will raise if the creation fails, if it succeeds it will add the member.
-    # However, since we are in a transaction, the member will not be fully added until the transaction is committed.
-    # What happens now is that we speculatively create the member, and if the payment fails, or requires more
-    # verification steps, we just rollback the transaction.
-    # This ensures that the member can be created before the payment is completed.
     member_id: int = member_entity.create(
         {
             "firstname": data.member.firstName,

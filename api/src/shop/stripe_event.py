@@ -7,7 +7,6 @@ from typing import Any, Dict, List, Optional
 import stripe
 from stripe.error import SignatureVerificationError, RateLimitError
 from datetime import timezone
-from membership.enums import PriceLevel
 from shop import stripe_subscriptions
 import shop.transactions
 from shop.stripe_util import event_semantic_time
@@ -33,10 +32,8 @@ from shop.transactions import (
     commit_fail_transaction,
     PaymentFailed,
 )
-from membership.membership import add_membership_days
 from service.db import db_session
 from membership.models import Member
-from membership.models import Span
 from shop.stripe_subscriptions import get_subscription_product, SubscriptionType
 from datetime import datetime
 
@@ -371,32 +368,7 @@ def stripe_subscription_schedule_event(event_subtype: EventSubtype, event: strip
 
 
 def stripe_checkout_event(event_subtype: EventSubtype, event: stripe.Event) -> None:
-    if event_subtype == EventSubtype.SESSION_COMPLETED:
-        # This event is triggered when we go thru the setup intent flow.
-        # This typically happens as part of the subscription flow in MakerAdmin but
-        # could happen at other times. For now, we capture this event and set
-        # the default invoice payment method to the payment method in the setup
-        # intent. We might want to consider updating the default source instead.
-        checkout_session = event["data"]["object"]
-
-        # Only setup intents are of our concern. If a checkout from the webshop
-        # triggers the event, we should see other modes than setup.
-        if checkout_session["mode"] == "setup":
-            setup_intent = stripe.SetupIntent.retrieve(checkout_session["setup_intent"])
-            if setup_intent == None:
-                print("No setup intent found!")
-                return
-            payment_method = setup_intent["payment_method"]
-            customer = setup_intent["customer"]
-            print(f"Updating default invoice payment method to {payment_method} for customer {customer}")
-            stripe.Customer.modify(
-                customer,
-                invoice_settings={
-                    "default_payment_method": payment_method,
-                },
-            )
-    else:
-        logger.warning(f"Unknown subtype {event_subtype}")
+    pass
 
 
 def stripe_event(event: stripe.Event, current_time: datetime) -> None:
