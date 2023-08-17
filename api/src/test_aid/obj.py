@@ -49,6 +49,7 @@ class ObjFactory:
                          f'{firstname}.{lastname}+{random_str(6)}@bmail.com'.lower().replace(' ', '_')),
             price_level=PriceLevel.Normal.value,
             price_level_motivation=None,
+            pending_activation=False,
         )
         obj.update(kwargs)
         self.member = obj

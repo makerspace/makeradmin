@@ -2,6 +2,7 @@ from random import randint
 from time import time
 
 import stripe
+from shop.stripe_payment_intent import PaymentIntentResult
 from shop.stripe_constants import MakerspaceMetadataKeys
 from shop.stripe_subscriptions import SubscriptionType
 from shop.transactions import CartItem, Purchase
@@ -27,16 +28,11 @@ class Test(ApiShopTestMixin, ApiTest):
         )
     ]
 
-    def test_registring_new_member_works_and_returns_token(self) -> None:
+    def test_registering_new_member_works_and_returns_token(self) -> None:
         payment_method = stripe.PaymentMethod.create(type="card", card=self.card(VALID_NON_3DS_CARD_NO))
 
         member = self.obj.create_member()
         register: RegisterRequest = RegisterRequest(
-            purchase=Purchase(
-                cart=[CartItem(self.p0_id, 1)],
-                expected_sum="300",
-                stripe_payment_method_id=payment_method.id,
-            ),
             member=MemberInfo(
                 firstName=member["firstname"],
                 lastName=member["lastname"],
@@ -44,8 +40,6 @@ class Test(ApiShopTestMixin, ApiTest):
                 phone=member["phone"],
                 zipCode=member["address_zipcode"],
             ),
-            setup_intent_id=None,
-            subscriptions=[],
             discount=None,
         )
 
@@ -70,7 +64,17 @@ class Test(ApiShopTestMixin, ApiTest):
             )
             .data
         )
-        self.assertIsNone(before_activation["deleted_at"])
+
+        self.assertIsNotNone(before_activation["deleted_at"])
+
+        purchase = Purchase(
+            cart=[CartItem(self.p0_id, 1)],
+            expected_sum="300",
+            stripe_payment_method_id=payment_method.id,
+        )
+        self.post(f"/webshop/pay", purchase.to_dict(), token=token).expect(code=200, status="ok", data={
+            "type": PaymentIntentResult.Success.value
+        })
 
         after_activation = self.get(f"/membership/member/{member_id}").expect(code=200).data
         self.assertIsNone(after_activation["deleted_at"])
@@ -78,18 +82,11 @@ class Test(ApiShopTestMixin, ApiTest):
         span = db_session.query(Span).filter_by(member_id=member_id, type=Span.MEMBERSHIP).one()
         self.assertEqual(self.date(365), span.enddate)
 
-    def test_registring_new_member_fails_with_invalid_email(self) -> None:
-        payment_method = stripe.PaymentMethod.create(type="card", card=self.card(VALID_NON_3DS_CARD_NO))
-
+    def test_registering_new_member_fails_with_invalid_email(self) -> None:
         member = self.obj.create_member()
         member["email"] = member["email"].replace("@", "_")
 
         register: RegisterRequest = RegisterRequest(
-            purchase=Purchase(
-                cart=[CartItem(self.p0_id, 1)],
-                expected_sum="300",
-                stripe_payment_method_id=payment_method.id,
-            ),
             member=MemberInfo(
                 firstName=member["firstname"],
                 lastName=member["lastname"],
@@ -97,8 +94,6 @@ class Test(ApiShopTestMixin, ApiTest):
                 phone=member["phone"],
                 zipCode=member["address_zipcode"],
             ),
-            setup_intent_id=None,
-            subscriptions=[],
             discount=None,
         )
 
@@ -106,18 +101,11 @@ class Test(ApiShopTestMixin, ApiTest):
             data__token=None, code=422, message="Email is not valid."
         )
 
-    def test_registring_with_existing_member_email_does_not_work_and_does_not_return_token(self) -> None:
-        payment_method = stripe.PaymentMethod.create(type="card", card=self.card(VALID_NON_3DS_CARD_NO))
-
+    def test_registering_with_existing_member_email_does_not_work_and_does_not_return_token(self) -> None:
         member = self.obj.create_member()
         self.api.create_member(**member)
 
         register: RegisterRequest = RegisterRequest(
-            purchase=Purchase(
-                cart=[CartItem(self.p0_id, 1)],
-                expected_sum="300",
-                stripe_payment_method_id=payment_method.id,
-            ),
             member=MemberInfo(
                 firstName=member["firstname"],
                 lastName=member["lastname"],
@@ -125,8 +113,6 @@ class Test(ApiShopTestMixin, ApiTest):
                 phone=member["phone"],
                 zipCode=member["address_zipcode"],
             ),
-            setup_intent_id=None,
-            subscriptions=[],
             discount=None,
         )
 
@@ -134,17 +120,12 @@ class Test(ApiShopTestMixin, ApiTest):
             data__token=None, code=422, what="not_unique", fields="email"
         )
 
-    def test_registring_with_failed_payment_does_not_work_and_does_not_return_token(self) -> None:
+    def test_registering_with_failed_payment_does_not_work_and_does_not_return_token(self) -> None:
         payment_method = stripe.PaymentMethod.create(type="card", card=self.card(EXPIRED_3DS_CARD_NO))
 
         member = self.obj.create_member()
 
         register: RegisterRequest = RegisterRequest(
-            purchase=Purchase(
-                cart=[CartItem(self.p0_id, 1)],
-                expected_sum="121212121.00",
-                stripe_payment_method_id=payment_method.id,
-            ),
             member=MemberInfo(
                 firstName=member["firstname"],
                 lastName=member["lastname"],
@@ -152,9 +133,15 @@ class Test(ApiShopTestMixin, ApiTest):
                 phone=member["phone"],
                 zipCode=member["address_zipcode"],
             ),
-            setup_intent_id=None,
-            subscriptions=[],
             discount=None,
         )
 
-        self.post(f"/webshop/register", register.to_dict(), headers={}).expect(code=200, data={"type": "failed"})
+        (member_id, token) = self.post(f"/webshop/register", register.to_dict(), headers={}).expect(code=200).get("data__member_id", "data__token")
+
+        purchase = Purchase(
+            cart=[CartItem(self.p0_id, 1)],
+            expected_sum="121212121.00",
+            stripe_payment_method_id=payment_method.id,
+        )
+
+        self.post(f"/webshop/pay", purchase.to_dict(), token=token).expect(code=400, what="non_matching_sums")
