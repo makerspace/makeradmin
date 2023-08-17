@@ -78,12 +78,12 @@ export function uploadFile<T>(url: string, file: File): Promise<T> {
 	}).then(response => response.json())
 }
 
-export function ajax(type: string, url: string, data: object | null = null): Promise<ServerResponse<any>> {
+export function ajax(type: string, url: string, data: object | null = null, options: { loginToken?: string } = {}): Promise<ServerResponse<any>> {
 	return new Promise((resolve, reject) => {
 		const xhr = new XMLHttpRequest();
 		xhr.open(type, url);
 		xhr.setRequestHeader('Content-Type', 'application/json; charset=utf-8');
-		let token = localStorage.getItem("token");
+		let token = options.loginToken ?? localStorage.getItem("token");
 		if (token) {
 			xhr.setRequestHeader('Authorization', "Bearer " + token);
 		}
