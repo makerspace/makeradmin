@@ -579,12 +579,15 @@ export async function pay(paymentMethod: stripe.paymentMethod.PaymentMethod, car
         expected_to_pay_recurring: "" + amount,
         expected_to_pay_now: "0", // We should already have paid for the member to be a member, so the subscription should start in the future and not charge anything right now
     }));
-    try {
-        await common.ajax('POST', `${window.apiBasePath}/webshop/member/current/subscriptions`, {
-            subscriptions: subscriptionStarts,
-        } as StartSubscriptionsRequest, { loginToken: options.loginToken });
-    } catch (e) {
-        throw new PaymentFailedError(common.get_error(e));
+
+    if (subscriptionStarts.length > 0) {
+        try {
+            await common.ajax('POST', `${window.apiBasePath}/webshop/member/current/subscriptions`, {
+                subscriptions: subscriptionStarts,
+            } as StartSubscriptionsRequest, { loginToken: options.loginToken });
+        } catch (e) {
+            throw new PaymentFailedError(common.get_error(e));
+        }
     }
 
     return { transaction_id }
