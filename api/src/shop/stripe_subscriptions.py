@@ -145,6 +145,9 @@ def setup_subscription_makeradmin_product(
         product.display_order = (db_session.query(func.max(Product.display_order)).scalar() or 0) + 1
         db_session.add(product)
 
+    # Flush to be able to get the product id
+    db_session.flush()
+
     # Delete all existing product actions for this product, and create new ones.
     # When a subscription runs as normal, these actions will not be triggered,
     # instead the paid invoice will be processed, and there's some custom code to add membership
