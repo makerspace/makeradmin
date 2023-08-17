@@ -7,6 +7,7 @@ from dataclasses_json import DataClassJsonMixin
 
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 from sqlalchemy.sql import func
+from shop.stripe_constants import MakerspaceMetadataKeys
 from shop.stripe_discounts import get_discount_for_product, get_price_level_for_member
 from shop.stripe_subscriptions import SubscriptionType, resume_paused_subscription
 
@@ -345,6 +346,13 @@ def process_cart(member_id: int, cart: List[CartItem]) -> Tuple[Decimal, List[Tr
                     message=f"Bad product count for product {product_id}.",
                     what=NEGATIVE_ITEM_COUNT,
                 )
+
+            if product.get_metadata(MakerspaceMetadataKeys.SUBSCRIPTION_TYPE, None) is not None:
+                if count != product.smallest_multiple:
+                    raise BadRequest(
+                        f"Bad count for subscription product {product_id}. Count must be exactly {product.smallest_multiple}, was {count}.",
+                        what=INVALID_ITEM_COUNT,
+                    )
 
             if count % product.smallest_multiple != 0:
                 raise BadRequest(
