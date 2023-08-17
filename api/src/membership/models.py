@@ -44,6 +44,10 @@ class Member(Base):
     created_at = Column(DateTime, server_default=func.now())
     updated_at = Column(DateTime, server_default=func.now())
     deleted_at = Column(DateTime)
+
+    # True during the registration flow as the payment is being processed
+    pending_activation = Column(Boolean, nullable=False)
+
     member_number = Column(Integer, unique=True)
     labaccess_agreement_at = Column(DateTime)
     pin_code = Column(String(30))
