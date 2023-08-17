@@ -110,29 +110,29 @@ function Info2({ translation_key, info }: { translation_key: "labaccess" | "memb
         const remainingDays = Math.floor((end - Date.now()) / millisecondsPerDay);
 
         if (remainingDays < -1) {
-            text = t(`membership_status.${translation_key}.inactive_recent`)(-remainingDays);
+            text = t(`member_page.old_membership_status.${translation_key}.inactive_recent`)(-remainingDays);
             icon = "close";
             color = "member-key-color-inactive";
         } else if (remainingDays < 0) {
-            text = t(`membership_status.${translation_key}.inactive_yesterday`);
+            text = t(`member_page.old_membership_status.${translation_key}.inactive_yesterday`);
             icon = "close";
             color = "member-key-color-inactive";
         } else if (remainingDays < 1) {
             const remainingHours = Math.ceil((end - Date.now()) / millisecondsPerHour);
-            text = t(`membership_status.${translation_key}.active_hours_remaining`)(remainingHours);
+            text = t(`member_page.old_membership_status.${translation_key}.active_hours_remaining`)(remainingHours);
             icon = "check";
             color = "member-key-color-warning";
         } else if (remainingDays < 14) {
-            text = t(`membership_status.${translation_key}.active_few_days_remaining`)(info.enddate, remainingDays);
+            text = t(`member_page.old_membership_status.${translation_key}.active_few_days_remaining`)(info.enddate, remainingDays);
             icon = "check";
             color = "member-key-color-warning";
         } else {
-            text = t(`membership_status.${translation_key}.active_days_remaining`)(info.enddate, remainingDays);
+            text = t(`member_page.old_membership_status.${translation_key}.active_days_remaining`)(info.enddate, remainingDays);
             icon = "check";
             color = "member-key-color-active";
         }
     } else {
-        text = t(`membership_status.${translation_key}.inactive`);
+        text = t(`member_page.old_membership_status.${translation_key}.inactive`);
         icon = "close";
         color = "member-key-color-inactive";
     }

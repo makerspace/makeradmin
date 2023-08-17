@@ -54,7 +54,7 @@ const PayDialog = ({ stripe, products, productData, discount, currentMemberships
 
                     if (p.unit !== "mån" && p.unit !== "år" && p.unit !== "st") throw new Error(`Unexpected unit '${p.unit}' for ${p.name}. Expected one of år/mån/st`);
 
-                    return <p class="small-print">{t(`summaries.${sub_type}_subscription.summary`)} {t('member_page.subscriptions.binding_period')(p.smallest_multiple + " " + t(`unit.${p.unit}.many`))}</p>;
+                    return <p class="small-print">{t(`special_products.${sub_type}_subscription.summary`)} {t('member_page.subscriptions.binding_period')(p.smallest_multiple + " " + t(`unit.${p.unit}.many`))}</p>;
                 })}
                 <ToPayPreview productData={productData} cart={cart} discount={discount} currentMemberships={currentMemberships} />
                 <div class="uk-margin"></div>
@@ -94,7 +94,7 @@ const PayDialog = ({ stripe, products, productData, discount, currentMemberships
 
 const CancelDialog = ({ types, membership, onCancelDialog, onCancelSubscriptions }: { types: SubscriptionType[], membership: membership_t, onCancelDialog: () => void, onCancelSubscriptions: () => void }) => {
     const t = useTranslation();
-    const typeStr = types.map(ty => t(`summaries.${ty}_subscription.summary`)).join(" " + t("and") + " ");
+    const typeStr = types.map(ty => t(`special_products.${ty}_subscription.summary`)).join(" " + t("and") + " ");
     return <>
         <div class="uk-modal-header">
             <h2>Cancel auto-renewal</h2>

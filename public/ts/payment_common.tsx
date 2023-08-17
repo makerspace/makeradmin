@@ -334,12 +334,12 @@ export const ToPayPreview = ({ productData, cart, discount, currentMemberships }
     let renewInfoText = payRecurring.map(({ product, amount }) => {
         const product_id = product.product_metadata.special_product_id;
         AssertIsWellKnownProductId(product_id);
-        return t(`summaries.${product_id}.renewal`)(amount)
+        return t(`special_products.${product_id}.renewal`)(amount)
     }).join(" ");
     if (payRecurring.length == 1) {
-        renewInfoText += " " + t("summaries.renewal.one");
+        renewInfoText += " " + t("special_products.renewal.one");
     } else if (payRecurring.length > 1) {
-        renewInfoText += " " + t("summaries.renewal.many");
+        renewInfoText += " " + t("special_products.renewal.many");
     }
 
     let anyDiscountedColumn = false;
@@ -350,23 +350,23 @@ export const ToPayPreview = ({ productData, cart, discount, currentMemberships }
         let period = product.smallest_multiple + " " + t(`unit.${product.unit}.${product.smallest_multiple > 1 ? "many" : "one"}`);
         if (product_id === "access_starter_pack") {
             // Special case for the starter pack period. Otherwise it would show "1 st"
-            period = t("summaries.access_starter_pack.period");
+            period = t("special_products.access_starter_pack.period");
         }
         if (amount !== originalAmount) {
             anyDiscountedColumn = true;
         }
-        return [t(`summaries.${product_id}.summary`) + " - " + period, amount, amount !== originalAmount ? originalAmount : undefined];
+        return [t(`special_products.${product_id}.summary`) + " - " + period, amount, amount !== originalAmount ? originalAmount : undefined];
     });
 
     if (paidRightNowItems.length === 0) {
         return <>
-            <span className="small-print">{t("summaries.payment_right_now_nothing")}</span>
+            <span className="small-print">{t("special_products.payment_right_now_nothing")}</span>
             {payRecurring.length > 0 ? (<span className="small-print">{renewInfoText}</span>) : null}
         </>
     } else {
         return (
             <>
-                <span className="small-print">{t("summaries.payment_right_now")}</span>
+                <span className="small-print">{t("special_products.payment_right_now")}</span>
                 <div class="history-item to-pay-preview">
                     <div class={"receipt-items " + (anyDiscountedColumn ? "with-original-price-column" : "")}>
                         {paidRightNowItems.map(([summary, price, normalPrice]) => (
@@ -378,7 +378,7 @@ export const ToPayPreview = ({ productData, cart, discount, currentMemberships }
                         ))}
                     </div>
                     <div class="receipt-amount">
-                        <span>{t("summaries.cart_total")}</span>
+                        <span>{t("special_products.cart_total")}</span>
                         <span className="receipt-amount-value">{currencyToString(payNow.reduce((s, { amount }) => s + amount, 0))} {t("priceUnit")}</span>
                     </div>
                 </div>

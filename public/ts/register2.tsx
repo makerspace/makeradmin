@@ -59,8 +59,8 @@ const PlanButton = ({ plan, selected, onClick, order }: { plan: Plan, selected: 
             </div>
             {plan.description1 && <div className="access-plan-description">{plan.description1}</div>}
             <ul className="checkmark-list">
-                {t(`plans.${plan.id}.included`).map((reason, i) => <li key={i}><span className="positive" uk-icon="icon: check"></span> {reason}</li>)}
-                {t(`plans.${plan.id}.notIncluded`).map((reason, i) => <li key={i}><span className="negative" uk-icon="icon: close"></span> {reason}</li>)}
+                {t(`registration_page.plans.${plan.id}.included`).map((reason, i) => <li key={i}><span className="positive" uk-icon="icon: check"></span> {reason}</li>)}
+                {t(`registration_page.plans.${plan.id}.notIncluded`).map((reason, i) => <li key={i}><span className="negative" uk-icon="icon: close"></span> {reason}</li>)}
             </ul>
             {plan.description2 && <div className="access-plan-description">{plan.description2}</div>}
         </div>
@@ -102,12 +102,12 @@ const MemberInfoForm = ({ info, onChange, onSubmit, onBack }: { info: MemberInfo
             console.log("invalid");
             setShowErrors(true);
         }}>
-            <LabeledInput label={t("memberInfo.firstName")} id="firstName" type="text" required value={info.firstName} onChange={firstName => onChange(info => ({ ...info, firstName }))} onInvalid={onInvalid} />
-            <LabeledInput label={t("memberInfo.lastName")} id="lastName" type="text" required value={info.lastName} onChange={lastName => onChange(info => ({ ...info, lastName }))} onInvalid={onInvalid} />
-            <LabeledInput label={t("memberInfo.email")} id="email" type="email" required value={info.email} onChange={email => onChange(info => ({ ...info, email }))} onInvalid={onInvalid} />
-            <LabeledInput label={t("memberInfo.phone")} id="phone" type="tel" pattern="[\-\+\s0-9]*" required value={info.phone} onChange={phone => onChange(info => ({ ...info, phone }))} onInvalid={onInvalid} />
-            <LabeledInput label={t("memberInfo.zipCode")} id="zipCode" type="text" pattern="[0-9\s]*" required value={info.zipCode} onChange={zipCode => onChange(info => ({ ...info, zipCode }))} onInvalid={onInvalid} />
-            <input type="submit" className="flow-button primary" value={t("memberInfo.submit")} />
+            <LabeledInput label={t("registration_page.memberInfo.firstName")} id="firstName" type="text" required value={info.firstName} onChange={firstName => onChange(info => ({ ...info, firstName }))} onInvalid={onInvalid} />
+            <LabeledInput label={t("registration_page.memberInfo.lastName")} id="lastName" type="text" required value={info.lastName} onChange={lastName => onChange(info => ({ ...info, lastName }))} onInvalid={onInvalid} />
+            <LabeledInput label={t("registration_page.memberInfo.email")} id="email" type="email" required value={info.email} onChange={email => onChange(info => ({ ...info, email }))} onInvalid={onInvalid} />
+            <LabeledInput label={t("registration_page.memberInfo.phone")} id="phone" type="tel" pattern="[\-\+\s0-9]*" required value={info.phone} onChange={phone => onChange(info => ({ ...info, phone }))} onInvalid={onInvalid} />
+            <LabeledInput label={t("registration_page.memberInfo.zipCode")} id="zipCode" type="text" pattern="[0-9\s]*" required value={info.zipCode} onChange={zipCode => onChange(info => ({ ...info, zipCode }))} onInvalid={onInvalid} />
+            <input type="submit" className="flow-button primary" value={t("registration_page.memberInfo.submit")} />
             <BackButton onClick={onBack} />
         </form>
     )
@@ -132,16 +132,16 @@ type Terms = {
 const TermsAndConditions = ({ onAccept, onBack, acceptedTerms, onChangeAcceptedTerms }: { onAccept: () => void, onBack: () => void, acceptedTerms: Terms, onChangeAcceptedTerms: (terms: Terms) => void }) => {
     const t = useTranslation();
     return (<div class="terms-and-conditions">
-        <h2>{t("terms.title")}</h2>
-        <p>{t("terms.pledge")}</p>
+        <h2>{t("registration_page.terms.title")}</h2>
+        <p>{t("registration_page.terms.pledge")}</p>
         <ol className="rules-list">
-            {t("terms.rules").map(rule => <li>{rule}</li>)}
+            {t("registration_page.terms.rules").map(rule => <li>{rule}</li>)}
         </ol>
 
-        <RuleCheckbox rule={t("terms.understanding1")} onChange={() => onChangeAcceptedTerms({ ...acceptedTerms, accepted1: !acceptedTerms.accepted1 })} value={acceptedTerms.accepted1} />
-        <RuleCheckbox rule={t("terms.understanding2")} onChange={() => onChangeAcceptedTerms({ ...acceptedTerms, accepted2: !acceptedTerms.accepted2 })} value={acceptedTerms.accepted2} />
-        <RuleCheckbox rule={t("terms.welcoming")} onChange={() => onChangeAcceptedTerms({ ...acceptedTerms, accepted3: !acceptedTerms.accepted3 })} value={acceptedTerms.accepted3} />
-        <button className="flow-button primary" disabled={!acceptedTerms.accepted1 || !acceptedTerms.accepted2 || !acceptedTerms.accepted3} onClick={onAccept}>{t("terms.accept")}</button>
+        <RuleCheckbox rule={t("registration_page.terms.understanding1")} onChange={() => onChangeAcceptedTerms({ ...acceptedTerms, accepted1: !acceptedTerms.accepted1 })} value={acceptedTerms.accepted1} />
+        <RuleCheckbox rule={t("registration_page.terms.understanding2")} onChange={() => onChangeAcceptedTerms({ ...acceptedTerms, accepted2: !acceptedTerms.accepted2 })} value={acceptedTerms.accepted2} />
+        <RuleCheckbox rule={t("registration_page.terms.welcoming")} onChange={() => onChangeAcceptedTerms({ ...acceptedTerms, accepted3: !acceptedTerms.accepted3 })} value={acceptedTerms.accepted3} />
+        <button className="flow-button primary" disabled={!acceptedTerms.accepted1 || !acceptedTerms.accepted2 || !acceptedTerms.accepted3} onClick={onAccept}>{t("registration_page.terms.accept")}</button>
         <BackButton onClick={onBack} />
     </div>);
 }
@@ -164,11 +164,11 @@ const Confirmation = ({ memberInfo, selectedPlan, productData, discount, discoun
     return (<>
         {/* <h2>{t("payment.title")}</h2> */}
         <div class="uk-flex-1" />
-        {t("payment.text")}
+        {t("registration_page.payment.text")}
         <div class="uk-flex-1" />
         <ToPayPreview productData={productData} cart={Cart.oneOfEachProduct(selectedPlan.products)} discount={discount} currentMemberships={[]} />
         <div class="uk-flex-1" />
-        <span class="payment-processor">{t("payment.payment_processor")}</span>
+        <span class="payment-processor">{t("registration_page.payment.payment_processor")}</span>
         <StripeCardInput element={card} />
         <button className="flow-button primary" disabled={inProgress} onClick={async () => {
             setInProgress(true);
@@ -206,7 +206,7 @@ const Confirmation = ({ memberInfo, selectedPlan, productData, discount, discoun
             }
         }}>
             <span className={"uk-spinner uk-icon progress-spinner " + (inProgress ? "progress-spinner-visible" : "")} uk-spinner={''} />
-            <span>{t("payment.pay")}</span>
+            <span>{t("registration_page.payment.pay")}</span>
         </button>
         <BackButton onClick={onBack} />
         <div class="uk-flex-1" />
@@ -282,20 +282,20 @@ const Success = ({ member }: { member: member_t }) => {
     })
 
     return (<>
-        <h1>{t("success.title")}</h1>
-        {t("success.text")}
+        <h1>{t("registration_page.success.title")}</h1>
+        {t("registration_page.success.text")}
         <ul className="registration-task-list">
             <li>
                 <CheckIcon done={booked} />
                 <div class="uk-flex uk-flex-column">
-                    <span>{t("success.book_step")}</span>
-                    <button className="flow-button primary flow-button-small" onClick={() => setBookModalOpen(true)}>{t("success.book_button")}</button>
+                    <span>{t("registration_page.success.book_step")}</span>
+                    <button className="flow-button primary flow-button-small" onClick={() => setBookModalOpen(true)}>{t("registration_page.success.book_button")}</button>
                 </div>
             </li>
-            {t("success.steps").map((step, i) => <li key={i}><CheckIcon done={clickedSteps.has(i)} /><span>{step((e) => setClickedSteps(new Set(clickedSteps).add(i)))}</span></li>)}
+            {t("registration_page.success.steps").map((step, i) => <li key={i}><CheckIcon done={clickedSteps.has(i)} /><span>{step((e) => setClickedSteps(new Set(clickedSteps).add(i)))}</span></li>)}
         </ul>
         <div class="uk-flex-1" />
-        <a href={RELATIVE_MEMBER_PORTAL} className="flow-button primary" >{t("success.continue_to_member_portal")}</a>
+        <a href={RELATIVE_MEMBER_PORTAL} className="flow-button primary" >{t("registration_page.success.continue_to_member_portal")}</a>
         <PopupModal
             url="https://calendly.com/medlemsintroduktion/medlemsintroduktion"
             rootElement={document.getElementById("root")!}
@@ -319,31 +319,31 @@ const Discounts = ({ discounts, setDiscounts, onSubmit, discountAmounts }: { dis
 
     if (step == 0) {
         return <>
-            <h2>{t("discounts.title")}</h2>
-            <p>{t("discounts.text")}</p>
+            <h2>{t("registration_page.discounts.title")}</h2>
+            <p>{t("registration_page.discounts.text")}</p>
 
             {reasons.map(reason =>
                 <div class="rule-checkbox">
                     <input id={`reason.${reason}`} type="checkbox" checked={discounts.discountReason === reason} onChange={(e) => setDiscounts({ ...discounts, discountReason: e.currentTarget.checked ? reason : null })} />
-                    <label for={`reason.${reason}`}>{t(`discounts.reasons.${reason}`)}</label>
+                    <label for={`reason.${reason}`}>{t(`registration_page.discounts.reasons.${reason}`)}</label>
                 </div>
             )}
-            <textarea placeholder={t("discounts.messagePlaceholder")} value={discounts.discountReasonMessage} onChange={(e) => setDiscounts({ ...discounts, discountReasonMessage: e.currentTarget.value })} />
-            <button className="flow-button primary" onClick={() => setStep(1)} disabled={discounts.discountReason === null || discounts.discountReasonMessage.length < 30}>{t("discounts.submit")}</button>
+            <textarea placeholder={t("registration_page.discounts.messagePlaceholder")} value={discounts.discountReasonMessage} onChange={(e) => setDiscounts({ ...discounts, discountReasonMessage: e.currentTarget.value })} />
+            <button className="flow-button primary" onClick={() => setStep(1)} disabled={discounts.discountReason === null || discounts.discountReasonMessage.length < 30}>{t("registration_page.discounts.submit")}</button>
             <button className="flow-button primary" onClick={() => {
                 setDiscounts({ discountReason: null, discountReasonMessage: "" });
                 onSubmit();
-            }}>{t("discounts.cancel")}</button>
+            }}>{t("registration_page.discounts.cancel")}</button>
         </>;
     } else {
         return <>
-            <h2>{t("discounts.title")}</h2>
-            {t("discounts.confirmation")(discountAmounts["low_income_discount"])}
-            <button className="flow-button primary" onClick={onSubmit}>{t("discounts.submit")}</button>
+            <h2>{t("registration_page.discounts.title")}</h2>
+            {t("registration_page.discounts.confirmation")(discountAmounts["low_income_discount"])}
+            <button className="flow-button primary" onClick={onSubmit}>{t("registration_page.discounts.submit")}</button>
             <button className="flow-button primary" onClick={() => {
                 setDiscounts({ discountReason: null, discountReasonMessage: "" });
                 onSubmit();
-            }}>{t("discounts.cancel")}</button>
+            }}>{t("registration_page.discounts.cancel")}</button>
         </>
     }
 }
@@ -353,11 +353,11 @@ const Calendar = ({ member }: { member: member_t }) => {
     console.log(member);
     return (
         <>
-            <h2>{t("calendar.title")}</h2>
-            <p>{t("calendar.text")}</p>
+            <h2>{t("registration_page.calendar.title")}</h2>
+            <p>{t("registration_page.calendar.text")}</p>
             <PopupWidget
                 url="https://calendly.com/medlemsintroduktion/medlemsintroduktion"
-                text={t("calendar.book_button")}
+                text={t("registration_page.calendar.book_button")}
                 rootElement={document.getElementById("root")!}
                 prefill={{
                     name: member.firstname + " " + member.lastname,
@@ -450,54 +450,54 @@ const RegisterPage = ({ }: {}) => {
     const plans: Plan[] = [
         {
             id: "starterPack",
-            title: t("plans.starterPack.title"),
-            abovePrice: t("plans.starterPack.abovePrice"),
+            title: t("registration_page.plans.starterPack.title"),
+            abovePrice: t("registration_page.plans.starterPack.abovePrice"),
             price: parseFloat(relevantProducts.starterPackProduct.price),
-            belowPrice: t("plans.ofWhichBaseMembership")(baseMembershipCost),
-            description1: t("plans.starterPack.description1"),
-            description2: t("plans.starterPack.description2"),
+            belowPrice: t("registration_page.plans.ofWhichBaseMembership")(baseMembershipCost),
+            description1: t("registration_page.plans.starterPack.description1"),
+            description2: t("registration_page.plans.starterPack.description2"),
             products: [relevantProducts.starterPackProduct, relevantProducts.membershipSubscriptionProduct],
             highlight: "Recommended",
         },
         {
             id: "singleMonth",
-            title: t("plans.singleMonth.title"),
-            abovePrice: t("plans.singleMonth.abovePrice"),
+            title: t("registration_page.plans.singleMonth.title"),
+            abovePrice: t("registration_page.plans.singleMonth.abovePrice"),
             price: parseFloat(relevantProducts.labaccessProduct.price),
-            belowPrice: t("plans.ofWhichBaseMembership")(baseMembershipCost),
-            description1: t("plans.singleMonth.description1"),
-            description2: t("plans.singleMonth.description2"),
+            belowPrice: t("registration_page.plans.ofWhichBaseMembership")(baseMembershipCost),
+            description1: t("registration_page.plans.singleMonth.description1"),
+            description2: t("registration_page.plans.singleMonth.description2"),
             products: [relevantProducts.labaccessProduct, relevantProducts.membershipSubscriptionProduct],
             highlight: null,
         },
         // {
         //     id: "makerspaceAccessSub",
-        //     title: t("plans.makerspaceAccessSub.title"),
-        //     abovePrice: t("plans.makerspaceAccessSub.abovePrice"),
+        //     title: t("registration_page.plans.makerspaceAccessSub.title"),
+        //     abovePrice: t("registration_page.plans.makerspaceAccessSub.abovePrice"),
         //     price: parseFloat(relevantProducts.labaccessSubscriptionProduct.price),
-        //     period: t("plans.makerspaceAccessSub.period"),
-        //     description: t("plans.makerspaceAccessSub.description"),
+        //     period: t("registration_page.plans.makerspaceAccessSub.period"),
+        //     description: t("registration_page.plans.makerspaceAccessSub.description"),
         //     products: [relevantProducts.membershipSubscriptionProduct, relevantProducts.labaccessSubscriptionProduct],
         //     highlight: null,
         // },
         {
             id: "decideLater",
-            title: t("plans.decideLater.title"),
-            abovePrice: t("plans.decideLater.abovePrice"),
+            title: t("registration_page.plans.decideLater.title"),
+            abovePrice: t("registration_page.plans.decideLater.abovePrice"),
             price: 0,
             belowPrice: "",
-            description1: t("plans.decideLater.description1"),
-            description2: t("plans.decideLater.description2")(accessCostSingle, accessSubscriptionCost),
+            description1: t("registration_page.plans.decideLater.description1"),
+            description2: t("registration_page.plans.decideLater.description2")(accessCostSingle, accessSubscriptionCost),
             products: [relevantProducts.membershipSubscriptionProduct],
             highlight: null,
         },
         // {
         //     id: "discounted",
-        //     title: t("plans.discounted.title"),
-        //     abovePrice: t("plans.discounted.abovePrice"),
+        //     title: t("registration_page.plans.discounted.title"),
+        //     abovePrice: t("registration_page.plans.discounted.abovePrice"),
         //     price: 0,
-        //     period: t("plans.discounted.period"),
-        //     description: t("plans.discounted.description"),
+        //     period: t("registration_page.plans.discounted.period"),
+        //     description: t("registration_page.plans.discounted.description"),
         //     products: [relevantProducts.membershipSubscriptionProduct],
         //     highlight: null,
         // }
@@ -520,12 +520,12 @@ const RegisterPage = ({ }: {}) => {
         case State.ChoosePlan:
             return (<>
                 <MakerspaceLogo />
-                <h1>{t("memberships.title")}</h1>
-                <p>{t("memberships.p1")}</p>
-                <p>{t("memberships.p2")}</p>
+                <h1>{t("registration_page.memberships.title")}</h1>
+                <p>{t("registration_page.memberships.p1")}</p>
+                <p>{t("registration_page.memberships.p2")}</p>
 
-                <h2>{t("chooseYourPlan.title")}</h2>
-                <span>{t("chooseYourPlan.help")}</span>
+                <h2>{t("registration_page.chooseYourPlan.title")}</h2>
+                <span>{t("registration_page.chooseYourPlan.help")}</span>
                 <div class="plan-buttons">
                     {plans.map((plan, i) => <PlanButton selected={selectedPlan === plan.id} onClick={() => setSelectedPlan(plan.id)} plan={plan} order={i} />)}
                 </div>
@@ -536,7 +536,7 @@ const RegisterPage = ({ }: {}) => {
         case State.MemberInfo:
             return (<>
                 <MakerspaceLogo />
-                <h2>{t("memberInfo.title")}</h2>
+                <h2>{t("registration_page.memberInfo.title")}</h2>
                 <MemberInfoForm info={memberInfo} onChange={setMemberInfo} onSubmit={(_) => setState(State.Terms)} onBack={() => setState(State.ChoosePlan)} />
             </>);
         case State.Terms:
