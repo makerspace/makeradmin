@@ -205,6 +205,13 @@ def stripe_invoice_event(subtype: EventSubtype, event: stripe.Event, current_tim
             # This allows us to collect the first payment (which will typically be 2 months for the binding period),
             # which creates an incentive for the user to actually go and join this makerspace thingy.
             # A few members will never end up signing the agreement, but we can't do anything about that.
+            #
+            # TODO: The first payment is now done using a regular payment, instead of via the subscription.
+            # This will cause the wrong behaviour if a makerspace access subscription is started via the registration form
+            # (the user will be billed twice for the binding period). It's not an issue right now, because no makerspace
+            # access subscription is started during registration, but it would be good to fix.
+            # Presumably, it should be fixed by immediately pausing the subscription *before* the first
+            # invoice is paid, and making sure the invoice does not contain the binding period.
             if subscription_type == SubscriptionType.LAB and member.labaccess_agreement_at is None:
                 stripe_subscriptions.pause_subscription(member_id, SubscriptionType.LAB, test_clock=None)
 
