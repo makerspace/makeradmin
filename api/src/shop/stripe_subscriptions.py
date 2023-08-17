@@ -32,7 +32,7 @@ from stripe.error import InvalidRequestError
 from shop.stripe_util import retry
 from membership.enums import PriceLevel
 from shop.stripe_discounts import get_discount_for_product, get_price_level_for_member
-from shop.models import Product, ProductCategory
+from shop.models import Product, ProductAction, ProductCategory
 from service.error import BadRequest, NotFound
 from service.db import db_session
 from membership.models import Member
@@ -66,6 +66,10 @@ BINDING_PERIOD = {
 def setup_subscription_makeradmin_product(
     subscription_type: SubscriptionType,
 ) -> Product:
+    # TODO: Maybe we should create separate products for the binding period.
+    # This would allow us to have different prices for the binding period and the recurring period.
+    # Not sure if that's useful though.
+
     name = f"{subscription_type.value.title()} Subscription"
 
     offset = 0
@@ -73,11 +77,14 @@ def setup_subscription_makeradmin_product(
         with db_session.begin_nested():
             try:
                 offset += 1
-                category = db_session.query(ProductCategory).filter(ProductCategory.name == "Subscriptions").one_or_none()
+                category = (
+                    db_session.query(ProductCategory).filter(ProductCategory.name == "Subscriptions").one_or_none()
+                )
                 if category is None:
                     category = ProductCategory(
                         name="Subscriptions",
-                        display_order=(db_session.query(func.max(ProductCategory.display_order)).scalar() or 0) + offset,
+                        display_order=(db_session.query(func.max(ProductCategory.display_order)).scalar() or 0)
+                        + offset,
                     )
                     db_session.add(category)
                     db_session.flush()
@@ -111,8 +118,10 @@ def setup_subscription_makeradmin_product(
     interval = recurring_price["recurring"]["interval"]
     if interval == "month":
         product.unit = "mån"
+        average_days = 30
     elif interval == "year":
         product.unit = "år"
+        average_days = 365
     else:
         raise RuntimeError(f"Unexpected interval {interval} in stripe product")
     assert int(recurring_price["recurring"]["interval_count"]) == 1
@@ -123,24 +132,38 @@ def setup_subscription_makeradmin_product(
     # The smallest_multiple field is somewhat like a binding period.
     # The frontend may use this to display binding period information for subscriptions.
     if subscription_prices.binding_period_price is not None:
-        product.smallest_multiple = subscription_prices.binding_period_price[
-            "recurring"
-        ]["interval_count"]
+        product.smallest_multiple = subscription_prices.binding_period_price["recurring"]["interval_count"]
 
         # Just a sanity check, but not actually a requirement.
-        assert (
-            product.smallest_multiple >= 2
-        ), "Binding period must be at least 2 months"
+        assert product.smallest_multiple >= 2, "Binding period must be at least 2 months"
     else:
         product.smallest_multiple = 1
 
     product.filter = ""
     product.show = False  # The subscription products are not shown in the shop
     if new:
-        product.display_order = (
-            db_session.query(func.max(Product.display_order)).scalar() or 0
-        ) + 1
+        product.display_order = (db_session.query(func.max(Product.display_order)).scalar() or 0) + 1
         db_session.add(product)
+
+    # Delete all existing product actions for this product, and create new ones.
+    # When a subscription runs as normal, these actions will not be triggered,
+    # instead the paid invoice will be processed, and there's some custom code to add membership
+    # for the exact number of days that stripe says that the invoice was for (it may vary depending on the number of days in a month for example).
+    # However, when a member starts a new subscription, we will use a regular purchase for the first payment.
+    # This purchase will use these actions. The stripe subscription will instead start on the renewal date.
+    #
+    # A regular purchase is used for the first payment, since otherwise it is not possible to start multiple subscriptions (or start one subscription and pay for something else)
+    # at the same time, if the card requires 3D secure authentication.
+    # This is an annoying stripe limitation.
+    # By making the first payment a regular purchase, we can make sure the subscription is always scheduled for the future
+    # instead of starting immediately.
+    db_session.query(ProductAction).filter(ProductAction.product_id == product.id).delete()
+    actions = {
+        SubscriptionType.LAB: ProductAction.ADD_LABACCESS_DAYS,
+        SubscriptionType.MEMBERSHIP: ProductAction.ADD_MEMBERSHIP_DAYS,
+    }
+    action = ProductAction(product_id=product.id, action_type=actions[subscription_type], value=average_days)
+    db_session.add(action)
 
     db_session.flush()
     return product
@@ -154,12 +177,8 @@ def get_subscription_products() -> Dict[SubscriptionType, int]:
     global SUBSCRIPTION_PRODUCTS
     if SUBSCRIPTION_PRODUCTS is None:
         SUBSCRIPTION_PRODUCTS = {
-            SubscriptionType.MEMBERSHIP: setup_subscription_makeradmin_product(
-                SubscriptionType.MEMBERSHIP
-            ).id,
-            SubscriptionType.LAB: setup_subscription_makeradmin_product(
-                SubscriptionType.LAB
-            ).id,
+            SubscriptionType.MEMBERSHIP: setup_subscription_makeradmin_product(SubscriptionType.MEMBERSHIP).id,
+            SubscriptionType.LAB: setup_subscription_makeradmin_product(SubscriptionType.LAB).id,
         }
 
     return SUBSCRIPTION_PRODUCTS
@@ -177,17 +196,14 @@ def get_subscription_product(subscription_type: SubscriptionType) -> Product:
     return p
 
 
-def get_stripe_subscriptions(
-    stripe_customer_id: str, active_only: bool = True
-) -> List[stripe.Subscription]:
+def get_stripe_subscriptions(stripe_customer_id: str, active_only: bool = True) -> List[stripe.Subscription]:
     """Returns the list of subscription objects for the given user."""
     resp = retry(lambda: stripe.Subscription.list(customer=stripe_customer_id))
     return [
         sub
         for sub in resp["data"]
         if not active_only
-        or SubscriptionStatus(sub["status"])
-        in [SubscriptionStatus.ACTIVE, SubscriptionStatus.TRAILING]
+        or SubscriptionStatus(sub["status"]) in [SubscriptionStatus.ACTIVE, SubscriptionStatus.TRAILING]
     ]
 
 
@@ -219,21 +235,30 @@ def attach_and_set_default_payment_method(
     )
 
 
+def are_metadata_dicts_equivalent(a: Dict[str, Any], b: Dict[str, Any]) -> bool:
+    a = {k: v for k, v in a.items() if v != ""}
+    b = {k: v for k, v in b.items() if v != ""}
+    return a == b
+
+
 def get_stripe_customer(
     member_info: Member, test_clock: Optional[stripe.test_helpers.TestClock]
 ) -> Optional[stripe.Customer]:
     try:
         if member_info.stripe_customer_id is not None:
             try:
-                customer = retry(
-                    lambda: stripe.Customer.retrieve(member_info.stripe_customer_id)
-                )
+                customer = retry(lambda: stripe.Customer.retrieve(member_info.stripe_customer_id))
                 assert customer is not None
 
                 # Update the metadata if needed
+                expected_metadata = {
+                    # Setting to an empty string will delete the key if present
+                    MSMetaKeys.PENDING_MEMBER.value: "pending" if member_info.pending_activation else "",
+                    MSMetaKeys.USER_ID.value: member_info.member_id,
+                    MSMetaKeys.MEMBER_NUMBER.value: member_info.member_number,
+                }
                 if (
-                    MSMetaKeys.USER_ID.value not in customer.metadata
-                    or MSMetaKeys.MEMBER_NUMBER.value not in customer.metadata
+                    not are_metadata_dicts_equivalent(customer.metadata, expected_metadata)
                     or customer.email != member_info.email
                 ):
                     stripe.Customer.modify(
@@ -241,19 +266,12 @@ def get_stripe_customer(
                         description=f"Created by Makeradmin (#{member_info.member_number})",
                         email=member_info.email,
                         name=f"{member_info.firstname} {member_info.lastname}",
-                        metadata={
-                            # Delete the pending member key if present
-                            MSMetaKeys.PENDING_MEMBER: "",
-                            MSMetaKeys.USER_ID.value: member_info.member_id,
-                            MSMetaKeys.MEMBER_NUMBER.value: member_info.member_number,
-                        },
+                        metadata=expected_metadata,
                     )
                 return customer
             except InvalidRequestError as e:
                 if "No such customer" in str(e.user_message):
-                    print(
-                        "Stripe customer not found, even though it existed in the database. Creating a new one."
-                    )
+                    print("Stripe customer not found, even though it existed in the database. Creating a new one.")
 
         # If no customer is found, we create one
         customer = retry(
@@ -354,15 +372,13 @@ def lookup_subscription_price_for(
             p
             for p in prices
             if MSMetaKeys.PRICE_TYPE.value in p["metadata"]
-            if p["metadata"][MSMetaKeys.PRICE_TYPE.value]
-            == PriceType.BINDING_PERIOD.value
+            if p["metadata"][MSMetaKeys.PRICE_TYPE.value] == PriceType.BINDING_PERIOD.value
         ]
         # Filter by period
         starting_prices = [
             p
             for p in starting_prices
-            if p["recurring"]["interval"] == "month"
-            and p["recurring"]["interval_count"] == binding_period
+            if p["recurring"]["interval"] == "month" and p["recurring"]["interval_count"] == binding_period
         ]
 
         assert (
@@ -372,9 +388,7 @@ def lookup_subscription_price_for(
     else:
         binding_period_price = None
 
-    res = ProductPricing(
-        recurring_price=recurring_price, binding_period_price=binding_period_price
-    )
+    res = ProductPricing(recurring_price=recurring_price, binding_period_price=binding_period_price)
     SUBSCRIPTION_PRICE_CACHE.set(subscription_type, res)
     return res
 
@@ -394,20 +408,13 @@ def calc_subscription_start_time(
 ) -> Tuple[bool, datetime]:
     if earliest_start_at is None:
         earliest_start_at = datetime.now(timezone.utc)
-    assert (
-        earliest_start_at.tzinfo is not None
-    ), "earliest_start_at must be timezone aware"
+    assert earliest_start_at.tzinfo is not None, "earliest_start_at must be timezone aware"
 
     memberships = get_membership_summary(member_id, earliest_start_at)
     was_already_member = False
-    if (
-        memberships.membership_active
-        and subscription_type == SubscriptionType.MEMBERSHIP
-    ):
+    if memberships.membership_active and subscription_type == SubscriptionType.MEMBERSHIP:
         assert memberships.membership_end is not None
-        subscription_start = calc_start_ts(
-            memberships.membership_end, earliest_start_at
-        )
+        subscription_start = calc_start_ts(memberships.membership_end, earliest_start_at)
         was_already_member = True
     elif memberships.labaccess_active and subscription_type == SubscriptionType.LAB:
         assert memberships.labaccess_end is not None
@@ -461,8 +468,7 @@ def start_subscription(
                     (price.binding_period_price or price.recurring_price).stripe_id
                 )
                 to_pay_now = (
-                    (Decimal(to_pay_now_price["unit_amount"]) / STRIPE_CURRENTY_BASE)
-                    * (1 - discount.fraction_off)
+                    (Decimal(to_pay_now_price["unit_amount"]) / STRIPE_CURRENTY_BASE) * (1 - discount.fraction_off)
                 ).quantize(Decimal("0.01"))
             if to_pay_now != expected_to_pay_now:
                 raise BadRequest(
@@ -471,12 +477,9 @@ def start_subscription(
 
         if expected_to_pay_recurring is not None:
             # Fetch a fresh price object from stripe to make sure we have the latest price
-            to_pay_recurring_price = stripe.Price.retrieve(
-                price.recurring_price.stripe_id
-            )
+            to_pay_recurring_price = stripe.Price.retrieve(price.recurring_price.stripe_id)
             to_pay_recurring = (
-                (Decimal(to_pay_recurring_price["unit_amount"]) / STRIPE_CURRENTY_BASE)
-                * (1 - discount.fraction_off)
+                (Decimal(to_pay_recurring_price["unit_amount"]) / STRIPE_CURRENTY_BASE) * (1 - discount.fraction_off)
             ).quantize(Decimal("0.01"))
             if to_pay_recurring != expected_to_pay_recurring:
                 raise BadRequest(
@@ -492,13 +495,9 @@ def start_subscription(
 
         if current_subscription_id is not None:
             if current_subscription_id.startswith("sub_sched_"):
-                current_subscription = stripe.SubscriptionSchedule.retrieve(
-                    current_subscription_id
-                )
+                current_subscription = stripe.SubscriptionSchedule.retrieve(current_subscription_id)
             else:
-                current_subscription = stripe.Subscription.retrieve(
-                    current_subscription_id
-                )
+                current_subscription = stripe.Subscription.retrieve(current_subscription_id)
 
             if current_subscription is None:
                 # Possibly the subscription has been deleted, but the webhook hasn't been processed yet.
@@ -546,9 +545,7 @@ def start_subscription(
                     "metadata": metadata,
                     "proration_behavior": "none",
                     "iterations": 1,
-                    "coupon": discount.coupon.stripe_id
-                    if discount.coupon is not None
-                    else None,
+                    "coupon": discount.coupon.stripe_id if discount.coupon is not None else None,
                 }
             )
 
@@ -563,9 +560,7 @@ def start_subscription(
                 "collection_method": "charge_automatically",
                 "metadata": metadata,
                 "proration_behavior": "none",
-                "coupon": discount.coupon.stripe_id
-                if discount.coupon is not None
-                else None,
+                "coupon": discount.coupon.stripe_id if discount.coupon is not None else None,
             }
         )
 
@@ -753,51 +748,14 @@ def cancel_subscription(
     return True
 
 
-def create_stripe_checkout_session(
-    member_id: int,
-    data: Any = None,
-    test_clock: Optional[stripe.test_helpers.TestClock] = None,
-) -> str:
-    print("Creating stripe checkout session")
-    checkout_session = None
-
-    member = db_session.query(Member).get(member_id)
-    assert member is not None
-    stripe_customer = get_stripe_customer(member, test_clock)
-    if stripe_customer is None:
-        raise BadRequest("Unable to find corresponding stripe member")
-
-    metadata = {
-        MSMetaKeys.USER_ID.value: member_id,
-        MSMetaKeys.MEMBER_NUMBER.value: member.member_number,
-    }
-
-    checkout_session = stripe.checkout.Session.create(
-        payment_method_types=["card"],
-        mode="setup",
-        metadata=metadata,
-        test_clock=test_clock,
-        customer=stripe_customer["id"],
-        success_url=data["success_url"],
-        cancel_url=data["cancel_url"],
-    )
-
-    # TODO: Handle normal shop payments?
-    return cast(str, checkout_session.url)
-
-
-def open_stripe_customer_portal(
-    member_id: int, test_clock: Optional[stripe.test_helpers.TestClock]
-) -> str:
+def open_stripe_customer_portal(member_id: int, test_clock: Optional[stripe.test_helpers.TestClock]) -> str:
     """Create a customer portal session and return the URL to which the user should be redirected."""
     member = db_session.query(Member).get(member_id)
     assert member is not None
     stripe_customer = get_stripe_customer(member, test_clock)
     assert stripe_customer is not None
 
-    billing_portal_session = stripe.billing_portal.Session.create(
-        customer=stripe_customer["id"]
-    )
+    billing_portal_session = stripe.billing_portal.Session.create(customer=stripe_customer["id"])
     print(billing_portal_session)
 
     return cast(str, billing_portal_session.url)
@@ -816,9 +774,7 @@ class SubscriptionInfo:
     upcoming_invoice: Optional[UpcomingInvoice]
 
 
-def get_subscription_info_from_subscription(
-    sub_type: SubscriptionType, sub_id: str
-) -> SubscriptionInfo:
+def get_subscription_info_from_subscription(sub_type: SubscriptionType, sub_id: str) -> SubscriptionInfo:
     try:
         if sub_id.startswith("sub_sched_"):
             upcoming = stripe.Invoice.upcoming(schedule=sub_id)
@@ -829,9 +785,7 @@ def get_subscription_info_from_subscription(
             type=sub_type,
             active=True,
             upcoming_invoice=UpcomingInvoice(
-                payment_date=datetime.fromtimestamp(
-                    upcoming["next_payment_attempt"], tz=timezone.utc
-                ),
+                payment_date=datetime.fromtimestamp(upcoming["next_payment_attempt"], tz=timezone.utc),
                 amount_due=Decimal(upcoming["amount_due"]) / STRIPE_CURRENTY_BASE,
             ),
         )
@@ -866,18 +820,14 @@ def list_subscriptions(member_id: int) -> List[SubscriptionInfo]:
                     # The subscription is scheduled to start at some point in the future.
                     # This most likely means the member already had some membership when they signed up for the subscription.
                     # We don't want to start the subscription until the member actually needs it.
-                    result.append(
-                        get_subscription_info_from_subscription(sub_type, sub_id)
-                    )
+                    result.append(get_subscription_info_from_subscription(sub_type, sub_id))
                 elif status == SubscriptionScheduleStatus.ACTIVE:
                     # We may just be waiting for the webhook to fire. So generally we should not be in this state for more than a few seconds.
                     # Though in dev mode, the webhook may not fire at all if the developer hasn't configured stripe events properly (see readme).
                     print(
                         "If the subscription schedule has started, the member should have a reference to the started subscription instead."
                     )
-                    result.append(
-                        get_subscription_info_from_subscription(sub_type, sub_id)
-                    )
+                    result.append(get_subscription_info_from_subscription(sub_type, sub_id))
                 elif status in [
                     SubscriptionScheduleStatus.RELEASED,
                     SubscriptionScheduleStatus.COMPLETED,

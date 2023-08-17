@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from typing import Any
-from flask import Response, g, request, send_file, make_response, redirect, jsonify
+from flask import Response, g, request, send_file, make_response
 from sqlalchemy.exc import NoResultFound
 from membership.enums import PriceLevel
 from shop.stripe_discounts import get_discount_fraction_off
@@ -15,7 +15,6 @@ from service.api_definition import (
     POST,
     DELETE,
     Arg,
-    WEBSHOP_ADMIN,
     MEMBER_EDIT,
 )
 from service.db import db_session
@@ -32,8 +31,15 @@ from shop.entities import (
     product_action_entity,
 )
 from shop.models import TransactionContent, ProductImage
-from shop.pay import RegisterResponse, cancel_subscriptions, pay, register, register, start_subscriptions
-from shop.stripe_payment_intent import PartialPayment, confirm_stripe_payment_intent
+from shop.pay import (
+    cancel_subscriptions,
+    pay,
+    register,
+    register,
+    setup_payment_method,
+    start_subscriptions,
+)
+from shop.stripe_payment_intent import PartialPayment
 from shop.shop_data import (
     pending_actions,
     member_history,
@@ -41,16 +47,14 @@ from shop.shop_data import (
     get_product_data,
     all_product_data,
     get_membership_products,
-    special_product_data,
 )
 from shop.stripe_event import stripe_callback
 from shop.transactions import ship_labaccess_orders
 from logging import getLogger
 
 from shop.stripe_subscriptions import (
-    SubscriptionType,
     cancel_subscription,
-    create_stripe_checkout_session,
+    get_subscription_products,
     list_subscriptions,
     open_stripe_customer_portal,
 )
@@ -179,8 +183,8 @@ def accessy_invite():
 
 
 @service.route("/member/current/subscriptions", method=POST, permission=USER)
-def start_subscriptions_route() -> Any:
-    return start_subscriptions(request.json, g.user_id).to_dict()
+def start_subscriptions_route() -> None:
+    return start_subscriptions(request.json, g.user_id)
 
 
 @service.route("/member/current/subscriptions", method=DELETE, permission=USER)
@@ -251,9 +255,12 @@ def public_image(image_id: int) -> Response:
 
 @service.route("/register_page_data", method=GET, permission=PUBLIC)
 def register_page_data():
+    # Make sure subscription products have been created and are up to date
+    get_subscription_products()
+
     return {
         "membershipProducts": get_membership_products(),
-        "productData": [product_entity.to_obj(p) for p in special_product_data()],
+        "productData": all_product_data(),
         "discounts": {
             price_level.value: get_discount_fraction_off(price_level).fraction_off for price_level in PriceLevel
         },
@@ -266,10 +273,9 @@ def pay_route() -> PartialPayment:
 
 
 # Used to just initiate a capture of a payment method via a setup intent
-@service.route("/setup_payment_method", method=GET, permission=USER, commit_on_error=True)
-def stripe_payment_method_route():
-    url = create_stripe_checkout_session(g.user_id, data=request.json)
-    return redirect(url)
+@service.route("/setup_payment_method", method=POST, permission=USER, commit_on_error=True)
+def setup_payment_method_route():
+    return setup_payment_method(request.json, g.user_id)
 
 
 @service.route("/register", method=POST, permission=PUBLIC, commit_on_error=True)

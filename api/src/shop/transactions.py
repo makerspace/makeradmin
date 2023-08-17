@@ -63,6 +63,7 @@ class Purchase(DataClassJsonMixin):
     cart: List[CartItem]
     expected_sum: str
     stripe_payment_method_id: str
+    transaction_id: Optional[int] = None
 
 
 @dataclass
@@ -72,11 +73,10 @@ class CartItem(DataClassJsonMixin):
 
 
 @dataclass
-class Purchase(DataClassJsonMixin):
-    cart: List[CartItem]
-    expected_sum: str
-    stripe_payment_method_id: str
-    transaction_id: Optional[int] = None
+class SubscriptionStart(DataClassJsonMixin):
+    subscription: SubscriptionType
+    expected_to_pay_now: Decimal
+    expected_to_pay_recurring: Decimal
 
 
 def get_source_transaction(source_id: str) -> Optional[Transaction]:
