@@ -337,13 +337,17 @@ def register(data_dict: Any, remote_addr: str, user_agent: str) -> RegisterRespo
             # Mark the member instantly as pending
             # The member will be activated on the first successful purchase
             "pending_activation": True,
-            # Mark the member as deleted, so that it is not visible in the member list, and it cannot be used to log in
-            "deleted_at": datetime.utcnow(),
             "price_level": (data.discount.price_level if data.discount is not None else PriceLevel.Normal).value,
             "price_level_motivation": data.discount.message if data.discount is not None else None,
         },
-        commit=False,
+        commit=True,
     )["member_id"]
+
+    # Mark the member as deleted, so that it is not visible in the member list, and it cannot be used to log in
+    # We cannot pass the deleted_at parameter to the create function because it the API prevents that field from being set.
+    member = db_session.query(Member).filter(Member.member_id == member_id).one()
+    member.deleted_at = datetime.utcnow()
+    db_session.flush()
 
     token = auth.force_login(remote_addr, user_agent, member_id)["access_token"]
     return RegisterResponse(
