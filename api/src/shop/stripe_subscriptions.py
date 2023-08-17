@@ -2,21 +2,28 @@
 This module contains the logic for handling Stripe subscriptions.
 
 The model for subscriptions is as follows:
-- A member may have at most one membership subscription and at most one lab access subscription.
+- A member may have at most one membership subscription and at most one makespace access subscription.
 - A subscription is a Stripe subscription.
 - When subscription is created, we look at the current membership of the member and may schedule the subscription to start in the future instead of immediately.
 - The member stores the Stripe subscription id, or the schedule id in the database (the schedule if the subscription is scheduled to start in the future).
-- When subscriptions are paid, an order is added to makeradmin with an action that indicates that days should be added to their membership.
+- When subscriptions are paid, a transaction is added to makeradmin with an action that indicates that days should be added to their membership.
     - The order is shipped immediately.
-- When a new member starts subscribing to lab membership, we pause the subscription immediately after the first payment.
-    - This is done since the member will not be able to get any lab access until after they sign the lab access agreement.
+- When a new member starts subscribing to makerspace membership, and they haven't signed the access agreement, we pause the subscription immediately after the first payment.
+    - This is done since the member will not be able to get any makespace access until after they sign the makespace access agreement.
     - When the lab membership agreement is signed (and orders are shipped), we resume the subscription.
 - Subscriptions may have binding periods. This means that the member will pay for N months in advance the first time they pay, and then the normal subscription will continue.
     - The binding period is set by the `BINDING_PERIOD` constant.
     - Binding period prices need to be configured in the stripe dashboard with the metadata price_type=binding_period.
         - It should also be configured as recurring with the number of months that the binding period should be.
-    - If desired, this can also be used to discount the subscription during the binding period.
-- Subscriptions will use the default price that is defined on the stripe product (except for the binding period).
+    - Currently the binding period need to have the same price per month as the non-binding period.
+- Subscriptions will use the price that has the metadata price_type=recurring (except for the binding period).
+
+Due to a limitation in how stripe works, we need to use a regular purchase for the first payment.
+This is because stripe doesn't allow starting multiple subscriptions at the same time, which becomes a UX issue if the card requires 3D secure authentication
+(we don't want the user to have to authenticate multiple times).
+Therefore we use a regular purchase for the first payment, and then schedule the subscription to start at the next renewal date.
+This logic is handled in the frontend.
+
 """
 from dataclasses import dataclass
 from decimal import Decimal
