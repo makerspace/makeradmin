@@ -27,7 +27,7 @@ export const Sidebar = ({ cart, className = "" }: { cart: { cart: Cart, productD
                 <NavItem url="/shop" icon="cart">Webshop</NavItem>
                 {(path === "/shop" || path === "/shop/cart") && cart !== null &&
                     <ul id="categories" className="uk-nav-sub">
-                        {cart.productData.products.map(category =>
+                        {cart.productData.categories.map(category =>
                             <li><a href={`/shop/#category${category.id}`} uk-scroll={path === "/shop"}><span uk-icon="tag"></span> {category.name}</a></li>
                         )}
                         <NavItem url="/shop/cart" icon="cart">Min Kundvagn ({Cart.formatCurrency(cart.cart.sum(cart.productData.id2item))})</NavItem>

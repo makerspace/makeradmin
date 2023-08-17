@@ -9,7 +9,7 @@ import { show_phone_number_dialog } from "./change_phone";
 import { SubscriptionInfo, SubscriptionInfos, SubscriptionType, activateSubscription, cancelSubscription, getCurrentSubscriptions } from "./subscriptions";
 import { TranslationKey, useTranslation } from "./translations";
 import { Sidebar } from "./sidebar";
-import { LoadProductData, Product, ProductData, RelevantProducts, extractRelevantProducts, initializeStripe } from "./payment_common";
+import { FindWellKnownProduct, LoadProductData, Product, ProductData, RelevantProducts, extractRelevantProducts, initializeStripe } from "./payment_common";
 import Cart, { useCart } from "./cart";
 import { MEMBERBOOTH_URL } from "./urls";
 declare var UIkit: any;
@@ -370,7 +370,11 @@ function Address({ member }: { member: member_t }) {
     );
 }
 
-function SubscriptionPayment({ sub, membership, subscriptions, member, type }: { sub: SubscriptionInfo | null, membership: membership_t, subscriptions: SubscriptionInfo[], member: member_t, type: SubscriptionType }) {
+function SubscriptionPayment({ sub, membership, subscriptions, member, type, productData }: { sub: SubscriptionInfo | null, membership: membership_t, subscriptions: SubscriptionInfo[], member: member_t, type: SubscriptionType, productData: ProductData }) {
+    const product = FindWellKnownProduct(productData.products, `${type}_subscription`)!;
+    const t = useTranslation();
+    if (product.unit !== "mån" && product.unit !== "år" && product.unit !== "st") throw new Error(`Unexpected unit '${product.unit}' for ${product.name}. Expected one of år/mån/st`);
+
     return sub ?
         <div class="uk-button-group">
             <button class="uk-button" disabled>Auto renew: Active</button>
@@ -383,9 +387,13 @@ function SubscriptionPayment({ sub, membership, subscriptions, member, type }: {
         <>
             <button class="uk-button uk-button-primary" onClick={e => {
                 e.preventDefault();
+                if (member.labaccess_agreement_at === null) {
+                    UIkit.modal.alert(`<h2>Cannot start subscription</h2><p>You must attend a member introduction before you can start an auto-renewal subscription.</p><p>You can find them in the <a href="${calendarURL}">calendar</a>.</p>`);
+                    return;
+                }
+
                 activateSubscription(type, member, membership, subscriptions);
-            }}>Activate auto renewal</button>
-            <p>Enable auto-renewal to get a 10% discount on your membership.</p>
+            }}>Activate auto renewal: {product.price}/{t(`unit.${product.unit}.one`)}</button>
         </>;
 }
 
@@ -405,7 +413,7 @@ function SubscriptionProduct({ product, cart, onChangeCart }: { product: Product
     </button>
 }
 
-function BaseMembership({ member, membership, subscriptions, relevantProducts, cart, onChangeCart }: { member: member_t, membership: membership_t, subscriptions: SubscriptionInfo[], relevantProducts: RelevantProducts, cart: Cart, onChangeCart: (cart: Cart) => void }) {
+function BaseMembership({ member, membership, subscriptions, relevantProducts, cart, onChangeCart, productData }: { member: member_t, membership: membership_t, subscriptions: SubscriptionInfo[], relevantProducts: RelevantProducts, cart: Cart, onChangeCart: (cart: Cart) => void, productData: ProductData }) {
     const t = useTranslation();
     const sub = subscriptions.find(sub => sub.type === "membership") || null;
     return <fieldset>
@@ -413,13 +421,14 @@ function BaseMembership({ member, membership, subscriptions, relevantProducts, c
         <Info2 info={{ active: membership.membership_active, enddate: membership.membership_end }} translation_key="membership" />
         <p>{t("member_page.subscriptions.descriptions.membership")}</p>
         <hr />
-        <SubscriptionPayment type="membership" sub={sub} membership={membership} subscriptions={subscriptions} member={member} />
+        <SubscriptionPayment type="membership" sub={sub} membership={membership} subscriptions={subscriptions} member={member} productData={productData} />
+        <div class="uk-margin-small-top" />
         {sub && sub.upcoming_invoice && <p>{t("member_page.subscriptions.next_charge")(sub.upcoming_invoice.amount_due, sub.upcoming_invoice.payment_date)}</p>}
         {!sub && <SubscriptionProduct product={relevantProducts.baseMembershipProduct} cart={cart} onChangeCart={onChangeCart} />}
     </fieldset>
 }
 
-function MakerspaceAccess({ member, membership, subscriptions, relevantProducts, cart, onChangeCart }: { member: member_t, membership: membership_t, subscriptions: SubscriptionInfo[], relevantProducts: RelevantProducts, cart: Cart, onChangeCart: (cart: Cart) => void }) {
+function MakerspaceAccess({ member, membership, subscriptions, relevantProducts, pending_labaccess_days, cart, onChangeCart, productData }: { member: member_t, membership: membership_t, pending_labaccess_days: number, subscriptions: SubscriptionInfo[], relevantProducts: RelevantProducts, cart: Cart, onChangeCart: (cart: Cart) => void, productData: ProductData }) {
     const t = useTranslation();
     const sub = subscriptions.find(sub => sub.type === "labaccess") || null;
     return <fieldset>
@@ -428,9 +437,11 @@ function MakerspaceAccess({ member, membership, subscriptions, relevantProducts,
         {
             membership.special_labaccess_active && <Info2 info={{ active: membership.special_labaccess_active, enddate: membership.special_labaccess_end }} translation_key="special_labaccess" />
         }
+        {pending_labaccess_days > 0 && <p>Your <strong>{pending_labaccess_days}</strong> days of makerspace access will start when you attend a member introduction.</p>}
         <p>{t("member_page.subscriptions.descriptions.labaccess")}</p>
         <hr />
-        <SubscriptionPayment type="labaccess" sub={sub} membership={membership} subscriptions={subscriptions} member={member} />
+        <SubscriptionPayment type="labaccess" sub={sub} membership={membership} subscriptions={subscriptions} member={member} productData={productData} />
+        <div class="uk-margin-small-top" />
         {sub && sub.upcoming_invoice && <p>{t("member_page.subscriptions.next_charge")(sub.upcoming_invoice.amount_due, sub.upcoming_invoice.payment_date)}</p>}
         {!sub && <SubscriptionProduct product={relevantProducts.labaccessProduct} cart={cart} onChangeCart={onChangeCart} />}
     </fieldset>
@@ -483,8 +494,8 @@ function MemberPage({ member, membership: initial_membership, pending_labaccess_
                     <h2>{t("member_page.member")} {member.member_number}: {member.firstname} {member.lastname}</h2>
                     {show_beta ? <>
                         <Help member={member} membership={membership} pending_labaccess_days={pending_labaccess_days} onSendAccessyInvite={send_accessy_invite} />
-                        <BaseMembership member={member} membership={membership} subscriptions={subscriptions} relevantProducts={relevantProducts} cart={cart} onChangeCart={setCart} />
-                        <MakerspaceAccess member={member} membership={membership} subscriptions={subscriptions} relevantProducts={relevantProducts} cart={cart} onChangeCart={setCart} />
+                        <BaseMembership member={member} membership={membership} subscriptions={subscriptions} relevantProducts={relevantProducts} cart={cart} onChangeCart={setCart} productData={productData} />
+                        <MakerspaceAccess member={member} membership={membership} subscriptions={subscriptions} relevantProducts={relevantProducts} cart={cart} onChangeCart={setCart} productData={productData} pending_labaccess_days={pending_labaccess_days} />
                         <Billing />
                     </>
                         : <>

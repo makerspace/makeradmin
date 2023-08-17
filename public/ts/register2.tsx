@@ -1,14 +1,15 @@
 import * as common from "./common";
-import { Component, ComponentChildren, createContext, render } from 'preact';
-import { StateUpdater, useContext, useEffect, useMemo, useRef, useState } from 'preact/hooks';
+import { render } from 'preact';
+import { StateUpdater, useEffect, useMemo, useState } from 'preact/hooks';
 import { ServerResponse } from "./common";
-import { Translation, TranslationKeyValues } from "./translate";
-import { AssertIsWellKnownProductId, Discount, FindWellKnownProduct, PaymentAction, PaymentFailedError, PaymentIntentNextActionType, PriceLevel, Product, Purchase, RegisterPageData, RelevantProducts, SetupIntentResponse, StripeCardInput, ToPayPreview, calculateAmountToPay, createPaymentMethod, createStripeCardInput, display_stripe_error, extractRelevantProducts, handleStripeSetupIntent, initializeStripe, stripe } from "./payment_common";
+import { BackendPaymentResponse, Discount, PaymentFailedError, PriceLevel, Product, ProductData, ProductDataFromProducts, RegisterPageData, RelevantProducts, SetupIntentResponse, SetupPaymentMethodRequest, StripeCardInput, ToPayPreview, calculateAmountToPay, createPaymentMethod, createStripeCardInput, extractRelevantProducts, handleStripeSetupIntent, initializeStripe, negotiatePayment, pay } from "./payment_common";
 import { PopupModal, PopupWidget, useCalendlyEventListener } from "react-calendly";
-import { CALENDAR, FACEBOOK_GROUP, GET_STARTED_QUIZ, INSTAGRAM, RELATIVE_MEMBER_PORTAL, SLACK_HELP, WIKI } from "./urls";
+import { RELATIVE_MEMBER_PORTAL } from "./urls";
 import { LoadCurrentMemberInfo, member_t } from "./member_common";
-import { SubscriptionStart } from "./subscriptions";
-import { Dictionary, TranslationContext, TranslationWrapper, Translations, useTranslation } from "./translations";
+import { StartSubscriptionsRequest, SubscriptionStart } from "./subscriptions";
+import { PaymentRequest } from "./payment_common";
+import { TranslationWrapper, Translations, useTranslation } from "./translations";
+import Cart from "./cart";
 
 declare var UIkit: any;
 
@@ -156,7 +157,7 @@ enum State {
     Discounts,
 }
 
-const Confirmation = ({ memberInfo, selectedPlan, relevantProducts, discount, discountInfo, card, onRegistered, onBack }: { memberInfo: MemberInfo, selectedPlan: Plan, relevantProducts: RelevantProducts, discount: Discount, discountInfo: DiscountsInfo, card: stripe.elements.Element, onRegistered: (r: RegistrationSuccess) => void, onBack: () => void }) => {
+const Confirmation = ({ memberInfo, selectedPlan, productData, discount, discountInfo, card, onRegistered, onBack }: { memberInfo: MemberInfo, selectedPlan: Plan, productData: ProductData, discount: Discount, discountInfo: DiscountsInfo, card: stripe.elements.Element, onRegistered: (r: RegistrationSuccess) => void, onBack: () => void }) => {
     const t = useTranslation();
     const [inProgress, setInProgress] = useState(false);
 
@@ -165,7 +166,7 @@ const Confirmation = ({ memberInfo, selectedPlan, relevantProducts, discount, di
         <div class="uk-flex-1" />
         {t("payment.text")}
         <div class="uk-flex-1" />
-        <ToPayPreview products={selectedPlan.products} discount={discount} currentMemberships={[]} />
+        <ToPayPreview productData={productData} cart={Cart.oneOfEachProduct(selectedPlan.products)} discount={discount} currentMemberships={[]} />
         <div class="uk-flex-1" />
         <span class="payment-processor">{t("payment.payment_processor")}</span>
         <StripeCardInput element={card} />
@@ -191,7 +192,7 @@ const Confirmation = ({ memberInfo, selectedPlan, relevantProducts, discount, di
 
                 if (paymentMethod !== null) {
                     try {
-                        onRegistered(await registerMember(paymentMethod, memberInfo, selectedPlan, discount, discountInfo, relevantProducts));
+                        onRegistered(await registerMember(paymentMethod, productData, memberInfo, selectedPlan, discount, discountInfo));
                     } catch (e) {
                         if (e instanceof PaymentFailedError) {
                             UIkit.modal.alert("<h2>Payment failed</h2>" + e.message);
@@ -218,49 +219,47 @@ type DiscountRequest = {
 }
 
 type RegisterRequest = {
-    purchase: Purchase
-    setup_intent_id: string | null
     member: MemberInfo
-    subscriptions: SubscriptionStart[]
     discount: DiscountRequest | null
+}
+
+type RegisterResponse = {
+    token: string
+    member_id: number
 }
 
 type RegistrationSuccess = {
     loginToken: string
 }
 
-async function registerMember(paymentMethod: stripe.paymentMethod.PaymentMethod, memberInfo: MemberInfo, selectedPlan: Plan, discount: Discount, discountInfo: DiscountsInfo, relevantProducts: RelevantProducts): Promise<RegistrationSuccess> {
-    const { payNow, payRecurring } = calculateAmountToPay({ products: selectedPlan.products, discount, currentMemberships: [] })
-    const nonSubscriptionProducts = selectedPlan.products.filter(p => p.product_metadata.subscription_type === undefined);
+async function registerMember(paymentMethod: stripe.paymentMethod.PaymentMethod, productData: ProductData, memberInfo: MemberInfo, selectedPlan: Plan, discount: Discount, discountInfo: DiscountsInfo): Promise<RegistrationSuccess> {
     const data: RegisterRequest = {
         member: memberInfo,
-        purchase: {
-            cart: nonSubscriptionProducts.map(p => ({
-                id: p.id,
-                count: 1,
-            })),
-            expected_sum: "" + payNow.filter(p => p.product.product_metadata.subscription_type === undefined).reduce((sum, { amount }) => sum + amount, 0),
-            stripe_payment_method_id: paymentMethod.id,
-        },
-        subscriptions: selectedPlan.products.filter(p => p.product_metadata.subscription_type !== undefined).map(p => {
-            const payNowForSubscription = payNow.find(({ product }) => p == product);
-            const payRecurringForSubscription = payRecurring.find(({ product }) => p == product);
-            return {
-                subscription: p.product_metadata.subscription_type!,
-                expected_to_pay_now: "" + (payNowForSubscription ? payNowForSubscription.amount : 0),
-                expected_to_pay_recurring: "" + (payRecurringForSubscription ? payRecurringForSubscription.amount : 0),
-            }
-        }),
-        setup_intent_id: null,
         discount: discount.priceLevel !== null && discountInfo.discountReason !== null ? {
             price_level: discount.priceLevel,
             message: `${discountInfo.discountReason}: ${discountInfo.discountReasonMessage}`,
         } : null,
     };
 
-    return {
-        loginToken: (await handleStripeSetupIntent<RegisterRequest, SetupIntentResponse & { token: string }>(window.apiBasePath + "/webshop/register", data)).token!
-    };
+    // This registers the member as pending
+    // If the payment fails, we can safely forget about the member (it will be cleaned up during the next registration attempt).
+    let loginToken: string;
+    try {
+        loginToken = (await common.ajax('POST', `${window.apiBasePath}/webshop/register`, data) as ServerResponse<RegisterResponse>).data.token;
+    } catch (e) {
+        throw new PaymentFailedError(common.get_error(e));
+    }
+
+    const cart = new Cart(
+        selectedPlan.products.map(p => ({
+            id: p.id,
+            count: 1
+        }))
+    )
+
+    await pay(paymentMethod, cart, productData, discount, [], { loginToken });
+
+    return { loginToken };
 }
 
 
@@ -423,15 +422,17 @@ const RegisterPage = ({ }: {}) => {
         discountReason: null,
         discountReasonMessage: "",
     });
+    const [productData, setProductData] = useState<ProductData | null>(null);
 
 
     useEffect(() => {
         common.ajax('GET', `${window.apiBasePath}/webshop/register_page_data`).then(x => {
             setRegisterPageData(x.data);
+            setProductData(ProductDataFromProducts((x.data as RegisterPageData).productData));
         });
     }, []);
 
-    if (registerPageData === null) {
+    if (registerPageData === null || productData === null) {
         return <div>Loading...</div>
     }
 
@@ -441,7 +442,7 @@ const RegisterPage = ({ }: {}) => {
         fractionOff: registerPageData.discounts[priceLevel],
     }
 
-    const relevantProducts = extractRelevantProducts(registerPageData.productData);
+    const relevantProducts = extractRelevantProducts(productData.products);
     const accessCostSingle = parseFloat(relevantProducts.labaccessProduct.price) * (1 - discount.fractionOff);
     const accessSubscriptionCost = parseFloat(relevantProducts.labaccessSubscriptionProduct.price) * (1 - discount.fractionOff);
     const baseMembershipCost = parseFloat(relevantProducts.baseMembershipProduct.price) * (1 - discount.fractionOff);
@@ -503,7 +504,7 @@ const RegisterPage = ({ }: {}) => {
     ];
 
     for (const plan of plans) {
-        const toPay = calculateAmountToPay({ products: plan.products, discount: discount, currentMemberships: [] });
+        const toPay = calculateAmountToPay({ productData, cart: Cart.oneOfEachProduct(plan.products), discount: discount, currentMemberships: [] });
         plan.price = toPay.payNow.reduce((a, b) => a + b.amount, 0);
     }
 
@@ -529,7 +530,7 @@ const RegisterPage = ({ }: {}) => {
                     {plans.map((plan, i) => <PlanButton selected={selectedPlan === plan.id} onClick={() => setSelectedPlan(plan.id)} plan={plan} order={i} />)}
                 </div>
                 {registerPageData.discounts["low_income_discount"] > 0 && <button className="flow-button" onClick={() => setState(State.Discounts)}>{t("apply_for_discounts")}</button>}
-                {activePlan !== undefined ? <ToPayPreview products={activePlan.products} discount={discount} currentMemberships={[]} /> : null}
+                {activePlan !== undefined ? <ToPayPreview productData={productData} cart={Cart.oneOfEachProduct(activePlan.products)} discount={discount} currentMemberships={[]} /> : null}
                 <button className="flow-button primary" disabled={selectedPlan == null} onClick={() => setState(State.MemberInfo)}>{t("continue")}</button>
             </>);
         case State.MemberInfo:
@@ -559,7 +560,7 @@ const RegisterPage = ({ }: {}) => {
                     card={card}
                     selectedPlan={activePlan}
                     memberInfo={memberInfo}
-                    relevantProducts={relevantProducts}
+                    productData={productData}
                     discount={discount}
                     discountInfo={discounts}
                     onRegistered={async (r) => {

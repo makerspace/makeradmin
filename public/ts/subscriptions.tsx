@@ -1,9 +1,10 @@
 import { render } from "preact";
 import { member_t, membership_t } from "./member_common"
-import { Discount, PaymentFailedError, Product, RegisterPageData, SetupIntentResponse, StripeCardInput, ToPayPreview, calculateAmountToPay, createPaymentMethod, createStripeCardInput, extractRelevantProducts, handleStripeSetupIntent } from "./payment_common";
+import { Discount, LoadProductData, PaymentFailedError, Product, ProductData, ProductDataFromProducts, RegisterPageData, SetupIntentResponse, StripeCardInput, ToPayPreview, calculateAmountToPay, createPaymentMethod, createStripeCardInput, extractRelevantProducts, handleStripeSetupIntent, pay } from "./payment_common";
 import { ajax, show_error } from "./common";
 import { useState } from "preact/hooks";
 import { TranslationWrapper, useTranslation } from "./translations";
+import Cart from "./cart";
 declare var UIkit: any;
 
 export type SubscriptionType = "membership" | "labaccess"
@@ -30,15 +31,14 @@ export type SubscriptionInfos = {
     makerspace_access: SubscriptionInfo,
 }
 
-type StartSubscriptionsRequest = {
+export type StartSubscriptionsRequest = {
     subscriptions: SubscriptionStart[]
-    setup_intent_id: string | null,
-    stripe_payment_method_id: string
 }
 
-const PayDialog = ({ stripe, products, discount, currentMemberships, memberInfo, onCancel, onPay }: { stripe: stripe.elements.Element, products: Product[], currentMemberships: SubscriptionType[], discount: Discount, memberInfo: member_t, onCancel: () => void, onPay: () => void }) => {
+const PayDialog = ({ stripe, products, productData, discount, currentMemberships, memberInfo, onCancel, onPay }: { stripe: stripe.elements.Element, productData: ProductData, products: Product[], currentMemberships: SubscriptionType[], discount: Discount, memberInfo: member_t, onCancel: () => void, onPay: () => void }) => {
     const t = useTranslation();
     const [inProgress, setInProgress] = useState(false);
+    const cart = new Cart(products.map(p => ({ id: p.id, count: p.smallest_multiple })));
     return (
         <>
             <div class="uk-modal-header">
@@ -52,7 +52,7 @@ const PayDialog = ({ stripe, products, discount, currentMemberships, memberInfo,
 
                     return <p class="small-print">{t(`summaries.${sub_type}_subscription.summary`)} {t('member_page.subscriptions.binding_period')(p.smallest_multiple + " " + t(`unit.${p.unit}.many`))}</p>;
                 })}
-                <ToPayPreview products={products} discount={discount} currentMemberships={currentMemberships} />
+                <ToPayPreview productData={productData} cart={cart} discount={discount} currentMemberships={currentMemberships} />
                 <div class="uk-margin"></div>
                 <StripeCardInput element={stripe} />
             </div>
@@ -66,23 +66,8 @@ const PayDialog = ({ stripe, products, discount, currentMemberships, memberInfo,
                         setInProgress(false);
                         return;
                     }
-                    const { payNow, payRecurring } = calculateAmountToPay({ products, discount, currentMemberships })
-                    const req: StartSubscriptionsRequest = {
-                        subscriptions: products.filter(p => p.product_metadata.subscription_type !== undefined).map(p => {
-                            const payNowForSubscription = payNow.find(({ product }) => p == product);
-                            const payRecurringForSubscription = payRecurring.find(({ product }) => p == product);
-                            return {
-                                subscription: p.product_metadata.subscription_type!,
-                                expected_to_pay_now: "" + (payNowForSubscription ? payNowForSubscription.amount : 0),
-                                expected_to_pay_recurring: "" + (payRecurringForSubscription ? payRecurringForSubscription.amount : 0),
-                            }
-                        }),
-                        setup_intent_id: null,
-                        stripe_payment_method_id: paymentMethod.id,
-                    };
-
                     try {
-                        await handleStripeSetupIntent<StartSubscriptionsRequest, SetupIntentResponse>(`${window.apiBasePath}/webshop/member/current/subscriptions`, req);
+                        await pay(paymentMethod, cart, productData, discount, currentMemberships);
                     } catch (e) {
                         setInProgress(false);
                         if (e instanceof PaymentFailedError) {
@@ -103,7 +88,7 @@ const PayDialog = ({ stripe, products, discount, currentMemberships, memberInfo,
     );
 };
 
-const CancelDialog = ({ types, membership, onCancelDialog, onCancelSubscriptions }: { types: SubscriptionType[], membership: membership_t, onCancelDialog: () => void, onCancelSubscriptions: ()=>void }) => {
+const CancelDialog = ({ types, membership, onCancelDialog, onCancelSubscriptions }: { types: SubscriptionType[], membership: membership_t, onCancelDialog: () => void, onCancelSubscriptions: () => void }) => {
     const t = useTranslation();
     const typeStr = types.map(ty => t(`summaries.${ty}_subscription.summary`)).join(" " + t("and") + " ");
     return <>
@@ -112,8 +97,8 @@ const CancelDialog = ({ types, membership, onCancelDialog, onCancelSubscriptions
         </div>
         <div class="uk-modal-body">
             <p>Your {typeStr} will no longer be automatically renewed.</p>
-            { types.includes("membership") && membership.membership_active && <p>{t("member_page.subscriptions.cancel.membership.valid_until")(membership.membership_end)}</p>}
-            { types.includes("labaccess") && membership.labaccess_active && <p>{t("member_page.subscriptions.cancel.labaccess.valid_until")(membership.labaccess_end)}</p>}
+            {types.includes("membership") && membership.membership_active && <p>{t("member_page.subscriptions.cancel.membership.valid_until")(membership.membership_end)}</p>}
+            {types.includes("labaccess") && membership.labaccess_active && <p>{t("member_page.subscriptions.cancel.labaccess.valid_until")(membership.labaccess_end)}</p>}
         </div>
         <div class="uk-modal-footer uk-text-right">
             <button class="uk-button" onClick={onCancelDialog}>Nevermind</button>{" "}
@@ -173,8 +158,6 @@ export async function activateSubscription(type: SubscriptionType, member: membe
         throw new Error("Member already has this subscription");
     }
 
-    const registerPageDataPromise = ajax('GET', `${window.apiBasePath}/webshop/register_page_data`);
-
     let to_activate: SubscriptionType[] = [type];
     if (type === "labaccess" && !subscriptions.some(s => s.type === "membership")) {
         try {
@@ -190,8 +173,8 @@ export async function activateSubscription(type: SubscriptionType, member: membe
     if (membership.membership_active) currentMemberships.push("membership");
     if (membership.labaccess_active) currentMemberships.push("labaccess");
 
-    const registerPageData: RegisterPageData = (await registerPageDataPromise).data;
-    const products = registerPageData.productData.filter(p => to_activate.includes(p.product_metadata.subscription_type!));
+    const productData = await LoadProductData();
+    const products = productData.products.filter(p => to_activate.includes(p.product_metadata.subscription_type!));
     if (products.length !== to_activate.length) {
         throw new Error("Could not find all subscription products");
     }
@@ -206,6 +189,7 @@ export async function activateSubscription(type: SubscriptionType, member: membe
                 <PayDialog
                     stripe={stripe}
                     products={products}
+                    productData={productData}
                     discount={{ priceLevel: "normal", fractionOff: 0.0 }}
                     memberInfo={member}
                     currentMemberships={currentMemberships}

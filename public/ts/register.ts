@@ -1,7 +1,7 @@
 import Cart from "./cart"
 import * as common from "./common"
 import { login } from "./common";
-import { Product, Purchase, RegisterPageData, SetupIntentResponse, calculateAmountToPay, createPaymentMethod, disable_pay_button, enable_pay_button, handleStripeSetupIntent, initializeStripe, mountStripe, pay } from "./payment_common"
+import { Product, ProductData, ProductDataFromProducts, Purchase, RegisterPageData, SetupIntentResponse, calculateAmountToPay, createPaymentMethod, disable_pay_button, enable_pay_button, handleStripeSetupIntent, initializeStripe, mountStripe } from "./payment_common"
 declare var UIkit: any;
 
 type MemberInfo = {
@@ -28,8 +28,8 @@ type Plan = {
     products: Product[],
 }
 
-async function registerMember(paymentMethod: stripe.paymentMethod.PaymentMethod, memberInfo: MemberInfo, selectedPlan: Plan): Promise<RegistrationSuccess> {
-    const { payNow, payRecurring } = calculateAmountToPay({ products: selectedPlan.products, discount: { priceLevel: "normal", fractionOff: 0 }, currentMemberships: [] })
+async function registerMember(paymentMethod: stripe.paymentMethod.PaymentMethod, productData: ProductData, memberInfo: MemberInfo, selectedPlan: Plan): Promise<RegistrationSuccess> {
+    const { payNow, payRecurring } = calculateAmountToPay({ cart: Cart.oneOfEachProduct(selectedPlan.products), productData, discount: { priceLevel: "normal", fractionOff: 0 }, currentMemberships: [] })
     const nonSubscriptionProducts = selectedPlan.products.filter(p => p.product_metadata.subscription_type === undefined);
     const data: RegisterRequest = {
         member: memberInfo,
@@ -55,7 +55,8 @@ common.onGetAndDocumentLoaded("/webshop/register_page_data", (value: RegisterPag
     common.addSidebarListeners();
     initializeStripe();
 
-    const { productData, membershipProducts } = value;
+    const { membershipProducts } = value;
+    const productData = ProductDataFromProducts(value.productData);
 
     const apiBasePath = window.apiBasePath;
 
@@ -66,12 +67,6 @@ common.onGetAndDocumentLoaded("/webshop/register_page_data", (value: RegisterPag
 
     // Add an instance of the card Element into the `card-element` <div>.
     const element = mountStripe();
-
-    const id2item = new Map();
-
-    for (const item of productData) {
-        id2item.set(item.id, item);
-    }
 
     let cart: Cart = new Cart([]);
 
@@ -86,7 +81,7 @@ common.onGetAndDocumentLoaded("/webshop/register_page_data", (value: RegisterPag
             count: 1,
         }]);
 
-        const totalSum = cart.sum(id2item);
+        const totalSum = cart.sum(productData.id2item);
         document.querySelector("#pay-button")!.querySelector("span")!.innerHTML = "Betala " + Cart.formatCurrency(totalSum);
     }
 
@@ -150,8 +145,8 @@ common.onGetAndDocumentLoaded("/webshop/register_page_data", (value: RegisterPag
                 labaccess_agreement_at: "",
             });
             if (paymentMethod !== null) {
-                const registration = await registerMember(paymentMethod, memberInfo, {
-                    products: productData.filter((p: any) => cart.items.find(x => x.id === p.id)),
+                const registration = await registerMember(paymentMethod, productData, memberInfo, {
+                    products: productData.products.filter((p: any) => cart.items.find(x => x.id === p.id)),
                 });
                 login(registration.loginToken);
                 window.location.href = "/member";
@@ -159,7 +154,7 @@ common.onGetAndDocumentLoaded("/webshop/register_page_data", (value: RegisterPag
         } catch (e: any) {
             enable_pay_button();
             if (e.what === "not_unique") {
-                UIkit.modal.alert("<h2>Email has already been registered</h2>Log in <a href=\"/member\">on the member pages</a> and then continue to the shop, where you can buy either the membership or the starter pack.</p>");
+                UIkit.modal.alert("<h2>Registration failed</h2><p>This email has already been registered</p>");
             } else {
                 common.show_error("Registrering misslyckades", e);
             }

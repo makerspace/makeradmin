@@ -2,10 +2,10 @@
 import { useEffect, useRef } from "preact/hooks";
 import * as common from "./common"
 import { ServerResponse } from "./common";
-import { SubscriptionType } from "./subscriptions";
+import { StartSubscriptionsRequest, SubscriptionStart, SubscriptionType } from "./subscriptions";
 import { useTranslation } from "./translations";
 import { member_t } from "./member_common";
-import Cart from "./cart";
+import Cart, { Item } from "./cart";
 
 declare var UIkit: any;
 
@@ -97,6 +97,13 @@ export type PaymentAction = {
     client_secret: string
 }
 
+export type PaymentRequest = {
+    cart: Item[],
+    expected_sum: number,
+    stripe_payment_method_id: string,
+    transaction_id: number | null
+}
+
 export type BackendPaymentResponse = {
     type: PaymentIntentResult
     transaction_id: number,
@@ -112,70 +119,6 @@ export type Purchase = {
     cart: CartItem[]
     expected_sum: string
     stripe_payment_method_id: string
-}
-
-// This function might be called recursively doing multiple authentication steps.
-async function handleBackendResponse(json: ServerResponse<BackendPaymentResponse>, object: PaymentFlowDefinition) {
-    if (object.handle_backend_response) { object.handle_backend_response(json); }
-
-    const action_info = json.data.action_info;
-    if (action_info && action_info.type === PaymentIntentNextActionType.USE_STRIPE_SDK) {
-        // This might be a recursive call doing multiple authentication steps.
-        await handleStripeAction(action_info.client_secret, object);
-    } else {
-        if (object.on_payment_success) { object.on_payment_success(json); }
-    }
-}
-
-// This function might be called recursively doing multiple authentication steps.
-async function handleStripeAction(client_secret: string, object: PaymentFlowDefinition) {
-    const result = await stripe.handleCardAction(
-        client_secret
-    );
-    if (result.error) {
-        display_stripe_error(result.error);
-        if (object.on_stripe_error) { object.on_stripe_error(result.error); }
-        enable_pay_button();
-    } else {
-        // The card action has been handled
-        // The PaymentIntent can be confirmed again on the server
-        try {
-            const json = await common.ajax("POST", window.apiBasePath + "/webshop/confirm_payment", {
-                payment_intent_id: result.paymentIntent!.id,
-            });
-            // This might be a recursive call doing multiple authentication steps.
-            await handleBackendResponse(json as ServerResponse<BackendPaymentResponse>, object);
-        } catch (json) {
-            if (object.on_failure) { object.on_failure(json as ServerResponse<any>); }
-            enable_pay_button();
-        }
-    }
-}
-
-
-export async function pay(object: PaymentFlowDefinition) {
-    // Don't allow any clicks while waiting for a response from the server
-    if (waitingForPaymentResponse) {
-        return;
-    }
-
-    if (object.before_initiate_payment) { object.before_initiate_payment(); }
-    default_before_initiate_payment();
-
-    const result = await stripe.createPaymentMethod('card', card);
-    if (result.error) {
-        display_stripe_error(result.error);
-        if (object.on_stripe_error) { object.on_stripe_error(result.error); }
-        enable_pay_button();
-    } else {
-        try {
-            const json = await object.initiate_payment(result);
-            await handleBackendResponse(json, object);
-        } catch (json) {
-            if (object.on_failure) { object.on_failure(json); }
-            enable_pay_button();
-        }
-    }
 }
 
 export type PriceLevel = "normal" | "low_income_discount";
@@ -208,13 +151,14 @@ export type RegisterPageData = {
         name: string,
         price: number,
     }[],
-    productData: Product[],
+    productData: ProductCategory[],
     discounts: Record<PriceLevel, number>,
 }
 
 export type ToPay = {
     product: Product,
     amount: number,
+    count: number,
     originalAmount: number,
 }
 
@@ -236,7 +180,7 @@ export function FindWellKnownProduct(products: Product[], id: WellKnownProductId
     return products.find(p => p.product_metadata.special_product_id === id) || null;
 }
 
-export const calculateAmountToPay = ({ products, currentMemberships, discount }: { products: Product[], discount: Discount, currentMemberships: SubscriptionType[] }) => {
+export const calculateAmountToPay = ({ productData, cart, currentMemberships, discount }: { productData: ProductData, cart: Cart, discount: Discount, currentMemberships: SubscriptionType[] }) => {
     const payNow: ToPay[] = [];
     const payRecurring: ToPay[] = [];
 
@@ -245,15 +189,26 @@ export const calculateAmountToPay = ({ products, currentMemberships, discount }:
     // This is because the starter pack includes makerspace acccess membership for 2 months, so the subscription will then only start
     // after the starter pack is over, and thus the subscription will not be included in the paidRightNow output.
     currentMemberships = [...currentMemberships];
-    if (FindWellKnownProduct(products, "single_labaccess_month") !== null || FindWellKnownProduct(products, "access_starter_pack") !== null) {
+    const cartProducts = cart.items.map(i => productData.id2item.get(i.id)!);
+    if (FindWellKnownProduct(cartProducts, "single_labaccess_month") !== null || FindWellKnownProduct(cartProducts, "access_starter_pack") !== null) {
         currentMemberships.push("labaccess");
     }
-    if (FindWellKnownProduct(products, "single_membership_year") !== null) {
+    if (FindWellKnownProduct(cartProducts, "single_membership_year") !== null) {
         currentMemberships.push("membership");
     }
 
-    for (const product of products) {
+    for (const item of cart.items) {
+        const product = productData.id2item.get(item.id)!;
         const subscriptionType = product.product_metadata.subscription_type;
+
+        if (subscriptionType !== undefined) {
+            if (item.count != product.smallest_multiple) {
+                throw new Error(`Cannot purchase ${item.count} of product ${product.name}. Expected ${product.smallest_multiple}`);
+            }
+        } else if (item.count % product.smallest_multiple !== 0) {
+            throw new Error(`Cannot purchase ${item.count} of product ${product.name}. Expected a multiple of ${product.smallest_multiple}`);
+        }
+
         let price = parseFloat(product.price);
         const originalPrice = price;
         if (product.product_metadata.allowed_price_levels?.includes(discount.priceLevel) ?? false) {
@@ -263,13 +218,16 @@ export const calculateAmountToPay = ({ products, currentMemberships, discount }:
             // TODO: There's no support right now for displaying a different price during the binding period, if one exists
             payNow.push({
                 product,
-                amount: price * product.smallest_multiple,
-                originalAmount: originalPrice * product.smallest_multiple,
+                count: item.count,
+                amount: price * item.count,
+                originalAmount: originalPrice * item.count,
             });
         }
         if (subscriptionType !== undefined) {
+            // The recurring price is always just a single unit of the product
             payRecurring.push({
                 product,
+                count: 1,
                 amount: price,
                 originalAmount: originalPrice,
             });
@@ -300,21 +258,27 @@ export type Transaction = {
 }
 
 export type ProductData = {
-    products: ProductCategory[]
+    categories: ProductCategory[]
+    products: Product[]
     id2item: Map<number, Product>
 }
 
 export async function LoadProductData(): Promise<ProductData> {
-    const products = (await common.ajax("GET", window.apiBasePath + "/webshop/product_data", null)).data as ProductCategory[];
+    const categories = (await common.ajax("GET", window.apiBasePath + "/webshop/product_data", null)).data as ProductCategory[];
+    return ProductDataFromProducts(categories);
+}
 
+export function ProductDataFromProducts(categories: ProductCategory[]): ProductData {
     const id2item = new Map<number, Product>();
+    const products = [];
 
-    for (const category of products) {
-        for (const item of category.items) {
+    for (const c of categories) {
+        for (const item of c.items) {
             id2item.set(item.id, item);
+            products.push(item);
         }
     }
-    return { products, id2item };
+    return { categories, products, id2item };
 }
 
 export const StripeCardInput = ({ element }: { element: stripe.elements.Element }) => {
@@ -363,9 +327,9 @@ const currencyToString = (value: number) => {
 }
 
 
-export const ToPayPreview = ({ products, discount, currentMemberships }: { products: Product[], discount: Discount, currentMemberships: SubscriptionType[] }) => {
+export const ToPayPreview = ({ productData, cart, discount, currentMemberships }: { productData: ProductData, cart: Cart, discount: Discount, currentMemberships: SubscriptionType[] }) => {
     const t = useTranslation();
-    const { payNow, payRecurring } = calculateAmountToPay({ products, discount, currentMemberships });
+    const { payNow, payRecurring } = calculateAmountToPay({ productData, cart, discount, currentMemberships });
 
     let renewInfoText = payRecurring.map(({ product, amount }) => {
         const product_id = product.product_metadata.special_product_id;
@@ -494,6 +458,13 @@ export type SetupIntentResponse = {
     action_info: PaymentAction | null
 }
 
+export type SetupPaymentMethodRequest = {
+    stripe_payment_method_id: string
+    setup_intent_id: string | null
+}
+
+export type SetupPaymentMethodResponse = SetupIntentResponse;
+
 export enum PaymentIntentResult {
     Success = "success",
     RequiresAction = "requires_action",
@@ -540,11 +511,11 @@ export async function handleStripeSetupIntent<T extends { setup_intent_id: strin
     }
 }
 
-export async function negotiatePayment<T extends { transaction_id: number | null }, R extends BackendPaymentResponse>(endpoint: string, data: T): Promise<R> {
+export async function negotiatePayment<T extends { transaction_id: number | null }, R extends BackendPaymentResponse>(endpoint: string, data: T, options: { loginToken?: string } = {}): Promise<R> {
     while (true) {
         let res: ServerResponse<R>;
         try {
-            res = await common.ajax("POST", endpoint, data);
+            res = await common.ajax("POST", endpoint, data, { loginToken: options.loginToken });
         } catch (e: any) {
             if (e["message"] !== undefined) {
                 throw new PaymentFailedError(e["message"]);
@@ -576,4 +547,45 @@ export async function negotiatePayment<T extends { transaction_id: number | null
                 break;
         }
     }
+}
+
+export async function pay(paymentMethod: stripe.paymentMethod.PaymentMethod, cart: Cart, productData: ProductData, discount: Discount, currentMemberships: SubscriptionType[], options: { loginToken?: string } = {}): Promise<{ transaction_id: number | null }> {
+    const { payNow, payRecurring } = calculateAmountToPay({ cart, productData, discount, currentMemberships })
+
+    let transaction_id: number | null = null;
+
+    if (payNow.length > 0) {
+        transaction_id = (await negotiatePayment<PaymentRequest, BackendPaymentResponse>(window.apiBasePath + "/webshop/pay", {
+            cart: payNow.map(p => ({
+                id: p.product.id,
+                count: p.count,
+            })),
+            expected_sum: payNow.reduce((sum, { amount }) => sum + amount, 0),
+            stripe_payment_method_id: paymentMethod.id,
+            transaction_id: null,
+        }, { loginToken: options.loginToken })).transaction_id;
+    } else {
+        // This will configure the default payment method
+        // This is necessary if the member already has membership (and thus the subscription will not start immediately),
+        // but they have not had a subscription before, so no default payment method has been configured yet.
+        await handleStripeSetupIntent<SetupPaymentMethodRequest, SetupIntentResponse>(window.apiBasePath + "/webshop/setup_payment_method", {
+            stripe_payment_method_id: paymentMethod.id,
+            setup_intent_id: null
+        })
+    }
+
+    const subscriptionStarts: SubscriptionStart[] = payRecurring.map(({ product, amount }) => ({
+        subscription: product.product_metadata.subscription_type!,
+        expected_to_pay_recurring: "" + amount,
+        expected_to_pay_now: "0", // We should already have paid for the member to be a member, so the subscription should start in the future and not charge anything right now
+    }));
+    try {
+        await common.ajax('POST', `${window.apiBasePath}/webshop/member/current/subscriptions`, {
+            subscriptions: subscriptionStarts,
+        } as StartSubscriptionsRequest, { loginToken: options.loginToken });
+    } catch (e) {
+        throw new PaymentFailedError(common.get_error(e));
+    }
+
+    return { transaction_id }
 }

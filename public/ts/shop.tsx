@@ -120,7 +120,7 @@ const ShopPage = ({ productData }: { productData: ProductData }) => {
             <button className={`layout-button uk-icon-button ${layoutMode === "layout-table" ? "selected" : ""}`} uk-icon="icon: table" onClick={() => setLayoutMode("layout-table")}></button>
           </div>
         </li>
-        {productData.products.map(cat => <ProductCategory category={cat} cart={cart} onChangeCart={setCart} visibleItems={visibleItems} />)}
+        {productData.categories.map(cat => <ProductCategory category={cat} cart={cart} onChangeCart={setCart} visibleItems={visibleItems} />)}
       </ul>
     </div>
   </>
