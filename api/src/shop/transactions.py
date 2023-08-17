@@ -39,7 +39,6 @@ from shop.models import (
     TransactionContent,
     Transaction,
     ProductAction,
-    PendingRegistration,
     StripePending,
     Product,
 )
@@ -94,9 +93,7 @@ def get_source_transaction(source_id: str) -> Optional[Transaction]:
 
 
 @nested_atomic
-def commit_transaction_to_db(
-    member_id: int, total_amount: Decimal, contents: List[TransactionContent], activates_member: bool = False
-) -> Transaction:
+def commit_transaction_to_db(member_id: int, total_amount: Decimal, contents: List[TransactionContent]) -> Transaction:
     """Save as new transaction with transaction content in db and return it transaction."""
 
     transaction = Transaction(member_id=member_id, amount=total_amount, status=Transaction.PENDING)
@@ -122,10 +119,6 @@ def commit_transaction_to_db(
                 "product_id": content.product_id,
             },
         )
-
-    if activates_member:
-        # Mark this transaction as one that is for registering a member.
-        db_session.add(PendingRegistration(transaction_id=transaction.id))
 
     return transaction
 
@@ -247,19 +240,15 @@ def ship_add_membership_action(action: TransactionAction, transaction: Transacti
 def activate_member(member: Member) -> None:
     logger.info(f"activating member {member.member_id}")
     member.deleted_at = None
+    member.pending_activation = False
     db_session.add(member)
     db_session.flush()
     send_new_member_email(member)
 
 
-def create_transaction(member_id: int, purchase: Purchase, activates_member: bool) -> Transaction:
+def create_transaction(member_id: int, purchase: Purchase) -> Transaction:
     total_amount, contents = validate_order(member_id, purchase.cart, purchase.expected_sum)
-    transaction = commit_transaction_to_db(
-        member_id=member_id,
-        total_amount=total_amount,
-        contents=contents,
-        activates_member=activates_member,
-    )
+    transaction = commit_transaction_to_db(member_id=member_id, total_amount=total_amount, contents=contents)
 
     logger.info(f"created transaction {transaction.id}, total_amount={total_amount}, member_id={member_id}")
 
@@ -321,10 +310,13 @@ def ship_labaccess_orders(
 @nested_atomic
 def payment_success(transaction: Transaction) -> None:
     complete_transaction(transaction)
-    ship_orders(ship_add_labaccess=False, transaction_filter=transaction)
 
-    if db_session.query(PendingRegistration).filter(PendingRegistration.transaction_id == transaction.id).count():
+    member: Member = transaction.member
+    if member.pending_activation:
+        # Members are activated when they make their first purchase
         activate_member(transaction.member)
+
+    ship_orders(ship_add_labaccess=True, transaction_filter=transaction)
 
 
 def process_cart(member_id: int, cart: List[CartItem]) -> Tuple[Decimal, List[TransactionContent]]:

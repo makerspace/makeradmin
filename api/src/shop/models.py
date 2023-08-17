@@ -1,5 +1,18 @@
 from typing import Any
-from sqlalchemy import JSON, Column, Integer, String, DateTime, func, Text, Numeric, ForeignKey, Enum, Boolean, LargeBinary
+from sqlalchemy import (
+    JSON,
+    Column,
+    Integer,
+    String,
+    DateTime,
+    func,
+    Text,
+    Numeric,
+    ForeignKey,
+    Enum,
+    Boolean,
+    LargeBinary,
+)
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, configure_mappers, validates
 from shop.stripe_constants import MakerspaceMetadataKeys
@@ -148,23 +161,13 @@ class TransactionAction(Base):
     status = Column(Enum(PENDING, COMPLETED), nullable=False)
     completed_at = Column(DateTime)
 
-    content = relationship(TransactionContent, backref='actions')
+    content = relationship(TransactionContent, backref="actions")
 
     def __repr__(self) -> str:
-        return f'TransactionAction(id={self.id}, value={self.value}, status={self.status},' \
-               f' action_type={self.action_type})'
-
-
-class PendingRegistration(Base):
-    __tablename__ = 'webshop_pending_registrations'
-    
-    id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
-    transaction_id = Column(Integer, ForeignKey(Transaction.id), nullable=False)
-
-    transaction = relationship(Transaction, backref='pending_registrations')
-
-    def __repr__(self) -> str:
-        return f'PendingRegistration(id={self.id})'
+        return (
+            f"TransactionAction(id={self.id}, value={self.value}, status={self.status},"
+            f" action_type={self.action_type})"
+        )
 
 
 class StripePending(Base):

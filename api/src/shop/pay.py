@@ -37,17 +37,13 @@ from shop.transactions import Purchase, activate_member, create_transaction
 logger = getLogger("makeradmin")
 
 
-def make_purchase(
-    member_id: int, purchase: Purchase, activates_member: bool = False
-) -> Tuple[Transaction, Optional[PaymentAction]]:
+def make_purchase(member_id: int, purchase: Purchase) -> Transaction:
     """Pay using the data in purchase, the purchase structure should be validated according to schema."""
 
     payment_method_id: str = purchase.stripe_payment_method_id
 
-    transaction = create_transaction(
-        member_id=member_id,
-        purchase=purchase,
-        activates_member=activates_member,
+    transaction = create_transaction(member_id=member_id, purchase=purchase)
+
     )
     action_info = pay_with_stripe(transaction, payment_method_id)
 
