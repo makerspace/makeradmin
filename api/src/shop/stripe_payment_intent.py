@@ -133,7 +133,7 @@ def confirm_stripe_payment_intent(transaction_id: int) -> PartialPayment:
 
     if (
         action_info is None
-        and payment_intent.setup_future_usage != ""
+        and payment_intent.setup_future_usage is not None
         and SetupFutureUsage(payment_intent.setup_future_usage) == SetupFutureUsage.OFF_SESSION
     ):
         # We have indicated that this payment method should be used for future payments too.
