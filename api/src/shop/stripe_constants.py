@@ -129,3 +129,17 @@ class SubscriptionScheduleStatus(str, Enum):
     COMPLETED = "completed"
     RELEASED = "released"
     CANCELED = "canceled"
+
+
+class SetupIntentStatus(Enum):
+    REQUIRES_PAYMENT_METHOD = "requires_payment_method"
+    REQUIRES_CONFIRMATION = "requires_confirmation"
+    REQUIRES_ACTION = "requires_action"
+    PROCESSING = "processing"
+    CANCELED = "canceled"
+    SUCCEEDED = "succeeded"
+
+
+class SetupFutureUsage(str, Enum):
+    OFF_SESSION = "off_session"
+    ON_SESSION = "on_session"
