@@ -1,7 +1,7 @@
 import Cart from "./cart"
 import * as common from "./common"
-import { login } from "./common";
-import { Product, ProductData, ProductDataFromProducts, Purchase, RegisterPageData, SetupIntentResponse, calculateAmountToPay, createPaymentMethod, disable_pay_button, enable_pay_button, handleStripeSetupIntent, initializeStripe, mountStripe } from "./payment_common"
+import { ServerResponse, login } from "./common";
+import { PaymentFailedError, Product, ProductData, ProductDataFromProducts, Purchase, RegisterPageData, SetupIntentResponse, calculateAmountToPay, createPaymentMethod, disable_pay_button, enable_pay_button, handleStripeSetupIntent, initializeStripe, mountStripe, pay } from "./payment_common"
 declare var UIkit: any;
 
 type MemberInfo = {
@@ -13,11 +13,13 @@ type MemberInfo = {
 }
 
 type RegisterRequest = {
-    purchase: Purchase
-    setup_intent_id: string | null
     member: MemberInfo
-    subscriptions: []
     discount: null
+}
+
+type RegisterResponse = {
+    token: string
+    member_id: number
 }
 
 type RegistrationSuccess = {
@@ -31,24 +33,31 @@ type Plan = {
 async function registerMember(paymentMethod: stripe.paymentMethod.PaymentMethod, productData: ProductData, memberInfo: MemberInfo, selectedPlan: Plan): Promise<RegistrationSuccess> {
     const { payNow, payRecurring } = calculateAmountToPay({ cart: Cart.oneOfEachProduct(selectedPlan.products), productData, discount: { priceLevel: "normal", fractionOff: 0 }, currentMemberships: [] })
     const nonSubscriptionProducts = selectedPlan.products.filter(p => p.product_metadata.subscription_type === undefined);
+
     const data: RegisterRequest = {
         member: memberInfo,
-        purchase: {
-            cart: nonSubscriptionProducts.map(p => ({
-                id: p.id,
-                count: 1,
-            })),
-            expected_sum: "" + payNow.filter(p => p.product.product_metadata.subscription_type === undefined).reduce((sum, { amount }) => sum + amount, 0),
-            stripe_payment_method_id: paymentMethod.id,
-        },
-        subscriptions: [],
-        setup_intent_id: null,
         discount: null,
     };
 
-    return {
-        loginToken: (await handleStripeSetupIntent<RegisterRequest, SetupIntentResponse & { token: string }>(window.apiBasePath + "/webshop/register", data)).token!
-    };
+    // This registers the member as pending
+    // If the payment fails, we can safely forget about the member (it will be cleaned up during the next registration attempt).
+    let loginToken: string;
+    try {
+        loginToken = (await common.ajax('POST', `${window.apiBasePath}/webshop/register`, data) as ServerResponse<RegisterResponse>).data.token;
+    } catch (e) {
+        throw new PaymentFailedError(common.get_error(e));
+    }
+
+    const cart = new Cart(
+        nonSubscriptionProducts.map(p => ({
+            id: p.id,
+            count: 1,
+        }))
+    )
+
+    await pay(paymentMethod, cart, productData, { priceLevel: "normal", fractionOff: 0.0 }, [], { loginToken });
+
+    return { loginToken };
 }
 
 common.onGetAndDocumentLoaded("/webshop/register_page_data", (value: RegisterPageData) => {
@@ -61,7 +70,7 @@ common.onGetAndDocumentLoaded("/webshop/register_page_data", (value: RegisterPag
     const apiBasePath = window.apiBasePath;
 
     // Add membership products
-    membershipProducts.forEach((product: any) => {
+    membershipProducts.filter(p => productData.id2item.get(p.id)!.product_metadata.subscription_type === undefined).forEach((product: any) => {
         document.querySelector("#products")!.innerHTML += `<div><input class="uk-radio" type="radio" value="${product.id}" name="product" checked/> ${product.name}: ${product.price} kr</div>`;
     });
 
