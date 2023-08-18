@@ -230,23 +230,24 @@ def stripe_invoice_event(subtype: EventSubtype, event: stripe.Event, current_tim
         # It should also be configured to automatically cancel the subscription after some failed attempts.
         pass
     elif subtype == EventSubtype.CREATED:
-        # Immediately charge the customer when the invoice is created.
+        # If subscriptions were to start immediately after a user action,
+        # this would be a good time to finalize draft invoices and pay them immediately.
         # Otherwise stripe will keep it in the draft state for an hour or so.
         # That would be especially bad when starting a subscription, since the user
         # wants to see their membership activate immediately.
-        invoice = event["data"]["object"]
-        if invoice["test_clock"] is not None:
-            # In test mode, we don't care about charging customers quickly.
-            # It's best that we don't do this, since if a developer has makeradmin running
-            # and listening for events, we might try to finalize the invoice twice
-            # (once in the test container, and once in the dev container).
-            # That just causes noisy errors in the logs.
-            return
-
-        if invoice["status"] == "draft":
-            logger.info(f"Draft invoice created ({event['id']}), charging customer...")
-            stripe.Invoice.finalize_invoice(invoice["id"], auto_advance=True)
-            stripe.Invoice.pay(invoice["id"])
+        #
+        # However, since when starting subscriptions we always do a normal purchase
+        # for the first invoice (see explanation at the top of stripe_subscriptions.py),
+        # all subscription invoices will be off-session (no user will be present)
+        # and so waiting an hour for the invoice to be paid is not a problem.
+        #
+        # Note: If immediately finalizing invoices becomes necessary at some point,
+        # the steps are:
+        # - if the invoice has a test clock, ignore it to avoid messing up tests.
+        # - if the invoice is not in draft state, ignore it.
+        # - finalize the invoice
+        # - pay the invoice
+        pass
 
 
 def stripe_customer_event(event_subtype: EventSubtype, event: stripe.Event) -> None:
