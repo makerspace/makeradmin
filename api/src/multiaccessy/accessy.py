@@ -38,12 +38,14 @@ def request(method, path, token=None, json=None, max_tries=8, err_msg=None):
         headers["Authorization"] = f"Bearer {token}"
     if json:
         headers["Content-Type"] = "application/json"
-        
+
     backoff = 1.0
     for i in range(max_tries):
         response = requests.request(method, ACCESSY_URL + path, json=json, headers=headers)
         if response.status_code == 429:
-            logger.warning(f"requesting accessy returned 429, too many reqeusts, try {i+1}/{max_tries}, retrying in {backoff}s, {path=}")
+            logger.warning(
+                f"requesting accessy returned 429, too many reqeusts, try {i+1}/{max_tries}, retrying in {backoff}s, {path=}"
+            )
             sleep(backoff)
             backoff = backoff * (1.2 + 0.1 * random())
             continue
@@ -95,32 +97,38 @@ class AccessySession:
     #################
 
     def get_all_members(self) -> list[AccessyMember]:
-        """ Get a list of all Accessy members in the ORG with GROUPS (lab and special) """
+        """Get a list of all Accessy members in the ORG with GROUPS (lab and special)"""
 
         org_member_ids = set(item["id"] for item in self._get_users_org())
 
         members = self._user_ids_to_accessy_members(org_member_ids)
-        
+
         lab_ids = set(item["userId"] for item in self._get_users_lab())
         special_ids = set(item["userId"] for item in self._get_users_special())
-        
+
         for m in members:
             if m.user_id in lab_ids:
                 m.groups.add(ACCESSY_LABACCESS_GROUP)
             if m.user_id in special_ids:
                 m.groups.add(ACCESSY_SPECIAL_LABACCESS_GROUP)
-        
+
         return members
 
     def is_in_org(self, phone_number: MSISDN, users_org: list[dict] = None) -> bool:
-        """ Check if a user with a specific phone number is in the ORG """
+        """Check if a user with a specific phone number is in the ORG"""
+        if not self.has_authentication():
+            return False
+
         user = self._get_org_user_from_phone(phone_number, users_org)
         if user is not None:
             return True
         return False
 
     def is_in_group(self, phone_number: MSISDN, access_group_id: UUID) -> bool:
-        """ Check if a user is in a specific access group """
+        """Check if a user is in a specific access group"""
+        if not self.has_authentication():
+            return False
+
         accessy_member = self._get_org_user_from_phone(phone_number)
         if accessy_member is None:
             return False
@@ -143,10 +151,12 @@ class AccessySession:
         if accessy_member is None:
             return
 
-        self.__delete(f"/asset/admin/access-permission-group/{access_group_id}/membership/{accessy_member.membership_id}")
+        self.__delete(
+            f"/asset/admin/access-permission-group/{access_group_id}/membership/{accessy_member.membership_id}"
+        )
 
     def add_to_group(self, phone_number: MSISDN, access_group_id: UUID):
-        """ Add a specific user with phone number to access group """
+        """Add a specific user with phone number to access group"""
         accessy_member = self._get_org_user_from_phone(phone_number)
         if accessy_member is None:
             self.invite_phone_to_org_and_groups([phone_number], [access_group_id])
@@ -156,16 +166,26 @@ class AccessySession:
             json=dict(membership=accessy_member.membership_id),
         )
 
-    def invite_phone_to_org_and_groups(self, phone_numbers: Iterable[MSISDN], access_group_ids: Iterable[UUID] = [], message_to_user: str = ""):
-        """ Invite a list of phone numbers to a list of groups """
+    def invite_phone_to_org_and_groups(
+        self, phone_numbers: Iterable[MSISDN], access_group_ids: Iterable[UUID] = [], message_to_user: str = ""
+    ):
+        """Invite a list of phone numbers to a list of groups"""
         self.__post(
             f"/org/admin/organization/{self.organization_id()}/invitation",
-            json=dict(accessPermissionGroupIds=list(access_group_ids), message=message_to_user, msisdns=list(phone_numbers)),
+            json=dict(
+                accessPermissionGroupIds=list(access_group_ids), message=message_to_user, msisdns=list(phone_numbers)
+            ),
             err_msg=f"invite {phone_numbers=} to org and groups {access_group_ids}. {message_to_user=}",
         )
-    
+
+    def has_authentication(self) -> bool:
+        return ACCESSY_CLIENT_ID is not None and ACCESSY_CLIENT_SECRET is not None
+
     def get_pending_invitations(self, after_date: date = None) -> Iterable[MSISDN]:
-        """ Get all pending invitations after a specific date (including). """
+        """Get all pending invitations after a specific date (including)."""
+        if not self.has_authentication():
+            return set()
+
         data = self._get(f"/org/admin/organization/{self.organization_id()}/invitation")
         pending_invitations = set()
         for inv in data:
@@ -176,20 +196,23 @@ class AccessySession:
             if is_pending and (after_date is None or invitation_date >= after_date):
                 pending_invitations.add(recipient)
         return pending_invitations
-        
+
     def organization_id(self):
         if self._organization_id:
             return self._organization_id
         self.__ensure_token()
         return self._organization_id
-    
+
     def get_user_groups(self, phone_number: MSISDN) -> list[str]:
-        """ Get all of the groups of a member """
+        """Get all of the groups of a member"""
+        if not self.has_authentication():
+            return []
+
         accessy_member = self._get_org_user_from_phone(phone_number)
         if accessy_member is None:
             return []
 
-        org_groups = (d['id'] for d in self._get_organization_groups())
+        org_groups = (d["id"] for d in self._get_organization_groups())
 
         group_descriptions = []
         for group_id in org_groups:
@@ -203,8 +226,8 @@ class AccessySession:
     # Internal methods
     ################################################
 
-    def __ensure_token(self):
-        if not ACCESSY_CLIENT_ID or not ACCESSY_CLIENT_SECRET:
+    def __ensure_token(self) -> None:
+        if not self.has_authentication():
             return
 
         with self._mutex:  # Only allow one concurrent token refresh as rate limiting on this endpoint is aggressive.
@@ -220,24 +243,26 @@ class AccessySession:
                         "client_secret": ACCESSY_CLIENT_SECRET,
                     },
                 )
-                
+
                 self.session_token = data["access_token"]
                 self.session_token_token_expires_at = now + timedelta(milliseconds=int(data["expires_in"]))
-                logger.info(f"accessy session token refreshed, expires_at={self.session_token_token_expires_at.isoformat()} token={self.session_token}")
-                
+                logger.info(
+                    f"accessy session token refreshed, expires_at={self.session_token_token_expires_at.isoformat()} token={self.session_token}"
+                )
+
             if not self._organization_id:
                 data = request(
                     "get",
                     "/asset/user/organization-membership",
                     token=self.session_token,
                 )
-                
+
                 match len(data):
                     case 0:
                         raise AccessyError("The API key does not have a corresponding organization membership")
                     case l if l > 1:
                         logger.warning("API key has several memberships. This is probably an error...")
-        
+
                 self._organization_id = data[0]["organizationId"]
                 logger.info(f"fetched accessy organization_id {self._organization_id}")
 
@@ -253,7 +278,7 @@ class AccessySession:
         if ACCESSY_DO_MODIFY and self.session_token:
             return request("delete", path, token=self.session_token, err_msg=err_msg)
         logger.info(f"ACCESSY_DO_MODIFY is false, skipping delete to {path=}")
-    
+
     def __post(self, path: str, err_msg: str = None, json: dict = None):
         self.__ensure_token()
         if ACCESSY_DO_MODIFY and self.session_token:
@@ -267,7 +292,7 @@ class AccessySession:
         logger.info(f"ACCESSY_DO_MODIFY is false, skipping put to {path=}")
 
     def _get_json_paginated(self, url: str, msg: str = None):
-        """ Convenience method for getting all data for a JSON endpoint that is paginated """
+        """Convenience method for getting all data for a JSON endpoint that is paginated"""
         page_size = 10000
         page_number = 0
         items = []
@@ -287,7 +312,9 @@ class AccessySession:
             total_item_count = data["totalItems"]
 
             if len(current_items) == 0 and total_item_count != 0:
-                raise AccessyError(f"Could not get all items. Not enough items were returned from Accessy endpoint during pagination loop. Got {received_item_count} out of {total_item_count} expected items")
+                raise AccessyError(
+                    f"Could not get all items. Not enough items were returned from Accessy endpoint during pagination loop. Got {received_item_count} out of {total_item_count} expected items"
+                )
 
         return items
 
@@ -296,44 +323,47 @@ class AccessySession:
     ################################################
 
     def _get_user_details(self, user_id: UUID) -> dict:
-        """ Get details for user ID. Fields: id, msisdn, firstName, lastName, ... """
+        """Get details for user ID. Fields: id, msisdn, firstName, lastName, ..."""
         return self._get(f"/org/admin/user/{user_id}", err_msg="Getting user details")
 
     def _get_users_org(self) -> list[dict]:
-        """ Get all user ID:s """
+        """Get all user ID:s"""
         return self._get_json_paginated(f"/asset/admin/organization/{self.organization_id()}/user")
         # {"items":[{"id":<uuid>,"msisdn":"+46...","firstName":str,"lastName":str}, ...],"totalItems":6,"pageSize":25,"pageNumber":0,"totalPages":1}
-    
+
     def _get_users_in_access_group(self, access_group_id: UUID) -> list[dict]:
-        """ Get all user ID:s in a specific access group """
+        """Get all user ID:s in a specific access group"""
         return self._get_json_paginated(f"/asset/admin/access-permission-group/{access_group_id}/membership")
         # {"items":[{"id":<uuid>,"userId":<uuid>,"organizationId":<uuid>,"roles":[<roles>]}, ...],"totalItems":3,"pageSize":25,"pageNumber":0,"totalPages":1}
 
     def _get_users_lab(self) -> list[dict]:
-        """ Get all user ID:s with lab access """
+        """Get all user ID:s with lab access"""
         return self._get_users_in_access_group(ACCESSY_LABACCESS_GROUP)
 
     def _get_users_special(self) -> list[dict]:
-        """ Get all user ID:s with special access """
+        """Get all user ID:s with special access"""
         return self._get_users_in_access_group(ACCESSY_SPECIAL_LABACCESS_GROUP)
-    
+
     def _get_organization_groups(self) -> list[dict]:
-        """ Get information about all groups """
+        """Get information about all groups"""
         return self._get_json_paginated(f"/asset/admin/organization/{self.organization_id()}/access-permission-group")
         # {"items": [{"id":<uuid>, "name":<string>, "description":<string>, constraints: <object>, childConstraints: <bool>}],"totalItems":2,"pageSize":25,"pageNumber":0,"totalPages":1}
-    
+
     def _get_membership_ids_in_group(self, group_id: UUID) -> list[UUID]:
-        """ Get each membership for a specific group """
-        return [d["id"] for d in self._get_json_paginated(f"/asset/admin/access-permission-group/{group_id}/membership")]
-    
+        """Get each membership for a specific group"""
+        return [
+            d["id"] for d in self._get_json_paginated(f"/asset/admin/access-permission-group/{group_id}/membership")
+        ]
+
     def _get_group_description(self, group_id: UUID) -> str:
-        """ Get a description for a group ID """
+        """Get a description for a group ID"""
         return self._get(f"/asset/admin/access-permission-group/{group_id}")["name"]
 
     def _user_ids_to_accessy_members(self, user_ids: Iterable[UUID]) -> list[AccessyMember]:
-        """ Convert a list of User ID:s to AccessyMembers """
+        """Convert a list of User ID:s to AccessyMembers"""
 
         APPLICATION_PHONE_NUMBER = object()  # Sentinel phone number for applications
+
         def fill_user_details(user: AccessyMember):
             data = self._get(f"/org/admin/user/{user.user_id}")
 
@@ -351,28 +381,30 @@ class AccessySession:
         def fill_membership_id(user: AccessyMember):
             data = self._get(f"/asset/admin/user/{user.user_id}/organization/{self.organization_id()}/membership")
             user.membership_id = data["id"]
-        
+
         threads = []
         accessy_members = []
         for uid in user_ids:
             accessy_member = AccessyMember(user_id=uid)
-            threads.append(threading.Thread(target=fill_user_details, args=(accessy_member, )))
-            threads.append(threading.Thread(target=fill_membership_id, args=(accessy_member, )))
+            threads.append(threading.Thread(target=fill_user_details, args=(accessy_member,)))
+            threads.append(threading.Thread(target=fill_membership_id, args=(accessy_member,)))
             accessy_members.append(accessy_member)
-        
+
         for t in threads:
             t.start()
 
         for t in threads:
             t.join()
-        
+
         # Filter out API keys
         accessy_members = [m for m in accessy_members if m.phone is not APPLICATION_PHONE_NUMBER]
 
         return accessy_members
-    
-    def _get_org_user_from_phone(self, phone_number: MSISDN, users_in_org: list[dict] = None) -> Union[None, AccessyMember]:
-        """ Get a AccessyMember from a phone number (if in org) """
+
+    def _get_org_user_from_phone(
+        self, phone_number: MSISDN, users_in_org: list[dict] = None
+    ) -> Union[None, AccessyMember]:
+        """Get a AccessyMember from a phone number (if in org)"""
         if users_in_org is None:
             users_in_org = self._get_users_org()
 

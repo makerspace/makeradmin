@@ -5,8 +5,13 @@ from sqlalchemy.exc import NoResultFound
 
 from membership.membership import get_membership_summary
 from membership.models import Member
-from multiaccessy.accessy import ACCESSY_LABACCESS_GROUP, ACCESSY_SPECIAL_LABACCESS_GROUP, \
-    AccessyError, accessy_session
+from multiaccessy.accessy import (
+    ACCESSY_CLIENT_SECRET,
+    ACCESSY_LABACCESS_GROUP,
+    ACCESSY_SPECIAL_LABACCESS_GROUP,
+    AccessyError,
+    accessy_session,
+)
 from service.db import db_session
 
 
@@ -40,8 +45,12 @@ def check_labaccess_requirements(member_id) -> LabaccessRequirements:
 
 
 def ensure_accessy_labaccess(member_id):
-    """ If all preconditions are met, send an accessy invite (including auto add to labaccess gropup). Returns human
-    readable message of what happened. """
+    """ If all preconditions are met, send an accessy invite (including auto add to labaccess gropup). Returns human readable message of what happened. """
+
+    if ACCESSY_CLIENT_SECRET is None:
+        logger.warn("Missing accessy client secret: skipping updates")
+        return
+
     state = check_labaccess_requirements(member_id)
     match state:
         case LabaccessRequirements.MEMBER_MISSING:
@@ -66,7 +75,9 @@ def ensure_accessy_labaccess(member_id):
     try:
         if accessy_session.is_in_org(member.phone):
             for group in groups:
-                logger.info(f"accessy, already in org, addding to group, will be noop if already in group: {member=} {group=}")
+                logger.info(
+                    f"accessy, already in org, addding to group, will be noop if already in group: {member=} {group=}"
+                )
                 accessy_session.add_to_group(member.phone, group)
         else:
             logger.info(f"accessy, sending invite: {member=} {groups=}")
