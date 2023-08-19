@@ -47,7 +47,7 @@ class SystestBase(TestBase):
         super().setUpClass()
 
         # Use the public key for these tests. TODO: Why not the private one?
-        set_stripe_key(False)
+        set_stripe_key(private=False)
         
         # Make sure sessions is removed so it is not using another engine in this thread.
         db_session.remove()
