@@ -11,6 +11,7 @@ const Eng = {
     continue: "Continue",
     back: "Back",
     and: "and",
+    cancel: "Cancel",
     apply_for_discounts: "I cannot afford the membership fee",
     unit: {
         år: {
@@ -51,7 +52,7 @@ const Eng = {
         },
         renewal: {
             one: "You can cancel this subscription at any time.",
-            many: "You can cancel these subscription at any time."
+            many: "You can cancel these subscriptions at any time."
         },
         cart_total: "Total",
         payment_right_now_nothing: "Right now, you will pay nothing.",
@@ -188,7 +189,6 @@ const Eng = {
                 <p>Almost done, we just need to take care of the payment.</p>
                 <p>Before you gain access to the makerspace you need to attend a member introduction. These are held <a target="_blank" href={URL_CALENDAR}>regularly every 1-2 weeks</a>.</p>
             </>,
-            pay: "Pay with Stripe",
             payment_processor: "Payment handled by Stripe",
         },
         success: {
@@ -276,10 +276,25 @@ const Eng = {
                 You get 24/7 access to the space and you can also store one box with your own things at the space.
                 Makerspace Access requires the Base Membership.`,
             },
+            pending_makerspace_access: (pending_days: number) => <>Your <strong>{pending_days}</strong> days of makerspace access will start when you attend a member introduction.</>,
             add_to_cart: (count: number, unit: string, price: number) => `Add ${count} ${unit} to cart: ${price} kr`,
-            binding_period: (duration: string) => `subscription has a binding period of ${duration}.`,
+            binding_period: (count: number, unit: string) => `subscription has a binding period of ${count} ${unit}.`,
             next_charge: (amount: string, date: string) => `Your membership will renew at ${formatDate(date)} for ${amount} kr.`,
+            activate_auto_renewal: (price: string, unit: string) => `Activate auto-renewal: ${price}/${unit}`,
+            auto_renewal_active: "Auto renew: Active",
+            errors: {
+                no_member_introduction: `
+                    <h2>Cannot start subscription</h2>
+                    <p>You must attend a member introduction before you can start an auto-renewal subscription.</p><p>You can find them in the <a href="${URL_CALENDAR}">calendar</a>.</p>
+                `
+            },
+            pay_dialog: {
+                title: "Activate auto-renewal",
+            }
         },
+    },
+    payment: {
+        pay_with_stripe: "Pay with Stripe",
     }
 }
 
@@ -326,4 +341,9 @@ export const TranslationWrapper = ({ children }: { children: preact.ComponentChi
             {children}
         </TranslationContext.Provider>
     )
+}
+
+export const translateUnit = (unit: string, count: number, t: InstanceType<typeof Translation<typeof Eng>>["t"]) => {
+    if (unit !== "mån" && unit !== "år" && unit !== "st") throw new Error(`Unexpected unit '${unit}'. Expected one of år/mån/st`);
+    return t(`unit.${unit}.${count > 1 ? "many" : "one"}`);
 }

@@ -206,7 +206,7 @@ const Confirmation = ({ memberInfo, selectedPlan, productData, discount, discoun
             }
         }}>
             <span className={"uk-spinner uk-icon progress-spinner " + (inProgress ? "progress-spinner-visible" : "")} uk-spinner={''} />
-            <span>{t("registration_page.payment.pay")}</span>
+            <span>{t("payment.pay_with_stripe")}</span>
         </button>
         <BackButton onClick={onBack} />
         <div class="uk-flex-1" />

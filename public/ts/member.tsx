@@ -6,12 +6,12 @@ import { LoadCurrentMemberGroups, LoadCurrentMemberInfo, LoadCurrentMembershipIn
 import { render } from "preact";
 import { useEffect, useMemo, useState } from "preact/hooks";
 import { show_phone_number_dialog } from "./change_phone";
-import { SubscriptionInfo, SubscriptionInfos, SubscriptionType, activateSubscription, cancelSubscription, getCurrentSubscriptions } from "./subscriptions";
-import { TranslationKey, useTranslation } from "./translations";
+import { SubscriptionInfo, SubscriptionType, activateSubscription, cancelSubscription, getCurrentSubscriptions } from "./subscriptions";
+import { useTranslation, translateUnit } from "./translations";
 import { Sidebar } from "./sidebar";
 import { FindWellKnownProduct, LoadProductData, Product, ProductData, RelevantProducts, extractRelevantProducts, initializeStripe } from "./payment_common";
 import Cart, { useCart } from "./cart";
-import { URL_MEMBERBOOTH } from "./urls";
+import { URL_CALENDAR, URL_MEMBERBOOTH } from "./urls";
 declare var UIkit: any;
 
 
@@ -34,7 +34,6 @@ type membership_info_t = {
     active: boolean
 };
 
-const calendarURL = "https://www.makerspace.se/kalendarium";
 const webshop_url = `${window.location.origin}/shop`;
 
 
@@ -153,7 +152,7 @@ function WarningItem({ children }: { children: preact.ComponentChildren }) {
 }
 
 function SignedContractWarning({ member }: { member: member_t }) {
-    return member.labaccess_agreement_at ? null : <WarningItem>Du måste delta på en <strong>medlemintroduktion</strong>. Du hittar dem i <a href={calendarURL}>kalendern</a>.</WarningItem>;
+    return member.labaccess_agreement_at ? null : <WarningItem>Du måste delta på en <strong>medlemintroduktion</strong>. Du hittar dem i <a href={URL_CALENDAR}>kalendern</a>.</WarningItem>;
 }
 
 
@@ -373,27 +372,26 @@ function Address({ member }: { member: member_t }) {
 function SubscriptionPayment({ sub, membership, subscriptions, member, type, productData }: { sub: SubscriptionInfo | null, membership: membership_t, subscriptions: SubscriptionInfo[], member: member_t, type: SubscriptionType, productData: ProductData }) {
     const product = FindWellKnownProduct(productData.products, `${type}_subscription`)!;
     const t = useTranslation();
-    if (product.unit !== "mån" && product.unit !== "år" && product.unit !== "st") throw new Error(`Unexpected unit '${product.unit}' for ${product.name}. Expected one of år/mån/st`);
 
     return sub ?
         <div class="uk-button-group">
-            <button class="uk-button" disabled>Auto renew: Active</button>
+            <button class="uk-button" disabled>{t("member_page.subscriptions.auto_renewal_active")}</button>
             <button class="uk-button uk-button-danger" onClick={e => {
                 e.preventDefault();
                 cancelSubscription(type, membership, subscriptions);
-            }}>Cancel</button>
+            }}>{t("cancel")}</button>
         </div>
         :
         <>
             <button class="uk-button uk-button-primary" onClick={e => {
                 e.preventDefault();
                 if (member.labaccess_agreement_at === null) {
-                    UIkit.modal.alert(`<h2>Cannot start subscription</h2><p>You must attend a member introduction before you can start an auto-renewal subscription.</p><p>You can find them in the <a href="${calendarURL}">calendar</a>.</p>`);
+                    UIkit.modal.alert(t("member_page.subscriptions.errors.no_member_introduction"));
                     return;
                 }
 
                 activateSubscription(type, member, membership, subscriptions);
-            }}>Activate auto renewal: {product.price}/{t(`unit.${product.unit}.one`)}</button>
+            }}>{t("member_page.subscriptions.activate_auto_renewal")(product.price, translateUnit(product.unit, 1, t))}</button>
         </>;
 }
 
@@ -437,7 +435,7 @@ function MakerspaceAccess({ member, membership, subscriptions, relevantProducts,
         {
             membership.special_labaccess_active && <Info2 info={{ active: membership.special_labaccess_active, enddate: membership.special_labaccess_end }} translation_key="special_labaccess" />
         }
-        {pending_labaccess_days > 0 && <p>Your <strong>{pending_labaccess_days}</strong> days of makerspace access will start when you attend a member introduction.</p>}
+        {pending_labaccess_days > 0 && <p>{t("member_page.subscriptions.pending_makerspace_access")(pending_labaccess_days)}</p>}
         <p>{t("member_page.subscriptions.descriptions.labaccess")}</p>
         <hr />
         <SubscriptionPayment type="labaccess" sub={sub} membership={membership} subscriptions={subscriptions} member={member} productData={productData} />
@@ -479,9 +477,7 @@ function MemberPage({ member, membership: initial_membership, pending_labaccess_
     const relevantProducts = useMemo(() => extractRelevantProducts([...productData.id2item.values()]), [productData.id2item]);
 
     // Automatically refresh membership info.
-    // This is particularly useful when the user has just bought a subscription,
-    // but the invoice has not yet been paid.
-    // In most cases it will get paid in a few seconds, and we want to show this to the user when it happens.
+    // This is particularly useful when the user has had the tab open for a long time.
     useFetchRepeatedly(LoadCurrentMembershipInfo, setMembership);
     const t = useTranslation();
     const { cart, setCart } = useCart();

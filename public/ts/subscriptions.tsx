@@ -3,7 +3,7 @@ import { member_t, membership_t } from "./member_common"
 import { Discount, LoadProductData, PaymentFailedError, Product, ProductData, ProductDataFromProducts, RegisterPageData, SetupIntentResponse, StripeCardInput, ToPayPreview, calculateAmountToPay, createPaymentMethod, createStripeCardInput, extractRelevantProducts, handleStripeSetupIntent, pay } from "./payment_common";
 import { ajax, show_error } from "./common";
 import { useState } from "preact/hooks";
-import { TranslationWrapper, useTranslation } from "./translations";
+import { TranslationWrapper, useTranslation, translateUnit } from "./translations";
 import Cart from "./cart";
 declare var UIkit: any;
 
@@ -42,7 +42,7 @@ const PayDialog = ({ stripe, products, productData, discount, currentMemberships
     return (
         <>
             <div class="uk-modal-header">
-                <h2>Activate auto-renewal</h2>
+                <h2>{t('member_page.subscriptions.pay_dialog.title')}</h2>
             </div>
             <div class="uk-modal-body">
                 {products.filter(p => p.smallest_multiple > 1).map(p => {
@@ -52,16 +52,14 @@ const PayDialog = ({ stripe, products, productData, discount, currentMemberships
                     // If the member already has membership, information about the binding period is redundant, or even misleading
                     if (currentMemberships.includes(sub_type)) return null;
 
-                    if (p.unit !== "mån" && p.unit !== "år" && p.unit !== "st") throw new Error(`Unexpected unit '${p.unit}' for ${p.name}. Expected one of år/mån/st`);
-
-                    return <p class="small-print">{t(`special_products.${sub_type}_subscription.summary`)} {t('member_page.subscriptions.binding_period')(p.smallest_multiple + " " + t(`unit.${p.unit}.many`))}</p>;
+                    return <p class="small-print">{t(`special_products.${sub_type}_subscription.summary`)} {t('member_page.subscriptions.binding_period')(p.smallest_multiple, translateUnit(p.unit, p.smallest_multiple, t))}</p>;
                 })}
                 <ToPayPreview productData={productData} cart={cart} discount={discount} currentMemberships={currentMemberships} />
                 <div class="uk-margin"></div>
                 <StripeCardInput element={stripe} />
             </div>
             <div class="uk-modal-footer uk-text-right">
-                <button class="uk-button" onClick={onCancel}>Cancel</button>{" "}
+                <button class="uk-button" onClick={onCancel}>${t("cancel")}</button>{" "}
                 <button class="uk-button uk-button-primary spinner-button" disabled={inProgress} onClick={async () => {
                     setInProgress(true);
                     const paymentMethod = await createPaymentMethod(stripe, memberInfo);
@@ -85,7 +83,7 @@ const PayDialog = ({ stripe, products, productData, discount, currentMemberships
                     onPay();
                 }}>
                     <span className={"uk-spinner uk-icon progress-spinner " + (inProgress ? "progress-spinner-visible" : "")} uk-spinner={''} />
-                    <span>Pay with Stripe</span>
+                    <span>{t("payment.pay_with_stripe")}</span>
                 </button>
             </div>
         </>
