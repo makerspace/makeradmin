@@ -61,7 +61,7 @@ const Eng = {
         memberships: {
             title: "Makerspace Memberships",
             p1: "Memberships are split into two parts",
-            p2: "Everyone has the base membership, and if you want to work on your own projects, you must also get Makerspace Access.",
+            p2: <>Everyone has the yearly <b>Base Membership</b>, and if you want to work on your own projects, you must also get <b>Makerspace Access</b> (paid monthly).</>,
         },
         chooseYourPlan: {
             title: "Choose your membership",
@@ -78,6 +78,7 @@ const Eng = {
                 included: [
                     "Take part in courses and social events",
                     "Vote at yearly meetings",
+                    "Support your local makerspace",
                     "Access to Stockholm Makerspace 24/7",
                     "Work on your own projects",
                     "Store a personal box at the space"
@@ -88,11 +89,12 @@ const Eng = {
                 title: "Starter Pack",
                 abovePrice: "",
                 period: "",
-                description1: "Two months of makerspace access for a lower price.\nNew members only.",
+                description1: "Two months of makerspace access for a lower price. New members only.",
                 description2: "",
                 included: [
                     "Take part in courses and social events",
                     "Vote at yearly meetings",
+                    "Support your local makerspace",
                     "Access to Stockholm Makerspace 24/7",
                     "Work on your own projects",
                     "Store a personal box at the space"
@@ -108,6 +110,7 @@ const Eng = {
                 included: [
                     "Take part in courses and social events",
                     "Vote at yearly meetings",
+                    "Support your local makerspace",
                     "Access to Stockholm Makerspace 24/7",
                     "Work on your own projects",
                     "Store a personal box at the space"
@@ -129,6 +132,7 @@ const Eng = {
                 ],
                 notIncluded: [
                     "Access to the space outside of events",
+                    "Work on your own projects",
                     "Store a personal box at the space",
                 ],
             },
