@@ -4,9 +4,13 @@ from datetime import datetime, timezone
 from logging import getLogger
 from typing import Any, Dict, List, Optional, Tuple
 from dataclasses_json import DataClassJsonMixin
+from service.config import config
 
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 from sqlalchemy.sql import func
+from membership.enums import PriceLevel
+from messages.message import send_message
+from messages.models import MessageTemplate
 from shop.stripe_constants import MakerspaceMetadataKeys
 from shop.stripe_discounts import get_discount_for_product, get_price_level_for_member
 from shop.stripe_subscriptions import SubscriptionType, resume_paused_subscription
@@ -238,6 +242,15 @@ def ship_add_membership_action(action: TransactionAction, transaction: Transacti
     send_membership_updated_email(transaction.member_id, days_to_add, membership_end)
 
 
+def send_price_level_email(member: Member) -> None:
+    if PriceLevel(member.price_level) != PriceLevel.Normal:
+        admin_email = config.get("ADMIN_EMAIL", default="")
+        if admin_email == "":
+            logger.warning(f"ADMIN_EMAIL not set, cannot send price level email for member {member.member_id}")
+        else:
+            send_message(MessageTemplate.NEW_LOW_INCOME_MEMBER, member, recipient_email=admin_email)
+
+
 def activate_member(member: Member) -> None:
     logger.info(f"activating member {member.member_id}")
     member.deleted_at = None
@@ -245,6 +258,7 @@ def activate_member(member: Member) -> None:
     db_session.add(member)
     db_session.flush()
     send_new_member_email(member)
+    send_price_level_email(member)
 
 
 def create_transaction(member_id: int, purchase: Purchase) -> Transaction:
