@@ -11,7 +11,12 @@ $primary-color: #333;
 $break-small: 480px;
 $break-medium: 600px;
 $break-large: 1000px;
-$makerspace-orange: #FF8B37;
+
+$makerspace-orange-light1: #C87744;
+$makerspace-orange: #E46D22;
+$makerspace-orange-dark1: #D9651D;
+$makerspace-orange-dark2: #C25F22;
+$makerspace-orange-dark3: #B14908;
 
 html,
 body {
@@ -20,6 +25,18 @@ body {
 
 .uk-button {
     border-radius: 2px;
+
+    &.uk-button-primary:not(:disabled) {
+        background-color: $makerspace-orange;
+
+        &:hover {
+            background-color: $makerspace-orange-dark1;
+        }
+
+        &:active {
+            background-color: $makerspace-orange-dark2;
+        }
+    }
 }
 
 .uk-button-group {
@@ -1544,7 +1561,7 @@ $palette-red: $palette4;
         display: flex;
         flex-direction: column;
 
-        @media screen and (width > $break-medium) {
+        @media screen and (width > $break-large) {
             align-self: center;
             flex-direction: row;
 
@@ -1579,7 +1596,7 @@ $palette-red: $palette4;
         transition: outline-color 100ms;
         outline: 4px solid transparent;
 
-        @media screen and (width > $break-medium) {
+        @media screen and (width > $break-large) {
             width: 400px;
         }
 
@@ -1618,16 +1635,31 @@ $palette-red: $palette4;
             position: relative;
         }
 
-        .access-plan-description {
+        .access-plan-description-top,
+        .access-plan-description-bottom {
             padding: 16px 16px;
             white-space: pre-wrap;
         }
 
+        @media screen and (width > $break-large) {
+            .access-plan-description-top {
+                height: 3em;
+            }
+        }
+
         .access-plan-price {
-            background-color: #E46D22;
+            background-color: $makerspace-orange;
             display: flex;
             flex-direction: column;
             align-items: center;
+            justify-content: center;
+
+            @media screen and (width > $break-large) {
+                // To make all plans the same height on larger screens where the plans are shown side-by-side
+                height: 102px;
+                box-sizing: border-box;
+            }
+
             color: white;
             padding: 20px;
 
@@ -1681,7 +1713,7 @@ $palette-red: $palette4;
         }
 
         .small-price {
-            color: #E46D22;
+            color: $makerspace-orange;
         }
 
         ul {
@@ -1698,7 +1730,7 @@ $palette-red: $palette4;
 
         .price {
             border-radius: 5px;
-            background-color: #E46D22;
+            background-color: $makerspace-orange;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -1728,7 +1760,7 @@ $palette-red: $palette4;
     .flow-button-back {
         font-size: 0.8em;
         align-self: center;
-        color: #c6550d;
+        color: $makerspace-orange-dark3;
     }
 
     a.flow-button,
@@ -1755,13 +1787,13 @@ $palette-red: $palette4;
         }
 
         &.primary {
-            background: #e46d22;
-            border-bottom: 2px solid #B14908;
+            background: $makerspace-orange;
+            border-bottom: 2px solid $makerspace-orange-dark3;
             color: white;
 
             &:hover:not(:disabled),
             &:active:not(:disabled) {
-                background-color: #d9651d;
+                background-color: $makerspace-orange-dark1;
                 color: white;
             }
         }
@@ -1838,7 +1870,7 @@ $palette-red: $palette4;
         }
 
         &.validate input:invalid {
-            outline: 2px solid #e46d22;
+            outline: 2px solid $makerspace-orange;
         }
     }
 
@@ -1900,7 +1932,7 @@ $palette-red: $palette4;
     }
 
     .receipt-items {
-        background-color: #c87744;
+        background-color: $makerspace-orange-light1;
         font-size: 1.0em;
 
         grid-template-columns: 5fr 1fr;
@@ -1925,7 +1957,7 @@ $palette-red: $palette4;
     }
 
     .receipt-amount {
-        background-color: #c25f22;
+        background-color: $makerspace-orange-dark2;
         font-size: 1.2em;
     }
 

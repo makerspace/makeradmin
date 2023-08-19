@@ -57,12 +57,12 @@ const PlanButton = ({ plan, selected, onClick, order }: { plan: Plan, selected: 
                 <span class="price">{plan.price} {t("priceUnit")}</span>
                 {plan.belowPrice && <span class="belowPrice">{plan.belowPrice}</span>}
             </div>
-            {plan.description1 && <div className="access-plan-description">{plan.description1}</div>}
+            {plan.description1 && <div className="access-plan-description-top">{plan.description1}</div>}
             <ul className="checkmark-list">
                 {t(`registration_page.plans.${plan.id}.included`).map((reason, i) => <li key={i}><span className="positive" uk-icon="icon: check"></span> {reason}</li>)}
                 {t(`registration_page.plans.${plan.id}.notIncluded`).map((reason, i) => <li key={i}><span className="negative" uk-icon="icon: close"></span> {reason}</li>)}
             </ul>
-            {plan.description2 && <div className="access-plan-description">{plan.description2}</div>}
+            {plan.description2 && <div className="access-plan-description-bottom">{plan.description2}</div>}
         </div>
     );
 }
