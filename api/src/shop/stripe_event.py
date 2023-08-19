@@ -117,13 +117,10 @@ def stripe_payment_intent_event(subtype: EventSubtype, event: stripe.Event) -> N
 
 
 def stripe_invoice_event(subtype: EventSubtype, event: stripe.Event, current_time: datetime) -> None:
-    # FIXME: In the case of uncollectable subtype, we should probably e-mail the invoice to the member
-
     if subtype == EventSubtype.PAID:
         logger.info(f"Processing paid invoice {event['id']}")
         # Member has paid something and we can now add things accordingly...
         invoice = event["data"]["object"]
-        # print(invoice)
         transaction_ids: List[int] = []
 
         for line in invoice["lines"]["data"]:

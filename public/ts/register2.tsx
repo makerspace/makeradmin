@@ -2,13 +2,11 @@ import * as common from "./common";
 import { render } from 'preact';
 import { StateUpdater, useEffect, useMemo, useState } from 'preact/hooks';
 import { ServerResponse } from "./common";
-import { BackendPaymentResponse, Discount, PaymentFailedError, PriceLevel, Product, ProductData, ProductDataFromProducts, RegisterPageData, RelevantProducts, SetupIntentResponse, SetupPaymentMethodRequest, StripeCardInput, ToPayPreview, calculateAmountToPay, createPaymentMethod, createStripeCardInput, extractRelevantProducts, handleStripeSetupIntent, initializeStripe, negotiatePayment, pay } from "./payment_common";
-import { PopupModal, PopupWidget, useCalendlyEventListener } from "react-calendly";
+import { Discount, PaymentFailedError, PriceLevel, Product, ProductData, ProductDataFromProducts, RegisterPageData, StripeCardInput, ToPayPreview, calculateAmountToPay, createPaymentMethod, createStripeCardInput, extractRelevantProducts, initializeStripe, pay } from "./payment_common";
+import { PopupModal, useCalendlyEventListener } from "react-calendly";
 import { URL_RELATIVE_MEMBER_PORTAL } from "./urls";
 import { LoadCurrentMemberInfo, member_t } from "./member_common";
-import { StartSubscriptionsRequest, SubscriptionStart } from "./subscriptions";
-import { PaymentRequest } from "./payment_common";
-import { TranslationWrapper, Translations, useTranslation } from "./translations";
+import { TranslationWrapper, useTranslation } from "./translations";
 import Cart from "./cart";
 
 declare var UIkit: any;
@@ -24,18 +22,6 @@ type Plan = {
     description2: string,
     products: Product[],
     highlight: string | null,
-}
-
-
-const LanguageChooser = ({ setLanguage }: { setLanguage: (lang: keyof typeof Translations) => void }) => {
-    return (
-        <div className="language-chooser">
-            <div className="language-chooser-buttons">
-                <button className="language-chooser-button" onClick={() => setLanguage("en")}>English</button>
-                <button className="language-chooser-button" onClick={() => setLanguage("sv")}>Svenska</button>
-            </div>
-        </div>
-    );
 }
 
 const LabeledInput = ({ label, id, required, type, value, pattern, onChange, onInvalid }: { id: string, type: string, pattern?: string, label: string, required: boolean, value: string, onChange: (value: string) => void, onInvalid: () => void }) => {
@@ -147,11 +133,9 @@ const TermsAndConditions = ({ onAccept, onBack, acceptedTerms, onChangeAcceptedT
 }
 
 enum State {
-    ChooseLanguage,
     ChoosePlan,
     MemberInfo,
     Terms,
-    Calendar,
     Confirmation,
     Success,
     Discounts,
@@ -162,7 +146,6 @@ const Confirmation = ({ memberInfo, selectedPlan, productData, discount, discoun
     const [inProgress, setInProgress] = useState(false);
 
     return (<>
-        {/* <h2>{t("payment.title")}</h2> */}
         <div class="uk-flex-1" />
         {t("registration_page.payment.text")}
         <div class="uk-flex-1" />
@@ -241,8 +224,9 @@ async function registerMember(paymentMethod: stripe.paymentMethod.PaymentMethod,
         } : null,
     };
 
-    // This registers the member as pending
+    // This registers the member as pending.
     // If the payment fails, we can safely forget about the member (it will be cleaned up during the next registration attempt).
+    // If the payment succeeds, the member will be automatically activated.
     let loginToken: string;
     try {
         loginToken = (await common.ajax('POST', `${window.apiBasePath}/webshop/register`, data) as ServerResponse<RegisterResponse>).data.token;
@@ -272,7 +256,6 @@ const Success = ({ member }: { member: member_t }) => {
     const [isBookModalOpen, setBookModalOpen] = useState(false);
     const [booked, setBooked] = useState(false);
     const [clickedSteps, setClickedSteps] = useState(new Set<number>());
-    console.log("Rendering", clickedSteps);
     const t = useTranslation();
 
     useCalendlyEventListener({
@@ -348,46 +331,15 @@ const Discounts = ({ discounts, setDiscounts, onSubmit, discountAmounts }: { dis
     }
 }
 
-const Calendar = ({ member }: { member: member_t }) => {
-    const t = useTranslation();
-    console.log(member);
-    return (
-        <>
-            <h2>{t("registration_page.calendar.title")}</h2>
-            <p>{t("registration_page.calendar.text")}</p>
-            <PopupWidget
-                url="https://calendly.com/medlemsintroduktion/medlemsintroduktion"
-                text={t("registration_page.calendar.book_button")}
-                rootElement={document.getElementById("root")!}
-                prefill={{
-                    name: member.firstname + " " + member.lastname,
-                    firstName: member.firstname,
-                    lastName: member.lastname,
-                    email: member.email,
-                }}
-            />
-        </>
-    )
-}
-
 const MakerspaceLogo = () => {
     return <img src={window.staticBasePath + "/images/logo-transparent-500px-300x210.png"} alt="Makerspace Logo" className="registration-logo" />
 }
 
-type PlanId = "starterPack" | "makerspaceAccessSub" | "decideLater" | "singleMonth";
+type PlanId = "starterPack" | "decideLater" | "singleMonth";
 
 const RegisterPage = ({ }: {}) => {
-    // Language chooser
-    // Inspiration page?
-    // Plan chooser
-    // User details
-    // Accept terms page
-    // -> stripe
-    // (Ideally calendar page)
-    // Success page
-
     const [state, setState] = useState(State.ChoosePlan);
-    const [selectedPlan, setSelectedPlan] = useState<PlanId | null>("starterPack"); // TODO: Should be null
+    const [selectedPlan, setSelectedPlan] = useState<PlanId | null>("starterPack");
     const [memberInfo, setMemberInfo] = useState<MemberInfo>({
         firstName: "",
         lastName: "",
@@ -401,20 +353,7 @@ const RegisterPage = ({ }: {}) => {
         accepted3: false
     });
 
-    // TODO
-    const [loggedInMember, setLoggedInMember] = useState<member_t | null>({
-        address_street: "",
-        address_extra: "",
-        address_zipcode: "",
-        address_city: "",
-        email: "a.b@gmail.com",
-        member_number: 1234,
-        firstname: "Aron",
-        lastname: "Granberg",
-        phone: "0735986675",
-        pin_code: "1234",
-        labaccess_agreement_at: "2020-01-01",
-    });
+    const [loggedInMember, setLoggedInMember] = useState<member_t | null>(null);
     const t = useTranslation();
     const card = useMemo(() => createStripeCardInput(), []);
     const [registerPageData, setRegisterPageData] = useState<RegisterPageData | null>(null);
@@ -470,16 +409,6 @@ const RegisterPage = ({ }: {}) => {
             products: [relevantProducts.labaccessProduct, relevantProducts.membershipSubscriptionProduct],
             highlight: null,
         },
-        // {
-        //     id: "makerspaceAccessSub",
-        //     title: t("registration_page.plans.makerspaceAccessSub.title"),
-        //     abovePrice: t("registration_page.plans.makerspaceAccessSub.abovePrice"),
-        //     price: parseFloat(relevantProducts.labaccessSubscriptionProduct.price),
-        //     period: t("registration_page.plans.makerspaceAccessSub.period"),
-        //     description: t("registration_page.plans.makerspaceAccessSub.description"),
-        //     products: [relevantProducts.membershipSubscriptionProduct, relevantProducts.labaccessSubscriptionProduct],
-        //     highlight: null,
-        // },
         {
             id: "decideLater",
             title: t("registration_page.plans.decideLater.title"),
@@ -491,16 +420,6 @@ const RegisterPage = ({ }: {}) => {
             products: [relevantProducts.membershipSubscriptionProduct],
             highlight: null,
         },
-        // {
-        //     id: "discounted",
-        //     title: t("registration_page.plans.discounted.title"),
-        //     abovePrice: t("registration_page.plans.discounted.abovePrice"),
-        //     price: 0,
-        //     period: t("registration_page.plans.discounted.period"),
-        //     description: t("registration_page.plans.discounted.description"),
-        //     products: [relevantProducts.membershipSubscriptionProduct],
-        //     highlight: null,
-        // }
     ];
 
     for (const plan of plans) {
@@ -508,15 +427,9 @@ const RegisterPage = ({ }: {}) => {
         plan.price = toPay.payNow.reduce((a, b) => a + b.amount, 0);
     }
 
-    const lowestMakerspaceAccessPrice = Math.min(accessCostSingle, accessSubscriptionCost);
-    const highestMakerspaceAccessPrice = Math.max(accessCostSingle, accessSubscriptionCost);
     const activePlan = plans.find(plan => plan.id === selectedPlan);
 
     switch (state) {
-        case State.ChooseLanguage:
-            return <LanguageChooser setLanguage={lang => {
-                setState(State.ChoosePlan);
-            }} />;
         case State.ChoosePlan:
             return (<>
                 <MakerspaceLogo />
@@ -543,14 +456,6 @@ const RegisterPage = ({ }: {}) => {
             return (<>
                 <MakerspaceLogo />
                 <TermsAndConditions onAccept={() => setState(State.Confirmation)} onBack={() => setState(State.MemberInfo)} acceptedTerms={acceptedTerms} onChangeAcceptedTerms={setAcceptedTerms} />
-            </>);
-        case State.Calendar:
-            // TODO: Should get member info from server, as it has been validated there
-            if (loggedInMember === null) throw new Error("No logged in member");
-
-            return (<>
-                <MakerspaceLogo />
-                <Calendar member={loggedInMember} />
             </>);
         case State.Confirmation:
             if (activePlan === undefined) throw new Error("No active plan");
