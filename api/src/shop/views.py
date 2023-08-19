@@ -35,7 +35,6 @@ from shop.pay import (
     cancel_subscriptions,
     pay,
     register,
-    register,
     setup_payment_method,
     start_subscriptions,
 )
