@@ -17,7 +17,7 @@ def set_stripe_key(private: bool) -> None:
     stripe.api_key = STRIPE_PRIVATE_KEY if private else STRIPE_PUBLIC_KEY
 
 
-set_stripe_key(True)
+set_stripe_key(private=True)
 
 
 class MakerspaceMetadataKeys(Enum):
