@@ -222,6 +222,12 @@ def stripe_invoice_event(subtype: EventSubtype, event: stripe.Event, current_tim
                     MakerspaceMetadataKeys.TRANSACTION_IDS.value: ",".join([str(x) for x in transaction_ids]),
                 },
             )
+            stripe.PaymentIntent.modify(
+                sid=invoice["payment_intent"],
+                metadata={
+                    MakerspaceMetadataKeys.TRANSACTION_IDS.value: ",".join([str(x) for x in transaction_ids]),
+                },
+            )
 
         return
     elif subtype == EventSubtype.PAYMENT_FAILED:

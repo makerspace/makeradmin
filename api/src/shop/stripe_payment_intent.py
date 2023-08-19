@@ -14,6 +14,7 @@ from service.db import db_session
 from service.error import InternalServerError, EXCEPTION, BadRequest
 from shop.models import Transaction, StripePending
 from shop.stripe_constants import (
+    MakerspaceMetadataKeys,
     PaymentIntentStatus,
     PaymentIntentNextActionType,
     CURRENCY,
@@ -173,6 +174,9 @@ def pay_with_stripe(transaction: Transaction, payment_method_id: str, setup_futu
             # Subscriptions may instead email the user to ask them to verify the payment.
             off_session=False,
             setup_future_usage=SetupFutureUsage.OFF_SESSION.value if setup_future_usage else None,
+            metadata={
+                MakerspaceMetadataKeys.TRANSACTION_IDS.value: transaction.id,
+            },
         )
 
         db_session.add(StripePending(transaction_id=transaction.id, stripe_token=payment_intent.stripe_id))
