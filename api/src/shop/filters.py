@@ -18,7 +18,7 @@ def filter_start_package(cart_item: "CartItem", member_id: int) -> None:
 
     if date.today() < end_date + timedelta(days=30 * 9):
         raise BadRequest(
-            "Starterpack can only be bought if you haven't had" " lab acccess during the last 9 months (30*9 days)."
+            "Starterpack can only be bought if you haven't had lab acccess during the last 9 months (30*9 days)."
         )
 
     if cart_item.count > 1:
