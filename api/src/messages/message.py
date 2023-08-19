@@ -14,7 +14,10 @@ def render_template(name, **kwargs):
     return template_env.get_template(name).render(**kwargs)
 
 
-def send_message(template: MessageTemplate, member, db_session=None, **kwargs) -> None:
+def send_message(template: MessageTemplate, member, db_session=None, recipient_email=None, **kwargs) -> None:
+    if recipient_email is None:
+        recipient_email = member.email
+
     subject = render_template(
         f"{template.value}.subject.html",
         public_url=get_public_url,
@@ -36,7 +39,7 @@ def send_message(template: MessageTemplate, member, db_session=None, **kwargs) -
         subject=subject,
         body=body,
         member_id=member.member_id,
-        recipient=member.email,
+        recipient=recipient_email,
         status=Message.QUEUED,
         template=template.value,
     ))
