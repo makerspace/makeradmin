@@ -45,7 +45,7 @@ def ensure_accessy_labaccess(member_id: int) -> None:
     """ If all preconditions are met, send an accessy invite (including auto add to labaccess gropup). Returns human readable message of what happened. """
 
     if ACCESSY_CLIENT_SECRET is None:
-        logger.warn("Missing accessy client secret: skipping updates")
+        logger.warning("Missing accessy client secret: skipping updates")
         return
 
     state = check_labaccess_requirements(member_id)
