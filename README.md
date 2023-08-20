@@ -95,6 +95,16 @@ file system).
 Then go to:
 * (http://localhost:8080)
 
+## Additional configuration
+
+The `.env` file includes a number of variables that are unset by default.
+
+If you want emails to be sent, you'll need to set the `MAILGUN_DOMAIN`, `MAILGUN_KEY` and `MAILGUN_FROM` variables.
+You will also want to set the `ADMIN_EMAIL` variable to some mailbox that you monitor.
+
+To deploy on any host which is not localhost, you'll need to change the `HOST_BACKEND`, `HOST_FRONTEND` and `HOST_PUBLIC` variables.
+These are important to make sure links work, but also to handle CORS in the browser.
+
 ## Tests
 
 ### System tests/integration tests that requires a running installation
