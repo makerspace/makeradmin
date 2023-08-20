@@ -165,6 +165,7 @@ const Confirmation = ({ memberInfo, selectedPlan, productData, discount, discoun
                     address_zipcode: memberInfo.zipCode,
                     address_city: "",
                     email: memberInfo.email,
+                    member_id: 0,
                     member_number: 0,
                     firstname: memberInfo.firstName,
                     lastname: memberInfo.lastName,

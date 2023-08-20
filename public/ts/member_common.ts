@@ -8,6 +8,7 @@ export type member_t = {
     address_zipcode: string,
     address_city: string,
     email: string,
+    member_id: number,
     member_number: number,
     firstname: string,
     lastname: string,
