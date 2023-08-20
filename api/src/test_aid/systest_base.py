@@ -34,6 +34,8 @@ EXPIRED_CVC_ZIP = "4242424242424"
 
 logger = getLogger('makeradmin')
 
+def is_inside_docker() -> bool:
+    return "TEST_IS_INSIDE_DOCKER" in os.environ
 
 class SystestBase(TestBase):
     """ Base class for systest with config available. """
@@ -52,7 +54,7 @@ class SystestBase(TestBase):
         # Make sure sessions is removed so it is not using another engine in this thread.
         db_session.remove()
         
-        if "TEST_IS_INSIDE_DOCKER" not in os.environ:
+        if not is_inside_docker():
             # This test requires a connection to the mysql database instead of just an in-memory db.
             # Therefore we only run this test when we are inside docker.
             raise SkipTest("Not running inside docker")
