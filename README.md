@@ -83,18 +83,6 @@ public_1            | 10.0.2.2 - - [18/Dec/2018:20:50:23 +0000] "GET / HTTP/1.1"
 [...]
 ```
 
-### "Paying" with fake Stripe key
-You will not be able to go to the checkout unless you have a Stripe key in the .env-file. If this is set up, you can use [Stripe's fake cards](https://stripe.com/docs/testing#cards) for completing the purchase.
-
-### Frontend js dev-server
-To run a webpack-dev-server inside a docker container (will node, npm
-and node_modules inside the image and mount js source files from local
-file system).
-
-```make admin-dev-server```
-Then go to:
-* (http://localhost:8080)
-
 ## Additional configuration
 
 The `.env` file includes a number of variables that are unset by default.
@@ -148,8 +136,16 @@ After this you can run `make firstrun` again to set things up again.
 
 ## Development with Stripe
 
-Create your own stripe account and add your keys to the `.env` file.
-Install the Stripe CLI and forward events using
+Create your own stripe account and add your keys to the `.env` file to allow purchases to work.
+
+### "Paying" with fake Stripe key
+
+You will not be able to go to the checkout unless you have a Stripe key in the .env-file. If this is set up, you can use [Stripe's fake cards](https://stripe.com/docs/testing#cards) for completing the purchase.
+
+### Stripe subscription support
+
+To handle subscriptions properly, the server needs to listen to stripe webhooks and configure subscription products (see next session).
+You can do this by installing the Stripe CLI and forward events using
 
 ```bash
 stripe listen --forward-to http://localhost:8010/webshop/stripe_callback
