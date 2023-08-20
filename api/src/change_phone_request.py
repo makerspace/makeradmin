@@ -26,7 +26,6 @@ def change_phone_request(member_id: int | None, phone: str) -> int:
     except ValueError:
         raise BadRequest("Inte ett giltigt telefonnummer.")
 
-    # Only rate limit requests
     if member_id is not None:
         # Limit total number of requests in a month
         total_requests = db_session.query(PhoneNumberChangeRequest).filter(PhoneNumberChangeRequest.timestamp >= now-timedelta(days=30)).count()
