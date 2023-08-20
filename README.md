@@ -136,7 +136,7 @@ make clean-nuke
 
 After this you can run `make firstrun` again to set things up again.
 
-## Development with Stripe 
+## Development with Stripe
 
 Create your own stripe account and add your keys to the `.env` file.
 Install the Stripe CLI and forward events using
@@ -146,3 +146,18 @@ stripe listen --forward-to http://localhost:8010/webshop/stripe_callback
 ```
 
 After the forwarding has started, you'll need to copy the signing secret it gives you, and put it in your own `.env` file in the key `STRIPE_SIGNING_SECRET`.
+
+### Setting up Stripe subscription products
+
+When using stripe, subscriptions need to be configured via the stripe website.
+These subscriptions will automatically be turned into makeradmin products so that members can purchase them.
+
+The configuration needed on stripe is:
+
+* Create a product for base membership. Add the metadata "subscription_type"="membership"
+  * Add a yearly price, and add the metadata "price_type"="recurring"
+* Create a product for makerspace access. Add the metadata "subscription_type"="labaccess"
+  * Add a monthly price, and add the metadata "price_type"="recurring"
+  * Add a price for N months, where N is the binding period as specified in `stripe_subscriptions.py->BINDING_PERIOD`. The price should be N times the recurring price. Add the metadata "price_type"="binding_period"
+
+If you try to access any page which needs these products (e.g. the registration page, or the member page), makeradmin will fetch them from stripe and do a bunch of validation checks.
