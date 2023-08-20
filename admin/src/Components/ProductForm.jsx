@@ -119,9 +119,9 @@ class ProductForm extends React.Component {
                         <legend><i className="uk-icon-filter"/> Filter</legend>
                         <SelectInput model={product} name="filter" title="Filter" getLabel={o => o.name} getValue={o => o.id} options={[
                             {id: "", name: "No filter"},
-                            {id: "start_package", name: "Startpaket"},
-                            {id: "labaccess_non_subscription_purchase", name: "Labaccess Non Subscription Purchase"},
-                            {id: "membership_non_subscription_purchase", name: "Membership Non Subscription Purchase"},
+                            {id: "start_package", name: "Purchasable only for new/inactive members (starter pack)"},
+                            {id: "labaccess_non_subscription_purchase", name: "Purchasable only if makerspace access subscription is inactive"},
+                            {id: "membership_non_subscription_purchase", name: "Purchasable only if base membership subscription is inactive"},
                         ]}/>
                     </fieldset>
                     <fieldset className="uk-margin-top">
