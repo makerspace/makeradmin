@@ -77,8 +77,6 @@ const BackButton = ({ onClick }: { onClick: () => void }) => {
 }
 
 const validate_phone_number = async (phone: string, t: Translator) => {
-    // UIkit.modal.prompt(prompt, current_number)
-    // async () => await UIkit.modal.prompt(t("change_phone.new_number_prompt")
     const r = await show_phone_number_dialog(
         null,
         async () => phone,
