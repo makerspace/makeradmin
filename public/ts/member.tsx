@@ -7,7 +7,7 @@ import { render } from "preact";
 import { useEffect, useMemo, useState } from "preact/hooks";
 import { show_phone_number_dialog } from "./change_phone";
 import { SubscriptionInfo, SubscriptionType, activateSubscription, cancelSubscription, getCurrentSubscriptions } from "./subscriptions";
-import { useTranslation, translateUnit } from "./translations";
+import { useTranslation, translateUnit, Translator } from "./translations";
 import { Sidebar } from "./sidebar";
 import { FindWellKnownProduct, LoadProductData, Product, ProductData, RelevantProducts, extractRelevantProducts, initializeStripe } from "./payment_common";
 import Cart, { useCart } from "./cart";
@@ -230,8 +230,14 @@ async function change_pin_code(member: member_t) {
     }
 }
 
-async function change_phone_number(member: member_t, membership: membership_t) {
-    switch (await show_phone_number_dialog(member.phone)) {
+async function change_phone_number(member: member_t, membership: membership_t, t: Translator) {
+    const r = await show_phone_number_dialog(
+        member.member_id,
+        async () => await UIkit.modal.prompt(t("change_phone.new_number_prompt")),
+        async () => await UIkit.modal.prompt(t("change_phone.validation_code_prompt")),
+        t
+    );
+    switch (r) {
         case "ok":
             await UIkit.modal.alert(`<h2>Telefonnummret är nu bytt</h2>`);
 
@@ -243,7 +249,6 @@ async function change_phone_number(member: member_t, membership: membership_t) {
             location.reload();
             break;
         case "cancel":
-        case "no-change":
             break;
         case UNAUTHORIZED:
             login.redirect_to_member_page();
@@ -502,7 +507,7 @@ function MemberPage({ member, membership: initial_membership, pending_labaccess_
                     <PersonalData
                         member={member}
                         onChangePinCode={() => void change_pin_code(member)}
-                        onChangePhoneNumber={() => void change_phone_number(member, membership)}
+                        onChangePhoneNumber={() => void change_phone_number(member, membership, t)}
                     />
                     <Address member={member} />
                 </form>

@@ -146,6 +146,8 @@ const Eng = {
             phone: "Phone",
             zipCode: "Zip code",
             submit: "Continue",
+            validatePhone: "We have sent a validation code to your phone. Please enter it below.",
+            validatePhoneSuccess: "Thanks! Your phone number has been validated.",
         },
         terms: {
             title: "Rules for the premises",
@@ -295,6 +297,14 @@ const Eng = {
     },
     payment: {
         pay_with_stripe: "Pay with Stripe",
+    },
+    change_phone: {
+        new_number_prompt: "New phone number",
+        validation_code_prompt: "Validation code: ",
+        errors: {
+            generic: "Could not change phone number",
+            incorrect_code: "Incorrect code. Try again.",
+        }
     }
 }
 
@@ -311,7 +321,8 @@ export const Translations: { "en": typeof Eng, "sv": typeof Eng } = {
 
 export const TranslationContext = createContext(new Translation(Translations.en));
 
-export const useTranslation = (): InstanceType<typeof Translation<typeof Eng>>["t"] => {
+export type Translator = InstanceType<typeof Translation<typeof Eng>>["t"];
+export const useTranslation = (): Translator => {
     const t = useContext(TranslationContext);
     return t.t.bind(t);
 }
@@ -343,7 +354,7 @@ export const TranslationWrapper = ({ children }: { children: preact.ComponentChi
     )
 }
 
-export const translateUnit = (unit: string, count: number, t: InstanceType<typeof Translation<typeof Eng>>["t"]) => {
+export const translateUnit = (unit: string, count: number, t: Translator) => {
     if (unit !== "mån" && unit !== "år" && unit !== "st") throw new Error(`Unexpected unit '${unit}'. Expected one of år/mån/st`);
     return t(`unit.${unit}.${count > 1 ? "many" : "one"}`);
 }

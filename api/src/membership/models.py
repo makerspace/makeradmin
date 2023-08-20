@@ -198,7 +198,7 @@ class PhoneNumberChangeRequest(Base):
     __tablename__ = 'change_phone_number_requests'
     
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
-    member_id = Column(Integer, ForeignKey('membership_members.member_id'), nullable=False)
+    member_id = Column(Integer, ForeignKey('membership_members.member_id'), nullable=True)
     phone = Column(String(255), nullable=False)
 
     # Number used to compare if the reques is valid or not.

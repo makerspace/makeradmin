@@ -1,4 +1,5 @@
 import time
+from service.error import Unauthorized
 
 from quiz.views import member_quiz_statistics
 from flask import request, g
@@ -52,12 +53,13 @@ def set_pin_code_endpoint(pin_code=Arg(str)):
     return set_pin_code(g.user_id, pin_code)
 
 
-@service.route("/current/change_phone_request", method=POST, permission=USER)
-def request_change_phone_number(phone=Arg(non_empty_str)):
-    return change_phone_request(g.user_id, phone)
+@service.route("/send_phone_number_validation_code", method=POST, permission=PUBLIC)
+def request_change_phone_number(member_id: int | None = Arg(int, required=False), phone=Arg(non_empty_str)):
+    if member_id is not None and member_id != g.user_id:
+        raise Unauthorized("You can only change your own phone number.")
+    return change_phone_request(member_id, phone)
 
 
-@service.route("/current/change_phone_validate", method=POST, permission=USER)
-def validate_change_phone_number(validation_code=Arg(int)):
-    return change_phone_validate(g.user_id, validation_code)
-
+@service.route("/validate_phone_number", method=POST, permission=PUBLIC)
+def validate_change_phone_number(id: int = Arg(int), validation_code=Arg(int)):
+    return change_phone_validate(g.user_id, id, validation_code)

@@ -1,49 +1,52 @@
 import * as common from "./common"
 import { UNAUTHORIZED } from "./common";
+import { Translator } from "./translations";
 
 declare var UIkit: any;
 
-export async function show_phone_number_dialog(current_number: string): Promise<"ok" | "cancel" | "no-change" | typeof UNAUTHORIZED> {
-    let new_number: string | null = await UIkit.modal.prompt("Nytt telefonnummer", current_number);
+export async function show_phone_number_dialog(member_id: number | null, prompt: () => Promise<string | null>, validate_prompt: () => Promise<string | null>, t: Translator): Promise<"ok" | "cancel" | typeof UNAUTHORIZED> {
+    let new_number: string | null = await prompt();
     if (new_number === null) {
         return "cancel";
     }
 
+    let change_id: number;
     try {
-        const { data } = await common.ajax("POST", `${window.apiBasePath}/member/current/change_phone_request`, { phone: new_number.trim() });
+        change_id = (await common.ajax("POST", `${window.apiBasePath}/member/send_phone_number_validation_code`, { member_id, phone: new_number.trim() })).data;
+        console.assert(typeof change_id === "number");
     } catch (error: any) {
         if (error.status === UNAUTHORIZED) {
             return UNAUTHORIZED;
         } else {
-            await common.show_error("Kunde inte byta telefonnummer", error)
+            await common.show_error(t("change_phone.errors.generic"), error)
             return "cancel";
         }
     }
 
+    return await validate_phone_number_prompt(change_id, validate_prompt, t);
+}
+
+async function validate_phone_number_prompt(id: number, prompt: () => Promise<string | null>, t: Translator): Promise<"ok" | "cancel" | typeof UNAUTHORIZED> {
     while (true) {
-        let validation_code: string | null = await UIkit.modal.prompt("Valideringskod: ", "");
+        let validation_code: string | null = await prompt();
         if (validation_code === null) {
             return "cancel";
         }
 
         if (isNaN(parseInt(validation_code))) {
-            await UIkit.modal.alert("<h2>Ogiltig kod. Försök igen.</h2>");
+            await UIkit.modal.alert(`<h2>${t("change_phone.errors.incorrect_code")}</h2>`);
         } else {
             try {
-                await common.ajax("POST", `${window.apiBasePath}/member/current/change_phone_validate`, { validation_code });
+                await common.ajax("POST", `${window.apiBasePath}/member/validate_phone_number`, { id, validation_code });
                 break;
             } catch (error: any) {
                 if (error.status === UNAUTHORIZED) {
                     return UNAUTHORIZED;
                 } else {
-                    await common.show_error("Felaktig kod. Försök igen.", error);
+                    await common.show_error(t("change_phone.errors.incorrect_code"), error);
                 }
             }
         }
-    }
-
-    if (current_number.trim() === new_number.trim()) {
-        return "no-change";
     }
 
     return "ok";

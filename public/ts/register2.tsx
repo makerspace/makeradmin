@@ -6,8 +6,9 @@ import { Discount, PaymentFailedError, PriceLevel, Product, ProductData, Product
 import { PopupModal, useCalendlyEventListener } from "react-calendly";
 import { URL_RELATIVE_MEMBER_PORTAL } from "./urls";
 import { LoadCurrentMemberInfo, member_t } from "./member_common";
-import { TranslationWrapper, useTranslation } from "./translations";
+import { TranslationWrapper, Translator, useTranslation } from "./translations";
 import Cart from "./cart";
+import { show_phone_number_dialog } from "./change_phone";
 
 declare var UIkit: any;
 
@@ -75,15 +76,33 @@ const BackButton = ({ onClick }: { onClick: () => void }) => {
     );
 }
 
+const validate_phone_number = async (phone: string, t: Translator) => {
+    // UIkit.modal.prompt(prompt, current_number)
+    // async () => await UIkit.modal.prompt(t("change_phone.new_number_prompt")
+    const r = await show_phone_number_dialog(
+        null,
+        async () => phone,
+        async () => await UIkit.modal.prompt(t("registration_page.memberInfo.validatePhone")),
+        t
+    );
+    if (r === "ok") {
+        await UIkit.modal.alert(t("registration_page.memberInfo.validatePhoneSuccess"));
+    }
+    return r;
+}
+
 const MemberInfoForm = ({ info, onChange, onSubmit, onBack }: { info: MemberInfo, onChange: StateUpdater<MemberInfo>, onSubmit: (info: MemberInfo) => void, onBack: () => void }) => {
     const t = useTranslation();
     const [showErrors, setShowErrors] = useState(false);
     const onInvalid = () => setShowErrors(true);
     return (
-        <form className={"member-info " + (showErrors ? "validate" : "")} onSubmit={e => {
+        <form className={"member-info " + (showErrors ? "validate" : "")} onSubmit={async e => {
             e.preventDefault();
             setShowErrors(false);
-            onSubmit(info);
+
+            if ((await validate_phone_number(info.phone, t)) === "ok") {
+                onSubmit(info);
+            }
         }} onInvalid={() => {
             console.log("invalid");
             setShowErrors(true);
