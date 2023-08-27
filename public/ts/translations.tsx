@@ -221,6 +221,7 @@ const Eng = {
                     The Makerspace is run by its members volonteering their time and effort. Join a work day, help out with maintaining a machine, or why not hold a course about something you are excited about?</p>
             </>,
             submit: "Continue",
+            submit_write_more: "Please write a bit more",
             cancel: "Cancel",
             messagePlaceholder: "Tell us why you need a discount, in at least a few sentences.",
             reasons: {

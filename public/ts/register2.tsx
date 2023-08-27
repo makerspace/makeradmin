@@ -317,6 +317,7 @@ const Discounts = ({ discounts, setDiscounts, onSubmit, discountAmounts }: { dis
 
     const reasons: DiscountReason[] = ["student", "unemployed", "senior", "other"];
     const [step, setStep] = useState(0);
+    const MIN_DISCOUNT_REASON_LENGTH = 30;
 
     if (step == 0) {
         return <>
@@ -330,7 +331,9 @@ const Discounts = ({ discounts, setDiscounts, onSubmit, discountAmounts }: { dis
                 </div>
             )}
             <textarea placeholder={t("registration_page.discounts.messagePlaceholder")} value={discounts.discountReasonMessage} onChange={(e) => setDiscounts({ ...discounts, discountReasonMessage: e.currentTarget.value })} />
-            <button className="flow-button primary" onClick={() => setStep(1)} disabled={discounts.discountReason === null || discounts.discountReasonMessage.length < 30}>{t("registration_page.discounts.submit")}</button>
+            <button className="flow-button primary" onClick={() => setStep(1)} disabled={discounts.discountReason === null || discounts.discountReasonMessage.length < MIN_DISCOUNT_REASON_LENGTH}>
+                {discounts.discountReason !== null && discounts.discountReasonMessage.length < MIN_DISCOUNT_REASON_LENGTH ? t("registration_page.discounts.submit_write_more") : t("registration_page.discounts.submit")}
+            </button>
             <button className="flow-button primary" onClick={() => {
                 setDiscounts({ discountReason: null, discountReasonMessage: "" });
                 onSubmit();
