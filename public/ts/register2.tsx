@@ -326,7 +326,7 @@ const Discounts = ({ discounts, setDiscounts, onSubmit, discountAmounts }: { dis
 
             {reasons.map(reason =>
                 <div class="rule-checkbox">
-                    <input id={`reason.${reason}`} type="checkbox" checked={discounts.discountReason === reason} onChange={(e) => setDiscounts({ ...discounts, discountReason: e.currentTarget.checked ? reason : null })} />
+                    <input id={`reason.${reason}`} type="radio" checked={discounts.discountReason === reason} onChange={(e) => setDiscounts({ ...discounts, discountReason: e.currentTarget.checked ? reason : null })} />
                     <label for={`reason.${reason}`}>{t(`registration_page.discounts.reasons.${reason}`)}</label>
                 </div>
             )}
