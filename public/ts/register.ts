@@ -138,12 +138,12 @@ common.onGetAndDocumentLoaded("/webshop/register_page_data", (value: RegisterPag
                 lastName: common.getValue("#lastname"),
                 email: common.getValue("#email"),
                 phone: common.getValue("#phone"),
-                zipCode: common.getValue("#address_zipcode").replace(/ /g, ''),
+                zipCode: common.getValue("#address_zipcode").replace(/\s*/g, ''),
             };
             const paymentMethod = await createPaymentMethod(element, {
                 address_street: "",
                 address_extra: "",
-                address_zipcode: memberInfo.zipCode,
+                address_zipcode: Number(memberInfo.zipCode),
                 address_city: "",
                 email: memberInfo.email,
                 member_id: 0,

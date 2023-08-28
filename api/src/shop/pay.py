@@ -76,14 +76,13 @@ class MemberInfo(DataClassJsonMixin):
     lastName: str
     email: str
     phone: str
-    zipCode: str
+    zipCode: int
 
     def strip(self) -> None:
         self.firstName = self.firstName.strip()
         self.lastName = self.lastName.strip()
         self.email = self.email.strip()
         self.phone = self.phone.strip()
-        self.zipCode = self.zipCode.strip()
 
     def validate(self) -> None:
         if not self.firstName:
@@ -94,8 +93,8 @@ class MemberInfo(DataClassJsonMixin):
             raise BadRequest(message="Email is required.")
         if not self.phone:
             raise BadRequest(message="Phone is required.")
-        if not self.zipCode:
-            raise BadRequest(message="Zip code is required.")
+        if self.zipCode <= 0:
+            raise BadRequest(message="Zip code must be positive")
 
         if not re.match(
             "^[a-zA-Z0-9.!#$%&'*+\\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}"

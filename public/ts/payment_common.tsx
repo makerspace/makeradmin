@@ -424,7 +424,7 @@ export async function createPaymentMethod(element: stripe.elements.Element, memb
             email: memberInfo.email,
             phone: memberInfo.phone,
             address: {
-                postal_code: memberInfo.address_zipcode || undefined,
+                postal_code: `${memberInfo.address_zipcode}`,
             },
         },
     });

@@ -25,11 +25,11 @@ type Plan = {
     highlight: string | null,
 }
 
-const LabeledInput = ({ label, id, required, type, value, pattern, onChange, onInvalid }: { id: string, type: string, pattern?: string, label: string, required: boolean, value: string, onChange: (value: string) => void, onInvalid: () => void }) => {
+const LabeledInput = ({ label, id, required, type, value, pattern, onChange, onInvalid, placeholder }: { id: string, type: string, pattern?: string, label: string, required: boolean, value: string, placeholder?: string, onChange: (value: string) => void, onInvalid: () => void }) => {
     return (
         <div>
             <label for={id} class="uk-form-label">{label}</label>
-            <input id={id} class="uk-input" type={type} pattern={pattern} placeholder="" value={value} required={required} maxLength={255} onChange={e => onChange(e.currentTarget.value)} onInvalid={onInvalid} />
+            <input id={id} class="uk-input" type={type} pattern={pattern} placeholder={placeholder} value={value} required={required} maxLength={255} onChange={e => onChange(e.currentTarget.value)} onInvalid={onInvalid} />
         </div>
     )
 }
@@ -60,6 +60,14 @@ type MemberInfo = {
     email: string,
     phone: string,
     zipCode: string,
+}
+
+type MemberInfoValidated = {
+    firstName: string,
+    lastName: string,
+    email: string,
+    phone: string,
+    zipCode: number,
 }
 
 type DiscountReason = "student" | "unemployed" | "senior" | "other";
@@ -109,7 +117,7 @@ const MemberInfoForm = ({ info, onChange, onSubmit, onBack }: { info: MemberInfo
             <LabeledInput label={t("registration_page.memberInfo.lastName")} id="lastName" type="text" required value={info.lastName} onChange={lastName => onChange(info => ({ ...info, lastName }))} onInvalid={onInvalid} />
             <LabeledInput label={t("registration_page.memberInfo.email")} id="email" type="email" required value={info.email} onChange={email => onChange(info => ({ ...info, email }))} onInvalid={onInvalid} />
             <LabeledInput label={t("registration_page.memberInfo.phone")} id="phone" type="tel" pattern="[\-\+\s0-9]*" required value={info.phone} onChange={phone => onChange(info => ({ ...info, phone }))} onInvalid={onInvalid} />
-            <LabeledInput label={t("registration_page.memberInfo.zipCode")} id="zipCode" type="text" pattern="[0-9\s]*" required value={info.zipCode} onChange={zipCode => onChange(info => ({ ...info, zipCode }))} onInvalid={onInvalid} />
+            <LabeledInput label={t("registration_page.memberInfo.zipCode")} id="zipCode" type="text" pattern="[0-9\s]+" placeholder={"XXX XX"} required value={info.zipCode} onChange={zipCode => onChange(info => ({ ...info, zipCode }))} onInvalid={onInvalid} />
             <input type="submit" className="flow-button primary" value={t("registration_page.memberInfo.submit")} />
             <BackButton onClick={onBack} />
         </form>
@@ -176,10 +184,14 @@ const Confirmation = ({ memberInfo, selectedPlan, productData, discount, discoun
                 if (selectedPlan == null) {
                     throw new Error("No plan selected");
                 }
+                const memberInfoValidated: MemberInfoValidated = {
+                    ...memberInfo,
+                    zipCode: Number(memberInfo.zipCode.replace(/\s/g, "")),
+                }
                 const paymentMethod = await createPaymentMethod(card, {
                     address_street: "",
                     address_extra: "",
-                    address_zipcode: memberInfo.zipCode,
+                    address_zipcode: memberInfoValidated.zipCode,
                     address_city: "",
                     email: memberInfo.email,
                     member_id: 0,
@@ -193,7 +205,7 @@ const Confirmation = ({ memberInfo, selectedPlan, productData, discount, discoun
 
                 if (paymentMethod !== null) {
                     try {
-                        onRegistered(await registerMember(paymentMethod, productData, memberInfo, selectedPlan, discount, discountInfo));
+                        onRegistered(await registerMember(paymentMethod, productData, memberInfoValidated, selectedPlan, discount, discountInfo));
                     } catch (e) {
                         if (e instanceof PaymentFailedError) {
                             UIkit.modal.alert("<h2>Payment failed</h2>" + e.message);
@@ -220,7 +232,7 @@ type DiscountRequest = {
 }
 
 type RegisterRequest = {
-    member: MemberInfo
+    member: MemberInfoValidated
     discount: DiscountRequest | null
 }
 
@@ -233,7 +245,7 @@ type RegistrationSuccess = {
     loginToken: string
 }
 
-async function registerMember(paymentMethod: stripe.paymentMethod.PaymentMethod, productData: ProductData, memberInfo: MemberInfo, selectedPlan: Plan, discount: Discount, discountInfo: DiscountsInfo): Promise<RegistrationSuccess> {
+async function registerMember(paymentMethod: stripe.paymentMethod.PaymentMethod, productData: ProductData, memberInfo: MemberInfoValidated, selectedPlan: Plan, discount: Discount, discountInfo: DiscountsInfo): Promise<RegistrationSuccess> {
     const data: RegisterRequest = {
         member: memberInfo,
         discount: discount.priceLevel !== null && discountInfo.discountReason !== null ? {

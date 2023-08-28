@@ -5,7 +5,7 @@ export type date_t = string;
 export type member_t = {
     address_street: string,
     address_extra: string,
-    address_zipcode: string,
+    address_zipcode: number,
     address_city: string,
     email: string,
     member_id: number,
