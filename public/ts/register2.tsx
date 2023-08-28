@@ -312,7 +312,7 @@ const Success = ({ member }: { member: member_t }) => {
     </>);
 }
 
-const Discounts = ({ discounts, setDiscounts, onSubmit, discountAmounts }: { discounts: DiscountsInfo, discountAmounts: Record<PriceLevel, number>, setDiscounts: (m: DiscountsInfo) => void, onSubmit: () => void }) => {
+const Discounts = ({ discounts, setDiscounts, onSubmit, onCancel, discountAmounts }: { discounts: DiscountsInfo, discountAmounts: Record<PriceLevel, number>, setDiscounts: (m: DiscountsInfo) => void, onSubmit: () => void, onCancel: () => void }) => {
     const t = useTranslation();
 
     const reasons: DiscountReason[] = ["student", "unemployed", "senior", "other"];
@@ -336,7 +336,7 @@ const Discounts = ({ discounts, setDiscounts, onSubmit, discountAmounts }: { dis
             </button>
             <button className="flow-button primary" onClick={() => {
                 setDiscounts({ discountReason: null, discountReasonMessage: "" });
-                onSubmit();
+                onCancel();
             }}>{t("registration_page.discounts.cancel")}</button>
         </>;
     } else {
@@ -346,7 +346,7 @@ const Discounts = ({ discounts, setDiscounts, onSubmit, discountAmounts }: { dis
             <button className="flow-button primary" onClick={onSubmit}>{t("registration_page.discounts.submit")}</button>
             <button className="flow-button primary" onClick={() => {
                 setDiscounts({ discountReason: null, discountReasonMessage: "" });
-                onSubmit();
+                onCancel();
             }}>{t("registration_page.discounts.cancel")}</button>
         </>
     }
@@ -358,8 +358,35 @@ const MakerspaceLogo = () => {
 
 type PlanId = "starterPack" | "decideLater" | "singleMonth";
 
+const poorMansHistoryManager = <T,>(state: T, defaultState: T, setState: (v: T) => void, parse: (s: string) => T | undefined, toString: (s: T) => string) => {
+    useEffect(() => {
+        history.replaceState({
+            state
+        }, "");
+
+        const listener = (e: PopStateEvent) => {
+            let newState = defaultState;
+            if (location.hash.startsWith("#")) {
+                const st: T | undefined = parse(location.hash.slice(1));
+                if (st !== undefined) newState = st;
+            }
+            setState(newState);
+        };
+        window.addEventListener("popstate", listener);
+        return () => window.removeEventListener("popstate", listener);
+    }, []);
+
+
+    return (newState: T) => {
+        history.pushState({}, "", "#" + toString(newState));
+        setState(newState);
+    }
+}
+
 const RegisterPage = ({ }: {}) => {
-    const [state, setState] = useState(State.ChoosePlan);
+    const [state, setStateInternal] = useState(State.ChoosePlan);
+    const setState = poorMansHistoryManager(state, State.ChoosePlan, setStateInternal, s => State[s as keyof typeof State], s => State[s]);
+
     const [selectedPlan, setSelectedPlan] = useState<PlanId | null>("starterPack");
     const [memberInfo, setMemberInfo] = useState<MemberInfo>({
         firstName: "",
@@ -471,15 +498,20 @@ const RegisterPage = ({ }: {}) => {
             return (<>
                 <MakerspaceLogo />
                 <h2>{t("registration_page.memberInfo.title")}</h2>
-                <MemberInfoForm info={memberInfo} onChange={setMemberInfo} onSubmit={(_) => setState(State.Terms)} onBack={() => setState(State.ChoosePlan)} />
+                <MemberInfoForm info={memberInfo} onChange={setMemberInfo} onSubmit={(_) => setState(State.Terms)} onBack={() => history.back()} />
             </>);
         case State.Terms:
             return (<>
                 <MakerspaceLogo />
-                <TermsAndConditions onAccept={() => setState(State.Confirmation)} onBack={() => setState(State.MemberInfo)} acceptedTerms={acceptedTerms} onChangeAcceptedTerms={setAcceptedTerms} />
+                <TermsAndConditions onAccept={() => setState(State.Confirmation)} onBack={() => history.back()} acceptedTerms={acceptedTerms} onChangeAcceptedTerms={setAcceptedTerms} />
             </>);
         case State.Confirmation:
-            if (activePlan === undefined) throw new Error("No active plan");
+            if (activePlan === undefined) {
+                // This should never happen during a normal flow, but could happen if the user does weird history manipulation
+                setState(State.ChoosePlan);
+                return null;
+            }
+
             return <>
                 <MakerspaceLogo />
                 <Confirmation
@@ -494,11 +526,15 @@ const RegisterPage = ({ }: {}) => {
                         setLoggedInMember(await LoadCurrentMemberInfo());
                         setState(State.Success);
                     }}
-                    onBack={() => setState(State.Terms)}
+                    onBack={() => history.back()}
                 />
             </>;
         case State.Success:
-            if (loggedInMember === null) throw new Error("No logged in member");
+            if (loggedInMember === null) {
+                // This should never happen during a normal flow, but could happen if the user does weird history manipulation
+                setState(State.ChoosePlan);
+                return null;
+            }
 
             return <>
                 <MakerspaceLogo />
@@ -509,7 +545,7 @@ const RegisterPage = ({ }: {}) => {
                 <MakerspaceLogo />
                 <Discounts discounts={discounts} setDiscounts={setDiscounts} discountAmounts={registerPageData.discounts} onSubmit={() => {
                     setState(State.ChoosePlan);
-                }} />
+                }} onCancel={() => history.back()} />
             </>
     }
 }
