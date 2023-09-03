@@ -11,7 +11,7 @@ import Cart from "./cart";
 import { show_phone_number_dialog } from "./change_phone";
 
 declare var UIkit: any;
-
+const FEATURE_FLAG_LOW_INCOME_DISCOUNT = false;
 
 type Plan = {
     id: PlanId,
@@ -400,6 +400,8 @@ const poorMansHistoryManager = <T,>(state: T, defaultState: T, setState: (v: T) 
     }
 }
 
+/// Returns what options should be visible to the user depending on a random seed.
+/// This method should be deterministic given the seed.
 const abStateFromSeed = (seed: number) => {
     return {
         subscription: seed % 2 === 0
@@ -529,7 +531,7 @@ const RegisterPage = ({ }: {}) => {
                 <div class="plan-buttons">
                     {plans.map((plan, i) => <PlanButton selected={selectedPlan === plan.id} onClick={() => setSelectedPlan(plan.id)} plan={plan} order={i} />)}
                 </div>
-                {registerPageData.discounts["low_income_discount"] > 0 && <button className="flow-button" onClick={() => setState(State.Discounts)}>{t("apply_for_discounts")}</button>}
+                {FEATURE_FLAG_LOW_INCOME_DISCOUNT && registerPageData.discounts["low_income_discount"] > 0 && <button className="flow-button" onClick={() => setState(State.Discounts)}>{t("apply_for_discounts")}</button>}
                 {activePlan !== undefined ? <ToPayPreview productData={productData} cart={Cart.oneOfEachProduct(activePlan.products)} discount={discount} currentMemberships={[]} /> : null}
                 <button className="flow-button primary" disabled={selectedPlan == null} onClick={() => setState(State.MemberInfo)}>{t("continue")}</button>
             </>);
