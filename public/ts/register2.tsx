@@ -400,11 +400,15 @@ const poorMansHistoryManager = <T,>(state: T, defaultState: T, setState: (v: T) 
     }
 }
 
+type ABState = {
+    registration_base_membership_type: "oneyear" | "subscription",
+}
+
 /// Returns what options should be visible to the user depending on a random seed.
 /// This method should be deterministic given the seed.
-const abStateFromSeed = (seed: number) => {
+const abStateFromSeed = (seed: number): ABState => {
     return {
-        subscription: seed % 2 === 0
+        registration_base_membership_type: seed % 2 === 0 ? "oneyear" : "subscription",
     }
 }
 
@@ -474,7 +478,7 @@ const RegisterPage = ({ }: {}) => {
     const accessSubscriptionCost = parseFloat(relevantProducts.labaccessSubscriptionProduct.price) * (1 - discount.fractionOff);
     const baseMembershipCost = parseFloat(relevantProducts.baseMembershipProduct.price) * (1 - discount.fractionOff);
 
-    const membershipProduct = abState.subscription ? relevantProducts.membershipSubscriptionProduct : relevantProducts.baseMembershipProduct;
+    const membershipProduct = abState.registration_base_membership_type === "subscription" ? relevantProducts.membershipSubscriptionProduct : relevantProducts.baseMembershipProduct;
     const plans: Plan[] = [
         {
             id: "starterPack",
