@@ -400,8 +400,17 @@ const poorMansHistoryManager = <T,>(state: T, defaultState: T, setState: (v: T) 
     }
 }
 
+/// Used to get a somewhat statistically independenent number from the same seed
+function hash(x: number): number {
+    x = Math.imul(((x >> 16) ^ x), 0x45d9f3b);
+    x = Math.imul(((x >> 16) ^ x), 0x45d9f3b);
+    x = (x >> 16) ^ x;
+    return x;
+}
+
 type ABState = {
     registration_base_membership_type: "oneyear" | "subscription",
+    registration_base_membership_only_plan_enabled: boolean,
 }
 
 /// Returns what options should be visible to the user depending on a random seed.
@@ -409,6 +418,7 @@ type ABState = {
 const abStateFromSeed = (seed: number): ABState => {
     return {
         registration_base_membership_type: seed % 2 === 0 ? "oneyear" : "subscription",
+        registration_base_membership_only_plan_enabled: hash(seed) % 3 !== 0, // 2/3 of users will see the base membership only plan
     }
 }
 
@@ -424,11 +434,11 @@ const RegisterPage = ({ }: {}) => {
     const setStateHistory = poorMansHistoryManager(state, State.ChoosePlan, setStateInternal, s => State[s as keyof typeof State], s => State[s]);
     const setState = (s: State) => {
         setStateHistory(s);
-        trackPlausible(`register/${State[s]}`, { abState });
+        trackPlausible(`register/${State[s]}`, abState);
     }
 
     useEffect(() => {
-        trackPlausible(`register/${State[state]}`, { abState });
+        trackPlausible(`register/${State[state]}`, abState);
     }, []);
 
     const [selectedPlan, setSelectedPlan] = useState<PlanId | null>("starterPack");
@@ -476,15 +486,16 @@ const RegisterPage = ({ }: {}) => {
     const relevantProducts = extractRelevantProducts(productData.products);
     const accessCostSingle = parseFloat(relevantProducts.labaccessProduct.price) * (1 - discount.fractionOff);
     const accessSubscriptionCost = parseFloat(relevantProducts.labaccessSubscriptionProduct.price) * (1 - discount.fractionOff);
-    const baseMembershipCost = parseFloat(relevantProducts.baseMembershipProduct.price) * (1 - discount.fractionOff);
 
     const membershipProduct = abState.registration_base_membership_type === "subscription" ? relevantProducts.membershipSubscriptionProduct : relevantProducts.baseMembershipProduct;
+    const baseMembershipCost = parseFloat(membershipProduct.price) * (1 - discount.fractionOff);
+
     const plans: Plan[] = [
         {
             id: "starterPack",
             title: t("registration_page.plans.starterPack.title"),
             abovePrice: t("registration_page.plans.starterPack.abovePrice"),
-            price: parseFloat(relevantProducts.starterPackProduct.price),
+            price: 0,
             belowPrice: t("registration_page.plans.ofWhichBaseMembership")(baseMembershipCost),
             description1: t("registration_page.plans.starterPack.description1"),
             description2: t("registration_page.plans.starterPack.description2"),
@@ -495,14 +506,16 @@ const RegisterPage = ({ }: {}) => {
             id: "singleMonth",
             title: t("registration_page.plans.singleMonth.title"),
             abovePrice: t("registration_page.plans.singleMonth.abovePrice"),
-            price: parseFloat(relevantProducts.labaccessProduct.price),
+            price: 0,
             belowPrice: t("registration_page.plans.ofWhichBaseMembership")(baseMembershipCost),
             description1: t("registration_page.plans.singleMonth.description1"),
             description2: t("registration_page.plans.singleMonth.description2"),
             products: [relevantProducts.labaccessProduct, membershipProduct],
             highlight: null,
         },
-        {
+    ];
+    if (abState.registration_base_membership_only_plan_enabled) {
+        plans.push({
             id: "decideLater",
             title: t("registration_page.plans.decideLater.title"),
             abovePrice: t("registration_page.plans.decideLater.abovePrice"),
@@ -512,8 +525,8 @@ const RegisterPage = ({ }: {}) => {
             description2: t("registration_page.plans.decideLater.description2")(accessCostSingle, accessSubscriptionCost),
             products: [membershipProduct],
             highlight: null,
-        },
-    ];
+        });
+    }
 
     for (const plan of plans) {
         const toPay = calculateAmountToPay({ productData, cart: Cart.oneOfEachProduct(plan.products), discount: discount, currentMemberships: [] });
