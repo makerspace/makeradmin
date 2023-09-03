@@ -116,6 +116,7 @@ services:
     environment:
       APIGATEWAY: "api"
       HOST_BACKEND:
+      HOST_PUBLIC:
       STRIPE_PUBLIC_KEY:
       VIRTUAL_HOST: "${HOST_PUBLIC}"
       LETSENCRYPT_HOST: "${HOST_PUBLIC}"

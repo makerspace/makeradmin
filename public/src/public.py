@@ -139,6 +139,8 @@ api_base_url = os.environ["HOST_BACKEND"]
 if not api_base_url.startswith("http"):
     api_base_url = "https://" + api_base_url
 
+host_public = os.environ["HOST_PUBLIC"]
+
 
 @app.context_processor
 def context():
@@ -147,5 +149,6 @@ def context():
         meta=dict(
             api_base_url=api_base_url,
             stripe_public_key=os.environ["STRIPE_PUBLIC_KEY"],
+            host_public=host_public
         )
     )

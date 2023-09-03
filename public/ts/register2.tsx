@@ -1,7 +1,7 @@
 import * as common from "./common";
 import { render } from 'preact';
 import { StateUpdater, useEffect, useMemo, useState } from 'preact/hooks';
-import { ServerResponse } from "./common";
+import { ServerResponse, trackPlausible } from "./common";
 import { Discount, PaymentFailedError, PriceLevel, Product, ProductData, ProductDataFromProducts, RegisterPageData, StripeCardInput, ToPayPreview, calculateAmountToPay, createPaymentMethod, createStripeCardInput, extractRelevantProducts, initializeStripe, pay } from "./payment_common";
 import { PopupModal, useCalendlyEventListener } from "react-calendly";
 import { URL_RELATIVE_MEMBER_PORTAL } from "./urls";
@@ -400,9 +400,30 @@ const poorMansHistoryManager = <T,>(state: T, defaultState: T, setState: (v: T) 
     }
 }
 
+const abStateFromSeed = (seed: number) => {
+    return {
+        subscription: seed % 2 === 0
+    }
+}
+
 const RegisterPage = ({ }: {}) => {
+    const abState = useMemo(() => {
+        let seed = parseInt(localStorage.getItem("abTestSeed") ?? "");
+        if (!isFinite(seed)) seed = (Math.random() * 1000000) | 0;
+        localStorage.setItem("abTestSeed", seed.toString());
+        return abStateFromSeed(seed);
+    }, []);
+
     const [state, setStateInternal] = useState(State.ChoosePlan);
-    const setState = poorMansHistoryManager(state, State.ChoosePlan, setStateInternal, s => State[s as keyof typeof State], s => State[s]);
+    const setStateHistory = poorMansHistoryManager(state, State.ChoosePlan, setStateInternal, s => State[s as keyof typeof State], s => State[s]);
+    const setState = (s: State) => {
+        setStateHistory(s);
+        trackPlausible(`register/${State[s]}`, { abState });
+    }
+
+    useEffect(() => {
+        trackPlausible(`register/${State[state]}`, { abState });
+    }, []);
 
     const [selectedPlan, setSelectedPlan] = useState<PlanId | null>("starterPack");
     const [memberInfo, setMemberInfo] = useState<MemberInfo>({
@@ -451,6 +472,7 @@ const RegisterPage = ({ }: {}) => {
     const accessSubscriptionCost = parseFloat(relevantProducts.labaccessSubscriptionProduct.price) * (1 - discount.fractionOff);
     const baseMembershipCost = parseFloat(relevantProducts.baseMembershipProduct.price) * (1 - discount.fractionOff);
 
+    const membershipProduct = abState.subscription ? relevantProducts.membershipSubscriptionProduct : relevantProducts.baseMembershipProduct;
     const plans: Plan[] = [
         {
             id: "starterPack",
@@ -460,7 +482,7 @@ const RegisterPage = ({ }: {}) => {
             belowPrice: t("registration_page.plans.ofWhichBaseMembership")(baseMembershipCost),
             description1: t("registration_page.plans.starterPack.description1"),
             description2: t("registration_page.plans.starterPack.description2"),
-            products: [relevantProducts.starterPackProduct, relevantProducts.membershipSubscriptionProduct],
+            products: [relevantProducts.starterPackProduct, membershipProduct],
             highlight: "Recommended",
         },
         {
@@ -471,7 +493,7 @@ const RegisterPage = ({ }: {}) => {
             belowPrice: t("registration_page.plans.ofWhichBaseMembership")(baseMembershipCost),
             description1: t("registration_page.plans.singleMonth.description1"),
             description2: t("registration_page.plans.singleMonth.description2"),
-            products: [relevantProducts.labaccessProduct, relevantProducts.membershipSubscriptionProduct],
+            products: [relevantProducts.labaccessProduct, membershipProduct],
             highlight: null,
         },
         {
@@ -482,7 +504,7 @@ const RegisterPage = ({ }: {}) => {
             belowPrice: "",
             description1: t("registration_page.plans.decideLater.description1"),
             description2: t("registration_page.plans.decideLater.description2")(accessCostSingle, accessSubscriptionCost),
-            products: [relevantProducts.membershipSubscriptionProduct],
+            products: [membershipProduct],
             highlight: null,
         },
     ];
