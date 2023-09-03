@@ -147,7 +147,6 @@ const Eng = {
             zipCode: "Zip code",
             submit: "Continue",
             validatePhone: "We have sent a validation code to your phone. Please enter it below.",
-            validatePhoneSuccess: "Thanks! Your phone number has been validated.",
         },
         terms: {
             title: "Rules for the premises",

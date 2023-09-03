@@ -91,26 +91,28 @@ const validate_phone_number = async (phone: string, t: Translator) => {
         async () => await UIkit.modal.prompt(t("registration_page.memberInfo.validatePhone")),
         t
     );
-    if (r === "ok") {
-        await UIkit.modal.alert(t("registration_page.memberInfo.validatePhoneSuccess"));
-    }
     return r;
 }
 
 const MemberInfoForm = ({ info, onChange, onSubmit, onBack }: { info: MemberInfo, onChange: StateUpdater<MemberInfo>, onSubmit: (info: MemberInfo) => void, onBack: () => void }) => {
     const t = useTranslation();
     const [showErrors, setShowErrors] = useState(false);
+    const [inProgress, setInProgress] = useState(false);
     const onInvalid = () => setShowErrors(true);
     return (
         <form className={"member-info " + (showErrors ? "validate" : "")} onSubmit={async e => {
+            setInProgress(true);
             e.preventDefault();
             setShowErrors(false);
 
-            if ((await validate_phone_number(info.phone, t)) === "ok") {
-                onSubmit(info);
+            try {
+                if ((await validate_phone_number(info.phone, t)) === "ok") {
+                    onSubmit(info);
+                }
+            } finally {
+                setInProgress(false);
             }
         }} onInvalid={() => {
-            console.log("invalid");
             setShowErrors(true);
         }}>
             <LabeledInput label={t("registration_page.memberInfo.firstName")} id="firstName" type="text" required value={info.firstName} onChange={firstName => onChange(info => ({ ...info, firstName }))} onInvalid={onInvalid} />
@@ -118,7 +120,10 @@ const MemberInfoForm = ({ info, onChange, onSubmit, onBack }: { info: MemberInfo
             <LabeledInput label={t("registration_page.memberInfo.email")} id="email" type="email" required value={info.email} onChange={email => onChange(info => ({ ...info, email }))} onInvalid={onInvalid} />
             <LabeledInput label={t("registration_page.memberInfo.phone")} id="phone" type="tel" pattern="[\-\+\s0-9]*" required value={info.phone} onChange={phone => onChange(info => ({ ...info, phone }))} onInvalid={onInvalid} />
             <LabeledInput label={t("registration_page.memberInfo.zipCode")} id="zipCode" type="text" pattern="[0-9\s]+" placeholder={"XXX XX"} required value={info.zipCode} onChange={zipCode => onChange(info => ({ ...info, zipCode }))} onInvalid={onInvalid} />
-            <input type="submit" className="flow-button primary" value={t("registration_page.memberInfo.submit")} />
+            <button type="submit" className="flow-button primary" disabled={inProgress}>
+                <span className={"uk-spinner uk-icon progress-spinner " + (inProgress ? "progress-spinner-visible" : "")} uk-spinner={''} />
+                <span>{t("registration_page.memberInfo.submit")}</span>
+            </button>
             <BackButton onClick={onBack} />
         </form>
     )
