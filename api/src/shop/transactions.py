@@ -49,6 +49,9 @@ from shop.models import (
 )
 from shop.stripe_util import convert_to_stripe_amount
 
+# If false, labaccess is synced to accessy once per week
+LABACCESS_SHIPS_IMMEDIATELY_ON_PURCHASE = False
+
 logger = getLogger("makeradmin")
 
 
@@ -331,7 +334,7 @@ def payment_success(transaction: Transaction) -> None:
         # Members are activated when they make their first purchase
         activate_member(transaction.member)
 
-    ship_orders(ship_add_labaccess=True, transaction_filter=transaction)
+    ship_orders(ship_add_labaccess=LABACCESS_SHIPS_IMMEDIATELY_ON_PURCHASE, transaction_filter=transaction)
 
 
 def process_cart(member_id: int, cart: List[CartItem]) -> Tuple[Decimal, List[TransactionContent]]:
