@@ -143,7 +143,7 @@ const Eng = {
             firstName: "First name",
             lastName: "Last name",
             email: "Email",
-            phone: "Phone",
+            phone: "Phone (your phone will be used as your key to the makerspace)",
             zipCode: "Zip code",
             submit: "Continue",
             validatePhone: "We have sent a validation code to your phone. Please enter it below.",
