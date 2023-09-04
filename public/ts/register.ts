@@ -1,6 +1,6 @@
 import Cart from "./cart"
 import * as common from "./common"
-import { ServerResponse, login } from "./common";
+import { ServerResponse, login, trackPlausible } from "./common";
 import { PaymentFailedError, Product, ProductData, ProductDataFromProducts, Purchase, RegisterPageData, SetupIntentResponse, calculateAmountToPay, createPaymentMethod, disable_pay_button, enable_pay_button, handleStripeSetupIntent, initializeStripe, mountStripe, pay } from "./payment_common"
 declare var UIkit: any;
 
@@ -57,6 +57,7 @@ async function registerMember(paymentMethod: stripe.paymentMethod.PaymentMethod,
 
     await pay(paymentMethod, cart, productData, { priceLevel: "normal", fractionOff: 0.0 }, [], { loginToken });
 
+    trackPlausible(`register/Success`, { oldpage: true });
     return { loginToken };
 }
 
