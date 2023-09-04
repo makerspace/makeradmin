@@ -59,7 +59,7 @@ const PayDialog = ({ stripe, products, productData, discount, currentMemberships
                 <StripeCardInput element={stripe} />
             </div>
             <div class="uk-modal-footer uk-text-right">
-                <button class="uk-button" onClick={onCancel}>${t("cancel")}</button>{" "}
+                <button class="uk-button" onClick={onCancel}>{t("cancel")}</button>{" "}
                 <button class="uk-button uk-button-primary spinner-button" disabled={inProgress} onClick={async () => {
                     setInProgress(true);
                     const paymentMethod = await createPaymentMethod(stripe, memberInfo);
