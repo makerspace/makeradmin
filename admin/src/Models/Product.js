@@ -1,6 +1,7 @@
 import Base from './Base';
 import ProductAction from "./ProductAction";
 import {get} from "../gateway";
+import UIkit from 'uikit';
 
 export default class Product extends Base {
     
@@ -94,6 +95,25 @@ export default class Product extends Base {
         model.refreshRelated();
         return model;
     }
+    
+    deserialize(x) {
+        // We store the product metadata as a json object in the database,
+        // but we want to edit it as a string in the UI.
+        // This is perhaps not the prettiest solution, but it works.
+        x['product_metadata'] = JSON.stringify(x['product_metadata']);
+        return x;
+    }
+
+    serialize(x) {
+        try {
+            x['product_metadata'] = JSON.parse(x['product_metadata']);
+        } catch (e) {
+            // In case the user supplied invalid json, we ignore the update.
+            UIkit.modal.alert("Invalid product metadata json.");
+            x['product_metadata'] = JSON.parse(this.saved['product_metadata']);
+        }
+        return x;
+    }
 }
 
 
@@ -103,6 +123,7 @@ Product.model = {
     attributes: {
         created_at: null,
         updated_at: null,
+        product_metadata: "{}",
         name: "",
         description: "",
         category_id: 0,

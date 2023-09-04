@@ -2,13 +2,16 @@ import * as common from "./common";
 import * as login from "./login";
 import { UNAUTHORIZED, get_error } from "./common";
 import { JSX } from "preact/jsx-runtime";
-import { LoadCurrentMemberInfo, date_t, member_t } from "./member_common";
+import { LoadCurrentMemberGroups, LoadCurrentMemberInfo, LoadCurrentMembershipInfo, date_t, member_t, membership_t } from "./member_common";
 import { render } from "preact";
-import { useState } from "preact/hooks";
-import { showPhoneNumberDialog } from "./change_phone";
+import { useEffect, useMemo, useState } from "preact/hooks";
+import { show_phone_number_dialog } from "./change_phone";
+import { SubscriptionInfo, SubscriptionType, activateSubscription, cancelSubscription, getCurrentSubscriptions } from "./subscriptions";
+import { useTranslation, translateUnit, Translator } from "./translations";
 import { Sidebar } from "./sidebar";
-import { LoadProductData, ProductData } from "./payment_common";
-import { useCart } from "./cart";
+import { FindWellKnownProduct, LoadProductData, Product, ProductData, RelevantProducts, extractRelevantProducts, initializeStripe } from "./payment_common";
+import Cart, { useCart } from "./cart";
+import { URL_CALENDAR, URL_MEMBERBOOTH } from "./urls";
 declare var UIkit: any;
 
 
@@ -25,22 +28,12 @@ type template_strings_t = [fn_past_enddate, fn_expired_yesterday,
     fn_lots_of_time_left, fn_inactive];
 
 
-type membership_t = {
-    membership_active: boolean,
-    membership_end: date_t,
-    labaccess_active: boolean,
-    labaccess_end: date_t,
-    special_labaccess_active: boolean,
-    special_labaccess_end: date_t
-};
-
 
 type membership_info_t = {
     enddate: date_t,
     active: boolean
 };
 
-const calendarURL = "https://www.makerspace.se/kalendarium";
 const webshop_url = `${window.location.origin}/shop`;
 
 
@@ -101,12 +94,65 @@ function Info({ info, template_strings }: { info: membership_info_t, template_st
     );
 }
 
+function Info2({ translation_key, info }: { translation_key: "labaccess" | "membership" | "special_labaccess", info: membership_info_t }) {
+    const t = useTranslation();
+    let text: JSX.Element | string;
+    let icon: string;
+    let color: string;
+
+    const millisecondsPerHour = 1000 * 3600;
+    const millisecondsPerDay = millisecondsPerHour * 24;
+
+    const end = Date.parse(info.enddate) + millisecondsPerDay;
+
+    if (info.active) {
+        const remainingDays = Math.floor((end - Date.now()) / millisecondsPerDay);
+
+        if (remainingDays < -1) {
+            text = t(`member_page.old_membership_status.${translation_key}.inactive_recent`)(-remainingDays);
+            icon = "close";
+            color = "member-key-color-inactive";
+        } else if (remainingDays < 0) {
+            text = t(`member_page.old_membership_status.${translation_key}.inactive_yesterday`);
+            icon = "close";
+            color = "member-key-color-inactive";
+        } else if (remainingDays < 1) {
+            const remainingHours = Math.ceil((end - Date.now()) / millisecondsPerHour);
+            text = t(`member_page.old_membership_status.${translation_key}.active_hours_remaining`)(remainingHours);
+            icon = "check";
+            color = "member-key-color-warning";
+        } else if (remainingDays < 14) {
+            text = t(`member_page.old_membership_status.${translation_key}.active_few_days_remaining`)(info.enddate, remainingDays);
+            icon = "check";
+            color = "member-key-color-warning";
+        } else {
+            text = t(`member_page.old_membership_status.${translation_key}.active_days_remaining`)(info.enddate, remainingDays);
+            icon = "check";
+            color = "member-key-color-active";
+        }
+    } else {
+        text = t(`member_page.old_membership_status.${translation_key}.inactive`);
+        icon = "close";
+        color = "member-key-color-inactive";
+    }
+
+    return (
+        <div class="member-key-box">
+            <div class={`uk-icon-small member-key-icon ${color}`} uk-icon={icon}>
+            </div>
+            <div class="member-key-status">
+                {text}
+            </div>
+        </div>
+    );
+}
+
 function WarningItem({ children }: { children: preact.ComponentChildren }) {
     return <p><i class="member-text-warning" uk-icon="warning"></i> &nbsp; {children}</p>;
 }
 
 function SignedContractWarning({ member }: { member: member_t }) {
-    return member.labaccess_agreement_at ? null : <WarningItem>Du måste delta på en <strong>medlemintroduktion</strong>. Du hittar dem i <a href={calendarURL}>kalendern</a>.</WarningItem>;
+    return member.labaccess_agreement_at ? null : <WarningItem>Du måste delta på en <strong>medlemintroduktion</strong>. Du hittar dem i <a href={URL_CALENDAR}>kalendern</a>.</WarningItem>;
 }
 
 
@@ -133,10 +179,15 @@ function PendingLabaccessInstructions({ can_sync_labaccess, pending_labaccess_da
 
 function Help({ member, membership, pending_labaccess_days, onSendAccessyInvite }: { member: member_t, membership: membership_t, pending_labaccess_days: number, onSendAccessyInvite: () => void }) {
     const todo_bullets = [
-        <SignedContractWarning member={member} />,
-        <NoMembershipWarning membership={membership} />,
-        <MissingPhoneNumber member={member} />,
-    ];
+        SignedContractWarning({ member }),
+        NoMembershipWarning({ membership }),
+        MissingPhoneNumber({ member }),
+        // TODO: Accessy invite. Check if user is in accessy group.
+    ].filter(x => x !== null);
+
+    if (todo_bullets.length === 0) {
+        return null;
+    }
 
     const pending_labaccess_instruction = <PendingLabaccessInstructions can_sync_labaccess={!todo_bullets} pending_labaccess_days={pending_labaccess_days} />;
 
@@ -165,6 +216,54 @@ function get_pending_labaccess_days(pending_actions_json: any): number {
     return pendingLabaccessDays;
 }
 
+async function change_pin_code(member: member_t) {
+    const pin_code = await UIkit.modal.prompt("Välj en pinkod", member.pin_code === null ? get_random_pin_code(4) : member.pin_code);
+    if (pin_code === null)
+        return;
+
+    try {
+        await common.ajax("POST", `${window.apiBasePath}/member/current/set_pin_code`, { pin_code: pin_code })
+        await UIkit.modal.alert(`<h2>Pinkoden är nu bytt</h2>`);
+        location.reload();
+    } catch (e) {
+        UIkit.modal.alert(`<h2>Kunde inte byta pinkod</h2><b class="uk-text-danger"">${get_error(e)}</b>`);
+    }
+}
+
+async function change_phone_number(member: member_t, membership: membership_t, t: Translator) {
+    const r = await show_phone_number_dialog(
+        member.member_id,
+        async () => await UIkit.modal.prompt(t("change_phone.new_number_prompt")),
+        async () => await UIkit.modal.prompt(t("change_phone.validation_code_prompt")),
+        t
+    );
+    switch (r) {
+        case "ok":
+            await UIkit.modal.alert(`<h2>Telefonnummret är nu bytt</h2>`);
+
+            if (membership.labaccess_active || membership.special_labaccess_active) {
+                // Send accessy invite to the new phone number
+                await common.ajax("POST", `${window.apiBasePath}/webshop/member/current/accessy_invite`);
+            }
+
+            location.reload();
+            break;
+        case "cancel":
+            break;
+        case UNAUTHORIZED:
+            login.redirect_to_member_page();
+            break;
+    }
+}
+
+async function send_accessy_invite() {
+    try {
+        await common.ajax("POST", `${window.apiBasePath}/webshop/member/current/accessy_invite`);
+        UIkit.modal.alert(`<h2>Inbjudan skickad</h2>`);
+    } catch (e) {
+        UIkit.modal.alert(`<h2>Inbjudan misslyckades</h2><b class="uk-text-danger"">${get_error(e)}</b>`);
+    }
+}
 
 function MembershipView({ member, membership, pendingLabaccessDays }: { member: member_t, membership: membership_t, pendingLabaccessDays: number }) {
     const labaccessStrings: template_strings_t = [
@@ -204,7 +303,7 @@ function MembershipView({ member, membership, pendingLabaccessDays }: { member: 
 
 
 function PersonalData({ member, onChangePinCode, onChangePhoneNumber }: { member: member_t, onChangePinCode: () => void, onChangePhoneNumber: () => void }) {
-    const pin_warning = member.pin_code == null ? <label class="uk-form-label" style="color: red;">Du har inte satt någon PIN-kod ännu. Använd BYT-knappen för att sätta den.</label> : null;
+    const pin_warning = member.pin_code == null ? <label class="uk-form-label" style="color: red;">Du har inte satt någon PIN-kod ännu. Använd BYT-knappen för att sätta den. PIN-koden används för <a href={URL_MEMBERBOOTH}>memberbooth</a>.</label> : null;
     const [showPinCode, setShowPinCode] = useState(false);
     return (
         <fieldset>
@@ -275,51 +374,141 @@ function Address({ member }: { member: member_t }) {
     );
 }
 
-function MemberPage({ member, membership, pending_labaccess_days, productData }: { member: member_t, membership: membership_t, pending_labaccess_days: number, productData: ProductData }) {
+function SubscriptionPayment({ sub, membership, subscriptions, member, type, productData }: { sub: SubscriptionInfo | null, membership: membership_t, subscriptions: SubscriptionInfo[], member: member_t, type: SubscriptionType, productData: ProductData }) {
+    const product = FindWellKnownProduct(productData.products, `${type}_subscription`)!;
+    const t = useTranslation();
+
+    return sub ?
+        <div class="uk-button-group">
+            <button class="uk-button" disabled>{t("member_page.subscriptions.auto_renewal_active")}</button>
+            <button class="uk-button uk-button-danger" onClick={e => {
+                e.preventDefault();
+                cancelSubscription(type, membership, subscriptions);
+            }}>{t("cancel")}</button>
+        </div>
+        :
+        <>
+            <button class="uk-button uk-button-primary" onClick={e => {
+                e.preventDefault();
+                if (member.labaccess_agreement_at === null) {
+                    UIkit.modal.alert(t("member_page.subscriptions.errors.no_member_introduction"));
+                    return;
+                }
+
+                activateSubscription(type, member, membership, subscriptions);
+            }}>{t("member_page.subscriptions.activate_auto_renewal")(product.price, translateUnit(product.unit, 1, t))}</button>
+        </>;
+}
+
+function SubscriptionProduct({ product, cart, onChangeCart }: { product: Product, cart: Cart, onChangeCart: (cart: Cart) => void }) {
+    const t = useTranslation();
+    if (product.unit !== "mån" && product.unit !== "år" && product.unit !== "st") throw new Error(`Unexpected unit '${product.unit}' for ${product.name}. Expected one of år/mån/st`);
+
+    return <button
+        class="uk-button uk-button-primary"
+        onClick={e => {
+            e.preventDefault();
+            cart.setItem(product.id, cart.getItemCount(product.id) + 1);
+            onChangeCart(cart);
+        }}
+    >
+        {t("member_page.subscriptions.add_to_cart")(product.smallest_multiple, t(`unit.${product.unit}.${product.smallest_multiple > 1 ? 'many' : 'one'}`), Number(product.price) * product.smallest_multiple)}
+    </button>
+}
+
+function BaseMembership({ member, membership, subscriptions, relevantProducts, cart, onChangeCart, productData }: { member: member_t, membership: membership_t, subscriptions: SubscriptionInfo[], relevantProducts: RelevantProducts, cart: Cart, onChangeCart: (cart: Cart) => void, productData: ProductData }) {
+    const t = useTranslation();
+    const sub = subscriptions.find(sub => sub.type === "membership") || null;
+    return <fieldset>
+        <legend><i uk-icon="home"></i> Base Membership</legend>
+        <Info2 info={{ active: membership.membership_active, enddate: membership.membership_end }} translation_key="membership" />
+        <p>{t("member_page.subscriptions.descriptions.membership")}</p>
+        <hr />
+        <SubscriptionPayment type="membership" sub={sub} membership={membership} subscriptions={subscriptions} member={member} productData={productData} />
+        <div class="uk-margin-small-top" />
+        {sub && sub.upcoming_invoice && <p>{t("member_page.subscriptions.next_charge")(sub.upcoming_invoice.amount_due, sub.upcoming_invoice.payment_date)}</p>}
+        {!sub && <SubscriptionProduct product={relevantProducts.baseMembershipProduct} cart={cart} onChangeCart={onChangeCart} />}
+    </fieldset>
+}
+
+function MakerspaceAccess({ member, membership, subscriptions, relevantProducts, pending_labaccess_days, cart, onChangeCart, productData }: { member: member_t, membership: membership_t, pending_labaccess_days: number, subscriptions: SubscriptionInfo[], relevantProducts: RelevantProducts, cart: Cart, onChangeCart: (cart: Cart) => void, productData: ProductData }) {
+    const t = useTranslation();
+    const sub = subscriptions.find(sub => sub.type === "labaccess") || null;
+    return <fieldset>
+        <legend><i uk-icon="home"></i> Makerspace Access</legend>
+        <Info2 info={{ active: membership.labaccess_active, enddate: membership.labaccess_end }} translation_key="labaccess" />
+        {
+            membership.special_labaccess_active && <Info2 info={{ active: membership.special_labaccess_active, enddate: membership.special_labaccess_end }} translation_key="special_labaccess" />
+        }
+        {pending_labaccess_days > 0 && <p>{t("member_page.subscriptions.pending_makerspace_access")(pending_labaccess_days)}</p>}
+        <p>{t("member_page.subscriptions.descriptions.labaccess")}</p>
+        <hr />
+        <SubscriptionPayment type="labaccess" sub={sub} membership={membership} subscriptions={subscriptions} member={member} productData={productData} />
+        <div class="uk-margin-small-top" />
+        {sub && sub.upcoming_invoice && <p>{t("member_page.subscriptions.next_charge")(sub.upcoming_invoice.amount_due, sub.upcoming_invoice.payment_date)}</p>}
+        {!sub && <SubscriptionProduct product={relevantProducts.labaccessProduct} cart={cart} onChangeCart={onChangeCart} />}
+    </fieldset>
+}
+
+function Billing() {
+    const t = useTranslation();
+    return <fieldset>
+        <legend><i uk-icon="credit-card"></i> {t("member_page.billing.title")}</legend>
+        <button className="uk-button" onClick={async e => {
+            e.preventDefault();
+            const url = (await common.ajax("GET", `${window.apiBasePath}/webshop/member/current/stripe_customer_portal`)).data;
+            location.href = url;
+        }}>{t("member_page.billing.manage")}</button>
+    </fieldset>;
+}
+
+function useFetchRepeatedly<T>(fetcher: () => Promise<T>, callback: (t: T) => void) {
+    useEffect(() => {
+        let i = 0;
+        let id: NodeJS.Timeout;
+        const f = async () => {
+            callback(await fetcher());
+            i++;
+            id = setTimeout(f, Math.min(60 * 60 * 1000, Math.pow(1.5, i) * 1000));
+        };
+        id = setTimeout(f, 1000);
+        return () => clearInterval(id);
+    }, []);
+}
+
+function MemberPage({ member, membership: initial_membership, pending_labaccess_days, productData, subscriptions, show_beta }: { member: member_t, membership: membership_t, pending_labaccess_days: number, subscriptions: SubscriptionInfo[], show_beta: boolean, productData: ProductData }) {
     const apiBasePath = window.apiBasePath;
-    const { cart } = useCart();
+    const [membership, setMembership] = useState(initial_membership);
+    const relevantProducts = useMemo(() => extractRelevantProducts([...productData.id2item.values()]), [productData.id2item]);
+
+    // Automatically refresh membership info.
+    // This is particularly useful when the user has had the tab open for a long time.
+    useFetchRepeatedly(LoadCurrentMembershipInfo, setMembership);
+    const t = useTranslation();
+    const { cart, setCart } = useCart();
 
     return (
         <>
             <Sidebar cart={cart.items.length > 0 ? { cart, productData } : null} />
             <div id="content">
                 <form class="uk-form uk-form-stacked uk-margin-bottom">
-                    <h2>Medlem {member.member_number}: {member.firstname} {member.lastname}</h2>
-                    <MembershipView member={member} membership={membership} pendingLabaccessDays={pending_labaccess_days} />
-                    <Help member={member} membership={membership} pending_labaccess_days={pending_labaccess_days} onSendAccessyInvite={async () => {
-                        try {
-                            await common.ajax("POST", `${window.apiBasePath}/webshop/member/current/accessy_invite`);
-                            UIkit.modal.alert(`<h2>Inbjudan skickad</h2>`);
-                        } catch (e) {
-                            UIkit.modal.alert(`<h2>Inbjudan misslyckades</h2><b class="uk-text-danger"">${get_error(e)}</b>`);
-                        }
-                    }} />
-                    <PersonalData member={member} onChangePinCode={async () => {
-                        const pin_code = await UIkit.modal.prompt("Välj en pinkod", member.pin_code === null ? get_random_pin_code(4) : member.pin_code);
-                        if (pin_code === null)
-                            return;
-
-                        try {
-                            await common.ajax("POST", `${apiBasePath}/member/current/set_pin_code`, { pin_code: pin_code })
-                            await UIkit.modal.alert(`<h2>Pinkoden är nu bytt</h2>`);
-                            location.reload();
-                        } catch (e) {
-                            UIkit.modal.alert(`<h2>Kunde inte byta pinkod</h2><b class="uk-text-danger"">${get_error(e)}</b>`);
-                        }
-                    }}
-                        onChangePhoneNumber={async () => {
-                            switch (await showPhoneNumberDialog(member.phone)) {
-                                case "ok":
-                                    await UIkit.modal.alert(`<h2>Telefonnummret är nu bytt</h2>`)
-                                    location.reload();
-                                    break;
-                                case "cancel":
-                                    break;
-                                case UNAUTHORIZED:
-                                    login.redirect_to_member_page();
-                                    break;
-                            }
-                        }} />
+                    <h2>{t("member_page.member")} {member.member_number}: {member.firstname} {member.lastname}</h2>
+                    {show_beta ? <>
+                        <Help member={member} membership={membership} pending_labaccess_days={pending_labaccess_days} onSendAccessyInvite={send_accessy_invite} />
+                        <BaseMembership member={member} membership={membership} subscriptions={subscriptions} relevantProducts={relevantProducts} cart={cart} onChangeCart={setCart} productData={productData} />
+                        <MakerspaceAccess member={member} membership={membership} subscriptions={subscriptions} relevantProducts={relevantProducts} cart={cart} onChangeCart={setCart} productData={productData} pending_labaccess_days={pending_labaccess_days} />
+                        <Billing />
+                    </>
+                        : <>
+                            <MembershipView member={member} membership={membership} pendingLabaccessDays={pending_labaccess_days} />
+                            <Help member={member} membership={membership} pending_labaccess_days={pending_labaccess_days} onSendAccessyInvite={send_accessy_invite} />
+                        </>
+                    }
+                    <PersonalData
+                        member={member}
+                        onChangePinCode={() => void change_pin_code(member)}
+                        onChangePhoneNumber={() => void change_phone_number(member, membership, t)}
+                    />
                     <Address member={member} />
                 </form>
             </div>
@@ -329,21 +518,25 @@ function MemberPage({ member, membership, pending_labaccess_days, productData }:
 
 common.documentLoaded().then(() => {
     common.addSidebarListeners();
+    initializeStripe();
 
     const apiBasePath = window.apiBasePath;
     const root = document.querySelector("#root") as HTMLElement;
 
     const future1 = LoadCurrentMemberInfo();
-    const future2 = common.ajax("GET", apiBasePath + "/member/current/membership", null);
+    const membership = LoadCurrentMembershipInfo();
     const future3 = common.ajax("GET", apiBasePath + "/webshop/member/current/pending_actions", null);
+    const subscriptions = getCurrentSubscriptions().then(s => s.filter(sub => sub.active));
+    const groups = LoadCurrentMemberGroups();
     const productData = LoadProductData();
 
-    Promise.all([future1, future2, future3, productData]).then(([member, membership_json, pending_actions_json, productData]) => {
-        const membership: membership_t = membership_json.data;
+
+    Promise.all([future1, membership, future3, subscriptions, groups, productData]).then(([member, membership, pending_actions_json, subscriptions, groups, productData]) => {
         const pending_labaccess_days = get_pending_labaccess_days(pending_actions_json);
+        const in_beta_group = groups.some(g => g.name === "betatesters");
         if (root != null) {
             render(
-                <MemberPage member={member} membership={membership} pending_labaccess_days={pending_labaccess_days} productData={productData} />,
+                <MemberPage member={member} membership={membership} pending_labaccess_days={pending_labaccess_days} subscriptions={subscriptions} show_beta={in_beta_group} productData={productData} />,
                 root
             );
         }

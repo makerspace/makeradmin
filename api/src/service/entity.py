@@ -3,11 +3,11 @@ from datetime import datetime, date
 from decimal import Decimal
 from logging import getLogger
 from math import ceil
-from typing import Any, Mapping, Dict, Callable, Type
+from typing import Any, Mapping, Dict, Callable, Type, TypeVar, Union
 
 from flask import request
 from pytz import UTC
-from sqlalchemy import inspect, Integer, String, DateTime, Text, desc, asc, or_, text, Date, Enum as DbEnum, Numeric, \
+from sqlalchemy import JSON, inspect, Integer, String, DateTime, Text, desc, asc, or_, text, Date, Enum as DbEnum, Numeric, \
     Boolean, LargeBinary
 
 from service.api_definition import BAD_VALUE, REQUIRED, Arg, symbol, Enum, natural0, natural1
@@ -27,9 +27,12 @@ def not_empty(key, value):
         raise UnprocessableEntity(f"'{key}' can not be empty.", fields=key, what=REQUIRED)
 
 
-def to_model_wrap(value_converter):
-    def error_handling_wrapper(key):
-        def converter(value):
+T = TypeVar('T')
+U = TypeVar('U')
+
+def to_model_wrap(value_converter: Callable[[T],U]) -> Callable[[str], Callable[[T],Union[U, None]]]:
+    def error_handling_wrapper(key: str) -> Callable[[T],Union[U, None]]:
+        def converter(value: T) -> Union[U, None]:
             if value is None:
                 return None
             try:
@@ -41,7 +44,7 @@ def to_model_wrap(value_converter):
     return error_handling_wrapper
 
 
-def identity(value):
+def identity(value: T) -> T:
     return value
 
 
@@ -73,6 +76,7 @@ to_model_converters: Dict[Type, Callable] = {
     DbEnum: to_model_wrap(str),
     Boolean: to_model_wrap(bool),
     LargeBinary: to_model_wrap(base64decode),
+    JSON: to_model_wrap(identity),
 }
 
 
@@ -86,6 +90,7 @@ to_obj_converters: Dict[Type, Callable] = {
     DbEnum: identity,
     Boolean: identity,
     LargeBinary: base64encode,
+    JSON: identity,
 }
 
 

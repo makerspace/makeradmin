@@ -7,6 +7,8 @@ from sqlalchemy import Column, Integer, String, DateTime, Text, Date, Enum, Tabl
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, column_property, configure_mappers, validates
 
+from membership.enums import PriceLevel
+
 Base = declarative_base()
 
 
@@ -42,9 +44,18 @@ class Member(Base):
     created_at = Column(DateTime, server_default=func.now())
     updated_at = Column(DateTime, server_default=func.now())
     deleted_at = Column(DateTime)
+
+    # True during the registration flow as the payment is being processed
+    pending_activation = Column(Boolean, nullable=False)
+
     member_number = Column(Integer, unique=True)
     labaccess_agreement_at = Column(DateTime)
     pin_code = Column(String(30))
+    stripe_customer_id = Column(String(64))
+    stripe_membership_subscription_id = Column(String(64))
+    stripe_labaccess_subscription_id = Column(String(64))
+    price_level = Column(Enum(*[x.value for x in PriceLevel]), nullable=False)
+    price_level_motivation = Column(String)
 
     @validates('phone')
     def validate_phone(self, key: Any, value: Optional[str]) -> Optional[str]:
@@ -187,7 +198,7 @@ class PhoneNumberChangeRequest(Base):
     __tablename__ = 'change_phone_number_requests'
     
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
-    member_id = Column(Integer, ForeignKey('membership_members.member_id'), nullable=False)
+    member_id = Column(Integer, ForeignKey('membership_members.member_id'), nullable=True)
     phone = Column(String(255), nullable=False)
 
     # Number used to compare if the reques is valid or not.

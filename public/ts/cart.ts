@@ -1,4 +1,5 @@
 import { useEffect, useState } from "preact/hooks";
+import { Product } from "./payment_common";
 
 export interface Item {
 	id: number;
@@ -91,6 +92,10 @@ export default class Cart {
 
 	saveToStorage() {
 		localStorage.setItem("cart", JSON.stringify(this.items));
+	}
+
+	static oneOfEachProduct(products: Product[]) {
+		return new Cart(products.map(p => ({ id: p.id, count: 1 })))
 	}
 
 	static fromStorage(): Cart {

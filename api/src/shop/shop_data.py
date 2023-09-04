@@ -1,10 +1,13 @@
 from dataclasses import dataclass
 from logging import getLogger
 from typing import List
+import collections
 
 from sqlalchemy import desc
 from sqlalchemy.orm import joinedload, contains_eager
 from sqlalchemy.orm.exc import NoResultFound
+from shop.stripe_constants import MakerspaceMetadataKeys
+from shop.stripe_subscriptions import get_subscription_products
 
 from membership.views import member_entity
 from service.db import db_session

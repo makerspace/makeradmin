@@ -2,8 +2,7 @@ import Cart, { Item, useCart } from "./cart"
 import * as common from "./common"
 import * as login from "./login"
 import { ServerResponse, UNAUTHORIZED } from "./common";
-import { renderSidebarCategories } from "./category"
-import { BackendPaymentResponse, LoadProductData, PaymentFlowDefinition, Product, ProductData, StripeCardInput, createStripeCardInput, initializeStripe, mountStripe, negotiatePayment, pay } from "./payment_common"
+import { BackendPaymentResponse, LoadProductData, PaymentFlowDefinition, ProductData, StripeCardInput, createStripeCardInput, initializeStripe, negotiatePayment, pay } from "./payment_common"
 import { LoadCurrentMemberInfo } from "./member_common";
 import { render } from "preact";
 import { stripe } from './payment_common';
@@ -46,13 +45,6 @@ const CartItem = ({ cartItem, productData, cart, onChangeCart }: { cartItem: Ite
 			/>
 		</div>
 	</div>;
-}
-
-type PaymentRequest = {
-	cart: Item[],
-	expected_sum: number,
-	stripe_payment_method_id: string,
-	transaction_id: number | null
 }
 
 const PaymentButton = ({ cart, productData }: { cart: Cart, productData: ProductData }) => {
@@ -102,16 +94,20 @@ const PaymentButton = ({ cart, productData }: { cart: Cart, productData: Product
 					if (result.error) {
 						throw result.error;
 					} else {
-						const payment = await negotiatePayment<PaymentRequest, BackendPaymentResponse>(window.apiBasePath + "/webshop/pay", {
-							cart: cart.items,
-							expected_sum: cart.sum(productData.id2item),
-							stripe_payment_method_id: result.paymentMethod!.id,
-							transaction_id: null,
-						})
+						const payment = await pay(result.paymentMethod!, cart, productData, {
+							// TODO: Add support for discounts here
+							priceLevel: "normal",
+							fractionOff: 0
+						}, []);
 
 						// Payment succeeded! Clear the cart and go to the receipt page.
 						new Cart([]).saveToStorage();
-						window.location.href = "receipt/" + payment.transaction_id;
+						if (payment.transaction_id !== null) {
+							window.location.href = "receipt/" + payment.transaction_id;
+						} else {
+							// Shouldn't happen unless only subscriptions were started. Which shouldn't be possible from the cart page.
+							window.location.href = "/member";
+						}
 					}
 				} catch (e) {
 					common.show_error("Betalningen misslyckades", e);

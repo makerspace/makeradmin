@@ -1,13 +1,25 @@
-from flask import g, request, send_file, make_response
+from dataclasses import dataclass
 from typing import Any
-from flask import Response, g, request, send_file, make_response, redirect, jsonify
+from flask import Response, g, request, send_file, make_response
 from sqlalchemy.exc import NoResultFound
+from membership.enums import PriceLevel
+from shop.stripe_discounts import get_discount_fraction_off
 
 from multiaccessy.invite import AccessyInvitePreconditionFailed, ensure_accessy_labaccess
-from service.api_definition import WEBSHOP, WEBSHOP_EDIT, PUBLIC, GET, USER, POST, Arg, WEBSHOP_ADMIN, MEMBER_EDIT
+from service.api_definition import (
+    WEBSHOP,
+    WEBSHOP_EDIT,
+    PUBLIC,
+    GET,
+    USER,
+    POST,
+    DELETE,
+    Arg,
+    MEMBER_EDIT,
+)
 from service.db import db_session
 from service.entity import OrmSingeRelation, OrmSingleSingleRelation
-from service.error import PreconditionFailed
+from service.error import InternalServerError, PreconditionFailed
 from shop import service
 from shop.entities import (
     product_image_entity,
@@ -19,8 +31,14 @@ from shop.entities import (
     product_action_entity,
 )
 from shop.models import TransactionContent, ProductImage
-from shop.pay import pay, register
-from shop.stripe_payment_intent import PartialPayment, confirm_stripe_payment_intent
+from shop.pay import (
+    cancel_subscriptions,
+    pay,
+    register,
+    setup_payment_method,
+    start_subscriptions,
+)
+from shop.stripe_payment_intent import PartialPayment
 from shop.shop_data import (
     pending_actions,
     member_history,
@@ -29,8 +47,18 @@ from shop.shop_data import (
     all_product_data,
     get_membership_products,
 )
-from shop.stripe_event import stripe_callback, process_stripe_events
+from shop.stripe_event import stripe_callback
 from shop.transactions import ship_labaccess_orders
+from logging import getLogger
+
+from shop.stripe_subscriptions import (
+    cancel_subscription,
+    get_subscription_products,
+    list_subscriptions,
+    open_stripe_customer_portal,
+)
+
+logger = getLogger("makeradmin")
 
 service.entity_routes(
     path="/category",
@@ -153,6 +181,26 @@ def accessy_invite():
         raise PreconditionFailed(message=str(e))
 
 
+@service.route("/member/current/subscriptions", method=POST, permission=USER)
+def start_subscriptions_route() -> None:
+    return start_subscriptions(request.json, g.user_id)
+
+
+@service.route("/member/current/subscriptions", method=DELETE, permission=USER)
+def cancel_subscriptions_route() -> Any:
+    return cancel_subscriptions(request.json, g.user_id)
+
+
+@service.route("/member/current/subscriptions", method=GET, permission=USER)
+def list_subscriptions_route() -> Any:
+    return list_subscriptions(g.user_id)
+
+
+@service.route("/member/current/stripe_customer_portal", method=GET, permission=PUBLIC)
+def open_stripe_customer_portal_route() -> str:
+    return open_stripe_customer_portal(g.user_id, test_clock=None)
+
+
 @service.route("/member/<int:member_id>/ship_labaccess_orders", method=POST, permission=MEMBER_EDIT)
 def ship_labaccess_orders_endpoint(member_id=None):
     try:
@@ -189,7 +237,16 @@ def public_image(image_id: int) -> Response:
 
 @service.route("/register_page_data", method=GET, permission=PUBLIC)
 def register_page_data():
-    return {"membershipProducts": get_membership_products(), "productData": all_product_data()}
+    # Make sure subscription products have been created and are up to date
+    get_subscription_products()
+
+    return {
+        "membershipProducts": get_membership_products(),
+        "productData": all_product_data(),
+        "discounts": {
+            price_level.value: get_discount_fraction_off(price_level).fraction_off for price_level in PriceLevel
+        },
+    }
 
 
 @service.route("/pay", method=POST, permission=USER, commit_on_error=True)
@@ -197,20 +254,18 @@ def pay_route() -> PartialPayment:
     return pay(request.json, g.user_id)
 
 
+# Used to just initiate a capture of a payment method via a setup intent
+@service.route("/setup_payment_method", method=POST, permission=USER, commit_on_error=True)
+def setup_payment_method_route():
+    return setup_payment_method(request.json, g.user_id)
+
+
 @service.route("/register", method=POST, permission=PUBLIC, commit_on_error=True)
-def register_route():
+def register_route() -> Any:
     assert request.remote_addr is not None
-    return register(request.json, request.remote_addr, request.user_agent.string)
+    return register(request.json, request.remote_addr, request.user_agent.string).to_dict()
 
 
 @service.route("/stripe_callback", method=POST, permission=PUBLIC, commit_on_error=True)
 def stripe_callback_route():
     stripe_callback(request.data, request.headers)
-
-
-@service.route("/process_stripe_events", method=POST, permission=WEBSHOP_ADMIN, commit_on_error=True)
-def process_stripe_events_route(
-    start=Arg(str, required=False), source_id=Arg(str, required=False), type=Arg(str, required=False)
-):
-    """Used to make server fetch stripe events, used for testing since webhook is hard to use."""
-    return process_stripe_events(start, source_id, type)

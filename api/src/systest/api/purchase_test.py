@@ -2,6 +2,7 @@ from logging import getLogger
 
 
 import stripe
+from shop.transactions import CartItem, Purchase
 
 from test_aid.systest_base import ApiShopTestMixin, ApiTest, VALID_NON_3DS_CARD_NO, VALID_3DS_CARD_NO, retry
 
@@ -21,19 +22,19 @@ class Test(ApiShopTestMixin, ApiTest):
 
         expected_sum = self.p0_price * p0_count + self.p1_price * p1_count
         cart = [
-            {"id": self.p0_id, "count": p0_count},
-            {"id": self.p1_id, "count": p1_count},
+            CartItem(self.p0_id, p0_count),
+            CartItem(self.p1_id, p1_count),
         ]
         
         payment_method = stripe.PaymentMethod.create(type="card", card=self.card(VALID_NON_3DS_CARD_NO))
         
-        purchase = {
-            "cart": cart,
-            "expected_sum": expected_sum,
-            "stripe_payment_method_id": payment_method.id,
-        }
+        purchase = Purchase(
+            cart=cart,
+            expected_sum=expected_sum,
+            stripe_payment_method_id=payment_method.id,
+        )
         
-        transaction_id = self.post(f"/webshop/pay", purchase, token=self.token)\
+        transaction_id = self.post(f"/webshop/pay", purchase.to_dict(), token=self.token)\
             .expect(code=200, status="ok").get('data__transaction_id')
 
         self.get(f"/webshop/transaction/{transaction_id}").expect(
@@ -57,19 +58,19 @@ class Test(ApiShopTestMixin, ApiTest):
         
         expected_sum = self.p0_price * p0_count + self.p1_price * p1_count
         cart = [
-            {"id": self.p0_id, "count": p0_count},
-            {"id": self.p1_id, "count": p1_count},
+            CartItem(self.p0_id, p0_count),
+            CartItem(self.p1_id, p1_count),
         ]
         
         payment_method = stripe.PaymentMethod.create(type="card", card=self.card(VALID_3DS_CARD_NO))
         
-        purchase = {
-            "cart": cart,
-            "expected_sum": expected_sum,
-            "stripe_payment_method_id": payment_method.id,
-        }
+        purchase = Purchase(
+            cart=cart,
+            expected_sum=expected_sum,
+            stripe_payment_method_id=payment_method.id,
+        )
         
-        transaction_id = self.post(f"/webshop/pay", purchase, token=self.token)\
+        transaction_id = self.post(f"/webshop/pay", purchase.to_dict(), token=self.token)\
             .expect(code=200, status="ok").get('data__transaction_id')
 
         def assert_transation():
@@ -90,37 +91,37 @@ class Test(ApiShopTestMixin, ApiTest):
         )
 
     def test_count_not_of_correct_multiple_fails_purchase(self):
-        purchase = {
-            "cart": [{"id": self.p1_id, "count": 17}],
-            "expected_sum": self.p1_price * 17,
-            "stripe_payment_method_id": "not_used",
-        }
+        purchase = Purchase(
+            cart = [CartItem(self.p1_id, 17)],
+            expected_sum = self.p1_price * 17,
+            stripe_payment_method_id = "not_used",
+        )
 
-        self.post(f"/webshop/pay", purchase, token=self.token).expect(code=400, what="invalid_item_count")
+        self.post(f"/webshop/pay", purchase.to_dict(), token=self.token).expect(code=400, what="invalid_item_count")
     
     def test_invalid_expected_sum_fails_purchase(self):
-        purchase = {
-            "cart": [{"id": self.p0_id, "count": 1}],
-            "expected_sum": self.p0_price + 1,
-            "stripe_payment_method_id": "not_used",
-        }
+        purchase = Purchase(
+            cart=[CartItem(self.p0_id, 1)],
+            expected_sum=self.p0_price + 1,
+            stripe_payment_method_id="not_used",
+        )
 
-        self.post(f"/webshop/pay", purchase, token=self.token).expect(code=400, what="non_matching_sums")
+        self.post(f"/webshop/pay", purchase.to_dict(), token=self.token).expect(code=400, what="non_matching_sums")
     
     def test_negative_count_fails_purchaste(self):
-        purchase = {
-            "cart": [{"id": self.p0_id, "count": -1}],
-            "expected_sum": self.p0_price,
-            "stripe_payment_method_id": "not_used",
-        }
+        purchase = Purchase(
+            cart=[CartItem(self.p0_id, -1)],
+            expected_sum=self.p0_price,
+            stripe_payment_method_id="not_used",
+        )
 
-        self.post(f"/webshop/pay", purchase, token=self.token).expect(code=400, what="negative_item_count")
+        self.post(f"/webshop/pay", purchase.to_dict(), token=self.token).expect(code=400, what="negative_item_count")
     
     def test_empty_cart_fails_purchase(self):
-        purchase = {
-            "cart": [],
-            "expected_sum": self.p0_price,
-            "stripe_payment_method_id": "not_used",
-        }
+        purchase = Purchase(
+            cart=[],
+            expected_sum=self.p0_price,
+            stripe_payment_method_id="not_used",
+        )
 
-        self.post(f"/webshop/pay", purchase, token=self.token).expect(code=400, what="empty_cart")
+        self.post(f"/webshop/pay", purchase.to_dict(), token=self.token).expect(code=400, what="empty_cart")

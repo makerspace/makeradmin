@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Bli medlem, Become a member - Stockholm Makerspace</title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="{{ STATIC }}/uikit/css/uikit.min.css" />
+        <link rel="stylesheet" href="{{ STATIC }}/style.css" />
+        <script src='{{ STATIC }}/uikit/js/uikit.min.js'></script>
+        <script src='{{ STATIC }}/uikit/js/uikit-icons.min.js'></script>
+        <script src="https://js.stripe.com/v3/"></script>
+        {% include 'meta.html' %}
+        <script src='{{ STATIC }}/js/register2.js'></script>
+    </head>
+    <body>
+        {% include 'banner.html' %}
+        <div id="root" class="register-page">
+        </div>
+    </body>
+</html>

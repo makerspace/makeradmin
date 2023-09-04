@@ -9,6 +9,7 @@ declare global {
 		staticBasePath: string;
 		productId: number;
 		transactionId: number;
+		plausible: any;
 	}
 }
 
@@ -19,6 +20,22 @@ export interface ServerResponse<T> {
 
 export const UNAUTHORIZED = "unauthorized";
 
+export const trackPlausible: (tag: string, options?: object) => void = window.plausible || function () { (window.plausible.q = window.plausible.q || []).push(arguments) };
+
+export function formatDate(str: any) {
+	const options: Intl.DateTimeFormatOptions = {
+		year: "numeric", month: "numeric", day: "numeric",
+		hour12: false
+	};
+
+	const parsed_date = Date.parse(str);
+
+	// If the date was parsed successfully we should update the string
+	if (!isNaN(parsed_date)) {
+		return new Intl.DateTimeFormat("sv-SE", options).format(parsed_date);
+	}
+	return "";
+}
 
 export function formatDateTime(str: any) {
 	const options: Intl.DateTimeFormatOptions = {
@@ -64,12 +81,12 @@ export function uploadFile<T>(url: string, file: File): Promise<T> {
 	}).then(response => response.json())
 }
 
-export function ajax(type: string, url: string, data: object | null = null): Promise<any> {
+export function ajax(type: string, url: string, data: object | null = null, options: { loginToken?: string } = {}): Promise<ServerResponse<any>> {
 	return new Promise((resolve, reject) => {
 		const xhr = new XMLHttpRequest();
 		xhr.open(type, url);
 		xhr.setRequestHeader('Content-Type', 'application/json; charset=utf-8');
-		let token = localStorage.getItem("token");
+		let token = options.loginToken ?? localStorage.getItem("token");
 		if (token) {
 			xhr.setRequestHeader('Authorization', "Bearer " + token);
 		}

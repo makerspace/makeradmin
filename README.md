@@ -83,17 +83,15 @@ public_1            | 10.0.2.2 - - [18/Dec/2018:20:50:23 +0000] "GET / HTTP/1.1"
 [...]
 ```
 
-### "Paying" with fake Stripe key
-You will not be able to go to the checkout unless you have a Stripe key in the .env-file. If this is set up, you can use [Stripe's fake cards](https://stripe.com/docs/testing#cards) for completing the purchase.
+## Additional configuration
 
-### Frontend js dev-server
-To run a webpack-dev-server inside a docker container (will node, npm
-and node_modules inside the image and mount js source files from local
-file system).
+The `.env` file includes a number of variables that are unset by default.
 
-```make admin-dev-server```
-Then go to:
-* (http://localhost:8080)
+If you want emails to be sent, you'll need to set the `MAILGUN_DOMAIN`, `MAILGUN_KEY` and `MAILGUN_FROM` variables.
+You will also want to set the `ADMIN_EMAIL` variable to some mailbox that you monitor.
+
+To deploy on any host which is not localhost, you'll need to change the `HOST_BACKEND`, `HOST_FRONTEND` and `HOST_PUBLIC` variables.
+These are important to make sure links work, but also to handle CORS in the browser.
 
 ## Tests
 
@@ -135,3 +133,37 @@ make clean-nuke
 *Warning: this will completely wipe out all your makeradmin data!*
 
 After this you can run `make firstrun` again to set things up again.
+
+## Development with Stripe
+
+Create your own stripe account and add your keys to the `.env` file to allow purchases to work.
+
+### "Paying" with fake Stripe key
+
+You will not be able to go to the checkout unless you have a Stripe key in the .env-file. If this is set up, you can use [Stripe's fake cards](https://stripe.com/docs/testing#cards) for completing the purchase.
+
+### Stripe subscription support
+
+To handle subscriptions properly, the server needs to listen to stripe webhooks and configure subscription products (see next session).
+You can do this by installing the Stripe CLI and forward events using
+
+```bash
+stripe listen --forward-to http://localhost:8010/webshop/stripe_callback
+```
+
+After the forwarding has started, you'll need to copy the signing secret it gives you, and put it in your own `.env` file in the key `STRIPE_SIGNING_SECRET`.
+
+### Setting up Stripe subscription products
+
+When using stripe, subscriptions need to be configured via the stripe website.
+These subscriptions will automatically be turned into makeradmin products so that members can purchase them.
+
+The configuration needed on stripe is:
+
+* Create a product for base membership. Add the metadata "subscription_type"="membership"
+  * Add a yearly price, and add the metadata "price_type"="recurring"
+* Create a product for makerspace access. Add the metadata "subscription_type"="labaccess"
+  * Add a monthly price, and add the metadata "price_type"="recurring"
+  * Add a price for N months, where N is the binding period as specified in `stripe_subscriptions.py->BINDING_PERIOD`. The price should be N times the recurring price. Add the metadata "price_type"="binding_period"
+
+If you try to access any page which needs these products (e.g. the registration page, or the member page), makeradmin will fetch them from stripe and do a bunch of validation checks.

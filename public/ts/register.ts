@@ -1,32 +1,81 @@
 import Cart from "./cart"
 import * as common from "./common"
-import { login } from "./common";
-import { mountStripe, pay } from "./payment_common"
+import { ServerResponse, login } from "./common";
+import { PaymentFailedError, Product, ProductData, ProductDataFromProducts, Purchase, RegisterPageData, SetupIntentResponse, calculateAmountToPay, createPaymentMethod, disable_pay_button, enable_pay_button, handleStripeSetupIntent, initializeStripe, mountStripe, pay } from "./payment_common"
 declare var UIkit: any;
 
+type MemberInfo = {
+    firstName: string,
+    lastName: string,
+    email: string,
+    phone: string,
+    zipCode: string,
+}
 
-common.onGetAndDocumentLoaded("/webshop/register_page_data", (value: any) => {
+type RegisterRequest = {
+    member: MemberInfo
+    discount: null
+}
+
+type RegisterResponse = {
+    token: string
+    member_id: number
+}
+
+type RegistrationSuccess = {
+    loginToken: string
+}
+
+type Plan = {
+    products: Product[],
+}
+
+async function registerMember(paymentMethod: stripe.paymentMethod.PaymentMethod, productData: ProductData, memberInfo: MemberInfo, selectedPlan: Plan): Promise<RegistrationSuccess> {
+    const { payNow, payRecurring } = calculateAmountToPay({ cart: Cart.oneOfEachProduct(selectedPlan.products), productData, discount: { priceLevel: "normal", fractionOff: 0 }, currentMemberships: [] })
+    const nonSubscriptionProducts = selectedPlan.products.filter(p => p.product_metadata.subscription_type === undefined);
+
+    const data: RegisterRequest = {
+        member: memberInfo,
+        discount: null,
+    };
+
+    // This registers the member as pending
+    // If the payment fails, we can safely forget about the member (it will be cleaned up during the next registration attempt).
+    let loginToken: string;
+    try {
+        loginToken = (await common.ajax('POST', `${window.apiBasePath}/webshop/register`, data) as ServerResponse<RegisterResponse>).data.token;
+    } catch (e) {
+        throw new PaymentFailedError(common.get_error(e));
+    }
+
+    const cart = new Cart(
+        nonSubscriptionProducts.map(p => ({
+            id: p.id,
+            count: 1,
+        }))
+    )
+
+    await pay(paymentMethod, cart, productData, { priceLevel: "normal", fractionOff: 0.0 }, [], { loginToken });
+
+    return { loginToken };
+}
+
+common.onGetAndDocumentLoaded("/webshop/register_page_data", (value: RegisterPageData) => {
     common.addSidebarListeners();
+    initializeStripe();
 
-    const { productData, membershipProducts } = value;
+    const { membershipProducts } = value;
+    const productData = ProductDataFromProducts(value.productData);
 
     const apiBasePath = window.apiBasePath;
 
     // Add membership products
-    membershipProducts.forEach((product: any) => {
+    membershipProducts.filter(p => productData.id2item.get(p.id)!.product_metadata.subscription_type === undefined).forEach((product: any) => {
         document.querySelector("#products")!.innerHTML += `<div><input class="uk-radio" type="radio" value="${product.id}" name="product" checked/> ${product.name}: ${product.price} kr</div>`;
     });
 
     // Add an instance of the card Element into the `card-element` <div>.
-    mountStripe();
-
-    const id2item = new Map();
-
-    for (const cat of productData) {
-        for (const item of cat.items) {
-            id2item.set(item.id, item);
-        }
-    }
+    const element = mountStripe();
 
     let cart: Cart = new Cart([]);
 
@@ -41,7 +90,7 @@ common.onGetAndDocumentLoaded("/webshop/register_page_data", (value: any) => {
             count: 1,
         }]);
 
-        const totalSum = cart.sum(id2item);
+        const totalSum = cart.sum(productData.id2item);
         document.querySelector("#pay-button")!.querySelector("span")!.innerHTML = "Betala " + Cart.formatCurrency(totalSum);
     }
 
@@ -55,7 +104,7 @@ common.onGetAndDocumentLoaded("/webshop/register_page_data", (value: any) => {
     });
 
     const payment_button = document.querySelector<HTMLButtonElement>("#pay-button")!;
-    const validate_fields: Array<string> = ['firstname', 'lastname', 'email', 'address_zipcode'];
+    const validate_fields: Array<string> = ['firstname', 'lastname', 'email', 'phone', 'address_zipcode'];
 
     function checkInputField(field: string): boolean {
         const el = document.querySelector<HTMLInputElement>("#" + field)!;
@@ -80,51 +129,46 @@ common.onGetAndDocumentLoaded("/webshop/register_page_data", (value: any) => {
         });
     });
 
-
-    function pay_config() {
-        function initiate_payment(result: any) {
-            return common.ajax("POST", apiBasePath + "/webshop/register", {
-                member: {
-                    firstname: common.getValue("#firstname"),
-                    lastname: common.getValue("#lastname"),
-                    email: common.getValue("#email"),
-                    // phone: common.getValue("#phone"), disabled until we can validate phone on register
-                    address_street: "", // common.getValue("#address_street"),
-                    address_extra: "", // common.getValue("#address_extra"),
-                    address_zipcode: parseInt(common.getValue("#address_zipcode").replace(/ /g, '')) || null,
-                    address_city: "", // common.getValue("#address_city"),
-                },
-                purchase: {
-                    cart: cart.items,
-                    expected_sum: cart.sum(id2item),
-                    stripe_payment_method_id: result.paymentMethod.id,
-                }
-            });
-        };
-        function handle_backend_response(json: any) {
-            const token: string = json.data.token;
-            if (token) {
-                login(token);
-            }
-        };
-        function on_failure(json: any) {
-            if (json.what === "not_unique") {
-                UIkit.modal.alert("<h2>Email has already been registered</h2>Log in <a href=\"/member\">on the member pages</a> and then continue to the shop, where you can buy either the membership or the starter pack.</p>");
-            } else {
-                UIkit.modal.alert("<h2>The payment failed</h2>" + common.get_error(json));
-            }
-        };
-        return {
-            initiate_payment: initiate_payment,
-            handle_backend_response: handle_backend_response,
-            on_failure: on_failure,
-        };
-    };
-    const payment_config = pay_config();
-
-    document.querySelector("#pay-button")!.addEventListener("click", ev => {
+    document.querySelector("#pay-button")!.addEventListener("click", async ev => {
         ev.preventDefault();
-        pay(payment_config);
+        try {
+            disable_pay_button();
+            const memberInfo: MemberInfo = {
+                firstName: common.getValue("#firstname"),
+                lastName: common.getValue("#lastname"),
+                email: common.getValue("#email"),
+                phone: common.getValue("#phone"),
+                zipCode: common.getValue("#address_zipcode").replace(/\s*/g, ''),
+            };
+            const paymentMethod = await createPaymentMethod(element, {
+                address_street: "",
+                address_extra: "",
+                address_zipcode: Number(memberInfo.zipCode),
+                address_city: "",
+                email: memberInfo.email,
+                member_id: 0,
+                member_number: 0,
+                firstname: memberInfo.firstName,
+                lastname: memberInfo.lastName,
+                phone: "",
+                pin_code: "",
+                labaccess_agreement_at: "",
+            });
+            if (paymentMethod !== null) {
+                const registration = await registerMember(paymentMethod, productData, memberInfo, {
+                    products: productData.products.filter((p: any) => cart.items.find(x => x.id === p.id)),
+                });
+                login(registration.loginToken);
+                window.location.href = "/member";
+            }
+        } catch (e: any) {
+            enable_pay_button();
+            if (e.what === "not_unique") {
+                UIkit.modal.alert("<h2>Registration failed</h2><p>This email has already been registered</p>");
+            } else {
+                common.show_error("Registrering misslyckades", e);
+            }
+        }
     });
 
     refresh();

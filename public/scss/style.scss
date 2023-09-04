@@ -10,7 +10,13 @@ $primary-color: #333;
 // Breakpoint between mobile and desktop layout
 $break-small: 480px;
 $break-medium: 600px;
-$makerspace-orange: #FF8B37;
+$break-large: 1000px;
+
+$makerspace-orange-light1: #C87744;
+$makerspace-orange: #E46D22;
+$makerspace-orange-dark1: #D9651D;
+$makerspace-orange-dark2: #C25F22;
+$makerspace-orange-dark3: #B14908;
 
 html,
 body {
@@ -19,6 +25,18 @@ body {
 
 .uk-button {
     border-radius: 2px;
+
+    &.uk-button-primary:not(:disabled) {
+        background-color: $makerspace-orange;
+
+        &:hover {
+            background-color: $makerspace-orange-dark1;
+        }
+
+        &:active {
+            background-color: $makerspace-orange-dark2;
+        }
+    }
 }
 
 .uk-button-group {
@@ -579,37 +597,6 @@ form input.readonly-input {
     color: #333 !important;
 }
 
-.receipt-item {
-    display: flex;
-    flex-direction: row;
-    border-bottom: 1px solid #EEE;
-
-    .product-title {
-        color: white;
-        flex: 5;
-    }
-
-    a.product-title {
-        text-decoration: none;
-
-        &:hover {
-            text-decoration: underline;
-        }
-    }
-
-    .receipt-item-count {
-        flex: 1;
-        min-width: 100px;
-        text-align: right;
-    }
-
-    .receipt-item-amount {
-        flex: 1;
-        min-width: 100px;
-        text-align: right;
-    }
-}
-
 #content {
     max-width: 800px;
     padding: 10px;
@@ -792,10 +779,41 @@ form input.readonly-input {
         padding-right: 20px;
         padding-top: 10px;
         padding-bottom: 10px;
-    }
 
-    .receipt-item {
-        border-bottom: none;
+        display: grid;
+        grid-template-columns: 5fr 1fr 1fr;
+        column-gap: 20px;
+
+        .product-title {
+            color: white;
+            grid-column: 1;
+        }
+
+        a.product-title {
+            text-decoration: none;
+
+            &:hover {
+                text-decoration: underline;
+            }
+        }
+
+        .receipt-item-count {
+            grid-column: 2;
+            white-space: nowrap;
+            text-align: right;
+        }
+
+        .receipt-item-amount {
+            grid-column: 3;
+            flex-shrink: 0;
+            white-space: nowrap;
+            text-align: right;
+        }
+
+        .strikethrough-price {
+            text-decoration: line-through;
+            color: rgba(255, 255, 255, 0.5);
+        }
     }
 
     .receipt-amount {
@@ -1485,4 +1503,512 @@ $palette-red: $palette4;
     // Setting an aspect ratio is important to avoid layout shifts as the page loads
     aspect-ratio: 300/210;
     width: 100%;
+}
+
+#root.register-page {
+    padding-top: 32px;
+    background: #ECECEC;
+    min-height: 100%;
+    box-sizing: border-box;
+    padding-bottom: 32px;
+
+    .content-wrapper {
+        max-width: 800px;
+        flex: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        align-self: stretch;
+
+        @media screen and (width > $break-medium) {
+            // align-items: center;
+            align-self: center;
+        }
+
+        @media screen and (width > $break-large) {
+            min-width: 800px;
+        }
+    }
+
+    .StripeElement {
+        margin: 0px 16px;
+    }
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    h1 {
+        font-weight: bold;
+        font-size: 1.8em;
+        text-align: center;
+    }
+
+    p {
+        margin: 10px 32px;
+        text-align: center;
+        color: #222;
+    }
+
+    h2 {
+        font-weight: bold;
+        font-size: 1.8em;
+        text-align: center;
+        margin: 32px 0px;
+    }
+
+    .plan-buttons {
+        display: flex;
+        flex-direction: column;
+
+        @media screen and (width > $break-large) {
+            align-self: center;
+            flex-direction: row;
+
+            // Make the buttons ordered from the center outwards
+            .semantic-order-0 {
+                order: 1;
+            }
+
+            .semantic-order-1 {
+                order: 0;
+            }
+
+            .semantic-order-2 {
+                order: 2;
+            }
+        }
+    }
+
+    .access-plan {
+        margin: 16px 16px;
+
+        background: white;
+        border-bottom: 2px solid #B6B6B6;
+        border-radius: 5px;
+        display: flex;
+        align-self: stretch;
+        flex-direction: column;
+        align-items: stretch;
+        padding: 0px 0px;
+        padding-bottom: 20px;
+        text-align: center;
+        transition: outline-color 100ms;
+        outline: 4px solid transparent;
+
+        @media screen and (width > $break-large) {
+            width: 400px;
+        }
+
+        &.selected {
+            outline: 4px solid rgb(73, 73, 73);
+        }
+
+        &:not(.selected):hover {
+            outline: 4px solid rgb(73, 73, 73, 0.1);
+        }
+
+        .plan-highlight {
+            position: absolute;
+            right: 5px;
+            top: 0px;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.6em;
+            height: 100%;
+
+            span {
+                color: white;
+                background-color: #51B911;
+                border-radius: 100px;
+                padding: 5px 10px;
+            }
+        }
+
+        .access-plan-title {
+            font-weight: bold;
+            font-size: 1.1em;
+            margin-top: 10px;
+            margin-bottom: 10px;
+            position: relative;
+        }
+
+        .access-plan-description-top,
+        .access-plan-description-bottom {
+            padding: 16px 16px;
+            white-space: pre-wrap;
+        }
+
+        @media screen and (width > $break-large) {
+            .access-plan-description-top {
+                height: 3em;
+            }
+        }
+
+        .access-plan-price {
+            background-color: $makerspace-orange;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+
+            @media screen and (width > $break-large) {
+                // To make all plans the same height on larger screens where the plans are shown side-by-side
+                height: 102px;
+                box-sizing: border-box;
+            }
+
+            color: white;
+            padding: 20px;
+
+            .abovePrice,
+            .belowPrice {
+                font-size: 0.9em;
+                font-weight: bold;
+                line-height: 100%;
+                opacity: 0.6;
+            }
+
+            .price {
+                font-weight: bold;
+                font-size: 3em;
+                line-height: 100%;
+            }
+
+            .period {
+                font-size: 1.2em;
+                line-height: 100%;
+                font-weight: bold;
+            }
+        }
+
+        .checkmark-list {
+            margin: 0px;
+        }
+    }
+
+    .panel {
+        margin: 16px 16px;
+
+        background: white;
+        border-bottom: 2px solid #B6B6B6;
+        border-radius: 5px;
+        display: flex;
+        align-self: stretch;
+        flex-direction: column;
+        align-items: stretch;
+        padding: 10px;
+
+        .panel-divider {
+            border-bottom: 1px solid #B6B6B6;
+            margin-top: 10px;
+            margin-bottom: 16px;
+        }
+
+        .small-price,
+        .requirement {
+            text-align: center;
+        }
+
+        .small-price {
+            color: $makerspace-orange;
+        }
+
+        ul {
+            margin-top: 16px;
+            width: 100%;
+        }
+
+        h3 {
+            font-weight: bold;
+            text-align: center;
+            margin: 0px;
+            margin-top: 4px;
+        }
+
+        .price {
+            border-radius: 5px;
+            background-color: $makerspace-orange;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: white;
+            padding-top: 16px;
+            padding-bottom: 20px;
+
+            font-weight: bold;
+            font-size: 2em;
+            line-height: 100%;
+
+            .period {
+                font-size: 0.5em;
+                line-height: 100%;
+            }
+        }
+    }
+
+    .payment-processor {
+        margin-left: 21px;
+        margin-top: 10px;
+        font-size: 11px;
+        color: #777;
+        margin-bottom: 4px;
+    }
+
+    .flow-button-back {
+        font-size: 0.8em;
+        align-self: center;
+        color: $makerspace-orange-dark3;
+    }
+
+    a.flow-button,
+    button.flow-button,
+    input[type="submit"].flow-button {
+        // Required for progress spinner
+        position: relative;
+
+        .uk-spinner {
+            position: absolute;
+            left: 16px;
+            top: 7px;
+        }
+
+        border: none;
+        background: #fff;
+        color: rgb(104, 104, 104);
+        border-bottom: 2px solid #b6b6b6;
+
+        &:hover:not(:disabled),
+        &:active:not(:disabled) {
+            background-color: #e5e5e5;
+            color: rgb(90, 90, 90);
+        }
+
+        &.primary {
+            background: $makerspace-orange;
+            border-bottom: 2px solid $makerspace-orange-dark3;
+            color: white;
+
+            &:hover:not(:disabled),
+            &:active:not(:disabled) {
+                background-color: $makerspace-orange-dark1;
+                color: white;
+            }
+        }
+
+        padding: 10px 20px;
+        border-radius: 5px;
+        font-size: 20px;
+        margin-left: 16px;
+        margin-right: 16px;
+        margin-top: 16px;
+        margin-bottom: 16px;
+        transition: 50ms background-color;
+        cursor: pointer;
+        text-decoration: none; // Remove underline from links
+        font-family: inherit; // Disable the browser's own font-family for buttons
+        line-height: normal; // Reset line-height to normal, as it otherwise differs between 'a' and 'button' tags
+        text-align: center;
+
+        &:disabled {
+            background-color: #a7a7a7;
+            border-bottom: 2px solid #828282;
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        &.flow-button-small {
+            font-size: 0.9em;
+            margin: 0px;
+        }
+    }
+
+    .registration-task-list {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: start;
+        gap: 20px;
+        margin: 10px 0px;
+        padding: 0px 20px;
+        list-style: none;
+
+        li {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 20px;
+        }
+
+        button {
+            max-width: 300px;
+        }
+    }
+
+    .registration-logo {
+        max-width: 200px;
+        aspect-ratio: 300/210;
+        margin: 0px 16px;
+        align-self: center;
+    }
+
+    form {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        padding: 0px 16px;
+
+        input[type="submit"] {
+            align-self: center;
+        }
+
+        input {
+            border: none;
+            /* Remove default style */
+        }
+
+        &.validate input:invalid {
+            outline: 2px solid $makerspace-orange;
+        }
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="numeric"],
+    input[type="tel"] {
+        border-radius: 5px;
+    }
+
+    .terms-and-conditions {
+        display: flex;
+        flex-direction: column;
+        align-items: left;
+    }
+
+    .rule-checkbox {
+        display: flex;
+        flex-direction: row;
+        margin: 20px;
+        align-items: center;
+        gap: 25px;
+
+        input {
+            width: 30px;
+            height: 30px;
+            flex-shrink: 0;
+        }
+    }
+
+    .rules-list {
+        margin: 0px 20px;
+
+        li {
+            margin: 5px 0px;
+        }
+    }
+
+    textarea {
+        margin: 0px 16px;
+        border-radius: 5px;
+        min-height: 100px;
+        border: none;
+        padding: 10px;
+    }
+}
+
+.to-pay-preview {
+    margin-right: 16px;
+    margin-left: 16px;
+    color: #fff;
+    overflow: hidden;
+    border-radius: 4px;
+    margin-bottom: 6px;
+    margin-top: 6px;
+
+    @media screen and (width > $break-medium) {
+        align-self: stretch;
+    }
+
+    .receipt-items {
+        background-color: $makerspace-orange-light1;
+        font-size: 1.0em;
+
+        grid-template-columns: 5fr 1fr;
+
+        .receipt-item-amount {
+            grid-column: 2;
+        }
+
+        &.with-original-price-column {
+            grid-template-columns: 5fr 1fr 1fr;
+
+            .receipt-item-original-amount {
+                grid-column: 2;
+                text-align: right;
+                white-space: nowrap;
+            }
+
+            .receipt-item-amount {
+                grid-column: 3;
+            }
+        }
+    }
+
+    .receipt-amount {
+        background-color: $makerspace-orange-dark2;
+        font-size: 1.2em;
+    }
+
+    box-shadow: 0px 0.1px 0.3px rgba(0, 0, 0, 0.02),
+    0px 0.3px 0.7px rgba(0, 0, 0, 0.028),
+    0px 0.5px 1.3px rgba(0, 0, 0, 0.035),
+    0px 0.9px 2.2px rgba(0, 0, 0, 0.042),
+    0px 1.7px 4.2px rgba(0, 0, 0, 0.05),
+    0px 4px 10px rgba(0, 0, 0, 0.07);
+
+
+}
+
+.small-print {
+    font-size: 0.9em;
+    display: block;
+    margin-left: 21px;
+    margin-right: 16px;
+}
+
+.task {
+    padding: 5px;
+    border: 1px solid black;
+    border-radius: 100%;
+    opacity: 30%;
+    transition: 100ms opacity, 100ms background-color;
+    background-color: rgba(135, 201, 43, 0);
+
+    &.task-done {
+        background-color: rgb(135, 201, 43);
+        color: white;
+        border: 1px solid transparent;
+        opacity: 100%;
+    }
+}
+
+.checkmark-list {
+    list-style: none;
+    padding-left: 20px;
+    text-align: left;
+    line-height: 1.8;
+
+    span {
+        margin-right: 10px;
+    }
+
+    span.positive {
+        color: rgb(135, 201, 43);
+    }
+
+    span.negative {
+        color: rgb(201, 43, 43);
+    }
 }

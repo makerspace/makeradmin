@@ -72,7 +72,7 @@ class ApiFactory:
         self.action = None
         self.key = None
     
-    def request(self, method, path, **kwargs):
+    def request(self, method: str, path: str, **kwargs) -> ApiResponse:
         token = kwargs.pop('token', self.api_token)
         headers = kwargs.pop('headers', {"Authorization": "Bearer " + token})
         url = self.base_url + path

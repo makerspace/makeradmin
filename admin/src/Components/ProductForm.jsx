@@ -80,8 +80,9 @@ class ProductForm extends React.Component {
             <div className="uk-margin-top">
                 <form className="uk-form uk-form-stacked" onSubmit={(e) => {e.preventDefault(); onSave(); return false;}}>
                     <fieldset className="uk-margin-top">
-                        <legend><i className="uk-icon-shopping-cart"/> Produkt</legend>
+                        <legend><i className="uk-icon-shopping-cart" /> Produkt</legend>
                         <TextInput model={product} name="name" title="Produktnamn" />
+                        <TextInput model={product} name="product_metadata" title="Metadata" />
                         <SelectInput model={product} name="category_id" title="Kategori" getLabel={o => o.name} getValue={o => o.id} dataSource={"/webshop/category"} />
                         <Textarea model={product} name="description" title="Beskrivning" rows="4"/>
                         <TextInput model={product} name="unit" title="Enhet" />
@@ -116,7 +117,12 @@ class ProductForm extends React.Component {
                     </fieldset>
                     <fieldset className="uk-margin-top">
                         <legend><i className="uk-icon-filter"/> Filter</legend>
-                        <SelectInput model={product} name="filter" title="Filter" getLabel={o => o.name} getValue={o => o.id} options={[{id: "", name: "No filter"}, {id: "start_package", name: "Startpaket"}]}/>
+                        <SelectInput model={product} name="filter" title="Filter" getLabel={o => o.name} getValue={o => o.id} options={[
+                            {id: "", name: "No filter"},
+                            {id: "start_package", name: "Purchasable only for new/inactive members (starter pack)"},
+                            {id: "labaccess_non_subscription_purchase", name: "Purchasable only if makerspace access subscription is inactive"},
+                            {id: "membership_non_subscription_purchase", name: "Purchasable only if base membership subscription is inactive"},
+                        ]}/>
                     </fieldset>
                     <fieldset className="uk-margin-top">
                         <legend><i className="uk-icon-tag"/> Metadata</legend>

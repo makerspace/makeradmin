@@ -1,4 +1,5 @@
 from datetime import date
+from shop.models import Transaction
 from membership.models import Member
 from messages.message import send_message
 from messages.models import MessageTemplate
@@ -26,7 +27,7 @@ def send_labaccess_extended_email(member_id: int, extended_days: int, end_date: 
     )
 
 
-def send_receipt_email(transaction):
+def send_receipt_email(transaction: Transaction) -> None:
     contents = transaction.contents
     products = [content.product for content in contents]
 
@@ -38,7 +39,7 @@ def send_receipt_email(transaction):
     )
 
 
-def send_new_member_email(member):
+def send_new_member_email(member: Member) -> None:
     send_message(
         MessageTemplate.NEW_MEMBER, member,
     )

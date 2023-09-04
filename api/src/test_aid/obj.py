@@ -1,9 +1,10 @@
 from datetime import datetime
 from random import randint, choice, seed
-
+from typing import Any, Dict
 from faker import Faker
+from membership.enums import PriceLevel
 
-from membership.models import Span
+from membership.models import Member, Span
 from messages.models import Message
 from shop.models import ProductAction
 from test_aid.test_util import random_str
@@ -30,7 +31,7 @@ class ObjFactory:
         self.phone_request = None
         seed()
 
-    def create_member(self, **kwargs):
+    def create_member(self, **kwargs) -> Dict[str, Any]:
         firstname = self.fake.first_name()
         lastname = self.fake.last_name()
         obj = dict(
@@ -46,6 +47,9 @@ class ObjFactory:
             civicregno=f"19901011{randint(1000, 9999):04d}",
             email=re.sub('[^a-zA-Z0-9.!#$%&\'*+\\/=?^_`{|}~\\-@\\.]', '_',
                          f'{firstname}.{lastname}+{random_str(6)}@bmail.com'.lower().replace(' ', '_')),
+            price_level=PriceLevel.Normal.value,
+            price_level_motivation=None,
+            pending_activation=False,
         )
         obj.update(kwargs)
         self.member = obj
@@ -72,7 +76,7 @@ class ObjFactory:
         self.group = obj
         return self.group
 
-    def create_key(self, **kwargs):
+    def create_key(self, **kwargs) -> Dict[str,str]:
         obj = dict(
             tagid=str(randint(int(1e12), int(9e12))),
             description=self.fake.bs(),
@@ -112,6 +116,7 @@ class ObjFactory:
             smallest_multiple=1,
             filter=None,
             category_id=category_id,
+            product_metadata=dict()
         )
         obj.update(kwargs)
         self.product = obj
@@ -139,5 +144,5 @@ class ObjFactory:
         return self.message
 
 
-def random_phone_number():
+def random_phone_number() -> str:
     return f'070-1{randint(int(1e6), int(9e6)):06d}'

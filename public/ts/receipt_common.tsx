@@ -12,11 +12,11 @@ function format_receipt_status(transaction_status: string) {
 }
 
 const ReceiptItem = ({ item }: { item: TransactionItem }) => {
-    return <div className="receipt-item">
+    return <>
         <a className="product-title" href={`/shop/product/${item.product.id}`}>{item.product.name}</a>
         <span className="receipt-item-count">{item.count} {item.product.unit}</span>
         <span className="receipt-item-amount">{Cart.formatCurrency(Number(item.amount))}</span>
-    </div>
+    </>
 }
 
 export const Receipt = ({ transaction, member, detailed }: { transaction: Transaction, member?: member_t, detailed: boolean }) => {
@@ -42,12 +42,12 @@ export const Receipt = ({ transaction, member, detailed }: { transaction: Transa
             <span className="receipt-amount-value">{Cart.formatCurrency(Number(transaction.amount))}</span>
         </div>
         {member !== undefined && detailed && <div className="receipt-items">
-            <div className="receipt-item">
+            <>
                 <span className="product-title">{`#${member.member_number} - ${member.firstname} ${member.lastname}`}</span>
                 <span className="receipt-item-amount">
 
                 </span>
-            </div>
+            </>
         </div>
         }
     </div>

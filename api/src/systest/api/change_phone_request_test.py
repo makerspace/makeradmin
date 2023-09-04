@@ -23,7 +23,7 @@ class Test(ApiTest):
         member = self.db.create_member()
         old_phone = member.phone
         
-        change_phone_request(member.member_id, new_phone)
+        request_id = change_phone_request(member.member_id, new_phone)
 
         db_item = db_session.query(PhoneNumberChangeRequest).filter(PhoneNumberChangeRequest.member_id == member.member_id).one()
         self.assertEqual(db_item.member_id, member.member_id)
@@ -35,7 +35,7 @@ class Test(ApiTest):
         validation_code = db_item.validation_code
         mock_send_validation_code.assert_called_with(new_phone, validation_code)
 
-        change_phone_validate(member.member_id, validation_code)
+        change_phone_validate(member.member_id, request_id, validation_code)
 
         db_item = db_session.query(PhoneNumberChangeRequest).filter(PhoneNumberChangeRequest.member_id == member.member_id).one()
         self.assertEqual(db_item.member_id, member.member_id)
@@ -70,7 +70,7 @@ class Test(ApiTest):
         member = self.db.create_member()
         old_phone = member.phone
         
-        change_phone_request(member.member_id, new_phone)
+        request_id = change_phone_request(member.member_id, new_phone)
 
         db_item = db_session.query(PhoneNumberChangeRequest).filter(PhoneNumberChangeRequest.member_id == member.member_id).one()
         self.assertEqual(db_item.member_id, member.member_id)
@@ -82,7 +82,7 @@ class Test(ApiTest):
         validation_code = db_item.validation_code
         mock_send_validation_code.assert_called_with(new_phone, validation_code)
 
-        self.assertRaises(NotFound, change_phone_validate, member.member_id, validation_code-1)
+        self.assertRaises(NotFound, change_phone_validate, member.member_id, request_id, validation_code-1)
 
         db_item = db_session.query(PhoneNumberChangeRequest).filter(PhoneNumberChangeRequest.member_id == member.member_id).one()
         self.assertEqual(db_item.member_id, member.member_id)
@@ -102,7 +102,7 @@ class Test(ApiTest):
         member = self.db.create_member()
         old_phone = member.phone
         
-        change_phone_request(member.member_id, new_phone)
+        request_id = change_phone_request(member.member_id, new_phone)
 
         db_item = db_session.query(PhoneNumberChangeRequest).filter(PhoneNumberChangeRequest.member_id == member.member_id).one()
         self.assertEqual(db_item.member_id, member.member_id)
@@ -114,8 +114,8 @@ class Test(ApiTest):
         validation_code = db_item.validation_code
         mock_send_validation_code.assert_called_with(new_phone, validation_code)
 
-        change_phone_validate(member.member_id, validation_code)
-        self.assertRaises(BadRequest, change_phone_validate, member.member_id, validation_code)
+        change_phone_validate(member.member_id, request_id, validation_code)
+        self.assertRaises(BadRequest, change_phone_validate, member.member_id, request_id, validation_code)
 
         db_item = db_session.query(PhoneNumberChangeRequest).filter(PhoneNumberChangeRequest.member_id == member.member_id).one()
         self.assertEqual(db_item.member_id, member.member_id)
@@ -136,7 +136,7 @@ class Test(ApiTest):
         self.db.create_phone_request(timestamp=now - timedelta(hours=2))
 
         new_phone = f'+46{randint(int(1e8), int(9e8))}'
-        change_phone_request(member.member_id, new_phone)
+        request_id = change_phone_request(member.member_id, new_phone)
         
         db_items_filter = db_session.query(PhoneNumberChangeRequest).filter(PhoneNumberChangeRequest.member_id == member.member_id,
                                                                             PhoneNumberChangeRequest.phone == new_phone)
@@ -151,7 +151,7 @@ class Test(ApiTest):
         validation_code = db_item.validation_code
         mock_send_validation_code.assert_called_with(new_phone, validation_code)
         
-        change_phone_validate(member.member_id, validation_code)
+        change_phone_validate(member.member_id, request_id, validation_code)
 
         db_item = db_session.query(PhoneNumberChangeRequest).filter(PhoneNumberChangeRequest.member_id == member.member_id,
                                                                     PhoneNumberChangeRequest.validation_code == validation_code).one()
@@ -176,7 +176,7 @@ class Test(ApiTest):
             r = random.randrange(int(1e8), int(9e8), 8)
             new_phone = f'+46{r}'
             rand_member = member[i % num_members]
-            change_phone_request(rand_member.member_id, new_phone)
+            request_id = change_phone_request(rand_member.member_id, new_phone)
 
             db_items_filter = db_session.query(PhoneNumberChangeRequest).filter(PhoneNumberChangeRequest.member_id == rand_member.member_id, 
                                                PhoneNumberChangeRequest.phone == new_phone)
@@ -191,7 +191,7 @@ class Test(ApiTest):
             validation_code = db_item.validation_code
             mock_send_validation_code.assert_called_with(new_phone, validation_code)
 
-            change_phone_validate(rand_member.member_id, validation_code)
+            change_phone_validate(rand_member.member_id, request_id, validation_code)
 
             db_item = db_session.query(PhoneNumberChangeRequest).filter(PhoneNumberChangeRequest.member_id == rand_member.member_id,
                                                                         PhoneNumberChangeRequest.validation_code == validation_code).one()

@@ -46,8 +46,8 @@ def create_stripe_charge(transaction, card_source_id) -> stripe.Charge:
         raise InternalServerError(log=f"stripe charge failed (possibly temporarily): {str(e)}")
 
 
-def charge_transaction(transaction, charge):
-    if charge.status != ChargeStatus.SUCCEEDED:
+def charge_transaction(transaction: Transaction, charge) -> None:
+    if ChargeStatus(charge.status) != ChargeStatus.SUCCEEDED:
         raise InternalServerError(log=f"unexpected charge status '{charge.status}' for transaction {transaction.id} "
                                       f"this should be handled")
 

@@ -12,6 +12,7 @@ module.exports = (env, args) => {
             cart: "./ts/cart.ts",
             category: "./ts/category.ts",
             register: "./ts/register.ts",
+            register2: "./ts/register2.tsx",
             product: "./ts/product.ts",
             history: "./ts/history.tsx",
             member: "./ts/member.tsx",
@@ -39,7 +40,11 @@ module.exports = (env, args) => {
         },
         
         resolve: {
-            extensions: ['*', '.ts', '.tsx', '.js']
+            extensions: ['*', '.ts', '.tsx', '.js'],
+            alias: {
+                "react": "preact/compat",
+                "react-dom": "preact/compat"
+            }
         },
         
         plugins: [
@@ -56,6 +61,7 @@ module.exports = (env, args) => {
             ],
             devServer: {
                 host: "0.0.0.0",
+                allowedHosts: "all",
                 port: 80,
                 static: '/static/js',
                 proxy: {

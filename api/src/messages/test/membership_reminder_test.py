@@ -140,7 +140,6 @@ class Test(ShopTestMixin, FlaskTestBase):
         transaction = create_transaction(
             member_id=member.member_id,
             purchase=Purchase(cart=cart, expected_sum=str(expected_sum), stripe_payment_method_id="not_used"),
-            activates_member=False,
         )
         transaction.status = Transaction.COMPLETED
         db_session.add(transaction)
