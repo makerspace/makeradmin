@@ -20,7 +20,13 @@ export interface ServerResponse<T> {
 
 export const UNAUTHORIZED = "unauthorized";
 
-export const trackPlausible: (tag: string, options?: object) => void = window.plausible || function () { (window.plausible.q = window.plausible.q || []).push(arguments) };
+export const trackPlausible: (tag: string, options?: object) => void = (...args) => {
+	if (window.plausible !== undefined) {
+		window.plausible(...args);
+	} else {
+		(window.plausible.q = window.plausible.q || []).push(args);
+	}
+};
 
 export function formatDate(str: any) {
 	const options: Intl.DateTimeFormatOptions = {
