@@ -57,7 +57,7 @@ async function registerMember(paymentMethod: stripe.paymentMethod.PaymentMethod,
 
     await pay(paymentMethod, cart, productData, { priceLevel: "normal", fractionOff: 0.0 }, [], { loginToken });
 
-    trackPlausible(`register/Success`, { oldpage: true });
+    trackPlausible(`register/Success`, { props: { oldpage: true } });
 
     // Add a small delay to allow the plausible request to be sent.
     // If we redirect too quickly, the request will be aborted.

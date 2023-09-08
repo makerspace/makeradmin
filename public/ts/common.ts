@@ -20,7 +20,7 @@ export interface ServerResponse<T> {
 
 export const UNAUTHORIZED = "unauthorized";
 
-export const trackPlausible: (tag: string, options?: object) => void = (...args) => {
+export const trackPlausible: (tag: string, options?: { props?: object, meta?: object }) => void = (...args) => {
 	if (window.plausible !== undefined) {
 		window.plausible(...args);
 	} else {

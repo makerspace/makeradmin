@@ -409,6 +409,7 @@ function hash(x: number): number {
 }
 
 type ABState = {
+    oldpage: false,
     registration_base_membership_type: "oneyear" | "subscription",
     registration_base_membership_only_plan_enabled: boolean,
 }
@@ -417,6 +418,7 @@ type ABState = {
 /// This method should be deterministic given the seed.
 const abStateFromSeed = (seed: number): ABState => {
     return {
+        oldpage: false,
         registration_base_membership_type: seed % 2 === 0 ? "oneyear" : "subscription",
         registration_base_membership_only_plan_enabled: hash(seed) % 3 !== 0, // 2/3 of users will see the base membership only plan
     }
@@ -434,11 +436,11 @@ const RegisterPage = ({ }: {}) => {
     const setStateHistory = poorMansHistoryManager(state, State.ChoosePlan, setStateInternal, s => State[s as keyof typeof State], s => State[s]);
     const setState = (s: State) => {
         setStateHistory(s);
-        trackPlausible(`register/${State[s]}`, abState);
+        trackPlausible(`register/${State[s]}`, { props: abState });
     }
 
     useEffect(() => {
-        trackPlausible(`register/${State[state]}`, abState);
+        trackPlausible(`register/${State[state]}`, { props: abState });
     }, []);
 
     const [selectedPlan, setSelectedPlan] = useState<PlanId | null>("starterPack");
