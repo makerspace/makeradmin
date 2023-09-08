@@ -69,7 +69,7 @@ async function registerMember(paymentMethod: stripe.paymentMethod.PaymentMethod,
 if (Math.random() < 0.8) {
     // Redirect to the new registration page with a high probability.
     // Keep the old one around for a while to AB-test
-    location.href = "/register2";
+    location.href = "/shop/register2";
 } else {
     common.onGetAndDocumentLoaded("/webshop/register_page_data", (value: RegisterPageData) => {
         common.addSidebarListeners();
