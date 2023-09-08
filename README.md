@@ -158,6 +158,8 @@ After the forwarding has started, you'll need to copy the signing secret it give
 When using stripe, subscriptions need to be configured via the stripe website.
 These subscriptions will automatically be turned into makeradmin products so that members can purchase them.
 
+Note: You should *not* modify these products in makeradmin. They will be reset whenever the docker container restarts anyway (when the registration page is visited).
+
 The configuration needed on stripe is:
 
 * Create a product for base membership. Add the metadata "subscription_type"="membership"
