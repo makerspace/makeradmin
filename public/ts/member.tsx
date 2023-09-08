@@ -533,7 +533,7 @@ common.documentLoaded().then(() => {
 
     Promise.all([future1, membership, future3, subscriptions, groups, productData]).then(([member, membership, pending_actions_json, subscriptions, groups, productData]) => {
         const pending_labaccess_days = get_pending_labaccess_days(pending_actions_json);
-        const in_beta_group = groups.some(g => g.name === "betatesters");
+        const in_beta_group = true;
         if (root != null) {
             render(
                 <MemberPage member={member} membership={membership} pending_labaccess_days={pending_labaccess_days} subscriptions={subscriptions} show_beta={in_beta_group} productData={productData} />,

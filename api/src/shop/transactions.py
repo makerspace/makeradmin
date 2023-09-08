@@ -50,7 +50,7 @@ from shop.models import (
 from shop.stripe_util import convert_to_stripe_amount
 
 # If false, labaccess is synced to accessy once per week
-LABACCESS_SHIPS_IMMEDIATELY_ON_PURCHASE = False
+LABACCESS_SHIPS_IMMEDIATELY_ON_PURCHASE = True
 
 logger = getLogger("makeradmin")
 
