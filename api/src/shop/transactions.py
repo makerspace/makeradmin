@@ -217,7 +217,7 @@ def ship_add_labaccess_action(
 
     # After a member has been granted labaccess, we want to make sure that their subscription is active.
     # It may already be active, but if it's paused, we want to resume it.
-    # Note: passing created_at here is important during tests which use a simulated time
+    # Note: passing earliest_start_date here is important during tests which use a simulated time
     activate_paused_labaccess_subscription(transaction.member_id, earliest_start_date)
     complete_pending_action(action)
     send_labaccess_extended_email(transaction.member_id, days_to_add, labaccess_end)
