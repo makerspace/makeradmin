@@ -254,6 +254,8 @@ def are_metadata_dicts_equivalent(a: Dict[str, Any], b: Dict[str, Any]) -> bool:
 def get_stripe_customer(
     member_info: Member, test_clock: Optional[stripe.test_helpers.TestClock]
 ) -> Optional[stripe.Customer]:
+    # Stripe will reject emails with trailing whitespace
+    member_email = member_info.email.strip()
     try:
         if member_info.stripe_customer_id is not None:
             try:
@@ -269,12 +271,12 @@ def get_stripe_customer(
                 }
                 if (
                     not are_metadata_dicts_equivalent(customer.metadata, expected_metadata)
-                    or customer.email != member_info.email
+                    or customer.email != member_email
                 ):
                     stripe.Customer.modify(
                         customer["id"],
                         description=f"Created by Makeradmin (#{member_info.member_number})",
-                        email=member_info.email.strip(),  # Stripe will reject emails with trailing whitespace
+                        email=member_email,
                         name=f"{member_info.firstname} {member_info.lastname}",
                         metadata=expected_metadata,
                     )
@@ -287,7 +289,7 @@ def get_stripe_customer(
         customer = retry(
             lambda: stripe.Customer.create(
                 description=f"Created by Makeradmin (#{member_info.member_number})",
-                email=member_info.email.strip(),  # Stripe will reject emails with trailing whitespace
+                email=member_email,
                 name=f"{member_info.firstname} {member_info.lastname}",
                 metadata={
                     MSMetaKeys.USER_ID.value: member_info.member_id,
