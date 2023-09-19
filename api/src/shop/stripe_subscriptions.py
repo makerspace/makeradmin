@@ -274,7 +274,7 @@ def get_stripe_customer(
                     stripe.Customer.modify(
                         customer["id"],
                         description=f"Created by Makeradmin (#{member_info.member_number})",
-                        email=member_info.email,
+                        email=member_info.email.strip(),  # Stripe will reject emails with trailing whitespace
                         name=f"{member_info.firstname} {member_info.lastname}",
                         metadata=expected_metadata,
                     )
@@ -287,7 +287,7 @@ def get_stripe_customer(
         customer = retry(
             lambda: stripe.Customer.create(
                 description=f"Created by Makeradmin (#{member_info.member_number})",
-                email=member_info.email,
+                email=member_info.email.strip(),  # Stripe will reject emails with trailing whitespace
                 name=f"{member_info.firstname} {member_info.lastname}",
                 metadata={
                     MSMetaKeys.USER_ID.value: member_info.member_id,
