@@ -17,7 +17,7 @@ type Plan = {
     id: PlanId,
     title: string,
     abovePrice: string,
-    price: number,
+    price: string,
     belowPrice: string,
     description1: string
     description2: string,
@@ -41,7 +41,7 @@ const PlanButton = ({ plan, selected, onClick, order }: { plan: Plan, selected: 
             <div className="access-plan-title">{plan.title}{plan.highlight !== null ? <span class="plan-highlight"><span>{plan.highlight}</span></span> : null}</div>
             <div className="access-plan-price">
                 {plan.abovePrice && <span class="abovePrice">{plan.abovePrice}</span>}
-                <span class="price">{plan.price} {t("priceUnit")}</span>
+                <span class="price">{plan.price}</span>
                 {plan.belowPrice && <span class="belowPrice">{plan.belowPrice}</span>}
             </div>
             {plan.description1 && <div className="access-plan-description-top">{plan.description1}</div>}
@@ -412,6 +412,7 @@ type ABState = {
     oldpage: false,
     registration_base_membership_type: "oneyear" | "subscription",
     registration_base_membership_only_plan_enabled: boolean,
+    price_grouping: "separate" | "combined",
 }
 
 /// Returns what options should be visible to the user depending on a random seed.
@@ -421,6 +422,7 @@ const abStateFromSeed = (seed: number): ABState => {
         oldpage: false,
         registration_base_membership_type: seed % 2 === 0 ? "oneyear" : "subscription",
         registration_base_membership_only_plan_enabled: hash(seed) % 3 !== 0, // 2/3 of users will see the base membership only plan
+        price_grouping: (hash(seed + 1) % 2) === 0 ? "separate" : "combined", // 1/2 of users will see the base membership price separately like "200 + 375 kr", instead of combined like "575 kr"
     }
 }
 
@@ -497,7 +499,7 @@ const RegisterPage = ({ }: {}) => {
             id: "starterPack",
             title: t("registration_page.plans.starterPack.title"),
             abovePrice: t("registration_page.plans.starterPack.abovePrice"),
-            price: 0,
+            price: "",
             belowPrice: t("registration_page.plans.ofWhichBaseMembership")(baseMembershipCost),
             description1: t("registration_page.plans.starterPack.description1"),
             description2: t("registration_page.plans.starterPack.description2"),
@@ -508,7 +510,7 @@ const RegisterPage = ({ }: {}) => {
             id: "singleMonth",
             title: t("registration_page.plans.singleMonth.title"),
             abovePrice: t("registration_page.plans.singleMonth.abovePrice"),
-            price: 0,
+            price: "",
             belowPrice: t("registration_page.plans.ofWhichBaseMembership")(baseMembershipCost),
             description1: t("registration_page.plans.singleMonth.description1"),
             description2: t("registration_page.plans.singleMonth.description2"),
@@ -521,7 +523,7 @@ const RegisterPage = ({ }: {}) => {
             id: "decideLater",
             title: t("registration_page.plans.decideLater.title"),
             abovePrice: t("registration_page.plans.decideLater.abovePrice"),
-            price: 0,
+            price: "",
             belowPrice: "",
             description1: t("registration_page.plans.decideLater.description1"),
             description2: t("registration_page.plans.decideLater.description2")(accessCostSingle, accessSubscriptionCost),
@@ -531,8 +533,18 @@ const RegisterPage = ({ }: {}) => {
     }
 
     for (const plan of plans) {
-        const toPay = calculateAmountToPay({ productData, cart: Cart.oneOfEachProduct(plan.products), discount: discount, currentMemberships: [] });
-        plan.price = toPay.payNow.reduce((a, b) => a + b.amount, 0);
+        if (abState.price_grouping === "separate") {
+            const membershipProducts = plan.products.filter(p => p === membershipProduct);
+            const nonMembershipProducts = plan.products.filter(p => p !== membershipProduct);
+            const toPay1 = calculateAmountToPay({ productData, cart: Cart.oneOfEachProduct(membershipProducts), discount: discount, currentMemberships: [] });
+            const toPay2 = calculateAmountToPay({ productData, cart: Cart.oneOfEachProduct(nonMembershipProducts), discount: discount, currentMemberships: [] });
+            const toPaySum1 = toPay1.payNow.reduce((a, b) => a + b.amount, 0);
+            const toPaySum2 = toPay2.payNow.reduce((a, b) => a + b.amount, 0);
+            plan.price = toPaySum1 + " + " + toPaySum2 + " " + t("priceUnit");
+        } else {
+            const toPay = calculateAmountToPay({ productData, cart: Cart.oneOfEachProduct(plan.products), discount: discount, currentMemberships: [] });
+            plan.price = toPay.payNow.reduce((a, b) => a + b.amount, 0) + " " + t("priceUnit");
+        }
     }
 
     const activePlan = plans.find(plan => plan.id === selectedPlan);
