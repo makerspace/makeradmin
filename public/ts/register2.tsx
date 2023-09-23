@@ -540,7 +540,11 @@ const RegisterPage = ({ }: {}) => {
             const toPay2 = calculateAmountToPay({ productData, cart: Cart.oneOfEachProduct(nonMembershipProducts), discount: discount, currentMemberships: [] });
             const toPaySum1 = toPay1.payNow.reduce((a, b) => a + b.amount, 0);
             const toPaySum2 = toPay2.payNow.reduce((a, b) => a + b.amount, 0);
-            plan.price = toPaySum1 + " + " + toPaySum2 + " " + t("priceUnit");
+            if (toPaySum1 === 0 || toPaySum2 === 0) {
+                plan.price = (toPaySum1 + toPaySum2) + " " + t("priceUnit");
+            } else {
+                plan.price = toPaySum1 + " + " + toPaySum2 + " " + t("priceUnit");
+            }
         } else {
             const toPay = calculateAmountToPay({ productData, cart: Cart.oneOfEachProduct(plan.products), discount: discount, currentMemberships: [] });
             plan.price = toPay.payNow.reduce((a, b) => a + b.amount, 0) + " " + t("priceUnit");
