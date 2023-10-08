@@ -82,6 +82,7 @@ def create_admin(admins):
                     lastname=input("Last name: "),
                     email=input("Email: "),
                     unhashed_password=getpass("Password: "),
+                    pending_activation=False,
                     price_level=PriceLevel.Normal.value,
                 )
             )
