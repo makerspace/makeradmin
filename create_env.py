@@ -29,6 +29,7 @@ config = {
     "STRIPE_PRIVATE_KEY": os.environ.get("STRIPE_PRIVATE_KEY", ""),
     "STRIPE_PUBLIC_KEY": os.environ.get("STRIPE_PUBLIC_KEY", ""),
     "STRIPE_SIGNING_SECRET": "",
+    "STRIPE_CURRENCY": "sek",
     "ACCESSY_CLIENT_ID": "",
     "ACCESSY_CLIENT_SECRET": "",
     "ACCESSY_LABACCESS_GROUP": "",
