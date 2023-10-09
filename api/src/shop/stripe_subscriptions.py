@@ -49,6 +49,7 @@ from shop.stripe_constants import (
     MakerspaceMetadataKeys as MSMetaKeys,
     PriceType,
     SubscriptionScheduleStatus,
+    CURRENCY,
 )
 from shop.stripe_constants import SubscriptionStatus
 import stripe.error
@@ -133,7 +134,7 @@ def setup_subscription_makeradmin_product(
         raise RuntimeError(f"Unexpected interval {interval} in stripe product")
     assert int(recurring_price["recurring"]["interval_count"]) == 1
     assert recurring_price["type"] == "recurring"
-    assert recurring_price["currency"] == "sek"
+    assert recurring_price["currency"] == CURRENCY, f"Expected prices to be in currency: {CURRENCY}, not {recurring_price['currency']}"
     product.price = Decimal(recurring_price["unit_amount"]) / STRIPE_CURRENTY_BASE
 
     # The smallest_multiple field is somewhat like a binding period.
