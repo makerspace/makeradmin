@@ -162,10 +162,10 @@ Note: You should *not* modify these products in makeradmin. They will be reset w
 
 The configuration needed on stripe is:
 
-* Create a product for base membership. Add the metadata "subscription_type"="membership"
-  * Add a yearly price, and add the metadata "price_type"="recurring"
-* Create a product for makerspace access. Add the metadata "subscription_type"="labaccess"
-  * Add a monthly price, and add the metadata "price_type"="recurring"
-  * Add a price for N months, where N is the binding period as specified in `stripe_subscriptions.py->BINDING_PERIOD`. The price should be N times the recurring price. Add the metadata "price_type"="binding_period"
+* Create a **product** for base membership. Add the metadata "subscription_type"="membership" to the **product** item
+  * Add a yearly **price**, and add the metadata "price_type"="recurring" to the **price** item
+* Create a **product** for makerspace access. Add the metadata "subscription_type"="labaccess" to the **product** item
+  * Add a monthly price, and add the metadata "price_type"="recurring" to the **price** item
+  * Add a **price** for N months, where N is the binding period as specified in `stripe_subscriptions.py->BINDING_PERIOD`. The price should be N times the recurring price. Add the metadata "price_type"="binding_period"
 
 If you try to access any page which needs these products (e.g. the registration page, or the member page), makeradmin will fetch them from stripe and do a bunch of validation checks.
