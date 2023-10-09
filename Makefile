@@ -3,6 +3,8 @@ COMPOSE=docker compose
 TEST_COMPOSE=docker compose -p test -f docker-compose.yml -f docker-compose.test.yml
 DEV_COMPOSE=docker compose -f docker-compose.yml -f docker-compose.dev.yml
 PYTEST_PARAMS?=
+PYTHON_VENV=.pydevproject
+PYTHON=$(PYTHON_VENV)/bin/python
 
 -include local.mk
 
@@ -32,19 +34,24 @@ clean-nuke:
 	docker volume rm -f test_logs
 
 dev-test:
-	(cd api/src && python3 -m pytest --workers auto -ra $(PYTEST_PARAMS))
+	(cd api/src && $(PYTHON) -m pytest --workers auto -ra $(PYTEST_PARAMS))
 
 init-npm:
 	cd admin && npm install 
 	cd public && npm install 
 
+init-venv:
+	python3 -m venv $(PYTHON_VENV)
+
 init-pip:
-	python3 -m pip install --upgrade -r requirements.txt
+	$(PYTHON) -m pip install -v wheel
+	$(PYTHON) -m pip install --no-build-isolation -v "cython<3.0.0" pyyaml==5.4.1 # PyYaml has a bug in their latest build with cython3...
+	$(PYTHON) -m pip install -r requirements.txt
 
 init: init-pip init-npm
 
 .env:
-	python3 create_env.py
+	$(PYTHON) create_env.py
 
 stop:
 	$(COMPOSE) down
@@ -53,7 +60,7 @@ test-admin-js:
 	npm --prefix admin run eslint
 	npm --prefix admin run test
 
-firstrun: .env init build
+firstrun: init-venv .env init build
 	$(COMPOSE) run api python3 ./firstrun.py
 
 .PHONY: build firstrun init init-npm init-pip install run stop dev-test test-clean test dev
