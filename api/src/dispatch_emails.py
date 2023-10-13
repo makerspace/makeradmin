@@ -53,13 +53,23 @@ def send_messages(key, domain, sender, to_override, limit):
 
         logger.info(msg)
 
-        response = requests.post(f"https://api.mailgun.net/v3/{domain}/messages", auth=('api', key),
-                                 data={
-                                     'from': sender,
-                                     'to': to,
-                                     'subject': message.subject,
-                                     'html': message.body,
-                                 })
+        while True:
+            try:
+                response = requests.post(
+                    f"https://api.mailgun.net/v3/{domain}/messages",
+                    auth=("api", key),
+                    data={
+                        "from": sender,
+                        "to": to,
+                        "subject": message.subject,
+                        "html": message.body,
+                    },
+                )
+                break
+            except requests.ConnectionError as e:
+                # Can happen if e.g. the mailgun is down for a few seconds (which does happen!)
+                logger.warning(f"Temporary connection error when sending email. Retrying in a few seconds: {e}\n")
+                sleep(5)
 
         if response.ok:
             message.status = Message.SENT
