@@ -134,7 +134,9 @@ def setup_subscription_makeradmin_product(
         raise RuntimeError(f"Unexpected interval {interval} in stripe product")
     assert int(recurring_price["recurring"]["interval_count"]) == 1
     assert recurring_price["type"] == "recurring"
-    assert recurring_price["currency"] == CURRENCY, f"Expected prices to be in currency: {CURRENCY}, not {recurring_price['currency']}"
+    assert (
+        recurring_price["currency"] == CURRENCY
+    ), f"Expected prices to be in currency: {CURRENCY}, not {recurring_price['currency']}"
     product.price = Decimal(recurring_price["unit_amount"]) / STRIPE_CURRENTY_BASE
 
     # The smallest_multiple field is somewhat like a binding period.
@@ -262,6 +264,8 @@ def get_stripe_customer(
             try:
                 customer = retry(lambda: stripe.Customer.retrieve(member_info.stripe_customer_id))
                 assert customer is not None
+                if hasattr(customer, "deleted") and customer.deleted:
+                    raise InvalidRequestError("Customer has been deleted", "customer")
 
                 # Update the metadata if needed
                 expected_metadata = {
@@ -283,7 +287,7 @@ def get_stripe_customer(
                     )
                 return customer
             except InvalidRequestError as e:
-                if "No such customer" in str(e.user_message):
+                if "No such customer" in str(e.user_message) or "Customer has been deleted" in str(e.user_message):
                     print("Stripe customer not found, even though it existed in the database. Creating a new one.")
 
         # If no customer is found, we create one
@@ -307,7 +311,7 @@ def get_stripe_customer(
         db_session.flush()
         return customer
     except Exception as e:
-        print(f"Unable to get or create stripe user: {e}")
+        print(f"Unable to get or create stripe user: {type(e)}: {e}")
 
     return None
 
