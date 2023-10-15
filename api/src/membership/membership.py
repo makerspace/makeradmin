@@ -6,7 +6,7 @@ from sqlalchemy import func
 from membership.models import Span, Member
 from service.api_definition import NOT_UNIQUE
 from service.db import db_session
-from service.error import UnprocessableEntity
+from service.error import UnprocessableEntity, PreconditionFailed
 from service.util import date_to_str
 from typing import Any, Dict, List, Optional, Set, Tuple, TypeVar
 
@@ -185,6 +185,8 @@ def add_membership_days(member_id: int, span_type: str, days: int, creation_reas
 
 def get_access_summary(member_id: int):
     from multiaccessy.accessy import accessy_session
+    if accessy_session is None:
+        return PreconditionFailed(f"Accessy is not configured.")
     member: Member = (
         db_session
             .query(Member)

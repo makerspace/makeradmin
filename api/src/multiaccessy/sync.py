@@ -92,6 +92,10 @@ def calculate_diff(actual_members: Dict[str, AccessyMember], wanted_members: Dic
 
 
 def sync(today=None):
+    if accessy_session is None:
+        logger.info(f"accessy sync skipped, accessy not configured.")
+        return 
+
     if not today:
         today = date.today()
     
