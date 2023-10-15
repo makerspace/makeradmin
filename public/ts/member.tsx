@@ -2,7 +2,7 @@ import * as common from "./common";
 import * as login from "./login";
 import { UNAUTHORIZED, get_error } from "./common";
 import { JSX } from "preact/jsx-runtime";
-import { LoadCurrentMemberGroups, LoadCurrentMemberInfo, LoadCurrentMembershipInfo, date_t, member_t, membership_t } from "./member_common";
+import { LoadCurrentAccessInfo, LoadCurrentMemberGroups, LoadCurrentMemberInfo, LoadCurrentMembershipInfo, access_t, date_t, member_t, membership_t } from "./member_common";
 import { render } from "preact";
 import { useEffect, useMemo, useState } from "preact/hooks";
 import { show_phone_number_dialog } from "./change_phone";
@@ -165,43 +165,65 @@ function MissingPhoneNumber({ member }: { member: member_t }) {
     return member.phone ? null : <WarningItem>Du måste lägga in ditt <strong>telefonnummer</strong> i personuppgifterna nedan.</WarningItem>;
 }
 
+function MissingAccessyInvite({ membership, access, member, onSendAccessyInvite }: { membership: membership_t, access: access_t, member: member_t, onSendAccessyInvite: () => void }) {
+    const t = useTranslation();
+    if (!membership.labaccess_active && !membership.special_labaccess_active) {
+        // Accessy is not relevant if the member does not have makerspace access
+        return null;
+    }
+    if (access.in_org) {
+        // Don't need to send an invite if the member is already in the accessy organization
+        return null;
+    }
+    if (member.phone === null) {
+        // Can't send an invite if the member does not have a phone number
+        return null;
+    }
+    return [
+        <WarningItem>{t("member_page.send_accessy_invite_msg")}</WarningItem>,
+        <WarningItem><button onClick={(e) => {
+            e.preventDefault();
+            onSendAccessyInvite();
+        }} className="uk-button uk-button-primary">{t("member_page.send_accessy_invite")}</button></WarningItem>
+    ]
+}
+
 
 function PendingLabaccessInstructions({ can_sync_labaccess, pending_labaccess_days }: { can_sync_labaccess: boolean, pending_labaccess_days: number }) {
     if (!can_sync_labaccess && pending_labaccess_days) {
         return <>Du behöver åtgärda ovanstående fel innan din labbaccess kan synkas. När de är åtgärdade kommer den digitala nyckeln att förlängas med <strong>{pending_labaccess_days} dagar</strong> vid nästa nyckelsynkronisering.</>;
     } else if (can_sync_labaccess && pending_labaccess_days) {
         return <><strong>{pending_labaccess_days} dagar</strong> kommer läggas till vid nästa nyckelsynkronisering. Då kommer din access att förlängas.</>;
+    } else {
+        return null;
     }
-
-    return <>Du behöver köpa labbmedlemskap i <a href={webshop_url}>webshoppen</a> för att förlänga ditt labbmedlemskap.</>;
 }
 
 
-function Help({ member, membership, pending_labaccess_days, onSendAccessyInvite }: { member: member_t, membership: membership_t, pending_labaccess_days: number, onSendAccessyInvite: () => void }) {
-    const todo_bullets = [
+function Help({ member, membership, pending_labaccess_days, access, onSendAccessyInvite }: { member: member_t, membership: membership_t, pending_labaccess_days: number, access: access_t, onSendAccessyInvite: () => void }) {
+    const todo_bullets1 = [
         SignedContractWarning({ member }),
         NoMembershipWarning({ membership }),
         MissingPhoneNumber({ member }),
-        // TODO: Accessy invite. Check if user is in accessy group.
+    ].filter(x => x !== null);;
+
+    const todo_bullets2 = [
+        MissingAccessyInvite({ membership, access, member, onSendAccessyInvite }),
     ].filter(x => x !== null);
 
-    if (todo_bullets.length === 0) {
+    if (todo_bullets1.length === 0 && todo_bullets2.length === 0) {
         return null;
     }
 
-    const pending_labaccess_instruction = <PendingLabaccessInstructions can_sync_labaccess={!todo_bullets} pending_labaccess_days={pending_labaccess_days} />;
-
-    const disabled = !member.phone || (!membership.labaccess_active && !membership.special_labaccess_active);
-    const accessyInvite = <p><button disabled={disabled} class="uk-button uk-button-danger" onClick={e => {
-        e.preventDefault();
-        onSendAccessyInvite();
-    }}>Skicka Accessy-inbjudan</button></p>;
+    const t = useTranslation();
+    const pending_labaccess_instruction = <PendingLabaccessInstructions can_sync_labaccess={todo_bullets1.length == 0} pending_labaccess_days={pending_labaccess_days} />;
 
     return <fieldset>
-        <legend><i uk-icon="info"></i> Instruktioner för att bli labbmedlem</legend>
-        {todo_bullets}
+        <legend><i uk-icon="info"></i> {t("member_page.instructions_to_become_member")}</legend>
+        {todo_bullets1}
+        {todo_bullets2}
         {pending_labaccess_instruction}
-        {accessyInvite}
+        {/* {accessyInvite} */}
     </fieldset>;
 }
 
@@ -305,6 +327,7 @@ function MembershipView({ member, membership, pendingLabaccessDays }: { member: 
 function PersonalData({ member, onChangePinCode, onChangePhoneNumber }: { member: member_t, onChangePinCode: () => void, onChangePhoneNumber: () => void }) {
     const pin_warning = member.pin_code == null ? <label class="uk-form-label" style="color: red;">Du har inte satt någon PIN-kod ännu. Använd BYT-knappen för att sätta den. PIN-koden används för <a href={URL_MEMBERBOOTH}>memberbooth</a>.</label> : null;
     const [showPinCode, setShowPinCode] = useState(false);
+    const t = useTranslation();
     return (
         <fieldset>
             <legend><i uk-icon="user"></i> Personuppgifter</legend>
@@ -327,7 +350,7 @@ function PersonalData({ member, onChangePinCode, onChangePhoneNumber }: { member
                     <button class="uk-button uk-button-danger" onClick={e => {
                         e.preventDefault();
                         onChangePhoneNumber();
-                    }} >Byt</button>
+                    }} >{t("member_page.change_phone_number")}</button>
                 </span>
             </div>
             <div>
@@ -341,7 +364,7 @@ function PersonalData({ member, onChangePinCode, onChangePhoneNumber }: { member
                     <button class="uk-button uk-button-danger" onClick={e => {
                         e.preventDefault();
                         onChangePinCode();
-                    }}>Byt</button>
+                    }}>{t("member_page.change_pin_code")}</button>
                 </span>
                 {pin_warning}
             </div>
@@ -476,7 +499,7 @@ function useFetchRepeatedly<T>(fetcher: () => Promise<T>, callback: (t: T) => vo
     }, []);
 }
 
-function MemberPage({ member, membership: initial_membership, pending_labaccess_days, productData, subscriptions, show_beta }: { member: member_t, membership: membership_t, pending_labaccess_days: number, subscriptions: SubscriptionInfo[], show_beta: boolean, productData: ProductData }) {
+function MemberPage({ member, membership: initial_membership, pending_labaccess_days, productData, subscriptions, show_beta, access }: { member: member_t, membership: membership_t, pending_labaccess_days: number, subscriptions: SubscriptionInfo[], show_beta: boolean, productData: ProductData, access: access_t }) {
     const apiBasePath = window.apiBasePath;
     const [membership, setMembership] = useState(initial_membership);
     const relevantProducts = useMemo(() => extractRelevantProducts([...productData.id2item.values()]), [productData.id2item]);
@@ -494,14 +517,14 @@ function MemberPage({ member, membership: initial_membership, pending_labaccess_
                 <form class="uk-form uk-form-stacked uk-margin-bottom">
                     <h2>{t("member_page.member")} {member.member_number}: {member.firstname} {member.lastname}</h2>
                     {show_beta ? <>
-                        <Help member={member} membership={membership} pending_labaccess_days={pending_labaccess_days} onSendAccessyInvite={send_accessy_invite} />
+                        <Help member={member} membership={membership} pending_labaccess_days={pending_labaccess_days} access={access} onSendAccessyInvite={send_accessy_invite} />
                         <BaseMembership member={member} membership={membership} subscriptions={subscriptions} relevantProducts={relevantProducts} cart={cart} onChangeCart={setCart} productData={productData} />
                         <MakerspaceAccess member={member} membership={membership} subscriptions={subscriptions} relevantProducts={relevantProducts} cart={cart} onChangeCart={setCart} productData={productData} pending_labaccess_days={pending_labaccess_days} />
                         <Billing />
                     </>
                         : <>
                             <MembershipView member={member} membership={membership} pendingLabaccessDays={pending_labaccess_days} />
-                            <Help member={member} membership={membership} pending_labaccess_days={pending_labaccess_days} onSendAccessyInvite={send_accessy_invite} />
+                            <Help member={member} membership={membership} pending_labaccess_days={pending_labaccess_days} access={access} onSendAccessyInvite={send_accessy_invite} />
                         </>
                     }
                     <PersonalData
@@ -529,14 +552,15 @@ common.documentLoaded().then(() => {
     const subscriptions = getCurrentSubscriptions().then(s => s.filter(sub => sub.active));
     const groups = LoadCurrentMemberGroups();
     const productData = LoadProductData();
+    const access = LoadCurrentAccessInfo();
 
 
-    Promise.all([future1, membership, future3, subscriptions, groups, productData]).then(([member, membership, pending_actions_json, subscriptions, groups, productData]) => {
+    Promise.all([future1, membership, future3, subscriptions, groups, productData, access]).then(([member, membership, pending_actions_json, subscriptions, groups, productData, access]) => {
         const pending_labaccess_days = get_pending_labaccess_days(pending_actions_json);
         const in_beta_group = true;
         if (root != null) {
             render(
-                <MemberPage member={member} membership={membership} pending_labaccess_days={pending_labaccess_days} subscriptions={subscriptions} show_beta={in_beta_group} productData={productData} />,
+                <MemberPage member={member} membership={membership} pending_labaccess_days={pending_labaccess_days} subscriptions={subscriptions} show_beta={in_beta_group} productData={productData} access={access} />,
                 root
             );
         }

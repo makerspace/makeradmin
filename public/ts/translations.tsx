@@ -294,6 +294,11 @@ const Eng = {
                 title: "Activate auto-renewal",
             }
         },
+        change_phone_number: "Change",
+        send_accessy_invite_msg: "Install the Accessy app on your phone. You can use this to unlock doors at the makerspace.",
+        send_accessy_invite: "Send Accessy invite",
+        change_pin_code: "Change",
+        instructions_to_become_member: "Remaining steps to get makerspace access",
     },
     payment: {
         pay_with_stripe: "Pay with Stripe",

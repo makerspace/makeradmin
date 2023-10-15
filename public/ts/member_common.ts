@@ -37,6 +37,12 @@ export type group_t = {
     updated_at: string,
 }
 
+export type access_t = {
+    in_org: boolean,
+    pending_invite_count: number,
+    access_permission_group_names: string[],
+}
+
 export async function LoadCurrentMemberInfo(): Promise<member_t> {
     return (await common.ajax("GET", window.apiBasePath + "/member/current", null)).data;
 }
@@ -47,4 +53,8 @@ export async function LoadCurrentMembershipInfo(): Promise<membership_t> {
 
 export async function LoadCurrentMemberGroups(): Promise<group_t[]> {
     return (await common.ajax("GET", `${window.apiBasePath}/member/current/groups`)).data;
+}
+
+export async function LoadCurrentAccessInfo(): Promise<access_t> {
+    return (await common.ajax("GET", window.apiBasePath + "/member/current/access", null)).data;
 }
