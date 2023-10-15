@@ -130,6 +130,14 @@ def labaccess_reminder() -> None:
 
         already_purchased = \
             pending_action_value_sum(member_id=member.member_id, action_type=ProductAction.ADD_LABACCESS_DAYS) > 0
+
+        # If the member has a subscription, don't send a reminder, as it will be renewed automatically.
+        # TODO: Ideally we should have a cron job that checks if the subscription is truly valid on the stripe side as well,
+        # and in that case nulls the subscription id on the makeradmin side.
+        # It *shouldn't* (TM) get out of sync. But it is theoretically possible that that it does, and then the member
+        # would loose access without us reminding them (bad).
+        already_purchased |= member.stripe_labaccess_subscription_id is not None
+
         if already_purchased:
             continue
 
@@ -164,13 +172,16 @@ def membership_reminder() -> None:
         if membership.membership_end > end_date_reminder_target:
             # Membership is valid for a long time
             continue
-        
+
         # Don't send a reminder if we sent a reminder the last 28 days.
         if already_sent_message(MessageTemplate.MEMBERSHIP_REMINDER, member, MEMBERSHIP_REMINDER_GRACE_PERIOD):
             continue
 
         already_purchased = \
             pending_action_value_sum(member_id=member.member_id, action_type=ProductAction.ADD_MEMBERSHIP_DAYS) > 0
+
+        already_purchased |= member.stripe_membership_subscription_id is not None
+
         if already_purchased:
             # Member has already purchased extra membership
             continue
@@ -271,7 +282,7 @@ def get_login_link(member, browser, path):
     redirect = get_public_url(path)
     access_token = create_access_token("localhost", browser, member.member_id, valid_duration=timedelta(days=4))['access_token']
     return get_public_url(f"/member/login/{access_token}?redirect=" + quote_plus(redirect))
-    
+
 
 if __name__ == '__main__':
 
