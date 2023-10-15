@@ -13,6 +13,9 @@ You need to sign out and sign back in again for changes to take effect.
 ### Python
 Python 3.10.
 
+The install process will install additional pip packages.
+Activate a venv / virtualenv before install if you want python environment isolation.
+
 ### npm
 ```bash
 sudo apt-get install npm
