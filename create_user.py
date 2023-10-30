@@ -36,6 +36,8 @@ def create_user(first_name: str, last_name: str, email: str, user_type: str, pas
             "email": email,
             "firstname": first_name,
             "lastname": last_name,
+            "pending_activation" :False,
+            "price_level" :0,
         }
         if password is not None:
             payload["unhashed_password"] = password
