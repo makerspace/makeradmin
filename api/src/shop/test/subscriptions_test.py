@@ -5,6 +5,7 @@ import random
 import math
 from dateutil.relativedelta import relativedelta
 from typing import Any, Dict, List, Optional, Set, Tuple, cast
+from unittest import skipIf
 
 import pytest
 from shop.stripe_util import event_semantic_time
@@ -69,6 +70,7 @@ class Test(FlaskTestBase):
     models = [membership.models, messages.models, shop.models, core.models]
     seen_event_ids: Set[str]
 
+    @skipIf(not stripe.api_key, "subscriptions tests require stripe api key in .env file")
     def setUp(self) -> None:
         db_session.query(Member).delete()
         db_session.query(Span).delete()
