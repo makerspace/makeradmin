@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from typing import Any
 from flask import Response, g, request, send_file, make_response
 from sqlalchemy.exc import NoResultFound
-from membership.enums import PriceLevel
+from basic_types.enums import PriceLevel
 from shop.stripe_discounts import get_discount_fraction_off
 
 from multiaccessy.invite import AccessyInvitePreconditionFailed, ensure_accessy_labaccess

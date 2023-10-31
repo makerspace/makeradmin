@@ -1,7 +1,7 @@
 import argparse
 
 from sqlalchemy import func
-from membership.enums import PriceLevel
+from basic_types.enums import PriceLevel
 
 from init_db import init_db
 from membership.models import Group, Permission, Member

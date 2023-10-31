@@ -8,7 +8,7 @@ from service.config import config
 
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 from sqlalchemy.sql import func
-from membership.enums import PriceLevel
+from basic_types.enums import PriceLevel
 from messages.message import send_message
 from messages.models import MessageTemplate
 from shop.stripe_constants import MakerspaceMetadataKeys
