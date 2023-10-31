@@ -11,9 +11,7 @@ def send_membership_updated_email(member_id: int, extended_days: int, end_date: 
     member = db_session.query(Member).get(member_id)
 
     send_message(
-        MessageTemplate.ADD_MEMBERSHIP_TIME, member,
-        extended_days=extended_days,
-        end_date=date_to_str(end_date)
+        MessageTemplate.ADD_MEMBERSHIP_TIME, member, extended_days=extended_days, end_date=date_to_str(end_date)
     )
 
 
@@ -21,9 +19,7 @@ def send_labaccess_extended_email(member_id: int, extended_days: int, end_date: 
     member = db_session.query(Member).get(member_id)
 
     send_message(
-        MessageTemplate.ADD_LABACCESS_TIME, member,
-        extended_days=extended_days,
-        end_date=date_to_str(end_date)
+        MessageTemplate.ADD_LABACCESS_TIME, member, extended_days=extended_days, end_date=date_to_str(end_date)
     )
 
 
@@ -32,7 +28,8 @@ def send_receipt_email(transaction: Transaction) -> None:
     products = [content.product for content in contents]
 
     send_message(
-        MessageTemplate.RECEIPT, transaction.member,
+        MessageTemplate.RECEIPT,
+        transaction.member,
         cart=list(zip(products, contents)),
         transaction=transaction,
         currency="kr",
@@ -41,5 +38,6 @@ def send_receipt_email(transaction: Transaction) -> None:
 
 def send_new_member_email(member: Member) -> None:
     send_message(
-        MessageTemplate.NEW_MEMBER, member,
+        MessageTemplate.NEW_MEMBER,
+        member,
     )

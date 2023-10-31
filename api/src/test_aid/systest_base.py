@@ -21,9 +21,18 @@ from shop.stripe_constants import EventType, set_stripe_key
 from test_aid.api import ApiFactory, ApiResponse
 from test_aid.db import DbFactory
 from test_aid.obj import DEFAULT_PASSWORD
-from test_aid.systest_config import HOST_FRONTEND, HOST_PUBLIC, HOST_BACKEND, \
-    SELENIUM_BASE_TIMEOUT, SLEEP, WEBDRIVER_TYPE, TEST_SERVICE_TOKEN, SELENIUM_SCREENSHOT_DIR, KEEP_BROWSER, \
-    STRIPE_PUBLIC_KEY
+from test_aid.systest_config import (
+    HOST_FRONTEND,
+    HOST_PUBLIC,
+    HOST_BACKEND,
+    SELENIUM_BASE_TIMEOUT,
+    SLEEP,
+    WEBDRIVER_TYPE,
+    TEST_SERVICE_TOKEN,
+    SELENIUM_SCREENSHOT_DIR,
+    KEEP_BROWSER,
+    STRIPE_PUBLIC_KEY,
+)
 from test_aid.test_base import TestBase, ShopTestMixin
 
 VALID_NON_3DS_CARD_NO = "378282246310005"
@@ -32,13 +41,16 @@ EXPIRED_3DS_CARD_NO = "4000000000000069"
 DECLINE_AFTER_ATTACHING_CARD = "4000000000000341"
 EXPIRED_CVC_ZIP = "4242424242424"
 
-logger = getLogger('makeradmin')
+logger = getLogger("makeradmin")
+
 
 def is_inside_docker() -> bool:
     return "TEST_IS_INSIDE_DOCKER" in os.environ
 
+
 class SystestBase(TestBase):
-    """ Base class for systest with config available. """
+    """Base class for systest with config available."""
+
     db: DbFactory
     admin_url: str
     public_url: str
@@ -50,32 +62,32 @@ class SystestBase(TestBase):
 
         # Use the public key for these tests. TODO: Why not the private one?
         set_stripe_key(private=False)
-        
+
         # Make sure sessions is removed so it is not using another engine in this thread.
         db_session.remove()
-        
+
         if not is_inside_docker():
             # This test requires a connection to the mysql database instead of just an in-memory db.
             # Therefore we only run this test when we are inside docker.
             raise SkipTest("Not running inside docker")
 
         create_mysql_engine(**get_mysql_config(), isolation_level="READ_COMMITTED")
-        
+
         self.db = DbFactory(self, self.obj)
         self.admin_url = HOST_FRONTEND
         self.public_url = HOST_PUBLIC
         self.api_url = HOST_BACKEND
-        
+
     def tearDown(self) -> None:
         super().tearDown()
         db_session.close()
 
-    
+
 class ApiTest(SystestBase):
-    """ Base class for tests that accesses the api. """
-    
+    """Base class for tests that accesses the api."""
+
     api: Optional[ApiFactory] = None
-    
+
     @classmethod
     def setUpClass(self) -> None:
         super().setUpClass()
@@ -117,54 +129,57 @@ def retry(timeout=SELENIUM_BASE_TIMEOUT, sleep=SLEEP, retry_exception=None, retr
                     elapsed = time.perf_counter() - start
                     if elapsed > timeout or not retry_exception(e):
                         raise
-                    print(f"{wrapped.__qualname__} failed with the following error after {elapsed:02f}s:"
-                          f" {e.__class__.__name__} {str(e)}",
-                          file=sys.stderr)
+                    print(
+                        f"{wrapped.__qualname__} failed with the following error after {elapsed:02f}s:"
+                        f" {e.__class__.__name__} {str(e)}",
+                        file=sys.stderr,
+                    )
                 time.sleep(sleep)
+
         return wrap
+
     return decorator
-    
+
 
 def create_webdriver():
-    if WEBDRIVER_TYPE == 'CHROME':
+    if WEBDRIVER_TYPE == "CHROME":
         return chrome.WebDriver()
-    
-    if WEBDRIVER_TYPE == 'REMOTE_CHROME':
-        return remote.WebDriver(command_executor='http://selenium:4444/wd/hub',
-                                options=webdriver.ChromeOptions())
-    
+
+    if WEBDRIVER_TYPE == "REMOTE_CHROME":
+        return remote.WebDriver(command_executor="http://selenium:4444/wd/hub", options=webdriver.ChromeOptions())
+
     raise Exception(f"bad webdriver type {WEBDRIVER_TYPE}")
 
 
 class SeleniumTest(ApiTest):
-    """ Base class for selenium tests. """
-    
+    """Base class for selenium tests."""
+
     @classmethod
     def setUpClass(self):
         super().setUpClass()
         self.webdriver = create_webdriver()
-        
+
     def tearDown(self):
         if self.this_test_failed():
             if not os.path.exists(SELENIUM_SCREENSHOT_DIR):
                 os.makedirs(SELENIUM_SCREENSHOT_DIR)
                 os.chmod(SELENIUM_SCREENSHOT_DIR, 0o777)
             filename = f'{SELENIUM_SCREENSHOT_DIR}/{self.id()}--{self.now.strftime("%Y-%m-%dT%H-%M-%S")}'
-            
+
             print(f"saving screenshot to {filename}.png", file=sys.stderr)
             try:
-                self.webdriver.save_screenshot(filename + '.png')
-                with open(filename + '.html', 'w') as w:
+                self.webdriver.save_screenshot(filename + ".png")
+                with open(filename + ".html", "w") as w:
                     w.write(self.webdriver.page_source)
-                with open(filename + '.url', 'w') as w:
+                with open(filename + ".url", "w") as w:
                     w.write(self.webdriver.current_url)
-                with open(filename + '.console', 'w') as w:
-                    w.write(repr(self.webdriver.get_log('browser')))
+                with open(filename + ".console", "w") as w:
+                    w.write(repr(self.webdriver.get_log("browser")))
             except Exception as e:
                 print(f"failed to save screenshot: {str(e)}", file=sys.stderr)
-      
+
         super().tearDown()
-    
+
     @classmethod
     def tearDownClass(self):
         if not KEEP_BROWSER and getattr(self, "webdriver"):
@@ -183,58 +198,91 @@ class SeleniumTest(ApiTest):
         token = self.api.login_member(member)
         self.webdriver.get(f"{self.public_url}/member/login/{token}")
 
-    def wait_for_element(self, id=None, name=None, tag=None, css=None, xpath=None,
-                         timeout=SELENIUM_BASE_TIMEOUT, sleep=SLEEP):
+    def wait_for_element(
+        self, id=None, name=None, tag=None, css=None, xpath=None, timeout=SELENIUM_BASE_TIMEOUT, sleep=SLEEP
+    ):
         if id:
+
             def get():
                 return self.webdriver.find_element(By.ID, id)
+
         elif name:
+
             def get():
                 return self.webdriver.find_element(By.NAME, name)
+
         elif tag:
+
             def get():
                 return self.webdriver.find_element(By.TAG_NAME, tag)
+
         elif css:
+
             def get():
                 return self.webdriver.find_element(by=By.CSS_SELECTOR, value=css)
+
         elif xpath:
+
             def get():
                 return self.webdriver.find_element(By.XPATH, xpath)
+
         else:
             raise Exception("missing parameter")
-        
-        return retry(timeout=timeout, sleep=sleep, retry_exception=lambda e: isinstance(e, NoSuchElementException))(get)()
 
-    def wait_for_elements(self, id=None, name=None, tag=None, css=None, xpath=None, expected_count=None,
-                          timeout=SELENIUM_BASE_TIMEOUT, sleep=SLEEP):
+        return retry(timeout=timeout, sleep=sleep, retry_exception=lambda e: isinstance(e, NoSuchElementException))(
+            get
+        )()
+
+    def wait_for_elements(
+        self,
+        id=None,
+        name=None,
+        tag=None,
+        css=None,
+        xpath=None,
+        expected_count=None,
+        timeout=SELENIUM_BASE_TIMEOUT,
+        sleep=SLEEP,
+    ):
         if id:
+
             def get():
                 return self.webdriver.find_elements(By.ID, id)
+
         elif name:
+
             def get():
                 return self.webdriver.find_elements(By.NAME, name)
+
         elif tag:
+
             def get():
                 return self.webdriver.find_elements(By.TAG_NAME, tag)
+
         elif css:
+
             def get():
                 return self.webdriver.find_elements(By.CSS_SELECTOR, css)
+
         elif xpath:
+
             def get():
                 return self.webdriver.find_elements(By.XPATH, xpath)
+
         else:
             raise Exception("missing parameter")
-        
+
         return retry(
-            timeout=timeout, sleep=sleep,
+            timeout=timeout,
+            sleep=sleep,
             retry_exception=lambda e: isinstance(e, NoSuchElementException),
-            retry_result=lambda r: len(r) != expected_count
+            retry_result=lambda r: len(r) != expected_count,
         )(get)()
 
     def browse_member_page(self):
         self.webdriver.get(f"{self.public_url}/member")
         self.wait_for_page(title="Medlemssidor - Stockholm Makerspace Webshop")
-        
+
     def browse_shop(self):
         self.webdriver.get(f"{self.public_url}/shop")
         self.wait_for_page(title="Stockholm Makerspace Webshop")
@@ -242,34 +290,37 @@ class SeleniumTest(ApiTest):
     def browse_cart_page(self):
         self.webdriver.get(f"{self.public_url}/shop/cart")
         self.wait_for_page(title="Stockholm Makerspace Webshop")
-        
-        
+
+
 class ApiShopTestMixin(ShopTestMixin):
-    
     @skipIf(not stripe.api_key, "webshop tests require stripe api key in .env file")
     def setUp(self):
         super().setUp()
         self.member = self.api.create_member(unhashed_password=DEFAULT_PASSWORD)
-        self.member_id = self.member['member_id']
+        self.member_id = self.member["member_id"]
         self.test_start_timestamp = str(int(time.time()))
         self.token = self.factory.login_member()
 
     def trigger_stripe_source_event(self, source_id, expected_event_count=1):
-        """ Make server fetch events and filter it on source and type, do this until one event was processed. """
-        
+        """Make server fetch events and filter it on source and type, do this until one event was processed."""
+
         for i in range(10):
-            event_count = self.post(
-                f"/webshop/process_stripe_events",
-                dict(
-                    start=self.test_start_timestamp,
-                    type=f"{EventType.SOURCE}*",
-                    source_id=source_id,
+            event_count = (
+                self.post(
+                    f"/webshop/process_stripe_events",
+                    dict(
+                        start=self.test_start_timestamp,
+                        type=f"{EventType.SOURCE}*",
+                        source_id=source_id,
+                    ),
                 )
-            ).expect(200).data
-            
+                .expect(200)
+                .data
+            )
+
             if event_count >= expected_event_count:
                 return
-                
+
             time.sleep(1)
-            
+
         raise AssertionError(f"failed to get source events for {source_id}")

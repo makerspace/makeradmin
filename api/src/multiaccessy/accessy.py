@@ -92,21 +92,23 @@ class AccessySession:
         self._organization_id = None
         self._mutex = threading.Lock()
 
-
     #################
     # Class methods
     #################
 
     @staticmethod
     def is_env_configured():
-        return all(config_var is not None and len(config_var) > 0 for config_var in (
-            ACCESSY_URL,
-            ACCESSY_CLIENT_SECRET,
-            ACCESSY_CLIENT_ID,
-            ACCESSY_LABACCESS_GROUP,
-            ACCESSY_SPECIAL_LABACCESS_GROUP,
-            ACCESSY_DO_MODIFY,
-        ))
+        return all(
+            config_var is not None and len(config_var) > 0
+            for config_var in (
+                ACCESSY_URL,
+                ACCESSY_CLIENT_SECRET,
+                ACCESSY_CLIENT_ID,
+                ACCESSY_LABACCESS_GROUP,
+                ACCESSY_SPECIAL_LABACCESS_GROUP,
+                ACCESSY_DO_MODIFY,
+            )
+        )
 
     #################
     # Public methods
@@ -438,6 +440,7 @@ accessy_session = AccessySession() if AccessySession.is_env_configured() else No
 STATUS_OK = 0
 ERROR_NOT_CONFIGURED = 1
 
+
 def main() -> int:
     if accessy_session is None:
         print("Accessy not configured.")
@@ -449,4 +452,5 @@ def main() -> int:
 
 if __name__ == "__main__":
     import sys
+
     sys.exit(main())

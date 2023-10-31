@@ -18,14 +18,15 @@ from membership.views import group_entity
 def send_access_token_email(redirect, user_identification, ip, browser):
     member = get_member_by_user_identification(user_identification)
 
-    access_token = create_access_token(ip, browser, member.member_id)['access_token']
+    access_token = create_access_token(ip, browser, member.member_id)["access_token"]
 
     url = config.get_public_url(f"/member/login/{access_token}?redirect=" + quote_plus(redirect))
 
     logger.info(f"sending login link {url!r} to member_id {member.member_id}")
 
     send_message(
-        MessageTemplate.LOGIN_LINK, member,
+        MessageTemplate.LOGIN_LINK,
+        member,
         url=url,
         now=format_datetime(datetime.now()),
     )
@@ -45,6 +46,13 @@ def set_pin_code(member_id: int, pin_code: str):
 
     return {"status": "PIN code changed"}
 
+
 def get_member_groups(member_id: int) -> List[Any]:
-    groups = db_session.query(Group).join(Member.groups).filter(Member.member_id==member_id).filter(Group.deleted_at==None).all()
+    groups = (
+        db_session.query(Group)
+        .join(Member.groups)
+        .filter(Member.member_id == member_id)
+        .filter(Group.deleted_at == None)
+        .all()
+    )
     return [group_entity.to_obj(g) for g in groups]

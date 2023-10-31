@@ -31,7 +31,7 @@ def contains_sub_sequence(value: str, sequence: str, length: Optional[int]) -> b
         length = len(sequence)
     value = value.lower()
     for i in range(0, len(sequence) - length + 1):
-        if value.find(sequence[i:i + length]) != -1:
+        if value.find(sequence[i : i + length]) != -1:
             return True
     return False
 
@@ -49,39 +49,38 @@ def hash_password(password: str) -> str:
 def check_and_hash_password(unhashed_password: Optional[str]) -> Optional[str]:
     if unhashed_password is None:
         return None
-        
+
     contained_chars_set = set(unhashed_password)
 
     if len(unhashed_password) < 8 or len(contained_chars_set) < 6:
         raise ValueError("Password must be at least 8 characters long with at least 6 unique characters.")
 
     # Test for forbidden sequences
-    if any(contains_sub_sequence(unhashed_password, sequence, length)
-           for sequence, length in FORBIDDEN_SUB_SEQUENCES):
+    if any(contains_sub_sequence(unhashed_password, sequence, length) for sequence, length in FORBIDDEN_SUB_SEQUENCES):
         raise ValueError("Password contains a forbidden sequence of characters, try something less common.")
 
     return hash_password(unhashed_password)
 
 
-def get_member_permissions(member_id: Optional[int]=None) -> List[Tuple[int, str]]:
-    """ Return query to get all (permission_id, permission) for a memeber, used from core. """
+def get_member_permissions(member_id: Optional[int] = None) -> List[Tuple[int, str]]:
+    """Return query to get all (permission_id, permission) for a memeber, used from core."""
     return (
-        db_session
-            .query(Permission.permission_id, Permission.permission)
-            .distinct()
-            .join(Group, Permission.groups)
-            .join(Member, Group.members)
-            .filter_by(member_id=member_id)
+        db_session.query(Permission.permission_id, Permission.permission)
+        .distinct()
+        .join(Group, Permission.groups)
+        .join(Member, Group.members)
+        .filter_by(member_id=member_id)
     )
 
 
-def authenticate(username: Optional[str]=None, password: Optional[str]=None) -> int:
-    """ Authenticate a member trough username and password, returns member_id if authenticated, used from core. """
-    
+def authenticate(username: Optional[str] = None, password: Optional[str] = None) -> int:
+    """Authenticate a member trough username and password, returns member_id if authenticated, used from core."""
+
     member: Optional[Member] = db_session.query(Member).filter_by(email=username).first()
-    
+
     if member is None or not verify_password(password, member.password):
-        raise Unauthorized("The username and/or password you specified was incorrect.",
-                           fields='username,password', what=BAD_VALUE)
-    
+        raise Unauthorized(
+            "The username and/or password you specified was incorrect.", fields="username,password", what=BAD_VALUE
+        )
+
     return member.member_id

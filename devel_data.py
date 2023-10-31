@@ -17,11 +17,11 @@ env = dotenv_values()
 
 
 headers = {
-    'Authorization': f'Bearer {env.get("TEST_SERVICE_TOKEN")}',
+    "Authorization": f'Bearer {env.get("TEST_SERVICE_TOKEN")}',
 }
 
 
-api_url = env.get('HOST_BACKEND')
+api_url = env.get("HOST_BACKEND")
 
 
 def post(url, payload):
@@ -36,7 +36,7 @@ def get(url):
 def delete_all_spans(member_id):
     response = requests.get(f"{api_url}/membership/member/{member_id}/spans", headers=headers)
     assert response.ok, response.text
-    spans = response.json()['data']
+    spans = response.json()["data"]
     for span in spans:
         response = requests.delete(f"{api_url}/membership/span/{span['span_id']}", headers=headers)
         print("delete", response.status_code)
@@ -50,7 +50,7 @@ def create_span(member_id, startdate, enddate, span_type, creation_reason=None):
         type=span_type,
         creation_reason=creation_reason,
     )
-    
+
     response = post("membership/span", payload=payload)
     assert response.ok, response.text
     pprint(json.loads(response.content.decode()))

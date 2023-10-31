@@ -16,9 +16,9 @@ sys.path.append(os.path.join(os.path.dirname(__file__), "backend/src"))
 # import backend_service
 
 headers = {
-    'Authorization': f'Bearer {env.get("TEST_SERVICE_TOKEN")}',
+    "Authorization": f'Bearer {env.get("TEST_SERVICE_TOKEN")}',
 }
-api_url = env.get('HOST_BACKEND')
+api_url = env.get("HOST_BACKEND")
 
 
 def post(url, payload):
@@ -29,7 +29,7 @@ def post(url, payload):
 def get(url):
     return requests.get(f"{api_url}/{url}", headers=headers)
 
-    
+
 def create_user(first_name: str, last_name: str, email: str, user_type: str, password: Optional[str]):
     # gateway = backend_service.gateway_from_envfile(".env")
 
@@ -56,15 +56,14 @@ def create_user(first_name: str, last_name: str, email: str, user_type: str, pas
 
     if user_type == "admin":
         admin_group_id = [g["group_id"] for g in get("membership/group").json()["data"] if g["name"] == "admins"][0]
-        r = post("membership/member/" + str(user["member_id"]) + "/groups/add", payload={
-            "groups": [admin_group_id]
-        })
+        r = post("membership/member/" + str(user["member_id"]) + "/groups/add", payload={"groups": [admin_group_id]})
         assert r.ok, r.text
 
     return user
 
+
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='Create a new MakerAdmin user')
+    parser = argparse.ArgumentParser(description="Create a new MakerAdmin user")
     parser.add_argument("--first-name", help="First name of the user", required=True)
     parser.add_argument("--last-name", help="Last name of the user", required=True)
     parser.add_argument("--email", help="Email of the user", required=True)
