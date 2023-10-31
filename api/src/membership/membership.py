@@ -186,7 +186,11 @@ def add_membership_days(member_id: int, span_type: str, days: int, creation_reas
 def get_access_summary(member_id: int):
     from multiaccessy.accessy import accessy_session
     if accessy_session is None:
-        return PreconditionFailed(f"Accessy is not configured.")
+        return dict(
+            in_org=False,
+            pending_invite_count=0,
+            access_permission_group_names=[]
+        )
     member: Member = (
         db_session
             .query(Member)
