@@ -37,7 +37,7 @@ import stripe
 from datetime import datetime, timezone, date, time, timedelta
 from stripe.error import InvalidRequestError
 from shop.stripe_util import retry
-from membership.enums import PriceLevel
+from basic_types.enums import PriceLevel
 from shop.stripe_discounts import get_discount_for_product, get_price_level_for_member
 from shop.models import Product, ProductAction, ProductCategory
 from service.error import BadRequest, NotFound

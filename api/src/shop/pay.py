@@ -7,7 +7,7 @@ from typing import Any, List, Optional
 from dataclasses_json import DataClassJsonMixin
 
 import stripe
-from membership.enums import PriceLevel
+from basic_types.enums import PriceLevel
 from shop.stripe_constants import MakerspaceMetadataKeys
 from shop.stripe_setup_intent import SetupIntentFailed, SetupIntentResult, handle_setup_intent
 from membership.models import Member, Span

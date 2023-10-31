@@ -2,7 +2,7 @@ from datetime import datetime
 from random import randint, choice, seed
 from typing import Any, Dict
 from faker import Faker
-from membership.enums import PriceLevel
+from basic_types.enums import PriceLevel
 
 from membership.models import Member, Span
 from messages.models import Message

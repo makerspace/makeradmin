@@ -5,7 +5,7 @@ import time
 from typing import TYPE_CHECKING, Dict, List, Optional
 import stripe
 from shop.stripe_util import retry
-from membership.enums import PriceLevel
+from basic_types.enums import PriceLevel
 
 from shop.stripe_constants import MakerspaceMetadataKeys
 if TYPE_CHECKING:

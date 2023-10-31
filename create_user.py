@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+from api.src.basic_types.enums import PriceLevel
+
 import argparse
 import sys
 import os
@@ -36,8 +38,8 @@ def create_user(first_name: str, last_name: str, email: str, user_type: str, pas
             "email": email,
             "firstname": first_name,
             "lastname": last_name,
-            "pending_activation" :False,
-            "price_level" :0,
+            "pending_activation": False,
+            "price_level": PriceLevel.Normal.value,
         }
         if password is not None:
             payload["unhashed_password"] = password

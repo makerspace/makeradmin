@@ -7,7 +7,7 @@ from sqlalchemy import Column, Integer, String, DateTime, Text, Date, Enum, Tabl
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, column_property, configure_mappers, validates
 
-from membership.enums import PriceLevel
+from basic_types.enums import PriceLevel
 
 Base = declarative_base()
 
