@@ -7,11 +7,14 @@ from flask import Flask, Blueprint, redirect, url_for, send_from_directory
 import flask
 
 
-basicConfig(format='%(asctime)s %(levelname)s [%(process)d/%(threadName)s %(pathname)s:%(lineno)d]: %(message)s',
-            stream=sys.stderr, level=INFO)
+basicConfig(
+    format="%(asctime)s %(levelname)s [%(process)d/%(threadName)s %(pathname)s:%(lineno)d]: %(message)s",
+    stream=sys.stderr,
+    level=INFO,
+)
 
 
-logger = getLogger('makeradmin')
+logger = getLogger("makeradmin")
 
 # This is the current global banner.
 # Set to an empty string ("") to disable.
@@ -20,10 +23,10 @@ banner = ""
 sidebar_additional_classes = ""
 if banner:
     # Set the sidebar to not to use fixed positioning if there is a banner because otherwise the sidebar may end up below the banner, esp. on mobile devices
-    sidebar_additional_classes = 'sidebar-banner-adjust'
+    sidebar_additional_classes = "sidebar-banner-adjust"
+
 
 class Section(Blueprint):
-
     def __init__(self, name):
         super().__init__(name, name)
         self.context_processor(lambda: dict(url=self.url))
@@ -37,6 +40,7 @@ class Section(Blueprint):
 
 def render_template(path: str, **kwargs: Any) -> str:
     return flask.render_template(path, banner=banner, sidebar_additional_classes=sidebar_additional_classes, **kwargs)
+
 
 shop = Section("shop")
 
@@ -55,9 +59,11 @@ def cart() -> str:
 def register_member():
     return render_template("register.html")
 
+
 @shop.route("/register2")
 def register_member2() -> str:
     return render_template("register2.html")
+
 
 @shop.route("/member/history")
 def purchase_history():
@@ -147,8 +153,6 @@ def context():
     return dict(
         STATIC=app.static_url_path,
         meta=dict(
-            api_base_url=api_base_url,
-            stripe_public_key=os.environ["STRIPE_PUBLIC_KEY"],
-            host_public=host_public
-        )
+            api_base_url=api_base_url, stripe_public_key=os.environ["STRIPE_PUBLIC_KEY"], host_public=host_public
+        ),
     )
