@@ -20,7 +20,7 @@ class Discount:
     fraction_off: Decimal
 
 
-DISCOUNT_FRACTIONS: Optional[Dict[PriceLevel, Discount]] = None
+DISCOUNT_FRACTIONS: Optional[Dict[PriceLevel, Discount]] = {price_level: None for price_level in PriceLevel}
 
 
 def get_price_level_for_member(member: "Member") -> PriceLevel:
@@ -39,9 +39,8 @@ def get_discount_for_product(product: "Product", price_level: PriceLevel) -> Dis
 
 def get_discount_fraction_off(price_level: PriceLevel) -> Discount:
     global DISCOUNT_FRACTIONS
-    if DISCOUNT_FRACTIONS is None:
-        DISCOUNT_FRACTIONS = {price_level: _query_discount_fraction_off(price_level) for price_level in PriceLevel}
-
+    if DISCOUNT_FRACTIONS[price_level] is None:
+        DISCOUNT_FRACTIONS[price_level] = _query_discount_fraction_off(price_level)
     return DISCOUNT_FRACTIONS[price_level]
 
 
