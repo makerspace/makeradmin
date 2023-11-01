@@ -14,30 +14,32 @@ from test_aid.obj import ObjFactory, DEFAULT_PASSWORD
 from test_aid.test_util import classinstancemethod
 from datetime import date
 
+
 class TestBase(TestCase):
-    """ Base test with obj factory and date helpers. """
+    """Base test with obj factory and date helpers."""
+
     now: datetime
     today: date
     obj: ObjFactory
-    
+
     @classmethod
     def setUpClass(self) -> None:
         super().setUpClass()
         self.obj = ObjFactory(self)
-        
+
         self.now = datetime.utcnow()
         self.today = self.now.date()
-        
+
     @classinstancemethod
-    def date(self, days:int=0) -> date:
+    def date(self, days: int = 0) -> date:
         return self.today + timedelta(days=days)
 
     @classinstancemethod
     def datetime(self, **kwargs) -> datetime:
         return self.now + timedelta(**kwargs)
-    
+
     def this_test_failed(self):
-        if hasattr(self._outcome, 'errors'):
+        if hasattr(self._outcome, "errors"):
             # Python 3.4 - 3.10  (These two methods have no side effects)
             result = self.defaultTestResult()
             self._feedErrorsToResult(result, self._outcome.errors)
@@ -45,18 +47,18 @@ class TestBase(TestCase):
             # Python 3.11+
             # This does not work when running in pytest, will fix later, maybe....
             result = self._outcome.result
-            
+
         return getattr(result, "errors", None) or getattr(result, "failures", None)
-    
+
 
 class FlaskTestBase(TestBase):
-    """ Includes setup of flask and in memory db. """
-    
+    """Includes setup of flask and in memory db."""
+
     models = []
     app: Flask
     db: DbFactory
     service: InternalService
-    
+
     @classmethod
     def setUpClass(self) -> None:
         super().setUpClass()
@@ -66,7 +68,7 @@ class FlaskTestBase(TestBase):
         # Make sure sessions is removed so it is not using another engine in this thread.
         db_session.remove()
 
-        engine = create_engine('sqlite:///:memory:')
+        engine = create_engine("sqlite:///:memory:")
         for model in self.models:
             metadata = model.Base.metadata
             for table in metadata.tables.values():
@@ -74,16 +76,16 @@ class FlaskTestBase(TestBase):
                     if isinstance(column.type, Numeric):
                         column.type.asdecimal = False
             metadata.create_all(engine)
-        
+
         db_session_factory.init_with_engine(engine)
 
-        self.service = InternalService('service')
+        self.service = InternalService("service")
 
         self.db = DbFactory(self, self.obj)
 
 
 class ShopTestMixin:
-    """ Mixin that sets up data for shop tests. """
+    """Mixin that sets up data for shop tests."""
 
     products = []
 
@@ -101,12 +103,7 @@ class ShopTestMixin:
 
     @staticmethod
     def card(number):
-        return {
-            "number": str(number),
-            "exp_month": 12,
-            "exp_year": 2030,
-            "cvc": '123'
-        }
+        return {"number": str(number), "exp_month": 12, "exp_year": 2030, "cvc": "123"}
 
     @classmethod
     def setUpClass(self):
@@ -116,26 +113,26 @@ class ShopTestMixin:
 
         for i, product_kwargs in enumerate(self.products):
             product_kwargs = copy(product_kwargs)
-            action_kwargs = product_kwargs.pop('action', None)
+            action_kwargs = product_kwargs.pop("action", None)
             product = self.factory.create_product(**product_kwargs)
-            product_id = int(product.id if hasattr(product, "id") else product['id'])
-            product_price = float(product.price if hasattr(product, "price") else product['price'])
+            product_id = int(product.id if hasattr(product, "id") else product["id"])
+            product_price = float(product.price if hasattr(product, "price") else product["price"])
             if action_kwargs:
                 self.factory.create_product_action(product_id=product_id, **action_kwargs)
-            setattr(self, f'p{i}', product)
-            setattr(self, f'p{i}_id', product_id)
-            setattr(self, f'p{i}_price', product_price)
+            setattr(self, f"p{i}", product)
+            setattr(self, f"p{i}_id", product_id)
+            setattr(self, f"p{i}_price", product_price)
 
     @classmethod
     def tearDownClass(self):
         for i in range(len(self.products)):
-            self.factory.delete_product(getattr(self, f'p{i}_id'))
+            self.factory.delete_product(getattr(self, f"p{i}_id"))
         self.factory.delete_category()
         super().tearDownClass()
 
     def setUp(self):
         super().setUp()
         self.member = self.factory.create_member(password=hash_password(DEFAULT_PASSWORD))
-        self.member_id = self.member.member_id if hasattr(self.member, "member_id") else self.member['member_id']
+        self.member_id = self.member.member_id if hasattr(self.member, "member_id") else self.member["member_id"]
 
         self.test_start_timestamp = str(int(time.time()))

@@ -8,7 +8,7 @@ from service.entity import not_empty, OrmSingeRelation
 message_entity = MessageEntity(
     Message,
     validation=dict(title=not_empty),
-    search_columns=('subject', 'body', 'recipient'),
+    search_columns=("subject", "body", "recipient"),
 )
 
 
@@ -24,6 +24,6 @@ service.entity_routes(
 service.related_entity_routes(
     path="/member/<int:related_entity_id>/messages",
     entity=message_entity,
-    relation=OrmSingeRelation('member_messages', 'member_id'),
+    relation=OrmSingeRelation("member_messages", "member_id"),
     permission_list=MESSAGE_VIEW,
 )

@@ -72,9 +72,9 @@ class Test(ApiShopTestMixin, ApiTest):
             expected_sum="300",
             stripe_payment_method_id=payment_method.id,
         )
-        self.post(f"/webshop/pay", purchase.to_dict(), token=token).expect(code=200, status="ok", data={
-            "type": PaymentIntentResult.Success.value
-        })
+        self.post(f"/webshop/pay", purchase.to_dict(), token=token).expect(
+            code=200, status="ok", data={"type": PaymentIntentResult.Success.value}
+        )
 
         after_activation = self.get(f"/membership/member/{member_id}").expect(code=200).data
         self.assertIsNone(after_activation["deleted_at"])
@@ -136,7 +136,11 @@ class Test(ApiShopTestMixin, ApiTest):
             discount=None,
         )
 
-        (member_id, token) = self.post(f"/webshop/register", register.to_dict(), headers={}).expect(code=200).get("data__member_id", "data__token")
+        (member_id, token) = (
+            self.post(f"/webshop/register", register.to_dict(), headers={})
+            .expect(code=200)
+            .get("data__member_id", "data__token")
+        )
 
         purchase = Purchase(
             cart=[CartItem(self.p0_id, 1)],

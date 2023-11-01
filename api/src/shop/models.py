@@ -25,8 +25,8 @@ Base = declarative_base()
 
 
 class ProductCategory(Base):
-    __tablename__ = 'webshop_product_categories'
-    
+    __tablename__ = "webshop_product_categories"
+
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
     name = Column(String(255), nullable=False)
     display_order = Column(Integer, nullable=False, unique=True)
@@ -35,11 +35,11 @@ class ProductCategory(Base):
     deleted_at = Column(DateTime)
 
     def __repr__(self) -> str:
-        return f'ProductCategory(id={self.id}, name={self.name}, display_order={self.display_order})'
+        return f"ProductCategory(id={self.id}, name={self.name}, display_order={self.display_order})"
 
 
 class ProductImage(Base):
-    __tablename__ = 'webshop_product_images'
+    __tablename__ = "webshop_product_images"
 
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
     name = Column(String(255), nullable=False)
@@ -48,14 +48,14 @@ class ProductImage(Base):
     created_at = Column(DateTime, server_default=func.now())
     updated_at = Column(DateTime, server_default=func.now())
     deleted_at = Column(DateTime)
-    
+
     def __repr__(self) -> str:
-        return f'ProductImage(id={self.id}, path={self.path})'
+        return f"ProductImage(id={self.id}, path={self.path})"
 
 
 class Product(Base):
-    __tablename__ = 'webshop_products'
-    
+    __tablename__ = "webshop_products"
+
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
     product_metadata = Column(JSON, nullable=False)
     category_id = Column(Integer, ForeignKey(ProductCategory.id), nullable=False)
@@ -63,7 +63,7 @@ class Product(Base):
     description = Column(Text)
     unit = Column(String(30))
     price = Column(Numeric(precision="15,3"), nullable=False)
-    smallest_multiple = Column(Integer, nullable=False, server_default='1')
+    smallest_multiple = Column(Integer, nullable=False, server_default="1")
     filter = Column(String(255))
     display_order = Column(Integer, nullable=False, unique=True)
     created_at = Column(DateTime, server_default=func.now())
@@ -71,7 +71,7 @@ class Product(Base):
     deleted_at = Column(DateTime)
     show = Column(Boolean, nullable=False, server_default="1")
 
-    category = relationship(ProductCategory, backref='products')
+    category = relationship(ProductCategory, backref="products")
     actions = relationship("ProductAction")
 
     image_id = Column(Integer, ForeignKey(ProductImage.id), nullable=True)
@@ -81,19 +81,21 @@ class Product(Base):
         assert isinstance(meta, dict)
         return meta.get(key.value, default)
 
-    @validates('price')
+    @validates("price")
     def validate_name(self, key, value):
         if value < 0:
             raise UnprocessableEntity(f"Price can't be below zero.", fields=key, what=BAD_VALUE)
         return value
 
     def __repr__(self) -> str:
-        return f'Product(id={self.id}, name={self.name}, category_id={self.category_id}' \
-               f', display_order={self.display_order})'
+        return (
+            f"Product(id={self.id}, name={self.name}, category_id={self.category_id}"
+            f", display_order={self.display_order})"
+        )
 
 
 class ProductAction(Base):
-    __tablename__ = 'webshop_product_actions'
+    __tablename__ = "webshop_product_actions"
 
     ADD_LABACCESS_DAYS = "add_labaccess_days"
     ADD_MEMBERSHIP_DAYS = "add_membership_days"
@@ -107,17 +109,17 @@ class ProductAction(Base):
     created_at = Column(DateTime, server_default=func.now())
     updated_at = Column(DateTime, server_default=func.now())
     deleted_at = Column(DateTime)
-    
+
     def __repr__(self) -> str:
-        return f'ProductAction(id={self.id}, value={self.value}, action_type={self.action_type})'
+        return f"ProductAction(id={self.id}, value={self.value}, action_type={self.action_type})"
 
 
 class Transaction(Base):
-    __tablename__ = 'webshop_transactions'
+    __tablename__ = "webshop_transactions"
 
-    PENDING = 'pending'
-    COMPLETED = 'completed'
-    FAILED = 'failed'
+    PENDING = "pending"
+    COMPLETED = "completed"
+    FAILED = "failed"
 
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
     member_id = Column(Integer, ForeignKey(Member.member_id), nullable=False)
@@ -129,30 +131,30 @@ class Transaction(Base):
     stripe_pending = relationship("StripePending")
 
     def __repr__(self) -> str:
-        return f'Transaction(id={self.id}, amount={self.amount}, status={self.status})'
+        return f"Transaction(id={self.id}, amount={self.amount}, status={self.status})"
 
 
 class TransactionContent(Base):
-    __tablename__ = 'webshop_transaction_contents'
-    
+    __tablename__ = "webshop_transaction_contents"
+
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
     transaction_id = Column(Integer, ForeignKey(Transaction.id), nullable=False)
     product_id = Column(Integer, ForeignKey(Product.id), nullable=False)
     count = Column(Integer, nullable=False)
     amount = Column(Numeric(precision="15,2"), nullable=False)
 
-    transaction = relationship(Transaction, backref='contents')
+    transaction = relationship(Transaction, backref="contents")
     product = relationship(Product)
 
     def __repr__(self) -> str:
-        return f'TransactionContent(id={self.id}, count={self.count}, amount={self.amount})'
+        return f"TransactionContent(id={self.id}, count={self.count}, amount={self.amount})"
 
 
 class TransactionAction(Base):
-    __tablename__ = 'webshop_transaction_actions'
+    __tablename__ = "webshop_transaction_actions"
 
-    PENDING = 'pending'
-    COMPLETED = 'completed'
+    PENDING = "pending"
+    COMPLETED = "completed"
 
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
     content_id = Column(Integer, ForeignKey(TransactionContent.id), nullable=False)
@@ -171,7 +173,7 @@ class TransactionAction(Base):
 
 
 class StripePending(Base):
-    __tablename__ = 'webshop_stripe_pending'
+    __tablename__ = "webshop_stripe_pending"
 
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
     transaction_id = Column(Integer, ForeignKey(Transaction.id), nullable=False)
@@ -179,7 +181,7 @@ class StripePending(Base):
     created_at = Column(DateTime, server_default=func.now())
 
     def __repr__(self) -> str:
-        return f'StripePending(id={self.id}, stripe_token={self.stripe_token})'
+        return f"StripePending(id={self.id}, stripe_token={self.stripe_token})"
 
 
 # https://stackoverflow.com/questions/67149505/how-do-i-make-sqlalchemy-backref-work-without-creating-an-orm-object

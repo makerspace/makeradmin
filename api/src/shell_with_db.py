@@ -19,13 +19,13 @@ def init_db():
     return session_factory
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     session_factory = init_db()
 
     with closing(session_factory()) as session:
         connection = session.connection()
         execute = connection.execute
-        
+
         namespace = {
             "session": session,
             "connection": connection,
@@ -41,9 +41,9 @@ if __name__ == '__main__':
         for k in sorted(namespace.keys()):
             print(f"   {k}")
         print(f"")
-        print(f"Now do something, for example: execute(select(membership.Group.name, membership.Group.num_members)).all()")
+        print(
+            f"Now do something, for example: execute(select(membership.Group.name, membership.Group.num_members)).all()"
+        )
         print(f"")
 
         start_ipython(argv=[], user_ns=namespace)
-
-        

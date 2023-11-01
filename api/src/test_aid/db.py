@@ -14,19 +14,19 @@ from shop.models import ProductCategory, Product, ProductAction
 from test_aid.test_util import random_str
 
 
-logger = getLogger('makeradmin')
+logger = getLogger("makeradmin")
 
 
 class DbFactory:
-    """ Create entities directly in the db, uses db_session to access the db so it can be used for both remote db
-    access and in memory db. """
-    
-    def __init__(self, test, obj_factory: Optional[ObjFactory]=None) -> None:
+    """Create entities directly in the db, uses db_session to access the db so it can be used for both remote db
+    access and in memory db."""
+
+    def __init__(self, test, obj_factory: Optional[ObjFactory] = None) -> None:
         self.test = test
         self.obj = obj_factory
-        
-        self.fake = Faker('sv_SE')
-        
+
+        self.fake = Faker("sv_SE")
+
         self.access_token: Optional[AccessToken] = None
         self.member: Optional[Member] = None
         self.group: Optional[Group] = None
@@ -40,13 +40,13 @@ class DbFactory:
         self.action: Optional[ProductAction] = None
         self.password_reset_token: Optional[PasswordResetToken] = None
         self.phone_request: Optional[PhoneNumberChangeRequest] = None
-        
+
     def create_access_token(self, **kwargs) -> AccessToken:
         obj = dict(
             user_id=TEST_SERVICE_USER_ID,
             access_token=random_str(),
-            browser=f'a-browser-{random_str()}',
-            ip=f'{randint(0, 255)}.{randint(0, 255)}.{randint(0, 255)}.{randint(0, 255)}',
+            browser=f"a-browser-{random_str()}",
+            ip=f"{randint(0, 255)}.{randint(0, 255)}.{randint(0, 255)}.{randint(0, 255)}",
             expires=self.test.datetime(days=1),
         )
         obj.update(kwargs)
@@ -54,7 +54,7 @@ class DbFactory:
         db_session.add(self.access_token)
         db_session.commit()
         return self.access_token
-        
+
     def create_member(self, **kwargs) -> Member:
         assert self.obj is not None
         obj = self.obj.create_member(**kwargs)
@@ -94,12 +94,12 @@ class DbFactory:
 
     def create_span(self, **kwargs) -> Span:
         assert self.obj is not None
-        if 'member' in kwargs:
-            member = kwargs.pop('member')
+        if "member" in kwargs:
+            member = kwargs.pop("member")
         else:
             assert self.member is not None
             member = self.member
-            
+
         obj = self.obj.create_span(**kwargs)
         self.span = Span(**obj, member=member)
         db_session.add(self.span)
@@ -108,8 +108,8 @@ class DbFactory:
 
     def create_key(self, **kwargs) -> Key:
         assert self.obj is not None
-        if 'member' in kwargs:
-            member = kwargs.pop('member')
+        if "member" in kwargs:
+            member = kwargs.pop("member")
         else:
             assert self.member is not None
             member = self.member
@@ -120,10 +120,10 @@ class DbFactory:
         db_session.commit()
         return self.key
 
-    def create_message(self, member: Optional[Member]=None, **kwargs) -> Message:
+    def create_message(self, member: Optional[Member] = None, **kwargs) -> Message:
         member = member or self.member
         assert member is not None
-        
+
         obj = dict(
             member=member,
             subject=random_str(),
@@ -164,7 +164,7 @@ class DbFactory:
         db_session.commit()
         return self.category
 
-    def delete_category(self, id: Optional[int]=None) -> None:
+    def delete_category(self, id: Optional[int] = None) -> None:
         assert self.category is not None
         category_id = id or self.category.id
         assert category_id is not None
@@ -174,7 +174,7 @@ class DbFactory:
     def create_product(self, **kwargs) -> Product:
         assert self.obj is not None
         if self.category:
-            kwargs.setdefault('category_id', self.category.id)
+            kwargs.setdefault("category_id", self.category.id)
 
         obj = self.obj.create_product(**kwargs)
 
@@ -183,7 +183,7 @@ class DbFactory:
         db_session.flush()
         return self.product
 
-    def delete_product(self, id: Optional[int]=None) -> None:
+    def delete_product(self, id: Optional[int] = None) -> None:
         product_id = id
         if product_id is None:
             assert self.product is not None
@@ -196,7 +196,7 @@ class DbFactory:
     def create_product_action(self, **kwargs) -> ProductAction:
         assert self.obj is not None
         if self.product:
-            kwargs.setdefault('product_id', self.product.id)
+            kwargs.setdefault("product_id", self.product.id)
 
         obj = self.obj.create_product_action(**kwargs)
         self.action = ProductAction(**obj)
@@ -204,14 +204,14 @@ class DbFactory:
         db_session.flush()
         return self.action
 
-    def create_password_reset_token(self, member: Optional[Member]=None, **kwargs) -> PasswordResetToken:
+    def create_password_reset_token(self, member: Optional[Member] = None, **kwargs) -> PasswordResetToken:
         member = member or self.member
         assert member is not None
-        
+
         if "member_id" not in kwargs:
             kwargs["member_id"] = member.member_id
         if "token" not in kwargs:
-            kwargs["token"]= random_str(),
+            kwargs["token"] = (random_str(),)
         self.password_reset_token = PasswordResetToken(**kwargs)
         db_session.add(self.password_reset_token)
         db_session.commit()

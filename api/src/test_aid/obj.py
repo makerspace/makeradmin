@@ -10,16 +10,16 @@ from shop.models import ProductAction
 from test_aid.test_util import random_str
 import re
 
-DEFAULT_PASSWORD = 'D9ub8$13'
+DEFAULT_PASSWORD = "D9ub8$13"
 
 
 class ObjFactory:
-    """ Create dicts representing entities. """
-    
+    """Create dicts representing entities."""
+
     def __init__(self, test):
         self.test = test
-        self.fake = Faker('sv_SE')
-        
+        self.fake = Faker("sv_SE")
+
         self.member = None
         self.group = None
         self.category = None
@@ -45,8 +45,11 @@ class ObjFactory:
             address_country=self.fake.country_code(representation="alpha-2"),
             phone=random_phone_number(),
             civicregno=f"19901011{randint(1000, 9999):04d}",
-            email=re.sub('[^a-zA-Z0-9.!#$%&\'*+\\/=?^_`{|}~\\-@\\.]', '_',
-                         f'{firstname}.{lastname}+{random_str(6)}@bmail.com'.lower().replace(' ', '_')),
+            email=re.sub(
+                "[^a-zA-Z0-9.!#$%&'*+\\/=?^_`{|}~\\-@\\.]",
+                "_",
+                f"{firstname}.{lastname}+{random_str(6)}@bmail.com".lower().replace(" ", "_"),
+            ),
             price_level=PriceLevel.Normal.value,
             price_level_motivation=None,
             pending_activation=False,
@@ -65,7 +68,7 @@ class ObjFactory:
         obj.update(kwargs)
         self.phone_request = obj
         return self.phone_request
-        
+
     def create_group(self, **kwargs):
         obj = dict(
             name=f"group-{random_str(12)}",
@@ -76,7 +79,7 @@ class ObjFactory:
         self.group = obj
         return self.group
 
-    def create_key(self, **kwargs) -> Dict[str,str]:
+    def create_key(self, **kwargs) -> Dict[str, str]:
         obj = dict(
             tagid=str(randint(int(1e12), int(9e12))),
             description=self.fake.bs(),
@@ -95,7 +98,7 @@ class ObjFactory:
         obj.update(kwargs)
         self.span = obj
         return self.span
-    
+
     def create_category(self, **kwargs):
         obj = dict(
             name=f"category-{random_str(12)}",
@@ -106,7 +109,7 @@ class ObjFactory:
         return self.category
 
     def create_product(self, **kwargs):
-        category_id = kwargs.pop('category_id', None) or (self.category and self.category['id'])
+        category_id = kwargs.pop("category_id", None) or (self.category and self.category["id"])
         obj = dict(
             name=f"product-{random_str(12)}",
             price=100.0,
@@ -116,7 +119,7 @@ class ObjFactory:
             smallest_multiple=1,
             filter=None,
             category_id=category_id,
-            product_metadata=dict()
+            product_metadata=dict(),
         )
         obj.update(kwargs)
         self.product = obj
@@ -145,4 +148,4 @@ class ObjFactory:
 
 
 def random_phone_number() -> str:
-    return f'070-1{randint(int(1e6), int(9e6)):06d}'
+    return f"070-1{randint(int(1e6), int(9e6)):06d}"

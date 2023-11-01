@@ -6,7 +6,7 @@ from messages.models import MessageTemplate, Message
 from service.config import get_public_url
 
 
-template_loader = FileSystemLoader(abspath(dirname(dirname(__file__))) + '/templates')
+template_loader = FileSystemLoader(abspath(dirname(dirname(__file__))) + "/templates")
 template_env = Environment(loader=template_loader, autoescape=select_autoescape())
 
 
@@ -24,7 +24,7 @@ def send_message(template: MessageTemplate, member, db_session=None, recipient_e
         member=member,
         **kwargs,
     )
-    
+
     body = render_template(
         f"{template.value}.body.html",
         public_url=get_public_url,
@@ -34,13 +34,14 @@ def send_message(template: MessageTemplate, member, db_session=None, recipient_e
 
     if not db_session:
         from service.db import db_session
-    
-    db_session.add(Message(
-        subject=subject,
-        body=body,
-        member_id=member.member_id,
-        recipient=recipient_email,
-        status=Message.QUEUED,
-        template=template.value,
-    ))
-    
+
+    db_session.add(
+        Message(
+            subject=subject,
+            body=body,
+            member_id=member.member_id,
+            recipient=recipient_email,
+            status=Message.QUEUED,
+            template=template.value,
+        )
+    )

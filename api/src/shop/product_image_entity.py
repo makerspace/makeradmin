@@ -7,7 +7,6 @@ from service.error import BadRequest
 
 
 class ProductImageEntity(Entity):
-    
     def to_model(self, obj):
         model = super().to_model(obj)
 
@@ -23,5 +22,5 @@ class ProductImageEntity(Entity):
             model["type"] = "image/png"
             if len(model["data"]) > 1_000_000:
                 raise BadRequest("image too large")
-            
+
         return model

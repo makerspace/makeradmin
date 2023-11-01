@@ -20,7 +20,7 @@ def log(level: int, message: str) -> None:
         logger.log(level, message)
 
 
-def error_handler_db(error: 'ApiError') -> Response:
+def error_handler_db(error: "ApiError") -> Response:
     logger.exception(f"error when communicating with db: {str(error)}")
     response = jsonify(
         message=GENERIC_500_ERROR_MESSAGE,
@@ -30,42 +30,51 @@ def error_handler_db(error: 'ApiError') -> Response:
     )
     response.status_code = 500
     return response
-    
 
-def error_handler_api(error: 'ApiError') -> Response:
+
+def error_handler_api(error: "ApiError") -> Response:
     if error.log is True:
         log(error.level, repr(error))
     elif error.log:
         log(error.level, error.log)
-        
+
     return error.to_response()
 
 
 def error_handler_400(error: Any) -> Tuple[Response, int]:
-    return jsonify(dict(message='Bad request.', status='error')), 400
+    return jsonify(dict(message="Bad request.", status="error")), 400
 
 
 def error_handler_404(error: Any) -> Tuple[Response, int]:
-    return jsonify(dict(message='Not found.', status='error')), 404
+    return jsonify(dict(message="Not found.", status="error")), 404
 
 
 def error_handler_405(error: Any) -> Tuple[Response, int]:
-    return jsonify(dict(message='Method not allowed.', status='error')), 405
+    return jsonify(dict(message="Method not allowed.", status="error")), 405
 
 
 def error_handler_500(error: Any) -> Tuple[Response, int]:
-    return jsonify(dict(message='Internal server error.', status='error')), 500
+    return jsonify(dict(message="Internal server error.", status="error")), 500
 
 
 class ApiError(Exception):
-    """ Used for errors that should be communicated to the client as json payload, but also raised as results when
-    communcating with external services. In that case the response is used to choose class and fill the data.  """
-    
+    """Used for errors that should be communicated to the client as json payload, but also raised as results when
+    communcating with external services. In that case the response is used to choose class and fill the data."""
+
     code = 400
     message: Optional[str] = None
 
-    def __init__(self, message: Optional[str]=None, fields: Optional[str]=None, what: Optional[str]=None, status: str="error", service: Optional[str]=None, code: Optional[int]=None,
-                 log: Optional[Union[str, bool]]=None, level: int=ERROR):
+    def __init__(
+        self,
+        message: Optional[str] = None,
+        fields: Optional[str] = None,
+        what: Optional[str] = None,
+        status: str = "error",
+        service: Optional[str] = None,
+        code: Optional[int] = None,
+        log: Optional[Union[str, bool]] = None,
+        level: int = ERROR,
+    ):
         """
         :param message human readable message of what went wrong, should be safe to show to end users
         :param status is this really needed? we have http status code
@@ -86,11 +95,13 @@ class ApiError(Exception):
         self.service = service
         self.log = log
         self.level = level
-        
+
     def __repr__(self) -> str:
-        return f"{self.__class__.__name__}(code={self.code}, status={self.status}, fields={self.fields}" \
-               f", what={self.what}, message='{self.message}, service='{self.service}')"
-    
+        return (
+            f"{self.__class__.__name__}(code={self.code}, status={self.status}, fields={self.fields}"
+            f", what={self.what}, message='{self.message}, service='{self.service}')"
+        )
+
     def to_response(self) -> Response:
         response = jsonify(
             message=self.message,
@@ -112,8 +123,8 @@ class BadRequest(ApiError):
 
 class Unauthorized(ApiError):
     code = 401
-    
-    
+
+
 class Forbidden(ApiError):
     code = 403
 
@@ -138,5 +149,7 @@ class InternalServerError(ApiError):
     code = 500
 
 
-errors = {e.code: e for e in [BadRequest, Unauthorized, Forbidden, NotFound, TooManyRequests, UnprocessableEntity,
-                              InternalServerError]}
+errors = {
+    e.code: e
+    for e in [BadRequest, Unauthorized, Forbidden, NotFound, TooManyRequests, UnprocessableEntity, InternalServerError]
+}

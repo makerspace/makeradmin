@@ -49,9 +49,7 @@ def spans_by_date(span_type) -> List[Tuple[str, int]]:
     return dates_str
 
 
-def membership_number_months(
-    membership_type: str, startdate: date, enddate: date
-) -> List[int]:
+def membership_number_months(membership_type: str, startdate: date, enddate: date) -> List[int]:
     """Of all members who became members before startdate, how many months have they had active lab membership between startdate and enddate. Returns a mapping of month count to member counts."""
     total_months = math.ceil((enddate - startdate).days / 30)
 
@@ -66,15 +64,13 @@ def membership_number_months(
         )
         .all()
     )
-    valid_members = (
-        db_session.query(Member.member_id).filter(Member.created_at <= startdate).all()
-    )
+    valid_members = db_session.query(Member.member_id).filter(Member.created_at <= startdate).all()
     amount_by_member = {}
 
     for (member_id,) in valid_members:
         amount_by_member[member_id] = timedelta(days=0)
 
-    for (member_id, span_startdate, span_enddate) in spans:
+    for member_id, span_startdate, span_enddate in spans:
         span_startdate: datetime = max(span_startdate, startdate)
         span_enddate: datetime = min(span_enddate, enddate)
         length = span_enddate - span_startdate
@@ -82,7 +78,7 @@ def membership_number_months(
 
     # Number of members active for exactly N months during this period
     members_active_for_months = [0] * (total_months + 1)
-    for (_, member_time) in amount_by_member.items():
+    for _, member_time in amount_by_member.items():
         days = member_time.days
         months = round(days / 30)
         if months > total_months:
@@ -94,9 +90,7 @@ def membership_number_months(
     return members_active_for_months
 
 
-def membership_number_months2(
-    membership_type: str, startdate: date, enddate: date
-) -> List[int]:
+def membership_number_months2(membership_type: str, startdate: date, enddate: date) -> List[int]:
     """Of all members who became members before startdate, how many months have they had active lab membership between startdate and enddate. Returns a mapping of month count to member counts."""
     total_months = math.ceil((enddate - startdate).days / 30)
 
@@ -116,7 +110,7 @@ def membership_number_months2(
     for (member_id,) in valid_members:
         amount_by_member[member_id] = timedelta(days=0)
 
-    for (member_id, span_startdate, span_enddate) in spans:
+    for member_id, span_startdate, span_enddate in spans:
         span_startdate: datetime = max(span_startdate, startdate)
         span_enddate: datetime = min(span_enddate, enddate)
         length = span_enddate - span_startdate
@@ -124,7 +118,7 @@ def membership_number_months2(
 
     # Number of members active for exactly N months during this period
     members_active_for_months = [0] * (total_months + 1)
-    for (_, member_time) in amount_by_member.items():
+    for _, member_time in amount_by_member.items():
         days = member_time.days
         months = round(days / 30)
         if months > total_months:
@@ -140,12 +134,8 @@ def membership_number_months_default():
     now = datetime.now()
     starttime = now - timedelta(days=30 * 12)
     return {
-        "membership": membership_number_months(
-            "membership", starttime.date(), now.date()
-        ),
-        "labaccess": membership_number_months(
-            "labaccess", starttime.date(), now.date()
-        ),
+        "membership": membership_number_months("membership", starttime.date(), now.date()),
+        "labaccess": membership_number_months("labaccess", starttime.date(), now.date()),
     }
 
 
@@ -153,12 +143,8 @@ def membership_number_months2_default():
     now = datetime.now()
     starttime = now - timedelta(days=30 * 12)
     return {
-        "membership": membership_number_months2(
-            "membership", starttime.date(), now.date()
-        ),
-        "labaccess": membership_number_months2(
-            "labaccess", starttime.date(), now.date()
-        ),
+        "membership": membership_number_months2("membership", starttime.date(), now.date()),
+        "labaccess": membership_number_months2("labaccess", starttime.date(), now.date()),
     }
 
 
@@ -193,9 +179,7 @@ def shop_statistics():
 
     date_lower_limit = datetime.now() - timedelta(days=365)
     sales_by_product = mapify(
-        db_session.query(
-            TransactionContent.product_id, func.sum(TransactionContent.amount)
-        )
+        db_session.query(TransactionContent.product_id, func.sum(TransactionContent.amount))
         .join(TransactionContent.transaction)
         .filter(Transaction.created_at > date_lower_limit)
         .filter(Transaction.status == Transaction.COMPLETED)
@@ -213,32 +197,23 @@ def shop_statistics():
     )
 
     product_ids = sales_by_product.keys()
-    products = (
-        db_session.query(Product)
-        .filter((Product.deleted_at == None) | (Product.id.in_(product_ids)))
-        .all()
-    )
+    products = db_session.query(Product).filter((Product.deleted_at == None) | (Product.id.in_(product_ids))).all()
     products_json = list(map(product_entity.to_obj, list(products)))
 
     category_ids = sales_by_category.keys()
     categories = (
         db_session.query(ProductCategory)
-        .filter(
-            (ProductCategory.deleted_at == None)
-            | (ProductCategory.id.in_(category_ids))
-        )
+        .filter((ProductCategory.deleted_at == None) | (ProductCategory.id.in_(category_ids)))
         .all()
     )
     categories_json = list(map(category_entity.to_obj, list(categories)))
 
     return {
         "revenue_by_product_last_12_months": [
-            {"product_id": r.id, "amount": float(sales_by_product.get(r.id, 0))}
-            for r in products
+            {"product_id": r.id, "amount": float(sales_by_product.get(r.id, 0))} for r in products
         ],
         "revenue_by_category_last_12_months": [
-            {"category_id": r.id, "amount": float(sales_by_category.get(r.id, 0))}
-            for r in categories
+            {"category_id": r.id, "amount": float(sales_by_category.get(r.id, 0))} for r in categories
         ],
         "products": products_json,
         "categories": categories_json,
@@ -272,10 +247,7 @@ def retention_graph(startdate: date, enddate: date):
     spans_by_member = itertools.groupby(lab_spans, key=lambda x: x[0])
     spans_by_member = [(x[0], list(x[1])) for x in spans_by_member]
 
-    membership_spans_by_member = {
-        x[0]: list(x[1])
-        for x in itertools.groupby(membership_spans, key=lambda x: x[0])
-    }
+    membership_spans_by_member = {x[0]: list(x[1]) for x in itertools.groupby(membership_spans, key=lambda x: x[0])}
     members = {m.member_id: m for m in db_session.query(Member).all()}
 
     summaries = get_membership_summaries([x[0] for x in spans_by_member])
@@ -315,12 +287,10 @@ def retention_graph(startdate: date, enddate: date):
         links[key]["value"] += 1
         return b
 
-    for ((member_id, spans), summary) in zip(spans_by_member, summaries):
+    for (member_id, spans), summary in zip(spans_by_member, summaries):
         member = members[member_id]
         if member_id not in membership_spans_by_member:
-            print(
-                f"Member {member.member_number} has {len(spans)} labaccess spans but no membership spans"
-            )
+            print(f"Member {member.member_number} has {len(spans)} labaccess spans but no membership spans")
             continue
         mspans = membership_spans_by_member[member_id]
         last = None

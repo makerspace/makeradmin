@@ -2,8 +2,8 @@ import secrets
 import argparse
 import os
 
-parser = argparse.ArgumentParser(description='Create a default \'.env\' file with secrets if it doesn\'t exist')
-parser.add_argument('--force', '-f', dest='force', action='store_true', help='overwrite existing \'.env\' file')
+parser = argparse.ArgumentParser(description="Create a default '.env' file with secrets if it doesn't exist")
+parser.add_argument("--force", "-f", dest="force", action="store_true", help="overwrite existing '.env' file")
 args = parser.parse_args()
 
 config = {
@@ -34,12 +34,12 @@ config = {
     "ACCESSY_CLIENT_SECRET": "",
     "ACCESSY_LABACCESS_GROUP": "",
     "ACCESSY_SPECIAL_LABACCESS_GROUP": "",
-    "ACCESSY_DO_MODIFY":"false",
+    "ACCESSY_DO_MODIFY": "false",
     "CORS_ALLOWED_ORIGINS": "http://localhost:8009,http://localhost:8011,http://localhost:8080",
 }
 
 if not args.force and os.path.isfile(".env"):
-    print('.env file already exists, touching')
+    print(".env file already exists, touching")
     os.utime(".env", None)
 else:
     with open(".env", "w") as f:
