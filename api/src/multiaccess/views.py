@@ -1,8 +1,7 @@
 from flask import g
 
 from multiaccess import service
-from multiaccess.box_terminator import box_terminator_validate, box_terminator_nag, \
-    box_terminator_boxes
+from multiaccess.box_terminator import box_terminator_validate, box_terminator_nag, box_terminator_boxes
 from multiaccess.memberbooth import pin_login_to_memberinfo, tag_to_memberinfo, member_number_to_memberinfo
 from service.api_definition import GET, Arg, MEMBER_EDIT, POST, symbol, MEMBERBOOTH
 
@@ -24,17 +23,17 @@ def memberbooth_member(member_number=Arg(int)):
 
 @service.route("/box-terminator/boxes", method=GET, permission=MEMBER_EDIT)
 def box_terminator_boxes_routes():
-    """ Returns a list of all boxes scanned, ever. """
+    """Returns a list of all boxes scanned, ever."""
     return box_terminator_boxes()
 
 
 @service.route("/box-terminator/nag", method=POST, permission=MEMBER_EDIT)
 def box_terminator_nag_route(member_number=Arg(int), box_label_id=Arg(int), nag_type=Arg(symbol)):
-    """ Send a nag email for this box. """
+    """Send a nag email for this box."""
     return box_terminator_nag(member_number, box_label_id, nag_type)
 
 
 @service.route("/box-terminator/validate-box", method=POST, permission=MEMBER_EDIT)
 def box_terminator_validate_route(member_number=Arg(int), box_label_id=Arg(int)):
-    """ Used when scanning boxes. """
+    """Used when scanning boxes."""
     return box_terminator_validate(member_number, box_label_id, g.session_token)

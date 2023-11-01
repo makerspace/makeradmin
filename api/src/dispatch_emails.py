@@ -88,13 +88,17 @@ def send_messages(key, domain, sender, to_override, limit):
 
 
 def already_sent_message(template: MessageTemplate, member: Member, days: int):
-    ''' True if a message has been sent with the given template to the member in the last #days days'''
+    """True if a message has been sent with the given template to the member in the last #days days"""
     now = datetime.utcnow()
-    reminder_sent = db_session.query(Message).filter(
-        Message.member == member,
-        Message.template == template.value,
-        now - timedelta(days=days) < Message.created_at,
-    ).count()
+    reminder_sent = (
+        db_session.query(Message)
+        .filter(
+            Message.member == member,
+            Message.template == template.value,
+            now - timedelta(days=days) < Message.created_at,
+        )
+        .count()
+    )
     return reminder_sent > 0
 
 
@@ -116,11 +120,11 @@ def labaccess_reminder() -> None:
         # We have a candidate, now check if we should send a reminder.
 
         # First double check the end date so we don't send reminder if there is another span further in the future.
-        end_date = db_session.query(func.max(Span.enddate)).filter(
-            Span.member == member,
-            Span.type == Span.LABACCESS,
-            Span.deleted_at.is_(None)
-        ).scalar()
+        end_date = (
+            db_session.query(func.max(Span.enddate))
+            .filter(Span.member == member, Span.type == Span.LABACCESS, Span.deleted_at.is_(None))
+            .scalar()
+        )
         if end_date != end_date_reminder_target:
             continue
 
@@ -128,8 +132,9 @@ def labaccess_reminder() -> None:
         if already_sent_message(MessageTemplate.LABACCESS_REMINDER, member, LABACCESS_REMINDER_GRACE_PERIOD):
             continue
 
-        already_purchased = \
+        already_purchased = (
             pending_action_value_sum(member_id=member.member_id, action_type=ProductAction.ADD_LABACCESS_DAYS) > 0
+        )
 
         # If the member has a subscription, don't send a reminder, as it will be renewed automatically.
         # TODO: Ideally we should have a cron job that checks if the subscription is truly valid on the stripe side as well,
@@ -141,7 +146,7 @@ def labaccess_reminder() -> None:
         if already_purchased:
             continue
 
-        logger.info(f'sending labaccess reminder to member with id {member.member_id}')
+        logger.info(f"sending labaccess reminder to member with id {member.member_id}")
 
         send_message(
             template=MessageTemplate.LABACCESS_REMINDER,
@@ -177,8 +182,9 @@ def membership_reminder() -> None:
         if already_sent_message(MessageTemplate.MEMBERSHIP_REMINDER, member, MEMBERSHIP_REMINDER_GRACE_PERIOD):
             continue
 
-        already_purchased = \
+        already_purchased = (
             pending_action_value_sum(member_id=member.member_id, action_type=ProductAction.ADD_MEMBERSHIP_DAYS) > 0
+        )
 
         already_purchased |= member.stripe_membership_subscription_id is not None
 
@@ -196,7 +202,10 @@ def membership_reminder() -> None:
             expiration_date=membership.membership_end,
         )
 
-        logger.info(f'sending yearly membership reminder to member with id {member.member_id}. Expires ' + str(membership.membership_end))
+        logger.info(
+            f"sending yearly membership reminder to member with id {member.member_id}. Expires "
+            + str(membership.membership_end)
+        )
 
 
 def quiz_reminders() -> None:
@@ -206,9 +215,7 @@ def quiz_reminders() -> None:
     now = datetime.utcnow()
 
     members, memberships = get_members_and_membership()
-    id_to_member = {
-        member.member_id: (member, membership) for member, membership in zip(members, memberships)
-    }
+    id_to_member = {member.member_id: (member, membership) for member, membership in zip(members, memberships)}
 
     # Get all pending shop actions and check which members have pending purchases of lab access
     actions = pending_actions()
@@ -217,16 +224,37 @@ def quiz_reminders() -> None:
         if action["action"]["action"] == "add_labaccess_days" and action["action"]["value"] > 0:
             members_with_pending_labaccess.add(action["member_id"])
 
-    recently_sent_messages_by_member = set(x[0] for x in db_session.query(Message.member_id).filter(
-          ((Message.template == MessageTemplate.QUIZ_FIRST_NEWMEMBER.value) & (now - timedelta(days=QUIZ_DAYS_FROM_FIRST_EMAIL_TO_REMINDER) < Message.created_at))
-        | ((Message.template == MessageTemplate.QUIZ_FIRST_OLDMEMBER.value) & (now - timedelta(days=QUIZ_DAYS_FROM_FIRST_EMAIL_TO_REMINDER) < Message.created_at))
-        | ((Message.template == MessageTemplate.QUIZ_REMINDER.value) & (now - timedelta(days=QUIZ_DAYS_BETWEEN_REMINDERS) < Message.created_at))
-    ).group_by(Message.member_id).all())
+    recently_sent_messages_by_member = set(
+        x[0]
+        for x in db_session.query(Message.member_id)
+        .filter(
+            (
+                (Message.template == MessageTemplate.QUIZ_FIRST_NEWMEMBER.value)
+                & (now - timedelta(days=QUIZ_DAYS_FROM_FIRST_EMAIL_TO_REMINDER) < Message.created_at)
+            )
+            | (
+                (Message.template == MessageTemplate.QUIZ_FIRST_OLDMEMBER.value)
+                & (now - timedelta(days=QUIZ_DAYS_FROM_FIRST_EMAIL_TO_REMINDER) < Message.created_at)
+            )
+            | (
+                (Message.template == MessageTemplate.QUIZ_REMINDER.value)
+                & (now - timedelta(days=QUIZ_DAYS_BETWEEN_REMINDERS) < Message.created_at)
+            )
+        )
+        .group_by(Message.member_id)
+        .all()
+    )
 
-    sent_first_message_by_member = set(x[0] for x in db_session.query(Message.member_id).filter(
-          (Message.template == MessageTemplate.QUIZ_FIRST_NEWMEMBER.value)
-        | (Message.template == MessageTemplate.QUIZ_FIRST_OLDMEMBER.value)
-    ).group_by(Message.member_id).all())
+    sent_first_message_by_member = set(
+        x[0]
+        for x in db_session.query(Message.member_id)
+        .filter(
+            (Message.template == MessageTemplate.QUIZ_FIRST_NEWMEMBER.value)
+            | (Message.template == MessageTemplate.QUIZ_FIRST_OLDMEMBER.value)
+        )
+        .group_by(Message.member_id)
+        .all()
+    )
 
     for quiz_member in quiz_members:
         if quiz_member.remaining_questions > 0:
@@ -280,30 +308,32 @@ def quiz_reminders() -> None:
 
 def get_login_link(member, browser, path):
     redirect = get_public_url(path)
-    access_token = create_access_token("localhost", browser, member.member_id, valid_duration=timedelta(days=4))['access_token']
+    access_token = create_access_token("localhost", browser, member.member_id, valid_duration=timedelta(days=4))[
+        "access_token"
+    ]
     return get_public_url(f"/member/login/{access_token}?redirect=" + quote_plus(redirect))
 
 
-if __name__ == '__main__':
-
+if __name__ == "__main__":
     with log_exception(status=1), stoppable():
-        parser = ArgumentParser(description="Dispatch emails in db send queue.",
-                                formatter_class=ArgumentDefaultsHelpFormatter)
+        parser = ArgumentParser(
+            description="Dispatch emails in db send queue.", formatter_class=ArgumentDefaultsHelpFormatter
+        )
 
-        parser.add_argument('--sleep', default=4, help='Sleep time (in seconds) between doing ant work.')
-        parser.add_argument('--limit', default=10, help='Max messages to send every time checking for messages.')
+        parser.add_argument("--sleep", default=4, help="Sleep time (in seconds) between doing ant work.")
+        parser.add_argument("--limit", default=10, help="Max messages to send every time checking for messages.")
 
         args = parser.parse_args()
 
         engine = create_mysql_engine(**get_mysql_config())
         session_factory = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-        logger.info(f'checking for emails to send every {args.sleep} seconds, limit is {args.limit}')
+        logger.info(f"checking for emails to send every {args.sleep} seconds, limit is {args.limit}")
 
-        key = config.get('MAILGUN_KEY', log_value=False)
-        domain = config.get('MAILGUN_DOMAIN')
-        sender = config.get('MAILGUN_FROM')
-        to_override = config.get('MAILGUN_TO_OVERRIDE')
+        key = config.get("MAILGUN_KEY", log_value=False)
+        domain = config.get("MAILGUN_DOMAIN")
+        sender = config.get("MAILGUN_FROM")
+        to_override = config.get("MAILGUN_TO_OVERRIDE")
         last_quiz_check = time.time()
 
         while True:

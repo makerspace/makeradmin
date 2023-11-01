@@ -18,8 +18,11 @@ JUDGMENT_DAY = date(1997, 9, 26)  # Used as default for missing lab access date.
 
 def get_labacess_end_date(box):
     try:
-        return max(s.enddate for s in box.member.spans
-                   if s.type in (Span.LABACCESS, Span.SPECIAL_LABACESS) and not s.deleted_at)
+        return max(
+            s.enddate
+            for s in box.member.spans
+            if s.type in (Span.LABACCESS, Span.SPECIAL_LABACESS) and not s.deleted_at
+        )
     except ValueError:
         return JUDGMENT_DAY
 
@@ -33,7 +36,7 @@ def get_box_query():
 def get_expire_date_from_labaccess_end_date(expire_date):
     if expire_date:
         return expire_date + timedelta(days=45)
-    
+
     return JUDGMENT_DAY
 
 
@@ -69,11 +72,12 @@ def box_terminator_boxes():
 
 def box_terminator_nag(member_number=None, box_label_id=None, nag_type=None):
     try:
-        box = db_session.query(Box).filter(Box.box_label_id == box_label_id,
-                                           Member.member_number == member_number).one()
+        box = (
+            db_session.query(Box).filter(Box.box_label_id == box_label_id, Member.member_number == member_number).one()
+        )
     except NoResultFound:
         raise NotFound("Bloop, lådan finns i Lettland")
-    
+
     try:
         template = {
             "nag-warning": MessageTemplate.BOX_WARNING,
@@ -83,18 +87,19 @@ def box_terminator_nag(member_number=None, box_label_id=None, nag_type=None):
 
     except KeyError:
         raise BadRequest(f"Bad nag type {nag_type}")
-    
+
     today = date.today()
     end_date = get_labacess_end_date(box)
     terminate_date = get_expire_date_from_labaccess_end_date(end_date)
-    
+
     send_message(
-        template, box.member,
+        template,
+        box.member,
         labaccess_end_date=date_to_str(end_date),
         to_termination_days=(terminate_date - today).days,
         days_after_expiration=(today - end_date).days,
     )
-    
+
     box.last_nag_at = datetime.utcnow()
 
 

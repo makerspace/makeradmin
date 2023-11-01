@@ -11,12 +11,12 @@ logger = getLogger("makeradmin")
 
 def member_to_response_object(member: Member):
     return {
-        'member_id': member.member_id,
-        'member_number': member.member_number,
-        'firstname': member.firstname,
-        'lastname': member.lastname,
-        'end_date': max((span.enddate for span in member.spans)).isoformat() if len(member.spans) > 0 else None,
-        'keys': [{'key_id': key.key_id, 'rfid_tag': key.tagid} for key in member.keys],
+        "member_id": member.member_id,
+        "member_number": member.member_number,
+        "firstname": member.firstname,
+        "lastname": member.lastname,
+        "end_date": max((span.enddate for span in member.spans)).isoformat() if len(member.spans) > 0 else None,
+        "keys": [{"key_id": key.key_id, "rfid_tag": key.tagid} for key in member.keys],
     }
 
 
@@ -28,14 +28,16 @@ def memberbooth_response_object(member: Member, membership_data):
 
 
 def tag_to_memberinfo(tagid: str):
-    key = db_session.query(Key)\
-        .join(Key.member) \
-        .filter(Key.tagid == tagid) \
+    key = (
+        db_session.query(Key)
+        .join(Key.member)
+        .filter(Key.tagid == tagid)
         .filter(
             Member.deleted_at.is_(None),
             Key.deleted_at.is_(None),
-        ) \
+        )
         .first()
+    )
 
     if key is None:
         return None
@@ -45,10 +47,12 @@ def tag_to_memberinfo(tagid: str):
 
 
 def pin_login_to_memberinfo(member_number: int, pin_code: str):
-    member = db_session.query(Member)\
-        .filter(Member.member_number == member_number) \
-        .filter(Member.deleted_at.is_(None)) \
+    member = (
+        db_session.query(Member)
+        .filter(Member.member_number == member_number)
+        .filter(Member.deleted_at.is_(None))
         .first()
+    )
 
     if member is None:
         logger.info("The member number did not match any known member")

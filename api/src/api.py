@@ -8,8 +8,15 @@ from membership.permissions import register_permissions
 from service.api_definition import ALL_PERMISSIONS
 from service.config import get_mysql_config, config
 from service.db import create_mysql_engine, shutdown_session, populate_fields_by_index
-from service.error import ApiError, error_handler_api, error_handler_db, error_handler_500, error_handler_404, \
-    error_handler_400, error_handler_405
+from service.error import (
+    ApiError,
+    error_handler_api,
+    error_handler_db,
+    error_handler_500,
+    error_handler_404,
+    error_handler_400,
+    error_handler_405,
+)
 from service.traffic_logger import traffic_logger_init, traffic_logger_commit
 from services import services
 
@@ -18,10 +25,16 @@ app = Flask(__name__, static_folder=None)
 
 flask_cors.CORS(
     app,
-    max_age='1728000',
-    allow_headers=['Origin', 'Content-Type', 'Accept', 'Authorization', 'X-Request-With',
-                   'Access-Control-Allow-Origin'],
-    origins=config.get('CORS_ALLOWED_ORIGINS').split(',')
+    max_age="1728000",
+    allow_headers=[
+        "Origin",
+        "Content-Type",
+        "Accept",
+        "Authorization",
+        "X-Request-With",
+        "Access-Control-Allow-Origin",
+    ],
+    origins=config.get("CORS_ALLOWED_ORIGINS").split(","),
 )
 
 
