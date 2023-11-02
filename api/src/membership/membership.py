@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from datetime import date, timedelta
+import logging
 
 from sqlalchemy import func
 
@@ -9,6 +10,8 @@ from service.db import db_session
 from service.error import UnprocessableEntity, PreconditionFailed
 from service.util import date_to_str
 from typing import Any, Dict, List, Optional, Set, Tuple, TypeVar
+
+logger = logging.getLogger("makeradmin")
 
 
 @dataclass(frozen=True)
@@ -197,8 +200,10 @@ def add_membership_days(
 def get_access_summary(member_id: int):
     from multiaccessy.accessy import accessy_session
 
+    dummy_accessy_summary = dict(in_org=False, pending_invite_count=0, access_permission_group_names=[])
     if accessy_session is None:
-        return dict(in_org=False, pending_invite_count=0, access_permission_group_names=[])
+        logger.warning("No accessy session, using dummy accessy summary.")
+        return dummy_accessy_summary
     member: Member = db_session.query(Member).filter(Member.member_id == member_id).one()
 
     msisdn = member.phone
