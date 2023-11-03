@@ -176,8 +176,7 @@ If you try to access any page which needs these products (e.g. the registration 
 
 ### Setting up required products in makeradmin
 
-For stripe to work there are also a few products needed in makeradmin in the
-category Medlemskap.
+For the member view page and regristration page to work there are also a few products needed in makeradmin in the category Medlemskap.
 
 * Base membership
   * Metadata: {"allowed_price_levels":["low_income_discount"],"special_product_id":"single_membership_year"}
