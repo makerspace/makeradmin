@@ -180,10 +180,13 @@ For the member view page and regristration page to work there are also a few pro
 
 * Base membership
   * Metadata: {"allowed_price_levels":["low_income_discount"],"special_product_id":"single_membership_year"}
+  * Enhet/unit: år
   * Action: add membership days
 * Makerspace access
   * Metadata: {"allowed_price_levels":["low_income_discount"],"special_product_id":"single_labaccess_month"}
+  * Enhet/unit: mån
   * Action: add membership days, add labaccess days
 * Makerspace access starter pack
   * Metadata:{"allowed_price_levels":["low_income_discount"],"special_product_id":"access_starter_pack"}
+  * Enhet/unit: st
   * Action: add labaccess days
