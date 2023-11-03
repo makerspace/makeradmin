@@ -170,5 +170,23 @@ The configuration needed on stripe is:
 * Create a **product** for makerspace access. Add the metadata "subscription_type"="labaccess" to the **product** item
   * Add a monthly price, and add the metadata "price_type"="recurring" to the **price** item
   * Add a **price** for N months, where N is the binding period as specified in `stripe_subscriptions.py->BINDING_PERIOD`. The price should be N times the recurring price. Add the metadata "price_type"="binding_period"
+* Create a **coupon** for low income discount. It should be with percentage discount. Add the metadata "makerspace_price_level" = "low_income_discount"
 
 If you try to access any page which needs these products (e.g. the registration page, or the member page), makeradmin will fetch them from stripe and do a bunch of validation checks.
+
+### Setting up required products in makeradmin
+
+For the member view page and regristration page to work there are also a few products needed in makeradmin in the category Medlemskap.
+
+* Base membership
+  * Metadata: {"allowed_price_levels":["low_income_discount"],"special_product_id":"single_membership_year"}
+  * Enhet/unit: år
+  * Action: add membership days
+* Makerspace access
+  * Metadata: {"allowed_price_levels":["low_income_discount"],"special_product_id":"single_labaccess_month"}
+  * Enhet/unit: mån
+  * Action: add membership days, add labaccess days
+* Makerspace access starter pack
+  * Metadata:{"allowed_price_levels":["low_income_discount"],"special_product_id":"access_starter_pack"}
+  * Enhet/unit: st
+  * Action: add labaccess days
