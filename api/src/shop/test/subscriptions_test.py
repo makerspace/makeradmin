@@ -37,7 +37,7 @@ from test_aid.test_base import FlaskTestBase
 import stripe
 import stripe.error
 from shop import stripe_event
-from shop import stripe_constants
+from shop import stripe_setup
 
 logger = logging.getLogger("makeradmin")
 
@@ -78,7 +78,7 @@ class Test(FlaskTestBase):
         self.seen_event_ids = set()
         self.earliest_possible_event_time = datetime.now(timezone.utc)
         self.clocks_to_destroy: List[FakeClock] = []
-        stripe_constants.set_stripe_key(True)
+        stripe_setup.set_stripe_key(True)
 
         disable_loggers = ["stripe"]
 

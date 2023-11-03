@@ -2,7 +2,6 @@ import flask_cors
 from flask import Flask, jsonify
 from flask.wrappers import Response as FlaskResponse
 from sqlalchemy.exc import OperationalError
-
 from core.auth import authenticate_request
 from membership.permissions import register_permissions
 from service.api_definition import ALL_PERMISSIONS
@@ -19,6 +18,7 @@ from service.error import (
 )
 from service.traffic_logger import traffic_logger_init, traffic_logger_commit
 from services import services
+from shop.stripe_setup import setup_stripe
 
 app = Flask(__name__, static_folder=None)
 
@@ -69,6 +69,8 @@ engine = create_mysql_engine(**get_mysql_config())
 
 populate_fields_by_index(engine)
 register_permissions(ALL_PERMISSIONS)
+
+setup_stripe(config.get("DEV_RUN") == "true")
 
 
 @app.route("/")
