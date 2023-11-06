@@ -11,7 +11,6 @@ from shop.stripe_constants import (
     STRIPE_CURRENTY_BASE,
     MakerspaceMetadataKeys as MSMetaKeys,
     PriceType,
-    SubscriptionScheduleStatus,
     CURRENCY,
 )
 from shop.stripe_util import retry
@@ -54,74 +53,148 @@ def get_category() -> ProductCategory:
 
 
 # TODO only list with correct mode
-# TODO cache
-def get_stripe_products() -> List[stripe.Product]:
-    products = retry(lambda: stripe.Product.list())
-    return products
+# TODO cache?
+def get_stripe_product(makeradmin_product: Product) -> stripe.Product | None:
+    try:
+        product = retry(lambda: stripe.Product.retrieve(str(makeradmin_product.id)))
+    except stripe.error.InvalidRequestError as e:
+        logger.warning(
+            f"failed to retrive product from stripe for makeradmin product with id {makeradmin_product.id}, {e}"
+        )
+        return None
+    return product
 
 
 # TODO only list with correct mode
 # TODO cache?
 def get_stripe_prices(stripe_product: stripe.Product):
-    prices = list(retry(lambda: stripe.Price.list(product=stripe_product.stripe_id)))
+    try:
+        prices = list(retry(lambda: stripe.Price.list(product=stripe_product.stripe_id)))
+    except stripe.error.InvalidRequestError as e:
+        logger.warning(f"failed to retrive prices from stripe for stripe product with id {stripe_product.id}, {e}")
+        return None
     return prices
 
 
-def check_difference_with_stripe(makeradmin_product: Product, stripe_products:List[stripe.Product]):
-    # find the corresponding product
-    for p in stripe_products:
-        if makeradmin_product.get_metadata(MSMetaKeys.SPECIAL_PRODUCT_ID) == p.metadata[MSMetaKeys.SPECIAL_PRODUCT_ID]
-            stripe_product = p
-            break
-    # prices = get_stripe_prices(stripe_product)
-
-    # diff
-    # active
-    # binding period
-    # period
-
-    # price stuff
+def check_stripe_prices(stripe_prices: list[stripe.Price]):
+    differences = [[]] * len(stripe_prices)
+    # TODO deal with the multple prices case
+    for i, price in enumerate(stripe_prices):
+        if not price.active:
+            differences[i].append("active")
+        if price.currency != CURRENCY:
+            differences[i].append("currency")
+    return differences
+    # TODO check
+    # recuring interval and count
     # price
     # currency
 
-    # check that
-    # is subscription
+
+def check_stripe_product(makeradmin_product: Product, stripe_product: stripe.Product):
+    differences = []
+    if not stripe_product.active:
+        differences.append("active")
+    if stripe_product.name != makeradmin_product.name:
+        differences.append("name")
+    return differences
+
+
+def create_stripe_product(makeradmin_product: Product) -> stripe.Product | None:
+    stripe_product = retry(
+        lambda: stripe.Product.create(
+            id=str(makeradmin_product.id),
+            name=makeradmin_product.name,
+            description=f"Created by Makeradmin, product id (#{makeradmin_product.id})",
+        )
+    )
+    return stripe_product
+
+
+def _create_stripe_price(makeradmin_product: Product, stripe_product: stripe.Product, priceType: PriceType):
+    interval = "month"  # TODO how to control this? use the unit?
+    interval_count = makeradmin_product.smallest_multiple
+    recurring = {"interval": interval, "interval_count": interval_count}
+    stripe_price = retry(
+        lambda: stripe.Price.create(
+            name=f"{makeradmin_product.name} price {priceType}",
+            product=stripe_product.id,
+            description=f"Created by Makeradmin (#{makeradmin_product.id})",
+            unit_amount=makeradmin_product.price * interval_count,
+            currency=CURRENCY,
+            recurring=recurring,
+            metadata={"priceType": priceType},
+        )
+    )
+    return stripe_price
+
+
+def create_stripe_prices_for_product(
+    makeradmin_product: Product, stripe_product: stripe.Product
+) -> stripe.Price | None:
+    interval_count = makeradmin_product.smallest_multiple
+
+    stripe_prices = [_create_stripe_price(makeradmin_product, stripe_product)]
+    if interval_count > 1:
+        stripe_prices.append(_create_stripe_price())
+    return stripe_prices
+
+
+def update_stripe_prices_for_product(makeradmin_product: Product, stripe_prices: list[stripe.Price], difference):
+    # TODO
+    pass
+    # loop over the things to update and update stuff
 
 
 def update_stripe_product(makeradmin_product: Product, difference):
+    # TODO
     pass
-    # loop over the dict and update stuff
+    # loop over the things to update and update stuff
 
 
 def setup_stripe_discounts():
-    # TODO check if the keys are set or not
+    # TODO check if the stripe keys are set or not
     logger.info("setting up stripe discounts")
     # TODO
 
 
 def setup_stripe_products():
-    # TODO check if the keys are set or not
+    # TODO check if the stripe keys are set or not
     logger.info("setting up stripe products")
-    stripe_products = get_stripe_products()
 
     makeradmin_category = get_category()
     makeradmin_products = db_session.query(Product).filter(ProductCategory.id == makeradmin_category.id)
-    # TODO probably print a warning about the stuff we expect are in the makeradmin products?
+    # TODO assert that the correct products are in the makeradmin db
     for makeradmin_product in makeradmin_products:
-        setup_stripe_product(makeradmin_product, stripe_products)
+        setup_stripe_product(makeradmin_product)
 
 
-def setup_stripe_product(makeradmin_product: Product, stripe_products: List[stripe.Product] = None):
-    # TODO check if the keys are set or not
-    if stripe_products is None:
-        stripe_products = get_stripe_products()
-    difference = check_difference_with_stripe(makeradmin_product, stripe_products)
-    if difference:
-        update_stripe_product(makeradmin_product, difference)
+def setup_stripe_product(makeradmin_product: Product):
+    # TODO check if the stripe keys are set or not
+    stripe_product = get_stripe_product(makeradmin_product)
+    if stripe_product is None:
+        stripe_product = create_stripe_product(makeradmin_product)
+        create_stripe_prices_for_product(makeradmin_product, stripe_product)
+        # TODO error handling
+        return
+
+    product_difference = check_stripe_product(makeradmin_product, stripe_product)
+    if product_difference:
+        update_stripe_product(makeradmin_product, product_difference)
+
+    stripe_prices = get_stripe_prices(stripe_product)
+    if stripe_prices is None:
+        create_stripe_prices_for_product(makeradmin_product, stripe_product)
+        # TODO error handling
+        return
+
+    price_difference = check_stripe_prices(stripe_prices)
+    if price_difference:
+        update_stripe_prices_for_product(makeradmin_product, stripe_prices, price_difference)
 
 
 def setup_stripe(dev_mode: bool):
-    # TODO check if the keys are set or not
+    # TODO check if the stripe keys are set or not
     # TODO use dev_mode bool
 
     logger.info("setting up stripe")

@@ -561,7 +561,7 @@ def start_subscription(
                     "collection_method": "charge_automatically",
                     "metadata": metadata,
                     "proration_behavior": "none",
-                    "iterations": 1,
+                    "iterations": 1,  # TODO is this correct?
                     "coupon": discount.coupon.stripe_id if discount.coupon is not None else None,
                 }
             )
