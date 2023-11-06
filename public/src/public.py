@@ -135,6 +135,7 @@ def giftcards_fin():
    return render_template("fin_transaction.html")
 
 # I added this to make my test work
+
 os.environ.setdefault('STATIC_PREFIX_HASH', 'default_hash_value')
 static_hash = os.environ["STATIC_PREFIX_HASH"]
 
