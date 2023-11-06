@@ -123,12 +123,29 @@ def quiz_backwards_compatibility():
 def change_phone():
     return render_template("change_phone.html")
 
+giftcards = Section("giftcards")
+@giftcards.route("/")
+def show_giftcars():
+    return render_template("giftcards.html")
+@giftcards.route("/confirmation")
+def giftcards_confirmation():
+    return render_template("giftcards_confirmation.html")
+@giftcards.route("/finish")
+def giftcards_fin():
+   return render_template("fin_transaction.html")
 
+# I added this to make my test work
+os.environ.setdefault('STATIC_PREFIX_HASH', 'default_hash_value')
 static_hash = os.environ["STATIC_PREFIX_HASH"]
+
+
+#static_hash = os.environ["STATIC_PREFIX_HASH"]
 app = Flask(__name__, static_url_path=f"/static{static_hash}", static_folder="../static")
 sys.stderr.write("STATIC URL PATH" + app.static_url_path + "\n")
 app.register_blueprint(shop)
 app.register_blueprint(member)
+
+app.register_blueprint(giftcards)
 
 
 @app.route("/static/product_images/<path:path>")
