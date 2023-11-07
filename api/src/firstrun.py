@@ -11,7 +11,7 @@ from service.api_definition import ALL_PERMISSIONS
 from service.config import config
 from service.db import db_session
 from service.logging import logger
-from shop.models import ProductCategory
+from shop.models import ProductCategory, Product, ProductAction, ProductAction
 from getpass import getpass
 
 YELLOW = "\u001b[33m"
@@ -101,14 +101,62 @@ def create_admin(admins):
 def create_members():
     banner(RED, "TDOO: Creating Fake Members")
 
+    get_or_create(Member, email="first1.last1@gmail.com", defaults= dict(firstname="first1", lastname="last1", price_level = 'normal', pending_activation=False, member_number = 2000))
+    get_or_create(Member, email="first2.last2@gmail.com", defaults= dict(firstname="first2", lastname="last2", price_level = 'normal', pending_activation=False, member_number = 2001))
+    get_or_create(Member, email="first3.last3@gmail.com", defaults= dict(firstname="first3", lastname="last3", price_level = 'normal', pending_activation=False, member_number = 2002))
 
 def create_shop_products():
-    banner(BLUE, "Creating Fake Shop Products")
-    display_order = db_session.query(func.max(ProductCategory.display_order)).scalar() or 0
-    get_or_create(ProductCategory, name="Medlemskap", defaults=dict(display_order=display_order + 1))
-    get_or_create(ProductCategory, name="Förbrukning", defaults=dict(display_order=display_order + 2))
-    get_or_create(ProductCategory, name="Verktyg", defaults=dict(display_order=display_order + 3))
-    get_or_create(ProductCategory, name="Övrigt", defaults=dict(display_order=display_order + 4))
+    banner(BLUE, "Creating Fake Shop Categories and Products")
+    
+    display_order_category = db_session.query(func.max(ProductCategory.display_order)).scalar() or 0
+    member_category = get_or_create(ProductCategory, name="Medlemskap", defaults=dict(display_order=display_order_category + 1))
+    consumption_category = get_or_create(ProductCategory, name="Förbrukning", defaults=dict(display_order=display_order_category + 2))
+    tools_category = get_or_create(ProductCategory, name="Verktyg", defaults=dict(display_order=display_order_category + 3))
+    get_or_create(ProductCategory, name="Övrigt", defaults=dict(display_order=display_order_category + 4))
+    
+
+    display_order_product = db_session.query(func.max(Product.display_order)).scalar() or 0
+    prod1 = get_or_create(Product, name="Base membership", 
+                  defaults=dict(price = 200, 
+                                id=62, 
+                                unit = "år", 
+                                display_order = display_order_product + 1, 
+                                category_id = member_category.id, 
+                                product_metadata = {"allowed_price_levels":["low_income_discount"],"special_product_id":["single_membership_year"]}))
+    get_or_create(ProductAction, product_id = prod1.id, defaults=dict(value = 365, action_type = "add_membership_days"))
+    prod2 = get_or_create(Product, name="Makerspace access",
+                  defaults=dict(price = 575, 
+                                id=63,
+                                unit= "mån",
+                                display_order = display_order_product + 2,
+                                category_id = member_category.id,
+                                product_metadata = {"allowed_price_levels":["low_income_discount"],"special_product_id":["single_membership_year"]}))
+    get_or_create(ProductAction, product_id = prod2.id, defaults=dict(value = 365, action_type = "add_membership_days"))
+    get_or_create(ProductAction, product_id = prod2.id, defaults=dict(value = 30, action_type = "add_labaccess_days"))
+    prod3 = get_or_create(Product, name="Makerspace access starter pack",
+                  defaults=dict(price = 750, 
+                                id=64,
+                                unit= "st",
+                                display_order = display_order_product + 3,
+                                category_id = member_category.id,
+                                product_metadata = {"allowed_price_levels":["low_income_discount"],"special_product_id":["access_starter_pack"]}))
+    get_or_create(ProductAction, product_id = prod3.id, defaults=dict(value = 365, action_type = "add_labaccess_days"))
+
+
+    get_or_create(Product, name="Trälist",
+                  defaults=dict(price = 5,
+                                unit= "dm",
+                                display_order = display_order_product + 4,
+                                category_id = consumption_category.id,
+                                product_metadata = {}))
+    get_or_create(Product, name="Lödtråd",
+                  defaults=dict(price = 20,
+                                unit= "dm",
+                                product_metadata = {},
+                                category_id = tools_category.id,
+                                display_order = display_order_product + 5))
+
+
     db_session.commit()
 
 
