@@ -49,6 +49,23 @@ class Test(ShopTestMixin, FlaskTestBase):
     def setUp(self) -> None:
         self.seen_products = []
 
+    @staticmethod
+    def assertPrice(stripe_price: stripe.Price, makeradmin_product: Product):
+        assert stripe_price.unit_amount == stripe_util.convert_to_stripe_amount(makeradmin_product["price"])
+        assert stripe_price.currency == CURRENCY
+        assert stripe_price.active
+        assert stripe_price.type == "recurring"
+        reccuring = stripe_price.recurring
+        if "mån" in makeradmin_product["unit"]:
+            assert reccuring["interval"] == "month"
+        else:
+            assert reccuring["interval"] == "year"
+        assert reccuring["interval_count"] == makeradmin_product["smallest_multiple"]
+        assert (
+            stripe_price.metadata["price_type"] == PriceType.BINDING_PERIOD.value
+            or stripe_price.metadata["price_type"] == PriceType.RECURRING.value
+        )
+
     def tearDown(self) -> None:
         # It is not possible to delete prices through the api so we set them as inactive instead
         for makeradmin_product in self.seen_products:
@@ -66,5 +83,44 @@ class Test(ShopTestMixin, FlaskTestBase):
     def test_create_product(self) -> None:
         makeradmin_test_product = self.products[0]
         self.seen_products.append(makeradmin_test_product)
-        stripe_test_product = stripe_util.find_or_create_stripe_product(makeradmin_test_product, livemode=False)
+        stripe_test_product = stripe_util.find_or_create_stripe_product(makeradmin_test_product)
+        assert stripe_test_product
+        assert stripe_test_product.active
         assert stripe_test_product.name == makeradmin_test_product["name"]
+
+    def test_create_product_with_price_monthly_simple(self) -> None:
+        makeradmin_test_product = self.products[0]
+        self.seen_products.append(makeradmin_test_product)
+        stripe_test_product = stripe_util.find_or_create_stripe_product(makeradmin_test_product)
+        assert stripe_test_product
+
+        stripe_test_prices = stripe_util.find_or_create_stripe_prices_for_product(
+            makeradmin_test_product, stripe_test_product
+        )
+        assert stripe_test_prices
+        assert len(stripe_test_prices) == 1
+        self.assertPrice(stripe_test_prices[0], makeradmin_test_product)
+
+    def test_create_product_with_price_yearly_simple(self) -> None:
+        makeradmin_test_product = self.products[1]
+        self.seen_products.append(makeradmin_test_product)
+        stripe_test_product = stripe_util.find_or_create_stripe_product(makeradmin_test_product)
+        assert stripe_test_product
+
+        stripe_test_prices = stripe_util.find_or_create_stripe_prices_for_product(
+            makeradmin_test_product, stripe_test_product
+        )
+        assert stripe_test_prices
+        assert len(stripe_test_prices) == 1
+
+    def test_create_product_with_price_monthly_with_binding_period(self) -> None:
+        makeradmin_test_product = self.products[2]
+        self.seen_products.append(makeradmin_test_product)
+        stripe_test_product = stripe_util.find_or_create_stripe_product(makeradmin_test_product)
+        assert stripe_test_product
+
+        stripe_test_prices = stripe_util.find_or_create_stripe_prices_for_product(
+            makeradmin_test_product, stripe_test_product
+        )
+        assert stripe_test_prices
+        assert len(stripe_test_prices) == 2
