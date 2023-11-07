@@ -67,7 +67,7 @@ def get_stripe_product(makeradmin_product: Product) -> stripe.Product | None:
 
 # TODO only list with correct mode
 # TODO cache?
-def get_stripe_prices(stripe_product: stripe.Product):
+def get_stripe_prices(stripe_product: stripe.Product) -> list[stripe.Price] | None:
     try:
         prices = list(retry(lambda: stripe.Price.list(product=stripe_product.stripe_id)))
     except stripe.error.InvalidRequestError as e:
@@ -76,7 +76,10 @@ def get_stripe_prices(stripe_product: stripe.Product):
     return prices
 
 
-def check_stripe_prices(stripe_prices: list[stripe.Price]):
+def check_stripe_prices(stripe_prices: list[stripe.Price]) -> Dict[PriceType, stripe.Price] | None:
+    if len(stripe_prices) > 2:
+        raise RuntimeError(f"Number of stripe prices is {len(stripe_prices)}, expected <= 2")
+
     differences = [[]] * len(stripe_prices)
     # TODO deal with the multple prices case
     for i, price in enumerate(stripe_prices):
@@ -111,15 +114,20 @@ def create_stripe_product(makeradmin_product: Product) -> stripe.Product | None:
     return stripe_product
 
 
-def _create_stripe_price(makeradmin_product: Product, stripe_product: stripe.Product, priceType: PriceType):
-    interval = "month"  # TODO how to control this? use the unit?
+def create_stripe_price(makeradmin_product: Product, stripe_product: stripe.Product, priceType: PriceType):
+    if "mån" in makeradmin_product.unit or "month" in makeradmin_product.unit:
+        interval = "month"
+    elif "år" in makeradmin_product.unit or "year" in makeradmin_product.unit:
+        interval = "year"
+    else:
+        raise RuntimeError(f"Unexpected unit {makeradmin_product.unit} in makeradmin product {makeradmin_product.id}")
     interval_count = makeradmin_product.smallest_multiple
     recurring = {"interval": interval, "interval_count": interval_count}
     stripe_price = retry(
         lambda: stripe.Price.create(
             name=f"{makeradmin_product.name} price {priceType}",
             product=stripe_product.id,
-            description=f"Created by Makeradmin (#{makeradmin_product.id})",
+            description=f"Created by Makeradmin for makeradmin product (#{makeradmin_product.id})",
             unit_amount=makeradmin_product.price * interval_count,
             currency=CURRENCY,
             recurring=recurring,
@@ -134,9 +142,9 @@ def create_stripe_prices_for_product(
 ) -> stripe.Price | None:
     interval_count = makeradmin_product.smallest_multiple
 
-    stripe_prices = [_create_stripe_price(makeradmin_product, stripe_product)]
+    stripe_prices = [create_stripe_price(makeradmin_product, stripe_product, PriceType.RECURRING)]
     if interval_count > 1:
-        stripe_prices.append(_create_stripe_price())
+        stripe_prices.append(create_stripe_price(makeradmin_product, stripe_product, PriceType.BINDING_PERIOD))
     return stripe_prices
 
 
@@ -153,13 +161,11 @@ def update_stripe_product(makeradmin_product: Product, difference):
 
 
 def setup_stripe_discounts():
-    # TODO check if the stripe keys are set or not
     logger.info("setting up stripe discounts")
     # TODO
 
 
 def setup_stripe_products():
-    # TODO check if the stripe keys are set or not
     logger.info("setting up stripe products")
 
     makeradmin_category = get_category()
@@ -170,7 +176,6 @@ def setup_stripe_products():
 
 
 def setup_stripe_product(makeradmin_product: Product):
-    # TODO check if the stripe keys are set or not
     stripe_product = get_stripe_product(makeradmin_product)
     if stripe_product is None:
         stripe_product = create_stripe_product(makeradmin_product)
@@ -194,12 +199,15 @@ def setup_stripe_product(makeradmin_product: Product):
 
 
 def setup_stripe(dev_mode: bool):
-    # TODO check if the stripe keys are set or not
     # TODO use dev_mode bool
 
     logger.info("setting up stripe")
     stripe.api_version = "2022-11-15"
     set_stripe_key(private=True)  # TODO based on mode?
+
+    if stripe.api_key is None:
+        logger.warning("skipping setting up stripe, keys are not set")
+        return
 
     setup_stripe_products()
     setup_stripe_discounts()
