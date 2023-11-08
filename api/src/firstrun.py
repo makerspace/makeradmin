@@ -28,17 +28,7 @@ def banner(color, message):
     print("### " + message + " ###")
     print(line)
     print(RESET)
-
-
-'''def get_or_create(model, defaults=None, **kwargs):
-    entity = db_session.query(model).filter_by(**kwargs).first()
-    if entity:
-        return entity
-
-    entity = model(**{**kwargs, **defaults})
-    db_session.add(entity)
-    db_session.flush()
-    return entity'''
+    
 
 def get_or_create(model, defaults=None, **kwargs):
     entity = db_session.query(model).filter_by(**kwargs).first()
@@ -109,7 +99,7 @@ def create_admin(admins):
 
 
 def create_members():
-    banner(RED, "TODO: Creating Fake Members")
+    banner(RED, "Creating Fake Members")
 
     get_or_create(Member, email="first1.last1@gmail.com", defaults= dict(firstname="first1", lastname="last1", price_level = 'normal', pending_activation=False, member_number = 2000))
     get_or_create(Member, email="first2.last2@gmail.com", defaults= dict(firstname="first2", lastname="last2", price_level = 'normal', pending_activation=False, member_number = 2001))
