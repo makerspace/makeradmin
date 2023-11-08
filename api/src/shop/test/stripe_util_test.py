@@ -1,4 +1,3 @@
-from datetime import datetime, timezone
 from logging import getLogger
 from unittest import skipIf
 
@@ -8,11 +7,7 @@ import messages.models
 import core.models
 from shop import stripe_util
 from shop.models import Product, ProductAction
-from shop.stripe_constants import (
-    STRIPE_CURRENTY_BASE,
-    PriceType,
-    CURRENCY,
-)
+from shop import stripe_constants
 import stripe
 from test_aid.test_base import FlaskTestBase, ShopTestMixin
 
@@ -51,8 +46,10 @@ class Test(ShopTestMixin, FlaskTestBase):
 
     @staticmethod
     def assertPrice(stripe_price: stripe.Price, makeradmin_product: Product):
-        assert stripe_price.unit_amount == stripe_util.convert_to_stripe_amount(makeradmin_product["price"])
-        assert stripe_price.currency == CURRENCY
+        assert stripe_price.unit_amount == stripe_util.convert_to_stripe_amount(
+            makeradmin_product["price"] * makeradmin_product["smallest_multiple"]
+        )
+        assert stripe_price.currency == stripe_constants.CURRENCY
         assert stripe_price.active
         assert stripe_price.type == "recurring"
         reccuring = stripe_price.recurring
@@ -62,8 +59,8 @@ class Test(ShopTestMixin, FlaskTestBase):
             assert reccuring["interval"] == "year"
         assert reccuring["interval_count"] == makeradmin_product["smallest_multiple"]
         assert (
-            stripe_price.metadata["price_type"] == PriceType.BINDING_PERIOD.value
-            or stripe_price.metadata["price_type"] == PriceType.RECURRING.value
+            stripe_price.metadata["price_type"] == stripe_constants.PriceType.BINDING_PERIOD.value
+            or stripe_price.metadata["price_type"] == stripe_constants.PriceType.RECURRING.value
         )
 
     def tearDown(self) -> None:
@@ -76,7 +73,7 @@ class Test(ShopTestMixin, FlaskTestBase):
             if stripe_prices is None:
                 continue
             for price in stripe_prices:
-                stripe_util.retry(lambda: stripe.Product.modify(price.id, active=False))
+                stripe_util.retry(lambda: stripe.Price.modify(price.id, active=False))
             stripe_util.retry(lambda: stripe.Product.modify(stripe_product.id, active=False))
             return super().tearDown()
 
@@ -112,6 +109,7 @@ class Test(ShopTestMixin, FlaskTestBase):
         )
         assert stripe_test_prices
         assert len(stripe_test_prices) == 1
+        self.assertPrice(stripe_test_prices[0], makeradmin_test_product)
 
     def test_create_product_with_price_monthly_with_binding_period(self) -> None:
         makeradmin_test_product = self.products[2]
@@ -124,3 +122,9 @@ class Test(ShopTestMixin, FlaskTestBase):
         )
         assert stripe_test_prices
         assert len(stripe_test_prices) == 2
+        self.assertPrice(stripe_test_prices[0], makeradmin_test_product)
+        self.assertPrice(stripe_test_prices[1], makeradmin_test_product)
+
+        test_price_types = [p.metadata["price_type"] for p in stripe_test_prices]
+        assert stripe_constants.PriceType.BINDING_PERIOD.value in test_price_types
+        assert stripe_constants.PriceType.RECURRING.value in test_price_types

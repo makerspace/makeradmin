@@ -16,12 +16,21 @@ import stripe
 
 logger = getLogger("makeradmin")
 
-CURRENCY = "sek"  # TODO fix this
+makeradmin_unit_to_stripe_unit = {
+    "mån": "month",
+    "month": "month",
+    "år": "year",
+    "year": "year",
+}
+
+
+def get_stripe_product_id(makeradmin_product: Product, livemode: bool = False) -> str:
+    return f'prod_{makeradmin_product["id"]}' if livemode else f'test_{makeradmin_product["id"]}'
 
 
 # TODO cache?
 def get_stripe_product(makeradmin_product: Product, livemode: bool = False) -> stripe.Product | None:
-    id = f'prod_{makeradmin_product["id"]}' if livemode else f'test_{makeradmin_product["id"]}'
+    id = get_stripe_product_id(makeradmin_product, livemode)
     try:
         product = retry(lambda: stripe.Product.retrieve(id=id))
     except stripe.error.InvalidRequestError as e:
@@ -50,7 +59,7 @@ def get_stripe_prices(
 
 
 def _create_stripe_product(makeradmin_product: Product, livemode: bool = False) -> stripe.Product | None:
-    id = f'prod_{makeradmin_product["id"]}' if livemode else f'test_{makeradmin_product["id"]}'
+    id = get_stripe_product_id(makeradmin_product, livemode)
     stripe_product = retry(
         lambda: stripe.Product.create(
             id=id,
@@ -65,11 +74,13 @@ def _create_stripe_product(makeradmin_product: Product, livemode: bool = False) 
 def _create_stripe_price(
     makeradmin_product: Product, stripe_product: stripe.Product, priceType: PriceType, livemode: bool = False
 ) -> stripe.Price | None:
-    id = f'prod_{makeradmin_product["id"]}_{priceType}' if livemode else f'test_{makeradmin_product["id"]}_{priceType}'
-    if "mån" in makeradmin_product["unit"] or "month" in makeradmin_product["unit"]:
-        interval = "month"
-    elif "år" in makeradmin_product["unit"] or "year" in makeradmin_product["unit"]:
-        interval = "year"
+    nickname = (
+        f'prod_{makeradmin_product["id"]}_{priceType.value}'
+        if livemode
+        else f'test_{makeradmin_product["id"]}_{priceType.value}'
+    )
+    if makeradmin_product["unit"] in makeradmin_unit_to_stripe_unit:
+        interval = makeradmin_unit_to_stripe_unit[makeradmin_product["unit"]]
     else:
         raise RuntimeError(
             f'Unexpected unit {makeradmin_product["unit"]} in makeradmin product {makeradmin_product["id"]}'
@@ -78,12 +89,12 @@ def _create_stripe_price(
     recurring = {"interval": interval, "interval_count": interval_count}
     stripe_price = retry(
         lambda: stripe.Price.create(
-            nickname=id,
+            nickname=nickname,
             product=stripe_product.id,
             unit_amount=convert_to_stripe_amount(makeradmin_product["price"] * interval_count),
             currency=CURRENCY,
             recurring=recurring,
-            metadata={"price_type": priceType},
+            metadata={"price_type": priceType.value},
         )
     )
     assert stripe_price.livemode == livemode
@@ -93,11 +104,10 @@ def _create_stripe_price(
 def find_or_create_stripe_product(makeradmin_product: Product, livemode: bool = False) -> stripe.Product | None:
     stripe_product = get_stripe_product(makeradmin_product, livemode)
     if stripe_product is None:
-        return _create_stripe_product(makeradmin_product, livemode)
-    else:
-        if not stripe_product.active:
-            retry(lambda: stripe.Product.modify(stripe_product.id, active=True))
-        return stripe_product
+        stripe_product = _create_stripe_product(makeradmin_product, livemode)
+    elif not stripe_product.active:
+        stripe_product = retry(lambda: stripe.Product.modify(stripe_product.id, active=True))
+    return stripe_product
 
 
 def _find_price_type(stripe_prices: list[stripe.Price] | None, price_type: PriceType):
@@ -116,19 +126,24 @@ def find_or_create_stripe_prices_for_product(
     stripe_prices = get_stripe_prices(stripe_product, filterInactive=False, livemode=livemode)
 
     stripe_price_recurring = _find_price_type(stripe_prices, PriceType.RECURRING)
+
     if stripe_price_recurring is None:
         stripe_price_recurring = _create_stripe_price(makeradmin_product, stripe_product, PriceType.RECURRING, livemode)
+    elif not stripe_price_recurring.active:
+        stripe_price_recurring = retry(lambda: stripe.Price.modify(stripe_price_recurring.id, active=True))
 
     if interval_count == 1:
         return [stripe_price_recurring]
 
-    stripe_price_binding = _find_price_type(stripe_prices, PriceType.RECURRING)
+    stripe_price_binding = _find_price_type(stripe_prices, PriceType.BINDING_PERIOD)
     if stripe_price_binding is None:
         stripe_price_binding = _create_stripe_price(
             makeradmin_product, stripe_product, PriceType.BINDING_PERIOD, livemode
         )
+    elif not stripe_price_binding.active:
+        stripe_price_binding = retry(lambda: stripe.Price.modify(stripe_price_binding.id, active=True))
 
-    return [stripe_price_recurring, stripe_price_recurring]
+    return [stripe_price_recurring, stripe_price_binding]
 
 
 def convert_to_stripe_amount(amount: Decimal) -> int:
