@@ -14,6 +14,8 @@ from test_aid.test_base import FlaskTestBase, ShopTestMixin
 
 logger = getLogger("makeradmin")
 
+# The stripe ids product have to be unique in each test to prevent race conditions
+
 
 class Test(ShopTestMixin, FlaskTestBase):
     models = [membership.models, messages.models, shop.models, core.models]
