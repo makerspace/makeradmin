@@ -1,5 +1,6 @@
 from datetime import datetime, timezone
 from decimal import Decimal
+from enum import Enum
 import random
 import time
 from logging import getLogger
@@ -24,14 +25,18 @@ makeradmin_unit_to_stripe_unit = {
 }
 
 
+class StripeDifference(Enum):
+    Equal = "equal"
+    DifferentChangable = "different chanagable"
+    DifferentUnchangable = "different unchangable"
+
+
 def makeradmin_to_stripe_recurring(makeradmin_product: Product, price_type: PriceType) -> Dict[str, Any]:
     if price_type == PriceType.RECURRING or price_type == PriceType.BINDING_PERIOD:
         if makeradmin_product.unit in makeradmin_unit_to_stripe_unit:
             interval = makeradmin_unit_to_stripe_unit[makeradmin_product.unit]
         else:
-            raise RuntimeError(
-                f"Unexpected unit {makeradmin_product.unit} in makeradmin product {makeradmin_product.id}"
-            )
+            raise ValueError(f"Unexpected unit {makeradmin_product.unit} in makeradmin product {makeradmin_product.id}")
         interval_count = makeradmin_product.smallest_multiple if price_type == PriceType.BINDING_PERIOD else 1
         return {"interval": interval, "interval_count": interval_count}
     else:
@@ -70,29 +75,41 @@ def get_stripe_prices(
     return prices
 
 
-def eq_makeradmin_stripe_product(makeradmin_product: Product, stripe_product: stripe.Product) -> bool:
-    return stripe_product.name == makeradmin_product.name
+def eq_makeradmin_stripe_product(makeradmin_product: Product, stripe_product: stripe.Product) -> StripeDifference:
+    if stripe_product.name == makeradmin_product.name:
+        return StripeDifference.Equal
+    else:
+        return StripeDifference.DifferentChangable
 
 
-# TODO need different levels depending on what can be changed and not
-def eq_makeradmin_stripe_price(makeradmin_product: Product, stripe_price: stripe.Price, price_type: PriceType) -> bool:
+def eq_makeradmin_stripe_price(
+    makeradmin_product: Product, stripe_price: stripe.Price, price_type: PriceType
+) -> StripeDifference:
     recurring = makeradmin_to_stripe_recurring(makeradmin_product, price_type)
-    different = []
+    different_changable = []
+    different_unchangable = []
 
     if len(recurring) != 0:
         if stripe_price.recurring is None:
-            return False
-        different.append(stripe_price.recurring.get("interval") == recurring["interval"])
-        different.append(stripe_price.recurring.get("interval_count") == recurring["interval_count"])
-    different.append(stripe_price.unit_amount == stripe_amount_from_makeradmin_product(makeradmin_product, recurring))
-    different.append(stripe_price.currency == CURRENCY)
-    different.append(stripe_price.metadata.get("price_type") == price_type.value)
-    return not any(different)
+            return StripeDifference.DifferentUnchangable
+        different_unchangable.append(stripe_price.recurring.get("interval") != recurring["interval"])
+        different_unchangable.append(stripe_price.recurring.get("interval_count") != recurring["interval_count"])
+    different_changable.append(
+        stripe_price.unit_amount != stripe_amount_from_makeradmin_product(makeradmin_product, recurring)
+    )
+    different_changable.append(stripe_price.currency != CURRENCY)
+    different_changable.append(stripe_price.metadata.get("price_type") != price_type.value)
+
+    if any(different_unchangable):
+        return StripeDifference.DifferentUnchangable
+    if any(different_changable):
+        return StripeDifference.DifferentChangable
+    return StripeDifference.Equal
 
 
 def eq_makeradmin_stripe(
     makeradmin_product: Product, stripe_product: stripe.Product, stripe_prices: Dict[PriceType, stripe.Price]
-) -> Dict[str, bool]:
+) -> Dict[str, StripeDifference]:
     differences = {"product": eq_makeradmin_stripe_product(makeradmin_product, stripe_product)}
     interval_count = makeradmin_product.smallest_multiple
     expected_number_of_prices = 1 if interval_count == 1 else 2
@@ -150,8 +167,6 @@ def find_or_create_stripe_product(makeradmin_product: Product, livemode: bool = 
     stripe_product = get_stripe_product(makeradmin_product, livemode)
     if stripe_product is None:
         stripe_product = _create_stripe_product(makeradmin_product, livemode)
-    elif not stripe_product.active:
-        stripe_product = retry(lambda: stripe.Product.modify(stripe_product.id, active=True))
     return stripe_product
 
 
@@ -177,9 +192,6 @@ def find_or_create_stripe_prices_for_product(
 
     if stripe_price_recurring is None:
         stripe_price_recurring = _create_stripe_price(makeradmin_product, stripe_product, PriceType.RECURRING, livemode)
-    elif not stripe_price_recurring.active:
-        stripe_price_recurring = retry(lambda: stripe.Price.modify(stripe_price_recurring.id, active=True))
-
     if interval_count == 1:
         return {PriceType.RECURRING: stripe_price_recurring}
 
@@ -188,21 +200,29 @@ def find_or_create_stripe_prices_for_product(
         stripe_price_binding = _create_stripe_price(
             makeradmin_product, stripe_product, PriceType.BINDING_PERIOD, livemode
         )
-    elif not stripe_price_binding.active:
-        stripe_price_binding = retry(lambda: stripe.Price.modify(stripe_price_binding.id, active=True))
-
     return {PriceType.RECURRING: stripe_price_recurring, PriceType.BINDING_PERIOD: stripe_price_binding}
 
 
 def update_stripe_product(makeradmin_product: Product, stripe_product: stripe.Product) -> stripe.Product:
+    """Update the stripe product to match the makeradmin product, i.e. change it's name."""
     return retry(lambda: stripe.Product.modify(stripe_product.id, name=makeradmin_product.name))
 
 
+# TODO this is broken
 def update_stripe_price(makeradmin_product: Product, stripe_price: stripe.Price, price_type: PriceType) -> stripe.Price:
-    # TOOD reccuring cant be changed, hmm???
+    """Update the stripe price to match the makeradmin product and price type.
+    It is not possible to update interval and interval_count"""
     recurring = makeradmin_to_stripe_recurring(makeradmin_product, price_type)
+    if stripe_price.recurring or len(recurring) != 0:
+        if (
+            recurring["interval"] != stripe_price.recurring["interval"]
+            or recurring["interval_count"] != stripe_price.recurring["interval_count"]
+        ):
+            raise ValueError(
+                f"It is not possible to update the recurring part of a price, create a new one instead. Tried to update {stripe_price.recurring} to {recurring}"
+            )
     unit_amount = stripe_amount_from_makeradmin_product(makeradmin_product, recurring)
-    currency_options_param = {"unit_amount": unit_amount}  # TODO fix this
+    currency_options_param = {"unit_amount": unit_amount}
     currency_options = {CURRENCY: currency_options_param}
     return retry(
         lambda: stripe.Price.modify(
@@ -211,6 +231,22 @@ def update_stripe_price(makeradmin_product: Product, stripe_price: stripe.Price,
             metadata={"price_type": price_type.value},
         )
     )
+
+
+def activate_stripe_product(stripe_product: stripe.Product) -> stripe.Product:
+    return retry(lambda: stripe.Product.modify(stripe_product.id, active=True))
+
+
+def deactivate_stripe_product(stripe_product: stripe.Product) -> stripe.Product:
+    return retry(lambda: stripe.Product.modify(stripe_product.id, active=False))
+
+
+def activate_stripe_price(stripe_price: stripe.Price) -> stripe.Price:
+    return retry(lambda: stripe.Price.modify(stripe_price.id, active=True))
+
+
+def deactivate_stripe_price(stripe_price: stripe.Price) -> stripe.Price:
+    return retry(lambda: stripe.Price.modify(stripe_price.id, active=True))
 
 
 def stripe_amount_from_makeradmin_product(makeradmin_product: Product, recurring: Dict[str, Any]) -> int:
