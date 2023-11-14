@@ -1,8 +1,7 @@
 import argparse
-
+from datetime import datetime, timedelta
 from sqlalchemy import func
 from basic_types.enums import PriceLevel
-
 from init_db import init_db
 from membership.models import Group, Permission, Member
 from membership.permissions import register_permissions
@@ -11,7 +10,14 @@ from service.api_definition import ALL_PERMISSIONS
 from service.config import config
 from service.db import db_session
 from service.logging import logger
-from shop.models import ProductCategory, Product, ProductAction, ProductAction
+from shop.models import (
+    ProductCategory,
+    Product,
+    ProductAction,
+    Transaction,
+    TransactionAction,
+    TransactionContent,
+)
 from getpass import getpass
 
 YELLOW = "\u001b[33m"
@@ -28,7 +34,7 @@ def banner(color, message):
     print("### " + message + " ###")
     print(line)
     print(RESET)
-    
+
 
 def get_or_create(model, defaults=None, **kwargs):
     entity = db_session.query(model).filter_by(**kwargs).first()
@@ -101,81 +107,212 @@ def create_admin(admins):
 def create_members():
     banner(RED, "Creating Fake Members")
 
-    get_or_create(Member, email="first1.last1@gmail.com", defaults= dict(firstname="first1", lastname="last1", price_level = 'normal', pending_activation=False, member_number = 2000))
-    get_or_create(Member, email="first2.last2@gmail.com", defaults= dict(firstname="first2", lastname="last2", price_level = 'normal', pending_activation=False, member_number = 2001))
-    get_or_create(Member, email="first3.last3@gmail.com", defaults= dict(firstname="first3", lastname="last3", price_level = 'normal', pending_activation=False, member_number = 2002))
+    get_or_create(
+        Member,
+        email="first1.last1@gmail.com",
+        defaults=dict(
+            firstname="first1", lastname="last1", price_level="normal", pending_activation=False, member_number=2000
+        ),
+    )
+    get_or_create(
+        Member,
+        email="first2.last2@gmail.com",
+        defaults=dict(
+            firstname="first2", lastname="last2", price_level="normal", pending_activation=False, member_number=2001
+        ),
+    )
+    get_or_create(
+        Member,
+        email="first3.last3@gmail.com",
+        defaults=dict(
+            firstname="first3", lastname="last3", price_level="normal", pending_activation=False, member_number=2002
+        ),
+    )
+
 
 def create_shop_products():
     banner(BLUE, "Creating Fake Shop Categories and Products")
-    
+
     display_order_category = db_session.query(func.max(ProductCategory.display_order)).scalar() or 0
-    member_category = get_or_create(ProductCategory, name="Medlemskap", defaults=dict(display_order=display_order_category + 1))
-    consumption_category = get_or_create(ProductCategory, name="Förbrukning", defaults=dict(display_order=display_order_category + 2))
-    tools_category = get_or_create(ProductCategory, name="Verktyg", defaults=dict(display_order=display_order_category + 3))
-    others_category = get_or_create(ProductCategory, name="Övrigt", defaults=dict(display_order=display_order_category + 4))
-    
+    member_category = get_or_create(
+        ProductCategory, name="Medlemskap", defaults=dict(display_order=display_order_category + 1)
+    )
+    consumption_category = get_or_create(
+        ProductCategory, name="Förbrukning", defaults=dict(display_order=display_order_category + 2)
+    )
+    tools_category = get_or_create(
+        ProductCategory, name="Verktyg", defaults=dict(display_order=display_order_category + 3)
+    )
+    others_category = get_or_create(
+        ProductCategory, name="Övrigt", defaults=dict(display_order=display_order_category + 4)
+    )
 
     display_order_product = db_session.query(func.max(Product.display_order)).scalar() or 0
-    prod1 = get_or_create(Product, name="Base membership", 
-                  defaults=dict(price = 200, 
-                                id=62, 
-                                unit = "år", 
-                                display_order = display_order_product + 1, 
-                                category_id = member_category.id, 
-                                product_metadata = {"allowed_price_levels":["low_income_discount"],"special_product_id":["single_membership_year"]}))
-    get_or_create(ProductAction, product_id = prod1.id, value = 365, action_type = "add_membership_days")
-    prod2 = get_or_create(Product, name="Makerspace access",
-                  defaults=dict(price = 575, 
-                                id=63,
-                                unit= "mån",
-                                display_order = display_order_product + 2,
-                                category_id = member_category.id,
-                                product_metadata = {"allowed_price_levels":["low_income_discount"],"special_product_id":["single_membership_year"]}))
-    get_or_create(ProductAction, product_id = prod2.id, value = 365, action_type = "add_membership_days")
-    get_or_create(ProductAction, product_id = prod2.id, value = 30, action_type = "add_labaccess_days")
-    prod3 = get_or_create(Product, name="Makerspace access starter pack",
-                  defaults=dict(price = 750, 
-                                id=64,
-                                unit= "st",
-                                display_order = display_order_product + 3,
-                                category_id = member_category.id,
-                                product_metadata = {"allowed_price_levels":["low_income_discount"],"special_product_id":["access_starter_pack"]}))
-    get_or_create(ProductAction, product_id = prod3.id, value = 365, action_type = "add_labaccess_days")
+    prod1 = get_or_create(
+        Product,
+        name="Base membership",
+        defaults=dict(
+            price=200,
+            id=62,
+            unit="år",
+            display_order=display_order_product + 1,
+            category_id=member_category.id,
+            product_metadata={
+                "allowed_price_levels": ["low_income_discount"],
+                "special_product_id": ["single_membership_year"],
+            },
+        ),
+    )
+    get_or_create(ProductAction, product_id=prod1.id, value=365, action_type="add_membership_days")
+    prod2 = get_or_create(
+        Product,
+        name="Makerspace access",
+        defaults=dict(
+            price=575,
+            id=63,
+            unit="mån",
+            display_order=display_order_product + 2,
+            category_id=member_category.id,
+            product_metadata={
+                "allowed_price_levels": ["low_income_discount"],
+                "special_product_id": ["single_membership_year"],
+            },
+        ),
+    )
+    get_or_create(ProductAction, product_id=prod2.id, value=365, action_type="add_membership_days")
+    get_or_create(ProductAction, product_id=prod2.id, value=30, action_type="add_labaccess_days")
+    prod3 = get_or_create(
+        Product,
+        name="Makerspace access starter pack",
+        defaults=dict(
+            price=750,
+            id=64,
+            unit="st",
+            display_order=display_order_product + 3,
+            category_id=member_category.id,
+            product_metadata={
+                "allowed_price_levels": ["low_income_discount"],
+                "special_product_id": ["access_starter_pack"],
+            },
+        ),
+    )
+    get_or_create(ProductAction, product_id=prod3.id, value=365, action_type="add_labaccess_days")
 
-
-    get_or_create(Product, name="Trälist",
-                  defaults=dict(price = 5,
-                                unit= "dm",
-                                display_order = display_order_product + 4,
-                                category_id = consumption_category.id,
-                                product_metadata = {}))
-    get_or_create(Product, name="Lödtråd",
-                  defaults=dict(price = 20,
-                                unit= "dm",
-                                product_metadata = {},
-                                category_id = tools_category.id,
-                                display_order = display_order_product + 5))
-    get_or_create(Product, name="Tång",
-                  defaults=dict(price = 50,
-                                unit= "st",
-                                product_metadata = {},
-                                category_id = tools_category.id,
-                                display_order = display_order_product + 6))
-    get_or_create(Product, name="Färgat papper",
-                  defaults=dict(price = 7,
-                                unit= "st",
-                                product_metadata = {},
-                                category_id = consumption_category.id,
-                                display_order = display_order_product + 7))
-    get_or_create(Product, name="Fjädrar",
-                  defaults=dict(price = 1,
-                                unit= "st",
-                                product_metadata = {},
-                                category_id = others_category.id,
-                                display_order = display_order_product + 8))
-
-
+    get_or_create(
+        Product,
+        name="Trälist",
+        defaults=dict(
+            price=5,
+            unit="dm",
+            display_order=display_order_product + 4,
+            category_id=consumption_category.id,
+            product_metadata={},
+        ),
+    )
+    get_or_create(
+        Product,
+        name="Lödtråd",
+        defaults=dict(
+            price=20,
+            unit="dm",
+            product_metadata={},
+            category_id=tools_category.id,
+            display_order=display_order_product + 5,
+        ),
+    )
+    get_or_create(
+        Product,
+        name="Tång",
+        defaults=dict(
+            price=50,
+            unit="st",
+            product_metadata={},
+            category_id=tools_category.id,
+            display_order=display_order_product + 6,
+        ),
+    )
+    get_or_create(
+        Product,
+        name="Färgat papper",
+        defaults=dict(
+            price=7,
+            unit="st",
+            product_metadata={},
+            category_id=consumption_category.id,
+            display_order=display_order_product + 7,
+        ),
+    )
+    get_or_create(
+        Product,
+        name="Fjädrar",
+        defaults=dict(
+            price=1,
+            unit="st",
+            product_metadata={},
+            category_id=others_category.id,
+            display_order=display_order_product + 8,
+        ),
+    )
     db_session.commit()
+
+
+
+def create_shop_transactions():
+    banner(GREEN, "Creating Fake Shop Transactions And Content")
+
+    tools_category = get_or_create(
+        ProductCategory, name="Verktyg"
+    )
+    
+  
+    products = db_session.query(Product).filter_by(category_id=tools_category.id)
+    start_date = datetime(2020,1,1)
+    end_date = datetime.today()
+    
+    numdays_list=[1,10,35,400]
+    index = 1
+
+    for product in products:
+    
+        for numdays in numdays_list:
+            test_date = datetime.today() - timedelta(days=numdays)
+            
+            transaction = get_or_create(
+                Transaction,
+                id=index,
+                defaults=dict(
+                    member_id=1,
+                    amount=100,
+                    status="completed",
+                    created_at = test_date
+                ),
+            )
+            transaction_content = get_or_create(
+                TransactionContent,
+                id = index,
+                defaults=dict(
+                    transaction_id=transaction.id,
+                    product_id=product.id,
+                    count=1,
+                    amount=100,
+                ),
+            )
+            get_or_create(
+                TransactionAction,
+                id = index,
+                defaults=dict(
+                    content_id= transaction_content.id,
+                    action_type="add_labaccess_days",
+                    value=10,
+                    status="completed",
+                    completed_at = test_date,
+                    
+                ),
+            )
+            index += 1 
+    
+    
+        db_session.commit()
 
 
 def firstrun():
@@ -184,6 +321,7 @@ def firstrun():
     create_admin(admins)
     create_members()
     create_shop_products()
+    create_shop_transactions()
 
     banner(
         GREEN,
