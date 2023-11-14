@@ -1,6 +1,5 @@
 import argparse
-from datetime import datetime
-
+from datetime import datetime, timedelta
 from sqlalchemy import func
 from basic_types.enums import PriceLevel
 from init_db import init_db
@@ -14,7 +13,6 @@ from service.logging import logger
 from shop.models import (
     ProductCategory,
     Product,
-    ProductAction,
     ProductAction,
     Transaction,
     TransactionAction,
@@ -255,7 +253,9 @@ def create_shop_products():
             display_order=display_order_product + 8,
         ),
     )
-    # Fake Transaction
+    db_session.commit()
+
+
 
 def create_shop_transactions():
     banner(GREEN, "Creating Fake Shop Transactions And Content")
@@ -266,39 +266,50 @@ def create_shop_transactions():
     
   
     products = db_session.query(Product).filter_by(category_id=tools_category.id)
+    start_date = datetime(2020,1,1)
+    end_date = datetime.today()
     
-    for index, product in enumerate(products, start=1):
-        
-        transaction = get_or_create(
-            Transaction,
-            id=index,
-            defaults=dict(
-                member_id=1,
-                amount=100,
-                status="completed",
-            ),
-        )
-        transaction_content = get_or_create(
-            TransactionContent,
-            id = index,
-            defaults=dict(
-                transaction_id=transaction.id,
-                product_id=product.id,
-                count=1,
-                amount=100,
-            ),
-        )
-        get_or_create(
-            TransactionAction,
-            id = index,
-            defaults=dict(
-                content_id= transaction_content.id,
-                action_type="add_labaccess_days",
-                value=10,
-                status="completed",
-                completed_at = datetime.today()
-            ),
-        )
+    numdays_list=[1,10,35,400]
+    index = 1
+
+    for product in products:
+    
+        for numdays in numdays_list:
+            test_date = datetime.today() - timedelta(days=numdays)
+            
+            transaction = get_or_create(
+                Transaction,
+                id=index,
+                defaults=dict(
+                    member_id=1,
+                    amount=100,
+                    status="completed",
+                    created_at = test_date
+                ),
+            )
+            transaction_content = get_or_create(
+                TransactionContent,
+                id = index,
+                defaults=dict(
+                    transaction_id=transaction.id,
+                    product_id=product.id,
+                    count=1,
+                    amount=100,
+                ),
+            )
+            get_or_create(
+                TransactionAction,
+                id = index,
+                defaults=dict(
+                    content_id= transaction_content.id,
+                    action_type="add_labaccess_days",
+                    value=10,
+                    status="completed",
+                    completed_at = test_date,
+                    
+                ),
+            )
+            index += 1 
     
     
         db_session.commit()

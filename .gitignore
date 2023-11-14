@@ -2,6 +2,7 @@
 env
 venv
 .venv
+*.tsv
 logs
 __pycache__/
 .idea
