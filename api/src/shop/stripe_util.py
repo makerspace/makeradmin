@@ -1,13 +1,16 @@
 from datetime import datetime, timezone
+from dataclasses import asdict, dataclass
 from decimal import Decimal
 from enum import Enum
 import random
+from sqlalchemy import func
 import time
 from logging import getLogger
 from typing import Any, Callable, Dict, TypeVar
 
 from service.error import InternalServerError
-from shop.models import Product
+from service.db import db_session
+from shop.models import Product, ProductCategory
 from shop.stripe_constants import (
     STRIPE_CURRENTY_BASE,
     PriceType,
@@ -27,20 +30,33 @@ makeradmin_unit_to_stripe_unit = {
 
 class StripeDifference(Enum):
     Equal = "equal"
-    DifferentChangable = "different chanagable"
-    DifferentUnchangable = "different unchangable"
+    DifferentChangeable = "different changeable"
+    DifferentUnchangeable = "different unchangeable"
 
 
-def makeradmin_to_stripe_recurring(makeradmin_product: Product, price_type: PriceType) -> Dict[str, Any]:
+@dataclass
+class StripeRecurring:
+    interval: str | None = None
+    interval_count: int | None = None
+
+    def __post_init__(self) -> None:
+        if (self.interval is None) ^ (self.interval_count is None):
+            raise ValueError(f"Both values have to be None or not None in StripeRecurring, can't be mixed.")
+
+    def is_empty(self) -> bool:
+        return self.interval is None or self.interval_count is None
+
+
+def makeradmin_to_stripe_recurring(makeradmin_product: Product, price_type: PriceType) -> StripeRecurring:
     if price_type == PriceType.RECURRING or price_type == PriceType.BINDING_PERIOD:
         if makeradmin_product.unit in makeradmin_unit_to_stripe_unit:
             interval = makeradmin_unit_to_stripe_unit[makeradmin_product.unit]
         else:
             raise ValueError(f"Unexpected unit {makeradmin_product.unit} in makeradmin product {makeradmin_product.id}")
         interval_count = makeradmin_product.smallest_multiple if price_type == PriceType.BINDING_PERIOD else 1
-        return {"interval": interval, "interval_count": interval_count}
+        return StripeRecurring(interval=interval, interval_count=interval_count)
     else:
-        return {}
+        return StripeRecurring()
 
 
 def get_stripe_product_id(makeradmin_product: Product, livemode: bool = False) -> str:
@@ -79,31 +95,31 @@ def eq_makeradmin_stripe_product(makeradmin_product: Product, stripe_product: st
     if stripe_product.name == makeradmin_product.name:
         return StripeDifference.Equal
     else:
-        return StripeDifference.DifferentChangable
+        return StripeDifference.DifferentChangeable
 
 
 def eq_makeradmin_stripe_price(
     makeradmin_product: Product, stripe_price: stripe.Price, price_type: PriceType
 ) -> StripeDifference:
     recurring = makeradmin_to_stripe_recurring(makeradmin_product, price_type)
-    different_changable = []
-    different_unchangable = []
+    different_changeable = []
+    different_unchangeable = []
 
-    if len(recurring) != 0:
+    if not recurring.is_empty():
         if stripe_price.recurring is None:
-            return StripeDifference.DifferentUnchangable
-        different_unchangable.append(stripe_price.recurring.get("interval") != recurring["interval"])
-        different_unchangable.append(stripe_price.recurring.get("interval_count") != recurring["interval_count"])
-    different_changable.append(
+            return StripeDifference.DifferentUnchangeable
+        different_unchangeable.append(stripe_price.recurring.get("interval") != recurring.interval)
+        different_unchangeable.append(stripe_price.recurring.get("interval_count") != recurring.interval_count)
+    different_changeable.append(
         stripe_price.unit_amount != stripe_amount_from_makeradmin_product(makeradmin_product, recurring)
     )
-    different_changable.append(stripe_price.currency != CURRENCY)
-    different_changable.append(stripe_price.metadata.get("price_type") != price_type.value)
+    different_changeable.append(stripe_price.currency != CURRENCY)
+    different_changeable.append(stripe_price.metadata.get("price_type") != price_type.value)
 
-    if any(different_unchangable):
-        return StripeDifference.DifferentUnchangable
-    if any(different_changable):
-        return StripeDifference.DifferentChangable
+    if any(different_unchangeable):
+        return StripeDifference.DifferentUnchangeable
+    if any(different_changeable):
+        return StripeDifference.DifferentChangeable
     return StripeDifference.Equal
 
 
@@ -149,13 +165,14 @@ def _create_stripe_price(
         else f"test_{makeradmin_product.id}_{price_type.value}"
     )
     recurring = makeradmin_to_stripe_recurring(makeradmin_product, price_type)
+    recurring_dict = {} if recurring.is_empty() else asdict(recurring)
     stripe_price = retry(
         lambda: stripe.Price.create(
             nickname=nickname,
             product=stripe_product.id,
             unit_amount=stripe_amount_from_makeradmin_product(makeradmin_product, recurring),
             currency=CURRENCY,
-            recurring=recurring,
+            recurring=recurring_dict,
             metadata={"price_type": price_type.value},
         )
     )
@@ -188,6 +205,14 @@ def find_or_create_stripe_prices_for_product(
     interval_count = makeradmin_product.smallest_multiple
     stripe_prices = get_stripe_prices(stripe_product, filter_inactive=False, livemode=livemode)
 
+    if makeradmin_product.category.name != "Subscriptions":  # TODO cleanup
+        stripe_price_regular = _find_price_type(stripe_prices, PriceType.REGULAR_PRODUCT)
+        if stripe_price_regular is None:
+            stripe_price_regular = _create_stripe_price(
+                makeradmin_product, stripe_product, PriceType.REGULAR_PRODUCT, livemode
+            )
+        return {PriceType.REGULAR_PRODUCT: stripe_price_regular}
+
     stripe_price_recurring = _find_price_type(stripe_prices, PriceType.RECURRING)
 
     if stripe_price_recurring is None:
@@ -211,12 +236,16 @@ def update_stripe_product(makeradmin_product: Product, stripe_product: stripe.Pr
 # TODO this is broken
 def update_stripe_price(makeradmin_product: Product, stripe_price: stripe.Price, price_type: PriceType) -> stripe.Price:
     """Update the stripe price to match the makeradmin product and price type.
-    It is not possible to update interval and interval_count"""
+    It is not possible to update interval and interval_count. Updating subscription related prices is
+    not supported in MakerAdmin"""
+    if price_type != PriceType.REGULAR_PRODUCT:
+        raise RuntimeError(f"update_stripe_price does not support updating subscription prices")
+
     recurring = makeradmin_to_stripe_recurring(makeradmin_product, price_type)
-    if stripe_price.recurring or len(recurring) != 0:
+    if stripe_price.recurring or not recurring.is_empty():
         if (
-            recurring["interval"] != stripe_price.recurring["interval"]
-            or recurring["interval_count"] != stripe_price.recurring["interval_count"]
+            recurring.interval != stripe_price.recurring["interval"]
+            or recurring.interval_count != stripe_price.recurring["interval_count"]
         ):
             raise ValueError(
                 f"It is not possible to update the recurring part of a price, create a new one instead. Tried to update {stripe_price.recurring} to {recurring}"
@@ -249,8 +278,11 @@ def deactivate_stripe_price(stripe_price: stripe.Price) -> stripe.Price:
     return retry(lambda: stripe.Price.modify(stripe_price.id, active=True))
 
 
-def stripe_amount_from_makeradmin_product(makeradmin_product: Product, recurring: Dict[str, Any]) -> int:
-    return convert_to_stripe_amount(makeradmin_product.price * recurring["interval_count"])
+def stripe_amount_from_makeradmin_product(makeradmin_product: Product, recurring: StripeRecurring) -> int:
+    if recurring.is_empty():
+        return convert_to_stripe_amount(makeradmin_product.price)
+    else:
+        return convert_to_stripe_amount(makeradmin_product.price * recurring.interval_count)
 
 
 def convert_to_stripe_amount(amount: Decimal) -> int:
