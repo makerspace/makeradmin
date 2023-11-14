@@ -3,10 +3,6 @@ from datetime import datetime
 
 from sqlalchemy import func
 from basic_types.enums import PriceLevel
-import sys
-
-print(sys.path)
-
 from init_db import init_db
 from membership.models import Group, Permission, Member
 from membership.permissions import register_permissions
