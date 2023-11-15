@@ -26,7 +26,7 @@ makeradmin_unit_to_stripe_unit = {
 }
 
 
-def get_category() -> ProductCategory:
+def get_subscription_category() -> ProductCategory:
     offset = 0
     while True:
         with db_session.begin_nested():
@@ -148,7 +148,7 @@ def eq_makeradmin_stripe(
     differences = {"product": eq_makeradmin_stripe_product(makeradmin_product, stripe_product)}
     price_types = []
     expected_number_of_prices = 1
-    if makeradmin_product.category.id != get_category().id:
+    if makeradmin_product.category.id != get_subscription_category().id:
         price_types.append(PriceType.REGULAR_PRODUCT)
     else:
         price_types.append(PriceType.RECURRING)
@@ -226,7 +226,7 @@ def find_or_create_stripe_prices_for_product(
     makeradmin_product: Product, stripe_product: stripe.Product, livemode: bool = False
 ) -> Dict[PriceType, stripe.Price | None] | None:
     price_types = []
-    if makeradmin_product.category.id != get_category().id:
+    if makeradmin_product.category.id != get_subscription_category().id:
         price_types.append(PriceType.REGULAR_PRODUCT)
     else:
         price_types.append(PriceType.RECURRING)
