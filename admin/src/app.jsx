@@ -32,7 +32,7 @@ import Settings from "./Settings/Routes";
 import Quiz from "./Quiz/Routes";
 
 const nav = {
-    brand: "MakerAdmin 1.0",
+    brand: "MakerAdmin",
     items: [
         {
             text: "Medlemmar",
