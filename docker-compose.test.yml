@@ -7,7 +7,7 @@ services:
       - logs:/var/www/html/storage/logs
     ports:
       - "3307:3306"
-      
+
   api:
     volumes:
       - logs:/work/logs
@@ -16,10 +16,11 @@ services:
       CORS_ALLOWED_ORIGINS: 'http://admin,http://api,http://public'
       TEST_SERVICE_TOKEN:
 
+
   public:
     environment:
       HOST_BACKEND: 'http://api'
-      
+
   admin:
     environment:
       HOST_BACKEND: 'http://api'
@@ -34,11 +35,11 @@ services:
       - /dev/shm:/dev/shm
 
   email-dispatcher:
-    command: ['/bin/sleep', '3600']
+    command: [ '/bin/sleep', '3600' ]
     environment:
       MAILGUN_DOMAIN: ""
       MAILGUN_KEY: ""
-      
+
   test:
     image: makeradmin/test:1.0
     build:
@@ -70,6 +71,7 @@ services:
       APIGATEWAY: "api"
       STRIPE_PRIVATE_KEY:
       STRIPE_PUBLIC_KEY:
+      STRIPE_CURRENCY:
       TEST_PARALELLISM:
       SELENIUM_BASE_TIMEOUT:
       SELENIUM_SCREENSHOT_DIR: "/work/.test/selenium-screenshots"
