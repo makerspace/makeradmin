@@ -1,6 +1,6 @@
 from logging import getLogger
 from typing import Any, Dict, List
-from unittest import skipIf
+from unittest import skipIf, mock
 
 import membership.models
 import shop.models
@@ -66,6 +66,8 @@ class StripeUtilWithoutStripeTest(ShopTestMixin, FlaskTestBase):
 
 class StripeUtilWithStripeTest(ShopTestMixin, FlaskTestBase):
     # The products id in makeradmin have to be unique in each test to prevent race conditions
+    # Some of the tests here will generate new objects in stripe. They are all ran in test mode
+    # You can clear the test area in stripe's developer dashboard.
 
     models = [membership.models, messages.models, shop.models, core.models]
     base_stripe_id = 5100
@@ -108,12 +110,14 @@ class StripeUtilWithStripeTest(ShopTestMixin, FlaskTestBase):
             stripe_product = stripe_util.get_stripe_product(makeradmin_product, livemode=False)
             if stripe_product is None:
                 continue
+            if stripe_product.active:
+                stripe_util.deactivate_stripe_product(stripe_product)
             stripe_prices = stripe_util.get_stripe_prices(stripe_product, livemode=False)
             if stripe_prices is None:
                 continue
             for price in stripe_prices:
-                stripe_util.deactivate_stripe_price(price)
-            stripe_util.deactivate_stripe_product(stripe_product)
+                if price.active:
+                    stripe_util.deactivate_stripe_price(price)
             return super().tearDown()
 
     def test_create_product(self) -> None:
@@ -274,63 +278,134 @@ class StripeUtilWithStripeTest(ShopTestMixin, FlaskTestBase):
         stripe_product = stripe_util.get_stripe_product(makeradmin_test_product)
         assert stripe_product.name == makeradmin_test_product.name
 
-    # def test_update_price(self) -> None:
-    #     makeradmin_test_product = self.db.create_product(
-    #         name="test update price",
-    #         price=100.0,
-    #         id=self.base_stripe_id + 7,
-    #         unit="mån",
-    #         smallest_multiple=1,
-    #         category_id=self.not_subscription_category.id,
-    #     )
-    #     self.seen_products.append(makeradmin_test_product)
-    #     stripe_test_product = stripe_util.find_or_create_stripe_product(makeradmin_test_product)
-    #     assert stripe_test_product
+    def test_replace_price(self) -> None:
+        makeradmin_test_product = self.db.create_product(
+            name="test update price",
+            price=100.0,
+            id=self.base_stripe_id + 7,
+            unit="mån",
+            smallest_multiple=1,
+            category_id=self.not_subscription_category.id,
+        )
+        self.seen_products.append(makeradmin_test_product)
+        stripe_test_product = stripe_util.find_or_create_stripe_product(makeradmin_test_product)
+        assert stripe_test_product
 
-    #     stripe_test_prices = stripe_util.find_or_create_stripe_prices_for_product(
-    #         makeradmin_test_product, stripe_test_product
-    #     )
-    #     assert stripe_test_prices
-    #     assert len(stripe_test_prices) == 1
-    #     stripe_test_price = stripe_test_prices[stripe_constants.PriceType.REGULAR_PRODUCT]
+        stripe_test_prices = stripe_util.find_or_create_stripe_prices_for_product(
+            makeradmin_test_product, stripe_test_product
+        )
+        assert stripe_test_prices
+        assert len(stripe_test_prices) == 1
+        stripe_test_price = stripe_test_prices[stripe_constants.PriceType.REGULAR_PRODUCT]
 
-    #     makeradmin_test_product.price = 200.0
-    #     new_stripe_price = stripe_util.update_stripe_price(
-    #         makeradmin_test_product, stripe_test_price, stripe_constants.PriceType.REGULAR_PRODUCT
-    #     )
-    #     self.assertPrice(new_stripe_price, makeradmin_test_product, stripe_constants.PriceType.REGULAR_PRODUCT)
+        makeradmin_test_product.price = 200.0
+        new_stripe_price = stripe_util.replace_stripe_price(
+            makeradmin_test_product, stripe_test_price, stripe_constants.PriceType.REGULAR_PRODUCT
+        )
+        self.assertPrice(new_stripe_price, makeradmin_test_product, stripe_constants.PriceType.REGULAR_PRODUCT)
 
-    #     makeradmin_test_product.price = 100.0
-    #     new_stripe_price = stripe_util.update_stripe_price(
-    #         makeradmin_test_product, stripe_test_price, stripe_constants.PriceType.REGULAR_PRODUCT
-    #     )
-    #     self.assertPrice(new_stripe_price, makeradmin_test_product, stripe_constants.PriceType.REGULAR_PRODUCT)
+        makeradmin_test_product.price = 100.0
+        new_stripe_price = stripe_util.replace_stripe_price(
+            makeradmin_test_product, stripe_test_price, stripe_constants.PriceType.REGULAR_PRODUCT
+        )
+        self.assertPrice(new_stripe_price, makeradmin_test_product, stripe_constants.PriceType.REGULAR_PRODUCT)
 
-    # def test_update_price_fail(self) -> None:
-    #     makeradmin_test_product = self.db.create_product(
-    #         name="test update price",
-    #         price=100.0,
-    #         id=self.base_stripe_id + 8,
-    #         unit="mån",
-    #         smallest_multiple=1,
-    #         category_id=self.not_subscription_category.id,
-    #     )
-    #     self.seen_products.append(makeradmin_test_product)
-    #     stripe_test_product = stripe_util.find_or_create_stripe_product(makeradmin_test_product)
-    #     assert stripe_test_product
+    def test_equal_product(self) -> None:
+        makeradmin_test_eq_product = self.db.create_product(
+            name="test eq price",
+            price=200.0,
+            id=self.base_stripe_id + 8,
+            unit="mån",
+            smallest_multiple=1,
+            category_id=self.subscription_category.id,
+        )
+        makeradmin_test_not_eq_product = self.db.create_product(
+            name="test not eq price",
+            price=200.0,
+            id=self.base_stripe_id - 1,
+            unit="mån",
+            smallest_multiple=1,
+            category_id=self.subscription_category.id,
+        )
 
-    #     stripe_test_prices = stripe_util.find_or_create_stripe_prices_for_product(
-    #         makeradmin_test_product, stripe_test_product
-    #     )
-    #     assert stripe_test_prices
-    #     assert len(stripe_test_prices) == 1
-    #     stripe_test_price = stripe_test_prices[stripe_constants.PriceType.RECURRING]
+        self.seen_products.append(makeradmin_test_eq_product)
+        stripe_test_product = stripe_util.find_or_create_stripe_product(makeradmin_test_eq_product)
+        assert stripe_test_product
 
-    #     with self.assertRaises(ValueError) as context:
-    #         makeradmin_test_product.unit = "year"
-    #         stripe_util.update_stripe_price(
-    #             makeradmin_test_product, stripe_test_price, stripe_constants.PriceType.BINDING_PERIOD
-    #         )
-    #     self.assertTrue("not possible" in str(context.exception))
+        stripe_test_prices = stripe_util.find_or_create_stripe_prices_for_product(
+            makeradmin_test_eq_product, stripe_test_product
+        )
+        assert stripe_test_prices
+        assert len(stripe_test_prices) == 1
 
-    # TODO test equal
+        assert stripe_util.eq_makeradmin_stripe_product(makeradmin_test_eq_product, stripe_test_product)
+        assert not stripe_util.eq_makeradmin_stripe_product(makeradmin_test_not_eq_product, stripe_test_product)
+
+    def test_equal_price(self) -> None:
+        makeradmin_test_eq_product = self.db.create_product(
+            name="test eq price",
+            price=200.0,
+            id=self.base_stripe_id + 9,
+            unit="mån",
+            smallest_multiple=1,
+            category_id=self.subscription_category.id,
+        )
+        product_not_eq_price = self.db.create_product(
+            name="test not eq price",
+            price=210.0,
+            id=self.base_stripe_id - 1,
+            unit="mån",
+            smallest_multiple=1,
+            category_id=self.subscription_category.id,
+        )
+        product_not_eq_unit = self.db.create_product(
+            name="test not eq unit",
+            price=200.0,
+            id=self.base_stripe_id - 2,
+            unit="year",
+            smallest_multiple=1,
+            category_id=self.subscription_category.id,
+        )
+        product_not_eq_id = self.db.create_product(
+            name="test not eq mult",
+            price=200.0,
+            id=self.base_stripe_id - 3,
+            unit="mån",
+            smallest_multiple=2,
+            category_id=self.subscription_category.id,
+        )
+        product_not_eq_cat = self.db.create_product(
+            name="test not eq category",
+            price=200.0,
+            id=self.base_stripe_id - 4,
+            unit="mån",
+            smallest_multiple=2,
+            category_id=self.not_subscription_category.id,
+        )
+        makeradmin_test_products_not_eq = [
+            product_not_eq_price,
+            product_not_eq_unit,
+            product_not_eq_id,
+            product_not_eq_cat,
+        ]
+        self.seen_products.append(makeradmin_test_eq_product)
+        stripe_test_product = stripe_util.find_or_create_stripe_product(makeradmin_test_eq_product)
+        assert stripe_test_product
+
+        stripe_test_prices = stripe_util.find_or_create_stripe_prices_for_product(
+            makeradmin_test_eq_product, stripe_test_product
+        )
+        assert stripe_test_prices
+        assert len(stripe_test_prices) == 1
+
+        assert stripe_util.eq_makeradmin_stripe_price(
+            makeradmin_test_eq_product,
+            stripe_test_prices[stripe_constants.PriceType.RECURRING],
+            stripe_constants.PriceType.RECURRING,
+        )
+        for product in makeradmin_test_products_not_eq:
+            assert not stripe_util.eq_makeradmin_stripe_price(
+                product,
+                stripe_test_prices[stripe_constants.PriceType.RECURRING],
+                stripe_constants.PriceType.RECURRING,
+            )
