@@ -8,7 +8,7 @@ stripe.api_version = "2022-11-15"
 # All stripe calculations are done with cents (ören in Sweden)
 STRIPE_CURRENTY_BASE = 100
 
-CURRENCY = "sek"  # TODO fix config.get("STRIPE_CURRENCY")
+CURRENCY = config.get("STRIPE_CURRENCY")
 
 STRIPE_SIGNING_SECRET = config.get("STRIPE_SIGNING_SECRET", log_value=False)
 

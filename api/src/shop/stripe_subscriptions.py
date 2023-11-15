@@ -232,7 +232,6 @@ def delete_stripe_customer(member_id: int) -> None:
     db_session.flush()
 
 
-# TODO is this a test help function only?
 def attach_and_set_default_payment_method(
     member: Member,
     payment_method: stripe.PaymentMethod,

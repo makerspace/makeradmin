@@ -1,6 +1,6 @@
 from logging import getLogger
 from typing import Any, Dict, List
-from unittest import skipIf, mock
+from unittest import skipIf
 
 import membership.models
 import shop.models
