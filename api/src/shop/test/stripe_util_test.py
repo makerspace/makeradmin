@@ -388,6 +388,12 @@ class StripeUtilWithStripeTest(ShopTestMixin, FlaskTestBase):
             product_not_eq_id,
             product_not_eq_cat,
         ]
+        price_types = [
+            stripe_constants.PriceType.RECURRING,
+            stripe_constants.PriceType.RECURRING,
+            stripe_constants.PriceType.BINDING_PERIOD,
+            stripe_constants.PriceType.REGULAR_PRODUCT,
+        ]
         self.seen_products.append(makeradmin_test_eq_product)
         stripe_test_product = stripe_util.find_or_create_stripe_product(makeradmin_test_eq_product)
         assert stripe_test_product
@@ -403,9 +409,9 @@ class StripeUtilWithStripeTest(ShopTestMixin, FlaskTestBase):
             stripe_test_prices[stripe_constants.PriceType.RECURRING],
             stripe_constants.PriceType.RECURRING,
         )
-        for product in makeradmin_test_products_not_eq:
+        for product, price_type in zip(makeradmin_test_products_not_eq, price_types):
             assert not stripe_util.eq_makeradmin_stripe_price(
                 product,
                 stripe_test_prices[stripe_constants.PriceType.RECURRING],
-                stripe_constants.PriceType.RECURRING,
+                price_type,
             )

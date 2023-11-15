@@ -95,10 +95,12 @@ def get_stripe_prices(
 
 
 def eq_makeradmin_stripe_product(makeradmin_product: Product, stripe_product: stripe.Product) -> bool:
+    """Check that the essential parts of the product are the same in both makeradmin and stripe"""
     return stripe_product.name == makeradmin_product.name
 
 
 def eq_makeradmin_stripe_price(makeradmin_product: Product, stripe_price: stripe.Price, price_type: PriceType) -> bool:
+    """Check that the essential parts of the price are the same in both makeradmin and stripe"""
     recurring = makeradmin_to_stripe_recurring(makeradmin_product, price_type)
     different = []
 
@@ -110,13 +112,13 @@ def eq_makeradmin_stripe_price(makeradmin_product: Product, stripe_price: stripe
     different.append(stripe_price.unit_amount != stripe_amount_from_makeradmin_product(makeradmin_product, recurring))
     different.append(stripe_price.currency != CURRENCY)
     different.append(stripe_price.metadata.get("price_type") != price_type.value)
-
     return not any(different)
 
 
 def eq_makeradmin_stripe(
     makeradmin_product: Product, stripe_product: stripe.Product, stripe_prices: Dict[PriceType, stripe.Price]
 ) -> Dict[str, bool]:
+    """Check that the essential parts of the product and it's prices are the same in both makeradmin and stripe"""
     differences = {"product": eq_makeradmin_stripe_product(makeradmin_product, stripe_product)}
     price_types = []
     expected_number_of_prices = 1
