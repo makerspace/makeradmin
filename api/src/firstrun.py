@@ -17,6 +17,8 @@ from shop.models import (
     Transaction,
     TransactionAction,
     TransactionContent,
+    CostCenter,
+    Account
 )
 from getpass import getpass
 
@@ -311,9 +313,47 @@ def create_shop_transactions():
             )
             index += 1 
     
-    
         db_session.commit()
 
+def create_shop_accounts():
+    banner(BLUE, "Creating Fake Account")
+    tools_category = get_or_create(
+    ProductCategory, name="Verktyg"
+)
+    products = db_session.query(Product).filter_by(category_id=tools_category.id)
+    for product in products:
+        for account_id in range(1, 3):
+            get_or_create(
+                Account,
+                    product_id=product.id,
+                    account = account_id,
+                defaults=dict(  
+                    debits = 0.5,
+                    credits =0.5
+                )
+            )
+
+    db_session.commit()
+
+def create_shop_cost_center():
+    banner(YELLOW, "Creating Fake Cost Center")
+    tools_category = get_or_create(
+    ProductCategory, name="Verktyg"
+)
+    products = db_session.query(Product).filter_by(category_id=tools_category.id)
+    for product in products:
+        for cost_center_id in range(1, 3):
+            get_or_create(
+                CostCenter,
+                    product_id=product.id,
+                    cost_center = cost_center_id,
+                    defaults=dict(  
+                    debits = 0.5,
+                    credits =0.5
+                )
+            )
+            
+    db_session.commit()
 
 def firstrun():
     create_db()
@@ -322,7 +362,9 @@ def firstrun():
     create_members()
     create_shop_products()
     create_shop_transactions()
-
+    create_shop_accounts()
+    create_shop_cost_center()
+    
     banner(
         GREEN,
         "Done, now run servers with 'make dev' then browse admin gui at "
