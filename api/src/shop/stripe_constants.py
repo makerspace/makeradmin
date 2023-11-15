@@ -1,6 +1,5 @@
 from enum import Enum
 
-# TODO move this and the keys
 from service.config import config
 
 # All stripe calculations are done with cents (ören in Sweden)
