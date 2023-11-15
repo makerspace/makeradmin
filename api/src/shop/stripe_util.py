@@ -141,33 +141,6 @@ def eq_makeradmin_stripe_price(makeradmin_product: Product, stripe_price: stripe
     return not any(different)
 
 
-def eq_makeradmin_stripe(
-    makeradmin_product: Product, stripe_product: stripe.Product, stripe_prices: Dict[PriceType, stripe.Price]
-) -> Dict[str, bool]:
-    """Check that the essential parts of the product and it's prices are the same in both makeradmin and stripe"""
-    differences = {"product": eq_makeradmin_stripe_product(makeradmin_product, stripe_product)}
-    price_types = []
-    expected_number_of_prices = 1
-    if makeradmin_product.category.id != get_subscription_category().id:
-        price_types.append(PriceType.REGULAR_PRODUCT)
-    else:
-        price_types.append(PriceType.RECURRING)
-        if makeradmin_product.smallest_multiple != 1:
-            expected_number_of_prices = 2
-            price_types.append(PriceType.BINDING_PERIOD)
-
-    if len(stripe_prices) != expected_number_of_prices:
-        raise RuntimeError(
-            f"Number of stripe prices does not match with makeradmin product multiplier. Got {len(stripe_prices)}, expected {expected_number_of_prices}"
-        )
-
-    for price_type in price_types:
-        differences[price_type.value] = eq_makeradmin_stripe_price(
-            makeradmin_product, stripe_prices[price_type], price_type
-        )
-    return differences
-
-
 def _create_stripe_product(makeradmin_product: Product, livemode: bool = False) -> stripe.Product | None:
     id = get_stripe_product_id(makeradmin_product, livemode)
     stripe_product = retry(
