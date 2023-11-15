@@ -56,11 +56,12 @@ services:
       ACCESSY_SPECIAL_LABACCESS_GROUP:
       ACCESSY_DO_MODIFY:
 
+
   email-dispatcher:
     image: makeradmin/api:1.0
     build:
       context: ./api
-    command: 
+    command:
       - "/work/dispatch_emails.sh"
     environment:
       MYSQL_HOST: db2
@@ -83,7 +84,7 @@ services:
     image: makeradmin/api:1.0
     build:
       context: ./api
-    command: 
+    command:
       - "/work/accessy_syncer.sh"
     environment:
       MYSQL_HOST: db2
@@ -107,7 +108,6 @@ services:
     networks:
       - makeradmin
 
-      
   public:
     image: makeradmin/public:1.0
     volumes:
