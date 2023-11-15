@@ -4,7 +4,7 @@ from sqlalchemy import func
 
 
 import stripe
-from test_aid.systest_config import STRIPE_PRIVATE_KEY, STRIPE_PUBLIC_KEY  # TODO this is probably wrong
+from test_aid.systest_config import STRIPE_PRIVATE_KEY, STRIPE_PUBLIC_KEY
 
 from shop.models import Product, ProductCategory
 from shop.stripe_constants import (
@@ -28,7 +28,6 @@ def setup_stripe_products(livemode: bool) -> None:
 
     subscription_category = get_subscription_category()
     makeradmin_products = db_session.query(Product).filter(ProductCategory.id == subscription_category.id)
-    # TODO assert that the correct products are in the makeradmin db
     for makeradmin_product in makeradmin_products:
         setup_stripe_product_and_prices(makeradmin_product, livemode)
 
@@ -60,7 +59,7 @@ def setup_stripe(livemode: bool) -> None:
     mode_str = "production" if livemode else "test/dev"
     logger.info(f"setting up stripe in {mode_str} mode")
     stripe.api_version = "2022-11-15"
-    set_stripe_key(private=True)  # TODO based on mode?
+    set_stripe_key(private=True)
 
     if stripe.api_key is None:
         logger.warning("skipping setting up stripe, keys are not set")
