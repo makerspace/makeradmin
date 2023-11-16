@@ -75,8 +75,8 @@ class Product(Base):
 
     category = relationship(ProductCategory, backref="products")
     actions = relationship("ProductAction")
-    accounts = relationship("Account")
-    cost_center = relationship("CostCenter")
+    accounts_cost_centers = relationship("AccountsCostCenters")
+    
 
     image_id = Column(Integer, ForeignKey(ProductImage.id), nullable=True)
 
@@ -174,31 +174,19 @@ class TransactionAction(Base):
             f"TransactionAction(id={self.id}, value={self.value}, status={self.status},"
             f" action_type={self.action_type})"
         )
-class Account(Base):
-    __tablename__ = "webshop_account"
+class AccountsCostCenters(Base):
+    __tablename__ = "webshop_accounts_cost_centers"
     
-    id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
-    product_id = Column(Integer, ForeignKey('webshop_products.id'), nullable=False)
-    account = Column(Integer, nullable=False)
-    debits = Column(Numeric(10,2))
-    credits = Column(Numeric(10,2))
-    product = relationship("Product", back_populates="accounts")
-    
-    def __repr__(self) -> str:
-        return  f"Account(id={self.id}, account={self.product_id}, debits={self.debits}, credits={self.credits})"    
-
-class CostCenter(Base):
-    __tablename__ = "webshop_cost_center"
-
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
     product_id = Column(Integer, ForeignKey('webshop_products.id'), nullable=False)
     cost_center = Column(Integer, nullable=False)
+    account = Column(Integer, nullable=False)
     debits = Column(Numeric(10,2))
     credits = Column(Numeric(10,2))
-    product = relationship("Product", back_populates="cost_center")
-
+    product = relationship("Product", back_populates="accounts_cost_centers")
+    
     def __repr__(self) -> str:
-        return  f"CostCenter(id={self.id}, cost_center{self.product_id}, debits={self.debits}, credits={self.credits})"        
+        return  f"AccountsCostCenters(id={self.id}, cost_center={self.cost_center}, account={self.product_id}, debits={self.debits}, credits={self.credits})"     
 
 class StripePending(Base):
     __tablename__ = "webshop_stripe_pending"
