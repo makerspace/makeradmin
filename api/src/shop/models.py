@@ -1,3 +1,4 @@
+
 from typing import Any
 from sqlalchemy import (
     JSON,
@@ -13,6 +14,7 @@ from sqlalchemy import (
     Boolean,
     LargeBinary,
 )
+
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, configure_mappers, validates
 from shop.stripe_constants import MakerspaceMetadataKeys
@@ -73,6 +75,8 @@ class Product(Base):
 
     category = relationship(ProductCategory, backref="products")
     actions = relationship("ProductAction")
+    accounts = relationship("Account")
+    cost_center = relationship("CostCenter")
 
     image_id = Column(Integer, ForeignKey(ProductImage.id), nullable=True)
 
@@ -170,7 +174,31 @@ class TransactionAction(Base):
             f"TransactionAction(id={self.id}, value={self.value}, status={self.status},"
             f" action_type={self.action_type})"
         )
+class Account(Base):
+    __tablename__ = "webshop_account"
+    
+    id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
+    product_id = Column(Integer, ForeignKey('webshop_products.id'), nullable=False)
+    account = Column(Integer, nullable=False)
+    debits = Column(Numeric(10,2))
+    credits = Column(Numeric(10,2))
+    product = relationship("Product", back_populates="accounts")
+    
+    def __repr__(self) -> str:
+        return  f"Account(id={self.id}, account={self.product_id}, debits={self.debits}, credits={self.credits})"    
 
+class CostCenter(Base):
+    __tablename__ = "webshop_cost_center"
+
+    id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
+    product_id = Column(Integer, ForeignKey('webshop_products.id'), nullable=False)
+    cost_center = Column(Integer, nullable=False)
+    debits = Column(Numeric(10,2))
+    credits = Column(Numeric(10,2))
+    product = relationship("Product", back_populates="cost_center")
+
+    def __repr__(self) -> str:
+        return  f"CostCenter(id={self.id}, cost_center{self.product_id}, debits={self.debits}, credits={self.credits})"        
 
 class StripePending(Base):
     __tablename__ = "webshop_stripe_pending"
