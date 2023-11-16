@@ -107,12 +107,12 @@ class StripeUtilWithStripeTest(ShopTestMixin, FlaskTestBase):
     def tearDown(self) -> None:
         # It is not possible to delete prices through the api so we set them as inactive instead
         for makeradmin_product in self.seen_products:
-            stripe_product = stripe_util.get_stripe_product(makeradmin_product, livemode=False)
+            stripe_product = stripe_util.get_stripe_product(makeradmin_product)
             if stripe_product is None:
                 continue
             if stripe_product.active:
                 stripe_util.deactivate_stripe_product(stripe_product)
-            stripe_prices = stripe_util.get_stripe_prices(stripe_product, livemode=False)
+            stripe_prices = stripe_util.get_stripe_prices(stripe_product)
             if stripe_prices is None:
                 continue
             for price in stripe_prices:
