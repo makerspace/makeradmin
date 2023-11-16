@@ -214,13 +214,13 @@ def stripe_invoice_event(subtype: EventSubtype, event: stripe.Event, current_tim
             # This is nice to have in the future if we need to match them somehow.
             # In the vast majority of all cases, this will just contain a single transaction id.
             stripe.Invoice.modify(
-                sid=invoice["id"],
+                invoice["id"],
                 metadata={
                     MakerspaceMetadataKeys.TRANSACTION_IDS.value: ",".join([str(x) for x in transaction_ids]),
                 },
             )
             stripe.PaymentIntent.modify(
-                sid=invoice["payment_intent"],
+                invoice["payment_intent"],
                 metadata={
                     MakerspaceMetadataKeys.TRANSACTION_IDS.value: ",".join([str(x) for x in transaction_ids]),
                 },

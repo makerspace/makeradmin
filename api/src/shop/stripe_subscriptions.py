@@ -232,22 +232,6 @@ def delete_stripe_customer(member_id: int) -> None:
     db_session.flush()
 
 
-def attach_and_set_default_payment_method(
-    member: Member,
-    payment_method: stripe.PaymentMethod,
-    test_clock: Optional[stripe.test_helpers.TestClock] = None,
-) -> None:
-    stripe_member = get_stripe_customer(member, test_clock=test_clock)
-    assert stripe_member is not None
-    stripe.PaymentMethod.attach(payment_method, customer=stripe_member.stripe_id)
-    stripe.Customer.modify(
-        stripe_member.stripe_id,
-        invoice_settings={
-            "default_payment_method": payment_method.stripe_id,
-        },
-    )
-
-
 def are_metadata_dicts_equivalent(a: Dict[str, Any], b: Dict[str, Any]) -> bool:
     a = {k: v for k, v in a.items() if v != ""}
     b = {k: v for k, v in b.items() if v != ""}
@@ -680,7 +664,7 @@ def pause_subscription(
             return False
         elif subscription_id.startswith("sub_"):
             stripe.Subscription.modify(
-                sid=subscription_id,
+                subscription_id,
                 pause_collection={
                     "behavior": "void",
                     "resumes_at": None,
@@ -740,10 +724,10 @@ def cancel_subscription(
 
                 if schedule["subscription"]:
                     # Also delete the subscription which the schedule drives, if one exists
-                    stripe.Subscription.delete(sid=schedule["subscription"])
+                    stripe.Subscription.delete(schedule["subscription"])
 
         elif subscription_id.startswith("sub_"):
-            stripe.Subscription.delete(sid=subscription_id)
+            stripe.Subscription.delete(subscription_id)
         else:
             assert False
     except stripe.error.InvalidRequestError as e:
