@@ -70,7 +70,7 @@ engine = create_mysql_engine(**get_mysql_config())
 populate_fields_by_index(engine)
 register_permissions(ALL_PERMISSIONS)
 
-setup_stripe(config.get("DEV_RUN") != "true")
+setup_stripe()
 
 
 @app.route("/")
