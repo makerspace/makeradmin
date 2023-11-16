@@ -17,8 +17,7 @@ from shop.models import (
     Transaction,
     TransactionAction,
     TransactionContent,
-    CostCenter,
-    Account
+    AccountsCostCenters
 )
 from getpass import getpass
 
@@ -266,16 +265,11 @@ def create_shop_transactions():
         ProductCategory, name="Verktyg"
     )
     
-  
     products = db_session.query(Product).filter_by(category_id=tools_category.id)
-    start_date = datetime(2020,1,1)
-    end_date = datetime.today()
-    
     numdays_list=[1,10,35,400]
     index = 1
 
     for product in products:
-    
         for numdays in numdays_list:
             test_date = datetime.today() - timedelta(days=numdays)
             
@@ -315,45 +309,30 @@ def create_shop_transactions():
     
         db_session.commit()
 
-def create_shop_accounts():
-    banner(BLUE, "Creating Fake Account")
+def create_shop_accounts_cost_centers():
+    banner(BLUE, "Creating Fake Account and Cost Centers")
     tools_category = get_or_create(
     ProductCategory, name="Verktyg"
 )
     products = db_session.query(Product).filter_by(category_id=tools_category.id)
     for product in products:
         for account_id in range(1, 3):
-            get_or_create(
-                Account,
-                    product_id=product.id,
-                    account = account_id,
-                defaults=dict(  
-                    debits = 0.5,
-                    credits =0.5
-                )
-            )
-
-    db_session.commit()
-
-def create_shop_cost_center():
-    banner(YELLOW, "Creating Fake Cost Center")
-    tools_category = get_or_create(
-    ProductCategory, name="Verktyg"
-)
-    products = db_session.query(Product).filter_by(category_id=tools_category.id)
-    for product in products:
-        for cost_center_id in range(1, 3):
-            get_or_create(
-                CostCenter,
+            for cost_center_id in range(1,3):
+             
+             get_or_create(
+                AccountsCostCenters,
                     product_id=product.id,
                     cost_center = cost_center_id,
+                    account = account_id,
                     defaults=dict(  
-                    debits = 0.5,
-                    credits =0.5
+                    debits = 0.25,
+                    credits =0.25
                 )
             )
-            
+
     db_session.commit()
+
+
 
 def firstrun():
     create_db()
@@ -362,8 +341,8 @@ def firstrun():
     create_members()
     create_shop_products()
     create_shop_transactions()
-    create_shop_accounts()
-    create_shop_cost_center()
+    create_shop_accounts_cost_centers()
+    
     
     banner(
         GREEN,
