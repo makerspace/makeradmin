@@ -1,4 +1,5 @@
 from datetime import date, datetime, timezone, time as dt_time
+from enum import Enum
 import logging
 import time
 import random
@@ -9,7 +10,6 @@ from unittest import skipIf
 
 import pytest
 from shop.stripe_util import event_semantic_time
-from test_aid.systest_base import DECLINE_AFTER_ATTACHING_CARD, VALID_3DS_CARD_NO
 from shop.stripe_subscriptions import (
     BINDING_PERIOD,
     SubscriptionType,
@@ -41,6 +41,11 @@ from shop import stripe_constants
 logger = logging.getLogger("makeradmin")
 
 
+class TestCardPmToken(Enum):
+    Normal = "pm_card_visa"
+    DeclineAfterAttach = "pm_card_chargeCustomerFail"
+
+
 def noon(date: date) -> datetime:
     return datetime.combine(date, dt_time(hour=12, minute=0, second=0), tzinfo=timezone.utc)
 
@@ -54,8 +59,9 @@ def time_delta(years: int = 0, months: int = 0, days: int = 0) -> relativedelta:
     return relativedelta(years=years, months=months, days=days)
 
 
-def attach_and_set_default_payment_method(
+def attach_and_set_payment_method(
     member: Member,
+    card_token: TestCardPmToken,
     test_clock: Optional[stripe.test_helpers.TestClock] = None,
 ) -> None:
     stripe_member = stripe_subscriptions.get_stripe_customer(member, test_clock=test_clock)
@@ -63,12 +69,11 @@ def attach_and_set_default_payment_method(
 
     # stripe.Customer.create_source
     # payment_method = stripe.PaymentMethod.create(type="card")
-    payment_method = "pm_card_visa"
-    stripe_payment_method = stripe.PaymentMethod.attach(payment_method, customer=stripe_member.stripe_id)
+    payment_method = stripe.PaymentMethod.attach(card_token.value, customer=stripe_member.stripe_id)
     stripe.Customer.modify(
         stripe_member.stripe_id,
         invoice_settings={
-            "default_payment_method": stripe_payment_method.stripe_id,
+            "default_payment_method": payment_method.stripe_id,
         },
     )
 
@@ -128,23 +133,24 @@ class Test(FlaskTestBase):
 
     def create_member_that_can_pay(self, test_clock: FakeClock, signed_labaccess: bool = True) -> Member:
         member = self.db.create_member(password=hash_password(DEFAULT_PASSWORD))
-        self.set_payment_method(member, test_clock)
+        self.set_payment_method(member, TestCardPmToken.Normal, test_clock)
         if signed_labaccess:
             member.labaccess_agreement_at = test_clock.date
         return member
 
-    def set_payment_method(self, member: Member, test_clock: FakeClock) -> None:
-        attach_and_set_default_payment_method(member, test_clock.stripe_clock)
+    def set_payment_method(self, member: Member, card_token: TestCardPmToken, test_clock: FakeClock) -> None:
+        attach_and_set_payment_method(member, card_token, test_clock.stripe_clock)
 
     def get_member(self, member_id: int) -> Member:
         return cast(Member, db_session.query(Member).get(member_id))
 
-    def setup_single_member(self, signed_labaccess: bool = True) -> Tuple[datetime, FakeClock, int]:
-        now = datetime.now(timezone.utc)
-        clock = FakeClock(now)
+    def setup_single_member(
+        self, signed_labaccess: bool = True, start_time: datetime = datetime.now(timezone.utc)
+    ) -> Tuple[datetime, FakeClock, int]:
+        clock = FakeClock(start_time)
         self.clocks_to_destroy.append(clock)
         member_id = self.create_member_that_can_pay(clock, signed_labaccess).member_id
-        return (now, clock, member_id)
+        return (start_time, clock, member_id)
 
     def advance_clock(self, clock: FakeClock, time: datetime) -> None:
         clock.advance(to=time)
@@ -526,91 +532,91 @@ class Test(FlaskTestBase):
         summary = get_membership_summary(member_id, clock.date)
         assert summary.labaccess_end == sub_start + time_delta(months=1, days=1)
 
-    # def test_subscriptions_failing_card(self) -> None:
-    #     """
-    #     Checks that if a subscription fails to charge, the subscription is deleted after a while
-    #     """
-    #     binding_period = BINDING_PERIOD[SubscriptionType.LAB]
-    #     if binding_period <= 0:
-    #         pytest.skip("No binding period for lab access")
+    def test_subscriptions_failing_card(self) -> None:
+        """
+        Checks that if a subscription fails to charge, the subscription is deleted after a while
+        """
+        binding_period = BINDING_PERIOD[SubscriptionType.LAB]
+        if binding_period <= 0:
+            pytest.skip("No binding period for lab access")
 
-    #     (now, clock, member_id) = self.setup_single_member()
+        (now, clock, member_id) = self.setup_single_member()
 
-    #     stripe_subscriptions.start_subscription(
-    #         member_id,
-    #         SubscriptionType.MEMBERSHIP,
-    #         earliest_start_at=now,
-    #         test_clock=clock.stripe_clock,
-    #     )
-    #     self.advance_clock(clock, now + time_delta(days=1))
+        stripe_subscriptions.start_subscription(
+            member_id,
+            SubscriptionType.MEMBERSHIP,
+            earliest_start_at=now,
+            test_clock=clock.stripe_clock,
+        )
+        self.advance_clock(clock, now + time_delta(days=1))
 
-    #     summary = get_membership_summary(member_id, clock.date)
-    #     assert (
-    #         summary.membership_active
-    #     ), "The subscription was paid with a valid card the first time, so the member should have active membership"
+        summary = get_membership_summary(member_id, clock.date)
+        assert (
+            summary.membership_active
+        ), "The subscription was paid with a valid card the first time, so the member should have active membership"
 
-    #     self.set_payment_method(self.get_member(member_id), DECLINE_AFTER_ATTACHING_CARD, clock) #TODO fix
+        self.set_payment_method(self.get_member(member_id), TestCardPmToken.DeclineAfterAttach, clock)  # TODO fix
 
-    #     # Stripe should be configured to retry the payment 3 times before giving up
-    #     # This will take 3 + 5 + 7 = 15 days with the default settings
-    #     # We use 20 days here, though, since stripe confusingly sometimes does not generate
-    #     # all events if we don't advance the clock a bit more.
-    #     self.advance_clock(clock, now + time_delta(years=1, days=20))
+        # Stripe should be configured to retry the payment 3 times before giving up
+        # This will take 3 + 5 + 7 = 15 days with the default settings
+        # We use 20 days here, though, since stripe confusingly sometimes does not generate
+        # all events if we don't advance the clock a bit more.
+        self.advance_clock(clock, now + time_delta(years=1, days=20))
 
-    #     summary = get_membership_summary(member_id, clock.date)
-    #     assert (
-    #         not summary.membership_active
-    #     ), "The subscription was not paid, so the member should not have active membership"
-    #     assert (
-    #         self.get_member(member_id).stripe_membership_subscription_id is None
-    #     ), "The subscription should have been cancelled at this point"
+        summary = get_membership_summary(member_id, clock.date)
+        assert (
+            not summary.membership_active
+        ), "The subscription was not paid, so the member should not have active membership"
+        assert (
+            self.get_member(member_id).stripe_membership_subscription_id is None
+        ), "The subscription should have been cancelled at this point"
 
-    # def test_subscriptions_retry_card(self) -> None:
-    #     """
-    #     Checks that if a subscription fails to charge, the subscription is retried a few times and then nenewed when we switch to a new card
-    #     """
-    #     binding_period = BINDING_PERIOD[SubscriptionType.LAB]
-    #     if binding_period <= 0:
-    #         pytest.skip("No binding period for lab access")
+    def test_subscriptions_retry_card(self) -> None:
+        """
+        Checks that if a subscription fails to charge, the subscription is retried a few times and then nenewed when we switch to a new card
+        """
+        binding_period = BINDING_PERIOD[SubscriptionType.LAB]
+        if binding_period <= 0:
+            pytest.skip("No binding period for lab access")
 
-    #     (now, clock, member_id) = self.setup_single_member()
+        (now, clock, member_id) = self.setup_single_member()
 
-    #     stripe_subscriptions.start_subscription(
-    #         member_id,
-    #         SubscriptionType.MEMBERSHIP,
-    #         earliest_start_at=now,
-    #         test_clock=clock.stripe_clock,
-    #     )
-    #     self.advance_clock(clock, now + time_delta(days=1))
+        stripe_subscriptions.start_subscription(
+            member_id,
+            SubscriptionType.MEMBERSHIP,
+            earliest_start_at=now,
+            test_clock=clock.stripe_clock,
+        )
+        self.advance_clock(clock, now + time_delta(days=1))
 
-    #     summary = get_membership_summary(member_id, clock.date)
-    #     assert (
-    #         summary.membership_active
-    #     ), "The subscription was paid with a valid card the first time, so the member should have active membership"
+        summary = get_membership_summary(member_id, clock.date)
+        assert (
+            summary.membership_active
+        ), "The subscription was paid with a valid card the first time, so the member should have active membership"
 
-    #     self.set_payment_method(self.get_member(member_id), DECLINE_AFTER_ATTACHING_CARD, clock)  # TODO
+        self.set_payment_method(self.get_member(member_id), TestCardPmToken.DeclineAfterAttach, clock)  # TODO
 
-    #     # Stripe should be configured to retry the payment 3 times before giving up
-    #     # This will take 3 + 5 + 7 = 15 days with the default settings
-    #     self.advance_clock(clock, now + time_delta(years=1, days=2))
+        # Stripe should be configured to retry the payment 3 times before giving up
+        # This will take 3 + 5 + 7 = 15 days with the default settings
+        self.advance_clock(clock, now + time_delta(years=1, days=2))
 
-    #     # Restore a valid payment method. The card will be retried at 1year + 3days
-    #     self.set_payment_method(self.get_member(member_id), VALID_3DS_CARD_NO, clock)
+        # Restore a valid payment method. The card will be retried at 1year + 3days
+        self.set_payment_method(self.get_member(member_id), TestCardPmToken.Normal, clock)
 
-    #     self.advance_clock(clock, now + time_delta(years=1, days=10))
+        self.advance_clock(clock, now + time_delta(years=1, days=10))
 
-    #     summary = get_membership_summary(member_id, clock.date)
-    #     assert summary.membership_active, "The subscription was paid, so the member should have active membership"
-    #     # When the card is retried, the subscription should be renewed for another year.
-    #     # This behavior is slightly different to what will happen in reality.
-    #     # In reality, the subscription will be renewed at 1year+3days because
-    #     # that's when stripe checks the card again, and then we will add new membership to the member from that time.
-    #     # But since we are faking times during the test, the behavior is not 100% truthful.
-    #     # But this is close enough to verify that everything works as expected.
-    #     assert summary.membership_end == (now + time_delta(years=2)).date()
-    #     assert (
-    #         self.get_member(member_id).stripe_membership_subscription_id is not None
-    #     ), "The subscription should not have been deleted"
+        summary = get_membership_summary(member_id, clock.date)
+        assert summary.membership_active, "The subscription was paid, so the member should have active membership"
+        # When the card is retried, the subscription should be renewed for another year.
+        # This behavior is slightly different to what will happen in reality.
+        # In reality, the subscription will be renewed at 1year+3days because
+        # that's when stripe checks the card again, and then we will add new membership to the member from that time.
+        # But since we are faking times during the test, the behavior is not 100% truthful.
+        # But this is close enough to verify that everything works as expected.
+        assert summary.membership_end == (now + time_delta(years=2)).date()
+        assert (
+            self.get_member(member_id).stripe_membership_subscription_id is not None
+        ), "The subscription should not have been deleted"
 
     def test_subscriptions_signed_agreement1(self) -> None:
         """
@@ -622,7 +628,7 @@ class Test(FlaskTestBase):
 
         assert not get_membership_summary(member_id).membership_active
 
-        subscription_schedule_id = stripe_subscriptions.start_subscription(
+        stripe_subscriptions.start_subscription(
             member_id,
             SubscriptionType.LAB,
             earliest_start_at=now,
@@ -662,25 +668,74 @@ class Test(FlaskTestBase):
         The subscription is immediately paused, and only resumed when the member signs the agreement.
         In this variant the member signs the agreement after the binding period would have been over.
         """
-        (now, clock, member_id) = self.setup_single_member(signed_labaccess=False)
+        (start_time, clock, member_id) = self.setup_single_member(
+            start_time=datetime(2023, 6, 1, tzinfo=timezone.utc), signed_labaccess=False
+        )
 
         assert not get_membership_summary(member_id).membership_active
 
         stripe_subscriptions.start_subscription(
             member_id,
             SubscriptionType.LAB,
-            earliest_start_at=now,
+            earliest_start_at=start_time,
             test_clock=clock.stripe_clock,
         )
 
-        self.advance_clock(clock, now + time_delta(months=2, days=5))
+        self.advance_clock(clock, start_time + time_delta(months=1, days=5))
 
         # Since the member has not signed the agreement yet, they should not have labaccess
         summary = get_membership_summary(member_id, clock.date)
         assert not summary.labaccess_active
 
-        self.advance_clock(clock, now + time_delta(months=3, days=5))
-        self.advance_clock(clock, now + time_delta(months=4, days=5))
+        self.advance_clock(clock, start_time + time_delta(months=2, days=5))
+        self.advance_clock(clock, start_time + time_delta(months=3, days=5))
+
+        # Member signs agreement after more than 3 months
+        # Their 2 months of initial labaccess will start ticking now
+        self.get_member(member_id).labaccess_agreement_at = clock.date
+        db_session.commit()
+        sub_start = clock.date.date()
+        ship_orders(True, current_time=clock.date, member_id=member_id)
+
+        self.advance_clock(clock, noon(sub_start + time_delta(months=0, days=10)))
+
+        summary = get_membership_summary(member_id, clock.date)
+        assert summary.labaccess_active
+        assert summary.labaccess_end == sub_start + time_delta(months=2)
+
+        self.advance_clock(clock, noon(sub_start + time_delta(months=2, days=3)))
+
+        # The member should now have finished their binding period and been billed for another month
+        summary = get_membership_summary(member_id, clock.date)
+        assert summary.labaccess_active
+        assert summary.labaccess_end == sub_start + time_delta(months=3)
+
+    def test_subscriptions_signed_agreement_leap_year(self) -> None:
+        """
+        Checks that labaccess works correctly if there is a leaps year and
+        the agreement is signed later.
+        """
+        (start_time, clock, member_id) = self.setup_single_member(
+            start_time=datetime(2023, 11, 15, tzinfo=timezone.utc), signed_labaccess=False
+        )
+
+        assert not get_membership_summary(member_id).membership_active
+
+        stripe_subscriptions.start_subscription(
+            member_id,
+            SubscriptionType.LAB,
+            earliest_start_at=start_time,
+            test_clock=clock.stripe_clock,
+        )
+
+        self.advance_clock(clock, start_time + time_delta(months=1, days=5))
+
+        # Since the member has not signed the agreement yet, they should not have labaccess
+        summary = get_membership_summary(member_id, clock.date)
+        assert not summary.labaccess_active
+
+        self.advance_clock(clock, start_time + time_delta(months=2, days=5))
+        self.advance_clock(clock, start_time + time_delta(months=3, days=5))
 
         # Member signs agreement after more than 3 months
         # Their 2 months of initial labaccess will start ticking now
