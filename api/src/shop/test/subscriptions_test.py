@@ -41,7 +41,7 @@ from shop import stripe_constants
 logger = logging.getLogger("makeradmin")
 
 
-class TestCardPmToken(Enum):
+class FakeCardPmToken(Enum):
     Normal = "pm_card_visa"
     DeclineAfterAttach = "pm_card_chargeCustomerFail"
 
@@ -61,7 +61,7 @@ def time_delta(years: int = 0, months: int = 0, days: int = 0) -> relativedelta:
 
 def attach_and_set_payment_method(
     member: Member,
-    card_token: TestCardPmToken,
+    card_token: FakeCardPmToken,
     test_clock: Optional[stripe.test_helpers.TestClock] = None,
 ) -> None:
     stripe_member = stripe_subscriptions.get_stripe_customer(member, test_clock=test_clock)
@@ -133,12 +133,12 @@ class Test(FlaskTestBase):
 
     def create_member_that_can_pay(self, test_clock: FakeClock, signed_labaccess: bool = True) -> Member:
         member = self.db.create_member(password=hash_password(DEFAULT_PASSWORD))
-        self.set_payment_method(member, TestCardPmToken.Normal, test_clock)
+        self.set_payment_method(member, FakeCardPmToken.Normal, test_clock)
         if signed_labaccess:
             member.labaccess_agreement_at = test_clock.date
         return member
 
-    def set_payment_method(self, member: Member, card_token: TestCardPmToken, test_clock: FakeClock) -> None:
+    def set_payment_method(self, member: Member, card_token: FakeCardPmToken, test_clock: FakeClock) -> None:
         attach_and_set_payment_method(member, card_token, test_clock.stripe_clock)
 
     def get_member(self, member_id: int) -> Member:
@@ -555,7 +555,7 @@ class Test(FlaskTestBase):
             summary.membership_active
         ), "The subscription was paid with a valid card the first time, so the member should have active membership"
 
-        self.set_payment_method(self.get_member(member_id), TestCardPmToken.DeclineAfterAttach, clock)  # TODO fix
+        self.set_payment_method(self.get_member(member_id), FakeCardPmToken.DeclineAfterAttach, clock)  # TODO fix
 
         # Stripe should be configured to retry the payment 3 times before giving up
         # This will take 3 + 5 + 7 = 15 days with the default settings
@@ -594,14 +594,14 @@ class Test(FlaskTestBase):
             summary.membership_active
         ), "The subscription was paid with a valid card the first time, so the member should have active membership"
 
-        self.set_payment_method(self.get_member(member_id), TestCardPmToken.DeclineAfterAttach, clock)  # TODO
+        self.set_payment_method(self.get_member(member_id), FakeCardPmToken.DeclineAfterAttach, clock)  # TODO
 
         # Stripe should be configured to retry the payment 3 times before giving up
         # This will take 3 + 5 + 7 = 15 days with the default settings
         self.advance_clock(clock, now + time_delta(years=1, days=2))
 
         # Restore a valid payment method. The card will be retried at 1year + 3days
-        self.set_payment_method(self.get_member(member_id), TestCardPmToken.Normal, clock)
+        self.set_payment_method(self.get_member(member_id), FakeCardPmToken.Normal, clock)
 
         self.advance_clock(clock, now + time_delta(years=1, days=10))
 
@@ -710,13 +710,13 @@ class Test(FlaskTestBase):
         assert summary.labaccess_active
         assert summary.labaccess_end == sub_start + time_delta(months=3)
 
-    def test_subscriptions_signed_agreement_leap_year(self) -> None:
+    def test_subscriptions_signed_agreement_february(self) -> None:
         """
         Checks that labaccess works correctly if there is a leaps year and
         the agreement is signed later.
         """
         (start_time, clock, member_id) = self.setup_single_member(
-            start_time=datetime(2023, 11, 15, tzinfo=timezone.utc), signed_labaccess=False
+            start_time=datetime(2022, 11, 15, tzinfo=timezone.utc), signed_labaccess=False
         )
 
         assert not get_membership_summary(member_id).membership_active
