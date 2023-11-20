@@ -67,8 +67,6 @@ def attach_and_set_payment_method(
     stripe_member = stripe_subscriptions.get_stripe_customer(member, test_clock=test_clock)
     assert stripe_member is not None
 
-    # stripe.Customer.create_source
-    # payment_method = stripe.PaymentMethod.create(type="card")
     payment_method = stripe.PaymentMethod.attach(card_token.value, customer=stripe_member.stripe_id)
     stripe.Customer.modify(
         stripe_member.stripe_id,
@@ -555,7 +553,7 @@ class Test(FlaskTestBase):
             summary.membership_active
         ), "The subscription was paid with a valid card the first time, so the member should have active membership"
 
-        self.set_payment_method(self.get_member(member_id), FakeCardPmToken.DeclineAfterAttach, clock)  # TODO fix
+        self.set_payment_method(self.get_member(member_id), FakeCardPmToken.DeclineAfterAttach, clock)
 
         # Stripe should be configured to retry the payment 3 times before giving up
         # This will take 3 + 5 + 7 = 15 days with the default settings
@@ -594,7 +592,7 @@ class Test(FlaskTestBase):
             summary.membership_active
         ), "The subscription was paid with a valid card the first time, so the member should have active membership"
 
-        self.set_payment_method(self.get_member(member_id), FakeCardPmToken.DeclineAfterAttach, clock)  # TODO
+        self.set_payment_method(self.get_member(member_id), FakeCardPmToken.DeclineAfterAttach, clock)
 
         # Stripe should be configured to retry the payment 3 times before giving up
         # This will take 3 + 5 + 7 = 15 days with the default settings
