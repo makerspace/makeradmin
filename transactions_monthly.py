@@ -39,8 +39,7 @@ with open(output, 'w', newline='') as file:
                 account,
                 cost_center
             ])
-            
-print(f"Data sammanställd till {output}")
+print(f"Data Compiled to {output}")
 
 
 
