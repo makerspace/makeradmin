@@ -622,18 +622,19 @@ class Test(FlaskTestBase):
         The subscription is immediatelly paused, and only resumed when the member signs the agreement.
         In this variant the member signs the agreement after just a few days.
         """
-        (now, clock, member_id) = self.setup_single_member(signed_labaccess=False)
-
+        (start_time, clock, member_id) = self.setup_single_member(
+            start_time=datetime(2023, 6, 1, tzinfo=timezone.utc), signed_labaccess=False
+        )
         assert not get_membership_summary(member_id).membership_active
 
         stripe_subscriptions.start_subscription(
             member_id,
             SubscriptionType.LAB,
-            earliest_start_at=now,
+            earliest_start_at=start_time,
             test_clock=clock.stripe_clock,
         )
 
-        self.advance_clock(clock, now + time_delta(days=5))
+        self.advance_clock(clock, start_time + time_delta(days=5))
 
         summary = get_membership_summary(member_id, clock.date)
         assert not summary.labaccess_active
@@ -650,7 +651,7 @@ class Test(FlaskTestBase):
 
         summary = get_membership_summary(member_id, clock.date)
         assert summary.labaccess_active
-        assert summary.labaccess_end == sub_start + time_delta(months=2)
+        assert summary.labaccess_end == sub_start + time_delta(days=61)
 
         # Stripe limits how much we can advance the clock in one go
         self.advance_clock(clock, noon(sub_start + time_delta(months=2, days=3)))
@@ -658,7 +659,7 @@ class Test(FlaskTestBase):
 
         summary = get_membership_summary(member_id, clock.date)
         assert summary.labaccess_active
-        assert summary.labaccess_end == sub_start + time_delta(months=3)
+        assert summary.labaccess_end == sub_start + time_delta(days=61) + time_delta(months=1)
 
     def test_subscriptions_signed_agreement_late(self) -> None:
         """
@@ -699,14 +700,58 @@ class Test(FlaskTestBase):
 
         summary = get_membership_summary(member_id, clock.date)
         assert summary.labaccess_active
-        assert summary.labaccess_end == sub_start + time_delta(months=2)
+        assert summary.labaccess_end == sub_start + time_delta(days=61)
 
         self.advance_clock(clock, noon(sub_start + time_delta(months=2, days=3)))
 
         # The member should now have finished their binding period and been billed for another month
         summary = get_membership_summary(member_id, clock.date)
         assert summary.labaccess_active
-        assert summary.labaccess_end == sub_start + time_delta(months=3)
+        assert summary.labaccess_end == sub_start + time_delta(days=61) + time_delta(months=1)
+
+    def test_subscriptions_signed_agreement_immediate_february(self) -> None:
+        """
+        Checks that labaccess works correctly if paid and signed in february
+        """
+        (start_time, clock, member_id) = self.setup_single_member(
+            start_time=datetime(2023, 2, 10, tzinfo=timezone.utc), signed_labaccess=False
+        )
+
+        assert not get_membership_summary(member_id).membership_active
+
+        stripe_subscriptions.start_subscription(
+            member_id,
+            SubscriptionType.LAB,
+            earliest_start_at=start_time,
+            test_clock=clock.stripe_clock,
+        )
+
+        self.advance_clock(clock, start_time + time_delta(days=5))
+
+        summary = get_membership_summary(member_id, clock.date)
+        assert not summary.labaccess_active
+
+        # Member signs agreement
+        self.get_member(member_id).labaccess_agreement_at = clock.date
+        db_session.commit()
+        # Ship any orders related to the member. We exclude all other members
+        # because that might mess up other tests running in parallel.
+        ship_orders(True, current_time=clock.date, member_id=member_id)
+        sub_start = clock.date.date()
+
+        self.advance_clock(clock, noon(sub_start + time_delta(days=5)))
+
+        summary = get_membership_summary(member_id, clock.date)
+        assert summary.labaccess_active
+        assert summary.labaccess_end == sub_start + time_delta(days=61)
+
+        # Stripe limits how much we can advance the clock in one go
+        self.advance_clock(clock, noon(sub_start + time_delta(months=2, days=3)))
+        self.advance_clock(clock, noon(sub_start + time_delta(months=2, days=5)))
+
+        summary = get_membership_summary(member_id, clock.date)
+        assert summary.labaccess_active
+        assert summary.labaccess_end == sub_start + time_delta(days=61) + time_delta(months=1)
 
     def test_subscriptions_late_signed_agreement_february(self) -> None:
         """
@@ -745,11 +790,11 @@ class Test(FlaskTestBase):
 
         summary = get_membership_summary(member_id, clock.date)
         assert summary.labaccess_active
-        assert summary.labaccess_end == sub_start + time_delta(months=2)
+        assert summary.labaccess_end == sub_start + time_delta(days=61)
 
         self.advance_clock(clock, noon(sub_start + time_delta(months=2, days=3)))
 
         # The member should now have finished their binding period and been billed for another month
         summary = get_membership_summary(member_id, clock.date)
         assert summary.labaccess_active
-        assert summary.labaccess_end == sub_start + time_delta(months=3)
+        assert summary.labaccess_end == sub_start + time_delta(days=61) + time_delta(months=1)

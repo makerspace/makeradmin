@@ -1,6 +1,7 @@
 from decimal import Decimal
 from logging import getLogger
 import random
+from math import ceil
 import time
 from typing import Any, Dict, List, Optional
 
@@ -148,6 +149,15 @@ def stripe_invoice_event(subtype: EventSubtype, event: stripe.Event, current_tim
 
             # Divide the timespan down to days
             days = round((end_ts - start_ts) / 86400)
+
+            # Different months have different number of days this can cause issues if the member agreement is
+            # signed later. E.g. if the payment is in february but signed in may then the number of days too short
+            # To prevent this we assume the worst case amount of days, i.e. maximal number of months with 31 days
+            if subscription_type == SubscriptionType.LAB and member.labaccess_agreement_at is None:
+                months = round(days / 30)
+                months_31_days = ceil(months / 2)
+                months_30_days = months - months_31_days
+                days = months_31_days * 31 + months_30_days * 30
 
             product = get_subscription_product(subscription_type)
             # Note: We use stripe as the source of truth for how much was actually paid.
