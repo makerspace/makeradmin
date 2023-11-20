@@ -148,6 +148,7 @@ def stripe_invoice_event(subtype: EventSubtype, event: stripe.Event, current_tim
 
             # Divide the timespan down to days
             days = round((end_ts - start_ts) / 86400)
+            logger.warning(f"**************** days {days} start {start_ts} end {end_ts}")
 
             product = get_subscription_product(subscription_type)
             # Note: We use stripe as the source of truth for how much was actually paid.

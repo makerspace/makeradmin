@@ -618,7 +618,7 @@ class Test(FlaskTestBase):
             self.get_member(member_id).stripe_membership_subscription_id is not None
         ), "The subscription should not have been deleted"
 
-    def test_subscriptions_signed_agreement1(self) -> None:
+    def test_subscriptions_signed_agreement_immediate(self) -> None:
         """
         Checks that labaccess is not granted if the member has not signed the agreement.
         The subscription is immediatelly paused, and only resumed when the member signs the agreement.
@@ -662,7 +662,7 @@ class Test(FlaskTestBase):
         assert summary.labaccess_active
         assert summary.labaccess_end == sub_start + time_delta(months=3)
 
-    def test_subscriptions_signed_agreement2(self) -> None:
+    def test_subscriptions_signed_agreement_late(self) -> None:
         """
         Checks that labaccess is not granted if the member has not signed the agreement.
         The subscription is immediately paused, and only resumed when the member signs the agreement.
@@ -710,10 +710,9 @@ class Test(FlaskTestBase):
         assert summary.labaccess_active
         assert summary.labaccess_end == sub_start + time_delta(months=3)
 
-    def test_subscriptions_signed_agreement_february(self) -> None:
+    def test_subscriptions_late_signed_agreement_february(self) -> None:
         """
-        Checks that labaccess works correctly if there is a leaps year and
-        the agreement is signed later.
+        Checks that labaccess works correctly if the agreement is signed later in february.
         """
         (start_time, clock, member_id) = self.setup_single_member(
             start_time=datetime(2022, 11, 15, tzinfo=timezone.utc), signed_labaccess=False
