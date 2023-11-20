@@ -17,6 +17,7 @@ from shop.models import (
     Transaction,
     TransactionAction,
     TransactionContent,
+    AccountsCostCenters
 )
 from getpass import getpass
 
@@ -264,16 +265,11 @@ def create_shop_transactions():
         ProductCategory, name="Verktyg"
     )
     
-  
     products = db_session.query(Product).filter_by(category_id=tools_category.id)
-    start_date = datetime(2020,1,1)
-    end_date = datetime.today()
-    
     numdays_list=[1,10,35,400]
     index = 1
 
     for product in products:
-    
         for numdays in numdays_list:
             test_date = datetime.today() - timedelta(days=numdays)
             
@@ -311,8 +307,31 @@ def create_shop_transactions():
             )
             index += 1 
     
-    
         db_session.commit()
+
+def create_shop_accounts_cost_centers():
+    banner(BLUE, "Creating Fake Account and Cost Centers")
+    tools_category = get_or_create(
+    ProductCategory, name="Verktyg"
+)
+    products = db_session.query(Product).filter_by(category_id=tools_category.id)
+    for product in products:
+        for account_id in range(1, 3):
+            for cost_center_id in range(1,3):
+             
+             get_or_create(
+                AccountsCostCenters,
+                    product_id=product.id,
+                    cost_center = cost_center_id,
+                    account = account_id,
+                    defaults=dict(  
+                    debits = 0.25,
+                    credits =0.25
+                )
+            )
+
+    db_session.commit()
+
 
 
 def firstrun():
@@ -322,7 +341,9 @@ def firstrun():
     create_members()
     create_shop_products()
     create_shop_transactions()
-
+    create_shop_accounts_cost_centers()
+    
+    
     banner(
         GREEN,
         "Done, now run servers with 'make dev' then browse admin gui at "
