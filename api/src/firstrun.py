@@ -314,7 +314,7 @@ def create_shop_accounts_cost_centers() -> None:
                 account=account_id,
                 defaults=dict(
                     display_order=account_id,
-                    name=f"TransactionAcount {account_id}",
+                    name=f"Account {account_id}",
                 ),
             )
         )
@@ -327,7 +327,7 @@ def create_shop_accounts_cost_centers() -> None:
                 cost_center=cost_center_id,
                 defaults=dict(
                     display_order=cost_center_id,
-                    name=f"TransactionAcount {cost_center_id}",
+                    name=f"CostCenter {cost_center_id}",
                 ),
             )
         )

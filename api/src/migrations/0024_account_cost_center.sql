@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS `webshop_transaction_accounts` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `account` int(10) unsigned NOT NULL,
+  `account` int(10) unsigned NOT NULL UNIQUE,
   `display_order` int(10) unsigned NOT NULL,
   `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS `webshop_transaction_accounts` (
 CREATE TABLE IF NOT EXISTS `webshop_transaction_cost_centers` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `cost_center` int(10) unsigned NOT NULL,
+  `cost_center` int(10) unsigned NOT NULL UNIQUE,
   `display_order` int(10) unsigned NOT NULL,
   `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,

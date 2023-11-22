@@ -177,7 +177,7 @@ class TransactionAccount(Base):
 
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
     name = Column(String(255), nullable=False)
-    account = Column(Integer, nullable=False)
+    account = Column(Integer, nullable=False, unique=True)
     display_order = Column(Integer, nullable=False, unique=True)
     created_at = Column(DateTime, server_default=func.now())
     updated_at = Column(DateTime, server_default=func.now())
@@ -192,7 +192,7 @@ class TransactionCostcenter(Base):
 
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
     name = Column(String(255), nullable=False)
-    cost_center = Column(String(100), nullable=False)
+    cost_center = Column(String(100), nullable=False, unique=True)
     display_order = Column(Integer, nullable=False, unique=True)
     created_at = Column(DateTime, server_default=func.now())
     updated_at = Column(DateTime, server_default=func.now())
