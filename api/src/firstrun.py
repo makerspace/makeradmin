@@ -17,7 +17,9 @@ from shop.models import (
     Transaction,
     TransactionAction,
     TransactionContent,
-    AccountsCostCenters
+    TransactionAccount,
+    TransactionCostcenter,
+    ProductAccountsCostCenters,
 )
 from getpass import getpass
 
@@ -28,7 +30,7 @@ BLUE = "\u001b[34m"
 RESET = "\u001b[0m"
 
 
-def banner(color, message):
+def banner(color, message) -> None:
     line = "#" * (len(message) + (1 + 3) * 2)
     print(color)
     print(line)
@@ -257,35 +259,27 @@ def create_shop_products():
     db_session.commit()
 
 
-
-def create_shop_transactions():
+def create_shop_transactions() -> None:
     banner(GREEN, "Creating Fake Shop Transactions And Content")
 
-    tools_category = get_or_create(
-        ProductCategory, name="Verktyg"
-    )
-    
+    tools_category = get_or_create(ProductCategory, name="Verktyg")
+
     products = db_session.query(Product).filter_by(category_id=tools_category.id)
-    numdays_list=[1,10,35,400]
+    numdays_list = [1, 10, 35, 400]
     index = 1
 
     for product in products:
         for numdays in numdays_list:
             test_date = datetime.today() - timedelta(days=numdays)
-            
+
             transaction = get_or_create(
                 Transaction,
                 id=index,
-                defaults=dict(
-                    member_id=1,
-                    amount=100,
-                    status="completed",
-                    created_at = test_date
-                ),
+                defaults=dict(member_id=1, amount=100, status="completed", created_at=test_date),
             )
             transaction_content = get_or_create(
                 TransactionContent,
-                id = index,
+                id=index,
                 defaults=dict(
                     transaction_id=transaction.id,
                     product_id=product.id,
@@ -295,46 +289,66 @@ def create_shop_transactions():
             )
             get_or_create(
                 TransactionAction,
-                id = index,
+                id=index,
                 defaults=dict(
-                    content_id= transaction_content.id,
+                    content_id=transaction_content.id,
                     action_type="add_labaccess_days",
                     value=10,
                     status="completed",
-                    completed_at = test_date,
-                    
+                    completed_at=test_date,
                 ),
             )
-            index += 1 
-    
+            index += 1
+
         db_session.commit()
 
-def create_shop_accounts_cost_centers():
+
+def create_shop_accounts_cost_centers() -> None:
     banner(BLUE, "Creating Fake Account and Cost Centers")
-    tools_category = get_or_create(
-    ProductCategory, name="Verktyg"
-)
+
+    accounts = []
+    for account_id in range(1, 3):
+        accounts.append(
+            get_or_create(
+                TransactionAccount,
+                account=account_id,
+                defaults=dict(
+                    display_order=account_id,
+                    name=f"TransactionAcount {account_id}",
+                ),
+            )
+        )
+
+    cost_centers = []
+    for cost_center_id in range(1, 3):
+        cost_centers.append(
+            get_or_create(
+                TransactionCostcenter,
+                cost_center=cost_center_id,
+                defaults=dict(
+                    display_order=cost_center_id,
+                    name=f"TransactionAcount {cost_center_id}",
+                ),
+            )
+        )
+
+    tools_category = get_or_create(ProductCategory, name="Verktyg")
     products = db_session.query(Product).filter_by(category_id=tools_category.id)
     for product in products:
-        for account_id in range(1, 3):
-            for cost_center_id in range(1,3):
-             
-             get_or_create(
-                AccountsCostCenters,
+        for account in accounts:
+            for cost_center in cost_centers:
+                get_or_create(
+                    ProductAccountsCostCenters,
                     product_id=product.id,
-                    cost_center = cost_center_id,
-                    account = account_id,
-                    defaults=dict(  
-                    debits = 0.25,
-                    credits =0.25
+                    account_id=account.id,
+                    cost_center_id=cost_center.id,
+                    defaults=dict(debits=0.25, credits=0.25),
                 )
-            )
 
     db_session.commit()
 
 
-
-def firstrun():
+def firstrun() -> None:
     create_db()
     admins = admin_group()
     create_admin(admins)
@@ -342,8 +356,7 @@ def firstrun():
     create_shop_products()
     create_shop_transactions()
     create_shop_accounts_cost_centers()
-    
-    
+
     banner(
         GREEN,
         "Done, now run servers with 'make dev' then browse admin gui at "
