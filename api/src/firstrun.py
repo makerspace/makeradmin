@@ -17,7 +17,7 @@ from shop.models import (
     Transaction,
     TransactionAction,
     TransactionContent,
-    AccountsCostCenters
+    AccountsCostCenters, GiftCard, ProductGiftCardMapping
 )
 from getpass import getpass
 
@@ -280,7 +280,7 @@ def create_shop_transactions():
                     member_id=1,
                     amount=100,
                     status="completed",
-                    created_at = test_date
+                    created_at=test_date
                 ),
             )
             transaction_content = get_or_create(
@@ -333,6 +333,31 @@ def create_shop_accounts_cost_centers():
     db_session.commit()
 
 
+def create_shop_gift_cards():
+    banner(YELLOW, "Creating Fake Gift Cards and Gift Card & Product Mappings")
+
+    gift_card = get_or_create(
+        GiftCard,
+        amount=299.00,
+        validation_code=12989519,
+        email="test@fake.com",
+        status="activated"
+    )
+
+    # Get existing product with ID: 64 (Makerspace access starter pack)
+    product = get_or_create(
+        Product,
+        id=64,
+    )
+
+    get_or_create(
+        ProductGiftCardMapping,
+        gift_card_id=gift_card.id,
+        product_id=product.id
+    )
+
+    db_session.commit()
+
 
 def firstrun():
     create_db()
@@ -342,6 +367,7 @@ def firstrun():
     create_shop_products()
     create_shop_transactions()
     create_shop_accounts_cost_centers()
+    create_shop_gift_cards()
     
     
     banner(

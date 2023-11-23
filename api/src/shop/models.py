@@ -127,7 +127,7 @@ class Transaction(Base):
 
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
     member_id = Column(Integer, ForeignKey(Member.member_id), nullable=True)
-    credits = Column(Numeric(precision="15,2"), nullable=False)
+    amount = Column(Numeric(precision="15,2"), nullable=False)
     status = Column(Enum(PENDING, COMPLETED, FAILED), nullable=False)
     created_at = Column(DateTime, server_default=func.now())
 
@@ -184,26 +184,23 @@ class GiftCard(Base):
     EXPIRED = "expired"
 
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
-    member_id = Column(Integer, ForeignKey(Member.member_id), nullable=False)  # Should be false if membership not required
-    amount = Column(Numeric(precision="10,2"), nullable=False)
+    amount = Column(Numeric(precision="15,2"), nullable=False)
+    validation_code = Column(Integer, nullable=False)
+    email = Column(String(255), unique=True, nullable=False)
     status = Column(Enum(PENDING, ACTIVATED, EXPIRED), nullable=False, default=PENDING)
     created_at = Column(DateTime, server_default=func.now())
 
-    member = relationship(Member)
 
+class ProductGiftCardMapping(Base):
+    __tablename__ = "webshop_product_gift_card_mapping"
 
-#class GiftCardTransaction(Base):
-#    __table_name__ = "webshop_gift_card_transaction"
-#
-#    id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
-#    member_id = Column(Integer, ForeignKey(Member.member_id), nullable=False)
-#    gift_card_id = Column(Integer, ForeignKey(GiftCard.id), nullable=False)
-#    status = Column(Enum(Transaction.PENDING, Transaction.COMPLETED, Transaction.FAILED),
-#                    nullable=False)
-#    created_at = Column(DateTime, server_default=func.now())
-#
-#    member = relationship(Member)
-#    gift_card = relationship(GiftCard)
+    id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
+    gift_card_id = Column(Integer, ForeignKey(GiftCard.id))
+    product_id = Column(Integer, ForeignKey(Product.id))
+    product_quantity = Column(Integer, nullable=False, default=1)
+
+    gift_card = relationship(GiftCard)
+    product = relationship(Product)
 
 
 class AccountsCostCenters(Base):

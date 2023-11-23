@@ -58,7 +58,6 @@ class Member(Base):
     created_at = Column(DateTime, server_default=func.now())
     updated_at = Column(DateTime, server_default=func.now())
     deleted_at = Column(DateTime)
-    credits = Column(Numeric(precision="15,2"), nullable=False, default=0.0)
 
     # True during the registration flow as the payment is being processed
     pending_activation = Column(Boolean, nullable=False)
