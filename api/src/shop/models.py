@@ -130,7 +130,6 @@ class Transaction(Base):
     credits = Column(Numeric(precision="15,2"), nullable=False)
     status = Column(Enum(PENDING, COMPLETED, FAILED), nullable=False)
     created_at = Column(DateTime, server_default=func.now())
-    #gift_card_id = Column(Integer, ForeignKey(GiftCard.id), nullable=True)
 
     member = relationship(Member)
     stripe_pending = relationship("StripePending")
@@ -185,7 +184,7 @@ class GiftCard(Base):
     EXPIRED = "expired"
 
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
-    member_id = Column(Integer, ForeignKey(Member.member_id))
+    member_id = Column(Integer, ForeignKey(Member.member_id), nullable=False)  # Should be false if membership not required
     amount = Column(Numeric(precision="10,2"), nullable=False)
     status = Column(Enum(PENDING, ACTIVATED, EXPIRED), nullable=False, default=PENDING)
     created_at = Column(DateTime, server_default=func.now())
