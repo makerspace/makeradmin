@@ -17,6 +17,7 @@ from sqlalchemy import (
     select,
     BigInteger,
     Boolean,
+    Numeric,
 )
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, column_property, configure_mappers, validates
@@ -57,6 +58,7 @@ class Member(Base):
     created_at = Column(DateTime, server_default=func.now())
     updated_at = Column(DateTime, server_default=func.now())
     deleted_at = Column(DateTime)
+    credits = Column(Numeric(precision="15,2"), nullable=False, default=0.0)
 
     # True during the registration flow as the payment is being processed
     pending_activation = Column(Boolean, nullable=False)
@@ -77,7 +79,7 @@ class Member(Base):
     groups = relationship("Group", secondary=member_group, back_populates="members")
 
     def __repr__(self) -> str:
-        return f"Member(member_id={self.member_id}, member_number={self.member_number}, email={self.email})"
+        return f"Member(member_id={self.member_id}, member_number={self.member_number}, credits={self.credits} email={self.email})"
 
 
 group_permission = Table(

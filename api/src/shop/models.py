@@ -126,10 +126,11 @@ class Transaction(Base):
     FAILED = "failed"
 
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
-    member_id = Column(Integer, ForeignKey(Member.member_id), nullable=False)
-    amount = Column(Numeric(precision="15,2"), nullable=False)
+    member_id = Column(Integer, ForeignKey(Member.member_id), nullable=True)
+    credits = Column(Numeric(precision="15,2"), nullable=False)
     status = Column(Enum(PENDING, COMPLETED, FAILED), nullable=False)
     created_at = Column(DateTime, server_default=func.now())
+    #gift_card_id = Column(Integer, ForeignKey(GiftCard.id), nullable=True)
 
     member = relationship(Member)
     stripe_pending = relationship("StripePending")
@@ -174,6 +175,38 @@ class TransactionAction(Base):
             f"TransactionAction(id={self.id}, value={self.value}, status={self.status},"
             f" action_type={self.action_type})"
         )
+
+
+class GiftCard(Base):
+    __tablename__ = "webshop_gift_card"
+
+    PENDING = "pending"
+    ACTIVATED = "activated"
+    EXPIRED = "expired"
+
+    id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
+    member_id = Column(Integer, ForeignKey(Member.member_id))
+    amount = Column(Numeric(precision="10,2"), nullable=False)
+    status = Column(Enum(PENDING, ACTIVATED, EXPIRED), nullable=False, default=PENDING)
+    created_at = Column(DateTime, server_default=func.now())
+
+    member = relationship(Member)
+
+
+#class GiftCardTransaction(Base):
+#    __table_name__ = "webshop_gift_card_transaction"
+#
+#    id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
+#    member_id = Column(Integer, ForeignKey(Member.member_id), nullable=False)
+#    gift_card_id = Column(Integer, ForeignKey(GiftCard.id), nullable=False)
+#    status = Column(Enum(Transaction.PENDING, Transaction.COMPLETED, Transaction.FAILED),
+#                    nullable=False)
+#    created_at = Column(DateTime, server_default=func.now())
+#
+#    member = relationship(Member)
+#    gift_card = relationship(GiftCard)
+
+
 class AccountsCostCenters(Base):
     __tablename__ = "webshop_accounts_cost_centers"
     
