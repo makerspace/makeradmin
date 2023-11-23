@@ -78,7 +78,7 @@ class Member(Base):
     groups = relationship("Group", secondary=member_group, back_populates="members")
 
     def __repr__(self) -> str:
-        return f"Member(member_id={self.member_id}, member_number={self.member_number}, credits={self.credits} email={self.email})"
+        return f"Member(member_id={self.member_id}, member_number={self.member_number}, email={self.email})"
 
 
 group_permission = Table(
