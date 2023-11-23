@@ -3,7 +3,6 @@ from dataclasses import dataclass, field
 from typing import List
 import csv
 import pprint
-from accounting import account_lookup
 
 
 @dataclass

@@ -3,7 +3,7 @@ from transactions import Purchase
 from stripe_transactions import StripeTransaction
 from argparse import ArgumentParser
 from datetime import datetime
-from accounting import account_name_lookup, accounts
+from accounting import Monthly_Transactions
 import sys
 
 HEADER_TEMPLATE = '''
@@ -38,28 +38,31 @@ def transaction_string(account, sum, date, description) -> str:
     return f'#TRANS {account} {{}} {sum} {date} "{description}"'
 
 
-def main():
+def main():   
     parser = ArgumentParser()
     parser.add_argument("--signer", help="Who generated the file", required=True)
-    parser.add_argument("--makeradmin-tsv", nargs="?", required=True,
-                        help=".tsv file exported using the export_transactions.sh script on the Makeradmin server")
-    parser.add_argument("--stripe-csv", required=True,
+   # parser.add_argument("--makeradmin-tsv", nargs="?", required=True,
+    #                    help=".tsv file exported using the export_transactions.sh script on the Makeradmin server")
+    parser.add_argument("--stripe-csv", required=False,
                         nargs="?", help=".csv file exported from Stripe")
     parser.add_argument("--output", "-o", default=None, help="The output file where to save the export")
     parser.add_argument("--no-summary", action="store_true", help="Do not print a summary of the accounts")
     parser.add_argument("--financial-year", type=int, required=True,
                         help="The financial year of the bookings")
+    parser.add_argument("--monthly-csv", required=True, help="csv for monthly transactions"),
     args = parser.parse_args()
 
     purchases = Purchase.parse_csv(args.makeradmin_tsv)
     stripe_transactions = StripeTransaction.parse_csv(args.stripe_csv)
+    monthly_transactions = Monthly_Transactions.parse_csv(args.monthly_csv)
 
     ma_transaction_ids = set(t.id for t in purchases)
     stripe_transaction_ids = set(t.get_makeradmin_transaction_id() for t in stripe_transactions)
+    
 
     # Check that we have exactly the same transactions in Makeradmin and Stripe (very important)
     transaction_differences = ma_transaction_ids.symmetric_difference(stripe_transaction_ids)
-    if len(transaction_differences):
+    if len(transaction_differences):    
         for id in transaction_differences:
             if id in ma_transaction_ids:
                 print(f"{id} is in makeradmin, but not in stripe")
@@ -96,7 +99,8 @@ def main():
     #     file_str += r
 
     # Create all transactions
-    verfication_number = 1
+    
+    
     for transaction_id in sorted(ma_transaction_ids):
         ma_trans, stripe_trans = transactions[transaction_id]
         datestr = date_format(ma_trans.dt)
@@ -130,6 +134,8 @@ def main():
     if args.output is not None:
         with open(args.output, mode="w", encoding="cp437") as f:
             f.write(file_str)
+        
+
 
 
 if __name__ == "__main__":

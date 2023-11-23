@@ -50,10 +50,33 @@ class Account:
             reader = csv.DictReader(f)
             accounts = [cls.parse_row(row) for row in reader]
         return accounts
+@dataclass
+class MonthlyTransactions:
+    period: str
+    amount_debit: float
+    amount_credit:float
+    account: int
+    cost_center: int
 
+    @classmethod
+    def parse_row(cls,row: dict):
+        return cls(
+            str(row["Period"]),
+            float(row["AmountDebit"]),
+            float(row["AmountCredit"]),
+            int(row["Account"]),
+            int(row["CostCenter"])
+        )
+    @classmethod
+    def parse_csv(cls,filename) -> List["MonthlyTransactions"]:
+        with open(filename, encoding="utf-8-sig") as f:
+            reader = csv.DictReader(f,delimiter=' ')
+            accounts = [cls.parse_row(row)for row in reader]
+        return accounts            
+#m_trans = MonthlyTransactions.parse_csv
+ 
+#accounting = Accounting.parse_csv("accounting_place.csv")
+#account_lookup = {a.article: a.account for a in accounting}
 
-accounting = Accounting.parse_csv("accounting_place.csv")
-account_lookup = {a.article: a.account for a in accounting}
-
-accounts = Account.parse_csv("accounts.csv")
-account_name_lookup = {a.account: a.name for a in accounts}
+#accounts = Account.parse_csv("accounts.csv")
+#account_name_lookup = {a.account: a.name for a in accounts}
