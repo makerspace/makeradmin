@@ -6,6 +6,8 @@ from shop.models import (
     TransactionContent,
     Product,
     TransactionAction,
+    TransactionAccount,
+    TransactionCostcenter,
     ProductCategory,
     ProductAction,
 )
@@ -13,6 +15,7 @@ from shop.ordered_entity import OrderedEntity
 from shop.product_image_entity import ProductImageEntity
 
 category_entity = OrderedEntity(ProductCategory)
+transaction_account_entity = OrderedEntity(TransactionAccount)
 
 
 product_entity = OrderedEntity(

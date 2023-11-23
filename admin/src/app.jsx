@@ -89,6 +89,10 @@ const nav = {
                         text: "Kategorier",
                         target: "/sales/category",
                     },
+                    {
+                        text: "Bokförings konton",
+                        target: "/sales/transaction_accounts",
+                    },
                 ],
         },
         {

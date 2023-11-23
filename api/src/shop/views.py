@@ -29,6 +29,7 @@ from shop.entities import (
     product_entity,
     category_entity,
     product_action_entity,
+    transaction_account_entity,
 )
 from shop.models import TransactionContent, ProductImage
 from shop.pay import (
@@ -138,6 +139,15 @@ service.related_entity_routes(
     permission_list=WEBSHOP,
 )
 
+service.entity_routes(
+    path="/transaction_account",
+    entity=transaction_account_entity,
+    permission_list=WEBSHOP,
+    permission_read=WEBSHOP,
+    permission_create=WEBSHOP_EDIT,
+    permission_update=WEBSHOP_EDIT,
+    permission_delete=WEBSHOP_EDIT,
+)
 
 service.related_entity_routes(
     path="/member/<int:related_entity_id>/transactions",
