@@ -21,5 +21,4 @@ services = (
     Instance(path="/statistics", service=statistics.service),
     Instance(path="/multiaccess", service=multiaccess.service),
     Instance(path="/quiz", service=quiz.service),
-    # Instance(path="
 )
