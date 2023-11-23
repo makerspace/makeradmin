@@ -176,30 +176,30 @@ class TransactionAccount(Base):
     __tablename__ = "webshop_transaction_accounts"
 
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
-    name = Column(String(255), nullable=False)
     account = Column(Integer, nullable=False, unique=True)
+    description = Column(String(255), nullable=False)
     display_order = Column(Integer, nullable=False, unique=True)
     created_at = Column(DateTime, server_default=func.now())
     updated_at = Column(DateTime, server_default=func.now())
     deleted_at = Column(DateTime)
 
     def __repr__(self) -> str:
-        return f"TransactionAccount(id={self.id}, name={self.name}, account={self.account})"
+        return f"TransactionAccount(id={self.id}, account={self.account}, description={self.description})"
 
 
 class TransactionCostcenter(Base):
     __tablename__ = "webshop_transaction_cost_centers"
 
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
-    name = Column(String(255), nullable=False)
     cost_center = Column(String(100), nullable=False, unique=True)
+    description = Column(String(255), nullable=False)
     display_order = Column(Integer, nullable=False, unique=True)
     created_at = Column(DateTime, server_default=func.now())
     updated_at = Column(DateTime, server_default=func.now())
     deleted_at = Column(DateTime)
 
     def __repr__(self) -> str:
-        return f"TransactionConstCenter(id={self.id}, name={self.name}, cost_center={self.cost_center})"
+        return f"TransactionConstCenter(id={self.id}, cost_center={self.cost_center}, description={self.description})"
 
 
 class ProductAccountsCostCenters(Base):
@@ -209,8 +209,8 @@ class ProductAccountsCostCenters(Base):
     product_id = Column(Integer, ForeignKey("webshop_products.id"), nullable=False)
     account_id = Column(Integer, ForeignKey("webshop_transaction_accounts.id"), nullable=False)
     cost_center_id = Column(Integer, ForeignKey("webshop_transaction_cost_centers.id"), nullable=False)
-    debits = Column(Numeric(10, 2))
-    credits = Column(Numeric(10, 2))
+    debits = Column(Numeric(10, 2), nullable=False, server_default=("0"))
+    credits = Column(Numeric(10, 2), nullable=False, server_default=("0"))
 
     product = relationship(Product, backref="product_accounts_cost_centers")
     account = relationship(TransactionAccount, backref="product_accounts_cost_centers")

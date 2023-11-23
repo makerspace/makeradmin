@@ -314,7 +314,7 @@ def create_shop_accounts_cost_centers() -> None:
                 account=account_id,
                 defaults=dict(
                     display_order=account_id,
-                    name=f"Account {account_id}",
+                    description=f"Account {account_id}",
                 ),
             )
         )
@@ -324,10 +324,10 @@ def create_shop_accounts_cost_centers() -> None:
         cost_centers.append(
             get_or_create(
                 TransactionCostcenter,
-                cost_center=cost_center_id,
+                cost_center=f"cost center number {cost_center_id}",
                 defaults=dict(
                     display_order=cost_center_id,
-                    name=f"CostCenter {cost_center_id}",
+                    description=f"CostCenter {cost_center_id}",
                 ),
             )
         )
