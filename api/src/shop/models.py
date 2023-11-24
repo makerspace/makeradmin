@@ -177,6 +177,17 @@ class TransactionAction(Base):
 
 
 class GiftCard(Base):
+    """
+    Represents a gift card in the webshop.
+
+    Attributes:
+        id (int): Unique identifier for gift card.
+        amount (float): the monetary value associated with the gift card.
+        validation_code (int): The unique code used to validate the gift card
+        email (str): The email address associated with the gift card. Used to send the validation code to the client.
+        status (enum): The status of the gift card (PENDING, ACTIVATED, EXPIRED)
+        created_at (datetime): the timestamp when the card was created.
+    """
     __tablename__ = "webshop_gift_card"
 
     PENDING = "pending"
