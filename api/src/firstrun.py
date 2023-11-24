@@ -347,7 +347,7 @@ def create_shop_gift_cards():
     # Get existing product with ID: 64 (Makerspace access starter pack)
     product = get_or_create(
         Product,
-        id=64,
+        name="Makerspace access starter pack",
     )
 
     get_or_create(
