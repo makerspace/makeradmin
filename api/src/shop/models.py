@@ -203,6 +203,19 @@ class GiftCard(Base):
 
 
 class ProductGiftCardMapping(Base):
+    """
+    Represents the mapping between a Products and a Gift cards in the webshop.
+
+    Attributes:
+        id (int): Unique identifier for the mapping.
+        gift_card_id (int): The ID of the associated gift card.
+        product_id (int): The ID of the associated product.
+        product_quantity (int): The quantity of the product associated with the gift card.
+
+    Relationships:
+        gift_card (GiftCard): The gift card associated with the mapping.
+        product (Product): The product associated with the mapping.
+    """
     __tablename__ = "webshop_product_gift_card_mapping"
 
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
