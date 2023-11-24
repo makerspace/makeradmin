@@ -305,9 +305,43 @@ def create_shop_transactions():
                     
                 ),
             )
-            index += 1 
+            index += 1
+
+    # A transaction with member_id as null to represent a gift card.
+    transaction = get_or_create(
+        Transaction,
+        id=index,
+        defaults=dict(
+            member_id=None,
+            amount=100,
+            status="completed",
+            created_at=datetime.now()
+        ),
+    )
+    transaction_content = get_or_create(
+        TransactionContent,
+        id=index,
+        defaults=dict(
+            transaction_id=transaction.id,
+            product_id=product.id,
+            count=1,
+            amount=100,
+        ),
+    )
+    get_or_create(
+        TransactionAction,
+        id=index,
+        defaults=dict(
+            content_id=transaction_content.id,
+            action_type="add_labaccess_days",
+            value=10,
+            status="completed",
+            completed_at=datetime.now(),
+        ),
+    )
+    index += 1
     
-        db_session.commit()
+    db_session.commit()
 
 def create_shop_accounts_cost_centers():
     banner(BLUE, "Creating Fake Account and Cost Centers")
