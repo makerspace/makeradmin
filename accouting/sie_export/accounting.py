@@ -73,10 +73,4 @@ class MonthlyTransactions:
             reader = csv.DictReader(f,delimiter=' ')
             accounts = [cls.parse_row(row)for row in reader]
         return accounts            
-#m_trans = MonthlyTransactions.parse_csv
- 
-#accounting = Accounting.parse_csv("accounting_place.csv")
-#account_lookup = {a.article: a.account for a in accounting}
 
-#accounts = Account.parse_csv("accounts.csv")
-#account_name_lookup = {a.account: a.name for a in accounts}
