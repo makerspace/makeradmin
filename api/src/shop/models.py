@@ -7,6 +7,7 @@ from sqlalchemy import (
     DateTime,
     func,
     Text,
+    Table,
     Numeric,
     ForeignKey,
     Enum,
@@ -212,9 +213,9 @@ class ProductAccountsCostCenters(Base):
     debits = Column(Numeric(10, 2), nullable=False, server_default=("0"))
     credits = Column(Numeric(10, 2), nullable=False, server_default=("0"))
 
-    product = relationship(Product, backref="product_accounts_cost_centers")
-    account = relationship(TransactionAccount, backref="product_accounts_cost_centers")
-    cost_center = relationship(TransactionCostcenter, backref="product_accounts_cost_centers")
+    product = relationship(Product, backref="accounts_cost_centers")
+    account = relationship(TransactionAccount, backref="accounts_cost_centers")
+    cost_center = relationship(TransactionCostcenter, backref="accounts_cost_centers")
 
     def __repr__(self) -> str:
         return f"ProductAccountsCostCenters(id={self.id}, cost_center={self.cost_center}, account={self.account}, debits={self.debits}, credits={self.credits})"

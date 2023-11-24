@@ -18,7 +18,7 @@ from service.api_definition import (
     MEMBER_EDIT,
 )
 from service.db import db_session
-from service.entity import OrmSingeRelation, OrmSingleSingleRelation
+from service.entity import OrmSingeRelation, OrmSingleSingleRelation, OrmManyRelation
 from service.error import InternalServerError, PreconditionFailed
 from shop import service
 from shop.entities import (
@@ -31,7 +31,7 @@ from shop.entities import (
     product_action_entity,
     transaction_account_entity,
 )
-from shop.models import TransactionContent, ProductImage
+from shop.models import TransactionContent, Product, ProductImage, ProductAccountsCostCenters
 from shop.pay import (
     cancel_subscriptions,
     pay,
@@ -148,6 +148,17 @@ service.entity_routes(
     permission_update=WEBSHOP_EDIT,
     permission_delete=WEBSHOP_EDIT,
 )
+
+# service.related_entity_routes(
+#     path="/transaction_account/<int:related_entity_id>/products",
+#     entity=product_entity,
+#     relation=OrmManyRelation(
+#         "products", Product.product_accounts_cost_centers, ProductAccountsCostCenters.__table__, "member_id", "group_id"
+#     ),
+#     permission_list=WEBSHOP,
+#     permission_add=WEBSHOP_EDIT,
+#     permission_remove=WEBSHOP_EDIT,
+# )
 
 service.related_entity_routes(
     path="/member/<int:related_entity_id>/transactions",

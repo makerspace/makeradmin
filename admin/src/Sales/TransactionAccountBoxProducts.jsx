@@ -43,7 +43,7 @@ class TransactionAccountBoxProducts extends React.Component {
     }
 
     render() {
-        const columns = [
+        const columns = [ //TODO add debit credit column
             { title: "Namn", sort: "name" },
             { title: "Beskrivning", sort: "description" },
             { title: "" },
