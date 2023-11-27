@@ -1,3 +1,4 @@
+
 from typing import Any
 from sqlalchemy import (
     JSON,
@@ -13,6 +14,7 @@ from sqlalchemy import (
     Boolean,
     LargeBinary,
 )
+
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, configure_mappers, validates
 from shop.stripe_constants import MakerspaceMetadataKeys
@@ -73,6 +75,8 @@ class Product(Base):
 
     category = relationship(ProductCategory, backref="products")
     actions = relationship("ProductAction")
+    accounts_cost_centers = relationship("AccountsCostCenters")
+    
 
     image_id = Column(Integer, ForeignKey(ProductImage.id), nullable=True)
 
@@ -171,6 +175,71 @@ class TransactionAction(Base):
             f" action_type={self.action_type})"
         )
 
+
+class GiftCard(Base):
+    """
+    Represents a gift card in the webshop.
+
+    Attributes:
+        id (int): Unique identifier for gift card.
+        amount (float): the monetary value associated with the gift card.
+        validation_code (int): The unique code used to validate the gift card
+        email (str): The email address associated with the gift card. Used to send the validation code to the client.
+        status (enum): The status of the gift card (PENDING, ACTIVATED, EXPIRED)
+        created_at (datetime): the timestamp when the card was created.
+    """
+    __tablename__ = "webshop_gift_card"
+
+    PENDING = "pending"
+    ACTIVATED = "activated"
+    EXPIRED = "expired"
+
+    id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
+    amount = Column(Numeric(precision="15,2"), nullable=False)
+    validation_code = Column(Integer, nullable=False)
+    email = Column(String(255), unique=True, nullable=False)
+    status = Column(Enum(PENDING, ACTIVATED, EXPIRED), nullable=False, default=PENDING)
+    created_at = Column(DateTime, server_default=func.now())
+
+
+class ProductGiftCardMapping(Base):
+    """
+    Represents the mapping between a Products and a Gift cards in the webshop.
+
+    Attributes:
+        id (int): Unique identifier for the mapping.
+        gift_card_id (int): The ID of the associated gift card.
+        product_id (int): The ID of the associated product.
+        product_quantity (int): The quantity of the product associated with the gift card.
+
+    Relationships:
+        gift_card (GiftCard): The gift card associated with the mapping.
+        product (Product): The product associated with the mapping.
+    """
+    __tablename__ = "webshop_product_gift_card_mapping"
+
+    id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
+    gift_card_id = Column(Integer, ForeignKey(GiftCard.id))
+    product_id = Column(Integer, ForeignKey(Product.id))
+    product_quantity = Column(Integer, nullable=False, default=1)
+
+    gift_card = relationship(GiftCard)
+    product = relationship(Product)
+
+
+class AccountsCostCenters(Base):
+    __tablename__ = "webshop_accounts_cost_centers"
+    
+    id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
+    product_id = Column(Integer, ForeignKey('webshop_products.id'), nullable=False)
+    cost_center = Column(Integer, nullable=False)
+    account = Column(Integer, nullable=False)
+    debits = Column(Numeric(10,2))
+    credits = Column(Numeric(10,2))
+    product = relationship("Product", back_populates="accounts_cost_centers")
+    
+    def __repr__(self) -> str:
+        return  f"AccountsCostCenters(id={self.id}, cost_center={self.cost_center}, account={self.product_id}, debits={self.debits}, credits={self.credits})"     
 
 class StripePending(Base):
     __tablename__ = "webshop_stripe_pending"

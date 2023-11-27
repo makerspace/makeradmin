@@ -17,6 +17,7 @@ services:
       DEV_RUN: "true"
       TEST_SERVICE_TOKEN:
 
+
   email-dispatcher:
     volumes:
       - ./api/src:/work/src
@@ -24,7 +25,7 @@ services:
   accessy-syncer:
     volumes:
       - ./api/src:/work/src
-      
+
   public:
     build:
       args:
@@ -46,7 +47,6 @@ services:
     volumes:
       - ./admin/src:/work/src
       - ./admin/dist:/work/dist
-
 
 volumes:
   logs:

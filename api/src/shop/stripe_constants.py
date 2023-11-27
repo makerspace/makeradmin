@@ -42,6 +42,7 @@ class MakerspaceMetadataKeys(Enum):
 class PriceType(str, Enum):
     BINDING_PERIOD = "binding_period"
     RECURRING = "recurring"
+    FIXED_PRICE = "fixed_price"
 
 
 class EventType(str, Enum):

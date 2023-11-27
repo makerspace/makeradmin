@@ -24,12 +24,12 @@ PHONE = str
 UUID = str  # The UUID used by Accessy is a 16 byte hexadecimal number formatted as 01234567-abcd-abcd-abcd-0123456789ab (i.e. grouped by 4, 2, 2, 2, 6 with dashes in between)
 MSISDN = str  # Standardized number of the form +46123123456
 
-ACCESSY_URL = config.get("ACCESSY_URL")
-ACCESSY_CLIENT_SECRET = config.get("ACCESSY_CLIENT_SECRET", log_value=False)
-ACCESSY_CLIENT_ID = config.get("ACCESSY_CLIENT_ID")
-ACCESSY_LABACCESS_GROUP = config.get("ACCESSY_LABACCESS_GROUP")
-ACCESSY_SPECIAL_LABACCESS_GROUP = config.get("ACCESSY_SPECIAL_LABACCESS_GROUP")
-ACCESSY_DO_MODIFY = config.get("ACCESSY_DO_MODIFY", default="false").lower() == "true"
+ACCESSY_URL: str = config.get("ACCESSY_URL")
+ACCESSY_CLIENT_SECRET: str = config.get("ACCESSY_CLIENT_SECRET", log_value=False)
+ACCESSY_CLIENT_ID: str = config.get("ACCESSY_CLIENT_ID")
+ACCESSY_LABACCESS_GROUP: str = config.get("ACCESSY_LABACCESS_GROUP")
+ACCESSY_SPECIAL_LABACCESS_GROUP: str = config.get("ACCESSY_SPECIAL_LABACCESS_GROUP")
+ACCESSY_DO_MODIFY: bool = config.get("ACCESSY_DO_MODIFY", default="false").lower() == "true"
 
 
 def request(method, path, token=None, json=None, max_tries=8, err_msg=None):
@@ -99,7 +99,7 @@ class AccessySession:
     @staticmethod
     def is_env_configured():
         return all(
-            config_var is not None and len(config_var) > 0
+            isinstance(config_var, bool) or (isinstance(config_var, str) and len(config_var) > 0)
             for config_var in (
                 ACCESSY_URL,
                 ACCESSY_CLIENT_SECRET,
