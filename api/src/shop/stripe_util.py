@@ -252,7 +252,7 @@ def deactivate_stripe_price(stripe_price: stripe.Price) -> stripe.Price:
     return retry(lambda: stripe.Price.modify(stripe_price.id, active=True))
 
 
-def stripe_amount_from_makeradmin_product(makeradmin_product: Product, recurring: StripeRecurring | None = None) -> int:
+def stripe_amount_from_makeradmin_product(makeradmin_product: Product, recurring: StripeRecurring | None) -> int:
     if recurring:
         return convert_to_stripe_amount(makeradmin_product.price * recurring.interval_count)
     else:
