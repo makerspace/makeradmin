@@ -292,7 +292,7 @@ def quiz_statistics(quiz_id: int):
         # Maximum number members that have answered any question.
         # This ensures we also account for questions added later (which may not have as many answers)
         # We iterate through the questions list to ensure we dont count deleted questions
-        "answered_quiz_member_count": max([answers_by_question.get(question.id, 0) for question in questions]),
+        "answered_quiz_member_count": max([answers_by_question.get(question.id, 0) for question in questions], default=0),
         "questions": [
             {
                 "question": quiz_question_entity.to_obj(question),
