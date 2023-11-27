@@ -83,7 +83,7 @@ class StripeUtilWithStripeTest(ShopTestMixin, FlaskTestBase):
         stripe_price: stripe.Price, makeradmin_product: Product, price_type: stripe_constants.PriceType
     ) -> None:
         assert stripe_price.currency == stripe_constants.CURRENCY
-        if price_type == stripe_constants.PriceType.REGULAR_PRODUCT:
+        if price_type == stripe_constants.PriceType.FIXED_PRICE:
             assert stripe_price.type == "one_time"
             interval_count = 1
         else:
@@ -153,9 +153,9 @@ class StripeUtilWithStripeTest(ShopTestMixin, FlaskTestBase):
         assert stripe_test_prices
         assert len(stripe_test_prices) == 1
         self.assertPrice(
-            stripe_test_prices[stripe_constants.PriceType.REGULAR_PRODUCT],
+            stripe_test_prices[stripe_constants.PriceType.FIXED_PRICE],
             makeradmin_test_product,
-            stripe_constants.PriceType.REGULAR_PRODUCT,
+            stripe_constants.PriceType.FIXED_PRICE,
         )
 
     def test_create_product_with_price_monthly_simple(self) -> None:
@@ -296,19 +296,19 @@ class StripeUtilWithStripeTest(ShopTestMixin, FlaskTestBase):
         )
         assert stripe_test_prices
         assert len(stripe_test_prices) == 1
-        stripe_test_price = stripe_test_prices[stripe_constants.PriceType.REGULAR_PRODUCT]
+        stripe_test_price = stripe_test_prices[stripe_constants.PriceType.FIXED_PRICE]
 
         makeradmin_test_product.price = 200.0
         new_stripe_price = stripe_util.replace_stripe_price(
-            makeradmin_test_product, stripe_test_price, stripe_constants.PriceType.REGULAR_PRODUCT
+            makeradmin_test_product, stripe_test_price, stripe_constants.PriceType.FIXED_PRICE
         )
-        self.assertPrice(new_stripe_price, makeradmin_test_product, stripe_constants.PriceType.REGULAR_PRODUCT)
+        self.assertPrice(new_stripe_price, makeradmin_test_product, stripe_constants.PriceType.FIXED_PRICE)
 
         makeradmin_test_product.price = 100.0
         new_stripe_price = stripe_util.replace_stripe_price(
-            makeradmin_test_product, stripe_test_price, stripe_constants.PriceType.REGULAR_PRODUCT
+            makeradmin_test_product, stripe_test_price, stripe_constants.PriceType.FIXED_PRICE
         )
-        self.assertPrice(new_stripe_price, makeradmin_test_product, stripe_constants.PriceType.REGULAR_PRODUCT)
+        self.assertPrice(new_stripe_price, makeradmin_test_product, stripe_constants.PriceType.FIXED_PRICE)
 
     def test_equal_product(self) -> None:
         makeradmin_test_eq_product = self.db.create_product(
@@ -392,7 +392,7 @@ class StripeUtilWithStripeTest(ShopTestMixin, FlaskTestBase):
             stripe_constants.PriceType.RECURRING,
             stripe_constants.PriceType.RECURRING,
             stripe_constants.PriceType.BINDING_PERIOD,
-            stripe_constants.PriceType.REGULAR_PRODUCT,
+            stripe_constants.PriceType.FIXED_PRICE,
         ]
         self.seen_products.append(makeradmin_test_eq_product)
         stripe_test_product = stripe_util.find_or_create_stripe_product(makeradmin_test_eq_product)
