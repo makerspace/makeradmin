@@ -98,10 +98,7 @@ def get_stripe_prices(
     stripe_product: stripe.Product, lookup_keys: List[str] | None = None
 ) -> list[stripe.Price] | None:
     try:
-        if lookup_keys:
-            return list(retry(lambda: stripe.Price.list(product=stripe_product.stripe_id, lookup_keys=lookup_keys)))
-        else:
-            return list(retry(lambda: stripe.Price.list(product=stripe_product.stripe_id)))
+        return list(retry(lambda: stripe.Price.list(product=stripe_product.stripe_id, lookup_keys=lookup_keys)))
     except stripe.error.InvalidRequestError as e:
         logger.warning(f"failed to retrive prices from stripe for stripe product with id {stripe_product.id}, {e}")
         return None
@@ -255,11 +252,11 @@ def deactivate_stripe_price(stripe_price: stripe.Price) -> stripe.Price:
     return retry(lambda: stripe.Price.modify(stripe_price.id, active=True))
 
 
-def stripe_amount_from_makeradmin_product(makeradmin_product: Product, recurring: StripeRecurring) -> int:
-    if recurring.is_empty():
-        return convert_to_stripe_amount(makeradmin_product.price)
-    else:
+def stripe_amount_from_makeradmin_product(makeradmin_product: Product, recurring: StripeRecurring | None = None) -> int:
+    if recurring:
         return convert_to_stripe_amount(makeradmin_product.price * recurring.interval_count)
+    else:
+        return convert_to_stripe_amount(makeradmin_product.price)
 
 
 def convert_to_stripe_amount(amount: Decimal) -> int:
