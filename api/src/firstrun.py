@@ -323,7 +323,7 @@ def create_shop_transactions():
         id=index,
         defaults=dict(
             transaction_id=transaction.id,
-            product_id=product.id,
+            product_id=products[0].id,
             count=1,
             amount=100,
         ),
@@ -368,7 +368,7 @@ def create_shop_accounts_cost_centers():
 
 
 def create_shop_gift_cards():
-    banner(YELLOW, "Creating Fake Gift Cards and Gift Card & Product Mappings")
+    banner(YELLOW, "Creating Fake 'Gift Cards' and 'Gift Card & Product Mappings'")
 
     gift_card = get_or_create(
         GiftCard,

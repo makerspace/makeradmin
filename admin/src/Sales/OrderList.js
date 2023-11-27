@@ -14,7 +14,12 @@ const Row = props => {
             <td><Link to={"/sales/order/" + item.id}>{item.id}</Link></td>
             <td><DateTimeShow date={item.created_at}/></td>
             <td>{item.status}</td>
-            <td><Link to={"/membership/members/" + item.member_id}>#{item.member_number}: {item.firstname} {item.lastname}</Link></td>
+            <td>
+              {item.member_id
+                ? <Link to={"/membership/members/" + item.member_id}>#{item.member_number}: {item.firstname} {item.lastname}</Link>
+                  : "Gift card"
+              }
+            </td>
             <td className='uk-text-right'>{item.amount} kr</td>
         </tr>
     );
