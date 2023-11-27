@@ -91,5 +91,5 @@ def get_admin_url(path):
     return f"{host}{path}"
 
 
-def debug_mode():
+def debug_mode() -> bool:
     return config.get("DEV_RUN") == "true"
