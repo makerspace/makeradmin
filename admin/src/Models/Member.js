@@ -1,6 +1,4 @@
 import Base from './Base';
-// import { put, post } from '../gateway';
-//import common from './common;'
 
 export default class Member extends Base {
 
