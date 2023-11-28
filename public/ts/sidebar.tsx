@@ -19,7 +19,7 @@ export const Sidebar = ({ cart, className = "" }: { cart: { cart: Cart, productD
     const sidebarRef = useRef<HTMLDivElement>(null);
     const [isSidebarScrollable, setIsSidebarScrollable] = useState(false);
 
-    useEffect((): (() => void) | void => {
+    useEffect((): (() => void) => {
         const checkSidebarHeight = () => {
             if(sidebarRef.current) {
                 setIsSidebarScrollable(sidebarRef.current.scrollHeight > sidebarRef.current.clientHeight);
