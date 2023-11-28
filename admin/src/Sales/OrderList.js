@@ -17,7 +17,7 @@ const Row = props => {
             <td>
               {item.member_id
                 ? <Link to={"/membership/members/" + item.member_id}>#{item.member_number}: {item.firstname} {item.lastname}</Link>
-                  : "Gift card"
+                  : "Gift"
               }
             </td>
             <td className='uk-text-right'>{item.amount} kr</td>
