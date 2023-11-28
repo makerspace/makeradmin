@@ -21,3 +21,6 @@ CREATE TABLE IF NOT EXISTS `webshop_product_gift_card_mapping` (
     KEY `product_id_index` (`product_id`),
     CONSTRAINT `product_id_foreign` FOREIGN KEY (`product_id`) REFERENCES `webshop_products` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- Make member_id nullable in Transactions, to enable Gift card purchasable without being a member
+ALTER TABLE `webshop_transactions` MODIFY COLUMN member_id int(10) unsigned NULL;
