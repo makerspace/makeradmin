@@ -54,7 +54,6 @@ export const Sidebar = ({ cart, className = "" }: { cart: { cart: Cart, productD
                 <NavItem url="/shop/member/history" icon="history">Min köphistorik</NavItem>
                 <NavItem url="/shop/member/courses" icon="star">Kurser</NavItem>
                 <NavItem url="/shop/member/licenses" icon="tag">Licenser och rabatter</NavItem>
-                {/*<NavItem url="#" icon="cart">Presentkort</NavItem>*/}
                 <li>
                     <a onClick={e => {
                         e.preventDefault();
