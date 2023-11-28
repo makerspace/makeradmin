@@ -19,7 +19,7 @@ export const Sidebar = ({ cart, className = "" }: { cart: { cart: Cart, productD
     const sidebarRef = useRef<HTMLDivElement>(null);
     const [isSidebarScrollable, setIsSidebarScrollable] = useState(false);
 
-    useEffect((): (() => void) => {
+    useEffect((): (() => void) | void => {
         const checkSidebarHeight = () => {
             if(sidebarRef.current) {
                 setIsSidebarScrollable(sidebarRef.current.scrollHeight > sidebarRef.current.clientHeight);
@@ -37,7 +37,7 @@ export const Sidebar = ({ cart, className = "" }: { cart: { cart: Cart, productD
     if (path.endsWith("/")) {
         path = path.substring(0, path.length - 1);
     }
-    return <div id="left-sidebar" ref={sidebarRef} className={isSidebarScrollable ? "scrollable" : ""}>
+    return <div id="left-sidebar">
         <div className={`sidebar-fixed-content ${className}`}>
             <img className="makerspace-logo" src={`${window.staticBasePath}/images/logo-transparent-500px-300x210.png`} />
             <ul className="uk-nav uk-nav-default">
@@ -54,7 +54,6 @@ export const Sidebar = ({ cart, className = "" }: { cart: { cart: Cart, productD
                 <NavItem url="/shop/member/history" icon="history">Min köphistorik</NavItem>
                 <NavItem url="/shop/member/courses" icon="star">Kurser</NavItem>
                 <NavItem url="/shop/member/licenses" icon="tag">Licenser och rabatter</NavItem>
-                {/*<NavItem url="#" icon="cart">Presentkort</NavItem>*/}
                 <li>
                     <a onClick={e => {
                         e.preventDefault();
