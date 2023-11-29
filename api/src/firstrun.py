@@ -161,7 +161,7 @@ def create_shop_products():
             display_order=display_order_product + 1,
             category_id=member_category.id,
             product_metadata={
-                "allowed_price_levels": "low_income_discount",
+                "allowed_price_levels": ["low_income_discount"],
                 "special_product_id": "single_membership_year",
             },
         ),
@@ -177,7 +177,7 @@ def create_shop_products():
             display_order=display_order_product + 2,
             category_id=member_category.id,
             product_metadata={
-                "allowed_price_levels": "low_income_discount",
+                "allowed_price_levels": ["low_income_discount"],
                 "special_product_id": "single_labaccess_month",
             },
         ),
@@ -194,7 +194,7 @@ def create_shop_products():
             display_order=display_order_product + 3,
             category_id=member_category.id,
             product_metadata={
-                "allowed_price_levels": "low_income_discount",
+                "allowed_price_levels": ["low_income_discount"],
                 "special_product_id": "access_starter_pack",
             },
         ),
