@@ -110,7 +110,7 @@ def create_members():
 
     get_or_create(Member, 
         email="first1.last1@gmail.com", member_number=1001,
-        firstname="first1", lastname="last1", price_level="normal,
+        firstname="first1", lastname="last1", price_level="normal",
         pending_activation=False
     )
     get_or_create(Member, 
