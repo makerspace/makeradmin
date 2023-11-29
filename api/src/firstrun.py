@@ -41,14 +41,6 @@ def get_or_create(model, defaults=None, **kwargs):
     entity = db_session.query(model).filter_by(**kwargs).first()
     if entity:
         return entity
-
-    if model == Member:
-        (max_member_number,) = db_session.execute(
-            "SELECT COALESCE(MAX(member_number), 999) FROM membership_members"
-            ).fetchone()
-        member_number = max_member_number + 1
-
-        kwargs = {'member_number':member_number, 'pending_activation': False, 'price_level': PriceLevel.Normal.value, **kwargs}
         
     entity = model(**{**kwargs, **defaults}) if defaults else model(**{**kwargs})
     db_session.add(entity)
@@ -117,16 +109,19 @@ def create_members():
     banner(RED, "Creating Fake Members")
 
     get_or_create(Member, 
-        email="first1.last1@gmail.com",
-        firstname="first1", lastname="last1"
+        email="first1.last1@gmail.com", member_number=1001,
+        firstname="first1", lastname="last1", price_level="normal,
+        pending_activation=False
     )
     get_or_create(Member, 
-        email="first2.last2@gmail.com",
-        firstname="first2", lastname="last2", price_level="normal"
+        email="first2.last2@gmail.com", member_number=1002,
+        firstname="first2", lastname="last2", price_level="normal",
+        pending_activation=False
     )
     get_or_create(Member, 
-        email="first3.last3@gmail.com",
-        firstname="first3", lastname="last3", price_level="low_income_discount"
+        email="first3.last3@gmail.com", member_number=1003,
+        firstname="first3", lastname="last3", price_level="low_income_discount",
+        pending_activation=False
     )
 
     db_session.commit()
