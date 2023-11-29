@@ -35,8 +35,7 @@ class MemberEntity(Entity):
             data = request.json or {}
 
         handle_password(data)
-
-        assert "member_number" not in data
+    
         # Locking was used here previously, but that did not work well with transactions
         # so now we use transactions to solve EVERYTHING.
         # In practice we will never get a race here, except possibly in tests that run in parallel.
