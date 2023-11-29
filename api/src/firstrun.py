@@ -42,6 +42,14 @@ def get_or_create(model, defaults=None, **kwargs):
     if entity:
         return entity
 
+    if model == Member:
+        (max_member_number,) = db_session.execute(
+            "SELECT COALESCE(MAX(member_number), 999) FROM membership_members"
+            ).fetchone()
+        member_number = max_member_number + 1
+
+        kwargs = {'member_number':member_number, 'pending_activation': False, 'price_level': PriceLevel.Normal.value, **kwargs}
+        
     entity = model(**{**kwargs, **defaults}) if defaults else model(**{**kwargs})
     db_session.add(entity)
     db_session.flush()
@@ -104,32 +112,24 @@ def create_admin(admins):
             print(e)
             print("Something went wrong while creating the new user. Please try again.")
 
-def create_member(**kwargs):
-        try:
-            kwargs = {'pending_activation': False, 'price_level': PriceLevel.Normal.value, **kwargs}
-            member = member_entity.create(kwargs)
 
-            db_session.commit()
-        except Exception as e:
-            print(e)
-            print("Something went wrong while creating the new user. Please try again.")
-
-
-def create_fake_members():
+def create_members():
     banner(RED, "Creating Fake Members")
 
-    create_member(
+    get_or_create(Member, 
         email="first1.last1@gmail.com",
         firstname="first1", lastname="last1"
     )
-    create_member(
+    get_or_create(Member, 
         email="first2.last2@gmail.com",
         firstname="first2", lastname="last2", price_level="normal"
     )
-    create_member(
+    get_or_create(Member, 
         email="first3.last3@gmail.com",
         firstname="first3", lastname="last3", price_level="low_income_discount"
     )
+
+    db_session.commit()
 
 
 def create_shop_products():
@@ -399,7 +399,7 @@ def firstrun():
     create_db()
     admins = admin_group()
     create_admin(admins)
-    create_fake_members()
+    create_members()
     create_shop_products()
     create_shop_transactions()
     create_shop_accounts_cost_centers()
