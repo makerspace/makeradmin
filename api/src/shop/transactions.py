@@ -12,7 +12,6 @@ from basic_types.enums import PriceLevel
 from messages.message import send_message
 from messages.models import MessageTemplate
 from shop.stripe_constants import MakerspaceMetadataKeys
-from shop.stripe_customer import get_and_sync_stripe_customer
 from shop.stripe_discounts import get_discount_for_product, get_price_level_for_member
 from shop.stripe_subscriptions import SubscriptionType, resume_paused_subscription
 
@@ -187,11 +186,8 @@ def activate_paused_labaccess_subscription(member_id: int, earliest_start_at: da
     member = db_session.query(Member).get(member_id)
     if member is None:
         raise BadRequest(f"Unable to find member with id {member_id}")
-    stripe_customer = get_and_sync_stripe_customer(member)
-    if stripe_customer is None:
-        raise BadRequest(f"Unable to find corresponding stripe member {member}")
     if member is not None and member.stripe_labaccess_subscription_id is not None:
-        resume_paused_subscription(member, stripe_customer, SubscriptionType.LAB, earliest_start_at, test_clock=None)
+        resume_paused_subscription(member, SubscriptionType.LAB, earliest_start_at, test_clock=None)
 
 
 def ship_add_labaccess_action(

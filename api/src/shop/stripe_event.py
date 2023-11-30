@@ -35,7 +35,7 @@ from shop.transactions import (
 )
 from service.db import db_session
 from membership.models import Member
-from shop.stripe_subscriptions import get_subscription_product, SubscriptionType
+from shop.stripe_subscriptions import get_makeradmin_subscription_product, SubscriptionType
 from datetime import datetime
 
 logger = getLogger("makeradmin")
@@ -159,7 +159,7 @@ def stripe_invoice_event(subtype: EventSubtype, event: stripe.Event, current_tim
                 months_30_days = months - months_31_days
                 days = months_31_days * 31 + months_30_days * 30
 
-            product = get_subscription_product(subscription_type)
+            product = get_makeradmin_subscription_product(subscription_type)
             # Note: We use stripe as the source of truth for how much was actually paid.
             amount = Decimal(line["amount"]) / STRIPE_CURRENTY_BASE
             transaction = Transaction(

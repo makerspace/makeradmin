@@ -39,9 +39,10 @@ from stripe.error import InvalidRequestError
 from shop.stripe_util import retry, get_and_sync_stripe_product_and_prices, convert_from_stripe_amount
 from shop.stripe_customer import get_and_sync_stripe_customer
 from basic_types.enums import PriceLevel
+from shop.shop_data import get_product_data_by_special_id
 from shop.stripe_discounts import get_discount_for_product, get_price_level_for_member, convert_from_stripe_amount
 from shop.models import Product, ProductAction, ProductCategory
-from service.error import BadRequest, NotFound
+from service.error import BadRequest, NotFound, InternalServerError
 from service.db import db_session
 from membership.models import Member
 from membership.membership import get_membership_summary
@@ -89,6 +90,15 @@ BINDING_PERIOD = {
 SUBSCRIPTION_PRODUCTS: Optional[Dict[SubscriptionType, int]] = None
 
 
+def get_subscription_id(member: Member, subscription_type: SubscriptionType) -> str | None:
+    if subscription_type == SubscriptionType.MEMBERSHIP:
+        return member.stripe_membership_subscription_id
+    elif subscription_type == SubscriptionType.LAB:
+        return member.stripe_labaccess_subscription_id
+    else:
+        raise InternalServerError(f"Unknown SubscriptionType {subscription_type}")
+
+
 def get_stripe_subscriptions(stripe_customer_id: str, active_only: bool = True) -> List[stripe.Subscription]:
     """Returns the list of subscription objects for the given user."""
     resp = retry(lambda: stripe.Subscription.list(customer=stripe_customer_id))
@@ -133,18 +143,29 @@ def calc_subscription_start_time(
     return was_already_member, subscription_start
 
 
+def get_makeradmin_subscription_product(subscription_type: SubscriptionType) -> Product:
+    special_id = f"{subscription_type.value}_subscription"
+    product = get_product_data_by_special_id(special_id)
+    if product is None:
+        raise InternalServerError(
+            f"Unable to find product for subscription_type {subscription_type.value} with special id {special_id}"
+        )
+    return product
+
+
 # TODO for tests use
 # stripe_customer = get_and_sync_stripe_customer(member, test_clock)
 def start_subscription(
     member: Member,
-    stripe_customer: stripe.Customer,
     subscription_type: SubscriptionType,
     earliest_start_at: Optional[datetime] = None,
     expected_to_pay_now: Optional[Decimal] = None,
     expected_to_pay_recurring: Optional[Decimal] = None,
+    test_clock: Optional[stripe.test_helpers.TestClock] = None,
 ) -> str:
-    # TODO maybe fix this?
-    assert member.stripe_customer_id == stripe_customer.stripe_id
+    stripe_customer = get_and_sync_stripe_customer(member, test_clock)
+    if stripe_customer is None:
+        raise BadRequest(f"Unable to create, find or update corresponding stripe customer for member {member}")
 
     logger.info(f"Attempting to start new subscription {subscription_type}")
     try:
@@ -152,7 +173,6 @@ def start_subscription(
             member.member_id, subscription_type, earliest_start_at
         )
 
-        # TODO maybe merge with find well known product?
         makeradmin_subscription_product = get_makeradmin_subscription_product(subscription_type)
 
         discount = get_discount_for_product(
@@ -191,13 +211,7 @@ def start_subscription(
                     f"Expected to pay {expected_to_pay_recurring} when {subscription_type} subscription renews, but the recurring price is {to_pay_recurring}"
                 )
 
-        if subscription_type == SubscriptionType.MEMBERSHIP:
-            current_subscription_id = member.stripe_membership_subscription_id
-        elif subscription_type == SubscriptionType.LAB:
-            current_subscription_id = member.stripe_labaccess_subscription_id
-        else:
-            assert False
-
+        current_subscription_id = get_subscription_id(member, subscription_type)
         if current_subscription_id:
             if current_subscription_id.startswith("sub_sched_"):
                 current_subscription = stripe.SubscriptionSchedule.retrieve(current_subscription_id)
@@ -213,7 +227,7 @@ def start_subscription(
                 # The subscription could also be trailing. In that the user has already cancelled it,
                 # but it has not yet been deleted. In that case the cancel is a NOOP.
                 try:
-                    cancel_subscription(member, subscription_type)
+                    cancel_subscription(member, subscription_type, test_clock)
                 except Exception as e:
                     print(type(e))
                     print(e)
@@ -271,7 +285,7 @@ def start_subscription(
 
         subscription_schedule = stripe.SubscriptionSchedule.create(
             start_date=int(subscription_start.timestamp()),
-            customer=stripe_customer.stripe_id,
+            customer=member.stripe_customer_id,
             metadata=metadata,
             phases=phases,
         )
@@ -296,17 +310,15 @@ def start_subscription(
 
 def resume_paused_subscription(
     member: Member,
-    stripe_customer: stripe.Customer,
     subscription_type: SubscriptionType,
     earliest_start_at: Optional[datetime],
+    test_clock: Optional[stripe.test_helpers.TestClock] = None,
 ) -> bool:
-    if subscription_type == SubscriptionType.MEMBERSHIP:
-        subscription_id = member.stripe_membership_subscription_id
-    elif subscription_type == SubscriptionType.LAB:
-        subscription_id = member.stripe_labaccess_subscription_id
-    else:
-        assert False
+    stripe_customer = get_and_sync_stripe_customer(member, test_clock)
+    if stripe_customer is None:
+        raise BadRequest(f"Unable to create, find or update corresponding stripe customer for member {member}")
 
+    subscription_id = get_subscription_id(member, subscription_type)
     if subscription_id is None:
         return False
 
@@ -324,23 +336,23 @@ def resume_paused_subscription(
     # but it was very tricky to do it while handling binding periods correctly.
     # So we just cancel the subscription and start a new one.
     # Much less code, much lower risk of bugs. Everyone is happy :)
-    cancel_subscription(member, subscription_type)
-    start_subscription(member, stripe_customer, subscription_type, earliest_start_at)
+    cancel_subscription(member, subscription_type, test_clock)
+    start_subscription(member, subscription_type, earliest_start_at, test_clock)
     return True
 
 
-def pause_subscription(member: Member, subscription_type: SubscriptionType) -> bool:
-    # TODO turn below into a function?
-    if subscription_type == SubscriptionType.MEMBERSHIP:
-        subscription_id = member.stripe_membership_subscription_id
-    elif subscription_type == SubscriptionType.LAB:
-        subscription_id = member.stripe_labaccess_subscription_id
-    else:
-        assert False
+def pause_subscription(
+    member: Member,
+    subscription_type: SubscriptionType,
+    test_clock: Optional[stripe.test_helpers.TestClock] = None,
+) -> bool:
+    stripe_customer = get_and_sync_stripe_customer(member, test_clock)
+    if stripe_customer is None:
+        raise BadRequest(f"Unable to create, find or update corresponding stripe customer for member {member}")
 
+    subscription_id = get_subscription_id(member, subscription_type)
     if subscription_id is None:
         return False
-    # TODO function to here
 
     try:
         # The subscription might be a scheduled one so we need to check the id prefix
@@ -374,14 +386,16 @@ def pause_subscription(member: Member, subscription_type: SubscriptionType) -> b
             raise
 
 
-def cancel_subscription(member: Member, subscription_type: SubscriptionType) -> bool:
-    if subscription_type == SubscriptionType.MEMBERSHIP:
-        subscription_id = member.stripe_membership_subscription_id
-    elif subscription_type == SubscriptionType.LAB:
-        subscription_id = member.stripe_labaccess_subscription_id
-    else:
-        assert False
+def cancel_subscription(
+    member: Member,
+    subscription_type: SubscriptionType,
+    test_clock: Optional[stripe.test_helpers.TestClock] = None,
+) -> bool:
+    stripe_customer = get_and_sync_stripe_customer(member, test_clock)
+    if stripe_customer is None:
+        raise BadRequest(f"Unable to create, find or update corresponding stripe customer for member {member}")
 
+    subscription_id = get_subscription_id(member, subscription_type)
     if subscription_id is None:
         return False
 
