@@ -1,21 +1,16 @@
-from dataclasses import dataclass
-from decimal import Decimal
-from enum import Enum
 from logging import getLogger
-from typing import Any, Dict, Generic, List, Optional, Tuple, TypeVar, cast
-from sqlalchemy import func
+from typing import Any, Dict, Optional
 
 import stripe
 
 from stripe.error import InvalidRequestError
 from shop.stripe_util import retry, are_metadata_dicts_equivalent
 from service.db import db_session
-from service.error import BadRequest, NotFound, InternalServerError
+from service.error import NotFound, InternalServerError
 from membership.models import Member
 from shop.stripe_constants import (
     MakerspaceMetadataKeys as MSMetaKeys,
 )
-import stripe.error
 
 logger = getLogger("makeradmin")
 
@@ -31,7 +26,7 @@ def _get_metadata_for_stripe_customer(makeradmin_member: Member) -> Dict[str, An
 def get_stripe_customer(makeradmin_member: Member) -> stripe.Customer | None:
     try:
         customer = retry(lambda: stripe.Customer.retrieve(makeradmin_member.stripe_customer_id))
-    except stripe.error.InvalidRequestError as e:
+    except InvalidRequestError as e:
         logger.warning(
             f"failed to retrive customer from stripe for makeradmin member with id {makeradmin_member.member_id}, {e}"
         )
