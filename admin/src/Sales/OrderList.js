@@ -48,7 +48,7 @@ class OrderList extends CollectionNavigation {
             <div className="uk-margin-top">
                 <h2>Inkomna ordrar</h2>
                 <SearchBox handleChange={this.onSearch} value={this.state.search} />
-                <CollectionTable emptyMessage="Ingar ordrar" rowComponent={Row} collection={this.collection} columns={columns} onPageNav={this.onPageNav} />
+                <CollectionTable emptyMessage="Inga ordrar" rowComponent={Row} collection={this.collection} columns={columns} onPageNav={this.onPageNav} />
             </div>
         );
     }
