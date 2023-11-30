@@ -158,6 +158,9 @@ def pending_actions_query(member_id: Optional[int] = None, transaction: Optional
 
     if member_id:
         query = query.filter(Transaction.member_id == member_id)
+    else:
+        # Exclude transactions with member_id set to None (Gift cards)
+        query = query.filter(Transaction.member_id.isnot(None))
 
     return query
 
