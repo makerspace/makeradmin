@@ -36,7 +36,7 @@ import stripe
 
 from datetime import datetime, timezone, date, time, timedelta
 from stripe.error import InvalidRequestError
-from shop.stripe_util import retry
+from shop.stripe_util import retry, are_metadata_dicts_equivalent
 from basic_types.enums import PriceLevel
 from shop.stripe_discounts import get_discount_for_product, get_price_level_for_member
 from shop.models import Product, ProductAction, ProductCategory
@@ -230,12 +230,6 @@ def delete_stripe_customer(member_id: int) -> None:
 
     member.stripe_customer_id = None
     db_session.flush()
-
-
-def are_metadata_dicts_equivalent(a: Dict[str, Any], b: Dict[str, Any]) -> bool:
-    a = {k: v for k, v in a.items() if v != ""}
-    b = {k: v for k, v in b.items() if v != ""}
-    return a == b
 
 
 def get_stripe_customer(
