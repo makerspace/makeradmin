@@ -217,7 +217,7 @@ def stripe_invoice_event(subtype: EventSubtype, event: stripe.Event, current_tim
             # Presumably, it should be fixed by immediately pausing the subscription *before* the first
             # invoice is paid, and making sure the invoice does not contain the binding period.
             if subscription_type == SubscriptionType.LAB and member.labaccess_agreement_at is None:
-                stripe_subscriptions.pause_subscription(member_id, SubscriptionType.LAB, test_clock=None)
+                stripe_subscriptions.pause_subscription(member, SubscriptionType.LAB)
 
         if len(transaction_ids) > 0:
             # Attach a makerspace transaction id to the stripe invoice item.

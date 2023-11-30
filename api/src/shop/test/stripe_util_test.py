@@ -130,7 +130,7 @@ class StripeUtilWithStripeTest(ShopTestMixin, FlaskTestBase):
             category_id=self.subscription_category.id,
         )
         self.seen_products.append(makeradmin_test_product)
-        stripe_test_product = stripe_util.find_or_create_stripe_product(makeradmin_test_product)
+        stripe_test_product = stripe_util.get_or_create_stripe_product(makeradmin_test_product)
         assert stripe_test_product
         assert stripe_test_product.name == makeradmin_test_product.name
 
@@ -144,10 +144,10 @@ class StripeUtilWithStripeTest(ShopTestMixin, FlaskTestBase):
             category_id=self.not_subscription_category.id,
         )
         self.seen_products.append(makeradmin_test_product)
-        stripe_test_product = stripe_util.find_or_create_stripe_product(makeradmin_test_product)
+        stripe_test_product = stripe_util.get_or_create_stripe_product(makeradmin_test_product)
         assert stripe_test_product
 
-        stripe_test_prices = stripe_util.find_or_create_stripe_prices_for_product(
+        stripe_test_prices = stripe_util.get_or_create_stripe_prices_for_product(
             makeradmin_test_product, stripe_test_product
         )
         assert stripe_test_prices
@@ -168,10 +168,10 @@ class StripeUtilWithStripeTest(ShopTestMixin, FlaskTestBase):
             category_id=self.subscription_category.id,
         )
         self.seen_products.append(makeradmin_test_product)
-        stripe_test_product = stripe_util.find_or_create_stripe_product(makeradmin_test_product)
+        stripe_test_product = stripe_util.get_or_create_stripe_product(makeradmin_test_product)
         assert stripe_test_product
 
-        stripe_test_prices = stripe_util.find_or_create_stripe_prices_for_product(
+        stripe_test_prices = stripe_util.get_or_create_stripe_prices_for_product(
             makeradmin_test_product, stripe_test_product
         )
         assert stripe_test_prices
@@ -192,10 +192,10 @@ class StripeUtilWithStripeTest(ShopTestMixin, FlaskTestBase):
             category_id=self.subscription_category.id,
         )
         self.seen_products.append(makeradmin_test_product)
-        stripe_test_product = stripe_util.find_or_create_stripe_product(makeradmin_test_product)
+        stripe_test_product = stripe_util.get_or_create_stripe_product(makeradmin_test_product)
         assert stripe_test_product
 
-        stripe_test_prices = stripe_util.find_or_create_stripe_prices_for_product(
+        stripe_test_prices = stripe_util.get_or_create_stripe_prices_for_product(
             makeradmin_test_product, stripe_test_product
         )
         assert stripe_test_prices
@@ -216,10 +216,10 @@ class StripeUtilWithStripeTest(ShopTestMixin, FlaskTestBase):
             category_id=self.subscription_category.id,
         )
         self.seen_products.append(makeradmin_test_product)
-        stripe_test_product = stripe_util.find_or_create_stripe_product(makeradmin_test_product)
+        stripe_test_product = stripe_util.get_or_create_stripe_product(makeradmin_test_product)
         assert stripe_test_product
 
-        stripe_test_prices = stripe_util.find_or_create_stripe_prices_for_product(
+        stripe_test_prices = stripe_util.get_or_create_stripe_prices_for_product(
             makeradmin_test_product, stripe_test_product
         )
         assert stripe_test_prices
@@ -245,7 +245,7 @@ class StripeUtilWithStripeTest(ShopTestMixin, FlaskTestBase):
             category_id=self.subscription_category.id,
         )
         self.seen_products.append(makeradmin_test_product)
-        stripe_test_product = stripe_util.find_or_create_stripe_product(makeradmin_test_product)
+        stripe_test_product = stripe_util.get_or_create_stripe_product(makeradmin_test_product)
         assert stripe_test_product
 
         stripe_util.activate_stripe_product(stripe_test_product)
@@ -270,7 +270,7 @@ class StripeUtilWithStripeTest(ShopTestMixin, FlaskTestBase):
             category_id=self.subscription_category.id,
         )
         self.seen_products.append(makeradmin_test_product)
-        stripe_test_product = stripe_util.find_or_create_stripe_product(makeradmin_test_product)
+        stripe_test_product = stripe_util.get_or_create_stripe_product(makeradmin_test_product)
         assert stripe_test_product
 
         makeradmin_test_product.name = "test name change"
@@ -288,10 +288,10 @@ class StripeUtilWithStripeTest(ShopTestMixin, FlaskTestBase):
             category_id=self.not_subscription_category.id,
         )
         self.seen_products.append(makeradmin_test_product)
-        stripe_test_product = stripe_util.find_or_create_stripe_product(makeradmin_test_product)
+        stripe_test_product = stripe_util.get_or_create_stripe_product(makeradmin_test_product)
         assert stripe_test_product
 
-        stripe_test_prices = stripe_util.find_or_create_stripe_prices_for_product(
+        stripe_test_prices = stripe_util.get_or_create_stripe_prices_for_product(
             makeradmin_test_product, stripe_test_product
         )
         assert stripe_test_prices
@@ -329,10 +329,10 @@ class StripeUtilWithStripeTest(ShopTestMixin, FlaskTestBase):
         )
 
         self.seen_products.append(makeradmin_test_eq_product)
-        stripe_test_product = stripe_util.find_or_create_stripe_product(makeradmin_test_eq_product)
+        stripe_test_product = stripe_util.get_or_create_stripe_product(makeradmin_test_eq_product)
         assert stripe_test_product
 
-        stripe_test_prices = stripe_util.find_or_create_stripe_prices_for_product(
+        stripe_test_prices = stripe_util.get_or_create_stripe_prices_for_product(
             makeradmin_test_eq_product, stripe_test_product
         )
         assert stripe_test_prices
@@ -395,10 +395,10 @@ class StripeUtilWithStripeTest(ShopTestMixin, FlaskTestBase):
             stripe_constants.PriceType.FIXED_PRICE,
         ]
         self.seen_products.append(makeradmin_test_eq_product)
-        stripe_test_product = stripe_util.find_or_create_stripe_product(makeradmin_test_eq_product)
+        stripe_test_product = stripe_util.get_or_create_stripe_product(makeradmin_test_eq_product)
         assert stripe_test_product
 
-        stripe_test_prices = stripe_util.find_or_create_stripe_prices_for_product(
+        stripe_test_prices = stripe_util.get_or_create_stripe_prices_for_product(
             makeradmin_test_eq_product, stripe_test_product
         )
         assert stripe_test_prices

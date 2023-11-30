@@ -52,7 +52,6 @@ from shop.transactions import ship_labaccess_orders
 from logging import getLogger
 
 from shop.stripe_subscriptions import (
-    cancel_subscription,
     get_subscription_products,
     list_subscriptions,
     open_stripe_customer_portal,
@@ -198,7 +197,7 @@ def list_subscriptions_route() -> Any:
 
 @service.route("/member/current/stripe_customer_portal", method=GET, permission=PUBLIC)
 def open_stripe_customer_portal_route() -> str:
-    return open_stripe_customer_portal(g.user_id, test_clock=None)
+    return open_stripe_customer_portal(g.user_id)
 
 
 @service.route("/member/<int:member_id>/ship_labaccess_orders", method=POST, permission=MEMBER_EDIT)

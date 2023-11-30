@@ -14,6 +14,7 @@ from shop.stripe_subscriptions import (
     BINDING_PERIOD,
     SubscriptionType,
 )
+from shop.stripe_customer import get_and_sync_stripe_customer
 from shop import stripe_subscriptions
 from membership.membership import get_membership_summary
 from test_aid.test_util import random_str
@@ -64,7 +65,7 @@ def attach_and_set_payment_method(
     card_token: FakeCardPmToken,
     test_clock: Optional[stripe.test_helpers.TestClock] = None,
 ) -> None:
-    stripe_member = stripe_subscriptions.get_stripe_customer(member, test_clock=test_clock)
+    stripe_member = get_and_sync_stripe_customer(member, test_clock=test_clock)
     assert stripe_member is not None
 
     payment_method = stripe.PaymentMethod.attach(card_token.value, customer=stripe_member.stripe_id)
@@ -354,9 +355,7 @@ class Test(FlaskTestBase):
         assert summary.membership_active
         assert summary.membership_end == (now + time_delta(years=2)).date()
 
-        was_cancelled = stripe_subscriptions.cancel_subscription(
-            member_id, SubscriptionType.MEMBERSHIP, test_clock=clock.stripe_clock
-        )
+        was_cancelled = stripe_subscriptions.cancel_subscription(member_id, SubscriptionType.MEMBERSHIP)
         assert was_cancelled
 
         # Check that the membership is still active until the end of the current membership period.
@@ -397,9 +396,7 @@ class Test(FlaskTestBase):
 
         self.advance_clock(clock, now + time_delta(days=4))
 
-        was_cancelled = stripe_subscriptions.cancel_subscription(
-            member_id, SubscriptionType.MEMBERSHIP, test_clock=clock.stripe_clock
-        )
+        was_cancelled = stripe_subscriptions.cancel_subscription(member_id, SubscriptionType.MEMBERSHIP)
         assert was_cancelled
 
         self.advance_clock(clock, now + time_delta(days=6))
@@ -505,7 +502,7 @@ class Test(FlaskTestBase):
         assert summary.labaccess_active and summary.labaccess_end is not None
 
         # Cancel subscription after one day
-        stripe_subscriptions.cancel_subscription(member_id, SubscriptionType.LAB, test_clock=clock.stripe_clock)
+        stripe_subscriptions.cancel_subscription(member_id, SubscriptionType.LAB)
         # And immediately regret that decision and resubscribe (which is only proper)
         # The new subscription will start one day before the current membership ends
         sub_start = summary.labaccess_end - time_delta(days=1)

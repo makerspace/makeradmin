@@ -1,5 +1,4 @@
 from logging import getLogger
-from typing import Any, Dict, Generic, List, Optional, Tuple, TypeVar, cast
 
 
 import stripe
@@ -8,7 +7,7 @@ from test_aid.systest_config import STRIPE_PRIVATE_KEY, STRIPE_PUBLIC_KEY
 from shop.models import Product, ProductCategory
 from service.config import debug_mode
 from service.db import db_session
-from service.error import InternalServerError
+from shop.stripe_util import get_subscription_category, get_and_sync_stripe_product_and_prices
 
 logger = getLogger("makeradmin")
 
@@ -24,30 +23,7 @@ def setup_stripe_products() -> None:
     subscription_category = get_subscription_category()
     makeradmin_products = db_session.query(Product).filter(ProductCategory.id == subscription_category.id)
     for makeradmin_product in makeradmin_products:
-        setup_stripe_product_and_prices(makeradmin_product)
-
-
-def setup_stripe_product_and_prices(makeradmin_product: Product) -> None:
-    stripe_product = find_or_create_stripe_product(makeradmin_product)
-    if stripe_product is None:
-        raise InternalServerError(f"Failed to find/create stripe product for makeradmin product {makeradmin_product}")
-
-    if not eq_makeradmin_stripe_product(makeradmin_product, stripe_product):
-        update_stripe_product(makeradmin_product, stripe_product)
-
-    stripe_prices = find_or_create_stripe_prices_for_product(makeradmin_product, stripe_product)
-    for price_type, stripe_price in stripe_prices.items():
-        if stripe_price is None:
-            raise InternalServerError(
-                f"Failed to find/create stripe price for makeradmin product {makeradmin_product} with price type {price_type}"
-            )
-
-        if not eq_makeradmin_stripe_price(makeradmin_product, stripe_price, price_type):
-            stripe_price = replace_stripe_price(makeradmin_product, stripe_price, price_type)
-        if not stripe_price.active:
-            stripe_price = activate_stripe_price(stripe_price)
-    if not stripe_product.active:
-        stripe_product = activate_stripe_product(stripe_product)
+        get_and_sync_stripe_product_and_prices(makeradmin_product)
 
 
 def setup_stripe() -> None:

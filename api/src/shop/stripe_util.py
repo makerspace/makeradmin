@@ -4,7 +4,8 @@ from decimal import Decimal
 import random
 import time
 from logging import getLogger
-from typing import Any, Callable, Dict, List, TypeVar
+from sqlalchemy import func
+from typing import Any, Callable, Dict, List, TypeVar, Tuple
 
 from service.config import debug_mode
 from service.error import InternalServerError
@@ -25,6 +26,12 @@ makeradmin_unit_to_stripe_unit = {
     "år": "year",
     "year": "year",
 }
+
+
+def are_metadata_dicts_equivalent(a: Dict[str, Any], b: Dict[str, Any]) -> bool:
+    a = {k: v for k, v in a.items() if v != ""}
+    b = {k: v for k, v in b.items() if v != ""}
+    return a == b
 
 
 def get_subscription_category() -> ProductCategory:
@@ -158,7 +165,47 @@ def _create_stripe_price(
     return stripe_price
 
 
-def find_or_create_stripe_product(makeradmin_product: Product) -> stripe.Product:
+# TODO make some tests for the get and sync methods
+def get_and_sync_stripe_product(makeradmin_product: Product) -> stripe.Product:
+    try:
+        stripe_product = get_or_create_stripe_product(makeradmin_product)
+        if not eq_makeradmin_stripe_product(makeradmin_product, stripe_product):
+            stripe_product = update_stripe_product(makeradmin_product, stripe_product)
+        if not stripe_product.active:
+            stripe_product = activate_stripe_product(stripe_product)
+        return stripe_product
+    except Exception as e:
+        raise InternalServerError(
+            f"Failed to sync stripe product for makeradmin product {makeradmin_product}. Exception {e}"
+        )
+
+
+def get_and_sync_stripe_prices_for_product(
+    makeradmin_product: Product, stripe_product: stripe.Product
+) -> Dict[PriceType, stripe.Price]:
+    try:
+        stripe_prices = get_or_create_stripe_prices_for_product(makeradmin_product, stripe_product)
+        for price_type, stripe_price in stripe_prices.items():
+            if not eq_makeradmin_stripe_price(makeradmin_product, stripe_price, price_type):
+                stripe_price = replace_stripe_price(makeradmin_product, stripe_price, price_type)
+            if not stripe_price.active:
+                stripe_price = activate_stripe_price(stripe_price)
+        return stripe_prices
+    except Exception as e:
+        raise InternalServerError(
+            f"Failed to sync stripe prices for makeradmin product {makeradmin_product}. Exception {e}"
+        )
+
+
+def get_and_sync_stripe_product_and_prices(
+    makeradmin_product: Product,
+) -> Tuple[stripe.Product, Dict[PriceType, stripe.Price]]:
+    stripe_product = get_and_sync_stripe_product(makeradmin_product)
+    stripe_prices = get_and_sync_stripe_prices_for_product(makeradmin_product, stripe_product)
+    return (stripe_product, stripe_prices)
+
+
+def get_or_create_stripe_product(makeradmin_product: Product) -> stripe.Product:
     stripe_product = get_stripe_product(makeradmin_product)
     if stripe_product is None:
         stripe_product = _create_stripe_product(makeradmin_product)
@@ -177,7 +224,7 @@ def _find_price_type(stripe_prices: list[stripe.Price] | None, price_type: Price
     return None
 
 
-def find_or_create_stripe_prices_for_product(
+def get_or_create_stripe_prices_for_product(
     makeradmin_product: Product, stripe_product: stripe.Product
 ) -> Dict[PriceType, stripe.Price]:
     price_types = []
@@ -267,8 +314,13 @@ def convert_to_stripe_amount(amount: Decimal) -> int:
             message=f"The amount could not be converted to an even number of ören ({amount}).",
             log=f"Stripe amount not even number of ören, maybe some product has uneven ören.",
         )
-
     return int(stripe_amount)
+
+
+def convert_from_stripe_amount(stripe_amount: int) -> Decimal:
+    """Convert stripe amount to decimal amount and return it."""
+    amount = ((Decimal(stripe_amount) / STRIPE_CURRENTY_BASE)).quantize(Decimal("0.01"))
+    return amount
 
 
 def event_semantic_time(event: stripe.Event) -> datetime:
