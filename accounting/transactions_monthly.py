@@ -8,9 +8,8 @@ inputs = f"transactions_{year}.tsv"
 output = f"monthly_transactions_summary_{year}.tsv"
 
 monthly_totals = defaultdict(float)
-monthly_transactions = defaultdict(int)
-account_totals = defaultdict(lambda: defaultdict(float))
-cost_center_totals = defaultdict(lambda: defaultdict(float))
+debit_totals = defaultdict(lambda: defaultdict(float))
+credit_totals = defaultdict(lambda: defaultdict(float))
 
 with open(inputs, "r") as file:
     reader = csv.DictReader(file, delimiter="\t")
@@ -19,11 +18,12 @@ with open(inputs, "r") as file:
         year_month = date.strftime("%Y-%m")
         amount = float(row["amount"])
         monthly_totals[year_month] += amount
-        monthly_transactions[year_month] += 1  # TODO not correct?
         account = row["account"]
+        debits_fraction = float(row["debits"])
+        credits_fraction = float(row["credits"])
         cost_center = row["cost_center"]
-        account_totals[year_month][account] += amount
-        cost_center_totals[year_month][cost_center] += amount
+        debit_totals[year_month][(account, cost_center)] += amount * debits_fraction
+        credit_totals[year_month][(account, cost_center)] += amount * credits_fraction
 
 with open(output, "w", newline="") as file:
     writer = csv.writer(file, delimiter="\t")
@@ -31,14 +31,14 @@ with open(output, "w", newline="") as file:
     writer.writerow(headers)
 
     for year_month in sorted(monthly_totals.keys()):
-        for account, cost_center in zip(account_totals[year_month], cost_center_totals[year_month]):
+        for acc_cost_tuple in debit_totals[year_month].keys():
             writer.writerow(
                 [
                     year_month,
-                    account_totals[year_month][account],
-                    cost_center_totals[year_month][cost_center],
-                    account,
-                    cost_center,
+                    debit_totals[year_month][acc_cost_tuple],
+                    credit_totals[year_month][acc_cost_tuple],
+                    acc_cost_tuple[0],
+                    acc_cost_tuple[1],
                 ]
             )
 print(f"Data Compiled to {output}")

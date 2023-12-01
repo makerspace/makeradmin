@@ -1,6 +1,8 @@
 import argparse
 from datetime import datetime, timedelta
 from sqlalchemy import func
+from typing import Any, Dict, Generic, Literal, Optional, Tuple, TypeVar, cast
+
 from basic_types.enums import PriceLevel
 from init_db import init_db
 from membership.models import Group, Permission, Member
@@ -32,7 +34,7 @@ BLUE = "\u001b[34m"
 RESET = "\u001b[0m"
 
 
-def banner(color, message):
+def banner(color: Any, message: str) -> None:
     line = "#" * (len(message) + (1 + 3) * 2)
     print(color)
     print(line)
@@ -41,7 +43,7 @@ def banner(color, message):
     print(RESET)
 
 
-def get_or_create(model, defaults=None, **kwargs):
+def get_or_create(model: Any, defaults: Optional[Any] = None, **kwargs: Any) -> Any:
     entity = db_session.query(model).filter_by(**kwargs).first()
     if entity:
         return entity
@@ -52,12 +54,12 @@ def get_or_create(model, defaults=None, **kwargs):
     return entity
 
 
-def create_db():
+def create_db() -> None:
     banner(BLUE, "Making Sure Database Tables Exist")
     init_db()
 
 
-def admin_group():
+def admin_group() -> Any:
     banner(BLUE, "Adding Admin Permissions")
 
     logger.info(f"Adding permissions: {ALL_PERMISSIONS}")
@@ -72,7 +74,7 @@ def admin_group():
     return admins
 
 
-def create_admin(admins) -> None:
+def create_admin(admins: Any) -> None:
     banner(BLUE, "Admin User")
 
     while True:
@@ -294,7 +296,7 @@ def create_shop_transactions() -> None:
             transaction = get_or_create(
                 Transaction,
                 id=index,
-                defaults=dict(member_id=1, amount=100, status="completed", created_at=test_date),
+                defaults=dict(member_id=1, amount=product.price, status="completed", created_at=test_date),
             )
             transaction_content = get_or_create(
                 TransactionContent,
@@ -303,21 +305,39 @@ def create_shop_transactions() -> None:
                     transaction_id=transaction.id,
                     product_id=product.id,
                     count=1,
-                    amount=100,
-                ),
-            )
-            get_or_create(
-                TransactionAction,
-                id=index,
-                defaults=dict(
-                    content_id=transaction_content.id,
-                    action_type="add_labaccess_days",
-                    value=10,
-                    status="completed",
-                    completed_at=test_date,
+                    amount=product.price,
                 ),
             )
             index += 1
+
+    membership_prod = get_or_create(Product, name="Base membership")
+    transaction = get_or_create(
+        Transaction,
+        id=index,
+        defaults=dict(member_id=1, amount=membership_prod.price, status="completed", created_at=test_date),
+    )
+    transaction_content = get_or_create(
+        TransactionContent,
+        id=index,
+        defaults=dict(
+            transaction_id=transaction.id,
+            product_id=membership_prod.id,
+            count=1,
+            amount=membership_prod.price,
+        ),
+    )
+    get_or_create(
+        TransactionAction,
+        id=index,
+        defaults=dict(
+            content_id=transaction_content.id,
+            action_type="add_labaccess_days",
+            value=10,
+            status="completed",
+            completed_at=test_date,
+        ),
+    )
+    index += 1
 
     # A transaction with member_id as null to represent a gift card.
     transaction = get_or_create(
@@ -374,14 +394,17 @@ def create_shop_accounts_cost_centers() -> None:
     tools_category = get_or_create(ProductCategory, name="Tools")
     products = db_session.query(Product).filter_by(category_id=tools_category.id).all()
     for product in products:
-        for account in accounts:
-            for cost_center in cost_centers:
+        for i, account in enumerate(accounts):
+            for j, cost_center in enumerate(cost_centers):
+                debits = 0 if i % 2 == 0 else 0.5
+                credit_value = 0.3 if j % 2 == 0 else 0.7
+                credits = 0 if i % 2 != 0 else credit_value
                 get_or_create(
                     ProductAccountsCostCenters,
                     product_id=product.id,
                     account_id=account.id,
                     cost_center_id=cost_center.id,
-                    defaults=dict(debits=0.25, credits=0.25),
+                    defaults=dict(debits=debits, credits=credits),
                 )
 
     db_session.commit()
