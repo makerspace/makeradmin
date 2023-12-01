@@ -36,7 +36,7 @@ import stripe
 
 from datetime import datetime, timezone, date, time, timedelta
 from stripe.error import InvalidRequestError
-from shop.stripe_util import retry
+from shop.stripe_util import retry, convert_from_stripe_amount
 from basic_types.enums import PriceLevel
 from shop.stripe_discounts import get_discount_for_product, get_price_level_for_member
 from shop.models import Product, ProductAction, ProductCategory
@@ -468,9 +468,7 @@ def start_subscription(
                 to_pay_now_price = stripe.Price.retrieve(
                     (price.binding_period_price or price.recurring_price).stripe_id
                 )
-                to_pay_now = (
-                    (Decimal(to_pay_now_price["unit_amount"]) / STRIPE_CURRENTY_BASE) * (1 - discount.fraction_off)
-                ).quantize(Decimal("0.01"))
+                to_pay_now = convert_from_stripe_amount(to_pay_now_price["unit_amount"]) * (1 - discount.fraction_off)
             if to_pay_now != expected_to_pay_now:
                 raise BadRequest(
                     f"Expected to pay {expected_to_pay_now} now, for starting {subscription_type} subscription, but should actually pay {to_pay_now}"
@@ -479,9 +477,9 @@ def start_subscription(
         if expected_to_pay_recurring is not None:
             # Fetch a fresh price object from stripe to make sure we have the latest price
             to_pay_recurring_price = stripe.Price.retrieve(price.recurring_price.stripe_id)
-            to_pay_recurring = (
-                (Decimal(to_pay_recurring_price["unit_amount"]) / STRIPE_CURRENTY_BASE) * (1 - discount.fraction_off)
-            ).quantize(Decimal("0.01"))
+            to_pay_recurring = convert_from_stripe_amount(to_pay_recurring_price["unit_amount"]) * (
+                1 - discount.fraction_off
+            )
             if to_pay_recurring != expected_to_pay_recurring:
                 raise BadRequest(
                     f"Expected to pay {expected_to_pay_recurring} when {subscription_type} subscription renews, but the recurring price is {to_pay_recurring}"
