@@ -17,7 +17,11 @@ from shop.models import (
     Transaction,
     TransactionAction,
     TransactionContent,
-    AccountsCostCenters, GiftCard, ProductGiftCardMapping
+    TransactionAccount,
+    TransactionCostcenter,
+    ProductAccountsCostCenters,
+    GiftCard,
+    ProductGiftCardMapping,
 )
 from getpass import getpass
 
@@ -41,7 +45,7 @@ def get_or_create(model, defaults=None, **kwargs):
     entity = db_session.query(model).filter_by(**kwargs).first()
     if entity:
         return entity
-        
+
     entity = model(**{**kwargs, **defaults}) if defaults else model(**{**kwargs})
     db_session.add(entity)
     db_session.flush()
@@ -68,7 +72,7 @@ def admin_group():
     return admins
 
 
-def create_admin(admins):
+def create_admin(admins) -> None:
     banner(BLUE, "Admin User")
 
     while True:
@@ -105,29 +109,47 @@ def create_admin(admins):
             print("Something went wrong while creating the new user. Please try again.")
 
 
-def create_members():
+def create_members() -> None:
     banner(RED, "Creating Fake Members")
 
-    get_or_create(Member, 
-        email="first1.last1@gmail.com", member_number=1001,
-        firstname="first1", lastname="last1", price_level="normal",
-        pending_activation=False
+    get_or_create(
+        Member,
+        email="first1.last1@gmail.com",
+        defaults=dict(
+            member_number=1001,
+            firstname="first1",
+            lastname="last1",
+            price_level="normal",
+            pending_activation=False,
+        ),
     )
-    get_or_create(Member, 
-        email="first2.last2@gmail.com", member_number=1002,
-        firstname="first2", lastname="last2", price_level="normal",
-        pending_activation=False
+    get_or_create(
+        Member,
+        email="first2.last2@gmail.com",
+        defaults=dict(
+            member_number=1002,
+            firstname="first2",
+            lastname="last2",
+            price_level="normal",
+            pending_activation=False,
+        ),
     )
-    get_or_create(Member, 
-        email="first3.last3@gmail.com", member_number=1003,
-        firstname="first3", lastname="last3", price_level="low_income_discount",
-        pending_activation=False
+    get_or_create(
+        Member,
+        email="first3.last3@gmail.com",
+        defaults=dict(
+            member_number=1003,
+            firstname="first3",
+            lastname="last3",
+            price_level="low_income_discount",
+            pending_activation=False,
+        ),
     )
 
     db_session.commit()
 
 
-def create_shop_products():
+def create_shop_products() -> None:
     banner(BLUE, "Creating Fake Shop Categories")
 
     display_order_category = db_session.query(func.max(ProductCategory.display_order)).scalar() or 0
@@ -254,35 +276,29 @@ def create_shop_products():
     db_session.commit()
 
 
-
-def create_shop_transactions():
+def create_shop_transactions() -> None:
     banner(GREEN, "Creating Fake Shop Transactions And Content")
 
-    tools_category = get_or_create(
-        ProductCategory, name="Tools"
-    )
-    
-    products = db_session.query(Product).filter_by(category_id=tools_category.id)
-    numdays_list=[1,10,35,400]
+    tools_category = get_or_create(ProductCategory, name="Tools")
+
+    products = db_session.query(Product).filter_by(category_id=tools_category.id).all()
+    logger.info("******************")
+    logger.info(products)
+    numdays_list = [1, 10, 35, 400]
     index = 1
 
     for product in products:
         for numdays in numdays_list:
             test_date = datetime.today() - timedelta(days=numdays)
-            
+
             transaction = get_or_create(
                 Transaction,
                 id=index,
-                defaults=dict(
-                    member_id=1,
-                    amount=100,
-                    status="completed",
-                    created_at=test_date
-                ),
+                defaults=dict(member_id=1, amount=100, status="completed", created_at=test_date),
             )
             transaction_content = get_or_create(
                 TransactionContent,
-                id = index,
+                id=index,
                 defaults=dict(
                     transaction_id=transaction.id,
                     product_id=product.id,
@@ -292,14 +308,13 @@ def create_shop_transactions():
             )
             get_or_create(
                 TransactionAction,
-                id = index,
+                id=index,
                 defaults=dict(
-                    content_id= transaction_content.id,
+                    content_id=transaction_content.id,
                     action_type="add_labaccess_days",
                     value=10,
                     status="completed",
-                    completed_at = test_date,
-                    
+                    completed_at=test_date,
                 ),
             )
             index += 1
@@ -308,13 +323,10 @@ def create_shop_transactions():
     transaction = get_or_create(
         Transaction,
         id=index,
-        defaults=dict(
-            member_id=None,
-            amount=100,
-            status="completed",
-            created_at=datetime.now()
-        ),
+        defaults=dict(member_id=None, amount=100, status="completed", created_at=datetime.now()),
     )
+
+    # TODO this should probabl be associated with some sort of gift card product later
     transaction_content = get_or_create(
         TransactionContent,
         id=index,
@@ -325,54 +337,61 @@ def create_shop_transactions():
             amount=100,
         ),
     )
-    get_or_create(
-        TransactionAction,
-        id=index,
-        defaults=dict(
-            content_id=transaction_content.id,
-            action_type="add_labaccess_days",
-            value=10,
-            status="completed",
-            completed_at=datetime.now(),
-        ),
-    )
     index += 1
-    
+
     db_session.commit()
 
-def create_shop_accounts_cost_centers():
+
+def create_shop_accounts_cost_centers() -> None:
     banner(BLUE, "Creating Fake Account and Cost Centers")
-    tools_category = get_or_create(
-    ProductCategory, name="Tools"
-)
-    products = db_session.query(Product).filter_by(category_id=tools_category.id)
-    for product in products:
-        for account_id in range(1, 3):
-            for cost_center_id in range(1,3):
-             
-             get_or_create(
-                AccountsCostCenters,
-                    product_id=product.id,
-                    cost_center = cost_center_id,
-                    account = account_id,
-                    defaults=dict(  
-                    debits = 0.25,
-                    credits =0.25
-                )
+
+    accounts = []
+    for account_id in range(1, 3):
+        accounts.append(
+            get_or_create(
+                TransactionAccount,
+                account=account_id,
+                defaults=dict(
+                    display_order=account_id,
+                    description=f"Account {account_id}",
+                ),
             )
+        )
+
+    cost_centers = []
+    for cost_center_id in range(1, 3):
+        cost_centers.append(
+            get_or_create(
+                TransactionCostcenter,
+                cost_center=f"cost center number {cost_center_id}",
+                defaults=dict(
+                    display_order=cost_center_id,
+                    description=f"CostCenter {cost_center_id}",
+                ),
+            )
+        )
+
+    tools_category = get_or_create(ProductCategory, name="Tools")
+    products = db_session.query(Product).filter_by(category_id=tools_category.id).all()
+    for product in products:
+        for account in accounts:
+            for cost_center in cost_centers:
+                get_or_create(
+                    ProductAccountsCostCenters,
+                    product_id=product.id,
+                    account_id=account.id,
+                    cost_center_id=cost_center.id,
+                    defaults=dict(debits=0.25, credits=0.25),
+                )
 
     db_session.commit()
 
 
-def create_shop_gift_cards():
+def create_shop_gift_cards() -> None:
     banner(YELLOW, "Creating Fake 'Gift Cards' and 'Gift Card & Product Mappings'")
 
     gift_card = get_or_create(
-        GiftCard,
-        amount=299.00,
-        validation_code=12989519,
-        email="test@fake.com",
-        status="activated"
+        GiftCard, amount=299.00, validation_code=12989519, email="test@fake.com", status="activated"
     )
 
     # Get existing product with ID: 64 (Makerspace access starter pack)
@@ -381,16 +400,12 @@ def create_shop_gift_cards():
         name="Makerspace access starter pack",
     )
 
-    get_or_create(
-        ProductGiftCardMapping,
-        gift_card_id=gift_card.id,
-        product_id=product.id
-    )
+    get_or_create(ProductGiftCardMapping, gift_card_id=gift_card.id, product_id=product.id)
 
     db_session.commit()
 
 
-def firstrun():
+def firstrun() -> None:
     create_db()
     admins = admin_group()
     create_admin(admins)
@@ -399,8 +414,7 @@ def firstrun():
     create_shop_transactions()
     create_shop_accounts_cost_centers()
     create_shop_gift_cards()
-    
-    
+
     banner(
         GREEN,
         "Done, now run servers with 'make dev' then browse admin gui at "

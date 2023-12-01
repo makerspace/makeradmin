@@ -1,4 +1,3 @@
-
 from typing import Any
 from sqlalchemy import (
     JSON,
@@ -75,8 +74,6 @@ class Product(Base):
 
     category = relationship(ProductCategory, backref="products")
     actions = relationship("ProductAction")
-    accounts_cost_centers = relationship("AccountsCostCenters")
-    
 
     image_id = Column(Integer, ForeignKey(ProductImage.id), nullable=True)
 
@@ -188,6 +185,7 @@ class GiftCard(Base):
         status (enum): The status of the gift card (PENDING, ACTIVATED, EXPIRED)
         created_at (datetime): the timestamp when the card was created.
     """
+
     __tablename__ = "webshop_gift_card"
 
     PENDING = "pending"
@@ -216,6 +214,7 @@ class ProductGiftCardMapping(Base):
         gift_card (GiftCard): The gift card associated with the mapping.
         product (Product): The product associated with the mapping.
     """
+
     __tablename__ = "webshop_product_gift_card_mapping"
 
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
@@ -227,19 +226,53 @@ class ProductGiftCardMapping(Base):
     product = relationship(Product)
 
 
-class AccountsCostCenters(Base):
-    __tablename__ = "webshop_accounts_cost_centers"
-    
+class TransactionAccount(Base):
+    __tablename__ = "webshop_transaction_accounts"
+
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
-    product_id = Column(Integer, ForeignKey('webshop_products.id'), nullable=False)
-    cost_center = Column(Integer, nullable=False)
-    account = Column(Integer, nullable=False)
-    debits = Column(Numeric(10,2))
-    credits = Column(Numeric(10,2))
-    product = relationship("Product", back_populates="accounts_cost_centers")
-    
+    account = Column(Integer, nullable=False, unique=True)
+    description = Column(String(255), nullable=False)
+    display_order = Column(Integer, nullable=False, unique=True)
+    created_at = Column(DateTime, server_default=func.now())
+    updated_at = Column(DateTime, server_default=func.now())
+    deleted_at = Column(DateTime)
+
     def __repr__(self) -> str:
-        return  f"AccountsCostCenters(id={self.id}, cost_center={self.cost_center}, account={self.product_id}, debits={self.debits}, credits={self.credits})"     
+        return f"TransactionAccount(id={self.id}, account={self.account}, description={self.description})"
+
+
+class TransactionCostcenter(Base):
+    __tablename__ = "webshop_transaction_cost_centers"
+
+    id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
+    cost_center = Column(String(100), nullable=False, unique=True)
+    description = Column(String(255), nullable=False)
+    display_order = Column(Integer, nullable=False, unique=True)
+    created_at = Column(DateTime, server_default=func.now())
+    updated_at = Column(DateTime, server_default=func.now())
+    deleted_at = Column(DateTime)
+
+    def __repr__(self) -> str:
+        return f"TransactionConstCenter(id={self.id}, cost_center={self.cost_center}, description={self.description})"
+
+
+class ProductAccountsCostCenters(Base):
+    __tablename__ = "webshop_product_accounting"
+
+    id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
+    product_id = Column(Integer, ForeignKey("webshop_products.id"), nullable=False)
+    account_id = Column(Integer, ForeignKey("webshop_transaction_accounts.id"), nullable=False)
+    cost_center_id = Column(Integer, ForeignKey("webshop_transaction_cost_centers.id"), nullable=False)
+    debits = Column(Numeric(10, 2), nullable=False, server_default=("0"))
+    credits = Column(Numeric(10, 2), nullable=False, server_default=("0"))
+
+    product = relationship(Product, backref="accounts_cost_centers")
+    account = relationship(TransactionAccount, backref="accounts_cost_centers")
+    cost_center = relationship(TransactionCostcenter, backref="accounts_cost_centers")
+
+    def __repr__(self) -> str:
+        return f"ProductAccountsCostCenters(id={self.id}, cost_center={self.cost_center}, account={self.account}, debits={self.debits}, credits={self.credits})"
+
 
 class StripePending(Base):
     __tablename__ = "webshop_stripe_pending"
