@@ -2,6 +2,7 @@ from collections import defaultdict
 from typing import Dict, Tuple
 from datetime import datetime
 from argparse import ArgumentParser
+
 from accounting import MonthlyTransactions
 
 
