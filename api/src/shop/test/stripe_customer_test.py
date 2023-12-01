@@ -26,8 +26,7 @@ logger = getLogger("makeradmin")
 
 
 class StripeCustomerTest(ShopTestMixin, FlaskTestBase):
-    # The products id in makeradmin have to be unique in each test to prevent race conditions
-    # Some of the tests here will generate new objects in stripe. They are all ran in test mode
+    # Some of the tests here will generate new customers in stripe, but they will be marked as deleted.
     # You can clear the test area in stripe's developer dashboard.
 
     models = [membership.models, messages.models, shop.models, core.models]
@@ -37,7 +36,6 @@ class StripeCustomerTest(ShopTestMixin, FlaskTestBase):
         self.seen_members: List[Member] = []
 
     def tearDown(self) -> None:
-        # It is not possible to delete prices through the api so we set them as inactive instead
         for makeradmin_member in self.seen_members:
             delete_stripe_customer(makeradmin_member.member_id)
             return super().tearDown()
