@@ -25,7 +25,6 @@ class Test(ApiShopTestMixin, ApiTest):
             CartItem(self.p1_id, p1_count),
         ]
 
-        # TODO check that this tests works properly and runs. It shouldnt work to send a card directly
         payment_method = stripe.PaymentMethod.create(type="card", card=self.card(VALID_NON_3DS_CARD_NO))
 
         purchase = Purchase(

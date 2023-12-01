@@ -16,7 +16,8 @@ The model for subscriptions is as follows:
     - Binding period prices need to be configured in the stripe dashboard with the metadata price_type=binding_period.
         - It should also be configured as recurring with the number of months that the binding period should be.
     - Currently the binding period need to have the same price per month as the non-binding period.
-- Subscriptions will use the price that has the metadata price_type=recurring (except for the binding period).
+- Subscriptions will use the price (in stripe or makeradmin? fix) that has the metadata price_type=recurring (except for the binding period).
+- Subscriptions use custom product actions via transaction actions instead of the product action associated with the subscription product. This is because the number of days in a month varies.
 
 Due to a limitation in how stripe works, we need to use a regular purchase for the first payment.
 This is because stripe doesn't allow starting multiple subscriptions at the same time, which becomes a UX issue if the card requires 3D secure authentication
@@ -67,24 +68,11 @@ logger = getLogger("makeradmin")
 # Binding period in months.
 # Set to zero to disable binding periods.
 # Setting it to 1 is not particularly useful, since it will be the same as a normal subscription.
+# TODO need to fix this
 BINDING_PERIOD = {
     SubscriptionType.MEMBERSHIP: 0,
     SubscriptionType.LAB: 2,
 }
-
-# TODO place this somewhere
-# Delete all existing product actions for this product, and create new ones.
-# When a subscription runs as normal, these actions will not be triggered,
-# instead the paid invoice will be processed, and there's some custom code to add membership
-# for the exact number of days that stripe says that the invoice was for (it may vary depending on the number of days in a month for example).
-# However, when a member starts a new subscription, we will use a regular purchase for the first payment.
-# This purchase will use these actions. The stripe subscription will instead start on the renewal date.
-#
-# A regular purchase is used for the first payment, since otherwise it is not possible to start multiple subscriptions (or start one subscription and pay for something else)
-# at the same time, if the card requires 3D secure authentication.
-# This is an annoying stripe limitation.
-# By making the first payment a regular purchase, we can make sure the subscription is always scheduled for the future
-# instead of starting immediately.
 
 
 SUBSCRIPTION_PRODUCTS: Optional[Dict[SubscriptionType, int]] = None
