@@ -15,11 +15,11 @@ from shop.stripe_constants import (
 logger = getLogger("makeradmin")
 
 
-def _get_metadata_for_stripe_customer(makeradmin_member: Member) -> Dict[str, Any]:
+def _get_metadata_for_stripe_customer(makeradmin_member: Member) -> Dict[str, str]:
     return {
         MSMetaKeys.PENDING_MEMBER.value: "pending" if makeradmin_member.pending_activation else "",
-        MSMetaKeys.USER_ID.value: makeradmin_member.member_id,
-        MSMetaKeys.MEMBER_NUMBER.value: makeradmin_member.member_number,
+        MSMetaKeys.USER_ID.value: str(makeradmin_member.member_id),
+        MSMetaKeys.MEMBER_NUMBER.value: str(makeradmin_member.member_number),
     }
 
 
@@ -50,7 +50,7 @@ def _create_stripe_customer(
     makeradmin_member: Member, test_clock: Optional[stripe.test_helpers.TestClock] = None
 ) -> stripe.Customer:
     expected_metadata = _get_metadata_for_stripe_customer(makeradmin_member)
-    customer = retry(
+    stripe_customer = retry(
         lambda: stripe.Customer.create(
             description=f"Created by Makeradmin (#{makeradmin_member.member_number})",
             email=makeradmin_member.email.strip(),
@@ -59,14 +59,18 @@ def _create_stripe_customer(
             test_clock=test_clock,
         )
     )
-    return customer
+    # Note: Stripe doesn't update its search index of customers immediately,
+    # so the new customer may not be visible to stripe.Customer.search for a few seconds.
+    # Therefore we always try to find the customer by its ID, that we store in the database
+    makeradmin_member.stripe_customer_id = stripe_customer.stripe_id
+    db_session.flush()
+    return stripe_customer
 
 
 def get_or_create_stripe_customer(
     makeradmin_member: Member, test_clock: Optional[stripe.test_helpers.TestClock] = None
 ) -> stripe.Customer:
-    if makeradmin_member.stripe_customer_id:
-        stripe_customer = get_stripe_customer(makeradmin_member)
+    stripe_customer = get_stripe_customer(makeradmin_member) if makeradmin_member.stripe_customer_id else None
     if stripe_customer is None:
         stripe_customer = _create_stripe_customer(makeradmin_member, test_clock)
     return stripe_customer
@@ -79,12 +83,6 @@ def get_and_sync_stripe_customer(
         stripe_customer = get_or_create_stripe_customer(makeradmin_member, test_clock)
         if not eq_makeradmin_stripe_customer(makeradmin_member, stripe_customer):
             stripe_customer = update_stripe_customer(makeradmin_member)
-
-        # Note: Stripe doesn't update its search index of customers immediately,
-        # so the new customer may not be visible to stripe.Customer.search for a few seconds.
-        # Therefore we always try to find the customer by its ID, that we store in the database
-        makeradmin_member.stripe_customer_id = stripe_customer.stripe_id
-        db_session.flush()
         return stripe_customer
     except Exception as e:
         raise InternalServerError(f"Failed to sync stripe customer for member {makeradmin_member}. Exception {e}")
@@ -92,14 +90,14 @@ def get_and_sync_stripe_customer(
 
 def update_stripe_customer(makeradmin_member: Member) -> stripe.Customer:
     """Update the stripe product to match the makeradmin product"""
-    expected_metadata = _get_metadata_for_stripe_customer(makeradmin_member)
+    metadata = _get_metadata_for_stripe_customer(makeradmin_member)
     return retry(
         lambda: stripe.Customer.modify(
             makeradmin_member.stripe_customer_id,
             description=f"Created by Makeradmin (#{makeradmin_member.member_number})",
             email=makeradmin_member.email.strip(),
             name=f"{makeradmin_member.firstname} {makeradmin_member.lastname}",
-            metadata=expected_metadata,
+            metadata=metadata,
         )
     )
 
