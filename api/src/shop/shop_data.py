@@ -7,7 +7,6 @@ from sqlalchemy import desc
 from sqlalchemy.orm import joinedload, contains_eager
 from sqlalchemy.orm.exc import NoResultFound
 from shop.stripe_constants import MakerspaceMetadataKeys
-from shop.stripe_subscriptions import get_subscription_products
 
 from membership.views import member_entity
 from service.db import db_session
@@ -129,6 +128,14 @@ def get_product_data(product_id):
         "product": product_entity.to_obj(product),
         "productData": all_product_data(),
     }
+
+
+def get_product_data_by_special_id(special_product_id: str) -> Product | None:
+    return (
+        db_session.query(Product)
+        .filter(Product.product_metadata[MakerspaceMetadataKeys.SPECIAL_PRODUCT_ID.value] == special_product_id)
+        .one_or_none()
+    )
 
 
 @dataclass

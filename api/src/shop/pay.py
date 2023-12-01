@@ -15,9 +15,9 @@ from shop.models import Product, StripePending, Transaction, TransactionAction, 
 from shop.stripe_subscriptions import (
     SubscriptionType,
     cancel_subscription,
-    get_stripe_customer,
     start_subscription,
 )
+from shop.stripe_customer import get_and_sync_stripe_customer
 from service.db import db_session
 from core import auth
 from membership.views import member_entity
@@ -36,7 +36,6 @@ logger = getLogger("makeradmin")
 
 def make_purchase(member_id: int, purchase: Purchase) -> Transaction:
     """Pay using the data in purchase, the purchase structure should be validated according to schema."""
-
     payment_method_id: str = purchase.stripe_payment_method_id
 
     transaction = create_transaction(member_id=member_id, purchase=purchase)
@@ -160,10 +159,12 @@ def setup_payment_method(data_dict: Any, member_id: int) -> SetupPaymentMethodRe
         raise BadRequest(message=f"Invalid data: {e}")
 
     member = db_session.query(Member).get(member_id)
-    assert member is not None
+    if member is None:
+        raise BadRequest(f"Unable to find member with id {member_id}")
 
-    stripe_customer = get_stripe_customer(member, test_clock=None)
-    assert stripe_customer is not None
+    stripe_customer = get_and_sync_stripe_customer(member)
+    if stripe_customer is None:
+        raise BadRequest(f"Unable to find corresponding stripe member {member}")
 
     if data.setup_intent_id is None:
         try:
@@ -205,14 +206,15 @@ def cancel_subscriptions(data_dict: Any, user_id: int) -> None:
         raise BadRequest(message=f"Invalid data: {e}")
 
     member = db_session.query(Member).get(user_id)
-    assert member is not None
+    if member is None:
+        raise BadRequest(f"Unable to find member with id {member_id}")
 
     if SubscriptionType.MEMBERSHIP in data.subscriptions and SubscriptionType.LAB not in data.subscriptions:
         # This should be handled automatically by the frontend with a nice popup, but we will enforce it here
         data.subscriptions.append(SubscriptionType.LAB)
 
     for sub in data.subscriptions:
-        cancel_subscription(member.member_id, sub, test_clock=None)
+        cancel_subscription(member, sub)
 
 
 def start_subscriptions(data_dict: Any, user_id: int) -> None:
@@ -222,11 +224,13 @@ def start_subscriptions(data_dict: Any, user_id: int) -> None:
         raise BadRequest(message=f"Invalid data: {e}")
 
     member = db_session.query(Member).get(user_id)
-    assert member is not None
+    if member is None:
+        raise BadRequest(f"Unable to find member with id {member_id}")
 
-    stripe_customer = get_stripe_customer(member, test_clock=None)
+    stripe_customer = get_stripe_customer(member)
     assert stripe_customer is not None
 
+    # TODO where?
     if not stripe_customer.invoice_settings["default_payment_method"]:
         raise BadRequest(message="You must add a default payment method before starting a subscription.")
 
@@ -234,7 +238,7 @@ def start_subscriptions(data_dict: Any, user_id: int) -> None:
         # Note: This will *not* raise in case the user has not enough funds.
         # In that case we should send an email to the user.
         start_subscription(
-            member.member_id,
+            member,
             subscription.subscription,
             test_clock=None,
             expected_to_pay_now=subscription.expected_to_pay_now,

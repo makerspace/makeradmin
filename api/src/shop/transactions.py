@@ -184,8 +184,10 @@ def complete_pending_action(action: TransactionAction) -> None:
 
 def activate_paused_labaccess_subscription(member_id: int, earliest_start_at: datetime) -> None:
     member = db_session.query(Member).get(member_id)
+    if member is None:
+        raise BadRequest(f"Unable to find member with id {member_id}")
     if member is not None and member.stripe_labaccess_subscription_id is not None:
-        resume_paused_subscription(member.member_id, SubscriptionType.LAB, earliest_start_at, test_clock=None)
+        resume_paused_subscription(member, SubscriptionType.LAB, earliest_start_at, test_clock=None)
 
 
 def ship_add_labaccess_action(

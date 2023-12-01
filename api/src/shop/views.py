@@ -48,12 +48,11 @@ from shop.shop_data import (
     get_membership_products,
 )
 from shop.stripe_event import stripe_callback
+from shop.stripe_setup import setup_stripe_products
 from shop.transactions import ship_labaccess_orders
 from logging import getLogger
 
 from shop.stripe_subscriptions import (
-    cancel_subscription,
-    get_subscription_products,
     list_subscriptions,
     open_stripe_customer_portal,
 )
@@ -198,7 +197,7 @@ def list_subscriptions_route() -> Any:
 
 @service.route("/member/current/stripe_customer_portal", method=GET, permission=PUBLIC)
 def open_stripe_customer_portal_route() -> str:
-    return open_stripe_customer_portal(g.user_id, test_clock=None)
+    return open_stripe_customer_portal(g.user_id)
 
 
 @service.route("/member/<int:member_id>/ship_labaccess_orders", method=POST, permission=MEMBER_EDIT)
@@ -238,7 +237,7 @@ def public_image(image_id: int) -> Response:
 @service.route("/register_page_data", method=GET, permission=PUBLIC)
 def register_page_data():
     # Make sure subscription products have been created and are up to date
-    get_subscription_products()
+    setup_stripe_products()
 
     return {
         "membershipProducts": get_membership_products(),

@@ -19,6 +19,7 @@ from service.error import (
 )
 from service.traffic_logger import traffic_logger_init, traffic_logger_commit
 from services import services
+from shop.stripe_setup import setup_stripe
 
 app = Flask(__name__, static_folder=None)
 
@@ -69,6 +70,8 @@ engine = create_mysql_engine(**get_mysql_config())
 
 populate_fields_by_index(engine)
 register_permissions(ALL_PERMISSIONS)
+
+setup_stripe()
 
 
 @app.route("/")

@@ -35,7 +35,7 @@ from shop.transactions import (
 )
 from service.db import db_session
 from membership.models import Member
-from shop.stripe_subscriptions import get_subscription_product, SubscriptionType
+from shop.stripe_subscriptions import get_makeradmin_subscription_product, SubscriptionType
 from datetime import datetime
 
 logger = getLogger("makeradmin")
@@ -159,7 +159,7 @@ def stripe_invoice_event(subtype: EventSubtype, event: stripe.Event, current_tim
                 months_30_days = months - months_31_days
                 days = months_31_days * 31 + months_30_days * 30
 
-            product = get_subscription_product(subscription_type)
+            product = get_makeradmin_subscription_product(subscription_type)
             # Note: We use stripe as the source of truth for how much was actually paid.
             amount = Decimal(line["amount"]) / STRIPE_CURRENTY_BASE
             transaction = Transaction(
@@ -217,7 +217,7 @@ def stripe_invoice_event(subtype: EventSubtype, event: stripe.Event, current_tim
             # Presumably, it should be fixed by immediately pausing the subscription *before* the first
             # invoice is paid, and making sure the invoice does not contain the binding period.
             if subscription_type == SubscriptionType.LAB and member.labaccess_agreement_at is None:
-                stripe_subscriptions.pause_subscription(member_id, SubscriptionType.LAB, test_clock=None)
+                stripe_subscriptions.pause_subscription(member, SubscriptionType.LAB, test_clock=None)
 
         if len(transaction_ids) > 0:
             # Attach a makerspace transaction id to the stripe invoice item.
