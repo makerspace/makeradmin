@@ -125,7 +125,7 @@ class Transaction(Base):
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
     member_id = Column(Integer, ForeignKey(Member.member_id), nullable=True)
     amount = Column(Numeric(precision="15,2"), nullable=False)
-    transaction_fee = Column(Numeric(precision="15,2"), nullable=False)
+    transaction_fee = Column(Numeric(precision="15,2"), nullable=True)
     status = Column(Enum(PENDING, COMPLETED, FAILED), nullable=False)
     created_at = Column(DateTime, server_default=func.now())
 
