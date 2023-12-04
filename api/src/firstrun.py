@@ -294,7 +294,13 @@ def create_shop_transactions() -> None:
             transaction = get_or_create(
                 Transaction,
                 id=index,
-                defaults=dict(member_id=1, amount=product.price, status="completed", created_at=test_date),
+                defaults=dict(
+                    member_id=1,
+                    amount=product.price,
+                    status="completed",
+                    transaction_fee=2,
+                    created_at=test_date,
+                ),
             )
             transaction_content = get_or_create(
                 TransactionContent,
@@ -341,7 +347,13 @@ def create_shop_transactions() -> None:
     transaction = get_or_create(
         Transaction,
         id=index,
-        defaults=dict(member_id=None, amount=100, status="completed", created_at=datetime.now()),
+        defaults=dict(
+            member_id=None,
+            amount=100,
+            status="completed",
+            transaction_fee=5,
+            created_at=datetime.now(),
+        ),
     )
 
     # TODO this should probabl be associated with some sort of gift card product later
