@@ -15,6 +15,7 @@ CREATE TABLE IF NOT EXISTS `webshop_product_gift_card_mapping` (
     `gift_card_id` int(11) unsigned NOT NULL,
     `product_id` int(10) unsigned NOT NULL,
     `product_quantity` int(10) unsigned NOT NULL,
+    `amount` decimal(15,2) NOT NULL,
     PRIMARY KEY (`id`),
     KEY `gift_card_id_index` (`gift_card_id`),
     CONSTRAINT `gift_card_id_foreign` FOREIGN KEY (`gift_card_id`) REFERENCES `webshop_gift_card` (`id`),

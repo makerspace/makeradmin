@@ -219,9 +219,10 @@ class ProductGiftCardMapping(Base):
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
     gift_card_id = Column(Integer, ForeignKey(GiftCard.id))
     product_id = Column(Integer, ForeignKey(Product.id))
-    product_quantity = Column(Integer, nullable=False, default=1)
+    product_quantity = Column(Integer, nullable=False)
+    amount = Column(Numeric(precision="15,2"), nullable=False)
 
-    gift_card = relationship(GiftCard)
+    gift_card = relationship(GiftCard, backref="products")
     product = relationship(Product)
 
 

@@ -312,7 +312,7 @@ def create_shop_transactions() -> None:
     transaction = get_or_create(
         Transaction,
         id=index,
-        defaults=dict(member_id=1, amount=membership_prod.price, status="completed", created_at=test_date),
+        defaults=dict(member_id=1, amount=membership_prod.price, status="completed", created_at=datetime.now()),
     )
     transaction_content = get_or_create(
         TransactionContent,
@@ -332,7 +332,7 @@ def create_shop_transactions() -> None:
             action_type="add_labaccess_days",
             value=10,
             status="completed",
-            completed_at=test_date,
+            completed_at=datetime.now(),
         ),
     )
     index += 1
@@ -411,17 +411,27 @@ def create_shop_accounts_cost_centers() -> None:
 def create_shop_gift_cards() -> None:
     banner(YELLOW, "Creating Fake 'Gift Cards' and 'Gift Card & Product Mappings'")
 
-    gift_card = get_or_create(
-        GiftCard, amount=299.00, validation_code=12989519, email="test@fake.com", status="activated"
-    )
-
-    # Get existing product with ID: 64 (Makerspace access starter pack)
+    # Get existing product Makerspace access starter pack
     product = get_or_create(
         Product,
         name="Makerspace access starter pack",
     )
 
-    get_or_create(ProductGiftCardMapping, gift_card_id=gift_card.id, product_id=product.id)
+    gift_card = get_or_create(
+        GiftCard,
+        amount=product.price,
+        validation_code=12989519,
+        email="test@fake.com",
+        status="activated",
+    )
+
+    get_or_create(
+        ProductGiftCardMapping,
+        gift_card_id=gift_card.id,
+        product_id=product.id,
+        product_quantity=1,
+        amount=product.price,
+    )
 
     db_session.commit()
 
