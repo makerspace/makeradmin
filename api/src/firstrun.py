@@ -284,8 +284,6 @@ def create_shop_transactions() -> None:
     tools_category = get_or_create(ProductCategory, name="Tools")
 
     products = db_session.query(Product).filter_by(category_id=tools_category.id).all()
-    logger.info("******************")
-    logger.info(products)
     numdays_list = [1, 10, 35, 400]
     index = 1
 
