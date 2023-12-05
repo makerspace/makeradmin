@@ -11,4 +11,4 @@ def generate_gift_card_code(length=16):
     Returns:
     A unique validation code.
     """
-    return token_hex(length)[:length]
+    return token_hex(length)[:length].upper()
