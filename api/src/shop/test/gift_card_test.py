@@ -1,5 +1,5 @@
 from unittest import TestCase
-from ..gift_card_util import generate_gift_card_code
+from shop.gift_card_util import generate_gift_card_code
 
 
 class GiftCardTest(TestCase):
