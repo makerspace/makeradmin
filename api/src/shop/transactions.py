@@ -14,7 +14,8 @@ from messages.models import MessageTemplate
 from shop.stripe_constants import MakerspaceMetadataKeys
 from shop.stripe_discounts import get_discount_for_product, get_price_level_for_member
 from shop.stripe_subscriptions import SubscriptionType, resume_paused_subscription
-
+from shop.stripe_util import retry, convert_from_stripe_amount
+import stripe
 
 from membership.membership import add_membership_days
 from membership.models import Member, Span
@@ -275,7 +276,25 @@ def create_transaction(member_id: int, purchase: Purchase) -> Transaction:
 
 def complete_transaction(transaction: Transaction) -> None:
     assert transaction.status == Transaction.PENDING
+    # TODO what do we do when we fail to get some transaction fee?
 
+    stripe_pending = (
+        db_session.query(StripePending)
+        .filter(Transaction.stripe_pending.any(StripePending.transaction_id == transaction.id))
+        .one_or_none()
+    )
+    if stripe_pending is None:
+        logger.warning(f"Failed to fetch stripe payment intent for transaction with id {transaction.id}")
+
+    payment_intent = retry(
+        lambda: stripe.PaymentIntent.retrieve(stripe_pending.stripe_token, expand=["latest_charge.balance_transaction"])
+    )
+    if payment_intent is None:
+        logger.warning(f"Failed to fetch transaction fee from stripe for transaction with id {transaction.id}")
+    assert payment_intent.latest_charge.paid
+
+    transaction_fee_in_stripe_amount = payment_intent.latest_charge.balance_transaction.fee
+    transaction.transaction_fee = convert_from_stripe_amount(transaction_fee_in_stripe_amount)
     transaction.status = Transaction.COMPLETED
     db_session.add(transaction)
     db_session.flush()

@@ -280,7 +280,7 @@ class StripePending(Base):
 
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
     transaction_id = Column(Integer, ForeignKey(Transaction.id), nullable=False)
-    stripe_token = Column(String(255), nullable=False, index=True)
+    stripe_token = Column(String(255), nullable=False, index=True)  # TODO make a PR to change this name
     created_at = Column(DateTime, server_default=func.now())
 
     def __repr__(self) -> str:

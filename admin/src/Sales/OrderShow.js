@@ -22,8 +22,8 @@ class OrderShow extends React.Component {
 
     componentDidMount() {
         this.unsubscribe = this.order.subscribe(() => {
-            const { member_id, transaction_fee } = this.order;
-            this.setState({ member_id, transaction_fee });
+            const { member_id, firstname, transaction_fee } = this.order;
+            this.setState({ member_id, firstname, transaction_fee });
         });
     }
 
@@ -32,7 +32,7 @@ class OrderShow extends React.Component {
     }
 
     render() {
-        const { member_id, transaction_fee } = this.state;
+        const { member_id, firstname, transaction_fee } = this.state;
         const { id } = this.props.match.params;
 
         return (
@@ -41,11 +41,11 @@ class OrderShow extends React.Component {
                     <h2>Order #{id}</h2>
                     <div>
                         <h3>Medlem</h3>
-                        <Link to={"/membership/members/" + member_id}>member_id {member_id}</Link>
+                        {member_id ? <Link to={"/membership/members/" + member_id}>asdf{firstname}</Link> : "Giftcard"}
                     </div>
                     <div>
                         <h3>Transaktions avgift</h3>
-                        <td>{transaction_fee}</td>
+                        <td><Currency value={100 * transaction_fee} /> kr</td>
                     </div>
                 </div>
                 <div className="uk-margin-top">

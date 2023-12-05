@@ -271,6 +271,12 @@ def convert_to_stripe_amount(amount: Decimal) -> int:
     return int(stripe_amount)
 
 
+def convert_from_stripe_amount(stripe_amount: int) -> Decimal:
+    """Convert stripe amount to decimal amount and return it."""
+    amount = ((Decimal(stripe_amount) / STRIPE_CURRENTY_BASE)).quantize(Decimal("0.01"))
+    return amount
+
+
 def event_semantic_time(event: stripe.Event) -> datetime:
     """
     This is the time when the event happens semantically. E.g. an invoice is created at exactly 00:00 on the first of the month.
