@@ -10,7 +10,7 @@ from core.service_users import TEST_SERVICE_USER_ID
 from membership.models import Member, Group, Permission, Span, Key, Box, PhoneNumberChangeRequest
 from messages.models import Message
 from service.db import db_session
-from shop.models import ProductCategory, Product, ProductAction
+from shop.models import ProductCategory, Product, ProductAction, Transaction
 from test_aid.test_util import random_str
 
 
@@ -40,6 +40,7 @@ class DbFactory:
         self.action: Optional[ProductAction] = None
         self.password_reset_token: Optional[PasswordResetToken] = None
         self.phone_request: Optional[PhoneNumberChangeRequest] = None
+        self.transaction: Optional[Transaction] = None
 
     def create_access_token(self, **kwargs) -> AccessToken:
         obj = dict(
@@ -216,3 +217,11 @@ class DbFactory:
         db_session.add(self.password_reset_token)
         db_session.commit()
         return self.password_reset_token
+
+    def create_transaction(self, **kwargs) -> Transaction:
+        assert self.obj is not None
+        obj = self.obj.create_transaction(**kwargs)
+        self.transaction = Transaction(**obj)
+        db_session.add(self.transaction)
+        db_session.commit()
+        return self.transaction

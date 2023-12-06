@@ -1,7 +1,8 @@
 from dataclasses import dataclass
+from datetime import datetime, timezone, date, time, timedelta
 from enum import Enum
 from logging import getLogger
-from typing import Optional
+from typing import Optional, List
 from typing_extensions import Never
 from dataclasses_json import DataClassJsonMixin
 import stripe
@@ -20,7 +21,7 @@ from shop.stripe_constants import (
     CURRENCY,
     SetupFutureUsage,
 )
-from shop.stripe_util import convert_to_stripe_amount, replace_default_payment_method
+from shop.stripe_util import retry, convert_to_stripe_amount, replace_default_payment_method
 from shop.transactions import (
     PaymentFailed,
     payment_success,
@@ -151,32 +152,33 @@ def confirm_stripe_payment_intent(transaction_id: int) -> PartialPayment:
     )
 
 
-def pay_with_stripe(transaction: Transaction, payment_method_id: str, setup_future_usage: bool) -> None:
-    """Handle stripe payment, Returns dict containing data for further processing customer action or None."""
+def pay_with_stripe(transaction: Transaction, payment_method_id: str, setup_future_usage: bool) -> stripe.PaymentIntent:
+    """Handle stripe payment"""
 
     try:
         member = db_session.query(Member).get(transaction.member_id)
         assert member is not None
-        stripe_customer = get_stripe_customer(member, test_clock=None)
+        stripe_customer = retry(lambda: get_stripe_customer(member, test_clock=None))
         assert stripe_customer is not None
 
-        payment_intent = stripe.PaymentIntent.create(
-            payment_method=payment_method_id,
-            amount=convert_to_stripe_amount(transaction.amount),
-            currency=CURRENCY,
-            customer=stripe_customer.stripe_id,
-            description=f"charge for transaction id {transaction.id}",
-            confirmation_method="manual",
-            confirm=True,
-            # One might think that off_session could be set to true to make payments possible without
-            # user interaction. Sadly, it seems that most cards require 3d secure verification, which
-            # is not possible with off_session payments.
-            # Subscriptions may instead email the user to ask them to verify the payment.
-            off_session=False,
-            setup_future_usage=SetupFutureUsage.OFF_SESSION.value if setup_future_usage else None,
-            metadata={
-                MakerspaceMetadataKeys.TRANSACTION_IDS.value: transaction.id,
-            },
+        payment_intent = retry(
+            lambda: stripe.PaymentIntent.create(
+                payment_method=payment_method_id,
+                amount=convert_to_stripe_amount(transaction.amount),
+                currency=CURRENCY,
+                customer=stripe_customer.stripe_id,
+                confirmation_method="manual",
+                confirm=True,
+                # One might think that off_session could be set to true to make payments possible without
+                # user interaction. Sadly, it seems that most cards require 3d secure verification, which
+                # is not possible with off_session payments.
+                # Subscriptions may instead email the user to ask them to verify the payment.
+                off_session=False,
+                setup_future_usage=SetupFutureUsage.OFF_SESSION.value if setup_future_usage else None,
+                metadata={
+                    MakerspaceMetadataKeys.TRANSACTION_IDS.value: transaction.id,
+                },
+            )
         )
 
         db_session.add(StripePending(transaction_id=transaction.id, stripe_token=payment_intent.stripe_id))
@@ -185,5 +187,18 @@ def pay_with_stripe(transaction: Transaction, payment_method_id: str, setup_futu
         logger.info(
             f"created stripe payment_intent for transaction {transaction.id}, payment_intent id {payment_intent.id}"
         )
+        return payment_intent
     except InvalidRequestError as e:
         raise_from_stripe_invalid_request_error(e)
+
+
+def get_all_stripe_payment_intents(start_date: date, include_transaction_fees: bool) -> List[stripe.PaymentIntent]:
+    expand = [["latest_charge.balance_transaction"]] if include_transaction_fees else None
+    stripe_intents = stripe.PaymentIntent.list(limit=100, created={"gte": start_date}, expand=expand)
+
+    # TODO deal with pages
+
+    return stripe_intents
+
+
+# TODO some helper function using the above function that returns somethign nicer than intents
