@@ -3,12 +3,9 @@ from logging import getLogger
 from typing import Any, Callable, Dict, List, Tuple, TypeVar
 
 from service.config import debug_mode
-from service.error import InternalServerError
+from service.error import InternalServerError, BadRequest
 from shop.models import Product
-from shop.stripe_constants import (
-    PriceType,
-    CURRENCY,
-)
+from shop.stripe_constants import PriceType, CURRENCY, MakerspaceMetadataKeys
 from shop.stripe_util import StripeRecurring, retry, stripe_amount_from_makeradmin_product, get_subscription_category
 import stripe
 
@@ -67,15 +64,18 @@ def get_stripe_prices(
 
 def eq_makeradmin_stripe_product(makeradmin_product: Product, stripe_product: stripe.Product) -> bool:
     """Check that the essential parts of the product are the same in both makeradmin and stripe"""
+    if stripe_product.id != makeradmin_product.id:
+        raise BadRequest(f"Stripe product id and makeradmin product id does not match")
     return stripe_product.name == makeradmin_product.name
 
 
+# TODO use are dicts equal function
 def eq_makeradmin_stripe_price(makeradmin_product: Product, stripe_price: stripe.Price, price_type: PriceType) -> bool:
     """Check that the essential parts of the price are the same in both makeradmin and stripe"""
     recurring = makeradmin_to_stripe_recurring(makeradmin_product, price_type)
     different = []
 
-    if recurring:
+    if recurring is not None:
         if stripe_price.recurring is None:
             return False
         different.append(stripe_price.recurring.get("interval") != recurring.interval)
@@ -92,7 +92,9 @@ def _create_stripe_product(makeradmin_product: Product) -> stripe.Product:
         lambda: stripe.Product.create(
             id=id,
             name=makeradmin_product.name,
-            description=f"Created by Makeradmin, product id (#{makeradmin_product.id})",
+            metadata={
+                MakerspaceMetadataKeys.PRODUCT_ID.value: makeradmin_product.id,
+            },
         )
     )
     return stripe_product
@@ -113,7 +115,10 @@ def _create_stripe_price(
             unit_amount=stripe_amount_from_makeradmin_product(makeradmin_product, recurring),
             currency=CURRENCY,
             recurring=recurring_dict,
-            metadata={"price_type": price_type.value},
+            metadata={
+                MakerspaceMetadataKeys.PRICE_TYPE.value: price_type.value,
+                MakerspaceMetadataKeys.PRODUCT_ID.value: makeradmin_product.id,
+            },
         )
     )
     return stripe_price
@@ -159,7 +164,7 @@ def get_or_create_stripe_prices_for_product(
         prices_to_create = []
         for price_type in price_types:
             stripe_price = _find_price_type(stripe_prices, price_type)
-            if stripe_price:
+            if stripe_price is not None:
                 prices_to_return[price_type] = stripe_price
             else:
                 prices_to_create.append(price_type)

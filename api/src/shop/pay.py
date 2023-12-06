@@ -207,7 +207,7 @@ def cancel_subscriptions(data_dict: Any, user_id: int) -> None:
 
     member = db_session.query(Member).get(user_id)
     if member is None:
-        raise BadRequest(f"Unable to find member with id {member_id}")
+        raise BadRequest(f"Unable to find member with id {user_id}")
 
     if SubscriptionType.MEMBERSHIP in data.subscriptions and SubscriptionType.LAB not in data.subscriptions:
         # This should be handled automatically by the frontend with a nice popup, but we will enforce it here
@@ -225,14 +225,7 @@ def start_subscriptions(data_dict: Any, user_id: int) -> None:
 
     member = db_session.query(Member).get(user_id)
     if member is None:
-        raise BadRequest(f"Unable to find member with id {member_id}")
-
-    stripe_customer = get_stripe_customer(member)
-    assert stripe_customer is not None
-
-    # TODO where?
-    if not stripe_customer.invoice_settings["default_payment_method"]:
-        raise BadRequest(message="You must add a default payment method before starting a subscription.")
+        raise BadRequest(f"Unable to find member with id {user_id}")
 
     for subscription in data.subscriptions:
         # Note: This will *not* raise in case the user has not enough funds.

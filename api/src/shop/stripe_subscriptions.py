@@ -142,8 +142,6 @@ def get_makeradmin_subscription_product(subscription_type: SubscriptionType) -> 
     return product
 
 
-# TODO for tests use
-# stripe_customer = get_and_sync_stripe_customer(member, test_clock)
 def start_subscription(
     member: Member,
     subscription_type: SubscriptionType,
@@ -155,6 +153,9 @@ def start_subscription(
     stripe_customer = get_and_sync_stripe_customer(member, test_clock)
     if stripe_customer is None:
         raise BadRequest(f"Unable to create, find or update corresponding stripe customer for member {member}")
+
+    if not stripe_customer.invoice_settings["default_payment_method"]:
+        raise BadRequest(message="You must add a default payment method before starting a subscription.")
 
     logger.info(f"Attempting to start new subscription {subscription_type}")
     try:
@@ -201,7 +202,7 @@ def start_subscription(
                 )
 
         current_subscription_id = get_subscription_id(member, subscription_type)
-        if current_subscription_id:
+        if current_subscription_id is not None:
             if current_subscription_id.startswith("sub_sched_"):
                 current_subscription = stripe.SubscriptionSchedule.retrieve(current_subscription_id)
             else:

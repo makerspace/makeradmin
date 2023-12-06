@@ -52,7 +52,6 @@ def _create_stripe_customer(
     expected_metadata = _get_metadata_for_stripe_customer(makeradmin_member)
     stripe_customer = retry(
         lambda: stripe.Customer.create(
-            description=f"Created by Makeradmin (#{makeradmin_member.member_number})",
             email=makeradmin_member.email.strip(),
             name=f"{makeradmin_member.firstname} {makeradmin_member.lastname}",
             metadata=expected_metadata,
@@ -94,7 +93,6 @@ def update_stripe_customer(makeradmin_member: Member) -> stripe.Customer:
     return retry(
         lambda: stripe.Customer.modify(
             makeradmin_member.stripe_customer_id,
-            description=f"Created by Makeradmin (#{makeradmin_member.member_number})",
             email=makeradmin_member.email.strip(),
             name=f"{makeradmin_member.firstname} {makeradmin_member.lastname}",
             metadata=metadata,
