@@ -37,7 +37,7 @@ def get_stripe_customer(makeradmin_member: Member) -> stripe.Customer | None:
 
 
 def eq_makeradmin_stripe_customer(makeradmin_member: Member, stripe_customer: stripe.Customer) -> bool:
-    """Check that the essential parts of the product are the same in both makeradmin and stripe"""
+    """Check that the essential parts of the member in makeradmin and the stripe customer are equal"""
     member_email = makeradmin_member.email.strip()
     expected_metadata = _get_metadata_for_stripe_customer(makeradmin_member)
     return (

@@ -5,7 +5,7 @@ import random
 import time
 from logging import getLogger
 from sqlalchemy import func
-from typing import Callable, TypeVar
+from typing import Any, Callable, Dict, TypeVar
 
 from service.error import InternalServerError
 from service.db import db_session

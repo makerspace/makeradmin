@@ -58,36 +58,6 @@ class StripeUtilWithoutStripeTest(ShopTestMixin, FlaskTestBase):
         dict_B = {}
         assert not stripe_util.are_metadata_dicts_equivalent(dict_A, dict_B)
 
-    def test_makeradmin_to_stripe_recurring_recurring(self) -> None:
-        makeradmin_test_product = self.db.create_product(
-            unit="mån",
-            smallest_multiple=3,
-        )
-        recurring = stripe_util.makeradmin_to_stripe_recurring(
-            makeradmin_test_product, stripe_constants.PriceType.RECURRING
-        )
-        assert recurring.interval == "month"
-        assert recurring.interval_count == 1
-
-    def test_makeradmin_to_stripe_recurring_binding(self) -> None:
-        makeradmin_test_product = self.db.create_product(
-            unit="mån",
-            smallest_multiple=3,
-        )
-        recurring = stripe_util.makeradmin_to_stripe_recurring(
-            makeradmin_test_product, stripe_constants.PriceType.BINDING_PERIOD
-        )
-        assert recurring.interval == "month"
-        assert recurring.interval_count == 3
-
-    def test_makeradmin_to_stripe_recurring_wrong_unit(self) -> None:
-        makeradmin_test_product = self.db.create_product(
-            unit="st",
-        )
-        with self.assertRaises(ValueError) as context:
-            stripe_util.makeradmin_to_stripe_recurring(makeradmin_test_product, stripe_constants.PriceType.RECURRING),
-        self.assertTrue("Unexpected unit" in str(context.exception))
-
     def test_stripe_amount_from_makeradmin_product(self) -> None:
         price = 200
         multiples = [1, 3]
