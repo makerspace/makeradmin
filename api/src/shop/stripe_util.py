@@ -27,6 +27,12 @@ makeradmin_unit_to_stripe_unit = {
 }
 
 
+def are_metadata_dicts_equivalent(a: Dict[str, Any], b: Dict[str, Any]) -> bool:
+    a = {k: v for k, v in a.items() if v != ""}
+    b = {k: v for k, v in b.items() if v != ""}
+    return a == b
+
+
 def get_subscription_category() -> ProductCategory:
     offset = 0
     while True:
