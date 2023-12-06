@@ -34,14 +34,15 @@ from typing import Any, Dict, Generic, List, Optional, Tuple, TypeVar, cast
 from sqlalchemy import func
 
 import stripe
+from stripe.error import InvalidRequestError
 
 from datetime import datetime, timezone, date, time, timedelta
-from stripe.error import InvalidRequestError
-from shop.stripe_util import retry, get_and_sync_stripe_product_and_prices, convert_from_stripe_amount
-from shop.stripe_customer import get_and_sync_stripe_customer
 from basic_types.enums import PriceLevel
+from shop.stripe_util import retry, are_metadata_dicts_equivalent, convert_from_stripe_amount
+from shop.stripe_customer import get_and_sync_stripe_customer
+from shop.stripe_product_price import get_and_sync_stripe_product_and_prices
+from shop.stripe_discounts import get_discount_for_product, get_price_level_for_member
 from shop.shop_data import get_product_data_by_special_id
-from shop.stripe_discounts import get_discount_for_product, get_price_level_for_member, convert_from_stripe_amount
 from shop.models import Product, ProductAction, ProductCategory
 from service.error import BadRequest, NotFound, InternalServerError
 from service.db import db_session
@@ -173,8 +174,8 @@ def start_subscription(
         # Check that the price is as expected
         # This is done to ensure that the frontend logic is in sync with the backend logic and the user
         # has been presented the correct price before starting the subscription.
-        if expected_to_pay_now:
-            if was_already_member:
+        if expected_to_pay_now is not None:
+            if was_already_member is not None:
                 # If the member already has the relevant membership, the subscription will start at the end of the current period, and nothing is paid right now
                 to_pay_now = Decimal(0)
             else:
@@ -189,7 +190,7 @@ def start_subscription(
                     f"Expected to pay {expected_to_pay_now} now, for starting {subscription_type} subscription, but should actually pay {to_pay_now}"
                 )
 
-        if expected_to_pay_recurring:
+        if expected_to_pay_recurring is not None:
             to_pay_recurring_price = stripe_prices[PriceType.RECURRING]
             to_pay_recurring = convert_from_stripe_amount(to_pay_recurring_price["unit_amount"]) * (
                 1 - discount.fraction_off
