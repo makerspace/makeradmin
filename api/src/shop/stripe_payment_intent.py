@@ -9,7 +9,7 @@ from stripe.error import InvalidRequestError, StripeError, CardError
 
 from stripe import PaymentIntent
 from membership.models import Member
-from shop.stripe_subscriptions import get_stripe_customer
+from shop.stripe_customer import get_and_sync_stripe_customer
 from service.db import db_session
 from service.error import InternalServerError, EXCEPTION, BadRequest
 from shop.models import Transaction, StripePending
@@ -157,7 +157,7 @@ def pay_with_stripe(transaction: Transaction, payment_method_id: str, setup_futu
     try:
         member = db_session.query(Member).get(transaction.member_id)
         assert member is not None
-        stripe_customer = get_stripe_customer(member, test_clock=None)
+        stripe_customer = get_and_sync_stripe_customer(member)
         assert stripe_customer is not None
 
         payment_intent = stripe.PaymentIntent.create(
