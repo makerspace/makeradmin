@@ -1,5 +1,6 @@
 from logging import getLogger
 from datetime import datetime, timezone, date, timedelta
+from dataclasses import dataclass
 from typing import Any, Dict, List
 from unittest import skipIf
 import math
@@ -9,7 +10,7 @@ import shop.models
 import messages.models
 import core.models
 from service.db import db_session
-from shop.stripe_constants import CURRENCY, MakerspaceMetadataKeys
+from shop.stripe_constants import CURRENCY, MakerspaceMetadataKeys, PaymentIntentStatus
 from shop.stripe_customer import delete_stripe_customer
 from shop.stripe_util import convert_from_stripe_amount, convert_to_stripe_amount
 from membership.models import Member
@@ -21,7 +22,52 @@ from subscriptions_test import attach_and_set_payment_method, FakeCardPmToken
 
 logger = getLogger("makeradmin")
 
-# TODO Make a test without stripe to test convert_stripe_intents_to_payments
+
+@dataclass
+class FakeBalanceTransaction:
+    fee: int
+
+
+@dataclass
+class FakeStripeCharge:
+    balance_transaction: FakeBalanceTransaction
+    paid: bool
+    amount: int
+
+
+@dataclass
+class FakeStripePaymentIntent:
+    status: PaymentIntentStatus
+    latest_charge: FakeStripeCharge
+    metadata: Dict[str, Any]
+    created: int  # unix timestamp
+
+
+class StripePaymentIntentWithoutStripeTest(ShopTestMixin, FlaskTestBase):
+    models = [membership.models, messages.models, shop.models, core.models]
+
+    def test_convert_stripe_intents_to_payments(self) -> None:
+        stripe_intents = []
+        for i in range(5):
+            paid = i % 2 == 0
+            status = PaymentIntentStatus.SUCCEEDED if paid else PaymentIntentStatus.REQUIRES_PAYMENT_METHOD
+            metadata = {MakerspaceMetadataKeys.TRANSACTION_IDS.value: str(i)}
+            balance = FakeBalanceTransaction(fee=convert_to_stripe_amount(10 + i))
+            charge = FakeStripeCharge(
+                balance_transaction=balance, paid=paid, amount=convert_to_stripe_amount(100 + (10 * i))
+            )
+            intent = FakeStripePaymentIntent(
+                created=1701966186 + (i * 10000), status=status, latest_charge=charge, metadata=metadata
+            )
+            stripe_intents.append(intent)
+        payments = convert_stripe_intents_to_payments(stripe_intents)
+        assert len(payments) == 3
+        for transaction_id in payments:
+            payment = payments[transaction_id]
+            assert payment.transaction_id == transaction_id
+            assert payment.amount == 100 + (10 * transaction_id)
+            assert payment.fee == 10 + transaction_id
+            assert payment.created == datetime.fromtimestamp(1701966186 + (transaction_id * 10000), tz=timezone.utc)
 
 
 class StripePaymentIntentTest(ShopTestMixin, FlaskTestBase):
@@ -98,8 +144,6 @@ class StripePaymentIntentTest(ShopTestMixin, FlaskTestBase):
             estimated_transaction_fee = test_transaction.amount * 0.025 + 1.8
             assert math.isclose(transaction_fee, estimated_transaction_fee, abs_tol=test_transaction.amount * 0.025)
         assert len(test_transactions) == 0
-
-    # TODO test get all intents with date
 
     # TODO test with subscriptions
 
