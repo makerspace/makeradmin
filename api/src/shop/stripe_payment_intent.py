@@ -12,8 +12,6 @@ from stripe.error import InvalidRequestError, StripeError, CardError
 
 from stripe import PaymentIntent
 from membership.models import Member
-from shop.stripe_subscriptions import get_stripe_customer
-from shop.stripe_util import convert_from_stripe_amount
 from service.db import db_session
 from service.error import InternalServerError, EXCEPTION, BadRequest
 from shop.models import Transaction, StripePending
@@ -24,7 +22,8 @@ from shop.stripe_constants import (
     CURRENCY,
     SetupFutureUsage,
 )
-from shop.stripe_util import retry, convert_to_stripe_amount, replace_default_payment_method
+from shop.stripe_customer import get_and_sync_stripe_customer
+from shop.stripe_util import retry, convert_to_stripe_amount, convert_from_stripe_amount, replace_default_payment_method
 from shop.transactions import (
     PaymentFailed,
     payment_success,
@@ -171,7 +170,7 @@ def pay_with_stripe(transaction: Transaction, payment_method_id: str, setup_futu
     try:
         member = db_session.query(Member).get(transaction.member_id)
         assert member is not None
-        stripe_customer = retry(lambda: get_stripe_customer(member, test_clock=None))
+        stripe_customer = get_and_sync_stripe_customer(member)
         assert stripe_customer is not None
 
         payment_intent = retry(

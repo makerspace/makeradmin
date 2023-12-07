@@ -37,6 +37,7 @@ import stripe
 from datetime import datetime, timezone, date, time, timedelta
 from stripe.error import InvalidRequestError
 from shop.stripe_util import are_metadata_dicts_equivalent, retry, convert_from_stripe_amount
+from shop.stripe_customer import get_and_sync_stripe_customer
 from basic_types.enums import PriceLevel
 from shop.stripe_discounts import get_discount_for_product, get_price_level_for_member
 from shop.models import Product, ProductAction, ProductCategory
@@ -220,80 +221,6 @@ def get_stripe_subscriptions(stripe_customer_id: str, active_only: bool = True) 
     ]
 
 
-def delete_stripe_customer(member_id: int) -> None:
-    member = db_session.query(Member).get(member_id)
-    if member is None:
-        raise NotFound(f"Unable to find member with id {member_id}")
-    if member.stripe_customer_id is not None:
-        # Note: This will also delete all subscriptions
-        stripe.Customer.delete(member.stripe_customer_id)
-
-    member.stripe_customer_id = None
-    db_session.flush()
-
-
-def get_stripe_customer(
-    member_info: Member, test_clock: Optional[stripe.test_helpers.TestClock]
-) -> Optional[stripe.Customer]:
-    # Stripe will reject emails with trailing whitespace
-    member_email = member_info.email.strip()
-    try:
-        if member_info.stripe_customer_id is not None:
-            try:
-                customer = retry(lambda: stripe.Customer.retrieve(member_info.stripe_customer_id))
-                assert customer is not None
-                if hasattr(customer, "deleted") and customer.deleted:
-                    raise InvalidRequestError("Customer has been deleted", "customer")
-
-                # Update the metadata if needed
-                expected_metadata = {
-                    # Setting to an empty string will delete the key if present
-                    MSMetaKeys.PENDING_MEMBER.value: "pending" if member_info.pending_activation else "",
-                    MSMetaKeys.USER_ID.value: member_info.member_id,
-                    MSMetaKeys.MEMBER_NUMBER.value: member_info.member_number,
-                }
-                if (
-                    not are_metadata_dicts_equivalent(customer.metadata, expected_metadata)
-                    or customer.email != member_email
-                ):
-                    stripe.Customer.modify(
-                        customer["id"],
-                        description=f"Created by Makeradmin (#{member_info.member_number})",
-                        email=member_email,
-                        name=f"{member_info.firstname} {member_info.lastname}",
-                        metadata=expected_metadata,
-                    )
-                return customer
-            except InvalidRequestError as e:
-                if "No such customer" in str(e.user_message) or "Customer has been deleted" in str(e.user_message):
-                    print("Stripe customer not found, even though it existed in the database. Creating a new one.")
-
-        # If no customer is found, we create one
-        customer = retry(
-            lambda: stripe.Customer.create(
-                description=f"Created by Makeradmin (#{member_info.member_number})",
-                email=member_email,
-                name=f"{member_info.firstname} {member_info.lastname}",
-                metadata={
-                    MSMetaKeys.USER_ID.value: member_info.member_id,
-                    MSMetaKeys.MEMBER_NUMBER.value: member_info.member_number,
-                },
-                test_clock=test_clock,
-            )
-        )
-
-        # Note: Stripe doesn't update its search index of customers immediately,
-        # so the new customer may not be visible to stripe.Customer.search for a few seconds.
-        # Therefore we always try to find the customer by its ID, that we store in the database
-        member_info.stripe_customer_id = customer.stripe_id
-        db_session.flush()
-        return customer
-    except Exception as e:
-        print(f"Unable to get or create stripe user: {type(e)}: {e}")
-
-    return None
-
-
 @dataclass
 class ProductPricing:
     recurring_price: stripe.Price
@@ -438,7 +365,7 @@ def start_subscription(
 
         member = db_session.query(Member).get(member_id)
         assert member is not None
-        stripe_customer = get_stripe_customer(member, test_clock)
+        stripe_customer = get_and_sync_stripe_customer(member, test_clock)
         if stripe_customer is None:
             raise BadRequest(f"Unable to find corresponding stripe member {member}")
         assert member.stripe_customer_id == stripe_customer.stripe_id
@@ -629,7 +556,7 @@ def pause_subscription(
     member: Optional[Member] = db_session.query(Member).get(member_id)
     if member is None:
         raise BadRequest(f"Unable to find member with id {member_id}")
-    stripe_customer = get_stripe_customer(member, test_clock)
+    stripe_customer = get_and_sync_stripe_customer(member, test_clock)
     assert stripe_customer is not None
     assert member.stripe_customer_id == stripe_customer.stripe_id
 
@@ -683,7 +610,7 @@ def cancel_subscription(
     member: Optional[Member] = db_session.query(Member).get(member_id)
     if member is None:
         raise BadRequest(f"Unable to find member with id {member_id}")
-    stripe_customer = get_stripe_customer(member, test_clock)
+    stripe_customer = get_and_sync_stripe_customer(member, test_clock)
     assert stripe_customer is not None
     assert member.stripe_customer_id == stripe_customer.stripe_id
 
@@ -745,7 +672,7 @@ def open_stripe_customer_portal(member_id: int, test_clock: Optional[stripe.test
     """Create a customer portal session and return the URL to which the user should be redirected."""
     member = db_session.query(Member).get(member_id)
     assert member is not None
-    stripe_customer = get_stripe_customer(member, test_clock)
+    stripe_customer = get_and_sync_stripe_customer(member, test_clock)
     assert stripe_customer is not None
 
     billing_portal_session = stripe.billing_portal.Session.create(customer=stripe_customer["id"])
@@ -797,7 +724,7 @@ def list_subscriptions(member_id: int) -> List[SubscriptionInfo]:
     member = db_session.query(Member).get(member_id)
     assert member is not None
 
-    stripe_customer = get_stripe_customer(member, test_clock=None)
+    stripe_customer = get_and_sync_stripe_customer(member)
     assert stripe_customer is not None
 
     result: List[SubscriptionInfo] = []

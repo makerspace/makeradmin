@@ -9,6 +9,7 @@ from typing import Any, Dict, List, Optional, Set, Tuple, cast
 from unittest import skipIf
 
 import pytest
+from shop.stripe_customer import get_and_sync_stripe_customer
 from shop.stripe_util import event_semantic_time
 from shop.stripe_subscriptions import (
     BINDING_PERIOD,
@@ -64,7 +65,7 @@ def attach_and_set_payment_method(
     card_token: FakeCardPmToken,
     test_clock: Optional[stripe.test_helpers.TestClock] = None,
 ) -> stripe.PaymentMethod:
-    stripe_customer = stripe_subscriptions.get_stripe_customer(member, test_clock=test_clock)
+    stripe_customer = get_and_sync_stripe_customer(member, test_clock=test_clock)
     assert stripe_customer is not None
 
     payment_method = stripe.PaymentMethod.attach(card_token.value, customer=stripe_customer.stripe_id)
