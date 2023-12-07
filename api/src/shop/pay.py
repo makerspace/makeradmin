@@ -15,9 +15,9 @@ from shop.models import Product, StripePending, Transaction, TransactionAction, 
 from shop.stripe_subscriptions import (
     SubscriptionType,
     cancel_subscription,
-    get_stripe_customer,
     start_subscription,
 )
+from shop.stripe_customer import get_and_sync_stripe_customer
 from service.db import db_session
 from core import auth
 from membership.views import member_entity
@@ -162,7 +162,7 @@ def setup_payment_method(data_dict: Any, member_id: int) -> SetupPaymentMethodRe
     member = db_session.query(Member).get(member_id)
     assert member is not None
 
-    stripe_customer = get_stripe_customer(member, test_clock=None)
+    stripe_customer = get_and_sync_stripe_customer(member)
     assert stripe_customer is not None
 
     if data.setup_intent_id is None:
@@ -224,7 +224,7 @@ def start_subscriptions(data_dict: Any, user_id: int) -> None:
     member = db_session.query(Member).get(user_id)
     assert member is not None
 
-    stripe_customer = get_stripe_customer(member, test_clock=None)
+    stripe_customer = get_and_sync_stripe_customer(member)
     assert stripe_customer is not None
 
     if not stripe_customer.invoice_settings["default_payment_method"]:
