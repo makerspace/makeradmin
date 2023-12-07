@@ -193,6 +193,9 @@ def stripe_invoice_event(subtype: EventSubtype, event: stripe.Event, current_tim
                     status=TransactionAction.PENDING,
                 )
             )
+
+            # TODO store the payment intent id on the transaction, so we can match them up later if needed.
+
             db_session.flush()
 
             transaction_ids.append(transaction.id)
