@@ -62,7 +62,7 @@ class PartialPayment(DataClassJsonMixin):
 
 
 @dataclass(frozen=True)
-class OldCompletedPayment(DataClassJsonMixin):
+class CompletedPayment(DataClassJsonMixin):
     """Used to return old payments that are already completed"""
 
     transaction_id: int
@@ -173,10 +173,12 @@ def pay_with_stripe(transaction: Transaction, payment_method_id: str, setup_futu
         stripe_customer = get_and_sync_stripe_customer(member)
         assert stripe_customer is not None
 
+        amount = convert_to_stripe_amount(transaction.amount)
+        logger.info(f"********** creating stripe payment_intent for transaction {transaction.id}, amount {amount}")
         payment_intent = retry(
             lambda: stripe.PaymentIntent.create(
                 payment_method=payment_method_id,
-                amount=convert_to_stripe_amount(transaction.amount),
+                amount=amount,
                 currency=CURRENCY,
                 customer=stripe_customer.stripe_id,
                 confirmation_method="manual",
@@ -212,14 +214,15 @@ def get_stripe_payment_intents(start_date: date, end_date: date) -> List[stripe.
     payments: List[stripe.PaymentIntent] = []
 
     # Loop over the intents and store them. We need to loop to deal with pagination
-    for intent in stripe_intents:
+    for intent in stripe_intents.auto_paging_iter():
         payments.append(intent)
 
+    logger.info(f"**************** found {len(payments)} stripe payment_intents")
     return payments
 
 
-def convert_stripe_intents_to_payments(stripe_intents: List[PaymentIntent]) -> Dict[int, OldCompletedPayment] | None:
-    payments: Dict[int, OldCompletedPayment] = {}
+def convert_stripe_intents_to_payments(stripe_intents: List[PaymentIntent]) -> Dict[int, CompletedPayment] | None:
+    payments: Dict[int, CompletedPayment] = {}
     for intent in stripe_intents:
         if intent.status != PaymentIntentStatus.SUCCEEDED:
             continue
@@ -228,7 +231,7 @@ def convert_stripe_intents_to_payments(stripe_intents: List[PaymentIntent]) -> D
         assert charge.balance_transaction is not None
         assert charge.paid
         id = int(intent.metadata[MakerspaceMetadataKeys.TRANSACTION_IDS.value])
-        payments[id] = OldCompletedPayment(
+        payments[id] = CompletedPayment(
             transaction_id=id,
             amount=convert_from_stripe_amount(charge.amount),
             created=datetime.fromtimestamp(intent.created, timezone.utc),

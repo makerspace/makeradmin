@@ -51,6 +51,7 @@ def eq_makeradmin_stripe_customer(makeradmin_member: Member, stripe_customer: st
 def _create_stripe_customer(
     makeradmin_member: Member, test_clock: Optional[stripe.test_helpers.TestClock] = None
 ) -> stripe.Customer:
+    logger.info(f"*********************************Creating stripe customer for member {makeradmin_member}")
     expected_metadata = _get_metadata_for_stripe_customer(makeradmin_member)
     stripe_customer = retry(
         lambda: stripe.Customer.create(
