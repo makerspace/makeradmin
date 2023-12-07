@@ -38,12 +38,12 @@ from stripe.error import InvalidRequestError
 
 from datetime import datetime, timezone, date, time, timedelta
 from basic_types.enums import PriceLevel
-from shop.stripe_util import retry, are_metadata_dicts_equivalent, convert_from_stripe_amount
+from shop.stripe_util import retry, convert_from_stripe_amount
 from shop.stripe_customer import get_and_sync_stripe_customer
 from shop.stripe_product_price import get_and_sync_stripe_product_and_prices
 from shop.stripe_discounts import get_discount_for_product, get_price_level_for_member
 from shop.shop_data import get_product_data_by_special_id
-from shop.models import Product, ProductAction, ProductCategory
+from shop.models import Product
 from service.error import BadRequest, NotFound, InternalServerError
 from service.db import db_session
 from membership.models import Member

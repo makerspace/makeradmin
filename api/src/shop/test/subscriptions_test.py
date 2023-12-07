@@ -9,6 +9,7 @@ from typing import Any, Dict, List, Optional, Set, Tuple, cast
 from unittest import skipIf
 
 import pytest
+from shop.stripe_customer import get_and_sync_stripe_customer
 from shop.stripe_util import event_semantic_time
 from shop.stripe_subscriptions import (
     BINDING_PERIOD,
@@ -448,7 +449,7 @@ class Test(FlaskTestBase):
         (now, clock, member) = self.setup_single_member()
 
         stripe_subscriptions.start_subscription(
-            member_id,
+            member.member_id,
             SubscriptionType.LAB,
             earliest_start_at=now,
             test_clock=clock.stripe_clock,

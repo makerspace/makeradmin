@@ -24,6 +24,8 @@ def _get_metadata_for_stripe_customer(makeradmin_member: Member) -> Dict[str, st
 
 
 def get_stripe_customer(makeradmin_member: Member) -> stripe.Customer | None:
+    if makeradmin_member.stripe_customer_id is None:
+        return None
     try:
         customer = retry(lambda: stripe.Customer.retrieve(makeradmin_member.stripe_customer_id))
     except InvalidRequestError as e:
