@@ -20,7 +20,7 @@ def raise_from_stripe_invalid_request_error(e):
     raise PaymentFailed(log=f"stripe charge failed: {str(e)}", level=EXCEPTION)
 
 
-def create_stripe_charge(transaction, card_source_id) -> stripe.Charge:
+def create_stripe_charge(transaction: Transaction, card_source_id) -> stripe.Charge:
     if transaction.status != Transaction.PENDING:
         raise InternalServerError(
             f"unexpected status of transaction",
