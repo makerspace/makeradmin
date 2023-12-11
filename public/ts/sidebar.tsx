@@ -37,7 +37,7 @@ export const Sidebar = ({ cart, className = "" }: { cart: { cart: Cart, productD
     if (path.endsWith("/")) {
         path = path.substring(0, path.length - 1);
     }
-    return <div id="left-sidebar">
+    return <div id="left-sidebar" ref={sidebarRef} className={isSidebarScrollable ? "scrollable" : ""}>
         <div className={`sidebar-fixed-content ${className}`}>
             <img className="makerspace-logo" src={`${window.staticBasePath}/images/logo-transparent-500px-300x210.png`} />
             <ul className="uk-nav uk-nav-default">
