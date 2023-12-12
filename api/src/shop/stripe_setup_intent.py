@@ -9,7 +9,7 @@ from shop.stripe_constants import PaymentIntentNextActionType, SetupIntentStatus
 from shop.stripe_payment_intent import PaymentAction
 from shop.transactions import PaymentFailed
 from stripe import SetupIntent
-from stripe.error import CardError
+from stripe import CardError
 
 
 class SetupIntentResult(str, Enum):

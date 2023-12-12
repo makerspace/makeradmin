@@ -2,7 +2,7 @@
 CREATE TABLE IF NOT EXISTS `webshop_gift_card`(
     `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
     `amount` decimal(15,2) NOT NULL,
-    `validation_code` int(10) unsigned NOT NULL,
+    `validation_code` VARCHAR(16) unique COLLATE utf8mb4_0900_ai_ci NOT NULL,
     `email` varchar(255) COLLATE utf8mb4_0900_ai_ci NOT NULL,
     `status` enum('pending','activated','expired') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
     `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,

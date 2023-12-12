@@ -180,12 +180,11 @@ class GiftCard(Base):
     Attributes:
         id (int): Unique identifier for gift card.
         amount (float): the monetary value associated with the gift card.
-        validation_code (int): The unique code used to validate the gift card
+        validation_code (str): The unique hex code used to validate the gift card. Length is 16 characters.
         email (str): The email address associated with the gift card. Used to send the validation code to the client.
         status (enum): The status of the gift card (PENDING, ACTIVATED, EXPIRED)
         created_at (datetime): the timestamp when the card was created.
     """
-
     __tablename__ = "webshop_gift_card"
 
     PENDING = "pending"
@@ -194,7 +193,7 @@ class GiftCard(Base):
 
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
     amount = Column(Numeric(precision="15,2"), nullable=False)
-    validation_code = Column(Integer, nullable=False)
+    validation_code = Column(String(16), unique=True, nullable=False)
     email = Column(String(255), unique=True, nullable=False)
     status = Column(Enum(PENDING, ACTIVATED, EXPIRED), nullable=False, default=PENDING)
     created_at = Column(DateTime, server_default=func.now())
