@@ -389,30 +389,46 @@ def cancel_subscription(
     if subscription_id is None:
         return False
 
-    # The subscription might be a scheduled one so we need to check the id prefix
-    # to determine which API to use.
+    try:
+        # The subscription might be a scheduled one so we need to check the id prefix
+        # to determine which API to use.
 
-    # We delete the subscription here. This will make stripe send us an event
-    # and that will make us remove the reference from the member.
-    # We rely on webhooks as much as possible since this allows admins to
-    # manage subscriptions and customers from the stripe dashboard without
-    # the risk of getting out of sync with the database.
-    if subscription_id.startswith("sub_sched_"):
-        schedule = stripe.SubscriptionSchedule.retrieve(subscription_id)
-        if SubscriptionScheduleStatus(schedule.status) in [
-            SubscriptionScheduleStatus.NOT_STARTED,
-            SubscriptionScheduleStatus.ACTIVE,
-        ]:
-            stripe.SubscriptionSchedule.release(subscription_id)
+        # We delete the subscription here. This will make stripe send us an event
+        # and that will make us remove the reference from the member.
+        # We rely on webhooks as much as possible since this allows admins to
+        # manage subscriptions and customers from the stripe dashboard without
+        # the risk of getting out of sync with the database.
+        if subscription_id.startswith("sub_sched_"):
+            schedule = stripe.SubscriptionSchedule.retrieve(subscription_id)
+            if SubscriptionScheduleStatus(schedule.status) in [
+                SubscriptionScheduleStatus.NOT_STARTED,
+                SubscriptionScheduleStatus.ACTIVE,
+            ]:
+                stripe.SubscriptionSchedule.release(subscription_id)
 
-            if schedule["subscription"]:
-                # Also delete the subscription which the schedule drives, if one exists
-                stripe.Subscription.delete(schedule["subscription"])
+                if schedule["subscription"]:
+                    # Also delete the subscription which the schedule drives, if one exists
+                    stripe.Subscription.delete(schedule["subscription"])
 
-    elif subscription_id.startswith("sub_"):
-        stripe.Subscription.delete(subscription_id)
-    else:
-        assert False
+        elif subscription_id.startswith("sub_"):
+            stripe.Subscription.delete(subscription_id)
+        else:
+            assert False
+    except stripe.InvalidRequestError as e:
+        if e.code == "resource_missing":
+            # The subscription was already deleted.
+            # We might have missed the webhook to delete the reference from the member.
+            # Or the webhook might be on its way.
+            # Since it is a risk that we have missed it, we should remove the reference from the member here.
+            if subscription_type == SubscriptionType.MEMBERSHIP:
+                member.stripe_membership_subscription_id = None
+            elif subscription_type == SubscriptionType.LAB:
+                member.stripe_labaccess_subscription_id = None
+            else:
+                assert False
+            db_session.flush()
+        else:
+            raise
 
     return True
 
