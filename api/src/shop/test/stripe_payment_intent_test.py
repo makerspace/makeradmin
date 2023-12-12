@@ -21,7 +21,7 @@ from shop.stripe_payment_intent import (
     pay_with_stripe,
 )
 import stripe
-from stripe.error import CardError
+from stripe import CardError
 from test_aid.test_base import FlaskTestBase, ShopTestMixin
 from subscriptions_test import attach_and_set_payment_method, FakeCardPmToken
 
