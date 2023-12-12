@@ -301,7 +301,7 @@ class StripeProductPriceTest(ShopTestMixin, FlaskTestBase):
         makeradmin_test_product = self.db.create_product(
             name="test update product",
             price=100.0,
-            id=self.base_stripe_id + 6,
+            id=self.base_stripe_id + 8,
             unit="mån",
             smallest_multiple=1,
             category_id=self.subscription_category.id,
@@ -319,7 +319,7 @@ class StripeProductPriceTest(ShopTestMixin, FlaskTestBase):
         makeradmin_test_product = self.db.create_product(
             name="test update price",
             price=100.0,
-            id=self.base_stripe_id + 7,
+            id=self.base_stripe_id + 9,
             unit="mån",
             smallest_multiple=1,
             category_id=self.not_subscription_category.id,
@@ -352,7 +352,7 @@ class StripeProductPriceTest(ShopTestMixin, FlaskTestBase):
         makeradmin_test_eq_product = self.db.create_product(
             name="test eq price",
             price=200.0,
-            id=self.base_stripe_id + 8,
+            id=self.base_stripe_id + 10,
             unit="mån",
             smallest_multiple=1,
             category_id=self.subscription_category.id,
@@ -381,7 +381,7 @@ class StripeProductPriceTest(ShopTestMixin, FlaskTestBase):
         makeradmin_test_eq_product = self.db.create_product(
             name="test eq price",
             price=200.0,
-            id=self.base_stripe_id + 9,
+            id=self.base_stripe_id + 11,
             unit="mån",
             smallest_multiple=1,
             category_id=self.subscription_category.id,

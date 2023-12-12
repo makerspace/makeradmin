@@ -5,7 +5,7 @@ from typing import Optional
 from typing_extensions import Never
 from dataclasses_json import DataClassJsonMixin
 import stripe
-from stripe.error import InvalidRequestError, StripeError, CardError
+from stripe import InvalidRequestError, CardError
 
 from stripe import PaymentIntent
 from membership.models import Member
