@@ -1,7 +1,7 @@
 from logging import getLogger
 
 import stripe
-from stripe.error import InvalidRequestError, CardError, StripeError
+from stripe import StripeError, InvalidRequestError, CardError
 
 from service.error import InternalServerError, EXCEPTION
 from shop.models import Transaction

@@ -32,14 +32,14 @@ class Test(ApiTest):
         self.assertNotEqual(number1, number2)
 
     def test_create_password_using_unhashed_password(self):
-        pwd = random_str(8)
+        pwd = random_str(16)
         member = self.api.create_member(password=None, unhashed_password=pwd)
         self.post("/oauth/token", {"grant_type": "password", "username": member["email"], "password": pwd}).expect(
             code=200
         )
 
     def test_update_password_using_unhashed_password(self):
-        pwd = random_str(8)
+        pwd = random_str(16)
         member = self.db.create_member()
         self.put(f"/membership/member/{member.member_id}", dict(unhashed_password=pwd)).expect(200)
         self.post("/oauth/token", {"grant_type": "password", "username": member.email, "password": pwd}).expect(

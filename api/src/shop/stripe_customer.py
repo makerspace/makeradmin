@@ -3,7 +3,7 @@ from typing import Any, Dict, Optional
 
 import stripe
 
-from stripe.error import InvalidRequestError
+from stripe import InvalidRequestError
 from shop.stripe_util import retry, are_metadata_dicts_equivalent
 from service.db import db_session
 from service.error import NotFound, InternalServerError

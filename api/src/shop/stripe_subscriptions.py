@@ -35,7 +35,7 @@ from sqlalchemy import func
 import stripe
 
 from datetime import datetime, timezone, date, time, timedelta
-from stripe.error import InvalidRequestError
+from stripe import InvalidRequestError
 from shop.stripe_util import are_metadata_dicts_equivalent, retry, convert_from_stripe_amount
 from shop.stripe_customer import get_and_sync_stripe_customer
 from basic_types.enums import PriceLevel
@@ -53,7 +53,7 @@ from shop.stripe_constants import (
     CURRENCY,
 )
 from shop.stripe_constants import SubscriptionStatus
-import stripe.error
+import stripe
 
 
 class SubscriptionType(str, Enum):
@@ -592,7 +592,7 @@ def pause_subscription(
             return True
         else:
             assert False
-    except stripe.error.InvalidRequestError as e:
+    except stripe.InvalidRequestError as e:
         if e.code == "resource_missing":
             # The subscription was already deleted
             # We might have missed the webhook to delete the reference from the member.
@@ -649,7 +649,7 @@ def cancel_subscription(
             stripe.Subscription.delete(subscription_id)
         else:
             assert False
-    except stripe.error.InvalidRequestError as e:
+    except stripe.InvalidRequestError as e:
         if e.code == "resource_missing":
             # The subscription was already deleted.
             # We might have missed the webhook to delete the reference from the member.
@@ -709,7 +709,7 @@ def get_subscription_info_from_subscription(sub_type: SubscriptionType, sub_id: 
                 amount_due=Decimal(upcoming["amount_due"]) / STRIPE_CURRENTY_BASE,
             ),
         )
-    except stripe.error.InvalidRequestError as e:
+    except stripe.InvalidRequestError as e:
         if e.code == "invoice_upcoming_none":
             return SubscriptionInfo(
                 type=sub_type,

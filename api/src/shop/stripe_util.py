@@ -117,7 +117,7 @@ def retry(f: Callable[[], T]) -> T:
     while True:
         try:
             return f()
-        except stripe.error.RateLimitError:
+        except stripe.RateLimitError:
             its += 1
             if its > MAX_TRIES:
                 raise

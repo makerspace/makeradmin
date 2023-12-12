@@ -35,7 +35,7 @@ from service.db import db_session
 from shop.transactions import ship_orders
 from test_aid.test_base import FlaskTestBase
 import stripe
-import stripe.error
+import stripe
 from shop import stripe_event
 from shop import stripe_constants
 
@@ -222,7 +222,7 @@ class Test(FlaskTestBase):
                             logger.info("Clock is ready. Waiting a bit to make sure we have received all events...")
                             done = 1
                             break
-            except stripe.error.RateLimitError:
+            except stripe.RateLimitError:
                 logger.warning("Exceeded Stripe API rate limit. Waiting a bit...")
                 # This is most likely because we are running tests in parallel.
                 # Add some jitter to avoid the stripe tests from running so much in parallel.
