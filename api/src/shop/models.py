@@ -185,17 +185,19 @@ class GiftCard(Base):
         status (enum): The status of the gift card (PENDING, ACTIVATED, EXPIRED)
         created_at (datetime): the timestamp when the card was created.
     """
+
     __tablename__ = "webshop_gift_card"
 
-    PENDING = "pending"
-    ACTIVATED = "activated"
+    VALID = "valid"
+    USED = "used"
     EXPIRED = "expired"
+    CANCELLED = "cancelled"
 
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
     amount = Column(Numeric(precision="15,2"), nullable=False)
     validation_code = Column(String(16), unique=True, nullable=False)
     email = Column(String(255), unique=True, nullable=False)
-    status = Column(Enum(PENDING, ACTIVATED, EXPIRED), nullable=False, default=PENDING)
+    status = Column(Enum(VALID, USED, EXPIRED, CANCELLED), nullable=False, default=VALID)
     created_at = Column(DateTime, server_default=func.now())
 
 

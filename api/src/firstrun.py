@@ -417,21 +417,23 @@ def create_shop_gift_cards() -> None:
         name="Makerspace access starter pack",
     )
 
-    gift_card = get_or_create(
-        GiftCard,
-        amount=product.price,
-        validation_code=12989519,
-        email="test@fake.com",
-        status="activated",
-    )
+    for i in range(2):
+        status = "valid" if i % 2 == 0 else "used"
+        gift_card = get_or_create(
+            GiftCard,
+            amount=product.price,
+            validation_code=str(129895190 + i),
+            email="test@fake.com",
+            status=status,
+        )
 
-    get_or_create(
-        ProductGiftCardMapping,
-        gift_card_id=gift_card.id,
-        product_id=product.id,
-        product_quantity=1,
-        amount=product.price,
-    )
+        get_or_create(
+            ProductGiftCardMapping,
+            gift_card_id=gift_card.id,
+            product_id=product.id,
+            product_quantity=1,
+            amount=product.price,
+        )
 
     db_session.commit()
 
