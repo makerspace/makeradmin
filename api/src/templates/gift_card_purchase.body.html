@@ -1,0 +1,17 @@
+{% extends 'email_body_base.html' %}
+
+{% block swedish %}
+    <p>Hej!</p>
+    <p>Tack så mycket för ditt köp av ett presentkort!</p>
+    <p>Ditt presentkort har skickats till dig och är redo att användas.</p>
+    {# site url behövs uppdateras med den faktiska urlen #}
+    <p>Logga in på <a href="{{ site_url_here }}">{{ site_url }}</a> för att se detaljerna och använda ditt presentkort.</p>
+{% endblock %}
+
+{% block english %}
+    <p>Hi!</p>
+    <p>Thank you so much for your purchase of a gift card!</p>
+    <p>Your gift card has been sent to you and is ready to use.</p>
+    {# site url needs to be updated with the actual url #}
+    <p>Log in to <a href="{{ site_url_here }}">{{ site_url }}</a> to view the details and redeem your gift card.</p>
+{% endblock %}
