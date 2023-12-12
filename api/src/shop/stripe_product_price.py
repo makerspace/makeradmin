@@ -48,7 +48,7 @@ def get_stripe_product(makeradmin_product: Product) -> stripe.Product | None:
     id = get_stripe_product_id(makeradmin_product)
     try:
         return retry(lambda: stripe.Product.retrieve(id=id))
-    except stripe.error.InvalidRequestError as e:
+    except stripe.InvalidRequestError as e:
         logger.warning(
             f"failed to retrive product from stripe for makeradmin product with id {makeradmin_product.id}, {e}"
         )
@@ -60,7 +60,7 @@ def get_stripe_prices(
 ) -> list[stripe.Price] | None:
     try:
         return list(retry(lambda: stripe.Price.list(product=stripe_product.stripe_id, lookup_keys=lookup_keys)))
-    except stripe.error.InvalidRequestError as e:
+    except stripe.InvalidRequestError as e:
         logger.warning(f"failed to retrive prices from stripe for stripe product with id {stripe_product.id}, {e}")
         return None
 
