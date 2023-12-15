@@ -18,7 +18,7 @@ from selenium.webdriver.common.by import By
 from service.config import get_mysql_config
 from service.db import create_mysql_engine, db_session_factory, db_session
 from shop.stripe_constants import EventType
-from shop.stripe_setup import setup_stripe, are_stripe_keyes_live
+from shop.stripe_setup import setup_stripe, are_stripe_keys_live
 from test_aid.api import ApiFactory, ApiResponse
 from test_aid.db import DbFactory
 from test_aid.obj import DEFAULT_PASSWORD
@@ -60,8 +60,8 @@ class SystestBase(TestBase):
     def setUpClass(self) -> None:
         super().setUpClass()
 
-        if are_stripe_keyes_live():
-            raise Exception("Stripe keys are live, this is not allowed in tests")
+        if are_stripe_keys_live():
+            "Live Stripe keys detected during test setup. Using live keys in tests is prohibited to prevent unintended side effects."
         setup_stripe(private=False)
 
         # Make sure sessions is removed so it is not using another engine in this thread.

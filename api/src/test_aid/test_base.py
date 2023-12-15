@@ -12,7 +12,7 @@ from service.internal_service import InternalService
 from test_aid.db import DbFactory
 from test_aid.obj import ObjFactory, DEFAULT_PASSWORD
 from test_aid.test_util import classinstancemethod
-from shop.stripe_setup import setup_stripe, are_stripe_keyes_live
+from shop.stripe_setup import setup_stripe, are_stripe_keys_live
 from datetime import date
 
 
@@ -84,8 +84,10 @@ class FlaskTestBase(TestBase):
 
         self.db = DbFactory(self, self.obj)
 
-        if are_stripe_keyes_live():
-            raise Exception("Live Stripe keys detected during test setup. Using live keys in tests is prohibited to prevent unintended side effects.")
+        if are_stripe_keys_live():
+            raise Exception(
+                "Live Stripe keys detected during test setup. Using live keys in tests is prohibited to prevent unintended side effects."
+            )
         setup_stripe(private=True)
 
 

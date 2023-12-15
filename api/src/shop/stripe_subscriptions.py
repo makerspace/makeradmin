@@ -35,9 +35,7 @@ import stripe
 
 from datetime import datetime, timezone, date, time, timedelta
 from shop.stripe_customer import get_and_sync_stripe_customer
-from shop.stripe_util import are_metadata_dicts_equivalent, retry, convert_from_stripe_amount
 from basic_types.enums import PriceLevel
-from shop.stripe_customer import get_and_sync_stripe_customer
 from shop.stripe_discounts import get_discount_for_product, get_price_level_for_member
 from shop.stripe_product_price import get_and_sync_stripe_product_and_prices
 from shop.stripe_util import retry, convert_from_stripe_amount

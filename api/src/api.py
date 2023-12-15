@@ -19,7 +19,7 @@ from service.error import (
 )
 from service.traffic_logger import traffic_logger_init, traffic_logger_commit
 from services import services
-from shop.stripe_setup import setup_stripe, are_stripe_keyes_live
+from shop.stripe_setup import setup_stripe, are_stripe_keys_live
 
 app = Flask(__name__, static_folder=None)
 
@@ -67,17 +67,17 @@ app.after_request(after_request_functions)
 
 engine = create_mysql_engine(**get_mysql_config())
 
-if are_stripe_keyes_live() and debug_mode():
+if are_stripe_keys_live() and debug_mode():
     while True:
         s = input(
-            "The stripe keyes in .env are live keys and makeradmin is in dev/debug mode. Are you sure you want to continue?"
+            "The stripe keys in .env are live keys and makeradmin is in dev/debug mode. Are you sure you want to continue?"
             "[Y/n]: "
         )
         if s in ["n", "no"]:
             raise Exception("Aborted")
         if s in ["y", "yes"]:
             break
-setup_stripe(private=True)
+setup_stripe(private=True)  # TODO run make dev and make sure this works
 
 populate_fields_by_index(engine)
 register_permissions(ALL_PERMISSIONS)

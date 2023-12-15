@@ -189,7 +189,7 @@ def activate_paused_labaccess_subscription(member_id: int, earliest_start_at: da
     member = db_session.query(Member).get(member_id)
     if member is None:
         raise BadRequest(f"Unable to find member with id {member_id}")
-    if member is not None and member.stripe_labaccess_subscription_id is not None:
+    if member.stripe_labaccess_subscription_id is not None:
         resume_paused_subscription(member, SubscriptionType.LAB, earliest_start_at, test_clock=None)
 
 

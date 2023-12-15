@@ -21,6 +21,7 @@ class ShopDataTest(FlaskTestBase):
                 MakerspaceMetadataKeys.SPECIAL_PRODUCT_ID.value: "found",
             },
         )
+        # Make sure we don't match on value whic contains the special id as substring
         self.db.create_product(
             name="test not found",
             category_id=category.id,
@@ -28,6 +29,7 @@ class ShopDataTest(FlaskTestBase):
                 MakerspaceMetadataKeys.SPECIAL_PRODUCT_ID.value: "not found",
             },
         )
+        # Make sure we don't match on keys that are substrings of the special id
         self.db.create_product(
             name="test not found key",
             category_id=category.id,
@@ -53,6 +55,17 @@ class ShopDataTest(FlaskTestBase):
             product_metadata={
                 MakerspaceMetadataKeys.SPECIAL_PRODUCT_ID.value: "not found",
             },
+        )
+        self.db.create_product(
+            name="test not found key",
+            category_id=category.id,
+            product_metadata={
+                "found": "not found",
+            },
+        )
+        self.db.create_product(
+            name="test not found no meta",
+            category_id=category.id,
         )
 
         found_product = get_product_data_by_special_id("found")

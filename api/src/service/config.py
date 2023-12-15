@@ -24,7 +24,6 @@ class DotEnvFile(Dict):
 default = Dict(
     name="default",
     src=dict(
-        ASDF="asdf2",
         MYSQL_HOST="localhost",
         MYSQL_PORT=3306,
         MYSQL_USER="makeradmin",

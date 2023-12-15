@@ -132,7 +132,7 @@ def get_product_data(product_id):
 
 def get_product_data_by_special_id(special_product_id: str) -> Product | None:
     products = db_session.query(Product).filter(Product.product_metadata.like(f'%"{special_product_id}"%')).all()
-    if products is None:
+    if not products:
         return None
     # The following is a hack to get around the fact that the product_metadata is a string/json and not a dict
     # i.e. it matches on the key and not only the value of the key

@@ -14,7 +14,7 @@ def set_stripe_key(private: bool) -> None:
     stripe.api_key = STRIPE_PRIVATE_KEY if private else STRIPE_PUBLIC_KEY
 
 
-def are_stripe_keyes_live() -> bool:
+def are_stripe_keys_live() -> bool:
     if "live" in STRIPE_PRIVATE_KEY and "live" in STRIPE_PUBLIC_KEY:
         return True
     elif "test" in STRIPE_PRIVATE_KEY and "test" in STRIPE_PUBLIC_KEY:
