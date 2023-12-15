@@ -124,7 +124,7 @@ class Test(FlaskTestBase):
             name="test subscriptions access",
             price=350.0,
             unit="mån",
-            smallest_multiple=1,
+            smallest_multiple=2,  # TODO need to test with multiple values
             category_id=subscription_category.id,
             product_metadata={
                 MakerspaceMetadataKeys.ALLOWED_PRICE_LEVELS.value: ["low_income_discount"],
@@ -160,7 +160,7 @@ class Test(FlaskTestBase):
         self.seen_event_ids = set()
         self.earliest_possible_event_time = datetime.now(timezone.utc)
         self.clocks_to_destroy: List[FakeClock] = []
-        stripe_setup.set_stripe_key(True)
+        # stripe_setup.set_stripe_key(True)
 
         disable_loggers = ["stripe"]
 
@@ -489,7 +489,7 @@ class Test(FlaskTestBase):
 
         self.advance_clock(clock, now + time_delta(days=4))
 
-        membership.views.member_entity.delete(member, commit=True)
+        membership.views.member_entity.delete(member.member_id, commit=True)
 
         self.advance_clock(clock, now + time_delta(days=6))
         self.advance_clock(clock, now + time_delta(days=10))
@@ -497,6 +497,7 @@ class Test(FlaskTestBase):
         assert member.deleted_at is not None
         assert stripe.Customer.retrieve(stripe_customer_id).deleted
 
+    # TODO fix this test to work with new stripe setup and no binding period
     def test_subscriptions_binding_period(self) -> None:
         """
         Checks that a lab subscription is started with a binding period
@@ -508,7 +509,7 @@ class Test(FlaskTestBase):
         (now, clock, member) = self.setup_single_member()
 
         stripe_subscriptions.start_subscription(
-            member.member_id,
+            member,
             SubscriptionType.LAB,
             earliest_start_at=now,
             test_clock=clock.stripe_clock,
@@ -538,7 +539,7 @@ class Test(FlaskTestBase):
         """
         Checks that a subscription can be cancelled, and the member can resubscribe immediately
         """
-        binding_period = BINDING_PERIOD[SubscriptionType.LAB]
+        binding_period = 2  # TODO fix this, split into two tests
         if binding_period <= 0:
             pytest.skip("No binding period for lab access")
 
@@ -696,7 +697,7 @@ class Test(FlaskTestBase):
         db_session.commit()
         # Ship any orders related to the member. We exclude all other members
         # because that might mess up other tests running in parallel.
-        ship_orders(True, current_time=clock.date, member_id=member)
+        ship_orders(True, current_time=clock.date, member_id=member.member_id)
         sub_start = clock.date.date()
 
         self.advance_clock(clock, noon(sub_start + time_delta(days=5)))
