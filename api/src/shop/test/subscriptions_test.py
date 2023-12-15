@@ -7,20 +7,29 @@ import math
 from dateutil.relativedelta import relativedelta
 from typing import Any, Dict, List, Optional, Set, Tuple, cast
 from unittest import skipIf
-
 import pytest
+
+from shop.stripe_constants import MakerspaceMetadataKeys
 from shop.stripe_customer import get_and_sync_stripe_customer
-from shop.stripe_util import event_semantic_time
+from shop.stripe_util import event_semantic_time, get_subscription_category
 from shop.stripe_subscriptions import (
     BINDING_PERIOD,
     SubscriptionType,
 )
-from shop.stripe_customer import get_and_sync_stripe_customer
+from shop.stripe_setup import setup_stripe_products
+from shop.stripe_product_price import (
+    get_stripe_product,
+    get_stripe_prices,
+    deactivate_stripe_product,
+    deactivate_stripe_price,
+)
 from shop import stripe_subscriptions
+from shop.models import Product
 from membership.membership import get_membership_summary
 from test_aid.test_util import random_str
 from membership.member_auth import hash_password
 from test_aid.obj import DEFAULT_PASSWORD
+from test_aid.systest_config import STRIPE_PRIVATE_KEY
 import core
 import messages
 import shop
@@ -93,7 +102,57 @@ class Test(FlaskTestBase):
     models = [membership.models, messages.models, shop.models, core.models]
     seen_event_ids: Set[str]
 
-    @skipIf(not stripe.api_key, "subscriptions tests require stripe api key in .env file")
+    @classmethod
+    def setUpClass(self) -> None:
+        super().setUpClass()
+
+        subscription_category = get_subscription_category()
+
+        self.membership_subscription_product = self.db.create_product(
+            name="test subscriptions membership",
+            price=200.0,
+            unit="år",
+            smallest_multiple=1,
+            category_id=subscription_category.id,
+            product_metadata={
+                MakerspaceMetadataKeys.ALLOWED_PRICE_LEVELS.value: ["low_income_discount"],
+                MakerspaceMetadataKeys.SPECIAL_PRODUCT_ID.value: "membership_subscription",
+            },
+        )
+
+        self.access_subscription_product = self.db.create_product(
+            name="test subscriptions access",
+            price=350.0,
+            unit="mån",
+            smallest_multiple=1,
+            category_id=subscription_category.id,
+            product_metadata={
+                MakerspaceMetadataKeys.ALLOWED_PRICE_LEVELS.value: ["low_income_discount"],
+                MakerspaceMetadataKeys.SPECIAL_PRODUCT_ID.value: "labaccess_subscription",
+            },
+        )
+
+        setup_stripe_products()
+
+    @classmethod
+    def tearDownClass(self) -> None:
+        # It is not possible to delete prices through the api so we set them as inactive instead
+        for makeradmin_product in [self.membership_subscription_product, self.access_subscription_product]:
+            stripe_product = get_stripe_product(makeradmin_product)
+            if stripe_product is None:
+                continue
+            if stripe_product.active:
+                deactivate_stripe_product(stripe_product)
+            stripe_prices = get_stripe_prices(stripe_product)
+            if stripe_prices is None:
+                continue
+            for price in stripe_prices:
+                if price.active:
+                    deactivate_stripe_price(price)
+
+        super().tearDownClass()
+
+    @skipIf(not STRIPE_PRIVATE_KEY, "subscriptions tests require stripe api key in .env file")
     def setUp(self) -> None:
         db_session.query(Member).delete()
         db_session.query(Span).delete()
@@ -254,7 +313,7 @@ class Test(FlaskTestBase):
         for _, ev in events_with_random_time:
             stripe_event.stripe_event(ev, current_time=event_semantic_time(ev))
 
-    def test_subscriptions_create1(self) -> None:
+    def test_subscriptions_create_new_member(self) -> None:
         """
         Checks that a subscription is started for new members.
         """
@@ -275,7 +334,7 @@ class Test(FlaskTestBase):
         # Note: Uses time_delta to be able to handle leap years.
         assert summary.membership_end == (now + time_delta(years=1)).date()
 
-    def test_subscriptions_create2(self) -> None:
+    def test_subscriptions_create_old_member(self) -> None:
         """
         Checks that a subscription is scheduled when a member is already a member.
         """

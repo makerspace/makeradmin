@@ -6,11 +6,11 @@ import collections
 from sqlalchemy import desc
 from sqlalchemy.orm import joinedload, contains_eager
 from sqlalchemy.orm.exc import NoResultFound
-from shop.stripe_constants import MakerspaceMetadataKeys
 
 from membership.views import member_entity
 from service.db import db_session
-from service.error import NotFound
+from service.error import NotFound, InternalServerError
+from shop.stripe_constants import MakerspaceMetadataKeys
 from shop.entities import (
     transaction_entity,
     transaction_content_entity,
@@ -131,11 +131,19 @@ def get_product_data(product_id):
 
 
 def get_product_data_by_special_id(special_product_id: str) -> Product | None:
-    return (
-        db_session.query(Product)
-        .filter(Product.product_metadata[MakerspaceMetadataKeys.SPECIAL_PRODUCT_ID.value] == special_product_id)
-        .one_or_none()
-    )
+    products = db_session.query(Product).filter(Product.product_metadata.like(f'%"{special_product_id}"%')).all()
+    if products is None:
+        return None
+    # The following is a hack to get around the fact that the product_metadata is a string/json and not a dict
+    # i.e. it matches on the key and not only the value of the key
+    products = [
+        product
+        for product in products
+        if product.product_metadata.get(MakerspaceMetadataKeys.SPECIAL_PRODUCT_ID.value, None) == special_product_id
+    ]
+    if len(products) > 1:
+        raise InternalServerError(f"Multiple products found with special id {special_product_id}")
+    return products[0] if products else None
 
 
 @dataclass

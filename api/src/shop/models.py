@@ -91,7 +91,7 @@ class Product(Base):
     def __repr__(self) -> str:
         return (
             f"Product(id={self.id}, name={self.name}, category_id={self.category_id}"
-            f", display_order={self.display_order})"
+            f", display_order={self.display_order}, metadata={self.product_metadata})"
         )
 
 
@@ -185,6 +185,7 @@ class GiftCard(Base):
         status (enum): The status of the gift card (PENDING, ACTIVATED, EXPIRED)
         created_at (datetime): the timestamp when the card was created.
     """
+
     __tablename__ = "webshop_gift_card"
 
     PENDING = "pending"

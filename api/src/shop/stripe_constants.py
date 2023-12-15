@@ -2,6 +2,8 @@ from enum import Enum
 
 from service.config import config
 
+# from shop.stripe_setup import setup_stripe
+
 # All stripe calculations are done with cents (ören in Sweden)
 STRIPE_CURRENTY_BASE = 100
 
@@ -134,3 +136,6 @@ class SetupIntentStatus(Enum):
 class SetupFutureUsage(str, Enum):
     OFF_SESSION = "off_session"
     ON_SESSION = "on_session"
+
+
+# setup_stripe()

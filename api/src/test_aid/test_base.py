@@ -12,6 +12,7 @@ from service.internal_service import InternalService
 from test_aid.db import DbFactory
 from test_aid.obj import ObjFactory, DEFAULT_PASSWORD
 from test_aid.test_util import classinstancemethod
+from shop.stripe_setup import setup_stripe, are_stripe_keyes_live
 from datetime import date
 
 
@@ -82,6 +83,10 @@ class FlaskTestBase(TestBase):
         self.service = InternalService("service")
 
         self.db = DbFactory(self, self.obj)
+
+        if are_stripe_keyes_live():
+            raise Exception("Stripe keys are live, this is not allowed in tests")
+        setup_stripe(private=True)
 
 
 class ShopTestMixin:

@@ -2,7 +2,6 @@ from dataclasses import asdict, dataclass
 from logging import getLogger
 from typing import Any, Callable, Dict, List, Tuple, TypeVar
 
-from service.config import debug_mode
 from service.error import InternalServerError, BadRequest
 from shop.models import Product
 from shop.stripe_constants import PriceType, CURRENCY, MakerspaceMetadataKeys
@@ -32,13 +31,11 @@ def makeradmin_to_stripe_recurring(makeradmin_product: Product, price_type: Pric
 
 
 def get_stripe_product_id(makeradmin_product: Product) -> str:
-    prefix = "debug" if debug_mode() else "prod"
-    return f"{prefix}_{makeradmin_product.id}"
+    return f"{makeradmin_product.id}"
 
 
 def get_stripe_price_lookup_key(makeradmin_product: Product, price_type: PriceType) -> str:
-    prefix = "debug" if debug_mode() else "prod"
-    return f"{prefix}_{makeradmin_product.id}_{price_type.value}"
+    return f"{makeradmin_product.id}_{price_type.value}"
 
 
 def get_stripe_product(makeradmin_product: Product) -> stripe.Product | None:
@@ -64,8 +61,10 @@ def get_stripe_prices(
 
 def eq_makeradmin_stripe_product(makeradmin_product: Product, stripe_product: stripe.Product) -> bool:
     """Check that the essential parts of the product are the same in both makeradmin and stripe"""
-    if stripe_product.id != makeradmin_product.id:
-        raise BadRequest(f"Stripe product id and makeradmin product id does not match")
+    # TODO check metadata?
+    # TODO how to handle this?
+    # if stripe_product.id != makeradmin_product.id:
+    #    raise BadRequest(f"Stripe product id and makeradmin product id does not match")
     return stripe_product.name == makeradmin_product.name
 
 

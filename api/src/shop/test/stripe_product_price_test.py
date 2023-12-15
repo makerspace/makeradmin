@@ -24,6 +24,7 @@ from shop.stripe_product_price import (
     update_stripe_product,
     replace_stripe_price,
 )
+from test_aid.systest_config import STRIPE_PRIVATE_KEY
 from shop.stripe_util import convert_to_stripe_amount
 from shop.models import Product
 from shop import stripe_constants
@@ -71,7 +72,7 @@ class StripeProductPriceTest(ShopTestMixin, FlaskTestBase):
     models = [membership.models, messages.models, shop.models, core.models]
     base_stripe_id = 5100
 
-    @skipIf(not stripe.api_key, "stripe util tests require stripe api key in .env file")
+    @skipIf(not STRIPE_PRIVATE_KEY, "stripe util tests require stripe api key in .env file")
     def setUp(self) -> None:
         self.seen_products: List[Product] = []
         self.subscription_category = self.db.create_category(name="Subscriptions")
@@ -91,7 +92,7 @@ class StripeProductPriceTest(ShopTestMixin, FlaskTestBase):
             for price in stripe_prices:
                 if price.active:
                     deactivate_stripe_price(price)
-            return super().tearDown()
+        return super().tearDown()
 
     @staticmethod
     def assertPrice(
@@ -350,7 +351,7 @@ class StripeProductPriceTest(ShopTestMixin, FlaskTestBase):
 
     def test_equal_product(self) -> None:
         makeradmin_test_eq_product = self.db.create_product(
-            name="test eq price",
+            name="test eq",
             price=200.0,
             id=self.base_stripe_id + 10,
             unit="mån",
@@ -358,7 +359,7 @@ class StripeProductPriceTest(ShopTestMixin, FlaskTestBase):
             category_id=self.subscription_category.id,
         )
         makeradmin_test_not_eq_product = self.db.create_product(
-            name="test not eq price",
+            name="test not eq",
             price=200.0,
             id=self.base_stripe_id - 1,
             unit="mån",
@@ -367,10 +368,10 @@ class StripeProductPriceTest(ShopTestMixin, FlaskTestBase):
         )
 
         self.seen_products.append(makeradmin_test_eq_product)
-        stripe_test_product = get_or_create_stripe_product(makeradmin_test_eq_product)
+        stripe_test_product = get_and_sync_stripe_product(makeradmin_test_eq_product)
         assert stripe_test_product
 
-        stripe_test_prices = get_or_create_stripe_prices_for_product(makeradmin_test_eq_product, stripe_test_product)
+        stripe_test_prices = get_and_sync_stripe_prices_for_product(makeradmin_test_eq_product, stripe_test_product)
         assert stripe_test_prices
         assert len(stripe_test_prices) == 1
 
@@ -431,10 +432,10 @@ class StripeProductPriceTest(ShopTestMixin, FlaskTestBase):
             stripe_constants.PriceType.FIXED_PRICE,
         ]
         self.seen_products.append(makeradmin_test_eq_product)
-        stripe_test_product = get_or_create_stripe_product(makeradmin_test_eq_product)
+        stripe_test_product = get_and_sync_stripe_product(makeradmin_test_eq_product)
         assert stripe_test_product
 
-        stripe_test_prices = get_or_create_stripe_prices_for_product(makeradmin_test_eq_product, stripe_test_product)
+        stripe_test_prices = get_and_sync_stripe_prices_for_product(makeradmin_test_eq_product, stripe_test_product)
         assert stripe_test_prices
         assert len(stripe_test_prices) == 1
 

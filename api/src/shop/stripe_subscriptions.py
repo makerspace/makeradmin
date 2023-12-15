@@ -12,11 +12,9 @@ The model for subscriptions is as follows:
     - This is done since the member will not be able to get any makespace access until after they sign the makespace access agreement.
     - When the lab membership agreement is signed (and orders are shipped), we resume the subscription.
 - Subscriptions may have binding periods. This means that the member will pay for N months in advance the first time they pay, and then the normal subscription will continue.
-    - The binding period is set by the `BINDING_PERIOD` constant.
-    - Binding period prices need to be configured in the stripe dashboard with the metadata price_type=binding_period.
-        - It should also be configured as recurring with the number of months that the binding period should be.
+    - The binding period is set by the smallest multiple in the makeradmin product that corresponds to the subsscription.
     - Currently the binding period need to have the same price per month as the non-binding period.
-- Subscriptions will use the price (in stripe or makeradmin? fix) that has the metadata price_type=recurring (except for the binding period).
+- Subscriptions will use the price from the makeradmin product
 - Subscriptions use custom product actions via transaction actions instead of the product action associated with the subscription product. This is because the number of days in a month varies.
 
 Due to a limitation in how stripe works, we need to use a regular purchase for the first payment.
@@ -39,11 +37,10 @@ from datetime import datetime, timezone, date, time, timedelta
 from shop.stripe_customer import get_and_sync_stripe_customer
 from shop.stripe_util import are_metadata_dicts_equivalent, retry, convert_from_stripe_amount
 from basic_types.enums import PriceLevel
-from shop.stripe_util import retry, convert_from_stripe_amount
 from shop.stripe_customer import get_and_sync_stripe_customer
-from shop.stripe_product_price import get_and_sync_stripe_product_and_prices
 from shop.stripe_discounts import get_discount_for_product, get_price_level_for_member
-from shop.shop_data import get_product_data_by_special_id
+from shop.stripe_product_price import get_and_sync_stripe_product_and_prices
+from shop.stripe_util import retry, convert_from_stripe_amount
 from shop.models import Product
 from service.error import BadRequest, NotFound, InternalServerError
 from service.db import db_session
@@ -133,6 +130,9 @@ def calc_subscription_start_time(
 
 
 def get_makeradmin_subscription_product(subscription_type: SubscriptionType) -> Product:
+    # Import here to prevent circular imports
+    from shop.shop_data import get_product_data_by_special_id
+
     special_id = f"{subscription_type.value}_subscription"
     product = get_product_data_by_special_id(special_id)
     if product is None:

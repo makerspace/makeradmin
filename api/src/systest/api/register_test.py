@@ -1,6 +1,7 @@
 from random import randint
 from time import time
 
+from logging import getLogger
 import stripe
 from shop.stripe_payment_intent import PaymentIntentResult
 from shop.stripe_constants import MakerspaceMetadataKeys
@@ -13,6 +14,8 @@ from service.api_definition import NON_MATCHING_SUMS
 from service.db import db_session
 from shop.models import ProductAction
 from test_aid.systest_base import ApiShopTestMixin, ApiTest, VALID_NON_3DS_CARD_NO, EXPIRED_3DS_CARD_NO
+
+logger = getLogger("makeradmin")
 
 
 class Test(ApiShopTestMixin, ApiTest):
@@ -66,6 +69,9 @@ class Test(ApiShopTestMixin, ApiTest):
         )
 
         self.assertIsNotNone(before_activation["deleted_at"])
+
+        logger.info("****************")
+        logger.info(stripe.api_key)
 
         purchase = Purchase(
             cart=[CartItem(self.p0_id, 1)],

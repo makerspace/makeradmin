@@ -145,6 +145,12 @@ Create your own stripe account and add your keys to the `.env` file to allow pur
 
 You will not be able to go to the checkout unless you have a Stripe key in the .env-file. If this is set up, you can use [Stripe's fake cards](https://stripe.com/docs/testing#cards) for completing the purchase.
 
+### Stripe - makeradmin connection
+
+Makeradmin is used as the truth
+
+The smallest multiple of the product is used to set the binding time for the subscription.
+
 ### Stripe subscription support
 
 To handle subscriptions properly, the server needs to listen to stripe webhooks and configure subscription products (see next session).
@@ -155,24 +161,6 @@ stripe listen --forward-to http://localhost:8010/webshop/stripe_callback
 ```
 
 After the forwarding has started, you'll need to copy the signing secret it gives you, and put it in your own `.env` file in the key `STRIPE_SIGNING_SECRET`.
-
-### Setting up Stripe subscription products
-
-When using stripe, subscriptions need to be configured via the stripe website.
-These subscriptions will automatically be turned into makeradmin products so that members can purchase them.
-
-Note: You should *not* modify these products in makeradmin. They will be reset whenever the docker container restarts anyway (when the registration page is visited).
-
-The configuration needed on stripe is:
-
-* Create a **product** for base membership. Add the metadata "subscription_type"="membership" to the **product** item
-  * Add a yearly **price**, and add the metadata "price_type"="recurring" to the **price** item
-* Create a **product** for makerspace access. Add the metadata "subscription_type"="labaccess" to the **product** item
-  * Add a monthly price, and add the metadata "price_type"="recurring" to the **price** item
-  * Add a **price** for N months, where N is the binding period as specified in `stripe_subscriptions.py->BINDING_PERIOD`. The price should be N times the recurring price. Add the metadata "price_type"="binding_period"
-* Create a **coupon** for low income discount. It should be with percentage discount. Add the metadata "makerspace_price_level" = "low_income_discount"
-
-If you try to access any page which needs these products (e.g. the registration page, or the member page), makeradmin will fetch them from stripe and do a bunch of validation checks.
 
 ### Setting up required products in makeradmin
 

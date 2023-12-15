@@ -21,6 +21,8 @@ from shop.stripe_constants import (
 from membership.models import Member
 import stripe
 from test_aid.test_base import FlaskTestBase, ShopTestMixin
+from test_aid.systest_config import STRIPE_PRIVATE_KEY
+
 
 logger = getLogger("makeradmin")
 
@@ -31,7 +33,7 @@ class StripeCustomerTest(ShopTestMixin, FlaskTestBase):
 
     models = [membership.models, messages.models, shop.models, core.models]
 
-    @skipIf(not stripe.api_key, "stripe util tests require stripe api key in .env file")
+    @skipIf(not STRIPE_PRIVATE_KEY, "stripe util tests require stripe api key in .env file")
     def setUp(self) -> None:
         self.seen_members: List[Member] = []
 
