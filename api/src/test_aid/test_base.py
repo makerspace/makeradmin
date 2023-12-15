@@ -85,7 +85,7 @@ class FlaskTestBase(TestBase):
         self.db = DbFactory(self, self.obj)
 
         if are_stripe_keyes_live():
-            raise Exception("Stripe keys are live, this is not allowed in tests")
+            raise Exception("Live Stripe keys detected during test setup. Using live keys in tests is prohibited to prevent unintended side effects.")
         setup_stripe(private=True)
 
 
