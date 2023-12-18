@@ -77,7 +77,7 @@ if are_stripe_keys_live() and debug_mode():
             raise Exception("Aborted")
         if s in ["y", "yes"]:
             break
-setup_stripe(private=True)  # TODO run make dev and make sure this works
+setup_stripe(private=True)
 
 populate_fields_by_index(engine)
 register_permissions(ALL_PERMISSIONS)

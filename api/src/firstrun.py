@@ -151,27 +151,20 @@ def create_members() -> None:
     db_session.commit()
 
 
-def create_shop_products() -> None:
-    banner(BLUE, "Creating Fake Shop Categories")
+def create_membership_products() -> None:
+    banner(BLUE, "Creating Basic Membership Products")
 
     display_order_category = db_session.query(func.max(ProductCategory.display_order)).scalar() or 0
     member_category = get_or_create(
         ProductCategory, name="Membership", defaults=dict(display_order=display_order_category + 1)
     )
-    consumption_category = get_or_create(
-        ProductCategory, name="Consumption", defaults=dict(display_order=display_order_category + 2)
+    subscription_category = get_or_create(
+        ProductCategory, name="Membership", defaults=dict(display_order=display_order_category + 1)
     )
-    tools_category = get_or_create(
-        ProductCategory, name="Tools", defaults=dict(display_order=display_order_category + 3)
-    )
-    others_category = get_or_create(
-        ProductCategory, name="Other", defaults=dict(display_order=display_order_category + 4)
-    )
-
-    banner(BLUE, "Creating Fake Shop Products")
 
     display_order_product = db_session.query(func.max(Product.display_order)).scalar() or 0
-    prod1 = get_or_create(
+
+    membership_product = get_or_create(
         Product,
         name="Base membership",
         defaults=dict(
@@ -185,13 +178,13 @@ def create_shop_products() -> None:
             },
         ),
     )
-    get_or_create(ProductAction, product_id=prod1.id, value=365, action_type="add_membership_days")
+    get_or_create(ProductAction, product_id=membership_product.id, value=365, action_type="add_membership_days")
 
-    prod2 = get_or_create(
+    access_product = get_or_create(
         Product,
         name="Makerspace access",
         defaults=dict(
-            price=575,
+            price=375,
             unit="mån",
             display_order=display_order_product + 2,
             category_id=member_category.id,
@@ -201,16 +194,29 @@ def create_shop_products() -> None:
             },
         ),
     )
-    get_or_create(ProductAction, product_id=prod2.id, value=365, action_type="add_membership_days")
-    get_or_create(ProductAction, product_id=prod2.id, value=30, action_type="add_labaccess_days")
+    get_or_create(ProductAction, product_id=access_product.id, value=30, action_type="add_labaccess_days")
 
-    prod3 = get_or_create(
+    starter_product = get_or_create(
         Product,
-        name="Makerspace access starter pack",
+        name="Starter pack",
         defaults=dict(
             price=750,
             unit="st",
             display_order=display_order_product + 3,
+            category_id=member_category.id,
+            product_metadata={},
+        ),
+    )
+    get_or_create(ProductAction, product_id=starter_product.id, value=60, action_type="add_labaccess_days")
+    get_or_create(ProductAction, product_id=starter_product.id, value=365, action_type="add_labaccess_days")
+
+    starter_access_product = get_or_create(
+        Product,
+        name="Makerspace access starter pack",
+        defaults=dict(
+            price=550,
+            unit="st",
+            display_order=display_order_product + 4,
             category_id=member_category.id,
             product_metadata={
                 "allowed_price_levels": ["low_income_discount"],
@@ -218,7 +224,63 @@ def create_shop_products() -> None:
             },
         ),
     )
-    get_or_create(ProductAction, product_id=prod3.id, value=365, action_type="add_labaccess_days")
+    get_or_create(ProductAction, product_id=starter_access_product.id, value=60, action_type="add_labaccess_days")
+
+    membership_subscription_product = get_or_create(
+        Product,
+        name="Base membership subscription",
+        defaults=dict(
+            price=200,
+            unit="år",
+            display_order=display_order_product + 5,
+            category_id=subscription_category.id,
+            show=False,
+            product_metadata={
+                "allowed_price_levels": ["low_income_discount"],
+                "special_product_id": "membership_subscription",
+            },
+        ),
+    )
+    get_or_create(
+        ProductAction, product_id=membership_subscription_product.id, value=365, action_type="add_membership_days"
+    )
+
+    access_subscription_product = get_or_create(
+        Product,
+        name="Makerspace access subscription",
+        defaults=dict(
+            price=350,
+            unit="mån",
+            display_order=display_order_product + 6,
+            category_id=subscription_category.id,
+            show=False,
+            smallest_multiple=2,
+            product_metadata={
+                "allowed_price_levels": ["low_income_discount"],
+                "special_product_id": "labaccess_subscription",
+            },
+        ),
+    )
+    get_or_create(ProductAction, product_id=access_subscription_product.id, value=30, action_type="add_labaccess_days")
+
+
+def create_shop_products() -> None:
+    banner(BLUE, "Creating Fake Shop Categories")
+
+    display_order_category = db_session.query(func.max(ProductCategory.display_order)).scalar() or 0
+    consumption_category = get_or_create(
+        ProductCategory, name="Consumption", defaults=dict(display_order=display_order_category + 2)
+    )
+    tools_category = get_or_create(
+        ProductCategory, name="Tools", defaults=dict(display_order=display_order_category + 3)
+    )
+    others_category = get_or_create(
+        ProductCategory, name="Other", defaults=dict(display_order=display_order_category + 4)
+    )
+
+    banner(BLUE, "Creating Fake Shop Products")
+
+    display_order_product = db_session.query(func.max(Product.display_order)).scalar() or 0
 
     get_or_create(
         Product,
@@ -226,7 +288,7 @@ def create_shop_products() -> None:
         defaults=dict(
             price=5,
             unit="dm",
-            display_order=display_order_product + 4,
+            display_order=display_order_product + 1,
             category_id=consumption_category.id,
             product_metadata={},
         ),
@@ -239,7 +301,7 @@ def create_shop_products() -> None:
             unit="dm",
             product_metadata={},
             category_id=tools_category.id,
-            display_order=display_order_product + 5,
+            display_order=display_order_product + 2,
         ),
     )
     get_or_create(
@@ -250,7 +312,7 @@ def create_shop_products() -> None:
             unit="st",
             product_metadata={},
             category_id=tools_category.id,
-            display_order=display_order_product + 6,
+            display_order=display_order_product + 3,
         ),
     )
     get_or_create(
@@ -261,7 +323,7 @@ def create_shop_products() -> None:
             unit="st",
             product_metadata={},
             category_id=consumption_category.id,
-            display_order=display_order_product + 7,
+            display_order=display_order_product + 4,
         ),
     )
     get_or_create(
@@ -272,7 +334,7 @@ def create_shop_products() -> None:
             unit="st",
             product_metadata={},
             category_id=others_category.id,
-            display_order=display_order_product + 8,
+            display_order=display_order_product + 5,
         ),
     )
     db_session.commit()
@@ -308,20 +370,20 @@ def create_shop_transactions() -> None:
             )
             index += 1
 
-    membership_prod = get_or_create(Product, name="Base membership")
+    membership_product = get_or_create(Product, name="Base membership")
     transaction = get_or_create(
         Transaction,
         id=index,
-        defaults=dict(member_id=1, amount=membership_prod.price, status="completed", created_at=test_date),
+        defaults=dict(member_id=1, amount=membership_product.price, status="completed", created_at=test_date),
     )
     transaction_content = get_or_create(
         TransactionContent,
         id=index,
         defaults=dict(
             transaction_id=transaction.id,
-            product_id=membership_prod.id,
+            product_id=membership_product.id,
             count=1,
-            amount=membership_prod.price,
+            amount=membership_product.price,
         ),
     )
     get_or_create(
@@ -344,7 +406,7 @@ def create_shop_transactions() -> None:
         defaults=dict(member_id=None, amount=100, status="completed", created_at=datetime.now()),
     )
 
-    # TODO this should probabl be associated with some sort of gift card product later
+    # TODO this should be associated with some sort of gift card product later
     transaction_content = get_or_create(
         TransactionContent,
         id=index,
@@ -431,14 +493,31 @@ def firstrun() -> None:
     admins = admin_group()
     create_admin(admins)
 
+    create_dev_data = False
     while True:
         s = input("Do you want to add various fake data for development purposes? [Y/n]: ")
         if s in ["n", "no"]:
-            create_dev_data = False
             break
         if s in {"", "y", "yes"}:
             create_dev_data = True
             break
+
+    create_membership_data = True
+    if not create_dev_data:
+        while True:
+            s = input(
+                "Do you want to add products for memberships?"
+                " (Some products are required for the member view and regristration page to load) [Y/n]: "
+            )
+            if s in ["n", "no"]:
+                create_membership_data = False
+                break
+            if s in {"", "y", "yes"}:
+                create_membership_data = True
+                break
+
+    if create_membership_data:
+        create_membership_products()
 
     if create_dev_data:
         create_members()
