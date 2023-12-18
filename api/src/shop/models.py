@@ -182,7 +182,7 @@ class GiftCard(Base):
         amount (float): the monetary value associated with the gift card.
         validation_code (str): The unique hex code used to validate the gift card. Length is 16 characters.
         email (str): The email address associated with the gift card. Used to send the validation code to the client.
-        status (enum): The status of the gift card (PENDING, ACTIVATED, EXPIRED)
+        status (enum): The status of the gift card
         created_at (datetime): the timestamp when the card was created.
     """
 

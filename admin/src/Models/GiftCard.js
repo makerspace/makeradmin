@@ -15,6 +15,7 @@ GiftCard.model = {
         created_at: null,
         email: "",
         status: "",
+        amount: 0,
         validation_code: 0,
     },
 };
