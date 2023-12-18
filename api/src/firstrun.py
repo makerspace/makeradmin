@@ -430,11 +430,22 @@ def firstrun() -> None:
     create_db()
     admins = admin_group()
     create_admin(admins)
-    create_members()
-    create_shop_products()
-    create_shop_transactions()
-    create_shop_accounts_cost_centers()
-    create_shop_gift_cards()
+
+    while True:
+        s = input("Do you want to add various fake data for development purposes? [Y/n]: ")
+        if s in ["n", "no"]:
+            create_dev_data = False
+            break
+        if s in {"", "y", "yes"}:
+            create_dev_data = True
+            break
+
+    if create_dev_data:
+        create_members()
+        create_shop_products()
+        create_shop_transactions()
+        create_shop_accounts_cost_centers()
+        create_shop_gift_cards()
 
     banner(
         GREEN,
@@ -444,7 +455,4 @@ def firstrun() -> None:
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Initialize the database with some development data.")
-    args = parser.parse_args()
-
     firstrun()
