@@ -391,19 +391,17 @@ def create_shop_accounts_cost_centers() -> None:
 
     tools_category = get_or_create(ProductCategory, name="Tools")
     products = db_session.query(Product).filter_by(category_id=tools_category.id).all()
-    for product in products:
-        for i, account in enumerate(accounts):
-            for j, cost_center in enumerate(cost_centers):
-                debits = 0 if i % 2 == 0 else 0.5
-                credit_value = 0.3 if j % 2 == 0 else 0.7
-                credits = 0 if i % 2 != 0 else credit_value
-                get_or_create(
-                    ProductAccountsCostCenters,
-                    product_id=product.id,
-                    account_id=account.id,
-                    cost_center_id=cost_center.id,
-                    defaults=dict(debits=debits, credits=credits),
-                )
+    for i, product in enumerate(products):
+        debits = 0 if i % 2 == 0 else 0.5
+        credit_value = 0.3 if i % 2 == 0 else 0.7
+        credits = 0 if i % 2 != 0 else credit_value
+        get_or_create(
+            ProductAccountsCostCenters,
+            product_id=product.id,
+            account_id=accounts[i].id,
+            cost_center_id=cost_centers[i].id,
+            defaults=dict(debits=debits, credits=credits),
+        )
 
     db_session.commit()
 
