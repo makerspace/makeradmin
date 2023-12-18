@@ -147,7 +147,9 @@ You will not be able to go to the checkout unless you have a Stripe key in the .
 
 ### Stripe - makeradmin connection
 
-Makeradmin is used as the truth
+Makeradmin is used as the truth. Work in progress to change so that discounts are also in makeradmin. However, currently the discount coupon needs to be set in stripe.
+
+* Create a **coupon** for low income discount. It should be with percentage discount. Add the metadata "makerspace_price_level" = "low_income_discount"
 
 The smallest multiple of the product is used to set the binding time for the subscription.
 

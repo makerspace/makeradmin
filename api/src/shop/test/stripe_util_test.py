@@ -8,7 +8,6 @@ import messages.models
 import core.models
 from shop import stripe_util
 from shop import stripe_constants
-from test_aid.systest_config import STRIPE_PRIVATE_KEY
 from test_aid.test_base import FlaskTestBase, ShopTestMixin
 
 logger = getLogger("makeradmin")
