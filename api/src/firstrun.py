@@ -20,7 +20,7 @@ from shop.models import (
     TransactionAction,
     TransactionContent,
     TransactionAccount,
-    TransactionCostcenter,
+    TransactionCostCenter,
     ProductAccountsCostCenters,
     GiftCard,
     ProductGiftCardMapping,
@@ -380,7 +380,7 @@ def create_shop_accounts_cost_centers() -> None:
     for cost_center_id in range(1, 3):
         cost_centers.append(
             get_or_create(
-                TransactionCostcenter,
+                TransactionCostCenter,
                 cost_center=f"cost center number {cost_center_id}",
                 defaults=dict(
                     display_order=cost_center_id,
