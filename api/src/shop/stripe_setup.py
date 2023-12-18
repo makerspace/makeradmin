@@ -20,7 +20,7 @@ def are_stripe_keys_live() -> bool:
     elif "test" in STRIPE_PRIVATE_KEY and "test" in STRIPE_PUBLIC_KEY:
         return False
     else:
-        raise Exception("Stripe keys in .env have to be both either live or test")
+        raise Exception("Stripe keys in .env must both be set to either 'live' or 'test'. Please check your configuration.")
 
 
 def setup_stripe_products() -> None:
