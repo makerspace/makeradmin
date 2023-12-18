@@ -471,12 +471,9 @@ class StripeProductPriceTest(ShopTestMixin, FlaskTestBase):
                 price_type,
             )
 
-        logger.info(stripe_test_prices[stripe_constants.PriceType.BINDING_PERIOD])
         for key, value in not_equal_variables.items():
             old_value = getattr(makeradmin_test_product, key)
             setattr(makeradmin_test_product, key, value)
-            logger.info(f"key {key} value {value}")
-            logger.info(makeradmin_test_product)
             assert not eq_makeradmin_stripe_price(
                 makeradmin_test_product,
                 stripe_test_prices[stripe_constants.PriceType.BINDING_PERIOD],
