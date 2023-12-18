@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from "react-router-dom";
-import Order from "../Models/Order";
+import GiftCard from "../Models/GiftCard";
 import Collection from "../Models/Collection";
 import CollectionTable from "../Components/CollectionTable";
 import DateTimeShow from "../Components/DateTimeShow";
@@ -11,48 +11,41 @@ const Row = props => {
     const { item } = props;
     return (
         <tr>
-            <td><Link to={"/sales/order/" + item.id}>{item.id}</Link></td>
+            <td><Link to={"/sales/gift-card/" + item.id}>{item.id}</Link></td>
             <td><DateTimeShow date={item.created_at} /></td>
             <td>{item.status}</td>
-            <td>
-                {item.member_id
-                    ? <Link to={"/membership/members/" + item.member_id}>#{item.member_number}: {item.firstname} {item.lastname}</Link>
-                    : "Gift"
-                }
-            </td>
-            <td className='uk-text-right'>{item.amount} kr</td>
+            <td>{item.email}</td>
         </tr>
     );
 };
 
 
-class OrderList extends CollectionNavigation {
+class GiftCardList extends CollectionNavigation {
 
     constructor(props) {
         super(props);
         const { search, page } = this.state;
 
-        this.collection = new Collection({ type: Order, url: "/webshop/transaction", expand: 'member', search, page });
+        this.collection = new Collection({ type: GiftCard, url: "/webshop/gift-card", search, page });
     }
 
     render() {
         const columns = [
-            { title: "Order" },
+            { title: "Presentkort" },
             { title: "Skapad" },
             { title: "Status" },
-            { title: "Medlem" },
-            { title: "Belopp" },
+            { title: "Email" },
         ];
 
         return (
             <div className="uk-margin-top">
-                <h2>Inkommna ordrar</h2>
+                <h2>Presentkort</h2>
                 <SearchBox handleChange={this.onSearch} value={this.state.search} />
-                <CollectionTable emptyMessage="Ingar ordrar" rowComponent={Row} collection={this.collection} columns={columns} onPageNav={this.onPageNav} />
+                <CollectionTable emptyMessage="Inga presentkort" rowComponent={Row} collection={this.collection} columns={columns} onPageNav={this.onPageNav} />
             </div>
         );
     }
 }
 
 
-export default OrderList;
+export default GiftCardList;

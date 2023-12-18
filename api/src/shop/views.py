@@ -29,6 +29,8 @@ from shop.entities import (
     product_entity,
     category_entity,
     product_action_entity,
+    gift_card_entity,
+    gift_card_content_entity,
 )
 from shop.models import TransactionContent, ProductImage
 from shop.pay import (
@@ -138,6 +140,19 @@ service.related_entity_routes(
     permission_list=WEBSHOP,
 )
 
+service.entity_routes(
+    path="/gift-card",
+    entity=gift_card_entity,
+    permission_list=WEBSHOP,
+    permission_read=WEBSHOP,
+)
+
+service.related_entity_routes(
+    path="/gift-card/<int:related_entity_id>/products",
+    entity=gift_card_content_entity,
+    relation=OrmSingeRelation("products", "gift_card_id"),
+    permission_list=WEBSHOP,
+)
 
 service.related_entity_routes(
     path="/member/<int:related_entity_id>/transactions",

@@ -78,6 +78,10 @@ const nav = {
                         target: "/sales/order",
                     },
                     {
+                        text: "Presentkort",
+                        target: "/sales/gift-card",
+                    },
+                    {
                         text: "Produkter",
                         target: "/sales/product",
                     },

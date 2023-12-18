@@ -182,20 +182,22 @@ class GiftCard(Base):
         amount (float): the monetary value associated with the gift card.
         validation_code (str): The unique hex code used to validate the gift card. Length is 16 characters.
         email (str): The email address associated with the gift card. Used to send the validation code to the client.
-        status (enum): The status of the gift card (PENDING, ACTIVATED, EXPIRED)
+        status (enum): The status of the gift card
         created_at (datetime): the timestamp when the card was created.
     """
+
     __tablename__ = "webshop_gift_card"
 
-    PENDING = "pending"
-    ACTIVATED = "activated"
+    VALID = "valid"
+    USED = "used"
     EXPIRED = "expired"
+    CANCELLED = "cancelled"
 
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
     amount = Column(Numeric(precision="15,2"), nullable=False)
     validation_code = Column(String(16), unique=True, nullable=False)
     email = Column(String(255), unique=True, nullable=False)
-    status = Column(Enum(PENDING, ACTIVATED, EXPIRED), nullable=False, default=PENDING)
+    status = Column(Enum(VALID, USED, EXPIRED, CANCELLED), nullable=False, default=VALID)
     created_at = Column(DateTime, server_default=func.now())
 
 
@@ -219,9 +221,10 @@ class ProductGiftCardMapping(Base):
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
     gift_card_id = Column(Integer, ForeignKey(GiftCard.id))
     product_id = Column(Integer, ForeignKey(Product.id))
-    product_quantity = Column(Integer, nullable=False, default=1)
+    product_quantity = Column(Integer, nullable=False)
+    amount = Column(Numeric(precision="15,2"), nullable=False)
 
-    gift_card = relationship(GiftCard)
+    gift_card = relationship(GiftCard, backref="products")
     product = relationship(Product)
 
 
