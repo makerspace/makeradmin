@@ -18,6 +18,7 @@ from shop.stripe_subscriptions import (
     start_subscription,
 )
 from shop.stripe_customer import get_and_sync_stripe_customer
+from shop.stripe_util import retry
 from service.db import db_session
 from core import auth
 from membership.views import member_entity
@@ -168,18 +169,20 @@ def setup_payment_method(data_dict: Any, member_id: int) -> SetupPaymentMethodRe
 
     if data.setup_intent_id is None:
         try:
-            payment_method = stripe.PaymentMethod.retrieve(data.stripe_payment_method_id)
+            payment_method = retry(lambda: stripe.PaymentMethod.retrieve(data.stripe_payment_method_id))
         except:
             raise BadRequest(message="The payment method is not valid.")
 
-        setup_intent = stripe.SetupIntent.create(
-            payment_method_types=["card"],
-            metadata={},
-            payment_method=payment_method.stripe_id,
-            customer=stripe_customer.stripe_id,
+        setup_intent = retry(
+            lambda: stripe.SetupIntent.create(
+                payment_method_types=["card"],
+                metadata={},
+                payment_method=payment_method.stripe_id,
+                customer=stripe_customer.stripe_id,
+            )
         )
     else:
-        setup_intent = stripe.SetupIntent.retrieve(data.setup_intent_id)
+        setup_intent = retry(lambda: stripe.SetupIntent.retrieve(data.setup_intent_id))
 
     try:
         handle_setup_intent(setup_intent)
@@ -258,7 +261,7 @@ def cleanup_pending_members(relevant_email: str) -> None:
         # We delete the customer just to keep things tidy. It's not strictly necessary.
         if member.stripe_customer_id is not None:
             try:
-                stripe.Customer.delete(member.stripe_customer_id)
+                retry(lambda: stripe.Customer.delete(member.stripe_customer_id))
             except:
                 # If it cannot be deleted, we don't care
                 pass

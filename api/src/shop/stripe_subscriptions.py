@@ -61,15 +61,6 @@ class SubscriptionType(str, Enum):
 
 logger = getLogger("makeradmin")
 
-# Binding period in months.
-# Set to zero to disable binding periods.
-# Setting it to 1 is not particularly useful, since it will be the same as a normal subscription.
-# TODO need to fix this
-BINDING_PERIOD = {
-    SubscriptionType.MEMBERSHIP: 0,
-    SubscriptionType.LAB: 2,
-}
-
 
 SUBSCRIPTION_PRODUCTS: Optional[Dict[SubscriptionType, int]] = None
 
@@ -315,7 +306,7 @@ def resume_paused_subscription(
         # We can just wait for it to start as normal
         return False
 
-    subscription = stripe.Subscription.retrieve(subscription_id)
+    subscription = retry(lambda: stripe.Subscription.retrieve(subscription_id))
     # If the subscription is not paused, we can just do nothing.
     if subscription["pause_collection"] is None:
         return False
@@ -354,12 +345,14 @@ def pause_subscription(
             # that already had membership when they signed up for the subscription.
             return False
         elif subscription_id.startswith("sub_"):
-            stripe.Subscription.modify(
-                subscription_id,
-                pause_collection={
-                    "behavior": "void",
-                    "resumes_at": None,
-                },
+            retry(
+                lambda: stripe.Subscription.modify(
+                    subscription_id,
+                    pause_collection={
+                        "behavior": "void",
+                        "resumes_at": None,
+                    },
+                )
             )
             return True
         else:
@@ -402,14 +395,14 @@ def cancel_subscription(
                 SubscriptionScheduleStatus.NOT_STARTED,
                 SubscriptionScheduleStatus.ACTIVE,
             ]:
-                stripe.SubscriptionSchedule.release(subscription_id)
+                retry(lambda: stripe.SubscriptionSchedule.release(subscription_id))
 
                 if schedule["subscription"]:
                     # Also delete the subscription which the schedule drives, if one exists
-                    stripe.Subscription.delete(schedule["subscription"])
+                    retry(lambda: stripe.Subscription.delete(schedule["subscription"]))
 
         elif subscription_id.startswith("sub_"):
-            stripe.Subscription.delete(subscription_id)
+            retry(lambda: stripe.Subscription.delete(subscription_id))
         else:
             assert False
     except stripe.InvalidRequestError as e:
@@ -502,7 +495,7 @@ def list_subscriptions(member_id: int) -> List[SubscriptionInfo]:
     ]:
         if sub_id is not None:
             if sub_id.startswith("sub_sched_"):
-                sched = stripe.SubscriptionSchedule.retrieve(sub_id)
+                sched = retry(lambda: stripe.SubscriptionSchedule.retrieve(sub_id))
                 status = SubscriptionScheduleStatus(sched.status)
                 if status == SubscriptionScheduleStatus.NOT_STARTED:
                     # The subscription is scheduled to start at some point in the future.

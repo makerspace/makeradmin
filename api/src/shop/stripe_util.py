@@ -96,15 +96,17 @@ def event_semantic_time(event: stripe.Event) -> datetime:
 
 
 def replace_default_payment_method(customer_id: str, payment_method_id: str) -> None:
-    stripe.Customer.modify(
-        customer_id,
-        invoice_settings={"default_payment_method": payment_method_id},
+    retry(
+        lambda: stripe.Customer.modify(
+            customer_id,
+            invoice_settings={"default_payment_method": payment_method_id},
+        )
     )
 
     # Delete all previous payment methods to keep things clean
     for pm in stripe.PaymentMethod.list(customer=customer_id).auto_paging_iter():
         if pm.id != payment_method_id:
-            stripe.PaymentMethod.detach(pm.id)
+            retry(lambda: stripe.PaymentMethod.detach(pm.id))
 
 
 T = TypeVar("T")

@@ -11,11 +11,8 @@ import pytest
 
 from shop.stripe_constants import MakerspaceMetadataKeys
 from shop.stripe_customer import get_and_sync_stripe_customer
-from shop.stripe_util import event_semantic_time, get_subscription_category
-from shop.stripe_subscriptions import (
-    BINDING_PERIOD,
-    SubscriptionType,
-)
+from shop.stripe_util import event_semantic_time, get_subscription_category, retry
+from shop.stripe_subscriptions import SubscriptionType
 from shop.stripe_setup import setup_stripe_products
 from shop.stripe_product_price import (
     get_stripe_product,
@@ -78,12 +75,14 @@ def attach_and_set_payment_method(
     stripe_member = get_and_sync_stripe_customer(member, test_clock=test_clock)
     assert stripe_member is not None
 
-    payment_method = stripe.PaymentMethod.attach(card_token.value, customer=stripe_member.stripe_id)
-    stripe.Customer.modify(
-        stripe_member.stripe_id,
-        invoice_settings={
-            "default_payment_method": payment_method.stripe_id,
-        },
+    payment_method = retry(lambda: stripe.PaymentMethod.attach(card_token.value, customer=stripe_member.stripe_id))
+    retry(
+        lambda: stripe.Customer.modify(
+            stripe_member.stripe_id,
+            invoice_settings={
+                "default_payment_method": payment_method.stripe_id,
+            },
+        )
     )
 
 
@@ -109,6 +108,7 @@ class Test(FlaskTestBase):
         subscription_category = get_subscription_category()
 
         self.membership_subscription_product = self.db.create_product(
+            id=100,
             name="test subscriptions membership",
             price=200.0,
             unit="år",
@@ -121,10 +121,11 @@ class Test(FlaskTestBase):
         )
 
         self.access_subscription_product = self.db.create_product(
+            id=101,
             name="test subscriptions access",
             price=350.0,
             unit="mån",
-            smallest_multiple=2,  # TODO need to test with multiple values
+            smallest_multiple=2,
             category_id=subscription_category.id,
             product_metadata={
                 MakerspaceMetadataKeys.ALLOWED_PRICE_LEVELS.value: ["low_income_discount"],
@@ -134,24 +135,6 @@ class Test(FlaskTestBase):
 
         setup_stripe_products()
 
-    @classmethod
-    def tearDownClass(self) -> None:
-        # It is not possible to delete prices through the api so we set them as inactive instead
-        for makeradmin_product in [self.membership_subscription_product, self.access_subscription_product]:
-            stripe_product = get_stripe_product(makeradmin_product)
-            if stripe_product is None:
-                continue
-            if stripe_product.active:
-                deactivate_stripe_product(stripe_product)
-            stripe_prices = get_stripe_prices(stripe_product)
-            if stripe_prices is None:
-                continue
-            for price in stripe_prices:
-                if price.active:
-                    deactivate_stripe_price(price)
-
-        super().tearDownClass()
-
     @skipIf(not STRIPE_PRIVATE_KEY, "subscriptions tests require stripe api key in .env file")
     def setUp(self) -> None:
         db_session.query(Member).delete()
@@ -160,7 +143,6 @@ class Test(FlaskTestBase):
         self.seen_event_ids = set()
         self.earliest_possible_event_time = datetime.now(timezone.utc)
         self.clocks_to_destroy: List[FakeClock] = []
-        # stripe_setup.set_stripe_key(True)
 
         disable_loggers = ["stripe"]
 
@@ -495,17 +477,13 @@ class Test(FlaskTestBase):
         self.advance_clock(clock, now + time_delta(days=10))
 
         assert member.deleted_at is not None
-        assert stripe.Customer.retrieve(stripe_customer_id).deleted
+        assert retry(lambda: stripe.Customer.retrieve(stripe_customer_id)).deleted
 
-    # TODO fix this test to work with new stripe setup and no binding period
     def test_subscriptions_binding_period(self) -> None:
         """
         Checks that a lab subscription is started with a binding period
         """
-        binding_period = BINDING_PERIOD[SubscriptionType.LAB]
-        if binding_period <= 0:
-            pytest.skip("No binding period for lab access")
-
+        binding_period = self.access_subscription_product.smallest_multiple
         (now, clock, member) = self.setup_single_member()
 
         stripe_subscriptions.start_subscription(
@@ -539,7 +517,7 @@ class Test(FlaskTestBase):
         """
         Checks that a subscription can be cancelled, and the member can resubscribe immediately
         """
-        binding_period = 2  # TODO fix this, split into two tests
+        binding_period = self.access_subscription_product.smallest_multiple
         if binding_period <= 0:
             pytest.skip("No binding period for lab access")
 
@@ -589,9 +567,7 @@ class Test(FlaskTestBase):
         """
         Checks that if a subscription fails to charge, the subscription is deleted after a while
         """
-        binding_period = BINDING_PERIOD[SubscriptionType.LAB]
-        if binding_period <= 0:
-            pytest.skip("No binding period for lab access")
+        binding_period = self.access_subscription_product.smallest_multiple
 
         (now, clock, member) = self.setup_single_member()
 
@@ -628,9 +604,7 @@ class Test(FlaskTestBase):
         """
         Checks that if a subscription fails to charge, the subscription is retried a few times and then nenewed when we switch to a new card
         """
-        binding_period = BINDING_PERIOD[SubscriptionType.LAB]
-        if binding_period <= 0:
-            pytest.skip("No binding period for lab access")
+        binding_period = self.access_subscription_product.smallest_multiple
 
         (now, clock, member) = self.setup_single_member()
 

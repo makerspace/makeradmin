@@ -10,7 +10,7 @@ from stripe import SignatureVerificationError, RateLimitError
 from datetime import timezone
 from shop import stripe_subscriptions
 import shop.transactions
-from shop.stripe_util import event_semantic_time
+from shop.stripe_util import event_semantic_time, retry
 
 from service.error import BadRequest, InternalServerError
 from shop.models import (
@@ -223,17 +223,21 @@ def stripe_invoice_event(subtype: EventSubtype, event: stripe.Event, current_tim
             # Attach a makerspace transaction id to the stripe invoice item.
             # This is nice to have in the future if we need to match them somehow.
             # In the vast majority of all cases, this will just contain a single transaction id.
-            stripe.Invoice.modify(
-                invoice["id"],
-                metadata={
-                    MakerspaceMetadataKeys.TRANSACTION_IDS.value: ",".join([str(x) for x in transaction_ids]),
-                },
+            retry(
+                lambda: stripe.Invoice.modify(
+                    invoice["id"],
+                    metadata={
+                        MakerspaceMetadataKeys.TRANSACTION_IDS.value: ",".join([str(x) for x in transaction_ids]),
+                    },
+                )
             )
-            stripe.PaymentIntent.modify(
-                invoice["payment_intent"],
-                metadata={
-                    MakerspaceMetadataKeys.TRANSACTION_IDS.value: ",".join([str(x) for x in transaction_ids]),
-                },
+            retry(
+                lambda: stripe.PaymentIntent.modify(
+                    invoice["payment_intent"],
+                    metadata={
+                        MakerspaceMetadataKeys.TRANSACTION_IDS.value: ",".join([str(x) for x in transaction_ids]),
+                    },
+                )
             )
 
         return

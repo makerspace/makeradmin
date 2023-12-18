@@ -19,7 +19,10 @@ makeradmin_unit_to_stripe_unit = {
 
 
 def makeradmin_to_stripe_recurring(makeradmin_product: Product, price_type: PriceType) -> StripeRecurring | None:
+    subscription_category_id = get_subscription_category().id
     if price_type == PriceType.RECURRING or price_type == PriceType.BINDING_PERIOD:
+        if makeradmin_product.category.id != subscription_category_id:
+            raise ValueError(f"Unexpected price type {price_type} for non-subscription product {makeradmin_product.id}")
         if makeradmin_product.unit in makeradmin_unit_to_stripe_unit:
             interval = makeradmin_unit_to_stripe_unit[makeradmin_product.unit]
         else:
@@ -27,6 +30,8 @@ def makeradmin_to_stripe_recurring(makeradmin_product: Product, price_type: Pric
         interval_count = makeradmin_product.smallest_multiple if price_type == PriceType.BINDING_PERIOD else 1
         return StripeRecurring(interval=interval, interval_count=interval_count)
     else:
+        if makeradmin_product.category.id == subscription_category_id:
+            raise ValueError(f"Unexpected price type {price_type} for subscription product {makeradmin_product.id}")
         return None
 
 
@@ -61,16 +66,21 @@ def get_stripe_prices(
 
 def eq_makeradmin_stripe_product(makeradmin_product: Product, stripe_product: stripe.Product) -> bool:
     """Check that the essential parts of the product are the same in both makeradmin and stripe"""
-    # TODO check metadata?
-    # TODO how to handle this?
-    # if stripe_product.id != makeradmin_product.id:
-    #    raise BadRequest(f"Stripe product id and makeradmin product id does not match")
+    if stripe_product.id != str(makeradmin_product.id):
+        raise BadRequest(
+            f"Stripe product id {stripe_product.id} and makeradmin product id {makeradmin_product.id} does not match"
+        )
     return stripe_product.name == makeradmin_product.name
 
 
-# TODO use are dicts equal function
 def eq_makeradmin_stripe_price(makeradmin_product: Product, stripe_price: stripe.Price, price_type: PriceType) -> bool:
     """Check that the essential parts of the price are the same in both makeradmin and stripe"""
+    lookup_key_for_product = get_stripe_price_lookup_key(makeradmin_product, price_type)
+    if stripe_price.lookup_key != lookup_key_for_product:
+        raise BadRequest(
+            f"Stripe price lookup key {stripe_price.lookup_key} and corresponding key from makeradmin product {makeradmin_product.id} and PriceType {price_type} does not match"
+        )
+
     recurring = makeradmin_to_stripe_recurring(makeradmin_product, price_type)
     different = []
 
@@ -79,6 +89,9 @@ def eq_makeradmin_stripe_price(makeradmin_product: Product, stripe_price: stripe
             return False
         different.append(stripe_price.recurring.get("interval") != recurring.interval)
         different.append(stripe_price.recurring.get("interval_count") != recurring.interval_count)
+    else:
+        if stripe_price.recurring is not None:
+            return False
     different.append(stripe_price.unit_amount != stripe_amount_from_makeradmin_product(makeradmin_product, recurring))
     different.append(stripe_price.currency != CURRENCY)
     different.append(stripe_price.metadata.get("price_type") != price_type.value)

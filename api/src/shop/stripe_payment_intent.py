@@ -20,7 +20,7 @@ from shop.stripe_constants import (
     CURRENCY,
     SetupFutureUsage,
 )
-from shop.stripe_util import convert_to_stripe_amount, replace_default_payment_method
+from shop.stripe_util import retry, convert_to_stripe_amount, replace_default_payment_method
 from shop.transactions import (
     PaymentFailed,
     payment_success,
@@ -91,7 +91,7 @@ def create_client_response(transaction: Transaction, payment_intent: PaymentInte
         return create_action_required_response(transaction, payment_intent)
 
     elif status == PaymentIntentStatus.REQUIRES_CONFIRMATION:
-        confirmed_intent = stripe.PaymentIntent.confirm(payment_intent.id)
+        confirmed_intent = retry(lambda: stripe.PaymentIntent.confirm(payment_intent.id))
         assert PaymentIntentStatus(confirmed_intent.status) != PaymentIntentStatus.REQUIRES_CONFIRMATION
         return create_client_response(transaction, confirmed_intent)
 
@@ -118,7 +118,7 @@ def confirm_stripe_payment_intent(transaction_id: int) -> PartialPayment:
     if transaction.status != Transaction.PENDING:
         raise BadRequest(f"transaction ({transaction_id}) is not pending")
 
-    payment_intent = stripe.PaymentIntent.retrieve(pending.stripe_token)
+    payment_intent = retry(lambda: stripe.PaymentIntent.retrieve(pending.stripe_token))
     status = PaymentIntentStatus(payment_intent.status)
     if status == PaymentIntentStatus.CANCELED:
         raise BadRequest(f"unexpected stripe payment intent status {status}")
@@ -160,23 +160,25 @@ def pay_with_stripe(transaction: Transaction, payment_method_id: str, setup_futu
         stripe_customer = get_and_sync_stripe_customer(member)
         assert stripe_customer is not None
 
-        payment_intent = stripe.PaymentIntent.create(
-            payment_method=payment_method_id,
-            amount=convert_to_stripe_amount(transaction.amount),
-            currency=CURRENCY,
-            customer=stripe_customer.stripe_id,
-            description=f"charge for transaction id {transaction.id}",
-            confirmation_method="manual",
-            confirm=True,
-            # One might think that off_session could be set to true to make payments possible without
-            # user interaction. Sadly, it seems that most cards require 3d secure verification, which
-            # is not possible with off_session payments.
-            # Subscriptions may instead email the user to ask them to verify the payment.
-            off_session=False,
-            setup_future_usage=SetupFutureUsage.OFF_SESSION.value if setup_future_usage else None,
-            metadata={
-                MakerspaceMetadataKeys.TRANSACTION_IDS.value: transaction.id,
-            },
+        payment_intent = retry(
+            lambda: stripe.PaymentIntent.create(
+                payment_method=payment_method_id,
+                amount=convert_to_stripe_amount(transaction.amount),
+                currency=CURRENCY,
+                customer=stripe_customer.stripe_id,
+                description=f"charge for transaction id {transaction.id}",
+                confirmation_method="manual",
+                confirm=True,
+                # One might think that off_session could be set to true to make payments possible without
+                # user interaction. Sadly, it seems that most cards require 3d secure verification, which
+                # is not possible with off_session payments.
+                # Subscriptions may instead email the user to ask them to verify the payment.
+                off_session=False,
+                setup_future_usage=SetupFutureUsage.OFF_SESSION.value if setup_future_usage else None,
+                metadata={
+                    MakerspaceMetadataKeys.TRANSACTION_IDS.value: transaction.id,
+                },
+            )
         )
 
         db_session.add(StripePending(transaction_id=transaction.id, stripe_token=payment_intent.stripe_id))
