@@ -61,7 +61,9 @@ class SystestBase(TestBase):
         super().setUpClass()
 
         if are_stripe_keys_live():
-            "Live Stripe keys detected during test setup. Using live keys in tests is prohibited to prevent unintended side effects."
+            raise Exception(
+                "Live Stripe keys detected during test setup. Using live keys in tests is prohibited to prevent unintended side effects."
+            )
         setup_stripe(private=False)
 
         # Make sure sessions is removed so it is not using another engine in this thread.

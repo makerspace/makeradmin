@@ -42,9 +42,7 @@ from service.db import db_session
 from shop.transactions import ship_orders
 from test_aid.test_base import FlaskTestBase
 import stripe
-import stripe
 from shop import stripe_event
-from shop import stripe_setup
 
 logger = logging.getLogger("makeradmin")
 

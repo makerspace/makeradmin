@@ -125,7 +125,7 @@ class StripeProductPriceTest(ShopTestMixin, FlaskTestBase):
             for price in stripe_prices:
                 if price.active:
                     deactivate_stripe_price(price)
-        return super().tearDown()
+        super().tearDown()
 
     @staticmethod
     def assertPrice(
