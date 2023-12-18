@@ -11,7 +11,7 @@ sudo adduser your_username docker
 You need to sign out and sign back in again for changes to take effect. 
 
 ### Python
-Python 3.10.
+Makeradmin uses Python 3.10.
 
 The install process will install additional pip packages.
 Activate a venv / virtualenv before install if you want python environment isolation.
@@ -30,6 +30,8 @@ This will build docker images and configure the database. This may take quite so
 It will also generate a `.env` file with new random keys and passwords that the system will use.
 
 You will be prompted for if you want to create a new admin user, it is recommended to do this here.
+
+You will also be prompted for if you want to create some fake members, transactions etc which can be useful for development.
 
 If you are deploying on a server you need to configure hosts and other settings by editing the `.env` file.
 If you do modify the `.env` file you need to restart the services afterwards by running

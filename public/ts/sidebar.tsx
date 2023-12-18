@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from "preact/hooks";
 import { ComponentChildren } from "preact";
 import { logout } from "./common";
 import Cart from "./cart";
@@ -15,11 +16,28 @@ const NavItem = ({ url, icon, children }: { url: string, icon: string, children:
 }
 
 export const Sidebar = ({ cart, className = "" }: { cart: { cart: Cart, productData: ProductData } | null, className?: string }) => {
+    const sidebarRef = useRef<HTMLDivElement>(null);
+    const [isSidebarScrollable, setIsSidebarScrollable] = useState(false);
+
+    useEffect((): (() => void) => {
+        const checkSidebarHeight = () => {
+            if (sidebarRef.current) {
+                setIsSidebarScrollable(sidebarRef.current.scrollHeight > sidebarRef.current.clientHeight);
+            }
+        }
+        checkSidebarHeight();
+        window.addEventListener("resize", checkSidebarHeight);
+
+        return () => {
+            window.removeEventListener("resize", checkSidebarHeight);
+        };
+    }, []);
+
     let path = location.pathname.trim();
     if (path.endsWith("/")) {
         path = path.substring(0, path.length - 1);
     }
-    return <div id="left-sidebar">
+    return <div id="left-sidebar" ref={sidebarRef} className={isSidebarScrollable ? "scrollable" : ""}>
         <div className={`sidebar-fixed-content ${className}`}>
             <img className="makerspace-logo" src={`${window.staticBasePath}/images/logo-transparent-500px-300x210.png`} />
             <ul className="uk-nav uk-nav-default">
@@ -43,9 +61,12 @@ export const Sidebar = ({ cart, className = "" }: { cart: { cart: Cart, productD
                     }}><span uk-icon="sign-out"></span> Logga ut</a>
                 </li>
 
-                {cart !== null && <li className={`uk-button uk-button-primary sidebar-buy-btn ${cart.cart.items.length === 0 ? 'cart-empty' : ''}`}>
-                    <a href="/shop/cart"><span uk-icon="cart"></span> Betala<span id="cart-sum">{Cart.formatCurrency(cart.cart.sum(cart.productData.id2item))}</span></a>
-                </li>
+                {cart !== null &&
+                    <li className={`uk-button uk-button-primary sidebar-buy-btn ${cart.cart.items.length === 0 ? 'cart-empty' : ''}`}>
+                        <a href="/shop/cart"><span uk-icon="cart"></span> Betala
+                            <span id="cart-sum">{Cart.formatCurrency(cart.cart.sum(cart.productData.id2item))}</span>
+                        </a>
+                    </li>
                 }
             </ul>
         </div>
