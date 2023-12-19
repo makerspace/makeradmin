@@ -9,8 +9,10 @@ from typing import Any, Dict, List, Optional, Set, Tuple, cast
 from unittest import skipIf
 
 import pytest
+from shop.stripe_constants import CURRENCY, PaymentIntentStatus
 from shop.stripe_customer import get_and_sync_stripe_customer
-from shop.stripe_util import event_semantic_time
+from shop.stripe_payment_intent import get_stripe_payment_intents
+from shop.stripe_util import event_semantic_time, convert_from_stripe_amount, convert_to_stripe_amount
 from shop.stripe_subscriptions import (
     BINDING_PERIOD,
     SubscriptionType,
@@ -93,7 +95,7 @@ class Test(FlaskTestBase):
     models = [membership.models, messages.models, shop.models, core.models]
     seen_event_ids: Set[str]
 
-    @skipIf(True, "subscriptions tests require stripe api key in .env file")
+    @skipIf(not stripe.api_key, "subscriptions tests require stripe api key in .env file")
     def setUp(self) -> None:
         db_session.query(Member).delete()
         db_session.query(Span).delete()
@@ -800,3 +802,68 @@ class Test(FlaskTestBase):
         summary = get_membership_summary(member_id, clock.date)
         assert summary.labaccess_active
         assert summary.labaccess_end == sub_start + time_delta(days=61) + time_delta(months=1)
+
+    # TODO This placement is not ideal, if we refactor the stripe tests, we should move this to a better place
+    def test_subscriptions_get_all_payment_intents(self) -> None:
+        """
+        Checks that a subscription is started for new members.
+        """
+
+        def filter_intents_on_customers(
+            stripe_intents: List[stripe.PaymentIntent], seen_members: List[Member]
+        ) -> Dict[int, stripe.PaymentIntent]:
+            filtered_intents: Dict[int, stripe.PaymentIntent] = {}
+            stripe_customers_id: List[str] = []
+            for member in seen_members:
+                stripe_customers_id.append(member.stripe_customer_id)
+            for intent in stripe_intents:
+                if intent.customer in stripe_customers_id:
+                    transaction_id = int(intent.metadata[stripe_constants.MakerspaceMetadataKeys.TRANSACTION_IDS.value])
+                    filtered_intents[transaction_id] = intent
+            return filtered_intents
+
+        (now, clock, member_id) = self.setup_single_member()
+
+        member = db_session.query(Member).get(member_id)
+        assert member is not None
+        seen_members = [member]
+
+        assert not get_membership_summary(member_id).membership_active
+
+        stripe_subscriptions.start_subscription(
+            member_id,
+            SubscriptionType.MEMBERSHIP,
+            earliest_start_at=now,
+            test_clock=clock.stripe_clock,
+        )
+        self.advance_clock(clock, now + time_delta(days=1))
+
+        summary = get_membership_summary(member_id, clock.date)
+        assert summary.membership_active
+        assert summary.membership_end == (now + time_delta(years=1)).date()
+
+        self.advance_clock(clock, now + time_delta(years=1, days=5))
+
+        start_date = datetime.now(timezone.utc) - time_delta(days=1)
+        end_date = datetime.now(timezone.utc) + time_delta(years=2)
+        intents = get_stripe_payment_intents(start_date, end_date)
+
+        # We have to filter the completed payments because get_stripe_payments returns ALL intents,
+        # including the ones from other tests and older test runs
+        filtered_intents = filter_intents_on_customers(intents, seen_members)
+
+        test_transactions = db_session.query(shop.models.Transaction).filter_by(member_id=member_id).all()
+        assert test_transactions
+        assert len(test_transactions) == 2
+
+        for transaction in test_transactions:
+            transaction_id = transaction.id
+            assert transaction_id == transaction.id
+            assert convert_from_stripe_amount(filtered_intents[transaction_id].amount) == transaction.amount
+            assert filtered_intents[transaction_id].currency == CURRENCY
+            assert filtered_intents[transaction_id].status == PaymentIntentStatus.SUCCEEDED.value
+            transaction_fee = convert_from_stripe_amount(
+                filtered_intents[transaction_id].latest_charge.balance_transaction.fee
+            )
+            estimated_transaction_fee = transaction.amount * 0.025 + 1.8
+            assert math.isclose(transaction_fee, estimated_transaction_fee, abs_tol=transaction.amount * 0.025)

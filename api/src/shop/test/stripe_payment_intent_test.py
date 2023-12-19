@@ -48,7 +48,7 @@ class FakeStripePaymentIntent:
     created: int  # unix timestamp
 
 
-class StripePaymentIntentWithoutStripeTest(ShopTestMixin, FlaskTestBase):
+class StripePaymentIntentWithoutStripeTest(FlaskTestBase):
     models = [membership.models, messages.models, shop.models, core.models]
 
     def test_convert_stripe_intents_to_payments(self) -> None:
@@ -75,7 +75,7 @@ class StripePaymentIntentWithoutStripeTest(ShopTestMixin, FlaskTestBase):
             assert payment.created == datetime.fromtimestamp(1701966186 + (transaction_id * 10000), tz=timezone.utc)
 
 
-class StripePaymentIntentTest(ShopTestMixin, FlaskTestBase):
+class StripePaymentIntentTest(FlaskTestBase):
     models = [membership.models, messages.models, shop.models, core.models]
 
     @skipIf(not stripe.api_key, "stripe payment intent tests require stripe api key in .env file")
@@ -189,9 +189,6 @@ class StripePaymentIntentTest(ShopTestMixin, FlaskTestBase):
         # We have to filter the completed payments because get_stripe_payments returns ALL intents,
         # including the ones from other tests and older test runs
         filtered_intents = self.filter_intents_on_customers(intents)
-
-        logger.info(f"***********************")
-        logger.info(completed_payments)
 
         assert len(filtered_intents) == len(test_transactions)
         for transaction_id in filtered_intents:

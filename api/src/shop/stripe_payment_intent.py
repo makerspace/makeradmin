@@ -63,7 +63,7 @@ class PartialPayment(DataClassJsonMixin):
 
 @dataclass(frozen=True)
 class CompletedPayment(DataClassJsonMixin):
-    """Used to return old payments that are already completed"""
+    """Used for bookkeeping for old transactions that are already completed"""
 
     transaction_id: int
     amount: Decimal
