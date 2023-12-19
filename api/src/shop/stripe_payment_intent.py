@@ -174,7 +174,6 @@ def pay_with_stripe(transaction: Transaction, payment_method_id: str, setup_futu
         assert stripe_customer is not None
 
         amount = convert_to_stripe_amount(transaction.amount)
-        logger.info(f"********** creating stripe payment_intent for transaction {transaction.id}, amount {amount}")
         payment_intent = retry(
             lambda: stripe.PaymentIntent.create(
                 payment_method=payment_method_id,
@@ -216,8 +215,6 @@ def get_stripe_payment_intents(start_date: date, end_date: date) -> List[stripe.
     # Loop over the intents and store them. We need to loop to deal with pagination
     for intent in stripe_intents.auto_paging_iter():
         payments.append(intent)
-
-    logger.info(f"**************** found {len(payments)} stripe payment_intents")
     return payments
 
 
