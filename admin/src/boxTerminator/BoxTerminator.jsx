@@ -10,26 +10,17 @@ class BoxTerminator extends React.Component {
         this.scanCallback = this.scanCallback.bind(this);
     }
 
-    render() {
-        return (
-            <div>
-                <QrCodeScanner
-                    qrCodeSuccessCallback={this.scanCallback}
-                />
-            </div>
-        );
-    }
-
-    async scanCallback(scannedString) {
+    scanCallback(scannedString) {
         // console.dir(message);
         try {
             const scannedObject = JSON.stringify(scannedString);
+            console.dir(scannedObject)
             if ( !scannedObject.hasOwnPropery('member_number') ) {
-                throw('Not a member memberbooth tag!')
+                throw(new Error('Not a member memberbooth tag!'));
             }
 
             switch (scannedObject.type) {
-                case value:
+                case "":
                     
                     break;
             
@@ -40,6 +31,13 @@ class BoxTerminator extends React.Component {
         } catch(err) {
             showError(err);
         }
+    }
+    render() {
+        return (
+            <div>
+                <QrCodeScanner onSuccess={this.scanCallback} filterScan={(ignore) => {return true}}/>
+            </div>
+        );
     }
 }
 

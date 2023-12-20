@@ -1,37 +1,34 @@
-import React from 'react';
-import { Html5Qrcode } from 'html5-qrcode';
-import { showError } from '../message';
+import React, {useEffect } from "react";
+import { Html5Qrcode, Html5QrcodeSupportedFormats } from "html5-qrcode";
 
-class QrCodeScanner extends React.Component {
-    render() {
-        return(<div id="QrReader" width="600px"></div>);
-    }
+const QrCodeScanner = ({ filterScan, onSuccess }) => {
+  useEffect(() => {
+    const scanner = new Html5Qrcode("qr-reader", {
+      formatsToSupport: [Html5QrcodeSupportedFormats.QR_CODE],
+    });
 
-    componentDidMount() {
-        if (!(this.props.qrCodeSuccessCallback)) {
-            throw new Error("qrCodeSuccessCallback is required");
+    scanner.start(
+      { facingMode: "environment" }, // Prefer rear camera on mobiles
+      {
+        fps: 15,
+        qrbox: 300,
+      },
+      (qrCodeMessage) => {
+        if (filterScan(qrCodeMessage)) {
+          scanner.stop().then(() => {
+            // QR Code scanning is stopped.
+            onSuccess(qrCodeMessage);
+          });
         }
+      }
+    );
 
+    return () => {
+      scanner.clear();
+    };
+  }, []);
 
-        const config = {
-            qrbox: { width: 300, height: 300 } 
-        };
-
-        this.html5QrCode = new Html5Qrcode(/* element id */ "QrReader");
-        this.html5QrCode.start({ facingMode: { exact: "environment"}}, config, this.props.qrCodeSuccessCallback)
-        .catch(err => {
-            showError(err);
-        });
-    }
-
-    componentWillUnmount() {
-        try {
-            this.html5QrCode.stop();
-        } catch(err) {
-            console.error(`Error during qrcode unmount ${err}`);
-        }
-    }
-
-}
+  return <div id="qr-reader" style={{ width: "100%", height: "100%" }} />;
+};
 
 export default QrCodeScanner;
