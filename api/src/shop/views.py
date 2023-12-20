@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from typing import Any
-from flask import Response, g, request, send_file, make_response
+from flask import Response, g, request, send_file, send_from_directory, make_response
 from sqlalchemy.exc import NoResultFound
 from basic_types.enums import PriceLevel
 from shop.stripe_discounts import get_discount_fraction_off
@@ -284,3 +284,13 @@ def register_route() -> Any:
 @service.route("/stripe_callback", method=POST, permission=PUBLIC, commit_on_error=True)
 def stripe_callback_route():
     stripe_callback(request.data, request.headers)
+
+
+@service.route("/shop/bookkeeping_export", method=POST, permission=PUBLIC)  # TODO What permission to use here?
+def bookkeeping_export(product_id):
+    return get_product_data(product_id)  # TODO import correct function
+
+
+@service.route("/shop/download/<filename>", methods=GET, permission=PUBLIC)  # TODO What permission to use here?
+def download_file(filename):
+    return send_from_directory(app.config["UPLOAD_FOLDER"], filename, as_attachment=True)  # TODO fix
