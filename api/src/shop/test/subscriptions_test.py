@@ -91,6 +91,7 @@ class FakeClock:
         stripe.test_helpers.TestClock.advance(self.stripe_clock.stripe_id, frozen_time=int(self.date.timestamp()))
 
 
+# TODO The placement of tests related to payment intents is not ideal, if we refactor the stripe tests, we should move them to a better place
 class Test(FlaskTestBase):
     models = [membership.models, messages.models, shop.models, core.models]
     seen_event_ids: Set[str]
@@ -117,6 +118,45 @@ class Test(FlaskTestBase):
         for c in self.clocks_to_destroy:
             stripe.test_helpers.TestClock.delete(c.stripe_clock.stripe_id)
         return super().tearDown()
+
+    def filter_intents_on_customers(
+        self, stripe_intents: List[stripe.PaymentIntent], seen_members: List[Member]
+    ) -> Dict[int, stripe.PaymentIntent]:
+        # We have to filter the completed payments because get_stripe_payments returns ALL intents,
+        # including the ones from other tests and older test runs
+        # This used for the payment intent tests related to subscriptions
+        filtered_intents: Dict[int, stripe.PaymentIntent] = {}
+        stripe_customers_id: List[str] = []
+        for member in seen_members:
+            stripe_customers_id.append(member.stripe_customer_id)
+        for intent in stripe_intents:
+            if intent.customer in stripe_customers_id:
+                if intent.status == PaymentIntentStatus.SUCCEEDED:
+                    # TODO we currently don't add a transaction to the db and
+                    # the transacion id to the intent for failed subscription payments so we have to filter them out
+                    transaction_id = int(intent.metadata[stripe_constants.MakerspaceMetadataKeys.TRANSACTION_IDS.value])
+                    filtered_intents[transaction_id] = intent
+        return filtered_intents
+
+    def assert_payment_intents(self, member_id: int, filtered_intents: Dict[int, stripe.PaymentIntent]) -> None:
+        test_transactions = db_session.query(shop.models.Transaction).filter_by(member_id=member_id).all()
+        logger.info(f"Found {len(test_transactions)} transactions")
+        logger.info(test_transactions)
+
+        assert test_transactions
+        assert len(test_transactions) == len(filtered_intents)
+
+        for transaction in test_transactions:
+            transaction_id = transaction.id
+            assert transaction_id == transaction.id
+            assert convert_from_stripe_amount(filtered_intents[transaction_id].amount) == transaction.amount
+            assert filtered_intents[transaction_id].currency == CURRENCY
+            assert filtered_intents[transaction_id].status == PaymentIntentStatus.SUCCEEDED.value
+            transaction_fee = convert_from_stripe_amount(
+                filtered_intents[transaction_id].latest_charge.balance_transaction.fee
+            )
+            estimated_transaction_fee = transaction.amount * 0.025 + 1.8
+            assert math.isclose(transaction_fee, estimated_transaction_fee, abs_tol=transaction.amount * 0.025)
 
     def add_span(self, member: Member, type: str, startdate: date, enddate: date) -> None:
         span = Span(
@@ -803,26 +843,13 @@ class Test(FlaskTestBase):
         assert summary.labaccess_active
         assert summary.labaccess_end == sub_start + time_delta(days=61) + time_delta(months=1)
 
-    # TODO This placement is not ideal, if we refactor the stripe tests, we should move this to a better place
-    def test_subscriptions_get_all_payment_intents(self) -> None:
+    def test_subscriptions_get_payment_intents(self) -> None:
         """
-        Checks that a subscription is started for new members.
+        Checks that we can get the payment intents for a subscription.
         """
-
-        def filter_intents_on_customers(
-            stripe_intents: List[stripe.PaymentIntent], seen_members: List[Member]
-        ) -> Dict[int, stripe.PaymentIntent]:
-            filtered_intents: Dict[int, stripe.PaymentIntent] = {}
-            stripe_customers_id: List[str] = []
-            for member in seen_members:
-                stripe_customers_id.append(member.stripe_customer_id)
-            for intent in stripe_intents:
-                if intent.customer in stripe_customers_id:
-                    transaction_id = int(intent.metadata[stripe_constants.MakerspaceMetadataKeys.TRANSACTION_IDS.value])
-                    filtered_intents[transaction_id] = intent
-            return filtered_intents
 
         (now, clock, member_id) = self.setup_single_member()
+        intent_start_date = now
 
         member = db_session.query(Member).get(member_id)
         assert member is not None
@@ -844,26 +871,111 @@ class Test(FlaskTestBase):
 
         self.advance_clock(clock, now + time_delta(years=1, days=5))
 
-        start_date = datetime.now(timezone.utc) - time_delta(days=1)
-        end_date = datetime.now(timezone.utc) + time_delta(years=2)
-        intents = get_stripe_payment_intents(start_date, end_date)
+        intent_end_date = clock.date
+        intents = get_stripe_payment_intents(intent_start_date, intent_end_date)
+        filtered_intents = self.filter_intents_on_customers(intents, seen_members)
 
-        # We have to filter the completed payments because get_stripe_payments returns ALL intents,
-        # including the ones from other tests and older test runs
-        filtered_intents = filter_intents_on_customers(intents, seen_members)
+        assert len(filtered_intents) == 2
+        self.assert_payment_intents(member.member_id, filtered_intents)
 
-        test_transactions = db_session.query(shop.models.Transaction).filter_by(member_id=member_id).all()
-        assert test_transactions
-        assert len(test_transactions) == 2
+    def test_subscriptions_resubscribe_get_payment_intents(self) -> None:
+        """
+        Checks that we get the correct payment intents if a subscription is cancelled, and then resubscribed
+        """
+        binding_period = BINDING_PERIOD[SubscriptionType.LAB]
+        if binding_period <= 0:
+            pytest.skip("No binding period for lab access")
 
-        for transaction in test_transactions:
-            transaction_id = transaction.id
-            assert transaction_id == transaction.id
-            assert convert_from_stripe_amount(filtered_intents[transaction_id].amount) == transaction.amount
-            assert filtered_intents[transaction_id].currency == CURRENCY
-            assert filtered_intents[transaction_id].status == PaymentIntentStatus.SUCCEEDED.value
-            transaction_fee = convert_from_stripe_amount(
-                filtered_intents[transaction_id].latest_charge.balance_transaction.fee
-            )
-            estimated_transaction_fee = transaction.amount * 0.025 + 1.8
-            assert math.isclose(transaction_fee, estimated_transaction_fee, abs_tol=transaction.amount * 0.025)
+        (now, clock, member_id) = self.setup_single_member()
+        intent_start_date = now
+
+        member = db_session.query(Member).get(member_id)
+        assert member is not None
+        seen_members = [member]
+
+        stripe_subscriptions.start_subscription(
+            member_id,
+            SubscriptionType.LAB,
+            earliest_start_at=now,
+            test_clock=clock.stripe_clock,
+        )
+        first_sub_start = clock.date.date()
+        self.advance_clock(clock, now + time_delta(days=1))
+        # Sometimes stripe misses to send the paid event here... so let's retry
+        self.advance_clock(clock, now + time_delta(days=1))
+
+        summary = get_membership_summary(member_id, clock.date)
+
+        # Cancel subscription after one day
+        stripe_subscriptions.cancel_subscription(member_id, SubscriptionType.LAB, test_clock=clock.stripe_clock)
+
+        intent_end_date = clock.date
+        intents = get_stripe_payment_intents(intent_start_date, intent_end_date)
+        filtered_intents = self.filter_intents_on_customers(intents, seen_members)
+
+        assert len(filtered_intents) == 1
+        self.assert_payment_intents(member.member_id, filtered_intents)
+
+        # Resubscribe, the new subscription will start one day before the current membership ends
+        sub_start = summary.labaccess_end - time_delta(days=1)
+        stripe_subscriptions.start_subscription(member_id, SubscriptionType.LAB, test_clock=clock.stripe_clock)
+
+        self.advance_clock(clock, noon(first_sub_start + time_delta(days=3)))
+
+        summary = get_membership_summary(member_id, clock.date)
+
+        # Stripe does not allow us to advance clocks more than 2 subscription-periods at once
+        # So we have to do this in steps.
+        for month in range(binding_period):
+            self.advance_clock(clock, noon(first_sub_start + time_delta(months=month + 1)))
+
+        self.advance_clock(clock, noon(sub_start + time_delta(months=0, days=5)))
+
+        intent_end_date = clock.date
+        intents = get_stripe_payment_intents(intent_start_date, intent_end_date)
+        filtered_intents = self.filter_intents_on_customers(intents, seen_members)
+
+        assert len(filtered_intents) == binding_period
+        self.assert_payment_intents(member.member_id, filtered_intents)
+
+    def test_subscriptions_retry_card_get_payment_intents(self) -> None:
+        """
+        Checks that we get the correct payment intents if a subscription fails to charge, the subscription is retried a few times and then nenewed when we switch to a new card
+        """
+        (now, clock, member_id) = self.setup_single_member()
+        intent_start_date = now
+
+        member = db_session.query(Member).get(member_id)
+        assert member is not None
+        seen_members = [member]
+
+        stripe_subscriptions.start_subscription(
+            member_id,
+            SubscriptionType.MEMBERSHIP,
+            earliest_start_at=now,
+            test_clock=clock.stripe_clock,
+        )
+        self.advance_clock(clock, now + time_delta(days=1))
+        self.set_payment_method(self.get_member(member_id), FakeCardPmToken.DeclineAfterAttach, clock)
+
+        # Stripe should be configured to retry the payment 3 times before giving up
+        # This will take 3 + 5 + 7 = 15 days with the default settings
+        self.advance_clock(clock, now + time_delta(years=1, days=2))
+
+        intent_end_date = clock.date
+        intents = get_stripe_payment_intents(intent_start_date, intent_end_date)
+        filtered_intents = self.filter_intents_on_customers(intents, seen_members)
+
+        assert len(filtered_intents) == 1  # The start of the subscription was a successful payment
+        self.assert_payment_intents(member.member_id, filtered_intents)
+
+        # Restore a valid payment method. The card will be retried at 1year + 3days
+        self.set_payment_method(self.get_member(member_id), FakeCardPmToken.Normal, clock)
+        self.advance_clock(clock, now + time_delta(years=1, days=10))
+
+        intent_end_date = clock.date
+        intents = get_stripe_payment_intents(intent_start_date, intent_end_date)
+        filtered_intents = self.filter_intents_on_customers(intents, seen_members)
+
+        assert len(filtered_intents) == 2
+        self.assert_payment_intents(member.member_id, filtered_intents)

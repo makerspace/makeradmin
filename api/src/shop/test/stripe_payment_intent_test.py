@@ -209,4 +209,4 @@ class StripePaymentIntentTest(FlaskTestBase):
                 assert filtered_intents[transaction_id].latest_charge.balance_transaction is None
         assert len(test_transactions) == 0
 
-    # TODO test with subscriptions
+    # TODO test with dates
