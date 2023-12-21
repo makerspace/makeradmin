@@ -116,7 +116,6 @@ export default class Product extends Base {
     }
 }
 
-
 Product.model = {
     id: "id",
     root: "/webshop/product",
@@ -133,5 +132,8 @@ Product.model = {
         filter: null,
         show: true,
         image_id: null,
+        // extend = accounting
+        account_id: 0,
+        cost_center_id: 0
     },
 };

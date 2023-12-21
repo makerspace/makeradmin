@@ -74,6 +74,7 @@ class Product(Base):
 
     category = relationship(ProductCategory, backref="products")
     actions = relationship("ProductAction")
+    product_accounting = relationship("ProductAccountsCostCenters", backref="accounts_cost_centers")
 
     image_id = Column(Integer, ForeignKey(ProductImage.id), nullable=True)
 

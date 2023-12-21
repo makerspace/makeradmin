@@ -23,6 +23,12 @@ product_entity = OrderedEntity(
     default_sort_column="name",
     default_sort_order=ASC,
     search_columns=("name", "description"),
+    expand_fields={
+        "product_accounting": ExpandField(
+            Product.product_accounting,
+            [ProductAccountsCostCenters.account_id, ProductAccountsCostCenters.cost_center_id],
+        )
+    },
 )
 
 

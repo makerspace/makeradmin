@@ -25,8 +25,8 @@ CREATE TABLE IF NOT EXISTS `webshop_transaction_cost_centers` (
 CREATE TABLE IF NOT EXISTS `webshop_product_accounting` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `product_id` int(10) unsigned NOT NULL,
-  `account_id` int(10) unsigned NOT NULL,
-  `cost_center_id` int(10) unsigned NOT NULL,
+  `account_id` int(10) unsigned,
+  `cost_center_id` int(10) unsigned,
   `debits` decimal(10,2) unsigned NOT NULL DEFAULT 0,
   `credits` decimal(10,2) unsigned NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`),

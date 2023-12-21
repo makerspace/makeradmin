@@ -1,5 +1,16 @@
-html, body, #main {
+html,
+body,
+#main {
 	height: 100%;
+}
+
+.prevent-select {
+	-webkit-user-select: none;
+	/* Safari */
+	-ms-user-select: none;
+	/* IE 10 and IE 11 */
+	user-select: none;
+	/* Standard syntax */
 }
 
 /* Loading React application */
@@ -30,13 +41,23 @@ html, body, #main {
 }
 
 @keyframes fadein {
-	from { opacity: 0; }
-	to   { opacity: 1; }
+	from {
+		opacity: 0;
+	}
+
+	to {
+		opacity: 1;
+	}
 }
 
 @keyframes fadein2 {
-	from { filter: blur(0px); }
-	to   { filter: blur(1px); }
+	from {
+		filter: blur(0px);
+	}
+
+	to {
+		filter: blur(1px);
+	}
 }
 
 .loadingOverlay span {
@@ -50,7 +71,7 @@ html, body, #main {
 
 
 .invoice .box {
-/*	border: 1px solid #000;*/
+	/*	border: 1px solid #000;*/
 }
 
 .invoice .title {
@@ -58,8 +79,7 @@ html, body, #main {
 	font-size: 0.9em;
 }
 
-.invoice .data {
-}
+.invoice .data {}
 
 
 /* react-select */
@@ -168,11 +188,11 @@ html, body, #main {
 	font-size: 10px;
 }
 
-.meep .uk-form-row + .uk-form-row {
+.meep .uk-form-row+.uk-form-row {
 	margin-top: 10px;
 }
 
-.meep .uk-form-icon > [class*="uk-icon-"] {
+.meep .uk-form-icon>[class*="uk-icon-"] {
 	margin-left: -30px;
 }
 
@@ -230,13 +250,13 @@ html, body, #main {
 	width: 342px;
 }
 
-.uk-form-row.address_city + div {
+.uk-form-row.address_city+div {
 	clear: both;
 }
 
 /* Hilite fields that have changed since last sync */
 .meep .changed input {
-/*	background-color: blue !important;*/
+	/*	background-color: blue !important;*/
 }
 
 .meep .changed label::before {
@@ -244,14 +264,14 @@ html, body, #main {
 }
 
 span.ma-changed {
-    position: relative;
+	position: relative;
 }
 
 .ma-changed::after {
-    position: absolute;
-    right: 8px;
-    top: -0.1em;
-    content: "*";
+	position: absolute;
+	right: 8px;
+	top: -0.1em;
+	content: "*";
 }
 
 /* Filterbox */
@@ -284,9 +304,9 @@ tr.toggle.show td {
 }
 
 tr.toggle div.wrapper {
-    -webkit-transition: max-height 1.5s cubic-bezier(0, 1.05, 0, 1);
-    -moz-transition: max-height 1.5s cubic-bezier(0, 1.05, 0, 1);
-    transition: max-height 1.5s ease cubic-bezier(0, 1.05, 0, 1);
+	-webkit-transition: max-height 1.5s cubic-bezier(0, 1.05, 0, 1);
+	-moz-transition: max-height 1.5s cubic-bezier(0, 1.05, 0, 1);
+	transition: max-height 1.5s ease cubic-bezier(0, 1.05, 0, 1);
 
 	max-height: 0;
 	overflow: hidden;
@@ -299,9 +319,9 @@ tr.toggle div.scrolling {
 tr.toggle.show div.wrapper {
 	max-height: 500px;
 
-    -webkit-transition: max-height 1s ease;
-    -moz-transition: max-height 1s ease;
-    transition: max-height 1s ease;
+	-webkit-transition: max-height 1s ease;
+	-moz-transition: max-height 1s ease;
+	transition: max-height 1s ease;
 }
 
 tr.toggle.show div.scrolling {
@@ -332,7 +352,7 @@ tr.toggle pre {
 }
 
 .datebox .uk-grid {
-/*	margin-left:-15px;*/
+	/*	margin-left:-15px;*/
 }
 
 .datebox p {
@@ -347,18 +367,20 @@ tr.toggle pre {
 	margin: 0;
 }
 
-.meep .uk-form-controls > .uk-form-icon {
+.meep .uk-form-controls>.uk-form-icon {
 	width: 100%;
 }
 
 /* MultiAccess stuff*/
-.multiaccess h4
-{
+.multiaccess h4 {
 	font-size: 14px;
 	font-weight: bold;
 }
 
-.multiaccess h3, .multiaccess h4, .multiaccess ul, .multiaccess p {
+.multiaccess h3,
+.multiaccess h4,
+.multiaccess ul,
+.multiaccess p {
 	margin: 0;
 }
 
