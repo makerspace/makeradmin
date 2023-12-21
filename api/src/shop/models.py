@@ -132,7 +132,7 @@ class Transaction(Base):
     stripe_pending = relationship("StripePending")
 
     def __repr__(self) -> str:
-        return f"Transaction(id={self.id}, amount={self.amount}, status={self.status})"
+        return f"Transaction(id={self.id}, amount={self.amount}, status={self.status}, created_at={self.created_at})"
 
 
 class TransactionContent(Base):
@@ -185,6 +185,7 @@ class GiftCard(Base):
         status (enum): The status of the gift card (PENDING, ACTIVATED, EXPIRED)
         created_at (datetime): the timestamp when the card was created.
     """
+
     __tablename__ = "webshop_gift_card"
 
     PENDING = "pending"
