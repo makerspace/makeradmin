@@ -271,7 +271,7 @@ class ProductAccountsCostCenters(Base):
     cost_center = relationship(TransactionCostCenter, backref="accounts_cost_centers")
 
     def __repr__(self) -> str:
-        return f"ProductAccountsCostCenters(id={self.id}, cost_center={self.cost_center}, account={self.account}, debits={self.debits}, credits={self.credits})"
+        return f"ProductAccounting(id={self.id}, cost_center={self.cost_center}, account={self.account}, debits={self.debits}, credits={self.credits})"
 
 
 class StripePending(Base):

@@ -8,6 +8,9 @@ from shop.models import (
     TransactionAction,
     ProductCategory,
     ProductAction,
+    TransactionAccount,
+    TransactionCostCenter,
+    ProductAccountsCostCenters,
 )
 from shop.ordered_entity import OrderedEntity
 from shop.product_image_entity import ProductImageEntity
@@ -51,4 +54,26 @@ transaction_content_entity = Entity(
 transaction_action_entity = Entity(
     TransactionAction,
     default_sort_column=None,
+)
+
+
+transaction_account_entity = OrderedEntity(
+    TransactionAccount,
+    default_sort_column="account",
+    default_sort_order=ASC,
+    search_columns=("account", "description"),
+)
+
+transaction_cost_center_entity = OrderedEntity(
+    TransactionCostCenter,
+    default_sort_column="cost_center",
+    default_sort_order=ASC,
+    search_columns=("cost_center", "description"),
+)
+
+product_accounting_entity = Entity(
+    ProductAccountsCostCenters,
+    default_sort_column="id",
+    default_sort_order=ASC,
+    search_columns=("cost_center_id", "account_id"),
 )

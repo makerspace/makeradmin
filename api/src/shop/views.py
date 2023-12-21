@@ -29,6 +29,9 @@ from shop.entities import (
     product_entity,
     category_entity,
     product_action_entity,
+    transaction_account_entity,
+    transaction_cost_center_entity,
+    product_accounting_entity,
 )
 from shop.models import TransactionContent, ProductImage
 from shop.pay import (
@@ -150,6 +153,36 @@ service.related_entity_routes(
 service.entity_routes(
     path="/product_image",
     entity=product_image_entity,
+    permission_list=WEBSHOP,
+    permission_read=WEBSHOP,
+    permission_create=WEBSHOP_EDIT,
+    permission_update=WEBSHOP_EDIT,
+    permission_delete=WEBSHOP_EDIT,
+)
+
+service.entity_routes(
+    path="/transaction_account",
+    entity=transaction_account_entity,
+    permission_list=WEBSHOP,
+    permission_read=WEBSHOP,
+    permission_create=WEBSHOP_EDIT,
+    permission_update=WEBSHOP_EDIT,
+    permission_delete=WEBSHOP_EDIT,
+)
+
+service.entity_routes(
+    path="/transaction_cost_center",
+    entity=transaction_cost_center_entity,
+    permission_list=WEBSHOP,
+    permission_read=WEBSHOP,
+    permission_create=WEBSHOP_EDIT,
+    permission_update=WEBSHOP_EDIT,
+    permission_delete=WEBSHOP_EDIT,
+)
+
+service.entity_routes(
+    path="/accounting",
+    entity=product_accounting_entity,
     permission_list=WEBSHOP,
     permission_read=WEBSHOP,
     permission_create=WEBSHOP_EDIT,
