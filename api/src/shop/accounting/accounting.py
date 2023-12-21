@@ -14,15 +14,11 @@ from shop.models import (
     TransactionContent,
 )
 from shop.stripe_payment_intent import CompletedPayment
-from shop.accounting.sie_file import write_to_sie_file
-from shop.accounting.verification import create_verificatons
 
 
 @dataclass(frozen=True)
-class TransactionWithAccountAndCostCenter:
-    transaction_id: int
+class AmountPerAccountAndCostCenter:
     amount: Decimal
-    transaction_fee: Decimal
     date: datetime
     account: int
     cost_center: str
@@ -85,32 +81,14 @@ def diff_transactions_and_completed_payments(
 
 
 def add_accounting_to_transactions(
-    product_to_accounting: ProductToAccountCostCenter,
     transactions: List[Transaction],
-    completed_payments: List[CompletedPayment],
-) -> List[TransactionWithAccountAndCostCenter]:
+    completed_payments: List[CompletedPayment],  # TODO probably dont need completed_payments
+) -> List[AmountPerAccountAndCostCenter]:
     product_to_accounting = ProductToAccountCostCenter()
 
     # TODO query TransactionContent for products somewhere
 
-    transactions_with_accounting: List[TransactionWithAccountAndCostCenter] = []
+    transactions_with_accounting: List[AmountPerAccountAndCostCenter] = []
     for payment in completed_payments:
         pass  # TODO
     return transactions_with_accounting
-
-
-def export_accounting() -> None:  # TODO input is two dates
-    completed_payments = None  # TODO a different PR
-
-    # TODO query for transactions
-    transactions = None
-
-    diff = diff_transactions_and_completed_payments(transactions, completed_payments)
-    if len(diff) > 0:
-        raise InternalServerError(f"Transactions and completed payments do not match, {diff}")
-
-    transactions_with_accounting = add_accounting_to_transactions(transactions, completed_payments)
-
-    verifications = create_verificatons(transactions_with_accounting)  # TODO probably some group by input
-
-    write_to_sie_file(verifications)  # TODO probably some file name input

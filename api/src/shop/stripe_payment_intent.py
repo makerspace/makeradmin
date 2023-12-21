@@ -3,7 +3,7 @@ from decimal import Decimal
 from datetime import datetime, timezone, date
 from enum import Enum
 from logging import getLogger
-from typing import Optional
+from typing import Dict, Optional, List
 from typing_extensions import Never
 from dataclasses_json import DataClassJsonMixin
 import stripe
