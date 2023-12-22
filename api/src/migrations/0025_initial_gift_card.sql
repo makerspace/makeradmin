@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS `webshop_gift_card`(
     `amount` decimal(15,2) NOT NULL,
     `validation_code` VARCHAR(16) unique COLLATE utf8mb4_0900_ai_ci NOT NULL,
     `email` varchar(255) COLLATE utf8mb4_0900_ai_ci NOT NULL,
-    `status` enum('pending','activated','expired') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+    `status` enum('valid','used','expired','cancelled') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
     `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
@@ -15,6 +15,7 @@ CREATE TABLE IF NOT EXISTS `webshop_product_gift_card_mapping` (
     `gift_card_id` int(11) unsigned NOT NULL,
     `product_id` int(10) unsigned NOT NULL,
     `product_quantity` int(10) unsigned NOT NULL,
+    `amount` decimal(15,2) NOT NULL,
     PRIMARY KEY (`id`),
     KEY `gift_card_id_index` (`gift_card_id`),
     CONSTRAINT `gift_card_id_foreign` FOREIGN KEY (`gift_card_id`) REFERENCES `webshop_gift_card` (`id`),

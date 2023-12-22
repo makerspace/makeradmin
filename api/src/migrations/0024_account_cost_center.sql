@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS `webshop_transaction_accounts` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `account` int(10) unsigned NOT NULL UNIQUE,
+  `account` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `description` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `display_order` int(10) unsigned NOT NULL,
   `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS `webshop_transaction_accounts` (
 
 CREATE TABLE IF NOT EXISTS `webshop_transaction_cost_centers` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `cost_center` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL UNIQUE,
+  `cost_center` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `description` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `display_order` int(10) unsigned NOT NULL,
   `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
@@ -25,10 +25,10 @@ CREATE TABLE IF NOT EXISTS `webshop_transaction_cost_centers` (
 CREATE TABLE IF NOT EXISTS `webshop_product_accounting` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `product_id` int(10) unsigned NOT NULL,
-  `account_id` int(10) unsigned NOT NULL,
-  `cost_center_id` int(10) unsigned NOT NULL,
-  `debits` decimal(10,2) unsigned NOT NULL DEFAULT 0,
-  `credits` decimal(10,2) unsigned NOT NULL DEFAULT 0,
+  `account_id` int(10) unsigned,
+  `cost_center_id` int(10) unsigned,
+  `fraction` decimal(6,3) unsigned NOT NULL DEFAULT 0.0,
+  `type` enum('debit','credit') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   PRIMARY KEY (`id`),
   KEY `account_id_key` (`account_id`),
   CONSTRAINT `webshop_product_accounting_account_id_foreign` FOREIGN KEY (`account_id`) REFERENCES `webshop_transaction_accounts` (`id`),

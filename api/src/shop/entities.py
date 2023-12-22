@@ -1,5 +1,5 @@
 from membership.models import Member
-from service.entity import Entity, ExpandField, ASC
+from service.entity import Entity, ExpandField, ASC, DESC
 from shop.models import (
     ProductImage,
     Transaction,
@@ -8,6 +8,8 @@ from shop.models import (
     TransactionAction,
     ProductCategory,
     ProductAction,
+    GiftCard,
+    ProductGiftCardMapping,
 )
 from shop.ordered_entity import OrderedEntity
 from shop.product_image_entity import ProductImageEntity
@@ -51,4 +53,18 @@ transaction_content_entity = Entity(
 transaction_action_entity = Entity(
     TransactionAction,
     default_sort_column=None,
+)
+
+gift_card_entity = Entity(
+    GiftCard,
+    default_sort_column="id",
+    default_sort_order=DESC,
+    search_columns=("id", "created_at", "status", "email"),
+)
+
+gift_card_content_entity = Entity(
+    ProductGiftCardMapping,
+    default_sort_column="id",
+    default_sort_order=DESC,
+    expand_fields={"product": ExpandField(ProductGiftCardMapping.product, [Product.name])},
 )
