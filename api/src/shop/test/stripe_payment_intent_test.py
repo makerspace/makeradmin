@@ -87,7 +87,7 @@ class StripePaymentIntentTest(FlaskTestBase):
     def tearDown(self) -> None:
         for makeradmin_member in self.seen_members:
             delete_stripe_customer(makeradmin_member.member_id)
-            return super().tearDown()
+            super().tearDown()
 
     def filter_intents_on_customers(
         self, stripe_intents: List[stripe.PaymentIntent]
