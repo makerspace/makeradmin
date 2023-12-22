@@ -1,4 +1,6 @@
 from dataclasses import dataclass
+from decimal import Decimal
+from datetime import datetime, timezone, date
 from enum import Enum
 from logging import getLogger
 from typing import Optional
@@ -56,6 +58,16 @@ class PartialPayment(DataClassJsonMixin):
     # Payment needs additional actions to complete if this is non-null.
     # If it is None then the payment is complete.
     action_info: Optional[PaymentAction]
+
+
+@dataclass(frozen=True)
+class CompletedPayment(DataClassJsonMixin):
+    """Used for bookkeeping for old transactions that are already completed"""
+
+    transaction_id: int
+    amount: Decimal
+    created: datetime
+    fee: Decimal
 
 
 def create_action_required_response(transaction: Transaction, payment_intent: PaymentIntent) -> PaymentAction:
