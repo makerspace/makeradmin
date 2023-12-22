@@ -1,4 +1,5 @@
 from datetime import date, datetime, timezone, time as dt_time
+from datetime import timedelta as abs_tdelta
 from enum import Enum
 import logging
 import time
@@ -143,26 +144,11 @@ class Test(FlaskTestBase):
         self,
         member_id: int,
         filtered_intents: Dict[int, stripe.PaymentIntent],
-        start_date: datetime,
-        end_date: datetime,
     ) -> None:
-        logger.info(f"start date {start_date} end date {end_date}")
-        test_transactions_all = db_session.query(shop.models.Transaction).filter_by(member_id=member_id).all()
-        logger.info(test_transactions_all)
-        test_transactions: List[shop.models.Transaction] = []
-        for transaciton in test_transactions_all:
-            if (
-                transaciton.created_at.replace(tzinfo=pytz.UTC).date() >= start_date.date()
-                and transaciton.created_at.replace(tzinfo=pytz.UTC).date() <= end_date.date()
-            ):
-                test_transactions.append(transaciton)
-
-        logger.info(f"Found {len(test_transactions)} transactions")
-        logger.info(test_transactions)
+        test_transactions = db_session.query(shop.models.Transaction).filter_by(member_id=member_id).all()
 
         assert test_transactions is not None
         assert len(test_transactions) == len(filtered_intents)
-
         for transaction in test_transactions:
             transaction_id = transaction.id
             assert transaction_id == transaction.id
@@ -866,7 +852,6 @@ class Test(FlaskTestBase):
         """
 
         (now, clock, member_id) = self.setup_single_member()
-        intent_start_date = now
 
         member = db_session.query(Member).get(member_id)
         assert member is not None
@@ -888,29 +873,14 @@ class Test(FlaskTestBase):
 
         self.advance_clock(clock, now + time_delta(years=1, days=5))
 
-        intent_end_date = clock.date
-        intents = get_stripe_payment_intents(intent_start_date, intent_end_date)
+        intents = get_stripe_payment_intents(
+            datetime.now(timezone.utc) - abs_tdelta(hours=1),
+            datetime.now(timezone.utc) + abs_tdelta(hours=1),
+        )
         filtered_intents = self.filter_intents_on_customers(intents, seen_members)
-        logger.info("filtered_intents: %s", filtered_intents)
 
         assert len(filtered_intents) == 2
-        self.assert_payment_intents(member.member_id, filtered_intents, intent_start_date, intent_end_date)
-
-        # Test filtering on dates where there shouldn't be any intents
-        intent_start_date = clock.date - time_delta(days=1)
-        intent_end_date = clock.date
-        intents = get_stripe_payment_intents(intent_start_date, intent_end_date)
-        filtered_intents = self.filter_intents_on_customers(intents, seen_members)
-        assert len(filtered_intents) == 0
-
-        # Test filtering on dates
-        # TODO this is broken because of stripe
-        intent_start_date = clock.date - time_delta(days=7)
-        intent_end_date = clock.date
-        intents = get_stripe_payment_intents(intent_start_date, intent_end_date)
-        filtered_intents = self.filter_intents_on_customers(intents, seen_members)
-        assert len(filtered_intents) == 1
-        self.assert_payment_intents(member.member_id, filtered_intents, intent_start_date, intent_end_date)
+        self.assert_payment_intents(member.member_id, filtered_intents)
 
     def test_subscriptions_resubscribe_get_payment_intents(self) -> None:
         """
@@ -921,7 +891,6 @@ class Test(FlaskTestBase):
             pytest.skip("No binding period for lab access")
 
         (now, clock, member_id) = self.setup_single_member()
-        intent_start_date = now
 
         member = db_session.query(Member).get(member_id)
         assert member is not None
@@ -943,12 +912,14 @@ class Test(FlaskTestBase):
         # Cancel subscription after one day
         stripe_subscriptions.cancel_subscription(member_id, SubscriptionType.LAB, test_clock=clock.stripe_clock)
 
-        intent_end_date = clock.date
-        intents = get_stripe_payment_intents(intent_start_date, intent_end_date)
+        intents = get_stripe_payment_intents(
+            datetime.now(timezone.utc) - abs_tdelta(hours=1),
+            datetime.now(timezone.utc) + abs_tdelta(hours=1),
+        )
         filtered_intents = self.filter_intents_on_customers(intents, seen_members)
 
         assert len(filtered_intents) == 1
-        self.assert_payment_intents(member.member_id, filtered_intents, intent_start_date, intent_end_date)
+        self.assert_payment_intents(member.member_id, filtered_intents)
 
         # Resubscribe, the new subscription will start one day before the current membership ends
         sub_start = summary.labaccess_end - time_delta(days=1)
@@ -965,19 +936,20 @@ class Test(FlaskTestBase):
 
         self.advance_clock(clock, noon(sub_start + time_delta(months=0, days=5)))
 
-        intent_end_date = clock.date
-        intents = get_stripe_payment_intents(intent_start_date, intent_end_date)
+        intents = get_stripe_payment_intents(
+            datetime.now(timezone.utc) - abs_tdelta(hours=1),
+            datetime.now(timezone.utc) + abs_tdelta(hours=1),
+        )
         filtered_intents = self.filter_intents_on_customers(intents, seen_members)
 
         assert len(filtered_intents) == binding_period
-        self.assert_payment_intents(member.member_id, filtered_intents, intent_start_date, intent_end_date)
+        self.assert_payment_intents(member.member_id, filtered_intents)
 
     def test_subscriptions_retry_card_get_payment_intents(self) -> None:
         """
         Checks that we get the correct payment intents if a subscription fails to charge, the subscription is retried a few times and then nenewed when we switch to a new card
         """
         (now, clock, member_id) = self.setup_single_member()
-        intent_start_date = now
 
         member = db_session.query(Member).get(member_id)
         assert member is not None
@@ -996,20 +968,24 @@ class Test(FlaskTestBase):
         # This will take 3 + 5 + 7 = 15 days with the default settings
         self.advance_clock(clock, now + time_delta(years=1, days=2))
 
-        intent_end_date = clock.date
-        intents = get_stripe_payment_intents(intent_start_date, intent_end_date)
+        intents = get_stripe_payment_intents(
+            datetime.now(timezone.utc) - abs_tdelta(hours=1),
+            datetime.now(timezone.utc) + abs_tdelta(hours=1),
+        )
         filtered_intents = self.filter_intents_on_customers(intents, seen_members)
 
         assert len(filtered_intents) == 1  # The start of the subscription was a successful payment
-        self.assert_payment_intents(member.member_id, filtered_intents, intent_start_date, intent_end_date)
+        self.assert_payment_intents(member.member_id, filtered_intents)
 
         # Restore a valid payment method. The card will be retried at 1year + 3days
         self.set_payment_method(self.get_member(member_id), FakeCardPmToken.Normal, clock)
         self.advance_clock(clock, now + time_delta(years=1, days=10))
 
-        intent_end_date = clock.date
-        intents = get_stripe_payment_intents(intent_start_date, intent_end_date)
+        intents = get_stripe_payment_intents(
+            datetime.now(timezone.utc) - abs_tdelta(hours=1),
+            datetime.now(timezone.utc) + abs_tdelta(hours=1),
+        )
         filtered_intents = self.filter_intents_on_customers(intents, seen_members)
 
         assert len(filtered_intents) == 2
-        self.assert_payment_intents(member.member_id, filtered_intents, intent_start_date, intent_end_date)
+        self.assert_payment_intents(member.member_id, filtered_intents)

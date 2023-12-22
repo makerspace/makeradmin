@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from typing import Any, Dict, List
 from unittest import skipIf
 import math
+import time
 
 import membership.models
 import shop.models
@@ -11,7 +12,7 @@ import messages.models
 import core.models
 from service.db import db_session
 from shop.stripe_constants import CURRENCY, MakerspaceMetadataKeys, PaymentIntentStatus
-from shop.stripe_customer import delete_stripe_customer
+from shop.stripe_customer import delete_stripe_customer, get_and_sync_stripe_customer
 from shop.stripe_util import convert_from_stripe_amount, convert_to_stripe_amount
 from membership.models import Member
 from shop.models import Transaction, StripePending
@@ -20,6 +21,7 @@ from shop.stripe_payment_intent import (
     convert_completed_stripe_intents_to_payments,
     pay_with_stripe,
 )
+from shop.stripe_util import retry
 import stripe
 from stripe import CardError
 from test_aid.test_base import FlaskTestBase, ShopTestMixin
@@ -208,3 +210,64 @@ class StripePaymentIntentTest(FlaskTestBase):
                 assert filtered_intents[transaction_id].status != PaymentIntentStatus.SUCCEEDED.value
                 assert filtered_intents[transaction_id].latest_charge.balance_transaction is None
         assert len(test_transactions) == 0
+
+    def test_get_payment_intent_date_range(self) -> None:
+        # This test is a bit weird because we can't actually set the created time of a stripe payment intent
+        member = self.db.create_member()
+        self.seen_members.append(member)
+        customer = get_and_sync_stripe_customer(member)
+
+        test_intents_in_range: List[str] = []
+        test_intents_out_of_range: List[str] = []
+        transaction_id = 1
+
+        stripe_intent = retry(
+            lambda: stripe.PaymentIntent.create(
+                amount=convert_to_stripe_amount(100),
+                currency=CURRENCY,
+                customer=customer.id,
+                metadata={MakerspaceMetadataKeys.TRANSACTION_IDS.value: str(transaction_id)},
+            )
+        )
+        transaction_id += 1
+        test_intents_out_of_range.append(stripe_intent.id)
+        time.sleep(5)
+
+        start = datetime.now(timezone.utc)
+        time.sleep(5)
+
+        for i in range(2):
+            stripe_intent = retry(
+                lambda: stripe.PaymentIntent.create(
+                    amount=convert_to_stripe_amount(100),
+                    currency=CURRENCY,
+                    customer=customer.id,
+                    metadata={MakerspaceMetadataKeys.TRANSACTION_IDS.value: str(transaction_id)},
+                )
+            )
+            test_intents_in_range.append(stripe_intent.id)
+            time.sleep(5)
+            transaction_id += 1
+
+        end = datetime.now(timezone.utc)
+        time.sleep(5)
+
+        stripe_intent = retry(
+            lambda: stripe.PaymentIntent.create(
+                amount=convert_to_stripe_amount(100),
+                currency=CURRENCY,
+                customer=customer.id,
+                metadata={MakerspaceMetadataKeys.TRANSACTION_IDS.value: str(transaction_id)},
+            )
+        )
+        test_intents_out_of_range.append(stripe_intent.id)
+
+        intents = get_stripe_payment_intents(start, end)
+        filtered_intents = self.filter_intents_on_customers(intents)
+
+        assert len(filtered_intents) == len(test_intents_in_range)
+        for intent in filtered_intents.values():
+            assert intent.created >= start.timestamp()
+            assert intent.created <= end.timestamp()
+            assert intent.id in test_intents_in_range
+            assert not intent.id in test_intents_out_of_range
