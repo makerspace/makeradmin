@@ -232,7 +232,7 @@ class TransactionAccount(Base):
     __tablename__ = "webshop_transaction_accounts"
 
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
-    account = Column(Integer, nullable=False, unique=True)
+    account = Column(String(100), nullable=False)
     description = Column(String(255), nullable=False)
     display_order = Column(Integer, nullable=False, unique=True)
     created_at = Column(DateTime, server_default=func.now())
@@ -247,7 +247,7 @@ class TransactionCostcenter(Base):
     __tablename__ = "webshop_transaction_cost_centers"
 
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
-    cost_center = Column(String(100), nullable=False, unique=True)
+    cost_center = Column(String(100), nullable=False)
     description = Column(String(255), nullable=False)
     display_order = Column(Integer, nullable=False, unique=True)
     created_at = Column(DateTime, server_default=func.now())
@@ -263,8 +263,8 @@ class ProductAccountsCostCenters(Base):
 
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
     product_id = Column(Integer, ForeignKey("webshop_products.id"), nullable=False)
-    account_id = Column(Integer, ForeignKey("webshop_transaction_accounts.id"), nullable=False)
-    cost_center_id = Column(Integer, ForeignKey("webshop_transaction_cost_centers.id"), nullable=False)
+    account_id = Column(Integer, ForeignKey("webshop_transaction_accounts.id"), nullable=True)
+    cost_center_id = Column(Integer, ForeignKey("webshop_transaction_cost_centers.id"), nullable=True)
     debits = Column(Numeric(10, 2), nullable=False, server_default=("0"))
     credits = Column(Numeric(10, 2), nullable=False, server_default=("0"))
 

@@ -368,7 +368,7 @@ def create_shop_accounts_cost_centers() -> None:
         accounts.append(
             get_or_create(
                 TransactionAccount,
-                account=4000 + account_id,
+                account=str(4000 + account_id),
                 defaults=dict(
                     display_order=account_id,
                     description=f"Account {account_id}",
