@@ -402,7 +402,14 @@ def create_shop_accounts_cost_centers() -> None:
                     product_id=product.id,
                     account_id=account.id,
                     cost_center_id=cost_center.id,
-                    defaults=dict(debits=debits, credits=credits),
+                    defaults=dict(fraction=debits, type=ProductAccountsCostCenters.DEBIT),
+                )
+                get_or_create(
+                    ProductAccountsCostCenters,
+                    product_id=product.id,
+                    account_id=account.id,
+                    cost_center_id=cost_center.id,
+                    defaults=dict(fraction=credits, type=ProductAccountsCostCenters.CREDIT),
                 )
 
     db_session.commit()
