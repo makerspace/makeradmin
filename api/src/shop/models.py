@@ -261,12 +261,15 @@ class TransactionCostcenter(Base):
 class ProductAccountsCostCenters(Base):
     __tablename__ = "webshop_product_accounting"
 
+    DEBIT = "debit"
+    CREDIT = "credit"
+
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
     product_id = Column(Integer, ForeignKey("webshop_products.id"), nullable=False)
     account_id = Column(Integer, ForeignKey("webshop_transaction_accounts.id"), nullable=True)
     cost_center_id = Column(Integer, ForeignKey("webshop_transaction_cost_centers.id"), nullable=True)
-    debits = Column(Numeric(10, 2), nullable=False, server_default=("0"))
-    credits = Column(Numeric(10, 2), nullable=False, server_default=("0"))
+    fraction = Column(Numeric(6, 3), nullable=False, server_default=("0.0"))
+    type = Column(Enum(DEBIT, CREDIT), nullable=False)
 
     product = relationship(Product, backref="accounts_cost_centers")
     account = relationship(TransactionAccount, backref="accounts_cost_centers")
