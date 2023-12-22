@@ -6,7 +6,7 @@ from basic_types.enums import PriceLevel
 
 from membership.models import Member, Span
 from messages.models import Message
-from shop.models import ProductAction, Transaction
+from shop.models import ProductAction, Transaction, TransactionContent
 from test_aid.test_util import random_str
 import re
 
@@ -30,6 +30,8 @@ class ObjFactory:
         self.message = None
         self.phone_request = None
         self.transaction = None
+        self.transaction_content = None
+
         seed()
 
     def create_member(self, **kwargs) -> Dict[str, Any]:
@@ -157,6 +159,19 @@ class ObjFactory:
         obj.update(**kwargs)
         self.transaction = obj
         return self.transaction
+
+    def create_transaction_content(self, **kwargs) -> TransactionContent:
+        transaction_id = kwargs.pop("transaction_id", None) or (self.transaction and self.transaction["id"])
+        product_id = kwargs.pop("product_id", None) or (self.product and self.product["id"])
+        obj = dict(
+            transaction_id=transaction_id,
+            product_id=product_id,
+            count=1,
+            amount=100.0,
+        )
+        obj.update(**kwargs)
+        self.transaction_content = obj
+        return self.transaction_content
 
 
 def random_phone_number() -> str:

@@ -1,3 +1,4 @@
+from logging import getLogger
 from dataclasses import dataclass
 from typing import List, Dict, Optional, Tuple
 from decimal import Decimal
@@ -15,21 +16,24 @@ from shop.models import (
 )
 from shop.stripe_payment_intent import CompletedPayment
 
+logger = getLogger("makeradmin")
 
-@dataclass(frozen=True)
+
+@dataclass()
 class AmountPerAccountAndCostCenter:
     amount: Decimal
     date: datetime
-    account: int
-    cost_center: str
+    account: str
+    type: str  # TODO fix
+    cost_center: str | None
 
 
 @dataclass()
 class AccountCostCenter:
-    acccount: int
-    cost_center: str
-    debit: Decimal
-    credit: Decimal
+    acccount: str
+    cost_center: str | None
+    type: str  # TODO fix this
+    fraction: Decimal
 
 
 class ProductToAccountCostCenter:
@@ -51,8 +55,7 @@ class ProductToAccountCostCenter:
                     AccountCostCenter(
                         product_info.account.account,
                         product_info.cost_center.cost_center,
-                        product_info.debit,
-                        product_info.credit,
+                        product_info.fraction,
                     )
                 )
 
@@ -80,15 +83,27 @@ def diff_transactions_and_completed_payments(
     return unmatched_data
 
 
-def add_accounting_to_transactions(
-    transactions: List[Transaction],
-    completed_payments: List[CompletedPayment],  # TODO probably dont need completed_payments
-) -> List[AmountPerAccountAndCostCenter]:
+def split_transactions_over_accounts(transactions: List[Transaction]) -> List[AmountPerAccountAndCostCenter]:
     product_to_accounting = ProductToAccountCostCenter()
+    transactions_with_accounting: Dict[Tuple[str, str], AmountPerAccountAndCostCenter] = []
 
-    # TODO query TransactionContent for products somewhere
+    for transaction in transactions:
+        logger.info(f"transaction: {transaction}")
+        for product in transaction.contents:
+            logger.info(f"product: {product}")
+            product_accounting = product_to_accounting.get_account_cost_center(product.id)
+            logger.info(f"product_accounting: {product_accounting}")
+            for accounting in product_accounting:
+                amount_to_add = accounting.fraction * transaction.amount  # TODO rounding errors?
+                key = {accounting.acccount, accounting.cost_center}
+                if key in transactions_with_accounting:
+                    transactions_with_accounting[key].amount += amount_to_add
+                else:
+                    transactions_with_accounting[key] = AmountPerAccountAndCostCenter(
+                        amount=amount_to_add,
+                        date=transaction.created_at,
+                        account=accounting.acccount,
+                        cost_center=accounting.cost_center,
+                    )
 
-    transactions_with_accounting: List[AmountPerAccountAndCostCenter] = []
-    for payment in completed_payments:
-        pass  # TODO
-    return transactions_with_accounting
+    return transactions_with_accounting.values()
