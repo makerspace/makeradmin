@@ -193,6 +193,7 @@ def stripe_invoice_event(subtype: EventSubtype, event: stripe.Event, current_tim
                     status=TransactionAction.PENDING,
                 )
             )
+
             db_session.flush()
 
             transaction_ids.append(transaction.id)

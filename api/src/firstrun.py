@@ -294,7 +294,12 @@ def create_shop_transactions() -> None:
             transaction = get_or_create(
                 Transaction,
                 id=index,
-                defaults=dict(member_id=1, amount=product.price, status="completed", created_at=test_date),
+                defaults=dict(
+                    member_id=1,
+                    amount=product.price,
+                    status="completed",
+                    created_at=test_date,
+                ),
             )
             transaction_content = get_or_create(
                 TransactionContent,
@@ -308,6 +313,55 @@ def create_shop_transactions() -> None:
             )
             index += 1
 
+    # A transaction that is pending
+    product = products[0]
+    transaction = get_or_create(
+        Transaction,
+        id=index,
+        defaults=dict(
+            member_id=1,
+            amount=product.price,
+            status="pending",
+            created_at=test_date,
+        ),
+    )
+    transaction_content = get_or_create(
+        TransactionContent,
+        id=index,
+        defaults=dict(
+            transaction_id=transaction.id,
+            product_id=product.id,
+            count=1,
+            amount=product.price,
+        ),
+    )
+    index += 1
+
+    # A failed transaction
+    product = products[1]
+    transaction = get_or_create(
+        Transaction,
+        id=index,
+        defaults=dict(
+            member_id=1,
+            amount=product.price,
+            status="failed",
+            created_at=test_date,
+        ),
+    )
+    transaction_content = get_or_create(
+        TransactionContent,
+        id=index,
+        defaults=dict(
+            transaction_id=transaction.id,
+            product_id=product.id,
+            count=1,
+            amount=product.price,
+        ),
+    )
+    index += 1
+
+    # A transaction with a membership
     membership_prod = get_or_create(Product, name="Base membership")
     transaction = get_or_create(
         Transaction,
@@ -341,7 +395,12 @@ def create_shop_transactions() -> None:
     transaction = get_or_create(
         Transaction,
         id=index,
-        defaults=dict(member_id=None, amount=100, status="completed", created_at=datetime.now()),
+        defaults=dict(
+            member_id=None,
+            amount=100,
+            status="completed",
+            created_at=datetime.now(),
+        ),
     )
 
     # TODO this should probabl be associated with some sort of gift card product later

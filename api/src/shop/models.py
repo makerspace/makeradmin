@@ -132,7 +132,7 @@ class Transaction(Base):
     stripe_pending = relationship("StripePending")
 
     def __repr__(self) -> str:
-        return f"Transaction(id={self.id}, amount={self.amount}, status={self.status})"
+        return f"Transaction(id={self.id}, amount={self.amount}, status={self.status}, created_at={self.created_at})"
 
 
 class TransactionContent(Base):
