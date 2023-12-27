@@ -11,7 +11,7 @@ sudo adduser $(whoami) docker
 You need to sign out and sign back in again for changes to take effect. 
 
 ### Python
-Makeradmin uses Python 3.10.
+Makeradmin uses Python 3.11.
 
 ```bash
 sudo apt-get install python3.10-dev python3.10-doc python3-pip
