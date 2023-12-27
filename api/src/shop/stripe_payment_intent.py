@@ -1,7 +1,10 @@
 from dataclasses import dataclass
+from decimal import Decimal
+from datetime import datetime, timezone, date
+from time import mktime
 from enum import Enum
 from logging import getLogger
-from typing import Optional
+from typing import Dict, Optional, List
 from typing_extensions import Never
 from dataclasses_json import DataClassJsonMixin
 import stripe
@@ -9,7 +12,6 @@ from stripe import InvalidRequestError, CardError
 
 from stripe import PaymentIntent
 from membership.models import Member
-from shop.stripe_customer import get_and_sync_stripe_customer
 from service.db import db_session
 from service.error import InternalServerError, EXCEPTION, BadRequest
 from shop.models import Transaction, StripePending
@@ -20,7 +22,8 @@ from shop.stripe_constants import (
     CURRENCY,
     SetupFutureUsage,
 )
-from shop.stripe_util import retry, convert_to_stripe_amount, replace_default_payment_method
+from shop.stripe_customer import get_and_sync_stripe_customer
+from shop.stripe_util import retry, convert_to_stripe_amount, convert_from_stripe_amount, replace_default_payment_method
 from shop.transactions import (
     PaymentFailed,
     payment_success,
@@ -56,6 +59,16 @@ class PartialPayment(DataClassJsonMixin):
     # Payment needs additional actions to complete if this is non-null.
     # If it is None then the payment is complete.
     action_info: Optional[PaymentAction]
+
+
+@dataclass(frozen=True)
+class CompletedPayment(DataClassJsonMixin):
+    """Used for bookkeeping for old transactions that are already completed"""
+
+    transaction_id: int
+    amount: Decimal
+    created: datetime
+    fee: Decimal
 
 
 def create_action_required_response(transaction: Transaction, payment_intent: PaymentIntent) -> PaymentAction:
@@ -151,8 +164,8 @@ def confirm_stripe_payment_intent(transaction_id: int) -> PartialPayment:
     )
 
 
-def pay_with_stripe(transaction: Transaction, payment_method_id: str, setup_future_usage: bool) -> None:
-    """Handle stripe payment, Returns dict containing data for further processing customer action or None."""
+def pay_with_stripe(transaction: Transaction, payment_method_id: str, setup_future_usage: bool) -> stripe.PaymentIntent:
+    """Handle stripe payment"""
 
     try:
         member = db_session.query(Member).get(transaction.member_id)
@@ -160,13 +173,13 @@ def pay_with_stripe(transaction: Transaction, payment_method_id: str, setup_futu
         stripe_customer = get_and_sync_stripe_customer(member)
         assert stripe_customer is not None
 
+        amount = convert_to_stripe_amount(transaction.amount)
         payment_intent = retry(
             lambda: stripe.PaymentIntent.create(
                 payment_method=payment_method_id,
-                amount=convert_to_stripe_amount(transaction.amount),
+                amount=amount,
                 currency=CURRENCY,
                 customer=stripe_customer.stripe_id,
-                description=f"charge for transaction id {transaction.id}",
                 confirmation_method="manual",
                 confirm=True,
                 # One might think that off_session could be set to true to make payments possible without
@@ -187,5 +200,40 @@ def pay_with_stripe(transaction: Transaction, payment_method_id: str, setup_futu
         logger.info(
             f"created stripe payment_intent for transaction {transaction.id}, payment_intent id {payment_intent.id}"
         )
+        return payment_intent
     except InvalidRequestError as e:
         raise_from_stripe_invalid_request_error(e)
+
+
+def get_stripe_payment_intents(start_date: date, end_date: date) -> List[stripe.PaymentIntent]:
+    expand = ["data.latest_charge.balance_transaction"]
+    created = {"gte": int(mktime(start_date.timetuple())), "lte": int(mktime(end_date.timetuple()))}
+
+    stripe_intents = retry(lambda: stripe.PaymentIntent.list(limit=100, created=created, expand=expand))
+    payments: List[stripe.PaymentIntent] = []
+
+    # Loop over the intents and store them. We need to loop to deal with pagination
+    for intent in stripe_intents.auto_paging_iter():
+        payments.append(intent)
+    return payments
+
+
+def convert_completed_stripe_intents_to_payments(
+    stripe_intents: List[PaymentIntent],
+) -> Dict[int, CompletedPayment] | None:
+    payments: Dict[int, CompletedPayment] = {}
+    for intent in stripe_intents:
+        if intent.status != PaymentIntentStatus.SUCCEEDED:
+            continue
+
+        charge = intent.latest_charge
+        assert charge.balance_transaction is not None
+        assert charge.paid
+        id = int(intent.metadata[MakerspaceMetadataKeys.TRANSACTION_IDS.value])
+        payments[id] = CompletedPayment(
+            transaction_id=id,
+            amount=convert_from_stripe_amount(charge.amount),
+            created=datetime.fromtimestamp(intent.created, timezone.utc),
+            fee=convert_from_stripe_amount(charge.balance_transaction.fee),
+        )
+    return payments

@@ -33,7 +33,7 @@ class StripeCustomerTest(ShopTestMixin, FlaskTestBase):
 
     models = [membership.models, messages.models, shop.models, core.models]
 
-    @skipIf(not STRIPE_PRIVATE_KEY, "stripe util tests require stripe api key in .env file")
+    @skipIf(not STRIPE_PRIVATE_KEY, "stripe customer tests require stripe api key in .env file")
     def setUp(self) -> None:
         self.seen_members: List[Member] = []
 

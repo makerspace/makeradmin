@@ -159,7 +159,7 @@ def create_membership_products() -> None:
         ProductCategory, name="Membership", defaults=dict(display_order=display_order_category + 1)
     )
     subscription_category = get_or_create(
-        ProductCategory, name="Membership", defaults=dict(display_order=display_order_category + 1)
+        ProductCategory, name="Subscriptions", defaults=dict(display_order=display_order_category + 1)
     )
 
     display_order_product = db_session.query(func.max(Product.display_order)).scalar() or 0
@@ -208,7 +208,7 @@ def create_membership_products() -> None:
         ),
     )
     get_or_create(ProductAction, product_id=starter_product.id, value=60, action_type="add_labaccess_days")
-    get_or_create(ProductAction, product_id=starter_product.id, value=365, action_type="add_labaccess_days")
+    get_or_create(ProductAction, product_id=starter_product.id, value=365, action_type="add_membership_days")
 
     starter_access_product = get_or_create(
         Product,
@@ -356,7 +356,12 @@ def create_shop_transactions() -> None:
             transaction = get_or_create(
                 Transaction,
                 id=index,
-                defaults=dict(member_id=1, amount=product.price, status="completed", created_at=test_date),
+                defaults=dict(
+                    member_id=1,
+                    amount=product.price,
+                    status="completed",
+                    created_at=test_date,
+                ),
             )
             transaction_content = get_or_create(
                 TransactionContent,
@@ -370,20 +375,69 @@ def create_shop_transactions() -> None:
             )
             index += 1
 
-    membership_product = get_or_create(Product, name="Base membership")
+    # A transaction that is pending
+    product = products[0]
     transaction = get_or_create(
         Transaction,
         id=index,
-        defaults=dict(member_id=1, amount=membership_product.price, status="completed", created_at=test_date),
+        defaults=dict(
+            member_id=1,
+            amount=product.price,
+            status="pending",
+            created_at=test_date,
+        ),
     )
     transaction_content = get_or_create(
         TransactionContent,
         id=index,
         defaults=dict(
             transaction_id=transaction.id,
-            product_id=membership_product.id,
+            product_id=product.id,
             count=1,
-            amount=membership_product.price,
+            amount=product.price,
+        ),
+    )
+    index += 1
+
+    # A failed transaction
+    product = products[1]
+    transaction = get_or_create(
+        Transaction,
+        id=index,
+        defaults=dict(
+            member_id=1,
+            amount=product.price,
+            status="failed",
+            created_at=test_date,
+        ),
+    )
+    transaction_content = get_or_create(
+        TransactionContent,
+        id=index,
+        defaults=dict(
+            transaction_id=transaction.id,
+            product_id=product.id,
+            count=1,
+            amount=product.price,
+        ),
+    )
+    index += 1
+
+    # A transaction with a membership
+    membership_prod = get_or_create(Product, name="Base membership")
+    transaction = get_or_create(
+        Transaction,
+        id=index,
+        defaults=dict(member_id=1, amount=membership_prod.price, status="completed", created_at=datetime.now()),
+    )
+    transaction_content = get_or_create(
+        TransactionContent,
+        id=index,
+        defaults=dict(
+            transaction_id=transaction.id,
+            product_id=membership_prod.id,
+            count=1,
+            amount=membership_prod.price,
         ),
     )
     get_or_create(
@@ -394,7 +448,7 @@ def create_shop_transactions() -> None:
             action_type="add_labaccess_days",
             value=10,
             status="completed",
-            completed_at=test_date,
+            completed_at=datetime.now(),
         ),
     )
     index += 1
@@ -403,7 +457,12 @@ def create_shop_transactions() -> None:
     transaction = get_or_create(
         Transaction,
         id=index,
-        defaults=dict(member_id=None, amount=100, status="completed", created_at=datetime.now()),
+        defaults=dict(
+            member_id=None,
+            amount=100,
+            status="completed",
+            created_at=datetime.now(),
+        ),
     )
 
     # TODO this should be associated with some sort of gift card product later
@@ -430,7 +489,7 @@ def create_shop_accounts_cost_centers() -> None:
         accounts.append(
             get_or_create(
                 TransactionAccount,
-                account=4000 + account_id,
+                account=str(4000 + account_id),
                 defaults=dict(
                     display_order=account_id,
                     description=f"Account {account_id}",
@@ -464,7 +523,14 @@ def create_shop_accounts_cost_centers() -> None:
                     product_id=product.id,
                     account_id=account.id,
                     cost_center_id=cost_center.id,
-                    defaults=dict(debits=debits, credits=credits),
+                    defaults=dict(fraction=debits, type=ProductAccountsCostCenters.DEBIT),
+                )
+                get_or_create(
+                    ProductAccountsCostCenters,
+                    product_id=product.id,
+                    account_id=account.id,
+                    cost_center_id=cost_center.id,
+                    defaults=dict(fraction=credits, type=ProductAccountsCostCenters.CREDIT),
                 )
 
     db_session.commit()
@@ -473,17 +539,29 @@ def create_shop_accounts_cost_centers() -> None:
 def create_shop_gift_cards() -> None:
     banner(YELLOW, "Creating Fake 'Gift Cards' and 'Gift Card & Product Mappings'")
 
-    gift_card = get_or_create(
-        GiftCard, amount=299.00, validation_code=12989519, email="test@fake.com", status="activated"
-    )
-
-    # Get existing product with ID: 64 (Makerspace access starter pack)
+    # Get existing product Makerspace access starter pack
     product = get_or_create(
         Product,
         name="Makerspace access starter pack",
     )
 
-    get_or_create(ProductGiftCardMapping, gift_card_id=gift_card.id, product_id=product.id)
+    for i in range(2):
+        status = "valid" if i % 2 == 0 else "used"
+        gift_card = get_or_create(
+            GiftCard,
+            amount=product.price,
+            validation_code=str(129895190 + i),
+            email="test@fake.com",
+            status=status,
+        )
+
+        get_or_create(
+            ProductGiftCardMapping,
+            gift_card_id=gift_card.id,
+            product_id=product.id,
+            product_quantity=1,
+            amount=product.price,
+        )
 
     db_session.commit()
 

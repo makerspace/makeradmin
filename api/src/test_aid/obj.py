@@ -7,7 +7,7 @@ from basic_types.enums import PriceLevel
 
 from membership.models import Member, Span
 from messages.models import Message
-from shop.models import ProductAction
+from shop.models import ProductAction, Transaction
 from test_aid.test_util import random_str
 import re
 
@@ -32,6 +32,7 @@ class ObjFactory:
         self.span = None
         self.message = None
         self.phone_request = None
+        self.transaction = None
         seed()
 
     def create_member(self, **kwargs) -> Dict[str, Any]:
@@ -148,6 +149,17 @@ class ObjFactory:
         obj.update(**kwargs)
         self.message = obj
         return self.message
+
+    def create_transaction(self, **kwargs) -> Transaction:
+        member_id = kwargs.pop("member_id", None) or (self.member and self.member["member_id"])
+        obj = dict(
+            status=Transaction.COMPLETED,
+            amount=100.0,
+            member_id=member_id,
+        )
+        obj.update(**kwargs)
+        self.transaction = obj
+        return self.transaction
 
 
 def random_phone_number() -> str:

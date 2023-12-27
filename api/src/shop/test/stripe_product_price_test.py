@@ -105,7 +105,7 @@ class StripeProductPriceTest(ShopTestMixin, FlaskTestBase):
     models = [membership.models, messages.models, shop.models, core.models]
     base_stripe_id = 5100
 
-    @skipIf(not STRIPE_PRIVATE_KEY, "stripe util tests require stripe api key in .env file")
+    @skipIf(not STRIPE_PRIVATE_KEY, "stripe products and prices tests require stripe api key in .env file")
     def setUp(self) -> None:
         self.seen_products: List[Product] = []
         self.subscription_category = self.db.create_category(name="Subscriptions")
