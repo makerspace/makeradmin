@@ -5,8 +5,9 @@ from faker import Faker
 from basic_types.enums import PriceLevel
 
 from membership.models import Member, Span
+from box_terminator.models import StorageItem, StorageMessage, StorageType, StorageMessageType
 from messages.models import Message
-from shop.models import ProductAction, Transaction
+from shop.models import ProductAction
 from test_aid.test_util import random_str
 import re
 
@@ -29,7 +30,10 @@ class ObjFactory:
         self.span = None
         self.message = None
         self.phone_request = None
-        self.transaction = None
+        self.storage_message_type = None
+        self.storage_message = None
+        self.storage_type: Optional[StorageType] = None
+        self.storage_item = None
         seed()
 
     def create_member(self, **kwargs) -> Dict[str, Any]:
@@ -147,16 +151,51 @@ class ObjFactory:
         self.message = obj
         return self.message
 
-    def create_transaction(self, **kwargs) -> Transaction:
-        member_id = kwargs.pop("member_id", None) or (self.member and self.member["member_id"])
+    def create_storage_message_type(self, **kwargs) -> StorageItem:
         obj = dict(
-            status=Transaction.COMPLETED,
-            amount=100.0,
-            member_id=member_id,
+            message_type=f"message_type-{random_str(12)}",
+            display_order=randint(int(1e8), int(9e8)),
         )
-        obj.update(**kwargs)
-        self.transaction = obj
-        return self.transaction
+        obj.update(kwargs)
+        self.storage_message_type = obj
+        return self.storage_message_type
+
+    def create_storage_message(self, **kwargs) -> StorageItem:
+        member_id = kwargs.pop("member_id", None) or (self.member and self.member["id"])
+        storage_message_type_id = kwargs.pop("storage_message_type_id", None) or (
+            self.storage_message_type and self.storage_message_type["id"]
+        )
+        item_id = kwargs.pop("storage_item_id", None) or (self.storage_item and self.storage_item["id"])
+        obj = dict(
+            member_id=member_id,
+            storage_message_type_id=storage_message_type_id,
+            storage_item_id=item_id,
+        )
+        obj.update(kwargs)
+        self.storage_message = obj
+        return self.storage_message
+
+    def create_storage_type(self, **kwargs) -> StorageItem:
+        obj = dict(
+            storage_type=f"storage_type-{random_str(12)}",
+            display_order=randint(int(1e8), int(9e8)),
+            has_fixed_end_date=False,
+        )
+        obj.update(kwargs)
+        self.storage_type = obj
+        return self.storage_type
+
+    def create_storage_item(self, **kwargs) -> StorageItem:
+        member_id = kwargs.pop("member_id", None) or (self.member and self.member["id"])
+        storage_type_id = kwargs.pop("storage_type_id", None) or (self.storage_type and self.storage_type["id"])
+        obj = dict(
+            item_label_id=randint(int(1e8), int(9e8)),
+            member_id=member_id,
+            storage_type_id=storage_type_id,
+        )
+        obj.update(kwargs)
+        self.storage_item = obj
+        return self.storage_item
 
 
 def random_phone_number() -> str:
