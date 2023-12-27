@@ -4,6 +4,7 @@ import { UNAUTHORIZED, get_error } from "./common";
 import { JSX } from "preact/jsx-runtime";
 import { LoadCurrentAccessInfo, LoadCurrentMemberGroups, LoadCurrentMemberInfo, LoadCurrentMembershipInfo, access_t, date_t, member_t, membership_t } from "./member_common";
 import { render } from "preact";
+import { render as jsx_to_string } from "preact-render-to-string";
 import { useEffect, useMemo, useState } from "preact/hooks";
 import { show_phone_number_dialog } from "./change_phone";
 import { SubscriptionInfo, SubscriptionType, activateSubscription, cancelSubscription, getCurrentSubscriptions } from "./subscriptions";
@@ -571,7 +572,10 @@ common.documentLoaded().then(() => {
             login.render_login(root, null, null);
         } else {
             console.log(e);
-            UIkit.modal.alert("<h2>Failed to load member info</h2>");
+            UIkit.modal.alert(jsx_to_string(<>
+                <h2>Failed to load member info</h2>
+                <p>{e.toString()}</p>
+            </>));
         }
     });
 });
