@@ -7,7 +7,8 @@ from test_aid.obj import ObjFactory
 
 from core.models import AccessToken, PasswordResetToken
 from core.service_users import TEST_SERVICE_USER_ID
-from membership.models import Member, Group, Permission, Span, Key, Box, PhoneNumberChangeRequest
+from membership.models import Member, Group, Permission, Span, Key, PhoneNumberChangeRequest
+from box_terminator.models import StorageItem, StorageMessage, StorageType, StorageMessageType
 from messages.models import Message
 from service.db import db_session
 from shop.models import ProductCategory, Product, ProductAction
@@ -34,12 +35,15 @@ class DbFactory:
         self.key: Optional[Key] = None
         self.permission: Optional[Permission] = None
         self.message: Optional[Message] = None
-        self.box: Optional[Box] = None
         self.category: Optional[ProductCategory] = None
         self.product: Optional[Product] = None
         self.action: Optional[ProductAction] = None
         self.password_reset_token: Optional[PasswordResetToken] = None
         self.phone_request: Optional[PhoneNumberChangeRequest] = None
+        self.storage_message_type: Optional[StorageMessageType] = None
+        self.storage_message: Optional[StorageMessage] = None
+        self.storage_type: Optional[StorageType] = None
+        self.storage_item: Optional[StorageItem] = None
 
     def create_access_token(self, **kwargs) -> AccessToken:
         obj = dict(
@@ -70,19 +74,6 @@ class DbFactory:
         db_session.add(self.phone_request)
         db_session.commit()
         return self.phone_request
-
-    def create_box(self, **kwargs) -> Box:
-        assert self.member is not None
-        obj = dict(
-            member_id=self.member.member_id,
-            box_label_id=randint(int(1e9), int(9e9)),
-            session_token=random_str(),
-        )
-        obj.update(kwargs)
-        self.box = Box(**obj)
-        db_session.add(self.box)
-        db_session.commit()
-        return self.box
 
     def create_group(self, **kwargs) -> Group:
         assert self.obj is not None
@@ -216,3 +207,49 @@ class DbFactory:
         db_session.add(self.password_reset_token)
         db_session.commit()
         return self.password_reset_token
+
+    def create_storage_message_type(self, **kwargs) -> StorageMessageType:
+        assert self.obj is not None
+
+        obj = self.obj.create_storage_message_type(**kwargs)
+        self.storage_message_type = StorageMessageType(**obj)
+        db_session.add(self.storage_message_type)
+        db_session.commit()
+        return self.storage_message_type
+
+    def create_storage_message(self, **kwargs) -> StorageMessage:
+        assert self.obj is not None
+        if self.storage_message_type:
+            kwargs.setdefault("storage_message_id", self.storage_message_type.id)
+        if self.member:
+            kwargs.setdefault("member_id", self.member.id)
+        if self.storage_item:
+            kwargs.setdefault("storage_item_id", self.storage_item.id)
+
+        obj = self.obj.create_storage_message(**kwargs)
+        self.storage_message = StorageMessage(**obj)
+        db_session.add(self.storage_message)
+        db_session.commit()
+        return self.storage_message
+
+    def create_storage_type(self, **kwargs) -> StorageType:
+        assert self.obj is not None
+
+        obj = self.obj.create_storage_type(**kwargs)
+        self.storage_type = StorageType(**obj)
+        db_session.add(self.storage_type)
+        db_session.commit()
+        return self.storage_type
+
+    def create_storage_item(self, **kwargs) -> StorageItem:
+        assert self.obj is not None
+        if self.storage_type:
+            kwargs.setdefault("storage_type_id", self.storage_type.id)
+        if self.member:
+            kwargs.setdefault("member_id", self.member.id)
+
+        obj = self.obj.create_storage_item(**kwargs)
+        self.storage_item = StorageItem(**obj)
+        db_session.add(self.storage_item)
+        db_session.commit()
+        return self.storage_item
