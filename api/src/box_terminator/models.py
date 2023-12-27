@@ -40,23 +40,7 @@ class StorageMessageType(Base):
     deleted_at = Column(DateTime)
 
     def __repr__(self) -> str:
-        return f"MessageType(id={self.id}, message_type={self.description})"
-
-
-class StorageMessage(Base):
-    __tablename__ = "storage_messages"
-
-    id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
-    member_id = Column(Integer, ForeignKey("membership_members.member_id"), nullable=False)  # TODO relationship?
-    storage_item_id = Column(BigInteger, ForeignKey("storage_items.id"), nullable=False)  # TODO relationship?
-    message_type_id = Column(Integer, ForeignKey("storage_message_types.id"), nullable=False)
-    message_at = Column(DateTime, server_default=func.now())
-
-    def __repr__(self):
-        return (
-            f"Message(id={self.id}, item_label_id={self.item_label_id}, member_id={self.member_id}"
-            f", message_at={self.message_at}, message_type_id={self.message_type_id})"
-        )
+        return f"MessageType(id={self.id}, message_type={self.description})"  # TODO
 
 
 class StorageType(Base):
@@ -72,7 +56,7 @@ class StorageType(Base):
     deleted_at = Column(DateTime)
 
     def __repr__(self) -> str:
-        return f"StorageType(id={self.id}, storage_type={self.description})"
+        return f"StorageType(id={self.id}, storage_type={self.description})"  # TODO
 
 
 class StorageItem(Base):
@@ -84,16 +68,33 @@ class StorageItem(Base):
     last_check_at = Column(DateTime, nullable=True)
     fixed_end_date = Column(DateTime, nullable=True)
     storage_type_id = Column(Integer, ForeignKey("storage_types.id"), nullable=False)
-    member = relationship(Member, backref="storage_items")
-    storage_type = relationship(StorageType, backref="storage_items")
-    storage_messages = relationship(
-        StorageMessage, backref="storage_items", order_by="StorageMessage.message_at.desc()"
-    )
 
-    def __repr__(self):
+    member = relationship(Member)
+    storage_type = relationship(StorageType, backref="storage_items")
+
+    def __repr__(self) -> str:
         return (
             f"Storage(id={self.id}, item_label_id={self.item_label_id}, member_id={self.member_id}"
             f", storage_type_id={self.storage_type_id}, last_check_at={self.last_check_at}, fixed_expire_date={self.fixed_end_date})"
+        )
+
+
+class StorageMessage(Base):
+    __tablename__ = "storage_messages"
+
+    id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
+    member_id = Column(Integer, ForeignKey("membership_members.member_id"), nullable=False)
+    storage_item_id = Column(BigInteger, ForeignKey("storage_items.id"), nullable=False)
+    message_type_id = Column(Integer, ForeignKey("storage_message_types.id"), nullable=False)
+    message_at = Column(DateTime, server_default=func.now())
+
+    member = relationship(Member)
+    storage_type = relationship("StorageItem", backref="storage_messages")
+
+    def __repr__(self) -> str:
+        return (
+            f"Message(id={self.id}, storage_item_id={self.storage_item_id}, member_id={self.member_id}"
+            f", message_at={self.message_at}, message_type_id={self.message_type_id})"
         )
 
 
