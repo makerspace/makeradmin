@@ -1,4 +1,3 @@
 requests
 pip
-docker-compose
 -r api/requirements.txt
