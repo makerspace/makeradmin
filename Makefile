@@ -35,8 +35,8 @@ dev-test:
 	(cd api/src && python3 -m pytest --workers auto -ra $(PYTEST_PARAMS))
 
 init-npm:
-	cd admin && npm install 
-	cd public && npm install 
+	cd admin && npm ci
+	cd public && npm ci
 
 init-pip:
 	python3 -m pip install --upgrade -r requirements.txt
