@@ -1,0 +1,7 @@
+# Downloaded files
+/admin/dist/css/*.almost-flat.css
+/admin/dist/css/react-select.css
+/public/static/uikit
+
+# Generated files
+**/package-lock.json

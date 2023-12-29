@@ -56,9 +56,11 @@ test-admin-js:
 firstrun: .env init build
 	$(COMPOSE) run api python3 ./firstrun.py
 
-format: format-python
+format: format-python format-webstuff
 format-python:
 	ruff format .
+format-webstuff:
+	npx prettier --write --cache .
 
 .PHONY: build firstrun init init-npm init-pip install run stop dev-test
-.PHONY: test-clean test dev format format-python
+.PHONY: test-clean test dev format format-python format-webstuff
