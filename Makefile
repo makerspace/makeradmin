@@ -59,6 +59,7 @@ firstrun: .env init build
 format: format-python format-webstuff
 format-python:
 	ruff format .
+	ruff check --fix
 format-webstuff:
 	npx prettier --write --cache .
 
