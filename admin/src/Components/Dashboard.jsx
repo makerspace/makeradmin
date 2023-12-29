@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 
 export default () => (
     <div className="uk-width-1-1">

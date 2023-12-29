@@ -1,11 +1,11 @@
-import React from 'react';
-import {withRouter} from "react-router";
+import React from "react";
+import { withRouter } from "react-router";
 import Quiz from "../Models/Quiz";
-import { browserHistory } from '../browser_history';
-import QuizEditForm from './QuizEditForm';
+import { browserHistory } from "../browser_history";
+import QuizEditForm from "./QuizEditForm";
 
 interface State {
-    quiz: null|Quiz;
+    quiz: null | Quiz;
 }
 
 class QuizAdd extends React.Component<{}, State> {
@@ -18,7 +18,7 @@ class QuizAdd extends React.Component<{}, State> {
 
     async save() {
         await this.quiz.save();
-        browserHistory.replace('/quiz/' + this.quiz.id);
+        browserHistory.replace("/quiz/" + this.quiz.id);
     }
 
     delete() {
@@ -35,7 +35,9 @@ class QuizAdd extends React.Component<{}, State> {
                 />
                 <div className="uk-margin-top">
                     <h2>Quizfrågor</h2>
-                    <p className="uk-float-left">Du kan lägga till frågor efter att du har skapat quizet</p>
+                    <p className="uk-float-left">
+                        Du kan lägga till frågor efter att du har skapat quizet
+                    </p>
                 </div>
             </>
         );

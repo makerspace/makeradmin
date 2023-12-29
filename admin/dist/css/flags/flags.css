@@ -1,4 +1,3 @@
-
 /*!
  * Generated with CSS Flag Sprite generator (https://www.flag-sprites.com/)
  */
@@ -6,9 +5,8 @@
     display: inline-block;
     width: 16px;
     height: 11px;
-    background: url('flags.png') no-repeat;
+    background: url("flags.png") no-repeat;
 }
-
 
 .flag.flag-gw {
     background-position: -144px -55px;

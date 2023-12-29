@@ -1,13 +1,14 @@
-import Base from './Base';
+import Base from "./Base";
 
 export default class Member extends Base {
-
     deleteConfirmMessage() {
         return `Are you sure you want to delete member ${this.firstname} ${this.lastname}?`;
     }
 
     canSave() {
-        return this.isDirty() && this.email.length > 0 && this.firstname.length > 0;
+        return (
+            this.isDirty() && this.email.length > 0 && this.firstname.length > 0
+        );
     }
 }
 
@@ -31,6 +32,6 @@ Member.model = {
         address_country: "se",
         labaccess_agreement_at: null,
         pending_activation: false,
-        price_level: 'normal',
+        price_level: "normal",
     },
 };

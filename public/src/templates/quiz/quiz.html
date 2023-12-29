@@ -1,22 +1,24 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
     <head>
         <title>Quiz - Stockholm Makerspace</title>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="stylesheet" href="{{ STATIC }}/uikit/css/uikit.min.css" />
         <link rel="stylesheet" href="{{ STATIC }}/style.css" />
-        <link href="https://fonts.googleapis.com/css2?family=Bitter:wght@600&display=swap" rel="stylesheet"> 
-        <script src='{{ STATIC }}/uikit/js/uikit.min.js'></script>
-        <script src='{{ STATIC }}/uikit/js/uikit-icons.min.js'></script>
+        <link
+            href="https://fonts.googleapis.com/css2?family=Bitter:wght@600&display=swap"
+            rel="stylesheet"
+        />
+        <script src="{{ STATIC }}/uikit/js/uikit.min.js"></script>
+        <script src="{{ STATIC }}/uikit/js/uikit-icons.min.js"></script>
         <script src="https://js.stripe.com/v3/"></script>
         {% include 'meta.html' %}
-        <script src='{{ STATIC }}/js/quiz.js'></script>
+        <script src="{{ STATIC }}/js/quiz.js"></script>
     </head>
     <body>
         <div id="root" class="quiz-background">
-            <div id="content" class="quizpage">
-            </div>
+            <div id="content" class="quizpage"></div>
         </div>
     </body>
 </html>

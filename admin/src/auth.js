@@ -1,13 +1,11 @@
-import {showError, showSuccess} from "./message";
-import {post} from "./gateway";
-
+import { showError, showSuccess } from "./message";
+import { post } from "./gateway";
 
 class Auth {
-
     getAccessToken() {
         return localStorage.token;
     }
-    
+
     setToken(token) {
         localStorage.token = token;
         this.onChange(true);
@@ -16,51 +14,70 @@ class Auth {
     getUsername() {
         return localStorage.username;
     }
-    
+
     setUsername(username) {
         localStorage.username = username;
         this.onChange(true);
     }
-    
+
     isLoggedIn() {
-        return typeof(this.getAccessToken()) !== "undefined";
+        return typeof this.getAccessToken() !== "undefined";
     }
 
     // Ask server to send a password reset email to the user.
     requestPasswordReset(user_identification) {
-        return post({url: "/oauth/request_password_reset", params: {user_identification}, errorMessage: "Error when sending", expectedDataStatus: 'ok'});
+        return post({
+            url: "/oauth/request_password_reset",
+            params: { user_identification },
+            errorMessage: "Error when sending",
+            expectedDataStatus: "ok",
+        });
     }
 
     // Reset the password.
     passwordReset(reset_token, unhashed_password) {
-        return post({url: "/oauth/password_reset", params: {unhashed_password, reset_token}, errorMessage: "Error when sending", expectedDataStatus: 'ok'});
+        return post({
+            url: "/oauth/password_reset",
+            params: { unhashed_password, reset_token },
+            errorMessage: "Error when sending",
+            expectedDataStatus: "ok",
+        });
     }
 
     login(username, password) {
-        fetch(config.apiBasePath + "/oauth/token",
-            {
-                body:    JSON.stringify({grant_type: "password", username, password}),
-                method:  "POST",
-                headers: {'Content-Type': 'application/json; charset=UTF-8'},
-            })
-            .then(response => {
+        fetch(config.apiBasePath + "/oauth/token", {
+            body: JSON.stringify({
+                grant_type: "password",
+                username,
+                password,
+            }),
+            method: "POST",
+            headers: { "Content-Type": "application/json; charset=UTF-8" },
+        })
+            .then((response) => {
                 if (response.status === 401) {
-                    return Promise.reject("Felaktigt användarnamn eller lösenord.");
+                    return Promise.reject(
+                        "Felaktigt användarnamn eller lösenord.",
+                    );
                 }
                 if (response.status === 429) {
-                    return Promise.reject("För många misslyckades inloggningar. Kontot spärrat i 60 minuter.");
+                    return Promise.reject(
+                        "För många misslyckades inloggningar. Kontot spärrat i 60 minuter.",
+                    );
                 }
                 if (response.status === 200) {
                     return response.json();
                 }
-            
-                return Promise.reject("Oväntad statuskod (" + response.status + ") från servern.");
+
+                return Promise.reject(
+                    "Oväntad statuskod (" + response.status + ") från servern.",
+                );
             })
-            .catch(msg => {
+            .catch((msg) => {
                 showError("<h2>Inloggningen misslyckades</h2>" + msg);
                 return Promise.reject(null);
             })
-            .then(data => {
+            .then((data) => {
                 this.setToken(data.access_token);
                 this.setUsername(username);
                 this.onChange(true);
@@ -72,51 +89,67 @@ class Auth {
         // Tell the server to delete the access token
         const token = this.getAccessToken();
         if (token) {
-            fetch(config.apiBasePath + "/oauth/token/" + token,
-                {
-                    method:  "DELETE",
-                    headers: {'Content-Type': 'application/json; charset=UTF-8', "Authorization": "Bearer " + token},
-                })
-                .then(() => null, () => null);
+            fetch(config.apiBasePath + "/oauth/token/" + token, {
+                method: "DELETE",
+                headers: {
+                    "Content-Type": "application/json; charset=UTF-8",
+                    Authorization: "Bearer " + token,
+                },
+            }).then(
+                () => null,
+                () => null,
+            );
         }
-        
+
         // Delete from localStorage and send user to login form.
         delete localStorage.token;
         this.onChange(false);
     }
 
     login_via_single_use_link(tag) {
-        fetch(config.apiBasePath + "/member/send_access_token",
-            {
-                body:    JSON.stringify({user_identification: tag}),
-                method:  "POST",
-                headers: {'Content-Type': 'application/json; charset=UTF-8'},
-            })
-            .then(response => response.json().then(responseData => ({response, responseData})))
-            .then(({response, responseData}) => {
+        fetch(config.apiBasePath + "/member/send_access_token", {
+            body: JSON.stringify({ user_identification: tag }),
+            method: "POST",
+            headers: { "Content-Type": "application/json; charset=UTF-8" },
+        })
+            .then((response) =>
+                response
+                    .json()
+                    .then((responseData) => ({ response, responseData })),
+            )
+            .then(({ response, responseData }) => {
                 if (response.status === 200) {
-                    showSuccess("Ett mail har skickats till dig med en inloggningslänk, använd den för att logga in.");
-                }
-                else if (responseData.status === "ambiguous") {
-                    showError("<h2>Inloggningen misslyckades</h2>Det finns flera medlemmar som matchar '" + tag + "'. Välj något som är mer unikt, t.ex email eller medlemsnummer.");
-                }
-                else if (responseData.status === "not found") {
+                    showSuccess(
+                        "Ett mail har skickats till dig med en inloggningslänk, använd den för att logga in.",
+                    );
+                } else if (responseData.status === "ambiguous") {
                     showError(
-                        "<h2>Inloggningen misslyckades</h2>Ingen medlem med det namnet, email eller medlemsnummer existerar.");
-                }
-                else {
-                    showError("<h2>Inloggningen misslyckades</h2>Tog emot ett oväntat svar från servern:<br><br>" + response.status + " " + response.statusText);
+                        "<h2>Inloggningen misslyckades</h2>Det finns flera medlemmar som matchar '" +
+                            tag +
+                            "'. Välj något som är mer unikt, t.ex email eller medlemsnummer.",
+                    );
+                } else if (responseData.status === "not found") {
+                    showError(
+                        "<h2>Inloggningen misslyckades</h2>Ingen medlem med det namnet, email eller medlemsnummer existerar.",
+                    );
+                } else {
+                    showError(
+                        "<h2>Inloggningen misslyckades</h2>Tog emot ett oväntat svar från servern:<br><br>" +
+                            response.status +
+                            " " +
+                            response.statusText,
+                    );
                 }
             })
             .catch(() => {
-                showError("<h2>Inloggningen misslyckades</h2>Kunde inte kommunicera med servern.");
+                showError(
+                    "<h2>Inloggningen misslyckades</h2>Kunde inte kommunicera med servern.",
+                );
             });
     }
-    
-    onChange() {
-    }
-}
 
+    onChange() {}
+}
 
 const auth = new Auth();
 
