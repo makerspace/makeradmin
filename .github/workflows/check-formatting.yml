@@ -10,6 +10,9 @@ on:
 
 jobs:
   ruff:
+    strategy:
+      matrix:
+        ruff_args: ["format --diff", "check"]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -23,7 +26,7 @@ jobs:
           pip install --user ruff
       - name: Check formatting
         run: |
-          ruff format --diff
+          ruff ${{ matrix.ruff_args }}
       - name: Inform about how to fix failure
         if: failure()
         run: |
