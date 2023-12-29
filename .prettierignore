@@ -5,3 +5,6 @@
 
 # Generated files
 **/package-lock.json
+
+# Jinja2 templates do not work well for some reason
+/api/src/templates/
