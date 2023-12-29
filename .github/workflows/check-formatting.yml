@@ -28,3 +28,21 @@ jobs:
         if: failure()
         run: |
           echo '::notice::To auto-fix the formatting error, run `make format`'
+  prettier:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18.x
+          cache: "npm"
+      - name: Install packages
+        run: |
+          npm install -g prettier
+      - name: Check formatting
+        run: |
+          npx prettier --check .
+      - name: Inform about how to fix failure
+        if: failure()
+        run: |
+          echo '::notice::To auto-fix the formatting error, run `make format`'
