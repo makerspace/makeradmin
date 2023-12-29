@@ -1,3 +1,4 @@
 requests
 pip
+ruff
 -r api/requirements.txt

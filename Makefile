@@ -56,4 +56,9 @@ test-admin-js:
 firstrun: .env init build
 	$(COMPOSE) run api python3 ./firstrun.py
 
-.PHONY: build firstrun init init-npm init-pip install run stop dev-test test-clean test dev
+format: format-python
+format-python:
+	ruff format .
+
+.PHONY: build firstrun init init-npm init-pip install run stop dev-test
+.PHONY: test-clean test dev format format-python
