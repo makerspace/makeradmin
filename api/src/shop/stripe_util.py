@@ -79,7 +79,7 @@ def convert_to_stripe_amount(amount: Decimal) -> int:
 
 def convert_from_stripe_amount(stripe_amount: int) -> Decimal:
     """Convert stripe amount to decimal amount and return it."""
-    amount = ((Decimal(stripe_amount) / STRIPE_CURRENTY_BASE)).quantize(Decimal("0.01"))
+    amount = (Decimal(stripe_amount) / STRIPE_CURRENTY_BASE).quantize(Decimal("0.01"))
     return amount
 
 

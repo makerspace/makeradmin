@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#import os
+# import os
 import argparse
 import shlex
 from datetime import datetime, date
@@ -26,9 +26,7 @@ class SIEVerificationLine(DataClassJsonMixin):
     amount: Decimal
     date: datetime = field(
         metadata=config(
-            encoder=datetime.isoformat,
-            decoder=datetime.fromisoformat,
-            mm_field=fields.DateTime(format='iso')
+            encoder=datetime.isoformat, decoder=datetime.fromisoformat, mm_field=fields.DateTime(format="iso")
         )
     )
     description: str
@@ -40,9 +38,7 @@ class SIEVerification(DataClassJsonMixin):
     id: int
     date: datetime = field(
         metadata=config(
-            encoder=datetime.isoformat,
-            decoder=datetime.fromisoformat,
-            mm_field=fields.DateTime(format='iso')
+            encoder=datetime.isoformat, decoder=datetime.fromisoformat, mm_field=fields.DateTime(format="iso")
         )
     )
     description: str
@@ -52,18 +48,10 @@ class SIEVerification(DataClassJsonMixin):
 @dataclass
 class DateRange:
     start: date = field(
-        metadata=config(
-            encoder=date.isoformat,
-            decoder=date.fromisoformat,
-            mm_field=fields.Date(format='iso')
-        )
+        metadata=config(encoder=date.isoformat, decoder=date.fromisoformat, mm_field=fields.Date(format="iso"))
     )
     end: date = field(
-        metadata=config(
-            encoder=date.isoformat,
-            decoder=date.fromisoformat,
-            mm_field=fields.Date(format='iso')
-        )
+        metadata=config(encoder=date.isoformat, decoder=date.fromisoformat, mm_field=fields.Date(format="iso"))
     )
 
 
@@ -89,11 +77,9 @@ class SIEFile(DataClassJsonMixin):
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Parse SIE file format')
-    parser.add_argument('--filename',
-                        required=True, nargs='+')
-    parser.add_argument('--encoding', default='cp850',
-                        choices=['cp850', 'latin-1', 'utf-8', 'windows-1252'])
+    parser = argparse.ArgumentParser(description="Parse SIE file format")
+    parser.add_argument("--filename", required=True, nargs="+")
+    parser.add_argument("--encoding", default="cp850", choices=["cp850", "latin-1", "utf-8", "windows-1252"])
 
     args = parser.parse_args()
 
@@ -101,16 +87,16 @@ def main():
         print(parse(inputfile, args.encoding))
 
 
-def parse(filepath: str, encoding: str = 'cp850') -> SIEFile:
+def parse(filepath: str, encoding: str = "cp850") -> SIEFile:
     attribute_dims = dict()
 
     siefile = SIEFile()
 
-    with open(filepath, 'rb') as f:
-        content = f.read().decode(encoding).split('\n')
+    with open(filepath, "rb") as f:
+        content = f.read().decode(encoding).split("\n")
         for l in range(0, len(content)):
             line = content[l]
-            if not line.startswith('#') or len(line.split(' ')) == 0:
+            if not line.startswith("#") or len(line.split(" ")) == 0:
                 continue
             label, text, parts = parse_line(line)
 
@@ -134,21 +120,21 @@ def parse(filepath: str, encoding: str = 'cp850') -> SIEFile:
                 siefile.objects.append(SIEObjekt(type=int(parts[0]), code=parts[1], name=parts[2]))
             if label == "RAR":
                 if int(parts[0]) == 0:
-                    siefile.date_range = DateRange(datetime.strptime(
-                        parts[1], "%Y%m%d").date(), datetime.strptime(parts[2], "%Y%m%d").date())
+                    siefile.date_range = DateRange(
+                        datetime.strptime(parts[1], "%Y%m%d").date(), datetime.strptime(parts[2], "%Y%m%d").date()
+                    )
             if label == "VER":
-
                 series = parts[0]
                 verno = parts[1]
-                verdate = datetime.strptime(parts[2], r'%Y%m%d')
+                verdate = datetime.strptime(parts[2], r"%Y%m%d")
                 if len(parts) > 3:
                     vertext = parts[3]
                 else:
                     vertext = ""
-                l, vers = parse_ver(content, l,
-                                    vertext, verdate, verno)
-                siefile.verifications.append(SIEVerification(series=series, id=verno,
-                                                             date=verdate, description=vertext, lines=vers))
+                l, vers = parse_ver(content, l, vertext, verdate, verno)
+                siefile.verifications.append(
+                    SIEVerification(series=series, id=verno, date=verdate, description=vertext, lines=vers)
+                )
 
     for year in [-1, 0, 1]:
         for account in siefile.outgoing_balances[year].keys():
@@ -163,29 +149,28 @@ def parse(filepath: str, encoding: str = 'cp850') -> SIEFile:
 
 
 def parse_line(line):
-    if not line.startswith('#') or len(line.split(' ')) == 0:
+    if not line.startswith("#") or len(line.split(" ")) == 0:
         return False, False, False
-    parts = [s for s in shlex.split(line.replace('{', '"').replace('}', '"'))]
+    parts = [s for s in shlex.split(line.replace("{", '"').replace("}", '"'))]
     label = parts[0].upper()[1:]
-    text = ' '.join(parts[1:])
+    text = " ".join(parts[1:])
     return label, text, parts[1:]
 
 
-def parse_ver(content, line, default_vertext, default_verdate,
-              verno) -> Tuple[int, List[SIEVerificationLine]]:
+def parse_ver(content, line, default_vertext, default_verdate, verno) -> Tuple[int, List[SIEVerificationLine]]:
     vers = list()
-    if content[line + 1].startswith('{'):
+    if content[line + 1].startswith("{"):
         line = line + 2
-        while not content[line].startswith('}'):
+        while not content[line].startswith("}"):
             label, text, parts = parse_line(content[line].strip())
-            #print("label: %s text: %s parts: %s" % (label, text, parts))
+            # print("label: %s text: %s parts: %s" % (label, text, parts))
             kst = ""
             proj = ""
             account = int(parts[0])
             p = parts[1]
             amount = Decimal(parts[2])
             if len(parts) > 3:
-                verdate = datetime.strptime(parts[3], r'%Y%m%d')
+                verdate = datetime.strptime(parts[3], r"%Y%m%d")
             else:
                 verdate = default_verdate
             if len(parts) > 4:
@@ -194,15 +179,16 @@ def parse_ver(content, line, default_vertext, default_verdate,
                 vertext = default_vertext
 
             objects = []
-            if len(p.split(' ')) > 0 and p.split(' ')[0] == '1':
-                kst = p.split(' ')[1]
+            if len(p.split(" ")) > 0 and p.split(" ")[0] == "1":
+                kst = p.split(" ")[1]
                 objects.append(kst)
 
-            if len(p.split(' ')) > 2 and p.split(' ')[2] == '6':
-                proj = p.split(' ')[3]
+            if len(p.split(" ")) > 2 and p.split(" ")[2] == "6":
+                proj = p.split(" ")[3]
 
-            vers.append(SIEVerificationLine(account=account, amount=amount,
-                                            date=verdate, description=vertext, objects=objects))
+            vers.append(
+                SIEVerificationLine(account=account, amount=amount, date=verdate, description=vertext, objects=objects)
+            )
             line = line + 1
 
     return line, vers

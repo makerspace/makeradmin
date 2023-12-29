@@ -59,7 +59,7 @@ class StripeRecurringWithoutStripeTest(ShopTestMixin, FlaskTestBase):
             unit="st",
         )
         with self.assertRaises(ValueError) as context:
-            makeradmin_to_stripe_recurring(makeradmin_test_product, stripe_constants.PriceType.RECURRING),
+            (makeradmin_to_stripe_recurring(makeradmin_test_product, stripe_constants.PriceType.RECURRING),)
         self.assertTrue("Unexpected unit" in str(context.exception))
 
 

@@ -30,4 +30,3 @@ def send_gift_card_email(gift_card):
         recipient_email=gift_card.email,
         gift_card=gift_card,
     )
-

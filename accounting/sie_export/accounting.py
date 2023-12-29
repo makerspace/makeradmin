@@ -41,7 +41,7 @@ class Account:
             bool(row["IsCostCenterAllowed"]),
             bool(row["IsProjectAllowed"]),
             bool(row["AllowTransactionText"]),
-            bool(row["IsBlockedForManualBooking"])
+            bool(row["IsBlockedForManualBooking"]),
         )
 
     @classmethod
@@ -50,27 +50,29 @@ class Account:
             reader = csv.DictReader(f)
             accounts = [cls.parse_row(row) for row in reader]
         return accounts
+
+
 @dataclass
 class MonthlyTransactions:
     period: str
     amount_debit: float
-    amount_credit:float
+    amount_credit: float
     account: int
     cost_center: int
 
     @classmethod
-    def parse_row(cls,row: dict):
+    def parse_row(cls, row: dict):
         return cls(
             str(row["Period"]),
             float(row["AmountDebit"]),
             float(row["AmountCredit"]),
             int(row["Account"]),
-            int(row["CostCenter"])
+            int(row["CostCenter"]),
         )
-    @classmethod
-    def parse_csv(cls,filename) -> List["MonthlyTransactions"]:
-        with open(filename, encoding="utf-8-sig") as f:
-            reader = csv.DictReader(f,delimiter=' ')
-            accounts = [cls.parse_row(row)for row in reader]
-        return accounts            
 
+    @classmethod
+    def parse_csv(cls, filename) -> List["MonthlyTransactions"]:
+        with open(filename, encoding="utf-8-sig") as f:
+            reader = csv.DictReader(f, delimiter=" ")
+            accounts = [cls.parse_row(row) for row in reader]
+        return accounts
