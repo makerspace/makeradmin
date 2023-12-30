@@ -1,11 +1,11 @@
-from typing import List, Dict, Optional, Tuple
-from decimal import Decimal
 from datetime import datetime
+from decimal import Decimal
 from itertools import groupby
 from operator import itemgetter
+from typing import Dict, List, Optional, Tuple
 
-from shop.accounting.verification import Verification
 from membership.models import Member
+from shop.accounting.verification import Verification
 
 HEADER_TEMPLATE = """
 #FLAGGA 0

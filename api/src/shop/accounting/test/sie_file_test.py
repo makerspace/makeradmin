@@ -1,16 +1,16 @@
-from logging import getLogger
-from typing import List, Dict, Optional, Tuple
-from datetime import datetime, timezone, date
+from datetime import date, datetime, timezone
 from decimal import Decimal
+from logging import getLogger
+from typing import Dict, List, Optional, Tuple
 from unittest import TestCase
 
-from shop.accounting.verification import Verification
 from shop.accounting.sie_file import (
+    convert_to_sie_format,
     get_header,
     transaction_string,
-    convert_to_sie_format,
     write_to_sie_file,
 )
+from shop.accounting.verification import Verification
 
 logger = getLogger("makeradmin")
 

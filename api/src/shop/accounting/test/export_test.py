@@ -1,13 +1,13 @@
-from logging import getLogger
-from typing import List, Dict, Optional, Tuple
-from datetime import datetime, timezone, date
+from datetime import date, datetime, timezone
 from decimal import Decimal
+from logging import getLogger
+from typing import Dict, List, Optional, Tuple
 from unittest import TestCase
 
-from shop.stripe_payment_intent import CompletedPayment
 from shop.accounting.accounting import AmountPerAccountAndCostCenter
 from shop.accounting.export import export_accounting, transaction_fees_to_transaction_with_accounting
 from shop.accounting.verification import Verification
+from shop.stripe_payment_intent import CompletedPayment
 
 logger = getLogger("makeradmin")
 

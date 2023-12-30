@@ -1,25 +1,25 @@
-from logging import getLogger
-from typing import List, Dict, Optional, Tuple
-from datetime import datetime, timezone, date
+from datetime import date, datetime, timezone
 from decimal import Decimal
+from logging import getLogger
+from typing import Dict, List, Optional, Tuple
 from unittest import TestCase
-from unittest.mock import patch, Mock
+from unittest.mock import Mock, patch
 
 import core
 import membership
 import shop
-from service.db import db_session
-from shop.stripe_payment_intent import CompletedPayment
 from membership.models import Member
-from shop.models import Transaction, TransactionContent, Product
+from service.db import db_session
 from shop.accounting.accounting import (
-    AmountPerAccountAndCostCenter,
     AccountCostCenter,
+    AmountPerAccountAndCostCenter,
     ProductToAccountCostCenter,
     diff_transactions_and_completed_payments,
     split_transactions_over_accounts,
 )
 from shop.accounting.verification import Verification
+from shop.models import Product, Transaction, TransactionContent
+from shop.stripe_payment_intent import CompletedPayment
 from test_aid.test_base import FlaskTestBase
 
 logger = getLogger("makeradmin")

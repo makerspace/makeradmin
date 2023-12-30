@@ -1,19 +1,10 @@
 from dataclasses import dataclass
-from typing import List, Dict, Optional, Tuple
-from decimal import Decimal
 from datetime import datetime
+from decimal import Decimal
+from typing import Dict, List, Optional, Tuple
 
 from service.db import db_session
 from service.error import InternalServerError
-from shop.models import (
-    Product,
-    TransactionAccount,
-    TransactionCostcenter,
-    ProductAccountsCostCenters,
-    Transaction,
-    TransactionContent,
-)
-from shop.stripe_payment_intent import CompletedPayment
 from shop.accounting.accounting import (
     AmountPerAccountAndCostCenter,
     diff_transactions_and_completed_payments,
@@ -21,6 +12,15 @@ from shop.accounting.accounting import (
 )
 from shop.accounting.sie_file import write_to_sie_file
 from shop.accounting.verification import create_verificatons
+from shop.models import (
+    Product,
+    ProductAccountsCostCenters,
+    Transaction,
+    TransactionAccount,
+    TransactionContent,
+    TransactionCostcenter,
+)
+from shop.stripe_payment_intent import CompletedPayment
 
 
 def transaction_fees_to_transaction_with_accounting(

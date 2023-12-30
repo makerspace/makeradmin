@@ -1,6 +1,6 @@
 from dataclasses import dataclass
-from typing import List, Dict, Optional, Tuple
 from decimal import Decimal
+from typing import Dict, List, Optional, Tuple
 
 from service.db import db_session
 from service.error import InternalServerError
