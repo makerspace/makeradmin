@@ -1,8 +1,8 @@
 from dataclasses import dataclass
 from typing import Sequence
 
+from service.api_definition import ALL_PERMISSIONS, MEMBER_VIEW, MEMBERBOOTH, WEBSHOP
 from service.config import config
-from service.api_definition import ALL_PERMISSIONS, MEMBER_VIEW, WEBSHOP, MEMBERBOOTH
 
 
 @dataclass

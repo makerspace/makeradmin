@@ -1,9 +1,9 @@
+from service.api_definition import MESSAGE_SEND, MESSAGE_VIEW
+from service.entity import OrmSingeRelation, not_empty
+
 from messages import service
 from messages.message_entity import MessageEntity
 from messages.models import Message
-from service.api_definition import MESSAGE_VIEW, MESSAGE_SEND
-from service.entity import not_empty, OrmSingeRelation
-
 
 message_entity = MessageEntity(
     Message,

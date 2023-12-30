@@ -1,6 +1,6 @@
 from contextlib import closing
 from datetime import date, datetime
-from socket import socket, AF_INET, SOCK_STREAM
+from socket import AF_INET, SOCK_STREAM, socket
 from time import perf_counter, sleep
 from typing import Optional
 

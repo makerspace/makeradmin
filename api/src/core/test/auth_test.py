@@ -1,16 +1,15 @@
+import membership
 from flask import g
+from service.api_definition import ALL_PERMISSIONS, GET, PUBLIC, USER
+from service.db import db_session
+from service.error import Forbidden, Unauthorized
+from test_aid.test_base import FlaskTestBase
 
 import core
-import membership
-
 from core import models
 from core.auth import authenticate_request
 from core.models import AccessToken
 from core.service_users import TEST_SERVICE_USER_ID
-from service.api_definition import USER, GET, PUBLIC, ALL_PERMISSIONS
-from service.db import db_session
-from service.error import Unauthorized, Forbidden
-from test_aid.test_base import FlaskTestBase
 
 
 class Test(FlaskTestBase):

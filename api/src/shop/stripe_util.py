@@ -1,19 +1,20 @@
-from datetime import datetime, timezone
-from dataclasses import asdict, dataclass
-from decimal import Decimal
 import random
 import time
+from dataclasses import asdict, dataclass
+from datetime import datetime, timezone
+from decimal import Decimal
 from logging import getLogger
-from sqlalchemy import func
 from typing import Any, Callable, Dict, TypeVar
 
-from service.error import InternalServerError
+import stripe
 from service.db import db_session
+from service.error import InternalServerError
+from sqlalchemy import func
+
 from shop.models import Product, ProductCategory
 from shop.stripe_constants import (
     STRIPE_CURRENTY_BASE,
 )
-import stripe
 
 logger = getLogger("makeradmin")
 

@@ -1,5 +1,5 @@
-import sys
 import csv
+import sys
 from collections import defaultdict
 from datetime import datetime
 

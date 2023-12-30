@@ -1,19 +1,19 @@
 import argparse
+import datetime
 from dataclasses import dataclass
 from decimal import Decimal
 from typing import Dict, List, Tuple
-from cv2 import threshold
 
-from pandas.core.algorithms import unique
-import parse_sie
+import matplotlib.dates as mdates
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import parse_sie
 import seaborn as sns
-import matplotlib.pyplot as plt
-import datetime
-import matplotlib.dates as mdates
-from matplotlib.ticker import NullFormatter, FuncFormatter
-from matplotlib.dates import MonthLocator, DateFormatter
+from cv2 import threshold
+from matplotlib.dates import DateFormatter, MonthLocator
+from matplotlib.ticker import FuncFormatter, NullFormatter
+from pandas.core.algorithms import unique
 
 INCOME_ACCOUNTS = [
     1934,

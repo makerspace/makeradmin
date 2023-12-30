@@ -1,16 +1,16 @@
 import time
-from service.error import Unauthorized
 
-from quiz.views import member_quiz_statistics
-from flask import request, g
-
-from member import service
-from member.member import send_access_token_email, set_pin_code, get_member_groups
+from change_phone_request import change_phone_request, change_phone_validate
+from flask import g, request
 from membership.member_auth import get_member_permissions
 from membership.membership import get_access_summary, get_membership_summary
 from membership.views import member_entity
-from service.api_definition import POST, PUBLIC, Arg, GET, USER, natural1, non_empty_str
-from change_phone_request import change_phone_request, change_phone_validate
+from quiz.views import member_quiz_statistics
+from service.api_definition import GET, POST, PUBLIC, USER, Arg, natural1, non_empty_str
+from service.error import Unauthorized
+
+from member import service
+from member.member import get_member_groups, send_access_token_email, set_pin_code
 
 
 @service.route("/send_access_token", method=POST, permission=PUBLIC)

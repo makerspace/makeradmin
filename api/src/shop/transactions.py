@@ -1,37 +1,33 @@
 from dataclasses import dataclass
-from decimal import localcontext, Decimal, Rounded
 from datetime import datetime, timezone
+from decimal import Decimal, Rounded, localcontext
 from logging import getLogger
 from typing import Any, Dict, List, Optional, Tuple
-from dataclasses_json import DataClassJsonMixin
-from service.config import config
 
-from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
-from sqlalchemy.sql import func
 from basic_types.enums import PriceLevel
-from messages.message import send_message
-from messages.models import MessageTemplate
-from shop.stripe_constants import MakerspaceMetadataKeys
-from shop.stripe_discounts import get_discount_for_product, get_price_level_for_member
-from shop.stripe_subscriptions import SubscriptionType, resume_paused_subscription
-
-
+from dataclasses_json import DataClassJsonMixin
 from membership.membership import add_membership_days
 from membership.models import Member, Span
+from messages.message import send_message
+from messages.models import MessageTemplate
 from multiaccessy.invite import (
-    ensure_accessy_labaccess,
     AccessyError,
-    check_labaccess_requirements,
     LabaccessRequirements,
+    check_labaccess_requirements,
+    ensure_accessy_labaccess,
 )
 from service.api_definition import (
-    NEGATIVE_ITEM_COUNT,
-    INVALID_ITEM_COUNT,
     EMPTY_CART,
+    INVALID_ITEM_COUNT,
+    NEGATIVE_ITEM_COUNT,
     NON_MATCHING_SUMS,
 )
+from service.config import config
 from service.db import db_session, nested_atomic
-from service.error import InternalServerError, BadRequest, NotFound
+from service.error import BadRequest, InternalServerError, NotFound
+from sqlalchemy.orm.exc import MultipleResultsFound, NoResultFound
+from sqlalchemy.sql import func
+
 from shop.email import (
     send_labaccess_extended_email,
     send_membership_updated_email,
@@ -40,13 +36,16 @@ from shop.email import (
 )
 from shop.filters import PRODUCT_FILTERS
 from shop.models import (
-    TransactionAction,
-    TransactionContent,
-    Transaction,
+    Product,
     ProductAction,
     StripePending,
-    Product,
+    Transaction,
+    TransactionAction,
+    TransactionContent,
 )
+from shop.stripe_constants import MakerspaceMetadataKeys
+from shop.stripe_discounts import get_discount_for_product, get_price_level_for_member
+from shop.stripe_subscriptions import SubscriptionType, resume_paused_subscription
 from shop.stripe_util import convert_to_stripe_amount
 
 # If false, labaccess is synced to accessy once per week

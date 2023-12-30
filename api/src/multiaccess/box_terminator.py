@@ -1,17 +1,15 @@
-from datetime import date, timedelta, datetime
+from datetime import date, datetime, timedelta
 
-from sqlalchemy import desc
-from sqlalchemy.orm import contains_eager
-from sqlalchemy.orm.exc import NoResultFound
-
-from membership.models import Member, Box, Span
+from membership.models import Box, Member, Span
 from messages.message import send_message
 from messages.models import MessageTemplate
 from service.db import db_session
-from service.error import NotFound, BadRequest
+from service.error import BadRequest, NotFound
 from service.util import date_to_str, dt_to_str
-from shop.transactions import pending_action_value_sum, ProductAction
-
+from shop.transactions import ProductAction, pending_action_value_sum
+from sqlalchemy import desc
+from sqlalchemy.orm import contains_eager
+from sqlalchemy.orm.exc import NoResultFound
 
 JUDGMENT_DAY = date(1997, 9, 26)  # Used as default for missing lab access date.
 

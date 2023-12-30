@@ -1,10 +1,9 @@
-from collections import defaultdict
-from typing import Dict, Tuple
-from datetime import datetime
 from argparse import ArgumentParser
+from collections import defaultdict
+from datetime import datetime
+from typing import Dict, Tuple
 
 from accounting import MonthlyTransactions
-
 
 HEADER_TEMPLATE = """
 #FLAGGA 0

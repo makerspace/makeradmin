@@ -1,4 +1,5 @@
 from secrets import token_hex
+
 from messages.message import send_message
 from messages.models import MessageTemplate
 

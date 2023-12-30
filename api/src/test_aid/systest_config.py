@@ -2,7 +2,7 @@ import os
 from logging import INFO
 
 from dotenv import dotenv_values, find_dotenv
-from rocky.config import Dict, Env, Config
+from rocky.config import Config, Dict, Env
 
 env = Env()
 

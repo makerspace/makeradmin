@@ -2,23 +2,22 @@ import secrets
 from datetime import datetime, timedelta
 from logging import getLogger
 from string import ascii_letters, digits
+from typing import Optional
 from urllib.parse import quote_plus
 
-from flask import g, request, jsonify
-from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
-
-from core.models import Login, AccessToken, PasswordResetToken
-from core.service_users import SERVICE_NAMES, SERVICE_PERMISSIONS
-from membership.member_auth import get_member_permissions, authenticate, check_and_hash_password
+from flask import g, jsonify, request
+from membership.member_auth import authenticate, check_and_hash_password, get_member_permissions
 from membership.models import Member
 from messages.message import send_message
 from messages.models import MessageTemplate
 from service import config
-from service.api_definition import USER, REQUIRED, BAD_VALUE, EXPIRED
+from service.api_definition import BAD_VALUE, EXPIRED, REQUIRED, USER
 from service.db import db_session
-from service.error import TooManyRequests, ApiError, NotFound, Unauthorized, BadRequest, InternalServerError
-from typing import Optional
+from service.error import ApiError, BadRequest, InternalServerError, NotFound, TooManyRequests, Unauthorized
+from sqlalchemy.orm.exc import MultipleResultsFound, NoResultFound
 
+from core.models import AccessToken, Login, PasswordResetToken
+from core.service_users import SERVICE_NAMES, SERVICE_PERMISSIONS
 
 logger = getLogger("makeradmin")
 

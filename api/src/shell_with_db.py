@@ -1,16 +1,14 @@
 #!python
 from contextlib import closing
 
-from sqlalchemy import select, Column, Integer, Text, ForeignKey
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker, relationship
-
-from IPython import start_ipython
-
 import membership.models
 import quiz.models
+from IPython import start_ipython
 from service.config import get_mysql_config
 from service.db import create_mysql_engine
+from sqlalchemy import Column, ForeignKey, Integer, Text, select
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import relationship, sessionmaker
 
 
 def init_db():

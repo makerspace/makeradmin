@@ -1,19 +1,18 @@
 #!python
 
-from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
+from argparse import ArgumentDefaultsHelpFormatter, ArgumentParser
 from contextlib import closing
-from datetime import timedelta, datetime
-
-from rocky.process import log_exception
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
+from datetime import datetime, timedelta
 
 from core.auth import generate_token
-from core.service_users import SERVICE_USERS
 from core.models import AccessToken
+from core.service_users import SERVICE_USERS
+from migrate import ensure_migrations_table, run_migrations
+from rocky.process import log_exception
 from service.config import get_mysql_config
 from service.db import create_mysql_engine
-from migrate import ensure_migrations_table, run_migrations
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm.exc import MultipleResultsFound, NoResultFound
 
 
 def clear_permission_cache(session_factory):

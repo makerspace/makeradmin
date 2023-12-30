@@ -1,5 +1,5 @@
-from dataclasses import dataclass
 import csv
+from dataclasses import dataclass
 from typing import List
 
 

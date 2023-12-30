@@ -1,17 +1,15 @@
-from datetime import datetime
 import time
-from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
+from argparse import ArgumentDefaultsHelpFormatter, ArgumentParser
+from datetime import datetime
 
 import schedule
-from rocky.process import log_exception, stoppable
-from sqlalchemy.orm import sessionmaker
-
 from multiaccessy.sync import sync
+from rocky.process import log_exception, stoppable
 from service.config import get_mysql_config
 from service.db import create_mysql_engine, db_session
 from service.logging import logger
 from shop.transactions import ship_orders
-
+from sqlalchemy.orm import sessionmaker
 
 COMMAND_SCHEDULED = "sheduled"
 COMMAND_SHIP = "ship"

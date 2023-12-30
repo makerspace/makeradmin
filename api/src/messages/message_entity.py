@@ -1,5 +1,4 @@
 from flask import request
-
 from membership.models import Member, member_group
 from service.api_definition import BAD_VALUE, natural1
 from service.db import db_session

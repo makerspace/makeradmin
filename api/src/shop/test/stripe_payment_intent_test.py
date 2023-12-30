@@ -1,31 +1,30 @@
-from logging import getLogger
-from datetime import datetime, timezone, date, timedelta
-from dataclasses import dataclass
-from typing import Any, Dict, List
-from unittest import skipIf
 import math
 import time
+from dataclasses import dataclass
+from datetime import date, datetime, timedelta, timezone
+from logging import getLogger
+from typing import Any, Dict, List
+from unittest import skipIf
 
-import membership.models
-import shop.models
-import messages.models
 import core.models
+import membership.models
+import messages.models
+import shop.models
+import stripe
+from membership.models import Member
 from service.db import db_session
+from shop.models import StripePending, Transaction
 from shop.stripe_constants import CURRENCY, MakerspaceMetadataKeys, PaymentIntentStatus
 from shop.stripe_customer import delete_stripe_customer, get_and_sync_stripe_customer
-from shop.stripe_util import convert_from_stripe_amount, convert_to_stripe_amount
-from membership.models import Member
-from shop.models import Transaction, StripePending
 from shop.stripe_payment_intent import (
-    get_stripe_payment_intents,
     convert_completed_stripe_intents_to_payments,
+    get_stripe_payment_intents,
     pay_with_stripe,
 )
-from shop.stripe_util import retry
-import stripe
+from shop.stripe_util import convert_from_stripe_amount, convert_to_stripe_amount, retry
 from stripe import CardError
+from subscriptions_test import FakeCardPmToken, attach_and_set_payment_method
 from test_aid.test_base import FlaskTestBase, ShopTestMixin
-from subscriptions_test import attach_and_set_payment_method, FakeCardPmToken
 
 logger = getLogger("makeradmin")
 

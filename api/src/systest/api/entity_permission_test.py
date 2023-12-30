@@ -1,6 +1,6 @@
 from core.auth import create_access_token
 from membership.models import Permission
-from service.api_definition import MEMBER_VIEW, MEMBER_CREATE, MEMBER_EDIT, MEMBER_DELETE
+from service.api_definition import MEMBER_CREATE, MEMBER_DELETE, MEMBER_EDIT, MEMBER_VIEW
 from service.db import db_session
 from test_aid.systest_base import ApiTest
 

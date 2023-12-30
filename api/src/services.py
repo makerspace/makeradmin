@@ -1,13 +1,13 @@
+import statistics
 from collections import namedtuple
 
+import core
 import member
 import membership
-import core
 import messages
 import multiaccess
-import shop
-import statistics
 import quiz
+import shop
 
 Instance = namedtuple("Instance", "path,service")
 
