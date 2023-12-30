@@ -1,8 +1,8 @@
 from enum import Enum
-import stripe
-from test_aid.systest_config import STRIPE_PRIVATE_KEY, STRIPE_PUBLIC_KEY
 
+import stripe
 from service.config import config
+from test_aid.systest_config import STRIPE_PRIVATE_KEY, STRIPE_PUBLIC_KEY
 
 stripe.api_version = "2022-11-15"
 # All stripe calculations are done with cents (ören in Sweden)

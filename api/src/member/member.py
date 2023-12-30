@@ -1,10 +1,10 @@
 from datetime import datetime
 from typing import Any, List
 from urllib.parse import quote_plus
-from sqlalchemy.exc import DataError
 
 from core.auth import create_access_token, get_member_by_user_identification
-from membership.models import Member, Group
+from membership.models import Group, Member
+from membership.views import group_entity
 from messages.message import send_message
 from messages.models import MessageTemplate
 from service import config
@@ -12,7 +12,7 @@ from service.db import db_session
 from service.error import BadRequest
 from service.logging import logger
 from service.util import format_datetime
-from membership.views import group_entity
+from sqlalchemy.exc import DataError
 
 
 def send_access_token_email(redirect, user_identification, ip, browser):

@@ -1,8 +1,7 @@
 import os
 from collections.abc import Mapping
-from random import seed, choice
+from random import choice, seed
 from string import ascii_letters, digits
-
 
 seed(os.urandom(8))
 

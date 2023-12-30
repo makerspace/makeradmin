@@ -2,17 +2,16 @@ from random import randint
 from time import time
 
 import stripe
-from shop.stripe_payment_intent import PaymentIntentResult
-from shop.stripe_constants import MakerspaceMetadataKeys
-from shop.stripe_subscriptions import SubscriptionType
-from shop.transactions import CartItem, Purchase
-from shop.pay import MemberInfo, RegisterRequest
-
 from membership.models import Span
 from service.api_definition import NON_MATCHING_SUMS
 from service.db import db_session
 from shop.models import ProductAction
-from test_aid.systest_base import ApiShopTestMixin, ApiTest, VALID_NON_3DS_CARD_NO, EXPIRED_3DS_CARD_NO
+from shop.pay import MemberInfo, RegisterRequest
+from shop.stripe_constants import MakerspaceMetadataKeys
+from shop.stripe_payment_intent import PaymentIntentResult
+from shop.stripe_subscriptions import SubscriptionType
+from shop.transactions import CartItem, Purchase
+from test_aid.systest_base import EXPIRED_3DS_CARD_NO, VALID_NON_3DS_CARD_NO, ApiShopTestMixin, ApiTest
 
 
 class Test(ApiShopTestMixin, ApiTest):

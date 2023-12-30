@@ -1,8 +1,8 @@
 from dataclasses import dataclass
 from typing import Sequence
 
+from service.api_definition import ALL_PERMISSIONS, MEMBER_VIEW, MEMBERBOOTH, WEBSHOP
 from service.config import config
-from service.api_definition import ALL_PERMISSIONS, MEMBER_VIEW, WEBSHOP, MEMBERBOOTH
 
 
 @dataclass
@@ -15,7 +15,7 @@ class ServiceUser:
 
 
 TEST_SERVICE_USER_ID = -1
-TEST_SERVICE_TOKEN = config.get('TEST_SERVICE_TOKEN')
+TEST_SERVICE_TOKEN = config.get("TEST_SERVICE_TOKEN")
 
 
 SERVICE_USERS = (

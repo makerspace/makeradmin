@@ -2,32 +2,32 @@ from logging import getLogger
 from typing import List
 from unittest import skipIf
 
-import membership.models
-import shop.models
-import messages.models
 import core.models
+import membership.models
+import messages.models
+import shop.models
+import stripe
+from shop import stripe_constants
+from shop.models import Product
 from shop.stripe_product_price import (
-    get_stripe_product,
-    get_stripe_prices,
-    get_or_create_stripe_product,
-    get_or_create_stripe_prices_for_product,
-    get_and_sync_stripe_product,
-    get_and_sync_stripe_prices_for_product,
-    get_and_sync_stripe_product_and_prices,
-    activate_stripe_product,
-    deactivate_stripe_product,
     activate_stripe_price,
+    activate_stripe_product,
     deactivate_stripe_price,
-    makeradmin_to_stripe_recurring,
-    eq_makeradmin_stripe_product,
+    deactivate_stripe_product,
     eq_makeradmin_stripe_price,
-    update_stripe_product,
+    eq_makeradmin_stripe_product,
+    get_and_sync_stripe_prices_for_product,
+    get_and_sync_stripe_product,
+    get_and_sync_stripe_product_and_prices,
+    get_or_create_stripe_prices_for_product,
+    get_or_create_stripe_product,
+    get_stripe_prices,
+    get_stripe_product,
+    makeradmin_to_stripe_recurring,
     replace_stripe_price,
+    update_stripe_product,
 )
 from shop.stripe_util import convert_to_stripe_amount
-from shop.models import Product
-from shop import stripe_constants
-import stripe
 from test_aid.test_base import FlaskTestBase, ShopTestMixin
 
 logger = getLogger("makeradmin")
@@ -59,7 +59,7 @@ class StripeRecurringWithoutStripeTest(ShopTestMixin, FlaskTestBase):
             unit="st",
         )
         with self.assertRaises(ValueError) as context:
-            makeradmin_to_stripe_recurring(makeradmin_test_product, stripe_constants.PriceType.RECURRING),
+            (makeradmin_to_stripe_recurring(makeradmin_test_product, stripe_constants.PriceType.RECURRING),)
         self.assertTrue("Unexpected unit" in str(context.exception))
 
 

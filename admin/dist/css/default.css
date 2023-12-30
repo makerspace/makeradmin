@@ -1,106 +1,114 @@
-html, body, #main {
-	height: 100%;
+html,
+body,
+#main {
+    height: 100%;
 }
 
 /* Loading React application */
 .loading-application {
-	margin: 0 auto;
-	border: 1px solid #000;
-	width: 200px;
-	text-align: center;
-	margin-top: 50%;
+    margin: 0 auto;
+    border: 1px solid #000;
+    width: 200px;
+    text-align: center;
+    margin-top: 50%;
 }
 
 /* Loading data from REST API into collection or model */
 .loadingOverlay {
-	position: absolute;
-	top: 0;
-	height: 100%;
-	width: 100%;
-	font-size: 1.5em;
-	background-color: rgba(0, 0, 0, 0.05);
-	text-align: center;
-	border-radius: 3px;
-	animation: fadein 0.3s;
+    position: absolute;
+    top: 0;
+    height: 100%;
+    width: 100%;
+    font-size: 1.5em;
+    background-color: rgba(0, 0, 0, 0.05);
+    text-align: center;
+    border-radius: 3px;
+    animation: fadein 0.3s;
 }
 
 .loadingOverlay .loadingWrapper {
-	position: relative;
-	top: 50%;
+    position: relative;
+    top: 50%;
 }
 
 @keyframes fadein {
-	from { opacity: 0; }
-	to   { opacity: 1; }
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
 }
 
 @keyframes fadein2 {
-	from { filter: blur(0px); }
-	to   { filter: blur(1px); }
+    from {
+        filter: blur(0px);
+    }
+    to {
+        filter: blur(1px);
+    }
 }
 
 .loadingOverlay span {
-	color: steelblue;
+    color: steelblue;
 }
 
 .backboneTableLoading tbody {
-	animation: fadein2 0.3s;
-	filter: blur(1px);
+    animation: fadein2 0.3s;
+    filter: blur(1px);
 }
 
-
 .invoice .box {
-/*	border: 1px solid #000;*/
+    /*	border: 1px solid #000;*/
 }
 
 .invoice .title {
-	font-weight: bold;
-	font-size: 0.9em;
+    font-weight: bold;
+    font-size: 0.9em;
 }
 
 .invoice .data {
 }
 
-
 /* react-select */
 .Select input {
-	border: 0 !important;
-	background: 0;
+    border: 0 !important;
+    background: 0;
 }
 
 /* Key stuff */
 .key-active {
-	color: #8f8;
+    color: #8f8;
 }
 
 .key-inactive {
-	color: #f88;
+    color: #f88;
 }
 
 /* Better forms */
 .meep .uk-form-width-large {
-	width: 100%;
+    width: 100%;
 }
 
 .meep .uk-form input,
 .meep .uk-form textarea {
-	border: none;
-	border-radius: 0;
-	border-bottom: 1px solid #aaa;
-	background-color: #fff;
-	padding: 0;
-	color: #000;
-	margin: 5px 0;
-	height: 25px;
+    border: none;
+    border-radius: 0;
+    border-bottom: 1px solid #aaa;
+    background-color: #fff;
+    padding: 0;
+    color: #000;
+    margin: 5px 0;
+    height: 25px;
 }
 
 .meep select {
-	margin-top: 12px !important;
+    margin-top: 12px !important;
 }
 
 .meep .uk-form textarea {
-	overflow: hidden;
-	resize: none;
+    overflow: hidden;
+    resize: none;
 }
 
 /*
@@ -110,137 +118,137 @@ html, body, #main {
 */
 
 .meep .uk-form-row label {
-	font-size: 11px;
-	font-weight: bold;
-	color: #888;
-	height: 16px;
-	display: inline-block;
+    font-size: 11px;
+    font-weight: bold;
+    color: #888;
+    height: 16px;
+    display: inline-block;
 }
 
 .meep .uk-form-row {
-	position: relative;
-	margin-bottom: 5px;
+    position: relative;
+    margin-bottom: 5px;
 }
 
 .meep .uk-form-row:focus {
-	background-color: green;
+    background-color: green;
 }
 
 .meep .uk-form-controls {
-	margin-top: -7px;
-	margin-left: 0;
+    margin-top: -7px;
+    margin-left: 0;
 }
 
 .meep .uk-form fieldset {
-	margin-bottom: 2em;
-	padding-left: 3em;
+    margin-bottom: 2em;
+    padding-left: 3em;
 }
 
 .meep .uk-form legend {
-	margin-left: -2em;
-	padding: 0;
+    margin-left: -2em;
+    padding: 0;
 }
 
 .meep ::-webkit-input-placeholder {
-	font-style: italic;
+    font-style: italic;
 }
 
 .meep :-moz-placeholder {
-	font-style: italic;
+    font-style: italic;
 }
 
 .meep ::-moz-placeholder {
-	font-style: italic;
+    font-style: italic;
 }
 
 .meep :-ms-input-placeholder {
-	font-style: italic;
+    font-style: italic;
 }
 
 .uk-form .error input,
 .uk-form .error textarea {
-	border-bottom: 3px solid red !important;
+    border-bottom: 3px solid red !important;
 }
 
 .uk-form .uk-form-help-block.error {
-	color: red;
-	margin-top: -8px;
-	font-size: 10px;
+    color: red;
+    margin-top: -8px;
+    font-size: 10px;
 }
 
 .meep .uk-form-row + .uk-form-row {
-	margin-top: 10px;
+    margin-top: 10px;
 }
 
 .meep .uk-form-icon > [class*="uk-icon-"] {
-	margin-left: -30px;
+    margin-left: -30px;
 }
 
 .meep .uk-form-icon input {
-	padding-left: 0 !important;
+    padding-left: 0 !important;
 }
 
 /* Hilite label and border */
 .meep .uk-form .selected input,
 .meep .uk-form .selected textarea {
-	border-bottom: 3px solid #58f !important;
-	padding-bottom: 2px;
-	margin-bottom: 3px;
-	color: #000;
+    border-bottom: 3px solid #58f !important;
+    padding-bottom: 2px;
+    margin-bottom: 3px;
+    color: #000;
 }
 
 .meep .uk-form .selected textarea {
-	margin-top: 3px !important;
-	margin-bottom: 5px !important;
+    margin-top: 3px !important;
+    margin-bottom: 5px !important;
 }
 
 .meep .uk-form .selected label {
-	color: #58f;
+    color: #58f;
 }
 
 .meep .uk-form .selected .uk-form-controls {
-	margin-top: -5px;
+    margin-top: -5px;
 }
 
 /* Fany transisions for hilite */
 .meep .uk-form input,
 .meep .uk-form textarea,
 .meep .uk-form .uk-form-controls {
-	transition-delay: 0s;
-	transition-duration: 0.2s;
-	transition-property: border, padding, margin;
-	transition-timing-function: linear;
+    transition-delay: 0s;
+    transition-duration: 0.2s;
+    transition-property: border, padding, margin;
+    transition-timing-function: linear;
 }
 
 /* Change size on post address fields */
 .meep .address_zipcode,
 .meep .address_city {
-	float: left;
+    float: left;
 }
 
 .meep .address_zipcode {
-	width: 157px;
+    width: 157px;
 }
 
 .meep .address_zipcode input {
-	width: 130px;
+    width: 130px;
 }
 
 .meep .address_city input {
-	width: 342px;
+    width: 342px;
 }
 
 .uk-form-row.address_city + div {
-	clear: both;
+    clear: both;
 }
 
 /* Hilite fields that have changed since last sync */
 .meep .changed input {
-/*	background-color: blue !important;*/
+    /*	background-color: blue !important;*/
 }
 
 .meep .changed label::before {
-	content: "* ";
+    content: "* ";
 }
 
 span.ma-changed {
@@ -256,31 +264,30 @@ span.ma-changed {
 
 /* Filterbox */
 .filterbox {
-	clear: both;
-	border: 1px solid #ccc;
-	border-radius: 8px;
-	padding: 10px;
-	margin: 20px 0;
+    clear: both;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 10px;
+    margin: 20px 0;
 }
 
 /* Other stuff */
 .uk-button.uk-float-left {
-	margin-right: 1em;
+    margin-right: 1em;
 }
-
 
 /* Dropdown buttons in tables <TableDropdownMenu /> */
 .uk-button-dropdown {
-	display: block !important;
+    display: block !important;
 }
 
 /* Toggle rows in tables */
 tr.toggle td {
-	padding: 0;
+    padding: 0;
 }
 
 tr.toggle.show td {
-	border-bottom: 3px solid #ddd;
+    border-bottom: 3px solid #ddd;
 }
 
 tr.toggle div.wrapper {
@@ -288,16 +295,16 @@ tr.toggle div.wrapper {
     -moz-transition: max-height 1.5s cubic-bezier(0, 1.05, 0, 1);
     transition: max-height 1.5s ease cubic-bezier(0, 1.05, 0, 1);
 
-	max-height: 0;
-	overflow: hidden;
+    max-height: 0;
+    overflow: hidden;
 }
 
 tr.toggle div.scrolling {
-	overflow: auto;
+    overflow: auto;
 }
 
 tr.toggle.show div.wrapper {
-	max-height: 500px;
+    max-height: 500px;
 
     -webkit-transition: max-height 1s ease;
     -moz-transition: max-height 1s ease;
@@ -305,7 +312,7 @@ tr.toggle.show div.wrapper {
 }
 
 tr.toggle.show div.scrolling {
-	max-height: 500px;
+    max-height: 500px;
 }
 
 /*
@@ -317,51 +324,53 @@ Zebra tables does not work when using toggle rows
 
 /* Removing styling from <pre> when using in toggle tables */
 tr.toggle pre {
-	margin-bottom: 0;
-	border: 0;
-	background: none;
+    margin-bottom: 0;
+    border: 0;
+    background: none;
 }
 
 .datebox {
-	border: 2px dotted #ddd;
-	margin-top: 20px;
-	padding: 0 10px;
-	border-radius: 5px;
-	background-color: #fff;
-	border-radius: 5px;
+    border: 2px dotted #ddd;
+    margin-top: 20px;
+    padding: 0 10px;
+    border-radius: 5px;
+    background-color: #fff;
+    border-radius: 5px;
 }
 
 .datebox .uk-grid {
-/*	margin-left:-15px;*/
+    /*	margin-left:-15px;*/
 }
 
 .datebox p {
-	margin: 5px 0 !important;
+    margin: 5px 0 !important;
 }
 
 .meep .uk-section {
-	margin-bottom: 3em;
+    margin-bottom: 3em;
 }
 
 .meep p {
-	margin: 0;
+    margin: 0;
 }
 
 .meep .uk-form-controls > .uk-form-icon {
-	width: 100%;
+    width: 100%;
 }
 
 /* MultiAccess stuff*/
-.multiaccess h4
-{
-	font-size: 14px;
-	font-weight: bold;
+.multiaccess h4 {
+    font-size: 14px;
+    font-weight: bold;
 }
 
-.multiaccess h3, .multiaccess h4, .multiaccess ul, .multiaccess p {
-	margin: 0;
+.multiaccess h3,
+.multiaccess h4,
+.multiaccess ul,
+.multiaccess p {
+    margin: 0;
 }
 
 .multiaccess .error {
-	margin-top: 10px;
+    margin-top: 10px;
 }

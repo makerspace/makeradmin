@@ -1,3 +1,5 @@
 requests
 pip
+ruff
+pre-commit
 -r api/requirements.txt

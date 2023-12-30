@@ -1,17 +1,17 @@
 import re
-from functools import wraps, partial
+from functools import partial, wraps
 from typing import Any, Callable, List, Optional, Tuple
 
 import pymysql
 from flask import Blueprint, g, jsonify
-from pymysql.constants.ER import DUP_ENTRY, BAD_NULL_ERROR
+from flask import typing as ft
+from pymysql.constants.ER import BAD_NULL_ERROR, DUP_ENTRY
 from sqlalchemy.exc import IntegrityError
 
-from service.api_definition import Arg, PUBLIC, GET, POST, PUT, DELETE, REQUIRED, NOT_UNIQUE
+from service.api_definition import DELETE, GET, NOT_UNIQUE, POST, PUBLIC, PUT, REQUIRED, Arg
 from service.db import db_session, fields_by_index
 from service.error import Forbidden, UnprocessableEntity
 from service.logging import logger
-from flask import typing as ft
 
 
 class InternalService(Blueprint):

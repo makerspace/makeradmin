@@ -1,11 +1,11 @@
 from typing import List, Optional, Tuple
-import bcrypt
 
-from membership.models import Permission, Group, Member
+import bcrypt
 from service.api_definition import BAD_VALUE
 from service.db import db_session
 from service.error import Unauthorized
 
+from membership.models import Group, Member, Permission
 
 FORBIDDEN_SUB_SEQUENCES = [
     ("abcdefghijklmnopqrstuvwxyzåäö", 4),

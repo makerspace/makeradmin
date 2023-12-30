@@ -1,7 +1,7 @@
+from service.db import db_session
 from sqlalchemy.exc import IntegrityError
 
 from membership.models import Permission
-from service.db import db_session
 
 
 def register_permissions(permissions):

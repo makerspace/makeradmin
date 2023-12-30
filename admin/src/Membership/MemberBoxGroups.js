@@ -1,38 +1,40 @@
-import React from 'react';
+import React from "react";
 import Collection from "../Models/Collection";
 import { Link } from "react-router-dom";
 import Group from "../Models/Group";
 import CollectionTable from "../Components/CollectionTable";
-import {get} from "../gateway";
+import { get } from "../gateway";
 import Select from "react-select";
 import * as _ from "underscore";
 
 const filterOptions = (items, options) => {
-    const current = new Set(items.map(i => i.id));
-    return options.filter(o => !current.has(o.group_id));
+    const current = new Set(items.map((i) => i.id));
+    return options.filter((o) => !current.has(o.group_id));
 };
 
-
-const updateItems = items => prevState => {
+const updateItems = (items) => (prevState) => {
     return {
         showOptions: filterOptions(items, prevState.options),
         items,
     };
 };
 
-const updateOptions = options => prevState => {
+const updateOptions = (options) => (prevState) => {
     return {
         showOptions: filterOptions(prevState.items, options),
         options,
     };
 };
 
-
 class MemberBoxGroups extends React.Component {
-
     constructor(props) {
         super(props);
-        this.collection = new Collection({type: Group, url: `/membership/member/${props.match.params.member_id}/groups`, idListName: 'groups', pageSize: 0});
+        this.collection = new Collection({
+            type: Group,
+            url: `/membership/member/${props.match.params.member_id}/groups`,
+            idListName: "groups",
+            pageSize: 0,
+        });
         this.state = {
             items: [],
             options: [],
@@ -40,31 +42,37 @@ class MemberBoxGroups extends React.Component {
             selectedOption: null,
         };
 
-        get({url: '/membership/group'}).then(data => this.setState(updateOptions(data.data)));
+        get({ url: "/membership/group" }).then((data) =>
+            this.setState(updateOptions(data.data)),
+        );
     }
 
     componentDidMount() {
-        this.unsubscribe = this.collection.subscribe(({items}) => this.setState(updateItems(items || [])));
+        this.unsubscribe = this.collection.subscribe(({ items }) =>
+            this.setState(updateItems(items || [])),
+        );
     }
-    
+
     componentWillUnmount() {
         this.unsubscribe();
     }
-    
+
     selectOption(member_id, group) {
-        this.setState({selectedOption: group});
-        
+        this.setState({ selectedOption: group });
+
         if (_.isEmpty(group)) {
             return;
         }
-        
-        this.collection.add(new Group(group)).then(this.setState({selectedOption: null}));
+
+        this.collection
+            .add(new Group(group))
+            .then(this.setState({ selectedOption: null }));
     }
-    
+
     render() {
-        const {member_id} = this.props.match.params;
-        const {selectedOption, showOptions} = this.state;
-        
+        const { member_id } = this.props.match.params;
+        const { selectedOption, showOptions } = this.state;
+
         return (
             <div>
                 <div className="uk-margin-top uk-form uk-form-stacked">
@@ -72,14 +80,17 @@ class MemberBoxGroups extends React.Component {
                         Lägg till i grupp
                     </label>
                     <div className="uk-form-controls">
-                        <Select name="group"
-                                className="uk-select"
-                                tabIndex={1}
-                                options={showOptions}
-                                value={selectedOption}
-                                getOptionValue={g => g.group_id}
-                                getOptionLabel={g => g.title}
-                                onChange={group => this.selectOption(member_id, group)}
+                        <Select
+                            name="group"
+                            className="uk-select"
+                            tabIndex={1}
+                            options={showOptions}
+                            value={selectedOption}
+                            getOptionValue={(g) => g.group_id}
+                            getOptionLabel={(g) => g.title}
+                            onChange={(group) =>
+                                this.selectOption(member_id, group)
+                            }
                         />
                     </div>
                 </div>
@@ -88,15 +99,28 @@ class MemberBoxGroups extends React.Component {
                         emptyMessage="Inte med i några grupper"
                         collection={this.collection}
                         columns={[
-                            {title: "Titel", sort: "title"},
-                            {title: "Antal medlemmar"},
-                            {title: ""},
+                            { title: "Titel", sort: "title" },
+                            { title: "Antal medlemmar" },
+                            { title: "" },
                         ]}
-                        rowComponent={({item}) => (
+                        rowComponent={({ item }) => (
                             <tr>
-                                <td><Link to={"/membership/groups/" + item.id}>{item.title}</Link></td>
+                                <td>
+                                    <Link to={"/membership/groups/" + item.id}>
+                                        {item.title}
+                                    </Link>
+                                </td>
                                 <td>{item.num_members}</td>
-                                <td><a onClick={() => this.collection.remove(item)} className="removebutton"><i className="uk-icon-trash"/></a></td>
+                                <td>
+                                    <a
+                                        onClick={() =>
+                                            this.collection.remove(item)
+                                        }
+                                        className="removebutton"
+                                    >
+                                        <i className="uk-icon-trash" />
+                                    </a>
+                                </td>
                             </tr>
                         )}
                     />

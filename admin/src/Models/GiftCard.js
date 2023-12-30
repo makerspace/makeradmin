@@ -1,8 +1,6 @@
-import Base from './Base';
-
+import Base from "./Base";
 
 export default class GiftCard extends Base {
-
     del() {
         throw new Error("Gift card delete not supported.");
     }

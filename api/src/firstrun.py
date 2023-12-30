@@ -1,11 +1,11 @@
 import argparse
 from datetime import datetime, timedelta
-from sqlalchemy import func
+from getpass import getpass
 from typing import Any, Dict, Generic, Literal, Optional, Tuple, TypeVar, cast
 
 from basic_types.enums import PriceLevel
 from init_db import init_db
-from membership.models import Group, Permission, Member
+from membership.models import Group, Member, Permission
 from membership.permissions import register_permissions
 from membership.views import member_entity
 from service.api_definition import ALL_PERMISSIONS
@@ -13,19 +13,19 @@ from service.config import config
 from service.db import db_session
 from service.logging import logger
 from shop.models import (
-    ProductCategory,
+    GiftCard,
     Product,
+    ProductAccountsCostCenters,
     ProductAction,
+    ProductCategory,
+    ProductGiftCardMapping,
     Transaction,
+    TransactionAccount,
     TransactionAction,
     TransactionContent,
-    TransactionAccount,
     TransactionCostcenter,
-    ProductAccountsCostCenters,
-    GiftCard,
-    ProductGiftCardMapping,
 )
-from getpass import getpass
+from sqlalchemy import func
 
 YELLOW = "\u001b[33m"
 GREEN = "\u001b[32m"

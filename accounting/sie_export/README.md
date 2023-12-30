@@ -26,4 +26,4 @@ scp aron@makeradmin.se:/home/johank/docker/MakerAdmin/makeradmin/transactions_20
 
 ## Exportera från Stripe
 
-Exportera data från Stripe genom att logga in och gå sedan till *Reports* -> *Balance* -> Ändra till "Last Year" -> *Balance change from activity* -> *Charges* -> *Download*.
+Exportera data från Stripe genom att logga in och gå sedan till _Reports_ -> _Balance_ -> Ändra till "Last Year" -> _Balance change from activity_ -> _Charges_ -> _Download_.

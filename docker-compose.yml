@@ -56,7 +56,6 @@ services:
       ACCESSY_SPECIAL_LABACCESS_GROUP:
       ACCESSY_DO_MODIFY:
 
-
   email-dispatcher:
     image: makeradmin/api:1.0
     build:

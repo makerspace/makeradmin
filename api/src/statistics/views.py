@@ -1,14 +1,15 @@
 from datetime import date
-from service.api_definition import GET, PUBLIC
 from statistics import service
 from statistics.maker_statistics import (
-    membership_by_date_statistics,
     lasertime,
+    membership_by_date_statistics,
+    membership_number_months2_default,
+    membership_number_months_default,
     retention_graph,
     shop_statistics,
-    membership_number_months_default,
-    membership_number_months2_default,
 )
+
+from service.api_definition import GET, PUBLIC
 
 
 @service.route("/membership/distribution_by_month2", method=GET, permission=PUBLIC)

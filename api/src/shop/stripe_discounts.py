@@ -1,16 +1,18 @@
+import time
 from dataclasses import dataclass
 from decimal import Decimal
 from enum import Enum
-import time
 from typing import TYPE_CHECKING, Dict, List, Optional
+
 import stripe
-from shop.stripe_util import retry
 from basic_types.enums import PriceLevel
 
 from shop.stripe_constants import MakerspaceMetadataKeys
+from shop.stripe_util import retry
 
 if TYPE_CHECKING:
     from membership.models import Member
+
     from shop.models import Product
 
 

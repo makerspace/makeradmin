@@ -1,16 +1,15 @@
-from collections import defaultdict
-from datetime import timedelta, datetime
-from random import randint
 import logging
+from collections import defaultdict
+from datetime import datetime, timedelta
+from random import randint
 
+from dispatch_sms import send_validation_code
+from membership.models import PhoneNumberChangeRequest, normalise_phone_number
+from multiaccessy.invite import AccessyError, ensure_accessy_labaccess
+from service.db import db_session
+from service.error import BadRequest, NotFound, Unauthorized
 from sqlalchemy import desc
 from sqlalchemy.orm.exc import NoResultFound
-
-from membership.models import PhoneNumberChangeRequest, normalise_phone_number
-from multiaccessy.invite import ensure_accessy_labaccess, AccessyError
-from service.db import db_session
-from service.error import NotFound, BadRequest, Unauthorized
-from dispatch_sms import send_validation_code
 
 logger = logging.getLogger("makeradmin")
 

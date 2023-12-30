@@ -1,15 +1,15 @@
+import logging
 from dataclasses import dataclass
 from datetime import date, timedelta
-import logging
+from typing import Any, Dict, List, Optional, Set, Tuple, TypeVar
 
-from sqlalchemy import func
-
-from membership.models import Span, Member
 from service.api_definition import NOT_UNIQUE
 from service.db import db_session
-from service.error import UnprocessableEntity, PreconditionFailed
+from service.error import PreconditionFailed, UnprocessableEntity
 from service.util import date_to_str
-from typing import Any, Dict, List, Optional, Set, Tuple, TypeVar
+from sqlalchemy import func
+
+from membership.models import Member, Span
 
 logger = logging.getLogger("makeradmin")
 

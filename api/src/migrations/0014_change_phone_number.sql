@@ -13,4 +13,3 @@ CREATE TABLE IF NOT EXISTS `change_phone_number_requests` (
 
 --- comment out after migrations is done:
 UPDATE membership_members SET phone = NULL;
-

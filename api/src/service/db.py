@@ -2,10 +2,10 @@ from functools import wraps
 from typing import Any, Callable, TypeVar, Union, cast
 
 from sqlalchemy import create_engine, inspect
-from sqlalchemy.orm import scoped_session, Session, sessionmaker
+from sqlalchemy.orm import Session, scoped_session, sessionmaker
 
 from service.logging import logger
-from service.util import wait_for, can_connect
+from service.util import can_connect, wait_for
 
 
 class SessionFactoryWrapper:

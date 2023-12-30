@@ -1,26 +1,26 @@
 from typing import Any
-from sqlalchemy import (
-    JSON,
-    Column,
-    Integer,
-    String,
-    DateTime,
-    func,
-    Text,
-    Numeric,
-    ForeignKey,
-    Enum,
-    Boolean,
-    LargeBinary,
-)
-
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import relationship, configure_mappers, validates
-from shop.stripe_constants import MakerspaceMetadataKeys
 
 from membership.models import Member
 from service.api_definition import BAD_VALUE
 from service.error import UnprocessableEntity
+from sqlalchemy import (
+    JSON,
+    Boolean,
+    Column,
+    DateTime,
+    Enum,
+    ForeignKey,
+    Integer,
+    LargeBinary,
+    Numeric,
+    String,
+    Text,
+    func,
+)
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import configure_mappers, relationship, validates
+
+from shop.stripe_constants import MakerspaceMetadataKeys
 
 Base = declarative_base()
 
