@@ -66,7 +66,7 @@ module.exports = class FileInput extends React.Component {
 
 			}
 		};
-		
+
 		var select = UIkit.uploadSelect($("#upload-select"), settings),
 		drop = UIkit.uploadDrop($("#upload-drop"), settings);
 		*/
@@ -169,7 +169,7 @@ module.exports = class FileInput extends React.Component {
 			<div className={classes}>
 				<label htmlFor={this.props.name} className="uk-form-label">{this.props.title}</label>
 				<div className="uk-form-controls">
-					{this.props.icon ? 
+					{this.props.icon ?
 						<div className="uk-form-icon">
 							<i className={"uk-icon-" + this.props.icon}></i>
 							<input type="text" name={this.props.name} id={this.props.name} disabled={this.props.disabled} value={this.state.value} placeholder={this.props.placeholder ? this.props.placeholder : this.props.title} onChange={this.onChange.bind(this)} className="uk-form-width-large" onFocus={this.onFocus.bind(this)} onBlur={this.onBlur.bind(this)} />
