@@ -23,7 +23,7 @@ jobs:
           FIRSTRUN_AUTO_ADMIN_EMAIL: maker@bmail.com
           FIRSTRUN_AUTO_ADMIN_PASSWORD: not_a_real_passw0rd
 
-  test:
+  unit-test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -31,3 +31,16 @@ jobs:
         run: make build
       - name: Run tests
         run: make test
+
+  stripe-tests:
+    runs-on: ubuntu-latest
+    concurrency: stripe
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build docker
+        run: make build
+      - name: Run tests
+        run: make test
+        env:
+          STRIPE_PRIVATE_KEY: ${{ secrets.STRIPE_PRIVATE_KEY }}
+          STRIPE_PUBLIC_KEY: ${{ secrets.STRIPE_PUBLIC_KEY }}
