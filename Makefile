@@ -40,6 +40,7 @@ init-npm:
 
 init-pip:
 	python3 -m pip install --upgrade -r requirements.txt
+	pre-commit install --install-hooks
 
 init: init-pip init-npm
 
@@ -56,12 +57,15 @@ test-admin-js:
 firstrun: .env init build
 	$(COMPOSE) run api python3 ./firstrun.py
 
-format: format-python format-webstuff
+format: format-python format-precommit format-webstuff
 format-python:
 	ruff format .
 	ruff check --fix
 format-webstuff:
 	npx prettier --write --cache .
+format-precommit:
+	pre-commit run
 
 .PHONY: build firstrun init init-npm init-pip install run stop dev-test
 .PHONY: test-clean test dev format format-python format-webstuff
+.PHONY: format-precommit

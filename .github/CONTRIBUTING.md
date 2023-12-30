@@ -7,10 +7,11 @@ Thank you for considering to contribute to Makeradmin! Here are some guidelines 
 Code needs to follow the formatting rules set up in the repository.
 You should always format your code before each commit.
 This can be done with the command `make format`.
-
 Python code if formatted with `ruff` and web-code is formatted with `prettier`.
 
-Formatting is checked automatically when opening a pull request.
+It is recommended to set up the pre-commit hooks to check the formatting before pushing to Github. They can be installed by running `make init-pip`.
+
+Formatting is otherwise checked automatically when opening a pull request.
 
 ### IDE settings
 
