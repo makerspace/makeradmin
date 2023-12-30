@@ -1,14 +1,15 @@
+import re
 from datetime import datetime
-from random import randint, choice, seed
+from random import choice, randint, seed
 from typing import Any, Dict
-from faker import Faker
-from basic_types.enums import PriceLevel
 
+from basic_types.enums import PriceLevel
+from faker import Faker
 from membership.models import Member, Span
 from messages.models import Message
 from shop.models import ProductAction, Transaction, TransactionContent
+
 from test_aid.test_util import random_str
-import re
 
 DEFAULT_PASSWORD = "D9ub8$13"
 

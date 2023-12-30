@@ -1,7 +1,6 @@
 from logging import getLogger
 
 import requests
-
 from service.config import get_46elks_auth
 from service.error import InternalServerError, UnprocessableEntity
 

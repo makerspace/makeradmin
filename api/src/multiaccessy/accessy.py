@@ -1,6 +1,5 @@
 import threading
 from collections.abc import Iterable
-
 from dataclasses import dataclass, field
 from datetime import date, datetime, timedelta
 from logging import getLogger
@@ -9,7 +8,6 @@ from time import sleep
 from typing import Union
 
 import requests
-
 from service.config import config
 from service.entity import fromisoformat
 

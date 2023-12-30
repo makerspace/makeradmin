@@ -1,11 +1,11 @@
 import argparse
 from datetime import datetime, timedelta
-from sqlalchemy import func
+from getpass import getpass
 from typing import Any, Dict, Generic, Literal, Optional, Tuple, TypeVar, cast
 
 from basic_types.enums import PriceLevel
 from init_db import init_db
-from membership.models import Group, Permission, Member
+from membership.models import Group, Member, Permission
 from membership.permissions import register_permissions
 from membership.views import member_entity
 from service.api_definition import ALL_PERMISSIONS
@@ -13,19 +13,19 @@ from service.config import config
 from service.db import db_session
 from service.logging import logger
 from shop.models import (
-    ProductCategory,
+    GiftCard,
     Product,
+    ProductAccountsCostCenters,
     ProductAction,
+    ProductCategory,
+    ProductGiftCardMapping,
     Transaction,
+    TransactionAccount,
     TransactionAction,
     TransactionContent,
-    TransactionAccount,
     TransactionCostcenter,
-    ProductAccountsCostCenters,
-    GiftCard,
-    ProductGiftCardMapping,
 )
-from getpass import getpass
+from sqlalchemy import func
 
 YELLOW = "\u001b[33m"
 GREEN = "\u001b[32m"
@@ -294,7 +294,12 @@ def create_shop_transactions() -> None:
             transaction = get_or_create(
                 Transaction,
                 id=index,
-                defaults=dict(member_id=1, amount=product.price, status="completed", created_at=test_date),
+                defaults=dict(
+                    member_id=1,
+                    amount=product.price,
+                    status="completed",
+                    created_at=test_date,
+                ),
             )
             transaction_content = get_or_create(
                 TransactionContent,
@@ -308,6 +313,55 @@ def create_shop_transactions() -> None:
             )
             index += 1
 
+    # A transaction that is pending
+    product = products[0]
+    transaction = get_or_create(
+        Transaction,
+        id=index,
+        defaults=dict(
+            member_id=1,
+            amount=product.price,
+            status="pending",
+            created_at=test_date,
+        ),
+    )
+    transaction_content = get_or_create(
+        TransactionContent,
+        id=index,
+        defaults=dict(
+            transaction_id=transaction.id,
+            product_id=product.id,
+            count=1,
+            amount=product.price,
+        ),
+    )
+    index += 1
+
+    # A failed transaction
+    product = products[1]
+    transaction = get_or_create(
+        Transaction,
+        id=index,
+        defaults=dict(
+            member_id=1,
+            amount=product.price,
+            status="failed",
+            created_at=test_date,
+        ),
+    )
+    transaction_content = get_or_create(
+        TransactionContent,
+        id=index,
+        defaults=dict(
+            transaction_id=transaction.id,
+            product_id=product.id,
+            count=1,
+            amount=product.price,
+        ),
+    )
+    index += 1
+
+    # A transaction with a membership
     membership_prod = get_or_create(Product, name="Base membership")
     transaction = get_or_create(
         Transaction,
@@ -341,7 +395,12 @@ def create_shop_transactions() -> None:
     transaction = get_or_create(
         Transaction,
         id=index,
-        defaults=dict(member_id=None, amount=100, status="completed", created_at=datetime.now()),
+        defaults=dict(
+            member_id=None,
+            amount=100,
+            status="completed",
+            created_at=datetime.now(),
+        ),
     )
 
     # TODO this should probabl be associated with some sort of gift card product later

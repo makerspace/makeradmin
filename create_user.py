@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
-from api.src.basic_types.enums import PriceLevel
-
 import argparse
-import sys
 import os
+import sys
 from typing import Optional
-from dotenv import dotenv_values
+
 import requests
+from dotenv import dotenv_values
+
+from api.src.basic_types.enums import PriceLevel
 
 env = dotenv_values()
 

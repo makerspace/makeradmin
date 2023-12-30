@@ -1,10 +1,12 @@
 from logging import getLogger
-from test_aid.systest_config import STRIPE_PRIVATE_KEY, STRIPE_PUBLIC_KEY
-from shop.models import Product, ProductCategory
+
+import stripe
 from service.config import debug_mode
 from service.db import db_session
-from shop.stripe_util import get_subscription_category, get_and_sync_stripe_product_and_prices
-import stripe
+from test_aid.systest_config import STRIPE_PRIVATE_KEY, STRIPE_PUBLIC_KEY
+
+from shop.models import Product, ProductCategory
+from shop.stripe_util import get_and_sync_stripe_product_and_prices, get_subscription_category
 
 logger = getLogger("makeradmin")
 

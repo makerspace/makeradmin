@@ -1,10 +1,9 @@
 from os.path import abspath, dirname
 
-from jinja2 import FileSystemLoader, Environment, select_autoescape
-
-from messages.models import MessageTemplate, Message
+from jinja2 import Environment, FileSystemLoader, select_autoescape
 from service.config import get_public_url
 
+from messages.models import Message, MessageTemplate
 
 template_loader = FileSystemLoader(abspath(dirname(dirname(__file__))) + "/templates")
 template_env = Environment(loader=template_loader, autoescape=select_autoescape())

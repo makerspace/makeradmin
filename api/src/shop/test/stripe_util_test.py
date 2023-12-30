@@ -2,14 +2,13 @@ from logging import getLogger
 from typing import Any, Dict, List
 from unittest import skipIf
 
-import membership.models
-import shop.models
-import messages.models
 import core.models
-from shop import stripe_util
-from shop.models import Product
-from shop import stripe_constants
+import membership.models
+import messages.models
+import shop.models
 import stripe
+from shop import stripe_constants, stripe_util
+from shop.models import Product
 from test_aid.test_base import FlaskTestBase, ShopTestMixin
 
 logger = getLogger("makeradmin")

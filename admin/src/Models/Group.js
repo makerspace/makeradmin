@@ -1,12 +1,10 @@
-import Base from './Base';
-
+import Base from "./Base";
 
 export default class Group extends Base {
-    
     deleteConfirmMessage() {
         return `Are you sure you want to delete group ${this.title}?`;
     }
-    
+
     canSave() {
         return this.isDirty() && this.title && this.name;
     }

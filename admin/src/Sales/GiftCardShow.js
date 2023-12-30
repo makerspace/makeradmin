@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 import { Link } from "react-router-dom";
 import GiftCard from "../Models/GiftCard";
 import Collection from "../Models/Collection";
@@ -7,13 +7,17 @@ import GiftCardRow from "../Models/GiftCardRow";
 import Currency from "../Components/Currency";
 
 class GiftCardShow extends React.Component {
-
     constructor(props) {
         super(props);
         const { id } = props.match.params;
         this.gift_card = GiftCard.get(id);
         this.state = {};
-        this.gift_cardRows = new Collection({ type: GiftCardRow, url: `/webshop/gift-card/${id}/products`, pageSize: 0, expand: 'product' });
+        this.gift_cardRows = new Collection({
+            type: GiftCardRow,
+            url: `/webshop/gift-card/${id}/products`,
+            pageSize: 0,
+            expand: "product",
+        });
     }
 
     componentDidMount() {
@@ -51,18 +55,34 @@ class GiftCardShow extends React.Component {
                         collection={this.gift_cardRows}
                         columns={[
                             { title: "Produkt" },
-                            { title: "Pris", class: 'uk-text-right' },
+                            { title: "Pris", class: "uk-text-right" },
                             { title: "Antal" },
-                            { title: "Summa", class: 'uk-text-right' }
+                            { title: "Summa", class: "uk-text-right" },
                         ]}
-                        rowComponent={({ item }) =>
+                        rowComponent={({ item }) => (
                             <tr>
-                                <td><Link to={"/sales/product/" + item.product_id}>{item.name}</Link></td>
-                                <td className="uk-text-right"><Currency value={100 * item.amount / item.product_quantity} /> kr</td>
+                                <td>
+                                    <Link
+                                        to={"/sales/product/" + item.product_id}
+                                    >
+                                        {item.name}
+                                    </Link>
+                                </td>
+                                <td className="uk-text-right">
+                                    <Currency
+                                        value={
+                                            (100 * item.amount) /
+                                            item.product_quantity
+                                        }
+                                    />{" "}
+                                    kr
+                                </td>
                                 <td>{item.product_quantity}</td>
-                                <td className="uk-text-right"><Currency value={100 * item.amount} /> kr</td>
+                                <td className="uk-text-right">
+                                    <Currency value={100 * item.amount} /> kr
+                                </td>
                             </tr>
-                        }
+                        )}
                     />
                 </div>
             </div>

@@ -1,10 +1,9 @@
-from collections import defaultdict
-from typing import Dict, Tuple
-from datetime import datetime
 from argparse import ArgumentParser
+from collections import defaultdict
+from datetime import datetime
+from typing import Dict, Tuple
 
 from accounting import MonthlyTransactions
-
 
 HEADER_TEMPLATE = """
 #FLAGGA 0
@@ -41,10 +40,10 @@ def transaction_string(account, cost_center, sum, date, description) -> str:
 
 def main():
     parser = ArgumentParser()
-    parser.add_argument("--signer", help="Who generated the file", required=True),
-    parser.add_argument("--financial-year", type=int, required=True, help="The financial year of the bookings"),
-    parser.add_argument("--output", "-o", default=None, help="The output file where to save the export"),
-    parser.add_argument("--monthly-csv", required=True, help="csv for monthly transactions"),
+    parser.add_argument("--signer", help="Who generated the file", required=True)
+    parser.add_argument("--financial-year", type=int, required=True, help="The financial year of the bookings")
+    parser.add_argument("--output", "-o", default=None, help="The output file where to save the export")
+    parser.add_argument("--monthly-csv", required=True, help="csv for monthly transactions")
     args = parser.parse_args()
 
     monthly_transactions = MonthlyTransactions.parse_csv(args.monthly_csv)

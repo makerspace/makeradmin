@@ -10,7 +10,7 @@ COPY ./webpack.config.js ./tsconfig.json ./package.json ./package-lock.json /wor
 
 WORKDIR /work
 
-RUN npm install
+RUN npm ci
 
 COPY ./src/ /work/src
 COPY ./jestSetup.js /work/

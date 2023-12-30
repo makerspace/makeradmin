@@ -9,41 +9,50 @@
 import { VNode, isValidElement } from "preact";
 
 // T is the dictionary, S ist the next string part of the object property path
-// If S does not match dict shape, return its next expected properties 
-type DeepKeys<T, S extends string> =
-T extends VNode ? "" :
-(T extends object
-? S extends `${infer I1}.${infer I2}`
-    ? I1 extends keyof T
-        // fix issue allowed last dot
-        ? T[I1] extends object
-            ? `${I1}.${DeepKeys<T[I1], I2>}`
+// If S does not match dict shape, return its next expected properties
+type DeepKeys<T, S extends string> = T extends VNode
+    ? ""
+    : T extends object
+      ? S extends `${infer I1}.${infer I2}`
+          ? I1 extends keyof T
+              ? // fix issue allowed last dot
+                T[I1] extends object
+                  ? `${I1}.${DeepKeys<T[I1], I2>}`
+                  : keyof T & string
+              : keyof T & string
+          : S extends keyof T
+            ? `${S}`
             : keyof T & string
-        : keyof T & string
-    : S extends keyof T
-        ? `${S}`
-        : keyof T & string
-: "");
-
+      : "";
 
 /// Get all possible key paths
-type DeepKeysAll<T> = T extends VNode ? "" : (T extends object ? {
-    [K in keyof T]-?: `${K & string}` | Concat<K & string, DeepKeysAll<T[K]>>
-}[keyof T] : "");
+type DeepKeysAll<T> = T extends VNode
+    ? ""
+    : T extends object
+      ? {
+            [K in keyof T]-?:
+                | `${K & string}`
+                | Concat<K & string, DeepKeysAll<T[K]>>;
+        }[keyof T]
+      : "";
 
-type Concat<K extends string, P extends string> =
-    `${K}${"" extends P ? "" : "."}${P}`;
+type Concat<K extends string, P extends string> = `${K}${"" extends P
+    ? ""
+    : "."}${P}`;
 
 // or: only get leaf and no intermediate key path
-export type TranslationKeyValues<T> = T extends object ?
-    { [K in keyof T]-?: Concat<K & string, DeepKeysAll<T[K]>> }[keyof T] : "";
+export type TranslationKeyValues<T> = T extends object
+    ? { [K in keyof T]-?: Concat<K & string, DeepKeysAll<T[K]>> }[keyof T]
+    : "";
 
 /// Returns property value from object O given property path T, otherwise never
-type GetDictValue<T extends string, O> =
-    T extends `${infer A}.${infer B}` ? 
-    A extends keyof O ? GetDictValue<B, O[A]> : never
-    : T extends keyof O ? O[T] : never;
-
+type GetDictValue<T extends string, O> = T extends `${infer A}.${infer B}`
+    ? A extends keyof O
+        ? GetDictValue<B, O[A]>
+        : never
+    : T extends keyof O
+      ? O[T]
+      : never;
 
 export class Translation<T extends Record<string, any>> {
     translations: T;
@@ -65,7 +74,7 @@ export class Translation<T extends Record<string, any>> {
             }
             item = child;
         }
-        const v = item[parts[parts.length-1]];
+        const v = item[parts[parts.length - 1]];
         if (typeof v !== "object" || Array.isArray(v) || isValidElement(v)) {
             return v as unknown as GetDictValue<S, T>;
         } else {

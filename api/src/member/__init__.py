@@ -1,7 +1,6 @@
 from service.internal_service import InternalService
 
-
-service = InternalService(name='member')
+service = InternalService(name="member")
 
 
 import member.views

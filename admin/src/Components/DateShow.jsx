@@ -1,13 +1,16 @@
-import React from 'react';
-import {dateToStr} from "../utils";
+import React from "react";
+import { dateToStr } from "../utils";
 
-
-const DateShow = ({date}) => {
+const DateShow = ({ date }) => {
     if (date) {
         return <span>{dateToStr(date)}</span>;
     }
-    
-    return <span><em>Not set</em></span>;
+
+    return (
+        <span>
+            <em>Not set</em>
+        </span>
+    );
 };
 
 export default DateShow;

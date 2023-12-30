@@ -1,15 +1,15 @@
-from datetime import datetime, timedelta, date
-from typing import List, Tuple
+import itertools
 import math
-from membership.membership import get_membership_summaries
+from datetime import date, datetime, timedelta
+from typing import List, Tuple
 
+from membership.membership import get_membership_summaries
+from membership.models import Member, Span
 from service.db import db_session
 from service.logging import logger
-from shop.models import Product, Transaction, TransactionContent, ProductCategory
-from shop.entities import product_entity, category_entity
-from membership.models import Member, Span
+from shop.entities import category_entity, product_entity
+from shop.models import Product, ProductCategory, Transaction, TransactionContent
 from sqlalchemy import func
-import itertools
 
 
 def spans_by_date(span_type) -> List[Tuple[str, int]]:
