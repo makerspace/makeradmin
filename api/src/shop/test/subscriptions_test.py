@@ -9,6 +9,7 @@ from typing import Any, Dict, List, Optional, Set, Tuple, cast
 from unittest import skipIf
 
 import pytest
+from shop.stripe_customer import get_and_sync_stripe_customer
 from shop.stripe_util import event_semantic_time
 from shop.stripe_subscriptions import (
     BINDING_PERIOD,
@@ -34,7 +35,7 @@ from service.db import db_session
 from shop.transactions import ship_orders
 from test_aid.test_base import FlaskTestBase
 import stripe
-import stripe.error
+import stripe
 from shop import stripe_event
 from shop import stripe_constants
 
@@ -64,7 +65,7 @@ def attach_and_set_payment_method(
     card_token: FakeCardPmToken,
     test_clock: Optional[stripe.test_helpers.TestClock] = None,
 ) -> None:
-    stripe_member = stripe_subscriptions.get_stripe_customer(member, test_clock=test_clock)
+    stripe_member = get_and_sync_stripe_customer(member, test_clock=test_clock)
     assert stripe_member is not None
 
     payment_method = stripe.PaymentMethod.attach(card_token.value, customer=stripe_member.stripe_id)
@@ -220,7 +221,7 @@ class Test(FlaskTestBase):
                             logger.info("Clock is ready. Waiting a bit to make sure we have received all events...")
                             done = 1
                             break
-            except stripe.error.RateLimitError:
+            except stripe.RateLimitError:
                 logger.warning("Exceeded Stripe API rate limit. Waiting a bit...")
                 # This is most likely because we are running tests in parallel.
                 # Add some jitter to avoid the stripe tests from running so much in parallel.

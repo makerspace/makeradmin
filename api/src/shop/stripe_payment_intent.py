@@ -1,15 +1,17 @@
 from dataclasses import dataclass
+from decimal import Decimal
+from datetime import datetime, timezone, date
 from enum import Enum
 from logging import getLogger
 from typing import Optional
 from typing_extensions import Never
 from dataclasses_json import DataClassJsonMixin
 import stripe
-from stripe.error import InvalidRequestError, StripeError, CardError
+from stripe import InvalidRequestError, CardError
 
 from stripe import PaymentIntent
 from membership.models import Member
-from shop.stripe_subscriptions import get_stripe_customer
+from shop.stripe_customer import get_and_sync_stripe_customer
 from service.db import db_session
 from service.error import InternalServerError, EXCEPTION, BadRequest
 from shop.models import Transaction, StripePending
@@ -56,6 +58,16 @@ class PartialPayment(DataClassJsonMixin):
     # Payment needs additional actions to complete if this is non-null.
     # If it is None then the payment is complete.
     action_info: Optional[PaymentAction]
+
+
+@dataclass(frozen=True)
+class CompletedPayment(DataClassJsonMixin):
+    """Used for bookkeeping for old transactions that are already completed"""
+
+    transaction_id: int
+    amount: Decimal
+    created: datetime
+    fee: Decimal
 
 
 def create_action_required_response(transaction: Transaction, payment_intent: PaymentIntent) -> PaymentAction:
@@ -157,7 +169,7 @@ def pay_with_stripe(transaction: Transaction, payment_method_id: str, setup_futu
     try:
         member = db_session.query(Member).get(transaction.member_id)
         assert member is not None
-        stripe_customer = get_stripe_customer(member, test_clock=None)
+        stripe_customer = get_and_sync_stripe_customer(member)
         assert stripe_customer is not None
 
         payment_intent = stripe.PaymentIntent.create(

@@ -312,7 +312,7 @@ def create_shop_transactions() -> None:
     transaction = get_or_create(
         Transaction,
         id=index,
-        defaults=dict(member_id=1, amount=membership_prod.price, status="completed", created_at=test_date),
+        defaults=dict(member_id=1, amount=membership_prod.price, status="completed", created_at=datetime.now()),
     )
     transaction_content = get_or_create(
         TransactionContent,
@@ -332,7 +332,7 @@ def create_shop_transactions() -> None:
             action_type="add_labaccess_days",
             value=10,
             status="completed",
-            completed_at=test_date,
+            completed_at=datetime.now(),
         ),
     )
     index += 1
@@ -409,17 +409,29 @@ def create_shop_accounts_cost_centers() -> None:
 def create_shop_gift_cards() -> None:
     banner(YELLOW, "Creating Fake 'Gift Cards' and 'Gift Card & Product Mappings'")
 
-    gift_card = get_or_create(
-        GiftCard, amount=299.00, validation_code=12989519, email="test@fake.com", status="activated"
-    )
-
-    # Get existing product with ID: 64 (Makerspace access starter pack)
+    # Get existing product Makerspace access starter pack
     product = get_or_create(
         Product,
         name="Makerspace access starter pack",
     )
 
-    get_or_create(ProductGiftCardMapping, gift_card_id=gift_card.id, product_id=product.id)
+    for i in range(2):
+        status = "valid" if i % 2 == 0 else "used"
+        gift_card = get_or_create(
+            GiftCard,
+            amount=product.price,
+            validation_code=str(129895190 + i),
+            email="test@fake.com",
+            status=status,
+        )
+
+        get_or_create(
+            ProductGiftCardMapping,
+            gift_card_id=gift_card.id,
+            product_id=product.id,
+            product_quantity=1,
+            amount=product.price,
+        )
 
     db_session.commit()
 
@@ -428,11 +440,22 @@ def firstrun() -> None:
     create_db()
     admins = admin_group()
     create_admin(admins)
-    create_members()
-    create_shop_products()
-    create_shop_transactions()
-    create_shop_accounts_cost_centers()
-    create_shop_gift_cards()
+
+    while True:
+        s = input("Do you want to add various fake data for development purposes? [Y/n]: ")
+        if s in ["n", "no"]:
+            create_dev_data = False
+            break
+        if s in {"", "y", "yes"}:
+            create_dev_data = True
+            break
+
+    if create_dev_data:
+        create_members()
+        create_shop_products()
+        create_shop_transactions()
+        create_shop_accounts_cost_centers()
+        create_shop_gift_cards()
 
     banner(
         GREEN,
@@ -442,7 +465,4 @@ def firstrun() -> None:
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Initialize the database with some development data.")
-    args = parser.parse_args()
-
     firstrun()

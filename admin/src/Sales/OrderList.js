@@ -47,8 +47,17 @@ class OrderList extends CollectionNavigation {
         return (
             <div className="uk-margin-top">
                 <h2>Inkomna ordrar</h2>
-                <SearchBox handleChange={this.onSearch} value={this.state.search} />
-                <CollectionTable emptyMessage="Inga ordrar" rowComponent={Row} collection={this.collection} columns={columns} onPageNav={this.onPageNav} />
+                <SearchBox
+                    handleChange={this.onSearch}
+                    value={this.state.search}
+                />
+                <CollectionTable
+                    emptyMessage="Inga ordrar"
+                    rowComponent={Row}
+                    collection={this.collection}
+                    columns={columns}
+                    onPageNav={this.onPageNav}
+                />
             </div>
         );
     }

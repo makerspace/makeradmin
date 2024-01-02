@@ -6,7 +6,7 @@ import time
 from typing import Any, Dict, List, Optional
 
 import stripe
-from stripe.error import SignatureVerificationError, RateLimitError
+from stripe import SignatureVerificationError, RateLimitError
 from datetime import timezone
 from shop import stripe_subscriptions
 import shop.transactions
