@@ -31,7 +31,7 @@ class TransactionWithAccounting:
 
 @dataclass()
 class AccountCostCenter:
-    acccount: str | None
+    account: str | None
     cost_center: str | None
     fraction: Decimal
     type: AccountingEntryType
@@ -56,7 +56,7 @@ class ProductToAccountCostCenter:
             fraction_sums[AccountingEntryType.DEBIT] = Decimal(0)
             account_cost_centers: List[AccountCostCenter] = []
             for product_info in product_accounting:
-                if product_info.account.acccount is None and product_info.cost_center.cost_center is None:
+                if product_info.account.account is None and product_info.cost_center.cost_center is None:
                     raise InternalServerError(
                         f"Product {product.id} has accounting with both account and cost center as none"
                     )
@@ -85,18 +85,22 @@ class ProductToAccountCostCenter:
 
 def diff_transactions_and_completed_payments(
     transactions: List[Transaction], completed_payments: Dict[int, CompletedPayment]
-) -> List[Tuple[Transaction | None, CompletedPayment]]:
+) -> List[Tuple[Transaction | None, CompletedPayment | None]]:
     unmatched_data: List[Tuple[Transaction | None, CompletedPayment]] = []
 
     for transaction in transactions:
         if transaction.status != Transaction.COMPLETED:
+            continue
+        if transaction.id not in completed_payments:
+            unmatched_data.append((transaction, None))
             continue
         completed_payment = completed_payments.pop(transaction.id)
         if transaction.amount != completed_payment.amount or transaction.id != completed_payment.transaction_id:
             unmatched_data.append((transaction, completed_payment))
 
     if len(completed_payments) > 0:
-        unmatched_data.append((None, completed_payments))
+        for payment in completed_payments.values():
+            unmatched_data.append((None, payment))
 
     return unmatched_data
 
@@ -117,7 +121,7 @@ def split_transactions_over_accounts(transactions: List[Transaction]) -> List[Tr
                     TransactionWithAccounting(
                         amount=amount_to_add,
                         date=transaction.created_at,
-                        account=accounting.acccount,
+                        account=accounting.account,
                         cost_center=accounting.cost_center,
                         type=accounting.type,
                     )
