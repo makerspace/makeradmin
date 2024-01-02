@@ -1,11 +1,10 @@
 import os
 import sys
-from logging import basicConfig, INFO, getLogger
+from logging import INFO, basicConfig, getLogger
 from typing import Any
 
-from flask import Flask, Blueprint, redirect, url_for, send_from_directory
 import flask
-
+from flask import Blueprint, Flask, redirect, send_from_directory, url_for
 
 basicConfig(
     format="%(asctime)s %(levelname)s [%(process)d/%(threadName)s %(pathname)s:%(lineno)d]: %(message)s",

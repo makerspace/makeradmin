@@ -1,10 +1,12 @@
 from datetime import date
-from shop.models import Transaction
+
 from membership.models import Member
 from messages.message import send_message
 from messages.models import MessageTemplate
 from service.db import db_session
 from service.util import date_to_str
+
+from shop.models import Transaction
 
 
 def send_membership_updated_email(member_id: int, extended_days: int, end_date: date) -> None:

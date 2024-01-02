@@ -1,26 +1,26 @@
 from typing import Any
-from sqlalchemy import (
-    JSON,
-    Column,
-    Integer,
-    String,
-    DateTime,
-    func,
-    Text,
-    Numeric,
-    ForeignKey,
-    Enum,
-    Boolean,
-    LargeBinary,
-)
-
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import relationship, configure_mappers, validates
-from shop.stripe_constants import MakerspaceMetadataKeys
 
 from membership.models import Member
 from service.api_definition import BAD_VALUE
 from service.error import UnprocessableEntity
+from sqlalchemy import (
+    JSON,
+    Boolean,
+    Column,
+    DateTime,
+    Enum,
+    ForeignKey,
+    Integer,
+    LargeBinary,
+    Numeric,
+    String,
+    Text,
+    func,
+)
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import configure_mappers, relationship, validates
+
+from shop.stripe_constants import MakerspaceMetadataKeys
 
 Base = declarative_base()
 
@@ -133,7 +133,7 @@ class Transaction(Base):
     stripe_pending = relationship("StripePending")
 
     def __repr__(self) -> str:
-        return f"Transaction(id={self.id}, amount={self.amount}, status={self.status})"
+        return f"Transaction(id={self.id}, amount={self.amount}, status={self.status}, created_at={self.created_at})"
 
 
 class TransactionContent(Base):
@@ -233,7 +233,7 @@ class TransactionAccount(Base):
     __tablename__ = "webshop_transaction_accounts"
 
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
-    account = Column(Integer, nullable=False)
+    account = Column(String(100), nullable=False)
     description = Column(String(255), nullable=False)
     display_order = Column(Integer, nullable=False)
     created_at = Column(DateTime, server_default=func.now())
@@ -248,7 +248,7 @@ class TransactionCostCenter(Base):
     __tablename__ = "webshop_transaction_cost_centers"
 
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
-    cost_center = Column(String(100), nullable=False, unique=True)
+    cost_center = Column(String(100), nullable=False)
     description = Column(String(255), nullable=False)
     display_order = Column(Integer, nullable=False, unique=True)
     created_at = Column(DateTime, server_default=func.now())
@@ -262,12 +262,15 @@ class TransactionCostCenter(Base):
 class ProductAccountsCostCenters(Base):
     __tablename__ = "webshop_product_accounting"
 
+    DEBIT = "debit"
+    CREDIT = "credit"
+
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
     product_id = Column(Integer, ForeignKey("webshop_products.id"), nullable=False)
-    account_id = Column(Integer, ForeignKey("webshop_transaction_accounts.id"), nullable=False)
-    cost_center_id = Column(Integer, ForeignKey("webshop_transaction_cost_centers.id"), nullable=False)
-    debits = Column(Numeric(10, 2), nullable=False, server_default=("0"))
-    credits = Column(Numeric(10, 2), nullable=False, server_default=("0"))
+    account_id = Column(Integer, ForeignKey("webshop_transaction_accounts.id"), nullable=True)
+    cost_center_id = Column(Integer, ForeignKey("webshop_transaction_cost_centers.id"), nullable=True)
+    fraction = Column(Numeric(6, 3), nullable=False, server_default=("0.0"))
+    type = Column(Enum(DEBIT, CREDIT), nullable=False)
 
     product = relationship(Product, backref="accounts_cost_centers")
     account = relationship(TransactionAccount, backref="accounts_cost_centers")

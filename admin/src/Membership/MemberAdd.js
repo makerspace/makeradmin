@@ -1,12 +1,10 @@
-import React from 'react';
+import React from "react";
 
-import MemberForm from '../Components/MemberForm';
+import MemberForm from "../Components/MemberForm";
 import Member from "../Models/Member";
-import { browserHistory } from '../browser_history';
-
+import { browserHistory } from "../browser_history";
 
 class MemberAdd extends React.Component {
-
     constructor(props) {
         super(props);
         this.member = new Member();
@@ -18,7 +16,15 @@ class MemberAdd extends React.Component {
                 <h2>Skapa medlem</h2>
                 <MemberForm
                     member={this.member}
-                    onSave={() => this.member.save().then(() => browserHistory.replace('/membership/members/' + this.member.id))}
+                    onSave={() =>
+                        this.member
+                            .save()
+                            .then(() =>
+                                browserHistory.replace(
+                                    "/membership/members/" + this.member.id,
+                                ),
+                            )
+                    }
                 />
             </div>
         );

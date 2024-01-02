@@ -1,0 +1,16 @@
+{
+    "devDependencies": {
+        "prettier": "3.1.1"
+    },
+    "prettier": {
+        "tabWidth": 4,
+        "overrides": [
+            {
+                "files": "*.yml",
+                "options": {
+                    "tabWidth": 2
+                }
+            }
+        ]
+    }
+}

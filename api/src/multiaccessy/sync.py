@@ -4,17 +4,17 @@ from datetime import date, timedelta
 from logging import getLogger
 from typing import Dict, List
 
+from membership.models import Member, Span
+from service.db import db_session
 from sqlalchemy.orm import contains_eager
 
-from membership.models import Member, Span
 from multiaccessy.accessy import (
-    PHONE,
-    AccessyMember,
     ACCESSY_LABACCESS_GROUP,
     ACCESSY_SPECIAL_LABACCESS_GROUP,
+    PHONE,
+    AccessyMember,
     accessy_session,
 )
-from service.db import db_session
 
 logger = getLogger("makeradmin")
 

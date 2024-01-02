@@ -1,8 +1,5 @@
 {
-    "include": [
-        "src/**/*.ts",
-        "src/**/*.tsx",
-    ],
+    "include": ["src/**/*.ts", "src/**/*.tsx"],
     "compilerOptions": {
         "target": "es6",
         "lib": ["es5", "es6", "dom"],
@@ -14,6 +11,6 @@
         "moduleResolution": "node",
         "jsx": "react",
         "allowJs": true,
-        "skipLibCheck": true,
-    },
+        "skipLibCheck": true
+    }
 }

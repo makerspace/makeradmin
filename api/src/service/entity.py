@@ -1,34 +1,36 @@
+from base64 import b64decode, b64encode
 from collections import namedtuple
-from datetime import datetime, date
+from datetime import date, datetime
 from decimal import Decimal
 from logging import getLogger
 from math import ceil
-from typing import Any, Mapping, Dict, Callable, Type, TypeVar, Union
+from typing import Any, Callable, Dict, Mapping, Type, TypeVar, Union
 
 from flask import request
 from pytz import UTC
 from sqlalchemy import (
     JSON,
-    inspect,
-    Integer,
-    String,
+    Boolean,
+    Date,
     DateTime,
+    Integer,
+    LargeBinary,
+    Numeric,
+    String,
     Text,
-    desc,
     asc,
+    desc,
+    inspect,
     or_,
     text,
-    Date,
+)
+from sqlalchemy import (
     Enum as DbEnum,
-    Numeric,
-    Boolean,
-    LargeBinary,
 )
 
-from service.api_definition import BAD_VALUE, REQUIRED, Arg, symbol, Enum, natural0, natural1
+from service.api_definition import BAD_VALUE, REQUIRED, Arg, Enum, natural0, natural1, symbol
 from service.db import db_session
 from service.error import NotFound, UnprocessableEntity
-from base64 import b64decode, b64encode
 
 ASC = "asc"
 DESC = "desc"

@@ -1,18 +1,17 @@
 import time
-from datetime import datetime, timedelta
-from unittest import TestCase
 from copy import copy
+from datetime import date, datetime, timedelta
+from unittest import TestCase
 
 from flask import Flask
-from sqlalchemy import create_engine, Numeric
-
 from membership.member_auth import hash_password
-from service.db import db_session_factory, db_session
+from service.db import db_session, db_session_factory
 from service.internal_service import InternalService
+from sqlalchemy import Numeric, create_engine
+
 from test_aid.db import DbFactory
-from test_aid.obj import ObjFactory, DEFAULT_PASSWORD
+from test_aid.obj import DEFAULT_PASSWORD, ObjFactory
 from test_aid.test_util import classinstancemethod
-from datetime import date
 
 
 class TestBase(TestCase):

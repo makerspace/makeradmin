@@ -1,9 +1,8 @@
 from flask import request
-from sqlalchemy import func
-
 from service.db import db_session
 from service.entity import Entity
 from service.error import InternalServerError
+from sqlalchemy import func
 
 
 class OrderedEntity(Entity):

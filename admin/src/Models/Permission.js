@@ -1,12 +1,10 @@
-import Base from './Base';
-
+import Base from "./Base";
 
 export default class Permission extends Base {
-    
     deleteConfirmMessage() {
         throw new Error("Order delete not supported.");
     }
-    
+
     canSave() {
         return this.isDirty();
     }

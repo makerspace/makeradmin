@@ -27,7 +27,7 @@ COPY ./package.json ./package-lock.json /work/
 
 WORKDIR /work
 
-RUN npm install
+RUN npm ci
 
 COPY ./webpack.config.js /work/
 

@@ -1,44 +1,59 @@
-import React from 'react';
-import { withRouter} from 'react-router';
+import React from "react";
+import { withRouter } from "react-router";
 import { NavItem } from "../nav";
-import PropTypes from 'prop-types';
+import PropTypes from "prop-types";
 import Group from "../Models/Group";
 
-
 class GroupBox extends React.Component {
-    
     constructor(props) {
         super(props);
-        const {group_id} = props.match.params;
+        const { group_id } = props.match.params;
         this.group = Group.get(group_id);
-        this.state = {group_id, title: ""};
+        this.state = { group_id, title: "" };
     }
 
     getChildContext() {
-        return {group: this.group};
+        return { group: this.group };
     }
 
     componentDidMount() {
         const group = this.group;
-        this.unsubscribe = group.subscribe(() => this.setState({title: group.title}));
+        this.unsubscribe = group.subscribe(() =>
+            this.setState({ title: group.title }),
+        );
     }
-    
+
     componentWillUnmount() {
         this.unsubscribe();
     }
-    
+
     render() {
-        const {group_id} = this.props.match.params;
-        const {title} = this.state;
-        
+        const { group_id } = this.props.match.params;
+        const { title } = this.state;
+
         return (
             <div>
                 <h2>Grupp {title}</h2>
 
                 <ul className="uk-tab">
-                    <NavItem icon={null} to={"/membership/groups/" + group_id + "/info"}>Information</NavItem>
-                    <NavItem icon={null} to={"/membership/groups/" + group_id + "/members"}>Medlemmar</NavItem>
-                    <NavItem icon={null} to={"/membership/groups/" + group_id + "/permissions"}>Behörigheter</NavItem>
+                    <NavItem
+                        icon={null}
+                        to={"/membership/groups/" + group_id + "/info"}
+                    >
+                        Information
+                    </NavItem>
+                    <NavItem
+                        icon={null}
+                        to={"/membership/groups/" + group_id + "/members"}
+                    >
+                        Medlemmar
+                    </NavItem>
+                    <NavItem
+                        icon={null}
+                        to={"/membership/groups/" + group_id + "/permissions"}
+                    >
+                        Behörigheter
+                    </NavItem>
                 </ul>
                 {this.props.children}
             </div>
@@ -47,7 +62,7 @@ class GroupBox extends React.Component {
 }
 
 GroupBox.childContextTypes = {
-    group: PropTypes.instanceOf(Group)
+    group: PropTypes.instanceOf(Group),
 };
 
 export default withRouter(GroupBox);

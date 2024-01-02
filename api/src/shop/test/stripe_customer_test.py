@@ -2,24 +2,24 @@ from logging import getLogger
 from typing import Any, Dict, List
 from unittest import skipIf
 
-import membership.models
-import shop.models
-import messages.models
 import core.models
-from shop.stripe_customer import (
-    _get_metadata_for_stripe_customer,
-    get_or_create_stripe_customer,
-    get_and_sync_stripe_customer,
-    update_stripe_customer,
-    delete_stripe_customer,
-    eq_makeradmin_stripe_customer,
-)
-from shop.stripe_util import retry, are_metadata_dicts_equivalent
+import membership.models
+import messages.models
+import shop.models
+import stripe
+from membership.models import Member
 from shop.stripe_constants import (
     MakerspaceMetadataKeys as MSMetaKeys,
 )
-from membership.models import Member
-import stripe
+from shop.stripe_customer import (
+    _get_metadata_for_stripe_customer,
+    delete_stripe_customer,
+    eq_makeradmin_stripe_customer,
+    get_and_sync_stripe_customer,
+    get_or_create_stripe_customer,
+    update_stripe_customer,
+)
+from shop.stripe_util import are_metadata_dicts_equivalent, retry
 from test_aid.test_base import FlaskTestBase, ShopTestMixin
 
 logger = getLogger("makeradmin")
@@ -31,7 +31,7 @@ class StripeCustomerTest(ShopTestMixin, FlaskTestBase):
 
     models = [membership.models, messages.models, shop.models, core.models]
 
-    @skipIf(not stripe.api_key, "stripe util tests require stripe api key in .env file")
+    @skipIf(not stripe.api_key, "stripe customer tests require stripe api key in .env file")
     def setUp(self) -> None:
         self.seen_members: List[Member] = []
 

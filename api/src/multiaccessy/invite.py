@@ -3,6 +3,8 @@ from logging import getLogger
 
 from membership.membership import get_membership_summary
 from membership.models import Member
+from service.db import db_session
+
 from multiaccessy.accessy import (
     ACCESSY_CLIENT_SECRET,
     ACCESSY_LABACCESS_GROUP,
@@ -10,8 +12,6 @@ from multiaccessy.accessy import (
     AccessyError,
     accessy_session,
 )
-from service.db import db_session
-
 
 logger = getLogger("makeradmin")
 

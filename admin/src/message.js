@@ -1,33 +1,26 @@
-global.jQuery = require('jquery');
+global.jQuery = require("jquery");
 global.$ = global.jQuery;
-require('uikit');
-
+require("uikit");
 
 export function showPermissionDenied(message) {
-    message = message || (
+    message =
+        message ||
         "<h2>Error</h2>" +
-        "You are unauthorized to use this API resource. " +
-        "This could be because one of the following reasons:<br>" +
-        "<br>1) You have been logged out from the API" +
-        "<br>2) You do not have permissions to access this resource"
-    );
-    UIkit.notify(message, {timeout: 0, status: "danger"});
+            "You are unauthorized to use this API resource. " +
+            "This could be because one of the following reasons:<br>" +
+            "<br>1) You have been logged out from the API" +
+            "<br>2) You do not have permissions to access this resource";
+    UIkit.notify(message, { timeout: 0, status: "danger" });
 }
-
 
 export function showError(message) {
-    message = message || (
-        "<h2>Error</h2>" +
-        "Unknown error."
-    );
-    UIkit.notify(message, {timeout: 0, status: "danger"});
+    message = message || "<h2>Error</h2>" + "Unknown error.";
+    UIkit.notify(message, { timeout: 0, status: "danger" });
 }
-
 
 export function showSuccess(message) {
-    UIkit.notify(message, {timeout: 0, status: "success"});
+    UIkit.notify(message, { timeout: 0, status: "success" });
 }
-
 
 export function confirmModal(message) {
     return new Promise((resolve, reject) => {
@@ -35,7 +28,6 @@ export function confirmModal(message) {
     });
 }
 
-
 export function notifySuccess(message) {
-    UIkit.notify(message,  {status: "success"});
+    UIkit.notify(message, { status: "success" });
 }

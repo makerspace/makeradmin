@@ -1,24 +1,23 @@
 import flask_cors
+from core.auth import authenticate_request
 from flask import Flask, jsonify
 from flask.wrappers import Response as FlaskResponse
-from sqlalchemy.exc import OperationalError
-
-from core.auth import authenticate_request
 from membership.permissions import register_permissions
 from service.api_definition import ALL_PERMISSIONS
-from service.config import get_mysql_config, config
-from service.db import create_mysql_engine, shutdown_session, populate_fields_by_index
+from service.config import config, get_mysql_config
+from service.db import create_mysql_engine, populate_fields_by_index, shutdown_session
 from service.error import (
     ApiError,
+    error_handler_400,
+    error_handler_404,
+    error_handler_405,
+    error_handler_500,
     error_handler_api,
     error_handler_db,
-    error_handler_500,
-    error_handler_404,
-    error_handler_400,
-    error_handler_405,
 )
-from service.traffic_logger import traffic_logger_init, traffic_logger_commit
+from service.traffic_logger import traffic_logger_commit, traffic_logger_init
 from services import services
+from sqlalchemy.exc import OperationalError
 
 app = Flask(__name__, static_folder=None)
 

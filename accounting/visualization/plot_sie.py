@@ -1,36 +1,48 @@
 import argparse
+import datetime
 from dataclasses import dataclass
 from decimal import Decimal
 from typing import Dict, List, Tuple
-from cv2 import threshold
 
-from pandas.core.algorithms import unique
-import parse_sie
+import matplotlib.dates as mdates
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import parse_sie
 import seaborn as sns
-import matplotlib.pyplot as plt
-import datetime
-import matplotlib.dates as mdates
-from matplotlib.ticker import NullFormatter, FuncFormatter
-from matplotlib.dates import MonthLocator, DateFormatter
+from cv2 import threshold
+from matplotlib.dates import DateFormatter, MonthLocator
+from matplotlib.ticker import FuncFormatter, NullFormatter
+from pandas.core.algorithms import unique
 
-INCOME_ACCOUNTS = [1934, 3893,
-                   # From the accounting_place.csv file
-                   3010, 3011, 3012, 3013, 3014, 3015, 3020, 3031, 3032, 3050, 3890, 3891, 3892, 3993,
-                   ]
+INCOME_ACCOUNTS = [
+    1934,
+    3893,
+    # From the accounting_place.csv file
+    3010,
+    3011,
+    3012,
+    3013,
+    3014,
+    3015,
+    3020,
+    3031,
+    3032,
+    3050,
+    3890,
+    3891,
+    3892,
+    3993,
+]
 BANK_ACCOUNTS = [1930, 1933, 1935, 1936, 1938, 2407, 2409]
 IGNORE_ACCOUNTS = [2069, 1229, 7832]
 
 # Sum all expenses for x[0] and add one item for each month which is the montly average with the label x[1]
-SPREAD_OUT_EVENLY_OVER_YEAR = [
-    ("Städning - lokalkostnader", "Städning"),
-    ("Lokalhyra", "Lokalhyra")
-]
+SPREAD_OUT_EVENLY_OVER_YEAR = [("Städning - lokalkostnader", "Städning"), ("Lokalhyra", "Lokalhyra")]
 
 
 def date2float(date: pd.Timestamp) -> float:
-    return date.year*12 + (date.month-1) + (date.day-1)/date.days_in_month
+    return date.year * 12 + (date.month - 1) + (date.day - 1) / date.days_in_month
 
 
 @dataclass
@@ -75,15 +87,24 @@ def average_expenses(sie: parse_sie.SIEFile):
 
     sie.verifications = [v for v in sie.verifications if v not in toDelete]
 
-    for ((account, total_accounts), (_, description)) in zip(spread_accounts.items(), SPREAD_OUT_EVENLY_OVER_YEAR):
+    for (account, total_accounts), (_, description) in zip(spread_accounts.items(), SPREAD_OUT_EVENLY_OVER_YEAR):
         for m in range(0, 12):
-            d = datetime.datetime(year=year, month=m+1, day=1)
-            sie.verifications.append(parse_sie.SIEVerification(series="", id=0, date=d, description=description, lines=[
-                parse_sie.SIEVerificationLine(account, [], Decimal(value/12), d, description)
-                for account, value in total_accounts.items()]))
+            d = datetime.datetime(year=year, month=m + 1, day=1)
+            sie.verifications.append(
+                parse_sie.SIEVerification(
+                    series="",
+                    id=0,
+                    date=d,
+                    description=description,
+                    lines=[
+                        parse_sie.SIEVerificationLine(account, [], Decimal(value / 12), d, description)
+                        for account, value in total_accounts.items()
+                    ],
+                )
+            )
             for account, value in total_accounts.items():
                 if account in sie.outgoing_balances[0]:
-                    sie.outgoing_balances[0][account] += Decimal(value/12)
+                    sie.outgoing_balances[0][account] += Decimal(value / 12)
             # sie.outgoing_balances[0][1930] -= v
 
 
@@ -148,7 +169,9 @@ def process_sie(sie: parse_sie.SIEFile) -> PlottingInput:
         if account in accounts:
             assert accounts[account] == expected_value
         else:
-            assert expected_value == 0, f"Expected outgoing balance for account {account} to be 0, but found {expected_value}"
+            assert (
+                expected_value == 0
+            ), f"Expected outgoing balance for account {account} to be 0, but found {expected_value}"
 
     return PlottingInput(
         expenses_by_month=expenses_by_month,
@@ -157,14 +180,17 @@ def process_sie(sie: parse_sie.SIEFile) -> PlottingInput:
         expenses_by_room=expenses_by_room,
         expenses_by_account=expenses_by_account,
         incomes_by_account=incomes_by_account,
-        months=months
+        months=months,
     )
 
 
-def per_month_stacked_plot(ax: plt.Axes, months: List[pd.Timestamp], value_by_month: List[List[Tuple[str, Decimal]]], ylabel: str):
+def per_month_stacked_plot(
+    ax: plt.Axes, months: List[pd.Timestamp], value_by_month: List[List[Tuple[str, Decimal]]], ylabel: str
+):
     unique_labels = list(set([x[0] for items in value_by_month for x in items]))
-    sum_and_name = [(sum(x[1] for month_data in value_by_month for x in month_data if x[0] == key), key)
-                    for key in unique_labels]
+    sum_and_name = [
+        (sum(x[1] for month_data in value_by_month for x in month_data if x[0] == key), key) for key in unique_labels
+    ]
     # Sort to find the top expenses, but always sort unspecified expenses last
     sum_and_name.sort(reverse=True, key=lambda x: 0 if x[1] == "Kostnader ospec" else x[0])
     topNexpenses = [x[1] for x in sum_and_name[0:5]]
@@ -173,12 +199,13 @@ def per_month_stacked_plot(ax: plt.Axes, months: List[pd.Timestamp], value_by_mo
 
     # Sum the incomes/expenses per label and per month
     month_sums = []
-    for (i, tp) in enumerate(topNexpenses):
+    for i, tp in enumerate(topNexpenses):
         sum_per_month = [sum(exp[1] for exp in month_expenses if exp[0] == tp) for month_expenses in value_by_month]
         month_sums.append((tp, np.array(sum_per_month)))
 
-    sum_per_month = [sum(exp[1] for exp in month_expenses if exp[0] not in topNexpenses)
-                     for month_expenses in value_by_month]
+    sum_per_month = [
+        sum(exp[1] for exp in month_expenses if exp[0] not in topNexpenses) for month_expenses in value_by_month
+    ]
     month_sums.append(("Övrigt", np.array(sum_per_month)))
 
     # For display, it looks nicer in the reverse order (largest expenses at the bottom, "Övrigt" at the top)
@@ -193,36 +220,39 @@ def per_month_stacked_plot(ax: plt.Axes, months: List[pd.Timestamp], value_by_mo
         month_sums[i] = (label, sum(month_sums[j][1] for j in range(i, len(month_sums))))
 
     month_indices = list(range(len(months)))
-    for (i, (label, sum_per_month)) in enumerate(month_sums):
+    for i, (label, sum_per_month) in enumerate(month_sums):
         sns.barplot(x=month_indices, y=sum_per_month, label=label, alpha=1.0, color=colors[i], ax=ax)
 
     ax.legend()
     sns.despine(ax=ax, top=True, right=True)
 
-    x_dates = [x.strftime(r'%b %Y') for x in months]
+    x_dates = [x.strftime(r"%b %Y") for x in months]
 
     # Draw nice lines *around* the boxes.
     # These can nicely line up with a separate line plot
-    ax.xaxis.set_ticks([x-0.5 for x in range(len(x_dates)+1)], minor=False)
-    ax.xaxis.set_ticklabels(["" for _ in range(len(x_dates)+1)], minor=False)
+    ax.xaxis.set_ticks([x - 0.5 for x in range(len(x_dates) + 1)], minor=False)
+    ax.xaxis.set_ticklabels(["" for _ in range(len(x_dates) + 1)], minor=False)
 
     ax.xaxis.set_ticks([x for x in range(len(x_dates))], minor=True)
-    ax.xaxis.set_ticklabels(x_dates, rotation=45, ha='right', minor=True)
-    ax.grid(True, which='major')
+    ax.xaxis.set_ticklabels(x_dates, rotation=45, ha="right", minor=True)
+    ax.grid(True, which="major")
     ax.set_ylabel(ylabel)
 
 
 def ellipsis(s: str, threshold: int) -> str:
     if len(s) > threshold:
-        return s[:threshold-3] + "..."
+        return s[: threshold - 3] + "..."
     else:
         return s
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Plot economy graphs')
-    parser.add_argument('--sie', help="Path to the input SIE file. Can be exported from your favorite accounting software.",
-                        required=True)
+    parser = argparse.ArgumentParser(description="Plot economy graphs")
+    parser.add_argument(
+        "--sie",
+        help="Path to the input SIE file. Can be exported from your favorite accounting software.",
+        required=True,
+    )
 
     args = parser.parse_args()
     sie = parse_sie.parse(args.sie)
@@ -249,8 +279,11 @@ def main():
     average_expenses(sie)
     input = process_sie(sie)
 
-    data = pd.DataFrame([sum(x[1][account] for account in BANK_ACCOUNTS) for x in input.accounts_by_date], [
-                        pd.Timestamp(x[0]) for x in input.accounts_by_date], columns=["amount"])
+    data = pd.DataFrame(
+        [sum(x[1][account] for account in BANK_ACCOUNTS) for x in input.accounts_by_date],
+        [pd.Timestamp(x[0]) for x in input.accounts_by_date],
+        columns=["amount"],
+    )
 
     sns.set_theme(style="whitegrid")
     sns.set_style("whitegrid")
@@ -258,7 +291,7 @@ def main():
     currency_formatter = FuncFormatter(lambda p, _: f"{p/1000:.0f}k")
 
     months = [pd.Timestamp(m) for m in input.months]
-    month_subset = data['amount'][months]
+    month_subset = data["amount"][months]
     data = data.reset_index()
     month_subset = month_subset.reset_index()
 
@@ -282,7 +315,7 @@ def main():
     # Remove month names at the bottom
     # ax0.tick_params(axis='x', which='both', labelbottom=False)
     ax0.yaxis.set_major_formatter(currency_formatter)
-    ax0.tick_params(axis='x', which='both', rotation=45)
+    ax0.tick_params(axis="x", which="both", rotation=45)
     # ax0.xaxis.set_ticklabels(ax0.xaxis.get_ticklabels(minor=True), rotation=45, ha='right', minor=True)
 
     per_month_stacked_plot(axs[1, 0], months, input.expenses_by_month, "Utgifter [kr]")
@@ -318,8 +351,10 @@ def main():
     for account in BANK_ACCOUNTS:
         print(sie.accounts[account], sie.incoming_balances[0][account], sie.outgoing_balances[0][account])
 
-    sns.barplot(x=[sie.date_range.start.year], y=[sum(sie.outgoing_balances[0]
-                                                      [c] - sie.incoming_balances[0][c] for c in BANK_ACCOUNTS)])
+    sns.barplot(
+        x=[sie.date_range.start.year],
+        y=[sum(sie.outgoing_balances[0][c] - sie.incoming_balances[0][c] for c in BANK_ACCOUNTS)],
+    )
     ax2.set_ylabel("Resultat [kr]")
     ax2.set_title(f"Resultat {sie.date_range.start.year}")
 
