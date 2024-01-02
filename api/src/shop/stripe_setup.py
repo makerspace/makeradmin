@@ -17,13 +17,7 @@ def set_stripe_key(private: bool) -> None:
 
 
 def are_stripe_keys_set() -> bool:
-    logger.info(f"checking if stripe keys are set")
-    logger.info(STRIPE_PRIVATE_KEY)
-    logger.info(STRIPE_PUBLIC_KEY)
-    if STRIPE_PRIVATE_KEY and STRIPE_PUBLIC_KEY:
-        return True
-    else:
-        return False
+    return bool(STRIPE_PRIVATE_KEY and STRIPE_PUBLIC_KEY)
 
 
 def are_stripe_keys_live() -> bool:
