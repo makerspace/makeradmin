@@ -279,6 +279,40 @@ def create_shop_products() -> None:
             display_order=display_order_product + 8,
         ),
     )
+
+    product_names = [
+        "Kork",
+        "Bräda",
+        "Frigolit",
+        "Fleece tygbit",
+        "Tygbit",
+        "Tråd",
+        "Filt tygbit",
+        "Pappersark",
+        "Brodyrtråd",
+        "Tejp",
+        "Färgat papper",
+        "Silkespapper",
+        "Kartong",
+        "Wellpapp",
+        "Playwood",
+        "Flörtkulor",
+    ]
+    product_prices = [5, 12, 20, 22, 30, 2, 4, 10, 12, 24, 10, 13, 22, 23, 31, 4]
+
+    for i, name in enumerate(product_names):
+        get_or_create(
+            Product,
+            name=name,
+            defaults=dict(
+                price=product_prices[i],
+                unit="st",
+                display_order=display_order_product + 9 + i,
+                category_id=consumption_category.id,
+                product_metadata={},
+            ),
+        )
+
     db_session.commit()
 
 

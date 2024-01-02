@@ -42,7 +42,7 @@ class AccountingProduct extends CollectionNavigation {
     constructor(props) {
         super(props);
         const { search, page } = this.state;
-        this.collection = new Collection({ type: Product, url: '/webshop/product', expand: "product_accounting", search: search, page: page });
+        this.collection = new Collection({ type: Product, url: '/webshop/product', expand: "product_accounting", search: search, page: page, pageSize: 0 });
         this.state = {
             categories: null,
             items_account: [],
