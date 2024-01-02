@@ -38,6 +38,7 @@ from shop.stripe_subscriptions import (
 from shop.stripe_util import convert_from_stripe_amount, convert_to_stripe_amount, event_semantic_time
 from shop.transactions import ship_orders
 from test_aid.obj import DEFAULT_PASSWORD
+from test_aid.systest_config import STRIPE_PRIVATE_KEY
 from test_aid.test_base import FlaskTestBase
 from test_aid.test_util import random_str
 
@@ -96,7 +97,7 @@ class Test(FlaskTestBase):
     models = [membership.models, messages.models, shop.models, core.models]
     seen_event_ids: Set[str]
 
-    @skipIf(not stripe.api_key, "subscriptions tests require stripe api key in .env file")
+    @skipIf(not STRIPE_PRIVATE_KEY, "subscriptions tests require stripe api key in .env file")
     def setUp(self) -> None:
         db_session.query(Member).delete()
         db_session.query(Span).delete()
@@ -104,7 +105,6 @@ class Test(FlaskTestBase):
         self.seen_event_ids = set()
         self.earliest_possible_event_time = datetime.now(timezone.utc)
         self.clocks_to_destroy: List[FakeClock] = []
-        stripe_constants.set_stripe_key(True)
 
         disable_loggers = ["stripe"]
 

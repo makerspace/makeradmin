@@ -20,6 +20,7 @@ from shop.stripe_customer import (
     update_stripe_customer,
 )
 from shop.stripe_util import are_metadata_dicts_equivalent, retry
+from test_aid.systest_config import STRIPE_PRIVATE_KEY
 from test_aid.test_base import FlaskTestBase, ShopTestMixin
 
 logger = getLogger("makeradmin")
@@ -31,7 +32,7 @@ class StripeCustomerTest(ShopTestMixin, FlaskTestBase):
 
     models = [membership.models, messages.models, shop.models, core.models]
 
-    @skipIf(not stripe.api_key, "stripe customer tests require stripe api key in .env file")
+    @skipIf(not STRIPE_PRIVATE_KEY, "stripe customer tests require stripe api key in .env file")
     def setUp(self) -> None:
         self.seen_members: List[Member] = []
 

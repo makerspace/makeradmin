@@ -24,6 +24,7 @@ from shop.stripe_payment_intent import (
 from shop.stripe_util import convert_from_stripe_amount, convert_to_stripe_amount, retry
 from stripe import CardError
 from subscriptions_test import FakeCardPmToken, attach_and_set_payment_method
+from test_aid.systest_config import STRIPE_PRIVATE_KEY
 from test_aid.test_base import FlaskTestBase, ShopTestMixin
 
 logger = getLogger("makeradmin")
@@ -79,7 +80,7 @@ class StripePaymentIntentWithoutStripeTest(FlaskTestBase):
 class StripePaymentIntentTest(FlaskTestBase):
     models = [membership.models, messages.models, shop.models, core.models]
 
-    @skipIf(not stripe.api_key, "stripe payment intent tests require stripe api key in .env file")
+    @skipIf(not STRIPE_PRIVATE_KEY, "stripe payment intent tests require stripe api key in .env file")
     def setUp(self) -> None:
         self.seen_members: List[Member] = []
 

@@ -28,6 +28,7 @@ from shop.stripe_product_price import (
     update_stripe_product,
 )
 from shop.stripe_util import convert_to_stripe_amount
+from test_aid.systest_config import STRIPE_PRIVATE_KEY
 from test_aid.test_base import FlaskTestBase, ShopTestMixin
 
 logger = getLogger("makeradmin")
@@ -71,7 +72,7 @@ class StripeProductPriceTest(ShopTestMixin, FlaskTestBase):
     models = [membership.models, messages.models, shop.models, core.models]
     base_stripe_id = 5100
 
-    @skipIf(not stripe.api_key, "stripe products and prices tests require stripe api key in .env file")
+    @skipIf(not STRIPE_PRIVATE_KEY, "stripe products and prices tests require stripe api key in .env file")
     def setUp(self) -> None:
         self.seen_products: List[Product] = []
         self.subscription_category = self.db.create_category(name="Subscriptions")
