@@ -4,35 +4,27 @@ from typing import Dict, List, Optional, Tuple
 
 from service.db import db_session
 from service.error import InternalServerError
-from shop.accounting.accounting import AmountPerAccountAndCostCenter
+from shop.accounting.accounting import TransactionWithAccounting
 
 
 @dataclass(frozen=True)
 class Verification:
     period: str
-    amounts: List[AmountPerAccountAndCostCenter]
+    amounts: Dict[Tuple[str | None, str | None], Decimal]
 
 
-def group_amounts(amounts: List[AmountPerAccountAndCostCenter]) -> Dict[str, List[AmountPerAccountAndCostCenter]]:
-    grouped_amounts: Dict[str, List[AmountPerAccountAndCostCenter]] = {}
-    for amount in amounts:
-        year_month = amount.date.strftime("%Y-%m")
-        if year_month in grouped_amounts:
-            grouped_amounts[year_month].append(amount)
+def create_verificatons(
+    transactions_with_accounting: List[TransactionWithAccounting],
+) -> List[Verification]:
+    verifications: Dict[str, Verification] = {}
+    for transaction in transactions_with_accounting:
+        year_month = transaction.date.strftime("%Y-%m")
+        inner_key = (transaction.account, transaction.cost_center)
+        if year_month in verifications:
+            if inner_key in verifications[year_month].amounts:
+                verifications[year_month].amounts[inner_key] += transaction.amount
+            else:
+                verifications[year_month].amounts[inner_key] = transaction.amount
         else:
-            grouped_amounts[year_month] = [amount]
-    return grouped_amounts
-
-
-def create_verificatons(transactions_with_accounting: List[AmountPerAccountAndCostCenter]) -> List[Verification]:
-    grouped_amounts = group_amounts(transactions_with_accounting)
-    verifications: List[Verification] = []
-    for period, group in grouped_amounts.items():
-        amounts = list(group)
-        verifications.append(
-            Verification(
-                period=period,
-                amounts=amounts,
-            )
-        )
-    return verifications
+            verifications[year_month] = Verification(year_month, {inner_key: transaction.amount})
+    return list(verifications.values())

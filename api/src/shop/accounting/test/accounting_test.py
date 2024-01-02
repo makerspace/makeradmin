@@ -8,12 +8,13 @@ from unittest.mock import Mock, patch
 import core
 import membership
 import shop
+from basic_types.enums import AccountingEntryType
 from membership.models import Member
 from service.db import db_session
 from shop.accounting.accounting import (
     AccountCostCenter,
-    AmountPerAccountAndCostCenter,
     ProductToAccountCostCenter,
+    TransactionWithAccounting,
     diff_transactions_and_completed_payments,
     split_transactions_over_accounts,
 )
@@ -34,20 +35,23 @@ class AccountingTest(FlaskTestBase):
         db_session.query(Transaction).delete()
         db_session.query(TransactionContent).delete()
 
+    def test_diff_transactions_and_completed_payments(self) -> None:
+        pass
+
     def test_product_to_accounting(self) -> None:
         pass
 
-    def test_diff_transactions_payments(self) -> None:
-        pass
+    # TODO test failing table ok check
 
-    # TODO include some none cost center in the test
     @patch("shop.accounting.accounting.ProductToAccountCostCenter")
     def test_split_transactions_over_accounts(self, mock_product_to_accounting: Mock) -> None:
         def get_accounting_side_effect(*args, **kwargs) -> List[AccountCostCenter]:
-            return [AccountCostCenter(str(args[0]), str[args[0]], args[0] / 10, args[0] / 100)]  # TODO fix
+            logger.info("args")
+            logger.info(args[0])
+            return [AccountCostCenter(str(args[0]), str(args[0]), args[0] / 10, AccountingEntryType.CREDIT)]
 
         num_transactions = 5
-        num_products = [int(i / num_transactions) + 1 for i in range(num_transactions)]
+        num_products = 2
         amounts = [100 + 10 * i for i in range(num_transactions)]
 
         member = self.db.create_member()
@@ -56,9 +60,9 @@ class AccountingTest(FlaskTestBase):
         for i in range(num_transactions):
             transaction = self.db.create_transaction(member_id=member.member_id, amount=amounts[i])
 
-            for j in range(num_products[i]):
+            for j in range(num_products):
                 self.db.create_transaction_content(
-                    transaction_id=transaction.id, product_id=product.id, amount=amounts[i] / num_products[i]
+                    transaction_id=transaction.id, product_id=product.id, amount=amounts[i] / num_products
                 )
 
         transactions = db_session.query(Transaction).all()
@@ -68,9 +72,14 @@ class AccountingTest(FlaskTestBase):
         product_to_accounting_instance = mock_product_to_accounting.return_value
         product_to_accounting_instance.get_account_cost_center.side_effect = get_accounting_side_effect
 
-        split_transactions_over_accounts(transactions)
+        accounting = split_transactions_over_accounts(transactions)
 
-        assert False
+        assert len(accounting) == num_transactions * num_products
+        # TODO more asserts
+
+    # TODO test split with some none cost center and account in the test
+
+    # TODO some split test with more variation and different types
 
     # TODO a test without the mock
 

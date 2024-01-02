@@ -1,5 +1,6 @@
 from typing import Any
 
+from basic_types.enums import AccountingEntryType
 from membership.models import Member
 from service.api_definition import BAD_VALUE
 from service.error import UnprocessableEntity
@@ -261,22 +262,19 @@ class TransactionCostcenter(Base):
 class ProductAccountsCostCenters(Base):
     __tablename__ = "webshop_product_accounting"
 
-    DEBIT = "debit"
-    CREDIT = "credit"
-
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
     product_id = Column(Integer, ForeignKey("webshop_products.id"), nullable=False)
     account_id = Column(Integer, ForeignKey("webshop_transaction_accounts.id"), nullable=True)
     cost_center_id = Column(Integer, ForeignKey("webshop_transaction_cost_centers.id"), nullable=True)
     fraction = Column(Numeric(6, 3), nullable=False, server_default=("0.0"))
-    type = Column(Enum(DEBIT, CREDIT), nullable=False)
+    type = Column(Enum(*[x.value for x in AccountingEntryType]), nullable=False)
 
     product = relationship(Product, backref="accounts_cost_centers")
     account = relationship(TransactionAccount, backref="accounts_cost_centers")
     cost_center = relationship(TransactionCostcenter, backref="accounts_cost_centers")
 
     def __repr__(self) -> str:
-        return f"ProductAccountsCostCenters(id={self.id}, cost_center={self.cost_center}, account={self.account}, debits={self.debits}, credits={self.credits})"
+        return f"ProductAccountsCostCenters(id={self.id}, account_id={self.account_id}, cost_center_id={self.cost_center_id}, type={self.type}, fraction={self.fraction})"
 
 
 class StripePending(Base):

@@ -220,7 +220,7 @@ def get_stripe_payment_intents(start_date: date, end_date: date) -> List[stripe.
 
 def convert_completed_stripe_intents_to_payments(
     stripe_intents: List[PaymentIntent],
-) -> Dict[int, CompletedPayment] | None:
+) -> Dict[int, CompletedPayment]:
     payments: Dict[int, CompletedPayment] = {}
     for intent in stripe_intents:
         if intent.status != PaymentIntentStatus.SUCCEEDED:

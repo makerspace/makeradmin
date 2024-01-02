@@ -4,6 +4,7 @@ from decimal import Decimal
 from logging import getLogger
 from typing import Dict, List, Optional, Tuple
 
+from basic_types.enums import AccountingEntryType
 from service.db import db_session
 from service.error import InternalServerError
 from shop.models import (
@@ -20,20 +21,20 @@ logger = getLogger("makeradmin")
 
 
 @dataclass()
-class AmountPerAccountAndCostCenter:
+class TransactionWithAccounting:
     amount: Decimal
     date: datetime
-    account: str
-    type: str  # TODO fix
+    account: str | None
     cost_center: str | None
+    type: AccountingEntryType
 
 
 @dataclass()
 class AccountCostCenter:
-    acccount: str
+    acccount: str | None
     cost_center: str | None
-    type: str  # TODO fix this
     fraction: Decimal
+    type: AccountingEntryType
 
 
 class ProductToAccountCostCenter:
@@ -49,15 +50,32 @@ class ProductToAccountCostCenter:
                 .filter(ProductAccountsCostCenters.product_id == product.id)
                 .all()
             )
+
+            fraction_sums = Dict(AccountingEntryType, Decimal)
+            fraction_sums[AccountingEntryType.CREDIT] = Decimal(0)
+            fraction_sums[AccountingEntryType.DEBIT] = Decimal(0)
             account_cost_centers: List[AccountCostCenter] = []
             for product_info in product_accounting:
+                if product_info.account.acccount is None and product_info.cost_center.cost_center is None:
+                    raise InternalServerError(
+                        f"Product {product.id} has accounting with both account and cost center as none"
+                    )
+
+                fraction_sums[product_info.account.type] += product_info.fraction
                 account_cost_centers.append(
                     AccountCostCenter(
                         product_info.account.account,
                         product_info.cost_center.cost_center,
                         product_info.fraction,
+                        product_info.account.type,
                     )
                 )
+
+            for key in fraction_sums:
+                if fraction_sums[key] != Decimal(1):
+                    raise InternalServerError(
+                        f"Product {product.id} has accounting type {key} with fraction not adding up to 1"
+                    )
 
             self.product_to_account_cost_center[product.id] = account_cost_centers
 
@@ -83,9 +101,9 @@ def diff_transactions_and_completed_payments(
     return unmatched_data
 
 
-def split_transactions_over_accounts(transactions: List[Transaction]) -> List[AmountPerAccountAndCostCenter]:
+def split_transactions_over_accounts(transactions: List[Transaction]) -> List[TransactionWithAccounting]:
     product_to_accounting = ProductToAccountCostCenter()
-    transactions_with_accounting: Dict[Tuple[str, str], AmountPerAccountAndCostCenter] = []
+    transactions_with_accounting: List[TransactionWithAccounting] = []
 
     for transaction in transactions:
         logger.info(f"transaction: {transaction}")
@@ -95,15 +113,13 @@ def split_transactions_over_accounts(transactions: List[Transaction]) -> List[Am
             logger.info(f"product_accounting: {product_accounting}")
             for accounting in product_accounting:
                 amount_to_add = accounting.fraction * transaction.amount  # TODO rounding errors?
-                key = {accounting.acccount, accounting.cost_center}
-                if key in transactions_with_accounting:
-                    transactions_with_accounting[key].amount += amount_to_add
-                else:
-                    transactions_with_accounting[key] = AmountPerAccountAndCostCenter(
+                transactions_with_accounting.append(
+                    TransactionWithAccounting(
                         amount=amount_to_add,
                         date=transaction.created_at,
                         account=accounting.acccount,
                         cost_center=accounting.cost_center,
+                        type=accounting.type,
                     )
-
-    return transactions_with_accounting.values()
+                )
+    return transactions_with_accounting
