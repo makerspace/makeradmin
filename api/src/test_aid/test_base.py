@@ -1,19 +1,18 @@
 import time
-from datetime import datetime, timedelta
-from unittest import TestCase
 from copy import copy
+from datetime import date, datetime, timedelta
+from unittest import TestCase
 
 from flask import Flask
-from sqlalchemy import create_engine, Numeric
-
 from membership.member_auth import hash_password
-from service.db import db_session_factory, db_session
+from service.db import db_session, db_session_factory
 from service.internal_service import InternalService
+from shop.stripe_setup import are_stripe_keys_live, are_stripe_keys_set, setup_stripe
+from sqlalchemy import Numeric, create_engine
+
 from test_aid.db import DbFactory
-from test_aid.obj import ObjFactory, DEFAULT_PASSWORD
+from test_aid.obj import DEFAULT_PASSWORD, ObjFactory
 from test_aid.test_util import classinstancemethod
-from shop.stripe_setup import setup_stripe, are_stripe_keys_live
-from datetime import date
 
 
 class TestBase(TestCase):
@@ -84,11 +83,12 @@ class FlaskTestBase(TestBase):
 
         self.db = DbFactory(self, self.obj)
 
-        if are_stripe_keys_live():
-            raise Exception(
-                "Live Stripe keys detected during test setup. Using live keys in tests is prohibited to prevent unintended side effects."
-            )
-        setup_stripe(private=True)
+        if are_stripe_keys_set():
+            if are_stripe_keys_live():
+                raise Exception(
+                    "Live Stripe keys detected during test setup. Using live keys in tests is prohibited to prevent unintended side effects."
+                )
+            setup_stripe(private=True)
 
 
 class ShopTestMixin:

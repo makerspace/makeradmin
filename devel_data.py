@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 import json
+import random
+from datetime import datetime, timedelta
 from pprint import pprint
 
 import requests
 from dotenv import dotenv_values
-import random
+
 from create_user import create_user
-from datetime import datetime, timedelta
 
 "labaccess"
 "special_labaccess"

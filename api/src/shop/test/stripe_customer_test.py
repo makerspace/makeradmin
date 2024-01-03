@@ -2,27 +2,26 @@ from logging import getLogger
 from typing import Any, Dict, List
 from unittest import skipIf
 
-import membership.models
-import shop.models
-import messages.models
 import core.models
-from shop.stripe_customer import (
-    _get_metadata_for_stripe_customer,
-    get_or_create_stripe_customer,
-    get_and_sync_stripe_customer,
-    update_stripe_customer,
-    delete_stripe_customer,
-    eq_makeradmin_stripe_customer,
-)
-from shop.stripe_util import retry, are_metadata_dicts_equivalent
+import membership.models
+import messages.models
+import shop.models
+import stripe
+from membership.models import Member
 from shop.stripe_constants import (
     MakerspaceMetadataKeys as MSMetaKeys,
 )
-from membership.models import Member
-import stripe
-from test_aid.test_base import FlaskTestBase, ShopTestMixin
+from shop.stripe_customer import (
+    _get_metadata_for_stripe_customer,
+    delete_stripe_customer,
+    eq_makeradmin_stripe_customer,
+    get_and_sync_stripe_customer,
+    get_or_create_stripe_customer,
+    update_stripe_customer,
+)
+from shop.stripe_util import are_metadata_dicts_equivalent, retry
 from test_aid.systest_config import STRIPE_PRIVATE_KEY
-
+from test_aid.test_base import FlaskTestBase, ShopTestMixin
 
 logger = getLogger("makeradmin")
 

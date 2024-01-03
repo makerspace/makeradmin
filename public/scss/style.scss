@@ -1,8 +1,8 @@
-@import 'include-media';
+@import "include-media";
 $breakpoints: (
     phone: 320px,
     tablet: 800px,
-    desktop: 1024px
+    desktop: 1024px,
 );
 
 $primary-color: #333;
@@ -12,11 +12,11 @@ $break-small: 480px;
 $break-medium: 600px;
 $break-large: 1000px;
 
-$makerspace-orange-light1: #C87744;
-$makerspace-orange: #E46D22;
-$makerspace-orange-dark1: #D9651D;
-$makerspace-orange-dark2: #C25F22;
-$makerspace-orange-dark3: #B14908;
+$makerspace-orange-light1: #c87744;
+$makerspace-orange: #e46d22;
+$makerspace-orange-dark1: #d9651d;
+$makerspace-orange-dark2: #c25f22;
+$makerspace-orange-dark3: #b14908;
 
 html,
 body {
@@ -98,7 +98,6 @@ body {
     }
 
     @include media("<=tablet") {
-
         .sidebar-fixed-content {
             width: 100%;
             text-align: center;
@@ -130,11 +129,11 @@ body {
         transition: opacity 200ms;
 
         a {
-            color: #FFF;
+            color: #fff;
         }
     }
 
-    li.active>a {
+    li.active > a {
         color: #444;
     }
 
@@ -333,9 +332,9 @@ body {
 
     .product-amount {
         width: 45px;
-        border-left: 1px solid #EEE;
-        border-top: 1px solid #EEE;
-        border-bottom: 1px solid #EEE;
+        border-left: 1px solid #eee;
+        border-top: 1px solid #eee;
+        border-bottom: 1px solid #eee;
         padding-right: 6px;
 
         ::-webkit-outer-spin-button,
@@ -350,13 +349,13 @@ body {
     }
 
     .product-unit {
-        border-top: 1px solid #EEE;
-        border-right: 1px solid #EEE;
-        border-bottom: 1px solid #EEE;
+        border-top: 1px solid #eee;
+        border-right: 1px solid #eee;
+        border-bottom: 1px solid #eee;
         width: 40px;
         padding-top: 3px;
         text-align: center;
-        background: #EEE;
+        background: #eee;
         font-weight: bold;
         color: #666;
         margin-right: 5px;
@@ -402,17 +401,17 @@ body {
 
         .layout-button {
             width: 50px;
-            border: 1px solid #AAA;
+            border: 1px solid #aaa;
         }
 
         .selected {
-            background: #CCC;
+            background: #ccc;
         }
     }
 }
 
 .product:hover .edit-display.active {
-    opacity: 1.0;
+    opacity: 1;
     visibility: visible;
 }
 
@@ -420,7 +419,8 @@ body {
     margin-left: 24px;
 }
 
-.category-add {}
+.category-add {
+}
 
 .category-edit-box {
     position: absolute;
@@ -446,16 +446,15 @@ body {
 
 .progress-spinner.progress-spinner-visible {
     opacity: 1;
-    transition: opacity 0.0s linear 0s;
+    transition: opacity 0s linear 0s;
     // visibility: visible;
 }
 
-
 #pay-module.non-empty {
-    border-color: #7C7;
+    border-color: #7c7;
 
     #pay-module-open-button {
-        background: #7C7;
+        background: #7c7;
     }
 }
 
@@ -473,7 +472,7 @@ body {
     text-transform: none;
 
     &:disabled {
-        background: #CCC;
+        background: #ccc;
     }
 }
 
@@ -514,7 +513,7 @@ body {
 
 #card-errors {
     font-size: 14pt;
-    color: #D61;
+    color: #d61;
     font-weight: bold;
     margin-left: 10px;
     margin-top: 5px;
@@ -532,7 +531,6 @@ body {
     background-color: #fefde5 !important;
 }
 
-
 // Product edit form
 
 .product-edit-form {
@@ -541,7 +539,7 @@ body {
     margin-left: auto;
     margin-right: auto;
 
-    >div {
+    > div {
         margin-top: 5px;
     }
 
@@ -670,63 +668,63 @@ form input.readonly-input {
 
 .receipt-message {
     text-align: center;
-    color: #CCC;
+    color: #ccc;
 }
 
 .history-item-completed {
     .receipt-header {
-        background: #469ABE;
+        background: #469abe;
         transition: background 100ms;
     }
 
     a.receipt-header:hover {
-        background: saturate(darken(#469ABE, 5%), 12%);
+        background: saturate(darken(#469abe, 5%), 12%);
     }
 
     .receipt-items {
-        background: #2785AD;
+        background: #2785ad;
     }
 
     .receipt-amount {
-        background: #07719F;
+        background: #07719f;
     }
 }
 
 .history-item-pending {
     .receipt-header {
-        background: #BE9A46;
+        background: #be9a46;
         transition: background 100ms;
     }
 
     a.receipt-header:hover {
-        background: saturate(darken(#BE9A46, 5%), 12%);
+        background: saturate(darken(#be9a46, 5%), 12%);
     }
 
     .receipt-items {
-        background: #AD8527;
+        background: #ad8527;
     }
 
     .receipt-amount {
-        background: #9F7107;
+        background: #9f7107;
     }
 }
 
 .history-item-failed {
     .receipt-header {
-        background: #BE4646;
+        background: #be4646;
         transition: background 100ms;
     }
 
     a.receipt-header:hover {
-        background: saturate(darken(#BE4646, 5%), 12%);
+        background: saturate(darken(#be4646, 5%), 12%);
     }
 
     .receipt-items {
-        background: #AD2727;
+        background: #ad2727;
     }
 
     .receipt-amount {
-        background: #9F1107;
+        background: #9f1107;
     }
 }
 
@@ -761,7 +759,7 @@ form input.readonly-input {
 
         span {
             font-size: 16pt;
-            color: #FFF;
+            color: #fff;
         }
     }
 
@@ -836,7 +834,7 @@ form input.readonly-input {
 }
 
 .product-view {
-    background: #2785AD;
+    background: #2785ad;
     color: white;
     overflow: hidden;
     margin-top: 5px;
@@ -865,7 +863,7 @@ form input.readonly-input {
 
     h1 {
         color: white;
-        background: #469ABE;
+        background: #469abe;
         text-align: center;
         padding: 20px;
         margin: 0px;
@@ -880,7 +878,7 @@ form input.readonly-input {
         text-align: center;
         width: 100%;
         display: block;
-        background: #07719F;
+        background: #07719f;
         height: 40px;
         font-size: 16pt;
         padding-top: 5px;
@@ -892,7 +890,7 @@ form input.readonly-input {
         display: flex;
         justify-content: center;
 
-        >div {
+        > div {
             background: #07719f;
             border-radius: 10px;
             overflow: hidden;
@@ -1118,18 +1116,19 @@ input:invalid {
     font-weight: bold;
 }
 
-.statistics-member-stats-value {}
+.statistics-member-stats-value {
+}
 
 .statistics-member-stats-row {
     display: flex;
     flex-direction: row;
 }
 
-$palette1: #5C2849;
-$palette2: #A73E5C;
-$palette3: #EC4863;
-$palette4: #FF733F;
-$palette5: #A8C545;
+$palette1: #5c2849;
+$palette2: #a73e5c;
+$palette3: #ec4863;
+$palette4: #ff733f;
+$palette5: #a8c545;
 $palette-green: $palette5;
 $palette-red: $palette4;
 
@@ -1170,7 +1169,7 @@ $palette-red: $palette4;
     }
 
     .uk-button {
-        color: white
+        color: white;
     }
 
     &.quiz-complete {
@@ -1180,14 +1179,13 @@ $palette-red: $palette4;
         text-align: center;
 
         h2 {
-            font-family: 'Bitter';
+            font-family: "Bitter";
             color: white;
         }
     }
 
-
     h1 {
-        font-family: 'Bitter', serif;
+        font-family: "Bitter", serif;
         margin-top: 0px;
         padding-top: 0px;
         font-size: 30pt;
@@ -1285,7 +1283,6 @@ $palette-red: $palette4;
         // border: 1px solid darken($palette-green, 0.1);
         // background: $palette-green;
         color: $palette-green;
-
     }
 
     .question-answer-description {
@@ -1424,7 +1421,7 @@ $palette-red: $palette4;
         padding-left: 20px;
         padding-right: 0px;
 
-        >span {
+        > span {
             padding-top: 8px;
             padding-bottom: 8px;
         }
@@ -1454,21 +1451,21 @@ $palette-red: $palette4;
         }
 
         .course-not-completed {
-            background: #469ABE;
+            background: #469abe;
             color: white;
             transition: 100ms background-color;
         }
 
         &:hover {
-            background: darken(#FFF, 2%);
+            background: darken(#fff, 2%);
         }
 
         &:hover .course-not-completed {
-            background: saturate(darken(#469ABE, 5%), 12%);
+            background: saturate(darken(#469abe, 5%), 12%);
         }
 
-        .course-not-completed>div,
-        .course-completed>div {
+        .course-not-completed > div,
+        .course-completed > div {
             position: relative;
             top: -10px;
             left: -10px;
@@ -1508,7 +1505,7 @@ $palette-red: $palette4;
 
 #root.register-page {
     padding-top: 32px;
-    background: #ECECEC;
+    background: #ececec;
     min-height: 100%;
     box-sizing: border-box;
     padding-bottom: 32px;
@@ -1585,7 +1582,7 @@ $palette-red: $palette4;
         margin: 16px 16px;
 
         background: white;
-        border-bottom: 2px solid #B6B6B6;
+        border-bottom: 2px solid #b6b6b6;
         border-radius: 5px;
         display: flex;
         align-self: stretch;
@@ -1622,7 +1619,7 @@ $palette-red: $palette4;
 
             span {
                 color: white;
-                background-color: #51B911;
+                background-color: #51b911;
                 border-radius: 100px;
                 padding: 5px 10px;
             }
@@ -1694,7 +1691,7 @@ $palette-red: $palette4;
         margin: 16px 16px;
 
         background: white;
-        border-bottom: 2px solid #B6B6B6;
+        border-bottom: 2px solid #b6b6b6;
         border-radius: 5px;
         display: flex;
         align-self: stretch;
@@ -1703,7 +1700,7 @@ $palette-red: $palette4;
         padding: 10px;
 
         .panel-divider {
-            border-bottom: 1px solid #B6B6B6;
+            border-bottom: 1px solid #b6b6b6;
             margin-top: 10px;
             margin-bottom: 16px;
         }
@@ -1934,7 +1931,7 @@ $palette-red: $palette4;
 
     .receipt-items {
         background-color: $makerspace-orange-light1;
-        font-size: 1.0em;
+        font-size: 1em;
 
         grid-template-columns: 5fr 1fr;
 
@@ -1962,14 +1959,13 @@ $palette-red: $palette4;
         font-size: 1.2em;
     }
 
-    box-shadow: 0px 0.1px 0.3px rgba(0, 0, 0, 0.02),
-    0px 0.3px 0.7px rgba(0, 0, 0, 0.028),
-    0px 0.5px 1.3px rgba(0, 0, 0, 0.035),
-    0px 0.9px 2.2px rgba(0, 0, 0, 0.042),
-    0px 1.7px 4.2px rgba(0, 0, 0, 0.05),
-    0px 4px 10px rgba(0, 0, 0, 0.07);
-
-
+    box-shadow:
+        0px 0.1px 0.3px rgba(0, 0, 0, 0.02),
+        0px 0.3px 0.7px rgba(0, 0, 0, 0.028),
+        0px 0.5px 1.3px rgba(0, 0, 0, 0.035),
+        0px 0.9px 2.2px rgba(0, 0, 0, 0.042),
+        0px 1.7px 4.2px rgba(0, 0, 0, 0.05),
+        0px 4px 10px rgba(0, 0, 0, 0.07);
 }
 
 .small-print {
@@ -1984,7 +1980,9 @@ $palette-red: $palette4;
     border: 1px solid black;
     border-radius: 100%;
     opacity: 30%;
-    transition: 100ms opacity, 100ms background-color;
+    transition:
+        100ms opacity,
+        100ms background-color;
     background-color: rgba(135, 201, 43, 0);
 
     &.task-done {

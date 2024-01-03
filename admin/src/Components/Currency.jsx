@@ -1,7 +1,7 @@
-import React from 'react';
+import React from "react";
 
 const Currency = (props) => {
-    const formatter = new Intl.NumberFormat('sv-SE', {
+    const formatter = new Intl.NumberFormat("sv-SE", {
         // style: 'currency',
         // currency: 'SEK',
         minimumFractionDigits: 2,
@@ -9,8 +9,11 @@ const Currency = (props) => {
     });
 
     const value = formatter.format(props.value / 100);
-    return <span>{value} {props.currency}</span>;
+    return (
+        <span>
+            {value} {props.currency}
+        </span>
+    );
 };
-
 
 export default Currency;

@@ -1,51 +1,60 @@
-from datetime import date, datetime, timezone, time as dt_time
+import logging
+import math
+import random
+import time
+from datetime import date, datetime, timezone
+from datetime import time as dt_time
 from datetime import timedelta as abs_tdelta
 from enum import Enum
-import logging
-import time
-import random
-import math
-from dateutil.relativedelta import relativedelta
-import pytz
 from typing import Any, Dict, List, Optional, Set, Tuple, cast
 from unittest import skipIf
-import pytest
 
-from shop.stripe_constants import CURRENCY, PaymentIntentStatus, MakerspaceMetadataKeys
-from shop.stripe_customer import get_and_sync_stripe_customer
-from shop.stripe_util import event_semantic_time, get_subscription_category, retry, convert_from_stripe_amount
-from shop.stripe_setup import setup_stripe_products
-from shop.stripe_product_price import (
-    get_stripe_product,
-    get_stripe_prices,
-    deactivate_stripe_product,
-    deactivate_stripe_price,
-)
-from shop.stripe_payment_intent import get_stripe_payment_intents
-from shop.stripe_subscriptions import SubscriptionType
-from shop import stripe_subscriptions
-from shop.models import Product
-from membership.membership import get_membership_summary
-from test_aid.test_util import random_str
-from membership.member_auth import hash_password
-from test_aid.obj import DEFAULT_PASSWORD
-from test_aid.systest_config import STRIPE_PRIVATE_KEY
 import core
-import messages
-import shop
+import core.models
 import membership
 import membership.models
-import shop.models
-import messages.models
-import core.models
-from membership.models import Span, Member
-from messages.models import Message
 import membership.views
-from service.db import db_session
-from shop.transactions import ship_orders
-from test_aid.test_base import FlaskTestBase
+import messages
+import messages.models
+import pytest
+import pytz
+import shop
+import shop.models
 import stripe
-from shop import stripe_event
+from dateutil.relativedelta import relativedelta
+from membership.member_auth import hash_password
+from membership.membership import get_membership_summary
+from membership.models import Member, Span
+from messages.models import Message
+from service.db import db_session
+from shop import stripe_constants, stripe_event, stripe_subscriptions
+from shop.models import Product
+from shop.stripe_constants import CURRENCY, MakerspaceMetadataKeys, PaymentIntentStatus
+from shop.stripe_customer import get_and_sync_stripe_customer
+from shop.stripe_payment_intent import get_stripe_payment_intents
+from shop.stripe_product_price import (
+    deactivate_stripe_price,
+    deactivate_stripe_product,
+    get_stripe_prices,
+    get_stripe_product,
+)
+from shop.stripe_setup import setup_stripe_products
+from shop.stripe_subscriptions import (
+    BINDING_PERIOD,
+    SubscriptionType,
+)
+from shop.stripe_util import (
+    convert_from_stripe_amount,
+    convert_to_stripe_amount,
+    event_semantic_time,
+    get_subscription_category,
+    retry,
+)
+from shop.transactions import ship_orders
+from test_aid.obj import DEFAULT_PASSWORD
+from test_aid.systest_config import STRIPE_PRIVATE_KEY
+from test_aid.test_base import FlaskTestBase
+from test_aid.test_util import random_str
 
 logger = logging.getLogger("makeradmin")
 

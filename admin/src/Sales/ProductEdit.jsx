@@ -1,19 +1,17 @@
-import React from 'react';
-import {withRouter} from "react-router";
+import React from "react";
+import { withRouter } from "react-router";
 import Product from "../Models/Product";
 import ProductForm from "../Components/ProductForm";
-import {confirmModal} from "../message";
-import { browserHistory } from '../browser_history';
-
+import { confirmModal } from "../message";
+import { browserHistory } from "../browser_history";
 
 class ProductEdit extends React.Component {
-    
     constructor(props) {
         super(props);
-        const {id} = props.match.params;
+        const { id } = props.match.params;
         this.product = Product.getWithRelated(id);
     }
-    
+
     render() {
         return (
             <div>

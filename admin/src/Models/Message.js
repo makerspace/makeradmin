@@ -1,14 +1,17 @@
-import Base from './Base';
-
+import Base from "./Base";
 
 export default class Message extends Base {
-    
     del() {
         throw new Error("Message delete not supported.");
     }
-    
+
     canSave() {
-        return this.body && this.recipients && this.recipients.length && this.subject;
+        return (
+            this.body &&
+            this.recipients &&
+            this.recipients.length &&
+            this.subject
+        );
     }
 }
 
@@ -29,8 +32,7 @@ Message.model = {
     },
 };
 
-
-Message.statusText = message => {
+Message.statusText = (message) => {
     switch (message.status) {
         case "queued":
             return "Queued";
@@ -42,5 +44,3 @@ Message.statusText = message => {
             return "Unknown";
     }
 };
-
-

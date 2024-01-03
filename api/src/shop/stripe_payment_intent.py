@@ -1,33 +1,33 @@
 from dataclasses import dataclass
+from datetime import date, datetime, timezone
 from decimal import Decimal
-from datetime import datetime, timezone, date
-from time import mktime
 from enum import Enum
 from logging import getLogger
-from typing import Dict, Optional, List
-from typing_extensions import Never
-from dataclasses_json import DataClassJsonMixin
-import stripe
-from stripe import InvalidRequestError, CardError
+from time import mktime
+from typing import Dict, List, Optional
 
-from stripe import PaymentIntent
+import stripe
+from dataclasses_json import DataClassJsonMixin
 from membership.models import Member
 from service.db import db_session
-from service.error import InternalServerError, EXCEPTION, BadRequest
-from shop.models import Transaction, StripePending
+from service.error import EXCEPTION, BadRequest, InternalServerError
+from stripe import CardError, InvalidRequestError, PaymentIntent
+from typing_extensions import Never
+
+from shop.models import StripePending, Transaction
 from shop.stripe_constants import (
-    MakerspaceMetadataKeys,
-    PaymentIntentStatus,
-    PaymentIntentNextActionType,
     CURRENCY,
+    MakerspaceMetadataKeys,
+    PaymentIntentNextActionType,
+    PaymentIntentStatus,
     SetupFutureUsage,
 )
 from shop.stripe_customer import get_and_sync_stripe_customer
-from shop.stripe_util import retry, convert_to_stripe_amount, convert_from_stripe_amount, replace_default_payment_method
+from shop.stripe_util import convert_from_stripe_amount, convert_to_stripe_amount, replace_default_payment_method, retry
 from shop.transactions import (
     PaymentFailed,
-    payment_success,
     commit_fail_transaction,
+    payment_success,
 )
 
 logger = getLogger("makeradmin")

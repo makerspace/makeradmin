@@ -2,15 +2,15 @@ from logging import getLogger
 from typing import Any, Dict, Optional
 
 import stripe
-
-from stripe import InvalidRequestError
-from shop.stripe_util import retry, are_metadata_dicts_equivalent
-from service.db import db_session
-from service.error import NotFound, InternalServerError
 from membership.models import Member
+from service.db import db_session
+from service.error import InternalServerError, NotFound
+from stripe import InvalidRequestError
+
 from shop.stripe_constants import (
     MakerspaceMetadataKeys as MSMetaKeys,
 )
+from shop.stripe_util import are_metadata_dicts_equivalent, retry
 
 logger = getLogger("makeradmin")
 

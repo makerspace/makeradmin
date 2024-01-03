@@ -1,7 +1,7 @@
-from sqlalchemy import Column, Integer, String, DateTime, func, Text, Numeric, ForeignKey, Enum, Boolean
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import relationship, configure_mappers
 from membership.models import Member
+from sqlalchemy import Boolean, Column, DateTime, Enum, ForeignKey, Integer, Numeric, String, Text, func
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import configure_mappers, relationship
 
 Base = declarative_base()
 

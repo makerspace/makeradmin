@@ -1,10 +1,9 @@
 from logging import getLogger
 
 from membership.membership import get_membership_summary
+from membership.models import Key, Member
 from service.db import db_session
 from service.error import NotFound
-from membership.models import Member, Key
-
 
 logger = getLogger("makeradmin")
 

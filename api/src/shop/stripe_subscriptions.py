@@ -25,33 +25,34 @@ This logic is handled in the frontend.
 
 """
 from dataclasses import dataclass
+from datetime import date, datetime, time, timedelta, timezone
 from decimal import Decimal
 from enum import Enum
 from logging import getLogger
 from typing import Any, Dict, Generic, List, Optional, Tuple, TypeVar, cast
-from sqlalchemy import func
 
 import stripe
-
-from datetime import datetime, timezone, date, time, timedelta
-from shop.stripe_customer import get_and_sync_stripe_customer
 from basic_types.enums import PriceLevel
-from shop.stripe_discounts import get_discount_for_product, get_price_level_for_member
-from shop.stripe_product_price import get_and_sync_stripe_product_and_prices
-from shop.stripe_util import retry, convert_from_stripe_amount
-from shop.models import Product
-from service.error import BadRequest, NotFound, InternalServerError
-from service.db import db_session
-from membership.models import Member
 from membership.membership import get_membership_summary
+from membership.models import Member
+from service.db import db_session
+from service.error import BadRequest, InternalServerError, NotFound
+from sqlalchemy import func
+from stripe import InvalidRequestError
+
+from shop.models import Product, ProductAction, ProductCategory
 from shop.stripe_constants import (
+    CURRENCY,
     STRIPE_CURRENTY_BASE,
-    MakerspaceMetadataKeys as MSMetaKeys,
     PriceType,
     SubscriptionScheduleStatus,
     SubscriptionStatus,
-    CURRENCY,
 )
+from shop.stripe_constants import MakerspaceMetadataKeys as MSMetaKeys
+from shop.stripe_customer import get_and_sync_stripe_customer
+from shop.stripe_discounts import get_discount_for_product, get_price_level_for_member
+from shop.stripe_product_price import get_and_sync_stripe_product_and_prices
+from shop.stripe_util import are_metadata_dicts_equivalent, convert_from_stripe_amount, retry
 
 
 class SubscriptionType(str, Enum):

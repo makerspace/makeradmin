@@ -1,24 +1,25 @@
+import collections
 from dataclasses import dataclass
 from logging import getLogger
 from typing import List
-import collections
-
-from sqlalchemy import desc
-from sqlalchemy.orm import joinedload, contains_eager
-from sqlalchemy.orm.exc import NoResultFound
 
 from membership.views import member_entity
 from service.db import db_session
-from service.error import NotFound, InternalServerError
-from shop.stripe_constants import MakerspaceMetadataKeys
+from service.error import InternalServerError, NotFound
+from sqlalchemy import desc
+from sqlalchemy.orm import contains_eager, joinedload
+from sqlalchemy.orm.exc import NoResultFound
+
 from shop.entities import (
-    transaction_entity,
-    transaction_content_entity,
-    product_entity,
     category_entity,
+    product_entity,
     product_image_entity,
+    transaction_content_entity,
+    transaction_entity,
 )
-from shop.models import Transaction, Product, ProductCategory, ProductAction
+from shop.models import Product, ProductAction, ProductCategory, Transaction
+from shop.stripe_constants import MakerspaceMetadataKeys
+from shop.stripe_subscriptions import get_subscription_products
 from shop.transactions import pending_actions_query
 
 logger = getLogger("makeradmin")

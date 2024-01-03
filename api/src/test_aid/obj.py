@@ -1,15 +1,16 @@
-from logging import getLogger
+import re
 from datetime import datetime
-from random import randint, choice, seed
+from logging import getLogger
+from random import choice, randint, seed
 from typing import Any, Dict
-from faker import Faker
-from basic_types.enums import PriceLevel
 
+from basic_types.enums import PriceLevel
+from faker import Faker
 from membership.models import Member, Span
 from messages.models import Message
 from shop.models import ProductAction, Transaction
+
 from test_aid.test_util import random_str
-import re
 
 logger = getLogger("makeradmin")
 

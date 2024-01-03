@@ -1,35 +1,35 @@
+import re
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from decimal import Decimal
-import re
 from logging import getLogger
 from typing import Any, List, Optional
-from dataclasses_json import DataClassJsonMixin
 
 import stripe
 from basic_types.enums import PriceLevel
-from shop.stripe_constants import MakerspaceMetadataKeys
-from shop.stripe_setup_intent import SetupIntentFailed, SetupIntentResult, handle_setup_intent
-from membership.models import Member, Span
-from shop.models import Product, StripePending, Transaction, TransactionAction, TransactionContent
-from shop.stripe_subscriptions import (
-    SubscriptionType,
-    cancel_subscription,
-    start_subscription,
-)
-from shop.stripe_customer import get_and_sync_stripe_customer
-from shop.stripe_util import retry
-from service.db import db_session
 from core import auth
+from dataclasses_json import DataClassJsonMixin
+from membership.models import Member, Span
 from membership.views import member_entity
+from service.db import db_session
 from service.error import BadRequest, UnprocessableEntity
-from shop.stripe_payment_intent import PartialPayment, PaymentAction, pay_with_stripe
+
+from shop.models import Product, StripePending, Transaction, TransactionAction, TransactionContent
+from shop.stripe_constants import MakerspaceMetadataKeys
+from shop.stripe_customer import get_and_sync_stripe_customer
 from shop.stripe_payment_intent import (
     PartialPayment,
     PaymentAction,
     confirm_stripe_payment_intent,
     pay_with_stripe,
 )
+from shop.stripe_setup_intent import SetupIntentFailed, SetupIntentResult, handle_setup_intent
+from shop.stripe_subscriptions import (
+    SubscriptionType,
+    cancel_subscription,
+    start_subscription,
+)
+from shop.stripe_util import retry
 from shop.transactions import Purchase, create_transaction
 
 logger = getLogger("makeradmin")
