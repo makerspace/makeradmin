@@ -66,18 +66,6 @@ app.after_request(after_request_functions)
 
 engine = create_mysql_engine(**get_mysql_config())
 
-if are_stripe_keys_live() and debug_mode():
-    while True:
-        s = input(
-            "The stripe keys in .env are live keys and makeradmin is in dev/debug mode. Are you sure you want to continue?"
-            "[Y/n]: "
-        )
-        if s in ["n", "no"]:
-            raise Exception("Aborted")
-        if s in ["y", "yes"]:
-            break
-setup_stripe(private=True)
-
 if are_stripe_keys_set():
     if are_stripe_keys_live() and debug_mode():
         while True:

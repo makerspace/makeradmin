@@ -19,7 +19,6 @@ from shop.entities import (
 )
 from shop.models import Product, ProductAction, ProductCategory, Transaction
 from shop.stripe_constants import MakerspaceMetadataKeys
-from shop.stripe_subscriptions import get_subscription_products
 from shop.transactions import pending_actions_query
 
 logger = getLogger("makeradmin")

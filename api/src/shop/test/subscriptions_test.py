@@ -40,7 +40,6 @@ from shop.stripe_product_price import (
 )
 from shop.stripe_setup import setup_stripe_products
 from shop.stripe_subscriptions import (
-    BINDING_PERIOD,
     SubscriptionType,
 )
 from shop.stripe_util import (
@@ -114,6 +113,7 @@ class Test(FlaskTestBase):
     seen_event_ids: Set[str]
 
     @classmethod
+    @skipIf(not STRIPE_PRIVATE_KEY, "subscriptions tests require stripe api key in .env file")
     def setUpClass(self) -> None:
         super().setUpClass()
 
@@ -147,7 +147,6 @@ class Test(FlaskTestBase):
 
         setup_stripe_products()
 
-    @skipIf(not STRIPE_PRIVATE_KEY, "subscriptions tests require stripe api key in .env file")
     def setUp(self) -> None:
         db_session.query(Member).delete()
         db_session.query(Span).delete()
