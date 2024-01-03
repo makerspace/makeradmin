@@ -149,7 +149,7 @@ const nav = {
             text: "boxTerminator",
             target: "/boxTerminator",
             icon: "crosshairs",
-            // children: 
+            // children:
             //     [
             //         {
             //             text: "About",
@@ -227,9 +227,9 @@ class App extends React.Component {
                                                     path="/quiz"
                                                     component={Quiz}
                                                 />
-                                                <Route 
+                                                <Route
                                                     path="/boxTerminator"
-                                                    component={BoxTerminator} 
+                                                    component={BoxTerminator}
                                                 />
                                                 <Route component={Page404} />
                                             </Switch>
