@@ -3,11 +3,18 @@ from datetime import datetime
 from random import choice, randint, seed
 from typing import Any, Dict
 
-from basic_types.enums import PriceLevel
+from basic_types.enums import AccountingEntryType, PriceLevel
 from faker import Faker
 from membership.models import Member, Span
 from messages.models import Message
-from shop.models import ProductAction, Transaction, TransactionContent
+from shop.models import (
+    ProductAccountsCostCenters,
+    ProductAction,
+    Transaction,
+    TransactionAccount,
+    TransactionContent,
+    TransactionCostcenter,
+)
 
 from test_aid.test_util import random_str
 
@@ -32,6 +39,9 @@ class ObjFactory:
         self.phone_request = None
         self.transaction = None
         self.transaction_content = None
+        self.transaction_account = None
+        self.transaction_cost_center = None
+        self.product_account_cost_center = None
 
         seed()
 
@@ -173,6 +183,43 @@ class ObjFactory:
         obj.update(**kwargs)
         self.transaction_content = obj
         return self.transaction_content
+
+    def create_transaction_account(self, **kwargs) -> TransactionAccount:
+        obj = dict(
+            account=f"account-{random_str(5)}",
+            description=f"desc-{random_str(12)}",
+            display_order=randint(int(1e8), int(9e8)),
+        )
+        obj.update(kwargs)
+        self.transaction_account = obj
+        return self.transaction_account
+
+    def create_transaction_cost_center(self, **kwargs) -> TransactionCostcenter:
+        obj = dict(
+            cost_center=f"cost-center-{random_str(5)}",
+            description=f"desc-{random_str(12)}",
+            display_order=randint(int(1e8), int(9e8)),
+        )
+        obj.update(kwargs)
+        self.transaction_cost_center = obj
+        return self.transaction_cost_center
+
+    def create_product_account_cost_center(self, **kwargs) -> ProductAccountsCostCenters:
+        account_id = kwargs.pop("account_id", None) or (self.transaction_account and self.transaction_account["id"])
+        cost_center_id = kwargs.pop("cost_center_id", None) or (
+            self.transaction_cost_center and self.transaction_cost_center["id"]
+        )
+        product_id = kwargs.pop("product_id", None) or (self.product and self.product["id"])
+        obj = dict(
+            account_id=account_id,
+            cost_center_id=cost_center_id,
+            product_id=product_id,
+            fraction=1,
+            type=AccountingEntryType.CREDIT,
+        )
+        obj.update(**kwargs)
+        self.product_account_cost_center = obj
+        return self.product_account_cost_center
 
 
 def random_phone_number() -> str:

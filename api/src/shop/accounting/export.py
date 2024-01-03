@@ -49,7 +49,7 @@ def export_accounting() -> None:  # TODO input is two dates, filename?
     stripe_payment_intents = get_stripe_payment_intents(start_date, end_date)
     completed_payments = convert_completed_stripe_intents_to_payments(stripe_payment_intents)
 
-    # TODO query for transactions
+    # TODO query for transactions including contents
     transactions = None
 
     diff = diff_transactions_and_completed_payments(transactions, completed_payments)

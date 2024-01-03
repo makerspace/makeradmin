@@ -8,7 +8,16 @@ from faker import Faker
 from membership.models import Box, Group, Key, Member, Permission, PhoneNumberChangeRequest, Span
 from messages.models import Message
 from service.db import db_session
-from shop.models import Product, ProductAction, ProductCategory, Transaction, TransactionContent
+from shop.models import (
+    Product,
+    ProductAccountsCostCenters,
+    ProductAction,
+    ProductCategory,
+    Transaction,
+    TransactionAccount,
+    TransactionContent,
+    TransactionCostcenter,
+)
 
 from test_aid.obj import ObjFactory
 from test_aid.test_util import random_str
@@ -41,6 +50,9 @@ class DbFactory:
         self.phone_request: Optional[PhoneNumberChangeRequest] = None
         self.transaction: Optional[Transaction] = None
         self.transaction_content: Optional[TransactionContent] = None
+        self.transaction_account: Optional[TransactionAccount] = None
+        self.transaction_cost_center: Optional[TransactionCostcenter] = None
+        self.product_account_cost_center: Optional[ProductAccountsCostCenters] = None
 
     def create_access_token(self, **kwargs) -> AccessToken:
         obj = dict(
@@ -233,3 +245,27 @@ class DbFactory:
         db_session.add(self.transaction_content)
         db_session.commit()
         return self.transaction_content
+
+    def create_transaction_account(self, **kwargs) -> TransactionAccount:
+        assert self.obj is not None
+        obj = self.obj.create_transaction_account(**kwargs)
+        self.transaction_account = TransactionAccount(**obj)
+        db_session.add(self.transaction_account)
+        db_session.commit()
+        return self.transaction_account
+
+    def create_transaction_cost_center(self, **kwargs) -> TransactionCostcenter:
+        assert self.obj is not None
+        obj = self.obj.create_transaction_cost_center(**kwargs)
+        self.transaction_cost_center = TransactionCostcenter(**obj)
+        db_session.add(self.transaction_cost_center)
+        db_session.commit()
+        return self.transaction_cost_center
+
+    def create_product_account_cost_center(self, **kwargs) -> ProductAccountsCostCenters:
+        assert self.obj is not None
+        obj = self.obj.create_product_account_cost_center(**kwargs)
+        self.product_account_cost_center = ProductAccountsCostCenters(**obj)
+        db_session.add(self.product_account_cost_center)
+        db_session.commit()
+        return self.product_account_cost_center

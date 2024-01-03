@@ -111,12 +111,13 @@ def split_transactions_over_accounts(transactions: List[Transaction]) -> List[Tr
 
     for transaction in transactions:
         logger.info(f"transaction: {transaction}")
-        for product in transaction.contents:
-            logger.info(f"product: {product}")
-            product_accounting = product_to_accounting.get_account_cost_center(product.id)
+        for content in transaction.contents:
+            logger.info(f"content: {content}")
+            product_accounting = product_to_accounting.get_account_cost_center(content.product_id)
+            transaction_content_amount = content.amount
             logger.info(f"product_accounting: {product_accounting}")
             for accounting in product_accounting:
-                amount_to_add = accounting.fraction * transaction.amount  # TODO rounding errors?
+                amount_to_add = accounting.fraction * transaction_content_amount  # TODO rounding errors?
                 transactions_with_accounting.append(
                     TransactionWithAccounting(
                         amount=amount_to_add,
