@@ -1,30 +1,29 @@
-from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
+import time
+from argparse import ArgumentDefaultsHelpFormatter, ArgumentParser
 from contextlib import closing
 from datetime import datetime, timedelta
 from os.path import abspath, dirname
 from time import sleep
-import time
 from urllib.parse import quote_plus
 
 import requests
-from jinja2 import Environment, select_autoescape, FileSystemLoader
-from rocky.process import log_exception, stoppable
-from sqlalchemy import func
-from sqlalchemy.exc import DatabaseError
-from sqlalchemy.orm import sessionmaker
-
-from membership.models import Member, Span
+from core.auth import create_access_token
+from jinja2 import Environment, FileSystemLoader, select_autoescape
 from membership.membership import get_members_and_membership
+from membership.models import Member, Span
 from messages.message import send_message
 from messages.models import Message, MessageTemplate
-from service.config import get_mysql_config, config, get_public_url
+from quiz.views import quiz_member_answer_stats
+from rocky.process import log_exception, stoppable
+from service.config import config, get_mysql_config, get_public_url
 from service.db import create_mysql_engine, db_session
 from service.logging import logger
 from shop.models import ProductAction
-from shop.transactions import pending_action_value_sum
 from shop.shop_data import pending_actions
-from quiz.views import quiz_member_answer_stats
-from core.auth import create_access_token
+from shop.transactions import pending_action_value_sum
+from sqlalchemy import func
+from sqlalchemy.exc import DatabaseError
+from sqlalchemy.orm import sessionmaker
 
 LABACCESS_REMINDER_DAYS_BEFORE = 20
 LABACCESS_REMINDER_GRACE_PERIOD = 28

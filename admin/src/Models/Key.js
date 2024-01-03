@@ -1,12 +1,10 @@
-import Base from './Base';
-
+import Base from "./Base";
 
 export default class Key extends Base {
-    
     deleteConfirmMessage() {
         return `Are you sure you want to delete key ${this.tagid}?`;
     }
-    
+
     canSave() {
         return this.isDirty() && this.tagid && this.tagid.length > 0;
     }

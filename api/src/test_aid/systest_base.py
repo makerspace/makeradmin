@@ -5,35 +5,36 @@ from functools import wraps
 from logging import getLogger
 from typing import Optional
 from unittest import SkipTest, skipIf
-from sqlalchemy import create_engine
 
 import stripe
 from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException
-from selenium.webdriver.remote import webdriver as remote
 from selenium.webdriver.chrome import webdriver as chrome
-from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.common.by import By
-
+from selenium.webdriver.remote import webdriver as remote
+from selenium.webdriver.support.wait import WebDriverWait
 from service.config import get_mysql_config
-from service.db import create_mysql_engine, db_session_factory, db_session
-from shop.stripe_constants import EventType, set_stripe_key
+from service.db import create_mysql_engine, db_session, db_session_factory
+from shop.stripe_constants import EventType
+from shop.stripe_setup import are_stripe_keys_live, are_stripe_keys_set, setup_stripe
+from sqlalchemy import create_engine
+
 from test_aid.api import ApiFactory, ApiResponse
 from test_aid.db import DbFactory
 from test_aid.obj import DEFAULT_PASSWORD
 from test_aid.systest_config import (
+    HOST_BACKEND,
     HOST_FRONTEND,
     HOST_PUBLIC,
-    HOST_BACKEND,
-    SELENIUM_BASE_TIMEOUT,
-    SLEEP,
-    WEBDRIVER_TYPE,
-    TEST_SERVICE_TOKEN,
-    SELENIUM_SCREENSHOT_DIR,
     KEEP_BROWSER,
+    SELENIUM_BASE_TIMEOUT,
+    SELENIUM_SCREENSHOT_DIR,
+    SLEEP,
     STRIPE_PUBLIC_KEY,
+    TEST_SERVICE_TOKEN,
+    WEBDRIVER_TYPE,
 )
-from test_aid.test_base import TestBase, ShopTestMixin
+from test_aid.test_base import ShopTestMixin, TestBase
 
 VALID_NON_3DS_CARD_NO = "378282246310005"
 VALID_3DS_CARD_NO = "4242424242424242"
@@ -59,8 +60,12 @@ class SystestBase(TestBase):
     def setUpClass(self) -> None:
         super().setUpClass()
 
-        # Use the public key for these tests. TODO: Why not the private one?
-        set_stripe_key(private=False)
+        if are_stripe_keys_set():
+            if are_stripe_keys_live():
+                raise Exception(
+                    "Live Stripe keys detected during test setup. Using live keys in tests is prohibited to prevent unintended side effects."
+                )
+            setup_stripe(private=False)
 
         # Make sure sessions is removed so it is not using another engine in this thread.
         db_session.remove()
@@ -292,7 +297,7 @@ class SeleniumTest(ApiTest):
 
 
 class ApiShopTestMixin(ShopTestMixin):
-    @skipIf(not stripe.api_key, "webshop tests require stripe api key in .env file")
+    @skipIf(not STRIPE_PUBLIC_KEY, "webshop tests require stripe api key in .env file")
     def setUp(self):
         super().setUp()
         self.member = self.api.create_member(unhashed_password=DEFAULT_PASSWORD)

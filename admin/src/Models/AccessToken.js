@@ -1,8 +1,6 @@
-import Base from './Base';
+import Base from "./Base";
 
-
-export default class AccessToken extends Base {
-}
+export default class AccessToken extends Base {}
 
 AccessToken.model = {
     root: "/oauth/token",

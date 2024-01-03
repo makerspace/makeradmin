@@ -1,22 +1,19 @@
-import React from 'react';
+import React from "react";
 //import classNames from 'classnames/bind'
 // import auth from '../auth';
 
-module.exports = class FileInput extends React.Component
-{
-	constructor(props)
-	{
-		super(props);
-		this.state = {
-			progressbarVisible: false,
-			progressbarWidth: 0,
-			filename: "",
-		};
-	}
+module.exports = class FileInput extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            progressbarVisible: false,
+            progressbarWidth: 0,
+            filename: "",
+        };
+    }
 
-	componentDidMount()
-	{
-		/*
+    componentDidMount() {
+        /*
 		var _this = this;
 		var settings = {
 			action: config.apiBasePath + this.props.action,
@@ -69,11 +66,11 @@ module.exports = class FileInput extends React.Component
 
 			}
 		};
-		
+
 		var select = UIkit.uploadSelect($("#upload-select"), settings),
 		drop = UIkit.uploadDrop($("#upload-drop"), settings);
 		*/
-/*
+        /*
 		var _this = this;
 
 		// A sync event is fired when the model is saved
@@ -97,43 +94,69 @@ module.exports = class FileInput extends React.Component
 			}
 		});
 */
-	}
+    }
 
-	clearUpload()
-	{
-		this.setState({filename: ""});
-	}
-/*
+    clearUpload() {
+        this.setState({ filename: "" });
+    }
+    /*
 	onChange(event)
 	{
 		this.state.model.set(this.props.name, event.target.value);
 	}
 */
-	render()
-	{
-		return (
-			<div>
-				<div id="upload-drop" className="uk-placeholder">
-					<p>
-						<i className="uk-icon-cloud-upload uk-icon-medium uk-text-muted uk-margin-small-right"></i>
-						{this.state.filename ?
-							<span>{this.state.filename} (<a onClick={this.clearUpload.bind(this)}>Ta bort</a>)</span>
-						:
-							<span>Ladda upp genom att dra och släppa en fil här eller klicka på <a className="uk-form-file">ladda upp<input id="upload-select" className="uk-hidden" type="file" /></a>.</span>
-						}
-					</p>
+    render() {
+        return (
+            <div>
+                <div id="upload-drop" className="uk-placeholder">
+                    <p>
+                        <i className="uk-icon-cloud-upload uk-icon-medium uk-text-muted uk-margin-small-right"></i>
+                        {this.state.filename ? (
+                            <span>
+                                {this.state.filename} (
+                                <a onClick={this.clearUpload.bind(this)}>
+                                    Ta bort
+                                </a>
+                                )
+                            </span>
+                        ) : (
+                            <span>
+                                Ladda upp genom att dra och släppa en fil här
+                                eller klicka på{" "}
+                                <a className="uk-form-file">
+                                    ladda upp
+                                    <input
+                                        id="upload-select"
+                                        className="uk-hidden"
+                                        type="file"
+                                    />
+                                </a>
+                                .
+                            </span>
+                        )}
+                    </p>
 
-					{this.state.progressbarVisible ?
-						<div>
-							<div id="progressbar" className="uk-progress">
-								<div className="uk-progress-bar" style={{width: this.state.progressbarWidth + "%"}}>{this.state.progressbarWidth}%</div>
-							</div>
-						</div>
-					: ""}
-				</div>
-			</div>
-		);
-/*
+                    {this.state.progressbarVisible ? (
+                        <div>
+                            <div id="progressbar" className="uk-progress">
+                                <div
+                                    className="uk-progress-bar"
+                                    style={{
+                                        width:
+                                            this.state.progressbarWidth + "%",
+                                    }}
+                                >
+                                    {this.state.progressbarWidth}%
+                                </div>
+                            </div>
+                        </div>
+                    ) : (
+                        ""
+                    )}
+                </div>
+            </div>
+        );
+        /*
 		var classes = classNames({
 			"uk-form-row": true,
 			"selected": this.state.selected,
@@ -146,7 +169,7 @@ module.exports = class FileInput extends React.Component
 			<div className={classes}>
 				<label htmlFor={this.props.name} className="uk-form-label">{this.props.title}</label>
 				<div className="uk-form-controls">
-					{this.props.icon ? 
+					{this.props.icon ?
 						<div className="uk-form-icon">
 							<i className={"uk-icon-" + this.props.icon}></i>
 							<input type="text" name={this.props.name} id={this.props.name} disabled={this.props.disabled} value={this.state.value} placeholder={this.props.placeholder ? this.props.placeholder : this.props.title} onChange={this.onChange.bind(this)} className="uk-form-width-large" onFocus={this.onFocus.bind(this)} onBlur={this.onBlur.bind(this)} />
@@ -161,5 +184,5 @@ module.exports = class FileInput extends React.Component
 			</div>
 		);
 */
-	}
+    }
 };

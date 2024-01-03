@@ -1,5 +1,4 @@
 from flask import request
-
 from membership.models import Member, member_group
 from service.api_definition import BAD_VALUE, natural1
 from service.db import db_session
@@ -31,7 +30,7 @@ class MessageEntity(Entity):
                 member_ids.add(id_)
             else:
                 member_ids.update(
-                    {i for i, in db_session.query(member_group.c.member_id).filter(member_group.c.group_id == id_)}
+                    {i for (i,) in db_session.query(member_group.c.member_id).filter(member_group.c.group_id == id_)}
                 )
 
         members = db_session.query(Member).filter(Member.member_id.in_(member_ids)).all()

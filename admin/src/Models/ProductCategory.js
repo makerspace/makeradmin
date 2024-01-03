@@ -1,4 +1,4 @@
-import Base from './Base';
+import Base from "./Base";
 
 export default class Category extends Base {
     canSave() {
@@ -9,7 +9,6 @@ export default class Category extends Base {
         return `Are you sure you want to delete category ${this.name}?`;
     }
 }
-
 
 Category.model = {
     id: "id",

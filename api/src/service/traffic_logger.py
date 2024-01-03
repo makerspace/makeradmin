@@ -1,9 +1,11 @@
 import json
-from typing import List
-from requests import Response, PreparedRequest
-from flask import g, request, Request as FlaskRequest
-from flask.wrappers import Response as FlaskResponse
 from datetime import datetime
+from typing import List
+
+from flask import Request as FlaskRequest
+from flask import g, request
+from flask.wrappers import Response as FlaskResponse
+from requests import PreparedRequest, Response
 
 
 def byte_decode(data: bytes) -> str:

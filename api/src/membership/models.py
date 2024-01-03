@@ -2,26 +2,25 @@ from logging import getLogger
 from typing import Any, Optional
 
 import phonenumbers as phonenumbers
+from basic_types.enums import PriceLevel
 from sqlalchemy import (
-    Column,
-    Integer,
-    String,
-    DateTime,
-    Text,
-    Date,
-    Enum,
-    Table,
-    ForeignKey,
-    func,
-    text,
-    select,
     BigInteger,
     Boolean,
+    Column,
+    Date,
+    DateTime,
+    Enum,
+    ForeignKey,
+    Integer,
+    String,
+    Table,
+    Text,
+    func,
+    select,
+    text,
 )
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import relationship, column_property, configure_mappers, validates
-
-from basic_types.enums import PriceLevel
+from sqlalchemy.orm import column_property, configure_mappers, relationship, validates
 
 Base = declarative_base()
 

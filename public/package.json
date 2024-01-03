@@ -25,6 +25,7 @@
         "markdown-it": "^12.2.0",
         "npm": "^9.2.0",
         "preact": "^10.15.1",
+        "preact-render-to-string": "^6.3.1",
         "react-calendly": "^4.1.1"
     },
     "scripts": {

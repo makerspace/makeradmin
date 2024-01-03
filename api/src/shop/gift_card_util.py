@@ -1,4 +1,5 @@
 from secrets import token_hex
+
 from messages.message import send_message
 from messages.models import MessageTemplate
 
@@ -30,4 +31,3 @@ def send_gift_card_email(gift_card):
         recipient_email=gift_card.email,
         gift_card=gift_card,
     )
-

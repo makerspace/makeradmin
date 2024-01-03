@@ -1,15 +1,15 @@
-import React from 'react';
-import {withRouter} from "react-router";
+import React from "react";
+import { withRouter } from "react-router";
 import QuizQuestion from "../Models/QuizQuestion";
-import { browserHistory } from '../browser_history';
-import QuestionEditForm from './QuestionEditForm';
+import { browserHistory } from "../browser_history";
+import QuestionEditForm from "./QuestionEditForm";
 
 interface State {
-    question: null|QuizQuestion;
+    question: null | QuizQuestion;
 }
 
 interface Props {
-    match: { params: { quiz_id: string }}
+    match: { params: { quiz_id: string } };
 }
 
 class QuestionAdd extends React.Component<Props, State> {
@@ -23,9 +23,9 @@ class QuestionAdd extends React.Component<Props, State> {
     async save() {
         this.question.quiz_id = parseInt(this.props.match.params.quiz_id);
         await this.question.save();
-        browserHistory.replace('/quiz/question/' + this.question.id);
+        browserHistory.replace("/quiz/question/" + this.question.id);
     }
-    
+
     delete() {
         browserHistory.push(`/quiz/${this.props.match.params.quiz_id}`);
     }
@@ -40,5 +40,5 @@ class QuestionAdd extends React.Component<Props, State> {
         );
     }
 }
-    
+
 export default QuestionAdd;

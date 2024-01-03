@@ -1,18 +1,19 @@
+import random
+import time
+from datetime import datetime, timezone
 from decimal import Decimal
 from logging import getLogger
-import random
 from math import ceil
-import time
 from typing import Any, Dict, List, Optional
 
 import stripe
-from stripe import SignatureVerificationError, RateLimitError
-from datetime import timezone
-from shop import stripe_subscriptions
-import shop.transactions
-from shop.stripe_util import event_semantic_time
-
+from membership.models import Member
+from service.db import db_session
 from service.error import BadRequest, InternalServerError
+from stripe import RateLimitError, SignatureVerificationError
+
+import shop.transactions
+from shop import stripe_subscriptions
 from shop.models import (
     ProductAction,
     Transaction,
@@ -23,20 +24,18 @@ from shop.stripe_charge import charge_transaction, create_stripe_charge
 from shop.stripe_constants import (
     STRIPE_CURRENTY_BASE,
     STRIPE_SIGNING_SECRET,
-    MakerspaceMetadataKeys,
-    EventType,
     EventSubtype,
+    EventType,
+    MakerspaceMetadataKeys,
     SourceType,
 )
+from shop.stripe_subscriptions import SubscriptionType, get_subscription_product
+from shop.stripe_util import event_semantic_time
 from shop.transactions import (
-    get_source_transaction,
-    commit_fail_transaction,
     PaymentFailed,
+    commit_fail_transaction,
+    get_source_transaction,
 )
-from service.db import db_session
-from membership.models import Member
-from shop.stripe_subscriptions import get_subscription_product, SubscriptionType
-from datetime import datetime
 
 logger = getLogger("makeradmin")
 
@@ -193,6 +192,7 @@ def stripe_invoice_event(subtype: EventSubtype, event: stripe.Event, current_tim
                     status=TransactionAction.PENDING,
                 )
             )
+
             db_session.flush()
 
             transaction_ids.append(transaction.id)

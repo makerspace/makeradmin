@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 import MemberList from "./MemberList";
 import GroupAdd from "./GroupAdd";
 import GroupBox from "./GroupBox";
@@ -23,7 +23,7 @@ import MemberExport from "./MemberExport";
 import SpanList from "./SpanList";
 import SpanShow from "./SpanShow";
 
-import { Route, Switch } from 'react-router-dom';
+import { Route, Switch } from "react-router-dom";
 
 const Group = ({ match: { path } }) => (
     <GroupBox>
@@ -31,7 +31,10 @@ const Group = ({ match: { path } }) => (
             <Route exact path={`${path}/`} component={GroupBoxEditInfo} />
             <Route path={`${path}/info`} component={GroupBoxEditInfo} />
             <Route path={`${path}/members`} component={GroupBoxMembers} />
-            <Route path={`${path}/permissions`} component={GroupBoxPermissions} />
+            <Route
+                path={`${path}/permissions`}
+                component={GroupBoxPermissions}
+            />
         </Switch>
     </GroupBox>
 );
@@ -49,12 +52,21 @@ const Member = ({ match: { path } }) => (
         <Switch>
             <Route exact path={`${path}/`} component={KeyHandout} />
             <Route path={`${path}/key-handout`} component={KeyHandout} />
-            <Route path={`${path}/member-data`} component={MemberBoxMemberData} />
+            <Route
+                path={`${path}/member-data`}
+                component={MemberBoxMemberData}
+            />
             <Route path={`${path}/groups`} component={MemberBoxGroups} />
             <Route path={`${path}/keys`} component={MemberBoxKeys} />
-            <Route path={`${path}/permissions`} component={MemberBoxPermissions} />
+            <Route
+                path={`${path}/permissions`}
+                component={MemberBoxPermissions}
+            />
             <Route path={`${path}/orders`} component={MemberBoxOrders} />
-            <Route path={`${path}/messages/new`} component={MemberBoxNewMessage} />
+            <Route
+                path={`${path}/messages/new`}
+                component={MemberBoxNewMessage}
+            />
             <Route path={`${path}/messages`} component={MemberBoxMessages} />
             <Route path={`${path}/spans`} component={MemberBoxSpans} />
         </Switch>

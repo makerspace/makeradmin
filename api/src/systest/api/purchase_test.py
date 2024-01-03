@@ -1,10 +1,8 @@
 from logging import getLogger
 
-
 import stripe
 from shop.transactions import CartItem, Purchase
-
-from test_aid.systest_base import ApiShopTestMixin, ApiTest, VALID_NON_3DS_CARD_NO, VALID_3DS_CARD_NO, retry
+from test_aid.systest_base import VALID_3DS_CARD_NO, VALID_NON_3DS_CARD_NO, ApiShopTestMixin, ApiTest, retry
 
 logger = getLogger("makeradmin")
 

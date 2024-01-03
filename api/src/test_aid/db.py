@@ -1,19 +1,18 @@
 from logging import getLogger
 from random import randint
 from typing import Optional
-from faker import Faker
-from test_aid.obj import ObjFactory
 
-
+from box_terminator.models import StorageItem, StorageMessage, StorageMessageType, StorageType
 from core.models import AccessToken, PasswordResetToken
 from core.service_users import TEST_SERVICE_USER_ID
-from membership.models import Member, Group, Permission, Span, Key, PhoneNumberChangeRequest
-from box_terminator.models import StorageItem, StorageMessage, StorageType, StorageMessageType
+from faker import Faker
+from membership.models import Group, Key, Member, Permission, PhoneNumberChangeRequest, Span
 from messages.models import Message
 from service.db import db_session
-from shop.models import ProductCategory, Product, ProductAction
-from test_aid.test_util import random_str
+from shop.models import Product, ProductAction, ProductCategory, Transaction
 
+from test_aid.obj import ObjFactory
+from test_aid.test_util import random_str
 
 logger = getLogger("makeradmin")
 

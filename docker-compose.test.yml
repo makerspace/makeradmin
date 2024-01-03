@@ -1,7 +1,6 @@
 version: "3"
 
 services:
-
   db2:
     volumes:
       - logs:/var/www/html/storage/logs
@@ -13,29 +12,28 @@ services:
       - logs:/work/logs
     environment:
       TEST: "true"
-      CORS_ALLOWED_ORIGINS: 'http://admin,http://api,http://public'
+      CORS_ALLOWED_ORIGINS: "http://admin,http://api,http://public"
       TEST_SERVICE_TOKEN:
-
 
   public:
     environment:
-      HOST_BACKEND: 'http://api'
+      HOST_BACKEND: "http://api"
 
   admin:
     environment:
-      HOST_BACKEND: 'http://api'
+      HOST_BACKEND: "http://api"
 
   selenium:
     image: selenium/standalone-chrome-debug
     networks:
       - makeradmin
     ports:
-      - '4444'
+      - "4444"
     volumes:
       - /dev/shm:/dev/shm
 
   email-dispatcher:
-    command: [ '/bin/sleep', '3600' ]
+    command: ["/bin/sleep", "3600"]
     environment:
       MAILGUN_DOMAIN: ""
       MAILGUN_KEY: ""
@@ -65,9 +63,9 @@ services:
       WEBDRIVER_TYPE: "REMOTE_CHROME"
       TEST_IS_INSIDE_DOCKER: "true"
       TEST_SERVICE_TOKEN:
-      HOST_FRONTEND: 'http://admin'
-      HOST_BACKEND: 'http://api'
-      HOST_PUBLIC: 'http://public'
+      HOST_FRONTEND: "http://admin"
+      HOST_BACKEND: "http://api"
+      HOST_PUBLIC: "http://public"
       APIGATEWAY: "api"
       STRIPE_PRIVATE_KEY:
       STRIPE_PUBLIC_KEY:

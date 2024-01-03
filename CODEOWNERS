@@ -1,0 +1,6 @@
+# Make sure we don't get unintentional changes unless the packages.json and
+# package-lock.json files are changed synchronously
+admin/packages.json @makerspace/makeradmin
+admin/package-lock.json @makerspace/makeradmin
+public/packages.json @makerspace/makeradmin
+public/package-lock.json @makerspace/makeradmin

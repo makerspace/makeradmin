@@ -12,4 +12,3 @@ INSERT INTO `quiz_quizzes` (name, description) VALUES('Stockholm Makerspace Get 
 ALTER TABLE `quiz_questions` ADD COLUMN `quiz_id` int unsigned NOT NULL;
 UPDATE `quiz_questions` SET `quiz_id`=(SELECT id from quiz_quizzes WHERE name='Stockholm Makerspace Get Started Quiz!');
 ALTER TABLE `quiz_questions` ADD CONSTRAINT `quiz_constraint` FOREIGN KEY (`quiz_id`) REFERENCES `quiz_quizzes` (`id`);
-

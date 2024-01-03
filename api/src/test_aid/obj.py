@@ -1,15 +1,16 @@
-from datetime import datetime
-from random import randint, choice, seed
-from typing import Any, Dict
-from faker import Faker
-from basic_types.enums import PriceLevel
-
-from membership.models import Member, Span
-from box_terminator.models import StorageItem, StorageMessage, StorageType, StorageMessageType
-from messages.models import Message
-from shop.models import ProductAction
-from test_aid.test_util import random_str
 import re
+from datetime import datetime
+from random import choice, randint, seed
+from typing import Any, Dict
+
+from basic_types.enums import PriceLevel
+from box_terminator.models import StorageItem, StorageMessage, StorageMessageType, StorageType
+from faker import Faker
+from membership.models import Member, Span
+from messages.models import Message
+from shop.models import ProductAction, Transaction
+
+from test_aid.test_util import random_str
 
 DEFAULT_PASSWORD = "D9ub8$13"
 
@@ -32,7 +33,7 @@ class ObjFactory:
         self.phone_request = None
         self.storage_message_type = None
         self.storage_message = None
-        self.storage_type: Optional[StorageType] = None
+        self.storage_type: None
         self.storage_item = None
         seed()
 

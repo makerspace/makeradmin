@@ -1,18 +1,19 @@
 import core
-import messages
-import shop
-from dispatch_emails import membership_reminder, MEMBERSHIP_REMINDER_DAYS_BEFORE, MEMBERSHIP_REMINDER_GRACE_PERIOD
+import core.models
 import membership
 import membership.models
+import shop
 import shop.models
-import messages.models
-import core.models
-from membership.models import Span, Member
-from messages.models import Message, MessageTemplate
+from dispatch_emails import MEMBERSHIP_REMINDER_DAYS_BEFORE, MEMBERSHIP_REMINDER_GRACE_PERIOD, membership_reminder
+from membership.models import Member, Span
 from service.db import db_session
 from shop.models import ProductAction, Transaction
 from shop.transactions import CartItem, Purchase, create_transaction
 from test_aid.test_base import FlaskTestBase, ShopTestMixin
+
+import messages
+import messages.models
+from messages.models import Message, MessageTemplate
 
 
 class Test(ShopTestMixin, FlaskTestBase):

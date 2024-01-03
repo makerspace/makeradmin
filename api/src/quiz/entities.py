@@ -1,5 +1,6 @@
 from service.entity import Entity, ExpandField
-from quiz.models import QuizQuestion, QuizQuestionOption, Quiz
+
+from quiz.models import Quiz, QuizQuestion, QuizQuestionOption
 
 quiz_entity = Entity(
     Quiz,
