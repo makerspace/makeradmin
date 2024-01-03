@@ -1,22 +1,29 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
     <head>
         <title>Stockholm Makerspace Webshop</title>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="stylesheet" href="{{ STATIC }}/uikit/css/uikit.min.css" />
         <link rel="stylesheet" href="{{ STATIC }}/style.css" />
-        <script src='{{ STATIC }}/uikit/js/uikit.min.js'></script>
-        <script src='{{ STATIC }}/uikit/js/uikit-icons.min.js'></script>
+        <script src="{{ STATIC }}/uikit/js/uikit.min.js"></script>
+        <script src="{{ STATIC }}/uikit/js/uikit-icons.min.js"></script>
         {% include 'meta.html' %}
-        <script>window.productId = {{ product_id }};</script>
-        <script src='{{ STATIC }}/js/product.js'></script>
+        <script>
+            window.productId = {{ product_id }};
+        </script>
+        <script src="{{ STATIC }}/js/product.js"></script>
     </head>
     <body>
         <div id="single-page-content">
             <div class="product-nav-buttons">
-                <a class="product-nav-left" href='{{ url("/") }}'><span uk-icon="arrow-left"></span> Tillbaka</a>
-                <a class="product-nav-right" href='{{ url("/cart") }}'>Min kundvagn<span id='cart-sum'></span> <span uk-icon="cart"></span></a>
+                <a class="product-nav-left" href='{{ url("/") }}'
+                    ><span uk-icon="arrow-left"></span> Tillbaka</a
+                >
+                <a class="product-nav-right" href='{{ url("/cart") }}'
+                    >Min kundvagn<span id="cart-sum"></span>
+                    <span uk-icon="cart"></span
+                ></a>
             </div>
             <div class="product-view">
                 <h1 id="name"></h1>
@@ -25,10 +32,27 @@
 
                 <div class="centered-product-count">
                     <div>
-                        <button type="button" class="number-subtract" data-amount="1" uk-icon="minus"></button>
-                        <input id="smallest-multiple" type="number" min=0 max=9999 placeholder="0" class="product-amount"></input>
+                        <button
+                            type="button"
+                            class="number-subtract"
+                            data-amount="1"
+                            uk-icon="minus"
+                        ></button>
+                        <input
+                            id="smallest-multiple"
+                            type="number"
+                            min="0"
+                            max="9999"
+                            placeholder="0"
+                            class="product-amount"
+                        />
                         <span id="unit" class="product-unit"></span>
-                        <button type="button" class="number-add" data-amount="1"  uk-icon="plus"></button>
+                        <button
+                            type="button"
+                            class="number-add"
+                            data-amount="1"
+                            uk-icon="plus"
+                        ></button>
                     </div>
                 </div>
 

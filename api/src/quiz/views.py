@@ -1,14 +1,15 @@
-from flask import g, request
-
-from service.api_definition import QUIZ_EDIT, USER, GET, PUBLIC, POST
-from quiz.entities import quiz_question_entity, quiz_question_option_entity, quiz_entity
-from quiz import service
-from service.db import db_session
-from quiz.models import Quiz, QuizQuestion, QuizQuestionOption, QuizAnswer
-from service.entity import OrmSingeRelation
-from sqlalchemy import func, exists, distinct
-from membership.models import Member
 from dataclasses import dataclass
+
+from flask import g, request
+from membership.models import Member
+from service.api_definition import GET, POST, PUBLIC, QUIZ_EDIT, USER
+from service.db import db_session
+from service.entity import OrmSingeRelation
+from sqlalchemy import distinct, exists, func
+
+from quiz import service
+from quiz.entities import quiz_entity, quiz_question_entity, quiz_question_option_entity
+from quiz.models import Quiz, QuizAnswer, QuizQuestion, QuizQuestionOption
 
 service.entity_routes(
     path="/quiz",
@@ -292,7 +293,9 @@ def quiz_statistics(quiz_id: int):
         # Maximum number members that have answered any question.
         # This ensures we also account for questions added later (which may not have as many answers)
         # We iterate through the questions list to ensure we dont count deleted questions
-        "answered_quiz_member_count": max([answers_by_question.get(question.id, 0) for question in questions], default=0),
+        "answered_quiz_member_count": max(
+            [answers_by_question.get(question.id, 0) for question in questions], default=0
+        ),
         "questions": [
             {
                 "question": quiz_question_entity.to_obj(question),

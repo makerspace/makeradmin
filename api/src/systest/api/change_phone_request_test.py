@@ -1,17 +1,16 @@
+import random
 from datetime import datetime, timedelta
-from time import sleep
 from random import randint
+from time import sleep
 from unittest import skip
 from unittest.mock import patch
-from sqlalchemy import desc, asc
 
-from service.db import db_session
-from test_aid.systest_base import ApiTest
-import random
-
-from membership.models import PhoneNumberChangeRequest, Member, normalise_phone_number
 from change_phone_request import change_phone_request, change_phone_validate
-from service.error import NotFound, BadRequest
+from membership.models import Member, PhoneNumberChangeRequest, normalise_phone_number
+from service.db import db_session
+from service.error import BadRequest, NotFound
+from sqlalchemy import asc, desc
+from test_aid.systest_base import ApiTest
 
 
 class Test(ApiTest):

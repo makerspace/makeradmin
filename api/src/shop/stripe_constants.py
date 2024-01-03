@@ -1,23 +1,13 @@
 from enum import Enum
-import stripe
-from test_aid.systest_config import STRIPE_PRIVATE_KEY, STRIPE_PUBLIC_KEY
 
 from service.config import config
 
-stripe.api_version = "2022-11-15"
 # All stripe calculations are done with cents (ören in Sweden)
 STRIPE_CURRENTY_BASE = 100
 
 CURRENCY = config.get("STRIPE_CURRENCY")
 
 STRIPE_SIGNING_SECRET = config.get("STRIPE_SIGNING_SECRET", log_value=False)
-
-
-def set_stripe_key(private: bool) -> None:
-    stripe.api_key = STRIPE_PRIVATE_KEY if private else STRIPE_PUBLIC_KEY
-
-
-set_stripe_key(private=True)
 
 
 class MakerspaceMetadataKeys(Enum):

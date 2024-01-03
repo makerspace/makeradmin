@@ -1,13 +1,15 @@
-import React from 'react';
+import React from "react";
 
 // Get versions of dependencies
-const ReactVersion    = require("../../node_modules/react/package.json").version;
+const ReactVersion = require("../../node_modules/react/package.json").version;
 const JqueryVersion = require("../../node_modules/jquery/package.json").version;
 const UikitVersion = require("../../node_modules/uikit/package.json").version;
-const ReactRouterVersion = require("../../node_modules/react-router/package.json").version;
-const ReactSelectVersion = require("../../node_modules/react-select/package.json").version;
-const ReactDomVersion = require("../../node_modules/react-dom/package.json").version;
-
+const ReactRouterVersion =
+    require("../../node_modules/react-router/package.json").version;
+const ReactSelectVersion =
+    require("../../node_modules/react-select/package.json").version;
+const ReactDomVersion =
+    require("../../node_modules/react-dom/package.json").version;
 
 export default () => {
     return (

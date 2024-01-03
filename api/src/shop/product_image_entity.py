@@ -1,7 +1,6 @@
 from io import BytesIO
 
 from PIL import Image, UnidentifiedImageError
-
 from service.entity import Entity, logger
 from service.error import BadRequest
 

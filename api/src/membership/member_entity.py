@@ -1,14 +1,14 @@
-from flask import request
-import pymysql
-from sqlalchemy.exc import IntegrityError
-from pymysql.constants.ER import DUP_ENTRY
-from membership.models import Member
-
-from membership.member_auth import check_and_hash_password
-from service.db import db_session
-from service.entity import Entity
 from logging import getLogger
 
+import pymysql
+from flask import request
+from pymysql.constants.ER import DUP_ENTRY
+from service.db import db_session
+from service.entity import Entity
+from sqlalchemy.exc import IntegrityError
+
+from membership.member_auth import check_and_hash_password
+from membership.models import Member
 
 logger = getLogger("makeradmin")
 

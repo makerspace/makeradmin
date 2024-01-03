@@ -2,14 +2,12 @@ import re
 from collections import namedtuple
 from contextlib import closing
 from datetime import datetime
-from inspect import getmodule, stack, getfile
-
-from sqlalchemy import inspect
+from inspect import getfile, getmodule, stack
+from os import listdir
+from os.path import dirname, exists, isdir, join
 
 from service.logging import logger
-from os.path import join, dirname, exists, isdir
-from os import listdir
-
+from sqlalchemy import inspect
 
 Migration = namedtuple("Migration", "id,name")
 

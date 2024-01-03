@@ -1,8 +1,6 @@
-import Base from './Base';
-
+import Base from "./Base";
 
 export default class OrderRow extends Base {
-    
     del() {
         throw new Error("Order delete not supported.");
     }

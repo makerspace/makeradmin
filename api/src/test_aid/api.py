@@ -1,4 +1,5 @@
 from typing import Any, Dict, Optional
+
 import requests
 
 from test_aid.obj import DEFAULT_PASSWORD

@@ -2,8 +2,8 @@ import re
 from datetime import date
 
 from membership.models import Span
-from multiaccessy.accessy import AccessyMember, ACCESSY_LABACCESS_GROUP, ACCESSY_SPECIAL_LABACCESS_GROUP
-from multiaccessy.sync import get_wanted_access, calculate_diff, Diff, GroupOp
+from multiaccessy.accessy import ACCESSY_LABACCESS_GROUP, ACCESSY_SPECIAL_LABACCESS_GROUP, AccessyMember
+from multiaccessy.sync import Diff, GroupOp, calculate_diff, get_wanted_access
 from test_aid.obj import random_phone_number
 from test_aid.systest_base import ApiTest
 

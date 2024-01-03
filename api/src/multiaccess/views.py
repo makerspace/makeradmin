@@ -1,9 +1,9 @@
 from flask import g
+from service.api_definition import GET, MEMBER_EDIT, MEMBERBOOTH, POST, Arg, symbol
 
 from multiaccess import service
-from multiaccess.box_terminator import box_terminator_validate, box_terminator_nag, box_terminator_boxes
-from multiaccess.memberbooth import pin_login_to_memberinfo, tag_to_memberinfo, member_number_to_memberinfo
-from service.api_definition import GET, Arg, MEMBER_EDIT, POST, symbol, MEMBERBOOTH
+from multiaccess.box_terminator import box_terminator_boxes, box_terminator_nag, box_terminator_validate
+from multiaccess.memberbooth import member_number_to_memberinfo, pin_login_to_memberinfo, tag_to_memberinfo
 
 
 @service.route("/memberbooth/tag", method=GET, permission=MEMBERBOOTH)

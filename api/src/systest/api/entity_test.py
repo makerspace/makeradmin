@@ -2,8 +2,7 @@ from datetime import datetime
 from random import randint
 
 from pytz import UTC
-
-from service.api_definition import REQUIRED, NOT_UNIQUE
+from service.api_definition import NOT_UNIQUE, REQUIRED
 from test_aid.systest_base import ApiTest
 from test_aid.test_util import random_str
 

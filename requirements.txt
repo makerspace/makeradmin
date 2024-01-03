@@ -1,4 +1,5 @@
 requests
 pip
-docker-compose
+ruff
+pre-commit
 -r api/requirements.txt

@@ -1,8 +1,12 @@
 /// <reference path="../node_modules/@types/stripe-v3/index.d.ts" />
 import { useEffect, useRef } from "preact/hooks";
-import * as common from "./common"
+import * as common from "./common";
 import { ServerResponse } from "./common";
-import { StartSubscriptionsRequest, SubscriptionStart, SubscriptionType } from "./subscriptions";
+import {
+    StartSubscriptionsRequest,
+    SubscriptionStart,
+    SubscriptionType,
+} from "./subscriptions";
 import { useTranslation } from "./translations";
 import { member_t } from "./member_common";
 import Cart, { Item } from "./cart";
@@ -26,28 +30,28 @@ export function mountStripe() {
     // Custom styling can be passed to options when creating an Element.
     const stripeStyle = {
         base: {
-            color: '#32325d',
-            lineHeight: '18px',
+            color: "#32325d",
+            lineHeight: "18px",
             fontFamily: '"Helvetica Neue", Helvetica, sans-serif',
-            fontSmoothing: 'antialiased',
-            fontSize: '16px',
-            '::placeholder': {
-                color: '#aab7c4'
-            }
+            fontSmoothing: "antialiased",
+            fontSize: "16px",
+            "::placeholder": {
+                color: "#aab7c4",
+            },
         },
         invalid: {
-            color: '#fa755a',
-            iconColor: '#fa755a'
-        }
+            color: "#fa755a",
+            iconColor: "#fa755a",
+        },
     };
 
     // Create an instance of the card Element.
-    card = elements.create('card', { style: stripeStyle });
+    card = elements.create("card", { style: stripeStyle });
     card.mount("#card-element");
 
     payButton = document.getElementById("pay-button") as HTMLInputElement;
     spinner = document.querySelector(".progress-spinner");
-    errorElement = document.getElementById('card-errors');
+    errorElement = document.getElementById("card-errors");
     return card;
 }
 
@@ -61,7 +65,9 @@ export interface PaymentFlowDefinition {
     initiate_payment: InitializePaymentFunction;
     before_initiate_payment?: Function;
     on_stripe_error?: (error: stripe.Error) => void;
-    handle_backend_response?: (json: ServerResponse<BackendPaymentResponse>) => void;
+    handle_backend_response?: (
+        json: ServerResponse<BackendPaymentResponse>,
+    ) => void;
     on_payment_success?: (json: ServerResponse<BackendPaymentResponse>) => void;
     on_failure?: (error: any) => void;
 }
@@ -72,115 +78,139 @@ export function enable_pay_button() {
     spinner.classList.remove("progress-spinner-visible");
     waitingForPaymentResponse = false;
     payButton.disabled = false;
-};
+}
 export function disable_pay_button() {
     payButton.disabled = true;
     waitingForPaymentResponse = true;
     spinner.classList.add("progress-spinner-visible");
-};
+}
 
 function default_before_initiate_payment() {
     disable_pay_button();
     errorElement.textContent = "";
-};
+}
 export function display_stripe_error(error: any) {
     errorElement.textContent = error.message;
     UIkit.modal.alert("<h2>Your payment failed</h2>" + errorElement.innerHTML);
 }
 
 export enum PaymentIntentNextActionType {
-    USE_STRIPE_SDK = 'use_stripe_sdk',
+    USE_STRIPE_SDK = "use_stripe_sdk",
 }
 
 export type PaymentAction = {
-    type: PaymentIntentNextActionType
-    client_secret: string
-}
+    type: PaymentIntentNextActionType;
+    client_secret: string;
+};
 
 export type PaymentRequest = {
-    cart: Item[],
-    expected_sum: number,
-    stripe_payment_method_id: string,
-    transaction_id: number | null
-}
+    cart: Item[];
+    expected_sum: number;
+    stripe_payment_method_id: string;
+    transaction_id: number | null;
+};
 
 export type BackendPaymentResponse = {
-    type: PaymentIntentResult
-    transaction_id: number,
-    action_info: PaymentAction,
-}
+    type: PaymentIntentResult;
+    transaction_id: number;
+    action_info: PaymentAction;
+};
 
 export type CartItem = {
-    id: number
-    count: number
-}
+    id: number;
+    count: number;
+};
 
 export type Purchase = {
-    cart: CartItem[]
-    expected_sum: string
-    stripe_payment_method_id: string
-}
+    cart: CartItem[];
+    expected_sum: string;
+    stripe_payment_method_id: string;
+};
 
 export type PriceLevel = "normal" | "low_income_discount";
 
 export type Product = {
-    category_id: number,
-    created_at: string,
-    deleted_at: string | null,
-    updated_at: string,
-    description: string,
-    display_order: number,
-    filter: string,
-    id: number,
-    image_id: number | null,
+    category_id: number;
+    created_at: string;
+    deleted_at: string | null;
+    updated_at: string;
+    description: string;
+    display_order: number;
+    filter: string;
+    id: number;
+    image_id: number | null;
     product_metadata: {
-        subscription_type?: SubscriptionType,
-        special_product_id?: string,
-        allowed_price_levels?: PriceLevel[],
-    },
-    name: string,
-    price: string,
-    show: boolean,
-    smallest_multiple: number,
-    unit: string,
-}
+        subscription_type?: SubscriptionType;
+        special_product_id?: string;
+        allowed_price_levels?: PriceLevel[];
+    };
+    name: string;
+    price: string;
+    show: boolean;
+    smallest_multiple: number;
+    unit: string;
+};
 
 export type RegisterPageData = {
     membershipProducts: {
-        id: number,
-        name: string,
-        price: number,
-    }[],
-    productData: ProductCategory[],
-    discounts: Record<PriceLevel, number>,
-}
+        id: number;
+        name: string;
+        price: number;
+    }[];
+    productData: ProductCategory[];
+    discounts: Record<PriceLevel, number>;
+};
 
 export type ToPay = {
-    product: Product,
-    amount: number,
-    count: number,
-    originalAmount: number,
-}
+    product: Product;
+    amount: number;
+    count: number;
+    originalAmount: number;
+};
 
 export type Discount = {
-    priceLevel: PriceLevel,
-    fractionOff: number,
-}
+    priceLevel: PriceLevel;
+    fractionOff: number;
+};
 
-const WellKnownProducts = ["access_starter_pack", "single_membership_year", "single_labaccess_month", "membership_subscription", "labaccess_subscription"] as const;
-type WellKnownProductId = typeof WellKnownProducts[number];
+const WellKnownProducts = [
+    "access_starter_pack",
+    "single_membership_year",
+    "single_labaccess_month",
+    "membership_subscription",
+    "labaccess_subscription",
+] as const;
+type WellKnownProductId = (typeof WellKnownProducts)[number];
 
-export function AssertIsWellKnownProductId(id: string | undefined): asserts id is WellKnownProductId {
+export function AssertIsWellKnownProductId(
+    id: string | undefined,
+): asserts id is WellKnownProductId {
     if (!WellKnownProducts.includes(id as any)) {
         throw new Error(`Unknown product id ${id}`);
     }
 }
 
-export function FindWellKnownProduct(products: Product[], id: WellKnownProductId): Product | null {
-    return products.find(p => p.product_metadata.special_product_id === id) || null;
+export function FindWellKnownProduct(
+    products: Product[],
+    id: WellKnownProductId,
+): Product | null {
+    return (
+        products.find((p) => p.product_metadata.special_product_id === id) ||
+        null
+    );
 }
 
-export const calculateAmountToPay = ({ productData, cart, currentMemberships, discount }: { productData: ProductData, cart: Cart, discount: Discount, currentMemberships: SubscriptionType[] }) => {
+export const calculateAmountToPay = ({
+    productData,
+    cart,
+    currentMemberships,
+    discount,
+}: {
+    productData: ProductData;
+    cart: Cart;
+    discount: Discount;
+    currentMemberships: SubscriptionType[];
+}) => {
     const payNow: ToPay[] = [];
     const payRecurring: ToPay[] = [];
 
@@ -189,8 +219,11 @@ export const calculateAmountToPay = ({ productData, cart, currentMemberships, di
     // This is because the starter pack includes makerspace acccess membership for 2 months, so the subscription will then only start
     // after the starter pack is over, and thus the subscription will not be included in the paidRightNow output.
     currentMemberships = [...currentMemberships];
-    const cartProducts = cart.items.map(i => productData.id2item.get(i.id)!);
-    if (FindWellKnownProduct(cartProducts, "single_labaccess_month") !== null || FindWellKnownProduct(cartProducts, "access_starter_pack") !== null) {
+    const cartProducts = cart.items.map((i) => productData.id2item.get(i.id)!);
+    if (
+        FindWellKnownProduct(cartProducts, "single_labaccess_month") !== null ||
+        FindWellKnownProduct(cartProducts, "access_starter_pack") !== null
+    ) {
         currentMemberships.push("labaccess");
     }
     if (FindWellKnownProduct(cartProducts, "single_membership_year") !== null) {
@@ -203,18 +236,30 @@ export const calculateAmountToPay = ({ productData, cart, currentMemberships, di
 
         if (subscriptionType !== undefined) {
             if (item.count != product.smallest_multiple) {
-                throw new Error(`Cannot purchase ${item.count} of product ${product.name}. Expected ${product.smallest_multiple}`);
+                throw new Error(
+                    `Cannot purchase ${item.count} of product ${product.name}. Expected ${product.smallest_multiple}`,
+                );
             }
         } else if (item.count % product.smallest_multiple !== 0) {
-            throw new Error(`Cannot purchase ${item.count} of product ${product.name}. Expected a multiple of ${product.smallest_multiple}`);
+            throw new Error(
+                `Cannot purchase ${item.count} of product ${product.name}. Expected a multiple of ${product.smallest_multiple}`,
+            );
         }
 
         let price = parseFloat(product.price);
         const originalPrice = price;
-        if (product.product_metadata.allowed_price_levels?.includes(discount.priceLevel) ?? false) {
+        if (
+            product.product_metadata.allowed_price_levels?.includes(
+                discount.priceLevel,
+            ) ??
+            false
+        ) {
             price *= 1 - discount.fractionOff;
         }
-        if (subscriptionType === undefined || !currentMemberships.includes(subscriptionType)) {
+        if (
+            subscriptionType === undefined ||
+            !currentMemberships.includes(subscriptionType)
+        ) {
             // TODO: There's no support right now for displaying a different price during the binding period, if one exists
             payNow.push({
                 product,
@@ -234,41 +279,49 @@ export const calculateAmountToPay = ({ productData, cart, currentMemberships, di
         }
     }
     return { payNow, payRecurring };
-}
+};
 
 export type ProductCategory = {
-    id: number
-    name: string
-    items: Product[]
-}
+    id: number;
+    name: string;
+    items: Product[];
+};
 
 export type TransactionItem = {
-    product: Product
-    count: number
-    unit: string
-    amount: string
-}
+    product: Product;
+    count: number;
+    unit: string;
+    amount: string;
+};
 
 export type Transaction = {
-    id: number
-    created_at: string
-    status: "pending" | "completed" | "failed"
-    amount: string
-    contents: TransactionItem[]
-}
+    id: number;
+    created_at: string;
+    status: "pending" | "completed" | "failed";
+    amount: string;
+    contents: TransactionItem[];
+};
 
 export type ProductData = {
-    categories: ProductCategory[]
-    products: Product[]
-    id2item: Map<number, Product>
-}
+    categories: ProductCategory[];
+    products: Product[];
+    id2item: Map<number, Product>;
+};
 
 export async function LoadProductData(): Promise<ProductData> {
-    const categories = (await common.ajax("GET", window.apiBasePath + "/webshop/product_data", null)).data as ProductCategory[];
+    const categories = (
+        await common.ajax(
+            "GET",
+            window.apiBasePath + "/webshop/product_data",
+            null,
+        )
+    ).data as ProductCategory[];
     return ProductDataFromProducts(categories);
 }
 
-export function ProductDataFromProducts(categories: ProductCategory[]): ProductData {
+export function ProductDataFromProducts(
+    categories: ProductCategory[],
+): ProductData {
     const id2item = new Map<number, Product>();
     const products = [];
 
@@ -281,17 +334,19 @@ export function ProductDataFromProducts(categories: ProductCategory[]): ProductD
     return { categories, products, id2item };
 }
 
-export const StripeCardInput = ({ element }: { element: stripe.elements.Element }) => {
+export const StripeCardInput = ({
+    element,
+}: {
+    element: stripe.elements.Element;
+}) => {
     const mountPoint = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         element.mount(mountPoint.current!);
     }, []);
 
-    return (
-        <div ref={mountPoint}></div>
-    )
-}
+    return <div ref={mountPoint}></div>;
+};
 
 export const createStripeCardInput = () => {
     // Create an instance of Elements.
@@ -299,24 +354,27 @@ export const createStripeCardInput = () => {
     // Custom styling can be passed to options when creating an Element.
     const stripeStyle = {
         base: {
-            color: '#32325d',
-            lineHeight: '18px',
+            color: "#32325d",
+            lineHeight: "18px",
             fontFamily: '"Helvetica Neue", Helvetica, sans-serif',
-            fontSmoothing: 'antialiased',
-            fontSize: '16px',
-            '::placeholder': {
-                color: '#aab7c4'
-            }
+            fontSmoothing: "antialiased",
+            fontSize: "16px",
+            "::placeholder": {
+                color: "#aab7c4",
+            },
         },
         invalid: {
-            color: '#fa755a',
-            iconColor: '#fa755a'
-        }
+            color: "#fa755a",
+            iconColor: "#fa755a",
+        },
     };
 
     // Create an instance of the card Element.
-    return elements.create('card', { style: stripeStyle, hidePostalCode: true });
-}
+    return elements.create("card", {
+        style: stripeStyle,
+        hidePostalCode: true,
+    });
+};
 
 const currencyToString = (value: number) => {
     if (value - Math.abs(value) < 0.01) {
@@ -324,18 +382,34 @@ const currencyToString = (value: number) => {
     } else {
         return value.toFixed(2);
     }
-}
+};
 
-
-export const ToPayPreview = ({ productData, cart, discount, currentMemberships }: { productData: ProductData, cart: Cart, discount: Discount, currentMemberships: SubscriptionType[] }) => {
+export const ToPayPreview = ({
+    productData,
+    cart,
+    discount,
+    currentMemberships,
+}: {
+    productData: ProductData;
+    cart: Cart;
+    discount: Discount;
+    currentMemberships: SubscriptionType[];
+}) => {
     const t = useTranslation();
-    const { payNow, payRecurring } = calculateAmountToPay({ productData, cart, discount, currentMemberships });
+    const { payNow, payRecurring } = calculateAmountToPay({
+        productData,
+        cart,
+        discount,
+        currentMemberships,
+    });
 
-    let renewInfoText = payRecurring.map(({ product, amount }) => {
-        const product_id = product.product_metadata.special_product_id;
-        AssertIsWellKnownProductId(product_id);
-        return t(`special_products.${product_id}.renewal`)(amount)
-    }).join(" ");
+    let renewInfoText = payRecurring
+        .map(({ product, amount }) => {
+            const product_id = product.product_metadata.special_product_id;
+            AssertIsWellKnownProductId(product_id);
+            return t(`special_products.${product_id}.renewal`)(amount);
+        })
+        .join(" ");
     if (payRecurring.length == 1) {
         renewInfoText += " " + t("special_products.renewal.one");
     } else if (payRecurring.length > 1) {
@@ -343,70 +417,145 @@ export const ToPayPreview = ({ productData, cart, discount, currentMemberships }
     }
 
     let anyDiscountedColumn = false;
-    const paidRightNowItems: [string, number, number | undefined][] = payNow.map(({ product, amount, originalAmount }, i) => {
-        const product_id = product.product_metadata.special_product_id;
-        AssertIsWellKnownProductId(product_id);
-        if (product.unit !== "mån" && product.unit !== "år" && product.unit !== "st") throw new Error(`Unexpected unit '${product.unit}' for ${product.name}. Expected one of år/mån/st`);
-        let period = product.smallest_multiple + " " + t(`unit.${product.unit}.${product.smallest_multiple > 1 ? "many" : "one"}`);
-        if (product_id === "access_starter_pack") {
-            // Special case for the starter pack period. Otherwise it would show "1 st"
-            period = t("special_products.access_starter_pack.period");
-        }
-        if (amount !== originalAmount) {
-            anyDiscountedColumn = true;
-        }
-        return [t(`special_products.${product_id}.summary`) + " - " + period, amount, amount !== originalAmount ? originalAmount : undefined];
-    });
+    const paidRightNowItems: [string, number, number | undefined][] =
+        payNow.map(({ product, amount, originalAmount }, i) => {
+            const product_id = product.product_metadata.special_product_id;
+            AssertIsWellKnownProductId(product_id);
+            if (
+                product.unit !== "mån" &&
+                product.unit !== "år" &&
+                product.unit !== "st"
+            )
+                throw new Error(
+                    `Unexpected unit '${product.unit}' for ${product.name}. Expected one of år/mån/st`,
+                );
+            let period =
+                product.smallest_multiple +
+                " " +
+                t(
+                    `unit.${product.unit}.${
+                        product.smallest_multiple > 1 ? "many" : "one"
+                    }`,
+                );
+            if (product_id === "access_starter_pack") {
+                // Special case for the starter pack period. Otherwise it would show "1 st"
+                period = t("special_products.access_starter_pack.period");
+            }
+            if (amount !== originalAmount) {
+                anyDiscountedColumn = true;
+            }
+            return [
+                t(`special_products.${product_id}.summary`) + " - " + period,
+                amount,
+                amount !== originalAmount ? originalAmount : undefined,
+            ];
+        });
 
     if (paidRightNowItems.length === 0) {
-        return <>
-            <span className="small-print">{t("special_products.payment_right_now_nothing")}</span>
-            {payRecurring.length > 0 ? (<span className="small-print">{renewInfoText}</span>) : null}
-        </>
+        return (
+            <>
+                <span className="small-print">
+                    {t("special_products.payment_right_now_nothing")}
+                </span>
+                {payRecurring.length > 0 ? (
+                    <span className="small-print">{renewInfoText}</span>
+                ) : null}
+            </>
+        );
     } else {
         return (
             <>
-                <span className="small-print">{t("special_products.payment_right_now")}</span>
+                <span className="small-print">
+                    {t("special_products.payment_right_now")}
+                </span>
                 <div class="history-item to-pay-preview">
-                    <div class={"receipt-items " + (anyDiscountedColumn ? "with-original-price-column" : "")}>
-                        {paidRightNowItems.map(([summary, price, normalPrice]) => (
-                            <>
-                                <span className="product-title">{summary}</span>
-                                {normalPrice !== undefined && <span className="receipt-item-original-amount strikethrough-price">{currencyToString(normalPrice)} {t("priceUnit")}</span>}
-                                <span className="receipt-item-amount">{currencyToString(price)} {t("priceUnit")}</span>
-                            </>
-                        ))}
+                    <div
+                        class={
+                            "receipt-items " +
+                            (anyDiscountedColumn
+                                ? "with-original-price-column"
+                                : "")
+                        }
+                    >
+                        {paidRightNowItems.map(
+                            ([summary, price, normalPrice]) => (
+                                <>
+                                    <span className="product-title">
+                                        {summary}
+                                    </span>
+                                    {normalPrice !== undefined && (
+                                        <span className="receipt-item-original-amount strikethrough-price">
+                                            {currencyToString(normalPrice)}{" "}
+                                            {t("priceUnit")}
+                                        </span>
+                                    )}
+                                    <span className="receipt-item-amount">
+                                        {currencyToString(price)}{" "}
+                                        {t("priceUnit")}
+                                    </span>
+                                </>
+                            ),
+                        )}
                     </div>
                     <div class="receipt-amount">
                         <span>{t("special_products.cart_total")}</span>
-                        <span className="receipt-amount-value">{currencyToString(payNow.reduce((s, { amount }) => s + amount, 0))} {t("priceUnit")}</span>
+                        <span className="receipt-amount-value">
+                            {currencyToString(
+                                payNow.reduce((s, { amount }) => s + amount, 0),
+                            )}{" "}
+                            {t("priceUnit")}
+                        </span>
                     </div>
                 </div>
-                {payRecurring.length > 0 ? (<span className="small-print">{renewInfoText}</span>) : null}
+                {payRecurring.length > 0 ? (
+                    <span className="small-print">{renewInfoText}</span>
+                ) : null}
             </>
-        )
+        );
     }
-}
+};
 
 export type RelevantProducts = {
-    starterPackProduct: Product,
-    baseMembershipProduct: Product,
-    labaccessProduct: Product,
-    membershipSubscriptionProduct: Product,
-    labaccessSubscriptionProduct: Product,
-}
+    starterPackProduct: Product;
+    baseMembershipProduct: Product;
+    labaccessProduct: Product;
+    membershipSubscriptionProduct: Product;
+    labaccessSubscriptionProduct: Product;
+};
 
-export const extractRelevantProducts = (products: Product[]): RelevantProducts => {
-    const starterPackProduct = FindWellKnownProduct(products, "access_starter_pack");
-    const baseMembershipProduct = FindWellKnownProduct(products, "single_membership_year");
-    const labaccessProduct = FindWellKnownProduct(products, "single_labaccess_month");
-    const membershipSubscriptionProduct = FindWellKnownProduct(products, "membership_subscription");
-    const labaccessSubscriptionProduct = FindWellKnownProduct(products, "labaccess_subscription");
-    if (starterPackProduct === null) throw new Error("No starter pack product found");
-    if (baseMembershipProduct === null) throw new Error("No base membership product found");
-    if (labaccessProduct === null) throw new Error("No labaccess product found");
-    if (membershipSubscriptionProduct === null) throw new Error("No membership subscription product found");
-    if (labaccessSubscriptionProduct === null) throw new Error("No labaccess subscription product found");
+export const extractRelevantProducts = (
+    products: Product[],
+): RelevantProducts => {
+    const starterPackProduct = FindWellKnownProduct(
+        products,
+        "access_starter_pack",
+    );
+    const baseMembershipProduct = FindWellKnownProduct(
+        products,
+        "single_membership_year",
+    );
+    const labaccessProduct = FindWellKnownProduct(
+        products,
+        "single_labaccess_month",
+    );
+    const membershipSubscriptionProduct = FindWellKnownProduct(
+        products,
+        "membership_subscription",
+    );
+    const labaccessSubscriptionProduct = FindWellKnownProduct(
+        products,
+        "labaccess_subscription",
+    );
+    if (starterPackProduct === null)
+        throw new Error("No starter pack product found");
+    if (baseMembershipProduct === null)
+        throw new Error("No base membership product found");
+    if (labaccessProduct === null)
+        throw new Error("No labaccess product found");
+    if (membershipSubscriptionProduct === null)
+        throw new Error("No membership subscription product found");
+    if (labaccessSubscriptionProduct === null)
+        throw new Error("No labaccess subscription product found");
     return {
         starterPackProduct,
         baseMembershipProduct,
@@ -414,11 +563,13 @@ export const extractRelevantProducts = (products: Product[]): RelevantProducts =
         membershipSubscriptionProduct,
         labaccessSubscriptionProduct,
     };
+};
 
-}
-
-export async function createPaymentMethod(element: stripe.elements.Element, memberInfo: member_t): Promise<stripe.paymentMethod.PaymentMethod | null> {
-    const result = await stripe.createPaymentMethod('card', element, {
+export async function createPaymentMethod(
+    element: stripe.elements.Element,
+    memberInfo: member_t,
+): Promise<stripe.paymentMethod.PaymentMethod | null> {
+    const result = await stripe.createPaymentMethod("card", element, {
         billing_details: {
             name: `${memberInfo.firstname} ${memberInfo.lastname}`,
             email: memberInfo.email,
@@ -429,7 +580,9 @@ export async function createPaymentMethod(element: stripe.elements.Element, memb
         },
     });
     if (result.error) {
-        UIkit.modal.alert("<h2>Your payment failed</h2>" + result.error.message);
+        UIkit.modal.alert(
+            "<h2>Your payment failed</h2>" + result.error.message,
+        );
         return null;
     }
     console.assert(result.paymentMethod !== undefined);
@@ -452,16 +605,16 @@ export enum SetupIntentResult {
 }
 
 export type SetupIntentResponse = {
-    setup_intent_id: string
-    type: SetupIntentResult
-    error: string | null
-    action_info: PaymentAction | null
-}
+    setup_intent_id: string;
+    type: SetupIntentResult;
+    error: string | null;
+    action_info: PaymentAction | null;
+};
 
 export type SetupPaymentMethodRequest = {
-    stripe_payment_method_id: string
-    setup_intent_id: string | null
-}
+    stripe_payment_method_id: string;
+    setup_intent_id: string | null;
+};
 
 export type SetupPaymentMethodResponse = SetupIntentResponse;
 
@@ -471,7 +624,10 @@ export enum PaymentIntentResult {
     Wait = "wait",
 }
 
-export async function handleStripeSetupIntent<T extends { setup_intent_id: string | null }, R extends SetupIntentResponse>(endpoint: string, data: T): Promise<R> {
+export async function handleStripeSetupIntent<
+    T extends { setup_intent_id: string | null },
+    R extends SetupIntentResponse,
+>(endpoint: string, data: T): Promise<R> {
     while (true) {
         let res: ServerResponse<R>;
         try {
@@ -489,10 +645,17 @@ export async function handleStripeSetupIntent<T extends { setup_intent_id: strin
             case SetupIntentResult.Success:
                 return res.data;
             case SetupIntentResult.RequiresAction:
-                if (res.data.action_info!.type === PaymentIntentNextActionType.USE_STRIPE_SDK) {
-                    const stripeResult = await stripe.confirmCardSetup(res.data.action_info!.client_secret);
+                if (
+                    res.data.action_info!.type ===
+                    PaymentIntentNextActionType.USE_STRIPE_SDK
+                ) {
+                    const stripeResult = await stripe.confirmCardSetup(
+                        res.data.action_info!.client_secret,
+                    );
                     if (stripeResult.error) {
-                        throw new PaymentFailedError(stripeResult.error.message!);
+                        throw new PaymentFailedError(
+                            stripeResult.error.message!,
+                        );
                     } else {
                         // The card action has been handled
                         // Now we try the server endpoint again in the next iteration of the loop
@@ -503,19 +666,28 @@ export async function handleStripeSetupIntent<T extends { setup_intent_id: strin
                 break;
             case SetupIntentResult.Wait:
                 // Stripe needs some time to confirm the payment. Wait a bit and try again.
-                await new Promise(resolve => setTimeout(resolve, 500));
+                await new Promise((resolve) => setTimeout(resolve, 500));
                 break;
             case SetupIntentResult.Failed:
-                throw new PaymentFailedError(res.data.error!)
+                throw new PaymentFailedError(res.data.error!);
         }
     }
 }
 
-export async function negotiatePayment<T extends { transaction_id: number | null }, R extends BackendPaymentResponse>(endpoint: string, data: T, options: { loginToken?: string } = {}): Promise<R> {
+export async function negotiatePayment<
+    T extends { transaction_id: number | null },
+    R extends BackendPaymentResponse,
+>(
+    endpoint: string,
+    data: T,
+    options: { loginToken?: string } = {},
+): Promise<R> {
     while (true) {
         let res: ServerResponse<R>;
         try {
-            res = await common.ajax("POST", endpoint, data, { loginToken: options.loginToken });
+            res = await common.ajax("POST", endpoint, data, {
+                loginToken: options.loginToken,
+            });
         } catch (e: any) {
             if (e["message"] !== undefined) {
                 throw new PaymentFailedError(e["message"]);
@@ -529,10 +701,17 @@ export async function negotiatePayment<T extends { transaction_id: number | null
             case PaymentIntentResult.Success:
                 return res.data;
             case PaymentIntentResult.RequiresAction:
-                if (res.data.action_info!.type === PaymentIntentNextActionType.USE_STRIPE_SDK) {
-                    const stripeResult = await stripe.handleCardAction(res.data.action_info!.client_secret);
+                if (
+                    res.data.action_info!.type ===
+                    PaymentIntentNextActionType.USE_STRIPE_SDK
+                ) {
+                    const stripeResult = await stripe.handleCardAction(
+                        res.data.action_info!.client_secret,
+                    );
                     if (stripeResult.error) {
-                        throw new PaymentFailedError(stripeResult.error.message!);
+                        throw new PaymentFailedError(
+                            stripeResult.error.message!,
+                        );
                     } else {
                         // The card action has been handled
                         // Now we try the server endpoint again in the next iteration of the loop
@@ -543,52 +722,83 @@ export async function negotiatePayment<T extends { transaction_id: number | null
                 break;
             case PaymentIntentResult.Wait:
                 // Stripe needs some time to confirm the payment. Wait a bit and try again.
-                await new Promise(resolve => setTimeout(resolve, 500));
+                await new Promise((resolve) => setTimeout(resolve, 500));
                 break;
         }
     }
 }
 
-export async function pay(paymentMethod: stripe.paymentMethod.PaymentMethod, cart: Cart, productData: ProductData, discount: Discount, currentMemberships: SubscriptionType[], options: { loginToken?: string } = {}): Promise<{ transaction_id: number | null }> {
-    const { payNow, payRecurring } = calculateAmountToPay({ cart, productData, discount, currentMemberships })
+export async function pay(
+    paymentMethod: stripe.paymentMethod.PaymentMethod,
+    cart: Cart,
+    productData: ProductData,
+    discount: Discount,
+    currentMemberships: SubscriptionType[],
+    options: { loginToken?: string } = {},
+): Promise<{ transaction_id: number | null }> {
+    const { payNow, payRecurring } = calculateAmountToPay({
+        cart,
+        productData,
+        discount,
+        currentMemberships,
+    });
 
     let transaction_id: number | null = null;
 
     if (payNow.length > 0) {
-        transaction_id = (await negotiatePayment<PaymentRequest, BackendPaymentResponse>(window.apiBasePath + "/webshop/pay", {
-            cart: payNow.map(p => ({
-                id: p.product.id,
-                count: p.count,
-            })),
-            expected_sum: payNow.reduce((sum, { amount }) => sum + amount, 0),
-            stripe_payment_method_id: paymentMethod.id,
-            transaction_id: null,
-        }, { loginToken: options.loginToken })).transaction_id;
+        transaction_id = (
+            await negotiatePayment<PaymentRequest, BackendPaymentResponse>(
+                window.apiBasePath + "/webshop/pay",
+                {
+                    cart: payNow.map((p) => ({
+                        id: p.product.id,
+                        count: p.count,
+                    })),
+                    expected_sum: payNow.reduce(
+                        (sum, { amount }) => sum + amount,
+                        0,
+                    ),
+                    stripe_payment_method_id: paymentMethod.id,
+                    transaction_id: null,
+                },
+                { loginToken: options.loginToken },
+            )
+        ).transaction_id;
     } else {
         // This will configure the default payment method
         // This is necessary if the member already has membership (and thus the subscription will not start immediately),
         // but they have not had a subscription before, so no default payment method has been configured yet.
-        await handleStripeSetupIntent<SetupPaymentMethodRequest, SetupIntentResponse>(window.apiBasePath + "/webshop/setup_payment_method", {
+        await handleStripeSetupIntent<
+            SetupPaymentMethodRequest,
+            SetupIntentResponse
+        >(window.apiBasePath + "/webshop/setup_payment_method", {
             stripe_payment_method_id: paymentMethod.id,
-            setup_intent_id: null
-        })
+            setup_intent_id: null,
+        });
     }
 
-    const subscriptionStarts: SubscriptionStart[] = payRecurring.map(({ product, amount }) => ({
-        subscription: product.product_metadata.subscription_type!,
-        expected_to_pay_recurring: "" + amount,
-        expected_to_pay_now: "0", // We should already have paid for the member to be a member, so the subscription should start in the future and not charge anything right now
-    }));
+    const subscriptionStarts: SubscriptionStart[] = payRecurring.map(
+        ({ product, amount }) => ({
+            subscription: product.product_metadata.subscription_type!,
+            expected_to_pay_recurring: "" + amount,
+            expected_to_pay_now: "0", // We should already have paid for the member to be a member, so the subscription should start in the future and not charge anything right now
+        }),
+    );
 
     if (subscriptionStarts.length > 0) {
         try {
-            await common.ajax('POST', `${window.apiBasePath}/webshop/member/current/subscriptions`, {
-                subscriptions: subscriptionStarts,
-            } as StartSubscriptionsRequest, { loginToken: options.loginToken });
+            await common.ajax(
+                "POST",
+                `${window.apiBasePath}/webshop/member/current/subscriptions`,
+                {
+                    subscriptions: subscriptionStarts,
+                } as StartSubscriptionsRequest,
+                { loginToken: options.loginToken },
+            );
         } catch (e) {
             throw new PaymentFailedError(common.get_error(e));
         }
     }
 
-    return { transaction_id }
+    return { transaction_id };
 }

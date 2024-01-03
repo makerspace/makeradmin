@@ -1,10 +1,9 @@
 from logging import ERROR
+from typing import Any, Optional, Tuple, Union
 
 from flask import Response, jsonify
 
 from service.logging import logger
-from typing import Any, Optional, Tuple, Union
-
 
 # Internal log level to error log with exception.
 EXCEPTION = 333
