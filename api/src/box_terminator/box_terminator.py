@@ -1,19 +1,18 @@
 from dataclasses import dataclass
-from datetime import date, timedelta, datetime
+from datetime import date, datetime, timedelta
 from typing import Any, Dict, List, Optional, Tuple
-from sqlalchemy import desc
-from sqlalchemy.orm import contains_eager
-from sqlalchemy.orm.exc import NoResultFound
 
+from box_terminator.models import StorageItem, StorageMessage, StorageMessageType, StorageType
 from membership.models import Member, Span
 from messages.message import send_message
 from messages.models import MessageTemplate
 from service.db import db_session
-from service.error import NotFound, BadRequest
+from service.error import BadRequest, NotFound
 from service.util import date_to_str, dt_to_str, str_to_date
-from shop.transactions import pending_action_value_sum, ProductAction
-from box_terminator.models import StorageItem, StorageMessage, StorageType, StorageMessageType
-
+from shop.transactions import ProductAction, pending_action_value_sum
+from sqlalchemy import desc
+from sqlalchemy.orm import contains_eager
+from sqlalchemy.orm.exc import NoResultFound
 
 JUDGMENT_DAY = datetime(1997, 9, 26)  # Used as default for missing lab access date
 EXPIRATION_TIME = 45  # Number of days from expiration date to the termination date when the item is removed
@@ -183,14 +182,7 @@ def send_message_about_storage(
     storage_type: StorageType,
     fixed_end_date: Optional[datetime],
 ) -> None:
-    item = (
-        db_session.query(StorageItem)
-        .filter(
-            StorageItem.item_label_id == item_label_id,
-            Member.member_number == member_number,
-        )
-        .one_or_none()
-    )
+    item = get_item_from_label_id(item_label_id)
     if item is None:
         raise NotFound(f"Storage item, {item_label_id}, for member number {member_number} not found")
 
@@ -279,7 +271,7 @@ def fetch_storage_item(
     storage_type: StorageType,
     fixed_end_date: datetime,
 ) -> StorageInfo:
-    item = get_item_from_id(item_label_id)
+    item = get_item_from_label_id(item_label_id)
     if item is not None:
         found_item = True
         if storage_type != item.storage_type:

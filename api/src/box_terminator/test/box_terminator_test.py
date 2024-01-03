@@ -1,19 +1,19 @@
 from datetime import date
 
-from membership.models import Member, Span
-from box_terminator.models import StorageItem, StorageMessage, StorageType, StorageMessageType
-from messages.models import Message
-from service.db import db_session
 from box_terminator.box_terminator import (
-    get_item_from_label_id,
-    get_dates,
-    check_status,
-    get_storage_info,
-    Reason,
-    Status,
     EXPIRATION_TIME,
     JUDGMENT_DAY,
+    Reason,
+    Status,
+    check_status,
+    get_dates,
+    get_item_from_label_id,
+    get_storage_info,
 )
+from box_terminator.models import StorageItem, StorageMessage, StorageMessageType, StorageType
+from membership.models import Member, Span
+from messages.models import Message
+from service.db import db_session
 from test_aid.test_base import FlaskTestBase
 
 
