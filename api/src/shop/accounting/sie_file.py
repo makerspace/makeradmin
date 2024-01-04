@@ -54,7 +54,9 @@ def convert_to_sie_format(verifications: List[Verification]) -> List[str]:
     return sie_content
 
 
-def write_to_sie_file(verifications: List[Verification], file_name: str, signer: Member) -> None:
+def write_to_sie_file(
+    verifications: List[Verification], start_date: datetime, end_date: datetime, filepath: str, signer: Member
+) -> None:
     sie_content = convert_to_sie_format(verifications)
 
     header = get_header(signer, start_date, end_date)

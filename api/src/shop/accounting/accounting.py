@@ -35,7 +35,7 @@ class TransactionWithAccounting:
 class AccountCostCenter:
     account: str | None
     cost_center: str | None
-    fraction: Decimal
+    fraction: int
     type: AccountingEntryType
 
 
@@ -123,19 +123,36 @@ def diff_transactions_and_completed_payments(
     return unmatched_data
 
 
-def split_transactions_over_accounts(transactions: List[Transaction]) -> List[TransactionWithAccounting]:
+def split_transactions_over_accounts(
+    transactions: List[Transaction],
+) -> Tuple[List[TransactionWithAccounting], Dict[Tuple[int, int, AccountingEntryType], Decimal]]:
     product_to_accounting = ProductToAccountCostCenter()
     transactions_with_accounting: List[TransactionWithAccounting] = []
+    leftover_amounts: Dict[Tuple[int, int, AccountingEntryType], Decimal] = {}
 
     for transaction in transactions:
         logger.info(f"transaction: {transaction}")
         for content in transaction.contents:
-            logger.info(f"content: {content}")
             product_accounting = product_to_accounting.get_account_cost_center(content.product_id)
-            transaction_content_amount = content.amount
             logger.info(f"product_accounting: {product_accounting}")
+            logger.info(f"content.amount: {content.amount}")
+            transaction_content_amount = Decimal(content.amount)
+            amounts_added: Dict[AccountingEntryType, Decimal] = {}
+
             for accounting in product_accounting:
-                amount_to_add = (accounting.fraction * Decimal(transaction_content_amount)) / Decimal(100)
+                amount_to_add = (accounting.fraction * transaction_content_amount) / Decimal(100)
+                logger.info(f"amount_to_add before rounding: {amount_to_add}")
+                amount_to_add = Decimal(round(amount_to_add, 2))
+
+                key = accounting.type
+                if key in amounts_added:
+                    amounts_added[key] += amount_to_add
+                else:
+                    amounts_added[key] = amount_to_add
+
+                logger.info(f"amount_to_add: {amount_to_add}")
+                logger.info(f"amounts_added: {amounts_added}")
+
                 transactions_with_accounting.append(
                     TransactionWithAccounting(
                         transaction_id=transaction.id,
@@ -147,4 +164,14 @@ def split_transactions_over_accounts(transactions: List[Transaction]) -> List[Tr
                         type=accounting.type,
                     )
                 )
-    return transactions_with_accounting
+
+            for entry_type, amount in amounts_added.items():
+                if amount != transaction_content_amount:
+                    leftover_key: Tuple[int, int, AccountingEntryType] = (
+                        transaction.id,
+                        content.product_id,
+                        entry_type,
+                    )
+                    leftover_amounts[leftover_key] = transaction_content_amount - amount
+    logger.info(f"leftover_amounts: {leftover_amounts}")
+    return transactions_with_accounting, leftover_amounts
