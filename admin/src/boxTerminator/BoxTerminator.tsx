@@ -14,10 +14,8 @@ const BoxTerminator = () => {
         try {
             get({
                 url: `/box_terminator/fetch/${scannedString}`,
-                // data: { message: scannedString },
             }).then((res) => {
                 if (res.status === "ok") {
-                    // alert("Box terminated successfully!");
                     setResponse(JSON.parse(res.data));
                     setRunScanner(false);
                 }
@@ -50,7 +48,7 @@ const BoxTerminator = () => {
             ) : (
                 <>
                     <Termination
-                        render={response}
+                        props={response}
                         callback={() => setRunScanner(true)}
                     />
                 </>
