@@ -27,16 +27,16 @@ def date_format(dt: datetime) -> str:
     return dt.strftime("%Y%m%d")
 
 
-def get_header(signer: str, financial_year: int):
+def get_header(signer: str, start_date: datetime, end_date: datetime):
     return HEADER_TEMPLATE.format(
         date=date_format(datetime.now()),
         signer=signer,
-        date_start=date_format(datetime(financial_year, 1, 1)),
-        date_end=date_format(datetime(financial_year, 12, 31)),
+        date_start=date_format(start_date),
+        date_end=date_format(end_date),
     )
 
 
-def transaction_string(account, cost_center, sum, date, description) -> str:
+def transaction_string(account: str, cost_center: str, sum: Decimal, date: datetime, description: str) -> str:
     return f'#TRANS {account} {{"1" "{cost_center}"}} {sum} {date} "{description}"'
 
 
@@ -57,7 +57,7 @@ def convert_to_sie_format(verifications: List[Verification]) -> List[str]:
 def write_to_sie_file(verifications: List[Verification], file_name: str, signer: Member) -> None:
     sie_content = convert_to_sie_format(verifications)
 
-    header = get_header(signer, year)
+    header = get_header(signer, start_date, end_date)
 
     with open(file_name, "w") as file:
         file.write("\n".join(sie_content))

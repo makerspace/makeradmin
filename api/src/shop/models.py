@@ -266,7 +266,9 @@ class ProductAccountsCostCenters(Base):
     product_id = Column(Integer, ForeignKey("webshop_products.id"), nullable=False)
     account_id = Column(Integer, ForeignKey("webshop_transaction_accounts.id"), nullable=True)
     cost_center_id = Column(Integer, ForeignKey("webshop_transaction_cost_centers.id"), nullable=True)
-    fraction = Column(Numeric(6, 3), nullable=False, server_default=("0.0"))
+    fraction = Column(
+        Integer, nullable=False, server_default=("0")
+    )  # Using integer with the range 0-100 to represent fractions and avoind precision issues
     type = Column(Enum(*[x.value for x in AccountingEntryType]), nullable=False)
 
     product = relationship(Product, backref="accounts_cost_centers")

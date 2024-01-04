@@ -45,6 +45,7 @@ def transaction_fees_to_transaction_with_accounting(
     return amounts
 
 
+# TODO add logger stuff for production code
 def export_accounting() -> None:  # TODO input is two dates, filename?
     stripe_payment_intents = get_stripe_payment_intents(start_date, end_date)
     completed_payments = convert_completed_stripe_intents_to_payments(stripe_payment_intents)
@@ -60,4 +61,4 @@ def export_accounting() -> None:  # TODO input is two dates, filename?
     transaction_fees = transaction_fees_to_transaction_with_accounting(completed_payments)
     transactions_with_accounting.extend(transaction_fees)
     verifications = create_verificatons(transactions_with_accounting, completed_payments)
-    write_to_sie_file(verifications)  # TODO probably some file name input
+    write_to_sie_file(verifications, start_date, end_date)  # TODO probably some file name input

@@ -2,7 +2,7 @@ import random
 from datetime import date, datetime, timezone
 from decimal import Decimal
 from logging import getLogger
-from typing import Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 from unittest import TestCase
 from unittest.mock import Mock, patch
 
@@ -150,9 +150,9 @@ class ProductToAccountCostCenterTest(FlaskTestBase):
         db_session.query(Transaction).delete()
         db_session.query(TransactionContent).delete()
 
-        self.number_of_products = 3
-        self.number_of_accounts = 4
-        self.number_of_cost_centers = 3
+        self.number_of_products = 1
+        self.number_of_accounts = 2
+        self.number_of_cost_centers = 1
 
         for i in range(self.number_of_accounts):
             self.db.create_transaction_account()
@@ -167,41 +167,77 @@ class ProductToAccountCostCenterTest(FlaskTestBase):
         product_category = self.db.create_category()
         for i in range(self.number_of_products):
             product = self.db.create_product(category_id=product_category.id)
-            fractions_left = {type: Decimal(1) for type in AccountingEntryType}
+            fractions_left = {type: 100 for type in AccountingEntryType}
             for j in range(self.number_of_accounts):
                 for k in range(self.number_of_cost_centers):
                     for type in AccountingEntryType:
-                        fraction = Decimal(random.uniform(0, float(fractions_left[type]) / 2))
+                        fraction = random.randint(1, round(fractions_left[type] / 1.5))
+                        logger.info(f"type: {type}")
+                        logger.info(f"fraction: {fraction}")
                         fractions_left[type] -= fraction
                         if j > k:
                             self.db.create_product_account_cost_center(
                                 product_id=product.id,
-                                account_id=self.transaction_accounts[j],
-                                cost_center_id=self.transaction_cost_centers[k],
-                                type=type,
+                                account_id=self.transaction_accounts[j].id,
+                                cost_center_id=self.transaction_cost_centers[k].id,
+                                type=type.value,
+                                fraction=fraction,
                             )
                         elif j == k:
                             self.db.create_product_account_cost_center(
                                 product_id=product.id,
-                                account_id=self.transaction_accounts[j],
+                                account_id=self.transaction_accounts[j].id,
                                 cost_center_id=None,
-                                type=type,
+                                type=type.value,
+                                fraction=fraction,
                             )
             for type in AccountingEntryType:
                 fraction = fractions_left[type]
+                logger.info(f"type: {type}")
+                logger.info(f"fraction: {fraction}")
                 self.db.create_product_account_cost_center(
                     product_id=product.id,
                     account_id=None,
-                    cost_center_id=self.transaction_cost_centers[0],
-                    type=type,
+                    cost_center_id=self.transaction_cost_centers[0].id,
+                    type=type.value,
                     fraction=fraction,
                 )
 
     def test_product_to_accounting(self) -> None:
+        def custom_sort_key(item: Any) -> Tuple[str, str]:
+            account_value = str(item.account.account) if item.account else "0"
+            cost_center_value = str(item.cost_center.cost_center) if item.cost_center else "0"
+            return (account_value, cost_center_value)
+
         prod_to_account = ProductToAccountCostCenter()
 
         for product in db_session.query(Product).all():
+            db_info = (
+                db_session.query(ProductAccountsCostCenters)
+                .outerjoin(TransactionAccount, ProductAccountsCostCenters.account)
+                .outerjoin(TransactionCostcenter, ProductAccountsCostCenters.cost_center)
+                .filter(ProductAccountsCostCenters.product_id == product.id)
+                .all()
+            )
             accounting = prod_to_account.get_account_cost_center(product.id)
+            assert len(accounting) == len(db_info)
+            accounting.sort(key=lambda x: ((x.account or "0"), (x.cost_center or "0")))
+            db_info.sort(key=custom_sort_key)
+
+            for acc, product_info in zip(accounting, db_info):
+                assert acc.fraction > 1
+                assert acc.fraction <= 100
+                assert acc.fraction == product_info.fraction
+                assert acc.type == AccountingEntryType(product_info.type)
+
+                if product_info.account is None:
+                    assert acc.account is None
+                else:
+                    assert acc.account == product_info.account.account
+                if product_info.cost_center is None:
+                    assert acc.cost_center is None
+                else:
+                    assert acc.cost_center == product_info.cost_center.cost_center
 
     # TODO test failing fractions and double nones ok check
 

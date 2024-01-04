@@ -43,38 +43,49 @@ class ProductToAccountCostCenter:
 
         products = db_session.query(Product).all()
         for product in products:
+            logger.info(f"product: {product}")
             product_accounting = (
-                db_session.query(ProductAccountsCostCenters, TransactionAccount, TransactionCostcenter)
-                .join(TransactionAccount, ProductAccountsCostCenters.account)
-                .join(TransactionCostcenter, ProductAccountsCostCenters.cost_center)
+                db_session.query(ProductAccountsCostCenters)
+                .outerjoin(TransactionAccount, ProductAccountsCostCenters.account)
+                .outerjoin(TransactionCostcenter, ProductAccountsCostCenters.cost_center)
                 .filter(ProductAccountsCostCenters.product_id == product.id)
                 .all()
             )
+            logger.info(f"product_accounting: {product_accounting}")
 
-            fraction_sums = Dict(AccountingEntryType, Decimal)
-            fraction_sums[AccountingEntryType.CREDIT] = Decimal(0)
-            fraction_sums[AccountingEntryType.DEBIT] = Decimal(0)
+            fraction_sums: Dict[AccountingEntryType, int] = {}
+            fraction_sums[AccountingEntryType.CREDIT] = 0
+            fraction_sums[AccountingEntryType.DEBIT] = 0
             account_cost_centers: List[AccountCostCenter] = []
             for product_info in product_accounting:
-                if product_info.account.account is None and product_info.cost_center.cost_center is None:
+                # logger.info(f"product_info: {product_info}")
+                logger.info(f"product_info.type: {product_info.type}")
+                # logger.info(f"product_info.account: {product_info.account}")
+                # logger.info(f"product_info.cost_center: {product_info.cost_center}")
+                logger.info(f"fraction: {product_info.fraction}")
+                account = product_info.account.account if product_info.account is not None else None
+                cost_center = product_info.cost_center.cost_center if product_info.cost_center is not None else None
+                if account is None and cost_center is None:
                     raise InternalServerError(
-                        f"Product {product.id} has accounting with both account and cost center as none"
+                        f"Product {product.id} has accounting with both account and cost center as None. At least one must be set to a value."
                     )
 
-                fraction_sums[product_info.account.type] += product_info.fraction
+                accounting_type = AccountingEntryType(product_info.type)
+                fraction_sums[accounting_type] += product_info.fraction
                 account_cost_centers.append(
                     AccountCostCenter(
-                        product_info.account.account,
-                        product_info.cost_center.cost_center,
+                        account,
+                        cost_center,
                         product_info.fraction,
-                        product_info.account.type,
+                        accounting_type,
                     )
                 )
 
+            logger.info(f"fraction_sums: {fraction_sums}")
             for key in fraction_sums:
-                if fraction_sums[key] != Decimal(1):
+                if fraction_sums[key] != 100:
                     raise InternalServerError(
-                        f"Product {product.id} has accounting type {key} with fraction not adding up to 1"
+                        f"Product {product.id} has accounting type {key} with fraction weights not adding up to 100"
                     )
 
             self.product_to_account_cost_center[product.id] = account_cost_centers
