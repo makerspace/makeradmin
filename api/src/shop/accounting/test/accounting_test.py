@@ -13,6 +13,7 @@ import shop
 from basic_types.enums import AccountingEntryType
 from membership.models import Member
 from service.db import db_session
+from service.error import InternalServerError
 from shop.accounting.accounting import (
     AccountCostCenter,
     ProductToAccountCostCenter,
@@ -150,9 +151,10 @@ class ProductToAccountCostCenterTest(FlaskTestBase):
         db_session.query(Transaction).delete()
         db_session.query(TransactionContent).delete()
 
-        self.number_of_products = 1
-        self.number_of_accounts = 2
-        self.number_of_cost_centers = 1
+        self.number_of_products = 3
+        self.number_of_accounts = 4
+        self.number_of_cost_centers = 3
+        random_scale = self.number_of_accounts * self.number_of_cost_centers / 2
 
         for i in range(self.number_of_accounts):
             self.db.create_transaction_account()
@@ -171,11 +173,15 @@ class ProductToAccountCostCenterTest(FlaskTestBase):
             for j in range(self.number_of_accounts):
                 for k in range(self.number_of_cost_centers):
                     for type in AccountingEntryType:
-                        fraction = random.randint(1, round(fractions_left[type] / 1.5))
-                        logger.info(f"type: {type}")
-                        logger.info(f"fraction: {fraction}")
-                        fractions_left[type] -= fraction
+                        if j >= k:
+                            max_fraction = min(fractions_left[type] / 2, 100 / random_scale)
+                            fraction = random.randint(1, round(max_fraction))
+                            logger.info(f"type: {type}")
+                            logger.info(f"fraction: {fraction}")
+                            fractions_left[type] -= fraction
+
                         if j > k:
+                            logger.info("j<k")
                             self.db.create_product_account_cost_center(
                                 product_id=product.id,
                                 account_id=self.transaction_accounts[j].id,
@@ -184,6 +190,7 @@ class ProductToAccountCostCenterTest(FlaskTestBase):
                                 fraction=fraction,
                             )
                         elif j == k:
+                            logger.info("j==k")
                             self.db.create_product_account_cost_center(
                                 product_id=product.id,
                                 account_id=self.transaction_accounts[j].id,
@@ -193,6 +200,7 @@ class ProductToAccountCostCenterTest(FlaskTestBase):
                             )
             for type in AccountingEntryType:
                 fraction = fractions_left[type]
+                logger.info("leftover")
                 logger.info(f"type: {type}")
                 logger.info(f"fraction: {fraction}")
                 self.db.create_product_account_cost_center(
@@ -202,6 +210,7 @@ class ProductToAccountCostCenterTest(FlaskTestBase):
                     type=type.value,
                     fraction=fraction,
                 )
+            logger.info(f"fractions_left: {fractions_left}")
 
     def test_product_to_accounting(self) -> None:
         def custom_sort_key(item: Any) -> Tuple[str, str]:
@@ -225,7 +234,7 @@ class ProductToAccountCostCenterTest(FlaskTestBase):
             db_info.sort(key=custom_sort_key)
 
             for acc, product_info in zip(accounting, db_info):
-                assert acc.fraction > 1
+                assert acc.fraction >= 1
                 assert acc.fraction <= 100
                 assert acc.fraction == product_info.fraction
                 assert acc.type == AccountingEntryType(product_info.type)
@@ -239,7 +248,79 @@ class ProductToAccountCostCenterTest(FlaskTestBase):
                 else:
                     assert acc.cost_center == product_info.cost_center.cost_center
 
-    # TODO test failing fractions and double nones ok check
+    def test_product_to_accounting_outside_range_0(self) -> None:
+        products = db_session.query(Product).all()
+        self.db.create_product_account_cost_center(
+            product_id=products[0].id,
+            account_id=self.transaction_accounts[0].id,
+            cost_center_id=self.transaction_cost_centers[0].id,
+            type=AccountingEntryType.CREDIT.value,
+            fraction=0,
+        )
+        with self.assertRaises(InternalServerError) as context:
+            ProductToAccountCostCenter()
+        self.assertTrue("not in range [1, 100]" in str(context.exception))
+
+    def test_product_to_accounting_outside_range_101(self) -> None:
+        products = db_session.query(Product).all()
+        self.db.create_product_account_cost_center(
+            product_id=products[0].id,
+            account_id=self.transaction_accounts[0].id,
+            cost_center_id=self.transaction_cost_centers[0].id,
+            type=AccountingEntryType.CREDIT.value,
+            fraction=101,
+        )
+        with self.assertRaises(InternalServerError) as context:
+            ProductToAccountCostCenter()
+        self.assertTrue("not in range [1, 100]" in str(context.exception))
+
+    def test_product_to_accounting_fraction_not_sum_correctly_extra_entry(self) -> None:
+        products = db_session.query(Product).all()
+        self.db.create_product_account_cost_center(
+            product_id=products[0].id,
+            account_id=self.transaction_accounts[0].id,
+            cost_center_id=self.transaction_cost_centers[0].id,
+            type=AccountingEntryType.CREDIT.value,
+            fraction=1,
+        )
+        with self.assertRaises(InternalServerError) as context:
+            ProductToAccountCostCenter()
+        self.assertTrue("fraction weights not adding up to 100" in str(context.exception))
+
+    def test_product_to_accounting_fraction_not_sum_correctly_modified_add(self) -> None:
+        accounting = db_session.query(ProductAccountsCostCenters).all()
+        for acc in accounting:
+            if acc.fraction < 100:
+                acc.fraction = acc.fraction + 1
+                break
+        db_session.commit()
+        with self.assertRaises(InternalServerError) as context:
+            ProductToAccountCostCenter()
+        self.assertTrue("fraction weights not adding up to 100" in str(context.exception))
+
+    def test_product_to_accounting_fraction_not_sum_correctly_modified_sub(self) -> None:
+        accounting = db_session.query(ProductAccountsCostCenters).all()
+        for acc in accounting:
+            if acc.fraction > 1:
+                acc.fraction = acc.fraction - 1
+                break
+        db_session.commit()
+        with self.assertRaises(InternalServerError) as context:
+            ProductToAccountCostCenter()
+        self.assertTrue("fraction weights not adding up to 100" in str(context.exception))
+
+    def test_product_to_accounting_both_account_cost_center_are_none(self) -> None:
+        products = db_session.query(Product).all()
+        self.db.create_product_account_cost_center(
+            product_id=products[0].id,
+            account_id=None,
+            cost_center_id=None,
+            type=AccountingEntryType.CREDIT.value,
+            fraction=100,
+        )
+        with self.assertRaises(InternalServerError) as context:
+            ProductToAccountCostCenter()
+        self.assertTrue("both account and cost center as None" in str(context.exception))
 
 
 class SplitTransactionsTest(FlaskTestBase):
@@ -252,53 +333,109 @@ class SplitTransactionsTest(FlaskTestBase):
         db_session.query(Transaction).delete()
         db_session.query(TransactionContent).delete()
 
-    @patch("shop.accounting.accounting.ProductToAccountCostCenter")
-    def test_split_transactions_over_accounts_simple(self, mock_product_to_accounting: Mock) -> None:
-        def get_accounting_side_effect(*args, **kwargs) -> List[AccountCostCenter]:
-            return [AccountCostCenter("acc" + str(args[0]), "cc" + str(args[0]), args[0], AccountingEntryType.CREDIT)]
+    @staticmethod
+    def assertAccounting(
+        true_transactions: Dict[int, Transaction],
+        accounting: List[TransactionWithAccounting],
+        true_transaction_contents: Dict[int, Dict[int, TransactionContent]],
+    ) -> None:
+        logger.info(f"accounting: {accounting}")
 
-        num_transactions = 5
-        num_products = 2
-        amounts = [100 + 10 * i for i in range(num_transactions)]
+        for acc in accounting:
+            product_id = acc.product_id
+            transaction = true_transactions[acc.transaction_id]
 
+            assert acc.amount == Decimal(true_transaction_contents[transaction.id][product_id].amount) * Decimal(
+                product_id
+            ) / Decimal(100)
+            assert transaction.created_at == acc.date
+            assert acc.type == AccountingEntryType.CREDIT
+            if product_id == 1:
+                assert acc.account is None
+            else:
+                assert acc.account == "acc" + str(product_id)
+            if product_id == 2:
+                assert acc.cost_center is None
+            else:
+                assert acc.cost_center == "cc" + str(product_id)
+
+    def create_fake_data(
+        self, num_transactions: int, num_products: List[int], amounts: List[Decimal]
+    ) -> Tuple[Dict[int, Transaction], Dict[int, Dict[int, TransactionContent]]]:
         member = self.db.create_member()
         product_category = self.db.create_category()
-        true_info: Dict[datetime, Dict[Decimal, int]] = {}
+        true_transaction_contents: Dict[int, Dict[int, TransactionContent]] = {}
+        true_transactions: Dict[int, Transaction] = {}
         for i in range(num_transactions):
             created = datetime(2023, 3, i + 1, tzinfo=timezone.utc)
             transaction = self.db.create_transaction(member_id=member.member_id, amount=amounts[i], created_at=created)
+            true_transactions[transaction.id] = transaction
 
-            product_info: Dict[Decimal, int] = {}
-            for j in range(num_products):
-                product_price = amounts[i] / num_products
-                product = self.db.create_product(category_id=product_category.id, price=product_price)
-                product_info[product_price * product.id] = product.id
-                self.db.create_transaction_content(
+            transaction_contents: Dict[int, TransactionContent] = {}
+            for j in range(num_products[i]):
+                product_price = amounts[i] / num_products[i]
+                logger.info(f"product_price: {product_price}")
+                product = self.db.create_product(
+                    id=(i * num_transactions) + j + 1, category_id=product_category.id, price=product_price
+                )
+                transaction_contents[product.id] = self.db.create_transaction_content(
                     transaction_id=transaction.id, product_id=product.id, amount=product_price, count=1
                 )
-            true_info[created] = product_info
+            true_transaction_contents[transaction.id] = transaction_contents
+        return true_transactions, true_transaction_contents
 
-        transactions = db_session.query(Transaction).join(TransactionContent).all()
+    @staticmethod
+    def get_accounting_side_effect(product_id: int) -> List[AccountCostCenter]:
+        account = "acc" + str(product_id)
+        cost_center = "cc" + str(product_id)
+        if product_id == 1:
+            account = None
+        elif product_id == 2:
+            cost_center = None
+        return [AccountCostCenter(account, cost_center, product_id, AccountingEntryType.CREDIT)]
+
+    @patch("shop.accounting.accounting.ProductToAccountCostCenter")
+    def test_split_transactions_over_accounts(self, mock_product_to_accounting: Mock) -> None:
+        num_transactions = 1
+        num_products = [i + 1 for i in range(num_transactions)]
+        random.shuffle(num_products)
+        amounts = [100 + 10 * i for i in range(num_transactions)]
+
+        true_transactions, true_transaction_contents = self.create_fake_data(num_transactions, num_products, amounts)
+
+        transactions = db_session.query(Transaction).outerjoin(TransactionContent).all()
         assert transactions
         assert len(transactions) == num_transactions
 
         product_to_accounting_instance = mock_product_to_accounting.return_value
-        product_to_accounting_instance.get_account_cost_center.side_effect = get_accounting_side_effect
+        product_to_accounting_instance.get_account_cost_center.side_effect = self.get_accounting_side_effect
 
         accounting = split_transactions_over_accounts(transactions)
 
-        assert len(accounting) == num_transactions * num_products
-        for acc in accounting:
-            timezone_aware_date = acc.date.replace(tzinfo=pytz.UTC)
-            product_id = true_info[timezone_aware_date][acc.amount]
-            assert acc.account == "acc" + str(product_id)
-            assert acc.cost_center == "cc" + str(product_id)
-            assert acc.type == AccountingEntryType.CREDIT
+        assert len(accounting) == sum(num_products)
+        self.assertAccounting(true_transactions, accounting, true_transaction_contents)
 
-    # TODO some split test with more variation and different types
-    # different number of product counts in transaction content
-    # with some none cost center and account in the test
+    @patch("shop.accounting.accounting.ProductToAccountCostCenter")
+    def test_split_transactions_over_accounts_odd_fractions(self, mock_product_to_accounting: Mock) -> None:
+        num_transactions = 20
+        num_products = [2 for i in range(num_transactions)]
+        amounts = [100 + 1.23 * i for i in range(num_transactions)]
 
-    # TODO a test with odd fractions to test rounding
+        true_transactions, true_transaction_contents = self.create_fake_data(num_transactions, num_products, amounts)
 
-    # TODO a test without the mock, inherit ProductToAccountCostCenterTest
+        transactions = db_session.query(Transaction).outerjoin(TransactionContent).all()
+        assert transactions
+        assert len(transactions) == num_transactions
+
+        product_to_accounting_instance = mock_product_to_accounting.return_value
+        product_to_accounting_instance.get_account_cost_center.side_effect = self.get_accounting_side_effect
+
+        accounting = split_transactions_over_accounts(transactions)
+
+        assert len(accounting) == sum(num_products)
+        self.assertAccounting(true_transactions, accounting, true_transaction_contents)
+
+
+class SplitTransactionsWithoutMockTest(ProductToAccountCostCenterTest, SplitTransactionsTest):
+    def test_split_transactions_over_accounts_no_mock_simple(self) -> None:
+        pass

@@ -206,14 +206,8 @@ class ObjFactory:
 
     def create_product_account_cost_center(self, **kwargs) -> ProductAccountsCostCenters:
         product_id = kwargs.pop("product_id", None) or (self.product and self.product["id"])
-
         account_id = kwargs.pop("account_id", None)
         cost_center_id = kwargs.pop("cost_center_id", None)
-        if account_id is None and cost_center_id is None:
-            account_id = self.transaction_account["id"] if self.transaction_account else None
-            cost_center_id = self.transaction_cost_center["id"] if self.transaction_cost_center else None
-        if account_id is None and cost_center_id is None:
-            raise ValueError("Must specify either account_id or cost_center_id")
 
         obj = dict(
             account_id=account_id,

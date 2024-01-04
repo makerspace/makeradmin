@@ -35,6 +35,8 @@ def transaction_fees_to_transaction_with_accounting(
     for payment in completed_payments:
         amounts.append(
             TransactionWithAccounting(
+                transaction_id=payment.transaction_id,
+                product_id=None,
                 amount=payment.fee,
                 date=payment.created,
                 account="6573",

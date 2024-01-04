@@ -24,7 +24,7 @@ class VerificationTest(TestCase):
             group = groups[i]
             created = datetime(2023, group, 1, tzinfo=timezone.utc)
             amount = 100 + i
-            transactions.append(TransactionWithAccounting(amount, created, "1", "1", AccountingEntryType.CREDIT))
+            transactions.append(TransactionWithAccounting(i, i, amount, created, "1", "1", AccountingEntryType.CREDIT))
 
         verifications = create_verificatons(transactions)
 
@@ -51,7 +51,7 @@ class VerificationTest(TestCase):
             else:
                 true_ammounts[date] = amount
 
-            transactions.append(TransactionWithAccounting(amount, created, "1", "1", AccountingEntryType.CREDIT))
+            transactions.append(TransactionWithAccounting(i, i, amount, created, "1", "1", AccountingEntryType.CREDIT))
 
         verifications = create_verificatons(transactions)
         verifications_dict = {verification.period: verification for verification in verifications}
@@ -93,7 +93,9 @@ class VerificationTest(TestCase):
                 true_ammounts[key] = amount
 
             transactions.append(
-                TransactionWithAccounting(amount, created, accounts[i], cost_centers[i], AccountingEntryType.CREDIT)
+                TransactionWithAccounting(
+                    i, i, amount, created, accounts[i], cost_centers[i], AccountingEntryType.CREDIT
+                )
             )
 
         verifications = create_verificatons(transactions)

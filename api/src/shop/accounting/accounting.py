@@ -22,6 +22,8 @@ logger = getLogger("makeradmin")
 
 @dataclass()
 class TransactionWithAccounting:
+    transaction_id: int
+    product_id: int
     amount: Decimal
     date: datetime
     account: str | None
@@ -67,11 +69,16 @@ class ProductToAccountCostCenter:
                 cost_center = product_info.cost_center.cost_center if product_info.cost_center is not None else None
                 if account is None and cost_center is None:
                     raise InternalServerError(
-                        f"Product {product.id} has accounting with both account and cost center as None. At least one must be set to a value."
+                        f"Product with id {product.id} has accounting with both account and cost center as None. At least one must be set to a value."
+                    )
+                if product_info.fraction <= 0 or product_info.fraction > 100:
+                    raise InternalServerError(
+                        f"Product with id {product.id} has accounting with id {product_info.id} with fraction {product_info.fraction} not in range [1, 100]"
                     )
 
                 accounting_type = AccountingEntryType(product_info.type)
                 fraction_sums[accounting_type] += product_info.fraction
+                logger.info(f"fraction_sums: {fraction_sums}")
                 account_cost_centers.append(
                     AccountCostCenter(
                         account,
@@ -85,7 +92,7 @@ class ProductToAccountCostCenter:
             for key in fraction_sums:
                 if fraction_sums[key] != 100:
                     raise InternalServerError(
-                        f"Product {product.id} has accounting type {key} with fraction weights not adding up to 100"
+                        f"Product with id {product.id} has accounting type {key} with fraction weights not adding up to 100"
                     )
 
             self.product_to_account_cost_center[product.id] = account_cost_centers
@@ -128,9 +135,11 @@ def split_transactions_over_accounts(transactions: List[Transaction]) -> List[Tr
             transaction_content_amount = content.amount
             logger.info(f"product_accounting: {product_accounting}")
             for accounting in product_accounting:
-                amount_to_add = accounting.fraction * transaction_content_amount  # TODO rounding errors?
+                amount_to_add = (accounting.fraction * Decimal(transaction_content_amount)) / Decimal(100)
                 transactions_with_accounting.append(
                     TransactionWithAccounting(
+                        transaction_id=transaction.id,
+                        product_id=content.product_id,
                         amount=amount_to_add,
                         date=transaction.created_at,
                         account=accounting.account,
