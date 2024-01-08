@@ -45,7 +45,6 @@ class ProductToAccountCostCenter:
 
         products = db_session.query(Product).all()
         for product in products:
-            logger.info(f"product: {product}")
             product_accounting = (
                 db_session.query(ProductAccountsCostCenters)
                 .outerjoin(TransactionAccount, ProductAccountsCostCenters.account)
@@ -53,18 +52,12 @@ class ProductToAccountCostCenter:
                 .filter(ProductAccountsCostCenters.product_id == product.id)
                 .all()
             )
-            logger.info(f"product_accounting: {product_accounting}")
 
             fraction_sums: Dict[AccountingEntryType, int] = {}
             fraction_sums[AccountingEntryType.CREDIT] = 0
             fraction_sums[AccountingEntryType.DEBIT] = 0
             account_cost_centers: List[AccountCostCenter] = []
             for product_info in product_accounting:
-                # logger.info(f"product_info: {product_info}")
-                logger.info(f"product_info.type: {product_info.type}")
-                # logger.info(f"product_info.account: {product_info.account}")
-                # logger.info(f"product_info.cost_center: {product_info.cost_center}")
-                logger.info(f"fraction: {product_info.fraction}")
                 account = product_info.account.account if product_info.account is not None else None
                 cost_center = product_info.cost_center.cost_center if product_info.cost_center is not None else None
                 if account is None and cost_center is None:
@@ -78,7 +71,6 @@ class ProductToAccountCostCenter:
 
                 accounting_type = AccountingEntryType(product_info.type)
                 fraction_sums[accounting_type] += product_info.fraction
-                logger.info(f"fraction_sums: {fraction_sums}")
                 account_cost_centers.append(
                     AccountCostCenter(
                         account,
@@ -88,7 +80,6 @@ class ProductToAccountCostCenter:
                     )
                 )
 
-            logger.info(f"fraction_sums: {fraction_sums}")
             for key in fraction_sums:
                 if fraction_sums[key] != 100:
                     raise InternalServerError(
@@ -113,7 +104,7 @@ def diff_transactions_and_completed_payments(
             unmatched_data.append((transaction, None))
             continue
         completed_payment = completed_payments.pop(transaction.id)
-        if transaction.amount != completed_payment.amount or transaction.id != completed_payment.transaction_id:
+        if transaction.amount != float(completed_payment.amount) or transaction.id != completed_payment.transaction_id:
             unmatched_data.append((transaction, completed_payment))
 
     if len(completed_payments) > 0:
@@ -131,27 +122,19 @@ def split_transactions_over_accounts(
     leftover_amounts: Dict[Tuple[int, int, AccountingEntryType], Decimal] = {}
 
     for transaction in transactions:
-        logger.info(f"transaction: {transaction}")
         for content in transaction.contents:
             product_accounting = product_to_accounting.get_account_cost_center(content.product_id)
-            logger.info(f"product_accounting: {product_accounting}")
-            logger.info(f"content.amount: {content.amount}")
             transaction_content_amount = Decimal(content.amount)
-            amounts_added: Dict[AccountingEntryType, Decimal] = {}
+            amounts_added: Dict[AccountingEntryType, Decimal] = {type: Decimal(0) for type in AccountingEntryType}
 
             for accounting in product_accounting:
-                amount_to_add = (accounting.fraction * transaction_content_amount) / Decimal(100)
-                logger.info(f"amount_to_add before rounding: {amount_to_add}")
+                amount_to_add = transaction_content_amount * (
+                    accounting.fraction * Decimal(0.01)
+                )  # Multiply with 0.01 instead of division by 100
                 amount_to_add = Decimal(round(amount_to_add, 2))
 
                 key = accounting.type
-                if key in amounts_added:
-                    amounts_added[key] += amount_to_add
-                else:
-                    amounts_added[key] = amount_to_add
-
-                logger.info(f"amount_to_add: {amount_to_add}")
-                logger.info(f"amounts_added: {amounts_added}")
+                amounts_added[key] += amount_to_add
 
                 transactions_with_accounting.append(
                     TransactionWithAccounting(
@@ -173,5 +156,4 @@ def split_transactions_over_accounts(
                         entry_type,
                     )
                     leftover_amounts[leftover_key] = transaction_content_amount - amount
-    logger.info(f"leftover_amounts: {leftover_amounts}")
     return transactions_with_accounting, leftover_amounts

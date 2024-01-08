@@ -1,5 +1,7 @@
 import re
 from datetime import datetime
+from decimal import Decimal
+from logging import getLogger
 from random import choice, randint, seed
 from typing import Any, Dict
 
@@ -17,6 +19,9 @@ from shop.models import (
 )
 
 from test_aid.test_util import random_str
+
+logger = getLogger("makeradmin")
+
 
 DEFAULT_PASSWORD = "D9ub8$13"
 
@@ -164,7 +169,7 @@ class ObjFactory:
         member_id = kwargs.pop("member_id", None) or (self.member and self.member["member_id"])
         obj = dict(
             status=Transaction.COMPLETED,
-            amount=100.0,
+            amount=Decimal("100.0"),
             member_id=member_id,
         )
         obj.update(**kwargs)

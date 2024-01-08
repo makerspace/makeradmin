@@ -125,7 +125,7 @@ class Transaction(Base):
 
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
     member_id = Column(Integer, ForeignKey(Member.member_id), nullable=True)
-    amount = Column(Numeric(precision="15,2"), nullable=False)
+    amount = Column(Numeric(precision=15, scale=2, asdecimal=True), nullable=False)
     status = Column(Enum(PENDING, COMPLETED, FAILED), nullable=False)
     created_at = Column(DateTime, server_default=func.now())
 
@@ -133,7 +133,7 @@ class Transaction(Base):
     stripe_pending = relationship("StripePending")
 
     def __repr__(self) -> str:
-        return f"Transaction(id={self.id}, amount={self.amount}, status={self.status}, created_at={self.created_at})"
+        return f"Transaction(id={self.id}, amount={self.amount}, type={type(self.amount)}, status={self.status}, created_at={self.created_at})"
 
 
 class TransactionContent(Base):
