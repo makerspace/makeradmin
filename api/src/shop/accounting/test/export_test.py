@@ -14,7 +14,7 @@ logger = getLogger("makeradmin")
 
 class ExportTest(TestCase):
     def test_fees_to_transaction_with_accounting(self) -> None:
-        completed_payments: List[CompletedPayment] = []
+        completed_payments: Dict[int, CompletedPayment] = {}
         num_payments = 10
         num_groups = 3
         groups = [int(i / num_groups) + 1 for i in range(num_payments)]
@@ -25,7 +25,7 @@ class ExportTest(TestCase):
             fee = 10 + i
             true_fees.append(fee)
             payment = CompletedPayment(i, 100 * i, created, fee)
-            completed_payments.append(payment)
+            completed_payments[i] = payment
 
         transaction_fees = transaction_fees_to_transaction_with_accounting(completed_payments)
 

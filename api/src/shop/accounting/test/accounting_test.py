@@ -330,6 +330,7 @@ class SplitTransactionsTest(FlaskTestBase):
     def assertAccounting(
         num_products: List[int],
         true_transactions: Dict[int, Transaction],
+        completed_payments: Dict[int, CompletedPayment],
         accounting: List[TransactionWithAccounting],
         true_transaction_contents: Dict[int, Dict[int, TransactionContent]],
     ) -> None:
@@ -341,9 +342,10 @@ class SplitTransactionsTest(FlaskTestBase):
             transaction = true_transactions[acc.transaction_id]
             num_entry_types_found[acc.type] += 1
 
-            actual_amount = (
-                Decimal(true_transaction_contents[transaction.id][product_id].amount) * Decimal(50) * Decimal(0.01)
-            )  # Multiply by 0.01 instead of dividing by 100
+            transaction_fee = completed_payments[transaction.id].fee
+            amount = Decimal(true_transaction_contents[transaction.id][product_id].amount)
+            amount = amount if acc.type == AccountingEntryType.CREDIT else amount - transaction_fee
+            actual_amount = amount * Decimal(50) * Decimal(0.01)  # Multiply by 0.01 instead of dividing by 100
             assert acc.amount == pytest.approx(actual_amount, abs=0.0001)
             assert transaction.created_at == acc.date
             if product_id == 1:
@@ -411,6 +413,11 @@ class SplitTransactionsTest(FlaskTestBase):
         amounts = [Decimal("100") + Decimal("10") * Decimal(i) for i in range(num_transactions)]
 
         true_transactions, true_transaction_contents = self.create_fake_data(num_transactions, num_products, amounts)
+        completed_payments: Dict[int, CompletedPayment] = {}
+        for transaction in true_transactions.values():
+            completed_payments[transaction.id] = CompletedPayment(
+                transaction.id, transaction.amount, transaction.created_at, Decimal("1.00")
+            )
 
         transactions = db_session.query(Transaction).outerjoin(TransactionContent).all()
         assert transactions
@@ -419,10 +426,14 @@ class SplitTransactionsTest(FlaskTestBase):
         product_to_accounting_instance = mock_product_to_accounting.return_value
         product_to_accounting_instance.get_account_cost_center.side_effect = self.get_accounting_side_effect
 
-        accounting, leftover_amounts = split_transactions_over_accounts(transactions)
+        accounting, leftover_amounts = split_transactions_over_accounts(transactions, completed_payments)
         assert len(leftover_amounts) == 0
 
-        self.assertAccounting(num_products, true_transactions, accounting, true_transaction_contents)
+        self.assertAccounting(
+            num_products, true_transactions, completed_payments, accounting, true_transaction_contents
+        )
+
+    # TODO a test with more odd fees
 
     # TODO test disabled because of rounding issues
     # @patch("shop.accounting.accounting.ProductToAccountCostCenter")
@@ -457,7 +468,7 @@ class SplitTransactionsWithoutMockTest(ProductToAccountCostCenterTest):
         for i in range(ProductToAccountCostCenterTest.number_of_products)
     ]
 
-    def test_split_transactions_over_accounts_no_mock(self) -> None:
+    def test_split_transaction_over_accounts_no_mock(self) -> None:
         count = 2
 
         member = self.db.create_member()
@@ -478,8 +489,18 @@ class SplitTransactionsWithoutMockTest(ProductToAccountCostCenterTest):
                 transaction_id=true_transaction.id, product_id=product.id, amount=product.price * count, count=count
             )
 
+        completed_payments: Dict[int, CompletedPayment] = {}
+        completed_payments[true_transaction.id] = CompletedPayment(
+            true_transaction.id,
+            true_transaction.amount,
+            true_transaction.created_at,
+            Decimal("1.00"),  # TODO more odd fees such as 1.23
+        )
+
         transactions_from_db = db_session.query(Transaction).outerjoin(TransactionContent).all()
-        transactions_with_accounting, leftover_amounts = split_transactions_over_accounts(transactions_from_db)
+        transactions_with_accounting, leftover_amounts = split_transactions_over_accounts(
+            transactions_from_db, completed_payments
+        )
         transactions_with_accounting.sort(key=lambda x: ((x.account or "0"), (x.cost_center or "0")))
 
         prod_to_account = ProductToAccountCostCenter()
@@ -499,15 +520,17 @@ class SplitTransactionsWithoutMockTest(ProductToAccountCostCenterTest):
                         break
                 transaction_acc = transactions_with_accounting.pop(index)
 
-                true_ammount = (
-                    Decimal(true_transaction_contents[product.id].amount) * account_cost_center.fraction / Decimal(100)
-                )
+                transaction_fee = completed_payments[true_transaction.id].fee
+                amount = Decimal(Decimal(true_transaction_contents[product.id].amount))
+                amount = amount if transaction_acc.type == AccountingEntryType.CREDIT else amount - transaction_fee
+                true_ammount = amount * account_cost_center.fraction / Decimal(100)
+
                 assert transaction_acc.amount == true_ammount
                 key: Tuple[int, AccountingEntryType] = (product.id, account_cost_center.type)
                 if key in found_amounts_sum:
-                    found_amounts_sum[key] += transaction_acc.amount
+                    found_amounts_sum[key] += true_ammount
                 else:
-                    found_amounts_sum[key] = transaction_acc.amount
+                    found_amounts_sum[key] = true_ammount
 
                 assert transaction_acc.account == account_cost_center.account
                 assert transaction_acc.cost_center == account_cost_center.cost_center
@@ -517,4 +540,7 @@ class SplitTransactionsWithoutMockTest(ProductToAccountCostCenterTest):
         assert len(transactions_with_accounting) == 0
 
         for key, amount in found_amounts_sum.items():
-            assert amount == true_transaction_contents[key[0]].amount
+            if key[1] == AccountingEntryType.DEBIT:
+                assert amount == true_transaction_contents[key[0]].amount - completed_payments[true_transaction.id].fee
+            else:
+                assert amount == true_transaction_contents[key[0]].amount

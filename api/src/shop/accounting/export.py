@@ -28,15 +28,12 @@ from shop.stripe_payment_intent import (
     get_stripe_payment_intents,
 )
 
-# TODO deal with the debit transaction fee and the other debit parts
-# it needs to sum up correctly to the total amount of the transaction
-
 
 def transaction_fees_to_transaction_with_accounting(
-    completed_payments: List[CompletedPayment],
+    completed_payments: Dict[int, CompletedPayment],
 ) -> List[TransactionWithAccounting]:
     amounts: List[TransactionWithAccounting] = []
-    for payment in completed_payments:
+    for payment in completed_payments.values():
         amounts.append(
             TransactionWithAccounting(
                 transaction_id=payment.transaction_id,
@@ -61,7 +58,7 @@ def export_accounting(start_date: datetime, end_date: datetime, filepath: str, s
     if len(diff) > 0:
         raise InternalServerError(f"Transactions and completed payments do not match, {diff}")
 
-    transactions_with_accounting, leftover_amounts = split_transactions_over_accounts(transactions)
+    transactions_with_accounting, leftover_amounts = split_transactions_over_accounts(transactions, completed_payments)
     if len(leftover_amounts) > 0:
         raise InternalServerError(
             f"Leftover amounts, {leftover_amounts}, currently not supporting all fractions for bookkeeping"

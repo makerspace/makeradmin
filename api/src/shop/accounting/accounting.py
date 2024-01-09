@@ -31,7 +31,7 @@ class TransactionWithAccounting:
     type: AccountingEntryType
 
 
-@dataclass()
+@dataclass(frozen=True)
 class AccountCostCenter:
     account: str | None
     cost_center: str | None
@@ -115,7 +115,7 @@ def diff_transactions_and_completed_payments(
 
 
 def split_transactions_over_accounts(
-    transactions: List[Transaction],
+    transactions: List[Transaction], completed_payments: Dict[int, CompletedPayment]
 ) -> Tuple[List[TransactionWithAccounting], Dict[Tuple[int, int, AccountingEntryType], Decimal]]:
     product_to_accounting = ProductToAccountCostCenter()
     transactions_with_accounting: List[TransactionWithAccounting] = []
@@ -124,11 +124,16 @@ def split_transactions_over_accounts(
     for transaction in transactions:
         for content in transaction.contents:
             product_accounting = product_to_accounting.get_account_cost_center(content.product_id)
-            transaction_content_amount = Decimal(content.amount)
+
             amounts_added: Dict[AccountingEntryType, Decimal] = {type: Decimal(0) for type in AccountingEntryType}
 
             for accounting in product_accounting:
-                amount_to_add = transaction_content_amount * (
+                adjusted_transaction_content_amount = (
+                    Decimal(content.amount)
+                    if accounting.type == AccountingEntryType.CREDIT
+                    else Decimal(content.amount) - completed_payments[transaction.id].fee
+                )
+                amount_to_add = adjusted_transaction_content_amount * (
                     accounting.fraction * Decimal(0.01)
                 )  # Multiply with 0.01 instead of division by 100
                 amount_to_add = Decimal(round(amount_to_add, 2))
@@ -149,11 +154,16 @@ def split_transactions_over_accounts(
                 )
 
             for entry_type, amount in amounts_added.items():
-                if amount != transaction_content_amount:
+                adjusted_transaction_content_amount = (
+                    Decimal(content.amount)
+                    if entry_type == AccountingEntryType.CREDIT
+                    else Decimal(content.amount) - completed_payments[transaction.id].fee
+                )
+                if amount != adjusted_transaction_content_amount:
                     leftover_key: Tuple[int, int, AccountingEntryType] = (
                         transaction.id,
                         content.product_id,
                         entry_type,
                     )
-                    leftover_amounts[leftover_key] = transaction_content_amount - amount
+                    leftover_amounts[leftover_key] = adjusted_transaction_content_amount - amount
     return transactions_with_accounting, leftover_amounts
