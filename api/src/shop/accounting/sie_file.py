@@ -61,5 +61,5 @@ def write_to_sie_file(
 
     header = get_header(signer, start_date, end_date)
 
-    with open(file_name, "w") as file:
+    with open(filepath, "w") as file:
         file.write("\n".join(sie_content))
