@@ -12,7 +12,7 @@ from shop.accounting.accounting import (
     diff_transactions_and_completed_payments,
     split_transactions_over_accounts,
 )
-from shop.accounting.sie_file import write_to_sie_file
+from shop.accounting.sie_file import get_sie_string
 from shop.accounting.verification import create_verificatons
 from shop.models import (
     Product,
@@ -66,4 +66,4 @@ def export_accounting(start_date: datetime, end_date: datetime, filepath: str, s
     transaction_fees = transaction_fees_to_transaction_with_accounting(completed_payments)
     transactions_with_accounting.extend(transaction_fees)
     verifications = create_verificatons(transactions_with_accounting)
-    write_to_sie_file(verifications, start_date, end_date, filepath, signer)
+    get_sie_string(verifications, start_date, end_date, filepath, signer)

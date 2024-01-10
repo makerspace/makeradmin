@@ -13,6 +13,7 @@ class Verification:
     period: str
     amounts: Dict[Tuple[str | None, str | None], Decimal]
     types: Dict[Tuple[str | None, str | None], AccountingEntryType]
+    serie: str = "B"
 
 
 def create_verificatons(

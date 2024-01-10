@@ -134,7 +134,7 @@ def split_transactions_over_accounts(
                     else Decimal(content.amount) - completed_payments[transaction.id].fee
                 )
                 amount_to_add = adjusted_transaction_content_amount * (
-                    accounting.fraction * Decimal(0.01)
+                    accounting.fraction * Decimal("0.01")
                 )  # Multiply with 0.01 instead of division by 100
                 amount_to_add = Decimal(round(amount_to_add, 2))
 

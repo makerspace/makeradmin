@@ -345,7 +345,7 @@ class SplitTransactionsTest(FlaskTestBase):
             transaction_fee = completed_payments[transaction.id].fee
             amount = Decimal(true_transaction_contents[transaction.id][product_id].amount)
             amount = amount if acc.type == AccountingEntryType.CREDIT else amount - transaction_fee
-            actual_amount = amount * Decimal(fraction) * Decimal(0.01)  # Multiply by 0.01 instead of dividing by 100
+            actual_amount = amount * Decimal(fraction) * Decimal("0.01")  # Multiply by 0.01 instead of dividing by 100
             assert acc.amount == pytest.approx(actual_amount, abs=0.0001)
             assert transaction.created_at == acc.date
             if product_id == 1:
@@ -634,7 +634,6 @@ class SplitTransactionsWithoutMockTest(ProductToAccountCostCenterTest):
 
                 transaction_fee = completed_payments[true_transaction.id].fee
                 amount = Decimal(true_transaction_contents[product.id].amount)
-                logger.info(f"amount: {amount}")
                 amount = amount if transaction_acc.type == AccountingEntryType.CREDIT else amount - transaction_fee
                 true_ammount = amount * account_cost_center.fraction / Decimal(100)
 
