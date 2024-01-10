@@ -15,7 +15,8 @@ from selenium.webdriver.remote import webdriver as remote
 from selenium.webdriver.support.wait import WebDriverWait
 from service.config import get_mysql_config
 from service.db import create_mysql_engine, db_session, db_session_factory
-from shop.stripe_constants import EventType, set_stripe_key
+from shop.stripe_constants import EventType
+from shop.stripe_setup import are_stripe_keys_live, are_stripe_keys_set, setup_stripe
 from sqlalchemy import create_engine
 
 from test_aid.api import ApiFactory, ApiResponse
@@ -59,8 +60,12 @@ class SystestBase(TestBase):
     def setUpClass(self) -> None:
         super().setUpClass()
 
-        # Use the public key for these tests. TODO: Why not the private one?
-        set_stripe_key(private=False)
+        if are_stripe_keys_set():
+            if are_stripe_keys_live():
+                raise Exception(
+                    "Live Stripe keys detected during test setup. Using live keys in tests is prohibited to prevent unintended side effects."
+                )
+            setup_stripe(private=False)
 
         # Make sure sessions is removed so it is not using another engine in this thread.
         db_session.remove()
@@ -292,7 +297,7 @@ class SeleniumTest(ApiTest):
 
 
 class ApiShopTestMixin(ShopTestMixin):
-    @skipIf(not stripe.api_key, "webshop tests require stripe api key in .env file")
+    @skipIf(not STRIPE_PUBLIC_KEY, "webshop tests require stripe api key in .env file")
     def setUp(self):
         super().setUp()
         self.member = self.api.create_member(unhashed_password=DEFAULT_PASSWORD)
