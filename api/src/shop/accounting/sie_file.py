@@ -1,12 +1,13 @@
 from datetime import datetime
 from decimal import Decimal
-from itertools import groupby
-from operator import itemgetter
+from logging import getLogger
 from typing import Dict, List, Optional, Tuple
 
 from basic_types.enums import AccountingEntryType
 from membership.models import Member
 from shop.accounting.verification import Verification
+
+logger = getLogger("makeradmin")
 
 HEADER_TEMPLATE = """
 #FLAGGA 0
@@ -47,6 +48,7 @@ def verification_string(verification: Verification, verfication_number: int) -> 
 
 def transaction_string(account: str, cost_center: str | None, sum: Decimal, period: str, description: str) -> str:
     if account is None:
+        logger.warning("Account cannot be None for SIE export.")
         raise ValueError("Account cannot be None for SIE export.")
     if cost_center is None:
         cc_string = f"{{}}"
@@ -67,6 +69,7 @@ def convert_to_sie_format(verifications: List[Verification]) -> List[str]:
             account = accounting_key[0]
             cost_center = accounting_key[1]
             if account is None:
+                logger.warning("Account cannot be None for SIE export.")
                 raise ValueError("Account cannot be None for SIE export.")
             sie_amount_adjusted = -amount if verification.types[accounting_key] == AccountingEntryType.DEBIT else amount
             sie_content.append(

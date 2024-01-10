@@ -1,6 +1,5 @@
-from dataclasses import dataclass
 from datetime import datetime
-from decimal import Decimal
+from logging import getLogger
 from typing import Dict, List, Optional, Tuple
 
 from basic_types.enums import AccountingEntryType
@@ -28,6 +27,8 @@ from shop.stripe_payment_intent import (
     get_stripe_payment_intents,
 )
 
+logger = getLogger("makeradmin")
+
 
 def transaction_fees_to_transaction_with_accounting(
     completed_payments: Dict[int, CompletedPayment],
@@ -48,14 +49,15 @@ def transaction_fees_to_transaction_with_accounting(
     return amounts
 
 
-# TODO add logger stuff for production code
-def export_accounting(start_date: datetime, end_date: datetime, filepath: str, signer: Member) -> None:
+def export_accounting(start_date: datetime, end_date: datetime, filepath: str, signer: Member) -> str:
+    logger.info(f"Exporting accounting from {start_date} to {end_date} with signer {signer.member_number}")
     stripe_payment_intents = get_stripe_payment_intents(start_date, end_date)
     completed_payments = convert_completed_stripe_intents_to_payments(stripe_payment_intents)
     transactions = db_session.query(Transaction).outerjoin(TransactionContent).all()
 
     diff = diff_transactions_and_completed_payments(transactions, completed_payments)
     if len(diff) > 0:
+        logger.warning(f"Transactions and completed payments do not match, {diff}")
         raise InternalServerError(f"Transactions and completed payments do not match, {diff}")
 
     transactions_with_accounting, leftover_amounts = split_transactions_over_accounts(transactions, completed_payments)
@@ -66,4 +68,4 @@ def export_accounting(start_date: datetime, end_date: datetime, filepath: str, s
     transaction_fees = transaction_fees_to_transaction_with_accounting(completed_payments)
     transactions_with_accounting.extend(transaction_fees)
     verifications = create_verificatons(transactions_with_accounting)
-    get_sie_string(verifications, start_date, end_date, filepath, signer)
+    return get_sie_string(verifications, start_date, end_date, f"{signer.firstname} {signer.lastname}")

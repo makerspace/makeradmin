@@ -1,11 +1,14 @@
 from dataclasses import dataclass
 from decimal import Decimal
+from logging import getLogger
 from typing import Dict, List, Optional, Tuple
 
 from basic_types.enums import AccountingEntryType
 from service.db import db_session
 from service.error import InternalServerError
 from shop.accounting.accounting import TransactionWithAccounting
+
+logger = getLogger("makeradmin")
 
 
 @dataclass(frozen=True)
@@ -26,6 +29,9 @@ def create_verificatons(
         if year_month in verifications:
             if inner_key in verifications[year_month].amounts:
                 if verifications[year_month].types[inner_key] != transaction.type:
+                    logger.warning(
+                        f"Multiple transactions with different types for the same account, {transaction.account}, and cost center, {transaction.cost_center}, in the same period {year_month}."
+                    )
                     raise InternalServerError(
                         f"Multiple transactions with different types for the same account, {transaction.account}, and cost center, {transaction.cost_center}, in the same period {year_month}."
                     )
