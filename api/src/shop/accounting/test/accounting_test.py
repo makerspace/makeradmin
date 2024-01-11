@@ -223,7 +223,12 @@ class ProductToAccountCostCenterTest(FlaskTestBase):
             )
             accounting = prod_to_account.get_account_cost_center(product.id)
             assert len(accounting) == len(db_info)
-            accounting.sort(key=lambda x: ((x.account or "0"), (x.cost_center or "0")))
+            accounting.sort(
+                key=lambda x: (
+                    (x.account.account if x.account else "0"),
+                    (x.cost_center.cost_center if x.cost_center else "0"),
+                )
+            )
             db_info.sort(key=custom_sort_key)
 
             for acc, product_info in zip(accounting, db_info):
@@ -235,11 +240,11 @@ class ProductToAccountCostCenterTest(FlaskTestBase):
                 if product_info.account is None:
                     assert acc.account is None
                 else:
-                    assert acc.account == product_info.account.account
+                    assert acc.account == product_info.account
                 if product_info.cost_center is None:
                     assert acc.cost_center is None
                 else:
-                    assert acc.cost_center == product_info.cost_center.cost_center
+                    assert acc.cost_center == product_info.cost_center
 
     def test_product_to_accounting_outside_range_0(self) -> None:
         products = db_session.query(Product).all()
@@ -613,14 +618,26 @@ class SplitTransactionsWithoutMockTest(ProductToAccountCostCenterTest):
         transactions_with_accounting, leftover_amounts = split_transactions_over_accounts(
             transactions_from_db, completed_payments
         )
-        transactions_with_accounting.sort(key=lambda x: ((x.account or "0"), (x.cost_center or "0")))
+        assert len(leftover_amounts) == 0
+
+        transactions_with_accounting.sort(
+            key=lambda x: (
+                (x.account.account if x.account else "0"),
+                (x.cost_center.cost_center if x.cost_center else "0"),
+            )
+        )
 
         prod_to_account = ProductToAccountCostCenter()
         found_amounts_sum: Dict[Tuple[int, AccountingEntryType], Decimal] = {}
 
         for product in products:
             accounts_for_product = prod_to_account.get_account_cost_center(product.id)
-            accounts_for_product.sort(key=lambda x: ((x.account or "0"), (x.cost_center or "0")))
+            accounts_for_product.sort(
+                key=lambda x: (
+                    (x.account.account if x.account else "0"),
+                    (x.cost_center.cost_center if x.cost_center else "0"),
+                )
+            )
 
             for account_cost_center in accounts_for_product:
                 for i, transaction_acc in enumerate(transactions_with_accounting):

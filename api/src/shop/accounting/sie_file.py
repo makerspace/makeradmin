@@ -5,6 +5,7 @@ from typing import Dict, List, Optional, Tuple
 
 from basic_types.enums import AccountingEntryType
 from membership.models import Member
+from shop.accounting.accounting import TransactionAccount, TransactionCostcenter
 from shop.accounting.verification import Verification
 
 logger = getLogger("makeradmin")
@@ -33,7 +34,7 @@ def date_format(dt: datetime) -> str:
     return dt.strftime("%Y%m%d")
 
 
-def get_header(signer: str, start_date: datetime, end_date: datetime):
+def get_header(signer: str, start_date: datetime, end_date: datetime) -> str:
     return HEADER_TEMPLATE.format(
         date=date_format(datetime.now()),
         signer=signer,
@@ -46,15 +47,38 @@ def verification_string(verification: Verification, verfication_number: int) -> 
     return f'#VER {verification.serie} {verfication_number} {period_to_date_format(verification.period)} "MakerAdmin"'
 
 
-def transaction_string(account: str, cost_center: str | None, sum: Decimal, period: str, description: str) -> str:
-    if account is None:
-        logger.warning("Account cannot be None for SIE export.")
-        raise ValueError("Account cannot be None for SIE export.")
+def transaction_string(
+    account: TransactionAccount, cost_center: TransactionCostcenter | None, sum: Decimal, period: str, description: str
+) -> str:
     if cost_center is None:
         cc_string = f"{{}}"
     else:
-        cc_string = f'{{1 "{cost_center}"}}'
-    return f'#TRANS {account} {cc_string} {sum} {period_to_date_format(period)} "{description}"'
+        cc_string = f'{{1 "{cost_center.cost_center}"}}'
+    return f'#TRANS {account.account} {cc_string} {sum} {period_to_date_format(period)} "{description}"'
+
+
+def get_account_header(verifications: List[Verification]) -> List[str]:
+    accounts_header: List[str] = []
+    for verification in verifications:
+        for accounting_key in verification.amounts.keys():
+            account = accounting_key[0]
+            if account is None:
+                logger.warning("Account cannot be None for SIE export.")
+                raise ValueError("Account cannot be None for SIE export.")
+            accounts_header.append(f'#KONTO {account.account} "{account.description}"')
+
+    return accounts_header
+
+
+def get_cost_center_header(verifications: List[Verification]) -> List[str]:
+    cost_center_header: List[str] = []
+    for verification in verifications:
+        for accounting_key in verification.amounts.keys():
+            cost_center = accounting_key[1]
+            if cost_center is not None:
+                cost_center_header.append(f'#OBJEKT 1 "{cost_center.cost_center}" "{cost_center.description}"')
+
+    return cost_center_header
 
 
 def convert_to_sie_format(verifications: List[Verification]) -> List[str]:
@@ -90,5 +114,7 @@ def get_sie_string(verifications: List[Verification], start_date: datetime, end_
     sie_content = convert_to_sie_format(verifications)
 
     header = get_header(signer, start_date, end_date)
+    account_header = get_account_header(verifications)
+    cost_center_header = get_cost_center_header(verifications)
 
-    return header + "\n".join(sie_content)
+    return header + "\n".join(account_header) + "\n" + "\n".join(cost_center_header) + "\n" + "\n".join(sie_content)

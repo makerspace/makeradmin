@@ -26,15 +26,15 @@ class TransactionWithAccounting:
     product_id: int
     amount: Decimal
     date: datetime
-    account: str | None
-    cost_center: str | None
+    account: TransactionAccount | None
+    cost_center: TransactionCostcenter | None
     type: AccountingEntryType
 
 
 @dataclass(frozen=True)
 class AccountCostCenter:
-    account: str | None
-    cost_center: str | None
+    account: TransactionAccount | None
+    cost_center: TransactionCostcenter | None
     fraction: int
     type: AccountingEntryType
 
@@ -58,8 +58,8 @@ class ProductToAccountCostCenter:
             fraction_sums[AccountingEntryType.DEBIT] = 0
             account_cost_centers: List[AccountCostCenter] = []
             for product_info in product_accounting:
-                account = product_info.account.account if product_info.account is not None else None
-                cost_center = product_info.cost_center.cost_center if product_info.cost_center is not None else None
+                account = product_info.account if product_info.account is not None else None
+                cost_center = product_info.cost_center if product_info.cost_center is not None else None
                 if account is None and cost_center is None:
                     logger.warning(
                         f"Product with id {product.id} has accounting with both account and cost center as None. At least one must be set to a value."

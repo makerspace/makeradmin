@@ -6,7 +6,7 @@ from typing import Dict, List, Optional, Tuple
 from basic_types.enums import AccountingEntryType
 from service.db import db_session
 from service.error import InternalServerError
-from shop.accounting.accounting import TransactionWithAccounting
+from shop.accounting.accounting import TransactionAccount, TransactionCostcenter, TransactionWithAccounting
 
 logger = getLogger("makeradmin")
 
@@ -14,11 +14,12 @@ logger = getLogger("makeradmin")
 @dataclass(frozen=True)
 class Verification:
     period: str
-    amounts: Dict[Tuple[str | None, str | None], Decimal]
-    types: Dict[Tuple[str | None, str | None], AccountingEntryType]
+    amounts: Dict[Tuple[TransactionAccount | None, TransactionCostcenter | None], Decimal]
+    types: Dict[Tuple[TransactionAccount | None, TransactionCostcenter | None], AccountingEntryType]
     serie: str = "B"
 
 
+# TODO fix groupings
 def create_verificatons(
     transactions_with_accounting: List[TransactionWithAccounting],
 ) -> List[Verification]:

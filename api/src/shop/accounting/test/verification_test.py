@@ -5,34 +5,48 @@ from logging import getLogger
 from typing import Dict, List, Optional, Tuple
 from unittest import TestCase
 
+import core
+import membership
+import pytest
+import shop
 from basic_types.enums import AccountingEntryType
-from shop.accounting.accounting import TransactionWithAccounting
+from service.db import db_session
+from shop.accounting.accounting import TransactionAccount, TransactionCostcenter, TransactionWithAccounting
 from shop.accounting.verification import Verification, create_verificatons
 from shop.stripe_payment_intent import CompletedPayment
+from test_aid.test_base import FlaskTestBase
 
 logger = getLogger("makeradmin")
 
 
-class VerificationTest(TestCase):
+class VerificationTest(FlaskTestBase):
+    models = [core.models, membership.models, shop.models]
+
+    def setUp(self) -> None:
+        db_session.query(TransactionAccount).delete()
+        db_session.query(TransactionCostcenter).delete()
+
     def test_create_verificatons_simple(self) -> None:
         transactions: List[TransactionWithAccounting] = []
         num_payments = 10
         groups = [i + 1 for i in range(num_payments)]
         random.shuffle(groups)
+        account = self.db.create_transaction_account(account="acc1")
+        cost_center = self.db.create_transaction_cost_center(cost_center="cc1")
 
         for i in range(num_payments):
             group = groups[i]
             created = datetime(2023, group, 1, tzinfo=timezone.utc)
-            amount = 100 + i
+            amount = Decimal("100") + Decimal(i)
             type = AccountingEntryType.CREDIT if i % 2 == 0 else AccountingEntryType.DEBIT
-            transactions.append(TransactionWithAccounting(i, i, amount, created, "1", "1", type))
+            transactions.append(TransactionWithAccounting(i, i, amount, created, account, cost_center, type))
 
         verifications = create_verificatons(transactions)
 
         assert len(verifications) == num_payments
         for verification, transaction in zip(verifications, transactions):
-            assert verification.amounts == {("1", "1"): transaction.amount}
-            assert verification.types == {("1", "1"): transaction.type}
+            assert verification.amounts == {(account, cost_center): transaction.amount}
+            assert verification.types == {(account, cost_center): transaction.type}
 
     def test_create_verifications_multiple_per_period(self) -> None:
         transactions: List[TransactionWithAccounting] = []
@@ -40,12 +54,14 @@ class VerificationTest(TestCase):
         num_groups = 3
         groups = [int(i / (num_payments / num_groups)) + 1 for i in range(num_payments)]
         random.shuffle(groups)
+        account = self.db.create_transaction_account(account="acc1")
+        cost_center = self.db.create_transaction_cost_center(cost_center="cc1")
         true_ammounts: Dict[str, Decimal] = {}
 
         for i in range(num_payments):
             group = groups[i]
             created = datetime(2023, group, 1, tzinfo=timezone.utc)
-            amount = 100 + i
+            amount = Decimal("100") + Decimal(i)
 
             date = created.strftime("%Y-%m")
             if date in true_ammounts:
@@ -53,32 +69,40 @@ class VerificationTest(TestCase):
             else:
                 true_ammounts[date] = amount
 
-            transactions.append(TransactionWithAccounting(i, i, amount, created, "1", "1", AccountingEntryType.CREDIT))
+            transactions.append(
+                TransactionWithAccounting(i, i, amount, created, account, cost_center, AccountingEntryType.CREDIT)
+            )
 
         verifications = create_verificatons(transactions)
         verifications_dict = {verification.period: verification for verification in verifications}
 
         assert len(verifications) == num_groups
         for date, amount in true_ammounts.items():
-            assert verifications_dict[date].amounts == {("1", "1"): amount}
-            assert verifications_dict[date].types == {("1", "1"): AccountingEntryType.CREDIT}
+            assert verifications_dict[date].amounts == {(account, cost_center): amount}
+            assert verifications_dict[date].types == {(account, cost_center): AccountingEntryType.CREDIT}
 
     def test_create_verifications_multiple_accounts(self) -> None:
         transactions: List[TransactionWithAccounting] = []
-        true_ammounts: Dict[Tuple[str, str, str], Decimal] = {}
+        true_ammounts: Dict[Tuple[str, TransactionAccount | None, TransactionCostcenter | None], Decimal] = {}
 
         num_payments = 100
         num_groups = 4
         num_accounts = 4
         num_cost_centers = 6
         groups = [int(i / (num_payments / num_groups)) + 1 for i in range(num_payments)]
-        accounts = [str(int(i / (num_payments / num_accounts))) for i in range(num_payments)]
-        accounts = [None if account == "0" else account for account in accounts]
-        cost_centers = [str(int(i / (num_payments / num_cost_centers))) for i in range(num_payments)]
-        cost_centers = [None if cost_center == "0" else cost_center for cost_center in cost_centers]
+
+        true_accounts: List[TransactionAccount | None] = [None]
+        true_cost_centers: List[TransactionCostcenter | None] = [None]
+        for i in range(1, num_accounts):
+            true_accounts.append(self.db.create_transaction_account(id=i, account="acc" + str(i + 1)))
+        for i in range(1, num_cost_centers):
+            true_cost_centers.append(self.db.create_transaction_cost_center(id=i, cost_center="cc" + str(i + 1)))
+
+        accounts = [true_accounts[int(i / (num_payments / num_accounts))] for i in range(num_payments)]
+        cost_centers = [true_cost_centers[int(i / (num_payments / num_cost_centers))] for i in range(num_payments)]
 
         iter = 0
-        true_types: Dict[Tuple[str | None, str | None], AccountingEntryType] = {}
+        true_types: Dict[Tuple[TransactionAccount | None, TransactionCostcenter | None], AccountingEntryType] = {}
         for acc in accounts:
             for cc in cost_centers:
                 true_types[(acc, cc)] = AccountingEntryType.CREDIT if iter % 2 == 0 else AccountingEntryType.DEBIT
@@ -88,14 +112,15 @@ class VerificationTest(TestCase):
         random.shuffle(accounts)
         random.shuffle(cost_centers)
 
+        # If we get the comibination of None, None for the accounting we have to change because it is invalid to have two Nones
         for i in range(num_payments):
             if accounts[i] is None and cost_centers[i] is None:
-                accounts[i] = "1"
+                accounts[i] = true_accounts[0]
 
         for i in range(num_payments):
             group = groups[i]
             created = datetime(2023, group, 1, tzinfo=timezone.utc)
-            amount = 100 + i
+            amount = Decimal("100") + Decimal(i)
 
             date = created.strftime("%Y-%m")
             key = (date, accounts[i], cost_centers[i])
