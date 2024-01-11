@@ -579,44 +579,52 @@ class SplitTransactionsTest(FlaskTestBase):
 class SplitTransactionsWithoutMockTest(ProductToAccountCostCenterTest):
     number_of_accounts = 1
     number_of_cost_centers = 1
+    transaction_fee = Decimal("1.00")
+    count = 2
     amounts = [
         Decimal("100.0") + Decimal("10.0") * Decimal(i)  # TODO make a test with odd fractions
         for i in range(ProductToAccountCostCenterTest.number_of_products)
     ]
 
-    def test_split_transaction_over_accounts_no_mock(self) -> None:
-        count = 2
+    def setUp(self) -> None:
+        db_session.query(TransactionContent).delete()
+        db_session.query(Transaction).delete()
 
-        member = self.db.create_member()
+        super().setUp()
+
+        self.member = self.db.create_member()
         products = db_session.query(Product).all()
 
         total_amount = Decimal("0")
         for product in products:
-            total_amount += Decimal(str(round(product.price, 2))) * Decimal(count)
+            total_amount += Decimal(str(round(product.price, 2))) * Decimal(self.count)
 
         created = datetime(2023, 3, 1, tzinfo=timezone.utc)
-        true_transaction = self.db.create_transaction(
-            member_id=member.member_id, amount=total_amount, created_at=created
+        self.transaction = self.db.create_transaction(
+            member_id=self.member.member_id, amount=total_amount, created_at=created
         )
 
-        true_transaction_contents: Dict[int, TransactionContent] = {}
+        self.transaction_contents: Dict[int, TransactionContent] = {}
         for product in products:
-            amount = product.price * count
-            true_transaction_contents[product.id] = self.db.create_transaction_content(
-                transaction_id=true_transaction.id, product_id=product.id, amount=amount, count=count
+            amount = product.price * self.count
+            self.transaction_contents[product.id] = self.db.create_transaction_content(
+                transaction_id=self.transaction.id, product_id=product.id, amount=amount, count=self.count
             )
 
-        completed_payments: Dict[int, CompletedPayment] = {}
-        completed_payments[true_transaction.id] = CompletedPayment(
-            true_transaction.id,
-            true_transaction.amount,
-            true_transaction.created_at,
-            Decimal("1.00"),  # TODO make a test with odd fees
+        self.completed_payments: Dict[int, CompletedPayment] = {}
+        self.completed_payments[self.transaction.id] = CompletedPayment(
+            self.transaction.id,
+            self.transaction.amount,
+            self.transaction.created_at,
+            self.transaction_fee,
         )
+
+    def test_split_transaction_over_accounts_no_mock(self) -> None:
+        products = db_session.query(Product).all()
 
         transactions_from_db = db_session.query(Transaction).outerjoin(TransactionContent).all()
         transactions_with_accounting, leftover_amounts = split_transactions_over_accounts(
-            transactions_from_db, completed_payments
+            transactions_from_db, self.completed_payments
         )
         assert len(leftover_amounts) == 0
 
@@ -649,8 +657,8 @@ class SplitTransactionsWithoutMockTest(ProductToAccountCostCenterTest):
                         break
                 transaction_acc = transactions_with_accounting.pop(index)
 
-                transaction_fee = completed_payments[true_transaction.id].fee
-                amount = Decimal(true_transaction_contents[product.id].amount)
+                transaction_fee = self.completed_payments[self.transaction.id].fee
+                amount = Decimal(self.transaction_contents[product.id].amount)
                 amount = amount if transaction_acc.type == AccountingEntryType.CREDIT else amount - transaction_fee
                 true_ammount = amount * account_cost_center.fraction / Decimal(100)
 
@@ -664,12 +672,17 @@ class SplitTransactionsWithoutMockTest(ProductToAccountCostCenterTest):
                 assert transaction_acc.account == account_cost_center.account
                 assert transaction_acc.cost_center == account_cost_center.cost_center
                 assert transaction_acc.type == account_cost_center.type
-                assert transaction_acc.date == true_transaction.created_at
+                assert transaction_acc.date == self.transaction.created_at
 
         assert len(transactions_with_accounting) == 0
 
         for key, amount in found_amounts_sum.items():
             if key[1] == AccountingEntryType.DEBIT:
-                assert amount == true_transaction_contents[key[0]].amount - completed_payments[true_transaction.id].fee
+                assert (
+                    amount
+                    == self.transaction_contents[key[0]].amount - self.completed_payments[self.transaction.id].fee
+                )
             else:
-                assert amount == true_transaction_contents[key[0]].amount
+                assert amount == self.transaction_contents[key[0]].amount
+
+    # TODO make a test with odd fees

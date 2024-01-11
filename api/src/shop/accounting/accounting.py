@@ -117,6 +117,7 @@ def diff_transactions_and_completed_payments(
             unmatched_data.append((transaction, completed_payment))
 
     if len(completed_payments) > 0:
+        logger.warning(f"Completed payments without matching transaction, {completed_payments}")
         for payment in completed_payments.values():
             unmatched_data.append((None, payment))
 
