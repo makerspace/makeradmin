@@ -9,9 +9,13 @@ import core
 import membership
 import pytest
 import shop
-from basic_types.enums import AccountingEntryType
 from service.db import db_session
-from shop.accounting.accounting import TransactionAccount, TransactionCostcenter, TransactionWithAccounting
+from shop.accounting.accounting import (
+    AccountingEntryType,
+    TransactionAccount,
+    TransactionCostcenter,
+    TransactionWithAccounting,
+)
 from shop.accounting.verification import Verification, create_verificatons
 from shop.stripe_payment_intent import CompletedPayment
 from test_aid.test_base import FlaskTestBase

@@ -9,9 +9,8 @@ import core
 import membership
 import pytest
 import shop
-from basic_types.enums import AccountingEntryType
 from service.db import db_session
-from shop.accounting.accounting import TransactionAccount, TransactionCostcenter
+from shop.accounting.accounting import AccountingEntryType, TransactionAccount, TransactionCostcenter
 from shop.accounting.sie_file import (
     convert_to_sie_format,
     get_account_header,

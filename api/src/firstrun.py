@@ -12,8 +12,8 @@ from service.api_definition import ALL_PERMISSIONS
 from service.config import config
 from service.db import db_session
 from service.logging import logger
+from shop.accounting.accounting import AccountingEntryType
 from shop.models import (
-    AccountingEntryType,
     GiftCard,
     Product,
     ProductAccountsCostCenters,

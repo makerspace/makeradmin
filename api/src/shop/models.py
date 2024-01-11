@@ -1,6 +1,5 @@
 from typing import Any
 
-from basic_types.enums import AccountingEntryType
 from membership.models import Member
 from service.api_definition import BAD_VALUE
 from service.error import UnprocessableEntity
@@ -21,6 +20,7 @@ from sqlalchemy import (
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import configure_mappers, relationship, validates
 
+from shop.accounting.accounting import AccountingEntryType
 from shop.stripe_constants import MakerspaceMetadataKeys
 
 Base = declarative_base()

@@ -5,10 +5,11 @@ from logging import getLogger
 from random import choice, randint, seed
 from typing import Any, Dict
 
-from basic_types.enums import AccountingEntryType, PriceLevel
+from basic_types.enums import PriceLevel
 from faker import Faker
 from membership.models import Member, Span
 from messages.models import Message
+from shop.accounting.accounting import AccountingEntryType
 from shop.models import (
     ProductAccountsCostCenters,
     ProductAction,

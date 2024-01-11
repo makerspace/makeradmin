@@ -1,10 +1,10 @@
 from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
+from enum import Enum
 from logging import getLogger
 from typing import Dict, List, Optional, Tuple
 
-from basic_types.enums import AccountingEntryType
 from service.db import db_session
 from service.error import InternalServerError
 from shop.models import (
@@ -18,6 +18,11 @@ from shop.models import (
 from shop.stripe_payment_intent import CompletedPayment
 
 logger = getLogger("makeradmin")
+
+
+class AccountingEntryType(Enum):
+    DEBIT = "debit"
+    CREDIT = "credit"
 
 
 @dataclass()

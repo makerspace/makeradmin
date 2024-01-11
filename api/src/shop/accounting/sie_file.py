@@ -3,9 +3,8 @@ from decimal import Decimal
 from logging import getLogger
 from typing import Dict, List, Optional, Tuple
 
-from basic_types.enums import AccountingEntryType
 from membership.models import Member
-from shop.accounting.accounting import TransactionAccount, TransactionCostcenter
+from shop.accounting.accounting import AccountingEntryType, TransactionAccount, TransactionCostcenter
 from shop.accounting.verification import Verification
 
 logger = getLogger("makeradmin")
