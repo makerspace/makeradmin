@@ -27,6 +27,8 @@ from shop.stripe_payment_intent import (
     get_stripe_payment_intents,
 )
 
+from api.src.basic_types.time_period import TimePeriod
+
 logger = getLogger("makeradmin")
 
 
@@ -49,7 +51,7 @@ def transaction_fees_to_transaction_with_accounting(
     return amounts
 
 
-def export_accounting(start_date: datetime, end_date: datetime, filepath: str, signer: Member) -> str:
+def export_accounting(start_date: datetime, end_date: datetime, group_by_period: TimePeriod, signer: Member) -> str:
     logger.info(f"Exporting accounting from {start_date} to {end_date} with signer {signer.member_number}")
     stripe_payment_intents = get_stripe_payment_intents(start_date, end_date)
     completed_payments = convert_completed_stripe_intents_to_payments(stripe_payment_intents)
@@ -67,5 +69,5 @@ def export_accounting(start_date: datetime, end_date: datetime, filepath: str, s
         )
     transaction_fees = transaction_fees_to_transaction_with_accounting(completed_payments)
     transactions_with_accounting.extend(transaction_fees)
-    verifications = create_verificatons(transactions_with_accounting)
+    verifications = create_verificatons(transactions_with_accounting, group_by_period)
     return get_sie_string(verifications, start_date, end_date, f"{signer.firstname} {signer.lastname}")

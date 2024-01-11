@@ -20,6 +20,8 @@ from shop.accounting.verification import Verification, create_verificatons
 from shop.stripe_payment_intent import CompletedPayment
 from test_aid.test_base import FlaskTestBase
 
+from api.src.basic_types.time_period import TimePeriod, date_to_period
+
 logger = getLogger("makeradmin")
 
 
@@ -37,6 +39,7 @@ class VerificationTest(FlaskTestBase):
         random.shuffle(groups)
         account = self.db.create_transaction_account(account="acc1")
         cost_center = self.db.create_transaction_cost_center(cost_center="cc1")
+        period = TimePeriod.Month
 
         for i in range(num_payments):
             group = groups[i]
@@ -45,7 +48,7 @@ class VerificationTest(FlaskTestBase):
             type = AccountingEntryType.CREDIT if i % 2 == 0 else AccountingEntryType.DEBIT
             transactions.append(TransactionWithAccounting(i, i, amount, created, account, cost_center, type))
 
-        verifications = create_verificatons(transactions)
+        verifications = create_verificatons(transactions, period)
 
         assert len(verifications) == num_payments
         for verification, transaction in zip(verifications, transactions):
@@ -61,13 +64,14 @@ class VerificationTest(FlaskTestBase):
         account = self.db.create_transaction_account(account="acc1")
         cost_center = self.db.create_transaction_cost_center(cost_center="cc1")
         true_ammounts: Dict[str, Decimal] = {}
+        period = TimePeriod.Month
 
         for i in range(num_payments):
             group = groups[i]
             created = datetime(2023, group, 1, tzinfo=timezone.utc)
             amount = Decimal("100") + Decimal(i)
 
-            date = created.strftime("%Y-%m")
+            date = date_to_period(created, period)
             if date in true_ammounts:
                 true_ammounts[date] += amount
             else:
@@ -77,7 +81,7 @@ class VerificationTest(FlaskTestBase):
                 TransactionWithAccounting(i, i, amount, created, account, cost_center, AccountingEntryType.CREDIT)
             )
 
-        verifications = create_verificatons(transactions)
+        verifications = create_verificatons(transactions, period)
         verifications_dict = {verification.period: verification for verification in verifications}
 
         assert len(verifications) == num_groups
@@ -93,6 +97,7 @@ class VerificationTest(FlaskTestBase):
         num_groups = 4
         num_accounts = 4
         num_cost_centers = 6
+        period = TimePeriod.Month
         groups = [int(i / (num_payments / num_groups)) + 1 for i in range(num_payments)]
 
         true_accounts: List[TransactionAccount | None] = [None]
@@ -126,7 +131,7 @@ class VerificationTest(FlaskTestBase):
             created = datetime(2023, group, 1, tzinfo=timezone.utc)
             amount = Decimal("100") + Decimal(i)
 
-            date = created.strftime("%Y-%m")
+            date = date_to_period(created, period)
             key = (date, accounts[i], cost_centers[i])
             if key in true_ammounts:
                 true_ammounts[key] += amount
@@ -139,7 +144,7 @@ class VerificationTest(FlaskTestBase):
                 )
             )
 
-        verifications = create_verificatons(transactions)
+        verifications = create_verificatons(transactions, period)
         verifications_dict = {verification.period: verification for verification in verifications}
 
         assert len(verifications) == num_groups

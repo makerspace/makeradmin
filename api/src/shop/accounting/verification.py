@@ -12,6 +12,8 @@ from shop.accounting.accounting import (
     TransactionWithAccounting,
 )
 
+from api.src.basic_types.time_period import TimePeriod, date_to_period
+
 logger = getLogger("makeradmin")
 
 
@@ -23,13 +25,12 @@ class Verification:
     serie: str = "B"
 
 
-# TODO fix groupings
 def create_verificatons(
-    transactions_with_accounting: List[TransactionWithAccounting],
+    transactions_with_accounting: List[TransactionWithAccounting], group_by_period: TimePeriod
 ) -> List[Verification]:
     verifications: Dict[str, Verification] = {}
     for transaction in transactions_with_accounting:
-        year_month = transaction.date.strftime("%Y-%m")
+        year_month = date_to_period(transaction.date, group_by_period)
         inner_key = (transaction.account, transaction.cost_center)
         if year_month in verifications:
             if inner_key in verifications[year_month].amounts:
