@@ -10,12 +10,12 @@ import core
 import membership
 import pytest
 import shop
+from basic_types.enums import AccountingEntryType
 from membership.models import Member
 from service.db import db_session
 from service.error import InternalServerError
 from shop.accounting.accounting import (
     AccountCostCenter,
-    AccountingEntryType,
     ProductToAccountCostCenter,
     TransactionWithAccounting,
     diff_transactions_and_completed_payments,

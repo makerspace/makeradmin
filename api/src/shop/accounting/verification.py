@@ -3,14 +3,10 @@ from decimal import Decimal
 from logging import getLogger
 from typing import Dict, List, Optional, Tuple
 
+from basic_types.enums import AccountingEntryType
 from service.db import db_session
 from service.error import InternalServerError
-from shop.accounting.accounting import (
-    AccountingEntryType,
-    TransactionAccount,
-    TransactionCostcenter,
-    TransactionWithAccounting,
-)
+from shop.accounting.accounting import TransactionAccount, TransactionCostcenter, TransactionWithAccounting
 
 from api.src.basic_types.time_period import TimePeriod, date_to_period
 
