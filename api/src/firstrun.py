@@ -1,4 +1,5 @@
 import argparse
+import random
 from datetime import datetime, timedelta
 from getpass import getpass
 from typing import Any, Dict, Generic, Literal, Optional, Tuple, TypeVar, cast
@@ -23,11 +24,7 @@ from shop.models import (
     TransactionAccount,
     TransactionAction,
     TransactionContent,
-    TransactionAccount,
     TransactionCostCenter,
-    ProductAccountsCostCenters,
-    GiftCard,
-    ProductGiftCardMapping,
 )
 from sqlalchemy import func
 
@@ -118,39 +115,31 @@ def create_admin(admins: Any) -> None:
 def create_members() -> None:
     banner(RED, "Creating Fake Members")
 
-    get_or_create(
-        Member,
-        email="first1.last1@gmail.com",
-        defaults=dict(
-            member_number=1001,
-            firstname="first1",
-            lastname="last1",
-            price_level="normal",
-            pending_activation=False,
-        ),
-    )
-    get_or_create(
-        Member,
-        email="first2.last2@gmail.com",
-        defaults=dict(
-            member_number=1002,
-            firstname="first2",
-            lastname="last2",
-            price_level="normal",
-            pending_activation=False,
-        ),
-    )
-    get_or_create(
-        Member,
-        email="first3.last3@gmail.com",
-        defaults=dict(
-            member_number=1003,
-            firstname="first3",
-            lastname="last3",
-            price_level="low_income_discount",
-            pending_activation=False,
-        ),
-    )
+    price_levels = ["normal", "low_income_discount"]
+    for num in range(1, 55):
+        get_or_create(
+            Member,
+            email="first" + str(num) + ".last" + str(num) + "@gmail.com",
+            defaults=dict(
+                member_number=1000 + num,
+                firstname="first" + str(num),
+                lastname="last" + str(num),
+                price_level=random.choice(price_levels),
+                pending_activation=False,
+            ),
+        )
+
+    db_session.commit()
+
+
+def create_groups() -> None:
+    banner(RED, "Creating Fake Groups")
+
+    register_permissions(ALL_PERMISSIONS)
+    for num in range(1, 26):
+        current_group = get_or_create(Group, name="Group" + str(num), defaults=dict(title="Group" + str(num)))
+        for permission in db_session.query(Permission):
+            current_group.permissions.append(permission)
 
     db_session.commit()
 
@@ -159,22 +148,44 @@ def create_shop_products() -> None:
     banner(BLUE, "Creating Fake Shop Categories")
 
     display_order_category = db_session.query(func.max(ProductCategory.display_order)).scalar() or 0
-    member_category = get_or_create(
-        ProductCategory, name="Membership", defaults=dict(display_order=display_order_category + 1)
-    )
-    consumption_category = get_or_create(
-        ProductCategory, name="Consumption", defaults=dict(display_order=display_order_category + 2)
-    )
-    tools_category = get_or_create(
-        ProductCategory, name="Tools", defaults=dict(display_order=display_order_category + 3)
-    )
-    others_category = get_or_create(
-        ProductCategory, name="Other", defaults=dict(display_order=display_order_category + 4)
-    )
+
+    categories = [
+        "Membership",
+        "Consumption",
+        "Tools",
+        "Other",
+        "Trä",
+        "Tyg",
+        "Metall",
+        "Garn",
+        "Övrig textil",
+        "Färg",
+        "Lim",
+        "Vinyl",
+        "Laser",
+        "Skivor",
+        "Papper",
+        "Kartong",
+        "Små verktyg",
+        "Stora verktyg",
+        "Farliga verktyg",
+        "Känsliga verktyg",
+        "Fyllnadsmassor",
+        "Påbörjade projekt",
+        "Band",
+        "Sprayer",
+        "Dryck",
+        "Fika",
+    ]
+
+    for i, name in enumerate(categories):
+        get_or_create(ProductCategory, name=name, defaults=dict(display_order=display_order_category + i))
 
     banner(BLUE, "Creating Fake Shop Products")
 
     display_order_product = db_session.query(func.max(Product.display_order)).scalar() or 0
+    member_category = get_or_create(ProductCategory, name="Membership")
+
     prod1 = get_or_create(
         Product,
         name="Base membership",
@@ -224,91 +235,58 @@ def create_shop_products() -> None:
     )
     get_or_create(ProductAction, product_id=prod3.id, value=365, action_type="add_labaccess_days")
 
-    get_or_create(
-        Product,
-        name="Trälist",
-        defaults=dict(
-            price=5,
-            unit="dm",
-            display_order=display_order_product + 4,
-            category_id=consumption_category.id,
-            product_metadata={},
-        ),
-    )
-    get_or_create(
-        Product,
-        name="Lödtråd",
-        defaults=dict(
-            price=20,
-            unit="dm",
-            product_metadata={},
-            category_id=tools_category.id,
-            display_order=display_order_product + 5,
-        ),
-    )
-    get_or_create(
-        Product,
-        name="Tång",
-        defaults=dict(
-            price=50,
-            unit="st",
-            product_metadata={},
-            category_id=tools_category.id,
-            display_order=display_order_product + 6,
-        ),
-    )
-    get_or_create(
-        Product,
-        name="Färgat papper",
-        defaults=dict(
-            price=7,
-            unit="st",
-            product_metadata={},
-            category_id=consumption_category.id,
-            display_order=display_order_product + 7,
-        ),
-    )
-    get_or_create(
-        Product,
-        name="Fjädrar",
-        defaults=dict(
-            price=1,
-            unit="st",
-            product_metadata={},
-            category_id=others_category.id,
-            display_order=display_order_product + 8,
-        ),
-    )
-
-    product_names = [
+    product_names_consumption = [
+        "Trälist",
+        "Färgat papper",
         "Kork",
+        "Fjädrar",
         "Bräda",
-        "Frigolit",
-        "Fleece tygbit",
         "Tygbit",
-        "Tråd",
+        "Frigolit",
         "Filt tygbit",
+        "Fleece tygbit",
+        "Tråd",
         "Pappersark",
         "Brodyrtråd",
         "Tejp",
-        "Färgat papper",
         "Silkespapper",
         "Kartong",
         "Wellpapp",
         "Playwood",
         "Flörtkulor",
+        "Ullgarn",
+        "Akrylgarn",
+        "Bomullsgarn",
+        "Glittertråd",
+        "Vinyl",
     ]
-    product_prices = [5, 12, 20, 22, 30, 2, 4, 10, 12, 24, 10, 13, 22, 23, 31, 4]
+    consumption_category = get_or_create(ProductCategory, name="Consumption")
 
-    for i, name in enumerate(product_names):
+    for i, name in enumerate(product_names_consumption):
         get_or_create(
             Product,
             name=name,
             defaults=dict(
-                price=product_prices[i],
-                unit="st",
-                display_order=display_order_product + 9 + i,
+                price=random.randint(5, 100),
+                unit="dm",
+                display_order=display_order_product + 4 + i,
                 category_id=consumption_category.id,
+                product_metadata={},
+            ),
+        )
+
+    product_names_tools = ["Lödtråd", "Tång", "Sågblad", "Hammare", "Nål"]
+    tools_category = get_or_create(ProductCategory, name="Tools")
+
+    for i, name in enumerate(product_names_tools):
+        get_or_create(
+            Product,
+            name=name,
+            defaults=dict(
+                price=random.randint(5, 100),
+                unit="st",
+                display_order=display_order_product + 27 + i,
+                category_id=tools_category.id,
                 product_metadata={},
             ),
         )
@@ -460,8 +438,17 @@ def create_shop_transactions() -> None:
 def create_shop_accounts_cost_centers() -> None:
     banner(BLUE, "Creating Fake Account and Cost Centers")
 
+    debits_account = get_or_create(
+        TransactionAccount,
+        account="1000",
+        defaults=dict(
+            display_order=1,
+            description=f"Debits account",
+        ),
+    )
+
     accounts = []
-    for account_id in range(1, 3):
+    for account_id in range(2, 30):
         accounts.append(
             get_or_create(
                 TransactionAccount,
@@ -474,7 +461,7 @@ def create_shop_accounts_cost_centers() -> None:
         )
 
     cost_centers = []
-    for cost_center_id in range(1, 3):
+    for cost_center_id in range(1, 30):
         cost_centers.append(
             get_or_create(
                 TransactionCostCenter,
@@ -486,25 +473,26 @@ def create_shop_accounts_cost_centers() -> None:
             )
         )
 
-    tools_category = get_or_create(ProductCategory, name="Tools")
-    products = db_session.query(Product).filter_by(category_id=tools_category.id).all()
+    consumption_category = get_or_create(ProductCategory, name="Consumption")
+    products = db_session.query(Product).filter_by(category_id=consumption_category.id).all()
+
     for i, product in enumerate(products):
-        debits = 0 if i % 2 == 0 else 0.5
-        credit_value = 0.3 if i % 2 == 0 else 0.7
-        credits = 0 if i % 2 != 0 else credit_value
+        debits = 100
+        credits = 100
         get_or_create(
             ProductAccountsCostCenters,
             product_id=product.id,
-            account_id=accounts[i].id,
-            cost_center_id=cost_centers[i].id,
-            defaults=dict(fraction=debits, type=ProductAccountsCostCenters.DEBIT),
+            account_id=random.choice(accounts).id,
+            cost_center_id=random.choice(cost_centers).id,
+            type="credit",
+            fraction=credits,
         )
         get_or_create(
             ProductAccountsCostCenters,
             product_id=product.id,
-            account_id=accounts[i].id,
-            cost_center_id=cost_centers[i].id,
-            defaults=dict(fraction=credits, type=ProductAccountsCostCenters.CREDIT),
+            account_id=debits_account.id,
+            type="debit",
+            fraction=debits,
         )
 
     db_session.commit()
@@ -556,6 +544,7 @@ def firstrun() -> None:
 
     if create_dev_data:
         create_members()
+        create_groups()
         create_shop_products()
         create_shop_transactions()
         create_shop_accounts_cost_centers()
