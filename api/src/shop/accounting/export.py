@@ -18,7 +18,7 @@ from shop.models import (
     Transaction,
     TransactionAccount,
     TransactionContent,
-    TransactionCostcenter,
+    TransactionCostCenter,
 )
 from shop.stripe_payment_intent import CompletedPayment, get_completed_payments_from_stripe
 
@@ -38,7 +38,7 @@ def transaction_fees_to_transaction_with_accounting(
                 date=payment.created,
                 # TODO improve this part
                 account=TransactionAccount(account="6573", description="6573", id=0, display_order=1),
-                cost_center=TransactionCostcenter(
+                cost_center=TransactionCostCenter(
                     cost_center="Föreningsgemensamt", description="Föreningsgemensamt", id=0, display_order=1
                 ),
                 type=AccountingEntryType.DEBIT,
@@ -47,7 +47,8 @@ def transaction_fees_to_transaction_with_accounting(
     return amounts
 
 
-def export_accounting(start_date: datetime, end_date: datetime, group_by_period: TimePeriod, signer: Member) -> str:
+def export_accounting(start_date: datetime, end_date: datetime, group_by_period: TimePeriod, member_id: int) -> str:
+    signer = db_session.query(Member).filter(Member.member_id == member_id).one_or_none()
     logger.info(f"Exporting accounting from {start_date} to {end_date} with signer {signer.member_number}")
     completed_payments = get_completed_payments_from_stripe(start_date, end_date)
     transactions = db_session.query(Transaction).outerjoin(TransactionContent).all()

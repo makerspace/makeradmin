@@ -12,7 +12,7 @@ import shop
 from basic_types.enums import AccountingEntryType
 from basic_types.time_period import TimePeriod, date_to_period
 from service.db import db_session
-from shop.accounting.accounting import TransactionAccount, TransactionCostcenter, TransactionWithAccounting
+from shop.accounting.accounting import TransactionAccount, TransactionCostCenter, TransactionWithAccounting
 from shop.accounting.verification import Verification, create_verificatons
 from shop.stripe_payment_intent import CompletedPayment
 from test_aid.test_base import FlaskTestBase
@@ -25,7 +25,7 @@ class VerificationTest(FlaskTestBase):
 
     def setUp(self) -> None:
         db_session.query(TransactionAccount).delete()
-        db_session.query(TransactionCostcenter).delete()
+        db_session.query(TransactionCostCenter).delete()
 
     def test_create_verificatons_simple(self) -> None:
         transactions: List[TransactionWithAccounting] = []
@@ -86,7 +86,7 @@ class VerificationTest(FlaskTestBase):
 
     def test_create_verifications_multiple_accounts(self) -> None:
         transactions: List[TransactionWithAccounting] = []
-        true_ammounts: Dict[Tuple[str, TransactionAccount | None, TransactionCostcenter | None], Decimal] = {}
+        true_ammounts: Dict[Tuple[str, TransactionAccount | None, TransactionCostCenter | None], Decimal] = {}
 
         num_payments = 100
         num_groups = 4
@@ -96,7 +96,7 @@ class VerificationTest(FlaskTestBase):
         groups = [int(i / (num_payments / num_groups)) + 1 for i in range(num_payments)]
 
         true_accounts: List[TransactionAccount | None] = [None]
-        true_cost_centers: List[TransactionCostcenter | None] = [None]
+        true_cost_centers: List[TransactionCostCenter | None] = [None]
         for i in range(1, num_accounts):
             true_accounts.append(self.db.create_transaction_account(id=i, account="acc" + str(i + 1)))
         for i in range(1, num_cost_centers):
@@ -106,7 +106,7 @@ class VerificationTest(FlaskTestBase):
         cost_centers = [true_cost_centers[int(i / (num_payments / num_cost_centers))] for i in range(num_payments)]
 
         iter = 0
-        true_types: Dict[Tuple[TransactionAccount | None, TransactionCostcenter | None], AccountingEntryType] = {}
+        true_types: Dict[Tuple[TransactionAccount | None, TransactionCostCenter | None], AccountingEntryType] = {}
         for acc in accounts:
             for cc in cost_centers:
                 true_types[(acc, cc)] = AccountingEntryType.CREDIT if iter % 2 == 0 else AccountingEntryType.DEBIT

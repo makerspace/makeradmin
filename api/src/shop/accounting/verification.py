@@ -7,7 +7,7 @@ from basic_types.enums import AccountingEntryType
 from basic_types.time_period import TimePeriod, date_to_period
 from service.db import db_session
 from service.error import InternalServerError
-from shop.accounting.accounting import TransactionAccount, TransactionCostcenter, TransactionWithAccounting
+from shop.accounting.accounting import TransactionAccount, TransactionCostCenter, TransactionWithAccounting
 
 logger = getLogger("makeradmin")
 
@@ -15,8 +15,8 @@ logger = getLogger("makeradmin")
 @dataclass(frozen=True)
 class Verification:
     period: str
-    amounts: Dict[Tuple[TransactionAccount | None, TransactionCostcenter | None], Decimal]
-    types: Dict[Tuple[TransactionAccount | None, TransactionCostcenter | None], AccountingEntryType]
+    amounts: Dict[Tuple[TransactionAccount | None, TransactionCostCenter | None], Decimal]
+    types: Dict[Tuple[TransactionAccount | None, TransactionCostCenter | None], AccountingEntryType]
     serie: str = "B"
 
 

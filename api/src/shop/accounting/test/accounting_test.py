@@ -29,7 +29,7 @@ from shop.models import (
     Transaction,
     TransactionAccount,
     TransactionContent,
-    TransactionCostcenter,
+    TransactionCostCenter,
 )
 from shop.stripe_payment_intent import CompletedPayment
 from test_aid.test_base import FlaskTestBase
@@ -45,7 +45,7 @@ class AccountingDifferenceTest(FlaskTestBase):
         db_session.query(Product).delete()
         db_session.query(ProductCategory).delete()
         db_session.query(TransactionAccount).delete()
-        db_session.query(TransactionCostcenter).delete()
+        db_session.query(TransactionCostCenter).delete()
         db_session.query(ProductAccountsCostCenters).delete()
 
         self.num_transactions = 10
@@ -156,13 +156,13 @@ class ProductToAccountCostCenterTest(FlaskTestBase):
         db_session.query(Transaction).delete()
         db_session.query(TransactionContent).delete()
         db_session.query(TransactionAccount).delete()
-        db_session.query(TransactionCostcenter).delete()
+        db_session.query(TransactionCostCenter).delete()
         db_session.query(ProductAccountsCostCenters).delete()
 
         random_scale = self.number_of_accounts * self.number_of_cost_centers / 2
 
         self.transaction_accounts: Dict[AccountingEntryType, List[TransactionAccount]] = {}
-        self.transaction_cost_centers: Dict[AccountingEntryType, List[TransactionCostcenter]] = {}
+        self.transaction_cost_centers: Dict[AccountingEntryType, List[TransactionCostCenter]] = {}
 
         for type in AccountingEntryType:
             self.transaction_accounts[type] = []
@@ -230,7 +230,7 @@ class ProductToAccountCostCenterTest(FlaskTestBase):
             db_info = (
                 db_session.query(ProductAccountsCostCenters)
                 .outerjoin(TransactionAccount, ProductAccountsCostCenters.account)
-                .outerjoin(TransactionCostcenter, ProductAccountsCostCenters.cost_center)
+                .outerjoin(TransactionCostCenter, ProductAccountsCostCenters.cost_center)
                 .filter(ProductAccountsCostCenters.product_id == product.id)
                 .all()
             )
@@ -344,7 +344,7 @@ class SplitTransactionsTest(FlaskTestBase):
         db_session.query(Transaction).delete()
         db_session.query(TransactionContent).delete()
         db_session.query(TransactionAccount).delete()
-        db_session.query(TransactionCostcenter).delete()
+        db_session.query(TransactionCostCenter).delete()
 
     @staticmethod
     def assertAccounting(
@@ -438,7 +438,7 @@ class SplitTransactionsTest(FlaskTestBase):
             account_name = entry_type.value + "_acc" + str(product_id) + str(i)
             cost_center_name = entry_type.value + "_cc" + str(product_id) + str(i)
             account = TransactionAccount(id=i, account=account_name, description="", display_order=i)
-            cost_center = TransactionCostcenter(id=i, cost_center=cost_center_name, description="", display_order=i)
+            cost_center = TransactionCostCenter(id=i, cost_center=cost_center_name, description="", display_order=i)
             if product_id == 1:
                 account = None
             elif product_id == 2:
@@ -455,7 +455,7 @@ class SplitTransactionsTest(FlaskTestBase):
             account_name = entry_type.value + "_acc" + str(product_id) + str(i)
             cost_center_name = entry_type.value + "_cc" + str(product_id) + str(i)
             account = TransactionAccount(id=i, account=account_name, description="", display_order=i)
-            cost_center = TransactionCostcenter(id=i, cost_center=cost_center_name, description="", display_order=i)
+            cost_center = TransactionCostCenter(id=i, cost_center=cost_center_name, description="", display_order=i)
             if product_id == 1:
                 account = None
             elif product_id == 2:

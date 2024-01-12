@@ -13,7 +13,7 @@ from shop.models import (
     Transaction,
     TransactionAccount,
     TransactionContent,
-    TransactionCostcenter,
+    TransactionCostCenter,
 )
 from shop.stripe_payment_intent import CompletedPayment
 
@@ -27,14 +27,14 @@ class TransactionWithAccounting:
     amount: Decimal
     date: datetime
     account: TransactionAccount | None
-    cost_center: TransactionCostcenter | None
+    cost_center: TransactionCostCenter | None
     type: AccountingEntryType
 
 
 @dataclass(frozen=True)
 class AccountCostCenter:
     account: TransactionAccount | None
-    cost_center: TransactionCostcenter | None
+    cost_center: TransactionCostCenter | None
     fraction: int
     type: AccountingEntryType
 
@@ -48,7 +48,7 @@ class ProductToAccountCostCenter:
             product_accounting = (
                 db_session.query(ProductAccountsCostCenters)
                 .outerjoin(TransactionAccount, ProductAccountsCostCenters.account)
-                .outerjoin(TransactionCostcenter, ProductAccountsCostCenters.cost_center)
+                .outerjoin(TransactionCostCenter, ProductAccountsCostCenters.cost_center)
                 .filter(ProductAccountsCostCenters.product_id == product.id)
                 .all()
             )
