@@ -4,7 +4,7 @@ from flask import Flask, jsonify
 from flask.wrappers import Response as FlaskResponse
 from membership.permissions import register_permissions
 from service.api_definition import ALL_PERMISSIONS
-from service.config import config, get_mysql_config
+from service.config import config, debug_mode, get_mysql_config
 from service.db import create_mysql_engine, populate_fields_by_index, shutdown_session
 from service.error import (
     ApiError,
@@ -17,6 +17,7 @@ from service.error import (
 )
 from service.traffic_logger import traffic_logger_commit, traffic_logger_init
 from services import services
+from shop.stripe_setup import are_stripe_keys_live, are_stripe_keys_set, setup_stripe
 from sqlalchemy.exc import OperationalError
 
 app = Flask(__name__, static_folder=None)
@@ -65,6 +66,19 @@ app.after_request(after_request_functions)
 
 engine = create_mysql_engine(**get_mysql_config())
 
+
+if are_stripe_keys_set():
+    if are_stripe_keys_live() and debug_mode():
+        while True:
+            s = input(
+                "The stripe keys in .env are live keys and makeradmin is in dev/debug mode. Are you sure you want to continue?"
+                "[Y/n]: "
+            )
+            if s in ["n", "no"]:
+                raise Exception("Aborted")
+            if s in ["y", "yes"]:
+                break
+    setup_stripe(private=True)
 
 populate_fields_by_index(engine)
 register_permissions(ALL_PERMISSIONS)

@@ -7,6 +7,7 @@ from flask import Flask
 from membership.member_auth import hash_password
 from service.db import db_session, db_session_factory
 from service.internal_service import InternalService
+from shop.stripe_setup import are_stripe_keys_live, are_stripe_keys_set, setup_stripe
 from sqlalchemy import Numeric, create_engine
 
 from test_aid.db import DbFactory
@@ -81,6 +82,13 @@ class FlaskTestBase(TestBase):
         self.service = InternalService("service")
 
         self.db = DbFactory(self, self.obj)
+
+        if are_stripe_keys_set():
+            if are_stripe_keys_live():
+                raise Exception(
+                    "Live Stripe keys detected during test setup. Using live keys in tests is prohibited to prevent unintended side effects."
+                )
+            setup_stripe(private=True)
 
 
 class ShopTestMixin:

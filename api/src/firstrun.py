@@ -14,6 +14,7 @@ from service.config import config
 from service.db import db_session
 from service.logging import logger
 from shop.models import (
+    AccountingEntryType,
     GiftCard,
     Product,
     ProductAccountsCostCenters,
@@ -484,14 +485,14 @@ def create_shop_accounts_cost_centers() -> None:
             product_id=product.id,
             account_id=random.choice(accounts).id,
             cost_center_id=random.choice(cost_centers).id,
-            type="credit",
+            type=AccountingEntryType.CREDIT.value,
             fraction=credits,
         )
         get_or_create(
             ProductAccountsCostCenters,
             product_id=product.id,
             account_id=debits_account.id,
-            type="debit",
+            type=AccountingEntryType.DEBIT.value,
             fraction=debits,
         )
 
