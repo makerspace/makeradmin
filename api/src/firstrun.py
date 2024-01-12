@@ -13,6 +13,7 @@ from service.config import config
 from service.db import db_session
 from service.logging import logger
 from shop.models import (
+    AccountingEntryType,
     GiftCard,
     Product,
     ProductAccountsCostCenters,
@@ -461,14 +462,14 @@ def create_shop_accounts_cost_centers() -> None:
                     product_id=product.id,
                     account_id=account.id,
                     cost_center_id=cost_center.id,
-                    defaults=dict(fraction=debits, type=ProductAccountsCostCenters.DEBIT),
+                    defaults=dict(fraction=debits, type=AccountingEntryType.DEBIT.value),
                 )
                 get_or_create(
                     ProductAccountsCostCenters,
                     product_id=product.id,
                     account_id=account.id,
                     cost_center_id=cost_center.id,
-                    defaults=dict(fraction=credits, type=ProductAccountsCostCenters.CREDIT),
+                    defaults=dict(fraction=credits, type=AccountingEntryType.CREDIT.value),
                 )
 
     db_session.commit()

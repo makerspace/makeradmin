@@ -11,7 +11,7 @@ from dataclasses_json import DataClassJsonMixin
 from membership.models import Member
 from service.db import db_session
 from service.error import EXCEPTION, BadRequest, InternalServerError
-from stripe import CardError, InvalidRequestError, PaymentIntent
+from stripe import CardError, InvalidRequestError, PaymentIntent, StripeError
 from typing_extensions import Never
 
 from shop.models import StripePending, Transaction
@@ -220,7 +220,7 @@ def get_stripe_payment_intents(start_date: date, end_date: date) -> List[stripe.
 
 def convert_completed_stripe_intents_to_payments(
     stripe_intents: List[PaymentIntent],
-) -> Dict[int, CompletedPayment] | None:
+) -> Dict[int, CompletedPayment]:
     payments: Dict[int, CompletedPayment] = {}
     for intent in stripe_intents:
         if intent.status != PaymentIntentStatus.SUCCEEDED:
@@ -237,3 +237,11 @@ def convert_completed_stripe_intents_to_payments(
             fee=convert_from_stripe_amount(charge.balance_transaction.fee),
         )
     return payments
+
+
+def get_completed_payments_from_stripe(start_date: date, end_date: date) -> Dict[int, CompletedPayment]:
+    try:
+        stripe_intents = get_stripe_payment_intents(start_date, end_date)
+    except StripeError as e:
+        raise BadRequest(message=f"Failed to fetch stripe payment intents: {e}")
+    return convert_completed_stripe_intents_to_payments(stripe_intents)
