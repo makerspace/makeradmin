@@ -11,7 +11,7 @@ import pytest
 import shop
 from basic_types.enums import AccountingEntryType
 from service.db import db_session
-from shop.accounting.accounting import TransactionAccount, TransactionCostcenter
+from shop.accounting.accounting import TransactionAccount, TransactionCostCenter
 from shop.accounting.sie_file import (
     convert_to_sie_format,
     get_account_header,
@@ -31,7 +31,7 @@ class SieFileTest(FlaskTestBase):
 
     def setUp(self) -> None:
         db_session.query(TransactionAccount).delete()
-        db_session.query(TransactionCostcenter).delete()
+        db_session.query(TransactionCostCenter).delete()
 
     def test_verification_string(self) -> None:
         period = datetime(
@@ -80,11 +80,11 @@ class SieFileWithVerificationTest(FlaskTestBase):
 
     def setUp(self) -> None:
         db_session.query(TransactionAccount).delete()
-        db_session.query(TransactionCostcenter).delete()
+        db_session.query(TransactionCostCenter).delete()
 
         self.verifications: List[Verification] = []
         self.accounts: List[TransactionAccount] = []
-        self.cost_centers: List[TransactionCostcenter] = []
+        self.cost_centers: List[TransactionCostCenter] = []
 
         for i in range(1, self.number_of_verifications + 1):
             period = datetime(
@@ -92,8 +92,8 @@ class SieFileWithVerificationTest(FlaskTestBase):
                 i,
                 i + 3,
             ).strftime("%Y-%m")
-            amounts: Dict[Tuple[TransactionAccount | None, TransactionCostcenter | None], Decimal] = {}
-            types: Dict[Tuple[TransactionAccount | None, TransactionCostcenter | None], AccountingEntryType] = {}
+            amounts: Dict[Tuple[TransactionAccount | None, TransactionCostCenter | None], Decimal] = {}
+            types: Dict[Tuple[TransactionAccount | None, TransactionCostCenter | None], AccountingEntryType] = {}
 
             for j in range(1, self.number_of_transactions + 1):
                 account = self.db.create_transaction_account(account=f"account{j}")

@@ -1,8 +1,10 @@
 from dataclasses import dataclass
+from datetime import datetime, timezone
 from logging import getLogger
 from typing import Any
 
 from basic_types.enums import PriceLevel
+from basic_types.time_period import TimePeriod
 from flask import Response, g, make_response, request, send_file
 from multiaccessy.invite import AccessyInvitePreconditionFailed, ensure_accessy_labaccess
 from service.api_definition import (
@@ -22,7 +24,7 @@ from service.error import InternalServerError, PreconditionFailed
 from sqlalchemy.exc import NoResultFound
 
 from shop import service
-from shop.accounting_data import download_accounting_file
+from shop.accounting.export import export_accounting
 from shop.entities import (
     category_entity,
     gift_card_content_entity,
@@ -322,4 +324,6 @@ def stripe_callback_route():
 
 @service.route("/download-accounting-file/<int:from_year>/<int:to_year>", method=GET, permission=WEBSHOP)
 def download_accounting_file_route(from_year, to_year):
-    return download_accounting_file(from_year, to_year)
+    start_date = datetime(from_year, 1, 1, tzinfo=timezone.utc)
+    end_data = datetime(to_year, 12, 31, tzinfo=timezone.utc)
+    return export_accounting(start_date, end_data, TimePeriod.Month, g.user_id)

@@ -16,7 +16,7 @@ from shop.models import (
     Transaction,
     TransactionAccount,
     TransactionContent,
-    TransactionCostcenter,
+    TransactionCostCenter,
 )
 
 from test_aid.obj import ObjFactory
@@ -51,7 +51,7 @@ class DbFactory:
         self.transaction: Optional[Transaction] = None
         self.transaction_content: Optional[TransactionContent] = None
         self.transaction_account: Optional[TransactionAccount] = None
-        self.transaction_cost_center: Optional[TransactionCostcenter] = None
+        self.transaction_cost_center: Optional[TransactionCostCenter] = None
         self.product_account_cost_center: Optional[ProductAccountsCostCenters] = None
 
     def create_access_token(self, **kwargs) -> AccessToken:
@@ -254,10 +254,10 @@ class DbFactory:
         db_session.commit()
         return self.transaction_account
 
-    def create_transaction_cost_center(self, **kwargs) -> TransactionCostcenter:
+    def create_transaction_cost_center(self, **kwargs) -> TransactionCostCenter:
         assert self.obj is not None
         obj = self.obj.create_transaction_cost_center(**kwargs)
-        self.transaction_cost_center = TransactionCostcenter(**obj)
+        self.transaction_cost_center = TransactionCostCenter(**obj)
         db_session.add(self.transaction_cost_center)
         db_session.commit()
         return self.transaction_cost_center

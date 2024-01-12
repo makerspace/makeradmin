@@ -5,7 +5,7 @@ from typing import Dict, List, Optional, Tuple
 
 from basic_types.enums import AccountingEntryType
 from membership.models import Member
-from shop.accounting.accounting import TransactionAccount, TransactionCostcenter
+from shop.accounting.accounting import TransactionAccount, TransactionCostCenter
 from shop.accounting.verification import Verification
 
 logger = getLogger("makeradmin")
@@ -48,7 +48,7 @@ def verification_string(verification: Verification, verfication_number: int) -> 
 
 
 def transaction_string(
-    account: TransactionAccount, cost_center: TransactionCostcenter | None, sum: Decimal, period: str, description: str
+    account: TransactionAccount, cost_center: TransactionCostCenter | None, sum: Decimal, period: str, description: str
 ) -> str:
     logger.info(f"Transaction: {account} {cost_center} {sum} {period} {description}")
     if cost_center is None:

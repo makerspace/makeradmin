@@ -15,7 +15,7 @@ from shop.models import (
     Transaction,
     TransactionAccount,
     TransactionContent,
-    TransactionCostcenter,
+    TransactionCostCenter,
 )
 
 from test_aid.test_util import random_str
@@ -199,7 +199,7 @@ class ObjFactory:
         self.transaction_account = obj
         return self.transaction_account
 
-    def create_transaction_cost_center(self, **kwargs) -> TransactionCostcenter:
+    def create_transaction_cost_center(self, **kwargs) -> TransactionCostCenter:
         obj = dict(
             cost_center=f"cost-center-{random_str(5)}",
             description=f"desc-{random_str(12)}",

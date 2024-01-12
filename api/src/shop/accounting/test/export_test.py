@@ -24,7 +24,7 @@ from shop.models import (
     Transaction,
     TransactionAccount,
     TransactionContent,
-    TransactionCostcenter,
+    TransactionCostCenter,
 )
 from shop.stripe_payment_intent import CompletedPayment
 from test_aid.test_base import FlaskTestBase
@@ -74,13 +74,13 @@ class AccountingExportWithStripeMockTest(FlaskTestBase):
         db_session.query(Transaction).delete()
         db_session.query(TransactionContent).delete()
         db_session.query(TransactionAccount).delete()
-        db_session.query(TransactionCostcenter).delete()
+        db_session.query(TransactionCostCenter).delete()
         db_session.query(ProductAccountsCostCenters).delete()
 
         random_scale = self.number_of_accounts * self.number_of_cost_centers / 2
 
         self.transaction_accounts: Dict[AccountingEntryType, List[TransactionAccount]] = {}
-        self.transaction_cost_centers: Dict[AccountingEntryType, List[TransactionCostcenter]] = {}
+        self.transaction_cost_centers: Dict[AccountingEntryType, List[TransactionCostCenter]] = {}
 
         self.member = self.db.create_member()
 
