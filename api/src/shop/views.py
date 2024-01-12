@@ -1,10 +1,6 @@
 from dataclasses import dataclass
 from logging import getLogger
 from typing import Any
-from flask import Response, g, request, send_file, make_response, send_from_directory
-from sqlalchemy.exc import NoResultFound
-from basic_types.enums import PriceLevel
-from shop.stripe_discounts import get_discount_fraction_off
 
 from basic_types.enums import PriceLevel
 from flask import Response, g, make_response, request, send_file
@@ -26,25 +22,20 @@ from service.error import InternalServerError, PreconditionFailed
 from sqlalchemy.exc import NoResultFound
 
 from shop import service
+from shop.accounting_data import download_accounting_file
 from shop.entities import (
     category_entity,
     gift_card_content_entity,
     gift_card_entity,
+    product_accounting_entity,
     product_action_entity,
     product_entity,
     product_image_entity,
+    transaction_account_entity,
     transaction_action_entity,
     transaction_content_entity,
-    transaction_entity,
-    transaction_action_entity,
-    product_entity,
-    category_entity,
-    product_action_entity,
-    transaction_account_entity,
     transaction_cost_center_entity,
-    product_accounting_entity,
-    gift_card_entity,
-    gift_card_content_entity,
+    transaction_entity,
 )
 from shop.models import ProductImage, TransactionContent
 from shop.pay import (
@@ -329,43 +320,6 @@ def stripe_callback_route():
     stripe_callback(request.data, request.headers)
 
 
-# ADDED THIS
-# import os
-
-# # if not os.path.exists(UPLOAD_DIRECTORY):
-# #     os.makedirs(UPLOAD_DIRECTORY)
-
-
-# @service.route("/post_file/<file_name>", methods=POST, permission=PUBLIC)
-# def post_file(file_name):
-#     """Upload a file"""
-#     print("HEJ I POST FILE")
-#     UPLOAD_DIRECTORY = (
-#         "/mnt/c/Users/ellsi/Documents/Makerspace_project/my_makeradmin/accounting/exported_accounting_files"
-#     )
-#     if "/" in file_name:
-#         pass  # (400, "Not allowed to use subdirectories")
-
-#     with open(os.path.join(UPLOAD_DIRECTORY, file_name), "w") as fp:
-#         fp.write(request.data)
-
-#     # Return 201 CREATED
-#     return "", 201
-
-
-# @service.route("/download_file/<path:file_name>", methods=GET, permission=PUBLIC)
-# def download_file_route(file_name):
-#     """Download a file"""
-#     print("HEJ I DOWNLOAD FILE")
-#     UPLOAD_DIRECTORY = (
-#         "/mnt/c/Users/ellsi/Documents/Makerspace_project/my_makeradmin/accounting/exported_accounting_files"
-#     )
-#     # uploads = os.path.join(current_app.root_path, app.config["UPLOAD_FOLDER"])
-#     # upload = Upload.query.filter(id=upload_id).first()
-#     return send_from_directory(
-#         # app.config['UPLOAD_FOLDER'],
-#         # service.static_folder,
-#         UPLOAD_DIRECTORY,
-#         file_name,
-#         as_attachment=True,
-#     )
+@service.route("/download-accounting-file/<int:from_year>/<int:to_year>", method=GET, permission=WEBSHOP)
+def download_accounting_file_route(from_year, to_year):
+    return download_accounting_file(from_year, to_year)
