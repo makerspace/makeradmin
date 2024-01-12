@@ -1,7 +1,6 @@
-import Base from './Base';
+import Base from "./Base";
 
-export default class ProductAccountsCostCenters extends Base {
-}
+export default class ProductAccountsCostCenters extends Base {}
 
 ProductAccountsCostCenters.model = {
     id: "id",
@@ -10,7 +9,7 @@ ProductAccountsCostCenters.model = {
         product_id: null,
         account_id: null,
         cost_center_id: null,
-        debits: null,
-        credits: null,
+        fraction: null,
+        type: null,
     },
 };

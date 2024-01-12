@@ -4,25 +4,25 @@ from service.entity import ASC, DESC, Entity, ExpandField
 from shop.models import (
     GiftCard,
     Product,
+    ProductAccountsCostCenters,
     ProductAction,
     ProductCategory,
     ProductGiftCardMapping,
     ProductImage,
     Transaction,
-    TransactionAction,
-    ProductCategory,
-    ProductAction,
     TransactionAccount,
-    TransactionCostCenter,
-    ProductAccountsCostCenters,
-    GiftCard,
-    ProductGiftCardMapping,
+    TransactionAction,
     TransactionContent,
+    TransactionCostCenter,
 )
 from shop.ordered_entity import OrderedEntity
 from shop.product_image_entity import ProductImageEntity
 
-category_entity = OrderedEntity(ProductCategory)
+category_entity = OrderedEntity(
+    ProductCategory,
+    default_sort_column="name",
+    default_sort_order=ASC,
+)
 
 
 product_entity = OrderedEntity(
@@ -33,7 +33,11 @@ product_entity = OrderedEntity(
     expand_fields={
         "product_accounting": ExpandField(
             Product.product_accounting,
-            [ProductAccountsCostCenters.account_id, ProductAccountsCostCenters.cost_center_id],
+            [
+                ProductAccountsCostCenters.account_id,
+                ProductAccountsCostCenters.cost_center_id,
+                ProductAccountsCostCenters.type,
+            ],
         )
     },
 )

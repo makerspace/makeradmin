@@ -272,12 +272,11 @@ class ProductAccountsCostCenters(Base):
     fraction = Column(Numeric(6, 3), nullable=False, server_default=("0.0"))
     type = Column(Enum(DEBIT, CREDIT), nullable=False)
 
-    product = relationship(Product, backref="accounts_cost_centers")
     account = relationship(TransactionAccount, backref="accounts_cost_centers")
     cost_center = relationship(TransactionCostCenter, backref="accounts_cost_centers")
 
     def __repr__(self) -> str:
-        return f"ProductAccounting(id={self.id}, cost_center={self.cost_center}, account={self.account}, debits={self.debits}, credits={self.credits})"
+        return f"ProductAccounting(id={self.id}, cost_center={self.cost_center}, account={self.account}, fraction={self.fraction}, type={self.type})"
 
 
 class StripePending(Base):
