@@ -75,58 +75,76 @@ class AccountingProduct extends CollectionNavigation {
         this.product = new Product();
         this.product_accounts_cost_centers = new ProductAccountsCostCenters();
 
-        get({ url: "/webshop/category", params: { page_size: 0 } }).then(
-            (data) => {
-                const categories = _.reduce(
-                    data.data,
-                    (obj, item) => {
-                        obj[item.id] = item.name;
-                        return obj;
-                    },
-                    {},
-                );
-                this.setState({ categories });
-            },
-            () => null,
-        );
+        get({ url: "/webshop/category", params: { page_size: 0 } })
+            .then(
+                (data) => {
+                    const categories = _.reduce(
+                        data.data,
+                        (obj, item) => {
+                            obj[item.id] = item.name;
+                            return obj;
+                        },
+                        {},
+                    );
+                    this.setState({ categories });
+                },
+                () => null,
+            )
+            .catch((error) => {
+                showError("<h2>Failed to find categories</h2>" + error.message);
+            });
 
         get({
             url: "/webshop/transaction_account",
             params: { page_size: 0 },
-        }).then(
-            (data) => {
-                const transaction_account = _.reduce(
-                    data.data,
-                    (obj, item) => {
-                        obj[item.id] = item.account;
-                        return obj;
-                    },
-                    {},
+        })
+            .then(
+                (data) => {
+                    const transaction_account = _.reduce(
+                        data.data,
+                        (obj, item) => {
+                            obj[item.id] = item.account;
+                            return obj;
+                        },
+                        {},
+                    );
+                    this.setState({ transaction_account });
+                    this.setState(updateOptions_account(data.data));
+                },
+                () => null,
+            )
+            .catch((error) => {
+                showError(
+                    "<h2>Failed to find transaction accounts</h2>" +
+                        error.message,
                 );
-                this.setState({ transaction_account });
-                this.setState(updateOptions_account(data.data));
-            },
-            () => null,
-        );
+            });
 
         get({
             url: "/webshop/transaction_cost_center",
             params: { page_size: 0 },
-        }).then(
-            (data) => {
-                const transaction_cost_center = _.reduce(
-                    data.data,
-                    (obj, item) => {
-                        obj[item.id] = item.cost_center;
-                        return obj;
-                    },
-                    {},
+        })
+            .then(
+                (data) => {
+                    const transaction_cost_center = _.reduce(
+                        data.data,
+                        (obj, item) => {
+                            obj[item.id] = item.cost_center;
+                            return obj;
+                        },
+                        {},
+                    );
+                    this.setState({ transaction_cost_center });
+                    this.setState(updateOptions_cost_center(data.data));
+                },
+                () => null,
+            )
+            .catch((error) => {
+                showError(
+                    "<h2>Failed to find transaction cost centers</h2>" +
+                        error.message,
                 );
-                this.setState({ transaction_cost_center });
-                this.setState(updateOptions_cost_center(data.data));
-            },
-            () => null,
-        );
+            });
     }
 
     selectOptionAccount(account) {
