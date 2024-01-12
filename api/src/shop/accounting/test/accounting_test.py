@@ -140,6 +140,7 @@ class AccountingDifferenceTest(FlaskTestBase):
         assert transaction.id == wrong_transaction.id
 
 
+# TODO fix all the | None to be Optional[...] instead
 class ProductToAccountCostCenterTest(FlaskTestBase):
     models = [core.models, membership.models, shop.models]
     number_of_products = 3
@@ -156,15 +157,20 @@ class ProductToAccountCostCenterTest(FlaskTestBase):
 
         random_scale = self.number_of_accounts * self.number_of_cost_centers / 2
 
-        for i in range(self.number_of_accounts):
-            self.db.create_transaction_account()
-        self.transaction_accounts = db_session.query(TransactionAccount).all()
-        random.shuffle(self.transaction_accounts)
+        self.transaction_accounts: Dict[AccountingEntryType, List[TransactionAccount]] = {}
+        self.transaction_cost_centers: Dict[AccountingEntryType, List[TransactionCostcenter]] = {}
 
-        for i in range(self.number_of_cost_centers):
-            self.db.create_transaction_cost_center()
-        self.transaction_cost_centers = db_session.query(TransactionCostcenter).all()
-        random.shuffle(self.transaction_cost_centers)
+        for type in AccountingEntryType:
+            self.transaction_accounts[type] = []
+            self.transaction_cost_centers[type] = []
+            for i in range(self.number_of_accounts):
+                acc = self.db.create_transaction_account()
+                self.transaction_accounts[type].append(acc)
+            for i in range(self.number_of_cost_centers):
+                cc = self.db.create_transaction_cost_center()
+                self.transaction_cost_centers[type].append(cc)
+            random.shuffle(self.transaction_accounts[type])
+            random.shuffle(self.transaction_cost_centers[type])
 
         product_category = self.db.create_category()
         for i in range(self.number_of_products):
@@ -174,33 +180,36 @@ class ProductToAccountCostCenterTest(FlaskTestBase):
             for j in range(self.number_of_accounts):
                 for k in range(self.number_of_cost_centers):
                     for type in AccountingEntryType:
-                        if j >= k:
-                            max_fraction = min(fractions_left[type] / 2, 100 / random_scale)
-                            fraction = random.randint(1, round(max_fraction))
-                            fractions_left[type] -= fraction
-
+                        added = False
+                        max_fraction = min(fractions_left[type] / 2, 100 / random_scale)
+                        fraction = random.randint(1, round(max_fraction))
                         if j > k:
                             self.db.create_product_account_cost_center(
                                 product_id=product.id,
-                                account_id=self.transaction_accounts[j].id,
-                                cost_center_id=self.transaction_cost_centers[k].id,
+                                account_id=self.transaction_accounts[type][j].id,
+                                cost_center_id=self.transaction_cost_centers[type][k].id,
                                 type=type.value,
                                 fraction=fraction,
                             )
+                            added = True
                         elif j == k:
                             self.db.create_product_account_cost_center(
                                 product_id=product.id,
-                                account_id=self.transaction_accounts[j].id,
-                                cost_center_id=None,
+                                account_id=None,
+                                cost_center_id=self.transaction_cost_centers[type][k].id,
                                 type=type.value,
                                 fraction=fraction,
                             )
+                            added = True
+                        if added:
+                            fractions_left[type] -= fraction
+            # Adding the leftover fractions
             for type in AccountingEntryType:
                 fraction = fractions_left[type]
                 self.db.create_product_account_cost_center(
                     product_id=product.id,
-                    account_id=None,
-                    cost_center_id=self.transaction_cost_centers[0].id,
+                    account_id=self.transaction_accounts[type][0].id,
+                    cost_center_id=None,
                     type=type.value,
                     fraction=fraction,
                 )
@@ -250,8 +259,8 @@ class ProductToAccountCostCenterTest(FlaskTestBase):
         products = db_session.query(Product).all()
         self.db.create_product_account_cost_center(
             product_id=products[0].id,
-            account_id=self.transaction_accounts[0].id,
-            cost_center_id=self.transaction_cost_centers[0].id,
+            account_id=self.transaction_accounts[AccountingEntryType.CREDIT][0].id,
+            cost_center_id=self.transaction_cost_centers[AccountingEntryType.CREDIT][0].id,
             type=AccountingEntryType.CREDIT.value,
             fraction=0,
         )
@@ -263,8 +272,8 @@ class ProductToAccountCostCenterTest(FlaskTestBase):
         products = db_session.query(Product).all()
         self.db.create_product_account_cost_center(
             product_id=products[0].id,
-            account_id=self.transaction_accounts[0].id,
-            cost_center_id=self.transaction_cost_centers[0].id,
+            account_id=self.transaction_accounts[AccountingEntryType.CREDIT][0].id,
+            cost_center_id=self.transaction_cost_centers[AccountingEntryType.CREDIT][0].id,
             type=AccountingEntryType.CREDIT.value,
             fraction=101,
         )
@@ -276,8 +285,8 @@ class ProductToAccountCostCenterTest(FlaskTestBase):
         products = db_session.query(Product).all()
         self.db.create_product_account_cost_center(
             product_id=products[0].id,
-            account_id=self.transaction_accounts[0].id,
-            cost_center_id=self.transaction_cost_centers[0].id,
+            account_id=self.transaction_accounts[AccountingEntryType.CREDIT][0].id,
+            cost_center_id=self.transaction_cost_centers[AccountingEntryType.CREDIT][0].id,
             type=AccountingEntryType.CREDIT.value,
             fraction=1,
         )
@@ -330,6 +339,8 @@ class SplitTransactionsTest(FlaskTestBase):
         db_session.query(ProductCategory).delete()
         db_session.query(Transaction).delete()
         db_session.query(TransactionContent).delete()
+        db_session.query(TransactionAccount).delete()
+        db_session.query(TransactionCostcenter).delete()
 
     @staticmethod
     def assertAccounting(
@@ -356,11 +367,11 @@ class SplitTransactionsTest(FlaskTestBase):
             if product_id == 1:
                 assert acc.account is None
             else:
-                assert acc.type.value + "_acc" + str(product_id) in acc.account
+                assert acc.type.value + "_acc" + str(product_id) in acc.account.account
             if product_id == 2:
                 assert acc.cost_center is None
             else:
-                assert acc.type.value + "_cc" + str(product_id) in acc.cost_center
+                assert acc.type.value + "_cc" + str(product_id) in acc.cost_center.cost_center
 
         for type, count in num_entry_types_found.items():
             if fraction == 100:
@@ -403,8 +414,10 @@ class SplitTransactionsTest(FlaskTestBase):
         account_cost_center: List[AccountCostCenter] = []
         for i in range(2):
             entry_type = AccountingEntryType.CREDIT if i % 2 == 0 else AccountingEntryType.DEBIT
-            account = entry_type.value + "_acc" + str(product_id) + str(i)
-            cost_center = entry_type.value + "_cc" + str(product_id) + str(i)
+            account_name = entry_type.value + "_acc" + str(product_id) + str(i)
+            cost_center_name = entry_type.value + "_cc" + str(product_id) + str(i)
+            account = TransactionAccount(id=i, account=account_name, description="", display_order=i)
+            cost_center = TransactionCostcenter(id=i, cost_center=cost_center_name, description="", display_order=i)
             if product_id == 1:
                 account = None
             elif product_id == 2:
@@ -418,8 +431,10 @@ class SplitTransactionsTest(FlaskTestBase):
         account_cost_center: List[AccountCostCenter] = []
         for i in range(4):
             entry_type = AccountingEntryType.CREDIT if i % 2 == 0 else AccountingEntryType.DEBIT
-            account = entry_type.value + "_acc" + str(product_id) + str(i)
-            cost_center = entry_type.value + "_cc" + str(product_id) + str(i)
+            account_name = entry_type.value + "_acc" + str(product_id) + str(i)
+            cost_center_name = entry_type.value + "_cc" + str(product_id) + str(i)
+            account = TransactionAccount(id=i, account=account_name, description="", display_order=i)
+            cost_center = TransactionCostcenter(id=i, cost_center=cost_center_name, description="", display_order=i)
             if product_id == 1:
                 account = None
             elif product_id == 2:

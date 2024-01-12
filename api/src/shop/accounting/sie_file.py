@@ -50,6 +50,7 @@ def verification_string(verification: Verification, verfication_number: int) -> 
 def transaction_string(
     account: TransactionAccount, cost_center: TransactionCostcenter | None, sum: Decimal, period: str, description: str
 ) -> str:
+    logger.info(f"Transaction: {account} {cost_center} {sum} {period} {description}")
     if cost_center is None:
         cc_string = f"{{}}"
     else:

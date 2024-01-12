@@ -105,6 +105,7 @@ def diff_transactions_and_completed_payments(
     transactions: List[Transaction], completed_payments: Dict[int, CompletedPayment]
 ) -> List[Tuple[Transaction | None, CompletedPayment | None]]:
     unmatched_data: List[Tuple[Transaction | None, CompletedPayment]] = []
+    completed_payments = completed_payments.copy()  # TODO improve this and remove pop
 
     for transaction in transactions:
         if transaction.status != Transaction.COMPLETED:

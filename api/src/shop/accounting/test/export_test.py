@@ -64,4 +64,7 @@ class AccountingExportWithStripeMockTest(SplitTransactionsWithoutMockTest):
         end_date = datetime(2023, 12, 31)
 
         get_payments_from_stripe.return_value = self.completed_payments
+
+        logger.info(f"Completed payments: {self.completed_payments}")
+
         sie_str = export_accounting(start_date, end_date, TimePeriod.Month, self.member)
