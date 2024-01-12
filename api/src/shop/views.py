@@ -22,15 +22,19 @@ from service.error import InternalServerError, PreconditionFailed
 from sqlalchemy.exc import NoResultFound
 
 from shop import service
+from shop.accounting_data import download_accounting_file
 from shop.entities import (
     category_entity,
     gift_card_content_entity,
     gift_card_entity,
+    product_accounting_entity,
     product_action_entity,
     product_entity,
     product_image_entity,
+    transaction_account_entity,
     transaction_action_entity,
     transaction_content_entity,
+    transaction_cost_center_entity,
     transaction_entity,
 )
 from shop.models import ProductImage, TransactionContent
@@ -172,6 +176,36 @@ service.entity_routes(
     permission_delete=WEBSHOP_EDIT,
 )
 
+service.entity_routes(
+    path="/transaction_account",
+    entity=transaction_account_entity,
+    permission_list=WEBSHOP,
+    permission_read=WEBSHOP,
+    permission_create=WEBSHOP_EDIT,
+    permission_update=WEBSHOP_EDIT,
+    permission_delete=WEBSHOP_EDIT,
+)
+
+service.entity_routes(
+    path="/transaction_cost_center",
+    entity=transaction_cost_center_entity,
+    permission_list=WEBSHOP,
+    permission_read=WEBSHOP,
+    permission_create=WEBSHOP_EDIT,
+    permission_update=WEBSHOP_EDIT,
+    permission_delete=WEBSHOP_EDIT,
+)
+
+service.entity_routes(
+    path="/accounting",
+    entity=product_accounting_entity,
+    permission_list=WEBSHOP,
+    permission_read=WEBSHOP,
+    permission_create=WEBSHOP_EDIT,
+    permission_update=WEBSHOP_EDIT,
+    permission_delete=WEBSHOP_EDIT,
+)
+
 
 @service.route("/member/current/pending_actions", method=GET, permission=USER)
 def pending_actions_for_member():
@@ -284,3 +318,8 @@ def register_route() -> Any:
 @service.route("/stripe_callback", method=POST, permission=PUBLIC, commit_on_error=True)
 def stripe_callback_route():
     stripe_callback(request.data, request.headers)
+
+
+@service.route("/download-accounting-file/<int:from_year>/<int:to_year>", method=GET, permission=WEBSHOP)
+def download_accounting_file_route(from_year, to_year):
+    return download_accounting_file(from_year, to_year)

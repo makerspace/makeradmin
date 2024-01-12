@@ -75,6 +75,7 @@ class Product(Base):
 
     category = relationship(ProductCategory, backref="products")
     actions = relationship("ProductAction")
+    product_accounting = relationship("ProductAccountsCostCenters", backref="accounts_cost_centers")
 
     image_id = Column(Integer, ForeignKey(ProductImage.id), nullable=True)
 
@@ -235,7 +236,7 @@ class TransactionAccount(Base):
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
     account = Column(String(100), nullable=False)
     description = Column(String(255), nullable=False)
-    display_order = Column(Integer, nullable=False, unique=True)
+    display_order = Column(Integer, nullable=False)
     created_at = Column(DateTime, server_default=func.now())
     updated_at = Column(DateTime, server_default=func.now())
     deleted_at = Column(DateTime)
@@ -244,7 +245,7 @@ class TransactionAccount(Base):
         return f"TransactionAccount(id={self.id}, account={self.account}, description={self.description})"
 
 
-class TransactionCostcenter(Base):
+class TransactionCostCenter(Base):
     __tablename__ = "webshop_transaction_cost_centers"
 
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
@@ -271,9 +272,8 @@ class ProductAccountsCostCenters(Base):
     )  # Using integer with the range 0-100 to represent fractions and avoind precision issues
     type = Column(Enum(*[x.value for x in AccountingEntryType]), nullable=False)
 
-    product = relationship(Product, backref="accounts_cost_centers")
     account = relationship(TransactionAccount, backref="accounts_cost_centers")
-    cost_center = relationship(TransactionCostcenter, backref="accounts_cost_centers")
+    cost_center = relationship(TransactionCostCenter, backref="accounts_cost_centers")
 
     def __repr__(self) -> str:
         return f"ProductAccountsCostCenters(id={self.id}, account_id={self.account_id}, cost_center_id={self.cost_center_id}, type={self.type}, fraction={self.fraction})"
