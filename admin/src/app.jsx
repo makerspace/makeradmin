@@ -69,33 +69,32 @@ const nav = {
             text: "Försäljning",
             target: "/sales",
             icon: "shopping-basket",
-            children:
-                [
-                    {
-                        text: "Ordrar",
-                        target: "/sales/order",
-                    },
-                    {
-                        text: "Presentkort",
-                        target: "/sales/gift-card",
-                    },
-                    {
-                        text: "Produkter",
-                        target: "/sales/product",
-                    },
-                    {
-                        text: "Bilder",
-                        target: "/sales/image",
-                    },
-                    {
-                        text: "Kategorier",
-                        target: "/sales/category",
-                    },
-                    {
-                        text: "Bokföring",
-                        target: "/sales/accounting",
-                    },
-                ],
+            children: [
+                {
+                    text: "Ordrar",
+                    target: "/sales/order",
+                },
+                {
+                    text: "Presentkort",
+                    target: "/sales/gift-card",
+                },
+                {
+                    text: "Produkter",
+                    target: "/sales/product",
+                },
+                {
+                    text: "Bilder",
+                    target: "/sales/image",
+                },
+                {
+                    text: "Kategorier",
+                    target: "/sales/category",
+                },
+                {
+                    text: "Bokföring",
+                    target: "/sales/accounting",
+                },
+            ],
         },
         {
             text: "Utskick",

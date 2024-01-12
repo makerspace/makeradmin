@@ -1,8 +1,6 @@
-import Base from './Base';
-
+import Base from "./Base";
 
 export default class TransactionCostCenter extends Base {
-
     deleteConfirmMessage() {
         return `Are you sure you want to delete account ${this.cost_center}?`;
     }

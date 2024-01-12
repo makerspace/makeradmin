@@ -78,7 +78,8 @@ body,
     font-size: 0.9em;
 }
 
-.invoice .data {}
+.invoice .data {
+}
 
 /* react-select */
 .Select input {
@@ -186,11 +187,11 @@ body,
     font-size: 10px;
 }
 
-.meep .uk-form-row+.uk-form-row {
+.meep .uk-form-row + .uk-form-row {
     margin-top: 10px;
 }
 
-.meep .uk-form-icon>[class*="uk-icon-"] {
+.meep .uk-form-icon > [class*="uk-icon-"] {
     margin-left: -30px;
 }
 
@@ -248,7 +249,7 @@ body,
     width: 342px;
 }
 
-.uk-form-row.address_city+div {
+.uk-form-row.address_city + div {
     clear: both;
 }
 
@@ -364,7 +365,7 @@ tr.toggle pre {
     margin: 0;
 }
 
-.meep .uk-form-controls>.uk-form-icon {
+.meep .uk-form-controls > .uk-form-icon {
     width: 100%;
 }
 
