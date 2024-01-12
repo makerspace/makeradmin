@@ -125,7 +125,7 @@ class Transaction(Base):
 
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
     member_id = Column(Integer, ForeignKey(Member.member_id), nullable=True)
-    amount = Column(Numeric(precision=15, scale=2, asdecimal=True), nullable=False)
+    amount = Column(Numeric(precision="15,2"), nullable=False)
     status = Column(Enum(PENDING, COMPLETED, FAILED), nullable=False)
     created_at = Column(DateTime, server_default=func.now())
 
@@ -143,7 +143,7 @@ class TransactionContent(Base):
     transaction_id = Column(Integer, ForeignKey(Transaction.id), nullable=False)
     product_id = Column(Integer, ForeignKey(Product.id), nullable=False)
     count = Column(Integer, nullable=False)
-    amount = Column(Numeric(precision=15, scale=2, asdecimal=True), nullable=False)
+    amount = Column(Numeric(precision="15,2"), nullable=False)
 
     transaction = relationship(Transaction, backref="contents")
     product = relationship(Product)
