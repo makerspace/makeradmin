@@ -165,6 +165,7 @@ class SieFileWithVerificationTest(FlaskTestBase):
 
         sie_rows = sie_str.split("\n")
 
+        # TODO assert more info about the header
         while True:
             row = sie_rows.pop(0)
 

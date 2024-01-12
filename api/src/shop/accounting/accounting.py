@@ -125,6 +125,19 @@ def diff_transactions_and_completed_payments(
     return unmatched_data
 
 
+def split_transaction_fee_over_transaction_contents(transaction: Transaction, fee: Decimal) -> Dict[int, Decimal]:
+    split_fees: Dict[int, Decimal] = {}
+    leftover_fee = fee
+    for content in transaction.contents:
+        logger.info(f"Content amount {content.amount}")
+        logger.info(f"Transaction amount {transaction.amount}")
+        adjusted_fee = round(Decimal(content.amount / transaction.amount) * fee, 2)
+        split_fees[content.id] = adjusted_fee
+        leftover_fee -= adjusted_fee
+    split_fees[transaction.contents[0].id] += leftover_fee
+    return split_fees
+
+
 def split_transactions_over_accounts(
     transactions: List[Transaction], completed_payments: Dict[int, CompletedPayment]
 ) -> Tuple[List[TransactionWithAccounting], Dict[Tuple[int, int, AccountingEntryType], Decimal]]:
@@ -133,6 +146,11 @@ def split_transactions_over_accounts(
     leftover_amounts: Dict[Tuple[int, int, AccountingEntryType], Decimal] = {}
 
     for transaction in transactions:
+        logger.info(split_transaction_fee_over_transaction_contents)
+        split_fees = split_transaction_fee_over_transaction_contents(
+            transaction, completed_payments[transaction.id].fee
+        )
+        logger.info(f"Split fees: {split_fees}")
         for content in transaction.contents:
             product_accounting = product_to_accounting.get_account_cost_center(content.product_id)
 
@@ -142,12 +160,14 @@ def split_transactions_over_accounts(
                 adjusted_transaction_content_amount = (
                     Decimal(content.amount)
                     if accounting.type == AccountingEntryType.CREDIT
-                    else Decimal(content.amount) - completed_payments[transaction.id].fee
+                    else Decimal(content.amount) - split_fees[content.id]
                 )
                 amount_to_add = adjusted_transaction_content_amount * (
                     accounting.fraction * Decimal("0.01")
                 )  # Multiply with 0.01 instead of division by 100
                 amount_to_add = Decimal(round(amount_to_add, 2))
+
+                logger.info(f"Adding amount {amount_to_add} to accounting {accounting}")
 
                 key = accounting.type
                 amounts_added[key] += amount_to_add
@@ -168,7 +188,7 @@ def split_transactions_over_accounts(
                 adjusted_transaction_content_amount = (
                     Decimal(content.amount)
                     if entry_type == AccountingEntryType.CREDIT
-                    else Decimal(content.amount) - completed_payments[transaction.id].fee
+                    else Decimal(content.amount) - split_fees[content.id]
                 )
                 if amount != adjusted_transaction_content_amount:
                     leftover_key: Tuple[int, int, AccountingEntryType] = (

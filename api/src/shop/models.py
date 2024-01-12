@@ -143,7 +143,7 @@ class TransactionContent(Base):
     transaction_id = Column(Integer, ForeignKey(Transaction.id), nullable=False)
     product_id = Column(Integer, ForeignKey(Product.id), nullable=False)
     count = Column(Integer, nullable=False)
-    amount = Column(Numeric(precision="15,2"), nullable=False)
+    amount = Column(Numeric(precision=15, scale=2, asdecimal=True), nullable=False)
 
     transaction = relationship(Transaction, backref="contents")
     product = relationship(Product)

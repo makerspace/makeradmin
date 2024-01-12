@@ -16,7 +16,9 @@ from shop.accounting.sie_file import get_sie_string
 from shop.accounting.verification import create_verificatons
 from shop.models import (
     Transaction,
+    TransactionAccount,
     TransactionContent,
+    TransactionCostcenter,
 )
 from shop.stripe_payment_intent import CompletedPayment, get_completed_payments_from_stripe
 
@@ -34,8 +36,11 @@ def transaction_fees_to_transaction_with_accounting(
                 product_id=None,
                 amount=payment.fee,
                 date=payment.created,
-                account="6573",
-                cost_center="Föreningsgemensamt",
+                # TODO improve this part
+                account=TransactionAccount(account="6573", description="6573", id=0, display_order=1),
+                cost_center=TransactionCostcenter(
+                    cost_center="Föreningsgemensamt", description="Föreningsgemensamt", id=0, display_order=1
+                ),
                 type=AccountingEntryType.DEBIT,
             )
         )
