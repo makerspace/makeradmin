@@ -6,7 +6,7 @@ export default class Member extends Base {
         return `Are you sure you want to delete member ${this.firstname} ${this.lastname}?`;
     }
 
-    save() {
+    maybe_inform_member_before_changed_info() {
         if (Object.prototype.hasOwnProperty.call(this.unsaved, "email")) {
             post({
                 url: "/member/send_updated_member_info",
@@ -20,6 +20,10 @@ export default class Member extends Base {
                 expectedDataStatus: "ok",
             });
         }
+    }
+
+    save() {
+        this.maybe_inform_member_before_changed_info();
         super.save();
     }
 
