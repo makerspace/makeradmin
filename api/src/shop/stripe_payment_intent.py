@@ -180,7 +180,7 @@ def pay_with_stripe(transaction: Transaction, payment_method_id: str, setup_futu
                 payment_method=payment_method_id,
                 amount=amount,
                 currency=CURRENCY,
-                customer=stripe_customer.stripe_id,
+                customer=stripe_customer.id,
                 confirmation_method="manual",
                 confirm=True,
                 # One might think that off_session could be set to true to make payments possible without
@@ -195,7 +195,7 @@ def pay_with_stripe(transaction: Transaction, payment_method_id: str, setup_futu
             )
         )
 
-        db_session.add(StripePending(transaction_id=transaction.id, stripe_token=payment_intent.stripe_id))
+        db_session.add(StripePending(transaction_id=transaction.id, stripe_token=payment_intent.id))
         db_session.flush()
 
         logger.info(

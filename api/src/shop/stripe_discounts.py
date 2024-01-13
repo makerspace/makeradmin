@@ -67,7 +67,7 @@ def _query_discount_fraction_off(price_level: PriceLevel) -> Discount:
     coupon = coupons[0]
     if (coupon["amount_off"] or 0) > 0:
         raise Exception(
-            f"Stripe coupon {coupon.stripe_id} has a fixed amount off. Only a percentage off is supported by MakerAdmin"
+            f"Stripe coupon {coupon.id} has a fixed amount off. Only a percentage off is supported by MakerAdmin"
         )
 
     percent_off = coupon["percent_off"]
