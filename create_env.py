@@ -36,6 +36,10 @@ config = {
     "ACCESSY_SPECIAL_LABACCESS_GROUP": "",
     "ACCESSY_DO_MODIFY": "false",
     "CORS_ALLOWED_ORIGINS": "http://localhost:8009,http://localhost:8011,http://localhost:8080",
+    "FIRSTRUN_AUTO_ADMIN_FIRSTNAME": "",
+    "FIRSTRUN_AUTO_ADMIN_LASTNAME": "",
+    "FIRSTRUN_AUTO_ADMIN_EMAIL": "",
+    "FIRSTRUN_AUTO_ADMIN_PASSWORD": "",
 }
 
 if not args.force and os.path.isfile(".env"):

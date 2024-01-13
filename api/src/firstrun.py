@@ -91,12 +91,37 @@ def create_admin(admins: Any) -> None:
 
     while True:
         try:
+
+            def get_first_name():
+                if config.get("FIRSTRUN_AUTO_ADMIN_FIRSTNAME", log_level=False):
+                    return config.get("FIRSTRUN_AUTO_ADMIN_FIRSTNAME", log_level=False)
+                else:
+                    return input("First name: ")
+
+            def get_last_name():
+                if config.get("FIRSTRUN_AUTO_ADMIN_LASTNAME", log_level=False):
+                    return config.get("FIRSTRUN_AUTO_ADMIN_LASTNAME", log_level=False)
+                else:
+                    return input("Last name: ")
+
+            def get_email():
+                if config.get("FIRSTRUN_AUTO_ADMIN_EMAIL", log_level=False):
+                    return config.get("FIRSTRUN_AUTO_ADMIN_EMAIL", log_level=False)
+                else:
+                    return input("Email: ")
+
+            def get_password():
+                if config.get("FIRSTRUN_AUTO_ADMIN_PASSWORD", log_level=False):
+                    return config.get("FIRSTRUN_AUTO_ADMIN_PASSWORD", log_level=False)
+                else:
+                    return getpass("Password: ")
+
             member = member_entity.create(
                 dict(
-                    firstname=input("First name: "),
-                    lastname=input("Last name: "),
-                    email=input("Email: "),
-                    unhashed_password=getpass("Password: "),
+                    firstname=get_first_name(),
+                    lastname=get_last_name(),
+                    email=get_email(),
+                    unhashed_password=get_password(),
                     pending_activation=False,
                     price_level=PriceLevel.Normal.value,
                 )
