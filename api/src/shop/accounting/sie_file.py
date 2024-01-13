@@ -59,24 +59,30 @@ def transaction_string(
 
 def get_account_header(verifications: List[Verification]) -> List[str]:
     accounts_header: List[str] = []
+    seen_accounts: set[TransactionAccount | None] = set()
     for verification in verifications:
         for accounting_key in verification.amounts.keys():
             account = accounting_key[0]
-            if account is None:
-                logger.warning("Account cannot be None for SIE export.")
-                raise ValueError("Account cannot be None for SIE export.")
-            accounts_header.append(f'#KONTO {account.account} "{account.description}"')
+            if account not in seen_accounts:
+                seen_accounts.add(account)
+                if account is None:
+                    logger.warning("Account cannot be None for SIE export.")
+                    raise ValueError("Account cannot be None for SIE export.")
+                accounts_header.append(f'#KONTO {account.account} "{account.description}"')
 
     return accounts_header
 
 
 def get_cost_center_header(verifications: List[Verification]) -> List[str]:
     cost_center_header: List[str] = []
+    seen_cost_centers: set[TransactionAccount | None] = set()
     for verification in verifications:
         for accounting_key in verification.amounts.keys():
             cost_center = accounting_key[1]
-            if cost_center is not None:
-                cost_center_header.append(f'#OBJEKT 1 "{cost_center.cost_center}" "{cost_center.description}"')
+            if cost_center not in seen_cost_centers:
+                seen_cost_centers.add(cost_center)
+                if cost_center is not None:
+                    cost_center_header.append(f'#OBJEKT 1 "{cost_center.cost_center}" "{cost_center.description}"')
 
     return cost_center_header
 
