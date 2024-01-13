@@ -1,27 +1,25 @@
 from logging import getLogger
 from typing import Any, Optional
 
+from membership.models import Member
 from sqlalchemy import (
-    Column,
-    Integer,
-    String,
-    DateTime,
-    Text,
-    Date,
-    Enum,
-    Table,
-    ForeignKey,
-    func,
-    text,
-    select,
     BigInteger,
     Boolean,
+    Column,
+    Date,
+    DateTime,
+    Enum,
+    ForeignKey,
+    Integer,
+    String,
+    Table,
+    Text,
+    func,
+    select,
+    text,
 )
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import relationship, column_property, configure_mappers, validates
-
-from membership.models import Member
-
+from sqlalchemy.orm import column_property, configure_mappers, relationship, validates
 
 Base = declarative_base()
 
@@ -64,6 +62,7 @@ class StorageItem(Base):
 
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
     member_id = Column(Integer, ForeignKey("membership_members.member_id"), nullable=False)
+    members_description = Column(Text)
     item_label_id = Column(BigInteger, unique=True, nullable=False)
     last_check_at = Column(DateTime, nullable=True)
     fixed_end_date = Column(DateTime, nullable=True)

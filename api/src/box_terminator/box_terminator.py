@@ -174,17 +174,10 @@ def store_message(item: StorageItem, message_type: StorageMessageType) -> None:
     db_session.flush()
 
 
-def send_message_about_storage(
-    member_number: int,
-    item_label_id: int,
-    message_type: StorageMessageType,
-    description: str,
-    storage_type: StorageType,
-    fixed_end_date: Optional[datetime],
-) -> None:
+def send_message_about_storage(item_label_id: int, message_type: StorageMessageType) -> None:
     item = get_item_from_label_id(item_label_id)
     if item is None:
-        raise NotFound(f"Storage item, {item_label_id}, for member number {member_number} not found")
+        raise NotFound(f"Storage item {item_label_id}  not found")
 
     dates = get_dates(item)
     status, reason = check_status(dates)
@@ -265,41 +258,13 @@ def send_message_about_storage(
     store_message(item, message_type)
 
 
-def fetch_storage_item(
-    member_number: int,
-    item_label_id: int,
-    storage_type: StorageType,
-    fixed_end_date: datetime,
-) -> StorageInfo:
+def fetch_storage_item(item_label_id: int) -> StorageInfo:
     item = get_item_from_label_id(item_label_id)
-    if item is not None:
-        found_item = True
-        if storage_type != item.storage_type:
-            raise BadRequest("Storage type argument does not match storage type in db.")
-        if item.storage_type:  # TODO has fixed end date check
-            if item.fixed_end_date is None:
-                raise BadRequest("Fixed end date is missing in db.")
-            if fixed_end_date != item.fixed_end_date:
-                raise BadRequest("Fixed end date does not match fixed end date in db.")
-    else:
-        found_item = False
-        try:
-            # Find the member since there was nothing in the db with the item_label_id
-            member = db_session.query(Member).filter(Member.member_number == member_number).one()
-        except NoResultFound:
-            raise NotFound(f"Member not found {member_number}")
-        item = StorageItem(
-            member_id=member.member_id,
-            item_label_id=item_label_id,
-            storage_type=storage_type,
-            fixed_end_date=fixed_end_date,
-        )
+    if item is None:
+        raise NotFound(f"Storage item, {item_label_id}, not found")
 
     item.last_check_at = datetime.utcnow()
-    if not found_item:
-        db_session.add(item)
     db_session.commit()
-
     return get_storage_info(item)
 
 

@@ -1,14 +1,13 @@
-from flask import g
-
-from multiaccess import service  # TODO fix maybe?
 from box_terminator.box_terminator import (
+    fetch_storage_item,
     send_message_about_storage,
     terminate_storage_item,
-    fetch_storage_item,
 )
-from service.api_definition import GET, Arg, MEMBER_EDIT, POST, symbol
-from service.error import NotFound, BadRequest
 from box_terminator.models import MessageType, StorageType
+from flask import g
+from multiaccess import service  # TODO fix maybe?
+from service.api_definition import GET, MEMBER_EDIT, POST, Arg, symbol
+from service.error import BadRequest, NotFound
 
 
 @service.route("/box_terminator/message", method=POST, permission=MEMBER_EDIT)

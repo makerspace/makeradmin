@@ -30,6 +30,7 @@ CREATE TABLE IF NOT EXISTS `storage_message_types` (
 --- create a new table to store the items instead of the old one
 CREATE TABLE IF NOT EXISTS `storage_items` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `members_description` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `member_id` int(10) unsigned NOT NULL,
   `item_label_id` bigint(20) unsigned NOT NULL,
   `last_check_at` datetime DEFAULT NULL,
