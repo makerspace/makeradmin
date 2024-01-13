@@ -1,12 +1,12 @@
 import React from "react";
 import { Button } from "../Components/Button";
-import { ExpiredLogo } from "./ExpiredLogo";
-import { ActiveLogo } from "./ActiveLogo";
 import { get } from "../gateway";
+import { ActiveLogo } from "./ActiveLogo";
+import { ExpiredLogo } from "./ExpiredLogo";
 
-const runAction = (action: string, box_id: number) => {
+const runAction = (action: string, storage_id: number) => {
     get({
-        url: `/box_terminator/action/${action}/${box_id}`,
+        url: `/box_terminator/action/${action}/${storage_id}`,
     }).then((res) => {
         if (res.status === "ok") {
             alert(res.data);
@@ -21,7 +21,7 @@ export type TerminationRenderProps = {
     expired: boolean;
     expired_date: string;
     info?: string;
-    box_id: number;
+    storage_id: number;
     options?: [{ text: string; path: string; color: string }];
 } | null;
 
@@ -58,7 +58,7 @@ export const Termination = ({ props, callback }: TerminationProps) => {
                           <Button
                               key={option.text}
                               onClick={() => {
-                                  runAction(option.path, props.box_id);
+                                  runAction(option.path, props.storage_id);
                               }}
                               style={{ backgroundColor: option.color }}
                           >

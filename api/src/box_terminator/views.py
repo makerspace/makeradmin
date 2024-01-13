@@ -23,7 +23,7 @@ def box_terminator_fetch(
                     "expired": False,
                     "expired_date": "2024-09-09",
                     "info": "last nagged 2023-09-09",
-                    "box_id": 1,
+                    "storage_id": 1,
                 }
             )
         else:
@@ -37,7 +37,7 @@ def box_terminator_fetch(
                     "expired": True,
                     "expired_date": "2020-01-01",
                     "info": "last nagged 2023-09-09",
-                    "box_id": 1,
+                    "storage_id": 1,
                     "options": [
                         nagButton,
                         terminateButton,
@@ -46,10 +46,10 @@ def box_terminator_fetch(
             )
 
 
-@service.route("/action/<string:action>/<string:box_id>", method=GET, permission=PUBLIC)
+@service.route("/action/<string:action>/<string:storage_id>", method=GET, permission=PUBLIC)
 def box_terminator_nag_route(
     action,
-    box_id,
+    storage_id,
 ):
     """Send a nag email for this box."""
     if action == "nag":
