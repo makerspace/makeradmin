@@ -5,7 +5,7 @@ from membership.membership import get_access_summary, get_membership_summary
 from membership.models import Member
 from membership.views import member_entity
 from quiz.views import member_quiz_statistics
-from service.api_definition import GET, MEMBER_EDIT, POST, PUBLIC, USER, Arg, natural1, non_empty_str
+from service.api_definition import GET, MESSAGE_SEND, POST, PUBLIC, USER, Arg, natural1, non_empty_str
 from service.error import Unauthorized
 
 from member import service
@@ -20,10 +20,10 @@ def send_access_token(redirect=Arg(str, required=False), user_identification: st
     )
 
 
-@service.route("/send_updated_member_info", method=POST, permission=MEMBER_EDIT)
-def send_updated_member_info(member_id: int = Arg(int)):
+@service.route("/send_updated_member_info", method=POST, permission=MESSAGE_SEND)
+def send_updated_member_info(member_id: int = Arg(int), msg_swe: str = Arg(str), msg_en: str = Arg(str)):
     """Send email to user with information that personal information has been updated."""
-    return send_updated_member_info_email(member_id)
+    return send_updated_member_info_email(member_id, msg_swe, msg_en)
 
 
 @service.route("/current", method=GET, permission=USER)

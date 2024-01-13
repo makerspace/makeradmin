@@ -8,6 +8,10 @@
     in på din <a href="{{ public_url('/member') }}">Stockholm Makerspace medlemssida</a>.
 </p>
 
+{% if message_swe %}
+{{ message_swe }}
+{% endif %}
+
 <p>Med vänliga hälsningar,<br />Stockholm Makerspace</p>
 {% endblock %}
 
@@ -16,6 +20,10 @@
     Your personal information has been updated. If this was incorrect you should have a look at your personal
     information by logging in to your <a href="{{ public_url('/member') }}">Stockholm Makerspace medlemssida</a>.
 </p>
+
+{% if message_en %}
+{{ message_en }}
+{% endif %}
 
 <p>Sincerely,<br />Stockholm Makerspace</p>
 {% endblock %}

@@ -10,13 +10,17 @@ export default class Member extends Base {
         if (Object.prototype.hasOwnProperty.call(this.unsaved, "email")) {
             post({
                 url: "/member/send_updated_member_info",
-                data: { member_id: this.member_id },
+                data: {
+                    member_id: this.member_id,
+                    msg_swe: `Din epost ändrades från ${this.saved.email} till ${this.unsaved.email}`,
+                    msg_en: `Your email was updated from ${this.saved.email} to ${this.unsaved.email}`,
+                },
                 errorMessage:
                     "Error when sending email about updated information.",
                 expectedDataStatus: "ok",
             });
         }
-        return super.save();
+        super.save();
     }
 
     canSave() {
