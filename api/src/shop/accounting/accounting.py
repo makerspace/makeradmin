@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
+from enum import Enum
 from logging import getLogger
 from typing import Dict, List, Tuple
 
@@ -23,7 +24,7 @@ logger = getLogger("makeradmin")
 @dataclass()
 class TransactionWithAccounting:
     transaction_id: int
-    product_id: int
+    product_id: int | None
     amount: Decimal
     date: datetime
     account: TransactionAccount | None
@@ -37,6 +38,21 @@ class AccountCostCenter:
     cost_center: TransactionCostCenter | None
     fraction: int
     type: AccountingEntryType
+
+
+class RoundingErrorSource(Enum):
+    FEE_SPLIT = "fee_split"  # From splitting the fee over the transaction contents
+    TRANSACTION_SPLIT = (
+        "transaction_split"  # From splitting the transaction over the different accounts and cost centers
+    )
+
+
+@dataclass(frozen=True)
+class RoundingError:
+    transaction_id: int
+    amount: Decimal
+    type: AccountingEntryType
+    source: RoundingErrorSource
 
 
 class ProductToAccountCostCenter:
@@ -123,28 +139,36 @@ def diff_transactions_and_completed_payments(
     return unmatched_data
 
 
-def split_transaction_fee_over_transaction_contents(transaction: Transaction, fee: Decimal) -> Dict[int, Decimal]:
+def split_transaction_fee_over_transaction_contents(
+    transaction: Transaction, fee: Decimal
+) -> Tuple[Dict[int, Decimal], Decimal]:
     split_fees: Dict[int, Decimal] = {}
-    leftover_fee = fee
+    rounding_error = fee
     for content in transaction.contents:
         adjusted_fee = round(Decimal(content.amount / transaction.amount) * fee, 2)
+        logger.info(f"Adjusted fee: {adjusted_fee} for content {content.id} with amount {content.amount}")
         split_fees[content.id] = adjusted_fee
-        leftover_fee -= adjusted_fee
-    split_fees[transaction.contents[0].id] += leftover_fee
-    return split_fees
+        rounding_error -= adjusted_fee
+    return split_fees, rounding_error
 
 
 def split_transactions_over_accounts(
     transactions: List[Transaction], completed_payments: Dict[int, CompletedPayment]
-) -> Tuple[List[TransactionWithAccounting], Dict[Tuple[int, int, AccountingEntryType], Decimal]]:
+) -> Tuple[List[TransactionWithAccounting], List[RoundingError]]:
     product_to_accounting = ProductToAccountCostCenter()
     transactions_with_accounting: List[TransactionWithAccounting] = []
     leftover_amounts: Dict[Tuple[int, int, AccountingEntryType], Decimal] = {}
+    rounding_errors: List[RoundingError] = []
 
     for transaction in transactions:
-        split_fees = split_transaction_fee_over_transaction_contents(
+        split_fees, rounding_error = split_transaction_fee_over_transaction_contents(
             transaction, completed_payments[transaction.id].fee
         )
+        if rounding_error != Decimal("0.00"):
+            rounding_error_obj = RoundingError(
+                transaction.id, rounding_error, AccountingEntryType.DEBIT, RoundingErrorSource.FEE_SPLIT
+            )
+            rounding_errors.append(rounding_error_obj)
         for content in transaction.contents:
             product_accounting = product_to_accounting.get_account_cost_center(content.product_id)
 
@@ -189,4 +213,10 @@ def split_transactions_over_accounts(
                         entry_type,
                     )
                     leftover_amounts[leftover_key] = adjusted_transaction_content_amount - amount
-    return transactions_with_accounting, leftover_amounts
+
+    for leftover_key, leftover_amount in leftover_amounts.items():
+        rounding_error_obj = RoundingError(
+            leftover_key[0], leftover_amount, leftover_key[2], RoundingErrorSource.TRANSACTION_SPLIT
+        )
+        rounding_errors.append(rounding_error_obj)
+    return transactions_with_accounting, rounding_errors
