@@ -63,7 +63,7 @@ def _create_stripe_customer(
     # Note: Stripe doesn't update its search index of customers immediately,
     # so the new customer may not be visible to stripe.Customer.search for a few seconds.
     # Therefore we always try to find the customer by its ID, that we store in the database
-    makeradmin_member.stripe_customer_id = stripe_customer.stripe_id
+    makeradmin_member.stripe_customer_id = stripe_customer.id
     db_session.flush()
     return stripe_customer
 

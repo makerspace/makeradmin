@@ -53,7 +53,7 @@ def handle_setup_intent(setup_intent: stripe.SetupIntent) -> None:
             )
         elif status == SetupIntentStatus.REQUIRES_CONFIRMATION:
             try:
-                setup_intent = stripe.SetupIntent.confirm(setup_intent.stripe_id)
+                setup_intent = stripe.SetupIntent.confirm(setup_intent.id)
             except CardError as e:
                 # This can happen if the card was declined in *some* cases.
                 # In particular, it happens if you try to use a real card in a testing environment.
