@@ -38,7 +38,10 @@ const BoxTerminator = () => {
                     onSuccess={scanCallback}
                     filterScan={(scannedString) => {
                         const parsedString = JSON.parse(scannedString);
-                        if (!parsedString.hasOwnProperty("member_number")) {
+                        if (
+                            !parsedString.hasOwnProperty("member_number") ||
+                            !parsedString.hasOwnProperty("storage_id")
+                        ) {
                             showError("Not a member memberbooth tag!");
                             return false;
                         }
