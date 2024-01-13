@@ -383,18 +383,24 @@ function Accessy({
         !member.phone ||
         (!membership.labaccess_active && !membership.special_labaccess_active);
     const accessyInvite = (
-        <p>
-            <button
-                disabled={disabled}
-                class="uk-button uk-button-danger"
-                onClick={(e) => {
-                    e.preventDefault();
-                    onSendAccessyInvite();
-                }}
-            >
-                Skicka Accessy-inbjudan
-            </button>
-        </p>
+        <>
+            <p>
+                If you have reinstalled the Accessy app, you need to re-invite
+                yourself to get access again.
+            </p>
+            <p>
+                <button
+                    disabled={disabled}
+                    class="uk-button uk-button-danger"
+                    onClick={(e) => {
+                        e.preventDefault();
+                        onSendAccessyInvite();
+                    }}
+                >
+                    Skicka Accessy-inbjudan
+                </button>
+            </p>
+        </>
     );
     return (
         <fieldset>
