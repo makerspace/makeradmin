@@ -148,15 +148,6 @@ class Auth {
             });
     }
 
-    update_member_info(member_id) {
-        post({
-            url: "/member/send_updated_member_info",
-            data: { member_id },
-            errorMessage: "Error when sending email about updated information.",
-            expectedDataStatus: "ok",
-        });
-    }
-
     onChange() {}
 }
 
