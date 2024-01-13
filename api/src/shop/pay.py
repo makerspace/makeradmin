@@ -29,6 +29,7 @@ from shop.stripe_subscriptions import (
     cancel_subscription,
     start_subscription,
 )
+from shop.stripe_util import retry
 from shop.transactions import Purchase, create_transaction
 
 logger = getLogger("makeradmin")
@@ -160,25 +161,29 @@ def setup_payment_method(data_dict: Any, member_id: int) -> SetupPaymentMethodRe
         raise BadRequest(message=f"Invalid data: {e}")
 
     member = db_session.query(Member).get(member_id)
-    assert member is not None
+    if member is None:
+        raise BadRequest(f"Unable to find member with id {member_id}")
 
     stripe_customer = get_and_sync_stripe_customer(member)
-    assert stripe_customer is not None
+    if stripe_customer is None:
+        raise BadRequest(f"Unable to find corresponding stripe member {member}")
 
     if data.setup_intent_id is None:
         try:
-            payment_method = stripe.PaymentMethod.retrieve(data.stripe_payment_method_id)
+            payment_method = retry(lambda: stripe.PaymentMethod.retrieve(data.stripe_payment_method_id))
         except:
             raise BadRequest(message="The payment method is not valid.")
 
-        setup_intent = stripe.SetupIntent.create(
-            payment_method_types=["card"],
-            metadata={},
-            payment_method=payment_method.stripe_id,
-            customer=stripe_customer.stripe_id,
+        setup_intent = retry(
+            lambda: stripe.SetupIntent.create(
+                payment_method_types=["card"],
+                metadata={},
+                payment_method=payment_method.stripe_id,
+                customer=stripe_customer.stripe_id,
+            )
         )
     else:
-        setup_intent = stripe.SetupIntent.retrieve(data.setup_intent_id)
+        setup_intent = retry(lambda: stripe.SetupIntent.retrieve(data.setup_intent_id))
 
     try:
         handle_setup_intent(setup_intent)
@@ -205,7 +210,8 @@ def cancel_subscriptions(data_dict: Any, user_id: int) -> None:
         raise BadRequest(message=f"Invalid data: {e}")
 
     member = db_session.query(Member).get(user_id)
-    assert member is not None
+    if member is None:
+        raise BadRequest(f"Unable to find member with id {user_id}")
 
     if SubscriptionType.MEMBERSHIP in data.subscriptions and SubscriptionType.LAB not in data.subscriptions:
         # This should be handled automatically by the frontend with a nice popup, but we will enforce it here
@@ -222,7 +228,8 @@ def start_subscriptions(data_dict: Any, user_id: int) -> None:
         raise BadRequest(message=f"Invalid data: {e}")
 
     member = db_session.query(Member).get(user_id)
-    assert member is not None
+    if member is None:
+        raise BadRequest(f"Unable to find member with id {user_id}")
 
     stripe_customer = get_and_sync_stripe_customer(member)
     assert stripe_customer is not None
@@ -261,7 +268,7 @@ def cleanup_pending_members(relevant_email: str) -> None:
         # We delete the customer just to keep things tidy. It's not strictly necessary.
         if member.stripe_customer_id is not None:
             try:
-                stripe.Customer.delete(member.stripe_customer_id)
+                retry(lambda: stripe.Customer.delete(member.stripe_customer_id))
             except:
                 # If it cannot be deleted, we don't care
                 pass

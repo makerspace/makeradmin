@@ -105,7 +105,7 @@ def create_client_response(transaction: Transaction, payment_intent: PaymentInte
         return create_action_required_response(transaction, payment_intent)
 
     elif status == PaymentIntentStatus.REQUIRES_CONFIRMATION:
-        confirmed_intent = stripe.PaymentIntent.confirm(payment_intent.id)
+        confirmed_intent = retry(lambda: stripe.PaymentIntent.confirm(payment_intent.id))
         assert PaymentIntentStatus(confirmed_intent.status) != PaymentIntentStatus.REQUIRES_CONFIRMATION
         return create_client_response(transaction, confirmed_intent)
 
@@ -132,7 +132,7 @@ def confirm_stripe_payment_intent(transaction_id: int) -> PartialPayment:
     if transaction.status != Transaction.PENDING:
         raise BadRequest(f"transaction ({transaction_id}) is not pending")
 
-    payment_intent = stripe.PaymentIntent.retrieve(pending.stripe_token)
+    payment_intent = retry(lambda: stripe.PaymentIntent.retrieve(pending.stripe_token))
     status = PaymentIntentStatus(payment_intent.status)
     if status == PaymentIntentStatus.CANCELED:
         raise BadRequest(f"unexpected stripe payment intent status {status}")
