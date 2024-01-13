@@ -1,11 +1,11 @@
 import json
 
-from flask import g
-from service.api_definition import GET, MEMBER_EDIT, POST, PUBLIC, Arg, symbol
+from service.api_definition import GET, MEMBER_EDIT, PUBLIC
 
 from box_terminator import service
 
 
+# The following routes are just mocks, needs to be implemented properly
 @service.route("/fetch/<string:message>", method=GET, permission=MEMBER_EDIT)
 def box_terminator_fetch(
     message,
@@ -27,6 +27,8 @@ def box_terminator_fetch(
                 }
             )
         else:
+            nagButton = {"text": "nag", "path": "nag", "color": "#FF0000"}
+            terminateButton = {"text": "Terminate", "path": "terminate", "color": "#FF0000"}
             return json.dumps(
                 {
                     "type": "temp storage",
@@ -37,8 +39,8 @@ def box_terminator_fetch(
                     "info": "last nagged 2023-09-09",
                     "box_id": 1,
                     "options": [
-                        {"text": "nag", "path": "nag", "color": "#FF0000"},
-                        {"text": "Terminate", "path": "terminate", "color": "#FF0000"},
+                        nagButton,
+                        terminateButton,
                     ],
                 }
             )
