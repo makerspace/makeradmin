@@ -6,7 +6,7 @@ from stripe import CardError, InvalidRequestError, StripeError
 
 from shop.models import Transaction
 from shop.stripe_constants import CURRENCY, ChargeStatus
-from shop.stripe_util import convert_to_stripe_amount
+from shop.stripe_util import convert_to_stripe_amount, retry
 from shop.transactions import PaymentFailed, payment_success
 
 logger = getLogger("makeradmin")
@@ -29,11 +29,13 @@ def create_stripe_charge(transaction: Transaction, card_source_id: stripe.Source
     stripe_amount = convert_to_stripe_amount(transaction.amount)
 
     try:
-        return stripe.Charge.create(
-            amount=stripe_amount,
-            currency=CURRENCY,
-            description=f"charge for transaction id {transaction.id}",
-            source=card_source_id,
+        return retry(
+            lambda: stripe.Charge.create(
+                amount=stripe_amount,
+                currency=CURRENCY,
+                description=f"charge for transaction id {transaction.id}",
+                source=card_source_id,
+            )
         )
     except InvalidRequestError as e:
         raise_from_stripe_invalid_request_error(e)
