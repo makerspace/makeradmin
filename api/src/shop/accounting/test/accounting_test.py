@@ -158,8 +158,6 @@ class ProductToAccountCostCenterTest(FlaskTestBase):
         db_session.query(TransactionCostCenter).delete()
         db_session.query(ProductAccountsCostCenters).delete()
 
-        random_scale = self.number_of_accounts * self.number_of_cost_centers / 2
-
         self.transaction_accounts: Dict[AccountingEntryType, List[TransactionAccount]] = {}
         self.transaction_cost_centers: Dict[AccountingEntryType, List[TransactionCostCenter]] = {}
 
@@ -184,8 +182,7 @@ class ProductToAccountCostCenterTest(FlaskTestBase):
                 for k in range(self.number_of_cost_centers):
                     for type in AccountingEntryType:
                         added = False
-                        max_fraction = min(fractions_left[type] / 2, 100 / random_scale)
-                        fraction = random.randint(1, round(max_fraction))
+                        fraction = round(100 / (self.number_of_accounts * self.number_of_cost_centers * 1.3))
                         if j > k:
                             self.db.create_product_account_cost_center(
                                 product_id=product.id,
