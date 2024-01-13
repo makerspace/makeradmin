@@ -2,7 +2,7 @@ import random
 from datetime import date, datetime, timezone
 from decimal import Decimal
 from logging import getLogger
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Tuple
 from unittest import TestCase
 from unittest.mock import Mock, patch
 
@@ -141,7 +141,6 @@ class AccountingDifferenceTest(FlaskTestBase):
         assert transaction.id == wrong_transaction.id
 
 
-# TODO fix all the | None to be Optional[...] instead
 class ProductToAccountCostCenterTest(FlaskTestBase):
     models = [core.models, membership.models, shop.models]
     number_of_products = 3
@@ -389,7 +388,6 @@ class SplitTransactionsTest(FlaskTestBase):
             for type in AccountingEntryType:
                 fee = completed_payments[transaction.id].fee if type == AccountingEntryType.DEBIT else Decimal("0")
                 key = (type, transaction.id)
-                logger.info(f"Key {key}")
                 assert transaction.amount - (fee * len(transaction.contents)) == pytest.approx(
                     transaction_sums[key], abs=0.0001
                 )
@@ -745,13 +743,10 @@ class SplitTransactionsWithoutMockTest(ProductToAccountCostCenterTest):  # TODO 
                 transaction_acc = transactions_with_accounting.pop(index)
 
                 transaction_fee = self.true_split_fees[product.id]  # TODO check the total sums of fees is correct
-                logger.info(f"Transaction fee {transaction_fee}")
                 amount = Decimal(self.transaction_contents[product.id].amount)
-                logger.info(f"Amount {amount}")
                 amount = amount if transaction_acc.type == AccountingEntryType.CREDIT else amount - transaction_fee
                 true_amount = amount * account_cost_center.fraction / Decimal(100)
                 rounded_true_amount = round(true_amount, 2)  # TODO check rounding errors sum
-                logger.info(f"True amount {true_amount}")
 
                 assert transaction_acc.amount == rounded_true_amount
                 key: Tuple[int, AccountingEntryType] = (product.id, account_cost_center.type)

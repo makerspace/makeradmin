@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
 from logging import getLogger
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Tuple
 
 from basic_types.enums import AccountingEntryType
 from service.db import db_session
@@ -45,7 +45,6 @@ class ProductToAccountCostCenter:
 
         products = db_session.query(Product).all()
         for product in products:
-            logger.warning(f"Product: {product}")
             product_accounting = (
                 db_session.query(ProductAccountsCostCenters)
                 .outerjoin(TransactionAccount, ProductAccountsCostCenters.account)
@@ -60,20 +59,13 @@ class ProductToAccountCostCenter:
             fraction_sums[AccountingEntryType.DEBIT] = 0
             account_cost_centers: List[AccountCostCenter] = []
             for product_info in product_accounting:
-                logger.warning(f"Product info: {product_info}")
                 account = product_info.account if product_info.account is not None else None
                 cost_center = product_info.cost_center if product_info.cost_center is not None else None
                 if account is None and cost_center is None:
-                    logger.warning(
-                        f"Product with id {product.id} has accounting with both account and cost center as None. At least one must be set to a value."
-                    )
                     raise InternalServerError(
                         f"Product with id {product.id} has accounting with both account and cost center as None. At least one must be set to a value."
                     )
                 if product_info.fraction <= 0 or product_info.fraction > 100:
-                    logger.warning(
-                        f"Product with id {product.id} has accounting with id {product_info.id} with fraction {product_info.fraction} not in range [1, 100]"
-                    )
                     raise InternalServerError(
                         f"Product with id {product.id} has accounting with id {product_info.id} with fraction {product_info.fraction} not in range [1, 100]"
                     )
@@ -92,17 +84,10 @@ class ProductToAccountCostCenter:
 
             for key in fraction_sums:
                 if not entry_type_found[key]:
-                    logger.warning(
-                        f"Product with id {product.id} named {product.name} has no accounting information for {key.value}"
-                    )
                     raise InternalServerError(
                         f"Product with id {product.id} named {product.name} has no accounting information for {key.value}"
                     )
                 if fraction_sums[key] != 100:
-                    logger.warning(
-                        f"Product with id {product.id} named {product.name} has accounting type {key.value} "
-                        + f"with fraction weights not adding up to 100, was {fraction_sums[key]}",
-                    )
                     raise InternalServerError(
                         f"Product with id {product.id} named {product.name} has accounting type {key.value} "
                         + f"with fraction weights not adding up to 100, was {fraction_sums[key]}",
@@ -142,8 +127,6 @@ def split_transaction_fee_over_transaction_contents(transaction: Transaction, fe
     split_fees: Dict[int, Decimal] = {}
     leftover_fee = fee
     for content in transaction.contents:
-        logger.info(f"Content amount {content.amount}")
-        logger.info(f"Transaction amount {transaction.amount}")
         adjusted_fee = round(Decimal(content.amount / transaction.amount) * fee, 2)
         split_fees[content.id] = adjusted_fee
         leftover_fee -= adjusted_fee
@@ -159,11 +142,9 @@ def split_transactions_over_accounts(
     leftover_amounts: Dict[Tuple[int, int, AccountingEntryType], Decimal] = {}
 
     for transaction in transactions:
-        logger.info(split_transaction_fee_over_transaction_contents)
         split_fees = split_transaction_fee_over_transaction_contents(
             transaction, completed_payments[transaction.id].fee
         )
-        logger.info(f"Split fees: {split_fees}")
         for content in transaction.contents:
             product_accounting = product_to_accounting.get_account_cost_center(content.product_id)
 
@@ -179,8 +160,6 @@ def split_transactions_over_accounts(
                     accounting.fraction * Decimal("0.01")
                 )  # Multiply with 0.01 instead of division by 100
                 amount_to_add = Decimal(round(amount_to_add, 2))
-
-                logger.info(f"Adding amount {amount_to_add} to accounting {accounting}")
 
                 key = accounting.type
                 amounts_added[key] += amount_to_add

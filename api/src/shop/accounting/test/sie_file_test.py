@@ -2,7 +2,7 @@ import random
 from datetime import date, datetime, timezone
 from decimal import Decimal
 from logging import getLogger
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Tuple
 from unittest import TestCase
 
 import core
@@ -147,7 +147,6 @@ class SieFileWithVerificationTest(FlaskTestBase):
 
             for j in range(1, self.number_of_transactions + 1):
                 transaction_row = sie_rows.pop(0)
-                logger.info(transaction_row)
                 if (j - 1) % 2 == 0:
                     assert transaction_row.startswith(
                         f'#TRANS account{i} {{1 "cost_center{j}"}} -{Decimal("1000") + Decimal(f"{i * j + j}")} 2023{i:02d}01 "MakerAdmin period 2023-{i:02d}"'
@@ -162,50 +161,51 @@ class SieFileWithVerificationTest(FlaskTestBase):
 
         assert len(sie_rows) == 0
 
-    # def test_get_sie_string(self) -> None:
-    #     start_date = datetime(2023, 1, 1)
-    #     end_date = datetime(2023, 12, 31)
-    #     signer = "Maker Makerson"
+    def test_get_sie_string(self) -> None:
+        start_date = datetime(2023, 1, 1)
+        end_date = datetime(2023, 12, 31)
+        signer = "Maker Makerson"
 
-    #     sie_str = get_sie_string(self.verifications, start_date, end_date, signer)
+        sie_str = get_sie_string(self.verifications, start_date, end_date, signer)
+        sie_rows = sie_str.split("\n")
 
-    #     logger.info(sie_str)
+        while True:
+            row = sie_rows.pop(0)
 
-    #     sie_rows = sie_str.split("\n")
+            if row.startswith("#GEN"):
+                assert datetime.now().strftime("%Y%m%d") in row
+                assert signer in row
 
-    #     # TODO assert more info about the header
-    #     while True:
-    #         row = sie_rows.pop(0)
+            if row.startswith("#DIM"):
+                assert "Kostnadställe" in row
 
-    #         if row.startswith("#GEN"):
-    #             assert datetime.now().strftime("%Y%m%d") in row
-    #             assert signer in row
+            if row.startswith("#KONTO"):
+                assert "account" in row
 
-    #         if row.startswith("#DIM"):
-    #             assert "Kostnadställe" in row
+            if row.startswith("#OBJEKT"):
+                assert "cost_center" in row
 
-    #         if row.startswith("#VER"):
-    #             break
+            if row.startswith("#VER"):
+                break
 
-    #     for i in range(1, self.number_of_verifications + 1):
-    #         verification_row = sie_rows.pop(0) if i != 1 else row
-    #         assert verification_row.startswith(f'#VER B {i} 2023{i:02d}01 "MakerAdmin"')
-    #         verification_row = sie_rows.pop(0)
-    #         assert verification_row.strip() == "{"
+        for i in range(1, self.number_of_verifications + 1):
+            verification_row = sie_rows.pop(0) if i != 1 else row
+            assert verification_row.startswith(f'#VER B {i} 2023{i:02d}01 "MakerAdmin"')
+            verification_row = sie_rows.pop(0)
+            assert verification_row.strip() == "{"
 
-    #         for j in range(1, self.number_of_transactions + 1):
-    #             transaction_row = sie_rows.pop(0)
+            for j in range(1, self.number_of_transactions + 1):
+                transaction_row = sie_rows.pop(0)
+                if (j - 1) % 2 == 0:
+                    assert transaction_row.startswith(
+                        f'#TRANS account{i} {{1 "cost_center{j}"}} -{Decimal("1000") + Decimal(f"{i * j + j}")} 2023{i:02d}01 "MakerAdmin period 2023-{i:02d}"'
+                    )
+                else:
+                    assert transaction_row.startswith(
+                        f'#TRANS account{i} {{1 "cost_center{j}"}} {Decimal(f"{i * j + j}")} 2023{i:02d}01 "MakerAdmin period 2023-{i:02d}"'
+                    )
 
-    #             if (j - 1) % 2 == 0:
-    #                 assert transaction_row.startswith(
-    #                     f'#TRANS account{i} {{1 "cost_center{j}"}} -{Decimal("1000") + Decimal(f"{i * j + j}")} 2023{i:02d}01 "MakerAdmin period 2023-{i:02d}"'
-    #                 )
-    #             else:
-    #                 assert transaction_row.startswith(
-    #                     f'#TRANS account{i} {{1 "cost_center{j}"}} {Decimal(f"{i * j + j}")} 2023{i:02d}01 "MakerAdmin period 2023-{i:02d}"'
-    #                 )
+            verification_row = sie_rows.pop(0)
+            assert verification_row.strip() == "}"
 
-    #         verification_row = sie_rows.pop(0)
-    #         assert verification_row.strip() == "}"
-
-    #     assert len(sie_rows) == 0
+        assert len(sie_rows) == 0

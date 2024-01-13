@@ -1,6 +1,6 @@
 from datetime import datetime
 from logging import getLogger
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Tuple
 
 from basic_types.enums import AccountingEntryType
 from basic_types.time_period import TimePeriod
@@ -63,9 +63,6 @@ def export_accounting(start_date: datetime, end_date: datetime, group_by_period:
 
     diff = diff_transactions_and_completed_payments(transactions, completed_payments)
     if len(diff) > 0:
-        logger.warning(f"Transactions and completed payments do not match")
-        for d in diff:
-            logger.warning(f"Transaction: {d[0]}\nCompleted payment: {d[1]}\n*********")
         raise InternalServerError(f"Transactions and completed payments do not match, {diff}")
 
     transactions_with_accounting, leftover_amounts = split_transactions_over_accounts(transactions, completed_payments)
