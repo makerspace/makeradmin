@@ -262,6 +262,8 @@ function MissingAccessyInvite({
     }
     if (access.in_org) {
         // Don't need to send an invite if the member is already in the accessy organization
+        // Unless the person has reinstalled the app (see #431) and needs to
+        // reinvite themselves. But that button is added further down.
         return null;
     }
     if (member.phone === null) {
