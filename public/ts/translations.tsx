@@ -459,6 +459,7 @@ const Swe: typeof Eng = {
     member_page: {
         ...Eng.member_page,
         send_accessy_invite: "Skicka Accessy-inbjudan",
+        accessy_invite: "Bjud in dig själv till Accessy",
     },
 };
 
