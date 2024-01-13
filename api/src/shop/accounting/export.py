@@ -66,7 +66,7 @@ def rounding_errors_to_transaction_with_accounting(
                 transaction_id=error.transaction_id,
                 product_id=None,
                 amount=error.amount,
-                date=datetime.now(),
+                date=error.date,
                 account=account,
                 cost_center=cost_center_per_source[error.source],
                 type=error.type,

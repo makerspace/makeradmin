@@ -63,7 +63,9 @@ class ExportTest(TestCase):
         rounding_errors: List[RoundingError] = []
         for i in range(number_of_rounding_errors):
             source = RoundingErrorSource.FEE_SPLIT if i % 2 == 0 else RoundingErrorSource.TRANSACTION_SPLIT
-            rounding_errors.append(RoundingError(i, Decimal("10.0") * Decimal(i), AccountingEntryType.DEBIT, source))
+            rounding_errors.append(
+                RoundingError(i, Decimal("10.0") * Decimal(i), AccountingEntryType.DEBIT, source, datetime.now())
+            )
 
         transaction_rounding = rounding_errors_to_transaction_with_accounting(rounding_errors)
 

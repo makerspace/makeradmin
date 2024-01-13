@@ -53,6 +53,7 @@ class RoundingError:
     amount: Decimal
     type: AccountingEntryType
     source: RoundingErrorSource
+    date: datetime
 
 
 class ProductToAccountCostCenter:
@@ -157,7 +158,6 @@ def split_transactions_over_accounts(
 ) -> Tuple[List[TransactionWithAccounting], List[RoundingError]]:
     product_to_accounting = ProductToAccountCostCenter()
     transactions_with_accounting: List[TransactionWithAccounting] = []
-    leftover_amounts: Dict[Tuple[int, int, AccountingEntryType], Decimal] = {}
     rounding_errors: List[RoundingError] = []
 
     for transaction in transactions:
@@ -166,7 +166,11 @@ def split_transactions_over_accounts(
         )
         if rounding_error != Decimal("0.00"):
             rounding_error_obj = RoundingError(
-                transaction.id, rounding_error, AccountingEntryType.DEBIT, RoundingErrorSource.FEE_SPLIT
+                transaction.id,
+                rounding_error,
+                AccountingEntryType.DEBIT,
+                RoundingErrorSource.FEE_SPLIT,
+                transaction.created_at,
             )
             rounding_errors.append(rounding_error_obj)
         for content in transaction.contents:
@@ -212,11 +216,14 @@ def split_transactions_over_accounts(
                         content.product_id,
                         entry_type,
                     )
-                    leftover_amounts[leftover_key] = adjusted_transaction_content_amount - amount
+                    leftover_amount = adjusted_transaction_content_amount - amount
+                    rounding_error_obj = RoundingError(
+                        leftover_key[0],
+                        leftover_amount,
+                        leftover_key[2],
+                        RoundingErrorSource.TRANSACTION_SPLIT,
+                        transaction.created_at,
+                    )
+                    rounding_errors.append(rounding_error_obj)
 
-    for leftover_key, leftover_amount in leftover_amounts.items():
-        rounding_error_obj = RoundingError(
-            leftover_key[0], leftover_amount, leftover_key[2], RoundingErrorSource.TRANSACTION_SPLIT
-        )
-        rounding_errors.append(rounding_error_obj)
     return transactions_with_accounting, rounding_errors
