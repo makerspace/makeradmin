@@ -1,8 +1,7 @@
 import React, { useState } from "react";
-// import Button from '../Components/Button';
-import QrCodeScanner from "./QrCodeScanner";
-import { showError } from "../message";
 import { get } from "../gateway";
+import { showError } from "../message";
+import QrCodeScanner from "./QrCodeScanner";
 import { Termination, TerminationRenderProps } from "./Termination";
 
 type ResponseType = TerminationRenderProps;
@@ -39,7 +38,7 @@ const BoxTerminator = () => {
                     filterScan={(scannedString) => {
                         const parsedString = JSON.parse(scannedString);
                         if (
-                            !parsedString.hasOwnProperty("member_number") ||
+                            !parsedString.hasOwnProperty("member_number") &&
                             !parsedString.hasOwnProperty("storage_id")
                         ) {
                             showError("Not a member memberbooth tag!");
