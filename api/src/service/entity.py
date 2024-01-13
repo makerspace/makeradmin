@@ -242,6 +242,9 @@ class Entity:
 
             column_obj_converter = [to_obj_converters[type(c.type)] for c in expand_field.columns]
 
+            for c in expand_field.columns:
+                self.columns.add(c)
+
             # Use to_obj that can unpack result row.
             def to_obj(row):
                 obj = self.to_obj(row[0])

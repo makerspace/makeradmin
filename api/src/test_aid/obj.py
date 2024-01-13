@@ -1,15 +1,27 @@
 import re
 from datetime import datetime
+from decimal import Decimal
+from logging import getLogger
 from random import choice, randint, seed
 from typing import Any, Dict
 
-from basic_types.enums import PriceLevel
+from basic_types.enums import AccountingEntryType, PriceLevel
 from faker import Faker
 from membership.models import Member, Span
 from messages.models import Message
-from shop.models import ProductAction, Transaction
+from shop.models import (
+    ProductAccountsCostCenters,
+    ProductAction,
+    Transaction,
+    TransactionAccount,
+    TransactionContent,
+    TransactionCostCenter,
+)
 
 from test_aid.test_util import random_str
+
+logger = getLogger("makeradmin")
+
 
 DEFAULT_PASSWORD = "D9ub8$13"
 
@@ -31,6 +43,11 @@ class ObjFactory:
         self.message = None
         self.phone_request = None
         self.transaction = None
+        self.transaction_content = None
+        self.transaction_account = None
+        self.transaction_cost_center = None
+        self.product_account_cost_center = None
+
         seed()
 
     def create_member(self, **kwargs) -> Dict[str, Any]:
@@ -152,12 +169,61 @@ class ObjFactory:
         member_id = kwargs.pop("member_id", None) or (self.member and self.member["member_id"])
         obj = dict(
             status=Transaction.COMPLETED,
-            amount=100.0,
+            amount=Decimal("100.0"),
             member_id=member_id,
         )
         obj.update(**kwargs)
         self.transaction = obj
         return self.transaction
+
+    def create_transaction_content(self, **kwargs) -> TransactionContent:
+        transaction_id = kwargs.pop("transaction_id", None) or (self.transaction and self.transaction["id"])
+        product_id = kwargs.pop("product_id", None) or (self.product and self.product["id"])
+        obj = dict(
+            transaction_id=transaction_id,
+            product_id=product_id,
+            count=1,
+            amount=100.0,
+        )
+        obj.update(**kwargs)
+        self.transaction_content = obj
+        return self.transaction_content
+
+    def create_transaction_account(self, **kwargs) -> TransactionAccount:
+        obj = dict(
+            account=f"account-{random_str(5)}",
+            description=f"desc-{random_str(12)}",
+            display_order=randint(int(1e8), int(9e8)),
+        )
+        obj.update(kwargs)
+        self.transaction_account = obj
+        return self.transaction_account
+
+    def create_transaction_cost_center(self, **kwargs) -> TransactionCostCenter:
+        obj = dict(
+            cost_center=f"cost-center-{random_str(5)}",
+            description=f"desc-{random_str(12)}",
+            display_order=randint(int(1e8), int(9e8)),
+        )
+        obj.update(kwargs)
+        self.transaction_cost_center = obj
+        return self.transaction_cost_center
+
+    def create_product_account_cost_center(self, **kwargs) -> ProductAccountsCostCenters:
+        product_id = kwargs.pop("product_id", None) or (self.product and self.product["id"])
+        account_id = kwargs.pop("account_id", None)
+        cost_center_id = kwargs.pop("cost_center_id", None)
+
+        obj = dict(
+            account_id=account_id,
+            cost_center_id=cost_center_id,
+            product_id=product_id,
+            fraction=100,
+            type=AccountingEntryType.CREDIT,
+        )
+        obj.update(**kwargs)
+        self.product_account_cost_center = obj
+        return self.product_account_cost_center
 
 
 def random_phone_number() -> str:

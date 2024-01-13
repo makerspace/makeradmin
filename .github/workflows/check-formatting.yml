@@ -41,7 +41,7 @@ jobs:
           cache: "npm"
       - name: Install packages
         run: |
-          npm install -g prettier
+          npm ci
       - name: Check formatting
         run: |
           npx prettier --check .

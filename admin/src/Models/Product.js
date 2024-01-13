@@ -155,5 +155,9 @@ Product.model = {
         filter: null,
         show: true,
         image_id: null,
+        // extend = accounting
+        account_id: 0,
+        cost_center_id: 0,
+        type: null,
     },
 };

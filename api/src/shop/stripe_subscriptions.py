@@ -272,7 +272,7 @@ def lookup_subscription_price_for(
     ), f"Expected to find a single stripe product with metadata->{MSMetaKeys.SUBSCRIPTION_TYPE.value}={subscription_type.value}, but found {len(products.data)}"
     product = products.data[0]
 
-    prices = list(retry(lambda: stripe.Price.list(product=product.stripe_id)))
+    prices = list(retry(lambda: stripe.Price.list(product=product.id)))
 
     # Don't include archived prices
     prices = [p for p in prices if p["active"]]
@@ -285,7 +285,7 @@ def lookup_subscription_price_for(
     ]
     assert (
         len(recurring_prices) == 1
-    ), f"Expected to find a single stripe price for {subscription_type.name} with metadata->{MSMetaKeys.PRICE_TYPE.value}={PriceType.RECURRING.value}, but found {len(recurring_prices)} prices: {[p.stripe_id for p in recurring_prices]}"
+    ), f"Expected to find a single stripe price for {subscription_type.name} with metadata->{MSMetaKeys.PRICE_TYPE.value}={PriceType.RECURRING.value}, but found {len(recurring_prices)} prices: {[p.id for p in recurring_prices]}"
     recurring_price = recurring_prices[0]
 
     if BINDING_PERIOD[subscription_type] > 0:
@@ -306,7 +306,7 @@ def lookup_subscription_price_for(
 
         assert (
             len(starting_prices) == 1
-        ), f"Expected to find a single stripe price for {subscription_type.name} with metadata->{MSMetaKeys.PRICE_TYPE.value}={PriceType.BINDING_PERIOD.value}, a period of exactly {binding_period} months, but found {len(starting_prices)} prices: {[p.stripe_id for p in starting_prices]}"
+        ), f"Expected to find a single stripe price for {subscription_type.name} with metadata->{MSMetaKeys.PRICE_TYPE.value}={PriceType.BINDING_PERIOD.value}, a period of exactly {binding_period} months, but found {len(starting_prices)} prices: {[p.id for p in starting_prices]}"
         binding_period_price = starting_prices[0]
     else:
         binding_period_price = None
@@ -369,7 +369,7 @@ def start_subscription(
         stripe_customer = get_and_sync_stripe_customer(member, test_clock)
         if stripe_customer is None:
             raise BadRequest(f"Unable to find corresponding stripe member {member}")
-        assert member.stripe_customer_id == stripe_customer.stripe_id
+        assert member.stripe_customer_id == stripe_customer.id
 
         price = lookup_subscription_price_for(subscription_type)
 
@@ -387,9 +387,7 @@ def start_subscription(
                 to_pay_now = Decimal(0)
             else:
                 # Fetch a fresh price object from stripe to make sure we have the latest price
-                to_pay_now_price = stripe.Price.retrieve(
-                    (price.binding_period_price or price.recurring_price).stripe_id
-                )
+                to_pay_now_price = stripe.Price.retrieve((price.binding_period_price or price.recurring_price).id)
                 to_pay_now = convert_from_stripe_amount(to_pay_now_price["unit_amount"]) * (1 - discount.fraction_off)
             if to_pay_now != expected_to_pay_now:
                 raise BadRequest(
@@ -398,7 +396,7 @@ def start_subscription(
 
         if expected_to_pay_recurring is not None:
             # Fetch a fresh price object from stripe to make sure we have the latest price
-            to_pay_recurring_price = stripe.Price.retrieve(price.recurring_price.stripe_id)
+            to_pay_recurring_price = stripe.Price.retrieve(price.recurring_price.id)
             to_pay_recurring = convert_from_stripe_amount(to_pay_recurring_price["unit_amount"]) * (
                 1 - discount.fraction_off
             )
@@ -458,7 +456,7 @@ def start_subscription(
                 {
                     "items": [
                         {
-                            "price": price.binding_period_price.stripe_id,
+                            "price": price.binding_period_price.id,
                             "metadata": metadata,
                         },
                     ],
@@ -466,7 +464,7 @@ def start_subscription(
                     "metadata": metadata,
                     "proration_behavior": "none",
                     "iterations": 1,
-                    "coupon": discount.coupon.stripe_id if discount.coupon is not None else None,
+                    "coupon": discount.coupon.id if discount.coupon is not None else None,
                 }
             )
 
@@ -474,20 +472,20 @@ def start_subscription(
             {
                 "items": [
                     {
-                        "price": price.recurring_price.stripe_id,
+                        "price": price.recurring_price.id,
                         "metadata": metadata,
                     },
                 ],
                 "collection_method": "charge_automatically",
                 "metadata": metadata,
                 "proration_behavior": "none",
-                "coupon": discount.coupon.stripe_id if discount.coupon is not None else None,
+                "coupon": discount.coupon.id if discount.coupon is not None else None,
             }
         )
 
         subscription_schedule = stripe.SubscriptionSchedule.create(
             start_date=int(subscription_start.timestamp()),
-            customer=stripe_customer.stripe_id,
+            customer=stripe_customer.id,
             metadata=metadata,
             phases=phases,
         )
@@ -559,7 +557,7 @@ def pause_subscription(
         raise BadRequest(f"Unable to find member with id {member_id}")
     stripe_customer = get_and_sync_stripe_customer(member, test_clock)
     assert stripe_customer is not None
-    assert member.stripe_customer_id == stripe_customer.stripe_id
+    assert member.stripe_customer_id == stripe_customer.id
 
     if subscription_type == SubscriptionType.MEMBERSHIP:
         subscription_id = member.stripe_membership_subscription_id
@@ -613,7 +611,7 @@ def cancel_subscription(
         raise BadRequest(f"Unable to find member with id {member_id}")
     stripe_customer = get_and_sync_stripe_customer(member, test_clock)
     assert stripe_customer is not None
-    assert member.stripe_customer_id == stripe_customer.stripe_id
+    assert member.stripe_customer_id == stripe_customer.id
 
     if subscription_type == SubscriptionType.MEMBERSHIP:
         subscription_id = member.stripe_membership_subscription_id
