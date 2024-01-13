@@ -38,9 +38,11 @@ class AccountingExport extends React.Component {
                     "/" +
                     Object.values(this.state.selectedOption_to)[0],
             })
-                .then((r) => {
+                .then((response) => {
                     const element = document.createElement("a");
-                    const file = new Blob([r.data], { type: "text/plain" });
+                    const file = new Blob([atob(response.data)], {
+                        type: "text/plain",
+                    });
                     element.href = URL.createObjectURL(file);
                     element.download = file_name;
                     document.body.appendChild(element);
