@@ -63,7 +63,7 @@ def _create_stripe_customer(
     # Note: Stripe doesn't update its search index of customers immediately,
     # so the new customer may not be visible to stripe.Customer.search for a few seconds.
     # Therefore we always try to find the customer by its ID, that we store in the database
-    makeradmin_member.stripe_customer_id = stripe_customer.stripe_id
+    makeradmin_member.stripe_customer_id = stripe_customer.id
     db_session.flush()
     return stripe_customer
 
@@ -108,7 +108,7 @@ def delete_stripe_customer(member_id: int) -> None:
         raise NotFound(f"Unable to find member with id {member_id}")
     if member.stripe_customer_id is not None:
         # Note: This will also delete all subscriptions
-        stripe.Customer.delete(member.stripe_customer_id)
+        retry(lambda: stripe.Customer.delete(member.stripe_customer_id))
 
     member.stripe_customer_id = None
     db_session.flush()

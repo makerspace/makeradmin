@@ -1,9 +1,9 @@
-import React from "react";
 import PropTypes from "prop-types";
-import Member from "../Models/Member";
-import MemberForm from "../Components/MemberForm";
-import { confirmModal } from "../message";
+import React from "react";
 import { withRouter } from "react-router";
+import MemberForm from "../Components/MemberForm";
+import Member from "../Models/Member";
+import { confirmModal } from "../message";
 
 class MemberBoxMemberData extends React.Component {
     render() {
@@ -13,7 +13,9 @@ class MemberBoxMemberData extends React.Component {
             <div className="uk-margin-top">
                 <MemberForm
                     member={this.context.member}
-                    onSave={() => this.context.member.save()}
+                    onSave={() => {
+                        this.context.member.save();
+                    }}
                     onDelete={() => {
                         const { member } = this.context;
                         return confirmModal(member.deleteConfirmMessage())

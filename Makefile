@@ -35,6 +35,7 @@ dev-test:
 	(cd api/src && python3 -m pytest --workers auto -ra $(PYTEST_PARAMS))
 
 init-npm:
+	npm ci
 	cd admin && npm ci
 	cd public && npm ci
 

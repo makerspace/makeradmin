@@ -9,9 +9,10 @@ from typing import Dict, List, Optional
 import stripe
 from dataclasses_json import DataClassJsonMixin
 from membership.models import Member
+from service.config import debug_mode
 from service.db import db_session
 from service.error import EXCEPTION, BadRequest, InternalServerError
-from stripe import CardError, InvalidRequestError, PaymentIntent
+from stripe import CardError, InvalidRequestError, PaymentIntent, StripeError
 from typing_extensions import Never
 
 from shop.models import StripePending, Transaction
@@ -104,7 +105,7 @@ def create_client_response(transaction: Transaction, payment_intent: PaymentInte
         return create_action_required_response(transaction, payment_intent)
 
     elif status == PaymentIntentStatus.REQUIRES_CONFIRMATION:
-        confirmed_intent = stripe.PaymentIntent.confirm(payment_intent.id)
+        confirmed_intent = retry(lambda: stripe.PaymentIntent.confirm(payment_intent.id))
         assert PaymentIntentStatus(confirmed_intent.status) != PaymentIntentStatus.REQUIRES_CONFIRMATION
         return create_client_response(transaction, confirmed_intent)
 
@@ -131,7 +132,7 @@ def confirm_stripe_payment_intent(transaction_id: int) -> PartialPayment:
     if transaction.status != Transaction.PENDING:
         raise BadRequest(f"transaction ({transaction_id}) is not pending")
 
-    payment_intent = stripe.PaymentIntent.retrieve(pending.stripe_token)
+    payment_intent = retry(lambda: stripe.PaymentIntent.retrieve(pending.stripe_token))
     status = PaymentIntentStatus(payment_intent.status)
     if status == PaymentIntentStatus.CANCELED:
         raise BadRequest(f"unexpected stripe payment intent status {status}")
@@ -179,7 +180,7 @@ def pay_with_stripe(transaction: Transaction, payment_method_id: str, setup_futu
                 payment_method=payment_method_id,
                 amount=amount,
                 currency=CURRENCY,
-                customer=stripe_customer.stripe_id,
+                customer=stripe_customer.id,
                 confirmation_method="manual",
                 confirm=True,
                 # One might think that off_session could be set to true to make payments possible without
@@ -194,7 +195,7 @@ def pay_with_stripe(transaction: Transaction, payment_method_id: str, setup_futu
             )
         )
 
-        db_session.add(StripePending(transaction_id=transaction.id, stripe_token=payment_intent.stripe_id))
+        db_session.add(StripePending(transaction_id=transaction.id, stripe_token=payment_intent.id))
         db_session.flush()
 
         logger.info(
@@ -220,7 +221,7 @@ def get_stripe_payment_intents(start_date: date, end_date: date) -> List[stripe.
 
 def convert_completed_stripe_intents_to_payments(
     stripe_intents: List[PaymentIntent],
-) -> Dict[int, CompletedPayment] | None:
+) -> Dict[int, CompletedPayment]:
     payments: Dict[int, CompletedPayment] = {}
     for intent in stripe_intents:
         if intent.status != PaymentIntentStatus.SUCCEEDED:
@@ -237,3 +238,36 @@ def convert_completed_stripe_intents_to_payments(
             fee=convert_from_stripe_amount(charge.balance_transaction.fee),
         )
     return payments
+
+
+def create_fake_completed_payments_from_db(start_date: date, end_date: date) -> Dict[int, CompletedPayment]:
+    payments: Dict[int, CompletedPayment] = {}
+    transactions = (
+        db_session.query(Transaction)
+        .filter(Transaction.created_at >= start_date, Transaction.created_at <= end_date)
+        .all()
+    )
+    for transaction in transactions:
+        if transaction.status != Transaction.COMPLETED:
+            continue
+        payments[transaction.id] = CompletedPayment(
+            transaction_id=transaction.id,
+            amount=transaction.amount,
+            created=transaction.created_at,
+            fee=Decimal(str(round(transaction.amount * Decimal(0.03), 2))),
+        )
+    return payments
+
+
+def get_completed_payments_from_stripe(start_date: date, end_date: date) -> Dict[int, CompletedPayment]:
+    if debug_mode():
+        logger.warning(
+            "In debug/dev mode, using fake stripe payments for accounting by generating from existing data in db"
+        )
+        return create_fake_completed_payments_from_db(start_date, end_date)
+
+    try:
+        stripe_intents = get_stripe_payment_intents(start_date, end_date)
+    except StripeError as e:
+        raise BadRequest(message=f"Failed to fetch stripe payment intents: {e}")
+    return convert_completed_stripe_intents_to_payments(stripe_intents)
