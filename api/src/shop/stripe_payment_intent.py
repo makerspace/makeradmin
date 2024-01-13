@@ -9,6 +9,7 @@ from typing import Dict, List, Optional
 import stripe
 from dataclasses_json import DataClassJsonMixin
 from membership.models import Member
+from service.config import debug_mode
 from service.db import db_session
 from service.error import EXCEPTION, BadRequest, InternalServerError
 from stripe import CardError, InvalidRequestError, PaymentIntent, StripeError
@@ -239,7 +240,32 @@ def convert_completed_stripe_intents_to_payments(
     return payments
 
 
+def create_fake_completed_payments_from_db(start_date: date, end_date: date) -> Dict[int, CompletedPayment]:
+    payments: Dict[int, CompletedPayment] = {}
+    transactions = (
+        db_session.query(Transaction)
+        .filter(Transaction.created_at >= start_date, Transaction.created_at <= end_date)
+        .all()
+    )
+    for transaction in transactions:
+        if transaction.status != Transaction.COMPLETED:
+            continue
+        payments[transaction.id] = CompletedPayment(
+            transaction_id=transaction.id,
+            amount=transaction.amount,
+            created=transaction.created_at,
+            fee=Decimal(str(round(transaction.amount * Decimal(0.03), 2))),
+        )
+    return payments
+
+
 def get_completed_payments_from_stripe(start_date: date, end_date: date) -> Dict[int, CompletedPayment]:
+    if debug_mode():
+        logger.warning(
+            "In debug/dev mode, using fake stripe payments for accounting by generating from existing data in db"
+        )
+        return create_fake_completed_payments_from_db(start_date, end_date)
+
     try:
         stripe_intents = get_stripe_payment_intents(start_date, end_date)
     except StripeError as e:

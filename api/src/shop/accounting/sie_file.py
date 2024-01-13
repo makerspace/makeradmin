@@ -10,8 +10,7 @@ from shop.accounting.verification import Verification
 
 logger = getLogger("makeradmin")
 
-HEADER_TEMPLATE = """
-#FLAGGA 0
+HEADER_TEMPLATE = """#FLAGGA 0
 
 #PROGRAM "MakerAdmin Booking" 1.0
 #FORMAT PC8

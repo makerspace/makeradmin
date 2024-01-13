@@ -75,8 +75,8 @@ class SieFileTest(FlaskTestBase):
 
 class SieFileWithVerificationTest(FlaskTestBase):
     models = [core.models, shop.models]
-    number_of_verifications = 2
-    number_of_transactions = 3
+    number_of_verifications = 3
+    number_of_transactions = 4
 
     def setUp(self) -> None:
         db_session.query(TransactionAccount).delete()
@@ -95,8 +95,8 @@ class SieFileWithVerificationTest(FlaskTestBase):
             amounts: Dict[Tuple[TransactionAccount | None, TransactionCostCenter | None], Decimal] = {}
             types: Dict[Tuple[TransactionAccount | None, TransactionCostCenter | None], AccountingEntryType] = {}
 
+            account = self.db.create_transaction_account(account=f"account{i}")
             for j in range(1, self.number_of_transactions + 1):
-                account = self.db.create_transaction_account(account=f"account{j}")
                 cost_center = self.db.create_transaction_cost_center(cost_center=f"cost_center{j}")
                 self.accounts.append(account)
                 self.cost_centers.append(cost_center)
@@ -119,7 +119,9 @@ class SieFileWithVerificationTest(FlaskTestBase):
 
         self.accounts.sort(key=lambda x: x.account if x else "")
         for account in self.accounts:
-            assert f'#KONTO {account.account} "{account.description}"' in acc_header
+            pos = acc_header.index(f'#KONTO {account.account} "{account.description}"')
+            acc_header.pop(pos)
+        assert len(acc_header) == 0
 
     def test_get_cost_centers_header(self) -> None:
         random.shuffle(self.verifications)
@@ -127,7 +129,9 @@ class SieFileWithVerificationTest(FlaskTestBase):
 
         self.cost_centers.sort(key=lambda x: x.cost_center if x else "")
         for cost_center in self.cost_centers:
-            assert f'#OBJEKT 1 "{cost_center.cost_center}" "{cost_center.description}"' in cc_header
+            pos = cc_header.index(f'#OBJEKT 1 "{cost_center.cost_center}" "{cost_center.description}"')
+            cc_header.pop(pos)
+        assert len(cc_header) == 0
 
     def test_convert_to_sie_format(self) -> None:
         sie_rows = convert_to_sie_format(self.verifications)
@@ -142,11 +146,11 @@ class SieFileWithVerificationTest(FlaskTestBase):
                 transaction_row = sie_rows.pop(0)
                 if j % 2 == 0:
                     assert transaction_row.startswith(
-                        f'#TRANS account{j} {{1 "cost_center{j}"}} -{Decimal("1000") + Decimal(f"{i * j + j}")} 2023{i:02d}01 "MakerAdmin period 2023-{i:02d}"'
+                        f'#TRANS account{i} {{1 "cost_center{j}"}} -{Decimal("1000") + Decimal(f"{i * j + j}")} 2023{i:02d}01 "MakerAdmin period 2023-{i:02d}"'
                     )
                 else:
                     assert transaction_row.startswith(
-                        f'#TRANS account{j} {{1 "cost_center{j}"}} {Decimal(f"{i * j + j}")} 2023{i:02d}01 "MakerAdmin period 2023-{i:02d}"'
+                        f'#TRANS account{i} {{1 "cost_center{j}"}} {Decimal(f"{i * j + j}")} 2023{i:02d}01 "MakerAdmin period 2023-{i:02d}"'
                     )
 
             verification_row = sie_rows.pop(0)
@@ -190,11 +194,11 @@ class SieFileWithVerificationTest(FlaskTestBase):
 
                 if j % 2 == 0:
                     assert transaction_row.startswith(
-                        f'#TRANS account{j} {{1 "cost_center{j}"}} -{Decimal("1000") + Decimal(f"{i * j + j}")} 2023{i:02d}01 "MakerAdmin period 2023-{i:02d}"'
+                        f'#TRANS account{i} {{1 "cost_center{j}"}} -{Decimal("1000") + Decimal(f"{i * j + j}")} 2023{i:02d}01 "MakerAdmin period 2023-{i:02d}"'
                     )
                 else:
                     assert transaction_row.startswith(
-                        f'#TRANS account{j} {{1 "cost_center{j}"}} {Decimal(f"{i * j + j}")} 2023{i:02d}01 "MakerAdmin period 2023-{i:02d}"'
+                        f'#TRANS account{i} {{1 "cost_center{j}"}} {Decimal(f"{i * j + j}")} 2023{i:02d}01 "MakerAdmin period 2023-{i:02d}"'
                     )
 
             verification_row = sie_rows.pop(0)

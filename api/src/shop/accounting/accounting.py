@@ -45,6 +45,7 @@ class ProductToAccountCostCenter:
 
         products = db_session.query(Product).all()
         for product in products:
+            logger.warning(f"Product: {product}")
             product_accounting = (
                 db_session.query(ProductAccountsCostCenters)
                 .outerjoin(TransactionAccount, ProductAccountsCostCenters.account)
@@ -53,11 +54,13 @@ class ProductToAccountCostCenter:
                 .all()
             )
 
+            entry_type_found = {entry_type: False for entry_type in AccountingEntryType}
             fraction_sums: Dict[AccountingEntryType, int] = {}
             fraction_sums[AccountingEntryType.CREDIT] = 0
             fraction_sums[AccountingEntryType.DEBIT] = 0
             account_cost_centers: List[AccountCostCenter] = []
             for product_info in product_accounting:
+                logger.warning(f"Product info: {product_info}")
                 account = product_info.account if product_info.account is not None else None
                 cost_center = product_info.cost_center if product_info.cost_center is not None else None
                 if account is None and cost_center is None:
@@ -76,6 +79,7 @@ class ProductToAccountCostCenter:
                     )
 
                 accounting_type = AccountingEntryType(product_info.type)
+                entry_type_found[accounting_type] = True
                 fraction_sums[accounting_type] += product_info.fraction
                 account_cost_centers.append(
                     AccountCostCenter(
@@ -87,12 +91,21 @@ class ProductToAccountCostCenter:
                 )
 
             for key in fraction_sums:
-                if fraction_sums[key] != 100:
+                if not entry_type_found[key]:
                     logger.warning(
-                        f"Product with id {product.id} has accounting type {key} with fraction weights not adding up to 100"
+                        f"Product with id {product.id} named {product.name} has no accounting information for {key.value}"
                     )
                     raise InternalServerError(
-                        f"Product with id {product.id} has accounting type {key} with fraction weights not adding up to 100"
+                        f"Product with id {product.id} named {product.name} has no accounting information for {key.value}"
+                    )
+                if fraction_sums[key] != 100:
+                    logger.warning(
+                        f"Product with id {product.id} named {product.name} has accounting type {key.value} "
+                        + f"with fraction weights not adding up to 100, was {fraction_sums[key]}",
+                    )
+                    raise InternalServerError(
+                        f"Product with id {product.id} named {product.name} has accounting type {key.value} "
+                        + f"with fraction weights not adding up to 100, was {fraction_sums[key]}",
                     )
 
             self.product_to_account_cost_center[product.id] = account_cost_centers
