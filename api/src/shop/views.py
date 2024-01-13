@@ -1,3 +1,4 @@
+from base64 import b64encode
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from logging import getLogger
@@ -326,4 +327,6 @@ def stripe_callback_route():
 def download_accounting_file_route(from_year, to_year):
     start_date = datetime(from_year, 1, 1, tzinfo=timezone.utc)
     end_data = datetime(to_year, 12, 31, tzinfo=timezone.utc)
-    return export_accounting(start_date, end_data, TimePeriod.Month, g.user_id)
+    return b64encode(export_accounting(start_date, end_data, TimePeriod.Month, g.user_id).encode("cp437")).decode(
+        "ascii"
+    )
