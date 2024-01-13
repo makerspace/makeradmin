@@ -1,13 +1,13 @@
 import React from "react";
-import Collection from "../Models/Collection";
-import CollectionTable from "../Components/CollectionTable";
-import Currency from "../Components/Currency";
-import * as _ from "underscore";
-import CollectionNavigation from "../Models/CollectionNavigation";
-import Product from "../Models/Product";
 import { Link } from "react-router-dom";
 import Select from "react-select";
+import * as _ from "underscore";
+import CollectionTable from "../Components/CollectionTable";
+import Currency from "../Components/Currency";
 import SearchBox from "../Components/SearchBox";
+import Collection from "../Models/Collection";
+import CollectionNavigation from "../Models/CollectionNavigation";
+import Product from "../Models/Product";
 import ProductAccountsCostCenters from "../Models/ProductAccountsCostCenters";
 import { get } from "../gateway";
 import { showError } from "../message";
@@ -58,6 +58,7 @@ class AccountingProduct extends CollectionNavigation {
             pageSize: 0,
             filter_out_key: "type",
             filter_out_value: "debit",
+            includeDeleted: true,
         });
         this.state = {
             categories: null,
@@ -192,7 +193,7 @@ class AccountingProduct extends CollectionNavigation {
                     accounting_element_debit.product_id = product_id;
                     accounting_element_debit.type = "debit";
                     accounting_element_debit.account_id = 1;
-                    accounting_element_debit.fraction = 1;
+                    accounting_element_debit.fraction = 100;
                     accounting_element_debit.save().then(() => {
                         accounting_element_debit.reset();
                     });
@@ -204,6 +205,7 @@ class AccountingProduct extends CollectionNavigation {
                         );
                     accounting_element_credit.product_id = product_id;
                     accounting_element_credit.type = "credit";
+                    accounting_element_credit.fraction = 100;
 
                     if (account && account.id !== 0) {
                         accounting_element_credit.account_id = account.id;
