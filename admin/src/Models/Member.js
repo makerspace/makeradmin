@@ -7,7 +7,11 @@ export default class Member extends Base {
 
     canSave() {
         return (
-            this.isDirty() && this.email.length > 0 && this.firstname.length > 0
+            this.isDirty() &&
+            this.firstname.length > 0 &&
+            this.email.length > 0 &&
+            this.email.includes("@") &&
+            this.email.includes(".")
         );
     }
 }

@@ -1,5 +1,5 @@
-import { showError, showSuccess } from "./message";
 import { post } from "./gateway";
+import { showError, showSuccess } from "./message";
 
 class Auth {
     getAccessToken() {
@@ -146,6 +146,15 @@ class Auth {
                     "<h2>Inloggningen misslyckades</h2>Kunde inte kommunicera med servern.",
                 );
             });
+    }
+
+    update_member_info(member_id) {
+        post({
+            url: "/member/send_updated_member_info",
+            data: { member_id },
+            errorMessage: "Error when sending email about updated information.",
+            expectedDataStatus: "ok",
+        });
     }
 
     onChange() {}

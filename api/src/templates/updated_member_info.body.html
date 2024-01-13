@@ -1,0 +1,21 @@
+{% extends "email_body_base.html" %}
+
+{% block swedish %}
+<p>Hej {{ member.firstname }},</p>
+<p>(See below for English).</p>
+<p>
+    Dina personliga uppgifter har uppdaterats. Om detta inte var korrekt bör du se över dina uppgifter genom att logga
+    in på din <a href="{{ public_url('/member') }}">Stockholm Makerspace medlemssida</a>.
+</p>
+
+<p>Med vänliga hälsningar,<br />Stockholm Makerspace</p>
+{% endblock %}
+
+{% block english %}
+<p>
+    Your personal information has been updated. If this was incorrect you should have a look at your personal
+    information by logging in to your <a href="{{ public_url('/member') }}">Stockholm Makerspace medlemssida</a>.
+</p>
+
+<p>Sincerely,<br />Stockholm Makerspace</p>
+{% endblock %}
