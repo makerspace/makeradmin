@@ -362,7 +362,44 @@ function Help({
             {todo_bullets1}
             {todo_bullets2}
             {pending_labaccess_instruction}
-            {/* {accessyInvite} */}
+        </fieldset>
+    );
+}
+
+function Accessy({
+    member,
+    membership,
+    onSendAccessyInvite,
+}: {
+    member: member_t;
+    membership: membership_t;
+    onSendAccessyInvite: () => void;
+}) {
+    const t = useTranslation();
+
+    const disabled =
+        !member.phone ||
+        (!membership.labaccess_active && !membership.special_labaccess_active);
+    const accessyInvite = (
+        <p>
+            <button
+                disabled={disabled}
+                class="uk-button uk-button-danger"
+                onClick={(e) => {
+                    e.preventDefault();
+                    onSendAccessyInvite();
+                }}
+            >
+                Skicka Accessy-inbjudan
+            </button>
+        </p>
+    );
+    return (
+        <fieldset>
+            <legend>
+                <i uk-icon="info"></i> {t("member_page.accessy_invite")}
+            </legend>
+            {accessyInvite}
         </fieldset>
     );
 }
@@ -1174,6 +1211,11 @@ function MemberPage({
                         }
                     />
                     <Address member={member} />
+                    <Accessy
+                        member={member}
+                        membership={membership}
+                        onSendAccessyInvite={send_accessy_invite}
+                    />
                 </form>
             </div>
         </>
