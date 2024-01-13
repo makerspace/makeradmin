@@ -456,6 +456,10 @@ const Swe: typeof Eng = {
     // TODO
     ...Eng,
     continue: "Fortsätt",
+    member_page: {
+        ...Eng.member_page,
+        send_accessy_invite: "Skicka Accessy-inbjudan",
+    },
 };
 
 export const Translations: { en: typeof Eng; sv: typeof Eng } = {

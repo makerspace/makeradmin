@@ -397,7 +397,7 @@ function Accessy({
                         onSendAccessyInvite();
                     }}
                 >
-                    Skicka Accessy-inbjudan
+                    {t("member_page.send_accessy_invite")}
                 </button>
             </p>
         </>
