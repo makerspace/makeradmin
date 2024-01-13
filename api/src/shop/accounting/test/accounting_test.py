@@ -333,6 +333,74 @@ class ProductToAccountCostCenterTest(FlaskTestBase):
         self.assertTrue("both account and cost center as None" in str(context.exception))
 
 
+class SplitFeesTest(FlaskTestBase):
+    models = [core.models, membership.models, shop.models]
+
+    def setUp(self) -> None:
+        db_session.query(Member).delete()
+        db_session.query(Product).delete()
+        db_session.query(ProductCategory).delete()
+        db_session.query(Transaction).delete()
+        db_session.query(TransactionContent).delete()
+        db_session.query(TransactionAccount).delete()
+        db_session.query(TransactionCostCenter).delete()
+
+    def create_fake_data(
+        self, num_transactions: int, num_products: List[int], amounts: List[Decimal]
+    ) -> Tuple[Dict[int, Transaction], Dict[int, Dict[int, TransactionContent]]]:
+        member = self.db.create_member()
+        product_category = self.db.create_category()
+        true_transaction_contents: Dict[int, Dict[int, TransactionContent]] = {}
+        true_transactions: Dict[int, Transaction] = {}
+        for i in range(num_transactions):
+            created = datetime(2023, 3, i + 1, tzinfo=timezone.utc)
+            transaction = self.db.create_transaction(member_id=member.member_id, amount=amounts[i], created_at=created)
+            true_transactions[transaction.id] = transaction
+
+            transaction_contents: Dict[int, TransactionContent] = {}
+            price_left = amounts[i]
+            for j in range(num_products[i]):
+                if j == num_products[i] - 1:
+                    product_price = price_left
+                else:
+                    product_price = Decimal(round(amounts[i] / num_products[i]))
+                    price_left -= product_price
+                product = self.db.create_product(
+                    id=(i * num_transactions) + j + 1, category_id=product_category.id, price=product_price
+                )
+                transaction_contents[product.id] = self.db.create_transaction_content(
+                    transaction_id=transaction.id, product_id=product.id, amount=product_price, count=1
+                )
+            true_transaction_contents[transaction.id] = transaction_contents
+        return true_transactions, true_transaction_contents
+
+    def test_split_transaction_fee_over_transaction_contents_odd_fee(self) -> None:
+        num_transactions = 1
+        num_products = [3]
+        random.shuffle(num_products)
+        amounts = [Decimal("100") + Decimal("10.11") * Decimal(i) for i in range(num_transactions)]
+        true_fee = Decimal("1.23")
+
+        true_transactions, true_transaction_contents = self.create_fake_data(num_transactions, num_products, amounts)
+
+        transactions = db_session.query(Transaction).outerjoin(TransactionContent).all()
+        transaction = transactions[0]
+        split_fees, rounding_error = split_transaction_fee_over_transaction_contents(transaction, true_fee)
+        assert rounding_error == -Decimal("0.01")
+
+        assert len(split_fees) == sum(num_products)
+        split_sum = Decimal("0")
+
+        first_content = transaction.contents.pop(0)
+        for transaction_content in transaction.contents:
+            true_split = round(Decimal(transaction_content.amount / transaction.amount) * true_fee, 2)
+            assert split_fees[transaction_content.id] == true_split
+            split_sum += true_split
+        last_split_fee = split_fees[first_content.id]
+        assert last_split_fee == true_fee - split_sum - rounding_error
+        assert true_fee == split_sum + last_split_fee + rounding_error
+
+
 class SplitTransactionsTest(FlaskTestBase):
     models = [core.models, membership.models, shop.models]
 
@@ -463,12 +531,20 @@ class SplitTransactionsTest(FlaskTestBase):
         return account_cost_center
 
     @staticmethod
-    def get_split_fees_side_effect(transaction: Transaction, fee: Decimal) -> Dict[int, Decimal]:
-        return {content.id: Decimal("1.00") for content in transaction.contents}
+    def get_split_fees_side_effect(transaction: Transaction, fee: Decimal) -> Tuple[Dict[int, Decimal], Decimal]:
+        return ({content.id: Decimal("1.00") for content in transaction.contents}, Decimal("0.0"))
 
     @staticmethod
-    def get_split_fees_side_effect_odd_fee(transaction: Transaction, fee: Decimal) -> Dict[int, Decimal]:
-        return {content.id: Decimal("1.23") for content in transaction.contents}
+    def get_split_fees_side_effect_odd_fee(
+        transaction: Transaction, fee: Decimal
+    ) -> Tuple[Dict[int, Decimal], Decimal]:
+        return ({content.id: Decimal("1.23") for content in transaction.contents}, Decimal("0.0"))
+
+    @staticmethod
+    def get_split_fees_side_effect_odd_fee_and_rounding_error(
+        transaction: Transaction, fee: Decimal
+    ) -> Tuple[Dict[int, Decimal], Decimal]:
+        return ({content.id: Decimal("1.23") for content in transaction.contents}, Decimal("0.1"))
 
     @patch("shop.accounting.accounting.ProductToAccountCostCenter")
     @patch("shop.accounting.accounting.split_transaction_fee_over_transaction_contents")
@@ -495,8 +571,8 @@ class SplitTransactionsTest(FlaskTestBase):
         product_to_accounting_instance = mock_product_to_accounting.return_value
         product_to_accounting_instance.get_account_cost_center.side_effect = self.get_accounting_side_effect_one_acc_cc
 
-        accounting, leftover_amounts = split_transactions_over_accounts(transactions, completed_payments)
-        assert len(leftover_amounts) == 0
+        accounting, rounding_errors = split_transactions_over_accounts(transactions, completed_payments)
+        assert len(rounding_errors) == 0
 
         assert len(accounting) == sum(num_products) * 2
         self.assertAccounting(
@@ -505,7 +581,7 @@ class SplitTransactionsTest(FlaskTestBase):
 
     @patch("shop.accounting.accounting.ProductToAccountCostCenter")
     @patch("shop.accounting.accounting.split_transaction_fee_over_transaction_contents")
-    def test_split_transactions_over_accounts_simple_odd_fee(
+    def test_split_transactions_over_accounts_odd_fee(
         self, split_fees_mock: Mock, mock_product_to_accounting: Mock
     ) -> None:
         num_transactions = 5
@@ -528,8 +604,43 @@ class SplitTransactionsTest(FlaskTestBase):
         product_to_accounting_instance = mock_product_to_accounting.return_value
         product_to_accounting_instance.get_account_cost_center.side_effect = self.get_accounting_side_effect_one_acc_cc
 
-        accounting, leftover_amounts = split_transactions_over_accounts(transactions, completed_payments)
-        assert len(leftover_amounts) == 0
+        accounting, rounding_errors = split_transactions_over_accounts(transactions, completed_payments)
+        assert len(rounding_errors) == 0
+
+        assert len(accounting) == sum(num_products) * 2
+        self.assertAccounting(
+            num_products, true_transactions, completed_payments, accounting, true_transaction_contents, 100
+        )
+
+    @patch("shop.accounting.accounting.ProductToAccountCostCenter")
+    @patch("shop.accounting.accounting.split_transaction_fee_over_transaction_contents")
+    def test_split_transactions_over_accounts_rounding_error(
+        self, split_fees_mock: Mock, mock_product_to_accounting: Mock
+    ) -> None:
+        num_transactions = 5
+        num_products = [i + 1 for i in range(num_transactions)]
+        random.shuffle(num_products)
+        amounts = [Decimal("100") + Decimal("10") * Decimal(i) for i in range(num_transactions)]
+
+        true_transactions, true_transaction_contents = self.create_fake_data(num_transactions, num_products, amounts)
+        completed_payments: Dict[int, CompletedPayment] = {}
+        for transaction in true_transactions.values():
+            completed_payments[transaction.id] = CompletedPayment(
+                transaction.id, transaction.amount, transaction.created_at, Decimal("1.23")
+            )
+
+        transactions = db_session.query(Transaction).outerjoin(TransactionContent).all()
+        assert transactions
+        assert len(transactions) == num_transactions
+
+        split_fees_mock.side_effect = self.get_split_fees_side_effect_odd_fee_and_rounding_error
+        product_to_accounting_instance = mock_product_to_accounting.return_value
+        product_to_accounting_instance.get_account_cost_center.side_effect = self.get_accounting_side_effect_one_acc_cc
+
+        accounting, rounding_errors = split_transactions_over_accounts(transactions, completed_payments)
+        assert len(rounding_errors) == num_transactions
+        for error in rounding_errors:
+            assert error.amount == Decimal("0.10")  # TODO why not 0.01?
 
         assert len(accounting) == sum(num_products) * 2
         self.assertAccounting(
@@ -561,38 +672,13 @@ class SplitTransactionsTest(FlaskTestBase):
         product_to_accounting_instance = mock_product_to_accounting.return_value
         product_to_accounting_instance.get_account_cost_center.side_effect = self.get_accounting_side_effect
 
-        accounting, leftover_amounts = split_transactions_over_accounts(transactions, completed_payments)
-        assert len(leftover_amounts) == 0
+        accounting, rounding_errors = split_transactions_over_accounts(transactions, completed_payments)
+        assert len(rounding_errors) == 0
 
         assert len(accounting) == sum(num_products) * 4
         self.assertAccounting(
             num_products, true_transactions, completed_payments, accounting, true_transaction_contents, 50
         )
-
-    def test_split_transaction_fee_over_transaction_contents(self) -> None:
-        num_transactions = 1
-        num_products = [2]
-        random.shuffle(num_products)
-        amounts = [Decimal("100") + Decimal("10.11") * Decimal(i) for i in range(num_transactions)]
-        true_fee = Decimal("1.23")
-
-        true_transactions, true_transaction_contents = self.create_fake_data(num_transactions, num_products, amounts)
-
-        transactions = db_session.query(Transaction).outerjoin(TransactionContent).all()
-        transaction = transactions[0]
-        split_fees = split_transaction_fee_over_transaction_contents(transaction, true_fee)
-
-        assert len(split_fees) == sum(num_products)
-        split_sum = Decimal("0")
-
-        first_content = transaction.contents.pop(0)
-        for transaction_content in transaction.contents:
-            true_split = round(Decimal(transaction_content.amount / transaction.amount) * true_fee, 2)
-            assert split_fees[transaction_content.id] == true_split
-            split_sum += true_split
-        last_split_fee = split_fees[first_content.id]
-        assert last_split_fee == true_fee - split_sum
-        assert true_fee == split_sum + last_split_fee
 
     # TODO test disabled because of rounding issues
     # @patch("shop.accounting.accounting.ProductToAccountCostCenter")
@@ -694,7 +780,7 @@ class SplitTransactionsWithoutMockTest(ProductToAccountCostCenterTest):  # TODO 
             adjusted_fee = round((amount / total_amount) * self.transaction_fee, 2)
             leftover_fee -= adjusted_fee
             self.true_split_fees[product.id] = adjusted_fee
-        self.true_split_fees[products[0].id] += leftover_fee
+        self.true_rounding_error = leftover_fee
 
         self.completed_payments: Dict[int, CompletedPayment] = {}
         self.completed_payments[self.transaction.id] = CompletedPayment(
@@ -708,10 +794,11 @@ class SplitTransactionsWithoutMockTest(ProductToAccountCostCenterTest):  # TODO 
         products = db_session.query(Product).all()
 
         transactions_from_db = db_session.query(Transaction).outerjoin(TransactionContent).all()
-        transactions_with_accounting, leftover_amounts = split_transactions_over_accounts(
+        transactions_with_accounting, rounding_errors = split_transactions_over_accounts(
             transactions_from_db, self.completed_payments
         )
-        assert len(leftover_amounts) == 0
+        assert len(rounding_errors) == 1
+        assert rounding_errors[0].amount == self.true_rounding_error
 
         transactions_with_accounting.sort(
             key=lambda x: (

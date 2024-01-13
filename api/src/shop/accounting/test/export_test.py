@@ -14,8 +14,12 @@ from basic_types.enums import AccountingEntryType
 from basic_types.time_period import TimePeriod, date_to_period
 from membership.models import Member
 from service.db import db_session
-from shop.accounting.accounting import TransactionWithAccounting
-from shop.accounting.export import export_accounting, transaction_fees_to_transaction_with_accounting
+from shop.accounting.accounting import RoundingError, RoundingErrorSource
+from shop.accounting.export import (
+    export_accounting,
+    rounding_errors_to_transaction_with_accounting,
+    transaction_fees_to_transaction_with_accounting,
+)
 from shop.accounting.verification import Verification
 from shop.models import (
     Product,
@@ -53,6 +57,23 @@ class ExportTest(TestCase):
             self.assertEqual(transaction_fees[i].amount, true_fees[i])
             assert transaction_fees[i].account.account == "6573"
             assert transaction_fees[i].cost_center.cost_center == "Föreningsgemensamt"
+
+    def test_rounding_errors_to_transaction_with_accounting(self) -> None:
+        number_of_rounding_errors = 5
+        rounding_errors: List[RoundingError] = []
+        for i in range(number_of_rounding_errors):
+            source = RoundingErrorSource.FEE_SPLIT if i % 2 == 0 else RoundingErrorSource.TRANSACTION_SPLIT
+            rounding_errors.append(
+                RoundingError(i, Decimal("10.0") * Decimal(i), AccountingEntryType.DEBIT, source, datetime.now())
+            )
+
+        transaction_rounding = rounding_errors_to_transaction_with_accounting(rounding_errors)
+
+        for i in range(number_of_rounding_errors):
+            assert transaction_rounding[i].amount == Decimal("10.0") * Decimal(i)
+            assert transaction_rounding[i].account.account == "3740"
+            source = RoundingErrorSource.FEE_SPLIT if i % 2 == 0 else RoundingErrorSource.TRANSACTION_SPLIT
+            assert transaction_rounding[i].cost_center.cost_center == source.value
 
 
 class AccountingExportWithStripeMockTest(FlaskTestBase):
