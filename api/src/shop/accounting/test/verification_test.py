@@ -2,7 +2,7 @@ import random
 from datetime import date, datetime, timezone
 from decimal import Decimal
 from logging import getLogger
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Tuple
 from unittest import TestCase
 
 import core

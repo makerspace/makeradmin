@@ -1,6 +1,6 @@
 from datetime import datetime
 from logging import getLogger
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Tuple
 
 from basic_types.enums import AccountingEntryType
 from basic_types.time_period import TimePeriod

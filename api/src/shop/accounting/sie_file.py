@@ -1,7 +1,7 @@
 from datetime import datetime
 from decimal import Decimal
 from logging import getLogger
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Tuple
 
 from basic_types.enums import AccountingEntryType
 from membership.models import Member
@@ -49,7 +49,6 @@ def verification_string(verification: Verification, verfication_number: int) -> 
 def transaction_string(
     account: TransactionAccount, cost_center: TransactionCostCenter | None, sum: Decimal, period: str, description: str
 ) -> str:
-    logger.info(f"Transaction: {account} {cost_center} {sum} {period} {description}")
     if cost_center is None:
         cc_string = f"{{}}"
     else:
