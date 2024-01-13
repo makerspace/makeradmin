@@ -8,7 +8,7 @@ PyMySQL
 requests
 python-dotenv
 bcrypt
-stripe==7.12.0
+stripe==7.8.2
 jsonschema
 jinja2
 pytz
