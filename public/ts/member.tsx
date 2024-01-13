@@ -262,6 +262,8 @@ function MissingAccessyInvite({
     }
     if (access.in_org) {
         // Don't need to send an invite if the member is already in the accessy organization
+        // Unless the person has reinstalled the app (see #431) and needs to
+        // reinvite themselves. But that button is added further down.
         return null;
     }
     if (member.phone === null) {
@@ -362,7 +364,50 @@ function Help({
             {todo_bullets1}
             {todo_bullets2}
             {pending_labaccess_instruction}
-            {/* {accessyInvite} */}
+        </fieldset>
+    );
+}
+
+function Accessy({
+    member,
+    membership,
+    onSendAccessyInvite,
+}: {
+    member: member_t;
+    membership: membership_t;
+    onSendAccessyInvite: () => void;
+}) {
+    const t = useTranslation();
+
+    const disabled =
+        !member.phone ||
+        (!membership.labaccess_active && !membership.special_labaccess_active);
+    const accessyInvite = (
+        <>
+            <p>
+                If you have reinstalled the Accessy app, you need to re-invite
+                yourself to get access again.
+            </p>
+            <p>
+                <button
+                    disabled={disabled}
+                    class="uk-button uk-button-danger"
+                    onClick={(e) => {
+                        e.preventDefault();
+                        onSendAccessyInvite();
+                    }}
+                >
+                    {t("member_page.send_accessy_invite")}
+                </button>
+            </p>
+        </>
+    );
+    return (
+        <fieldset>
+            <legend>
+                <i uk-icon="info"></i> {t("member_page.accessy_invite")}
+            </legend>
+            {accessyInvite}
         </fieldset>
     );
 }
@@ -1174,6 +1219,11 @@ function MemberPage({
                         }
                     />
                     <Address member={member} />
+                    <Accessy
+                        member={member}
+                        membership={membership}
+                        onSendAccessyInvite={send_accessy_invite}
+                    />
                 </form>
             </div>
         </>
