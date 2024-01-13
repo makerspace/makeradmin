@@ -29,6 +29,10 @@ def transaction_fees_to_transaction_with_accounting(
     completed_payments: Dict[int, CompletedPayment],
 ) -> List[TransactionWithAccounting]:
     amounts: List[TransactionWithAccounting] = []
+    account = TransactionAccount(account="6573", description="6573", id=0, display_order=1)
+    cost_center = TransactionCostCenter(
+        cost_center="Föreningsgemensamt", description="Föreningsgemensamt", id=0, display_order=1
+    )
     for payment in completed_payments.values():
         amounts.append(
             TransactionWithAccounting(
@@ -36,11 +40,8 @@ def transaction_fees_to_transaction_with_accounting(
                 product_id=None,
                 amount=payment.fee,
                 date=payment.created,
-                # TODO improve this part
-                account=TransactionAccount(account="6573", description="6573", id=0, display_order=1),
-                cost_center=TransactionCostCenter(
-                    cost_center="Föreningsgemensamt", description="Föreningsgemensamt", id=0, display_order=1
-                ),
+                account=account,
+                cost_center=cost_center,
                 type=AccountingEntryType.DEBIT,
             )
         )
@@ -49,13 +50,22 @@ def transaction_fees_to_transaction_with_accounting(
 
 def export_accounting(start_date: datetime, end_date: datetime, group_by_period: TimePeriod, member_id: int) -> str:
     signer = db_session.query(Member).filter(Member.member_id == member_id).one_or_none()
+    if signer is None:
+        raise InternalServerError(f"Member with id {member_id} not found")
     logger.info(f"Exporting accounting from {start_date} to {end_date} with signer {signer.member_number}")
     completed_payments = get_completed_payments_from_stripe(start_date, end_date)
-    transactions = db_session.query(Transaction).outerjoin(TransactionContent).all()
+    transactions = (
+        db_session.query(Transaction)
+        .filter(Transaction.created_at >= start_date, Transaction.created_at <= end_date)
+        .outerjoin(TransactionContent)
+        .all()
+    )
 
     diff = diff_transactions_and_completed_payments(transactions, completed_payments)
     if len(diff) > 0:
-        logger.warning(f"Transactions and completed payments do not match, {diff}")
+        logger.warning(f"Transactions and completed payments do not match")
+        for d in diff:
+            logger.warning(f"Transaction: {d[0]}\nCompleted payment: {d[1]}\n*********")
         raise InternalServerError(f"Transactions and completed payments do not match, {diff}")
 
     transactions_with_accounting, leftover_amounts = split_transactions_over_accounts(transactions, completed_payments)
@@ -66,4 +76,5 @@ def export_accounting(start_date: datetime, end_date: datetime, group_by_period:
     transaction_fees = transaction_fees_to_transaction_with_accounting(completed_payments)
     transactions_with_accounting.extend(transaction_fees)
     verifications = create_verificatons(transactions_with_accounting, group_by_period)
+    logger.info(f"Verifications: {verifications}")
     return get_sie_string(verifications, start_date, end_date, f"{signer.firstname} {signer.lastname}")

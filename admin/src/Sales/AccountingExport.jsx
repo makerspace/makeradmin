@@ -21,14 +21,14 @@ class AccountingExport extends React.Component {
                 Object.values(this.state.selectedOption_to)[0]
         ) {
             if (file_name) {
-                file_name = file_name + ".sie";
+                file_name = file_name + ".si";
             } else {
                 file_name =
                     "Accounting_" +
                     Object.values(this.state.selectedOption_from)[0] +
                     "_" +
                     Object.values(this.state.selectedOption_to)[0] +
-                    ".sie";
+                    ".si";
             }
 
             get({

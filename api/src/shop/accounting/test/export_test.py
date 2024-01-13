@@ -163,7 +163,7 @@ class AccountingExportWithStripeMockTest(FlaskTestBase):
 
         # logger.info(f"Completed payments: {self.completed_payments}")
 
-        # sie_str = export_accounting(start_date, end_date, TimePeriod.Month, self.member)
+        # sie_str = export_accounting(start_date, end_date, TimePeriod.Month, self.member.member_id)
 
         # logger.info(f"{sie_str}")
 

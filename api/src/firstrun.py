@@ -474,8 +474,7 @@ def create_shop_accounts_cost_centers() -> None:
             )
         )
 
-    consumption_category = get_or_create(ProductCategory, name="Consumption")
-    products = db_session.query(Product).filter_by(category_id=consumption_category.id).all()
+    products = db_session.query(Product).all()
 
     for i, product in enumerate(products):
         debits = 100
