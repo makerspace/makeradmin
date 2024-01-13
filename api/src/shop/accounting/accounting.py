@@ -62,16 +62,10 @@ class ProductToAccountCostCenter:
                 account = product_info.account if product_info.account is not None else None
                 cost_center = product_info.cost_center if product_info.cost_center is not None else None
                 if account is None and cost_center is None:
-                    logger.warning(
-                        f"Product with id {product.id} has accounting with both account and cost center as None. At least one must be set to a value."
-                    )
                     raise InternalServerError(
                         f"Product with id {product.id} has accounting with both account and cost center as None. At least one must be set to a value."
                     )
                 if product_info.fraction <= 0 or product_info.fraction > 100:
-                    logger.warning(
-                        f"Product with id {product.id} has accounting with id {product_info.id} with fraction {product_info.fraction} not in range [1, 100]"
-                    )
                     raise InternalServerError(
                         f"Product with id {product.id} has accounting with id {product_info.id} with fraction {product_info.fraction} not in range [1, 100]"
                     )
@@ -90,17 +84,10 @@ class ProductToAccountCostCenter:
 
             for key in fraction_sums:
                 if not entry_type_found[key]:
-                    logger.warning(
-                        f"Product with id {product.id} named {product.name} has no accounting information for {key.value}"
-                    )
                     raise InternalServerError(
                         f"Product with id {product.id} named {product.name} has no accounting information for {key.value}"
                     )
                 if fraction_sums[key] != 100:
-                    logger.warning(
-                        f"Product with id {product.id} named {product.name} has accounting type {key.value} "
-                        + f"with fraction weights not adding up to 100, was {fraction_sums[key]}",
-                    )
                     raise InternalServerError(
                         f"Product with id {product.id} named {product.name} has accounting type {key.value} "
                         + f"with fraction weights not adding up to 100, was {fraction_sums[key]}",

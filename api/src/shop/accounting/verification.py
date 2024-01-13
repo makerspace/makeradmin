@@ -30,9 +30,6 @@ def create_verificatons(
         if year_month in verifications:
             if inner_key in verifications[year_month].amounts:
                 if verifications[year_month].types[inner_key] != transaction.type:
-                    logger.warning(
-                        f"Multiple transactions with different types for the same account, {transaction.account}, and cost center, {transaction.cost_center}, in the same period {year_month}."
-                    )
                     raise InternalServerError(
                         f"Multiple transactions with different types for the same account, {transaction.account}, and cost center, {transaction.cost_center}, in the same period {year_month}."
                     )
