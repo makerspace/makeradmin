@@ -86,7 +86,7 @@ def export_accounting(start_date: datetime, end_date: datetime, group_by_period:
         db_session.query(Transaction)
         .filter(
             Transaction.created_at >= start_date,
-            Transaction.created_at <= end_date,
+            Transaction.created_at < end_date,
             Transaction.status == Transaction.COMPLETED,
         )
         .outerjoin(TransactionContent)

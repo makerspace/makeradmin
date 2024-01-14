@@ -1,11 +1,12 @@
 from base64 import b64encode
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from logging import getLogger
 from typing import Any
 
 from basic_types.enums import PriceLevel
 from basic_types.time_period import TimePeriod
+from dateutil.relativedelta import relativedelta
 from flask import Response, g, make_response, request, send_file
 from multiaccessy.invite import AccessyInvitePreconditionFailed, ensure_accessy_labaccess
 from service.api_definition import (
@@ -323,10 +324,10 @@ def stripe_callback_route():
     stripe_callback(request.data, request.headers)
 
 
-@service.route("/download-accounting-file/<int:from_year>/<int:to_year>", method=GET, permission=WEBSHOP)
-def download_accounting_file_route(from_year, to_year):
-    start_date = datetime(from_year, 1, 1, tzinfo=timezone.utc)
-    end_data = datetime(to_year, 12, 31, tzinfo=timezone.utc)
+@service.route("/download-accounting-file/<int:year>/<int:month>", method=GET, permission=WEBSHOP)
+def download_accounting_file_route(year, month):
+    start_date = datetime(year, month, 1, tzinfo=timezone.utc)
+    end_data = datetime(year, month, 1, tzinfo=timezone.utc) + relativedelta(months=1)
     return b64encode(export_accounting(start_date, end_data, TimePeriod.Month, g.user_id).encode("cp437")).decode(
         "ascii"
     )
