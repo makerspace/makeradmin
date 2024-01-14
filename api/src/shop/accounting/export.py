@@ -83,7 +83,11 @@ def export_accounting(start_date: datetime, end_date: datetime, group_by_period:
     completed_payments = get_completed_payments_from_stripe(start_date, end_date)
     transactions = (
         db_session.query(Transaction)
-        .filter(Transaction.created_at >= start_date, Transaction.created_at <= end_date)
+        .filter(
+            Transaction.created_at >= start_date,
+            Transaction.created_at < end_date,
+            Transaction.status == Transaction.COMPLETED,
+        )
         .outerjoin(TransactionContent)
         .all()
     )

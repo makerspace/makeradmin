@@ -208,7 +208,7 @@ def pay_with_stripe(transaction: Transaction, payment_method_id: str, setup_futu
 
 def get_stripe_payment_intents(start_date: date, end_date: date) -> List[stripe.PaymentIntent]:
     expand = ["data.latest_charge.balance_transaction"]
-    created = {"gte": int(mktime(start_date.timetuple())), "lte": int(mktime(end_date.timetuple()))}
+    created = {"gte": int(mktime(start_date.timetuple())), "lt": int(mktime(end_date.timetuple()))}
 
     stripe_intents = retry(lambda: stripe.PaymentIntent.list(limit=100, created=created, expand=expand))
     payments: List[stripe.PaymentIntent] = []
