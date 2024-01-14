@@ -75,6 +75,7 @@ def rounding_errors_to_transaction_with_accounting(
     return transactions
 
 
+# TODO check for pending transactions, raise if found
 def export_accounting(start_date: datetime, end_date: datetime, group_by_period: TimePeriod, member_id: int) -> str:
     signer = db_session.query(Member).filter(Member.member_id == member_id).one_or_none()
     if signer is None:
