@@ -8,7 +8,6 @@ from unittest.mock import Mock, patch
 
 import core
 import membership
-import pytest
 import shop
 from basic_types.enums import AccountingEntryType
 from membership.models import Member
@@ -429,12 +428,10 @@ class SplitTransactionsTest(FlaskTestBase):
             transaction = true_transactions[acc.transaction_id]
             num_entry_types_found[acc.type] += 1
 
-            amount = Decimal(true_transaction_contents[transaction.id][product_id].amount)
+            amount = Decimal(str(round(true_transaction_contents[transaction.id][product_id].amount, 2)))
             amount = amount if acc.type == AccountingEntryType.CREDIT else amount - transaction_fee
             actual_amount = amount * Decimal(fraction) * Decimal("0.01")  # Multiply by 0.01 instead of dividing by 100
-            assert acc.amount == pytest.approx(
-                actual_amount, abs=0.0001
-            )  # TODO could approx be removed? replaced with round 2 in some places
+            assert acc.amount == actual_amount
 
             key = (acc.type, transaction.id)
             if key not in transaction_sums:
@@ -456,9 +453,7 @@ class SplitTransactionsTest(FlaskTestBase):
             for type in AccountingEntryType:
                 fee = transaction_fee if type == AccountingEntryType.DEBIT else Decimal("0")
                 key = (type, transaction.id)
-                assert transaction.amount - (fee * len(transaction.contents)) == pytest.approx(
-                    transaction_sums[key], abs=0.0001
-                )
+                assert transaction.amount - (fee * len(transaction.contents)) == transaction_sums[key]
 
         for type, count in num_entry_types_found.items():
             if fraction == 100:
@@ -756,7 +751,7 @@ class SplitTransactionsTest(FlaskTestBase):
     #     assert len(leftover_amounts) == 2
 
     #     for tuple_key, leftover in leftover_amounts.items():
-    #         assert leftover == pytest.approx(Decimal("-0.01"), abs=0.01)
+    #         assert leftover == Decimal("-0.01")
 
     #     assert len(accounting) == sum(num_products) * 4
     #     self.assertAccounting(num_products, true_transactions, accounting, true_transaction_contents,transaction_fee, 50)
