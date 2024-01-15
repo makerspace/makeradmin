@@ -147,9 +147,12 @@ def split_transaction_fee_over_transaction_contents(
     rounding_error = fee
     for content in transaction.contents:
         adjusted_fee = round(Decimal(content.amount / transaction.amount) * fee, 2)
-        logger.info(f"Adjusted fee: {adjusted_fee} for content {content.id} with amount {content.amount}")
         split_fees[content.id] = adjusted_fee
         rounding_error -= adjusted_fee
+
+    values = list(split_fees.values())
+    max_key = list(split_fees.keys())[values.index(max(values))]
+    split_fees[max_key] += rounding_error
     return split_fees, rounding_error
 
 
@@ -173,18 +176,21 @@ def split_transactions_over_accounts(
                 transaction.created_at,
             )
             rounding_errors.append(rounding_error_obj)
+
         for content in transaction.contents:
             product_accounting = product_to_accounting.get_account_cost_center(content.product_id)
+            if not product_accounting:
+                raise InternalServerError(f"Product with id {content.product_id} has no accounting information")
 
             amounts_added: Dict[AccountingEntryType, Decimal] = {type: Decimal(0) for type in AccountingEntryType}
+            adjusted_transaction_content_amounts: Dict[AccountingEntryType, Decimal] = {
+                AccountingEntryType.CREDIT: Decimal(content.amount),
+                AccountingEntryType.DEBIT: Decimal(content.amount) - split_fees[content.id],
+            }
 
+            index_to_add_leftover_amount = (-1, Decimal("-1"))
             for accounting in product_accounting:
-                adjusted_transaction_content_amount = (
-                    Decimal(content.amount)
-                    if accounting.type == AccountingEntryType.CREDIT
-                    else Decimal(content.amount) - split_fees[content.id]
-                )
-                amount_to_add = adjusted_transaction_content_amount * (
+                amount_to_add = adjusted_transaction_content_amounts[accounting.type] * (
                     accounting.fraction * Decimal("0.01")
                 )  # Multiply with 0.01 instead of division by 100
                 amount_to_add = Decimal(round(amount_to_add, 2))
@@ -204,23 +210,17 @@ def split_transactions_over_accounts(
                     )
                 )
 
-            for entry_type, amount in amounts_added.items():
-                adjusted_transaction_content_amount = (
-                    Decimal(content.amount)
-                    if entry_type == AccountingEntryType.CREDIT
-                    else Decimal(content.amount) - split_fees[content.id]
-                )
-                if amount != adjusted_transaction_content_amount:
-                    leftover_key: Tuple[int, int, AccountingEntryType] = (
-                        transaction.id,
-                        content.product_id,
-                        entry_type,
-                    )
-                    leftover_amount = adjusted_transaction_content_amount - amount
+                if amount_to_add > index_to_add_leftover_amount[1]:
+                    index_to_add_leftover_amount = (len(transactions_with_accounting) - 1, amount_to_add)
+
+            for entry_type, amount_added in amounts_added.items():
+                leftover_amount = adjusted_transaction_content_amounts[entry_type] - amount_added
+                if leftover_amount != 0:
+                    transactions_with_accounting[index_to_add_leftover_amount[0]].amount += leftover_amount
                     rounding_error_obj = RoundingError(
-                        leftover_key[0],
+                        transaction.id,
                         leftover_amount,
-                        leftover_key[2],
+                        entry_type,
                         RoundingErrorSource.TRANSACTION_SPLIT,
                         transaction.created_at,
                     )

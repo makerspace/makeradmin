@@ -231,3 +231,11 @@ For the member view page and regristration page to work there are also a few pro
     -   Metadata:{"allowed_price_levels":["low_income_discount"],"special_product_id":"access_starter_pack"}
     -   Enhet/unit: st
     -   Action: add labaccess days
+
+## Bookkeeping and accounting
+
+For accounting Makeradmin supports exporting the transaction history as sie files.
+
+The transaction history is compared with Stripe to make sure it matches and there are no extra transactions in Makeradmin or Stripe.
+
+Debit bookings adjust the product price with the transaction fee. However, each transaction usually contain multiple products. Thus, the transaction fee neds to be distributed over the products if the debit accounts or cost centers for the product are different. This adjustment involves distributing the transaction fee among the products in proportion to their total price within the transaction, which takes into consideration the quantity of products purchased. Any rounding errors are corrected by adjusting them to the nearest, higher or lower, amount. Any left over cent is added or removed on the most expensive price to make sure the total sum is correct.

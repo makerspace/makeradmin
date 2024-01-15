@@ -42,3 +42,6 @@ def create_verificatons(
                 year_month, {inner_key: transaction.amount}, {inner_key: transaction.type}
             )
     return list(verifications.values())
+
+
+# TODO create verification tests with different time periods should add up to the same thing
