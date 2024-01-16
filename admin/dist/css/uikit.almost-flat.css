@@ -8412,6 +8412,13 @@ a.uk-thumbnail:focus {
 /* Scrollable
  ========================================================================== */
 /*
+ * Enable scrolling for component
+ */
+.uk-scrollable-component {
+  max-height: 300px;
+  overflow-y: auto;
+}
+ /*
  * Enable scrolling for preformatted text
  */
 .uk-scrollable-text {
