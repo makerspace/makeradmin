@@ -1,11 +1,10 @@
 import React from "react";
-import Collection from "../Models/Collection";
 import CollectionTable from "../Components/CollectionTable";
-import CollectionNavigation from "../Models/CollectionNavigation";
-import TextInput from "../Components/TextInput";
-import TransactionAccount from "../Models/TransactionAccount";
 import SearchBox from "../Components/SearchBox";
-import Textarea from "../Components/Textarea";
+import TextInput from "../Components/TextInput";
+import Collection from "../Models/Collection";
+import CollectionNavigation from "../Models/CollectionNavigation";
+import TransactionAccount from "../Models/TransactionAccount";
 
 class AccountingAccount extends CollectionNavigation {
     constructor(props) {
@@ -63,7 +62,7 @@ class AccountingAccount extends CollectionNavigation {
                             title="Namn"
                             placeholder="Nummer på nytt konto"
                         />
-                        <Textarea
+                        <TextInput
                             model={this.transactionAccount}
                             name="description"
                             title="Beskrivning"
