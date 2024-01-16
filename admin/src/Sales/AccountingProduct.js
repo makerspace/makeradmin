@@ -408,9 +408,7 @@ class AccountingProduct extends CollectionNavigation {
                             options={showOptions_account}
                             value={selectedOption_account}
                             getOptionValue={(g) => g.id}
-                            getOptionLabel={(g) =>
-                                g.account + " : " + g.description
-                            }
+                            getOptionLabel={(g) => g.account}
                             onChange={(account) =>
                                 this.selectOptionAccount(account)
                             }
@@ -426,9 +424,7 @@ class AccountingProduct extends CollectionNavigation {
                             options={showOptions_cost_center}
                             value={selectedOption_cost_center}
                             getOptionValue={(g) => g.id}
-                            getOptionLabel={(g) =>
-                                g.cost_center + " : " + g.description
-                            }
+                            getOptionLabel={(g) => g.cost_center}
                             onChange={(cost_center) =>
                                 this.selectOptionCostCenter(cost_center)
                             }
