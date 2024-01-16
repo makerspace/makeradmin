@@ -23,9 +23,13 @@ const filterOptions_cost_center = (items_cost_center, options_cost_center) => {
 };
 
 const updateOptions_account = (options_account) => (prevState) => {
-    let options = [{ account: "No modification", id: 0 }].concat(
-        filterOptions_account(prevState.items_account, options_account),
-    );
+    let options = [
+        {
+            account: "No modification",
+            id: 0,
+            description: "Do not change account",
+        },
+    ].concat(filterOptions_account(prevState.items_account, options_account));
     return {
         showOptions_account: options,
         options_account,
@@ -33,7 +37,13 @@ const updateOptions_account = (options_account) => (prevState) => {
 };
 
 const updateOptions_cost_center = (options_cost_center) => (prevState) => {
-    let options = [{ cost_center: "No modification", id: 0 }].concat(
+    let options = [
+        {
+            cost_center: "No modification",
+            id: 0,
+            description: "Do not change cost center",
+        },
+    ].concat(
         filterOptions_cost_center(
             prevState.items_cost_center,
             options_cost_center,
