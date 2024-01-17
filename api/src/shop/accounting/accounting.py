@@ -195,27 +195,36 @@ def split_transactions_over_accounts(
                 )  # Multiply with 0.01 instead of division by 100
                 amount_to_add = Decimal(round(amount_to_add, 2))
 
-                key = accounting.type
-                amounts_added[key] += amount_to_add
+                amounts_added[accounting.type] += amount_to_add
 
-                transactions_with_accounting.append(
-                    TransactionWithAccounting(
-                        transaction_id=transaction.id,
-                        product_id=content.product_id,
-                        amount=amount_to_add,
-                        date=transaction.created_at,
-                        account=accounting.account,
-                        cost_center=accounting.cost_center,
-                        type=accounting.type,
-                    )
+                logger.info(f"Accounting: {accounting}")
+                logger.info(f"Amount to add: {amount_to_add}")
+                logger.info(f"Amounts added: {amounts_added}")
+                logger.info(f"Entry type: {accounting.type}")
+
+                transacion_acc = TransactionWithAccounting(
+                    transaction_id=transaction.id,
+                    product_id=content.product_id,
+                    amount=amount_to_add,
+                    date=transaction.created_at,
+                    account=accounting.account,
+                    cost_center=accounting.cost_center,
+                    type=accounting.type,
                 )
+                logger.info(f"Transaction with accounting: {transacion_acc}")
+                transactions_with_accounting.append(transacion_acc)
 
-                if amount_to_add > index_to_add_leftover_amount[1]:
+                if accounting.type == AccountingEntryType.DEBIT and amount_to_add > index_to_add_leftover_amount[1]:
+                    logger.info("*** update")
                     index_to_add_leftover_amount = (len(transactions_with_accounting) - 1, amount_to_add)
 
             for entry_type, amount_added in amounts_added.items():
                 leftover_amount = adjusted_transaction_content_amounts[entry_type] - amount_added
                 if leftover_amount != 0:
+                    logger.info(f"Leftover amount: {leftover_amount}")
+                    logger.info(f"Amount added: {amount_added}")
+                    logger.info(f"Entry type: {entry_type}")
+                    logger.info(f"Index to add leftover amount: {index_to_add_leftover_amount}")
                     transactions_with_accounting[index_to_add_leftover_amount[0]].amount += leftover_amount
                     rounding_error_obj = RoundingError(
                         transaction.id,
@@ -226,4 +235,5 @@ def split_transactions_over_accounts(
                     )
                     rounding_errors.append(rounding_error_obj)
 
+    logger.info(f"Transactions with accounting: {transactions_with_accounting}")
     return transactions_with_accounting, rounding_errors

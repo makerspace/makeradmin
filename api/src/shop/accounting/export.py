@@ -72,7 +72,6 @@ def export_accounting(start_date: datetime, end_date: datetime, group_by_period:
         raise InternalServerError(f"Transactions and completed payments do not match, {diff}")
 
     transactions_with_accounting, rounding_errors = split_transactions_over_accounts(transactions, completed_payments)
-    logger.info(f"Roundings errors from split: {rounding_errors}")
 
     transaction_fees = transaction_fees_to_transaction_with_accounting(completed_payments)
     transactions_with_accounting.extend(transaction_fees)
