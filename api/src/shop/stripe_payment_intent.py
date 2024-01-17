@@ -230,7 +230,15 @@ def convert_completed_stripe_intents_to_payments(
         charge = intent.latest_charge
         assert charge.balance_transaction is not None
         assert charge.paid
-        id = int(intent.metadata[MakerspaceMetadataKeys.TRANSACTION_IDS.value])
+
+        try:
+            id = int(intent.metadata[MakerspaceMetadataKeys.TRANSACTION_IDS.value])
+        except KeyError:
+            # Temporary fix to deal with an older way of storing transaction ids
+            # It is stored in the description field instead of metadata
+            str_split = intent.description.split("id ")
+            id = int(str_split[1])
+
         payments[id] = CompletedPayment(
             transaction_id=id,
             amount=convert_from_stripe_amount(charge.amount),
