@@ -882,23 +882,20 @@ class Test(FlaskTestBase):
         Checks that we can get the payment intents for a subscription.
         """
 
-        (now, clock, member_id) = self.setup_single_member()
-
-        member = db_session.query(Member).get(member_id)
-        assert member is not None
+        (now, clock, member) = self.setup_single_member()
         seen_members = [member]
 
-        assert not get_membership_summary(member_id).membership_active
+        assert not get_membership_summary(member.member_id).membership_active
 
         stripe_subscriptions.start_subscription(
-            member_id,
+            member,
             SubscriptionType.MEMBERSHIP,
             earliest_start_at=now,
             test_clock=clock.stripe_clock,
         )
         self.advance_clock(clock, now + time_delta(days=1))
 
-        summary = get_membership_summary(member_id, clock.date)
+        summary = get_membership_summary(member.member_id, clock.date)
         assert summary.membership_active
         assert summary.membership_end == (now + time_delta(years=1)).date()
 
@@ -919,14 +916,12 @@ class Test(FlaskTestBase):
         """
         binding_period = self.access_subscription_product.smallest_multiple
 
-        (now, clock, member_id) = self.setup_single_member()
+        (now, clock, member) = self.setup_single_member()
 
-        member = db_session.query(Member).get(member_id)
-        assert member is not None
         seen_members = [member]
 
         stripe_subscriptions.start_subscription(
-            member_id,
+            member,
             SubscriptionType.LAB,
             earliest_start_at=now,
             test_clock=clock.stripe_clock,
@@ -936,10 +931,10 @@ class Test(FlaskTestBase):
         # Sometimes stripe misses to send the paid event here... so let's retry
         self.advance_clock(clock, now + time_delta(days=1))
 
-        summary = get_membership_summary(member_id, clock.date)
+        summary = get_membership_summary(member.member_id, clock.date)
 
         # Cancel subscription after one day
-        stripe_subscriptions.cancel_subscription(member_id, SubscriptionType.LAB, test_clock=clock.stripe_clock)
+        stripe_subscriptions.cancel_subscription(member, SubscriptionType.LAB, test_clock=clock.stripe_clock)
 
         intents = get_stripe_payment_intents(
             datetime.now(timezone.utc) - abs_tdelta(hours=1),
@@ -952,11 +947,11 @@ class Test(FlaskTestBase):
 
         # Resubscribe, the new subscription will start one day before the current membership ends
         sub_start = summary.labaccess_end - time_delta(days=1)
-        stripe_subscriptions.start_subscription(member_id, SubscriptionType.LAB, test_clock=clock.stripe_clock)
+        stripe_subscriptions.start_subscription(member, SubscriptionType.LAB, test_clock=clock.stripe_clock)
 
         self.advance_clock(clock, noon(first_sub_start + time_delta(days=3)))
 
-        summary = get_membership_summary(member_id, clock.date)
+        summary = get_membership_summary(member.member_id, clock.date)
 
         # Stripe does not allow us to advance clocks more than 2 subscription-periods at once
         # So we have to do this in steps.
@@ -978,20 +973,17 @@ class Test(FlaskTestBase):
         """
         Checks that we get the correct payment intents if a subscription fails to charge, the subscription is retried a few times and then nenewed when we switch to a new card
         """
-        (now, clock, member_id) = self.setup_single_member()
-
-        member = db_session.query(Member).get(member_id)
-        assert member is not None
+        (now, clock, member) = self.setup_single_member()
         seen_members = [member]
 
         stripe_subscriptions.start_subscription(
-            member_id,
+            member,
             SubscriptionType.MEMBERSHIP,
             earliest_start_at=now,
             test_clock=clock.stripe_clock,
         )
         self.advance_clock(clock, now + time_delta(days=1))
-        self.set_payment_method(self.get_member(member_id), FakeCardPmToken.DeclineAfterAttach, clock)
+        self.set_payment_method(member, FakeCardPmToken.DeclineAfterAttach, clock)
 
         # Stripe should be configured to retry the payment 3 times before giving up
         # This will take 3 + 5 + 7 = 15 days with the default settings
@@ -1007,7 +999,7 @@ class Test(FlaskTestBase):
         self.assert_payment_intents(member.member_id, filtered_intents)
 
         # Restore a valid payment method. The card will be retried at 1year + 3days
-        self.set_payment_method(self.get_member(member_id), FakeCardPmToken.Normal, clock)
+        self.set_payment_method(member, FakeCardPmToken.Normal, clock)
         self.advance_clock(clock, now + time_delta(years=1, days=10))
 
         intents = get_stripe_payment_intents(
