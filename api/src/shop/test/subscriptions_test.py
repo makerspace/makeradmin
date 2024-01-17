@@ -84,12 +84,12 @@ def attach_and_set_payment_method(
     stripe_customer = get_and_sync_stripe_customer(member, test_clock=test_clock)
     assert stripe_customer is not None
 
-    payment_method = retry(lambda: stripe.PaymentMethod.attach(card_token.value, customer=stripe_customer.stripe_id))
+    payment_method = retry(lambda: stripe.PaymentMethod.attach(card_token.value, customer=stripe_customer.id))
     retry(
         lambda: stripe.Customer.modify(
-            stripe_customer.stripe_id,
+            stripe_customer.id,
             invoice_settings={
-                "default_payment_method": payment_method.stripe_id,
+                "default_payment_method": payment_method.id,
             },
         )
     )
@@ -104,7 +104,7 @@ class FakeClock:
     def advance(self, to: datetime) -> None:
         assert to >= self.date
         self.date = to
-        stripe.test_helpers.TestClock.advance(self.stripe_clock.stripe_id, frozen_time=int(self.date.timestamp()))
+        stripe.test_helpers.TestClock.advance(self.stripe_clock.id, frozen_time=int(self.date.timestamp()))
 
 
 # TODO The placement of tests related to payment intents is not ideal, if we refactor the stripe tests, we should move them to a better place
@@ -165,7 +165,7 @@ class Test(FlaskTestBase):
         # Delete all test clocks
         # This will also delete all customers and subscriptions created during the test
         for c in self.clocks_to_destroy:
-            stripe.test_helpers.TestClock.delete(c.stripe_clock.stripe_id)
+            stripe.test_helpers.TestClock.delete(c.stripe_clock.id)
         return super().tearDown()
 
     def filter_intents_on_customers(
@@ -251,7 +251,7 @@ class Test(FlaskTestBase):
         self.poll_stripe_events(
             self.earliest_possible_event_time,
             "test_helpers.test_clock.ready",
-            clock.stripe_clock.stripe_id,
+            clock.stripe_clock.id,
         )
 
     def poll_stripe_events(self, min_time: datetime, until_seen_type: str, test_clock: str) -> None:
@@ -301,7 +301,7 @@ class Test(FlaskTestBase):
                         if test_clock_for_event(ev) != test_clock:
                             continue
 
-                        self.seen_event_ids.add(ev.stripe_id)
+                        self.seen_event_ids.add(ev.id)
 
                         # Do not forward test clock events. They are just debugging noise.
                         if not ev.type.startswith("test_helpers.test_clock."):
@@ -917,9 +917,7 @@ class Test(FlaskTestBase):
         """
         Checks that we get the correct payment intents if a subscription is cancelled, and then resubscribed
         """
-        binding_period = BINDING_PERIOD[SubscriptionType.LAB]
-        if binding_period <= 0:
-            pytest.skip("No binding period for lab access")
+        binding_period = self.access_subscription_product.smallest_multiple
 
         (now, clock, member_id) = self.setup_single_member()
 

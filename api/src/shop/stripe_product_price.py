@@ -64,7 +64,7 @@ def get_stripe_prices(
     stripe_product: stripe.Product, lookup_keys: List[str] | None = None
 ) -> list[stripe.Price] | None:
     try:
-        return list(retry(lambda: stripe.Price.list(product=stripe_product.stripe_id, lookup_keys=lookup_keys)))
+        return list(retry(lambda: stripe.Price.list(product=stripe_product.id, lookup_keys=lookup_keys)))
     except stripe.InvalidRequestError as e:
         logger.warning(f"failed to retrive prices from stripe for stripe product with id {stripe_product.id}, {e}")
         return None

@@ -1,8 +1,12 @@
+from base64 import b64encode
 from dataclasses import dataclass
+from datetime import datetime, timedelta, timezone
 from logging import getLogger
 from typing import Any
 
 from basic_types.enums import PriceLevel
+from basic_types.time_period import TimePeriod
+from dateutil.relativedelta import relativedelta
 from flask import Response, g, make_response, request, send_file
 from multiaccessy.invite import AccessyInvitePreconditionFailed, ensure_accessy_labaccess
 from service.api_definition import (
@@ -22,15 +26,19 @@ from service.error import InternalServerError, PreconditionFailed
 from sqlalchemy.exc import NoResultFound
 
 from shop import service
+from shop.accounting.export import export_accounting
 from shop.entities import (
     category_entity,
     gift_card_content_entity,
     gift_card_entity,
+    product_accounting_entity,
     product_action_entity,
     product_entity,
     product_image_entity,
+    transaction_account_entity,
     transaction_action_entity,
     transaction_content_entity,
+    transaction_cost_center_entity,
     transaction_entity,
 )
 from shop.models import ProductImage, TransactionContent
@@ -171,6 +179,36 @@ service.entity_routes(
     permission_delete=WEBSHOP_EDIT,
 )
 
+service.entity_routes(
+    path="/transaction_account",
+    entity=transaction_account_entity,
+    permission_list=WEBSHOP,
+    permission_read=WEBSHOP,
+    permission_create=WEBSHOP_EDIT,
+    permission_update=WEBSHOP_EDIT,
+    permission_delete=WEBSHOP_EDIT,
+)
+
+service.entity_routes(
+    path="/transaction_cost_center",
+    entity=transaction_cost_center_entity,
+    permission_list=WEBSHOP,
+    permission_read=WEBSHOP,
+    permission_create=WEBSHOP_EDIT,
+    permission_update=WEBSHOP_EDIT,
+    permission_delete=WEBSHOP_EDIT,
+)
+
+service.entity_routes(
+    path="/accounting",
+    entity=product_accounting_entity,
+    permission_list=WEBSHOP,
+    permission_read=WEBSHOP,
+    permission_create=WEBSHOP_EDIT,
+    permission_update=WEBSHOP_EDIT,
+    permission_delete=WEBSHOP_EDIT,
+)
+
 
 @service.route("/member/current/pending_actions", method=GET, permission=USER)
 def pending_actions_for_member():
@@ -283,3 +321,12 @@ def register_route() -> Any:
 @service.route("/stripe_callback", method=POST, permission=PUBLIC, commit_on_error=True)
 def stripe_callback_route():
     stripe_callback(request.data, request.headers)
+
+
+@service.route("/download-accounting-file/<int:year>/<int:month>", method=GET, permission=WEBSHOP)
+def download_accounting_file_route(year, month):
+    start_date = datetime(year, month, 1, tzinfo=timezone.utc)
+    end_data = datetime(year, month, 1, tzinfo=timezone.utc) + relativedelta(months=1)
+    return b64encode(export_accounting(start_date, end_data, TimePeriod.Month, g.user_id).encode("cp437")).decode(
+        "ascii"
+    )

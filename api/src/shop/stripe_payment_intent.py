@@ -9,9 +9,10 @@ from typing import Dict, List, Optional
 import stripe
 from dataclasses_json import DataClassJsonMixin
 from membership.models import Member
+from service.config import debug_mode
 from service.db import db_session
 from service.error import EXCEPTION, BadRequest, InternalServerError
-from stripe import CardError, InvalidRequestError, PaymentIntent
+from stripe import CardError, InvalidRequestError, PaymentIntent, StripeError
 from typing_extensions import Never
 
 from shop.models import StripePending, Transaction
@@ -179,7 +180,7 @@ def pay_with_stripe(transaction: Transaction, payment_method_id: str, setup_futu
                 payment_method=payment_method_id,
                 amount=amount,
                 currency=CURRENCY,
-                customer=stripe_customer.stripe_id,
+                customer=stripe_customer.id,
                 confirmation_method="manual",
                 confirm=True,
                 # One might think that off_session could be set to true to make payments possible without
@@ -194,7 +195,7 @@ def pay_with_stripe(transaction: Transaction, payment_method_id: str, setup_futu
             )
         )
 
-        db_session.add(StripePending(transaction_id=transaction.id, stripe_token=payment_intent.stripe_id))
+        db_session.add(StripePending(transaction_id=transaction.id, stripe_token=payment_intent.id))
         db_session.flush()
 
         logger.info(
@@ -207,7 +208,7 @@ def pay_with_stripe(transaction: Transaction, payment_method_id: str, setup_futu
 
 def get_stripe_payment_intents(start_date: date, end_date: date) -> List[stripe.PaymentIntent]:
     expand = ["data.latest_charge.balance_transaction"]
-    created = {"gte": int(mktime(start_date.timetuple())), "lte": int(mktime(end_date.timetuple()))}
+    created = {"gte": int(mktime(start_date.timetuple())), "lt": int(mktime(end_date.timetuple()))}
 
     stripe_intents = retry(lambda: stripe.PaymentIntent.list(limit=100, created=created, expand=expand))
     payments: List[stripe.PaymentIntent] = []
@@ -220,7 +221,7 @@ def get_stripe_payment_intents(start_date: date, end_date: date) -> List[stripe.
 
 def convert_completed_stripe_intents_to_payments(
     stripe_intents: List[PaymentIntent],
-) -> Dict[int, CompletedPayment] | None:
+) -> Dict[int, CompletedPayment]:
     payments: Dict[int, CompletedPayment] = {}
     for intent in stripe_intents:
         if intent.status != PaymentIntentStatus.SUCCEEDED:
@@ -229,7 +230,15 @@ def convert_completed_stripe_intents_to_payments(
         charge = intent.latest_charge
         assert charge.balance_transaction is not None
         assert charge.paid
-        id = int(intent.metadata[MakerspaceMetadataKeys.TRANSACTION_IDS.value])
+
+        try:
+            id = int(intent.metadata[MakerspaceMetadataKeys.TRANSACTION_IDS.value])
+        except KeyError:
+            # Temporary fix to deal with an older way of storing transaction ids
+            # It is stored in the description field instead of metadata
+            str_split = intent.description.split("id ")
+            id = int(str_split[1])
+
         payments[id] = CompletedPayment(
             transaction_id=id,
             amount=convert_from_stripe_amount(charge.amount),
@@ -237,3 +246,36 @@ def convert_completed_stripe_intents_to_payments(
             fee=convert_from_stripe_amount(charge.balance_transaction.fee),
         )
     return payments
+
+
+def create_fake_completed_payments_from_db(start_date: date, end_date: date) -> Dict[int, CompletedPayment]:
+    payments: Dict[int, CompletedPayment] = {}
+    transactions = (
+        db_session.query(Transaction)
+        .filter(Transaction.created_at >= start_date, Transaction.created_at <= end_date)
+        .all()
+    )
+    for transaction in transactions:
+        if transaction.status != Transaction.COMPLETED:
+            continue
+        payments[transaction.id] = CompletedPayment(
+            transaction_id=transaction.id,
+            amount=transaction.amount,
+            created=transaction.created_at,
+            fee=Decimal(str(round(transaction.amount * Decimal(0.03), 2))),
+        )
+    return payments
+
+
+def get_completed_payments_from_stripe(start_date: date, end_date: date) -> Dict[int, CompletedPayment]:
+    if debug_mode():
+        logger.warning(
+            "In debug/dev mode, using fake stripe payments for accounting by generating from existing data in db"
+        )
+        return create_fake_completed_payments_from_db(start_date, end_date)
+
+    try:
+        stripe_intents = get_stripe_payment_intents(start_date, end_date)
+    except StripeError as e:
+        raise BadRequest(message=f"Failed to fetch stripe payment intents: {e}")
+    return convert_completed_stripe_intents_to_payments(stripe_intents)

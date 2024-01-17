@@ -236,7 +236,7 @@ def start_subscription(
                 {
                     "items": [
                         {
-                            "price": stripe_prices[PriceType.BINDING_PERIOD].stripe_id,
+                            "price": stripe_prices[PriceType.BINDING_PERIOD].id,
                             "metadata": metadata,
                         },
                     ],
@@ -244,7 +244,7 @@ def start_subscription(
                     "metadata": metadata,
                     "proration_behavior": "none",
                     "iterations": 1,
-                    "coupon": discount.coupon.stripe_id if discount.coupon else None,
+                    "coupon": discount.coupon.id if discount.coupon is not None else None,
                 }
             )
 
@@ -252,14 +252,14 @@ def start_subscription(
             {
                 "items": [
                     {
-                        "price": stripe_prices[PriceType.RECURRING].stripe_id,
+                        "price": stripe_prices[PriceType.RECURRING].id,
                         "metadata": metadata,
                     },
                 ],
                 "collection_method": "charge_automatically",
                 "metadata": metadata,
                 "proration_behavior": "none",
-                "coupon": discount.coupon.stripe_id if discount.coupon else None,
+                "coupon": discount.coupon.id if discount.coupon is not None else None,
             }
         )
 

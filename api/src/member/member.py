@@ -34,6 +34,25 @@ def send_access_token_email(redirect, user_identification, ip, browser):
     return {"status": "sent"}
 
 
+def send_updated_member_info_email(member_id: int, msg_swe: str, msg_en: str):
+    member = db_session.query(Member).get(member_id)
+
+    logger.info(
+        f"sending email about updated personal information to member_id {member.member_id} with message {msg_en=},"
+        f" {msg_swe=}"
+    )
+
+    send_message(
+        MessageTemplate.UPDATED_MEMBER_INFO,
+        member,
+        now=format_datetime(datetime.now()),
+        message_swe=msg_swe,
+        message_en=msg_en,
+    )
+
+    return {"status": "sent"}
+
+
 def set_pin_code(member_id: int, pin_code: str):
     member: Member = db_session.query(Member).get(member_id)
     member.pin_code = pin_code

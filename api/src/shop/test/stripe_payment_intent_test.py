@@ -2,6 +2,7 @@ import math
 import time
 from dataclasses import dataclass
 from datetime import date, datetime, timedelta, timezone
+from decimal import Decimal
 from logging import getLogger
 from typing import Any, Dict, List
 from unittest import skipIf
@@ -18,6 +19,7 @@ from shop.stripe_constants import CURRENCY, MakerspaceMetadataKeys, PaymentInten
 from shop.stripe_customer import delete_stripe_customer, get_and_sync_stripe_customer
 from shop.stripe_payment_intent import (
     convert_completed_stripe_intents_to_payments,
+    create_fake_completed_payments_from_db,
     get_stripe_payment_intents,
     pay_with_stripe,
 )
@@ -48,10 +50,15 @@ class FakeStripePaymentIntent:
     latest_charge: FakeStripeCharge
     metadata: Dict[str, Any]
     created: int  # unix timestamp
+    description: str = ""  # Tmp to fix legacy
 
 
 class StripePaymentIntentWithoutStripeTest(FlaskTestBase):
     models = [membership.models, messages.models, shop.models, core.models]
+
+    def setUp(self) -> None:
+        db_session.query(Member).delete()
+        db_session.query(Transaction).delete()
 
     def test_convert_stripe_intents_to_payments(self) -> None:
         stripe_intents = []
@@ -75,6 +82,72 @@ class StripePaymentIntentWithoutStripeTest(FlaskTestBase):
             assert payment.amount == 100 + (10 * transaction_id)
             assert payment.fee == 10 + transaction_id
             assert payment.created == datetime.fromtimestamp(1701966186 + (transaction_id * 10000), tz=timezone.utc)
+
+    # Temporary test to test older legacy way of storing transaction id in stripe
+    def test_convert_stripe_intents_to_payments_legacy(self) -> None:
+        stripe_intents = []
+        for i in range(5):
+            paid = True
+            status = PaymentIntentStatus.SUCCEEDED if paid else PaymentIntentStatus.REQUIRES_PAYMENT_METHOD
+            if i < 2:
+                metadata = {MakerspaceMetadataKeys.TRANSACTION_IDS.value: str(i)}
+                description = ""
+            else:
+                metadata = {}
+                description = "charge for transaction id " + str(i)
+            balance = FakeBalanceTransaction(fee=convert_to_stripe_amount(10 + i))
+            charge = FakeStripeCharge(
+                balance_transaction=balance, paid=paid, amount=convert_to_stripe_amount(100 + (10 * i))
+            )
+            intent = FakeStripePaymentIntent(
+                created=1701966186 + (i * 10000),
+                status=status,
+                latest_charge=charge,
+                metadata=metadata,
+                description=description,
+            )
+            stripe_intents.append(intent)
+        payments = convert_completed_stripe_intents_to_payments(stripe_intents)
+        assert len(payments) == 5
+        for transaction_id in payments:
+            payment = payments[transaction_id]
+            assert payment.transaction_id == transaction_id
+            assert payment.amount == 100 + (10 * transaction_id)
+            assert payment.fee == 10 + transaction_id
+            assert payment.created == datetime.fromtimestamp(1701966186 + (transaction_id * 10000), tz=timezone.utc)
+
+    def test_create_fake_completed_payments_from_db(self) -> None:
+        number_of_transactions = 3
+
+        member = self.db.create_member()
+        start_date = datetime.now(timezone.utc) - timedelta(days=1)
+        end_date = datetime.now(timezone.utc) + timedelta(days=1)
+        amounts: List[Decimal] = []
+
+        for i in range(number_of_transactions):
+            amounts.append(Decimal("100") + Decimal("10") * Decimal(i))
+            self.db.create_transaction(id=i, member_id=member.member_id, amount=amounts[i])
+
+        self.db.create_transaction(
+            member_id=member.member_id,
+            amount=Decimal("400"),
+            created_at=start_date - timedelta(days=1),
+        )
+        self.db.create_transaction(
+            member_id=member.member_id,
+            amount=Decimal("600"),
+            created_at=end_date + timedelta(days=1),
+        )
+
+        fake_completed = create_fake_completed_payments_from_db(start_date, end_date)
+
+        assert len(fake_completed) == number_of_transactions
+        for i in range(number_of_transactions):
+            assert fake_completed[i].transaction_id == i
+            assert fake_completed[i].amount == amounts[i]
+            assert fake_completed[i].fee == Decimal(str(round(amounts[i] * Decimal("0.03"), 2)))
+            assert fake_completed[i].created >= start_date.replace(tzinfo=None)
+            assert fake_completed[i].created <= end_date.replace(tzinfo=None)
 
 
 class StripePaymentIntentTest(FlaskTestBase):

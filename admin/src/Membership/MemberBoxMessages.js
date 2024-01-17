@@ -1,5 +1,6 @@
 import React from "react";
 import Collection from "../Models/Collection";
+import CollectionNavigation from "../Models/CollectionNavigation";
 import CollectionTable from "../Components/CollectionTable";
 import Message from "../Models/Message";
 import DateTimeShow from "../Components/DateTimeShow";
@@ -22,15 +23,18 @@ const Row = (props) => {
     );
 };
 
-class MemberBoxMessages extends React.Component {
+class MemberBoxMessages extends CollectionNavigation {
     constructor(props) {
         super(props);
+        const { search, page } = this.state;
         this.collection = new Collection({
             type: Message,
             url:
                 "/messages/member/" +
                 props.match.params.member_id +
                 "/messages",
+            search,
+            page,
         });
     }
 
@@ -48,6 +52,7 @@ class MemberBoxMessages extends React.Component {
                     rowComponent={Row}
                     collection={this.collection}
                     columns={columns}
+                    onPageNav={this.onPageNav}
                 />
                 <Link
                     to={

@@ -185,6 +185,46 @@ stripe listen --forward-to http://localhost:8010/webshop/stripe_callback
 
 After the forwarding has started, you'll need to copy the signing secret it gives you, and put it in your own `.env` file in the key `STRIPE_SIGNING_SECRET`.
 
+TODO cleanup text
+
+### Setting up Stripe subscription products
+
+When using stripe, subscriptions need to be configured via the stripe website.
+These subscriptions will automatically be turned into makeradmin products so that members can purchase them.
+
+Note: You should _not_ modify these products in makeradmin. They will be reset whenever the docker container restarts anyway (when the registration page is visited).
+
+#### Needed Stripe configuration
+
+The configuration needed on stripe is:
+
+-   Create a **product** for base membership. Add the metadata "subscription_type"="membership" to the **product** item
+    -   Add a yearly **price**, and add the metadata "price_type"="recurring" to the **price** item
+-   Create a **product** for makerspace access. Add the metadata "subscription_type"="labaccess" to the **product** item
+    -   Add a monthly price, and add the metadata "price_type"="recurring" to the **price** item
+    -   Add a **price** for N months, where N is the binding period as specified in `stripe_subscriptions.py->BINDING_PERIOD`. The price should be N times the recurring price. Add the metadata "price_type"="binding_period"
+-   Create a **coupon** for low income discount. It should be with percentage discount. Add the metadata "makerspace_price_level" = "low_income_discount"
+
+You can achieve all of this using the Stripe CLI:
+
+```bash
+# Create a yearly membership product with a price
+stripe products create -d 'metadata[subscription_type]=membership' --name='Base membership'
+# -> This gives a product ID `prod_MEMBERSHIP` that you need to substitute below
+stripe prices create --unit-amount=20000 --currency=sek -d "recurring[interval]"=year --product="prod_MEMBERSHIP" -d "recurring[interval_count]"=1 -d 'metadata[price_type]=recurring'
+
+# Create a makerspace access product with prices
+stripe products create -d 'metadata[subscription_type]=labaccess' --name='Makerspace access'
+# -> This gives a product ID `prod_LABACCESS` that you need to substitute below
+stripe prices create --unit-amount=30000 --currency=sek -d "recurring[interval]"=month --product="prod_LABACCESS" -d "recurring[interval_count]"=1 -d 'metadata[price_type]=recurring'
+stripe prices create --unit-amount=60000 --currency=sek -d "recurring[interval]"=month --product="prod_LABACCESS" -d "recurring[interval_count]"=2 -d 'metadata[price_type]=binding_period'
+
+# Create a coupon
+stripe coupons create --name='Low income discount' --percent-off=50 -d 'metadata[makerspace_price_level]=low_income_discount'
+```
+
+If you try to access any page which needs these products (e.g. the registration page, or the member page), makeradmin will fetch them from stripe and do a bunch of validation checks.
+
 ### Setting up required products in makeradmin
 
 For the member view page and regristration page to work there are also a few products needed in makeradmin in the category Medlemskap.
@@ -201,3 +241,11 @@ For the member view page and regristration page to work there are also a few pro
     -   Metadata:{"allowed_price_levels":["low_income_discount"],"special_product_id":"access_starter_pack"}
     -   Enhet/unit: st
     -   Action: add labaccess days
+
+## Bookkeeping and accounting
+
+For accounting Makeradmin supports exporting the transaction history as sie files.
+
+The transaction history is compared with Stripe to make sure it matches and there are no extra transactions in Makeradmin or Stripe.
+
+Debit bookings adjust the product price with the transaction fee. However, each transaction usually contain multiple products. Thus, the transaction fee neds to be distributed over the products if the debit accounts or cost centers for the product are different. This adjustment involves distributing the transaction fee among the products in proportion to their total price within the transaction, which takes into consideration the quantity of products purchased. Any rounding errors are corrected by adjusting them to the nearest, higher or lower, amount. Any left over cent is added or removed on the most expensive price to make sure the total sum is correct.

@@ -19,8 +19,6 @@ from shop.stripe_product_price import (
     get_and_sync_stripe_prices_for_product,
     get_and_sync_stripe_product,
     get_and_sync_stripe_product_and_prices,
-    get_or_create_stripe_prices_for_product,
-    get_or_create_stripe_product,
     get_stripe_prices,
     get_stripe_product,
     makeradmin_to_stripe_recurring,
@@ -161,7 +159,7 @@ class StripeProductPriceTest(ShopTestMixin, FlaskTestBase):
             category_id=self.subscription_category.id,
         )
         self.seen_products.append(makeradmin_test_product)
-        stripe_test_product = get_or_create_stripe_product(makeradmin_test_product)
+        stripe_test_product = get_and_sync_stripe_product(makeradmin_test_product)
         assert stripe_test_product
         assert stripe_test_product.name == makeradmin_test_product.name
 
@@ -175,10 +173,10 @@ class StripeProductPriceTest(ShopTestMixin, FlaskTestBase):
             category_id=self.not_subscription_category.id,
         )
         self.seen_products.append(makeradmin_test_product)
-        stripe_test_product = get_or_create_stripe_product(makeradmin_test_product)
+        stripe_test_product = get_and_sync_stripe_product(makeradmin_test_product)
         assert stripe_test_product
 
-        stripe_test_prices = get_or_create_stripe_prices_for_product(makeradmin_test_product, stripe_test_product)
+        stripe_test_prices = get_and_sync_stripe_prices_for_product(makeradmin_test_product, stripe_test_product)
         assert stripe_test_prices
         assert len(stripe_test_prices) == 1
         self.assertPrice(
@@ -197,10 +195,10 @@ class StripeProductPriceTest(ShopTestMixin, FlaskTestBase):
             category_id=self.subscription_category.id,
         )
         self.seen_products.append(makeradmin_test_product)
-        stripe_test_product = get_or_create_stripe_product(makeradmin_test_product)
+        stripe_test_product = get_and_sync_stripe_product(makeradmin_test_product)
         assert stripe_test_product
 
-        stripe_test_prices = get_or_create_stripe_prices_for_product(makeradmin_test_product, stripe_test_product)
+        stripe_test_prices = get_and_sync_stripe_prices_for_product(makeradmin_test_product, stripe_test_product)
         assert stripe_test_prices
         assert len(stripe_test_prices) == 1
         self.assertPrice(
@@ -219,10 +217,10 @@ class StripeProductPriceTest(ShopTestMixin, FlaskTestBase):
             category_id=self.subscription_category.id,
         )
         self.seen_products.append(makeradmin_test_product)
-        stripe_test_product = get_or_create_stripe_product(makeradmin_test_product)
+        stripe_test_product = get_and_sync_stripe_product(makeradmin_test_product)
         assert stripe_test_product
 
-        stripe_test_prices = get_or_create_stripe_prices_for_product(makeradmin_test_product, stripe_test_product)
+        stripe_test_prices = get_and_sync_stripe_prices_for_product(makeradmin_test_product, stripe_test_product)
         assert stripe_test_prices
         assert len(stripe_test_prices) == 1
         self.assertPrice(
@@ -241,10 +239,10 @@ class StripeProductPriceTest(ShopTestMixin, FlaskTestBase):
             category_id=self.subscription_category.id,
         )
         self.seen_products.append(makeradmin_test_product)
-        stripe_test_product = get_or_create_stripe_product(makeradmin_test_product)
+        stripe_test_product = get_and_sync_stripe_product(makeradmin_test_product)
         assert stripe_test_product
 
-        stripe_test_prices = get_or_create_stripe_prices_for_product(makeradmin_test_product, stripe_test_product)
+        stripe_test_prices = get_and_sync_stripe_prices_for_product(makeradmin_test_product, stripe_test_product)
         assert stripe_test_prices
         assert len(stripe_test_prices) == 2
         self.assertPrice(
@@ -268,7 +266,7 @@ class StripeProductPriceTest(ShopTestMixin, FlaskTestBase):
             category_id=self.subscription_category.id,
         )
         self.seen_products.append(makeradmin_test_product)
-        stripe_test_product = get_or_create_stripe_product(makeradmin_test_product)
+        stripe_test_product = get_and_sync_stripe_product(makeradmin_test_product)
         assert stripe_test_product
 
         activate_stripe_product(stripe_test_product)
@@ -293,7 +291,7 @@ class StripeProductPriceTest(ShopTestMixin, FlaskTestBase):
             category_id=self.subscription_category.id,
         )
         self.seen_products.append(makeradmin_test_product)
-        stripe_test_product = get_or_create_stripe_product(makeradmin_test_product)
+        stripe_test_product = get_and_sync_stripe_product(makeradmin_test_product)
         assert stripe_test_product
 
         makeradmin_test_product.name = "test name change"
@@ -311,10 +309,10 @@ class StripeProductPriceTest(ShopTestMixin, FlaskTestBase):
             category_id=self.not_subscription_category.id,
         )
         self.seen_products.append(makeradmin_test_product)
-        stripe_test_product = get_or_create_stripe_product(makeradmin_test_product)
+        stripe_test_product = get_and_sync_stripe_product(makeradmin_test_product)
         assert stripe_test_product
 
-        stripe_test_prices = get_or_create_stripe_prices_for_product(makeradmin_test_product, stripe_test_product)
+        stripe_test_prices = get_and_sync_stripe_prices_for_product(makeradmin_test_product, stripe_test_product)
         assert stripe_test_prices
         assert len(stripe_test_prices) == 1
         stripe_test_price = stripe_test_prices[stripe_constants.PriceType.FIXED_PRICE]
@@ -359,7 +357,7 @@ class StripeProductPriceTest(ShopTestMixin, FlaskTestBase):
             category_id=self.not_subscription_category.id,
         )
         self.seen_products.append(makeradmin_test_product)
-        stripe_test_product = get_or_create_stripe_product(makeradmin_test_product)
+        stripe_test_product = get_and_sync_stripe_product(makeradmin_test_product)
         assert stripe_test_product
 
         stripe_test_prices = get_and_sync_stripe_prices_for_product(makeradmin_test_product, stripe_test_product)

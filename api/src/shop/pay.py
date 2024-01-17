@@ -177,8 +177,8 @@ def setup_payment_method(data_dict: Any, member_id: int) -> SetupPaymentMethodRe
             lambda: stripe.SetupIntent.create(
                 payment_method_types=["card"],
                 metadata={},
-                payment_method=payment_method.stripe_id,
-                customer=stripe_customer.stripe_id,
+                payment_method=payment_method.id,
+                customer=stripe_customer.id,
             )
         )
     else:
@@ -189,14 +189,14 @@ def setup_payment_method(data_dict: Any, member_id: int) -> SetupPaymentMethodRe
     except SetupIntentFailed as e:
         return SetupPaymentMethodResponse(
             type=e.type,
-            setup_intent_id=setup_intent.stripe_id,
+            setup_intent_id=setup_intent.id,
             action_info=e.action_info,
             error=e.error,
         )
 
     return SetupPaymentMethodResponse(
         type=SetupIntentResult.Success,
-        setup_intent_id=setup_intent.stripe_id,
+        setup_intent_id=setup_intent.id,
         action_info=None,
         error=None,
     )

@@ -126,7 +126,7 @@ def get_product_data(product_id):
 
     return {
         "product": product_entity.to_obj(product),
-        "productData": all_product_data(),
+        "productData": all_product_data(),  # TODO ????
     }
 
 
