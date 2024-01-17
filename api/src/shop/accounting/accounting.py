@@ -133,7 +133,6 @@ def diff_transactions_and_completed_payments(
             unmatched_data.append((transaction, completed_payment))
 
     if len(completed_payments) > 0:
-        logger.warning(f"Completed payments without matching transaction, {completed_payments}")
         for payment in completed_payments.values():
             unmatched_data.append((None, payment))
 
@@ -183,12 +182,15 @@ def split_transactions_over_accounts(
                 raise InternalServerError(f"Product with id {content.product_id} has no accounting information")
 
             amounts_added: Dict[AccountingEntryType, Decimal] = {type: Decimal(0) for type in AccountingEntryType}
+            content_amount_decimal = Decimal(
+                str(round(content.amount, 2))
+            )  # The db should be using Decimal but seems to be using float, see github issue #416
             adjusted_transaction_content_amounts: Dict[AccountingEntryType, Decimal] = {
-                AccountingEntryType.CREDIT: Decimal(content.amount),
-                AccountingEntryType.DEBIT: Decimal(content.amount) - split_fees[content.id],
+                AccountingEntryType.CREDIT: content_amount_decimal,
+                AccountingEntryType.DEBIT: content_amount_decimal - split_fees[content.id],
             }
 
-            index_to_add_leftover_amount = (-1, Decimal("-1"))
+            index_to_add_leftover_amount = {entry_type: (-1, Decimal("-1")) for entry_type in AccountingEntryType}
             for accounting in product_accounting:
                 amount_to_add = adjusted_transaction_content_amounts[accounting.type] * (
                     accounting.fraction * Decimal("0.01")
@@ -196,11 +198,6 @@ def split_transactions_over_accounts(
                 amount_to_add = Decimal(round(amount_to_add, 2))
 
                 amounts_added[accounting.type] += amount_to_add
-
-                logger.info(f"Accounting: {accounting}")
-                logger.info(f"Amount to add: {amount_to_add}")
-                logger.info(f"Amounts added: {amounts_added}")
-                logger.info(f"Entry type: {accounting.type}")
 
                 transacion_acc = TransactionWithAccounting(
                     transaction_id=transaction.id,
@@ -211,21 +208,18 @@ def split_transactions_over_accounts(
                     cost_center=accounting.cost_center,
                     type=accounting.type,
                 )
-                logger.info(f"Transaction with accounting: {transacion_acc}")
                 transactions_with_accounting.append(transacion_acc)
 
-                if accounting.type == AccountingEntryType.DEBIT and amount_to_add > index_to_add_leftover_amount[1]:
-                    logger.info("*** update")
-                    index_to_add_leftover_amount = (len(transactions_with_accounting) - 1, amount_to_add)
+                if amount_to_add > index_to_add_leftover_amount[accounting.type][1]:
+                    index_to_add_leftover_amount[accounting.type] = (
+                        len(transactions_with_accounting) - 1,
+                        amount_to_add,
+                    )
 
             for entry_type, amount_added in amounts_added.items():
                 leftover_amount = adjusted_transaction_content_amounts[entry_type] - amount_added
                 if leftover_amount != 0:
-                    logger.info(f"Leftover amount: {leftover_amount}")
-                    logger.info(f"Amount added: {amount_added}")
-                    logger.info(f"Entry type: {entry_type}")
-                    logger.info(f"Index to add leftover amount: {index_to_add_leftover_amount}")
-                    transactions_with_accounting[index_to_add_leftover_amount[0]].amount += leftover_amount
+                    transactions_with_accounting[index_to_add_leftover_amount[entry_type][0]].amount += leftover_amount
                     rounding_error_obj = RoundingError(
                         transaction.id,
                         leftover_amount,
@@ -235,5 +229,4 @@ def split_transactions_over_accounts(
                     )
                     rounding_errors.append(rounding_error_obj)
 
-    logger.info(f"Transactions with accounting: {transactions_with_accounting}")
     return transactions_with_accounting, rounding_errors
