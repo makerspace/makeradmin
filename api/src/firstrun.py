@@ -178,7 +178,7 @@ def create_membership_products() -> None:
         ProductCategory, name="Membership", defaults=dict(display_order=display_order_category + 1)
     )
     subscription_category = get_or_create(
-        ProductCategory, name="Subscriptions", defaults=dict(display_order=display_order_category + 1)
+        ProductCategory, name="Subscriptions", defaults=dict(display_order=display_order_category + 2)
     )
 
     display_order_product = db_session.query(func.max(Product.display_order)).scalar() or 0
