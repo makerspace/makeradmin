@@ -60,13 +60,12 @@ class ExportTest(TestCase):
 
 class AccountingExportWithStripeMockTest(FlaskTestBase):
     models = [core.models, membership.models, shop.models]
-    number_of_products = 2
+    number_of_products = 3
     number_of_accounts = 2
     number_of_cost_centers = 2
-    amounts = [
-        Decimal("100.0") + Decimal("10.0") * Decimal(i)  # TODO make a test with odd fractions
-        for i in range(number_of_products)
-    ]
+    number_of_verifications = 2
+    number_of_transactions = 3
+    amounts = [Decimal("100.0") + Decimal("10.1") * Decimal(i) for i in range(number_of_products)]
     transaction_fee = Decimal("1.00")
     count = 2
 
@@ -80,21 +79,23 @@ class AccountingExportWithStripeMockTest(FlaskTestBase):
         db_session.query(TransactionCostCenter).delete()
         db_session.query(ProductAccountsCostCenters).delete()
 
-        random_scale = self.number_of_accounts * self.number_of_cost_centers / 2
-
         self.transaction_accounts: Dict[AccountingEntryType, List[TransactionAccount]] = {}
         self.transaction_cost_centers: Dict[AccountingEntryType, List[TransactionCostCenter]] = {}
 
-        self.member = self.db.create_member()
+        self.member = self.db.create_member(firstname="Test", lastname="Testsson")
 
         for type in AccountingEntryType:
             self.transaction_accounts[type] = []
             self.transaction_cost_centers[type] = []
             for i in range(self.number_of_accounts):
-                acc = self.db.create_transaction_account()
+                acc = self.db.create_transaction_account(
+                    account=f"account {type.value} {i}", description=f"account {i} {type.value}"
+                )
                 self.transaction_accounts[type].append(acc)
             for i in range(self.number_of_cost_centers):
-                cc = self.db.create_transaction_cost_center()
+                cc = self.db.create_transaction_cost_center(
+                    cost_center=f"cost_center {type.value} {i}", description=f"cost_center {i} {type.value}"
+                )
                 self.transaction_cost_centers[type].append(cc)
             random.shuffle(self.transaction_accounts[type])
             random.shuffle(self.transaction_cost_centers[type])
@@ -108,8 +109,7 @@ class AccountingExportWithStripeMockTest(FlaskTestBase):
                 for k in range(self.number_of_cost_centers):
                     for type in AccountingEntryType:
                         added = False
-                        max_fraction = min(fractions_left[type] / 2, 100 / random_scale)
-                        fraction = random.randint(1, round(max_fraction))
+                        fraction = round(100 / (self.number_of_accounts * (self.number_of_cost_centers + 1)))
                         if j > k:
                             self.db.create_product_account_cost_center(
                                 product_id=product.id,
@@ -133,83 +133,78 @@ class AccountingExportWithStripeMockTest(FlaskTestBase):
                 )
 
         products = db_session.query(Product).all()
-        total_amount = Decimal("0")
-        for product in products:
-            total_amount += Decimal(str(round(product.price, 2))) * Decimal(self.count)
-
-        created = datetime(2023, 3, 1, tzinfo=timezone.utc)
-        self.transaction = self.db.create_transaction(
-            member_id=self.member.member_id, amount=total_amount, created_at=created
-        )
-
-        self.transaction_contents: Dict[int, TransactionContent] = {}
-        for product in products:
-            amount = product.price * self.count
-            self.transaction_contents[product.id] = self.db.create_transaction_content(
-                transaction_id=self.transaction.id, product_id=product.id, amount=amount, count=self.count
-            )
-
         self.completed_payments: Dict[int, CompletedPayment] = {}
-        self.completed_payments[self.transaction.id] = CompletedPayment(
-            self.transaction.id,
-            self.transaction.amount,
-            self.transaction.created_at,
-            self.transaction_fee,
-        )
+
+        for i in range(self.number_of_verifications):
+            for j in range(self.number_of_transactions):
+                total_amount = Decimal("0")
+                for product in products:
+                    if not (i != j and (i == product.id or j == product.id)):
+                        total_amount += Decimal(str(round(product.price, 2))) * Decimal(self.count)
+
+                created = datetime(2023, i + 1, j + 5, tzinfo=timezone.utc)
+                transaction = self.db.create_transaction(
+                    member_id=self.member.member_id, amount=total_amount, created_at=created
+                )
+
+                for product in products:
+                    if not (i != j and (i == product.id or j == product.id)):
+                        amount = product.price * self.count
+                        self.db.create_transaction_content(
+                            transaction_id=transaction.id, product_id=product.id, amount=amount, count=self.count
+                        )
+
+                self.completed_payments[transaction.id] = CompletedPayment(
+                    transaction.id,
+                    transaction.amount,
+                    created,
+                    self.transaction_fee,
+                )
 
     @patch("shop.accounting.export.get_completed_payments_from_stripe")
     def test_export_accounting(self, get_payments_from_stripe: Mock) -> None:
         start_date = datetime(2023, 1, 1)
         end_date = datetime(2023, 12, 31)
+        ver_1_amounts = [Decimal("-264.96"), Decimal("265.47"), Decimal("-1293.64"), Decimal("1296.13")]
+        ver_2_amounts = [Decimal("-230.97"), Decimal("231.47"), Decimal("-1127.63"), Decimal("1130.13")]
+        ver_amounts = [ver_1_amounts, ver_2_amounts]
 
-        # get_payments_from_stripe.return_value = self.completed_payments
+        get_payments_from_stripe.return_value = self.completed_payments
 
-        # logger.info(f"Completed payments: {self.completed_payments}")
+        sie_str = export_accounting(start_date, end_date, TimePeriod.Month, self.member.member_id)
+        sie_rows = sie_str.split("\n")
 
-        # sie_str = export_accounting(start_date, end_date, TimePeriod.Month, self.member.member_id)
+        while True:
+            row = sie_rows.pop(0)
 
-        # logger.info(f"{sie_str}")
+            if row.startswith("#GEN"):
+                assert datetime.now().strftime("%Y%m%d") in row
+                assert self.member.firstname in row
+                assert self.member.lastname in row
 
-        # sie_rows = sie_str.split("\n")
+            if row.startswith("#DIM"):
+                assert "Kostnadställe" in row
 
-        # # TODO assert more info about the header
-        # while True:
-        #     row = sie_rows.pop(0)
+            if row.startswith("#VER"):
+                break
 
-        #     if row.startswith("#GEN"):
-        #         assert datetime.now().strftime("%Y%m%d") in row
-        #         assert self.member.firstname in row
-        #         assert self.member.lastname in row
+        for i in range(1, self.number_of_verifications + 1):
+            verification_row = sie_rows.pop(0) if i != 1 else row
+            assert verification_row.startswith(f'#VER B {i} 2023{i:02d}01 "MakerAdmin"')
+            verification_row = sie_rows.pop(0)
+            assert verification_row.strip() == "{"
 
-        #     if row.startswith("#DIM"):
-        #         assert "Kostnadställe" in row
+            for j in range(4):
+                transaction_row = sie_rows.pop(0)
+                right_half = transaction_row.split("}")[1]
+                amount_str = right_half.split("2023")[0]
+                amount = Decimal(amount_str)
+                assert amount == ver_amounts[i - 1][j]
 
-        #     if row.startswith("#VER"):
-        #         break
+            transaction_row = sie_rows.pop(0)
+            assert transaction_row.startswith(f'#TRANS 6573 {{1 "Föreningsgemensamt"}} -3.00 2023{i:02d}01')
 
-        # number_of_verifications = 1
-        # number_of_transactions = 1
-        # for i in range(1, number_of_verifications + 1):
-        #     verification_row = sie_rows.pop(0) if i != 1 else row
-        #     assert verification_row.startswith(f'#VER B {i} 2023{i:02d}01 "MakerAdmin"')
-        #     verification_row = sie_rows.pop(0)
-        #     assert verification_row.strip() == "{"
+            verification_row = sie_rows.pop(0)
+            assert verification_row.strip() == "}"
 
-        #     for j in range(1, number_of_transactions + 1):
-        #         transaction_row = sie_rows.pop(0)
-
-        #         if j % 2 == 0:
-        #             assert transaction_row.startswith(
-        #                 f'#TRANS account{j} {{1 "cost_center{j}"}} -{Decimal("1000") + Decimal(f"{i * j + j}")} 2023{i:02d}01 "MakerAdmin period 2023-{i:02d}"'
-        #             )
-        #         else:
-        #             assert transaction_row.startswith(
-        #                 f'#TRANS account{j} {{1 "cost_center{j}"}} {Decimal(f"{i * j + j}")} 2023{i:02d}01 "MakerAdmin period 2023-{i:02d}"'
-        #             )
-
-        #     verification_row = sie_rows.pop(0)
-        #     assert verification_row.strip() == "}"
-
-        # assert len(sie_rows) == 0
-
-        # assert False
+        assert len(sie_rows) == 0
