@@ -54,7 +54,9 @@ def export_accounting(start_date: datetime, end_date: datetime, group_by_period:
     signer = db_session.query(Member).filter(Member.member_id == member_id).one_or_none()
     if signer is None:
         raise InternalServerError(f"Member with id {member_id} not found")
-    logger.info(f"Exporting accounting from {start_date} to {end_date} with signer {signer.member_number}")
+    logger.info(
+        f"Exporting accounting from {start_date} to {end_date} with signer member number {signer.member_number}"
+    )
     completed_payments = get_completed_payments_from_stripe(start_date, end_date)
     transactions = (
         db_session.query(Transaction)

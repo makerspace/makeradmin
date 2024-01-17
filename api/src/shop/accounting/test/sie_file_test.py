@@ -34,11 +34,7 @@ class SieFileTest(FlaskTestBase):
         db_session.query(TransactionCostCenter).delete()
 
     def test_verification_string(self) -> None:
-        period = datetime(
-            2023,
-            1,
-            2,
-        ).strftime("%Y-%m")
+        period = datetime(2023, 1, 2).strftime("%Y-%m")
         verification = Verification(period, {}, {}, "B")
         verification_str = verification_string(verification, 1)
 
@@ -48,11 +44,7 @@ class SieFileTest(FlaskTestBase):
         account = self.db.create_transaction_account(account=f"account")
         cost_center = self.db.create_transaction_cost_center(cost_center=f"cost center")
         sum = Decimal("100.0")
-        period = datetime(
-            2023,
-            1,
-            2,
-        ).strftime("%Y-%m")
+        period = datetime(2023, 1, 2).strftime("%Y-%m")
         description = "test"
         transaction_str = transaction_string(account, cost_center, sum, period, description)
 
@@ -62,11 +54,7 @@ class SieFileTest(FlaskTestBase):
         account = self.db.create_transaction_account(account=f"account")
         cost_center = None
         sum = Decimal("100.0")
-        period = datetime(
-            2023,
-            1,
-            2,
-        ).strftime("%Y-%m")
+        period = datetime(2023, 1, 2).strftime("%Y-%m")
         description = "test"
         transaction_str = transaction_string(account, cost_center, sum, period, description)
 
@@ -94,11 +82,7 @@ class SieFileWithVerificationTest(FlaskTestBase):
             self.cost_centers.append(cost_center)
 
         for i in range(self.number_of_verifications):
-            period = datetime(
-                2023,
-                i + 1,
-                i + 3,
-            ).strftime("%Y-%m")
+            period = datetime(2023, i + 1, i + 3).strftime("%Y-%m")
             amounts: Dict[Tuple[TransactionAccount | None, TransactionCostCenter | None], Decimal] = {}
             types: Dict[Tuple[TransactionAccount | None, TransactionCostCenter | None], AccountingEntryType] = {}
 
