@@ -8412,10 +8412,10 @@ a.uk-thumbnail:focus {
 /* Scrollable
  ========================================================================== */
 /*
- * Enable scrolling for component
+ * Enable scrolling for table
  */
-.uk-scrollable-component {
-  max-height: 300px;
+.uk-scrollable-table {
+  max-height: 600px;
   overflow-y: auto;
 }
  /*

@@ -444,7 +444,7 @@ class AccountingProduct extends CollectionNavigation {
 
                     <CollectionTable
                         id="product_table"
-                        className="uk-margin-top prevent-select uk-scrollable-component"
+                        className="uk-margin-top prevent-select uk-scrollable-table"
                         collection={this.collection}
                         emptyMessage="Inga produkter"
                         columns={[
