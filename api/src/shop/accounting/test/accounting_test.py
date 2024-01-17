@@ -573,6 +573,7 @@ class SplitTransactionsTest(FlaskTestBase):
         accounting, rounding_errors = split_transactions_over_accounts(transactions, completed_payments)
         assert len(rounding_errors) == 0
 
+        assert len(accounting) == sum(num_products) * 2
         self.assertAccounting(
             num_products,
             true_transactions,
@@ -614,6 +615,7 @@ class SplitTransactionsTest(FlaskTestBase):
         accounting, rounding_errors = split_transactions_over_accounts(transactions, completed_payments)
         assert len(rounding_errors) == 0
 
+        assert len(accounting) == sum(num_products) * 2
         self.assertAccounting(
             num_products,
             true_transactions,
@@ -658,6 +660,7 @@ class SplitTransactionsTest(FlaskTestBase):
             assert error.amount == Decimal("0.10")
             assert error.source == RoundingErrorSource.FEE_SPLIT
 
+        assert len(accounting) == sum(num_products) * 2
         self.assertAccounting(
             num_products, true_transactions, accounting, true_transaction_contents, transaction_fee, 100
         )
@@ -694,6 +697,7 @@ class SplitTransactionsTest(FlaskTestBase):
         accounting, rounding_errors = split_transactions_over_accounts(transactions, completed_payments)
         assert len(rounding_errors) == 0
 
+        assert len(accounting) == sum(num_products) * 4
         self.assertAccounting(
             num_products, true_transactions, accounting, true_transaction_contents, transaction_fee, 50
         )
