@@ -116,6 +116,39 @@ class StripePaymentIntentWithoutStripeTest(FlaskTestBase):
             assert payment.fee == 10 + transaction_id
             assert payment.created == datetime.fromtimestamp(1701966186 + (transaction_id * 10000), tz=timezone.utc)
 
+    # Temporary test to test skipping test payments
+    def test_convert_stripe_intents_to_payments_legacy(self) -> None:
+        stripe_intents = []
+        for i in range(5):
+            paid = True
+            status = PaymentIntentStatus.SUCCEEDED if paid else PaymentIntentStatus.REQUIRES_PAYMENT_METHOD
+            if i == 0:
+                metadata = {}
+                description = "charge for transaction id <invalid because it was made in a test environment>"
+            else:
+                metadata = {}
+                description = "charge for transaction id " + str(i)
+            balance = FakeBalanceTransaction(fee=convert_to_stripe_amount(10 + i))
+            charge = FakeStripeCharge(
+                balance_transaction=balance, paid=paid, amount=convert_to_stripe_amount(100 + (10 * i))
+            )
+            intent = FakeStripePaymentIntent(
+                created=1701966186 + (i * 10000),
+                status=status,
+                latest_charge=charge,
+                metadata=metadata,
+                description=description,
+            )
+            stripe_intents.append(intent)
+        payments = convert_completed_stripe_intents_to_payments(stripe_intents)
+        assert len(payments) == 4
+        for transaction_id in payments:
+            payment = payments[transaction_id]
+            assert payment.transaction_id == transaction_id
+            assert payment.amount == 100 + (10 * transaction_id)
+            assert payment.fee == 10 + transaction_id
+            assert payment.created == datetime.fromtimestamp(1701966186 + (transaction_id * 10000), tz=timezone.utc)
+
     def test_create_fake_completed_payments_from_db(self) -> None:
         number_of_transactions = 3
 
