@@ -243,6 +243,11 @@ def convert_completed_stripe_intents_to_payments(
                 logger.info(f"stripe charge: {charge}")
                 continue
             id = int(str_split[1])
+            if id < 100:
+                logger.info(f"skipping invalid transaction low id, {id}")
+                logger.info(f"stripe intent: {intent}")
+                logger.info(f"stripe charge: {charge}")
+                continue
 
         payments[id] = CompletedPayment(
             transaction_id=id,

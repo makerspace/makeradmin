@@ -71,6 +71,7 @@ def export_accounting(start_date: datetime, end_date: datetime, group_by_period:
 
     diff = diff_transactions_and_completed_payments(transactions, completed_payments)
     if len(diff) > 0:
+        logger.warning(f"Transactions and completed payments do not match, {diff}")
         raise InternalServerError(f"Transactions and completed payments do not match, {diff}")
 
     transactions_with_accounting, rounding_errors = split_transactions_over_accounts(transactions, completed_payments)
