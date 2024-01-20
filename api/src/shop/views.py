@@ -4,7 +4,6 @@ from datetime import datetime, timedelta, timezone
 from logging import getLogger
 from typing import Any
 
-import pytz
 from basic_types.enums import PriceLevel
 from basic_types.time_period import TimePeriod
 from dateutil.relativedelta import relativedelta
@@ -25,6 +24,7 @@ from service.db import db_session
 from service.entity import OrmSingeRelation, OrmSingleSingleRelation
 from service.error import InternalServerError, PreconditionFailed
 from sqlalchemy.exc import NoResultFound
+from zoneinfo import ZoneInfo
 
 from shop import service
 from shop.accounting.export import export_accounting
@@ -326,10 +326,12 @@ def stripe_callback_route():
 
 
 @service.route("/download-accounting-file/<int:year>/<int:month>", method=GET, permission=WEBSHOP)
-def download_accounting_file_route(year, month):
-    zone = pytz.timezone("Europe/Stockholm")
-    start_date = datetime(year, month, 1, tzinfo=zone)
-    end_data = datetime(year, month, 1, tzinfo=zone) + relativedelta(months=1)
+def download_accounting_file_route(year: str, month: str):
+    zone = ZoneInfo("Europe/Stockholm")
+    start_date = datetime(year=year, month=month, day=1, hour=0, minute=0, second=0, microsecond=0, tzinfo=zone)
+    end_data = datetime(
+        year=year, month=month, day=1, hour=0, minute=0, second=0, microsecond=0, tzinfo=zone
+    ) + relativedelta(months=1)
     return b64encode(export_accounting(start_date, end_data, TimePeriod.Month, g.user_id).encode("cp437")).decode(
         "ascii"
     )
