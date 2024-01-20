@@ -1,7 +1,6 @@
-import React from "react";
 import Span from "../Models/Span";
+import React from "react";
 import * as _ from "underscore";
-
 class SpanShow extends React.Component {
     constructor(props) {
         super(props);

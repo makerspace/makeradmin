@@ -1,9 +1,9 @@
-import React from "react";
-import Collection from "../Models/Collection";
-import AccessToken from "../Models/AccessToken";
-import CollectionTable from "../Components/CollectionTable";
 import auth from "../auth";
+import CollectionTable from "../Components/CollectionTable";
 import DateTimeShow from "../Components/DateTimeShow";
+import AccessToken from "../Models/AccessToken";
+import Collection from "../Models/Collection";
+import React from "react";
 
 export default class AccessTokenList extends React.Component {
     constructor(props) {

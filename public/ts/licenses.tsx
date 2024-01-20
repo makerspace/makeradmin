@@ -1,8 +1,8 @@
+import { UNAUTHORIZED } from "./common";
 import * as common from "./common";
 import * as login from "./login";
-import { UNAUTHORIZED } from "./common";
-import { render } from "preact";
 import { Sidebar } from "./sidebar";
+import { render } from "preact";
 declare var UIkit: any;
 
 const LicensesPage = () => {
@@ -89,6 +89,7 @@ const LicensesPage = () => {
 };
 
 const apiBasePath = window.apiBasePath;
+
 const future1 = common.ajax("GET", apiBasePath + "/member/current", null);
 
 common.documentLoaded().then(() => {

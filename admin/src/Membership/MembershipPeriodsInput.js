@@ -1,8 +1,8 @@
-import React from "react";
-import CategoryPeriods from "../Models/CategoryPeriods";
-import CategoryPeriodsInput from "../Components/CategoryPeriodsInput";
-import { calculateSpanDiff, filterPeriods } from "../Models/Span";
 import auth from "../auth";
+import CategoryPeriodsInput from "../Components/CategoryPeriodsInput";
+import CategoryPeriods from "../Models/CategoryPeriods";
+import { calculateSpanDiff, filterPeriods } from "../Models/Span";
+import React from "react";
 
 export default class MembershipPeriodsInput extends React.Component {
     constructor(props) {

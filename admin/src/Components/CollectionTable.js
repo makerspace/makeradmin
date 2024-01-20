@@ -1,6 +1,6 @@
+import { confirmModal } from "../message";
 import React from "react";
 import * as _ from "underscore";
-import { confirmModal } from "../message";
 
 export default class CollectionTable extends React.Component {
     constructor(props) {

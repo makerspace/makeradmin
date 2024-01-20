@@ -1,6 +1,5 @@
-import * as _ from "underscore";
 import { get, post } from "../gateway";
-
+import * as _ from "underscore";
 // Handle collection of a model class. Support stateful interaction with server.
 //
 // type: type of model that this is a collection of

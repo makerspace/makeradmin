@@ -1,9 +1,7 @@
-import React from "react";
-
 import { browserHistory } from "../browser_history";
-import Product from "../Models/Product";
 import ProductForm from "../Components/ProductForm";
-
+import Product from "../Models/Product";
+import React from "react";
 class ProductAdd extends React.Component {
     constructor(props) {
         super(props);

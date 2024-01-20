@@ -1,13 +1,12 @@
-import React from "react";
-import { Link } from "react-router-dom";
-import Order from "../Models/Order";
-import Collection from "../Models/Collection";
 import CollectionTable from "../Components/CollectionTable";
-import OrderRow from "../Models/OrderRow";
-import OrderAction from "../Models/OrderAction";
 import Currency from "../Components/Currency";
+import Collection from "../Models/Collection";
+import Order from "../Models/Order";
+import OrderAction from "../Models/OrderAction";
+import OrderRow from "../Models/OrderRow";
 import { dateTimeToStr } from "../utils";
-
+import { Link } from "react-router-dom";
+import React from "react";
 class OrderShow extends React.Component {
     constructor(props) {
         super(props);

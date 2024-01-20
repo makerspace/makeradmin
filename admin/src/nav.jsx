@@ -1,7 +1,6 @@
-import React from "react";
-import * as _ from "underscore";
-import { withRouter, matchPath } from "react-router";
 import { Link, NavLink } from "react-router-dom";
+import { matchPath, withRouter } from "react-router";
+import * as _ from "underscore";
 
 export const NavItem = withRouter((props) => {
     const { location, icon, to } = props;

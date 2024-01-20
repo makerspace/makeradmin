@@ -1,5 +1,3 @@
-import React from "react";
-
 export default () => (
     <div className="uk-width-1-1">
         <div className="uk-panel uk-panel-box uk-panel-box-primary">

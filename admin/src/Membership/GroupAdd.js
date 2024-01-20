@@ -1,9 +1,7 @@
-import React from "react";
-
-import GroupForm from "../Components/GroupForm";
 import { browserHistory } from "../browser_history";
+import GroupForm from "../Components/GroupForm";
 import Group from "../Models/Group";
-
+import React from "react";
 class GroupAdd extends React.Component {
     constructor(props) {
         super(props);

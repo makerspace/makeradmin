@@ -1,10 +1,9 @@
-import React from "react";
-import { Link } from "react-router-dom";
-import Collection from "../Models/Collection";
 import CollectionTable from "../Components/CollectionTable";
-import Group from "../Models/Group";
 import SearchBox from "../Components/SearchBox";
+import Collection from "../Models/Collection";
 import CollectionNavigation from "../Models/CollectionNavigation";
+import Group from "../Models/Group";
+import { Link } from "react-router-dom";
 
 const Row = (props) => {
     const { item, deleteItem } = props;

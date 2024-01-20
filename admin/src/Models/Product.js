@@ -1,6 +1,6 @@
+import { get } from "../gateway";
 import Base from "./Base";
 import ProductAction from "./ProductAction";
-import { get } from "../gateway";
 import UIkit from "uikit";
 
 export default class Product extends Base {

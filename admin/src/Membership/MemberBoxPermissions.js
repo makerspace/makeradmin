@@ -1,7 +1,7 @@
-import React from "react";
-import Collection from "../Models/Collection";
 import CollectionTable from "../Components/CollectionTable";
+import Collection from "../Models/Collection";
 import Permission from "../Models/Permission";
+import React from "react";
 
 const Row = (props) => (
     <tr>

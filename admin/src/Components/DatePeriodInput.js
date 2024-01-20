@@ -1,6 +1,6 @@
+import { formatUtcDate, parseUtcDate, utcToday } from "../utils";
 import DayPickerInput from "react-day-picker/DayPickerInput";
 import React from "react";
-import { formatUtcDate, parseUtcDate, utcToday } from "../utils";
 
 export default class DatePeriodInput extends React.Component {
     constructor(props) {

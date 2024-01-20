@@ -1,8 +1,7 @@
-import Base from "./Base";
 import { addToDate, assert, formatUtcDate, parseUtcDate } from "../utils";
+import Base from "./Base";
 import DatePeriod from "./DatePeriod";
 import * as _ from "underscore";
-
 // Spans are startdate - enddate (inclusive - inclusive) but some spans are overlapping.
 export default class Span extends Base {
     deleteConfirmMessage() {

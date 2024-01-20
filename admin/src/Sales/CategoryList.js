@@ -1,10 +1,8 @@
-import React from "react";
+import CollectionTable from "../Components/CollectionTable";
+import TextInput from "../Components/TextInput";
 import Collection from "../Models/Collection";
 import CollectionNavigation from "../Models/CollectionNavigation";
-import CollectionTable from "../Components/CollectionTable";
 import Category from "../Models/ProductCategory";
-import TextInput from "../Components/TextInput";
-
 class CategoryList extends CollectionNavigation {
     constructor(props) {
         super(props);

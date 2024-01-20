@@ -1,10 +1,9 @@
-import PropTypes from "prop-types";
-import React from "react";
-import { withRouter } from "react-router";
 import MemberForm from "../Components/MemberForm";
-import Member from "../Models/Member";
 import { confirmModal } from "../message";
-
+import Member from "../Models/Member";
+import PropTypes from "prop-types";
+import { withRouter } from "react-router";
+import React from "react";
 class MemberBoxMemberData extends React.Component {
     render() {
         const { router } = this.props;

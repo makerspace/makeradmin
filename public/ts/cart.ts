@@ -1,5 +1,5 @@
-import { useEffect, useState } from "preact/hooks";
 import { Product } from "./payment_common";
+import { useEffect, useState } from "preact/hooks";
 
 export interface Item {
     id: number;

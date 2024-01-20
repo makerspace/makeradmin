@@ -1,14 +1,12 @@
+import { addToDate, formatUtcDate, utcToday } from "../../utils";
+import DatePeriod from "../DatePeriod";
+import Span, { calculateSpanDiff, DAY_MILLIS } from "../Span";
+import * as _ from "underscore";
 /**
  * @jest-environment jsdom
  */
 
 /* eslint-env jest */
-import { addToDate, formatUtcDate, utcToday } from "../../utils";
-import { calculateSpanDiff, DAY_MILLIS } from "../Span";
-import Span from "../Span";
-import DatePeriod from "../DatePeriod";
-import * as _ from "underscore";
-
 const today = utcToday();
 
 const day = (offsetDays) => addToDate(today, offsetDays * DAY_MILLIS);

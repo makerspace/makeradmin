@@ -1,11 +1,11 @@
-import React from "react";
-import Collection from "../Models/Collection";
-import { Link } from "react-router-dom";
 import CollectionTable from "../Components/CollectionTable";
-import Key from "../Models/Key";
-import { confirmModal } from "../message";
-import TextInput from "../Components/TextInput";
 import DateTimeShow from "../Components/DateTimeShow";
+import TextInput from "../Components/TextInput";
+import { confirmModal } from "../message";
+import Collection from "../Models/Collection";
+import Key from "../Models/Key";
+import { Link } from "react-router-dom";
+import React from "react";
 
 const Row = (collection) => (props) => {
     const { item } = props;

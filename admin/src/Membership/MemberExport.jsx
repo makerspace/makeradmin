@@ -1,6 +1,5 @@
-import React from "react";
 import { get } from "../gateway";
-
+import React from "react";
 class MemberExport extends React.Component {
     constructor(props) {
         super(props);

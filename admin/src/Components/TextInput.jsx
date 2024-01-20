@@ -1,5 +1,5 @@
-import React from "react";
 import classNames from "classnames/bind";
+import React from "react";
 import * as _ from "underscore";
 
 export default class TextInput extends React.Component {

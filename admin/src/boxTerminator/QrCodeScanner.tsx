@@ -1,5 +1,5 @@
-import React, { FC, useEffect } from "react";
 import { Html5Qrcode, Html5QrcodeSupportedFormats } from "html5-qrcode";
+import { FC, useEffect } from "react";
 
 type QrCodeScannerProps = {
     onSuccess: (qrCodeMessage: string) => void;

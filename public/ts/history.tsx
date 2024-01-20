@@ -1,18 +1,17 @@
-import * as common from "./common";
-import * as login from "./login";
 import Cart from "./cart";
 import { UNAUTHORIZED } from "./common";
+import * as common from "./common";
+import * as login from "./login";
+import { LoadCurrentMemberInfo, member_t } from "./member_common";
 import {
     LoadProductData,
     Product,
     ProductData,
     Transaction,
-    TransactionItem,
 } from "./payment_common";
-import { LoadCurrentMemberInfo, member_t } from "./member_common";
+import { Receipt } from "./receipt_common";
 import { Sidebar } from "./sidebar";
 import { render } from "preact";
-import { Receipt } from "./receipt_common";
 declare var UIkit: any;
 
 const HistoryPage = ({

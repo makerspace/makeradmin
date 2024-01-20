@@ -1,9 +1,8 @@
-import React from "react";
 import CountryDropdown from "./CountryDropdown";
 import DateTimeShow from "./DateTimeShow";
 import TextInput from "./TextInput";
 import { withRouter } from "react-router";
-
+import React from "react";
 class MemberForm extends React.Component {
     constructor(props) {
         super(props);

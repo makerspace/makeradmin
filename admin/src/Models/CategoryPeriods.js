@@ -1,7 +1,6 @@
 import Base from "./Base";
-import * as _ from "underscore";
 import { mergePeriods } from "./Span";
-
+import * as _ from "underscore";
 // In memory module representing a list of date periods in the same span category.
 export default class CategoryPeriods extends Base {
     constructor(data) {

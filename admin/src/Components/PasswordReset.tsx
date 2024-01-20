@@ -1,11 +1,10 @@
-import React from "react";
 import auth from "../auth";
-import { withRouter } from "react-router";
-import { showError, showSuccess } from "../message";
 import { browserHistory } from "../browser_history";
+import { showError, showSuccess } from "../message";
 import { Link } from "react-router-dom";
+import { withRouter } from "react-router";
+import React from "react";
 import * as _ from "underscore";
-
 class PasswordReset extends React.Component {
     input = React.createRef<HTMLInputElement>();
 

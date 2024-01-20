@@ -1,8 +1,8 @@
-import { useEffect, useRef, useState } from "preact/hooks";
-import { ComponentChildren } from "preact";
-import { logout } from "./common";
 import Cart from "./cart";
+import { logout } from "./common";
 import { Product, ProductData } from "./payment_common";
+import { ComponentChildren } from "preact";
+import { useEffect, useRef, useState } from "preact/hooks";
 
 const NavItem = ({
     url,

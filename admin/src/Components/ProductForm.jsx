@@ -1,13 +1,12 @@
-import React from "react";
-import TextInput from "./TextInput";
-import Textarea from "./Textarea";
-import DateTimeInput from "./DateTimeInput";
-import * as _ from "underscore";
-import SelectInput from "./SelectInput";
-import ReactSelect from "react-select";
 import ProductAction, { ACTION_TYPES } from "../Models/ProductAction";
 import CheckboxInput from "./CheckboxInput";
-
+import DateTimeInput from "./DateTimeInput";
+import SelectInput from "./SelectInput";
+import Textarea from "./Textarea";
+import TextInput from "./TextInput";
+import ReactSelect from "react-select";
+import React from "react";
+import * as _ from "underscore";
 // Return list of available actions types based on selected ones
 const filterAvailableActions = (actions) => {
     return ACTION_TYPES.filter(

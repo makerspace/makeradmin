@@ -1,11 +1,9 @@
-import React from "react";
 import CollectionTable from "../Components/CollectionTable";
 import SearchBox from "../Components/SearchBox";
 import TextInput from "../Components/TextInput";
 import Collection from "../Models/Collection";
 import CollectionNavigation from "../Models/CollectionNavigation";
 import TransactionAccount from "../Models/TransactionAccount";
-
 class AccountingAccount extends CollectionNavigation {
     constructor(props) {
         super(props);

@@ -1,15 +1,9 @@
-import React from "react";
-import Collection from "../Models/Collection";
-import { RouteComponentProps } from "react-router";
-import { Link } from "react-router-dom";
 import CollectionTable from "../Components/CollectionTable";
-import Key from "../Models/Key";
 import { confirmModal } from "../message";
-import TextInput from "../Components/TextInput";
-import DateTimeShow from "../Components/DateTimeShow";
+import Collection from "../Models/Collection";
 import QuizQuestionOption from "../Models/QuizQuestionOption";
+import React from "react";
 import _ from "underscore";
-
 // Save functions for each item. Debounced to avoid a ton of unnecessary saves
 const debouncedSaves = new Map<QuizQuestionOption, () => void>();
 

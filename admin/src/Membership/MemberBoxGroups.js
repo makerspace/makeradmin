@@ -1,10 +1,10 @@
-import React from "react";
-import Collection from "../Models/Collection";
-import { Link } from "react-router-dom";
-import Group from "../Models/Group";
 import CollectionTable from "../Components/CollectionTable";
 import { get } from "../gateway";
+import Collection from "../Models/Collection";
+import Group from "../Models/Group";
+import { Link } from "react-router-dom";
 import Select from "react-select";
+import React from "react";
 import * as _ from "underscore";
 
 const filterOptions = (items, options) => {

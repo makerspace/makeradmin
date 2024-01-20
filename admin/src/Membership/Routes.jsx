@@ -1,5 +1,3 @@
-import React from "react";
-import MemberList from "./MemberList";
 import GroupAdd from "./GroupAdd";
 import GroupBox from "./GroupBox";
 import GroupBoxEditInfo from "./GroupBoxEditInfo";
@@ -7,22 +5,22 @@ import GroupBoxMembers from "./GroupBoxMembers";
 import GroupBoxPermissions from "./GroupBoxPermissions";
 import GroupList from "./GroupList";
 import KeyEdit from "./KeyEdit";
+import KeyHandout from "./KeyHandout";
 import KeyList from "./KeyList";
 import MemberAdd from "./MemberAdd";
 import MemberBox from "./MemberBox";
 import MemberBoxGroups from "./MemberBoxGroups";
 import MemberBoxKeys from "./MemberBoxKeys";
 import MemberBoxMemberData from "./MemberBoxMemberData";
-import KeyHandout from "./KeyHandout";
 import MemberBoxMessages from "./MemberBoxMessages";
 import MemberBoxNewMessage from "./MemberBoxNewMessage";
 import MemberBoxOrders from "./MemberBoxOrders";
 import MemberBoxPermissions from "./MemberBoxPermissions";
 import MemberBoxSpans from "./MemberBoxSpans";
 import MemberExport from "./MemberExport";
+import MemberList from "./MemberList";
 import SpanList from "./SpanList";
 import SpanShow from "./SpanShow";
-
 import { Route, Switch } from "react-router-dom";
 
 const Group = ({ match: { path } }) => (

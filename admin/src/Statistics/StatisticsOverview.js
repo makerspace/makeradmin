@@ -1,5 +1,3 @@
-import React from "react";
-
 export default () => {
     return (
         <div className="uk-width-1-1">

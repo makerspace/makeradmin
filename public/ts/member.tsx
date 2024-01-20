@@ -1,45 +1,47 @@
-import { render } from "preact";
-import { render as jsx_to_string } from "preact-render-to-string";
-import { useEffect, useMemo, useState } from "preact/hooks";
-import { JSX } from "preact/jsx-runtime";
 import Cart, { useCart } from "./cart";
 import { show_phone_number_dialog } from "./change_phone";
+import { get_error, UNAUTHORIZED } from "./common";
 import * as common from "./common";
-import { UNAUTHORIZED, get_error } from "./common";
 import * as login from "./login";
 import {
+    access_t,
+    date_t,
     LoadCurrentAccessInfo,
     LoadCurrentMemberGroups,
     LoadCurrentMemberInfo,
     LoadCurrentMembershipInfo,
-    access_t,
-    date_t,
     member_t,
     membership_t,
 } from "./member_common";
 import {
+    extractRelevantProducts,
     FindWellKnownProduct,
+    initializeStripe,
     LoadProductData,
     Product,
     ProductData,
     RelevantProducts,
-    extractRelevantProducts,
-    initializeStripe,
 } from "./payment_common";
 import { Sidebar } from "./sidebar";
 import {
-    SubscriptionInfo,
-    SubscriptionType,
     activateSubscription,
     cancelSubscription,
     getCurrentSubscriptions,
+    SubscriptionInfo,
+    SubscriptionType,
 } from "./subscriptions";
-import { Translator, translateUnit, useTranslation } from "./translations";
+import { translateUnit, Translator, useTranslation } from "./translations";
 import { URL_CALENDAR, URL_MEMBERBOOTH } from "./urls";
+import { render as jsx_to_string } from "preact-render-to-string";
+import { render } from "preact";
+import { useEffect, useMemo, useState } from "preact/hooks";
+import { JSX } from "preact/jsx-runtime";
 declare var UIkit: any;
 
 type fn_past_enddate = (enddate: date_t, remaining_days: number) => JSX.Element;
+
 type fn_expired_yesterday = () => JSX.Element;
+
 type fn_less_than_one_day_left = (remaining_hours: number) => JSX.Element;
 type fn_less_than_two_weeks_left = (
     enddate: date_t,

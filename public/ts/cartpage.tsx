@@ -1,23 +1,22 @@
 import Cart, { Item, useCart } from "./cart";
+import { ServerResponse, UNAUTHORIZED } from "./common";
 import * as common from "./common";
 import * as login from "./login";
-import { ServerResponse, UNAUTHORIZED } from "./common";
+import { LoadCurrentMemberInfo } from "./member_common";
 import {
     BackendPaymentResponse,
-    LoadProductData,
-    PaymentFlowDefinition,
-    ProductData,
-    StripeCardInput,
     createStripeCardInput,
     initializeStripe,
-    negotiatePayment,
+    LoadProductData,
     pay,
+    PaymentFlowDefinition,
+    ProductData,
+    stripe,
+    StripeCardInput,
 } from "./payment_common";
-import { LoadCurrentMemberInfo } from "./member_common";
-import { render } from "preact";
-import { stripe } from "./payment_common";
-import { useMemo, useState } from "preact/hooks";
 import { Sidebar } from "./sidebar";
+import { render } from "preact";
+import { useMemo, useState } from "preact/hooks";
 declare var UIkit: any;
 
 const CartItem = ({

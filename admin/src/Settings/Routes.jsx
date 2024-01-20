@@ -1,8 +1,7 @@
-import React from "react";
-import { Route, Switch } from "react-router-dom";
+import About from "./About";
 import AccessTokenList from "./AccessTokenList";
 import ServiceTokenList from "./ServiceTokenList";
-import About from "./About";
+import { Route, Switch } from "react-router-dom";
 
 export default ({ match }) => (
     <Switch>

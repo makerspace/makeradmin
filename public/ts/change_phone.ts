@@ -1,7 +1,6 @@
-import * as common from "./common";
 import { UNAUTHORIZED } from "./common";
+import * as common from "./common";
 import { Translator } from "./translations";
-
 declare var UIkit: any;
 
 export async function show_phone_number_dialog(

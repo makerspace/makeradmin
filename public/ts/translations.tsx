@@ -1,5 +1,3 @@
-import { createContext } from "preact";
-import { useContext, useState } from "preact/hooks";
 import { formatDate } from "./common";
 import { Translation, TranslationKeyValues } from "./translate";
 import {
@@ -10,6 +8,8 @@ import {
     URL_SLACK_HELP,
     URL_WIKI,
 } from "./urls";
+import { createContext } from "preact";
+import { useContext, useState } from "preact/hooks";
 
 export type Dictionary = Translation<typeof Eng>;
 export type TranslationKey = TranslationKeyValues<typeof Eng>;

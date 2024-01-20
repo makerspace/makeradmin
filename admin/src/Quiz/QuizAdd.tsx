@@ -1,8 +1,7 @@
-import React from "react";
-import { withRouter } from "react-router";
-import Quiz from "../Models/Quiz";
 import { browserHistory } from "../browser_history";
+import Quiz from "../Models/Quiz";
 import QuizEditForm from "./QuizEditForm";
+import React from "react";
 
 interface State {
     quiz: null | Quiz;

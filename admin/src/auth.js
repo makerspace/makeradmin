@@ -1,6 +1,5 @@
 import { post } from "./gateway";
 import { showError, showSuccess } from "./message";
-
 class Auth {
     getAccessToken() {
         return localStorage.token;

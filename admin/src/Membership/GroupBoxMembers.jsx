@@ -1,11 +1,11 @@
-import React from "react";
-import { Link } from "react-router-dom";
-import { Async } from "react-select";
-import Collection from "../Models/Collection";
-import Member from "../Models/Member";
 import CollectionTable from "../Components/CollectionTable";
 import Date from "../Components/DateShow";
 import { get } from "../gateway";
+import Collection from "../Models/Collection";
+import Member from "../Models/Member";
+import { Link } from "react-router-dom";
+import { Async } from "react-select";
+import React from "react";
 import * as _ from "underscore";
 
 const Row = (collection) => (props) => {

@@ -1,11 +1,10 @@
-import React from "react";
-import { Link } from "react-router-dom";
-import GiftCard from "../Models/GiftCard";
-import Collection from "../Models/Collection";
 import CollectionTable from "../Components/CollectionTable";
-import GiftCardRow from "../Models/GiftCardRow";
 import Currency from "../Components/Currency";
-
+import Collection from "../Models/Collection";
+import GiftCard from "../Models/GiftCard";
+import GiftCardRow from "../Models/GiftCardRow";
+import { Link } from "react-router-dom";
+import React from "react";
 class GiftCardShow extends React.Component {
     constructor(props) {
         super(props);

@@ -1,10 +1,8 @@
-import React from "react";
-import CollectionNavigation from "../Models/CollectionNavigation";
-import ProductImage from "../Models/ProductImage";
-import Collection from "../Models/Collection";
 import CollectionTable from "../Components/CollectionTable";
 import SearchBox from "../Components/SearchBox";
-
+import Collection from "../Models/Collection";
+import CollectionNavigation from "../Models/CollectionNavigation";
+import ProductImage from "../Models/ProductImage";
 class ImageList extends CollectionNavigation {
     constructor(props) {
         super(props);

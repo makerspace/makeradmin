@@ -1,16 +1,15 @@
-/// <reference path="../node_modules/@types/stripe-v3/index.d.ts" />
-import { useEffect, useRef } from "preact/hooks";
-import * as common from "./common";
+import Cart, { Item } from "./cart";
 import { ServerResponse } from "./common";
+import * as common from "./common";
+import { member_t } from "./member_common";
 import {
     StartSubscriptionsRequest,
     SubscriptionStart,
     SubscriptionType,
 } from "./subscriptions";
 import { useTranslation } from "./translations";
-import { member_t } from "./member_common";
-import Cart, { Item } from "./cart";
-
+import { useEffect, useRef } from "preact/hooks";
+/// <reference path="../node_modules/@types/stripe-v3/index.d.ts" />
 declare var UIkit: any;
 
 export var stripe: stripe.Stripe;
@@ -180,6 +179,7 @@ const WellKnownProducts = [
     "membership_subscription",
     "labaccess_subscription",
 ] as const;
+
 type WellKnownProductId = (typeof WellKnownProducts)[number];
 
 export function AssertIsWellKnownProductId(

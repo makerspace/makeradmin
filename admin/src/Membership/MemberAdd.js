@@ -1,9 +1,7 @@
-import React from "react";
-
+import { browserHistory } from "../browser_history";
 import MemberForm from "../Components/MemberForm";
 import Member from "../Models/Member";
-import { browserHistory } from "../browser_history";
-
+import React from "react";
 class MemberAdd extends React.Component {
     constructor(props) {
         super(props);

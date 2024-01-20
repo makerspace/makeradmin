@@ -1,9 +1,8 @@
-import React from "react";
 import MessageForm from "../Components/MessageForm";
-import Message from "../Models/Message";
 import { notifySuccess } from "../message";
+import Message from "../Models/Message";
 import { withRouter } from "react-router";
-
+import React from "react";
 class MessageAdd extends React.Component {
     constructor(props) {
         super(props);

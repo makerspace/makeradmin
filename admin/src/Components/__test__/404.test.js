@@ -1,9 +1,6 @@
-/* eslint-env jest */
-
-import React from "react";
-import { shallow } from "enzyme";
 import Show404 from "../404";
-
+import { shallow } from "enzyme";
+/* eslint-env jest */
 describe("404", () => {
     test("renders", () => {
         const component = shallow(<Show404 />);

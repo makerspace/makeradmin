@@ -1,5 +1,4 @@
 import Cart from "./cart";
-
 declare var UIkit: any;
 
 declare global {

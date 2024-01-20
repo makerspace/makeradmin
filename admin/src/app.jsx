@@ -1,3 +1,23 @@
+import auth from "./auth";
+import BoxTerminator from "./boxTerminator/Routes";
+import { browserHistory } from "./browser_history";
+import Page404 from "./Components/404";
+import Dashboard from "./Components/Dashboard";
+import Login from "./Components/Login";
+import Logout from "./Components/Logout";
+import PasswordReset from "./Components/PasswordReset";
+import RequestPasswordReset from "./Components/RequestPasswordReset";
+import Membership from "./Membership/Routes";
+import Messages from "./Messages/Routes";
+import { Nav, SideNav } from "./nav";
+import Quiz from "./Quiz/Routes";
+import Sales from "./Sales/Routes";
+import Settings from "./Settings/Routes";
+import Statistics from "./Statistics/Routes";
+import ReactDOM from "react-dom";
+import { Route, Switch } from "react-router-dom";
+import { Router } from "react-router";
+import React from "react";
 // Load jQuery and UIkit
 global.jQuery = require("jquery");
 global.$ = global.jQuery;
@@ -7,29 +27,6 @@ require("uikit/dist/js/components/pagination");
 require("uikit/dist/js/components/autocomplete");
 require("uikit/dist/js/components/notify");
 require("uikit/dist/js/components/upload");
-
-import React from "react";
-import ReactDOM from "react-dom";
-import { Router } from "react-router";
-import { Route, Switch } from "react-router-dom";
-import Login from "./Components/Login";
-import auth from "./auth";
-import { browserHistory } from "./browser_history";
-import { Nav, SideNav } from "./nav";
-
-import Page404 from "./Components/404";
-import Dashboard from "./Components/Dashboard";
-import Logout from "./Components/Logout";
-import PasswordReset from "./Components/PasswordReset";
-import RequestPasswordReset from "./Components/RequestPasswordReset";
-
-import Membership from "./Membership/Routes";
-import Messages from "./Messages/Routes";
-import Quiz from "./Quiz/Routes";
-import Sales from "./Sales/Routes";
-import Settings from "./Settings/Routes";
-import Statistics from "./Statistics/Routes";
-import BoxTerminator from "./boxTerminator/Routes";
 
 const nav = {
     brand: "MakerAdmin",

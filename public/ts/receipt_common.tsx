@@ -1,7 +1,6 @@
 import Cart from "./cart";
 import { member_t } from "./member_common";
 import { Transaction, TransactionItem } from "./payment_common";
-
 function format_receipt_status(transaction_status: string) {
     switch (transaction_status) {
         case "pending":

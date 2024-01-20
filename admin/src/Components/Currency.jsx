@@ -1,5 +1,3 @@
-import React from "react";
-
 const Currency = (props) => {
     const formatter = new Intl.NumberFormat("sv-SE", {
         // style: 'currency',

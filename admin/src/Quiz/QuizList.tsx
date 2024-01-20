@@ -1,9 +1,8 @@
-import React from "react";
-import { Link } from "react-router-dom";
-import Collection from "../Models/Collection";
 import CollectionTable from "../Components/CollectionTable";
+import Collection from "../Models/Collection";
 import Quiz from "../Models/Quiz";
-
+import { Link } from "react-router-dom";
+import React from "react";
 class QuestionList extends React.Component {
     collection = new Collection({ type: Quiz });
 

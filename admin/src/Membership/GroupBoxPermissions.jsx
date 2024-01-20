@@ -1,10 +1,10 @@
-import React from "react";
-import Permission from "../Models/Permission";
 import CollectionTable from "../Components/CollectionTable";
-import Collection from "../Models/Collection";
 import { get } from "../gateway";
-import * as _ from "underscore";
+import Collection from "../Models/Collection";
+import Permission from "../Models/Permission";
 import Select from "react-select";
+import React from "react";
+import * as _ from "underscore";
 
 const Row = (collection) => (props) => {
     const { item } = props;

@@ -1,9 +1,16 @@
-import * as common from "./common";
-import { render } from "preact";
-import { StateUpdater, useEffect, useMemo, useState } from "preact/hooks";
+import Cart from "./cart";
+import { show_phone_number_dialog } from "./change_phone";
 import { ServerResponse, trackPlausible } from "./common";
+import * as common from "./common";
+import { LoadCurrentMemberInfo, member_t } from "./member_common";
 import {
+    calculateAmountToPay,
+    createPaymentMethod,
+    createStripeCardInput,
     Discount,
+    extractRelevantProducts,
+    initializeStripe,
+    pay,
     PaymentFailedError,
     PriceLevel,
     Product,
@@ -12,21 +19,14 @@ import {
     RegisterPageData,
     StripeCardInput,
     ToPayPreview,
-    calculateAmountToPay,
-    createPaymentMethod,
-    createStripeCardInput,
-    extractRelevantProducts,
-    initializeStripe,
-    pay,
 } from "./payment_common";
-import { PopupModal, useCalendlyEventListener } from "react-calendly";
-import { URL_RELATIVE_MEMBER_PORTAL } from "./urls";
-import { LoadCurrentMemberInfo, member_t } from "./member_common";
 import { TranslationWrapper, Translator, useTranslation } from "./translations";
-import Cart from "./cart";
-import { show_phone_number_dialog } from "./change_phone";
-
+import { URL_RELATIVE_MEMBER_PORTAL } from "./urls";
+import { render } from "preact";
+import { StateUpdater, useEffect, useMemo, useState } from "preact/hooks";
+import { PopupModal, useCalendlyEventListener } from "react-calendly";
 declare var UIkit: any;
+
 const FEATURE_FLAG_LOW_INCOME_DISCOUNT = false;
 
 type Plan = {

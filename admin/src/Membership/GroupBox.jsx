@@ -1,9 +1,8 @@
-import React from "react";
-import { withRouter } from "react-router";
+import Group from "../Models/Group";
 import { NavItem } from "../nav";
 import PropTypes from "prop-types";
-import Group from "../Models/Group";
-
+import { withRouter } from "react-router";
+import React from "react";
 class GroupBox extends React.Component {
     constructor(props) {
         super(props);

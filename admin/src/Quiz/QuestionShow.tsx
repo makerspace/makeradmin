@@ -1,8 +1,8 @@
-import React from "react";
-import QuizQuestion from "../Models/QuizQuestion";
 import { browserHistory } from "../browser_history";
 import { confirmModal } from "../message";
+import QuizQuestion from "../Models/QuizQuestion";
 import QuestionEditForm from "./QuestionEditForm";
+import React from "react";
 
 interface State {
     question: null | QuizQuestion;

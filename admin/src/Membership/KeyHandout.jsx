@@ -1,9 +1,8 @@
-import React from "react";
-import PropTypes from "prop-types";
-import Member from "../Models/Member";
 import KeyHandoutForm from "../Components/KeyHandoutForm";
+import Member from "../Models/Member";
+import PropTypes from "prop-types";
 import { withRouter } from "react-router";
-
+import React from "react";
 class KeyHandout extends React.Component {
     render() {
         return (

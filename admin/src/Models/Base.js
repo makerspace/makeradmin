@@ -1,6 +1,6 @@
-import * as _ from "underscore";
-import { del, get, put, post } from "../gateway";
+import { del, get, post, put } from "../gateway";
 import { deepcopy } from "../utils";
+import * as _ from "underscore";
 
 export default class Base {
     constructor(data = null) {

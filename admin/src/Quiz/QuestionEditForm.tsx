@@ -1,7 +1,5 @@
-import React from "react";
-import { withRouter } from "react-router";
-import QuizQuestion from "../Models/QuizQuestion";
 import Textarea from "../Components/Textarea";
+import QuizQuestion from "../Models/QuizQuestion";
 import QuestionOptionList from "./QuestionOptionList";
 
 interface Props {

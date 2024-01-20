@@ -1,9 +1,9 @@
-import React from "react";
-import { Link } from "react-router-dom";
-import Order from "../Models/Order";
-import Collection from "../Models/Collection";
 import CollectionTable from "../Components/CollectionTable";
 import DateTimeShow from "../Components/DateTimeShow";
+import Collection from "../Models/Collection";
+import Order from "../Models/Order";
+import { Link } from "react-router-dom";
+import React from "react";
 
 const Row = (props) => {
     const { item } = props;

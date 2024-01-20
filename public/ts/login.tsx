@@ -1,7 +1,7 @@
-import { useState } from "preact/hooks";
 import * as common from "./common";
 import { Sidebar } from "./sidebar";
 import { render } from "preact";
+import { useState } from "preact/hooks";
 declare var UIkit: any;
 
 function showSuccess(message: string) {

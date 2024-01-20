@@ -1,19 +1,19 @@
-import React from "react";
-import OrderList from "./OrderList";
-import OrderShow from "./OrderShow";
+import AccountingAccount from "./AccountingAccount";
+import AccountingBox from "./AccountingBox";
+import AccountingCostCenter from "./AccountingCostCenter";
+import AccountingExport from "./AccountingExport";
+import AccountingProduct from "./AccountingProduct";
+import CategoryList from "./CategoryList";
 import GiftCardList from "./GiftCardList";
 import GiftCardShow from "./GiftCardShow";
-import ProductList from "./ProductList";
+import ImageList from "./ImageList";
+import OrderList from "./OrderList";
+import OrderShow from "./OrderShow";
 import ProductAdd from "./ProductAdd";
 import ProductEdit from "./ProductEdit";
-import CategoryList from "./CategoryList";
+import ProductList from "./ProductList";
 import { Route, Switch } from "react-router-dom";
-import ImageList from "./ImageList";
-import AccountingBox from "./AccountingBox";
-import AccountingExport from "./AccountingExport";
-import AccountingAccount from "./AccountingAccount";
-import AccountingCostCenter from "./AccountingCostCenter";
-import AccountingProduct from "./AccountingProduct";
+
 const Accounting = ({ match: { path } }) => (
     <AccountingBox>
         <Switch>

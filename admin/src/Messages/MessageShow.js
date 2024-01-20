@@ -1,8 +1,7 @@
-import React from "react";
-import { withRouter } from "react-router";
-import Message from "../Models/Message";
 import DateTimeShow from "../Components/DateTimeShow";
-
+import Message from "../Models/Message";
+import { withRouter } from "react-router";
+import React from "react";
 class MessageShow extends React.Component {
     constructor(props) {
         super(props);

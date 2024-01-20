@@ -1,9 +1,8 @@
-import React from "react";
-import QuizAdd from "./QuizAdd";
 import QuestionAdd from "./QuestionAdd";
 import QuestionShow from "./QuestionShow";
-import QuizShow from "./QuizShow";
+import QuizAdd from "./QuizAdd";
 import QuizList from "./QuizList";
+import QuizShow from "./QuizShow";
 import { Route, Switch } from "react-router-dom";
 
 export default ({ match }) => {

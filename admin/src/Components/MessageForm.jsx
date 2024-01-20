@@ -1,11 +1,11 @@
-import React from "react";
-import { withRouter } from "react-router";
-import TextInput from "./TextInput";
-import Textarea from "./Textarea";
-import { Async } from "react-select";
 import { get } from "../gateway";
 import Group from "../Models/Group";
 import Member from "../Models/Member";
+import Textarea from "./Textarea";
+import TextInput from "./TextInput";
+import { withRouter } from "react-router";
+import { Async } from "react-select";
+import React from "react";
 
 const groupOption = (d) => {
     const id = d[Group.model.id];

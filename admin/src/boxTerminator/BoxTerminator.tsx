@@ -1,8 +1,8 @@
-import React, { useState } from "react";
 import { get } from "../gateway";
 import { showError } from "../message";
 import QrCodeScanner from "./QrCodeScanner";
 import { Termination, TerminationRenderProps } from "./Termination";
+import { useState } from "react";
 
 type ResponseType = TerminationRenderProps;
 

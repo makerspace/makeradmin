@@ -1,8 +1,7 @@
-import React from "react";
+import Textarea from "./Textarea";
 import TextInput from "./TextInput";
 import { withRouter } from "react-router";
-import Textarea from "./Textarea";
-
+import React from "react";
 class GroupForm extends React.Component {
     constructor(props) {
         super(props);

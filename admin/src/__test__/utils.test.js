@@ -1,11 +1,9 @@
+import { dateTimeToStr, dateToStr } from "../utils";
 /**
  * @jest-environment jsdom
  */
 
 /* eslint-env jest */
-
-import { dateTimeToStr, dateToStr } from "../utils";
-
 describe("timestamp string from server", () => {
     test("is coverted to nice date string", () => {
         expect(dateToStr("2018-10-26T18:44:40Z")).toBe("2018-10-26");

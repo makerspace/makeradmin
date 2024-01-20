@@ -1,18 +1,12 @@
-/// <reference path="../node_modules/moment/moment.d.ts" />
+import { ServerResponse } from "./common";
 import * as common from "./common";
+import { Quiz } from "./quiz";
+import { sankey, sankeyLeft, sankeyLinkHorizontal } from "d3-sankey";
+import * as d3 from "d3";
+/// <reference path="../node_modules/moment/moment.d.ts" />
+
 //import * as moment from 'moment';
 import "moment/locale/sv";
-import { ServerResponse } from "./common";
-import { Quiz } from "./quiz";
-import * as d3 from "d3";
-import {
-    sankey,
-    SankeyGraph,
-    SankeyLayout,
-    sankeyLeft,
-    sankeyLinkHorizontal,
-} from "d3-sankey";
-
 declare var UIkit: any;
 declare var Chart: any;
 
@@ -798,7 +792,9 @@ function addRevenueChart(
 }
 
 type Node = { id: number; name: string; color?: string };
+
 type Link = { source: number; target: number; value: number; pause: boolean };
+
 type RetentionGraph = {
     nodes: Node[];
     links: Link[];

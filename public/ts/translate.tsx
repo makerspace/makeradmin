@@ -1,3 +1,4 @@
+import { isValidElement, VNode } from "preact";
 /// This file contains a bunch of hard to understand typescript types.
 /// They are used to type check the translation dictionary.
 /// The dictionary is a nested object with string keys and string/function values.
@@ -5,9 +6,6 @@
 /// This file should rarely require any modifications.
 ///
 /// See https://stackoverflow.com/questions/58277973/how-to-type-check-i18n-dictionaries-with-typescript
-
-import { VNode, isValidElement } from "preact";
-
 // T is the dictionary, S ist the next string part of the object property path
 // If S does not match dict shape, return its next expected properties
 type DeepKeys<T, S extends string> = T extends VNode

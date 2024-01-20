@@ -1,9 +1,8 @@
-import React from "react";
-import { NavItem } from "../nav";
-import { withRouter } from "react-router";
-import PropTypes from "prop-types";
 import Member from "../Models/Member";
-
+import { NavItem } from "../nav";
+import PropTypes from "prop-types";
+import { withRouter } from "react-router";
+import React from "react";
 class MemberBox extends React.Component {
     constructor(props) {
         super(props);

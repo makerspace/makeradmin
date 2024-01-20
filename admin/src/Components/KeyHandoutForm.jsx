@@ -1,15 +1,13 @@
-import React from "react";
-import { Prompt } from "react-router";
-import TextInput from "./TextInput";
-import { withRouter } from "react-router";
-import Span, { filterCategory } from "../Models/Span";
-import Collection from "../Models/Collection";
-import { ADD_LABACCESS_DAYS } from "../Models/ProductAction";
-import { dateTimeToStr, parseUtcDate, utcToday } from "../utils";
 import { get, post } from "../gateway";
 import { notifySuccess } from "../message";
+import Collection from "../Models/Collection";
+import { ADD_LABACCESS_DAYS } from "../Models/ProductAction";
+import Span, { filterCategory } from "../Models/Span";
+import { dateTimeToStr, parseUtcDate, utcToday } from "../utils";
+import TextInput from "./TextInput";
 import { renderToString } from "react-dom/server";
-
+import { Prompt, withRouter } from "react-router";
+import React from "react";
 function last_span_enddate(spans, category) {
     const last_span = filterCategory(spans, category).splice(-1)[0];
     if (last_span) {

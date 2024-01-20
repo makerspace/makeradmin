@@ -1,5 +1,4 @@
 import Base from "./Base";
-
 // In memory model representing a date period.
 export default class DatePeriod extends Base {
     constructor(data) {

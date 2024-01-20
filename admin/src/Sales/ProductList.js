@@ -1,14 +1,12 @@
-import React from "react";
-import { Link } from "react-router-dom";
-import Collection from "../Models/Collection";
 import CollectionTable from "../Components/CollectionTable";
-import Product from "../Models/Product";
 import Currency from "../Components/Currency";
-import * as _ from "underscore";
-import { get } from "../gateway";
 import SearchBox from "../Components/SearchBox";
+import { get } from "../gateway";
+import Collection from "../Models/Collection";
 import CollectionNavigation from "../Models/CollectionNavigation";
-
+import Product from "../Models/Product";
+import { Link } from "react-router-dom";
+import * as _ from "underscore";
 class ProductList extends CollectionNavigation {
     constructor(props) {
         super(props);

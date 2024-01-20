@@ -1,9 +1,8 @@
-import React from "react";
 import auth from "../auth";
-import { withRouter } from "react-router";
 import { browserHistory } from "../browser_history";
 import { showError, showSuccess } from "../message";
-
+import { withRouter } from "react-router";
+import React from "react";
 class RequestPasswordReset extends React.Component {
     cancel() {
         browserHistory.push("/");

@@ -1,7 +1,7 @@
-import React from "react";
+import DatePeriod from "../Models/DatePeriod";
 import { utcToday } from "../utils";
 import DatePeriodInput from "./DatePeriodInput";
-import DatePeriod from "../Models/DatePeriod";
+import React from "react";
 
 export default class CategoryPeriodsInput extends React.Component {
     constructor(props) {

@@ -1,6 +1,6 @@
+import { ServerResponse, UNAUTHORIZED } from "./common";
 import * as common from "./common";
 import * as login from "./login";
-import { ServerResponse, UNAUTHORIZED } from "./common";
 import { Quiz } from "./quiz";
 import { Sidebar } from "./sidebar";
 import { render } from "preact";

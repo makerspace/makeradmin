@@ -1,8 +1,8 @@
-import React from "react";
-import Collection from "../Models/Collection";
-import ServiceAccessToken from "../Models/ServiceAccessToken";
 import CollectionTable from "../Components/CollectionTable";
 import { del } from "../gateway";
+import Collection from "../Models/Collection";
+import ServiceAccessToken from "../Models/ServiceAccessToken";
+import React from "react";
 
 const Row = (collection) => (props) => {
     const { item } = props;

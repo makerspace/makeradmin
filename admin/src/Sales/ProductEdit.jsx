@@ -1,10 +1,9 @@
-import React from "react";
-import { withRouter } from "react-router";
-import Product from "../Models/Product";
+import { browserHistory } from "../browser_history";
 import ProductForm from "../Components/ProductForm";
 import { confirmModal } from "../message";
-import { browserHistory } from "../browser_history";
-
+import Product from "../Models/Product";
+import { withRouter } from "react-router";
+import React from "react";
 class ProductEdit extends React.Component {
     constructor(props) {
         super(props);

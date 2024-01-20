@@ -1,16 +1,15 @@
-import React from "react";
-import { Link } from "react-router-dom";
-import Collection from "../Models/Collection";
-import Span from "../Models/Span";
-import { ADD_LABACCESS_DAYS } from "../Models/ProductAction";
-import { confirmModal } from "../message";
 import CollectionTable from "../Components/CollectionTable";
-import DateTimeShow from "../Components/DateTimeShow";
 import DateShow from "../Components/DateShow";
-import "react-day-picker/lib/style.css";
-import MembershipPeriodsInput from "./MembershipPeriodsInput";
+import DateTimeShow from "../Components/DateTimeShow";
 import { get } from "../gateway";
-
+import { confirmModal } from "../message";
+import Collection from "../Models/Collection";
+import { ADD_LABACCESS_DAYS } from "../Models/ProductAction";
+import Span from "../Models/Span";
+import MembershipPeriodsInput from "./MembershipPeriodsInput";
+import { Link } from "react-router-dom";
+import React from "react";
+import "react-day-picker/lib/style.css";
 class MemberBoxSpans extends React.Component {
     constructor(props) {
         super(props);

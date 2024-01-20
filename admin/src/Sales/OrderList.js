@@ -1,11 +1,10 @@
-import React from "react";
-import { Link } from "react-router-dom";
-import Order from "../Models/Order";
-import Collection from "../Models/Collection";
 import CollectionTable from "../Components/CollectionTable";
 import DateTimeShow from "../Components/DateTimeShow";
 import SearchBox from "../Components/SearchBox";
+import Collection from "../Models/Collection";
 import CollectionNavigation from "../Models/CollectionNavigation";
+import Order from "../Models/Order";
+import { Link } from "react-router-dom";
 
 const Row = (props) => {
     const { item } = props;

@@ -1,4 +1,3 @@
-import React from "react";
 import { dateToStr } from "../utils";
 
 const DateShow = ({ date }) => {

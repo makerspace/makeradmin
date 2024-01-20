@@ -1,11 +1,9 @@
-import React from "react";
 import CollectionTable from "../Components/CollectionTable";
 import SearchBox from "../Components/SearchBox";
 import TextInput from "../Components/TextInput";
 import Collection from "../Models/Collection";
 import CollectionNavigation from "../Models/CollectionNavigation";
 import TransactionCostCenter from "../Models/TransactionCostCenter";
-
 class AccountingCostCenter extends CollectionNavigation {
     constructor(props) {
         super(props);
