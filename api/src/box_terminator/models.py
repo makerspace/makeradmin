@@ -27,20 +27,6 @@ Base = declarative_base()
 logger = getLogger("makeradmin")
 
 
-class StorageMessageType(Base):
-    __tablename__ = "storage_message_types"
-
-    id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
-    message_type = Column(String(255), nullable=False)
-    display_order = Column(Integer, nullable=False, unique=True)
-    created_at = Column(DateTime, server_default=func.now())
-    updated_at = Column(DateTime, server_default=func.now())
-    deleted_at = Column(DateTime)
-
-    def __repr__(self) -> str:
-        return f"MessageType(id={self.id}, message_type={self.description})"  # TODO
-
-
 class StorageType(Base):
     __tablename__ = "storage_types"
 
@@ -76,6 +62,26 @@ class StorageItem(Base):
             f"Storage(id={self.id}, item_label_id={self.item_label_id}, member_id={self.member_id}"
             f", storage_type_id={self.storage_type_id}, last_check_at={self.last_check_at}, fixed_expire_date={self.fixed_end_date})"
         )
+
+
+class StorageAction(Base):
+    __tablename__ = "storage_actions"
+
+    id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
+    admin_description = Column(String(255), nullable=False)
+    button_text = Column(String(255), nullable=False)
+    button_color = Column(String(255), nullable=False)
+    storage_type_id = Column(Integer, ForeignKey("storage_types.id"), nullable=False)
+    email_template = Column(Text, nullable=False)
+    display_order = Column(Integer, nullable=False, unique=True)
+    created_at = Column(DateTime, server_default=func.now())
+    updated_at = Column(DateTime, server_default=func.now())
+    deleted_at = Column(DateTime)
+
+    storage_type = relationship(StorageType, backref="storage_actions")
+
+    def __repr__(self) -> str:
+        return f"MessageType(id={self.id}, message_type={self.description})"  # TODO
 
 
 class StorageMessage(Base):

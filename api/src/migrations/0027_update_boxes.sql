@@ -16,14 +16,20 @@ CREATE TABLE IF NOT EXISTS `storage_types` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --- create a new table to store the message types
-CREATE TABLE IF NOT EXISTS `storage_message_types` (
+CREATE TABLE IF NOT EXISTS `storage_actions` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `message_type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `admin_description` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `button_text` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `button_color` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `storage_type_id` int(10) unsigned NOT NULL,
+  `email_template` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `display_order` int(10) unsigned NOT NULL,
   `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `deleted_at` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
+  KEY `storage_type_id_key` (`storage_type_id`),
+  CONSTRAINT `storage_actions_storage_type_id_foreign` FOREIGN KEY (`storage_type_id`) REFERENCES `storage_types` (`id`),
   UNIQUE KEY `storage_message_types_display_order_unique` (`display_order`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 

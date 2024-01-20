@@ -168,35 +168,6 @@ class Span(Base):
         return f"Span(span_id={self.span_id}, type={self.type}, enddate={self.enddate})"
 
 
-class Box(Base):
-    __tablename__ = "membership_box"
-
-    id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
-
-    member_id = Column(Integer, ForeignKey("membership_members.member_id"), nullable=False)
-
-    # The id of the printed label on the box.
-    box_label_id = Column(BigInteger, unique=True, nullable=False)
-
-    # Scanning session to be able to make list of all scanned boxes during the session.
-    session_token = Column(String(32), index=True, nullable=False)
-
-    # Box last checked at timestamp.
-    last_check_at = Column(DateTime, nullable=True)
-
-    # Last time a nag mail was sent out for this box, note that for a member with several boxes this may not be the
-    # last nag date for that member.
-    last_nag_at = Column(DateTime, nullable=False)
-
-    member = relationship(Member, backref="boxes")
-
-    def __repr__(self) -> str:
-        return (
-            f"Box(id={self.id}, box_label_id={self.box_label_id}, member_id={self.member_id}"
-            f", last_check_at={self.last_check_at}, last_nag_at={self.last_nag_at})"
-        )
-
-
 class PhoneNumberChangeRequest(Base):
     __tablename__ = "change_phone_number_requests"
 
