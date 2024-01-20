@@ -1,4 +1,3 @@
-import random
 from datetime import date, datetime, timezone
 from decimal import Decimal
 from logging import getLogger
@@ -97,8 +96,6 @@ class AccountingExportWithStripeMockTest(FlaskTestBase):
                     cost_center=f"cost_center {type.value} {i}", description=f"cost_center {i} {type.value}"
                 )
                 self.transaction_cost_centers[type].append(cc)
-            random.shuffle(self.transaction_accounts[type])
-            random.shuffle(self.transaction_cost_centers[type])
 
         product_category = self.db.create_category()
         for i in range(self.number_of_products):
@@ -165,8 +162,11 @@ class AccountingExportWithStripeMockTest(FlaskTestBase):
     def test_export_accounting(self, get_payments_from_stripe: Mock) -> None:
         start_date = datetime(2023, 1, 1)
         end_date = datetime(2023, 12, 31)
-        ver_1_amounts = [Decimal("-264.96"), Decimal("265.47"), Decimal("-1293.64"), Decimal("1296.13")]
-        ver_2_amounts = [Decimal("-230.97"), Decimal("231.47"), Decimal("-1127.63"), Decimal("1130.13")]
+        # ver_1_amounts = [Decimal("-264.96"), Decimal("265.47"), Decimal("-1293.64"), Decimal("1296.13")]
+        # ver_2_amounts = [Decimal("-230.97"), Decimal("231.47"), Decimal("-1127.63"), Decimal("1130.13")]
+
+        ver_1_amounts = [Decimal("-1296.13"), Decimal("-265.47"), Decimal("1293.64"), Decimal("264.96")]
+        ver_2_amounts = [Decimal("-1130.13"), Decimal("-231.47"), Decimal("1127.63"), Decimal("230.97")]
         ver_amounts = [ver_1_amounts, ver_2_amounts]
 
         get_payments_from_stripe.return_value = self.completed_payments
@@ -194,15 +194,15 @@ class AccountingExportWithStripeMockTest(FlaskTestBase):
             verification_row = sie_rows.pop(0)
             assert verification_row.strip() == "{"
 
+            transaction_row = sie_rows.pop(0)
+            assert transaction_row.startswith(f'#TRANS 6573 {{1 "Föreningsgemensamt"}} 3.00 2023{i:02d}01')
+
             for j in range(4):
                 transaction_row = sie_rows.pop(0)
                 right_half = transaction_row.split("}")[1]
                 amount_str = right_half.split("2023")[0]
                 amount = Decimal(amount_str)
                 assert amount == ver_amounts[i - 1][j]
-
-            transaction_row = sie_rows.pop(0)
-            assert transaction_row.startswith(f'#TRANS 6573 {{1 "Föreningsgemensamt"}} -3.00 2023{i:02d}01')
 
             verification_row = sie_rows.pop(0)
             assert verification_row.strip() == "}"

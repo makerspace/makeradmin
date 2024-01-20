@@ -62,7 +62,7 @@ def export_accounting(start_date: datetime, end_date: datetime, group_by_period:
     transactions = (
         db_session.query(Transaction)
         .filter(
-            Transaction.created_at >= start_date.astimezone(pytz.utc),
+            Transaction.created_at >= start_date.astimezone(pytz.utc),  # TODO remove pytz
             Transaction.created_at < end_date.astimezone(pytz.utc),
             Transaction.status == Transaction.COMPLETED,
         )

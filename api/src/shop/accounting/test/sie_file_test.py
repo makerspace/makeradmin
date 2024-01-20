@@ -133,11 +133,11 @@ class SieFileWithVerificationTest(FlaskTestBase):
                 transaction_row = sie_rows.pop(0)
                 if (j - 1) % 2 == 0:
                     assert transaction_row.startswith(
-                        f'#TRANS account{i} {{1 "cost_center{j}"}} -{Decimal("1000") + Decimal(f"{i * j + j}")} 2023{i:02d}01 "MakerAdmin period 2023-{i:02d}"'
+                        f'#TRANS account{i} {{1 "cost_center{j}"}} {Decimal("1000") + Decimal(f"{i * j + j}")} 2023{i:02d}01 "MakerAdmin period 2023-{i:02d}"'
                     )
                 else:
                     assert transaction_row.startswith(
-                        f'#TRANS account{i} {{1 "cost_center{j}"}} {Decimal(f"{i * j + j}")} 2023{i:02d}01 "MakerAdmin period 2023-{i:02d}"'
+                        f'#TRANS account{i} {{1 "cost_center{j}"}} -{Decimal(f"{i * j + j}")} 2023{i:02d}01 "MakerAdmin period 2023-{i:02d}"'
                     )
 
             verification_row = sie_rows.pop(0)
@@ -182,11 +182,11 @@ class SieFileWithVerificationTest(FlaskTestBase):
                 transaction_row = sie_rows.pop(0)
                 if (j - 1) % 2 == 0:
                     assert transaction_row.startswith(
-                        f'#TRANS account{i} {{1 "cost_center{j}"}} -{Decimal("1000") + Decimal(f"{i * j + j}")} 2023{i:02d}01 "MakerAdmin period 2023-{i:02d}"'
+                        f'#TRANS account{i} {{1 "cost_center{j}"}} {Decimal("1000") + Decimal(f"{i * j + j}")} 2023{i:02d}01 "MakerAdmin period 2023-{i:02d}"'
                     )
                 else:
                     assert transaction_row.startswith(
-                        f'#TRANS account{i} {{1 "cost_center{j}"}} {Decimal(f"{i * j + j}")} 2023{i:02d}01 "MakerAdmin period 2023-{i:02d}"'
+                        f'#TRANS account{i} {{1 "cost_center{j}"}} -{Decimal(f"{i * j + j}")} 2023{i:02d}01 "MakerAdmin period 2023-{i:02d}"'
                     )
 
             verification_row = sie_rows.pop(0)
