@@ -208,7 +208,7 @@ def pay_with_stripe(transaction: Transaction, payment_method_id: str, setup_futu
 
 def get_stripe_payment_intents(start_date: date, end_date: date) -> List[stripe.PaymentIntent]:
     expand = ["data.latest_charge.balance_transaction"]
-    created = {"gte": int(mktime(start_date.timetuple())), "lte": int(mktime(end_date.timetuple()))}
+    created = {"gte": int(mktime(start_date.timetuple())), "lt": int(mktime(end_date.timetuple()))}
 
     stripe_intents = retry(lambda: stripe.PaymentIntent.list(limit=100, created=created, expand=expand))
     payments: List[stripe.PaymentIntent] = []
@@ -230,7 +230,25 @@ def convert_completed_stripe_intents_to_payments(
         charge = intent.latest_charge
         assert charge.balance_transaction is not None
         assert charge.paid
-        id = int(intent.metadata[MakerspaceMetadataKeys.TRANSACTION_IDS.value])
+
+        try:
+            id = int(intent.metadata[MakerspaceMetadataKeys.TRANSACTION_IDS.value])
+        except KeyError:
+            # Temporary fix to deal with an older way of storing transaction ids
+            # It is stored in the description field instead of metadata
+            str_split = intent.description.split("id ")
+            if "inval" in str_split[1]:
+                logger.info(f"skipping invalid transaction because of {str_split[1]}")
+                logger.info(f"stripe intent: {intent}")
+                logger.info(f"stripe charge: {charge}")
+                continue
+            id = int(str_split[1])
+        if id < 100:
+            logger.info(f"skipping invalid transaction low id, {id}")
+            logger.info(f"stripe intent: {intent}")
+            logger.info(f"stripe charge: {charge}")
+            continue
+
         payments[id] = CompletedPayment(
             transaction_id=id,
             amount=convert_from_stripe_amount(charge.amount),

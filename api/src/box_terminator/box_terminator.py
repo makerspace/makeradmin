@@ -2,7 +2,6 @@ from dataclasses import dataclass
 from datetime import date, datetime, timedelta
 from typing import Any, Dict, List, Optional, Tuple
 
-from box_terminator.models import StorageItem, StorageMessage, StorageMessageType, StorageType
 from membership.models import Member, Span
 from messages.message import send_message
 from messages.models import MessageTemplate
@@ -13,6 +12,8 @@ from shop.transactions import ProductAction, pending_action_value_sum
 from sqlalchemy import desc
 from sqlalchemy.orm import contains_eager
 from sqlalchemy.orm.exc import NoResultFound
+
+from box_terminator.models import StorageItem, StorageMessage, StorageMessageType, StorageType
 
 JUDGMENT_DAY = datetime(1997, 9, 26)  # Used as default for missing lab access date
 EXPIRATION_TIME = 45  # Number of days from expiration date to the termination date when the item is removed

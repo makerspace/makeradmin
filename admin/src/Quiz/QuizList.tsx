@@ -1,11 +1,18 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import Collection from "../Models/Collection";
 import CollectionTable from "../Components/CollectionTable";
+import Collection from "../Models/Collection";
+import CollectionNavigation from "../Models/CollectionNavigation";
 import Quiz from "../Models/Quiz";
 
-class QuestionList extends React.Component {
-    collection = new Collection({ type: Quiz });
+class QuizList extends CollectionNavigation {
+    collection: Collection;
+
+    constructor(props: any) {
+        super(props);
+        const { search, page } = this.state;
+        this.collection = new Collection({ type: Quiz, search, page });
+    }
 
     render() {
         return (
@@ -25,6 +32,7 @@ class QuestionList extends React.Component {
                     collection={this.collection}
                     emptyMessage="Inga quiz"
                     columns={[{ title: "Namn" }, { title: "" }]}
+                    onPageNav={this.onPageNav}
                     rowComponent={({
                         item,
                         deleteItem,
@@ -52,4 +60,4 @@ class QuestionList extends React.Component {
     }
 }
 
-export default QuestionList;
+export default QuizList;

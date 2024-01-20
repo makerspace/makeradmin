@@ -1,6 +1,7 @@
-import { Translation, TranslationKeyValues } from "./translate";
 import { createContext } from "preact";
 import { useContext, useState } from "preact/hooks";
+import { formatDate } from "./common";
+import { Translation, TranslationKeyValues } from "./translate";
 import {
     URL_CALENDAR,
     URL_FACEBOOK_GROUP,
@@ -9,7 +10,6 @@ import {
     URL_SLACK_HELP,
     URL_WIKI,
 } from "./urls";
-import { formatDate, formatDateTime } from "./common";
 
 export type Dictionary = Translation<typeof Eng>;
 export type TranslationKey = TranslationKeyValues<typeof Eng>;
@@ -437,6 +437,7 @@ const Eng = {
         change_pin_code: "Change",
         instructions_to_become_member:
             "Remaining steps to get makerspace access",
+        accessy_invite: "Invite yourself to Accessy",
     },
     payment: {
         pay_with_stripe: "Pay with Stripe",
@@ -455,6 +456,11 @@ const Swe: typeof Eng = {
     // TODO
     ...Eng,
     continue: "Fortsätt",
+    member_page: {
+        ...Eng.member_page,
+        send_accessy_invite: "Skicka Accessy-inbjudan",
+        accessy_invite: "Bjud in dig själv till Accessy",
+    },
 };
 
 export const Translations: { en: typeof Eng; sv: typeof Eng } = {

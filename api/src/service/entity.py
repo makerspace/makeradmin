@@ -28,7 +28,7 @@ from sqlalchemy import (
     Enum as DbEnum,
 )
 
-from service.api_definition import BAD_VALUE, REQUIRED, Arg, Enum, natural0, natural1, symbol
+from service.api_definition import BAD_VALUE, REQUIRED, Arg, Enum, boolean, natural0, natural1, symbol
 from service.db import db_session
 from service.error import NotFound, UnprocessableEntity
 
@@ -220,10 +220,14 @@ class Entity:
         expand=Arg(symbol, required=False),
         relation=None,
         related_entity_id=None,
+        include_deleted=Arg(boolean, required=False),
     ):
         query = db_session.query(self.model)
 
-        if not self.list_deleted:
+        if include_deleted is None:
+            include_deleted = False
+
+        if not self.list_deleted and not include_deleted:
             query = query.filter(self.model.deleted_at.is_(None))
 
         if relation and related_entity_id:

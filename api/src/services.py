@@ -1,6 +1,7 @@
 import statistics
 from collections import namedtuple
 
+import box_terminator
 import core
 import member
 import membership
@@ -21,4 +22,5 @@ services = (
     Instance(path="/statistics", service=statistics.service),
     Instance(path="/multiaccess", service=multiaccess.service),
     Instance(path="/quiz", service=quiz.service),
+    Instance(path="/box_terminator", service=box_terminator.service),
 )
