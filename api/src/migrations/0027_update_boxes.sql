@@ -51,17 +51,17 @@ CREATE TABLE IF NOT EXISTS `storage_items` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --- create a new table to store the message history
-CREATE TABLE IF NOT EXISTS `storage_messages` (
+CREATE TABLE IF NOT EXISTS `storage_message_history` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `member_id` int(10) unsigned NOT NULL,
   `storage_item_id` int(10) unsigned NOT NULL,
+  `storage_action_id` int(10) unsigned NOT NULL,
   `message_at` datetime NOT NULL,
-  `message_type_id` int(10) unsigned NOT NULL,
   PRIMARY KEY (`id`),
   KEY `storage_item_id_key` (`storage_item_id`),
   CONSTRAINT `storage_messages_storage_item_id_foreign` FOREIGN KEY (`storage_item_id`) REFERENCES `storage_items` (`id`),
   KEY `member_id_key` (`member_id`),
   CONSTRAINT `storage_messages_member_id_foreign` FOREIGN KEY (`member_id`) REFERENCES `membership_members` (`member_id`),
-  KEY `message_type_id_key` (`message_type_id`),
-  CONSTRAINT `storage_messages_message_type_id_foreign` FOREIGN KEY (`message_type_id`) REFERENCES `storage_message_types` (`id`)
+  KEY `storage_action_id_key` (`storage_action_id`),
+  CONSTRAINT `storage_messages_storage_action_id_foreign` FOREIGN KEY (`storage_action_id`) REFERENCES `storage_actions` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;

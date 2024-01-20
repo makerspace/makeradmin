@@ -85,21 +85,22 @@ class StorageAction(Base):
 
 
 class StorageMessage(Base):
-    __tablename__ = "storage_messages"
+    __tablename__ = "storage_message_history"
 
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
     member_id = Column(Integer, ForeignKey("membership_members.member_id"), nullable=False)
     storage_item_id = Column(BigInteger, ForeignKey("storage_items.id"), nullable=False)
-    message_type_id = Column(Integer, ForeignKey("storage_message_types.id"), nullable=False)
+    storage_action_id = Column(Integer, ForeignKey("storage_actions.id"), nullable=False)
     message_at = Column(DateTime, server_default=func.now())
 
     member = relationship(Member)
     storage_type = relationship("StorageItem", backref="storage_messages")
+    storage_action = relationship("StorageAction")
 
     def __repr__(self) -> str:
         return (
             f"Message(id={self.id}, storage_item_id={self.storage_item_id}, member_id={self.member_id}"
-            f", message_at={self.message_at}, message_type_id={self.message_type_id})"
+            f", message_at={self.message_at}, storage_action_id={self.storage_action_id})"
         )
 
 

@@ -13,7 +13,7 @@ from sqlalchemy import desc
 from sqlalchemy.orm import contains_eager
 from sqlalchemy.orm.exc import NoResultFound
 
-from box_terminator.models import StorageItem, StorageMessage, StorageMessageType, StorageType
+from box_terminator.models import StorageAction, StorageItem, StorageMessage, StorageType
 
 JUDGMENT_DAY = datetime(1997, 9, 26)  # Used as default for missing lab access date
 EXPIRATION_TIME = 45  # Number of days from expiration date to the termination date when the item is removed
@@ -164,99 +164,38 @@ def get_item_from_label_id(item_label_id: int) -> StorageItem | None:
     )
 
 
-def store_message(item: StorageItem, message_type: StorageMessageType) -> None:
+def store_message(item: StorageItem, storage_action: StorageAction) -> None:
     message = StorageMessage(
         member_id=item.member_id,
         item_label_id=item.item_label_id,
         message_at=datetime.utcnow(),
-        message_type=message_type,
+        storage_action=storage_action,
     )
     db_session.add(message)
     db_session.flush()
 
 
-def send_message_about_storage(item_label_id: int, message_type: StorageMessageType) -> None:
+def send_message_about_storage(item_label_id: int, storage_action: StorageAction) -> None:
     item = get_item_from_label_id(item_label_id)
     if item is None:
         raise NotFound(f"Storage item {item_label_id}  not found")
 
     dates = get_dates(item)
-    status, reason = check_status(dates)
 
-    if item.storage_type.has_fixed_end_date:
-        try:
-            template = {
-                (
-                    "message-warning",
-                    Reason.ACCESS_EXPIRED,
-                ): MessageTemplate.TEMP_STORAGE_WARNING_LAB,
-                (
-                    "message-last-warning",
-                    Reason.ACCESS_EXPIRED,
-                ): MessageTemplate.TEMP_STORAGE_WARNING_LAB,
-                (
-                    "message-terminated",
-                    Reason.ACCESS_EXPIRED,
-                ): MessageTemplate.TEMP_STORAGE_TERMINATED_LAB,
-                (
-                    "message-warning",
-                    Reason.DATE_EXPIRED,
-                ): MessageTemplate.TEMP_STORAGE_WARNING_DATE,
-                (
-                    "message-last-warning",
-                    Reason.DATE_EXPIRED,
-                ): MessageTemplate.TEMP_STORAGE_WARNING_DATE,
-                (
-                    "message-terminated",
-                    Reason.DATE_EXPIRED,
-                ): MessageTemplate.TEMP_STORAGE_TERMINATED_DATE,
-                (
-                    "message-warning",
-                    Reason.BOTH_EXPIRED,
-                ): MessageTemplate.TEMP_STORAGE_WARNING_BOTH,
-                (
-                    "message-last-warning",
-                    Reason.BOTH_EXPIRED,
-                ): MessageTemplate.TEMP_STORAGE_WARNING_BOTH,
-                (
-                    "message-terminated",
-                    Reason.BOTH_EXPIRED,
-                ): MessageTemplate.TEMP_STORAGE_TERMINATED_BOTH,
-            }[(message_type, reason)]
-        except KeyError:
-            raise BadRequest(f"Bad message type {message_type}")
-    else:
-        try:
-            template = {
-                "message-warning": MessageTemplate.BOX_WARNING,
-                "message-last-warning": MessageTemplate.BOX_FINAL_WARNING,
-                "message-terminated": MessageTemplate.BOX_TERMINATED,
-            }[message_type]
-        except KeyError:
-            raise BadRequest(f"Bad message type {message_type}")
+    template = storage_action.email_template  # TODO str to the enum
 
-    if item.storage_type.has_fixed_end_date:
-        send_message(
-            template,
-            item.member,
-            expiration_time=EXPIRATION_TIME,
-            labaccess_end_date=date_to_str(dates["expire_lab_date"]),
-            fixed_end_date=date_to_str(dates["fixed_end_date"]),
-            to_termination_days=dates["to_termination_days"],
-            days_after_expiration=dates["days_after_expiration"],
-            description=description,
-        )
-    else:
-        send_message(
-            template,
-            item.member,
-            expiration_time=EXPIRATION_TIME,
-            labaccess_end_date=date_to_str(dates["expire_lab_date"]),
-            to_termination_days=dates["to_termination_days"],
-            days_after_expiration=dates["days_after_expiration"],
-        )
+    send_message(
+        template,
+        item.member,
+        expiration_time=EXPIRATION_TIME,
+        labaccess_end_date=date_to_str(dates["expire_lab_date"]),
+        fixed_end_date=date_to_str(dates["fixed_end_date"]),
+        to_termination_days=dates["to_termination_days"],
+        days_after_expiration=dates["days_after_expiration"],
+        description=item.members_description,
+    )
 
-    store_message(item, message_type)
+    store_message(item, storage_action)
 
 
 def fetch_storage_item(item_label_id: int) -> StorageInfo:
