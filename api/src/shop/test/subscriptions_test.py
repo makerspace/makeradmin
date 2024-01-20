@@ -17,7 +17,6 @@ import membership.views
 import messages
 import messages.models
 import pytest
-import pytz
 import shop
 import shop.models
 import stripe
