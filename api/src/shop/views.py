@@ -4,6 +4,7 @@ from datetime import datetime, timedelta, timezone
 from logging import getLogger
 from typing import Any
 
+import pytz
 from basic_types.enums import PriceLevel
 from basic_types.time_period import TimePeriod
 from dateutil.relativedelta import relativedelta
@@ -326,8 +327,9 @@ def stripe_callback_route():
 
 @service.route("/download-accounting-file/<int:year>/<int:month>", method=GET, permission=WEBSHOP)
 def download_accounting_file_route(year, month):
-    start_date = datetime(year, month, 1, tzinfo=timezone.utc)
-    end_data = datetime(year, month, 1, tzinfo=timezone.utc) + relativedelta(months=1)
+    zone = pytz.timezone("Europe/Stockholm")
+    start_date = datetime(year, month, 1, tzinfo=zone)
+    end_data = datetime(year, month, 1, tzinfo=zone) + relativedelta(months=1)
     return b64encode(export_accounting(start_date, end_data, TimePeriod.Month, g.user_id).encode("cp437")).decode(
         "ascii"
     )
