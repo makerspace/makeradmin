@@ -5,7 +5,7 @@ import Collection from "../Models/Collection";
 import CollectionNavigation from "../Models/CollectionNavigation";
 import Quiz from "../Models/Quiz";
 
-class QuestionList extends CollectionNavigation {
+class QuizList extends CollectionNavigation {
     collection: Collection;
 
     constructor(props: any) {
@@ -60,4 +60,4 @@ class QuestionList extends CollectionNavigation {
     }
 }
 
-export default QuestionList;
+export default QuizList;
