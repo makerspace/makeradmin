@@ -2,7 +2,7 @@ import React from "react";
 import Quiz from "../Models/Quiz";
 import { browserHistory } from "../browser_history";
 import { confirmModal } from "../message";
-import QuestionList from "./QuestionList";
+import QuestionListRouter from "./QuestionList";
 import QuizEditForm from "./QuizEditForm";
 
 interface State {
@@ -70,7 +70,7 @@ class QuizShow extends React.Component<Props, State> {
                     onSave={() => this.save()}
                     onDelete={() => this.delete()}
                 />
-                <QuestionList quiz_id={this.state.quiz.id} />
+                <QuestionListRouter quiz_id={this.state.quiz.id} />
             </>
         );
     }
