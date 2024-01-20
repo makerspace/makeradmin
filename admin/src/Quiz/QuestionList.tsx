@@ -1,21 +1,26 @@
 import React from "react";
-import { Link } from "react-router-dom";
-import Collection from "../Models/Collection";
+import { Link, withRouter } from "react-router-dom";
 import CollectionTable from "../Components/CollectionTable";
+import Collection from "../Models/Collection";
+import CollectionNavigation from "../Models/CollectionNavigation";
 import QuizQuestion from "../Models/QuizQuestion";
 
 interface QuestionListProps {
     quiz_id: number;
 }
 
-class QuestionList extends React.Component<QuestionListProps> {
+export class QuestionList extends CollectionNavigation {
     collection: Collection;
 
     constructor(props: QuestionListProps) {
         super(props);
+        const { search, page } = this.state;
+        const url = `/quiz/quiz/${props.quiz_id}/questions`;
         this.collection = new Collection({
             type: QuizQuestion,
-            url: `/quiz/quiz/${props.quiz_id}/questions`,
+            url,
+            search,
+            page,
         });
     }
 
@@ -34,6 +39,7 @@ class QuestionList extends React.Component<QuestionListProps> {
                     collection={this.collection}
                     emptyMessage="Inga frågor"
                     columns={[{ title: "Fråga" }, { title: "" }]}
+                    onPageNav={this.onPageNav}
                     rowComponent={({
                         item,
                         deleteItem,
@@ -66,4 +72,5 @@ class QuestionList extends React.Component<QuestionListProps> {
     }
 }
 
-export default QuestionList;
+const QuestionListRouter = withRouter(QuestionList);
+export default QuestionListRouter;
