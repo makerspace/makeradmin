@@ -6,6 +6,7 @@ from logging import getLogger
 from time import mktime
 from typing import Dict, List, Optional
 
+import pytz
 import stripe
 from dataclasses_json import DataClassJsonMixin
 from membership.models import Member
@@ -206,9 +207,13 @@ def pay_with_stripe(transaction: Transaction, payment_method_id: str, setup_futu
         raise_from_stripe_invalid_request_error(e)
 
 
-def get_stripe_payment_intents(start_date: date, end_date: date) -> List[stripe.PaymentIntent]:
+def get_stripe_payment_intents(start_date: datetime, end_date: datetime) -> List[stripe.PaymentIntent]:
     expand = ["data.latest_charge.balance_transaction"]
-    created = {"gte": int(mktime(start_date.timetuple())), "lt": int(mktime(end_date.timetuple()))}
+    created = {
+        "gte": int(mktime(start_date.astimezone(pytz.UTC).timetuple())),
+        "lt": int(mktime(end_date.astimezone(pytz.UTC).timetuple())),
+    }
+    logger.info(f"Fetching stripe payment intents from {start_date} ({created['gte']}) to {end_date} ({created['lt']})")
 
     stripe_intents = retry(lambda: stripe.PaymentIntent.list(limit=100, created=created, expand=expand))
     payments: List[stripe.PaymentIntent] = []
@@ -277,7 +282,7 @@ def create_fake_completed_payments_from_db(start_date: date, end_date: date) -> 
     return payments
 
 
-def get_completed_payments_from_stripe(start_date: date, end_date: date) -> Dict[int, CompletedPayment]:
+def get_completed_payments_from_stripe(start_date: datetime, end_date: datetime) -> Dict[int, CompletedPayment]:
     if debug_mode():
         logger.warning(
             "In debug/dev mode, using fake stripe payments for accounting by generating from existing data in db"

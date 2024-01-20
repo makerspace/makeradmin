@@ -2,6 +2,7 @@ from datetime import datetime
 from logging import getLogger
 from typing import Dict, List, Tuple
 
+import pytz
 from basic_types.enums import AccountingEntryType
 from basic_types.time_period import TimePeriod
 from membership.models import Member
@@ -55,14 +56,14 @@ def export_accounting(start_date: datetime, end_date: datetime, group_by_period:
     if signer is None:
         raise InternalServerError(f"Member with id {member_id} not found")
     logger.info(
-        f"Exporting accounting from {start_date} to {end_date} with signer member number {signer.member_number}"
+        f"Exporting accounting from {start_date} ({start_date.astimezone(pytz.utc)}) to {end_date} ({end_date.astimezone(pytz.utc)}) with signer member number {signer.member_number}"
     )
     completed_payments = get_completed_payments_from_stripe(start_date, end_date)
     transactions = (
         db_session.query(Transaction)
         .filter(
-            Transaction.created_at >= start_date,
-            Transaction.created_at < end_date,
+            Transaction.created_at >= start_date.astimezone(pytz.utc),
+            Transaction.created_at < end_date.astimezone(pytz.utc),
             Transaction.status == Transaction.COMPLETED,
         )
         .outerjoin(TransactionContent)
