@@ -70,6 +70,12 @@ def export_accounting(start_date: datetime, end_date: datetime, group_by_period:
         .all()
     )
 
+    for transaction in transactions:
+        logger.info(f"Transaction: {transaction.id}")
+
+    for payment in completed_payments.values():
+        logger.info(f"Payment: {payment.transaction_id}")
+
     diff = diff_transactions_and_completed_payments(transactions, completed_payments)
     if len(diff) > 0:
         logger.warning(f"Transactions and completed payments do not match, {diff}")
