@@ -162,9 +162,6 @@ class AccountingExportWithStripeMockTest(FlaskTestBase):
     def test_export_accounting(self, get_payments_from_stripe: Mock) -> None:
         start_date = datetime(2023, 1, 1)
         end_date = datetime(2023, 12, 31)
-        # ver_1_amounts = [Decimal("-264.96"), Decimal("265.47"), Decimal("-1293.64"), Decimal("1296.13")]
-        # ver_2_amounts = [Decimal("-230.97"), Decimal("231.47"), Decimal("-1127.63"), Decimal("1130.13")]
-
         ver_1_amounts = [Decimal("-1296.13"), Decimal("-265.47"), Decimal("1293.64"), Decimal("264.96")]
         ver_2_amounts = [Decimal("-1130.13"), Decimal("-231.47"), Decimal("1127.63"), Decimal("230.97")]
         ver_amounts = [ver_1_amounts, ver_2_amounts]
