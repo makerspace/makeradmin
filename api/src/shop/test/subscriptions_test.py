@@ -404,6 +404,7 @@ class Test(FlaskTestBase):
         assert summary.membership_end == sub_start + time_delta(years=1)
 
         subscription_id = member.stripe_membership_subscription_id
+        assert member.stripe_membership_subscription_id.startswith("sub_sched_")
         # The real subscription should have started now, which has a different ID from the scheduled subscription.
         assert subscription_id is not None
         assert subscription_id != subscription_schedule_id

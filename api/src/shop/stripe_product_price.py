@@ -1,10 +1,9 @@
 from dataclasses import asdict, dataclass
 from logging import getLogger
-from typing import Any, Callable, Dict, List, Tuple, TypeVar
+from typing import Any, Dict, List, Tuple
 
 import stripe
-from service.config import debug_mode
-from service.error import BadRequest, InternalServerError
+from service.error import InternalServerError
 
 from shop.models import Product
 from shop.stripe_constants import (
@@ -73,7 +72,7 @@ def get_stripe_prices(
 def eq_makeradmin_stripe_product(makeradmin_product: Product, stripe_product: stripe.Product) -> bool:
     """Check that the essential parts of the product are the same in both makeradmin and stripe"""
     if stripe_product.id != str(makeradmin_product.id):
-        raise BadRequest(
+        raise ValueError(
             f"Stripe product id {stripe_product.id} and makeradmin product id {makeradmin_product.id} does not match"
         )
     return stripe_product.name == makeradmin_product.name
@@ -83,7 +82,7 @@ def eq_makeradmin_stripe_price(makeradmin_product: Product, stripe_price: stripe
     """Check that the essential parts of the price are the same in both makeradmin and stripe"""
     lookup_key_for_product = get_stripe_price_lookup_key(makeradmin_product, price_type)
     if stripe_price.lookup_key != lookup_key_for_product:
-        raise BadRequest(
+        raise ValueError(
             f"Stripe price lookup key {stripe_price.lookup_key} and corresponding key from makeradmin product {makeradmin_product.id} and PriceType {price_type} does not match"
         )
 

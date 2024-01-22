@@ -172,7 +172,7 @@ Makeradmin is used as the truth. Work in progress to change so that discounts ar
 
 -   Create a **coupon** for low income discount. It should be with percentage discount. Add the metadata "makerspace_price_level" = "low_income_discount"
 
-The smallest multiple of the product is used to set the binding time for the subscription.
+The smallest multiple of the product in makeradmin is used to set the binding time for the subscription.
 
 ### Stripe subscription support
 
@@ -221,7 +221,7 @@ For the member view page and regristration page to work there are also a few pro
     -   Enhet/unit: st
     -   Action: add labaccess days
 
-Makeradmin will use these products to create the following in stripe
+Makeradmin will use these products to create the following in stripe TODO FIX THIS
 
 -   A **product** for base membership. Add the metadata "subscription_type"="membership" to the **product** item
     -   Add a yearly **price**, and add the metadata "price_type"="recurring" to the **price** item
