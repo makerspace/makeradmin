@@ -1,167 +1,194 @@
 {% extends "email_body_base.html" %}
 
+<meta charset="UTF-8">
+<style>
+    .text-box {
+        border: 1px solid #000;
+        padding: 5px;
+    }
+  </style>
+
+{% block language clarification %}
+<div class="text-box">
+    <h3 > About language</h3>
+    <p>The primary language on Stockholm Makerspace is Swedish, but you are very welcome to use English as well. Newsletters and important announcements as well as our courses are as a rule available in English. If you need help to translate something from Swedish to English, don’t hesitate to ask other members or post about it on Slack.</p>
+</div>
+<hr>
+{% enbblock %}
+
 {% block swedish %}
-<h1>Hej {{member.firstname}},</h1>
-<p style="font-size: small;"><em>(For information in ENGLISH, see below the dashed line).</em></p>
+<h2>SVENSKA</h2>
+<p>Hejsan! Välkommen till Stockholm Makerspace! &#128515;<br> Vi hoppas du uppskattade introkursen och är redo att påbörja din kreativa resa med oss.</p>
 
-<p>
-    Välkommen till Stockholm Makerspace! Du är nu del av Sveriges största självständiga Makerspace. Tillsammans hjälps vi åt att förbli en självständig och medlems-driven teknisk fristad för gemenskap och skapande.</p>
+<p>Som ny medlem har du förmodligen en del frågor. I detta mail kommer du få en sammanfattning av vad du fick höra på introkursen och länkar till några onlineresurser som hjälper dig att sätta igång.</p>
 
-<p>Allt i Stockholm Makerspace är byggt, köpt, dit-kört och renoverat av medlemmar som du och jag. Ingen får lön och vi får inga bidrag. Orsaken till att vi kan betala hyran är att vi är många som hjälps åt genom att betala medlemsskap. Det är fantastiskt vad medborgare kan skapa tillsammans. Om du tycker att det finns något som kan utvecklas så är du varmt välkommen att engagera dig i driften av vår förening.
+<h3>Dina medlemsuppgifter:</h3>
+<p>Namn: {{member.firstname}} {{member.lastname}}<br/>
+    Epost: {{member.email}}<br/>
+    Medlemsnummer: {{member.member_number}}<br/>
 </p>
 
-<p>
-    Vi vet av erfarenhet att du, som ny medlem, har mängder av frågor om Stockholm Makerspace. I detta mail hittar du den information du behöver för att själv kunna hitta svaren på alla dina frågor och funderingar, så läs mailet noga!
-</p>
+<p>Vi kommer använda denna epostadress för att nå ut till dig. Om detta inte stämmer, vänligen kontakta <a href="mailto:info@makerspace.se">info@makerspace.se</a>.</p>
 
-<h3>Medlemsinformation</h3>
-<p>Namn: <i>{{member.firstname}} {{member.lastname}}</i><br/>
-    Email: <i>{{member.email}}</i><br/>
-    Medlemsnummer: <i>{{member.member_number}}</i><br/>
-</p>
+<p>Här kommer en sammanfattning av huvudpunkterna från introkursen:</p>
 
-<p>
-    Om föreningen behöver nå dig så använder vi den här emailen. Det är därför viktigt att du tar ansvar för att den här e-mailadressen fungerar, eller anmäler ny email. Medlemsnummret används för vår interna organisation och du kommer att behöva det för att anmäla dig till våra kurser.
-</p>
+<h3>Om Stockholm Makerspace:</h3>
+<p>Stockholm Makerspace är en ideell förening som drivs “av medlemmar för medlemmar”. Detta innebär att du, som föreningsmedlem, uppmuntras att delta i föreningens drift och utveckling.</p>
 
-<h3>TVÅ TYPER AV MEDLEMSKAP</h3>
-<p>
-    <b>Grundmedlem</b><br/>
-    Som medlem i föreningen så är du välkommen på kurser och workhops som vi arrangerar, samt årsmötet. Vill du utföra självständigt arbete i lokalen så ska du skaffa makerspace access.
-</p>
-
-<p>
-    <b>Makerspace Access</b><br/>
-    För medlemmar som har Makerspace Access så är lokalen öppen dygnet runt, året runt, men för att komma in första gången så måste du besöka en medlemsintroduktion. Medlemsintroduktioner äger rum ungefär varannan vecka, och datum hittar du i vårt <a href="https://makerspace.se/kalendarium">kalendarium</a>. För få access måste du skriva under ett avtal där du ålägger dig att följa våra <a href="https://wiki.makerspace.se/Lokalregler">lokalregler</a>, samt visa ID.
-</p>
-
-<h3>Jag vill gå kurs! När är det kurs?</h3>
-<p>All verksamhet bedrivs av volontärer, som du och jag. Vi hjälps åt att lära varandra maskinerna så att alla kan utföra självständigt arbete. Man delar vad man kan, och ber om hjälp om man kör fast. Några saker måste man gå kurs för att kunna använda, till exempel: svetsrummet, laserskäraren, brodyrmaskinen och resin-printern. Kurser annonseras i <a href="https://www.facebook.com/groups/makerspace.se">Facebookgruppen</a> och på <a href="https://wiki.makerspace.se/Slack">Slack</a> och läggs in i kalendern. Det finns ingen kö, först till kvarn gäller.
-</p>
-
-<h3>Jag är jätteduktig på en sak. Får jag hålla kurs i saken?</h3>
-<p>Absolut! Emaila styrelsen på <a href="mailto:info@makerspace.se">info@makerspace.se</a> så pratar vi upplägg, anmälan och sätter in kursen i kalendariet. Om du är osäker på om det finns en efterfrågan inom just ditt kunskapsområde kan du kolla av intresse genom att posta om saken i Facebookgruppen eller på Slack.</p>
-
-<h3>Min Makerspace Acccess håller på att ta slut, måste jag komma förbi igen och aktivera den?</h3>
-<p>Nej. Du behöver bara gå på en medlemsintroduktion första gången. Sedan kan du köpa mer access via din <a href="https://medlem.makerspace.se/">medlems-sida</a>.</p>
-
-<h3>Vad är mitt medlemsnummer, är mitt medlemsskap aktivt och hur lång tid är det aktivt?</h3>
-<p>Kolla <a href="https://medlem.makerspace.se/">din alldeles egna medlems-sida</a>.</p>
-
-<h3>Jag saknar en sak. Kan jag köpa in saken?</h3>
-<p>Inköp till föreningen ska vara demokratiska i så stor utsträckning som möjligt. Vi har tyvärr bara 300m2 utrymme och det är proppfullt med saker, så donationer och inköp måste godkännas av styrelsen innan inköp och transport sker till lokalen. Om man vill få ersättning för utlägg som görs för vår gemensamma maskinpark så behöver du få inköpet godkänt av styrelsemedlem eller rumsansvarig innan inköp. Spara inköpskvittot så att vår kassör kan sköta vår gemensamma redovisning. Vid dyrare inköp så behöver styrelsen sammanträda för att ta gemensamt beslut innan inköp kan göras. Du kan även lyfta din önskan i Facebookgruppen eller på Slack. </p>
-
-<h3>Får jag göra en prototyp på Stockholm Makerspace?</h3>
-<p>Ja, i mån av plats och om du inte säljer prototypen. Du ska heller inte ha bolagiserat ännu. Stockholm Makerspace är en ideell förening. För att kunna fortsätta vara det så får vi inte bedriva kommersiell verksamhet. Det betyder att du inte får göra produkter till försäljning.</p>
-
-<h3>Är det sant att jag får ha min alldeles egen låda här?</h3>
-<p>Yes! Köp din egen förvaringsbox med måtten 50x39x26 cm (32L). Märk den med en etikett från <a href="https://wiki.makerspace.se/Memberbooth">Memberbooth</a> och ställ den på en en fri plats på hyllplanen i korridoren. Lådan finns ex vis på <a href="https://www.clasohlson.com/se/F%C3%B6rvaringsl%C3%A5da-SmartStore-Home/34-1552-31">Clas Ohlson</a>. </p>
-
-<h3>Jag bygger något större än labblådan, var ska jag förvara det?</h3>
-<p>I mån av plats så kan du lägga ditt projekt i de avsedda hyllorna i lagerrummet, under max 3 månader. Ditt projekt ska vara märkt med en etikett från <a href="https://wiki.makerspace.se/Memberbooth">Memberbooth</a>, annars kommer det att slängas. Vi har plats för köpta skivor av plywood, akryl och liknande bredvid laserskäraren i stora rummet. Alla regler kring förvaring på Stockholm Makerspace går att hitta på <a href="https://wiki.makerspace.se/Medlemsf%C3%B6rvaring">wikin.</a></p>
-
-<h3>Jag lämnade mitt projekt på ett bord över natten och sen var det borta!</h3>
-<p>Du måste städa efter dig. Vi har en städare som vi betalar en ansenlig summa för att våttorka golv och bord varje vecka. Men han rör inte bord med saker på, och städar inte golv där det står saker. Det är jätteviktigt att du städar undan efter dig, så att vi kan ha en gemensam, ren lokal. Har du råkat lämna saker på ett bord så kan det ha slängts eller flyttats till en Lost&Found-låda. Medlemmar hjälps åt att tömma soporna. Fråga en medlem om du inte vet hur man gör, eller kolla in <a href="https://wiki.makerspace.se/St%C3%A4drutiner">städrutinerna</a>.</p>
-
-<h3>Jag är hungrig.</h3>
-<p>Stockholm Makerspace erbjuder ett pentry med en kaffekokare och mikrovågsugn. Du kan också köpa färdigmat på The Coffice över gatan, eller på 7-Eleven eller T-Snabben nere vid Östra Station.</p>
-
-<h3>Hur funkar styrelsen?</h3>
-<p>Styrelsen arbetar ideellt och möts ungefär 1 gång i månaden. Då går man igenom ekonomi, kommande medlemsintroduktions-datum, eventuella problem och tar beslut kring större inköp. Om du vill kontakta styrelsen så emaila <a href="mailto:info@makerspace.se">info@makerspace.se</a>.</p>
-
-
-<h3>Ok. Var får jag reda på mer?</h3>
+<h3>Kom igång:</h3>
+<p>Först och främst, se till att du har allt du behöver för att komma igång:</p>
 <ul>
-    <li>Vår <a href="https://wiki.makerspace.se/Slack">Slack</a> är väldigt aktiv med rum för olika ämnesområden. Där ställer man frågor, hittar hjälp och får info om kurser. </li>
-    <li><a href="https://www.facebook.com/groups/makerspace.se">Facebook-gruppen</a>.
-    <li>I <a href="https://www.makerspace.se/kalendarium">Kalendariet</a> ser du events och medlemsintroduktioner.</li>
-    <li><a href="https://www.makerspace.se/">Hemsidan</a> innehåller länkar och info om föreningen.</li>
-    <li><a href="https://wiki.makerspace.se">Wikin</a> innehåller mycket, till ex <a href="https://wiki.makerspace.se/Makerspace_FAQ">Makerspace FAQ</a> (allmäna frågor & svar), och <a href="https://wiki.makerspace.se/Maskiner_och_inventarier">Maskiner och inventarier</a> samt hjälp och info per maskin.</li>
-    <li>Köp saker i vår <a href="https://medlem.makerspace.se/shop/">webbshop</a> (ladda på medlemskap, köp material, betala laser-tid, osv)</li>
-    <li>Frågor direkt till styrelsen skickas till <a href="mailto:info@makerspace.se">info@makerspace.se</a>.</li>
+    <li>Se till att du har laddat ner appen Accessy. Om du inte redan gjort detta så hittar du den information du behöver på <a href="https://wiki.makerspace.se/Accessy">Accessys wikisida</a>.</li>
+    <li>Se till att ladda ner och ordna ett konto på appen Slack (från <a herf="https://play.google.com/store/apps/details?id=com.Slack&hl=en_US&pli=1">Google Play</a> eller <a href="https://apps.apple.com/se/app/slack/id618783545">Apple Store</a>), eftersom det är det huvudsakliga sättet att kommunicera med andra på makerspacet. Om du behöver mer information, läs <a href="https://wiki.makerspace.se/Slack">Slacks wikisida</a></li>
+    <li>Here are links to other important online resources</li>
+    <ul>
+        <li>&#128100; <a href="https://medlem.makerspace.se/">Din medlemssida</a></li>
+        <li>&#x1F6D2; <a href="https://medlem.makerspace.se/shop">Medlemsshop</a></li>
+        <li>&#128198; <a href="https://www.makerspace.se/kalendarium">Kalendarium</a></li>
+        <li>&#128213; <a href="https://wiki.makerspace.se/V%C3%A4lkommen_till_Stockholm_Makerspace">Wikisidor</a></li>
+    </ul>
+    <li>Kolla gärna vad andra medlemmar har delat på <a href="https://stockholmmakerspace.slack.com/archives/C4M0MJ96K">#projekt</a>-kanalen på Slack och få inspiration!</li>
+    <li>Gå med i <a href="https://stockholmmakerspace.slack.com/archives/CGQ04052Q">#events</a>-kanalen på Slack för att få reda på kommande kurser, sammankomster och andra evenemang.</li>
 </ul>
 
+<h3>Trivselregler</h3>
+
+<p style="text-align:center;"><i>“Visa hänsyn. Ta ansvar.”</i></p>
+
+<p>Visa hänsyn mot andra medlemmar:</p>
+<ul>
+    <li>Städa alltid upp efter dig. Glöm inte att fler medlemmar kommer senare för att använda samma ytor och maskiner. Den medlemmen kan vara du.</li>
+    <li>Se till att använda utrustning och lokaler på ett korrekt sätt. Om utrustning används på felaktivt vis kan du skada utrustningen och göra den omöjlig att använda för fler medlemmar. Den medlemmen kan vara du.</li>
+    <li>Informera om något är trasigt, försvunnet eller om det behöver fyllas på med något. Saker går sönder ibland, det är sånt som händer. Om du inte kan laga det själv så skriv på Slack. Om du inte gör det kommer utrustningen förbli trasig när fler medlemmar vill använda den. Den medlemmen kan vara du.</li>
+    <li>Ta inte utrustning med dig. Om du tar hem saker är den inte tillgänglig för fler medlemmar. Den medlemmen kan vara du.</li>
+</ul>
+
+<p>Ta ansvar för...</p>
+<ul>
+    <li>...dina projekt och ditt material. Om du lämnar projekt eller material utan att märka upp det så kommer det slängas.</li>
+    <li>...dina gäster. Du får ta in gäster för att visa lokalerna men de får inte arbeta på dina projekt. Barn under 16 år får vara med och kan arbeta på projekt under ditt ansvar.</li>
+    <li>...din säkerhet. Du ansvarar för din fysiska säkerhet i föreningens lokaler.</li>
+    <li>...din användning av maskiner och utrustning. Du har ansvar för att du använder dessa på ett säkert sätt. Läs alltid de tillhörande skyltarna och informationen på wikin innan du sätter igång.</li>
+    <li>...att följa vår nolltolerans mot brott. Avsteg leder till påföljder.</li>
+    <li>...att följa vår nolltolerans mot alkohol. Avsteg leder till påföljder.</li>
+    <li>...att inte ta in kommersiell verksamhet. Det är okej att bygga prototyper för kommersiellt syfte, men det är förbjudet att bedriva tillverkning.</li>
+</ul>
+<p>För mer information om reglerna när du besöker makerspacet, läs wikisidan med våra <a href="https://wiki.makerspace.se/Lokalregler">Lokalregler</a>.</p>
+
+<h3>Städning, underhåll, ordning och reda:</h3>
+<ul>
+    <li>Pågående projekt, material och förvaringslådor kräver alla en förvaringslokal. Du kan skriva ut dessa i våra Memberbooth. Lär mer om dem på <a href="https://wiki.makerspace.se/Memberbooth">Memberbooth wikisida</a>.</li>
+    <li>Alla medlemmar har rätt att ha en förvaringslåda på makerspacet. Du hittar information om dessa på <a href="https://wiki.makerspace.se/Medlemsf%C3%B6rvaring">wikisidan för medlemsförvaring</a>.</li>
+    <li>Om du ser en full soptunna så töm soporna, släng påsen i soprummet och sätt in en ny påse. Så här går det till: <a href="https://wiki.makerspace.se/St%C3%A4drutiner">Städningsrutin</a>.</li>
+    <li>Kom ihåg! Du får inte förvara batterier i föreningens lokaler.</li>
+</ul>
+
+<h3>Några användbara länkar:</h3>
+<ul>
+    <li><p>Söker du någon i styrelsen?<br>
+        Du hittar alla namn på <a href="https://wiki.makerspace.se/Styrelsen">Styrelse wikisida</a>, eller du kan också skicka ett mail till <a href="mailto:info@makerspace.se">info@makerspace.se</a>.</p>
+    </li>
+    <li>Söker du en inköpsansvarig?<br>
+        Du hittar dem här: <a href="https://wiki.makerspace.se/Ink%C3%B6psansvariga">Wikisida för inköpsansvariga</a>.</li>
+    <li>Söker du wikisidan för något av våra rum?<br>
+        Du hittar alla länkar till dem här: <a href="https://wiki.makerspace.se/Kategori:Rum">Rums</a>.</li>
+</ul>
+
+<p>Vi glädjer oss att ha dig som medlem i Stockholm Makerspace! Om du har några frågor som wikin inte kan svara på, tveka inte att skriva på Slack. Det finns alltid andra medlemmar som vill hjälpa dig.</p>
+
 <p>
-    Bästa hälsningar,<br/>
-    Styrelsen i Stockholm Makerspace<br/>
+    Bästa skaparhälsningar!<br>
+    <b>Stockholm Makerspace</b><br>
     <a href="https://www.makerspace.se/">www.makerspace.se</a>
 </p>
+<hr>
 {% endblock %}
 
 {% block english %}
+<h2>ENGLISH</h2>
 
-<p>ENGLISH</p>
+<p>Hi there! Welcome to Stockholm Makerspace! &#128515;<br> We hope you enjoyed the Intro Course and are excited to embark on your creative journey with us.</p>
 
-<p>Welcome to the Stockholm Makerspace! You are now a part of Sweden's largest independent makerspace. We work together to remain an independent and member-driven tech haven for community and creation.</p>
+<p>As a new member, you probably have a lot of questions. In this email we provide you with a summary of what you heard on the introduction course and a few resources to get you started.</p>
 
-<p>Everything at Stockholm Makerspace is built, bought, transported, and renovated by members like you and me. No one gets a salary and we get no grants. The reason why we can pay the rent is that we are many who help out by paying membership dues. It's amazing what people can create together. If you think there is something that can be developed then you are most welcome to get involved in the operation of our association.</p>
-
-<p>As a new member, you probably have a lot of questions about the Stockholm Makerspace. In this email you'll find the info you need to answer most, if not all, of your questions, so please read this email carefully!
-</p>
-
-<h3>Member info</h3>
+<h3>Your member information:</h3>
 <p>Name: {{member.firstname}} {{member.lastname}}<br/>
     Email: {{member.email}}<br/>
     Membership number: {{member.member_number}}<br/>
 </p>
 
-<p>We’ll use this email if we need to reach you. Therefore it’s important that you ensure that it works, or notify us regarding new email info. Your membership number is used for our database, and you’ll need it to sign up for courses and workshops.</p>
+<p>We will use this email address to reach out to you. If it is not right, please email <a href="mailto:info@makerspace.se">info@makerspace.se</a>.</p>
 
-<h3>TWO TYPES OF MEMBERSHIP</h3>
-<p><b>Base Membership</b><br/>
-    As a member in the organisation you’re welcome to attend our events and workshops, as well as vote at the annual meeting. If you wish to do independent projects on your own on the premises, you need to become a makerspace access member.</p>
+<p>Here's a summary of the key points covered during the course:</p>
 
-<p><b>Makerspace Access</b><br/>
-    The premises are open 24/7 for members who have Makerspace Access, all year long, but to start gaining access you need to attend a new member introduction. New member introductions occur approximately every two weeks, and they’re called "medlemsintroduktion" in our <a href="https://makerspace.se/kalendarium">calendar</a>. To get access you need to sign an agreement where you agree to adhere to <a href="https://wiki.makerspace.se/Rules_for_Makerspace"></a>our rules</a>, and you also need to show an ID.</p>
+<h3>About Stockholm Makerspace:</h3>
+<p>Stockholm Makerspace is a non-profit organization “for members by members”. This means that you too, as a member, are encouraged to participate and collaborate with the development of the organization.</p>
 
-<h3>I want to go to a workshop! When is the next workshop?</h3>
-<p>All activities are run by volunteers, like you and me. We help each other learn the machines so that everyone can work independently. Share what you can, and ask for help if you get stuck. Some machines require that you have gone to a course for in order to be able to use, for example:  welding (svetsrummet), laser cutter, embroidery-machine and resin printer. Courses are advertised in the Facebook group and on Slack and can be found on the calendar. There is no queue - first come, first served.</p>
-
-<h3>I'm really good at something. Can I lead a workshop?</h3>
-<p>Absolutely! Email the board at <a href="mailto:info@makerspace.se">info@makerspace.se</a> to talk about the set up, creating a sign-up, and posting the course in the calendar. If you're unsure there is interest for your specific area of knowledge you can ask in the Facebook-group or on Slack.</p>
-
-<h3>My makerspace access is running out, do I have to come in person again to activate it?</h3>
-<p>No. You only need to attend a member introduction once. You can buy additional access from <a href="https://medlem.makerspace.se/">your member page</a>.</p>
-
-<h3>What is my member number, do I have access, and how long is my access valid for?</h3>
-<p>Check out <a href="https://medlem.makerspace.se/">your member page</a>.</p>
-
-<h3>I would like to have certain tool/thing. Can I buy that thing?</h3>
-<p>Purchases for the organization should be democratic as much as possible. Unfortunately, we only have 300m2 of space and it is packed with things, so donations and purchases must be approved by the board before purchasing and transport to the premises. If you want to get compensation for expenses that are made for our common machine park then you need to have the purchase approved by a board member or room manager before purchasing. Save the purchase receipt so that our treasurer can handle the accounting. In the case of more expensive purchases, the Board needs to meet to make a joint decision before a purchase can be made. You can also write down what you want on Slack or in the Facebook-group.</p>
-
-<h3>Can I make a prototype at the Stockholm Makerspace?</h3>
-<p>Yes, if there is room and if you do not sell the prototype. You also should not have formed a company yet. Stockholm Makerspace is a non-profit association. In order to be able to continue like this, we must not conduct commercial activities. This means that you are not allowed to make products for sale.</p>
-
-<h3>Is it true I can keep my own storage box here?</h3>
-<p>Yes! Purchase your own storage box of size 50x39x26 cm (32L). Label it with a label from <a href="https://wiki.makerspace.se/Memberbooth">Memberbooth</a> and find a place for it on the shelves in the corridor. Boxes can be purchased at places like <a href="https://www.clasohlson.com/se/F%C3%B6rvaringsl%C3%A5da-SmartStore-Home/34-1552-31">Clas Ohlson</a>.</p>
-
-<h3>I'm building something a bit bigger than a storage box, can I still store it here?</h3>
-<p>If there is space available, you can place your project on the shelves in the storage room, for a maximum of 3 months. Your project should be marked with a label for temporary storage from <a href="https://wiki.makerspace.se/Memberbooth">Memberbooth</a>, otherwise it will be thrown away. We have room for purchased sheets of plywood, acrylic and the like next to the laser cutter in the large room.</p>
-
-<h3>I left my project on a table over night and now it's gone!</h3>
-<p>You have to clean up after yourself. We have a cleaning service that we pay a considerable amount to mop floors and tables every week. But the cleaner does not touch tables with things on them, and does not clean floors where things are. It is very important that you clean up after yourself, so that we all can have a common, clean room. If you happened to leave things on a table, it might have been thrown away or moved to a Lost & Found box. Members help to empty the garbage. Ask a member if you don't know how to do it, or check out the <a href="https://wiki.makerspace.se/St%C3%A4drutiner">cleaning routines</a>.</p>
-
-<h3>I'm hungry.</h3>
-<p>Stockholm Makerspace has a kitchenette with a coffee maker and a microwave oven. You can buy food across the street at The Coffice, or at 7-Eleven or T-Snabben near the station.</p>
-
-<h3>How does the Board work?</h3>
-<p>All Board members are volunteers and we meet about once per month. At the board meetings we discuss the financials, upcoming new member introductions ("medlemsintroduktion"), any problems, and decide on larger purchases. If you want to contact the Board, email <a href="mailto:info@makerspace.se">info@makerspace.se</a>.</p>
-
-
-<h3>Ok. Where can I find out more?</h3>
+<h3>Getting Started:</h3>
+<p>First of all, make sure you have all you need to get started:</p>
 <ul>
-    <li>Our <a href="https://wiki.makerspace.se/Slack">Slack</a> is very active with chatrooms for different areas. There you can ask questions, ask for help, and get info about workshops.</li>
-    <li><a href="https://www.facebook.com/groups/makerspace.se">Our facebook-group</a>.
-    <li>In the <a href="https://www.makerspace.se/kalendarium">Calendar</a> you can see the upcoming events and new member introductions.</li>
-    <li><a href="https://www.makerspace.se/">The homepage</a> has links and other info about the association.</li>
-    <li><a href="https://wiki.makerspace.se">The Wiki</a> has lots of information, including <a href="https://wiki.makerspace.se/Makerspace_FAQ,_English">Makerspace FAQ</a>, and <a href="https://wiki.makerspace.se/Maskiner_och_inventarier">a list of tools and equipment</a>, as well as help for each machine.</li>
-    <li>Buy things in our <a href="https://medlem.makerspace.se/shop/">webshop</a> (renew memberships, buy material, pay for laser cutter time, etc).</li>
-    <li>Question for the Board can be sent directly to <a href="mailto:info@makerspace.se">info@makerspace.se</a>.</li>
+    <li>Make sure you have your Accessy app. If you don´t, you will find all the information you need on the <a href="https://wiki.makerspace.se/Accessy">Accessy wiki page</a>.</li>
+    <li>Make sure to download Slack (from <a herf="https://play.google.com/store/apps/details?id=com.Slack&hl=en_US&pli=1">Google Play</a> or <a href="https://apps.apple.com/se/app/slack/id618783545">Apple Store</a>), since it is the main means of communication at the makerspace. If you need help, check the <a href="https://wiki.makerspace.se/Slack">Slack Wiki page</a>.</li>
+    <li>Here are links to other important online resources</li>
+    <ul>
+        <li>&#128100; <a href="https://medlem.makerspace.se/">Din medlemssida</a></li>
+        <li>&#x1F6D2; <a href="https://medlem.makerspace.se/shop">Medlemsshop</a></li>
+        <li>&#128198; <a href="https://www.makerspace.se/kalendarium">Kalendarium</a></li>
+        <li>&#128213; <a href="https://wiki.makerspace.se/V%C3%A4lkommen_till_Stockholm_Makerspace">Wiki page</a></li>
+    </ul>
+    <li>Check some of the amazing things our members have created on the <a href="https://stockholmmakerspace.slack.com/archives/C4M0MJ96K">#projekt</a> channel on Slack, to get inspired!</li>
+    <li>Join the <a href="https://stockholmmakerspace.slack.com/archives/CGQ04052Q">#events</a> channel on Slack and find out about upcoming events and courses. </li>
 </ul>
 
+<h3>Expected conduct at the space</h3>
+
+<p style="text-align:center;"><i>“Be considered. Be responsible.”</i></p>
+
+<p>Be considered towards other members:</p>
+<ul>
+    <li>Clean after yourself. Think that there will always be another member who will come after you and will want to use the same space that you are using. That member could be you.</li>
+    <li>Follow proper use of equipment and premises. If the equipment is not used properly you may damage it and make it unavailable for other members. That member could be you.</li>
+    <li>Inform if something is broken, missing, or needs to be resupplied. Things break. It will happen. If you cannot repair it then inform about it on Slack. If you don´t, it will remain broken for other members. That member could be you.</li>
+    <li>Do not take equipment with you. If you take equipment home it will not be available for other members. That member could be you.</li>
+</ul>
+
+<p>Be responsible for...</p>
+<ul>
+    <li>...your projects and materials. If you leave materials and projects unlabeled, they will be discarded.</li>
+    <li>...your guests. Guests can visit the space but not work with you on projects. Children under 16 years old can be guests and work on projects.</li>
+    <li>...your safety. You are responsible for your physical safety in the space.</li>
+    <li>...the use of the equipment. You are responsible for the proper use of the equipment. Read the equipment sign and the information available on the wiki page.</li>
+    <li>...zero crime tolerance. Consequences apply.</li>
+    <li>...zero alcohol tolerance. Consequences apply.</li>
+    <li>...commercial activities are not allowed. Prototyping can be done but not manufacturing for commercial purposes.</li>
+</ul>
+<p>For more information on the space rules read the <a href="https://wiki.makerspace.se/Lokalregler">Local Rules wiki page</a>.</p>
+
+<h3>Order, cleaning, and maintenance:</h3>
+<ul>
+    <li>Stored projects, materials, and storage boxes require labels. You can get them at the Memberbooths. You can find more info about them on the <a href="https://wiki.makerspace.se/Memberbooth">Memberbooth wiki page</a>.</li>
+    <li>Every member has the right to keep a storage box at the makerspace. You can find more information about them on the <a href="https://wiki.makerspace.se/Medlemsf%C3%B6rvaring">Member Storage Wiki page</a>.</li>
+    <li>If you see a full trash bag, you can help by taking the bag to the trash room and replacing it with a new one. Here is how to do it: <a href="https://wiki.makerspace.se/St%C3%A4drutiner">Cleaning Routine</a>.</li>
+    <li>Remember: you are not allowed to store batteries in the makerspace.</li>
+</ul>
+
+<h3>Some references:</h3>
+<ul>
+    <li><p>Are you looking for somebody on the board?<br>
+        You will find their names at <a href="https://wiki.makerspace.se/Styrelsen">Styrelse wiki</a>, or you can write an email to <a href="mailto:info@makerspace.se">info@makerspace.se</a>.</p>
+    </li>
+    <li>Are you looking for a purchasing-responsible?<br>
+        You will find their names here: <a href="https://wiki.makerspace.se/Ink%C3%B6psansvariga">Purchasing responsible wiki</a>.</li>
+    <li>Are you looking for the wiki of a specific room?<br>
+        Here you will find the links to all of them: <a href="https://wiki.makerspace.se/Kategori:Rum">Rums</a>.</li>
+</ul>
+
+<p>We're thrilled to have you as a member of Stockholm Makerspace. If you have questions that cannot be answered with the information on the wiki, please post on Slack! There will always be other members happy to help you out.</p>
+
 <p>
-    Best regards,<br/>
-    The Board of Stockholm Makerspace<br/>
+    Happy Making!<br>
+    <b>Stockholm Makerspace</b><br>
     <a href="https://www.makerspace.se/">www.makerspace.se</a>
 </p>
+<hr>
 {% endblock %}
