@@ -122,6 +122,9 @@ def quiz_backwards_compatibility():
 def change_phone():
     return render_template("change_phone.html")
 
+@member.route("/reset_password")
+def reset_password():
+    return render_template("reset_password.html")
 
 static_hash = os.environ["STATIC_PREFIX_HASH"]
 app = Flask(__name__, static_url_path=f"/static{static_hash}", static_folder="../static")

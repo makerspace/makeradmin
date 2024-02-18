@@ -2008,3 +2008,14 @@ $palette-red: $palette4;
         color: rgb(201, 43, 43);
     }
 }
+
+.password-field {
+    opacity: 1;
+    height: auto;
+
+    &.hidden {
+        opacity: 0;
+        height: 0px;
+        pointer-events: none;
+    }
+}

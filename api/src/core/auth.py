@@ -79,7 +79,7 @@ def login(ip, browser, username, password):
     return create_access_token(ip, browser, member_id)
 
 
-def request_password_reset(user_identification):
+def request_password_reset(user_identification: str, redirect: str):
     member = get_member_by_user_identification(user_identification)
 
     token = generate_token()
@@ -87,10 +87,21 @@ def request_password_reset(user_identification):
     db_session.add(PasswordResetToken(member_id=member.member_id, token=token))
     db_session.flush()
 
+    if redirect == "admin":
+        url = config.get_admin_url("/password-reset")
+    elif redirect == "member":
+        url = config.get_public_url("/member/reset_password")
+    else:
+        raise BadRequest("Invalid redirect", fields="redirect", what=BAD_VALUE)
+    url += f"?reset_token={quote_plus(token)}"
+
+    if config.debug_mode():
+        logger.info(f"Reset link for {member.email} is {url}")
+
     send_message(
         MessageTemplate.PASSWORD_RESET,
         member,
-        url=config.get_admin_url(f"/password-reset?reset_token={quote_plus(token)}"),
+        url=url,
     )
 
 
