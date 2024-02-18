@@ -1,15 +1,13 @@
 from change_phone_request import change_phone_request, change_phone_validate
 from flask import g, request
 from member import service
-from member.member import (get_member_groups, send_access_token_email,
-                           send_updated_member_info_email, set_pin_code)
+from member.member import get_member_groups, send_access_token_email, send_updated_member_info_email, set_pin_code
 from membership.member_auth import get_member_permissions
 from membership.membership import get_access_summary, get_membership_summary
 from membership.models import Member
 from membership.views import member_entity
 from quiz.views import member_quiz_statistics
-from service.api_definition import (GET, MESSAGE_SEND, POST, PUBLIC, USER, Arg,
-                                    natural1, non_empty_str)
+from service.api_definition import GET, MESSAGE_SEND, POST, PUBLIC, USER, Arg, natural1, non_empty_str
 from service.db import db_session
 from service.error import Unauthorized
 
