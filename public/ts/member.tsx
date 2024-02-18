@@ -779,7 +779,7 @@ function PersonalData({
                     <input
                         name="password"
                         class="uk-input readonly-input"
-                        placeholder={member.has_password ? "********" : "Inget lösenord valt"}
+                        placeholder={member.has_password ? "********" : t("member_page.no_password_set")}
                         disabled
                     />
                     <button class="uk-button uk-button-danger"
@@ -789,18 +789,13 @@ function PersonalData({
                                 "POST", `${window.apiBasePath}/oauth/request_password_reset`,
                                 { user_identification: member.email, redirect: "member" }
                             ).then(() => {
-                                UIkit.modal.alert(
-                                    `Ett email skickats till ${member.email} med en länk för att ändra lösenordet`
-                                );
+                                UIkit.modal.alert(t("member_page.set_password_alert")(member));
                             }).catch((e) => {
-                                UIkit.modal.alert(
-                                    "Kunde inte skicka lösenordsåterställningsemail: " +
-                                    get_error(e)
-                                );
+                                UIkit.modal.alert(t("member_page.failed_set_password_alert")(get_error(e)));
                             })
                         }}
                     >
-                        {member.has_password ? "Ändra" : "Välj"}
+                        {member.has_password ? t("member_page.change_password") : t("member_page.set_password")}
                     </button>
                 </span>
             </div>

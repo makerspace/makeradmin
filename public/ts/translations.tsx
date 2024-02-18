@@ -1,6 +1,7 @@
 import { createContext } from "preact";
 import { useContext, useState } from "preact/hooks";
 import { formatDate } from "./common";
+import { member_t } from "./member_common";
 import { Translation, TranslationKeyValues } from "./translate";
 import {
     URL_CALENDAR,
@@ -446,6 +447,11 @@ const Eng = {
             "Install the Accessy app on your phone. You can use this to unlock doors at the makerspace.",
         send_accessy_invite: "Send Accessy invite",
         change_pin_code: "Change",
+        change_password: "Change",
+        set_password: "Set",
+        no_password_set: "No password set",
+        set_password_alert: (member: member_t) => `We've sent an email to ${member.email} with a link for changing your password.`,
+        failed_set_password_alert: (error: string) => `Failed to send email for setting password: ${error}.`,
         instructions_to_become_member:
             "Remaining steps to get makerspace access",
         accessy_invite: "Invite yourself to Accessy",
