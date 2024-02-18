@@ -856,7 +856,7 @@ const abStateFromSeed = (seed: number): ABState => {
         oldpage: false,
         registration_base_membership_type:
             seed % 2 === 0 ? "oneyear" : "subscription",
-        registration_base_membership_only_plan_enabled: hash(seed) % 3 !== 0, // 2/3 of users will see the base membership only plan
+        registration_base_membership_only_plan_enabled: true,
         price_grouping: hash(seed + 1) % 2 === 0 ? "separate" : "combined", // 1/2 of users will see the base membership price separately like "200 + 375 kr", instead of combined like "575 kr"
     };
 };
