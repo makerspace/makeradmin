@@ -560,9 +560,9 @@ async function registerMember(
         discount:
             discount.priceLevel !== null && discountInfo.discountReason !== null
                 ? {
-                    price_level: discount.priceLevel,
-                    message: `${discountInfo.discountReason}: ${discountInfo.discountReasonMessage}`,
-                }
+                      price_level: discount.priceLevel,
+                      message: `${discountInfo.discountReason}: ${discountInfo.discountReasonMessage}`,
+                  }
                 : null,
     };
 
@@ -606,13 +606,23 @@ const CheckIcon = ({ done }: { done: boolean }) => {
 };
 
 const TaskItem = ({
-    clickedSteps, setClickedSteps, step, children
-}: { clickedSteps: Set<number | string>, setClickedSteps: (s: Set<number | string>) => void, step: number | string, children: (tick: () => void) => ComponentChildren }) => {
+    clickedSteps,
+    setClickedSteps,
+    step,
+    children,
+}: {
+    clickedSteps: Set<number | string>;
+    setClickedSteps: (s: Set<number | string>) => void;
+    step: number | string;
+    children: (tick: () => void) => ComponentChildren;
+}) => {
     return (
         <li>
             <CheckIcon done={clickedSteps.has(step)} />
             <span>
-                {children(() => setClickedSteps(new Set(clickedSteps).add(step)))}
+                {children(() =>
+                    setClickedSteps(new Set(clickedSteps).add(step)),
+                )}
             </span>
         </li>
     );
@@ -620,7 +630,9 @@ const TaskItem = ({
 
 const Success = ({ member }: { member: member_t }) => {
     const [isBookModalOpen, setBookModalOpen] = useState(false);
-    const [clickedSteps, setClickedSteps] = useState(new Set<number | string>());
+    const [clickedSteps, setClickedSteps] = useState(
+        new Set<number | string>(),
+    );
     const t = useTranslation();
 
     useCalendlyEventListener({
@@ -634,7 +646,11 @@ const Success = ({ member }: { member: member_t }) => {
             <h1>{t("registration_page.success.title")}</h1>
             {t("registration_page.success.text")}
             <ul className="registration-task-list">
-                <TaskItem clickedSteps={clickedSteps} setClickedSteps={setClickedSteps} step="booked">
+                <TaskItem
+                    clickedSteps={clickedSteps}
+                    setClickedSteps={setClickedSteps}
+                    step="booked"
+                >
                     {(tick) => (
                         <button
                             className="flow-button primary flow-button-small"
@@ -644,9 +660,15 @@ const Success = ({ member }: { member: member_t }) => {
                         </button>
                     )}
                 </TaskItem>
-                {t("registration_page.success.steps").map((step, i) => <TaskItem clickedSteps={clickedSteps} setClickedSteps={setClickedSteps} step={`${i}`}>
-                    {(tick) => step(tick)}
-                </TaskItem>)}
+                {t("registration_page.success.steps").map((step, i) => (
+                    <TaskItem
+                        clickedSteps={clickedSteps}
+                        setClickedSteps={setClickedSteps}
+                        step={`${i}`}
+                    >
+                        {(tick) => step(tick)}
+                    </TaskItem>
+                ))}
             </ul>
             <div class="uk-flex-1" />
             <a
@@ -739,11 +761,11 @@ const Discounts = ({
                     disabled={
                         discounts.discountReason === null ||
                         discounts.discountReasonMessage.length <
-                        MIN_DISCOUNT_REASON_LENGTH
+                            MIN_DISCOUNT_REASON_LENGTH
                     }
                 >
                     {discounts.discountReason !== null &&
-                        discounts.discountReasonMessage.length <
+                    discounts.discountReasonMessage.length <
                         MIN_DISCOUNT_REASON_LENGTH
                         ? t("registration_page.discounts.submit_write_more")
                         : t("registration_page.discounts.submit")}
@@ -864,7 +886,7 @@ const abStateFromSeed = (seed: number): ABState => {
     };
 };
 
-const RegisterPage = ({ }: {}) => {
+const RegisterPage = ({}: {}) => {
     const abState = useMemo(() => {
         let seed = parseInt(localStorage.getItem("abTestSeed") ?? "");
         if (!isFinite(seed)) seed = (Math.random() * 1000000) | 0;
@@ -1067,7 +1089,7 @@ const RegisterPage = ({ }: {}) => {
                     </div>
                     {FEATURE_FLAG_LOW_INCOME_DISCOUNT &&
                         registerPageData.discounts["low_income_discount"] >
-                        0 && (
+                            0 && (
                             <button
                                 className="flow-button"
                                 onClick={() => setState(State.Discounts)}

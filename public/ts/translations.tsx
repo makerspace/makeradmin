@@ -268,8 +268,13 @@ const Eng = {
                             className="flow-button primary flow-button-small"
                             href={URL_SLACK_SIGNUP}
                             onClick={tick}
-                        >Join our Slack</a>
-                        {" "}to chat with other members. <a target="_blank" href={URL_SLACK_HELP}><i>What is this?</i></a>
+                        >
+                            Join our Slack
+                        </a>{" "}
+                        to chat with other members.{" "}
+                        <a target="_blank" href={URL_SLACK_HELP}>
+                            <i>What is this?</i>
+                        </a>
                     </>
                 ),
                 (tick: () => void) => (
@@ -279,8 +284,10 @@ const Eng = {
                             className="flow-button primary flow-button-small"
                             href={accessyURL()}
                             onClick={tick}
-                        >Install Accessy</a>
-                        {" "}to be able to unlock doors, after your introduction.
+                        >
+                            Install Accessy
+                        </a>{" "}
+                        to be able to unlock doors, after your introduction.
                     </>
                 ),
                 (tick: () => void) => (
@@ -308,11 +315,7 @@ const Eng = {
                 (tick: () => void) => (
                     <>
                         Get inspired on our{" "}
-                        <a
-                            target="_blank"
-                            href={URL_INSTAGRAM}
-                            onClick={tick}
-                        >
+                        <a target="_blank" href={URL_INSTAGRAM} onClick={tick}>
                             Instagram
                         </a>
                         .
@@ -450,8 +453,10 @@ const Eng = {
         change_password: "Change",
         set_password: "Set",
         no_password_set: "No password set",
-        set_password_alert: (member: member_t) => `We've sent an email to ${member.email} with a link for changing your password.`,
-        failed_set_password_alert: (error: string) => `Failed to send email for setting password: ${error}.`,
+        set_password_alert: (member: member_t) =>
+            `We've sent an email to ${member.email} with a link for changing your password.`,
+        failed_set_password_alert: (error: string) =>
+            `Failed to send email for setting password: ${error}.`,
         instructions_to_become_member:
             "Remaining steps to get makerspace access",
         accessy_invite: "Invite yourself to Accessy",

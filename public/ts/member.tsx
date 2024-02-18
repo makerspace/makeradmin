@@ -779,23 +779,45 @@ function PersonalData({
                     <input
                         name="password"
                         class="uk-input readonly-input"
-                        placeholder={member.has_password ? "********" : t("member_page.no_password_set")}
+                        placeholder={
+                            member.has_password
+                                ? "********"
+                                : t("member_page.no_password_set")
+                        }
                         disabled
                     />
-                    <button class="uk-button uk-button-danger"
+                    <button
+                        class="uk-button uk-button-danger"
                         onClick={(e) => {
                             e.preventDefault();
-                            common.ajax(
-                                "POST", `${window.apiBasePath}/oauth/request_password_reset`,
-                                { user_identification: member.email, redirect: "member" }
-                            ).then(() => {
-                                UIkit.modal.alert(t("member_page.set_password_alert")(member));
-                            }).catch((e) => {
-                                UIkit.modal.alert(t("member_page.failed_set_password_alert")(get_error(e)));
-                            })
+                            common
+                                .ajax(
+                                    "POST",
+                                    `${window.apiBasePath}/oauth/request_password_reset`,
+                                    {
+                                        user_identification: member.email,
+                                        redirect: "member",
+                                    },
+                                )
+                                .then(() => {
+                                    UIkit.modal.alert(
+                                        t("member_page.set_password_alert")(
+                                            member,
+                                        ),
+                                    );
+                                })
+                                .catch((e) => {
+                                    UIkit.modal.alert(
+                                        t(
+                                            "member_page.failed_set_password_alert",
+                                        )(get_error(e)),
+                                    );
+                                });
                         }}
                     >
-                        {member.has_password ? t("member_page.change_password") : t("member_page.set_password")}
+                        {member.has_password
+                            ? t("member_page.change_password")
+                            : t("member_page.set_password")}
                     </button>
                 </span>
             </div>
@@ -956,7 +978,8 @@ function SubscriptionProduct({
             {t("member_page.subscriptions.add_to_cart")(
                 product.smallest_multiple,
                 t(
-                    `unit.${product.unit}.${product.smallest_multiple > 1 ? "many" : "one"
+                    `unit.${product.unit}.${
+                        product.smallest_multiple > 1 ? "many" : "one"
                     }`,
                 ),
                 Number(product.price) * product.smallest_multiple,

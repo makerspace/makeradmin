@@ -95,7 +95,8 @@ class QuizManager extends Component<QuizManagerProps, State> {
         try {
             const data: ServerResponse<Question> = await common.ajax(
                 "GET",
-                `${window.apiBasePath}/quiz/quiz/${this.state.quiz!.id
+                `${window.apiBasePath}/quiz/quiz/${
+                    this.state.quiz!.id
                 }/next_question`,
             );
             if (data.data == null) {
@@ -226,7 +227,7 @@ class QuizManager extends Component<QuizManagerProps, State> {
                                 onClick={() => this.select(option.id)}
                                 className={
                                     (this.state.answer !== null &&
-                                        this.state.answer.selected == option.id
+                                    this.state.answer.selected == option.id
                                         ? "question-option-selected "
                                         : " ") +
                                     (option.correct !== undefined
@@ -292,8 +293,9 @@ class QuizManager extends Component<QuizManagerProps, State> {
             { option_id },
         );
         const fullQuestion = data.data as Question;
-        const correct = fullQuestion.options.find((x) => x.id == option_id)!
-            .correct!;
+        const correct = fullQuestion.options.find(
+            (x) => x.id == option_id,
+        )!.correct!;
         this.setState({
             question: fullQuestion,
             answer: { selected: option_id, correct },
@@ -301,7 +303,7 @@ class QuizManager extends Component<QuizManagerProps, State> {
         });
     }
 
-    async submit() { }
+    async submit() {}
 }
 
 common.documentLoaded().then(() => {

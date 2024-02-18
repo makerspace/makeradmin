@@ -2,11 +2,7 @@
 import * as common from "./common";
 //import * as moment from 'moment';
 import * as d3 from "d3";
-import {
-    sankey,
-    sankeyLeft,
-    sankeyLinkHorizontal
-} from "d3-sankey";
+import { sankey, sankeyLeft, sankeyLinkHorizontal } from "d3-sankey";
 import "moment/locale/sv";
 import { ServerResponse } from "./common";
 import { Product, WellKnownProductId } from "./payment_common";
@@ -88,9 +84,9 @@ common.documentLoaded().then(() => {
         .catch((json) => {
             UIkit.modal.alert(
                 "<h2>Couldn't load statistics</h2>" +
-                json.message +
-                " " +
-                json.error,
+                    json.message +
+                    " " +
+                    json.error,
             );
         });
 });
@@ -158,7 +154,7 @@ function addSubscriptionsChart(root: HTMLElement, data: ProductStatistics) {
                 "Has no subscription",
                 "Has membership sub (maybe more)",
                 "Has access sub (maybe more)",
-                "Has both subs"
+                "Has both subs",
             ],
             datasets: [
                 {
@@ -167,12 +163,15 @@ function addSubscriptionsChart(root: HTMLElement, data: ProductStatistics) {
                     borderColor: colors[0],
                     data: [
                         data.subscription_split.active_members,
-                        data.subscription_split.active_members - data.subscription_split.has_membership_sub - data.subscription_split.has_makerspace_access_sub + data.subscription_split.has_both_subs,
+                        data.subscription_split.active_members -
+                            data.subscription_split.has_membership_sub -
+                            data.subscription_split.has_makerspace_access_sub +
+                            data.subscription_split.has_both_subs,
                         data.subscription_split.has_membership_sub,
                         data.subscription_split.has_makerspace_access_sub,
-                        data.subscription_split.has_both_subs
+                        data.subscription_split.has_both_subs,
                     ],
-                }
+                },
             ],
         },
         options: {
@@ -329,14 +328,18 @@ function addChart(root: HTMLElement, data: any) {
     memberstats.innerHTML = `
 	<canvas width=500 height=300></canvas>
 	<div class="statistics-member-stats-box">
-	<div class="statistics-member-stats-row"><span class="statistics-member-stats-type">Membership</span><span  class="statistics-member-stats-value">${currentMembership.y
-        }</span></div>
-	<div class="statistics-member-stats-row"><span class="statistics-member-stats-type">Membership record</span><span  class="statistics-member-stats-value">${highestMembership.y
-        } members on ${date2str(highestMembership.x)}</span></div>
-	<div class="statistics-member-stats-row"><span class="statistics-member-stats-type">Labaccess</span><span  class="statistics-member-stats-value">${currentLabaccess.y
-        }</span></div>
-	<div class="statistics-member-stats-row"><span class="statistics-member-stats-type">Labaccess record</span><span  class="statistics-member-stats-value">${highestLabaccess.y
-        } members on ${date2str(highestLabaccess.x)}</span></div>
+	<div class="statistics-member-stats-row"><span class="statistics-member-stats-type">Membership</span><span  class="statistics-member-stats-value">${
+        currentMembership.y
+    }</span></div>
+	<div class="statistics-member-stats-row"><span class="statistics-member-stats-type">Membership record</span><span  class="statistics-member-stats-value">${
+        highestMembership.y
+    } members on ${date2str(highestMembership.x)}</span></div>
+	<div class="statistics-member-stats-row"><span class="statistics-member-stats-type">Labaccess</span><span  class="statistics-member-stats-value">${
+        currentLabaccess.y
+    }</span></div>
+	<div class="statistics-member-stats-row"><span class="statistics-member-stats-type">Labaccess record</span><span  class="statistics-member-stats-value">${
+        highestLabaccess.y
+    } members on ${date2str(highestLabaccess.x)}</span></div>
 	</div>
 	`;
     memberstats.className = "statistics-member-stats";
@@ -661,13 +664,13 @@ function addQuizChart(root: HTMLElement, data: QuizStatistics, quiz: Quiz) {
                     label: (tooltipItem: any, data: any) => {
                         const option =
                             datasets[tooltipItem.datasetIndex].options[
-                            tooltipItem.index
+                                tooltipItem.index
                             ];
                         if (option != null) {
                             return (
                                 Math.round(
                                     datasets[tooltipItem.datasetIndex].data[
-                                    tooltipItem.index
+                                        tooltipItem.index
                                     ] * 100,
                                 ) +
                                 "%: " +
@@ -690,13 +693,14 @@ function addQuizChart(root: HTMLElement, data: QuizStatistics, quiz: Quiz) {
 		<div class="statistics-member-stats-row">
 			<span class="statistics-member-stats-type">Median time to answer quiz [min]</span>
 			<span class="statistics-member-stats-value">${(
-            data.median_seconds_to_answer_quiz / 60
-        ).toFixed(1)}</span>
+                data.median_seconds_to_answer_quiz / 60
+            ).toFixed(1)}</span>
 		</div>
 		<div class="statistics-member-stats-row">
 			<span class="statistics-member-stats-type">Total quiz respondents</span>
-			<span class="statistics-member-stats-value">${data.answered_quiz_member_count
-        }</span>
+			<span class="statistics-member-stats-value">${
+                data.answered_quiz_member_count
+            }</span>
 		</div>
 	</div>
 	<canvas width=500 height=300></canvas>
@@ -733,11 +737,11 @@ interface ProductStatistics {
     products: Product[];
     categories: Category[];
     subscription_split: {
-        active_members: number,
-        has_membership_sub: number,
-        has_makerspace_access_sub: number,
-        has_both_subs: number,
-    }
+        active_members: number;
+        has_membership_sub: number;
+        has_makerspace_access_sub: number;
+        has_both_subs: number;
+    };
 }
 
 function addProductPurchasedChart(root: HTMLElement, data: ProductStatistics) {
@@ -749,10 +753,15 @@ function addProductPurchasedChart(root: HTMLElement, data: ProductStatistics) {
         "labaccess_subscription",
     ];
     const onlyMembershipProducts = data.products.filter((p) =>
-        membershipProductIDs.some(id => id == p.product_metadata.special_product_id)
+        membershipProductIDs.some(
+            (id) => id == p.product_metadata.special_product_id,
+        ),
     );
     const excludingMembershipProducts = data.products.filter(
-        (p) => !membershipProductIDs.some(id => id == p.product_metadata.special_product_id)
+        (p) =>
+            !membershipProductIDs.some(
+                (id) => id == p.product_metadata.special_product_id,
+            ),
     );
 
     const membershipSales = onlyMembershipProducts.map((p) => ({

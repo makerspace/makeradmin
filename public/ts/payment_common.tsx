@@ -433,7 +433,8 @@ export const ToPayPreview = ({
                 product.smallest_multiple +
                 " " +
                 t(
-                    `unit.${product.unit}.${product.smallest_multiple > 1 ? "many" : "one"
+                    `unit.${product.unit}.${
+                        product.smallest_multiple > 1 ? "many" : "one"
                     }`,
                 );
             if (product_id === "access_starter_pack") {
