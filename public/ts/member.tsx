@@ -779,7 +779,7 @@ function PersonalData({
                     <input
                         name="password"
                         class="uk-input readonly-input"
-                        value={member.has_password ? "********" : "Inget lösenord valt"}
+                        placeholder={member.has_password ? "********" : "Inget lösenord valt"}
                         disabled
                     />
                     <button class="uk-button uk-button-danger"
