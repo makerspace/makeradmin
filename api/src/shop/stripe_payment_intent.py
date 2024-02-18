@@ -13,6 +13,9 @@ from membership.models import Member
 from service.config import debug_mode
 from service.db import db_session
 from service.error import EXCEPTION, BadRequest, InternalServerError
+from stripe import CardError, InvalidRequestError, PaymentIntent, StripeError
+from typing_extensions import Never
+
 from shop.models import StripePending, Transaction
 from shop.stripe_constants import (
     CURRENCY,
@@ -24,8 +27,6 @@ from shop.stripe_constants import (
 from shop.stripe_customer import get_and_sync_stripe_customer
 from shop.stripe_util import convert_from_stripe_amount, convert_to_stripe_amount, replace_default_payment_method, retry
 from shop.transactions import PaymentFailed, commit_fail_transaction, payment_success
-from stripe import CardError, InvalidRequestError, PaymentIntent, StripeError
-from typing_extensions import Never
 
 logger = getLogger("makeradmin")
 

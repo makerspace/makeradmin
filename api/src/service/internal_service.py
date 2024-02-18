@@ -6,11 +6,12 @@ import pymysql
 from flask import Blueprint, g, jsonify
 from flask import typing as ft
 from pymysql.constants.ER import BAD_NULL_ERROR, DUP_ENTRY
+from sqlalchemy.exc import IntegrityError
+
 from service.api_definition import DELETE, GET, NOT_UNIQUE, POST, PUBLIC, PUT, REQUIRED, Arg
 from service.db import db_session, fields_by_index
 from service.error import Forbidden, Unauthorized, UnprocessableEntity
 from service.logging import logger
-from sqlalchemy.exc import IntegrityError
 
 
 class InternalService(Blueprint):

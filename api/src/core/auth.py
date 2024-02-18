@@ -5,8 +5,6 @@ from string import ascii_letters, digits
 from typing import Optional
 from urllib.parse import quote_plus
 
-from core.models import AccessToken, Login, PasswordResetToken
-from core.service_users import SERVICE_NAMES, SERVICE_PERMISSIONS
 from flask import g, jsonify, request
 from membership.member_auth import authenticate, check_and_hash_password, get_member_permissions
 from membership.models import Member
@@ -25,6 +23,9 @@ from service.error import (
     UnprocessableEntity,
 )
 from sqlalchemy.orm.exc import MultipleResultsFound, NoResultFound
+
+from core.models import AccessToken, Login, PasswordResetToken
+from core.service_users import SERVICE_NAMES, SERVICE_PERMISSIONS
 
 logger = getLogger("makeradmin")
 

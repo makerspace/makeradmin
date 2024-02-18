@@ -4,6 +4,7 @@ import membership.member_auth
 from core.models import AccessToken
 from core.service_users import SERVICE_PERMISSIONS
 from flask import g, request
+
 from service.api_definition import BAD_VALUE, EXPIRED, REQUIRED, USER
 from service.db import db_session
 from service.error import BadRequest, Unauthorized

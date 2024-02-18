@@ -1,8 +1,4 @@
-import core
 import membership
-from core import models
-from core.models import AccessToken
-from core.service_users import TEST_SERVICE_USER_ID
 from flask import g, request
 from service.api_definition import ALL_PERMISSIONS, GET, PUBLIC, USER
 from service.auth import authenticate_request
@@ -10,6 +6,11 @@ from service.db import db_session
 from service.error import Forbidden, Unauthorized
 from test_aid.test_base import FlaskTestBase
 from werkzeug.datastructures.headers import Headers
+
+import core
+from core import models
+from core.models import AccessToken
+from core.service_users import TEST_SERVICE_USER_ID
 
 
 class Test(FlaskTestBase):
