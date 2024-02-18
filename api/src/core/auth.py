@@ -5,19 +5,20 @@ from string import ascii_letters, digits
 from typing import Optional
 from urllib.parse import quote_plus
 
+from core.models import AccessToken, Login, PasswordResetToken
+from core.service_users import SERVICE_NAMES, SERVICE_PERMISSIONS
 from flask import g, jsonify, request
-from membership.member_auth import authenticate, check_and_hash_password, get_member_permissions
+from membership.member_auth import (authenticate, check_and_hash_password,
+                                    get_member_permissions)
 from membership.models import Member
 from messages.message import send_message
 from messages.models import MessageTemplate
 from service import config
 from service.api_definition import BAD_VALUE, EXPIRED, REQUIRED, USER
 from service.db import db_session
-from service.error import ApiError, BadRequest, InternalServerError, NotFound, TooManyRequests, Unauthorized
+from service.error import (ApiError, BadRequest, InternalServerError, NotFound,
+                           TooManyRequests, Unauthorized, UnprocessableEntity)
 from sqlalchemy.orm.exc import MultipleResultsFound, NoResultFound
-
-from core.models import AccessToken, Login, PasswordResetToken
-from core.service_users import SERVICE_NAMES, SERVICE_PERMISSIONS
 
 logger = getLogger("makeradmin")
 
@@ -98,18 +99,18 @@ def password_reset(reset_token, unhashed_password):
         password_reset_token = db_session.query(PasswordResetToken).filter_by(token=reset_token).one()
 
     except NoResultFound:
-        return dict(error_message="Could not find password reset token, try to request a new reset link.")
+        raise NotFound("Could not find password reset token, try to request a new reset link.")
 
     except MultipleResultsFound:
         raise InternalServerError(log=f"Multiple tokens {reset_token} found, this is a bug.")
 
     if datetime.utcnow() - password_reset_token.created_at > timedelta(minutes=10):
-        return dict(error_message="Reset link expired, try to request a new.")
+        raise UnprocessableEntity("Reset link expired, try to request a new one.")
 
     try:
         hashed_password = check_and_hash_password(unhashed_password)
     except ValueError as e:
-        return dict(error_message=str(e))
+        raise BadRequest(str(e))
 
     try:
         member = db_session.query(Member).get(password_reset_token.member_id)
@@ -118,6 +119,11 @@ def password_reset(reset_token, unhashed_password):
 
     member.password = hashed_password
     db_session.add(member)
+
+    # Prevent the reset tokens from being reused
+    db_session.query(PasswordResetToken).filter(PasswordResetToken.id==password_reset_token.id).delete()
+    db_session.flush()
+    print("Password reset for", member.email)
 
     return {}
 
