@@ -961,8 +961,7 @@ function SubscriptionProduct({
             {t("member_page.subscriptions.add_to_cart")(
                 product.smallest_multiple,
                 t(
-                    `unit.${product.unit}.${
-                        product.smallest_multiple > 1 ? "many" : "one"
+                    `unit.${product.unit}.${product.smallest_multiple > 1 ? "many" : "one"
                     }`,
                 ),
                 Number(product.price) * product.smallest_multiple,
