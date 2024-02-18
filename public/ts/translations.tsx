@@ -8,7 +8,9 @@ import {
     URL_GET_STARTED_QUIZ,
     URL_INSTAGRAM,
     URL_SLACK_HELP,
+    URL_SLACK_SIGNUP,
     URL_WIKI,
+    accessyURL,
 } from "./urls";
 
 export type Dictionary = Translation<typeof Eng>;
@@ -258,48 +260,57 @@ const Eng = {
             steps: [
                 // ((onClick: (e: MouseEvent)=>void) => (<>Book a Member Introduction, during which you'll get a tour of the space (if you haven't already) and gain permission to use the makerspace. Your makerspace access will not be activated until you have visited a Member Introduction.
                 // You can find them in the calendar: https://calendly.com/medlemsintroduktion/medlemsintroduktion ("Medlemsintroduktion" in Swedish)</>)),
-                (onClick: (e: MouseEvent) => void) => (
+                (tick: () => void) => (
                     <>
-                        Join our{" "}
                         <a
                             target="_blank"
-                            href={URL_SLACK_HELP}
-                            onClick={onClick}
-                        >
-                            Slack
-                        </a>{" "}
-                        to chat with other members.
+                            className="flow-button primary flow-button-small"
+                            href={URL_SLACK_SIGNUP}
+                            onClick={tick}
+                        >Join our Slack</a>
+                        {" "}to chat with other members. <a target="_blank" href={URL_SLACK_HELP}><i>What is this?</i></a>
                     </>
                 ),
-                (onClick: (e: MouseEvent) => void) => (
+                (tick: () => void) => (
+                    <>
+                        <a
+                            target="_blank"
+                            className="flow-button primary flow-button-small"
+                            href={accessyURL()}
+                            onClick={tick}
+                        >Install Accessy</a>
+                        {" "}to be able to unlock doors, after your introduction.
+                    </>
+                ),
+                (tick: () => void) => (
                     <>
                         Take our{" "}
                         <a
                             target="_blank"
                             href={URL_GET_STARTED_QUIZ}
-                            onClick={onClick}
+                            onClick={tick}
                         >
                             Get Started Quiz
                         </a>{" "}
                         to learn about the space.
                     </>
                 ),
-                (onClick: (e: MouseEvent) => void) => (
+                (tick: () => void) => (
                     <>
                         Check out our{" "}
-                        <a target="_blank" href={URL_WIKI} onClick={onClick}>
+                        <a target="_blank" href={URL_WIKI} onClick={tick}>
                             wiki
                         </a>
                         .
                     </>
                 ),
-                (onClick: (e: MouseEvent) => void) => (
+                (tick: () => void) => (
                     <>
                         Get inspired on our{" "}
                         <a
                             target="_blank"
                             href={URL_INSTAGRAM}
-                            onClick={onClick}
+                            onClick={tick}
                         >
                             Instagram
                         </a>

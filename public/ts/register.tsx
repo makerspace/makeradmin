@@ -1,7 +1,11 @@
-import * as common from "./common";
-import { render } from "preact";
+import { ComponentChildren, render } from "preact";
 import { StateUpdater, useEffect, useMemo, useState } from "preact/hooks";
+import { PopupModal, useCalendlyEventListener } from "react-calendly";
+import Cart from "./cart";
+import { show_phone_number_dialog } from "./change_phone";
+import * as common from "./common";
 import { ServerResponse, trackPlausible } from "./common";
+import { LoadCurrentMemberInfo, member_t } from "./member_common";
 import {
     Discount,
     PaymentFailedError,
@@ -19,12 +23,8 @@ import {
     initializeStripe,
     pay,
 } from "./payment_common";
-import { PopupModal, useCalendlyEventListener } from "react-calendly";
-import { URL_RELATIVE_MEMBER_PORTAL } from "./urls";
-import { LoadCurrentMemberInfo, member_t } from "./member_common";
 import { TranslationWrapper, Translator, useTranslation } from "./translations";
-import Cart from "./cart";
-import { show_phone_number_dialog } from "./change_phone";
+import { URL_RELATIVE_MEMBER_PORTAL } from "./urls";
 
 declare var UIkit: any;
 const FEATURE_FLAG_LOW_INCOME_DISCOUNT = false;
@@ -560,9 +560,9 @@ async function registerMember(
         discount:
             discount.priceLevel !== null && discountInfo.discountReason !== null
                 ? {
-                      price_level: discount.priceLevel,
-                      message: `${discountInfo.discountReason}: ${discountInfo.discountReasonMessage}`,
-                  }
+                    price_level: discount.priceLevel,
+                    message: `${discountInfo.discountReason}: ${discountInfo.discountReasonMessage}`,
+                }
                 : null,
     };
 
@@ -605,15 +605,27 @@ const CheckIcon = ({ done }: { done: boolean }) => {
     );
 };
 
+const TaskItem = ({
+    clickedSteps, setClickedSteps, step, children
+}: { clickedSteps: Set<number | string>, setClickedSteps: (s: Set<number | string>) => void, step: number | string, children: (tick: () => void) => ComponentChildren }) => {
+    return (
+        <li>
+            <CheckIcon done={clickedSteps.has(step)} />
+            <span>
+                {children(() => setClickedSteps(new Set(clickedSteps).add(step)))}
+            </span>
+        </li>
+    );
+};
+
 const Success = ({ member }: { member: member_t }) => {
     const [isBookModalOpen, setBookModalOpen] = useState(false);
-    const [booked, setBooked] = useState(false);
-    const [clickedSteps, setClickedSteps] = useState(new Set<number>());
+    const [clickedSteps, setClickedSteps] = useState(new Set<number | string>());
     const t = useTranslation();
 
     useCalendlyEventListener({
         onEventScheduled: () => {
-            setBooked(true);
+            setClickedSteps(new Set(clickedSteps).add("booked"));
         },
     });
 
@@ -622,28 +634,19 @@ const Success = ({ member }: { member: member_t }) => {
             <h1>{t("registration_page.success.title")}</h1>
             {t("registration_page.success.text")}
             <ul className="registration-task-list">
-                <li>
-                    <CheckIcon done={booked} />
-                    <div class="uk-flex uk-flex-column">
-                        <span>{t("registration_page.success.book_step")}</span>
+                <TaskItem clickedSteps={clickedSteps} setClickedSteps={setClickedSteps} step="booked">
+                    {(tick) => (
                         <button
                             className="flow-button primary flow-button-small"
                             onClick={() => setBookModalOpen(true)}
                         >
                             {t("registration_page.success.book_button")}
                         </button>
-                    </div>
-                </li>
-                {t("registration_page.success.steps").map((step, i) => (
-                    <li key={i}>
-                        <CheckIcon done={clickedSteps.has(i)} />
-                        <span>
-                            {step((e) =>
-                                setClickedSteps(new Set(clickedSteps).add(i)),
-                            )}
-                        </span>
-                    </li>
-                ))}
+                    )}
+                </TaskItem>
+                {t("registration_page.success.steps").map((step, i) => <TaskItem clickedSteps={clickedSteps} setClickedSteps={setClickedSteps} step={`${i}`}>
+                    {(tick) => step(tick)}
+                </TaskItem>)}
             </ul>
             <div class="uk-flex-1" />
             <a
@@ -736,11 +739,11 @@ const Discounts = ({
                     disabled={
                         discounts.discountReason === null ||
                         discounts.discountReasonMessage.length <
-                            MIN_DISCOUNT_REASON_LENGTH
+                        MIN_DISCOUNT_REASON_LENGTH
                     }
                 >
                     {discounts.discountReason !== null &&
-                    discounts.discountReasonMessage.length <
+                        discounts.discountReasonMessage.length <
                         MIN_DISCOUNT_REASON_LENGTH
                         ? t("registration_page.discounts.submit_write_more")
                         : t("registration_page.discounts.submit")}
@@ -861,7 +864,7 @@ const abStateFromSeed = (seed: number): ABState => {
     };
 };
 
-const RegisterPage = ({}: {}) => {
+const RegisterPage = ({ }: {}) => {
     const abState = useMemo(() => {
         let seed = parseInt(localStorage.getItem("abTestSeed") ?? "");
         if (!isFinite(seed)) seed = (Math.random() * 1000000) | 0;
@@ -1064,7 +1067,7 @@ const RegisterPage = ({}: {}) => {
                     </div>
                     {FEATURE_FLAG_LOW_INCOME_DISCOUNT &&
                         registerPageData.discounts["low_income_discount"] >
-                            0 && (
+                        0 && (
                             <button
                                 className="flow-button"
                                 onClick={() => setState(State.Discounts)}
