@@ -110,7 +110,7 @@ def password_reset(reset_token, unhashed_password):
         password_reset_token = db_session.query(PasswordResetToken).filter_by(token=reset_token).one()
 
     except NoResultFound:
-        raise NotFound("Could not find password reset token, try to request a new reset link.")
+        raise UnprocessableEntity("Could not find password reset token, try to request a new reset link.")
 
     except MultipleResultsFound:
         raise InternalServerError(log=f"Multiple tokens {reset_token} found, this is a bug.")
@@ -167,66 +167,6 @@ def list_for_user(user_id):
         )
         for access_token in db_session.query(AccessToken).filter(AccessToken.user_id == user_id)
     ]
-
-
-def authenticate_request() -> None:
-    """Update global object with user_id and user permissions using token from request header."""
-
-    # Make sure user_id and permissions is always set.
-    g.user_id = None
-    g.permissions = tuple()
-
-    # logger.info("DATA " + repr(request.get_data()))
-    # logger.info("HEADERS " + repr(request.headers))
-    # logger.info("ARGS " + repr(request.args))
-    # logger.info("FORM " + repr(request.form))
-    # logger.info("JSON " + repr(request.json))
-
-    authorization = request.headers.get("Authorization", None)
-    if authorization is None:
-        return
-
-    bearer = "Bearer "
-    if not authorization.startswith(bearer):
-        raise Unauthorized("Unauthorized, can't find credentials.", fields="bearer", what=REQUIRED)
-
-    token = authorization[len(bearer) :].strip()
-
-    access_token = db_session.query(AccessToken).get(token)
-    if not access_token:
-        raise Unauthorized("Unauthorized, invalid access token.", fields="bearer", what=BAD_VALUE)
-
-    now = datetime.utcnow()
-    if access_token.expires < now:
-        db_session.query(AccessToken).filter(AccessToken.expires < now).delete()
-        raise Unauthorized("Unauthorized, expired access token.", fields="bearer", what=EXPIRED)
-
-    if access_token.permissions is None:
-        if access_token.user_id < 0:
-            permissions = SERVICE_PERMISSIONS.get(access_token.user_id, [])
-
-        elif access_token.user_id > 0:
-            permissions_set = {p for _, p in get_member_permissions(access_token.user_id)}
-            permissions_set.add(USER)
-            permissions = list(permissions_set)
-
-        else:
-            raise BadRequest(
-                "Bad token.", log=f"access_token {access_token.access_token} has user_id 0, this should never happend"
-            )
-
-        access_token.permissions = ",".join(permissions)
-
-    access_token.ip = request.remote_addr
-    access_token.browser = request.user_agent.string
-    access_token.expires = datetime.utcnow() + timedelta(seconds=access_token.lifetime)
-
-    g.user_id = access_token.user_id
-    g.session_token = access_token.access_token
-    g.permissions = access_token.permissions.split(",")
-
-    # Commit token validation to make it stick even if request fails later.
-    db_session.commit()
 
 
 def roll_service_token(user_id):

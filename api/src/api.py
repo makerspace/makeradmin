@@ -1,23 +1,18 @@
 import flask_cors
-from core.auth import authenticate_request
 from flask import Flask, jsonify
 from flask.wrappers import Response as FlaskResponse
 from membership.permissions import register_permissions
 from service.api_definition import ALL_PERMISSIONS
 from service.config import config, debug_mode, get_mysql_config
-from service.db import create_mysql_engine, populate_fields_by_index, shutdown_session
-from service.error import (
-    ApiError,
-    error_handler_400,
-    error_handler_404,
-    error_handler_405,
-    error_handler_500,
-    error_handler_api,
-    error_handler_db,
-)
+from service.db import (create_mysql_engine, populate_fields_by_index,
+                        shutdown_session)
+from service.error import (ApiError, error_handler_400, error_handler_404,
+                           error_handler_405, error_handler_500,
+                           error_handler_api, error_handler_db)
 from service.traffic_logger import traffic_logger_commit, traffic_logger_init
 from services import services
-from shop.stripe_setup import are_stripe_keys_live, are_stripe_keys_set, setup_stripe
+from shop.stripe_setup import (are_stripe_keys_live, are_stripe_keys_set,
+                               setup_stripe)
 from sqlalchemy.exc import OperationalError
 
 app = Flask(__name__, static_folder=None)
@@ -44,7 +39,6 @@ for path, service in services:
 
 def before_request_functions():
     traffic_logger_init()
-    authenticate_request()
 
 
 def after_request_functions(response: FlaskResponse):

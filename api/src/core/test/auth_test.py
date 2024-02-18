@@ -1,15 +1,15 @@
+import core
 import membership
-from flask import g
+from core import models
+from core.models import AccessToken
+from core.service_users import TEST_SERVICE_USER_ID
+from flask import g, request
 from service.api_definition import ALL_PERMISSIONS, GET, PUBLIC, USER
+from service.auth import authenticate_request
 from service.db import db_session
 from service.error import Forbidden, Unauthorized
 from test_aid.test_base import FlaskTestBase
-
-import core
-from core import models
-from core.auth import authenticate_request
-from core.models import AccessToken
-from core.service_users import TEST_SERVICE_USER_ID
+from werkzeug.datastructures.headers import Headers
 
 
 class Test(FlaskTestBase):
@@ -141,20 +141,41 @@ class Test(FlaskTestBase):
         def view() -> str:
             return ""
 
-        with self.app.test_request_context():
-            g.user_id = 1
-            g.permissions = (USER, "webshop")
-            view()
+        tok = AccessToken(
+            user_id=1,
+            access_token="test_token",
+            expires=self.datetime(days=1),
+            permissions=",".join([USER, "webshop"]),
+            browser="test_browser",
+            ip="0.0.0.0",
+        )
+        db_session.add(tok)
+        db_session.commit()
+
+        def useToken():
+            request.headers = Headers()
+            request.headers.set("Authorization", "Bearer " + tok.access_token)
+            request.remote_addr = "Somewhere"
+            request.user_agent.string = "SomeBrowser"
 
         with self.app.test_request_context():
-            g.user_id = TEST_SERVICE_USER_ID
-            g.permissions = ALL_PERMISSIONS
+            useToken()
+            view()
+
+        tok.permissions = ",".join(ALL_PERMISSIONS)
+        tok.user_id = TEST_SERVICE_USER_ID
+        db_session.flush()
+
+        with self.app.test_request_context():
+            useToken()
             with self.assertRaises(Forbidden):
                 view()
 
+        tok.permissions = ""
+        db_session.flush()
+
         with self.app.test_request_context():
-            g.user_id = None
-            g.permissions = tuple()
+            useToken()
             with self.assertRaises(Forbidden):
                 view()
 
@@ -163,18 +184,40 @@ class Test(FlaskTestBase):
         def view() -> str:
             return ""
 
-        with self.app.test_request_context():
-            g.user_id = 1
-            g.permissions = (USER, "webshop")
-            view()
+        tok = AccessToken(
+            user_id=1,
+            access_token="test_token",
+            expires=self.datetime(days=1),
+            permissions=",".join([USER, "webshop"]),
+            browser="test_browser",
+            ip="0.0.0.0",
+        )
+        db_session.add(tok)
+        db_session.commit()
+
+        def useToken():
+            request.headers = Headers()
+            request.headers.set("Authorization", "Bearer " + tok.access_token)
+            request.remote_addr = "Somewhere"
+            request.user_agent.string = "SomeBrowser"
 
         with self.app.test_request_context():
-            g.user_id = TEST_SERVICE_USER_ID
-            g.permissions = ALL_PERMISSIONS
+            useToken()
             view()
 
+        tok.permissions = ",".join(ALL_PERMISSIONS)
+        tok.user_id = TEST_SERVICE_USER_ID
+        db_session.flush()
+
         with self.app.test_request_context():
-            g.user_id = None
-            g.permissions = tuple()
+            useToken()
+            view()
+
+        tok.permissions = ""
+        tok.user_id = 1
+        db_session.flush()
+
+        with self.app.test_request_context():
+            useToken()
             with self.assertRaises(Forbidden):
                 view()

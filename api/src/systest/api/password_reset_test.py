@@ -12,9 +12,9 @@ class Test(ApiTest):
     def test_request_password_reset_with_correct_email_creates_message_with_token(self):
         member = self.db.create_member()
 
-        self.api.post("/oauth/request_password_reset", data=dict(user_identification=member.email, redirect="admin"), headers={}).expect(
-            code=200
-        )
+        self.api.post(
+            "/oauth/request_password_reset", json=dict(user_identification=member.email, redirect="admin"), headers={}
+        ).expect(code=200)
 
         reset_token = db_session.query(PasswordResetToken).filter_by(member_id=member.member_id).one()
         message = db_session.query(Message).filter_by(member_id=member.member_id).one()
@@ -23,10 +23,10 @@ class Test(ApiTest):
     def test_reset_password_returns_error_if_token_does_not_exist(self):
         e = (
             self.api.post(
-                "/oauth/password_reset", data=dict(reset_token=random_str(), unhashed_password=DEFAULT_PASSWORD)
+                "/oauth/password_reset", json=dict(reset_token=random_str(), unhashed_password=DEFAULT_PASSWORD)
             )
-            .expect(code=200)
-            .get("data__error_message")
+            .expect(code=422)
+            .get("message")
         )
 
         self.assertIn("could not find", e.lower())
@@ -37,10 +37,10 @@ class Test(ApiTest):
 
         e = (
             self.api.post(
-                "/oauth/password_reset", data=dict(reset_token=reset_token.token, unhashed_password=DEFAULT_PASSWORD)
+                "/oauth/password_reset", json=dict(reset_token=reset_token.token, unhashed_password=DEFAULT_PASSWORD)
             )
-            .expect(code=200)
-            .get("data__error_message")
+            .expect(code=422)
+            .get("message")
         )
 
         self.assertIn("expired", e.lower())
@@ -52,10 +52,10 @@ class Test(ApiTest):
         e = (
             self.api.post(
                 "/oauth/password_reset",
-                data=dict(reset_token=reset_token.token, unhashed_password=DEFAULT_PASSWORD[:3]),
+                json=dict(reset_token=reset_token.token, unhashed_password=DEFAULT_PASSWORD[:3]),
             )
-            .expect(code=200)
-            .get("data__error_message")
+            .expect(code=400)
+            .get("message")
         )
 
         self.assertIn("at least", e.lower())
@@ -68,7 +68,7 @@ class Test(ApiTest):
 
         e = (
             self.api.post(
-                "/oauth/password_reset", data=dict(reset_token=reset_token.token, unhashed_password=unhashed_password)
+                "/oauth/password_reset", json=dict(reset_token=reset_token.token, unhashed_password=unhashed_password)
             )
             .expect(code=200)
             .get("data__error_message")

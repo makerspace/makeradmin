@@ -6,12 +6,11 @@ import pymysql
 from flask import Blueprint, g, jsonify
 from flask import typing as ft
 from pymysql.constants.ER import BAD_NULL_ERROR, DUP_ENTRY
-from sqlalchemy.exc import IntegrityError
-
 from service.api_definition import DELETE, GET, NOT_UNIQUE, POST, PUBLIC, PUT, REQUIRED, Arg
 from service.db import db_session, fields_by_index
-from service.error import Forbidden, UnprocessableEntity
+from service.error import Forbidden, Unauthorized, UnprocessableEntity
 from service.logging import logger
+from sqlalchemy.exc import IntegrityError
 
 
 class InternalService(Blueprint):
@@ -68,11 +67,22 @@ class InternalService(Blueprint):
 
             @wraps(f)
             def view_wrapper(*args, **kwargs):
-                try:
-                    has_permission = permission == PUBLIC or permission in g.permissions
+                from service.auth import authenticate_request
 
-                    if not has_permission:
-                        raise Forbidden(message=f"'{permission}' permission is required for this operation.")
+                try:
+                    if permission != PUBLIC:
+                        authenticate_request()
+                        has_permission = permission in g.permissions
+
+                        if not has_permission:
+                            raise Forbidden(message=f"'{permission}' permission is required for this operation.")
+                    else:
+                        try:
+                            authenticate_request()
+                        except Unauthorized:
+                            # This is fine. The user may have an invalid access token,
+                            # but we don't care about that for public endpoints.
+                            pass
 
                     Arg.fill_args(params, kwargs)
 
