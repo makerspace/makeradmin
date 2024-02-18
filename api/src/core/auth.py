@@ -8,16 +8,22 @@ from urllib.parse import quote_plus
 from core.models import AccessToken, Login, PasswordResetToken
 from core.service_users import SERVICE_NAMES, SERVICE_PERMISSIONS
 from flask import g, jsonify, request
-from membership.member_auth import (authenticate, check_and_hash_password,
-                                    get_member_permissions)
+from membership.member_auth import authenticate, check_and_hash_password, get_member_permissions
 from membership.models import Member
 from messages.message import send_message
 from messages.models import MessageTemplate
 from service import config
 from service.api_definition import BAD_VALUE, EXPIRED, REQUIRED, USER
 from service.db import db_session
-from service.error import (ApiError, BadRequest, InternalServerError, NotFound,
-                           TooManyRequests, Unauthorized, UnprocessableEntity)
+from service.error import (
+    ApiError,
+    BadRequest,
+    InternalServerError,
+    NotFound,
+    TooManyRequests,
+    Unauthorized,
+    UnprocessableEntity,
+)
 from sqlalchemy.orm.exc import MultipleResultsFound, NoResultFound
 
 logger = getLogger("makeradmin")
@@ -132,7 +138,7 @@ def password_reset(reset_token, unhashed_password):
     db_session.add(member)
 
     # Prevent the reset tokens from being reused
-    db_session.query(PasswordResetToken).filter(PasswordResetToken.id==password_reset_token.id).delete()
+    db_session.query(PasswordResetToken).filter(PasswordResetToken.id == password_reset_token.id).delete()
     db_session.flush()
     print("Password reset for", member.email)
 
