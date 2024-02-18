@@ -13,9 +13,6 @@ from membership.models import Member
 from service.config import debug_mode
 from service.db import db_session
 from service.error import EXCEPTION, BadRequest, InternalServerError
-from stripe import CardError, InvalidRequestError, PaymentIntent, StripeError
-from typing_extensions import Never
-
 from shop.models import StripePending, Transaction
 from shop.stripe_constants import (
     CURRENCY,
@@ -26,11 +23,9 @@ from shop.stripe_constants import (
 )
 from shop.stripe_customer import get_and_sync_stripe_customer
 from shop.stripe_util import convert_from_stripe_amount, convert_to_stripe_amount, replace_default_payment_method, retry
-from shop.transactions import (
-    PaymentFailed,
-    commit_fail_transaction,
-    payment_success,
-)
+from shop.transactions import PaymentFailed, commit_fail_transaction, payment_success
+from stripe import CardError, InvalidRequestError, PaymentIntent, StripeError
+from typing_extensions import Never
 
 logger = getLogger("makeradmin")
 
@@ -215,13 +210,16 @@ def get_stripe_payment_intents(start_date: datetime, end_date: datetime) -> List
     }
     logger.info(f"Fetching stripe payment intents from {start_date} ({created['gte']}) to {end_date} ({created['lt']})")
 
-    stripe_intents = retry(lambda: stripe.PaymentIntent.list(limit=100, created=created, expand=expand))
-    payments: List[stripe.PaymentIntent] = []
+    def get_intents():
+        stripe_intents = retry(lambda: stripe.PaymentIntent.list(limit=100, created=created, expand=expand))
+        payments: List[stripe.PaymentIntent] = []
 
-    # Loop over the intents and store them. We need to loop to deal with pagination
-    for intent in stripe_intents.auto_paging_iter():
-        payments.append(intent)
-    return payments
+        # Loop over the intents and store them. We need to loop to deal with pagination
+        for intent in stripe_intents.auto_paging_iter():
+            payments.append(intent)
+        return payments
+
+    return retry(get_intents)
 
 
 def convert_completed_stripe_intents_to_payments(
