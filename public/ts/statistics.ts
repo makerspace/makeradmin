@@ -62,6 +62,7 @@ common.documentLoaded().then(() => {
             const laserjson = data[1];
             addRetentionChart(root, data[6].data);
             addChart(root, membershipjson.data);
+            addSubscriptionsChart(root, data[3].data);
             addLaserChart(root, laserjson.data);
             for (let quiz of data[2].data) {
                 const quiz_future = common.ajax(
@@ -146,6 +147,69 @@ function pointAtDate(items: Array<any>, date: Date) {
         }
     }
     return best;
+}
+
+function addSubscriptionsChart(root: HTMLElement, data: ProductStatistics) {
+    const config = {
+        type: "horizontalBar",
+        data: {
+            labels: [
+                "Total members",
+                "Has no subscription",
+                "Has membership sub (maybe more)",
+                "Has access sub (maybe more)",
+                "Has both subs"
+            ],
+            datasets: [
+                {
+                    label: "Members",
+                    backgroundColor: "#FF000077",
+                    borderColor: colors[0],
+                    data: [
+                        data.subscription_split.active_members,
+                        data.subscription_split.active_members - data.subscription_split.has_membership_sub - data.subscription_split.has_makerspace_access_sub + data.subscription_split.has_both_subs,
+                        data.subscription_split.has_membership_sub,
+                        data.subscription_split.has_makerspace_access_sub,
+                        data.subscription_split.has_both_subs
+                    ],
+                }
+            ],
+        },
+        options: {
+            title: {
+                display: true,
+                text: "Antal medlemmar med olika typer av prenumerationer",
+            },
+            responsive: true,
+            scales: {
+                xAxes: [
+                    {
+                        stacked: false,
+                    },
+                ],
+                yAxes: [
+                    {
+                        stacked: true,
+                    },
+                ],
+            },
+        },
+    };
+
+    const stats = document.createElement("div") as HTMLDivElement;
+
+    stats.innerHTML = `
+	<h3>Statistics for Subscriptions</h3>
+	<canvas width=500 height=300></canvas>
+	`;
+    stats.className = "statistics-member-stats";
+
+    const canvas = stats.querySelector("canvas")!;
+    root.appendChild(stats);
+    canvas.width = 500;
+    canvas.height = 300;
+    const ctx = canvas.getContext("2d");
+    new Chart(ctx, config);
 }
 
 function addChart(root: HTMLElement, data: any) {
@@ -245,7 +309,7 @@ function addChart(root: HTMLElement, data: any) {
         },
     };
 
-    const memberstats = <HTMLDivElement>document.createElement("div");
+    const memberstats = document.createElement("div") as HTMLDivElement;
     const highestMembership = maxOfSeries(dataMembership) || {
         x: "never",
         y: 0,
@@ -338,7 +402,7 @@ function addLaserChart(root: HTMLElement, data: any) {
         },
     };
 
-    const canvas = <HTMLCanvasElement>document.createElement("canvas");
+    const canvas = document.createElement("canvas") as HTMLCanvasElement;
     root.appendChild(canvas);
     canvas.width = 500;
     canvas.height = 300;
@@ -415,14 +479,14 @@ function addMemberDistribution(
         },
     };
 
-    const canvas = <HTMLCanvasElement>document.createElement("canvas");
+    const canvas = document.createElement("canvas") as HTMLCanvasElement;
     root.appendChild(canvas);
     canvas.width = 500;
     canvas.height = 300;
     const ctx = canvas.getContext("2d");
     new Chart(ctx, config);
 
-    const desc = <HTMLParagraphElement>document.createElement("p");
+    const desc = document.createElement("p") as HTMLParagraphElement;
     desc.textContent = description;
     root.appendChild(desc);
 }
@@ -618,7 +682,7 @@ function addQuizChart(root: HTMLElement, data: QuizStatistics, quiz: Quiz) {
         },
     };
 
-    const quizstats = <HTMLDivElement>document.createElement("div");
+    const quizstats = document.createElement("div") as HTMLDivElement;
 
     quizstats.innerHTML = `
 	<h3>Statistics for Quiz: ${quiz.name}</h3>
@@ -668,6 +732,12 @@ interface ProductStatistics {
     }[];
     products: Product[];
     categories: Category[];
+    subscription_split: {
+        active_members: number,
+        has_membership_sub: number,
+        has_makerspace_access_sub: number,
+        has_both_subs: number,
+    }
 }
 
 function addProductPurchasedChart(root: HTMLElement, data: ProductStatistics) {
@@ -773,7 +843,7 @@ function addRevenueChart(
         },
     };
 
-    const canvas = <HTMLCanvasElement>document.createElement("canvas");
+    const canvas = document.createElement("canvas") as HTMLCanvasElement;
     root.appendChild(canvas);
     canvas.width = 500;
     canvas.height = 70 + 30 * data.length;
