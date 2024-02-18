@@ -1,17 +1,16 @@
 /// <reference path="../node_modules/moment/moment.d.ts" />
 import * as common from "./common";
 //import * as moment from 'moment';
-import "moment/locale/sv";
-import { ServerResponse } from "./common";
-import { Quiz } from "./quiz";
 import * as d3 from "d3";
 import {
     sankey,
-    SankeyGraph,
-    SankeyLayout,
     sankeyLeft,
-    sankeyLinkHorizontal,
+    sankeyLinkHorizontal
 } from "d3-sankey";
+import "moment/locale/sv";
+import { ServerResponse } from "./common";
+import { Product, WellKnownProductId } from "./payment_common";
+import { Quiz } from "./quiz";
 
 declare var UIkit: any;
 declare var Chart: any;
@@ -88,9 +87,9 @@ common.documentLoaded().then(() => {
         .catch((json) => {
             UIkit.modal.alert(
                 "<h2>Couldn't load statistics</h2>" +
-                    json.message +
-                    " " +
-                    json.error,
+                json.message +
+                " " +
+                json.error,
             );
         });
 });
@@ -266,18 +265,14 @@ function addChart(root: HTMLElement, data: any) {
     memberstats.innerHTML = `
 	<canvas width=500 height=300></canvas>
 	<div class="statistics-member-stats-box">
-	<div class="statistics-member-stats-row"><span class="statistics-member-stats-type">Membership</span><span  class="statistics-member-stats-value">${
-        currentMembership.y
-    }</span></div>
-	<div class="statistics-member-stats-row"><span class="statistics-member-stats-type">Membership record</span><span  class="statistics-member-stats-value">${
-        highestMembership.y
-    } members on ${date2str(highestMembership.x)}</span></div>
-	<div class="statistics-member-stats-row"><span class="statistics-member-stats-type">Labaccess</span><span  class="statistics-member-stats-value">${
-        currentLabaccess.y
-    }</span></div>
-	<div class="statistics-member-stats-row"><span class="statistics-member-stats-type">Labaccess record</span><span  class="statistics-member-stats-value">${
-        highestLabaccess.y
-    } members on ${date2str(highestLabaccess.x)}</span></div>
+	<div class="statistics-member-stats-row"><span class="statistics-member-stats-type">Membership</span><span  class="statistics-member-stats-value">${currentMembership.y
+        }</span></div>
+	<div class="statistics-member-stats-row"><span class="statistics-member-stats-type">Membership record</span><span  class="statistics-member-stats-value">${highestMembership.y
+        } members on ${date2str(highestMembership.x)}</span></div>
+	<div class="statistics-member-stats-row"><span class="statistics-member-stats-type">Labaccess</span><span  class="statistics-member-stats-value">${currentLabaccess.y
+        }</span></div>
+	<div class="statistics-member-stats-row"><span class="statistics-member-stats-type">Labaccess record</span><span  class="statistics-member-stats-value">${highestLabaccess.y
+        } members on ${date2str(highestLabaccess.x)}</span></div>
 	</div>
 	`;
     memberstats.className = "statistics-member-stats";
@@ -602,13 +597,13 @@ function addQuizChart(root: HTMLElement, data: QuizStatistics, quiz: Quiz) {
                     label: (tooltipItem: any, data: any) => {
                         const option =
                             datasets[tooltipItem.datasetIndex].options[
-                                tooltipItem.index
+                            tooltipItem.index
                             ];
                         if (option != null) {
                             return (
                                 Math.round(
                                     datasets[tooltipItem.datasetIndex].data[
-                                        tooltipItem.index
+                                    tooltipItem.index
                                     ] * 100,
                                 ) +
                                 "%: " +
@@ -631,14 +626,13 @@ function addQuizChart(root: HTMLElement, data: QuizStatistics, quiz: Quiz) {
 		<div class="statistics-member-stats-row">
 			<span class="statistics-member-stats-type">Median time to answer quiz [min]</span>
 			<span class="statistics-member-stats-value">${(
-                data.median_seconds_to_answer_quiz / 60
-            ).toFixed(1)}</span>
+            data.median_seconds_to_answer_quiz / 60
+        ).toFixed(1)}</span>
 		</div>
 		<div class="statistics-member-stats-row">
 			<span class="statistics-member-stats-type">Total quiz respondents</span>
-			<span class="statistics-member-stats-value">${
-                data.answered_quiz_member_count
-            }</span>
+			<span class="statistics-member-stats-value">${data.answered_quiz_member_count
+        }</span>
 		</div>
 	</div>
 	<canvas width=500 height=300></canvas>
@@ -651,22 +645,6 @@ function addQuizChart(root: HTMLElement, data: QuizStatistics, quiz: Quiz) {
     canvas.height = 800;
     const ctx = canvas.getContext("2d");
     new Chart(ctx, config);
-}
-
-interface Product {
-    id: number;
-    category_id: number;
-    name: string;
-    description: string;
-    unit: string;
-    price: number;
-    smallest_multiple: number;
-    filter: string;
-    image: string;
-    display_order: number;
-    created_at: string;
-    updated_at: string;
-    deleted_at: string | null;
 }
 
 interface Category {
@@ -693,12 +671,18 @@ interface ProductStatistics {
 }
 
 function addProductPurchasedChart(root: HTMLElement, data: ProductStatistics) {
-    const membershipProductIDs = [1, 2, 3];
+    const membershipProductIDs: WellKnownProductId[] = [
+        "access_starter_pack",
+        "single_membership_year",
+        "single_labaccess_month",
+        "membership_subscription",
+        "labaccess_subscription",
+    ];
     const onlyMembershipProducts = data.products.filter((p) =>
-        membershipProductIDs.includes(p.id),
+        membershipProductIDs.some(id => id == p.product_metadata.special_product_id)
     );
     const excludingMembershipProducts = data.products.filter(
-        (p) => !membershipProductIDs.includes(p.id),
+        (p) => !membershipProductIDs.some(id => id == p.product_metadata.special_product_id)
     );
 
     const membershipSales = onlyMembershipProducts.map((p) => ({
@@ -815,6 +799,7 @@ async function addRetentionChart(root: HTMLElement, graph: RetentionGraph) {
         .append("svg")
         .attr("width", width + margin.left + margin.right)
         .attr("height", height + margin.top + margin.bottom)
+        .attr("style", "max-width: unset;")
         .append("g")
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
