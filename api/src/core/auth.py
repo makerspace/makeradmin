@@ -13,7 +13,15 @@ from messages.models import MessageTemplate
 from service import config
 from service.api_definition import BAD_VALUE, EXPIRED, REQUIRED, USER
 from service.db import db_session
-from service.error import ApiError, BadRequest, InternalServerError, NotFound, TooManyRequests, Unauthorized
+from service.error import (
+    ApiError,
+    BadRequest,
+    InternalServerError,
+    NotFound,
+    TooManyRequests,
+    Unauthorized,
+    UnprocessableEntity,
+)
 from sqlalchemy.orm.exc import MultipleResultsFound, NoResultFound
 
 from core.models import AccessToken, Login, PasswordResetToken
@@ -78,7 +86,7 @@ def login(ip, browser, username, password):
     return create_access_token(ip, browser, member_id)
 
 
-def request_password_reset(user_identification):
+def request_password_reset(user_identification: str, redirect: str):
     member = get_member_by_user_identification(user_identification)
 
     token = generate_token()
@@ -86,10 +94,21 @@ def request_password_reset(user_identification):
     db_session.add(PasswordResetToken(member_id=member.member_id, token=token))
     db_session.flush()
 
+    if redirect == "admin":
+        url = config.get_admin_url("/password-reset")
+    elif redirect == "member":
+        url = config.get_public_url("/member/reset_password")
+    else:
+        raise BadRequest("Invalid redirect", fields="redirect", what=BAD_VALUE)
+    url += f"?reset_token={quote_plus(token)}"
+
+    if config.debug_mode():
+        logger.info(f"Reset link for {member.email} is {url}")
+
     send_message(
         MessageTemplate.PASSWORD_RESET,
         member,
-        url=config.get_admin_url(f"/password-reset?reset_token={quote_plus(token)}"),
+        url=url,
     )
 
 
@@ -98,18 +117,18 @@ def password_reset(reset_token, unhashed_password):
         password_reset_token = db_session.query(PasswordResetToken).filter_by(token=reset_token).one()
 
     except NoResultFound:
-        return dict(error_message="Could not find password reset token, try to request a new reset link.")
+        raise UnprocessableEntity("Could not find password reset token, try to request a new reset link.")
 
     except MultipleResultsFound:
         raise InternalServerError(log=f"Multiple tokens {reset_token} found, this is a bug.")
 
     if datetime.utcnow() - password_reset_token.created_at > timedelta(minutes=10):
-        return dict(error_message="Reset link expired, try to request a new.")
+        raise UnprocessableEntity("Reset link expired, try to request a new one.")
 
     try:
         hashed_password = check_and_hash_password(unhashed_password)
     except ValueError as e:
-        return dict(error_message=str(e))
+        raise BadRequest(str(e))
 
     try:
         member = db_session.query(Member).get(password_reset_token.member_id)
@@ -118,6 +137,11 @@ def password_reset(reset_token, unhashed_password):
 
     member.password = hashed_password
     db_session.add(member)
+
+    # Prevent the reset tokens from being reused
+    db_session.query(PasswordResetToken).filter(PasswordResetToken.id == password_reset_token.id).delete()
+    db_session.flush()
+    print("Password reset for", member.email)
 
     return {}
 
@@ -150,66 +174,6 @@ def list_for_user(user_id):
         )
         for access_token in db_session.query(AccessToken).filter(AccessToken.user_id == user_id)
     ]
-
-
-def authenticate_request() -> None:
-    """Update global object with user_id and user permissions using token from request header."""
-
-    # Make sure user_id and permissions is always set.
-    g.user_id = None
-    g.permissions = tuple()
-
-    # logger.info("DATA " + repr(request.get_data()))
-    # logger.info("HEADERS " + repr(request.headers))
-    # logger.info("ARGS " + repr(request.args))
-    # logger.info("FORM " + repr(request.form))
-    # logger.info("JSON " + repr(request.json))
-
-    authorization = request.headers.get("Authorization", None)
-    if authorization is None:
-        return
-
-    bearer = "Bearer "
-    if not authorization.startswith(bearer):
-        raise Unauthorized("Unauthorized, can't find credentials.", fields="bearer", what=REQUIRED)
-
-    token = authorization[len(bearer) :].strip()
-
-    access_token = db_session.query(AccessToken).get(token)
-    if not access_token:
-        raise Unauthorized("Unauthorized, invalid access token.", fields="bearer", what=BAD_VALUE)
-
-    now = datetime.utcnow()
-    if access_token.expires < now:
-        db_session.query(AccessToken).filter(AccessToken.expires < now).delete()
-        raise Unauthorized("Unauthorized, expired access token.", fields="bearer", what=EXPIRED)
-
-    if access_token.permissions is None:
-        if access_token.user_id < 0:
-            permissions = SERVICE_PERMISSIONS.get(access_token.user_id, [])
-
-        elif access_token.user_id > 0:
-            permissions_set = {p for _, p in get_member_permissions(access_token.user_id)}
-            permissions_set.add(USER)
-            permissions = list(permissions_set)
-
-        else:
-            raise BadRequest(
-                "Bad token.", log=f"access_token {access_token.access_token} has user_id 0, this should never happend"
-            )
-
-        access_token.permissions = ",".join(permissions)
-
-    access_token.ip = request.remote_addr
-    access_token.browser = request.user_agent.string
-    access_token.expires = datetime.utcnow() + timedelta(seconds=access_token.lifetime)
-
-    g.user_id = access_token.user_id
-    g.session_token = access_token.access_token
-    g.permissions = access_token.permissions.split(",")
-
-    # Commit token validation to make it stick even if request fails later.
-    db_session.commit()
 
 
 def roll_service_token(user_id):

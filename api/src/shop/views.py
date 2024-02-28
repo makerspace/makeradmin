@@ -9,17 +9,7 @@ from basic_types.time_period import TimePeriod
 from dateutil.relativedelta import relativedelta
 from flask import Response, g, make_response, request, send_file
 from multiaccessy.invite import AccessyInvitePreconditionFailed, ensure_accessy_labaccess
-from service.api_definition import (
-    DELETE,
-    GET,
-    MEMBER_EDIT,
-    POST,
-    PUBLIC,
-    USER,
-    WEBSHOP,
-    WEBSHOP_EDIT,
-    Arg,
-)
+from service.api_definition import DELETE, GET, MEMBER_EDIT, POST, PUBLIC, USER, WEBSHOP, WEBSHOP_EDIT, Arg
 from service.db import db_session
 from service.entity import OrmSingeRelation, OrmSingleSingleRelation
 from service.error import InternalServerError, PreconditionFailed
@@ -43,13 +33,7 @@ from shop.entities import (
     transaction_entity,
 )
 from shop.models import ProductImage, TransactionContent
-from shop.pay import (
-    cancel_subscriptions,
-    pay,
-    register,
-    setup_payment_method,
-    start_subscriptions,
-)
+from shop.pay import cancel_subscriptions, pay, register, setup_payment_method, start_subscriptions
 from shop.shop_data import (
     all_product_data,
     get_membership_products,

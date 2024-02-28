@@ -1,6 +1,7 @@
 import { createContext } from "preact";
 import { useContext, useState } from "preact/hooks";
 import { formatDate } from "./common";
+import { member_t } from "./member_common";
 import { Translation, TranslationKeyValues } from "./translate";
 import {
     URL_CALENDAR,
@@ -8,7 +9,9 @@ import {
     URL_GET_STARTED_QUIZ,
     URL_INSTAGRAM,
     URL_SLACK_HELP,
+    URL_SLACK_SIGNUP,
     URL_WIKI,
+    accessyURL,
 } from "./urls";
 
 export type Dictionary = Translation<typeof Eng>;
@@ -258,49 +261,61 @@ const Eng = {
             steps: [
                 // ((onClick: (e: MouseEvent)=>void) => (<>Book a Member Introduction, during which you'll get a tour of the space (if you haven't already) and gain permission to use the makerspace. Your makerspace access will not be activated until you have visited a Member Introduction.
                 // You can find them in the calendar: https://calendly.com/medlemsintroduktion/medlemsintroduktion ("Medlemsintroduktion" in Swedish)</>)),
-                (onClick: (e: MouseEvent) => void) => (
+                (tick: () => void) => (
                     <>
-                        Join our{" "}
                         <a
                             target="_blank"
-                            href={URL_SLACK_HELP}
-                            onClick={onClick}
+                            className="flow-button primary flow-button-small"
+                            href={URL_SLACK_SIGNUP}
+                            onClick={tick}
                         >
-                            Slack
+                            Join our Slack
                         </a>{" "}
-                        to chat with other members.
+                        to chat with other members.{" "}
+                        <a target="_blank" href={URL_SLACK_HELP}>
+                            <i>What is this?</i>
+                        </a>
                     </>
                 ),
-                (onClick: (e: MouseEvent) => void) => (
+                (tick: () => void) => (
+                    <>
+                        <a
+                            target="_blank"
+                            className="flow-button primary flow-button-small"
+                            href={accessyURL()}
+                            onClick={tick}
+                        >
+                            Install Accessy
+                        </a>{" "}
+                        to be able to unlock doors, after your introduction.
+                    </>
+                ),
+                (tick: () => void) => (
                     <>
                         Take our{" "}
                         <a
                             target="_blank"
                             href={URL_GET_STARTED_QUIZ}
-                            onClick={onClick}
+                            onClick={tick}
                         >
                             Get Started Quiz
                         </a>{" "}
                         to learn about the space.
                     </>
                 ),
-                (onClick: (e: MouseEvent) => void) => (
+                (tick: () => void) => (
                     <>
                         Check out our{" "}
-                        <a target="_blank" href={URL_WIKI} onClick={onClick}>
+                        <a target="_blank" href={URL_WIKI} onClick={tick}>
                             wiki
                         </a>
                         .
                     </>
                 ),
-                (onClick: (e: MouseEvent) => void) => (
+                (tick: () => void) => (
                     <>
                         Get inspired on our{" "}
-                        <a
-                            target="_blank"
-                            href={URL_INSTAGRAM}
-                            onClick={onClick}
-                        >
+                        <a target="_blank" href={URL_INSTAGRAM} onClick={tick}>
                             Instagram
                         </a>
                         .
@@ -435,6 +450,13 @@ const Eng = {
             "Install the Accessy app on your phone. You can use this to unlock doors at the makerspace.",
         send_accessy_invite: "Send Accessy invite",
         change_pin_code: "Change",
+        change_password: "Change",
+        set_password: "Set",
+        no_password_set: "No password set",
+        set_password_alert: (member: member_t) =>
+            `We've sent an email to ${member.email} with a link for changing your password.`,
+        failed_set_password_alert: (error: string) =>
+            `Failed to send email for setting password: ${error}.`,
         instructions_to_become_member:
             "Remaining steps to get makerspace access",
         accessy_invite: "Invite yourself to Accessy",

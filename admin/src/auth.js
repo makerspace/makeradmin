@@ -28,7 +28,7 @@ class Auth {
     requestPasswordReset(user_identification) {
         return post({
             url: "/oauth/request_password_reset",
-            params: { user_identification },
+            params: { user_identification, redirect: "admin" },
             errorMessage: "Error when sending",
             expectedDataStatus: "ok",
         });
@@ -125,8 +125,8 @@ class Auth {
                 } else if (responseData.status === "ambiguous") {
                     showError(
                         "<h2>Inloggningen misslyckades</h2>Det finns flera medlemmar som matchar '" +
-                            tag +
-                            "'. Välj något som är mer unikt, t.ex email eller medlemsnummer.",
+                        tag +
+                        "'. Välj något som är mer unikt, t.ex email eller medlemsnummer.",
                     );
                 } else if (responseData.status === "not found") {
                     showError(
@@ -135,9 +135,9 @@ class Auth {
                 } else {
                     showError(
                         "<h2>Inloggningen misslyckades</h2>Tog emot ett oväntat svar från servern:<br><br>" +
-                            response.status +
-                            " " +
-                            response.statusText,
+                        response.status +
+                        " " +
+                        response.statusText,
                     );
                 }
             })
@@ -148,7 +148,7 @@ class Auth {
             });
     }
 
-    onChange() {}
+    onChange() { }
 }
 
 const auth = new Auth();

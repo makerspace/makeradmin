@@ -133,7 +133,7 @@ body {
         }
     }
 
-    li.active > a {
+    li.active>a {
         color: #444;
     }
 
@@ -419,8 +419,7 @@ body {
     margin-left: 24px;
 }
 
-.category-add {
-}
+.category-add {}
 
 .category-edit-box {
     position: absolute;
@@ -539,7 +538,7 @@ body {
     margin-left: auto;
     margin-right: auto;
 
-    > div {
+    >div {
         margin-top: 5px;
     }
 
@@ -890,7 +889,7 @@ form input.readonly-input {
         display: flex;
         justify-content: center;
 
-        > div {
+        >div {
             background: #07719f;
             border-radius: 10px;
             overflow: hidden;
@@ -1116,8 +1115,7 @@ input:invalid {
     font-weight: bold;
 }
 
-.statistics-member-stats-value {
-}
+.statistics-member-stats-value {}
 
 .statistics-member-stats-row {
     display: flex;
@@ -1421,7 +1419,7 @@ $palette-red: $palette4;
         padding-left: 20px;
         padding-right: 0px;
 
-        > span {
+        >span {
             padding-top: 8px;
             padding-bottom: 8px;
         }
@@ -1464,8 +1462,8 @@ $palette-red: $palette4;
             background: saturate(darken(#469abe, 5%), 12%);
         }
 
-        .course-not-completed > div,
-        .course-completed > div {
+        .course-not-completed>div,
+        .course-completed>div {
             position: relative;
             top: -10px;
             left: -10px;
@@ -1959,13 +1957,12 @@ $palette-red: $palette4;
         font-size: 1.2em;
     }
 
-    box-shadow:
-        0px 0.1px 0.3px rgba(0, 0, 0, 0.02),
-        0px 0.3px 0.7px rgba(0, 0, 0, 0.028),
-        0px 0.5px 1.3px rgba(0, 0, 0, 0.035),
-        0px 0.9px 2.2px rgba(0, 0, 0, 0.042),
-        0px 1.7px 4.2px rgba(0, 0, 0, 0.05),
-        0px 4px 10px rgba(0, 0, 0, 0.07);
+    box-shadow: 0px 0.1px 0.3px rgba(0, 0, 0, 0.02),
+    0px 0.3px 0.7px rgba(0, 0, 0, 0.028),
+    0px 0.5px 1.3px rgba(0, 0, 0, 0.035),
+    0px 0.9px 2.2px rgba(0, 0, 0, 0.042),
+    0px 1.7px 4.2px rgba(0, 0, 0, 0.05),
+    0px 4px 10px rgba(0, 0, 0, 0.07);
 }
 
 .small-print {
@@ -2009,5 +2006,20 @@ $palette-red: $palette4;
 
     span.negative {
         color: rgb(201, 43, 43);
+    }
+}
+
+.password-field {
+    opacity: 1;
+    height: auto;
+    margin: 16px 0px;
+
+    &.hidden {
+        // Kinda hacky. Collapse the margin between the email field and "Continue" button.
+        // We can't use display: none because then password managers will not auto-fill the field.
+        margin: -8px 0px;
+        opacity: 0;
+        height: 0px;
+        pointer-events: none;
     }
 }

@@ -1,15 +1,15 @@
 /// <reference path="../node_modules/@types/stripe-v3/index.d.ts" />
 import { useEffect, useRef } from "preact/hooks";
+import Cart, { Item } from "./cart";
 import * as common from "./common";
 import { ServerResponse } from "./common";
+import { member_t } from "./member_common";
 import {
     StartSubscriptionsRequest,
     SubscriptionStart,
     SubscriptionType,
 } from "./subscriptions";
 import { useTranslation } from "./translations";
-import { member_t } from "./member_common";
-import Cart, { Item } from "./cart";
 
 declare var UIkit: any;
 
@@ -180,7 +180,7 @@ const WellKnownProducts = [
     "membership_subscription",
     "labaccess_subscription",
 ] as const;
-type WellKnownProductId = (typeof WellKnownProducts)[number];
+export type WellKnownProductId = (typeof WellKnownProducts)[number];
 
 export function AssertIsWellKnownProductId(
     id: string | undefined,

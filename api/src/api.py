@@ -1,5 +1,4 @@
 import flask_cors
-from core.auth import authenticate_request
 from flask import Flask, jsonify
 from flask.wrappers import Response as FlaskResponse
 from membership.permissions import register_permissions
@@ -44,7 +43,6 @@ for path, service in services:
 
 def before_request_functions():
     traffic_logger_init()
-    authenticate_request()
 
 
 def after_request_functions(response: FlaskResponse):
