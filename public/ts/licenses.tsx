@@ -57,7 +57,11 @@ const LicensesPage = () => {
                             egen dator, förbereda allt och öppna i CAD-datorn
                             för att spara ut toolpaths osv.
                         </p>
-                        <p><a href="https://portal.vectric.com/organization/shared-invite/jBAn3T9KLm6nT34tYtdg">Skaffa VCarve Pro - Stockholm Makerspace Edition</a></p>
+                        <p>
+                            <a href="https://portal.vectric.com/organization/shared-invite/jBAn3T9KLm6nT34tYtdg">
+                                Skaffa VCarve Pro - Stockholm Makerspace Edition
+                            </a>
+                        </p>
                     </div>
                 </div>
             </div>

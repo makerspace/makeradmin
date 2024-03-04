@@ -70,7 +70,7 @@ export function login_via_single_use_link(
             } else {
                 showError(
                     "<h2>Inloggningen misslyckades</h2>Tog emot ett oväntat svar från servern:<br><br>" +
-                    json.data.status,
+                        json.data.status,
                 );
             }
         })
@@ -82,7 +82,7 @@ export function login_via_single_use_link(
             } else {
                 showError(
                     "<h2>Inloggningen misslyckades</h2>Tog emot ett oväntat svar från servern:<br><br>" +
-                    json.message,
+                        json.message,
                 );
             }
         })
@@ -112,8 +112,8 @@ export const Login = ({ redirect }: { redirect: string | null }) => {
 
     let [loginMethod, setLoginMethod] = useState(
         LoginMethod[
-        (localStorage.getItem("last_login_method") ??
-            "") as keyof typeof LoginMethod
+            (localStorage.getItem("last_login_method") ??
+                "") as keyof typeof LoginMethod
         ] ?? LoginMethod.EmailLink,
     );
 
