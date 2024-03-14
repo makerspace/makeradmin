@@ -170,6 +170,119 @@ def create_groups() -> None:
     db_session.commit()
 
 
+def create_membership_products() -> None:
+    banner(BLUE, "Creating Basic Membership Products")
+
+    display_order_category = db_session.query(func.max(ProductCategory.display_order)).scalar() or 0
+    member_category = get_or_create(
+        ProductCategory, name="Membership", defaults=dict(display_order=display_order_category + 1)
+    )
+    subscription_category = get_or_create(
+        ProductCategory, name="Subscriptions", defaults=dict(display_order=display_order_category + 2)
+    )
+
+    display_order_product = db_session.query(func.max(Product.display_order)).scalar() or 0
+
+    membership_product = get_or_create(
+        Product,
+        name="Base membership",
+        defaults=dict(
+            price=200,
+            unit="år",
+            display_order=display_order_product + 1,
+            category_id=member_category.id,
+            product_metadata={
+                "allowed_price_levels": ["low_income_discount"],
+                "special_product_id": "single_membership_year",
+            },
+        ),
+    )
+    get_or_create(ProductAction, product_id=membership_product.id, value=365, action_type="add_membership_days")
+
+    access_product = get_or_create(
+        Product,
+        name="Makerspace access",
+        defaults=dict(
+            price=375,
+            unit="mån",
+            display_order=display_order_product + 2,
+            category_id=member_category.id,
+            product_metadata={
+                "allowed_price_levels": ["low_income_discount"],
+                "special_product_id": "single_labaccess_month",
+            },
+        ),
+    )
+    get_or_create(ProductAction, product_id=access_product.id, value=30, action_type="add_labaccess_days")
+
+    starter_product = get_or_create(
+        Product,
+        name="Starter pack",
+        defaults=dict(
+            price=750,
+            unit="st",
+            display_order=display_order_product + 3,
+            category_id=member_category.id,
+            product_metadata={},
+        ),
+    )
+    get_or_create(ProductAction, product_id=starter_product.id, value=60, action_type="add_labaccess_days")
+    get_or_create(ProductAction, product_id=starter_product.id, value=365, action_type="add_membership_days")
+
+    starter_access_product = get_or_create(
+        Product,
+        name="Makerspace access starter pack",
+        defaults=dict(
+            price=550,
+            unit="st",
+            display_order=display_order_product + 4,
+            category_id=member_category.id,
+            product_metadata={
+                "allowed_price_levels": ["low_income_discount"],
+                "special_product_id": "access_starter_pack",
+            },
+        ),
+    )
+    get_or_create(ProductAction, product_id=starter_access_product.id, value=60, action_type="add_labaccess_days")
+
+    membership_subscription_product = get_or_create(
+        Product,
+        name="Base membership subscription",
+        defaults=dict(
+            price=200,
+            unit="år",
+            display_order=display_order_product + 5,
+            category_id=subscription_category.id,
+            show=False,
+            product_metadata={
+                "allowed_price_levels": ["low_income_discount"],
+                "special_product_id": "membership_subscription",
+            },
+        ),
+    )
+    get_or_create(
+        ProductAction, product_id=membership_subscription_product.id, value=365, action_type="add_membership_days"
+    )
+
+    access_subscription_product = get_or_create(
+        Product,
+        name="Makerspace access subscription",
+        defaults=dict(
+            price=350,
+            unit="mån",
+            display_order=display_order_product + 6,
+            category_id=subscription_category.id,
+            show=False,
+            smallest_multiple=2,
+            product_metadata={
+                "allowed_price_levels": ["low_income_discount"],
+                "special_product_id": "labaccess_subscription",
+            },
+        ),
+    )
+    get_or_create(ProductAction, product_id=access_subscription_product.id, value=30, action_type="add_labaccess_days")
+
+
 def create_shop_products() -> None:
     banner(BLUE, "Creating Fake Shop Categories")
 
@@ -207,59 +320,19 @@ def create_shop_products() -> None:
     for i, name in enumerate(categories):
         get_or_create(ProductCategory, name=name, defaults=dict(display_order=display_order_category + i))
 
+    consumption_category = get_or_create(
+        ProductCategory, name="Consumption", defaults=dict(display_order=display_order_category + 2)
+    )
+    tools_category = get_or_create(
+        ProductCategory, name="Tools", defaults=dict(display_order=display_order_category + 3)
+    )
+    others_category = get_or_create(
+        ProductCategory, name="Other", defaults=dict(display_order=display_order_category + 4)
+    )
+
     banner(BLUE, "Creating Fake Shop Products")
 
     display_order_product = db_session.query(func.max(Product.display_order)).scalar() or 0
-    member_category = get_or_create(ProductCategory, name="Membership")
-
-    prod1 = get_or_create(
-        Product,
-        name="Base membership",
-        defaults=dict(
-            price=200,
-            unit="år",
-            display_order=display_order_product + 1,
-            category_id=member_category.id,
-            product_metadata={
-                "allowed_price_levels": ["low_income_discount"],
-                "special_product_id": "single_membership_year",
-            },
-        ),
-    )
-    get_or_create(ProductAction, product_id=prod1.id, value=365, action_type="add_membership_days")
-
-    prod2 = get_or_create(
-        Product,
-        name="Makerspace access",
-        defaults=dict(
-            price=575,
-            unit="mån",
-            display_order=display_order_product + 2,
-            category_id=member_category.id,
-            product_metadata={
-                "allowed_price_levels": ["low_income_discount"],
-                "special_product_id": "single_labaccess_month",
-            },
-        ),
-    )
-    get_or_create(ProductAction, product_id=prod2.id, value=365, action_type="add_membership_days")
-    get_or_create(ProductAction, product_id=prod2.id, value=30, action_type="add_labaccess_days")
-
-    prod3 = get_or_create(
-        Product,
-        name="Makerspace access starter pack",
-        defaults=dict(
-            price=750,
-            unit="st",
-            display_order=display_order_product + 3,
-            category_id=member_category.id,
-            product_metadata={
-                "allowed_price_levels": ["low_income_discount"],
-                "special_product_id": "access_starter_pack",
-            },
-        ),
-    )
-    get_or_create(ProductAction, product_id=prod3.id, value=365, action_type="add_labaccess_days")
 
     product_names_consumption = [
         "Trälist",
@@ -445,7 +518,7 @@ def create_shop_transactions() -> None:
         ),
     )
 
-    # TODO this should probabl be associated with some sort of gift card product later
+    # TODO this should be associated with some sort of gift card product later
     transaction_content = get_or_create(
         TransactionContent,
         id=index,
@@ -558,14 +631,31 @@ def firstrun() -> None:
     admins = admin_group()
     create_admin(admins)
 
+    create_dev_data = False
     while True:
         s = input("Do you want to add various fake data for development purposes? [Y/n]: ")
         if s in ["n", "no"]:
-            create_dev_data = False
             break
         if s in {"", "y", "yes"}:
             create_dev_data = True
             break
+
+    create_membership_data = True
+    if not create_dev_data:
+        while True:
+            s = input(
+                "Do you want to add products for memberships?"
+                " (Some products are required for the member view and regristration page to load) [Y/n]: "
+            )
+            if s in ["n", "no"]:
+                create_membership_data = False
+                break
+            if s in {"", "y", "yes"}:
+                create_membership_data = True
+                break
+
+    if create_membership_data:
+        create_membership_products()
 
     if create_dev_data:
         create_members()

@@ -1,31 +1,26 @@
 import { render } from "preact";
+import { useState } from "preact/hooks";
+import Cart from "./cart";
+import { ajax, show_error } from "./common";
 import { member_t, membership_t } from "./member_common";
 import {
     Discount,
+    FindWellKnownProduct,
     LoadProductData,
     PaymentFailedError,
     Product,
     ProductData,
-    ProductDataFromProducts,
-    RegisterPageData,
-    SetupIntentResponse,
     StripeCardInput,
     ToPayPreview,
-    calculateAmountToPay,
     createPaymentMethod,
     createStripeCardInput,
-    extractRelevantProducts,
-    handleStripeSetupIntent,
     pay,
 } from "./payment_common";
-import { ajax, show_error } from "./common";
-import { useState } from "preact/hooks";
 import {
     TranslationWrapper,
-    useTranslation,
     translateUnit,
+    useTranslation,
 } from "./translations";
-import Cart from "./cart";
 declare var UIkit: any;
 
 export type SubscriptionType = "membership" | "labaccess";
@@ -89,7 +84,7 @@ const PayDialog = ({
                 {products
                     .filter((p) => p.smallest_multiple > 1)
                     .map((p) => {
-                        const sub_type = p.product_metadata.subscription_type;
+                        const sub_type = p.product_metadata.subscription_type; //TODO fix
                         if (sub_type === undefined) return null;
 
                         // If the member already has membership, information about the binding period is redundant, or even misleading
@@ -300,7 +295,18 @@ export async function activateSubscription(
         throw new Error("Member already has this subscription");
     }
 
-    let to_activate: SubscriptionType[] = [type];
+    const productData = await LoadProductData();
+    let subscription_product = FindWellKnownProduct(
+        productData.products,
+        `${type}_subscription`,
+    )!;
+    if (subscription_product == null) {
+        UIkit.modal.alert(
+            `<h2>Could not find product for subscription ${type}</h2> Please contact the admin.`,
+        );
+        return;
+    }
+    let products = [subscription_product];
     if (
         type === "labaccess" &&
         !subscriptions.some((s) => s.type === "membership")
@@ -312,21 +318,23 @@ export async function activateSubscription(
         } catch {
             return;
         }
-        to_activate.push("membership");
+        subscription_product = FindWellKnownProduct(
+            productData.products,
+            "membership_subscription",
+        )!;
+        if (subscription_product == null) {
+            UIkit.modal.alert(
+                `<h2>Could not find product for subscription ${type}</h2> Please contact the admin.`,
+            );
+            return;
+        }
+        products.push(subscription_product);
     }
 
     // Note: This is not the same as the subscriptions array. A member may have access even if they do not have an active subscription.
     const currentMemberships: SubscriptionType[] = [];
     if (membership.membership_active) currentMemberships.push("membership");
     if (membership.labaccess_active) currentMemberships.push("labaccess");
-
-    const productData = await LoadProductData();
-    const products = productData.products.filter((p) =>
-        to_activate.includes(p.product_metadata.subscription_type!),
-    );
-    if (products.length !== to_activate.length) {
-        throw new Error("Could not find all subscription products");
-    }
 
     const stripe = createStripeCardInput();
 

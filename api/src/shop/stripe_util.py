@@ -59,6 +59,25 @@ def get_subscription_category() -> ProductCategory:
                 logger.info("Race condition when creating category. Trying again: ", e)
 
 
+T = TypeVar("T")
+MAX_TRIES = 10
+
+
+def retry(f: Callable[[], T]) -> T:
+    """Retries a stripe operation if it fails with a rate limit error."""
+    its = 0
+    while True:
+        try:
+            return f()
+        except stripe.RateLimitError:
+            its += 1
+            if its > MAX_TRIES:
+                raise
+            # Retry.
+            # Especially when starting a lot of parallel tests, we can get rate limit errors.
+            time.sleep(1 * (1.5**its) * (1.0 + random.random()))
+
+
 def stripe_amount_from_makeradmin_product(makeradmin_product: Product, recurring: StripeRecurring | None) -> int:
     if recurring:
         return convert_to_stripe_amount(makeradmin_product.price * recurring.interval_count)
@@ -97,31 +116,14 @@ def event_semantic_time(event: stripe.Event) -> datetime:
 
 
 def replace_default_payment_method(customer_id: str, payment_method_id: str) -> None:
-    stripe.Customer.modify(
-        customer_id,
-        invoice_settings={"default_payment_method": payment_method_id},
+    retry(
+        lambda: stripe.Customer.modify(
+            customer_id,
+            invoice_settings={"default_payment_method": payment_method_id},
+        )
     )
 
     # Delete all previous payment methods to keep things clean
     for pm in stripe.PaymentMethod.list(customer=customer_id).auto_paging_iter():
         if pm.id != payment_method_id:
-            stripe.PaymentMethod.detach(pm.id)
-
-
-T = TypeVar("T")
-MAX_TRIES = 10
-
-
-def retry(f: Callable[[], T]) -> T:
-    """Retries a stripe operation if it fails with a rate limit error."""
-    its = 0
-    while True:
-        try:
-            return f()
-        except stripe.RateLimitError:
-            its += 1
-            if its > MAX_TRIES:
-                raise
-            # Retry.
-            # Especially when starting a lot of parallel tests, we can get rate limit errors.
-            time.sleep(1.0 * (1.0 + random.random()))
+            retry(lambda: stripe.PaymentMethod.detach(pm.id))

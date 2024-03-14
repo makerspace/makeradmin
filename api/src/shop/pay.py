@@ -37,7 +37,6 @@ logger = getLogger("makeradmin")
 
 def make_purchase(member_id: int, purchase: Purchase) -> Transaction:
     """Pay using the data in purchase, the purchase structure should be validated according to schema."""
-
     payment_method_id: str = purchase.stripe_payment_method_id
 
     transaction = create_transaction(member_id=member_id, purchase=purchase)
@@ -218,7 +217,7 @@ def cancel_subscriptions(data_dict: Any, user_id: int) -> None:
         data.subscriptions.append(SubscriptionType.LAB)
 
     for sub in data.subscriptions:
-        cancel_subscription(member.member_id, sub, test_clock=None)
+        cancel_subscription(member, sub)
 
 
 def start_subscriptions(data_dict: Any, user_id: int) -> None:
@@ -231,17 +230,11 @@ def start_subscriptions(data_dict: Any, user_id: int) -> None:
     if member is None:
         raise BadRequest(f"Unable to find member with id {user_id}")
 
-    stripe_customer = get_and_sync_stripe_customer(member)
-    assert stripe_customer is not None
-
-    if not stripe_customer.invoice_settings["default_payment_method"]:
-        raise BadRequest(message="You must add a default payment method before starting a subscription.")
-
     for subscription in data.subscriptions:
         # Note: This will *not* raise in case the user has not enough funds.
         # In that case we should send an email to the user.
         start_subscription(
-            member.member_id,
+            member,
             subscription.subscription,
             test_clock=None,
             expected_to_pay_now=subscription.expected_to_pay_now,

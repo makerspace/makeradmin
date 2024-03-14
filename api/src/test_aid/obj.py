@@ -22,7 +22,6 @@ from test_aid.test_util import random_str
 
 logger = getLogger("makeradmin")
 
-
 DEFAULT_PASSWORD = "D9ub8$13"
 
 

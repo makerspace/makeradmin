@@ -13,7 +13,7 @@ class Test(ApiShopTestMixin, ApiTest):
         dict(price=1.2, unit="mm", smallest_multiple=100),
     ]
 
-    def test_purchase_from_existing_member_using_non_3ds_card_works(self):
+    def test_purchase_from_existing_member_using_non_3ds_card_works(self) -> None:
         p0_count = 100
         p1_count = 500
 
@@ -54,7 +54,7 @@ class Test(ApiShopTestMixin, ApiTest):
             [dict(amount=item["amount"], product_id=item["product_id"]) for item in data],
         )
 
-    def test_purchase_from_existing_member_using_auto_validating_3ds_card_works(self):
+    def test_purchase_from_existing_member_using_auto_validating_3ds_card_works(self) -> None:
         p0_count = 100
         p1_count = 500
 
@@ -78,7 +78,7 @@ class Test(ApiShopTestMixin, ApiTest):
             .get("data__transaction_id")
         )
 
-        def assert_transation():
+        def assert_transaction() -> None:
             self.get(f"/webshop/transaction/{transaction_id}").expect(
                 code=200,
                 status="ok",
@@ -87,7 +87,7 @@ class Test(ApiShopTestMixin, ApiTest):
                 data__status="completed",
             )
 
-        retry(retry_exception=lambda e: isinstance(e, AssertionError))(assert_transation)()
+        retry(retry_exception=lambda e: isinstance(e, AssertionError))(assert_transaction)()
 
         data = self.get(f"/webshop/transaction/{transaction_id}/contents").expect(code=200, status="ok").data
         self.assertCountEqual(
@@ -98,7 +98,7 @@ class Test(ApiShopTestMixin, ApiTest):
             [dict(amount=item["amount"], product_id=item["product_id"]) for item in data],
         )
 
-    def test_count_not_of_correct_multiple_fails_purchase(self):
+    def test_count_not_of_correct_multiple_fails_purchase(self) -> None:
         purchase = Purchase(
             cart=[CartItem(self.p1_id, 17)],
             expected_sum=self.p1_price * 17,
@@ -107,7 +107,7 @@ class Test(ApiShopTestMixin, ApiTest):
 
         self.post(f"/webshop/pay", purchase.to_dict(), token=self.token).expect(code=400, what="invalid_item_count")
 
-    def test_invalid_expected_sum_fails_purchase(self):
+    def test_invalid_expected_sum_fails_purchase(self) -> None:
         purchase = Purchase(
             cart=[CartItem(self.p0_id, 1)],
             expected_sum=self.p0_price + 1,
@@ -116,7 +116,7 @@ class Test(ApiShopTestMixin, ApiTest):
 
         self.post(f"/webshop/pay", purchase.to_dict(), token=self.token).expect(code=400, what="non_matching_sums")
 
-    def test_negative_count_fails_purchaste(self):
+    def test_negative_count_fails_purchase(self) -> None:
         purchase = Purchase(
             cart=[CartItem(self.p0_id, -1)],
             expected_sum=self.p0_price,
@@ -125,7 +125,7 @@ class Test(ApiShopTestMixin, ApiTest):
 
         self.post(f"/webshop/pay", purchase.to_dict(), token=self.token).expect(code=400, what="negative_item_count")
 
-    def test_empty_cart_fails_purchase(self):
+    def test_empty_cart_fails_purchase(self) -> None:
         purchase = Purchase(
             cart=[],
             expected_sum=self.p0_price,
