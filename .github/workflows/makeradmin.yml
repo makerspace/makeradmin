@@ -18,7 +18,12 @@ jobs:
           docker --version
           docker-compose --version
       - uses: actions/checkout@v2
+      - name: Init environment
+        run: make .env
       - name: Build docker
         run: make build
       - name: Run tests
         run: make test
+env:
+  STRIPE_PRIVATE_KEY: ${{ secrets.STRIPE_PRIVATE_KEY }}
+  STRIPE_PUBLIC_KEY: ${{ secrets.STRIPE_PUBLIC_KEY }}
