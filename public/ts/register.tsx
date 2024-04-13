@@ -356,15 +356,17 @@ const TermsAndConditions = ({
     return (
         <div class="terms-and-conditions">
             <h2>{t("registration_page.terms.title")}</h2>
-            <p>{t("registration_page.terms.pledge")}</p>
+            <p><b>{t("registration_page.terms.pledge")}</b></p>
             <ol className="rules-list">
-                {t("registration_page.terms.rules").map((rule) => (
-                    <li>{rule}</li>
-                ))}
+                {t("registration_page.terms.rules")}
+            </ol>
+            <p><b>{t("registration_page.terms.understanding_pledge")}</b></p>
+            <ol className="rules-list">
+                {t("registration_page.terms.understanding")}
             </ol>
 
             <RuleCheckbox
-                rule={t("registration_page.terms.understanding1")}
+                rule={t("registration_page.terms.accept")}
                 onChange={() =>
                     onChangeAcceptedTerms({
                         ...acceptedTerms,
@@ -374,7 +376,7 @@ const TermsAndConditions = ({
                 value={acceptedTerms.accepted1}
             />
             <RuleCheckbox
-                rule={t("registration_page.terms.understanding2")}
+                rule={t("registration_page.terms.welcoming")}
                 onChange={() =>
                     onChangeAcceptedTerms({
                         ...acceptedTerms,
@@ -383,26 +385,15 @@ const TermsAndConditions = ({
                 }
                 value={acceptedTerms.accepted2}
             />
-            <RuleCheckbox
-                rule={t("registration_page.terms.welcoming")}
-                onChange={() =>
-                    onChangeAcceptedTerms({
-                        ...acceptedTerms,
-                        accepted3: !acceptedTerms.accepted3,
-                    })
-                }
-                value={acceptedTerms.accepted3}
-            />
             <button
                 className="flow-button primary"
                 disabled={
                     !acceptedTerms.accepted1 ||
-                    !acceptedTerms.accepted2 ||
-                    !acceptedTerms.accepted3
+                    !acceptedTerms.accepted2
                 }
                 onClick={onAccept}
             >
-                {t("registration_page.terms.accept")}
+                {t("registration_page.terms.continue")}
             </button>
             <BackButton onClick={onBack} />
         </div>
@@ -560,9 +551,9 @@ async function registerMember(
         discount:
             discount.priceLevel !== null && discountInfo.discountReason !== null
                 ? {
-                      price_level: discount.priceLevel,
-                      message: `${discountInfo.discountReason}: ${discountInfo.discountReasonMessage}`,
-                  }
+                    price_level: discount.priceLevel,
+                    message: `${discountInfo.discountReason}: ${discountInfo.discountReasonMessage}`,
+                }
                 : null,
     };
 
@@ -761,11 +752,11 @@ const Discounts = ({
                     disabled={
                         discounts.discountReason === null ||
                         discounts.discountReasonMessage.length <
-                            MIN_DISCOUNT_REASON_LENGTH
+                        MIN_DISCOUNT_REASON_LENGTH
                     }
                 >
                     {discounts.discountReason !== null &&
-                    discounts.discountReasonMessage.length <
+                        discounts.discountReasonMessage.length <
                         MIN_DISCOUNT_REASON_LENGTH
                         ? t("registration_page.discounts.submit_write_more")
                         : t("registration_page.discounts.submit")}
@@ -886,7 +877,7 @@ const abStateFromSeed = (seed: number): ABState => {
     };
 };
 
-const RegisterPage = ({}: {}) => {
+const RegisterPage = ({ }: {}) => {
     const abState = useMemo(() => {
         let seed = parseInt(localStorage.getItem("abTestSeed") ?? "");
         if (!isFinite(seed)) seed = (Math.random() * 1000000) | 0;
@@ -1089,7 +1080,7 @@ const RegisterPage = ({}: {}) => {
                     </div>
                     {FEATURE_FLAG_LOW_INCOME_DISCOUNT &&
                         registerPageData.discounts["low_income_discount"] >
-                            0 && (
+                        0 && (
                             <button
                                 className="flow-button"
                                 onClick={() => setState(State.Discounts)}

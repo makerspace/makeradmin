@@ -178,34 +178,46 @@ const Eng = {
         },
         terms: {
             title: "Rules for the premises",
-            accept: "Accept",
-            pledge: "You must pledge to ...",
-            rules: [
-                "take responsibility for your own actions and to show consideration for other members.",
-                "not do anything illegal on the premises.",
-                "abstain from using drugs or alcohol on the premises.",
-                "not operate machines while under the influence.",
-                "keep yourself updated on the latest rules.",
-                "find and follow space- and machine-specific rules.",
-                "always clean up after yourself and leave the premises in a clean state.",
-                "ask a member of the Board if you're unsure about something.",
-                "always ask before taking pictures of people or other people's projects located on the premises.",
-                "not engage in commercial activities on the premises.",
-                "not sleep on the premises.",
-                "retrieve your storage box within 45 days from expiration of your makerspace access. After this period of time, any remaining materials belong to the Stockholm Makerspace.",
-                "take full responsibility for what your guests do on the premises. (Your guest is only allowed on the premises if your intention is to show them the space and activities. They must not work on a project of their during their visit.)",
-                "always leave the kitchen/common areas in better shape than you found them. This is especially important in areas shared with other building occupants and we risk losing access to these areas if this privilege is abused.",
-                "report lost keys to the Board immediately after loss.",
-                "report damage to the machines/premises to the Board immediately upon discovery.",
-                "not remove equipment from the premises. Stockholm Makerspace does not allow equipment rental or borrowing.",
-                "only visit the space when you hold an active membership. If your makerspace access is inactive, you have no access to the premises except as participant in Makerspace run activities such as courses, cleanup days or open days.",
-            ],
-            understanding1:
-                "I understand that if I violate any of the rules above or otherwise abuse my access to the premises, I may be banned from the premises without a refund of my access fee.",
-            understanding2:
-                "I understand that I am solely responsible for everything I do on the premises.",
+            continue: "Continue",
+            accept: "I accept the rules",
+            pledge: "I pledge to...",
+            rules: (
+                <>
+                    <li>keep myself up to date about:</li>
+                    <ol>
+                        <li>general rules.</li>
+                        <li>rules for storage.</li>
+                        <li>rules for specific rooms that I will be in.</li>
+                        <li>rules for the machines and tools I will use.</li>
+                    </ol>
+                    <li>only visit the space when I have an active makerspace access membership. If my makerspace access membership is not active, I don’t have access to the space, except during events like courses, work days, open house, and similar.</li>
+                    <li>not engage in commercial activities on the premises.</li>
+                    <li>take responsibility for my own actions and to be considerate towards others.</li>
+                    <li>store my projects correctly according to current rules. Left-behind materials belong to the association.</li>
+                    <li>always try to leave surfaces/machines/tools in better condition than I found them, and to plan my visit to ensure I have time to clean afterwards.</li>
+                    <li>not remove equipment from the space.</li>
+                    <li>report equipment damage to the board, or on Slack.</li>
+                    <li>ask other members, or the board, if I am unsure about something.</li>
+                    <li>always ask before I take photos of someone or something at the space.</li>
+                    <li>not do anything illegal at the space.</li>
+                    <li>not consume alcohol/drugs in the premises and to not use the association's machinery while under the influence.</li>
+                    <li>not sleep at the space.</li>
+                    <li>take full responsibility for what my guests do at the space. Guests may not work on their own projects during their visit.</li>
+                    <li>not use other areas of the building than those that belong to the space. For example AWL's kitchen on the entry floor, if the board has not said otherwise.</li>
+                </>
+            ),
+            understanding_pledge: "I understand that...",
+            understanding: (
+                <>
+                    <li>to handle membership and access to the space, Stockholm Makerspace needs to handle personal information.</li>
+                    <li>if I violate any of the rules above or in any other way misuse my access to the premises, I may be banned from the premises without refund of the paid fee.</li>
+                    <li>I may be liable for compensation if I act negligently.</li>
+                    <li>the space has camera surveillance.</li>
+                </>
+            ),
             welcoming:
                 "I will do my best to ensure that the Stockholm Makerspace is a clean, safe and welcoming place.",
+
         },
         calendar: {
             title: "Calendar",
