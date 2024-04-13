@@ -1,8 +1,9 @@
 import React from "react";
-import CategoryPeriods from "../Models/CategoryPeriods";
 import CategoryPeriodsInput from "../Components/CategoryPeriodsInput";
+import CategoryPeriods from "../Models/CategoryPeriods";
 import { calculateSpanDiff, filterPeriods } from "../Models/Span";
 import auth from "../auth";
+import { post } from "../gateway";
 
 export default class MembershipPeriodsInput extends React.Component {
     constructor(props) {
@@ -68,20 +69,27 @@ export default class MembershipPeriodsInput extends React.Component {
             const timestamp = new Date().getTime().toString();
             addSpans.forEach(
                 (s, i) =>
-                    (s.creation_reason = (
-                        timestamp +
-                        i +
-                        " gui_edit:" +
-                        auth.getUsername() +
-                        " replacing:" +
-                        deleteIds
-                    ).slice(0, 255)),
+                (s.creation_reason = (
+                    timestamp +
+                    i +
+                    " gui_edit:" +
+                    auth.getUsername() +
+                    " replacing:" +
+                    deleteIds
+                ).slice(0, 255)),
             );
 
             const promises = [];
             promises.push(...deleteSpans.map((s) => s.del()));
             promises.push(...addSpans.map((s) => s.save()));
-            Promise.all(promises).then(() => spans.fetch());
+            Promise.all(promises).then(() => {
+                spans.fetch();
+
+                post({
+                    url: `/webshop/member/${member_id}/ship_labaccess_orders`,
+                    expectedDataStatus: "ok",
+                });
+            });
         };
 
         return (
