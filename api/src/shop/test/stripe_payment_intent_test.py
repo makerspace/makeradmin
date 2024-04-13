@@ -302,18 +302,8 @@ class StripePaymentIntentTest(FlaskTestBase):
         )
         test_intents_out_of_range.append(stripe_intent.id)
 
-        created = {
-            "gte": int(start.timestamp()),
-            "lt": int(end.timestamp()),
-        }
-        stripe_intents = retry(
-            lambda: stripe.PaymentIntent.list(
-                limit=5,
-                created=created,
-                expand=["data.latest_charge.balance_transaction"],
-            )
-        )
-        filtered_intents = self.filter_intents_on_customers([intent for intent in stripe_intents.auto_paging_iter()])
+        intents = get_stripe_payment_intents(start, end)
+        filtered_intents = self.filter_intents_on_customers(intents)
 
         assert len(filtered_intents) == len(test_intents_in_range)
         for intent in filtered_intents.values():
