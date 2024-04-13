@@ -69,14 +69,14 @@ export default class MembershipPeriodsInput extends React.Component {
             const timestamp = new Date().getTime().toString();
             addSpans.forEach(
                 (s, i) =>
-                (s.creation_reason = (
-                    timestamp +
-                    i +
-                    " gui_edit:" +
-                    auth.getUsername() +
-                    " replacing:" +
-                    deleteIds
-                ).slice(0, 255)),
+                    (s.creation_reason = (
+                        timestamp +
+                        i +
+                        " gui_edit:" +
+                        auth.getUsername() +
+                        " replacing:" +
+                        deleteIds
+                    ).slice(0, 255)),
             );
 
             const promises = [];

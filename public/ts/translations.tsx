@@ -190,34 +190,77 @@ const Eng = {
                         <li>rules for specific rooms that I will be in.</li>
                         <li>rules for the machines and tools I will use.</li>
                     </ol>
-                    <li>only visit the space when I have an active makerspace access membership. If my makerspace access membership is not active, I don’t have access to the space, except during events like courses, work days, open house, and similar.</li>
-                    <li>not engage in commercial activities on the premises.</li>
-                    <li>take responsibility for my own actions and to be considerate towards others.</li>
-                    <li>store my projects correctly according to current rules. Left-behind materials belong to the association.</li>
-                    <li>always try to leave surfaces/machines/tools in better condition than I found them, and to plan my visit to ensure I have time to clean afterwards.</li>
+                    <li>
+                        only visit the space when I have an active makerspace
+                        access membership. If my makerspace access membership is
+                        not active, I don’t have access to the space, except
+                        during events like courses, work days, open house, and
+                        similar.
+                    </li>
+                    <li>
+                        not engage in commercial activities on the premises.
+                    </li>
+                    <li>
+                        take responsibility for my own actions and to be
+                        considerate towards others.
+                    </li>
+                    <li>
+                        store my projects correctly according to current rules.
+                        Left-behind materials belong to the association.
+                    </li>
+                    <li>
+                        always try to leave surfaces/machines/tools in better
+                        condition than I found them, and to plan my visit to
+                        ensure I have time to clean afterwards.
+                    </li>
                     <li>not remove equipment from the space.</li>
                     <li>report equipment damage to the board, or on Slack.</li>
-                    <li>ask other members, or the board, if I am unsure about something.</li>
-                    <li>always ask before I take photos of someone or something at the space.</li>
+                    <li>
+                        ask other members, or the board, if I am unsure about
+                        something.
+                    </li>
+                    <li>
+                        always ask before I take photos of someone or something
+                        at the space.
+                    </li>
                     <li>not do anything illegal at the space.</li>
-                    <li>not consume alcohol/drugs in the premises and to not use the association's machinery while under the influence.</li>
+                    <li>
+                        not consume alcohol/drugs in the premises and to not use
+                        the association's machinery while under the influence.
+                    </li>
                     <li>not sleep at the space.</li>
-                    <li>take full responsibility for what my guests do at the space. Guests may not work on their own projects during their visit.</li>
-                    <li>not use other areas of the building than those that belong to the space. For example AWL's kitchen on the entry floor, if the board has not said otherwise.</li>
+                    <li>
+                        take full responsibility for what my guests do at the
+                        space. Guests may not work on their own projects during
+                        their visit.
+                    </li>
+                    <li>
+                        not use other areas of the building than those that
+                        belong to the space. For example AWL's kitchen on the
+                        entry floor, if the board has not said otherwise.
+                    </li>
                 </>
             ),
             understanding_pledge: "I understand that...",
             understanding: (
                 <>
-                    <li>to handle membership and access to the space, Stockholm Makerspace needs to handle personal information.</li>
-                    <li>if I violate any of the rules above or in any other way misuse my access to the premises, I may be banned from the premises without refund of the paid fee.</li>
-                    <li>I may be liable for compensation if I act negligently.</li>
+                    <li>
+                        to handle membership and access to the space, Stockholm
+                        Makerspace needs to handle personal information.
+                    </li>
+                    <li>
+                        if I violate any of the rules above or in any other way
+                        misuse my access to the premises, I may be banned from
+                        the premises without refund of the paid fee.
+                    </li>
+                    <li>
+                        I may be liable for compensation if I act negligently.
+                    </li>
                     <li>the space has camera surveillance.</li>
                 </>
             ),
             welcoming:
                 "I will do my best to ensure that the Stockholm Makerspace is a clean, safe and welcoming place.",
-
         },
         calendar: {
             title: "Calendar",

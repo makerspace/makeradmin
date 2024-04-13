@@ -356,11 +356,13 @@ const TermsAndConditions = ({
     return (
         <div class="terms-and-conditions">
             <h2>{t("registration_page.terms.title")}</h2>
-            <p><b>{t("registration_page.terms.pledge")}</b></p>
-            <ol className="rules-list">
-                {t("registration_page.terms.rules")}
-            </ol>
-            <p><b>{t("registration_page.terms.understanding_pledge")}</b></p>
+            <p>
+                <b>{t("registration_page.terms.pledge")}</b>
+            </p>
+            <ol className="rules-list">{t("registration_page.terms.rules")}</ol>
+            <p>
+                <b>{t("registration_page.terms.understanding_pledge")}</b>
+            </p>
             <ol className="rules-list">
                 {t("registration_page.terms.understanding")}
             </ol>
@@ -387,10 +389,7 @@ const TermsAndConditions = ({
             />
             <button
                 className="flow-button primary"
-                disabled={
-                    !acceptedTerms.accepted1 ||
-                    !acceptedTerms.accepted2
-                }
+                disabled={!acceptedTerms.accepted1 || !acceptedTerms.accepted2}
                 onClick={onAccept}
             >
                 {t("registration_page.terms.continue")}
@@ -551,9 +550,9 @@ async function registerMember(
         discount:
             discount.priceLevel !== null && discountInfo.discountReason !== null
                 ? {
-                    price_level: discount.priceLevel,
-                    message: `${discountInfo.discountReason}: ${discountInfo.discountReasonMessage}`,
-                }
+                      price_level: discount.priceLevel,
+                      message: `${discountInfo.discountReason}: ${discountInfo.discountReasonMessage}`,
+                  }
                 : null,
     };
 
@@ -752,11 +751,11 @@ const Discounts = ({
                     disabled={
                         discounts.discountReason === null ||
                         discounts.discountReasonMessage.length <
-                        MIN_DISCOUNT_REASON_LENGTH
+                            MIN_DISCOUNT_REASON_LENGTH
                     }
                 >
                     {discounts.discountReason !== null &&
-                        discounts.discountReasonMessage.length <
+                    discounts.discountReasonMessage.length <
                         MIN_DISCOUNT_REASON_LENGTH
                         ? t("registration_page.discounts.submit_write_more")
                         : t("registration_page.discounts.submit")}
@@ -877,7 +876,7 @@ const abStateFromSeed = (seed: number): ABState => {
     };
 };
 
-const RegisterPage = ({ }: {}) => {
+const RegisterPage = ({}: {}) => {
     const abState = useMemo(() => {
         let seed = parseInt(localStorage.getItem("abTestSeed") ?? "");
         if (!isFinite(seed)) seed = (Math.random() * 1000000) | 0;
@@ -1080,7 +1079,7 @@ const RegisterPage = ({ }: {}) => {
                     </div>
                     {FEATURE_FLAG_LOW_INCOME_DISCOUNT &&
                         registerPageData.discounts["low_income_discount"] >
-                        0 && (
+                            0 && (
                             <button
                                 className="flow-button"
                                 onClick={() => setState(State.Discounts)}
