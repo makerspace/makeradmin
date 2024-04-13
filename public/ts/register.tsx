@@ -1,7 +1,11 @@
-import * as common from "./common";
-import { render } from "preact";
+import { ComponentChildren, render } from "preact";
 import { StateUpdater, useEffect, useMemo, useState } from "preact/hooks";
+import { PopupModal, useCalendlyEventListener } from "react-calendly";
+import Cart from "./cart";
+import { show_phone_number_dialog } from "./change_phone";
+import * as common from "./common";
 import { ServerResponse, trackPlausible } from "./common";
+import { LoadCurrentMemberInfo, member_t } from "./member_common";
 import {
     Discount,
     PaymentFailedError,
@@ -19,12 +23,8 @@ import {
     initializeStripe,
     pay,
 } from "./payment_common";
-import { PopupModal, useCalendlyEventListener } from "react-calendly";
-import { URL_RELATIVE_MEMBER_PORTAL } from "./urls";
-import { LoadCurrentMemberInfo, member_t } from "./member_common";
 import { TranslationWrapper, Translator, useTranslation } from "./translations";
-import Cart from "./cart";
-import { show_phone_number_dialog } from "./change_phone";
+import { URL_RELATIVE_MEMBER_PORTAL } from "./urls";
 
 declare var UIkit: any;
 const FEATURE_FLAG_LOW_INCOME_DISCOUNT = false;
@@ -356,15 +356,19 @@ const TermsAndConditions = ({
     return (
         <div class="terms-and-conditions">
             <h2>{t("registration_page.terms.title")}</h2>
-            <p>{t("registration_page.terms.pledge")}</p>
+            <p>
+                <b>{t("registration_page.terms.pledge")}</b>
+            </p>
+            <ol className="rules-list">{t("registration_page.terms.rules")}</ol>
+            <p>
+                <b>{t("registration_page.terms.understanding_pledge")}</b>
+            </p>
             <ol className="rules-list">
-                {t("registration_page.terms.rules").map((rule) => (
-                    <li>{rule}</li>
-                ))}
+                {t("registration_page.terms.understanding")}
             </ol>
 
             <RuleCheckbox
-                rule={t("registration_page.terms.understanding1")}
+                rule={t("registration_page.terms.accept")}
                 onChange={() =>
                     onChangeAcceptedTerms({
                         ...acceptedTerms,
@@ -374,7 +378,7 @@ const TermsAndConditions = ({
                 value={acceptedTerms.accepted1}
             />
             <RuleCheckbox
-                rule={t("registration_page.terms.understanding2")}
+                rule={t("registration_page.terms.welcoming")}
                 onChange={() =>
                     onChangeAcceptedTerms({
                         ...acceptedTerms,
@@ -383,26 +387,12 @@ const TermsAndConditions = ({
                 }
                 value={acceptedTerms.accepted2}
             />
-            <RuleCheckbox
-                rule={t("registration_page.terms.welcoming")}
-                onChange={() =>
-                    onChangeAcceptedTerms({
-                        ...acceptedTerms,
-                        accepted3: !acceptedTerms.accepted3,
-                    })
-                }
-                value={acceptedTerms.accepted3}
-            />
             <button
                 className="flow-button primary"
-                disabled={
-                    !acceptedTerms.accepted1 ||
-                    !acceptedTerms.accepted2 ||
-                    !acceptedTerms.accepted3
-                }
+                disabled={!acceptedTerms.accepted1 || !acceptedTerms.accepted2}
                 onClick={onAccept}
             >
-                {t("registration_page.terms.accept")}
+                {t("registration_page.terms.continue")}
             </button>
             <BackButton onClick={onBack} />
         </div>
@@ -605,15 +595,39 @@ const CheckIcon = ({ done }: { done: boolean }) => {
     );
 };
 
+const TaskItem = ({
+    clickedSteps,
+    setClickedSteps,
+    step,
+    children,
+}: {
+    clickedSteps: Set<number | string>;
+    setClickedSteps: (s: Set<number | string>) => void;
+    step: number | string;
+    children: (tick: () => void) => ComponentChildren;
+}) => {
+    return (
+        <li>
+            <CheckIcon done={clickedSteps.has(step)} />
+            <span>
+                {children(() =>
+                    setClickedSteps(new Set(clickedSteps).add(step)),
+                )}
+            </span>
+        </li>
+    );
+};
+
 const Success = ({ member }: { member: member_t }) => {
     const [isBookModalOpen, setBookModalOpen] = useState(false);
-    const [booked, setBooked] = useState(false);
-    const [clickedSteps, setClickedSteps] = useState(new Set<number>());
+    const [clickedSteps, setClickedSteps] = useState(
+        new Set<number | string>(),
+    );
     const t = useTranslation();
 
     useCalendlyEventListener({
         onEventScheduled: () => {
-            setBooked(true);
+            setClickedSteps(new Set(clickedSteps).add("booked"));
         },
     });
 
@@ -622,27 +636,28 @@ const Success = ({ member }: { member: member_t }) => {
             <h1>{t("registration_page.success.title")}</h1>
             {t("registration_page.success.text")}
             <ul className="registration-task-list">
-                <li>
-                    <CheckIcon done={booked} />
-                    <div class="uk-flex uk-flex-column">
-                        <span>{t("registration_page.success.book_step")}</span>
+                <TaskItem
+                    clickedSteps={clickedSteps}
+                    setClickedSteps={setClickedSteps}
+                    step="booked"
+                >
+                    {(tick) => (
                         <button
                             className="flow-button primary flow-button-small"
                             onClick={() => setBookModalOpen(true)}
                         >
                             {t("registration_page.success.book_button")}
                         </button>
-                    </div>
-                </li>
+                    )}
+                </TaskItem>
                 {t("registration_page.success.steps").map((step, i) => (
-                    <li key={i}>
-                        <CheckIcon done={clickedSteps.has(i)} />
-                        <span>
-                            {step((e) =>
-                                setClickedSteps(new Set(clickedSteps).add(i)),
-                            )}
-                        </span>
-                    </li>
+                    <TaskItem
+                        clickedSteps={clickedSteps}
+                        setClickedSteps={setClickedSteps}
+                        step={`${i}`}
+                    >
+                        {(tick) => step(tick)}
+                    </TaskItem>
                 ))}
             </ul>
             <div class="uk-flex-1" />
@@ -856,7 +871,7 @@ const abStateFromSeed = (seed: number): ABState => {
         oldpage: false,
         registration_base_membership_type:
             seed % 2 === 0 ? "oneyear" : "subscription",
-        registration_base_membership_only_plan_enabled: hash(seed) % 3 !== 0, // 2/3 of users will see the base membership only plan
+        registration_base_membership_only_plan_enabled: true,
         price_grouping: hash(seed + 1) % 2 === 0 ? "separate" : "combined", // 1/2 of users will see the base membership price separately like "200 + 375 kr", instead of combined like "575 kr"
     };
 };

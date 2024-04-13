@@ -1,13 +1,15 @@
 import React from "react";
 import Collection from "../Models/Collection";
+import CollectionNavigation from "../Models/CollectionNavigation";
 import CollectionTable from "../Components/CollectionTable";
 import Category from "../Models/ProductCategory";
 import TextInput from "../Components/TextInput";
 
-class CategoryList extends React.Component {
+class CategoryList extends CollectionNavigation {
     constructor(props) {
         super(props);
-        this.collection = new Collection({ type: Category });
+        const { search, page } = this.state;
+        this.collection = new Collection({ type: Category, search, page });
         this.state = { saveEnabled: false };
         this.category = new Category();
     }
@@ -99,6 +101,7 @@ class CategoryList extends React.Component {
                                 </td>
                             </tr>
                         )}
+                        onPageNav={this.onPageNav}
                     />
                 </div>
             </div>

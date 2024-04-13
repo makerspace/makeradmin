@@ -2011,3 +2011,18 @@ $palette-red: $palette4;
         color: rgb(201, 43, 43);
     }
 }
+
+.password-field {
+    opacity: 1;
+    height: auto;
+    margin: 16px 0px;
+
+    &.hidden {
+        // Kinda hacky. Collapse the margin between the email field and "Continue" button.
+        // We can't use display: none because then password managers will not auto-fill the field.
+        margin: -8px 0px;
+        opacity: 0;
+        height: 0px;
+        pointer-events: none;
+    }
+}

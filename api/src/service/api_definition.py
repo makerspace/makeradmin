@@ -157,6 +157,15 @@ class Enum:
 symbol_regex = re.compile(r"[A-Za-z0-9_]+")
 
 
+def boolean(value):
+    """A bool"""
+    try:
+        value = bool(value)
+    except Exception:
+        raise ValueError(f"Value {value} is not a bool.")
+    return value
+
+
 def symbol(value):
     """A string which is only A-Za-z0-9 and _."""
     if not symbol_regex.match(value):

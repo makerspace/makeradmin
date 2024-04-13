@@ -50,6 +50,7 @@ class FakeStripePaymentIntent:
     latest_charge: FakeStripeCharge
     metadata: Dict[str, Any]
     created: int  # unix timestamp
+    description: str = ""  # Tmp to fix legacy
 
 
 class StripePaymentIntentWithoutStripeTest(FlaskTestBase):

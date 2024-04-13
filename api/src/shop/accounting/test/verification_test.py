@@ -148,3 +148,66 @@ class VerificationTest(FlaskTestBase):
                 true_amount_key = (period, accounting_key[0], accounting_key[1])
                 assert verifications_dict[period].amounts[accounting_key] == true_ammounts[true_amount_key]
                 assert verification.types[accounting_key] == true_types[accounting_key]
+
+    def test_create_verifications_different_periods_sum_correctly(self) -> None:
+        transactions: List[TransactionWithAccounting] = []
+
+        num_payments = 100
+        num_groups = 4
+        num_accounts = 4
+        num_cost_centers = 6
+        period_short = TimePeriod.Day
+        period_long = TimePeriod.Month
+        groups = [int(i / (num_payments / num_groups)) + 1 for i in range(num_payments)]
+
+        true_accounts: List[TransactionAccount | None] = [None]
+        true_cost_centers: List[TransactionCostCenter | None] = [None]
+        for i in range(1, num_accounts):
+            true_accounts.append(self.db.create_transaction_account(id=i, account="acc" + str(i + 1)))
+        for i in range(1, num_cost_centers):
+            true_cost_centers.append(self.db.create_transaction_cost_center(id=i, cost_center="cc" + str(i + 1)))
+
+        accounts = [true_accounts[int(i / (num_payments / num_accounts))] for i in range(num_payments)]
+        cost_centers = [true_cost_centers[int(i / (num_payments / num_cost_centers))] for i in range(num_payments)]
+
+        iter = 0
+        true_types: Dict[Tuple[TransactionAccount | None, TransactionCostCenter | None], AccountingEntryType] = {}
+        for acc in accounts:
+            for cc in cost_centers:
+                true_types[(acc, cc)] = AccountingEntryType.CREDIT if iter % 2 == 0 else AccountingEntryType.DEBIT
+                iter += 1
+
+        random.shuffle(groups)
+        random.shuffle(accounts)
+        random.shuffle(cost_centers)
+
+        # If we get the comibination of None, None for the accounting we have to change because it is invalid to have two Nones
+        for i in range(num_payments):
+            if accounts[i] is None and cost_centers[i] is None:
+                accounts[i] = true_accounts[0]
+
+        for i in range(num_payments):
+            group = groups[i]
+            created = datetime(2023, 1, group, tzinfo=timezone.utc)
+            amount = Decimal("100") + Decimal(i)
+
+            transactions.append(
+                TransactionWithAccounting(
+                    i, i, amount, created, accounts[i], cost_centers[i], true_types[(accounts[i], cost_centers[i])]
+                )
+            )
+
+        verifications_short = create_verificatons(transactions, period_short)
+        verifications_long = create_verificatons(transactions, period_long)
+
+        sum_accounting: Dict[Tuple[TransactionAccount | None, TransactionCostCenter | None], Decimal] = {}
+        for verification in verifications_short:
+            for accounting_key in verification.amounts:
+                if accounting_key in sum_accounting:
+                    sum_accounting[accounting_key] += verification.amounts[accounting_key]
+                else:
+                    sum_accounting[accounting_key] = verification.amounts[accounting_key]
+
+        for verification in verifications_long:
+            for accounting_key in verification.amounts:
+                assert sum_accounting[accounting_key] == verification.amounts[accounting_key]

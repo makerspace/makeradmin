@@ -43,7 +43,9 @@ export type access_t = {
     access_permission_group_names: string[];
 };
 
-export async function LoadCurrentMemberInfo(): Promise<member_t> {
+export async function LoadCurrentMemberInfo(): Promise<
+    member_t & { has_password: boolean }
+> {
     return (
         await common.ajax("GET", window.apiBasePath + "/member/current", null)
     ).data;

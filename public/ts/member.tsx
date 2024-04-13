@@ -262,6 +262,8 @@ function MissingAccessyInvite({
     }
     if (access.in_org) {
         // Don't need to send an invite if the member is already in the accessy organization
+        // Unless the person has reinstalled the app (see #431) and needs to
+        // reinvite themselves. But that button is added further down.
         return null;
     }
     if (member.phone === null) {
@@ -362,7 +364,50 @@ function Help({
             {todo_bullets1}
             {todo_bullets2}
             {pending_labaccess_instruction}
-            {/* {accessyInvite} */}
+        </fieldset>
+    );
+}
+
+function Accessy({
+    member,
+    membership,
+    onSendAccessyInvite,
+}: {
+    member: member_t;
+    membership: membership_t;
+    onSendAccessyInvite: () => void;
+}) {
+    const t = useTranslation();
+
+    const disabled =
+        !member.phone ||
+        (!membership.labaccess_active && !membership.special_labaccess_active);
+    const accessyInvite = (
+        <>
+            <p>
+                If you have reinstalled the Accessy app, you need to re-invite
+                yourself to get access again.
+            </p>
+            <p>
+                <button
+                    disabled={disabled}
+                    class="uk-button uk-button-danger"
+                    onClick={(e) => {
+                        e.preventDefault();
+                        onSendAccessyInvite();
+                    }}
+                >
+                    {t("member_page.send_accessy_invite")}
+                </button>
+            </p>
+        </>
+    );
+    return (
+        <fieldset>
+            <legend>
+                <i uk-icon="info"></i> {t("member_page.accessy_invite")}
+            </legend>
+            {accessyInvite}
         </fieldset>
     );
 }
@@ -619,7 +664,7 @@ function PersonalData({
     onChangePinCode,
     onChangePhoneNumber,
 }: {
-    member: member_t;
+    member: member_t & { has_password: boolean };
     onChangePinCode: () => void;
     onChangePhoneNumber: () => void;
 }) {
@@ -725,6 +770,56 @@ function PersonalData({
                     </button>
                 </span>
                 {pin_warning}
+            </div>
+            <div>
+                <label for="password" class="uk-form-label">
+                    Lösenord
+                </label>
+                <span style="width: 100%; display: flex;">
+                    <input
+                        name="password"
+                        class="uk-input readonly-input"
+                        placeholder={
+                            member.has_password
+                                ? "********"
+                                : t("member_page.no_password_set")
+                        }
+                        disabled
+                    />
+                    <button
+                        class="uk-button uk-button-danger"
+                        onClick={(e) => {
+                            e.preventDefault();
+                            common
+                                .ajax(
+                                    "POST",
+                                    `${window.apiBasePath}/oauth/request_password_reset`,
+                                    {
+                                        user_identification: member.email,
+                                        redirect: "member",
+                                    },
+                                )
+                                .then(() => {
+                                    UIkit.modal.alert(
+                                        t("member_page.set_password_alert")(
+                                            member,
+                                        ),
+                                    );
+                                })
+                                .catch((e) => {
+                                    UIkit.modal.alert(
+                                        t(
+                                            "member_page.failed_set_password_alert",
+                                        )(get_error(e)),
+                                    );
+                                });
+                        }}
+                    >
+                        {member.has_password
+                            ? t("member_page.change_password")
+                            : t("member_page.set_password")}
+                    </button>
+                </span>
             </div>
         </fieldset>
     );
@@ -1088,7 +1183,7 @@ function MemberPage({
     show_beta,
     access,
 }: {
-    member: member_t;
+    member: member_t & { has_password: boolean };
     membership: membership_t;
     pending_labaccess_days: number;
     subscriptions: SubscriptionInfo[];
@@ -1174,6 +1269,11 @@ function MemberPage({
                         }
                     />
                     <Address member={member} />
+                    <Accessy
+                        member={member}
+                        membership={membership}
+                        onSendAccessyInvite={send_accessy_invite}
+                    />
                 </form>
             </div>
         </>

@@ -10,6 +10,7 @@ from shop.pay import MemberInfo, RegisterRequest
 from shop.stripe_constants import MakerspaceMetadataKeys
 from shop.stripe_payment_intent import PaymentIntentResult
 from shop.stripe_subscriptions import SubscriptionType
+from shop.stripe_util import retry
 from shop.transactions import CartItem, Purchase
 from test_aid.systest_base import EXPIRED_3DS_CARD_NO, VALID_NON_3DS_CARD_NO, ApiShopTestMixin, ApiTest
 
@@ -28,7 +29,7 @@ class Test(ApiShopTestMixin, ApiTest):
     ]
 
     def test_registering_new_member_works_and_returns_token(self) -> None:
-        payment_method = stripe.PaymentMethod.create(type="card", card=self.card(VALID_NON_3DS_CARD_NO))
+        payment_method = retry(lambda: stripe.PaymentMethod.create(type="card", card=self.card(VALID_NON_3DS_CARD_NO)))
 
         member = self.obj.create_member()
         register: RegisterRequest = RegisterRequest(
@@ -120,7 +121,7 @@ class Test(ApiShopTestMixin, ApiTest):
         )
 
     def test_registering_with_failed_payment_does_not_work_and_does_not_return_token(self) -> None:
-        payment_method = stripe.PaymentMethod.create(type="card", card=self.card(EXPIRED_3DS_CARD_NO))
+        payment_method = retry(lambda: stripe.PaymentMethod.create(type="card", card=self.card(EXPIRED_3DS_CARD_NO)))
 
         member = self.obj.create_member()
 

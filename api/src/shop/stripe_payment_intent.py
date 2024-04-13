@@ -6,6 +6,7 @@ from logging import getLogger
 from time import mktime
 from typing import Dict, List, Optional
 
+import pytz
 import stripe
 from dataclasses_json import DataClassJsonMixin
 from membership.models import Member
@@ -25,11 +26,7 @@ from shop.stripe_constants import (
 )
 from shop.stripe_customer import get_and_sync_stripe_customer
 from shop.stripe_util import convert_from_stripe_amount, convert_to_stripe_amount, replace_default_payment_method, retry
-from shop.transactions import (
-    PaymentFailed,
-    commit_fail_transaction,
-    payment_success,
-)
+from shop.transactions import PaymentFailed, commit_fail_transaction, payment_success
 
 logger = getLogger("makeradmin")
 
@@ -105,7 +102,7 @@ def create_client_response(transaction: Transaction, payment_intent: PaymentInte
         return create_action_required_response(transaction, payment_intent)
 
     elif status == PaymentIntentStatus.REQUIRES_CONFIRMATION:
-        confirmed_intent = stripe.PaymentIntent.confirm(payment_intent.id)
+        confirmed_intent = retry(lambda: stripe.PaymentIntent.confirm(payment_intent.id))
         assert PaymentIntentStatus(confirmed_intent.status) != PaymentIntentStatus.REQUIRES_CONFIRMATION
         return create_client_response(transaction, confirmed_intent)
 
@@ -132,7 +129,7 @@ def confirm_stripe_payment_intent(transaction_id: int) -> PartialPayment:
     if transaction.status != Transaction.PENDING:
         raise BadRequest(f"transaction ({transaction_id}) is not pending")
 
-    payment_intent = stripe.PaymentIntent.retrieve(pending.stripe_token)
+    payment_intent = retry(lambda: stripe.PaymentIntent.retrieve(pending.stripe_token))
     status = PaymentIntentStatus(payment_intent.status)
     if status == PaymentIntentStatus.CANCELED:
         raise BadRequest(f"unexpected stripe payment intent status {status}")
@@ -206,17 +203,24 @@ def pay_with_stripe(transaction: Transaction, payment_method_id: str, setup_futu
         raise_from_stripe_invalid_request_error(e)
 
 
-def get_stripe_payment_intents(start_date: date, end_date: date) -> List[stripe.PaymentIntent]:
+def get_stripe_payment_intents(start_date: datetime, end_date: datetime) -> List[stripe.PaymentIntent]:
     expand = ["data.latest_charge.balance_transaction"]
-    created = {"gte": int(mktime(start_date.timetuple())), "lte": int(mktime(end_date.timetuple()))}
+    created = {
+        "gte": int(start_date.astimezone(pytz.UTC).timestamp()),
+        "lt": int(end_date.astimezone(pytz.UTC).timestamp()),
+    }
+    logger.info(f"Fetching stripe payment intents from {start_date} ({created['gte']}) to {end_date} ({created['lt']})")
 
-    stripe_intents = retry(lambda: stripe.PaymentIntent.list(limit=100, created=created, expand=expand))
-    payments: List[stripe.PaymentIntent] = []
+    def get_intents():
+        stripe_intents = retry(lambda: stripe.PaymentIntent.list(limit=100, created=created, expand=expand))
+        payments: List[stripe.PaymentIntent] = []
 
-    # Loop over the intents and store them. We need to loop to deal with pagination
-    for intent in stripe_intents.auto_paging_iter():
-        payments.append(intent)
-    return payments
+        # Loop over the intents and store them. We need to loop to deal with pagination
+        for intent in stripe_intents.auto_paging_iter():
+            payments.append(intent)
+        return payments
+
+    return retry(get_intents)
 
 
 def convert_completed_stripe_intents_to_payments(
@@ -230,7 +234,9 @@ def convert_completed_stripe_intents_to_payments(
         charge = intent.latest_charge
         assert charge.balance_transaction is not None
         assert charge.paid
+
         id = int(intent.metadata[MakerspaceMetadataKeys.TRANSACTION_IDS.value])
+
         payments[id] = CompletedPayment(
             transaction_id=id,
             amount=convert_from_stripe_amount(charge.amount),
@@ -259,7 +265,7 @@ def create_fake_completed_payments_from_db(start_date: date, end_date: date) -> 
     return payments
 
 
-def get_completed_payments_from_stripe(start_date: date, end_date: date) -> Dict[int, CompletedPayment]:
+def get_completed_payments_from_stripe(start_date: datetime, end_date: datetime) -> Dict[int, CompletedPayment]:
     if debug_mode():
         logger.warning(
             "In debug/dev mode, using fake stripe payments for accounting by generating from existing data in db"

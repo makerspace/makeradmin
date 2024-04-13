@@ -12,23 +12,24 @@ import React from "react";
 import ReactDOM from "react-dom";
 import { Router } from "react-router";
 import { Route, Switch } from "react-router-dom";
+import Login from "./Components/Login";
+import auth from "./auth";
 import { browserHistory } from "./browser_history";
 import { Nav, SideNav } from "./nav";
-import auth from "./auth";
-import Login from "./Components/Login";
 
-import RequestPasswordReset from "./Components/RequestPasswordReset";
-import PasswordReset from "./Components/PasswordReset";
-import Logout from "./Components/Logout";
 import Page404 from "./Components/404";
 import Dashboard from "./Components/Dashboard";
+import Logout from "./Components/Logout";
+import PasswordReset from "./Components/PasswordReset";
+import RequestPasswordReset from "./Components/RequestPasswordReset";
 
-import Sales from "./Sales/Routes";
 import Membership from "./Membership/Routes";
 import Messages from "./Messages/Routes";
-import Statistics from "./Statistics/Routes";
-import Settings from "./Settings/Routes";
 import Quiz from "./Quiz/Routes";
+import Sales from "./Sales/Routes";
+import Settings from "./Settings/Routes";
+import Statistics from "./Statistics/Routes";
+import BoxTerminator from "./boxTerminator/Routes";
 
 const nav = {
     brand: "MakerAdmin",
@@ -149,6 +150,11 @@ const nav = {
             ],
         },
         {
+            text: "boxTerminator",
+            target: "/boxTerminator",
+            icon: "crosshairs",
+        },
+        {
             text: "Logga ut",
             target: "/logout",
             icon: "sign-out",
@@ -217,6 +223,10 @@ class App extends React.Component {
                                                 <Route
                                                     path="/quiz"
                                                     component={Quiz}
+                                                />
+                                                <Route
+                                                    path="/boxTerminator"
+                                                    component={BoxTerminator}
                                                 />
                                                 <Route component={Page404} />
                                             </Switch>

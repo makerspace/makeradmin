@@ -2,6 +2,7 @@ from datetime import datetime
 from logging import getLogger
 from typing import Dict, List, Tuple
 
+import pytz
 from basic_types.enums import AccountingEntryType
 from basic_types.time_period import TimePeriod
 from membership.models import Member
@@ -50,53 +51,38 @@ def transaction_fees_to_transaction_with_accounting(
     return amounts
 
 
-def rounding_errors_to_transaction_with_accounting(
-    rounding_errors: List[RoundingError],
-) -> List[TransactionWithAccounting]:
-    transactions: List[TransactionWithAccounting] = []
-    account = TransactionAccount(account="3740", description="Avrundningsfel", id=0, display_order=1)
-    cost_center_per_source: Dict[RoundingErrorSource, TransactionCostCenter] = {}
-    for source in RoundingErrorSource:
-        cost_center_per_source[source] = TransactionCostCenter(
-            cost_center=source.value, description=f"Avrundningsfel relaterat till {source.value}", id=0, display_order=1
-        )
-    for error in rounding_errors:
-        transactions.append(
-            TransactionWithAccounting(
-                transaction_id=error.transaction_id,
-                product_id=None,
-                amount=error.amount,
-                date=error.date,
-                account=account,
-                cost_center=cost_center_per_source[error.source],
-                type=error.type,
-            )
-        )
-    return transactions
-
-
 def export_accounting(start_date: datetime, end_date: datetime, group_by_period: TimePeriod, member_id: int) -> str:
     signer = db_session.query(Member).filter(Member.member_id == member_id).one_or_none()
     if signer is None:
         raise InternalServerError(f"Member with id {member_id} not found")
-    logger.info(f"Exporting accounting from {start_date} to {end_date} with signer {signer.member_number}")
+    logger.info(
+        f"Exporting accounting from {start_date} ({start_date.astimezone(pytz.utc)}) to {end_date} ({end_date.astimezone(pytz.utc)}) with signer member number {signer.member_number}"
+    )
     completed_payments = get_completed_payments_from_stripe(start_date, end_date)
     transactions = (
         db_session.query(Transaction)
-        .filter(Transaction.created_at >= start_date, Transaction.created_at <= end_date)
+        .filter(
+            Transaction.created_at >= start_date.astimezone(pytz.utc),
+            Transaction.created_at < end_date.astimezone(pytz.utc),
+            Transaction.status == Transaction.COMPLETED,
+        )
         .outerjoin(TransactionContent)
         .all()
     )
 
+    for transaction in transactions:
+        logger.info(f"Transaction: {transaction.id}")
+
+    for payment in completed_payments.values():
+        logger.info(f"Payment: {payment.transaction_id}")
+
     diff = diff_transactions_and_completed_payments(transactions, completed_payments)
     if len(diff) > 0:
+        logger.warning(f"Transactions and completed payments do not match, {diff}")
         raise InternalServerError(f"Transactions and completed payments do not match, {diff}")
 
     transactions_with_accounting, rounding_errors = split_transactions_over_accounts(transactions, completed_payments)
-    logger.info(f"Roundings errors from split: {rounding_errors}")
 
-    rounding_errors_with_accounting = rounding_errors_to_transaction_with_accounting(rounding_errors)
-    transactions_with_accounting.extend(rounding_errors_with_accounting)
     transaction_fees = transaction_fees_to_transaction_with_accounting(completed_payments)
     transactions_with_accounting.extend(transaction_fees)
 

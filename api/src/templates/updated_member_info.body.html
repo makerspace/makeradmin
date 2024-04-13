@@ -1,0 +1,27 @@
+{% extends "email_body_base.html" %}
+
+{% block swedish %}
+<p>Hej {{ member.firstname }},</p>
+<p>(See below for English).</p>
+<p>
+    Dina personliga uppgifter har uppdaterats. Om detta inte var korrekt bör du kontakta styrelsen på info@makerspace.se.
+</p>
+
+{% if message_swe %}
+{{ message_swe }}
+{% endif %}
+
+<p>Med vänliga hälsningar,<br />Stockholm Makerspace</p>
+{% endblock %}
+
+{% block english %}
+<p>
+    Your personal information has been updated. If this was incorrect you should inform the board on info@makerspace.se.
+</p>
+
+{% if message_en %}
+{{ message_en }}
+{% endif %}
+
+<p>Sincerely,<br />Stockholm Makerspace</p>
+{% endblock %}

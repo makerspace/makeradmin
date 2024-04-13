@@ -1,6 +1,8 @@
 from datetime import datetime
 from enum import Enum
 
+from zoneinfo import ZoneInfo
+
 
 class TimePeriod(Enum):
     Month = "month"
@@ -9,14 +11,14 @@ class TimePeriod(Enum):
     Day = "day"
 
 
-def date_to_period(date: datetime, period: TimePeriod) -> str:
+def date_to_period(date: datetime, period: TimePeriod, zone_info: ZoneInfo = ZoneInfo("Europe/Stockholm")) -> str:
     if period == TimePeriod.Month:
-        return date.strftime("%Y-%m")
+        return date.astimezone(zone_info).strftime("%Y-%m")
     elif period == TimePeriod.Year:
-        return date.strftime("%Y")
+        return date.astimezone(zone_info).strftime("%Y")
     elif period == TimePeriod.Week:
-        return date.strftime("%Y-%W")
+        return date.astimezone(zone_info).strftime("%Y-%W")
     elif period == TimePeriod.Day:
-        return date.strftime("%Y-%m-%d")
+        return date.astimezone(zone_info).strftime("%Y-%m-%d")
     else:
         raise ValueError(f"Unknown period {period}")

@@ -108,7 +108,7 @@ def delete_stripe_customer(member_id: int) -> None:
         raise NotFound(f"Unable to find member with id {member_id}")
     if member.stripe_customer_id is not None:
         # Note: This will also delete all subscriptions
-        stripe.Customer.delete(member.stripe_customer_id)
+        retry(lambda: stripe.Customer.delete(member.stripe_customer_id))
 
     member.stripe_customer_id = None
     db_session.flush()

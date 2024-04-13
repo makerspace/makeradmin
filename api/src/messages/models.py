@@ -25,6 +25,7 @@ class MessageTemplate(enum.Enum):
     MEMBERSHIP_REMINDER = "membership_reminder"
     NEW_LOW_INCOME_MEMBER = "new_low_income_member"
     GIFT_CARD_PURCHASE = "gift_card_purchase"
+    UPDATED_MEMBER_INFO = "updated_member_info"
 
 
 class Message(Base):

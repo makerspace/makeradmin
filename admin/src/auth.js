@@ -1,5 +1,5 @@
-import { showError, showSuccess } from "./message";
 import { post } from "./gateway";
+import { showError, showSuccess } from "./message";
 
 class Auth {
     getAccessToken() {
@@ -28,7 +28,7 @@ class Auth {
     requestPasswordReset(user_identification) {
         return post({
             url: "/oauth/request_password_reset",
-            params: { user_identification },
+            params: { user_identification, redirect: "admin" },
             errorMessage: "Error when sending",
             expectedDataStatus: "ok",
         });

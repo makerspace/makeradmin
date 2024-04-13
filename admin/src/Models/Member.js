@@ -1,3 +1,4 @@
+import { post } from "../gateway";
 import Base from "./Base";
 
 export default class Member extends Base {
@@ -5,9 +6,34 @@ export default class Member extends Base {
         return `Are you sure you want to delete member ${this.firstname} ${this.lastname}?`;
     }
 
+    maybe_inform_member_before_changed_info() {
+        if (Object.prototype.hasOwnProperty.call(this.unsaved, "email")) {
+            post({
+                url: "/member/send_updated_member_info",
+                data: {
+                    member_id: this.member_id,
+                    msg_swe: `Din epost ändrades från ${this.saved.email} till ${this.unsaved.email}`,
+                    msg_en: `Your email was updated from ${this.saved.email} to ${this.unsaved.email}`,
+                },
+                errorMessage:
+                    "Error when sending email about updated information.",
+                expectedDataStatus: "ok",
+            });
+        }
+    }
+
+    save() {
+        this.maybe_inform_member_before_changed_info();
+        super.save();
+    }
+
     canSave() {
         return (
-            this.isDirty() && this.email.length > 0 && this.firstname.length > 0
+            this.isDirty() &&
+            this.firstname.length > 0 &&
+            this.email.length > 0 &&
+            this.email.includes("@") &&
+            this.email.includes(".")
         );
     }
 }

@@ -1,7 +1,7 @@
 import React from "react";
 import Select from "react-select";
-import { showError, showSuccess } from "../message";
 import { get } from "../gateway";
+import { showError, showSuccess } from "../message";
 
 class AccountingExport extends React.Component {
     constructor(props) {
@@ -9,34 +9,29 @@ class AccountingExport extends React.Component {
         this.state = {
             csv_content: null,
             state: "none",
-            selectedOption_from: null,
-            selectedOption_to: null,
+            selectedOption_year: null,
+            selectedOption_month: null,
         };
     }
     exportAccounting(file_name) {
-        if (
-            this.state.selectedOption_from &&
-            this.state.selectedOption_to &&
-            Object.values(this.state.selectedOption_from)[0] <=
-                Object.values(this.state.selectedOption_to)[0]
-        ) {
+        if (this.state.selectedOption_year && this.state.selectedOption_month) {
             if (file_name) {
                 file_name = file_name + ".si";
             } else {
                 file_name =
                     "Accounting_" +
-                    Object.values(this.state.selectedOption_from)[0] +
+                    Object.values(this.state.selectedOption_year)[0] +
                     "_" +
-                    Object.values(this.state.selectedOption_to)[0] +
+                    Object.values(this.state.selectedOption_month)[0] +
                     ".si";
             }
 
             get({
                 url:
                     "/webshop/download-accounting-file/" +
-                    Object.values(this.state.selectedOption_from)[0] +
+                    Object.values(this.state.selectedOption_year)[0] +
                     "/" +
-                    Object.values(this.state.selectedOption_to)[0],
+                    Object.values(this.state.selectedOption_month)[0],
             })
                 .then((response) => {
                     const element = document.createElement("a");
@@ -63,21 +58,25 @@ class AccountingExport extends React.Component {
         }
     }
 
-    selectOptionFrom(year) {
-        this.setState({ selectedOption_from: year });
+    selectOptionYear(year) {
+        this.setState({ selectedOption_year: year });
     }
 
-    selectOptionTo(year) {
-        this.setState({ selectedOption_to: year });
+    selectOptionMonth(month) {
+        this.setState({ selectedOption_month: month });
     }
 
     render() {
-        const { selectedOption_from, selectedOption_to } = this.state;
+        const { selectedOption_year, selectedOption_month } = this.state;
         let years = [];
+        let months = [];
         let current_year = new Date().getFullYear();
 
         for (let i = current_year; i >= 2020; i--) {
             years.push({ year: i });
+        }
+        for (let i = 1; i <= 12; i++) {
+            months.push({ month: i });
         }
 
         return (
@@ -96,33 +95,33 @@ class AccountingExport extends React.Component {
                                     vilken period du vill exportera
                                 </legend>
                                 <label className="uk-form-label" htmlFor="">
-                                    Från och med år:
+                                    År:
                                 </label>
                                 <Select
-                                    name="from_year"
+                                    name="year"
                                     className="uk-select"
                                     tabIndex={1}
                                     options={years}
-                                    value={selectedOption_from}
+                                    value={selectedOption_year}
                                     getOptionValue={(g) => g.year}
                                     getOptionLabel={(g) => g.year}
                                     onChange={(from_year) =>
-                                        this.selectOptionFrom(from_year)
+                                        this.selectOptionYear(from_year)
                                     }
                                 />
                                 <label className="uk-form-label" htmlFor="">
-                                    Till och med år:
+                                    Månad:
                                 </label>
                                 <Select
-                                    name="to_year"
+                                    name="month"
                                     className="uk-select"
                                     tabIndex={1}
-                                    options={years}
-                                    value={selectedOption_to}
-                                    getOptionValue={(g) => g.year}
-                                    getOptionLabel={(g) => g.year}
-                                    onChange={(to_year) =>
-                                        this.selectOptionTo(to_year)
+                                    options={months}
+                                    value={selectedOption_month}
+                                    getOptionValue={(g) => g.month}
+                                    getOptionLabel={(g) => g.month}
+                                    onChange={(month) =>
+                                        this.selectOptionMonth(month)
                                     }
                                 />
                             </div>

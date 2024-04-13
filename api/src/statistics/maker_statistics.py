@@ -208,6 +208,35 @@ def shop_statistics():
     )
     categories_json = list(map(category_entity.to_obj, list(categories)))
 
+    valid_members = db_session.query(Member).filter(Member.deleted_at == None).all()
+
+    has_membership_sub = 0
+    has_makerspace_access_sub = 0
+    has_both_subs = 0
+    total_active_members = 0
+    for member in valid_members:
+        # Check if labaccess is active
+        labaccess_active = (
+            db_session.query(Span)
+            .filter(Span.member_id == member.member_id, Span.type == Span.LABACCESS)
+            .filter(Span.startdate <= datetime.now(), Span.enddate >= datetime.now())
+            .first()
+            is not None
+        )
+        if labaccess_active:
+            total_active_members += 1
+
+            if member.stripe_membership_subscription_id is not None:
+                has_membership_sub += 1
+            if member.stripe_labaccess_subscription_id is not None:
+                has_makerspace_access_sub += 1
+
+            if (
+                member.stripe_membership_subscription_id is not None
+                and member.stripe_labaccess_subscription_id is not None
+            ):
+                has_both_subs += 1
+
     return {
         "revenue_by_product_last_12_months": [
             {"product_id": r.id, "amount": float(sales_by_product.get(r.id, 0))} for r in products
@@ -217,6 +246,12 @@ def shop_statistics():
         ],
         "products": products_json,
         "categories": categories_json,
+        "subscription_split": {
+            "active_members": total_active_members,
+            "has_membership_sub": has_membership_sub,
+            "has_makerspace_access_sub": has_makerspace_access_sub,
+            "has_both_subs": has_both_subs,
+        },
     }
 
 

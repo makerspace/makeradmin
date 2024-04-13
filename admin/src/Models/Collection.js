@@ -1,5 +1,5 @@
-import { get, post } from "../gateway";
 import * as _ from "underscore";
+import { get, post } from "../gateway";
 
 // Handle collection of a model class. Support stateful interaction with server.
 //
@@ -21,6 +21,7 @@ export default class Collection {
         page = 1,
         filter_out_key = null,
         filter_out_value = null,
+        includeDeleted = false,
     }) {
         this.type = type;
         this.pageSize = pageSize;
@@ -38,6 +39,8 @@ export default class Collection {
 
         this.filter_out_key = filter_out_key;
         this.filter_out_value = filter_out_value;
+
+        this.includeDeleted = !!includeDeleted;
 
         this.fetch();
     }
@@ -110,6 +113,9 @@ export default class Collection {
             params.page = this.page.index;
         }
         params.page_size = this.pageSize;
+        if (this.includeDeleted) {
+            params.include_deleted = this.includeDeleted;
+        }
 
         if (!_.isEmpty(this.sort)) {
             params.sort_by = this.sort.key || "";

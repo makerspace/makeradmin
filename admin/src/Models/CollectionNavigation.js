@@ -8,7 +8,7 @@ export default class CollectionNavigation extends React.Component {
 
         this.params = new URLSearchParams(this.props.location.search);
         const search = this.params.get("search") || "";
-        const page = this.params.get("page") || 1;
+        const page = Number(this.params.get("page")) || 1;
         this.state = { search, page };
     }
 
