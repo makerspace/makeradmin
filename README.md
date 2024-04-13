@@ -120,7 +120,7 @@ These are important to make sure links work, but also to handle CORS in the brow
 ### System tests/integration tests that requires a running installation
 
 Systests are written in python and the sources for the systests are in the api/src/systest directory (because it shares a lot of code with the api unittests). There are
-tests using the api as well as selenium tests. Those tests are also run in travis.
+tests using the api as well as selenium tests. Those tests are also run in Github actions.
 
 You can run the tests in test containers using a one off db with:
 
