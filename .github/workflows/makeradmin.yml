@@ -27,6 +27,7 @@ jobs:
 
   stripe-tests:
     runs-on: ubuntu-latest
+    concurrency: stripe
     steps:
       - name: Install prerequisites
         run: |
