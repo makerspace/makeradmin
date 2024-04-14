@@ -154,7 +154,7 @@ If you for some reason want to remove the existing database and start from scrat
 make clean-nuke
 ```
 
-_Warning: this will completely wipe out all your makeradmin data!_
+⚠️ _Warning: this will completely wipe out all your makeradmin data!_
 
 After this you can run `make firstrun` again to set things up again.
 
