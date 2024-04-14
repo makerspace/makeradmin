@@ -184,36 +184,18 @@ These subscriptions will automatically be turned into makeradmin products so tha
 
 Note: You should _not_ modify these products in makeradmin. They will be reset whenever the docker container restarts anyway (when the registration page is visited).
 
-#### Needed Stripe configuration
+#### Required Stripe configuration
 
-The configuration needed on stripe is:
-
--   Create a **product** for base membership. Add the metadata "subscription_type"="membership" to the **product** item
-    -   Add a yearly **price**, and add the metadata "price_type"="recurring" to the **price** item
--   Create a **product** for makerspace access. Add the metadata "subscription_type"="labaccess" to the **product** item
-    -   Add a monthly price, and add the metadata "price_type"="recurring" to the **price** item
-    -   Add a **price** for N months, where N is the binding period as specified in `stripe_subscriptions.py->BINDING_PERIOD`. The price should be N times the recurring price. Add the metadata "price_type"="binding_period"
--   Create a **coupon** for low income discount. It should be with percentage discount. Add the metadata "makerspace_price_level" = "low_income_discount"
-
-You can achieve all of this using the Stripe CLI:
+Run the following script to create the required Stripe products. _You should only run it once._ But if anything goes wrong, you can modify the products from the Stripe dashboard.
 
 ```bash
-# Create a yearly membership product with a price
-stripe products create -d 'metadata[subscription_type]=membership' --name='Base membership'
-# -> This gives a product ID `prod_MEMBERSHIP` that you need to substitute below
-stripe prices create --unit-amount=20000 --currency=sek -d "recurring[interval]"=year --product="prod_MEMBERSHIP" -d "recurring[interval_count]"=1 -d 'metadata[price_type]=recurring'
-
-# Create a makerspace access product with prices
-stripe products create -d 'metadata[subscription_type]=labaccess' --name='Makerspace access'
-# -> This gives a product ID `prod_LABACCESS` that you need to substitute below
-stripe prices create --unit-amount=30000 --currency=sek -d "recurring[interval]"=month --product="prod_LABACCESS" -d "recurring[interval_count]"=1 -d 'metadata[price_type]=recurring'
-stripe prices create --unit-amount=60000 --currency=sek -d "recurring[interval]"=month --product="prod_LABACCESS" -d "recurring[interval_count]"=2 -d 'metadata[price_type]=binding_period'
-
-# Create a coupon
-stripe coupons create --name='Low income discount' --percent-off=50 -d 'metadata[makerspace_price_level]=low_income_discount'
+# Print the help
+./create_stripe_products.py --help
+# Example usage (change the arguments to suit your needs)
+./create_stripe_products.py --yearly-price 200 --monthly-price 300 --binding-period 2
 ```
 
-If you try to access any page which needs these products (e.g. the registration page, or the member page), makeradmin will fetch them from stripe and do a bunch of validation checks.
+If you try to access any page which needs these products (e.g. the registration page, or the member page), makeradmin will fetch them from stripe and do a bunch of validation checks on them.
 
 ### Setting up required products in makeradmin
 
