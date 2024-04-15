@@ -7,7 +7,6 @@ parser.add_argument("--force", "-f", dest="force", action="store_true", help="ov
 args = parser.parse_args()
 
 config = {
-    "COMPOSE_PROJECT_NAME": "makeradmin",
     "MYSQL_DB": "makeradmin",
     "MYSQL_PORT": "3306",
     "MYSQL_USER": "makeradmin",
@@ -15,9 +14,6 @@ config = {
     "MYSQL_ROOT_PASSWORD": secrets.token_hex(16),
     # Note: This must fit into the access_tokens table in the database
     "TEST_SERVICE_TOKEN": secrets.token_hex(16),
-    "TICTAIL_USER": "",
-    "TICTAIL_PASS": "",
-    "TICTAIL_STORE": "",
     "MAILGUN_DOMAIN": "",
     "MAILGUN_KEY": "",
     "MAILGUN_FROM": "MakerAdmin <excited@samples.mailgun.org>",
@@ -40,6 +36,8 @@ config = {
     "FIRSTRUN_AUTO_ADMIN_LASTNAME": "",
     "FIRSTRUN_AUTO_ADMIN_EMAIL": "",
     "FIRSTRUN_AUTO_ADMIN_PASSWORD": "",
+    "ELKS46_API_USER": "",
+    "ELKS46_API_KEY": "",
 }
 
 if not args.force and os.path.isfile(".env"):
