@@ -2,11 +2,9 @@ name: Check formatting of source code
 
 on:
   push:
-    branches:
-      - "**"
+    branches: [master, main]
   pull_request:
-    branches:
-      - "**"
+    types: [synchronize, opened]
 
 jobs:
   ruff:
