@@ -2,8 +2,9 @@ name: Build and run tests for makeradmin
 
 on:
   push:
-    branches:
-      - "**"
+    branches: [master, main]
+  pull_request:
+    types: [synchronize, opened]
 
 jobs:
   test:
