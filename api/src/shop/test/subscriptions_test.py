@@ -836,6 +836,10 @@ class Test(FlaskTestBase):
         assert summary.labaccess_active
         assert summary.labaccess_end == sub_start + time_delta(days=61)
 
+        # FIXME: For some reason we need to advance the clock twice here to get
+        # all the events needed. The polling function called when clock is advanced
+        # should be refactored to fix it.
+        self.advance_clock(clock, noon(sub_start + time_delta(months=2, days=3)))
         self.advance_clock(clock, noon(sub_start + time_delta(months=2, days=3)))
 
         # The member should now have finished their binding period and been billed for another month

@@ -356,15 +356,19 @@ const TermsAndConditions = ({
     return (
         <div class="terms-and-conditions">
             <h2>{t("registration_page.terms.title")}</h2>
-            <p>{t("registration_page.terms.pledge")}</p>
+            <p>
+                <b>{t("registration_page.terms.pledge")}</b>
+            </p>
+            <ol className="rules-list">{t("registration_page.terms.rules")}</ol>
+            <p>
+                <b>{t("registration_page.terms.understanding_pledge")}</b>
+            </p>
             <ol className="rules-list">
-                {t("registration_page.terms.rules").map((rule) => (
-                    <li>{rule}</li>
-                ))}
+                {t("registration_page.terms.understanding")}
             </ol>
 
             <RuleCheckbox
-                rule={t("registration_page.terms.understanding1")}
+                rule={t("registration_page.terms.accept")}
                 onChange={() =>
                     onChangeAcceptedTerms({
                         ...acceptedTerms,
@@ -374,7 +378,7 @@ const TermsAndConditions = ({
                 value={acceptedTerms.accepted1}
             />
             <RuleCheckbox
-                rule={t("registration_page.terms.understanding2")}
+                rule={t("registration_page.terms.welcoming")}
                 onChange={() =>
                     onChangeAcceptedTerms({
                         ...acceptedTerms,
@@ -383,26 +387,12 @@ const TermsAndConditions = ({
                 }
                 value={acceptedTerms.accepted2}
             />
-            <RuleCheckbox
-                rule={t("registration_page.terms.welcoming")}
-                onChange={() =>
-                    onChangeAcceptedTerms({
-                        ...acceptedTerms,
-                        accepted3: !acceptedTerms.accepted3,
-                    })
-                }
-                value={acceptedTerms.accepted3}
-            />
             <button
                 className="flow-button primary"
-                disabled={
-                    !acceptedTerms.accepted1 ||
-                    !acceptedTerms.accepted2 ||
-                    !acceptedTerms.accepted3
-                }
+                disabled={!acceptedTerms.accepted1 || !acceptedTerms.accepted2}
                 onClick={onAccept}
             >
-                {t("registration_page.terms.accept")}
+                {t("registration_page.terms.continue")}
             </button>
             <BackButton onClick={onBack} />
         </div>
