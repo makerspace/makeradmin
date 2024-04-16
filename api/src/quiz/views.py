@@ -163,7 +163,7 @@ def member_quiz_statistics(member_id: int):
     return [
         {
             "quiz": quiz_entity.to_obj(quiz),
-            "total_questions_in_quiz": total_questions_in_quiz[quiz.id],
+            "total_questions_in_quiz": total_questions_in_quiz[quiz.id] if quiz.id in total_questions_in_quiz else 0,
             "correctly_answered_questions": answered_questions_per_quiz[quiz.id]
             if quiz.id in answered_questions_per_quiz
             else 0,
