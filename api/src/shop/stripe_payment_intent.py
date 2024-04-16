@@ -206,8 +206,8 @@ def pay_with_stripe(transaction: Transaction, payment_method_id: str, setup_futu
 def get_stripe_payment_intents(start_date: datetime, end_date: datetime) -> List[stripe.PaymentIntent]:
     expand = ["data.latest_charge.balance_transaction"]
     created = {
-        "gte": int(mktime(start_date.astimezone(pytz.UTC).timetuple())),
-        "lt": int(mktime(end_date.astimezone(pytz.UTC).timetuple())),
+        "gte": int(start_date.astimezone(pytz.UTC).timestamp()),
+        "lt": int(end_date.astimezone(pytz.UTC).timestamp()),
     }
     logger.info(f"Fetching stripe payment intents from {start_date} ({created['gte']}) to {end_date} ({created['lt']})")
 
