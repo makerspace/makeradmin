@@ -7,6 +7,27 @@ on:
     types: [synchronize, opened]
 
 jobs:
+  firstrun:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install prerequisites
+        run: |
+          sudo apt install -y python3-pip
+      - uses: actions/checkout@v4
+      - name: Install dependencies
+        run: make init
+      - name: Make env
+        run: make .env
+      - name: Build container
+        run: make build
+      - name: Create the database
+        run: docker compose run api bash -c 'yes "" | python3 firstrun.py'
+        env:
+          FIRSTRUN_AUTO_ADMIN_FIRSTNAME: maker
+          FIRSTRUN_AUTO_ADMIN_LASTNAME: makersson
+          FIRSTRUN_AUTO_ADMIN_EMAIL: maker@bmail.com
+          FIRSTRUN_AUTO_ADMIN_PASSWORD: not_a_real_passw0rd
+
   test:
     runs-on: ubuntu-latest
     steps:
