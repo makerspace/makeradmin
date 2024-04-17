@@ -10,12 +10,7 @@ jobs:
   firstrun:
     runs-on: ubuntu-latest
     steps:
-      - name: Install prerequisites
-        run: |
-          sudo apt install -y python3-pip
       - uses: actions/checkout@v4
-      - name: Install dependencies
-        run: make init
       - name: Make env
         run: make .env
       - name: Build container
@@ -31,14 +26,6 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - name: Install prerequisites
-        run: |
-          sudo apt install -y python3-pip
-          pip3 install docker-compose
-      - name: List versions
-        run: |
-          docker --version
-          docker-compose --version
       - uses: actions/checkout@v4
       - name: Build docker
         run: make build
