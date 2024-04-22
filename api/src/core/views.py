@@ -7,10 +7,10 @@ from core import auth, service
 
 @service.route("/oauth/token", method=POST, permission=PUBLIC, flat_return=True)
 def login(grant_type=Arg(Enum("password")), username=Arg(str), password=Arg(str)):
-    """Login user with username and password, returns token."""
+    """Login user with username/email/member number and password, returns token."""
     assert grant_type
-    username = username.strip()
-
+    username = username.strip().lower()
+    password = password.strip()
     return auth.login(request.remote_addr, request.user_agent.string, username, password)
 
 
