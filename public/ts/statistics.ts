@@ -184,6 +184,9 @@ function addSubscriptionsChart(root: HTMLElement, data: ProductStatistics) {
                 xAxes: [
                     {
                         stacked: false,
+                        ticks: {
+                            beginAtZero: true,
+                        },
                     },
                 ],
                 yAxes: [
@@ -226,6 +229,7 @@ function addChart(root: HTMLElement, data: any) {
                     borderColor: colors[0],
                     fill: false,
                     data: dataMembership,
+                    yAxisID: "y-members",
                 },
                 {
                     label: "Labmedlemmar",
@@ -233,6 +237,7 @@ function addChart(root: HTMLElement, data: any) {
                     borderColor: colors[1],
                     fill: false,
                     data: dataLabaccess,
+                    yAxisID: "y-makerspaceAccess",
                 },
             ],
         },
@@ -264,6 +269,8 @@ function addChart(root: HTMLElement, data: any) {
                             // round: 'day'
                             tooltipFormat: "ll",
                             max: maxtime,
+                            unit: "year",
+                            stepSize: 1,
                         },
                         scaleLabel: {
                             display: true,
@@ -278,7 +285,22 @@ function addChart(root: HTMLElement, data: any) {
                         },
                         scaleLabel: {
                             display: true,
-                            labelString: "Antal",
+                            labelString: "Antal Medlemmar",
+                        },
+                        id: "y-members",
+                    },
+                    {
+                        ticks: {
+                            min: 0,
+                        },
+                        scaleLabel: {
+                            display: true,
+                            labelString: "Antal med Makerspace Access",
+                        },
+                        position: "right",
+                        id: "y-makerspaceAccess",
+                        gridLines: {
+                            color: colors[1],
                         },
                     },
                 ],
