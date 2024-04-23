@@ -618,8 +618,6 @@ class Test(FlaskTestBase):
         """
         Checks that if a subscription fails to charge, the subscription is deleted after a while
         """
-        binding_period = self.access_subscription_product.smallest_multiple
-
         (now, clock, member) = self.setup_single_member()
 
         stripe_subscriptions.start_subscription(
@@ -655,8 +653,6 @@ class Test(FlaskTestBase):
         """
         Checks that if a subscription fails to charge, the subscription is retried a few times and then nenewed when we switch to a new card
         """
-        binding_period = self.access_subscription_product.smallest_multiple
-
         (now, clock, member) = self.setup_single_member()
 
         stripe_subscriptions.start_subscription(
