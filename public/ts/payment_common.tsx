@@ -1,3 +1,4 @@
+import { useStripe } from "@stripe/react-stripe-js";
 import {
     loadStripe,
     PaymentMethod,
@@ -356,7 +357,9 @@ export const StripeCardInput = ({
 
 export const createStripeCardInput = () => {
     // Create an instance of Elements.
-    const elements = stripe!.elements({ locale: "sv" });
+    const stripe = useStripe();
+    const elements = stripe?.elements({ locale: "sv" });
+
     // Custom styling can be passed to options when creating an Element.
     const stripeStyle = {
         base: {
@@ -376,7 +379,7 @@ export const createStripeCardInput = () => {
     };
 
     // Create an instance of the card Element.
-    return elements.create("card", {
+    return elements?.create("card", {
         style: stripeStyle,
         hidePostalCode: true,
     });
