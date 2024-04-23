@@ -1,3 +1,4 @@
+import { PaymentMethod, StripeCardElement } from "@stripe/stripe-js";
 import { ComponentChildren, render } from "preact";
 import { StateUpdater, useEffect, useMemo, useState } from "preact/hooks";
 import { PopupModal, useCalendlyEventListener } from "react-calendly";
@@ -423,7 +424,7 @@ const Confirmation = ({
     productData: ProductData;
     discount: Discount;
     discountInfo: DiscountsInfo;
-    card: stripe.elements.Element;
+    card: StripeCardElement;
     onRegistered: (r: RegistrationSuccess) => void;
     onBack: () => void;
 }) => {
@@ -538,7 +539,7 @@ type RegistrationSuccess = {
 };
 
 async function registerMember(
-    paymentMethod: stripe.paymentMethod.PaymentMethod,
+    paymentMethod: PaymentMethod,
     productData: ProductData,
     memberInfo: MemberInfoValidated,
     selectedPlan: Plan,

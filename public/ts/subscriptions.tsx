@@ -1,3 +1,4 @@
+import { StripeCardElement } from "@stripe/stripe-js";
 import { render } from "preact";
 import { useState } from "preact/hooks";
 import Cart from "./cart";
@@ -60,7 +61,7 @@ const PayDialog = ({
     onCancel,
     onPay,
 }: {
-    stripe: stripe.elements.Element;
+    stripe: StripeCardElement;
     productData: ProductData;
     products: Product[];
     currentMemberships: SubscriptionType[];

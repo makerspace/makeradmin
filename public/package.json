@@ -17,8 +17,9 @@
         "webpack-merge": "^5.8.0"
     },
     "dependencies": {
+        "@stripe/react-stripe-js": "^2.7.0",
+        "@stripe/stripe-js": "^3.3.0",
         "@types/markdown-it": "^12.2.1",
-        "@types/stripe-v3": "^3.1.23",
         "chart.js": "^2.9.4",
         "d3": "^7.8.3",
         "d3-sankey": "^0.12.3",
