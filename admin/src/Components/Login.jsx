@@ -10,7 +10,7 @@ export default class Login extends React.Component {
         const password = this.password.value;
 
         if (!username || !password) {
-            showError("Du måste fylla i användarnamn och lösenord");
+            showError("Du måste fylla i email/medlemsnummer och lösenord");
             return;
         }
 
@@ -41,7 +41,7 @@ export default class Login extends React.Component {
                                     }}
                                     className="uk-form-large uk-form-width-large"
                                     type="text"
-                                    placeholder="Användarnamn"
+                                    placeholder="Email/Medlemsnummer"
                                 />
                             </div>
                         </div>
