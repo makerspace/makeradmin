@@ -57,7 +57,7 @@ class Auth {
             .then((response) => {
                 if (response.status === 401) {
                     return Promise.reject(
-                        "Felaktigt användarnamn eller lösenord.",
+                        "Felaktig email/medlemsnummer eller lösenord.",
                     );
                 }
                 if (response.status === 429) {

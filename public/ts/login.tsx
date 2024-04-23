@@ -29,7 +29,9 @@ export function login_via_password(
         })
         .catch((response: ServerResponse<any>) => {
             if (response.status === common.UNAUTHORIZED) {
-                return Promise.reject("Felaktigt användarnamn eller lösenord.");
+                return Promise.reject(
+                    "Felaktig email/medlemsnummer eller lösenord.",
+                );
             }
 
             return Promise.reject(
