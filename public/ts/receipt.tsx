@@ -1,17 +1,6 @@
-import * as login from "./login";
-import Cart from "./cart";
-import {
-    LoadProductData,
-    Product,
-    ProductData,
-    Transaction,
-    TransactionItem,
-} from "./payment_common";
-import { LoadCurrentMemberInfo, member_t } from "./member_common";
-import { Sidebar } from "./sidebar";
 import { render } from "preact";
-import { Receipt } from "./receipt_common";
 import { useEffect, useState } from "preact/hooks";
+import Cart from "./cart";
 import {
     UNAUTHORIZED,
     ajax,
@@ -19,6 +8,16 @@ import {
     get_error,
     show_error,
 } from "./common";
+import * as login from "./login";
+import { LoadCurrentMemberInfo, member_t } from "./member_common";
+import {
+    LoadProductData,
+    Product,
+    ProductData,
+    Transaction,
+} from "./payment_common";
+import { Receipt } from "./receipt_common";
+import { Sidebar } from "./sidebar";
 declare var UIkit: any;
 
 type ReceiptResponse = {

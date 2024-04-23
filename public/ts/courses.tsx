@@ -1,9 +1,9 @@
+import { render } from "preact";
 import * as common from "./common";
-import * as login from "./login";
 import { ServerResponse, UNAUTHORIZED } from "./common";
+import * as login from "./login";
 import { Quiz } from "./quiz";
 import { Sidebar } from "./sidebar";
-import { render } from "preact";
 declare var UIkit: any;
 
 interface QuizInfo {
