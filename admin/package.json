@@ -11,7 +11,7 @@
         "html5-qrcode": "^2.3.8",
         "jquery": "^3.6.0",
         "json-loader": "^0.5.4",
-        "npm": "^9.2.0",
+        "npm": "^10.5.2",
         "prop-types": "^15.7.2",
         "react": "^16.14.0",
         "react-day-picker": "^7.4.10",
