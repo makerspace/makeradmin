@@ -1,4 +1,7 @@
 import { render } from "preact";
+import { useState } from "preact/hooks";
+import Cart from "./cart";
+import { ajax, show_error } from "./common";
 import { member_t, membership_t } from "./member_common";
 import {
     Discount,
@@ -6,26 +9,17 @@ import {
     PaymentFailedError,
     Product,
     ProductData,
-    ProductDataFromProducts,
-    RegisterPageData,
-    SetupIntentResponse,
     StripeCardInput,
     ToPayPreview,
-    calculateAmountToPay,
     createPaymentMethod,
     createStripeCardInput,
-    extractRelevantProducts,
-    handleStripeSetupIntent,
     pay,
 } from "./payment_common";
-import { ajax, show_error } from "./common";
-import { useState } from "preact/hooks";
 import {
     TranslationWrapper,
-    useTranslation,
     translateUnit,
+    useTranslation,
 } from "./translations";
-import Cart from "./cart";
 declare var UIkit: any;
 
 export type SubscriptionType = "membership" | "labaccess";
