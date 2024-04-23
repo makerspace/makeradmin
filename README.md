@@ -7,7 +7,7 @@
 ### Docker
 
 ```bash
-sudo apt-get install docker.io docker-compose-plugin
+sudo apt-get install docker.io
 sudo adduser $(whoami) docker
 ```
 
@@ -31,6 +31,17 @@ sudo apt-get install npm
 ```
 
 ## Initialize everything
+
+Clone this git repository to a suitable place on your computer / server
+
+Start by initializing and activating a [virtual python environment](https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/) in the cloned folder
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+```
+
+Run the firstrun script
 
 ```bash
 make firstrun
