@@ -9,21 +9,12 @@ from basic_types.time_period import TimePeriod
 from dateutil.relativedelta import relativedelta
 from flask import Response, g, make_response, request, send_file
 from multiaccessy.invite import AccessyInvitePreconditionFailed, ensure_accessy_labaccess
-from service.api_definition import (
-    DELETE,
-    GET,
-    MEMBER_EDIT,
-    POST,
-    PUBLIC,
-    USER,
-    WEBSHOP,
-    WEBSHOP_EDIT,
-    Arg,
-)
+from service.api_definition import DELETE, GET, MEMBER_EDIT, POST, PUBLIC, USER, WEBSHOP, WEBSHOP_EDIT, Arg
 from service.db import db_session
 from service.entity import OrmSingeRelation, OrmSingleSingleRelation
 from service.error import InternalServerError, PreconditionFailed
 from sqlalchemy.exc import NoResultFound
+from zoneinfo import ZoneInfo
 
 from shop import service
 from shop.accounting.export import export_accounting
@@ -42,13 +33,7 @@ from shop.entities import (
     transaction_entity,
 )
 from shop.models import ProductImage, TransactionContent
-from shop.pay import (
-    cancel_subscriptions,
-    pay,
-    register,
-    setup_payment_method,
-    start_subscriptions,
-)
+from shop.pay import cancel_subscriptions, pay, register, setup_payment_method, start_subscriptions
 from shop.shop_data import (
     all_product_data,
     get_membership_products,
@@ -324,9 +309,12 @@ def stripe_callback_route():
 
 
 @service.route("/download-accounting-file/<int:year>/<int:month>", method=GET, permission=WEBSHOP)
-def download_accounting_file_route(year, month):
-    start_date = datetime(year, month, 1, tzinfo=timezone.utc)
-    end_data = datetime(year, month, 1, tzinfo=timezone.utc) + relativedelta(months=1)
+def download_accounting_file_route(year: str, month: str):
+    zone = ZoneInfo("Europe/Stockholm")
+    start_date = datetime(year=year, month=month, day=1, hour=0, minute=0, second=0, microsecond=0, tzinfo=zone)
+    end_data = datetime(
+        year=year, month=month, day=1, hour=0, minute=0, second=0, microsecond=0, tzinfo=zone
+    ) + relativedelta(months=1)
     return b64encode(export_accounting(start_date, end_data, TimePeriod.Month, g.user_id).encode("cp437")).decode(
         "ascii"
     )

@@ -180,7 +180,7 @@ const WellKnownProducts = [
     "membership_subscription",
     "labaccess_subscription",
 ] as const;
-type WellKnownProductId = (typeof WellKnownProducts)[number];
+export type WellKnownProductId = (typeof WellKnownProducts)[number];
 
 export function AssertIsWellKnownProductId(
     id: string | undefined,

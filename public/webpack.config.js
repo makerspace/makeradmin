@@ -19,6 +19,7 @@ module.exports = (env, args) => {
             quiz: "./ts/quiz.tsx",
             licenses: "./ts/licenses.tsx",
             courses: "./ts/courses.tsx",
+            reset_password: "./ts/reset_password.tsx",
         },
 
         output: {

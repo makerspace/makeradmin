@@ -120,7 +120,7 @@ These are important to make sure links work, but also to handle CORS in the brow
 ### System tests/integration tests that requires a running installation
 
 Systests are written in python and the sources for the systests are in the api/src/systest directory (because it shares a lot of code with the api unittests). There are
-tests using the api as well as selenium tests. Those tests are also run in travis.
+tests using the api as well as selenium tests. Those tests are also run in Github actions.
 
 You can run the tests in test containers using a one off db with:
 
@@ -154,7 +154,7 @@ If you for some reason want to remove the existing database and start from scrat
 make clean-nuke
 ```
 
-_Warning: this will completely wipe out all your makeradmin data!_
+⚠️ _Warning: this will completely wipe out all your makeradmin data!_
 
 After this you can run `make firstrun` again to set things up again.
 
@@ -189,37 +189,9 @@ After the forwarding has started, you'll need to copy the signing secret it give
 
 When using stripe, subscriptions need to be configured via the stripe website.
 
-#### Needed Stripe configuration
+#### Stripe configuration
 
-The configuration needed on stripe is:
-
--   Create a **coupon** for low income discount. It should be with percentage discount. Add the metadata "makerspace_price_level" = "low_income_discount"
-
-You can achieve all of this using the Stripe CLI:
-
-```bash
-# Create a coupon
-stripe coupons create --name='Low income discount' --percent-off=50 -d 'metadata[makerspace_price_level]=low_income_discount'
-```
-
-If you try to access any page which needs these products (e.g. the registration page, or the member page), makeradmin will fetch them from stripe and do a bunch of validation checks.
-
-### Setting up required products in makeradmin
-
-For the member view page and regristration page to work there are also a few products needed in makeradmin in the category Medlemskap.
-
--   Base membership
-    -   Metadata: {"allowed_price_levels":["low_income_discount"],"special_product_id":"single_membership_year"}
-    -   Enhet/unit: år
-    -   Action: add membership days
--   Makerspace access
-    -   Metadata: {"allowed_price_levels":["low_income_discount"],"special_product_id":"single_labaccess_month"}
-    -   Enhet/unit: mån
-    -   Action: add membership days, add labaccess days
--   Makerspace access starter pack
-    -   Metadata:{"allowed_price_levels":["low_income_discount"],"special_product_id":"access_starter_pack"}
-    -   Enhet/unit: st
-    -   Action: add labaccess days
+If you try to access any page which needs these products (e.g. the registration page, or the member page), makeradmin will fetch them from stripe and do a bunch of validation checks on them.
 
 Makeradmin will use these products to create the following in stripe TODO FIX THIS
 

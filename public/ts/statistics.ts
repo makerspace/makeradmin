@@ -1,17 +1,12 @@
 /// <reference path="../node_modules/moment/moment.d.ts" />
 import * as common from "./common";
 //import * as moment from 'moment';
+import * as d3 from "d3";
+import { sankey, sankeyLeft, sankeyLinkHorizontal } from "d3-sankey";
 import "moment/locale/sv";
 import { ServerResponse } from "./common";
+import { Product, WellKnownProductId } from "./payment_common";
 import { Quiz } from "./quiz";
-import * as d3 from "d3";
-import {
-    sankey,
-    SankeyGraph,
-    SankeyLayout,
-    sankeyLeft,
-    sankeyLinkHorizontal,
-} from "d3-sankey";
 
 declare var UIkit: any;
 declare var Chart: any;
@@ -63,6 +58,7 @@ common.documentLoaded().then(() => {
             const laserjson = data[1];
             addRetentionChart(root, data[6].data);
             addChart(root, membershipjson.data);
+            addSubscriptionsChart(root, data[3].data);
             addLaserChart(root, laserjson.data);
             for (let quiz of data[2].data) {
                 const quiz_future = common.ajax(
@@ -149,6 +145,75 @@ function pointAtDate(items: Array<any>, date: Date) {
     return best;
 }
 
+function addSubscriptionsChart(root: HTMLElement, data: ProductStatistics) {
+    const config = {
+        type: "horizontalBar",
+        data: {
+            labels: [
+                "Total members",
+                "Has no subscription",
+                "Has membership sub (maybe more)",
+                "Has access sub (maybe more)",
+                "Has both subs",
+            ],
+            datasets: [
+                {
+                    label: "Members",
+                    backgroundColor: "#FF000077",
+                    borderColor: colors[0],
+                    data: [
+                        data.subscription_split.active_members,
+                        data.subscription_split.active_members -
+                            data.subscription_split.has_membership_sub -
+                            data.subscription_split.has_makerspace_access_sub +
+                            data.subscription_split.has_both_subs,
+                        data.subscription_split.has_membership_sub,
+                        data.subscription_split.has_makerspace_access_sub,
+                        data.subscription_split.has_both_subs,
+                    ],
+                },
+            ],
+        },
+        options: {
+            title: {
+                display: true,
+                text: "Antal medlemmar med olika typer av prenumerationer",
+            },
+            responsive: true,
+            scales: {
+                xAxes: [
+                    {
+                        stacked: false,
+                        ticks: {
+                            beginAtZero: true,
+                        },
+                    },
+                ],
+                yAxes: [
+                    {
+                        stacked: true,
+                    },
+                ],
+            },
+        },
+    };
+
+    const stats = document.createElement("div") as HTMLDivElement;
+
+    stats.innerHTML = `
+	<h3>Statistics for Subscriptions</h3>
+	<canvas width=500 height=300></canvas>
+	`;
+    stats.className = "statistics-member-stats";
+
+    const canvas = stats.querySelector("canvas")!;
+    root.appendChild(stats);
+    canvas.width = 500;
+    canvas.height = 300;
+    const ctx = canvas.getContext("2d");
+    new Chart(ctx, config);
+}
+
 function addChart(root: HTMLElement, data: any) {
     const dataMembership = filterDuplicates(toPoints(data.membership));
     const dataLabaccess = filterDuplicates(toPoints(data.labaccess));
@@ -164,6 +229,7 @@ function addChart(root: HTMLElement, data: any) {
                     borderColor: colors[0],
                     fill: false,
                     data: dataMembership,
+                    yAxisID: "y-members",
                 },
                 {
                     label: "Labmedlemmar",
@@ -171,6 +237,7 @@ function addChart(root: HTMLElement, data: any) {
                     borderColor: colors[1],
                     fill: false,
                     data: dataLabaccess,
+                    yAxisID: "y-makerspaceAccess",
                 },
             ],
         },
@@ -202,6 +269,8 @@ function addChart(root: HTMLElement, data: any) {
                             // round: 'day'
                             tooltipFormat: "ll",
                             max: maxtime,
+                            unit: "year",
+                            stepSize: 1,
                         },
                         scaleLabel: {
                             display: true,
@@ -216,7 +285,22 @@ function addChart(root: HTMLElement, data: any) {
                         },
                         scaleLabel: {
                             display: true,
-                            labelString: "Antal",
+                            labelString: "Antal Medlemmar",
+                        },
+                        id: "y-members",
+                    },
+                    {
+                        ticks: {
+                            min: 0,
+                        },
+                        scaleLabel: {
+                            display: true,
+                            labelString: "Antal med Makerspace Access",
+                        },
+                        position: "right",
+                        id: "y-makerspaceAccess",
+                        gridLines: {
+                            color: colors[1],
                         },
                     },
                 ],
@@ -246,7 +330,7 @@ function addChart(root: HTMLElement, data: any) {
         },
     };
 
-    const memberstats = <HTMLDivElement>document.createElement("div");
+    const memberstats = document.createElement("div") as HTMLDivElement;
     const highestMembership = maxOfSeries(dataMembership) || {
         x: "never",
         y: 0,
@@ -343,7 +427,7 @@ function addLaserChart(root: HTMLElement, data: any) {
         },
     };
 
-    const canvas = <HTMLCanvasElement>document.createElement("canvas");
+    const canvas = document.createElement("canvas") as HTMLCanvasElement;
     root.appendChild(canvas);
     canvas.width = 500;
     canvas.height = 300;
@@ -420,14 +504,14 @@ function addMemberDistribution(
         },
     };
 
-    const canvas = <HTMLCanvasElement>document.createElement("canvas");
+    const canvas = document.createElement("canvas") as HTMLCanvasElement;
     root.appendChild(canvas);
     canvas.width = 500;
     canvas.height = 300;
     const ctx = canvas.getContext("2d");
     new Chart(ctx, config);
 
-    const desc = <HTMLParagraphElement>document.createElement("p");
+    const desc = document.createElement("p") as HTMLParagraphElement;
     desc.textContent = description;
     root.appendChild(desc);
 }
@@ -623,7 +707,7 @@ function addQuizChart(root: HTMLElement, data: QuizStatistics, quiz: Quiz) {
         },
     };
 
-    const quizstats = <HTMLDivElement>document.createElement("div");
+    const quizstats = document.createElement("div") as HTMLDivElement;
 
     quizstats.innerHTML = `
 	<h3>Statistics for Quiz: ${quiz.name}</h3>
@@ -653,22 +737,6 @@ function addQuizChart(root: HTMLElement, data: QuizStatistics, quiz: Quiz) {
     new Chart(ctx, config);
 }
 
-interface Product {
-    id: number;
-    category_id: number;
-    name: string;
-    description: string;
-    unit: string;
-    price: number;
-    smallest_multiple: number;
-    filter: string;
-    image: string;
-    display_order: number;
-    created_at: string;
-    updated_at: string;
-    deleted_at: string | null;
-}
-
 interface Category {
     id: number;
     name: string;
@@ -690,15 +758,32 @@ interface ProductStatistics {
     }[];
     products: Product[];
     categories: Category[];
+    subscription_split: {
+        active_members: number;
+        has_membership_sub: number;
+        has_makerspace_access_sub: number;
+        has_both_subs: number;
+    };
 }
 
 function addProductPurchasedChart(root: HTMLElement, data: ProductStatistics) {
-    const membershipProductIDs = [1, 2, 3];
+    const membershipProductIDs: WellKnownProductId[] = [
+        "access_starter_pack",
+        "single_membership_year",
+        "single_labaccess_month",
+        "membership_subscription",
+        "labaccess_subscription",
+    ];
     const onlyMembershipProducts = data.products.filter((p) =>
-        membershipProductIDs.includes(p.id),
+        membershipProductIDs.some(
+            (id) => id == p.product_metadata.special_product_id,
+        ),
     );
     const excludingMembershipProducts = data.products.filter(
-        (p) => !membershipProductIDs.includes(p.id),
+        (p) =>
+            !membershipProductIDs.some(
+                (id) => id == p.product_metadata.special_product_id,
+            ),
     );
 
     const membershipSales = onlyMembershipProducts.map((p) => ({
@@ -789,7 +874,7 @@ function addRevenueChart(
         },
     };
 
-    const canvas = <HTMLCanvasElement>document.createElement("canvas");
+    const canvas = document.createElement("canvas") as HTMLCanvasElement;
     root.appendChild(canvas);
     canvas.width = 500;
     canvas.height = 70 + 30 * data.length;
@@ -815,6 +900,7 @@ async function addRetentionChart(root: HTMLElement, graph: RetentionGraph) {
         .append("svg")
         .attr("width", width + margin.left + margin.right)
         .attr("height", height + margin.top + margin.bottom)
+        .attr("style", "max-width: unset;")
         .append("g")
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 

@@ -1,6 +1,7 @@
 from typing import List, Optional, Tuple
 
 import bcrypt
+import sqlalchemy
 from service.api_definition import BAD_VALUE
 from service.db import db_session
 from service.error import Unauthorized
@@ -74,13 +75,18 @@ def get_member_permissions(member_id: Optional[int] = None) -> List[Tuple[int, s
 
 
 def authenticate(username: Optional[str] = None, password: Optional[str] = None) -> int:
-    """Authenticate a member trough username and password, returns member_id if authenticated, used from core."""
-
-    member: Optional[Member] = db_session.query(Member).filter_by(email=username).first()
+    """Authenticate a member trough email/member number and password, returns member_id if authenticated, used from core."""
+    member: Optional[Member] = (
+        db_session.query(Member)
+        .filter((Member.email == username) | (sqlalchemy.cast(Member.member_number, sqlalchemy.String) == username))
+        .first()
+    )
 
     if member is None or not verify_password(password, member.password):
         raise Unauthorized(
-            "The username and/or password you specified was incorrect.", fields="username,password", what=BAD_VALUE
+            "The email/member number and/or password you specified was incorrect.",
+            fields="username,password",
+            what=BAD_VALUE,
         )
 
     return member.member_id

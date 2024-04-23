@@ -1,9 +1,8 @@
-import * as common from "./common";
-import { Component, render } from "preact";
-import { useState } from "preact/hooks";
-import { login_via_single_use_link } from "./login";
-import { ServerResponse } from "./common";
 import markdown from "markdown-it";
+import { Component, render } from "preact";
+import * as common from "./common";
+import { ServerResponse } from "./common";
+import { Login } from "./login";
 import { URL_FACEBOOK_GROUP, URL_SLACK_HELP } from "./urls";
 
 declare var UIkit: any;
@@ -12,47 +11,6 @@ const markdown_engine = markdown({
     linkify: true,
     html: true,
 });
-
-const Login = ({ redirect }: { redirect: string }) => {
-    let [tag, setTag] = useState("");
-
-    return (
-        <div className="uk-width-medium">
-            <form
-                className="uk-form"
-                onSubmit={(e) => {
-                    e.preventDefault();
-                    if (tag) {
-                        login_via_single_use_link(tag, redirect);
-                    } else {
-                        UIkit.modal.alert("You need to enter your email");
-                    }
-                }}
-            >
-                <div className="uk-form-row" style={{ margin: "16px 0" }}>
-                    <input
-                        autoFocus
-                        className="uk-form-large uk-width-1-1"
-                        type="text"
-                        placeholder="Email/Member number"
-                        value={tag}
-                        onChange={(v) => setTag(v.currentTarget.value)}
-                    />
-                </div>
-
-                <div className="uk-form-row" style={{ margin: "16px 0" }}>
-                    <button className="uk-width-1-1 uk-button uk-button-primary uk-button-large">
-                        <span className="uk-icon-check" />
-                        Continue
-                    </button>
-                </div>
-            </form>
-            <p style={{ textAlign: "center" }}>
-                <a href="/shop/register">Become a member</a>
-            </p>
-        </div>
-    );
-};
 
 interface Question {
     id: number;
@@ -230,7 +188,9 @@ class QuizManager extends Component<QuizManagerProps, State> {
                                 Please log in and then return to this quiz.
                             </p>
                             <div className="quiz-login">
-                                <Login redirect={window.location.href} />
+                                <div className="uk-width-medium">
+                                    <Login redirect={window.location.href} />
+                                </div>
                             </div>
                         </>
                     ) : this.state.loginState == "pending" ? (

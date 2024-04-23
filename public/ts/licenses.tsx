@@ -1,7 +1,7 @@
-import * as common from "./common";
-import * as login from "./login";
-import { UNAUTHORIZED } from "./common";
 import { render } from "preact";
+import * as common from "./common";
+import { UNAUTHORIZED } from "./common";
+import * as login from "./login";
 import { Sidebar } from "./sidebar";
 declare var UIkit: any;
 
@@ -57,30 +57,11 @@ const LicensesPage = () => {
                             egen dator, förbereda allt och öppna i CAD-datorn
                             för att spara ut toolpaths osv.
                         </p>
-                        <ol>
-                            <li>
-                                Ladda ner en trial av VCarve Pro och installera.
-                            </li>
-                            <li>
-                                Du hittar denna trial-version{" "}
-                                <a href="https://www.vectric.com/free-trial/vcarve-pro">
-                                    här
-                                </a>
-                                .
-                            </li>
-                            <li>
-                                Starta programmet och under fliken Help hittar
-                                du "About VCarve Pro Trial".
-                            </li>
-                            <li>
-                                Där sätter du in vårat Makerspace ID som är{" "}
-                                <pre>
-                                    <code>
-                                        B7D8D-0BB4E-E7877-8853E-F49AB-A1D0B-DEE9D
-                                    </code>
-                                </pre>
-                            </li>
-                        </ol>
+                        <p>
+                            <a href="https://portal.vectric.com/organization/shared-invite/jBAn3T9KLm6nT34tYtdg">
+                                Skaffa VCarve Pro - Stockholm Makerspace Edition
+                            </a>
+                        </p>
                     </div>
                 </div>
             </div>

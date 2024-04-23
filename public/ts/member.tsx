@@ -664,7 +664,7 @@ function PersonalData({
     onChangePinCode,
     onChangePhoneNumber,
 }: {
-    member: member_t;
+    member: member_t & { has_password: boolean };
     onChangePinCode: () => void;
     onChangePhoneNumber: () => void;
 }) {
@@ -770,6 +770,56 @@ function PersonalData({
                     </button>
                 </span>
                 {pin_warning}
+            </div>
+            <div>
+                <label for="password" class="uk-form-label">
+                    Lösenord
+                </label>
+                <span style="width: 100%; display: flex;">
+                    <input
+                        name="password"
+                        class="uk-input readonly-input"
+                        placeholder={
+                            member.has_password
+                                ? "********"
+                                : t("member_page.no_password_set")
+                        }
+                        disabled
+                    />
+                    <button
+                        class="uk-button uk-button-danger"
+                        onClick={(e) => {
+                            e.preventDefault();
+                            common
+                                .ajax(
+                                    "POST",
+                                    `${window.apiBasePath}/oauth/request_password_reset`,
+                                    {
+                                        user_identification: member.email,
+                                        redirect: "member",
+                                    },
+                                )
+                                .then(() => {
+                                    UIkit.modal.alert(
+                                        t("member_page.set_password_alert")(
+                                            member,
+                                        ),
+                                    );
+                                })
+                                .catch((e) => {
+                                    UIkit.modal.alert(
+                                        t(
+                                            "member_page.failed_set_password_alert",
+                                        )(get_error(e)),
+                                    );
+                                });
+                        }}
+                    >
+                        {member.has_password
+                            ? t("member_page.change_password")
+                            : t("member_page.set_password")}
+                    </button>
+                </span>
             </div>
         </fieldset>
     );
@@ -1133,7 +1183,7 @@ function MemberPage({
     show_beta,
     access,
 }: {
-    member: member_t;
+    member: member_t & { has_password: boolean };
     membership: membership_t;
     pending_labaccess_days: number;
     subscriptions: SubscriptionInfo[];

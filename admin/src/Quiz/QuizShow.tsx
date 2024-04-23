@@ -1,10 +1,8 @@
 import React from "react";
-import QuizQuestion from "../Models/QuizQuestion";
 import Quiz from "../Models/Quiz";
 import { browserHistory } from "../browser_history";
 import { confirmModal } from "../message";
-import QuestionEditForm from "./QuestionEditForm";
-import QuestionList from "./QuestionList";
+import QuestionListRouter from "./QuestionList";
 import QuizEditForm from "./QuizEditForm";
 
 interface State {
@@ -16,7 +14,7 @@ interface Props {
     match: { params: { id: string } };
 }
 
-class QuestionShow extends React.Component<Props, State> {
+class QuizShow extends React.Component<Props, State> {
     unsubscribe: () => void;
     quiz: Quiz;
 
@@ -72,10 +70,10 @@ class QuestionShow extends React.Component<Props, State> {
                     onSave={() => this.save()}
                     onDelete={() => this.delete()}
                 />
-                <QuestionList quiz_id={this.state.quiz.id} />
+                <QuestionListRouter quiz_id={this.state.quiz.id} />
             </>
         );
     }
 }
 
-export default QuestionShow;
+export default QuizShow;

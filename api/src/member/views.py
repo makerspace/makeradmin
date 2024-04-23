@@ -6,6 +6,7 @@ from membership.models import Member
 from membership.views import member_entity
 from quiz.views import member_quiz_statistics
 from service.api_definition import GET, MESSAGE_SEND, POST, PUBLIC, USER, Arg, natural1, non_empty_str
+from service.db import db_session
 from service.error import Unauthorized
 
 from member import service
@@ -29,7 +30,15 @@ def send_updated_member_info(member_id: int = Arg(int), msg_swe: str = Arg(str),
 @service.route("/current", method=GET, permission=USER)
 def current_member():
     """Get current member."""
-    return member_entity.read(g.user_id)
+    m = member_entity.read(g.user_id)
+
+    # Expose if the member has a password set, but not what the password is (not even the hash)
+    assert m is not None
+    m2 = db_session.query(Member).get(g.user_id)
+    assert m2 is not None
+    m["has_password"] = m2.password is not None
+
+    return m
 
 
 @service.route("/current/permissions", method=GET, permission=USER)

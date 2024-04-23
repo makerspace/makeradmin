@@ -24,6 +24,7 @@ Therefore we use a regular purchase for the first payment, and then schedule the
 This logic is handled in the frontend.
 
 """
+
 from dataclasses import dataclass
 from datetime import date, datetime, time, timedelta, timezone
 from decimal import Decimal
