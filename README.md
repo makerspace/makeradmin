@@ -1,27 +1,47 @@
 [![Build and run tests for makeradmin](https://github.com/makerspace/makeradmin/actions/workflows/makeradmin.yml/badge.svg)](https://github.com/makerspace/makeradmin/actions/workflows/makeradmin.yml)
+
 # Makeradmin
 
-## Install 
+## Install
 
 ### Docker
+
 ```bash
-sudo apt-get install docker.io docker-compose-plugin
-sudo adduser your_username docker
+sudo apt-get install docker.io
+sudo adduser $(whoami) docker
 ```
-You need to sign out and sign back in again for changes to take effect. 
+
+You need to sign out and sign back in again for changes to take effect.
 
 ### Python
-Python 3.10.
+
+Makeradmin uses Python 3.11.
+
+```bash
+sudo apt-get install python3.10-dev python3.10-doc python3-pip
+```
 
 The install process will install additional pip packages.
 Activate a venv / virtualenv before install if you want python environment isolation.
 
 ### npm
+
 ```bash
 sudo apt-get install npm
 ```
 
 ## Initialize everything
+
+Clone this git repository to a suitable place on your computer / server
+
+Start by initializing a [virtual python environment](https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/) in the cloned folder
+
+```bash
+python3 -m venv .venv
+```
+
+Run the firstrun script
+
 ```bash
 make firstrun
 ```
@@ -30,6 +50,8 @@ This will build docker images and configure the database. This may take quite so
 It will also generate a `.env` file with new random keys and passwords that the system will use.
 
 You will be prompted for if you want to create a new admin user, it is recommended to do this here.
+
+You will also be prompted for if you want to create some fake members, transactions etc which can be useful for development.
 
 If you are deploying on a server you need to configure hosts and other settings by editing the `.env` file.
 If you do modify the `.env` file you need to restart the services afterwards by running
@@ -41,11 +63,12 @@ docker-compose up -d --build
 ## Start MakerAdmin, web shop, etc.
 
 Run all services locally (but you will have to insert data, see below):
+
 ```bash
 make run
 ```
 
-You can also run in dev mode where source directories are mounted inside the containers and sources are 
+You can also run in dev mode where source directories are mounted inside the containers and sources are
 reloaded when changed (in most cases):
 
 ```bash
@@ -53,12 +76,15 @@ make dev
 ```
 
 ### Adding new users that can access MakerAdmin
+
 This can be done from the web UI, but it can be convenient to do it from the commandline too
+
 ```
 python3 create_user.py --first-name "Maker" --last-name "Makersson" --email "maker@example.com" --type admin
 ```
 
-Before running the command above you might have to run the commande below to install all dependencies. 
+Before running the command above you might have to run the commande below to install all dependencies.
+
 ```
 make init
 ```
@@ -73,11 +99,14 @@ make firstrun
 ```
 
 ### Viewing MakerAdmin etc.
+
 Go to:
-* [the makeradmin web site](http://localhost:8009)
-* [the web shop](http://localhost:8011/shop)
+
+-   [the makeradmin web site](http://localhost:8009)
+-   [the web shop](http://localhost:8011/shop)
 
 ### Logging in
+
 Go to [the member page](http://localhost:8011/member) and fill in the email address corresponding to the user created previously. A link will then be printed in the terminal (where `make dev` is run) that allows you to login. E.g.
 
 ```
@@ -100,15 +129,17 @@ These are important to make sure links work, but also to handle CORS in the brow
 
 ### System tests/integration tests that requires a running installation
 
-Systests are written in python and the sources for the systests are in the api/src/systest directory (because it shares a lot of code with the api unittests). There are 
-tests using the api as well as selenium tests. Those tests are also run in travis.
+Systests are written in python and the sources for the systests are in the api/src/systest directory (because it shares a lot of code with the api unittests). There are
+tests using the api as well as selenium tests. Those tests are also run in Github actions.
 
 You can run the tests in test containers using a one off db with:
+
 ```
 make test
 ```
 
 Or you can run against your local running environment with:
+
 ```
 make dev-test
 ```
@@ -118,22 +149,22 @@ runner (like pytest).
 
 ### Python unittests
 
-The api directory also contains unittests that can be run standalone, they will also run when running ```make test```.
+The api directory also contains unittests that can be run standalone, they will also run when running `make test`.
 
 ### Javascript unit tests
 
 Javascript unit tests are run when the images is build but they can also be run against the source directly
-by ```make test-admin-js``` or ```npm --prefix admin run test```.
-
+by `make test-admin-js` or `npm --prefix admin run test`.
 
 ### If everything goes wrong
 
 If you for some reason want to remove the existing database and start from scratch you can run the command
+
 ```
 make clean-nuke
 ```
 
-*Warning: this will completely wipe out all your makeradmin data!*
+⚠️ _Warning: this will completely wipe out all your makeradmin data!_
 
 After this you can run `make firstrun` again to set things up again.
 
@@ -161,32 +192,25 @@ After the forwarding has started, you'll need to copy the signing secret it give
 When using stripe, subscriptions need to be configured via the stripe website.
 These subscriptions will automatically be turned into makeradmin products so that members can purchase them.
 
-Note: You should *not* modify these products in makeradmin. They will be reset whenever the docker container restarts anyway (when the registration page is visited).
+Note: You should _not_ modify these products in makeradmin. They will be reset whenever the docker container restarts anyway (when the registration page is visited).
 
-The configuration needed on stripe is:
+#### Required Stripe configuration
 
-* Create a **product** for base membership. Add the metadata "subscription_type"="membership" to the **product** item
-  * Add a yearly **price**, and add the metadata "price_type"="recurring" to the **price** item
-* Create a **product** for makerspace access. Add the metadata "subscription_type"="labaccess" to the **product** item
-  * Add a monthly price, and add the metadata "price_type"="recurring" to the **price** item
-  * Add a **price** for N months, where N is the binding period as specified in `stripe_subscriptions.py->BINDING_PERIOD`. The price should be N times the recurring price. Add the metadata "price_type"="binding_period"
-* Create a **coupon** for low income discount. It should be with percentage discount. Add the metadata "makerspace_price_level" = "low_income_discount"
+Run the following script to create the required Stripe products. _You should only run it once._ But if anything goes wrong, you can modify the products from the Stripe dashboard.
 
-If you try to access any page which needs these products (e.g. the registration page, or the member page), makeradmin will fetch them from stripe and do a bunch of validation checks.
+```bash
+# Print the help
+./create_stripe_products.py --help
+# Example usage (change the arguments to suit your needs)
+./create_stripe_products.py --yearly-price 200 --monthly-price 300 --binding-period 2
+```
 
-### Setting up required products in makeradmin
+If you try to access any page which needs these products (e.g. the registration page, or the member page), makeradmin will fetch them from stripe and do a bunch of validation checks on them.
 
-For the member view page and regristration page to work there are also a few products needed in makeradmin in the category Medlemskap.
+## Bookkeeping and accounting
 
-* Base membership
-  * Metadata: {"allowed_price_levels":["low_income_discount"],"special_product_id":"single_membership_year"}
-  * Enhet/unit: år
-  * Action: add membership days
-* Makerspace access
-  * Metadata: {"allowed_price_levels":["low_income_discount"],"special_product_id":"single_labaccess_month"}
-  * Enhet/unit: mån
-  * Action: add membership days, add labaccess days
-* Makerspace access starter pack
-  * Metadata:{"allowed_price_levels":["low_income_discount"],"special_product_id":"access_starter_pack"}
-  * Enhet/unit: st
-  * Action: add labaccess days
+For accounting Makeradmin supports exporting the transaction history as sie files.
+
+The transaction history is compared with Stripe to make sure it matches and there are no extra transactions in Makeradmin or Stripe.
+
+Debit bookings adjust the product price with the transaction fee. However, each transaction usually contain multiple products. Thus, the transaction fee neds to be distributed over the products if the debit accounts or cost centers for the product are different. This adjustment involves distributing the transaction fee among the products in proportion to their total price within the transaction, which takes into consideration the quantity of products purchased. Any rounding errors are corrected by adjusting them to the nearest, higher or lower, amount. Any left over cent is added or removed on the most expensive price to make sure the total sum is correct.
