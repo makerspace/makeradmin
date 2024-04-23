@@ -14,7 +14,7 @@ class ProductImageEntity(Entity):
                 image = Image.open(BytesIO(model["data"]))
             except UnidentifiedImageError:
                 raise BadRequest("unsupported or invalid file format")
-            image.thumbnail((500, 1_000_000), Image.ANTIALIAS)
+            image.thumbnail((500, 1_000_000), Image.LANCZOS)
             bytes = BytesIO()
             image.save(bytes, format="png", compress_level=8)
             model["data"] = bytes.getvalue()
