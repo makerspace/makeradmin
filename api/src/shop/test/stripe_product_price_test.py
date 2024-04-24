@@ -163,6 +163,7 @@ class StripeProductPriceTest(ShopTestMixin, FlaskTestBase):
         stripe_test_product = _create_stripe_product(makeradmin_test_product)
         assert stripe_test_product
         assert stripe_test_product.name == makeradmin_test_product.name
+        assert makeradmin_test_product.stripe_product_id == stripe_test_product.id
 
     def test_create_product_with_price_regular(self) -> None:
         makeradmin_test_product = self.db.create_product(
