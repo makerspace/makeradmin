@@ -25,7 +25,7 @@ from shop.stripe_product_price import (
     replace_stripe_price,
     update_stripe_product,
 )
-from shop.stripe_util import convert_to_stripe_amount
+from shop.stripe_util import convert_to_stripe_amount, get_subscription_category
 from test_aid.systest_config import STRIPE_PRIVATE_KEY
 from test_aid.test_base import FlaskTestBase, ShopTestMixin
 
@@ -35,10 +35,25 @@ logger = getLogger("makeradmin")
 class StripeRecurringWithoutStripeTest(ShopTestMixin, FlaskTestBase):
     models = [membership.models, messages.models, shop.models, core.models]
 
+    @classmethod
+    def setUpClass(self) -> None:
+        super().setUpClass()
+        self.subscription_category_id = get_subscription_category().id
+        self.not_subscription_category_id = self.db.create_category(name="Not Subscriptions").id
+
+    def test_makeradmin_to_stripe_recurring_fixed(self) -> None:
+        makeradmin_test_product = self.db.create_product(
+            unit="st",
+            category_id=self.not_subscription_category_id,
+        )
+        recurring = makeradmin_to_stripe_recurring(makeradmin_test_product, stripe_constants.PriceType.FIXED_PRICE)
+        assert recurring is None
+
     def test_makeradmin_to_stripe_recurring_recurring(self) -> None:
         makeradmin_test_product = self.db.create_product(
             unit="mån",
             smallest_multiple=3,
+            category_id=self.subscription_category_id,
         )
         recurring = makeradmin_to_stripe_recurring(makeradmin_test_product, stripe_constants.PriceType.RECURRING)
         assert recurring.interval == "month"
@@ -48,6 +63,7 @@ class StripeRecurringWithoutStripeTest(ShopTestMixin, FlaskTestBase):
         makeradmin_test_product = self.db.create_product(
             unit="mån",
             smallest_multiple=3,
+            category_id=self.subscription_category_id,
         )
         recurring = makeradmin_to_stripe_recurring(makeradmin_test_product, stripe_constants.PriceType.BINDING_PERIOD)
         assert recurring.interval == "month"
@@ -56,10 +72,27 @@ class StripeRecurringWithoutStripeTest(ShopTestMixin, FlaskTestBase):
     def test_makeradmin_to_stripe_recurring_wrong_unit(self) -> None:
         makeradmin_test_product = self.db.create_product(
             unit="st",
+            category_id=self.subscription_category_id,
         )
         with self.assertRaises(ValueError) as context:
             (makeradmin_to_stripe_recurring(makeradmin_test_product, stripe_constants.PriceType.RECURRING),)
         self.assertTrue("Unexpected unit" in str(context.exception))
+
+    def test_makeradmin_to_stripe_recurring_price_type_missmatch_sub(self) -> None:
+        makeradmin_test_product = self.db.create_product(
+            category_id=self.subscription_category_id,
+        )
+        with self.assertRaises(ValueError) as context:
+            (makeradmin_to_stripe_recurring(makeradmin_test_product, stripe_constants.PriceType.FIXED_PRICE),)
+        self.assertTrue("Unexpected price type" in str(context.exception))
+
+    def test_makeradmin_to_stripe_recurring_price_type_missmatch_not_sub(self) -> None:
+        makeradmin_test_product = self.db.create_product(
+            category_id=self.not_subscription_category_id,
+        )
+        with self.assertRaises(ValueError) as context:
+            (makeradmin_to_stripe_recurring(makeradmin_test_product, stripe_constants.PriceType.RECURRING),)
+        self.assertTrue("Unexpected price type" in str(context.exception))
 
 
 class StripeProductPriceTest(ShopTestMixin, FlaskTestBase):
@@ -90,7 +123,7 @@ class StripeProductPriceTest(ShopTestMixin, FlaskTestBase):
             for price in stripe_prices:
                 if price.active:
                     deactivate_stripe_price(price)
-            return super().tearDown()
+        super().tearDown()
 
     @staticmethod
     def assertPrice(
@@ -348,36 +381,30 @@ class StripeProductPriceTest(ShopTestMixin, FlaskTestBase):
         )
 
     def test_equal_product(self) -> None:
-        makeradmin_test_eq_product = self.db.create_product(
-            name="test eq price",
+        makeradmin_test_product = self.db.create_product(
+            name="test eq",
             price=200.0,
             id=self.base_stripe_id + 10,
             unit="mån",
             smallest_multiple=1,
             category_id=self.subscription_category.id,
         )
-        makeradmin_test_not_eq_product = self.db.create_product(
-            name="test not eq price",
-            price=200.0,
-            id=self.base_stripe_id - 1,
-            unit="mån",
-            smallest_multiple=1,
-            category_id=self.subscription_category.id,
-        )
 
-        self.seen_products.append(makeradmin_test_eq_product)
-        stripe_test_product = get_and_sync_stripe_product(makeradmin_test_eq_product)
+        self.seen_products.append(makeradmin_test_product)
+        stripe_test_product = get_and_sync_stripe_product(makeradmin_test_product)
         assert stripe_test_product
 
-        stripe_test_prices = get_and_sync_stripe_prices_for_product(makeradmin_test_eq_product, stripe_test_product)
+        stripe_test_prices = get_and_sync_stripe_prices_for_product(makeradmin_test_product, stripe_test_product)
         assert stripe_test_prices
         assert len(stripe_test_prices) == 1
 
-        assert eq_makeradmin_stripe_product(makeradmin_test_eq_product, stripe_test_product)
-        assert not eq_makeradmin_stripe_product(makeradmin_test_not_eq_product, stripe_test_product)
+        assert eq_makeradmin_stripe_product(makeradmin_test_product, stripe_test_product)
 
-    def test_equal_price(self) -> None:
-        makeradmin_test_eq_product = self.db.create_product(
+        makeradmin_test_product.name = "test not eq name"
+        assert not eq_makeradmin_stripe_product(makeradmin_test_product, stripe_test_product)
+
+    def test_equal_price_non_binding(self) -> None:
+        makeradmin_test_product = self.db.create_product(
             name="test eq price",
             price=200.0,
             id=self.base_stripe_id + 11,
@@ -385,66 +412,69 @@ class StripeProductPriceTest(ShopTestMixin, FlaskTestBase):
             smallest_multiple=1,
             category_id=self.subscription_category.id,
         )
-        product_not_eq_price = self.db.create_product(
-            name="test not eq price",
-            price=210.0,
-            id=self.base_stripe_id - 1,
-            unit="mån",
-            smallest_multiple=1,
-            category_id=self.subscription_category.id,
-        )
-        product_not_eq_unit = self.db.create_product(
-            name="test not eq unit",
-            price=200.0,
-            id=self.base_stripe_id - 2,
-            unit="year",
-            smallest_multiple=1,
-            category_id=self.subscription_category.id,
-        )
-        product_not_eq_id = self.db.create_product(
-            name="test not eq mult",
-            price=200.0,
-            id=self.base_stripe_id - 3,
-            unit="mån",
-            smallest_multiple=2,
-            category_id=self.subscription_category.id,
-        )
-        product_not_eq_cat = self.db.create_product(
-            name="test not eq category",
-            price=200.0,
-            id=self.base_stripe_id - 4,
-            unit="mån",
-            smallest_multiple=2,
-            category_id=self.not_subscription_category.id,
-        )
-        makeradmin_test_products_not_eq = [
-            product_not_eq_price,
-            product_not_eq_unit,
-            product_not_eq_id,
-            product_not_eq_cat,
-        ]
-        price_types = [
-            stripe_constants.PriceType.RECURRING,
-            stripe_constants.PriceType.RECURRING,
-            stripe_constants.PriceType.BINDING_PERIOD,
-            stripe_constants.PriceType.FIXED_PRICE,
-        ]
-        self.seen_products.append(makeradmin_test_eq_product)
-        stripe_test_product = get_and_sync_stripe_product(makeradmin_test_eq_product)
+        not_equal_variables = {
+            "price": 210,
+            "unit": "year",
+        }
+        self.seen_products.append(makeradmin_test_product)
+        stripe_test_product = get_and_sync_stripe_product(makeradmin_test_product)
         assert stripe_test_product
 
-        stripe_test_prices = get_and_sync_stripe_prices_for_product(makeradmin_test_eq_product, stripe_test_product)
+        stripe_test_prices = get_and_sync_stripe_prices_for_product(makeradmin_test_product, stripe_test_product)
         assert stripe_test_prices
         assert len(stripe_test_prices) == 1
 
         assert eq_makeradmin_stripe_price(
-            makeradmin_test_eq_product,
+            makeradmin_test_product,
             stripe_test_prices[stripe_constants.PriceType.RECURRING],
             stripe_constants.PriceType.RECURRING,
         )
-        for product, price_type in zip(makeradmin_test_products_not_eq, price_types):
+
+        for key, value in not_equal_variables.items():
+            old_value = getattr(makeradmin_test_product, key)
+            setattr(makeradmin_test_product, key, value)
             assert not eq_makeradmin_stripe_price(
-                product,
+                makeradmin_test_product,
                 stripe_test_prices[stripe_constants.PriceType.RECURRING],
+                stripe_constants.PriceType.RECURRING,
+            )
+            setattr(makeradmin_test_product, key, old_value)
+
+    def test_equal_price_with_binding(self) -> None:
+        makeradmin_test_product = self.db.create_product(
+            name="test eq price binding",
+            price=250.0,
+            id=self.base_stripe_id + 12,
+            unit="mån",
+            smallest_multiple=2,
+            category_id=self.subscription_category.id,
+        )
+        not_equal_variables = {
+            "price": 110,
+            "unit": "year",
+            "smallest_multiple": 3,
+        }
+        self.seen_products.append(makeradmin_test_product)
+        stripe_test_product = get_and_sync_stripe_product(makeradmin_test_product)
+        assert stripe_test_product
+
+        stripe_test_prices = get_and_sync_stripe_prices_for_product(makeradmin_test_product, stripe_test_product)
+        assert stripe_test_prices
+        assert len(stripe_test_prices) == 2
+
+        for price_type in [stripe_constants.PriceType.RECURRING, stripe_constants.PriceType.BINDING_PERIOD]:
+            assert eq_makeradmin_stripe_price(
+                makeradmin_test_product,
+                stripe_test_prices[price_type],
                 price_type,
             )
+
+        for key, value in not_equal_variables.items():
+            old_value = getattr(makeradmin_test_product, key)
+            setattr(makeradmin_test_product, key, value)
+            assert not eq_makeradmin_stripe_price(
+                makeradmin_test_product,
+                stripe_test_prices[stripe_constants.PriceType.BINDING_PERIOD],
+                stripe_constants.PriceType.BINDING_PERIOD,
+            )
+            setattr(makeradmin_test_product, key, old_value)
