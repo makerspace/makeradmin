@@ -35,7 +35,7 @@ import {
     getCurrentSubscriptions,
 } from "./subscriptions";
 import { Translator, translateUnit, useTranslation } from "./translations";
-import { URL_CALENDAR, URL_MEMBERBOOTH } from "./urls";
+import { URL_CALENDAR } from "./urls";
 declare var UIkit: any;
 
 type fn_past_enddate = (enddate: date_t, remaining_days: number) => JSX.Element;
@@ -218,6 +218,7 @@ function WarningItem({ children }: { children: preact.ComponentChildren }) {
 }
 
 function SignedContractWarning({ member }: { member: member_t }) {
+    const t = useTranslation();
     return member.labaccess_agreement_at ? null : (
         <WarningItem>
             Du måste delta på en <strong>medlemintroduktion</strong>. Du hittar
@@ -423,8 +424,9 @@ function get_pending_labaccess_days(pending_actions_json: any): number {
 }
 
 async function change_pin_code(member: member_t) {
+    const t = useTranslation();
     const pin_code = await UIkit.modal.prompt(
-        "Välj en pinkod",
+        t("change_pin.choose"),
         member.pin_code === null ? get_random_pin_code(4) : member.pin_code,
     );
     if (pin_code === null) return;
@@ -435,13 +437,13 @@ async function change_pin_code(member: member_t) {
             `${window.apiBasePath}/member/current/set_pin_code`,
             { pin_code: pin_code },
         );
-        await UIkit.modal.alert(`<h2>Pinkoden är nu bytt</h2>`);
+        await UIkit.modal.alert(`<h2>${t("change_pin.success")}</h2>`);
         location.reload();
     } catch (e) {
         UIkit.modal.alert(
-            `<h2>Kunde inte byta pinkod</h2><b class="uk-text-danger"">${get_error(
-                e,
-            )}</b>`,
+            `<h2>${t(
+                "change_pin.error",
+            )}</h2><b class="uk-text-danger"">${get_error(e)}</b>`,
         );
     }
 }
@@ -461,7 +463,9 @@ async function change_phone_number(
     );
     switch (r) {
         case "ok":
-            await UIkit.modal.alert(`<h2>Telefonnummret är nu bytt</h2>`);
+            await UIkit.modal.alert(
+                `<h2>${t("change_phone.validation_changed_success")}</h2>`,
+            );
 
             if (
                 membership.labaccess_active ||
@@ -509,99 +513,47 @@ function MembershipView({
     membership: membership_t;
     pendingLabaccessDays: number;
 }) {
+    const t = useTranslation();
     const labaccessStrings: template_strings_t = [
         (enddate: string, days: number) => (
-            <>
-                Din <strong>labaccess</strong> är ogiltig sedan {days} dagar (
-                {enddate}
-                ). <br />
-                Your <strong>lab membership</strong> expired {days} day(s) ago (
-                {enddate}).
-            </>
+            <>{t("member_page.labaccess.expired_days")(enddate, days)}</>
         ),
-        () => (
-            <>
-                Din <strong>labaccess</strong> gick ut igår. <br />
-                Your <strong>lab membership</strong> expired yesterday.
-            </>
-        ),
+        () => <>{t("member_page.labaccess.expired_single_day")}</>,
         (hours: number) => (
-            <>
-                Din <strong>labaccess</strong> är giltig i mindre än {hours}{" "}
-                timmar till. <br />
-                Your <strong>lab membership</strong> is valid for {hours} more
-                hours.
-            </>
+            <>{t("member_page.labaccess.expires_today")(hours)}</>
         ),
         (enddate: string, days: number) => (
             <>
-                Din <strong>labaccess</strong> är giltig t.o.m. {enddate}{" "}
-                (endast {days} dagar till). Kom ihåg att förnya den innan nästa
-                fredag morgon. <br />
-                Your <strong>lab membership</strong> is valid through {enddate}{" "}
-                (only {days} day(s) left). Remember to extend your lab
-                membership before next Friday morning.
+                {t("member_page.labaccess.valid")(enddate, days)}
+                {t("member_page.labaccess.extend_on_friday")}
             </>
         ),
         (enddate: string, days: number) => (
-            <>
-                Din <strong>labaccess</strong> är giltig t.o.m. {enddate} (
-                {days} dagar till). <br />
-                Your <strong>lab membership</strong> is valid through {enddate}{" "}
-                (only {days} day(s) left).
-            </>
+            <>{t("member_page.labaccess.valid")(enddate, days)}</>
         ),
-        () => (
-            <>
-                Din <strong>labaccess</strong> är inaktiv. <br />
-                Your <strong>lab membership</strong> is inactive.
-            </>
-        ),
+        () => <>{t("member_page.labaccess.inactive")}</>,
     ];
 
     const membershipStrings: template_strings_t = [
         (enddate: string, days: number) => (
             <>
-                Ditt <strong>föreningsmedlemsskap</strong> är ogiltigt sedan{" "}
-                {days} dagar ({enddate}). <br />
-                Your <strong>membership</strong> expired {days} day(s) ago (
-                {enddate})
+                {t("member_page.membership_strings.expired_days")(
+                    enddate,
+                    days,
+                )}
             </>
         ),
-        () => (
-            <>
-                Ditt <strong>föreningsmedlemsskap</strong> gick ut igår. <br />
-                Your <strong>membership</strong> expired yesterday.
-            </>
-        ),
+        () => <>{t("member_page.membership_strings.expired_single_day")}</>,
         (hours: number) => (
-            <>
-                Ditt <strong>föreningsmedlemsskap</strong> går ut idag. <br />
-                Your <strong>membership</strong> expires today.
-            </>
+            <>{t("member_page.membership_strings.expires_today")}</>
         ),
         (enddate: string, days: number) => (
-            <>
-                Ditt <strong>föreningsmedlemsskap</strong> är giltigt t.o.m.{" "}
-                {enddate} (endast {days} dagar till). <br />
-                Your <strong>membership</strong> is valid through {enddate}{" "}
-                (only {days} day(s) left).
-            </>
+            <>{t("member_page.membership_strings.valid")(enddate, days)}</>
         ),
         (enddate: string, days: number) => (
-            <>
-                Ditt <strong>föreningsmedlemsskap</strong> är giltigt t.o.m.{" "}
-                {enddate} ({days} dagar till). <br />
-                Your <strong>membership</strong> is valid through {enddate}{" "}
-                (only {days} day(s) left).
-            </>
+            <>{t("member_page.membership_strings.valid")(enddate, days)}</>
         ),
-        () => (
-            <>
-                Ditt <strong>föreningsmedlemsskap</strong> är inaktivt. <br />
-                Your <strong>membership</strong> is inactive.
-            </>
-        ),
+        () => <>{t("member_page.membership_strings.inactive")}</>,
     ];
 
     const specialLabaccessStrings: template_strings_t = [
@@ -609,20 +561,10 @@ function MembershipView({
         () => <></>,
         (hours: number) => <></>,
         (enddate: string, days: number) => (
-            <>
-                Du har fått <strong>specialtillträde</strong> till
-                föreningslokalerna t.o.m. {enddate} ({days} dagar till). <br />
-                You have been given <strong>special access</strong> to the
-                premises through {enddate} ({days} day(s) left).
-            </>
+            <>{t("member_page.special_access_notice")(enddate, days)}</>
         ),
         (enddate: string, days: number) => (
-            <>
-                Du har fått <strong>specialtillträde</strong> till
-                föreningslokalerna t.o.m. {enddate} ({days} dagar till). <br />
-                You have been given <strong>special access</strong> to the
-                premises through {enddate} ({days} day(s) left).
-            </>
+            <>{t("member_page.special_access_notice")(enddate, days)}</>
         ),
         () => <></>,
     ];
@@ -668,16 +610,14 @@ function PersonalData({
     onChangePinCode: () => void;
     onChangePhoneNumber: () => void;
 }) {
+    const t = useTranslation();
     const pin_warning =
         member.pin_code == null ? (
             <label class="uk-form-label" style="color: red;">
-                Du har inte satt någon PIN-kod ännu. Använd BYT-knappen för att
-                sätta den. PIN-koden används för{" "}
-                <a href={URL_MEMBERBOOTH}>memberbooth</a>.
+                {t("member_page.no_pin_warning")}
             </label>
         ) : null;
     const [showPinCode, setShowPinCode] = useState(false);
-    const t = useTranslation();
     return (
         <fieldset>
             <legend>
@@ -685,7 +625,7 @@ function PersonalData({
             </legend>
             <div>
                 <label for="firstname" class="uk-form-label">
-                    Förnamn
+                    {t("member_page.personal.firstname")}
                 </label>
                 <input
                     name="firstname"
@@ -696,7 +636,7 @@ function PersonalData({
             </div>
             <div>
                 <label for="lastname" class="uk-form-label">
-                    Efternamn
+                    {t("member_page.personal.lastname")}
                 </label>
                 <input
                     name="lastname"
@@ -707,7 +647,7 @@ function PersonalData({
             </div>
             <div>
                 <label for="email" class="uk-form-label">
-                    E-post
+                    {t("member_page.personal.email")}
                 </label>
                 <input
                     name="email"
@@ -718,7 +658,7 @@ function PersonalData({
             </div>
             <div>
                 <label for="phone" class="uk-form-label">
-                    Telefonnummer
+                    {t("member_page.personal.phone")}
                 </label>
                 <span style="width: 100%; display: flex;">
                     <input
@@ -826,6 +766,7 @@ function PersonalData({
 }
 
 function Address({ member }: { member: member_t }) {
+    const t = useTranslation();
     return (
         <fieldset data-uk-margin>
             <legend>
@@ -833,7 +774,7 @@ function Address({ member }: { member: member_t }) {
             </legend>
             <div>
                 <label for="address_street" class="uk-form-label">
-                    Address
+                    {t("member_page.addr.street_and_number")}
                 </label>
                 <input
                     name="address_street"
@@ -844,7 +785,7 @@ function Address({ member }: { member: member_t }) {
             </div>
             <div>
                 <label for="address_extra" class="uk-form-label">
-                    Extra adressrad, t ex C/O
+                    {t("member_page.addr.extra")}
                 </label>
                 <input
                     name="address_extra"
@@ -855,7 +796,7 @@ function Address({ member }: { member: member_t }) {
             </div>
             <div>
                 <label for="address_zipcode" class="uk-form-label">
-                    Postnummer
+                    {t("member_page.addr.postal_code")}
                 </label>
                 <input
                     name="address_zipcode"
@@ -866,7 +807,7 @@ function Address({ member }: { member: member_t }) {
             </div>
             <div>
                 <label for="address_city" class="uk-form-label">
-                    Postort
+                    {t("member_page.addr.city")}
                 </label>
                 <input
                     name="address_city"
