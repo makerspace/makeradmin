@@ -18,7 +18,7 @@ RUN npm install -g npm@9.2.0
 
 RUN npm i -g npm sass
 
-RUN pip3 install flask gunicorn
+RUN pip3 install flask flask_babel gunicorn
 
 RUN mkdir -p /work/src && mkdir -p /work/dist/js
 

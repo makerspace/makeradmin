@@ -1,7 +1,7 @@
 <form id="pay">
-    <h3>Betala med kort via Stripe</h3>
+    <h3>{{ _("Pay with bank card via Stripe") }}</h3>
     <div class="form-row">
-        {# <label for="card-element"> Credit or debit card </label> #}
+        {# <label for="card-element">{{ _("Credit or debit card") }}</label> #}
         <div id="payment_element"></div>
         <div id="card-element">
             <!-- A Stripe Element will be inserted here. -->
@@ -18,6 +18,6 @@
         disabled
     >
         <div class="progress-spinner" uk-spinner></div>
-        <span>Betala / Pay<span id="cart-sum"></span></span>
+        <span>{{ _("Pay") }}<span id="cart-sum"></span></span>
     </button>
 </form>
