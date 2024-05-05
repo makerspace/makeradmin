@@ -10,7 +10,7 @@ import stripe
 from shop import stripe_constants
 from shop.models import Product
 from shop.stripe_product_price import (
-    _create_stripe_price,  # TODO test
+    _create_stripe_price,
     _create_stripe_product,
     activate_stripe_price,
     activate_stripe_product,
@@ -20,7 +20,6 @@ from shop.stripe_product_price import (
     eq_makeradmin_stripe_product,
     get_and_sync_stripe_prices_for_product,
     get_and_sync_stripe_product,
-    get_and_sync_stripe_product_and_prices,
     get_or_create_stripe_prices_for_product,
     get_stripe_prices,
     get_stripe_product,
@@ -164,6 +163,27 @@ class StripeProductPriceTest(ShopTestMixin, FlaskTestBase):
         assert stripe_test_product
         assert stripe_test_product.name == makeradmin_test_product.name
         assert makeradmin_test_product.stripe_product_id == stripe_test_product.id
+
+    def test_create_price(self) -> None:
+        makeradmin_test_product = self.db.create_product(
+            name="test pris enkel",
+            price=100.0,
+            unit="st",
+            smallest_multiple=1,
+            category_id=self.not_subscription_category.id,
+        )
+        self.seen_products.append(makeradmin_test_product)
+        stripe_test_product = _create_stripe_product(makeradmin_test_product)
+        stripe_test_price = _create_stripe_price(
+            makeradmin_test_product, stripe_test_product, stripe_constants.PriceType.FIXED_PRICE
+        )
+
+        assert stripe_test_price
+        self.assertPrice(
+            stripe_test_price,
+            makeradmin_test_product,
+            stripe_constants.PriceType.FIXED_PRICE,
+        )
 
     def test_create_product_with_price_regular(self) -> None:
         makeradmin_test_product = self.db.create_product(

@@ -76,9 +76,10 @@ def get_stripe_prices(
 
 def eq_makeradmin_stripe_product(makeradmin_product: Product, stripe_product: stripe.Product) -> bool:
     """Check that the essential parts of the product are the same in both makeradmin and stripe"""
-    if stripe_product.id != str(makeradmin_product.stripe_product_id):
+    if stripe_product.id != makeradmin_product.stripe_product_id:
         raise ValueError(
-            f"Stripe product id {stripe_product.id} and makeradmin product id {makeradmin_product.id} does not match"
+            f"Stripe product id {stripe_product.id} and the stripe id, {makeradmin_product.stripe_product_id}, "
+            + f"associated with makeradmin product id {makeradmin_product.id} does not match"
         )
     return stripe_product.name == makeradmin_product.name
 
@@ -93,26 +94,35 @@ def eq_makeradmin_stripe_price(makeradmin_product: Product, stripe_price: stripe
         )
 
     recurring = makeradmin_to_stripe_recurring(makeradmin_product, price_type)
-    different = []
 
-    if recurring is not None:
-        if stripe_price.recurring is None:
-            return False
-        different.append(stripe_price.recurring.get("interval") != recurring.interval)
-        different.append(stripe_price.recurring.get("interval_count") != recurring.interval_count)
+    base_eq_check = (
+        stripe_price.unit_amount == stripe_amount_from_makeradmin_product(makeradmin_product, recurring)
+        and stripe_price.currency == CURRENCY
+        and stripe_price.metadata.get("price_type") == price_type.value
+    )
+
+    # Check that recurring part of the product and price matches
+    if recurring is not None and stripe_price.recurring is not None:
+        # Both recurring are not None so we have a subscription price,
+        # and hence need to compare the subscription related information
+        return (
+            base_eq_check
+            and stripe_price.recurring.get("interval") == recurring.interval
+            and stripe_price.recurring.get("interval_count") == recurring.interval_count
+        )
+    elif recurring is None and stripe_price.recurring is None:
+        # Both recurring are None so we have a regular product
+        return base_eq_check
     else:
-        if stripe_price.recurring is not None:
-            return False
-    different.append(stripe_price.unit_amount != stripe_amount_from_makeradmin_product(makeradmin_product, recurring))
-    different.append(stripe_price.currency != CURRENCY)
-    different.append(stripe_price.metadata.get("price_type") != price_type.value)
-    return not any(different)
+        # There is a missmatch between the reccuring and stripe_price.recurring being None
+        return False
 
 
 def _create_stripe_product(makeradmin_product: Product) -> stripe.Product:
     stripe_product = retry(
         lambda: stripe.Product.create(
             name=makeradmin_product.name,
+            description=f"Created by Makeradmin, product id (#{makeradmin_product.id})",
             metadata={
                 MakerspaceMetadataKeys.PRODUCT_ID.value: makeradmin_product.id,
             },
