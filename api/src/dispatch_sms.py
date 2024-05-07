@@ -2,17 +2,21 @@ from logging import getLogger
 
 import requests
 from service.config import get_46elks_auth
-from service.error import InternalServerError, UnprocessableEntity
+from service.error import InternalServerError
 
 logger = getLogger("makeradmin")
+
+
+class NoAuthConfigured(Exception):
+    pass
 
 
 def send_sms(phone: str, message: str) -> None:
     data = {"from": "Makerspace", "to": phone, "message": message}
     auth = get_46elks_auth()
     if not auth:
-        logger.info(f"NOT sending sms, no auth configured {phone=} {data=}")
-        raise UnprocessableEntity("Cannot send SMS because the server has not been configured for it.")
+        logger.info(f"NOT sending SMS, authentication not configured {phone=} {data=}")
+        raise NoAuthConfigured("Cannot send SMS because the server has not been configured for it.")
 
     logger.info(f"sending sms {phone=} {data=}")
 
