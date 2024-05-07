@@ -95,7 +95,7 @@ def eq_makeradmin_stripe_price(makeradmin_product: Product, stripe_price: stripe
 
     recurring = makeradmin_to_stripe_recurring(makeradmin_product, price_type)
 
-    if 
+    if (
         stripe_price.unit_amount != stripe_amount_from_makeradmin_product(makeradmin_product, recurring)
         or stripe_price.currency != CURRENCY
         or stripe_price.metadata.get("price_type") != price_type.value
@@ -107,7 +107,8 @@ def eq_makeradmin_stripe_price(makeradmin_product: Product, stripe_price: stripe
         return False
 
     if recurring is not None:
-        return (stripe_price.recurring.get("interval") == recurring.interval
+        return (
+            stripe_price.recurring.get("interval") == recurring.interval
             and stripe_price.recurring.get("interval_count") == recurring.interval_count
         )
 
