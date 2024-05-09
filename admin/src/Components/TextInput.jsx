@@ -1,5 +1,5 @@
-import React from "react";
 import classNames from "classnames/bind";
+import React from "react";
 import * as _ from "underscore";
 
 export default class TextInput extends React.Component {
@@ -39,6 +39,7 @@ export default class TextInput extends React.Component {
             tabIndex,
             type,
             label,
+            autoComplete,
         } = this.props;
 
         const classes = classNames(name, {
@@ -63,6 +64,7 @@ export default class TextInput extends React.Component {
                 }
                 onFocus={() => this.setState({ selected: true })}
                 onBlur={() => this.setState({ selected: false })}
+                autoComplete={autoComplete}
             />
         );
 
@@ -91,4 +93,5 @@ export default class TextInput extends React.Component {
 TextInput.defaultProps = {
     formrow: true,
     label: true,
+    autoComplete: "off",
 };
