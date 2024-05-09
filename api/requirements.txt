@@ -19,6 +19,7 @@ python-dateutil
 types-python-dateutil
 types-sqlalchemy
 sqlalchemy-stubs
+markdown
 
 dataclasses_json
 # Test requirements
