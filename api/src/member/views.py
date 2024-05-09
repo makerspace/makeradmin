@@ -10,7 +10,13 @@ from service.db import db_session
 from service.error import Unauthorized
 
 from member import service
-from member.member import get_member_groups, send_access_token_email, send_updated_member_info_email, set_pin_code
+from member.member import (
+    get_license_html_text,
+    get_member_groups,
+    send_access_token_email,
+    send_updated_member_info_email,
+    set_pin_code,
+)
 
 
 @service.route("/send_access_token", method=POST, permission=PUBLIC)
@@ -85,3 +91,8 @@ def request_change_phone_number(member_id: int | None = Arg(int, required=False)
 @service.route("/validate_phone_number", method=POST, permission=PUBLIC)
 def validate_change_phone_number(id: int = Arg(int), validation_code=Arg(int)):
     return change_phone_validate(g.user_id, id, validation_code)
+
+
+@service.route("/licenses", method=GET, permission=USER)
+def get_licenses():
+    return get_license_html_text()
