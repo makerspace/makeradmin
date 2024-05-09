@@ -75,7 +75,7 @@ class Test(ApiTest):
 
         self.assertTrue(data["deleted_at"] >= data["created_at"])
 
-    def test_list_deleted_entity_show_up_if_list_deleted_is_true_for_entity(self):
+    def test_list_deleted_entity_show_up_if_list_deleted_is_true_for_entity(self):  # TODO remove?
         self.db.create_member()
         span = self.db.create_span(deleted_at=self.datetime())
         self.assertIn(span.span_id, [e["span_id"] for e in self.get("/membership/span?page_size=0").data])

@@ -1,12 +1,12 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import Date from "../Components/DateShow";
-import Collection from "../Models/Collection";
 import CollectionTable from "../Components/CollectionTable";
+import Date from "../Components/DateShow";
 import DateTimeShow from "../Components/DateTimeShow";
+import Collection from "../Models/Collection";
+import CollectionNavigation from "../Models/CollectionNavigation";
 import Span from "../Models/Span";
 import { confirmModal } from "../message";
-import CollectionNavigation from "../Models/CollectionNavigation";
 
 const Row = (deleteItem) => (props) => {
     const { item } = props;
@@ -53,6 +53,7 @@ class SpanList extends CollectionNavigation {
         this.collection = new Collection({
             type: Span,
             expand: "member",
+            includeDeleted: true,
             page,
         });
     }

@@ -133,7 +133,6 @@ class Entity:
         default_sort_column="created_at",
         default_sort_order=DESC,
         search_columns=tuple(),
-        list_deleted=False,
         expand_fields=None,
     ):
         """
@@ -145,7 +144,6 @@ class Entity:
         :param default_sort_column column name
         :param default_sort_order asc/desc
         :param search_columns columns that should be used for text search (search param to list)
-        :param list_deleted whether deleted entities should be included in list or not
         :param expand_fields map of name to ExpandField for data from other models that can be added when listing entity
         """
 
@@ -164,8 +162,6 @@ class Entity:
         self.pk = model_inspect.primary_key[0]
 
         self.columns = model_inspect.columns
-
-        self.list_deleted = list_deleted or "deleted_at" not in self.columns
 
         assert default_sort_column is None or default_sort_column in self.columns, "default_sort_column does not exist"
 
@@ -227,7 +223,7 @@ class Entity:
         if include_deleted is None:
             include_deleted = False
 
-        if not self.list_deleted and not include_deleted:
+        if not include_deleted:
             query = query.filter(self.model.deleted_at.is_(None))
 
         if relation and related_entity_id:
