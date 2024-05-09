@@ -51,6 +51,7 @@ const LabeledInput = ({
     onChange,
     onInvalid,
     placeholder,
+    autoComplete,
 }: {
     id: string;
     type: string;
@@ -61,6 +62,7 @@ const LabeledInput = ({
     placeholder?: string;
     onChange: (value: string) => void;
     onInvalid: () => void;
+    autoComplete?: string;
 }) => {
     return (
         <div>
@@ -78,6 +80,7 @@ const LabeledInput = ({
                 maxLength={255}
                 onChange={(e) => onChange(e.currentTarget.value)}
                 onInvalid={onInvalid}
+                autoComplete={autoComplete}
             />
         </div>
     );

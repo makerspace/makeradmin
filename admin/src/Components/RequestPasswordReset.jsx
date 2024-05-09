@@ -62,6 +62,7 @@ class RequestPasswordReset extends React.Component {
                                         className="uk-form-large uk-form-width-large"
                                         type="text"
                                         placeholder="Email/Medlemsnummer"
+                                        autoComplete="username"
                                     />
                                 </div>
                             </div>
