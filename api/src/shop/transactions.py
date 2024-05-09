@@ -341,8 +341,12 @@ def payment_success(transaction: Transaction) -> None:
 
 def process_cart(member_id: int, cart: List[CartItem]) -> Tuple[Decimal, List[TransactionContent]]:
     contents = []
+    labaccess_in_cart = False
+    base_membership_in_cart = False
 
-    price_level = get_price_level_for_member(db_session.query(Member).get(member_id))
+    member = db_session.query(Member).get(member_id)
+    price_level = get_price_level_for_member(member)
+    member_has_base_membership = "membership" in [span.type for span in member.spans]
 
     with localcontext() as ctx:
         ctx.clear_flags()
@@ -366,7 +370,8 @@ def process_cart(member_id: int, cart: List[CartItem]) -> Tuple[Decimal, List[Tr
                     what=NEGATIVE_ITEM_COUNT,
                 )
 
-            if product.get_metadata(MakerspaceMetadataKeys.SUBSCRIPTION_TYPE, None) is not None:
+            subscription_type = product.get_metadata(MakerspaceMetadataKeys.SUBSCRIPTION_TYPE, None)
+            if subscription_type is not None:
                 if count != product.smallest_multiple:
                     raise BadRequest(
                         f"Bad count for subscription product {product_id}. Count must be exactly {product.smallest_multiple}, was {count}.",
@@ -383,6 +388,13 @@ def process_cart(member_id: int, cart: List[CartItem]) -> Tuple[Decimal, List[Tr
             if product.filter:
                 PRODUCT_FILTERS[product.filter](item, member_id)
 
+            special_product_id = product.get_metadata(MakerspaceMetadataKeys.SPECIAL_PRODUCT_ID, None)
+            if subscription_type == SubscriptionType.LAB or special_product_id == "single_labaccess_month":
+                labaccess_in_cart = True
+
+            if subscription_type == SubscriptionType.MEMBERSHIP or special_product_id == "single_membership_year":
+                base_membership_in_cart = True
+
             discount = get_discount_for_product(product, price_level)
 
             amount = Decimal(product.price) * Decimal(count) * (1 - discount.fraction_off)
@@ -390,6 +402,11 @@ def process_cart(member_id: int, cart: List[CartItem]) -> Tuple[Decimal, List[Tr
 
             content = TransactionContent(product_id=product_id, count=count, amount=amount)
             contents.append(content)
+
+        if labaccess_in_cart and not (member_has_base_membership or base_membership_in_cart):
+            raise BadRequest(
+                "Could not purchase selected subscription. Please buy the base annual membership before lab access."
+            )
 
         if ctx.flags[Rounded]:
             # This can possibly happen with huge values, I suppose they will be caught below anyway but it's good to
