@@ -94,3 +94,9 @@ class PurchaseTest(ApiShopTestMixin, ApiTest):
         )
 
         self.post(f"/webshop/pay", purchase.to_dict(), token=self.token).expect(code=400, what="empty_cart")
+
+    def test_labaccess_purchase_fails_without_base_membership(self):
+        pass
+
+    def test_labaccess_purchase_allowed_together_with_base_membership(self):
+        pass
