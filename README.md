@@ -18,7 +18,7 @@ You need to sign out and sign back in again for changes to take effect.
 Makeradmin uses Python 3.11.
 
 ```bash
-sudo apt-get install python3.11-dev python3.11-doc python3-pip
+sudo apt-get install python3.11-dev python3.11-doc python3.11-venv python3-pip
 ```
 
 ### npm
@@ -26,6 +26,20 @@ sudo apt-get install python3.11-dev python3.11-doc python3-pip
 ```bash
 sudo apt-get install npm
 ```
+
+### Inside a Dev Container with VS Code
+
+#### On your host machine
+
+To install the git hooks, so they are ran also when using git on the host machine.
+
+```bash
+make init-pip
+```
+
+#### Inside the Dev Container
+
+Proceed as normal.
 
 ## Initialize everything
 

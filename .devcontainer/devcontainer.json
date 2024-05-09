@@ -1,0 +1,41 @@
+// For format details, see https://aka.ms/devcontainer.json
+{
+    "name": "makeradmin",
+    "build": {
+        "dockerfile": "devcontainer.Dockerfile",
+        "context": "../"
+    },
+
+    "mounts": [
+        {
+            "source": "makerspace-makeradmin-home",
+            "target": "/mnt/home/",
+            "type": "volume"
+        }
+    ],
+
+    "postAttachCommand": "sudo chown vscode:vscode /mnt/home && ln -sf /mnt/home/.zsh_history ~/",
+
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "charliermarsh.ruff",
+                "esbenp.prettier-vscode",
+                "github.vscode-github-actions",
+                "ms-azuretools.vscode-docker",
+                "ms-vscode.makefile-tools"
+            ],
+            "settings": {
+                "terminal.integrated.defaultProfile.linux": "zsh"
+            }
+        }
+    },
+
+    "features": {
+        "ghcr.io/devcontainers/features/docker-in-docker:2.12.0": {
+            "dockerDashComposeVersion": "latest",
+            "mobyBuildxVersion": "latest",
+            "version": "latest"
+        }
+    }
+}
