@@ -16,6 +16,7 @@ Group.model = {
     attributes: {
         created_at: null,
         updated_at: null,
+        deleted_at: null,
         name: "",
         title: "",
         description: "",
