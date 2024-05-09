@@ -62,7 +62,7 @@ class Test(ApiTest):
         self.assertIn(entity1_id, ids_after)
         self.assertIn(entity2_id, ids_after)
 
-    def test_list_with_table_without_delted_at_column(self):
+    def test_list_with_table_without_deleted_at_column(self):
         transaction = self.db.create_transaction(id=123)
         self.assertIn(transaction.id, [e["id"] for e in self.get("/webshop/transaction?page_size=0").data])
 
