@@ -1,6 +1,7 @@
 import React from "react";
-import TextInput from "./TextInput";
 import { withRouter } from "react-router";
+import DateTimeInput from "./DateTimeInput";
+import TextInput from "./TextInput";
 import Textarea from "./Textarea";
 
 class GroupForm extends React.Component {
@@ -48,10 +49,25 @@ class GroupForm extends React.Component {
                         name="description"
                         title="Beskrivning"
                     />
+                    <DateTimeInput
+                        model={group}
+                        name="created_at"
+                        title="Skapad"
+                    />
+                    <DateTimeInput
+                        model={group}
+                        name="updated_at"
+                        title="Uppdaterad"
+                    />
+                    <DateTimeInput
+                        model={group}
+                        name="deleted_at"
+                        title="Borttagen"
+                    />
 
                     <div className="uk-form-row uk-margin-top">
                         <div className="uk-form-controls">
-                            {group.id ? (
+                            {group.id && !group.deleted_at && (
                                 <a
                                     className="uk-button uk-button-danger uk-float-left"
                                     onClick={onDelete}
@@ -59,8 +75,6 @@ class GroupForm extends React.Component {
                                     <i className="uk-icon-trash" /> Ta bort
                                     grupp
                                 </a>
-                            ) : (
-                                ""
                             )}
                             <button
                                 className="uk-button uk-button-success uk-float-right"
