@@ -30,6 +30,20 @@ Activate a venv / virtualenv before install if you want python environment isola
 sudo apt-get install npm
 ```
 
+### Inside a Dev Container with VS Code
+
+#### On your host machine
+
+To install the git hooks, so they are ran also when using git on the host machine.
+
+```bash
+make init-pip
+```
+
+#### Inside the Dev Container
+
+Proceed as normal.
+
 ## Initialize everything
 
 Clone this git repository to a suitable place on your computer / server
