@@ -78,7 +78,9 @@ class Test(ApiTest):
     def test_list_deleted_entity_show_up_if_list_deleted_is_true_for_entity(self):
         self.db.create_member()
         span = self.db.create_span(deleted_at=self.datetime())
-        self.assertIn(span.span_id, [e["span_id"] for e in self.get("/membership/span?page_size=0").data])
+        self.assertIn(
+            span.span_id, [e["span_id"] for e in self.get("/membership/span?page_size=0&include_deleted=true").data]
+        )
 
     def test_deleting_deleted_existing_entry_returns_200(self):
         # This replicates the behavior in the previous implementation.
