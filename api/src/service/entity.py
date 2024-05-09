@@ -223,7 +223,7 @@ class Entity:
         if include_deleted is None:
             include_deleted = False
 
-        if not include_deleted:
+        if not include_deleted and "deleted_at" in self.columns:
             query = query.filter(self.model.deleted_at.is_(None))
 
         if relation and related_entity_id:
