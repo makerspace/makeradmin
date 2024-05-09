@@ -162,6 +162,7 @@ export const Login = ({ redirect }: { redirect: string | null }) => {
                         placeholder="Email/Medlemsnummer"
                         value={tag}
                         onChange={(e) => setTag(e.currentTarget.value)}
+                        autoComplete="username"
                     />
                 </div>
 
@@ -179,6 +180,7 @@ export const Login = ({ redirect }: { redirect: string | null }) => {
                         placeholder="Lösenord"
                         value={password}
                         onChange={(e) => setPassword(e.currentTarget.value)}
+                        autoComplete="current-password"
                     />
                 </div>
 

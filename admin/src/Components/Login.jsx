@@ -42,6 +42,7 @@ export default class Login extends React.Component {
                                     className="uk-form-large uk-form-width-large"
                                     type="text"
                                     placeholder="Email/Medlemsnummer"
+                                    autoComplete="username"
                                 />
                             </div>
                         </div>
@@ -56,6 +57,7 @@ export default class Login extends React.Component {
                                     className="uk-form-large uk-form-width-large"
                                     type="password"
                                     placeholder="Lösenord"
+                                    autoComplete="current-password"
                                 />
                             </div>
                         </div>
