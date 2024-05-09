@@ -26,6 +26,7 @@ services:
       context: ./api
     volumes:
       - ./logs/api:/work/logs
+      - ./data/licenses:/work/data/licenses
     depends_on:
       - db2
     networks:
