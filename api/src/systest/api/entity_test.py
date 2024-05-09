@@ -62,6 +62,10 @@ class Test(ApiTest):
         self.assertIn(entity1_id, ids_after)
         self.assertIn(entity2_id, ids_after)
 
+    def test_list_with_table_without_delted_at_column(self):
+        transaction = self.db.create_transaction(id=123)
+        self.assertIn(transaction.id, [e["id"] for e in self.get("/webshop/transaction?page_size=0").data])
+
     def test_deleted_entity_does_not_show_up_in_list_but_can_still_be_fetched(self):
         entity_id = self.api.create_group()["group_id"]
 
