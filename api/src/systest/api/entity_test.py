@@ -1,10 +1,10 @@
 from datetime import datetime
 from random import randint
 
-from pytz import UTC
 from service.api_definition import NOT_UNIQUE, REQUIRED
 from test_aid.systest_base import ApiTest
 from test_aid.test_util import random_str
+from zoneinfo import ZoneInfo
 
 
 class Test(ApiTest):
@@ -37,7 +37,7 @@ class Test(ApiTest):
         )
 
         self.assertTrue(data["updated_at"] >= data["created_at"])
-        self.assertTrue(datetime.fromisoformat(data["updated_at"]) > entity.updated_at.replace(tzinfo=UTC))
+        self.assertTrue(datetime.fromisoformat(data["updated_at"]) > entity.updated_at.replace(tzinfo=ZoneInfo("UTC")))
 
     def test_can_not_update_entity_using_empty_or_read_only_data(self):
         entity = self.api.create_group()

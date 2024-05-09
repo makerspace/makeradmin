@@ -2,7 +2,6 @@ from datetime import datetime
 from logging import getLogger
 from typing import Dict, List, Tuple
 
-import pytz
 from basic_types.enums import AccountingEntryType
 from basic_types.time_period import TimePeriod
 from membership.models import Member
@@ -24,6 +23,7 @@ from shop.models import (
     TransactionCostCenter,
 )
 from shop.stripe_payment_intent import CompletedPayment, get_completed_payments_from_stripe
+from zoneinfo import ZoneInfo
 
 logger = getLogger("makeradmin")
 
@@ -55,15 +55,16 @@ def export_accounting(start_date: datetime, end_date: datetime, group_by_period:
     signer = db_session.query(Member).filter(Member.member_id == member_id).one_or_none()
     if signer is None:
         raise InternalServerError(f"Member with id {member_id} not found")
+    utc_zone = ZoneInfo("UTC")
     logger.info(
-        f"Exporting accounting from {start_date} ({start_date.astimezone(pytz.utc)}) to {end_date} ({end_date.astimezone(pytz.utc)}) with signer member number {signer.member_number}"
+        f"Exporting accounting from {start_date} ({start_date.astimezone(utc_zone)}) to {end_date} ({end_date.astimezone(utc_zone)}) with signer member number {signer.member_number}"
     )
     completed_payments = get_completed_payments_from_stripe(start_date, end_date)
     transactions = (
         db_session.query(Transaction)
         .filter(
-            Transaction.created_at >= start_date.astimezone(pytz.utc),
-            Transaction.created_at < end_date.astimezone(pytz.utc),
+            Transaction.created_at >= start_date.astimezone(utc_zone),
+            Transaction.created_at < end_date.astimezone(utc_zone),
             Transaction.status == Transaction.COMPLETED,
         )
         .outerjoin(TransactionContent)

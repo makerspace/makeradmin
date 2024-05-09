@@ -7,7 +7,6 @@ from math import ceil
 from typing import Any, Callable, Dict, Mapping, Type, TypeVar, Union
 
 from flask import request
-from pytz import UTC
 from sqlalchemy import (
     JSON,
     Boolean,
@@ -27,6 +26,7 @@ from sqlalchemy import (
 from sqlalchemy import (
     Enum as DbEnum,
 )
+from zoneinfo import ZoneInfo
 
 from service.api_definition import BAD_VALUE, REQUIRED, Arg, Enum, boolean, natural0, natural1, symbol
 from service.db import db_session
@@ -106,7 +106,7 @@ to_obj_converters: Dict[Type, Callable] = {
     Numeric: str,
     String: identity,
     Text: identity,
-    DateTime: lambda d: None if d is None else d.replace(tzinfo=UTC).isoformat(),
+    DateTime: lambda d: None if d is None else d.replace(tzinfo=ZoneInfo("UTC")).isoformat(),
     Date: lambda d: None if d is None else d.isoformat(),
     DbEnum: identity,
     Boolean: identity,
