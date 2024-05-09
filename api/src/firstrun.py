@@ -180,7 +180,6 @@ def create_required_stripe_products():
             },
         ),
     )
-    get_or_create(ProductAction, product_id=prod2.id, value=365, action_type="add_membership_days")
     get_or_create(ProductAction, product_id=prod2.id, value=30, action_type="add_labaccess_days")
 
     prod3 = get_or_create(
@@ -198,6 +197,7 @@ def create_required_stripe_products():
         ),
     )
     get_or_create(ProductAction, product_id=prod3.id, value=365, action_type="add_labaccess_days")
+    get_or_create(ProductAction, product_id=prod2.id, value=60, action_type="add_labaccess_days")
 
     prod = get_or_create(
         Product,
