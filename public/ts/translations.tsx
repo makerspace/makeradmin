@@ -8,6 +8,7 @@ import {
     URL_FACEBOOK_GROUP,
     URL_GET_STARTED_QUIZ,
     URL_INSTAGRAM,
+    URL_MEMBERBOOTH,
     URL_SLACK_HELP,
     URL_SLACK_SIGNUP,
     URL_WIKI,
@@ -500,6 +501,58 @@ const Eng = {
                 title: "Activate auto-renewal",
             },
         },
+        labaccess: {
+            expired_days: (enddate: string, days: number) => `
+                Your <strong>lab membership</strong> expired ${days} day(s) ago
+                (${enddate})
+            `,
+            expired_single_day:
+                "Your <strong>lab membership</strong> expired yesterday.",
+            expires_today: (hours: number) =>
+                `Your <strong>lab membership</strong> is valid for ${hours} more hours.`,
+            valid: (enddate: string, days: number) => `
+                Your <strong>lab membership</strong> is valid through ${enddate}${" "}
+                (only ${days} day(s) left).
+            `,
+            inactive: "Your <strong>lab membership</strong> is inactive.",
+            extend_on_friday:
+                "Remember to extend your lab membership before next Friday morning.",
+        },
+        membership_strings: {
+            expired_days: (enddate: string, days: number) => `
+                Your <strong>membership</strong> expired ${days} day(s) ago
+                (${enddate})
+            `,
+            expired_single_day:
+                "Your <strong>membership</strong> expired yesterday.",
+            expires_today: "Your <strong>membership</strong> expires today.",
+            valid: (enddate: string, days: number) => `
+                Your <strong>membership</strong> is valid through ${enddate}${" "}
+                (only ${days} day(s) left).
+            `,
+            inactive: "Your <strong>membership</strong> is inactive.",
+        },
+        special_access_notice: (enddate: string, days: number) => `
+            You have been given <strong>special access</strong> to the
+            premises through ${enddate} (${days} day(s) left).
+        `,
+        no_pin_warning: `
+            You do not have a PIN code yet. Use the CHANGE button to set it.
+            The PIN code is used for ${" "}
+            <a href="${URL_MEMBERBOOTH}">memberbooth</a>.
+        `,
+        personal: {
+            firstname: "First Name",
+            lastname: "Last Name",
+            email: "E-mail",
+            phone: "Phone Number",
+        },
+        addr: {
+            street_and_number: "Street and number",
+            extra: "Extra address info, fx C/O, 2.th.",
+            postal_code: "Postal code",
+            city: "City",
+        },
         change_phone_number: "Change",
         send_accessy_invite_msg:
             "Install the Accessy app on your phone. You can use this to unlock doors at the makerspace.",
@@ -519,9 +572,15 @@ const Eng = {
     payment: {
         pay_with_stripe: "Pay with Stripe",
     },
+    change_pin: {
+        choose: "Choose a pin code",
+        success: "The pin code is now updated",
+        error: "Not able to change the pin code",
+    },
     change_phone: {
         new_number_prompt: "New phone number",
         validation_code_prompt: "Validation code: ",
+        validation_changed_success: "The phone number is now updated",
         errors: {
             generic: "Could not change phone number",
             incorrect_code: "Incorrect code. Try again.",
@@ -535,8 +594,70 @@ const Swe: typeof Eng = {
     continue: "Fortsätt",
     member_page: {
         ...Eng.member_page,
+
+        labaccess: {
+            expired_days: (enddate: string, days: number) => `
+                Din <strong>labaccess</strong> är ogiltig sedan ${days} dagar (${enddate}).
+            `,
+            expired_single_day: "Din <strong>labaccess</strong> gick ut igår.",
+            expires_today: (hours: number) =>
+                `Din <strong>labaccess</strong> är giltig i mindre än ${hours}${" "} timmar till.`,
+            valid: (enddate: string, days: number) => `
+                Din <strong>labaccess</strong> är giltig t.o.m. ${enddate}${" "}
+                (endast ${days} dagar till).
+            `,
+            inactive: "Din <strong>labaccess</strong> är inaktiv.",
+            extend_on_friday:
+                "Kom ihåg att förnya den innan nästa fredag morgon.",
+        },
+        membership_strings: {
+            expired_days: (enddate: string, days: number) => `
+                Ditt <strong>föreningsmedlemsskap</strong> är ogiltigt sedan${" "}
+                ${days} dagar (${enddate}).
+            `,
+            expired_single_day:
+                "Ditt <strong>föreningsmedlemsskap</strong> gick ut igår.",
+            expires_today:
+                "Ditt <strong>föreningsmedlemsskap</strong> går ut idag.",
+            valid: (enddate: string, days: number) => `
+                Ditt <strong>föreningsmedlemsskap</strong> är giltigt t.o.m.${" "}
+                ${enddate} (endast ${days} dagar till).
+            `,
+            inactive: "Ditt <strong>föreningsmedlemsskap</strong> är inaktivt.",
+        },
+        special_access_notice: (enddate: string, days: number) => `
+            Du har fått <strong>specialtillträde</strong> till
+            föreningslokalerna t.o.m. ${enddate} (${days} dagar till).
+        `,
+        no_pin_warning: `
+            Du har inte satt någon PIN-kod ännu. Använd BYT-knappen för att
+            sätta den. PIN-koden används för${" "}
+            <a href="${URL_MEMBERBOOTH}">memberbooth</a>.
+        `,
+        personal: {
+            firstname: "Förnamn",
+            lastname: "Efternamn",
+            email: "E-post",
+            phone: "Telefonnummer",
+        },
+        addr: {
+            street_and_number: "Address",
+            extra: "Extra adressrad, t ex C/O",
+            postal_code: "Postnummer",
+            city: "Postort",
+        },
         send_accessy_invite: "Skicka Accessy-inbjudan",
         accessy_invite: "Bjud in dig själv till Accessy",
+    },
+
+    change_pin: {
+        choose: "Välj en pinkod",
+        success: "Pinkoden är nu bytt",
+        error: "Kunde inte byta pinkod",
+    },
+    change_phone: {
+        ...Eng.change_phone,
+        validation_changed_success: "Telefonnummret är nu bytt",
     },
 };
 
@@ -557,6 +678,7 @@ export const useTranslation = (): Translator => {
 
 const heuristicallyPickLanguage = (): "en" | "sv" => {
     const langs = navigator.languages || [navigator.language];
+    console.log("lang ", langs);
     for (let lang of langs) {
         lang = lang.toLowerCase();
 

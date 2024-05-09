@@ -1,7 +1,7 @@
 <!doctype html>
 <html>
     <head>
-        <title>Stockholm Makerspace Webshop</title>
+        <title>Stockholm Makerspace {{ _("Webshop") }}</title>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="stylesheet" href="{{ STATIC }}/uikit/css/uikit.min.css" />
@@ -18,10 +18,12 @@
         <div id="single-page-content">
             <div class="product-nav-buttons">
                 <a class="product-nav-left" href='{{ url("/") }}'
-                    ><span uk-icon="arrow-left"></span> Tillbaka</a
+                    ><span uk-icon="arrow-left"></span> {{ _("Back") }}</a
                 >
                 <a class="product-nav-right" href='{{ url("/cart") }}'
-                    >Min kundvagn<span id="cart-sum"></span>
+                    >{{ _("Shopping Cart") }}Min kundvagn<span
+                        id="cart-sum"
+                    ></span>
                     <span uk-icon="cart"></span
                 ></a>
             </div>

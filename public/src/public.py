@@ -5,6 +5,7 @@ from typing import Any
 
 import flask
 from flask import Blueprint, Flask, redirect, send_from_directory, url_for
+from flask_babel import Babel
 
 basicConfig(
     format="%(asctime)s %(levelname)s [%(process)d/%(threadName)s %(pathname)s:%(lineno)d]: %(message)s",
@@ -35,6 +36,17 @@ class Section(Blueprint):
 
     def route(self, path, **kwargs):
         return super().route(self.url(path), **kwargs)
+
+
+def get_locale():
+    # # if a user is logged in, use the locale from the user settings
+    # user = getattr(g, 'user', None)
+    # if user is not None:
+    #     return user.locale
+    # otherwise try to guess the language from the user accept
+    # header the browser transmits.  We support de/fr/en in this
+    # example.  The best match wins.
+    return flask.request.accept_languages.best_match(["en", "sv"])
 
 
 def render_template(path: str, **kwargs: Any) -> str:
@@ -130,6 +142,7 @@ def reset_password():
 
 static_hash = os.environ["STATIC_PREFIX_HASH"]
 app = Flask(__name__, static_url_path=f"/static{static_hash}", static_folder="../static")
+babel = Babel(app, locale_selector=get_locale)
 sys.stderr.write("STATIC URL PATH" + app.static_url_path + "\n")
 app.register_blueprint(shop)
 app.register_blueprint(member)
