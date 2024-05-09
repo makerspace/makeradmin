@@ -6,7 +6,6 @@ from logging import getLogger
 from time import mktime
 from typing import Dict, List, Optional
 
-import pytz
 import stripe
 from dataclasses_json import DataClassJsonMixin
 from membership.models import Member
@@ -15,6 +14,7 @@ from service.db import db_session
 from service.error import EXCEPTION, BadRequest, InternalServerError
 from stripe import CardError, InvalidRequestError, PaymentIntent, StripeError
 from typing_extensions import Never
+from zoneinfo import ZoneInfo
 
 from shop.models import StripePending, Transaction
 from shop.stripe_constants import (
@@ -206,8 +206,8 @@ def pay_with_stripe(transaction: Transaction, payment_method_id: str, setup_futu
 def get_stripe_payment_intents(start_date: datetime, end_date: datetime) -> List[stripe.PaymentIntent]:
     expand = ["data.latest_charge.balance_transaction"]
     created = {
-        "gte": int(start_date.astimezone(pytz.UTC).timestamp()),
-        "lt": int(end_date.astimezone(pytz.UTC).timestamp()),
+        "gte": int(start_date.astimezone(ZoneInfo("UTC")).timestamp()),
+        "lt": int(end_date.astimezone(ZoneInfo("UTC")).timestamp()),
     }
     logger.info(f"Fetching stripe payment intents from {start_date} ({created['gte']}) to {end_date} ({created['lt']})")
 
