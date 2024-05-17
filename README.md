@@ -116,6 +116,20 @@ public_1            | 10.0.2.2 - - [18/Dec/2018:20:50:23 +0000] "GET / HTTP/1.1"
 [...]
 ```
 
+### Required membership products
+
+Some pages needs special products in order to function (e.g. the registration page, or the member page).
+
+The following products are required and can be created via the firstrun script:
+
+TODO need to update this section
+
+-   A **product** for base membership. Add the metadata "subscription_type"="membership" to the **product** item
+    -   Add a yearly **price**, and add the metadata "price_type"="recurring" to the **price** item
+-   A **product** for makerspace access. Add the metadata "subscription_type"="labaccess" to the **product** item
+    -   Monthly price, and add the metadata "price_type"="recurring" to the **price** item
+    -   **price** for N months, where N is the binding period as specified in `stripe_subscriptions.py->BINDING_PERIOD`. The price should be N times the recurring price. Add the metadata "price_type"="binding_period"
+
 ## Additional configuration
 
 The `.env` file includes a number of variables that are unset by default.
@@ -179,11 +193,7 @@ You will not be able to go to the checkout unless you have a Stripe key in the .
 
 ### Stripe - makeradmin connection
 
-Makeradmin is used as the truth. Work in progress to change so that discounts are also in makeradmin. However, currently the discount coupon needs to be set in stripe.
-
--   Create a **coupon** for low income discount. It should be with percentage discount. Add the metadata "makerspace_price_level" = "low_income_discount"
-
-The smallest multiple of the product in makeradmin is used to set the binding time for the subscription.
+Makeradmin is used as the truth and stripe is automatically sync with the makeradmin products.
 
 ### Stripe subscription support
 
@@ -195,22 +205,6 @@ stripe listen --forward-to http://localhost:8010/webshop/stripe_callback
 ```
 
 After the forwarding has started, you'll need to copy the signing secret it gives you, and put it in your own `.env` file in the key `STRIPE_SIGNING_SECRET`.
-
-### Setting up Stripe subscription products
-
-When using stripe, subscriptions need to be configured via the stripe website.
-
-#### Stripe configuration
-
-If you try to access any page which needs these products (e.g. the registration page, or the member page), makeradmin will fetch them from stripe and do a bunch of validation checks on them.
-
-Makeradmin will use these products to create the following in stripe TODO FIX THIS
-
--   A **product** for base membership. Add the metadata "subscription_type"="membership" to the **product** item
-    -   Add a yearly **price**, and add the metadata "price_type"="recurring" to the **price** item
--   A **product** for makerspace access. Add the metadata "subscription_type"="labaccess" to the **product** item
-    -   Monthly price, and add the metadata "price_type"="recurring" to the **price** item
-    -   **price** for N months, where N is the binding period as specified in `stripe_subscriptions.py->BINDING_PERIOD`. The price should be N times the recurring price. Add the metadata "price_type"="binding_period"
 
 ## Bookkeeping and accounting
 

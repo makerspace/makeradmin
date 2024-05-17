@@ -8,7 +8,7 @@ The relationship between the structures such as Product in makeradmin and their 
 
 ### Product
 
-The id of the stripe product is the id of the corresponding makeradmin product.
+The connection between stripe product and makeradmin product is stored in the database. It is possible to set the id of a stripe product on creation but it's not possible to change and thus basing the connection on ids being identical can break if something changes.
 
 ### Price
 
