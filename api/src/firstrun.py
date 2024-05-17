@@ -610,7 +610,7 @@ def firstrun() -> None:
         while True:
             s = input(
                 "Do you want to add products for stripe and memberships?"
-                " (Some products are required for the member view and regristration page to load) [Y/n]: "
+                " (Some products are required for the member portal and regristration page to load) [Y/n]: "
             )
             if s in ["n", "no"]:
                 create_stripe_data = False
