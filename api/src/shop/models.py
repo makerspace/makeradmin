@@ -72,6 +72,7 @@ class Product(Base):
     updated_at = Column(DateTime, server_default=func.now())
     deleted_at = Column(DateTime)
     show = Column(Boolean, nullable=False, server_default="1")
+    stripe_product_id = Column(String(64))
 
     category = relationship(ProductCategory, backref="products")
     actions = relationship("ProductAction")
