@@ -1,15 +1,15 @@
 import React from "react";
-import { Link } from "react-router-dom";
-import Collection from "../Models/Collection";
-import Span from "../Models/Span";
-import { ADD_LABACCESS_DAYS } from "../Models/ProductAction";
-import { confirmModal } from "../message";
-import CollectionTable from "../Components/CollectionTable";
-import DateTimeShow from "../Components/DateTimeShow";
-import DateShow from "../Components/DateShow";
 import "react-day-picker/lib/style.css";
-import MembershipPeriodsInput from "./MembershipPeriodsInput";
+import { Link } from "react-router-dom";
+import CollectionTable from "../Components/CollectionTable";
+import DateShow from "../Components/DateShow";
+import DateTimeShow from "../Components/DateTimeShow";
+import Collection from "../Models/Collection";
+import { ADD_LABACCESS_DAYS } from "../Models/ProductAction";
+import Span from "../Models/Span";
 import { get } from "../gateway";
+import { confirmModal } from "../message";
+import MembershipPeriodsInput from "./MembershipPeriodsInput";
 
 class MemberBoxSpans extends React.Component {
     constructor(props) {
@@ -18,6 +18,7 @@ class MemberBoxSpans extends React.Component {
             type: Span,
             url: `/membership/member/${props.match.params.member_id}/spans`,
             pageSize: 0,
+            includeDeleted: true,
         });
         this.state = { items: [], pending_labaccess_days: "?" };
         this.pending_actions = get({

@@ -29,7 +29,9 @@ export function login_via_password(
         })
         .catch((response: ServerResponse<any>) => {
             if (response.status === common.UNAUTHORIZED) {
-                return Promise.reject("Felaktigt användarnamn eller lösenord.");
+                return Promise.reject(
+                    "Felaktig email/medlemsnummer eller lösenord.",
+                );
             }
 
             return Promise.reject(
@@ -160,6 +162,7 @@ export const Login = ({ redirect }: { redirect: string | null }) => {
                         placeholder="Email/Medlemsnummer"
                         value={tag}
                         onChange={(e) => setTag(e.currentTarget.value)}
+                        autoComplete="username"
                     />
                 </div>
 
@@ -177,6 +180,7 @@ export const Login = ({ redirect }: { redirect: string | null }) => {
                         placeholder="Lösenord"
                         value={password}
                         onChange={(e) => setPassword(e.currentTarget.value)}
+                        autoComplete="current-password"
                     />
                 </div>
 

@@ -1,6 +1,6 @@
 import React from "react";
-import auth from "../auth";
 import { withRouter } from "react-router";
+import auth from "../auth";
 import { browserHistory } from "../browser_history";
 import { showError, showSuccess } from "../message";
 
@@ -46,9 +46,9 @@ class RequestPasswordReset extends React.Component {
 
                             <div className="uk-form-row">
                                 <p>
-                                    Fyll i ditt användarnamn så skickar vi
-                                    instruktioner om hur du nollställer ditt
-                                    lösenord.
+                                    Fyll i ditt email eller medlemsnummer så
+                                    skickar vi instruktioner om hur du
+                                    nollställer ditt lösenord.
                                 </p>
                             </div>
 
@@ -61,7 +61,8 @@ class RequestPasswordReset extends React.Component {
                                         }}
                                         className="uk-form-large uk-form-width-large"
                                         type="text"
-                                        placeholder="Användarnamn"
+                                        placeholder="Email/Medlemsnummer"
+                                        autoComplete="username"
                                     />
                                 </div>
                             </div>

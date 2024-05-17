@@ -51,6 +51,7 @@ const ResetPassword = ({ token }: { token: string }) => {
                             placeholder="New password"
                             value={password}
                             onChange={(e) => setPassword(e.currentTarget.value)}
+                            autoComplete="new-password"
                         />
                     </div>
                     <div class="uk-form-row" style="margin: 16px 0;">

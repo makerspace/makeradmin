@@ -1,4 +1,3 @@
-version: "3"
 services:
   db2:
     image: mysql:8.0.33
@@ -27,6 +26,7 @@ services:
       context: ./api
     volumes:
       - ./logs/api:/work/logs
+      - ./data/licenses:/work/data/licenses
     depends_on:
       - db2
     networks:

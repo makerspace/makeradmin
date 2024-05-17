@@ -74,7 +74,6 @@ permission_entity = Entity(
 span_entity = Entity(
     Span,
     search_columns=("member_id",),
-    list_deleted=True,
     expand_fields={"member": ExpandField(Span.member, [Member.member_number, Member.firstname, Member.lastname])},
 )
 

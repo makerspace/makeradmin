@@ -7,7 +7,12 @@ export default class Member extends Base {
     }
 
     maybe_inform_member_before_changed_info() {
-        if (Object.prototype.hasOwnProperty.call(this.unsaved, "email")) {
+        const has_email = !!this.saved.email;
+        const email_is_changed = Object.prototype.hasOwnProperty.call(
+            this.unsaved,
+            "email",
+        );
+        if (has_email && email_is_changed) {
             post({
                 url: "/member/send_updated_member_info",
                 data: {

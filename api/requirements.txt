@@ -11,7 +11,6 @@ bcrypt
 stripe==7.8.2
 jsonschema
 jinja2
-pytz
 ipython
 Pillow
 Phonenumbers
@@ -20,6 +19,7 @@ python-dateutil
 types-python-dateutil
 types-sqlalchemy
 sqlalchemy-stubs
+markdown
 
 dataclasses_json
 # Test requirements

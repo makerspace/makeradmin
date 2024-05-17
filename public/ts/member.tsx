@@ -297,17 +297,15 @@ function PendingLabaccessInstructions({
         return (
             <>
                 Du behöver åtgärda ovanstående fel innan din labbaccess kan
-                synkas. När de är åtgärdade kommer den digitala nyckeln att
-                förlängas med <strong>{pending_labaccess_days} dagar</strong>{" "}
-                vid nästa nyckelsynkronisering.
+                förlängas. När de är åtgärdade kommer den att förlängas med
+                <strong>{pending_labaccess_days} dagar</strong>.
             </>
         );
     } else if (can_sync_labaccess && pending_labaccess_days) {
         return (
             <>
                 <strong>{pending_labaccess_days} dagar</strong> kommer läggas
-                till vid nästa nyckelsynkronisering. Då kommer din access att
-                förlängas.
+                vid nästa synkronisering.
             </>
         );
     } else {

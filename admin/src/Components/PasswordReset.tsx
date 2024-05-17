@@ -1,10 +1,10 @@
 import React from "react";
-import auth from "../auth";
 import { withRouter } from "react-router";
-import { showError, showSuccess } from "../message";
-import { browserHistory } from "../browser_history";
 import { Link } from "react-router-dom";
 import * as _ from "underscore";
+import auth from "../auth";
+import { browserHistory } from "../browser_history";
+import { showError, showSuccess } from "../message";
 
 class PasswordReset extends React.Component {
     input = React.createRef<HTMLInputElement>();
@@ -54,6 +54,7 @@ class PasswordReset extends React.Component {
                                         className="uk-form-large uk-form-width-large"
                                         type="password"
                                         placeholder="New Password"
+                                        autoComplete="new-password"
                                     />
                                 </div>
                             </div>
