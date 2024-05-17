@@ -1,12 +1,12 @@
 from typing import Any, Dict, List, Optional, Set, Tuple, cast
 
-from test_aid.test_base import FlaskTestBase
-import membership.models
-import shop.models
-import messages.models
 import core.models
+import membership.models
+import messages.models
+import shop.models
 from shop.shop_data import get_product_data_by_special_id
 from shop.stripe_constants import MakerspaceMetadataKeys
+from test_aid.test_base import FlaskTestBase
 
 
 class ShopDataTest(FlaskTestBase):
