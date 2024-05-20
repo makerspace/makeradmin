@@ -4,14 +4,14 @@ import { formatDate } from "./common";
 import { member_t } from "./member_common";
 import { Translation, TranslationKeyValues } from "./translate";
 import {
-    URL_CALENDAR,
+    URL_CALENDLY_BOOK,
     URL_FACEBOOK_GROUP,
     URL_GET_STARTED_QUIZ,
     URL_INSTAGRAM,
     URL_SLACK_HELP,
     URL_SLACK_SIGNUP,
     URL_WIKI,
-    accessyURL,
+    accessyURL
 } from "./urls";
 
 export type Dictionary = Translation<typeof Eng>;
@@ -289,7 +289,7 @@ const Eng = {
                     <p>
                         Before you gain access to the makerspace you need to
                         attend a member introduction. These are held{" "}
-                        <a target="_blank" href={URL_CALENDAR}>
+                        <a target="_blank" href={URL_CALENDLY_BOOK}>
                             regularly every 1-2 weeks
                         </a>
                         .
@@ -493,7 +493,7 @@ const Eng = {
             errors: {
                 no_member_introduction: `
                     <h2>Cannot start subscription</h2>
-                    <p>You must attend a member introduction before you can start an auto-renewal subscription.</p><p>You can find them in the <a href="${URL_CALENDAR}">calendar</a>.</p>
+                    <p>You must attend a member introduction before you can start an auto-renewal subscription.</p><p>You can find them in the <a href="${URL_CALENDLY_BOOK}">calendar</a>.</p>
                 `,
             },
             pay_dialog: {

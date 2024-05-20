@@ -14,6 +14,7 @@ export const URL_GET_STARTED_QUIZ =
 export const URL_INSTAGRAM = "https://www.instagram.com/stockholmmakerspace/";
 export const URL_RELATIVE_MEMBER_PORTAL = "/member";
 export const URL_CALENDAR = "https://www.makerspace.se/kalendarium";
+export const URL_CALENDLY_BOOK = "https://calendly.com/medlemsintroduktion/medlemsintroduktion";
 export const URL_MEMBERBOOTH = "https://wiki.makerspace.se/Memberbooth";
 export const URL_ACCESSY_ANDROID =
     "https://play.google.com/store/apps/details?id=com.axessions.app";
