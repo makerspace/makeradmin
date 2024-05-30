@@ -154,10 +154,10 @@ const PaymentButton = ({
                         e.preventDefault();
                         setInProgress(true);
                         try {
-                            const result = await stripe.createPaymentMethod(
-                                "card",
-                                element,
-                            );
+                            const result = await stripe!.createPaymentMethod({
+                                type: "card",
+                                card: element,
+                            });
                             if (result.error) {
                                 throw result.error;
                             } else {

@@ -1,3 +1,9 @@
+import { Elements } from "@stripe/react-stripe-js";
+import {
+    loadStripe,
+    PaymentMethod,
+    StripeCardElement,
+} from "@stripe/stripe-js";
 import { ComponentChildren, render } from "preact";
 import { StateUpdater, useEffect, useMemo, useState } from "preact/hooks";
 import { PopupModal, useCalendlyEventListener } from "react-calendly";
@@ -7,7 +13,12 @@ import * as common from "./common";
 import { ServerResponse, trackPlausible } from "./common";
 import { LoadCurrentMemberInfo, member_t } from "./member_common";
 import {
+    calculateAmountToPay,
+    createPaymentMethod,
+    createStripeCardInput,
     Discount,
+    extractRelevantProducts,
+    pay,
     PaymentFailedError,
     PriceLevel,
     Product,
@@ -16,12 +27,6 @@ import {
     RegisterPageData,
     StripeCardInput,
     ToPayPreview,
-    calculateAmountToPay,
-    createPaymentMethod,
-    createStripeCardInput,
-    extractRelevantProducts,
-    initializeStripe,
-    pay,
 } from "./payment_common";
 import { TranslationWrapper, Translator, useTranslation } from "./translations";
 import { URL_RELATIVE_MEMBER_PORTAL } from "./urls";
@@ -426,7 +431,7 @@ const Confirmation = ({
     productData: ProductData;
     discount: Discount;
     discountInfo: DiscountsInfo;
-    card: stripe.elements.Element;
+    card: StripeCardElement;
     onRegistered: (r: RegistrationSuccess) => void;
     onBack: () => void;
 }) => {
@@ -541,7 +546,7 @@ type RegistrationSuccess = {
 };
 
 async function registerMember(
-    paymentMethod: stripe.paymentMethod.PaymentMethod,
+    paymentMethod: PaymentMethod,
     productData: ProductData,
     memberInfo: MemberInfoValidated,
     selectedPlan: Plan,
@@ -1191,12 +1196,14 @@ const RegisterPage = ({}: {}) => {
 
 common.documentLoaded().then(() => {
     const root = document.getElementById("root");
-    initializeStripe();
+    const stripe = loadStripe(window.stripeKey);
     if (root != null) {
         render(
             <TranslationWrapper>
                 <div className="content-wrapper">
-                    <RegisterPage />
+                    <Elements stripe={stripe}>
+                        <RegisterPage />
+                    </Elements>
                 </div>
             </TranslationWrapper>,
             root,

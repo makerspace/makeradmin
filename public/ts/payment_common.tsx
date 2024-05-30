@@ -1,4 +1,11 @@
-/// <reference path="../node_modules/@types/stripe-v3/index.d.ts" />
+import { useStripe } from "@stripe/react-stripe-js";
+import {
+    loadStripe,
+    PaymentMethod,
+    Stripe,
+    StripeCardElement,
+    StripeError,
+} from "@stripe/stripe-js";
 import { useEffect, useRef } from "preact/hooks";
 import Cart, { Item } from "./cart";
 import * as common from "./common";
@@ -13,20 +20,20 @@ import { useTranslation } from "./translations";
 
 declare var UIkit: any;
 
-export var stripe: stripe.Stripe;
-var card: stripe.elements.Element;
+export var stripe: Stripe | null;
+var card: StripeCardElement;
 var spinner: any;
 var payButton: HTMLInputElement;
 var errorElement: any;
 
-export function initializeStripe() {
+export async function initializeStripe() {
     // Create a Stripe client.
-    stripe = Stripe(window.stripeKey);
+    stripe = await loadStripe(window.stripeKey);
 }
 
 export function mountStripe() {
     // Create an instance of Elements.
-    const elements = stripe.elements({ locale: "sv" });
+    const elements = stripe!.elements({ locale: "sv" });
     // Custom styling can be passed to options when creating an Element.
     const stripeStyle = {
         base: {
@@ -64,7 +71,7 @@ interface ResponseFunction {
 export interface PaymentFlowDefinition {
     initiate_payment: InitializePaymentFunction;
     before_initiate_payment?: Function;
-    on_stripe_error?: (error: stripe.Error) => void;
+    on_stripe_error?: (error: StripeError) => void;
     handle_backend_response?: (
         json: ServerResponse<BackendPaymentResponse>,
     ) => void;
@@ -337,7 +344,7 @@ export function ProductDataFromProducts(
 export const StripeCardInput = ({
     element,
 }: {
-    element: stripe.elements.Element;
+    element: StripeCardElement;
 }) => {
     const mountPoint = useRef<HTMLDivElement>(null);
 
@@ -350,7 +357,9 @@ export const StripeCardInput = ({
 
 export const createStripeCardInput = () => {
     // Create an instance of Elements.
-    const elements = stripe.elements({ locale: "sv" });
+    const stripe = useStripe();
+    const elements = stripe?.elements({ locale: "sv" });
+
     // Custom styling can be passed to options when creating an Element.
     const stripeStyle = {
         base: {
@@ -370,7 +379,7 @@ export const createStripeCardInput = () => {
     };
 
     // Create an instance of the card Element.
-    return elements.create("card", {
+    return elements?.create("card", {
         style: stripeStyle,
         hidePostalCode: true,
     });
@@ -566,10 +575,12 @@ export const extractRelevantProducts = (
 };
 
 export async function createPaymentMethod(
-    element: stripe.elements.Element,
+    element: StripeCardElement,
     memberInfo: member_t,
-): Promise<stripe.paymentMethod.PaymentMethod | null> {
-    const result = await stripe.createPaymentMethod("card", element, {
+): Promise<PaymentMethod | null> {
+    const result = await stripe!.createPaymentMethod({
+        type: "card",
+        card: element,
         billing_details: {
             name: `${memberInfo.firstname} ${memberInfo.lastname}`,
             email: memberInfo.email,
@@ -649,7 +660,7 @@ export async function handleStripeSetupIntent<
                     res.data.action_info!.type ===
                     PaymentIntentNextActionType.USE_STRIPE_SDK
                 ) {
-                    const stripeResult = await stripe.confirmCardSetup(
+                    const stripeResult = await stripe!.confirmCardSetup(
                         res.data.action_info!.client_secret,
                     );
                     if (stripeResult.error) {
@@ -705,7 +716,7 @@ export async function negotiatePayment<
                     res.data.action_info!.type ===
                     PaymentIntentNextActionType.USE_STRIPE_SDK
                 ) {
-                    const stripeResult = await stripe.handleCardAction(
+                    const stripeResult = await stripe!.handleCardAction(
                         res.data.action_info!.client_secret,
                     );
                     if (stripeResult.error) {
@@ -729,7 +740,7 @@ export async function negotiatePayment<
 }
 
 export async function pay(
-    paymentMethod: stripe.paymentMethod.PaymentMethod,
+    paymentMethod: PaymentMethod,
     cart: Cart,
     productData: ProductData,
     discount: Discount,
