@@ -16,7 +16,7 @@ A part of the price object in stripe is lookup_key. This is used to keep track o
 
 ### Customer
 
-The stripe customer api doesn't support the ways we keep track of products and prices. To keep track of the member stripe customer relationship we store the stripe customer id in the Member table in the database.
+The stripe customer api doesn't support the ways we keep track of products and prices. To keep track of the member Stripe customer relationship, we store the Stripe customer id in the Member table in the database.
 
 ## Subscriptions
 
