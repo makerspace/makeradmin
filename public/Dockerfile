@@ -10,11 +10,10 @@ RUN apk update \
 	netcat-openbsd \
 	inotify-tools \
 	wget \
+	nodejs \
 	npm \
 	curl \
 	&& rm -rf /var/cache/apk/*
-
-RUN npm install -g npm@9.2.0
 
 RUN npm i -g npm sass
 
