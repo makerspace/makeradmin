@@ -118,7 +118,7 @@ public_1            | 10.0.2.2 - - [18/Dec/2018:20:50:23 +0000] "GET / HTTP/1.1"
 
 ### Required membership products
 
-Some pages needs special products in order to function (e.g. the registration page, or the member page).
+Some pages need special products in order to function (e.g. the registration page, or the member page).
 
 The following products are required and can be created via the firstrun script:
 
