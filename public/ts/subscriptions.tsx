@@ -84,7 +84,7 @@ const PayDialog = ({
                 {products
                     .filter((p) => p.smallest_multiple > 1)
                     .map((p) => {
-                        const sub_type = p.product_metadata.subscription_type; //TODO fix
+                        const sub_type = p.product_metadata.subscription_type;
                         if (sub_type === undefined) return null;
 
                         // If the member already has membership, information about the binding period is redundant, or even misleading

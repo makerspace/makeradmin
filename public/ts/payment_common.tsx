@@ -233,7 +233,7 @@ export const calculateAmountToPay = ({
 
     for (const item of cart.items) {
         const product = productData.id2item.get(item.id)!;
-        const subscriptionType = product.product_metadata.subscription_type; //TODO fix
+        const subscriptionType = product.product_metadata.subscription_type;
 
         if (subscriptionType !== undefined) {
             if (item.count != product.smallest_multiple) {
@@ -780,7 +780,7 @@ export async function pay(
 
     const subscriptionStarts: SubscriptionStart[] = payRecurring.map(
         ({ product, amount }) => ({
-            subscription: product.product_metadata.subscription_type!, //TODO fix
+            subscription: product.product_metadata.subscription_type!,
             expected_to_pay_recurring: "" + amount,
             expected_to_pay_now: "0", // We should already have paid for the member to be a member, so the subscription should start in the future and not charge anything right now
         }),

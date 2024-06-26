@@ -208,7 +208,9 @@ def create_required_stripe_products():
             display_order=next_display_order(Product),
             category_id=member_category.id,
             product_metadata={
+                "allowed_price_levels": ["low_income_discount"],
                 "special_product_id": "membership_subscription",
+                "subscription_type": "membership",
             },
         ),
     )
@@ -223,7 +225,9 @@ def create_required_stripe_products():
             display_order=next_display_order(Product),
             category_id=member_category.id,
             product_metadata={
+                "allowed_price_levels": ["low_income_discount"],
                 "special_product_id": "labaccess_subscription",
+                "subscription_type": "labaccess",
             },
         ),
     )
