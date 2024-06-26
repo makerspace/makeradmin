@@ -118,17 +118,7 @@ public_1            | 10.0.2.2 - - [18/Dec/2018:20:50:23 +0000] "GET / HTTP/1.1"
 
 ### Required membership products
 
-Some pages need special products in order to function (e.g. the registration page, or the member page).
-
-The following products are required and can be created via the firstrun script:
-
-TODO need to update this section
-
--   A **product** for base membership. Add the metadata "subscription_type"="membership" to the **product** item
-    -   Add a yearly **price**, and add the metadata "price_type"="recurring" to the **price** item
--   A **product** for makerspace access. Add the metadata "subscription_type"="labaccess" to the **product** item
-    -   Monthly price, and add the metadata "price_type"="recurring" to the **price** item
-    -   **price** for N months, where N is the binding period as specified in `stripe_subscriptions.py->BINDING_PERIOD`. The price should be N times the recurring price. Add the metadata "price_type"="binding_period"
+Some pages need special products in order to function (e.g. the registration page, or the member page). The products can be created via the firstrun script.
 
 ## Additional configuration
 
