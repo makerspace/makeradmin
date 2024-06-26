@@ -1,6 +1,6 @@
 # Stripe
 
-For the general introduction to how we use stripe, see the main [readme](../../../README.md)
+For the general introduction to how we use Stripe, see the main [readme](../../../README.md)
 
 ## Makeradmin stripe relationships
 
