@@ -134,13 +134,21 @@ tests using the api as well as selenium tests. Those tests are also run in Githu
 
 You can run the tests in test containers using a one off db with:
 
-```
+```bash
 make test
 ```
 
+To run a single test, you can pass options to pytest using the `PYTEST_ADDOPTS` environment variable, for example:
+
+```bash
+PYTEST_ADDOPTS='-k "test_empty_cart_fails_purchase"' make test
+```
+
+Other test options that pytest supports can be passed using the same variable.
+
 Or you can run against your local running environment with:
 
-```
+```bash
 make dev-test
 ```
 
