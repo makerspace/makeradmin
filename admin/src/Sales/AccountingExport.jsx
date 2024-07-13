@@ -14,6 +14,7 @@ function download_blob(blob, file_name) {
     document.body.appendChild(element);
     element.click();
     document.body.removeChild(element);
+    URL.revokeObjectURL(element.href);
 }
 
 function exportAccounting(year, month, file_name) {
