@@ -11,7 +11,7 @@ import {
     URL_SLACK_HELP,
     URL_SLACK_SIGNUP,
     URL_WIKI,
-    accessyURL
+    accessyURL,
 } from "./urls";
 
 export type Dictionary = Translation<typeof Eng>;
