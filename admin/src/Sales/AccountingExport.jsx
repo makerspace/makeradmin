@@ -70,9 +70,8 @@ export default function AccountingExport() {
             <form className="uk-form uk-form-stacked">
                 <fieldset className="uk-margin-top">
                     <div>
-                        <legend>
-                            <i className="uk-icon-shopping-cart" /> Välj vilken
-                            period du vill exportera
+                        <legend className="uk-legend">
+                            Välj vilken period du vill exportera
                         </legend>
                         <label className="uk-form-label" htmlFor="year">
                             År:
@@ -109,6 +108,7 @@ export default function AccountingExport() {
                             placeholder="Enter file name..."
                             id="file_name"
                             name="file_name"
+                            className="uk-input"
                         />
                     </div>
                     <button
