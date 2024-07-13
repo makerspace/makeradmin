@@ -108,11 +108,11 @@ export default function AccountingExport() {
                             placeholder="Enter file name..."
                             id="file_name"
                             name="file_name"
-                            className="uk-input"
+                            className="uk-input uk-width-1-1"
                         />
                     </div>
                     <button
-                        className="uk-button uk-button-primary"
+                        className="uk-button uk-button-primary uk-width-1-1"
                         role="button"
                         tabIndex={4}
                         style={{ marginTop: "2px" }}
