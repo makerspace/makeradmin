@@ -12,9 +12,7 @@ from service.error import InternalServerError
 from sqlalchemy import func
 
 from shop.models import Product, ProductCategory
-from shop.stripe_constants import (
-    STRIPE_CURRENTY_BASE,
-)
+from shop.stripe_constants import STRIPE_CURRENTY_BASE, PriceType
 
 logger = getLogger("makeradmin")
 
@@ -78,9 +76,9 @@ def retry(f: Callable[[], T]) -> T:
             time.sleep(1 * (1.5**its) * (1.0 + random.random()))
 
 
-def stripe_amount_from_makeradmin_product(makeradmin_product: Product, recurring: StripeRecurring | None) -> int:
-    if recurring:
-        return convert_to_stripe_amount(makeradmin_product.price * recurring.interval_count)
+def stripe_amount_from_makeradmin_product(makeradmin_product: Product, price_type: PriceType) -> int:
+    if price_type == PriceType.BINDING_PERIOD:
+        return convert_to_stripe_amount(makeradmin_product.price * makeradmin_product.smallest_multiple)
     else:
         return convert_to_stripe_amount(makeradmin_product.price)
 

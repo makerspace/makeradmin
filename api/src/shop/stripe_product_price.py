@@ -33,8 +33,7 @@ def makeradmin_to_stripe_recurring(makeradmin_product: Product, price_type: Pric
             interval = makeradmin_unit_to_stripe_unit[makeradmin_product.unit]
         else:
             raise ValueError(f"Unexpected unit {makeradmin_product.unit} in makeradmin product {makeradmin_product.id}")
-        interval_count = makeradmin_product.smallest_multiple if price_type == PriceType.BINDING_PERIOD else 1
-        return StripeRecurring(interval=interval, interval_count=interval_count)
+        return StripeRecurring(interval=interval, interval_count=1)
     else:
         if makeradmin_product.category.id == subscription_category_id:
             raise ValueError(f"Unexpected price type {price_type} for subscription product {makeradmin_product.id}")
@@ -96,7 +95,7 @@ def eq_makeradmin_stripe_price(makeradmin_product: Product, stripe_price: stripe
     recurring = makeradmin_to_stripe_recurring(makeradmin_product, price_type)
 
     if (
-        stripe_price.unit_amount != stripe_amount_from_makeradmin_product(makeradmin_product, recurring)
+        stripe_price.unit_amount != stripe_amount_from_makeradmin_product(makeradmin_product, price_type)
         or stripe_price.currency != CURRENCY
         or stripe_price.metadata.get("price_type") != price_type.value
     ):
@@ -142,7 +141,7 @@ def _create_stripe_price(
             nickname=key,
             transfer_lookup_key=True,
             product=stripe_product.id,
-            unit_amount=stripe_amount_from_makeradmin_product(makeradmin_product, recurring),
+            unit_amount=stripe_amount_from_makeradmin_product(makeradmin_product, price_type),
             currency=CURRENCY,
             recurring=recurring_dict,
             metadata={

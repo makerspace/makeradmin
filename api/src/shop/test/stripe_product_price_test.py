@@ -69,7 +69,7 @@ class StripeRecurringWithoutStripeTest(ShopTestMixin, FlaskTestBase):
         )
         recurring = makeradmin_to_stripe_recurring(makeradmin_test_product, stripe_constants.PriceType.BINDING_PERIOD)
         assert recurring.interval == "month"
-        assert recurring.interval_count == 3
+        assert recurring.interval_count == 1
 
     def test_makeradmin_to_stripe_recurring_wrong_unit(self) -> None:
         makeradmin_test_product = self.db.create_product(
@@ -133,7 +133,7 @@ class StripeProductPriceTest(ShopTestMixin, FlaskTestBase):
         assert stripe_price.currency == stripe_constants.CURRENCY
         if price_type == stripe_constants.PriceType.FIXED_PRICE:
             assert stripe_price.type == "one_time"
-            interval_count = 1
+            multiple = 1
         else:
             assert stripe_price.type == "recurring"
             reccuring = stripe_price.recurring
@@ -141,14 +141,14 @@ class StripeProductPriceTest(ShopTestMixin, FlaskTestBase):
                 assert reccuring["interval"] == "month"
             else:
                 assert reccuring["interval"] == "year"
-            interval_count = (
+            multiple = (
                 makeradmin_product.smallest_multiple
                 if stripe_price.metadata["price_type"] == stripe_constants.PriceType.BINDING_PERIOD.value
                 else 1
             )
-            assert reccuring["interval_count"] == interval_count
+            assert reccuring["interval_count"] == 1
         assert stripe_price.metadata["price_type"] == price_type.value
-        assert stripe_price.unit_amount == convert_to_stripe_amount(makeradmin_product.price * interval_count)
+        assert stripe_price.unit_amount == convert_to_stripe_amount(makeradmin_product.price * multiple)
 
     def test_create_product(self) -> None:
         makeradmin_test_product = self.db.create_product(
