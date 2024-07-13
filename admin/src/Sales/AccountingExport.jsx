@@ -8,6 +8,15 @@ function create_option(label) {
     return { label: label, value: label };
 }
 
+function download_blob(blob, file_name) {
+    const element = document.createElement("a");
+    element.href = URL.createObjectURL(blob);
+    element.download = file_name;
+    document.body.appendChild(element);
+    element.click();
+    document.body.removeChild(element);
+}
+
 function AccountingExport() {
     let year_options = [];
     let month_options = [];
@@ -37,15 +46,10 @@ function AccountingExport() {
             url: `/webshop/download-accounting-file/${yearOption.label}/${monthOption.label}`,
         })
             .then((response) => {
-                const element = document.createElement("a");
-                const file = new Blob([atob(response.data)], {
+                const blob = new Blob([atob(response.data)], {
                     type: "text/plain",
                 });
-                element.href = URL.createObjectURL(file);
-                element.download = file_name;
-                document.body.appendChild(element);
-                element.click();
-                document.body.removeChild(element);
+                download_blob(blob, file_name);
                 showSuccess("Laddat ner SIE-fil för bokföring.");
             })
             .catch((error) => {
