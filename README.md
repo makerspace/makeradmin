@@ -33,7 +33,7 @@ Clone this git repository to a suitable place on your computer / server
 
 > [!TIP]
 > Start by initializing and activating a [virtual python environment](https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/) in the cloned folder.
-> This makes sure that the packages used for Makeradmin are isolated into it's own "environment" (i.e. in the local directory), and will not interfere with packages already installed.
+> This makes sure that the packages used for Makeradmin are isolated into its own "environment" (i.e. in the local directory), and will not interfere with packages already installed.
 >
 > ```bash
 > python3 -m venv .venv
