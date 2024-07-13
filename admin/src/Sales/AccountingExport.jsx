@@ -7,7 +7,6 @@ class AccountingExport extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            csv_content: null,
             state: "none",
             selectedOption_year: null,
             selectedOption_month: null,
