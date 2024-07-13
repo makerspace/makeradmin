@@ -1,3 +1,4 @@
+import { render as jsx_to_string } from "preact-render-to-string";
 import React, { useState } from "react";
 import Select from "react-select";
 import { get } from "../gateway";
@@ -36,8 +37,13 @@ function exportAccounting(year, month, file_name) {
         })
         .catch((error) => {
             showError(
-                "<h2>Misslyckades ladda ner fil.</h2>Kunde inte kommunicera med servern: " +
-                    error.message,
+                jsx_to_string(
+                    <>
+                        <h2>Misslyckades ladda ner fil</h2>Kunde inte
+                        kommunicera med servern:
+                        <pre>{JSON.stringify(error.message)}</pre>
+                    </>,
+                ),
             );
         });
 }
