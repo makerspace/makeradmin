@@ -60,6 +60,17 @@ export default function AccountingExport() {
     );
     const [loading, setLoading] = useState(false);
 
+    const handleExportClick = (event) => {
+        event.preventDefault();
+        setLoading(true);
+        const promise = exportAccounting(
+            yearOption.label,
+            monthOption.label,
+            document.getElementById("file_name").value,
+        );
+        promise.then(() => setLoading(false));
+    };
+
     return (
         <div>
             <h2>Exportera SIE-fil</h2>
@@ -117,16 +128,7 @@ export default function AccountingExport() {
                         tabIndex={4}
                         style={{ marginTop: "2px" }}
                         disabled={loading}
-                        onClick={(event) => {
-                            event.preventDefault();
-                            setLoading(true);
-                            const promise = exportAccounting(
-                                yearOption.label,
-                                monthOption.label,
-                                document.getElementById("file_name").value,
-                            );
-                            promise.then(() => setLoading(false));
-                        }}
+                        onClick={handleExportClick}
                     >
                         {loading ? "Laddar..." : "Exportera"}
                     </button>
