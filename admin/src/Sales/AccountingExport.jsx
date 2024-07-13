@@ -117,18 +117,19 @@ function AccountingExport() {
                             />
                         </div>
 
-                        <div
+                        <button
                             className="uk-button uk-button-primary"
                             role="button"
                             style={{ marginTop: "2px" }}
-                            onClick={() =>
+                            onClick={(event) => {
+                                event.preventDefault();
                                 exportAccounting(
                                     document.getElementById("file_name").value,
-                                )
-                            }
+                                );
+                            }}
                         >
                             Exportera SIE-fil för vald period
-                        </div>
+                        </button>
                     </fieldset>
                 </form>
             </div>
