@@ -74,10 +74,11 @@ export default function AccountingExport() {
                                 <i className="uk-icon-shopping-cart" /> Välj
                                 vilken period du vill exportera
                             </legend>
-                            <label className="uk-form-label" htmlFor="">
+                            <label className="uk-form-label" htmlFor="year">
                                 År:
                             </label>
                             <Select
+                                id="year"
                                 name="year"
                                 className="uk-select"
                                 tabIndex={1}
@@ -87,10 +88,11 @@ export default function AccountingExport() {
                                     setYearOption(from_year)
                                 }
                             />
-                            <label className="uk-form-label" htmlFor="">
+                            <label className="uk-form-label" htmlFor="month">
                                 Månad:
                             </label>
                             <Select
+                                id="month"
                                 name="month"
                                 className="uk-select"
                                 tabIndex={2}
@@ -100,7 +102,10 @@ export default function AccountingExport() {
                             />
                         </div>
                         <div>
-                            <label className="uk-form-label" htmlFor="">
+                            <label
+                                className="uk-form-label"
+                                htmlFor="file_name"
+                            >
                                 File name:
                             </label>
                             <input
