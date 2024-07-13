@@ -30,20 +30,11 @@ function AccountingExport() {
         if (file_name) {
             file_name = file_name + ".si";
         } else {
-            file_name =
-                "Accounting_" +
-                Object.values(yearOption)[0] +
-                "_" +
-                Object.values(monthOption)[0] +
-                ".si";
+            file_name = `Accounting_${yearOption.label}_${monthOption.label}.si`;
         }
 
         get({
-            url:
-                "/webshop/download-accounting-file/" +
-                Object.values(yearOption)[0] +
-                "/" +
-                Object.values(monthOption)[0],
+            url: `/webshop/download-accounting-file/${yearOption.label}/${monthOption.label}`,
         })
             .then((response) => {
                 const element = document.createElement("a");
