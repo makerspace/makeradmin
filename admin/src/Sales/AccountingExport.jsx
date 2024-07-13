@@ -4,39 +4,39 @@ import { get } from "../gateway";
 import { showError, showSuccess } from "../message";
 
 function AccountingExport() {
-    const [year, setYear] = useState(null);
-    const [month, setMonth] = useState(null);
+    const [yearOption, setYear] = useState(null);
+    const [monthOption, setMonth] = useState(null);
 
-    let years = [];
-    let months = [];
+    let year_options = [];
+    let month_options = [];
     let current_year = new Date().getFullYear();
 
     for (let i = current_year; i >= 2020; i--) {
-        years.push({ year: i });
+        year_options.push({ value: i });
     }
     for (let i = 1; i <= 12; i++) {
-        months.push({ month: i });
+        month_options.push({ value: i });
     }
 
     const exportAccounting = (file_name) => {
-        if (year && month) {
+        if (yearOption && monthOption) {
             if (file_name) {
                 file_name = file_name + ".si";
             } else {
                 file_name =
                     "Accounting_" +
-                    Object.values(year)[0] +
+                    Object.values(yearOption)[0] +
                     "_" +
-                    Object.values(month)[0] +
+                    Object.values(monthOption)[0] +
                     ".si";
             }
 
             get({
                 url:
                     "/webshop/download-accounting-file/" +
-                    Object.values(year)[0] +
+                    Object.values(yearOption)[0] +
                     "/" +
-                    Object.values(month)[0],
+                    Object.values(monthOption)[0],
             })
                 .then((response) => {
                     const element = document.createElement("a");
@@ -85,10 +85,10 @@ function AccountingExport() {
                                 name="year"
                                 className="uk-select"
                                 tabIndex={1}
-                                options={years}
-                                value={year}
-                                getOptionValue={(g) => g.year}
-                                getOptionLabel={(g) => g.year}
+                                options={year_options}
+                                value={yearOption}
+                                getOptionValue={(option) => option.value}
+                                getOptionLabel={(option) => option.value}
                                 onChange={(from_year) => setYear(from_year)}
                             />
                             <label className="uk-form-label" htmlFor="">
@@ -98,10 +98,10 @@ function AccountingExport() {
                                 name="month"
                                 className="uk-select"
                                 tabIndex={1}
-                                options={months}
-                                value={month}
-                                getOptionValue={(g) => g.month}
-                                getOptionLabel={(g) => g.month}
+                                options={month_options}
+                                value={monthOption}
+                                getOptionValue={(option) => option.value}
+                                getOptionLabel={(option) => option.value}
                                 onChange={(month) => setMonth(month)}
                             />
                         </div>
