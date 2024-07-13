@@ -21,9 +21,6 @@ Makeradmin uses Python 3.11.
 sudo apt-get install python3.11-dev python3.11-doc python3-pip
 ```
 
-The install process will install additional pip packages.
-Activate a venv / virtualenv before install if you want python environment isolation.
-
 ### npm
 
 ```bash
@@ -34,12 +31,14 @@ sudo apt-get install npm
 
 Clone this git repository to a suitable place on your computer / server
 
-Start by initializing and activating a [virtual python environment](https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/) in the cloned folder
-
-```bash
-python3 -m venv .venv
-source .venv/bin/activate
-```
+> [!TIP]
+> Start by initializing and activating a [virtual python environment](https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/) in the cloned folder.
+> This makes sure that the packages used for Makeradmin are isolated into it's own "environment" (i.e. in the local directory), and will not interfere with packages already installed.
+>
+> ```bash
+> python3 -m venv .venv
+> source .venv/bin/activate
+> ```
 
 Run the firstrun script
 
