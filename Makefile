@@ -27,6 +27,8 @@ clean-nuke:
 	$(COMPOSE) down
 	docker volume rm -f makeradmin_dbdata
 	docker volume rm -f makeradmin_logs
+	docker volume rm -f makeradmin_accessy_syncer_logs
+	docker volume rm -f makeradmin_email_dispatcher_logs
 	docker volume rm -f makeradmin_node_modules
 	docker volume rm -f test_dbdata
 	docker volume rm -f test_logs
