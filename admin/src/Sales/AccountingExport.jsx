@@ -3,7 +3,6 @@ import Select from "react-select";
 import { get } from "../gateway";
 import { showError, showSuccess } from "../message";
 
-
 function create_option(label) {
     return { label: label, value: label };
 }
@@ -15,6 +14,31 @@ function download_blob(blob, file_name) {
     document.body.appendChild(element);
     element.click();
     document.body.removeChild(element);
+}
+
+function exportAccounting(yearOption, monthOption, file_name) {
+    if (file_name) {
+        file_name = file_name + ".si";
+    } else {
+        file_name = `Accounting_${yearOption.label}_${monthOption.label}.si`;
+    }
+
+    get({
+        url: `/webshop/download-accounting-file/${yearOption.label}/${monthOption.label}`,
+    })
+        .then((response) => {
+            const blob = new Blob([atob(response.data)], {
+                type: "text/plain",
+            });
+            download_blob(blob, file_name);
+            showSuccess("Laddat ner SIE-fil för bokföring.");
+        })
+        .catch((error) => {
+            showError(
+                "<h2>Misslyckades ladda ner fil.</h2>Kunde inte kommunicera med servern: " +
+                    error.message,
+            );
+        });
 }
 
 export default function AccountingExport() {
@@ -34,31 +58,6 @@ export default function AccountingExport() {
     const [monthOption, setMonthOption] = useState(
         create_option(current_month),
     );
-
-    const exportAccounting = (file_name) => {
-        if (file_name) {
-            file_name = file_name + ".si";
-        } else {
-            file_name = `Accounting_${yearOption.label}_${monthOption.label}.si`;
-        }
-
-        get({
-            url: `/webshop/download-accounting-file/${yearOption.label}/${monthOption.label}`,
-        })
-            .then((response) => {
-                const blob = new Blob([atob(response.data)], {
-                    type: "text/plain",
-                });
-                download_blob(blob, file_name);
-                showSuccess("Laddat ner SIE-fil för bokföring.");
-            })
-            .catch((error) => {
-                showError(
-                    "<h2>Misslyckades ladda ner fil.</h2>Kunde inte kommunicera med servern: " +
-                        error.message,
-                );
-            });
-    };
 
     return (
         <div>
@@ -121,6 +120,8 @@ export default function AccountingExport() {
                             onClick={(event) => {
                                 event.preventDefault();
                                 exportAccounting(
+                                    yearOption,
+                                    monthOption,
                                     document.getElementById("file_name").value,
                                 );
                             }}
