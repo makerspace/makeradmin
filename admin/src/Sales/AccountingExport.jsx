@@ -61,81 +61,74 @@ export default function AccountingExport() {
 
     return (
         <div>
-            <div>
-                <h2>Exportera SIE-fil</h2>
-                <p>
-                    På denna sida kan du exportera transaktioner för vald period
-                    till en SIE-fil.
-                </p>
-                <form className="uk-form uk-form-stacked">
-                    <fieldset className="uk-margin-top">
-                        <div>
-                            <legend>
-                                <i className="uk-icon-shopping-cart" /> Välj
-                                vilken period du vill exportera
-                            </legend>
-                            <label className="uk-form-label" htmlFor="year">
-                                År:
-                            </label>
-                            <Select
-                                id="year"
-                                name="year"
-                                className="uk-select"
-                                tabIndex={1}
-                                options={year_options}
-                                value={yearOption}
-                                onChange={(from_year) =>
-                                    setYearOption(from_year)
-                                }
-                            />
-                            <label className="uk-form-label" htmlFor="month">
-                                Månad:
-                            </label>
-                            <Select
-                                id="month"
-                                name="month"
-                                className="uk-select"
-                                tabIndex={2}
-                                options={month_options}
-                                value={monthOption}
-                                onChange={(month) => setMonthOption(month)}
-                            />
-                        </div>
-                        <div>
-                            <label
-                                className="uk-form-label"
-                                htmlFor="file_name"
-                            >
-                                File name:
-                            </label>
-                            <input
-                                type="text"
-                                tabIndex={3}
-                                placeholder="Enter file name..."
-                                id="file_name"
-                                name="file_name"
-                            />
-                        </div>
+            <h2>Exportera SIE-fil</h2>
+            <p>
+                På denna sida kan du exportera transaktioner för vald period
+                till en SIE-fil.
+            </p>
+            <form className="uk-form uk-form-stacked">
+                <fieldset className="uk-margin-top">
+                    <div>
+                        <legend>
+                            <i className="uk-icon-shopping-cart" /> Välj vilken
+                            period du vill exportera
+                        </legend>
+                        <label className="uk-form-label" htmlFor="year">
+                            År:
+                        </label>
+                        <Select
+                            id="year"
+                            name="year"
+                            className="uk-select"
+                            tabIndex={1}
+                            options={year_options}
+                            value={yearOption}
+                            onChange={(from_year) => setYearOption(from_year)}
+                        />
+                        <label className="uk-form-label" htmlFor="month">
+                            Månad:
+                        </label>
+                        <Select
+                            id="month"
+                            name="month"
+                            className="uk-select"
+                            tabIndex={2}
+                            options={month_options}
+                            value={monthOption}
+                            onChange={(month) => setMonthOption(month)}
+                        />
+                    </div>
+                    <div>
+                        <label className="uk-form-label" htmlFor="file_name">
+                            File name:
+                        </label>
+                        <input
+                            type="text"
+                            tabIndex={3}
+                            placeholder="Enter file name..."
+                            id="file_name"
+                            name="file_name"
+                        />
+                    </div>
 
-                        <button
-                            className="uk-button uk-button-primary"
-                            role="button"
-                            tabIndex={4}
-                            style={{ marginTop: "2px" }}
-                            onClick={(event) => {
-                                event.preventDefault();
-                                exportAccounting(
-                                    yearOption.label,
-                                    monthOption.label,
-                                    document.getElementById("file_name").value,
-                                );
-                            }}
-                        >
-                            Exportera SIE-fil för vald period
-                        </button>
-                    </fieldset>
-                </form>
-            </div>
+                    <button
+                        className="uk-button uk-button-primary"
+                        role="button"
+                        tabIndex={4}
+                        style={{ marginTop: "2px" }}
+                        onClick={(event) => {
+                            event.preventDefault();
+                            exportAccounting(
+                                yearOption.label,
+                                monthOption.label,
+                                document.getElementById("file_name").value,
+                            );
+                        }}
+                    >
+                        Exportera SIE-fil för vald period
+                    </button>
+                </fieldset>
+            </form>
         </div>
     );
 }
