@@ -1,18 +1,18 @@
 import React from "react";
-import { withRouter } from "react-router";
-import QuizQuestion from "../Models/QuizQuestion";
 import Textarea from "../Components/Textarea";
+import QuizQuestion from "../Models/QuizQuestion";
 import QuestionOptionList from "./QuestionOptionList";
 
 interface Props {
     question: QuizQuestion | null;
     onSave: () => void;
     onDelete: () => void;
+    onNew: () => void;
 }
 
 export default (props: Props) => {
     const { question } = props;
-    const { onSave, onDelete } = props;
+    const { onSave, onDelete, onNew } = props;
 
     if (question == null) return null;
 
@@ -30,6 +30,14 @@ export default (props: Props) => {
             onClick={onSave}
         >
             <i className="uk-icon-save" /> {question.id ? "Spara" : "Skapa"}
+        </a>
+    );
+    const new_button = !question.id ? null : (
+        <a
+            className="uk-button uk-button-success uk-float-right"
+            onClick={onNew}
+        >
+            <i className="uk-icon-save" /> New question
         </a>
     );
 
@@ -61,6 +69,7 @@ export default (props: Props) => {
                 </fieldset>
                 <div className="uk-form-row uk-margin-top">
                     {delete_button}
+                    {new_button}
                     {save_button}
                 </div>
             </form>
