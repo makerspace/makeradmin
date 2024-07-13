@@ -87,48 +87,44 @@ export default function AccountingExport() {
             </p>
             <form className="uk-form uk-form-stacked">
                 <fieldset className="uk-margin-top">
-                    <div>
-                        <legend className="uk-legend">
-                            Välj vilken period du vill exportera
-                        </legend>
-                        <label className="uk-form-label" htmlFor="year">
-                            År:
-                        </label>
-                        <Select
-                            id="year"
-                            name="year"
-                            className="uk-select"
-                            tabIndex={1}
-                            options={year_options}
-                            value={yearOption}
-                            onChange={(from_year) => setYearOption(from_year)}
-                        />
-                        <label className="uk-form-label" htmlFor="month">
-                            Månad:
-                        </label>
-                        <Select
-                            id="month"
-                            name="month"
-                            className="uk-select"
-                            tabIndex={2}
-                            options={month_options}
-                            value={monthOption}
-                            onChange={(month) => setMonthOption(month)}
-                        />
-                    </div>
-                    <div>
-                        <label className="uk-form-label" htmlFor="file_name">
-                            File name:
-                        </label>
-                        <input
-                            type="text"
-                            tabIndex={3}
-                            placeholder="Enter file name..."
-                            id="file_name"
-                            name="file_name"
-                            className="uk-input uk-width-1-1"
-                        />
-                    </div>
+                    <legend className="uk-legend">
+                        Välj vilken period du vill exportera
+                    </legend>
+                    <label className="uk-form-label" htmlFor="year">
+                        År:
+                    </label>
+                    <Select
+                        id="year"
+                        name="year"
+                        className="uk-select"
+                        tabIndex={1}
+                        options={year_options}
+                        value={yearOption}
+                        onChange={(from_year) => setYearOption(from_year)}
+                    />
+                    <label className="uk-form-label" htmlFor="month">
+                        Månad:
+                    </label>
+                    <Select
+                        id="month"
+                        name="month"
+                        className="uk-select"
+                        tabIndex={2}
+                        options={month_options}
+                        value={monthOption}
+                        onChange={(month) => setMonthOption(month)}
+                    />
+                    <label className="uk-form-label" htmlFor="file_name">
+                        File name:
+                    </label>
+                    <input
+                        type="text"
+                        tabIndex={3}
+                        placeholder="Enter file name..."
+                        id="file_name"
+                        name="file_name"
+                        className="uk-input uk-width-1-1"
+                    />
                     <button
                         className="uk-button uk-button-primary uk-width-1-1"
                         role="button"
