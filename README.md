@@ -18,7 +18,7 @@ You need to sign out and sign back in again for changes to take effect.
 Makeradmin uses Python 3.11.
 
 ```bash
-sudo apt-get install python3.10-dev python3.10-doc python3-pip
+sudo apt-get install python3.11-dev python3.11-doc python3-pip
 ```
 
 The install process will install additional pip packages.
