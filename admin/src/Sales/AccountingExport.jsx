@@ -94,7 +94,7 @@ export default function AccountingExport() {
                             <Select
                                 name="month"
                                 className="uk-select"
-                                tabIndex={1}
+                                tabIndex={2}
                                 options={month_options}
                                 value={monthOption}
                                 onChange={(month) => setMonthOption(month)}
@@ -106,6 +106,7 @@ export default function AccountingExport() {
                             </label>
                             <input
                                 type="text"
+                                tabIndex={3}
                                 placeholder="Enter file name..."
                                 id="file_name"
                                 name="file_name"
@@ -115,6 +116,7 @@ export default function AccountingExport() {
                         <button
                             className="uk-button uk-button-primary"
                             role="button"
+                            tabIndex={4}
                             style={{ marginTop: "2px" }}
                             onClick={(event) => {
                                 event.preventDefault();
