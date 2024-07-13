@@ -50,7 +50,9 @@ export const Termination = ({ props, callback }: TerminationProps) => {
                     ? `expired since: ${props.expired_date}`
                     : `Expires: ${props.expired_date}`}
             </h3>
-            {props.info && <h3>{props.info}</h3>}
+            {props.info && (
+                <h3 style={{ whiteSpace: "pre-line" }}>{props.info}</h3>
+            )}
 
             {props.options
                 ? props.options.map((option) => {
