@@ -1348,7 +1348,7 @@ common.documentLoaded().then(() => {
                     jsx_to_string(
                         <>
                             <h2>Failed to load member info</h2>
-                            <p>{e.toString()}</p>
+                            <pre>{JSON.stringify(e)}</pre>
                         </>,
                     ),
                 );
