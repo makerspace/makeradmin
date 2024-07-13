@@ -23,7 +23,7 @@ function exportAccounting(year, month, file_name) {
         file_name = `Accounting_${year}_${month}.si`;
     }
 
-    get({
+    return get({
         url: `/webshop/download-accounting-file/${year}/${month}`,
     })
         .then((response) => {
@@ -58,6 +58,7 @@ export default function AccountingExport() {
     const [monthOption, setMonthOption] = useState(
         create_option(current_month),
     );
+    const [loading, setLoading] = useState(false);
 
     return (
         <div>
@@ -110,22 +111,24 @@ export default function AccountingExport() {
                             name="file_name"
                         />
                     </div>
-
                     <button
                         className="uk-button uk-button-primary"
                         role="button"
                         tabIndex={4}
                         style={{ marginTop: "2px" }}
+                        disabled={loading}
                         onClick={(event) => {
                             event.preventDefault();
-                            exportAccounting(
+                            setLoading(true);
+                            const promise = exportAccounting(
                                 yearOption.label,
                                 monthOption.label,
                                 document.getElementById("file_name").value,
                             );
+                            promise.then(() => setLoading(false));
                         }}
                     >
-                        Exportera SIE-fil för vald period
+                        {loading ? "Laddar..." : "Exportera"}
                     </button>
                 </fieldset>
             </form>
