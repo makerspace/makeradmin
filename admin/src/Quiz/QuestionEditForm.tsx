@@ -16,16 +16,26 @@ export default (props: Props) => {
 
     if (question == null) return null;
 
+    const delete_button = !question.id ? null : (
+        <a
+            className="uk-button uk-button-danger uk-float-left"
+            onClick={onDelete}
+        >
+            <i className="uk-icon-trash" /> Radera fråga
+        </a>
+    );
+    const save_button = (
+        <a
+            className="uk-button uk-button-success uk-float-right"
+            onClick={onSave}
+        >
+            <i className="uk-icon-save" /> {question.id ? "Spara" : "Skapa"}
+        </a>
+    );
+
     return (
         <div className="uk-margin-top">
-            <form
-                className="uk-form uk-form-stacked"
-                onSubmit={(e) => {
-                    e.preventDefault();
-                    onSave();
-                    return false;
-                }}
-            >
+            <form className="uk-form uk-form-stacked">
                 <fieldset className="uk-margin-top">
                     <legend>Quizfråga</legend>
                     {question && (
@@ -50,20 +60,8 @@ export default (props: Props) => {
                     )}
                 </fieldset>
                 <div className="uk-form-row uk-margin-top">
-                    {question.id ? (
-                        <a
-                            className="uk-button uk-button-danger uk-float-left"
-                            onClick={onDelete}
-                        >
-                            <i className="uk-icon-trash" /> Radera fråga
-                        </a>
-                    ) : (
-                        ""
-                    )}
-                    <button className="uk-button uk-button-success uk-float-right">
-                        <i className="uk-icon-save" />{" "}
-                        {question.id ? "Spara" : "Skapa"}
-                    </button>
+                    {delete_button}
+                    {save_button}
                 </div>
             </form>
             {question.id ? (
