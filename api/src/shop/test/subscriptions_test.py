@@ -34,7 +34,7 @@ from shop.stripe_subscriptions import (
     BINDING_PERIOD,
     SubscriptionType,
 )
-from shop.stripe_util import convert_from_stripe_amount, convert_to_stripe_amount, event_semantic_time
+from shop.stripe_util import convert_from_stripe_amount, convert_to_stripe_amount, event_semantic_time, retry
 from shop.transactions import ship_orders
 from test_aid.obj import DEFAULT_PASSWORD
 from test_aid.systest_config import STRIPE_PRIVATE_KEY
@@ -70,12 +70,14 @@ def attach_and_set_payment_method(
     stripe_customer = get_and_sync_stripe_customer(member, test_clock=test_clock)
     assert stripe_customer is not None
 
-    payment_method = stripe.PaymentMethod.attach(card_token.value, customer=stripe_customer.id)
-    stripe.Customer.modify(
-        stripe_customer.id,
-        invoice_settings={
-            "default_payment_method": payment_method.id,
-        },
+    payment_method = retry(lambda: stripe.PaymentMethod.attach(card_token.value, customer=stripe_customer.id))
+    retry(
+        lambda: stripe.Customer.modify(
+            stripe_customer.id,
+            invoice_settings={
+                "default_payment_method": payment_method.id,
+            },
+        )
     )
     return payment_method
 
@@ -485,7 +487,8 @@ class Test(FlaskTestBase):
         self.advance_clock(clock, now + time_delta(days=10))
 
         assert self.get_member(member_id).deleted_at is not None
-        assert stripe.Customer.retrieve(stripe_customer_id).deleted
+        stripe_customer = retry(lambda: stripe.Customer.retrieve(stripe_customer_id))
+        assert stripe_customer.deleted
 
     def test_subscriptions_binding_period(self) -> None:
         """
