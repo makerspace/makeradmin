@@ -12,10 +12,10 @@ function AccountingExport() {
     let current_year = new Date().getFullYear();
 
     for (let i = current_year; i >= 2020; i--) {
-        year_options.push({ value: i });
+        year_options.push({ value: i, label: i });
     }
     for (let i = 1; i <= 12; i++) {
-        month_options.push({ value: i });
+        month_options.push({ value: i, label: i });
     }
 
     const exportAccounting = (file_name) => {
@@ -87,8 +87,6 @@ function AccountingExport() {
                                 tabIndex={1}
                                 options={year_options}
                                 value={yearOption}
-                                getOptionValue={(option) => option.value}
-                                getOptionLabel={(option) => option.value}
                                 onChange={(from_year) => setYear(from_year)}
                             />
                             <label className="uk-form-label" htmlFor="">
@@ -100,8 +98,6 @@ function AccountingExport() {
                                 tabIndex={1}
                                 options={month_options}
                                 value={monthOption}
-                                getOptionValue={(option) => option.value}
-                                getOptionLabel={(option) => option.value}
                                 onChange={(month) => setMonth(month)}
                             />
                         </div>
