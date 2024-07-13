@@ -3,64 +3,66 @@ import Select from "react-select";
 import { get } from "../gateway";
 import { showError, showSuccess } from "../message";
 
-function AccountingExport() {
-    const [yearOption, setYear] = useState(null);
-    const [monthOption, setMonth] = useState(null);
 
+function create_option(label) {
+    return { label: label, value: label };
+}
+
+function AccountingExport() {
     let year_options = [];
     let month_options = [];
-    let current_year = new Date().getFullYear();
+    const current_year = new Date().getFullYear();
+    const current_month = new Date().getMonth() + 1;
 
     for (let i = current_year; i >= 2020; i--) {
-        year_options.push({ value: i, label: i });
+        year_options.push(create_option(i));
     }
     for (let i = 1; i <= 12; i++) {
-        month_options.push({ value: i, label: i });
+        month_options.push(create_option(i));
     }
 
-    const exportAccounting = (file_name) => {
-        if (yearOption && monthOption) {
-            if (file_name) {
-                file_name = file_name + ".si";
-            } else {
-                file_name =
-                    "Accounting_" +
-                    Object.values(yearOption)[0] +
-                    "_" +
-                    Object.values(monthOption)[0] +
-                    ".si";
-            }
+    const [yearOption, setYearOption] = useState(create_option(current_year));
+    const [monthOption, setMonthOption] = useState(
+        create_option(current_month),
+    );
 
-            get({
-                url:
-                    "/webshop/download-accounting-file/" +
-                    Object.values(yearOption)[0] +
-                    "/" +
-                    Object.values(monthOption)[0],
-            })
-                .then((response) => {
-                    const element = document.createElement("a");
-                    const file = new Blob([atob(response.data)], {
-                        type: "text/plain",
-                    });
-                    element.href = URL.createObjectURL(file);
-                    element.download = file_name;
-                    document.body.appendChild(element);
-                    element.click();
-                    document.body.removeChild(element);
-                    showSuccess("Laddat ner SIE-fil för bokföring.");
-                })
-                .catch((error) => {
-                    showError(
-                        "<h2>Misslyckades ladda ner fil.</h2>Kunde inte kommunicera med servern: " +
-                            error.message,
-                    );
-                });
+    const exportAccounting = (file_name) => {
+        if (file_name) {
+            file_name = file_name + ".si";
         } else {
-            showError(
-                "<h2>Failed</h2>You missed entering to and from years, or you have mixed up the order of years",
-            );
+            file_name =
+                "Accounting_" +
+                Object.values(yearOption)[0] +
+                "_" +
+                Object.values(monthOption)[0] +
+                ".si";
         }
+
+        get({
+            url:
+                "/webshop/download-accounting-file/" +
+                Object.values(yearOption)[0] +
+                "/" +
+                Object.values(monthOption)[0],
+        })
+            .then((response) => {
+                const element = document.createElement("a");
+                const file = new Blob([atob(response.data)], {
+                    type: "text/plain",
+                });
+                element.href = URL.createObjectURL(file);
+                element.download = file_name;
+                document.body.appendChild(element);
+                element.click();
+                document.body.removeChild(element);
+                showSuccess("Laddat ner SIE-fil för bokföring.");
+            })
+            .catch((error) => {
+                showError(
+                    "<h2>Misslyckades ladda ner fil.</h2>Kunde inte kommunicera med servern: " +
+                        error.message,
+                );
+            });
     };
 
     return (
@@ -87,7 +89,9 @@ function AccountingExport() {
                                 tabIndex={1}
                                 options={year_options}
                                 value={yearOption}
-                                onChange={(from_year) => setYear(from_year)}
+                                onChange={(from_year) =>
+                                    setYearOption(from_year)
+                                }
                             />
                             <label className="uk-form-label" htmlFor="">
                                 Månad:
@@ -98,7 +102,7 @@ function AccountingExport() {
                                 tabIndex={1}
                                 options={month_options}
                                 value={monthOption}
-                                onChange={(month) => setMonth(month)}
+                                onChange={(month) => setMonthOption(month)}
                             />
                         </div>
                         <div>
