@@ -1,4 +1,5 @@
 /// <reference path="../node_modules/@types/stripe-v3/index.d.ts" />
+import { render as jsx_to_string } from "preact-render-to-string";
 import { useEffect, useRef } from "preact/hooks";
 import Cart, { Item } from "./cart";
 import * as common from "./common";
@@ -21,6 +22,22 @@ var errorElement: any;
 
 export function initializeStripe() {
     // Create a Stripe client.
+    if (!window.stripeKey) {
+        UIkit.modal.alert(
+            jsx_to_string(
+                <>
+                    <h2>Stripe configuration missing</h2>
+                    <p>You need to set the Stripe keys in your .env file</p>
+                </>,
+            ),
+            {
+                timeout: 0,
+                status: "danger",
+            },
+        );
+        return; // Exit early since otherwise the call below will crash.
+    }
+
     stripe = Stripe(window.stripeKey);
 }
 
