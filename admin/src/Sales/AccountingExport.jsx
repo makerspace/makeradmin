@@ -16,15 +16,15 @@ function download_blob(blob, file_name) {
     document.body.removeChild(element);
 }
 
-function exportAccounting(yearOption, monthOption, file_name) {
+function exportAccounting(year, month, file_name) {
     if (file_name) {
         file_name = file_name + ".si";
     } else {
-        file_name = `Accounting_${yearOption.label}_${monthOption.label}.si`;
+        file_name = `Accounting_${year}_${month}.si`;
     }
 
     get({
-        url: `/webshop/download-accounting-file/${yearOption.label}/${monthOption.label}`,
+        url: `/webshop/download-accounting-file/${year}/${month}`,
     })
         .then((response) => {
             const blob = new Blob([atob(response.data)], {
@@ -120,8 +120,8 @@ export default function AccountingExport() {
                             onClick={(event) => {
                                 event.preventDefault();
                                 exportAccounting(
-                                    yearOption,
-                                    monthOption,
+                                    yearOption.label,
+                                    monthOption.label,
                                     document.getElementById("file_name").value,
                                 );
                             }}
