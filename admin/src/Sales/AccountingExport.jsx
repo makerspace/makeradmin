@@ -17,7 +17,7 @@ function download_blob(blob, file_name) {
     document.body.removeChild(element);
 }
 
-function AccountingExport() {
+export default function AccountingExport() {
     let year_options = [];
     let month_options = [];
     const current_year = new Date().getFullYear();
@@ -131,5 +131,3 @@ function AccountingExport() {
         </div>
     );
 }
-
-export default AccountingExport;
