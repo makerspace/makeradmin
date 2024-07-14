@@ -2,11 +2,7 @@
     "[python]": {
         "editor.defaultFormatter": "charliermarsh.ruff"
     },
-    "editor.codeActionsOnSave": {
-        "source.organizeImports": "always"
-    },
     "editor.defaultFormatter": "esbenp.prettier-vscode",
     "editor.formatOnSave": true,
-    "black-formatter.args": ["--line-length", "120"],
-    "ruff.format.args": ["--line-length", "120"]
+    "black-formatter.args": ["--line-length", "120"]
 }
