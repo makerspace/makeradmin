@@ -148,7 +148,7 @@ class StripePaymentIntentTest(FlaskTestBase):
         transaction = self.db.create_transaction(member_id=member.member_id, amount=200)
         payment_method = attach_and_set_payment_method(member, FakeCardPmToken.Normal)
 
-        stripe_intent = pay_with_stripe(transaction, payment_method.id, False)
+        stripe_intent = pay_with_stripe(transaction, payment_method.id, False, is_test=True)
 
         assert stripe_intent.status == PaymentIntentStatus.SUCCEEDED
         assert transaction.status == Transaction.COMPLETED
@@ -166,7 +166,7 @@ class StripePaymentIntentTest(FlaskTestBase):
         payment_method = attach_and_set_payment_method(member, FakeCardPmToken.DeclineAfterAttach)
 
         with self.assertRaises(CardError) as context:
-            pay_with_stripe(transaction, payment_method.id, False)
+            pay_with_stripe(transaction, payment_method.id, False, is_test=True)
         self.assertTrue("declined" in str(context.exception))
 
     def test_get_payment_intent_few(self) -> None:
@@ -178,7 +178,7 @@ class StripePaymentIntentTest(FlaskTestBase):
             self.seen_members.append(member)
             transaction = self.db.create_transaction(member_id=member.member_id, amount=200 + (i * 10))
             payment_method = attach_and_set_payment_method(member, FakeCardPmToken.Normal)
-            test_intents[transaction.id] = pay_with_stripe(transaction, payment_method.id, False)
+            test_intents[transaction.id] = pay_with_stripe(transaction, payment_method.id, False, is_test=True)
             test_transactions[transaction.id] = transaction
 
         start_date = datetime.now(timezone.utc) - timedelta(days=1)
