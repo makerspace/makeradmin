@@ -81,7 +81,7 @@ def get_stripe_subscriptions(stripe_customer_id: str, active_only: bool = True) 
     resp = retry(lambda: stripe.Subscription.list(customer=stripe_customer_id))
     return [
         sub
-        for sub in resp["data"]
+        for sub in resp
         if not active_only
         or SubscriptionStatus(sub["status"]) in [SubscriptionStatus.ACTIVE, SubscriptionStatus.TRAILING]
     ]
@@ -145,7 +145,7 @@ def start_subscription(
     if stripe_customer is None:
         raise BadRequest(f"Unable to create, find or update corresponding stripe customer for member {member}")
 
-    if not stripe_customer.invoice_settings["default_payment_method"]:
+    if stripe_customer.invoice_settings is None or not stripe_customer.invoice_settings["default_payment_method"]:
         raise BadRequest(message="You must add a default payment method before starting a subscription.")
 
     logger.info(f"Attempting to start new subscription {subscription_type}")
@@ -195,7 +195,9 @@ def start_subscription(
         current_subscription_id = get_subscription_id(member, subscription_type)
         if current_subscription_id is not None:
             if current_subscription_id.startswith("sub_sched_"):
-                current_subscription = stripe.SubscriptionSchedule.retrieve(current_subscription_id)
+                current_subscription: stripe.SubscriptionSchedule | stripe.Subscription = (
+                    stripe.SubscriptionSchedule.retrieve(current_subscription_id)
+                )
             else:
                 current_subscription = stripe.Subscription.retrieve(current_subscription_id)
 
@@ -350,10 +352,7 @@ def pause_subscription(
             retry(
                 lambda: stripe.Subscription.modify(
                     subscription_id,
-                    pause_collection={
-                        "behavior": "void",
-                        "resumes_at": None,
-                    },
+                    pause_collection={"behavior": "void"},
                 )
             )
             return True
@@ -404,7 +403,8 @@ def cancel_subscription(
                     retry(lambda: stripe.Subscription.delete(schedule["subscription"]))
 
         elif subscription_id.startswith("sub_"):
-            retry(lambda: stripe.Subscription.delete(subscription_id))
+            # (mypy falsely doesn't use the class-method of the delete method)
+            retry(lambda: stripe.Subscription.delete(subscription_id))  # type: ignore[arg-type]
         else:
             assert False
     except stripe.InvalidRequestError as e:
