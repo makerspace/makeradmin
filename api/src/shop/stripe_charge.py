@@ -1,4 +1,5 @@
 from logging import getLogger
+from typing import Never
 
 import stripe
 from service.error import EXCEPTION, InternalServerError
@@ -12,14 +13,14 @@ from shop.transactions import PaymentFailed, payment_success
 logger = getLogger("makeradmin")
 
 
-def raise_from_stripe_invalid_request_error(e) -> None:
+def raise_from_stripe_invalid_request_error(e: InvalidRequestError) -> Never:
     if "Amount must convert to at least" in str(e) or "Amount must be at least" in str(e):
         raise PaymentFailed("Total amount too small total, least chargable amount is around 5 SEK.")
 
     raise PaymentFailed(log=f"stripe charge failed: {str(e)}", level=EXCEPTION)
 
 
-def create_stripe_charge(transaction: Transaction, card_source_id: stripe.Source) -> stripe.Charge:
+def create_stripe_charge(transaction: Transaction, card_source_id: str) -> stripe.Charge:
     if transaction.status != Transaction.PENDING:
         raise InternalServerError(
             f"unexpected status of transaction",

@@ -41,5 +41,5 @@ def setup_stripe_products() -> None:
 
 def setup_stripe(private: bool) -> None:
     logger.info(f"setting up stripe")
-    stripe.api_version = "2022-11-15"
+    stripe.api_version = "2024-06-20"
     set_stripe_key(private=private)
