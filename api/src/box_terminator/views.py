@@ -22,7 +22,7 @@ def box_terminator_fetch(
                     "member_name": "Test Testsson",
                     "expired": False,
                     "expired_date": "2024-09-09",
-                    "info": "last nagged 2023-09-09",
+                    "info": "last nagged 2023-09-09\nThis is a new line",
                     "storage_id": 1,
                 }
             )

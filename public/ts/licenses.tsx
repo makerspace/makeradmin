@@ -1,4 +1,5 @@
 import { render } from "preact";
+import { render as jsx_to_string } from "preact-render-to-string";
 import * as common from "./common";
 import { UNAUTHORIZED } from "./common";
 import * as login from "./login";
@@ -37,7 +38,14 @@ common.documentLoaded().then(() => {
                 // Render login
                 login.render_login(root, null, null);
             } else {
-                UIkit.modal.alert("<h2>Failed to load member info</h2>");
+                UIkit.modal.alert(
+                    jsx_to_string(
+                        <>
+                            <h2>Failed to load member info</h2>
+                            <pre>{JSON.stringify(e)}</pre>
+                        </>,
+                    ),
+                );
             }
         });
 });

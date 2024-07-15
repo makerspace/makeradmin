@@ -18,10 +18,12 @@ services:
   email-dispatcher:
     volumes:
       - ./api/src:/work/src
+      - email_dispatcher_logs:/work/logs
 
   accessy-syncer:
     volumes:
       - ./api/src:/work/src
+      - accessy_syncer_logs:/work/logs
 
   public:
     build:
@@ -47,3 +49,5 @@ services:
 
 volumes:
   logs:
+  accessy_syncer_logs:
+  email_dispatcher_logs:

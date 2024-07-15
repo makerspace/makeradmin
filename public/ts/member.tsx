@@ -35,7 +35,7 @@ import {
     getCurrentSubscriptions,
 } from "./subscriptions";
 import { Translator, translateUnit, useTranslation } from "./translations";
-import { URL_CALENDAR, URL_MEMBERBOOTH } from "./urls";
+import { URL_CALENDLY_BOOK, URL_MEMBERBOOTH } from "./urls";
 declare var UIkit: any;
 
 type fn_past_enddate = (enddate: date_t, remaining_days: number) => JSX.Element;
@@ -221,7 +221,7 @@ function SignedContractWarning({ member }: { member: member_t }) {
     return member.labaccess_agreement_at ? null : (
         <WarningItem>
             Du måste delta på en <strong>medlemintroduktion</strong>. Du hittar
-            dem i <a href={URL_CALENDAR}>kalendern</a>.
+            dem i <a href={URL_CALENDLY_BOOK}>kalendern</a>.
         </WarningItem>
     );
 }
@@ -1348,7 +1348,7 @@ common.documentLoaded().then(() => {
                     jsx_to_string(
                         <>
                             <h2>Failed to load member info</h2>
-                            <p>{e.toString()}</p>
+                            <pre>{JSON.stringify(e)}</pre>
                         </>,
                     ),
                 );

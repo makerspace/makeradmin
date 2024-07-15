@@ -18,11 +18,8 @@ You need to sign out and sign back in again for changes to take effect.
 Makeradmin uses Python 3.11.
 
 ```bash
-sudo apt-get install python3.10-dev python3.10-doc python3-pip
+sudo apt-get install python3.11-dev python3.11-doc python3-pip
 ```
-
-The install process will install additional pip packages.
-Activate a venv / virtualenv before install if you want python environment isolation.
 
 ### npm
 
@@ -34,12 +31,14 @@ sudo apt-get install npm
 
 Clone this git repository to a suitable place on your computer / server
 
-Start by initializing and activating a [virtual python environment](https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/) in the cloned folder
-
-```bash
-python3 -m venv .venv
-source .venv/bin/activate
-```
+> [!TIP]
+> Start by initializing and activating a [virtual python environment](https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/) in the cloned folder.
+> This makes sure that the packages used for Makeradmin are isolated into its own "environment" (i.e. in the local directory), and will not interfere with packages already installed.
+>
+> ```bash
+> python3 -m venv .venv
+> source .venv/bin/activate
+> ```
 
 Run the firstrun script
 
@@ -139,13 +138,21 @@ tests using the api as well as selenium tests. Those tests are also run in Githu
 
 You can run the tests in test containers using a one off db with:
 
-```
+```bash
 make test
 ```
 
+To run a single test, you can pass options to pytest using the `PYTEST_ADDOPTS` environment variable, for example:
+
+```bash
+PYTEST_ADDOPTS='-k "test_empty_cart_fails_purchase"' make test
+```
+
+Other test options that pytest supports can be passed using the same variable.
+
 Or you can run against your local running environment with:
 
-```
+```bash
 make dev-test
 ```
 
@@ -169,7 +176,8 @@ If you for some reason want to remove the existing database and start from scrat
 make clean-nuke
 ```
 
-⚠️ _Warning: this will completely wipe out all your makeradmin data!_
+> [!WARNING]
+> This will completely wipe out all your makeradmin data!
 
 After this you can run `make firstrun` again to set things up again.
 

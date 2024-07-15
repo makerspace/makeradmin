@@ -64,6 +64,8 @@ services:
     image: makeradmin/api:1.0
     build:
       context: ./api
+    volumes:
+      - ./logs/email_dispatcher:/work/logs
     command:
       - "/work/dispatch_emails.sh"
     environment:
@@ -87,6 +89,8 @@ services:
     image: makeradmin/api:1.0
     build:
       context: ./api
+    volumes:
+      - ./logs/accessy_syncer:/work/logs
     command:
       - "/work/accessy_syncer.sh"
     environment:
