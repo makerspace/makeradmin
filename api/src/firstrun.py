@@ -222,6 +222,8 @@ def create_required_stripe_products():
             unit="mån",
             display_order=next_display_order(Product),
             category_id=member_category.id,
+            # This is effectively the binding period
+            smallest_multiple=2,
             product_metadata={
                 "special_product_id": "labaccess_subscription",
             },
