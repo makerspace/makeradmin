@@ -36,9 +36,7 @@ def makeradmin_to_stripe_recurring(makeradmin_product: Product, price_type: Pric
     if price_type == PriceType.RECURRING or price_type == PriceType.BINDING_PERIOD:
         if makeradmin_product.category.id != subscription_category_id:
             raise ValueError(f"Unexpected price type {price_type} for non-subscription product {makeradmin_product.id}")
-        interval_count = 1
-        if price_type == PriceType.BINDING_PERIOD:
-            interval_count = makeradmin_product.smallest_multiple
+        interval_count = makeradmin_product.smallest_multiple if price_type == PriceType.BINDING_PERIOD else 1
         assert makeradmin_product.unit is not None
         return StripeInterval(
             interval_unit=convert_makeradmin_unit_to_stripe_unit(makeradmin_product.unit), interval_count=interval_count
