@@ -73,12 +73,6 @@ class Purchase(DataClassJsonMixin):
 
 
 @dataclass
-class CartItem(DataClassJsonMixin):
-    id: int
-    count: int
-
-
-@dataclass
 class SubscriptionStart(DataClassJsonMixin):
     subscription: SubscriptionType
     expected_to_pay_now: Decimal
@@ -195,6 +189,7 @@ def ship_add_labaccess_action(
 ) -> None:
     days_to_add = action.value
     assert days_to_add is not None
+    assert transaction.member_id is not None, "Trying to ship labaccess action for a transaction without a member_id"
 
     state = check_labaccess_requirements(transaction.member_id)
     if state != LabaccessRequirements.OK:
@@ -231,6 +226,7 @@ def ship_add_membership_action(action: TransactionAction, transaction: Transacti
     days_to_add = action.value
     assert days_to_add is not None
     assert transaction.created_at is not None
+    assert transaction.member_id is not None, "Trying to ship membership action for a transaction without a member_id"
 
     membership_end = add_membership_days(
         transaction.member_id,
@@ -342,7 +338,10 @@ def payment_success(transaction: Transaction) -> None:
 def process_cart(member_id: int, cart: List[CartItem]) -> Tuple[Decimal, List[TransactionContent]]:
     contents = []
 
-    price_level = get_price_level_for_member(db_session.query(Member).get(member_id))
+    member = db_session.query(Member).get(member_id)
+    if member is None:
+        raise NotFound(message=f"Could not find member with id {member_id}.")
+    price_level = get_price_level_for_member(member)
 
     with localcontext() as ctx:
         ctx.clear_flags()
