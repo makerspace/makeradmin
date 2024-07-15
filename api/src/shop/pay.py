@@ -205,30 +205,22 @@ def setup_payment_method(data_dict: Any, member_id: int) -> SetupPaymentMethodRe
     )
 
 
-def cancel_subscriptions(data_dict: Any, user_id: int) -> None:
-    try:
-        data = CancelSubscriptionsRequest.from_dict(data_dict)
-    except Exception as e:
-        raise BadRequest(message=f"Invalid data: {e}")
-
+def cancel_subscriptions(data: CancelSubscriptionsRequest, user_id: int) -> None:
     member = db_session.query(Member).get(user_id)
     if member is None:
         raise BadRequest(f"Unable to find member with id {user_id}")
 
+    # Ensure that a lab subscription is always accompanied by a membership subscription.
+    # If the membership subscript is cancelled, the lab subscription must therefore also be cancelled.
+    # This should be handled automatically by the frontend with a nice popup, but we will enforce it here
     if SubscriptionType.MEMBERSHIP in data.subscriptions and SubscriptionType.LAB not in data.subscriptions:
-        # This should be handled automatically by the frontend with a nice popup, but we will enforce it here
         data.subscriptions.append(SubscriptionType.LAB)
 
     for sub in data.subscriptions:
         cancel_subscription(member, sub)
 
 
-def start_subscriptions(data_dict: Any, user_id: int) -> None:
-    try:
-        data = StartSubscriptionsRequest.from_dict(data_dict)
-    except Exception as e:
-        raise BadRequest(message=f"Invalid data: {e}")
-
+def start_subscriptions(data: StartSubscriptionsRequest, user_id: int) -> None:
     member = db_session.query(Member).get(user_id)
     if member is None:
         raise BadRequest(f"Unable to find member with id {user_id}")

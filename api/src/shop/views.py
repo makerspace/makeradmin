@@ -12,7 +12,7 @@ from multiaccessy.invite import AccessyInvitePreconditionFailed, ensure_accessy_
 from service.api_definition import DELETE, GET, MEMBER_EDIT, POST, PUBLIC, USER, WEBSHOP, WEBSHOP_EDIT, Arg
 from service.db import db_session
 from service.entity import OrmSingeRelation, OrmSingleSingleRelation
-from service.error import InternalServerError, PreconditionFailed
+from service.error import BadRequest, InternalServerError, PreconditionFailed
 from sqlalchemy.exc import NoResultFound
 from zoneinfo import ZoneInfo
 
@@ -33,7 +33,15 @@ from shop.entities import (
     transaction_entity,
 )
 from shop.models import ProductImage, TransactionContent
-from shop.pay import cancel_subscriptions, pay, register, setup_payment_method, start_subscriptions
+from shop.pay import (
+    CancelSubscriptionsRequest,
+    StartSubscriptionsRequest,
+    cancel_subscriptions,
+    pay,
+    register,
+    setup_payment_method,
+    start_subscriptions,
+)
 from shop.shop_data import (
     all_product_data,
     get_membership_products,
@@ -211,7 +219,7 @@ def receipt_for_member(transaction_id):
 
 
 @service.route("/member/current/accessy_invite", method=POST, permission=USER)
-def accessy_invite():
+def accessy_invite() -> None:
     try:
         ensure_accessy_labaccess(member_id=g.user_id)
     except AccessyInvitePreconditionFailed as e:
@@ -220,12 +228,20 @@ def accessy_invite():
 
 @service.route("/member/current/subscriptions", method=POST, permission=USER)
 def start_subscriptions_route() -> None:
-    return start_subscriptions(request.json, g.user_id)
+    try:
+        data = StartSubscriptionsRequest.from_dict(request.json)
+    except Exception as e:
+        raise BadRequest(message=f"Invalid data: {e}")
+    return start_subscriptions(data, g.user_id)
 
 
 @service.route("/member/current/subscriptions", method=DELETE, permission=USER)
 def cancel_subscriptions_route() -> Any:
-    return cancel_subscriptions(request.json, g.user_id)
+    try:
+        data = CancelSubscriptionsRequest.from_dict(request.json)
+    except Exception as e:
+        raise BadRequest(message=f"Invalid data: {e}")
+    return cancel_subscriptions(data, g.user_id)
 
 
 @service.route("/member/current/subscriptions", method=GET, permission=USER)
