@@ -78,7 +78,7 @@ def get_subscription_id(member: Member, subscription_type: SubscriptionType) -> 
 
 def get_stripe_subscriptions(stripe_customer_id: str, active_only: bool = True) -> List[stripe.Subscription]:
     """Returns the list of subscription objects for the given user."""
-    resp = retry(lambda: stripe.Subscription.list(customer=stripe_customer_id))
+    resp = retry(lambda: list(stripe.Subscription.list(customer=stripe_customer_id).auto_paging_iter()))
     return [
         sub
         for sub in resp
@@ -160,7 +160,7 @@ def start_subscription(
             makeradmin_subscription_product,
             get_price_level_for_member(member),
         )
-        # Fetch fresh price objects from stripe to make sure we have the latest price
+        # Sync stripe products and prices to ensure everything is up to date
         stripe_product, stripe_prices = get_and_sync_stripe_product_and_prices(makeradmin_subscription_product)
 
         metadata = {
@@ -216,7 +216,6 @@ def start_subscription(
             "metadata": metadata,
             "proration_behavior": "none",
         }
-        # "coupon": discount.coupon.id if discount.coupon is not None else None,
         if discount.coupon is not None:
             phase["coupon"] = discount.coupon.id
         phases.append(phase)
@@ -235,7 +234,8 @@ def start_subscription(
                     else stripe_prices[PriceType.RECURRING]
                 )
                 assert phases[0]["items"][0]["price"] == to_pay_now_price.id
-                to_pay_now = convert_from_stripe_amount(to_pay_now_price["unit_amount"]) * (1 - discount.fraction_off)
+                assert to_pay_now_price.unit_amount is not None
+                to_pay_now = convert_from_stripe_amount(to_pay_now_price.unit_amount) * (1 - discount.fraction_off)
             if to_pay_now != expected_to_pay_now:
                 raise BadRequest(
                     f"Expected to pay {expected_to_pay_now} now, for starting {subscription_type} subscription, but should actually pay {to_pay_now}"
@@ -244,7 +244,8 @@ def start_subscription(
         if expected_to_pay_recurring is not None:
             to_pay_recurring_price = stripe_prices[PriceType.RECURRING]
             assert phases[-1]["items"][0]["price"] == to_pay_recurring_price.id
-            to_pay_recurring = convert_from_stripe_amount(to_pay_recurring_price["unit_amount"]) * (
+            assert to_pay_recurring_price.unit_amount is not None
+            to_pay_recurring = convert_from_stripe_amount(to_pay_recurring_price.unit_amount) * (
                 1 - discount.fraction_off
             )
             if to_pay_recurring != expected_to_pay_recurring:
