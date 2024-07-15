@@ -1,7 +1,7 @@
 import collections
 from dataclasses import dataclass
 from logging import getLogger
-from typing import List
+from typing import Any, List, Optional
 
 from membership.views import member_entity
 from service.db import db_session
@@ -25,7 +25,7 @@ from shop.transactions import pending_actions_query
 logger = getLogger("makeradmin")
 
 
-def pending_actions(member_id: int = None):
+def pending_actions(member_id: Optional[int] = None) -> List[Any]:
     query = pending_actions_query(member_id)
 
     return [
@@ -139,8 +139,6 @@ def get_product_data_by_special_id(special_product_id: str) -> Product | None:
         )
         .all()
     )
-    if not products:
-        return None
     if len(products) > 1:
         raise InternalServerError(f"Multiple products found with special id {special_product_id}")
     return products[0] if products else None
