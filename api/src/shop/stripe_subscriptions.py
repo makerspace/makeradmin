@@ -167,7 +167,7 @@ def start_subscription(
         # This is done to ensure that the frontend logic is in sync with the backend logic and the user
         # has been presented the correct price before starting the subscription.
         if expected_to_pay_now is not None:
-            if was_already_member is not None:
+            if was_already_member:
                 # If the member already has the relevant membership, the subscription will start at the end of the current period, and nothing is paid right now
                 to_pay_now = Decimal(0)
             else:
