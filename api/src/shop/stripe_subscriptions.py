@@ -317,8 +317,8 @@ def resume_paused_subscription(
     # but it was very tricky to do it while handling binding periods correctly.
     # So we just cancel the subscription and start a new one.
     # Much less code, much lower risk of bugs. Everyone is happy :)
-    cancel_subscription(member, subscription_type, test_clock)
-    start_subscription(member, subscription_type, earliest_start_at, test_clock)
+    cancel_subscription(member, subscription_type, test_clock=test_clock)
+    start_subscription(member, subscription_type, earliest_start_at, test_clock=test_clock)
     return True
 
 
