@@ -117,7 +117,7 @@ public_1            | 10.0.2.2 - - [18/Dec/2018:20:50:23 +0000] "GET / HTTP/1.1"
 
 ### Required membership products
 
-Some pages need special products in order to function (e.g. the registration page, or the member page). The products can be created via the firstrun script.
+Some pages need special products in order to function (e.g. the registration page, or the member page). The products can be created using `make firstrun`.
 
 ## Additional configuration
 
@@ -189,9 +189,9 @@ Create your own stripe account and add your keys to the `.env` file to allow pur
 
 You will not be able to go to the checkout unless you have a Stripe key in the .env-file. If this is set up, you can use [Stripe's fake cards](https://stripe.com/docs/testing#cards) for completing the purchase.
 
-### Stripe - makeradmin connection
+### Stripe - Makeradmin connection
 
-Makeradmin is used as the truth and stripe is automatically sync with the makeradmin products.
+Makeradmin is used as the truth, and Stripe is automatically synced with the makeradmin products.
 
 ### Stripe subscription support
 
@@ -203,6 +203,8 @@ stripe listen --forward-to http://localhost:8010/webshop/stripe_callback
 ```
 
 After the forwarding has started, you'll need to copy the signing secret it gives you, and put it in your own `.env` file in the key `STRIPE_SIGNING_SECRET`.
+
+Note: When running tests, this is not necessary, as it will poll the stripe server automatically.
 
 ## Bookkeeping and accounting
 
