@@ -747,12 +747,15 @@ class Test(FlaskTestBase):
         )
 
         assert not get_membership_summary(member.member_id).membership_active
+        product = get_makeradmin_subscription_product(SubscriptionType.LAB)
 
         stripe_subscriptions.start_subscription(
             member,
             SubscriptionType.LAB,
             earliest_start_at=start_time,
             test_clock=clock.stripe_clock,
+            expected_to_pay_now=product.price * product.smallest_multiple,
+            expected_to_pay_recurring=product.price,
         )
 
         self.advance_clock(clock, start_time + time_delta(months=1, days=5))
@@ -766,6 +769,9 @@ class Test(FlaskTestBase):
 
         # Member signs agreement after more than 3 months
         # Their 2 months of initial labaccess will start ticking now
+        # This will always add 61 days of labaccess, since the code will
+        # assume the worst case scenario when the order is completed (i.e.
+        # the most months with 31 days).
         member.labaccess_agreement_at = clock.date
         db_session.commit()
         sub_start = clock.date.date()
