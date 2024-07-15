@@ -163,6 +163,64 @@ def start_subscription(
         # Fetch fresh price objects from stripe to make sure we have the latest price
         stripe_product, stripe_prices = get_and_sync_stripe_product_and_prices(makeradmin_subscription_product)
 
+        metadata = {
+            MSMetaKeys.USER_ID.value: str(member.member_id),
+            MSMetaKeys.MEMBER_NUMBER.value: str(member.member_number),
+            MSMetaKeys.SUBSCRIPTION_TYPE.value: subscription_type.value,
+        }
+
+        phases: List[stripe.SubscriptionSchedule.CreateParamsPhase] = []
+        # If the user is not already a member, we require a binding period.
+        # This allows someone to switch to a subscription without a binding period
+        # if they have been paying as they go for individual months (or if they just cancelled a subscription)
+        # If we raise the binding time to more than two months we may want to
+        # do something fancier here. As otherwise a user could just buy 1 month
+        # of membership, and then switch to a subscription which might normally
+        # have, say, a 6 month binding period.
+        # But with the current binding period of 2 months, this is not a problem.
+        # And we might not even want to change it even if we increase the binding period.
+        # The binding period is primarily to prevent people from subscribing and then
+        # immediately cancelling.
+        #
+        # Note: This case typically does not happen, because in the frontend
+        # we convert all subscription starts to direct payments, if the user is not already a member.
+        # This allows us to start multiple subscriptions with the same transaction, since stripe
+        # is terrible and will otherwise need multiple 3d-secure authentication iterations.
+        # Thus when we reach this point, we will basically always already have access (was_already_member=True).
+        # This code will trigger during some tests, however.
+        if PriceType.BINDING_PERIOD in stripe_prices and not was_already_member:
+            phase: stripe.SubscriptionSchedule.CreateParamsPhase = {
+                "items": [
+                    {
+                        "price": stripe_prices[PriceType.BINDING_PERIOD].id,
+                        "metadata": metadata,
+                    },
+                ],
+                "collection_method": "charge_automatically",
+                "metadata": metadata,
+                "proration_behavior": "none",
+                "iterations": 1,
+            }
+            if discount.coupon is not None:
+                phase["coupon"] = discount.coupon.id
+            phases.append(phase)
+
+        phase = {
+            "items": [
+                {
+                    "price": stripe_prices[PriceType.RECURRING].id,
+                    "metadata": metadata,
+                },
+            ],
+            "collection_method": "charge_automatically",
+            "metadata": metadata,
+            "proration_behavior": "none",
+        }
+        # "coupon": discount.coupon.id if discount.coupon is not None else None,
+        if discount.coupon is not None:
+            phase["coupon"] = discount.coupon.id
+        phases.append(phase)
+
         # Check that the price is as expected
         # This is done to ensure that the frontend logic is in sync with the backend logic and the user
         # has been presented the correct price before starting the subscription.
@@ -176,6 +234,7 @@ def start_subscription(
                     if PriceType.BINDING_PERIOD in stripe_prices
                     else stripe_prices[PriceType.RECURRING]
                 )
+                assert phases[0]["items"][0]["price"] == to_pay_now_price.id
                 to_pay_now = convert_from_stripe_amount(to_pay_now_price["unit_amount"]) * (1 - discount.fraction_off)
             if to_pay_now != expected_to_pay_now:
                 raise BadRequest(
@@ -184,6 +243,7 @@ def start_subscription(
 
         if expected_to_pay_recurring is not None:
             to_pay_recurring_price = stripe_prices[PriceType.RECURRING]
+            assert phases[-1]["items"][0]["price"] == to_pay_recurring_price.id
             to_pay_recurring = convert_from_stripe_amount(to_pay_recurring_price["unit_amount"]) * (
                 1 - discount.fraction_off
             )
@@ -215,56 +275,6 @@ def start_subscription(
                     print(type(e))
                     print(e)
                     raise e
-
-        metadata = {
-            MSMetaKeys.USER_ID.value: member.member_id,
-            MSMetaKeys.MEMBER_NUMBER.value: member.member_number,
-            MSMetaKeys.SUBSCRIPTION_TYPE.value: subscription_type.value,
-        }
-
-        phases = []
-        # If the user is not already a member, we require a binding period.
-        # This allows someone to switch to a subscription without a binding period
-        # if they have been paying as they go for individual months (or if they just cancelled a subscription)
-        # If we raise the binding time to more than two months we may want to
-        # do something fancier here. As otherwise a user could just buy 1 month
-        # of membership, and then switch to a subscription which might normally
-        # have, say, a 6 month binding period.
-        # But with the current binding period of 2 months, this is not a problem.
-        # And we might not even want to change it even if we increase the binding period.
-        # The binding period is primarily to prevent people from subscribing and then
-        # immediately cancelling.
-        if PriceType.BINDING_PERIOD in stripe_prices and not was_already_member:
-            phases.append(
-                {
-                    "items": [
-                        {
-                            "price": stripe_prices[PriceType.BINDING_PERIOD].id,
-                            "metadata": metadata,
-                        },
-                    ],
-                    "collection_method": "charge_automatically",
-                    "metadata": metadata,
-                    "proration_behavior": "none",
-                    "iterations": 1,
-                    "coupon": discount.coupon.id if discount.coupon is not None else None,
-                }
-            )
-
-        phases.append(
-            {
-                "items": [
-                    {
-                        "price": stripe_prices[PriceType.RECURRING].id,
-                        "metadata": metadata,
-                    },
-                ],
-                "collection_method": "charge_automatically",
-                "metadata": metadata,
-                "proration_behavior": "none",
-                "coupon": discount.coupon.id if discount.coupon is not None else None,
-            }
-        )
 
         subscription_schedule = stripe.SubscriptionSchedule.create(
             start_date=int(subscription_start.timestamp()),
