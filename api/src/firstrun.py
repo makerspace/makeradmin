@@ -208,7 +208,9 @@ def create_required_stripe_products():
             display_order=next_display_order(Product),
             category_id=member_category.id,
             product_metadata={
+                "allowed_price_levels": ["low_income_discount"],
                 "special_product_id": "membership_subscription",
+                "subscription_type": "membership",
             },
         ),
     )
@@ -225,7 +227,9 @@ def create_required_stripe_products():
             # This is effectively the binding period
             smallest_multiple=2,
             product_metadata={
+                "allowed_price_levels": ["low_income_discount"],
                 "special_product_id": "labaccess_subscription",
+                "subscription_type": "labaccess",
             },
         ),
     )
@@ -485,7 +489,7 @@ def create_shop_transactions() -> None:
         ),
     )
 
-    # TODO this should probabl be associated with some sort of gift card product later
+    # TODO this should be associated with some sort of gift card product later
     transaction_content = get_or_create(
         TransactionContent,
         id=index,
@@ -597,16 +601,32 @@ def firstrun() -> None:
     create_db()
     admins = admin_group()
     create_admin(admins)
-    create_required_stripe_products()
 
+    create_dev_data = False
     while True:
         s = input("Do you want to add various fake data for development purposes? [Y/n]: ")
         if s in ["n", "no"]:
-            create_dev_data = False
             break
         if s in {"", "y", "yes"}:
             create_dev_data = True
             break
+
+    create_stripe_data = True
+    if not create_dev_data:
+        while True:
+            s = input(
+                "Do you want to add products for stripe and memberships?"
+                " (Some products are required for the member portal and regristration page to load) [Y/n]: "
+            )
+            if s in ["n", "no"]:
+                create_stripe_data = False
+                break
+            if s in {"", "y", "yes"}:
+                create_stripe_data = True
+                break
+
+    if create_stripe_data:
+        create_required_stripe_products()
 
     if create_dev_data:
         create_members()

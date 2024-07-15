@@ -115,6 +115,10 @@ public_1            | 10.0.2.2 - - [18/Dec/2018:20:50:23 +0000] "GET / HTTP/1.1"
 [...]
 ```
 
+### Required membership products
+
+Some pages need special products in order to function (e.g. the registration page, or the member page). The products can be created using `make firstrun`.
+
 ## Additional configuration
 
 The `.env` file includes a number of variables that are unset by default.
@@ -185,6 +189,10 @@ Create your own stripe account and add your keys to the `.env` file to allow pur
 
 You will not be able to go to the checkout unless you have a Stripe key in the .env-file. If this is set up, you can use [Stripe's fake cards](https://stripe.com/docs/testing#cards) for completing the purchase.
 
+### Stripe - Makeradmin connection
+
+Makeradmin is used as the truth, and Stripe is automatically synced with the makeradmin products.
+
 ### Stripe subscription support
 
 To handle subscriptions properly, the server needs to listen to stripe webhooks and configure subscription products (see next session).
@@ -196,25 +204,7 @@ stripe listen --forward-to http://localhost:8010/webshop/stripe_callback
 
 After the forwarding has started, you'll need to copy the signing secret it gives you, and put it in your own `.env` file in the key `STRIPE_SIGNING_SECRET`.
 
-### Setting up Stripe subscription products
-
-When using stripe, subscriptions need to be configured via the stripe website.
-These subscriptions will automatically be turned into makeradmin products so that members can purchase them.
-
-Note: You should _not_ modify these products in makeradmin. They will be reset whenever the docker container restarts anyway (when the registration page is visited).
-
-#### Required Stripe configuration
-
-Run the following script to create the required Stripe products. _You should only run it once._ But if anything goes wrong, you can modify the products from the Stripe dashboard.
-
-```bash
-# Print the help
-./create_stripe_products.py --help
-# Example usage (change the arguments to suit your needs)
-./create_stripe_products.py --yearly-price 200 --monthly-price 300 --binding-period 2
-```
-
-If you try to access any page which needs these products (e.g. the registration page, or the member page), makeradmin will fetch them from stripe and do a bunch of validation checks on them.
+Note: When running tests, this is not necessary, as it will poll the stripe server automatically.
 
 ## Bookkeeping and accounting
 

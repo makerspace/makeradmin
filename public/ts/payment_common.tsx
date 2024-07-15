@@ -211,10 +211,11 @@ export function FindWellKnownProduct(
     products: Product[],
     id: WellKnownProductId,
 ): Product | null {
-    return (
-        products.find((p) => p.product_metadata.special_product_id === id) ||
-        null
+    const foundProduct = products.find(
+        (p) => p.product_metadata?.special_product_id === id,
     );
+
+    return foundProduct || null;
 }
 
 export const calculateAmountToPay = ({
