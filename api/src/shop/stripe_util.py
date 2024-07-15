@@ -1,6 +1,6 @@
 import random
 import time
-from dataclasses import asdict, dataclass
+from dataclasses import dataclass
 from datetime import datetime, timezone
 from decimal import Decimal
 from logging import getLogger
@@ -18,9 +18,12 @@ logger = getLogger("makeradmin")
 
 
 @dataclass
-class StripeRecurring:
-    interval: str
+class StripeInterval:
+    interval_unit: str
     interval_count: int
+
+    def to_stripe(self) -> stripe.Price.CreateParamsRecurring:
+        return stripe.Price.CreateParamsRecurring(interval=self.interval_unit, interval_count=self.interval_count)
 
 
 def are_metadata_dicts_equivalent(a: Dict[str, Any], b: Dict[str, Any]) -> bool:

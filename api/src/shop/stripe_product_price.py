@@ -12,7 +12,7 @@ from shop.stripe_constants import (
     MakerspaceMetadataKeys,
     PriceType,
 )
-from shop.stripe_util import StripeRecurring, get_subscription_category, retry, stripe_amount_from_makeradmin_product
+from shop.stripe_util import StripeInterval, get_subscription_category, retry, stripe_amount_from_makeradmin_product
 
 logger = getLogger("makeradmin")
 
@@ -24,16 +24,25 @@ makeradmin_unit_to_stripe_unit = {
 }
 
 
-def makeradmin_to_stripe_recurring(makeradmin_product: Product, price_type: PriceType) -> StripeRecurring | None:
+def convert_makeradmin_unit_to_stripe_unit(unit: str) -> str:
+    if unit in makeradmin_unit_to_stripe_unit:
+        return makeradmin_unit_to_stripe_unit[unit]
+    else:
+        raise ValueError(f"Unexpected unit {unit} in makeradmin product.")
+
+
+def makeradmin_to_stripe_recurring(makeradmin_product: Product, price_type: PriceType) -> StripeInterval | None:
     subscription_category_id = get_subscription_category().id
     if price_type == PriceType.RECURRING or price_type == PriceType.BINDING_PERIOD:
         if makeradmin_product.category.id != subscription_category_id:
             raise ValueError(f"Unexpected price type {price_type} for non-subscription product {makeradmin_product.id}")
-        if makeradmin_product.unit in makeradmin_unit_to_stripe_unit:
-            interval = makeradmin_unit_to_stripe_unit[makeradmin_product.unit]
-        else:
-            raise ValueError(f"Unexpected unit {makeradmin_product.unit} in makeradmin product {makeradmin_product.id}")
-        return StripeRecurring(interval=interval, interval_count=1)
+        interval_count = 1
+        if price_type == PriceType.BINDING_PERIOD:
+            interval_count = makeradmin_product.smallest_multiple
+        assert makeradmin_product.unit is not None
+        return StripeInterval(
+            interval_unit=convert_makeradmin_unit_to_stripe_unit(makeradmin_product.unit), interval_count=interval_count
+        )
     else:
         if makeradmin_product.category.id == subscription_category_id:
             raise ValueError(f"Unexpected price type {price_type} for subscription product {makeradmin_product.id}")
@@ -67,7 +76,9 @@ def get_stripe_prices(
     stripe_product: stripe.Product, lookup_keys: List[str] | None = None
 ) -> list[stripe.Price] | None:
     try:
-        return list(retry(lambda: stripe.Price.list(product=stripe_product.id, lookup_keys=lookup_keys)))
+        return list(
+            retry(lambda: stripe.Price.list(product=stripe_product.id, lookup_keys=lookup_keys).auto_paging_iter())
+        )
     except stripe.InvalidRequestError as e:
         logger.warning(f"failed to retrive prices from stripe for stripe product with id {stripe_product.id}, {e}")
         return None
@@ -102,14 +113,15 @@ def eq_makeradmin_stripe_price(makeradmin_product: Product, stripe_price: stripe
         return False
 
     # Check that either both are recurring, or none are recurring
-    if (recurring is not None) != (stripe_price.recurring is not None):
-        return False
-
-    if recurring is not None:
+    if recurring is not None and stripe_price.recurring is not None:
         return (
-            stripe_price.recurring.get("interval") == recurring.interval
-            and stripe_price.recurring.get("interval_count") == recurring.interval_count
+            stripe_price.recurring.interval == recurring.interval_unit
+            and stripe_price.recurring.interval_count == recurring.interval_count
         )
+    elif recurring is None and stripe_price.recurring is None:
+        pass
+    else:
+        return False
 
     return True
 
@@ -133,23 +145,22 @@ def _create_stripe_price(
     makeradmin_product: Product, stripe_product: stripe.Product, price_type: PriceType
 ) -> stripe.Price:
     key = get_stripe_price_lookup_key(makeradmin_product, price_type)
-    recurring = makeradmin_to_stripe_recurring(makeradmin_product, price_type)
-    recurring_dict = asdict(recurring) if recurring else {}
-    stripe_price = retry(
-        lambda: stripe.Price.create(
-            lookup_key=key,
-            nickname=key,
-            transfer_lookup_key=True,
-            product=stripe_product.id,
-            unit_amount=stripe_amount_from_makeradmin_product(makeradmin_product, price_type),
-            currency=CURRENCY,
-            recurring=recurring_dict,
-            metadata={
-                MakerspaceMetadataKeys.PRICE_TYPE.value: price_type.value,
-                MakerspaceMetadataKeys.PRODUCT_ID.value: makeradmin_product.id,
-            },
-        )
+    create_params = stripe.Price.CreateParams(
+        lookup_key=key,
+        nickname=key,
+        transfer_lookup_key=True,
+        product=stripe_product.id,
+        unit_amount=stripe_amount_from_makeradmin_product(makeradmin_product, price_type),
+        currency=CURRENCY,
+        metadata={
+            MakerspaceMetadataKeys.PRICE_TYPE.value: price_type.value,
+            MakerspaceMetadataKeys.PRODUCT_ID.value: str(makeradmin_product.id),
+        },
     )
+    recurring = makeradmin_to_stripe_recurring(makeradmin_product, price_type)
+    if recurring is not None:
+        create_params["recurring"] = recurring.to_stripe()
+    stripe_price = retry(lambda: stripe.Price.create(**create_params))
     return stripe_price
 
 
@@ -186,7 +197,7 @@ def get_or_create_stripe_prices_for_product(
     lookup_keys = [get_stripe_price_lookup_key(makeradmin_product, price_type) for price_type in price_types]
     stripe_prices = get_stripe_prices(stripe_product, lookup_keys=lookup_keys)
 
-    prices_to_return: Dict[PriceType, stripe.Price | None] = {}
+    prices_to_return: Dict[PriceType, stripe.Price] = {}
     if stripe_prices is None:
         prices_to_create = price_types
     else:
@@ -260,6 +271,9 @@ def replace_stripe_price(
         raise InternalServerError(
             f"The lookup key for stripe price {stripe_price.id} does not match makeradmin product {makeradmin_product.id}"
         )
+    logger.warning(
+        f"Replacing outdated stripe price with new price. product={makeradmin_product.name} price_type={price_type}"
+    )
     deactivate_stripe_price(stripe_price)
     stripe_product = get_stripe_product(makeradmin_product)
     if stripe_product is None:
