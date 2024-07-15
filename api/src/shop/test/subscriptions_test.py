@@ -26,8 +26,7 @@ from membership.membership import get_membership_summary
 from membership.models import Member, Span
 from messages.models import Message
 from service.db import db_session
-from shop import stripe_constants, stripe_event, stripe_subscriptions
-from shop.models import Product
+from shop import stripe_event, stripe_subscriptions
 from shop.stripe_constants import CURRENCY, MakerspaceMetadataKeys, PaymentIntentStatus
 from shop.stripe_customer import get_and_sync_stripe_customer
 from shop.stripe_payment_intent import get_stripe_payment_intents
@@ -40,6 +39,7 @@ from shop.stripe_product_price import (
 from shop.stripe_setup import setup_stripe_products
 from shop.stripe_subscriptions import (
     SubscriptionType,
+    get_makeradmin_subscription_product,
 )
 from shop.stripe_util import (
     convert_from_stripe_amount,
@@ -128,6 +128,7 @@ class Test(FlaskTestBase):
             product_metadata={
                 MakerspaceMetadataKeys.ALLOWED_PRICE_LEVELS.value: ["low_income_discount"],
                 MakerspaceMetadataKeys.SPECIAL_PRODUCT_ID.value: "membership_subscription",
+                MakerspaceMetadataKeys.SUBSCRIPTION_TYPE.value: SubscriptionType.MEMBERSHIP.value,
             },
         )
 
@@ -141,6 +142,7 @@ class Test(FlaskTestBase):
             product_metadata={
                 MakerspaceMetadataKeys.ALLOWED_PRICE_LEVELS.value: ["low_income_discount"],
                 MakerspaceMetadataKeys.SPECIAL_PRODUCT_ID.value: "labaccess_subscription",
+                MakerspaceMetadataKeys.SUBSCRIPTION_TYPE.value: SubscriptionType.LAB.value,
             },
         )
 
