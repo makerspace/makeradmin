@@ -221,14 +221,9 @@ def get_stripe_payment_intents(start_date: datetime, end_date: datetime) -> List
     }
     logger.info(f"Fetching stripe payment intents from {start_date} ({created['gte']}) to {end_date} ({created['lt']})")
 
-    def get_intents():
+    def get_intents() -> List[stripe.PaymentIntent]:
         stripe_intents = retry(lambda: stripe.PaymentIntent.list(limit=100, created=created, expand=expand))
-        payments: List[stripe.PaymentIntent] = []
-
-        # Loop over the intents and store them. We need to loop to deal with pagination
-        for intent in stripe_intents.auto_paging_iter():
-            payments.append(intent)
-        return payments
+        return list(stripe_intents.auto_paging_iter())
 
     return retry(get_intents)
 
