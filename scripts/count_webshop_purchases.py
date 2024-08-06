@@ -69,7 +69,8 @@ for item in items:
 try:
     proc = subprocess.run(
         [
-            "docker-compose",
+            "docker",
+	    "compose",
             "exec",
             "-T",
             "db2",
