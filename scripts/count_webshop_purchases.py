@@ -70,7 +70,7 @@ try:
     proc = subprocess.run(
         [
             "docker",
-	    "compose",
+            "compose",
             "exec",
             "-T",
             "db2",
