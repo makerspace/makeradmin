@@ -95,6 +95,7 @@ class ApiTest(SystestBase):
     @classmethod
     def setUpClass(self) -> None:
         super().setUpClass()
+        assert TEST_SERVICE_TOKEN, "TEST_SERVICE_TOKEN is not set in .env file"
         self.api = ApiFactory(obj_factory=self.obj, base_url=self.api_url, api_token=TEST_SERVICE_TOKEN)
 
     def request(self, *args, **kwargs) -> ApiResponse:

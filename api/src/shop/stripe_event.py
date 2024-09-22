@@ -4,7 +4,7 @@ from datetime import datetime, timezone
 from decimal import Decimal
 from logging import getLogger
 from math import ceil
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, cast
 
 import stripe
 from membership.models import Member
@@ -57,9 +57,10 @@ def get_pending_source_transaction(source_id: str) -> Transaction:
 
 
 def stripe_charge_event(subtype: EventSubtype, event: stripe.Event) -> None:
-    charge = event.data.object
-
-    transaction = get_pending_source_transaction(charge.payment_method)
+    charge = cast(stripe.Charge, event.data.object)
+    payment_method = charge.payment_method
+    assert payment_method is not None
+    transaction = get_pending_source_transaction(payment_method)
 
     if subtype == EventSubtype.SUCCEEDED:
         charge_transaction(transaction, charge)
@@ -70,7 +71,7 @@ def stripe_charge_event(subtype: EventSubtype, event: stripe.Event) -> None:
 
 
 def stripe_source_event(subtype: EventSubtype, event: stripe.Event) -> None:
-    source = event.data.object
+    source = cast(stripe.Source, event.data.object)
 
     transaction = get_pending_source_transaction(source.id)
 
@@ -104,7 +105,7 @@ def stripe_source_event(subtype: EventSubtype, event: stripe.Event) -> None:
 
 
 def stripe_payment_intent_event(subtype: EventSubtype, event: stripe.Event) -> None:
-    payment_intent = event.data.object
+    payment_intent = cast(stripe.PaymentIntent, event.data.object)
 
     transaction = get_pending_source_transaction(payment_intent.id)
 
@@ -120,11 +121,12 @@ def stripe_invoice_event(subtype: EventSubtype, event: stripe.Event, current_tim
     if subtype == EventSubtype.PAID:
         logger.info(f"Processing paid invoice {event['id']}")
         # Member has paid something and we can now add things accordingly...
-        invoice = event["data"]["object"]
+        invoice = cast(stripe.Invoice, event.data.object)
+
         transaction_ids: List[int] = []
 
-        for line in invoice["lines"]["data"]:
-            metadata: Dict[str, str] = line["metadata"]
+        for line in invoice.lines.data:
+            metadata = line.metadata
 
             try:
                 member_id = int(metadata[MakerspaceMetadataKeys.USER_ID.value])
@@ -143,12 +145,13 @@ def stripe_invoice_event(subtype: EventSubtype, event: stripe.Event, current_tim
                 logger.error(f"Ignoring invoice which contains subscription for non-existing member (id={member_id}).")
                 continue
 
-            end_ts = int(line["period"]["end"])
-            start_ts = int(line["period"]["start"])
+            end_ts = int(line.period.end)
+            start_ts = int(line.period.start)
 
             # Divide the timespan down to days
             days = round((end_ts - start_ts) / 86400)
 
+            logger.info(f"Adding {days} days to member {member_id} for subscription {subscription_type}")
             # Different months have different number of days this can cause issues if the member agreement is
             # signed later. E.g. if the payment is in february but signed in may then the number of days too short
             # To prevent this we assume the worst case amount of days, i.e. maximal number of months with 31 days
@@ -157,10 +160,11 @@ def stripe_invoice_event(subtype: EventSubtype, event: stripe.Event, current_tim
                 months_31_days = ceil(months / 2)
                 months_30_days = months - months_31_days
                 days = months_31_days * 31 + months_30_days * 30
+                logger.warning(f"Member has not signed agreement. Rounding up number of days to add to {days}")
 
             product = get_subscription_product(subscription_type)
             # Note: We use stripe as the source of truth for how much was actually paid.
-            amount = Decimal(line["amount"]) / STRIPE_CURRENTY_BASE
+            amount = Decimal(line.amount) / STRIPE_CURRENTY_BASE
             transaction = Transaction(
                 member_id=member_id,
                 amount=amount,
@@ -223,17 +227,21 @@ def stripe_invoice_event(subtype: EventSubtype, event: stripe.Event, current_tim
             # Attach a makerspace transaction id to the stripe invoice item.
             # This is nice to have in the future if we need to match them somehow.
             # In the vast majority of all cases, this will just contain a single transaction id.
+            invoice_id = invoice.id
+            assert invoice_id is not None
             retry(
                 lambda: stripe.Invoice.modify(
-                    invoice["id"],
+                    invoice_id,
                     metadata={
                         MakerspaceMetadataKeys.TRANSACTION_IDS.value: ",".join([str(x) for x in transaction_ids]),
                     },
                 )
             )
+            payment_intent = invoice.payment_intent
+            assert type(payment_intent) == str
             retry(
                 lambda: stripe.PaymentIntent.modify(
-                    invoice["payment_intent"],
+                    payment_intent,
                     metadata={
                         MakerspaceMetadataKeys.TRANSACTION_IDS.value: ",".join([str(x) for x in transaction_ids]),
                     },
@@ -346,8 +354,8 @@ def stripe_customer_event(event_subtype: EventSubtype, event: stripe.Event) -> N
 
 
 def stripe_subscription_schedule_event(event_subtype: EventSubtype, event: stripe.Event) -> None:
-    subscription = event["data"]["object"]
-    meta = subscription["metadata"]
+    subscription = cast(stripe.Subscription, event.data.object)
+    meta = subscription.metadata
 
     if MakerspaceMetadataKeys.USER_ID.value not in meta:
         logger.error(f"Ignoring subscription schedule event {event['id']} without correct metadata")
@@ -365,7 +373,7 @@ def stripe_subscription_schedule_event(event_subtype: EventSubtype, event: strip
         if subscription_type == SubscriptionType.LAB
         else member.stripe_membership_subscription_id
     )
-    subscription_id = subscription["id"]
+    subscription_id = subscription.id
 
     if event_subtype == EventSubtype.RELEASED:
         # This can happen if we cancel a scheduled subscription before it starts,

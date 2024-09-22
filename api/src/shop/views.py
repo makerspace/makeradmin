@@ -2,7 +2,7 @@ from base64 import b64encode
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 from logging import getLogger
-from typing import Any
+from typing import Any, Optional
 
 from basic_types.enums import PriceLevel
 from basic_types.time_period import TimePeriod
@@ -240,7 +240,7 @@ def open_stripe_customer_portal_route() -> str:
 
 
 @service.route("/member/<int:member_id>/ship_labaccess_orders", method=POST, permission=MEMBER_EDIT)
-def ship_labaccess_orders_endpoint(member_id=None):
+def ship_labaccess_orders_endpoint(member_id: int) -> None:
     try:
         ship_labaccess_orders(member_id, skip_ensure_accessy=True)
         ensure_accessy_labaccess(member_id)  # Always do this, not only when the order is shipped.

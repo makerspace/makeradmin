@@ -51,6 +51,11 @@ class QuestionShow extends React.Component<Props, State> {
                 question={this.state.question}
                 onSave={() => this.save()}
                 onDelete={() => this.delete()}
+                onNew={() => {
+                    browserHistory.push(
+                        `/quiz/${this.question.quiz_id}/question/add`,
+                    );
+                }}
             />
         );
     }

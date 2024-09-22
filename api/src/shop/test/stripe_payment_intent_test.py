@@ -148,7 +148,7 @@ class StripePaymentIntentTest(FlaskTestBase):
         transaction = self.db.create_transaction(member_id=member.member_id, amount=200)
         payment_method = attach_and_set_payment_method(member, FakeCardPmToken.Normal)
 
-        stripe_intent = pay_with_stripe(transaction, payment_method.id, False)
+        stripe_intent = pay_with_stripe(transaction, payment_method.id, False, is_test=True)
 
         assert stripe_intent.status == PaymentIntentStatus.SUCCEEDED
         assert transaction.status == Transaction.COMPLETED
@@ -166,7 +166,7 @@ class StripePaymentIntentTest(FlaskTestBase):
         payment_method = attach_and_set_payment_method(member, FakeCardPmToken.DeclineAfterAttach)
 
         with self.assertRaises(CardError) as context:
-            pay_with_stripe(transaction, payment_method.id, False)
+            pay_with_stripe(transaction, payment_method.id, False, is_test=True)
         self.assertTrue("declined" in str(context.exception))
 
     def test_get_payment_intent_few(self) -> None:
@@ -178,30 +178,47 @@ class StripePaymentIntentTest(FlaskTestBase):
             self.seen_members.append(member)
             transaction = self.db.create_transaction(member_id=member.member_id, amount=200 + (i * 10))
             payment_method = attach_and_set_payment_method(member, FakeCardPmToken.Normal)
-            test_intents[transaction.id] = pay_with_stripe(transaction, payment_method.id, False)
+            test_intents[transaction.id] = pay_with_stripe(transaction, payment_method.id, False, is_test=True)
             test_transactions[transaction.id] = transaction
 
         start_date = datetime.now(timezone.utc) - timedelta(days=1)
         end_date = datetime.now(timezone.utc) + timedelta(days=1)
-        intents = get_stripe_payment_intents(start_date, end_date)
+        while True:
+            intents = get_stripe_payment_intents(start_date, end_date)
 
-        # We have to filter the completed payments because get_stripe_payments returns ALL intents,
-        # including the ones from other tests and older test runs
-        filtered_intents = self.filter_intents_on_customers(intents)
+            # We have to filter the completed payments because get_stripe_payments returns ALL intents,
+            # including the ones from other tests and older test runs
+            filtered_intents = self.filter_intents_on_customers(intents)
 
-        assert len(filtered_intents) == len(test_transactions)
-        for transaction_id in filtered_intents:
+            assert len(filtered_intents) == len(test_transactions)
+
+            if all(
+                isinstance(intent.latest_charge, stripe.Charge) and intent.latest_charge.balance_transaction is not None
+                for intent in filtered_intents.values()
+            ):
+                break
+            else:
+                # Wait for a second until stripe has generated the balance transactions
+                # Stripe typically generates these after a second or two
+                logger.info("Waiting for stripe to generate balance transactions...")
+                time.sleep(1)
+
+        for transaction_id, payment_intent in filtered_intents.items():
             test_transaction = test_transactions.pop(transaction_id)
             assert transaction_id == test_transaction.id
             assert convert_from_stripe_amount(test_intents[transaction_id].amount) == test_transaction.amount
-            assert convert_from_stripe_amount(filtered_intents[transaction_id].amount) == test_transaction.amount
-            assert filtered_intents[transaction_id].currency == CURRENCY
-            assert filtered_intents[transaction_id].status == PaymentIntentStatus.SUCCEEDED.value
-            transaction_fee = convert_from_stripe_amount(
-                filtered_intents[transaction_id].latest_charge.balance_transaction.fee
+            assert convert_from_stripe_amount(payment_intent.amount) == test_transaction.amount
+            assert payment_intent.currency == CURRENCY
+            assert payment_intent.status == PaymentIntentStatus.SUCCEEDED.value
+            latest_charge = payment_intent.latest_charge
+            assert isinstance(latest_charge, stripe.Charge)
+            balance_transaction = latest_charge.balance_transaction
+            assert isinstance(balance_transaction, stripe.BalanceTransaction)
+            transaction_fee = convert_from_stripe_amount(balance_transaction.fee)
+            estimated_transaction_fee = test_transaction.amount * Decimal("0.025") + Decimal("1.8")
+            assert math.isclose(
+                transaction_fee, estimated_transaction_fee, abs_tol=test_transaction.amount * Decimal("0.025")
             )
-            estimated_transaction_fee = test_transaction.amount * 0.025 + 1.8
-            assert math.isclose(transaction_fee, estimated_transaction_fee, abs_tol=test_transaction.amount * 0.025)
         assert len(test_transactions) == 0
 
     def test_get_payment_intent_with_declined_card(self) -> None:
@@ -216,39 +233,61 @@ class StripePaymentIntentTest(FlaskTestBase):
             if i % 2 == 0:
                 completed_payments[transaction.id] = True
                 payment_method = attach_and_set_payment_method(member, FakeCardPmToken.Normal)
-                pay_with_stripe(transaction, payment_method.id, False)
+                pay_with_stripe(transaction, payment_method.id, False, is_test=True)
             else:
                 completed_payments[transaction.id] = False
                 payment_method = attach_and_set_payment_method(member, FakeCardPmToken.DeclineAfterAttach)
                 with self.assertRaises(CardError) as context:
-                    pay_with_stripe(transaction, payment_method.id, False)
+                    pay_with_stripe(transaction, payment_method.id, False, is_test=True)
                 self.assertTrue("declined" in str(context.exception))
 
         start_date = datetime.now(timezone.utc) - timedelta(days=1)
         end_date = datetime.now(timezone.utc) + timedelta(days=1)
-        intents = get_stripe_payment_intents(start_date, end_date)
+        while True:
+            intents = get_stripe_payment_intents(start_date, end_date)
 
-        # We have to filter the completed payments because get_stripe_payments returns ALL intents,
-        # including the ones from other tests and older test runs
-        filtered_intents = self.filter_intents_on_customers(intents)
+            # We have to filter the completed payments because get_stripe_payments returns ALL intents,
+            # including the ones from other tests and older test runs
+            filtered_intents = self.filter_intents_on_customers(intents)
+
+            # All successful payments should have a balance transaction.
+            # Stripe tends to generate this a second or two after the payment intent is marked as succeeded.
+            missing = False
+            for intent in filtered_intents.values():
+                if intent.status == PaymentIntentStatus.SUCCEEDED.value and (
+                    not isinstance(intent.latest_charge, stripe.Charge)
+                    or intent.latest_charge.balance_transaction is None
+                ):
+                    missing = True
+                    break
+
+            if missing:
+                # Wait for a second until stripe has generated the balance transactions
+                logger.info("Waiting for stripe to generate balance transactions...")
+                time.sleep(1)
+            else:
+                break
 
         assert len(filtered_intents) == len(test_transactions)
-        for transaction_id in filtered_intents:
+        for transaction_id, payment_intent in filtered_intents.items():
             test_transaction = test_transactions.pop(transaction_id)
             assert transaction_id == test_transaction.id
-            assert convert_from_stripe_amount(filtered_intents[transaction_id].amount) == test_transaction.amount
-            assert filtered_intents[transaction_id].currency == CURRENCY
+            assert convert_from_stripe_amount(payment_intent.amount) == test_transaction.amount
+            assert payment_intent.currency == CURRENCY
+
+            latest_charge = payment_intent.latest_charge
+            assert isinstance(latest_charge, stripe.Charge)
 
             if completed_payments[transaction_id]:
-                assert filtered_intents[transaction_id].status == PaymentIntentStatus.SUCCEEDED.value
-                transaction_fee = convert_from_stripe_amount(
-                    filtered_intents[transaction_id].latest_charge.balance_transaction.fee
+                assert payment_intent.status == PaymentIntentStatus.SUCCEEDED.value
+                transaction_fee = convert_from_stripe_amount(latest_charge.balance_transaction.fee)
+                estimated_transaction_fee = test_transaction.amount * Decimal("0.025") + Decimal("1.8")
+                assert math.isclose(
+                    transaction_fee, estimated_transaction_fee, abs_tol=test_transaction.amount * Decimal("0.025")
                 )
-                estimated_transaction_fee = test_transaction.amount * 0.025 + 1.8
-                assert math.isclose(transaction_fee, estimated_transaction_fee, abs_tol=test_transaction.amount * 0.025)
             else:
-                assert filtered_intents[transaction_id].status != PaymentIntentStatus.SUCCEEDED.value
-                assert filtered_intents[transaction_id].latest_charge.balance_transaction is None
+                assert payment_intent.status != PaymentIntentStatus.SUCCEEDED.value
+                assert latest_charge.balance_transaction is None
         assert len(test_transactions) == 0
 
     def test_get_payment_intent_date_range(self) -> None:

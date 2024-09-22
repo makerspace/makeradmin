@@ -4,7 +4,7 @@ from typing import Any, Dict, Optional
 import stripe
 from membership.models import Member
 from service.db import db_session
-from service.error import InternalServerError, NotFound
+from service.error import BadRequest, InternalServerError, NotFound
 from stripe import InvalidRequestError
 
 from shop.stripe_constants import (
@@ -24,17 +24,18 @@ def _get_metadata_for_stripe_customer(makeradmin_member: Member) -> Dict[str, st
 
 
 def get_stripe_customer(makeradmin_member: Member) -> stripe.Customer | None:
-    if makeradmin_member.stripe_customer_id is None:
+    stripe_customer_id = makeradmin_member.stripe_customer_id
+    if stripe_customer_id is None:
         return None
     try:
-        customer = retry(lambda: stripe.Customer.retrieve(makeradmin_member.stripe_customer_id))
+        customer = retry(lambda: stripe.Customer.retrieve(stripe_customer_id))
     except InvalidRequestError as e:
         logger.warning(
             f"failed to retrive customer from stripe for makeradmin member with id {makeradmin_member.member_id}, {e}"
         )
         return None
     if hasattr(customer, "deleted") and customer.deleted:
-        raise InvalidRequestError(f"Customer for member with id {makeradmin_member.member_id} has been deleted")
+        raise BadRequest(f"Customer for member with id {makeradmin_member.member_id} has been deleted")
     return customer
 
 
@@ -42,6 +43,7 @@ def eq_makeradmin_stripe_customer(makeradmin_member: Member, stripe_customer: st
     """Check that the essential parts of the member in makeradmin and the stripe customer are equal"""
     member_email = makeradmin_member.email.strip()
     expected_metadata = _get_metadata_for_stripe_customer(makeradmin_member)
+    assert stripe_customer.metadata is not None
     return (
         are_metadata_dicts_equivalent(stripe_customer.metadata, expected_metadata)
         and stripe_customer.email == member_email
@@ -91,10 +93,12 @@ def get_and_sync_stripe_customer(
 
 def update_stripe_customer(makeradmin_member: Member) -> stripe.Customer:
     """Update the stripe product to match the makeradmin product"""
+    stripe_customer_id = makeradmin_member.stripe_customer_id
+    assert stripe_customer_id is not None
     metadata = _get_metadata_for_stripe_customer(makeradmin_member)
     return retry(
         lambda: stripe.Customer.modify(
-            makeradmin_member.stripe_customer_id,
+            stripe_customer_id,
             email=makeradmin_member.email.strip(),
             name=f"{makeradmin_member.firstname} {makeradmin_member.lastname}",
             metadata=metadata,
@@ -106,9 +110,10 @@ def delete_stripe_customer(member_id: int) -> None:
     member = db_session.query(Member).get(member_id)
     if member is None:
         raise NotFound(f"Unable to find member with id {member_id}")
-    if member.stripe_customer_id is not None:
+    stripe_customer_id = member.stripe_customer_id
+    if stripe_customer_id is not None:
         # Note: This will also delete all subscriptions
-        retry(lambda: stripe.Customer.delete(member.stripe_customer_id))
+        retry(lambda: stripe.Customer.delete(stripe_customer_id))
 
     member.stripe_customer_id = None
     db_session.flush()

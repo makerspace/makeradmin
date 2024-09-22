@@ -7,12 +7,13 @@ from typing import Optional
 import requests
 from dotenv import dotenv_values
 
-from api.src.basic_types.enums import PriceLevel
-
 env = dotenv_values()
 
 # Ugly
 sys.path.append(os.path.join(os.path.dirname(__file__), "backend/src"))
+sys.path.append(os.path.join(os.path.dirname(__file__), "api/src"))
+
+from basic_types.enums import PriceLevel
 
 # import backend_service
 

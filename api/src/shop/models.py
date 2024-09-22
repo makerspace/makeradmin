@@ -72,6 +72,7 @@ class Product(Base):
     updated_at = Column(DateTime, server_default=func.now())
     deleted_at = Column(DateTime)
     show = Column(Boolean, nullable=False, server_default="1")
+    stripe_product_id = Column(String(64))
 
     category = relationship(ProductCategory, backref="products")
     actions = relationship("ProductAction")
@@ -128,7 +129,7 @@ class Transaction(Base):
     member_id = Column(Integer, ForeignKey(Member.member_id), nullable=True)
     amount = Column(Numeric(precision="15,2"), nullable=False)
     status = Column(Enum(PENDING, COMPLETED, FAILED), nullable=False)
-    created_at = Column(DateTime, server_default=func.now())
+    created_at = Column(DateTime, server_default=func.now(), nullable=False)
 
     member = relationship(Member)
     stripe_pending = relationship("StripePending")
