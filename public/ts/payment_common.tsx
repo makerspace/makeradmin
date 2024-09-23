@@ -722,7 +722,7 @@ export async function negotiatePayment<
                     res.data.action_info!.type ===
                     PaymentIntentNextActionType.USE_STRIPE_SDK
                 ) {
-                    const stripeResult = await stripe.handleCardAction(
+                    const stripeResult = await stripe.confirmCardPayment(
                         res.data.action_info!.client_secret,
                     );
                     if (stripeResult.error) {
