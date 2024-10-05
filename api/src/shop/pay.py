@@ -1,6 +1,6 @@
 import re
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from decimal import Decimal
 from logging import getLogger
 from typing import Any, List, Optional
@@ -262,7 +262,9 @@ def cleanup_pending_members(relevant_email: str) -> None:
         db_session.query(Member)
         .filter(
             (Member.pending_activation == True)
-            & ((Member.email == relevant_email) | (Member.created_at < datetime.utcnow() - timedelta(hours=1))),
+            & (
+                (Member.email == relevant_email) | (Member.created_at < datetime.now(timezone.utc) - timedelta(hours=1))
+            ),
         )
         .all()
     )
@@ -329,7 +331,7 @@ def register(data_dict: Any, remote_addr: str, user_agent: str) -> RegisterRespo
     # Mark the member as deleted, so that it is not visible in the member list, and it cannot be used to log in
     # We cannot pass the deleted_at parameter to the create function because it the API prevents that field from being set.
     member = db_session.query(Member).filter(Member.member_id == member_id).one()
-    member.deleted_at = datetime.utcnow()
+    member.deleted_at = datetime.now(timezone.utc)
     db_session.flush()
 
     token = auth.force_login(remote_addr, user_agent, member_id)["access_token"]
