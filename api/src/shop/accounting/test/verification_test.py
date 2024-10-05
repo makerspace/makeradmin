@@ -14,7 +14,6 @@ from basic_types.time_period import TimePeriod, date_to_period
 from service.db import db_session
 from shop.accounting.accounting import TransactionAccount, TransactionCostCenter, TransactionWithAccounting
 from shop.accounting.verification import Verification, create_verificatons
-from shop.stripe_payment_intent import CompletedPayment
 from test_aid.test_base import FlaskTestBase
 
 logger = getLogger("makeradmin")

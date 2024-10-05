@@ -19,6 +19,7 @@ from shop.accounting.export import (
     transaction_fees_to_transaction_with_accounting,
 )
 from shop.accounting.verification import Verification
+from shop.completed_payment import CompletedPayment
 from shop.models import (
     Product,
     ProductAccountsCostCenters,
@@ -28,7 +29,6 @@ from shop.models import (
     TransactionContent,
     TransactionCostCenter,
 )
-from shop.stripe_payment_intent import CompletedPayment
 from test_aid.test_base import FlaskTestBase
 
 logger = getLogger("makeradmin")
