@@ -1,4 +1,4 @@
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, timedelta, timezone
 
 from membership.models import Box, Member, Span
 from messages.message import send_message
@@ -98,7 +98,7 @@ def box_terminator_nag(member_number=None, box_label_id=None, nag_type=None):
         days_after_expiration=(today - end_date).days,
     )
 
-    box.last_nag_at = datetime.utcnow()
+    box.last_nag_at = datetime.now(timezone.utc)
 
 
 def box_terminator_validate(member_number=None, box_label_id=None, session_token=None):
@@ -114,7 +114,7 @@ def box_terminator_validate(member_number=None, box_label_id=None, session_token
 
         box = Box(member_id=member.member_id, box_label_id=box_label_id)
 
-    box.last_check_at = datetime.utcnow()
+    box.last_check_at = datetime.now(timezone.utc)
     box.session_token = session_token
     db_session.add(box)
     db_session.flush()

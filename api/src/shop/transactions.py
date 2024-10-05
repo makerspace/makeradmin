@@ -173,7 +173,7 @@ def pending_action_value_sum(member_id: int, action_type: str) -> int:
 
 def complete_pending_action(action: TransactionAction) -> None:
     action.status = TransactionAction.COMPLETED
-    action.completed_at = datetime.utcnow()
+    action.completed_at = datetime.now(timezone.utc)
     db_session.add(action)
     db_session.flush()
 

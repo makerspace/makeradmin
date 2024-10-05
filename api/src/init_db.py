@@ -2,7 +2,7 @@
 
 from argparse import ArgumentDefaultsHelpFormatter, ArgumentParser
 from contextlib import closing
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 from core.auth import generate_token
 from core.models import AccessToken
@@ -44,7 +44,7 @@ def refresh_service_access_tokens(session_factory):
                     raise Exception(f"Found multiple of service token id {service_user.id}, this is a bug.") from e
 
                 access_token.lifetime = ten_years.total_seconds()
-                access_token.expires = datetime.utcnow() + ten_years
+                access_token.expires = datetime.now(timezone.utc) + ten_years
 
                 session.add(access_token)
             else:

@@ -1,5 +1,5 @@
 import random
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from random import randint
 from time import sleep
 from unittest import skip
@@ -16,7 +16,7 @@ from test_aid.systest_base import ApiTest
 class Test(ApiTest):
     @patch("change_phone_request.send_validation_code")
     def test_request_and_validate(self, mock_send_validation_code):
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
         new_phone = "+461234567"
         member = self.db.create_member()
         old_phone = member.phone
@@ -71,7 +71,7 @@ class Test(ApiTest):
 
     @patch("change_phone_request.send_validation_code")
     def test_validate_wrong_code(self, mock_send_validation_code):
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
         new_phone = "+461234567"
         member = self.db.create_member()
         old_phone = member.phone
@@ -111,7 +111,7 @@ class Test(ApiTest):
 
     @patch("change_phone_request.send_validation_code")
     def test_validate_already_used_code(self, mock_send_validation_code):
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
         new_phone = "+461234567"
         member = self.db.create_member()
         old_phone = member.phone
@@ -152,7 +152,7 @@ class Test(ApiTest):
 
     @patch("change_phone_request.send_validation_code")
     def test_validate_mult_reqs_one_member(self, mock_send_validation_code):
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
         member = self.db.create_member()
         self.db.create_phone_request(timestamp=now - timedelta(hours=1))
         self.db.create_phone_request(timestamp=now - timedelta(hours=2))
@@ -193,7 +193,7 @@ class Test(ApiTest):
 
     @patch("change_phone_request.send_validation_code")
     def test_validate_mult_reqs_mult_members(self, mock_send_validation_code):
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
         num_members = 20
 
         member = [None] * num_members

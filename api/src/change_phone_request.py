@@ -1,6 +1,6 @@
 import logging
 from collections import defaultdict
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from random import randint
 
 from dispatch_sms import NoAuthConfigured, send_validation_code
@@ -15,7 +15,7 @@ logger = logging.getLogger("makeradmin")
 
 
 def change_phone_request(member_id: int | None, phone: str) -> int:
-    now = datetime.utcnow()
+    now = datetime.now(timezone.utc)
 
     try:
         phone = normalise_phone_number(phone)
@@ -88,7 +88,11 @@ def change_phone_request(member_id: int | None, phone: str) -> int:
         raise BadRequest("Misslyckades med att skicka sms med verifikations kod")
 
     change_request = PhoneNumberChangeRequest(
-        member_id=member_id, phone=phone, validation_code=validation_code, completed=False, timestamp=datetime.utcnow()
+        member_id=member_id,
+        phone=phone,
+        validation_code=validation_code,
+        completed=False,
+        timestamp=datetime.now(timezone.utc),
     )
 
     db_session.add(change_request)
@@ -104,7 +108,7 @@ def change_phone_request(member_id: int | None, phone: str) -> int:
 
 def change_phone_validate(member_id: int | None, request_id: int, validation_code: str):
     logging.info(f"member {member_id} validating phone number, code {validation_code}")
-    now = datetime.utcnow()
+    now = datetime.now(timezone.utc)
 
     try:
         change_request = (
