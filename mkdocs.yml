@@ -5,6 +5,10 @@ site_description: Stockholm Makerspace member administration and store
 theme:
   name: readthedocs
   locale: en
+markdown_extensions:
+  - toc:
+      permalink: true
+      separator: "-"
 nav:
   - Home: index.md
   - User Guide:
