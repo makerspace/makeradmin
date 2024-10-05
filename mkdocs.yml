@@ -1,0 +1,7 @@
+site_name: Makeradmin
+nav:
+  - Home: index.md
+  - User Guide:
+      - Getting Started: user-guide/getting-started.md
+  - Developper Guide:
+      - Getting Started: dev-guide/getting-started.md
