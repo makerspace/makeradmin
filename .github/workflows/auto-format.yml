@@ -17,7 +17,7 @@ jobs:
       - name: Install packages
         run: |
           python -m pip install --upgrade pip
-          pip install --user ruff
+          pip install --user ruff==0.6.9
       - name: Auto-fix Python formatting
         run: |
           ruff format
