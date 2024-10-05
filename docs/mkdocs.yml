@@ -9,6 +9,8 @@ markdown_extensions:
   - toc:
       permalink: true
       separator: "-"
+site_dir: ../site
+docs_dir: src
 nav:
   - Home: index.md
   - User Guide:
