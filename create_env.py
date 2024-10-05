@@ -38,6 +38,7 @@ config = {
     "FIRSTRUN_AUTO_ADMIN_PASSWORD": "",
     "ELKS46_API_USER": "",
     "ELKS46_API_KEY": "",
+    "MAKERSPACE_LOCAL_TIMEZONE": "Europe/Stockholm",
 }
 
 if not args.force and os.path.isfile(".env"):
