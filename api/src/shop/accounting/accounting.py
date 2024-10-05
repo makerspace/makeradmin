@@ -8,6 +8,7 @@ from typing import Dict, List, Tuple
 from basic_types.enums import AccountingEntryType
 from service.db import db_session
 from service.error import InternalServerError
+from shop.completed_payment import CompletedPayment
 from shop.models import (
     Product,
     ProductAccountsCostCenters,
@@ -16,7 +17,6 @@ from shop.models import (
     TransactionContent,
     TransactionCostCenter,
 )
-from shop.stripe_payment_intent import CompletedPayment
 
 logger = getLogger("makeradmin")
 
