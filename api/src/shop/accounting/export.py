@@ -16,13 +16,13 @@ from shop.accounting.accounting import (
 )
 from shop.accounting.sie_file import get_sie_string
 from shop.accounting.verification import create_verificatons
+from shop.completed_payment import CompletedPayment, get_completed_payments_from_stripe
 from shop.models import (
     Transaction,
     TransactionAccount,
     TransactionContent,
     TransactionCostCenter,
 )
-from shop.stripe_payment_intent import CompletedPayment, get_completed_payments_from_stripe
 from zoneinfo import ZoneInfo
 
 logger = getLogger("makeradmin")
@@ -42,7 +42,7 @@ def transaction_fees_to_transaction_with_accounting(
                 transaction_id=payment.transaction_id,
                 product_id=None,
                 amount=payment.fee,
-                date=payment.created,
+                date=payment.charge_created,
                 account=account,
                 cost_center=cost_center,
                 type=AccountingEntryType.DEBIT,

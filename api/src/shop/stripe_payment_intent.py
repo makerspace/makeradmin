@@ -3,7 +3,6 @@ from datetime import date, datetime, timezone
 from decimal import Decimal
 from enum import Enum
 from logging import getLogger
-from time import mktime
 from typing import Dict, List, Optional
 
 import stripe
@@ -57,16 +56,6 @@ class PartialPayment(DataClassJsonMixin):
     # Payment needs additional actions to complete if this is non-null.
     # If it is None then the payment is complete.
     action_info: Optional[PaymentAction]
-
-
-@dataclass(frozen=True)
-class CompletedPayment(DataClassJsonMixin):
-    """Used for bookkeeping for old transactions that are already completed"""
-
-    transaction_id: int
-    amount: Decimal
-    created: datetime
-    fee: Decimal
 
 
 def create_action_required_response(transaction: Transaction, payment_intent: PaymentIntent) -> PaymentAction:
@@ -211,74 +200,3 @@ def pay_with_stripe(
         return payment_intent
     except InvalidRequestError as e:
         raise_from_stripe_invalid_request_error(e)
-
-
-def get_stripe_payment_intents(start_date: datetime, end_date: datetime) -> List[stripe.PaymentIntent]:
-    expand = ["data.latest_charge.balance_transaction"]
-    created = {
-        "gte": int(start_date.astimezone(ZoneInfo("UTC")).timestamp()),
-        "lt": int(end_date.astimezone(ZoneInfo("UTC")).timestamp()),
-    }
-    logger.info(f"Fetching stripe payment intents from {start_date} ({created['gte']}) to {end_date} ({created['lt']})")
-
-    def get_intents() -> List[stripe.PaymentIntent]:
-        stripe_intents = retry(lambda: stripe.PaymentIntent.list(limit=100, created=created, expand=expand))
-        return list(stripe_intents.auto_paging_iter())
-
-    return retry(get_intents)
-
-
-def convert_completed_stripe_intents_to_payments(
-    stripe_intents: List[PaymentIntent],
-) -> Dict[int, CompletedPayment]:
-    payments: Dict[int, CompletedPayment] = {}
-    for intent in stripe_intents:
-        if intent.status != PaymentIntentStatus.SUCCEEDED:
-            continue
-
-        charge = intent.latest_charge
-        assert charge.balance_transaction is not None
-        assert charge.paid
-
-        id = int(intent.metadata[MakerspaceMetadataKeys.TRANSACTION_IDS.value])
-
-        payments[id] = CompletedPayment(
-            transaction_id=id,
-            amount=convert_from_stripe_amount(charge.amount),
-            created=datetime.fromtimestamp(intent.created, timezone.utc),
-            fee=convert_from_stripe_amount(charge.balance_transaction.fee),
-        )
-    return payments
-
-
-def create_fake_completed_payments_from_db(start_date: date, end_date: date) -> Dict[int, CompletedPayment]:
-    payments: Dict[int, CompletedPayment] = {}
-    transactions = (
-        db_session.query(Transaction)
-        .filter(Transaction.created_at >= start_date, Transaction.created_at <= end_date)
-        .all()
-    )
-    for transaction in transactions:
-        if transaction.status != Transaction.COMPLETED:
-            continue
-        payments[transaction.id] = CompletedPayment(
-            transaction_id=transaction.id,
-            amount=transaction.amount,
-            created=transaction.created_at,
-            fee=Decimal(str(round(transaction.amount * Decimal(0.03), 2))),
-        )
-    return payments
-
-
-def get_completed_payments_from_stripe(start_date: datetime, end_date: datetime) -> Dict[int, CompletedPayment]:
-    if debug_mode():
-        logger.warning(
-            "In debug/dev mode, using fake stripe payments for accounting by generating from existing data in db"
-        )
-        return create_fake_completed_payments_from_db(start_date, end_date)
-
-    try:
-        stripe_intents = get_stripe_payment_intents(start_date, end_date)
-    except StripeError as e:
-        raise BadRequest(message=f"Failed to fetch stripe payment intents: {e}")
-    return convert_completed_stripe_intents_to_payments(stripe_intents)
