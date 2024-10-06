@@ -64,7 +64,6 @@ app.after_request(after_request_functions)
 
 engine = create_mysql_engine(**get_mysql_config())
 
-
 if are_stripe_keys_set():
     if are_stripe_keys_live() and debug_mode():
         while True:

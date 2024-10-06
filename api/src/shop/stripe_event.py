@@ -29,7 +29,7 @@ from shop.stripe_constants import (
     MakerspaceMetadataKeys,
     SourceType,
 )
-from shop.stripe_subscriptions import SubscriptionType, get_subscription_product
+from shop.stripe_subscriptions import SubscriptionType, get_makeradmin_subscription_product
 from shop.stripe_util import event_semantic_time, retry
 from shop.transactions import (
     PaymentFailed,
@@ -162,7 +162,7 @@ def stripe_invoice_event(subtype: EventSubtype, event: stripe.Event, current_tim
                 days = months_31_days * 31 + months_30_days * 30
                 logger.warning(f"Member has not signed agreement. Rounding up number of days to add to {days}")
 
-            product = get_subscription_product(subscription_type)
+            product = get_makeradmin_subscription_product(subscription_type)
             # Note: We use stripe as the source of truth for how much was actually paid.
             amount = Decimal(line.amount) / STRIPE_CURRENTY_BASE
             transaction = Transaction(
@@ -221,7 +221,7 @@ def stripe_invoice_event(subtype: EventSubtype, event: stripe.Event, current_tim
             # Presumably, it should be fixed by immediately pausing the subscription *before* the first
             # invoice is paid, and making sure the invoice does not contain the binding period.
             if subscription_type == SubscriptionType.LAB and member.labaccess_agreement_at is None:
-                stripe_subscriptions.pause_subscription(member_id, SubscriptionType.LAB, test_clock=None)
+                stripe_subscriptions.pause_subscription(member, SubscriptionType.LAB, test_clock=None)
 
         if len(transaction_ids) > 0:
             # Attach a makerspace transaction id to the stripe invoice item.
