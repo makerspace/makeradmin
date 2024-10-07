@@ -19,7 +19,7 @@ jobs:
       - run: pip install mkdocs==1.6.1
       - name: Build docs
         shell: sh
-        run: mkdocs build
+        run: mkdocs build -f ./docs/mkdocs.yml
 
       - name: Upload Artifact
         uses: actions/upload-pages-artifact@v3

@@ -21,3 +21,5 @@ node_modules
 public/dist
 public/static/js
 local.mk
+# MkDocs static site
+site/
