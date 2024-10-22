@@ -82,7 +82,12 @@ def answer_question(question_id):
     question = db_session.query(QuizQuestion).get(question_id)
     json = quiz_question_entity.to_obj(question)
     json["options"] = []
-    for option in question.options:
+    options = (
+        db_session.query(QuizQuestionOption)
+        .filter(QuizQuestionOption.question_id == question_id, QuizQuestionOption.deleted_at == None)
+        .all()
+    )
+    for option in options:
         option = quiz_question_option_entity.to_obj(option)
         json["options"].append(option)
 
