@@ -288,7 +288,6 @@ def quiz_statistics(quiz_id: int):
             {"quiz_id": quiz_id},
         )
     )
-    print(seconds_to_answer_quiz)
     median_seconds_to_answer_quiz = (
         seconds_to_answer_quiz[len(seconds_to_answer_quiz) // 2][0] if len(seconds_to_answer_quiz) > 0 else 0
     )
