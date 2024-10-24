@@ -14,41 +14,46 @@ from shop.models import Product, ProductCategory, Transaction, TransactionConten
 from sqlalchemy import func
 
 
-def spans_by_date(span_type) -> List[Tuple[str, int]]:
+def spans_by_date(span_type: str) -> List[Tuple[str, int]]:
     """Number of active spans of a given type indexed by a date string"""
-    # Warning: doesn't accurately add datapoints when the number of members drops to zero
-    # But since we know that Stockholm Makerspace will exist forever, this is an edge case that will never happen.
-    query = """
-    SELECT date, count(distinct(member_id)) AS labmembers
-        FROM membership_spans as ms
-        JOIN (
-            (SELECT enddate AS date FROM membership_spans WHERE type = :span_type AND deleted_at IS NULL)
-            UNION DISTINCT
-            (SELECT DATE_ADD(enddate, INTERVAL 1 DAY) as date FROM membership_spans
-               WHERE type = :span_type AND deleted_at IS NULL)
-            UNION DISTINCT
-            (SELECT startdate FROM membership_spans
-                WHERE type = :span_type AND deleted_at IS NULL)
-            UNION DISTINCT
-            (SELECT DATE_SUB(startdate, INTERVAL 1 DAY) FROM membership_spans
-               WHERE type = :span_type AND deleted_at IS NULL)
-        ) AS dates
-        ON (
-            ms.startdate <= dates.date AND
-            dates.date <= ms.enddate
-        )
-        WHERE (
-            ms.type = :span_type AND
-            ms.deleted_at IS NULL
-        )
-        GROUP BY date
-        ORDER BY date;"""
+    spans = db_session.query(Span).filter(Span.type == span_type, Span.deleted_at == None).all()
 
-    dates = db_session.execute(query, {"span_type": span_type})
+    events = []
+    for span in spans:
+        # Make sure we calculate the correct number of members on the day before the span starts
+        events.append((span.startdate - timedelta(days=1), 0, span.member_id))
+        events.append((span.startdate, 1, span.member_id))
+        events.append((span.enddate, 0, span.member_id))
+        # enddate is inclusive, so membership is lost on the day after enddate
+        events.append((span.enddate + timedelta(days=1), -1, span.member_id))
 
-    dates_str = [(date.strftime("%Y-%m-%d"), count) for (date, count) in dates]
+    # Note: The order of the events within a single day does not matter.
+    # The result will be calculated after all events in a day have been processed.
+    events.sort(key=lambda x: x[0])
 
-    return dates_str
+    counter = 0
+    active_members: Dict[int, int] = dict()
+    result: List[Tuple[date, int]] = []
+    if len(events) == 0:
+        return []
+
+    current_date = events[0][0]
+    for d, delta, member_id in events:
+        if current_date < d:
+            result.append((current_date, counter))
+            current_date = d
+
+        # Need to handle overlapping spans, to avoid double counting members
+        new_count = active_members.get(member_id, 0) + delta
+        active_members[member_id] = new_count
+        if delta == 1 and new_count == 1:
+            counter += 1
+        elif delta == -1 and new_count == 0:
+            counter -= 1
+
+    result.append((current_date, counter))
+
+    return [(date.strftime("%Y-%m-%d"), count) for (date, count) in result]
 
 
 def membership_number_months(membership_type: str, startdate: date, enddate: date) -> List[int]:
