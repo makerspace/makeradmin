@@ -175,17 +175,46 @@ def lasertime() -> List[Tuple[str, int]]:
     )
 
     results = [(date, int(count)) for (date, count) in query]
-    logger.info(results)
     return results
 
 
-def shop_statistics():
+@dataclass
+class ProductRevenue:
+    product_id: int
+    amount: float
+
+
+@dataclass
+class CategoryRevenue:
+    category_id: int
+    amount: float
+
+
+@dataclass
+class SubscriptionSplit:
+    active_members: int
+    has_membership_sub: int
+    has_makerspace_access_sub: int
+    has_both_subs: int
+
+
+@dataclass
+class ShopStatistics:
+    revenue_by_product_last_12_months: List[ProductRevenue]
+    revenue_by_category_last_12_months: List[CategoryRevenue]
+    products: List[Any]
+    categories: List[Any]
+    subscription_split: SubscriptionSplit
+
+
+def shop_statistics() -> ShopStatistics:
     # Converts a list of rows of IDs and values to a map from id to value
-    def mapify(rows):
+    def mapify(rows: List[Tuple[Any, Any]]) -> Dict[Any, Any]:
         return {r[0]: r[1] for r in rows}
 
     date_lower_limit = datetime.now() - timedelta(days=365)
-    sales_by_product = mapify(
+
+    sales_by_product: Dict[int, float] = mapify(
         db_session.query(TransactionContent.product_id, func.sum(TransactionContent.amount))
         .join(TransactionContent.transaction)
         .filter(Transaction.created_at > date_lower_limit)
@@ -193,7 +222,8 @@ def shop_statistics():
         .group_by(TransactionContent.product_id)
         .all()
     )
-    sales_by_category = mapify(
+
+    sales_by_category: Dict[int, float] = mapify(
         db_session.query(Product.category_id, func.sum(TransactionContent.amount))
         .join(TransactionContent.product)
         .join(TransactionContent.transaction)
@@ -215,22 +245,15 @@ def shop_statistics():
     )
     categories_json = list(map(category_entity.to_obj, list(categories)))
 
-    valid_members = db_session.query(Member).filter(Member.deleted_at == None).all()
+    members, memberships = get_members_and_membership()
 
-    has_membership_sub = 0
-    has_makerspace_access_sub = 0
-    has_both_subs = 0
-    total_active_members = 0
-    for member in valid_members:
+    has_membership_sub: int = 0
+    has_makerspace_access_sub: int = 0
+    has_both_subs: int = 0
+    total_active_members: int = 0
+    for member, membership in zip(members, memberships):
         # Check if labaccess is active
-        labaccess_active = (
-            db_session.query(Span)
-            .filter(Span.member_id == member.member_id, Span.type == Span.LABACCESS)
-            .filter(Span.startdate <= datetime.now(), Span.enddate >= datetime.now())
-            .first()
-            is not None
-        )
-        if labaccess_active:
+        if membership.labaccess_active:
             total_active_members += 1
 
             if member.stripe_membership_subscription_id is not None:
@@ -244,22 +267,22 @@ def shop_statistics():
             ):
                 has_both_subs += 1
 
-    return {
-        "revenue_by_product_last_12_months": [
-            {"product_id": r.id, "amount": float(sales_by_product.get(r.id, 0))} for r in products
+    return ShopStatistics(
+        revenue_by_product_last_12_months=[
+            ProductRevenue(product_id=r.id, amount=float(sales_by_product.get(r.id, 0))) for r in products
         ],
-        "revenue_by_category_last_12_months": [
-            {"category_id": r.id, "amount": float(sales_by_category.get(r.id, 0))} for r in categories
+        revenue_by_category_last_12_months=[
+            CategoryRevenue(category_id=r.id, amount=float(sales_by_category.get(r.id, 0))) for r in categories
         ],
-        "products": products_json,
-        "categories": categories_json,
-        "subscription_split": {
-            "active_members": total_active_members,
-            "has_membership_sub": has_membership_sub,
-            "has_makerspace_access_sub": has_makerspace_access_sub,
-            "has_both_subs": has_both_subs,
-        },
-    }
+        products=products_json,
+        categories=categories_json,
+        subscription_split=SubscriptionSplit(
+            active_members=total_active_members,
+            has_membership_sub=has_membership_sub,
+            has_makerspace_access_sub=has_makerspace_access_sub,
+            has_both_subs=has_both_subs,
+        ),
+    )
 
 
 @dataclass
