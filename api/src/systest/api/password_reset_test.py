@@ -76,6 +76,6 @@ class Test(ApiTest):
 
         self.assertIsNone(e)
 
-        member = db_session.query(Member).get(member_id)
+        member = db_session.get(Member, member_id)
 
         self.assertTrue(verify_password(unhashed_password, member.password))
