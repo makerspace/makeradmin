@@ -14,7 +14,10 @@ import requests
 from dataclasses_json import DataClassJsonMixin
 from NamedAtomicLock import NamedAtomicLock
 from service.config import config
+from service.db import db_session
 from service.entity import fromisoformat
+
+from api.src.membership.models import Member
 
 logger = getLogger("accessy")
 
@@ -172,6 +175,18 @@ class AccessyWebhookCreate(DataClassJsonMixin):
     eventTypes: list[AccessyWebhookEventType]
 
 
+@dataclass
+class AccessyUser(DataClassJsonMixin):
+    id: UUID
+    firstName: str
+    lastName: str
+    email: str
+    phone: str
+    msisdn: str
+    uiLanguageCode: str
+    application: bool
+
+
 class AccessySession:
     def __init__(self) -> None:
         self.session_token: str | None = None
@@ -179,6 +194,7 @@ class AccessySession:
         self._organization_id: str | None = None
         self._mutex = threading.Lock()
         self._all_webhooks: Optional[List[AccessyWebhook]] = None
+        self._accessy_id_to_member_id_cache: dict[str, int] = {}
 
     #################
     # Class methods
@@ -201,6 +217,19 @@ class AccessySession:
     #################
     # Public methods
     #################
+
+    def get_member_id_from_accessy_id(self, accessy_id: UUID) -> Optional[int]:
+        if accessy_id in self._accessy_id_to_member_id_cache:
+            return self._accessy_id_to_member_id_cache[accessy_id]
+
+        user_details = self.get_user_details(accessy_id)
+
+        member = db_session.query(Member).filter(Member.phone == user_details.msisdn).first()
+        if member is not None:
+            self._accessy_id_to_member_id_cache[accessy_id] = member.id
+            return member.id
+        else:
+            return None
 
     def get_all_members(self) -> list[AccessyMember]:
         """Get a list of all Accessy members in the ORG with GROUPS (lab and special)"""
@@ -437,6 +466,10 @@ class AccessySession:
 
         return items
 
+    def get_user_details(self, user_id: UUID) -> AccessyUser:
+        """Get details for user ID."""
+        return AccessyUser.from_dict(self._get_user_details(user_id))
+
     ################################################
     # Methods that return raw JSON data from API:s
     ################################################
@@ -486,18 +519,19 @@ class AccessySession:
         APPLICATION_PHONE_NUMBER = object()  # Sentinel phone number for applications
 
         def fill_user_details(user: AccessyMember) -> None:
-            data = self._get(f"/org/admin/user/{user.user_id}")
+            assert user.user_id is not None
+            data = self.get_user_details(user.user_id)
 
             # API keys do not have phone numbers, set it to sentinel object so we can filter out API keys further down
-            if data["application"]:
+            if data.application:
                 user.phone = APPLICATION_PHONE_NUMBER
                 return
 
             try:
-                user.phone = data["msisdn"]
+                user.phone = data.msisdn
             except KeyError:
                 logger.warning(f"User {user.user_id} does not have a phone number in accessy. {data=}")
-            user.name = f"{data.get('firstName', '')} {data.get('lastName', '')}"
+            user.name = f"{data.firstName} {data.lastName}"
 
         def fill_membership_id(user: AccessyMember) -> None:
             data = self._get(f"/asset/admin/user/{user.user_id}/organization/{self.organization_id()}/membership")
@@ -656,5 +690,7 @@ def main() -> int:
 
 if __name__ == "__main__":
     import sys
+
+    sys.exit(main())
 
     sys.exit(main())
