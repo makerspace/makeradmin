@@ -11,6 +11,7 @@ from migrate import ensure_migrations_table, run_migrations
 from rocky.process import log_exception
 from service.config import get_mysql_config
 from service.db import create_mysql_engine
+from sqlalchemy import text
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm.exc import MultipleResultsFound, NoResultFound
 
@@ -18,7 +19,7 @@ from sqlalchemy.orm.exc import MultipleResultsFound, NoResultFound
 def clear_permission_cache(session_factory):
     """Clear permisssion cache as a part of every db_init/restart."""
     with closing(session_factory()) as session:
-        session.execute("UPDATE access_tokens SET permissions = NULL")
+        session.execute(text("UPDATE access_tokens SET permissions = NULL"))
         session.commit()
 
 
