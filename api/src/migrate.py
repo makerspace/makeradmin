@@ -135,7 +135,7 @@ def run_migrations(session_factory):
                 for sql in read_sql(join(migrations_dir, migration.name + ".sql")):
                     session.execute(text(sql))
 
-                session.execute(
+                session.get_bind().execute(
                     text("INSERT INTO migrations VALUES (:id, :name, :applied_at)"),
                     {
                         "id": migration.id,
