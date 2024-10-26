@@ -2,6 +2,7 @@ from logging import INFO
 
 from dotenv import dotenv_values, find_dotenv
 from rocky.config import Config, Dict, Env
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from service.logging import logger
 
@@ -62,7 +63,7 @@ def get_mysql_config():
     user = config.get("MYSQL_USER")
     pwd = config.get("MYSQL_PASS", log_value=False)
     if not pwd:
-        raise Exception("config MYSQL_PASS is required")
+        raise NameError("config MYSQL_PASS is required")
 
     return dict(host=host, port=port, db=db, user=user, pwd=pwd)
 
@@ -89,6 +90,15 @@ def get_admin_url(path):
     if not host.startswith("http://") and not host.startswith("https://"):
         host = "http://" + host
     return f"{host}{path}"
+
+
+def get_makerspace_local_timezone() -> ZoneInfo:
+    zone_str = config.get("MAKERSPACE_LOCAL_TIMEZONE")
+    try:
+        zone = ZoneInfo(zone_str)
+    except ZoneInfoNotFoundError as e:
+        raise NameError(f"Variable MAKERSPACE_LOCAL_TIMEZONE not set correctly in .env, failed due to {e}")
+    return zone
 
 
 def debug_mode() -> bool:
