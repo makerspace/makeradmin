@@ -25,6 +25,7 @@ from service.api_definition import (
 from service.config import config
 from service.db import db_session, nested_atomic
 from service.error import BadRequest, InternalServerError, NotFound
+from sqlalchemy import text
 from sqlalchemy.orm.exc import MultipleResultsFound, NoResultFound
 from sqlalchemy.sql import func
 
@@ -108,11 +109,13 @@ def commit_transaction_to_db(member_id: int, total_amount: Decimal, contents: Li
         db_session.flush()
 
         db_session.execute(
-            """
-            INSERT INTO webshop_transaction_actions (content_id, action_type, value, status)
-            SELECT :content_id AS content_id, action_type, SUM(:count * value) AS value, :pending AS status
-            FROM webshop_product_actions WHERE product_id=:product_id AND deleted_at IS NULL GROUP BY action_type
-            """,
+            text(
+                """
+                INSERT INTO webshop_transaction_actions (content_id, action_type, value, status)
+                SELECT :content_id AS content_id, action_type, SUM(:count * value) AS value, :pending AS status
+                FROM webshop_product_actions WHERE product_id=:product_id AND deleted_at IS NULL GROUP BY action_type
+                """
+            ),
             {
                 "content_id": content.id,
                 "count": content.count,
