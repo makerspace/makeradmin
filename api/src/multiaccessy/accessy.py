@@ -57,9 +57,6 @@ def request(
     backoff = 1.0
     for i in range(max_tries):
         response = requests.request(method, ACCESSY_URL + path, data=data, headers=headers)
-        print(ACCESSY_URL + path)
-        print(data)
-        print(headers)
         if response.status_code == 429:
             logger.warning(
                 f"requesting accessy returned 429, too many reqeusts, try {i+1}/{max_tries}, retrying in {backoff}s, {path=}"
@@ -570,8 +567,10 @@ class AccessySession:
         found_identical = False
         for w in self._all_webhooks:
             diff = w.destinationUrl != destinationURL or set([e.name for e in w.eventTypes]) != set(eventTypes)
+            # Only remove webhooks for the same host
+            # Other hosts can manage their own webhooks
             if urlparse(w.destinationUrl).hostname == host:
-                if diff or True:
+                if diff:
                     logger.info(f"Removing previous Accessy webhook for host {host} at {w.destinationUrl}")
                     self.remove_webhook(w.id)
                 else:
@@ -618,7 +617,6 @@ def register_accessy_webhook() -> bool:
         # We must ensure that only one instance of the server registers the webhook.
         # Otherwise we could end up with zero or many webhooks registered.
         if webhook_create_lock.acquire(timeout=15):
-            logger.info(f"Registering accessy webhook to {webhook_url}...")
             accessy_session.register_webhook(
                 webhook_url,
                 [
