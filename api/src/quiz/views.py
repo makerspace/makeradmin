@@ -5,7 +5,7 @@ from membership.models import Member
 from service.api_definition import GET, POST, PUBLIC, QUIZ_EDIT, USER
 from service.db import db_session
 from service.entity import OrmSingeRelation
-from sqlalchemy import distinct, exists, func
+from sqlalchemy import distinct, exists, func, text
 
 from quiz import service
 from quiz.entities import quiz_entity, quiz_question_entity, quiz_question_option_entity
@@ -284,8 +284,10 @@ def quiz_statistics(quiz_id: int):
 
     seconds_to_answer_quiz = list(
         db_session.execute(
-            "select TIME_TO_SEC(TIMEDIFF(max(quiz_answers.created_at), min(quiz_answers.created_at))) as t from quiz_answers JOIN quiz_questions ON question_id=quiz_questions.id where quiz_questions.quiz_id=:quiz_id group by member_id order by t asc;",
-            {"quiz_id": quiz_id},
+            text(
+                "select TIME_TO_SEC(TIMEDIFF(max(quiz_answers.created_at), min(quiz_answers.created_at))) as t from quiz_answers JOIN quiz_questions ON question_id=quiz_questions.id where quiz_questions.quiz_id=:quiz_id group by member_id order by t asc;",
+                {"quiz_id": quiz_id},
+            )
         )
     )
     median_seconds_to_answer_quiz = (

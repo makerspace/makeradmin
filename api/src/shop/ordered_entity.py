@@ -2,7 +2,7 @@ from flask import request
 from service.db import db_session
 from service.entity import Entity
 from service.error import InternalServerError
-from sqlalchemy import func
+from sqlalchemy import func, text
 
 
 class OrderedEntity(Entity):
@@ -17,7 +17,7 @@ class OrderedEntity(Entity):
         if data is None:
             data = request.json or {}
 
-        (status,) = db_session.execute("SELECT GET_LOCK('display_order', 20)").fetchone()
+        (status,) = db_session.execute(text("SELECT GET_LOCK('display_order', 20)")).fetchone()
         if not status:
             raise InternalServerError("Failed to create, try again later.", log="failed to aquire display_order lock")
         try:
@@ -30,4 +30,4 @@ class OrderedEntity(Entity):
             db_session.rollback()
             raise
         finally:
-            db_session.execute("DO RELEASE_LOCK('display_order')")
+            db_session.execute(text("DO RELEASE_LOCK('display_order')"))

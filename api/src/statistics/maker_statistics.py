@@ -11,7 +11,7 @@ from service.db import db_session
 from service.logging import logger
 from shop.entities import category_entity, product_entity
 from shop.models import Product, ProductCategory, Transaction, TransactionContent
-from sqlalchemy import func
+from sqlalchemy import func, text
 
 
 def spans_by_date(span_type: str) -> List[Tuple[str, int]]:
@@ -164,7 +164,8 @@ def membership_by_date_statistics():
 
 def lasertime() -> List[Tuple[str, int]]:
     query = db_session.execute(
-        """
+        text(
+            """
             SELECT DATE_FORMAT(webshop_transactions.created_at, "%Y-%m"), sum(webshop_transaction_contents.count)
             FROM webshop_transaction_contents
             INNER JOIN webshop_transactions
@@ -172,6 +173,7 @@ def lasertime() -> List[Tuple[str, int]]:
             WHERE webshop_transaction_contents.product_id=7 AND webshop_transactions.status='completed'
             GROUP BY DATE_FORMAT(webshop_transactions.created_at, "%Y-%m")
             """
+        )
     )
 
     results = [(date, int(count)) for (date, count) in query]
