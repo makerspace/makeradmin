@@ -81,7 +81,7 @@ def base64encode(value):
     return b64encode(value).decode()
 
 
-def fromisoformat(value):
+def fromisoformat(value: str) -> datetime:
     if value[-1].lower() == "z":
         value = value[:-1]
     return datetime.fromisoformat(value)
