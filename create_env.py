@@ -17,13 +17,14 @@ if not args.force and os.path.isfile(".env"):
 
 if args.interactive:
     while True:
-        zone_str = input("What is the makerspace timezone?: ")
-
+        zone_str = input("Enter the makerspace timezone [Europe/Stockholm]: ") or "Europe/Stockholm"
         if zone_str in available_timezones():
             makerspace_local_timezone = zone_str
             break
         else:
-            print(f"Timezone {zone_str} is not in the list of available zones")
+            print(f"Timezone '{zone_str}' is not valid.")
+            print("Please enter a valid timezone (e.g., 'Europe/Stockholm').")
+
 else:
     makerspace_local_timezone = "Europe/Stockholm"
 
