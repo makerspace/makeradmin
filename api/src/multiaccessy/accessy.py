@@ -589,7 +589,7 @@ class AccessySession:
 
         self._all_webhooks = self.list_webhooks()
         logger.info(
-            f"Registered Accessy webhook at {destinationURL}. There are currently {len(self._all_webhooks)} webhooks."
+            f"Registered Accessy webhook at {destinationURL}. There are currently {len(self._all_webhooks)} webhooks: {self._all_webhooks}"
         )
 
 
@@ -630,6 +630,7 @@ def register_accessy_webhook() -> bool:
                     AccessyWebhookEventType.ORGANIZATION_INVITATION_DELETED,
                 ],
             )
+            webhook_create_lock.release()
             return True
         else:
             logger.warning(f"Failed to acquire webhook create lock. Skipping accessy webhook registration.")
