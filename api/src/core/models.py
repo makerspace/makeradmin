@@ -45,12 +45,12 @@ class Login:
 
     @staticmethod
     def register_login_failed(ip):
-        db_session.execute(text("INSERT INTO login (success, ip) VALUES (0, :ip)", {"ip": ip}))
+        db_session.execute(text("INSERT INTO login (success, ip) VALUES (0, :ip)"), {"ip": ip})
 
     @staticmethod
     def register_login_success(ip, user_id):
         db_session.execute(
-            text("INSERT INTO login (success, user_id, ip) VALUES (1, :user_id, :ip)", {"user_id": user_id, "ip": ip})
+            text("INSERT INTO login (success, user_id, ip) VALUES (1, :user_id, :ip)"), {"user_id": user_id, "ip": ip}
         )
 
     @staticmethod
