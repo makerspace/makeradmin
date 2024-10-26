@@ -23,8 +23,9 @@ types-markdown
 types-PyMySQL
 sqlalchemy-stubs
 markdown
-
+NamedAtomicLock
 dataclasses_json
+
 # Test requirements
 pytest<7.2.0 # https://github.com/pytest-dev/pytest/issues/10420 remove version limitation when fixed
 pytest-parallel<7.2.0 # https://github.com/pytest-dev/pytest/issues/10420 remove version limitation when fixed
