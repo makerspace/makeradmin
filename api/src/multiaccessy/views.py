@@ -190,7 +190,7 @@ def handle_event(event: AccessyWebhookEvent) -> None:
         db_session.commit()
 
 
-@service.route("/accessy/event", method=POST, permission=PUBLIC)
+@service.route("/event", method=POST, permission=PUBLIC)
 def accessy_webhook() -> None:
     if accessy_session is None:
         raise UnprocessableEntity("Accessy session not initialized")
