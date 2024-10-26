@@ -179,7 +179,6 @@ class AccessyUser(DataClassJsonMixin):
     id: UUID
     firstName: str
     lastName: str
-    email: str
     phone: str
     msisdn: str
     uiLanguageCode: str
