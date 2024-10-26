@@ -569,7 +569,6 @@ class AccessySession:
 
     def list_webhooks(self) -> list[AccessyWebhook]:
         hooks = self._get(f"/subscription/{self.organization_id()}/webhook")
-        print(hooks)
         return [AccessyWebhook.from_dict(x) for x in hooks]
 
     def is_valid_webhook_signature(self, signature: str) -> bool:
