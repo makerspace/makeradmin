@@ -219,5 +219,3 @@ def accessy_webhook() -> None:
         return None
     else:
         raise UnprocessableEntity("Invalid signature")
-        raise UnprocessableEntity("Invalid signature")
-        raise UnprocessableEntity("Invalid signature")
