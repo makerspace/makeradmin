@@ -1,7 +1,7 @@
 import time
 from argparse import ArgumentDefaultsHelpFormatter, ArgumentParser
 from contextlib import closing
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from os.path import abspath, dirname
 from time import sleep
 from urllib.parse import quote_plus
@@ -72,7 +72,7 @@ def send_messages(key, domain, sender, to_override, limit):
 
         if response.ok:
             message.status = Message.SENT
-            message.sent_at = datetime.utcnow()
+            message.sent_at = datetime.now(timezone.utc)
 
             db_session.add(message)
             db_session.commit()
@@ -88,7 +88,7 @@ def send_messages(key, domain, sender, to_override, limit):
 
 def already_sent_message(template: MessageTemplate, member: Member, days: int):
     """True if a message has been sent with the given template to the member in the last #days days"""
-    now = datetime.utcnow()
+    now = datetime.now(timezone.utc)
     reminder_sent = (
         db_session.query(Message)
         .filter(
@@ -102,7 +102,7 @@ def already_sent_message(template: MessageTemplate, member: Member, days: int):
 
 
 def labaccess_reminder() -> None:
-    now = datetime.utcnow()
+    now = datetime.now(timezone.utc)
 
     end_date_reminder_target = now.date() + timedelta(days=LABACCESS_REMINDER_DAYS_BEFORE)
 
@@ -156,7 +156,7 @@ def labaccess_reminder() -> None:
 
 
 def membership_reminder() -> None:
-    now = datetime.utcnow().date()
+    now = datetime.now(timezone.utc).date()
 
     members, memberships = get_members_and_membership()
     members = list(members)
@@ -211,7 +211,7 @@ def quiz_reminders() -> None:
     # Assume quiz 1 is the get started quiz
     quiz_id = 1
     quiz_members = quiz_member_answer_stats(quiz_id)
-    now = datetime.utcnow()
+    now = datetime.now(timezone.utc)
 
     members, memberships = get_members_and_membership()
     id_to_member = {member.member_id: (member, membership) for member, membership in zip(members, memberships)}

@@ -1,6 +1,6 @@
 from base64 import b64decode, b64encode
 from collections import namedtuple
-from datetime import date, datetime
+from datetime import date, datetime, timezone
 from decimal import Decimal
 from logging import getLogger
 from math import ceil
@@ -340,7 +340,7 @@ class Entity:
             raise NotFound("Could not find any entity with specified parameters.")
 
         if not entity.deleted_at:
-            entity.deleted_at = datetime.utcnow()
+            entity.deleted_at = datetime.now(timezone.utc)
 
         if commit:
             db_session.commit()

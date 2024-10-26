@@ -1,7 +1,7 @@
 import re
 from collections import namedtuple
 from contextlib import closing
-from datetime import datetime
+from datetime import datetime, timezone
 from inspect import getfile, getmodule, stack
 from os import listdir
 from os.path import dirname, exists, isdir, join
@@ -119,7 +119,7 @@ def run_migrations(session_factory):
 
                 session.execute(
                     "INSERT INTO migrations VALUES (:id, :name, :applied_at)",
-                    {"id": migration.id, "name": migration.name, "applied_at": datetime.utcnow()},
+                    {"id": migration.id, "name": migration.name, "applied_at": datetime.now(timezone.utc)},
                 )
                 session.commit()
             except Exception:
