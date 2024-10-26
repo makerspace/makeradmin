@@ -601,8 +601,7 @@ ERROR_NOT_CONFIGURED = 1
 
 def register_accessy_webhook() -> bool:
     HOST_BACKEND: str = config.get("HOST_BACKEND").strip()
-    # webhook_url: str = f"{HOST_BACKEND}/accessy/event"
-    webhook_url = "https://accessy.arongranberg.com"
+    webhook_url: str = f"{HOST_BACKEND}/accessy/event"
     if accessy_session is None:
         logger.warning(f"Accessy not configured. Skipping accessy webhook registration.")
         return False
@@ -611,7 +610,8 @@ def register_accessy_webhook() -> bool:
         webhook_create_lock = NamedAtomicLock("makeradmin_accessy_webhook_create_lock")
         # We must ensure that only one instance of the server registers the webhook.
         # Otherwise we could end up with zero or many webhooks registered.
-        if webhook_create_lock.acquire(timeout=15):
+        if webhook_create_lock.acquire(timeout=15, maxLockAge=60 * 5):
+            logger.info(f"Registering accessy webhook to {webhook_url}...")
             accessy_session.register_webhook(
                 webhook_url,
                 [
