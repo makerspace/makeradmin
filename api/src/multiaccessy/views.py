@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from datetime import date, datetime
 from logging import getLogger
 from typing import Any, Optional
@@ -20,10 +21,12 @@ class DateTimeWithTimeZone(DataClassJsonMixin):
     zoneId: str
 
 
+@dataclass
 class AccessyWebhookEvent(DataClassJsonMixin):
     pass
 
 
+@dataclass
 class AccessyWebhookEventAsset_Operation_Invoked(AccessyWebhookEvent):
     userId: UUID
     """Universally unique identifier for object."""
@@ -38,6 +41,7 @@ class AccessyWebhookEventAsset_Operation_Invoked(AccessyWebhookEvent):
     """A local date time along with time zone."""
 
 
+@dataclass
 class AccessyWebhookEventMembership_Created(AccessyWebhookEvent):
     userId: UUID
     """Universally unique identifier for object."""
@@ -53,6 +57,7 @@ class AccessyWebhookEventMembership_Created(AccessyWebhookEvent):
     requestingUserSuperAdmin: bool
 
 
+@dataclass
 class AccessyWebhookEventMembership_Removed(AccessyWebhookEvent):
     userId: UUID
     """Universally unique identifier for object."""
@@ -64,6 +69,7 @@ class AccessyWebhookEventMembership_Removed(AccessyWebhookEvent):
     '''Enum: "ASSET_ADMINISTRATOR" "DELEGATOR" "DEVICE_ADMINISTRATOR" "ORGANIZATION_ADMINISTRATOR" "USER"'''
 
 
+@dataclass
 class AccessyWebhookEventMembership_Request_Created(AccessyWebhookEvent):
     userId: UUID
     """Universally unique identifier for object."""
@@ -75,6 +81,7 @@ class AccessyWebhookEventMembership_Request_Created(AccessyWebhookEvent):
     """Universally unique identifier for object."""
 
 
+@dataclass
 class AccessyWebhookEventMembership_Request_Approved(AccessyWebhookEvent):
     userId: UUID
     """Universally unique identifier for object."""
@@ -86,6 +93,7 @@ class AccessyWebhookEventMembership_Request_Approved(AccessyWebhookEvent):
     """Universally unique identifier for object."""
 
 
+@dataclass
 class AccessyWebhookEventMembership_Request_Denied(AccessyWebhookEvent):
     userId: UUID
     """Universally unique identifier for object."""
@@ -97,6 +105,7 @@ class AccessyWebhookEventMembership_Request_Denied(AccessyWebhookEvent):
     """Universally unique identifier for object."""
 
 
+@dataclass
 class AccessyWebhookEventMembership_Role_Added(AccessyWebhookEvent):
     userId: UUID
     """Universally unique identifier for object."""
@@ -111,6 +120,7 @@ class AccessyWebhookEventMembership_Role_Added(AccessyWebhookEvent):
     """Universally unique identifier for object."""
 
 
+@dataclass
 class AccessyWebhookEventMembership_Role_Removed(AccessyWebhookEvent):
     userId: UUID
     """Universally unique identifier for object."""
@@ -126,6 +136,7 @@ class AccessyWebhookEventMembership_Role_Removed(AccessyWebhookEvent):
     """Universally unique identifier for object."""
 
 
+@dataclass
 class AccessyWebhookEventGuestDoorEntry(AccessyWebhookEvent):
     assetOperationId: UUID
     """Universally unique identifier for object."""
