@@ -285,9 +285,9 @@ def quiz_statistics(quiz_id: int):
     seconds_to_answer_quiz = list(
         db_session.execute(
             text(
-                "select TIME_TO_SEC(TIMEDIFF(max(quiz_answers.created_at), min(quiz_answers.created_at))) as t from quiz_answers JOIN quiz_questions ON question_id=quiz_questions.id where quiz_questions.quiz_id=:quiz_id group by member_id order by t asc;",
-                {"quiz_id": quiz_id},
-            )
+                "select TIME_TO_SEC(TIMEDIFF(max(quiz_answers.created_at), min(quiz_answers.created_at))) as t from quiz_answers JOIN quiz_questions ON question_id=quiz_questions.id where quiz_questions.quiz_id=:quiz_id group by member_id order by t asc;"
+            ),
+            {"quiz_id": quiz_id},
         )
     )
     median_seconds_to_answer_quiz = (
