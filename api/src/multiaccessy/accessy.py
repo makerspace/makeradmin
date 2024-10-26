@@ -607,10 +607,10 @@ def register_accessy_webhook() -> bool:
         return False
 
     if webhook_url.startswith("https://"):
-        webhook_create_lock = NamedAtomicLock("makeradmin_accessy_webhook_create_lock")
+        webhook_create_lock = NamedAtomicLock("makeradmin_accessy_webhook_create_lock", maxLockAge=60 * 5)
         # We must ensure that only one instance of the server registers the webhook.
         # Otherwise we could end up with zero or many webhooks registered.
-        if webhook_create_lock.acquire(timeout=15, maxLockAge=60 * 5):
+        if webhook_create_lock.acquire(timeout=15):
             logger.info(f"Registering accessy webhook to {webhook_url}...")
             accessy_session.register_webhook(
                 webhook_url,
