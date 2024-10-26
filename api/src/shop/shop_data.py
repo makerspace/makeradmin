@@ -51,7 +51,7 @@ def pending_actions(member_id: Optional[int] = None) -> List[Any]:
 def member_history(member_id: int):
     query = (
         db_session.query(Transaction)
-        .options(joinedload("contents"), joinedload("contents.product"))
+        .options(joinedload(Transaction.contents), joinedload("contents.product"))
         .filter(Transaction.member_id == member_id)
         .order_by(desc(Transaction.id))
     )
@@ -76,7 +76,7 @@ def receipt(member_id, transaction_id):
         transaction = (
             db_session.query(Transaction)
             .filter_by(member_id=member_id, id=transaction_id)
-            .options(joinedload("contents"), joinedload("contents.product"))
+            .options(joinedload(Transaction.contents), joinedload("contents.product"))
             .one()
         )
     except NoResultFound:
