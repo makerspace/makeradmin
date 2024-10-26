@@ -10,5 +10,5 @@ CREATE TABLE IF NOT EXISTS `physical_access_log`(
     PRIMARY KEY (`id`),
     KEY `member_id_key` (`member_id`),
     KEY `invoked_at_key` (`invoked_at`),
-    CONSTRAINT `physical_access_member_constraint` FOREIGN KEY (`member_id`) REFERENCES `membership_members` (`member_id`),
+    CONSTRAINT `physical_access_member_constraint` FOREIGN KEY (`member_id`) REFERENCES `membership_members` (`member_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
