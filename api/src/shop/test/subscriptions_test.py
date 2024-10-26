@@ -36,7 +36,11 @@ from shop.stripe_product_price import (
     get_stripe_product,
 )
 from shop.stripe_setup import setup_stripe_products
-from shop.stripe_subscriptions import SubscriptionType, get_makeradmin_subscription_product
+from shop.stripe_subscriptions import (
+    SubscriptionType,
+    calc_subscription_start_time,
+    get_makeradmin_subscription_product,
+)
 from shop.stripe_util import (
     event_semantic_time,
     get_subscription_category,
@@ -45,7 +49,7 @@ from shop.stripe_util import (
 from shop.transactions import ship_orders
 from test_aid.obj import DEFAULT_PASSWORD
 from test_aid.systest_config import STRIPE_PRIVATE_KEY
-from test_aid.test_base import FlaskTestBase
+from test_aid.test_base import FlaskTestBase, ShopTestMixin
 from test_aid.test_util import random_str
 
 logger = logging.getLogger("makeradmin")
@@ -100,7 +104,56 @@ class FakeClock:
         stripe.test_helpers.TestClock.advance(self.stripe_clock.id, frozen_time=int(self.date.timestamp()))
 
 
-class Test(FlaskTestBase):
+class SubscriptionTestWithoutStripe(ShopTestMixin, FlaskTestBase):
+    models = [membership.models, messages.models, shop.models, core.models]
+
+    @classmethod
+    def setUpClass(self) -> None:
+        super().setUpClass()
+        self.subscription_category_id = get_subscription_category().id
+        self.not_subscription_category_id = self.db.create_category(name="Not Subscriptions").id
+
+    def test_calc_subscription_start_time_old(self) -> None:
+        member = self.db.create_member()
+        lab_access_end_date = self.date(-10)
+
+        self.db.create_span(type=Span.MEMBERSHIP, enddate=self.date(200))
+        self.db.create_span(type=Span.LABACCESS, enddate=lab_access_end_date)
+
+        was_already_member, subscription_start = calc_subscription_start_time(member.member_id, SubscriptionType.LAB)
+
+        self.assertFalse(was_already_member)
+        self.assertTrue(abs(subscription_start - datetime.now(timezone.utc)) < abs_tdelta(seconds=5))
+
+    def test_calc_subscription_start_time_future(self) -> None:
+        member = self.db.create_member()
+        lab_access_end_date = self.date(20)
+
+        self.db.create_span(type=Span.MEMBERSHIP, enddate=self.date(200))
+        self.db.create_span(type=Span.LABACCESS, enddate=lab_access_end_date)
+
+        was_already_member, subscription_start = calc_subscription_start_time(member.member_id, SubscriptionType.LAB)
+
+        self.assertTrue(was_already_member)
+        expected_start = datetime.combine(lab_access_end_date, dt_time(0, 0, 0, tzinfo=timezone.utc)) - time_delta(
+            days=1
+        )
+        self.assertEqual(subscription_start, expected_start)
+
+    def test_calc_subscription_start_time_today(self) -> None:
+        member = self.db.create_member()
+        lab_access_end_date = self.date()
+
+        self.db.create_span(type=Span.MEMBERSHIP, enddate=self.date(200))
+        self.db.create_span(type=Span.LABACCESS, enddate=lab_access_end_date)
+
+        was_already_member, subscription_start = calc_subscription_start_time(member.member_id, SubscriptionType.LAB)
+
+        self.assertTrue(was_already_member)
+        self.assertTrue(abs(subscription_start - datetime.now(timezone.utc)) < abs_tdelta(seconds=5))
+
+
+class SubscriptionTestWithStripe(FlaskTestBase):
     models = [membership.models, messages.models, shop.models, core.models]
     seen_event_ids: Set[str]
 
