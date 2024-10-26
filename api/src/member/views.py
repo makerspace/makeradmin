@@ -40,7 +40,7 @@ def current_member():
 
     # Expose if the member has a password set, but not what the password is (not even the hash)
     assert m is not None
-    m2 = db_session.query(Member).get(g.user_id)
+    m2 = db_session.get(Member, g.user_id)
     assert m2 is not None
     m["has_password"] = m2.password is not None
 
