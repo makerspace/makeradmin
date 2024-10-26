@@ -63,7 +63,7 @@ def get_mysql_config():
     user = config.get("MYSQL_USER")
     pwd = config.get("MYSQL_PASS", log_value=False)
     if not pwd:
-        raise Exception("config MYSQL_PASS is required")
+        raise NameError("config MYSQL_PASS is required")
 
     return dict(host=host, port=port, db=db, user=user, pwd=pwd)
 
@@ -97,7 +97,7 @@ def get_makerspace_local_timezone() -> ZoneInfo:
     try:
         zone = ZoneInfo(zone_str)
     except Exception as e:
-        raise (f"Variable MAKERSPACE_LOCAL_TIMEZONE not set correctly in .env, failed due to {e}")
+        raise NameError(f"Variable MAKERSPACE_LOCAL_TIMEZONE not set correctly in .env, failed due to {e}")
     return zone
 
 
