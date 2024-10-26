@@ -1,7 +1,6 @@
 from service.db import db_session
 from sqlalchemy import Column, DateTime, Integer, String, Text, func, text
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import configure_mappers
+from sqlalchemy.orm import configure_mappers, declarative_base
 
 Base = declarative_base()
 

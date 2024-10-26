@@ -17,10 +17,8 @@ from sqlalchemy import (
     Text,
     func,
     select,
-    text,
 )
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import column_property, configure_mappers, relationship, validates
+from sqlalchemy.orm import column_property, configure_mappers, declarative_base, relationship, validates
 
 Base = declarative_base()
 
