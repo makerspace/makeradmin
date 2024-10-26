@@ -57,6 +57,9 @@ def request(
     backoff = 1.0
     for i in range(max_tries):
         response = requests.request(method, ACCESSY_URL + path, data=data, headers=headers)
+        print(ACCESSY_URL + path)
+        print(data)
+        print(headers)
         if response.status_code == 429:
             logger.warning(
                 f"requesting accessy returned 429, too many reqeusts, try {i+1}/{max_tries}, retrying in {backoff}s, {path=}"
@@ -547,10 +550,14 @@ class AccessySession:
 
         return signature in [webhook.signature for webhook in self._all_webhooks]
 
-    def remove_webhook(self, id: UUID) -> None:
+    def remove_webhook(self, id: UUID) -> Any:
         # Need to refetch webhooks
         self._all_webhooks = None
-        self.__delete(f"/subscription/{self.organization_id()}/webhook/{id}", force_allow_modify=True)
+        return self.__delete(
+            f"/subscription/{self.organization_id()}/webhook/{id}",
+            force_allow_modify=True,
+            err_msg="Failed to delete webhook",
+        )
 
     def remove_all_webhooks(self) -> None:
         for webhook in self.list_webhooks():
