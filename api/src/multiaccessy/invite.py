@@ -30,7 +30,7 @@ class LabaccessRequirements(Enum):
 
 
 def check_labaccess_requirements(member_id: int) -> LabaccessRequirements:
-    member = db_session.query(Member).get(member_id)
+    member = db_session.get(Member, member_id)
     if member is None:
         return LabaccessRequirements.MEMBER_MISSING
 

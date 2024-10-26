@@ -114,7 +114,7 @@ def create_client_response(transaction: Transaction, payment_intent: PaymentInte
 def confirm_stripe_payment_intent(transaction_id: int) -> PartialPayment:
     """Called by client after payment_intent next_action has been handled"""
     pending = db_session.query(StripePending).filter_by(transaction_id=transaction_id).one()
-    transaction = db_session.query(Transaction).get(transaction_id)
+    transaction = db_session.get(Transaction, transaction_id)
     if not transaction:
         raise BadRequest(f"unknown transaction ({transaction_id})")
     if transaction.status == Transaction.FAILED:
@@ -163,7 +163,7 @@ def pay_with_stripe(
     """Handle stripe payment"""
 
     try:
-        member = db_session.query(Member).get(transaction.member_id)
+        member = db_session.get(Member, transaction.member_id)
         assert member is not None
         stripe_customer = get_and_sync_stripe_customer(member)
         assert stripe_customer is not None

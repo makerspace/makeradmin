@@ -22,7 +22,7 @@ logger = getLogger("makeradmin")
 
 def get_wanted_access(today: date, member_id: Optional[int] = None) -> dict[PHONE, AccessyMember]:
     if member_id is not None:
-        member = db_session.query(Member).get(member_id)
+        member = db_session.get(Member, member_id)
         if member is None:
             raise Exception("Member does not exist")
         members = [member]
@@ -109,7 +109,7 @@ def sync(today: Optional[date] = None, member_id: Optional[int] = None) -> None:
     # If a specific member is given, sync only that member,
     # otherwise sync all members
     if member_id is not None:
-        member = db_session.query(Member).get(member_id)
+        member = db_session.get(Member, member_id)
         if member is None:
             raise Exception("Member does not exist")
         if member.phone is None:

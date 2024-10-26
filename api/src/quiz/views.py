@@ -79,7 +79,7 @@ def answer_question(question_id):
     )
     db_session.flush()
 
-    question = db_session.query(QuizQuestion).get(question_id)
+    question = db_session.get(QuizQuestion, question_id)
     json = quiz_question_entity.to_obj(question)
     json["options"] = []
     options = (

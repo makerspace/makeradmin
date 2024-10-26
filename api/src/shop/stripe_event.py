@@ -113,7 +113,7 @@ def stripe_invoice_event(subtype: EventSubtype, event: stripe.Event, current_tim
                 logger.error(f"Unexpected error reading invoice metadata: {e}")
                 continue
 
-            member: Optional[Member] = db_session.query(Member).get(member_id)
+            member: Optional[Member] = db_session.get(Member, member_id)
             if member is None:
                 logger.error(f"Ignoring invoice which contains subscription for non-existing member (id={member_id}).")
                 continue
@@ -257,7 +257,7 @@ def stripe_customer_event(event_subtype: EventSubtype, event: stripe.Event) -> N
             return
 
         member_id = int(meta[MakerspaceMetadataKeys.USER_ID.value])
-        member = db_session.query(Member).get(member_id)
+        member = db_session.get(Member, member_id)
         if member is None:
             logger.warning(f"Ignoring customer event {event['id']} for non-existing member (id={member_id}).")
             return
@@ -335,7 +335,7 @@ def stripe_subscription_schedule_event(event_subtype: EventSubtype, event: strip
         return
 
     member_id = int(meta[MakerspaceMetadataKeys.USER_ID.value])
-    member: Optional[Member] = db_session.query(Member).get(member_id)
+    member: Optional[Member] = db_session.get(Member, member_id)
     if member is None:
         logger.warning(f"Ignoring subscription schedule event {event['id']} for unknown member {member_id}")
         return
