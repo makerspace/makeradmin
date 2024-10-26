@@ -1,11 +1,13 @@
-from datetime import date
+from datetime import date, datetime
 from logging import getLogger
 from typing import Any, Optional
 
 from dataclasses_json import DataClassJsonMixin
 from flask import request
 from multiaccessy import service
+from multiaccessy.models import PhysicalAccessEntry
 from service.api_definition import POST, PUBLIC
+from service.db import db_session
 from service.error import UnprocessableEntity
 
 from .accessy import UUID, AccessyWebhookEventType, accessy_session
@@ -33,7 +35,7 @@ class AccessyWebhookEventAsset_Operation_Invoked(AccessyWebhookEvent):
     assetPublicationId: UUID
     """Universally unique identifier for object."""
 
-    invokedAt: str
+    invokedAt: datetime
     """A local date time along with time zone."""
 
 
@@ -168,6 +170,26 @@ def decode_event(data: Any) -> Optional[AccessyWebhookEvent]:
         return None
 
 
+def handle_event(event: AccessyWebhookEvent) -> None:
+    assert accessy_session is not None
+
+    if isinstance(event, AccessyWebhookEventAsset_Operation_Invoked):
+        member_id = accessy_session.get_member_id_from_accessy_id(event.userId)
+        if member_id is None:
+            logger.warning(f"Accessy user could not be associated with a makerspace member: {event.userId}")
+
+        db_session.add(
+            PhysicalAccessEntry(
+                member_id=member_id,
+                accessy_user_id=event.userId,
+                accessy_asset_operation_id=event.assetOperationId,
+                accessy_asset_publication_id=event.assetPublicationId,
+                invoked_at=event.invokedAt,
+            )
+        )
+        db_session.commit()
+
+
 @service.route("/accessy/event", method=POST, permission=PUBLIC)
 def accessy_webhook() -> None:
     if accessy_session is None:
@@ -177,6 +199,9 @@ def accessy_webhook() -> None:
         event = decode_event(request.json)
         if event is not None:
             logger.info(f"Received accessy event: {event.to_dict()}")
+            handle_event(event)
         return None
     else:
+        raise UnprocessableEntity("Invalid signature")
+        raise UnprocessableEntity("Invalid signature")
         raise UnprocessableEntity("Invalid signature")
