@@ -17,7 +17,7 @@ if not args.force and os.path.isfile(".env"):
 
 if args.interactive:
     while True:
-        zone_str = input("What is the makerspace timezone? [Y/n]: ")
+        zone_str = input("What is the makerspace timezone?: ")
 
         if zone_str in available_timezones():
             makerspace_local_timezone = zone_str
