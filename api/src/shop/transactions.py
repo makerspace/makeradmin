@@ -182,7 +182,7 @@ def complete_pending_action(action: TransactionAction) -> None:
 
 
 def activate_paused_labaccess_subscription(member_id: int, earliest_start_at: datetime) -> None:
-    member = db_session.query(Member).get(member_id)
+    member = db_session.get(Member, member_id)
     if member is None:
         raise BadRequest(f"Unable to find member with id {member_id}")
     if member.stripe_labaccess_subscription_id is not None:
@@ -343,7 +343,7 @@ def payment_success(transaction: Transaction) -> None:
 def process_cart(member_id: int, cart: List[CartItem]) -> Tuple[Decimal, List[TransactionContent]]:
     contents = []
 
-    member = db_session.query(Member).get(member_id)
+    member = db_session.get(Member, member_id)
     if member is None:
         raise NotFound(message=f"Could not find member with id {member_id}.")
     price_level = get_price_level_for_member(member)

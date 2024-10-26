@@ -28,7 +28,7 @@ class LabaccessRequirements(Enum):
 
 
 def check_labaccess_requirements(member_id: int) -> LabaccessRequirements:
-    member = db_session.query(Member).get(member_id)
+    member = db_session.get(Member, member_id)
     if member is None:
         return LabaccessRequirements.MEMBER_MISSING
 
@@ -67,7 +67,7 @@ def ensure_accessy_labaccess(member_id: int) -> None:
     if summary.special_labaccess_active:
         groups.append(ACCESSY_SPECIAL_LABACCESS_GROUP)
 
-    member = db_session.query(Member).get(member_id)
+    member = db_session.get(Member, member_id)
     assert member is not None
 
     try:
