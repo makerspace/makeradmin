@@ -37,7 +37,7 @@ class AccessyWebhookEventAsset_Operation_Invoked(AccessyWebhookEvent):
     assetPublicationId: UUID
     """Universally unique identifier for object."""
 
-    invokedAt: datetime
+    invokedAt: str
     """A local date time along with time zone."""
 
 
@@ -180,6 +180,12 @@ def decode_event(event_type_str: str, data: Any) -> Optional[AccessyWebhookEvent
         return None
 
 
+def parse_accessy_date(date_str: str) -> datetime:
+    assert date_str.endswith("Z")
+    date_str = date_str.split(".")[0] + "+0000"
+    return datetime.strptime(date_str, "%Y-%m-%dT%H:%M:%S%z")
+
+
 def handle_event(event: AccessyWebhookEvent) -> None:
     assert accessy_session is not None
 
@@ -194,7 +200,7 @@ def handle_event(event: AccessyWebhookEvent) -> None:
                 accessy_user_id=event.userId,
                 accessy_asset_operation_id=event.assetOperationId,
                 accessy_asset_publication_id=event.assetPublicationId,
-                invoked_at=event.invokedAt,
+                invoked_at=parse_accessy_date(event.invokedAt),
             )
         )
         db_session.commit()
