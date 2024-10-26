@@ -13,7 +13,7 @@ args = parser.parse_args()
 if not args.force and os.path.isfile(".env"):
     print(".env file already exists, touching")
     os.utime(".env", None)
-    exit()
+    exit(0)
 
 if args.interactive:
     while True:
