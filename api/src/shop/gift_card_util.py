@@ -4,7 +4,7 @@ from messages.message import send_message
 from messages.models import MessageTemplate
 
 
-def generate_gift_card_code(length=16):
+def generate_gift_card_code(length: int = 16) -> str:
     """
     Generate a unique validation code for gift cards.
 

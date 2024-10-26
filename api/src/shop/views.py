@@ -12,7 +12,7 @@ from multiaccessy.invite import AccessyInvitePreconditionFailed, ensure_accessy_
 from service.api_definition import DELETE, GET, MEMBER_EDIT, POST, PUBLIC, USER, WEBSHOP, WEBSHOP_EDIT, Arg
 from service.db import db_session
 from service.entity import OrmSingeRelation, OrmSingleSingleRelation
-from service.error import InternalServerError, PreconditionFailed
+from service.error import BadRequest, InternalServerError, PreconditionFailed
 from sqlalchemy.exc import NoResultFound
 from zoneinfo import ZoneInfo
 
@@ -33,7 +33,15 @@ from shop.entities import (
     transaction_entity,
 )
 from shop.models import ProductImage, TransactionContent
-from shop.pay import cancel_subscriptions, pay, register, setup_payment_method, start_subscriptions
+from shop.pay import (
+    CancelSubscriptionsRequest,
+    StartSubscriptionsRequest,
+    cancel_subscriptions,
+    pay,
+    register,
+    setup_payment_method,
+    start_subscriptions,
+)
 from shop.shop_data import (
     all_product_data,
     get_membership_products,
@@ -45,9 +53,8 @@ from shop.shop_data import (
 from shop.stripe_discounts import get_discount_fraction_off
 from shop.stripe_event import stripe_callback
 from shop.stripe_payment_intent import PartialPayment
+from shop.stripe_setup import setup_stripe_products
 from shop.stripe_subscriptions import (
-    cancel_subscription,
-    get_subscription_products,
     list_subscriptions,
     open_stripe_customer_portal,
 )
@@ -212,7 +219,7 @@ def receipt_for_member(transaction_id):
 
 
 @service.route("/member/current/accessy_invite", method=POST, permission=USER)
-def accessy_invite():
+def accessy_invite() -> None:
     try:
         ensure_accessy_labaccess(member_id=g.user_id)
     except AccessyInvitePreconditionFailed as e:
@@ -221,12 +228,20 @@ def accessy_invite():
 
 @service.route("/member/current/subscriptions", method=POST, permission=USER)
 def start_subscriptions_route() -> None:
-    return start_subscriptions(request.json, g.user_id)
+    try:
+        data = StartSubscriptionsRequest.from_dict(request.json)
+    except Exception as e:
+        raise BadRequest(message=f"Invalid data: {e}")
+    return start_subscriptions(data, g.user_id)
 
 
 @service.route("/member/current/subscriptions", method=DELETE, permission=USER)
 def cancel_subscriptions_route() -> Any:
-    return cancel_subscriptions(request.json, g.user_id)
+    try:
+        data = CancelSubscriptionsRequest.from_dict(request.json)
+    except Exception as e:
+        raise BadRequest(message=f"Invalid data: {e}")
+    return cancel_subscriptions(data, g.user_id)
 
 
 @service.route("/member/current/subscriptions", method=GET, permission=USER)
@@ -236,7 +251,7 @@ def list_subscriptions_route() -> Any:
 
 @service.route("/member/current/stripe_customer_portal", method=GET, permission=PUBLIC)
 def open_stripe_customer_portal_route() -> str:
-    return open_stripe_customer_portal(g.user_id, test_clock=None)
+    return open_stripe_customer_portal(g.user_id)
 
 
 @service.route("/member/<int:member_id>/ship_labaccess_orders", method=POST, permission=MEMBER_EDIT)
@@ -276,7 +291,7 @@ def public_image(image_id: int) -> Response:
 @service.route("/register_page_data", method=GET, permission=PUBLIC)
 def register_page_data():
     # Make sure subscription products have been created and are up to date
-    get_subscription_products()
+    setup_stripe_products()
 
     return {
         "membershipProducts": get_membership_products(),

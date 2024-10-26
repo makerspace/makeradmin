@@ -1,6 +1,6 @@
 import random
 import time
-from dataclasses import asdict, dataclass
+from dataclasses import dataclass
 from datetime import datetime, timezone
 from decimal import Decimal
 from logging import getLogger
@@ -12,17 +12,18 @@ from service.error import InternalServerError
 from sqlalchemy import func
 
 from shop.models import Product, ProductCategory
-from shop.stripe_constants import (
-    STRIPE_CURRENTY_BASE,
-)
+from shop.stripe_constants import STRIPE_CURRENTY_BASE, PriceType
 
 logger = getLogger("makeradmin")
 
 
 @dataclass
-class StripeRecurring:
-    interval: str
+class StripeInterval:
+    interval_unit: str
     interval_count: int
+
+    def to_stripe(self) -> stripe.Price.CreateParamsRecurring:
+        return stripe.Price.CreateParamsRecurring(interval=self.interval_unit, interval_count=self.interval_count)
 
 
 def are_metadata_dicts_equivalent(a: Dict[str, Any], b: Dict[str, Any]) -> bool:
@@ -78,9 +79,9 @@ def retry(f: Callable[[], T]) -> T:
             time.sleep(1 * (1.5**its) * (1.0 + random.random()))
 
 
-def stripe_amount_from_makeradmin_product(makeradmin_product: Product, recurring: StripeRecurring | None) -> int:
-    if recurring:
-        return convert_to_stripe_amount(makeradmin_product.price * recurring.interval_count)
+def stripe_amount_from_makeradmin_product(makeradmin_product: Product, price_type: PriceType) -> int:
+    if price_type == PriceType.BINDING_PERIOD:
+        return convert_to_stripe_amount(makeradmin_product.price * makeradmin_product.smallest_multiple)
     else:
         return convert_to_stripe_amount(makeradmin_product.price)
 
