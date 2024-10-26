@@ -12,12 +12,11 @@ from urllib.parse import urlparse
 
 import requests
 from dataclasses_json import DataClassJsonMixin
+from membership.models import Member
 from NamedAtomicLock import NamedAtomicLock
 from service.config import config
 from service.db import db_session
 from service.entity import fromisoformat
-
-from api.src.membership.models import Member
 
 logger = getLogger("accessy")
 
