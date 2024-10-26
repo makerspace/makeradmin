@@ -7,6 +7,7 @@ import member
 import membership
 import messages
 import multiaccess
+import multiaccessy
 import quiz
 import shop
 
@@ -22,5 +23,6 @@ services = (
     Instance(path="/statistics", service=statistics.service),
     Instance(path="/multiaccess", service=multiaccess.service),
     Instance(path="/quiz", service=quiz.service),
+    Instance(path="/accessy", service=multiaccessy.service),
     Instance(path="/box_terminator", service=box_terminator.service),
 )
