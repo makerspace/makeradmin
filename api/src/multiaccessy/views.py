@@ -21,8 +21,7 @@ class DateTimeWithTimeZone(DataClassJsonMixin):
 
 
 class AccessyWebhookEvent(DataClassJsonMixin):
-    eventType: AccessyWebhookEventType
-    dataData: dict
+    pass
 
 
 class AccessyWebhookEventAsset_Operation_Invoked(AccessyWebhookEvent):
@@ -160,8 +159,8 @@ event_types = {
 }
 
 
-def decode_event(data: Any) -> Optional[AccessyWebhookEvent]:
-    event_type = AccessyWebhookEventType(data["eventType"])
+def decode_event(event_type_str: str, data: Any) -> Optional[AccessyWebhookEvent]:
+    event_type = AccessyWebhookEventType(event_type_str)
     if event_type in event_types:
         cls = event_types[event_type]
         return cls.from_dict(data)
@@ -196,7 +195,7 @@ def accessy_webhook() -> None:
         raise UnprocessableEntity("Accessy session not initialized")
 
     if accessy_session.is_valid_webhook_signature(request.headers["Accessy-Webhook-Signature"]):
-        event = decode_event(request.json)
+        event = decode_event(request.headers["X-Axs-Event-Type"], request.json)
         if event is not None:
             logger.info(f"Received accessy event: {event.to_dict()}")
             handle_event(event)
