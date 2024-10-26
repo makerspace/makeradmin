@@ -2,9 +2,30 @@ import argparse
 import os
 import secrets
 
+from zoneinfo import available_timezones
+
 parser = argparse.ArgumentParser(description="Create a default '.env' file with secrets if it doesn't exist")
 parser.add_argument("--force", "-f", dest="force", action="store_true", help="overwrite existing '.env' file")
+parser.add_argument("--interactive", "-i", dest="interactive", action="store_true", help="run with interactive choices")
+
 args = parser.parse_args()
+
+if not args.force and os.path.isfile(".env"):
+    print(".env file already exists, touching")
+    os.utime(".env", None)
+    exit()
+
+if args.interactive:
+    while True:
+        zone_str = input("What is the makerspace timezone? [Y/n]: ")
+
+        if zone_str in available_timezones():
+            makerspace_local_timezone = zone_str
+            break
+        else:
+            print(f"Timezone {zone_str} is not in the list of available zones")
+else:
+    makerspace_local_timezone = "Europe/Stockholm"
 
 config = {
     "MYSQL_DB": "makeradmin",
@@ -38,12 +59,9 @@ config = {
     "FIRSTRUN_AUTO_ADMIN_PASSWORD": "",
     "ELKS46_API_USER": "",
     "ELKS46_API_KEY": "",
-    "MAKERSPACE_LOCAL_TIMEZONE": "Europe/Stockholm",
+    "MAKERSPACE_LOCAL_TIMEZONE": makerspace_local_timezone,
 }
 
-if not args.force and os.path.isfile(".env"):
-    print(".env file already exists, touching")
-    os.utime(".env", None)
-else:
-    with open(".env", "w") as f:
-        f.write("\n".join(key + "=" + value for (key, value) in config.items()))
+
+with open(".env", "w") as f:
+    f.write("\n".join(key + "=" + value for (key, value) in config.items()))

@@ -2,7 +2,7 @@ from logging import INFO
 
 from dotenv import dotenv_values, find_dotenv
 from rocky.config import Config, Dict, Env
-from zoneinfo import ZoneInfo
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from service.logging import logger
 
@@ -96,7 +96,7 @@ def get_makerspace_local_timezone() -> ZoneInfo:
     zone_str = config.get("MAKERSPACE_LOCAL_TIMEZONE")
     try:
         zone = ZoneInfo(zone_str)
-    except Exception as e:
+    except ZoneInfoNotFoundError as e:
         raise NameError(f"Variable MAKERSPACE_LOCAL_TIMEZONE not set correctly in .env, failed due to {e}")
     return zone
 
