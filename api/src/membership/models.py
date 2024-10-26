@@ -17,10 +17,8 @@ from sqlalchemy import (
     Text,
     func,
     select,
-    text,
 )
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import column_property, configure_mappers, relationship, validates
+from sqlalchemy.orm import column_property, configure_mappers, declarative_base, relationship, validates
 
 Base = declarative_base()
 
@@ -110,7 +108,7 @@ class Group(Base):
 # Calculated property will be executed as a sub select for each groups, since it is not that many groups this will be
 # fine.
 Group.num_members = column_property(
-    select([func.count(member_group.columns.member_id)])
+    select(func.count(member_group.columns.member_id))
     .where(Group.group_id == member_group.columns.group_id)
     .scalar_subquery()
 )

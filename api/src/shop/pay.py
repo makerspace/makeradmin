@@ -44,7 +44,7 @@ def make_purchase(member_id: int, purchase: Purchase) -> Transaction:
     # If this purchase will start a subscription, then the payment method should be attached to the customer so that it can be used for the subscription.
     starts_subscription = False
     for item in purchase.cart:
-        product = db_session.query(Product).get(item.id)
+        product = db_session.get(Product, item.id)
         assert product is not None
         starts_subscription |= product.get_metadata(MakerspaceMetadataKeys.SUBSCRIPTION_TYPE, None) is not None
 
@@ -161,7 +161,7 @@ def setup_payment_method(data_dict: Any, member_id: int) -> SetupPaymentMethodRe
     except Exception as e:
         raise BadRequest(message=f"Invalid data: {e}")
 
-    member = db_session.query(Member).get(member_id)
+    member = db_session.get(Member, member_id)
     if member is None:
         raise BadRequest(f"Unable to find member with id {member_id}")
 
@@ -206,7 +206,7 @@ def setup_payment_method(data_dict: Any, member_id: int) -> SetupPaymentMethodRe
 
 
 def cancel_subscriptions(data: CancelSubscriptionsRequest, user_id: int) -> None:
-    member = db_session.query(Member).get(user_id)
+    member = db_session.get(Member, user_id)
     if member is None:
         raise BadRequest(f"Unable to find member with id {user_id}")
 
@@ -221,7 +221,7 @@ def cancel_subscriptions(data: CancelSubscriptionsRequest, user_id: int) -> None
 
 
 def start_subscriptions(data: StartSubscriptionsRequest, user_id: int) -> None:
-    member = db_session.query(Member).get(user_id)
+    member = db_session.get(Member, user_id)
     if member is None:
         raise BadRequest(f"Unable to find member with id {user_id}")
 

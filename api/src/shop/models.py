@@ -18,8 +18,7 @@ from sqlalchemy import (
     Text,
     func,
 )
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import configure_mappers, relationship, validates
+from sqlalchemy.orm import configure_mappers, declarative_base, relationship, validates
 
 from shop.stripe_constants import MakerspaceMetadataKeys
 

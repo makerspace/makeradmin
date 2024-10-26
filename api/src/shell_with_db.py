@@ -6,9 +6,8 @@ import quiz.models
 from IPython import start_ipython
 from service.config import get_mysql_config
 from service.db import create_mysql_engine
-from sqlalchemy import Column, ForeignKey, Integer, Text, select
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import relationship, sessionmaker
+from sqlalchemy import select
+from sqlalchemy.orm import sessionmaker
 
 
 def init_db():
