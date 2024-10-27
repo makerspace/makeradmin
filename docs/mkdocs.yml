@@ -15,5 +15,6 @@ nav:
   - Home: index.md
   - User Guide:
       - Getting Started: user-guide/getting-started.md
+      - Running tests: user-guide/run-tests.md
   - Developer Guide:
       - Getting Started: dev-guide/getting-started.md
