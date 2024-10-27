@@ -32,4 +32,8 @@ rm -rf /work/.test/selenium-screenshots
 
 cd /work/src
 
-python3 -m pytest --color=yes . --workers ${TEST_PARALELLISM} -ra
+if [ -n "$WAIT_FOR_DEBUGGER" ]; then
+    wait_for_debugger_flags="-m debugpy --listen 0.0.0.0:5678 --wait-for-client"
+fi
+
+python3 $wait_for_debugger_flags -m pytest --color=yes . --workers ${TEST_PARALELLISM} -ra
