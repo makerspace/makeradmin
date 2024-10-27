@@ -18,7 +18,14 @@ class SessionFactoryWrapper:
     def init_with_engine(self, engine):
         if self.session_factory is None:
             logger.info(f"initializing session factory with engine {engine}")
-            self.session_factory = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+            self.session_factory = sessionmaker(
+                autocommit=False,
+                autoflush=False,
+                bind=engine,
+                # TODO: remove future=True after upgrade to SQLalchemy 2
+                # https://github.com/makerspace/makeradmin/issues/489
+                future=True,
+            )
         else:
             logger.info(f"reinitializing session factory with engine {engine}")
             self.session_factory.configure(bind=engine)
