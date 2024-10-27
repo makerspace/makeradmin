@@ -74,4 +74,4 @@ format-precommit:
 
 .PHONY: build firstrun init init-npm init-pip install run stop dev-test
 .PHONY: test-clean test dev format format-python format-webstuff
-.PHONY: format-precommit
+.PHONY: format-precommit .env
