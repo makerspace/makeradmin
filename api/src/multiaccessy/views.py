@@ -5,11 +5,12 @@ from typing import Any, Optional
 
 from dataclasses_json import DataClassJsonMixin
 from flask import request
-from multiaccessy import service
-from multiaccessy.models import PhysicalAccessEntry
 from service.api_definition import POST, PUBLIC
 from service.db import db_session
 from service.error import UnprocessableEntity
+
+from multiaccessy import service
+from multiaccessy.models import PhysicalAccessEntry
 
 from .accessy import UUID, AccessyWebhookEventType, accessy_session
 
