@@ -647,26 +647,28 @@ def register_accessy_webhook() -> bool:
         # We must ensure that only one instance of the server registers the webhook.
         # Otherwise we could end up with zero or many webhooks registered.
         if webhook_create_lock.acquire(timeout=15):
-            accessy_session.register_webhook(
-                webhook_url,
-                [
-                    AccessyWebhookEventType.ASSET_OPERATION_INVOKED,
-                    AccessyWebhookEventType.ACCESS_REQUEST,
-                    AccessyWebhookEventType.APPLICATION_ADDED,
-                    AccessyWebhookEventType.APPLICATION_REMOVED,
-                    AccessyWebhookEventType.GUEST_DOOR_ENTRY,
-                    AccessyWebhookEventType.MEMBERSHIP_CREATED,
-                    AccessyWebhookEventType.MEMBERSHIP_REMOVED,
-                    AccessyWebhookEventType.MEMBERSHIP_REQUEST_CREATED,
-                    AccessyWebhookEventType.MEMBERSHIP_REQUEST_APPROVED,
-                    AccessyWebhookEventType.MEMBERSHIP_REQUEST_DENIED,
-                    AccessyWebhookEventType.MEMBERSHIP_ROLE_ADDED,
-                    AccessyWebhookEventType.MEMBERSHIP_ROLE_REMOVED,
-                    AccessyWebhookEventType.ORGANIZATION_INVITATION_DELETED,
-                ],
-            )
-            webhook_create_lock.release()
-            return True
+            try:
+                accessy_session.register_webhook(
+                    webhook_url,
+                    [
+                        AccessyWebhookEventType.ASSET_OPERATION_INVOKED,
+                        AccessyWebhookEventType.ACCESS_REQUEST,
+                        AccessyWebhookEventType.APPLICATION_ADDED,
+                        AccessyWebhookEventType.APPLICATION_REMOVED,
+                        AccessyWebhookEventType.GUEST_DOOR_ENTRY,
+                        AccessyWebhookEventType.MEMBERSHIP_CREATED,
+                        AccessyWebhookEventType.MEMBERSHIP_REMOVED,
+                        AccessyWebhookEventType.MEMBERSHIP_REQUEST_CREATED,
+                        AccessyWebhookEventType.MEMBERSHIP_REQUEST_APPROVED,
+                        AccessyWebhookEventType.MEMBERSHIP_REQUEST_DENIED,
+                        AccessyWebhookEventType.MEMBERSHIP_ROLE_ADDED,
+                        AccessyWebhookEventType.MEMBERSHIP_ROLE_REMOVED,
+                        AccessyWebhookEventType.ORGANIZATION_INVITATION_DELETED,
+                    ],
+                )
+                return True
+            finally:
+                webhook_create_lock.release()
         else:
             logger.warning(f"Failed to acquire webhook create lock. Skipping accessy webhook registration.")
             return False

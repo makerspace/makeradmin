@@ -14,5 +14,5 @@ class PhysicalAccessEntry(Base):
     accessy_user_id = Column(Text, nullable=True)
     accessy_asset_operation_id = Column(Text, nullable=False)
     accessy_asset_publication_id = Column(Text, nullable=False)
-    invoked_at = Column(DateTime)
-    created_at = Column(DateTime, server_default=func.now())
+    invoked_at = Column(DateTime, nullable=False)
+    created_at = Column(DateTime, server_default=func.now(), nullable=False)
