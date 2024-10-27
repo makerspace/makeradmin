@@ -211,8 +211,14 @@ def accessy_webhook() -> None:
     if accessy_session is None:
         raise UnprocessableEntity("Accessy session not initialized")
 
-    if accessy_session.is_valid_webhook_signature(request.headers["Accessy-Webhook-Signature"]):
-        event = decode_event(request.headers["X-Axs-Event-Type"], request.json)
+    signature = request.headers.get("Accessy-Webhook-Signature")
+    if not signature:
+        raise UnprocessableEntity("Missing Accessy-Webhook-Signature header")
+    event_type_str = request.headers.get("X-Axs-Event-Type")
+    if not event_type_str:
+        raise UnprocessableEntity("Missing X-Axs-Event-Type header")
+    if accessy_session.is_valid_webhook_signature(signature):
+        event = decode_event(event_type_str, request.json)
         if event is not None:
             logger.info(f"Received accessy event: {event.to_dict()}")
             handle_event(event)
