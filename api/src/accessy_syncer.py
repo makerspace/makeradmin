@@ -70,7 +70,7 @@ def main():
         args = parser.parse_args()
 
         engine = create_mysql_engine(**get_mysql_config())
-        session_factory = sessionmaker(autocommit=False, autoflush=False, bind=engine, future=True)
+        session_factory = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
         logger.info(f"running syncer command {args.command}")
 

@@ -18,14 +18,7 @@ class SessionFactoryWrapper:
     def init_with_engine(self, engine):
         if self.session_factory is None:
             logger.info(f"initializing session factory with engine {engine}")
-            self.session_factory = sessionmaker(
-                autocommit=False,
-                autoflush=False,
-                bind=engine,
-                # TODO: remove future=True after upgrade to SQLalchemy 2
-                # https://github.com/makerspace/makeradmin/issues/489
-                future=True,
-            )
+            self.session_factory = sessionmaker(autocommit=False, autoflush=False, bind=engine)
         else:
             logger.info(f"reinitializing session factory with engine {engine}")
             self.session_factory.configure(bind=engine)
@@ -53,10 +46,7 @@ def create_mysql_engine(
         raise Exception(f"could not connect to db at {host}:{port} in {timeout} seconds")
 
     engine = create_engine(
-        f"mysql+pymysql://{user}:{pwd}@{host}:{port}/{db}",
-        pool_recycle=1800,
-        isolation_level=isolation_level,
-        future=True,
+        f"mysql+pymysql://{user}:{pwd}@{host}:{port}/{db}", pool_recycle=1800, isolation_level=isolation_level
     )
 
     db_session_factory.init_with_engine(engine)

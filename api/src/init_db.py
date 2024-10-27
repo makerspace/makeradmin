@@ -56,7 +56,7 @@ def refresh_service_access_tokens(session_factory):
 
 def init_db():
     engine = create_mysql_engine(**get_mysql_config())
-    session_factory = sessionmaker(autocommit=False, autoflush=False, bind=engine, future=True)
+    session_factory = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
     ensure_migrations_table(engine, session_factory)
 
