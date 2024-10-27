@@ -12,7 +12,7 @@ from sqlalchemy.orm import sessionmaker
 
 def init_db():
     engine = create_mysql_engine(**get_mysql_config())
-    session_factory = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+    session_factory = sessionmaker(autocommit=False, autoflush=False, bind=engine, future=True)
     return session_factory
 
 
