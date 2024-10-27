@@ -223,8 +223,8 @@ class AccessySession:
 
         member = db_session.query(Member).filter(Member.phone == user_details.msisdn).first()
         if member is not None:
-            self._accessy_id_to_member_id_cache[accessy_id] = member.id
-            return member.id
+            self._accessy_id_to_member_id_cache[accessy_id] = member.member_id
+            return member.member_id
         else:
             return None
 
