@@ -40,6 +40,8 @@ services:
     build:
       context: ./api
       dockerfile: TestDockerfile
+    ports:
+      - "5678:5678"
     networks:
       - makeradmin
     command:
@@ -73,6 +75,7 @@ services:
       ACCESSY_LABACCESS_GROUP: "00000000-0000-0000-0000-000000000000"
       ACCESSY_SPECIAL_LABACCESS_GROUP: "00000000-0000-0000-0000-000000000001"
       PYTEST_ADDOPTS:
+      WAIT_FOR_DEBUGGER:
 
 volumes:
   logs:
