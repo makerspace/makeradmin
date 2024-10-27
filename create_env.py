@@ -27,6 +27,7 @@ config = {
     "STRIPE_PUBLIC_KEY": os.environ.get("STRIPE_PUBLIC_KEY", ""),
     "STRIPE_SIGNING_SECRET": "",
     "STRIPE_CURRENCY": "sek",
+    "ACCESSY_URL": "https://api.accessy.se",
     "ACCESSY_CLIENT_ID": "",
     "ACCESSY_CLIENT_SECRET": "",
     "ACCESSY_LABACCESS_GROUP": "",
