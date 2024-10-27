@@ -341,7 +341,7 @@ if __name__ == "__main__":
         args = parser.parse_args()
 
         engine = create_mysql_engine(**get_mysql_config())
-        session_factory = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+        session_factory = sessionmaker(autocommit=False, autoflush=False, bind=engine, future=True)
 
         logger.info(f"checking for emails to send every {args.sleep} seconds, limit is {args.limit}")
 
