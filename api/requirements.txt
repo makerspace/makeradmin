@@ -1,7 +1,7 @@
 # Runtime requirements
 flask
 flask_cors
-sqlalchemy>=1.4.9,<2.0
+sqlalchemy~=2.0
 gunicorn
 rocky>=1,<2
 PyMySQL
