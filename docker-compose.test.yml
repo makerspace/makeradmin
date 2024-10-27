@@ -52,6 +52,8 @@ services:
       - api
       - selenium
     environment:
+      PYTHONWARNINGS: "always::DeprecationWarning"
+      SQLALCHEMY_WARN_20: "1"
       MYSQL_HOST: db2
       MYSQL_DB:
       MYSQL_PORT:
