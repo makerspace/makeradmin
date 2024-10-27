@@ -1,14 +1,21 @@
+import json as libjson
 import threading
 from collections.abc import Iterable
 from dataclasses import dataclass, field
 from datetime import date, datetime, timedelta
+from enum import Enum
 from logging import getLogger
 from random import random
 from time import sleep
-from typing import Union
+from typing import Any, List, Optional, Union
+from urllib.parse import urlparse
 
 import requests
+from dataclasses_json import DataClassJsonMixin
+from membership.models import Member
+from NamedAtomicLock import NamedAtomicLock
 from service.config import config
+from service.db import db_session
 from service.entity import fromisoformat
 
 logger = getLogger("accessy")
@@ -30,16 +37,28 @@ ACCESSY_SPECIAL_LABACCESS_GROUP: str = config.get("ACCESSY_SPECIAL_LABACCESS_GRO
 ACCESSY_DO_MODIFY: bool = config.get("ACCESSY_DO_MODIFY", default="false").lower() == "true"
 
 
-def request(method, path, token=None, json=None, max_tries=8, err_msg=None):
+def request(
+    method: str,
+    path: str,
+    token: Optional[str] = None,
+    json: dict[str, Any] | DataClassJsonMixin | None = None,
+    max_tries: int = 8,
+    err_msg: Optional[str] = None,
+) -> Any:
     headers = {}
     if token:
         headers["Authorization"] = f"Bearer {token}"
     if json:
         headers["Content-Type"] = "application/json"
 
+    if isinstance(json, DataClassJsonMixin):
+        data = json.to_json()
+    else:
+        data = libjson.dumps(json)
+
     backoff = 1.0
     for i in range(max_tries):
-        response = requests.request(method, ACCESSY_URL + path, json=json, headers=headers)
+        response = requests.request(method, ACCESSY_URL + path, data=data, headers=headers)
         if response.status_code == 429:
             logger.warning(
                 f"requesting accessy returned 429, too many reqeusts, try {i+1}/{max_tries}, retrying in {backoff}s, {path=}"
@@ -63,6 +82,40 @@ def request(method, path, token=None, json=None, max_tries=8, err_msg=None):
     raise AccessyError("too many requests")
 
 
+class AccessyWebhookEventType(Enum):
+    ASSET_OPERATION_INVOKED = "ASSET_OPERATION_INVOKED"
+    ACCESS_REQUEST = "ACCESS_REQUEST"
+    APPLICATION_ADDED = "APPLICATION_ADDED"
+    APPLICATION_REMOVED = "APPLICATION_REMOVED"
+    GUEST_DOOR_ENTRY = "GUEST_DOOR_ENTRY"
+    MEMBERSHIP_CREATED = "MEMBERSHIP_CREATED"
+    MEMBERSHIP_REMOVED = "MEMBERSHIP_REMOVED"
+    MEMBERSHIP_REQUEST_CREATED = "MEMBERSHIP_REQUEST_CREATED"
+    MEMBERSHIP_REQUEST_APPROVED = "MEMBERSHIP_REQUEST_APPROVED"
+    MEMBERSHIP_REQUEST_DENIED = "MEMBERSHIP_REQUEST_DENIED"
+    MEMBERSHIP_ROLE_ADDED = "MEMBERSHIP_ROLE_ADDED"
+    MEMBERSHIP_ROLE_REMOVED = "MEMBERSHIP_ROLE_REMOVED"
+    ORGANIZATION_INVITATION_DELETED = "ORGANIZATION_INVITATION_DELETED"
+
+    # Note: Only these seem to have any documentation
+    # ASSET_OPERATION_INVOKED
+    # MEMBERSHIP_CREATED
+    # MEMBERSHIP_REMOVED
+    # MEMBERSHIP_REQUEST_CREATED
+    # MEMBERSHIP_REQUEST_APPROVED
+    # MEMBERSHIP_REQUEST_DENIED
+    # MEMBERSHIP_ROLE_ADDED
+    # MEMBERSHIP_ROLE_REMOVED
+    # GUEST_DOOR_ENTRY
+
+
+@dataclass
+class AccessyWebhookEventTypeObject(DataClassJsonMixin):
+    id: int
+    name: AccessyWebhookEventType
+    group: str
+
+
 @dataclass
 class AccessyMember:
     user_id: Union[UUID, None] = None
@@ -72,9 +125,9 @@ class AccessyMember:
     name: str = "<name>"
     member_id: Union[int, None] = None  # Makeradmin member_id
     member_number: Union[int, None] = None  # Makeradmin member_number
-    groups: {str} = field(default_factory=set)
+    groups: set[str] = field(default_factory=set)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         groups = []
         if ACCESSY_LABACCESS_GROUP in self.groups:
             groups.append("labaccess")
@@ -83,19 +136,69 @@ class AccessyMember:
         return f"AccessyMember(phone={self.phone}, name={self.name}, {groups=}, member_id={self.member_id}, member_number={self.member_number}, user_id={self.user_id})"
 
 
+@dataclass
+class AccessyWebhook(DataClassJsonMixin):
+    id: UUID
+    """An unique id."""
+
+    name: str
+    """Name or identifier."""
+
+    signature: str
+    """The signature whe webhook will send in the header (Accessy-Webhook-Signature) that can be used to verify it is comming from the correct service (security)."""
+
+    destinationUrl: str
+    """The destination url to the webhook, needs to be a https and start with https://"""
+
+    createdAt: str
+    """A date when the webhook was created using UTC and the format YYYY-MM-ddTHH:MM.SS.ssssssZ e.g 2021-04-09T09:06:12.627917Z"""
+
+    createdBy: UUID
+    """UUID of the user that created this webhook."""
+
+    updatedAt: str
+    """A date when the webhook was created using UTC and the format YYYY-MM-ddTHH:MM.SS.ssssssZ e.g 2021-04-09T09:06:12.627917Z"""
+
+    updatedBy: UUID
+    """UUID of the user that updated this webhook."""
+
+    eventTypes: list[AccessyWebhookEventTypeObject]
+    """An array of event types (one or more) that this webhook should listen to."""
+
+
+@dataclass
+class AccessyWebhookCreate(DataClassJsonMixin):
+    name: str
+    description: str
+    destinationUrl: str
+    eventTypes: list[AccessyWebhookEventType]
+
+
+@dataclass
+class AccessyUser(DataClassJsonMixin):
+    id: UUID
+    firstName: str
+    lastName: str
+    msisdn: str
+    uiLanguageCode: str
+    application: bool
+
+
 class AccessySession:
-    def __init__(self):
-        self.session_token = None
-        self.session_token_token_expires_at = None
-        self._organization_id = None
+    def __init__(self) -> None:
+        self.session_token: str | None = None
+        self.session_token_token_expires_at: datetime | None = None
+        self._organization_id: str | None = None
         self._mutex = threading.Lock()
+        self._all_webhooks: Optional[List[AccessyWebhook]] = None
+        self._accessy_id_to_member_id_cache: dict[str, int] = {}
 
     #################
     # Class methods
     #################
 
     @staticmethod
-    def is_env_configured():
+    def is_env_configured() -> bool:
         return all(
             isinstance(config_var, bool) or (isinstance(config_var, str) and len(config_var) > 0)
             for config_var in (
@@ -111,6 +214,19 @@ class AccessySession:
     #################
     # Public methods
     #################
+
+    def get_member_id_from_accessy_id(self, accessy_id: UUID) -> Optional[int]:
+        if accessy_id in self._accessy_id_to_member_id_cache:
+            return self._accessy_id_to_member_id_cache[accessy_id]
+
+        user_details = self.get_user_details(accessy_id)
+
+        member = db_session.query(Member).filter(Member.phone == user_details.msisdn).first()
+        if member is not None:
+            self._accessy_id_to_member_id_cache[accessy_id] = member.id
+            return member.id
+        else:
+            return None
 
     def get_all_members(self) -> list[AccessyMember]:
         """Get a list of all Accessy members in the ORG with GROUPS (lab and special)"""
@@ -130,7 +246,7 @@ class AccessySession:
 
         return members
 
-    def is_in_org(self, phone_number: MSISDN, users_org: list[dict] = None) -> bool:
+    def is_in_org(self, phone_number: MSISDN, users_org: list[dict] | None = None) -> bool:
         """Check if a user with a specific phone number is in the ORG"""
         if not self.has_authentication():
             return False
@@ -155,14 +271,14 @@ class AccessySession:
                 return True
         return False
 
-    def remove_from_org(self, phone_number: MSISDN):
+    def remove_from_org(self, phone_number: MSISDN) -> None:
         accessy_member = self._get_org_user_from_phone(phone_number)
         if accessy_member is None:
             return
 
         self.__delete(f"/org/admin/organization/{self.organization_id()}/user/{accessy_member.user_id}")
 
-    def remove_from_group(self, phone_number: MSISDN, access_group_id: UUID):
+    def remove_from_group(self, phone_number: MSISDN, access_group_id: UUID) -> None:
         accessy_member = self._get_org_user_from_phone(phone_number)
         if accessy_member is None:
             return
@@ -171,20 +287,20 @@ class AccessySession:
             f"/asset/admin/access-permission-group/{access_group_id}/membership/{accessy_member.membership_id}"
         )
 
-    def add_to_group(self, phone_number: MSISDN, access_group_id: UUID):
+    def add_to_group(self, phone_number: MSISDN, access_group_id: UUID) -> None:
         """Add a specific user with phone number to access group"""
         accessy_member = self._get_org_user_from_phone(phone_number)
         if accessy_member is None:
             self.invite_phone_to_org_and_groups([phone_number], [access_group_id])
-
-        self.__put(
-            f"/asset/admin/access-permission-group/{access_group_id}/membership",
-            json=dict(membership=accessy_member.membership_id),
-        )
+        else:
+            self.__put(
+                f"/asset/admin/access-permission-group/{access_group_id}/membership",
+                json=dict(membership=accessy_member.membership_id),
+            )
 
     def invite_phone_to_org_and_groups(
         self, phone_numbers: Iterable[MSISDN], access_group_ids: Iterable[UUID] = [], message_to_user: str = ""
-    ):
+    ) -> None:
         """Invite a list of phone numbers to a list of groups"""
         self.__post(
             f"/org/admin/organization/{self.organization_id()}/invitation",
@@ -197,7 +313,7 @@ class AccessySession:
     def has_authentication(self) -> bool:
         return ACCESSY_CLIENT_ID is not None and ACCESSY_CLIENT_SECRET is not None
 
-    def get_pending_invitations(self, after_date: date = None) -> Iterable[MSISDN]:
+    def get_pending_invitations(self, after_date: Optional[date] = None) -> Iterable[MSISDN]:
         """Get all pending invitations after a specific date (including)."""
         if not self.has_authentication():
             return set()
@@ -213,10 +329,11 @@ class AccessySession:
                 pending_invitations.add(recipient)
         return pending_invitations
 
-    def organization_id(self):
+    def organization_id(self) -> str:
         if self._organization_id:
             return self._organization_id
         self.__ensure_token()
+        assert self._organization_id is not None
         return self._organization_id
 
     def get_user_groups(self, phone_number: MSISDN) -> list[str]:
@@ -247,7 +364,11 @@ class AccessySession:
             return
 
         with self._mutex:  # Only allow one concurrent token refresh as rate limiting on this endpoint is aggressive.
-            if not self.session_token or datetime.now() > self.session_token_token_expires_at:
+            if (
+                not self.session_token
+                or self.session_token_token_expires_at is None
+                or datetime.now() > self.session_token_token_expires_at
+            ):
                 now = datetime.now()
                 data = request(
                     "post",
@@ -282,32 +403,40 @@ class AccessySession:
                 self._organization_id = data[0]["organizationId"]
                 logger.info(f"fetched accessy organization_id {self._organization_id}")
 
-    def _get(self, path: str, err_msg: str = None) -> dict:
+    def _get(self, path: str, err_msg: str | None = None) -> Any:
         self.__ensure_token()
         if self.session_token:
             return request("get", path, token=self.session_token, err_msg=err_msg)
         logger.info(f"NO ACCESSY SESSION TOKEN (ID or CLIENT not configured), skipping get from {path=}")
         return {}
 
-    def __delete(self, path: str, err_msg: str = None):
+    def __delete(self, path: str, err_msg: str | None = None, force_allow_modify: bool = False) -> Any:
         self.__ensure_token()
-        if ACCESSY_DO_MODIFY and self.session_token:
+        if (ACCESSY_DO_MODIFY or force_allow_modify) and self.session_token:
             return request("delete", path, token=self.session_token, err_msg=err_msg)
         logger.info(f"ACCESSY_DO_MODIFY is false, skipping delete to {path=}")
 
-    def __post(self, path: str, err_msg: str = None, json: dict = None):
+    def __post(
+        self,
+        path: str,
+        err_msg: str | None = None,
+        json: dict[str, Any] | DataClassJsonMixin | None = None,
+        force_allow_modify: bool = False,
+    ) -> Any:
         self.__ensure_token()
-        if ACCESSY_DO_MODIFY and self.session_token:
+        if (ACCESSY_DO_MODIFY or force_allow_modify) and self.session_token:
             return request("post", path, token=self.session_token, err_msg=err_msg, json=json)
         logger.info(f"ACCESSY_DO_MODIFY is false, skipping post to {path=}")
 
-    def __put(self, path: str, err_msg: str = None, json: dict = None):
+    def __put(
+        self, path: str, err_msg: str | None = None, json: dict[str, Any] | DataClassJsonMixin | None = None
+    ) -> Any:
         self.__ensure_token()
         if ACCESSY_DO_MODIFY and self.session_token:
             return request("put", path, token=self.session_token, err_msg=err_msg, json=json)
         logger.info(f"ACCESSY_DO_MODIFY is false, skipping put to {path=}")
 
-    def _get_json_paginated(self, url: str, msg: str = None):
+    def _get_json_paginated(self, url: str, msg: str | None = None) -> list[Any]:
         """Convenience method for getting all data for a JSON endpoint that is paginated"""
         page_size = 10000
         page_number = 0
@@ -334,11 +463,15 @@ class AccessySession:
 
         return items
 
+    def get_user_details(self, user_id: UUID) -> AccessyUser:
+        """Get details for user ID."""
+        return AccessyUser.from_dict(self._get_user_details(user_id))
+
     ################################################
     # Methods that return raw JSON data from API:s
     ################################################
 
-    def _get_user_details(self, user_id: UUID) -> dict:
+    def _get_user_details(self, user_id: UUID) -> Any:
         """Get details for user ID. Fields: id, msisdn, firstName, lastName, ..."""
         return self._get(f"/org/admin/user/{user_id}", err_msg="Getting user details")
 
@@ -373,28 +506,31 @@ class AccessySession:
 
     def _get_group_description(self, group_id: UUID) -> str:
         """Get a description for a group ID"""
-        return self._get(f"/asset/admin/access-permission-group/{group_id}")["name"]
+        name = self._get(f"/asset/admin/access-permission-group/{group_id}")["name"]
+        assert isinstance(name, str)
+        return name
 
     def _user_ids_to_accessy_members(self, user_ids: Iterable[UUID]) -> list[AccessyMember]:
         """Convert a list of User ID:s to AccessyMembers"""
 
         APPLICATION_PHONE_NUMBER = object()  # Sentinel phone number for applications
 
-        def fill_user_details(user: AccessyMember):
-            data = self._get(f"/org/admin/user/{user.user_id}")
+        def fill_user_details(user: AccessyMember) -> None:
+            assert user.user_id is not None
+            data = self.get_user_details(user.user_id)
 
             # API keys do not have phone numbers, set it to sentinel object so we can filter out API keys further down
-            if data["application"]:
+            if data.application:
                 user.phone = APPLICATION_PHONE_NUMBER
                 return
 
             try:
-                user.phone = data["msisdn"]
+                user.phone = data.msisdn
             except KeyError:
                 logger.warning(f"User {user.user_id} does not have a phone number in accessy. {data=}")
-            user.name = f"{data.get('firstName', '')} {data.get('lastName', '')}"
+            user.name = f"{data.firstName} {data.lastName}"
 
-        def fill_membership_id(user: AccessyMember):
+        def fill_membership_id(user: AccessyMember) -> None:
             data = self._get(f"/asset/admin/user/{user.user_id}/organization/{self.organization_id()}/membership")
             user.membership_id = data["id"]
 
@@ -418,7 +554,7 @@ class AccessySession:
         return accessy_members
 
     def _get_org_user_from_phone(
-        self, phone_number: MSISDN, users_in_org: list[dict] = None
+        self, phone_number: MSISDN, users_in_org: list[dict] | None = None
     ) -> Union[None, AccessyMember]:
         """Get a AccessyMember from a phone number (if in org)"""
         if users_in_org is None:
@@ -431,24 +567,128 @@ class AccessySession:
         else:
             return None
 
+    def list_webhooks(self) -> list[AccessyWebhook]:
+        hooks = self._get(f"/subscription/{self.organization_id()}/webhook")
+        return [AccessyWebhook.from_dict(x) for x in hooks]
+
+    def is_valid_webhook_signature(self, signature: str) -> bool:
+        if self._all_webhooks is None:
+            self._all_webhooks = self.list_webhooks()
+
+        return signature in [webhook.signature for webhook in self._all_webhooks]
+
+    def remove_webhook(self, id: UUID) -> Any:
+        # Need to refetch webhooks
+        self._all_webhooks = None
+        return self.__delete(
+            f"/subscription/{self.organization_id()}/webhook/{id}",
+            force_allow_modify=True,
+            err_msg="Failed to delete webhook",
+        )
+
+    def remove_all_webhooks(self) -> None:
+        for webhook in self.list_webhooks():
+            self.remove_webhook(webhook.id)
+
+    def register_webhook(self, destinationURL: str, eventTypes: list[AccessyWebhookEventType]) -> None:
+        # Need to refetch webhooks
+        self._all_webhooks = self.list_webhooks()
+        host = urlparse(destinationURL).hostname
+        found_identical = False
+        for w in self._all_webhooks:
+            diff = w.destinationUrl != destinationURL or set([e.name for e in w.eventTypes]) != set(eventTypes)
+            # Only remove webhooks for the same host
+            # Other hosts can manage their own webhooks
+            if urlparse(w.destinationUrl).hostname == host:
+                if diff:
+                    logger.info(f"Removing previous Accessy webhook for host {host} at {w.destinationUrl}")
+                    self.remove_webhook(w.id)
+                else:
+                    found_identical = True
+
+        if found_identical:
+            logger.info(
+                f"Accessy webhook already configured at {destinationURL}. There are currently {len(self._all_webhooks)} webhooks."
+            )
+            return None
+
+        self.__post(
+            f"/subscription/{self.organization_id()}/webhook",
+            json=AccessyWebhookCreate(
+                name="MakerAdmin",
+                description="MakerAdmin webhook",
+                destinationUrl=destinationURL,
+                eventTypes=eventTypes,
+            ),
+            force_allow_modify=True,
+        )
+
+        self._all_webhooks = self.list_webhooks()
+        logger.info(
+            f"Registered Accessy webhook at {destinationURL}. There are currently {len(self._all_webhooks)} webhooks: {self._all_webhooks}"
+        )
+
 
 accessy_session = AccessySession() if AccessySession.is_env_configured() else None
 
-
 STATUS_OK = 0
 ERROR_NOT_CONFIGURED = 1
+
+
+def register_accessy_webhook() -> bool:
+    HOST_BACKEND: str = config.get("HOST_BACKEND").strip()
+    webhook_url: str = f"{HOST_BACKEND}/accessy/event"
+    if accessy_session is None:
+        logger.warning(f"Accessy not configured. Skipping accessy webhook registration.")
+        return False
+
+    if webhook_url.startswith("https://"):
+        webhook_create_lock = NamedAtomicLock("makeradmin_accessy_webhook_create_lock", maxLockAge=60 * 5)
+        # We must ensure that only one instance of the server registers the webhook.
+        # Otherwise we could end up with zero or many webhooks registered.
+        if webhook_create_lock.acquire(timeout=15):
+            try:
+                accessy_session.register_webhook(
+                    webhook_url,
+                    [
+                        AccessyWebhookEventType.ASSET_OPERATION_INVOKED,
+                        AccessyWebhookEventType.ACCESS_REQUEST,
+                        AccessyWebhookEventType.APPLICATION_ADDED,
+                        AccessyWebhookEventType.APPLICATION_REMOVED,
+                        AccessyWebhookEventType.GUEST_DOOR_ENTRY,
+                        AccessyWebhookEventType.MEMBERSHIP_CREATED,
+                        AccessyWebhookEventType.MEMBERSHIP_REMOVED,
+                        AccessyWebhookEventType.MEMBERSHIP_REQUEST_CREATED,
+                        AccessyWebhookEventType.MEMBERSHIP_REQUEST_APPROVED,
+                        AccessyWebhookEventType.MEMBERSHIP_REQUEST_DENIED,
+                        AccessyWebhookEventType.MEMBERSHIP_ROLE_ADDED,
+                        AccessyWebhookEventType.MEMBERSHIP_ROLE_REMOVED,
+                        AccessyWebhookEventType.ORGANIZATION_INVITATION_DELETED,
+                    ],
+                )
+                return True
+            finally:
+                webhook_create_lock.release()
+        else:
+            logger.warning(f"Failed to acquire webhook create lock. Skipping accessy webhook registration.")
+            return False
+    else:
+        logger.warning(f"Server is not running behind https. Skipping accessy webhook registration.")
+        return False
 
 
 def main() -> int:
     if accessy_session is None:
         print("Accessy not configured.")
         return ERROR_NOT_CONFIGURED
-    pending_invitations = accessy_session.get_pending_invitations(date(2022, 8, 30))
+    pending_invitations = list(accessy_session.get_pending_invitations(date(2022, 8, 30)))
     print("Pending invitations", len(pending_invitations), pending_invitations)
     return STATUS_OK
 
 
 if __name__ == "__main__":
     import sys
+
+    sys.exit(main())
 
     sys.exit(main())
