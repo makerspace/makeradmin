@@ -37,7 +37,7 @@ dev-test:
 	(cd api/src && python3 -m pytest --workers auto -ra $(PYTEST_PARAMS))
 
 dev-docs:
-	docker build -f ./docs/Dockerfile ./docs -t makeradmin-docs:latest && docker run -p "8000:8000" -v "./docs:/work/docs" makeradmin-docs:latest serve -f /work/docs/mkdocs.yml -a 0.0.0.0:8000
+	docker build -f ./docs/Dockerfile ./docs -t makeradmin-docs:latest && docker run -p "8000:8000" -v "$(shell pwd)/docs:/work/docs" makeradmin-docs:latest serve -f /work/docs/mkdocs.yml -a 0.0.0.0:8000
 
 init-npm:
 	npm ci
