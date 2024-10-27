@@ -53,7 +53,10 @@ def create_mysql_engine(
         raise Exception(f"could not connect to db at {host}:{port} in {timeout} seconds")
 
     engine = create_engine(
-        f"mysql+pymysql://{user}:{pwd}@{host}:{port}/{db}", pool_recycle=1800, isolation_level=isolation_level
+        f"mysql+pymysql://{user}:{pwd}@{host}:{port}/{db}",
+        pool_recycle=1800,
+        isolation_level=isolation_level,
+        future=True,
     )
 
     db_session_factory.init_with_engine(engine)

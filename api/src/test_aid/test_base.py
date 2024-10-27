@@ -68,7 +68,7 @@ class FlaskTestBase(TestBase):
         # Make sure sessions is removed so it is not using another engine in this thread.
         db_session.remove()
 
-        engine = create_engine("sqlite:///:memory:")
+        engine = create_engine("sqlite:///:memory:", future=True)
         for model in self.models:
             metadata = model.Base.metadata
             for table in metadata.tables.values():
