@@ -18,7 +18,7 @@ from shop.entities import (
     transaction_content_entity,
     transaction_entity,
 )
-from shop.models import Product, ProductAction, ProductCategory, Transaction
+from shop.models import Product, ProductAction, ProductCategory, Transaction, TransactionContent
 from shop.stripe_constants import MakerspaceMetadataKeys
 from shop.transactions import pending_actions_query
 
@@ -51,7 +51,7 @@ def pending_actions(member_id: Optional[int] = None) -> List[Any]:
 def member_history(member_id: int):
     query = (
         db_session.query(Transaction)
-        .options(joinedload(Transaction.contents), joinedload("contents.product"))
+        .options(joinedload(Transaction.contents).joinedload(TransactionContent.product))
         .filter(Transaction.member_id == member_id)
         .order_by(desc(Transaction.id))
     )
@@ -76,7 +76,7 @@ def receipt(member_id, transaction_id):
         transaction = (
             db_session.query(Transaction)
             .filter_by(member_id=member_id, id=transaction_id)
-            .options(joinedload(Transaction.contents), joinedload("contents.product"))
+            .options(joinedload(Transaction.contents).joinedload(TransactionContent.product))
             .one()
         )
     except NoResultFound:
