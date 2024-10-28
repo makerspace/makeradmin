@@ -56,7 +56,7 @@ def send_updated_member_info_email(member_id: int, msg_swe: str, msg_en: str):
 
 
 def set_pin_code(member_id: int, pin_code: str):
-    member: Member = db_session.query(Member).get(member_id)
+    member: Member = db_session.get(Member, member_id)
     member.pin_code = pin_code
 
     try:
