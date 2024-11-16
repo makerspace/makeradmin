@@ -482,13 +482,15 @@ def get_subscription_info_from_subscription(sub_type: SubscriptionType, sub_id: 
             ),
         )
     except stripe.InvalidRequestError as e:
-        if e.code == "invoice_upcoming_none":
+        if e.code == "invoice_upcoming_none" or e.code == "resource_missing":
+            # Seems like our data is inaccurate. The subscription is not active.
             return SubscriptionInfo(
                 type=sub_type,
                 active=False,
                 upcoming_invoice=None,
             )
         else:
+            print(e.code)
             raise e
 
 

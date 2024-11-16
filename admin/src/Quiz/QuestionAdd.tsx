@@ -35,6 +35,7 @@ class QuestionAdd extends React.Component<Props, State> {
                 question={this.question}
                 onSave={() => this.save()}
                 onDelete={() => this.delete()}
+                onChanged={() => this.setState({})}
                 onNew={() => {
                     browserHistory.push(
                         `/quiz/${this.props.match.params.quiz_id}/question/add`,

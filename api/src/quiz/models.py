@@ -6,6 +6,11 @@ from sqlalchemy.orm import configure_mappers, relationship
 Base = declarative_base()
 
 
+class QuizQuestionMode(Enum):
+    SINGLE_CHOICE = "single_choice"
+    MULTIPLE_CHOICE = "multiple_choice"
+
+
 class Quiz(Base):
     __tablename__ = "quiz_quizzes"
 
@@ -16,7 +21,7 @@ class Quiz(Base):
     updated_at = Column(DateTime, server_default=func.now())
     deleted_at = Column(DateTime)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"Quiz(id={self.id}, name={self.name})"
 
 
@@ -27,11 +32,12 @@ class QuizQuestion(Base):
     quiz_id = Column(Integer, ForeignKey(Quiz.id), nullable=False)
     question = Column(Text, nullable=False)
     answer_description = Column(Text, nullable=False)
+    mode = Column(Enum(QuizQuestionMode.SINGLE_CHOICE, QuizQuestionMode.MULTIPLE_CHOICE), nullable=False)
     created_at = Column(DateTime, server_default=func.now())
     updated_at = Column(DateTime, server_default=func.now())
     deleted_at = Column(DateTime)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"QuizQuestion(id={self.id}, question={self.question}, quiz={self.quiz_id})"
 
 
@@ -50,7 +56,7 @@ class QuizQuestionOption(Base):
 
     question = relationship(QuizQuestion, backref="options")
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"QuizQuestionOption(id={self.id}, description={self.description})"
 
 
@@ -69,7 +75,7 @@ class QuizAnswer(Base):
 
     question = relationship(QuizQuestion, backref="answers")
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"QuizAnswer(id={self.id})"
 
 

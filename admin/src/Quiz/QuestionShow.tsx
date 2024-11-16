@@ -42,7 +42,7 @@ class QuestionShow extends React.Component<Props, State> {
             await confirmModal(this.question.deleteConfirmMessage());
             await this.question.del();
             browserHistory.push(`/quiz/${this.question.quiz_id}`);
-        } catch {}
+        } catch { }
     }
 
     render() {
@@ -51,6 +51,7 @@ class QuestionShow extends React.Component<Props, State> {
                 question={this.state.question}
                 onSave={() => this.save()}
                 onDelete={() => this.delete()}
+                onChanged={() => this.setState({})}
                 onNew={() => {
                     browserHistory.push(
                         `/quiz/${this.question.quiz_id}/question/add`,

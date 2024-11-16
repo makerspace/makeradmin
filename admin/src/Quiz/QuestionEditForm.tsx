@@ -8,11 +8,20 @@ interface Props {
     onSave: () => void;
     onDelete: () => void;
     onNew: () => void;
+    onChanged: () => void;
 }
+
+const mode_names = {
+    single_choice: "Single Choice: User must select one of the correct options",
+    multiple_choice: "Multiple Choice: User must select all correct options",
+}
+
+const modes = ["single_choice", "multiple_choice"] as const;
 
 export default (props: Props) => {
     const { question } = props;
     const { onSave, onDelete, onNew } = props;
+    console.log(question);
 
     if (question == null) return null;
 
@@ -54,6 +63,39 @@ export default (props: Props) => {
                                 title="Fråga"
                                 rows="4"
                             />
+                            <div className="uk-form-row">
+                                <label className="uk-form-label">
+                                    Mode
+                                </label>
+                                <div className="uk-form-controls">
+                                    <div
+                                        data-uk-dropdown="{mode:'click'}"
+                                        className="uk-button-dropdown"
+                                    >
+                                        <button className="uk-button uk-button">
+                                            {mode_names[question.mode]}
+                                            <i className="uk-icon-angle-down" />
+                                        </button>
+                                        <div className="uk-dropdown uk-dropdown-scrollable uk-dropdown-small">
+                                            <ul className="uk-nav uk-nav-dropdown">
+                                                {modes.map((mode) => (
+                                                    <li key={mode}>
+                                                        <a
+                                                            onClick={(e) => {
+                                                                question.mode = mode;
+                                                                props.onChanged();
+                                                            }}
+                                                            className="uk-dropdown-close"
+                                                        >
+                                                            {mode_names[mode]}
+                                                        </a>
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                             <Textarea
                                 model={question}
                                 name="answer_description"

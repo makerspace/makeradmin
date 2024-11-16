@@ -4,6 +4,7 @@ export default class QuizQuestion extends Base {
     id: number | null;
     quiz_id: number;
     question: string;
+    mode: "single_choice" | "multiple_choice";
     answer_description: string;
     created_at: string;
     updated_at: string;
@@ -16,6 +17,7 @@ export default class QuizQuestion extends Base {
             question: "",
             answer_description: "",
             quiz_id: -1,
+            mode: "single_choice",
         },
     };
 

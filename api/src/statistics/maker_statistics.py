@@ -7,11 +7,73 @@ from typing import Any, Dict, List, Optional, Tuple
 
 from membership.membership import get_members_and_membership, get_membership_summaries
 from membership.models import Member, Span
+from multiaccessy.models import PhysicalAccessEntry
 from service.db import db_session
 from service.logging import logger
 from shop.entities import category_entity, product_entity
 from shop.models import Product, ProductCategory, Transaction, TransactionContent
 from sqlalchemy import func
+
+
+def is_still_here() -> None:
+    entries = (
+        db_session.query(PhysicalAccessEntry)
+        .filter(PhysicalAccessEntry.member_id != None)
+        .order_by(PhysicalAccessEntry.member_id, PhysicalAccessEntry.invoked_at)
+        .all()
+    )
+
+    # Group by member_id
+    entries_by_member = itertools.groupby(entries, key=lambda x: x.member_id)
+
+    max_hours = 6
+    votes_yes = [0] * (60 * max_hours)
+    votes_no = [0] * (60 * max_hours)
+    total = 0
+
+    for member_id, member_entries_it in entries_by_member:
+        member_entries = list(member_entries_it)
+        # print([v.invoked_at for v in member_entries])
+        print("Member ID", member_id)
+
+        for i in range(0, len(member_entries)):
+            entry = member_entries[i]
+            next_entry = member_entries[i + 1] if i + 1 < len(member_entries) else None
+
+            delta = None
+            if next_entry is not None:
+                delta = next_entry.invoked_at - entry.invoked_at
+                assert delta.total_seconds() >= 0
+
+                if delta.total_seconds() < 60:
+                    continue
+
+            if delta is None or delta > timedelta(hours=6):
+                delta = None
+
+            print("\t", delta)
+
+            if delta is not None:
+                minutes = int(delta.total_seconds() / 60)
+                votes_yes[0] += 1
+                votes_yes[minutes] -= 1
+                # votes_no[minutes] += 1
+                # votes_no[-1] -= 1
+            else:
+                votes_no[0] += 1
+                votes_no[-1] -= 1
+
+            total += 1
+
+    for i in range(1, len(votes_yes)):
+        votes_yes[i] += votes_yes[i - 1]
+        votes_no[i] += votes_no[i - 1]
+
+    normalized_votes = [
+        votes_yes[i] / (votes_yes[i] + votes_no[i]) if votes_yes[i] > 0 else 0 for i in range(0, len(votes_yes))
+    ]
+
+    print(normalized_votes)
 
 
 def spans_by_date(span_type: str) -> List[Tuple[str, int]]:
