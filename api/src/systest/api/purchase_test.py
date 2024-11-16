@@ -7,7 +7,7 @@ from test_aid.systest_base import VALID_3DS_CARD_NO, VALID_NON_3DS_CARD_NO, ApiS
 logger = getLogger("makeradmin")
 
 
-class Test(ApiShopTestMixin, ApiTest):
+class PurchaseTest(ApiShopTestMixin, ApiTest):
     products = [
         dict(price=12.3, unit="st", smallest_multiple=1),
         dict(price=1.2, unit="mm", smallest_multiple=100),

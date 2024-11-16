@@ -104,7 +104,7 @@ def calc_subscription_start_time(
         earliest_start_at = datetime.now(timezone.utc)
     assert earliest_start_at.tzinfo is not None, "earliest_start_at must be timezone aware"
 
-    memberships = get_membership_summary(member_id, earliest_start_at)
+    memberships = get_membership_summary(member_id, earliest_start_at.date())
     was_already_member = False
     if memberships.membership_active and subscription_type == SubscriptionType.MEMBERSHIP:
         assert memberships.membership_end is not None
