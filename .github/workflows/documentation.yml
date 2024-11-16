@@ -1,4 +1,4 @@
-name: Publish docs via GitHub Pages
+name: Documentation
 on:
   push:
     branches: [main]
@@ -7,7 +7,7 @@ on:
 
 jobs:
   build:
-    name: Deploy docs
+    name: Build documentation
     runs-on: ubuntu-latest
     steps:
       - name: Checkout branch
@@ -30,6 +30,7 @@ jobs:
           path: site/
   deploy:
     if: ${{ github.event_name == 'push' }}
+    name: Publish the documentation
     # Add a dependency to the build job
     needs: build
 
