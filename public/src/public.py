@@ -157,6 +157,8 @@ def context():
     return dict(
         STATIC=app.static_url_path,
         meta=dict(
-            api_base_url=api_base_url, stripe_public_key=os.environ["STRIPE_PUBLIC_KEY"], host_public=host_public
+            api_base_url=api_base_url,
+            stripe_public_key=os.environ.get("STRIPE_PUBLIC_KEY", ""),
+            host_public=host_public,
         ),
     )

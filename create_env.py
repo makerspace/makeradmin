@@ -18,20 +18,21 @@ config = {
     "MAILGUN_KEY": "",
     "MAILGUN_FROM": "MakerAdmin <excited@samples.mailgun.org>",
     "MAILGUN_TO_OVERRIDE": "",
-    "HOST_BACKEND": "http://localhost:8010",
-    "HOST_FRONTEND": "http://localhost:8009",
-    "HOST_PUBLIC": "http://localhost:8011",
+    "PROTOCOL": "http",
+    "HOST_BACKEND": "localhost:8010",
+    "HOST_FRONTEND": "localhost:8009",
+    "HOST_PUBLIC": "localhost:8011",
     "ADMIN_EMAIL": "",
     "STRIPE_PRIVATE_KEY": os.environ.get("STRIPE_PRIVATE_KEY", ""),
     "STRIPE_PUBLIC_KEY": os.environ.get("STRIPE_PUBLIC_KEY", ""),
     "STRIPE_SIGNING_SECRET": "",
     "STRIPE_CURRENCY": "sek",
+    "ACCESSY_URL": "https://api.accessy.se",
     "ACCESSY_CLIENT_ID": "",
     "ACCESSY_CLIENT_SECRET": "",
     "ACCESSY_LABACCESS_GROUP": "",
     "ACCESSY_SPECIAL_LABACCESS_GROUP": "",
     "ACCESSY_DO_MODIFY": "false",
-    "CORS_ALLOWED_ORIGINS": "http://localhost:8009,http://localhost:8011,http://localhost:8080",
     "FIRSTRUN_AUTO_ADMIN_FIRSTNAME": "",
     "FIRSTRUN_AUTO_ADMIN_LASTNAME": "",
     "FIRSTRUN_AUTO_ADMIN_EMAIL": "",
@@ -40,9 +41,44 @@ config = {
     "ELKS46_API_KEY": "",
 }
 
+whitelist = ["COMPOSE_PROJECT_NAME"]
+
+YELLOW = "\u001b[33m"
+GREEN = "\u001b[32m"
+RED = "\u001b[31m"
+BLUE = "\u001b[34m"
+RESET = "\u001b[0m"
+
 if not args.force and os.path.isfile(".env"):
     print(".env file already exists, touching")
-    os.utime(".env", None)
+
+    with open(".env", "r") as f:
+        data = f.read()
+
+    items = [tuple(l.split("=")) if "=" in l else ("", l.strip()) for l in data.strip().splitlines()]
+    for key, value in items:
+        # If the key=value pair is not:
+        # - a known key
+        # - or an empty line
+        # - or commented out and the default value is either empty or identical to the commented out value
+        # then warn about an unknown key
+        if (
+            key != ""
+            and key not in whitelist
+            and key not in config
+            and not (key.replace("#", "") in config and config[key.replace("#", "")] in ["", value])
+        ):
+            print(
+                f"{YELLOW}Unknown key {key}='{value}' in your .env file. You should be able to safely remove it.{RESET}"
+            )
+
+    for key, value in config.items():
+        if not any(k == key or k == f"#{key}" for (k, v) in items):
+            print(f"{GREEN}Adding new key {key}='{value}' to your .env file.{RESET}")
+            items.append((key, value))
+
+    with open(".env", "w") as f:
+        f.write("\n".join(f"{key}={value}" if key != "" else value for (key, value) in items))
 else:
     with open(".env", "w") as f:
         f.write("\n".join(key + "=" + value for (key, value) in config.items()))

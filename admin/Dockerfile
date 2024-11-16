@@ -1,7 +1,7 @@
 FROM node@sha256:8ec543d4795e2e85af924a24f8acb039792ae9fe8a42ad5b4bf4c277ab34b62e
 
 RUN apk add --no-cache tzdata
-ENV TZ Europe/Stockholm
+ENV TZ=Europe/Stockholm
 
 RUN mkdir -p /work/src && mkdir -p /work/dist/js
 

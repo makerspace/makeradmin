@@ -13,7 +13,6 @@ site_dir: ../site
 docs_dir: src
 nav:
   - Home: index.md
-  - User Guide:
-      - Getting Started: user-guide/getting-started.md
   - Developer Guide:
       - Getting Started: dev-guide/getting-started.md
+      - Running tests: dev-guide/run-tests.md
