@@ -33,9 +33,7 @@ def transaction_fees_to_transaction_with_accounting(
 ) -> List[TransactionWithAccounting]:
     amounts: List[TransactionWithAccounting] = []
     account = TransactionAccount(account="6573", description="6573", id=0, display_order=1)
-    cost_center = TransactionCostCenter(
-        cost_center="Föreningsgemensamt", description="Föreningsgemensamt", id=0, display_order=1
-    )
+    cost_center = TransactionCostCenter(cost_center="FG", description="Föreningsgemensamt", id=0, display_order=1)
     for payment in completed_payments.values():
         amounts.append(
             TransactionWithAccounting(

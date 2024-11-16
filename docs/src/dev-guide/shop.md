@@ -1,6 +1,6 @@
 # Stripe
 
-For the general introduction to how we use Stripe, see the main [readme](../../../README.md)
+We use stripe for the payments.
 
 ## Makeradmin stripe relationships
 
