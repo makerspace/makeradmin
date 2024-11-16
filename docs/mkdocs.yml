@@ -2,13 +2,54 @@ site_name: Makeradmin
 site_url: https://docs.makeradmin.se
 repo_url: https://github.com/makerspace/makeradmin
 site_description: Stockholm Makerspace member administration and store
+edit_uri: edit/main/docs/src/
 theme:
-  name: readthedocs
+  name: material
   locale: en
+  features:
+    - content.action.edit
+  icon:
+    repo: fontawesome/brands/github
+    edit: material/pencil
+    view: material/eye
+    admonition:
+      note: octicons/tag-16
+      abstract: octicons/checklist-16
+      info: octicons/info-16
+      tip: octicons/squirrel-16
+      success: octicons/check-16
+      question: octicons/question-16
+      warning: octicons/alert-16
+      failure: octicons/x-circle-16
+      danger: octicons/zap-16
+      bug: octicons/bug-16
+      example: octicons/beaker-16
+      quote: octicons/quote-16
+  palette:
+    # Palette toggle for automatic mode
+    - media: "(prefers-color-scheme)"
+      toggle:
+        icon: material/brightness-auto
+        name: Switch to light mode
+    # Palette toggle for light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    # Palette toggle for dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      toggle:
+        icon: material/brightness-4
+        name: Switch to system preference
 markdown_extensions:
   - toc:
       permalink: true
       separator: "-"
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
 site_dir: ../site
 docs_dir: src
 nav:
