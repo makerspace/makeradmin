@@ -2,6 +2,9 @@ name: Publish docs via GitHub Pages
 on:
   push:
     branches: [main]
+  pull_request:
+    types: [synchronize, opened]
+
 jobs:
   build:
     name: Deploy docs
@@ -26,6 +29,7 @@ jobs:
         with:
           path: site/
   deploy:
+    if: ${{ github.event_name == 'push' }}
     # Add a dependency to the build job
     needs: build
 
