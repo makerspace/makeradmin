@@ -1,10 +1,13 @@
-name: Publish docs via GitHub Pages
+name: Documentation
 on:
   push:
     branches: [main]
+  pull_request:
+    types: [synchronize, opened]
+
 jobs:
   build:
-    name: Deploy docs
+    name: Build documentation
     runs-on: ubuntu-latest
     steps:
       - name: Checkout branch
@@ -16,7 +19,7 @@ jobs:
           python-version: 3.12.6
           cache: "pip"
 
-      - run: pip install mkdocs==1.6.1
+      - run: pip install -r docs/requirements.txt
       - name: Build docs
         shell: sh
         run: mkdocs build -f ./docs/mkdocs.yml
@@ -25,13 +28,14 @@ jobs:
         uses: actions/upload-pages-artifact@v3
         with:
           path: site/
+
   deploy:
-    # Add a dependency to the build job
+    if: ${{ github.event_name == 'push' }}
+    name: Publish the documentation
     needs: build
 
-    # Grant GITHUB_TOKEN the permissions required to make a Pages deployment
     permissions:
-      pages: write # to deploy to Pages
+      pages: write
       id-token: write # to verify the deployment originates from an appropriate source
 
     # Deploy to the github-pages environment
@@ -39,9 +43,8 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
 
-    # Specify runner + deployment step
     runs-on: ubuntu-latest
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4 # or specific "vX.X.X" version tag for this action
+        uses: actions/deploy-pages@v4
