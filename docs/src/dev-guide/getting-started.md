@@ -34,11 +34,13 @@ sudo apt-get install npm
 
 Clone this git repository to a suitable place on your computer / server
 
-> Start by initializing and activating a [virtual python environment](https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/) in the cloned folder.
-> This makes sure that the packages used for Makeradmin are isolated into its own "environment" (i.e. in the local directory), and will not interfere with packages already installed.
->
->     $ python3 -m venv .venv
->     $ source .venv/bin/activate
+!!! tip "Tip: Use a Python virtual environment"
+
+    Start by initializing and activating a [virtual python environment](https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/) in the cloned folder.
+    This makes sure that the packages used for Makeradmin are isolated into its own "environment" (i.e. in the local directory), and will not interfere with packages already installed.
+
+        $ python3 -m venv .venv
+        $ source .venv/bin/activate
 
 Run the firstrun script
 
