@@ -6,6 +6,6 @@
 </script>
 <script
     defer
-    data-domain="{{ meta.host_public }}"
+    data-domain="{{ meta.host_public.replace('https://', '').replace('http://', '') }}"
     src="https://plausible.makerspace.se/js/script.tagged-events.js"
 ></script>

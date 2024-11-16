@@ -39,7 +39,7 @@ function update_all_refs_to_latest_digest() {
     image="$1"
     tag="$2"
     update_digest_in_files "$image" "$tag" \
-        admin/Dockerfile api/Dockerfile public/Dockerfile docker-compose.yml
+        admin/Dockerfile api/Dockerfile docs/Dockerfile public/Dockerfile docker-compose.yml
 }
 
 update_all_refs_to_latest_digest python 3.11-alpine

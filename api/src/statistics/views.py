@@ -1,6 +1,7 @@
 from datetime import date
 from statistics import service
 from statistics.maker_statistics import (
+    RetentionGraph,
     lasertime,
     membership_by_date_statistics,
     membership_number_months2_default,
@@ -38,5 +39,5 @@ def shop_route():
 
 
 @service.route("/retention_graph", method=GET, permission=PUBLIC)
-def retention_graph_route():
-    return retention_graph(date(2016, 1, 1), date(2023, 12, 31))
+def retention_graph_route() -> RetentionGraph:
+    return retention_graph(date(2020, 1, 1), date(2030, 12, 31))

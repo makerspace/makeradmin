@@ -1,0 +1,18 @@
+site_name: Makeradmin
+site_url: https://docs.makeradmin.se
+repo_url: https://github.com/makerspace/makeradmin
+site_description: Stockholm Makerspace member administration and store
+theme:
+  name: readthedocs
+  locale: en
+markdown_extensions:
+  - toc:
+      permalink: true
+      separator: "-"
+site_dir: ../site
+docs_dir: src
+nav:
+  - Home: index.md
+  - Developer Guide:
+      - Getting Started: dev-guide/getting-started.md
+      - Running tests: dev-guide/run-tests.md

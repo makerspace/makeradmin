@@ -1,7 +1,7 @@
 name: Publish docs via GitHub Pages
 on:
   push:
-    branches: [master, main]
+    branches: [main]
 jobs:
   build:
     name: Deploy docs
@@ -19,7 +19,7 @@ jobs:
       - run: pip install mkdocs==1.6.1
       - name: Build docs
         shell: sh
-        run: mkdocs build
+        run: mkdocs build -f ./docs/mkdocs.yml
 
       - name: Upload Artifact
         uses: actions/upload-pages-artifact@v3
