@@ -9,6 +9,8 @@ from membership.models import Box, Group, Key, Member, Permission, PhoneNumberCh
 from messages.models import Message
 from service.db import db_session
 from shop.models import (
+    Discount,
+    DiscountProductMapping,
     Product,
     ProductAccountsCostCenters,
     ProductAction,
@@ -269,3 +271,19 @@ class DbFactory:
         db_session.add(self.product_account_cost_center)
         db_session.commit()
         return self.product_account_cost_center
+
+    def create_discount(self, **kwargs) -> Discount:
+        assert self.obj is not None
+        obj = self.obj.create_discount(**kwargs)
+        self.discount = Discount(**obj)
+        db_session.add(self.discount)
+        db_session.commit()
+        return self.discount
+
+    def create_discount_product_mapping(self, **kwargs) -> DiscountProductMapping:
+        assert self.obj is not None
+        obj = self.obj.create_discount_product_mapping(**kwargs)
+        self.discount_product_map = DiscountProductMapping(**obj)
+        db_session.add(self.discount_product_map)
+        db_session.commit()
+        return self.discount_product_map

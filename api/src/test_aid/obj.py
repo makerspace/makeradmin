@@ -10,6 +10,8 @@ from faker import Faker
 from membership.models import Member, Span
 from messages.models import Message
 from shop.models import (
+    Discount,
+    DiscountProductMapping,
     ProductAccountsCostCenters,
     ProductAction,
     Transaction,
@@ -191,7 +193,7 @@ class ObjFactory:
     def create_transaction_account(self, **kwargs) -> TransactionAccount:
         obj = dict(
             account=f"account-{random_str(5)}",
-            description=f"desc-{random_str(12)}",
+            description=self.fake.bs(),
             display_order=randint(int(1e8), int(9e8)),
         )
         obj.update(kwargs)
@@ -201,7 +203,7 @@ class ObjFactory:
     def create_transaction_cost_center(self, **kwargs) -> TransactionCostCenter:
         obj = dict(
             cost_center=f"cost-center-{random_str(5)}",
-            description=f"desc-{random_str(12)}",
+            description=self.fake.bs(),
             display_order=randint(int(1e8), int(9e8)),
         )
         obj.update(kwargs)
@@ -223,6 +225,32 @@ class ObjFactory:
         obj.update(**kwargs)
         self.product_account_cost_center = obj
         return self.product_account_cost_center
+
+    def create_discount(self, **kwargs) -> Discount:
+        obj = dict(
+            name=f"discount-{random_str(12)}",
+            description=self.fake.bs(),
+            percent_off=50,
+            duration=Discount.REPEATING,
+            duration_in_months=3,
+            stripe_coupon_id=None,
+            display_order=randint(int(1e8), int(9e8)),
+        )
+        obj.update(kwargs)
+        self.discount = obj
+        return self.discount
+
+    def create_discount_product_mapping(self, **kwargs) -> DiscountProductMapping:
+        product_id = kwargs.pop("product_id", None) or (self.product and self.product["id"])
+        discount_id = kwargs.pop("discount_id", None) or (self.discount and self.discount["id"])
+
+        obj = dict(
+            discount_id=discount_id,
+            product_id=product_id,
+        )
+        obj.update(**kwargs)
+        self.discount_product_map = obj
+        return self.discount_product_map
 
 
 def random_phone_number() -> str:

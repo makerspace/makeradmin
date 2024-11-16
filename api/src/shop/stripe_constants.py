@@ -26,6 +26,7 @@ class MakerspaceMetadataKeys(Enum):
     PENDING_MEMBER = "makerspace_pending_member"
     PRICE_LEVEL = "makerspace_price_level"
     PRODUCT_ID = "makerspace_product_id"
+    DISCOUNT_ID = "makerspace_discount_id"
 
     # Used in the webshop for special products
     SPECIAL_PRODUCT_ID = "special_product_id"
