@@ -19,7 +19,7 @@ jobs:
           python-version: 3.12.6
           cache: "pip"
 
-      - run: pip install mkdocs==1.6.1
+      - run: pip install -r docs/requirements.txt
       - name: Build docs
         shell: sh
         run: mkdocs build -f ./docs/mkdocs.yml
