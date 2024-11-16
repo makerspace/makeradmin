@@ -98,7 +98,7 @@ def calc_start_ts(current_end_date: date, now: datetime) -> datetime:
 def calc_subscription_start_time(
     member_id: int,
     subscription_type: SubscriptionType,
-    earliest_start_at: Optional[datetime] = None,
+    earliest_start_at: Optional[datetime],
 ) -> Tuple[bool, datetime]:
     if earliest_start_at is None:
         earliest_start_at = datetime.now(timezone.utc)
