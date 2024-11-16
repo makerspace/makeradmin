@@ -54,7 +54,7 @@ class ExportTest(TestCase):
         for i in range(num_payments):
             self.assertEqual(transaction_fees[i].amount, true_fees[i])
             assert transaction_fees[i].account.account == "6573"
-            assert transaction_fees[i].cost_center.cost_center == "Föreningsgemensamt"
+            assert transaction_fees[i].cost_center.cost_center == "FG"
 
 
 class AccountingExportWithStripeMockTest(FlaskTestBase):
@@ -192,7 +192,7 @@ class AccountingExportWithStripeMockTest(FlaskTestBase):
             assert verification_row.strip() == "{"
 
             transaction_row = sie_rows.pop(0)
-            assert transaction_row.startswith(f'#TRANS 6573 {{1 "Föreningsgemensamt"}} 3.00 2023{i:02d}01')
+            assert transaction_row.startswith(f'#TRANS 6573 {{1 "FG"}} 3.00 2023{i:02d}01')
 
             for j in range(4):
                 transaction_row = sie_rows.pop(0)
