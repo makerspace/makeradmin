@@ -72,11 +72,14 @@ def update_docker_file(prefix: str, path: Path, skip_images: list[str]):
         if tag is None:
             continue
 
+        if sha is None:
+            sha_str = "None"
+
         image = get_latest_docker_image(image_name, tag)
 
         if sha != image.sha:
             new_line = f"{indent}{prefix} {docker_image_with_digest_specifier(image)}{eol}"
-            print(f"{path}:[{i+1}] updating {image.name} sha {sha[:5]}->{image.sha[:5]}")
+            print(f"{path}:[{i+1}] updating {image.name} sha {sha_str}->{image.sha[:5]}")
             print(f"{ANSI_RED}- {line}{ANSI_RESET}")
             print(f"{ANSI_GREEN}+ {new_line}{ANSI_RESET}")
             lines[i] = new_line
