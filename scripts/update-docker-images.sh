@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+repo_root_path="$(realpath -e -- "$( dirname -- "${BASH_SOURCE[0]}"; )/..")";
+
 function get_latest_digest() {
     image_name="$1"
     tag="$2"
@@ -31,7 +33,7 @@ function update_digest_in_files() {
 
     files="$*"
     for file in $files; do
-        update_digest_in_file "$image" "$digest" "$file"
+        update_digest_in_file "$image" "$digest" "${repo_root_path}/$file"
     done
 }
 
