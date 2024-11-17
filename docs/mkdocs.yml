@@ -8,6 +8,7 @@ theme:
   locale: en
   features:
     - content.action.edit
+    - navigation.footer
   icon:
     repo: fontawesome/brands/github
     edit: material/pencil
