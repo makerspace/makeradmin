@@ -46,7 +46,6 @@ init-npm:
 
 init-pip:
 	python3 -m pip install --upgrade -r requirements.txt
-	pre-commit install --install-hooks
 
 init: init-pip init-npm
 
