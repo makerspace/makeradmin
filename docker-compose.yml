@@ -1,6 +1,6 @@
 services:
   db2:
-    image: mysql@sha256:ea68e51ffe9b96fef6076f1218af11301aeaf13c6201e0ec9aaef5791d5ddc5d
+    image: mysql:8.0.33@sha256:ea68e51ffe9b96fef6076f1218af11301aeaf13c6201e0ec9aaef5791d5ddc5d
     # The lumen library seems to use an older mysql client which is not able to connect if mysql uses the newer caching_sha2_password authentication plugin.
     # Therefore we need to override the mysql starting command to set a config option to use the older password authentication plugin.
     # We need to call the entrypoint script manually because that one will also initialize the database, if one doesn't already exist.
