@@ -45,15 +45,18 @@ def get_latest_docker_image(image_name: str, tag: str) -> DockerImage:
     raise RuntimeError(f"Could not find the digest for Docker image {image_name}:{tag}")
 
 
-def update_dockerfile(path: Path, skip_images: list[str]):
+def update_docker_file(prefix: str, path: Path, skip_images: list[str]):
     lines = path.read_text().splitlines(keepends=False)
     has_changes = False
+    regex = re.compile(
+        r"^(?P<indent> *)"
+        + prefix
+        + r" +(?P<image>[^ :@]+):(?P<tag>[^@]*)(?P<digest>@sha256:(?P<sha>[a-f0-9]+))?(?P<eol>.*)$"
+    )
 
     for i, line in enumerate(lines):
-        m = re.match(
-            r"^(?P<indent> *)FROM +(?P<image>[^ :@]+):(?P<tag>[^@]*)(?P<digest>@sha256:(?P<sha>[a-f0-9]+))?(?P<eol>.*)$",
-            line,
-        )
+        m = regex.match(line)
+
         if not m:
             continue
 
@@ -72,7 +75,7 @@ def update_dockerfile(path: Path, skip_images: list[str]):
         image = get_latest_docker_image(image_name, tag)
 
         if sha != image.sha:
-            new_line = f"{indent}FROM {docker_image_with_digest_specifier(image)}{eol}"
+            new_line = f"{indent}{prefix} {docker_image_with_digest_specifier(image)}{eol}"
             print(f"{path}:[{i+1}] updating {image.name} sha {sha[:5]}->{image.sha[:5]}")
             print(f"{ANSI_RED}- {line}{ANSI_RESET}")
             print(f"{ANSI_GREEN}+ {new_line}{ANSI_RESET}")
@@ -83,46 +86,14 @@ def update_dockerfile(path: Path, skip_images: list[str]):
         path.write_text("\n".join(lines))
 
     Globals.made_changes |= has_changes
+
+
+def update_dockerfile(path: Path, skip_images: list[str]):
+    update_docker_file("FROM", path, skip_images)
 
 
 def update_docker_compose_file(path: Path, skip_images: list[str]):
-    lines = path.read_text().splitlines(keepends=False)
-    has_changes = False
-
-    for i, line in enumerate(lines):
-        m = re.match(
-            r"^(?P<indent> *)image: +(?P<image>[^ :@]+):(?P<tag>[^@]*)(?P<digest>@sha256:(?P<sha>[a-f0-9]+))?(?P<eol>.*)$",
-            line,
-        )
-        if not m:
-            continue
-
-        indent = m.group("indent")
-        image_name = m.group("image")
-        tag = m.group("tag")
-        sha = m.group("sha")
-        eol = m.group("eol")
-
-        if image_name in skip_images:
-            continue
-
-        if tag is None:
-            continue
-
-        image = get_latest_docker_image(image_name, tag)
-
-        if sha != image.sha:
-            new_line = f"{indent}image: {docker_image_with_digest_specifier(image)}{eol}"
-            print(f"{path}:[{i+1}] updating {image.name} sha {sha[:5]}->{image.sha[:5]}")
-            print(f"{ANSI_RED}- {line}{ANSI_RESET}")
-            print(f"{ANSI_GREEN}+ {new_line}{ANSI_RESET}")
-            lines[i] = new_line
-            has_changes = True
-
-    if has_changes:
-        path.write_text("\n".join(lines))
-
-    Globals.made_changes |= has_changes
+    update_docker_file("image:", path, skip_images)
 
 
 def main():
