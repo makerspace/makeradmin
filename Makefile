@@ -50,7 +50,7 @@ init-pip:
 init: init-pip init-npm
 
 .env:
-	python3 create_env.py
+	python3 scripts/create_env.py
 
 stop:
 	$(COMPOSE) down
