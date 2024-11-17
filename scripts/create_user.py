@@ -10,8 +10,8 @@ from dotenv import dotenv_values
 env = dotenv_values()
 
 # Ugly
-sys.path.append(os.path.join(os.path.dirname(__file__), "backend/src"))
-sys.path.append(os.path.join(os.path.dirname(__file__), "api/src"))
+sys.path.append(os.path.join(os.path.dirname(__file__), "../backend/src"))
+sys.path.append(os.path.join(os.path.dirname(__file__), "../api/src"))
 
 from basic_types.enums import PriceLevel
 

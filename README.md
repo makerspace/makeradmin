@@ -80,7 +80,7 @@ make dev
 This can be done from the web UI, but it can be convenient to do it from the commandline too
 
 ```
-python3 create_user.py --first-name "Maker" --last-name "Makersson" --email "maker@example.com" --type admin
+python3 scripts/create_user.py --first-name "Maker" --last-name "Makersson" --email "maker@example.com" --type admin
 ```
 
 Before running the command above you might have to run the commande below to install all dependencies.
