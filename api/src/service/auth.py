@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 import membership.member_auth
 from core.models import AccessToken
@@ -37,7 +37,7 @@ def authenticate_request() -> None:
     if not access_token:
         raise Unauthorized("Unauthorized, invalid access token.", fields="bearer", what=BAD_VALUE)
 
-    now = datetime.utcnow()
+    now = datetime.now(timezone.utc)
     if access_token.expires < now:
         db_session.query(AccessToken).filter(AccessToken.expires < now).delete()
         raise Unauthorized("Unauthorized, expired access token.", fields="bearer", what=EXPIRED)
@@ -60,7 +60,7 @@ def authenticate_request() -> None:
 
     access_token.ip = request.remote_addr
     access_token.browser = request.user_agent.string
-    access_token.expires = datetime.utcnow() + timedelta(seconds=access_token.lifetime)
+    access_token.expires = datetime.now(timezone.utc) + timedelta(seconds=access_token.lifetime)
 
     g.user_id = access_token.user_id
     g.session_token = access_token.access_token

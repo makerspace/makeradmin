@@ -1,5 +1,5 @@
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import List
 
 from flask import Request as FlaskRequest
@@ -20,7 +20,7 @@ class TrafficLogger:
     service_traffic: List[object]
 
     def __init__(self) -> None:
-        self.create_time = datetime.utcnow().isoformat() + "Z"
+        self.create_time = datetime.now(timezone.utc).isoformat() + "Z"
         self.service_traffic = list()
 
     def log_service_traffic(self, traffic: Response) -> None:
@@ -47,7 +47,7 @@ class TrafficLogger:
             "query": session_request.args,
         }
         session_response_data = {
-            "date": datetime.utcnow().isoformat() + "Z",
+            "date": datetime.now(timezone.utc).isoformat() + "Z",
             "status": session_response.status_code,
             "headers": dict(session_response.headers),
         }

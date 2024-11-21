@@ -1,6 +1,6 @@
 import time
 from copy import copy
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, timedelta, timezone
 from unittest import TestCase
 
 from flask import Flask
@@ -27,7 +27,7 @@ class TestBase(TestCase):
         super().setUpClass()
         self.obj = ObjFactory(self)
 
-        self.now = datetime.utcnow()
+        self.now = datetime.now(timezone.utc)
         self.today = self.now.date()
 
     @classinstancemethod
