@@ -1,14 +1,14 @@
-import React from "react";
-import { browserHistory } from "../browser_history";
+import React, { useEffect } from "react";
 import auth from "../auth";
+import { browserHistory } from "../browser_history";
 
-export default class Logout extends React.Component {
-    componentDidMount() {
+const Logout = () => {
+    useEffect(() => {
         auth.logout();
         browserHistory.push("/");
-    }
+    }, []);
 
-    render() {
-        return <p>You are now logged out</p>;
-    }
-}
+    return <p>You are now logged out</p>;
+};
+
+export default Logout;
