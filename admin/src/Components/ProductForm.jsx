@@ -29,15 +29,15 @@ const ProductForm = ({ product, onDelete, onSave }) => {
 
     useEffect(() => {
         const handleProductChange = () => {
-            const actions = product.actions;
-            const availableActionTypes = filterAvailableActions(actions);
+            const newActions = product.actions;
+            const newAvailableActionTypes = filterAvailableActions(newActions);
             const selectedActionType = filterSelectedActionType(
                 selectedActionType,
-                availableActionTypes,
+                newAvailableActionTypes,
             );
 
-            setActions(actions);
-            setAvailableActionTypes(availableActionTypes);
+            setActions(newActions);
+            setAvailableActionTypes(newAvailableActionTypes);
             setSelectedActionType(selectedActionType);
             setSaveDisabled(!product.canSave());
         };
