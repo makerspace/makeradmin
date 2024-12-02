@@ -1,12 +1,12 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import React, { useCallback, useState } from "react";
+import { Link, useParams } from "react-router-dom";
 import { Async } from "react-select";
-import Collection from "../Models/Collection";
-import Member from "../Models/Member";
+import * as _ from "underscore";
 import CollectionTable from "../Components/CollectionTable";
 import Date from "../Components/DateShow";
 import { get } from "../gateway";
-import * as _ from "underscore";
+import Collection from "../Models/Collection";
+import Member from "../Models/Member";
 
 const Row = (collection) => (props) => {
     const { item } = props;
@@ -35,18 +35,21 @@ const Row = (collection) => (props) => {
     );
 };
 
-class GroupBoxMembers extends React.Component {
-    constructor(props) {
-        super(props);
-        this.collection = new Collection({
-            type: Member,
-            url: `/membership/group/${props.match.params.group_id}/members`,
-            idListName: "members",
-        });
-        this.state = { selectedOption: null };
-    }
+export default function GroupBoxMembers() {
+    const { group_id } = useParams();
+    const [selectedOption, setSelectedOption] = useState(null);
 
-    loadOptions(inputValue, callback) {
+    const collection = React.useMemo(
+        () =>
+            new Collection({
+                type: Member,
+                url: `/membership/group/${group_id}/members`,
+                idListName: "members",
+            }),
+        [group_id],
+    );
+
+    const loadOptions = useCallback((inputValue, callback) => {
         get({
             url: "/membership/member",
             params: {
@@ -55,72 +58,69 @@ class GroupBoxMembers extends React.Component {
                 sort_order: "asc",
             },
         }).then((data) => callback(data.data));
-    }
+    }, []);
 
-    selectOption(member) {
-        this.setState({ selectedOption: member });
+    const selectOption = useCallback(
+        (member) => {
+            setSelectedOption(member);
 
-        if (_.isEmpty(member)) {
-            return;
-        }
+            if (_.isEmpty(member)) {
+                return;
+            }
 
-        this.collection
-            .add(new Member(member))
-            .then(this.setState({ selectedOption: null }));
-    }
+            collection
+                .add(new Member(member))
+                .then(() => setSelectedOption(null));
+        },
+        [collection],
+    );
 
-    render() {
-        const columns = [
-            { title: "#", sort: "member_id" },
-            { title: "Förnamn", sort: "firstname" },
-            { title: "Efternamn", sort: "lastname" },
-            { title: "E-post", sort: "email" },
-            { title: "Blev medlem", sort: "created_at" },
-            { title: "" },
-        ];
+    const columns = [
+        { title: "#", sort: "member_id" },
+        { title: "Förnamn", sort: "firstname" },
+        { title: "Efternamn", sort: "lastname" },
+        { title: "E-post", sort: "email" },
+        { title: "Blev medlem", sort: "created_at" },
+        { title: "" },
+    ];
 
-        const { selectedOption } = this.state;
-
-        return (
-            <div>
-                <div className="uk-margin-top uk-form uk-form-stacked">
-                    <label className="uk-form-label" htmlFor="member">
-                        Lägg till i grupp
-                    </label>
-                    <div className="uk-form-controls">
-                        <Async
-                            name="member"
-                            tabIndex={1}
-                            placeholder="Type to search for member"
-                            value={selectedOption}
-                            getOptionValue={(m) => m.member_id}
-                            getOptionLabel={(m) =>
-                                "#" +
-                                m.member_number +
-                                ": " +
-                                m.firstname +
-                                " " +
-                                (m.lastname || "") +
-                                " <" +
-                                m.email +
-                                ">"
-                            }
-                            loadOptions={(v, c) => this.loadOptions(v, c)}
-                            onChange={(member) => this.selectOption(member)}
-                        />
-                    </div>
-                </div>
-                <div className="uk-margin-top">
-                    <CollectionTable
-                        emptyMessage="Inga medlemmar i grupp"
-                        rowComponent={Row(this.collection)}
-                        collection={this.collection}
-                        columns={columns}
+    return (
+        <div>
+            <div className="uk-margin-top uk-form uk-form-stacked">
+                <label className="uk-form-label" htmlFor="member">
+                    Lägg till i grupp
+                </label>
+                <div className="uk-form-controls">
+                    <Async
+                        name="member"
+                        tabIndex={1}
+                        placeholder="Type to search for member"
+                        value={selectedOption}
+                        getOptionValue={(m) => m.member_id}
+                        getOptionLabel={(m) =>
+                            "#" +
+                            m.member_number +
+                            ": " +
+                            m.firstname +
+                            " " +
+                            (m.lastname || "") +
+                            " <" +
+                            m.email +
+                            ">"
+                        }
+                        loadOptions={loadOptions}
+                        onChange={selectOption}
                     />
                 </div>
             </div>
-        );
-    }
+            <div className="uk-margin-top">
+                <CollectionTable
+                    emptyMessage="Inga medlemmar i grupp"
+                    rowComponent={Row(collection)}
+                    collection={collection}
+                    columns={columns}
+                />
+            </div>
+        </div>
+    );
 }
-
-export default GroupBoxMembers;

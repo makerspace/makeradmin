@@ -1,34 +1,29 @@
 import React from "react";
 
-import GroupForm from "../Components/GroupForm";
 import { browserHistory } from "../browser_history";
+import GroupForm from "../Components/GroupForm";
 import Group from "../Models/Group";
 
-class GroupAdd extends React.Component {
-    constructor(props) {
-        super(props);
-        this.group = new Group();
-    }
+const GroupAdd = () => {
+    const group = new Group();
 
-    render() {
-        return (
-            <div>
-                <h2>Skapa grupp</h2>
-                <GroupForm
-                    group={this.group}
-                    onSave={() =>
-                        this.group
-                            .save()
-                            .then(() =>
-                                browserHistory.replace(
-                                    "/membership/groups/" + this.group.id,
-                                ),
-                            )
-                    }
-                />
-            </div>
-        );
-    }
-}
+    return (
+        <div>
+            <h2>Skapa grupp</h2>
+            <GroupForm
+                group={group}
+                onSave={() =>
+                    group
+                        .save()
+                        .then(() =>
+                            browserHistory.replace(
+                                "/membership/groups/" + group.id,
+                            ),
+                        )
+                }
+            />
+        </div>
+    );
+};
 
 export default GroupAdd;
