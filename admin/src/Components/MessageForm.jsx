@@ -79,10 +79,7 @@ const MessageForm = ({ message, onSave, recipientSelect }) => {
     };
 
     return (
-        <form
-            className="uk-form uk-form-horizontal"
-            onSubmit={handleSubmit}
-        >
+        <form className="uk-form uk-form-horizontal" onSubmit={handleSubmit}>
             {recipientSelect && (
                 <div className="uk-form-row">
                     <label className="uk-form-label" htmlFor="recipient">
