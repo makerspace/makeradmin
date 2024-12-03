@@ -180,7 +180,7 @@ class AccessyUser(DataClassJsonMixin):
     firstName: str
     lastName: str
     msisdn: str
-    uiLanguageCode: str
+    # uiLanguageCode: str # Ignore, since even though Accessy says it is required, it is not always returned by the API.
     application: bool
 
 
