@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React from "react";
 import { Link } from "react-router-dom";
 import CollectionTable from "../Components/CollectionTable";
 import DateTimeShow from "../Components/DateTimeShow";
@@ -22,14 +22,10 @@ const Row = ({ item }) => {
 
 function MemberBoxOrders(props) {
     const member_id = props.match.params.member_id;
-    const collectionRef = useRef(
-        new Collection({
-            type: Order,
-            url: `/webshop/member/${member_id}/transactions`,
-        }),
-    );
-
-    const collection = collectionRef.current;
+    const collection = new Collection({
+        type: Order,
+        url: `/webshop/member/${member_id}/transactions`,
+    });
 
     const columns = [
         { title: "Order" },
