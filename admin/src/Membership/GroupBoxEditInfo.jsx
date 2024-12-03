@@ -1,20 +1,23 @@
-import PropTypes from "prop-types";
-import React from "react";
+import React, { useContext } from "react";
 import { withRouter } from "react-router";
 import GroupForm from "../Components/GroupForm";
+import GroupContext from "../Contexts/GroupContext";
 import { confirmModal } from "../message";
-import Group from "../Models/Group";
 
-const GroupBoxEditInfo = (props, context) => {
+const GroupBoxEditInfo = (props) => {
     const { router } = props;
+    const group = useContext(GroupContext); // Access the group from context
+
+    if (!group) {
+        return <div>Group not found</div>; // Handle missing context gracefully
+    }
 
     return (
         <div className="uk-margin-top">
             <GroupForm
-                group={context.group}
-                onSave={() => context.group.save()}
+                group={group}
+                onSave={() => group.save()}
                 onDelete={() => {
-                    const { group } = context;
                     confirmModal(group.deleteConfirmMessage())
                         .then(() => group.del())
                         .then(() => {
@@ -25,10 +28,6 @@ const GroupBoxEditInfo = (props, context) => {
             />
         </div>
     );
-};
-
-GroupBoxEditInfo.contextTypes = {
-    group: PropTypes.instanceOf(Group),
 };
 
 export default withRouter(GroupBoxEditInfo);
