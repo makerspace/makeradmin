@@ -1,34 +1,24 @@
 import React from "react";
-
-import { browserHistory } from "../browser_history";
+import { useHistory } from "react-router-dom";
 import Product from "../Models/Product";
 import ProductForm from "../Components/ProductForm";
 
-class ProductAdd extends React.Component {
-    constructor(props) {
-        super(props);
-        this.product = new Product();
-    }
+const ProductAdd = () => {
+    const product = new Product();
+    const history = useHistory();
 
-    render() {
-        return (
-            <div>
-                <h2>Skapa produkt</h2>
-                <ProductForm
-                    product={this.product}
-                    onSave={() =>
-                        this.product
-                            .save()
-                            .then(() =>
-                                browserHistory.replace(
-                                    "/sales/product/" + this.product.id,
-                                ),
-                            )
-                    }
-                />
-            </div>
-        );
-    }
-}
+    const handleSave = () => {
+        product.save().then(() => {
+            history.replace(`/sales/product/${product.id}`);
+        });
+    };
+
+    return (
+        <div>
+            <h2>Skapa produkt</h2>
+            <ProductForm product={product} onSave={handleSave} />
+        </div>
+    );
+};
 
 export default ProductAdd;
