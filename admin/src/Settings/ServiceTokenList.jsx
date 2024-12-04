@@ -1,11 +1,10 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Collection from "../Models/Collection";
 import ServiceAccessToken from "../Models/ServiceAccessToken";
 import CollectionTable from "../Components/CollectionTable";
 import { del } from "../gateway";
 
-const Row = (collection) => (props) => {
-    const { item } = props;
+const Row = ({ item, collection }) => {
     return (
         <tr key={item.access_token}>
             <td>
@@ -27,25 +26,25 @@ const Row = (collection) => (props) => {
     );
 };
 
-export default class ServiceTokenList extends React.Component {
-    constructor(props) {
-        super(props);
-        this.collection = new Collection({ type: ServiceAccessToken });
-        this.state = {};
-    }
+const ServiceTokenList = () => {
+    const [collection, setCollection] = useState(new Collection({ type: ServiceAccessToken }));
 
-    render() {
-        return (
-            <CollectionTable
-                collection={this.collection}
-                columns={[
-                    { title: "" },
-                    { title: "Service" },
-                    { title: "Access token" },
-                    { title: "Permissions" },
-                ]}
-                rowComponent={Row(this.collection)}
-            />
-        );
-    }
-}
+    useEffect(() => {
+        collection.fetch();
+    }, [collection]);
+
+    return (
+        <CollectionTable
+            collection={collection}
+            columns={[
+                { title: "" },
+                { title: "Service" },
+                { title: "Access token" },
+                { title: "Permissions" },
+            ]}
+            rowComponent={(props) => <Row {...props} collection={collection} />}
+        />
+    );
+};
+
+export default ServiceTokenList;
