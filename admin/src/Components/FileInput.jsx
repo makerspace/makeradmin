@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 
-const FileInput = (props) => {
-    const [progressbarVisible, setProgressbarVisible] = useState(false);
-    const [progressbarWidth, setProgressbarWidth] = useState(0);
+const FileInput = () => {
+    // const [progressbarVisible, setProgressbarVisible] = useState(false);
+    // const [progressbarWidth, setProgressbarWidth] = useState(0);
     const [filename, setFilename] = useState("");
 
     /*
@@ -125,7 +125,7 @@ const FileInput = (props) => {
                     )}
                 </p>
 
-                {progressbarVisible ? (
+                {/* {progressbarVisible ? (
                     <div>
                         <div id="progressbar" className="uk-progress">
                             <div
@@ -138,7 +138,7 @@ const FileInput = (props) => {
                     </div>
                 ) : (
                     ""
-                )}
+                )} */}
             </div>
         </div>
     );
