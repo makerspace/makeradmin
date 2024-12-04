@@ -1,60 +1,62 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import { useLocation, useHistory } from "react-router-dom";
 
-export default class CollectionNavigation extends React.Component {
-    constructor(props) {
-        super(props);
-        this.onSearch = this.onSearch.bind(this);
-        this.onPageNav = this.onPageNav.bind(this);
+export default function CollectionNavigation({ collection }) {
+    const location = useLocation();
+    const history = useHistory();
+    const params = new URLSearchParams(location.search);
 
-        this.params = new URLSearchParams(this.props.location.search);
-        const search = this.params.get("search") || "";
-        const page = Number(this.params.get("page")) || 1;
-        this.state = { search, page };
-    }
+    const [search, setSearch] = useState(params.get("search") || "");
+    const [page, setPage] = useState(Number(params.get("page")) || 1);
 
-    componentDidMount() {
-        this.unsubscribe = this.collection.subscribe(({ page }) =>
-            this.gotNewData(page),
-        );
-    }
+    useEffect(() => {
+        const unsubscribe = collection.subscribe(({ page }) => {
+            gotNewData(page);
+        });
 
-    componentWillUnmount() {
-        this.unsubscribe();
-    }
+        return () => {
+            unsubscribe();
+        };
+    }, [collection]);
 
-    gotNewData(page) {
+    const gotNewData = (page) => {
         // If the returned result has fewer number of pages, keep the page within bounds
-        let index = this.state.page;
-        if (index && page.last_page < index) {
-            this.onPageNav(page.last_page);
+        if (page.last_page < page) {
+            onPageNav(page.last_page);
         }
-    }
+    };
 
-    setHistory() {
-        if (this.state.search === "") {
-            this.params.delete("search");
+    const setHistory = () => {
+        if (search === "") {
+            params.delete("search");
         } else {
-            this.params.set("search", this.state.search);
+            params.set("search", search);
         }
 
-        if (this.state.page === 1) {
-            this.params.delete("page");
+        if (page === 1) {
+            params.delete("page");
         } else {
-            this.params.set("page", this.state.page);
+            params.set("page", page);
         }
 
-        this.props.history.replace(
-            this.props.location.pathname + "?" + this.params.toString(),
-        );
-    }
+        history.replace(location.pathname + "?" + params.toString());
+    };
 
-    onSearch(term) {
-        this.setState({ search: term }, this.setHistory);
-        this.collection.updateSearch(term);
-    }
+    const onSearch = (term) => {
+        setSearch(term);
+        setHistory();
+        collection.updateSearch(term);
+    };
 
-    onPageNav(index) {
-        this.setState({ page: index }, this.setHistory);
-        this.collection.updatePage(index);
-    }
+    const onPageNav = (index) => {
+        setPage(index);
+        setHistory();
+        collection.updatePage(index);
+    };
+
+    return (
+        <div>
+            {/* Your JSX code for rendering the navigation UI */}
+        </div>
+    );
 }
