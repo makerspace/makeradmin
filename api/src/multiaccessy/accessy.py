@@ -180,7 +180,7 @@ class AccessyUser(DataClassJsonMixin):
     firstName: str
     lastName: str
     msisdn: str
-    uiLanguageCode: str
+    # uiLanguageCode: str # Ignore, since even though Accessy says it is required, it is not always returned by the API.
     application: bool
 
 
@@ -465,7 +465,11 @@ class AccessySession:
 
     def get_user_details(self, user_id: UUID) -> AccessyUser:
         """Get details for user ID."""
-        return AccessyUser.from_dict(self._get_user_details(user_id))
+        json = self._get_user_details(user_id)
+        try:
+            return AccessyUser.from_dict(json)
+        except Exception as e:
+            raise AccessyError(f"Could not get user details for {user_id}. Could not deserialize {json} as an AccessyUser") from e
 
     ################################################
     # Methods that return raw JSON data from API:s
