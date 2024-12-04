@@ -1,35 +1,28 @@
-import React from "react";
+import React, { useState } from "react";
 import MessageForm from "../Components/MessageForm";
 import Message from "../Models/Message";
 import { notifySuccess } from "../message";
-import { withRouter } from "react-router";
+import { useNavigate } from "react-router-dom";
 
-class MessageAdd extends React.Component {
-    constructor(props) {
-        super(props);
-        this.message = new Message();
-    }
+export default function MessageAdd() {
+    const [message] = useState(new Message());
+    const navigate = useNavigate();
 
-    onSend() {
-        const { router } = this.props;
-        this.message.save().then(() => {
-            router.push("/messages");
+    const onSend = () => {
+        message.save().then(() => {
+            navigate("/messages");
             notifySuccess("Ditt meddelande har skickats");
         });
-    }
+    };
 
-    render() {
-        return (
-            <div className="uk-margin-top">
-                <h2>Skapa utskick</h2>
-                <MessageForm
-                    recipientSelect={true}
-                    message={this.message}
-                    onSave={() => this.onSend()}
-                />
-            </div>
-        );
-    }
+    return (
+        <div className="uk-margin-top">
+            <h2>Skapa utskick</h2>
+            <MessageForm
+                recipientSelect={true}
+                message={message}
+                onSave={onSend}
+            />
+        </div>
+    );
 }
-
-export default withRouter(MessageAdd);
