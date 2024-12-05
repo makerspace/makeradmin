@@ -5,6 +5,7 @@ import * as _ from "underscore";
 import CollectionTable from "../Components/CollectionTable";
 import Collection from "../Models/Collection";
 import Group from "../Models/Group";
+import { get } from "../gateway";
 
 const filterOptions = (items, options) => {
     const current = new Set(items.map((i) => i.id));
@@ -27,7 +28,6 @@ function MemberBoxGroups(props) {
     const [selectedOption, setSelectedOption] = useState(null);
 
     useEffect(() => {
-        // eslint-disable-next-line no-undef
         get({ url: "/membership/group" }).then((data) => {
             const updatedOptions = data.data;
             setOptions(updatedOptions);
