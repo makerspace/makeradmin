@@ -1,97 +1,93 @@
 import classNames from "classnames/bind";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import * as _ from "underscore";
 
-export default class TextInput extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            value: null,
-            selected: false,
-            isDirty: false,
+const TextInput = (props) => {
+    const [value, setValue] = useState(null);
+    const [selected, setSelected] = useState(false);
+    const [isDirty, setIsDirty] = useState(false);
+
+    useEffect(() => {
+        const { model, name } = props;
+
+        const handleModelChange = () => {
+            setValue(model[name] === "" ? null : model[name]);
+            setIsDirty(model.isDirty(name));
         };
-    }
 
-    componentDidMount() {
-        const { model, name } = this.props;
-        this.unsubscribe = model.subscribe(() =>
-            this.setState({
-                value: model[name] === "" ? null : model[name],
-                isDirty: model.isDirty(name),
-            }),
-        );
-    }
+        const unsubscribe = model.subscribe(handleModelChange);
+        handleModelChange(); // Initialize state
 
-    componentWillUnmount() {
-        this.unsubscribe();
-    }
+        return () => {
+            unsubscribe();
+        };
+    }, [props.model, props.name]);
 
-    render() {
-        const { value, selected, isDirty } = this.state;
-        const {
-            model,
-            name,
-            title,
-            icon,
-            disabled,
-            placeholder,
-            formrow,
-            tabIndex,
-            type,
-            label,
-            autoComplete,
-        } = this.props;
+    const {
+        model,
+        name,
+        title,
+        icon,
+        disabled,
+        placeholder,
+        formrow,
+        tabIndex,
+        type,
+        label,
+        autoComplete,
+    } = props;
 
-        const classes = classNames(name, {
-            "uk-form-row": formrow,
-            selected: selected,
-            changed: isDirty,
-        });
+    const classes = classNames(name, {
+        "uk-form-row": formrow,
+        selected: selected,
+        changed: isDirty,
+    });
 
-        const input = (
-            <input
-                id={name}
-                name={name}
-                placeholder={placeholder}
-                className="uk-input uk-width-1-1"
-                value={_.isNull(value) ? "" : value}
-                disabled={disabled}
-                type={type || "text"}
-                tabIndex={tabIndex}
-                onChange={(event) =>
-                    (model[name] =
-                        event.target.value === "" ? null : event.target.value)
-                }
-                onFocus={() => this.setState({ selected: true })}
-                onBlur={() => this.setState({ selected: false })}
-                autoComplete={autoComplete}
-            />
-        );
+    const input = (
+        <input
+            id={name}
+            name={name}
+            placeholder={placeholder}
+            className="uk-input uk-width-1-1"
+            value={_.isNull(value) ? "" : value}
+            disabled={disabled}
+            type={type || "text"}
+            tabIndex={tabIndex}
+            onChange={(event) =>
+                (model[name] =
+                    event.target.value === "" ? null : event.target.value)
+            }
+            onFocus={() => setSelected(true)}
+            onBlur={() => setSelected(false)}
+            autoComplete={autoComplete}
+        />
+    );
 
-        return (
-            <div className={classes}>
-                {label ? (
-                    <label className="uk-form-label" htmlFor={name}>
-                        {title}
-                    </label>
-                ) : null}
-                <div className="uk-form-controls">
-                    {icon ? (
-                        <div className="uk-form-icon">
-                            <i className={"uk-icon-" + icon} />
-                            {input}
-                        </div>
-                    ) : (
-                        input
-                    )}
-                </div>
+    return (
+        <div className={classes}>
+            {label ? (
+                <label className="uk-form-label" htmlFor={name}>
+                    {title}
+                </label>
+            ) : null}
+            <div className="uk-form-controls">
+                {icon ? (
+                    <div className="uk-form-icon">
+                        <i className={"uk-icon-" + icon} />
+                        {input}
+                    </div>
+                ) : (
+                    input
+                )}
             </div>
-        );
-    }
-}
+        </div>
+    );
+};
 
 TextInput.defaultProps = {
     formrow: true,
     label: true,
     autoComplete: "off",
 };
+
+export default TextInput;
