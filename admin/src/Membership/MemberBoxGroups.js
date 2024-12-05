@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import Select from "react-select";
 import * as _ from "underscore";
@@ -25,6 +25,16 @@ function MemberBoxGroups(props) {
     const [options, setOptions] = useState([]);
     const [showOptions, setShowOptions] = useState([]);
     const [selectedOption, setSelectedOption] = useState(null);
+
+    // Define the `get` function for making GET requests
+    const get = async ({ url }) => {
+        const response = await fetch(url);
+        if (!response.ok) {
+            throw new Error("Failed to fetch data");
+        }
+        const data = await response.json();
+        return { data };
+    };
 
     useEffect(() => {
         get({ url: "/membership/group" }).then((data) => {
