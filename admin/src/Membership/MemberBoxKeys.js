@@ -1,11 +1,11 @@
-import React from "react";
-import Collection from "../Models/Collection";
+import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import CollectionTable from "../Components/CollectionTable";
+import DateTimeShow from "../Components/DateTimeShow";
+import TextInput from "../Components/TextInput";
+import Collection from "../Models/Collection";
 import Key from "../Models/Key";
 import { confirmModal } from "../message";
-import TextInput from "../Components/TextInput";
-import DateTimeShow from "../Components/DateTimeShow";
 
 const Row = (collection) => (props) => {
     const { item } = props;
@@ -37,105 +37,100 @@ const Row = (collection) => (props) => {
     );
 };
 
-class MemberBoxKeys extends React.Component {
-    constructor(props) {
-        super(props);
-        const { member_id } = props.match.params;
-        this.collection = new Collection({
+function MemberBoxKeys(props) {
+    const member_id = props.match.params.member_id;
+
+    const collectionRef = useRef(
+        new Collection({
             type: Key,
             url: `/membership/member/${member_id}/keys`,
             idListName: "keys",
             pageSize: 0,
+        }),
+    );
+
+    const [key, setKey] = useState(new Key({ member_id }));
+    const [saveEnabled, setSaveEnabled] = useState(false);
+
+    useEffect(() => {
+        const unsubscribe = key.subscribe(() => {
+            setSaveEnabled(key.canSave());
         });
-        this.key = new Key({ member_id });
-        this.state = { saveEnabled: false };
-    }
 
-    componentDidMount() {
-        const key = this.key;
-        this.unsubscribe = key.subscribe(() =>
-            this.setState({ saveEnabled: key.canSave() }),
-        );
-    }
+        return () => {
+            unsubscribe();
+        };
+    }, [key]);
 
-    componentWillUnmount() {
-        this.unsubscribe();
-    }
-
-    createKey() {
-        this.key.save().then(() => {
-            this.key.reset({ member_id: this.props.match.params.member_id });
-            this.collection.fetch();
+    const createKey = () => {
+        key.save().then(() => {
+            const newKey = new Key({ member_id: member_id });
+            setKey(newKey);
+            collectionRef.current.fetch();
         });
-    }
+    };
 
-    render() {
-        const columns = [
-            { title: "RFID", sort: "tagid" },
-            { title: "Kommentar" },
-            { title: "Skapad", sort: "created_at" },
-            { title: "" },
-        ];
+    const columns = [
+        { title: "RFID", sort: "tagid" },
+        { title: "Kommentar" },
+        { title: "Skapad", sort: "created_at" },
+        { title: "" },
+    ];
 
-        const { member_id } = this.props.match.params;
-        const { saveEnabled } = this.state;
+    return (
+        <div>
+            <div className="uk-margin-top uk-form uk-form-stacked">
+                <div className="meep">
+                    <form
+                        className="uk-form"
+                        onSubmit={(e) => {
+                            e.preventDefault();
+                            createKey();
+                        }}
+                    >
+                        <div className="uk-grid">
+                            <div className="uk-width-1-1">
+                                <TextInput
+                                    model={key}
+                                    tabIndex="1"
+                                    name="tagid"
+                                    title="RFID"
+                                    placeholder="Använd en RFID-läsare för att läsa av det unika numret på nyckeln"
+                                />
+                                <TextInput
+                                    model={key}
+                                    tabIndex="2"
+                                    name="description"
+                                    title="Kommentar"
+                                    placeholder="Det är valfritt att lägga in en kommentar av nyckeln"
+                                />
 
-        return (
-            <div>
-                <div className="uk-margin-top uk-form uk-form-stacked">
-                    <div className="meep">
-                        <form
-                            className="uk-form"
-                            onSubmit={(e) => {
-                                e.preventDefault();
-                                this.createKey();
-                                return false;
-                            }}
-                        >
-                            <div className="uk-grid">
-                                <div className="uk-width-1-1">
-                                    <TextInput
-                                        model={this.key}
-                                        tabIndex="1"
-                                        name="tagid"
-                                        title="RFID"
-                                        placeholder="Använd en RFID-läsare för att läsa av det unika numret på nyckeln"
-                                    />
-                                    <TextInput
-                                        model={this.key}
-                                        tabIndex="2"
-                                        name="description"
-                                        title="Kommentar"
-                                        placeholder="Det är valfritt att lägga in en kommentar av nyckeln"
-                                    />
-
-                                    <div className="uk-form-row uk-margin-top">
-                                        <div className="uk-form-controls">
-                                            <button
-                                                className="uk-button uk-button-success uk-float-right"
-                                                disabled={!saveEnabled}
-                                            >
-                                                <i className="uk-icon-save" />{" "}
-                                                Skapa nyckel
-                                            </button>
-                                        </div>
+                                <div className="uk-form-row uk-margin-top">
+                                    <div className="uk-form-controls">
+                                        <button
+                                            className="uk-button uk-button-success uk-float-right"
+                                            disabled={!saveEnabled}
+                                        >
+                                            <i className="uk-icon-save" /> Skapa
+                                            nyckel
+                                        </button>
                                     </div>
                                 </div>
                             </div>
-                        </form>
-                    </div>
-                </div>
-                <div className="uk-margin-top">
-                    <CollectionTable
-                        emptyMessage="Inga nycklar för medlemmen"
-                        rowComponent={Row(this.collection, member_id)}
-                        collection={this.collection}
-                        columns={columns}
-                    />
+                        </div>
+                    </form>
                 </div>
             </div>
-        );
-    }
+            <div className="uk-margin-top">
+                <CollectionTable
+                    emptyMessage="Inga nycklar för medlemmen"
+                    rowComponent={Row(collectionRef.current, member_id)}
+                    collection={collectionRef.current}
+                    columns={columns}
+                />
+            </div>
+        </div>
+    );
 }
 
 export default MemberBoxKeys;
