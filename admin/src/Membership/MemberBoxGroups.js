@@ -26,17 +26,8 @@ function MemberBoxGroups(props) {
     const [showOptions, setShowOptions] = useState([]);
     const [selectedOption, setSelectedOption] = useState(null);
 
-    // Define the `get` function for making GET requests
-    const get = async ({ url }) => {
-        const response = await fetch(url);
-        if (!response.ok) {
-            throw new Error("Failed to fetch data");
-        }
-        const data = await response.json();
-        return { data };
-    };
-
     useEffect(() => {
+        // eslint-disable-next-line no-undef
         get({ url: "/membership/group" }).then((data) => {
             const updatedOptions = data.data;
             setOptions(updatedOptions);
