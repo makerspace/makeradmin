@@ -469,7 +469,9 @@ class AccessySession:
         try:
             return AccessyUser.from_dict(json)
         except Exception as e:
-            raise AccessyError(f"Could not get user details for {user_id}. Could not deserialize {json} as an AccessyUser") from e
+            raise AccessyError(
+                f"Could not get user details for {user_id}. Could not deserialize {json} as an AccessyUser"
+            ) from e
 
     ################################################
     # Methods that return raw JSON data from API:s
