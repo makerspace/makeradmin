@@ -107,7 +107,7 @@ def update_stripe_customer(makeradmin_member: Member) -> stripe.Customer:
 
 
 def delete_stripe_customer(member_id: int) -> None:
-    member = db_session.query(Member).get(member_id)
+    member = db_session.get(Member, member_id)
     if member is None:
         raise NotFound(f"Unable to find member with id {member_id}")
     stripe_customer_id = member.stripe_customer_id

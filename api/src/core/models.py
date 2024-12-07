@@ -1,7 +1,6 @@
 from service.db import db_session
 from sqlalchemy import Column, DateTime, Integer, String, Text, func, text
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import configure_mappers
+from sqlalchemy.orm import configure_mappers, declarative_base
 
 Base = declarative_base()
 
@@ -46,19 +45,21 @@ class Login:
 
     @staticmethod
     def register_login_failed(ip):
-        db_session.execute("INSERT INTO login (success, ip) VALUES (0, :ip)", {"ip": ip})
+        db_session.execute(text("INSERT INTO login (success, ip) VALUES (0, :ip)"), {"ip": ip})
 
     @staticmethod
     def register_login_success(ip, user_id):
         db_session.execute(
-            "INSERT INTO login (success, user_id, ip) VALUES (1, :user_id, :ip)", {"user_id": user_id, "ip": ip}
+            text("INSERT INTO login (success, user_id, ip) VALUES (1, :user_id, :ip)"), {"user_id": user_id, "ip": ip}
         )
 
     @staticmethod
     def get_failed_login_count(ip):
         (count,) = db_session.execute(
-            "SELECT count(1) FROM login"
-            "   WHERE ip = :ip AND NOT success AND date >= DATE_SUB(NOW(), INTERVAL 1 HOUR)",
+            text(
+                "SELECT count(1) FROM login"
+                "   WHERE ip = :ip AND NOT success AND date >= DATE_SUB(NOW(), INTERVAL 1 HOUR)"
+            ),
             {"ip": ip},
         ).fetchone()
         return count

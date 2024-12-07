@@ -31,7 +31,7 @@ def filter_no_subscription_active(
     sub: SubscriptionType,
 ) -> Callable[["CartItem", int], None]:
     def filter(cart_item: "CartItem", member_id: int) -> None:
-        member: Member = db_session.query(Member).get(member_id)
+        member: Member = db_session.get(Member, member_id)
         if sub == SubscriptionType.LAB:
             if member.stripe_labaccess_subscription_id is not None:
                 raise BadRequest(

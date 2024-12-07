@@ -1,7 +1,6 @@
 from membership.models import Member
 from sqlalchemy import Boolean, Column, DateTime, Enum, ForeignKey, Integer, Numeric, String, Text, func
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import configure_mappers, relationship
+from sqlalchemy.orm import configure_mappers, declarative_base, relationship
 
 Base = declarative_base()
 
@@ -48,7 +47,7 @@ class QuizQuestionOption(Base):
     updated_at = Column(DateTime, server_default=func.now())
     deleted_at = Column(DateTime)
 
-    question = relationship(QuizQuestion, backref="options")
+    question = relationship(QuizQuestion, backref="options", cascade_backrefs=False)
 
     def __repr__(self):
         return f"QuizQuestionOption(id={self.id}, description={self.description})"
@@ -67,7 +66,7 @@ class QuizAnswer(Base):
     updated_at = Column(DateTime, server_default=func.now())
     deleted_at = Column(DateTime)
 
-    question = relationship(QuizQuestion, backref="answers")
+    question = relationship(QuizQuestion, backref="answers", cascade_backrefs=False)
 
     def __repr__(self):
         return f"QuizAnswer(id={self.id})"

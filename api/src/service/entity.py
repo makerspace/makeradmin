@@ -304,7 +304,7 @@ class Entity:
         return self.to_obj(self._create_internal(data, commit=commit))
 
     def read(self, entity_id):
-        entity = db_session.query(self.model).get(entity_id)
+        entity = db_session.get(self.model, entity_id)
         if not entity:
             raise NotFound("Could not find any entity with specified parameters.")
         obj = self.to_obj(entity)
@@ -316,7 +316,7 @@ class Entity:
         self.validate_present(input_data)
         if not input_data:
             raise UnprocessableEntity("Can not update using empty data.")
-        entity = db_session.query(self.model).get(entity_id)
+        entity = db_session.get(self.model, entity_id)
         if not entity:
             raise NotFound("Could not find any entity with specified parameters.")
 
@@ -335,7 +335,7 @@ class Entity:
         return self._update_internal(entity_id, request.json, commit=commit)
 
     def delete(self, entity_id: int, commit: bool = True) -> None:
-        entity = db_session.query(self.model).get(entity_id)
+        entity = db_session.get(self.model, entity_id)
         if not entity:
             raise NotFound("Could not find any entity with specified parameters.")
 
