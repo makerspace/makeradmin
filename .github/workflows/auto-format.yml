@@ -3,7 +3,7 @@ name: Auto-fix formatting of source code
 on:
   push:
     branches:
-      - master
+      - main
 
 jobs:
   fix_formatting:
