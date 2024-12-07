@@ -9,9 +9,9 @@ You should always format your code before each commit.
 This can be done with the command `make format`.
 Python code if formatted with `ruff` and web-code is formatted with `prettier`.
 
-It is recommended to set up the pre-commit hooks to check the formatting before pushing to Github. They can be installed by running `make init-pip`.
+It is recommended to set up the pre-commit hooks to check the formatting before pushing to Github. They can be installed by running `make init-pre-commit`.
 
-Formatting is otherwise checked automatically when opening a pull request.
+Formatting is also checked automatically when opening a pull request.
 
 ### IDE settings
 
