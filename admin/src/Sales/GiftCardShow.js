@@ -1,36 +1,39 @@
 import React, { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link } from "react-router-dom";
 import CollectionTable from "../Components/CollectionTable";
 import Currency from "../Components/Currency";
 import Collection from "../Models/Collection";
 import GiftCard from "../Models/GiftCard";
 import GiftCardRow from "../Models/GiftCardRow";
 
-const GiftCardShow = () => {
-    const { id } = useParams(); // Get id from URL params
-    const [giftCardDetails, setGiftCardDetails] = useState({
-        email: "",
-        validation_code: "",
-    });
+const GiftCardShow = ({ match }) => {
+    const { id } = match.params;
+    const [state, setState] = useState({});
 
-    const gift_card = GiftCard.get(id);
-    const gift_cardRows = new Collection({
-        type: GiftCardRow,
-        url: `/webshop/gift-card/${id}/products`,
-        pageSize: 0,
-        expand: "product",
-    });
+    const gift_card = React.useMemo(() => GiftCard.get(id), [id]);
+    const gift_cardRows = React.useMemo(
+        () =>
+            new Collection({
+                type: GiftCardRow,
+                url: `/webshop/gift-card/${id}/products`,
+                pageSize: 0,
+                expand: "product",
+            }),
+        [id],
+    );
 
     useEffect(() => {
         const unsubscribe = gift_card.subscribe(() => {
             const { email, validation_code } = gift_card;
-            setGiftCardDetails({ email, validation_code });
+            setState({ email, validation_code });
         });
 
-        return () => unsubscribe(); // Cleanup on component unmount
+        return () => {
+            unsubscribe();
+        };
     }, [gift_card]);
 
-    const { email, validation_code } = giftCardDetails;
+    const { email, validation_code } = state;
 
     return (
         <div>
@@ -57,7 +60,7 @@ const GiftCardShow = () => {
                         { title: "Summa", class: "uk-text-right" },
                     ]}
                     rowComponent={({ item }) => (
-                        <tr key={item.product_id}>
+                        <tr>
                             <td>
                                 <Link to={`/sales/product/${item.product_id}`}>
                                     {item.name}
