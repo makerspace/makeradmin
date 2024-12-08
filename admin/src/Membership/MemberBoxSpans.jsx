@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import "react-day-picker/lib/style.css";
 import { Link } from "react-router-dom";
 import CollectionTable from "../Components/CollectionTable";
@@ -11,51 +11,53 @@ import { get } from "../gateway";
 import { confirmModal } from "../message";
 import MembershipPeriodsInput from "./MembershipPeriodsInput";
 
-const MemberBoxSpans = (props) => {
-    const collection = new Collection({
-        type: Span,
-        url: `/membership/member/${props.match.params.member_id}/spans`,
-        pageSize: 0,
-        includeDeleted: true,
-    });
+function MemberBoxSpans(props) {
+    const memberId = props.match.params.member_id;
 
-    const [pendingLabAccessDays, setPendingLabAccessDays] = useState("?");
+    const [, setItems] = useState([]);
+    const [pendingLabaccessDays, setPendingLabaccessDays] = useState("?");
 
+    const collectionRef = useRef(
+        new Collection({
+            type: Span,
+            url: `/membership/member/${memberId}/spans`,
+            pageSize: 0,
+            includeDeleted: true,
+        }),
+    );
+
+    // Fetch pending actions on mount
     useEffect(() => {
-        // Fetch pending actions
-        const fetchPendingActions = async () => {
-            const response = await get({
-                url: `/membership/member/${props.match.params.member_id}/pending_actions`,
-            });
-            const sumPendingLabAccessDays = response.data.reduce(
-                (acc, value) => {
-                    if (value.action.action === ADD_LABACCESS_DAYS)
-                        return acc + value.action.value;
-                    return acc;
-                },
-                0,
-            );
-            setPendingLabAccessDays(sumPendingLabAccessDays);
-        };
+        get({ url: `/membership/member/${memberId}/pending_actions` }).then(
+            (r) => {
+                const sum_pending_labaccess_days = r.data.reduce(
+                    (acc, value) => {
+                        if (value.action.action === ADD_LABACCESS_DAYS)
+                            return acc + value.action.value;
+                        return acc;
+                    },
+                    0,
+                );
+                setPendingLabaccessDays(sum_pending_labaccess_days);
+            },
+        );
+    }, [memberId]);
 
-        fetchPendingActions();
-
-        // Subscribe to collection
-        const unsubscribe = collection.subscribe(() => {
-            // No need to handle the subscription data since it's unused
+    // Subscribe to collection changes
+    useEffect(() => {
+        const unsubscribe = collectionRef.current.subscribe(({ items }) => {
+            setItems(items);
         });
-
-        // Cleanup on component unmount
         return () => {
             unsubscribe();
         };
-    }, [props.match.params.member_id]);
+    }, []);
 
     const deleteItem = (item) =>
         confirmModal(item.deleteConfirmMessage())
             .then(() => item.del())
             .then(
-                () => collection.fetch(),
+                () => collectionRef.current.fetch(),
                 () => null,
             );
 
@@ -63,18 +65,18 @@ const MemberBoxSpans = (props) => {
         <div className="uk-margin-top">
             <h2>Medlemsperioder</h2>
             <p>
-                <b>{pendingLabAccessDays}</b> dagar labaccess kommer läggas till
+                <b>{pendingLabaccessDays}</b> dagar labaccess kommer läggas till
                 vid en nyckelsynkronisering.
             </p>
             <hr />
             <MembershipPeriodsInput
-                spans={collection}
-                member_id={props.match.params.member_id}
+                spans={collectionRef.current}
+                member_id={memberId}
             />
             <h2>Spans</h2>
             <hr />
             <CollectionTable
-                collection={collection}
+                collection={collectionRef.current}
                 columns={[
                     { title: "#", sort: "span_id" },
                     { title: "Typ", sort: "type" },
@@ -122,6 +124,6 @@ const MemberBoxSpans = (props) => {
             />
         </div>
     );
-};
+}
 
 export default MemberBoxSpans;

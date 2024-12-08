@@ -1,54 +1,60 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import CategoryPeriodsInput from "../Components/CategoryPeriodsInput";
 import CategoryPeriods from "../Models/CategoryPeriods";
 import { calculateSpanDiff, filterPeriods } from "../Models/Span";
 import auth from "../auth";
 import { post } from "../gateway";
 
-export default function MembershipPeriodsInput(props) {
+function MembershipPeriodsInput({ spans, member_id }) {
     const [showHistoric, setShowHistoric] = useState(true);
     const [saveDisabled, setSaveDisabled] = useState(true);
 
-    const categoryPeriodsList = [
+    const categoryPeriodsListRef = useRef([
         new CategoryPeriods({ category: "labaccess" }),
         new CategoryPeriods({ category: "membership" }),
         new CategoryPeriods({ category: "special_labaccess" }),
-    ];
+    ]);
 
-    const canSave = () => {
+    const categoryPeriodsList = categoryPeriodsListRef.current;
+
+    const canSave = useCallback(() => {
         return (
             categoryPeriodsList.every((c) => c.isValid()) &&
             categoryPeriodsList.some((c) => c.isDirty())
         );
-    };
+    }, [categoryPeriodsList]);
 
     useEffect(() => {
-        const unsubscribe = [];
-        unsubscribe.push(
-            props.spans.subscribe(({ items }) => {
+        const unsubscribes = [];
+
+        // Subscribe to spans updates
+        unsubscribes.push(
+            spans.subscribe(({ items }) => {
                 categoryPeriodsList.forEach((periods) =>
                     periods.replace(filterPeriods(items, periods.category)),
                 );
             }),
         );
+
+        // Subscribe to categoryPeriods updates
         categoryPeriodsList.forEach((cp) => {
-            unsubscribe.push(cp.subscribe(() => setSaveDisabled(!canSave())));
+            unsubscribes.push(cp.subscribe(() => setSaveDisabled(!canSave())));
         });
 
         return () => {
-            unsubscribe.forEach((u) => u());
+            unsubscribes.forEach((u) => u());
         };
-    }, [props.spans, categoryPeriodsList]);
+    }, [spans, categoryPeriodsList, canSave]);
 
-    const onSave = () => {
+    const onSave = useCallback(() => {
         const deleteSpans = [];
         const addSpans = [];
         categoryPeriodsList.forEach((cp) => {
             cp.merge();
             calculateSpanDiff({
-                items: props.spans.items,
+                items: spans.items,
                 categoryPeriods: cp,
-                member_id: props.member_id,
+                member_id,
                 deleteSpans,
                 addSpans,
             });
@@ -72,14 +78,22 @@ export default function MembershipPeriodsInput(props) {
         promises.push(...deleteSpans.map((s) => s.del()));
         promises.push(...addSpans.map((s) => s.save()));
         Promise.all(promises).then(() => {
-            props.spans.fetch();
+            spans.fetch();
 
+            // post({
+            //     url: `/webshop/member/${member_id}/ship_labaccess_orders`,
+            //     expectedDataStatus: "ok",
+            // });
             post({
-                url: `/webshop/member/${props.member_id}/ship_labaccess_orders`,
+                url: `/webshop/member/${member_id}/ship_labaccess_orders`,
+                headers: { "Content-Type": "application/json" },
+                payload: {
+                    /* any required data */
+                },
                 expectedDataStatus: "ok",
             });
         });
-    };
+    }, [categoryPeriodsList, spans, member_id]);
 
     return (
         <form
@@ -116,3 +130,5 @@ export default function MembershipPeriodsInput(props) {
         </form>
     );
 }
+
+export default MembershipPeriodsInput;
