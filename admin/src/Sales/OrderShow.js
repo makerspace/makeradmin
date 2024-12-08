@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import React, { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import CollectionTable from "../Components/CollectionTable";
 import Currency from "../Components/Currency";
 import Collection from "../Models/Collection";
@@ -8,22 +8,31 @@ import OrderAction from "../Models/OrderAction";
 import OrderRow from "../Models/OrderRow";
 import { dateTimeToStr } from "../utils";
 
-const OrderShow = () => {
-    const { id } = useParams(); // Get id from URL params
-    const [memberId, setMemberId] = useState(null);
+const OrderShow = ({ match }) => {
+    const { id } = match.params;
 
-    const order = Order.get(id);
-    const orderRows = new Collection({
-        type: OrderRow,
-        url: `/webshop/transaction/${id}/contents`,
-        pageSize: 0,
-        expand: "product",
-    });
-    const orderActions = new Collection({
-        type: OrderAction,
-        url: `/webshop/transaction/${id}/actions`,
-        pageSize: 0,
-    });
+    const order = useMemo(() => Order.get(id), [id]);
+    const orderRows = useMemo(
+        () =>
+            new Collection({
+                type: OrderRow,
+                url: `/webshop/transaction/${id}/contents`,
+                pageSize: 0,
+                expand: "product",
+            }),
+        [id],
+    );
+    const orderActions = useMemo(
+        () =>
+            new Collection({
+                type: OrderAction,
+                url: `/webshop/transaction/${id}/actions`,
+                pageSize: 0,
+            }),
+        [id],
+    );
+
+    const [memberId, setMemberId] = useState(null);
 
     useEffect(() => {
         const unsubscribe = order.subscribe(() => {
@@ -31,7 +40,9 @@ const OrderShow = () => {
             setMemberId(member_id);
         });
 
-        return () => unsubscribe(); // Cleanup on component unmount
+        return () => {
+            unsubscribe();
+        };
     }, [order]);
 
     return (
@@ -57,7 +68,7 @@ const OrderShow = () => {
                         { title: "Summa", class: "uk-text-right" },
                     ]}
                     rowComponent={({ item }) => (
-                        <tr key={item.product_id}>
+                        <tr>
                             <td>
                                 <Link to={`/sales/product/${item.product_id}`}>
                                     {item.name}
@@ -89,7 +100,7 @@ const OrderShow = () => {
                         { title: "Utförd", class: "uk-text-right" },
                     ]}
                     rowComponent={({ item }) => (
-                        <tr key={item.id}>
+                        <tr>
                             <td>{item.id}</td>
                             <td>{item.action_type}</td>
                             <td className="uk-text-right">{item.value}</td>
