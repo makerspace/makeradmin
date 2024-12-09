@@ -1,19 +1,21 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import * as _ from "underscore";
 import Span from "../Models/Span";
 
-export default function SpanShow(props) {
+function SpanShow(props) {
     const { span_id } = props.match.params;
+    const spanInstance = useMemo(() => Span.get(span_id), [span_id]);
     const [data, setData] = useState({});
 
-    const span = Span.get(span_id);
-
     useEffect(() => {
-        const unsubscribe = span.subscribe(() => setData(span.saved));
+        const unsubscribe = spanInstance.subscribe(() => {
+            setData(spanInstance.saved);
+        });
 
-        // Cleanup subscription on unmount
-        return () => unsubscribe();
-    }, [span]);
+        return () => {
+            unsubscribe();
+        };
+    }, [spanInstance]);
 
     return (
         <div>
@@ -29,3 +31,5 @@ export default function SpanShow(props) {
         </div>
     );
 }
+
+export default SpanShow;
