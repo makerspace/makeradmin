@@ -2,8 +2,6 @@ import argparse
 import os
 import secrets
 
-from zoneinfo import available_timezones
-
 parser = argparse.ArgumentParser(description="Create a default '.env' file with secrets if it doesn't exist")
 parser.add_argument("--force", "-f", dest="force", action="store_true", help="overwrite existing '.env' file")
 parser.add_argument("--interactive", "-i", dest="interactive", action="store_true", help="run with interactive choices")
@@ -18,7 +16,7 @@ if not args.force and os.path.isfile(".env"):
 if args.interactive:
     while True:
         zone_str = input("Enter the makerspace timezone [Europe/Stockholm]: ") or "Europe/Stockholm"
-        if zone_str in available_timezones():
+        if zone_str:
             makerspace_local_timezone = zone_str
             break
         else:
