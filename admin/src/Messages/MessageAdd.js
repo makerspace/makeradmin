@@ -1,35 +1,33 @@
-import React from "react";
+import React, { useMemo } from "react";
+import { withRouter } from "react-router";
 import MessageForm from "../Components/MessageForm";
 import Message from "../Models/Message";
 import { notifySuccess } from "../message";
-import { withRouter } from "react-router";
 
-class MessageAdd extends React.Component {
-    constructor(props) {
-        super(props);
-        this.message = new Message();
-    }
+function MessageAdd(props) {
+    const { router } = props;
 
-    onSend() {
-        const { router } = this.props;
-        this.message.save().then(() => {
+    // Create a new Message instance
+    const message = useMemo(() => new Message(), []);
+
+    // Handler for saving the message
+    const onSend = () => {
+        message.save().then(() => {
             router.push("/messages");
             notifySuccess("Ditt meddelande har skickats");
         });
-    }
+    };
 
-    render() {
-        return (
-            <div className="uk-margin-top">
-                <h2>Skapa utskick</h2>
-                <MessageForm
-                    recipientSelect={true}
-                    message={this.message}
-                    onSave={() => this.onSend()}
-                />
-            </div>
-        );
-    }
+    return (
+        <div className="uk-margin-top">
+            <h2>Skapa utskick</h2>
+            <MessageForm
+                recipientSelect={true}
+                message={message}
+                onSave={onSend}
+            />
+        </div>
+    );
 }
 
 export default withRouter(MessageAdd);

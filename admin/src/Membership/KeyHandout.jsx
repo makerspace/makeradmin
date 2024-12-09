@@ -1,21 +1,15 @@
-import React from "react";
-import PropTypes from "prop-types";
-import Member from "../Models/Member";
-import KeyHandoutForm from "../Components/KeyHandoutForm";
+import React, { useContext } from "react";
 import { withRouter } from "react-router";
+import KeyHandoutForm from "../Components/KeyHandoutForm";
+import { MemberContext } from "./MemberBox";
 
-class KeyHandout extends React.Component {
-    render() {
-        return (
-            <div className="uk-margin-top">
-                <KeyHandoutForm member={this.context.member} />
-            </div>
-        );
-    }
-}
-
-KeyHandout.contextTypes = {
-    member: PropTypes.instanceOf(Member),
+const KeyHandout = () => {
+    const member = useContext(MemberContext);
+    return (
+        <div className="uk-margin-top">
+            <KeyHandoutForm member={member} />
+        </div>
+    );
 };
 
 export default withRouter(KeyHandout);
