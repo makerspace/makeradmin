@@ -1,16 +1,19 @@
-import React, { useState } from "react";
-import { useHistory } from "react-router-dom";
+import React, { useMemo } from "react";
+import { withRouter } from "react-router";
 import MessageForm from "../Components/MessageForm";
 import Message from "../Models/Message";
 import { notifySuccess } from "../message";
 
-export default function MessageAdd() {
-    const [message] = useState(new Message());
-    const navigate = useHistory();
+function MessageAdd(props) {
+    const { router } = props;
 
+    // Create a new Message instance
+    const message = useMemo(() => new Message(), []);
+
+    // Handler for saving the message
     const onSend = () => {
         message.save().then(() => {
-            navigate("/messages");
+            router.push("/messages");
             notifySuccess("Ditt meddelande har skickats");
         });
     };
@@ -26,3 +29,5 @@ export default function MessageAdd() {
         </div>
     );
 }
+
+export default withRouter(MessageAdd);
