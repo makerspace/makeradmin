@@ -97,8 +97,8 @@ const ProductForm = ({ product, onDelete, onSave }) => {
             <form
                 className="uk-form uk-form-stacked"
                 onSubmit={(e) => {
-                    e.preventDefault();
                     onSave();
+                    return false;
                 }}
             >
                 <fieldset className="uk-margin-top">

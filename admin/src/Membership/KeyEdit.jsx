@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { useParams, withRouter } from "react-router";
+import { useParams } from "react-router";
 import DateTimeInput from "../Components/DateTimeInput";
 import TextInput from "../Components/TextInput";
 import Textarea from "../Components/Textarea";
@@ -53,7 +53,6 @@ function KeyEdit() {
                                         model={keyRef.current}
                                         name="created_at"
                                         title="Skapad"
-                                        disabled={true}
                                     />
                                 </div>
                                 <div className="uk-width-1-2">
@@ -61,7 +60,6 @@ function KeyEdit() {
                                         model={keyRef.current}
                                         name="updated_at"
                                         title="Ändrad"
-                                        disabled={true}
                                     />
                                 </div>
                             </div>
@@ -104,4 +102,4 @@ function KeyEdit() {
     );
 }
 
-export default withRouter(KeyEdit);
+export default KeyEdit;

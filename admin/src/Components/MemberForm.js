@@ -22,8 +22,8 @@ const MemberForm = ({ member, onSave, onDelete }) => {
             <form
                 className="uk-form"
                 onSubmit={(e) => {
-                    e.preventDefault();
                     onSave();
+                    return false;
                 }}
             >
                 <fieldset>

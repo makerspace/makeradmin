@@ -30,7 +30,6 @@ const SelectInput = (props) => {
         };
 
         const unsubscribe = props.model.subscribe(handleModelChange);
-        handleModelChange(); // Initialize state
 
         return () => {
             unsubscribe();

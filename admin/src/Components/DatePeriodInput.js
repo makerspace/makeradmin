@@ -7,7 +7,6 @@ const DatePeriodInput = ({ period }) => {
     const [end, setEnd] = useState(period.end || null);
 
     useEffect(() => {
-        // Synchronize state with period on subscription updates
         const unsubscribe = period.subscribe(() => {
             setStart(period.start);
             setEnd(period.end);

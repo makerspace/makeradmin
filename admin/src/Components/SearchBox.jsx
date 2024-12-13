@@ -1,8 +1,6 @@
-import React, { useRef } from "react";
+import React from "react";
 
 const SearchBox = ({ value, handleChange }) => {
-    const searchRef = useRef(null);
-
     return (
         <div className="filterbox">
             <div className="uk-grid">
@@ -15,7 +13,6 @@ const SearchBox = ({ value, handleChange }) => {
                             <i className="uk-icon-search" />
                             <input
                                 value={value}
-                                ref={searchRef}
                                 tabIndex="1"
                                 type="text"
                                 className="uk-form-width-large"
