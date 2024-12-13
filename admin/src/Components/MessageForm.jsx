@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Async } from "react-select";
 import { get } from "../gateway";
 import Group from "../Models/Group";
@@ -46,7 +46,7 @@ const MessageForm = ({ message, onSave, recipientSelect }) => {
         };
     }, [message]);
 
-    const loadOptions = useCallback((inputValue, callback) => {
+    const loadOptions = (inputValue, callback) => {
         Promise.all([
             get({
                 url: "/membership/group",
@@ -71,7 +71,7 @@ const MessageForm = ({ message, onSave, recipientSelect }) => {
                     .concat(members.map((d) => memberOption(d))),
             ),
         );
-    }, []);
+    };
 
     const handleSubmit = (e) => {
         e.preventDefault();
