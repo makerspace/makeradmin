@@ -16,7 +16,6 @@ const TextInput = (props) => {
         };
 
         const unsubscribe = model.subscribe(handleModelChange);
-        handleModelChange(); // Initialize state
 
         return () => {
             unsubscribe();

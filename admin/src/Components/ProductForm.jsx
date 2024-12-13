@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import ReactSelect from "react-select";
 import ProductAction, { ACTION_TYPES } from "../Models/ProductAction";
 import CheckboxInput from "./CheckboxInput";
@@ -62,32 +62,29 @@ const ProductForm = ({ product, onDelete, onSave }) => {
         product.removeAction(action);
     };
 
-    const renderAction = useCallback(
-        (action) => (
-            <div key={action.action_type} className="form-row uk-grid">
-                <div className="uk-with-1-6">{action.action_type}</div>
-                <div className="uk-with-1-6">
-                    <strong>Värde</strong>
-                </div>
-                <div className="uk-with-3-6">
-                    <TextInput
-                        model={action}
-                        label={false}
-                        formrow={false}
-                        name={"value"}
-                    />
-                </div>
-                <div className="uk-with-1-6">
-                    <a
-                        className="uk-button uk-button-danger"
-                        onClick={() => handleRemoveAction(action)}
-                    >
-                        <i className="uk-icon-trash-o" />
-                    </a>
-                </div>
+    const renderAction = (action) => (
+        <div key={action.action_type} className="form-row uk-grid">
+            <div className="uk-with-1-6">{action.action_type}</div>
+            <div className="uk-with-1-6">
+                <strong>Värde</strong>
             </div>
-        ),
-        [],
+            <div className="uk-with-3-6">
+                <TextInput
+                    model={action}
+                    label={false}
+                    formrow={false}
+                    name={"value"}
+                />
+            </div>
+            <div className="uk-with-1-6">
+                <a
+                    className="uk-button uk-button-danger"
+                    onClick={() => handleRemoveAction(action)}
+                >
+                    <i className="uk-icon-trash-o" />
+                </a>
+            </div>
+        </div>
     );
 
     const imageSrc = (o) => `data:${o.type};base64, ` + o.data;
@@ -97,8 +94,8 @@ const ProductForm = ({ product, onDelete, onSave }) => {
             <form
                 className="uk-form uk-form-stacked"
                 onSubmit={(e) => {
-                    e.preventDefault();
                     onSave();
+                    return false;
                 }}
             >
                 <fieldset className="uk-margin-top">

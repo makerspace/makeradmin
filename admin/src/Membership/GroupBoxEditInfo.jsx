@@ -6,10 +6,10 @@ import { confirmModal } from "../message";
 
 const GroupBoxEditInfo = (props) => {
     const { router } = props;
-    const group = useContext(GroupContext); // Access the group from context
+    const group = useContext(GroupContext);
 
     if (!group) {
-        return <div>Group not found</div>; // Handle missing context gracefully
+        return <div>Group not found</div>;
     }
 
     return (

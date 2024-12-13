@@ -3,13 +3,11 @@ import * as _ from "underscore";
 import { confirmModal } from "../message";
 
 const CollectionTable = (props) => {
-    // State variables
     const [sort, setSort] = useState({ key: null, order: "up" });
     const [items, setItems] = useState(null);
     const [page, setPage] = useState({});
     const [loading, setLoading] = useState(true);
 
-    // Destructure props
     const {
         collection,
         rowComponent,
@@ -19,7 +17,6 @@ const CollectionTable = (props) => {
         onPageNav,
     } = props;
 
-    // useEffect to handle subscription
     useEffect(() => {
         const unsubscribe = collection.subscribe(({ page, items }) => {
             setPage(page);
@@ -31,7 +28,6 @@ const CollectionTable = (props) => {
         };
     }, [collection]);
 
-    // Functions
     const renderHeading = (column, i) => {
         const sortState = sort;
 
@@ -127,7 +123,6 @@ const CollectionTable = (props) => {
             );
     };
 
-    // Render logic
     let rows = null;
     if (items !== null) {
         rows = items.map((item, i) => (
