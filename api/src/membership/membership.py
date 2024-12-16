@@ -1,6 +1,6 @@
 import logging
 from dataclasses import dataclass
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 from typing import Any, Dict, List, Optional, Set, Tuple, TypeVar
 
 from service.api_definition import NOT_UNIQUE
@@ -73,41 +73,41 @@ def get_membership_summaries(member_ids: List[int], at_date: Optional[date] = No
     def mapify(rows: List[Any]) -> Dict[Any, Any]:
         return {r[0]: r[1] for r in rows}
 
-    labaccess_active = setify(
+    labaccess_active: Set[int] = setify(
         db_session.query(Span.member_id)
         .filter(
             span_filter,
             Span.type == Span.LABACCESS,
             Span.startdate <= at_date,
             Span.enddate >= at_date,
-            Span.deleted_at.is_(None),
+            Span.deleted_at == None,
         )
         .group_by(Span.member_id)
         .all()
     )
 
-    labaccess_end = mapify(
+    labaccess_end: Dict[int, date] = mapify(
         db_session.query(Span.member_id, func.max(Span.enddate))
-        .filter(span_filter, Span.type == Span.LABACCESS, Span.deleted_at.is_(None))
+        .filter(span_filter, Span.type == Span.LABACCESS, Span.deleted_at == None)
         .group_by(Span.member_id)
         .all()
     )
 
-    membership_active = setify(
+    membership_active: Set[int] = setify(
         db_session.query(Span.member_id)
         .filter(
             span_filter,
             Span.type == Span.MEMBERSHIP,
             Span.startdate <= at_date,
             Span.enddate >= at_date,
-            Span.deleted_at.is_(None),
+            Span.deleted_at == None,
         )
         .all()
     )
 
-    membership_end = mapify(
+    membership_end: Dict[int, date] = mapify(
         db_session.query(Span.member_id, func.max(Span.enddate))
-        .filter(span_filter, Span.type == Span.MEMBERSHIP, Span.deleted_at.is_(None))
+        .filter(span_filter, Span.type == Span.MEMBERSHIP, Span.deleted_at == None)
         .group_by(Span.member_id)
         .all()
     )
@@ -119,15 +119,15 @@ def get_membership_summaries(member_ids: List[int], at_date: Optional[date] = No
             Span.type == Span.SPECIAL_LABACESS,
             Span.startdate <= at_date,
             Span.enddate >= at_date,
-            Span.deleted_at.is_(None),
+            Span.deleted_at == None,
         )
         .group_by(Span.member_id)
         .all()
     )
 
-    special_labaccess_end = mapify(
+    special_labaccess_end: Dict[int, date] = mapify(
         db_session.query(Span.member_id, func.max(Span.enddate))
-        .filter(span_filter, Span.type == Span.SPECIAL_LABACESS, Span.deleted_at.is_(None))
+        .filter(span_filter, Span.type == Span.SPECIAL_LABACESS, Span.deleted_at == None)
         .group_by(Span.member_id)
         .all()
     )
@@ -151,9 +151,9 @@ def get_membership_summaries(member_ids: List[int], at_date: Optional[date] = No
     return memberships
 
 
-def get_members_and_membership() -> Tuple[List[Member], List[MembershipData]]:
-    members: List[Member] = db_session.query(Member).filter(Member.deleted_at.is_(None))
-    memberships = get_membership_summaries([m.member_id for m in members])
+def get_members_and_membership(at_date: Optional[date] = None) -> Tuple[List[Member], List[MembershipData]]:
+    members: List[Member] = db_session.query(Member).filter(Member.deleted_at == None).all()
+    memberships = get_membership_summaries([m.member_id for m in members], at_date)
 
     return members, memberships
 
