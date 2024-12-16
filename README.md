@@ -102,8 +102,8 @@ make firstrun
 
 Go to:
 
--   [the makeradmin web site](http://localhost:8009)
--   [the web shop](http://localhost:8011/shop)
+- [the makeradmin web site](http://localhost:8009)
+- [the web shop](http://localhost:8011/shop)
 
 ### Logging in
 

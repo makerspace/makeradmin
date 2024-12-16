@@ -1,9 +1,9 @@
 # Påläsning av API-dokumentation
 
--   export av nyligen labbmedlemmar + telefonnummer
--   knapp i makeradmin för att skicka ut Accessy-länk manuellt. Används vid medlemsintroduktioner.
--   dela upp i veckovis access? Synka upp midnatt De som betalat före dess får access. Annars får man vänta till nästa vecka.
-    -   Se till att alltid synka upp några veckor i förväg så att folk fortsätter ha access och kommer in även om nätverket är nere.
+- export av nyligen labbmedlemmar + telefonnummer
+- knapp i makeradmin för att skicka ut Accessy-länk manuellt. Används vid medlemsintroduktioner.
+- dela upp i veckovis access? Synka upp midnatt De som betalat före dess får access. Annars får man vänta till nästa vecka.
+    - Se till att alltid synka upp några veckor i förväg så att folk fortsätter ha access och kommer in även om nätverket är nere.
 
 ## Frågor
 
@@ -29,19 +29,19 @@ Fixat
 
 ## Inbjudan
 
--   Invite via API
--   SMS skickas till personen
--   Personen får installera Accessy-appen och registrera användare i appen
+- Invite via API
+- SMS skickas till personen
+- Personen får installera Accessy-appen och registrera användare i appen
 
 ## Pending / shipping
 
--   30 dagar måste bli 28 dagar i pending labaccess
--   Nyköp blir 28 dagar
--   Vi behöver avrunda nuvarande labaccesser till slutet på veckan
--   Pending skeppas i slutet på varje vecka
--   Behövs inget startdatum. Istället avrundas vid skeppning.
--   Synkning bryr sig inte om pending, bara aktuella spans.
--   Behöver kunna skeppa för specifik användare vid medlemsintroduktion
+- 30 dagar måste bli 28 dagar i pending labaccess
+- Nyköp blir 28 dagar
+- Vi behöver avrunda nuvarande labaccesser till slutet på veckan
+- Pending skeppas i slutet på varje vecka
+- Behövs inget startdatum. Istället avrundas vid skeppning.
+- Synkning bryr sig inte om pending, bara aktuella spans.
+- Behöver kunna skeppa för specifik användare vid medlemsintroduktion
 
 # API-anrop
 
