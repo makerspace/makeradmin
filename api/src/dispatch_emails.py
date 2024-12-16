@@ -4,6 +4,7 @@ from contextlib import closing
 from datetime import datetime, timedelta
 from os.path import abspath, dirname
 from time import sleep
+from typing import Optional
 from urllib.parse import quote_plus
 
 import requests
@@ -34,11 +35,26 @@ MEMBERSHIP_REMINDER_GRACE_PERIOD = 28
 QUIZ_DAYS_FROM_FIRST_EMAIL_TO_REMINDER = 4
 QUIZ_DAYS_BETWEEN_REMINDERS = 21
 
+warned_about_missing_key = False
 
-def send_messages(key, domain, sender, to_override, limit):
+
+def send_messages(key: Optional[str], domain: str, sender: str, to_override: Optional[str], limit: int) -> None:
     query = db_session.query(Message)
     query = query.filter(Message.status == Message.QUEUED)
     query = query.limit(limit)
+
+    if key is not None:
+        messages = list(query)
+        global warned_about_missing_key
+        if len(messages) > 0 and not warned_about_missing_key:
+            warned_about_missing_key = True
+
+            for message in messages:
+                message.status = Message.FAILED
+                db_session.add(message)
+            db_session.commit()
+            logger.warning(f"No mailgun key found. Not sending {len(messages)} emails.")
+        return
 
     for message in query:
         to = message.recipient
