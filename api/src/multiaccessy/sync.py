@@ -20,12 +20,6 @@ from multiaccessy.accessy import (
 logger = getLogger("makeradmin")
 
 
-GROUPS = {
-    Span.SPECIAL_LABACESS: ACCESSY_SPECIAL_LABACCESS_GROUP,
-    Span.LABACCESS: ACCESSY_LABACCESS_GROUP,
-}
-
-
 def get_wanted_access(today: date, member_id: Optional[int] = None) -> dict[PHONE, AccessyMember]:
     if member_id is not None:
         member = db_session.query(Member).get(member_id)
