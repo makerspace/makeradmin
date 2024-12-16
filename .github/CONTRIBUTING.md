@@ -15,7 +15,7 @@ Formatting is also checked automatically when opening a pull request.
 
 ### IDE settings
 
-- **VS-code:** If you are using VS code, then you can install the [recommended extensions](/.vscode/extensions.json). Then most files will auto-format on save.
+-   **VS-code:** If you are using VS code, then you can install the [recommended extensions](/.vscode/extensions.json). Then most files will auto-format on save.
 
     **You should not modify these files.**
 
