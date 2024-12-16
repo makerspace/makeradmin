@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from datetime import date, datetime
 from logging import getLogger
-from typing import Any, Optional
+from typing import Any, Optional, cast
 
 from dataclasses_json import DataClassJsonMixin
 from flask import request
@@ -174,8 +174,12 @@ event_types = {
 def decode_event(event_type_str: str, data: Any) -> Optional[AccessyWebhookEvent]:
     event_type = AccessyWebhookEventType(event_type_str)
     if event_type in event_types:
-        cls = event_types[event_type]
-        return cls.from_dict(data)
+        try:
+            cls = event_types[event_type]
+            return cast(AccessyWebhookEvent, cls.from_dict(data))
+        except Exception as e:
+            logger.error(f"Failed to decode event: {data} with error: {e}")
+            return None
     else:
         logger.warning(f"Unknown event type: {event_type}")
         return None
