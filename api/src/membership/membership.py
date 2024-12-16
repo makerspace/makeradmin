@@ -145,6 +145,11 @@ def get_membership_summaries(member_ids: List[int], at_date: Optional[date] = No
                 membership_end=membership_end.get(id),
                 membership_active=id in membership_active,
                 effective_labaccess_end=max_or_none(labaccess_end.get(id), special_labaccess_end.get(id)),
+                # The effective labaccess is active if the member has normal or special labaccess
+                # The membership agreement does not matter here.
+                # If the user has the appropriate spans, then they get access.
+                # However, the spans are typically not added until the membership agreement is signed,
+                # as labaccess order actions will stay pending.
                 effective_labaccess_active=(id in labaccess_active) or (id in special_labaccess_active),
             )
         )

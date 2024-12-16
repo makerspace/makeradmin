@@ -61,7 +61,7 @@ def request(
         response = requests.request(method, ACCESSY_URL + path, data=data, headers=headers)
         if response.status_code == 429:
             logger.warning(
-                f"requesting accessy returned 429, too many reqeusts, try {i+1}/{max_tries}, retrying in {backoff}s, {path=}"
+                f"requesting accessy returned 429, too many requests, try {i+1}/{max_tries}, retrying in {backoff}s, {path=}"
             )
             sleep(backoff)
             backoff = backoff * (1.2 + 0.1 * random())
@@ -179,9 +179,9 @@ class AccessyUser(DataClassJsonMixin):
     id: UUID
     firstName: str
     lastName: str
-    msisdn: str
     # uiLanguageCode: str # Ignore, since even though Accessy says it is required, it is not always returned by the API.
     application: bool
+    msisdn: Optional[MSISDN] = None
 
 
 class AccessySession:
@@ -271,32 +271,25 @@ class AccessySession:
                 return True
         return False
 
-    def remove_from_org(self, phone_number: MSISDN) -> None:
-        accessy_member = self._get_org_user_from_phone(phone_number)
-        if accessy_member is None:
-            return
+    def remove_from_org(self, member: AccessyMember) -> None:
+        self.__delete(f"/org/admin/organization/{self.organization_id()}/user/{member.user_id}")
 
-        self.__delete(f"/org/admin/organization/{self.organization_id()}/user/{accessy_member.user_id}")
+    def remove_from_group(self, member: AccessyMember, access_group_id: UUID) -> None:
+        self.__delete(f"/asset/admin/access-permission-group/{access_group_id}/membership/{member.membership_id}")
 
-    def remove_from_group(self, phone_number: MSISDN, access_group_id: UUID) -> None:
-        accessy_member = self._get_org_user_from_phone(phone_number)
-        if accessy_member is None:
-            return
-
-        self.__delete(
-            f"/asset/admin/access-permission-group/{access_group_id}/membership/{accessy_member.membership_id}"
-        )
-
-    def add_to_group(self, phone_number: MSISDN, access_group_id: UUID) -> None:
+    def add_phone_to_group(self, phone_number: MSISDN, access_group_id: UUID) -> None:
         """Add a specific user with phone number to access group"""
         accessy_member = self._get_org_user_from_phone(phone_number)
         if accessy_member is None:
             self.invite_phone_to_org_and_groups([phone_number], [access_group_id])
         else:
-            self.__put(
-                f"/asset/admin/access-permission-group/{access_group_id}/membership",
-                json=dict(membership=accessy_member.membership_id),
-            )
+            self.add_to_group(accessy_member, access_group_id)
+
+    def add_to_group(self, member: AccessyMember, access_group_id: UUID) -> None:
+        self.__put(
+            f"/asset/admin/access-permission-group/{access_group_id}/membership",
+            json=dict(membership=member.membership_id),
+        )
 
     def invite_phone_to_org_and_groups(
         self, phone_numbers: Iterable[MSISDN], access_group_ids: Iterable[UUID] = [], message_to_user: str = ""
@@ -530,9 +523,9 @@ class AccessySession:
                 user.phone = APPLICATION_PHONE_NUMBER
                 return
 
-            try:
+            if data.msisdn is not None:
                 user.phone = data.msisdn
-            except KeyError:
+            else:
                 logger.warning(f"User {user.user_id} does not have a phone number in accessy. {data=}")
             user.name = f"{data.firstName} {data.lastName}"
 
