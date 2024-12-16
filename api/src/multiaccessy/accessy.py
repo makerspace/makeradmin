@@ -1,5 +1,6 @@
 import json as libjson
 import threading
+import time
 from collections.abc import Iterable
 from dataclasses import dataclass, field
 from datetime import date, datetime, timedelta
@@ -56,15 +57,15 @@ def request(
     else:
         data = libjson.dumps(json)
 
-    backoff = 1.0
+    backoff = 0.3
     for i in range(max_tries):
         response = requests.request(method, ACCESSY_URL + path, data=data, headers=headers)
         if response.status_code == 429:
             logger.warning(
                 f"requesting accessy returned 429, too many reqeusts, try {i+1}/{max_tries}, retrying in {backoff}s, {path=}"
             )
-            sleep(backoff)
-            backoff = backoff * (1.2 + 0.1 * random())
+            sleep(backoff * (0.5 + 1.0 * random()))
+            backoff *= 1.5
             continue
 
         if not response.ok:
@@ -541,14 +542,23 @@ class AccessySession:
             user.membership_id = data["id"]
 
         threads = []
+        user_ids = list(user_ids)
+        thread_count = min(4, len(user_ids))
         accessy_members = []
-        for uid in user_ids:
-            accessy_member = AccessyMember(user_id=uid)
-            threads.append(threading.Thread(target=fill_user_details, args=(accessy_member,)))
-            threads.append(threading.Thread(target=fill_membership_id, args=(accessy_member,)))
-            accessy_members.append(accessy_member)
+        for i in range(thread_count):
+            # Chunk the user_ids into equal parts for each thread
+            slice = user_ids[i::thread_count]
+            member_slice = [AccessyMember(user_id=uid) for uid in slice]
+            accessy_members.extend(member_slice)
 
-        for t in threads:
+            # Start a thread for each chunk
+            def worker(member_slice: list[AccessyMember]) -> None:
+                for member in member_slice:
+                    fill_user_details(member)
+                    fill_membership_id(member)
+
+            t = threading.Thread(target=worker, args=(member_slice,))
+            threads.append(t)
             t.start()
 
         for t in threads:
