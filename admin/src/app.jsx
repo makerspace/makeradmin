@@ -161,87 +161,80 @@ const nav = {
         },
     ],
 };
+const App = () => {
+    const [isLoggedIn, setIsLoggedIn] = React.useState(auth.isLoggedIn());
 
-class App extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            isLoggedIn: auth.isLoggedIn(),
-        };
-    }
+    React.useEffect(() => {
+        auth.onChange = (status) => setIsLoggedIn(status);
+    }, []);
 
-    componentDidMount() {
-        auth.onChange = (isLoggedIn) => this.setState({ isLoggedIn });
-    }
-
-    render() {
-        return (
-            <Router history={browserHistory}>
-                <Switch>
-                    <Route path="/logout" component={Logout} />
-                    <Route
-                        path="/request-password-reset"
-                        component={RequestPasswordReset}
-                    />
-                    <Route path="/password-reset" component={PasswordReset} />
-                    <Route path="*">
-                        {this.state.isLoggedIn && (
-                            <div style={{ marginBottom: "2em" }}>
-                                <Nav nav={nav} />
-                                <div className="uk-container uk-container-center uk-margin-top">
-                                    <div className="uk-grid">
-                                        <div className="uk-width-medium-1-4">
-                                            <SideNav nav={nav} />
-                                        </div>
-                                        <div className="uk-width-medium-3-4">
-                                            <Switch>
-                                                <Route
-                                                    exact
-                                                    path="/"
-                                                    component={Dashboard}
-                                                />
-                                                <Route
-                                                    path="/membership"
-                                                    component={Membership}
-                                                />
-                                                <Route
-                                                    path="/sales"
-                                                    component={Sales}
-                                                />
-                                                <Route
-                                                    path="/messages"
-                                                    component={Messages}
-                                                />
-                                                <Route
-                                                    path="/statistics"
-                                                    component={Statistics}
-                                                />
-                                                <Route
-                                                    path="/settings"
-                                                    component={Settings}
-                                                />
-                                                <Route
-                                                    path="/quiz"
-                                                    component={Quiz}
-                                                />
-                                                <Route
-                                                    path="/boxTerminator"
-                                                    component={BoxTerminator}
-                                                />
-                                                <Route component={Page404} />
-                                            </Switch>
-                                        </div>
+    return (
+        <Router history={browserHistory}>
+            <Switch>
+                <Route path="/logout" component={Logout} />
+                <Route
+                    path="/request-password-reset"
+                    component={RequestPasswordReset}
+                />
+                <Route path="/password-reset" component={PasswordReset} />
+                <Route path="*">
+                    {isLoggedIn && (
+                        <div style={{ marginBottom: "2em" }}>
+                            <Nav nav={nav} />
+                            <div className="uk-container uk-container-center uk-margin-top">
+                                <div className="uk-grid">
+                                    <div className="uk-width-medium-1-4">
+                                        <SideNav nav={nav} />
+                                    </div>
+                                    <div className="uk-width-medium-3-4">
+                                        <Switch>
+                                            <Route
+                                                exact
+                                                path="/"
+                                                component={Dashboard}
+                                            />
+                                            <Route
+                                                path="/membership"
+                                                component={Membership}
+                                            />
+                                            <Route
+                                                path="/sales"
+                                                component={Sales}
+                                            />
+                                            <Route
+                                                path="/messages"
+                                                component={Messages}
+                                            />
+                                            <Route
+                                                path="/statistics"
+                                                component={Statistics}
+                                            />
+                                            <Route
+                                                path="/settings"
+                                                component={Settings}
+                                            />
+                                            <Route
+                                                path="/quiz"
+                                                component={Quiz}
+                                            />
+                                            <Route
+                                                path="/boxTerminator"
+                                                component={BoxTerminator}
+                                            />
+                                            <Route component={Page404} />
+                                        </Switch>
                                     </div>
                                 </div>
                             </div>
-                        )}
-                        {!this.state.isLoggedIn && <Login />}
-                    </Route>
-                </Switch>
-            </Router>
-        );
-    }
-}
+                        </div>
+                    )}
+                    {!isLoggedIn && <Login />}
+                </Route>
+            </Switch>
+        </Router>
+    );
+};
+
 App.title = "MakerAdmin";
 
 ReactDOM.render(<App />, document.getElementById("main"));

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 
 const continents = [
     {
@@ -1041,82 +1041,70 @@ const continents = [
     },
 ];
 
-class CountryDropdown extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = { country: "" };
-    }
+const CountryDropdown = ({ model, name }) => {
+    const [country, setCountry] = useState("");
 
-    componentDidMount() {
-        const { model, name } = this.props;
-        this.unsubscribe = model.subscribe(() =>
-            this.setState({ country: model[name] === null ? "" : model[name] }),
-        );
-    }
+    useEffect(() => {
+        const unsubscribe = model.subscribe(() => {
+            setCountry(model[name] === null ? "" : model[name]);
+        });
 
-    componentWillUnmount() {
-        this.unsubscribe();
-    }
+        return () => {
+            unsubscribe();
+        };
+    }, [model, name]);
 
-    getCountryName(code) {
+    const getCountryName = (code) => {
         let name = "Unknown";
 
         continents.forEach((continent) => {
-            continent.countries.forEach((country) => {
-                if (country.code === code) {
-                    name = country.name;
+            continent.countries.forEach((ctry) => {
+                if (ctry.code === code) {
+                    name = ctry.name;
                 }
             });
         });
 
         return name;
-    }
+    };
 
-    render() {
-        const { model, name } = this.props;
+    let countries = [];
+    continents.forEach((continent) => {
+        countries.push(
+            <li key={continent.name} className="uk-nav-header">
+                {continent.name}
+            </li>,
+        );
 
-        let countries = [];
-        continents.forEach((continent) => {
+        continent.countries.forEach((country) => {
             countries.push(
-                <li key={continent.name} className="uk-nav-header">
-                    {continent.name}
+                <li key={country.code}>
+                    <a
+                        onClick={(e) =>
+                            (model[name] = e.target.dataset.country)
+                        }
+                        data-country={country.code}
+                        className="uk-dropdown-close"
+                    >
+                        <span className={"flag flag-" + country.code} />{" "}
+                        {country.name}
+                    </a>
                 </li>,
             );
-
-            continent.countries.forEach((country) => {
-                countries.push(
-                    <li key={country.code}>
-                        <a
-                            onClick={(e) =>
-                                (model[name] = e.target.dataset.country)
-                            }
-                            data-country={country.code}
-                            className="uk-dropdown-close"
-                        >
-                            <span className={"flag flag-" + country.code} />{" "}
-                            {country.name}
-                        </a>
-                    </li>,
-                );
-            });
         });
+    });
 
-        return (
-            <div
-                data-uk-dropdown="{mode:'click'}"
-                className="uk-button-dropdown"
-            >
-                <button className="uk-button uk-button-mini">
-                    <span className={"flag flag-" + this.state.country} />{" "}
-                    {this.getCountryName(this.state.country)}{" "}
-                    <i className="uk-icon-angle-down" />
-                </button>
-                <div className="uk-dropdown uk-dropdown-scrollable uk-dropdown-small">
-                    <ul className="uk-nav uk-nav-dropdown">{countries}</ul>
-                </div>
+    return (
+        <div data-uk-dropdown="{mode:'click'}" className="uk-button-dropdown">
+            <button className="uk-button uk-button-mini">
+                <span className={"flag flag-" + country} />{" "}
+                {getCountryName(country)} <i className="uk-icon-angle-down" />
+            </button>
+            <div className="uk-dropdown uk-dropdown-scrollable uk-dropdown-small">
+                <ul className="uk-nav uk-nav-dropdown">{countries}</ul>
             </div>
-        );
-    }
-}
+        </div>
+    );
+};
 
 export default CountryDropdown;

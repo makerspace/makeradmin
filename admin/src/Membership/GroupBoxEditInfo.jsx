@@ -1,36 +1,33 @@
-import React from "react";
-import PropTypes from "prop-types";
-import Group from "../Models/Group";
-import GroupForm from "../Components/GroupForm";
-import { confirmModal } from "../message";
+import React, { useContext } from "react";
 import { withRouter } from "react-router";
+import GroupForm from "../Components/GroupForm";
+import GroupContext from "../Contexts/GroupContext";
+import { confirmModal } from "../message";
 
-class GroupBoxEditInfo extends React.Component {
-    render() {
-        const { router } = this.props;
+const GroupBoxEditInfo = (props) => {
+    const { router } = props;
+    const group = useContext(GroupContext);
 
-        return (
-            <div className="uk-margin-top">
-                <GroupForm
-                    group={this.context.group}
-                    onSave={() => this.context.group.save()}
-                    onDelete={() => {
-                        const { group } = this.context;
-                        return confirmModal(group.deleteConfirmMessage())
-                            .then(() => group.del())
-                            .then(() => {
-                                router.push("/membership/groups/");
-                            })
-                            .catch(() => null);
-                    }}
-                />
-            </div>
-        );
+    if (!group) {
+        return <div>Group not found</div>;
     }
-}
 
-GroupBoxEditInfo.contextTypes = {
-    group: PropTypes.instanceOf(Group),
+    return (
+        <div className="uk-margin-top">
+            <GroupForm
+                group={group}
+                onSave={() => group.save()}
+                onDelete={() => {
+                    confirmModal(group.deleteConfirmMessage())
+                        .then(() => group.del())
+                        .then(() => {
+                            router.push("/membership/groups/");
+                        })
+                        .catch(() => null);
+                }}
+            />
+        </div>
+    );
 };
 
 export default withRouter(GroupBoxEditInfo);
