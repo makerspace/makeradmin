@@ -21,6 +21,13 @@ const GroupBoxPermissions = (props) => {
     );
     const collection = collectionRef.current;
 
+    const filterOptions = (allOptions) => {
+        const existing = new Set((collection.items || []).map((i) => i.id));
+        return allOptions.filter(
+            (permission) => !existing.has(permission.permission_id),
+        );
+    };
+
     useEffect(() => {
         get({ url: "/membership/permission" }).then((data) => {
             const fetchedOptions = data.data;
@@ -36,13 +43,6 @@ const GroupBoxPermissions = (props) => {
             unsubscribe();
         };
     }, []);
-
-    const filterOptions = (allOptions) => {
-        const existing = new Set((collection.items || []).map((i) => i.id));
-        return allOptions.filter(
-            (permission) => !existing.has(permission.permission_id),
-        );
-    };
 
     const selectOption = (permission) => {
         setSelectedOption(permission);
