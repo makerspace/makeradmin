@@ -31,14 +31,14 @@ const ProductForm = ({ product, onDelete, onSave }) => {
         const handleProductChange = () => {
             const newActions = product.actions;
             const newAvailableActionTypes = filterAvailableActions(newActions);
-            const selectedActionType = filterSelectedActionType(
+            const action = filterSelectedActionType(
                 selectedActionType,
                 newAvailableActionTypes,
             );
 
             setActions(newActions);
             setAvailableActionTypes(newAvailableActionTypes);
-            setSelectedActionType(selectedActionType);
+            setSelectedActionType(action);
             setSaveDisabled(!product.canSave());
         };
 
@@ -93,7 +93,7 @@ const ProductForm = ({ product, onDelete, onSave }) => {
         <div className="uk-margin-top">
             <form
                 className="uk-form uk-form-stacked"
-                onSubmit={(e) => {
+                onSubmit={() => {
                     onSave();
                     return false;
                 }}
