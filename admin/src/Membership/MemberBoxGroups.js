@@ -55,8 +55,6 @@ function MemberBoxGroups(props) {
 
         collectionRef.current.add(new Group(group)).then(() => {
             setSelectedOption(null);
-            const updatedItems = [...items, { id: group.group_id }];
-            setShowOptions(filterOptions(updatedItems, options));
         });
     };
 
@@ -99,21 +97,7 @@ function MemberBoxGroups(props) {
                             <td>
                                 <a
                                     onClick={() =>
-                                        collectionRef.current
-                                            .remove(item)
-                                            .then(() => {
-                                                const updatedItems =
-                                                    items.filter(
-                                                        (i) => i.id !== item.id,
-                                                    );
-                                                setItems(updatedItems);
-                                                setShowOptions(
-                                                    filterOptions(
-                                                        updatedItems,
-                                                        options,
-                                                    ),
-                                                );
-                                            })
+                                        collectionRef.current.remove(item)
                                     }
                                     className="removebutton"
                                 >
