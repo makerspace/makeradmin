@@ -38,7 +38,7 @@ const MessageForm = ({ message, onSave, recipientSelect }) => {
         const unsubscribe = message.subscribe(() => {
             setSendDisabled(!message.canSave());
             setRecipients(message.recipients);
-            setBodyLength(message.body.length); // Update body length whenever the message updates
+            setBodyLength(message.body.length);
         });
 
         return () => {
@@ -108,13 +108,13 @@ const MessageForm = ({ message, onSave, recipientSelect }) => {
                 model={message}
                 name="subject"
                 title="Ärende"
-                onChange={() => setBodyLength(message.body.length)} // Ensure the length is updated when body changes
+                onChange={() => setBodyLength(message.body.length)}
             />
             <Textarea
                 model={message}
                 name="body"
                 title="Meddelande"
-                onChange={() => setBodyLength(message.body.length)} // Ensure the length is updated when body changes
+                onChange={() => setBodyLength(message.body.length)}
             />
 
             <div className="uk-form-row">
