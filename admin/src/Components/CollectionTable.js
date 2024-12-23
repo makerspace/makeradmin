@@ -2,6 +2,15 @@ import React, { useEffect, useState } from "react";
 import * as _ from "underscore";
 import { confirmModal } from "../message";
 
+const deleteItem = (collection, item) => {
+    return confirmModal(item.deleteConfirmMessage())
+        .then(() => item.del())
+        .then(
+            () => collection.fetch(),
+            () => null,
+        );
+};
+
 const CollectionTable = (props) => {
     const [sort, setSort] = useState({ key: null, order: "up" });
     const [items, setItems] = useState(null);
@@ -18,9 +27,9 @@ const CollectionTable = (props) => {
     } = props;
 
     useEffect(() => {
-        const unsubscribe = collection.subscribe(({ page, items }) => {
-            setPage(page);
-            setItems(items);
+        const unsubscribe = collection.subscribe(({ page: p, items: i }) => {
+            setPage(p);
+            setItems(i);
             setLoading(false);
         });
         return () => {
@@ -112,15 +121,6 @@ const CollectionTable = (props) => {
                 })}
             </ul>
         );
-    };
-
-    const deleteItem = (collection, item) => {
-        return confirmModal(item.deleteConfirmMessage())
-            .then(() => item.del())
-            .then(
-                () => collection.fetch(),
-                () => null,
-            );
     };
 
     let rows = null;
