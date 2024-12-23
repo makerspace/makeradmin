@@ -5,6 +5,7 @@ from flask import request
 from pymysql.constants.ER import DUP_ENTRY
 from service.db import db_session
 from service.entity import Entity
+from sqlalchemy import text
 from sqlalchemy.exc import IntegrityError
 
 from membership.member_auth import check_and_hash_password
@@ -46,7 +47,7 @@ class MemberEntity(Entity):
                 with db_session.begin_nested():
                     data = data.copy()
                     (max_member_number,) = db_session.execute(
-                        "SELECT COALESCE(MAX(member_number), 999) FROM membership_members"
+                        text("SELECT COALESCE(MAX(member_number), 999) FROM membership_members")
                     ).fetchone()
                     data["member_number"] = max_member_number + offset
                     # We must not commit here, because that will end our transaction, and the to_obj call will fail

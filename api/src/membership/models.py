@@ -17,10 +17,8 @@ from sqlalchemy import (
     Text,
     func,
     select,
-    text,
 )
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import column_property, configure_mappers, relationship, validates
+from sqlalchemy.orm import column_property, configure_mappers, declarative_base, relationship, validates
 
 Base = declarative_base()
 
@@ -73,7 +71,7 @@ class Member(Base):
     def validate_phone(self, key: Any, value: Optional[str]) -> Optional[str]:
         return normalise_phone_number(value)
 
-    groups = relationship("Group", secondary=member_group, back_populates="members")
+    groups = relationship("Group", secondary=member_group, back_populates="members", cascade_backrefs=False)
 
     def __repr__(self) -> str:
         return f"Member(member_id={self.member_id}, member_number={self.member_number}, email={self.email})"
@@ -99,9 +97,13 @@ class Group(Base):
     updated_at = Column(DateTime, server_default=func.now())
     deleted_at = Column(DateTime)
 
-    members = relationship("Member", secondary=member_group, lazy="dynamic", back_populates="groups")
+    members = relationship(
+        "Member", secondary=member_group, lazy="dynamic", back_populates="groups", cascade_backrefs=False
+    )
 
-    permissions = relationship("Permission", secondary=group_permission, back_populates="groups")
+    permissions = relationship(
+        "Permission", secondary=group_permission, back_populates="groups", cascade_backrefs=False
+    )
 
     def __repr__(self) -> str:
         return f"Group(group_id={self.group_id}, name={self.name})"
@@ -110,7 +112,7 @@ class Group(Base):
 # Calculated property will be executed as a sub select for each groups, since it is not that many groups this will be
 # fine.
 Group.num_members = column_property(
-    select([func.count(member_group.columns.member_id)])
+    select(func.count(member_group.columns.member_id))
     .where(Group.group_id == member_group.columns.group_id)
     .scalar_subquery()
 )
@@ -125,7 +127,7 @@ class Permission(Base):
     updated_at = Column(DateTime, server_default=func.now())
     deleted_at = Column(DateTime)
 
-    groups = relationship("Group", secondary=group_permission, back_populates="permissions")
+    groups = relationship("Group", secondary=group_permission, back_populates="permissions", cascade_backrefs=False)
 
 
 class Key(Base):
@@ -139,7 +141,7 @@ class Key(Base):
     updated_at = Column(DateTime, server_default=func.now())
     deleted_at = Column(DateTime)
 
-    member = relationship(Member, backref="keys")
+    member = relationship(Member, backref="keys", cascade_backrefs=False)
 
     def __repr__(self) -> str:
         return f"Key(key_id={self.key_id}, tagid={self.tagid})"
@@ -162,7 +164,7 @@ class Span(Base):
     deleted_at = Column(DateTime)
     deletion_reason = Column(String(255))
 
-    member = relationship(Member, backref="spans")
+    member = relationship(Member, backref="spans", cascade_backrefs=False)
 
     def __repr__(self) -> str:
         return f"Span(span_id={self.span_id}, type={self.type}, enddate={self.enddate})"
@@ -188,7 +190,7 @@ class Box(Base):
     # last nag date for that member.
     last_nag_at = Column(DateTime, nullable=False)
 
-    member = relationship(Member, backref="boxes")
+    member = relationship(Member, backref="boxes", cascade_backrefs=False)
 
     def __repr__(self) -> str:
         return (
@@ -213,7 +215,7 @@ class PhoneNumberChangeRequest(Base):
     # When the request was made.
     timestamp = Column(DateTime, nullable=False)
 
-    member = relationship(Member, backref="change_phone_number_requests")
+    member = relationship(Member, backref="change_phone_number_requests", cascade_backrefs=False)
 
     @validates("phone")
     def validate_phone(self, key: Any, value: Optional[str]) -> Optional[str]:
