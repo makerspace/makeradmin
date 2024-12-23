@@ -14,7 +14,6 @@ const RequestPasswordReset = () => {
     const submit = (e) => {
         e.preventDefault();
 
-        // Error handling
         if (!userIdentification) {
             showError("You need to fill your email or member number.");
             return;
@@ -55,8 +54,8 @@ const RequestPasswordReset = () => {
                             <div className="uk-form-icon">
                                 <i className="uk-icon-user" />
                                 <input
-                                    value={userIdentification} // Controlled by state
-                                    onChange={handleInputChange} // Updates state on user input
+                                    value={userIdentification}
+                                    onChange={handleInputChange}
                                     className="uk-form-large uk-form-width-large"
                                     type="text"
                                     placeholder="Email/Medlemsnummer"

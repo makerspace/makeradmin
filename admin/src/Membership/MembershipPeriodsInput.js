@@ -27,7 +27,6 @@ function MembershipPeriodsInput({ spans, member_id }) {
     useEffect(() => {
         const unsubscribes = [];
 
-        // Subscribe to spans updates
         unsubscribes.push(
             spans.subscribe(({ items }) => {
                 categoryPeriodsList.forEach((periods) =>
@@ -36,7 +35,6 @@ function MembershipPeriodsInput({ spans, member_id }) {
             }),
         );
 
-        // Subscribe to categoryPeriods updates
         categoryPeriodsList.forEach((cp) => {
             unsubscribes.push(cp.subscribe(() => setSaveDisabled(!canSave())));
         });
@@ -80,16 +78,10 @@ function MembershipPeriodsInput({ spans, member_id }) {
         Promise.all(promises).then(() => {
             spans.fetch();
 
-            // post({
-            //     url: `/webshop/member/${member_id}/ship_labaccess_orders`,
-            //     expectedDataStatus: "ok",
-            // });
             post({
                 url: `/webshop/member/${member_id}/ship_labaccess_orders`,
                 headers: { "Content-Type": "application/json" },
-                payload: {
-                    /* any required data */
-                },
+                payload: {},
                 expectedDataStatus: "ok",
             });
         });

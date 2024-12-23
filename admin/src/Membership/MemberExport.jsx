@@ -5,7 +5,6 @@ function MemberExport() {
     const [csvContent, setCsvContent] = useState(null);
     const [state, setState] = useState("none");
 
-    // Function to export members
     const exportMembers = () => {
         setState("loading");
 
