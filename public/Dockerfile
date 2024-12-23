@@ -16,8 +16,6 @@ RUN apk update \
 
 RUN npm install -g npm@9.2.0
 
-RUN npm i -g npm sass
-
 RUN pip3 install flask gunicorn
 
 RUN mkdir -p /work/src && mkdir -p /work/dist/js
@@ -41,7 +39,7 @@ COPY src /work/src
 
 COPY run.sh /work/run.sh
 
-RUN sass scss/style.scss static/style.css
+RUN npm exec sass scss/style.scss static/style.css
 
 ARG DEV_BUILD
 
