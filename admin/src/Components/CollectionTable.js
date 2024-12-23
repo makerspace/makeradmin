@@ -11,20 +11,18 @@ const deleteItem = (collection, item) => {
         );
 };
 
-const CollectionTable = (props) => {
+const CollectionTable = ({
+    collection,
+    rowComponent,
+    columns,
+    emptyMessage,
+    className,
+    onPageNav,
+}) => {
     const [sort, setSort] = useState({ key: null, order: "up" });
     const [items, setItems] = useState(null);
     const [page, setPage] = useState({});
     const [loading, setLoading] = useState(true);
-
-    const {
-        collection,
-        rowComponent,
-        columns,
-        emptyMessage,
-        className,
-        onPageNav,
-    } = props;
 
     useEffect(() => {
         const unsubscribe = collection.subscribe(({ page: p, items: i }) => {

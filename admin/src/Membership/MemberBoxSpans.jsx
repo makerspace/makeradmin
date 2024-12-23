@@ -26,7 +26,6 @@ function MemberBoxSpans(props) {
         }),
     );
 
-    // Fetch pending actions on mount
     useEffect(() => {
         get({ url: `/membership/member/${memberId}/pending_actions` }).then(
             (r) => {
@@ -43,7 +42,6 @@ function MemberBoxSpans(props) {
         );
     }, [memberId]);
 
-    // Subscribe to collection changes
     useEffect(() => {
         const unsubscribe = collectionRef.current.subscribe(({ items }) => {
             setItems(items);

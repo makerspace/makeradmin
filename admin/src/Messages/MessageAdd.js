@@ -7,10 +7,8 @@ import { notifySuccess } from "../message";
 function MessageAdd(props) {
     const { router } = props;
 
-    // Create a new Message instance
     const message = useMemo(() => new Message(), []);
 
-    // Handler for saving the message
     const onSend = () => {
         message.save().then(() => {
             router.push("/messages");

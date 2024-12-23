@@ -8,7 +8,6 @@ function MessageShow(props) {
     const messageInstance = useMemo(() => Message.get(id), [id]);
 
     const [message, setMessage] = useState(() => {
-        // Initialize with extracted attributes
         return {
             body: "",
             created_at: null,
@@ -25,7 +24,6 @@ function MessageShow(props) {
     });
 
     useEffect(() => {
-        // Extract message attributes from the instance and set state
         const updateMessage = () => {
             setMessage({
                 body: messageInstance.body,
@@ -42,13 +40,10 @@ function MessageShow(props) {
             });
         };
 
-        // Call the function once to initialize state
         updateMessage();
 
-        // Subscribe to updates
         const unsubscribe = messageInstance.subscribe(updateMessage);
 
-        // Cleanup subscription on unmount
         return () => {
             unsubscribe();
         };
