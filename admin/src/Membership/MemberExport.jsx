@@ -1,17 +1,13 @@
-import React from "react";
+import React, { useState } from "react";
 import { get } from "../gateway";
 
-class MemberExport extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            csv_content: null,
-            state: "none",
-        };
-    }
+function MemberExport() {
+    const [csvContent, setCsvContent] = useState(null);
+    const [state, setState] = useState("none");
 
-    exportMembers() {
-        this.setState({ state: "loading" });
+    // Function to export members
+    const exportMembers = () => {
+        setState("loading");
 
         get({ url: "/membership/member/all_with_membership" }).then((data) => {
             const members = data.data;
@@ -46,38 +42,34 @@ class MemberExport extends React.Component {
                 ]);
             }
 
-            this.setState({
-                state: "loaded",
-                csv_content: rows.map((r) => r.join(",")).join("\n"),
-            });
+            setState("loaded");
+            setCsvContent(rows.map((r) => r.join(",")).join("\n"));
         });
-    }
+    };
 
-    render() {
-        return (
-            <div>
-                <h2>Exportera medlemslista</h2>
-                {this.state.csv_content && (
-                    <textarea
-                        readOnly
-                        className="uk-width-1-1"
-                        value={this.state.csv_content}
-                        rows={50}
-                    ></textarea>
-                )}
-                {!this.state.csv_content && (
-                    <a
-                        className="uk-button uk-button-primary"
-                        role="button"
-                        onClick={() => this.exportMembers()}
-                    >
-                        Exportera alla aktiva medlemmar som CSV
-                        {this.state.state === "loading" ? "..." : ""}
-                    </a>
-                )}
-            </div>
-        );
-    }
+    return (
+        <div>
+            <h2>Exportera medlemslista</h2>
+            {csvContent && (
+                <textarea
+                    readOnly
+                    className="uk-width-1-1"
+                    value={csvContent}
+                    rows={50}
+                ></textarea>
+            )}
+            {!csvContent && (
+                <a
+                    className="uk-button uk-button-primary"
+                    role="button"
+                    onClick={exportMembers}
+                >
+                    Exportera alla aktiva medlemmar som CSV
+                    {state === "loading" ? "..." : ""}
+                </a>
+            )}
+        </div>
+    );
 }
 
 export default MemberExport;
