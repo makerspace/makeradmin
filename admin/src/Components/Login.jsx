@@ -1,16 +1,14 @@
-import React, { useRef } from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import auth from "../auth";
 import { showError } from "../message";
 
 const Login = () => {
-    const usernameRef = useRef(null);
-    const passwordRef = useRef(null);
+    const [username, setUsername] = useState("");
+    const [password, setPassword] = useState("");
 
     const login = (e) => {
         e.preventDefault();
-        const username = usernameRef.current.value;
-        const password = passwordRef.current.value;
 
         if (!username || !password) {
             showError("Du måste fylla i email/medlemsnummer och lösenord");
@@ -38,7 +36,8 @@ const Login = () => {
                         <div className="uk-form-icon">
                             <i className="uk-icon-user" />
                             <input
-                                ref={usernameRef}
+                                value={username}
+                                onChange={(e) => setUsername(e.target.value)}
                                 className="uk-form-large uk-form-width-large"
                                 type="text"
                                 placeholder="Email/Medlemsnummer"
@@ -51,7 +50,8 @@ const Login = () => {
                         <div className="uk-form-icon">
                             <i className="uk-icon-lock" />
                             <input
-                                ref={passwordRef}
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
                                 className="uk-form-large uk-form-width-large"
                                 type="password"
                                 placeholder="Lösenord"
