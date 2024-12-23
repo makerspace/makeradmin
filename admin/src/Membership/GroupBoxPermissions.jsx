@@ -21,6 +21,13 @@ const GroupBoxPermissions = (props) => {
     );
     const collection = collectionRef.current;
 
+    const filterOptions = (allOptions) => {
+        const existing = new Set((collection.items || []).map((i) => i.id));
+        return allOptions.filter(
+            (permission) => !existing.has(permission.permission_id),
+        );
+    };
+
     useEffect(() => {
         get({ url: "/membership/permission" }).then((data) => {
             const fetchedOptions = data.data;
@@ -37,13 +44,6 @@ const GroupBoxPermissions = (props) => {
         };
     }, []);
 
-    const filterOptions = (allOptions) => {
-        const existing = new Set((collection.items || []).map((i) => i.id));
-        return allOptions.filter(
-            (permission) => !existing.has(permission.permission_id),
-        );
-    };
-
     const selectOption = (permission) => {
         setSelectedOption(permission);
 
@@ -59,8 +59,7 @@ const GroupBoxPermissions = (props) => {
 
     const columns = [{ title: "Behörigheter" }];
 
-    const Row = (collection) => (props) => {
-        const { item } = props;
+    const Row = ({ item }) => {
         return (
             <tr>
                 <td>{item.permission}</td>
@@ -103,7 +102,7 @@ const GroupBoxPermissions = (props) => {
             <div className="uk-margin-top">
                 <CollectionTable
                     emptyMessage="Gruppen har inga behörigheter"
-                    rowComponent={Row(collection)}
+                    rowComponent={Row}
                     collection={collection}
                     columns={columns}
                 />

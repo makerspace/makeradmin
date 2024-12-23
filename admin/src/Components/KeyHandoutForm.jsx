@@ -162,13 +162,9 @@ function KeyHandoutForm(props) {
         };
     }, [member.id]);
 
-    const renderAccessyInviteSaveButton = ({
-        has_signed,
-        labaccess_enddate,
-        special_enddate,
-        pending_labaccess_days,
-        member,
-    }) => {
+    const has_signed = member.labaccess_agreement_at !== null;
+
+    const AccessyInviteSaveButton = () => {
         let tooltip;
         let color;
 
@@ -228,8 +224,6 @@ function KeyHandoutForm(props) {
             </button>
         );
     };
-
-    const has_signed = member.labaccess_agreement_at !== null;
 
     let accessy_paragraph;
     if (accessy_in_org) {
@@ -366,13 +360,7 @@ function KeyHandoutForm(props) {
                 >
                     <i className="uk-icon-save" /> Spara
                 </button>
-                {renderAccessyInviteSaveButton({
-                    has_signed,
-                    labaccess_enddate,
-                    special_enddate,
-                    pending_labaccess_days,
-                    member,
-                })}
+                <AccessyInviteSaveButton />
             </div>
         </>
     );

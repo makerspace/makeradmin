@@ -1041,6 +1041,20 @@ const continents = [
     },
 ];
 
+const getCountryName = (code) => {
+    let name = "Unknown";
+
+    continents.forEach((continent) => {
+        continent.countries.forEach((ctry) => {
+            if (ctry.code === code) {
+                name = ctry.name;
+            }
+        });
+    });
+
+    return name;
+};
+
 const CountryDropdown = ({ model, name }) => {
     const [country, setCountry] = useState("");
 
@@ -1054,20 +1068,6 @@ const CountryDropdown = ({ model, name }) => {
         };
     }, [model, name]);
 
-    const getCountryName = (code) => {
-        let name = "Unknown";
-
-        continents.forEach((continent) => {
-            continent.countries.forEach((ctry) => {
-                if (ctry.code === code) {
-                    name = ctry.name;
-                }
-            });
-        });
-
-        return name;
-    };
-
     let countries = [];
     continents.forEach((continent) => {
         countries.push(
@@ -1076,18 +1076,17 @@ const CountryDropdown = ({ model, name }) => {
             </li>,
         );
 
-        continent.countries.forEach((country) => {
+        continent.countries.forEach((c) => {
             countries.push(
-                <li key={country.code}>
+                <li key={c.code}>
                     <a
                         onClick={(e) =>
                             (model[name] = e.target.dataset.country)
                         }
-                        data-country={country.code}
+                        data-country={c.code}
                         className="uk-dropdown-close"
                     >
-                        <span className={"flag flag-" + country.code} />{" "}
-                        {country.name}
+                        <span className={"flag flag-" + c.code} /> {c.name}
                     </a>
                 </li>,
             );
