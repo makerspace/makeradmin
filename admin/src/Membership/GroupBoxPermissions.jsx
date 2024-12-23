@@ -59,8 +59,7 @@ const GroupBoxPermissions = (props) => {
 
     const columns = [{ title: "Behörigheter" }];
 
-    const Row = (collection) => (props) => {
-        const { item } = props;
+    const Row = ({ item }) => {
         return (
             <tr>
                 <td>{item.permission}</td>
@@ -103,7 +102,7 @@ const GroupBoxPermissions = (props) => {
             <div className="uk-margin-top">
                 <CollectionTable
                     emptyMessage="Gruppen har inga behörigheter"
-                    rowComponent={Row(collection)}
+                    rowComponent={Row}
                     collection={collection}
                     columns={columns}
                 />
