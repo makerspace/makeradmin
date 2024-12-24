@@ -2,8 +2,9 @@
 from dataclasses import dataclass, field
 from datetime import date, timedelta
 from logging import getLogger
-from typing import Dict, List
+from typing import Dict, List, Optional
 
+from membership.membership import get_members_and_membership, get_membership_summaries, get_membership_summary
 from membership.models import Member, Span
 from service.db import db_session
 from sqlalchemy.orm import contains_eager
@@ -19,34 +20,33 @@ from multiaccessy.accessy import (
 logger = getLogger("makeradmin")
 
 
-GROUPS = {
-    Span.SPECIAL_LABACESS: ACCESSY_SPECIAL_LABACCESS_GROUP,
-    Span.LABACCESS: ACCESSY_LABACCESS_GROUP,
-}
-
-
-def get_wanted_access(today) -> dict[PHONE, AccessyMember]:
-    query = db_session.query(Member).join(Member.spans)
-    query = query.options(contains_eager(Member.spans))
-    query = query.filter(
-        Member.deleted_at.is_(None),
-        Member.phone.is_not(None),
-        Member.labaccess_agreement_at.is_not(None),
-        Span.type.in_([Span.LABACCESS, Span.SPECIAL_LABACESS]),
-        Span.startdate <= today,
-        Span.enddate >= today,
-        Span.deleted_at.is_(None),
-    )
+def get_wanted_access(today: date, member_id: Optional[int] = None) -> dict[PHONE, AccessyMember]:
+    if member_id is not None:
+        member = db_session.query(Member).get(member_id)
+        if member is None:
+            raise Exception("Member does not exist")
+        members = [member]
+        summaries = [get_membership_summary(member_id, at_date=today)]
+    else:
+        members, summaries = get_members_and_membership(at_date=today)
 
     return {
-        m.phone: AccessyMember(
-            phone=m.phone,
-            name=f"{m.firstname} {m.lastname}",
-            groups={GROUPS[span.type] for span in m.spans},
-            member_id=m.member_id,
-            member_number=m.member_number,
+        member.phone: AccessyMember(
+            phone=member.phone,
+            name=f"{member.firstname} {member.lastname}",
+            groups={
+                group
+                for group, enabled in {
+                    ACCESSY_SPECIAL_LABACCESS_GROUP: membership.special_labaccess_active,
+                    ACCESSY_LABACCESS_GROUP: membership.labaccess_active,
+                }.items()
+                if enabled
+            },
+            member_id=member.member_id,
+            member_number=member.member_number,
         )
-        for m in query
+        for member, membership in zip(members, summaries)
+        if member.phone is not None and membership.effective_labaccess_active
     }
 
 
@@ -98,7 +98,7 @@ def calculate_diff(actual_members: Dict[str, AccessyMember], wanted_members: Dic
     return diff
 
 
-def sync(today=None):
+def sync(today: Optional[date] = None, member_id: Optional[int] = None) -> None:
     if accessy_session is None:
         logger.info(f"accessy sync skipped, accessy not configured.")
         return
@@ -106,37 +106,53 @@ def sync(today=None):
     if not today:
         today = date.today()
 
-    actual_members = accessy_session.get_all_members()
+    # If a specific member is given, sync only that member,
+    # otherwise sync all members
+    if member_id is not None:
+        member = db_session.query(Member).get(member_id)
+        if member is None:
+            raise Exception("Member does not exist")
+        if member.phone is None:
+            return
+        accessy_member = accessy_session._get_org_user_from_phone(member.phone)
+        actual_members = [accessy_member] if accessy_member is not None else []
+    else:
+        actual_members = accessy_session.get_all_members()
+
     pending_invites = accessy_session.get_pending_invitations(after_date=today - timedelta(days=7))
-    wanted_members = get_wanted_access(today)
+    wanted_members = get_wanted_access(today, member_id=member_id)
 
     actual_members_by_phone = {}
+    members_to_discard: List[AccessyMember] = []
     for m in actual_members:
         if m.phone:
             actual_members_by_phone[m.phone] = m
         else:
-            logger.warning(
-                f"accessy sync got member %s from accessy without phone number, skipping in calculation, will probably cause extra invite or delayed org remove",
-                m,
-            )
+            # Members with no phone numbers are probably accounts that have gotten reset
+            members_to_discard.append(m)
 
     diff = calculate_diff(actual_members_by_phone, wanted_members)
 
-    for member in diff.invites:
-        if member.phone in pending_invites:
-            logger.info(f"accessy sync skipping, invite already pending: {member}")
+    for accessy_member in diff.invites:
+        assert accessy_member.phone is not None
+        if accessy_member.phone in pending_invites:
+            logger.info(f"accessy sync skipping, invite already pending: {accessy_member}")
             continue
-        logger.info(f"accessy sync inviting: {member}")
-        accessy_session.invite_phone_to_org_and_groups([member.phone], member.groups)
+        logger.info(f"accessy sync inviting: {accessy_member}")
+        accessy_session.invite_phone_to_org_and_groups([accessy_member.phone], accessy_member.groups)
 
     for op in diff.group_adds:
         logger.info(f"accessy sync adding to group: {op}")
-        accessy_session.add_to_group(op.member.phone, op.group)
+        accessy_session.add_to_group(op.member, op.group)
 
     for op in diff.group_removes:
         logger.info(f"accessy sync removing from group: {op}")
-        accessy_session.remove_from_group(op.member.phone, op.group)
+        accessy_session.remove_from_group(op.member, op.group)
 
-    for member in diff.org_removes:
-        logger.info(f"accessy sync removing from org: {member}")
-        accessy_session.remove_from_org(member.phone)
+    for accessy_member in diff.org_removes:
+        logger.info(f"accessy sync removing from org: {accessy_member}")
+        accessy_session.remove_from_org(accessy_member)
+
+    for accessy_member in members_to_discard:
+        logger.info(f"accessy sync removing from org: {accessy_member}, because phone number is missing")
+        accessy_session.remove_from_org(accessy_member)
