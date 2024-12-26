@@ -13,6 +13,8 @@ from multiaccessy.accessy import (
     accessy_session,
 )
 
+from .sync import sync
+
 logger = getLogger("makeradmin")
 
 
@@ -61,25 +63,4 @@ def ensure_accessy_labaccess(member_id: int) -> None:
     if not summary.labaccess_active and not summary.special_labaccess_active:
         raise AccessyInvitePreconditionFailed("ingen aktiv labaccess")
 
-    groups = []
-    if summary.labaccess_active:
-        groups.append(ACCESSY_LABACCESS_GROUP)
-    if summary.special_labaccess_active:
-        groups.append(ACCESSY_SPECIAL_LABACCESS_GROUP)
-
-    member = db_session.query(Member).get(member_id)
-    assert member is not None
-
-    try:
-        if accessy_session.is_in_org(member.phone):
-            for group in groups:
-                if not accessy_session.is_in_group(member.phone, group):
-                    logger.info(f"accessy: user is already in org, addding to group: {member=} {group=}")
-                    accessy_session.add_to_group(member.phone, group)
-                else:
-                    logger.info(f"accessy: user is already in group: {member=} {group=}")
-        else:
-            logger.info(f"accessy, sending invite: {member=} {groups=}")
-            accessy_session.invite_phone_to_org_and_groups([member.phone], groups)
-    except Exception as e:
-        raise AccessyError("failed to interact with accessy") from e
+    sync(member_id=member_id)
