@@ -44,23 +44,26 @@ class IgnoreEvent(Exception):
     pass
 
 
-def get_pending_source_transaction(source_id: str) -> Transaction:
-    transaction = get_source_transaction(source_id)
+def get_pending_source_transaction(payment_intent_id: str) -> Transaction:
+    transaction = get_source_transaction(payment_intent_id)
 
     if not transaction:
-        raise IgnoreEvent(f"no transaction exists for source ({source_id})")
+        raise IgnoreEvent(f"no transaction exists for payment intent ({payment_intent_id})")
 
     if transaction.status != Transaction.PENDING:
-        raise IgnoreEvent(f"transaction {transaction.id} status is {transaction.status}, source event {source_id}")
+        raise IgnoreEvent(
+            f"transaction {transaction.id} status is {transaction.status}, payment intent {payment_intent_id}"
+        )
 
     return transaction
 
 
 def stripe_charge_event(subtype: EventSubtype, event: stripe.Event) -> None:
     charge = cast(stripe.Charge, event.data.object)
-    payment_method = charge.payment_method
-    assert payment_method is not None
-    transaction = get_pending_source_transaction(payment_method)
+    payment_intent_id = charge.payment_intent
+    assert payment_intent_id is not None
+    assert type(payment_intent_id) == str
+    transaction = get_pending_source_transaction(payment_intent_id)
 
     if subtype == EventSubtype.SUCCEEDED:
         charge_transaction(transaction, charge)
@@ -71,37 +74,7 @@ def stripe_charge_event(subtype: EventSubtype, event: stripe.Event) -> None:
 
 
 def stripe_source_event(subtype: EventSubtype, event: stripe.Event) -> None:
-    source = cast(stripe.Source, event.data.object)
-
-    transaction = get_pending_source_transaction(source.id)
-
-    if subtype == EventSubtype.CHARGEABLE:
-        if SourceType(source.type) == SourceType.THREE_D_SECURE:
-            # Charge card and resolve transaction, don't fail transaction on errors as it may be resolved when we get
-            # callback again.
-            try:
-                charge = create_stripe_charge(transaction, source.id)
-            except PaymentFailed as e:
-                logger.info(f"failing transaction {transaction.id}, permanent error when creating charge: {str(e)}")
-                commit_fail_transaction(transaction)
-            else:
-                charge_transaction(transaction, charge)
-
-        elif source.type == SourceType.CARD:
-            # Non 3d secure cards should be charged synchronously in payment, not here.
-            raise IgnoreEvent(f"transaction {transaction.id} source event of type card is handled synchronously")
-
-        else:
-            raise InternalServerError(
-                log=f"unexpected source type '{source.type}'" f" when handling source event: {source}"
-            )
-
-    elif subtype in (EventSubtype.FAILED, EventSubtype.CANCELED):
-        logger.info(f"failing transaction {transaction.id} due to source event subtype {subtype}")
-        commit_fail_transaction(transaction)
-
-    else:
-        raise IgnoreEvent(f"source event subtype {subtype} for transaction {transaction.id}")
+    pass
 
 
 def stripe_payment_intent_event(subtype: EventSubtype, event: stripe.Event) -> None:
