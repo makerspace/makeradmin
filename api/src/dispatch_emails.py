@@ -43,7 +43,7 @@ def send_messages(key: Optional[str], domain: str, sender: str, to_override: Opt
     query = query.filter(Message.status == Message.QUEUED)
     query = query.limit(limit)
 
-    if key is not None:
+    if key is None:
         messages = list(query)
         global warned_about_missing_key
         if len(messages) > 0 and not warned_about_missing_key:
