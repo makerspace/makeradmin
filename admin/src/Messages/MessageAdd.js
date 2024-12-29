@@ -5,13 +5,13 @@ import Message from "../Models/Message";
 import { notifySuccess } from "../message";
 
 function MessageAdd(props) {
-    const { router } = props;
+    const { history } = props;
 
     const message = useMemo(() => new Message(), []);
 
     const onSend = () => {
         message.save().then(() => {
-            router.push("/messages");
+            history.push("/messages");
             notifySuccess("Ditt meddelande har skickats");
         });
     };
