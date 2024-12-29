@@ -51,11 +51,12 @@ class StorageInfo:
     expired_reasons: List[str]
     actions: List[StorageAction]
 
-    def to_json(self) -> Dict:
+    def to_dict(self) -> Dict:
         # The info text is fairly generic in what it can be
         info_text = ""  # TODO display some nag history here
 
         expired = self.status != Status.ACTIVE
+        options = [action.to_button() for action in self.actions]
         return {
             "type": self.item.storage_type.storage_type,
             "member_number": self.member_number,
@@ -63,6 +64,7 @@ class StorageInfo:
             "expired": expired,
             "expired_date": self.expiration_date,
             "storage_id": self.item.id,
+            "options": options,
             "info": info_text,
         }
 

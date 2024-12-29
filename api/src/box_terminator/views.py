@@ -13,7 +13,7 @@ from box_terminator.models import MessageType, StorageType
 def box_terminator_fetch(message):
     """Used when scanning qr codes."""
     ParsedScannedMessage = json.loads(message)
-    fetch_storage_item(
+    storage_info = fetch_storage_item(
         ParsedScannedMessage.box_id,
         ParsedScannedMessage.member_number,
         ParsedScannedMessage.type,
@@ -21,6 +21,8 @@ def box_terminator_fetch(message):
         ParsedScannedMessage.unix_timestamp,
         ParsedScannedMessage.description,
     )
+    return json.dump(storage_info.to_dict())
+
     # What should be returned.
     # if "member_number" in ParsedScannedMessage:
     #     if (not "type" in ParsedScannedMessage) or ParsedScannedMessage["type"] == "box":
@@ -53,9 +55,6 @@ def box_terminator_fetch(message):
     #                 ],
     #             }
     #         )
-
-
-# TODO route for memberbooth to fetch storage types
 
 
 @service.route("/action/<string:action>/<string:storage_id>", method=GET, permission=MEMBER_EDIT)
