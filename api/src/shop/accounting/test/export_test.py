@@ -175,7 +175,7 @@ class AccountingExportWithStripeMockTest(FlaskTestBase):
             row = sie_rows.pop(0)
 
             if row.startswith("#GEN"):
-                assert datetime.now().strftime("%Y%m%d") in row
+                assert datetime.now(timezone.utc).replace(tzinfo=None).strftime("%Y%m%d") in row
                 assert self.member.firstname in row
                 assert self.member.lastname in row
 

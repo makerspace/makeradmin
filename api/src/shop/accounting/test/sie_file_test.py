@@ -157,7 +157,7 @@ class SieFileWithVerificationTest(FlaskTestBase):
             row = sie_rows.pop(0)
 
             if row.startswith("#GEN"):
-                assert datetime.now().strftime("%Y%m%d") in row
+                assert datetime.now(timezone.utc).replace(tzinfo=None).strftime("%Y%m%d") in row
                 assert signer in row
 
             if row.startswith("#DIM"):

@@ -1,6 +1,6 @@
 import argparse
 import random
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from getpass import getpass
 from typing import Any, Dict, Generic, Literal, Optional, Tuple, TypeVar, cast
 
@@ -452,7 +452,12 @@ def create_shop_transactions() -> None:
     transaction = get_or_create(
         Transaction,
         id=index,
-        defaults=dict(member_id=1, amount=membership_prod.price, status="completed", created_at=datetime.now()),
+        defaults=dict(
+            member_id=1,
+            amount=membership_prod.price,
+            status="completed",
+            created_at=datetime.now(timezone.utc).replace(tzinfo=None),
+        ),
     )
     transaction_content = get_or_create(
         TransactionContent,
@@ -472,7 +477,7 @@ def create_shop_transactions() -> None:
             action_type="add_labaccess_days",
             value=10,
             status="completed",
-            completed_at=datetime.now(),
+            completed_at=datetime.now(timezone.utc).replace(tzinfo=None),
         ),
     )
     index += 1
@@ -485,7 +490,7 @@ def create_shop_transactions() -> None:
             member_id=None,
             amount=100,
             status="completed",
-            created_at=datetime.now(),
+            created_at=datetime.now(timezone.utc).replace(tzinfo=None),
         ),
     )
 

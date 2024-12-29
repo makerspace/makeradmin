@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import json
 import random
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pprint import pprint
 
 import requests
@@ -80,8 +80,8 @@ for member_id in range(2, 200):
         member = create_user("test user", "blah", f"test_user_{random.randrange(0, 100000)}", "user", None)
 
     delete_all_spans(member["member_id"])
-    startTime = datetime.now() + timedelta(days=random.randrange(-300, 0))
-    endTime = datetime.now() + timedelta(days=random.randrange(-300, 100))
+    startTime = datetime.now(timezone.utc).replace(tzinfo=None) + timedelta(days=random.randrange(-300, 0))
+    endTime = datetime.now(timezone.utc).replace(tzinfo=None) + timedelta(days=random.randrange(-300, 100))
     startTime = startTime.strftime("%Y-%m-%d")
     endTime = endTime.strftime("%Y-%m-%d")
     create_span(member["member_id"], startTime, endTime, "membership", str(random.randrange(0, 100000)))

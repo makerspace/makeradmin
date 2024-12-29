@@ -1,5 +1,5 @@
 import re
-from datetime import datetime
+from datetime import datetime, timezone
 from decimal import Decimal
 from logging import getLogger
 from random import choice, randint, seed
@@ -81,7 +81,7 @@ class ObjFactory:
             phone=random_phone_number(),
             validation_code=randint(1, 999999),
             completed=False,
-            timestamp=datetime.now(),
+            timestamp=datetime.now(timezone.utc).replace(tzinfo=None),
         )
         obj.update(kwargs)
         self.phone_request = obj

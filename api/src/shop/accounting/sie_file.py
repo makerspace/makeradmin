@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from decimal import Decimal
 from logging import getLogger
 from typing import Dict, List, Tuple
@@ -35,7 +35,7 @@ def date_format(dt: datetime) -> str:
 
 def get_header(signer: str, start_date: datetime, end_date: datetime) -> str:
     return HEADER_TEMPLATE.format(
-        date=date_format(datetime.now()),
+        date=date_format(datetime.now(timezone.utc).replace(tzinfo=None)),
         signer=signer,
         date_start=date_format(start_date),
         date_end=date_format(end_date),
