@@ -5,7 +5,7 @@ import Message from "../Models/Message";
 import { notifySuccess } from "../message";
 
 function MessageAdd(props) {
-    const { router } = props;
+    const { history } = props;
 
     // Create a new Message instance
     const message = useMemo(() => new Message(), []);
@@ -13,7 +13,7 @@ function MessageAdd(props) {
     // Handler for saving the message
     const onSend = () => {
         message.save().then(() => {
-            router.push("/messages");
+            history.push("/messages");
             notifySuccess("Ditt meddelande har skickats");
         });
     };
