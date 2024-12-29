@@ -235,6 +235,7 @@ def send_message_about_storage(item_label_id: int, storage_action: StorageAction
 def fetch_storage_item(item_label_id: int) -> StorageInfo:
     item = get_item_from_label_id(item_label_id)
     if item is None:
+        # TODO create the item in the db instead
         raise NotFound(f"Storage item, {item_label_id}, not found")
 
     item.last_check_at = datetime.utcnow()
