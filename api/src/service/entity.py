@@ -340,7 +340,7 @@ class Entity:
             raise NotFound("Could not find any entity with specified parameters.")
 
         if not entity.deleted_at:
-            entity.deleted_at = datetime.now(timezone.utc)
+            entity.deleted_at = datetime.now(timezone.utc).replace(tzinfo=None)
 
         if commit:
             db_session.commit()

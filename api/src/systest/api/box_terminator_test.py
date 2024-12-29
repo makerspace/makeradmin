@@ -90,7 +90,9 @@ class Test(ApiTest):
     def test_box_terminator_validate_deleted_span_is_filtered(self):
         member = self.db.create_member()
         box = self.db.create_box()
-        span = self.db.create_span(enddate=self.date(10), type=Span.LABACCESS, deleted_at=datetime.now(timezone.utc))
+        span = self.db.create_span(
+            enddate=self.date(10), type=Span.LABACCESS, deleted_at=datetime.now(timezone.utc).replace(tzinfo=None)
+        )
 
         self.api.post(
             "/multiaccess/box-terminator/validate-box",

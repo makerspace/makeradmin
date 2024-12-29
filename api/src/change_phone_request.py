@@ -15,7 +15,7 @@ logger = logging.getLogger("makeradmin")
 
 
 def change_phone_request(member_id: int | None, phone: str) -> int:
-    now = datetime.now(timezone.utc)
+    now = datetime.now(timezone.utc).replace(tzinfo=None)
 
     try:
         phone = normalise_phone_number(phone)
@@ -92,7 +92,7 @@ def change_phone_request(member_id: int | None, phone: str) -> int:
         phone=phone,
         validation_code=validation_code,
         completed=False,
-        timestamp=datetime.now(timezone.utc),
+        timestamp=datetime.now(timezone.utc).replace(tzinfo=None),
     )
 
     db_session.add(change_request)
@@ -108,7 +108,7 @@ def change_phone_request(member_id: int | None, phone: str) -> int:
 
 def change_phone_validate(member_id: int | None, request_id: int, validation_code: str):
     logging.info(f"member {member_id} validating phone number, code {validation_code}")
-    now = datetime.now(timezone.utc)
+    now = datetime.now(timezone.utc).replace(tzinfo=None)
 
     try:
         change_request = (

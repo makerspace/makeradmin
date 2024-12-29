@@ -27,7 +27,7 @@ class TestBase(TestCase):
         super().setUpClass()
         self.obj = ObjFactory(self)
 
-        self.now = datetime.now(timezone.utc)
+        self.now = datetime.now(timezone.utc).replace(tzinfo=None)
         self.today = self.now.date()
 
     @classinstancemethod

@@ -57,7 +57,8 @@ def create_access_token(ip: str, browser: Optional[str], user_id: int, valid_dur
         access_token=generate_token(),
         browser=browser,
         ip=ip,
-        expires=datetime.now(timezone.utc) + (timedelta(minutes=15) if valid_duration is None else valid_duration),
+        expires=datetime.now(timezone.utc).replace(tzinfo=None)
+        + (timedelta(minutes=15) if valid_duration is None else valid_duration),
         lifetime=int(timedelta(days=14).total_seconds()),
     )
 
@@ -122,7 +123,7 @@ def password_reset(reset_token, unhashed_password):
     except MultipleResultsFound:
         raise InternalServerError(log=f"Multiple tokens {reset_token} found, this is a bug.")
 
-    if datetime.now(timezone.utc) - password_reset_token.created_at > timedelta(minutes=10):
+    if datetime.now(timezone.utc).replace(tzinfo=None) - password_reset_token.created_at > timedelta(minutes=10):
         raise UnprocessableEntity("Reset link expired, try to request a new one.")
 
     try:
