@@ -96,7 +96,9 @@ const MemberForm = ({ member, onSave, onDelete }) => {
                     </div>
                 </fieldset>
 
-                {member.id && (
+                {!member.id ? (
+                    ""
+                ) : (
                     <fieldset data-uk-margin>
                         <legend>
                             <i className="uk-icon-tag" /> Metadata
@@ -127,7 +129,9 @@ const MemberForm = ({ member, onSave, onDelete }) => {
                 )}
 
                 <div className="uk-form-row">
-                    {member.id && (
+                    {!member.id ? (
+                        ""
+                    ) : (
                         <a
                             className="uk-button uk-button-danger uk-float-left"
                             onClick={onDelete}
