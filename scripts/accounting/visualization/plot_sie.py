@@ -4,16 +4,12 @@ from dataclasses import dataclass
 from decimal import Decimal
 from typing import Dict, List, Tuple
 
-import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import parse_sie
 import seaborn as sns
-from cv2 import threshold
-from matplotlib.dates import DateFormatter, MonthLocator
-from matplotlib.ticker import FuncFormatter, NullFormatter
-from pandas.core.algorithms import unique
+from matplotlib.ticker import FuncFormatter
 
 INCOME_ACCOUNTS = [
     1934,
