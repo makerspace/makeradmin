@@ -1,10 +1,11 @@
 import React, { useContext } from "react";
+import { useHistory } from "react-router-dom";
 import GroupForm from "../Components/GroupForm";
 import GroupContext from "../Contexts/GroupContext";
 import { confirmModal } from "../message";
 
-const GroupBoxEditInfo = (props) => {
-    const { router } = props;
+const GroupBoxEditInfo = () => {
+    const history = useHistory();
     const group = useContext(GroupContext);
 
     if (!group) {
@@ -20,7 +21,7 @@ const GroupBoxEditInfo = (props) => {
                     confirmModal(group.deleteConfirmMessage())
                         .then(() => group.del())
                         .then(() => {
-                            router.push("/membership/groups/");
+                            history.push("/membership/groups/");
                         })
                         .catch(() => null);
                 }}

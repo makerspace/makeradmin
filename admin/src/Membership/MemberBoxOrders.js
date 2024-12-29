@@ -1,5 +1,5 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import CollectionTable from "../Components/CollectionTable";
 import DateTimeShow from "../Components/DateTimeShow";
 import Collection from "../Models/Collection";
@@ -20,8 +20,8 @@ const Row = ({ item }) => {
     );
 };
 
-function MemberBoxOrders(props) {
-    const member_id = props.match.params.member_id;
+function MemberBoxOrders() {
+    const { member_id } = useParams();
     const collection = new Collection({
         type: Order,
         url: `/webshop/member/${member_id}/transactions`,

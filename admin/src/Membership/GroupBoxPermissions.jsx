@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import { useParams } from "react-router-dom";
 import Select from "react-select";
 import * as _ from "underscore";
 import CollectionTable from "../Components/CollectionTable";
@@ -6,7 +7,8 @@ import Collection from "../Models/Collection";
 import Permission from "../Models/Permission";
 import { get } from "../gateway";
 
-const GroupBoxPermissions = (props) => {
+const GroupBoxPermissions = () => {
+    const { group_id } = useParams();
     const [showOptions, setShowOptions] = useState([]);
     const [selectedOption, setSelectedOption] = useState(null);
     const [options, setOptions] = useState([]);
@@ -14,7 +16,7 @@ const GroupBoxPermissions = (props) => {
     const collectionRef = useRef(
         new Collection({
             type: Permission,
-            url: `/membership/group/${props.match.params.group_id}/permissions`,
+            url: `/membership/group/${group_id}/permissions`,
             idListName: "permissions",
             pageSize: 0,
         }),

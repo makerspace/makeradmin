@@ -1,10 +1,11 @@
 import React, { useEffect, useMemo, useState } from "react";
+import { useParams } from "react-router-dom";
 import GroupContext from "../Contexts/GroupContext";
 import Group from "../Models/Group";
 import { NavItem } from "../nav";
 
 function GroupBox(props) {
-    const { group_id } = props.match.params;
+    const { group_id } = useParams();
     const group = useMemo(() => Group.get(group_id), [group_id]);
     const [title, setTitle] = useState("");
 

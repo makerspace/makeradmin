@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import CollectionTable from "../Components/CollectionTable";
 import DateTimeShow from "../Components/DateTimeShow";
 import TextInput from "../Components/TextInput";
@@ -37,8 +37,8 @@ const Row = (collection) => (props) => {
     );
 };
 
-function MemberBoxKeys(props) {
-    const member_id = props.match.params.member_id;
+function MemberBoxKeys() {
+    const { member_id } = useParams();
 
     const collectionRef = useRef(
         new Collection({

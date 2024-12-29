@@ -1,9 +1,10 @@
 import React, { useEffect, useMemo, useState } from "react";
+import { useParams } from "react-router-dom";
 import DateTimeShow from "../Components/DateTimeShow";
 import Message from "../Models/Message";
 
-function MessageShow(props) {
-    const { id } = props.match.params;
+function MessageShow() {
+    const { id } = useParams();
     const messageInstance = useMemo(() => Message.get(id), [id]);
 
     const [message, setMessage] = useState(() => {
