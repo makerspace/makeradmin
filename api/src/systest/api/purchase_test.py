@@ -1,6 +1,8 @@
+from datetime import datetime, timedelta
 from logging import getLogger
 
 import stripe
+from membership.models import Span
 from shop.transactions import CartItem, Purchase
 from test_aid.systest_base import VALID_3DS_CARD_NO, VALID_NON_3DS_CARD_NO, ApiShopTestMixin, ApiTest, retry
 
@@ -94,3 +96,99 @@ class PurchaseTest(ApiShopTestMixin, ApiTest):
         )
 
         self.post(f"/webshop/pay", purchase.to_dict(), token=self.token).expect(code=400, what="empty_cart")
+
+    def test_labaccess_purchase_fails_without_base_membership(self):
+        category = self.db.create_category()
+        lab_access_product = self.db.create_product(
+            price=575,
+            unit="mån",
+            category_id=category.id,
+            product_metadata={
+                "allowed_price_levels": ["low_income_discount"],
+                "special_product_id": "single_labaccess_month",
+            },
+        )
+        purchase = Purchase(
+            cart=[CartItem(lab_access_product.id, 1)],
+            expected_sum=lab_access_product.price,
+            stripe_payment_method_id="not_used",
+        )
+        self.db.create_member()
+        self.post("/webshop/pay", purchase.to_dict(), token=self.token).expect(code=400)
+
+    def test_labaccess_purchase_allowed_together_with_base_membership(self):
+        category = self.db.create_category()
+        base_membership = self.db.create_product(
+            price=200,
+            unit="år",
+            category_id=category.id,
+            product_metadata={
+                "allowed_price_levels": ["low_income_discount"],
+                "special_product_id": "single_membership_year",
+            },
+        )
+        lab_access_product = self.db.create_product(
+            price=575,
+            unit="mån",
+            category_id=category.id,
+            product_metadata={
+                "allowed_price_levels": ["low_income_discount"],
+                "special_product_id": "single_labaccess_month",
+            },
+        )
+        payment_method = stripe.PaymentMethod.create(type="card", card=self.card(VALID_NON_3DS_CARD_NO))
+        purchase = Purchase(
+            cart=[CartItem(lab_access_product.id, 1), CartItem(base_membership.id, 1)],
+            expected_sum=lab_access_product.price + base_membership.price,
+            stripe_payment_method_id=payment_method.id,
+        )
+        self.db.create_member()
+        self.post("/webshop/pay", purchase.to_dict(), token=self.token).expect(code=200)
+
+    def test_labaccess_purchase_allowed_while_membership_active(self):
+        category = self.db.create_category()
+        lab_access_product = self.db.create_product(
+            price=575,
+            unit="mån",
+            category_id=category.id,
+            product_metadata={
+                "allowed_price_levels": ["low_income_discount"],
+                "special_product_id": "single_labaccess_month",
+            },
+        )
+        payment_method = stripe.PaymentMethod.create(type="card", card=self.card(VALID_NON_3DS_CARD_NO))
+        purchase = Purchase(
+            cart=[CartItem(lab_access_product.id, 1)],
+            expected_sum=lab_access_product.price,
+            stripe_payment_method_id=payment_method.id,
+        )
+        member = self.db.create_member()
+        token = self.db.create_access_token(user_id=member.member_id)
+        startdate = datetime.utcnow()
+        enddate = startdate + timedelta(days=30)
+        self.db.create_span(member=member, type=Span.MEMBERSHIP, startdate=startdate, enddate=enddate)
+        self.post("/webshop/pay", purchase.to_dict(), token=token.access_token).expect(code=200)
+
+    def test_labaccess_purchase_not_allowed_when_membership_expired(self):
+        category = self.db.create_category()
+        lab_access_product = self.db.create_product(
+            price=575,
+            unit="mån",
+            category_id=category.id,
+            product_metadata={
+                "allowed_price_levels": ["low_income_discount"],
+                "special_product_id": "single_labaccess_month",
+            },
+        )
+        payment_method = stripe.PaymentMethod.create(type="card", card=self.card(VALID_NON_3DS_CARD_NO))
+        purchase = Purchase(
+            cart=[CartItem(lab_access_product.id, 1)],
+            expected_sum=lab_access_product.price,
+            stripe_payment_method_id=payment_method.id,
+        )
+        member = self.db.create_member()
+        token = self.db.create_access_token(user_id=member.member_id)
+        startdate = datetime.utcnow()
+        enddate = startdate - timedelta(days=30)
+        self.db.create_span(member=member, type=Span.MEMBERSHIP, startdate=startdate, enddate=enddate)
+        self.post("/webshop/pay", purchase.to_dict(), token=token.access_token).expect(code=400)
