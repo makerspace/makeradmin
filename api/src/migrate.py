@@ -135,11 +135,13 @@ def run_migrations(session_factory):
                 for sql in read_sql(join(migrations_dir, migration.name + ".sql")):
                     session.execute(text(sql))
 
-                session.get_bind().execute(
-                    text(
-                        "INSERT INTO migrations VALUES (:id, :name, :applied_at)",
-                        {"id": migration.id, "name": migration.name, "applied_at": datetime.utcnow()},
-                    )
+                session.execute(
+                    text("INSERT INTO migrations VALUES (:id, :name, :applied_at)"),
+                    {
+                        "id": migration.id,
+                        "name": migration.name,
+                        "applied_at": datetime.now(timezone.utc).replace(tzinfo=None),
+                    },
                 )
                 session.commit()
             except Exception:
