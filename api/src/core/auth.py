@@ -131,9 +131,8 @@ def password_reset(reset_token, unhashed_password):
     except ValueError as e:
         raise BadRequest(str(e))
 
-    try:
-        member = db_session.query(Member).get(password_reset_token.member_id)
-    except NoResultFound:
+    member = db_session.get(Member, password_reset_token.member_id)
+    if member is None:
         raise InternalServerError(log=f"No member with id {password_reset_token.member_id} found, this is a bug.")
 
     member.password = hashed_password

@@ -134,7 +134,7 @@ def create_admin(admins: Any) -> None:
             member_id = member["member_id"]
 
             logger.info(f"Adding new member {member_id} to admin group.")
-            admins.members.append(db_session.query(Member).get(member_id))
+            admins.members.append(db_session.get(Member, member_id))
             db_session.commit()
             break
         except Exception as e:

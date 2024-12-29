@@ -33,7 +33,7 @@ def authenticate_request() -> None:
 
     token = authorization[len(bearer) :].strip()
 
-    access_token = db_session.query(AccessToken).get(token)
+    access_token = db_session.get(AccessToken, token)
     if not access_token:
         raise Unauthorized("Unauthorized, invalid access token.", fields="bearer", what=BAD_VALUE)
 

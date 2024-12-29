@@ -2,8 +2,7 @@ import enum
 
 from membership.models import Member
 from sqlalchemy import Column, Date, DateTime, Enum, ForeignKey, Integer, String, Text, func
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import configure_mappers, relationship
+from sqlalchemy.orm import configure_mappers, declarative_base, relationship
 
 Base = declarative_base()
 

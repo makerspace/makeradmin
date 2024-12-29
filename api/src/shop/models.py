@@ -18,8 +18,7 @@ from sqlalchemy import (
     Text,
     func,
 )
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import configure_mappers, relationship, validates
+from sqlalchemy.orm import configure_mappers, declarative_base, relationship, validates
 
 from shop.stripe_constants import MakerspaceMetadataKeys
 
@@ -74,9 +73,11 @@ class Product(Base):
     show = Column(Boolean, nullable=False, server_default="1")
     stripe_product_id = Column(String(64))
 
-    category = relationship(ProductCategory, backref="products")
+    category = relationship(ProductCategory, backref="products", cascade_backrefs=False)
     actions = relationship("ProductAction")
-    product_accounting = relationship("ProductAccountsCostCenters", backref="accounts_cost_centers")
+    product_accounting = relationship(
+        "ProductAccountsCostCenters", backref="accounts_cost_centers", cascade_backrefs=False
+    )
 
     image_id = Column(Integer, ForeignKey(ProductImage.id), nullable=True)
 
@@ -147,7 +148,7 @@ class TransactionContent(Base):
     count = Column(Integer, nullable=False)
     amount = Column(Numeric(precision="15,2"), nullable=False)
 
-    transaction = relationship(Transaction, backref="contents")
+    transaction = relationship(Transaction, backref="contents", cascade_backrefs=False)
     product = relationship(Product)
 
     def __repr__(self) -> str:
@@ -167,7 +168,7 @@ class TransactionAction(Base):
     status = Column(Enum(PENDING, COMPLETED), nullable=False)
     completed_at = Column(DateTime)
 
-    content = relationship(TransactionContent, backref="actions")
+    content = relationship(TransactionContent, backref="actions", cascade_backrefs=False)
 
     def __repr__(self) -> str:
         return (
@@ -227,7 +228,7 @@ class ProductGiftCardMapping(Base):
     product_quantity = Column(Integer, nullable=False)
     amount = Column(Numeric(precision="15,2"), nullable=False)
 
-    gift_card = relationship(GiftCard, backref="products")
+    gift_card = relationship(GiftCard, backref="products", cascade_backrefs=False)
     product = relationship(Product)
 
 
@@ -273,8 +274,8 @@ class ProductAccountsCostCenters(Base):
     )  # Using integer with the range 0-100 to represent fractions and avoind precision issues
     type = Column(Enum(*[x.value for x in AccountingEntryType]), nullable=False)
 
-    account = relationship(TransactionAccount, backref="accounts_cost_centers")
-    cost_center = relationship(TransactionCostCenter, backref="accounts_cost_centers")
+    account = relationship(TransactionAccount, backref="accounts_cost_centers", cascade_backrefs=False)
+    cost_center = relationship(TransactionCostCenter, backref="accounts_cost_centers", cascade_backrefs=False)
 
     def __repr__(self) -> str:
         return f"ProductAccountsCostCenters(id={self.id}, account_id={self.account_id}, cost_center_id={self.cost_center_id}, type={self.type}, fraction={self.fraction})"

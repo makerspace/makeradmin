@@ -439,7 +439,7 @@ def cancel_subscription(
 
 def open_stripe_customer_portal(member_id: int) -> str:
     """Create a customer portal session and return the URL to which the user should be redirected."""
-    member = db_session.query(Member).get(member_id)
+    member = db_session.get(Member, member_id)
     if member is None:
         raise BadRequest(f"Unable to find member with id {member_id}")
 
@@ -493,7 +493,7 @@ def get_subscription_info_from_subscription(sub_type: SubscriptionType, sub_id: 
 
 
 def list_subscriptions(member_id: int) -> List[SubscriptionInfo]:
-    member = db_session.query(Member).get(member_id)
+    member = db_session.get(Member, member_id)
     if member is None:
         raise BadRequest(f"Unable to find member with id {member_id}")
 
