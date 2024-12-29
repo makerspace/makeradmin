@@ -1,6 +1,6 @@
-import React from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { renderToString } from "react-dom/server";
-import { Prompt, withRouter } from "react-router";
+import { Prompt } from "react-router";
 import { get, post } from "../gateway";
 import { notifySuccess } from "../message";
 import Collection from "../Models/Collection";
@@ -85,19 +85,17 @@ function DateView(props) {
 
 function KeyHandoutForm(props) {
     const { member } = props;
-    const [can_save_member, setCanSaveMember] = React.useState(false);
-    const [pending_labaccess_days, setPendingLabaccessDays] =
-        React.useState("?");
-    const [labaccess_enddate, setLabaccessEnddate] = React.useState("");
-    const [membership_enddate, setMembershipEnddate] = React.useState("");
-    const [special_enddate, setSpecialEnddate] = React.useState("");
-    const [accessy_in_org, setAccessyInOrg] = React.useState(false);
-    const [accessy_groups, setAccessyGroups] = React.useState([]);
-    const [accessy_pending_invites, setAccessyPendingInvites] =
-        React.useState(0);
+    const [can_save_member, setCanSaveMember] = useState(false);
+    const [pending_labaccess_days, setPendingLabaccessDays] = useState("?");
+    const [labaccess_enddate, setLabaccessEnddate] = useState("");
+    const [membership_enddate, setMembershipEnddate] = useState("");
+    const [special_enddate, setSpecialEnddate] = useState("");
+    const [accessy_in_org, setAccessyInOrg] = useState(false);
+    const [accessy_groups, setAccessyGroups] = useState([]);
+    const [accessy_pending_invites, setAccessyPendingInvites] = useState(0);
 
-    const unsubscribe = React.useRef([]);
-    const spanCollection = React.useMemo(
+    const unsubscribe = useRef([]);
+    const spanCollection = useMemo(
         () =>
             new Collection({
                 type: Span,
@@ -139,7 +137,7 @@ function KeyHandoutForm(props) {
         });
     };
 
-    React.useEffect(() => {
+    useEffect(() => {
         unsubscribe.current.push(
             member.subscribe(() => setCanSaveMember(member.canSave())),
         );
@@ -449,4 +447,4 @@ function KeyHandoutForm(props) {
     );
 }
 
-export default withRouter(KeyHandoutForm);
+export default KeyHandoutForm;

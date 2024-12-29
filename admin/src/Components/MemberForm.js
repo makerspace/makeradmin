@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { withRouter } from "react-router";
 import CountryDropdown from "./CountryDropdown";
 import DateTimeShow from "./DateTimeShow";
 import TextInput from "./TextInput";
@@ -152,4 +151,4 @@ const MemberForm = ({ member, onSave, onDelete }) => {
     );
 };
 
-export default withRouter(MemberForm);
+export default MemberForm;

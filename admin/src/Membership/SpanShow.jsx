@@ -1,9 +1,10 @@
 import React, { useEffect, useMemo, useState } from "react";
+import { useParams } from "react-router-dom";
 import * as _ from "underscore";
 import Span from "../Models/Span";
 
-function SpanShow(props) {
-    const { span_id } = props.match.params;
+function SpanShow() {
+    const { span_id } = useParams();
     const spanInstance = useMemo(() => Span.get(span_id), [span_id]);
     const [data, setData] = useState({});
 

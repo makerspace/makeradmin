@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import "react-day-picker/lib/style.css";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import CollectionTable from "../Components/CollectionTable";
 import DateShow from "../Components/DateShow";
 import DateTimeShow from "../Components/DateTimeShow";
@@ -11,8 +11,8 @@ import { get } from "../gateway";
 import { confirmModal } from "../message";
 import MembershipPeriodsInput from "./MembershipPeriodsInput";
 
-function MemberBoxSpans(props) {
-    const memberId = props.match.params.member_id;
+function MemberBoxSpans() {
+    const { member_id } = useParams();
 
     const [, setItems] = useState([]);
     const [pendingLabaccessDays, setPendingLabaccessDays] = useState("?");
@@ -20,14 +20,14 @@ function MemberBoxSpans(props) {
     const collectionRef = useRef(
         new Collection({
             type: Span,
-            url: `/membership/member/${memberId}/spans`,
+            url: `/membership/member/${member_id}/spans`,
             pageSize: 0,
             includeDeleted: true,
         }),
     );
 
     useEffect(() => {
-        get({ url: `/membership/member/${memberId}/pending_actions` }).then(
+        get({ url: `/membership/member/${member_id}/pending_actions` }).then(
             (r) => {
                 const sum_pending_labaccess_days = r.data.reduce(
                     (acc, value) => {
@@ -40,7 +40,7 @@ function MemberBoxSpans(props) {
                 setPendingLabaccessDays(sum_pending_labaccess_days);
             },
         );
-    }, [memberId]);
+    }, [member_id]);
 
     useEffect(() => {
         const unsubscribe = collectionRef.current.subscribe(({ items }) => {
@@ -69,7 +69,7 @@ function MemberBoxSpans(props) {
             <hr />
             <MembershipPeriodsInput
                 spans={collectionRef.current}
-                member_id={memberId}
+                member_id={member_id}
             />
             <h2>Spans</h2>
             <hr />

@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { withRouter } from "react-router";
 import DateTimeInput from "./DateTimeInput";
 import TextInput from "./TextInput";
 import Textarea from "./Textarea";
@@ -74,4 +73,4 @@ const GroupForm = ({ group, onSave, onDelete }) => {
     );
 };
 
-export default withRouter(GroupForm);
+export default GroupForm;

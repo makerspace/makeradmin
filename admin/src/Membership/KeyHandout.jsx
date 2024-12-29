@@ -1,5 +1,4 @@
 import React, { useContext } from "react";
-import { withRouter } from "react-router";
 import KeyHandoutForm from "../Components/KeyHandoutForm";
 import { MemberContext } from "./MemberBox";
 
@@ -12,4 +11,4 @@ const KeyHandout = () => {
     );
 };
 
-export default withRouter(KeyHandout);
+export default KeyHandout;

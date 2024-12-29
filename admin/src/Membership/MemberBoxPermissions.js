@@ -1,4 +1,5 @@
 import React from "react";
+import { useParams } from "react-router-dom";
 import CollectionTable from "../Components/CollectionTable";
 import Collection from "../Models/Collection";
 import Permission from "../Models/Permission";
@@ -9,8 +10,8 @@ const Row = ({ item }) => (
     </tr>
 );
 
-function MemberBoxPermissions(props) {
-    const member_id = props.match.params.member_id;
+function MemberBoxPermissions() {
+    const { member_id } = useParams();
     const collection = new Collection({
         type: Permission,
         url: `/membership/member/${member_id}/permissions`,
