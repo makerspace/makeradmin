@@ -349,7 +349,7 @@ def process_cart(member_id: int, cart: List[CartItem]) -> Tuple[Decimal, List[Tr
     if member is None:
         raise NotFound(message=f"Could not find member with id {member_id}.")
     price_level = get_price_level_for_member(member)
-    member_has_base_membership = "membership" in [span.type for span in member.spans]
+    member_has_base_membership = Span.MEMBERSHIP in [span.type for span in member.spans]
 
     with localcontext() as ctx:
         ctx.clear_flags()
