@@ -559,7 +559,7 @@ class SubscriptionTestWithStripe(FlaskTestBase):
         Checks that a lab subscription is started with a binding period
         """
         binding_period = self.access_subscription_product.smallest_multiple
-        (now, clock, member) = self.setup_single_member()
+        (now, clock, member) = self.setup_single_member(start_time=datetime(2024, 10, 1, tzinfo=timezone.utc))
 
         stripe_subscriptions.start_subscription(
             member,
