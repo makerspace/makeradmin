@@ -1,5 +1,5 @@
-import React, { FC, useEffect } from "react";
 import { Html5Qrcode, Html5QrcodeSupportedFormats } from "html5-qrcode";
+import React, { FC, useEffect } from "react";
 
 type QrCodeScannerProps = {
     onSuccess: (qrCodeMessage: string) => void;
@@ -44,7 +44,13 @@ const QrCodeScanner: FC<QrCodeScannerProps> = ({ filterScan, onSuccess }) => {
         );
 
         return () => {
-            scanner.clear();
+            if (scanner.isScanning) {
+                scanner.stop().then(() => {
+                    scanner.clear();
+                });
+            } else {
+                scanner.clear();
+            }
         };
     }, []);
 
