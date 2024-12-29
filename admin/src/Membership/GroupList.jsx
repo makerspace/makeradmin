@@ -1,10 +1,11 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import Collection from "../Models/Collection";
 import CollectionTable from "../Components/CollectionTable";
-import Group from "../Models/Group";
+import Date from "../Components/DateShow";
 import SearchBox from "../Components/SearchBox";
+import Collection from "../Models/Collection";
 import CollectionNavigation from "../Models/CollectionNavigation";
+import Group from "../Models/Group";
 
 const Row = (props) => {
     const { item, deleteItem } = props;
@@ -18,6 +19,9 @@ const Row = (props) => {
                 <Link to={"/membership/groups/" + item.id}>{item.name}</Link>
             </td>
             <td>{item.num_members}</td>
+            <td>
+                <Date date={item.created_at} />
+            </td>
             <td>
                 <a onClick={() => deleteItem(item)} className="removebutton">
                     <i className="uk-icon-trash" />
@@ -44,6 +48,7 @@ class GroupList extends CollectionNavigation {
             { title: "Titel", sort: "title" },
             { title: "Namn", sort: "name" },
             { title: "Antal medlemmar" },
+            { title: "Skapad", sort: "created_at" },
             { title: "" },
         ];
 
