@@ -21,7 +21,8 @@ const MemberForm = ({ member, onSave, onDelete }) => {
         <div className="meep">
             <form
                 className="uk-form"
-                onSubmit={() => {
+                onSubmit={(e) => {
+                    e.preventDefault();
                     onSave();
                     return false;
                 }}
