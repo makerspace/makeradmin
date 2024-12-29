@@ -3,7 +3,7 @@ from collections import defaultdict
 from datetime import datetime, timedelta
 from random import randint
 
-from dispatch_sms import send_validation_code
+from dispatch_sms import NoAuthConfigured, send_validation_code
 from membership.models import PhoneNumberChangeRequest, normalise_phone_number
 from multiaccessy.invite import AccessyError, ensure_accessy_labaccess
 from service.db import db_session
@@ -82,8 +82,10 @@ def change_phone_request(member_id: int | None, phone: str) -> int:
         logging.info(
             f"member id {member_id} change phone number request, sms sent, phone {phone}, code {validation_code}"
         )
-    except Exception as e:
-        raise BadRequest("Misslyckades med att skicka sms med verifikations kod.")
+    except NoAuthConfigured:
+        pass
+    except Exception:
+        raise BadRequest("Misslyckades med att skicka sms med verifikations kod")
 
     change_request = PhoneNumberChangeRequest(
         member_id=member_id, phone=phone, validation_code=validation_code, completed=False, timestamp=datetime.utcnow()

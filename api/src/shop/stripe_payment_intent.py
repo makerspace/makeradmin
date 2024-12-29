@@ -3,7 +3,6 @@ from datetime import date, datetime, timezone
 from decimal import Decimal
 from enum import Enum
 from logging import getLogger
-from time import mktime
 from typing import Dict, List, Optional
 
 import stripe
@@ -14,6 +13,7 @@ from service.db import db_session
 from service.error import EXCEPTION, BadRequest, InternalServerError
 from stripe import CardError, InvalidRequestError, PaymentIntent, StripeError
 from typing_extensions import Never
+from zoneinfo import ZoneInfo
 
 from shop.models import StripePending, Transaction
 from shop.stripe_constants import (
@@ -25,11 +25,7 @@ from shop.stripe_constants import (
 )
 from shop.stripe_customer import get_and_sync_stripe_customer
 from shop.stripe_util import convert_from_stripe_amount, convert_to_stripe_amount, replace_default_payment_method, retry
-from shop.transactions import (
-    PaymentFailed,
-    commit_fail_transaction,
-    payment_success,
-)
+from shop.transactions import PaymentFailed, commit_fail_transaction, payment_success
 
 logger = getLogger("makeradmin")
 
@@ -62,22 +58,14 @@ class PartialPayment(DataClassJsonMixin):
     action_info: Optional[PaymentAction]
 
 
-@dataclass(frozen=True)
-class CompletedPayment(DataClassJsonMixin):
-    """Used for bookkeeping for old transactions that are already completed"""
-
-    transaction_id: int
-    amount: Decimal
-    created: datetime
-    fee: Decimal
-
-
 def create_action_required_response(transaction: Transaction, payment_intent: PaymentIntent) -> PaymentAction:
     """The payment_intent requires customer action to be confirmed. Create response to client"""
 
     try:
+        assert payment_intent.next_action is not None
         next_action_type = PaymentIntentNextActionType(payment_intent.next_action.type)
         if next_action_type == PaymentIntentNextActionType.USE_STRIPE_SDK:
+            assert payment_intent.client_secret is not None
             return PaymentAction(
                 type=PaymentIntentNextActionType.USE_STRIPE_SDK,
                 client_secret=payment_intent.client_secret,
@@ -165,7 +153,9 @@ def confirm_stripe_payment_intent(transaction_id: int) -> PartialPayment:
     )
 
 
-def pay_with_stripe(transaction: Transaction, payment_method_id: str, setup_future_usage: bool) -> stripe.PaymentIntent:
+def pay_with_stripe(
+    transaction: Transaction, payment_method_id: str, setup_future_usage: bool, is_test: bool = False
+) -> stripe.PaymentIntent:
     """Handle stripe payment"""
 
     try:
@@ -181,13 +171,19 @@ def pay_with_stripe(transaction: Transaction, payment_method_id: str, setup_futu
                 amount=amount,
                 currency=CURRENCY,
                 customer=stripe_customer.id,
-                confirmation_method="manual",
                 confirm=True,
+                automatic_payment_methods=stripe.PaymentIntent.CreateParamsAutomaticPaymentMethods(
+                    enabled=True, allow_redirects="never"
+                ),
                 # One might think that off_session could be set to true to make payments possible without
                 # user interaction. Sadly, it seems that most cards require 3d secure verification, which
                 # is not possible with off_session payments.
                 # Subscriptions may instead email the user to ask them to verify the payment.
-                off_session=False,
+                #
+                # During tests, we need to specify off_session=True, because we cannot handle 3D-secure authentication
+                # in our server side tests. Even for test cards, stripe will (sometimes? always?) require 3D-secure authentication,
+                # unless off_session is enabled.
+                off_session=is_test,
                 setup_future_usage=SetupFutureUsage.OFF_SESSION.value if setup_future_usage else None,
                 metadata={
                     MakerspaceMetadataKeys.TRANSACTION_IDS.value: transaction.id,
@@ -204,88 +200,3 @@ def pay_with_stripe(transaction: Transaction, payment_method_id: str, setup_futu
         return payment_intent
     except InvalidRequestError as e:
         raise_from_stripe_invalid_request_error(e)
-
-
-def get_stripe_payment_intents(start_date: date, end_date: date) -> List[stripe.PaymentIntent]:
-    expand = ["data.latest_charge.balance_transaction"]
-    created = {"gte": int(mktime(start_date.timetuple())), "lt": int(mktime(end_date.timetuple()))}
-
-    stripe_intents = retry(lambda: stripe.PaymentIntent.list(limit=100, created=created, expand=expand))
-    payments: List[stripe.PaymentIntent] = []
-
-    # Loop over the intents and store them. We need to loop to deal with pagination
-    for intent in stripe_intents.auto_paging_iter():
-        payments.append(intent)
-    return payments
-
-
-def convert_completed_stripe_intents_to_payments(
-    stripe_intents: List[PaymentIntent],
-) -> Dict[int, CompletedPayment]:
-    payments: Dict[int, CompletedPayment] = {}
-    for intent in stripe_intents:
-        if intent.status != PaymentIntentStatus.SUCCEEDED:
-            continue
-
-        charge = intent.latest_charge
-        assert charge.balance_transaction is not None
-        assert charge.paid
-
-        try:
-            id = int(intent.metadata[MakerspaceMetadataKeys.TRANSACTION_IDS.value])
-        except KeyError:
-            # Temporary fix to deal with an older way of storing transaction ids
-            # It is stored in the description field instead of metadata
-            str_split = intent.description.split("id ")
-            if "inval" in str_split[1]:
-                logger.info(f"skipping invalid transaction because of {str_split[1]}")
-                logger.info(f"stripe intent: {intent}")
-                logger.info(f"stripe charge: {charge}")
-                continue
-            id = int(str_split[1])
-        if id < 100:
-            logger.info(f"skipping invalid transaction low id, {id}")
-            logger.info(f"stripe intent: {intent}")
-            logger.info(f"stripe charge: {charge}")
-            continue
-
-        payments[id] = CompletedPayment(
-            transaction_id=id,
-            amount=convert_from_stripe_amount(charge.amount),
-            created=datetime.fromtimestamp(intent.created, timezone.utc),
-            fee=convert_from_stripe_amount(charge.balance_transaction.fee),
-        )
-    return payments
-
-
-def create_fake_completed_payments_from_db(start_date: date, end_date: date) -> Dict[int, CompletedPayment]:
-    payments: Dict[int, CompletedPayment] = {}
-    transactions = (
-        db_session.query(Transaction)
-        .filter(Transaction.created_at >= start_date, Transaction.created_at <= end_date)
-        .all()
-    )
-    for transaction in transactions:
-        if transaction.status != Transaction.COMPLETED:
-            continue
-        payments[transaction.id] = CompletedPayment(
-            transaction_id=transaction.id,
-            amount=transaction.amount,
-            created=transaction.created_at,
-            fee=Decimal(str(round(transaction.amount * Decimal(0.03), 2))),
-        )
-    return payments
-
-
-def get_completed_payments_from_stripe(start_date: date, end_date: date) -> Dict[int, CompletedPayment]:
-    if debug_mode():
-        logger.warning(
-            "In debug/dev mode, using fake stripe payments for accounting by generating from existing data in db"
-        )
-        return create_fake_completed_payments_from_db(start_date, end_date)
-
-    try:
-        stripe_intents = get_stripe_payment_intents(start_date, end_date)
-    except StripeError as e:
-        raise BadRequest(message=f"Failed to fetch stripe payment intents: {e}")
-    return convert_completed_stripe_intents_to_payments(stripe_intents)

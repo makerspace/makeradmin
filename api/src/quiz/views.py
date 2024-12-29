@@ -82,7 +82,12 @@ def answer_question(question_id):
     question = db_session.query(QuizQuestion).get(question_id)
     json = quiz_question_entity.to_obj(question)
     json["options"] = []
-    for option in question.options:
+    options = (
+        db_session.query(QuizQuestionOption)
+        .filter(QuizQuestionOption.question_id == question_id, QuizQuestionOption.deleted_at == None)
+        .all()
+    )
+    for option in options:
         option = quiz_question_option_entity.to_obj(option)
         json["options"].append(option)
 
@@ -163,7 +168,7 @@ def member_quiz_statistics(member_id: int):
     return [
         {
             "quiz": quiz_entity.to_obj(quiz),
-            "total_questions_in_quiz": total_questions_in_quiz[quiz.id],
+            "total_questions_in_quiz": total_questions_in_quiz[quiz.id] if quiz.id in total_questions_in_quiz else 0,
             "correctly_answered_questions": answered_questions_per_quiz[quiz.id]
             if quiz.id in answered_questions_per_quiz
             else 0,
@@ -283,7 +288,6 @@ def quiz_statistics(quiz_id: int):
             {"quiz_id": quiz_id},
         )
     )
-    print(seconds_to_answer_quiz)
     median_seconds_to_answer_quiz = (
         seconds_to_answer_quiz[len(seconds_to_answer_quiz) // 2][0] if len(seconds_to_answer_quiz) > 0 else 0
     )

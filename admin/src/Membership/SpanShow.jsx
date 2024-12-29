@@ -1,42 +1,35 @@
-import React from "react";
-import Span from "../Models/Span";
+import React, { useEffect, useMemo, useState } from "react";
 import * as _ from "underscore";
+import Span from "../Models/Span";
 
-class SpanShow extends React.Component {
-    constructor(props) {
-        super(props);
-        const { span_id } = props.match.params;
-        this.span = Span.get(span_id);
-        this.state = { data: {} };
-    }
+function SpanShow(props) {
+    const { span_id } = props.match.params;
+    const spanInstance = useMemo(() => Span.get(span_id), [span_id]);
+    const [data, setData] = useState({});
 
-    componentDidMount() {
-        this.unsubscribe = this.span.subscribe(() =>
-            this.setState({ data: this.span.saved }),
-        );
-    }
+    useEffect(() => {
+        const unsubscribe = spanInstance.subscribe(() => {
+            setData(spanInstance.saved);
+        });
 
-    componentWillUnmount() {
-        this.unsubscribe();
-    }
+        return () => {
+            unsubscribe();
+        };
+    }, [spanInstance]);
 
-    render() {
-        const { data } = this.state;
-
-        return (
-            <div>
-                <h2>Medlemsperiod {data.span_id}</h2>
-                <dl className="uk-description-list">
-                    {_.keys(data).map((key) => (
-                        <div key={key}>
-                            <dt>{key}:</dt>
-                            <dd>{data[key]}</dd>
-                        </div>
-                    ))}
-                </dl>
-            </div>
-        );
-    }
+    return (
+        <div>
+            <h2>Medlemsperiod {data.span_id}</h2>
+            <dl className="uk-description-list">
+                {_.keys(data).map((key) => (
+                    <div key={key}>
+                        <dt>{key}:</dt>
+                        <dd>{data[key]}</dd>
+                    </div>
+                ))}
+            </dl>
+        </div>
+    );
 }
 
 export default SpanShow;

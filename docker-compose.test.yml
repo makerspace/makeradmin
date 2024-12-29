@@ -1,5 +1,3 @@
-version: "3"
-
 services:
   db2:
     volumes:
@@ -12,16 +10,15 @@ services:
       - logs:/work/logs
     environment:
       TEST: "true"
-      CORS_ALLOWED_ORIGINS: "http://admin,http://api,http://public"
       TEST_SERVICE_TOKEN:
 
   public:
     environment:
-      HOST_BACKEND: "http://api"
+      HOST_BACKEND: "api"
 
   admin:
     environment:
-      HOST_BACKEND: "http://api"
+      HOST_BACKEND: "api"
 
   selenium:
     image: selenium/standalone-chrome-debug
@@ -75,6 +72,7 @@ services:
       SELENIUM_SCREENSHOT_DIR: "/work/.test/selenium-screenshots"
       ACCESSY_LABACCESS_GROUP: "00000000-0000-0000-0000-000000000000"
       ACCESSY_SPECIAL_LABACCESS_GROUP: "00000000-0000-0000-0000-000000000001"
+      PYTEST_ADDOPTS:
 
 volumes:
   logs:

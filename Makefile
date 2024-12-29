@@ -27,12 +27,17 @@ clean-nuke:
 	$(COMPOSE) down
 	docker volume rm -f makeradmin_dbdata
 	docker volume rm -f makeradmin_logs
+	docker volume rm -f makeradmin_accessy_syncer_logs
+	docker volume rm -f makeradmin_email_dispatcher_logs
 	docker volume rm -f makeradmin_node_modules
 	docker volume rm -f test_dbdata
 	docker volume rm -f test_logs
 
 dev-test:
 	(cd api/src && python3 -m pytest --workers auto -ra $(PYTEST_PARAMS))
+
+dev-docs:
+	docker build -f ./docs/Dockerfile ./docs -t makeradmin-docs:latest && docker run -p "8000:8000" -v "$(shell pwd)/docs:/work/docs" makeradmin-docs:latest serve -f /work/docs/mkdocs.yml -a 0.0.0.0:8000
 
 init-npm:
 	npm ci
@@ -41,6 +46,8 @@ init-npm:
 
 init-pip:
 	python3 -m pip install --upgrade -r requirements.txt
+
+init-pre-commit:
 	pre-commit install --install-hooks
 
 init: init-pip init-npm
@@ -69,4 +76,4 @@ format-precommit:
 
 .PHONY: build firstrun init init-npm init-pip install run stop dev-test
 .PHONY: test-clean test dev format format-python format-webstuff
-.PHONY: format-precommit
+.PHONY: format-precommit .env

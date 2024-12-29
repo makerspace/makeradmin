@@ -275,9 +275,9 @@ class AccountingProduct extends CollectionNavigation {
 
     updateResetSelectedProductId(element = null, table_index = []) {
         if (this.state.selected_product_id.length > 0) {
-            const table_index = [];
+            const indices_to_deselect = [];
             this.state.selected_product_id.forEach((product_id) => {
-                table_index.push(
+                indices_to_deselect.push(
                     this.collection.items
                         .map(function (e) {
                             return e.saved.id;
@@ -285,7 +285,7 @@ class AccountingProduct extends CollectionNavigation {
                         .indexOf(product_id),
                 );
             });
-            this.changeColor(false, table_index);
+            this.changeColor(false, indices_to_deselect);
         }
         this.setState({ selected_product_id: [element] });
         this.changeColor(true, [table_index]);

@@ -2,23 +2,45 @@ name: Build and run tests for makeradmin
 
 on:
   push:
-    branches:
-      - "**"
+    branches: [main]
+  pull_request:
+    types: [synchronize, opened]
 
 jobs:
-  test:
+  firstrun:
     runs-on: ubuntu-latest
     steps:
-      - name: Install prerequisites
-        run: |
-          sudo apt install -y python3-pip
-          pip3 install docker-compose
-      - name: List versions
-        run: |
-          docker --version
-          docker-compose --version
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
+      - name: Make env
+        run: make .env
+      - name: Build container
+        run: make build
+      - name: Create the database
+        run: docker compose run api bash -c 'yes "" | python3 firstrun.py'
+        env:
+          FIRSTRUN_AUTO_ADMIN_FIRSTNAME: maker
+          FIRSTRUN_AUTO_ADMIN_LASTNAME: makersson
+          FIRSTRUN_AUTO_ADMIN_EMAIL: maker@bmail.com
+          FIRSTRUN_AUTO_ADMIN_PASSWORD: not_a_real_passw0rd
+
+  unit-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
       - name: Build docker
         run: make build
       - name: Run tests
         run: make test
+
+  stripe-tests:
+    runs-on: ubuntu-latest
+    concurrency: stripe
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build docker
+        run: make build
+      - name: Run tests
+        run: make test
+        env:
+          STRIPE_PRIVATE_KEY: ${{ secrets.STRIPE_PRIVATE_KEY }}
+          STRIPE_PUBLIC_KEY: ${{ secrets.STRIPE_PUBLIC_KEY }}

@@ -1,18 +1,21 @@
-from service.entity import Entity, ExpandField
+from service.entity import Entity, not_empty
 
 from quiz.models import Quiz, QuizQuestion, QuizQuestionOption
 
 quiz_entity = Entity(
     Quiz,
     default_sort_column=None,
+    validation=dict(name=not_empty),
 )
 
 quiz_question_entity = Entity(
     QuizQuestion,
     default_sort_column=None,
+    validation=dict(question=not_empty),
 )
 
 quiz_question_option_entity = Entity(
     QuizQuestionOption,
     default_sort_column=None,
+    validation=dict(description=not_empty),
 )

@@ -1,114 +1,105 @@
-import React from "react";
-import Key from "../Models/Key";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import { useParams } from "react-router";
+import DateTimeInput from "../Components/DateTimeInput";
 import TextInput from "../Components/TextInput";
 import Textarea from "../Components/Textarea";
-import DateTimeInput from "../Components/DateTimeInput";
-import { withRouter } from "react-router";
+import Key from "../Models/Key";
+import { browserHistory } from "../browser_history";
 import { confirmModal } from "../message";
 
-class KeyEdit extends React.Component {
-    constructor(props) {
-        super(props);
-        const { key_id } = props.match.params;
-        this.key = Key.get(key_id);
-        this.state = { saveDisabled: true };
-    }
+function KeyEdit() {
+    const { key_id } = useParams();
+    const keyRef = useRef(Key.get(key_id));
+    const [saveDisabled, setSaveDisabled] = useState(true);
 
-    componentDidMount() {
-        this.unsubscribe = this.key.subscribe(() =>
-            this.setState({ saveDisabled: !this.key.canSave() }),
-        );
-    }
+    useEffect(() => {
+        const key = keyRef.current;
+        const unsubscribe = key.subscribe(() => {
+            setSaveDisabled(!key.canSave());
+        });
 
-    componentWillUnmount() {
-        this.unsubscribe();
-    }
+        return () => unsubscribe();
+    }, []);
 
-    render() {
-        const { saveDisabled } = this.state;
-        const { router } = this.props;
+    const onSave = useCallback(() => {
+        keyRef.current.save();
+    }, []);
 
-        const onSave = () => this.key.save();
+    const onDelete = useCallback(() => {
+        confirmModal(keyRef.current.deleteConfirmMessage())
+            .then(() => keyRef.current.del())
+            .then(() => {
+                browserHistory.push("/membership/keys/");
+            })
+            .catch(() => null);
+    }, []);
 
-        const onDelete = () => {
-            return confirmModal(this.key.deleteConfirmMessage())
-                .then(() => this.key.del())
-                .then(() => {
-                    router.push("/membership/keys/");
-                })
-                .catch(() => null);
-        };
-
-        return (
-            <div>
-                <h2>Redigera RFID-tagg</h2>
-                <div className="meep">
-                    <form
-                        className="uk-form"
-                        onSubmit={(e) => {
-                            e.preventDefault();
-                            onSave();
-                            return false;
-                        }}
-                    >
-                        <div className="uk-grid">
-                            <div className="uk-width-1-1">
-                                <div className="uk-grid">
-                                    <div className="uk-width-1-2">
-                                        <DateTimeInput
-                                            model={this.key}
-                                            name="created_at"
-                                            title="Skapad"
-                                            disabled={true}
-                                        />
-                                    </div>
-                                    <div className="uk-width-1-2">
-                                        <DateTimeInput
-                                            model={this.key}
-                                            name="updated_at"
-                                            title="Ändrad"
-                                            disabled={true}
-                                        />
-                                    </div>
+    return (
+        <div>
+            <h2>Redigera RFID-tagg</h2>
+            <div className="meep">
+                <form
+                    className="uk-form"
+                    onSubmit={(e) => {
+                        e.preventDefault();
+                        onSave();
+                    }}
+                >
+                    <div className="uk-grid">
+                        <div className="uk-width-1-1">
+                            <div className="uk-grid">
+                                <div className="uk-width-1-2">
+                                    <DateTimeInput
+                                        model={keyRef.current}
+                                        name="created_at"
+                                        title="Skapad"
+                                    />
                                 </div>
+                                <div className="uk-width-1-2">
+                                    <DateTimeInput
+                                        model={keyRef.current}
+                                        name="updated_at"
+                                        title="Ändrad"
+                                    />
+                                </div>
+                            </div>
 
-                                <TextInput
-                                    model={this.key}
-                                    name="tagid"
-                                    title="RFID"
-                                    placeholder="Använd en RFID-läsare för att läsa av det unika numret på nyckeln"
-                                />
-                                <Textarea
-                                    model={this.key}
-                                    name="description"
-                                    title="Kommentar"
-                                    placeholder="Det är valfritt att lägga in en kommenter av nyckeln"
-                                />
+                            <TextInput
+                                model={keyRef.current}
+                                name="tagid"
+                                title="RFID"
+                                placeholder="Använd en RFID-läsare för att läsa av det unika numret på nyckeln"
+                            />
+                            <Textarea
+                                model={keyRef.current}
+                                name="description"
+                                title="Kommentar"
+                                placeholder="Det är valfritt att lägga in en kommenter av nyckeln"
+                            />
 
-                                <div className="uk-form-row uk-margin-top">
-                                    <div className="uk-form-controls">
-                                        <a
-                                            className="uk-button uk-button-danger uk-float-left"
-                                            onClick={onDelete}
-                                        >
-                                            <i className="uk-icon-trash" /> Ta
-                                            bort nyckel
-                                        </a>
-                                        <button
-                                            className="uk-button uk-button-success uk-float-right"
-                                            disabled={saveDisabled}
-                                        >
-                                            <i className="uk-icon-save" /> Spara
-                                        </button>
-                                    </div>
+                            <div className="uk-form-row uk-margin-top">
+                                <div className="uk-form-controls">
+                                    <a
+                                        className="uk-button uk-button-danger uk-float-left"
+                                        onClick={onDelete}
+                                    >
+                                        <i className="uk-icon-trash" /> Ta bort
+                                        nyckel
+                                    </a>
+                                    <button
+                                        className="uk-button uk-button-success uk-float-right"
+                                        disabled={saveDisabled}
+                                    >
+                                        <i className="uk-icon-save" /> Spara
+                                    </button>
                                 </div>
                             </div>
                         </div>
-                    </form>
-                </div>
+                    </div>
+                </form>
             </div>
-        );
-    }
+        </div>
+    );
 }
 
-export default withRouter(KeyEdit);
+export default KeyEdit;

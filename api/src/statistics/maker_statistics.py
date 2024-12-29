@@ -1,9 +1,11 @@
 import itertools
 import math
+import time
+from dataclasses import dataclass
 from datetime import date, datetime, timedelta
-from typing import List, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
-from membership.membership import get_membership_summaries
+from membership.membership import get_members_and_membership, get_membership_summaries
 from membership.models import Member, Span
 from service.db import db_session
 from service.logging import logger
@@ -12,41 +14,46 @@ from shop.models import Product, ProductCategory, Transaction, TransactionConten
 from sqlalchemy import func
 
 
-def spans_by_date(span_type) -> List[Tuple[str, int]]:
+def spans_by_date(span_type: str) -> List[Tuple[str, int]]:
     """Number of active spans of a given type indexed by a date string"""
-    # Warning: doesn't accurately add datapoints when the number of members drops to zero
-    # But since we know that Stockholm Makerspace will exist forever, this is an edge case that will never happen.
-    query = """
-    SELECT date, count(distinct(member_id)) AS labmembers
-        FROM membership_spans as ms
-        JOIN (
-            (SELECT enddate AS date FROM membership_spans WHERE type = :span_type AND deleted_at IS NULL)
-            UNION DISTINCT
-            (SELECT DATE_ADD(enddate, INTERVAL 1 DAY) as date FROM membership_spans
-               WHERE type = :span_type AND deleted_at IS NULL)
-            UNION DISTINCT
-            (SELECT startdate FROM membership_spans
-                WHERE type = :span_type AND deleted_at IS NULL)
-            UNION DISTINCT
-            (SELECT DATE_SUB(startdate, INTERVAL 1 DAY) FROM membership_spans
-               WHERE type = :span_type AND deleted_at IS NULL)
-        ) AS dates
-        ON (
-            ms.startdate <= dates.date AND
-            dates.date <= ms.enddate
-        )
-        WHERE (
-            ms.type = :span_type AND
-            ms.deleted_at IS NULL
-        )
-        GROUP BY date
-        ORDER BY date;"""
+    spans = db_session.query(Span).filter(Span.type == span_type, Span.deleted_at == None).all()
 
-    dates = db_session.execute(query, {"span_type": span_type})
+    events = []
+    for span in spans:
+        # Make sure we calculate the correct number of members on the day before the span starts
+        events.append((span.startdate - timedelta(days=1), 0, span.member_id))
+        events.append((span.startdate, 1, span.member_id))
+        events.append((span.enddate, 0, span.member_id))
+        # enddate is inclusive, so membership is lost on the day after enddate
+        events.append((span.enddate + timedelta(days=1), -1, span.member_id))
 
-    dates_str = [(date.strftime("%Y-%m-%d"), count) for (date, count) in dates]
+    # Note: The order of the events within a single day does not matter.
+    # The result will be calculated after all events in a day have been processed.
+    events.sort(key=lambda x: x[0])
 
-    return dates_str
+    counter = 0
+    active_members: Dict[int, int] = dict()
+    result: List[Tuple[date, int]] = []
+    if len(events) == 0:
+        return []
+
+    current_date = events[0][0]
+    for d, delta, member_id in events:
+        if current_date < d:
+            result.append((current_date, counter))
+            current_date = d
+
+        # Need to handle overlapping spans, to avoid double counting members
+        new_count = active_members.get(member_id, 0) + delta
+        active_members[member_id] = new_count
+        if delta == 1 and new_count == 1:
+            counter += 1
+        elif delta == -1 and new_count == 0:
+            counter -= 1
+
+    result.append((current_date, counter))
+
+    return [(date.strftime("%Y-%m-%d"), count) for (date, count) in result]
 
 
 def membership_number_months(membership_type: str, startdate: date, enddate: date) -> List[int]:
@@ -155,7 +162,7 @@ def membership_by_date_statistics():
     }
 
 
-def lasertime():
+def lasertime() -> List[Tuple[str, int]]:
     query = db_session.execute(
         """
             SELECT DATE_FORMAT(webshop_transactions.created_at, "%Y-%m"), sum(webshop_transaction_contents.count)
@@ -168,17 +175,46 @@ def lasertime():
     )
 
     results = [(date, int(count)) for (date, count) in query]
-    logger.info(results)
     return results
 
 
-def shop_statistics():
+@dataclass
+class ProductRevenue:
+    product_id: int
+    amount: float
+
+
+@dataclass
+class CategoryRevenue:
+    category_id: int
+    amount: float
+
+
+@dataclass
+class SubscriptionSplit:
+    active_members: int
+    has_membership_sub: int
+    has_makerspace_access_sub: int
+    has_both_subs: int
+
+
+@dataclass
+class ShopStatistics:
+    revenue_by_product_last_12_months: List[ProductRevenue]
+    revenue_by_category_last_12_months: List[CategoryRevenue]
+    products: List[Any]
+    categories: List[Any]
+    subscription_split: SubscriptionSplit
+
+
+def shop_statistics() -> ShopStatistics:
     # Converts a list of rows of IDs and values to a map from id to value
-    def mapify(rows):
+    def mapify(rows: List[Tuple[Any, Any]]) -> Dict[Any, Any]:
         return {r[0]: r[1] for r in rows}
 
     date_lower_limit = datetime.now() - timedelta(days=365)
-    sales_by_product = mapify(
+
+    sales_by_product: Dict[int, float] = mapify(
         db_session.query(TransactionContent.product_id, func.sum(TransactionContent.amount))
         .join(TransactionContent.transaction)
         .filter(Transaction.created_at > date_lower_limit)
@@ -186,7 +222,8 @@ def shop_statistics():
         .group_by(TransactionContent.product_id)
         .all()
     )
-    sales_by_category = mapify(
+
+    sales_by_category: Dict[int, float] = mapify(
         db_session.query(Product.category_id, func.sum(TransactionContent.amount))
         .join(TransactionContent.product)
         .join(TransactionContent.transaction)
@@ -208,53 +245,108 @@ def shop_statistics():
     )
     categories_json = list(map(category_entity.to_obj, list(categories)))
 
-    return {
-        "revenue_by_product_last_12_months": [
-            {"product_id": r.id, "amount": float(sales_by_product.get(r.id, 0))} for r in products
+    members, memberships = get_members_and_membership()
+
+    has_membership_sub: int = 0
+    has_makerspace_access_sub: int = 0
+    has_both_subs: int = 0
+    total_active_members: int = 0
+    for member, membership in zip(members, memberships):
+        # Check if labaccess is active
+        if membership.labaccess_active:
+            total_active_members += 1
+
+            if member.stripe_membership_subscription_id is not None:
+                has_membership_sub += 1
+            if member.stripe_labaccess_subscription_id is not None:
+                has_makerspace_access_sub += 1
+
+            if (
+                member.stripe_membership_subscription_id is not None
+                and member.stripe_labaccess_subscription_id is not None
+            ):
+                has_both_subs += 1
+
+    return ShopStatistics(
+        revenue_by_product_last_12_months=[
+            ProductRevenue(product_id=r.id, amount=float(sales_by_product.get(r.id, 0))) for r in products
         ],
-        "revenue_by_category_last_12_months": [
-            {"category_id": r.id, "amount": float(sales_by_category.get(r.id, 0))} for r in categories
+        revenue_by_category_last_12_months=[
+            CategoryRevenue(category_id=r.id, amount=float(sales_by_category.get(r.id, 0))) for r in categories
         ],
-        "products": products_json,
-        "categories": categories_json,
-    }
+        products=products_json,
+        categories=categories_json,
+        subscription_split=SubscriptionSplit(
+            active_members=total_active_members,
+            has_membership_sub=has_membership_sub,
+            has_makerspace_access_sub=has_makerspace_access_sub,
+            has_both_subs=has_both_subs,
+        ),
+    )
 
 
-def retention_graph(startdate: date, enddate: date):
-    lab_spans = (
+@dataclass
+class RetentionGraph:
+    nodes: List[Any]
+    links: List[Any]
+
+
+@dataclass
+class RetentionNode:
+    id: int
+    name: str
+
+
+@dataclass
+class RetentionLink:
+    source: int
+    target: int
+    value: int
+    pause: bool
+
+
+def retention_graph(startdate: date, enddate: date) -> RetentionGraph:
+    hard_start_date = date(2016, 1, 1)
+    lab_spans: List[Tuple[int, datetime, datetime]] = (
         db_session.query(Member.member_id, Span.startdate, Span.enddate)
         .join(Member.spans)
         .filter(
             Span.startdate < enddate,
-            Span.enddate > startdate,
+            Span.enddate > hard_start_date,
             Span.type == Span.LABACCESS,
         )
-        .order_by(Member.member_id)
+        .order_by(Member.member_id, Span.enddate)
         .all()
     )
-    membership_spans = (
+    membership_spans: List[Tuple[int, datetime, datetime]] = (
         db_session.query(Member.member_id, Span.startdate, Span.enddate)
         .join(Member.spans)
         .filter(
             Span.startdate < enddate,
-            Span.enddate > startdate,
+            Span.enddate > hard_start_date,
             Span.type == Span.MEMBERSHIP,
         )
-        .order_by(Member.member_id)
+        .order_by(Member.member_id, Span.enddate)
         .all()
     )
 
-    spans_by_member = itertools.groupby(lab_spans, key=lambda x: x[0])
-    spans_by_member = [(x[0], list(x[1])) for x in spans_by_member]
+    members = {m.member_id: m for m in db_session.query(Member).all()}
+
+    spans_by_member_groups = itertools.groupby(lab_spans, key=lambda x: x[0])
+    spans_by_member = [(x[0], list(x[1])) for x in spans_by_member_groups]
+    has_any_spans = set([x[0] for x in spans_by_member])
+
+    for member_id in members.keys():
+        if member_id not in has_any_spans:
+            spans_by_member.append((member_id, []))
 
     membership_spans_by_member = {x[0]: list(x[1]) for x in itertools.groupby(membership_spans, key=lambda x: x[0])}
-    members = {m.member_id: m for m in db_session.query(Member).all()}
 
     summaries = get_membership_summaries([x[0] for x in spans_by_member])
     assert len(summaries) == len(spans_by_member)
 
-    nodes = {}
-    links = {}
+    nodes: Dict[str, RetentionNode] = {}
+    links: Dict[Tuple[int, int, bool], RetentionLink] = {}
 
     def add_node(key: str) -> int:
         if key not in nodes:
@@ -262,14 +354,14 @@ def retention_graph(startdate: date, enddate: date):
             if name.startswith("END"):
                 name = "Inactive"
 
-            nodes[key] = {
-                "id": len(nodes),
-                "name": name,
-            }
+            nodes[key] = RetentionNode(
+                id=len(nodes),
+                name=name,
+            )
 
-        return nodes[key]["id"]
+        return nodes[key].id
 
-    def connect(a, b, pause: bool) -> str:
+    def connect(a: Optional[str], b: str, pause: bool) -> str:
         if a is None:
             return b
 
@@ -277,23 +369,30 @@ def retention_graph(startdate: date, enddate: date):
         bi = add_node(b)
         key = (ai, bi, pause)
         if key not in links:
-            links[key] = {
-                "source": ai,
-                "target": bi,
-                "value": 0,
-                "pause": pause,
-            }
+            links[key] = RetentionLink(
+                source=ai,
+                target=bi,
+                value=0,
+                pause=pause,
+            )
 
-        links[key]["value"] += 1
+        links[key].value += 1
         return b
 
     for (member_id, spans), summary in zip(spans_by_member, summaries):
         member = members[member_id]
         if member_id not in membership_spans_by_member:
-            print(f"Member {member.member_number} has {len(spans)} labaccess spans but no membership spans")
+            if len(spans) > 0:
+                print(f"Member {member.member_number} has {len(spans)} labaccess spans but no membership spans")
             continue
         mspans = membership_spans_by_member[member_id]
         last = None
+
+        last_activity = mspans[-1][2] if len(mspans) > 0 else (spans[-1][2] if len(spans) > 0 else None)
+        if last_activity is not None and last_activity < startdate:
+            last = connect(last, f"inactive before {startdate}", False)
+            last = connect(last, f"END {startdate}", False)
+            continue
 
         if len(mspans) > 0:
             last = connect(last, "1st year membership", False)
@@ -328,7 +427,4 @@ def retention_graph(startdate: date, enddate: date):
     all_links = list(links.values())
     all_nodes = list(nodes.values())
 
-    return {
-        "nodes": all_nodes,
-        "links": all_links,
-    }
+    return RetentionGraph(nodes=all_nodes, links=all_links)

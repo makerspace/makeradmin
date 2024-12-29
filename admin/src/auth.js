@@ -28,7 +28,7 @@ class Auth {
     requestPasswordReset(user_identification) {
         return post({
             url: "/oauth/request_password_reset",
-            params: { user_identification },
+            params: { user_identification, redirect: "admin" },
             errorMessage: "Error when sending",
             expectedDataStatus: "ok",
         });
@@ -57,7 +57,7 @@ class Auth {
             .then((response) => {
                 if (response.status === 401) {
                     return Promise.reject(
-                        "Felaktigt användarnamn eller lösenord.",
+                        "Felaktig email/medlemsnummer eller lösenord.",
                     );
                 }
                 if (response.status === 429) {

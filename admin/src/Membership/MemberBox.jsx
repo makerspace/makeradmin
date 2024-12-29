@@ -1,41 +1,36 @@
-import React from "react";
-import { NavItem } from "../nav";
-import { withRouter } from "react-router";
 import PropTypes from "prop-types";
+import React, { createContext, useEffect, useRef, useState } from "react";
+import { useParams, withRouter } from "react-router";
 import Member from "../Models/Member";
+import { NavItem } from "../nav";
 
-class MemberBox extends React.Component {
-    constructor(props) {
-        super(props);
-        const { member_id } = props.match.params;
-        this.member = Member.get(member_id);
-        this.state = { member_id, firstname: "", lastname: "" };
-    }
+export const MemberContext = createContext(null);
 
-    getChildContext() {
-        return { member: this.member };
-    }
+function MemberBox({ children }) {
+    const { member_id } = useParams();
+    const memberRef = useRef(Member.get(member_id));
+    const [memberState, setMemberState] = useState({
+        member_number: "",
+        firstname: "",
+        lastname: "",
+    });
 
-    componentDidMount() {
-        const member = this.member;
-        this.unsubscribe = member.subscribe(() =>
-            this.setState({
+    useEffect(() => {
+        const member = memberRef.current;
+        const unsubscribe = member.subscribe(() => {
+            setMemberState({
                 member_number: member.member_number,
                 firstname: member.firstname,
                 lastname: member.lastname,
-            }),
-        );
-    }
+            });
+        });
+        return () => unsubscribe();
+    }, []);
 
-    componentWillUnmount() {
-        this.unsubscribe();
-    }
+    const { member_number, firstname, lastname } = memberState;
 
-    render() {
-        const { member_id } = this.props.match.params;
-        const { member_number, firstname, lastname } = this.state;
-
-        return (
+    return (
+        <MemberContext.Provider value={memberRef.current}>
             <div>
                 <h2>
                     Medlem #{member_number}: {firstname} {lastname}
@@ -43,50 +38,44 @@ class MemberBox extends React.Component {
 
                 <ul className="uk-tab">
                     <NavItem
-                        to={"/membership/members/" + member_id + "/key-handout"}
+                        to={`/membership/members/${member_id}/key-handout`}
                     >
                         Medlemsintroduktion
                     </NavItem>
                     <NavItem
-                        to={"/membership/members/" + member_id + "/member-data"}
+                        to={`/membership/members/${member_id}/member-data`}
                     >
                         Uppgifter
                     </NavItem>
-                    <NavItem
-                        to={"/membership/members/" + member_id + "/groups"}
-                    >
+                    <NavItem to={`/membership/members/${member_id}/groups`}>
                         Grupper
                     </NavItem>
-                    <NavItem to={"/membership/members/" + member_id + "/keys"}>
+                    <NavItem to={`/membership/members/${member_id}/keys`}>
                         Nycklar
                     </NavItem>
                     <NavItem
-                        to={"/membership/members/" + member_id + "/permissions"}
+                        to={`/membership/members/${member_id}/permissions`}
                     >
                         Behörigheter
                     </NavItem>
-                    <NavItem
-                        to={"/membership/members/" + member_id + "/orders"}
-                    >
+                    <NavItem to={`/membership/members/${member_id}/orders`}>
                         Ordrar
                     </NavItem>
-                    <NavItem
-                        to={"/membership/members/" + member_id + "/messages"}
-                    >
+                    <NavItem to={`/membership/members/${member_id}/messages`}>
                         Utskick
                     </NavItem>
-                    <NavItem to={"/membership/members/" + member_id + "/spans"}>
+                    <NavItem to={`/membership/members/${member_id}/spans`}>
                         Perioder
                     </NavItem>
                 </ul>
-                {this.props.children}
+                {children}
             </div>
-        );
-    }
+        </MemberContext.Provider>
+    );
 }
 
-MemberBox.childContextTypes = {
-    member: PropTypes.instanceOf(Member),
+MemberBox.propTypes = {
+    children: PropTypes.node,
 };
 
 export default withRouter(MemberBox);

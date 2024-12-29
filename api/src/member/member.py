@@ -1,7 +1,9 @@
 from datetime import datetime
+from pathlib import Path
 from typing import Any, List
 from urllib.parse import quote_plus
 
+import markdown
 from core.auth import create_access_token, get_member_by_user_identification
 from membership.models import Group, Member
 from membership.views import group_entity
@@ -75,3 +77,26 @@ def get_member_groups(member_id: int) -> List[Any]:
         .all()
     )
     return [group_entity.to_obj(g) for g in groups]
+
+
+def _get_file_content_as_html(path: Path):
+    file_content = path.read_text("utf-8")
+    if path.suffix == ".md":
+        return markdown.markdown(file_content)
+    return file_content
+
+
+def get_license_html_text() -> str:
+    repo_root = Path(__file__).parent / "../.."
+    readme_path = repo_root / "data/licenses/README.md"
+    html_files = list(repo_root.glob("data/licenses/*.html"))
+    md_files = list(repo_root.glob("data/licenses/*.md"))
+
+    no_licenses_added = (html_files + md_files) == [readme_path]
+    if no_licenses_added:
+        return _get_file_content_as_html(readme_path)
+
+    all_files_to_render = [f for f in html_files + md_files if f != readme_path]
+    combined_file_content = [_get_file_content_as_html(f) for f in all_files_to_render]
+
+    return "\n".join(combined_file_content)

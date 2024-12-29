@@ -7,7 +7,6 @@ from math import ceil
 from typing import Any, Callable, Dict, Mapping, Type, TypeVar, Union
 
 from flask import request
-from pytz import UTC
 from sqlalchemy import (
     JSON,
     Boolean,
@@ -27,6 +26,7 @@ from sqlalchemy import (
 from sqlalchemy import (
     Enum as DbEnum,
 )
+from zoneinfo import ZoneInfo
 
 from service.api_definition import BAD_VALUE, REQUIRED, Arg, Enum, boolean, natural0, natural1, symbol
 from service.db import db_session
@@ -81,7 +81,7 @@ def base64encode(value):
     return b64encode(value).decode()
 
 
-def fromisoformat(value):
+def fromisoformat(value: str) -> datetime:
     if value[-1].lower() == "z":
         value = value[:-1]
     return datetime.fromisoformat(value)
@@ -106,7 +106,7 @@ to_obj_converters: Dict[Type, Callable] = {
     Numeric: str,
     String: identity,
     Text: identity,
-    DateTime: lambda d: None if d is None else d.replace(tzinfo=UTC).isoformat(),
+    DateTime: lambda d: None if d is None else d.replace(tzinfo=ZoneInfo("UTC")).isoformat(),
     Date: lambda d: None if d is None else d.isoformat(),
     DbEnum: identity,
     Boolean: identity,
@@ -133,7 +133,6 @@ class Entity:
         default_sort_column="created_at",
         default_sort_order=DESC,
         search_columns=tuple(),
-        list_deleted=False,
         expand_fields=None,
     ):
         """
@@ -145,7 +144,6 @@ class Entity:
         :param default_sort_column column name
         :param default_sort_order asc/desc
         :param search_columns columns that should be used for text search (search param to list)
-        :param list_deleted whether deleted entities should be included in list or not
         :param expand_fields map of name to ExpandField for data from other models that can be added when listing entity
         """
 
@@ -164,8 +162,6 @@ class Entity:
         self.pk = model_inspect.primary_key[0]
 
         self.columns = model_inspect.columns
-
-        self.list_deleted = list_deleted or "deleted_at" not in self.columns
 
         assert default_sort_column is None or default_sort_column in self.columns, "default_sort_column does not exist"
 
@@ -227,7 +223,7 @@ class Entity:
         if include_deleted is None:
             include_deleted = False
 
-        if not self.list_deleted and not include_deleted:
+        if not include_deleted and "deleted_at" in self.columns:
             query = query.filter(self.model.deleted_at.is_(None))
 
         if relation and related_entity_id:

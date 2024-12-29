@@ -7,7 +7,7 @@
 ### Docker
 
 ```bash
-sudo apt-get install docker.io docker-compose-plugin
+sudo apt-get install docker.io
 sudo adduser $(whoami) docker
 ```
 
@@ -18,11 +18,8 @@ You need to sign out and sign back in again for changes to take effect.
 Makeradmin uses Python 3.11.
 
 ```bash
-sudo apt-get install python3.10-dev python3.10-doc python3-pip
+sudo apt-get install python3.11-dev python3.11-doc python3-pip
 ```
-
-The install process will install additional pip packages.
-Activate a venv / virtualenv before install if you want python environment isolation.
 
 ### npm
 
@@ -31,6 +28,19 @@ sudo apt-get install npm
 ```
 
 ## Initialize everything
+
+Clone this git repository to a suitable place on your computer / server
+
+> [!TIP]
+> Start by initializing and activating a [virtual python environment](https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/) in the cloned folder.
+> This makes sure that the packages used for Makeradmin are isolated into its own "environment" (i.e. in the local directory), and will not interfere with packages already installed.
+>
+> ```bash
+> python3 -m venv .venv
+> source .venv/bin/activate
+> ```
+
+Run the firstrun script
 
 ```bash
 make firstrun
@@ -105,6 +115,10 @@ public_1            | 10.0.2.2 - - [18/Dec/2018:20:50:23 +0000] "GET / HTTP/1.1"
 [...]
 ```
 
+### Required membership products
+
+Some pages need special products in order to function (e.g. the registration page, or the member page). The products can be created using `make firstrun`.
+
 ## Additional configuration
 
 The `.env` file includes a number of variables that are unset by default.
@@ -120,17 +134,25 @@ These are important to make sure links work, but also to handle CORS in the brow
 ### System tests/integration tests that requires a running installation
 
 Systests are written in python and the sources for the systests are in the api/src/systest directory (because it shares a lot of code with the api unittests). There are
-tests using the api as well as selenium tests. Those tests are also run in travis.
+tests using the api as well as selenium tests. Those tests are also run in Github actions.
 
 You can run the tests in test containers using a one off db with:
 
-```
+```bash
 make test
 ```
 
+To run a single test, you can pass options to pytest using the `PYTEST_ADDOPTS` environment variable, for example:
+
+```bash
+PYTEST_ADDOPTS='-k "test_empty_cart_fails_purchase"' make test
+```
+
+Other test options that pytest supports can be passed using the same variable.
+
 Or you can run against your local running environment with:
 
-```
+```bash
 make dev-test
 ```
 
@@ -154,7 +176,8 @@ If you for some reason want to remove the existing database and start from scrat
 make clean-nuke
 ```
 
-_Warning: this will completely wipe out all your makeradmin data!_
+> [!WARNING]
+> This will completely wipe out all your makeradmin data!
 
 After this you can run `make firstrun` again to set things up again.
 
@@ -165,6 +188,10 @@ Create your own stripe account and add your keys to the `.env` file to allow pur
 ### "Paying" with fake Stripe key
 
 You will not be able to go to the checkout unless you have a Stripe key in the .env-file. If this is set up, you can use [Stripe's fake cards](https://stripe.com/docs/testing#cards) for completing the purchase.
+
+### Stripe - Makeradmin connection
+
+Makeradmin is used as the truth, and Stripe is automatically synced with the makeradmin products.
 
 ### Stripe subscription support
 
@@ -177,60 +204,7 @@ stripe listen --forward-to http://localhost:8010/webshop/stripe_callback
 
 After the forwarding has started, you'll need to copy the signing secret it gives you, and put it in your own `.env` file in the key `STRIPE_SIGNING_SECRET`.
 
-### Setting up Stripe subscription products
-
-When using stripe, subscriptions need to be configured via the stripe website.
-These subscriptions will automatically be turned into makeradmin products so that members can purchase them.
-
-Note: You should _not_ modify these products in makeradmin. They will be reset whenever the docker container restarts anyway (when the registration page is visited).
-
-#### Needed Stripe configuration
-
-The configuration needed on stripe is:
-
--   Create a **product** for base membership. Add the metadata "subscription_type"="membership" to the **product** item
-    -   Add a yearly **price**, and add the metadata "price_type"="recurring" to the **price** item
--   Create a **product** for makerspace access. Add the metadata "subscription_type"="labaccess" to the **product** item
-    -   Add a monthly price, and add the metadata "price_type"="recurring" to the **price** item
-    -   Add a **price** for N months, where N is the binding period as specified in `stripe_subscriptions.py->BINDING_PERIOD`. The price should be N times the recurring price. Add the metadata "price_type"="binding_period"
--   Create a **coupon** for low income discount. It should be with percentage discount. Add the metadata "makerspace_price_level" = "low_income_discount"
-
-You can achieve all of this using the Stripe CLI:
-
-```bash
-# Create a yearly membership product with a price
-stripe products create -d 'metadata[subscription_type]=membership' --name='Base membership'
-# -> This gives a product ID `prod_MEMBERSHIP` that you need to substitute below
-stripe prices create --unit-amount=20000 --currency=sek -d "recurring[interval]"=year --product="prod_MEMBERSHIP" -d "recurring[interval_count]"=1 -d 'metadata[price_type]=recurring'
-
-# Create a makerspace access product with prices
-stripe products create -d 'metadata[subscription_type]=labaccess' --name='Makerspace access'
-# -> This gives a product ID `prod_LABACCESS` that you need to substitute below
-stripe prices create --unit-amount=30000 --currency=sek -d "recurring[interval]"=month --product="prod_LABACCESS" -d "recurring[interval_count]"=1 -d 'metadata[price_type]=recurring'
-stripe prices create --unit-amount=60000 --currency=sek -d "recurring[interval]"=month --product="prod_LABACCESS" -d "recurring[interval_count]"=2 -d 'metadata[price_type]=binding_period'
-
-# Create a coupon
-stripe coupons create --name='Low income discount' --percent-off=50 -d 'metadata[makerspace_price_level]=low_income_discount'
-```
-
-If you try to access any page which needs these products (e.g. the registration page, or the member page), makeradmin will fetch them from stripe and do a bunch of validation checks.
-
-### Setting up required products in makeradmin
-
-For the member view page and regristration page to work there are also a few products needed in makeradmin in the category Medlemskap.
-
--   Base membership
-    -   Metadata: {"allowed_price_levels":["low_income_discount"],"special_product_id":"single_membership_year"}
-    -   Enhet/unit: år
-    -   Action: add membership days
--   Makerspace access
-    -   Metadata: {"allowed_price_levels":["low_income_discount"],"special_product_id":"single_labaccess_month"}
-    -   Enhet/unit: mån
-    -   Action: add membership days, add labaccess days
--   Makerspace access starter pack
-    -   Metadata:{"allowed_price_levels":["low_income_discount"],"special_product_id":"access_starter_pack"}
-    -   Enhet/unit: st
-    -   Action: add labaccess days
+Note: When running tests, this is not necessary, as it will poll the stripe server automatically.
 
 ## Bookkeeping and accounting
 

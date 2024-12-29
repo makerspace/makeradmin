@@ -1,5 +1,4 @@
 import React from "react";
-import { withRouter } from "react-router";
 import QuizQuestion from "../Models/QuizQuestion";
 import { browserHistory } from "../browser_history";
 import QuestionEditForm from "./QuestionEditForm";
@@ -36,6 +35,11 @@ class QuestionAdd extends React.Component<Props, State> {
                 question={this.question}
                 onSave={() => this.save()}
                 onDelete={() => this.delete()}
+                onNew={() => {
+                    browserHistory.push(
+                        `/quiz/${this.props.match.params.quiz_id}/question/add`,
+                    );
+                }}
             />
         );
     }

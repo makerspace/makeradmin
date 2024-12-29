@@ -9,6 +9,7 @@ import shop.models
 import stripe
 from shop import stripe_constants, stripe_util
 from shop.models import Product
+from shop.stripe_constants import STRIPE_CURRENTY_BASE, PriceType
 from test_aid.test_base import FlaskTestBase, ShopTestMixin
 
 logger = getLogger("makeradmin")
@@ -59,15 +60,14 @@ class StripeUtilWithoutStripeTest(ShopTestMixin, FlaskTestBase):
 
     def test_stripe_amount_from_makeradmin_product(self) -> None:
         price = 200
-        multiples = [1, 3]
+        smallest_multiple = [5, 1]
 
         makeradmin_test_product = self.db.create_product(
             name="test",
             price=price,
             unit="mån",
-            smallest_multiple=5,
+            smallest_multiple=smallest_multiple[0],
         )
-        for multiple in multiples:
-            recurring = stripe_util.StripeRecurring(interval="month", interval_count=multiple)
-            stripe_amount = stripe_util.stripe_amount_from_makeradmin_product(makeradmin_test_product, recurring)
-            assert stripe_amount == multiple * price * stripe_constants.STRIPE_CURRENTY_BASE
+        for multiple, price_type in zip(smallest_multiple, [PriceType.BINDING_PERIOD, PriceType.RECURRING]):
+            stripe_amount = stripe_util.stripe_amount_from_makeradmin_product(makeradmin_test_product, price_type)
+            assert stripe_amount == multiple * price * STRIPE_CURRENTY_BASE

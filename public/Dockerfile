@@ -1,4 +1,4 @@
-FROM python:3.11-alpine
+FROM python:3.11-alpine@sha256:5d769f990397afbb2aca24b0655e404c0f2806d268f454b052e81e39d87abf42
 
 RUN apk update \
 	&& apk add \
@@ -15,8 +15,6 @@ RUN apk update \
 	&& rm -rf /var/cache/apk/*
 
 RUN npm install -g npm@9.2.0
-
-RUN npm i -g npm sass
 
 RUN pip3 install flask gunicorn
 
@@ -41,7 +39,7 @@ COPY src /work/src
 
 COPY run.sh /work/run.sh
 
-RUN sass scss/style.scss static/style.css
+RUN npm exec sass scss/style.scss static/style.css
 
 ARG DEV_BUILD
 

@@ -1,15 +1,16 @@
 /// <reference path="../node_modules/@types/stripe-v3/index.d.ts" />
+import { render as jsx_to_string } from "preact-render-to-string";
 import { useEffect, useRef } from "preact/hooks";
+import Cart, { Item } from "./cart";
 import * as common from "./common";
 import { ServerResponse } from "./common";
+import { member_t } from "./member_common";
 import {
     StartSubscriptionsRequest,
     SubscriptionStart,
     SubscriptionType,
 } from "./subscriptions";
 import { useTranslation } from "./translations";
-import { member_t } from "./member_common";
-import Cart, { Item } from "./cart";
 
 declare var UIkit: any;
 
@@ -21,6 +22,22 @@ var errorElement: any;
 
 export function initializeStripe() {
     // Create a Stripe client.
+    if (!window.stripeKey) {
+        UIkit.modal.alert(
+            jsx_to_string(
+                <>
+                    <h2>Stripe configuration missing</h2>
+                    <p>You need to set the Stripe keys in your .env file</p>
+                </>,
+            ),
+            {
+                timeout: 0,
+                status: "danger",
+            },
+        );
+        return; // Exit early since otherwise the call below will crash.
+    }
+
     stripe = Stripe(window.stripeKey);
 }
 
@@ -180,7 +197,7 @@ const WellKnownProducts = [
     "membership_subscription",
     "labaccess_subscription",
 ] as const;
-type WellKnownProductId = (typeof WellKnownProducts)[number];
+export type WellKnownProductId = (typeof WellKnownProducts)[number];
 
 export function AssertIsWellKnownProductId(
     id: string | undefined,
@@ -194,10 +211,11 @@ export function FindWellKnownProduct(
     products: Product[],
     id: WellKnownProductId,
 ): Product | null {
-    return (
-        products.find((p) => p.product_metadata.special_product_id === id) ||
-        null
+    const foundProduct = products.find(
+        (p) => p.product_metadata?.special_product_id === id,
     );
+
+    return foundProduct || null;
 }
 
 export const calculateAmountToPay = ({
@@ -705,7 +723,7 @@ export async function negotiatePayment<
                     res.data.action_info!.type ===
                     PaymentIntentNextActionType.USE_STRIPE_SDK
                 ) {
-                    const stripeResult = await stripe.handleCardAction(
+                    const stripeResult = await stripe.confirmCardPayment(
                         res.data.action_info!.client_secret,
                     );
                     if (stripeResult.error) {

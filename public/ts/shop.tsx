@@ -1,18 +1,17 @@
+import { render } from "preact";
+import { useState } from "preact/hooks";
 import Cart, { useCart } from "./cart";
-import * as shopsearch from "./shopsearch";
 import * as common from "./common";
 import * as login from "./login";
-import { renderSidebarCategories } from "./category";
+import { LoadCurrentMemberInfo } from "./member_common";
 import {
     LoadProductData,
     Product,
     ProductCategory,
     ProductData,
 } from "./payment_common";
-import { useEffect, useState } from "preact/hooks";
+import * as shopsearch from "./shopsearch";
 import { Sidebar } from "./sidebar";
-import { render } from "preact";
-import { LoadCurrentMemberInfo } from "./member_common";
 declare var UIkit: any;
 
 const ProductCategoryHeader = ({ category }: { category: ProductCategory }) => {

@@ -35,7 +35,7 @@ import {
     getCurrentSubscriptions,
 } from "./subscriptions";
 import { Translator, translateUnit, useTranslation } from "./translations";
-import { URL_CALENDAR, URL_MEMBERBOOTH } from "./urls";
+import { URL_CALENDLY_BOOK, URL_MEMBERBOOTH } from "./urls";
 declare var UIkit: any;
 
 type fn_past_enddate = (enddate: date_t, remaining_days: number) => JSX.Element;
@@ -221,7 +221,7 @@ function SignedContractWarning({ member }: { member: member_t }) {
     return member.labaccess_agreement_at ? null : (
         <WarningItem>
             Du måste delta på en <strong>medlemintroduktion</strong>. Du hittar
-            dem i <a href={URL_CALENDAR}>kalendern</a>.
+            dem i <a href={URL_CALENDLY_BOOK}>kalendern</a>.
         </WarningItem>
     );
 }
@@ -297,17 +297,15 @@ function PendingLabaccessInstructions({
         return (
             <>
                 Du behöver åtgärda ovanstående fel innan din labbaccess kan
-                synkas. När de är åtgärdade kommer den digitala nyckeln att
-                förlängas med <strong>{pending_labaccess_days} dagar</strong>{" "}
-                vid nästa nyckelsynkronisering.
+                förlängas. När de är åtgärdade kommer den att förlängas med
+                <strong>{pending_labaccess_days} dagar</strong>.
             </>
         );
     } else if (can_sync_labaccess && pending_labaccess_days) {
         return (
             <>
                 <strong>{pending_labaccess_days} dagar</strong> kommer läggas
-                till vid nästa nyckelsynkronisering. Då kommer din access att
-                förlängas.
+                vid nästa synkronisering.
             </>
         );
     } else {
@@ -664,7 +662,7 @@ function PersonalData({
     onChangePinCode,
     onChangePhoneNumber,
 }: {
-    member: member_t;
+    member: member_t & { has_password: boolean };
     onChangePinCode: () => void;
     onChangePhoneNumber: () => void;
 }) {
@@ -770,6 +768,56 @@ function PersonalData({
                     </button>
                 </span>
                 {pin_warning}
+            </div>
+            <div>
+                <label for="password" class="uk-form-label">
+                    Lösenord
+                </label>
+                <span style="width: 100%; display: flex;">
+                    <input
+                        name="password"
+                        class="uk-input readonly-input"
+                        placeholder={
+                            member.has_password
+                                ? "********"
+                                : t("member_page.no_password_set")
+                        }
+                        disabled
+                    />
+                    <button
+                        class="uk-button uk-button-danger"
+                        onClick={(e) => {
+                            e.preventDefault();
+                            common
+                                .ajax(
+                                    "POST",
+                                    `${window.apiBasePath}/oauth/request_password_reset`,
+                                    {
+                                        user_identification: member.email,
+                                        redirect: "member",
+                                    },
+                                )
+                                .then(() => {
+                                    UIkit.modal.alert(
+                                        t("member_page.set_password_alert")(
+                                            member,
+                                        ),
+                                    );
+                                })
+                                .catch((e) => {
+                                    UIkit.modal.alert(
+                                        t(
+                                            "member_page.failed_set_password_alert",
+                                        )(get_error(e)),
+                                    );
+                                });
+                        }}
+                    >
+                        {member.has_password
+                            ? t("member_page.change_password")
+                            : t("member_page.set_password")}
+                    </button>
+                </span>
             </div>
         </fieldset>
     );
@@ -1133,7 +1181,7 @@ function MemberPage({
     show_beta,
     access,
 }: {
-    member: member_t;
+    member: member_t & { has_password: boolean };
     membership: membership_t;
     pending_labaccess_days: number;
     subscriptions: SubscriptionInfo[];
@@ -1300,7 +1348,7 @@ common.documentLoaded().then(() => {
                     jsx_to_string(
                         <>
                             <h2>Failed to load member info</h2>
-                            <p>{e.toString()}</p>
+                            <pre>{JSON.stringify(e)}</pre>
                         </>,
                     ),
                 );

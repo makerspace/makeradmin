@@ -1,10 +1,10 @@
 from datetime import datetime
 from random import randint
 
-from pytz import UTC
 from service.api_definition import NOT_UNIQUE, REQUIRED
 from test_aid.systest_base import ApiTest
 from test_aid.test_util import random_str
+from zoneinfo import ZoneInfo
 
 
 class Test(ApiTest):
@@ -37,7 +37,7 @@ class Test(ApiTest):
         )
 
         self.assertTrue(data["updated_at"] >= data["created_at"])
-        self.assertTrue(datetime.fromisoformat(data["updated_at"]) > entity.updated_at.replace(tzinfo=UTC))
+        self.assertTrue(datetime.fromisoformat(data["updated_at"]) > entity.updated_at.replace(tzinfo=ZoneInfo("UTC")))
 
     def test_can_not_update_entity_using_empty_or_read_only_data(self):
         entity = self.api.create_group()
@@ -62,6 +62,10 @@ class Test(ApiTest):
         self.assertIn(entity1_id, ids_after)
         self.assertIn(entity2_id, ids_after)
 
+    def test_list_with_table_without_deleted_at_column(self):
+        transaction = self.db.create_transaction(id=123)
+        self.assertIn(transaction.id, [e["id"] for e in self.get("/webshop/transaction?page_size=0").data])
+
     def test_deleted_entity_does_not_show_up_in_list_but_can_still_be_fetched(self):
         entity_id = self.api.create_group()["group_id"]
 
@@ -78,7 +82,9 @@ class Test(ApiTest):
     def test_list_deleted_entity_show_up_if_list_deleted_is_true_for_entity(self):
         self.db.create_member()
         span = self.db.create_span(deleted_at=self.datetime())
-        self.assertIn(span.span_id, [e["span_id"] for e in self.get("/membership/span?page_size=0").data])
+        self.assertIn(
+            span.span_id, [e["span_id"] for e in self.get("/membership/span?page_size=0&include_deleted=true").data]
+        )
 
     def test_deleting_deleted_existing_entry_returns_200(self):
         # This replicates the behavior in the previous implementation.

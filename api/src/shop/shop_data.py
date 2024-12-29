@@ -1,12 +1,13 @@
 import collections
 from dataclasses import dataclass
 from logging import getLogger
-from typing import List
+from typing import Any, List, Optional
 
+import sqlalchemy
 from membership.views import member_entity
 from service.db import db_session
-from service.error import NotFound
-from sqlalchemy import desc
+from service.error import InternalServerError, NotFound
+from sqlalchemy import JSON, desc
 from sqlalchemy.orm import contains_eager, joinedload
 from sqlalchemy.orm.exc import NoResultFound
 
@@ -19,13 +20,12 @@ from shop.entities import (
 )
 from shop.models import Product, ProductAction, ProductCategory, Transaction
 from shop.stripe_constants import MakerspaceMetadataKeys
-from shop.stripe_subscriptions import get_subscription_products
 from shop.transactions import pending_actions_query
 
 logger = getLogger("makeradmin")
 
 
-def pending_actions(member_id=None):
+def pending_actions(member_id: Optional[int] = None) -> List[Any]:
     query = pending_actions_query(member_id)
 
     return [
@@ -48,7 +48,7 @@ def pending_actions(member_id=None):
     ]
 
 
-def member_history(member_id):
+def member_history(member_id: int):
     query = (
         db_session.query(Transaction)
         .options(joinedload("contents"), joinedload("contents.product"))
@@ -99,7 +99,6 @@ def receipt(member_id, transaction_id):
 
 def all_product_data():
     """Return all public products and categories."""
-
     query = (
         db_session.query(ProductCategory)
         .join(ProductCategory.products)
@@ -119,7 +118,7 @@ def all_product_data():
     ]
 
 
-def get_product_data(product_id):
+def get_product_data(product_id: int):
     try:
         product = db_session.query(Product).filter_by(id=product_id, deleted_at=None).one()
     except NoResultFound:
@@ -129,6 +128,20 @@ def get_product_data(product_id):
         "product": product_entity.to_obj(product),
         "productData": all_product_data(),  # TODO ????
     }
+
+
+def get_product_data_by_special_id(special_product_id: str) -> Product | None:
+    products = (
+        db_session.query(Product)
+        .filter(
+            Product.product_metadata[MakerspaceMetadataKeys.SPECIAL_PRODUCT_ID.value].as_string() == special_product_id,
+            Product.deleted_at == None,
+        )
+        .all()
+    )
+    if len(products) > 1:
+        raise InternalServerError(f"Multiple products found with special id {special_product_id}")
+    return products[0] if products else None
 
 
 @dataclass

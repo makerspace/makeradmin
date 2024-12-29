@@ -93,12 +93,17 @@ def convert_to_sie_format(verifications: List[Verification]) -> List[str]:
         sie_content.append(verification_string(verification, verfication_number + 1))
         sie_content.append("{")
 
-        for accounting_key, amount in verification.amounts.items():
+        for accounting_key, amount in sorted(
+            verification.amounts.items(),
+            key=lambda x: (x[0][0].account if x[0][0] else "", x[0][1].cost_center if x[0][1] else ""),
+        ):
             account = accounting_key[0]
             cost_center = accounting_key[1]
             if account is None:
                 raise ValueError("Account cannot be None for SIE export.")
-            sie_amount_adjusted = -amount if verification.types[accounting_key] == AccountingEntryType.DEBIT else amount
+            sie_amount_adjusted = (
+                -amount if verification.types[accounting_key] == AccountingEntryType.CREDIT else amount
+            )
             sie_content.append(
                 transaction_string(
                     account,

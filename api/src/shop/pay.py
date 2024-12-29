@@ -37,16 +37,17 @@ logger = getLogger("makeradmin")
 
 def make_purchase(member_id: int, purchase: Purchase) -> Transaction:
     """Pay using the data in purchase, the purchase structure should be validated according to schema."""
-
     payment_method_id: str = purchase.stripe_payment_method_id
 
     transaction = create_transaction(member_id=member_id, purchase=purchase)
 
     # If this purchase will start a subscription, then the payment method should be attached to the customer so that it can be used for the subscription.
-    starts_subscription = any(
-        db_session.query(Product).get(item.id).get_metadata(MakerspaceMetadataKeys.SUBSCRIPTION_TYPE, None) is not None
-        for item in purchase.cart
-    )
+    starts_subscription = False
+    for item in purchase.cart:
+        product = db_session.query(Product).get(item.id)
+        assert product is not None
+        starts_subscription |= product.get_metadata(MakerspaceMetadataKeys.SUBSCRIPTION_TYPE, None) is not None
+
     pay_with_stripe(transaction, payment_method_id, setup_future_usage=starts_subscription)
 
     return transaction
@@ -168,7 +169,8 @@ def setup_payment_method(data_dict: Any, member_id: int) -> SetupPaymentMethodRe
     if stripe_customer is None:
         raise BadRequest(f"Unable to find corresponding stripe member {member}")
 
-    if data.setup_intent_id is None:
+    setup_intent_id = data.setup_intent_id
+    if setup_intent_id is None:
         try:
             payment_method = retry(lambda: stripe.PaymentMethod.retrieve(data.stripe_payment_method_id))
         except:
@@ -183,7 +185,7 @@ def setup_payment_method(data_dict: Any, member_id: int) -> SetupPaymentMethodRe
             )
         )
     else:
-        setup_intent = retry(lambda: stripe.SetupIntent.retrieve(data.setup_intent_id))
+        setup_intent = retry(lambda: stripe.SetupIntent.retrieve(setup_intent_id))
 
     try:
         handle_setup_intent(setup_intent)
@@ -203,45 +205,31 @@ def setup_payment_method(data_dict: Any, member_id: int) -> SetupPaymentMethodRe
     )
 
 
-def cancel_subscriptions(data_dict: Any, user_id: int) -> None:
-    try:
-        data = CancelSubscriptionsRequest.from_dict(data_dict)
-    except Exception as e:
-        raise BadRequest(message=f"Invalid data: {e}")
-
+def cancel_subscriptions(data: CancelSubscriptionsRequest, user_id: int) -> None:
     member = db_session.query(Member).get(user_id)
     if member is None:
         raise BadRequest(f"Unable to find member with id {user_id}")
 
+    # Ensure that a lab subscription is always accompanied by a membership subscription.
+    # If the membership subscript is cancelled, the lab subscription must therefore also be cancelled.
+    # This should be handled automatically by the frontend with a nice popup, but we will enforce it here
     if SubscriptionType.MEMBERSHIP in data.subscriptions and SubscriptionType.LAB not in data.subscriptions:
-        # This should be handled automatically by the frontend with a nice popup, but we will enforce it here
         data.subscriptions.append(SubscriptionType.LAB)
 
     for sub in data.subscriptions:
-        cancel_subscription(member.member_id, sub, test_clock=None)
+        cancel_subscription(member, sub)
 
 
-def start_subscriptions(data_dict: Any, user_id: int) -> None:
-    try:
-        data = StartSubscriptionsRequest.from_dict(data_dict)
-    except Exception as e:
-        raise BadRequest(message=f"Invalid data: {e}")
-
+def start_subscriptions(data: StartSubscriptionsRequest, user_id: int) -> None:
     member = db_session.query(Member).get(user_id)
     if member is None:
         raise BadRequest(f"Unable to find member with id {user_id}")
-
-    stripe_customer = get_and_sync_stripe_customer(member)
-    assert stripe_customer is not None
-
-    if not stripe_customer.invoice_settings["default_payment_method"]:
-        raise BadRequest(message="You must add a default payment method before starting a subscription.")
 
     for subscription in data.subscriptions:
         # Note: This will *not* raise in case the user has not enough funds.
         # In that case we should send an email to the user.
         start_subscription(
-            member.member_id,
+            member,
             subscription.subscription,
             test_clock=None,
             expected_to_pay_now=subscription.expected_to_pay_now,
@@ -266,9 +254,10 @@ def cleanup_pending_members(relevant_email: str) -> None:
 
     for member in members_to_delete:
         # We delete the customer just to keep things tidy. It's not strictly necessary.
-        if member.stripe_customer_id is not None:
+        stripe_customer_id = member.stripe_customer_id
+        if stripe_customer_id is not None:
             try:
-                retry(lambda: stripe.Customer.delete(member.stripe_customer_id))
+                retry(lambda: stripe.Customer.delete(stripe_customer_id))
             except:
                 # If it cannot be deleted, we don't care
                 pass

@@ -6,10 +6,17 @@ from membership.models import Member
 from membership.views import member_entity
 from quiz.views import member_quiz_statistics
 from service.api_definition import GET, MESSAGE_SEND, POST, PUBLIC, USER, Arg, natural1, non_empty_str
+from service.db import db_session
 from service.error import Unauthorized
 
 from member import service
-from member.member import get_member_groups, send_access_token_email, send_updated_member_info_email, set_pin_code
+from member.member import (
+    get_license_html_text,
+    get_member_groups,
+    send_access_token_email,
+    send_updated_member_info_email,
+    set_pin_code,
+)
 
 
 @service.route("/send_access_token", method=POST, permission=PUBLIC)
@@ -29,7 +36,15 @@ def send_updated_member_info(member_id: int = Arg(int), msg_swe: str = Arg(str),
 @service.route("/current", method=GET, permission=USER)
 def current_member():
     """Get current member."""
-    return member_entity.read(g.user_id)
+    m = member_entity.read(g.user_id)
+
+    # Expose if the member has a password set, but not what the password is (not even the hash)
+    assert m is not None
+    m2 = db_session.query(Member).get(g.user_id)
+    assert m2 is not None
+    m["has_password"] = m2.password is not None
+
+    return m
 
 
 @service.route("/current/permissions", method=GET, permission=USER)
@@ -76,3 +91,8 @@ def request_change_phone_number(member_id: int | None = Arg(int, required=False)
 @service.route("/validate_phone_number", method=POST, permission=PUBLIC)
 def validate_change_phone_number(id: int = Arg(int), validation_code=Arg(int)):
     return change_phone_validate(g.user_id, id, validation_code)
+
+
+@service.route("/licenses", method=GET, permission=USER)
+def get_licenses():
+    return get_license_html_text()

@@ -1,32 +1,44 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import * as _ from "underscore";
 import { confirmModal } from "../message";
 
-export default class CollectionTable extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            sort: { key: null, order: "up" },
-            items: null,
-            page: {},
-            loading: true,
-        };
-    }
-
-    componentDidMount() {
-        const { collection } = this.props;
-        this.unsubscribe = collection.subscribe(({ page, items }) =>
-            this.setState({ page, items, loading: false }),
+const deleteItem = (collection, item) => {
+    return confirmModal(item.deleteConfirmMessage())
+        .then(() => item.del())
+        .then(
+            () => collection.fetch(),
+            () => null,
         );
-    }
+};
 
-    componentWillUnmount() {
-        this.unsubscribe();
-    }
+const CollectionTable = (props) => {
+    const [sort, setSort] = useState({ key: null, order: "up" });
+    const [items, setItems] = useState(null);
+    const [page, setPage] = useState({});
+    const [loading, setLoading] = useState(true);
 
-    renderHeading(column, i) {
-        const sortState = this.state.sort;
-        const { collection } = this.props;
+    const {
+        collection,
+        rowComponent,
+        columns,
+        emptyMessage,
+        className,
+        onPageNav,
+    } = props;
+
+    useEffect(() => {
+        const unsubscribe = collection.subscribe(({ page: p, items: i }) => {
+            setPage(p);
+            setItems(i);
+            setLoading(false);
+        });
+        return () => {
+            unsubscribe();
+        };
+    }, [collection]);
+
+    const renderHeading = (column, i) => {
+        const sortState = sort;
 
         if (column.title) {
             let title;
@@ -35,7 +47,7 @@ export default class CollectionTable extends React.Component {
                     <i className={"uk-icon-angle-" + sortState.order} />
                 );
                 const onClick = () => {
-                    const sort = {
+                    const newSort = {
                         key: column.sort,
                         order:
                             sortState.key === column.sort &&
@@ -43,8 +55,9 @@ export default class CollectionTable extends React.Component {
                                 ? "up"
                                 : "down",
                     };
-                    this.setState({ sort, loading: true });
-                    collection.updateSort(sort);
+                    setSort(newSort);
+                    setLoading(true);
+                    collection.updateSort(newSort);
                 };
                 title = (
                     <a data-sort={column.sort} onClick={onClick}>
@@ -62,12 +75,10 @@ export default class CollectionTable extends React.Component {
             );
         }
         return <th key={i} />;
-    }
+    };
 
-    renderPagination() {
-        const { page } = this.state;
+    const renderPagination = () => {
         const show_count = 2;
-        const onPageNav = this.props.onPageNav;
 
         if (!page.count) {
             page.count = 1;
@@ -91,7 +102,7 @@ export default class CollectionTable extends React.Component {
                             <li key={i}>
                                 <a
                                     onClick={() => {
-                                        this.setState({ loading: true });
+                                        setLoading(true);
                                         if (onPageNav) onPageNav(i);
                                     }}
                                 >
@@ -106,83 +117,68 @@ export default class CollectionTable extends React.Component {
                             </li>
                         );
                     }
-                    return "";
+                    return null;
                 })}
             </ul>
         );
-    }
+    };
 
-    deleteItem(collection, item) {
-        return confirmModal(item.deleteConfirmMessage())
-            .then(() => item.del())
-            .then(
-                () => collection.fetch(),
-                () => null,
+    let rows = null;
+    if (items !== null) {
+        rows = items.map((item, i) => (
+            <React.Fragment key={i}>
+                {rowComponent({
+                    item,
+                    deleteItem: () => deleteItem(collection, item),
+                })}
+            </React.Fragment>
+        ));
+        if (!rows.length && emptyMessage) {
+            rows = (
+                <tr>
+                    <td colSpan={columns.length} className="uk-text-center">
+                        <em>{emptyMessage}</em>
+                    </td>
+                </tr>
             );
-    }
-
-    render() {
-        const { rowComponent, columns, collection, emptyMessage, className } =
-            this.props;
-        const { items, loading } = this.state;
-
-        let rows = null;
-        if (items !== null) {
-            rows = items.map((item, i) => (
-                <React.Fragment key={i}>
-                    {rowComponent({
-                        item,
-                        deleteItem: () => this.deleteItem(collection, item),
-                    })}
-                </React.Fragment>
-            ));
-            if (!rows.length && emptyMessage) {
-                rows = (
-                    <tr>
-                        <td colSpan={columns.length} className="uk-text-center">
-                            <em>{emptyMessage}</em>
-                        </td>
-                    </tr>
-                );
-            }
         }
-
-        const headers = columns.map((c, i) => this.renderHeading(c, i));
-        const pagination =
-            typeof this.state.page !== "undefined" && this.state.page.count > 1
-                ? this.renderPagination()
-                : null;
-
-        return (
-            <div className={className}>
-                {pagination}
-                <div style={{ position: "relative", clear: "both" }}>
-                    <table
-                        className={
-                            "uk-table uk-table-condensed uk-table-striped uk-table-hover" +
-                            (loading ? " backboneTableLoading" : "")
-                        }
-                    >
-                        <thead>
-                            <tr>{headers}</tr>
-                        </thead>
-                        <tbody>{rows}</tbody>
-                    </table>
-                    {loading ? (
-                        <div className="loadingOverlay">
-                            <div className="loadingWrapper">
-                                <span>
-                                    <i className="uk-icon-refresh uk-icon-spin" />{" "}
-                                    Hämtar data...
-                                </span>
-                            </div>
-                        </div>
-                    ) : (
-                        ""
-                    )}
-                </div>
-                {pagination}
-            </div>
-        );
     }
-}
+
+    const headers = columns.map((c, i) => renderHeading(c, i));
+    const pagination =
+        typeof page !== "undefined" && page.count > 1
+            ? renderPagination()
+            : null;
+
+    return (
+        <div className={className}>
+            {pagination}
+            <div style={{ position: "relative", clear: "both" }}>
+                <table
+                    className={
+                        "uk-table uk-table-condensed uk-table-striped uk-table-hover" +
+                        (loading ? " backboneTableLoading" : "")
+                    }
+                >
+                    <thead>
+                        <tr>{headers}</tr>
+                    </thead>
+                    <tbody>{rows}</tbody>
+                </table>
+                {loading ? (
+                    <div className="loadingOverlay">
+                        <div className="loadingWrapper">
+                            <span>
+                                <i className="uk-icon-refresh uk-icon-spin" />{" "}
+                                Hämtar data...
+                            </span>
+                        </div>
+                    </div>
+                ) : null}
+            </div>
+            {pagination}
+        </div>
+    );
+};
+
+export default CollectionTable;

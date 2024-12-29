@@ -16,13 +16,14 @@ from shop.accounting.accounting import (
 )
 from shop.accounting.sie_file import get_sie_string
 from shop.accounting.verification import create_verificatons
+from shop.completed_payment import CompletedPayment, get_completed_payments_from_stripe
 from shop.models import (
     Transaction,
     TransactionAccount,
     TransactionContent,
     TransactionCostCenter,
 )
-from shop.stripe_payment_intent import CompletedPayment, get_completed_payments_from_stripe
+from zoneinfo import ZoneInfo
 
 logger = getLogger("makeradmin")
 
@@ -32,16 +33,14 @@ def transaction_fees_to_transaction_with_accounting(
 ) -> List[TransactionWithAccounting]:
     amounts: List[TransactionWithAccounting] = []
     account = TransactionAccount(account="6573", description="6573", id=0, display_order=1)
-    cost_center = TransactionCostCenter(
-        cost_center="Föreningsgemensamt", description="Föreningsgemensamt", id=0, display_order=1
-    )
+    cost_center = TransactionCostCenter(cost_center="FG", description="Föreningsgemensamt", id=0, display_order=1)
     for payment in completed_payments.values():
         amounts.append(
             TransactionWithAccounting(
                 transaction_id=payment.transaction_id,
                 product_id=None,
                 amount=payment.fee,
-                date=payment.created,
+                date=payment.charge_created,
                 account=account,
                 cost_center=cost_center,
                 type=AccountingEntryType.DEBIT,
@@ -54,20 +53,27 @@ def export_accounting(start_date: datetime, end_date: datetime, group_by_period:
     signer = db_session.query(Member).filter(Member.member_id == member_id).one_or_none()
     if signer is None:
         raise InternalServerError(f"Member with id {member_id} not found")
+    utc_zone = ZoneInfo("UTC")
     logger.info(
-        f"Exporting accounting from {start_date} to {end_date} with signer member number {signer.member_number}"
+        f"Exporting accounting from {start_date} ({start_date.astimezone(utc_zone)}) to {end_date} ({end_date.astimezone(utc_zone)}) with signer member number {signer.member_number}"
     )
     completed_payments = get_completed_payments_from_stripe(start_date, end_date)
     transactions = (
         db_session.query(Transaction)
         .filter(
-            Transaction.created_at >= start_date,
-            Transaction.created_at < end_date,
+            Transaction.created_at >= start_date.astimezone(utc_zone),
+            Transaction.created_at < end_date.astimezone(utc_zone),
             Transaction.status == Transaction.COMPLETED,
         )
         .outerjoin(TransactionContent)
         .all()
     )
+
+    for transaction in transactions:
+        logger.info(f"Transaction: {transaction.id}")
+
+    for payment in completed_payments.values():
+        logger.info(f"Payment: {payment.transaction_id}")
 
     diff = diff_transactions_and_completed_payments(transactions, completed_payments)
     if len(diff) > 0:
