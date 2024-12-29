@@ -117,22 +117,26 @@ def confirm_stripe_payment_intent(transaction_id: int) -> PartialPayment:
     transaction = db_session.query(Transaction).get(transaction_id)
     if not transaction:
         raise BadRequest(f"unknown transaction ({transaction_id})")
-    if transaction.status != Transaction.PENDING:
-        raise BadRequest(f"transaction ({transaction_id}) is not pending")
+    if transaction.status == Transaction.FAILED:
+        # We might receive a stripe charge event and update transaction to failed already
+        raise BadRequest(log=f"transaction {transaction_id} already failed")
 
     payment_intent = retry(lambda: stripe.PaymentIntent.retrieve(pending.stripe_token))
     status = PaymentIntentStatus(payment_intent.status)
     if status == PaymentIntentStatus.CANCELED:
         raise BadRequest(f"unexpected stripe payment intent status {status}")
 
-    try:
-        action_info = create_client_response(transaction, payment_intent)
-    except CardError as e:
-        # Reason can be for example: 'Your card's security code is incorrect'.
-        commit_fail_transaction(transaction)
-        err = PaymentFailed(log=f"Payment failed: {str(e)}", level=EXCEPTION)
-        err.message = e.user_message
-        raise err
+    action_info = None
+    if transaction.status != Transaction.COMPLETED:
+        # In case transaction was updated after stripe charge event, no action needed.
+        try:
+            action_info = create_client_response(transaction, payment_intent)
+        except CardError as e:
+            # Reason can be for example: 'Your card's security code is incorrect'.
+            commit_fail_transaction(transaction)
+            err = PaymentFailed(log=f"Payment failed: {str(e)}", level=EXCEPTION)
+            err.message = e.user_message
+            raise err
 
     if (
         action_info is None
