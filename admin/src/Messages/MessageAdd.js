@@ -1,5 +1,4 @@
 import React, { useMemo } from "react";
-import { withRouter } from "react-router";
 import MessageForm from "../Components/MessageForm";
 import Message from "../Models/Message";
 import { notifySuccess } from "../message";
@@ -28,4 +27,4 @@ function MessageAdd(props) {
     );
 }
 
-export default withRouter(MessageAdd);
+export default MessageAdd;

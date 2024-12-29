@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { withRouter } from "react-router";
 import { useParams } from "react-router-dom";
 import MessageForm from "../Components/MessageForm";
 import Message from "../Models/Message";
@@ -32,4 +31,4 @@ const MemberBoxMessages = () => {
     );
 };
 
-export default withRouter(MemberBoxMessages);
+export default MemberBoxMessages;

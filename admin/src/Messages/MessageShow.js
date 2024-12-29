@@ -1,5 +1,4 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { withRouter } from "react-router";
 import DateTimeShow from "../Components/DateTimeShow";
 import Message from "../Models/Message";
 
@@ -98,4 +97,4 @@ function MessageShow(props) {
     );
 }
 
-export default withRouter(MessageShow);
+export default MessageShow;

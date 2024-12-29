@@ -1,6 +1,6 @@
 import PropTypes from "prop-types";
 import React, { createContext, useEffect, useRef, useState } from "react";
-import { useParams, withRouter } from "react-router";
+import { useParams } from "react-router";
 import Member from "../Models/Member";
 import { NavItem } from "../nav";
 
@@ -78,4 +78,4 @@ MemberBox.propTypes = {
     children: PropTypes.node,
 };
 
-export default withRouter(MemberBox);
+export default MemberBox;

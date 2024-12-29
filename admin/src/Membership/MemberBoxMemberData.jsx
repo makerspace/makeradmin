@@ -1,5 +1,4 @@
 import React, { useContext } from "react";
-import { withRouter } from "react-router";
 import { browserHistory } from "../browser_history";
 import MemberForm from "../Components/MemberForm";
 import { confirmModal } from "../message";
@@ -28,4 +27,4 @@ function MemberBoxMemberData() {
     );
 }
 
-export default withRouter(MemberBoxMemberData);
+export default MemberBoxMemberData;

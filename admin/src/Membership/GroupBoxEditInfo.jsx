@@ -1,5 +1,4 @@
 import React, { useContext } from "react";
-import { withRouter } from "react-router";
 import GroupForm from "../Components/GroupForm";
 import GroupContext from "../Contexts/GroupContext";
 import { confirmModal } from "../message";
@@ -30,4 +29,4 @@ const GroupBoxEditInfo = (props) => {
     );
 };
 
-export default withRouter(GroupBoxEditInfo);
+export default GroupBoxEditInfo;

@@ -1,10 +1,11 @@
 import React from "react";
-import * as _ from "underscore";
-import { withRouter, matchPath } from "react-router";
+import { matchPath, useLocation } from "react-router";
 import { Link, NavLink } from "react-router-dom";
+import * as _ from "underscore";
 
-export const NavItem = withRouter((props) => {
-    const { location, icon, to } = props;
+export const NavItem = (props) => {
+    const { icon, to } = props;
+    const location = useLocation();
 
     return (
         <li className={location.pathname.indexOf(to) >= 0 ? "uk-active" : ""}>
@@ -19,7 +20,7 @@ export const NavItem = withRouter((props) => {
             </NavLink>
         </li>
     );
-});
+};
 
 export const Nav = ({ nav: { brand, items } }) => (
     <nav className="uk-navbar">
@@ -38,7 +39,8 @@ export const Nav = ({ nav: { brand, items } }) => (
     </nav>
 );
 
-export const SideNav = withRouter(({ nav, location }) => {
+export const SideNav = ({ nav }) => {
+    const location = useLocation();
     let activeItem = _.find(
         nav.items,
         (i) => matchPath(location.pathname, i.target) !== null,
@@ -87,4 +89,4 @@ export const SideNav = withRouter(({ nav, location }) => {
             </ul>
         </div>
     );
-});
+};

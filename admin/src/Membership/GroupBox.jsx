@@ -1,5 +1,4 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { withRouter } from "react-router";
 import GroupContext from "../Contexts/GroupContext";
 import Group from "../Models/Group";
 import { NavItem } from "../nav";
@@ -47,4 +46,4 @@ function GroupBox(props) {
     );
 }
 
-export default withRouter(GroupBox);
+export default GroupBox;

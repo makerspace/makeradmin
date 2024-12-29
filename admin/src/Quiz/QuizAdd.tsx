@@ -1,5 +1,4 @@
 import React from "react";
-import { withRouter } from "react-router";
 import Quiz from "../Models/Quiz";
 import { browserHistory } from "../browser_history";
 import QuizEditForm from "./QuizEditForm";
