@@ -9,13 +9,11 @@ import ProductForm from "../Components/ProductForm";
 import { confirmModal } from "../message";
 
 const ProductEdit = () => {
-    const { id } = useParams(); // Use useParams to get the route parameter
+    const { id } = useParams();
 
     const [product, setProduct] = useState(null);
 
     const history = useHistory();
-
-    // Fetch the product on mount
 
     useEffect(() => {
         const fetchedProduct = Product.getWithRelated(id);
@@ -41,8 +39,6 @@ const ProductEdit = () => {
                 .catch(() => null);
         }
     };
-
-    // Ensure the component has loaded the product before rendering
 
     if (!product) {
         return <div>Loading...</div>;

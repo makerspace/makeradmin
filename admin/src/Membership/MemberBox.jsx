@@ -24,8 +24,6 @@ function MemberBox({ children }) {
                 lastname: member.lastname,
             });
         });
-        console.log(children);
-
         return () => unsubscribe();
     }, []);
 
