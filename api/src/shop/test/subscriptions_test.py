@@ -256,7 +256,7 @@ class SubscriptionTestWithStripe(FlaskTestBase):
         attach_and_set_payment_method(member, card_token, test_clock.stripe_clock)
 
     def setup_single_member(
-        self, signed_labaccess: bool = True, start_time: datetime = datetime.now(timezone.utc)
+        self, signed_labaccess: bool = True, start_time: datetime = datetime(2024, 10, 1, tzinfo=timezone.utc)
     ) -> Tuple[datetime, FakeClock, Member]:
         clock = FakeClock(start_time)
         self.clocks_to_destroy.append(clock)
