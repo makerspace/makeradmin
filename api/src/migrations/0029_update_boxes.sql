@@ -15,24 +15,6 @@ CREATE TABLE IF NOT EXISTS `storage_types` (
   UNIQUE KEY `storage_types_display_order_unique` (`display_order`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
---- create a new table to store the message types
-CREATE TABLE IF NOT EXISTS `storage_actions` (
-  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `admin_description` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `button_text` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `button_color` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `storage_type_id` int(10) unsigned NOT NULL,
-  `email_template` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `display_order` int(10) unsigned NOT NULL,
-  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `deleted_at` datetime DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  KEY `storage_type_id_key` (`storage_type_id`),
-  CONSTRAINT `storage_actions_storage_type_id_foreign` FOREIGN KEY (`storage_type_id`) REFERENCES `storage_types` (`id`),
-  UNIQUE KEY `storage_message_types_display_order_unique` (`display_order`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
 --- create a new table to store the items instead of the old one
 CREATE TABLE IF NOT EXISTS `storage_items` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
@@ -55,13 +37,11 @@ CREATE TABLE IF NOT EXISTS `storage_message_history` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `member_id` int(10) unsigned NOT NULL,
   `storage_item_id` int(10) unsigned NOT NULL,
-  `storage_action_id` int(10) unsigned NOT NULL,
+  `action_used` varchar(255) COLLATE utf8mb4_0900_ai_ci NOT NULL,
   `message_at` datetime NOT NULL,
   PRIMARY KEY (`id`),
   KEY `storage_item_id_key` (`storage_item_id`),
   CONSTRAINT `storage_messages_storage_item_id_foreign` FOREIGN KEY (`storage_item_id`) REFERENCES `storage_items` (`id`),
   KEY `member_id_key` (`member_id`),
-  CONSTRAINT `storage_messages_member_id_foreign` FOREIGN KEY (`member_id`) REFERENCES `membership_members` (`member_id`),
-  KEY `storage_action_id_key` (`storage_action_id`),
-  CONSTRAINT `storage_messages_storage_action_id_foreign` FOREIGN KEY (`storage_action_id`) REFERENCES `storage_actions` (`id`)
+  CONSTRAINT `storage_messages_member_id_foreign` FOREIGN KEY (`member_id`) REFERENCES `membership_members` (`member_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;

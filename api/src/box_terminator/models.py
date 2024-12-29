@@ -21,6 +21,8 @@ from sqlalchemy import (
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import column_property, configure_mappers, relationship, validates
 
+from box_terminator import StorageAction
+
 Base = declarative_base()
 
 
@@ -64,26 +66,6 @@ class StorageItem(Base):
         )
 
 
-class StorageAction(Base):
-    __tablename__ = "storage_actions"
-
-    id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
-    admin_description = Column(String(255), nullable=False)
-    button_text = Column(String(255), nullable=False)
-    button_color = Column(String(255), nullable=False)
-    storage_type_id = Column(Integer, ForeignKey("storage_types.id"), nullable=False)
-    email_template = Column(Text, nullable=False)
-    display_order = Column(Integer, nullable=False, unique=True)
-    created_at = Column(DateTime, server_default=func.now())
-    updated_at = Column(DateTime, server_default=func.now())
-    deleted_at = Column(DateTime)
-
-    storage_type = relationship(StorageType, backref="storage_actions")
-
-    def __repr__(self) -> str:
-        return f"MessageType(id={self.id}, message_type={self.description})"  # TODO
-
-
 class StorageMessage(Base):
     __tablename__ = "storage_message_history"
 
@@ -92,10 +74,10 @@ class StorageMessage(Base):
     storage_item_id = Column(BigInteger, ForeignKey("storage_items.id"), nullable=False)
     storage_action_id = Column(Integer, ForeignKey("storage_actions.id"), nullable=False)
     message_at = Column(DateTime, server_default=func.now())
+    action_used = Column(String(255), nullable=False)
 
     member = relationship(Member)
     storage_type = relationship("StorageItem", backref="storage_messages")
-    storage_action = relationship("StorageAction")
 
     def __repr__(self) -> str:
         return (

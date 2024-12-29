@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from datetime import date, datetime, timedelta
+from enum import Enum
 from typing import Any, Dict, List, Optional, Tuple
 
 from membership.models import Member, Span
@@ -20,36 +21,54 @@ EXPIRATION_TIME = 45  # Number of days from expiration date to the termination d
 FUTURE_LIMIT = 90  # Maximum number of days possible for fixed_end_date
 
 
-class Reason:
-    ACCESS_EXPIRED = "access_expired"
-    DATE_EXPIRED = "date_expired"
-
-
-class Status:
+class Status(Enum):
     ACTIVE = "active"
     EXPIRED = "expired"
     TERMINATE = "terminate"
 
 
-@dataclass
-class BoxTerminatorButton:  # TODO
-    text: str
-    action: str
-    url: str
+class StorageAction(Enum):
+    TERMINATE = "terminate"
+    NAG = "nag"
+
+    def to_button(self) -> Dict[str, str]:
+        if self == StorageAction.TERMINATE:
+            color = "#FF0000"
+        elif self == StorageAction.NAG:
+            color = "#FFFF00"
+        else:
+            color = "#35B3EE"
+        return {"text": self.value, "path": self.value, color: color}
 
 
 @dataclass
 class StorageInfo:
-    name: str
-    days_after_expiration: int
+    member_name: str
+    member_number: str
+    storage_item: StorageItem
     status: Status
-    reason: Reason
-    messages: List[StorageMessage]
-    buttons: List[BoxTerminatorButton]
+    expiration_date: date
+    expired_reasons: List[str]
+    actions: List[StorageAction]
+
+    def to_json(self) -> Dict:
+        # The info text is fairly generic in what it can be
+        info_text = ""  # TODO display some nag history here
+
+        expired = self.status != Status.ACTIVE
+        return {
+            "type": self.item.storage_type.storage_type,
+            "member_number": self.member_number,
+            "member_name": self.member_name,
+            "expired": expired,
+            "expired_date": self.expiration_date,
+            "storage_id": self.item.id,
+            "info": info_text,
+        }
 
 
-def get_expire_date_from_end_date(expire_date: datetime) -> datetime:
-    return expire_date + timedelta(days=EXPIRATION_TIME)
+def get_expiration_date_from_end_date(expiration_date: datetime) -> datetime:
+    return expiration_date + timedelta(days=EXPIRATION_TIME)
 
 
 def get_labacess_end_date(item: StorageItem) -> datetime:
@@ -67,11 +86,11 @@ def get_dates(item: StorageItem) -> Dict[str, datetime]:
     today = date.today()
 
     expire_lab_date = get_labacess_end_date(item)
-    terminate_lab_date = get_expire_date_from_end_date(expire_lab_date)
+    terminate_lab_date = get_expiration_date_from_end_date(expire_lab_date)
 
     if item.storage_type.has_fixed_end_date:
         fixed_end_date = item.fixed_end_date
-        terminate_fixed_date = get_expire_date_from_end_date(fixed_end_date)
+        terminate_fixed_date = get_expiration_date_from_end_date(fixed_end_date)
 
         to_termination_days = min((terminate_fixed_date - today).days, (terminate_lab_date - today).days)
         days_after_expiration = max((today - fixed_end_date).days, (today - expire_lab_date).days)
@@ -84,7 +103,7 @@ def get_dates(item: StorageItem) -> Dict[str, datetime]:
 
     pending_labaccess_days = pending_action_value_sum(item.member_id, ProductAction.ADD_LABACCESS_DAYS)
 
-    return {
+    return {  # TODO change to a dataclass
         "expire_lab_date": expire_lab_date,
         "terminate_lab_date": terminate_lab_date,
         "expire_fixed_date": fixed_end_date,
@@ -95,7 +114,7 @@ def get_dates(item: StorageItem) -> Dict[str, datetime]:
     }
 
 
-def check_status(dates: Dict[str, datetime]) -> Tuple[Status, List[Reason]]:
+def get_date_status(dates: Dict[str, datetime]) -> Dict[str, Status]:
     today = date.today()
 
     if today <= dates["expire_lab_date"] or dates["pending_labaccess_days"] > 0:
@@ -115,43 +134,56 @@ def check_status(dates: Dict[str, datetime]) -> Tuple[Status, List[Reason]]:
     else:
         fixed_date_status = Status.ACTIVE
 
-    # TODO fix this mess
-    status, reason = {
-        (Status.ACTIVE, Status.ACTIVE): (Status.ACTIVE, None),
-        (Status.EXPIRED, Status.ACTIVE): (Status.EXPIRED, Reason.ACCESS_EXPIRED),
-        (Status.ACTIVE, Status.EXPIRED): (Status.EXPIRED, Reason.DATE_EXPIRED),
-        (Status.EXPIRED, Status.EXPIRED): (Status.EXPIRED, Reason.BOTH_EXPIRED),
-        (Status.TERMINATE, Status.ACTIVE): (Status.TERMINATE, Reason.ACCESS_EXPIRED),
-        (Status.ACTIVE, Status.TERMINATE): (Status.TERMINATE, Reason.DATE_EXPIRED),
-        (Status.TERMINATE, Status.EXPIRED): (Status.TERMINATE, Reason.BOTH_EXPIRED),
-        (Status.EXPIRED, Status.TERMINATE): (Status.TERMINATE, Reason.BOTH_EXPIRED),
-        (Status.TERMINATE, Status.TERMINATE): (Status.TERMINATE, Reason.BOTH_EXPIRED),
-    }[(lab_status, fixed_date_status)]
+    return {"labacces": lab_status, "fixed_date": fixed_date_status}
 
-    return status, reason
+
+def check_status(status_per_check: Dict[str, Status]) -> Tuple[Status, List[str]]:
+    reasons_per_check_status: Dict[Status, List[str]] = []
+    for check_type, check_status in status_per_check.items():
+        if check_status in reasons_per_check_status:
+            reasons_per_check_status[check_status].append(check_type)
+        else:
+            reasons_per_check_status[check_status] = [check_type]
+
+    if Status.TERMINATE in reasons_per_check_status:
+        status_to_return = Status.TERMINATE
+    elif Status.EXPIRED in reasons_per_check_status:
+        status_to_return = Status.EXPIRED
+    else:
+        status_to_return = Status.ACTIVE
+
+    return status_to_return, reasons_per_check_status[status_to_return]
+
+
+def get_storage_actions(type: StorageType, dates: Dict[str, datetime], status: Status) -> List[StorageAction]:
+    actions: List[StorageAction] = []
+
+    if status == Status.TERMINATE:
+        actions.append(StorageAction.TERMINATE)
+    elif status == Status.EXPIRED:
+        actions.append(StorageAction.NAG)
+
+    return actions
 
 
 def get_storage_info(item: StorageItem) -> StorageInfo:
     dates = get_dates(item)
-    status, reason = check_status(dates)
+    expiration_date = max(dates.values)
+    status_per_check = get_date_status(dates)
+    status, expired_reasons = check_status(status_per_check)
 
-    today = date.today()
-    messages = []
-    for message in item.storage_messages:
-        if (today - message.message_at).days < dates["days_after_expiration"]:
-            messages.append(dt_to_str(message))
+    actions = get_storage_actions(item.storage_type, dates, status)
 
-    return {  # TODO Fix this
-        "item_label_id": item.item_label_id,
-        "member_number": item.member.member_number,
-        "name": f"{item.member.firstname} {item.member.lastname or ''}",
-        "storage_type": item.storage_type,
-        "days_after_expiration": dates["days_after_expiration"],
-        "status": status,
-        "reason": reason,
-        "messages": messages,
-        "last_check_at": dt_to_str(item.last_check_at),
-    }
+    member_name = f"{item.member.first_name} {item.member.last_name}"
+
+    return StorageInfo(
+        member_name=member_name,
+        storage_item=item,
+        status=status,
+        expiration_date=expiration_date,
+        expired_reasons=expired_reasons,
+        actions=actions,
+    )
 
 
 def get_item_from_label_id(item_label_id: int) -> StorageItem | None:
