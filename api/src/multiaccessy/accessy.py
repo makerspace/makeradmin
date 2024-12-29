@@ -3,7 +3,7 @@ import threading
 import time
 from collections.abc import Iterable
 from dataclasses import dataclass, field
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, timedelta, timezone
 from enum import Enum
 from logging import getLogger
 from random import random
@@ -361,9 +361,9 @@ class AccessySession:
             if (
                 not self.session_token
                 or self.session_token_token_expires_at is None
-                or datetime.now() > self.session_token_token_expires_at
+                or datetime.now(timezone.utc).replace(tzinfo=None) > self.session_token_token_expires_at
             ):
-                now = datetime.now()
+                now = datetime.now(timezone.utc).replace(tzinfo=None)
                 data = request(
                     "post",
                     "/auth/oauth/token",

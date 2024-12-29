@@ -2,7 +2,7 @@ import itertools
 import math
 import time
 from dataclasses import dataclass
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional, Tuple
 
 from membership.membership import get_members_and_membership, get_membership_summaries
@@ -138,7 +138,7 @@ def membership_number_months2(membership_type: str, startdate: date, enddate: da
 
 
 def membership_number_months_default():
-    now = datetime.now()
+    now = datetime.now(timezone.utc).replace(tzinfo=None)
     starttime = now - timedelta(days=30 * 12)
     return {
         "membership": membership_number_months("membership", starttime.date(), now.date()),
@@ -147,7 +147,7 @@ def membership_number_months_default():
 
 
 def membership_number_months2_default():
-    now = datetime.now()
+    now = datetime.now(timezone.utc).replace(tzinfo=None)
     starttime = now - timedelta(days=30 * 12)
     return {
         "membership": membership_number_months2("membership", starttime.date(), now.date()),
@@ -212,7 +212,7 @@ def shop_statistics() -> ShopStatistics:
     def mapify(rows: List[Tuple[Any, Any]]) -> Dict[Any, Any]:
         return {r[0]: r[1] for r in rows}
 
-    date_lower_limit = datetime.now() - timedelta(days=365)
+    date_lower_limit = datetime.now(timezone.utc).replace(tzinfo=None) - timedelta(days=365)
 
     sales_by_product: Dict[int, float] = mapify(
         db_session.query(TransactionContent.product_id, func.sum(TransactionContent.amount))

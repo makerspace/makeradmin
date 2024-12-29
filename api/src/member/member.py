@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, List
 from urllib.parse import quote_plus
@@ -30,7 +30,7 @@ def send_access_token_email(redirect, user_identification, ip, browser):
         MessageTemplate.LOGIN_LINK,
         member,
         url=url,
-        now=format_datetime(datetime.now()),
+        now=format_datetime(datetime.now(timezone.utc).replace(tzinfo=None)),
     )
 
     return {"status": "sent"}
@@ -47,7 +47,7 @@ def send_updated_member_info_email(member_id: int, msg_swe: str, msg_en: str):
     send_message(
         MessageTemplate.UPDATED_MEMBER_INFO,
         member,
-        now=format_datetime(datetime.now()),
+        now=format_datetime(datetime.now(timezone.utc).replace(tzinfo=None)),
         message_swe=msg_swe,
         message_en=msg_en,
     )
