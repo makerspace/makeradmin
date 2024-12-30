@@ -32,6 +32,19 @@ jobs:
       - name: Run tests
         run: make test
 
+  admin-frontend-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set time zone
+        run: sudo timedatectl set-timezone Europe/Stockholm
+      - name: Install packages
+        run: npm --prefix admin ci
+      - name: Run tests
+        run: npm --prefix admin run test
+      - name: Lint
+        run: npm --prefix admin run eslint
+
   stripe-tests:
     runs-on: ubuntu-latest
     concurrency: stripe
