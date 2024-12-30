@@ -23,3 +23,6 @@ public/static/js
 local.mk
 # MkDocs static site
 site/
+
+# VS code
+.vscode/launch.json
