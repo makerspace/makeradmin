@@ -106,7 +106,7 @@ export default class Collection {
         }).then(() => this.fetch());
     }
 
-    fetch() {
+    create_fetch_parameters() {
         let params = {};
 
         if (this.pageSize !== 0) {
@@ -129,8 +129,14 @@ export default class Collection {
         if (this.search) {
             params.search = this.search.trim();
         }
+        return params;
+    }
 
-        return get({ url: this.url, params }).then((data) => {
+    fetch() {
+        return get({
+            url: this.url,
+            params: this.create_fetch_parameters(),
+        }).then((data) => {
             if (!data) return;
             this.page.count = data.last_page;
             this.page.index = Math.min(this.page.count, this.page.index) || 1;
