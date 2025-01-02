@@ -3,13 +3,12 @@ from dataclasses import dataclass
 from datetime import date, datetime, timedelta
 from typing import Any, Dict, List, Optional, Set, Tuple, TypeVar
 
+from membership.models import Member, Span
 from service.api_definition import NOT_UNIQUE
 from service.db import db_session
 from service.error import PreconditionFailed, UnprocessableEntity
 from service.util import date_to_str
 from sqlalchemy import func
-
-from membership.models import Member, Span
 
 logger = logging.getLogger("makeradmin")
 
@@ -211,12 +210,18 @@ def get_access_summary(member_id: int):
         return dummy_accessy_summary
     member: Member = db_session.query(Member).filter(Member.member_id == member_id).one()
 
-    msisdn = member.phone
-    pending_invite_count = sum(1 for no in accessy_session.get_pending_invitations() if no == msisdn)
-    groups = accessy_session.get_user_groups(msisdn)
+    msisdn: str | None = member.phone_number
+    if msisdn is not None:
+        pending_invite_count = sum(1 for no in accessy_session.get_pending_invitations() if no == msisdn)
+        groups = accessy_session.get_user_groups(msisdn)
+        in_org = accessy_session.is_in_org(msisdn)
+    else:
+        pending_invite_count = 0
+        groups = []
+        in_org = False
 
     return dict(
-        in_org=accessy_session.is_in_org(msisdn),
+        in_org=in_org,
         pending_invite_count=pending_invite_count,
         access_permission_group_names=groups,
     )
