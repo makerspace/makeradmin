@@ -59,11 +59,6 @@ def register_member():
     return render_template("register.html")
 
 
-@shop.route("/register2")
-def register_member2() -> str:
-    return render_template("register2.html")
-
-
 @shop.route("/member/history")
 def purchase_history():
     return render_template("history.html")
