@@ -91,6 +91,9 @@
             "__BUILD_DATE__": "readonly",
             "__COMMIT_HASH__": "readonly"
         },
+        "ignorePatterns": [
+            "/src/**/__test__/*"
+        ],
         "parser": "@babel/eslint-parser",
         "plugins": [
             "react"
