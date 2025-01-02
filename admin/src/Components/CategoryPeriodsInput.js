@@ -48,7 +48,7 @@ const CategoryPeriodsInput = ({ categoryPeriods, showHistoric }) => {
             <button
                 type="button"
                 style={{ marginTop: "2px" }}
-                className="uk-button uk-button-small uk-button-success"
+                className="uk-button uk-button-small uk-button-primary"
                 onClick={() => {
                     const period = new DatePeriod();
                     period.start = utcToday();

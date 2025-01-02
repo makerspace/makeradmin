@@ -115,7 +115,7 @@ function MembershipPeriodsInput({ spans, member_id }) {
             ))}
             <button
                 disabled={saveDisabled}
-                className="uk-button uk-button-success uk-float-right"
+                className="uk-button uk-button-primary uk-float-right"
             >
                 <i className="uk-icon-save" /> Spara
             </button>

@@ -67,7 +67,7 @@ const RequestPasswordReset = () => {
                         <div className="uk-form-row">
                             <button
                                 type="submit"
-                                className="uk-width-1-1 uk-button uk-button-success uk-button-large"
+                                className="uk-width-1-1 uk-button uk-button-primary uk-button-large"
                             >
                                 <span className="uk-icon-check" /> Skicka epost
                             </button>

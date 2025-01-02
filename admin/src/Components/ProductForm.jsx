@@ -185,7 +185,7 @@ const ProductForm = ({ product, onDelete, onSave }) => {
                             />
                             <button
                                 type="button"
-                                className="uk-button uk-button-success uk-float-right"
+                                className="uk-button uk-button-primary uk-float-right"
                                 onClick={handleAddAction}
                             >
                                 <i className="uk-icon-plus" /> Lägg till åtgärd
@@ -251,7 +251,7 @@ const ProductForm = ({ product, onDelete, onSave }) => {
                     )}
                     <button
                         disabled={saveDisabled}
-                        className="uk-button uk-button-success uk-float-right"
+                        className="uk-button uk-button-primary uk-float-right"
                     >
                         <i className="uk-icon-save" />{" "}
                         {product.id ? "Spara" : "Skapa"}

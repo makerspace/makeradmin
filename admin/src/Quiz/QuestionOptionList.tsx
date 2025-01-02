@@ -1,14 +1,9 @@
 import React from "react";
-import Collection from "../Models/Collection";
-import { RouteComponentProps } from "react-router";
-import { Link } from "react-router-dom";
-import CollectionTable from "../Components/CollectionTable";
-import Key from "../Models/Key";
-import { confirmModal } from "../message";
-import TextInput from "../Components/TextInput";
-import DateTimeShow from "../Components/DateTimeShow";
-import QuizQuestionOption from "../Models/QuizQuestionOption";
 import _ from "underscore";
+import CollectionTable from "../Components/CollectionTable";
+import Collection from "../Models/Collection";
+import QuizQuestionOption from "../Models/QuizQuestionOption";
+import { confirmModal } from "../message";
 
 // Save functions for each item. Debounced to avoid a ton of unnecessary saves
 const debouncedSaves = new Map<QuizQuestionOption, () => void>();
@@ -122,7 +117,7 @@ class QuestionOptionList extends React.Component<Props, State> {
                 </div>
                 <button
                     onClick={() => this.createOption()}
-                    className="uk-button uk-button-success uk-float-right"
+                    className="uk-button uk-button-primary uk-float-right"
                 >
                     <i className="uk-icon-save" /> Lägg till svarsalternativ
                 </button>

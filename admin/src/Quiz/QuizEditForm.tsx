@@ -54,7 +54,7 @@ export default (props: Props) => {
                     ) : (
                         ""
                     )}
-                    <button className="uk-button uk-button-success uk-float-right">
+                    <button className="uk-button uk-button-primary uk-float-right">
                         <i className="uk-icon-save" />{" "}
                         {quiz.id ? "Spara" : "Skapa"}
                     </button>
