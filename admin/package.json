@@ -20,7 +20,7 @@
         "react-router": "^5.2.0",
         "react-router-dom": "^5.2.0",
         "react-select": "^2.4.4",
-        "uikit": "^2.27.4",
+        "uikit": "^3.0.0",
         "underscore": "^1.13.0"
     },
     "devDependencies": {
