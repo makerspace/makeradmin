@@ -28,7 +28,6 @@ import Messages from "./Messages/Routes";
 import Quiz from "./Quiz/Routes";
 import Sales from "./Sales/Routes";
 import Settings from "./Settings/Routes";
-import Statistics from "./Statistics/Routes";
 import BoxTerminator from "./boxTerminator/Routes";
 
 const nav = {
@@ -126,11 +125,6 @@ const nav = {
             ],
         },
         {
-            text: "Statistik",
-            target: "/statistics",
-            icon: "area-chart",
-        },
-        {
             text: "Inställningar",
             target: "/settings",
             icon: "cog",
@@ -203,10 +197,6 @@ const App = () => {
                                             <Route
                                                 path="/messages"
                                                 component={Messages}
-                                            />
-                                            <Route
-                                                path="/statistics"
-                                                component={Statistics}
                                             />
                                             <Route
                                                 path="/settings"
