@@ -210,7 +210,7 @@ def get_access_summary(member_id: int):
         return dummy_accessy_summary
     member: Member = db_session.query(Member).filter(Member.member_id == member_id).one()
 
-    msisdn: str | None = member.phone_number
+    msisdn: str | None = member.phone
     if msisdn is not None:
         pending_invite_count = sum(1 for no in accessy_session.get_pending_invitations() if no == msisdn)
         groups = accessy_session.get_user_groups(msisdn)
