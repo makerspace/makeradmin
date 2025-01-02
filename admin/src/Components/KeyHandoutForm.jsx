@@ -184,7 +184,7 @@ function KeyHandoutForm(props) {
             color = "uk-button-danger";
         } else {
             tooltip = "All info finns, accessy invite kommer att skickas!";
-            color = "uk-button-success";
+            color = "uk-button-primary";
         }
 
         const on_click = (e) => {
@@ -351,7 +351,7 @@ function KeyHandoutForm(props) {
 
             <div style={{ paddingBottom: "4em" }}>
                 <button
-                    className="uk-button uk-button-success uk-float-right"
+                    className="uk-button uk-button-primary uk-float-right"
                     tabIndex="2"
                     title="Spara ändringar"
                     disabled={!can_save_member}

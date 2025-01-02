@@ -26,7 +26,7 @@ export default (props: Props) => {
     );
     const save_button = (
         <a
-            className="uk-button uk-button-success uk-float-right"
+            className="uk-button uk-button-primary uk-float-right"
             onClick={onSave}
         >
             <i className="uk-icon-save" /> {question.id ? "Spara" : "Skapa"}
@@ -34,7 +34,7 @@ export default (props: Props) => {
     );
     const new_button = !question.id ? null : (
         <a
-            className="uk-button uk-button-success uk-float-right"
+            className="uk-button uk-button-primary uk-float-right"
             onClick={onNew}
         >
             <i className="uk-icon-save" /> New question

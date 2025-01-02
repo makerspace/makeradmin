@@ -60,7 +60,7 @@ const GroupForm = ({ group, onSave, onDelete }) => {
                             </a>
                         )}
                         <button
-                            className="uk-button uk-button-success uk-float-right"
+                            className="uk-button uk-button-primary uk-float-right"
                             disabled={saveDisabled}
                         >
                             <i className="uk-icon-save" />{" "}

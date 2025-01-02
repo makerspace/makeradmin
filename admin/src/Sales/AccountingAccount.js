@@ -72,7 +72,7 @@ class AccountingAccount extends CollectionNavigation {
                         <div className="uk-form-row uk-margin-top">
                             <div className="uk-form-controls">
                                 <button
-                                    className="uk-button uk-button-success uk-float-right"
+                                    className="uk-button uk-button-primary uk-float-right"
                                     disabled={!saveEnabled}
                                 >
                                     <i className="uk-icon-save" />{" "}

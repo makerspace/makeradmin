@@ -125,7 +125,7 @@ const MessageForm = ({ message, onSave, recipientSelect }) => {
                 </div>
                 <div className="uk-form-controls">
                     <button
-                        className="uk-button uk-button-success uk-float-right"
+                        className="uk-button uk-button-primary uk-float-right"
                         disabled={sendDisabled}
                     >
                         <i className="uk-icon-save" /> Skicka
