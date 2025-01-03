@@ -54,7 +54,7 @@ const MemberForm = ({ member, onSave, onDelete }) => {
                     />
                 </fieldset>
 
-                <fieldset data-uk-margin>
+                <fieldset>
                     <legend>
                         <i className="uk-icon-home" /> Adress
                     </legend>
@@ -98,7 +98,7 @@ const MemberForm = ({ member, onSave, onDelete }) => {
                 {!member.id ? (
                     ""
                 ) : (
-                    <fieldset data-uk-margin>
+                    <fieldset>
                         <legend>
                             <i className="uk-icon-tag" /> Metadata
                         </legend>
