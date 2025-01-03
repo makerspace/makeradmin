@@ -6,6 +6,7 @@ import DateTimeInput from "./DateTimeInput";
 import SelectInput from "./SelectInput";
 import TextInput from "./TextInput";
 import Textarea from "./Textarea";
+import Icon from "./icons";
 
 // Return list of available actions types based on selected ones
 const filterAvailableActions = (actions) => {
@@ -81,7 +82,7 @@ const ProductForm = ({ product, onDelete, onSave }) => {
                     className="uk-button uk-button-danger"
                     onClick={() => handleRemoveAction(action)}
                 >
-                    <i className="uk-icon-trash-o" />
+                    <Icon icon="trash" />
                 </a>
             </div>
         </div>
@@ -100,7 +101,7 @@ const ProductForm = ({ product, onDelete, onSave }) => {
             >
                 <fieldset className="uk-margin-top">
                     <legend>
-                        <i className="uk-icon-shopping-cart" /> Produkt
+                        <Icon icon="cart" /> Produkt
                     </legend>
                     <TextInput
                         model={product}
@@ -166,7 +167,7 @@ const ProductForm = ({ product, onDelete, onSave }) => {
                 </fieldset>
                 <fieldset className="uk-margin-top">
                     <legend>
-                        <i className="uk-icon-magic" /> Åtgärder
+                        <Icon icon="wand" /> Åtgärder
                     </legend>
                     <div>{actions.map(renderAction)}</div>
                     {availableActionTypes.length > 0 && (
@@ -188,14 +189,14 @@ const ProductForm = ({ product, onDelete, onSave }) => {
                                 className="uk-button uk-button-primary uk-float-right"
                                 onClick={handleAddAction}
                             >
-                                <i className="uk-icon-plus" /> Lägg till åtgärd
+                                <Icon icon="plus" /> Lägg till åtgärd
                             </button>
                         </div>
                     )}
                 </fieldset>
                 <fieldset className="uk-margin-top">
                     <legend>
-                        <i className="uk-icon-filter" /> Filter
+                        <Icon icon="filter" /> Filter
                     </legend>
                     <SelectInput
                         model={product}
@@ -222,7 +223,7 @@ const ProductForm = ({ product, onDelete, onSave }) => {
                 </fieldset>
                 <fieldset className="uk-margin-top">
                     <legend>
-                        <i className="uk-icon-tag" /> Metadata
+                        <Icon icon="tag" /> Metadata
                     </legend>
                     <CheckboxInput model={product} name="show" title="Synlig" />
                     {product.id && (
@@ -246,15 +247,14 @@ const ProductForm = ({ product, onDelete, onSave }) => {
                             className="uk-button uk-button-danger uk-float-left"
                             onClick={onDelete}
                         >
-                            <i className="uk-icon-trash" /> Ta bort produkt
+                            <Icon icon="trash" /> Ta bort produkt
                         </a>
                     )}
                     <button
                         disabled={saveDisabled}
                         className="uk-button uk-button-primary uk-float-right"
                     >
-                        <i className="uk-icon-save" />{" "}
-                        {product.id ? "Spara" : "Skapa"}
+                        <Icon icon="save" /> {product.id ? "Spara" : "Skapa"}
                     </button>
                 </fieldset>
             </form>

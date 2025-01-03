@@ -5,6 +5,7 @@ import * as _ from "underscore";
 import auth from "../auth";
 import { browserHistory } from "../browser_history";
 import { showError, showSuccess } from "../message";
+import Icon from "./icons";
 
 class PasswordReset extends React.Component {
     input = React.createRef<HTMLInputElement>();
@@ -47,8 +48,8 @@ class PasswordReset extends React.Component {
                                 <h2>Password Reset</h2>
                             </div>
                             <div className="form-row">
-                                <div className="uk-form-icon">
-                                    <i className="uk-icon-user" />
+                                <div className="uk-inline">
+                                    <Icon form icon="user" />
                                     <input
                                         ref={this.input}
                                         className="uk-form-large uk-form-width-large"
@@ -64,7 +65,7 @@ class PasswordReset extends React.Component {
                                     type="submit"
                                     className="uk-width-1-1 uk-button uk-button-primary uk-button-large"
                                 >
-                                    <span className="uk-icon-check" /> Submit
+                                    <Icon icon="check" /> Submit
                                 </button>
                             </div>
                             <div className="form-row uk-text-small">

@@ -1,6 +1,7 @@
 import React from "react";
 import _ from "underscore";
 import CollectionTable from "../Components/CollectionTable";
+import Icon from "../Components/icons";
 import Collection from "../Models/Collection";
 import QuizQuestionOption from "../Models/QuizQuestionOption";
 import { confirmModal } from "../message";
@@ -52,7 +53,7 @@ const Row =
                 </td>
                 <td>
                     <a onClick={deleteItem} className="removebutton">
-                        <i className="uk-icon-trash" />
+                        <Icon icon="trash" />
                     </a>
                 </td>
             </tr>
@@ -119,7 +120,7 @@ class QuestionOptionList extends React.Component<Props, State> {
                     onClick={() => this.createOption()}
                     className="uk-button uk-button-primary uk-float-right"
                 >
-                    <i className="uk-icon-save" /> Lägg till svarsalternativ
+                    <Icon icon="save" /> Lägg till svarsalternativ
                 </button>
             </div>
         );

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import Icon from "./icons";
 
 const continents = [
     {
@@ -1100,7 +1101,7 @@ const CountryDropdown = ({ model, name }) => {
                 className="uk-button uk-button-default uk-form-small"
             >
                 <span className={"flag flag-" + country} />{" "}
-                {getCountryName(country)} <i className="uk-icon-angle-down" />
+                {getCountryName(country)} <Icon icon="chevron-down" />
             </button>
             <div
                 uk-dropdown="mode: click"

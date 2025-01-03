@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import * as _ from "underscore";
 import { confirmModal } from "../message";
+import Icon from "./icons";
 
 const deleteItem = (collection, item) => {
     return confirmModal(item.deleteConfirmMessage())
@@ -44,7 +45,13 @@ const CollectionTable = (props) => {
             let title;
             if (column.sort) {
                 const sortIcon = (
-                    <i className={"uk-icon-angle-" + sortState.order} />
+                    <Icon
+                        icon={
+                            sortState.order === "down"
+                                ? "chevron-down"
+                                : "chevron-up"
+                        }
+                    />
                 );
                 const onClick = () => {
                     const newSort = {
@@ -169,7 +176,9 @@ const CollectionTable = (props) => {
                     <div className="loadingOverlay">
                         <div className="loadingWrapper">
                             <span>
-                                <i className="uk-icon-refresh uk-icon-spin" />{" "}
+                                <div uk-spinner />
+                                {/* FIXME: Doesn't show */}
+                                <Icon icon="refresh" />
                                 Hämtar data...
                             </span>
                         </div>

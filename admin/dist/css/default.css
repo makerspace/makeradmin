@@ -337,3 +337,18 @@ tr.toggle pre {
 .multiaccess .error {
     margin-top: 10px;
 }
+
+/* UI-kit icons are not aligned with text for Buttons, legends, etc */
+.uk-icon {
+    transform: translateY(-2px);
+}
+
+/* However, in the Navbar they are already aligned */
+ul.uk-navbar-nav > li > a > .uk-icon {
+    transform: translateY(0px);
+}
+
+/* Icons from the react-icons package also need to be bumped a bit to be aligned with text */
+button > svg {
+    transform: translateY(-2px);
+}

@@ -3,6 +3,7 @@ import { useParams } from "react-router";
 import DateTimeInput from "../Components/DateTimeInput";
 import TextInput from "../Components/TextInput";
 import Textarea from "../Components/Textarea";
+import Icon from "../Components/icons";
 import Key from "../Models/Key";
 import { browserHistory } from "../browser_history";
 import { confirmModal } from "../message";
@@ -83,14 +84,13 @@ function KeyEdit() {
                                         className="uk-button uk-button-danger uk-float-left"
                                         onClick={onDelete}
                                     >
-                                        <i className="uk-icon-trash" /> Ta bort
-                                        nyckel
+                                        <Icon icon="trash" /> Ta bort nyckel
                                     </a>
                                     <button
                                         className="uk-button uk-button-primary uk-float-right"
                                         disabled={saveDisabled}
                                     >
-                                        <i className="uk-icon-save" /> Spara
+                                        <Icon icon="save" /> Spara
                                     </button>
                                 </div>
                             </div>

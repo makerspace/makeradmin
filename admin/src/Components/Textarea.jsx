@@ -25,7 +25,6 @@ const Textarea = (props) => {
         model,
         name,
         title,
-        icon,
         disabled,
         placeholder,
         formrow,
@@ -60,16 +59,7 @@ const Textarea = (props) => {
             <label className="uk-form-label" htmlFor={name}>
                 {title}
             </label>
-            <div className="uk-form-controls">
-                {icon ? (
-                    <div className="uk-form-icon">
-                        <i className={"uk-icon-" + icon} />
-                        {textarea}
-                    </div>
-                ) : (
-                    textarea
-                )}
-            </div>
+            <div className="uk-form-controls">{textarea}</div>
         </div>
     );
 };

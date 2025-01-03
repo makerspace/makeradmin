@@ -1,4 +1,5 @@
 import React from "react";
+import Icon from "../Components/icons";
 import Textarea from "../Components/Textarea";
 import TextInput from "../Components/TextInput";
 import Quiz from "../Models/Quiz";
@@ -49,14 +50,13 @@ export default (props: Props) => {
                             className="uk-button uk-button-danger uk-float-left"
                             onClick={onDelete}
                         >
-                            <i className="uk-icon-trash" /> Radera quiz
+                            <Icon icon="trash" /> Radera quiz
                         </a>
                     ) : (
                         ""
                     )}
                     <button className="uk-button uk-button-primary uk-float-right">
-                        <i className="uk-icon-save" />{" "}
-                        {quiz.id ? "Spara" : "Skapa"}
+                        <Icon icon="save" /> {quiz.id ? "Spara" : "Skapa"}
                     </button>
                 </div>
             </form>

@@ -5,6 +5,7 @@ import * as _ from "underscore";
 import CollectionTable from "../Components/CollectionTable";
 import Currency from "../Components/Currency";
 import SearchBox from "../Components/SearchBox";
+import Icon from "../Components/icons";
 import Collection from "../Models/Collection";
 import CollectionNavigation from "../Models/CollectionNavigation";
 import Product from "../Models/Product";
@@ -447,8 +448,8 @@ class AccountingProduct extends CollectionNavigation {
 
                     <fieldset className="form-row uk-margin-top">
                         <button className="uk-button uk-button-primary uk-float-right">
-                            <i className="uk-icon-save" />{" "}
-                            {"Applicera val på markerade produkter"}
+                            <Icon icon="save" /> Applicera val på markerade
+                            produkter
                         </button>
                     </fieldset>
                 </form>

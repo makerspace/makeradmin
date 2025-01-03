@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import Select from "react-select";
 import * as _ from "underscore";
 import CollectionTable from "../Components/CollectionTable";
+import Icon from "../Components/icons";
 import Collection from "../Models/Collection";
 import Group from "../Models/Group";
 import { get } from "../gateway";
@@ -101,7 +102,7 @@ function MemberBoxGroups(props) {
                                     }
                                     className="removebutton"
                                 >
-                                    <i className="uk-icon-trash" />
+                                    <Icon icon="trash" />
                                 </a>
                             </td>
                         </tr>

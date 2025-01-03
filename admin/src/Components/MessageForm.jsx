@@ -3,6 +3,7 @@ import { Async } from "react-select";
 import { get } from "../gateway";
 import Group from "../Models/Group";
 import Member from "../Models/Member";
+import Icon from "./icons";
 import Textarea from "./Textarea";
 import TextInput from "./TextInput";
 
@@ -128,7 +129,7 @@ const MessageForm = ({ message, onSave, recipientSelect }) => {
                         className="uk-button uk-button-primary uk-float-right"
                         disabled={sendDisabled}
                     >
-                        <i className="uk-icon-save" /> Skicka
+                        <Icon icon="send" /> Skicka
                     </button>
                 </div>
             </div>

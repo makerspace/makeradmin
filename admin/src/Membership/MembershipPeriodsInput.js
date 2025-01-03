@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import CategoryPeriodsInput from "../Components/CategoryPeriodsInput";
+import Icon from "../Components/icons";
 import CategoryPeriods from "../Models/CategoryPeriods";
 import { calculateSpanDiff, filterPeriods } from "../Models/Span";
 import auth from "../auth";
@@ -117,7 +118,7 @@ function MembershipPeriodsInput({ spans, member_id }) {
                 disabled={saveDisabled}
                 className="uk-button uk-button-primary uk-float-right"
             >
-                <i className="uk-icon-save" /> Spara
+                <Icon icon="save" /> Spara
             </button>
         </form>
     );

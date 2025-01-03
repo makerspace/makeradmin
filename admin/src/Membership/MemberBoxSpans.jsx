@@ -4,7 +4,7 @@ import { Link, useParams } from "react-router-dom";
 import CollectionTable from "../Components/CollectionTable";
 import DateShow from "../Components/DateShow";
 import DateTimeShow from "../Components/DateTimeShow";
-import UiKitIcon from "../Components/UiKitIcon";
+import Icon from "../Components/icons";
 import Collection from "../Models/Collection";
 import { ADD_LABACCESS_DAYS } from "../Models/ProductAction";
 import Span from "../Models/Span";
@@ -107,7 +107,7 @@ function MemberBoxSpans() {
                                     onClick={() => deleteItem(item)}
                                     className="removebutton"
                                 >
-                                    <UiKitIcon icon="trash" />
+                                    <Icon icon="trash" />
                                 </a>
                             )}
                         </td>

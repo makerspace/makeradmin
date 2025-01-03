@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import CountryDropdown from "./CountryDropdown";
 import DateTimeShow from "./DateTimeShow";
+import Icon from "./icons";
 import TextInput from "./TextInput";
 
 const MemberForm = ({ member, onSave, onDelete }) => {
@@ -27,7 +28,7 @@ const MemberForm = ({ member, onSave, onDelete }) => {
             >
                 <fieldset>
                     <legend>
-                        <i className="uk-icon-user" /> Personuppgifter
+                        <Icon icon="user" /> Personuppgifter
                     </legend>
 
                     <TextInput
@@ -56,7 +57,7 @@ const MemberForm = ({ member, onSave, onDelete }) => {
 
                 <fieldset>
                     <legend>
-                        <i className="uk-icon-home" /> Adress
+                        <Icon icon="home" /> Adress
                     </legend>
 
                     <TextInput
@@ -111,7 +112,7 @@ const MemberForm = ({ member, onSave, onDelete }) => {
                 ) : (
                     <fieldset>
                         <legend>
-                            <i className="uk-icon-tag" /> Metadata
+                            <Icon icon="tag" /> Metadata
                         </legend>
 
                         <div className="form-row">
@@ -119,7 +120,7 @@ const MemberForm = ({ member, onSave, onDelete }) => {
                                 Medlem sedan
                             </label>
                             <div className="uk-form-controls">
-                                <i className="uk-icon-calendar" />
+                                <Icon icon="calendar" />
                                 &nbsp;
                                 <DateTimeShow date={member.created_at} />
                             </div>
@@ -130,7 +131,7 @@ const MemberForm = ({ member, onSave, onDelete }) => {
                                 Senast uppdaterad
                             </label>
                             <div className="uk-form-controls">
-                                <i className="uk-icon-calendar" />
+                                <Icon icon="calendar" />
                                 &nbsp;
                                 <DateTimeShow date={member.updated_at} />
                             </div>
@@ -146,15 +147,14 @@ const MemberForm = ({ member, onSave, onDelete }) => {
                             className="uk-button uk-button-danger uk-float-left"
                             onClick={onDelete}
                         >
-                            <i className="uk-icon-trash" /> Ta bort medlem
+                            <Icon icon="trash" /> Ta bort medlem
                         </a>
                     )}
                     <button
                         className="uk-button uk-button-primary uk-float-right"
                         disabled={saveDisabled}
                     >
-                        <i className="uk-icon-save" />{" "}
-                        {member.id ? "Spara" : "Skapa"}
+                        <Icon icon="save" /> {member.id ? "Spara" : "Skapa"}
                     </button>
                 </div>
             </form>

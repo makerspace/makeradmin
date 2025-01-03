@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import auth from "../auth";
 import { showError } from "../message";
+import Icon from "./icons";
 
 const Login = () => {
     const [username, setUsername] = useState("");
@@ -33,8 +34,8 @@ const Login = () => {
                     </div>
 
                     <div className="form-row">
-                        <div className="uk-form-icon">
-                            <i className="uk-icon-user" />
+                        <div className="uk-inline">
+                            <Icon form icon="user" />
                             <input
                                 value={username}
                                 onChange={(e) => setUsername(e.target.value)}
@@ -47,8 +48,8 @@ const Login = () => {
                     </div>
 
                     <div className="form-row">
-                        <div className="uk-form-icon">
-                            <i className="uk-icon-lock" />
+                        <div className="uk-inline">
+                            <Icon form icon="lock" />
                             <input
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}

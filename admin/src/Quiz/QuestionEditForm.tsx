@@ -1,4 +1,5 @@
 import React from "react";
+import Icon from "../Components/icons";
 import Textarea from "../Components/Textarea";
 import QuizQuestion from "../Models/QuizQuestion";
 import QuestionOptionList from "./QuestionOptionList";
@@ -21,7 +22,7 @@ export default (props: Props) => {
             className="uk-button uk-button-danger uk-float-left"
             onClick={onDelete}
         >
-            <i className="uk-icon-trash" /> Radera fråga
+            <Icon icon="trash" /> Radera fråga
         </a>
     );
     const save_button = (
@@ -29,7 +30,7 @@ export default (props: Props) => {
             className="uk-button uk-button-primary uk-float-right"
             onClick={onSave}
         >
-            <i className="uk-icon-save" /> {question.id ? "Spara" : "Skapa"}
+            <Icon icon="save" /> {question.id ? "Spara" : "Skapa"}
         </a>
     );
     const new_button = !question.id ? null : (
@@ -37,7 +38,7 @@ export default (props: Props) => {
             className="uk-button uk-button-primary uk-float-right"
             onClick={onNew}
         >
-            <i className="uk-icon-save" /> New question
+            <Icon icon="save" /> New question
         </a>
     );
 

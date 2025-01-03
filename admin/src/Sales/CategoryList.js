@@ -1,5 +1,6 @@
 import React from "react";
 import CollectionTable from "../Components/CollectionTable";
+import Icon from "../Components/icons";
 import TextInput from "../Components/TextInput";
 import Collection from "../Models/Collection";
 import CollectionNavigation from "../Models/CollectionNavigation";
@@ -71,7 +72,7 @@ class CategoryList extends CollectionNavigation {
                                                 className="uk-button uk-button-primary uk-float-right"
                                                 disabled={!saveEnabled}
                                             >
-                                                <i className="uk-icon-save" />{" "}
+                                                <Icon icon="save" />
                                                 Skapa kategori
                                             </button>
                                         </div>
@@ -96,7 +97,7 @@ class CategoryList extends CollectionNavigation {
                                         onClick={() => deleteItem(item)}
                                         className="removebutton"
                                     >
-                                        <i className="uk-icon-trash" />
+                                        <Icon icon="trash" />
                                     </a>
                                 </td>
                             </tr>

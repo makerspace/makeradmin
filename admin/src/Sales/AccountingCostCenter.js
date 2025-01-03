@@ -1,5 +1,6 @@
 import React from "react";
 import CollectionTable from "../Components/CollectionTable";
+import Icon from "../Components/icons";
 import SearchBox from "../Components/SearchBox";
 import TextInput from "../Components/TextInput";
 import Collection from "../Models/Collection";
@@ -78,7 +79,7 @@ class AccountingCostCenter extends CollectionNavigation {
                                     className="uk-button uk-button-primary uk-float-right"
                                     disabled={!saveEnabled}
                                 >
-                                    <i className="uk-icon-save" />{" "}
+                                    <Icon icon="save" />{" "}
                                     {this.transactionCostCenter.id
                                         ? "Spara nytt kostnadsställe"
                                         : "Skapa nytt kostnadsställe"}
@@ -108,7 +109,7 @@ class AccountingCostCenter extends CollectionNavigation {
                                         onClick={() => deleteItem(item)}
                                         className="removebutton"
                                     >
-                                        <i className="uk-icon-trash" />
+                                        <Icon icon="trash" />
                                     </a>
                                 </td>
                             </tr>

@@ -7,6 +7,7 @@ import Collection from "../Models/Collection";
 import { ADD_LABACCESS_DAYS } from "../Models/ProductAction";
 import Span, { filterCategory } from "../Models/Span";
 import { dateTimeToStr, parseUtcDate, utcToday } from "../utils";
+import Icon from "./icons";
 import TextInput from "./TextInput";
 
 function last_span_enddate(spans, category) {
@@ -217,8 +218,8 @@ function KeyHandoutForm(props) {
                 tabIndex="1"
                 onClick={on_click}
             >
-                <i className="uk-icon-save" /> Spara, lägg till labaccess och
-                skicka Accessy-invite
+                <Icon icon="save" /> Spara, lägg till labaccess och skicka
+                Accessy-invite
             </button>
         );
     };
@@ -268,7 +269,7 @@ function KeyHandoutForm(props) {
                 <div>
                     <TextInput
                         model={member}
-                        icon="birthday-cake"
+                        icon="birthdaycake"
                         tabIndex="1"
                         name="civicregno"
                         title="Personnummer"
@@ -356,7 +357,7 @@ function KeyHandoutForm(props) {
                     title="Spara ändringar"
                     disabled={!can_save_member}
                 >
-                    <i className="uk-icon-save" /> Spara
+                    <Icon icon="save" /> Spara
                 </button>
                 <AccessyInviteSaveButton />
             </div>
