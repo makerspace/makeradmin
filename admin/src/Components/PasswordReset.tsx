@@ -43,10 +43,10 @@ class PasswordReset extends React.Component {
                             className="uk-panel uk-panel-box uk-form"
                             onSubmit={(e) => this.submit(e)}
                         >
-                            <div className="uk-form-row">
+                            <div className="form-row">
                                 <h2>Password Reset</h2>
                             </div>
-                            <div className="uk-form-row">
+                            <div className="form-row">
                                 <div className="uk-form-icon">
                                     <i className="uk-icon-user" />
                                     <input
@@ -59,7 +59,7 @@ class PasswordReset extends React.Component {
                                 </div>
                             </div>
 
-                            <div className="uk-form-row">
+                            <div className="form-row">
                                 <button
                                     type="submit"
                                     className="uk-width-1-1 uk-button uk-button-primary uk-button-large"
@@ -67,7 +67,7 @@ class PasswordReset extends React.Component {
                                     <span className="uk-icon-check" /> Submit
                                 </button>
                             </div>
-                            <div className="uk-form-row uk-text-small">
+                            <div className="form-row uk-text-small">
                                 <Link
                                     className="uk-link uk-link-muted"
                                     to="/request-password-reset"

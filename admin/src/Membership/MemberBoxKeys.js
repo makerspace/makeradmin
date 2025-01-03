@@ -79,10 +79,9 @@ function MemberBoxKeys() {
 
     return (
         <div>
-            <div className="uk-margin-top uk-form uk-form-stacked">
+            <div className="uk-margin-top">
                 <div className="meep">
                     <form
-                        className="uk-form"
                         onSubmit={(e) => {
                             e.preventDefault();
                             createKey();
@@ -105,7 +104,7 @@ function MemberBoxKeys() {
                                     placeholder="Det är valfritt att lägga in en kommentar av nyckeln"
                                 />
 
-                                <div className="uk-form-row uk-margin-top">
+                                <div className="uk-margin-top">
                                     <div className="uk-form-controls">
                                         <button
                                             className="uk-button uk-button-primary uk-float-right"

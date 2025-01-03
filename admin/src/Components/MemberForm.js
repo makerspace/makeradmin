@@ -19,7 +19,6 @@ const MemberForm = ({ member, onSave, onDelete }) => {
     return (
         <div className="meep">
             <form
-                className="uk-form"
                 onSubmit={(e) => {
                     e.preventDefault();
                     onSave();
@@ -32,6 +31,7 @@ const MemberForm = ({ member, onSave, onDelete }) => {
                     </legend>
 
                     <TextInput
+                        margin={false}
                         model={member}
                         name="civicregno"
                         title="Personnummer"
@@ -60,6 +60,7 @@ const MemberForm = ({ member, onSave, onDelete }) => {
                     </legend>
 
                     <TextInput
+                        margin={false}
                         model={member}
                         name="address_street"
                         title="Address"
@@ -70,28 +71,38 @@ const MemberForm = ({ member, onSave, onDelete }) => {
                         title="Address extra"
                         placeholder="Extra adressrad, t ex C/O adress"
                     />
-                    <TextInput
-                        model={member}
-                        type="number"
-                        name="address_zipcode"
-                        title="Postnummer"
-                    />
-                    <TextInput
-                        model={member}
-                        name="address_city"
-                        title="Postort"
-                    />
-
-                    <div className="uk-form-row">
-                        <label htmlFor="" className="uk-form-label">
-                            Land
-                        </label>
-                        <div className="uk-form-controls">
-                            <CountryDropdown
+                    <div style={{ display: "flex" }}>
+                        <div style={{ flex: "0 0 200px" }}>
+                            <TextInput
                                 model={member}
-                                name="address_country"
+                                type="number"
+                                name="address_zipcode"
+                                title="Postnummer"
                             />
                         </div>
+                        <div
+                            style={{ flex: "1 1 auto" }}
+                            className="uk-margin-left"
+                        >
+                            <TextInput
+                                model={member}
+                                name="address_city"
+                                title="Postort"
+                            />
+                        </div>
+                    </div>
+
+                    <div>
+                        <label
+                            htmlFor="address_country"
+                            className="uk-form-label"
+                        >
+                            Land
+                        </label>
+                        <CountryDropdown
+                            model={member}
+                            name="address_country"
+                        />
                     </div>
                 </fieldset>
 
@@ -103,7 +114,7 @@ const MemberForm = ({ member, onSave, onDelete }) => {
                             <i className="uk-icon-tag" /> Metadata
                         </legend>
 
-                        <div className="uk-form-row">
+                        <div className="form-row">
                             <label className="uk-form-label">
                                 Medlem sedan
                             </label>
@@ -114,7 +125,7 @@ const MemberForm = ({ member, onSave, onDelete }) => {
                             </div>
                         </div>
 
-                        <div className="uk-form-row">
+                        <div className="form-row">
                             <label className="uk-form-label">
                                 Senast uppdaterad
                             </label>
@@ -127,7 +138,7 @@ const MemberForm = ({ member, onSave, onDelete }) => {
                     </fieldset>
                 )}
 
-                <div className="uk-form-row">
+                <div className="form-row">
                     {!member.id ? (
                         ""
                     ) : (

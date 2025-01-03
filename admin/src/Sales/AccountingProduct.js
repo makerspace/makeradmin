@@ -445,7 +445,7 @@ class AccountingProduct extends CollectionNavigation {
                         />
                     </fieldset>
 
-                    <fieldset className="uk-form-row uk-margin-top">
+                    <fieldset className="form-row uk-margin-top">
                         <button className="uk-button uk-button-primary uk-float-right">
                             <i className="uk-icon-save" />{" "}
                             {"Applicera val på markerade produkter"}

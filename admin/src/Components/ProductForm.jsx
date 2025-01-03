@@ -72,7 +72,7 @@ const ProductForm = ({ product, onDelete, onSave }) => {
                 <TextInput
                     model={action}
                     label={false}
-                    formrow={false}
+                    margin={false}
                     name={"value"}
                 />
             </div>

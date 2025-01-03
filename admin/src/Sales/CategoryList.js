@@ -65,7 +65,7 @@ class CategoryList extends CollectionNavigation {
                                         placeholder="Namn för ny kategori"
                                     />
 
-                                    <div className="uk-form-row uk-margin-top">
+                                    <div className="form-row uk-margin-top">
                                         <div className="uk-form-controls">
                                             <button
                                                 className="uk-button uk-button-primary uk-float-right"

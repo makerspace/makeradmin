@@ -28,11 +28,11 @@ const Login = () => {
                     className="uk-panel uk-panel-box uk-form"
                     onSubmit={login}
                 >
-                    <div className="uk-form-row">
+                    <div className="form-row">
                         <h2>Logga in</h2>
                     </div>
 
-                    <div className="uk-form-row">
+                    <div className="form-row">
                         <div className="uk-form-icon">
                             <i className="uk-icon-user" />
                             <input
@@ -46,7 +46,7 @@ const Login = () => {
                         </div>
                     </div>
 
-                    <div className="uk-form-row">
+                    <div className="form-row">
                         <div className="uk-form-icon">
                             <i className="uk-icon-lock" />
                             <input
@@ -60,7 +60,7 @@ const Login = () => {
                         </div>
                     </div>
 
-                    <div className="uk-form-row">
+                    <div className="form-row">
                         <button
                             type="submit"
                             className="uk-width-1-1 uk-button uk-button-primary uk-button-large"
@@ -69,7 +69,7 @@ const Login = () => {
                         </button>
                     </div>
 
-                    <div className="uk-form-row uk-text-small">
+                    <div className="form-row uk-text-small">
                         <Link
                             className="uk-float-right uk-link uk-link-muted"
                             to="/request-password-reset"

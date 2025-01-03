@@ -69,7 +69,7 @@ class AccountingAccount extends CollectionNavigation {
                             placeholder="Beskrivning av nytt konto"
                         />
 
-                        <div className="uk-form-row uk-margin-top">
+                        <div className="form-row uk-margin-top">
                             <div className="uk-form-controls">
                                 <button
                                     className="uk-button uk-button-primary uk-float-right"

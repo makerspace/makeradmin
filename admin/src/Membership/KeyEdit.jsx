@@ -77,7 +77,7 @@ function KeyEdit() {
                                 placeholder="Det är valfritt att lägga in en kommenter av nyckeln"
                             />
 
-                            <div className="uk-form-row uk-margin-top">
+                            <div className="form-row uk-margin-top">
                                 <div className="uk-form-controls">
                                     <a
                                         className="uk-button uk-button-danger uk-float-left"
