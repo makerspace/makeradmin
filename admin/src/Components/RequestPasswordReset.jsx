@@ -3,6 +3,7 @@ import { withRouter } from "react-router";
 import auth from "../auth";
 import { browserHistory } from "../browser_history";
 import { showError, showSuccess } from "../message";
+import UiKitIcon from "./UiKitIcon";
 
 const RequestPasswordReset = () => {
     const [userIdentification, setUserIdentification] = useState("");
@@ -51,8 +52,8 @@ const RequestPasswordReset = () => {
                         </div>
 
                         <div className="form-row">
-                            <div className="uk-form-icon">
-                                <i className="uk-icon-user" />
+                            <div className="uk-inline">
+                                <UiKitIcon form icon="user" />
                                 <input
                                     value={userIdentification}
                                     onChange={handleInputChange}
@@ -69,7 +70,7 @@ const RequestPasswordReset = () => {
                                 type="submit"
                                 className="uk-width-1-1 uk-button uk-button-primary uk-button-large"
                             >
-                                <span className="uk-icon-check" /> Skicka epost
+                                <UiKitIcon icon="check" /> Skicka epost
                             </button>
                         </div>
                     </form>

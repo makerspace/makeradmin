@@ -5,7 +5,6 @@ const CheckboxInput = ({
     model,
     name,
     title,
-    icon,
     disabled,
     formrow,
     tabIndex,
@@ -54,16 +53,7 @@ const CheckboxInput = ({
                     {title}
                 </label>
             )}
-            <div className="uk-form-controls">
-                {icon ? (
-                    <div className="uk-form-icon">
-                        <i className={"uk-icon-" + icon} />
-                        {input}
-                    </div>
-                ) : (
-                    input
-                )}
-            </div>
+            <div className="uk-form-controls">{input}</div>
         </div>
     );
 };

@@ -2,7 +2,10 @@
 global.jQuery = require("jquery");
 global.$ = global.jQuery;
 import "uikit/dist/css/uikit.css";
-import "uikit/dist/js/uikit-icons.js";
+
+import UIkit from "uikit";
+import Icons from "uikit/dist/js/uikit-icons";
+UIkit.use(Icons);
 
 import React from "react";
 import ReactDOM from "react-dom";
@@ -42,7 +45,7 @@ const nav = {
                 {
                     text: "Grupper",
                     target: "/membership/groups",
-                    icon: "group",
+                    icon: "users",
                 },
                 {
                     text: "Nycklar",
@@ -52,7 +55,7 @@ const nav = {
                 {
                     text: "Medlemsperioder",
                     target: "/membership/spans",
-                    icon: "clock-o",
+                    icon: "clock",
                 },
                 {
                     text: "Exportera medlemmar",
@@ -64,7 +67,7 @@ const nav = {
         {
             text: "Försäljning",
             target: "/sales",
-            icon: "shopping-basket",
+            icon: "cart",
             children: [
                 {
                     text: "Ordrar",
@@ -95,7 +98,7 @@ const nav = {
         {
             text: "Utskick",
             target: "/messages",
-            icon: "envelope",
+            icon: "mail",
             children: [
                 {
                     text: "Historik",
@@ -105,7 +108,7 @@ const nav = {
                 {
                     text: "Nytt utskick",
                     target: "/messages/new",
-                    icon: "envelope",
+                    icon: "reply",
                 },
             ],
         },
@@ -142,7 +145,7 @@ const nav = {
         {
             text: "boxTerminator",
             target: "/boxTerminator",
-            icon: "crosshairs",
+            icon: "camera",
         },
         {
             text: "Logga ut",

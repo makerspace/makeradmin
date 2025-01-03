@@ -1,9 +1,10 @@
 import React from "react";
-import CollectionNavigation from "../Models/CollectionNavigation";
-import ProductImage from "../Models/ProductImage";
-import Collection from "../Models/Collection";
 import CollectionTable from "../Components/CollectionTable";
 import SearchBox from "../Components/SearchBox";
+import UiKitIcon from "../Components/UiKitIcon";
+import Collection from "../Models/Collection";
+import CollectionNavigation from "../Models/CollectionNavigation";
+import ProductImage from "../Models/ProductImage";
 
 class ImageList extends CollectionNavigation {
     constructor(props) {
@@ -99,7 +100,7 @@ class ImageList extends CollectionNavigation {
                                             onClick={() => deleteItem(item)}
                                             className="removebutton"
                                         >
-                                            <i className="uk-icon-trash" />
+                                            <UiKitIcon icon="trash" />
                                         </a>
                                     </td>
                                 </tr>

@@ -1,6 +1,7 @@
 import React from "react";
 import { Link, withRouter } from "react-router-dom";
 import CollectionTable from "../Components/CollectionTable";
+import UiKitIcon from "../Components/UiKitIcon";
 import Collection from "../Models/Collection";
 import CollectionNavigation from "../Models/CollectionNavigation";
 import QuizQuestion from "../Models/QuizQuestion";
@@ -32,7 +33,7 @@ export class QuestionList extends CollectionNavigation {
                     className="uk-button uk-button-primary uk-margin-bottom uk-float-right"
                     to={`/quiz/${this.props.quiz_id}/question/add`}
                 >
-                    <i className="uk-icon-plus-circle" /> Skapa ny fråga
+                    <UiKitIcon icon="plus-circle" /> Skapa ny fråga
                 </Link>
                 <CollectionTable
                     className="uk-margin-top"
@@ -61,7 +62,7 @@ export class QuestionList extends CollectionNavigation {
                                     onClick={() => deleteItem(item)}
                                     className="removebutton"
                                 >
-                                    <i className="uk-icon-trash" />
+                                    <UiKitIcon icon="trash" />
                                 </a>
                             </td>
                         </tr>

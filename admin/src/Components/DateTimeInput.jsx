@@ -2,7 +2,7 @@ import classNames from "classnames/bind";
 import React, { useEffect, useState } from "react";
 import { dateTimeToStr } from "../utils";
 
-const DateTimeInput = ({ model, name, title, icon, placeholder }) => {
+const DateTimeInput = ({ model, name, title, placeholder }) => {
     const [value, setValue] = useState("");
 
     useEffect(() => {
@@ -38,16 +38,7 @@ const DateTimeInput = ({ model, name, title, icon, placeholder }) => {
             <label htmlFor={name} className="uk-form-label">
                 {title}
             </label>
-            <div className="uk-form-controls">
-                {icon ? (
-                    <div className="uk-form-icon">
-                        <i className={"uk-icon-" + icon} />
-                        {input}
-                    </div>
-                ) : (
-                    input
-                )}
-            </div>
+            <div className="uk-form-controls">{input}</div>
         </div>
     );
 };

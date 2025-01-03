@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import CountryDropdown from "./CountryDropdown";
 import DateTimeShow from "./DateTimeShow";
 import TextInput from "./TextInput";
+import UiKitIcon, { SaveIcon } from "./UiKitIcon";
 
 const MemberForm = ({ member, onSave, onDelete }) => {
     const [saveDisabled, setSaveDisabled] = useState(true);
@@ -27,7 +28,7 @@ const MemberForm = ({ member, onSave, onDelete }) => {
             >
                 <fieldset>
                     <legend>
-                        <i className="uk-icon-user" /> Personuppgifter
+                        <UiKitIcon icon="user" /> Personuppgifter
                     </legend>
 
                     <TextInput
@@ -56,7 +57,7 @@ const MemberForm = ({ member, onSave, onDelete }) => {
 
                 <fieldset>
                     <legend>
-                        <i className="uk-icon-home" /> Adress
+                        <UiKitIcon icon="home" /> Adress
                     </legend>
 
                     <TextInput
@@ -111,7 +112,7 @@ const MemberForm = ({ member, onSave, onDelete }) => {
                 ) : (
                     <fieldset>
                         <legend>
-                            <i className="uk-icon-tag" /> Metadata
+                            <UiKitIcon icon="tag" /> Metadata
                         </legend>
 
                         <div className="form-row">
@@ -119,7 +120,7 @@ const MemberForm = ({ member, onSave, onDelete }) => {
                                 Medlem sedan
                             </label>
                             <div className="uk-form-controls">
-                                <i className="uk-icon-calendar" />
+                                <UiKitIcon icon="calendar" />
                                 &nbsp;
                                 <DateTimeShow date={member.created_at} />
                             </div>
@@ -130,7 +131,7 @@ const MemberForm = ({ member, onSave, onDelete }) => {
                                 Senast uppdaterad
                             </label>
                             <div className="uk-form-controls">
-                                <i className="uk-icon-calendar" />
+                                <UiKitIcon icon="calendar" />
                                 &nbsp;
                                 <DateTimeShow date={member.updated_at} />
                             </div>
@@ -146,15 +147,14 @@ const MemberForm = ({ member, onSave, onDelete }) => {
                             className="uk-button uk-button-danger uk-float-left"
                             onClick={onDelete}
                         >
-                            <i className="uk-icon-trash" /> Ta bort medlem
+                            <UiKitIcon icon="trash" /> Ta bort medlem
                         </a>
                     )}
                     <button
                         className="uk-button uk-button-primary uk-float-right"
                         disabled={saveDisabled}
                     >
-                        <i className="uk-icon-save" />{" "}
-                        {member.id ? "Spara" : "Skapa"}
+                        <SaveIcon /> {member.id ? "Spara" : "Skapa"}
                     </button>
                 </div>
             </form>

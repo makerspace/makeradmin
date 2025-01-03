@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import Select from "react-select";
 import * as _ from "underscore";
 import CollectionTable from "../Components/CollectionTable";
+import UiKitIcon from "../Components/UiKitIcon";
 import Collection from "../Models/Collection";
 import Permission from "../Models/Permission";
 import { get } from "../gateway";
@@ -74,7 +75,7 @@ const GroupBoxPermissions = () => {
                         }}
                         className="removebutton"
                     >
-                        <i className="uk-icon-trash" />
+                        <UiKitIcon icon="trash" />
                     </a>
                 </td>
             </tr>

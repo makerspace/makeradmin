@@ -3,6 +3,7 @@ import { Link, useParams } from "react-router-dom";
 import CollectionTable from "../Components/CollectionTable";
 import DateTimeShow from "../Components/DateTimeShow";
 import TextInput from "../Components/TextInput";
+import UiKitIcon, { SaveIcon } from "../Components/UiKitIcon";
 import Collection from "../Models/Collection";
 import Key from "../Models/Key";
 import { confirmModal } from "../message";
@@ -30,7 +31,7 @@ const Row = (collection) => (props) => {
             </td>
             <td>
                 <a onClick={deleteKey} className="removebutton">
-                    <i className="uk-icon-trash" />
+                    <UiKitIcon icon="trash" />
                 </a>
             </td>
         </tr>
@@ -110,8 +111,7 @@ function MemberBoxKeys() {
                                             className="uk-button uk-button-primary uk-float-right"
                                             disabled={!saveEnabled}
                                         >
-                                            <i className="uk-icon-save" /> Skapa
-                                            nyckel
+                                            <SaveIcon /> Skapa nyckel
                                         </button>
                                     </div>
                                 </div>

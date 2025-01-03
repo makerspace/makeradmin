@@ -2,6 +2,7 @@ import React from "react";
 import { matchPath, useLocation } from "react-router";
 import { Link, NavLink } from "react-router-dom";
 import * as _ from "underscore";
+import UiKitIcon from "./Components/UiKitIcon";
 
 export const NavItem = (props) => {
     const { icon, to } = props;
@@ -12,7 +13,7 @@ export const NavItem = (props) => {
             <NavLink to={to}>
                 {icon ? (
                     <>
-                        <i className={"uk-icon-" + icon} />
+                        <UiKitIcon icon={icon} />
                         &nbsp;
                     </>
                 ) : null}

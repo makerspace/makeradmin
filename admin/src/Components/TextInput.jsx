@@ -1,6 +1,7 @@
 import classNames from "classnames/bind";
 import React, { useEffect, useState } from "react";
 import * as _ from "underscore";
+import UiKitIcon from "./UiKitIcon";
 
 const TextInput = (props) => {
     const [value, setValue] = useState(null);
@@ -70,8 +71,8 @@ const TextInput = (props) => {
                 </label>
             ) : null}
             {icon ? (
-                <div className="uk-form-icon">
-                    <i className={"uk-icon-" + icon} />
+                <div className="uk-inline">
+                    <UiKitIcon form icon={icon} />
                     {input}
                 </div>
             ) : (

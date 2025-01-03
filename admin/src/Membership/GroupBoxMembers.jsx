@@ -4,6 +4,7 @@ import { Async } from "react-select";
 import * as _ from "underscore";
 import CollectionTable from "../Components/CollectionTable";
 import Date from "../Components/DateShow";
+import UiKitIcon from "../Components/UiKitIcon";
 import { get } from "../gateway";
 import Collection from "../Models/Collection";
 import Member from "../Models/Member";
@@ -28,7 +29,7 @@ const Row = (collection) => (props) => {
                     onClick={() => collection.remove(item)}
                     className="removebutton"
                 >
-                    <i className="uk-icon-trash" />
+                    <UiKitIcon icon="trash" />
                 </a>
             </td>
         </tr>

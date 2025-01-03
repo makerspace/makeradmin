@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import CollectionTable from "../Components/CollectionTable";
 import Date from "../Components/DateShow";
 import SearchBox from "../Components/SearchBox";
+import UiKitIcon from "../Components/UiKitIcon";
 import Collection from "../Models/Collection";
 import CollectionNavigation from "../Models/CollectionNavigation";
 import Group from "../Models/Group";
@@ -24,7 +25,7 @@ const Row = (props) => {
             </td>
             <td>
                 <a onClick={() => deleteItem(item)} className="removebutton">
-                    <i className="uk-icon-trash" />
+                    <UiKitIcon icon="trash" />
                 </a>
             </td>
         </tr>
@@ -63,7 +64,7 @@ class GroupList extends CollectionNavigation {
                     to="/membership/groups/add"
                     className="uk-button uk-button-primary uk-float-right"
                 >
-                    <i className="uk-icon-plus-circle" /> Skapa ny grupp
+                    <UiKitIcon icon="plus-circle" /> Skapa ny grupp
                 </Link>
 
                 <SearchBox

@@ -1,6 +1,7 @@
 import React from "react";
 import Textarea from "../Components/Textarea";
 import TextInput from "../Components/TextInput";
+import UiKitIcon, { SaveIcon } from "../Components/UiKitIcon";
 import Quiz from "../Models/Quiz";
 
 interface Props {
@@ -49,14 +50,13 @@ export default (props: Props) => {
                             className="uk-button uk-button-danger uk-float-left"
                             onClick={onDelete}
                         >
-                            <i className="uk-icon-trash" /> Radera quiz
+                            <UiKitIcon icon="trash" /> Radera quiz
                         </a>
                     ) : (
                         ""
                     )}
                     <button className="uk-button uk-button-primary uk-float-right">
-                        <i className="uk-icon-save" />{" "}
-                        {quiz.id ? "Spara" : "Skapa"}
+                        <SaveIcon /> {quiz.id ? "Spara" : "Skapa"}
                     </button>
                 </div>
             </form>

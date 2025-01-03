@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import CollectionTable from "../Components/CollectionTable";
 import Date from "../Components/DateShow";
 import DateTimeShow from "../Components/DateTimeShow";
+import UiKitIcon from "../Components/UiKitIcon";
 import Collection from "../Models/Collection";
 import CollectionNavigation from "../Models/CollectionNavigation";
 import Span from "../Models/Span";
@@ -38,7 +39,7 @@ const Row = (deleteItem) => (props) => {
             </td>
             <td>
                 <a onClick={() => deleteItem(item)} className="removebutton">
-                    <i className="uk-icon-trash" />
+                    <UiKitIcon icon="trash" />
                 </a>
             </td>
         </tr>
