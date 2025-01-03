@@ -4,12 +4,15 @@ import { Link, useParams } from "react-router-dom";
 import CollectionTable from "../Components/CollectionTable";
 import DateShow from "../Components/DateShow";
 import DateTimeShow from "../Components/DateTimeShow";
+import UiKitIcon from "../Components/UiKitIcon";
 import Collection from "../Models/Collection";
 import { ADD_LABACCESS_DAYS } from "../Models/ProductAction";
 import Span from "../Models/Span";
 import { get } from "../gateway";
 import { confirmModal } from "../message";
 import MembershipPeriodsInput from "./MembershipPeriodsInput";
+
+const empty_title_with_nonzero_width = <>&nbsp;&nbsp;&nbsp;&nbsp;</>;
 
 function MemberBoxSpans() {
     const { member_id } = useParams();
@@ -79,10 +82,11 @@ function MemberBoxSpans() {
                     { title: "#", sort: "span_id" },
                     { title: "Typ", sort: "type" },
                     { title: "Skapad", sort: "created_at" },
-                    { title: "" },
+                    { title: "Ursprung" },
                     { title: "Raderad", sort: "deleted_at" },
                     { title: "Start", sort: "startdate" },
                     { title: "Slut", sort: "enddate" },
+                    { title: empty_title_with_nonzero_width },
                 ]}
                 rowComponent={({ item }) => (
                     <tr>
@@ -110,12 +114,14 @@ function MemberBoxSpans() {
                             <DateShow date={item.enddate} />
                         </td>
                         <td>
-                            <a
-                                onClick={() => deleteItem(item)}
-                                className="removebutton"
-                            >
-                                <i className="uk-icon-trash" />
-                            </a>
+                            {item.deleted_at === null && (
+                                <a
+                                    onClick={() => deleteItem(item)}
+                                    className="removebutton"
+                                >
+                                    <UiKitIcon icon="trash" />
+                                </a>
+                            )}
                         </td>
                     </tr>
                 )}
