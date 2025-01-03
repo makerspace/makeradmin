@@ -63,12 +63,12 @@ const MemberForm = ({ member, onSave, onDelete }) => {
                         margin={false}
                         model={member}
                         name="address_street"
-                        title="Address"
+                        title="Adress"
                     />
                     <TextInput
                         model={member}
                         name="address_extra"
-                        title="Address extra"
+                        title="Adress extra"
                         placeholder="Extra adressrad, t ex C/O adress"
                     />
                     <div style={{ display: "flex" }}>
