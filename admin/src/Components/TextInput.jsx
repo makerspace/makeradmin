@@ -37,7 +37,7 @@ const TextInput = (props) => {
     } = props;
 
     const classes = classNames(name, {
-        "uk-form-row": formrow,
+        "form-row": formrow,
         selected: selected,
         changed: isDirty,
     });
@@ -69,16 +69,14 @@ const TextInput = (props) => {
                     {title}
                 </label>
             ) : null}
-            <div className="uk-form-controls">
-                {icon ? (
-                    <div className="uk-form-icon">
-                        <i className={"uk-icon-" + icon} />
-                        {input}
-                    </div>
-                ) : (
-                    input
-                )}
-            </div>
+            {icon ? (
+                <div className="uk-form-icon">
+                    <i className={"uk-icon-" + icon} />
+                    {input}
+                </div>
+            ) : (
+                input
+            )}
         </div>
     );
 };

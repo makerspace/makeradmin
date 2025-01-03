@@ -34,7 +34,7 @@ const Textarea = (props) => {
     } = props;
 
     const classes = classNames(name, {
-        "uk-form-row": formrow,
+        "form-row": formrow,
         selected: selected,
         changed: isDirty,
     });

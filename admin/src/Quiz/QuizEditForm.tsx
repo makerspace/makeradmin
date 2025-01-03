@@ -43,7 +43,7 @@ export default (props: Props) => {
                         </>
                     )}
                 </fieldset>
-                <div className="uk-form-row uk-margin-top">
+                <div className="form-row uk-margin-top">
                     {quiz.id ? (
                         <a
                             className="uk-button uk-button-danger uk-float-left"

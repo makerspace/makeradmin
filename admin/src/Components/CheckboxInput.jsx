@@ -26,7 +26,7 @@ const CheckboxInput = ({
     }, [model, name]);
 
     const classes = classNames(name, {
-        "uk-form-row": formrow,
+        "form-row": formrow,
         changed: isDirty,
     });
 

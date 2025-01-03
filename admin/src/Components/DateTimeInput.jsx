@@ -16,7 +16,7 @@ const DateTimeInput = ({ model, name, title, icon, placeholder }) => {
     }, [model, name]);
 
     const classes = classNames(name, {
-        "uk-form-row": true,
+        "form-row": true,
         selected: false,
         changed: false,
     });

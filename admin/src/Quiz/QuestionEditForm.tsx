@@ -67,7 +67,7 @@ export default (props: Props) => {
                         </>
                     )}
                 </fieldset>
-                <div className="uk-form-row uk-margin-top">
+                <div className="form-row uk-margin-top">
                     {delete_button}
                     {new_button}
                     {save_button}

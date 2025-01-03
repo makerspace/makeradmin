@@ -1094,13 +1094,19 @@ const CountryDropdown = ({ model, name }) => {
     });
 
     return (
-        <div data-uk-dropdown="{mode:'click'}" className="uk-button-dropdown">
-            <button className="uk-button uk-button-default uk-button-small">
+        <div>
+            <button
+                id={name}
+                className="uk-button uk-button-default uk-form-small"
+            >
                 <span className={"flag flag-" + country} />{" "}
                 {getCountryName(country)} <i className="uk-icon-angle-down" />
             </button>
-            <div className="uk-dropdown uk-dropdown-scrollable uk-dropdown-small">
-                <ul className="uk-nav uk-nav-dropdown">{countries}</ul>
+            <div
+                uk-dropdown="mode: click"
+                className="uk-dropdown uk-dropdown-scrollable"
+            >
+                <ul className="uk-nav uk-dropdown-nav">{countries}</ul>
             </div>
         </div>
     );

@@ -49,7 +49,7 @@ const GroupForm = ({ group, onSave, onDelete }) => {
                     title="Borttagen"
                 />
 
-                <div className="uk-form-row uk-margin-top">
+                <div className="form-row uk-margin-top">
                     <div className="uk-form-controls">
                         {group.id && !group.deleted_at && (
                             <a

@@ -122,13 +122,7 @@ body,
     resize: none;
 }
 
-/*
-.meep .uk-form input[disabled] {
-	border: 0;
-}
-*/
-
-.meep .uk-form-row label {
+.meep .form-row label {
     font-size: 11px;
     font-weight: bold;
     color: #888;
@@ -136,28 +130,13 @@ body,
     display: inline-block;
 }
 
-.meep .uk-form-row {
-    position: relative;
-    margin-bottom: 5px;
-}
-
-.meep .uk-form-row:focus {
+.meep .form-row:focus {
     background-color: green;
 }
 
 .meep .uk-form-controls {
     margin-top: -7px;
     margin-left: 0;
-}
-
-.meep .uk-form fieldset {
-    margin-bottom: 2em;
-    padding-left: 3em;
-}
-
-.meep .uk-form legend {
-    margin-left: -2em;
-    padding: 0;
 }
 
 .meep ::-webkit-input-placeholder {
@@ -187,7 +166,7 @@ body,
     font-size: 10px;
 }
 
-.meep .uk-form-row + .uk-form-row {
+.meep .form-row + .form-row {
     margin-top: 10px;
 }
 
@@ -231,28 +210,6 @@ body,
     transition-timing-function: linear;
 }
 
-/* Change size on post address fields */
-.meep .address_zipcode,
-.meep .address_city {
-    float: left;
-}
-
-.meep .address_zipcode {
-    width: 157px;
-}
-
-.meep .address_zipcode input {
-    width: 130px;
-}
-
-.meep .address_city input {
-    width: 342px;
-}
-
-.uk-form-row.address_city + div {
-    clear: both;
-}
-
 /* Hilite fields that have changed since last sync */
 .meep .changed input {
     /*	background-color: blue !important;*/
@@ -285,11 +242,6 @@ span.ma-changed {
 /* Other stuff */
 .uk-button.uk-float-left {
     margin-right: 1em;
-}
-
-/* Dropdown buttons in tables <TableDropdownMenu /> */
-.uk-button-dropdown {
-    display: block !important;
 }
 
 /* Toggle rows in tables */
