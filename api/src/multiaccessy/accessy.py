@@ -477,7 +477,15 @@ class AccessySession:
 
     def _get_users_org(self) -> list[dict]:
         """Get all user ID:s"""
-        return self._get_json_paginated(f"/asset/admin/organization/{self.organization_id()}/user")
+
+        def is_application(user: dict) -> bool:
+            return user.get("msisdn", None) is None
+
+        return [
+            v
+            for v in self._get_json_paginated(f"/asset/admin/organization/{self.organization_id()}/user")
+            if not is_application(v)
+        ]
         # {"items":[{"id":<uuid>,"msisdn":"+46...","firstName":str,"lastName":str}, ...],"totalItems":6,"pageSize":25,"pageNumber":0,"totalPages":1}
 
     def _get_users_in_access_group(self, access_group_id: UUID) -> list[dict]:
