@@ -5,6 +5,7 @@ import Group from "../Models/Group";
 import Member from "../Models/Member";
 import Textarea from "./Textarea";
 import TextInput from "./TextInput";
+import UiKitIcon from "./UiKitIcon";
 
 const groupOption = (d) => {
     const id = d[Group.model.id];
@@ -81,7 +82,7 @@ const MessageForm = ({ message, onSave, recipientSelect }) => {
     return (
         <form className="uk-form uk-form-horizontal" onSubmit={handleSubmit}>
             {recipientSelect && (
-                <div className="uk-form-row">
+                <div className="form-row">
                     <label className="uk-form-label" htmlFor="recipient">
                         Mottagare
                     </label>
@@ -117,7 +118,7 @@ const MessageForm = ({ message, onSave, recipientSelect }) => {
                 onChange={() => setBodyLength(message.body.length)}
             />
 
-            <div className="uk-form-row">
+            <div className="form-row">
                 <div className="uk-form-controls">
                     <p className="uk-float-left">
                         <span id="characterCounter">{bodyLength}</span> tecken
@@ -125,10 +126,10 @@ const MessageForm = ({ message, onSave, recipientSelect }) => {
                 </div>
                 <div className="uk-form-controls">
                     <button
-                        className="uk-button uk-button-success uk-float-right"
+                        className="uk-button uk-button-primary uk-float-right"
                         disabled={sendDisabled}
                     >
-                        <i className="uk-icon-save" /> Skicka
+                        <UiKitIcon icon="mail" /> Skicka
                     </button>
                 </div>
             </div>

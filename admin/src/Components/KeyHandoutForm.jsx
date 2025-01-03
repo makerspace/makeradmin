@@ -8,6 +8,7 @@ import { ADD_LABACCESS_DAYS } from "../Models/ProductAction";
 import Span, { filterCategory } from "../Models/Span";
 import { dateTimeToStr, parseUtcDate, utcToday } from "../utils";
 import TextInput from "./TextInput";
+import { SaveIcon } from "./UiKitIcon";
 
 function last_span_enddate(spans, category) {
     const last_span = filterCategory(spans, category).splice(-1)[0];
@@ -184,7 +185,7 @@ function KeyHandoutForm(props) {
             color = "uk-button-danger";
         } else {
             tooltip = "All info finns, accessy invite kommer att skickas!";
-            color = "uk-button-success";
+            color = "uk-button-primary";
         }
 
         const on_click = (e) => {
@@ -217,8 +218,8 @@ function KeyHandoutForm(props) {
                 tabIndex="1"
                 onClick={on_click}
             >
-                <i className="uk-icon-save" /> Spara, lägg till labaccess och
-                skicka Accessy-invite
+                <SaveIcon /> Spara, lägg till labaccess och skicka
+                Accessy-invite
             </button>
         );
     };
@@ -268,7 +269,7 @@ function KeyHandoutForm(props) {
                 <div>
                     <TextInput
                         model={member}
-                        icon="birthday-cake"
+                        icon="calendar"
                         tabIndex="1"
                         name="civicregno"
                         title="Personnummer"
@@ -287,7 +288,7 @@ function KeyHandoutForm(props) {
                     <div className="uk-width-1-1">
                         <TextInput
                             model={member}
-                            icon="at"
+                            icon="mail"
                             name="email"
                             tabIndex="1"
                             type="email"
@@ -351,12 +352,12 @@ function KeyHandoutForm(props) {
 
             <div style={{ paddingBottom: "4em" }}>
                 <button
-                    className="uk-button uk-button-success uk-float-right"
+                    className="uk-button uk-button-primary uk-float-right"
                     tabIndex="2"
                     title="Spara ändringar"
                     disabled={!can_save_member}
                 >
-                    <i className="uk-icon-save" /> Spara
+                    <SaveIcon /> Spara
                 </button>
                 <AccessyInviteSaveButton />
             </div>

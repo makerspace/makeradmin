@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import auth from "../auth";
 import { showError } from "../message";
+import UiKitIcon from "./UiKitIcon";
 
 const Login = () => {
     const [username, setUsername] = useState("");
@@ -28,13 +29,13 @@ const Login = () => {
                     className="uk-panel uk-panel-box uk-form"
                     onSubmit={login}
                 >
-                    <div className="uk-form-row">
+                    <div className="form-row">
                         <h2>Logga in</h2>
                     </div>
 
-                    <div className="uk-form-row">
-                        <div className="uk-form-icon">
-                            <i className="uk-icon-user" />
+                    <div className="form-row">
+                        <div className="uk-inline">
+                            <UiKitIcon form icon="user" />
                             <input
                                 value={username}
                                 onChange={(e) => setUsername(e.target.value)}
@@ -46,9 +47,9 @@ const Login = () => {
                         </div>
                     </div>
 
-                    <div className="uk-form-row">
-                        <div className="uk-form-icon">
-                            <i className="uk-icon-lock" />
+                    <div className="form-row">
+                        <div className="uk-inline">
+                            <UiKitIcon form icon="lock" />
                             <input
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
@@ -60,7 +61,7 @@ const Login = () => {
                         </div>
                     </div>
 
-                    <div className="uk-form-row">
+                    <div className="form-row">
                         <button
                             type="submit"
                             className="uk-width-1-1 uk-button uk-button-primary uk-button-large"
@@ -69,7 +70,7 @@ const Login = () => {
                         </button>
                     </div>
 
-                    <div className="uk-form-row uk-text-small">
+                    <div className="form-row uk-text-small">
                         <Link
                             className="uk-float-right uk-link uk-link-muted"
                             to="/request-password-reset"

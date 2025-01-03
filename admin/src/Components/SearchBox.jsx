@@ -1,4 +1,5 @@
 import React from "react";
+import UiKitIcon from "./UiKitIcon";
 
 const SearchBox = ({ value, handleChange }) => {
     return (
@@ -10,7 +11,7 @@ const SearchBox = ({ value, handleChange }) => {
                         onSubmit={(e) => e.preventDefault()}
                     >
                         <div className="uk-form-icon">
-                            <i className="uk-icon-search" />
+                            <UiKitIcon icon="search" />
                             <input
                                 value={value}
                                 tabIndex="1"

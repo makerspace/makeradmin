@@ -1,12 +1,11 @@
 // Load jQuery and UIkit
 global.jQuery = require("jquery");
 global.$ = global.jQuery;
-require("uikit");
-require("uikit/dist/js/core/dropdown");
-require("uikit/dist/js/components/pagination");
-require("uikit/dist/js/components/autocomplete");
-require("uikit/dist/js/components/notify");
-require("uikit/dist/js/components/upload");
+import "uikit/dist/css/uikit.css";
+
+import UIkit from "uikit";
+import Icons from "uikit/dist/js/uikit-icons";
+UIkit.use(Icons);
 
 import React from "react";
 import ReactDOM from "react-dom";
@@ -28,7 +27,6 @@ import Messages from "./Messages/Routes";
 import Quiz from "./Quiz/Routes";
 import Sales from "./Sales/Routes";
 import Settings from "./Settings/Routes";
-import Statistics from "./Statistics/Routes";
 import BoxTerminator from "./boxTerminator/Routes";
 
 const nav = {
@@ -47,7 +45,7 @@ const nav = {
                 {
                     text: "Grupper",
                     target: "/membership/groups",
-                    icon: "group",
+                    icon: "users",
                 },
                 {
                     text: "Nycklar",
@@ -57,7 +55,7 @@ const nav = {
                 {
                     text: "Medlemsperioder",
                     target: "/membership/spans",
-                    icon: "clock-o",
+                    icon: "clock",
                 },
                 {
                     text: "Exportera medlemmar",
@@ -69,7 +67,7 @@ const nav = {
         {
             text: "Försäljning",
             target: "/sales",
-            icon: "shopping-basket",
+            icon: "cart",
             children: [
                 {
                     text: "Ordrar",
@@ -100,7 +98,7 @@ const nav = {
         {
             text: "Utskick",
             target: "/messages",
-            icon: "envelope",
+            icon: "mail",
             children: [
                 {
                     text: "Historik",
@@ -110,7 +108,7 @@ const nav = {
                 {
                     text: "Nytt utskick",
                     target: "/messages/new",
-                    icon: "envelope",
+                    icon: "reply",
                 },
             ],
         },
@@ -124,11 +122,6 @@ const nav = {
                     target: "/quiz",
                 },
             ],
-        },
-        {
-            text: "Statistik",
-            target: "/statistics",
-            icon: "area-chart",
         },
         {
             text: "Inställningar",
@@ -152,7 +145,7 @@ const nav = {
         {
             text: "boxTerminator",
             target: "/boxTerminator",
-            icon: "crosshairs",
+            icon: "camera",
         },
         {
             text: "Logga ut",
@@ -204,10 +197,6 @@ const App = () => {
                                             <Route
                                                 path="/messages"
                                                 component={Messages}
-                                            />
-                                            <Route
-                                                path="/statistics"
-                                                component={Statistics}
                                             />
                                             <Route
                                                 path="/settings"

@@ -2,6 +2,7 @@ import React from "react";
 import CollectionTable from "../Components/CollectionTable";
 import SearchBox from "../Components/SearchBox";
 import TextInput from "../Components/TextInput";
+import UiKitIcon, { SaveIcon } from "../Components/UiKitIcon";
 import Collection from "../Models/Collection";
 import CollectionNavigation from "../Models/CollectionNavigation";
 import TransactionCostCenter from "../Models/TransactionCostCenter";
@@ -72,13 +73,13 @@ class AccountingCostCenter extends CollectionNavigation {
                             placeholder="Beskrivning av nytt kostnadsställe"
                         />
 
-                        <div className="uk-form-row uk-margin-top">
+                        <div className="form-row uk-margin-top">
                             <div className="uk-form-controls">
                                 <button
-                                    className="uk-button uk-button-success uk-float-right"
+                                    className="uk-button uk-button-primary uk-float-right"
                                     disabled={!saveEnabled}
                                 >
-                                    <i className="uk-icon-save" />{" "}
+                                    <SaveIcon />{" "}
                                     {this.transactionCostCenter.id
                                         ? "Spara nytt kostnadsställe"
                                         : "Skapa nytt kostnadsställe"}
@@ -108,7 +109,7 @@ class AccountingCostCenter extends CollectionNavigation {
                                         onClick={() => deleteItem(item)}
                                         className="removebutton"
                                     >
-                                        <i className="uk-icon-trash" />
+                                        <UiKitIcon icon="trash" />
                                     </a>
                                 </td>
                             </tr>

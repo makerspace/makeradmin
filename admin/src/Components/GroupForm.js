@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import DateTimeInput from "./DateTimeInput";
 import TextInput from "./TextInput";
 import Textarea from "./Textarea";
+import UiKitIcon, { SaveIcon } from "./UiKitIcon";
 
 const GroupForm = ({ group, onSave, onDelete }) => {
     const [saveDisabled, setSaveDisabled] = useState(true);
@@ -49,22 +50,21 @@ const GroupForm = ({ group, onSave, onDelete }) => {
                     title="Borttagen"
                 />
 
-                <div className="uk-form-row uk-margin-top">
+                <div className="form-row uk-margin-top">
                     <div className="uk-form-controls">
                         {group.id && !group.deleted_at && (
                             <a
                                 className="uk-button uk-button-danger uk-float-left"
                                 onClick={onDelete}
                             >
-                                <i className="uk-icon-trash" /> Ta bort grupp
+                                <UiKitIcon icon="trash" /> Ta bort grupp
                             </a>
                         )}
                         <button
-                            className="uk-button uk-button-success uk-float-right"
+                            className="uk-button uk-button-primary uk-float-right"
                             disabled={saveDisabled}
                         >
-                            <i className="uk-icon-save" />{" "}
-                            {group.id ? "Spara" : "Skapa"}
+                            <SaveIcon /> {group.id ? "Spara" : "Skapa"}
                         </button>
                     </div>
                 </div>

@@ -3,6 +3,7 @@ import { withRouter } from "react-router";
 import auth from "../auth";
 import { browserHistory } from "../browser_history";
 import { showError, showSuccess } from "../message";
+import UiKitIcon from "./UiKitIcon";
 
 const RequestPasswordReset = () => {
     const [userIdentification, setUserIdentification] = useState("");
@@ -38,11 +39,11 @@ const RequestPasswordReset = () => {
                         className="uk-panel uk-panel-box uk-form"
                         onSubmit={submit}
                     >
-                        <div className="uk-form-row">
+                        <div className="form-row">
                             <h2>Glömt ditt lösenord?</h2>
                         </div>
 
-                        <div className="uk-form-row">
+                        <div className="form-row">
                             <p>
                                 Fyll i ditt email eller medlemsnummer så skickar
                                 vi instruktioner om hur du nollställer ditt
@@ -50,9 +51,9 @@ const RequestPasswordReset = () => {
                             </p>
                         </div>
 
-                        <div className="uk-form-row">
-                            <div className="uk-form-icon">
-                                <i className="uk-icon-user" />
+                        <div className="form-row">
+                            <div className="uk-inline">
+                                <UiKitIcon form icon="user" />
                                 <input
                                     value={userIdentification}
                                     onChange={handleInputChange}
@@ -64,12 +65,12 @@ const RequestPasswordReset = () => {
                             </div>
                         </div>
 
-                        <div className="uk-form-row">
+                        <div className="form-row">
                             <button
                                 type="submit"
-                                className="uk-width-1-1 uk-button uk-button-success uk-button-large"
+                                className="uk-width-1-1 uk-button uk-button-primary uk-button-large"
                             >
-                                <span className="uk-icon-check" /> Skicka epost
+                                <UiKitIcon icon="check" /> Skicka epost
                             </button>
                         </div>
                     </form>
