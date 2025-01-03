@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import "react-day-picker/lib/style.css";
 import { Link, useParams } from "react-router-dom";
 import CollectionTable from "../Components/CollectionTable";
@@ -16,17 +16,17 @@ const empty_title_with_nonzero_width = <>&nbsp;&nbsp;&nbsp;&nbsp;</>;
 
 function MemberBoxSpans() {
     const { member_id } = useParams();
-
-    const [, setItems] = useState([]);
     const [pendingLabaccessDays, setPendingLabaccessDays] = useState("?");
 
-    const collectionRef = useRef(
-        new Collection({
-            type: Span,
-            url: `/membership/member/${member_id}/spans`,
-            pageSize: 0,
-            includeDeleted: true,
-        }),
+    const collection = useMemo(
+        () =>
+            new Collection({
+                type: Span,
+                url: `/membership/member/${member_id}/spans`,
+                pageSize: 0,
+                includeDeleted: true,
+            }),
+        [member_id],
     );
 
     useEffect(() => {
@@ -45,20 +45,11 @@ function MemberBoxSpans() {
         );
     }, [member_id]);
 
-    useEffect(() => {
-        const unsubscribe = collectionRef.current.subscribe(({ items }) => {
-            setItems(items);
-        });
-        return () => {
-            unsubscribe();
-        };
-    }, []);
-
     const deleteItem = (item) =>
         confirmModal(item.deleteConfirmMessage())
             .then(() => item.del())
             .then(
-                () => collectionRef.current.fetch(),
+                () => collection.fetch(),
                 () => null,
             );
 
@@ -70,14 +61,11 @@ function MemberBoxSpans() {
                 vid en nyckelsynkronisering.
             </p>
             <hr />
-            <MembershipPeriodsInput
-                spans={collectionRef.current}
-                member_id={member_id}
-            />
+            <MembershipPeriodsInput spans={collection} member_id={member_id} />
             <h2>Spans</h2>
             <hr />
             <CollectionTable
-                collection={collectionRef.current}
+                collection={collection}
                 columns={[
                     { title: "#", sort: "span_id" },
                     { title: "Typ", sort: "type" },
