@@ -17,11 +17,9 @@ Phonenumbers
 schedule
 python-dateutil
 types-python-dateutil
-types-sqlalchemy
 types-requests
 types-markdown
 types-PyMySQL
-sqlalchemy-stubs
 markdown
 NamedAtomicLock
 dataclasses_json
