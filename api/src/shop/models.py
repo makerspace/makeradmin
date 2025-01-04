@@ -1,4 +1,6 @@
-from typing import Any
+from datetime import datetime
+from decimal import Decimal
+from typing import Any, Dict, List, Literal, Optional
 
 from basic_types.enums import AccountingEntryType
 from membership.models import Member
@@ -18,22 +20,24 @@ from sqlalchemy import (
     Text,
     func,
 )
-from sqlalchemy.orm import configure_mappers, declarative_base, relationship, validates
+from sqlalchemy.orm import DeclarativeBase, Mapped, configure_mappers, mapped_column, relationship, validates
 
 from shop.stripe_constants import MakerspaceMetadataKeys
 
-Base = declarative_base()
+
+class Base(DeclarativeBase):
+    pass
 
 
 class ProductCategory(Base):
     __tablename__ = "webshop_product_categories"
 
-    id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
-    name = Column(String(255), nullable=False)
-    display_order = Column(Integer, nullable=False, unique=True)
-    created_at = Column(DateTime, server_default=func.now())
-    updated_at = Column(DateTime, server_default=func.now())
-    deleted_at = Column(DateTime)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, nullable=False, autoincrement=True)
+    name: Mapped[str] = mapped_column(String(255), nullable=False)
+    display_order: Mapped[int] = mapped_column(Integer, nullable=False, unique=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+    deleted_at: Mapped[Optional[datetime]] = mapped_column(DateTime)
 
     def __repr__(self) -> str:
         return f"ProductCategory(id={self.id}, name={self.name}, display_order={self.display_order})"
@@ -42,44 +46,44 @@ class ProductCategory(Base):
 class ProductImage(Base):
     __tablename__ = "webshop_product_images"
 
-    id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
-    name = Column(String(255), nullable=False)
-    type = Column(String(64), nullable=False)
-    data = Column(LargeBinary)
-    created_at = Column(DateTime, server_default=func.now())
-    updated_at = Column(DateTime, server_default=func.now())
-    deleted_at = Column(DateTime)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, nullable=False, autoincrement=True)
+    name: Mapped[str] = mapped_column(String(255), nullable=False)
+    type: Mapped[str] = mapped_column(String(64), nullable=False)
+    data: Mapped[Optional[int]] = mapped_column(LargeBinary)
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+    deleted_at: Mapped[Optional[datetime]] = mapped_column(DateTime)
 
     def __repr__(self) -> str:
-        return f"ProductImage(id={self.id}, path={self.path})"
+        return f"ProductImage(id={self.id}, name={self.name})"
 
 
 class Product(Base):
     __tablename__ = "webshop_products"
 
-    id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
-    product_metadata = Column(JSON, nullable=False)
-    category_id = Column(Integer, ForeignKey(ProductCategory.id), nullable=False)
-    name = Column(String(255), nullable=False)
-    description = Column(Text)
-    unit = Column(String(30))
-    price = Column(Numeric(precision="15,3"), nullable=False)
-    smallest_multiple = Column(Integer, nullable=False, server_default="1")
-    filter = Column(String(255))
-    display_order = Column(Integer, nullable=False, unique=True)
-    created_at = Column(DateTime, server_default=func.now())
-    updated_at = Column(DateTime, server_default=func.now())
-    deleted_at = Column(DateTime)
-    show = Column(Boolean, nullable=False, server_default="1")
-    stripe_product_id = Column(String(64))
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, nullable=False, autoincrement=True)
+    product_metadata: Mapped[Dict[any, any]] = mapped_column(JSON, nullable=False)
+    category_id: Mapped[int] = mapped_column(Integer, ForeignKey(ProductCategory.id), nullable=False)
+    name: Mapped[str] = mapped_column(String(255), nullable=False)
+    description: Mapped[Optional[str]] = mapped_column(Text)
+    unit: Mapped[Optional[str]] = mapped_column(String(30))
+    price: Mapped[Decimal] = mapped_column(Numeric(precision="15,3"), nullable=False)
+    smallest_multiple: Mapped[int] = mapped_column(Integer, nullable=False, server_default="1")
+    filter: Mapped[Optional[str]] = mapped_column(String(255))
+    display_order: Mapped[int] = mapped_column(Integer, nullable=False, unique=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+    deleted_at: Mapped[Optional[datetime]] = mapped_column(DateTime)
+    show: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default="1")
+    stripe_product_id: Mapped[Optional[str]] = mapped_column(String(64))
 
-    category = relationship(ProductCategory, backref="products", cascade_backrefs=False)
-    actions = relationship("ProductAction")
-    product_accounting = relationship(
+    category: Mapped[ProductCategory] = relationship(ProductCategory, backref="products", cascade_backrefs=False)
+    actions: Mapped[List["ProductAction"]] = relationship("ProductAction")
+    product_accounting: Mapped["ProductAccountsCostCenters"] = relationship(
         "ProductAccountsCostCenters", backref="accounts_cost_centers", cascade_backrefs=False
     )
 
-    image_id = Column(Integer, ForeignKey(ProductImage.id), nullable=True)
+    image_id: Mapped[int] = mapped_column(Integer, ForeignKey(ProductImage.id), nullable=True)
 
     def get_metadata(self, key: MakerspaceMetadataKeys, default: Any) -> Any:
         meta = self.product_metadata
@@ -87,7 +91,7 @@ class Product(Base):
         return meta.get(key.value, default)
 
     @validates("price")
-    def validate_name(self, key, value):
+    def validate_name(self, key: str, value: Decimal) -> Decimal:
         if value < 0:
             raise UnprocessableEntity(f"Price can't be below zero.", fields=key, what=BAD_VALUE)
         return value
@@ -102,18 +106,17 @@ class Product(Base):
 class ProductAction(Base):
     __tablename__ = "webshop_product_actions"
 
-    ADD_LABACCESS_DAYS = "add_labaccess_days"
-    ADD_MEMBERSHIP_DAYS = "add_membership_days"
+    PRODUCT_ACTIONS = Literal["add_labaccess_days", "add_membership_days"]
+    ADD_LABACCESS_DAYS: PRODUCT_ACTIONS = "add_labaccess_days"
+    ADD_MEMBERSHIP_DAYS: PRODUCT_ACTIONS = "add_membership_days"
 
-    PRODUCT_ACTIONS = (ADD_LABACCESS_DAYS, ADD_MEMBERSHIP_DAYS)
-
-    id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
-    product_id = Column(Integer, ForeignKey(Product.id), nullable=False)
-    action_type = Column(Enum(*PRODUCT_ACTIONS), nullable=False)
-    value = Column(Integer)
-    created_at = Column(DateTime, server_default=func.now())
-    updated_at = Column(DateTime, server_default=func.now())
-    deleted_at = Column(DateTime)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, nullable=False, autoincrement=True)
+    product_id: Mapped[int] = mapped_column(Integer, ForeignKey(Product.id), nullable=False)
+    action_type: Mapped[PRODUCT_ACTIONS] = mapped_column(Enum(ADD_LABACCESS_DAYS, ADD_MEMBERSHIP_DAYS), nullable=False)
+    value: Mapped[Optional[int]]
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+    deleted_at: Mapped[Optional[datetime]] = mapped_column(DateTime)
 
     def __repr__(self) -> str:
         return f"ProductAction(id={self.id}, value={self.value}, action_type={self.action_type})"
@@ -122,18 +125,19 @@ class ProductAction(Base):
 class Transaction(Base):
     __tablename__ = "webshop_transactions"
 
-    PENDING = "pending"
-    COMPLETED = "completed"
-    FAILED = "failed"
+    STATUS = Literal["pending", "completed", "failed"]
+    PENDING: STATUS = "pending"
+    COMPLETED: STATUS = "completed"
+    FAILED: STATUS = "failed"
 
-    id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
-    member_id = Column(Integer, ForeignKey(Member.member_id), nullable=True)
-    amount = Column(Numeric(precision="15,2"), nullable=False)
-    status = Column(Enum(PENDING, COMPLETED, FAILED), nullable=False)
-    created_at = Column(DateTime, server_default=func.now(), nullable=False)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, nullable=False, autoincrement=True)
+    member_id: Mapped[int] = mapped_column(Integer, ForeignKey(Member.member_id), nullable=True)
+    amount: Mapped[Decimal] = mapped_column(Numeric(precision="15,2"), nullable=False)
+    status: Mapped[STATUS] = mapped_column(Enum(PENDING, COMPLETED, FAILED), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now(), nullable=False)
 
-    member = relationship(Member)
-    stripe_pending = relationship("StripePending")
+    member: Mapped[Member] = relationship(Member)
+    stripe_pending: Mapped[Optional["StripePending"]] = relationship("StripePending")
 
     def __repr__(self) -> str:
         return f"Transaction(id={self.id}, amount={self.amount}, status={self.status}, created_at={self.created_at})"
@@ -142,14 +146,14 @@ class Transaction(Base):
 class TransactionContent(Base):
     __tablename__ = "webshop_transaction_contents"
 
-    id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
-    transaction_id = Column(Integer, ForeignKey(Transaction.id), nullable=False)
-    product_id = Column(Integer, ForeignKey(Product.id), nullable=False)
-    count = Column(Integer, nullable=False)
-    amount = Column(Numeric(precision="15,2"), nullable=False)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, nullable=False, autoincrement=True)
+    transaction_id: Mapped[int] = mapped_column(Integer, ForeignKey(Transaction.id), nullable=False)
+    product_id: Mapped[int] = mapped_column(Integer, ForeignKey(Product.id), nullable=False)
+    count: Mapped[int] = mapped_column(Integer, nullable=False)
+    amount: Mapped[Decimal] = mapped_column(Numeric(precision="15,2"), nullable=False)
 
-    transaction = relationship(Transaction, backref="contents", cascade_backrefs=False)
-    product = relationship(Product)
+    transaction: Mapped[Transaction] = relationship(Transaction, backref="contents", cascade_backrefs=False)
+    product: Mapped[Product] = relationship(Product)
 
     def __repr__(self) -> str:
         return f"TransactionContent(id={self.id}, count={self.count}, amount={self.amount})"
@@ -158,17 +162,20 @@ class TransactionContent(Base):
 class TransactionAction(Base):
     __tablename__ = "webshop_transaction_actions"
 
-    PENDING = "pending"
-    COMPLETED = "completed"
+    STATUS = Literal["pending", "completed"]
+    PENDING: STATUS = "pending"
+    COMPLETED: STATUS = "completed"
 
-    id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
-    content_id = Column(Integer, ForeignKey(TransactionContent.id), nullable=False)
-    action_type = Column(Enum(*ProductAction.PRODUCT_ACTIONS), nullable=False)
-    value = Column(Integer)
-    status = Column(Enum(PENDING, COMPLETED), nullable=False)
-    completed_at = Column(DateTime)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, nullable=False, autoincrement=True)
+    content_id: Mapped[int] = mapped_column(Integer, ForeignKey(TransactionContent.id), nullable=False)
+    action_type: Mapped[ProductAction.PRODUCT_ACTIONS] = mapped_column(
+        Enum(ProductAction.ADD_MEMBERSHIP_DAYS, ProductAction.ADD_LABACCESS_DAYS), nullable=False
+    )
+    value: Mapped[Optional[int]] = mapped_column(Integer)
+    status: Mapped[STATUS] = mapped_column(Enum(PENDING, COMPLETED), nullable=False)
+    completed_at: Mapped[Optional[datetime]]
 
-    content = relationship(TransactionContent, backref="actions", cascade_backrefs=False)
+    content: Mapped[TransactionContent] = relationship(TransactionContent, backref="actions", cascade_backrefs=False)
 
     def __repr__(self) -> str:
         return (
@@ -192,17 +199,18 @@ class GiftCard(Base):
 
     __tablename__ = "webshop_gift_card"
 
-    VALID = "valid"
-    USED = "used"
-    EXPIRED = "expired"
-    CANCELLED = "cancelled"
+    STATUS = Literal["valid", "used", "expired", "cancelled"]
+    VALID: STATUS = "valid"
+    USED: STATUS = "used"
+    EXPIRED: STATUS = "expired"
+    CANCELLED: STATUS = "cancelled"
 
-    id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
-    amount = Column(Numeric(precision="15,2"), nullable=False)
-    validation_code = Column(String(16), unique=True, nullable=False)
-    email = Column(String(255), unique=True, nullable=False)
-    status = Column(Enum(VALID, USED, EXPIRED, CANCELLED), nullable=False, default=VALID)
-    created_at = Column(DateTime, server_default=func.now())
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, nullable=False, autoincrement=True)
+    amount: Mapped[Decimal] = mapped_column(Numeric(precision="15,2"), nullable=False)
+    validation_code: Mapped[str] = mapped_column(String(16), unique=True, nullable=False)
+    email: Mapped[str] = mapped_column(String(255), unique=True, nullable=False)
+    status: Mapped[STATUS] = mapped_column(Enum(VALID, USED, EXPIRED, CANCELLED), nullable=False, default=VALID)
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
 
 
 class ProductGiftCardMapping(Base):
@@ -222,26 +230,26 @@ class ProductGiftCardMapping(Base):
 
     __tablename__ = "webshop_product_gift_card_mapping"
 
-    id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
-    gift_card_id = Column(Integer, ForeignKey(GiftCard.id))
-    product_id = Column(Integer, ForeignKey(Product.id))
-    product_quantity = Column(Integer, nullable=False)
-    amount = Column(Numeric(precision="15,2"), nullable=False)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, nullable=False, autoincrement=True)
+    gift_card_id: Mapped[int] = mapped_column(Integer, ForeignKey(GiftCard.id), nullable=False)
+    product_id: Mapped[int] = mapped_column(Integer, ForeignKey(Product.id), nullable=False)
+    product_quantity: Mapped[int] = mapped_column(Integer, nullable=False)
+    amount: Mapped[Decimal] = mapped_column(Numeric(precision="15,2"), nullable=False)
 
-    gift_card = relationship(GiftCard, backref="products", cascade_backrefs=False)
-    product = relationship(Product)
+    gift_card: Mapped[GiftCard] = relationship(GiftCard, backref="products", cascade_backrefs=False)
+    product: Mapped[Product] = relationship(Product)
 
 
 class TransactionAccount(Base):
     __tablename__ = "webshop_transaction_accounts"
 
-    id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
-    account = Column(String(100), nullable=False)
-    description = Column(String(255), nullable=False)
-    display_order = Column(Integer, nullable=False)
-    created_at = Column(DateTime, server_default=func.now())
-    updated_at = Column(DateTime, server_default=func.now())
-    deleted_at = Column(DateTime)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, nullable=False, autoincrement=True)
+    account: Mapped[str] = mapped_column(String(100), nullable=False)
+    description: Mapped[str] = mapped_column(String(255), nullable=False)
+    display_order: Mapped[int] = mapped_column(Integer, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+    deleted_at: Mapped[Optional[datetime]]
 
     def __repr__(self) -> str:
         return f"TransactionAccount(id={self.id}, account={self.account}, description={self.description})"
@@ -250,13 +258,13 @@ class TransactionAccount(Base):
 class TransactionCostCenter(Base):
     __tablename__ = "webshop_transaction_cost_centers"
 
-    id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
-    cost_center = Column(String(100), nullable=False)
-    description = Column(String(255), nullable=False)
-    display_order = Column(Integer, nullable=False, unique=True)
-    created_at = Column(DateTime, server_default=func.now())
-    updated_at = Column(DateTime, server_default=func.now())
-    deleted_at = Column(DateTime)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, nullable=False, autoincrement=True)
+    cost_center: Mapped[str] = mapped_column(String(100), nullable=False)
+    description: Mapped[str] = mapped_column(String(255), nullable=False)
+    display_order: Mapped[int] = mapped_column(Integer, nullable=False, unique=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+    deleted_at: Mapped[Optional[datetime]]
 
     def __repr__(self) -> str:
         return f"TransactionConstCenter(id={self.id}, cost_center={self.cost_center}, description={self.description})"
@@ -265,17 +273,23 @@ class TransactionCostCenter(Base):
 class ProductAccountsCostCenters(Base):
     __tablename__ = "webshop_product_accounting"
 
-    id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
-    product_id = Column(Integer, ForeignKey("webshop_products.id"), nullable=False)
-    account_id = Column(Integer, ForeignKey("webshop_transaction_accounts.id"), nullable=True)
-    cost_center_id = Column(Integer, ForeignKey("webshop_transaction_cost_centers.id"), nullable=True)
-    fraction = Column(
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, nullable=False, autoincrement=True)
+    product_id: Mapped[int] = mapped_column(Integer, ForeignKey("webshop_products.id"), nullable=False)
+    account_id: Mapped[int] = mapped_column(Integer, ForeignKey("webshop_transaction_accounts.id"), nullable=True)
+    cost_center_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("webshop_transaction_cost_centers.id"), nullable=True
+    )
+    fraction: Mapped[int] = mapped_column(
         Integer, nullable=False, server_default=("0")
     )  # Using integer with the range 0-100 to represent fractions and avoind precision issues
-    type = Column(Enum(*[x.value for x in AccountingEntryType]), nullable=False)
+    type: Mapped[str] = mapped_column(Enum(*[x.value for x in AccountingEntryType]), nullable=False)
 
-    account = relationship(TransactionAccount, backref="accounts_cost_centers", cascade_backrefs=False)
-    cost_center = relationship(TransactionCostCenter, backref="accounts_cost_centers", cascade_backrefs=False)
+    account: Mapped[TransactionAccount] = relationship(
+        TransactionAccount, backref="accounts_cost_centers", cascade_backrefs=False
+    )
+    cost_center: Mapped[TransactionCostCenter] = relationship(
+        TransactionCostCenter, backref="accounts_cost_centers", cascade_backrefs=False
+    )
 
     def __repr__(self) -> str:
         return f"ProductAccountsCostCenters(id={self.id}, account_id={self.account_id}, cost_center_id={self.cost_center_id}, type={self.type}, fraction={self.fraction})"
@@ -284,10 +298,10 @@ class ProductAccountsCostCenters(Base):
 class StripePending(Base):
     __tablename__ = "webshop_stripe_pending"
 
-    id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
-    transaction_id = Column(Integer, ForeignKey(Transaction.id), nullable=False)
-    stripe_token = Column(String(255), nullable=False, index=True)
-    created_at = Column(DateTime, server_default=func.now())
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, nullable=False, autoincrement=True)
+    transaction_id: Mapped[int] = mapped_column(Integer, ForeignKey(Transaction.id), nullable=False)
+    stripe_token: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
 
     def __repr__(self) -> str:
         return f"StripePending(id={self.id}, stripe_token={self.stripe_token})"
