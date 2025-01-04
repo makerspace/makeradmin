@@ -13,6 +13,7 @@
         "esModuleInterop": true,
         "sourceMap": true,
         "moduleResolution": "node",
+        "module": "esnext",
         "jsx": "react",
         "allowJs": true,
         "skipLibCheck": true
