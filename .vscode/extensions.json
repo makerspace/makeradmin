@@ -2,6 +2,7 @@
     "recommendations": [
         "esbenp.prettier-vscode",
         "charliermarsh.ruff",
-        "redhat.vscode-yaml"
+        "redhat.vscode-yaml",
+        "ms-python.mypy-type-checker"
     ]
 }
