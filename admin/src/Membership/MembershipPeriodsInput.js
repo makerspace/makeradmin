@@ -96,7 +96,7 @@ function MembershipPeriodsInput({ spans, member_id }) {
                 return false;
             }}
         >
-            <label className="uk-label" htmlFor="showHistoric">
+            <label className="uk-form-label" htmlFor="showHistoric">
                 Visa historiska
             </label>
             <input
