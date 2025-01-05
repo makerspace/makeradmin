@@ -20,7 +20,7 @@ const GroupForm = ({ group, onSave, onDelete }) => {
     return (
         <div className="meep">
             <form
-                className="uk-form uk-margin-bottom"
+                className="uk-margin-bottom"
                 onSubmit={(e) => {
                     e.preventDefault();
                     onSave();

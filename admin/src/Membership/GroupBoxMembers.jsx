@@ -87,7 +87,7 @@ export default function GroupBoxMembers() {
 
     return (
         <div>
-            <div className="uk-margin-top uk-form uk-form-stacked">
+            <div className="uk-margin-top uk-form-stacked">
                 <label className="uk-form-label" htmlFor="member">
                     Lägg till i grupp
                 </label>

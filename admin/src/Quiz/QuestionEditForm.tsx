@@ -44,7 +44,7 @@ export default (props: Props) => {
 
     return (
         <div className="uk-margin-top">
-            <form className="uk-form uk-form-stacked">
+            <form className="uk-form-stacked">
                 <fieldset className="uk-margin-top">
                     <legend>Quizfråga</legend>
                     {question && (

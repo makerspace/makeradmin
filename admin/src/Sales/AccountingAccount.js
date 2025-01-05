@@ -50,7 +50,7 @@ class AccountingAccount extends CollectionNavigation {
 
                 <div className="meep">
                     <form
-                        className="uk-form uk-margin-bottom"
+                        className="uk-margin-bottom"
                         onSubmit={(e) => {
                             e.preventDefault();
                             this.createAccount();

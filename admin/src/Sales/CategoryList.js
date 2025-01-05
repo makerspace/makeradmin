@@ -46,10 +46,9 @@ class CategoryList extends CollectionNavigation {
                     </p>
                 </div>
 
-                <div className="uk-margin-top uk-form">
+                <div className="uk-margin-top">
                     <div className="meep">
                         <form
-                            className="uk-form"
                             onSubmit={(e) => {
                                 e.preventDefault();
                                 this.createCategory();

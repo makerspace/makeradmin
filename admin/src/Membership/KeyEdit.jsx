@@ -40,7 +40,6 @@ function KeyEdit() {
             <h2>Redigera RFID-tagg</h2>
             <div className="meep">
                 <form
-                    className="uk-form"
                     onSubmit={(e) => {
                         e.preventDefault();
                         onSave();

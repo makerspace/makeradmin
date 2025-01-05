@@ -93,7 +93,7 @@ const ProductForm = ({ product, onDelete, onSave }) => {
     return (
         <div className="uk-margin-top">
             <form
-                className="uk-form uk-form-stacked"
+                className="uk-form-stacked"
                 onSubmit={() => {
                     onSave();
                     return false;

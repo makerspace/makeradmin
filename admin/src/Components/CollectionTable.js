@@ -163,7 +163,7 @@ const CollectionTable = (props) => {
             <div style={{ position: "relative", clear: "both" }}>
                 <table
                     className={
-                        "uk-table uk-table-condensed uk-table-striped uk-table-hover" +
+                        "uk-table uk-table-small uk-table-striped uk-table-hover" +
                         (loading ? " backboneTableLoading" : "")
                     }
                 >

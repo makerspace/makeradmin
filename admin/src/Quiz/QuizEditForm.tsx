@@ -19,7 +19,7 @@ export default (props: Props) => {
     return (
         <div className="uk-margin-top">
             <form
-                className="uk-form uk-form-stacked"
+                className="uk-form-stacked"
                 onSubmit={(e) => {
                     e.preventDefault();
                     onSave();

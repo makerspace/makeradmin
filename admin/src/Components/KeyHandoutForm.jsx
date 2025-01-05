@@ -372,7 +372,6 @@ function KeyHandoutForm(props) {
             ></Prompt>
             <div className="meep">
                 <form
-                    className="uk-form"
                     onSubmit={(e) => {
                         e.preventDefault();
                         save();

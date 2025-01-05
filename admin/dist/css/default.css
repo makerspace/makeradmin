@@ -101,8 +101,8 @@ body,
     width: 100%;
 }
 
-.meep .uk-form input,
-.meep .uk-form textarea {
+.meep form input,
+.meep form textarea {
     border: none;
     border-radius: 0;
     border-bottom: 1px solid #aaa;
@@ -117,7 +117,7 @@ body,
     margin-top: 12px !important;
 }
 
-.meep .uk-form textarea {
+.meep form textarea {
     overflow: hidden;
     resize: none;
 }
@@ -155,12 +155,12 @@ body,
     font-style: italic;
 }
 
-.uk-form .error input,
-.uk-form .error textarea {
+form .error input,
+form .error textarea {
     border-bottom: 3px solid red !important;
 }
 
-.uk-form .uk-form-help-block.error {
+form .uk-form-help-block.error {
     color: red;
     margin-top: -8px;
     font-size: 10px;
@@ -179,31 +179,31 @@ body,
 }
 
 /* Hilite label and border */
-.meep .uk-form .selected input,
-.meep .uk-form .selected textarea {
+.meep form .selected input,
+.meep form .selected textarea {
     border-bottom: 3px solid #58f !important;
     padding-bottom: 2px;
     margin-bottom: 3px;
     color: #000;
 }
 
-.meep .uk-form .selected textarea {
+.meep form .selected textarea {
     margin-top: 3px !important;
     margin-bottom: 5px !important;
 }
 
-.meep .uk-form .selected label {
+.meep form .selected label {
     color: #58f;
 }
 
-.meep .uk-form .selected .uk-form-controls {
+.meep form .selected .uk-form-controls {
     margin-top: -5px;
 }
 
 /* Fany transisions for hilite */
-.meep .uk-form input,
-.meep .uk-form textarea,
-.meep .uk-form .uk-form-controls {
+.meep form input,
+.meep form textarea,
+.meep form .uk-form-controls {
     transition-delay: 0s;
     transition-duration: 0.2s;
     transition-property: border, padding, margin;

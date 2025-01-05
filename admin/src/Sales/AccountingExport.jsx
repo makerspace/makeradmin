@@ -85,7 +85,7 @@ export default function AccountingExport() {
                 På denna sida kan du exportera transaktioner för vald period
                 till en SIE-fil.
             </p>
-            <form className="uk-form uk-form-stacked">
+            <form className="uk-form-stacked">
                 <fieldset className="uk-margin-top">
                     <legend className="uk-legend">
                         Välj vilken period du vill exportera

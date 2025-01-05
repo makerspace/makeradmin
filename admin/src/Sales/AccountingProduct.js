@@ -398,7 +398,7 @@ class AccountingProduct extends CollectionNavigation {
                 </div>
 
                 <form
-                    className="uk-form uk-form-stacked"
+                    className="uk-form-stacked"
                     onSubmit={(e) => {
                         e.preventDefault();
                         this.onSave(

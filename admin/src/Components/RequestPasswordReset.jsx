@@ -35,10 +35,7 @@ const RequestPasswordReset = () => {
                 style={{ width: "300px" }}
             >
                 <div className="uk-text-left">
-                    <form
-                        className="uk-panel uk-panel-box uk-form"
-                        onSubmit={submit}
-                    >
+                    <form className="uk-panel uk-panel-box" onSubmit={submit}>
                         <div className="form-row">
                             <h2>Glömt ditt lösenord?</h2>
                         </div>

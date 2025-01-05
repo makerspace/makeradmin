@@ -6,10 +6,7 @@ const SearchBox = ({ value, handleChange }) => {
         <div className="filterbox">
             <div className="uk-grid">
                 <div className="uk-width-2-3">
-                    <form
-                        className="uk-form"
-                        onSubmit={(e) => e.preventDefault()}
-                    >
+                    <form onSubmit={(e) => e.preventDefault()}>
                         <div className="uk-form-icon">
                             <Icon icon="search" />
                             <input

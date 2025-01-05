@@ -84,7 +84,7 @@ const GroupBoxPermissions = () => {
 
     return (
         <div>
-            <div className="uk-margin-top uk-form uk-form-stacked">
+            <div className="uk-margin-top uk-form-stacked">
                 <label className="uk-form-label" htmlFor="group">
                     Lägg till behörighet
                 </label>

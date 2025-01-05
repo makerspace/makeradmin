@@ -90,7 +90,6 @@ function MembershipPeriodsInput({ spans, member_id }) {
 
     return (
         <form
-            className="uk-form"
             onSubmit={(e) => {
                 e.preventDefault();
                 onSave();
