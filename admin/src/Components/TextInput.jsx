@@ -30,14 +30,13 @@ const TextInput = (props) => {
         icon,
         disabled,
         placeholder,
-        formrow,
         tabIndex,
         type,
         autoComplete,
     } = props;
 
     const classes = classNames(name, {
-        "form-row": formrow,
+        "form-row": true,
         selected: selected,
         changed: isDirty,
     });
@@ -82,7 +81,6 @@ const TextInput = (props) => {
 };
 
 TextInput.defaultProps = {
-    formrow: true,
     autoComplete: "off",
 };
 

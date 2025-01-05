@@ -21,19 +21,10 @@ const Textarea = (props) => {
         };
     }, [props.model, props.name]);
 
-    const {
-        model,
-        name,
-        title,
-        disabled,
-        placeholder,
-        formrow,
-        tabIndex,
-        rows,
-    } = props;
+    const { model, name, title, disabled, placeholder, tabIndex, rows } = props;
 
     const classes = classNames(name, {
-        "form-row": formrow,
+        "form-row": true,
         selected: selected,
         changed: isDirty,
     });
@@ -62,10 +53,6 @@ const Textarea = (props) => {
             <div className="uk-form-controls">{textarea}</div>
         </div>
     );
-};
-
-Textarea.defaultProps = {
-    formrow: true,
 };
 
 export default Textarea;
