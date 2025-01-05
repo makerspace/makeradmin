@@ -8,5 +8,6 @@
     "editor.defaultFormatter": "esbenp.prettier-vscode",
     "editor.formatOnSave": true,
     "ruff.format.args": ["--line-length", "120"],
-    "mypy.runUsingActiveInterpreter": true
+    "mypy.runUsingActiveInterpreter": true,
+    "eslint.workingDirectories": ["./admin"]
 }
