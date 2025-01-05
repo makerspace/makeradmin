@@ -176,9 +176,7 @@ const CollectionTable = (props) => {
                     <div className="loadingOverlay">
                         <div className="loadingWrapper">
                             <span>
-                                <div uk-spinner />
-                                {/* FIXME: Doesn't show */}
-                                <Icon icon="refresh" />
+                                <div uk-spinner="" />
                                 Hämtar data...
                             </span>
                         </div>
