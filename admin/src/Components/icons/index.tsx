@@ -11,18 +11,15 @@ export default function Icon({
     icon: name,
     form = false,
 }: IconProps): React.ReactElement {
+    const maybe_form_icon = form ? "uk-form-icon" : "";
+
     if (isExtraIconName(name)) {
         return (
-            <span className={form ? "uk-form-icon" : "uk-icon"}>
+            <span className={maybe_form_icon + " uk-icon"}>
                 {extraIcons[name]}
             </span>
         );
     }
 
-    return (
-        <span
-            className={form ? "uk-form-icon" : null}
-            uk-icon={"icon: " + name}
-        />
-    );
+    return <span className={maybe_form_icon} uk-icon={"icon: " + name} />;
 }
