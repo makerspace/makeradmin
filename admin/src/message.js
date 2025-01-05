@@ -21,9 +21,7 @@ export function showSuccess(message) {
 }
 
 export function confirmModal(message) {
-    return new Promise((resolve, reject) => {
-        UIkit.modal.confirm(message, resolve, reject);
-    });
+    return UIkit.modal.confirm(message);
 }
 
 export function notifySuccess(message) {
