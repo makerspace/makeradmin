@@ -174,7 +174,7 @@ const App = () => {
                     {isLoggedIn && (
                         <div style={{ marginBottom: "2em" }}>
                             <Nav nav={nav} />
-                            <div className="uk-container uk-container-center uk-margin-top">
+                            <div className="uk-container uk-container uk-margin-top">
                                 <div className="uk-grid">
                                     <div className="uk-width-medium-1-4">
                                         <SideNav nav={nav} />
