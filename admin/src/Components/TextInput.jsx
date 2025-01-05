@@ -33,7 +33,6 @@ const TextInput = (props) => {
         formrow,
         tabIndex,
         type,
-        label,
         autoComplete,
     } = props;
 
@@ -65,11 +64,11 @@ const TextInput = (props) => {
 
     return (
         <div className={classes}>
-            {label ? (
+            {title && (
                 <label className="uk-form-label" htmlFor={name}>
                     {title}
                 </label>
-            ) : null}
+            )}
             {icon ? (
                 <div className="uk-inline">
                     <Icon form icon={icon} />
@@ -84,7 +83,6 @@ const TextInput = (props) => {
 
 TextInput.defaultProps = {
     formrow: true,
-    label: true,
     autoComplete: "off",
 };
 

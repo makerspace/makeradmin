@@ -348,6 +348,11 @@ ul.uk-navbar-nav > li > a > .uk-icon {
     transform: translateY(0px);
 }
 
+/* Don't let the icons shrink */
+.uk-icon > svg {
+    max-width: none;
+}
+
 /* Icons from the react-icons package also need to be bumped a bit to be aligned with text */
 button > svg {
     transform: translateY(-2px);

@@ -64,26 +64,35 @@ const ProductForm = ({ product, onDelete, onSave }) => {
     };
 
     const renderAction = (action) => (
-        <div key={action.action_type} className="form-row uk-grid">
-            <div className="uk-with-1-6">{action.action_type}</div>
-            <div className="uk-with-1-6">
-                <strong>Värde</strong>
-            </div>
-            <div className="uk-with-3-6">
+        <div
+            key={action.action_type}
+            className="form-row uk-grid uk-margin-bottom"
+        >
+            <div className="uk-width-3-4">
                 <TextInput
                     model={action}
-                    label={false}
-                    margin={false}
                     name={"value"}
+                    title={
+                        <>
+                            Action: <code>{action.action_type}</code>, with
+                            value
+                        </>
+                    }
                 />
             </div>
-            <div className="uk-with-1-6">
-                <a
-                    className="uk-button uk-button-danger"
+            <div className="uk-width-1-4">
+                <button
+                    type="button"
+                    className="uk-button uk-button-danger uk-width-1-1 uk-height-1-1"
+                    style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                    }}
                     onClick={() => handleRemoveAction(action)}
                 >
                     <Icon icon="trash" />
-                </a>
+                </button>
             </div>
         </div>
     );
@@ -171,9 +180,9 @@ const ProductForm = ({ product, onDelete, onSave }) => {
                     </legend>
                     <div>{actions.map(renderAction)}</div>
                     {availableActionTypes.length > 0 && (
-                        <div>
+                        <div className="uk-grid">
                             <ReactSelect
-                                className="uk-width-3-5 uk-float-left"
+                                className="uk-width-1-2@s uk-width-2-3@m"
                                 value={{
                                     value: selectedActionType,
                                     label: selectedActionType,
@@ -184,13 +193,20 @@ const ProductForm = ({ product, onDelete, onSave }) => {
                                 }))}
                                 onChange={(o) => setSelectedActionType(o.value)}
                             />
-                            <button
-                                type="button"
-                                className="uk-button uk-button-primary uk-float-right"
-                                onClick={handleAddAction}
-                            >
-                                <Icon icon="plus" /> Lägg till åtgärd
-                            </button>
+                            <div className="uk-width-1-2@s uk-width-1-3@m">
+                                <button
+                                    type="button"
+                                    className="uk-button uk-button-primary uk-width-1-1"
+                                    style={{
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                    }}
+                                    onClick={handleAddAction}
+                                >
+                                    <Icon icon="plus" /> Lägg till åtgärd
+                                </button>
+                            </div>
                         </div>
                     )}
                 </fieldset>
