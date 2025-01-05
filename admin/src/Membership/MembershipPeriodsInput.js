@@ -96,9 +96,6 @@ function MembershipPeriodsInput({ spans, member_id }) {
                 return false;
             }}
         >
-            <label className="uk-form-label" htmlFor="showHistoric">
-                Visa historiska
-            </label>
             <input
                 id="showHistoric"
                 className="uk-checkbox"
@@ -106,6 +103,12 @@ function MembershipPeriodsInput({ spans, member_id }) {
                 checked={showHistoric}
                 onChange={(e) => setShowHistoric(e.target.checked)}
             />
+            <label
+                className="uk-form-label uk-margin-small-left"
+                htmlFor="showHistoric"
+            >
+                Visa historiska
+            </label>
             {categoryPeriodsList.map((cp) => (
                 <CategoryPeriodsInput
                     key={cp.category}
