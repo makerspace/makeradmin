@@ -24,12 +24,13 @@ export const NavItem = (props) => {
 };
 
 export const Nav = ({ nav: { brand, items } }) => (
-    <nav className="uk-navbar">
-        <div className="uk-container uk-container-center">
-            <Link to="/" className="uk-navbar-brand">
+    <nav className="uk-navbar-container">
+        <div className="uk-navbar-left">
+            <Link to="/" className="uk-navbar-item uk-logo">
                 {brand}
             </Link>
-            <ul className="uk-navbar-nav uk-navbar-attached">
+            {/* The uk-flex-wrap is added to make the items not overflow. Feels like a hack. */}
+            <ul className="uk-navbar-nav uk-flex-wrap">
                 {items.map((item, i) => (
                     <NavItem to={item.target} icon={item.icon} key={i}>
                         {item.text}
@@ -58,7 +59,7 @@ export const SideNav = ({ nav }) => {
             data-uk-sticky="{top:35}"
         >
             <ul
-                className="uk-nav uk-nav-side"
+                className="uk-nav uk-nav-default"
                 data-uk-scrollspy-nav="{closest:'li', smoothscroll:true}"
             >
                 <li className="uk-nav-header">{activeItem.text}</li>

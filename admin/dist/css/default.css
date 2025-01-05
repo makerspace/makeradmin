@@ -352,3 +352,9 @@ ul.uk-navbar-nav > li > a > .uk-icon {
 button > svg {
     transform: translateY(-2px);
 }
+
+/* The navbar items are by default very tall (80px), which takes too much space
+ * when combining with the flex layout */
+.uk-navbar-nav > li > a {
+    min-height: 40px !important;
+}
