@@ -1,7 +1,5 @@
 import * as _ from "underscore";
 
-
-// eslint-disable-next-line
 export const assert = (expression) => console.assert(expression);
 
 const utcDateFormat = Intl.DateTimeFormat("sv-SE", {
