@@ -86,7 +86,6 @@
         },
         "globals": {
             "config": true,
-            "UIkit": true,
             "global": true,
             "require": true,
             "module": true,
