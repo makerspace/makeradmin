@@ -1,6 +1,3 @@
-// Load jQuery and UIkit
-global.jQuery = require("jquery");
-global.$ = global.jQuery;
 import "uikit/dist/css/uikit.css";
 
 import UIkit from "uikit";
