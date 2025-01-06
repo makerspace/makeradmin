@@ -176,10 +176,10 @@ const App = () => {
                             <Nav nav={nav} />
                             <div className="uk-container uk-container uk-margin-top">
                                 <div className="uk-grid">
-                                    <div className="uk-width-medium-1-4">
+                                    <div className="uk-width-1-4@m">
                                         <SideNav nav={nav} />
                                     </div>
-                                    <div className="uk-width-medium-3-4">
+                                    <div className="uk-width-3-4@m">
                                         <Switch>
                                             {defaultSubpageRoute({
                                                 matchpath: "",
