@@ -82,13 +82,12 @@
     "eslintConfig": {
         "env": {
             "browser": true,
+            "node": true,
             "es6": true
         },
         "globals": {
             "config": true,
             "global": true,
-            "require": true,
-            "module": true,
             "__BUILD_DATE__": "readonly",
             "__COMMIT_HASH__": "readonly"
         },
