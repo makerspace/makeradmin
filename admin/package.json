@@ -87,7 +87,6 @@
         },
         "globals": {
             "config": true,
-            "global": true,
             "__BUILD_DATE__": "readonly",
             "__COMMIT_HASH__": "readonly"
         },
