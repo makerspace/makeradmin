@@ -17,7 +17,7 @@ const Row =
                 .then(() => item.del())
                 .then(
                     () => collection.fetch(),
-                    () => null,
+                    (): void => null,
                 );
         };
 
