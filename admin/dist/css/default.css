@@ -69,10 +69,6 @@ body,
     filter: blur(1px);
 }
 
-.invoice .box {
-    /*	border: 1px solid #000;*/
-}
-
 .invoice .title {
     font-weight: bold;
     font-size: 0.9em;
@@ -210,11 +206,6 @@ form .uk-form-help-block.error {
     transition-timing-function: linear;
 }
 
-/* Hilite fields that have changed since last sync */
-.meep .changed input {
-    /*	background-color: blue !important;*/
-}
-
 .meep .changed label::before {
     content: "* ";
 }
@@ -278,13 +269,6 @@ tr.toggle.show div.scrolling {
     max-height: 500px;
 }
 
-/*
-Zebra tables does not work when using toggle rows
-.uk-table-striped tbody tr.toggle:nth-of-type(2n+1) {
-	background: #fafafa none repeat scroll 0 0;
-}
-*/
-
 /* Removing styling from <pre> when using in toggle tables */
 tr.toggle pre {
     margin-bottom: 0;
@@ -299,10 +283,6 @@ tr.toggle pre {
     border-radius: 5px;
     background-color: #fff;
     border-radius: 5px;
-}
-
-.datebox .uk-grid {
-    /*	margin-left:-15px;*/
 }
 
 .datebox p {
