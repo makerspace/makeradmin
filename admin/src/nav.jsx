@@ -56,11 +56,11 @@ export const SideNav = ({ nav }) => {
         <div
             className="uk-panel uk-panel-box"
             style={{ marginBottom: "1em" }}
-            data-uk-sticky="{top:35}"
+            uk-sticky="{top:35}"
         >
             <ul
                 className="uk-nav uk-nav-default"
-                data-uk-scrollspy-nav="{closest:'li', smoothscroll:true}"
+                uk-scrollspy-nav="{closest:'li', smoothscroll:true}"
             >
                 <li className="uk-nav-header">{activeItem.text}</li>
                 <li className="uk-nav-divider" />
