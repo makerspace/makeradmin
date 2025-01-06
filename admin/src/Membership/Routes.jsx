@@ -1,5 +1,6 @@
 import React from "react";
-import MemberList from "./MemberList";
+import { Route, Switch } from "react-router-dom";
+import { defaultSubpageRoute } from "../Components/Routes";
 import GroupAdd from "./GroupAdd";
 import GroupBox from "./GroupBox";
 import GroupBoxEditInfo from "./GroupBoxEditInfo";
@@ -7,28 +8,27 @@ import GroupBoxMembers from "./GroupBoxMembers";
 import GroupBoxPermissions from "./GroupBoxPermissions";
 import GroupList from "./GroupList";
 import KeyEdit from "./KeyEdit";
+import KeyHandout from "./KeyHandout";
 import KeyList from "./KeyList";
 import MemberAdd from "./MemberAdd";
 import MemberBox from "./MemberBox";
 import MemberBoxGroups from "./MemberBoxGroups";
 import MemberBoxKeys from "./MemberBoxKeys";
 import MemberBoxMemberData from "./MemberBoxMemberData";
-import KeyHandout from "./KeyHandout";
 import MemberBoxMessages from "./MemberBoxMessages";
 import MemberBoxNewMessage from "./MemberBoxNewMessage";
 import MemberBoxOrders from "./MemberBoxOrders";
 import MemberBoxPermissions from "./MemberBoxPermissions";
 import MemberBoxSpans from "./MemberBoxSpans";
 import MemberExport from "./MemberExport";
+import MemberList from "./MemberList";
 import SpanList from "./SpanList";
 import SpanShow from "./SpanShow";
-
-import { Route, Switch } from "react-router-dom";
 
 const Group = ({ match: { path } }) => (
     <GroupBox>
         <Switch>
-            <Route exact path={`${path}/`} component={GroupBoxEditInfo} />
+            {defaultSubpageRoute({ matchpath: path, subpage: "info" })}
             <Route path={`${path}/info`} component={GroupBoxEditInfo} />
             <Route path={`${path}/members`} component={GroupBoxMembers} />
             <Route
@@ -50,7 +50,7 @@ const Groups = ({ match: { path } }) => (
 const Member = ({ match: { path } }) => (
     <MemberBox>
         <Switch>
-            <Route exact path={`${path}/`} component={KeyHandout} />
+            {defaultSubpageRoute({ matchpath: path, subpage: "key-handout" })}
             <Route path={`${path}/key-handout`} component={KeyHandout} />
             <Route
                 path={`${path}/member-data`}
@@ -97,7 +97,7 @@ const Spans = ({ match: { path } }) => (
 
 export default ({ match }) => (
     <Switch>
-        <Route exact path={match.path} component={MemberList} />
+        {defaultSubpageRoute({ matchpath: match.path, subpage: "members" })}
         <Route path={`${match.path}/members`} component={Members} />
         <Route path={`${match.path}/groups`} component={Groups} />
         <Route path={`${match.path}/keys`} component={Keys} />

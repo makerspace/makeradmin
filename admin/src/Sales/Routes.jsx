@@ -1,23 +1,24 @@
 import React from "react";
-import OrderList from "./OrderList";
-import OrderShow from "./OrderShow";
+import { Route, Switch } from "react-router-dom";
+import { defaultSubpageRoute } from "../Components/Routes";
+import AccountingAccount from "./AccountingAccount";
+import AccountingBox from "./AccountingBox";
+import AccountingCostCenter from "./AccountingCostCenter";
+import AccountingExport from "./AccountingExport";
+import AccountingProduct from "./AccountingProduct";
+import CategoryList from "./CategoryList";
 import GiftCardList from "./GiftCardList";
 import GiftCardShow from "./GiftCardShow";
-import ProductList from "./ProductList";
+import ImageList from "./ImageList";
+import OrderList from "./OrderList";
+import OrderShow from "./OrderShow";
 import ProductAdd from "./ProductAdd";
 import ProductEdit from "./ProductEdit";
-import CategoryList from "./CategoryList";
-import { Route, Switch } from "react-router-dom";
-import ImageList from "./ImageList";
-import AccountingBox from "./AccountingBox";
-import AccountingExport from "./AccountingExport";
-import AccountingAccount from "./AccountingAccount";
-import AccountingCostCenter from "./AccountingCostCenter";
-import AccountingProduct from "./AccountingProduct";
+import ProductList from "./ProductList";
 const Accounting = ({ match: { path } }) => (
     <AccountingBox>
         <Switch>
-            <Route exact path={`${path}/`} component={AccountingExport} />
+            {defaultSubpageRoute({ matchpath: path, subpage: "exporting" })}
             <Route path={`${path}/exporting`} component={AccountingExport} />
             <Route
                 path={`${path}/overview-product`}
@@ -34,7 +35,7 @@ const Accounting = ({ match: { path } }) => (
 
 export default ({ match }) => (
     <Switch>
-        <Route path={`${match.path}/`} exact component={OrderList} />
+        {defaultSubpageRoute({ matchpath: match.path, subpage: "order" })}
         <Route path={`${match.path}/order`} exact component={OrderList} />
         <Route path={`${match.path}/order/:id`} component={OrderShow} />
         <Route

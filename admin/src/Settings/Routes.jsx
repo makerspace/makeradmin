@@ -1,12 +1,13 @@
 import React from "react";
 import { Route, Switch } from "react-router-dom";
+import { defaultSubpageRoute } from "../Components/Routes";
+import About from "./About";
 import AccessTokenList from "./AccessTokenList";
 import ServiceTokenList from "./ServiceTokenList";
-import About from "./About";
 
 export default ({ match }) => (
     <Switch>
-        <Route path={`${match.path}/`} exact component={About} />
+        {defaultSubpageRoute({ matchpath: match.path, subpage: "about" })}
         <Route path={`${match.path}/about`} component={About} />
         <Route path={`${match.path}/tokens`} component={AccessTokenList} />
         <Route
