@@ -322,7 +322,9 @@ tr.toggle pre {
 }
 
 /* However, in the Navbar they are already aligned */
-ul.uk-navbar-nav > li > a > .uk-icon {
+ul.uk-navbar-nav > li > a > .uk-icon,
+/* As well as when inlined into an input */
+.uk-inline > .uk-icon:has(+input) {
     transform: translateY(0px);
 }
 
