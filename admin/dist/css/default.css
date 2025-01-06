@@ -221,8 +221,7 @@ span.ma-changed {
     content: "*";
 }
 
-/* Filterbox */
-.filterbox {
+.searchbox {
     clear: both;
     border: 1px solid #ccc;
     border-radius: 8px;

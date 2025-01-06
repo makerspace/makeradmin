@@ -3,7 +3,7 @@ import Icon from "./icons";
 
 const SearchBox = ({ value, handleChange }) => {
     return (
-        <form className="filterbox" onSubmit={(e) => e.preventDefault()}>
+        <form className="searchbox" onSubmit={(e) => e.preventDefault()}>
             <div className="uk-inline uk-width-1-1">
                 <Icon form icon="search" />
                 <input
