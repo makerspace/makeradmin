@@ -18,11 +18,11 @@ import { browserHistory } from "./browser_history";
 import { Nav, SideNav } from "./nav";
 
 import Page404 from "./Components/404";
-import Dashboard from "./Components/Dashboard";
 import Logout from "./Components/Logout";
 import PasswordReset from "./Components/PasswordReset";
 import RequestPasswordReset from "./Components/RequestPasswordReset";
 
+import { defaultSubpageRoute } from "./Components/Routes";
 import Membership from "./Membership/Routes";
 import Messages from "./Messages/Routes";
 import Quiz from "./Quiz/Routes";
@@ -188,11 +188,10 @@ const App = () => {
                                     </div>
                                     <div className="uk-width-medium-3-4">
                                         <Switch>
-                                            <Route
-                                                exact
-                                                path="/"
-                                                component={Dashboard}
-                                            />
+                                            {defaultSubpageRoute({
+                                                matchpath: "",
+                                                subpage: "membership",
+                                            })}
                                             <Route
                                                 path="/membership"
                                                 component={Membership}

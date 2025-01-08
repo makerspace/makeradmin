@@ -5,9 +5,16 @@ type RedirectProps = {
     subpage: string;
 };
 
+export function url_join([...paths]: string[]): string {
+    const paths_without_trailing_slashes = paths.map((path) =>
+        path.replace(/\/$/, ""),
+    );
+    return paths_without_trailing_slashes.join("/");
+}
+
 const RedirectToSubpage = ({ subpage }: RedirectProps) => {
     const location = useLocation();
-    const to = location.pathname.concat("/" + subpage);
+    const to = url_join([location.pathname, subpage]);
     return <Redirect to={to} />;
 };
 
