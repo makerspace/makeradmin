@@ -50,18 +50,18 @@ class Member(Base):
 
     member_id: Mapped[int] = mapped_column(Integer, primary_key=True, nullable=False, autoincrement=True)
     email: Mapped[str] = mapped_column(String(255), unique=True, nullable=False)
-    password: Mapped[Optional[str]]
-    firstname: Mapped[str]
-    lastname: Mapped[Optional[str]]
-    civicregno: Mapped[Optional[str]]
-    company: Mapped[Optional[str]]
-    orgno: Mapped[Optional[str]]
-    address_street: Mapped[Optional[str]]
-    address_extra: Mapped[Optional[str]]
+    password: Mapped[Optional[str]] = mapped_column(String(60))
+    firstname: Mapped[str] = mapped_column(String(255), nullable=False)
+    lastname: Mapped[Optional[str]] = mapped_column(String(255))
+    civicregno: Mapped[Optional[str]] = mapped_column(String(25))
+    company: Mapped[Optional[str]] = mapped_column(String(255))
+    orgno: Mapped[Optional[str]] = mapped_column(String(12))
+    address_street: Mapped[Optional[str]] = mapped_column(String(255))
+    address_extra: Mapped[Optional[str]] = mapped_column(String(255))
     address_zipcode: Mapped[Optional[int]]
-    address_city: Mapped[Optional[str]]
-    address_country: Mapped[Optional[str]]
-    phone: Mapped[Optional[str]]
+    address_city: Mapped[Optional[str]] = mapped_column(String(255))
+    address_country: Mapped[Optional[str]] = mapped_column(String(2))
+    phone: Mapped[Optional[str]] = mapped_column(String(255))
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
     deleted_at: Mapped[Optional[datetime]]
@@ -103,9 +103,9 @@ class Group(Base):
     __tablename__ = "membership_groups"
 
     group_id: Mapped[int] = mapped_column(Integer, primary_key=True, nullable=False, autoincrement=True)
-    name: Mapped[str]
-    title: Mapped[str]
-    description: Mapped[Optional[str]]
+    name: Mapped[str] = mapped_column(String(255), nullable=False)
+    title: Mapped[str] = mapped_column(String(255), nullable=False)
+    description: Mapped[Optional[str]] = mapped_column(Text)
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
     deleted_at: Mapped[Optional[datetime]]
@@ -220,7 +220,7 @@ class PhoneNumberChangeRequest(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, nullable=False, autoincrement=True)
     member_id: Mapped[int] = mapped_column(Integer, ForeignKey("membership_members.member_id"), nullable=True)
-    phone: Mapped[str]
+    phone: Mapped[str] = mapped_column(String(255), nullable=False)
 
     # Number used to compare if the reques is valid or not.
     validation_code: Mapped[int]
