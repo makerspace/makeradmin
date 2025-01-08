@@ -29,7 +29,7 @@ function DateView(props) {
 
     if (!props.date) {
         status = (
-            <div className="uk-panel-badge uk-badge uk-badge-warning">
+            <div className="uk-card-badge uk-label uk-label-warning">
                 Saknas
             </div>
         );
@@ -40,7 +40,7 @@ function DateView(props) {
         );
     } else if (!is_valid) {
         status = (
-            <div className="uk-panel-badge uk-badge uk-badge-danger">
+            <div className="uk-card-badge uk-label uk-label-danger">
                 Utgånget
             </div>
         );
@@ -54,7 +54,7 @@ function DateView(props) {
         );
     } else {
         status = (
-            <div className="uk-panel-badge uk-badge uk-badge-success">OK</div>
+            <div className="uk-card-badge uk-label uk-label-success">OK</div>
         );
         text = <p>Giltigt till: {props.date}</p>;
     }
@@ -62,12 +62,12 @@ function DateView(props) {
     // Override if there are pending days to be synchronized
     if (props.pending || is_valid) {
         status = (
-            <div className="uk-panel-badge uk-badge uk-badge-success">OK</div>
+            <div className="uk-card-badge uk-label uk-label-success">OK</div>
         );
     }
 
     return (
-        <div className="uk-panel uk-panel-box">
+        <div className="uk-card uk-card-default uk-card-small uk-margin-small-top">
             <p style={{ fontSize: "1.2em" }}>
                 <b>{props.title}</b>
             </p>
@@ -229,7 +229,7 @@ function KeyHandoutForm(props) {
     if (accessy_in_org) {
         accessy_paragraph = (
             <p>
-                <span className="uk-badge uk-badge-success">OK</span> Personen
+                <span className="uk-label uk-label-success">OK</span> Personen
                 är med i organisationen. <br /> Med i följande (
                 {accessy_groups.length}) grupper:{" "}
                 {accessy_groups.sort().join(", ")}{" "}
@@ -239,18 +239,18 @@ function KeyHandoutForm(props) {
         let invite_part;
         if (accessy_pending_invites === 0) {
             invite_part = (
-                <span className="uk-badge uk-badge-warning">Invite saknas</span>
+                <span className="uk-label uk-label-warning">Invite saknas</span>
             );
         } else {
             invite_part = (
-                <span className="uk-badge uk-badge-success">
+                <span className="uk-label uk-label-success">
                     Invite skickad
                 </span>
             );
         }
         accessy_paragraph = (
             <p>
-                <span className="uk-badge uk-badge-danger">Ej access</span>{" "}
+                <span className="uk-label uk-label-danger">Ej access</span>{" "}
                 Personen är inte med i organisationen ännu. <br /> {invite_part}{" "}
                 Det finns {accessy_pending_invites} aktiva inbjudningar utsända
                 för tillfället.{" "}
@@ -260,7 +260,7 @@ function KeyHandoutForm(props) {
 
     const section2andon = (
         <>
-            <div className="uk-section">
+            <div className="uk-section uk-padding-remove-vertical">
                 <h2>2. Kontrollera legitimation</h2>
                 <p>
                     Kontrollera personens legitimation och för in personnummret
@@ -279,7 +279,7 @@ function KeyHandoutForm(props) {
                 </div>
             </div>
 
-            <div className="uk-section">
+            <div className="uk-section uk-padding-remove-vertical">
                 <h2>3. Övrig information</h2>
                 <p>
                     Kontrollera <b>epost</b> så personen kommer åt kontot, och{" "}
@@ -319,7 +319,7 @@ function KeyHandoutForm(props) {
                 </div>
             </div>
 
-            <div className="uk-section">
+            <div className="uk-section uk-padding-remove-vertical">
                 <h2>4. Kontrollera medlemskap </h2>
                 <p>
                     Kontrollera om medlemmen har köpt medlemskap och
@@ -346,7 +346,7 @@ function KeyHandoutForm(props) {
                 </div>
             </div>
 
-            <div className="uk-section">
+            <div className="uk-section uk-padding-remove-vertical">
                 <h2>5. Kontrollera tillgång till Accessy </h2>
                 {accessy_paragraph}
             </div>
@@ -379,7 +379,7 @@ function KeyHandoutForm(props) {
                         return false;
                     }}
                 >
-                    <div className="uk-section">
+                    <div className="uk-section uk-padding-remove-vertical">
                         <h2>1. Ta emot signerat labbmedlemsavtal</h2>
                         <p>
                             Kontrollera att labbmedlemsavtalet är signerat och
