@@ -71,12 +71,12 @@ class Member(Base):
 
     member_number: Mapped[int] = mapped_column(Integer, unique=True, nullable=False)
     labaccess_agreement_at: Mapped[Optional[datetime]]
-    pin_code: Mapped[Optional[str]]
-    stripe_customer_id: Mapped[Optional[str]]
-    stripe_membership_subscription_id: Mapped[Optional[str]]
-    stripe_labaccess_subscription_id: Mapped[Optional[str]]
+    pin_code: Mapped[Optional[str]] = mapped_column(String(30))
+    stripe_customer_id: Mapped[Optional[str]] = mapped_column(String(64))
+    stripe_membership_subscription_id: Mapped[Optional[str]] = mapped_column(String(64))
+    stripe_labaccess_subscription_id: Mapped[Optional[str]] = mapped_column(String(64))
     price_level: Mapped[str] = mapped_column(Enum(*[x.value for x in PriceLevel]), nullable=False)
-    price_level_motivation: Mapped[Optional[str]]
+    price_level_motivation: Mapped[Optional[str]] = mapped_column(Text)
 
     @validates("phone")
     def validate_phone(self, key: Any, value: Optional[str]) -> Optional[str]:
@@ -178,7 +178,7 @@ class Span(Base):
     creation_reason: Mapped[str] = mapped_column(String(255), unique=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
     deleted_at: Mapped[Optional[datetime]]
-    deletion_reason: Mapped[Optional[str]]
+    deletion_reason: Mapped[Optional[str]] = mapped_column(String(255))
 
     member: Mapped[Member] = relationship(Member, backref="spans", cascade_backrefs=False)
 
