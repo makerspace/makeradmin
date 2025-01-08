@@ -27,7 +27,7 @@ class Test(ApiTest):
         self.assertEqual(Diff(group_removes=[GroupOp(m1_both, ACCESSY_SPECIAL_LABACCESS_GROUP)]), diff)
 
         diff = calculate_diff(wanted_members={m1_phone: m1_lab}, actual_members={m1_phone: m1_none})
-        self.assertEqual(Diff(group_adds=[GroupOp(m1_lab, ACCESSY_LABACCESS_GROUP)]), diff)
+        self.assertEqual(Diff(group_adds=[GroupOp(m1_none, ACCESSY_LABACCESS_GROUP)]), diff)
 
         diff = calculate_diff(wanted_members={}, actual_members={m1_phone: m1_none})
         self.assertEqual(Diff(org_removes=[m1_none]), diff)
