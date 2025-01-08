@@ -25,7 +25,7 @@ const Login = () => {
                 className="uk-vertical-align-middle"
                 style={{ width: "300px" }}
             >
-                <form className="uk-panel uk-panel-box" onSubmit={login}>
+                <form className="uk-card uk-card-default" onSubmit={login}>
                     <div className="form-row">
                         <h2>Logga in</h2>
                     </div>

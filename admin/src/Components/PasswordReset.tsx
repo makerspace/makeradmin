@@ -41,7 +41,7 @@ class PasswordReset extends React.Component {
                 >
                     <div className="uk-text-left">
                         <form
-                            className="uk-panel uk-panel-box"
+                            className="uk-card uk-card-default"
                             onSubmit={(e) => this.submit(e)}
                         >
                             <div className="form-row">
