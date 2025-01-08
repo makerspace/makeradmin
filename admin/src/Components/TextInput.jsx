@@ -69,7 +69,7 @@ const TextInput = (props) => {
                 </label>
             )}
             {icon ? (
-                <div className="uk-inline">
+                <div className="uk-inline uk-width-1-1">
                     <Icon form icon={icon} />
                     {input}
                 </div>
