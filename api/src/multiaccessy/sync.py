@@ -90,7 +90,7 @@ def calculate_diff(actual_members: Dict[str, AccessyMember], wanted_members: Dic
             continue
 
         for group in wanted.groups - actual_m.groups:
-            diff.group_adds.append(GroupOp(wanted, group))
+            diff.group_adds.append(GroupOp(actual_m, group))
 
         for group in actual_m.groups - wanted.groups:
             diff.group_removes.append(GroupOp(actual_m, group))
