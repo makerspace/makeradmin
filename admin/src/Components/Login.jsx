@@ -20,60 +20,69 @@ const Login = () => {
     };
 
     return (
-        <div className="uk-vertical-align uk-text-center uk-height-1-1">
+        <div className="uk-flex uk-flex-center uk-flex-middle uk-text-center uk-height-1-1">
             <div
                 className="uk-vertical-align-middle"
-                style={{ width: "300px" }}
+                style={{ width: "500px" }}
             >
-                <form className="uk-card uk-card-default" onSubmit={login}>
-                    <div className="form-row">
+                <form
+                    className="uk-card uk-card-default uk-card-body"
+                    onSubmit={login}
+                >
+                    <div className="uk-card-header">
                         <h2>Logga in</h2>
                     </div>
 
-                    <div className="form-row">
-                        <div className="uk-inline">
-                            <Icon form icon="user" />
-                            <input
-                                value={username}
-                                onChange={(e) => setUsername(e.target.value)}
-                                className="uk-form-large uk-form-width-large"
-                                type="text"
-                                placeholder="Email/Medlemsnummer"
-                                autoComplete="username"
-                            />
+                    <div className="uk-card-body">
+                        <div className="uk-margin-top">
+                            <div className="uk-inline uk-width-1-1">
+                                <Icon form icon="user" />
+                                <input
+                                    value={username}
+                                    onChange={(e) =>
+                                        setUsername(e.target.value)
+                                    }
+                                    className="uk-input"
+                                    type="text"
+                                    placeholder="Email/Medlemsnummer"
+                                    autoComplete="username"
+                                />
+                            </div>
                         </div>
-                    </div>
 
-                    <div className="form-row">
-                        <div className="uk-inline">
-                            <Icon form icon="lock" />
-                            <input
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                className="uk-form-large uk-form-width-large"
-                                type="password"
-                                placeholder="Lösenord"
-                                autoComplete="current-password"
-                            />
+                        <div className="uk-margin-top">
+                            <div className="uk-inline uk-width-1-1">
+                                <Icon form icon="lock" />
+                                <input
+                                    value={password}
+                                    onChange={(e) =>
+                                        setPassword(e.target.value)
+                                    }
+                                    className="uk-input"
+                                    type="password"
+                                    placeholder="Lösenord"
+                                    autoComplete="current-password"
+                                />
+                            </div>
                         </div>
-                    </div>
 
-                    <div className="form-row">
-                        <button
-                            type="submit"
-                            className="uk-width-1-1 uk-button uk-button-primary uk-button-large"
-                        >
-                            Logga in
-                        </button>
-                    </div>
+                        <div className="uk-margin-top">
+                            <button
+                                type="submit"
+                                className="uk-width-1-1 uk-button uk-button-primary uk-button-large"
+                            >
+                                Logga in
+                            </button>
+                        </div>
 
-                    <div className="form-row uk-text-small">
-                        <Link
-                            className="uk-float-right uk-link uk-link-muted"
-                            to="/request-password-reset"
-                        >
-                            Glömt ditt lösenord?
-                        </Link>
+                        <div className="uk-margin-top">
+                            <Link
+                                className="uk-float-right uk-button uk-button-text"
+                                to="/request-password-reset"
+                            >
+                                Glömt ditt lösenord?
+                            </Link>
+                        </div>
                     </div>
                 </form>
             </div>
