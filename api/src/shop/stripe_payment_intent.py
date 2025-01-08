@@ -4,6 +4,7 @@ from decimal import Decimal
 from enum import Enum
 from logging import getLogger
 from typing import Dict, List, Optional
+from zoneinfo import ZoneInfo
 
 import stripe
 from dataclasses_json import DataClassJsonMixin
@@ -13,7 +14,6 @@ from service.db import db_session
 from service.error import EXCEPTION, BadRequest, InternalServerError
 from stripe import CardError, InvalidRequestError, PaymentIntent, StripeError
 from typing_extensions import Never
-from zoneinfo import ZoneInfo
 
 from shop.models import StripePending, Transaction
 from shop.stripe_constants import (
@@ -202,5 +202,12 @@ def pay_with_stripe(
             f"created stripe payment_intent for transaction {transaction.id}, payment_intent id {payment_intent.id}"
         )
         return payment_intent
+    except CardError as e:
+        # Reason can be for example: 'Your card was declined. This transaction requires authentication'.
+        # It seems weird that it fails already when trying to create the payment intent, but it has been observed.
+        commit_fail_transaction(transaction)
+        err = PaymentFailed(log=f"Payment failed: {str(e)}", level=EXCEPTION)
+        err.message = e.user_message
+        raise err
     except InvalidRequestError as e:
         raise_from_stripe_invalid_request_error(e)
