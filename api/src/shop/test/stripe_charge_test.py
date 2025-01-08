@@ -25,6 +25,7 @@ from shop.stripe_payment_intent import (
     pay_with_stripe,
 )
 from shop.stripe_util import convert_from_stripe_amount, convert_to_stripe_amount, retry
+from shop.transactions import PaymentFailed
 from stripe import CardError
 from subscriptions_test import FakeCardPmToken, attach_and_set_payment_method
 from test_aid.systest_config import STRIPE_PRIVATE_KEY
@@ -117,7 +118,7 @@ class StripeChargeTest(FlaskTestBase):
             else:
                 completed_payments[transaction.id] = False
                 payment_method = attach_and_set_payment_method(member, FakeCardPmToken.DeclineAfterAttach)
-                with self.assertRaises(CardError) as context:
+                with self.assertRaises(PaymentFailed) as context:
                     pay_with_stripe(transaction, payment_method.id, False, is_test=True)
                 self.assertTrue("declined" in str(context.exception))
 
