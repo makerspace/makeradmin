@@ -21,6 +21,7 @@ jobs:
       - name: Auto-fix Python formatting
         run: |
           ruff format
+          ruff check --fix
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
