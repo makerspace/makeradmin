@@ -22,7 +22,7 @@ logger = getLogger("makeradmin")
 
 def get_wanted_access(today: date, member_id: Optional[int] = None) -> dict[PHONE, AccessyMember]:
     if member_id is not None:
-        member = db_session.get(Member, member_id)
+        member = db_session.query(Member).get(member_id)
         if member is None:
             raise Exception("Member does not exist")
         members = [member]
@@ -33,7 +33,7 @@ def get_wanted_access(today: date, member_id: Optional[int] = None) -> dict[PHON
     return {
         member.phone: AccessyMember(
             phone=member.phone,
-            name=f"{member.firstname} {member.lastname}",
+            name=f"{member.firstname} {member.lastname}",  # Never actually used
             groups={
                 group
                 for group, enabled in {
@@ -78,7 +78,7 @@ def calculate_diff(actual_members: Dict[str, AccessyMember], wanted_members: Dic
     for wanted in (wanted for phone, wanted in wanted_members.items() if phone not in actual_members):
         diff.invites.append(wanted)
 
-    # Should have any access, remove from org needed:
+    # Shouldn't have any access, remove from org needed:
     for actual in (actual for phone, actual in actual_members.items() if phone not in wanted_members):
         diff.org_removes.append(actual)
 
@@ -109,7 +109,7 @@ def sync(today: Optional[date] = None, member_id: Optional[int] = None) -> None:
     # If a specific member is given, sync only that member,
     # otherwise sync all members
     if member_id is not None:
-        member = db_session.get(Member, member_id)
+        member = db_session.query(Member).get(member_id)
         if member is None:
             raise Exception("Member does not exist")
         if member.phone is None:

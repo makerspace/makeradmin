@@ -134,7 +134,7 @@ class AccessyMember:
             groups.append("labaccess")
         if ACCESSY_SPECIAL_LABACCESS_GROUP in self.groups:
             groups.append("special")
-        return f"AccessyMember(phone={self.phone}, name={self.name}, {groups=}, member_id={self.member_id}, member_number={self.member_number}, user_id={self.user_id})"
+        return f"AccessyMember(phone={self.phone}, name={self.name}, {groups=}, member_id={self.member_id}, member_number={self.member_number}, user_id={self.user_id}, membership_id={self.membership_id})"
 
 
 @dataclass
@@ -287,6 +287,8 @@ class AccessySession:
             self.add_to_group(accessy_member, access_group_id)
 
     def add_to_group(self, member: AccessyMember, access_group_id: UUID) -> None:
+        if member.membership_id is None:
+            raise AccessyError(f"Membership ID is not set on {member}")
         self.__put(
             f"/asset/admin/access-permission-group/{access_group_id}/membership",
             json=dict(membership=member.membership_id),
@@ -696,10 +698,10 @@ def register_accessy_webhook() -> bool:
 
 def main() -> int:
     if accessy_session is None:
-        print("Accessy not configured.")
+        logger.warning("Accessy not configured.")
         return ERROR_NOT_CONFIGURED
     pending_invitations = list(accessy_session.get_pending_invitations(date(2022, 8, 30)))
-    print("Pending invitations", len(pending_invitations), pending_invitations)
+    logger.info("Pending invitations", len(pending_invitations), pending_invitations)
     return STATUS_OK
 
 
