@@ -69,7 +69,7 @@ def request(
             continue
 
         if not response.ok:
-            msg = f"got an error in the response for {response.request.path_url}, {response.status_code=}: {err_msg or ''}"
+            msg = f"got an error in the response for {response.request.path_url}, {response.text=}, {response.status_code=}: {err_msg or ''}"
             logger.error(msg)
             raise AccessyError(msg)
 
