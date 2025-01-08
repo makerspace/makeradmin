@@ -114,7 +114,7 @@ def sync(today: Optional[date] = None, member_id: Optional[int] = None) -> None:
             raise Exception("Member does not exist")
         if member.phone is None:
             return
-        accessy_member = accessy_session._get_org_user_from_phone(member.phone)
+        accessy_member = accessy_session.get_org_user_from_phone(member.phone)
         actual_members = [accessy_member] if accessy_member is not None else []
     else:
         actual_members = accessy_session.get_all_members()

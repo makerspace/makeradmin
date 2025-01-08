@@ -235,15 +235,7 @@ class AccessySession:
         org_member_ids = set(item["id"] for item in self._get_users_org())
 
         members = self._user_ids_to_accessy_members(org_member_ids)
-
-        lab_ids = set(item["userId"] for item in self._get_users_lab())
-        special_ids = set(item["userId"] for item in self._get_users_special())
-
-        for m in members:
-            if m.user_id in lab_ids:
-                m.groups.add(ACCESSY_LABACCESS_GROUP)
-            if m.user_id in special_ids:
-                m.groups.add(ACCESSY_SPECIAL_LABACCESS_GROUP)
+        self._populate_user_groups(members)
 
         return members
 
@@ -547,7 +539,7 @@ class AccessySession:
         threads = []
         user_ids = list(user_ids)
         thread_count = min(4, len(user_ids))
-        accessy_members = []
+        accessy_members: List[AccessyMember] = []
         for i in range(thread_count):
             # Chunk the user_ids into equal parts for each thread
             slice = user_ids[i::thread_count]
@@ -572,10 +564,29 @@ class AccessySession:
 
         return accessy_members
 
+    def _populate_user_groups(self, members: List[AccessyMember]) -> None:
+        lab_ids = set(item["userId"] for item in self._get_users_lab())
+        special_ids = set(item["userId"] for item in self._get_users_special())
+
+        for m in members:
+            if m.user_id in lab_ids:
+                m.groups.add(ACCESSY_LABACCESS_GROUP)
+            if m.user_id in special_ids:
+                m.groups.add(ACCESSY_SPECIAL_LABACCESS_GROUP)
+
+    def get_org_user_from_phone(
+        self, phone_number: MSISDN, users_in_org: list[dict] | None = None
+    ) -> Union[None, AccessyMember]:
+        """Get a AccessyMember from a phone number (if in org)."""
+        member = self._get_org_user_from_phone(phone_number, users_in_org)
+        if member is not None:
+            self._populate_user_groups([member])
+        return member
+
     def _get_org_user_from_phone(
         self, phone_number: MSISDN, users_in_org: list[dict] | None = None
     ) -> Union[None, AccessyMember]:
-        """Get a AccessyMember from a phone number (if in org)"""
+        """Get a AccessyMember from a phone number (if in org). Groups are not set."""
         if users_in_org is None:
             users_in_org = self._get_users_org()
 
