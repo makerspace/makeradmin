@@ -51,9 +51,7 @@ class StripePaymentIntentTest(FlaskTestBase):
         assert transaction.status == Transaction.COMPLETED
         assert stripe_intent.amount == convert_to_stripe_amount(transaction.amount)
         assert stripe_intent.currency == CURRENCY
-        stripe_pending = (
-            db_session.query(StripePending).filter(StripePending.transaction_id == transaction.id).one_or_none()
-        )
+        stripe_pending = db_session.query(StripePending).filter(StripePending.transaction_id == transaction.id).one()
         assert stripe_pending.stripe_token == stripe_intent.id
 
     def test_pay_with_stripe_fail(self) -> None:
@@ -64,4 +62,4 @@ class StripePaymentIntentTest(FlaskTestBase):
 
         with self.assertRaises(PaymentFailed) as context:
             pay_with_stripe(transaction, payment_method.id, False, is_test=True)
-        self.assertTrue("declined" in str(context.exception))
+        self.assertTrue("declined" in str(context.exception.message))

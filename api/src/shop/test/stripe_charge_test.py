@@ -120,7 +120,7 @@ class StripeChargeTest(FlaskTestBase):
                 payment_method = attach_and_set_payment_method(member, FakeCardPmToken.DeclineAfterAttach)
                 with self.assertRaises(PaymentFailed) as context:
                     pay_with_stripe(transaction, payment_method.id, False, is_test=True)
-                self.assertTrue("declined" in str(context.exception))
+                self.assertTrue("declined" in str(context.exception.message))
 
         start_date = datetime.now(timezone.utc) - timedelta(days=1)
         end_date = datetime.now(timezone.utc) + timedelta(days=1)
