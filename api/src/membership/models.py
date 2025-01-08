@@ -1,5 +1,6 @@
+from datetime import datetime
 from logging import getLogger
-from typing import Any, Optional
+from typing import Any, List, Literal, Optional
 
 import phonenumbers as phonenumbers
 from basic_types.enums import PriceLevel
@@ -18,13 +19,23 @@ from sqlalchemy import (
     func,
     select,
 )
-from sqlalchemy.orm import column_property, configure_mappers, declarative_base, relationship, validates
+from sqlalchemy.orm import (
+    DeclarativeBase,
+    Mapped,
+    MappedAsDataclass,
+    column_property,
+    configure_mappers,
+    mapped_column,
+    relationship,
+    validates,
+)
 
-Base = declarative_base()
+
+class Base(DeclarativeBase):
+    pass
 
 
 logger = getLogger("makeradmin")
-
 
 member_group = Table(
     "membership_members_groups",
@@ -37,41 +48,43 @@ member_group = Table(
 class Member(Base):
     __tablename__ = "membership_members"
 
-    member_id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
-    email = Column(String(255), unique=True, nullable=False)
-    password = Column(String(60))
-    firstname = Column(String(255), nullable=False)
-    lastname = Column(String(255))
-    civicregno = Column(String(25))
-    company = Column(String(255))
-    orgno = Column(String(12))
-    address_street = Column(String(255))
-    address_extra = Column(String(255))
-    address_zipcode = Column(Integer)
-    address_city = Column(String(255))
-    address_country = Column(String(2))
-    phone = Column(String(255))
-    created_at = Column(DateTime, server_default=func.now())
-    updated_at = Column(DateTime, server_default=func.now())
-    deleted_at = Column(DateTime)
+    member_id: Mapped[int] = mapped_column(Integer, primary_key=True, nullable=False, autoincrement=True)
+    email: Mapped[str] = mapped_column(String(255), unique=True, nullable=False)
+    password: Mapped[Optional[str]] = mapped_column(String(60))
+    firstname: Mapped[str] = mapped_column(String(255), nullable=False)
+    lastname: Mapped[Optional[str]] = mapped_column(String(255))
+    civicregno: Mapped[Optional[str]] = mapped_column(String(25))
+    company: Mapped[Optional[str]] = mapped_column(String(255))
+    orgno: Mapped[Optional[str]] = mapped_column(String(12))
+    address_street: Mapped[Optional[str]] = mapped_column(String(255))
+    address_extra: Mapped[Optional[str]] = mapped_column(String(255))
+    address_zipcode: Mapped[Optional[int]]
+    address_city: Mapped[Optional[str]] = mapped_column(String(255))
+    address_country: Mapped[Optional[str]] = mapped_column(String(2))
+    phone: Mapped[Optional[str]] = mapped_column(String(255))
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+    deleted_at: Mapped[Optional[datetime]]
 
     # True during the registration flow as the payment is being processed
-    pending_activation = Column(Boolean, nullable=False)
+    pending_activation: Mapped[bool]
 
-    member_number = Column(Integer, unique=True)
-    labaccess_agreement_at = Column(DateTime)
-    pin_code = Column(String(30))
-    stripe_customer_id = Column(String(64))
-    stripe_membership_subscription_id = Column(String(64))
-    stripe_labaccess_subscription_id = Column(String(64))
-    price_level = Column(Enum(*[x.value for x in PriceLevel]), nullable=False)
-    price_level_motivation = Column(String)
+    member_number: Mapped[int] = mapped_column(Integer, unique=True, nullable=False)
+    labaccess_agreement_at: Mapped[Optional[datetime]]
+    pin_code: Mapped[Optional[str]] = mapped_column(String(30))
+    stripe_customer_id: Mapped[Optional[str]] = mapped_column(String(64))
+    stripe_membership_subscription_id: Mapped[Optional[str]] = mapped_column(String(64))
+    stripe_labaccess_subscription_id: Mapped[Optional[str]] = mapped_column(String(64))
+    price_level: Mapped[str] = mapped_column(Enum(*[x.value for x in PriceLevel]), nullable=False)
+    price_level_motivation: Mapped[Optional[str]] = mapped_column(Text)
 
     @validates("phone")
     def validate_phone(self, key: Any, value: Optional[str]) -> Optional[str]:
         return normalise_phone_number(value)
 
-    groups = relationship("Group", secondary=member_group, back_populates="members", cascade_backrefs=False)
+    groups: Mapped[List["Group"]] = relationship(
+        "Group", secondary=member_group, back_populates="members", cascade_backrefs=False
+    )
 
     def __repr__(self) -> str:
         return f"Member(member_id={self.member_id}, member_number={self.member_number}, email={self.email})"
@@ -89,19 +102,19 @@ group_permission = Table(
 class Group(Base):
     __tablename__ = "membership_groups"
 
-    group_id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
-    name = Column(String(255), nullable=False)
-    title = Column(String(255), nullable=False)
-    description = Column(Text)
-    created_at = Column(DateTime, server_default=func.now())
-    updated_at = Column(DateTime, server_default=func.now())
-    deleted_at = Column(DateTime)
+    group_id: Mapped[int] = mapped_column(Integer, primary_key=True, nullable=False, autoincrement=True)
+    name: Mapped[str] = mapped_column(String(255), nullable=False)
+    title: Mapped[str] = mapped_column(String(255), nullable=False)
+    description: Mapped[Optional[str]] = mapped_column(Text)
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+    deleted_at: Mapped[Optional[datetime]]
 
-    members = relationship(
+    members: Mapped[List[Member]] = relationship(
         "Member", secondary=member_group, lazy="dynamic", back_populates="groups", cascade_backrefs=False
     )
 
-    permissions = relationship(
+    permissions: Mapped[List["Permission"]] = relationship(
         "Permission", secondary=group_permission, back_populates="groups", cascade_backrefs=False
     )
 
@@ -121,27 +134,29 @@ Group.num_members = column_property(
 class Permission(Base):
     __tablename__ = "membership_permissions"
 
-    permission_id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
-    permission = Column(String(255), nullable=False, unique=True)
-    created_at = Column(DateTime, server_default=func.now())
-    updated_at = Column(DateTime, server_default=func.now())
-    deleted_at = Column(DateTime)
+    permission_id: Mapped[int] = mapped_column(Integer, primary_key=True, nullable=False, autoincrement=True)
+    permission: Mapped[str] = mapped_column(String(255), nullable=False, unique=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+    deleted_at: Mapped[Optional[datetime]]
 
-    groups = relationship("Group", secondary=group_permission, back_populates="permissions", cascade_backrefs=False)
+    groups: Mapped[List[Group]] = relationship(
+        "Group", secondary=group_permission, back_populates="permissions", cascade_backrefs=False
+    )
 
 
 class Key(Base):
     __tablename__ = "membership_keys"
 
-    key_id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
-    member_id = Column(Integer, ForeignKey("membership_members.member_id"), nullable=False)
-    description = Column(Text)
-    tagid = Column(String(255), nullable=False, unique=True)
-    created_at = Column(DateTime, server_default=func.now())
-    updated_at = Column(DateTime, server_default=func.now())
-    deleted_at = Column(DateTime)
+    key_id: Mapped[int] = mapped_column(Integer, primary_key=True, nullable=False, autoincrement=True)
+    member_id: Mapped[int] = mapped_column(Integer, ForeignKey("membership_members.member_id"), nullable=False)
+    description: Mapped[Optional[str]] = mapped_column(Text)
+    tagid: Mapped[str] = mapped_column(String(255), nullable=False, unique=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+    deleted_at: Mapped[Optional[datetime]]
 
-    member = relationship(Member, backref="keys", cascade_backrefs=False)
+    member: Mapped[Member] = relationship(Member, backref="keys", cascade_backrefs=False)
 
     def __repr__(self) -> str:
         return f"Key(key_id={self.key_id}, tagid={self.tagid})"
@@ -150,21 +165,22 @@ class Key(Base):
 class Span(Base):
     __tablename__ = "membership_spans"
 
-    LABACCESS = "labaccess"
-    MEMBERSHIP = "membership"
-    SPECIAL_LABACESS = "special_labaccess"
+    ACCESS_TYPE = Literal["labaccess", "membership", "special_labaccess"]
+    LABACCESS: ACCESS_TYPE = "labaccess"
+    MEMBERSHIP: ACCESS_TYPE = "membership"
+    SPECIAL_LABACESS: ACCESS_TYPE = "special_labaccess"
 
-    span_id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
-    member_id = Column(Integer, ForeignKey("membership_members.member_id"), nullable=False)
-    startdate = Column(Date, nullable=False)  # Start date, inclusive
-    enddate = Column(Date, nullable=False)  # End date, inclusive
-    type = Column(Enum(LABACCESS, MEMBERSHIP, SPECIAL_LABACESS), nullable=False)
-    creation_reason = Column(String(255), unique=True)
-    created_at = Column(DateTime, server_default=func.now())
-    deleted_at = Column(DateTime)
-    deletion_reason = Column(String(255))
+    span_id: Mapped[int] = mapped_column(Integer, primary_key=True, nullable=False, autoincrement=True)
+    member_id: Mapped[int] = mapped_column(Integer, ForeignKey("membership_members.member_id"), nullable=False)
+    startdate: Mapped[Date] = mapped_column(Date, nullable=False)  # Start date, inclusive
+    enddate: Mapped[Date] = mapped_column(Date, nullable=False)  # End date, inclusive
+    type: Mapped[ACCESS_TYPE] = mapped_column(Enum(LABACCESS, MEMBERSHIP, SPECIAL_LABACESS), nullable=False)
+    creation_reason: Mapped[str] = mapped_column(String(255), unique=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+    deleted_at: Mapped[Optional[datetime]]
+    deletion_reason: Mapped[Optional[str]] = mapped_column(String(255))
 
-    member = relationship(Member, backref="spans", cascade_backrefs=False)
+    member: Mapped[Member] = relationship(Member, backref="spans", cascade_backrefs=False)
 
     def __repr__(self) -> str:
         return f"Span(span_id={self.span_id}, type={self.type}, enddate={self.enddate})"
@@ -173,24 +189,24 @@ class Span(Base):
 class Box(Base):
     __tablename__ = "membership_box"
 
-    id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, nullable=False, autoincrement=True)
 
-    member_id = Column(Integer, ForeignKey("membership_members.member_id"), nullable=False)
+    member_id: Mapped[int] = mapped_column(Integer, ForeignKey("membership_members.member_id"), nullable=False)
 
     # The id of the printed label on the box.
-    box_label_id = Column(BigInteger, unique=True, nullable=False)
+    box_label_id: Mapped[int] = mapped_column(BigInteger, unique=True, nullable=False)
 
     # Scanning session to be able to make list of all scanned boxes during the session.
-    session_token = Column(String(32), index=True, nullable=False)
+    session_token: Mapped[str] = mapped_column(String(32), index=True, nullable=False)
 
     # Box last checked at timestamp.
-    last_check_at = Column(DateTime, nullable=True)
+    last_check_at: Mapped[Optional[datetime]]
 
     # Last time a nag mail was sent out for this box, note that for a member with several boxes this may not be the
     # last nag date for that member.
-    last_nag_at = Column(DateTime, nullable=False)
+    last_nag_at: Mapped[Optional[datetime]]
 
-    member = relationship(Member, backref="boxes", cascade_backrefs=False)
+    member: Mapped[Member] = relationship(Member, backref="boxes", cascade_backrefs=False)
 
     def __repr__(self) -> str:
         return (
@@ -202,20 +218,20 @@ class Box(Base):
 class PhoneNumberChangeRequest(Base):
     __tablename__ = "change_phone_number_requests"
 
-    id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
-    member_id = Column(Integer, ForeignKey("membership_members.member_id"), nullable=True)
-    phone = Column(String(255), nullable=False)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, nullable=False, autoincrement=True)
+    member_id: Mapped[int] = mapped_column(Integer, ForeignKey("membership_members.member_id"), nullable=True)
+    phone: Mapped[str] = mapped_column(String(255), nullable=False)
 
     # Number used to compare if the reques is valid or not.
-    validation_code = Column(Integer, nullable=False)
+    validation_code: Mapped[int]
 
     # If the request has been completed or not.
-    completed = Column(Boolean, nullable=False)
+    completed: Mapped[bool]
 
     # When the request was made.
-    timestamp = Column(DateTime, nullable=False)
+    timestamp: Mapped[datetime]
 
-    member = relationship(Member, backref="change_phone_number_requests", cascade_backrefs=False)
+    member: Mapped[Member] = relationship(Member, backref="change_phone_number_requests", cascade_backrefs=False)
 
     @validates("phone")
     def validate_phone(self, key: Any, value: Optional[str]) -> Optional[str]:
