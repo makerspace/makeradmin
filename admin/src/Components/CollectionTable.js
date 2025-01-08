@@ -91,7 +91,10 @@ const CollectionTable = (props) => {
             page.count = 1;
         }
         return (
-            <ul className="uk-pagination" style={{ clear: "both" }}>
+            <ul
+                className="uk-pagination uk-flex-center"
+                style={{ clear: "both" }}
+            >
                 {_.range(1, page.count + 1).map((i) => {
                     const distance = Math.abs(i - page.index);
                     if (distance === 0) {
