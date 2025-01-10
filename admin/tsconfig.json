@@ -2,9 +2,6 @@
     "include": ["src/**/*.ts", "src/**/*.tsx"],
     "compilerOptions": {
         "baseUrl": "./src",
-        "paths": {
-            "@/*": ["*"]
-        },
         "target": "es6",
         "lib": ["es5", "es6", "dom"],
         "noImplicitAny": true,

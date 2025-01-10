@@ -1,8 +1,8 @@
-import { showError, showPermissionDenied } from "./message";
-import auth from "./auth";
 import * as _ from "underscore";
+import auth from "./auth";
+import { showError, showPermissionDenied } from "./message";
 
-const handleError = (message) => (error) => {
+const handleError = (message: string) => (error: Error) => {
     showError(
         "<h2>Error</h2>" +
             message +
@@ -21,10 +21,19 @@ export function request({
     options,
     errorMessage,
     expectedDataStatus,
-}) {
+}: {
+    url: string;
+    params: { [key: string]: string };
+    data: object | undefined;
+    options: RequestInit;
+    errorMessage: string;
+    expectedDataStatus: string | undefined;
+}): Promise<any> {
     const accessToken = auth.getAccessToken();
 
-    let headers = { "Content-Type": "application/json; charset=UTF-8" };
+    let headers: { [key: string]: string } = {
+        "Content-Type": "application/json; charset=UTF-8",
+    };
 
     if (accessToken) {
         headers["Authorization"] = "Bearer " + accessToken;
@@ -84,7 +93,14 @@ export function get({
     options = { method: "GET" },
     errorMessage = "Error when getting data from server:",
     expectedDataStatus = null,
-}) {
+}: {
+    url: string;
+    params: { [key: string]: string };
+    data: object | undefined;
+    options: RequestInit;
+    errorMessage: string;
+    expectedDataStatus: string | undefined;
+}): Promise<any> {
     return request({
         url,
         data,
@@ -102,7 +118,14 @@ export function post({
     options = { method: "POST" },
     errorMessage = "Error when creating:",
     expectedDataStatus = "created",
-}) {
+}: {
+    url: string;
+    params: { [key: string]: string };
+    data: object | undefined;
+    options: RequestInit;
+    errorMessage: string;
+    expectedDataStatus: string | undefined;
+}): Promise<any> {
     return request({
         url,
         data,
@@ -120,7 +143,14 @@ export function put({
     options = { method: "PUT" },
     errorMessage = "Error when saving:",
     expectedDataStatus = "updated",
-}) {
+}: {
+    url: string;
+    params: { [key: string]: string };
+    data: object | undefined;
+    options: RequestInit;
+    errorMessage: string;
+    expectedDataStatus: string | undefined;
+}): Promise<any> {
     return request({
         url,
         data,
@@ -138,7 +168,14 @@ export function del({
     options = { method: "DELETE" },
     errorMessage = "Error when deleting:",
     expectedDataStatus = "deleted",
-}) {
+}: {
+    url: string;
+    params: { [key: string]: string };
+    data: object | undefined;
+    options: RequestInit;
+    errorMessage: string;
+    expectedDataStatus: string | undefined;
+}): Promise<any> {
     return request({
         url,
         data,
