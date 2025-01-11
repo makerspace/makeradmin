@@ -54,7 +54,7 @@ export const SideNav = ({ nav }) => {
 
     return (
         <div
-            className="uk-card uk-card-default"
+            className="uk-card uk-card-default uk-card-body"
             style={{ marginBottom: "1em" }}
             uk-sticky="{top:35}"
         >

@@ -67,10 +67,8 @@ function DateView(props) {
     }
 
     return (
-        <div className="uk-card uk-card-default uk-card-small uk-margin-small-top">
-            <p style={{ fontSize: "1.2em" }}>
-                <b>{props.title}</b>
-            </p>
+        <div className="uk-card uk-card-default uk-card-body uk-card-small uk-margin-small-top">
+            <h3 className="uk-card-title">{props.title}</h3>
             {status}
             {text}
             {props.pending ? (
