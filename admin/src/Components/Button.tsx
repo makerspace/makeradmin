@@ -10,6 +10,7 @@ export const Button = (props: ButtonProps) => {
     return (
         <button
             onClick={props.onClick}
+            // TODO: Use UiKit styling
             style={{
                 backgroundColor: "#333333" /* Dark grey */,
                 border: "none",
