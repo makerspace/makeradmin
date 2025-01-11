@@ -1085,7 +1085,7 @@ const CountryDropdown = ({ model, name }) => {
                             (model[name] = e.target.dataset.country)
                         }
                         data-country={c.code}
-                        className="uk-dropdown-close"
+                        className="uk-drop-close"
                     >
                         <span className={"flag flag-" + c.code} /> {c.name}
                     </a>
