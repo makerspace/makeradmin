@@ -30,38 +30,38 @@ const ResetPasswordForm = () => {
 
     return (
         <form className="uk-card uk-card-default" onSubmit={submit}>
-            <div className="form-row">
+            <div className="uk-card-header">
                 <h2>Glömt ditt lösenord?</h2>
             </div>
 
-            <div className="form-row">
-                <p>
+            <div className="uk-card-body">
+                <div>
                     Fyll i ditt email eller medlemsnummer så skickar vi
                     instruktioner om hur du nollställer ditt lösenord.
-                </p>
-            </div>
-
-            <div className="form-row">
-                <div className="uk-inline">
-                    <Icon form icon="user" />
-                    <input
-                        value={userIdentification}
-                        onChange={handleInputChange}
-                        className="uk-form-large uk-form-width-large"
-                        type="text"
-                        placeholder="Email/Medlemsnummer"
-                        autoComplete="username"
-                    />
                 </div>
-            </div>
 
-            <div className="form-row">
-                <button
-                    type="submit"
-                    className="uk-width-1-1 uk-button uk-button-primary uk-button-large"
-                >
-                    <Icon icon="check" /> Skicka epost
-                </button>
+                <div className="uk-margin-top">
+                    <div className="uk-inline uk-width-1-1">
+                        <Icon form icon="user" />
+                        <input
+                            value={userIdentification}
+                            onChange={handleInputChange}
+                            className="uk-input"
+                            type="text"
+                            placeholder="Email/Medlemsnummer"
+                            autoComplete="username"
+                        />
+                    </div>
+                </div>
+
+                <div className="uk-margin-top">
+                    <button
+                        type="submit"
+                        className="uk-width-1-1 uk-button uk-button-primary uk-button-large"
+                    >
+                        <Icon icon="check" /> Skicka epost
+                    </button>
+                </div>
             </div>
         </form>
     );
