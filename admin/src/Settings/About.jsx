@@ -2,7 +2,6 @@ import React from "react";
 
 // Get versions of dependencies
 const ReactVersion = require("../../node_modules/react/package.json").version;
-const JqueryVersion = require("../../node_modules/jquery/package.json").version;
 const UikitVersion = require("../../node_modules/uikit/package.json").version;
 const ReactRouterVersion =
     require("../../node_modules/react-router/package.json").version;
@@ -36,9 +35,6 @@ export default () => {
             <dl>
                 <dt>React version:</dt>
                 <dd>{ReactVersion}</dd>
-
-                <dt>jQuery version:</dt>
-                <dd>{JqueryVersion}</dd>
 
                 <dt>uikit version:</dt>
                 <dd>{UikitVersion}</dd>
