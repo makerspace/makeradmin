@@ -68,7 +68,7 @@ function MemberBoxGroups(props) {
                 <div className="uk-form-controls">
                     <Select
                         name="group"
-                        className="uk-select"
+                        className="uk-width-1-1"
                         tabIndex={1}
                         options={showOptions}
                         value={selectedOption}

@@ -414,7 +414,7 @@ class AccountingProduct extends CollectionNavigation {
                         </label>
                         <Select
                             name="account_selection"
-                            className="uk-select"
+                            className="uk-width-1-1"
                             tabIndex={1}
                             options={showOptions_account}
                             value={selectedOption_account}
@@ -432,7 +432,7 @@ class AccountingProduct extends CollectionNavigation {
                         </label>
                         <Select
                             name="cost_center_selection"
-                            className="uk-select"
+                            className="uk-width-1-1"
                             tabIndex={1}
                             options={showOptions_cost_center}
                             value={selectedOption_cost_center}

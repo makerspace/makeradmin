@@ -96,7 +96,7 @@ export default function AccountingExport() {
                     <Select
                         id="year"
                         name="year"
-                        className="uk-select"
+                        className="uk-width-1-1"
                         tabIndex={1}
                         options={year_options}
                         value={yearOption}
@@ -108,7 +108,7 @@ export default function AccountingExport() {
                     <Select
                         id="month"
                         name="month"
-                        className="uk-select"
+                        className="uk-width-1-1"
                         tabIndex={2}
                         options={month_options}
                         value={monthOption}
