@@ -1,11 +1,11 @@
 import React, { useState } from "react";
-import { withRouter } from "react-router";
 import auth from "../auth";
 import { browserHistory } from "../browser_history";
 import { showError, showSuccess } from "../message";
+import { CenteredForm } from "./CenteredForm";
 import Icon from "./icons";
 
-const RequestPasswordReset = () => {
+const ResetPasswordForm = () => {
     const [userIdentification, setUserIdentification] = useState("");
 
     const handleInputChange = (e) => {
@@ -29,52 +29,50 @@ const RequestPasswordReset = () => {
     };
 
     return (
-        <div className="uk-vertical-align uk-text-center uk-height-1-1">
-            <div
-                className="uk-vertical-align-middle"
-                style={{ width: "300px" }}
-            >
-                <div className="uk-text-left">
-                    <form className="uk-card uk-card-default" onSubmit={submit}>
-                        <div className="form-row">
-                            <h2>Glömt ditt lösenord?</h2>
-                        </div>
+        <form className="uk-card uk-card-default" onSubmit={submit}>
+            <div className="form-row">
+                <h2>Glömt ditt lösenord?</h2>
+            </div>
 
-                        <div className="form-row">
-                            <p>
-                                Fyll i ditt email eller medlemsnummer så skickar
-                                vi instruktioner om hur du nollställer ditt
-                                lösenord.
-                            </p>
-                        </div>
+            <div className="form-row">
+                <p>
+                    Fyll i ditt email eller medlemsnummer så skickar vi
+                    instruktioner om hur du nollställer ditt lösenord.
+                </p>
+            </div>
 
-                        <div className="form-row">
-                            <div className="uk-inline">
-                                <Icon form icon="user" />
-                                <input
-                                    value={userIdentification}
-                                    onChange={handleInputChange}
-                                    className="uk-form-large uk-form-width-large"
-                                    type="text"
-                                    placeholder="Email/Medlemsnummer"
-                                    autoComplete="username"
-                                />
-                            </div>
-                        </div>
-
-                        <div className="form-row">
-                            <button
-                                type="submit"
-                                className="uk-width-1-1 uk-button uk-button-primary uk-button-large"
-                            >
-                                <Icon icon="check" /> Skicka epost
-                            </button>
-                        </div>
-                    </form>
+            <div className="form-row">
+                <div className="uk-inline">
+                    <Icon form icon="user" />
+                    <input
+                        value={userIdentification}
+                        onChange={handleInputChange}
+                        className="uk-form-large uk-form-width-large"
+                        type="text"
+                        placeholder="Email/Medlemsnummer"
+                        autoComplete="username"
+                    />
                 </div>
             </div>
-        </div>
+
+            <div className="form-row">
+                <button
+                    type="submit"
+                    className="uk-width-1-1 uk-button uk-button-primary uk-button-large"
+                >
+                    <Icon icon="check" /> Skicka epost
+                </button>
+            </div>
+        </form>
     );
 };
 
-export default withRouter(RequestPasswordReset);
+const RequestPasswordReset = () => {
+    return (
+        <CenteredForm>
+            <ResetPasswordForm />
+        </CenteredForm>
+    );
+};
+
+export default RequestPasswordReset;
