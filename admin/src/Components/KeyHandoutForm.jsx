@@ -67,7 +67,10 @@ function DateView(props) {
     }
 
     return (
-        <div className="uk-card uk-card-default uk-card-body uk-card-small uk-margin-small-top">
+        <div
+            className="uk-card uk-card-default uk-card-body uk-card-small uk-margin-small-top"
+            style={{ border: "1px solid #e5e5e5" }}
+        >
             <h3 className="uk-card-title">{props.title}</h3>
             {status}
             {text}
