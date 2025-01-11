@@ -343,3 +343,8 @@ button > svg {
 .uk-navbar-nav > li > a {
     min-height: 40px !important;
 }
+
+.centered-form form.uk-card {
+    border: 1px solid #aaa;
+    border-radius: 5px;
+}
