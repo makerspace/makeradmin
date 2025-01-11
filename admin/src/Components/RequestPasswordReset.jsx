@@ -59,7 +59,7 @@ const ResetPasswordForm = () => {
                         type="submit"
                         className="uk-width-1-1 uk-button uk-button-primary uk-button-large"
                     >
-                        <Icon icon="check" /> Skicka epost
+                        <Icon icon="mail" /> Skicka epost
                     </button>
                 </div>
             </div>

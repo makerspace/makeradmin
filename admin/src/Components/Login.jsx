@@ -21,13 +21,13 @@ function LoginForm() {
     };
 
     return (
-        <form className="uk-card uk-card-default uk-card-body" onSubmit={login}>
+        <form className="uk-card uk-card-default" onSubmit={login}>
             <div className="uk-card-header">
                 <h2>Logga in</h2>
             </div>
 
             <div className="uk-card-body">
-                <div className="uk-margin-top">
+                <div>
                     <div className="uk-inline uk-width-1-1">
                         <Icon form icon="user" />
                         <input
@@ -60,7 +60,7 @@ function LoginForm() {
                         type="submit"
                         className="uk-width-1-1 uk-button uk-button-primary uk-button-large"
                     >
-                        Logga in
+                        <Icon icon="sign-in" /> Logga in
                     </button>
                 </div>
 
