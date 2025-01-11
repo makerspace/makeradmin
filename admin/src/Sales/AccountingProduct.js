@@ -5,6 +5,7 @@ import * as _ from "underscore";
 import CollectionTable from "../Components/CollectionTable";
 import Currency from "../Components/Currency";
 import SearchBox from "../Components/SearchBox";
+import Icon from "../Components/icons";
 import Collection from "../Models/Collection";
 import CollectionNavigation from "../Models/CollectionNavigation";
 import Product from "../Models/Product";
@@ -397,7 +398,7 @@ class AccountingProduct extends CollectionNavigation {
                 </div>
 
                 <form
-                    className="uk-form uk-form-stacked"
+                    className="uk-form-stacked"
                     onSubmit={(e) => {
                         e.preventDefault();
                         this.onSave(
@@ -413,7 +414,7 @@ class AccountingProduct extends CollectionNavigation {
                         </label>
                         <Select
                             name="account_selection"
-                            className="uk-select"
+                            className="uk-width-1-1"
                             tabIndex={1}
                             options={showOptions_account}
                             value={selectedOption_account}
@@ -431,7 +432,7 @@ class AccountingProduct extends CollectionNavigation {
                         </label>
                         <Select
                             name="cost_center_selection"
-                            className="uk-select"
+                            className="uk-width-1-1"
                             tabIndex={1}
                             options={showOptions_cost_center}
                             value={selectedOption_cost_center}
@@ -445,10 +446,10 @@ class AccountingProduct extends CollectionNavigation {
                         />
                     </fieldset>
 
-                    <fieldset className="uk-form-row uk-margin-top">
-                        <button className="uk-button uk-button-success uk-float-right">
-                            <i className="uk-icon-save" />{" "}
-                            {"Applicera val på markerade produkter"}
+                    <fieldset className="form-row uk-margin-top">
+                        <button className="uk-button uk-button-primary uk-float-right">
+                            <Icon icon="save" /> Applicera val på markerade
+                            produkter
                         </button>
                     </fieldset>
                 </form>

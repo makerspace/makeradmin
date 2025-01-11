@@ -1,4 +1,5 @@
 import React from "react";
+import Icon from "../Components/icons";
 import Textarea from "../Components/Textarea";
 import QuizQuestion from "../Models/QuizQuestion";
 import QuestionOptionList from "./QuestionOptionList";
@@ -21,29 +22,29 @@ export default (props: Props) => {
             className="uk-button uk-button-danger uk-float-left"
             onClick={onDelete}
         >
-            <i className="uk-icon-trash" /> Radera fråga
+            <Icon icon="trash" /> Radera fråga
         </a>
     );
     const save_button = (
         <a
-            className="uk-button uk-button-success uk-float-right"
+            className="uk-button uk-button-primary uk-float-right"
             onClick={onSave}
         >
-            <i className="uk-icon-save" /> {question.id ? "Spara" : "Skapa"}
+            <Icon icon="save" /> {question.id ? "Spara" : "Skapa"}
         </a>
     );
     const new_button = !question.id ? null : (
         <a
-            className="uk-button uk-button-success uk-float-right"
+            className="uk-button uk-button-primary uk-float-right"
             onClick={onNew}
         >
-            <i className="uk-icon-save" /> New question
+            <Icon icon="save" /> New question
         </a>
     );
 
     return (
         <div className="uk-margin-top">
-            <form className="uk-form uk-form-stacked">
+            <form className="uk-form-stacked">
                 <fieldset className="uk-margin-top">
                     <legend>Quizfråga</legend>
                     {question && (
@@ -67,7 +68,7 @@ export default (props: Props) => {
                         </>
                     )}
                 </fieldset>
-                <div className="uk-form-row uk-margin-top">
+                <div className="form-row uk-margin-top">
                     {delete_button}
                     {new_button}
                     {save_button}

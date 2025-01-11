@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import CategoryPeriodsInput from "../Components/CategoryPeriodsInput";
+import Icon from "../Components/icons";
 import CategoryPeriods from "../Models/CategoryPeriods";
 import { calculateSpanDiff, filterPeriods } from "../Models/Span";
 import auth from "../auth";
@@ -89,16 +90,12 @@ function MembershipPeriodsInput({ spans, member_id }) {
 
     return (
         <form
-            className="uk-form"
             onSubmit={(e) => {
                 e.preventDefault();
                 onSave();
                 return false;
             }}
         >
-            <label className="uk-label" htmlFor="showHistoric">
-                Visa historiska
-            </label>
             <input
                 id="showHistoric"
                 className="uk-checkbox"
@@ -106,6 +103,12 @@ function MembershipPeriodsInput({ spans, member_id }) {
                 checked={showHistoric}
                 onChange={(e) => setShowHistoric(e.target.checked)}
             />
+            <label
+                className="uk-form-label uk-margin-small-left"
+                htmlFor="showHistoric"
+            >
+                Visa historiska
+            </label>
             {categoryPeriodsList.map((cp) => (
                 <CategoryPeriodsInput
                     key={cp.category}
@@ -115,9 +118,9 @@ function MembershipPeriodsInput({ spans, member_id }) {
             ))}
             <button
                 disabled={saveDisabled}
-                className="uk-button uk-button-success uk-float-right"
+                className="uk-button uk-button-primary uk-float-right"
             >
-                <i className="uk-icon-save" /> Spara
+                <Icon icon="save" /> Spara
             </button>
         </form>
     );

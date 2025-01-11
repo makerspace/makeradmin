@@ -1,9 +1,10 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import "react-day-picker/lib/style.css";
 import { Link, useParams } from "react-router-dom";
 import CollectionTable from "../Components/CollectionTable";
 import DateShow from "../Components/DateShow";
 import DateTimeShow from "../Components/DateTimeShow";
+import Icon from "../Components/icons";
 import Collection from "../Models/Collection";
 import { ADD_LABACCESS_DAYS } from "../Models/ProductAction";
 import Span from "../Models/Span";
@@ -11,19 +12,21 @@ import { get } from "../gateway";
 import { confirmModal } from "../message";
 import MembershipPeriodsInput from "./MembershipPeriodsInput";
 
+const empty_title_with_nonzero_width = <>&nbsp;&nbsp;&nbsp;&nbsp;</>;
+
 function MemberBoxSpans() {
     const { member_id } = useParams();
-
-    const [, setItems] = useState([]);
     const [pendingLabaccessDays, setPendingLabaccessDays] = useState("?");
 
-    const collectionRef = useRef(
-        new Collection({
-            type: Span,
-            url: `/membership/member/${member_id}/spans`,
-            pageSize: 0,
-            includeDeleted: true,
-        }),
+    const collection = useMemo(
+        () =>
+            new Collection({
+                type: Span,
+                url: `/membership/member/${member_id}/spans`,
+                pageSize: 0,
+                includeDeleted: true,
+            }),
+        [member_id],
     );
 
     useEffect(() => {
@@ -42,20 +45,11 @@ function MemberBoxSpans() {
         );
     }, [member_id]);
 
-    useEffect(() => {
-        const unsubscribe = collectionRef.current.subscribe(({ items }) => {
-            setItems(items);
-        });
-        return () => {
-            unsubscribe();
-        };
-    }, []);
-
     const deleteItem = (item) =>
         confirmModal(item.deleteConfirmMessage())
             .then(() => item.del())
             .then(
-                () => collectionRef.current.fetch(),
+                () => collection.fetch(),
                 () => null,
             );
 
@@ -67,22 +61,20 @@ function MemberBoxSpans() {
                 vid en nyckelsynkronisering.
             </p>
             <hr />
-            <MembershipPeriodsInput
-                spans={collectionRef.current}
-                member_id={member_id}
-            />
+            <MembershipPeriodsInput spans={collection} member_id={member_id} />
             <h2>Spans</h2>
             <hr />
             <CollectionTable
-                collection={collectionRef.current}
+                collection={collection}
                 columns={[
                     { title: "#", sort: "span_id" },
                     { title: "Typ", sort: "type" },
                     { title: "Skapad", sort: "created_at" },
-                    { title: "" },
+                    { title: "Ursprung" },
                     { title: "Raderad", sort: "deleted_at" },
                     { title: "Start", sort: "startdate" },
                     { title: "Slut", sort: "enddate" },
+                    { title: empty_title_with_nonzero_width },
                 ]}
                 rowComponent={({ item }) => (
                     <tr>
@@ -110,12 +102,14 @@ function MemberBoxSpans() {
                             <DateShow date={item.enddate} />
                         </td>
                         <td>
-                            <a
-                                onClick={() => deleteItem(item)}
-                                className="removebutton"
-                            >
-                                <i className="uk-icon-trash" />
-                            </a>
+                            {item.deleted_at === null && (
+                                <a
+                                    onClick={() => deleteItem(item)}
+                                    className="removebutton"
+                                >
+                                    <Icon icon="trash" />
+                                </a>
+                            )}
                         </td>
                     </tr>
                 )}

@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import CollectionTable from "../Components/CollectionTable";
+import Icon from "../Components/icons";
 import Collection from "../Models/Collection";
 import CollectionNavigation from "../Models/CollectionNavigation";
 import Quiz from "../Models/Quiz";
@@ -25,7 +26,7 @@ class QuizList extends CollectionNavigation {
                     className="uk-button uk-button-primary uk-margin-bottom uk-float-right"
                     to="/quiz/add"
                 >
-                    <i className="uk-icon-plus-circle" /> Skapa nytt quiz
+                    <Icon icon="plus-circle" /> Skapa nytt quiz
                 </Link>
                 <CollectionTable
                     className="uk-margin-top"
@@ -49,7 +50,7 @@ class QuizList extends CollectionNavigation {
                                     onClick={() => deleteItem(item)}
                                     className="removebutton"
                                 >
-                                    <i className="uk-icon-trash" />
+                                    <Icon icon="trash" />
                                 </a>
                             </td>
                         </tr>

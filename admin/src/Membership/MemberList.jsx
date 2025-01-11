@@ -1,11 +1,12 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import Date from "../Components/DateShow";
-import Collection from "../Models/Collection";
-import Member from "../Models/Member";
 import CollectionTable from "../Components/CollectionTable";
+import Date from "../Components/DateShow";
+import Icon from "../Components/icons";
 import SearchBox from "../Components/SearchBox";
+import Collection from "../Models/Collection";
 import CollectionNavigation from "../Models/CollectionNavigation";
+import Member from "../Models/Member";
 
 const Row = (props) => {
     const { item, deleteItem } = props;
@@ -24,7 +25,7 @@ const Row = (props) => {
             </td>
             <td>
                 <a onClick={() => deleteItem(item)} className="removebutton">
-                    <i className="uk-icon-trash" />
+                    <Icon icon="trash" />
                 </a>
             </td>
         </tr>
@@ -60,7 +61,7 @@ class MemberList extends CollectionNavigation {
                     to="/membership/members/add"
                     className="uk-button uk-button-primary uk-float-right"
                 >
-                    <i className="uk-icon-plus-circle" /> Skapa ny medlem
+                    <Icon icon="plus-circle" /> Skapa ny medlem
                 </Link>
 
                 <SearchBox

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import * as _ from "underscore";
 import { confirmModal } from "../message";
+import Icon from "./icons";
 
 const deleteItem = (collection, item) => {
     return confirmModal(item.deleteConfirmMessage())
@@ -44,7 +45,13 @@ const CollectionTable = (props) => {
             let title;
             if (column.sort) {
                 const sortIcon = (
-                    <i className={"uk-icon-angle-" + sortState.order} />
+                    <Icon
+                        icon={
+                            sortState.order === "down"
+                                ? "chevron-down"
+                                : "chevron-up"
+                        }
+                    />
                 );
                 const onClick = () => {
                     const newSort = {
@@ -84,7 +91,10 @@ const CollectionTable = (props) => {
             page.count = 1;
         }
         return (
-            <ul className="uk-pagination" style={{ clear: "both" }}>
+            <ul
+                className="uk-pagination uk-flex-center"
+                style={{ clear: "both" }}
+            >
                 {_.range(1, page.count + 1).map((i) => {
                     const distance = Math.abs(i - page.index);
                     if (distance === 0) {
@@ -156,7 +166,7 @@ const CollectionTable = (props) => {
             <div style={{ position: "relative", clear: "both" }}>
                 <table
                     className={
-                        "uk-table uk-table-condensed uk-table-striped uk-table-hover" +
+                        "uk-table uk-table-small uk-table-striped uk-table-hover" +
                         (loading ? " backboneTableLoading" : "")
                     }
                 >
@@ -169,7 +179,7 @@ const CollectionTable = (props) => {
                     <div className="loadingOverlay">
                         <div className="loadingWrapper">
                             <span>
-                                <i className="uk-icon-refresh uk-icon-spin" />{" "}
+                                <div uk-spinner="" />
                                 Hämtar data...
                             </span>
                         </div>

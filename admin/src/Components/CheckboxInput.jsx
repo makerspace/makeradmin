@@ -1,16 +1,7 @@
 import classNames from "classnames/bind";
 import React, { useEffect, useState } from "react";
 
-const CheckboxInput = ({
-    model,
-    name,
-    title,
-    icon,
-    disabled,
-    formrow,
-    tabIndex,
-    label,
-}) => {
+const CheckboxInput = ({ model, name, title, disabled, tabIndex }) => {
     const [value, setValue] = useState(false);
     const [isDirty, setIsDirty] = useState(false);
 
@@ -26,7 +17,6 @@ const CheckboxInput = ({
     }, [model, name]);
 
     const classes = classNames(name, {
-        "uk-form-row": formrow,
         changed: isDirty,
     });
 
@@ -38,7 +28,7 @@ const CheckboxInput = ({
         <input
             id={name}
             name={name}
-            className=""
+            className="uk-checkbox"
             checked={value}
             disabled={disabled}
             type="checkbox"
@@ -49,28 +39,11 @@ const CheckboxInput = ({
 
     return (
         <div className={classes}>
-            {label && (
-                <label className="uk-form-label" htmlFor={name}>
-                    {title}
-                </label>
-            )}
-            <div className="uk-form-controls">
-                {icon ? (
-                    <div className="uk-form-icon">
-                        <i className={"uk-icon-" + icon} />
-                        {input}
-                    </div>
-                ) : (
-                    input
-                )}
-            </div>
+            <label className="uk-form-label" htmlFor={name}>
+                {input} {title}
+            </label>
         </div>
     );
-};
-
-CheckboxInput.defaultProps = {
-    formrow: true,
-    label: true,
 };
 
 export default CheckboxInput;

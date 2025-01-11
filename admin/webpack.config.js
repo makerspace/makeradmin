@@ -70,7 +70,7 @@ module.exports = (env, args) => {
 
         // Files to include.
         resolve: {
-            extensions: ["*", ".js", ".jsx", ".ts", ".tsx"],
+            extensions: ["*", ".mjs", ".js", ".jsx", ".ts", ".tsx"],
         },
 
         // Include build information (build date, git hash)

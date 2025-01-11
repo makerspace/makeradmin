@@ -1,9 +1,10 @@
 import React from "react";
+import CollectionTable from "../Components/CollectionTable";
+import Icon from "../Components/icons";
+import TextInput from "../Components/TextInput";
 import Collection from "../Models/Collection";
 import CollectionNavigation from "../Models/CollectionNavigation";
-import CollectionTable from "../Components/CollectionTable";
 import Category from "../Models/ProductCategory";
-import TextInput from "../Components/TextInput";
 
 class CategoryList extends CollectionNavigation {
     constructor(props) {
@@ -45,10 +46,9 @@ class CategoryList extends CollectionNavigation {
                     </p>
                 </div>
 
-                <div className="uk-margin-top uk-form">
+                <div className="uk-margin-top">
                     <div className="meep">
                         <form
-                            className="uk-form"
                             onSubmit={(e) => {
                                 e.preventDefault();
                                 this.createCategory();
@@ -65,13 +65,13 @@ class CategoryList extends CollectionNavigation {
                                         placeholder="Namn för ny kategori"
                                     />
 
-                                    <div className="uk-form-row uk-margin-top">
+                                    <div className="form-row uk-margin-top">
                                         <div className="uk-form-controls">
                                             <button
-                                                className="uk-button uk-button-success uk-float-right"
+                                                className="uk-button uk-button-primary uk-float-right"
                                                 disabled={!saveEnabled}
                                             >
-                                                <i className="uk-icon-save" />{" "}
+                                                <Icon icon="save" />
                                                 Skapa kategori
                                             </button>
                                         </div>
@@ -96,7 +96,7 @@ class CategoryList extends CollectionNavigation {
                                         onClick={() => deleteItem(item)}
                                         className="removebutton"
                                     >
-                                        <i className="uk-icon-trash" />
+                                        <Icon icon="trash" />
                                     </a>
                                 </td>
                             </tr>

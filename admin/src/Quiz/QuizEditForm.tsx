@@ -1,4 +1,5 @@
 import React from "react";
+import Icon from "../Components/icons";
 import Textarea from "../Components/Textarea";
 import TextInput from "../Components/TextInput";
 import Quiz from "../Models/Quiz";
@@ -18,7 +19,7 @@ export default (props: Props) => {
     return (
         <div className="uk-margin-top">
             <form
-                className="uk-form uk-form-stacked"
+                className="uk-form-stacked"
                 onSubmit={(e) => {
                     e.preventDefault();
                     onSave();
@@ -43,20 +44,19 @@ export default (props: Props) => {
                         </>
                     )}
                 </fieldset>
-                <div className="uk-form-row uk-margin-top">
+                <div className="form-row uk-margin-top">
                     {quiz.id ? (
                         <a
                             className="uk-button uk-button-danger uk-float-left"
                             onClick={onDelete}
                         >
-                            <i className="uk-icon-trash" /> Radera quiz
+                            <Icon icon="trash" /> Radera quiz
                         </a>
                     ) : (
                         ""
                     )}
-                    <button className="uk-button uk-button-success uk-float-right">
-                        <i className="uk-icon-save" />{" "}
-                        {quiz.id ? "Spara" : "Skapa"}
+                    <button className="uk-button uk-button-primary uk-float-right">
+                        <Icon icon="save" /> {quiz.id ? "Spara" : "Skapa"}
                     </button>
                 </div>
             </form>

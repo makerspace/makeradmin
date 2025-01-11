@@ -1,5 +1,6 @@
 import React from "react";
 import CollectionTable from "../Components/CollectionTable";
+import Icon from "../Components/icons";
 import SearchBox from "../Components/SearchBox";
 import TextInput from "../Components/TextInput";
 import Collection from "../Models/Collection";
@@ -49,7 +50,7 @@ class AccountingAccount extends CollectionNavigation {
 
                 <div className="meep">
                     <form
-                        className="uk-form uk-margin-bottom"
+                        className="uk-margin-bottom"
                         onSubmit={(e) => {
                             e.preventDefault();
                             this.createAccount();
@@ -69,13 +70,13 @@ class AccountingAccount extends CollectionNavigation {
                             placeholder="Beskrivning av nytt konto"
                         />
 
-                        <div className="uk-form-row uk-margin-top">
+                        <div className="form-row uk-margin-top">
                             <div className="uk-form-controls">
                                 <button
-                                    className="uk-button uk-button-success uk-float-right"
+                                    className="uk-button uk-button-primary uk-float-right"
                                     disabled={!saveEnabled}
                                 >
-                                    <i className="uk-icon-save" />{" "}
+                                    <Icon icon="save" />{" "}
                                     {this.transactionAccount.id
                                         ? "Spara nytt konto"
                                         : "Skapa nytt konto"}
@@ -105,7 +106,7 @@ class AccountingAccount extends CollectionNavigation {
                                         onClick={() => deleteItem(item)}
                                         className="removebutton"
                                     >
-                                        <i className="uk-icon-trash" />
+                                        <Icon icon="trash" />
                                     </a>
                                 </td>
                             </tr>

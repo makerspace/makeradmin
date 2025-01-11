@@ -69,10 +69,6 @@ body,
     filter: blur(1px);
 }
 
-.invoice .box {
-    /*	border: 1px solid #000;*/
-}
-
 .invoice .title {
     font-weight: bold;
     font-size: 0.9em;
@@ -101,8 +97,8 @@ body,
     width: 100%;
 }
 
-.meep .uk-form input,
-.meep .uk-form textarea {
+.meep form .uk-input,
+.meep form .uk-textarea {
     border: none;
     border-radius: 0;
     border-bottom: 1px solid #aaa;
@@ -117,18 +113,12 @@ body,
     margin-top: 12px !important;
 }
 
-.meep .uk-form textarea {
+.meep form .uk-textarea {
     overflow: hidden;
     resize: none;
 }
 
-/*
-.meep .uk-form input[disabled] {
-	border: 0;
-}
-*/
-
-.meep .uk-form-row label {
+.meep .form-row label {
     font-size: 11px;
     font-weight: bold;
     color: #888;
@@ -136,28 +126,13 @@ body,
     display: inline-block;
 }
 
-.meep .uk-form-row {
-    position: relative;
-    margin-bottom: 5px;
-}
-
-.meep .uk-form-row:focus {
+.meep .form-row:focus {
     background-color: green;
 }
 
 .meep .uk-form-controls {
     margin-top: -7px;
     margin-left: 0;
-}
-
-.meep .uk-form fieldset {
-    margin-bottom: 2em;
-    padding-left: 3em;
-}
-
-.meep .uk-form legend {
-    margin-left: -2em;
-    padding: 0;
 }
 
 .meep ::-webkit-input-placeholder {
@@ -176,18 +151,18 @@ body,
     font-style: italic;
 }
 
-.uk-form .error input,
-.uk-form .error textarea {
+form .error .uk-input,
+form .error .uk-textarea {
     border-bottom: 3px solid red !important;
 }
 
-.uk-form .uk-form-help-block.error {
+form .uk-form-help-block.error {
     color: red;
     margin-top: -8px;
     font-size: 10px;
 }
 
-.meep .uk-form-row + .uk-form-row {
+.meep .form-row + .form-row {
     margin-top: 10px;
 }
 
@@ -195,67 +170,40 @@ body,
     margin-left: -30px;
 }
 
-.meep .uk-form-icon input {
+.meep .uk-form-icon .uk-input {
     padding-left: 0 !important;
 }
 
 /* Hilite label and border */
-.meep .uk-form .selected input,
-.meep .uk-form .selected textarea {
+.meep form .selected .uk-input,
+.meep form .selected .uk-textarea {
     border-bottom: 3px solid #58f !important;
     padding-bottom: 2px;
     margin-bottom: 3px;
     color: #000;
 }
 
-.meep .uk-form .selected textarea {
+.meep form .selected textarea {
     margin-top: 3px !important;
     margin-bottom: 5px !important;
 }
 
-.meep .uk-form .selected label {
+.meep form .selected label {
     color: #58f;
 }
 
-.meep .uk-form .selected .uk-form-controls {
+.meep form .selected .uk-form-controls {
     margin-top: -5px;
 }
 
 /* Fany transisions for hilite */
-.meep .uk-form input,
-.meep .uk-form textarea,
-.meep .uk-form .uk-form-controls {
+.meep form .uk-input,
+.meep form .uk-textarea,
+.meep form .uk-form-controls {
     transition-delay: 0s;
     transition-duration: 0.2s;
     transition-property: border, padding, margin;
     transition-timing-function: linear;
-}
-
-/* Change size on post address fields */
-.meep .address_zipcode,
-.meep .address_city {
-    float: left;
-}
-
-.meep .address_zipcode {
-    width: 157px;
-}
-
-.meep .address_zipcode input {
-    width: 130px;
-}
-
-.meep .address_city input {
-    width: 342px;
-}
-
-.uk-form-row.address_city + div {
-    clear: both;
-}
-
-/* Hilite fields that have changed since last sync */
-.meep .changed input {
-    /*	background-color: blue !important;*/
 }
 
 .meep .changed label::before {
@@ -273,8 +221,7 @@ span.ma-changed {
     content: "*";
 }
 
-/* Filterbox */
-.filterbox {
+.searchbox {
     clear: both;
     border: 1px solid #ccc;
     border-radius: 8px;
@@ -285,11 +232,6 @@ span.ma-changed {
 /* Other stuff */
 .uk-button.uk-float-left {
     margin-right: 1em;
-}
-
-/* Dropdown buttons in tables <TableDropdownMenu /> */
-.uk-button-dropdown {
-    display: block !important;
 }
 
 /* Toggle rows in tables */
@@ -326,13 +268,6 @@ tr.toggle.show div.scrolling {
     max-height: 500px;
 }
 
-/*
-Zebra tables does not work when using toggle rows
-.uk-table-striped tbody tr.toggle:nth-of-type(2n+1) {
-	background: #fafafa none repeat scroll 0 0;
-}
-*/
-
 /* Removing styling from <pre> when using in toggle tables */
 tr.toggle pre {
     margin-bottom: 0;
@@ -347,10 +282,6 @@ tr.toggle pre {
     border-radius: 5px;
     background-color: #fff;
     border-radius: 5px;
-}
-
-.datebox .uk-grid {
-    /*	margin-left:-15px;*/
 }
 
 .datebox p {
@@ -369,7 +300,6 @@ tr.toggle pre {
     width: 100%;
 }
 
-/* MultiAccess stuff*/
 .multiaccess h4 {
     font-size: 14px;
     font-weight: bold;
@@ -384,4 +314,37 @@ tr.toggle pre {
 
 .multiaccess .error {
     margin-top: 10px;
+}
+
+/* UI-kit icons are not aligned with text for Buttons, legends, etc */
+.uk-icon {
+    transform: translateY(-2px);
+}
+
+/* However, in the Navbar they are already aligned */
+ul.uk-navbar-nav > li > a > .uk-icon,
+/* As well as when inlined into an input */
+.uk-inline > .uk-icon:has(+input) {
+    transform: translateY(0px);
+}
+
+/* Don't let the icons shrink */
+.uk-icon > svg {
+    max-width: none;
+}
+
+/* Icons from the react-icons package also need to be bumped a bit to be aligned with text */
+button > svg {
+    transform: translateY(-2px);
+}
+
+/* The navbar items are by default very tall (80px), which takes too much space
+ * when combining with the flex layout */
+.uk-navbar-nav > li > a {
+    min-height: 40px !important;
+}
+
+.centered-form form.uk-card {
+    border: 1px solid #aaa;
+    border-radius: 5px;
 }

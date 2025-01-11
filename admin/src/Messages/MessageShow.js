@@ -52,7 +52,7 @@ function MessageShow() {
     return (
         <div className="uk-margin-top">
             <h2>Utskick</h2>
-            <div className="uk-panel uk-panel-box uk-margin-bottom">
+            <div className="uk-card uk-card-default uk-card-body uk-margin-bottom">
                 <table>
                     <tbody>
                         <tr>
@@ -85,14 +85,16 @@ function MessageShow() {
                 </table>
             </div>
 
-            <div className="uk-panel uk-panel-box uk-margin-bottom">
-                <h3
-                    className="uk-panel-title"
-                    dangerouslySetInnerHTML={{ __html: message.subject || "" }}
+            <div className="uk-card uk-card-default uk-margin-bottom">
+                <div className="uk-card-header">
+                    <h3 className="uk-card-title">
+                        {message.subject || "No subject"}
+                    </h3>
+                </div>
+                <div
+                    className="uk-card-body"
+                    dangerouslySetInnerHTML={{ __html: message.body || "" }}
                 />
-            </div>
-            <div className="uk-panel uk-panel-box uk-margin-bottom">
-                <div dangerouslySetInnerHTML={{ __html: message.body || "" }} />
             </div>
         </div>
     );

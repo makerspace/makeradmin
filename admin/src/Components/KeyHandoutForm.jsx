@@ -1,12 +1,14 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { renderToString } from "react-dom/server";
 import { Prompt } from "react-router";
+import UIkit from "uikit";
 import { get, post } from "../gateway";
 import { notifySuccess } from "../message";
 import Collection from "../Models/Collection";
 import { ADD_LABACCESS_DAYS } from "../Models/ProductAction";
 import Span, { filterCategory } from "../Models/Span";
 import { dateTimeToStr, parseUtcDate, utcToday } from "../utils";
+import Icon from "./icons";
 import TextInput from "./TextInput";
 
 function last_span_enddate(spans, category) {
@@ -27,7 +29,7 @@ function DateView(props) {
 
     if (!props.date) {
         status = (
-            <div className="uk-panel-badge uk-badge uk-badge-warning">
+            <div className="uk-card-badge uk-label uk-label-warning">
                 Saknas
             </div>
         );
@@ -38,7 +40,7 @@ function DateView(props) {
         );
     } else if (!is_valid) {
         status = (
-            <div className="uk-panel-badge uk-badge uk-badge-danger">
+            <div className="uk-card-badge uk-label uk-label-danger">
                 Utgånget
             </div>
         );
@@ -52,7 +54,7 @@ function DateView(props) {
         );
     } else {
         status = (
-            <div className="uk-panel-badge uk-badge uk-badge-success">OK</div>
+            <div className="uk-card-badge uk-label uk-label-success">OK</div>
         );
         text = <p>Giltigt till: {props.date}</p>;
     }
@@ -60,15 +62,16 @@ function DateView(props) {
     // Override if there are pending days to be synchronized
     if (props.pending || is_valid) {
         status = (
-            <div className="uk-panel-badge uk-badge uk-badge-success">OK</div>
+            <div className="uk-card-badge uk-label uk-label-success">OK</div>
         );
     }
 
     return (
-        <div className="uk-panel uk-panel-box">
-            <p style={{ fontSize: "1.2em" }}>
-                <b>{props.title}</b>
-            </p>
+        <div
+            className="uk-card uk-card-default uk-card-body uk-card-small uk-margin-small-top"
+            style={{ border: "1px solid #e5e5e5" }}
+        >
+            <h3 className="uk-card-title">{props.title}</h3>
             {status}
             {text}
             {props.pending ? (
@@ -184,7 +187,7 @@ function KeyHandoutForm(props) {
             color = "uk-button-danger";
         } else {
             tooltip = "All info finns, accessy invite kommer att skickas!";
-            color = "uk-button-success";
+            color = "uk-button-primary";
         }
 
         const on_click = (e) => {
@@ -217,8 +220,8 @@ function KeyHandoutForm(props) {
                 tabIndex="1"
                 onClick={on_click}
             >
-                <i className="uk-icon-save" /> Spara, lägg till labaccess och
-                skicka Accessy-invite
+                <Icon icon="save" /> Spara, lägg till labaccess och skicka
+                Accessy-invite
             </button>
         );
     };
@@ -227,7 +230,7 @@ function KeyHandoutForm(props) {
     if (accessy_in_org) {
         accessy_paragraph = (
             <p>
-                <span className="uk-badge uk-badge-success">OK</span> Personen
+                <span className="uk-label uk-label-success">OK</span> Personen
                 är med i organisationen. <br /> Med i följande (
                 {accessy_groups.length}) grupper:{" "}
                 {accessy_groups.sort().join(", ")}{" "}
@@ -237,18 +240,18 @@ function KeyHandoutForm(props) {
         let invite_part;
         if (accessy_pending_invites === 0) {
             invite_part = (
-                <span className="uk-badge uk-badge-warning">Invite saknas</span>
+                <span className="uk-label uk-label-warning">Invite saknas</span>
             );
         } else {
             invite_part = (
-                <span className="uk-badge uk-badge-success">
+                <span className="uk-label uk-label-success">
                     Invite skickad
                 </span>
             );
         }
         accessy_paragraph = (
             <p>
-                <span className="uk-badge uk-badge-danger">Ej access</span>{" "}
+                <span className="uk-label uk-label-danger">Ej access</span>{" "}
                 Personen är inte med i organisationen ännu. <br /> {invite_part}{" "}
                 Det finns {accessy_pending_invites} aktiva inbjudningar utsända
                 för tillfället.{" "}
@@ -258,7 +261,7 @@ function KeyHandoutForm(props) {
 
     const section2andon = (
         <>
-            <div className="uk-section">
+            <div className="uk-section uk-padding-remove-vertical">
                 <h2>2. Kontrollera legitimation</h2>
                 <p>
                     Kontrollera personens legitimation och för in personnummret
@@ -268,7 +271,7 @@ function KeyHandoutForm(props) {
                 <div>
                     <TextInput
                         model={member}
-                        icon="birthday-cake"
+                        icon="birthdaycake"
                         tabIndex="1"
                         name="civicregno"
                         title="Personnummer"
@@ -277,7 +280,7 @@ function KeyHandoutForm(props) {
                 </div>
             </div>
 
-            <div className="uk-section">
+            <div className="uk-section uk-padding-remove-vertical">
                 <h2>3. Övrig information</h2>
                 <p>
                     Kontrollera <b>epost</b> så personen kommer åt kontot, och{" "}
@@ -317,7 +320,7 @@ function KeyHandoutForm(props) {
                 </div>
             </div>
 
-            <div className="uk-section">
+            <div className="uk-section uk-padding-remove-vertical">
                 <h2>4. Kontrollera medlemskap </h2>
                 <p>
                     Kontrollera om medlemmen har köpt medlemskap och
@@ -344,19 +347,19 @@ function KeyHandoutForm(props) {
                 </div>
             </div>
 
-            <div className="uk-section">
+            <div className="uk-section uk-padding-remove-vertical">
                 <h2>5. Kontrollera tillgång till Accessy </h2>
                 {accessy_paragraph}
             </div>
 
             <div style={{ paddingBottom: "4em" }}>
                 <button
-                    className="uk-button uk-button-success uk-float-right"
+                    className="uk-button uk-button-primary uk-float-right"
                     tabIndex="2"
                     title="Spara ändringar"
                     disabled={!can_save_member}
                 >
-                    <i className="uk-icon-save" /> Spara
+                    <Icon icon="save" /> Spara
                 </button>
                 <AccessyInviteSaveButton />
             </div>
@@ -371,14 +374,13 @@ function KeyHandoutForm(props) {
             ></Prompt>
             <div className="meep">
                 <form
-                    className="uk-form"
                     onSubmit={(e) => {
                         e.preventDefault();
                         save();
                         return false;
                     }}
                 >
-                    <div className="uk-section">
+                    <div className="uk-section uk-padding-remove-vertical">
                         <h2>1. Ta emot signerat labbmedlemsavtal</h2>
                         <p>
                             Kontrollera att labbmedlemsavtalet är signerat och

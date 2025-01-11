@@ -2,6 +2,7 @@ import React from "react";
 import { matchPath, useLocation } from "react-router";
 import { Link, NavLink } from "react-router-dom";
 import * as _ from "underscore";
+import Icon from "./Components/icons";
 
 export const NavItem = (props) => {
     const { icon, to } = props;
@@ -12,7 +13,7 @@ export const NavItem = (props) => {
             <NavLink to={to}>
                 {icon ? (
                     <>
-                        <i className={"uk-icon-" + icon} />
+                        <Icon icon={icon} />
                         &nbsp;
                     </>
                 ) : null}
@@ -23,12 +24,13 @@ export const NavItem = (props) => {
 };
 
 export const Nav = ({ nav: { brand, items } }) => (
-    <nav className="uk-navbar">
-        <div className="uk-container uk-container-center">
-            <Link to="/" className="uk-navbar-brand">
+    <nav className="uk-navbar-container">
+        <div className="uk-navbar-left">
+            <Link to="/" className="uk-navbar-item uk-logo">
                 {brand}
             </Link>
-            <ul className="uk-navbar-nav uk-navbar-attached">
+            {/* The uk-flex-wrap is added to make the items not overflow. Feels like a hack. */}
+            <ul className="uk-navbar-nav uk-flex-wrap">
                 {items.map((item, i) => (
                     <NavItem to={item.target} icon={item.icon} key={i}>
                         {item.text}
@@ -52,13 +54,13 @@ export const SideNav = ({ nav }) => {
 
     return (
         <div
-            className="uk-panel uk-panel-box"
+            className="uk-card uk-card-default uk-card-body"
             style={{ marginBottom: "1em" }}
-            data-uk-sticky="{top:35}"
+            uk-sticky="media: @m"
         >
             <ul
-                className="uk-nav uk-nav-side"
-                data-uk-scrollspy-nav="{closest:'li', smoothscroll:true}"
+                className="uk-nav uk-nav-default"
+                uk-scrollspy-nav="{closest:'li', smoothscroll:true}"
             >
                 <li className="uk-nav-header">{activeItem.text}</li>
                 <li className="uk-nav-divider" />

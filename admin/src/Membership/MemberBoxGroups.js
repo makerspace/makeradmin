@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import Select from "react-select";
 import * as _ from "underscore";
 import CollectionTable from "../Components/CollectionTable";
+import Icon from "../Components/icons";
 import Collection from "../Models/Collection";
 import Group from "../Models/Group";
 import { get } from "../gateway";
@@ -60,14 +61,14 @@ function MemberBoxGroups(props) {
 
     return (
         <div>
-            <div className="uk-margin-top uk-form uk-form-stacked">
+            <div className="uk-margin-top uk-form-stacked">
                 <label className="uk-form-label" htmlFor="group">
                     Lägg till i grupp
                 </label>
                 <div className="uk-form-controls">
                     <Select
                         name="group"
-                        className="uk-select"
+                        className="uk-width-1-1"
                         tabIndex={1}
                         options={showOptions}
                         value={selectedOption}
@@ -101,7 +102,7 @@ function MemberBoxGroups(props) {
                                     }
                                     className="removebutton"
                                 >
-                                    <i className="uk-icon-trash" />
+                                    <Icon icon="trash" />
                                 </a>
                             </td>
                         </tr>

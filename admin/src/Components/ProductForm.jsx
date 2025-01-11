@@ -6,6 +6,7 @@ import DateTimeInput from "./DateTimeInput";
 import SelectInput from "./SelectInput";
 import TextInput from "./TextInput";
 import Textarea from "./Textarea";
+import Icon from "./icons";
 
 // Return list of available actions types based on selected ones
 const filterAvailableActions = (actions) => {
@@ -63,26 +64,35 @@ const ProductForm = ({ product, onDelete, onSave }) => {
     };
 
     const renderAction = (action) => (
-        <div key={action.action_type} className="form-row uk-grid">
-            <div className="uk-with-1-6">{action.action_type}</div>
-            <div className="uk-with-1-6">
-                <strong>Värde</strong>
-            </div>
-            <div className="uk-with-3-6">
+        <div
+            key={action.action_type}
+            className="form-row uk-grid uk-margin-bottom"
+        >
+            <div className="uk-width-3-4">
                 <TextInput
                     model={action}
-                    label={false}
-                    formrow={false}
                     name={"value"}
+                    title={
+                        <>
+                            Action: <code>{action.action_type}</code>, with
+                            value
+                        </>
+                    }
                 />
             </div>
-            <div className="uk-with-1-6">
-                <a
-                    className="uk-button uk-button-danger"
+            <div className="uk-width-1-4">
+                <button
+                    type="button"
+                    className="uk-button uk-button-danger uk-width-1-1 uk-height-1-1"
+                    style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                    }}
                     onClick={() => handleRemoveAction(action)}
                 >
-                    <i className="uk-icon-trash-o" />
-                </a>
+                    <Icon icon="trash" />
+                </button>
             </div>
         </div>
     );
@@ -92,7 +102,7 @@ const ProductForm = ({ product, onDelete, onSave }) => {
     return (
         <div className="uk-margin-top">
             <form
-                className="uk-form uk-form-stacked"
+                className="uk-form-stacked"
                 onSubmit={() => {
                     onSave();
                     return false;
@@ -100,7 +110,7 @@ const ProductForm = ({ product, onDelete, onSave }) => {
             >
                 <fieldset className="uk-margin-top">
                     <legend>
-                        <i className="uk-icon-shopping-cart" /> Produkt
+                        <Icon icon="cart" /> Produkt
                     </legend>
                     <TextInput
                         model={product}
@@ -166,13 +176,13 @@ const ProductForm = ({ product, onDelete, onSave }) => {
                 </fieldset>
                 <fieldset className="uk-margin-top">
                     <legend>
-                        <i className="uk-icon-magic" /> Åtgärder
+                        <Icon icon="wand" /> Åtgärder
                     </legend>
                     <div>{actions.map(renderAction)}</div>
                     {availableActionTypes.length > 0 && (
-                        <div>
+                        <div className="uk-grid">
                             <ReactSelect
-                                className="uk-width-3-5 uk-float-left"
+                                className="uk-width-1-2@s uk-width-2-3@m"
                                 value={{
                                     value: selectedActionType,
                                     label: selectedActionType,
@@ -183,19 +193,26 @@ const ProductForm = ({ product, onDelete, onSave }) => {
                                 }))}
                                 onChange={(o) => setSelectedActionType(o.value)}
                             />
-                            <button
-                                type="button"
-                                className="uk-button uk-button-success uk-float-right"
-                                onClick={handleAddAction}
-                            >
-                                <i className="uk-icon-plus" /> Lägg till åtgärd
-                            </button>
+                            <div className="uk-width-1-2@s uk-width-1-3@m">
+                                <button
+                                    type="button"
+                                    className="uk-button uk-button-primary uk-width-1-1"
+                                    style={{
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                    }}
+                                    onClick={handleAddAction}
+                                >
+                                    <Icon icon="plus" /> Lägg till åtgärd
+                                </button>
+                            </div>
                         </div>
                     )}
                 </fieldset>
                 <fieldset className="uk-margin-top">
                     <legend>
-                        <i className="uk-icon-filter" /> Filter
+                        <Icon icon="filter" /> Filter
                     </legend>
                     <SelectInput
                         model={product}
@@ -222,7 +239,7 @@ const ProductForm = ({ product, onDelete, onSave }) => {
                 </fieldset>
                 <fieldset className="uk-margin-top">
                     <legend>
-                        <i className="uk-icon-tag" /> Metadata
+                        <Icon icon="tag" /> Metadata
                     </legend>
                     <CheckboxInput model={product} name="show" title="Synlig" />
                     {product.id && (
@@ -246,15 +263,14 @@ const ProductForm = ({ product, onDelete, onSave }) => {
                             className="uk-button uk-button-danger uk-float-left"
                             onClick={onDelete}
                         >
-                            <i className="uk-icon-trash" /> Ta bort produkt
+                            <Icon icon="trash" /> Ta bort produkt
                         </a>
                     )}
                     <button
                         disabled={saveDisabled}
-                        className="uk-button uk-button-success uk-float-right"
+                        className="uk-button uk-button-primary uk-float-right"
                     >
-                        <i className="uk-icon-save" />{" "}
-                        {product.id ? "Spara" : "Skapa"}
+                        <Icon icon="save" /> {product.id ? "Spara" : "Skapa"}
                     </button>
                 </fieldset>
             </form>

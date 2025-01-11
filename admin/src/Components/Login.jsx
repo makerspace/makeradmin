@@ -2,8 +2,10 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import auth from "../auth";
 import { showError } from "../message";
+import { CenteredForm } from "./CenteredForm";
+import Icon from "./icons";
 
-const Login = () => {
+function LoginForm() {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
 
@@ -19,67 +21,67 @@ const Login = () => {
     };
 
     return (
-        <div className="uk-vertical-align uk-text-center uk-height-1-1">
-            <div
-                className="uk-vertical-align-middle"
-                style={{ width: "300px" }}
-            >
-                <form
-                    className="uk-panel uk-panel-box uk-form"
-                    onSubmit={login}
-                >
-                    <div className="uk-form-row">
-                        <h2>Logga in</h2>
-                    </div>
-
-                    <div className="uk-form-row">
-                        <div className="uk-form-icon">
-                            <i className="uk-icon-user" />
-                            <input
-                                value={username}
-                                onChange={(e) => setUsername(e.target.value)}
-                                className="uk-form-large uk-form-width-large"
-                                type="text"
-                                placeholder="Email/Medlemsnummer"
-                                autoComplete="username"
-                            />
-                        </div>
-                    </div>
-
-                    <div className="uk-form-row">
-                        <div className="uk-form-icon">
-                            <i className="uk-icon-lock" />
-                            <input
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                className="uk-form-large uk-form-width-large"
-                                type="password"
-                                placeholder="Lösenord"
-                                autoComplete="current-password"
-                            />
-                        </div>
-                    </div>
-
-                    <div className="uk-form-row">
-                        <button
-                            type="submit"
-                            className="uk-width-1-1 uk-button uk-button-primary uk-button-large"
-                        >
-                            Logga in
-                        </button>
-                    </div>
-
-                    <div className="uk-form-row uk-text-small">
-                        <Link
-                            className="uk-float-right uk-link uk-link-muted"
-                            to="/request-password-reset"
-                        >
-                            Glömt ditt lösenord?
-                        </Link>
-                    </div>
-                </form>
+        <form className="uk-card uk-card-default" onSubmit={login}>
+            <div className="uk-card-header">
+                <h2>Logga in</h2>
             </div>
-        </div>
+
+            <div className="uk-card-body">
+                <div>
+                    <div className="uk-inline uk-width-1-1">
+                        <Icon form icon="user" />
+                        <input
+                            value={username}
+                            onChange={(e) => setUsername(e.target.value)}
+                            className="uk-input"
+                            type="text"
+                            placeholder="Email/Medlemsnummer"
+                            autoComplete="username"
+                        />
+                    </div>
+                </div>
+
+                <div className="uk-margin-top">
+                    <div className="uk-inline uk-width-1-1">
+                        <Icon form icon="lock" />
+                        <input
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            className="uk-input"
+                            type="password"
+                            placeholder="Lösenord"
+                            autoComplete="current-password"
+                        />
+                    </div>
+                </div>
+
+                <div className="uk-margin-top">
+                    <button
+                        type="submit"
+                        className="uk-width-1-1 uk-button uk-button-primary uk-button-large"
+                    >
+                        <Icon icon="sign-in" /> Logga in
+                    </button>
+                </div>
+
+                <div className="uk-margin-top">
+                    <Link
+                        className="uk-float-right uk-button uk-button-text"
+                        to="/request-password-reset"
+                    >
+                        Glömt ditt lösenord?
+                    </Link>
+                </div>
+            </div>
+        </form>
+    );
+}
+
+const Login = () => {
+    return (
+        <CenteredForm>
+            <LoginForm />
+        </CenteredForm>
     );
 };
 

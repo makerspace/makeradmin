@@ -21,20 +21,10 @@ const Textarea = (props) => {
         };
     }, [props.model, props.name]);
 
-    const {
-        model,
-        name,
-        title,
-        icon,
-        disabled,
-        placeholder,
-        formrow,
-        tabIndex,
-        rows,
-    } = props;
+    const { model, name, title, disabled, placeholder, tabIndex, rows } = props;
 
     const classes = classNames(name, {
-        "uk-form-row": formrow,
+        "form-row": true,
         selected: selected,
         changed: isDirty,
     });
@@ -60,22 +50,9 @@ const Textarea = (props) => {
             <label className="uk-form-label" htmlFor={name}>
                 {title}
             </label>
-            <div className="uk-form-controls">
-                {icon ? (
-                    <div className="uk-form-icon">
-                        <i className={"uk-icon-" + icon} />
-                        {textarea}
-                    </div>
-                ) : (
-                    textarea
-                )}
-            </div>
+            <div className="uk-form-controls">{textarea}</div>
         </div>
     );
-};
-
-Textarea.defaultProps = {
-    formrow: true,
 };
 
 export default Textarea;

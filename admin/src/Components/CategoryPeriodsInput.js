@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import DatePeriod from "../Models/DatePeriod";
 import { utcToday } from "../utils";
 import DatePeriodInput from "./DatePeriodInput";
+import Icon from "./icons";
 
 const CategoryPeriodsInput = ({ categoryPeriods, showHistoric }) => {
     const [periods, setPeriods] = useState([]);
@@ -40,7 +41,7 @@ const CategoryPeriodsInput = ({ categoryPeriods, showHistoric }) => {
                             onClick={() => categoryPeriods.remove(p)}
                             className="removebutton"
                         >
-                            <i className="uk-icon-trash" />
+                            <Icon icon="trash" />
                         </a>
                     </div>
                 );
@@ -48,7 +49,7 @@ const CategoryPeriodsInput = ({ categoryPeriods, showHistoric }) => {
             <button
                 type="button"
                 style={{ marginTop: "2px" }}
-                className="uk-button uk-button-small uk-button-success"
+                className="uk-button uk-button-small uk-button-primary"
                 onClick={() => {
                     const period = new DatePeriod();
                     period.start = utcToday();

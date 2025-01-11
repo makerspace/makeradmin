@@ -1,6 +1,7 @@
 import classNames from "classnames/bind";
 import React, { useEffect, useState } from "react";
 import * as _ from "underscore";
+import Icon from "./icons";
 
 const TextInput = (props) => {
     const [value, setValue] = useState(null);
@@ -29,15 +30,13 @@ const TextInput = (props) => {
         icon,
         disabled,
         placeholder,
-        formrow,
         tabIndex,
         type,
-        label,
         autoComplete,
     } = props;
 
     const classes = classNames(name, {
-        "uk-form-row": formrow,
+        "form-row": true,
         selected: selected,
         changed: isDirty,
     });
@@ -64,28 +63,24 @@ const TextInput = (props) => {
 
     return (
         <div className={classes}>
-            {label ? (
+            {title && (
                 <label className="uk-form-label" htmlFor={name}>
                     {title}
                 </label>
-            ) : null}
-            <div className="uk-form-controls">
-                {icon ? (
-                    <div className="uk-form-icon">
-                        <i className={"uk-icon-" + icon} />
-                        {input}
-                    </div>
-                ) : (
-                    input
-                )}
-            </div>
+            )}
+            {icon ? (
+                <div className="uk-inline uk-width-1-1">
+                    <Icon form icon={icon} />
+                    {input}
+                </div>
+            ) : (
+                input
+            )}
         </div>
     );
 };
 
 TextInput.defaultProps = {
-    formrow: true,
-    label: true,
     autoComplete: "off",
 };
 

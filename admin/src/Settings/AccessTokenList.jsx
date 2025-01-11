@@ -2,6 +2,7 @@ import React, { useRef } from "react";
 import auth from "../auth";
 import CollectionTable from "../Components/CollectionTable";
 import DateTimeShow from "../Components/DateTimeShow";
+import Icon from "../Components/icons";
 import AccessToken from "../Models/AccessToken";
 import Collection from "../Models/Collection";
 
@@ -22,7 +23,7 @@ export default function AccessTokenList() {
                 <tr key={item.access_token}>
                     <td>
                         {auth.getAccessToken() === item.access_token ? (
-                            <i className="uk-icon-check" />
+                            <Icon icon="check" />
                         ) : null}
                     </td>
                     <td>{item.access_token}</td>

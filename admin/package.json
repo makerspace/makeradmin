@@ -9,7 +9,6 @@
         "classnames": "^2.3.1",
         "history": "^4.10.1",
         "html5-qrcode": "^2.3.8",
-        "jquery": "^3.6.0",
         "json-loader": "^0.5.4",
         "npm": "^10.5.2",
         "preact-render-to-string": "^6.5.5",
@@ -20,7 +19,7 @@
         "react-router": "^5.2.0",
         "react-router-dom": "^5.2.0",
         "react-select": "^2.4.4",
-        "uikit": "^2.27.4",
+        "uikit": "^3.22.0",
         "underscore": "^1.13.0"
     },
     "devDependencies": {
@@ -82,15 +81,11 @@
     "eslintConfig": {
         "env": {
             "browser": true,
+            "node": true,
             "es6": true
         },
         "globals": {
             "config": true,
-            "UIkit": true,
-            "global": true,
-            "require": true,
-            "module": true,
-            "console": true,
             "__BUILD_DATE__": "readonly",
             "__COMMIT_HASH__": "readonly"
         },

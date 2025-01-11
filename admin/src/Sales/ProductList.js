@@ -1,13 +1,14 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import Collection from "../Models/Collection";
-import CollectionTable from "../Components/CollectionTable";
-import Product from "../Models/Product";
-import Currency from "../Components/Currency";
 import * as _ from "underscore";
-import { get } from "../gateway";
+import CollectionTable from "../Components/CollectionTable";
+import Currency from "../Components/Currency";
+import Icon from "../Components/icons";
 import SearchBox from "../Components/SearchBox";
+import { get } from "../gateway";
+import Collection from "../Models/Collection";
 import CollectionNavigation from "../Models/CollectionNavigation";
+import Product from "../Models/Product";
 
 class ProductList extends CollectionNavigation {
     constructor(props) {
@@ -51,7 +52,7 @@ class ProductList extends CollectionNavigation {
                     className="uk-button uk-button-primary uk-margin-bottom uk-float-right"
                     to="/sales/product/add"
                 >
-                    <i className="uk-icon-plus-circle" /> Skapa ny produkt
+                    <Icon icon="plus-circle" /> Skapa ny produkt
                 </Link>
                 <SearchBox handleChange={this.onSearch} />
                 <CollectionTable
@@ -109,7 +110,7 @@ class ProductList extends CollectionNavigation {
                                     onClick={() => deleteItem(item)}
                                     className="removebutton"
                                 >
-                                    <i className="uk-icon-trash" />
+                                    <Icon icon="trash" />
                                 </a>
                             </td>
                         </tr>

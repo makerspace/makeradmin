@@ -85,7 +85,7 @@ export default function AccountingExport() {
                 På denna sida kan du exportera transaktioner för vald period
                 till en SIE-fil.
             </p>
-            <form className="uk-form uk-form-stacked">
+            <form className="uk-form-stacked">
                 <fieldset className="uk-margin-top">
                     <legend className="uk-legend">
                         Välj vilken period du vill exportera
@@ -96,7 +96,7 @@ export default function AccountingExport() {
                     <Select
                         id="year"
                         name="year"
-                        className="uk-select"
+                        className="uk-width-1-1"
                         tabIndex={1}
                         options={year_options}
                         value={yearOption}
@@ -108,7 +108,7 @@ export default function AccountingExport() {
                     <Select
                         id="month"
                         name="month"
-                        className="uk-select"
+                        className="uk-width-1-1"
                         tabIndex={2}
                         options={month_options}
                         value={monthOption}

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import Icon from "./icons";
 
 const continents = [
     {
@@ -1084,7 +1085,7 @@ const CountryDropdown = ({ model, name }) => {
                             (model[name] = e.target.dataset.country)
                         }
                         data-country={c.code}
-                        className="uk-dropdown-close"
+                        className="uk-drop-close"
                     >
                         <span className={"flag flag-" + c.code} /> {c.name}
                     </a>
@@ -1094,13 +1095,19 @@ const CountryDropdown = ({ model, name }) => {
     });
 
     return (
-        <div data-uk-dropdown="{mode:'click'}" className="uk-button-dropdown">
-            <button className="uk-button uk-button-mini">
+        <div>
+            <button
+                id={name}
+                className="uk-button uk-button-default uk-form-small"
+            >
                 <span className={"flag flag-" + country} />{" "}
-                {getCountryName(country)} <i className="uk-icon-angle-down" />
+                {getCountryName(country)} <Icon icon="chevron-down" />
             </button>
-            <div className="uk-dropdown uk-dropdown-scrollable uk-dropdown-small">
-                <ul className="uk-nav uk-nav-dropdown">{countries}</ul>
+            <div
+                uk-dropdown="mode: click"
+                className="uk-dropdown uk-dropdown-scrollable"
+            >
+                <ul className="uk-nav uk-dropdown-nav">{countries}</ul>
             </div>
         </div>
     );

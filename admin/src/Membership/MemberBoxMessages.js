@@ -1,10 +1,11 @@
 import React from "react";
+import { Link } from "react-router-dom";
+import CollectionTable from "../Components/CollectionTable";
+import DateTimeShow from "../Components/DateTimeShow";
+import Icon from "../Components/icons";
 import Collection from "../Models/Collection";
 import CollectionNavigation from "../Models/CollectionNavigation";
-import CollectionTable from "../Components/CollectionTable";
 import Message from "../Models/Message";
-import DateTimeShow from "../Components/DateTimeShow";
-import { Link } from "react-router-dom";
 
 const Row = (props) => {
     const { item } = props;
@@ -62,7 +63,7 @@ class MemberBoxMessages extends CollectionNavigation {
                     }
                     className="uk-button uk-button-primary"
                 >
-                    <i className="uk-icon-envelope" /> Skicka meddelande
+                    <Icon icon="mail" /> Skicka meddelande
                 </Link>
             </div>
         );

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import CollectionTable from "../Components/CollectionTable";
+import Icon from "../Components/icons";
 import Collection from "../Models/Collection";
 import ServiceAccessToken from "../Models/ServiceAccessToken";
 import { del } from "../gateway";
@@ -16,7 +17,7 @@ const Row = ({ item, collection }) => {
                     }
                     className="removebutton"
                 >
-                    <i className="uk-icon-trash" />
+                    <Icon icon="trash" />
                 </a>
             </td>
             <td>{item.service_name}</td>

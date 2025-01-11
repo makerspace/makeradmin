@@ -3,6 +3,7 @@ import { Link, useParams } from "react-router-dom";
 import CollectionTable from "../Components/CollectionTable";
 import DateTimeShow from "../Components/DateTimeShow";
 import TextInput from "../Components/TextInput";
+import Icon from "../Components/icons";
 import Collection from "../Models/Collection";
 import Key from "../Models/Key";
 import { confirmModal } from "../message";
@@ -30,7 +31,7 @@ const Row = (collection) => (props) => {
             </td>
             <td>
                 <a onClick={deleteKey} className="removebutton">
-                    <i className="uk-icon-trash" />
+                    <Icon icon="trash" />
                 </a>
             </td>
         </tr>
@@ -79,10 +80,9 @@ function MemberBoxKeys() {
 
     return (
         <div>
-            <div className="uk-margin-top uk-form uk-form-stacked">
+            <div className="uk-margin-top">
                 <div className="meep">
                     <form
-                        className="uk-form"
                         onSubmit={(e) => {
                             e.preventDefault();
                             createKey();
@@ -105,14 +105,13 @@ function MemberBoxKeys() {
                                     placeholder="Det är valfritt att lägga in en kommentar av nyckeln"
                                 />
 
-                                <div className="uk-form-row uk-margin-top">
+                                <div className="uk-margin-top">
                                     <div className="uk-form-controls">
                                         <button
-                                            className="uk-button uk-button-success uk-float-right"
+                                            className="uk-button uk-button-primary uk-float-right"
                                             disabled={!saveEnabled}
                                         >
-                                            <i className="uk-icon-save" /> Skapa
-                                            nyckel
+                                            <Icon icon="save" /> Skapa nyckel
                                         </button>
                                     </div>
                                 </div>

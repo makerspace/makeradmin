@@ -4,6 +4,7 @@ import { Async } from "react-select";
 import * as _ from "underscore";
 import CollectionTable from "../Components/CollectionTable";
 import Date from "../Components/DateShow";
+import Icon from "../Components/icons";
 import { get } from "../gateway";
 import Collection from "../Models/Collection";
 import Member from "../Models/Member";
@@ -28,7 +29,7 @@ const Row = (collection) => (props) => {
                     onClick={() => collection.remove(item)}
                     className="removebutton"
                 >
-                    <i className="uk-icon-trash" />
+                    <Icon icon="trash" />
                 </a>
             </td>
         </tr>
@@ -86,7 +87,7 @@ export default function GroupBoxMembers() {
 
     return (
         <div>
-            <div className="uk-margin-top uk-form uk-form-stacked">
+            <div className="uk-margin-top uk-form-stacked">
                 <label className="uk-form-label" htmlFor="member">
                     Lägg till i grupp
                 </label>
