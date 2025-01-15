@@ -5,13 +5,14 @@
     "main": "webpack.config.js",
     "repository": "https://github.com/makerspace/makeradmin",
     "license": "GPL-3.0",
+    "engines": {
+        "npm": ">=10.5.2",
+        "node": ">=20"
+    },
     "dependencies": {
         "classnames": "^2.3.1",
         "history": "^4.10.1",
         "html5-qrcode": "^2.3.8",
-        "json-loader": "^0.5.4",
-        "npm": "^10.5.2",
-        "preact-render-to-string": "^6.5.5",
         "prop-types": "^15.7.2",
         "react": "^16.14.0",
         "react-day-picker": "^7.4.10",
