@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Async } from "react-select";
+import Async from "react-select/async";
 import { get } from "../gateway";
 import Group from "../Models/Group";
 import Member from "../Models/Member";

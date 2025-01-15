@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import "react-day-picker/lib/style.css";
+import "react-day-picker/style.css";
 import { Link, useParams } from "react-router-dom";
 import CollectionTable from "../Components/CollectionTable";
 import DateShow from "../Components/DateShow";

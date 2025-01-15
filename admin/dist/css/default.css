@@ -348,3 +348,9 @@ button > svg {
     border: 1px solid #aaa;
     border-radius: 5px;
 }
+
+.changed-date {
+    border-color: #dbdc8d !important;
+    background: #fffff7 !important;
+    color: #9b8716 !important;
+}

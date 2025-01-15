@@ -222,4 +222,4 @@ const App = () => {
 
 App.title = "MakerAdmin";
 
-ReactDOM.render(<App />, document.getElementById("main"));
+ReactDOM.createRoot(document.getElementById("main")).render(<App />);
