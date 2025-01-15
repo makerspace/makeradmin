@@ -1,6 +1,6 @@
 import React, { useCallback, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { Async } from "react-select";
+import Async from "react-select/async";
 import * as _ from "underscore";
 import CollectionTable from "../Components/CollectionTable";
 import Date from "../Components/DateShow";

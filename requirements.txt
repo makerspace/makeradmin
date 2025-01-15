@@ -1,5 +1,5 @@
 requests
 pip
-ruff
+ruff==0.6.9
 pre-commit
 -r api/requirements.txt
