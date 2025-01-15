@@ -1,13 +1,9 @@
-/**
- * @jest-environment jsdom
- */
-
 /* eslint-env jest */
-import { addToDate, formatUtcDate, utcToday } from "../../utils";
-import { calculateSpanDiff, DAY_MILLIS } from "../Span";
-import Span from "../Span";
-import DatePeriod from "../DatePeriod";
+import { describe, expect, test } from "@jest/globals";
 import * as _ from "underscore";
+import { addToDate, formatUtcDate, utcToday } from "../../utils";
+import DatePeriod from "../DatePeriod";
+import Span, { calculateSpanDiff, DAY_MILLIS } from "../Span";
 
 const today = utcToday();
 
