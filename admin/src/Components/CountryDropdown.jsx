@@ -1104,7 +1104,7 @@ const CountryDropdown = ({ model, name }) => {
                 {getCountryName(country)} <Icon icon="chevron-down" />
             </button>
             <div
-                uk-dropdown="mode: click"
+                data-uk-dropdown="mode: click"
                 className="uk-dropdown uk-dropdown-scrollable"
             >
                 <ul className="uk-nav uk-dropdown-nav">{countries}</ul>
