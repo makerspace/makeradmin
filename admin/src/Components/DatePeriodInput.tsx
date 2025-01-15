@@ -9,14 +9,14 @@ const DayPickerInput = ({
     isChanged,
     value,
     onChange,
-    inputStyle
+    inputStyle,
 }: {
-    inputId: string
-    isValid: boolean,
-    isChanged: boolean,
-    value: Date | null,
-    onChange: (date: Date | undefined) => void,
-    inputStyle?: React.CSSProperties,
+    inputId: string;
+    isValid: boolean;
+    isChanged: boolean;
+    value: Date | null;
+    onChange: (date: Date | undefined) => void;
+    inputStyle?: React.CSSProperties;
 }) => {
     const dialogRef = useRef<HTMLDialogElement>(null);
     const dialogId = "dialog-" + inputId;
@@ -24,7 +24,9 @@ const DayPickerInput = ({
 
     // Hold the month in state to control the calendar when the input changes
     const [month, setMonth] = useState(value ?? new Date());
-    const [inputValue, setInputValue] = useState(value ? formatUtcDate(value) : "");
+    const [inputValue, setInputValue] = useState(
+        value ? formatUtcDate(value) : "",
+    );
 
     // Hold the dialog visibility in state
     const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -57,7 +59,9 @@ const DayPickerInput = ({
             // setInputValue("");
             // onChange(undefined);
         } else {
-            const utcDate = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+            const utcDate = new Date(
+                Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()),
+            );
             onChange(utcDate);
             setMonth(utcDate);
             setInputValue(formatUtcDate(utcDate));
@@ -78,50 +82,65 @@ const DayPickerInput = ({
         }
     };
 
-    return <>
-        <input
-            style={inputStyle}
-            id={inputId}
-            type="text"
-            value={inputValue}
-            placeholder="YYYY-MM-DD"
-            size={10}
-            className={"uk-input" + (isValid ? (isChanged ? " changed-date" : "") : " uk-form-danger")}
-            onChange={handleInputChange}
-            data-uk-dropdown
-        />
-        <button
-            type="button"
-            className="uk-button uk-button-default"
-            style={{ fontSize: "inherit" }}
-            onClick={toggleDialog}
-            aria-controls="dialog"
-            aria-haspopup="dialog"
-            aria-expanded={isDialogOpen}
-            aria-label="Open calendar to choose date"
-        >📆</button>
-        <dialog
-            role="dialog"
-            ref={dialogRef}
-            id={dialogId}
-            aria-modal
-            aria-labelledby={headerId}
-            onClose={() => setIsDialogOpen(false)}
-        >
-            <DayPicker
-                month={month}
-                onMonthChange={setMonth}
-                timeZone="UTC"
-                autoFocus
-                mode="single"
-                selected={value || new Date()}
-                onSelect={handleDayPickerSelect}
+    return (
+        <>
+            <input
+                style={inputStyle}
+                id={inputId}
+                type="text"
+                value={inputValue}
+                placeholder="YYYY-MM-DD"
+                size={10}
+                className={
+                    "uk-input" +
+                    (isValid
+                        ? isChanged
+                            ? " changed-date"
+                            : ""
+                        : " uk-form-danger")
+                }
+                onChange={handleInputChange}
+                data-uk-dropdown
             />
-        </dialog>
-    </>
-}
+            <button
+                type="button"
+                className="uk-button uk-button-default"
+                style={{ fontSize: "inherit" }}
+                onClick={toggleDialog}
+                aria-controls="dialog"
+                aria-haspopup="dialog"
+                aria-expanded={isDialogOpen}
+                aria-label="Open calendar to choose date"
+            >
+                📆
+            </button>
+            <dialog
+                role="dialog"
+                ref={dialogRef}
+                id={dialogId}
+                aria-modal
+                aria-labelledby={headerId}
+                onClose={() => setIsDialogOpen(false)}
+            >
+                <DayPicker
+                    month={month}
+                    onMonthChange={setMonth}
+                    timeZone="UTC"
+                    autoFocus
+                    mode="single"
+                    selected={value || new Date()}
+                    onSelect={handleDayPickerSelect}
+                />
+            </dialog>
+        </>
+    );
+};
 
-const DatePeriodInput = ({ period }: { period: DatePeriod & { start: Date | null, end: Date | null } }) => {
+const DatePeriodInput = ({
+    period,
+}: {
+    period: DatePeriod & { start: Date | null; end: Date | null };
+}) => {
     const [start, setStart] = useState(period.start || null);
     const [end, setEnd] = useState(period.end || null);
 
@@ -185,5 +204,3 @@ const DatePeriodInput = ({ period }: { period: DatePeriod & { start: Date | null
 };
 
 export default DatePeriodInput;
-
-

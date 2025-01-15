@@ -9,8 +9,8 @@ module.exports = (env, args) => {
     let commitHash = require("child_process")
         .execSync(
             "sh -c 'find " +
-            src +
-            " -type f -exec md5sum {} \\; | sort -k 2 | md5sum'",
+                src +
+                " -type f -exec md5sum {} \\; | sort -k 2 | md5sum'",
         )
         .toString();
 
