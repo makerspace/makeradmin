@@ -70,9 +70,11 @@ class QuizShow extends React.Component<Props, State> {
                     onSave={() => this.save()}
                     onDelete={() => this.delete()}
                 />
-                {quiz_id != null && <>
-                    <QuestionListRouter quiz_id={quiz_id} />
-                </>}
+                {quiz_id != null && (
+                    <>
+                        <QuestionListRouter quiz_id={quiz_id} />
+                    </>
+                )}
             </>
         );
     }
