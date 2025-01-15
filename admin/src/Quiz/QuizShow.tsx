@@ -62,6 +62,7 @@ class QuizShow extends React.Component<Props, State> {
             );
         }
 
+        const quiz_id = this.state.quiz.id;
         return (
             <>
                 <QuizEditForm
@@ -69,7 +70,9 @@ class QuizShow extends React.Component<Props, State> {
                     onSave={() => this.save()}
                     onDelete={() => this.delete()}
                 />
-                <QuestionListRouter quiz_id={this.state.quiz.id} />
+                {quiz_id != null && <>
+                    <QuestionListRouter quiz_id={quiz_id} />
+                </>}
             </>
         );
     }
