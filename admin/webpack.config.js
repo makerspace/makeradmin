@@ -9,8 +9,8 @@ module.exports = (env, args) => {
     let commitHash = require("child_process")
         .execSync(
             "sh -c 'find " +
-                src +
-                " -type f -exec md5sum {} \\; | sort -k 2 | md5sum'",
+            src +
+            " -type f -exec md5sum {} \\; | sort -k 2 | md5sum'",
         )
         .toString();
 
@@ -70,7 +70,7 @@ module.exports = (env, args) => {
 
         // Files to include.
         resolve: {
-            extensions: ["*", ".mjs", ".js", ".jsx", ".ts", ".tsx"],
+            extensions: [".*", ".mjs", ".js", ".jsx", ".ts", ".tsx"],
         },
 
         // Include build information (build date, git hash)
