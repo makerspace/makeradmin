@@ -167,4 +167,6 @@ export function del({
     });
 }
 
-window.get = get;
+if (typeof window !== "undefined") {
+    window.get = get;
+}
