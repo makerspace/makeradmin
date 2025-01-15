@@ -10,14 +10,14 @@ import { confirmModal } from "../message";
 const debouncedSaves = new Map<QuizQuestionOption, () => void>();
 
 const Row =
-    (collection: Collection, onChanged: () => void) =>
+    (collection: Collection<QuizQuestionOption>, onChanged: () => void) =>
     ({ item }: { item: QuizQuestionOption }) => {
         const deleteItem = () => {
             return confirmModal(item.deleteConfirmMessage())
                 .then(() => item.del())
                 .then(
                     () => collection.fetch(),
-                    (): void => null,
+                    () => null,
                 );
         };
 
@@ -36,7 +36,7 @@ const Row =
                         value={item.description}
                         onChange={(v) => {
                             (item.description = v.target.value), onChanged();
-                            debouncedSaves.get(item)();
+                            debouncedSaves.get(item)!();
                         }}
                     />
                 </td>
@@ -47,7 +47,7 @@ const Row =
                         checked={item.correct}
                         onChange={(v) => {
                             (item.correct = v.target.checked), onChanged();
-                            debouncedSaves.get(item)();
+                            debouncedSaves.get(item)!();
                         }}
                     />
                 </td>
@@ -69,14 +69,13 @@ interface Props {
 }
 
 class QuestionOptionList extends React.Component<Props, State> {
-    unsubscribe: () => void;
-    collection: Collection;
+    collection: Collection<QuizQuestionOption>;
     option: QuizQuestionOption;
 
     constructor(props: Props) {
         super(props);
         const id = props.question_id;
-        this.collection = new Collection({
+        this.collection = new Collection<QuizQuestionOption>({
             type: QuizQuestionOption,
             url: `/quiz/question/${id}/options`,
             idListName: "options",
@@ -86,9 +85,9 @@ class QuestionOptionList extends React.Component<Props, State> {
         this.state = { saveEnabled: false };
     }
 
-    componentDidMount() {}
+    override componentDidMount() {}
 
-    componentWillUnmount() {}
+    override componentWillUnmount() {}
 
     createOption() {
         this.option.description = "Nytt svarsalternativ!";
@@ -98,7 +97,7 @@ class QuestionOptionList extends React.Component<Props, State> {
         });
     }
 
-    render() {
+    override render() {
         const columns = [{ title: "Svarsalternativ" }, { title: "Korrekt" }];
 
         const id = this.props.question_id;

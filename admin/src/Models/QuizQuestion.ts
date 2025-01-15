@@ -1,13 +1,12 @@
 import Base from "./Base";
 
-export default class QuizQuestion extends Base {
-    id: number | null;
-    quiz_id: number;
-    question: string;
-    answer_description: string;
-    created_at: string;
-    updated_at: string;
-    deleted_at: string | null;
+export default class QuizQuestion extends Base<QuizQuestion> {
+    quiz_id!: number;
+    question!: string;
+    answer_description!: string;
+    created_at!: string;
+    updated_at!: string;
+    deleted_at!: string | null;
 
     static model = {
         root: "/quiz/question",
@@ -19,7 +18,7 @@ export default class QuizQuestion extends Base {
         },
     };
 
-    deleteConfirmMessage() {
+    override deleteConfirmMessage() {
         return "Are you sure you want to delete this question?";
     }
 }

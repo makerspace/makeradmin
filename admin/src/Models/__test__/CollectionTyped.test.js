@@ -1,8 +1,5 @@
-/**
- * @jest-environment jsdom
- */
-
 /* eslint-env jest */
+import { describe, expect, test } from "@jest/globals";
 import { get } from "../../gateway";
 import Collection from "../Collection";
 jest.mock("../../gateway");

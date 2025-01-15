@@ -1,8 +1,8 @@
-import { showError, showPermissionDenied } from "./message";
-import auth from "./auth";
 import * as _ from "underscore";
+import auth from "./auth";
+import { showError, showPermissionDenied } from "./message";
 
-const handleError = (message) => (error) => {
+const handleError = (message: string) => (error: Error) => {
     showError(
         "<h2>Error</h2>" +
             message +
@@ -21,10 +21,19 @@ export function request({
     options,
     errorMessage,
     expectedDataStatus,
-}) {
+}: {
+    url: string;
+    params: { [key: string]: string | number | boolean };
+    data: object | null | undefined;
+    options: RequestInit;
+    errorMessage: string;
+    expectedDataStatus: string | null | undefined;
+}): Promise<any> {
     const accessToken = auth.getAccessToken();
 
-    let headers = { "Content-Type": "application/json; charset=UTF-8" };
+    let headers: { [key: string]: string } = {
+        "Content-Type": "application/json; charset=UTF-8",
+    };
 
     if (accessToken) {
         headers["Authorization"] = "Bearer " + accessToken;
@@ -77,6 +86,15 @@ export function request({
         .catch(handleError(errorMessage));
 }
 
+export type RequestParams = {
+    url: string;
+    params?: { [key: string]: string | number | boolean };
+    data?: object | null;
+    options?: RequestInit;
+    errorMessage?: string;
+    expectedDataStatus?: string | null;
+};
+
 export function get({
     url,
     params = {},
@@ -84,7 +102,7 @@ export function get({
     options = { method: "GET" },
     errorMessage = "Error when getting data from server:",
     expectedDataStatus = null,
-}) {
+}: RequestParams): Promise<any> {
     return request({
         url,
         data,
@@ -102,7 +120,7 @@ export function post({
     options = { method: "POST" },
     errorMessage = "Error when creating:",
     expectedDataStatus = "created",
-}) {
+}: RequestParams): Promise<any> {
     return request({
         url,
         data,
@@ -120,7 +138,7 @@ export function put({
     options = { method: "PUT" },
     errorMessage = "Error when saving:",
     expectedDataStatus = "updated",
-}) {
+}: RequestParams): Promise<any> {
     return request({
         url,
         data,
@@ -138,7 +156,7 @@ export function del({
     options = { method: "DELETE" },
     errorMessage = "Error when deleting:",
     expectedDataStatus = "deleted",
-}) {
+}: RequestParams): Promise<any> {
     return request({
         url,
         data,
@@ -149,4 +167,6 @@ export function del({
     });
 }
 
-window.get = get;
+if (typeof window !== "undefined") {
+    window.get = get;
+}

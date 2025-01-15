@@ -29,7 +29,7 @@ class QuestionAdd extends React.Component<Props, State> {
         browserHistory.push(`/quiz/${this.props.match.params.quiz_id}`);
     }
 
-    render() {
+    override render() {
         return (
             <QuestionEditForm
                 question={this.question}

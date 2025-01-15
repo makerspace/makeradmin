@@ -9,7 +9,8 @@ const CategoryPeriodsInput = ({ categoryPeriods, showHistoric }) => {
 
     useEffect(() => {
         const unsubscribe = categoryPeriods.subscribe(() => {
-            setPeriods(categoryPeriods.periods);
+            // Must create a new array to force re-render
+            setPeriods(Array.from(categoryPeriods.periods));
         });
 
         return () => {

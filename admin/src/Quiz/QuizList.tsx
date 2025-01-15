@@ -7,7 +7,7 @@ import CollectionNavigation from "../Models/CollectionNavigation";
 import Quiz from "../Models/Quiz";
 
 class QuizList extends CollectionNavigation {
-    collection: Collection;
+    collection: Collection<Quiz>;
 
     constructor(props: any) {
         super(props);
@@ -15,7 +15,7 @@ class QuizList extends CollectionNavigation {
         this.collection = new Collection({ type: Quiz, search, page });
     }
 
-    render() {
+    override render() {
         return (
             <div className="uk-margin-top">
                 <h2>Quizzes</h2>

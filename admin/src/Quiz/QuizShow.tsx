@@ -15,23 +15,22 @@ interface Props {
 }
 
 class QuizShow extends React.Component<Props, State> {
-    unsubscribe: () => void;
-    quiz: Quiz;
+    unsubscribe: () => void = () => {};
 
     constructor(props: any) {
         super(props);
         const { id } = this.props.match.params;
-        const quiz = Quiz.get(id) as Quiz;
+        const quiz = Quiz.get(parseInt(id)) as Quiz;
         this.state = { quiz, loaded: false };
     }
 
-    componentDidMount() {
+    override componentDidMount() {
         this.unsubscribe = this.state.quiz.subscribe(() =>
             this.setState({ loaded: true }),
         );
     }
 
-    componentWillUnmount() {
+    override componentWillUnmount() {
         this.unsubscribe();
     }
 
@@ -53,7 +52,7 @@ class QuizShow extends React.Component<Props, State> {
         await this.state.quiz.refresh();
     }
 
-    render() {
+    override render() {
         if (this.state.quiz.deleted_at !== null) {
             return (
                 <>
@@ -63,6 +62,7 @@ class QuizShow extends React.Component<Props, State> {
             );
         }
 
+        const quiz_id = this.state.quiz.id;
         return (
             <>
                 <QuizEditForm
@@ -70,7 +70,11 @@ class QuizShow extends React.Component<Props, State> {
                     onSave={() => this.save()}
                     onDelete={() => this.delete()}
                 />
-                <QuestionListRouter quiz_id={this.state.quiz.id} />
+                {quiz_id != null && (
+                    <>
+                        <QuestionListRouter quiz_id={quiz_id} />
+                    </>
+                )}
             </>
         );
     }

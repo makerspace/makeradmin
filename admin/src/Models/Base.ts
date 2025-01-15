@@ -1,18 +1,20 @@
 import * as _ from "underscore";
-import { del, get, put, post } from "../gateway";
+import { del, get, post, put } from "../gateway";
 import { deepcopy } from "../utils";
 
-export default class Base {
-    constructor(data = null) {
-        this.subscribers = {};
-        this.subscriberId = 0;
+export default class Base<T extends object> {
+    id: number | null = null;
+    subscribers: { [key: number]: () => void } = {};
+    subscriberId: number = 0;
+    initializers: { [key: number]: () => void } = {};
+    initializerId: number = 0;
+    unsaved: { [key: string]: any } = {};
+    saved: { [key: string]: any } = {};
 
-        this.initializers = {};
-        this.initializerId = 0;
-
+    constructor(data: Partial<T> | null = null) {
         this.reset(data);
 
-        const model = this.constructor.model;
+        const model = (this.constructor as any).model;
         _.keys(model.attributes).forEach((key) => {
             Object.defineProperty(this, key, {
                 get: () => {
@@ -28,7 +30,7 @@ export default class Base {
                         return v;
                     }
 
-                    return model.attributes[v];
+                    return model.attributes[v as any];
                 },
                 set: (v) => {
                     if (_.isEqual(v, this.saved[key])) {
@@ -45,7 +47,7 @@ export default class Base {
     }
 
     // Subscribe to changes, returns function for unsubscribing.
-    subscribe(callback) {
+    subscribe(callback: () => void) {
         const id = this.subscriberId++;
         this.subscribers[id] = callback;
         callback();
@@ -53,7 +55,7 @@ export default class Base {
     }
 
     // Subscribe to initialization when data has been fetched (run only once, then unsubscribed)
-    initialization(callback) {
+    initialization(callback: () => void) {
         const id = this.initializerId++;
         this.initializers[id] = () => {
             callback();
@@ -69,8 +71,8 @@ export default class Base {
     }
 
     // Reset to empty/data state.
-    reset(data) {
-        const model = this.constructor.model;
+    reset(data: Partial<T> | null) {
+        const model = (this.constructor as any).model;
         if (data) {
             this.unsaved = {};
             this.saved = Object.assign(deepcopy(model.attributes), data);
@@ -87,7 +89,9 @@ export default class Base {
             return Promise.resolve(null);
         }
 
-        return del({ url: this.constructor.model.root + "/" + this.id });
+        return del({
+            url: (this.constructor as any).model.root + "/" + this.id,
+        });
     }
 
     // Refresh data from server, requires id in data, returns promise.
@@ -96,32 +100,32 @@ export default class Base {
             throw new Error("Refresh requires id.");
         }
 
-        return get({ url: this.constructor.model.root + "/" + this.id }).then(
-            (d) => {
-                this.saved = this.deserialize(d.data);
-                this.unsaved = {};
-                this.notify();
-            },
-        );
+        return get({
+            url: (this.constructor as any).model.root + "/" + this.id,
+        }).then((d) => {
+            this.saved = this.deserialize(d.data);
+            this.unsaved = {};
+            this.notify();
+        });
     }
 
-    deserialize(x) {
+    deserialize(x: any): T {
         return x;
     }
 
-    serialize(x) {
+    serialize(x: T) {
         return x;
     }
 
     // Save or create, returns promise.
     save() {
         const data = this.serialize(
-            Object.assign({}, this.saved, this.unsaved),
+            Object.assign({}, this.saved, this.unsaved) as T,
         );
 
         if (this.id) {
             return put({
-                url: this.constructor.model.root + "/" + this.id,
+                url: (this.constructor as any).model.root + "/" + this.id,
                 data,
             }).then((d) => {
                 this.saved = this.deserialize(d.data);
@@ -130,18 +134,20 @@ export default class Base {
             });
         }
 
-        return post({ url: this.constructor.model.root, data }).then((d) => {
-            this.saved = this.deserialize(d.data);
-            this.unsaved = {};
-            this.notify();
-        });
+        return post({ url: (this.constructor as any).model.root, data }).then(
+            (d) => {
+                this.saved = this.deserialize(d.data);
+                this.unsaved = {};
+                this.notify();
+            },
+        );
     }
 
     // Return a new shallow copy of object with id property set to 0.
     copy() {
-        const copy = new this.constructor();
+        const copy = new (this as any).constructor();
         copy.unsaved = Object.assign({}, this.saved, this.unsaved, {
-            [this.constructor.model.id]: 0,
+            [(this.constructor as any).model.id]: 0,
         });
         return copy;
     }
@@ -152,7 +158,7 @@ export default class Base {
     }
 
     // Returns true if any field changed.
-    isDirty(key) {
+    isDirty(key?: string): boolean {
         if (!key) {
             return !_.isEmpty(this.unsaved);
         }
@@ -160,7 +166,7 @@ export default class Base {
     }
 
     // Return true if save is a good idea given the internal state.
-    canSave() {
+    canSave(): boolean {
         return this.isDirty();
     }
 
@@ -172,9 +178,9 @@ export default class Base {
     }
 
     // Create and empty model with known id and refresh it, returns model.
-    static get(id) {
-        const model = new this({ [this.model.id]: id });
+    static get<U extends object>(id: number): Base<U> {
+        const model = new this({ [(this as any).model.id]: id });
         model.refresh();
-        return model;
+        return model as Base<U>;
     }
 }

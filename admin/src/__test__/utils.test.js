@@ -1,9 +1,6 @@
-/**
- * @jest-environment jsdom
- */
-
 /* eslint-env jest */
 
+import { describe, expect, test } from "@jest/globals";
 import { dateTimeToStr, dateToStr } from "../utils";
 
 describe("timestamp string from server", () => {

@@ -179,7 +179,7 @@ const CollectionTable = (props) => {
                     <div className="loadingOverlay">
                         <div className="loadingWrapper">
                             <span>
-                                <div uk-spinner="" />
+                                <div data-uk-spinner="" />
                                 Hämtar data...
                             </span>
                         </div>
