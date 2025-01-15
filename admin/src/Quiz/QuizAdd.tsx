@@ -24,7 +24,7 @@ class QuizAdd extends React.Component<{}, State> {
         browserHistory.push(`/quiz`);
     }
 
-    render() {
+    override render() {
         return (
             <>
                 <QuizEditForm

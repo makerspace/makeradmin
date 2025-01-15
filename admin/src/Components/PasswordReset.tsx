@@ -1,5 +1,5 @@
 import React from "react";
-import { withRouter } from "react-router";
+import { RouteComponentProps, withRouter } from "react-router";
 import { Link } from "react-router-dom";
 import * as _ from "underscore";
 import auth from "../auth";
@@ -7,19 +7,16 @@ import { browserHistory } from "../browser_history";
 import { showError, showSuccess } from "../message";
 import Icon from "./icons";
 
-class PasswordReset extends React.Component {
+class PasswordReset extends React.Component<RouteComponentProps> {
     input = React.createRef<HTMLInputElement>();
-
-    constructor(props: any) {
-        super(props);
-    }
 
     submit(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault();
-        const password = this.input.current.value;
-        const token = new RegExp("^\\?reset_token=([^&]*)$").exec(
+        const password = this.input.current!.value;
+        const tokens = new RegExp("^\\?reset_token=([^&]*)$").exec(
             browserHistory.location.search,
-        )[1];
+        );
+        const token = tokens ? tokens[1] : "";
 
         auth.passwordReset(token, password).then((response) => {
             const error_message = response.data.error_message;
@@ -32,7 +29,7 @@ class PasswordReset extends React.Component {
         });
     }
 
-    render() {
+    override render() {
         return (
             <div className="uk-vertical-align uk-text-center uk-height-1-1">
                 <div

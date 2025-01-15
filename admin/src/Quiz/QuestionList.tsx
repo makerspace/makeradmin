@@ -3,21 +3,23 @@ import { Link, withRouter } from "react-router-dom";
 import CollectionTable from "../Components/CollectionTable";
 import Icon from "../Components/icons";
 import Collection from "../Models/Collection";
-import CollectionNavigation from "../Models/CollectionNavigation";
+import CollectionNavigation, {
+    CollectionNavigationProps,
+} from "../Models/CollectionNavigation";
 import QuizQuestion from "../Models/QuizQuestion";
 
-interface QuestionListProps {
+interface QuestionListProps extends CollectionNavigationProps {
     quiz_id: number;
 }
 
-export class QuestionList extends CollectionNavigation {
-    collection: Collection;
+export class QuestionList extends CollectionNavigation<QuestionListProps> {
+    collection: Collection<QuizQuestion>;
 
     constructor(props: QuestionListProps) {
         super(props);
         const { search, page } = this.state;
         const url = `/quiz/quiz/${props.quiz_id}/questions`;
-        this.collection = new Collection({
+        this.collection = new Collection<QuizQuestion>({
             type: QuizQuestion,
             url,
             search,
@@ -25,13 +27,13 @@ export class QuestionList extends CollectionNavigation {
         });
     }
 
-    render() {
+    override render() {
         return (
             <div className="uk-margin-top">
                 <h2>Quizfrågor</h2>
                 <Link
                     className="uk-button uk-button-primary uk-margin-bottom uk-float-right"
-                    to={`/quiz/${this.props.quiz_id}/question/add`}
+                    to={`/quiz/${this.props["quiz_id"]}/question/add`}
                 >
                     <Icon icon="plus-circle" /> Skapa ny fråga
                 </Link>

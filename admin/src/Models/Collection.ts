@@ -9,7 +9,31 @@ import { get, post } from "../gateway";
 // expand: expand to include related model in request
 // idListName: used for add and remove if collection supports it by pushing id list to to <url>/remove or <url>/add,
 //             this could be simpler if server handled removes in a better way
-export default class Collection {
+export default class Collection<T extends { saved: { [key: string]: any } }> {
+    type: { new (data?: T | null): T; model: { root: string } };
+    pageSize: number;
+    url: string;
+    idListName: string | null;
+
+    items: T[] | null;
+    page: { index: number; count: number };
+    sort: { key?: string; order?: string };
+    search: string | null;
+    expand: string | null;
+
+    subscribers: {
+        [key: number]: (data: {
+            items: any[];
+            page: { index: number; count: number };
+        }) => void;
+    };
+    subscriberId: number;
+
+    filter_out_key: string | null;
+    filter_out_value: string | null;
+
+    includeDeleted: boolean;
+
     constructor({
         type,
         pageSize = 25,
@@ -22,6 +46,18 @@ export default class Collection {
         filter_out_key = null,
         filter_out_value = null,
         includeDeleted = false,
+    }: {
+        type: { new (data?: T | null): T; model: { root: string } };
+        pageSize?: number;
+        expand?: string | null;
+        sort?: { key?: string; order?: string };
+        url?: string | null;
+        idListName?: string | null;
+        search?: string | null;
+        page?: number;
+        filter_out_key?: string | null;
+        filter_out_value?: string | null;
+        includeDeleted?: boolean;
     }) {
         this.type = type;
         this.pageSize = pageSize;
@@ -46,7 +82,12 @@ export default class Collection {
     }
 
     // Subscribe to data from server {items, page}, returns function for unsubscribing.
-    subscribe(callback) {
+    subscribe(
+        callback: (data: {
+            items: any[];
+            page: { index: number; count: number };
+        }) => void,
+    ) {
         const id = this.subscriberId++;
         this.subscribers[id] = callback;
         if (this.items) {
@@ -56,7 +97,13 @@ export default class Collection {
     }
 
     // Update sort order, key is one of model attributes, order is up/asc or down/desc.
-    updateSort({ key, order = "down" }) {
+    updateSort({
+        key,
+        order = "down",
+    }: {
+        key: string;
+        order: "up" | "asc" | "down" | "desc";
+    }) {
         this.sort = {
             key,
             order: { up: "asc", asc: "asc", down: "desc", desc: "desc" }[order],
@@ -65,19 +112,19 @@ export default class Collection {
     }
 
     // Update filter, filter keys are model attributes, values are strings.
-    updateSearch(terms) {
+    updateSearch(terms: string) {
         this.search = terms;
         this.fetch();
     }
 
     // Change current page index (1-indexed).
-    updatePage(index) {
+    updatePage(index: number) {
         this.page.index = Math.min(index, this.page.count) || 1;
         this.fetch();
     }
 
     // Remove an item from this collection.
-    remove(item) {
+    remove(item: { id: number }) {
         if (!this.idListName) {
             throw new Error(
                 `Container for ${this.type.constructor.name} does not support remove.`,
@@ -92,7 +139,7 @@ export default class Collection {
     }
 
     // Add an item to this collection.
-    add(item) {
+    add(item: { id: number }) {
         if (!this.idListName) {
             throw new Error(
                 `Container for ${this.type.constructor.name} does not support add.`,
@@ -107,7 +154,15 @@ export default class Collection {
     }
 
     create_fetch_parameters() {
-        let params = {};
+        let params: {
+            page?: number;
+            page_size?: number;
+            include_deleted?: boolean;
+            sort_by?: string;
+            sort_order?: string;
+            expand?: string;
+            search?: string;
+        } = {};
 
         if (this.pageSize !== 0) {
             params.page = this.page.index;
@@ -140,15 +195,15 @@ export default class Collection {
             if (!data) return;
             this.page.count = data.last_page;
             this.page.index = Math.min(this.page.count, this.page.index) || 1;
-            this.items = data.data.map((m) => new this.type(m));
+            this.items = data.data.map((m: any) => new this.type(m));
             if (this.filter_out_value && this.filter_out_key) {
-                this.items = this.items.filter(
+                this.items = this.items!.filter(
                     (p) =>
-                        p.saved[this.filter_out_key] !== this.filter_out_value,
+                        p.saved[this.filter_out_key!] !== this.filter_out_value,
                 );
             }
             _.values(this.subscribers).forEach((s) =>
-                s({ items: this.items, page: this.page }),
+                s({ items: this.items!, page: this.page }),
             );
         });
     }

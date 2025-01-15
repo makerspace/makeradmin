@@ -1,7 +1,17 @@
 import React from "react";
+import { RouteComponentProps } from "react-router-dom";
 
-export default class CollectionNavigation extends React.Component {
-    constructor(props) {
+export type CollectionNavigationProps = RouteComponentProps;
+export type CollectionNavigationState = { page: number; search: string };
+
+export default class CollectionNavigation<
+    P extends CollectionNavigationProps = CollectionNavigationProps,
+    S extends CollectionNavigationState = CollectionNavigationState,
+> extends React.Component<P, S> {
+    unsubscribe: () => void = () => {};
+    params: URLSearchParams;
+
+    constructor(props: P) {
         super(props);
         this.onSearch = this.onSearch.bind(this);
         this.onPageNav = this.onPageNav.bind(this);
@@ -9,24 +19,26 @@ export default class CollectionNavigation extends React.Component {
         this.params = new URLSearchParams(this.props.location.search);
         const search = this.params.get("search") || "";
         const page = Number(this.params.get("page")) || 1;
-        this.state = { search, page };
+        this.state = { search, page } as S;
     }
 
-    componentDidMount() {
-        this.unsubscribe = this.collection.subscribe(({ page }) =>
-            this.gotNewData(page),
+    override componentDidMount() {
+        this.unsubscribe = (this as any).collection.subscribe(
+            ({ page }: { page: { index: number; count: number } }) =>
+                this.gotNewData(page),
         );
     }
 
-    componentWillUnmount() {
+    override componentWillUnmount() {
         this.unsubscribe();
     }
 
-    gotNewData(page) {
+    gotNewData(page: { index: number; count: number }) {
         // If the returned result has fewer number of pages, keep the page within bounds
         let index = this.state.page;
-        if (index && page.last_page < index) {
-            this.onPageNav(page.last_page);
+        // TODO: This seems like a bug. It shouldn't use .last_page here. I don't think that field exists.
+        if (index && (page as any).last_page < index) {
+            this.onPageNav((page as any).last_page);
         }
     }
 
@@ -40,7 +52,7 @@ export default class CollectionNavigation extends React.Component {
         if (this.state.page === 1) {
             this.params.delete("page");
         } else {
-            this.params.set("page", this.state.page);
+            this.params.set("page", this.state.page.toString());
         }
 
         this.props.history.replace(
@@ -48,13 +60,13 @@ export default class CollectionNavigation extends React.Component {
         );
     }
 
-    onSearch(term) {
+    onSearch(term: string) {
         this.setState({ search: term }, this.setHistory);
-        this.collection.updateSearch(term);
+        (this as any).collection.updateSearch(term);
     }
 
-    onPageNav(index) {
+    onPageNav(index: number) {
         this.setState({ page: index }, this.setHistory);
-        this.collection.updatePage(index);
+        (this as any).collection.updatePage(index);
     }
 }

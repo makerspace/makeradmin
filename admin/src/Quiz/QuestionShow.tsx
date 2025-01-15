@@ -13,23 +13,23 @@ interface Props {
 }
 
 class QuestionShow extends React.Component<Props, State> {
-    unsubscribe: () => void;
+    unsubscribe: () => void = () => {};
     question: QuizQuestion;
 
     constructor(props: any) {
         super(props);
         const { id } = this.props.match.params;
-        this.question = QuizQuestion.get(id) as QuizQuestion;
+        this.question = QuizQuestion.get(parseInt(id)) as QuizQuestion;
         this.state = { question: null };
     }
 
-    componentDidMount() {
+    override componentDidMount() {
         this.unsubscribe = this.question.subscribe(() =>
             this.setState({ question: this.question }),
         );
     }
 
-    componentWillUnmount() {
+    override componentWillUnmount() {
         this.unsubscribe();
     }
 
@@ -45,7 +45,7 @@ class QuestionShow extends React.Component<Props, State> {
         } catch {}
     }
 
-    render() {
+    override render() {
         return (
             <QuestionEditForm
                 question={this.state.question}

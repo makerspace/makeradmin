@@ -1,8 +1,8 @@
 import React from "react";
-import { Route, Switch } from "react-router-dom";
+import { Route, Switch, match } from "react-router-dom";
 import BoxTerminator from "./BoxTerminator";
 
-export default ({ match }) => (
+export default ({ match }: { match: match }) => (
     <Switch>
         <Route path={`${match.path}/`} exact component={BoxTerminator} />
     </Switch>

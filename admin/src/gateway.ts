@@ -23,11 +23,11 @@ export function request({
     expectedDataStatus,
 }: {
     url: string;
-    params: { [key: string]: string };
-    data: object | undefined;
+    params: { [key: string]: string | number | boolean };
+    data: object | null | undefined;
     options: RequestInit;
     errorMessage: string;
-    expectedDataStatus: string | undefined;
+    expectedDataStatus: string | null | undefined;
 }): Promise<any> {
     const accessToken = auth.getAccessToken();
 
@@ -86,6 +86,15 @@ export function request({
         .catch(handleError(errorMessage));
 }
 
+export type RequestParams = {
+    url: string;
+    params?: { [key: string]: string | number | boolean };
+    data?: object | null;
+    options?: RequestInit;
+    errorMessage?: string;
+    expectedDataStatus?: string | null;
+};
+
 export function get({
     url,
     params = {},
@@ -93,14 +102,7 @@ export function get({
     options = { method: "GET" },
     errorMessage = "Error when getting data from server:",
     expectedDataStatus = null,
-}: {
-    url: string;
-    params: { [key: string]: string };
-    data: object | undefined;
-    options: RequestInit;
-    errorMessage: string;
-    expectedDataStatus: string | undefined;
-}): Promise<any> {
+}: RequestParams): Promise<any> {
     return request({
         url,
         data,
@@ -118,14 +120,7 @@ export function post({
     options = { method: "POST" },
     errorMessage = "Error when creating:",
     expectedDataStatus = "created",
-}: {
-    url: string;
-    params: { [key: string]: string };
-    data: object | undefined;
-    options: RequestInit;
-    errorMessage: string;
-    expectedDataStatus: string | undefined;
-}): Promise<any> {
+}: RequestParams): Promise<any> {
     return request({
         url,
         data,
@@ -143,14 +138,7 @@ export function put({
     options = { method: "PUT" },
     errorMessage = "Error when saving:",
     expectedDataStatus = "updated",
-}: {
-    url: string;
-    params: { [key: string]: string };
-    data: object | undefined;
-    options: RequestInit;
-    errorMessage: string;
-    expectedDataStatus: string | undefined;
-}): Promise<any> {
+}: RequestParams): Promise<any> {
     return request({
         url,
         data,
@@ -168,14 +156,7 @@ export function del({
     options = { method: "DELETE" },
     errorMessage = "Error when deleting:",
     expectedDataStatus = "deleted",
-}: {
-    url: string;
-    params: { [key: string]: string };
-    data: object | undefined;
-    options: RequestInit;
-    errorMessage: string;
-    expectedDataStatus: string | undefined;
-}): Promise<any> {
+}: RequestParams): Promise<any> {
     return request({
         url,
         data,
