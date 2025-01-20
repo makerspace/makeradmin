@@ -51,6 +51,7 @@ from shop.shop_data import (
     pending_actions,
     receipt,
 )
+from shop.statistics import category_sales, product_sales
 from shop.stripe_discounts import get_discount_fraction_off
 from shop.stripe_event import stripe_callback
 from shop.stripe_payment_intent import PartialPayment
@@ -335,3 +336,23 @@ def download_accounting_file_route(year: int, month: int) -> str:
     return b64encode(export_accounting(start_date, end_data, TimePeriod.Month, g.user_id).encode("cp437")).decode(
         "ascii"
     )
+
+
+@service.route("/product/<int:product_id>/sales", method=GET, permission=WEBSHOP)
+def product_sales_route(product_id: int) -> Any:
+    start_str = request.args.get("start", default=None)
+    start = datetime.fromisoformat(start_str) if start_str is not None else None
+
+    end_str = request.args.get("end", default=None)
+    end = datetime.fromisoformat(end_str) if end_str is not None else None
+    return product_sales(product_id, start, end).to_dict()
+
+
+@service.route("/category/<int:category_id>/sales", method=GET, permission=WEBSHOP)
+def category_sales_route(category_id: int) -> Any:
+    start_str = request.args.get("start", default=None)
+    start = datetime.fromisoformat(start_str) if start_str is not None else None
+
+    end_str = request.args.get("end", default=None)
+    end = datetime.fromisoformat(end_str) if end_str is not None else None
+    return category_sales(category_id, start, end).to_dict()
