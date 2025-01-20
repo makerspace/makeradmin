@@ -6,6 +6,9 @@ import Product from "../Models/Product";
 
 import ProductForm from "../Components/ProductForm";
 
+import { useJson } from "State/useJson";
+import { InitialChartData, ProductChart } from "Statistics/Graphs/ProductGraph";
+import { ProductCategory } from "Statistics/types";
 import { confirmModal } from "../message";
 
 const ProductEdit = () => {
@@ -40,6 +43,20 @@ const ProductEdit = () => {
         }
     };
 
+    const { data } = useJson<ProductCategory[]>({
+        url: "/webshop/product_data",
+    });
+
+    const now = new Date();
+    const initial: Partial<InitialChartData> = {
+        selectedCategories: [],
+        selectedProducts: id !== undefined ? [parseInt(id)] : [],
+        grouping: "month",
+        valueType: "amount",
+        start: new Date(now.getTime() - 1000 * 60 * 60 * 24 * 365),
+        end: now,
+    };
+
     if (!product) {
         return <div>Loading...</div>;
     }
@@ -53,6 +70,15 @@ const ProductEdit = () => {
                 onSave={handleSave}
                 onDelete={handleDelete}
             />
+            <h2>Sales</h2>
+            {data !== null && (
+                <ProductChart
+                    categories={data}
+                    initial={initial}
+                    granularity="products"
+                    allowChangingSelection={false}
+                />
+            )}
         </div>
     );
 };
