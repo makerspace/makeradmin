@@ -9,14 +9,14 @@ import ProductForm from "../Components/ProductForm";
 import { confirmModal } from "../message";
 
 const ProductEdit = () => {
-    const { id } = useParams();
+    const { id } = useParams<{ id?: string }>();
 
-    const [product, setProduct] = useState(null);
+    const [product, setProduct] = useState<Product | null>(null);
 
     const history = useHistory();
 
     useEffect(() => {
-        const fetchedProduct = Product.getWithRelated(id);
+        const fetchedProduct = Product.getWithRelated(id) as Product;
 
         setProduct(fetchedProduct);
     }, [id]);
