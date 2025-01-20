@@ -749,7 +749,6 @@ export const ProductChart = ({
             }));
         }
     }, [categories, granularity]);
-    console.log(initial);
 
     const [selected, setSelected] = React.useState<SelectItem[]>(() => {
         const result = [];
@@ -773,7 +772,6 @@ export const ProductChart = ({
                     }
                 }
             }
-            console.log(result);
         }
         return result;
     });

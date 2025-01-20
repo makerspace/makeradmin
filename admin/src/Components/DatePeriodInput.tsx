@@ -52,7 +52,6 @@ const DayPickerInput = <T extends { label: string }>({
             );
             setInputValue(formatUtcDate(utcDate));
             setMonth(utcDate);
-            console.log(value, utcDate);
         }
     }, [value]);
 
