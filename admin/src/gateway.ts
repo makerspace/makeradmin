@@ -23,7 +23,7 @@ export function request({
     expectedDataStatus,
 }: {
     url: string;
-    params: { [key: string]: string | number | boolean };
+    params: { [key: string]: string | number | boolean | undefined };
     data: object | null | undefined;
     options: RequestInit;
     errorMessage: string;
@@ -45,9 +45,10 @@ export function request({
         options,
     );
 
-    const urlParams = _.map(
-        params,
-        (v, k) => encodeURIComponent(k) + "=" + encodeURIComponent(v),
+    const urlParams = _.map(params, (v, k) =>
+        v !== undefined
+            ? encodeURIComponent(k) + "=" + encodeURIComponent(v)
+            : "",
     ).join("&");
     url = config.apiBasePath + url + (urlParams ? "?" + urlParams : "");
     return fetch(url, options)
@@ -88,7 +89,7 @@ export function request({
 
 export type RequestParams = {
     url: string;
-    params?: { [key: string]: string | number | boolean };
+    params?: { [key: string]: string | number | boolean | undefined };
     data?: object | null;
     options?: RequestInit;
     errorMessage?: string;
