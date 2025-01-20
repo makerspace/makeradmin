@@ -156,7 +156,7 @@ class StripeChargeTest(FlaskTestBase):
             if completed_payments[transaction_id]:
                 assert charge.paid
                 transaction_fee = convert_from_stripe_amount(charge.balance_transaction.fee)
-                estimated_transaction_fee = test_transaction.amount * Decimal("0.025") + Decimal("1.8")
+                estimated_transaction_fee = test_transaction.amount * Decimal("0.015") + Decimal("1.8")
                 assert math.isclose(
                     transaction_fee, estimated_transaction_fee, abs_tol=test_transaction.amount * Decimal("0.025")
                 )
